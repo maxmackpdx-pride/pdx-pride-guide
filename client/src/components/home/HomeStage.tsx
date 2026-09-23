@@ -10,7 +10,6 @@ import HomeWorldCard from "@/components/home/HomeWorldCard";
 import { WorldFanCarousel } from "@/components/home/WorldFanCarousel";
 import { HandwritingText } from "@/components/ui/handwriting-text";
 import { WORLDS } from "@/lib/homeWorlds";
-import { useHomeWorlds } from "@/lib/useHomeWorlds";
 import {
   useHomeStageSamples,
   type HomeStageBoardKey,
@@ -38,7 +37,6 @@ type Props = {
 
 export default function HomeStage({ afterWelcome }: Props) {
   const { calmMode } = useTheme();
-  const worldData = useHomeWorlds();
   const { user } = useAuth();
   const logoRef = useRef<HTMLImageElement>(null);
   const [logoReady, setLogoReady] = useState(false);
@@ -46,7 +44,6 @@ export default function HomeStage({ afterWelcome }: Props) {
   const [selectedWorld, setSelectedWorld] = useState(0);
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
-  const hasPreviewError = Object.values(worldData.states).some(state => state === "error");
 
   useEffect(() => {
     let cancelled = false, firstPaint = 0, secondPaint = 0;
@@ -148,14 +145,6 @@ export default function HomeStage({ afterWelcome }: Props) {
           </h2>
           <p>Queer Portland, connected. Find your night out, your next escape, and your people. Pick a place to start; it’s all part of Zaylist.</p>
         </header>
-        {hasPreviewError ? (
-          <div className="home-front__preview-error" role="alert">
-            <span>Some live previews could not load. You can still open every destination.</span>
-            <button type="button" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" onClick={worldData.retry}>
-              Retry live previews
-            </button>
-          </div>
-        ) : null}
         <WorldFanCarousel
           total={WORLDS.length}
           selected={selectedWorld}
@@ -181,18 +170,6 @@ export default function HomeStage({ afterWelcome }: Props) {
                 key={world.key}
                 world={world}
                 hot={dist <= 1}
-                rows={worldData.outzRows}
-                flyers={worldData.flyers}
-                panels={worldData.panels}
-                postings={
-                  world.key === "hauz" || world.key === "giftz" || world.key === "gigz" || world.key === "mizzed"
-                    ? worldData.postings[world.key]
-                    : undefined
-                }
-                items={worldData.items}
-                today={worldData.today}
-                communities={worldData.communities}
-                previewState={worldData.states[world.key]}
               />
             );
           })}

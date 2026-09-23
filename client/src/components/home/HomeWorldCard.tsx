@@ -465,6 +465,23 @@ export default function HomeWorldCard({
         </div>
 
         <div className="home-world__slot">
+          {world.slot === "promo" ? (
+            <div className="home-world__promo">
+              {world.mapLayer ? (
+                <span className="home-world__map-badge">
+                  <span className="home-world__map-pulse" aria-hidden="true" />
+                  Live on MapZ · {world.mapLayer}
+                </span>
+              ) : null}
+              <ul className="home-world__promo-list">
+                {world.promoLines.map(line => (
+                  <li key={line}><span aria-hidden="true">↗</span>{line}</li>
+                ))}
+              </ul>
+              <span className="home-world__promo-callout">Built for Portland. Built for us.</span>
+            </div>
+          ) : null}
+
           {world.slot === "rows" ? (
             <div className="home-world__rows">
               {rows.map(row => (

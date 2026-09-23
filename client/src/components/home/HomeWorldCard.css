@@ -244,6 +244,92 @@
   margin: 9px 0;
 }
 
+.home-world__promo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 18px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--c) 32%, rgba(255, 255, 255, .08));
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--c) 13%, transparent), transparent 48%),
+    rgba(3, 4, 7, .62);
+  box-shadow: inset 0 0 28px color-mix(in srgb, var(--c) 7%, transparent);
+}
+
+.home-world__promo::after {
+  content: "";
+  position: absolute;
+  right: -35%;
+  bottom: -45%;
+  width: 82%;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+  border-radius: 50%;
+  box-shadow: 0 0 45px color-mix(in srgb, var(--c) 12%, transparent);
+  pointer-events: none;
+}
+
+.home-world__map-badge {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  border-radius: 999px;
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 9%, rgba(0, 0, 0, .7));
+  font: 800 9px/1 var(--font-mono, monospace);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.home-world__map-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 10px var(--c);
+  animation: homeWorldBlink 1.6s ease-in-out infinite;
+}
+
+.home-world__promo-list {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  margin: auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-world__promo-list li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 8px;
+  align-items: start;
+  color: rgba(255, 255, 255, .88);
+  font: 700 14px/1.18 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: .015em;
+}
+
+.home-world__promo-list li span {
+  color: var(--c);
+  font-size: 12px;
+}
+
+.home-world__promo-callout {
+  position: relative;
+  z-index: 1;
+  color: color-mix(in srgb, var(--c) 82%, white);
+  font: 800 10px/1 var(--font-mono, monospace);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
 .home-world__action {
   position: relative;
   z-index: 2;
