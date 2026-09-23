@@ -7,7 +7,7 @@ import { apiRequest, parseApiError, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
 import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import SpectrumLoader from "@/components/SpectrumLoader";
-import { resolveDirectoryLogo } from "@/lib/directoryLogos";
+import { communityLogo } from "@shared/communityLogos";
 import type { CommunitySummary } from "@shared/community";
 import "./ZIndex.css";
 
@@ -44,8 +44,8 @@ export default function ZIndex() {
     {communities.isError ? <section className="z-communities__state"><h2>Communities could not load.</h2><button type="button" onClick={() => communities.refetch()}>TRY AGAIN</button></section> : null}
     {!communities.isLoading && !communities.isError && communities.data?.length === 0 ? <section className="z-communities__state"><h2>No public communities yet.</h2><p>Check back soon, or start a community.</p></section> : null}
     <section className="z-communities__grid" aria-label="Communities">
-      {communities.data?.map(community => { const communityLogo = community.imageUrl || (community.sourcePlaceId ? resolveDirectoryLogo(community.name) : null); return <Link key={community.id} href={`/z/${community.slug}`} className="z-community-card">
-        <div className="z-community-card__image" style={communityLogo ? { backgroundImage: `url(${communityLogo})` } : undefined}>{!communityLogo ? <span aria-hidden="true">Z/</span> : null}</div>
+      {communities.data?.map(community => { const logo = communityLogo(community); return <Link key={community.id} href={`/z/${community.slug}`} className="z-community-card">
+        <div className="z-community-card__image" style={logo ? { backgroundImage: `url(${logo})`, backgroundSize: community.imageUrl ? undefined : "contain", backgroundColor: !community.imageUrl && community.slug === "lesbian-culture-club" ? "#f5f1e9" : undefined } : undefined}>{!logo ? <span aria-hidden="true">Z/</span> : null}</div>
         <div className="z-community-card__body">
           <p className="z-community-card__address">z/{community.slug}</p><h2>{community.name}</h2><p>{community.description}</p>
           <div className="z-community-card__meta"><span>{community.memberCount} {community.memberCount === 1 ? "member" : "members"}</span>{community.neighborhood ? <span>{community.neighborhood}</span> : null}</div>

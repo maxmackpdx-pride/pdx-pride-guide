@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ds";
 import SpectrumLoader from "@/components/SpectrumLoader";
-import { resolveDirectoryLogo } from "@/lib/directoryLogos";
+import { communityLogo } from "@shared/communityLogos";
 import type { CommunityDetail, CommunityPost } from "@shared/community";
 import "./ZIndex.css";
 
@@ -55,7 +55,7 @@ export default function Community({ params }: { params: { communitySlug: string 
       href="/z" label="Explore Z/ List" missing={missing} retry={missing ? undefined : () => { void community.refetch(); }} />;
   }
   const item = community.data;
-  const communityLogo = item.imageUrl || (item.sourcePlaceId ? resolveDirectoryLogo(item.name) : null);
+  const logo = communityLogo(item);
   function renderPost(entry: CommunityPost) {
     return <>
       <Link href={`/u/${entry.author.username}`}>{entry.author.displayName || entry.author.username}</Link>
@@ -74,7 +74,7 @@ export default function Community({ params }: { params: { communitySlug: string 
   return <div className="z-communities z-community-detail">
     <Link href="/z" className="z-community-detail__back">← ALL COMMUNITIES</Link>
     <header className="z-community-detail__hero">
-      <div className="z-community-detail__image" style={communityLogo ? { backgroundImage: `url(${communityLogo})` } : undefined}>{!communityLogo ? <span aria-hidden="true">Z/</span> : null}</div>
+      <div className="z-community-detail__image" style={logo ? { backgroundImage: `url(${logo})`, backgroundSize: item.imageUrl ? undefined : "contain", backgroundColor: !item.imageUrl && item.slug === "lesbian-culture-club" ? "#f5f1e9" : undefined } : undefined}>{!logo ? <span aria-hidden="true">Z/</span> : null}</div>
       <div><p className="z-community-card__address">z/{item.slug}</p><h1>{item.name}</h1><p>{item.description}</p><p className="z-community-detail__count">{item.memberCount} {item.memberCount === 1 ? "member" : "members"}</p>
         {user ? item.viewerMembershipStatus === "pending" ? <Button disabled accent="cyan">REQUEST PENDING</Button> : item.viewerRole === "owner" ? <p>You own this community. <button type="button" onClick={() => { setManaging(true); setTimeout(() => document.getElementById("community-members")?.scrollIntoView({ behavior: "smooth" }), 0); }}>Transfer ownership in Members</button> before leaving.</p> : <Button onClick={() => membership.mutate()} disabled={membership.isPending} accent="cyan">{item.viewerRole ? "LEAVE COMMUNITY" : item.membershipPolicy === "request" ? "REQUEST TO JOIN" : "JOIN COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO JOIN</Button></Link>}
         {item.canManage ? <Button onClick={() => setManaging(value => !value)}>{managing ? "CLOSE MODERATOR DESK" : "MANAGE COMMUNITY"}</Button> : null}

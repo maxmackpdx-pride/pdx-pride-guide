@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import type { CommunitySummary } from "@shared/community";
-import { resolveDirectoryLogo } from "@/lib/directoryLogos";
+import { communityLogo } from "@shared/communityLogos";
 import { prefersStillMotion } from "@/lib/motion";
 import {
   clearDynamicTextCache,
@@ -543,9 +543,9 @@ export default function HomeWorldCard({
           {world.slot === "communities" ? (
             <div className="home-world__communities">
               {communities.map(community => {
-                const logo = community.imageUrl || (community.sourcePlaceId ? resolveDirectoryLogo(community.name) : null);
+                const logo = communityLogo(community);
                 return <Link key={community.id} href={`/z/${community.slug}`} className="home-world__community">
-                  <span className="home-world__community-image">
+                  <span className="home-world__community-image" style={!community.imageUrl && community.slug === "lesbian-culture-club" ? { backgroundColor: "#f5f1e9" } : undefined}>
                     {logo ? <img src={logo} alt="" loading="lazy" /> : <span aria-hidden="true">Z/</span>}
                   </span>
                   <span className="home-world__community-copy">
