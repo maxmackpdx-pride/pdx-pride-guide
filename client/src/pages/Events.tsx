@@ -847,7 +847,6 @@ export default function Events() {
                   key={listingKey(e)}
                   event={e}
                   onClick={(originRect) => openEvent(e, originRect)}
-                  compactMissingFlyer
                   viewMode="grid"
                   revealDelay={(i % 8) * 70}
                   attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}

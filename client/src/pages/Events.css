@@ -63,7 +63,3 @@
  .events-page .pdxBoard__action {min-height:44px;height:auto}
  .events-page .pdxBoard__meta {padding:12px}
 }
-
-/* The Eventz board opts into a compact title well when no real flyer exists. */
-.events-page .pdxBoard--text .pdxBoard__poster { aspect-ratio:2 / 1; min-height:150px; }
-.events-page .pdxBoard--text .pdxBoard__ph { background:radial-gradient(ellipse at top right,color-mix(in srgb,var(--day-c) 22%,transparent),transparent 70%),#090b0e; }

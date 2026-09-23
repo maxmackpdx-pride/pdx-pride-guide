@@ -1,4 +1,4 @@
-import { isEventPlaceholderUrl } from "@shared/eventPoster";
+import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { useState } from "react";
 import type React from "react";
 import { useLocation } from "wouter";
@@ -88,7 +88,6 @@ type Props = {
   myTalent?: UserEventTalentCard | null;
   selfUserId?: number;
   shareHref: string;
-  compactMissingFlyer?: boolean;
 };
 
 export default function ListingCard({
@@ -100,7 +99,6 @@ export default function ListingCard({
   myTalent,
   selfUserId,
   shareHref,
-  compactMissingFlyer = false,
 }: Props) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
@@ -111,8 +109,15 @@ export default function ListingCard({
   const when = viewMode === "grid" ? formatGridCardWhen(event) : formatListingWhen(event);
   const types = listingTypeTags(event, viewMode === "grid" ? 3 : 2);
   const poster = listingPosterUrl(event);
-  const useTextWell = compactMissingFlyer && (isEventPlaceholderUrl(poster) || failedImage === poster);
-  const image = useTextWell ? undefined : poster;
+  const fallbackPoster = resolveEventPosterUrl(event.id, null, event.dayOfWeek);
+  const image = failedImage === poster ? fallbackPoster : poster;
+  const handlePosterError = (error: React.SyntheticEvent<HTMLDivElement>) => {
+    const target = error.target;
+    // Replace failed art once; a failed default must not create a retry loop.
+    if (target instanceof HTMLImageElement && target.getAttribute("src") === poster && poster !== fallbackPoster) {
+      setFailedImage(poster);
+    }
+  };
   const claimPending = Boolean(event.hasPendingClaim);
   // Public API strips claimedBy; isClaimable is the public signal for unclaimed listings.
   const claimable = Boolean(event.isClaimable && !event.claimedBy && !claimPending);
@@ -150,6 +155,7 @@ export default function ListingCard({
       <ScrollReveal delay={revealDelay}>
         <div
           className="ds-listing-card ds-listing-card--list pdx-glass-rebind"
+          onErrorCapture={handlePosterError}
           data-testid={`event-card-${event.id}`}
           style={{ ["--i" as string]: Math.round((revealDelay || 0) / 40) }}
           {...eventCardA11yProps(onClick)}
@@ -183,16 +189,13 @@ export default function ListingCard({
     <ScrollReveal delay={revealDelay}>
       <div
         className="ds-listing-card ds-listing-card--grid pdx-glass-rebind"
-        onErrorCapture={event => {
-          if (compactMissingFlyer && event.target instanceof HTMLImageElement && event.target.classList.contains("pdxBoard__img")) setFailedImage(poster);
-        }}
+        onErrorCapture={handlePosterError}
         data-testid={`event-card-${event.id}`}
         style={{ ["--i" as string]: Math.round((revealDelay || 0) / 40) }}
         {...eventCardA11yProps(onClick)}
       >
         <EventShareButton href={shareHref} title={event.title} />
         <PosterCard
-          className={useTextWell ? "pdxBoard--text" : undefined}
           title={event.title}
           venue={event.venueName}
           venueHref={venueHref}
