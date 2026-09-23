@@ -165,7 +165,6 @@ function roofLift(target,feature,surfaces){
 }
 const PLACEZ_HOVER_METERS=3;
 const PLACEZ_ROOF_CLEARANCE_METERS=4;
-const PLACEZ_BLOOM_RADIUS_SCALE=.35;
 function placezHoverLift(target,feature,surfaces){
  const coordinates=feature.geometry.coordinates;
  const roof=surfaces.roofs?.get(feature.properties.phase)??PLACEZ_HOVER_METERS;
@@ -495,10 +494,7 @@ function drawLights(fade,target=map,surface=lights){
  // recede. Holograms then grow smoothly as the camera approaches street level.
  const zoomScale=Math.min(1,Math.pow(2,(target.getZoom()-15)*.65));
  const streetProgress=smoothRange(13.5,15,target.getZoom());
- const closeProgress=smoothRange(15,17.25,target.getZoom());
  const hologramMultiplier=2.4-.75*streetProgress;
- const placezScale=1.625*(.375+.625*streetProgress+.2*closeProgress);
- const placezGlow=.375+.625*streetProgress+.12*closeProgress;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
  const overviewAnchor=.32+.68*smoothRange(11.25,14.25,target.getZoom());
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
@@ -515,7 +511,7 @@ function drawLights(fade,target=map,surface=lights){
  const ordered=lightFeatures.map(feature=>({feature,p:target.project(feature.geometry.coordinates)})).filter(({feature,p})=>p.x>=-420&&p.y>=-420&&p.x<=width+420&&p.y<=height+420*(feature.properties.isBar?feature.properties.heightScale:1)).sort((a,b)=>a.p.y-b.p.y);
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
  const reveal=smoothRange(14.5,16.5,target.getZoom());
- // Expand a few distinct locations; individual event rows remain discoverable as orbs.
+ // Expand a few distinct locations; other events remain selectable as compact markers.
  const candidates=ordered.filter(v=>(v.feature.properties.kind==='event'&&(activeToday(v.feature)||v.feature.properties.key===selectedKey))&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height);
  candidates.sort((a,b)=>Number(b.feature.properties.key===selectedKey)-Number(a.feature.properties.key===selectedKey)||Number(activeToday(b.feature))-Number(activeToday(a.feature))||Math.hypot(a.p.x-width/2,a.p.y-height/2)-Math.hypot(b.p.x-width/2,b.p.y-height/2)||String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
  const beacons=[];
@@ -532,15 +528,6 @@ function drawLights(fade,target=map,surface=lights){
  }
  const expandedKeys=new Set(beacons.map(item=>item.feature.properties.key));
  const placeClusters=clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel),selectedKey,target.getZoom(),width,height);
- const visibleOrbs=ordered.filter(item=>{
-  if(expandedKeys.has(item.feature.properties.key))return false;
-  const cluster=placeClusters.byKey.get(item.feature.properties.key);
-  return !cluster||cluster.leader===item;
- });
- const glowByKey=new Map(visibleOrbs.map(item=>{
-  const neighbors=visibleOrbs.filter(other=>other!==item&&Math.hypot(other.p.x-item.p.x,other.p.y-item.p.y)<92).length;
-  return [item.feature.properties.key,Math.max(.24,1/Math.sqrt(1+neighbors*.9))];
- }));
  for(const item of beacons){
   const phase=item.feature.properties.phase;
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
@@ -645,17 +632,18 @@ function drawLights(fade,target=map,surface=lights){
    }
    continue;
   }
-  if(pass===0){
-   const underProjector=beacons.some(beacon=>Math.hypot(p.x-beacon.p.x,p.y-8-beacon.p.y)<42);
-   if(isBar)hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:28,name:feature.properties.name,category:feature.properties.type});
-   else if(!underProjector){
-    const densityGlow=glowByKey.get(feature.properties.key)??1;
-    drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,placezGlow*densityGlow*bloomScale);
-    if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,raisedY,feature.properties.name,feature.properties.type,color,width);
-    hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:28,name:feature.properties.name,category:feature.properties.type});
+  if(!isBar){
+   const selected=feature.properties.key===selectedKey;
+   const geometry=waypointGeometry(p,selected,placezHoverLift(target,feature,surfaces));
+   if(pass===0)drawWaypointFoot(lightsContext,geometry,color,hologramMaterials,drawProjectionBeam,coreAlpha,selected);
+   else{
+    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,coreAlpha);
+    if(selected)drawSelectedMarkerLabel(lightsContext,geometry.x,geometry.y+geometry.size/2-14,feature.properties.name,feature.properties.type,color,width);
+    hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color});
    }
+   continue;
   }
-  if(!isBar)continue;
+  if(pass===0)hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:28,name:feature.properties.name,category:feature.properties.type});
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
   lightsContext.globalAlpha=(fade*pulse*beamAlpha)*bloomScale;
   if(isBar){
@@ -1084,24 +1072,7 @@ window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();
 // Interactive adapter: isolated from the original studio and homepage.
 function tell(type,payload={}){if(parent!==window)parent.postMessage({source:'zaydar-demo',type,...payload},location.origin);}
 function viewState(){const c=map.getCenter(),b=map.getBounds();tell('view',{center:[c.lat,c.lng],zoom:map.getZoom(),bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
-// Use the original Zaydar orb materials, breathing glow, and drifting mist.
 const typeIcons=new Map();
-function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon,scale=1,glowStrength=1,flat=false){
- if(alpha<=0)return;
- const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
- const size=(flat?72*PLACEZ_BLOOM_RADIUS_SCALE:126)*scale*(flat?1:(.92+.1*pulse));
- const coreSize=25*scale;
- const iconRadius=11*scale;
- const iconSize=15*scale;
- ctx.save();ctx.globalAlpha=fade*(flat?1:pulse)*glowStrength;
- ctx.drawImage(lightSprites.get(color),x-size/2,y-size/2,size,size);
- if(!flat)drawLightMist(ctx,x,y,phase,fade,scale,glowStrength);
- ctx.globalAlpha=alpha;
- ctx.drawImage(hologramMaterials.orbs.get(color),x-coreSize/2,y-coreSize/2,coreSize,coreSize);
- const icon=typeIcons.get(typeIcon);
- if(icon){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,iconRadius,0,Math.PI*2);ctx.fill();ctx.shadowColor='#000';ctx.shadowBlur=2;ctx.drawImage(color.toUpperCase()==='#FFFFFF'?icon.dark:icon.light,x-iconSize/2,y-iconSize/2,iconSize,iconSize);}
- ctx.restore();
-}
 function clusterPlaceMarkers(items,selected,zoom,width,height){
  const radius=zoom<13.5?64:zoom<14.5?52:zoom<15.5?38:zoom<16.25?28:12;
  const byKey=new Map();

@@ -27,9 +27,9 @@ test('labels and Placez markers stay locked to the map during camera movement',a
   assert.doesNotMatch(canvasHost,/ZaydarEventLabel|event\.data\.type==='labels'/);
   assert.match(renderer,/const cameraMoving=Boolean\(target\.isMoving\?\.\(\)\)/);
   assert.match(renderer,/reduced\.matches\|\|cameraMoving\?0:/);
-  assert.match(renderer,/const placezScale=1\.625\*/);
   assert.match(renderer,/r:Math\.max\(22,geometry\.size\/2\+8\)/);
-  assert.match(renderer,/flat\?1:\(\.92\+\.1\*pulse\)/);
+  assert.match(renderer,/if\(!isBar\)\{[\s\S]*?drawWaypointHead\(lightsContext,geometry,color,typeIcons\.get\(feature\.properties\.typeIcon\)\?\.light,null,selected,coreAlpha\)/);
+  assert.doesNotMatch(renderer,/drawDiscoveryOrb/);
   assert.match(renderer,/map\.isMoving\(\)\?1000\/60:frameInterval/);
 });
 
