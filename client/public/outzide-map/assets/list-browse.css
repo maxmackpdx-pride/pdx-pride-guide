@@ -11,7 +11,7 @@
 .search-panel-header button{width:44px;height:44px;min-height:44px;padding:0;border:0;font-size:26px;background:none}
 .outzide-shell .discovery .search{margin-top:4px}
 @media(max-width:760px){
- .outzide-shell .workspace.view-list #outz-browse-content{inset:auto 10px 16px;height:50dvh;max-height:calc(100dvh - 190px);border-radius:18px;transition:none}
+ .outzide-shell .workspace.view-list #outz-browse-content{inset:auto 10px 0;height:50dvh;max-height:calc(100dvh - 190px);border-radius:18px 18px 0 0;transition:none}
  .outzide-shell .workspace.view-list .browse-drawer-handle{display:none!important}
  .outzide-shell .workspace.view-list .map-stage{visibility:visible;pointer-events:auto}
  .outzide-shell .discovery .search{margin:4px 14px 10px;flex-shrink:0}
@@ -19,7 +19,7 @@
  .outzide-shell .explore-view-switch button{min-height:44px}
  .outzide-shell #results .place-card{min-height:110px}
  .outzide-shell #results .place-art{width:48px;height:48px}
- .outzide-shell .list-scroll{padding:0 14px}
+ .outzide-shell .list-scroll{padding:0 14px calc(80px + env(safe-area-inset-bottom,0px))}
 }
 
 .outzide-shell .detail-footer button{min-height:44px;padding:8px 16px;border-radius:9px;font-size:13px;color:var(--c)}
@@ -36,19 +36,15 @@
  .outzide-shell .fieldbar { height:auto; min-height:64px; padding-bottom:5px; }
 }
 
-/* The parent dock floats over the full-height map. Keep the browse sheet above
-   the expanded bar, then pair its compact handle with the circular Z. */
+/* The parent dock floats over the full-height map. Pair the compact search
+   handle with the circular Z and let the open sheet reach the bottom edge. */
 @media(max-width:640px) {
- .outzide-shell[data-mobile-dock="expanded"] .workspace .discovery,
- .outzide-shell[data-mobile-dock="expanded"] .workspace.view-list #outz-browse-content { bottom:calc(110px + env(safe-area-inset-bottom,0px)); }
+ .outzide-shell[data-mobile-dock="expanded"] .workspace.view-map .discovery { bottom:calc(110px + env(safe-area-inset-bottom,0px)); }
  .outzide-shell[data-mobile-dock="collapsed"] .workspace.view-map .discovery {
   left:max(80px,calc(68px + env(safe-area-inset-left,0px)));
   right:12px;
   bottom:calc(12px + env(safe-area-inset-bottom,0px));
   height:56px;
   border-radius:28px;
- }
- .outzide-shell[data-mobile-dock="collapsed"] .workspace.view-list #outz-browse-content {
-  bottom:calc(80px + env(safe-area-inset-bottom,0px));
  }
 }

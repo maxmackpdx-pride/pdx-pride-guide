@@ -87,7 +87,7 @@ export default function Outz() {
         const open = Boolean(workspace?.classList.contains("view-list"));
         if (open === sheetOpen) return;
         sheetOpen = open;
-        window.dispatchEvent(new CustomEvent("zaylist:drawer", { detail: { open, restorePrevious: true } }));
+        window.dispatchEvent(new CustomEvent("zaylist:drawer", { detail: { open, keepCollapsedOnClose: true } }));
       };
       const observer = new MutationObserver(syncSheet);
       if (workspace) observer.observe(workspace, { attributes: true, attributeFilter: ["class"] });
@@ -109,5 +109,5 @@ export default function Outz() {
       title={mapSlow ? "Outzide is taking longer than expected" : "Loading Outzide…"}
       description={mapSlow ? "Try loading the field guide again." : "Getting destinations and the map ready."}
       onAction={retryMap} actionLabel="Reload Outzide" /></div>}
-    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=mobile-optics-20260923&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} /></div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
+    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=mobile-drawer-20260923&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} /></div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
 }

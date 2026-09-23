@@ -60,12 +60,12 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
     };
     const syncMapSheet = (event: Event) => {
       if (innerWidth >= 960) return;
-      const detail = (event as CustomEvent<{ open?: boolean; restorePrevious?: boolean }>).detail;
+      const detail = (event as CustomEvent<{ open?: boolean; restorePrevious?: boolean; keepCollapsedOnClose?: boolean }>).detail;
       const open = Boolean(detail?.open);
       if (detail?.restorePrevious && open && mapDockSnapshot.current === null) {
         mapDockSnapshot.current = scrollState.current.collapsed;
       }
-      const nextCollapsed = open || (detail?.restorePrevious ? mapDockSnapshot.current ?? scrollState.current.collapsed : false);
+      const nextCollapsed = open || Boolean(detail?.keepCollapsedOnClose) || (detail?.restorePrevious ? mapDockSnapshot.current ?? scrollState.current.collapsed : false);
       if (!open) mapDockSnapshot.current = null;
       scrollState.current = {
         y: scrollSource.current instanceof Element ? scrollSource.current.scrollTop : window.scrollY,
