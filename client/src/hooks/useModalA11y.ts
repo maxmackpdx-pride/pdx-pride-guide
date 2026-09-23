@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/scrollLock";
 
+const modalStack: HTMLDivElement[] = [];
+
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -16,6 +18,8 @@ export function useModalA11y(opts: {
 }) {
   const { open = true, onClose, enabled = true } = opts;
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   const previousFocus = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -28,6 +32,7 @@ export function useModalA11y(opts: {
     lockBodyScroll();
 
     const node = dialogRef.current;
+    if (node) modalStack.push(node);
     const focusables = () =>
       node
         ? (Array.from(node.querySelectorAll(FOCUSABLE)) as HTMLElement[]).filter(
@@ -36,17 +41,19 @@ export function useModalA11y(opts: {
         : [];
 
     // Focus first focusable (or dialog itself)
-    requestAnimationFrame(() => {
+    const frame = requestAnimationFrame(() => {
+      if (node && modalStack.at(-1) !== node) return;
       const list = focusables();
       if (list[0]) list[0].focus();
       else node?.focus();
     });
 
     const onKeyDown = (e: KeyboardEvent) => {
+      if (node && modalStack.at(-1) !== node) return;
       if (e.key === "Escape") {
         e.preventDefault();
         e.stopPropagation();
-        onClose();
+        closeRef.current();
         return;
       }
       if (e.key !== "Tab" || !node) return;
@@ -71,11 +78,13 @@ export function useModalA11y(opts: {
 
     document.addEventListener("keydown", onKeyDown, true);
     return () => {
+      cancelAnimationFrame(frame);
+      if (node) { const index = modalStack.lastIndexOf(node); if (index >= 0) modalStack.splice(index, 1); }
       document.removeEventListener("keydown", onKeyDown, true);
       unlockBodyScroll();
-      previousFocus.current?.focus?.();
+      if (previousFocus.current?.isConnected) previousFocus.current.focus({ preventScroll: true });
     };
-  }, [enabled, open, onClose]);
+  }, [enabled, open]);
 
   return dialogRef;
 }

@@ -1,0 +1,29 @@
+/* Shared anatomy adapted from 21st search/header, modal, and empty-state patterns.
+   Product typography, colors, and primitives remain Zaylist's. */
+.section-breadcrumb{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 16px;font:600 12px/1.5 var(--font-body,sans-serif);color:var(--text-meta,#a6a6ad)}
+.section-breadcrumb a{display:inline-flex;align-items:center;min-height:44px;color:inherit;text-decoration:none}
+.section-breadcrumb a:hover{color:var(--text-hi,#fff)}
+.section-breadcrumb a:focus-visible{outline:2px solid var(--cyan,#19e3ff);outline-offset:4px}
+.browse-toolbar{gap:12px;min-width:0}
+.browse-toolbar :is(input[type=search],select){min-height:44px;font-size:16px}
+.browse-toolbar :is(button,[role=tab]){min-height:44px}
+.browse-toolbar :is(input,select,button):focus-visible{outline:2px solid var(--cyan,#19e3ff);outline-offset:3px}
+.browse-status{padding:32px 20px;text-align:center;border-block:1px solid var(--border-default,#303038);color:var(--text-hi,#fff)}
+.browse-status h3{margin:0 0 10px;font:700 clamp(22px,3vw,30px)/1.15 var(--font-display,'Barlow Condensed',sans-serif)}
+.browse-status p{max-width:52ch;margin:0 auto;color:var(--text-mid,#b6bbc4);font-size:15px;line-height:1.65}
+.browse-status__actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:20px}
+.detail-actions{position:relative;z-index:4;pointer-events:auto;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0}
+.detail-actions>button{gap:8px;min-height:44px;flex-shrink:0}
+.detail-actions>button.detail-actions__close{width:44px;padding:0;flex-shrink:0}
+.detail-actions>button:focus-visible{outline:2px solid var(--cyan,#19e3ff);outline-offset:3px}
+.detail-actions>button:disabled{opacity:.55;cursor:wait}
+.board-post-overlay>.detail-actions,.board-detail-modal--spotted>.detail-actions{padding:12px 12px 4px}
+.events-filter-row .events-filter-search{order:-1;flex:1 0 100%;max-width:none}
+.events-filter-row .events-filter-search .pdxSearch{height:48px}
+.events-clear-filters,.directory-browser-results__status>button{min-height:44px;text-decoration:underline;text-underline-offset:4px}
+.directory-page .directory-browser-header__identity{align-items:flex-start;flex-direction:column;gap:16px}
+.directory-page .directory-browser-header__identity h1{margin:0;max-width:100%}
+.directory-page .directory-browser-header__lede{max-width:58ch;font-size:clamp(16px,2vw,19px);line-height:1.65}
+@media(max-width:600px){.detail-actions>button{min-height:44px}.browse-toolbar{gap:10px}.directory-browser-header__wordmark{min-width:0;max-width:100%}}
+
+.place-modal-panel__inner>.detail-actions{margin-bottom:12px}

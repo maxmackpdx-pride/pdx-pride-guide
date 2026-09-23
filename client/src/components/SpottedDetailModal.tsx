@@ -1,3 +1,4 @@
+import DetailActions from "@/components/DetailActions";
 import { useCallback, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
@@ -98,9 +99,7 @@ export default function SpottedDetailModal({
         style={glassVars}
       >
         <BoardGlassMotif variant="quote-pair" />
-        <button type="button" className="gifting-close" onClick={onClose} aria-label="Close" style={{ position: "relative", zIndex: 3 }}>
-          <X size={18} />
-        </button>
+        <DetailActions label="listing" onClose={onClose} />
         <div className="board-detail-modal__meta" style={{ position: "relative", zIndex: 1 }}>
           <span className="board-detail-modal__live-dot" aria-hidden="true" />
           <span className="board-detail-modal__meta-line" style={{ color: kindColor || MC_GLASS }}>

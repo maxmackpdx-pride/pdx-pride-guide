@@ -1,3 +1,5 @@
+import BrowseToolbar from "@/components/BrowseToolbar";
+import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
 import type React from "react";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -324,7 +326,7 @@ export default function Events() {
   const [location, setLocation] = useLocation();
   const routeEventId = routeMatch && routeParams?.id ? Number(routeParams.id) : null;
   const routeDay = useMemo(() => readSearchParam("day").toUpperCase(), [location]);
-  const [activeDay, setActiveDay] = useState("ALL");
+  const [activeDay, setActiveDay] = useState(() => readSearchParam("window") || "ALL");
   const [activeFilters, setActiveFilters] = useState<string[]>(() => {
     const raw = readSearchParam("type");
     return raw
@@ -333,17 +335,17 @@ export default function Events() {
       .filter(isEventTypeFilterLabel);
   });
   /** Past events live in their own board view (chip next to day categories). */
-  const [pastView, setPastView] = useState(false);
+  const [pastView, setPastView] = useState(() => readSearchParam("past") === "1");
   const [searchQuery, setSearchQuery] = useState(() => {
     if (typeof window === "undefined") return "";
     return new URLSearchParams(window.location.search).get("q")?.trim() || "";
   });
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [eventOriginRect, setEventOriginRect] = useState<EventModalOriginRect | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">(() => readSearchParam("view") === "list" ? "list" : "grid");
   const [visibleItemCount, setVisibleItemCount] = useState(GRID_RENDER_BATCH);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const [sortMode, setSortMode] = useState<SortMode>("start_time");
+  const [sortMode, setSortMode] = useState<SortMode>(() => SORT_OPTIONS.find(option => option.value === readSearchParam("sort"))?.value || "start_time");
   const [activeTab, setActiveTabState] = useState<"board" | "schedule">(() =>
     readSearchParam("tab").toLowerCase() === "schedule" ? "schedule" : "board",
   );
@@ -355,29 +357,51 @@ export default function Events() {
     const qs = params.toString();
     setLocation(qs ? `/events?${qs}` : "/events");
   }, [setLocation]);
+  const browseQuery = useCallback(() => {
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set("q", searchQuery.trim());
+    if (activeDay !== "ALL") params.set("window", activeDay);
+    if (activeFilters.length) params.set("type", activeFilters.join("|"));
+    if (pastView) params.set("past", "1");
+    if (viewMode !== "grid") params.set("view", viewMode);
+    if (sortMode !== "start_time") params.set("sort", sortMode);
+    if (activeTab === "schedule") params.set("tab", activeTab);
+    return params;
+  }, [searchQuery, activeDay, activeFilters, pastView, viewMode, sortMode, activeTab]);
   const openEvent = useCallback((event: EventListing, originRect: EventModalOriginRect | null = null) => {
     setEventOriginRect(originRect);
     setSelectedEvent(event);
-    setLocation(eventPath(event.id, event.title, event.dayOfWeek));
-  }, [setLocation]);
+    const target = new URL(eventPath(event.id, event.title, event.dayOfWeek), window.location.origin);
+    browseQuery().forEach((value, key) => target.searchParams.set(key, value));
+    setLocation(target.pathname + target.search);
+  }, [setLocation, browseQuery]);
   const closeEvent = useCallback(() => {
     setSelectedEvent(null);
     setEventOriginRect(null);
-    const q = searchQuery.trim();
-    setLocation(q ? `/events?q=${encodeURIComponent(q)}` : "/events");
-  }, [setLocation, searchQuery]);
-
+    const query = browseQuery().toString();
+    setLocation(query ? `/events?${query}` : "/events");
+  }, [setLocation, browseQuery]);
   useEffect(() => {
     if (routeMatch) return;
-    const params = new URLSearchParams(window.location.search);
-    const currentQ = params.get("q") || "";
-    const nextQ = searchQuery.trim();
-    if (currentQ === nextQ) return;
-    if (nextQ) params.set("q", nextQ);
-    else params.delete("q");
-    const qs = params.toString();
-    setLocation(qs ? `/events?${qs}` : "/events");
-  }, [searchQuery, routeMatch, setLocation]);
+    const query = browseQuery().toString();
+    const target = query ? `/events?${query}` : "/events";
+    if (window.location.pathname + window.location.search !== target) {
+      window.history.replaceState(window.history.state, "", target);
+    }
+  }, [browseQuery, routeMatch]);
+  useEffect(() => {
+    const restore = () => {
+      setActiveDay(readSearchParam("window") || "ALL");
+      setActiveFilters(readSearchParam("type").split("|").filter(isEventTypeFilterLabel));
+      setPastView(readSearchParam("past") === "1");
+      setSearchQuery(readSearchParam("q"));
+      setViewMode(readSearchParam("view") === "list" ? "list" : "grid");
+      setSortMode(SORT_OPTIONS.find(option => option.value === readSearchParam("sort"))?.value || "start_time");
+      setActiveTabState(readSearchParam("tab") === "schedule" ? "schedule" : "board");
+    };
+    window.addEventListener("popstate", restore);
+    return () => window.removeEventListener("popstate", restore);
+  }, []);
 
   const { data: events = [], isLoading, isError, error, refetch } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
@@ -461,8 +485,8 @@ export default function Events() {
   const activeChipLabel = dayChips.find(c => c.key === activeDay)?.label ?? null;
   // If the selected window no longer exists in the pool (e.g. after toggling Past), fall back to All.
   useEffect(() => {
-    if (activeDay !== "ALL" && !dayChips.some(c => c.key === activeDay)) setActiveDay("ALL");
-  }, [dayChips, activeDay]);
+    if (!isLoading && activeDay !== "ALL" && !dayChips.some(c => c.key === activeDay)) setActiveDay("ALL");
+  }, [dayChips, activeDay, isLoading]);
 
   const filtered = useMemo(
     () => sortEvents(filterBoardEvents(events, activeDay, activeFilters, searchQuery, pastView, Date.now()), sortMode),
@@ -593,7 +617,7 @@ export default function Events() {
                     {pastView ? "Past events" : "Live listings"}
                   </h2>
                   <span className="board-active-feed__count" data-testid="events-count">
-                    {isLoading ? (
+                    {isError ? "Results unavailable" : isLoading ? (
                       "Loading…"
                     ) : hasActiveFilters && filtered.length !== poolEvents.length ? (
                       <>
@@ -621,7 +645,7 @@ export default function Events() {
                   </span>
                 </div>
               </div>
-              <div className="board-active-feed__controls">
+              <BrowseToolbar label="Search and filter Eventz" className="board-active-feed__controls">
                 <div className="board-filter-row events-filter-row">
                   {dayChips.map((chip, i) => {
                     const selected = activeDay === chip.key;
@@ -729,10 +753,10 @@ export default function Events() {
                       setActiveDay("ALL");
                     }}
                   >
-                    Clear filters ×
+                    Clear filters
                   </button>
                 )}
-              </div>
+              </BrowseToolbar>
             </div>
           </ScrollReveal>
 
@@ -740,17 +764,9 @@ export default function Events() {
         {isLoading ? (
           <BoardFeedSkeleton label="Loading events" shape="board" count={6} />
         ) : isError ? (
-          <div className="board-empty board-empty--prototype">
-            <p className="display section-heading">Could not load events</p>
-            <p className="board-copy-sm">
-              Could not load events. Try again in a moment.
-            </p>
-            <Button type="button" variant="solid" accent="lime" onClick={() => refetch()} style={{ marginTop: 16 }}>
-              Try again
-            </Button>
-          </div>
+          <BrowseStatus error title="Events couldn’t load" description="Your filters are still here. Try loading the events again." onAction={() => void refetch()} />
         ) : filtered.length === 0 ? (
-          <div className="board-empty board-empty--prototype">
+          <div className="browse-status" role="status">
             <p className="display section-heading">
               {poolEvents.length === 0
                 ? pastView ? "No past events yet" : "No upcoming events listed yet"

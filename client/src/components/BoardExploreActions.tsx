@@ -31,11 +31,11 @@ export default function BoardExploreActions({ primary, showSchedule = false, sch
           </Button>
         </Link>
       )}
-      <Link href="/submit">
+      {(showSchedule || !primary) && <Link href="/submit">
         <Button as="span" variant="neon" accent="lime" size="lg">
-          Add an event
+          Submit an Event
         </Button>
-      </Link>
+      </Link>}
     </>
   );
 }

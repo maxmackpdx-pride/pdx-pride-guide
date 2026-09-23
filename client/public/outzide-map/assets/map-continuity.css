@@ -90,3 +90,12 @@ html.calm-mode .outzide-shell,html.calm-mode .zaydar-map-demo,[data-calm=true] .
 .directions-options{position:absolute;bottom:calc(100% + 8px);right:0;width:250px;max-width:calc(100vw - 48px);padding:12px;display:grid;gap:8px;background:#131c17f5;backdrop-filter:blur(20px);border:1px solid #77857466;border-radius:12px;box-shadow:0 8px 24px #0008;z-index:5}
 .directions-options p{font-size:12px;color:var(--muted);line-height:1.5}
 .directions-options a{display:block;min-height:44px;padding:10px 12px}
+
+/* Site continuity: match Zaylist detail/search control anatomy. */
+.outzide-shell .detail-tools{display:flex;align-items:center;gap:8px}
+.outzide-shell .detail-tools button,.outzide-shell .utility-close,.outzide-shell [data-search-close]{min-width:44px;min-height:44px;border-radius:22px;display:inline-flex;align-items:center;justify-content:center}
+.outzide-shell .detail-tools button[data-action="share-place"]{width:auto;padding-inline:14px;gap:8px;font:600 14px/1 var(--body,Inter,sans-serif)}
+.outzide-shell .search{min-height:48px}
+.outzide-shell .search input{font-size:16px;min-height:44px}
+.outzide-shell :is(button,a,input,select):focus-visible{outline:2px solid var(--cyan,#19e3ff);outline-offset:3px}
+.outzide-shell .empty{padding:32px 20px;text-align:center;line-height:1.65}

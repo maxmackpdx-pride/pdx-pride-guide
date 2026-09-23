@@ -15,6 +15,7 @@ export default function ScheduleHero({ stats }: Props) {
       <BoardHero
         className="board-hero--room"
         accent="cyan"
+        section="My Schedule"
         kicker="Zaylist / Eventz · Your week"
         title={
           <>

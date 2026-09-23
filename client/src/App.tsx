@@ -4,7 +4,7 @@ import { Switch, Route, Router, Redirect, useLocation } from "wouter";
 import { Suspense, useEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
-import { scheduleScrollReset } from "./lib/resetPageScroll";
+import BrowseScrollRestoration from "./components/BrowseScrollRestoration";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
 import { InboxSheetProvider } from "./context/InboxSheetContext";
@@ -45,15 +45,7 @@ function RouteBoundary({ children }: { children: ReactNode }) {
   return <ErrorBoundary key={location.split("?")[0]}>{children}</ErrorBoundary>;
 }
 
-function ScrollToTop() {
-  const [location] = useLocation();
-  // Pathname only - query changes (filters, ?q=) must not yank scroll to top
-  const pathname = location.split("?")[0] || location;
-  useEffect(() => {
-    scheduleScrollReset();
-  }, [pathname]);
-  return null;
-}
+
 import { LEGACY_Z_PRODUCT_REDIRECTS } from "@shared/zNamespace";
 import CommunityStandardsGate from "./components/CommunityStandardsGate";
 import SuspendedAccountGate from "./components/SuspendedAccountGate";
@@ -260,7 +252,7 @@ export default function App() {
           <CommunityStandardsGate />
           <Router>
             <InboxSheetProvider>
-              <ScrollToTop />
+              <BrowseScrollRestoration />
               <AnalyticsTracker />
               <PrideGlowNudge />
               <RiverBratsIntroOnBeaches />

@@ -124,16 +124,10 @@ export function installScrollRecenterListeners() {
   if ((window as Window & { __pdxScrollRecenter?: boolean }).__pdxScrollRecenter) return;
   (window as Window & { __pdxScrollRecenter?: boolean }).__pdxScrollRecenter = true;
 
-  // Full reload + bfcache restore - once, not a cascade of top jumps
-  window.addEventListener("pageshow", (e) => {
-    scheduleScrollReset();
-    if (e.persisted) {
-      window.setTimeout(() => scheduleScrollReset(), 60);
-    }
-  });
-
+  // Preserve vertical position on bfcache return and orientation changes.
+  window.addEventListener("pageshow", () => ensurePageCentered());
   window.addEventListener("orientationchange", () => {
-    window.setTimeout(() => scheduleScrollReset(), 100);
+    window.setTimeout(() => ensurePageCentered(), 100);
   });
 
   // Pinch-zoom / layout resize:

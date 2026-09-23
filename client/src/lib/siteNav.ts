@@ -49,7 +49,7 @@ export const PRIMARY_NAV: NavEntry[] = [
     items: [
       { href: "/events", label: "All Eventz", accent: "cyan" },
       { href: "/schedule", label: "My Schedule", accent: "lime" },
-      { href: "/submit", label: "Promoters", accent: "orange" },
+      { href: "/submit", label: "Submit an Event", accent: "orange" },
     ],
   },
   { type: "link", href: "/map", label: "Mapz", accent: "blue" },
@@ -86,16 +86,16 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/the-hauz": { section: "Boards", title: "THE HAÜZ" },
   "/spotted": { section: "Boards", title: "MIZZED CONNECTION" },
   "/directory": { section: "PLACEZ", title: "OUR PLACEZ" },
-  "/outzide": { section: "OUTZ", title: "Outdoors" },
-  "/outzide/rooster-rock": { section: "OUTZ", title: "Rooster Rock" },
-  "/outzide/sauvie-island": { section: "OUTZ", title: "Sauvie Island" },
+  "/outzide": { section: "OutZide", title: "OutZide" },
+  "/outzide/rooster-rock": { section: "OutZide", title: "Rooster Rock" },
+  "/outzide/sauvie-island": { section: "OutZide", title: "Sauvie Island" },
   "/about": { section: "About", title: "About" },
   "/aboutz": { section: "About", title: "About" },
   "/resume": { section: "About", title: "Resume" },
   "/contact": { section: "About", title: "Contact" },
   "/sponsors": { section: "About", title: "Sponsors" },
   "/access": { section: "About", title: "Access & Safety" },
-  "/submit": { section: "Submit", title: "Submit an Event" },
+  "/submit": { section: "Eventz", title: "Submit an Event" },
   "/dashboard": { section: "Account", title: "Your Hub" },
   "/settings/notifications": { section: "Account", title: "Notification settings" },
   "/inbox": { section: "Account", title: "Inbox" },
@@ -122,7 +122,7 @@ export const OUTZ_INDEX = "/outzide";
 export const EVENTS_NAV: NavLinkItem[] = [
   { href: "/events", label: "Eventz" },
   { href: "/schedule", label: "My Schedule" },
-  { href: "/submit", label: "Promoters" },
+  { href: "/submit", label: "Submit an Event" },
 ];
 
 export function navLinkActive(location: string, href: string) {

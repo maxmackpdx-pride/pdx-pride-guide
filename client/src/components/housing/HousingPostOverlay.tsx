@@ -1,3 +1,4 @@
+import DetailActions from "@/components/DetailActions";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -198,7 +199,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, originRe
   return createPortal(
     <div className="board-detail-backdrop" onClick={requestClose}>
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} HAÜZ ${detail ? "details" : "card"}`} tabIndex={-1} className="hz pdx-glass-rebind" style={panelStyle} onClick={(event) => event.stopPropagation()}>
-        <button type="button" className="gifting-close" onClick={requestClose} aria-label="Close HAÜZ and return to map" style={{ position: "absolute", top: 10, right: 10, zIndex: 30 }}><X size={18} /></button>
+        <div style={{ position: "relative", zIndex: 30, padding: 12 }}><DetailActions label="Haüz listing" onClose={requestClose} /></div>
         <div key={detail ? "detail" : "card"} className="houz-overlay-content">
           {detail ? <HousingDetail post={post} h={detailHandlers} isOwner={isOwner} workspace={post.type === "FORMING" ? <HousingWorkspace post={post} onOpenThread={() => openSheet({ view: "inbox" })} /> : undefined} /> : <HousingCard post={post} h={cardHandlers} />}
         </div>

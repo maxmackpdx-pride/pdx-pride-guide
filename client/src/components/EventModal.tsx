@@ -1,3 +1,4 @@
+import DetailActions from "./DetailActions";
 import { useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
@@ -873,13 +874,7 @@ function EventModalInner({
         } as React.CSSProperties}
       >
         <div className="event-modal__chrome">
-          <div className="event-modal__chrome-tools">
-            <button
-              type="button"
-              className="event-modal__close event-modal__share"
-              aria-label="Share this event"
-              title="Share this event"
-              onClick={async () => {
+          <DetailActions label="event" onClose={onClose} onShare={async () => {
                 try {
                   const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek), event.title);
                   toast({ title: shareToastTitle(result, "event") });
@@ -888,13 +883,7 @@ function EventModalInner({
                     toast({ title: "Could not share event", variant: "destructive" });
                   }
                 }
-              }}
-            >
-              <Share2 size={18} strokeWidth={2.3} aria-hidden />
-              <span>Share</span>
-            </button>
-            <button type="button" className="event-modal__close" onClick={onClose} aria-label="Close event">✕</button>
-          </div>
+              }} />
         </div>
 
         <div className="event-modal__scroll" ref={scrollRef}>

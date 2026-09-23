@@ -1,3 +1,4 @@
+import DetailActions from "@/components/DetailActions";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -97,15 +98,7 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
           onClick={e => e.stopPropagation()}
           style={panelStyle}
         >
-          <button
-            type="button"
-            className="gifting-close"
-            onClick={onClose}
-            aria-label="Close"
-            style={{ position: "absolute", top: 10, right: 10, zIndex: 3 }}
-          >
-            <X size={18} />
-          </button>
+          <DetailActions label="listing" onClose={onClose} />
           {card ?? (
             <div className="board-listing-card board-listing-card--makeover pdx-glass-rebind" style={{ padding: 28, textAlign: "center", "--listing-accent": accent, "--c": accent } as CSSProperties}>
               <p className="board-copy-sm" role={query.isError ? "alert" : "status"}>{query.isLoading ? "Loading…" : query.isError ? "This listing could not load." : "This listing is no longer available."}</p>

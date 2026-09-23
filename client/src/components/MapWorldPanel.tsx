@@ -1,10 +1,12 @@
+import BrowseToolbar from "./BrowseToolbar";
+import BrowseStatus from "./BrowseStatus";
 import { useEffect, useState, type ReactNode } from "react";
 import { Plus, ChevronRight } from "lucide-react";
 import { mapCoordinates } from "@/lib/mapCoordinates";
 import { WORLD_NAMES, inMapBounds, type MapWorld, type WorldRow, type MapBounds } from "@/lib/mapWorlds";
 
-type Props = {world:MapWorld; rows:WorldRow[]; allRows:WorldRow[]; bounds:MapBounds|null; params:URLSearchParams; setParam:(key:string,value:string)=>void; onCreate:()=>void; onOpen:(row:WorldRow,target:Element)=>void; selectedId:number|null; loading:boolean; error:boolean; retry:()=>void; children?:ReactNode};
-export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam,onCreate,onOpen,selectedId,loading,error,retry,children}:Props) {
+type Props = {world:MapWorld; rows:WorldRow[]; allRows:WorldRow[]; bounds:MapBounds|null; params:URLSearchParams; setParam:(key:string,value:string)=>void; onClearFilters:()=>void; onCreate:()=>void; onOpen:(row:WorldRow,target:Element)=>void; selectedId:number|null; loading:boolean; error:boolean; retry:()=>void; children?:ReactNode};
+export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam,onClearFilters,onCreate,onOpen,selectedId,loading,error,retry,children}:Props) {
   const [limit,setLimit]=useState(40);
   useEffect(()=>setLimit(40),[world,params.toString()]);
   const get=(key:string)=>params.get(`${world}.${key}`)||"";
@@ -21,7 +23,7 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
   return <section className="zaydar-layer-panel" aria-label={`${name} in this map`}>
     <div className="zaydar-layer-panel__heading"><small>In this view</small><h2>{name}</h2></div>
     <button type="button" className="zaydar-houz-post" onClick={onCreate}><Plus size={16} aria-hidden="true"/> {world==="places"?"Add a place":`Post to ${name}`}</button>
-    <div className="zaydar-world-filters">
+    <BrowseToolbar label={`Search and filter ${name}`} className="zaydar-world-filters">
       <label>Search {name}<input type="search" value={get("q")} onChange={e=>set("q",e.target.value)} placeholder={`Search ${name}`} /></label>
       <label>Neighborhood<input value={get("area")} onChange={e=>set("area",e.target.value)} placeholder="All neighborhoods" /></label>
       {world === "places" ? <label><input type="checkbox" checked={get("owned")==="1"} onChange={e=>set("owned",e.target.checked?"1":"")}/> Queer owned</label> : select("view","Show",[["","All posts"],["mine","My posts"],...(world==="sellz"?[["saved","Saved"] as [string,string]]:[])])}
@@ -31,15 +33,15 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
       {(world === "giftz" || world === "sellz") && select("category","Category",[["","All categories"],...categories.map(value=>[value,value] as [string,string])])}
       {world === "sellz" && <>{select("condition","Condition",[["","Any condition"],...["New","Like new","Good","Fair","For parts"].map(value=>[value,value] as [string,string])])}{select("price","Price",[["","Any price"],["UNDER25","Under $25"],["25TO100","$25 to $100"],["OVER100","Over $100"]])}</>}
       {world !== "places" && select("sort","Sort",[["","Newest"],["oldest","Oldest"],...(world==="mizzed"?[["CLOSING","Closing soon"] as [string,string]]:[]),...(world==="sellz"?[["PRICE_LOW","Price: low to high"],["PRICE_HIGH","Price: high to low"]] as Array<[string,string]>:[])])}
-    </div>
+    </BrowseToolbar>
     {get("ids") && <p className="zaydar-layer-location-note">Showing this waypoint’s posts. <button onClick={()=>set("ids","")}>Show all in view</button></p>}
-    {applied.length>0&&<div className="map-applied-filters" aria-label="Applied filters">{applied.map(([key,value])=><button key={key} type="button" onClick={()=>setParam(key,"")} aria-label={"Remove "+key.split(".")[1]+" filter"}>{key.endsWith(".ids")?"Selected waypoint":key.endsWith(".owned")?"Queer owned":key.endsWith(".remote")?"Remote friendly":value.replaceAll("_"," ")} ×</button>)}</div>}
+    {applied.length>0&&<div className="map-applied-filters" aria-label="Applied filters"><button type="button" onClick={onClearFilters}>Clear filters</button>{applied.map(([key,value])=><button key={key} type="button" onClick={()=>setParam(key,"")} aria-label={"Remove "+key.split(".")[1]+" filter"}>{key.endsWith(".ids")?"Selected waypoint":key.endsWith(".owned")?"Queer owned":key.endsWith(".remote")?"Remote friendly":value.replaceAll("_"," ")} ×</button>)}</div>}
     {children}
-    {loading ? <p role="status">Loading {name}…</p> : error ? <p role="alert">{name} could not load. <button onClick={retry}>Try again</button></p> : <>
+    {loading ? <p role="status">Loading {name}…</p> : error ? <BrowseStatus error title={`${name} couldn’t load`} description="Your map and filters are still here. Try loading the listings again." onAction={retry} /> : <>
       <p role="status" className="zaydar-layer-location-note">{inView.length} in view{!bounds ? " · waiting for map bounds" : ""}</p>
       <div className="zaydar-layer-list">{renderRows(inView.slice(0,limit))}</div>
       {inView.length>limit && <button onClick={()=>setLimit(n=>n+40)}>Show more ({inView.length-limit})</button>}
-      {!inView.length && <p className="zaydar-layer-empty">No {name} match this view. Move the map or change your filters.</p>}
+      {!inView.length && <BrowseStatus title={`No ${name} in this view`} description="Move the map or broaden your filters to see more listings." onAction={applied.length ? onClearFilters : undefined} actionLabel="Clear filters" />}
       {unlocated.length>0 && <details className="zaydar-world-unlocated"><summary>{unlocated.length} remote or without a mapped location</summary><p className="zaydar-layer-location-note">These posts cannot be filtered by the map viewport.</p><div className="zaydar-layer-list">{renderRows(unlocated.slice(0,limit))}</div>{unlocated.length>limit && <button onClick={()=>setLimit(n=>n+40)}>Show more</button>}</details>}
     </>}
   </section>;

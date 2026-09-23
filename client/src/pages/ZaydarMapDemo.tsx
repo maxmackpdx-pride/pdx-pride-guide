@@ -1,3 +1,4 @@
+import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
 
@@ -627,7 +628,7 @@ export default function ZaydarMapDemo() {
         return <button type="button" className="zaydar-layer-row" key={`${event.id}-${event.dateStart}`} onClick={click => openMark({ key: `e-${event.id}-${event.dateStart}`, kind: "event", lat: event.lat!, lng: event.lng!, item: event }, click.currentTarget)}>
           <img src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} alt="" loading="lazy" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = EVENT_PLACEHOLDER_PENDING; }} />
           <span className="zaydar-layer-row__copy"><strong>{event.title}</strong><small>{event.venueName}</small></span>
-          <time dateTime={event.dateStart}>{!isToday && <small>{new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" }).format(starts)}</small>}{new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit" }).format(starts)}</time>
+          <time dateTime={event.dateStart}>{!isToday && <small>{eventDateLabel(event.dateStart)}</small>}{eventTimeLabel(event.dateStart)}</time>
           <ChevronRight size={17} aria-hidden="true" />
         </button>;
       })}
@@ -643,7 +644,7 @@ export default function ZaydarMapDemo() {
     const isMine=params.get(`${world}.view`)==="mine";
     const state={places:[placesLoading,placesError,retryPlaces],mizzed:[mizzedLoading,mizzedError,retryMizzed],gigz:[gigsLoading,gigsError,retryGigs],giftz:[giftsLoading,giftsError,retryGifts],sellz:[sellsLoading,sellsError,retrySells]}[world];
     const rows=world==="places"?mapPlaces as unknown as WorldRow[]:filteredWorlds[world];
-    return [world,<MapWorldPanel key={world} world={world} rows={rows} allRows={locatedWorlds[world]} bounds={mapBounds} params={params} setParam={(key,value)=>updateParams(p=>{if(value)p.set(key,value);else p.delete(key);})} onCreate={()=>openComposer(world)} selectedId={mapRecordId(params.get(WORLD_DETAIL_KEYS[world]))} loading={isMine?mineWorlds[world]?.isLoading:Boolean(state[0])} error={isMine?mineWorlds[world]?.isError:Boolean(state[1])} retry={()=>{if(isMine)void mineWorlds[world]?.refetch();else void (state[2] as ()=>unknown)();}} onOpen={(row,target)=>world==="places"?openMark(placeMarks([row as Place])[0]||{key:`p-${row.id}`,kind:"place",lat:NaN,lng:NaN,item:row as Place},target):openBoardRow(row,target)}>
+    return [world,<MapWorldPanel key={world} world={world} rows={rows} allRows={locatedWorlds[world]} bounds={mapBounds} params={params} setParam={(key,value)=>updateParams(p=>{if(value)p.set(key,value);else p.delete(key);})} onClearFilters={()=>updateParams(p=>{[...p.keys()].filter(key=>key.startsWith(world+".")).forEach(key=>p.delete(key));})} onCreate={()=>openComposer(world)} selectedId={mapRecordId(params.get(WORLD_DETAIL_KEYS[world]))} loading={isMine?mineWorlds[world]?.isLoading:Boolean(state[0])} error={isMine?mineWorlds[world]?.isError:Boolean(state[1])} retry={()=>{if(isMine)void mineWorlds[world]?.refetch();else void (state[2] as ()=>unknown)();}} onOpen={(row,target)=>world==="places"?openMark(placeMarks([row as Place])[0]||{key:`p-${row.id}`,kind:"place",lat:NaN,lng:NaN,item:row as Place},target):openBoardRow(row,target)}>
       {world==="places" && <div className="zaydar-layer-rail" role="group" aria-label="Place categories">{ZAYDAR_PLACE_TYPE_OPTIONS.map(type=><button key={type} aria-pressed={placeTypes.includes(type)} onClick={()=>updateParams(p=>p.set("placeTypes",(placeTypes.includes(type)?placeTypes.filter(item=>item!==type):[...placeTypes,type]).join(",")))}>{zaydarTypeLabel(type)}</button>)}</div>}
     </MapWorldPanel>];
   })) as Record<MapWorld,React.ReactNode>;
@@ -701,7 +702,7 @@ export default function ZaydarMapDemo() {
       alternateLogoKey:brands?.alternateDirectoryId?`directory-${brands.alternateDirectoryId}`:undefined,
       eventDay:event?portlandCalendarDay(event.dateStart):undefined,
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
-      time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
+      time:event?eventTimeLabel(event.dateStart):undefined};
   }), [marks, places, demoEventIds, attendance]);
   const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(!canOpenMapObjects){mapRef.current?.send('select',{key:null});setShowAuth(true);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
   useEffect(()=>{

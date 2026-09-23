@@ -1,4 +1,5 @@
 import "./InteriorHeader.css";
+import SectionBreadcrumb from "./SectionBreadcrumb";
 import type { ReactNode } from "react";
 import { Link } from "wouter";
 import GlitchWord from "@/components/GlitchWord";
@@ -33,15 +34,7 @@ export default function PageHeader({
   return (
     <header className={classes}>
       <div className="page-header__inner">
-        <nav className="page-header__crumb" aria-label="Breadcrumb">
-          <Link href="/" className="page-header__crumb-home">
-            Zaylist
-          </Link>
-          <span className="page-header__crumb-sep" aria-hidden="true">
-            /
-          </span>
-          <span className="page-header__crumb-section">{section}</span>
-        </nav>
+        <SectionBreadcrumb section={section} />
 
         {kicker && <p className="page-header__kicker">{kicker}</p>}
 

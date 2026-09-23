@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { parsePacificDateTime } from "@shared/missedConnections";
 
 export function useCountdown(target: number | null) {
   const [now, setNow] = useState(Date.now());
@@ -17,9 +18,7 @@ export function useCountdown(target: number | null) {
 }
 
 export function parsePacificEventTime(value?: string | null) {
-  if (!value) return null;
-  if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)) return new Date(value).getTime();
-  return new Date(`${value}-07:00`).getTime();
+  return value ? parsePacificDateTime(value) : null;
 }
 
 const PACIFIC_TZ = "America/Los_Angeles";

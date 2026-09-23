@@ -1,3 +1,6 @@
+import BrowseStatus from "@/components/BrowseStatus";
+import BrowseToolbar from "@/components/BrowseToolbar";
+import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import type React from "react";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -185,7 +188,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     const t = new URLSearchParams(window.location.search).get("type");
     return t && t !== "group" && t in TYPE_LABELS ? t : "ALL";
   });
-  const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
+  const [activeNeighborhood, setActiveNeighborhood] = useState(() => new URLSearchParams(window.location.search).get("neighborhood") || "ALL");
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
   const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
   const [placeOriginRect, setPlaceOriginRect] = useState<{
@@ -206,7 +209,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     });
   }, []);
 
-  const { data: businesses = [], isLoading, isError } = useQuery<Business[]>({
+  const { data: businesses = [], isLoading, isError, refetch } = useQuery<Business[]>({
     queryKey: ["/api/directory"],
     queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
     staleTime: 60_000,
@@ -223,13 +226,33 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     const params = new URLSearchParams();
     if (!isSpaces && activeType !== "ALL") params.set("type", activeType);
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
+    if (activeNeighborhood !== "ALL") params.set("neighborhood", activeNeighborhood);
+    if (formOpen) params.set("add", "1");
     const incomingFrom = new URLSearchParams(window.location.search).get("from") ?? "";
     if (/^\/(z|directory)(\/|\?|$)/.test(incomingFrom) && !incomingFrom.startsWith("//")) {
       params.set("from", incomingFrom);
     }
     const next = params.toString();
     return next ? `?${next}` : "";
-  }, [activeType, isSpaces, searchQuery]);
+  }, [activeType, isSpaces, searchQuery, activeNeighborhood, formOpen]);
+
+  useEffect(() => {
+    if (routePlaceId || new URLSearchParams(window.location.search).has("place")) return;
+    const suffix = directoryQuerySuffix();
+    const target = boardPath + suffix;
+    if (window.location.pathname + window.location.search !== target) window.history.replaceState(window.history.state, "", target);
+  }, [routePlaceId, boardPath, directoryQuerySuffix]);
+  useEffect(() => {
+    const restore = () => {
+      const params = new URLSearchParams(window.location.search);
+      const type = params.get("type");
+      setActiveType(isSpaces ? "group" : type && type !== "group" && type in TYPE_LABELS ? type : "ALL");
+      setSearchQuery(params.get("q") || "");
+      setActiveNeighborhood(params.get("neighborhood") || "ALL");
+    };
+    window.addEventListener("popstate", restore);
+    return () => window.removeEventListener("popstate", restore);
+  }, [isSpaces]);
 
   const openPlace = useCallback(
     (biz: Business, originEl?: HTMLElement | null) => {
@@ -417,7 +440,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     return ()=>window.clearTimeout(timer);
   }, [formOpen]);
 
-  const resultLine = isLoading
+  const resultLine = isError ? "Results unavailable" : isLoading
     ? "Loading…"
     : `${filtered.length} ${isSpaces ? (filtered.length === 1 ? "squad" : "squadz") : (filtered.length === 1 ? "PLACE" : "PLACEZ")}`;
 
@@ -425,13 +448,16 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     <div className={`zine-page directory-page board-page board-page--makeover directory-page--v2${isSpaces ? " directory-page--spaces" : ""}`}>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <header className="directory-browser-header">
+        <SectionBreadcrumb section={isSpaces ? "My Squadz" : "Our Placez"} />
         <div className="directory-browser-header__identity">
+          <h1>
           <img
             className="directory-browser-header__wordmark"
             src={isSpaces ? "/brand/family/my-squadz.svg" : "/brand/family/our-placez.svg"}
             alt={isSpaces ? "MY SQUADZ" : "OUR PLACEZ"}
             decoding="async"
           />
+          </h1>
           <p className="directory-browser-header__lede">
             {isSpaces
               ? "Find queer clubs, crews, nonprofits, and community groups across Portland."
@@ -439,7 +465,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
           </p>
         </div>
 
-        <div className="directory-browser-search pdx-glass-card pdx-glass-rebind">
+        <BrowseToolbar label="Search and filter places" className="directory-browser-search pdx-glass-card pdx-glass-rebind">
           <label className="directory-browser-search__field">
             <span>Search {isSpaces ? "MY SQUADZ" : "OUR PLACEZ"}</span>
             <SearchInput
@@ -489,7 +515,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               <Plus size={15} /> {isSpaces ? "Add a squad" : "Add a place"}
             </Button>
           </div>
-        </div>
+        </BrowseToolbar>
 
         {!isSpaces && (
           <div className="directory-browser-categories" role="group" aria-label="Filter by category">
@@ -531,7 +557,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
             </h2>
           </div>
           <div className="directory-browser-results__status">
-            <span data-testid="directory-result-count">{resultLine}</span>
+            <span role="status" data-testid="directory-result-count">{resultLine}</span>
             {(searchQuery || activeType !== "ALL" || activeNeighborhood !== "ALL") && (
               <button
                 type="button"
@@ -550,19 +576,11 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         {isLoading ? (
           <BoardLoadingState label="Loading directory" />
         ) : isError ? (
-          <div className="directory-inline-error">Could not load directory.</div>
+          <BrowseStatus error title="Places couldn’t load" description="Your filters are still here. Try loading the directory again." onAction={() => void refetch()} />
         ) : filtered.length === 0 ? (
-          <div className="board-empty board-empty--prototype directory-browser-results__empty">
-            <p className="display section-heading">Nothing matches</p>
-            <p className="board-copy-sm">
-              {isSpaces
-                ? "Try a broader search. If a squad is missing, add it for the next person."
-                : "Try a broader search or clear the filters. If a place is missing, add it for the next person."}
-            </p>
-            <button type="button" className="btn-neon magenta pdx-glass-rebind" onClick={openAddForm} style={{ marginTop: 16 }}>
-              <Plus size={16} /> {isSpaces ? "Add a squad" : "Add a place"}
-            </button>
-          </div>
+          <BrowseStatus title={visibleBusinesses.length ? "No places match your filters" : "No places listed yet"} description="Try a broader search or add a place for the next person." actionLabel="Clear filters" onAction={() => { setSearchQuery(""); setActiveType(isSpaces ? "group" : "ALL"); setActiveNeighborhood("ALL"); }}>
+            <Button variant="solid" accent="cyan" onClick={openAddForm}><Plus size={16} /> {isSpaces ? "Add a squad" : "Add a place"}</Button>
+          </BrowseStatus>
         ) : (
           <div className="directory-browser-grid">
             {filtered.map(biz => (

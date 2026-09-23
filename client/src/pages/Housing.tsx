@@ -1,3 +1,7 @@
+import BrowseToolbar from "@/components/BrowseToolbar";
+import BrowseStatus from "@/components/BrowseStatus";
+import SectionBreadcrumb from "@/components/SectionBreadcrumb";
+import { SearchInput } from "@/components/ds";
 /**
  * HAUSING - the Housing board.
  *
@@ -101,14 +105,16 @@ export default function Housing() {
       : "ALL";
   });
   const [showAuth, setShowAuth] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    if (searchQuery.trim()) params.set("q", searchQuery.trim()); else params.delete("q");
     if (filter === "ALL") params.delete("type"); else if (filter !== "SAVED") params.set("type", filter);
     if (filter === "SAVED") params.set("filter", "SAVED"); else params.delete("filter");
     const qs = params.toString();
-    window.history.replaceState(null, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
-  }, [filter]);
+    window.history.replaceState(window.history.state, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
+  }, [filter, searchQuery]);
 
   /*
    * Tag filters live in the URL, not in component state. Opening a listing and
@@ -131,8 +137,13 @@ export default function Housing() {
 
   // Back and forward move through filter states, so follow the URL when they do.
   useEffect(() => {
-    const onPop = () =>
-      setTagsState(parseHousingTagFilter(new URLSearchParams(window.location.search).get("tags")));
+    const onPop = () => {
+      const params = new URLSearchParams(window.location.search);
+      setTagsState(parseHousingTagFilter(params.get("tags")));
+      setSearchQuery(params.get("q") || "");
+      const type = params.get("type")?.toUpperCase() as HousingFilter;
+      setFilter(params.get("filter") === "SAVED" ? "SAVED" : HOUSING_FILTERS.includes(type) ? type : "ALL");
+    };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
@@ -150,13 +161,13 @@ export default function Housing() {
     },
   });
 
-  const posts = data?.posts ?? [];
+  const posts = (data?.posts ?? []).filter(post => !searchQuery.trim() || [post.displayName, post.headline].join(" ").toLowerCase().includes(searchQuery.trim().toLowerCase()));
   useEffect(() => {
     if (!isLoading) trackProductEvent("time_to_content", "housing", performance.now() - contentStartedAt.current);
   }, [isLoading]);
   const stats = data?.stats;
   const boardEmpty = !isLoading && !isError && posts.length === 0;
-  const showDemoSeed = boardEmpty && filter === "ALL" && tags.length === 0;
+  const showDemoSeed = boardEmpty && filter === "ALL" && tags.length === 0 && !searchQuery.trim();
   const { data: demoBoard } = useQuery<HousingBoardResponse>({
     queryKey: ["/api/housing", "demo"],
     enabled: showDemoSeed,
@@ -337,6 +348,7 @@ export default function Housing() {
         <span className="hz-hero__scrim" aria-hidden="true" />
         <div className="hz-pad">
           <div className="hz-wrap">
+            <SectionBreadcrumb section="The Haüz" />
             <h1 className="hz-title hz-hero__title hz-hero__title--brand">
               <img className="hz-hero__brand-logo" src="/brand/family/the-hauz.svg" alt="THE HAÜZ" />
               <span className="hz-beta">Beta</span>
@@ -445,6 +457,8 @@ export default function Housing() {
             </p>
           </div>
 
+          <BrowseToolbar label="Search and filter The Haüz">
+          <SearchInput id="housing-search" label="Search The Haüz" aria-label="Search The Haüz" placeholder="Search household names and headlines" value={searchQuery} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} onClear={() => setSearchQuery("")} />
           <div className="hz-filter" id="housing-listings" tabIndex={-1} style={{ scrollMarginTop: "calc(var(--site-header-height, 0px) + 16px)" }}>
             <Mono micro>Show me</Mono>
             <div className="hz-tabs" role="tablist">
@@ -464,6 +478,8 @@ export default function Housing() {
           </div>
 
           <HousingTagFilter applied={tags} onApply={setTags} />
+          {(searchQuery || tags.length > 0 || filter !== "ALL") && <button type="button" className="events-clear-filters" onClick={() => { setSearchQuery(""); setTags([]); setFilter("ALL"); }}>Clear filters</button>}
+          </BrowseToolbar>
         </div>
       </div>
 
@@ -482,18 +498,11 @@ export default function Housing() {
           {isLoading ? (
             <BoardFeedSkeleton label="Loading the board" shape="housing" count={4} />
           ) : isError ? (
-            <div className="hz-panel hz-empty">
-              The board did not load. Try again in a moment.
-              <div style={{ marginTop: 12 }}>
-                <Btn kind="neon" onClick={() => void refetch()}>
-                  Try again
-                </Btn>
-              </div>
-            </div>
+            <BrowseStatus error title="The Haüz couldn’t load" description="Your filters are still here. Try loading the board again." onAction={() => void refetch()} />
           ) : posts.length === 0 ? (
             <div>
-              <div className="hz-panel hz-empty">
-                {tags.length
+              <div className="browse-status" role="status">
+                {searchQuery.trim() ? "No households match your search. Try another name or clear your filters." : tags.length
                   ? "No posts match all of those tags. Try dropping one."
                   : filter === "SAVED"
                     ? "Nothing saved yet. Tap save on a post and it waits here."

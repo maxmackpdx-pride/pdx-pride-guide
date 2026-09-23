@@ -15,6 +15,7 @@ export default function EventsHero({ eventCount, stats }: Props) {
       <BoardHero
         className="board-hero--room"
         accent="cyan"
+        section="Eventz"
         kicker="Zaylist / Eventz · Portland, all year"
         title={
           <img

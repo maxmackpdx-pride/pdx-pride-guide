@@ -1,4 +1,5 @@
 import "./InteriorHeader.css";
+import SectionBreadcrumb from "./SectionBreadcrumb";
 import type { ReactNode } from "react";
 
 type BoardHeroProps = {
@@ -10,6 +11,7 @@ type BoardHeroProps = {
   /** lime | cyan | magenta | purple | orange | green */
   accent?: "lime" | "cyan" | "magenta" | "purple" | "orange" | "green";
   className?: string;
+  section?: string;
 };
 
 type RainbowHeroWordProps = {
@@ -39,11 +41,12 @@ export default function BoardHero({
   actions,
   accent = "lime",
   className = "",
+  section,
 }: BoardHeroProps) {
   return (
     <header className={`board-hero board-hero--${accent} ${className}`.trim()}>
       <div className="board-hero__inner">
-        <p className="board-hero__kicker">{kicker}</p>
+        {section ? <SectionBreadcrumb section={section} /> : <p className="board-hero__kicker">{kicker}</p>}
         <h1 className="board-hero__title">{title}</h1>
         <p className="board-hero__lede">{lede}</p>
         {actions && <div className="board-hero__actions">{actions}</div>}

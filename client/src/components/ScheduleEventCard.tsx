@@ -1,18 +1,10 @@
 import type { EventListing } from "@shared/multiDayEvents";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
-import { parsePacificDateTime } from "@shared/missedConnections";
+import { eventTimeLabel } from "@/lib/eventDisplay";
 import EventAttendancePreview from "@/components/EventAttendancePreview";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
 
-function formatTime(value: string): string {
-  const ms = parsePacificDateTime(value);
-  if (ms == null) return "";
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Los_Angeles",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(ms)).replace(" ", "").toLowerCase();
-}
+
 
 export default function ScheduleEventCard({
   event,
@@ -61,8 +53,8 @@ export default function ScheduleEventCard({
       <div className="schedule-event-card__content">
         <div>
           <div className="schedule-event-card__time">
-            {formatTime(event.dateStart)}
-            {!compact && ` – ${formatTime(event.dateEnd)}`}
+            {eventTimeLabel(event.dateStart)}
+            {!compact && ` – ${eventTimeLabel(event.dateEnd)}`}
           </div>
           <div className="schedule-event-card__title" style={{ fontSize: compact ? "0.78rem" : "0.92rem" }}>
             {event.title}

@@ -1,3 +1,4 @@
+import DetailActions from "./DetailActions";
 import type React from "react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -522,7 +523,7 @@ export default function PlaceModal({
         <div className="place-modal-panel__seam dir-refract" aria-hidden="true" />
 
         <div className="place-modal-panel__inner">
-        <div className="place-modal-panel__actions">
+        <DetailActions label="place" onClose={onClose} onShare={handleShare} sharing={sharing}>
           <VenueFollowButton
             businessId={place.id}
             initialFollowing={Boolean(place.isFollowing)}
@@ -530,24 +531,7 @@ export default function PlaceModal({
             accent={accent}
             onRequireAuth={onRequireAuth}
           />
-          <button
-            type="button"
-            className="place-modal-panel__share"
-            onClick={handleShare}
-            disabled={sharing}
-            aria-label="Share this venue"
-          >
-            <Share2 size={13} strokeWidth={2.5} /> {sharing ? "..." : "SHARE"}
-          </button>
-          <button
-            type="button"
-            className="place-modal-panel__close"
-            onClick={onClose}
-            aria-label="Close place detail"
-          >
-            ✕
-          </button>
-        </div>
+        </DetailActions>
 
         <div>
           <div className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
