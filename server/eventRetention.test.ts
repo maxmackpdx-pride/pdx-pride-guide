@@ -14,10 +14,11 @@ test("calendar-month cutoff respects Pacific dates, month ends and leap years", 
 test("retains cutoff day, ongoing, future and invalid schedules", () => {
   const cutoff = eventRetentionCutoff(now);
   assert.ok(isExpiredEvent("2026-06-22T20:00", "2026-06-22T23:59:59", cutoff));
+  assert.ok(isExpiredEvent("2026-01-01", "", cutoff));
   for (const [start, end] of [
     ["2026-06-22T20:00", "2026-06-23T00:00"],
     ["2026-06-01", "2026-10-01"], ["2026-10-01", "2026-10-02"],
-    ["bad", "2026-01-01"], ["2026-01-01", ""], ["2026-02-30", "2026-03-01"],
+    ["bad", "2026-01-01"], ["2026-01-01", "bad"], ["2026-02-30", "2026-03-01"],
     ["2026-10-01", "2026-01-01"],
   ]) assert.equal(isExpiredEvent(start, end, cutoff), false, `${start} / ${end}`);
 });
