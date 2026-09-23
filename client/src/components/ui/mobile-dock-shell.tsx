@@ -120,8 +120,21 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
     // Zaydar and other app surfaces scroll inside their own containers. Scroll
     // does not bubble, so capture it here to preserve the same dock behavior.
     document.addEventListener("scroll", scroll, { passive: true, capture: true });
+    const outzideScroll = (event: Event) => {
+      if (!location.startsWith("/outzide")) return;
+      const y = (event as CustomEvent<{ y: number }>).detail?.y;
+      if (typeof y !== "number" || !Number.isFinite(y)) return;
+      if (scrollSource.current !== window) {
+        scrollSource.current = window;
+        scrollState.current = { y: 0, travel: 0, collapsed: scrollState.current.collapsed };
+      }
+      scrollState.current = advanceDockScroll(scrollState.current, y, held, innerWidth >= 960);
+      setCollapseRequested(scrollState.current.collapsed);
+    };
+    window.addEventListener("zaylist:outzide-scroll", outzideScroll);
     return () => {
       document.removeEventListener("scroll", scroll, { capture: true });
+      window.removeEventListener("zaylist:outzide-scroll", outzideScroll);
       cancelAnimationFrame(frame);
     };
   }, [location, held]);
