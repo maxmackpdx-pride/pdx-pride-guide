@@ -282,14 +282,14 @@ export default function MobileBottomNav() {
             onClick={handleNavLink}
           >
             <span className="znav-icon-row">
-              <svg width="28" height="32" style={{ width: 28, height: 32, flexShrink: 0 }} viewBox="0 0 435 501" overflow="hidden" aria-hidden="true" focusable="false">
+              <svg width="32" height="32" style={{ width: 32, height: 32, flexShrink: 0 }} viewBox="0 0 510 501" overflow="hidden" aria-hidden="true" focusable="false">
                 <defs>
                   <filter id="outzide-dock-white" colorInterpolationFilters="sRGB">
                     <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0" />
                   </filter>
                 </defs>
                 <image href="/brand/outzide.png" width="1773" height="501" filter="url(#outzide-dock-white)" />
-                <text x="404" y="271" textAnchor="middle" fill="#fff" stroke="#050506" strokeWidth="18" paintOrder="stroke" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="72" fontWeight="900">E</text>
+                <text x="475" y="271" textAnchor="middle" fill="#fff" stroke="#050506" strokeWidth="18" paintOrder="stroke" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="72" fontWeight="900">E</text>
               </svg>
             </span>
             <span className="znav-caption">OutZide</span>
