@@ -43,8 +43,7 @@ export default function Outz() {
   useEffect(() => {
     const resize = () => {
       if (!frame.current) return;
-      const bottomNav = window.innerWidth < 768 ? 72 : 0;
-      frame.current.style.height = `${Math.max(360, window.innerHeight - frame.current.getBoundingClientRect().top - bottomNav)}px`;
+      frame.current.style.height = `${Math.max(360, window.innerHeight - frame.current.getBoundingClientRect().top)}px`;
     };
     resize();
     window.addEventListener("resize", resize);

@@ -30,7 +30,7 @@
     transition:width .32s cubic-bezier(.22,.8,.25,1),height .32s cubic-bezier(.22,.8,.25,1),left .32s cubic-bezier(.22,.8,.25,1),border-radius .32s;
   }
   .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock[data-collapsed="true"] {
-    width:56px;height:56px;left:max(8px,env(safe-area-inset-left,0px));border-radius:50%;
+    width:56px;height:56px;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));border-radius:50%;
   }
   .z-mobile-liquid__background { position:absolute;inset:0;z-index:-3;border-radius:inherit;pointer-events:none;backdrop-filter:blur(2.2px) saturate(1.03) brightness(.88);-webkit-backdrop-filter:blur(2.2px) saturate(1.03) brightness(.88); }
   .z-glass-inversion { position:absolute;inset:1px;z-index:-3;border-radius:inherit;overflow:hidden;pointer-events:none;visibility:hidden; }
