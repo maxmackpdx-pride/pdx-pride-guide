@@ -34,6 +34,7 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   badlands: "Badlands",
   basicrightsoregon: "Basic_Rights_Oregon",
   bearracuda: "Bearracuda",
+  bestcoastbarberco: "Best_Coast_Barber_Co",
   // Yes Coach Productions — group / party collective (Tucker_PDmaX)
   yescoachproductions: "Yes_Coach_Productions",
   yescoach: "Yes_Coach_Productions",

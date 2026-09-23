@@ -7962,6 +7962,39 @@ function runBootMigrationsOnce() {
       .run();
     recordBootMigration("remove_pride_northwest_placeholder_pin_2026_09_v2");
   }
+
+  if (!hasBootMigration("best_coast_barber_place_2026_09_v1")) {
+    const name = "Best Coast Barber Co.";
+    const details = {
+      type: "service",
+      description: "Downtown Portland barbershop and salon offering precision fades, short and long haircuts, beard shaping, straight razor shaves, color, facials and waxing. Book with a barber or stylist online.",
+      address: "1142 SW Harvey Milk St, Portland, OR 97205",
+      neighborhood: "Downtown",
+      website: "https://bestcoastbarberco.com/",
+      instagram: "@bcbarberco",
+      hours: "Mon–Fri 10am–7pm, Sat–Sun 10am–6pm",
+      phone: "(503) 432-8436",
+      lat: 45.5223559,
+      lng: -122.6828164,
+      imageUrl: "/directory-logos/Best_Coast_Barber_Co.png",
+      queerOwned: false,
+      queerFriendly: true,
+      active: true,
+      ingestEvents: false,
+    };
+    const existing = sqlite.prepare(`
+      SELECT id FROM businesses
+      WHERE LOWER(REPLACE(REPLACE(name, '.', ''), '&', 'and')) LIKE 'best coast barber%'
+         OR LOWER(COALESCE(website, '')) LIKE '%bestcoastbarberco.com%'
+      ORDER BY id LIMIT 1
+    `).get() as { id: number } | undefined;
+    if (existing) {
+      db.update(businesses).set(details).where(eq(businesses.id, existing.id)).run();
+    } else {
+      db.insert(businesses).values({ name, ...details, createdAt: new Date().toISOString() }).run();
+    }
+    recordBootMigration("best_coast_barber_place_2026_09_v1");
+  }
 }
 
 function parseEnvAdminLists() {
