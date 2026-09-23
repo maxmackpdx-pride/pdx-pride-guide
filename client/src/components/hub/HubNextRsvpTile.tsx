@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useMemo } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -68,7 +69,7 @@ export default function HubNextRsvpTile() {
           <div className="hub-next-rsvp__venue">{locationLine}</div>
           <div className="hub-next-rsvp__foot">
             <span className={`hub-next-rsvp__tag ${typePillClass(tag)}`}>{tag}</span>
-            <span className="hub-next-rsvp__going pdx-glass-rebind">Going ✓</span>
+            <span className="hub-next-rsvp__going pdx-glass-rebind">Going <Check size={14} aria-hidden="true" /></span>
           </div>
         </div>
       </Link>

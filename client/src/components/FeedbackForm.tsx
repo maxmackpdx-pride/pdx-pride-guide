@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -117,7 +118,7 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
             background: "none", border: "none", color: "#888",
             fontSize: "1.2rem", cursor: "pointer", lineHeight: 1,
           }}
-        >✕</button>
+        ><X size={16} aria-hidden="true" /></button>
         <div className="display" style={{ color: "#00FFFF", fontSize: "1.1rem", marginBottom: 6 }}>
           SOFT LAUNCH TECH FEEDBACK
         </div>

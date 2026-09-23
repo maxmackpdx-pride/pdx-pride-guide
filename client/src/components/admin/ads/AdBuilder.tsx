@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useMemo, useState } from "react";
 import FeedAdCard from "@/components/ads/FeedAdCard";
 import PosterAdCard from "@/components/ads/PosterAdCard";
@@ -328,7 +329,7 @@ export default function AdBuilder({ onSaved }: Props) {
               />
               {draft.logoImg ? (
                 <button type="button" className="ad-mgr__mini-btn" onClick={() => set("logoImg", null)}>
-                  ✕ clear logo
+                  <X size={14} aria-hidden="true" /> clear logo
                 </button>
               ) : null}
             </div>

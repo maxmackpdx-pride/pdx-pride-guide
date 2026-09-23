@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import "./support.css";
 
 export const SPONSOR_CHECKS = [
@@ -70,7 +71,7 @@ export default function SponsorsPanel({
           {SPONSOR_CHECKS.map(item => (
             <div key={item} className="support-sponsors__check about-v2-sponsors__check pdx-glass-rebind">
               <span className="mark" aria-hidden="true">
-                ✓
+                <Check size={16} aria-hidden="true" />
               </span>
               <span>{item}</span>
             </div>

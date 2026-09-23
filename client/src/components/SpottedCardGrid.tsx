@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { X } from "lucide-react";
@@ -142,7 +143,7 @@ export default function SpottedCardGrid({
           }}
           aria-expanded={composeOpen}
         >
-          {composeOpen ? "✕ Cancel" : "＋ Saw someone? Write a note"}
+          {composeOpen ? <><X size={16} aria-hidden="true" /> Cancel</> : <><Plus size={16} aria-hidden="true" /> Saw someone? Write a note</>}
         </button>
       )}
 

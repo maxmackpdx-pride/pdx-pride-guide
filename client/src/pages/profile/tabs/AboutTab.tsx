@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { PlaceCard } from "@/components/ds";
@@ -167,7 +168,7 @@ export default function AboutTab({
               <ul className="mp-standfor-list">
                 {standFor.map(item => (
                   <li key={item} className="mp-standfor-item">
-                    <span className="mp-standfor-check" aria-hidden="true">✓</span>
+                    <span className="mp-standfor-check" aria-hidden="true"><Check size={16} /></span>
                     {item}
                   </li>
                 ))}

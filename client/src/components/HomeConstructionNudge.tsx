@@ -1,4 +1,5 @@
 import { useModalA11y } from "@/hooks/useModalA11y";
+import { Coffee, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTipLinks } from "@/hooks/useTipLinks";
@@ -74,7 +75,7 @@ export default function HomeConstructionNudge() {
         onClick={e => e.stopPropagation()}
       >
         <button type="button" className="pgc-x" onClick={dismiss} aria-label="Close">
-          ✕
+          <X size={16} aria-hidden="true" />
         </button>
 
         <img
@@ -124,7 +125,7 @@ export default function HomeConstructionNudge() {
             data-testid="construction-buy-coffee-venmo"
             onClick={dismiss}
           >
-            ☕ Buy me a coffee
+            <Coffee size={16} aria-hidden="true" /> Buy me a coffee
           </a>
         </div>
 

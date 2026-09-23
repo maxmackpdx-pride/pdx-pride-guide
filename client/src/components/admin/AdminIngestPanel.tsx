@@ -1,3 +1,4 @@
+import { Star, TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link2, Loader2, Upload } from "lucide-react";
@@ -332,9 +333,9 @@ export default function AdminIngestPanel({ onCommitted }: { onCommitted?: () => 
                   }}
                   data-testid={`admin-ingest-source-${src.id}`}
                 >
-                  {src.priority ? "★ " : ""}
+                  {src.priority ? <Star size={13} fill="currentColor" aria-label="Priority" /> : null}
                   {src.label}
-                  {src.caution ? " ⚠" : ""}
+                  {src.caution ? <TriangleAlert size={13} aria-label="Caution" /> : null}
                 </button>
               );
             })}

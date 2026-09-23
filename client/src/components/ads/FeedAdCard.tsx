@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
 import type { AdDraft, AdServePayload } from "@/lib/adTypes";
 import { trackAdClick, trackAdImpression } from "@/lib/adTracking";
@@ -87,7 +88,7 @@ export default function FeedAdCard({ ad, preview = false, className = "" }: Prop
           aria-label="Dismiss"
           onClick={() => setOpen(false)}
         >
-          ✕
+          <X size={16} aria-hidden="true" />
         </button>
       )}
 

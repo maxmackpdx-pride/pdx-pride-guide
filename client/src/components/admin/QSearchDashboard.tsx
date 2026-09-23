@@ -1,3 +1,4 @@
+import { Check, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
@@ -2651,7 +2652,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                   onClick={() => setWorstFirst(v => !v)}
                   title="Sort lowest AI relevance first"
                 >
-                  {worstFirst ? "Worst first ✓" : "Worst first"}
+                  {worstFirst ? <>Worst first <Check size={14} aria-hidden="true" /></> : "Worst first"}
                 </button>
                 <button
                   type="button"
@@ -2686,7 +2687,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                   data-testid="qsearch-dismiss-selected"
                   title="Remove selected from Review without publishing"
                 >
-                  ✕ Dismiss {selectedCount || ""}
+                  <X size={14} aria-hidden="true" /> Dismiss {selectedCount || ""}
                 </button>
                 <button
                   type="button"
@@ -2754,7 +2755,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                         void dismissFromQueue([c.id], { confirmMulti: false });
                       }}
                     >
-                      ✕
+                      <X size={16} aria-hidden="true" />
                     </button>
                     <label className="qsearch__cand-check" title="Select for approve">
                       <input
@@ -2987,7 +2988,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                         )}
                         {dirAddedNames[venueNameKey] && !venueBrand && (
                           <span className="qsearch__cand-slot-name" style={{ color: "var(--qs-lime)" }}>
-                            Added ✓
+                            Added <Check size={14} aria-hidden="true" />
                           </span>
                         )}
                       </div>

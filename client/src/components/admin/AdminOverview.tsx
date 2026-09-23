@@ -1,3 +1,4 @@
+import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
@@ -376,7 +377,7 @@ export default function AdminOverview({
 
         {pendingCount === 0 ? (
           <div className="admin-shell__queue-clear">
-            <h3>✦ Queue clear ✦</h3>
+            <h3><Sparkles size={16} aria-hidden="true" /> Queue clear <Sparkles size={16} aria-hidden="true" /></h3>
             <p>Nothing needs you right now. Go drink some water.</p>
           </div>
         ) : (

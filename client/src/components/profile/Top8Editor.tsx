@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { apiRequest } from "@/lib/queryClient";
@@ -124,7 +125,7 @@ export default function Top8Editor({ current, onClose, onSave }: Props) {
         <div className="top8ed__head">
           <span className="display top8ed__title">Edit Top 8</span>
           <span className="top8ed__count">{list.length}/8</span>
-          <button ref={closeRef} type="button" className="top8ed__x" onClick={onClose} aria-label="Close">✕</button>
+          <button ref={closeRef} type="button" className="top8ed__x" onClick={onClose} aria-label="Close"><X size={16} aria-hidden="true" /></button>
         </div>
 
         {/* Current, ordered */}
@@ -140,7 +141,7 @@ export default function Top8Editor({ current, onClose, onSave }: Props) {
               </span>
               <button type="button" className="top8ed__mv" disabled={i === 0} onClick={() => move(i, -1)} aria-label={`Move ${nameOf(e)} up from position ${i + 1}`}>↑</button>
               <button type="button" className="top8ed__mv" disabled={i === list.length - 1} onClick={() => move(i, 1)} aria-label={`Move ${nameOf(e)} down from position ${i + 1}`}>↓</button>
-              <button type="button" className="top8ed__rm" onClick={() => { remove(e); setAnnouncement(`${nameOf(e)} removed from Top 8.`); }} aria-label={`Remove ${nameOf(e)}`}>✕</button>
+              <button type="button" className="top8ed__rm" onClick={() => { remove(e); setAnnouncement(`${nameOf(e)} removed from Top 8.`); }} aria-label={`Remove ${nameOf(e)}`}><X size={16} aria-hidden="true" /></button>
             </div>
           ))}
         </div>

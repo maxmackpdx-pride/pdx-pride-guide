@@ -117,6 +117,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   padding: 13px 18px;
   border-radius: 12px;
   font-weight: 800;

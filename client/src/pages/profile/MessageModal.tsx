@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/components/UserAvatar";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
@@ -111,7 +112,7 @@ export default function MessageModal({
           </div>
         ) : (
           <div className="mp-modal__sent">
-            <div className="mp-sent-check" aria-hidden="true">✓</div>
+            <div className="mp-sent-check" aria-hidden="true"><Check size={24} /></div>
             <div className="display mp-modal__sent-title">Message sent</div>
             <p>{displayName} will get back to you in the Hub inbox. Take care of each other.</p>
             <button type="button" className="btn-neon cyan pdx-glass-rebind" onClick={onClose}>Done</button>

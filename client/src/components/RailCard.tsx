@@ -1,3 +1,4 @@
+import { Heart, Star } from "lucide-react";
 import type { EventListing } from "@shared/multiDayEvents";
 import { DAY_COLORS, DAY_TEXT_COLORS, fmtClock, hexA } from "@shared/eventWeek";
 import type { ScheduleEvent } from "@/lib/scheduleEvents";
@@ -22,7 +23,7 @@ export interface RailCardProps {
 /**
  * Shared full-bleed poster card used by the Home headliner rail and the
  * Events page Happening Now / Up Next marquees. Day-color left border +
- * bottom scrim, ★ HEADLINER badge, live-now badge, RSVP heart.
+ * bottom scrim, headliner badge, live-now badge, RSVP heart.
  */
 export default function RailCard({
   event,
@@ -77,7 +78,7 @@ export default function RailCard({
         overflow: "visible",
       }}
     >
-      {rsvped ? "♥" : "♡"}
+      <Heart size={16} fill={rsvped ? "currentColor" : "none"} aria-hidden="true" />
     </button>
   );
 
@@ -213,7 +214,7 @@ export default function RailCard({
             boxShadow: `0 0 14px -2px ${hexA(dc, 0.85)}`,
           }}
         >
-          ★ HEADLINER
+          <Star size={12} fill="currentColor" aria-hidden="true" /> HEADLINER
         </div>
       )}
       {heart}
@@ -287,7 +288,7 @@ export default function RailCard({
         </div>
         {!sm && (
           <div style={{ fontFamily: "var(--font-body)", fontSize: 10.5, fontWeight: 600, color: "rgba(255,255,255,.6)", marginTop: 6 }}>
-            ♥ {event.going} going
+            <Heart size={11} fill="currentColor" aria-hidden="true" /> {event.going} going
           </div>
         )}
       </div>

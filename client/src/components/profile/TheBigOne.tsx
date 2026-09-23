@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import type { CSSProperties } from "react";
 import { dayAccentToken } from "@/lib/dsColors";
 import { formatPacificDateTime, parsePacificEventTime, useCountdown } from "@/lib/countdown";
@@ -227,7 +228,7 @@ export default function TheBigOne({
           >
             <span className="tbo__row-label display">
               {rsvpLabel}
-              {isGoing ? " ✓" : ""}
+              {isGoing ? <Check size={14} aria-label="Going" /> : null}
             </span>
             <span className="tbo__row-copy">{rsvpCaption}</span>
           </button>
@@ -245,7 +246,7 @@ export default function TheBigOne({
               onClick={onRsvp}
               disabled={!onRsvp}
             >
-              {isGoing ? "You're in ✓" : "RSVP"}
+              {isGoing ? <>You're in <Check size={14} aria-hidden="true" /></> : "RSVP"}
             </button>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import DetailActions from "./DetailActions";
 import { useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
@@ -1414,7 +1415,7 @@ function EventModalInner({
                 disabled={rsvp.isRsvpPending(event.id)}
                 onClick={() => rsvp.toggleRsvp(event.id)}
               >
-                {rsvp.myEventIds.has(event.id) ? "Interested ✓" : "I Am Interested"}
+                {rsvp.myEventIds.has(event.id) ? <>Interested <Check size={14} aria-hidden="true" /></> : "I Am Interested"}
               </button>
             )}
             {(event.isClaimable || hasPendingClaim) && (

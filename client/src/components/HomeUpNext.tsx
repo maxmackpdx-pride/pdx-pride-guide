@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { Link } from "wouter";
 import type { EventListing } from "@shared/multiDayEvents";
 import { formatUpNextWhen } from "@/lib/homeEvents";
@@ -73,7 +74,7 @@ export default function HomeUpNext({ events, posterBackdrop = true }: Props) {
                       toggleRsvp(event.id);
                     }}
                   >
-                    {rsvped ? "Going ✓" : "RSVP"}
+                    {rsvped ? <>Going <Check size={14} aria-hidden="true" /></> : "RSVP"}
                   </button>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import ImageUploader from "@/components/ImageUploader";
 import AuthModal from "@/components/AuthModal";
@@ -74,7 +75,7 @@ function FormProgress({ items, accent = "lime" }: { items: ProgressItem[]; accen
       <ol className="submit-progress__steps">
         {items.map((item, index) => (
           <li key={item.label} className={item.complete ? "is-complete" : ""}>
-            <span aria-hidden="true">{item.complete ? "✓" : index + 1}</span>
+            <span aria-hidden="true">{item.complete ? <Check size={16} aria-hidden="true" /> : index + 1}</span>
             {item.label}
           </li>
         ))}
@@ -718,7 +719,7 @@ export default function Submit() {
           <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
             {eventSubmitSuccess ? (
               <div className="submit-success submit-success--lime">
-                <div className="submit-success__check" aria-hidden="true">✓</div>
+                <div className="submit-success__check" aria-hidden="true"><Check size={28} /></div>
                 <div className="submit-success__title">{eventSubmitSuccess.title}</div>
                 <p className="submit-success__body" style={{ marginBottom: eventSubmitSuccess.potentialMatches?.length ? 16 : 22 }}>
                   {eventSubmitSuccess.desc}
@@ -990,7 +991,7 @@ export default function Submit() {
         {/* ── APPLY AS PROMOTER ── */}
         {mode === "apply" && (flowSuccess === "apply" ? (
           <div className="submit-success submit-success--purple">
-            <div className="submit-success__check" aria-hidden="true">✓</div>
+            <div className="submit-success__check" aria-hidden="true"><Check size={28} /></div>
             <div className="submit-success__title">Application submitted</div>
             <p className="submit-success__body">
               We will review your promoter request and be in touch. You will get a message when you are approved.
@@ -1068,7 +1069,7 @@ export default function Submit() {
         {/* ── SPOTTED AN EVENT ── */}
         {mode === "suggest" && (flowSuccess === "suggest" ? (
           <div className="submit-success submit-success--magenta">
-            <div className="submit-success__check" aria-hidden="true">✓</div>
+            <div className="submit-success__check" aria-hidden="true"><Check size={28} /></div>
             <div className="submit-success__title">Tip received</div>
             <p className="submit-success__body">
               We will review it and may add the event to Zaylist. Thanks for the heads up.
@@ -1149,7 +1150,7 @@ export default function Submit() {
         {/* ── CLAIM EXISTING EVENT ── */}
         {mode === "claim" && (flowSuccess === "claim" ? (
           <div className="submit-success submit-success--cyan">
-            <div className="submit-success__check" aria-hidden="true">✓</div>
+            <div className="submit-success__check" aria-hidden="true"><Check size={28} /></div>
             <div className="submit-success__title">{isApproved ? "Event claimed" : "Claim submitted"}</div>
             <p className="submit-success__body">
               {isApproved

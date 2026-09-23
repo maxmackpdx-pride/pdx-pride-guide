@@ -1,3 +1,4 @@
+import { Volume2, VolumeX, X } from "lucide-react";
 import {
   useEffect,
   useMemo,
@@ -194,7 +195,7 @@ function EasterEggOverlay({
           onClick={onClose}
           style={{ ...chromeBtn, fontSize: 22 }}
         >
-          ✕
+          <X size={16} aria-hidden="true" />
         </button>
       </div>
 
@@ -215,7 +216,7 @@ function EasterEggOverlay({
             style={chromeBtn}
             title={muted ? "Unmute" : "Mute"}
           >
-            {muted ? "🔇" : "🔊"}
+            {muted ? <VolumeX size={22} aria-hidden="true" /> : <Volume2 size={22} aria-hidden="true" />}
           </button>
         )}
       </div>
@@ -323,7 +324,7 @@ export default function FeaturedEventAd({
           onDismiss();
         }}
       >
-        ✕
+        <X size={16} aria-hidden="true" />
       </button>
 
       {/* Easter egg hit zone = slideshow + countdown ONLY. Tickets/RSVP stay outside. */}

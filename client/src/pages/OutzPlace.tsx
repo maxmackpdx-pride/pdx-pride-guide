@@ -1,3 +1,4 @@
+import { TriangleAlert } from "lucide-react";
 import PageRecovery from "@/components/PageRecovery";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -306,7 +307,7 @@ export default function OutzPlace() {
             </div> : officialNotice
             ? <div className="outz-place__alert outz-place__alert--bad"><strong>Official closure:</strong><span>{officialNotice.summary} <a href={officialNotice.sourceUrl} target="_blank" rel="noreferrer">Verify with Oregon Parks ↗</a></span></div>
             : alert
-            ? <div className="outz-place__alert outz-place__alert--bad"><strong>⚠ Alert:</strong><span>{alert.headline}</span></div>
+            ? <div className="outz-place__alert outz-place__alert--bad"><strong><TriangleAlert size={16} aria-hidden="true" /> Alert:</strong><span>{alert.headline}</span></div>
             : destination
               ? <div className="outz-place__alert outz-place__alert--good"><strong>No active NWS alert.</strong><span>Conditions change fast. Confirm on the official page before you drive.</span></div>
               : <div className="outz-place__alert outz-place__alert--warn"><strong>No live conditions for this listing.</strong><span>Confirm access, reservations, and closures on the official page before you drive.</span></div>}

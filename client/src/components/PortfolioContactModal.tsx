@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import "./PortfolioContactModal.css";
@@ -155,7 +156,7 @@ export default function PortfolioContactModal({
         tabIndex={-1}
       >
         <button type="button" className="pcm-close" onClick={onClose} aria-label="Close">
-          ✕
+          <X size={16} aria-hidden="true" />
         </button>
 
         {status === "sent" ? (

@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useState, useEffect, useRef, type CSSProperties } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -333,7 +334,7 @@ export default function AttendanceCluster({
               {myAttendance && (
                 <>
                   <span className="attendance-cluster-cta__status">
-                    ✓ On your profile
+                    <Check size={14} aria-hidden="true" /> On your profile
                   </span>
                   <button
                     type="button"
@@ -355,11 +356,11 @@ export default function AttendanceCluster({
                 disabled={mutation.isPending || removeMutation.isPending}
                 className="display attendance-cluster-cta__btn pdx-glass-rebind"
               >
-                {myAttendance ? "Going ✓" : "I'll be there →"}
+                {myAttendance ? <>Going <Check size={14} aria-hidden="true" /></> : "I'll be there →"}
               </button>
               {myAttendance && myPhrase && (
                 <span className="attendance-cluster-cta__status">
-                  ✓ You're going as "{myPhrase.label}"
+                  <Check size={14} aria-hidden="true" /> You're going as "{myPhrase.label}"
                 </span>
               )}
               {myAttendance && (
@@ -513,7 +514,7 @@ export default function AttendanceCluster({
                   {messageTarget.handle}
                 </div>
                 <div style={{ fontFamily: "var(--font-body)", fontSize: "0.7rem", letterSpacing: "0.04em", textTransform: "uppercase", color: "#00FFFF", marginTop: 2 }}>
-                  ✓ Both going
+                  <Check size={14} aria-hidden="true" /> Both going
                 </div>
               </div>
               <button

@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import type { MemberProfileData, PackLinkUser } from "./types";
@@ -21,7 +22,7 @@ function PackChip({ person, borderColor, onRemove }: { person: PackLinkUser; bor
       </Link>
       {onRemove && (
         <button type="button" className="mp-pack-chip__remove" onClick={onRemove} aria-label={`Remove @${person.username}`}>
-          ✕
+          <X size={16} aria-hidden="true" />
         </button>
       )}
     </span>

@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { PlaceCard, SectionHeader, StatPill, StickerBadge } from "@/components/ds";
@@ -66,7 +67,7 @@ export default function AboutTab({ data, isOwner, onBook }: Props) {
           <SectionHeader kicker="Values" title="What we stand for" />
           <ul className="pp-stand-for">
             {data.standFor!.map(item => (
-              <li key={item}><span className="pp-stand-for__check" aria-hidden="true">✓</span>{item}</li>
+              <li key={item}><span className="pp-stand-for__check" aria-hidden="true"><Check size={16} /></span>{item}</li>
             ))}
           </ul>
         </section>

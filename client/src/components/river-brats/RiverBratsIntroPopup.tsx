@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/scrollLock";
@@ -140,7 +141,7 @@ export default function RiverBratsIntroPopup() {
             cursor: "pointer",
           }}
         >
-          ✕
+          <X size={16} aria-hidden="true" />
         </button>
 
         <p className="rbi-kicker">Nude beaches · River Brats</p>

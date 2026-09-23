@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation } from "wouter";
@@ -252,7 +253,7 @@ export default function PrideGlowNudge() {
         aria-labelledby="glow-nudge-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <button type="button" className="glow-nudge__x" onClick={() => setOpen(false)} aria-label="Close">✕</button>
+        <button type="button" className="glow-nudge__x" onClick={() => setOpen(false)} aria-label="Close"><X size={16} aria-hidden="true" /></button>
 
         <div className="glow-nudge__preview" aria-hidden="true">
           <UserAvatar

@@ -1,4 +1,5 @@
 import BrowseStatus from "@/components/BrowseStatus";
+import { Check, Heart, X } from "lucide-react";
 /* ============================================================
    Zaylist | Schedule
    Festival-timeline redesign of /schedule. The whole week side by
@@ -515,7 +516,7 @@ export default function Schedule({
     showCheck: boolean;
     live: boolean;
     overlayStyle: React.CSSProperties;
-    quickIcon: string;
+    quickIcon: ReactNode;
     timeStyle: React.CSSProperties;
     titleStyle: React.CSSProperties;
     venueStyle: React.CSSProperties;
@@ -594,7 +595,7 @@ export default function Schedule({
           showQuick,
           showCheck: rsvp && !showQuick,
           live,
-          quickIcon: rsvp ? '♥' : '♡',
+          quickIcon: <Heart size={16} fill={rsvp ? "currentColor" : "none"} aria-hidden="true" />,
           overlayStyle: S({
             position: 'absolute',
             inset: 0,
@@ -1221,7 +1222,7 @@ export default function Schedule({
       rsvpLabel: isBeach
         ? "Remove beach day"
         : rsvp
-          ? "You’re going ✓"
+          ? <>You’re going <Check size={14} aria-hidden="true" /></>
           : "I’ll be there",
       rsvpBtnStyle: S({
         fontFamily: "var(--font-display)",
@@ -1313,7 +1314,7 @@ export default function Schedule({
             justifyContent: 'center',
           }}
         >
-          ✕
+          <X size={16} aria-hidden="true" />
         </button>
       </div>
       <div style={{ padding: '15px 17px 17px', minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
@@ -1662,7 +1663,7 @@ export default function Schedule({
                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                               {b.live && <span className="sch-livedot" style={b.liveDotStyle} />}
                               <span style={b.timeStyle}>{b.time}</span>
-                              {b.showCheck && <span style={b.checkStyle}>✓</span>}
+                              {b.showCheck && <span style={b.checkStyle}><Check size={14} aria-hidden="true" /></span>}
                             </div>
                             <div style={b.titleStyle}>{b.title}</div>
                             {b.showVenue && <div style={b.venueStyle}>{b.venue}</div>}

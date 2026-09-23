@@ -1,3 +1,4 @@
+import { Flag } from "lucide-react";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -317,7 +318,7 @@ export default function MissedConnectionsPanel({
           </button>
           <button onClick={() => setReplyingTo(null)} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "9px 12px", cursor: "pointer" }}>Cancel</button>
           <button onClick={handleReport} disabled={reportMutation.isPending} style={{ marginLeft: "auto", background: "transparent", color: "#ff6666", border: "1px solid #5a2a2a", padding: "9px 12px", cursor: "pointer", fontSize: "0.78rem" }}>
-            {reportMutation.isPending ? "REPORTING…" : "⚐ Report"}
+            {reportMutation.isPending ? "REPORTING…" : <><Flag size={14} aria-hidden="true" /> Report</>}
           </button>
         </div>
       </div>

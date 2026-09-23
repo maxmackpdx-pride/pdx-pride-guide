@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useEffect, useState, type CSSProperties } from "react";
 import "@/components/AffiliatePosterCard.css";
 
@@ -63,7 +64,7 @@ function CockBlockFeedAd({ onDismiss }: { onDismiss: () => void }) {
       <span className="pdx-glass-sheen--specular" aria-hidden="true" />
 
       <button type="button" className="feed-aff__dismiss" aria-label="Dismiss" onClick={onDismiss}>
-        ✕
+        <X size={16} aria-hidden="true" />
       </button>
 
       <div className="feed-aff__media">
@@ -125,7 +126,7 @@ function MrsLeatherFeedAd({ onDismiss }: { onDismiss: () => void }) {
       <span className="pdx-glass-sheen--specular" aria-hidden="true" />
 
       <button type="button" className="feed-aff__dismiss" aria-label="Dismiss" onClick={onDismiss}>
-        ✕
+        <X size={16} aria-hidden="true" />
       </button>
 
       <div className="feed-aff__media feed-aff__media--center">

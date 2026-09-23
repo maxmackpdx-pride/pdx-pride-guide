@@ -1,3 +1,4 @@
+import { Sprout } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useLocation } from "wouter";
@@ -3264,7 +3265,7 @@ export default function Admin() {
             {newUsersToday.length > 0 && (
               <div id="new-users-today" style={{ marginBottom: 28, padding: 16, border: "1px solid #C8FA3C33", background: "#0a0f00" }}>
                 <p className="display text-sm" style={{ color: "#C8FA3C", marginBottom: 12 }}>
-                  🌱 NEW TODAY: {newUsersToday.length} {newUsersToday.length === 1 ? "person" : "people"} joined
+                  <Sprout size={16} aria-hidden="true" /> NEW TODAY: {newUsersToday.length} {newUsersToday.length === 1 ? "person" : "people"} joined
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {newUsersToday.map(u => (

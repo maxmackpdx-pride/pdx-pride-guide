@@ -5445,6 +5445,7 @@ a.user-avatar.user-avatar--link:focus-visible {
   line-height: 1;
   filter: drop-shadow(0 0 4px rgba(180, 190, 210, 0.8));
 }
+.user-avatar__padlock svg { width: 1em; height: 1em; }
 
 /* Light sweep on the glow only - masked off the photo disc, always behind */
 .user-avatar__shimmer {
