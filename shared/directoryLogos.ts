@@ -1,7 +1,7 @@
 /** Map directory business names → static neon logo paths under /directory-logos. */
 
 /** Bump when logo assets under /directory-logos change so browsers fetch fresh files. */
-export const DIRECTORY_LOGO_VERSION = "2026-09-08-venue-artwork";
+export const DIRECTORY_LOGO_VERSION = "2026-09-23-placez-brand-audit";
 
 /** Append soft cache-bust query to pack paths. Skip if already has a query string. */
 function withLogoCacheBust(path: string): string {
@@ -215,6 +215,9 @@ export function resolveDirectoryLogo(
         stem = value;
       }
     }
+  }
+  if (norm === "lesbiancultureclub" || norm === "scoreportland") {
+    return withLogoCacheBust(`/directory-logos/place-${norm}.svg`);
   }
   if (stem) return withLogoCacheBust(`/directory-logos/${stem}.png`);
   // Every live Place is packaged locally. The deterministic stem covers records

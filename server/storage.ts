@@ -7995,6 +7995,49 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("best_coast_barber_place_2026_09_v1");
   }
+
+  // Public-facing addresses audited against each organization's own site on
+  // 2026-09-23. Leave touring groups, PO boxes, ticket-only venues, and
+  // addressless services unpinned. Match by name and only fill missing points
+  // so subsequent owner edits are preserved.
+  if (!hasBootMigration("placez_public_addresses_2026_09_v1")) {
+    const publicPlaces = [
+      ["Cascade AIDS Project (CAP) & Our House", "520 NW Davis St Suite 215, Portland, OR 97209", 45.5243838, -122.6759142],
+      ["The Marie Equi Center", "4434 SE 25th Ave, Portland, OR 97202", 45.4905921, -122.6402620],
+      ["Q Center", "4115 N Mississippi Ave Suite D, Portland, OR 97217", 45.5536560, -122.6758553],
+      ["Oregon Arts Commission", "775 Summer St NE Suite 310, Salem, OR 97301", 44.9453845, -123.0275772],
+      ["Regional Arts & Culture Council", "411 NW Park Ave Suite 101, Portland, OR 97209", 45.5261182, -122.6795040],
+      ["SCORE Portland", "12600 SW Crescent St Suite 160, Beaverton, OR 97005", 45.4908581, -122.8074863],
+      ["Open Space Dance", "8371 N Interstate Ave, Portland, OR 97217", 45.5833347, -122.6859490],
+      ["IL Youth 2 Youth", "925 NW Flanders St, Portland, OR 97209", 45.5259733, -122.6804000],
+    ] as const;
+    const fill = sqlite.prepare(`
+      UPDATE businesses SET
+        address = CASE WHEN address IS NULL OR TRIM(address) = '' THEN ? ELSE address END,
+        lat = ?, lng = ?,
+        locations = CASE
+          WHEN locations IS NULL OR TRIM(locations) = '' THEN ?
+          WHEN json_valid(locations) AND json_array_length(locations) = 1
+            AND json_extract(locations, '$[0].lat') IS NULL
+            THEN json_set(locations, '$[0].lat', ?, '$[0].lng', ?)
+          ELSE locations END
+      WHERE name = ? AND active = 1 AND (lat IS NULL OR lng IS NULL)
+    `);
+    for (const [name, address, lat, lng] of publicPlaces) {
+      const locations = name === "Cascade AIDS Project (CAP) & Our House"
+        ? [
+            { label: "CAP Portland", address, lat, lng },
+            { label: "Our House (contact first)", address: "2727 SE Alder St, Portland, OR 97214", lat: 45.5182228, lng: -122.6373999 },
+          ]
+        : [{ label: "Primary", address, lat, lng }];
+      fill.run(address, lat, lng, JSON.stringify(locations), lat, lng, name);
+    }
+    // Correct stale directory links and copy discovered during this audit.
+    sqlite.prepare(`UPDATE businesses SET website = 'https://www.multcoculturalcoalition.org/' WHERE name = 'Multnomah County Cultural Coalition' AND website = 'https://www.multculturalcoalition.org'`).run();
+    sqlite.prepare(`UPDATE businesses SET description = 'Youth arts programs at ILY2 in the Pearl District. Check the current class schedule and registration details on their site.' WHERE name = 'IL Youth 2 Youth' AND description LIKE '%Lloyd Center%'`).run();
+    sqlite.prepare(`UPDATE businesses SET type = 'service', description = 'Queer-owned preparedness and resilience education with workshops, resources, and community programs in Portland and online.' WHERE name = 'MakeWithPDX' AND description = 'Queer-owned DIY education and maker space.'`).run();
+    recordBootMigration("placez_public_addresses_2026_09_v1");
+  }
 }
 
 function parseEnvAdminLists() {
