@@ -74,6 +74,7 @@ type BuiltFlyer = {
   venue: string;
   day: string;
   date: string;
+  when: string;
   admission: string;
   rare: boolean;
   role: StashRole;
@@ -104,6 +105,17 @@ function formatShortDate(iso?: string | null): string {
     month: "short",
     day: "numeric",
   }).format(new Date(ms));
+}
+
+function formatPastWhen(iso?: string | null): string {
+  const parts = iso?.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/);
+  if (!parts) return "";
+  const [, year, month, day, hour, minute] = parts;
+  const date = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" })
+    .format(new Date(Date.UTC(Number(year), Number(month) - 1, Number(day))));
+  if (hour == null || minute == null) return date;
+  const h = Number(hour);
+  return `${date} · ${h % 12 || 12}:${minute}${h < 12 ? "am" : "pm"}`;
 }
 
 function normalizeAdmission(raw?: string | null): string {
@@ -173,6 +185,7 @@ function buildFlyers(events: FlyerStashEvent[]): BuiltFlyer[] {
       venue: e.venueName || "Portland",
       day: day || "NITE",
       date: formatShortDate(e.dateStart),
+      when: formatPastWhen(e.dateStart),
       admission: admission === "DONATION" ? "DONATE" : admission,
       rare,
       role,
@@ -423,6 +436,7 @@ export default function FlyerStash({
                   <div className="flyer-stash__card-title">{f.title}</div>
                   <div className="flyer-stash__card-foot">
                     <div className="flyer-stash__card-venue">{f.venue}</div>
+                    {f.when && <div className="flyer-stash__card-when">{f.when}</div>}
                   </div>
                 </div>
               </button>

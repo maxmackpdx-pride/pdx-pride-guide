@@ -47,13 +47,17 @@ function fmtUpcomingWhen(event: ProfileEvent): string {
   return `${day} ${mon} ${date} · ${time}`;
 }
 
-/** Compact when line for past: OCT 2025 */
+/** Keep the actual night and time visible on archived profile cards. */
 function fmtPastWhen(event: ProfileEvent): string {
   if (!event.dateStart) return "";
-  const d = new Date(event.dateStart);
-  if (Number.isNaN(d.getTime())) return "";
-  const mon = d.toLocaleString([], { month: "short" }).toUpperCase();
-  return `${mon} ${d.getFullYear()}`;
+  const local = event.dateStart.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/);
+  if (!local) return "";
+  const [, year, month, day, hour, minute] = local;
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+  const label = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" }).format(date).toUpperCase();
+  if (hour == null || minute == null) return label;
+  const h = Number(hour);
+  return `${label} · ${h % 12 || 12}:${minute}${h < 12 ? "AM" : "PM"}`;
 }
 
 function admissionChrome(admission?: string | null): string | null {
@@ -161,9 +165,10 @@ function HostingRail({
         {label}
       </div>
       <div
-        className="hp-rail"
+        className={`hp-rail${past ? " hp-rail--past" : ""}`}
         role="list"
         aria-labelledby={`hp-label-${past ? "past" : "next"}`}
+        tabIndex={past && events.length > 1 ? 0 : undefined}
       >
         {events.length > 0 ? (
           events.map(event => (

@@ -713,10 +713,15 @@ export function mergeTuckerHostedArchivePast(
 
   const seenSlug = new Set<string>();
   const archiveWire: ProfileHostedEventWire[] = [];
-  const mergedSoFar: ProfileHostedEventWire[] = [...livePast];
+  const recoveredLive = livePast.map(row => ({ ...row }));
+  const mergedSoFar: ProfileHostedEventWire[] = [...recoveredLive];
 
   for (const row of candidateRows) {
     if (seenSlug.has(row.slug)) continue;
+    // Keep the live event and its real ID, but use the preserved, date-matched
+    // flyer. Older remote poster links may no longer resolve after retention.
+    const matchingLive = recoveredLive.find(live => archiveDuplicatesLivePast(row, live));
+    if (matchingLive) matchingLive.posterImageUrl = row.posterImageUrl;
     if (archiveDuplicatesMergedPast(row, mergedSoFar)) continue;
     seenSlug.add(row.slug);
 
@@ -725,7 +730,7 @@ export function mergeTuckerHostedArchivePast(
     mergedSoFar.push(wire);
   }
 
-  return sortPastByDateDesc([...livePast, ...archiveWire]);
+  return sortPastByDateDesc([...recoveredLive, ...archiveWire]);
 }
 
 /** Synthetic host/talent for archive event detail (negative IDs not in event_* tables). */

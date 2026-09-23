@@ -151,6 +151,24 @@
   .hp-card__banner { width: 76px; height: 92px; }
   .hp-card__action { grid-column: 1 / -1; width: 100%; box-sizing: border-box; }
   .hp-card__tag { min-height: 26px; padding-inline: 7px; }
+  .hp-rail--past {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 2px;
+    padding: 4px 4px 18px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hp-rail--past > [role="listitem"] {
+    flex: 0 0 min(82vw, 325px);
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+  .hp-rail--past .hp-card { width: 100%; height: 100%; }
+  .hp-rail--past:focus-visible { outline: 2px solid var(--day-sat); outline-offset: 2px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

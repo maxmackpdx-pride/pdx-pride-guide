@@ -417,6 +417,14 @@
   overflow: hidden;
 }
 
+.flyer-stash__card-when {
+  margin-top: 4px;
+  color: #fff;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9px;
+  line-height: 1.2;
+}
+
 .flyer-stash__card-tag {
   display: inline-block;
   margin-top: 8px;
