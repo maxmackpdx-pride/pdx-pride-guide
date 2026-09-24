@@ -1,0 +1,33 @@
+.giftz-page .gigz-identity img{width:155px}
+.giftz-page .gigz-eyebrow,.giftz-page .gigz-section-head h1 span,.giftz-page .gigz-section-head h2 span{color:#ccff00}
+.giftz-page .gigz-eyebrow:before{background:#ccff00}
+.giftz-page .gigz-talent-zone{background:radial-gradient(ellipse 80% 70% at 48% 44%,#34431f51,#171d1344 50%,transparent)}
+.giftz-page .gigz-post,.giftz-page .board-follow-button{border-color:#648536;color:#e8f5c0}
+.giftz-page .gigz-post:hover:not(:disabled),.giftz-page .board-follow-button:hover:not(:disabled){background:#273319}
+.giftz-page .gigz-post:disabled{opacity:.55;cursor:not-allowed}
+.giftz-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.giftz-actions .board-follow-button{margin-bottom:5px}
+.giftz-filters{display:flex;flex-wrap:wrap;align-items:end;gap:12px;margin-bottom:23px;color:#c7d5ae;font-size:13px}
+.giftz-filters label{display:flex;flex-direction:column;gap:6px;min-width:128px}
+.giftz-filters input,.giftz-filters select{height:41px;border:1px solid #648536;border-radius:8px;background:#1c2417;color:#fff;padding:8px 10px;font:inherit;font-size:14px}
+.giftz-filters input[type=search]{min-width:170px}
+.giftz-filters .giftz-filters__check{display:flex;flex-direction:row;align-items:center;min-width:auto;padding-bottom:8px}
+.giftz-filters__check input{width:18px;height:18px;accent-color:#ccff00}
+.giftz-filters>button{height:41px;padding:0 12px;border:1px solid #648536;border-radius:8px;background:transparent;color:#e8f5c0}
+.giftz-posting-status{padding:12px 16px;margin:0 0 16px;border:1px solid #648536;border-radius:9px;color:#e8f5c0}
+.giftz-page .gigz-opportunity:hover,.giftz-page .gigz-talent:hover{border-color:#ccff00}
+.giftz-offer__fallback{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 65% 24%,#557b25,#283b1f 42%,#10160e);color:#ccff0080}
+.giftz-iso .gigz-talent__portrait{display:grid;place-items:center;color:#ccff00;background:linear-gradient(135deg,#34431e,#161c14)}
+.giftz-iso__category{color:#c7d4ae;font-size:12px;letter-spacing:.08em;font-weight:800;margin-top:7px}
+.giftz-iso .gigz-talent__location{margin-top:11px}
+.giftz-iso .gigz-talent__hire{margin-top:auto}
+.giftz-page .gigz-detail{border-color:#8aa747}
+.giftz-page .gigz-detail .board-listing-card{max-width:none}
+.giftz-inactive{margin:25px 0;padding:22px;border:1px solid #648536;border-radius:15px;background:#1c2417}
+.giftz-inactive h2{font-size:22px;font-weight:800;color:#fff;margin:0 0 4px}
+.giftz-inactive p{color:#c7d5ae;margin:0 0 15px}
+.giftz-inactive>div{display:flex;flex-wrap:wrap;gap:9px}
+.giftz-inactive button{padding:10px 13px;border:1px solid #648536;border-radius:8px;color:#fff;text-align:left}
+.giftz-inactive button span{color:#ccff00;margin-left:8px;font-size:11px;text-transform:capitalize}
+@media(max-width:760px){.giftz-actions{align-items:stretch}.giftz-actions .board-follow-button{margin:9px 0 0}.giftz-filters{gap:10px}.giftz-filters label{flex:1 1 145px}.giftz-filters label:first-child{flex-basis:100%}.giftz-filters input[type=search]{width:100%;min-width:0}}
+.giftz-page.gifting-page{background:#09090d;color:#faf8fc;min-height:100vh}

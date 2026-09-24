@@ -1,18 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Gift, HeartHandshake, RefreshCw, ShieldAlert, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Gift, MapPin, Plus, Search, X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
-import BoardHero from "@/components/BoardHero";
-import BoardHowItWorks from "@/components/BoardHowItWorks";
-import BoardCloseSeam from "@/components/BoardCloseSeam";
-import ScrollReveal from "@/components/ScrollReveal";
-import UserAvatar from "@/components/UserAvatar";
-import BoardStatsBar from "@/components/BoardStatsBar";
-import BoardActiveSection, { BoardFilterChip, BoardSelectField, BoardTextField } from "@/components/BoardActiveSection";
 import GiftListingCard, { type GiftingPost } from "@/components/board/GiftListingCard";
 import { Button } from "@/components/ds";
 import { isOpenGrabPost } from "@/lib/boardFeed";
@@ -21,6 +14,11 @@ import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import { trackProductEvent } from "@/lib/analytics";
+import { timeAgo } from "@/lib/boardFeed";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
+import type { CSSProperties } from "react";
+import "./PrideWork.css";
+import "./Gifting.css";
 
 const CATEGORIES = [
   "Clothing", "Party Closet", "Costumes and Theme Wear", "Circuit Party Wear", "Drag",
@@ -32,15 +30,6 @@ const CATEGORIES = [
 
 const PICKUP = ["Open Grab", "Porch pickup", "Public meetup", "Event handoff", "Flexible pickup", "Message to coordinate"];
 
-const HOW_IT_WORKS: Array<{ title: string; body: string; color: string }> = [
-  { title: "Post it", body: "Gift it, or search for it.", color: "#ccff00" },
-  { title: "Add photos", body: "Up to two. The site makes them fit.", color: "#ccff00" },
-  { title: "Three hands max", body: "Only three people can raise a hand on a gift.", color: "#ff8c00" },
-  { title: "Poster picks", body: "They choose one and send a message.", color: "#ccff00" },
-  { title: "Hand it off", body: "Porch, public meetup, or event handoff.", color: "#ccff00" },
-  { title: "Stamp it done", body: "Gifted or Found, then it leaves the feed.", color: "#ccff00" },
-];
-
 const blankForm = {
   postType: "GIFT",
   title: "",
@@ -51,15 +40,42 @@ const blankForm = {
   acceptRules: false,
 };
 
-/** Gifting board accent is lime (#CCFF00) for gift + ISO; grab stays orange. */
-const ACCENT = {
-  GIFT: "#ccff00",
-  ISO: "#ccff00",
-  GRAB: "#ff8c00",
-} as const;
-
 function isActivePost(p: GiftingPost) {
   return !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(p.status);
+}
+
+function GiftRail({ posts, type, selected, onSelect }: {
+  posts: GiftingPost[]; type: "GIFT" | "ISO"; selected: number | null; onSelect: (id: number) => void;
+}) {
+  const [api, setApi] = useState<CarouselApi>();
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
+  useEffect(() => {
+    if (!api) return;
+    const update = () => { setCanPrev(api.canScrollPrev()); setCanNext(api.canScrollNext()); };
+    update(); api.on("select", update); api.on("reInit", update);
+    return () => { api.off("select", update); api.off("reInit", update); };
+  }, [api]);
+  return <>
+    <Carousel setApi={setApi} opts={{ align: "start", dragFree: true, direction: "rtl" }} className="gigz-rail" dir="rtl">
+      <CarouselContent className="gigz-rail__track">
+        {posts.map((post, index) => <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
+          {type === "GIFT" ? <button type="button" className="gigz-opportunity giftz-offer" style={{ "--gigz-accent": ["#ccff00", "#a4d84a", "#e1ff80", "#89d69d"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gift: ${post.title}`}>
+            {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <span className="giftz-offer__fallback" aria-hidden="true"><Gift size={76} strokeWidth={1.2} /></span>}
+            <span className="gigz-opportunity__shade" /><span className="gigz-opportunity__top"><span><em>{post.category || "GIFT OFFERED"}</em><small>Gift offered · {timeAgo(post.createdAt)}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
+            <span className="gigz-opportunity__bottom"><strong>{post.title}</strong><span>{post.neighborhood || "Portland"} · {post.pickupPreference || "Message to coordinate"}</span><em>FREE</em></span>
+          </button> : <button type="button" className="gigz-talent giftz-iso" style={{ "--gigz-accent": ["#ccff00", "#b9eb75", "#e0ff87"][index % 3] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ISO: ${post.title}`}>
+            <span className="gigz-talent__status"><span><i /> In search of</span><small>Posted {timeAgo(post.createdAt)}</small></span>
+            <span className="gigz-talent__portrait">{post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <Search size={66} strokeWidth={1.2} aria-hidden="true" />}</span>
+            <strong>{post.title}</strong><span className="giftz-iso__category">{post.category || "COMMUNITY REQUEST"}</span>
+            <span className="gigz-talent__location"><MapPin size={14} />{post.neighborhood || "Portland"} · {post.pickupPreference || "Message to coordinate"}</span>
+            <span className="gigz-talent__hire">I have something <ArrowUpRight size={18} /></span><span className="gigz-talent__caption"><Search size={15} /> Community request</span>
+          </button>}
+        </CarouselItem>)}
+      </CarouselContent>
+    </Carousel>
+    <div className="gigz-rail__controls"><span>SWIPE TO EXPLORE <ArrowLeft size={15} /></span><div><button type="button" onClick={() => api?.scrollPrev()} disabled={!canPrev} aria-label={`Previous ${type === "GIFT" ? "gifts" : "ISO posts"}`}><ArrowRight size={18} /></button><button type="button" onClick={() => api?.scrollNext()} disabled={!canNext} aria-label={`Next ${type === "GIFT" ? "gifts" : "ISO posts"}`}><ArrowLeft size={18} /></button></div></div>
+  </>;
 }
 
 
@@ -114,28 +130,6 @@ export default function Gifting() {
   useEffect(() => {
     if (!isLoading) trackProductEvent("time_to_content", "gifz", performance.now() - contentStartedAt.current);
   }, [isLoading]);
-
-  const stats = useMemo(() => {
-    const active = posts.filter(isActivePost);
-    return [
-      { num: active.filter(p => p.postType === "GIFT").length, label: "Gifts up now", color: ACCENT.GIFT },
-      { num: active.filter(p => p.postType === "ISO").length, label: "In search of, open", color: ACCENT.ISO },
-      { num: posts.filter(p => p.status === "GIFTED" || p.status === "FOUND").length, label: "Homes found this season", color: "#ff1fa0" },
-    ];
-  }, [posts]);
-
-  const filterCounts = useMemo(() => {
-    const active = posts.filter(isActivePost);
-    let gift = 0;
-    let iso = 0;
-    let grab = 0;
-    for (const p of active) {
-      if (isOpenGrabPost(p)) grab += 1;
-      else if (p.postType === "ISO") iso += 1;
-      else gift += 1;
-    }
-    return { ALL: active.length, GIFT: gift, ISO: iso, GRAB: grab };
-  }, [posts]);
 
   // Canonical product deep-links open the requested post expanded.
   useEffect(() => {
@@ -207,150 +201,54 @@ export default function Gifting() {
     setSort("RECENT");
   };
 
-  const chipDefs: Array<{ key: string; label: string; accent: string }> = [
-    { key: "ALL", label: "All", accent: "lime" },
-    { key: "GIFT", label: "Gift", accent: "lime" },
-    { key: "ISO", label: "In search of", accent: "lime" },
-    { key: "GRAB", label: "Open grab", accent: "orange" },
-  ];
+  const offered = filtered.filter(post => isActivePost(post) && post.postType === "GIFT");
+  const requested = filtered.filter(post => isActivePost(post) && post.postType === "ISO");
+  const inactiveMine = onlyMine ? filtered.filter(post => post.isMine && !isActivePost(post)) : [];
+  const selected = posts.find(post => post.id === expandedId);
+  const select = (id: number) => {
+    setExpandedId(id);
+    const url = new URL(window.location.href);
+    url.searchParams.set("post", String(id));
+    window.history.replaceState(null, "", url.pathname + url.search);
+    window.setTimeout(() => document.getElementById("giftz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40);
+  };
+  const closeDetail = () => {
+    setExpandedId(null);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("post");
+    window.history.replaceState(null, "", url.pathname + url.search);
+  };
 
-  return (
-    <div className="zine-page gifting-page board-page board-page--makeover">
-      <BoardHero
-        accent="lime"
-        kicker="Free board · Pride season 2026"
-        title={<img className="board-hero__brand-logo board-hero__brand-logo--gifz" src="/brand/family/giftz.svg" alt="GIFTZ" />}
-        lede="A free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
-        actions={
-          <>
-            <BoardFollowButton board="giftz" />
-            <Button variant="solid" accent="lime" size="lg" arrow disabled={!postingOpen} onClick={() => openForm("GIFT")}>
-              {giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}
-            </Button>
-            <Button variant="neon" accent="lime" size="lg" disabled={!postingOpen} onClick={() => openForm("ISO")}>
-              {giftingStatusPending ? "Checking…" : postingOpen ? "Post an ISO" : "Posting paused"}
-            </Button>
-          </>
-        }
-      />
-
-      <BoardStatsBar stats={stats} variant="band" showLive={false} />
-
-      {!postingOpen && giftingStatus ? (
-        <p className="gifting-posting-status" role="status">{giftingStatus.message}</p>
-      ) : null}
-
+  return <main className="gigz-page giftz-page gifting-page">
+    <div className="gigz-shell">
+      <div className="gigz-identity"><img src="/brand/family/giftz.svg" alt="Giftz" /><span>Pass it on. Find what you need.</span></div>
+      <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE BOARD</div><h1>Good things move around<span>.</span></h1><p>Give what you can. Find what you need. Keep it free.</p></div>
+        <div className="giftz-actions"><BoardFollowButton board="giftz" /><button type="button" className="gigz-post" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
+      </div>
+      {!postingOpen && giftingStatus && <p className="giftz-posting-status" role="status">{giftingStatus.message}</p>}
+      <div className="giftz-filters" aria-label="Filter Giftz posts">
+        <label>Search Giftz<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search titles and details" /></label>
+        <label>Show<select value={filter} onChange={event => setFilter(event.target.value)}><option value="ALL">Offered & ISO</option><option value="GIFT">Gifts offered</option><option value="ISO">In search of</option><option value="GRAB">Open grab</option></select></label>
+        <label>Category<select value={category} onChange={event => setCategory(event.target.value)}><option value="ALL">All categories</option>{CATEGORIES.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+        <label>Neighborhood<input type="search" value={neighborhood} onChange={event => setNeighborhood(event.target.value)} placeholder="Anywhere nearby" /></label>
+        {user && <label className="giftz-filters__check"><input type="checkbox" checked={onlyMine} onChange={event => setOnlyMine(event.target.checked)} /> My posts</label>}
+        <label>Sort<select value={sort} onChange={event => setSort(event.target.value)}><option value="RECENT">Recently posted</option><option value="LONGEST">Longest up</option></select></label>
+        {(filter !== "ALL" || search || category !== "ALL" || neighborhood || onlyMine || sort !== "RECENT") && <button type="button" onClick={clearFilters}>Clear filters</button>}
+      </div>
+      {isError ? <div className="gigz-empty" role="alert">Could not load Giftz posts. <button type="button" onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })}>Try again</button></div> : <>
+        {isLoading ? <BoardFeedSkeleton label="Loading gifts offered" shape="board" count={3} /> : offered.length ? <GiftRail posts={offered} type="GIFT" selected={expandedId} onSelect={select} /> : <div className="gigz-empty">No gifts offered match right now. {postingOpen && <button type="button" onClick={() => openForm("GIFT")}>Post a gift</button>}</div>}
+        <div className="gigz-talent-zone"><div className="gigz-section-head"><div><div className="gigz-eyebrow">IN SEARCH OF</div><h2>On someone’s wish list<span>.</span></h2><p>See what neighbors are looking for. You might have just the thing.</p></div><button type="button" className="gigz-post" disabled={!postingOpen} onClick={() => openForm("ISO")}><Plus size={17} /> Post an ISO <ArrowUpRight size={16} /></button></div>
+          {!isLoading && (requested.length ? <GiftRail posts={requested} type="ISO" selected={expandedId} onSelect={select} /> : <div className="gigz-empty">No ISO posts match right now. {postingOpen && <button type="button" onClick={() => openForm("ISO")}>Post what you need</button>}</div>)}
+        </div>
+      </>}
+      {!isLoading && !isError && inactiveMine.length > 0 && <section className="giftz-inactive" aria-label="Your other posts"><h2>Your other posts</h2><p>Pending and completed posts are here so you can review and manage them.</p><div>{inactiveMine.map(post => <button type="button" key={post.id} onClick={() => select(post.id)}>{post.title} <span>{post.status}</span></button>)}</div></section>}
+      {selected && <section id="giftz-detail" className="gigz-detail giftz-detail" aria-label="Selected Giftz post"><button type="button" className="gigz-detail__close" onClick={closeDetail} aria-label="Close details"><X size={18} /></button><GiftListingCard post={selected} expanded onToggle={closeDetail} onRequireAuth={() => setShowAuth(true)} onDeleted={closeDetail} /></section>}
+      {formOpen && <GiftComposer initialType={composeType} onClose={() => setFormOpen(false)} onPosted={id => { setFormOpen(false); select(id); }} />}
       <SafetyGuide context="gifts" />
-
-      <ScrollReveal>
-        <BoardHowItWorks
-          className="gifting-how"
-          kickerTone="lime"
-          title={<>How <span className="board-how__title-accent">GIFTZ</span> works</>}
-          lede="Give what you can. Ask for what you need. Keep it local, free, and kind. Posts go live right away; anything that breaks the rules gets pulled."
-          steps={HOW_IT_WORKS}
-          footerLine="Keep it free · keep it kind · keep it moving · year-round"
-        />
-      </ScrollReveal>
-
-      {formOpen && <GiftComposer initialType={composeType} onClose={() => setFormOpen(false)} onPosted={() => setFormOpen(false)} />}
-
-      <BoardActiveSection
-        className="diag"
-        sticker="Active board"
-        stickerTone="lime"
-        stickerStyle="mono"
-        title="Gifts & in search of"
-        resultCount={`${filtered.length} showing`}
-        filters={
-          <>
-            {chipDefs.map(f => (
-              <BoardFilterChip
-                key={f.key}
-                active={filter === f.key}
-                onClick={() => setFilter(f.key)}
-                accent={f.accent}
-                count={filterCounts[f.key as keyof typeof filterCounts]}
-              >
-                {f.label}
-              </BoardFilterChip>
-            ))}
-          </>
-        }
-        filterRow2={
-          <>
-            <BoardSelectField value={category} onChange={setCategory}>
-              <option value="ALL">All categories</option>
-              {CATEGORIES.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </BoardSelectField>
-            <BoardTextField type="search" value={neighborhood} onChange={setNeighborhood} placeholder="Neighborhood" />
-            <BoardTextField type="search" value={search} onChange={setSearch} placeholder="Search titles, details, categories" />
-            {user ? (
-              <BoardFilterChip active={onlyMine} onClick={() => setOnlyMine(value => !value)} accent="cyan">
-                My posts
-              </BoardFilterChip>
-            ) : null}
-            <BoardSelectField value={sort} onChange={setSort}>
-              <option value="RECENT">Recently posted</option>
-              <option value="LONGEST">Longest up</option>
-            </BoardSelectField>
-          </>
-        }
-      >
-        {isLoading ? (
-          <BoardFeedSkeleton label="Loading GIFTZ posts" shape="board" count={6} />
-        ) : isError ? (
-          <div className="board-empty" style={{ borderColor: "#ccff00" }}>
-            <Gift size={40} style={{ color: "#ccff00", margin: "0 auto" }} />
-            <p className="display section-heading" style={{ color: "#fff" }}>Could not load posts</p>
-            <p className="board-copy-sm">
-              Could not load posts. Try again in a moment.
-            </p>
-            <Button variant="neon" accent="lime" style={{ marginTop: 20 }} onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })}>
-              Try again
-            </Button>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="board-empty board-empty--makeover">
-            <p className="display section-heading">Nothing on the shelf right now</p>
-            <p className="board-copy-sm">
-              {postingOpen ? "Free stuff goes fast. Widen your search, or post what you are hunting for and let it find you." : "New posts are paused. You can still browse existing gifts and continue handoffs in your inbox."}
-            </p>
-            <div className="board-empty__actions">
-              {postingOpen && <Button variant="solid" accent="lime" onClick={() => openForm("GIFT")}>Post a gift</Button>}
-              <Button variant="neon" accent="lime" onClick={clearFilters}>
-                Clear filters
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="board-listing-grid board-listing-grid--makeover">
-            {filtered.map((post, index) => (
-              <ScrollReveal key={post.id} delay={Math.min(index * 80, 400)}>
-                <GiftListingCard
-                  post={post}
-                  expanded={expandedId === post.id}
-                  onToggle={() => setExpandedId(expandedId === post.id ? null : post.id)}
-                  onRequireAuth={() => setShowAuth(true)}
-                />
-              </ScrollReveal>
-            ))}
-          </div>
-        )}
-      </BoardActiveSection>
-
-      <BoardCloseSeam
-        line="Keep it free · keep it kind · keep it moving"
-        url="zaylist.com/gifting"
-      />
-
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     </div>
-  );
+  </main>;
 }
-
 
 export function GiftComposer({initialType = "GIFT", onClose, onPosted}: {initialType?: "GIFT" | "ISO"; onClose: () => void; onPosted: (id: number) => void}) {
   const {toast} = useToast();
