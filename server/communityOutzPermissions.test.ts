@@ -15,7 +15,7 @@ after(() => { sqlite.close(); rmSync(directory, { recursive: true, force: true }
 
 const routes = new Map<string, Function[]>();
 const app: any = {};
-for (const method of ["get", "post", "patch", "delete"]) app[method] = (route: string, ...handlers: Function[]) => routes.set(`${method} ${route}`, handlers);
+for (const method of ["get", "post", "put", "patch", "delete"]) app[method] = (route: string, ...handlers: Function[]) => routes.set(`${method} ${route}`, handlers);
 registerCommunityRoutes(app, ((req: any, res: any, next: Function) => req.session.userId ? next() : res.status(401).json({ error: "Sign in" })) as any);
 function call(method: string, route: string, userId?: number, body: any = {}, params: any = {}) {
   let status = 200, result: any;
@@ -34,6 +34,33 @@ const params = { slug: community.slug };
 call("post", "/api/communities/:slug/join", author, {}, params);
 const parent = call("post", "/api/communities/:slug/posts", owner, { body: "Plan a community picnic" }, params).result.posts[0];
 const parentParams = { ...params, postId: parent.id };
+
+test("votes persist per member and respect community and post boundaries", () => {
+  const endpoint = "/api/communities/:slug/posts/:postId/vote";
+  assert.equal(call("put", endpoint, undefined, { value: 1 }, parentParams).status, 401);
+  assert.equal(call("put", endpoint, outsider, { value: 1 }, parentParams).status, 403);
+  assert.equal(call("put", endpoint, author, { value: 2 }, parentParams).status, 400);
+  assert.equal(call("put", endpoint, author, { value: 1 }, parentParams).status, 200);
+  assert.equal(call("get", "/api/communities/:slug", author, {}, params).result.posts[0].score, 1);
+  assert.equal(call("put", endpoint, author, { value: -1 }, parentParams).status, 200);
+  const voted = call("get", "/api/communities/:slug", author, {}, params).result.posts[0];
+  assert.equal(voted.score, -1);
+  assert.equal(voted.viewerVote, -1);
+  assert.equal(call("get", "/api/communities/:slug", owner, {}, params).result.posts[0].viewerVote, 0);
+  const other = call("post", "/api/communities", author, { name: "Vote Boundary Community", description: "A separate community for vote boundaries" }).result;
+  assert.equal(call("put", endpoint, author, { value: 1 }, { slug: other.slug, postId: parent.id }).status, 404);
+  assert.equal(call("put", endpoint, author, { value: 0 }, parentParams).status, 200);
+  assert.equal(call("get", "/api/communities/:slug", author, {}, params).result.posts[0].score, 0);
+});
+
+test("titled posts retain their title while legacy body-only posts remain readable", () => {
+  const other = call("post", "/api/communities", author, { name: "Title Test Community", description: "A separate community for title behavior" }).result;
+  const created = call("post", "/api/communities/:slug/posts", author, { title: "Picnic details", body: "Bring a blanket" }, { slug: other.slug });
+  assert.equal(created.status, 201);
+  assert.equal(created.result.posts[0].title, "Picnic details");
+  assert.equal(created.result.posts[0].body, "Bring a blanket");
+  assert.equal(call("get", "/api/communities/:slug", owner, {}, params).result.posts.find((post: any) => post.id === parent.id).title, "");
+});
 
 test("replies require sign-in and active membership; cannot cross communities or nest under replies", () => {
   const endpoint = "/api/communities/:slug/posts/:postId/replies";

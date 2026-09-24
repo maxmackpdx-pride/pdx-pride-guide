@@ -28,7 +28,10 @@ export type CommunitySummary = {
 
 export type CommunityPost = {
   id: number;
+  title: string;
   body: string;
+  score: number;
+  viewerVote: -1 | 0 | 1;
   createdAt: string;
   updatedAt: string | null;
   canEdit: boolean;

@@ -1,5 +1,6 @@
 import PageRecovery from "@/components/PageRecovery";
 import { useState } from "react";
+import { ArrowBigDown, ArrowBigUp, ArrowLeft, MessageCircle, Plus, Search, Share2, SlidersHorizontal } from "lucide-react";
 import { Link } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, parseApiError, queryClient } from "@/lib/queryClient";
@@ -17,11 +18,18 @@ export default function Community({ params }: { params: { communitySlug: string 
   const { user } = useAuth();
   const { toast } = useToast();
   const [postBody, setPostBody] = useState("");
+  const [postTitle, setPostTitle] = useState("");
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [sort, setSort] = useState<"new" | "top" | "discussed">("new");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [openReplies, setOpenReplies] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [managing, setManaging] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editPostId, setEditPostId] = useState<number | null>(null);
   const [editPostBody, setEditPostBody] = useState("");
+  const [editPostTitle, setEditPostTitle] = useState("");
   const [reportPostId, setReportPostId] = useState<number | null>(null);
   const [reportReason, setReportReason] = useState("");
   const [relationshipUrl, setRelationshipUrl] = useState("");
@@ -38,14 +46,19 @@ export default function Community({ params }: { params: { communitySlug: string 
     onSuccess: refresh, onError: err => setError(parseApiError(err, "Membership could not be updated.")),
   });
   const post = useMutation({
-    mutationFn: () => apiRequest("POST", `${key}/posts`, { body: postBody }),
-    onSuccess: async () => { setPostBody(""); setError(""); await refresh(); },
+    mutationFn: () => apiRequest("POST", `${key}/posts`, { title: postTitle, body: postBody }),
+    onSuccess: async () => { setPostTitle(""); setPostBody(""); setComposerOpen(false); setError(""); setSort("new"); await refresh(); },
     onError: err => setError(parseApiError(err, "Post could not be published.")),
   });
   const act = useMutation({
     mutationFn: async ({ method, path, body }: { method: "POST" | "PATCH" | "DELETE"; path: string; body?: any }) => apiRequest(method, `${key}${path}`, body),
     onSuccess: async (_response, action) => { if (action.path.endsWith("/report")) toast({ title: "Report sent", description: "Community moderators will review it." }); setError(""); setNotice(action.path.endsWith("/report") ? "Report sent. Community moderators will review it." : action.path.endsWith("/replies") ? "Reply posted." : "Changes saved."); setReplyTo(null); setReplyBody(""); setEditPostId(null); setReportPostId(null); setReportReason(""); await refresh(); await queryClient.invalidateQueries({ queryKey: [`${key}/manage`] }); },
     onError: err => setError(parseApiError(err, "Community action could not be completed.")),
+  });
+  const vote = useMutation({
+    mutationFn: async ({ id, value }: { id: number; value: -1 | 0 | 1 }) => apiRequest("PUT", `${key}/posts/${id}/vote`, { value }),
+    onSuccess: refresh,
+    onError: err => setError(parseApiError(err, "Vote could not be saved.")),
   });
   if (community.isLoading) return <SpectrumLoader variant="full" label="Loading community" />;
   if (!community.data) {
@@ -56,15 +69,29 @@ export default function Community({ params }: { params: { communitySlug: string 
   }
   const item = community.data;
   const logo = communityLogo(item);
+  const visiblePosts = item.posts.filter(entry => `${entry.title} ${entry.body} ${entry.author.displayName || ""} ${entry.author.username}`.toLowerCase().includes(searchTerm.trim().toLowerCase())).sort((a, b) => sort === "top" ? b.score - a.score || b.id - a.id : sort === "discussed" ? b.replies.length - a.replies.length || b.id - a.id : b.id - a.id);
+  const share = async (url: string) => {
+    try {
+      if (navigator.share) await navigator.share({ title: item.name, url });
+      else { await navigator.clipboard.writeText(url); setNotice("Link copied."); }
+    } catch (err) { if ((err as Error).name !== "AbortError") setError("The link could not be shared."); }
+  };
+  const pageUrl = `${window.location.origin}/z/${item.slug}`;
+  function voteButtons(entry: CommunityPost) {
+    return <div className="z-community-votes" aria-label={`Score ${entry.score}`}>
+      <button type="button" aria-label={`Upvote ${entry.author.username}'s post`} aria-pressed={entry.viewerVote === 1} disabled={!item.viewerRole || vote.isPending} onClick={() => vote.mutate({ id: entry.id, value: entry.viewerVote === 1 ? 0 : 1 })}><ArrowBigUp size={20}/></button>
+      <span>{entry.score}</span>
+      <button type="button" aria-label={`Downvote ${entry.author.username}'s post`} aria-pressed={entry.viewerVote === -1} disabled={!item.viewerRole || vote.isPending} onClick={() => vote.mutate({ id: entry.id, value: entry.viewerVote === -1 ? 0 : -1 })}><ArrowBigDown size={20}/></button>
+    </div>;
+  }
   function renderPost(entry: CommunityPost) {
     return <>
-      <Link href={`/u/${entry.author.username}`}>{entry.author.displayName || entry.author.username}</Link>
-      {editPostId === entry.id ? <form onSubmit={event => { event.preventDefault(); act.mutate({ method: "PATCH", path: `/posts/${entry.id}`, body: { body: editPostBody } }); }}>
-        <label>Edit your message<textarea value={editPostBody} onChange={event => setEditPostBody(event.target.value)} maxLength={2000} required/></label><Button type="submit" disabled={act.isPending || !editPostBody.trim()}>SAVE</Button><Button type="button" onClick={() => setEditPostId(null)}>CANCEL</Button>
-      </form> : <p>{entry.body}</p>}
-      <time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleDateString()}{entry.updatedAt && entry.updatedAt !== entry.createdAt ? " · edited" : ""}</time>
+      <div className="z-community-post__byline"><Link href={`/u/${entry.author.username}`} className="z-community-post__avatar">{entry.author.photoUrl ? <img src={entry.author.photoUrl} alt=""/> : (entry.author.displayName || entry.author.username).slice(0, 1).toUpperCase()}</Link><Link href={`/u/${entry.author.username}`}>@{entry.author.username}</Link><span>·</span><time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}{entry.updatedAt && entry.updatedAt !== entry.createdAt ? " · edited" : ""}</time></div>
+      {editPostId === entry.id ? <form className="z-community-composer" onSubmit={event => { event.preventDefault(); act.mutate({ method: "PATCH", path: `/posts/${entry.id}`, body: { title: editPostTitle, body: editPostBody } }); }}>
+        {entry.title ? <label>Edit title<input value={editPostTitle} onChange={event => setEditPostTitle(event.target.value)} maxLength={160}/></label> : null}<label>Edit your message<textarea value={editPostBody} onChange={event => setEditPostBody(event.target.value)} maxLength={2000}/></label><div><Button type="submit" disabled={act.isPending || (!editPostTitle.trim() && !editPostBody.trim())}>SAVE</Button><Button type="button" onClick={() => setEditPostId(null)}>CANCEL</Button></div>
+      </form> : <>{entry.title ? <h2 className="z-community-post__title">{entry.title}</h2> : null}{entry.body ? <p className="z-community-post__body">{entry.body}</p> : null}</>}
       <div className="z-community-post__actions">
-        {entry.canEdit ? <button type="button" onClick={() => { setEditPostId(entry.id); setEditPostBody(entry.body); }}>Edit</button> : null}
+        {entry.canEdit ? <button type="button" onClick={() => { setEditPostId(entry.id); setEditPostTitle(entry.title); setEditPostBody(entry.body); }}>Edit</button> : null}
         {entry.canEdit || entry.canModerate ? <button type="button" disabled={act.isPending} onClick={() => act.mutate({ method: "DELETE", path: `/posts/${entry.id}` })}>Remove</button> : null}
         {item.viewerRole && !entry.canEdit ? <button type="button" onClick={() => { setReportPostId(entry.id); setNotice(""); }}>Report</button> : null}
       </div>
@@ -72,27 +99,31 @@ export default function Community({ params }: { params: { communitySlug: string 
     </>;
   }
   return <div className="z-communities z-community-detail">
-    <Link href="/z" className="z-community-detail__back">← ALL COMMUNITIES</Link>
+    <div className="z-community-detail__toolbar"><Link href="/z" className="z-community-detail__back"><ArrowLeft size={19}/> Z/ LIST</Link><div className="z-community-detail__tools"><button type="button" aria-label="Search posts" aria-expanded={searchOpen} onClick={() => setSearchOpen(value => !value)}><Search size={19}/></button><button type="button" aria-label="Create post" onClick={() => { setComposerOpen(true); document.querySelector(".z-community-feed__compose")?.scrollIntoView({ behavior: "smooth" }); }}><Plus size={20}/></button><button type="button" aria-label="Share community" onClick={() => void share(pageUrl)}><Share2 size={19}/></button></div></div>
     <header className="z-community-detail__hero">
       <div className="z-community-detail__image" style={logo ? { backgroundImage: `url(${logo})`, backgroundSize: item.slug === "yes-coach-productions" && (!item.imageUrl || item.imageUrl === "/directory-logos/Yes_Coach_Productions.png") ? "75% auto" : !item.imageUrl || logo === "/community-logos/pink-ponies.jpeg" ? "contain" : undefined, backgroundColor: !item.imageUrl && item.slug === "lesbian-culture-club" ? "#f5f1e9" : undefined } : undefined}>{!logo ? <span aria-hidden="true">Z/</span> : null}</div>
-      <div><p className="z-community-card__address">z/{item.slug}</p><h1>{item.name}</h1><p>{item.description}</p><p className="z-community-detail__count">{item.memberCount} {item.memberCount === 1 ? "member" : "members"}</p>
+      <div className="z-community-detail__identity"><p className="z-community-card__address">z/{item.slug}</p><h1>{item.name}</h1><p className="z-community-detail__count">{item.memberCount} {item.memberCount === 1 ? "member" : "members"} · {item.posts.length} recent {item.posts.length === 1 ? "post" : "posts"}</p><p className="z-community-detail__description">{item.description}</p><div className="z-community-detail__membership">
         {user ? item.viewerMembershipStatus === "pending" ? <Button disabled accent="cyan">REQUEST PENDING</Button> : item.viewerRole === "owner" ? <p>You own this community. <button type="button" onClick={() => { setManaging(true); setTimeout(() => document.getElementById("community-members")?.scrollIntoView({ behavior: "smooth" }), 0); }}>Transfer ownership in Members</button> before leaving.</p> : <Button onClick={() => membership.mutate()} disabled={membership.isPending} accent="cyan">{item.viewerRole ? "LEAVE COMMUNITY" : item.membershipPolicy === "request" ? "REQUEST TO JOIN" : "JOIN COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO JOIN</Button></Link>}
-        {item.canManage ? <Button onClick={() => setManaging(value => !value)}>{managing ? "CLOSE MODERATOR DESK" : "MANAGE COMMUNITY"}</Button> : null}
+        {item.canManage ? <Button onClick={() => setManaging(value => !value)}>{managing ? "CLOSE MODERATOR DESK" : "MANAGE COMMUNITY"}</Button> : null}</div>
       </div>
     </header>
     {error ? <p className="z-community-detail__error" role="alert">{error}</p> : null}
     {notice ? <p role="status">{notice}</p> : null}
-    <div className="z-community-detail__columns"><main><section className="z-community-panel"><h2>COMMUNITY POSTS</h2>
-      {item.viewerRole ? <form onSubmit={event => { event.preventDefault(); post.mutate(); }} className="z-community-composer"><label htmlFor="community-post">Share with {item.name}</label><textarea id="community-post" value={postBody} onChange={event => setPostBody(event.target.value)} maxLength={2000} required/><Button type="submit" disabled={post.isPending || !postBody.trim()} variant="solid">POST</Button></form> : <p>Join this community to post.</p>}
-      <div className="z-community-posts">{item.posts.length === 0 ? <p>No posts yet.</p> : item.posts.map(entry => <article key={entry.id}>
+    <div className="z-community-feedbar"><label htmlFor="community-sort"><SlidersHorizontal size={18}/> POSTS</label><select id="community-sort" value={sort} onChange={event => setSort(event.target.value as typeof sort)}><option value="new">New posts</option><option value="top">Top posts</option><option value="discussed">Most discussed</option></select><span>{visiblePosts.length} shown</span></div>
+    {searchOpen ? <div className="z-community-search"><Search size={18}/><input type="search" value={searchTerm} onChange={event => setSearchTerm(event.target.value)} placeholder="Search posts and authors" aria-label="Search community posts" autoFocus/></div> : null}
+    <div className="z-community-detail__columns"><main className="z-community-feed"><section className="z-community-feed__compose">
+      {item.viewerRole ? composerOpen ? <form onSubmit={event => { event.preventDefault(); post.mutate(); }} className="z-community-composer"><label htmlFor="community-post-title">Title</label><input id="community-post-title" value={postTitle} onChange={event => setPostTitle(event.target.value)} maxLength={160} required autoFocus placeholder="Give your post a title"/><label htmlFor="community-post">Details (optional)</label><textarea id="community-post" value={postBody} onChange={event => setPostBody(event.target.value)} maxLength={2000} placeholder="What would you like to share?"/><div><Button type="submit" disabled={post.isPending || !postTitle.trim()} variant="solid">POST</Button><Button type="button" onClick={() => setComposerOpen(false)}>CANCEL</Button></div></form> : <button type="button" className="z-community-compose-trigger" onClick={() => setComposerOpen(true)}><Plus size={20}/> Share something with this community</button> : <p>Join this community to post and vote.</p>}
+    </section>
+      <div className="z-community-posts">{item.posts.length === 0 ? <p className="z-community-posts__empty">No posts yet. Start the conversation.</p> : visiblePosts.length === 0 ? <p className="z-community-posts__empty">No posts match your search.</p> : visiblePosts.map(entry => <article key={entry.id} id={`post-${entry.id}`}>
         {renderPost(entry)}
-        <div className="z-community-replies" aria-label="Replies">{entry.replies?.map(reply => <div className="z-community-reply" key={reply.id}>{renderPost(reply)}</div>)}</div>
+        <div className="z-community-post__engagement">{voteButtons(entry)}<button type="button" onClick={() => setOpenReplies(current => current === entry.id ? null : entry.id)} aria-expanded={openReplies === entry.id}><MessageCircle size={18}/> {entry.replies.length} {entry.replies.length === 1 ? "reply" : "replies"}</button><button type="button" onClick={() => void share(`${pageUrl}#post-${entry.id}`)}><Share2 size={18}/> Share</button></div>
+        {openReplies === entry.id ? <div className="z-community-thread"><div className="z-community-replies" aria-label="Replies">{entry.replies.length ? entry.replies.map(reply => <div className="z-community-reply" key={reply.id}>{renderPost(reply)}{voteButtons(reply)}</div>) : <p>No replies yet.</p>}</div>
         {item.viewerRole ? replyTo === entry.id ? <form className="z-community-composer" onSubmit={event => { event.preventDefault(); act.mutate({ method: "POST", path: `/posts/${entry.id}/replies`, body: { body: replyBody } }); }}>
           <label htmlFor={`reply-${entry.id}`}>Reply to {entry.author.displayName || entry.author.username}</label><textarea id={`reply-${entry.id}`} value={replyBody} onChange={event => setReplyBody(event.target.value)} maxLength={2000} required/>
           <Button type="submit" disabled={act.isPending || !replyBody.trim()}>POST REPLY</Button><Button type="button" onClick={() => setReplyTo(null)}>CANCEL</Button>
-        </form> : <button type="button" onClick={() => { setReplyTo(entry.id); setReplyBody(""); }}>Reply{entry.replies?.length ? ` (${entry.replies.length})` : ""}</button> : null}
+        </form> : <button type="button" className="z-community-thread__reply" onClick={() => { setReplyTo(entry.id); setReplyBody(""); }}>Write a reply</button> : <p>Join this community to reply.</p>}</div> : null}
       </article>)}</div>
-    </section></main><aside>
+    </main><aside>
       <section className="z-community-panel"><h2>RULES</h2><ol>{item.rules.map(rule => <li key={rule}>{rule}</li>)}</ol></section>
       <section className="z-community-panel"><h2>MODERATORS</h2>{item.moderators.length ? item.moderators.map(mod => <Link key={mod.id} href={`/u/${mod.username}`}>{mod.displayName || mod.username}</Link>) : <p>Managed by Zaylist until ownership is claimed.</p>}</section>
       <section className="z-community-panel"><h2>RELATED PRODUCTS</h2>{item.related.map(entry => <Link key={`${entry.type}-${entry.id}`} href={entry.url}><strong>{entry.type === "event" ? "EVENTZ" : entry.type === "sellz" ? "SELLZ" : entry.type === "gig" ? "GIGZ" : entry.type === "place" ? "PLACE" : "GUIDE"}:</strong> {entry.name}</Link>)}{item.related.length === 0 ? <p>No related products yet.</p> : null}</section>
