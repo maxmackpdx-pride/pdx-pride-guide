@@ -455,7 +455,7 @@ export default function Housing() {
       </div>
 
       <SafetyGuide context="housing" />
-      <CloseSeam line="Post it. Scroll it. Chat." url="zaylist.com/hausing" />
+      <CloseSeam line="Post it. Scroll it. Chat." url="zaylist.com/the-hauz" />
 
       {selectedPostId !== null && selectedQuery.isError && !selectedInFeed && <div className="hz-board-link-error" role="alert">This post is unavailable. <button type="button" onClick={() => { setSelectedPostId(null); setSelectedIntent(null); }}>Back to the board</button></div>}
       {selectedPost && <HousingPostOverlay key={selectedPost.id} post={selectedPost} userId={user?.id} initialDetail initialIntent={selectedIntent} sharePath={postId => `/the-hauz/${postId}`} onClose={() => { setSelectedPostId(null); setSelectedIntent(null); }} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => { setSelectedIntent(null); setSelectedPostId(postId); }} />}
