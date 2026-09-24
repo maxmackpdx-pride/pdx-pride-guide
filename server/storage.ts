@@ -8364,7 +8364,6 @@ function hubFeedEventAuthor(evt: Event | Record<string, unknown>, businesses: Bu
 }
 
 /** Same-venue same-window window for bundling multi-night drops. */
-const HUB_FEED_EVENT_CONDENSE_MS = 2 * 60 * 60 * 1000;
 
 function hubFeedAuthorKey(author: HubFeedAuthor): string {
   return (author.username || author.displayName || "unknown").toLowerCase();
@@ -8419,77 +8418,6 @@ function hubFeedEventCondenseKey(item: HubFeedItem): string {
   return `author:${hubFeedAuthorKey(item.author)}`;
 }
 
-/** Normalize titles so "Jiffy Kink" / "Jiffy Kink!" / "jiffy  kink" series-match. */
-function hubFeedNormalizeSeriesTitle(title: string | null | undefined): string {
-  return String(title || "")
-    .toLowerCase()
-    .replace(/\b(part|week|night|ep|episode)\s*#?\d+\b/g, " ")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim()
-    .replace(/\s+/g, " ");
-}
-
-/**
- * Recurring bulk adds: same venue + same show title across many nights.
- * Falls back to venue/author key when title is missing.
- */
-function hubFeedSeriesKey(item: HubFeedItem): string {
-  const title = hubFeedNormalizeSeriesTitle(item.event?.title);
-  const venue =
-    item.event?.venueName
-    || item.events?.[0]?.venueName
-    || (item.author.venueLogo ? item.author.displayName : "")
-    || "";
-  const venueKey = hubFeedNormalizeVenueKey(venue);
-  if (title && venueKey) return `series:${venueKey}|${title}`;
-  if (title) return `series:title:${title}`;
-  return hubFeedEventCondenseKey(item);
-}
-
-/**
- * Bulk recurring series → ONE feed card (badge Recurring), not N rows.
- * Embeds the next upcoming night (or earliest) only.
- */
-function bundleHubFeedRecurringSeries(cluster: HubFeedItem[]): HubFeedItem {
-  const withEvents = cluster.filter((item) => item.event != null);
-  if (withEvents.length === 0) return cluster[0];
-  if (withEvents.length === 1) return withEvents[0];
-
-  const byStart = [...withEvents].sort((a, b) =>
-    String(a.event!.dateStart || "").localeCompare(String(b.event!.dateStart || "")),
-  );
-  const now = Date.now();
-  const next =
-    byStart.find((item) => {
-      const ms = parsePacificDateTime(item.event!.dateStart);
-      return ms != null && ms >= now;
-    }) || byStart[0];
-
-  const newest = [...withEvents].sort((a, b) =>
-    String(b.createdAt).localeCompare(String(a.createdAt)),
-  )[0];
-  const n = withEvents.length;
-  const venueAuthor = newest.author.venueLogo;
-  const action = venueAuthor
-    ? `Listed a recurring series · ${n} nights`
-    : `Posted a recurring series · ${n} nights`;
-
-  return {
-    ...newest,
-    id: `event-series-${hubFeedSeriesKey(next)}-${n}`,
-    kind: "event",
-    badge: "Recurring",
-    action,
-    // Don't dump the first night's long description on a series card.
-    text: null,
-    // Single embed only - HubFeedCard must not render N event rows.
-    event: next.event ?? null,
-    events: undefined,
-    createdAt: newest.createdAt,
-    link: null,
-  };
-}
-
 function bundleHubFeedEventCluster(cluster: HubFeedItem[]): HubFeedItem {
   if (cluster.length === 1) return cluster[0];
   // Newest activity first in the bundle
@@ -8507,7 +8435,7 @@ function bundleHubFeedEventCluster(cluster: HubFeedItem[]): HubFeedItem {
     : (count === 1 ? "Posted a new event" : `Posted ${count} new events`);
   return {
     ...head,
-    id: `event-bundle-${hubFeedEventCondenseKey(head)}-${head.createdAt}`,
+    id: `event-bundle-${hubFeedEventCondenseKey(head)}-${hubFeedPostedDay(head.createdAt)}`,
     action,
     text: null,
     events,
@@ -8515,65 +8443,24 @@ function bundleHubFeedEventCluster(cluster: HubFeedItem[]): HubFeedItem {
   };
 }
 
-/**
- * Same-venue multi-night drops within a short createdAt window
- * (different show titles - not a single recurring series).
- */
-function condenseHubFeedByVenueWindow(items: HubFeedItem[]): HubFeedItem[] {
-  if (items.length <= 1) return items;
-  const byKey = new Map<string, HubFeedItem[]>();
-  for (const item of items) {
-    const key = hubFeedEventCondenseKey(item);
-    if (!byKey.has(key)) byKey.set(key, []);
-    byKey.get(key)!.push(item);
-  }
-  const out: HubFeedItem[] = [];
-  for (const group of Array.from(byKey.values())) {
-    group.sort((a: HubFeedItem, b: HubFeedItem) => String(b.createdAt).localeCompare(String(a.createdAt)));
-    let cluster: HubFeedItem[] = [];
-    for (const item of group) {
-      if (cluster.length === 0) {
-        cluster.push(item);
-        continue;
-      }
-      const anchor = new Date(cluster[0].createdAt).getTime();
-      const t = new Date(item.createdAt).getTime();
-      if (Number.isFinite(anchor) && Number.isFinite(t) && Math.abs(anchor - t) <= HUB_FEED_EVENT_CONDENSE_MS) {
-        cluster.push(item);
-      } else {
-        out.push(bundleHubFeedEventCluster(cluster));
-        cluster = [item];
-      }
-    }
-    if (cluster.length) out.push(bundleHubFeedEventCluster(cluster));
-  }
-  return out;
+/** Group by the day the events were posted, in the site's Pacific time zone. */
+function hubFeedPostedDay(createdAt: string): string {
+  const parsed = new Date(createdAt);
+  if (Number.isNaN(parsed.getTime())) return createdAt.slice(0, 10);
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(parsed);
 }
 
 function condenseHubFeedEventItems(items: HubFeedItem[]): HubFeedItem[] {
   if (items.length <= 1) return items;
-
-  // Pass 1 - recurring series: same venue + same title (bulk weekly/monthly adds).
-  // One news-feed card with badge "Recurring", not one row per night.
-  const bySeries = new Map<string, HubFeedItem[]>();
+  const byKey = new Map<string, HubFeedItem[]>();
   for (const item of items) {
-    const key = hubFeedSeriesKey(item);
-    if (!bySeries.has(key)) bySeries.set(key, []);
-    bySeries.get(key)!.push(item);
+    const key = `${hubFeedEventCondenseKey(item)}|${hubFeedPostedDay(item.createdAt)}`;
+    if (!byKey.has(key)) byKey.set(key, []);
+    byKey.get(key)!.push(item);
   }
-
-  const residual: HubFeedItem[] = [];
-  const seriesOut: HubFeedItem[] = [];
-  for (const [key, group] of Array.from(bySeries.entries())) {
-    if (key.startsWith("series:") && group.length >= 2) {
-      seriesOut.push(bundleHubFeedRecurringSeries(group));
-    } else {
-      residual.push(...group);
-    }
-  }
-
-  // Pass 2 - leftover multi-title drops at the same venue still window-bundle.
-  return [...seriesOut, ...condenseHubFeedByVenueWindow(residual)];
+  return Array.from(byKey.values(), bundleHubFeedEventCluster);
 }
 
 function canViewerSeeHubFeedRsvp(
@@ -15577,7 +15464,7 @@ export const storage: IStorage = {
     // newly-listed events are always in the candidate set. (Ordering by the
     // future party date meant that once 80+ upcoming events existed, a new
     // near-date event never became a candidate and never showed in the feed.)
-    // The venue/series condense pass collapses bulk seeds per venue, so a
+    // Daily venue bundling collapses bulk seeds per venue, so a
     // larger candidate pool doesn't flood the feed.
     const recentEvents = sqlite.prepare(`
       SELECT id, title, description, venue_name AS venueName, day_of_week AS dayOfWeek,

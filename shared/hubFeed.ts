@@ -67,7 +67,7 @@ export type HubFeedItem = {
    *  so co-hosts posting under a shared identity are still attributable. */
   postedBy?: HubFeedAuthor | null;
   event?: HubFeedEventEmbed | null;
-  /** Multiple events bundled from the same poster within a short window. */
+  /** Multiple events from the same venue or poster on one Pacific posting day. */
   events?: HubFeedEventEmbed[];
   link?: string | null;
   beachId?: string | null;

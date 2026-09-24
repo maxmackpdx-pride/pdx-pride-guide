@@ -37,8 +37,6 @@ function eventHref(item: HubFeedItem): string | null {
 }
 
 function eventRowsForItem(item: HubFeedItem): HubFeedEventEmbed[] {
-  // Recurring bulk series: one card, one row (badge "Recurring") - never expand N nights.
-  if (item.badge === "Recurring" && item.event) return [item.event];
   if (item.events?.length) return item.events;
   if (item.event) return [item.event];
   return [];
@@ -226,8 +224,7 @@ export default function HubFeedCard({ item }: Props) {
   };
 
   const bundledEvents = eventRowsForItem(item);
-  // Events render as the profile-style poster deck: one card for a single event,
-  // a fanned tap-to-cycle stack when there's more than one.
+  // Same-day event listings share one horizontal poster carousel.
   const eventBlock = bundledEvents.length > 0
     ? <FeedEventDeck events={bundledEvents} onOpen={openEventInPlace} />
     : null;
