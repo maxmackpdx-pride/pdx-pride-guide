@@ -72,6 +72,7 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath, {
     index: false,
+    redirect: false,
     setHeaders(res, filePath) {
       if (filePath.endsWith(`${path.sep}sw.js`)) {
         res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");

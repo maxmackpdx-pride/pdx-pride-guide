@@ -147,6 +147,7 @@ function AppLayout() {
             <Route path="/gifting" component={Gifting} />
             <Route path="/sellz/new">{() => <MapWorldRedirect world="sellz" />}</Route>
             <Route path="/sellz" component={Sellz} />
+            <Route path="/sellz/" component={Sellz} />
             <Route path="/the-hauz/new" component={HousingNew} />
             <Route path="/the-hauz/:id" component={HousingPost} />
             <Route path="/the-hauz" component={Housing} />
