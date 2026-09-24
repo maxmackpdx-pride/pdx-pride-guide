@@ -1238,6 +1238,51 @@ html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
   background: rgba(255, 255, 255, 0.04);
 }
 
+.site-profile-notify__children {
+  margin: 3px 8px 5px;
+  border-top: 1px solid rgba(172, 207, 231, .11);
+  padding-top: 4px;
+}
+.site-profile-notify .hub-member-folder__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.site-profile-notify__children .site-mobile-notify__list {
+  max-height: min(38dvh, 320px);
+  overflow-y: auto;
+}
+.site-profile-notify__entry {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+  touch-action: pan-y;
+}
+.site-profile-notify__entry .site-mobile-notify__row {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 0;
+}
+.site-profile-notify__delete {
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #b8b5ac;
+  cursor: pointer;
+}
+.site-profile-notify__delete:hover,
+.site-profile-notify__delete:focus-visible {
+  color: #ff6b9b;
+  background: rgba(255, 0, 100, .12);
+}
+.site-profile-notify__error {
+  padding: 8px 14px;
+  color: #ff9ebd;
+  font-size: 13px;
+}
+
 /* Desktop notifications bolt: a round hairline that lights magenta on hover,
    matching the nav pills beside it. */
 .site-auth--desktop .site-mobile-notify {
@@ -5768,6 +5813,32 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
   text-decoration: none;
   cursor: pointer;
   transition: color 0.1s, background 0.1s;
+}
+
+.site-profile-menu__messages {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 8px 8px;
+  border-radius: 10px;
+  color: #e8e5dc;
+}
+.site-profile-menu__messages-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.site-profile-menu__messages-badge {
+  display: inline-grid;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--neon-magenta);
+  color: #090909;
+  font: 800 12px/1 var(--font-mono, monospace);
 }
 
 .site-profile-menu__item:hover,

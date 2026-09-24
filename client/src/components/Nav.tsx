@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useLocation } from "wouter";
-import { useIsFetching, useQuery } from "@tanstack/react-query";
-import { CalendarDays, ChevronDown, House, Inbox, Search, Settings, UserRound, UsersRound, Zap } from "lucide-react";
+import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CalendarDays, ChevronDown, House, Inbox, Search, Settings, Trash2, UserRound, UsersRound } from "lucide-react";
 import { MenuCloseIcon } from "@/components/ui/animated-state-icons";
 import { CompactHubLink, CompactNavigation } from "@/components/ui/compact-navigation";
 import GlitchLogo from "@/components/GlitchLogo";
@@ -131,6 +131,7 @@ function ProfileMenuPanel({
   profileActive,
   hubActive,
   unreadCount,
+  adminPending,
   location,
   onClose,
   openSheet,
@@ -144,6 +145,7 @@ function ProfileMenuPanel({
   profileActive: boolean;
   hubActive: boolean;
   unreadCount: number;
+  adminPending: number;
   location: string;
   onClose: () => void;
   openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner"; threadId?: string | null }) => void;
@@ -168,13 +170,22 @@ function ProfileMenuPanel({
         <span className="site-profile-menu__username">@{user.username}</span>
         <span className="site-profile-menu__identity-hint">View public profile</span>
       </Link>
+      <button
+        type="button"
+        role="menuitem"
+        className="site-profile-menu__item site-profile-menu__messages"
+        aria-label={unreadCount > 0 ? `Messages, ${unreadCount} unread` : "Messages"}
+        onClick={() => { onClose(); openSheet(); }}
+      >
+        <span className="site-profile-menu__messages-label"><Inbox size={17} strokeWidth={2} aria-hidden="true" />Messages</span>
+        {unreadCount > 0 && <span className="site-profile-menu__messages-badge" aria-hidden="true">{unreadCount}</span>}
+      </button>
+      <NotifyMenu unreadCount={unreadCount} adminPending={adminPending} openSheet={openSheet} onClose={onClose} />
       <HubMemberFolder
         hubActive={hubActive}
         hubSection={hubSection}
         location={location}
-        unreadCount={unreadCount}
         onClose={onClose}
-        openSheet={openSheet}
       />
       {isAdmin && (
         <HubAdminFolder
@@ -205,16 +216,12 @@ function HubMemberFolder({
   hubActive,
   hubSection,
   location,
-  unreadCount,
   onClose,
-  openSheet,
 }: {
   hubActive: boolean;
   hubSection: ReturnType<typeof parseHubSection> | undefined;
   location: string;
-  unreadCount: number;
   onClose: () => void;
-  openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner"; threadId?: string | null }) => void;
 }) {
   const [open, setOpen] = useState(true);
   const profileEditorOpen = location.startsWith("/dashboard") && new URLSearchParams(window.location.search).get("edit") === "profile";
@@ -246,15 +253,6 @@ function HubMemberFolder({
               <span>{label}</span>
             </Link>
           ))}
-          <button
-            type="button"
-            role="menuitem"
-            className={`site-profile-menu__item hub-member-folder__child${location === "/inbox" || location.startsWith("/inbox?") ? " active" : ""}`}
-            onClick={() => { onClose(); openSheet(); }}
-          >
-            <Inbox size={16} strokeWidth={2} aria-hidden />
-            <span>Messages{unreadCount > 0 ? ` (${unreadCount})` : ""}</span>
-          </button>
         </div>
       )}
     </div>
@@ -270,6 +268,7 @@ function ProfileMenu({
   profileActive,
   hubActive,
   unreadCount,
+  adminPending,
   location,
   openSheet,
   logout,
@@ -286,6 +285,7 @@ function ProfileMenu({
   profileActive: boolean;
   hubActive: boolean;
   unreadCount: number;
+  adminPending: number;
   location: string;
   openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner"; threadId?: string | null }) => void;
   logout: () => Promise<void>;
@@ -348,6 +348,7 @@ function ProfileMenu({
           profileActive={profileActive}
           hubActive={hubActive}
           unreadCount={unreadCount}
+          adminPending={adminPending}
           location={location}
           onClose={closeAll}
           openSheet={openSheet}
@@ -384,26 +385,23 @@ function notifyHeadline(row: ApiMessageRow): string {
   return label ? `${tag}: ${label.toUpperCase()}` : tag;
 }
 
-/**
- * Notifications bolt with its pending count, plus the panel behind it. Sits in
- * the mobile top bar and in the desktop right cluster, so it is not "mobile"
- * anything - the class names stay for the styles that already target them.
- */
 function NotifyMenu({
   unreadCount,
   adminPending,
   openSheet,
-  onCloseOthers,
-  compact = false,
+  onClose,
 }: {
   unreadCount: number;
   adminPending: number;
   openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner"; threadId?: string | null }) => void;
-  onCloseOthers: () => void;
-  compact?: boolean;
+  onClose: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
+  const [error, setError] = useState("");
+  const swipe = useRef<{ id: number; x: number; y: number } | null>(null);
+  const suppressClick = useRef(false);
+  const queryClient = useQueryClient();
   const alertTotal = unreadCount + adminPending;
 
   const { data: inbox = [], isLoading } = useQuery<ApiMessageRow[]>({
@@ -424,82 +422,76 @@ function NotifyMenu({
     [inbox],
   );
 
-  useEffect(() => {
-    if (!open) return;
-
-    const onPointerDown = (event: MouseEvent) => {
-      if (!ref.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
-
-  const close = () => setOpen(false);
+  const remove = async (id: number) => {
+    if (deleting !== null) return;
+    setDeleting(id);
+    setError("");
+    try {
+      const response = await fetch(`/api/messages/${id}/inbox`, { method: "DELETE", credentials: "include" });
+      if (!response.ok) throw new Error("Could not delete notification.");
+      queryClient.setQueryData<ApiMessageRow[]>(["/api/messages/inbox"], previous => previous?.filter(row => row.id !== id));
+      await queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
+    } catch {
+      setError("Could not delete notification. Try again.");
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   return (
-    <div className={`site-mobile-notify${open ? " open" : ""}`} ref={ref}>
+    <div className="hub-member-folder site-profile-notify">
       <button
         type="button"
-        className={compact ? `znav-control pdx-glass-rebind${open ? " is-open" : ""}` : `hub-notify-btn site-mobile-notify__bolt${alertTotal > 0 ? " site-mobile-notify--alert" : ""}`}
-        data-accent={compact ? "magenta" : undefined}
+        className="site-profile-menu__item hub-member-folder__toggle"
         aria-expanded={open}
-        aria-haspopup="dialog"
-        aria-label={
-          alertTotal > 0
-            ? `Notifications, ${alertTotal} pending`
-            : "Notifications"
-        }
-        onClick={() => {
-          onCloseOthers();
-          dismissMobileNavOverlays("notify");
-          setOpen(v => !v);
-        }}
+        aria-controls="profile-notification-sections"
+        onClick={() => setOpen(value => !value)}
       >
-        <ButtonGlassOptics />
-        {compact ? <><span className="znav-icon-row znav-notification-icon"><Zap size={20} strokeWidth={1.8} aria-hidden="true" />{alertTotal > 0 && <span className="znav-hub-badge">{alertTotal}</span>}</span><span className="znav-caption" aria-hidden="true">Notifications</span></> : <><Zap size={17} strokeWidth={2.4} aria-hidden="true" />{alertTotal > 0 && <span className="hub-notify-btn__badge">{alertTotal}</span>}</>}
+        <span>Notifications{alertTotal > 0 ? ` (${alertTotal})` : ""}</span>
+        <ChevronDown size={14} strokeWidth={2.4} aria-hidden style={{ transform: open ? "rotate(180deg)" : "none" }} />
       </button>
       {open && (
-        <div className="site-mobile-notify__panel pdx-liquid-overlay" role="dialog" aria-label="Notifications">
-          <div className="site-mobile-notify__head">Notifications</div>
+        <div id="profile-notification-sections" className="hub-member-folder__children site-profile-notify__children" role="group" aria-label="Notifications">
           <div className="site-mobile-notify__list">
             {isLoading && <p className="site-mobile-notify__empty">Loading…</p>}
             {!isLoading && notifications.length === 0 && (
-              <p className="site-mobile-notify__empty">No messages yet.</p>
+              <p className="site-mobile-notify__empty">No notifications yet.</p>
             )}
+            {error && <p className="site-profile-notify__error" role="alert">{error}</p>}
             {notifications.map(row => {
               const unread = !(row.isRead ?? row.is_read);
               const subject = row.subject?.trim() || "New message";
               return (
-                <button
-                  key={row.id}
-                  type="button"
-                  className={`site-mobile-notify__row${unread ? " is-unread" : ""}`}
-                  onClick={() => {
-                    close();
-                    openSheet({ view: "inbox", account: "personal", threadId: row.threadId ?? row.thread_id ?? null });
-                  }}
-                >
-                  {unread && <span className="site-mobile-notify__dot" aria-hidden="true" />}
-                  <span className="site-mobile-notify__row-top">
-                    <span className="site-mobile-notify__sender">{senderLabel(row)}</span>
-                    <span className="site-mobile-notify__time">
-                      {formatNotifyTime(row.createdAt || row.created_at)}
+                <div key={row.id} className="site-profile-notify__entry" onPointerDown={event => {
+                  if (event.pointerType === "touch") swipe.current = { id: row.id, x: event.clientX, y: event.clientY };
+                }} onPointerUp={event => {
+                  const start = swipe.current;
+                  swipe.current = null;
+                  if (start?.id === row.id && start.x - event.clientX > 85 && Math.abs(start.y - event.clientY) < 65) {
+                    suppressClick.current = true;
+                    window.setTimeout(() => { suppressClick.current = false; }, 250);
+                    void remove(row.id);
+                  }
+                }} onPointerCancel={() => { swipe.current = null; }}>
+                  <button
+                    type="button"
+                    className={`site-mobile-notify__row${unread ? " is-unread" : ""}`}
+                    onClick={() => {
+                      if (suppressClick.current) { suppressClick.current = false; return; }
+                      onClose();
+                      openSheet({ view: "inbox", account: "personal", threadId: row.threadId ?? row.thread_id ?? null });
+                    }}
+                  >
+                    {unread && <span className="site-mobile-notify__dot" aria-hidden="true" />}
+                    <span className="site-mobile-notify__row-top">
+                      <span className="site-mobile-notify__sender">{senderLabel(row)}</span>
+                      <span className="site-mobile-notify__time">{formatNotifyTime(row.createdAt || row.created_at)}</span>
                     </span>
-                  </span>
-                  <span className="site-mobile-notify__tag">{notifyHeadline(row)}</span>
-                  <span className="site-mobile-notify__subject">{subject}</span>
-                </button>
+                    <span className="site-mobile-notify__tag">{notifyHeadline(row)}</span>
+                    <span className="site-mobile-notify__subject">{subject}</span>
+                  </button>
+                  <button type="button" className="site-profile-notify__delete" aria-label={`Delete notification from ${senderLabel(row)}`} disabled={deleting !== null} onClick={() => void remove(row.id)}><Trash2 size={16} aria-hidden="true" /></button>
+                </div>
               );
             })}
           </div>
@@ -509,7 +501,7 @@ function NotifyMenu({
                 type="button"
                 className="site-mobile-notify__foot-btn"
                 onClick={() => {
-                  close();
+                  onClose();
                   openSheet({ view: "inbox", account: "admin" });
                 }}
               >
@@ -519,7 +511,7 @@ function NotifyMenu({
             <Link
               href="/dashboard?section=settings"
               className="site-mobile-notify__foot-btn"
-              onClick={close}
+              onClick={onClose}
             >
               Notification settings
             </Link>
@@ -728,18 +720,6 @@ export default function Nav() {
                 }}
               />
             )}
-            {user && (
-              <NotifyMenu
-                compact
-                unreadCount={unreadCount}
-                adminPending={adminPending}
-                openSheet={openSheet}
-                onCloseOthers={() => {
-                  setMobileProfileOpen(false);
-                  dismissMobileNavOverlays("notify");
-                }}
-              />
-            )}
             {authLoading && !user ? (
               <span className="hub-mtop__mode-btn" role="status" aria-label="Checking your session">…</span>
             ) : user ? (
@@ -752,6 +732,7 @@ export default function Nav() {
                 profileActive={profileActive}
                 hubActive={hubActive}
                 unreadCount={unreadCount}
+                adminPending={adminPending}
                 location={location}
                 openSheet={openSheet}
                 logout={logout}
@@ -798,17 +779,6 @@ export default function Nav() {
 
             {(user || localDemo) && (
               <div className="site-auth site-auth--desktop">
-                {user && (
-                  <NotifyMenu
-                    unreadCount={unreadCount}
-                    adminPending={adminPending}
-                    openSheet={openSheet}
-                    onCloseOthers={() => {
-                      setProfileOpen(false);
-                      dismissMobileNavOverlays("notify");
-                    }}
-                  />
-                )}
                 <span className="site-auth__hub">
                   <CompactHubLink textOnly active={hubActive} unreadCount={unreadCount} onNavigate={closeMenu} />
                 </span>
@@ -823,6 +793,7 @@ export default function Nav() {
                   profileActive={profileActive}
                   hubActive={hubActive}
                   unreadCount={unreadCount}
+                  adminPending={adminPending}
                   location={location}
                   openSheet={openSheet}
                   logout={logout}

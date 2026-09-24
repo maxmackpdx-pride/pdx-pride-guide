@@ -9919,6 +9919,7 @@ export interface IStorage {
   markReadForUser(messageId: number, userId: number): boolean;
   getThread(threadId: string): Message[];
   softDeleteThread(threadId: string, userId: number): number;
+  softDeleteInboxMessage(messageId: number, userId: number): boolean;
   softDeleteTalentRequestThreads(talentId: number, userId: number): void;
   clearInboxFolder(userId: number, folder: "inbox" | "sent" | "all"): number;
   // Missed connections
@@ -13507,6 +13508,10 @@ export const storage: IStorage = {
     const from = sqlite.prepare(`UPDATE messages SET deleted_by_from = 1 WHERE thread_id = ? AND from_user_id = ? AND deleted_by_from = 0`).run(tid, userId);
     const to = sqlite.prepare(`UPDATE messages SET deleted_by_to = 1 WHERE thread_id = ? AND to_user_id = ? AND deleted_by_to = 0`).run(tid, userId);
     return (from.changes || 0) + (to.changes || 0);
+  },
+  softDeleteInboxMessage(messageId, userId) {
+    return sqlite.prepare(`UPDATE messages SET deleted_by_to = 1 WHERE id = ? AND to_user_id = ? AND deleted_by_to = 0`)
+      .run(messageId, userId).changes > 0;
   },
   softDeleteTalentRequestThreads(talentId, userId) {
     sqlite.prepare(`

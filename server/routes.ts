@@ -4996,6 +4996,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
+  app.delete("/api/messages/:id/inbox", requireAuth, (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id) || id <= 0) return res.status(400).json({ error: "Invalid message id" });
+    if (!storage.softDeleteInboxMessage(id, req.session.userId!)) return res.status(404).json({ error: "Message not found" });
+    res.json({ ok: true });
+  });
+
   // Long-press DM reactions: 👍 👎 😂 😢 ❤️ 💔 GAY!
   app.post("/api/messages/:id/reactions", requireAuth, (req: any, res) => {
     const messageId = Number(req.params.id);
