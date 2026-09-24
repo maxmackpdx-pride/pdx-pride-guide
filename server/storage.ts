@@ -8050,6 +8050,26 @@ function runBootMigrationsOnce() {
     sqlite.prepare(`UPDATE businesses SET type = 'service', description = 'Queer-owned preparedness and resilience education with workshops, resources, and community programs in Portland and online.' WHERE name = 'MakeWithPDX' AND description = 'Queer-owned DIY education and maker space.'`).run();
     recordBootMigration("placez_public_addresses_2026_09_v1");
   }
+
+  // Retire the specific Gigz post requested by its owner and the older,
+  // unclaimed admin listing. Keep the current Zaylist admin post intact.
+  if (!hasBootMigration("retire_gigz_post_6_and_legacy_admin_2026_09_v1")) {
+    ensureGigPostsSchema();
+    sqlite.prepare(`
+      UPDATE gig_posts SET status = 'REMOVED'
+      WHERE id = 6 AND post_type = 'LOOKING_FOR_WORK'
+        AND title = 'anything' AND name = 'brett'
+        AND created_at = '2026-07-13T19:15:16.892Z'
+        AND EXISTS (SELECT 1 FROM users WHERE users.id = gig_posts.user_id AND users.username = 'bwc02')
+    `).run();
+    sqlite.prepare(`
+      UPDATE gig_posts SET status = 'REMOVED'
+      WHERE id = 2 AND title = 'Site Admins Needed: PDX Pride Guide'
+        AND description LIKE 'PDX Pride Guide is looking for site admins%'
+        AND user_id IS NULL
+    `).run();
+    recordBootMigration("retire_gigz_post_6_and_legacy_admin_2026_09_v1");
+  }
 }
 
 function parseEnvAdminLists() {
