@@ -33,7 +33,7 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
       <label>Neighborhood<input value={get("area")} onChange={e=>set("area",e.target.value)} placeholder="All neighborhoods" /></label>
       {world === "places" ? <label><input type="checkbox" checked={get("owned")==="1"} onChange={e=>set("owned",e.target.checked?"1":"")}/> Queer owned</label> : select("view","Show",[["","All posts"],["mine","My posts"],...(world==="sellz"?[["saved","Saved"] as [string,string]]:[])])}
       {world === "gigz" && <>{select("type","Post type",[["","Gigs and talent"],["POSTING_GIG","Hiring"],["LOOKING_FOR_WORK","Available talent"]])}<label><input type="checkbox" checked={get("remote")==="1"} onChange={e=>set("remote",e.target.checked?"1":"")}/> Remote friendly</label></>}
-      {world === "mizzed" && select("type","Where",[["","Everywhere"],["EVENT","At an event"],["TOWN","Around town"],["ROOSTER","Rooster Rock"],["SAUVIE","Sauvie Island"]])}
+      {world === "mizzed" && select("type","Where",[["","Everywhere"],["EVENT","Events"],["PLACEZ","Placez"],["TOWN","Around town"],["ROOSTER","Rooster Rock"],["SAUVIE","Sauvie Island"]])}
       {world === "giftz" && select("type","Post type",[["","Gifts and requests"],["GIFT","Gift"],["ISO","In search of"],["GRAB","Open grab"]])}
       {(world === "giftz" || world === "sellz") && select("category","Category",[["","All categories"],...categories.map(value=>[value,value] as [string,string])])}
       {world === "sellz" && <>{select("condition","Condition",[["","Any condition"],...["New","Like new","Good","Fair","For parts"].map(value=>[value,value] as [string,string])])}{select("price","Price",[["","Any price"],["UNDER25","Under $25"],["25TO100","$25 to $100"],["OVER100","Over $100"]])}</>}

@@ -657,7 +657,7 @@ export default function ZaydarMapDemo() {
   const layers: ZaydarLayer[] = [
     { id: "events", label: "Eventz", color: "#FF00CC", enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
     { id:"places",label:"Placez",color:"#00FFFF",enabled:showPlaces,onToggle:()=>toggleLayer("hidePlaces"),panel:worldPanels.places,viewMore:[] },
-    { id:"mizzed",label:"Mizzed",color:"#FF00CC",enabled:showMizzed,onToggle:()=>toggleLayer("hideMizzed"),panel:worldPanels.mizzed,viewMore:[] },
+    { id:"mizzed",label:"Mizzed",color:"#FF00CC",enabled:showMizzed,onToggle:()=>toggleLayer("hideMizzed"),panel:worldPanels.mizzed,viewMore:[{label:"Browse all Mizzed",href:"/spotted"}] },
     { id:"gigz",label:"Gigz",color:"#8800FF",enabled:showGigz,onToggle:()=>toggleLayer("hideGigz"),panel:worldPanels.gigz,viewMore:[{label:"Browse all Gigz",href:"/pride-work"}] },
     { id:"giftz",label:"Giftz",color:"#CCFF00",enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[{label:"Browse all Giftz",href:"/gifting"}] },
     { id:"sellz",label:"Sellz",color:"#39FF14",enabled:showSellz,onToggle:()=>toggleLayer("hideSellz"),panel:worldPanels.sellz,viewMore:[{label:"Browse all Sellz",href:"/sellz"}] },

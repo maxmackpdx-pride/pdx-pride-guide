@@ -72,7 +72,7 @@ const Admin = lazyWithReload(() => import("./pages/Admin"));
 const Dashboard = lazyWithReload(() => import("./pages/Dashboard"));
 const NotificationSettings = lazyWithReload(() => import("./pages/NotificationSettings"));
 const Inbox = lazyWithReload(() => import("./pages/Inbox"));
-const MissedConnections = lazyWithReload(() => import("./pages/MissedConnections"));
+const MizzedBoard = lazyWithReload(() => import("./pages/MizzedBoard"));
 const Directory = lazyWithReload(() => import("./pages/Directory"));
 const RoosterRock = lazyWithReload(() => import("./pages/RoosterRock"));
 const SauvieIsland = lazyWithReload(() => import("./pages/SauvieIsland"));
@@ -184,8 +184,8 @@ function AppLayout() {
             <Route path="/settings/notifications" component={NotificationSettings} />
             <Route path="/reset-password" component={ResetPassword} />
             <Route path="/inbox" component={Inbox} />
-            <Route path="/spotted/new">{() => <MapWorldRedirect world="mizzed" />}</Route>
-            <Route path="/spotted">{() => <MapWorldRedirect world="mizzed" />}</Route>
+            <Route path="/spotted/new" component={MizzedBoard} />
+            <Route path="/spotted" component={MizzedBoard} />
             <Route path="/directory/new">{() => <MapWorldRedirect world="places" />}</Route>
             <Route path="/directory/:id/:slug?">{params => <MapWorldRedirect world="places" recordId={params.id} />}</Route>
 

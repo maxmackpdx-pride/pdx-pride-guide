@@ -25,6 +25,7 @@ export type SpottedDetailModalProps = {
   kindColor: string;
   isMine?: boolean;
   status?: string;
+  source?: { label: string; title: string; image: string | null; href: string; note: string } | null;
   onClose: () => void;
 };
 
@@ -40,6 +41,7 @@ export default function SpottedDetailModal({
   onClose,
   isMine = false,
   status = "ACTIVE",
+  source,
 }: SpottedDetailModalProps) {
   const { toast } = useToast();
   const [replyBody, setReplyBody] = useState("");
@@ -113,6 +115,7 @@ export default function SpottedDetailModal({
         <p className="board-copy-sm board-detail-modal__body" style={{ position: "relative", zIndex: 1 }}>
           {body}
         </p>
+        {source && <div className="mizzed-source-link"><span>FROM THE {source.label.toUpperCase()} CARD</span><div>{source.image && <img src={source.image} alt="" />}<div><strong>{source.title}</strong><small>{source.note}</small><a href={source.href}>Open source card ↗</a></div></div></div>}
         {isMine ? <div className="board-detail-modal__actions" style={{position:"relative",zIndex:1}}>
           {editing ? <form onSubmit={e=>{e.preventDefault();ownerMutation.mutate({method:"PUT",data:{title:editTitle,body:editBody}});}}><label>Title<input className="board-text-field" maxLength={80} value={editTitle} onChange={e=>setEditTitle(e.target.value)}/></label><label>Message<textarea className="board-text-field" maxLength={500} rows={5} required value={editBody} onChange={e=>setEditBody(e.target.value)}/></label><Button type="submit" disabled={ownerMutation.isPending||!editBody.trim()}>Save changes</Button><Button type="button" onClick={()=>setEditing(false)}>Cancel</Button></form> : <Button onClick={()=>setEditing(true)}>Edit connection</Button>}
           {status==="ACTIVE" && <Button disabled={ownerMutation.isPending} onClick={()=>ownerMutation.mutate({method:"PUT",data:{status:"ARCHIVED"}})}>Close connection</Button>}

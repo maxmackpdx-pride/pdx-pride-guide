@@ -520,6 +520,7 @@ export const missedConnections = sqliteTable("missed_connections", {
   userId: integer("user_id").notNull(),
   eventId: integer("event_id"),
   beachId: text("beach_id"),
+  placeId: integer("place_id"),
   title: text("title").notNull(),
   body: text("body").notNull(),
   dayOfWeek: text("day_of_week"),

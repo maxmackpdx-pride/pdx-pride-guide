@@ -4369,19 +4369,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
     try {
       const rawEventId = req.body.eventId;
       const rawBeachId = req.body.beachId;
+      const rawPlaceId = req.body.placeId;
       const hasEvent = rawEventId !== undefined && rawEventId !== null && rawEventId !== "";
       const hasBeach = rawBeachId !== undefined && rawBeachId !== null && rawBeachId !== "";
+      const hasPlace = rawPlaceId !== undefined && rawPlaceId !== null && rawPlaceId !== "";
       const eventId = hasEvent ? Number(rawEventId) : null;
       const beachId = hasBeach ? String(rawBeachId) : null;
+      const placeId = hasPlace ? Number(rawPlaceId) : null;
 
-      if (hasEvent && hasBeach) {
-        return res.status(400).json({ error: "Link to an event or a beach, not both" });
+      if (Number(hasEvent) + Number(hasBeach) + Number(hasPlace) > 1) {
+        return res.status(400).json({ error: "Choose one source card" });
       }
       if (hasEvent && !Number.isFinite(eventId)) {
         return res.status(400).json({ error: "Invalid event" });
       }
       if (hasBeach && !isValidBeachId(beachId)) {
         return res.status(400).json({ error: "Invalid beach" });
+      }
+      if (hasPlace && (!Number.isSafeInteger(placeId) || placeId! <= 0)) {
+        return res.status(400).json({ error: "Invalid Placez card" });
       }
 
       if (moderationGate(res, "MIZZED CONNECTION", {
@@ -4403,6 +4409,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
           userId: req.session.userId!,
           eventId: null,
           beachId,
+          placeId: null,
           dayOfWeek: pacificDayOfWeek(),
           venueHint: beachVenueLabel(beachId as "rooster-rock" | "sauvie-island"),
           closesAt: generalSpottedClosesAt(),
@@ -4419,11 +4426,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
           ...req.body,
           userId: req.session.userId!,
           eventId,
+          placeId: null,
+          beachId: null,
           dayOfWeek: evt.dayOfWeek,
           venueHint: evt.venueName,
           closesAt: window.closesAt || missedConnectionClosesAt(evt.dateStart, evt.dateEnd),
         };
         eventMeta = { title: evt.title, venueName: evt.venueName, dayOfWeek: evt.dayOfWeek || "" };
+      } else if (placeId != null) {
+        const place = storage.getBusiness(placeId);
+        if (!place || !place.active) return res.status(400).json({ error: "Placez card unavailable" });
+        payload = {
+          ...req.body,
+          userId: req.session.userId!,
+          eventId: null,
+          beachId: null,
+          placeId,
+          dayOfWeek: pacificDayOfWeek(),
+          venueHint: place.name,
+          closesAt: generalSpottedClosesAt(),
+        };
       } else {
         const customLabel = String(req.body.eventLabel || "").trim();
         const venueHint = formatCustomSpottedVenue(
@@ -4434,6 +4456,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
           ...req.body,
           userId: req.session.userId!,
           eventId: null,
+          beachId: null,
+          placeId: null,
           dayOfWeek: pacificDayOfWeek(),
           venueHint,
           closesAt: generalSpottedClosesAt(),

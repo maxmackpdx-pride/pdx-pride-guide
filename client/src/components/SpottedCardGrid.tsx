@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -11,10 +11,11 @@ import SpottedCard, { spottedKind, spottedPlace } from "./SpottedCard";
 import SpottedDetailModal from "./SpottedDetailModal";
 import { Button } from "@/components/ds";
 import type { LinkableMissedConnectionEvent, MissedConnectionPost } from "./MissedConnectionsPanel";
+import { placezStockImage } from "@/lib/mizzedSource";
 
 const AROUND_TOWN_KEY = "around" as const;
 const CUSTOM_SPOT_KEY = "custom" as const;
-type SpotMode = typeof AROUND_TOWN_KEY | typeof CUSTOM_SPOT_KEY | "event";
+type SpotMode = typeof AROUND_TOWN_KEY | typeof CUSTOM_SPOT_KEY | "event" | "placez" | "outzide";
 type BoardFilter = "ALL" | "EVENT" | "TOWN" | "ROOSTER" | "SAUVIE";
 
 function deriveTitle(title: string, body: string): string {
@@ -263,10 +264,13 @@ export default function SpottedCardGrid({
   );
 }
 
-export function MizzedComposer({linkableEvents, onPosted}: {linkableEvents: LinkableMissedConnectionEvent[]; onPosted: (id: number) => void}) {
+export function MizzedComposer({linkableEvents, onPosted, initialSource}: {linkableEvents: LinkableMissedConnectionEvent[]; onPosted: (id: number) => void; initialSource?: {eventId?:string;placeId?:string;beachId?:string}}) {
   const {toast} = useToast();
-  const [spotMode, setSpotMode] = useState<SpotMode>(AROUND_TOWN_KEY);
-  const [draftEventId, setDraftEventId] = useState("");
+  const {data: places = []} = useQuery<Array<{id:number;name:string;type:string;active?:boolean}>>({queryKey:["/api/directory","mizzed-places"],queryFn:async()=>{const response=await fetch("/api/directory",{credentials:"include"});if(!response.ok)throw new Error("Could not load Placez");return response.json();}});
+  const [spotMode, setSpotMode] = useState<SpotMode>(initialSource?.eventId ? "event" : initialSource?.placeId ? "placez" : initialSource?.beachId ? "outzide" : AROUND_TOWN_KEY);
+  const [draftEventId, setDraftEventId] = useState(initialSource?.eventId || "");
+  const [draftPlaceId, setDraftPlaceId] = useState(initialSource?.placeId || "");
+  const [draftBeachId, setDraftBeachId] = useState(initialSource?.beachId || "");
   const [draftTitle, setDraftTitle] = useState("");
   const [draftBody, setDraftBody] = useState("");
   const [draftVenueHint, setDraftVenueHint] = useState("");
@@ -283,13 +287,17 @@ export function MizzedComposer({linkableEvents, onPosted}: {linkableEvents: Link
   const canSubmit = useMemo(() => {
     if (!draftBody.trim() || !acceptRules) return false;
     if (spotMode === "event") return !!draftEventId;
+    if (spotMode === "placez") return !!draftPlaceId;
+    if (spotMode === "outzide") return !!draftBeachId;
     if (spotMode === CUSTOM_SPOT_KEY) return !!draftCustomEventName.trim() || !!draftCustomLocation.trim();
     return true;
-  }, [draftBody, acceptRules, spotMode, draftEventId, draftCustomEventName, draftCustomLocation]);
+  }, [draftBody, acceptRules, spotMode, draftEventId, draftPlaceId, draftBeachId, draftCustomEventName, draftCustomLocation]);
 
   const resetDraftSpotFields = (mode: SpotMode) => {
     setSpotMode(mode);
     if (mode !== "event") setDraftEventId("");
+    if (mode !== "placez") setDraftPlaceId("");
+    if (mode !== "outzide") setDraftBeachId("");
     if (mode !== CUSTOM_SPOT_KEY) { setDraftCustomEventName(""); setDraftCustomLocation(""); }
     if (mode !== AROUND_TOWN_KEY) setDraftVenueHint("");
   };
@@ -302,6 +310,8 @@ export function MizzedComposer({linkableEvents, onPosted}: {linkableEvents: Link
         scope: "board",
       };
       if (spotMode === "event") payload.eventId = Number(draftEventId);
+      else if (spotMode === "placez") payload.placeId = Number(draftPlaceId);
+      else if (spotMode === "outzide") payload.beachId = draftBeachId;
       else if (spotMode === CUSTOM_SPOT_KEY) {
         payload.eventLabel = draftCustomEventName.trim();
         payload.venueHint = draftCustomLocation.trim();
@@ -319,7 +329,7 @@ export function MizzedComposer({linkableEvents, onPosted}: {linkableEvents: Link
     },
     onSuccess: (data) => {
       setDraftTitle(""); setDraftBody(""); setDraftVenueHint("");
-      setDraftCustomEventName(""); setDraftCustomLocation(""); setDraftEventId("");
+      setDraftCustomEventName(""); setDraftCustomLocation(""); setDraftEventId(""); setDraftPlaceId(""); setDraftBeachId("");
       setSpotMode(AROUND_TOWN_KEY);
       setAcceptRules(false);
       onPosted(data.id);
@@ -344,6 +354,9 @@ export function MizzedComposer({linkableEvents, onPosted}: {linkableEvents: Link
     );
   };
 
+  const chosenEvent = linkableEvents.find(evt => String(evt.id) === draftEventId);
+  const chosenPlace = places.find(place => String(place.id) === draftPlaceId);
+  const sourceArt = spotMode === "event" ? chosenEvent?.posterImageUrl : spotMode === "placez" && chosenPlace ? placezStockImage(chosenPlace.type) : spotMode === "outzide" && draftBeachId ? `/outzide-map/assets/motifs/places/${draftBeachId}.svg` : null;
   const composeFields = (
     <>
       <div className="gifting-form-grid">
@@ -351,11 +364,14 @@ export function MizzedComposer({linkableEvents, onPosted}: {linkableEvents: Link
           Where did you see them
           <select
             className="board-text-field"
-            value={spotMode === "event" ? "EVENT" : spotMode === AROUND_TOWN_KEY ? "TOWN" : "TOWN"}
-            onChange={e => resetDraftSpotFields(e.target.value === "EVENT" ? "event" : AROUND_TOWN_KEY)}
+            value={spotMode}
+            onChange={e => resetDraftSpotFields(e.target.value as SpotMode)}
           >
-            <option value="EVENT">At a Pride event</option>
-            <option value="TOWN">Around town</option>
+            <option value="event">Events</option>
+            <option value="placez">Placez</option>
+            <option value="outzide">OutZide</option>
+            <option value="custom">That one spot by the…</option>
+            <option value="around">Around town</option>
           </select>
         </label>
         {spotMode === "event" ? (
@@ -368,7 +384,10 @@ export function MizzedComposer({linkableEvents, onPosted}: {linkableEvents: Link
               {renderEventOptions(groupedEvents.past, "Past events")}
             </select>
           </label>
-        ) : (
+        ) : spotMode === "placez" ? <label>Which Placez card<select className="board-text-field" value={draftPlaceId} onChange={e=>setDraftPlaceId(e.target.value)}><option value="">Choose a Placez card…</option>{places.filter(place=>place.active!==false).map(place=><option key={place.id} value={place.id}>{place.name}</option>)}</select></label>
+        : spotMode === "outzide" ? <label>Which OutZide destination<select className="board-text-field" value={draftBeachId} onChange={e=>setDraftBeachId(e.target.value)}><option value="">Choose a destination…</option><option value="rooster-rock">Rooster Rock</option><option value="sauvie-island">Sauvie Island</option></select></label>
+        : spotMode === "custom" ? <label>Name that spot<input className="board-text-field" maxLength={80} value={draftCustomLocation} onChange={e=>setDraftCustomLocation(e.target.value)} placeholder="The corner, the train stop, the place by…" /></label>
+        : (
           <label>
             Where around town (optional)
             <input
@@ -380,6 +399,7 @@ export function MizzedComposer({linkableEvents, onPosted}: {linkableEvents: Link
             />
           </label>
         )}
+        {sourceArt && <div className="mizzed-compose-art span"><img src={sourceArt} alt=""/><span>{spotMode === "placez" ? "Portland stock photo. Venue logo stays off your post." : spotMode === "event" ? "This Eventz flyer appears on your post." : "OutZide destination artwork appears on your post."}</span></div>}
         <label className="span">
           Title
           <input

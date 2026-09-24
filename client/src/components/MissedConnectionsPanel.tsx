@@ -21,6 +21,10 @@ export type MissedConnectionPost = {
   venueHint?: string | null;
   eventId?: number | null;
   beachId?: string | null;
+  placeId?: number | null;
+  placeName?: string | null;
+  placeType?: string | null;
+  eventPosterUrl?: string | null;
   eventTitle?: string | null;
   eventVenue?: string | null;
   eventDay?: string | null;
@@ -32,7 +36,7 @@ export type MissedConnectionPost = {
   isDemo?: boolean;
 };
 
-export type LinkableMissedConnectionEvent = Pick<Event, "id" | "title" | "venueName" | "dayOfWeek" | "dateStart" | "dateEnd"> & {
+export type LinkableMissedConnectionEvent = Pick<Event, "id" | "title" | "venueName" | "dayOfWeek" | "dateStart" | "dateEnd" | "posterImageUrl"> & {
   postable?: boolean;
   timing?: "upcoming" | "live" | "past";
 };

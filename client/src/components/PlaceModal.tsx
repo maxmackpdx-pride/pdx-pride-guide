@@ -1140,6 +1140,7 @@ export default function PlaceModal({
                 </div>
               )
             )}
+            {tab === "missed" && <Link href={`/spotted/new?place=${place.id}`} onClick={onClose} style={{ ...linkStyle, marginTop: 12 }}>Post a connection from this Placez card →</Link>}
 
             {tab === "gigs" && (
               gigs.length === 0 ? (

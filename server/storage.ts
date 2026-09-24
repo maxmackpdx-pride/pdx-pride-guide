@@ -1444,6 +1444,7 @@ function ensureMissedConnectionsSchema() {
     if (!names.has("admin_notes")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN admin_notes TEXT`);
     if (!names.has("admin_reviewed")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN admin_reviewed INTEGER DEFAULT 0`);
     if (!names.has("beach_id")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN beach_id TEXT`);
+    if (!names.has("place_id")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN place_id INTEGER`);
     // Spotted is public without approval - mark existing live posts reviewed so nothing sits in a fake queue.
     try {
       sqlite.exec(`UPDATE missed_connections SET admin_reviewed = 1 WHERE status = 'ACTIVE' AND (admin_reviewed IS NULL OR admin_reviewed = 0)`);
@@ -1463,6 +1464,7 @@ function ensureMissedConnectionsSchema() {
     `);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS missed_conn_event_idx ON missed_connections(event_id)`);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS missed_conn_beach_idx ON missed_connections(beach_id)`);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS missed_conn_place_idx ON missed_connections(place_id)`);
     sqlite.exec(`
       UPDATE missed_connections
       SET closes_at = datetime(created_at, '+7 days')
@@ -13495,6 +13497,7 @@ export const storage: IStorage = {
         dayOfWeek: evt.dayOfWeek,
         dateStart: evt.dateStart,
         dateEnd: evt.dateEnd,
+        posterImageUrl: evt.posterImageUrl,
         postable: isMissedConnectionPostable(evt.dateStart, evt.dateEnd).ok,
         timing: getEventTiming(evt.dateStart, evt.dateEnd),
       }))
@@ -13515,6 +13518,9 @@ export const storage: IStorage = {
         m.venue_hint AS venueHint,
         m.event_id AS eventId,
         m.beach_id AS beachId,
+        m.place_id AS placeId,
+        (SELECT name FROM businesses WHERE id = m.place_id AND active = 1) AS placeName,
+        (SELECT type FROM businesses WHERE id = m.place_id AND active = 1) AS placeType,
         m.status,
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
@@ -13522,6 +13528,7 @@ export const storage: IStorage = {
         CASE WHEN e.status = 'LIVE' THEN e.lat END AS eventLat,
         CASE WHEN e.status = 'LIVE' THEN e.lng END AS eventLng,
         e.title AS eventTitle,
+        e.poster_image_url AS eventPosterUrl,
         e.venue_name AS eventVenue,
         e.address AS eventAddress,
         e.day_of_week AS eventDay,
@@ -13544,6 +13551,9 @@ export const storage: IStorage = {
         m.venue_hint AS venueHint,
         m.event_id AS eventId,
         m.beach_id AS beachId,
+        m.place_id AS placeId,
+        (SELECT name FROM businesses WHERE id = m.place_id AND active = 1) AS placeName,
+        (SELECT type FROM businesses WHERE id = m.place_id AND active = 1) AS placeType,
         m.status,
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
@@ -13551,6 +13561,7 @@ export const storage: IStorage = {
         CASE WHEN e.status = 'LIVE' THEN e.lat END AS eventLat,
         CASE WHEN e.status = 'LIVE' THEN e.lng END AS eventLng,
         e.title AS eventTitle,
+        e.poster_image_url AS eventPosterUrl,
         e.venue_name AS eventVenue,
         e.address AS eventAddress,
         e.day_of_week AS eventDay,
@@ -13573,6 +13584,9 @@ export const storage: IStorage = {
         m.venue_hint AS venueHint,
         m.event_id AS eventId,
         m.beach_id AS beachId,
+        m.place_id AS placeId,
+        (SELECT name FROM businesses WHERE id = m.place_id AND active = 1) AS placeName,
+        (SELECT type FROM businesses WHERE id = m.place_id AND active = 1) AS placeType,
         m.status,
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
@@ -13580,6 +13594,7 @@ export const storage: IStorage = {
         CASE WHEN e.status = 'LIVE' THEN e.lat END AS eventLat,
         CASE WHEN e.status = 'LIVE' THEN e.lng END AS eventLng,
         e.title AS eventTitle,
+        e.poster_image_url AS eventPosterUrl,
         e.venue_name AS eventVenue,
         e.address AS eventAddress,
         e.day_of_week AS eventDay,
@@ -13602,6 +13617,9 @@ export const storage: IStorage = {
         m.venue_hint AS venueHint,
         m.event_id AS eventId,
         m.beach_id AS beachId,
+        m.place_id AS placeId,
+        (SELECT name FROM businesses WHERE id = m.place_id AND active = 1) AS placeName,
+        (SELECT type FROM businesses WHERE id = m.place_id AND active = 1) AS placeType,
         m.status,
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
@@ -13609,6 +13627,7 @@ export const storage: IStorage = {
         CASE WHEN e.status = 'LIVE' THEN e.lat END AS eventLat,
         CASE WHEN e.status = 'LIVE' THEN e.lng END AS eventLng,
         e.title AS eventTitle,
+        e.poster_image_url AS eventPosterUrl,
         e.venue_name AS eventVenue
       FROM missed_connections m
       LEFT JOIN events e ON e.id = m.event_id

@@ -29,7 +29,7 @@ export function locateWorldRow(row: WorldRow, world: MapWorld, places: WorldRow[
     const eventPoint = mapCoordinates(row.eventLat ?? event?.lat, row.eventLng ?? event?.lng);
     if (eventPoint) return {...row, ...eventPoint, locationLabel: row.eventVenue || event?.venueName || "Event venue"};
     const name = normalizeDirectoryName(String(row.eventVenue || row.venueHint || row.location || ""));
-    const place = places.find(place => (row.businessId && Number(place.id) === Number(row.businessId)) || (name && normalizeDirectoryName(place.name) === name));
+    const place = places.find(place => ((row.placeId || row.businessId) && Number(place.id) === Number(row.placeId || row.businessId)) || (name && normalizeDirectoryName(place.name) === name));
     const venuePoint = place && mapCoordinates(place.lat,place.lng);
     if (venuePoint) return {...row, ...venuePoint, locationLabel:place.name};
   }
@@ -63,7 +63,7 @@ export function filterWorldRows(rows: WorldRow[], world: MapWorld, params: URLSe
       if (type === "GRAB" ? !grab : type && row.postType !== type) return false;
     }
     if (world === "mizzed") {
-      if (type === "EVENT" && !row.eventId || type === "TOWN" && (row.eventId || row.beachId) || type === "ROOSTER" && row.beachId !== "rooster-rock" || type === "SAUVIE" && row.beachId !== "sauvie-island") return false;
+      if (type === "EVENT" && !row.eventId || type === "PLACEZ" && !row.placeId || type === "TOWN" && (row.eventId || row.beachId || row.placeId) || type === "ROOSTER" && row.beachId !== "rooster-rock" || type === "SAUVIE" && row.beachId !== "sauvie-island") return false;
     }
     if (world === "sellz") {
       if (get("condition") && row.condition !== get("condition")) return false;
