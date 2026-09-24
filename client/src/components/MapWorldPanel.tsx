@@ -1,5 +1,6 @@
 import BrowseToolbar from "./BrowseToolbar";
 import BrowseStatus from "./BrowseStatus";
+import BoardFollowButton from "./BoardFollowButton";
 import { useEffect, useState, type ReactNode } from "react";
 import { Plus, ChevronRight } from "lucide-react";
 import { mapCoordinates } from "@/lib/mapCoordinates";
@@ -23,6 +24,7 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
   </button>);
   return <section className="zaydar-layer-panel" aria-label={`${name} in this map`}>
     <div className="zaydar-layer-panel__heading"><small>In this view</small><h2>{name}</h2></div>
+    {(world === "gigz" || world === "giftz") && <BoardFollowButton board={world} />}
     <button type="button" className="zaydar-houz-post" onClick={onCreate}><Plus size={16} aria-hidden="true"/> {world==="places"?"Add a place":`Post to ${name}`}</button>
     <BrowseToolbar label={`Search and filter ${name}`} className="zaydar-world-filters">
       <label>Search {name}<input type="search" value={get("q")} onChange={e=>set("q",e.target.value)} placeholder={`Search ${name}`} /></label>

@@ -952,6 +952,25 @@ sqlite.exec(`
   CREATE INDEX IF NOT EXISTS outz_destination_follows_place_idx
     ON outz_destination_follows(place_id);
 `);
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS board_follows (
+    user_id INTEGER NOT NULL,
+    board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz')),
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, board)
+  );
+`);
+export function isFollowingBoard(userId: number, board: "gigz" | "giftz"): boolean {
+  return !!sqlite.prepare("SELECT 1 FROM board_follows WHERE user_id = ? AND board = ?").get(userId, board);
+}
+export function setBoardFollowing(userId: number, board: "gigz" | "giftz", follow: boolean): void {
+  if (follow) {
+    sqlite.prepare("INSERT OR IGNORE INTO board_follows (user_id, board, created_at) VALUES (?, ?, ?)")
+      .run(userId, board, new Date().toISOString());
+  } else {
+    sqlite.prepare("DELETE FROM board_follows WHERE user_id = ? AND board = ?").run(userId, board);
+  }
+}
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS push_subscriptions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -15446,6 +15465,8 @@ export const storage: IStorage = {
     const tab = parseHubFeedTab(opts.tab);
     const limit = Math.min(Math.max(opts.limit ?? 30, 1), 50);
     const viewerUserId = opts.viewerUserId;
+    const followsGiftz = viewerUserId != null && isFollowingBoard(viewerUserId, "giftz");
+    const followsGigz = viewerUserId != null && isFollowingBoard(viewerUserId, "gigz");
     const viewerIsAdmin = !!opts.viewerIsAdmin;
     const cursor = opts.cursor?.trim() || null;
 
@@ -15601,7 +15622,7 @@ export const storage: IStorage = {
       });
     }
 
-    for (const post of storage.getGiftingPosts({ viewerUserId }).slice(0, 15)) {
+    for (const post of storage.getGiftingPosts({ viewerUserId }).slice(0, followsGiftz ? 100 : 15)) {
       items.push({
         id: `gifting-${post.id}`,
         kind: "gifting",
@@ -15620,6 +15641,7 @@ export const storage: IStorage = {
         // Deep-link opens the free board with this exact post expanded.
         link: `/gifting?post=${post.id}`,
         boardPostId: post.id,
+        viewerFollowsBoard: followsGiftz,
       });
     }
 
@@ -15667,7 +15689,7 @@ export const storage: IStorage = {
       // A board that fails to read must never take the whole feed down.
     }
 
-    for (const gig of storage.getGigPosts("LIVE").slice(0, 12)) {
+    for (const gig of storage.getGigPosts("LIVE").slice(0, followsGigz ? 100 : 12)) {
       if (pinnedGigId != null && gig.id === pinnedGigId) continue;
       items.push({
         id: `gig-${gig.id}`,
@@ -15687,6 +15709,7 @@ export const storage: IStorage = {
         // Deep-link opens GIGZ with this exact post expanded.
         link: `/pride-work?post=${gig.id}`,
         boardPostId: gig.id,
+        viewerFollowsBoard: followsGigz,
       });
     }
 

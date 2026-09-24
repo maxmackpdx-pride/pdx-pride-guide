@@ -14,7 +14,7 @@ export type HubFeedKind =
   | "feed_text"
   | "feed_photo";
 
-export type HubFeedTab = "all" | "events" | "posts" | "rsvps" | "boards";
+export type HubFeedTab = "all" | "events" | "posts" | "rsvps" | "boards" | "followed_boards";
 
 export type HubFeedAuthor = {
   displayName: string;
@@ -84,6 +84,8 @@ export type HubFeedItem = {
   } | null;
   /** Numeric board post id for gig/gift cards, used to open the board overlay. */
   boardPostId?: number | null;
+  /** The viewer follows this Gigz or Giftz board. */
+  viewerFollowsBoard?: boolean;
   photoUrl?: string | null;
   /** Pinned scene cards sit below live activity; new posts stack above them. */
   pinned?: boolean;
@@ -118,6 +120,7 @@ export const HUB_FEED_TABS: Array<{ key: HubFeedTab; label: string }> = [
   { key: "posts", label: "Posts" },
   { key: "rsvps", label: "RSVPs" },
   { key: "boards", label: "Boards" },
+  { key: "followed_boards", label: "Following boards" },
 ];
 
 const TAB_PREDICATES: Record<HubFeedTab, (item: HubFeedItem) => boolean> = {
@@ -131,6 +134,7 @@ const TAB_PREDICATES: Record<HubFeedTab, (item: HubFeedItem) => boolean> = {
     || item.kind === "feed_photo",
   rsvps: (item) => item.kind === "rsvp",
   boards: (item) => ["gifting", "sellz", "spotted", "gig", "housing"].includes(item.kind),
+  followed_boards: (item) => !!item.viewerFollowsBoard,
 };
 
 export function filterHubFeedPinned(items: HubFeedItem[], tab: HubFeedTab): HubFeedItem[] {

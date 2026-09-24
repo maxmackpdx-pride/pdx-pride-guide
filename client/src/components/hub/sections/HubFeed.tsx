@@ -89,6 +89,8 @@ function emptyCopy(tab: HubFeedTab): string {
       return "No new RSVPs yet. Be the first to say you are going.";
     case "boards":
       return "No new board posts yet. The GIGZ highlight stays below.";
+    case "followed_boards":
+      return "Follow Gigz or Giftz to keep their posts here.";
     default:
       return "Nothing new in this feed yet.";
   }

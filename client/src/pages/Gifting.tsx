@@ -19,6 +19,7 @@ import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
+import BoardFollowButton from "@/components/BoardFollowButton";
 import { trackProductEvent } from "@/lib/analytics";
 
 const CATEGORIES = [
@@ -222,6 +223,7 @@ export default function Gifting() {
         lede="A free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
         actions={
           <>
+            <BoardFollowButton board="giftz" />
             <Button variant="solid" accent="lime" size="lg" arrow disabled={!postingOpen} onClick={() => openForm("GIFT")}>
               {giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}
             </Button>

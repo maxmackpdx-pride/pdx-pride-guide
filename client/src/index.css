@@ -18175,3 +18175,4 @@ html.calm-mode .z-board-address__index {
     max-width: 38vw;
   }
 }
+.board-follow-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid var(--follow-accent,#b777ff);border-radius:9px;padding:11px 14px;background:transparent;color:#e8dcf0;font-family:inherit;font-size:14px;font-weight:700;white-space:nowrap;cursor:pointer}.board-follow-button[data-board=giftz]{--follow-accent:#ccff00;color:#e5f2c1}.board-follow-button[aria-pressed=true]{background:color-mix(in srgb,var(--follow-accent) 20%,#141118)}.board-follow-button:hover:not(:disabled){background:color-mix(in srgb,var(--follow-accent) 15%,#141118)}.board-follow-button:disabled{opacity:.6;cursor:wait}

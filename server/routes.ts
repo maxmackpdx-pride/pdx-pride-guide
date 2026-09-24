@@ -22,7 +22,7 @@ import {
   prideDayFromDate,
   EVENT_WEEK_END_DATE,
 } from "@shared/eventWeek";
-import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts, normalizeAttendanceVisibility } from "./storage";
+import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts, normalizeAttendanceVisibility, isFollowingBoard, setBoardFollowing } from "./storage";
 import { isTransactionalEmailConfigured, sendOwnerDeskNotification, sendPasswordResetEmail } from "./email";
 import {
   adminSearchForViewer,
@@ -3046,6 +3046,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const rows = req.query.mine === "1" && viewerId ? storage.getGigPostsByUser(viewerId) : storage.getGigPosts("LIVE");
     const gigs = rows.map(gig => publicGigPost(gig, viewerId));
     res.json(gigs);
+  });
+
+  const boardFollowKey = (value: unknown): "gigz" | "giftz" | null =>
+    value === "gigz" || value === "giftz" ? value : null;
+  app.get("/api/boards/:board/follow", (req, res) => {
+    const board = boardFollowKey(req.params.board);
+    if (!board) return res.status(400).json({ error: "Unknown board" });
+    res.setHeader("Cache-Control", "private, no-store");
+    res.json({ isFollowing: !!req.session.userId && isFollowingBoard(req.session.userId, board) });
+  });
+  app.put("/api/boards/:board/follow", requireAuth, (req, res) => {
+    const board = boardFollowKey(req.params.board);
+    if (!board || typeof req.body?.follow !== "boolean") return res.status(400).json({ error: "Invalid board follow" });
+    setBoardFollowing(req.session.userId!, board, req.body.follow);
+    res.setHeader("Cache-Control", "private, no-store");
+    res.json({ isFollowing: req.body.follow });
   });
 
   app.post("/api/gigs", requireAuth, (req, res) => {
