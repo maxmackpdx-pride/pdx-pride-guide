@@ -616,7 +616,7 @@ export default function DirectoryMap({
   }
 
   return (
-    <div className={showKey ? "directory-map-wrap" : undefined}>
+    <div className={showKey || fillParent ? "directory-map-wrap" : undefined}>
       {mapSurface}
       {showKey && <DirectoryMapKey />}
     </div>

@@ -16,6 +16,7 @@ import { hubFeedBadgeColor, type HubFeedEventEmbed, type HubFeedItem } from "@sh
 import { ChangeBadge } from "@/components/ds/ChangeBadge";
 import type { Event } from "@shared/schema";
 import FeedEventDeck from "./FeedEventDeck";
+import RedgifsMedia from "@/components/RedgifsMedia";
 
 function stopCardNav(e: MouseEvent) {
   e.stopPropagation();
@@ -93,7 +94,7 @@ export default function HubFeedCard({ item }: Props) {
     !!user &&
     !!followUsername &&
     user.username?.toLowerCase() === followUsername.toLowerCase();
-  const showFollowShortcut = Boolean(user && followUsername && !isSelf);
+  const showFollowShortcut = Boolean(user && followUsername && !isSelf && item.kind !== "community");
   // Prefer server field; soft-launch default is following
   const isFollowing =
     followOverride !== null
@@ -198,6 +199,7 @@ export default function HubFeedCard({ item }: Props) {
     || item.kind === "gifting"
     || item.kind === "sellz"
     || item.kind === "housing"
+    || item.kind === "community"
   ) && !!item.title;
   // GIGZ and GIFTZ reuse the shared board overlay. SELLZ has its own listing
   // surface and keeps the canonical `/sellz?post=id` navigation path.
@@ -395,6 +397,7 @@ export default function HubFeedCard({ item }: Props) {
               loading="lazy"
             />
           )}
+          {item.mediaUrl && <RedgifsMedia url={item.mediaUrl} title={item.title || "Community post"}/>}
           {eventBlock}
           {beachBlock}
           {ctaBlock}

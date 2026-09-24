@@ -69,7 +69,7 @@ import { DIRECTORY_TYPES } from "@shared/directoryTheme";
 import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
-import { registerCommunityRoutes, searchCommunities } from "./communities";
+import { registerCommunityRoutes, searchCommunities, linkQSearchCandidateEvent } from "./communities";
 import { registerPlatformV1 } from "./platformV1";
 import { getSystemDiagnosticsDigest, recordSystemDiagnostic } from "./systemDiagnostics";
 import { commitIngest, previewIngest, mergeDraftIntoEvent } from "./ingest";
@@ -6878,6 +6878,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       committedEventIds.push(m.eventId);
     }
     if (committedIds.length) markCandidatesCommitted(committedIds, committedEventIds);
+    for (const [id, outcome] of byCand) for (const eventId of outcome.eventIds) linkQSearchCandidateEvent(id, eventId);
+    for (const merged of mergedCand) if (merged.candidateId) linkQSearchCandidateEvent(merged.candidateId, merged.eventId);
     if (autoSkipIds.length) markCandidatesSkipped(Array.from(new Set(autoSkipIds)));
 
     auditAdmin(req, "qsearch_approve", {

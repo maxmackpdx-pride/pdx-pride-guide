@@ -1,0 +1,6 @@
+.z-redgifs-media{max-width:540px;margin:12px 0 16px;border:1px solid rgba(255,255,255,.2);border-radius:12px;overflow:hidden;background:#101317}
+.z-redgifs-media iframe{display:block;width:100%;aspect-ratio:9/12;max-height:550px;border:0;background:#08090b}
+.z-redgifs-media__play{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:170px;border:0;background:linear-gradient(135deg,#262d36,#11161b);color:#fff;font:700 14px Inter,sans-serif;cursor:pointer}
+.z-redgifs-media__play:hover{background:#313a44}
+.z-redgifs-media>a{display:block;padding:10px 14px;color:#9ceefa;font-size:12px;text-decoration:none}
+.z-redgifs-media>a:hover{text-decoration:underline}

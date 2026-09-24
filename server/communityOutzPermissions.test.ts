@@ -9,7 +9,7 @@ const directory = mkdtempSync(path.resolve(".local/community-permissions-"));
 process.env.DATABASE_PATH = path.join(directory, "data.db");
 copyFileSync("data.db", process.env.DATABASE_PATH);
 const { sqlite } = await import("./storage");
-const { registerCommunityRoutes, communityRelationshipFromUrl } = await import("./communities");
+const { registerCommunityRoutes, communityRelationshipFromUrl, linkQSearchCommunityEvent } = await import("./communities");
 const { createOutzWallPost, createOutzWallComment, updateOutzWallPost, deleteOutzWallPost } = await import("./outzSocial");
 after(() => { sqlite.close(); rmSync(directory, { recursive: true, force: true }); });
 
@@ -34,6 +34,41 @@ const params = { slug: community.slug };
 call("post", "/api/communities/:slug/join", author, {}, params);
 const parent = call("post", "/api/communities/:slug/posts", owner, { body: "Plan a community picnic" }, params).result.posts[0];
 const parentParams = { ...params, postId: parent.id };
+
+test("joining follows the feed by default; members can mute and resume", () => {
+  assert.equal(call("get", "/api/communities/:slug", author, {}, params).result.viewerFollowing, true);
+  const endpoint="/api/communities/:slug/follow";
+  assert.equal(call("put", endpoint, outsider, {following:false}, params).status, 403);
+  assert.equal(call("put", endpoint, author, {following:false}, params).status, 200);
+  assert.equal(call("get", "/api/communities/:slug", author, {}, params).result.viewerFollowing, false);
+  assert.equal(call("put", endpoint, author, {following:true}, params).result.viewerFollowing, true);
+});
+
+test("RedGIFs media is stored; unsafe hosts are rejected", () => {
+  const created=call("post", "/api/communities/:slug/posts", author, {title:"Weekend photos",mediaUrl:"https://redgifs.com/watch/SampleClip?ref=feed"}, params);
+  assert.equal(created.status, 201);
+  const id=created.result.posts[0].id;
+  assert.equal(created.result.posts[0].mediaUrl, "https://www.redgifs.com/watch/SampleClip");
+  assert.equal(call("patch", "/api/communities/:slug/posts/:postId", author, {title:"Changed",body:"",mediaUrl:"https://redgifs.com.evil.test/watch/SampleClip"}, {...params,postId:id}).status, 400);
+  call("delete", "/api/communities/:slug/posts/:postId", author, {}, {...params,postId:id});
+});
+
+test("public group events appear for visitors in upcoming and past tabs", () => {
+  const groupId=Number(sqlite.prepare("INSERT INTO businesses (name,type,description,active) VALUES ('Community Event Group','group','Synthetic group',1)").run().lastInsertRowid);
+  const group=call("post", "/api/communities", owner, {name:"Community Event Test",description:"A community with group hosted events"}).result;
+  sqlite.prepare("UPDATE communities SET source_business_id=? WHERE id=?").run(groupId,group.id);
+  const insert=sqlite.prepare("INSERT INTO events (title,description,venue_name,date_start,date_end,status,is_public,is_private) VALUES (?,?,?,?,?,'LIVE',1,0)");
+  const future=new Date(Date.now()+7*86400000).toISOString(),past=new Date(Date.now()-7*86400000).toISOString();
+  const futureId=Number(insert.run("Upcoming gathering","Test","Other venue",future,future).lastInsertRowid);
+  const pastId=Number(insert.run("Past gathering","Test","Other venue",past,past).lastInsertRowid);
+  linkQSearchCommunityEvent(futureId,[{businessId:groupId,role:"venue"}]);
+  assert.equal(call("get", "/api/communities/:slug", undefined, {}, {slug:group.slug}).result.events.upcoming.length,0);
+  linkQSearchCommunityEvent(futureId,[{businessId:groupId,role:"group"}]);
+  linkQSearchCommunityEvent(pastId,[{businessId:groupId,role:"group"}]);
+  const events=call("get", "/api/communities/:slug", undefined, {}, {slug:group.slug}).result.events;
+  assert.deepEqual(events.upcoming.map((event:any)=>event.id),[futureId]);
+  assert.deepEqual(events.past.map((event:any)=>event.id),[pastId]);
+});
 
 test("votes persist per member and respect community and post boundaries", () => {
   const endpoint = "/api/communities/:slug/posts/:postId/vote";

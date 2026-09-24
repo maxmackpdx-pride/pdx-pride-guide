@@ -20,6 +20,7 @@ export type CommunitySummary = {
   memberCount: number;
   viewerRole: CommunityRole | null;
   viewerMembershipStatus: "active" | "pending" | "left" | "removed" | "rejected" | null;
+  viewerFollowing: boolean;
   canManage: boolean;
   sourcePlaceId: number | null;
   isClaimable: boolean;
@@ -30,6 +31,7 @@ export type CommunityPost = {
   id: number;
   title: string;
   body: string;
+  mediaUrl: string | null;
   score: number;
   viewerVote: -1 | 0 | 1;
   createdAt: string;
@@ -48,7 +50,18 @@ export type CommunityDetail = CommunitySummary & {
   rules: string[];
   moderators: Array<{ id: number; username: string; displayName: string | null; role: CommunityRole }>;
   posts: Array<CommunityPost & { replies: CommunityPost[] }>;
+  events: { upcoming: CommunityEvent[]; past: CommunityEvent[] };
   related: Array<{ type: "event" | "sellz" | "gig" | "place" | "guide"; relationshipType: string; id: string | number; name: string; meta: string | null; url: string }>;
+};
+
+export type CommunityEvent = {
+  id: number;
+  title: string;
+  dateStart: string;
+  dateEnd: string;
+  venueName: string;
+  posterImageUrl: string | null;
+  url: string;
 };
 
 export function communitySlug(value: string): string {

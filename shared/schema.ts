@@ -185,6 +185,7 @@ export const communityMemberships = sqliteTable("community_memberships", {
   userId: integer("user_id").notNull(),
   role: text("role").notNull().default("member"),
   status: text("status").notNull().default("active"),
+  following: integer("following", { mode: "boolean" }).notNull().default(true),
   rulesVersion: text("rules_version").notNull().default("1"),
   joinedAt: text("joined_at").notNull().default(""),
 });
@@ -194,6 +195,8 @@ export const communityPosts = sqliteTable("community_posts", {
   communityId: text("community_id").notNull(),
   userId: integer("user_id").notNull(),
   body: text("body").notNull(),
+  title: text("title").notNull().default(""),
+  mediaUrl: text("media_url"),
   status: text("status").notNull().default("published"),
   createdAt: text("created_at").notNull().default(""),
   updatedAt: text("updated_at").notNull().default(""),

@@ -12,7 +12,8 @@ export type HubFeedKind =
   | "outz"
   | "feedback"
   | "feed_text"
-  | "feed_photo";
+  | "feed_photo"
+  | "community";
 
 export type HubFeedTab = "all" | "events" | "posts" | "rsvps" | "boards" | "followed_boards";
 
@@ -87,6 +88,7 @@ export type HubFeedItem = {
   /** The viewer follows this Gigz or Giftz board. */
   viewerFollowsBoard?: boolean;
   photoUrl?: string | null;
+  mediaUrl?: string | null;
   /** Pinned scene cards sit below live activity; new posts stack above them. */
   pinned?: boolean;
   /** Opens the site feedback modal when set to "feedback". */
@@ -131,7 +133,8 @@ const TAB_PREDICATES: Record<HubFeedTab, (item: HubFeedItem) => boolean> = {
     || item.kind === "beach"
     || item.kind === "outz"
     || item.kind === "feed_text"
-    || item.kind === "feed_photo",
+    || item.kind === "feed_photo"
+    || item.kind === "community",
   rsvps: (item) => item.kind === "rsvp",
   boards: (item) => ["gifting", "sellz", "spotted", "gig", "housing"].includes(item.kind),
   followed_boards: (item) => !!item.viewerFollowsBoard,
@@ -169,6 +172,7 @@ export function hubFeedBadgeColor(kind: HubFeedKind): string {
     feedback: "var(--panel-lime)",
     feed_text: "var(--panel-cyan)",
     feed_photo: "var(--panel-magenta)",
+    community: "var(--panel-cyan)",
   };
   return map[kind] ?? "var(--panel-cyan)";
 }

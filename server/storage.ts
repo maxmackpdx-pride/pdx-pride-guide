@@ -15872,6 +15872,27 @@ export const storage: IStorage = {
       items.push(hubFeedPostToItem(row, goingCounts, businesses, viewerUserId));
     }
 
+    // Active membership follows Z/List posts by default; members can mute a feed.
+    if (viewerUserId != null && sqlite.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='community_memberships'").get()) {
+      const communityRows = sqlite.prepare(`
+        SELECT p.id,p.user_id userId,p.title,p.body,p.media_url mediaUrl,p.created_at createdAt,
+               c.slug,c.name communityName,u.display_name displayName,u.username,
+               u.photo_url photoUrl,u.avatar_choice avatarChoice,u.avatar_ring avatarRing
+        FROM community_posts p
+        JOIN community_memberships m ON m.community_id=p.community_id AND m.user_id=? AND m.status='active' AND m.following=1
+        JOIN communities c ON c.id=p.community_id
+        JOIN users u ON u.id=p.user_id
+        WHERE p.status='published' AND p.parent_post_id IS NULL AND datetime(p.created_at)>=datetime('now','-60 days')
+        ORDER BY p.created_at DESC LIMIT 40
+      `).all(viewerUserId) as any[];
+      for(const row of communityRows){
+        if(row.userId!==viewerUserId&&storage.isMemberInteractionBlocked(viewerUserId,row.userId))continue;
+        items.push({id:`community-${row.id}`,kind:"community",badge:"Z/LIST",action:`Posted in z/${row.slug}`,
+          title:row.title||null,text:row.body||null,mediaUrl:row.mediaUrl||null,createdAt:row.createdAt,
+          author:hubFeedAuthorFromUser(row),link:`/z/${row.slug}#post-${row.id}`});
+      }
+    }
+
     if (viewerUserId != null) {
       bumpSavedHubFeedItems(items, viewerUserId);
     }

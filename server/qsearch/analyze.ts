@@ -1036,7 +1036,7 @@ export function buildScanCandidates(
   raw: Array<{ draft: IngestEventDraft; sourceId: string; sourceLabel: string; sourceUrl: string }>,
   catalog: Event[],
   businesses: Business[] = [],
-  opts?: { includePastEvents?: boolean },
+  opts?: { includePastEvents?: boolean; onCandidateEvaluated?: (candidate: ScanCandidate) => void },
 ): ScanCandidate[] {
   const includePast = opts?.includePastEvents === true;
   // Filter past occurrences before condense so weekly groups still form from future dates
@@ -1218,6 +1218,7 @@ export function buildScanCandidates(
       fieldConflicts,
     };
   })
+    .map(c => { opts?.onCandidateEvaluated?.(c); return c; })
     // Main-board de-dupe: drop fully-covered one-offs / series; keep only new series nights
     .map(c => applyCatalogCoverage(c, catalog))
     .filter((c): c is ScanCandidate => c != null);

@@ -25,6 +25,7 @@ import {
 } from "../ingest/posterQuality";
 import { fetchSanctuaryDrafts } from "../ingest/adapters/sanctuary";
 import { storage } from "../storage";
+import { linkQSearchCommunityEvent } from "../communities";
 import { buildScanCandidates, priorFlyerFromCatalog, type ScanCandidate } from "./analyze";
 import { scrubCandidates } from "./scrubLlm";
 import { verifyAndRepairFlyers } from "./verifyFlyer";
@@ -748,6 +749,10 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
   const businesses = storage.getBusinesses({});
   const candidates = buildScanCandidates(raw, opts.existingEvents, businesses, {
     includePastEvents: opts.includePastEvents === true,
+    onCandidateEvaluated: candidate => {
+      const match = candidate.strongDuplicate;
+      if (match?.confidence === "high") linkQSearchCommunityEvent(match.eventId, candidate.directoryBrands);
+    },
   });
   // Low confidence vision/ig unselected
   for (const c of candidates) {
