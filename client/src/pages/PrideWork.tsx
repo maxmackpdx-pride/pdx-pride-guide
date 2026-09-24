@@ -4,20 +4,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link } from "wouter";
-import { Briefcase, CalendarDays, Share2, Trash2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, CalendarDays, MapPin, Plus, Share2, Trash2, X, Zap } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
-import BoardHero from "@/components/BoardHero";
-import BoardHowItWorks from "@/components/BoardHowItWorks";
-import BoardCloseSeam from "@/components/BoardCloseSeam";
-import ScrollReveal from "@/components/ScrollReveal";
 import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
-import BoardStatsBar from "@/components/BoardStatsBar";
-import BoardActiveSection, { BoardFilterChip, BoardSelectField, BoardTextField } from "@/components/BoardActiveSection";
 import { Button } from "@/components/ds";
 import ImageUploader from "@/components/ImageUploader";
 import { timeAgo } from "@/lib/boardFeed";
@@ -29,6 +23,8 @@ import type { CSSProperties } from "react";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
 import { trackProductEvent } from "@/lib/analytics";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
+import "./PrideWork.css";
 
 const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
@@ -43,6 +39,7 @@ const gigSchema = z.object({
   gigDate: z.string().optional(),
   gigTime: z.string().optional(),
   businessId: z.number().nullable().optional(),
+  imageUrl: z.string().optional(),
 });
 
 const newBusinessSubmissionSchema = z.object({
@@ -94,305 +91,90 @@ const TYPE_LABELS: Record<string, string> = {
   POSTING_GIG: "Gig posted",
 };
 
-const HOW_IT_WORKS = [
-  { title: "Pick your lane", body: "Hiring? Post the gig. Looking? Post your availability.", color: "#b06bff" },
-  { title: "Serve the details", body: "Skills, rates, dates, remote or on-site. Vague posts get scrolled past.", color: "#19e3ff" },
-  { title: "Get seen", body: "Goes live immediately. The board is public, replies stay in inbox.", color: "#ff1fa0" },
-  { title: "Connect", body: "Reply through the site inbox. Private and direct.", color: "#b06bff" },
-  { title: "Do the work", body: "Show up, get paid, keep the work moving.", color: "#19e3ff" },
-  { title: "Stamp it done", body: "Mark filled or found when the match wraps.", color: "#ff1fa0" },
-];
-
-/** Deep-glass board accent for Gigs (SoT §2.4 var(--board-gigs)). Subtype motifs differ; rim is board purple. */
-const ACCENT = {
-  POSTING_GIG: "var(--board-gigs)",
-  LOOKING_FOR_WORK: "var(--board-gigs)",
-} as const;
-
-function ghostLetter(title: string) {
-  return (title || "?").trim().charAt(0).toUpperCase();
-}
-
-function thumbGradient(isLooking: boolean) {
-  return isLooking
-    ? "linear-gradient(135deg,#19e3ff,#8a4bff)"
-    : "linear-gradient(135deg,#b06bff,#19e3ff)";
+function GigRail({ posts, kind, selected, onSelect }: {
+  posts: GigPost[]; kind: "gigs" | "talent"; selected: number | null; onSelect: (id: number) => void;
+}) {
+  const [api, setApi] = useState<CarouselApi>();
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
+  useEffect(() => {
+    if (!api) return;
+    const update = () => { setCanPrev(api.canScrollPrev()); setCanNext(api.canScrollNext()); };
+    update(); api.on("select", update); api.on("reInit", update);
+    return () => { api.off("select", update); api.off("reInit", update); };
+  }, [api]);
+  return <>
+    <Carousel setApi={setApi} opts={{ align: "start", dragFree: true, direction: "rtl" }} className="gigz-rail" dir="rtl">
+      <CarouselContent className="gigz-rail__track">
+        {posts.map((post, index) => {
+          const isTalent = kind === "talent";
+          const poster = post.displayName || post.name;
+          return <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
+            {isTalent ? <button type="button" className="gigz-talent" style={{ "--gigz-accent": ["#b984ff", "#bbff54", "#ff8bb8", "#8edfff"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ${poster}: ${post.title}`}>
+              <span className="gigz-talent__status"><span><i /> Available for gigs</span><small>Posted {timeAgo(post.createdAt)}</small></span>
+              <span className="gigz-talent__portrait">{post.posterPhotoUrl || post.imageUrl ? <img src={post.posterPhotoUrl || post.imageUrl || ""} alt="" loading="lazy" /> : <UserAvatar photoUrl={post.posterPhotoUrl} avatarChoice={post.avatarChoice} avatarRing={post.posterAvatarRing} displayName={poster} username={post.username} size={150} />}</span>
+              <strong>{poster}</strong><span className="gigz-talent__role">{post.title}</span>
+              <span className="gigz-talent__location"><MapPin size={14} /> {post.isRemote ? "Remote" : post.location || "Portland"}</span>
+              <span className="gigz-talent__hire">View and message <ArrowUpRight size={18} /></span>
+              <span className="gigz-talent__caption"><Zap size={15} /> {post.compensation || post.skills || "Available for work"}</span>
+            </button> : <button type="button" className="gigz-opportunity" style={{ "--gigz-accent": ["#bb8aff", "#75c9ef", "#ffb477", "#f39ace", "#c7fa89"][index % 5] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gig: ${post.title}`}>
+              {post.imageUrl ? <img src={post.imageUrl} alt="" loading="lazy" /> : <span className="gigz-opportunity__fallback" aria-hidden="true">GIGZ</span>}
+              <span className="gigz-opportunity__shade" />
+              <span className="gigz-opportunity__top"><span><em>{post.skills?.split(",")[0]?.trim() || "OPPORTUNITY"}</em><small>Gig posted · {timeAgo(post.createdAt)}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
+              <span className="gigz-opportunity__bottom"><strong>{post.title}</strong><span>{post.isRemote ? "Remote" : post.location || "Portland"}{post.gigDate ? ` · ${post.gigDate}${post.gigTime ? ` · ${post.gigTime}` : ""}` : ""}</span><em>{post.compensation || "Pay not listed"}</em></span>
+            </button>}
+          </CarouselItem>;
+        })}
+      </CarouselContent>
+    </Carousel>
+    <div className="gigz-rail__controls"><span>SWIPE TO EXPLORE <ArrowLeft size={15} /></span><div><button type="button" onClick={() => api?.scrollPrev()} disabled={!canPrev} aria-label={`Previous ${kind}`}><ArrowRight size={18} /></button><button type="button" onClick={() => api?.scrollNext()} disabled={!canNext} aria-label={`Next ${kind}`}><ArrowLeft size={18} /></button></div></div>
+  </>;
 }
 
 export default function PrideWork() {
-  const contentStartedAt = useRef(performance.now());
-  usePageSeo(
-    "GIGZ: Jobs & gigs | Zaylist",
-    "Find gigs and workers for Portland nights. Post or browse GIGZ.",
-    { image: shareCardUrl("prideWork"), imageAlt: "GIGZ on Zaylist" },
-  );
-  const { toast } = useToast();
+  usePageSeo("GIGZ: Jobs & gigs | Zaylist", "Find gigs and workers for Portland nights. Post or browse GIGZ.", { image: shareCardUrl("prideWork"), imageAlt: "GIGZ on Zaylist" });
   const { user } = useAuth();
   const [formOpen, setFormOpen] = useState(false);
   const [composeType, setComposeType] = useState<GigFormData["postType"]>("POSTING_GIG");
   const [showAuth, setShowAuth] = useState(false);
-  const [filter, setFilter] = useState<"ALL" | "LOOKING_FOR_WORK" | "POSTING_GIG">(() => {
-    const type = new URLSearchParams(window.location.search).get("type")?.toUpperCase();
-    return type === "LOOKING_FOR_WORK" || type === "POSTING_GIG" ? type : "ALL";
-  });
-  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
-  const [remoteOnly, setRemoteOnly] = useState(() => new URLSearchParams(window.location.search).get("remote") === "1");
+  const [selectedId, setSelectedId] = useState<number | null>(() => Number(new URLSearchParams(window.location.search).get("post")) || null);
+  const [search, setSearch] = useState("");
+  const [remoteOnly, setRemoteOnly] = useState(false);
   const [onlyMine, setOnlyMine] = useState(() => new URLSearchParams(window.location.search).get("mine") === "1");
-  const [sort, setSort] = useState(() => new URLSearchParams(window.location.search).get("sort") === "oldest" ? "LONGEST" : "RECENT");
-  const [expandedId, setExpandedId] = useState<number | null>(null);
-  const deepLinkHandled = useRef(false);
-  const { data: gigs = [], isLoading, isError, error } = useQuery<GigPost[]>({
+  const { data: gigs = [], isLoading, isError } = useQuery<GigPost[]>({
     queryKey: ["/api/gigs", onlyMine],
-    queryFn: async () => {
-      const r = await fetch(`/api/gigs${onlyMine ? "?mine=1" : ""}`, { credentials: "include" });
-      if (!r.ok) throw new Error(`${r.status}: ${(await r.text()) || r.statusText}`);
-      return r.json();
-    },
+    queryFn: async () => { const r = await fetch(`/api/gigs${onlyMine ? "?mine=1" : ""}`, { credentials: "include" }); if (!r.ok) throw new Error("Could not load Gigz"); return r.json(); },
   });
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (filter === "ALL") params.delete("type"); else params.set("type", filter);
-    if (search.trim()) params.set("q", search.trim()); else params.delete("q");
-    if (remoteOnly) params.set("remote", "1"); else params.delete("remote");
-    if (onlyMine) params.set("mine", "1"); else params.delete("mine");
-    if (sort === "LONGEST") params.set("sort", "oldest"); else params.delete("sort");
-    const qs = params.toString();
-    window.history.replaceState(null, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
-  }, [filter, onlyMine, remoteOnly, search, sort]);
-  useEffect(() => {
-    if (!isLoading) trackProductEvent("time_to_content", "gigz", performance.now() - contentStartedAt.current);
-  }, [isLoading]);
-
-  // Canonical product deep-links open the requested gig expanded.
-  useEffect(() => {
-    if (deepLinkHandled.current || !gigs.length) return;
-    const pid = new URLSearchParams(window.location.search).get("post");
-    if (!pid) { deepLinkHandled.current = true; return; }
-    const id = Number(pid);
-    deepLinkHandled.current = true;
-    if (Number.isFinite(id) && gigs.some(g => g.id === id)) {
-      setExpandedId(id);
-      window.setTimeout(() => {
-        document.getElementById(`board-post-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 350);
-    }
-  }, [gigs]);
-
-  const stats = useMemo(() => [
-    { num: gigs.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Talent on deck", color: "#19e3ff" },
-    { num: gigs.filter(g => g.postType === "POSTING_GIG").length, label: "GIGZ up for grabs", color: "#b06bff" },
-    { num: gigs.filter(g => g.isRemote).length, label: "Remote friendly", color: "#ff1fa0" },
-  ], [gigs]);
-
-  const filterCounts = useMemo(() => ({
-    ALL: gigs.length,
-    LOOKING_FOR_WORK: gigs.filter(g => g.postType === "LOOKING_FOR_WORK").length,
-    POSTING_GIG: gigs.filter(g => g.postType === "POSTING_GIG").length,
-  }), [gigs]);
-
-  const openForm = (postType: "POSTING_GIG" | "LOOKING_FOR_WORK") => {
-    if (!user) {
-      setShowAuth(true);
-      return;
-    }
-    setComposeType(postType);
-    setFormOpen(true);
-    window.setTimeout(() => document.getElementById("gigs-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20);
+  const openForm = (type: GigFormData["postType"]) => {
+    if (!user) { setShowAuth(true); return; }
+    setComposeType(type); setFormOpen(true);
+    window.setTimeout(() => document.getElementById("gigs-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 30);
   };
-
-  const filtered = useMemo(() => {
-    let rows = gigs.slice();
-    if (filter !== "ALL") rows = rows.filter(g => g.postType === filter);
-    if (remoteOnly) rows = rows.filter(g => !!g.isRemote);
-    if (onlyMine && user) rows = rows.filter(g => g.isMine);
-    const q = search.trim().toLowerCase();
-    if (q) {
-      rows = rows.filter(g =>
-        [g.title, g.description, g.skills, g.name, g.location, g.compensation]
-          .filter(Boolean)
-          .some(v => String(v).toLowerCase().includes(q)),
-      );
-    }
-    rows.sort((a, b) => {
-      const ta = new Date(a.createdAt).getTime();
-      const tb = new Date(b.createdAt).getTime();
-      return sort === "LONGEST" ? ta - tb : tb - ta;
-    });
-    return rows;
-  }, [gigs, filter, remoteOnly, onlyMine, search, sort, user]);
-
-  const clearFilters = () => {
-    setFilter("ALL");
-    setSearch("");
-    setRemoteOnly(false);
-    setOnlyMine(false);
-    setSort("RECENT");
-  };
-
-  return (
-    <div className="zine-page gigs-page board-page board-page--makeover">
-      <BoardHero
-        accent="purple"
-        kicker="Two-way work board · Pride season and beyond"
-        title={<img className="board-hero__brand-logo board-hero__brand-logo--gigz" src="/brand/family/gigz.svg" alt="GIGZ" />}
-        lede="Post your availability, post a gig, or browse both. Stage crew, photographers, bartenders, massage therapists, host homes, designers, producers. Workers and hosts in one place. Need work? Need help? Both belong here."
-        actions={
-          <>
-            <Button variant="neon" accent="cyan" size="lg" onClick={() => openForm("LOOKING_FOR_WORK")}>
-              Post availability
-            </Button>
-            <Button variant="solid" accent="purple" size="lg" arrow data-testid="button-post-gig" onClick={() => openForm("POSTING_GIG")}>
-              Post a gig
-            </Button>
-          </>
-        }
-      />
-
-      <BoardStatsBar stats={stats} variant="band" showLive={false} />
-
-      <SafetyGuide context="gigs" />
-
-      <ScrollReveal>
-        <BoardHowItWorks
-          className="gigs-how"
-          kickerTone="cyan"
-          title={<>How <span style={{ color: "#b06bff" }}>GIGZ</span> works</>}
-          lede="Same board, two sides. Talent posts what they do. Hosts post what they need. Everyone can browse both. Goes live right away, and every reply stays in a private inbox."
-          steps={HOW_IT_WORKS}
-          footerLine="Paid, respected, valued · work and gigs only · PG-13"
-          beforeSteps={
-            <div className="board-path-cards">
-              <article className="board-path-card board-path-card--talent pdx-glass-rebind">
-                <div className="board-path-card__label">For talent</div>
-                <h3>Looking for Pride work?</h3>
-                <p>
-                  Post your skills, schedule, and rate. Stage crew, photographers, bartenders, door staff,
-                  designers, producers. Say what you do and when you are free.
-                </p>
-                <Button variant="neon" accent="cyan" onClick={() => openForm("LOOKING_FOR_WORK")}>
-                  Post availability
-                </Button>
-              </article>
-              <article className="board-path-card board-path-card--host pdx-glass-rebind">
-                <div className="board-path-card__label">For hosts</div>
-                <h3>Need extra hands?</h3>
-                <p>
-                  Post paid gigs, volunteer shifts, and short Pride roles. Browse available talent or wait
-                  for replies in your inbox.
-                </p>
-                <Button variant="solid" accent="purple" onClick={() => openForm("POSTING_GIG")}>
-                  Post a gig
-                </Button>
-              </article>
-            </div>
-          }
-        />
-      </ScrollReveal>
-
-      {formOpen && <GigComposer initialType={composeType} onClose={() => setFormOpen(false)} onPosted={() => setFormOpen(false)} />}
-
-      <BoardActiveSection
-        className="diag"
-        sticker="Active board"
-        stickerTone="purple"
-        stickerStyle="mono"
-        title="Open gigs & available talent"
-        resultCount={`${filtered.length} showing`}
-        filters={
-          <>
-            {([
-              { key: "ALL" as const, label: "All", accent: "purple" },
-              { key: "LOOKING_FOR_WORK" as const, label: "Talent on deck", accent: "cyan" },
-              { key: "POSTING_GIG" as const, label: "GIGZ open", accent: "purple" },
-            ]).map(f => (
-              <BoardFilterChip
-                key={f.key}
-                active={filter === f.key}
-                onClick={() => setFilter(f.key)}
-                accent={f.accent}
-                count={filterCounts[f.key]}
-              >
-                {f.label}
-              </BoardFilterChip>
-            ))}
-          </>
-        }
-        filterRow2={
-          <>
-            <BoardTextField type="search" value={search} onChange={setSearch} placeholder="Search roles, skills, gigs" />
-            <BoardFilterChip active={remoteOnly} onClick={() => setRemoteOnly(v => !v)} accent="pink">
-              Remote only
-            </BoardFilterChip>
-            {user ? (
-              <BoardFilterChip active={onlyMine} onClick={() => setOnlyMine(value => !value)} accent="cyan">
-                My GIGZ
-              </BoardFilterChip>
-            ) : null}
-            <BoardSelectField value={sort} onChange={setSort}>
-              <option value="RECENT">Recently posted</option>
-              <option value="LONGEST">Longest up</option>
-            </BoardSelectField>
-          </>
-        }
-      >
-        {isLoading ? (
-          <BoardFeedSkeleton label="Loading talent & GIGZ posts" shape="board" count={6} />
-        ) : isError ? (
-          <div className="board-empty" style={{ borderColor: "#b06bff" }}>
-            <Briefcase size={40} style={{ color: "#b06bff", margin: "0 auto" }} />
-            <p className="display section-heading" style={{ color: "#fff" }}>Could not load posts</p>
-            <p className="board-copy-sm">Could not load posts. Try again in a moment.</p>
-            <Button variant="neon" accent="purple" style={{ marginTop: 20 }} onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>
-              Try again
-            </Button>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="board-empty board-empty--makeover">
-            <p className="display section-heading">Nobody&apos;s on deck yet</p>
-            <p className="board-copy-sm">
-              You bartend, you run sound, you take a good photo at 1am in bad light. Say so. Or post the gig, paid or volunteer, and be honest about which.
-            </p>
-            <div className="board-empty__actions">
-              <Button variant="neon" accent="cyan" onClick={() => openForm("LOOKING_FOR_WORK")}>Post availability</Button>
-              <Button variant="solid" accent="purple" onClick={() => openForm("POSTING_GIG")}>Post a gig</Button>
-              {(filter !== "ALL" || search || remoteOnly) && (
-                <Button variant="neon" accent="cyan" onClick={clearFilters}>Clear filters</Button>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="board-listing-grid board-listing-grid--makeover">
-            {filtered.map((gig, index) => {
-              const isLooking = gig.postType === "LOOKING_FOR_WORK";
-              const accent = isLooking ? ACCENT.LOOKING_FOR_WORK : ACCENT.POSTING_GIG;
-              const expanded = expandedId === gig.id;
-              const skills = gig.skills ? gig.skills.split(",").map(s => s.trim()).filter(Boolean) : [];
-              return (
-                <ScrollReveal key={gig.id} delay={Math.min(index * 80, 400)}>
-                  <GigListingCard
-                    gig={gig}
-                    accent={accent}
-                    expanded={expanded}
-                    skills={skills}
-                    isLooking={isLooking}
-                    onToggle={() => setExpandedId(expanded ? null : gig.id)}
-                  />
-                </ScrollReveal>
-              );
-            })}
-          </div>
-        )}
-      </BoardActiveSection>
-
-      <BoardCloseSeam
-        line="Need work · need help · both belong"
-        url="zaylist.com/pride-work"
-      />
-
+  const visible = useMemo(() => gigs.filter(g => (!remoteOnly || g.isRemote) && (!onlyMine || g.isMine) && (!search.trim() || [g.title, g.description, g.name, g.skills, g.location, g.compensation].some(v => v?.toLowerCase().includes(search.trim().toLowerCase())))), [gigs, remoteOnly, onlyMine, search]);
+  const opportunities = visible.filter(g => g.postType === "POSTING_GIG" && g.status === "LIVE");
+  const talent = visible.filter(g => g.postType === "LOOKING_FOR_WORK" && g.status === "LIVE");
+  const selected = gigs.find(g => g.id === selectedId);
+  const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/pride-work?post=${id}`); window.setTimeout(() => document.getElementById("gigz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
+  return <main className="gigz-page">
+    <div className="gigz-shell">
+      <div className="gigz-identity"><img src="/brand/family/gigz.svg" alt="Gigz" /><span>Work with your people.</span></div>
+      <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE BOARD</div><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
+      <div className="gigz-filter"><label>Search Gigz<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search roles, skills, gigs" /></label><label><input type="checkbox" checked={remoteOnly} onChange={e => setRemoteOnly(e.target.checked)} /> Remote only</label>{user && <label><input type="checkbox" checked={onlyMine} onChange={e => setOnlyMine(e.target.checked)} /> My Gigz</label>}</div>
+      {isLoading ? <BoardFeedSkeleton label="Loading Gigz posts" shape="board" count={3} /> : isError ? <div className="gigz-empty" role="alert">Could not load posts. <button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>Try again</button></div> : opportunities.length ? <GigRail posts={opportunities} kind="gigs" selected={selectedId} onSelect={select} /> : <div className="gigz-empty">No open gigs yet. <button onClick={() => openForm("POSTING_GIG")}>Post a gig</button></div>}
+      <div className="gigz-talent-zone"><div className="gigz-section-head"><div><div className="gigz-eyebrow">THE PEOPLE</div><h2>Available to hire<span>.</span></h2><p>Meet people ready to bring your next idea to life.</p></div><button type="button" className="gigz-post" onClick={() => openForm("LOOKING_FOR_WORK")}><Plus size={17} /> Post your availability <ArrowUpRight size={16} /></button></div>
+        {!isLoading && !isError && (talent.length ? <GigRail posts={talent} kind="talent" selected={selectedId} onSelect={select} /> : <div className="gigz-empty">No one has posted availability yet. <button onClick={() => openForm("LOOKING_FOR_WORK")}>Post yours</button></div>)}
+      </div>
+      {onlyMine && visible.some(g => g.status === "CLOSED") && <section className="gigz-closed"><h2>Completed posts</h2><p>These are visible only to you. Open one to edit or relist it.</p><div>{visible.filter(g => g.status === "CLOSED").map(g => <button type="button" key={g.id} onClick={() => select(g.id)}>{g.title} <ArrowUpRight size={16} /></button>)}</div></section>}
+      {selected && <section id="gigz-detail" className="gigz-detail" aria-label="Selected Gigz post"><button className="gigz-detail__close" onClick={() => { setSelectedId(null); window.history.replaceState(null, "", "/pride-work"); }} aria-label="Close details"><X size={18} /></button><GigListingCard gig={selected} accent="var(--board-gigs)" expanded skills={selected.skills?.split(",").map(s => s.trim()).filter(Boolean) || []} isLooking={selected.postType === "LOOKING_FOR_WORK"} onToggle={() => {}} /></section>}
+      {formOpen && <GigComposer initialType={composeType} onClose={() => setFormOpen(false)} onPosted={id => { setFormOpen(false); setSelectedId(id); }} />}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
+      <SafetyGuide context="gigs" />
     </div>
-  );
+  </main>;
 }
+
+function ghostLetter(title: string) { return (title || "?").trim().charAt(0).toUpperCase(); }
+function thumbGradient(isLooking: boolean) { return isLooking ? "linear-gradient(135deg,#19e3ff,#8a4bff)" : "linear-gradient(135deg,#b06bff,#19e3ff)"; }
 
 export function GigListingCard({
   gig,
@@ -735,6 +517,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
       gigDate: "",
       gigTime: "",
       businessId: null,
+      imageUrl: "",
     },
   });
 
@@ -875,6 +658,8 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
                   {...form.register("compensation")}
                 />
               </label>
+
+              {postType === "POSTING_GIG" && <div className="span gigz-cover-upload"><span>Cover photo (optional)</span><ImageUploader endpoint="/api/upload/poster" currentUrl={form.watch("imageUrl")} onUploaded={url => form.setValue("imageUrl", url)} label="Choose a cover photo" /><small>Use a photo you have permission to share. Posts without one use the Gigz artwork.</small></div>}
 
               <label className="span">
                 Location

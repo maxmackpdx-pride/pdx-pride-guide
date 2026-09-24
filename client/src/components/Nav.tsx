@@ -17,7 +17,7 @@ import { MobileLiquidGlass } from "@/components/ui/mobile-liquid-glass";
 import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
 import { counterpartyAvatar } from "@/lib/inboxAvatar";
 import { contextLabelOf, contextTypeOf, notifyContextTag } from "@/lib/inboxContext";
-import { PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
+import { BOARD_NAV, PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
 import type { NavAccent } from "@/lib/siteNav";
 import type { AuthUser } from "@/context/AuthContext";
 import type { ApiMessageRow } from "@/components/inbox/types";
@@ -180,6 +180,7 @@ function ProfileMenuPanel({
         <span className="site-profile-menu__messages-label"><Inbox size={17} strokeWidth={2} aria-hidden="true" />Messages</span>
         {unreadCount > 0 && <span className="site-profile-menu__messages-badge" aria-hidden="true">{unreadCount}</span>}
       </button>
+      <ProfileBoardsFolder location={location} onClose={onClose} />
       <NotifyMenu unreadCount={unreadCount} adminPending={adminPending} openSheet={openSheet} onClose={onClose} />
       <HubMemberFolder
         hubActive={hubActive}
@@ -210,6 +211,14 @@ function ProfileMenuPanel({
       </button>
     </div>
   );
+}
+
+function ProfileBoardsFolder({ location, onClose }: { location: string; onClose: () => void }) {
+  const [open, setOpen] = useState(false);
+  return <div className="hub-member-folder">
+    <button type="button" className="site-profile-menu__item hub-member-folder__toggle" aria-expanded={open} aria-controls="profile-board-links" onClick={() => setOpen(value => !value)}><span>Boards</span><ChevronDown size={14} strokeWidth={2.4} aria-hidden style={{ transform: open ? "rotate(180deg)" : "none" }} /></button>
+    {open && <div id="profile-board-links" className="hub-member-folder__children" role="group" aria-label="Boards">{BOARD_NAV.map(item => <Link key={item.href} href={item.href} role="menuitem" className={`site-profile-menu__item hub-member-folder__child${location === item.href ? " active" : ""}`} onClick={onClose}>{item.label}</Link>)}</div>}
+  </div>;
 }
 
 function HubMemberFolder({

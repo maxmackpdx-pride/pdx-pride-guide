@@ -139,9 +139,9 @@ function AppLayout() {
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />
             <Route path="/pride-work/new">{() => <MapWorldRedirect world="gigz" />}</Route>
-            <Route path="/pride-work">{() => <MapWorldRedirect world="gigz" />}</Route>
+            <Route path="/pride-work" component={PrideWork} />
             <Route path="/gigs">
-              {() => <MapWorldRedirect world="gigz" />}
+              {() => <Redirect to="/pride-work" />}
             </Route>
             <Route path="/gifting/new">{() => <MapWorldRedirect world="giftz" />}</Route>
             <Route path="/gifting">{() => <MapWorldRedirect world="giftz" />}</Route>
