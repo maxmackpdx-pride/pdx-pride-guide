@@ -2738,6 +2738,8 @@ html.calm-mode .hz-board-rail__item::after, :root[data-calm="true"] .hz-board-ra
 .hz-board-rail__controls button { width: 37px; height: 37px; border-radius: 50%; border: 1px solid var(--hz-accent); color: var(--text-hi); background: #18232a; cursor: pointer; }
 .hz-board-section__empty { padding: 19px; margin: 0; border: 1px dashed color-mix(in srgb,var(--hz-accent) 45%,transparent); border-radius: 12px; color: var(--board-muted); font-size: 13px; }
 .hz-board-post { margin-left: 10px; cursor: pointer; }
+.hz-board-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+.hz-board-actions .hz-board-post { margin-left: 0; }
 .hz-board-link-error { position: fixed; z-index: 90; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: calc(100vw - 30px); padding: 14px 18px; border: 1px solid var(--board-housing,#00ffff); border-radius: 10px; background: #14242a; color: white; box-shadow: 0 15px 40px #000a; }
 .hz-board-link-error button { margin-left: 12px; color: #72eaf1; border: 0; background: none; cursor: pointer; }
 @media (max-width: 767px) { .hz-board-section { padding: 22px 0 28px; } .hz-board-section__head { flex-direction: column; align-items: flex-start; gap: 13px; } .hz-board-rail__item { flex-basis: min(82vw,320px); } .hz-board-rail .hz-card { min-height: 510px; padding: 16px; } .hz-board-rail .hz-well { height: 210px; } .hz-board-rail .hz-well__cap .hz-mono { display: initial; } }

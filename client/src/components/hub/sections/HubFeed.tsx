@@ -90,7 +90,7 @@ function emptyCopy(tab: HubFeedTab): string {
     case "boards":
       return "No new board posts yet. The GIGZ highlight stays below.";
     case "followed_boards":
-      return "Follow Gigz or Giftz to keep their posts here.";
+      return "Follow a board to keep its posts here.";
     default:
       return "Nothing new in this feed yet.";
   }

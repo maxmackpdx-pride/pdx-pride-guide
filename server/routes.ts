@@ -3048,8 +3048,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(gigs);
   });
 
-  const boardFollowKey = (value: unknown): "gigz" | "giftz" | "sellz" | null =>
-    value === "gigz" || value === "giftz" || value === "sellz" ? value : null;
+  const boardFollowKey = (value: unknown): "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | null =>
+    value === "gigz" || value === "giftz" || value === "sellz" || value === "mizzed" || value === "houz" ? value : null;
   app.get("/api/boards/:board/follow", (req, res) => {
     const board = boardFollowKey(req.params.board);
     if (!board) return res.status(400).json({ error: "Unknown board" });

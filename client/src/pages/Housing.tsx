@@ -25,6 +25,7 @@ import {
   snapshotQueries,
 } from "@/lib/optimisticCache";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
+import BoardFollowButton from "@/components/BoardFollowButton";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -375,8 +376,11 @@ export default function Housing() {
             <div className="hz-hero__mantra">
               <Mono>Find a room · find people · find a home</Mono>
             </div>
-            <a className="hz-chip hz-chip--btn" href="#housing-listings" style={{ marginTop: 16 }}>Browse the listings ↓</a>
-            <button type="button" className="hz-chip hz-chip--btn hz-board-post" onClick={() => { if (requireAuth()) navigate("/the-hauz/new"); }}>Post to The Haüz ↗</button>
+            <div className="hz-board-actions">
+              <a className="hz-chip hz-chip--btn" href="#housing-listings">Browse the listings ↓</a>
+              <button type="button" className="hz-chip hz-chip--btn hz-board-post" onClick={() => { if (requireAuth()) navigate("/the-hauz/new"); }}>Post to The Haüz ↗</button>
+              <BoardFollowButton board="houz" />
+            </div>
           </div>
         </div>
       </div>

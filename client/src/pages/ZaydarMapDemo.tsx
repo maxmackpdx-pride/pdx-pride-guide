@@ -7,6 +7,7 @@ import { useLocation, useSearch } from "wouter";
 import { ZAYDAR_PLACE_TYPE_OPTIONS, zaydarTypeIcon, zaydarTypeLabel } from "@/components/ZaydarSearchDrawer";
 import ZaydarLayerSheet, { type ZaydarLayer, type ZaydarLayerId } from "@/components/ZaydarLayerSheet";
 import MapWorldPanel from "@/components/MapWorldPanel";
+import BoardFollowButton from "@/components/BoardFollowButton";
 import MapComposerOverlay from "@/components/MapComposerOverlay";
 import {readMapCamera,filterWorldRows,locateWorldRow,WORLD_DETAIL_KEYS,type MapWorld,type WorldRow,type MapBounds} from "@/lib/mapWorlds";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
@@ -637,6 +638,7 @@ export default function ZaydarMapDemo() {
   })) as Record<MapWorld,React.ReactNode>;
   const houzPanel = <section className="zaydar-layer-panel" aria-labelledby="map-houz-title">
     <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">Haüz</h2></div>
+    <BoardFollowButton board="houz" />
     {housingStats && <div className="zaydar-houz-stats" aria-label="HAÜZ board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
     <button type="button" className="zaydar-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to HAÜZ</button>
     <div className="zaydar-layer-rail zaydar-houz-actions" role="group" aria-label="Start a HAÜZ post">

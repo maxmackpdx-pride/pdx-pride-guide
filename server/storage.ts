@@ -955,17 +955,17 @@ sqlite.exec(`
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS board_follows (
     user_id INTEGER NOT NULL,
-    board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz')),
+    board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz', 'mizzed', 'houz')),
     created_at TEXT NOT NULL,
     PRIMARY KEY (user_id, board)
   );
 `);
 const boardFollowsSchema = sqlite.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'board_follows'").get() as { sql: string } | undefined;
-if (boardFollowsSchema && !boardFollowsSchema.sql.includes("'sellz'")) {
+if (boardFollowsSchema && (!boardFollowsSchema.sql.includes("'mizzed'") || !boardFollowsSchema.sql.includes("'houz'"))) {
   sqlite.transaction(() => {
     sqlite.exec(`CREATE TABLE board_follows_new (
       user_id INTEGER NOT NULL,
-      board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz')),
+      board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz', 'mizzed', 'houz')),
       created_at TEXT NOT NULL,
       PRIMARY KEY (user_id, board)
     )`);
@@ -974,10 +974,10 @@ if (boardFollowsSchema && !boardFollowsSchema.sql.includes("'sellz'")) {
     sqlite.exec("ALTER TABLE board_follows_new RENAME TO board_follows");
   })();
 }
-export function isFollowingBoard(userId: number, board: "gigz" | "giftz" | "sellz"): boolean {
+export function isFollowingBoard(userId: number, board: "gigz" | "giftz" | "sellz" | "mizzed" | "houz"): boolean {
   return !!sqlite.prepare("SELECT 1 FROM board_follows WHERE user_id = ? AND board = ?").get(userId, board);
 }
-export function setBoardFollowing(userId: number, board: "gigz" | "giftz" | "sellz", follow: boolean): void {
+export function setBoardFollowing(userId: number, board: "gigz" | "giftz" | "sellz" | "mizzed" | "houz", follow: boolean): void {
   if (follow) {
     sqlite.prepare("INSERT OR IGNORE INTO board_follows (user_id, board, created_at) VALUES (?, ?, ?)")
       .run(userId, board, new Date().toISOString());
@@ -15501,6 +15501,8 @@ export const storage: IStorage = {
     const followsGiftz = viewerUserId != null && isFollowingBoard(viewerUserId, "giftz");
     const followsGigz = viewerUserId != null && isFollowingBoard(viewerUserId, "gigz");
     const followsSellz = viewerUserId != null && isFollowingBoard(viewerUserId, "sellz");
+    const followsMizzed = viewerUserId != null && isFollowingBoard(viewerUserId, "mizzed");
+    const followsHouz = viewerUserId != null && isFollowingBoard(viewerUserId, "houz");
     const viewerIsAdmin = !!opts.viewerIsAdmin;
     const cursor = opts.cursor?.trim() || null;
 
@@ -15699,7 +15701,7 @@ export const storage: IStorage = {
     // HAUSING. Ordered by listing recency inside listHousingPosts, the same axis
     // the feed sorts on, so a new post is always a candidate.
     try {
-      for (const post of listHousingPosts(sqlite, { viewerId: viewerUserId ?? null, limit: 12 })) {
+      for (const post of listHousingPosts(sqlite, { viewerId: viewerUserId ?? null, limit: followsHouz ? 100 : 12 })) {
         items.push({
           id: `housing-${post.id}`,
           kind: "housing",
@@ -15718,6 +15720,7 @@ export const storage: IStorage = {
           link: `/hausing/${post.id}`,
           boardPostId: post.id,
           photoUrl: post.photos[0] || null,
+          viewerFollowsBoard: followsHouz,
         });
       }
     } catch {
@@ -15748,7 +15751,7 @@ export const storage: IStorage = {
       });
     }
 
-    for (const row of storage.getMissedConnections("ACTIVE", viewerUserId).slice(0, 12)) {
+    for (const row of storage.getMissedConnections("ACTIVE", viewerUserId).slice(0, followsMizzed ? 100 : 12)) {
       // Mirror the board's spottedKind()/spottedPlace() so the feed card and the
       // detail card that opens on tap read identically.
       const kind = row.eventId != null
@@ -15784,6 +15787,7 @@ export const storage: IStorage = {
         event: null,
         link: "/spotted",
         spotted: { id: row.id, kindLabel: kind.label, kindColor: kind.color },
+        viewerFollowsBoard: followsMizzed,
       });
     }
 

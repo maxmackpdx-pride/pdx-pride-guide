@@ -85,7 +85,7 @@ export type HubFeedItem = {
   } | null;
   /** Numeric board post id for gig/gift cards, used to open the board overlay. */
   boardPostId?: number | null;
-  /** The viewer follows this Gigz or Giftz board. */
+  /** The viewer follows this post's board. */
   viewerFollowsBoard?: boolean;
   photoUrl?: string | null;
   mediaUrl?: string | null;
