@@ -659,7 +659,7 @@ export default function ZaydarMapDemo() {
     { id:"places",label:"Placez",color:"#00FFFF",enabled:showPlaces,onToggle:()=>toggleLayer("hidePlaces"),panel:worldPanels.places,viewMore:[] },
     { id:"mizzed",label:"Mizzed",color:"#FF00CC",enabled:showMizzed,onToggle:()=>toggleLayer("hideMizzed"),panel:worldPanels.mizzed,viewMore:[] },
     { id:"gigz",label:"Gigz",color:"#8800FF",enabled:showGigz,onToggle:()=>toggleLayer("hideGigz"),panel:worldPanels.gigz,viewMore:[{label:"Browse all Gigz",href:"/pride-work"}] },
-    { id:"giftz",label:"Giftz",color:"#CCFF00",enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[] },
+    { id:"giftz",label:"Giftz",color:"#CCFF00",enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[{label:"Browse all Giftz",href:"/gifting"}] },
     { id:"sellz",label:"Sellz",color:"#39FF14",enabled:showSellz,onToggle:()=>toggleLayer("hideSellz"),panel:worldPanels.sellz,viewMore:[] },
     { id: "houz", label: "Haüz", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [] },
   ];
