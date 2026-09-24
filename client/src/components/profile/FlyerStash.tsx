@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
-import { useIsMobile } from "@/hooks/use-mobile";
+import AnimatedCardStack from "@/components/ui/animate-card-animation";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent } from "./types";
 import "./FlyerStash.css";
@@ -142,17 +142,6 @@ function normalizeRole(raw?: string | null): StashRole {
   return "WENT";
 }
 
-function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
-    if (document.documentElement.classList.contains("calm-mode")) return true;
-  } catch {
-    /* ignore */
-  }
-  return false;
-}
-
 function tierIndex(xp: number): number {
   let idx = 0;
   for (let i = 0; i < XP_TIERS.length; i++) {
@@ -216,21 +205,11 @@ export default function FlyerStash({
   const base = useMemo(() => buildFlyers(events), [events]);
   const n = base.length;
   const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const reduced = prefersReducedMotion();
-  const isMobile = useIsMobile();
+
 
   useEffect(() => {
     setActive(0);
   }, [n]);
-
-  useEffect(() => {
-    if (paused || n <= 1 || reduced || isMobile) return;
-    const id = window.setInterval(() => {
-      setActive((a) => a + 1);
-    }, CYCLE_MS);
-    return () => window.clearInterval(id);
-  }, [paused, n, reduced, isMobile]);
 
   const act = n > 0 ? ((active % n) + n) % n : 0;
 
@@ -286,36 +265,6 @@ export default function FlyerStash({
       posLabel: n ? `${act + 1} / ${n}` : "0 / 0",
     };
   }, [base, n, act]);
-
-  const spread = paused ? 15 : 10;
-  const gap = paused ? 88 : 56;
-
-  const laidOut = useMemo(() => {
-    return base.map((f, i) => {
-      let rel = i - act;
-      if (rel > n / 2) rel -= n;
-      if (rel < -n / 2) rel += n;
-      const abs = Math.abs(rel);
-      const rot = rel * spread;
-      const x = rel * gap;
-      const y = abs * abs * 9;
-      const scale = rel === 0 ? 1.14 : Math.max(0.6, 1 - Math.min(abs, 5) * 0.055);
-      const z = 200 - Math.round(abs * 10);
-      const opacity = abs > 5 ? 0 : 1;
-      const front = rel === 0;
-      const glow = front
-        ? `0 18px 44px rgba(0,0,0,0.7), 0 0 26px ${f.rare ? f.color : "rgba(255,0,204,0.35)"}`
-        : f.rare
-          ? `0 10px 26px rgba(0,0,0,0.6), 0 0 16px ${f.color}`
-          : "0 10px 26px rgba(0,0,0,0.55)";
-      const transform = `translateX(${x}px) translateY(${y}px) rotate(${rot}deg) scale(${scale})`;
-      return { ...f, transform, z, opacity, front, glow, index: i };
-    });
-  }, [base, act, n, spread, gap]);
-
-  const pick = useCallback((i: number) => {
-    setActive(i);
-  }, []);
 
   if (!n) return null;
 
@@ -380,31 +329,23 @@ export default function FlyerStash({
 
         <div
           className="flyer-stash__stage"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
+
         >
           <div className="flyer-stash__stage-dots" aria-hidden />
           <div className="flyer-stash__front-label">Front · {stats.frontTitle}</div>
 
-          <div className="flyer-stash__fan-anchor" role="region" aria-label="Past events">
-            {laidOut.map((f) => (
+          <AnimatedCardStack
+            items={base}
+            active={act}
+            getKey={(flyer) => flyer.id}
+            onAdvance={() => setActive((a) => a + 1)}
+            renderCard={(f) => (
               <button
-                key={f.id}
                 type="button"
                 className="flyer-stash__card"
-                style={{
-                  transform: f.transform,
-                  zIndex: f.z,
-                  opacity: f.opacity,
-                  borderColor: f.color,
-                  boxShadow: f.glow,
-                  pointerEvents: f.opacity === 0 ? "none" : "auto",
-                }}
-                onClick={() => {
-                  pick(f.index);
-                  onEventClick?.(f.event);
-                }}
-                aria-label={`${f.title} at ${f.venue}`}
+                style={{ borderColor: f.color }}
+                onClick={() => onEventClick?.(f.event)}
+                aria-label={`Open ${f.title} at ${f.venue}`}
               >
                 <div className="flyer-stash__card-daybar" style={{ background: f.color }} />
                 {f.posterUrl ? (
@@ -440,8 +381,8 @@ export default function FlyerStash({
                   </div>
                 </div>
               </button>
-            ))}
-          </div>
+            )}
+          />
 
           <div className="flyer-stash__controls">
             <button

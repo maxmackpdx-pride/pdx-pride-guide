@@ -574,3 +574,50 @@ html.calm-mode .flyer-stash__card-holo {
     scroll-snap-align: start;
   }
 }
+
+/* Record sleeves: the front flyer drops away to reveal the next. */
+.flyer-stash__stage .record-stack {
+  position: absolute;
+  inset: 48px 24px 62px;
+  overflow: hidden;
+}
+.flyer-stash__stage .record-stack__sleeve {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: min(100%, 420px);
+  height: min(100%, 312px);
+  margin-left: calc(-1 * min(100%, 420px) / 2);
+  padding: 6px 6px 0;
+  border: 1px solid #363640;
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: #18181d;
+  box-shadow: 0 -10px 35px rgba(0, 0, 0, .6);
+  box-sizing: border-box;
+  will-change: transform;
+}
+.flyer-stash__stage .flyer-stash__card {
+  position: relative;
+  inset: auto;
+  display: block;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px 8px 0 0;
+  touch-action: pan-x;
+}
+.flyer-stash__stage .flyer-stash__card-title { font-size: clamp(19px, 3vw, 27px); }
+.flyer-stash__stage .flyer-stash__controls { display: flex; }
+.flyer-stash__stage .flyer-stash__front-label { color: #aaa; }
+
+@media (max-width: 767px) {
+  .flyer-stash__stage { min-height: 390px; }
+  .flyer-stash__stage .record-stack { inset: 48px 12px 62px; }
+  .flyer-stash__stage .record-stack__sleeve {
+    width: min(100%, 340px);
+    height: min(100%, 290px);
+    margin-left: calc(-1 * min(100%, 340px) / 2);
+  }
+  .flyer-stash__stage .flyer-stash__card-title { font-size: 20px; }
+}
