@@ -80,20 +80,19 @@ export function eventMatchesBusiness(
   const eventAddressKey = event.address ? normalizeAddressKey(event.address) : "";
   const businessAddressKey = business.address ? normalizeAddressKey(business.address) : "";
 
-  if (eventAddressKey && businessAddressKey && eventAddressKey === businessAddressKey) {
-    return true;
+  // A known address conflict wins over a similar venue name. This also keeps
+  // relocated venues from attaching their old directory identity to an event.
+  if (eventAddressKey && businessAddressKey && eventAddressKey !== businessAddressKey) {
+    return false;
   }
 
   if (eventVenueKey && businessKey) {
-    if (eventVenueKey === businessKey) return true;
-    // Containment only when the shorter key is substantial (avoids "camp" ⊂ "triangle recreation camp")
-    const shorter = eventVenueKey.length <= businessKey.length ? eventVenueKey : businessKey;
-    const longer = eventVenueKey.length <= businessKey.length ? businessKey : eventVenueKey;
-    if (shorter.length >= 6 && longer.includes(shorter)) return true;
-    // Named venues that disagree on name must not collapse via nearby pins
-    // (CC Slaughters / Darcelle / Badlands sit within ~30m of each other).
-    return false;
+    // Organizer and venue names are different identities. A partial word or a
+    // shared street address cannot turn one named place into another.
+    return eventVenueKey === businessKey;
   }
+
+  if (eventAddressKey && businessAddressKey) return eventAddressKey === businessAddressKey;
 
   // Coords only when one side is missing a usable name (address already checked).
   if (hasMapCoordinates(event) && hasMapCoordinates(business)) {

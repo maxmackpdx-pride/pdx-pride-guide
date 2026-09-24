@@ -60,6 +60,14 @@ seed(candidateKey,{title:event.title},[sources[1]]);
 assert.equal(gate().publishable,false,"unpassed active regression still blocks");
 recordMistakeTestResult({testKey,passed:true});
 assert.equal(gate().publishable,true,"candidate is approved before an event ID exists");
+const ordinarySingleSourceKey="candidate:ordinary-single-source";
+seed(ordinarySingleSourceKey,event,[sources[0]]);
+seed(ordinarySingleSourceKey,{
+  venueName:event.venueName, address:event.address, dateStart:event.dateStart,
+  dateEnd:event.dateEnd, status:event.status, posterImageUrl:event.posterImageUrl,
+},[sources[1]]);
+assert.equal(gate({...gateInput,candidateKey:ordinarySingleSourceKey}).publishable,true,
+  "one primary source is enough for ordinary details when high-risk fields have two matching sources");
 seed(candidateKey,{title:"New contradiction from the first source"},[sources[0]]);
 assert.equal(gate().publishable,false,"new same-source contradiction supersedes older agreement, including equal checkedAt timestamps");
 seed(candidateKey,{title:event.title},[sources[0]]);

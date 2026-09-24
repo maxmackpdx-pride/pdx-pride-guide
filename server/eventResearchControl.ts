@@ -743,9 +743,14 @@ function evaluateCandidateDecisionGate(input: {
   const missingEvidence = fields.filter(field => !evidence.some(item => item.field === field));
   const mismatchedEvidence = fields.filter(field => evidence.some(item => item.field === field) && !matching(field).length);
   const conflictingEvidence = fields.filter(field => evidence.some(item => item.field === field && JSON.stringify(parseJson(item.observed_value_json, null)) !== JSON.stringify(values[field])));
-  // Creates contain high-risk dates/identity/status. Callers cannot opt out;
-  // independent sources must actually agree on each proposed value.
-  const insufficientIndependentVerification = fields.filter(field => new Set(matching(field).map(item => item.source_identity)).size < 2);
+  // Tucker's publication rule: ordinary details need one current primary
+  // source; date/time, venue/address, status, and artwork need two independent
+  // matching sources. The remaining conflict, duplicate, and mistake-test
+  // gates still apply to every candidate.
+  const highRiskFields = new Set(["dateStart", "dateEnd", "venueName", "address", "status", "posterImageUrl"]);
+  const insufficientIndependentVerification = fields.filter(field =>
+    highRiskFields.has(field) && new Set(matching(field).map(item => item.source_identity)).size < 2
+  );
   const conflicts = sqlite.prepare(`SELECT id, field FROM agent_event_conflicts WHERE candidate_key = ? AND status = 'open' AND material = 1`).all(candidateKey) as Array<{ id: string; field: string }>;
   const reviews = sqlite.prepare(`SELECT id FROM agent_review_queue WHERE candidate_key = ? AND status = 'open'`).all(candidateKey) as Array<{ id: string }>;
   const failedTests = sqlite.prepare(`SELECT test_key FROM agent_mistake_tests WHERE status = 'active' AND (last_result IS NULL OR last_result != 'passed' OR last_run_at IS NULL OR last_run_at < ?)`).all(run.started_at) as Array<{ test_key: string }>;
