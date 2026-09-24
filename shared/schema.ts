@@ -109,7 +109,10 @@ export const gigPosts = sqliteTable("gig_posts", {
   businessId: integer("business_id"),
 });
 
-export const insertGigPostSchema = createInsertSchema(gigPosts).omit({ id: true, createdAt: true, status: true });
+export const insertGigPostSchema = createInsertSchema(gigPosts).omit({ id: true, createdAt: true, status: true }).extend({
+  title: z.string().trim().min(3),
+  description: z.string().trim().min(20),
+});
 export type InsertGigPost = z.infer<typeof insertGigPostSchema>;
 export type GigPost = typeof gigPosts.$inferSelect;
 
@@ -595,6 +598,9 @@ export const insertGiftingPostSchema = createInsertSchema(giftingPosts).omit({
   renewCount: true,
   expiresAt: true,
   reportCount: true,
+}).extend({
+  title: z.string().trim().min(1).max(90),
+  description: z.string().trim().min(1),
 });
 export const insertGiftingInterestSchema = createInsertSchema(giftingInterests).omit({ id: true, createdAt: true, status: true });
 export const insertGiftingReportSchema = createInsertSchema(giftingReports).omit({ id: true, createdAt: true, status: true, adminNotes: true });
@@ -657,6 +663,9 @@ export const sellzSaves = sqliteTable("sellz_saves", {
 
 export const insertSellzPostSchema = createInsertSchema(sellzPosts).omit({
   id: true, createdAt: true, status: true, selectedInterestId: true, expiresAt: true, reportCount: true,
+}).extend({
+  title: z.string().trim().min(1),
+  description: z.string().trim().min(1),
 });
 export const insertSellzInterestSchema = createInsertSchema(sellzInterests).omit({ id: true, createdAt: true, status: true });
 export const insertSellzReportSchema = createInsertSchema(sellzReports).omit({ id: true, createdAt: true, status: true });

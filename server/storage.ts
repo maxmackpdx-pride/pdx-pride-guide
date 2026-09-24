@@ -4604,19 +4604,20 @@ function runBootMigrationsOnce() {
     // Record after the attempt so a failed import can still retry next boot.
     void import("./qsearch/seedMissingYearround")
       .then(({ seedMissingYearroundToReview }) => {
+        if (!sqlite.open) return;
         try {
           const result = seedMissingYearroundToReview();
           console.info(
             `[boot] seed_missing_yearround_review_v1: seeded=${result.seeded} skipBoard=${result.skippedBoard} skipPending=${result.skippedPending} path=${result.path}`,
           );
+          recordBootMigration("seed_missing_yearround_review_v1");
         } catch (e) {
           console.warn("[boot] seed_missing_yearround_review_v1 failed:", e);
         }
-        recordBootMigration("seed_missing_yearround_review_v1");
       })
       .catch((e) => {
-        console.warn("[boot] seed_missing_yearround_review_v1 failed:", e);
-        recordBootMigration("seed_missing_yearround_review_v1");
+        // Never touch a closed database or mark a failed import complete.
+        if (sqlite.open) console.warn("[boot] seed_missing_yearround_review_v1 failed:", e);
       });
   }
   if (!hasBootMigration("seed_plus_psychiatry_v1")) {

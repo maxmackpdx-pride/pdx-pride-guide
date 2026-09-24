@@ -141,7 +141,7 @@ function HostingCard({
         {event.venueName && <div className="hp-card__venue">{event.venueName}</div>}
         {status && <div className="hp-card__stat">{status}</div>}
       </div>
-      {interactive ? <span className="hp-card__action" aria-hidden="true">Manage</span> : null}
+      {interactive ? <span className="hp-card__action" aria-hidden="true">View event</span> : null}
     </article>
   );
 }

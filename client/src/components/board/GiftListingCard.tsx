@@ -277,10 +277,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
       tabIndex={0}
       onKeyDown={e => {
         // Don't steal Space/Enter from the reply note textarea (or any field).
-        const tag = (e.target as HTMLElement)?.tagName;
-        if (tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT" || (e.target as HTMLElement)?.isContentEditable) {
-          return;
-        }
+        if (e.target !== e.currentTarget) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onToggle();

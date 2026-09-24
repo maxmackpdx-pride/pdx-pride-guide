@@ -860,7 +860,6 @@ function publicGigPost(gig: any, viewerUserId?: number) {
   };
 }
 
-const GIFTING_RUN_END = new Date("2026-07-27T00:00:00-07:00").getTime();
 const RESTRICTED_GIFTING_TERMS = [
   "weapon", "gun", "ammo", "drugs", "cocaine", "meth", "fentanyl", "prescription",
   "alcohol", "needle", "needles", "poppers", "lube", "lubricant", "insertable",
@@ -898,7 +897,7 @@ function assertGigBoardAllowed(body: any, fields: {
 
 function assertGiftingAllowed(body: any) {
   if (!giftingPostingOpen()) {
-    throw new Error("Public GIFTZ posts are paused after July 26, 2026.");
+    throw new Error("New GIFTZ posts are temporarily paused.");
   }
   if (!body.acceptRules) throw new Error("You must agree to the community rules.");
   const haystack = `${body.title || ""} ${body.description || ""} ${body.category || ""}`.toLowerCase();
@@ -907,7 +906,8 @@ function assertGiftingAllowed(body: any) {
 }
 
 function giftingPostingOpen(): boolean {
-  return Date.now() < GIFTING_RUN_END || process.env.GIFTING_KEEP_OPEN === "true";
+  // GIFTZ is year-round; an explicit operational pause remains available.
+  return process.env.GIFTING_KEEP_OPEN !== "false";
 }
 
 function getBaseUrl(req: any) {
@@ -3401,12 +3401,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.put("/api/sellz/:id", requireAuth, (req, res) => {
     try {
+      const content = insertSellzPostSchema.pick({ title: true, description: true }).parse(req.body);
       const priceCents = parseMarketplacePrice(req.body.price);
       const haystack = `${req.body.title || ""} ${req.body.description || ""} ${req.body.category || ""}`.toLowerCase();
       if (RESTRICTED_GIFTING_TERMS.some(term => haystack.includes(term))) throw new Error("This listing appears to include a restricted item.");
       if (moderationGate(res, "SELLZ marketplace edit", { title: req.body.title, description: req.body.description })) return;
       const post = storage.updateSellzPost(Number(req.params.id), req.session.userId!, {
-        title: String(req.body.title || "").trim(), description: String(req.body.description || "").trim(),
+        title: content.title, description: content.description,
         category: String(req.body.category || "Other").trim(), condition: String(req.body.condition || "Good").trim(),
         priceCents, negotiable: Boolean(req.body.negotiable), neighborhood: String(req.body.neighborhood || "Portland").trim(),
         pickupPreference: String(req.body.pickupPreference || "Message to coordinate").trim(),

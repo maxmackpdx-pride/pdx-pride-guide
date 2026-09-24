@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DatabaseSync } from 'node:sqlite';
+import Database from 'better-sqlite3';
 import {createWaypointStore,waypointExpiry} from './outzWaypoints.ts';
 
 test('expiry honors days, weeks and clamped calendar months',()=>{
@@ -12,7 +12,7 @@ test('expiry honors days, weeks and clamped calendar months',()=>{
  assert.throws(()=>waypointExpiry('forever',now));
 });
 test('saved waypoints expire, stay scoped to a place, and only their author can remove them',()=>{
- const db=new DatabaseSync(':memory:');const store=createWaypointStore(db as any);
+ const db=new Database(':memory:');const store=createWaypointStore(db as any);
  const now=new Date('2026-09-22T12:00:00Z');
  const id=Number(store.add('trail',42,{title:'Creek crossing',note:'Wet rocks',lat:45,lng:-122,duration:'day'},now));
  assert.equal(store.list('trail',42,now)[0].canDelete,true);
@@ -24,7 +24,7 @@ test('saved waypoints expire, stay scoped to a place, and only their author can 
  assert.equal(store.list('trail',42,now).length,0);db.close();
 });
 test('invalid locations, text and expiry never persist',()=>{
- const db=new DatabaseSync(':memory:');const store=createWaypointStore(db as any);
+ const db=new Database(':memory:');const store=createWaypointStore(db as any);
  const input={title:'Water',note:'',lat:45,lng:-122,duration:'week'};
  for(const patch of [{lat:NaN},{lat:91},{lng:181},{title:''},{title:'x'.repeat(81)},{note:'x'.repeat(501)},{duration:'forever'}])assert.throws(()=>store.add('trail',1,{...input,...patch}));
  assert.equal(store.list('trail').length,0);db.close();

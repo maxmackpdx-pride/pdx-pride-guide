@@ -112,7 +112,7 @@ function GigRail({ posts, kind, selected, onSelect }: {
           const poster = post.displayName || post.name;
           return <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
             {isTalent ? <button type="button" className="gigz-talent" style={{ "--gigz-accent": ["#b984ff", "#bbff54", "#ff8bb8", "#8edfff"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ${poster}: ${post.title}`}>
-              <span className="gigz-talent__status"><span><i /> Available for gigs</span><small>Posted {timeAgo(post.createdAt)}</small></span>
+              <span className="gigz-talent__status"><span><i /> Available for gigs</span><small>{post.username === "hausing_demo" ? "DEMO LISTING" : `Posted ${timeAgo(post.createdAt)}`}</small></span>
               <span className="gigz-talent__portrait">{post.posterPhotoUrl || post.imageUrl ? <img src={post.posterPhotoUrl || post.imageUrl || ""} alt="" loading="lazy" /> : <UserAvatar photoUrl={post.posterPhotoUrl} avatarChoice={post.avatarChoice} avatarRing={post.posterAvatarRing} displayName={poster} username={post.username} size={150} />}</span>
               <strong>{poster}</strong><span className="gigz-talent__role">{post.title}</span>
               <span className="gigz-talent__location"><MapPin size={14} /> {post.isRemote ? "Remote" : post.location || "Portland"}</span>
@@ -121,7 +121,7 @@ function GigRail({ posts, kind, selected, onSelect }: {
             </button> : <button type="button" className="gigz-opportunity" style={{ "--gigz-accent": ["#bb8aff", "#75c9ef", "#ffb477", "#f39ace", "#c7fa89"][index % 5] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gig: ${post.title}`}>
               {post.imageUrl ? <img src={post.imageUrl} alt="" loading="lazy" /> : <span className="gigz-opportunity__fallback" aria-hidden="true">GIGZ</span>}
               <span className="gigz-opportunity__shade" />
-              <span className="gigz-opportunity__top"><span><em>{post.skills?.split(",")[0]?.trim() || "OPPORTUNITY"}</em><small>Gig posted · {timeAgo(post.createdAt)}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
+              <span className="gigz-opportunity__top"><span><em>{post.skills?.split(",")[0]?.trim() || "OPPORTUNITY"}</em><small>{post.username === "hausing_demo" ? "DEMO LISTING" : `Gig posted · ${timeAgo(post.createdAt)}`}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
               <span className="gigz-opportunity__bottom"><strong>{post.title}</strong><span>{post.isRemote ? "Remote" : post.location || "Portland"}{post.gigDate ? ` · ${post.gigDate}${post.gigTime ? ` · ${post.gigTime}` : ""}` : ""}</span><em>{post.compensation || "Pay not listed"}</em></span>
             </button>}
           </CarouselItem>;
@@ -288,10 +288,7 @@ export function GigListingCard({
       tabIndex={0}
       onKeyDown={e => {
         // Don't steal Space/Enter from the reply textarea (or any field).
-        const tag = (e.target as HTMLElement)?.tagName;
-        if (tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT" || (e.target as HTMLElement)?.isContentEditable) {
-          return;
-        }
+        if (e.target !== e.currentTarget) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onToggle();

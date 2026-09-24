@@ -33,26 +33,8 @@ type EventWithVenue = Event & {
   hasPendingClaim?: boolean;
 };
 
-export type ListingCardOriginRect = Pick<DOMRect, "left" | "top" | "width" | "height">;
-
-function cardOriginRect(element: HTMLElement): ListingCardOriginRect {
-  const { left, top, width, height } = element.getBoundingClientRect();
-  return { left, top, width, height };
-}
-
-function eventCardA11yProps(onClick: (originRect: ListingCardOriginRect) => void) {
-  return {
-    role: "button" as const,
-    tabIndex: 0,
-    onClick: (e: React.MouseEvent<HTMLDivElement>) => onClick(cardOriginRect(e.currentTarget)),
-    onKeyDown: (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        onClick(cardOriginRect(e.currentTarget as HTMLElement));
-      }
-    },
-  };
-}
+import { cardOriginRect, eventCardA11yProps, type ListingCardOriginRect } from "@/lib/eventCardInteraction";
+export type { ListingCardOriginRect } from "@/lib/eventCardInteraction";
 
 function EventShareButton({ href, title }: { href: string; title: string }) {
   const { toast } = useToast();
@@ -158,7 +140,7 @@ export default function ListingCard({
           onErrorCapture={handlePosterError}
           data-testid={`event-card-${event.id}`}
           style={{ ["--i" as string]: Math.round((revealDelay || 0) / 40) }}
-          {...eventCardA11yProps(onClick)}
+          {...eventCardA11yProps(onClick, event.title)}
         >
           <EventShareButton href={shareHref} title={event.title} />
           <DsEventRow
@@ -192,7 +174,7 @@ export default function ListingCard({
         onErrorCapture={handlePosterError}
         data-testid={`event-card-${event.id}`}
         style={{ ["--i" as string]: Math.round((revealDelay || 0) / 40) }}
-        {...eventCardA11yProps(onClick)}
+        {...eventCardA11yProps(onClick, event.title)}
       >
         <EventShareButton href={shareHref} title={event.title} />
         <PosterCard

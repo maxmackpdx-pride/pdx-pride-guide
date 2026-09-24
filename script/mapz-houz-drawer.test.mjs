@@ -12,7 +12,7 @@ test('HAÜZ card, detail, and close stay on Mapz',async()=>{
   assert.match(page,/<HousingPostOverlay/);
   assert.match(overlay,/onOpen: \(\) => showDetail\(true\)/);
   assert.match(overlay,/backLabel: "Back to card"/);
-  assert.match(overlay,/aria-label="Close HAÜZ and return to map"/);
+  assert.match(overlay,/<DetailActions label="Haüz listing" onClose=\{requestClose\}/);
   assert.doesNotMatch(overlay,/\/the-hauz/);
 });
 
