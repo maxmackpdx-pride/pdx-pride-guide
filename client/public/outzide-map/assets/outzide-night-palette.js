@@ -2,27 +2,27 @@
 // Keep this treatment local so Mapz and the home flyover retain their own shader.
 export function brightenOutzideTerrain(style) {
   const layer = id => style.layers.find(entry => entry.id === id);
-  layer('ground').paint['background-color'] = '#17262a';
+  layer('ground').paint['background-color'] = '#1d3034';
   Object.assign(layer('land-relief').paint, {
-    'hillshade-shadow-color': '#142126',
-    'hillshade-highlight-color': '#839b91',
-    'hillshade-accent-color': '#344b43',
+    'hillshade-shadow-color': '#132127',
+    'hillshade-highlight-color': '#a0b9aa',
+    'hillshade-accent-color': '#466457',
   });
-  for (const id of ['forest-landcover', 'forest-landuse']) layer(id).paint['fill-color'] = '#254237';
-  for (const id of ['leaf-landcover', 'leaf-landuse']) layer(id).paint['fill-color'] = '#2b4538';
-  layer('park-areas').paint['fill-color'] = '#304b3d';
+  for (const id of ['forest-landcover', 'forest-landuse']) layer(id).paint['fill-color'] = '#365a46';
+  for (const id of ['leaf-landcover', 'leaf-landuse']) layer(id).paint['fill-color'] = '#3a5947';
+  layer('park-areas').paint['fill-color'] = '#426650';
   layer('developed-earth').paint['fill-color'] = [
-    'match', ['get', 'class'], 'commercial', '#243638', 'retail', '#243638',
-    'industrial', '#273a3b', '#17262a',
+    'match', ['get', 'class'], 'commercial', '#33494a', 'retail', '#33494a',
+    'industrial', '#354b4c', '#1d3034',
   ];
   layer('water').paint['fill-color'] = [
-    'interpolate', ['linear'], ['zoom'], 10, '#102a36', 14, '#143540', 18, '#183e49',
+    'interpolate', ['linear'], ['zoom'], 10, '#123847', 14, '#184351', 18, '#1c4a58',
   ];
   layer('streets').paint['line-color'] = [
-    'match', ['get', 'class'], 'motorway', '#849fad', 'trunk', '#7895a2',
-    'primary', '#6b8997', 'secondary', '#5d7b88', 'tertiary', '#4f6975',
-    'minor', '#3e5660', 'service', '#334b54', 'path', '#3b554c',
-    'rail', '#506774', '#3e5660',
+    'match', ['get', 'class'], 'motorway', '#9ebaca', 'trunk', '#8eabba',
+    'primary', '#829dab', 'secondary', '#738d99', 'tertiary', '#607b86',
+    'minor', '#526d77', 'service', '#425e67', 'path', '#53715f',
+    'rail', '#647f8c', '#526d77',
   ];
   return style;
 }

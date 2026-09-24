@@ -48,3 +48,27 @@
   border-radius:28px;
  }
 }
+
+/* Mobile map: one compact category rail with an obvious next item. The map
+   starts immediately below it; both filter groups remain keyboard operable. */
+@media(max-width:760px){
+ .outzide-shell .topbar{top:8px;left:10px;right:10px;height:44px;padding:0 8px;gap:5px}
+ .outzide-shell .brand img{width:67px;height:38px}
+ .outzide-shell .topbar nav{margin-left:auto;min-width:0;padding:1px}
+ .outzide-shell .topbar nav button{font-size:0;min-height:38px;padding:4px 7px}
+ .outzide-shell .topbar nav button:last-child{font-size:0}
+ .outzide-shell .topbar nav button::after{font-size:11px}
+ .outzide-shell .topbar nav button[data-region="OR"]::after{content:"OR"}
+ .outzide-shell .topbar nav button[data-region="WA"]::after{content:"WA"}
+ .outzide-shell .topbar nav button[data-region="all"]::after{content:"NW"}
+ .outzide-shell .header-actions{margin-left:0}
+ .outzide-shell .header-actions #updates-button{font-size:11px;min-height:38px;white-space:nowrap;padding:5px 7px}
+ .outzide-shell .fieldbar{top:59px;left:10px;right:10px;height:49px;min-height:0;padding:3px;gap:4px;display:grid;grid-template-columns:auto minmax(0,1fr)}
+ .outzide-shell .fieldbar::after{content:none}
+ .outzide-shell .explore-view-switch button{min-height:41px}
+ .outzide-shell .fieldbar .filters{overflow-x:auto;overflow-y:hidden;padding:0 22px 0 0;scrollbar-width:none;mask-image:linear-gradient(to right,#000 calc(100% - 26px),transparent);-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 26px),transparent);scroll-snap-type:x proximity}
+ .outzide-shell .fieldbar .filters::-webkit-scrollbar{display:none}
+ .outzide-shell .fieldbar .filters button{min-height:41px;scroll-snap-align:start}
+ .outzide-shell .map-top{top:117px}
+ .outzide-shell .discovery{top:117px}
+}

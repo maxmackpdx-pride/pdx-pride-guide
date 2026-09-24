@@ -1,0 +1,25 @@
+/* This iframe mirrors the exact shared Zaylist color tokens in
+   client/src/components/ds/tokens/colors.css. A regression check guards drift. */
+:root{
+  --neon-yellow:#CCFF00;
+  --neon-cyan:#00FFFF;
+  --neon-magenta:#FF00CC;
+  --neon-orange:#FF6600;
+  --neon-red:#FF2400;
+  --neon-blue:#0044FF;
+  --green-acid:#39FF14;
+}
+.outzide-shell .waypoint-head{color:var(--c);border-color:var(--c)}
+.outzide-shell .waypoint-head:is(.winter,.atv,.boating,.fishing,.dayuse){color:color-mix(in srgb,var(--c) 60%,white)}
+.outzide-shell .waypoint-cluster .waypoint-head{
+  width:39px;height:39px;left:-19px;bottom:27px;border-radius:50%;
+  color:var(--c);background:#071819f5;border:2px solid var(--c);
+  box-shadow:0 2px 10px #000b;
+}
+.outzide-shell .waypoint-cluster .waypoint-label{bottom:71px;left:20px;color:var(--ink)}
+.outzide-shell .waypoint-cluster .cluster-total{
+  font:700 17px/1 var(--body);font-variant-numeric:tabular-nums;
+  color:var(--c);text-shadow:0 1px 2px #000;letter-spacing:0;
+}
+.outzide-shell .waypoint-cluster .waypoint-head::before,
+.outzide-shell .waypoint-cluster .waypoint-head::after{display:none}
