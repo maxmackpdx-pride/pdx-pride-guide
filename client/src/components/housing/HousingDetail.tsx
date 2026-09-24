@@ -442,14 +442,6 @@ function LookingDetail({
 
           <div className="hz-dhead">
             <HousingWell photos={post.photos} title={post.author.displayName} nameCap={0.35}>
-              <HouseholdStack
-                people={[self, ...people]}
-                pets={pets}
-                size="md"
-                scale={1.5}
-                wrap3
-                onSelect={h.onPerson}
-              />
               <Mono micro>Meet {first}</Mono>
             </HousingWell>
 
@@ -661,7 +653,7 @@ function OfferingDetail({ post, h, isOwner }: { post: HousingPostView; h: Housin
         h={h}
         isOwner={isOwner}
         primary={
-          <RequestButton post={post} h={h} kind="CHAT" icon="message" label="Chat with the household" />
+          <RequestButton post={post} h={h} kind="CHAT" icon="message" label="Contact Haüz" />
         }
       />
     </div>

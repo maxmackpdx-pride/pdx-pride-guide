@@ -661,7 +661,7 @@ export default function ZaydarMapDemo() {
     { id:"gigz",label:"Gigz",color:"#8800FF",enabled:showGigz,onToggle:()=>toggleLayer("hideGigz"),panel:worldPanels.gigz,viewMore:[{label:"Browse all Gigz",href:"/pride-work"}] },
     { id:"giftz",label:"Giftz",color:"#CCFF00",enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[{label:"Browse all Giftz",href:"/gifting"}] },
     { id:"sellz",label:"Sellz",color:"#39FF14",enabled:showSellz,onToggle:()=>toggleLayer("hideSellz"),panel:worldPanels.sellz,viewMore:[{label:"Browse all Sellz",href:"/sellz"}] },
-    { id: "houz", label: "Haüz", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [] },
+    { id: "houz", label: "Haüz", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "Browse all Haüz", href: "/the-hauz" }] },
   ];
 
   useAttendanceSummariesLive();

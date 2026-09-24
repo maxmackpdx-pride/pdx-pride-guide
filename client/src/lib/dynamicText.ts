@@ -79,7 +79,7 @@ const MIN_ROW_SIZE = 24;
 const MAX_ROW_SIZE = 220;
 
 /** Height weight per row, matching the shipped `.hz-well__name-line` line-height (0.82). */
-const ROW_HEIGHT_WEIGHT = 0.82;
+const ROW_HEIGHT_WEIGHT = 0.98;
 
 /**
  * Fixed tracking applied to every row, matching the shipped

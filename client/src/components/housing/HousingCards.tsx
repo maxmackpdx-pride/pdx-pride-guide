@@ -153,7 +153,7 @@ function CardActions({ post, h }: { post: HousingPostView; h: HousingCardHandler
       ) : (
         <Btn size="sm" kind="solid" disabled={requestBusy} onClick={stop(() => h.onChat(post))}>
           <HousingIcon name="message" />
-          {requested ? "Request sent" : "Chat"}
+          {requested ? "Request sent" : post.type === "OFFERING" ? "Contact Haüz" : `Contact ${post.author.displayName.split(" ")[0]}`}
         </Btn>
       )}
     </div>
@@ -162,32 +162,12 @@ function CardActions({ post, h }: { post: HousingPostView; h: HousingCardHandler
 
 /** Looking for housing. The person is the listing, so their name is the motif. */
 export function LookingCard({ post, h }: { post: HousingPostView; h: HousingCardHandlers }) {
-  const { people, pets } = splitPeople(post);
   const firstName = post.author.displayName.split(" ")[0];
-  const self: HousingPerson = {
-    id: -post.id,
-    kind: "MEMBER",
-    userId: post.author.userId,
-    username: post.author.username,
-    name: post.author.displayName,
-    photoUrl: post.author.photoUrl,
-    avatarChoice: post.author.avatarChoice,
-    avatarRing: post.author.avatarRing,
-    role: "MEMBER",
-  };
 
   return (
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.LOOKING} />
       <HousingWell photos={post.photos} title={cardDynamicTitle(post, post.author.displayName)}>
-        <HouseholdStack
-          people={[self, ...people]}
-          pets={pets}
-          size="sm"
-          scale={1.5}
-          wrap3
-          onSelect={h.onPerson}
-        />
         <Mono micro>Meet {firstName}</Mono>
       </HousingWell>
 

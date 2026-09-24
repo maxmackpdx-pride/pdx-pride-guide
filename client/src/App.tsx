@@ -61,7 +61,6 @@ const Gifting = lazyWithReload(() => import("./pages/Gifting"));
 const Sellz = lazyWithReload(() => import("./pages/Sellz"));
 const Housing = lazyWithReload(() => import("./pages/Housing"));
 const HousingNew = lazyWithReload(() => import("./pages/HousingNew"));
-const HousingPost = lazyWithReload(() => import("./pages/HousingPost"));
 const About = lazyWithReload(() => import("./pages/About"));
 const Resume = lazyWithReload(() => import("./pages/Resume"));
 const Legal = lazyWithReload(() => import("./pages/Legal"));
@@ -149,7 +148,11 @@ function AppLayout() {
             <Route path="/sellz" component={Sellz} />
             <Route path="/sellz/" component={Sellz} />
             <Route path="/the-hauz/new" component={HousingNew} />
-            <Route path="/the-hauz/:id" component={HousingPost} />
+            <Route path="/the-hauz/:id">{params => {
+              const search = new URLSearchParams(window.location.search);
+              search.set("post", params.id);
+              return <Redirect to={`/the-hauz?${search.toString()}`} replace />;
+            }}</Route>
             <Route path="/the-hauz" component={Housing} />
             <Route path="/hausing/new">
               {() => <Redirect to="/the-hauz/new" />}

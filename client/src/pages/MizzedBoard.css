@@ -9,3 +9,19 @@
 .mizzed-source-link{position:relative;z-index:1;border:1px solid #af649c;border-radius:12px;padding:13px;margin:14px 0 18px;background:#261729}.mizzed-source-link>span{color:#ff9cdd;font-size:11px;font-weight:850;letter-spacing:.1em}.mizzed-source-link>div{display:flex;gap:14px;margin-top:10px}.mizzed-source-link img{width:68px;height:72px;object-fit:cover;border-radius:7px;background:#120e17}.mizzed-source-link strong,.mizzed-source-link small,.mizzed-source-link a{display:block}.mizzed-source-link strong{font-size:14px}.mizzed-source-link small{color:#c9b4c4;font-size:11px;margin:4px 0}.mizzed-source-link a{color:#ffb9e8;font-size:12px;text-decoration:underline}
 @media(max-width:700px){.mizzed-board__identity{min-height:95px}.mizzed-board__identity img{max-height:52px}.mizzed-board__identity span{font-size:12px;padding-left:12px}.mizzed-board__head{display:block;padding:35px 0 20px}.mizzed-board__post{margin-top:22px}.mizzed-board__item{flex-basis:min(78vw,310px)}.mizzed-board__item .board-spotted-card{height:445px}.mizzed-board__item .board-spotted-card__art{height:187px}.mizzed-board__item .board-spotted-card__title{font-size:25px}}
 .mizzed-compose-art{display:flex;gap:12px;align-items:center;border:1px solid #894d7c;border-radius:10px;background:#321f32;padding:10px;color:#e8d3e4;font-size:12px}.mizzed-compose-art img{width:62px;height:72px;object-fit:contain;border-radius:6px;background:#17101c}
+/* Same narrow orbiting rim and black ring as the event grid cards. */
+@property --mizzed-edge-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes mizzedEdgeOrbit { to { --mizzed-edge-angle: 360deg; } }
+.mizzed-board__rail { padding: 18px 12px 28px; }
+.mizzed-board__item { position: relative; isolation: isolate; transition: transform .15s ease; }
+.mizzed-board__item:hover { transform: translateY(-2px); }
+.mizzed-board__item::after {
+  content: ""; position: absolute; z-index: 3; inset: 0; padding: 2px; border-radius: 20px; pointer-events: none;
+  background: conic-gradient(from var(--mizzed-edge-angle), #ff00cc 0deg, #ff9deb 75deg, #75005e 190deg, #ff00cc 280deg, #f8fbff 332deg, #ff00cc 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: mizzedEdgeOrbit 22s linear infinite;
+}
+.mizzed-board__item .board-spotted-card { border-color: #18181d; box-shadow: 0 0 0 2px #000, 0 20px 32px -22px #ff43bd77; }
+.mizzed-board__item .board-spotted-card:hover { transform: none; }
+@media (prefers-reduced-motion: reduce) { .mizzed-board__item::after { animation: none; } }
+html.calm-mode .mizzed-board__item::after, :root[data-calm="true"] .mizzed-board__item::after { animation: none; }

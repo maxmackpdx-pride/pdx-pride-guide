@@ -12,7 +12,7 @@ import { SearchInput } from "@/components/ds";
  * Spec: docs/HAUS_HOUSING_SPEC_v0.2.md
  * Design: docs/design-handoff-hausing/
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
@@ -29,50 +29,26 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import AuthModal from "@/components/AuthModal";
-import FeedAdCard from "@/components/ads/FeedAdCard";
-import type { AdServePayload } from "@/lib/adTypes";
+import HousingPostOverlay from "@/components/housing/HousingPostOverlay";
 import {
   HOUSING_FILTERS,
   HOUSING_FILTER_LABEL,
-  HOUSING_TYPE_BLURB,
-  HOUSING_TYPE_LABEL,
   HOUSING_ACCENT_VAR,
   type HousingBoardResponse,
   type HousingFilter,
   type HousingPostView,
+  type HousingRequestKind,
   type HousingType,
 } from "@shared/housing";
 import { parseHousingTagFilter } from "@shared/housingTags";
 import { HousingCard, type HousingCardHandlers } from "@/components/housing/HousingCards";
+import { GlowEffect } from "@/components/ui/glow-effect";
 import { HousingTagFilter } from "@/components/housing/HousingTagFilter";
-import { HousingIcon, type HousingIconName } from "@/components/housing/HousingIcon";
 import { Btn, CloseSeam, LiveDot, Mono, SectionTitle } from "@/components/housing/HousingPrimitives";
 import "./Housing.css";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
 import { trackProductEvent } from "@/lib/analytics";
-
-/** One neon per step, borrowed from the three peer post types. */
-const STEPS: Array<{ title: string; body: string; icon: HousingIconName; accent: string }> = [
-  {
-    title: "Say what you need",
-    body: "One question, four answers. Offering a room, looking for housing, forming a HAÜZ, or a managed unit.",
-    icon: "add",
-    accent: HOUSING_ACCENT_VAR.OFFERING,
-  },
-  {
-    title: "It lands in the feed",
-    body: "Your post appears on The Haüz. People can browse by what they need and start a conversation.",
-    icon: "boards",
-    accent: HOUSING_ACCENT_VAR.LOOKING,
-  },
-  {
-    title: "Tap chat",
-    body: "No application, no gate. Interest turns straight into a conversation.",
-    icon: "message",
-    accent: HOUSING_ACCENT_VAR.FORMING,
-  },
-];
 
 const SIGNS: Array<{ label: string; cls: string }> = [
   { label: "FOR RENT", cls: "s1" },
@@ -81,7 +57,47 @@ const SIGNS: Array<{ label: string; cls: string }> = [
   { label: "LOOKING FOR ROOM", cls: "s4" },
 ];
 
-const POST_OPTIONS: HousingType[] = ["OFFERING", "LOOKING", "FORMING"];
+const RAILS: Array<{ type: HousingType; eyebrow: string; title: string; description: string; action: string }> = [
+  { type: "OFFERING", eyebrow: "ROOMS WITH PEOPLE IN THEM", title: "Rooms offered", description: "Meet the household before you message.", action: "Post a room" },
+  { type: "LOOKING", eyebrow: "THE PEOPLE", title: "Looking for housing", description: "Find someone whose next place could be yours.", action: "Post your search" },
+  { type: "FORMING", eyebrow: "BUILD IT TOGETHER", title: "Forming a Haüz", description: "Find your people, then find the place.", action: "Start a Haüz" },
+  { type: "MANAGED", eyebrow: "VERIFIED LISTINGS", title: "Managed properties", description: "Explore a whole place and its real listing.", action: "List a property" },
+];
+
+function HousingRail({ type, eyebrow, title, description, action, posts, handlers, onCompose }: {
+  type: HousingType; eyebrow: string; title: string; description: string; action: string;
+  posts: HousingPostView[]; handlers: HousingCardHandlers; onCompose: (type: HousingType | "PM") => void;
+}) {
+  const track = useRef<HTMLDivElement>(null);
+  return (
+    <section className="hz-board-section" aria-label={title} style={{ "--hz-accent": HOUSING_ACCENT_VAR[type] } as React.CSSProperties}>
+      <div className="hz-board-section__head">
+        <div><Mono micro>{eyebrow}</Mono><h3>{title}<span>.</span></h3><p>{description}</p></div>
+        <button type="button" onClick={() => onCompose(type === "MANAGED" ? "PM" : type)}>{action} ↗</button>
+      </div>
+      {posts.length ? (
+        <>
+          <div className="hz-board-rail" dir="rtl" ref={track}>
+            {posts.map(post => <div className="hz-board-rail__item" dir="ltr" key={post.id} style={{ "--hz-edge-color": HOUSING_ACCENT_VAR[post.type] } as React.CSSProperties}>
+              <GlowEffect
+                colors={[HOUSING_ACCENT_VAR[post.type], `color-mix(in srgb, ${HOUSING_ACCENT_VAR[post.type]} 88%, white)`]}
+                mode="static"
+                blur="medium"
+                className="hz-board-rail__glow"
+              />
+              <HousingCard post={post} h={handlers} />
+            </div>)}
+          </div>
+          {posts.length > 1 && <div className="hz-board-rail__controls">
+            <span>SWIPE TO EXPLORE</span>
+            <button type="button" aria-label={`Previous ${title}`} onClick={() => track.current?.scrollBy({ left: 380, behavior: "smooth" })}>→</button>
+            <button type="button" aria-label={`Next ${title}`} onClick={() => track.current?.scrollBy({ left: -380, behavior: "smooth" })}>←</button>
+          </div>}
+        </>
+      ) : <p className="hz-board-section__empty">No {title.toLowerCase()} yet. Start this rail with a post.</p>}
+    </section>
+  );
+}
 
 export default function Housing() {
   const contentStartedAt = useRef(performance.now());
@@ -105,6 +121,18 @@ export default function Housing() {
       : "ALL";
   });
   const [showAuth, setShowAuth] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<number | null>(() => {
+    const id = Number(new URLSearchParams(window.location.search).get("post"));
+    return Number.isInteger(id) && id > 0 ? id : null;
+  });
+  const [selectedIntent, setSelectedIntent] = useState<HousingRequestKind | "BUILD" | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("build") === "1") return "BUILD";
+    if (params.get("join") === "1") return "JOIN";
+    if (params.get("waitlist") === "1") return "WAITLIST";
+    if (params.get("chat") === "1") return "CHAT";
+    return null;
+  });
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
 
   useEffect(() => {
@@ -115,6 +143,13 @@ export default function Housing() {
     const qs = params.toString();
     window.history.replaceState(window.history.state, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
   }, [filter, searchQuery]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (selectedPostId) params.set("post", String(selectedPostId)); else params.delete("post");
+    for (const key of ["chat", "join", "waitlist", "build"]) params.delete(key);
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`);
+  }, [selectedPostId]);
 
   /*
    * Tag filters live in the URL, not in component state. Opening a listing and
@@ -141,6 +176,8 @@ export default function Housing() {
       const params = new URLSearchParams(window.location.search);
       setTagsState(parseHousingTagFilter(params.get("tags")));
       setSearchQuery(params.get("q") || "");
+      const selected = Number(params.get("post"));
+      setSelectedPostId(Number.isInteger(selected) && selected > 0 ? selected : null);
       const type = params.get("type")?.toUpperCase() as HousingFilter;
       setFilter(params.get("filter") === "SAVED" ? "SAVED" : HOUSING_FILTERS.includes(type) ? type : "ALL");
     };
@@ -165,7 +202,6 @@ export default function Housing() {
   useEffect(() => {
     if (!isLoading) trackProductEvent("time_to_content", "housing", performance.now() - contentStartedAt.current);
   }, [isLoading]);
-  const stats = data?.stats;
   const boardEmpty = !isLoading && !isError && posts.length === 0;
   const showDemoSeed = boardEmpty && filter === "ALL" && tags.length === 0 && !searchQuery.trim();
   const { data: demoBoard } = useQuery<HousingBoardResponse>({
@@ -178,6 +214,18 @@ export default function Housing() {
     },
   });
   const demoPosts = demoBoard?.posts ?? [];
+  const displayedPosts = posts.length ? posts : showDemoSeed ? demoPosts : [];
+  const selectedInFeed = displayedPosts.find(post => post.id === selectedPostId);
+  const selectedQuery = useQuery<HousingPostView>({
+    queryKey: ["/api/housing", selectedPostId],
+    enabled: selectedPostId !== null && !selectedInFeed,
+    queryFn: async () => {
+      const res = await fetch(`/api/housing/${selectedPostId}`, { credentials: "include" });
+      if (!res.ok) throw new Error("This Haüz post could not load");
+      return res.json();
+    },
+  });
+  const selectedPost = selectedInFeed ?? selectedQuery.data;
 
   const saveMutation = useMutation({
     mutationFn: async (postId: number) => {
@@ -224,7 +272,8 @@ export default function Housing() {
           };
         });
       }
-      navigate(`/the-hauz/${post.id}`);
+      setSelectedIntent(null);
+      setSelectedPostId(post.id);
     },
     onSave: (post) => {
       if (!requireAuth()) return;
@@ -244,19 +293,19 @@ export default function Housing() {
     // Asking to chat is asking in, and nothing opens until the other side accepts.
     onChat: (post) => {
       if (!requireAuth()) return;
-      navigate(`/the-hauz/${post.id}?chat=1`);
+      setSelectedIntent("CHAT"); setSelectedPostId(post.id);
     },
     onJoin: (post) => {
       if (!requireAuth()) return;
-      navigate(`/the-hauz/${post.id}?join=1`);
+      setSelectedIntent("JOIN"); setSelectedPostId(post.id);
     },
     onWaitlist: (post) => {
       if (!requireAuth()) return;
-      navigate(`/the-hauz/${post.id}?waitlist=1`);
+      setSelectedIntent("WAITLIST"); setSelectedPostId(post.id);
     },
     onBuildHaus: (post) => {
       if (!requireAuth()) return;
-      navigate(`/the-hauz/${post.id}?build=1`);
+      setSelectedIntent("BUILD"); setSelectedPostId(post.id);
     },
     savePendingIds,
   };
@@ -265,41 +314,6 @@ export default function Housing() {
     if (!requireAuth()) return;
     navigate(`/the-hauz/new?type=${type.toLowerCase()}`);
   };
-
-  // Only Forming cards span both columns, so every other type is a half slot.
-  const oddHalfCards = useMemo(
-    () => posts.filter((p: HousingPostView) => p.type !== "FORMING").length % 2 === 1,
-    [posts],
-  );
-
-  /**
-   * The leftover half slot alternates between a served ad (Mr. S, CockBlock,
-   * whatever is live) and the house post prompt, so the board keeps asking for
-   * supply instead of only ever selling. Decided once per mount so it does not
-   * flicker between renders. The prompt is also the fallback whenever no ad is
-   * eligible, so the slot is never empty.
-   */
-  const [slotPrefersAd] = useState(() => Math.random() < 0.5);
-  const adQuery = useQuery<{ ads: AdServePayload[] }>({
-    queryKey: ["/api/ads/serve", "housing", user?.id ?? "guest"],
-    enabled: oddHalfCards && slotPrefersAd,
-    staleTime: 60_000,
-    queryFn: async () => {
-      const res = await fetch("/api/ads/serve?surface=feed&tab=boards", { credentials: "include" });
-      if (!res.ok) return { ads: [] };
-      return res.json();
-    },
-  });
-  const slotAd = slotPrefersAd ? (adQuery.data?.ads?.[0] ?? null) : null;
-
-  const statBlocks = useMemo(
-    () => [
-      { n: stats?.activePosts ?? 0, l: "Active posts" },
-      { n: stats?.roomsOpen ?? 0, l: "Rooms and units" },
-      { n: stats?.formingHouses ?? 0, l: "Forming a HAÜZ" },
-    ],
-    [stats],
-  );
 
   return (
     <div className="hz pdx-glass-rebind">
@@ -361,102 +375,14 @@ export default function Housing() {
             <div className="hz-hero__mantra">
               <Mono>Find a room · find people · find a home</Mono>
             </div>
-            <a className="hz-chip hz-chip--btn" href="#housing-listings" style={{ marginTop: 16 }}>
-              Browse the listings ↓
-            </a>
+            <a className="hz-chip hz-chip--btn" href="#housing-listings" style={{ marginTop: 16 }}>Browse the listings ↓</a>
+            <button type="button" className="hz-chip hz-chip--btn hz-board-post" onClick={() => { if (requireAuth()) navigate("/the-hauz/new"); }}>Post to The Haüz ↗</button>
           </div>
         </div>
       </div>
 
-      <SafetyGuide context="housing" />
-
-      {/* How it works */}
-      <div className="hz-band">
-        <div className="hz-pad">
-          <div className="hz-wrap">
-            <SectionTitle kicker="How it works">Under a minute</SectionTitle>
-            <div className="hz-steps">
-              {STEPS.map((step, i) => (
-                <div
-                  className="hz-step hz-panel pdx-glass-rebind"
-                  key={step.title}
-                  style={
-                    {
-                      "--c": step.accent,
-                      "--_c": step.accent,
-                      "--hz-accent": step.accent,
-                    } as React.CSSProperties
-                  }
-                >
-                  <div className="hz-step__top">
-                    <Mono accent>{`0${i + 1}`}</Mono>
-                    <HousingIcon name={step.icon} size={16} />
-                  </div>
-                  <b>{step.title}</b>
-                  <p>{step.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="pdx-seam" aria-hidden="true" />
-      <div className="hz-stats">
-        {statBlocks.map((s) => (
-          <div key={s.l}>
-            <b>{s.n}</b>
-            <span>
-              <Mono micro>{s.l}</Mono>
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Post to the board */}
       <div className="hz-pad hz-pad--tight">
         <div className="hz-wrap">
-          <div className="hz-panel">
-            <SectionTitle kicker="Post to the board">What are you looking for?</SectionTitle>
-            <div className="hz-ask">
-              {POST_OPTIONS.map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  className="pdx-glass-rebind"
-                  onClick={() => openCompose(t)}
-                  style={
-                    {
-                      "--c": HOUSING_ACCENT_VAR[t],
-                      "--hz-accent": HOUSING_ACCENT_VAR[t],
-                    } as React.CSSProperties
-                  }
-                >
-                  <b>{HOUSING_TYPE_LABEL[t]}</b>
-                  <small>{HOUSING_TYPE_BLURB[t]}</small>
-                </button>
-              ))}
-              <button
-                type="button"
-                className="pdx-glass-rebind"
-                onClick={() => openCompose("PM")}
-                style={
-                  {
-                    "--c": HOUSING_ACCENT_VAR.MANAGED,
-                    "--hz-accent": HOUSING_ACCENT_VAR.MANAGED,
-                  } as React.CSSProperties
-                }
-              >
-                <b>Managed property</b>
-                <small>Whole unit for rent. Apply to become a verified property manager.</small>
-              </button>
-            </div>
-            <p className="hz-ask__note">
-              Zaylist never handles rent, deposits, or fees. Money is always arranged directly between
-              people.
-            </p>
-          </div>
-
           <BrowseToolbar label="Search and filter The Haüz">
           <SearchInput id="housing-search" label="Search The Haüz" aria-label="Search The Haüz" placeholder="Search household names and headlines" value={searchQuery} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} onClear={() => setSearchQuery("")} />
           <div className="hz-filter" id="housing-listings" tabIndex={-1} style={{ scrollMarginTop: "calc(var(--site-header-height, 0px) + 16px)" }}>
@@ -518,51 +444,21 @@ export default function Housing() {
                   </div>
                 ) : null}
               </div>
-              {showDemoSeed && demoPosts.length ? (
-                <div className="hz-feed" style={{ paddingTop: 8 }}>
-                  {demoPosts.map((p: HousingPostView) => (
-                    <HousingCard key={`demo-${p.id}`} post={p} h={handlers} />
-                  ))}
-                </div>
-              ) : null}
+              {RAILS.filter(rail => filter === "ALL" || filter === "SAVED" || filter === rail.type).map(rail => <HousingRail key={rail.type} {...rail} posts={displayedPosts.filter(post => post.type === rail.type)} handlers={handlers} onCompose={openCompose} />)}
             </div>
           ) : (
-            <div className="hz-feed">
-              {posts.map((p: HousingPostView) => (
-                <HousingCard key={p.id} post={p} h={handlers} />
-              ))}
-              {/*
-                Forming cards span both columns, so when the number of half width
-                cards is odd one of them has nothing to pair with. Rather than
-                leave a hole or stretch a room listing to look like a Forming
-                post, fill the slot with the thing the board actually needs:
-                another post. Only rendered when the count is genuinely odd.
-              */}
-              {oddHalfCards ? (
-                slotAd ? (
-                  <div className="hz-adslot">
-                    <FeedAdCard ad={slotAd} />
-                  </div>
-                ) : (
-                  <button type="button" className="hz-fill pdx-glass-rebind" onClick={() => openCompose("OFFERING")}>
-                    <Mono accent>Post to the board</Mono>
-                    <b>Got a room?</b>
-                    <small>
-                      A room, a search, or a household you are starting. It takes under a minute and it is free.
-                    </small>
-                    <span className="hz-fill__cta">
-                      <HousingIcon name="add" size={15} />
-                      Post it
-                    </span>
-                  </button>
-                )
-              ) : null}
+            <div className="hz-board-rails">
+              {RAILS.filter(rail => filter === "ALL" || filter === "SAVED" || filter === rail.type).map(rail => <HousingRail key={rail.type} {...rail} posts={displayedPosts.filter(post => post.type === rail.type)} handlers={handlers} onCompose={openCompose} />)}
             </div>
           )}
         </div>
       </div>
 
+      <SafetyGuide context="housing" />
       <CloseSeam line="Post it. Scroll it. Chat." url="zaylist.com/hausing" />
+
+      {selectedPostId !== null && selectedQuery.isError && !selectedInFeed && <div className="hz-board-link-error" role="alert">This post is unavailable. <button type="button" onClick={() => { setSelectedPostId(null); setSelectedIntent(null); }}>Back to the board</button></div>}
+      {selectedPost && <HousingPostOverlay key={selectedPost.id} post={selectedPost} userId={user?.id} initialDetail initialIntent={selectedIntent} sharePath={postId => `/the-hauz/${postId}`} onClose={() => { setSelectedPostId(null); setSelectedIntent(null); }} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => { setSelectedIntent(null); setSelectedPostId(postId); }} />}
 
       {showAuth ? <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" /> : null}
     </div>

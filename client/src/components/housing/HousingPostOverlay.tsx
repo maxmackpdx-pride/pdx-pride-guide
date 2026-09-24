@@ -32,6 +32,9 @@ import "@/pages/Housing.css";
 type Props = {
   post: HousingPostView;
   userId?: number | null;
+  initialDetail?: boolean;
+  initialIntent?: HousingRequestKind | "BUILD" | null;
+  sharePath?: (postId: number) => string;
   originRect?: Pick<DOMRect, "left" | "top" | "width" | "height"> | null;
   onClose: () => void;
   onRequireAuth: () => void;
@@ -53,7 +56,7 @@ function markerTransform(source: Pick<DOMRect, "left" | "top" | "width" | "heigh
   return `translate3d(${x}px, ${y}px, 0) scale(${source.width / target.width}, ${source.height / target.height})`;
 }
 
-export default function HousingPostOverlay({ post: initialPost, userId, originRect, onClose, onRequireAuth, onSelectPost }: Props) {
+export default function HousingPostOverlay({ post: initialPost, userId, initialDetail = false, initialIntent = null, sharePath, originRect, onClose, onRequireAuth, onSelectPost }: Props) {
   const closingRef = useRef(false);
   const panelAnimationRef = useRef<Animation | null>(null);
   const transitionFromRef = useRef<DOMRect | null>(null);
@@ -74,7 +77,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, originRe
   const dialogRef = useModalA11y({ onClose: requestClose });
   const { toast } = useToast();
   const { openSheet } = useInboxSheet();
-  const [detail, setDetail] = useState(false);
+  const [detail, setDetail] = useState(initialDetail);
   const [reporting, setReporting] = useState(false);
   const savePendingRef = useRef(new Set<number>());
   const requestPendingRef = useRef(new Set<number>());
@@ -123,7 +126,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, originRe
   const signedIn = Boolean(userId);
   const isOwner = Boolean(userId) && userId === post.author.userId;
 
-  useEffect(() => { setDetail(false); setReporting(false); }, [postId]);
+  useEffect(() => { setDetail(initialDetail); setReporting(false); }, [postId, initialDetail]);
   useEffect(() => {
     if (!signedIn || !post.saved) return;
     const timer = window.setTimeout(() => { void fetch(`/api/housing/${postId}/seen`, { method: "POST", credentials: "include" }); }, 400);
@@ -166,7 +169,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, originRe
   });
 
   const share = () => {
-    const url = `${window.location.origin}${window.location.pathname}?houz=${post.id}`;
+    const url = `${window.location.origin}${sharePath ? sharePath(post.id) : `${window.location.pathname}?houz=${post.id}`}`;
     if (navigator.share) { void navigator.share({ title: post.displayName || post.headline, url }).catch(() => undefined); return; }
     void navigator.clipboard?.writeText(url); toast({ title: "Map link copied" });
   };
@@ -180,6 +183,16 @@ export default function HousingPostOverlay({ post: initialPost, userId, originRe
     if (!requireAuth() || !beginInFlight(savePendingRef.current, postId)) return;
     setSavePendingIds(new Set(savePendingRef.current)); saveMutation.mutate();
   };
+  const initialIntentHandled = useRef(false);
+  useEffect(() => {
+    if (!initialIntent || initialIntentHandled.current) return;
+    if (!signedIn) { initialIntentHandled.current = true; onRequireAuth(); return; }
+    initialIntentHandled.current = true;
+    if (initialIntent === "BUILD") buildMutation.mutate();
+    else request(initialIntent);
+    // An initial deep-link action runs once per opened post.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialIntent, signedIn, postId]);
   const cardHandlers: HousingCardHandlers = {
     onOpen: () => showDetail(true), onSave: save, onShare: share,
     onChat: () => request("CHAT"), onJoin: () => request("JOIN"), onWaitlist: () => request("WAITLIST"),
