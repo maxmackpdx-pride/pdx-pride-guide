@@ -640,3 +640,44 @@
     transition: none;
   }
 }
+
+/* The standalone Sellz board shares the Gigz and Giftz card language. */
+.sellz-board-page { background: #09090d; color: #faf8fc; min-height: 100vh; }
+.sellz-board-page .gigz-identity img { width: 155px; }
+.sellz-board-page .gigz-eyebrow,
+.sellz-board-page .gigz-section-head h1 span { color: #39ff14; }
+.sellz-board-page .gigz-eyebrow:before { background: #39ff14; }
+.sellz-board-page .gigz-post,
+.sellz-board-page .board-follow-button { border-color: #318d31; color: #d5fbd0; }
+.sellz-board-page .gigz-post:hover,
+.sellz-board-page .board-follow-button:hover:not(:disabled) { background: #1b321b; }
+.sellz-board-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sellz-board-actions .board-follow-button { margin-bottom: 5px; }
+.sellz-board-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin: 0 0 14px; color: #b8d5b7; font-size: 13px; }
+.sellz-board-filters label { display: flex; flex: 1 1 130px; flex-direction: column; gap: 6px; min-width: 125px; }
+.sellz-board-filters label:first-child { flex: 2 1 225px; }
+.sellz-board-filters input,
+.sellz-board-filters select { height: 41px; min-width: 0; width: 100%; border: 1px solid #318d31; border-radius: 8px; background: #152217; color: white; padding: 8px 10px; font: inherit; font-size: 14px; }
+.sellz-board-filters > button { display: flex; align-items: center; gap: 6px; height: 41px; padding: 0 12px; border: 1px solid #318d31; border-radius: 8px; color: #d5fbd0; }
+.sellz-board-summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; color: #a6bba2; font-size: 12px; letter-spacing: .07em; text-transform: uppercase; }
+.sellz-board-summary span { display: flex; align-items: center; gap: 6px; }
+.sellz-listing-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 17px; }
+.sellz-board-page .sellz-listing { width: 100%; height: clamp(310px, 32vw, 430px); }
+.sellz-board-page .sellz-listing:hover { border-color: #39ff14; }
+.sellz-listing__fallback { position: absolute; inset: 0; display: grid; place-items: center; background: radial-gradient(circle at 65% 24%, #356f38, #152c1e 48%, #0b1510); color: #39ff1477; }
+.sellz-listing__saved { position: absolute; right: 19px; bottom: 19px; z-index: 2; display: flex; align-items: center; gap: 4px; font-size: 12px; color: #cfffbb; }
+.sellz-listing .gigz-opportunity__bottom strong { font-size: clamp(20px, 2vw, 28px); }
+.sellz-listing .gigz-opportunity__bottom em { border-color: #39ff14; color: #d6ffce; }
+.sellz-listing:has(.sellz-listing__saved) .gigz-opportunity__bottom { bottom: 44px; }
+.sellz-board-page .gigz-detail { border-color: #318d31; }
+.sellz-board-page .gigz-detail .sellz-card { width: 100%; max-width: none; }
+.sellz-inactive { margin: 26px 0; padding: 22px; border: 1px solid #318d31; border-radius: 15px; background: #152217; }
+.sellz-inactive h2 { color: white; font-size: 22px; font-weight: 800; margin: 0 0 4px; }
+.sellz-inactive p { color: #b8d5b7; margin: 0 0 15px; }
+.sellz-inactive > div { display: flex; flex-wrap: wrap; gap: 9px; }
+.sellz-inactive button { padding: 10px 13px; border: 1px solid #318d31; border-radius: 8px; color: white; }
+.sellz-inactive button span { margin-left: 8px; color: #39ff14; font-size: 11px; text-transform: capitalize; }
+.sellz-board-rules { color: #899786; font-size: 12px; letter-spacing: .06em; margin: 46px 0 0; }
+@media (max-width: 900px) { .sellz-listing-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .sellz-listing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .sellz-board-page .sellz-listing { height: 310px; } .sellz-listing .gigz-opportunity__top, .sellz-listing .gigz-opportunity__bottom { left: 12px; right: 12px; } .sellz-listing .gigz-opportunity__top { top: 13px; } .sellz-listing .gigz-opportunity__bottom { bottom: 16px; } .sellz-listing .gigz-opportunity__bottom strong { font-size: 20px; } .sellz-listing .gigz-opportunity__bottom > span { margin-top: 9px; font-size: 11px; } .sellz-listing .gigz-opportunity__bottom em { margin-top: 9px; } .sellz-listing .gigz-opportunity__arrow { width: 28px; height: 28px; } .sellz-listing:has(.sellz-listing__saved) .gigz-opportunity__bottom { bottom: 40px; } .sellz-board-actions .board-follow-button { margin-top: 9px; } }
+@media (max-width: 390px) { .sellz-listing .gigz-opportunity__top em { font-size: 9px; } .sellz-listing .gigz-opportunity__bottom strong { font-size: 18px; } }

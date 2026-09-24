@@ -1,16 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Plus, RotateCcw, Search, ShieldCheck, X } from "lucide-react";
+import { ArrowUpRight, Bookmark, Plus, RotateCcw, Search, ShieldCheck, Tag, X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
-import BoardCloseSeam from "@/components/BoardCloseSeam";
-import ScrollReveal from "@/components/ScrollReveal";
 import { Button } from "@/components/ds";
 import SellzListingCard, { type SellzPost } from "@/components/board/SellzListingCard";
+import BoardFollowButton from "@/components/BoardFollowButton";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import { timeAgo } from "@/lib/boardFeed";
+import "./PrideWork.css";
 import "./Sellz.css";
 
 const CATEGORIES = ["Clothing", "Drag", "Leather and gear", "Home", "Furniture", "Electronics", "Art", "Tickets", "Tools", "Outdoor", "Collectibles", "Other"];
@@ -20,6 +21,20 @@ const blank = { title: "", description: "", category: "Clothing", condition: "Go
 
 type View = "ALL" | "SAVED" | "MINE";
 type Sort = "NEWEST" | "PRICE_LOW" | "PRICE_HIGH";
+
+const money = (cents: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);
+
+function SellzGrid({ posts, saved, selectedId, onSelect }: { posts: SellzPost[]; saved: Set<number>; selectedId: number | null; onSelect: (id: number) => void }) {
+  return <div className="sellz-listing-grid">
+    {posts.map((post, index) => <button type="button" key={post.id} className="gigz-opportunity sellz-listing" style={{ "--gigz-accent": ["#39ff14", "#83e35d", "#a5fb6e", "#49cb92"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selectedId === post.id} aria-label={`View listing: ${post.title}`}>
+      {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <span className="sellz-listing__fallback" aria-hidden="true"><Tag size={65} strokeWidth={1.2} /></span>}
+      <span className="gigz-opportunity__shade" />
+      <span className="gigz-opportunity__top"><span><em>{post.category}</em><small>{post.status === "ACTIVE" ? "Available" : post.status.toLowerCase()} · {timeAgo(post.createdAt)}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
+      <span className="gigz-opportunity__bottom"><strong>{post.title}</strong><span>{post.condition} · {post.neighborhood || "Portland"}</span><em>{money(post.priceCents)}{post.negotiable ? " OBO" : ""}</em></span>
+      {saved.has(post.id) && <span className="sellz-listing__saved"><Bookmark size={13} fill="currentColor" /> Saved</span>}
+    </button>)}
+  </div>;
+}
 
 export default function Sellz() {
   usePageSeo("SELLZ | Zaylist", "Buy and sell with Portland's queer community. Simple listings, real people, local handoffs.");
@@ -133,118 +148,58 @@ export default function Sellz() {
   const resultsError = ownerView ? mineIsError : isError;
 
   const activeCount = posts.filter(post => post.status === "ACTIVE").length;
-  const reservedCount = posts.filter(post => post.status === "RESERVED").length;
   const filtersActive = Boolean(search.trim() || category !== "ALL" || condition !== "ALL" || price !== "ALL" || view !== "ALL" || sort !== "NEWEST");
+  const activeListings = filtered.filter(post => post.status === "ACTIVE" || post.status === "RESERVED");
+  const inactiveMine = ownerView ? filtered.filter(post => post.status !== "ACTIVE" && post.status !== "RESERVED") : [];
+  const selected = filtered.find(post => post.id === expandedId) || minePosts.find(post => post.id === expandedId) || posts.find(post => post.id === expandedId);
 
   const clearFilters = () => {
-    setSearch("");
-    setCategory("ALL");
-    setCondition("ALL");
-    setPrice("ALL");
-    setView("ALL");
-    setSort("NEWEST");
+    setSearch(""); setCategory("ALL"); setCondition("ALL"); setPrice("ALL"); setView("ALL"); setSort("NEWEST");
   };
-
   const openForm = () => {
     if (!user) return setShowAuth(true);
     setFormOpen(true);
     setTimeout(() => document.getElementById("sellz-form")?.scrollIntoView({ behavior: "smooth" }), 20);
   };
+  const select = (id: number) => {
+    setExpandedId(id);
+    const url = new URL(window.location.href);
+    url.searchParams.set("post", String(id));
+    window.history.replaceState(null, "", url.pathname + url.search);
+    setTimeout(() => document.getElementById("sellz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40);
+  };
+  const closeDetail = () => {
+    setExpandedId(null);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("post");
+    window.history.replaceState(null, "", url.pathname + url.search);
+  };
 
-  return (
-    <div className="zine-page board-page board-page--makeover sellz-page">
-      <header className="sellz-market-header">
-        <div className="sellz-market-header__identity">
-          <div>
-            <p className="sellz-market-header__kicker">Portland's queer marketplace</p>
-            <img className="sellz-market-header__logo" src="/brand/family/sellz.svg" alt="SELLZ" />
-            <p className="sellz-market-header__lede">Find something good. Message the seller. Make the handoff directly.</p>
-          </div>
-          <Button variant="solid" accent="green" size="lg" onClick={openForm}><Plus size={18} aria-hidden="true" /> Sell something</Button>
-        </div>
-
-        <div className="sellz-market-search">
-          <Search size={23} aria-hidden="true" />
-          <label className="sr-only" htmlFor="sellz-search">Search SELLZ</label>
-          <input id="sellz-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search listings, categories, neighborhoods…" />
-          {search ? <button type="button" onClick={() => setSearch("")} aria-label="Clear search"><X size={18} /></button> : null}
-        </div>
-
-        <div className="sellz-market-toolbar" aria-label="Marketplace filters">
-          <div className="sellz-market-views" aria-label="Listing view">
-            <button className={view === "ALL" ? "is-active" : ""} type="button" onClick={() => setView("ALL")}>All</button>
-            <button className={view === "SAVED" ? "is-active" : ""} type="button" onClick={() => user ? setView("SAVED") : setShowAuth(true)}>Saved{user && saved.size ? <span>{saved.size}</span> : null}</button>
-            <button className={view === "MINE" ? "is-active" : ""} type="button" onClick={() => user ? setView("MINE") : setShowAuth(true)}>My listings</button>
-          </div>
-          <div className="sellz-market-selects">
-            <label><span>Category</span><select value={category} onChange={event => setCategory(event.target.value)}><option value="ALL">All categories</option>{CATEGORIES.map(value => <option key={value}>{value}</option>)}</select></label>
-            <label><span>Condition</span><select value={condition} onChange={event => setCondition(event.target.value)}><option value="ALL">Any condition</option>{CONDITIONS.map(value => <option key={value}>{value}</option>)}</select></label>
-            <label><span>Price</span><select value={price} onChange={event => setPrice(event.target.value)}><option value="ALL">Any price</option><option value="UNDER25">Under $25</option><option value="25TO100">$25 to $100</option><option value="OVER100">Over $100</option></select></label>
-            <label><span>Sort</span><select value={sort} onChange={event => setSort(event.target.value as Sort)}><option value="NEWEST">Newest</option><option value="PRICE_LOW">Price: low to high</option><option value="PRICE_HIGH">Price: high to low</option></select></label>
-          </div>
-          {filtersActive ? <button className="sellz-market-clear" type="button" onClick={clearFilters}><RotateCcw size={14} aria-hidden="true" /> Reset</button> : null}
-        </div>
-
-        <div className="sellz-market-status">
-          <span><strong>{activeCount}</strong> available</span>
-          <span><strong>{reservedCount}</strong> reserved</span>
-          <span className="sellz-market-status__safety"><ShieldCheck size={15} aria-hidden="true" /> No checkout or in-app payments</span>
-        </div>
-      </header>
-
-      {formOpen && <SellzComposer onClose={() => setFormOpen(false)} onPosted={() => setFormOpen(false)} />}
-
-      <main id="sellz-board" className="sellz-market-results">
-        <div className="sellz-market-results__head">
-          <div>
-            <p className="sellz-market-results__kicker">Marketplace</p>
-            <h1>What people are selling</h1>
-          </div>
-          <p aria-live="polite">{filtered.length} {filtered.length === 1 ? "listing" : "listings"}</p>
-        </div>
-
-        {missingLinkedPost && <div role="status" className="board-empty"><p>This shared listing is no longer available. It may have been sold or removed.</p><p>Browse the listings below, or sign in to check your own listings.</p></div>}
-        {resultsLoading ? <BoardFeedSkeleton label="Loading SELLZ listings" shape="board" count={6} /> : resultsError ? (
-          <div className="board-empty board-empty--makeover sellz-market-empty" role="alert">
-            <p className="display section-heading">Could not load SELLZ</p>
-            <p>The marketplace did not load. Try again without losing your filters.</p>
-            <Button variant="neon" accent="green" onClick={() => view === "MINE" ? refetchMine() : refetch()}>Try again</Button>
-          </div>
-        ) : filtered.length ? (
-          <div className="board-listing-grid board-listing-grid--makeover sellz-market-grid">
-            {filtered.map((post, index) => <ScrollReveal key={post.id} className={`sellz-market-cell${expandedId === post.id ? " is-expanded" : ""}`} delay={Math.min(index * 45, 270)}><SellzListingCard post={post} saved={saved.has(post.id)} expanded={expandedId === post.id} onToggle={() => setExpandedId(expandedId === post.id ? null : post.id)} onRequireAuth={() => setShowAuth(true)} /></ScrollReveal>)}
-          </div>
-        ) : (
-          <div className="board-empty board-empty--makeover sellz-market-empty">
-            <Search size={38} />
-            <p className="display section-heading">Nothing matches yet</p>
-            <p>{view === "SAVED" ? "You have not saved a matching listing yet." : view === "MINE" ? "You do not have a matching listing yet." : "Try a broader search or reset the filters."}</p>
-            <div className="sellz-market-empty__actions">
-              {filtersActive ? <Button variant="neon" accent="green" onClick={clearFilters}>Reset filters</Button> : null}
-              <Button variant="solid" accent="green" onClick={openForm}>Sell something</Button>
-            </div>
-          </div>
-        )}
-      </main>
-
-      <section className="sellz-market-how" aria-labelledby="sellz-how-title">
-        <div>
-          <p className="sellz-market-results__kicker">How SELLZ works</p>
-          <h2 id="sellz-how-title">Direct, local, and easy to close out</h2>
-        </div>
-        <ol>
-          <li><strong>List it</strong><span>Add photos, condition, price, and neighborhood.</span></li>
-          <li><strong>Message</strong><span>Buyers ask questions or send an offer through Inbox.</span></li>
-          <li><strong>Reserve</strong><span>The seller chooses a buyer and pauses the listing.</span></li>
-          <li><strong>Finish directly</strong><span>Arrange payment and pickup yourselves, then mark it sold.</span></li>
-        </ol>
-        <p className="sellz-market-how__rules">No weapons · no illegal goods · no counterfeit goods · no in-app payments</p>
-      </section>
-
-      <BoardCloseSeam line="Local stuff · real people · simple handoffs" url="zaylist.com/sellz" />
-      {showAuth ? <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" /> : null}
+  return <main className="gigz-page sellz-page sellz-board-page">
+    <div className="gigz-shell">
+      <div className="gigz-identity"><img src="/brand/family/sellz.svg" alt="Sellz" /><span>Good stuff. New hands.</span></div>
+      <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE MARKETPLACE</div><h1>Find your next good thing<span>.</span></h1><p>Buy and sell with your community. Message, agree, and hand off directly.</p></div>
+        <div className="sellz-board-actions"><BoardFollowButton board="sellz" /><button type="button" className="gigz-post" onClick={openForm}><Plus size={17} /> Sell something <ArrowUpRight size={16} /></button></div>
+      </div>
+      <div className="sellz-board-filters" aria-label="Filter Sellz listings">
+        <label>Search Sellz<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search listings and neighborhoods" /></label>
+        <label>View<select value={view} onChange={event => { const value = event.target.value as View; user || value === "ALL" ? setView(value) : setShowAuth(true); }}><option value="ALL">All listings</option><option value="SAVED">Saved</option><option value="MINE">My listings</option></select></label>
+        <label>Category<select value={category} onChange={event => setCategory(event.target.value)}><option value="ALL">All categories</option>{CATEGORIES.map(value => <option key={value}>{value}</option>)}</select></label>
+        <label>Condition<select value={condition} onChange={event => setCondition(event.target.value)}><option value="ALL">Any condition</option>{CONDITIONS.map(value => <option key={value}>{value}</option>)}</select></label>
+        <label>Price<select value={price} onChange={event => setPrice(event.target.value)}><option value="ALL">Any price</option><option value="UNDER25">Under $25</option><option value="25TO100">$25 to $100</option><option value="OVER100">Over $100</option></select></label>
+        <label>Sort<select value={sort} onChange={event => setSort(event.target.value as Sort)}><option value="NEWEST">Newest</option><option value="PRICE_LOW">Price: low to high</option><option value="PRICE_HIGH">Price: high to low</option></select></label>
+        {filtersActive && <button type="button" onClick={clearFilters}><RotateCcw size={14} /> Clear filters</button>}
+      </div>
+      <div className="sellz-board-summary"><span>{activeCount} available · {activeListings.length} showing</span><span><ShieldCheck size={15} /> No checkout or in-app payments</span></div>
+      {formOpen && <SellzComposer onClose={() => setFormOpen(false)} onPosted={id => { setFormOpen(false); select(id); }} />}
+      {missingLinkedPost && <div role="status" className="gigz-empty">This shared listing is no longer available. It may have been sold or removed.</div>}
+      {resultsLoading ? <BoardFeedSkeleton label="Loading Sellz listings" shape="board" count={4} /> : resultsError ? <div className="gigz-empty" role="alert">Could not load Sellz. <button type="button" onClick={() => void (ownerView ? refetchMine() : refetch())}>Try again</button></div> : activeListings.length ? <SellzGrid posts={activeListings} saved={saved} selectedId={expandedId} onSelect={select} /> : <div className="gigz-empty"><Search size={30} /><p>{view === "SAVED" ? "You have no matching saved listings." : view === "MINE" ? "You have no matching active listings." : "Nothing matches yet. Try broader filters or start a listing."}</p><button type="button" onClick={filtersActive ? clearFilters : openForm}>{filtersActive ? "Clear filters" : "Sell something"}</button></div>}
+      {inactiveMine.length > 0 && <section className="sellz-inactive" aria-label="Your other listings"><h2>Your other listings</h2><p>Review and manage completed or pending listings.</p><div>{inactiveMine.map(post => <button type="button" key={post.id} onClick={() => select(post.id)}>{post.title} <span>{post.status}</span></button>)}</div></section>}
+      {selected && <section id="sellz-detail" className="gigz-detail sellz-detail" aria-label="Selected Sellz listing"><button type="button" className="gigz-detail__close" onClick={closeDetail} aria-label="Close details"><X size={18} /></button><SellzListingCard key={selected.id} post={selected} saved={saved.has(selected.id)} expanded onToggle={closeDetail} onRequireAuth={() => setShowAuth(true)} onDeleted={closeDetail} /></section>}
+      <p className="sellz-board-rules">No weapons · no illegal goods · no counterfeit goods · no in-app payments</p>
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     </div>
-  );
+  </main>;
 }
 
 

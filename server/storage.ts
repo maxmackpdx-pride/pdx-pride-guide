@@ -955,15 +955,29 @@ sqlite.exec(`
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS board_follows (
     user_id INTEGER NOT NULL,
-    board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz')),
+    board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz')),
     created_at TEXT NOT NULL,
     PRIMARY KEY (user_id, board)
   );
 `);
-export function isFollowingBoard(userId: number, board: "gigz" | "giftz"): boolean {
+const boardFollowsSchema = sqlite.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'board_follows'").get() as { sql: string } | undefined;
+if (boardFollowsSchema && !boardFollowsSchema.sql.includes("'sellz'")) {
+  sqlite.transaction(() => {
+    sqlite.exec(`CREATE TABLE board_follows_new (
+      user_id INTEGER NOT NULL,
+      board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz')),
+      created_at TEXT NOT NULL,
+      PRIMARY KEY (user_id, board)
+    )`);
+    sqlite.exec("INSERT INTO board_follows_new SELECT * FROM board_follows");
+    sqlite.exec("DROP TABLE board_follows");
+    sqlite.exec("ALTER TABLE board_follows_new RENAME TO board_follows");
+  })();
+}
+export function isFollowingBoard(userId: number, board: "gigz" | "giftz" | "sellz"): boolean {
   return !!sqlite.prepare("SELECT 1 FROM board_follows WHERE user_id = ? AND board = ?").get(userId, board);
 }
-export function setBoardFollowing(userId: number, board: "gigz" | "giftz", follow: boolean): void {
+export function setBoardFollowing(userId: number, board: "gigz" | "giftz" | "sellz", follow: boolean): void {
   if (follow) {
     sqlite.prepare("INSERT OR IGNORE INTO board_follows (user_id, board, created_at) VALUES (?, ?, ?)")
       .run(userId, board, new Date().toISOString());
@@ -15467,6 +15481,7 @@ export const storage: IStorage = {
     const viewerUserId = opts.viewerUserId;
     const followsGiftz = viewerUserId != null && isFollowingBoard(viewerUserId, "giftz");
     const followsGigz = viewerUserId != null && isFollowingBoard(viewerUserId, "gigz");
+    const followsSellz = viewerUserId != null && isFollowingBoard(viewerUserId, "sellz");
     const viewerIsAdmin = !!opts.viewerIsAdmin;
     const cursor = opts.cursor?.trim() || null;
 
@@ -15645,7 +15660,7 @@ export const storage: IStorage = {
       });
     }
 
-    for (const post of storage.getSellzPosts().slice(0, 15)) {
+    for (const post of storage.getSellzPosts().slice(0, followsSellz ? 100 : 15)) {
       items.push({
         id: `sellz-${post.id}`,
         kind: "sellz",
@@ -15658,6 +15673,7 @@ export const storage: IStorage = {
         link: `/sellz?post=${post.id}`,
         boardPostId: post.id,
         photoUrl: post.photoUrls?.[0] || null,
+        viewerFollowsBoard: followsSellz,
       });
     }
 

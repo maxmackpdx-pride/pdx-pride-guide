@@ -123,7 +123,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
             {post.status === "ACTIVE" ? <button onClick={() => act(`/api/sellz/${post.id}/reserve`)}>Reserve</button> : <button onClick={() => act(`/api/sellz/${post.id}/reopen`)}>Reopen</button>}
             <button onClick={() => act(`/api/sellz/${post.id}/sold`)}>Mark sold</button>
             <button onClick={() => act(`/api/sellz/${post.id}/renew`)}>Renew 30 days</button>
-            <button onClick={() => { if (confirm(`Delete ${post.title}?`)) act(`/api/sellz/${post.id}`, undefined, "DELETE"); onDeleted?.(); }}>Delete</button>
+            <button onClick={() => { if (confirm(`Delete ${post.title}?`)) { act(`/api/sellz/${post.id}`, undefined, "DELETE"); onDeleted?.(); } }}>Delete</button>
           </div>
           {editing ? <div className="gifting-response sellz-edit-form">
             <input className="board-text-field" value={edit.title} onChange={e => setEdit({ ...edit, title: e.target.value })} aria-label="Listing title" />

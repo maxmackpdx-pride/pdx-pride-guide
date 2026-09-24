@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 
-export default function BoardFollowButton({ board }: { board: "gigz" | "giftz" }) {
+export default function BoardFollowButton({ board }: { board: "gigz" | "giftz" | "sellz" }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
@@ -21,6 +21,7 @@ export default function BoardFollowButton({ board }: { board: "gigz" | "giftz" }
     enabled: !!user,
   });
   const following = !!status.data?.isFollowing;
+  const boardName = board === "gigz" ? "Gigz" : board === "giftz" ? "Giftz" : "Sellz";
   const mutation = useMutation({
     mutationFn: async (follow: boolean) => {
       const response = await fetch(`/api/boards/${board}/follow`, {
@@ -40,7 +41,7 @@ export default function BoardFollowButton({ board }: { board: "gigz" | "giftz" }
   return <>
     <button type="button" className="board-follow-button" data-board={board} aria-pressed={following} disabled={!!user && (status.isPending || mutation.isPending)} onClick={() => !user ? setShowAuth(true) : status.isError ? void status.refetch() : mutation.mutate(!following)}>
       {following ? <BellOff size={17} aria-hidden="true" /> : <Bell size={17} aria-hidden="true" />}
-      {status.isError ? "Retry follow status" : following ? `Following ${board === "gigz" ? "Gigz" : "Giftz"}` : `Follow ${board === "gigz" ? "Gigz" : "Giftz"}`}
+      {status.isError ? "Retry follow status" : following ? `Following ${boardName}` : `Follow ${boardName}`}
     </button>
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
   </>;
