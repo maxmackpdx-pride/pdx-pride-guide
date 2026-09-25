@@ -1306,6 +1306,32 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
   });
 
+  // The agent may store a visually verified flyer without borrowing a human
+  // session. The image still needs a separate evidence/decision gate before it
+  // can be attached to a public event.
+  app.post("/api/admin/event-research/poster", requireEventResearchAccess, upload.single("poster"), (req: any, res) => {
+    if (!req.file) return res.status(400).json({ error: "A JPG, PNG, GIF, or WebP poster under 8 MB is required" });
+    const bytes = fs.readFileSync(req.file.path);
+    const jpeg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+    const png = bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    const gif = bytes.length >= 6 && ["GIF87a", "GIF89a"].includes(bytes.toString("ascii", 0, 6));
+    const webp = bytes.length >= 12 && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP";
+    const valid = (req.file.mimetype === "image/jpeg" && jpeg)
+      || (req.file.mimetype === "image/png" && png)
+      || (req.file.mimetype === "image/gif" && gif)
+      || (req.file.mimetype === "image/webp" && webp);
+    if (!valid) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ error: "Poster content does not match its image type" });
+    }
+    res.json({
+      url: `/uploads/${req.file.filename}`,
+      sha256: createHash("sha256").update(bytes).digest("hex"),
+      bytes: bytes.length,
+      contentType: req.file.mimetype,
+    });
+  });
+
   app.post("/api/admin/event-research/events", requireEventResearchAccess, (req, res) => {
     const result = createEventFromResearch({
       candidateKey: req.body?.candidateKey,

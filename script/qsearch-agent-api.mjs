@@ -2,6 +2,7 @@
 
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import path from "node:path";
 
 const KEYCHAIN_ACCOUNT = "qsearch-2";
 const KEYCHAIN_SERVICE = "zaylist-qsearch-agent-api";
@@ -95,6 +96,7 @@ function usage() {
     "  record-outcome <json|->",
     "  resolve-item <json|->",
     "  record-path <json|->",
+    "  upload-poster <local-image-path>",
     "  create-event <json|->",
     "  change-event <event-id> <json|->",
     "  rollback <rollback-token>",
@@ -175,6 +177,23 @@ async function main() {
         jsonInput(first),
       );
       break;
+    case "upload-poster": {
+      if (!first) throw new Error("A local poster path is required.");
+      const ext = path.extname(first).toLowerCase();
+      const mime = ({ ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".gif": "image/gif", ".webp": "image/webp" })[ext];
+      if (!mime) throw new Error("Poster must be JPG, PNG, GIF, or WebP.");
+      const body = new FormData();
+      body.set("poster", new Blob([readFileSync(first)], { type: mime }), path.basename(first));
+      const response = await fetch(`${baseUrl}/api/admin/event-research/poster`, {
+        method: "POST",
+        signal: AbortSignal.timeout(30_000),
+        headers: { Authorization: `Bearer ${readToken()}`, Accept: "application/json" },
+        body,
+      });
+      payload = await response.json();
+      if (!response.ok) throw new Error(`${response.status}: ${payload?.error || "Poster upload failed"}`);
+      break;
+    }
     case "create-event":
       payload = await request(
         "POST",
