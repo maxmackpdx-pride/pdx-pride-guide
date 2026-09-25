@@ -7934,18 +7934,20 @@ html.calm-mode .attendance-cluster-cta__btn,
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.72);
-  z-index: 55;
+  z-index: 3100;
 }
 
 .attendance-vibe-modal {
   position: fixed;
-  z-index: 60;
+  z-index: 3101;
+  display: flex;
+  flex-direction: column;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   width: min(520px, calc(100% - 32px));
-  max-height: min(88vh, 720px);
-  overflow-y: auto;
+  max-height: min(88dvh, 720px);
+  overflow: hidden;
   background: #090909;
   border: 2px solid var(--neon-cyan);
   box-shadow:
@@ -7961,13 +7963,37 @@ html.calm-mode .attendance-cluster-cta__btn,
   bottom: 0;
   transform: none;
   width: 100%;
-  max-height: 78vh;
+  max-height: 88dvh;
+  padding-bottom: max(22px, env(safe-area-inset-bottom));
   border-left: none;
   border-right: none;
   border-bottom: none;
   border-top: 2px solid var(--neon-yellow);
   box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.75);
   animation: attendance-sheet-up 0.25s ease-out;
+}
+
+.attendance-vibe-modal form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.attendance-vibe-modal__body {
+  position: relative;
+  overflow-y: auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+
+.attendance-vibe-modal__head,
+.attendance-vibe-modal__lede,
+.attendance-vibe-modal__actions {
+  flex-shrink: 0;
+}
+
+.attendance-vibe-modal__actions {
+  padding-top: 12px;
 }
 
 .attendance-vibe-modal__head {
@@ -8137,6 +8163,7 @@ html.calm-mode .attendance-cluster-cta__btn,
 }
 
 .attendance-visibility__option {
+  position: relative;
   display: grid;
   gap: 2px;
   padding: 10px 12px;

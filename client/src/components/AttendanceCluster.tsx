@@ -75,7 +75,9 @@ export default function AttendanceCluster({
   extraPeople = [],
   liveSocket = true,
   pastEvent = false,
+  onFormOpenChange,
 }: {
+  onFormOpenChange?: (open: boolean) => void;
   eventId: number;
   embedded?: boolean;
   extraPeople?: ExtraPerson[];
@@ -86,6 +88,10 @@ export default function AttendanceCluster({
 }) {
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
+  useEffect(() => {
+    onFormOpenChange?.(showForm);
+    return () => onFormOpenChange?.(false);
+  }, [showForm, onFormOpenChange]);
   const [selectedPhraseKey, setSelectedPhraseKey] = useState<AttendancePhraseKey>(DEFAULT_ATTENDANCE_PHRASE_KEY);
   const [visibility, setVisibility] = useState<AttendanceVisibility>("public");
   const [showChat, setShowChat] = useState(false);

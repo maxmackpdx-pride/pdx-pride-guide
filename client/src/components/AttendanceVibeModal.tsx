@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { useModalA11y } from "@/hooks/useModalA11y";
 
 /** Client mirror of shared AttendanceVisibility (+ legacy "visible" accepted server-side). */
 export type AttendanceVisibility = "public" | "friends" | "anonymous";
@@ -56,16 +58,19 @@ export default function AttendanceVibeModal({
   onRemove,
   children,
 }: AttendanceVibeModalProps) {
+  const dialogRef = useModalA11y({ open, onClose });
   if (!open) return null;
 
-  return (
-    <>
+  return createPortal(
+    <div onClick={(event) => event.stopPropagation()}>
       <div
         className="attendance-vibe-backdrop"
         onClick={onClose}
         data-testid="attendance-vibe-backdrop"
       />
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="attendance-vibe-title"
@@ -93,31 +98,33 @@ export default function AttendanceVibeModal({
           }}
           data-testid="form-attendance"
         >
-          {children}
-          <fieldset className="attendance-visibility">
-            <legend className="attendance-visibility__legend">Show as</legend>
-            <div className="attendance-visibility__options">
-              {VISIBILITY_OPTIONS.map((opt) => (
-                <label
-                  key={opt.value}
-                  className={`attendance-visibility__option${
-                    visibility === opt.value ? " attendance-visibility__option--active" : ""
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="attendance-visibility"
-                    value={opt.value}
-                    checked={visibility === opt.value}
-                    onChange={() => onVisibilityChange(opt.value)}
-                    data-testid={opt.testId}
-                  />
-                  <span className="attendance-visibility__label">{opt.label}</span>
-                  <span className="attendance-visibility__hint">{opt.hint}</span>
-                </label>
-              ))}
+          <div className="attendance-vibe-modal__body">
+            {children}
+            <fieldset className="attendance-visibility">
+              <legend className="attendance-visibility__legend">Show as</legend>
+              <div className="attendance-visibility__options">
+                {VISIBILITY_OPTIONS.map((opt) => (
+                  <label
+                    key={opt.value}
+                    className={`attendance-visibility__option${
+                      visibility === opt.value ? " attendance-visibility__option--active" : ""
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="attendance-visibility"
+                      value={opt.value}
+                      checked={visibility === opt.value}
+                      onChange={() => onVisibilityChange(opt.value)}
+                      data-testid={opt.testId}
+                    />
+                    <span className="attendance-visibility__label">{opt.label}</span>
+                    <span className="attendance-visibility__hint">{opt.hint}</span>
+                  </label>
+                ))}
             </div>
           </fieldset>
+          </div>
           <div className="attendance-vibe-modal__actions">
             <button
               type="submit"
@@ -125,7 +132,7 @@ export default function AttendanceVibeModal({
               disabled={isPending}
               className="display attendance-vibe-modal__submit"
             >
-              {isPending ? "SAVING..." : hasAttendance ? "UPDATE VIBE" : "I'LL BE THERE"}
+              {isPending ? "SAVING..." : hasAttendance ? "UPDATE VIBE" : "CONFIRM ATTENDANCE"}
             </button>
             {hasAttendance && onRemove && (
               <button type="button" className="attendance-vibe-modal__remove" onClick={onRemove}>
@@ -138,6 +145,7 @@ export default function AttendanceVibeModal({
           </div>
         </form>
       </div>
-    </>
+    </div>,
+    document.body,
   );
 }

@@ -295,3 +295,9 @@ html.calm-mode .pdxBoard--event-grid .pdxBoard__meta,
   .pdxBoard--event-grid:hover .pdxBoard__img,.pdxBoard--event-grid:hover .pdxBoard__title,
   .pdxBoard--event-grid:hover .pdxBoard__meta{transform:none;filter:none}
 }
+
+@media (max-width: 767px) {
+  .pdxBoard--event-grid .pdxBoard__actions--claim-only,
+  .pdxBoard--event-grid .pdxBoard__action--claim,
+  .pdxBoard--event-grid .pdxBoard__action--pending { display: none; }
+}

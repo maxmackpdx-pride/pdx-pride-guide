@@ -154,6 +154,9 @@ html.calm-mode .pdxRow,
   box-shadow:0 0 0 2px #000,0 18px 42px rgba(0,0,0,.72) !important;
 }
 
+@media (max-width:767px){
+  .pdxRow__claim{ display:none; }
+}
 @media (max-width:720px){
   .pdxRow{ grid-template-columns:82px minmax(0,1fr); gap:13px; min-height:142px; padding:13px; }
   .pdxRow__thumb{ width:82px; height:110px; }

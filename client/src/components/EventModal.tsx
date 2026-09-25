@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import { Check } from "lucide-react";
+import { Button } from "@/components/ds";
 import DetailActions from "./DetailActions";
 import { useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
@@ -225,6 +226,7 @@ function EventModalInner({
   const [coHostUsername, setCoHostUsername] = useState("");
   const [showAddCoHost, setShowAddCoHost] = useState(false);
   const [showCalPicker, setShowCalPicker] = useState(false);
+  const [attendanceFormOpen, setAttendanceFormOpen] = useState(false);
   const [socialTab, setSocialTab] = useState<"attendance" | "missed">("attendance");
   const [editing, setEditing] = useState(false);
   const [eventForm, setEventForm] = useState<EventEditFormState | null>(null);
@@ -845,7 +847,7 @@ function EventModalInner({
       data-testid={socialTab === "attendance" ? "event-modal-attendance" : "event-modal-missed"}
     >
       {socialTab === "attendance" ? (
-        <AttendanceCluster eventId={event.id} embedded extraPeople={extraPeople} pastEvent={isPastEvent} />
+        <AttendanceCluster eventId={event.id} embedded extraPeople={extraPeople} pastEvent={isPastEvent} onFormOpenChange={setAttendanceFormOpen} />
       ) : eventTiming === "upcoming" ? (
         <div className="event-modal__locked-panel">
           <Lock size={28} aria-hidden="true" />
@@ -886,7 +888,20 @@ function EventModalInner({
                     toast({ title: "Could not share event", variant: "destructive" });
                   }
                 }
-              }} />
+              }} >
+            {!editing && (event.isClaimable || hasPendingClaim) && (
+              <Button
+                variant="neon"
+                accent="cyan"
+                type="button"
+                data-testid="button-claim-event"
+                disabled={hasPendingClaim}
+                onClick={() => user ? claimEvent(event.id) : setShowAuth(true)}
+              >
+                {hasPendingClaim ? "Claim Pending" : "Claim"}
+              </Button>
+            )}
+          </DetailActions>
         </div>
 
         <div className="event-modal__scroll" ref={scrollRef}>
@@ -1399,7 +1414,7 @@ function EventModalInner({
         </div>
         </div>
 
-        {!editing && (
+        {!editing && !attendanceFormOpen && (
           <div className="event-modal__sticky-cta" data-testid="event-modal-sticky-cta">
             <button
               type="button"
@@ -1418,17 +1433,6 @@ function EventModalInner({
                 onClick={() => rsvp.toggleRsvp(event.id)}
               >
                 {rsvp.myEventIds.has(event.id) ? <>Interested <Check size={14} aria-hidden="true" /></> : "I Am Interested"}
-              </button>
-            )}
-            {(event.isClaimable || hasPendingClaim) && (
-              <button
-                type="button"
-                className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--secondary pdx-glass-rebind"
-                data-testid="button-claim-event"
-                disabled={hasPendingClaim}
-                onClick={() => user ? claimEvent(event.id) : setShowAuth(true)}
-              >
-                {hasPendingClaim ? "Claim Pending" : "Claim This Event"}
               </button>
             )}
             {isPastEvent && (
