@@ -16,7 +16,6 @@ export const BUILDING_OUTLINE = '#7397a0';
 export const NIGHT_EARTH = '#080c0c';
 export const COMMERCIAL_EARTH = '#101817';
 export const INDUSTRIAL_EARTH = '#121b1a';
-const CONTOUR_SIGNAL_COLORS=['#668f83','#8f6688','#a58b67'];
 const GREEN_OPACITY = ['interpolate',['linear'],['zoom'],10,.55,14,.72,18,.85];
 const URBAN_GREEN_OPACITY = ['interpolate',['linear'],['zoom'],10,.55,14,.72,15.75,.72,16.5,.2,17,0];
 
@@ -90,11 +89,6 @@ export function mapzSurfaceStyle({demTiles,contourTiles,terrainStrength=0}={}) {
     ...nightEarthFills(),
     ...quietGreenFills(),
     ...(contourTiles?[{id:'elevation-contours',type:'line',source:'contours','source-layer':'contours',minzoom:10,paint:{'line-color':'#35515a','line-opacity':['interpolate',['linear'],['zoom'],10,.08,12.5,.22,15,.14,18,.06],'line-width':['match',['get','level'],1,.85,.38]}}]:[]),
-    ...(contourTiles?CONTOUR_SIGNAL_COLORS.map((color,band)=>({
-      id:`elevation-contour-signal-${band}`,type:'line',source:'contours','source-layer':'contours',minzoom:10,maxzoom:15.9,
-      filter:['==',['%', ['to-number',['get','ele'],0],3],band],
-      paint:{'line-color':color,'line-opacity':0,'line-width':['match',['get','level'],1,1.12,.58],'line-blur':.25},
-    })):[]),
   );
   // Opaque terrain and water prevent the terrain framebuffer from exposing
   // lower surfaces. Underground transport must not be painted on top of land.
