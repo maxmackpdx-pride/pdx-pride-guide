@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -68,7 +69,7 @@ export default function ZIndex() {
             <textarea id={`claim-${community.id}`} value={claimReason} onChange={event => setClaimReason(event.target.value)} minLength={10} maxLength={500} required autoFocus />
             {claimError ? <p role="alert">{claimError}</p> : null}
             <div><button type="submit" disabled={claim.isPending}>SEND FOR REVIEW</button><button type="button" onClick={() => { setClaimSlug(null); setClaimReason(""); setClaimError(""); }}>CANCEL</button></div>
-          </form> : <button type="button" className="z-community-card__claim" onClick={() => { if (!user) { setShowAuth(true); return; } setClaimSlug(community.slug); setClaimReason(""); setClaimError(""); }}>Claim me →</button>}
+          </form> : <button type="button" className="z-community-card__claim" onClick={() => { if (!user) { setShowAuth(true); return; } setClaimSlug(community.slug); setClaimReason(""); setClaimError(""); }}>Claim me <ArrowRight size={14} aria-hidden="true" /></button>}
         </div> : null}
       </article>; })}
     </section>

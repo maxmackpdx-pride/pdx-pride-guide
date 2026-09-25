@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -400,7 +401,7 @@ export default function MissedConnectionsBubbleBoard({
                 disabled={!canSubmit || createMutation.isPending}
                 onClick={() => createMutation.mutate()}
               >
-                {createMutation.isPending ? "Posting…" : "Post it →"}
+                {createMutation.isPending ? "Posting…" : "Post it"}
               </button>
             </div>
             <div className="mc-compose__count">{draftBody.length}/500</div>
@@ -506,7 +507,7 @@ export default function MissedConnectionsBubbleBoard({
                           setHoveredId(null);
                         }}
                       >
-                        Reply →
+                        Reply <ArrowRight size={14} aria-hidden="true" />
                       </button>
                     )}
                   </div>
@@ -550,7 +551,7 @@ export default function MissedConnectionsBubbleBoard({
               disabled={!replyBody.trim() || replyMutation.isPending}
               onClick={() => replyMutation.mutate()}
             >
-              {replyMutation.isPending ? "Sending…" : "Send →"}
+              {replyMutation.isPending ? "Sending…" : "Send"}
             </button>
           </aside>
         </>

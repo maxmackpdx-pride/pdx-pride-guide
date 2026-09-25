@@ -263,8 +263,9 @@
     opacity: 1;
     pointer-events: auto;
     top: max(58px, calc(env(safe-area-inset-top, 0px) + 46px));
-    min-height: 41px;
-    padding: 7px 12px;
+    width: 44px;
+    min-height: 44px;
+    padding: 8px;
     font-size: 0.86rem;
     gap: 6px;
   }

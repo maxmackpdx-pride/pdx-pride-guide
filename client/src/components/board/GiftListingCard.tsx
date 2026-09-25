@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import GiftPostEditor from "./GiftPostEditor";
 import { useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -341,7 +342,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
               )}
               <span className="board-listing-card__status">{cardStatus(post)}</span>
             </div>
-            <span className="board-listing-card__cta">{cardCta(post)} →</span>
+            <span className="board-listing-card__cta">{cardCta(post)} <ArrowRight size={14} aria-hidden="true" /></span>
           </div>
         </div>
       </div>

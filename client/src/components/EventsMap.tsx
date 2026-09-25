@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -414,7 +415,7 @@ export function MapView({
         {variant === "home" && (
           <Link href="/events" className="home-map-all-events">
             <span>View all {events.length} events</span>
-            <span aria-hidden="true">→</span>
+            <span aria-hidden="true"><ArrowRight size={14} aria-hidden="true" /></span>
           </Link>
         )}
 

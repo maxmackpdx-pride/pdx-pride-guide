@@ -176,7 +176,7 @@ export function mapEventSample(
         "Portland",
     ),
     meta: metaBits.join(" · ") || "Events",
-    cta: "I'm going →",
+    cta: "I'm going",
     accent: day ? dayColorVar(day) : ACCENT.events,
     thumbUrl: listingPosterUrl(event) ?? null,
     isLive: true,
@@ -206,10 +206,10 @@ export function mapHousingSample(post: HousingPostView): HomeStageCardData {
   if (post.postedLabel) metaParts.push(post.postedLabel);
   const cta =
     post.type === "FORMING"
-      ? "Ask to join →"
+      ? "Ask to join"
       : post.type === "LOOKING"
-        ? "Say hi →"
-        : "Open →";
+        ? "Say hi"
+        : "Open";
   return {
     key: "housing",
     href: housingPostPath(post.id),
@@ -239,7 +239,7 @@ export function mapGiftingSample(post: GiftingRow): HomeStageCardData {
       [post.neighborhood, post.description].filter(Boolean).join(". ") || post.description,
     ),
     meta: [timeAgo(post.createdAt), handsMeta].filter(Boolean).join(" · "),
-    cta: post.postType === "ISO" ? "I can help →" : "Raise hand →",
+    cta: post.postType === "ISO" ? "I can help" : "Raise hand",
     accent: ACCENT.gifting,
     thumbUrl: post.photoUrls?.[0] ?? null,
     isLive: true,
@@ -257,7 +257,7 @@ export function mapGigSample(post: GigRow): HomeStageCardData {
     meta: [post.location, post.compensation, timeAgo(post.createdAt)]
       .filter(Boolean)
       .join(" · "),
-    cta: "Say hi →",
+    cta: "Say hi",
     accent: ACCENT.gigs,
     thumbUrl: post.imageUrl ?? null,
     isLive: true,
@@ -279,7 +279,7 @@ export function mapSpottedSample(post: SpottedRow): HomeStageCardData {
     title: post.title,
     line: clip(post.body),
     meta: [timeAgo(post.createdAt), day, place].filter(Boolean).join(" · "),
-    cta: "Reply →",
+    cta: "Reply",
     accent: ACCENT.spotted,
     thumbUrl: null,
     quoteTile: true,
@@ -328,7 +328,7 @@ export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
     title: "Wildrose haüs, 2 in, 2 to go",
     line: "Southeast. Big kitchen, one very polite beagle.",
     meta: "$850 · Feb 1 · 4 asks",
-    cta: "Ask to join →",
+    cta: "Ask to join",
     accent: ACCENT.housing,
     thumbUrl: "/home/hausing/room-forming.jpg",
     isLive: false,
@@ -340,7 +340,7 @@ export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
     title: "Free moving boxes (about 20)",
     line: "SE Portland. Take them all, they are clean and flat.",
     meta: "24m ago · 0 of 3 hands up",
-    cta: "Raise hand →",
+    cta: "Raise hand",
     accent: ACCENT.gifting,
     thumbUrl: "/home/gifting/gift-boxes.jpg",
     isLive: false,
@@ -352,7 +352,7 @@ export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
     title: "Coat check, two people, 9pm to 2am",
     line: "Paid cash at the end of the night. Tips are yours.",
     meta: "Sat · Southeast · $25/hr",
-    cta: "Say hi →",
+    cta: "Say hi",
     accent: ACCENT.gigs,
     thumbUrl: "/home/flyers/certified-freak-block-party.jpg",
     isLive: false,
@@ -364,7 +364,7 @@ export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
     title: "Blue buzzcut, back patio, two waters",
     line: "You gave one to me. I did not get your name.",
     meta: "2h ago · Fri · Pearl District",
-    cta: "Reply →",
+    cta: "Reply",
     accent: ACCENT.spotted,
     quoteTile: true,
     isLive: false,

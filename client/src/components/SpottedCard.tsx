@@ -1,3 +1,5 @@
+import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import type { CSSProperties } from "react";
 import { MapPin, Share2 } from "lucide-react";
 import type { MissedConnectionPost } from "./MissedConnectionsPanel";
@@ -98,10 +100,10 @@ export default function SpottedCard({
         <p className="board-spotted-card__body">{post.body}</p>
         <div className="board-spotted-card__foot">
           <span className="board-spotted-card__place">{spottedPlace(post)}</span>
-          {!post.isMine && !isClosed && <span className="board-spotted-card__cta" style={{ color: MC_GLASS }}>Reply →</span>}
+          {!post.isMine && !isClosed && <span className="board-spotted-card__cta" style={{ color: MC_GLASS }}>Reply <ArrowRight size={14} aria-hidden="true" /></span>}
         </div>
         {source && <span className="board-spotted-card__source">↳ From {source.label} card · {source.label === "Placez" ? "Portland stock photo" : source.label === "Eventz" ? "Event flyer" : "Destination art"}</span>}
-        <span className="board-spotted-card__open">View and reply <span aria-hidden="true">↗</span></span>
+        <span className="board-spotted-card__open">View and reply <span aria-hidden="true"><ArrowUpRight size={14} aria-hidden="true" /></span></span>
       </article>
     );
   }
@@ -155,7 +157,7 @@ export default function SpottedCard({
             onClick={onReply}
             aria-label={`Message about: ${post.title || post.body.slice(0, 40)}`}
           >
-            MESSAGE →
+            MESSAGE <ArrowRight size={14} aria-hidden="true" />
           </button>
         )}
         <button

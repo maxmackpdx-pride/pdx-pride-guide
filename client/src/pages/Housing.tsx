@@ -1,3 +1,7 @@
+import { ArrowDown } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import BrowseStatus from "@/components/BrowseStatus";
 import SectionBreadcrumb from "@/components/SectionBreadcrumb";
@@ -74,7 +78,7 @@ function HousingRail({ type, eyebrow, title, description, action, posts, handler
     <section className="hz-board-section" aria-label={title} style={{ "--hz-accent": HOUSING_ACCENT_VAR[type] } as React.CSSProperties}>
       <div className="hz-board-section__head">
         <div><Mono micro>{eyebrow}</Mono><h3>{title}<span>.</span></h3><p>{description}</p></div>
-        <button type="button" onClick={() => onCompose(type === "MANAGED" ? "PM" : type)}>{action} ↗</button>
+        <button type="button" onClick={() => onCompose(type === "MANAGED" ? "PM" : type)}>{action} <ArrowUpRight size={14} aria-hidden="true" /></button>
       </div>
       {posts.length ? (
         <>
@@ -91,8 +95,8 @@ function HousingRail({ type, eyebrow, title, description, action, posts, handler
           </div>
           {posts.length > 1 && <div className="hz-board-rail__controls">
             <span>SWIPE TO EXPLORE</span>
-            <button type="button" aria-label={`Previous ${title}`} onClick={() => track.current?.scrollBy({ left: 380, behavior: "smooth" })}>→</button>
-            <button type="button" aria-label={`Next ${title}`} onClick={() => track.current?.scrollBy({ left: -380, behavior: "smooth" })}>←</button>
+            <button type="button" aria-label={`Previous ${title}`} onClick={() => track.current?.scrollBy({ left: 380, behavior: "smooth" })}><ArrowRight size={14} aria-hidden="true" /></button>
+            <button type="button" aria-label={`Next ${title}`} onClick={() => track.current?.scrollBy({ left: -380, behavior: "smooth" })}><ArrowLeft size={14} aria-hidden="true" /></button>
           </div>}
         </>
       ) : <p className="hz-board-section__empty">No {title.toLowerCase()} yet. Start this rail with a post.</p>}
@@ -377,8 +381,8 @@ export default function Housing() {
               <Mono>Find a room · find people · find a home</Mono>
             </div>
             <div className="hz-board-actions">
-              <a className="hz-chip hz-chip--btn" href="#housing-listings">Browse the listings ↓</a>
-              <button type="button" className="hz-chip hz-chip--btn hz-board-post" onClick={() => { if (requireAuth()) navigate("/the-hauz/new"); }}>Post to The Haüz ↗</button>
+              <a className="hz-chip hz-chip--btn" href="#housing-listings">Browse the listings <ArrowDown size={14} aria-hidden="true" /></a>
+              <button type="button" className="hz-chip hz-chip--btn hz-board-post" onClick={() => { if (requireAuth()) navigate("/the-hauz/new"); }}>Post to The Haüz <ArrowUpRight size={14} aria-hidden="true" /></button>
               <BoardFollowButton board="houz" />
             </div>
           </div>

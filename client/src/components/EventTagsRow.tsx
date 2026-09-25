@@ -74,7 +74,7 @@ export default function EventTagsRow({
           role={onClaimClick ? "button" : undefined}
           tabIndex={onClaimClick ? 0 : undefined}
         >
-          {onClaimClick ? "Claim this event →" : "Claim me"}
+          {onClaimClick ? "Claim this event" : "Claim me"}
         </span>
       )}
     </div>

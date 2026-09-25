@@ -348,9 +348,9 @@
   text-decoration: none;
   text-transform: uppercase;
 }
-.home-world__action span:last-child { transition: transform .2s ease; }
-.home-world__action:hover span:last-child,
-.home-world__action:focus-visible span:last-child { transform: translate(3px, -3px); }
+.home-world__action svg:last-child { flex: none; transition: transform .2s ease; }
+.home-world__action:hover svg:last-child,
+.home-world__action:focus-visible svg:last-child { transform: translate(3px, -3px); }
 
 /* Shared chrome: the blinking live dot and the DEMO sticker. */
 .home-world__dot {
@@ -965,7 +965,7 @@ html.calm-mode .home-world__demo,
   .home-world__roadmap-glitch { animation: none; }
   .home-world__data-state-dot { animation: none; }
   .home-world__roadmap-glitch { display: none; }
-  .home-world__action span:last-child { transition: none; }
+  .home-world__action svg:last-child { transition: none; }
 }
 
 /* ── Keeping the title band alive on the shorter card boxes ─────────────

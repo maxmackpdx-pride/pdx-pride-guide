@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useId, type ReactNode } from "react";
 import { DashboardItemSkeleton } from "./DashboardThreadSkeleton";
 
@@ -56,7 +57,7 @@ export default function DashboardDrawer({
               onClick={e => e.stopPropagation()}
               style={{ fontSize: "0.65rem", color, fontFamily: "var(--font-display)", letterSpacing: "0.06em", opacity: 0.7, textDecoration: "none" }}
             >
-              VIEW ALL →
+              VIEW ALL <ArrowRight size={14} aria-hidden="true" />
             </a>
           )}
           <span className="dash-drawer-chevron" style={{ color }} aria-hidden="true">▾</span>

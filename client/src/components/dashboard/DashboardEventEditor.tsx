@@ -225,7 +225,7 @@ export function DashboardEventEditForm({
                 onClick={() => addCoHostMutation.mutate({ username: coHostUsername, email: "" })}
                 style={{ opacity: !coHostUsername.trim() ? 0.5 : 1 }}
               >
-                {addCoHostMutation.isPending ? "Adding…" : "Add →"}
+                {addCoHostMutation.isPending ? "Adding…" : "Add"}
               </button>
             </div>
           )}
@@ -258,7 +258,7 @@ export function DashboardEventEditForm({
             className="dash-btn dash-btn-lime"
             style={{ marginTop: 10, opacity: !hostUpdate.trim() || posting ? 0.5 : 1 }}
           >
-            {posting ? "Posting..." : "Post update →"}
+            {posting ? "Posting..." : "Post update"}
           </button>
         </div>}
         <div
@@ -284,7 +284,7 @@ export function DashboardEventEditForm({
             disabled={saving || deleting}
             className={embedded ? "btn-neon solid event-modal__action-btn" : "dash-btn dash-btn-lime active"}
           >
-            {saving ? "Saving..." : embedded ? "Save changes" : "Save event →"}
+            {saving ? "Saving..." : embedded ? "Save changes" : "Save event"}
           </button>
           {onDelete && (
             <button

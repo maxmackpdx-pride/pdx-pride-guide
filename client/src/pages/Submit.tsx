@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react";
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import ImageUploader from "@/components/ImageUploader";
@@ -749,7 +750,7 @@ export default function Submit() {
             ) : (
               <>
                 <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>
-                  ← Back to hub
+                  <ArrowLeft size={14} aria-hidden="true" /> Back to hub
                 </button>
                 <div className="board-section-kicker board-section-kicker--lime">Submit an event</div>
                 <h2 className="display section-heading">Add your event</h2>
@@ -1000,7 +1001,7 @@ export default function Submit() {
           </div>
         ) : (
           <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
-            <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>← Back to hub</button>
+            <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}><ArrowLeft size={14} aria-hidden="true" /> Back to hub</button>
             <div className="board-section-kicker" style={{ color: "var(--panel-purple, #b06bff)" }}>Promoter verification</div>
             <h2 className="display section-heading">Apply as promoter</h2>
             <p className="board-copy-sm">
@@ -1078,7 +1079,7 @@ export default function Submit() {
           </div>
         ) : (
           <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
-            <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>← Back to hub</button>
+            <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}><ArrowLeft size={14} aria-hidden="true" /> Back to hub</button>
             <div className="board-section-kicker board-section-kicker--magenta">Community tip</div>
             <h2 className="display section-heading">Spotted an event</h2>
             <p className="board-copy-sm">
@@ -1161,7 +1162,7 @@ export default function Submit() {
           </div>
         ) : (
           <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
-            <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>← Back to hub</button>
+            <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}><ArrowLeft size={14} aria-hidden="true" /> Back to hub</button>
             <div className="board-section-kicker board-section-kicker--cyan">Host your listing</div>
             <h2 className="display section-heading">Claim an event</h2>
             <div className="submit-chip-note" style={{ marginBottom: 22 }}>

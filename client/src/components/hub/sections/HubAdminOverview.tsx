@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ds";
 import { Link } from "wouter";
@@ -210,7 +211,7 @@ export default function HubAdminOverview({
           </Button>
           <Link href="/admin?tab=events" onClick={onOpenAdminPanel}>
             <Button variant="ghost" accent="cyan" size="sm">
-              Full admin tools →
+              Full admin tools <ArrowRight size={14} aria-hidden="true" />
             </Button>
           </Link>
         </div>

@@ -46,7 +46,7 @@ export const AVATAR_RING_OPTIONS: AvatarRingOption[] = [
 
 export interface AvatarEmojiOption {
   id: number;
-  /** Emoji glyph shown in the picker for the classic color avatars. */
+  /** Legacy field; classic avatar choices render the shared SVG icons. */
   emoji?: string;
   /** Background color for the emoji/initial avatars. */
   bg?: string;
@@ -56,12 +56,12 @@ export interface AvatarEmojiOption {
 }
 
 export const AVATAR_EMOJI_OPTIONS: AvatarEmojiOption[] = [
-  { id: 1, emoji: "🐱", bg: "#00FFFF", label: "Cyan Cat" },
-  { id: 2, emoji: "🦋", bg: "#FF00CC", label: "Magenta Butterfly" },
-  { id: 3, emoji: "🐍", bg: "#CCFF00", label: "Neon Snake" },
-  { id: 4, emoji: "🌙", bg: "#8800FF", label: "Violet Moon" },
-  { id: 5, emoji: "🔥", bg: "#FF6600", label: "Orange Flame" },
-  { id: 6, emoji: "⚡", bg: "#fff", label: "White Lightning" },
+  { id: 1, bg: "#00FFFF", label: "Cyan Cat" },
+  { id: 2, bg: "#FF00CC", label: "Magenta Butterfly" },
+  { id: 3, bg: "#CCFF00", label: "Neon Snake" },
+  { id: 4, bg: "#8800FF", label: "Violet Moon" },
+  { id: 5, bg: "#FF6600", label: "Orange Flame" },
+  { id: 6, bg: "#fff", label: "White Lightning" },
   // Illustrated Portland / Pride avatars.
   { id: 7, img: "/avatars/rose.webp", label: "Portland Rose" },
   { id: 8, img: "/avatars/bridge.webp", label: "St. Johns Bridge" },

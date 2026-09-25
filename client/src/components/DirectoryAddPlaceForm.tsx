@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import {useState} from 'react';
 import {useMutation} from '@tanstack/react-query';
 import {apiRequest,queryClient} from '@/lib/queryClient';
@@ -287,7 +288,7 @@ return <>{showAuth&&<AuthModal onClose={()=>setShowAuth(false)} defaultTab="logi
                             >
                               {claimMatchMutation.isPending && claimingBusinessId === match.businessId
                                 ? "Submitting…"
-                                : "Request ownership & merge updates →"}
+                                : "Request ownership & merge updates"}
                             </button>
                           )}
                         </li>
@@ -301,7 +302,7 @@ return <>{showAuth&&<AuthModal onClose={()=>setShowAuth(false)} defaultTab="logi
                         onClick={publishDespiteMatches}
                         style={{ width: "100%", justifyContent: "center" }}
                       >
-                        {createMutation.isPending ? "Publishing…" : "This is a different place, publish anyway →"}
+                        {createMutation.isPending ? "Publishing…" : "This is a different place, publish anyway"}
                       </button>
                     )}
                   </div>
@@ -310,7 +311,7 @@ return <>{showAuth&&<AuthModal onClose={()=>setShowAuth(false)} defaultTab="logi
                   {!submitResult.heldForReview && submitResult.postId && onView && <button type="button" className="btn-neon solid pdx-glass-rebind" onClick={()=>onView(submitResult.postId!)}>Open this place on the map</button>}
                   {!submitResult.heldForReview && (
                     <button type="button" className="btn-neon solid pdx-glass-rebind" onClick={openAddForm} style={{ width: "100%", justifyContent: "center" }}>
-                      Add another place →
+                      Add another place <ArrowRight size={14} aria-hidden="true" />
                     </button>
                   )}
                   <button type="button" onClick={finishDirectorySubmit} className="submit-hub-link">
@@ -420,7 +421,7 @@ return <>{showAuth&&<AuthModal onClose={()=>setShowAuth(false)} defaultTab="logi
               </div>
             </div>
             <button type="button" className="btn-neon solid pdx-glass-rebind" disabled={createMutation.isPending || readOnly} onClick={submitDirectoryForm}>
-              {createMutation.isPending ? "Adding…" : "Add to directory →"}
+              {createMutation.isPending ? "Adding…" : "Add to directory"}
             </button>
             </>
             )}

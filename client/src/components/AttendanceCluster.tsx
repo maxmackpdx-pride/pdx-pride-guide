@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { Check } from "lucide-react";
 import { useState, useEffect, useRef, type CSSProperties } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -328,7 +329,7 @@ export default function AttendanceCluster({
                   disabled={mutation.isPending}
                   className="display attendance-cluster-cta__btn pdx-glass-rebind"
                 >
-                  {mutation.isPending ? "Saving…" : "I was here →"}
+                  {mutation.isPending ? "Saving…" : "I was here"}
                 </button>
               )}
               {myAttendance && (
@@ -356,7 +357,7 @@ export default function AttendanceCluster({
                 disabled={mutation.isPending || removeMutation.isPending}
                 className="display attendance-cluster-cta__btn pdx-glass-rebind"
               >
-                {myAttendance ? <>Going <Check size={14} aria-hidden="true" /></> : "I'll be there →"}
+                {myAttendance ? <>Going <Check size={14} aria-hidden="true" /></> : "I'll be there"}
               </button>
               {myAttendance && myPhrase && (
                 <span className="attendance-cluster-cta__status">
@@ -371,7 +372,7 @@ export default function AttendanceCluster({
                     onClick={() => setShowChat(true)}
                     className="attendance-cluster-cta__chat"
                   >
-                    Open event chat →
+                    Open event chat <ArrowRight size={14} aria-hidden="true" />
                   </button>
                   <button
                     type="button"

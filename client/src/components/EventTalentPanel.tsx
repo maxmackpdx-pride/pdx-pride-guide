@@ -278,7 +278,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
             <button type="button" className="btn-neon solid pdx-glass-rebind" style={{ fontSize: "0.72rem", padding: "8px 14px" }}
               disabled={addMutation.isPending || !hostUsername.trim() || !hostRole}
               onClick={() => hostRole && addMutation.mutate()}>
-              {addMutation.isPending ? "ADDING..." : hostRole ? `ADD ${EVENT_TALENT_ROLE_LABELS[hostRole].toUpperCase()} →` : "PICK ROLE ↑"}
+              {addMutation.isPending ? "ADDING..." : hostRole ? `ADD ${EVENT_TALENT_ROLE_LABELS[hostRole].toUpperCase()}` : "PICK ROLE"}
             </button>
           </div>
         </div>
@@ -309,8 +309,8 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
             {selfMutation.isPending
               ? "ADDING..."
               : selfRole
-                ? `ADD ${EVENT_TALENT_ROLE_LABELS[selfRole].toUpperCase()} TAG →`
-                : "PICK YOUR ROLE ↑"}
+                ? `ADD ${EVENT_TALENT_ROLE_LABELS[selfRole].toUpperCase()} TAG`
+                : "PICK YOUR ROLE"}
           </button>
           {pendingRoles.length > 0 && (
             <p style={{ fontSize: "0.75rem", color: "var(--neon-cyan)", marginTop: 8 }}>

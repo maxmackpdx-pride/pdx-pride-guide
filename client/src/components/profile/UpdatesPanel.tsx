@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { Heart, MessageCircle } from "lucide-react";
 import { useCallback, useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from "react";
 import { Link } from "wouter";
@@ -537,7 +538,7 @@ export default function UpdatesPanel({
                     <div className="pp-updates__kick pp-updates__where">{post.where}</div>
                   ) : null}
                   {isBoardCard ? (
-                    <div className="pp-updates__open-hint">OPEN CARD →</div>
+                    <div className="pp-updates__open-hint">OPEN CARD <ArrowRight size={14} aria-hidden="true" /></div>
                   ) : null}
                 </div>
               </div>

@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import outzMapCatalog from "@shared/outzMapCatalog";
@@ -23,7 +24,7 @@ export default function OutzAdventures({ adventures }: { adventures: MemberProfi
 
   return (
     <section className="pp-adventures" aria-label="Outzide adventures">
-      <ProfileSectionHeader kicker="OUTZIDE" title="Adventures" action={<Link href="/outzide">Explore Outzide →</Link>} />
+      <ProfileSectionHeader kicker="OUTZIDE" title="Adventures" action={<Link href="/outzide">Explore Outzide <ArrowRight size={14} aria-hidden="true" /></Link>} />
       <p className="pp-adventures__note">Your check-in plans · Only visible to you</p>
       {(["upcoming", "previous"] as const).map(kind => {
         const rows = adventures?.[kind] ?? [];

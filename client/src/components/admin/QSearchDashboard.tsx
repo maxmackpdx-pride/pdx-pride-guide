@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { Check, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -2131,7 +2132,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                   setTab("venues");
                 }}
               >
-                Open in Sources →
+                Open in Sources <ArrowRight size={14} aria-hidden="true" />
               </button>
             </div>
           )}

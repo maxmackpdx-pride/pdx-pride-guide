@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React from "react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import LiveWave from "@/components/LiveWave";
 
 /* event-card-list-row: Events page list-view presentation.
@@ -234,14 +235,14 @@ export function EventCard({
         {venue && (
           <div className="pdxRow__venue">
             {venueHref
-              ? <a href={venueHref} target="_blank" rel="noopener noreferrer" onClick={stop}>{venue} ↗</a>
+              ? <a href={venueHref} target="_blank" rel="noopener noreferrer" onClick={stop}>{venue} <ArrowUpRight size={14} aria-hidden="true" /></a>
               : <b>{venue}</b>}
           </div>
         )}
         {address && <div className="pdxRow__address">{address}</div>}
         {ticketHref && (
           <a className="pdxRow__ticket pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href={ticketHref} target="_blank" rel="noopener noreferrer" onClick={stop}>
-            {ticketLabel} →
+            {ticketLabel} <ArrowRight size={15} aria-hidden="true" />
           </a>
         )}
         {when && <div className="pdxRow__when">{when}</div>}
@@ -272,7 +273,7 @@ export function EventCard({
               data-testid="tag-claim-event"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClaimClick?.(); }}
             >
-              Claim this event →
+              Claim this event <ArrowRight size={15} aria-hidden="true" />
             </button>
           )
         )}

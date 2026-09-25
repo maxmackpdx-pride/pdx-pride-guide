@@ -1,3 +1,5 @@
+import { ArrowDown } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -139,8 +141,8 @@ export default function Top8Editor({ current, onClose, onSave }: Props) {
                 <span className="top8ed__row-name display">{nameOf(e)}</span>
                 <span className="top8ed__row-sub">{subOf(e)}</span>
               </span>
-              <button type="button" className="top8ed__mv" disabled={i === 0} onClick={() => move(i, -1)} aria-label={`Move ${nameOf(e)} up from position ${i + 1}`}>↑</button>
-              <button type="button" className="top8ed__mv" disabled={i === list.length - 1} onClick={() => move(i, 1)} aria-label={`Move ${nameOf(e)} down from position ${i + 1}`}>↓</button>
+              <button type="button" className="top8ed__mv" disabled={i === 0} onClick={() => move(i, -1)} aria-label={`Move ${nameOf(e)} up from position ${i + 1}`}><ArrowUp size={14} aria-hidden="true" /></button>
+              <button type="button" className="top8ed__mv" disabled={i === list.length - 1} onClick={() => move(i, 1)} aria-label={`Move ${nameOf(e)} down from position ${i + 1}`}><ArrowDown size={14} aria-hidden="true" /></button>
               <button type="button" className="top8ed__rm" onClick={() => { remove(e); setAnnouncement(`${nameOf(e)} removed from Top 8.`); }} aria-label={`Remove ${nameOf(e)}`}><X size={16} aria-hidden="true" /></button>
             </div>
           ))}

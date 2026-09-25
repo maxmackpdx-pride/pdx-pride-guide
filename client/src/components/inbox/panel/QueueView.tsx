@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react";
 import { useMemo, useState, type CSSProperties } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
@@ -1036,7 +1037,7 @@ export default function QueueView({
               textDecoration: "none",
             }}
           >
-            OPEN ↗
+            OPEN <ArrowUpRight size={14} aria-hidden="true" />
           </a>
         </div>
 
@@ -1274,7 +1275,7 @@ export default function QueueView({
                       textDecoration: "none",
                     }}
                   >
-                    Attachment {ai + 1} ↗
+                    Attachment {ai + 1} <ArrowUpRight size={14} aria-hidden="true" />
                   </a>
                 ))}
               </div>

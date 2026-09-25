@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react";
 import { Star } from "lucide-react";
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -31,10 +32,10 @@ export default function OutzSelectedDetails({place}:{place:OutzDiscoveryPlace}) 
         <div className="outz-spot-forecast" role="region" tabIndex={0} aria-label="Seven-day area forecast">{q.data.forecast.map(day=><div key={day.date} className="outz-spot-day"><time dateTime={day.date}>{new Date(`${day.date}T12:00:00`).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</time><b>{day.highF==null?'—':`${Math.round(day.highF)}°`} / {day.lowF==null?'—':`${Math.round(day.lowF)}°`} F</b><span>{day.summary}</span>{day.rainChance!=null&&<small>Precip. {day.rainChance}%</small>}{day.wind&&<small>{day.wind}</small>}</div>)}</div>
         <small>High / low · {q.data.forecast.length<7?'Only the available forecast days are shown. ':''}A dash means that day or night period is unavailable.</small>
       </>}
-      {hasPoint&&<small><a href={`https://forecast.weather.gov/MapClick.php?lat=${place.lat}&lon=${place.lng}`} target="_blank" rel="noopener noreferrer">National Weather Service ↗</a>{q.data.forecastUpdatedAt&&` · Updated ${stamp(q.data.forecastUpdatedAt)}`}</small>}
+      {hasPoint&&<small><a href={`https://forecast.weather.gov/MapClick.php?lat=${place.lat}&lon=${place.lng}`} target="_blank" rel="noopener noreferrer">National Weather Service <ArrowUpRight size={14} aria-hidden="true" /></a>{q.data.forecastUpdatedAt&&` · Updated ${stamp(q.data.forecastUpdatedAt)}`}</small>}
       <h3>At this spot</h3>
       {q.data.factsUnavailable&&<p role="status">Some spot data could not refresh. Check source dates below.</p>}
-      {q.data.facts.length?<dl className="outz-spot-facts">{q.data.facts.map((fact,i)=><div key={`${fact.label}-${i}`}><dt>{fact.label}</dt><dd>{fact.value}<small>{publicHttpUrl(fact.href)?<a href={publicHttpUrl(fact.href)!} target="_blank" rel="noopener noreferrer">{fact.source} ↗</a>:fact.source}{fact.asOf&&` · ${stamp(fact.asOf)}`}</small></dd></div>)}</dl>:<p>No additional verified stats published for this spot yet.</p>}
+      {q.data.facts.length?<dl className="outz-spot-facts">{q.data.facts.map((fact,i)=><div key={`${fact.label}-${i}`}><dt>{fact.label}</dt><dd>{fact.value}<small>{publicHttpUrl(fact.href)?<a href={publicHttpUrl(fact.href)!} target="_blank" rel="noopener noreferrer">{fact.source} <ArrowUpRight size={14} aria-hidden="true" /></a>:fact.source}{fact.asOf&&` · ${stamp(fact.asOf)}`}</small></dd></div>)}</dl>:<p>No additional verified stats published for this spot yet.</p>}
     </>}
   </div>;
 }

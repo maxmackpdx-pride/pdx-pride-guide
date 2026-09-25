@@ -111,7 +111,7 @@ async function buildMissedConnectionCanvas(post: ShareMissedConnection): Promise
   if (post.location) {
     const location = document.createElement("div");
     location.style.cssText = `font-family:'Inter',sans-serif; font-size: 32px; color: ${accent}; font-weight: 700;`;
-    location.textContent = `📍 ${post.location}`;
+    location.textContent = post.location;
     card.appendChild(location);
   }
 

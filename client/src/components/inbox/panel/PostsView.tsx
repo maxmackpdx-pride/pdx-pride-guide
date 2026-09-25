@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
@@ -52,7 +53,7 @@ function Section({
           <span className="inbox-exp-post-section__count">{countLabel}</span>
         </div>
         <div className="inbox-exp-post-section__actions">
-          {!open && <span className="inbox-exp-post-section__view-all">VIEW ALL →</span>}
+          {!open && <span className="inbox-exp-post-section__view-all">VIEW ALL <ArrowRight size={14} aria-hidden="true" /></span>}
           <span className="inbox-exp-post-section__chev">
             <ChevronDown size={12} strokeWidth={2.6} />
           </span>
@@ -65,7 +66,7 @@ function Section({
               {hubHref ? "Manage these in the Hub." : "Nothing here yet."}
               {hubHref && onHub && (
                 <button type="button" className="inbox-exp-post-section__hub-btn" onClick={onHub}>
-                  OPEN HUB →
+                  OPEN HUB <ArrowRight size={14} aria-hidden="true" />
                 </button>
               )}
             </div>

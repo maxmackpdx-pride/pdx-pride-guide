@@ -1,3 +1,5 @@
+import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Check } from "lucide-react";
 import DetailActions from "./DetailActions";
 import { useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
@@ -1144,7 +1146,7 @@ function EventModalInner({
               >
                 {inviteAudienceMutation.isPending
                   ? "Sending…"
-                  : `Send invites${invitePreview != null ? ` (~${invitePreview.total})` : ""} →`}
+                  : `Send invites${invitePreview != null ? ` (~${invitePreview.total})` : ""}`}
               </button>
             </div>
           )}
@@ -1266,7 +1268,7 @@ function EventModalInner({
               </p>
               {noContactUrl ? (
                 <a href={noContactUrl} target="_blank" rel="noopener" className="pdx-glass-btn event-modal__action-btn pdx-glass-rebind">
-                  Visit event website →
+                  Visit event website <ArrowRight size={14} aria-hidden="true" />
                 </a>
               ) : (
                 <p className="event-modal__drawer-copy" style={{ marginTop: 0 }}>
@@ -1289,7 +1291,7 @@ function EventModalInner({
                 onClick={() => openModMode("remove")}
                 className="event-modal__footer-link"
               >
-                ↗ Request removal
+                <ArrowUpRight size={14} aria-hidden="true" /> Request removal
               </button>
             )}
             {modMode !== "flag" && (
@@ -1298,7 +1300,7 @@ function EventModalInner({
                 onClick={() => openModMode("flag")}
                 className="event-modal__footer-link event-modal__footer-link--orange"
               >
-                ↗ Flag data error
+                <ArrowUpRight size={14} aria-hidden="true" /> Flag data error
               </button>
             )}
             {isHost && modMode !== "transfer" && (
@@ -1307,7 +1309,7 @@ function EventModalInner({
                 onClick={() => openModMode("transfer")}
                 className="event-modal__footer-link event-modal__footer-link--lime"
               >
-                ↗ Transfer host
+                <ArrowUpRight size={14} aria-hidden="true" /> Transfer host
               </button>
             )}
           </div>

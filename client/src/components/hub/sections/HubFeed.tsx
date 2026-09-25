@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
@@ -375,7 +376,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
             className="ico hub-feed-retry"
             onClick={() => feedQuery.refetch()}
           >
-            Try again →
+            Try again <ArrowRight size={14} aria-hidden="true" />
           </button>
         </div>
       )}
@@ -387,7 +388,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
           <p className="hub-feed-empty__msg">{emptyCopy(filter)}</p>
           {filter !== "all" && (
             <button type="button" className="ico hub-feed-retry" onClick={() => setFilter("all")}>
-              Show everything →
+              Show everything <ArrowRight size={14} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -434,7 +435,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
             <div className="hub-feed-more-error" role="alert">
               <span>Older updates did not load.</span>
               <button type="button" className="ico" onClick={() => feedQuery.fetchNextPage()}>
-                Try again →
+                Try again <ArrowRight size={14} aria-hidden="true" />
               </button>
             </div>
           )}

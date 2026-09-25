@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 
@@ -45,12 +46,12 @@ export default function ResetPassword() {
         {done ? (
           <>
             <p>Your password has been changed. Return to Zaylist and log in with the new password.</p>
-            <Link className="zay-action zay-action--solid pdx-glass-rebind" href="/" style={actionStyle}>RETURN TO ZAYLIST →</Link>
+            <Link className="zay-action zay-action--solid pdx-glass-rebind" href="/" style={actionStyle}>RETURN TO ZAYLIST <ArrowRight size={14} aria-hidden="true" /></Link>
           </>
         ) : !token ? (
           <>
             <p role="alert">This reset link is missing its recovery code. Request a new link from Log in → Forgot password.</p>
-            <Link href="/" style={actionStyle}>RETURN TO ZAYLIST →</Link>
+            <Link href="/" style={actionStyle}>RETURN TO ZAYLIST <ArrowRight size={14} aria-hidden="true" /></Link>
           </>
         ) : (
           <form onSubmit={submit}>
@@ -60,7 +61,7 @@ export default function ResetPassword() {
             <label htmlFor="reset-password-confirm" style={labelStyle}>Enter it again</label>
             <input id="reset-password-confirm" style={inputStyle} type="password" value={confirm} onChange={e => setConfirm(e.target.value)} minLength={6} required autoComplete="new-password" />
             {error && <div role="alert" style={errorStyle}>{error}</div>}
-            <button className="zay-action zay-action--solid pdx-glass-rebind" style={buttonStyle} disabled={loading}>{loading ? "UPDATING..." : "UPDATE PASSWORD →"}</button>
+            <button className="zay-action zay-action--solid pdx-glass-rebind" style={buttonStyle} disabled={loading}>{loading ? "UPDATING..." : "UPDATE PASSWORD"}</button>
           </form>
         )}
       </div>

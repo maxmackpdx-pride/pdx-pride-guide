@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import AvatarChoiceIcon from "@/components/AvatarChoiceIcon";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation } from "wouter";
@@ -231,7 +232,7 @@ export default function PrideGlowNudge() {
       });
       if (!res.ok) throw new Error("Save failed");
       await refreshUser();
-      toast({ title: "Looking good 🌈" });
+      toast({ title: "Looking good" });
       setOpen(false);
     } catch {
       toast({ title: "Could not save - try again", variant: "destructive" });
@@ -284,7 +285,7 @@ export default function PrideGlowNudge() {
                 style={a.img ? undefined : { background: a.bg }}
                 onClick={() => pickAvatar(a.id)}
               >
-                {a.img ? <img src={a.img} alt={a.label} /> : a.emoji}
+                {a.img ? <img src={a.img} alt={a.label} /> : <AvatarChoiceIcon id={a.id} />}
               </button>
             ))}
           </div>

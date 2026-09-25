@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CSSProperties } from "react";
 import { RefreshCw } from "lucide-react";
@@ -121,7 +122,7 @@ function SauvieIslandPanel() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {step.linkLabel} →
+                {step.linkLabel} <ArrowRight size={14} aria-hidden="true" />
               </a>
             ) : null}
           </div>
@@ -167,7 +168,7 @@ function SauvieIslandPanel() {
           >
             <div className="nb-log-farm__row">
               <div className="nb-log-farm__title">{store.title}</div>
-              <span className="nb-log-farm__arrow" aria-hidden="true">→</span>
+              <span className="nb-log-farm__arrow" aria-hidden="true"><ArrowRight size={14} aria-hidden="true" /></span>
             </div>
             <p className="nb-log-farm__desc">{store.description}</p>
           </a>

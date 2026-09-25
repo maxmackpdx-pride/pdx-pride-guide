@@ -1,3 +1,5 @@
+import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -502,7 +504,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
               data-testid="owner-design-guide-link"
             >
               <span className="inbox-exp-design-guide__label">Design guide</span>
-              <span className="inbox-exp-design-guide__meta">Full system · share from the page ↗</span>
+              <span className="inbox-exp-design-guide__meta">Full system · share from the page <ArrowUpRight size={14} aria-hidden="true" /></span>
             </a>
           </div>
         )}
@@ -643,7 +645,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                   className="inbox-exp-jump inbox-exp-jump--magenta"
                   onClick={() => setAccount("admin")}
                 >
-                  {accountUnread.admin} item{accountUnread.admin === 1 ? "" : "s"} in the shared admin inbox →
+                  {accountUnread.admin} item{accountUnread.admin === 1 ? "" : "s"} in the shared admin inbox <ArrowRight size={14} aria-hidden="true" />
                 </button>
               )}
               {inboxActive && account === "personal" && isOwner && (pendingAdmin.ownerCount || 0) > 0 && (
@@ -652,7 +654,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                   className="inbox-exp-jump inbox-exp-jump--purple"
                   onClick={() => setAccount("owner")}
                 >
-                  {pendingAdmin.ownerCount} item{(pendingAdmin.ownerCount || 0) === 1 ? "" : "s"} on your Owner Desk →
+                  {pendingAdmin.ownerCount} item{(pendingAdmin.ownerCount || 0) === 1 ? "" : "s"} on your Owner Desk <ArrowRight size={14} aria-hidden="true" />
                 </button>
               )}
               {inboxActive && account === "personal" && (
@@ -826,7 +828,7 @@ function ThreadDetail({
       {openEventId != null && onOpenEvent && (
         <div className="inbox-exp-thread__pad">
           <button type="button" className="inbox-exp-thread__cta" onClick={() => onOpenEvent(openEventId)}>
-            Open event card →
+            Open event card <ArrowRight size={14} aria-hidden="true" />
           </button>
         </div>
       )}

@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { legacyOutzRedirect } from "@shared/outzRoutes";
 
@@ -27,7 +28,7 @@ export default function ZaylistMessageBody({ body }: { body: string }) {
   const slug = decodeURIComponent(path.split("?")[0].split("/").filter(Boolean).at(-1) || "Open on Zaylist");
     linkPreview = (
       <Link href={path} className="inbox-zay-link pdx-glass-rebind" aria-label={`Open ${labelFor(path)} link`}>
-        <span>{labelFor(path)}</span><strong>{slug}</strong><small>Open without leaving Zaylist →</small>
+        <span>{labelFor(path)}</span><strong>{slug}</strong><small>Open without leaving Zaylist <ArrowRight size={14} aria-hidden="true" /></small>
       </Link>
     );
   }

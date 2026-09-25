@@ -1,10 +1,13 @@
+import { Search } from "lucide-react";
+import { ArrowDown } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Drawer } from "vaul";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Link, useLocation } from "wouter";
 import { MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
-import { Navigation, SlidersHorizontal, X } from "lucide-react";
+import { ArrowRight, Navigation, SlidersHorizontal, X } from "lucide-react";
 import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Event } from "@shared/schema";
@@ -154,7 +157,7 @@ function railCopy(id: RailId, row: MapRow, fallbackLabel: string): { kicker: str
     return {
       kicker: DIRECTORY_TYPE_LABELS[type] || type || fallbackLabel,
       title: String(row.name || "Open listing"),
-      meta: `${String(row.neighborhood || "Portland")} →`,
+      meta: `${String(row.neighborhood || "Portland")}`,
     };
   }
   if (id === "mizzed") {
@@ -171,7 +174,7 @@ function railCopy(id: RailId, row: MapRow, fallbackLabel: string): { kicker: str
     return {
       kicker: HOUSING_TYPE_KICKER[type] || fallbackLabel,
       title: String(row.displayName || row.name || row.headline || "Open listing"),
-      meta: `${String(area || row.neighborhood || "View details")} →`,
+      meta: `${String(area || row.neighborhood || "View details")}`,
     };
   }
   if (id === "carpool") {
@@ -188,7 +191,7 @@ function railCopy(id: RailId, row: MapRow, fallbackLabel: string): { kicker: str
   return {
     kicker: String(row._board || row.type || fallbackLabel),
     title: String(row.title || row.name || "Open listing"),
-    meta: `${String(row.neighborhood || row.destination || row.time || "View details")} →`,
+    meta: `${String(row.neighborhood || row.destination || row.time || "View details")}`,
   };
 }
 
@@ -578,11 +581,11 @@ export default function LivingMap() {
     const item = config[id];
     const railIndex = railOrder.indexOf(id);
     return <section className="living-map-feed-section" key={id}>
-      <div className="living-map-section-head"><b>{item.label}</b><span>{item.rows.length}</span><span className="living-map-reorder"><button type="button" disabled={railIndex === 0} aria-label={`Move ${item.label} up`} onClick={() => reorder(id, -1)}>↑</button><button type="button" disabled={railIndex === railOrder.length - 1} aria-label={`Move ${item.label} down`} onClick={() => reorder(id, 1)}>↓</button></span></div>
+      <div className="living-map-section-head"><b>{item.label}</b><span>{item.rows.length}</span><span className="living-map-reorder"><button type="button" disabled={railIndex === 0} aria-label={`Move ${item.label} up`} onClick={() => reorder(id, -1)}><ArrowUp size={14} aria-hidden="true" /></button><button type="button" disabled={railIndex === railOrder.length - 1} aria-label={`Move ${item.label} down`} onClick={() => reorder(id, 1)}><ArrowDown size={14} aria-hidden="true" /></button></span></div>
       {item.loading ? <p className="living-map-rail-empty">Loading…</p> : item.error ? <p className="living-map-rail-empty" role="alert">This rail could not load. <button type="button" onClick={item.retry}>Try again</button></p> : item.rows.length === 0 ? <p className="living-map-rail-empty">Nothing live nearby right now.</p> : <div className="living-map-rail" data-vaul-no-drag>{item.rows.slice(0, 10).map((row, i) => {
         const copy = railCopy(id, row, item.label);
         const image = railImage(id, row, events);
-        const contents = <>{image && <img src={image} alt="" />}<span className="shade" /><small>{copy.kicker}</small><strong>{copy.title}</strong><em>{copy.meta}</em></>;
+        const contents = <>{image && <img src={image} alt="" />}<span className="shade" /><small>{copy.kicker}</small><strong>{copy.title}</strong><em>{copy.meta} <ArrowRight size={14} aria-hidden="true" /></em></>;
         const className = `living-map-card pdx-glass-rebind${id === "placez" ? " place" : ""}`;
         const style = { "--c": railAccent(id, row) } as CSSProperties;
         const key = `${id}-${row.id ?? i}`;
@@ -755,7 +758,7 @@ export default function LivingMap() {
       <Drawer.Title className="sr-only">Explore the map</Drawer.Title>
       {!desktop && <Drawer.Handle preventCycle className="living-map-handle" role="button" tabIndex={0} aria-hidden={false} aria-expanded={!mobileDrawerPeek} aria-controls="living-map-drawer-feed" aria-label={mobileDrawerPeek ? "Open map drawer" : "Close map drawer"} onClick={() => { if (drawerHandleDidDrag.current) return; setMobileDrawerSnap(mobileDrawerPeek ? MOBILE_DRAWER_SNAPS[1] : MOBILE_DRAWER_SNAPS[0]); }} onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setMobileDrawerSnap(mobileDrawerPeek ? MOBILE_DRAWER_SNAPS[1] : MOBILE_DRAWER_SNAPS[0]); } }}><span /></Drawer.Handle>}
       <div className="living-map-drawer-controls" {...inertWhen(!desktop && mobileDrawerPeek)}>
-      <label className="living-map-search" data-vaul-no-drag><span aria-hidden="true">⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search events, places, listings…" aria-label="Search the living map" /></label>
+      <label className="living-map-search" data-vaul-no-drag><span aria-hidden="true"><Search size={14} aria-hidden="true" /></span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search events, places, listings…" aria-label="Search the living map" /></label>
       {desktop && filterControls()}
       </div>
       <div id="living-map-drawer-feed" ref={drawerScrollRef} className="living-map-drawer-scroll" data-vaul-no-drag {...inertWhen(!desktop && mobileDrawerPeek)}>

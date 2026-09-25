@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ds";
 import "./PageRecovery.css";
@@ -25,7 +26,7 @@ export default function PageRecovery({ section, title, description, href, label,
       <div className="page-recovery__actions">
         {retry && <Button variant="solid" accent="cyan" onClick={retry}>Try again</Button>}
         <Link href={href}><Button as="span" variant={retry ? "neon" : "solid"} accent="cyan">{label}</Button></Link>
-        {href !== "/" && <Link href="/" className="page-recovery__home">Back to Zaylist <span aria-hidden="true">↗</span></Link>}
+        {href !== "/" && <Link href="/" className="page-recovery__home">Back to Zaylist <span aria-hidden="true"><ArrowUpRight size={14} aria-hidden="true" /></span></Link>}
       </div>
       <p className="page-recovery__help">Followed a broken link? <Link href="/contact">Let Tucker know.</Link></p>
     </div>

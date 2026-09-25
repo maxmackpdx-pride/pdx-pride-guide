@@ -1,4 +1,5 @@
 // @ts-nocheck - sandbox components are ported JSX without strict typings.
+import { ArrowLeft } from "lucide-react";
 import {
   Component,
   type ChangeEvent,
@@ -165,7 +166,7 @@ export default function DesignSystemSandbox() {
           </div>
           <div className="ds-sandbox__row">
             <Link href="/" className="ds-sandbox__back">
-              ← Live site
+              <ArrowLeft size={14} aria-hidden="true" /> Live site
             </Link>
             <div className="ds-sandbox__calm">
               <span className="ds-sandbox__calm-label">Calm mode</span>

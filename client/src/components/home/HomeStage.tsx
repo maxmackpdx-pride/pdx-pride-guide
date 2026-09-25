@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "wouter";
+import { Pause, Play } from "lucide-react";
 import AuthModal from "@/components/AuthModal";
 import HomeFlight from "@/components/home/HomeFlight";
 import { useAuth } from "@/context/AuthContext";
@@ -193,7 +194,7 @@ export default function HomeStage({ afterWelcome }: Props) {
             onEnded={() => setMusicPlaying(false)}
           />
           <button type="button" disabled={!musicReady} onClick={() => void toggleMusic()} aria-label={musicPlaying ? "Pause Fuck Meta" : "Play Fuck Meta"}>
-            <span aria-hidden="true">{musicPlaying ? "Ⅱ" : "▶"}</span>
+            {musicPlaying ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
             <span>{musicReady ? (musicPlaying ? "Pause" : "Play") : "Loading"}</span>
           </button>
         </div>

@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -92,7 +93,7 @@ function shortSha(sha?: string): string {
 
 const DEFAULT_BROADCAST_TITLE = "Making weekend plans?";
 const DEFAULT_BROADCAST_BODY =
-  "This weekend's queer events are live — plus fresh updates. Pride Guide is now Zaylist, Portland's queer event hub. 🌈";
+  "This weekend's queer events are live — plus fresh updates. Pride Guide is now Zaylist, Portland's queer event hub.";
 
 /** Owner-only: compose + send one push announcement to every subscribed device. */
 function BroadcastPanel({ reach }: { reach: number }) {
@@ -120,7 +121,7 @@ function BroadcastPanel({ reach }: { reach: number }) {
       });
       const data = await res.json();
       toast({
-        title: "Broadcast sent 🎉",
+        title: "Broadcast sent",
         description: `Delivered to ${data.sent} device${data.sent === 1 ? "" : "s"} across ${data.usersTargeted} member${data.usersTargeted === 1 ? "" : "s"}${data.usersOptedOut ? ` · ${data.usersOptedOut} muted` : ""}${data.failed ? ` · ${data.failed} failed` : ""}.`,
       });
     } catch (err) {
@@ -282,7 +283,7 @@ export default function AdminOverview({
             </p>
           </div>
           <button type="button" className="admin-owner-banner__cta" onClick={onOpenOwner}>
-            Owner desk →
+            Owner desk <ArrowRight size={14} aria-hidden="true" />
           </button>
         </section>
       )}
@@ -299,7 +300,7 @@ export default function AdminOverview({
           <span style={{ flex: 1 }} />
           {pendingCount > 0 && (
             <button type="button" className="admin-shell__ghost-btn" onClick={() => onOpenInbox()}>
-              Open queue →
+              Open queue <ArrowRight size={14} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -407,7 +408,7 @@ export default function AdminOverview({
             ))}
             {pendingCount > attentionItems.length && (
               <button type="button" className="admin-shell__ghost-btn" onClick={() => onOpenInbox()}>
-                View all {pendingCount} in queue →
+                View all {pendingCount} in queue <ArrowRight size={14} aria-hidden="true" />
               </button>
             )}
           </div>

@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
@@ -89,7 +90,7 @@ export default function AboutTab({ data, isOwner, onBook }: Props) {
             phone={data.businessPlace.phone || undefined}
           />
           <Link href={`/directory?place=${data.businessPlace.id}`} className="pp-directory-link display">
-            See in PLACEZ →
+            See in PLACEZ <ArrowRight size={14} aria-hidden="true" />
           </Link>
         </section>
       )}

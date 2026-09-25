@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
@@ -404,7 +405,7 @@ function DirectoryPopup({
           textDecoration: "none",
         }}
       >
-        View in directory →
+        View in directory <ArrowRight size={14} aria-hidden="true" />
       </a>
     </div>
   );

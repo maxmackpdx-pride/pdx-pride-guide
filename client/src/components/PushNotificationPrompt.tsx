@@ -224,7 +224,7 @@ export default function PushNotificationPrompt() {
 
         {installFirst && (
           <p style={{ color: "#FF00CC", fontSize: "0.86rem", fontStyle: "italic", lineHeight: 1.5, marginBottom: 18 }}>
-            IYKYK - it's the same move as saving Sniffies to your home screen. 😏
+            IYKYK, it's the same move as saving Sniffies to your home screen.
           </p>
         )}
 

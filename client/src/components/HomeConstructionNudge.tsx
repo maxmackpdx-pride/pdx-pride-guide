@@ -94,7 +94,7 @@ export default function HomeConstructionNudge() {
         <div className="pgc-body">
           <p>
             Thanks for using <strong>Pride Guide</strong> these past years. I hope it helped
-            you find your people and your parties. 🌈
+            you find your people and your parties.
           </p>
           <p>
             I&apos;m renaming it <strong>Zaylist</strong>: same home, new name. Year-round
@@ -104,7 +104,7 @@ export default function HomeConstructionNudge() {
           <p className="pgc-tip">
             Keeping the lights on isn&apos;t free. If this was useful, you&apos;re welcome to
             toss me a couple bucks toward a coffee or a muffin. Truly no pressure. Every
-            little bit helps. 💛
+            little bit helps.
           </p>
         </div>
 
@@ -129,7 +129,7 @@ export default function HomeConstructionNudge() {
           </a>
         </div>
 
-        <p className="pgc-foot">Made with 🖤 in Portland</p>
+        <p className="pgc-foot">Made in Portland</p>
       </div>
     </div>,
     document.body,

@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
@@ -385,7 +386,7 @@ export default function QSearchTrusted({
                             rel="noreferrer"
                             className="qsearch__trusted-link"
                           >
-                            Calendar ↗
+                            Calendar <ArrowUpRight size={14} aria-hidden="true" />
                           </a>
                         ) : null}
                         {v.feedUrl ? (
@@ -395,7 +396,7 @@ export default function QSearchTrusted({
                             rel="noreferrer"
                             className="qsearch__trusted-link qsearch__trusted-link--muted"
                           >
-                            Feed ↗
+                            Feed <ArrowUpRight size={14} aria-hidden="true" />
                           </a>
                         ) : null}
                         {v.consecutiveFails > 0 && (
@@ -501,7 +502,7 @@ export default function QSearchTrusted({
                         rel="noreferrer"
                         className="qsearch__trusted-link"
                       >
-                        Calendar page ↗
+                        Calendar page <ArrowUpRight size={14} aria-hidden="true" />
                       </a>
                     ) : null}
                     {v.feedUrl ? (
@@ -512,7 +513,7 @@ export default function QSearchTrusted({
                         className="qsearch__trusted-link qsearch__trusted-link--muted"
                         title={v.feedUrl}
                       >
-                        Feed ↗
+                        Feed <ArrowUpRight size={14} aria-hidden="true" />
                       </a>
                     ) : null}
                     {v.consecutiveFails > 0 && (

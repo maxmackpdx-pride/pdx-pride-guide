@@ -1,5 +1,7 @@
+import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "wouter";
+import { Check, Download, Share2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import GlitchLogo from "@/components/GlitchLogo";
@@ -298,11 +300,7 @@ export default function HomeHero() {
           aria-label="Download the app"
           data-testid="home-hero-download"
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 3v11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M8 10l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <Download size={18} aria-hidden="true" />
           <span className="home-hero__share-label">Download app</span>
         </button>
       )}
@@ -312,34 +310,12 @@ export default function HomeHero() {
         type="button"
         className="home-hero__share"
         onClick={() => void shareSite()}
-        aria-label={shareState === "copied" ? "Link copied" : "Share this site"}
+        aria-label={shareState === "copied" ? "Link copied" : shareState === "shared" ? "Shared" : "Share this site"}
         data-testid="home-hero-share"
       >
-        {shareState === "copied" ? (
-          <span className="home-hero__share-label">Copied</span>
-        ) : shareState === "shared" ? (
-          <span className="home-hero__share-label">Sent</span>
-        ) : (
-          <>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M12 16V4M12 4l-4 4M12 4l4 4"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="home-hero__share-label">Share</span>
-          </>
-        )}
+        {shareState === "copied" || shareState === "shared"
+          ? <Check size={20} aria-hidden="true" />
+          : <Share2 size={20} aria-hidden="true" />}
       </button>
 
       <div className="home-hero__inner">
@@ -401,10 +377,10 @@ export default function HomeHero() {
       {/* z5  -  CTAs under the wordmark, almost locked */}
       <div className="home-hero__cta">
         <Link href="/events" className="home-hero__btn home-hero__btn--primary" data-testid="hero-cta-events">
-          View all events →
+          View all events <ArrowRight size={14} aria-hidden="true" />
         </Link>
         <Link href="/spotted" className="home-hero__btn home-hero__btn--mizzed" data-testid="hero-cta-mizzed">
-          MIZZED CONNECTION →
+          MIZZED CONNECTION <ArrowRight size={14} aria-hidden="true" />
         </Link>
       </div>
 

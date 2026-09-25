@@ -1,3 +1,6 @@
+import { ArrowDown } from "lucide-react";
+import { ArrowUp } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useState, type CSSProperties, type MouseEvent } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -302,7 +305,7 @@ export default function HubFeedCard({ item }: Props) {
               {item.place} · Anonymous
             </div>
           )}
-          <div className="kick hub-feed-mc__reply">Reply privately →</div>
+          <div className="kick hub-feed-mc__reply">Reply privately <ArrowRight size={14} aria-hidden="true" /></div>
         </div>
       ) : (
       <div className="hub-feed-card__row">
@@ -416,7 +419,7 @@ export default function HubFeedCard({ item }: Props) {
                   disabled={voteMutation.isPending}
                   onClick={() => voteMutation.mutate(engagement.viewerVote === 1 ? 0 : 1)}
                 >
-                  <span aria-hidden="true">↑</span>
+                  <span aria-hidden="true"><ArrowUp size={14} aria-hidden="true" /></span>
                 </button>
                 <output className="hub-feed-card__score" aria-live="polite" aria-label={`${engagement.score} net votes`}>
                   {engagement.score}
@@ -429,7 +432,7 @@ export default function HubFeedCard({ item }: Props) {
                   disabled={voteMutation.isPending}
                   onClick={() => voteMutation.mutate(engagement.viewerVote === -1 ? 0 : -1)}
                 >
-                  <span aria-hidden="true">↓</span>
+                  <span aria-hidden="true"><ArrowDown size={14} aria-hidden="true" /></span>
                 </button>
               </div>
               <span className="kick hub-feed-card__replies">
@@ -446,12 +449,12 @@ export default function HubFeedCard({ item }: Props) {
                 openCard();
               }}
             >
-              {openLabelFor(item)} <span aria-hidden="true">→</span>
+              {openLabelFor(item)} <span aria-hidden="true"><ArrowRight size={14} aria-hidden="true" /></span>
             </button>
           )}
           {canNavigateCard && href && (
             <Link href={href} className="hub-feed-card__open" onClick={stopCardNav}>
-              {openLabelFor(item)} <span aria-hidden="true">→</span>
+              {openLabelFor(item)} <span aria-hidden="true"><ArrowRight size={14} aria-hidden="true" /></span>
             </Link>
           )}
         </div>

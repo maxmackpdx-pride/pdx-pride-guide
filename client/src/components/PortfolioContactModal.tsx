@@ -1,3 +1,4 @@
+import { Play } from "lucide-react";
 import { X } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useModalA11y } from "@/hooks/useModalA11y";
@@ -206,7 +207,7 @@ export default function PortfolioContactModal({
                         aria-label={`Play video: ${clip.label}`}
                       >
                         <img src={clip.poster} alt="" width={280} height={360} loading="lazy" />
-                        <span className="pcm-gallery__play-ico" aria-hidden="true">▶</span>
+                        <span className="pcm-gallery__play-ico" aria-hidden="true"><Play size={14} aria-hidden="true" /></span>
                       </button>
                     )}
                     <figcaption>{clip.label}</figcaption>

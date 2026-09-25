@@ -227,7 +227,7 @@ export function templateDraft(key: AdTemplateKey): AdDraft {
       /** Meta line under body (not the Shop Now button). */
       ctaTitle: "Code TUCKERMAX for 10% off",
       /** Solid Shop Now button label. */
-      ctaCopy: "Shop Now →",
+      ctaCopy: "Shop Now",
       logoText: "CockBlock",
       tag1: "Toys & Play",
       tag2: "Gay-Owned",
@@ -252,7 +252,7 @@ export function templateDraft(key: AdTemplateKey): AdDraft {
     title: "Mr. S Leather",
     body: "Harnesses, restraints & fetish gear, made in SF",
     ctaTitle: "Shop the link, support Zaylist",
-    ctaCopy: "Shop Now →",
+    ctaCopy: "Shop Now",
     logoText: "Mr. S Leather",
     tag1: "Leather & Gear",
     tag2: "Ships Worldwide",

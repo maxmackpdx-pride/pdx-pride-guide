@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react";
 import BrowseStatus from "@/components/BrowseStatus";
 import { Check, Heart, X } from "lucide-react";
 /* ============================================================
@@ -1241,7 +1242,7 @@ export default function Schedule({
           : "0 2px 0 color-mix(in srgb, var(--rsvp, var(--neon-yellow)) 40%, #000), var(--neon-bloom)",
       } as React.CSSProperties),
       dc,
-      detailLinkLabel: isBeach ? "Beach page →" : "Event page →",
+      detailLinkLabel: isBeach ? "Beach page" : "Event page",
       goingLabel: isBeach ? "On your list" : null as string | null,
     };
   }, [selKey, selRect, calm, myEventIds, scheduleEvents, listings, embed]);
@@ -1466,7 +1467,7 @@ export default function Schedule({
           <div className="schedule-toolbar__row">
             <Link href="/events" className="schedule-toolbar__back">
               <Button as="span" variant="neon" accent="cyan" size="sm">
-                ← Back to events
+                <ArrowLeft size={14} aria-hidden="true" /> Back to events
               </Button>
             </Link>
             <div className="schedule-seg" role="group" aria-label="Schedule view">

@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import type { NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
 import {
   swimSummaryDetail,
@@ -158,7 +159,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
           </p>
         )}
         <a className="nb-hub__link" href="https://roosterrockcrossing.com" target="_blank" rel="noopener noreferrer">
-          Charts &amp; history →
+          Charts &amp; history <ArrowRight size={14} aria-hidden="true" />
         </a>
       </section>
     </div>
@@ -231,7 +232,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
             || "Collins Beach is sampled bi-weekly through the Swim Guide. Verify the current sample before you get in."}
         </p>
         <a className="nb-hub__link" href={SAUVIE_ISLAND_SWIM_GUIDE_URL} target="_blank" rel="noopener noreferrer">
-          Swim Guide →
+          Swim Guide <ArrowRight size={14} aria-hidden="true" />
         </a>
       </section>
 
@@ -242,7 +243,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
             "Mandatory on summer weekends through Labor Day. Buy a daily day pass online - seasonal sold-out is not the same as day passes gone."}
         </p>
         <a className="nb-hub__link" href={SAUVIE_ISLAND_PARKING_URL} target="_blank" rel="noopener noreferrer">
-          Sauvie Island Parking →
+          Sauvie Island Parking <ArrowRight size={14} aria-hidden="true" />
         </a>
       </section>
     </div>

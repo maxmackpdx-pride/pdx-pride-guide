@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -100,7 +101,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
           <div className="sellz-card__price">{money(post.priceCents)}{post.negotiable ? <small> OBO</small> : null}</div>
           <p className="sellz-card__summary">{post.description}</p>
           <div className="board-listing-card__poster"><UserAvatar photoUrl={post.posterPhotoUrl} avatarChoice={post.avatarChoice} avatarRing={post.posterAvatarRing} displayName={post.displayName} username={post.username} href={memberProfileHref(post.username)} onClick={(e: MouseEvent) => e.stopPropagation()} size={18} /><span>@{post.username} · {post.neighborhood}</span></div>
-          <div className="board-listing-card__footer"><span className="board-listing-card__status">{post.condition} · {post.pickupPreference}</span><span className="board-listing-card__cta">{expanded ? "Close" : "View details"} →</span></div>
+          <div className="board-listing-card__footer"><span className="board-listing-card__status">{post.condition} · {post.pickupPreference}</span><span className="board-listing-card__cta">{expanded ? "Close" : "View details"} <ArrowRight size={14} aria-hidden="true" /></span></div>
         </div>
       </div>
       {expanded ? <div id={`sellz-details-${post.id}`} className="board-listing-card__expand">

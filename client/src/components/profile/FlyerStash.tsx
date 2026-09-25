@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import AnimatedCardStack from "@/components/ui/animate-card-animation";
@@ -320,7 +321,7 @@ export default function FlyerStash({
             <div className="flyer-stash__to-next">{stats.toNextLabel}</div>
           </div>
           <Link href={collectHref} className="flyer-stash__cta">
-            Collect more →
+            Collect more <ArrowRight size={14} aria-hidden="true" />
           </Link>
           <p className="flyer-stash__blurb">
             Every gig you work drops its flyer here and earns XP. The role you log most sets which title you climb, so DJ nights build a DJ name. Rare headliners shimmer and pay bonus XP.

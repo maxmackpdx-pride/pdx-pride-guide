@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -107,7 +108,7 @@ export default function HomeBeachWidget({ showCollins = true, showBoth = false }
               </div>
             </div>
             <Link href="/outzide/rooster-rock" className="home-beach-widget__link home-beach-widget__link--orange">
-              Full conditions →
+              Full conditions <ArrowRight size={14} aria-hidden="true" />
             </Link>
           </>
         )}
@@ -143,7 +144,7 @@ export default function HomeBeachWidget({ showCollins = true, showBoth = false }
               </div>
             </div>
             <Link href="/outzide/sauvie-island" className="home-beach-widget__link home-beach-widget__link--orange">
-              Full conditions →
+              Full conditions <ArrowRight size={14} aria-hidden="true" />
             </Link>
           </>
         )}

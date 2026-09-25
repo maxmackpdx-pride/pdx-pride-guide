@@ -5,6 +5,7 @@
  */
 
 import { Link } from "wouter";
+import { ArrowRight } from "lucide-react";
 import type { HomeStageCardData } from "@/lib/homeStageSamples";
 import "./HomeStageCard.css";
 
@@ -64,7 +65,7 @@ export default function HomeStageCard({ card, className = "", hidden }: Props) {
       </div>
       <div className="home-stage-card__foot">
         <span className="home-stage-card__meta">{card.meta}</span>
-        <span className="home-stage-card__cta">{card.cta}</span>
+        <span className="home-stage-card__cta">{card.cta} <ArrowRight size={15} aria-hidden="true" /></span>
       </div>
     </Link>
   );

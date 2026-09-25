@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AvatarEditor from "@/components/AvatarEditor";
+import AvatarChoiceIcon from "@/components/AvatarChoiceIcon";
 import CoverEditor from "@/components/CoverEditor";
 import { useToast } from "@/hooks/use-toast";
 import { AVATAR_EMOJI_OPTIONS } from "@shared/avatarRings";
@@ -137,7 +138,7 @@ export default function DashboardProfileEditor({
               className={`hub-v2-profile-editor__avatar-btn${a.img ? " is-image" : ""}${avatarChoice === a.id ? " is-selected" : ""}`}
               style={a.img ? undefined : { background: a.bg }}
             >
-              {a.img ? <img src={a.img} alt={a.label} /> : a.emoji}
+              {a.img ? <img src={a.img} alt={a.label} /> : <AvatarChoiceIcon id={a.id} />}
             </button>
           ))}
         </div>

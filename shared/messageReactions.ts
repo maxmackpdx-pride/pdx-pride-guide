@@ -17,20 +17,20 @@ export type MessageReactionCode = (typeof MESSAGE_REACTION_CODES)[number];
 
 export type MessageReactionDef = {
   code: MessageReactionCode;
-  /** Display token (emoji or short label). */
+  /** Text fallback; interface controls render a Lucide icon for each code. */
   label: string;
   /** Accessible name for buttons. */
   aria: string;
 };
 
 export const MESSAGE_REACTIONS: MessageReactionDef[] = [
-  { code: "thumbsup", label: "👍", aria: "Thumbs up" },
-  { code: "thumbsdown", label: "👎", aria: "Thumbs down" },
-  { code: "laugh", label: "😂", aria: "Laugh" },
-  { code: "cry", label: "😢", aria: "Cry" },
-  { code: "heart", label: "❤️", aria: "Heart" },
-  { code: "heartbreak", label: "💔", aria: "Heartbreak" },
-  { code: "gay", label: "GAY!", aria: "GAY!" },
+  { code: "thumbsup", label: "Thumbs up", aria: "Thumbs up" },
+  { code: "thumbsdown", label: "Thumbs down", aria: "Thumbs down" },
+  { code: "laugh", label: "Laugh", aria: "Laugh" },
+  { code: "cry", label: "Cry", aria: "Cry" },
+  { code: "heart", label: "Heart", aria: "Heart" },
+  { code: "heartbreak", label: "Heartbreak", aria: "Heartbreak" },
+  { code: "gay", label: "Pride", aria: "Pride" },
 ];
 
 export const MESSAGE_REACTION_BY_CODE: Record<MessageReactionCode, MessageReactionDef> =

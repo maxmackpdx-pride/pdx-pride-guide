@@ -135,7 +135,7 @@ export default function AdBuilder({ onSaved }: Props) {
       title: "New partner",
       body: "One-line pitch that sits under the title on the poster card.",
       ctaTitle: "Support Zaylist",
-      ctaCopy: "Shop Now →",
+      ctaCopy: "Shop Now",
       tag1: "Partner",
       tag2: "Local",
       pillLabel: "Affiliate",

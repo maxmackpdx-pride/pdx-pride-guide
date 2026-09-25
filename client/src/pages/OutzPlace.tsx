@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react";
 import { TriangleAlert } from "lucide-react";
 import PageRecovery from "@/components/PageRecovery";
 import { useMemo, useState } from "react";
@@ -321,7 +322,7 @@ export default function OutzPlace() {
               <article><span>Before you go</span><p>{stay.accessNote}</p></article>
               <article><span>Why it’s here</span><p>{stay.inclusionNote}</p></article>
             </div> : officialNotice
-            ? <div className="outz-place__alert outz-place__alert--bad"><strong>Official closure:</strong><span>{officialNotice.summary} <a href={officialNotice.sourceUrl} target="_blank" rel="noreferrer">Verify with Oregon Parks ↗</a></span></div>
+            ? <div className="outz-place__alert outz-place__alert--bad"><strong>Official closure:</strong><span>{officialNotice.summary} <a href={officialNotice.sourceUrl} target="_blank" rel="noreferrer">Verify with Oregon Parks <ArrowUpRight size={14} aria-hidden="true" /></a></span></div>
             : alert
             ? <div className="outz-place__alert outz-place__alert--bad"><strong><TriangleAlert size={16} aria-hidden="true" /> Alert:</strong><span>{alert.headline}</span></div>
             : destination
@@ -332,7 +333,7 @@ export default function OutzPlace() {
             {place?.sourceStatus ? <><span>{stay ? "Listing review" : "Official status"}</span> {place.sourceStatus}</> : null}
             {officialNotice ? <small> Official source checked {officialNotice.checkedAt}; recheck after {new Date(officialNotice.expiresAt).toLocaleDateString()}.</small> : null}
             {place?.officialUrl
-              ? <a href={place.officialUrl} target="_blank" rel="noreferrer">Official details ↗</a>
+              ? <a href={place.officialUrl} target="_blank" rel="noreferrer">Official details <ArrowUpRight size={14} aria-hidden="true" /></a>
               : <em>Official source has no direct visitor page.</em>}
           </p>
         </div>

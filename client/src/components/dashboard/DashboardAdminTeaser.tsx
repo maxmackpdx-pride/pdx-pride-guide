@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 
@@ -27,7 +28,7 @@ export default function DashboardAdminTeaser({ enabled }: { enabled: boolean }) 
         </p>
       </div>
       <Link href="/admin?tab=overview" className="dash-btn dash-btn-admin-cta">
-        OPEN ADMIN →
+        OPEN ADMIN <ArrowRight size={14} aria-hidden="true" />
       </Link>
     </section>
   );

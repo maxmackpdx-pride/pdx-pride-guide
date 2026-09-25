@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { Star, TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -450,7 +451,7 @@ export default function AdminIngestPanel({ onCommitted }: { onCommitted?: () => 
                     <div className="min-w-0 flex-1">
                       <div className="text-white text-sm font-medium truncate">{item.draft.title}</div>
                       <div className="text-white/50 text-xs mt-0.5">
-                        {item.draft.dateStart} → {item.draft.dateEnd}
+                        {item.draft.dateStart} <ArrowRight size={14} aria-hidden="true" /> {item.draft.dateEnd}
                         {item.draft.dayOfWeek ? ` · ${item.draft.dayOfWeek}` : ""}
                         {" · "}
                         {item.draft.venueName}

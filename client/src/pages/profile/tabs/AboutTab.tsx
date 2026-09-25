@@ -1,4 +1,5 @@
-import { Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Check, Link2, Mail } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { PlaceCard } from "@/components/ds";
@@ -196,7 +197,7 @@ export default function AboutTab({
                 instagram={business.instagram || undefined}
               />
               <Link href={`/directory?q=${encodeURIComponent(business.name)}`} className="mp-about__directory-link">
-                See in PLACEZ →
+                See in PLACEZ <ArrowRight size={14} aria-hidden="true" />
               </Link>
             </section>
           )}
@@ -207,7 +208,7 @@ export default function AboutTab({
               <div className="mp-find-list">
                 {findCards.map(c => (
                   <a key={c.platform.key} href={c.href} target="_blank" rel="noopener noreferrer" className="mp-find-row">
-                    <span className="mp-find-chip" style={{ background: c.platform.color, color: c.platform.whiteText ? "#fff" : "#000" }}>{c.platform.chip}</span>
+                    <span className="mp-find-chip" style={{ background: c.platform.color, color: c.platform.whiteText ? "#fff" : "#000" }}>{c.platform.key === "bookingEmail" ? <Mail size={16} aria-hidden="true" /> : <Link2 size={16} aria-hidden="true" />}</span>
                     <span className="mp-find-label">{c.platform.label}</span>
                     <span className="mp-find-handle">{c.handle}</span>
                   </a>
@@ -243,7 +244,7 @@ export default function AboutTab({
               <div className="mp-find-list">
                 {findCards.map(c => (
                   <a key={c.platform.key} href={c.href} target="_blank" rel="noopener noreferrer" className="mp-find-row">
-                    <span className="mp-find-chip" style={{ background: c.platform.color, color: c.platform.whiteText ? "#fff" : "#000" }}>{c.platform.chip}</span>
+                    <span className="mp-find-chip" style={{ background: c.platform.color, color: c.platform.whiteText ? "#fff" : "#000" }}>{c.platform.key === "bookingEmail" ? <Mail size={16} aria-hidden="true" /> : <Link2 size={16} aria-hidden="true" />}</span>
                     <span className="mp-find-label">{c.platform.label}</span>
                     <span className="mp-find-handle">{c.handle}</span>
                   </a>

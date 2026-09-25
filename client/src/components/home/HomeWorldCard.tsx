@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
+import { ArrowUpRight } from "lucide-react";
 import type { CommunitySummary } from "@shared/community";
 import { communityLogo } from "@shared/communityLogos";
 import { prefersStillMotion } from "@/lib/motion";
@@ -255,7 +256,7 @@ function Posting({ post, wide }: { post: WorldPosting; wide?: boolean }) {
           <span className="home-world__post-line">{post.line}</span>
           <span className="home-world__post-foot">
             <span className="home-world__post-meta">{post.meta}</span>
-            <span className="home-world__post-action">{post.action} ↗</span>
+            <span className="home-world__post-action">{post.action} <ArrowUpRight size={13} aria-hidden="true" /></span>
           </span>
         </span>
       </span>
@@ -475,7 +476,7 @@ export default function HomeWorldCard({
               ) : null}
               <ul className="home-world__promo-list">
                 {world.promoLines.map(line => (
-                  <li key={line}><span aria-hidden="true">↗</span>{line}</li>
+                  <li key={line}><ArrowUpRight size={16} aria-hidden="true" />{line}</li>
                 ))}
               </ul>
               <span className="home-world__promo-callout">Built for Portland. Built for us.</span>
@@ -621,7 +622,7 @@ export default function HomeWorldCard({
 
         <Link href={world.href} className="home-world__action">
           <span>{world.action}</span>
-          <span aria-hidden="true">↗</span>
+          <ArrowUpRight size={20} aria-hidden="true" />
         </Link>
       </div>
     </article>

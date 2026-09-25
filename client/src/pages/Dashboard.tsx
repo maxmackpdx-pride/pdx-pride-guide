@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -438,7 +439,7 @@ export default function Dashboard() {
                   {" - "}
                   chrome only. Feed, posts, and admin tools need a real login.{" "}
                   <Link href={LOCAL_DEMO_PROFILE_PATH} style={{ color: "#ccff00" }}>
-                    Open @{demoUser.username} profile →
+                    Open @{demoUser.username} profile <ArrowRight size={14} aria-hidden="true" />
                   </Link>
                 </p>
                 <button type="button" className="dash-btn dash-btn-lime" onClick={() => setShowAuth(true)}>

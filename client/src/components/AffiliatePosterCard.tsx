@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useEffect, useState, type CSSProperties } from "react";
 import type { AffiliateBrand } from "@/lib/affiliateCards";
 import { accentForAffiliateBrand, AFFILIATE_LINKS } from "@/lib/affiliateCards";
@@ -140,7 +141,7 @@ export default function AffiliatePosterCard({ brand, className = "", style }: Pr
             <span className="dot" aria-hidden="true" />
             Ad
           </span>
-          <span className="pdxBoard__affShop pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind">Shop Now →</span>
+          <span className="pdxBoard__affShop pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind">Shop Now <ArrowRight size={14} aria-hidden="true" /></span>
         </div>
       </div>
     </a>

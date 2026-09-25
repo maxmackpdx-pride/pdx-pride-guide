@@ -1,3 +1,5 @@
+import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import DetailActions from "./DetailActions";
 import type React from "react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -972,7 +974,7 @@ export default function PlaceModal({
                         textAlign: "left",
                       }}
                     >
-                      ↗{" "}
+                      <ArrowUpRight size={14} aria-hidden="true" />{" "}
                       {claimMutation.isPending
                         ? "Submitting…"
                         : multiLoc
@@ -1135,12 +1137,12 @@ export default function PlaceModal({
                     </div>
                   ))}
                   <Link href="/spotted" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
-                    View MIZZED CONNECTION board →
+                    View MIZZED CONNECTION board <ArrowRight size={14} aria-hidden="true" />
                   </Link>
                 </div>
               )
             )}
-            {tab === "missed" && <Link href={`/spotted/new?place=${place.id}`} onClick={onClose} style={{ ...linkStyle, marginTop: 12 }}>Post a connection from this Placez card →</Link>}
+            {tab === "missed" && <Link href={`/spotted/new?place=${place.id}`} onClick={onClose} style={{ ...linkStyle, marginTop: 12 }}>Post a connection from this Placez card <ArrowRight size={14} aria-hidden="true" /></Link>}
 
             {tab === "gigs" && (
               gigs.length === 0 ? (
@@ -1158,7 +1160,7 @@ export default function PlaceModal({
                     </div>
                   ))}
                   <Link href="/pride-work" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
-                    View GIGZ →
+                    View GIGZ <ArrowRight size={14} aria-hidden="true" />
                   </Link>
                 </div>
               )

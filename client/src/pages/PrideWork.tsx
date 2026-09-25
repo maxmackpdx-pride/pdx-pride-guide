@@ -320,7 +320,7 @@ export function GigListingCard({
             </div>
           </div>
           <div className="gig-talent-card__actions" onClick={e => e.stopPropagation()}>
-            <button type="button" onClick={() => openTalentReply(`Hi ${talentFirstName}, I’d like to hire you for `)}>Hire {talentFirstName} ↗</button>
+            <button type="button" onClick={() => openTalentReply(`Hi ${talentFirstName}, I’d like to hire you for `)}>Hire {talentFirstName} <ArrowUpRight size={14} aria-hidden="true" /></button>
             <button type="button" onClick={() => openTalentReply()}>Message</button>
           </div>
           <div className="gig-talent-card__footer"><span aria-hidden="true">✦</span>{availabilityDetail}</div>
@@ -366,7 +366,7 @@ export function GigListingCard({
               </div>
               <div className="board-listing-card__footer">
                 <span className="board-listing-card__status">{status}</span>
-                <span className="board-listing-card__cta">{cta} →</span>
+                <span className="board-listing-card__cta">{cta} <ArrowRight size={14} aria-hidden="true" /></span>
               </div>
             </div>
           </div>
@@ -775,7 +775,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
                             className="board-mini-btn"
                             onClick={() => { setNewBusinessForm(f => ({ ...f, name: venueQuery })); setVenueBranch("newBusiness"); }}
                           >
-                            This is a business. Add it →
+                            This is a business. Add it <ArrowRight size={14} aria-hidden="true" />
                           </button>
                         </div>
                       )}

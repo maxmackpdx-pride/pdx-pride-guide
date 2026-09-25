@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import type { CSSProperties, KeyboardEvent } from "react";
 
 export type ActionRowBadge = {
@@ -85,7 +86,7 @@ export default function ActionRow({
         </span>
       </span>
       <span className="pi-action-row__arrow" aria-hidden="true">
-        →
+        <ArrowRight size={14} aria-hidden="true" />
       </span>
     </button>
   );

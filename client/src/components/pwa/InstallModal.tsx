@@ -108,7 +108,7 @@ export default function InstallModal({ open, onClose }: { open: boolean; onClose
 
         {isIos && (
           <p style={{ color: "#FF00CC", fontSize: "0.82rem", fontStyle: "italic", lineHeight: 1.45, marginBottom: 14 }}>
-            IYKYK, it's the same move as saving Sniffies to your home screen. 😏
+            IYKYK, it's the same move as saving Sniffies to your home screen.
           </p>
         )}
 

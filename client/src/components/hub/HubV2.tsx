@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -157,7 +158,7 @@ function HubRightRail({
           })}
         </div>
         <button type="button" className="ico hub-rail-card__foot" onClick={onGoEvents}>
-          All your events →
+          All your events <ArrowRight size={14} aria-hidden="true" />
         </button>
       </div>
       <div className={`card hub-people-rail${suggestions.length === 0 ? " hub-people-rail--empty" : ""} pdx-glass-rebind`}>
@@ -185,7 +186,7 @@ function HubRightRail({
         ))}
         {suggestions.length > 0 && (
           <button type="button" className="ico hub-people-rail__foot" onClick={onGoPeople}>
-            See all in People →
+            See all in People <ArrowRight size={14} aria-hidden="true" />
           </button>
         )}
       </div>

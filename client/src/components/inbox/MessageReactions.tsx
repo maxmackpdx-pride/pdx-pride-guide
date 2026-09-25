@@ -7,6 +7,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import { Frown, Heart, HeartCrack, Laugh, Rainbow, ThumbsDown, ThumbsUp } from "lucide-react";
 import {
   MESSAGE_REACTIONS,
   MESSAGE_REACTION_BY_CODE,
@@ -16,6 +17,20 @@ import {
 } from "@shared/messageReactions";
 
 const LONG_PRESS_MS = 420;
+const REACTION_ICONS = {
+  thumbsup: ThumbsUp,
+  thumbsdown: ThumbsDown,
+  laugh: Laugh,
+  cry: Frown,
+  heart: Heart,
+  heartbreak: HeartCrack,
+  gay: Rainbow,
+} as const;
+
+function ReactionIcon({ code }: { code: MessageReactionCode }) {
+  const Icon = REACTION_ICONS[code];
+  return <Icon size={19} strokeWidth={2} aria-hidden="true" />;
+}
 
 function normalize(
   list: Array<{ code: string; count: number; mine: boolean }> | MessageReactionSummary[] | undefined,
@@ -56,7 +71,7 @@ function ReactionTray({
               onPick(r.code);
             }}
           >
-            {r.label}
+            <ReactionIcon code={r.code} />
           </button>
         );
       })}
@@ -93,7 +108,7 @@ function ReactionChips({
               onPick(c.code);
             }}
           >
-            <span className="msg-rxn__chip-label">{def?.label || c.code}</span>
+            <span className="msg-rxn__chip-label"><ReactionIcon code={c.code} /></span>
             {c.count > 1 ? <span className="msg-rxn__chip-n">{c.count}</span> : null}
           </button>
         );
