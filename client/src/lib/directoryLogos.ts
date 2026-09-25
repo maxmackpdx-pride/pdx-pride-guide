@@ -3,6 +3,7 @@ export {
   DIRECTORY_LOGO_VERSION,
   normalizeDirectoryName,
   resolveDirectoryLogo,
+  resolveDirectoryWaypointLogo,
   directoryFallbackLogo,
   hasDirectoryLogo,
 } from "@shared/directoryLogos";

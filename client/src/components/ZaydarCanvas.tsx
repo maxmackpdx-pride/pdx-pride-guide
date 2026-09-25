@@ -1,4 +1,4 @@
-import {forwardRef,useCallback,useEffect,useImperativeHandle,useMemo,useRef,useState} from 'react';
+import {forwardRef,useCallback,useEffect,useImperativeHandle,useLayoutEffect,useMemo,useRef,useState} from 'react';
 
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 export type MapView={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
@@ -6,8 +6,9 @@ type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:str
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
 type CanvasProps={initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};
-const MAP_SRC='/zaydar-map/index.html?v=20260925-venue-nights';
+const MAP_SRC='/zaydar-map/index.html?v=20260925-map-handshake';
 const MAX_3D_ATTEMPTS=3;
+const ALIVE_PHASES=new Set(['map-created','map-loaded','first-frame']);
 
 const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onCluster,onMode,onView},ref){
  const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onCluster,onMode,onView});latest.current={onFailure,onVisible,onSelect,onCluster,onMode,onView};
@@ -17,10 +18,14 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
  useImperativeHandle(ref,()=>({send:post}),[]);
  const fail=useCallback((reason:string)=>{
   if(failed.current)return;
+  const fatal=String(reason).startsWith('3D error:');
+  // Style load or MapLibre construction means the city is coming. Remounting
+  // a live iframe is what left the painted map under a false failure banner.
+  if(!fatal&&(firstFrame||ready||ALIVE_PHASES.has(phase)))return;
   failed.current=true;latest.current.onFailure(reason);
- },[]);
+ },[firstFrame,phase,ready]);
  useEffect(()=>{
-  if(firstFrame)return;
+  if(firstFrame||ready)return;
   let timer:number|undefined;
   const arm=()=>{
    window.clearTimeout(timer);
@@ -31,12 +36,12 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
   };
   arm();document.addEventListener('visibilitychange',arm);
   return()=>{window.clearTimeout(timer);document.removeEventListener('visibilitychange',arm);};
- },[phase,firstFrame,fail]);
- useEffect(()=>{const receive=(event:MessageEvent)=>{
-  if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='zaydar-demo'||failed.current)return;
+ },[phase,firstFrame,ready,fail]);
+ useLayoutEffect(()=>{const receive=(event:MessageEvent)=>{
+  if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='zaydar-demo')return;
   if(event.data.type==='phase'&&typeof event.data.phase==='string')setPhase(event.data.phase);
-  if(event.data.type==='first-frame'){setFirstFrame(true);latest.current.onVisible();}
-  if(event.data.type==='ready')setReady(true);
+  if(event.data.type==='first-frame'){failed.current=false;setFirstFrame(true);latest.current.onVisible();}
+  if(event.data.type==='ready'){setReady(true);latest.current.onVisible();}
   if(event.data.type==='view')latest.current.onView(event.data);
   if(event.data.type==='fatal'){
    const detail=typeof event.data.message==='string'?event.data.message.slice(0,300):'Unknown graphics error.';
@@ -57,7 +62,15 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
  useEffect(()=>{if(ready)post('select',{key:selected});},[ready,selected]);
  useEffect(()=>{if(ready)post('labels',{enabled:labelsEnabled});},[ready,labelsEnabled]);
  useEffect(()=>{if(ready)post('time',{timestamp:viewTime});},[ready,viewTime]);
- return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}`} title="Zaylist interactive Portland metro map" className="zaydar-demo-canvas"/>;
+ useEffect(()=>{
+  const node=frame.current;
+  if(!node)return;
+  const hello=()=>post('hello');
+  node.addEventListener('load',hello);
+  if(node.contentDocument?.readyState==='complete')hello();
+  return()=>node.removeEventListener('load',hello);
+ },[attempt]);
+ return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}`} title="Zaylist interactive Portland metro map" className="zaydar-demo-canvas" onLoad={()=>post('hello')}/>;
 });
 
 // Leaflet is deliberately disconnected. Its component is retained separately,
