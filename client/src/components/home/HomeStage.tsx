@@ -81,7 +81,7 @@ export default function HomeStage({ afterWelcome }: Props) {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !musicReady) return;
-    audio.volume = 0.7;
+    audio.volume = 0.42;
 
     let armed = true;
     const start = () => {
