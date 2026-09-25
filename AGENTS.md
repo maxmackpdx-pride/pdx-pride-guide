@@ -40,6 +40,11 @@ then advance `master` without force. Fetch and align the local checkout with the
 commit after publication. Preserve the same GitHub Actions, Railway, and live-site checks
 as a terminal push. Do not treat a GitHub ref update alone as a production deployment.
 
+Owner-authorized product deployments do not require a separate Foundation design
+approval, proposal export, or publication attestation. Keep build, predeploy,
+bundle, Railway SUCCESS, and live verification checks. Foundation approval tools
+are optional and must not block product fixes or releases.
+
 Staging environment `d10b5732-c324-46bc-b557-ac2cc626d4f0` was torn down on 2026-09-18.
 Do not wake or recreate it, apply leftover Railway canvas creates, or attach the
 production `/data` volume to any preview environment.
