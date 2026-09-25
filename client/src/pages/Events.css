@@ -56,12 +56,7 @@
  .events-page .board-stats-band__num { font-size:26px; line-height:1; }
  .events-page .board-stats-band__label { font-size:10px; letter-spacing:.03em; margin-top:6px; }
  .events-page.board-page--makeover .events-page-tab-bar { justify-content:flex-start; padding-top:8px; }
- .events-page .events-poster-grid { grid-template-columns:minmax(0,1fr); grid-auto-rows:auto; gap:24px; }
- .events-page .pdxBoard__venue {font-size:16px;line-height:1.3}
- .events-page .pdxBoard__when {font-size:14px;line-height:1.4}
- .events-page .pdxBoard__tags .pdxTag {font-size:11px;min-height:26px;padding:6px 8px}
- .events-page .pdxBoard__action {min-height:44px;height:auto}
- .events-page .pdxBoard__meta {padding:12px}
+
 }
 
 /* A feed can be thousands of pixels tall. Never promote it as one reveal
@@ -110,4 +105,36 @@
     animation: none;
     filter: none;
   }
+}
+
+/* Three compact event cards per row on phones, with the existing card
+   container rules fitting titles and poster proportions to each column. */
+@media (max-width: 767px) {
+  .events-page .events-poster-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    gap: 16px 10px;
+  }
+  .events-page .events-poster-grid > .scroll-reveal,
+  .events-page .events-poster-grid > .ds-listing-card {
+    contain-intrinsic-size: auto 300px;
+  }
+  .events-page .events-poster-grid .pdxBoard__meta { padding: 7px 6px 8px; }
+  .events-page .events-poster-grid .pdxBoard__venue { font-size: 11px; overflow-wrap: anywhere; }
+  .events-page .events-poster-grid .pdxBoard__when { font-size: 9px; }
+  .events-page .events-poster-grid .pdxTag {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 7px;
+    letter-spacing: .04em;
+    padding: 4px;
+  }
+  .events-page .events-poster-grid .pdxBoard__actions--claim-only { grid-template-columns: minmax(0, 1fr); }
+  .events-page .events-poster-grid .pdxBoard__actions--claim-only .pdxBoard__action { grid-column: 1; min-height: 32px; }
+  .events-page .events-poster-grid > .ds-listing-card { container-type: inline-size; }
+  .events-page .events-poster-grid .pdxBoard__affMeta { white-space: normal; overflow-wrap: anywhere; }
+  .events-page .events-poster-grid .pdxBoard__foot { flex-direction: column; align-items: stretch; }
+  .events-page .events-poster-grid .pdxBoard__affShop { min-width: 0; padding: 4px; font-size: 8px; white-space: normal; }
+
 }
