@@ -1835,7 +1835,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
     const websites = venueWebsiteIndex();
-    res.json(evts.map(evt => publicEvent(evt, pendingClaimIds, websites)));
+    // Batch public lineup names; pending invitations never enter the search payload.
+    const searchTalent = new Map<number, string[]>();
+    const lineup = sqlite.prepare(`
+      SELECT et.event_id AS eventId, et.role, u.username, u.display_name AS displayName
+      FROM event_talent et JOIN users u ON u.id = et.user_id
+      JOIN events e ON e.id = et.event_id
+      WHERE et.status = 'LIVE' AND e.status = 'LIVE'
+    `).all() as Array<{ eventId: number; role: string; username: string; displayName: string | null }>;
+    for (const row of lineup) {
+      const names = searchTalent.get(row.eventId) ?? [];
+      names.push(row.role, row.username, row.displayName ?? "");
+      searchTalent.set(row.eventId, names);
+    }
+    res.json(evts.map(evt => ({ ...publicEvent(evt, pendingClaimIds, websites), searchTalent: searchTalent.get(evt.id) ?? [] })));
+
   });
 
   /**

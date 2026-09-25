@@ -1,3 +1,4 @@
+import { createEventSearch } from "@shared/eventSearch";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
@@ -257,6 +258,7 @@ function filterBoardEvents(
     ["TODAY", "TONIGHT", "WEEKEND", "THIS_WEEK", "NEXT_WEEK"].includes(activeDay)
       ? buildDateWindows(nowMs)
       : { today: "", tonightStart: 0, tonightEnd: 0, weekend: EMPTY_DATES, thisWeek: EMPTY_DATES, nextWeek: EMPTY_DATES };
+  const matchesSearch = createEventSearch(searchQuery);
   return events
     .filter(e => {
       // Live board = upcoming + happening now. Past board = ended only.
@@ -275,11 +277,7 @@ function filterBoardEvents(
         if (activeFilters.includes("SEX POSITIVE") && !e.isSexPositive) return false;
         if (activeFilters.includes("NUDITY OK") && !e.nudityOk) return false;
       }
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const haystack = `${e.title} ${e.venueName} ${e.neighborhood} ${e.description}`.toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
+      if (!matchesSearch(e)) return false;
       return true;
     });
 }
@@ -713,7 +711,7 @@ export default function Events() {
                     <SearchInput
                       id="event-search"
                       aria-label={pastView ? "Search past events" : "Search events"}
-                      placeholder={pastView ? "Search past events..." : "Search events..."}
+                      placeholder={pastView ? "Search past events, venues, DJs, days…" : "Search events, venues, DJs, days…"}
                       value={searchQuery}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                       onClear={() => setSearchQuery("")}
