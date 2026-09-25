@@ -1,3 +1,4 @@
+import {eventNight} from '../../public/zaydar-map/event-night.js';
 import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
@@ -675,11 +676,19 @@ export default function ZaydarMapDemo() {
     const isHouz=String(row._board)==='The HAÜZ';
     const brands=event?eventBrandLogos(event,places):null;
     const color=event?zaydarEventColor(event,places):place?zaydarPlaceColor(place):boardColor(row);
-    const venue=event?places.find(p=>normalizeDirectoryName(p.name)===normalizeDirectoryName(event.venueName||'')):null;
+    const connectionEvent=row._board==='Mizzed'?events.find(e=>e.id===Number(row.eventId)):undefined;
+    const venueName=event?.venueName||connectionEvent?.venueName||String(row.eventVenue||row.venueHint||'');
+    const venue=event||row._board==='Mizzed'?places.find(p=>
+      (row._board==='Mizzed'&&Number(row.placeId)===p.id)||
+      (venueName&&normalizeDirectoryName(p.name)===normalizeDirectoryName(venueName))):undefined;
+    const venuePoint=venue?placeMarks([venue]).sort((a,b)=>Math.hypot(a.lat-mark.lat,a.lng-mark.lng)-Math.hypot(b.lat-mark.lat,b.lng-mark.lng))[0]:undefined;
+    const venueAnchor=venue&&venuePoint?{key:`directory-${venue.id}`,coordinates:[venuePoint.lng,venuePoint.lat],name:venue.name,
+      color:zaydarPlaceColor(venue),type:zaydarPlaceType(venue),typeIcon:zaydarTypeIcon(zaydarPlaceType(venue)),
+      waypointLogo:resolveDirectoryLogo(venue.name,venue.imageUrl)?.replace(/\.png(?=\?|$)/,'-white.png'),logo:''}:undefined;
     const type=place?zaydarPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');
     const name=event?.title||place?.name||boardTitle(row);
     const boardLogo=isHouz?firstImage(row.photos)||FORMING_COVER:firstImage(row.photoUrls)||firstImage(row.imageUrl);
-    return {waypointLogo:place?resolveDirectoryLogo(place.name,place.imageUrl)?.replace(/\.png(?=\?|$)/,"-white.png"):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place||event?zaydarTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
+    return {venueAnchor,createdAt:row.createdAt,closesAt:row.closesAt,status:row.status,waypointLogo:place?resolveDirectoryLogo(place.name,place.imageUrl)?.replace(/\.png(?=\?|$)/,"-white.png"):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place||event?zaydarTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
       logo:isHouz?'':brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':boardLogo||boardIcon(row)),
       alternateLogo:brands?.alternate,
       housingModel:isHouz?String(row.type||'LOOKING'):undefined,
@@ -690,9 +699,10 @@ export default function ZaydarMapDemo() {
       logoKey:brands?.directoryId?`directory-${brands.directoryId}`:place?`directory-${place.id}`:undefined,
       alternateLogoKey:brands?.alternateDirectoryId?`directory-${brands.alternateDirectoryId}`:undefined,
       eventDay:event?portlandCalendarDay(event.dateStart):undefined,
+      eventNight:event?eventNight(parsePacificDateTime(event.dateStart)??NaN):undefined,
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?eventTimeLabel(event.dateStart):undefined};
-  }), [marks, places, demoEventIds, attendance]);
+  }), [marks, places, events, demoEventIds, attendance]);
   const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{

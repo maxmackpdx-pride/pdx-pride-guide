@@ -4,10 +4,10 @@ import { mapListingKey, matchesMapEvent } from "./mapLayerFilters";
 
 const now = Date.parse("2026-09-20T18:00:00-07:00");
 const event = (dateStart: string, dateEnd: string, tags = "[]") => ({ dateStart, dateEnd, eventTypes: tags });
-test("Tonight is Portland's current day, not the upcoming three weeks", () => {
+test("Tonight retains the active Portland event night until 2am", () => {
   assert.equal(matchesMapEvent(event("2026-09-20T20:00:00", "2026-09-21T02:00:00"), "tonight", null, "", "", now), true);
   assert.equal(matchesMapEvent(event("2026-09-21T20:00:00", "2026-09-22T02:00:00"), "tonight", null, "", "", now), false);
-  assert.equal(matchesMapEvent(event("2026-09-20T12:00:00", "2026-09-20T16:00:00"), "tonight", null, "", "", now), false);
+  assert.equal(matchesMapEvent(event("2026-09-20T12:00:00", "2026-09-20T16:00:00"), "tonight", null, "", "", now), true);
 });
 test("Soon includes live events and the next 90 minutes", () => {
   for (const start of ["2026-09-20T17:00:00", "2026-09-20T19:30:00"]) assert.equal(matchesMapEvent(event(start, "2026-09-20T22:00:00"), "soon", null, "", "", now), true);
@@ -40,4 +40,14 @@ test("Upcoming applies the 21-day horizon and excludes invalid DST wall times", 
 test("Housing and board listings with equal numeric ids have different selection keys", () => {
   const keys = ["The Haüz", "Gigz", "Giftz", "Sellz"].map(board => mapListingKey(board, 9));
   assert.equal(new Set(keys).size, 4);
+});
+
+test("overnight map events roll over at 2am Portland time",()=>{
+ const evening=event("2026-09-25T21:00:00","2026-09-25T23:00:00"),afterMidnight=event("2026-09-26T01:00:00","2026-09-26T02:00:00"),next=event("2026-09-26T21:00:00","2026-09-27T02:00:00");
+ for(const filter of ["default","tonight"] as const){
+  assert.equal(matchesMapEvent(evening,filter,null,"","",Date.parse("2026-09-26T01:59:59-07:00")),true);
+  assert.equal(matchesMapEvent(evening,filter,null,"","",Date.parse("2026-09-26T02:00:00-07:00")),false);
+ }
+ assert.equal(matchesMapEvent(afterMidnight,"tonight",null,"","",now+5*86400000),true);
+ assert.equal(matchesMapEvent(next,"tonight",null,"","",Date.parse("2026-09-26T02:00:00-07:00")),true);
 });

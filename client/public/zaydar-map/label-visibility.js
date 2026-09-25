@@ -11,7 +11,7 @@ export function visibleHologramLabels(labels, selectedKey, width, height) {
   for (const label of ordered) {
     if (label.opacity <= .1) continue;
     const box = titleBox(label), selected = label.key === selectedKey;
-    if (!selected && (visible.length >= (width < 768 ? 5 : 10) || box.left < 0 || box.right > width || box.top < 0 || box.bottom > height
+    if (!selected && (box.left < 0 || box.right > width || box.top < 0 || box.bottom > height
       || placed.some(other => overlap(box, other)) || logos.some(logo => logo.key !== label.key && overlap(box, logo)))) continue;
     visible.push(label); placed.push(box);
   }

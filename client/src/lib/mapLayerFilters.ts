@@ -1,3 +1,4 @@
+import {eventNight} from '../../public/zaydar-map/event-night.js';
 import { parsePacificDateTime } from "../../../shared/missedConnections";
 
 export type MapTimeFilter = "default" | "tonight" | "soon" | "weekend" | "custom";
@@ -22,8 +23,9 @@ export function matchesMapEvent(event: ScheduledEvent, filter: MapTimeFilter, ta
     const [low, high] = from <= to ? [from, to] : [to, from];
     return portlandDay(start) <= high && portlandDay(end) >= low;
   }
-  if (end < now) return false;
-  if (filter === "tonight") return portlandDay(start) <= portlandDay(now) && portlandDay(end) >= portlandDay(now);
+  const sameNight=eventNight(start)===eventNight(now);
+  if (filter === "tonight") return sameNight;
+  if (end < now && !(filter === "default" && sameNight)) return false;
   if (filter === "soon") return start <= now + 90 * 60_000;
   if (filter === "weekend") {
     const day = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", weekday: "short" }).format(start);
