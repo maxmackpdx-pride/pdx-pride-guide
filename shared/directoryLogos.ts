@@ -1,7 +1,7 @@
 /** Map directory business names → static neon logo paths under /directory-logos. */
 
 /** Bump when logo assets under /directory-logos change so browsers fetch fresh files. */
-export const DIRECTORY_LOGO_VERSION = "2026-09-23-placez-brand-audit";
+export const DIRECTORY_LOGO_VERSION = "2026-09-25-placez-white-marks";
 
 /** Append soft cache-bust query to pack paths. Skip if already has a query string. */
 function withLogoCacheBust(path: string): string {
@@ -35,6 +35,13 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   basicrightsoregon: "Basic_Rights_Oregon",
   bearracuda: "Bearracuda",
   bestcoastbarberco: "Best_Coast_Barber_Co",
+  bestcoastbarber: "Best_Coast_Barber_Co",
+  clubprivata: "place-clubprivata",
+  privata: "place-clubprivata",
+  steamportland: "place-steamportland",
+  steampdx: "place-steamportland",
+  thevelvetrope: "place-thevelvetrope",
+  velvetrope: "place-thevelvetrope",
   // Yes Coach Productions — group / party collective (Tucker_PDmaX)
   yescoachproductions: "Yes_Coach_Productions",
   yescoach: "Yes_Coach_Productions",
@@ -190,6 +197,23 @@ export function normalizeDirectoryName(name: string): string {
     .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, "")
     .trim();
+}
+
+const WAYPOINT_ART_BY_STEM: Record<string, string> = {
+  "place-clubprivata": "/zaydar-map/venue-logos/club-privata-0.png",
+  "place-steamportland": "/zaydar-map/venue-logos/steam-portland-0.png",
+  "place-thevelvetrope": "/zaydar-map/venue-logos/velvet-rope-0.png",
+  Best_Coast_Barber_Co: "/directory-logos/Best_Coast_Barber_Co.png",
+};
+
+/** White waypoint mark. Uses existing flyover art when the pack has no -white file. */
+export function resolveDirectoryWaypointLogo(name: string, imageUrl?: string | null): string | null {
+  const primary = resolveDirectoryLogo(name, imageUrl);
+  if (!primary) return null;
+  const stem = primary.replace(/^\/directory-logos\//, "").replace(/\.png(?:\?.*)?$/, "");
+  const art = WAYPOINT_ART_BY_STEM[stem];
+  if (art) return art.startsWith("/directory-logos/") ? withLogoCacheBust(art) : art;
+  return primary.replace(/\.png(?=\?|$)/, "-white.png");
 }
 
 /**
