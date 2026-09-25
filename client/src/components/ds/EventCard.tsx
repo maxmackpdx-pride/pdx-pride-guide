@@ -222,7 +222,7 @@ export function EventCard({
       <span className="pdxRow__sheenSpec" aria-hidden="true" />
       <div className="pdxRow__thumb">
         <span className="pdxRow__scan" aria-hidden="true" />
-        {image ? <img src={image} alt="" /> : <span className="pdxRow__thumbPh">{(title || "?").charAt(0)}</span>}
+        {image ? <img src={image} alt="" loading="lazy" decoding="async" /> : <span className="pdxRow__thumbPh">{(title || "?").charAt(0)}</span>}
         <span className="pdxRow__thumbFloor" aria-hidden="true" />
       </div>
       <div className="pdxRow__main">

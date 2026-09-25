@@ -26,6 +26,7 @@ import type { EventModalOriginRect } from "../components/EventModal";
 import Schedule from "@/pages/Schedule";
 import ScheduleCard from "@/components/ScheduleCard";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
@@ -43,6 +44,13 @@ import { shareCardUrl } from "@shared/shareCards";
 const PACIFIC = "America/Los_Angeles";
 const GRID_RENDER_BATCH = 40;
 const LIST_RENDER_BATCH = 60;
+const MOBILE_GRID_RENDER_BATCH = 12;
+const MOBILE_LIST_RENDER_BATCH = 20;
+
+function renderBatch(viewMode: "grid" | "list", isMobile: boolean): number {
+  if (viewMode === "grid") return isMobile ? MOBILE_GRID_RENDER_BATCH : GRID_RENDER_BATCH;
+  return isMobile ? MOBILE_LIST_RENDER_BATCH : LIST_RENDER_BATCH;
+}
 
 /** Pacific YYYY-MM-DD for an epoch-ms. */
 function pacDate(ms: number): string {
@@ -322,6 +330,7 @@ function EventsTabBar({
 
 export default function Events() {
   const { user } = useAuth();
+  const isMobile = useIsMobile() || (typeof window !== "undefined" && window.innerWidth < 768);
   const [routeMatch, routeParams] = useRoute("/events/:id/:slug?");
   const [location, setLocation] = useLocation();
   const routeEventId = routeMatch && routeParams?.id ? Number(routeParams.id) : null;
@@ -343,7 +352,10 @@ export default function Events() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [eventOriginRect, setEventOriginRect] = useState<EventModalOriginRect | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">(() => readSearchParam("view") === "list" ? "list" : "grid");
-  const [visibleItemCount, setVisibleItemCount] = useState(GRID_RENDER_BATCH);
+  const [visibleItemCount, setVisibleItemCount] = useState(() => renderBatch(
+    readSearchParam("view") === "list" ? "list" : "grid",
+    typeof window !== "undefined" && window.innerWidth < 768,
+  ));
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [sortMode, setSortMode] = useState<SortMode>(() => SORT_OPTIONS.find(option => option.value === readSearchParam("sort"))?.value || "start_time");
   const [activeTab, setActiveTabState] = useState<"board" | "schedule">(() =>
@@ -526,13 +538,13 @@ export default function Events() {
     : visibleListEvents.length < filtered.length;
 
   useEffect(() => {
-    setVisibleItemCount(viewMode === "grid" ? GRID_RENDER_BATCH : LIST_RENDER_BATCH);
-  }, [viewMode, activeDay, activeFilters, searchQuery, sortMode, pastView]);
+    setVisibleItemCount(renderBatch(viewMode, isMobile));
+  }, [viewMode, isMobile, activeDay, activeFilters, searchQuery, sortMode, pastView]);
 
   useEffect(() => {
     const node = loadMoreRef.current;
     if (!node || !hasMoreVisibleItems) return;
-    const batch = viewMode === "grid" ? GRID_RENDER_BATCH : LIST_RENDER_BATCH;
+    const batch = renderBatch(viewMode, isMobile);
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -543,7 +555,7 @@ export default function Events() {
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [hasMoreVisibleItems, viewMode, visibleItemCount]);
+  }, [hasMoreVisibleItems, viewMode, isMobile, visibleItemCount]);
 
   // All upcoming (not-yet-ended) live events - the site is year-round now.
   const upcomingCount = liveEvents.length;

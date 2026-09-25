@@ -110,7 +110,7 @@ export function PosterCard({
     <article className={`pdxBoard pdxBoard--event-grid${className ? ` ${className}` : ""}`} style={{ "--day-c": base, "--c": base, "--on-c": contrast, "--opposite-neon": secondary, ...style }} {...rest}>
       <EdgeLight />
       <div className="pdxBoard__poster">
-        {image ? <img className="pdxBoard__img" src={image} alt="" /> : <div className="pdxBoard__ph" aria-hidden="true" />}
+        {image ? <img className="pdxBoard__img" src={image} alt="" loading="lazy" decoding="async" /> : <div className="pdxBoard__ph" aria-hidden="true" />}
         <span className="pdxBoard__scan" aria-hidden="true" />
         <DynamicEventTitle title={title} />
       </div>
