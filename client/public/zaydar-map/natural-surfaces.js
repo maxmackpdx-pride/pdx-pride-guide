@@ -78,10 +78,15 @@ export function mapzSurfaceStyle({demTiles,contourTiles,terrainStrength=0}={}) {
   };
   if(contourTiles)style.sources.contours={type:'vector',tiles:contourTiles,maxzoom:15};
   // Terrain remains opt-in while road approaches and model anchors are verified.
-  if(terrainStrength>0)style.terrain={source:'elevation',exaggeration:terrainStrength};
+  if(terrainStrength>0){
+    style.terrain={source:'elevation',exaggeration:terrainStrength};
+    // Terrain and hillshade need independent tile state in MapLibre. They can
+    // share the DEM protocol/cache, but must not share a raster source instance.
+    style.sources['hillshade-elevation']=structuredClone(style.sources.elevation);
+  }
   style.layers.unshift(
     {id:'ground',type:'background',paint:{'background-color':NIGHT_EARTH,'background-opacity':1}},
-    {id:'land-relief',type:'hillshade',source:'elevation',paint:{'hillshade-exaggeration':['interpolate',['linear'],['zoom'],10,.34,14,.24,17,.16],'hillshade-shadow-color':'#07110d','hillshade-highlight-color':'#53675d','hillshade-accent-color':'#132a20'}},
+    {id:'land-relief',type:'hillshade',source:terrainStrength>0?'hillshade-elevation':'elevation',paint:{'hillshade-exaggeration':['interpolate',['linear'],['zoom'],10,.34,14,.24,17,.16],'hillshade-shadow-color':'#07110d','hillshade-highlight-color':'#53675d','hillshade-accent-color':'#132a20'}},
     ...nightEarthFills(),
     ...quietGreenFills(),
     ...(contourTiles?[{id:'elevation-contours',type:'line',source:'contours','source-layer':'contours',minzoom:10,paint:{'line-color':'#35515a','line-opacity':['interpolate',['linear'],['zoom'],10,.08,12.5,.22,15,.14,18,.06],'line-width':['match',['get','level'],1,.85,.38]}}]:[]),
@@ -144,29 +149,40 @@ export function mapzSurfaceStyle({demTiles,contourTiles,terrainStrength=0}={}) {
   return style;
 }
 
+const buildingOcclusionCache=new WeakMap();
+
 /** Remove overlay light where 3D roofs and camera-facing walls cover it. */
 export function applyBuildingOcclusion(ctx,target,buildings,solidity=BUILDING_LIGHT_OCCLUSION) {
   if(!buildings.length||solidity<=0)return;
   const zoomScale=512*Math.pow(2,target.getZoom())/40075016.686,pitch=Math.sin(target.getPitch()*Math.PI/180);
-  ctx.save();ctx.beginPath();
-  // Normalize winding so overlapping roofs and walls form one union. Even-odd
-  // fill cancels their overlap and exposes rectangular strips of the beam.
-  const polygon=points=>{
-    const area=points.reduce((sum,a,i)=>{const b=points[(i+1)%points.length];return sum+a.x*b.y-b.x*a.y;},0);
-    if(area<0)points.reverse();
-    points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();
-  };
-  for(const building of buildings){
-    const lift=building.height*zoomScale/Math.cos(building.center[1]*Math.PI/180)*pitch;
-    const footprint=building.ring.map(point=>target.project(point));
-    polygon(footprint.map(p=>({x:p.x,y:p.y-lift})));
-    const winding=footprint.reduce((sum,a,i)=>{const b=footprint[(i+1)%footprint.length];return sum+a.x*b.y-b.x*a.y;},0);
-    for(let i=0;i<footprint.length;i++){
-      const a=footprint[i],b=footprint[(i+1)%footprint.length];if((b.x-a.x)*winding>=0)continue;
-      polygon([{x:a.x,y:a.y-lift},{x:b.x,y:b.y-lift},b,a]);
+  const center=target.getCenter();
+  const key=[center.lng,center.lat,target.getZoom(),target.getPitch(),target.getBearing(),ctx.canvas.width,ctx.canvas.height].join(':');
+  let cached=buildingOcclusionCache.get(target);
+  if(!cached||cached.key!==key||cached.buildings!==buildings){
+    // Build a detached path once per camera/geometry change. Appending thousands
+    // of subpaths to the live canvas causes costly closePath work on every frame.
+    const path=new Path2D();
+    // Normalize winding so overlapping roofs and walls form one union. Even-odd
+    // fill cancels their overlap and exposes rectangular strips of the beam.
+    const polygon=points=>{
+      const area=points.reduce((sum,a,i)=>{const b=points[(i+1)%points.length];return sum+a.x*b.y-b.x*a.y;},0);
+      if(area<0)points.reverse();
+      // fill() closes each subpath; closePath() repeatedly scans the growing city mask.
+      points.forEach((p,i)=>i?path.lineTo(p.x,p.y):path.moveTo(p.x,p.y));
+    };
+    for(const building of buildings){
+      const lift=building.height*zoomScale/Math.cos(building.center[1]*Math.PI/180)*pitch;
+      const footprint=building.ring.map(point=>target.project(point));
+      polygon(footprint.map(p=>({x:p.x,y:p.y-lift})));
+      const winding=footprint.reduce((sum,a,i)=>{const b=footprint[(i+1)%footprint.length];return sum+a.x*b.y-b.x*a.y;},0);
+      for(let i=0;i<footprint.length;i++){
+        const a=footprint[i],b=footprint[(i+1)%footprint.length];if((b.x-a.x)*winding>=0)continue;
+        polygon([{x:a.x,y:a.y-lift},{x:b.x,y:b.y-lift},b,a]);
+      }
     }
+    cached={key,buildings,path};buildingOcclusionCache.set(target,cached);
   }
-  ctx.globalCompositeOperation='destination-out';ctx.globalAlpha=solidity;ctx.fillStyle='#000';ctx.fill('nonzero');ctx.restore();
+  ctx.save();ctx.globalCompositeOperation='destination-out';ctx.globalAlpha=solidity;ctx.fillStyle='#000';ctx.fill(cached.path,'nonzero');ctx.restore();
 }
 
 /** Legacy canopy sprite. Unused by the live style. Kept so old imports do not throw. */

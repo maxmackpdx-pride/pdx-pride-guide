@@ -18,6 +18,14 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
   const container=map.getCanvasContainer(),canvas=map.getCanvas();
   const handlers=IOS_MAP_HANDLERS;
   const pointers=new Set();
+  let panFrame=0,panX=0,panY=0;
+  function flushPan(){
+    panFrame=0;
+    const offset=[panX,panY];panX=panY=0;
+    if(disposed||mode!=='exploring')return;
+    map.panBy(offset,{duration:0});onMove();
+  }
+  function cancelPan(){cancelAnimationFrame(panFrame);panFrame=0;panX=panY=0;}
   let mode='flight',idleTimer=0,returnEnd=null,disposed=false,instructionDismissed=false;
   try{instructionDismissed=localStorage.getItem('zaydar-exploration-seen')==='1';}catch{}
   canvas.tabIndex=0;
@@ -48,7 +56,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
   }
   function returnToFlight() {
     if(disposed||mode==='flight')return;
-    clearIdle();stopReturn();pointers.clear();mode='returning';
+    clearIdle();cancelPan();stopReturn();pointers.clear();mode='returning';
     pauseControl.checked=false;setGestures(false);
     message.textContent='Returning to the flight path…';
     returnEnd=()=>{
@@ -73,8 +81,9 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
     const gesture=trackpadGesture(event);
     if(gesture==='pan'){
       event.preventDefault();event.stopPropagation();
-      map.panBy([trackpadPanDelta(event.deltaX,event.deltaMode),trackpadPanDelta(event.deltaY,event.deltaMode)],{duration:0});
-      noteActivity();onMove();
+      panX+=trackpadPanDelta(event.deltaX,event.deltaMode);panY+=trackpadPanDelta(event.deltaY,event.deltaMode);
+      if(!panFrame)panFrame=requestAnimationFrame(flushPan);
+      noteActivity();
     }
   }
   function keyDown(event) {
@@ -118,7 +127,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
   return {
     get mode(){return mode;},noteActivity,
     dispose(){
-      disposed=true;clearIdle();stopReturn();setGestures(false);
+      disposed=true;clearIdle();cancelPan();stopReturn();setGestures(false);
       container.removeEventListener('pointerdown',pointerDown,true);
       container.removeEventListener('wheel',wheel,true);
       container.removeEventListener('keydown',keyDown,true);

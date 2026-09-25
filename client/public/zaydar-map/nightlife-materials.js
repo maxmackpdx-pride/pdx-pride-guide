@@ -27,7 +27,8 @@ export function createBuildingChrome(){
       if(!cached||cached.key!==key||cached.buildings!==buildings){
         const groups=Array.from({length:16},()=>({wall:new Path2D(),glint:new Path2D()}));
         const zoomScale=512*Math.pow(2,zoom)/40075016.686,tilt=Math.sin(pitch*Math.PI/180);
-        const polygon=(path,points)=>{points.forEach((p,i)=>i?path.lineTo(p.x,p.y):path.moveTo(p.x,p.y));path.closePath();};
+        // These paths are filled, so subpaths close implicitly without rescanning the accumulated walls.
+        const polygon=(path,points)=>{points.forEach((p,i)=>i?path.lineTo(p.x,p.y):path.moveTo(p.x,p.y));};
         for(const building of buildings){
           const latitudeScale=Math.cos(building.center[1]*Math.PI/180),lift=building.height*zoomScale/latitudeScale*tilt;
           if(lift<2)continue;

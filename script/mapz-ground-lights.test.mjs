@@ -103,9 +103,9 @@ test('zoom changes only the pool projection; geometry stays anchored and never w
 test('sparse building tiles keep street sparkles at overview zooms through sixteen',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   const roads=Array.from({length:100},(_,i)=>road([[-122.675+i*.0001,45.52],[-122.675+i*.0001,45.522]]));
-  const target={getLayer:()=>true,querySourceFeatures:(_source,{sourceLayer})=>sourceLayer==='building'?[]:roads,getZoom:()=>14,getPitch:()=>48};
+  const target={getCenter:()=>({lng:0,lat:45}),getBearing:()=>0,getLayer:()=>true,querySourceFeatures:(_source,{sourceLayer})=>sourceLayer==='building'?[]:roads,getZoom:()=>14,getPitch:()=>48};
   const context=vm.createContext({Map,Set,WeakMap,performance,window:{innerWidth:900,innerHeight:1200},matchMedia:()=>({matches:false}),
-    surfaceCache:new WeakMap(),glitterCache:new WeakMap(),bridgeLayer:{update(){}},portlandBridges:{update(){},models:[]},landmarkBuildings:{update(features){this.features=features},surfaceFeatures(){return this.features}},groundLightPools:{update(){}},ambientSignals:{update(){}},lightFeatures:[],
+    lastExplorationMove:-Infinity,elevationDirty:false,surfaceRevision:0,waterBloom:{invalidate(){}},surfaceCache:new WeakMap(),glitterCache:new WeakMap(),bridgeLayer:{update(){}},portlandBridges:{update(){},models:[]},landmarkBuildings:{update(features){this.features=features},surfaceFeatures(){return this.features}},groundLightPools:{update(){}},ambientSignals:{update(){}},lightFeatures:[],
     PORTLAND_BRIDGE_MODELS:[],bridgeGlowSpans:()=>[],terrainHeight:()=>0,bridgeWater:{update(){}},naturalWater:[],
     createSpatialIndex:()=>()=>[],intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles,CITY_SPARKLE_MAX_ZOOM,target,
   });

@@ -2,9 +2,9 @@ import { visibleHologramLabels } from './label-visibility.js';
 import {faceStackHtml} from '../outzide-map/assets/community-ui.js?v=map-continuity-1';
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
 import {createTerrainSampler,TERRAIN_STRENGTH} from './terrain-elevation.js';
-import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion,naturalWater} from './natural-surfaces.js?v=20260922-water-reflections-v4';
-import {createBuildingModelLayer} from './building-models.js';
-import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlife';
+import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion,naturalWater} from './natural-surfaces.js?v=20260925-smooth-map';
+import {createBuildingModelLayer} from './building-models.js?v=20260925-smooth-map';
+import {createBuildingChrome} from './nightlife-materials.js?v=20260925-smooth-map';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
 import {createBridgeLayer} from '../home-flight/bridge-roads.js?v=20260921-layer-join';
 import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-white-sparkles';
@@ -15,7 +15,7 @@ import {logoCoverage} from './logo-mask.js';
 import {createHologramMaterials,drawProjectionBeam,projectorGroundScale} from './hologram-materials.js?v=20260920-overview-projectors';
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
-import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260920-avatar-trackpad';
+import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer,PORTLAND_BRIDGE_MODELS} from './st-johns-bridge.js?v=20260921-layer-join';
 import {fitBridgeRoad} from './bridge-fit.js?v=20260921-layer-join';
@@ -49,7 +49,19 @@ const terrainSamples=createTerrainSampler(coordinates=>map.queryTerrainElevation
 const terrainHeight=coordinates=>terrainSamples.sample(coordinates).height;
 const waterBloom=createWaterBloom(),buildingChrome=createBuildingChrome();
 map.on('styleimagemissing',event=>{if(event.id==='forest-canopy'&&!map.hasImage(event.id))map.addImage(event.id,forestPattern(),{pixelRatio:2});});
-map.on('sourcedata',event=>{if(event.sourceId==='elevation'){terrainSamples.invalidate();groundLightPools.invalidate();}if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
+// Tile arrivals must not bypass the surface refresh budget. Keep the last
+// complete scene while new tiles arrive instead of rebuilding it on every frame.
+let elevationDirty=false,surfaceRevision=0,surfaceRefreshTimer=0;
+let lastExplorationMove=-Infinity,interactionSettledTimer=0;
+map.on('sourcedata',event=>{
+ if(event.sourceDataType!=='content')return;
+ if(event.sourceId==='elevation')elevationDirty=true;
+ if(event.sourceId==='terrain'||event.sourceId==='elevation'){
+  surfaceRevision++;scheduleFrame();
+  // Reduced-motion maps do not continuously draw: guarantee a settled refresh.
+  if(!surfaceRefreshTimer)surfaceRefreshTimer=window.setTimeout(()=>{surfaceRefreshTimer=0;scheduleFrame();},1600);
+ }
+});
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const baseColors=DAY_LIST;
@@ -89,7 +101,15 @@ map.on('load',()=>{
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
  if(cached && now-cached.time<1600)return cached;
+ // Keep geometry work out of a drag, pinch or trackpad burst. Base vector
+ // buildings still render continuously; overlay geometry catches up on settle.
+ if(cached&&now-lastExplorationMove<150)return cached;
+ const center=target.getCenter();
+ const cameraKey=[center.lng,center.lat,target.getZoom(),target.getPitch(),target.getBearing()].join(':');
+ if(cached&&cached.revision===surfaceRevision&&cached.cameraKey===cameraKey)return cached;
  if(!target.getLayer('bridge-decks'))return {buildings:[]};
+ if(elevationDirty){terrainSamples.invalidate();groundLightPools.invalidate();bridgeLayer.signature='';elevationDirty=false;}
+ waterBloom.invalidate();
  const buildings=[],seen=new Set();
  const buildingFeatures=target.querySourceFeatures('terrain',{sourceLayer:'building'});
  landmarkBuildings.update(buildingFeatures);
@@ -132,7 +152,7 @@ function updateSurfaces(target){
  // Marquam and Interstate use the connected road decks without a GLB model.
  const roadOnlyBridges=PORTLAND_BRIDGE_MODELS.filter(model=>model.disabled).map(model=>({...model,fit:fitBridgeRoad(allBridgeFeatures,model,terrainHeight)}));
  bridgeWater.update(bridgeGlowSpans([...portlandBridges.models,...roadOnlyBridges]),target.querySourceFeatures('terrain',{sourceLayer:'water',filter:naturalWater}));
- const result={time:now,buildings,reflections,roofs,overviewRoads};surfaceCache.set(target,result);return result;
+ const result={time:now,revision:surfaceRevision,cameraKey,buildings,reflections,roofs,overviewRoads};surfaceCache.set(target,result);return result;
 }
 function drawSurfaceReflections(ctx,target,reflections,fade){
  const zoomScale=512*Math.pow(2,target.getZoom())/40075016.686;
@@ -940,7 +960,13 @@ const exploration=createMapExploration({
   surfaceCache.delete(map);glitterCache.delete(map);hologramLayouts.delete(map);
   scheduleFrame();
  },
- onMove:()=>scheduleFrame()
+ onMove:()=>{
+  lastExplorationMove=performance.now();
+  clearTimeout(interactionSettledTimer);
+  const refreshDelay=Math.max(160,1600-(lastExplorationMove-(surfaceCache.get(map)?.time??0)));
+  interactionSettledTimer=window.setTimeout(()=>{interactionSettledTimer=0;scheduleFrame();},refreshDelay);
+  scheduleFrame();
+ }
 });
 let overviewPitchFrame=0;
 function syncOverviewPitch(){
@@ -1049,7 +1075,7 @@ function onVisibilityChange(){
 }
 document.addEventListener('visibilitychange',onVisibilityChange);
 window.addEventListener('pagehide',()=>{
- disposed=true;cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);
+ disposed=true;clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);
  cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);
  exploration.dispose();
  assetController.abort();reduced.removeEventListener('change',onReducedChange);window.removeEventListener('resize',onSceneResize);

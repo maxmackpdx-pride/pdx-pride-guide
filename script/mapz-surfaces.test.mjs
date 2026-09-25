@@ -1,3 +1,9 @@
+globalThis.Path2D=class {
+ constructor(){this.polygons=[];}
+ moveTo(x,y){this.polygons.push([[x,y]]);}
+ lineTo(x,y){this.polygons.at(-1).push([x,y]);}
+ closePath(){}
+};
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
@@ -25,8 +31,8 @@ test('hillshade and contours validate without deforming the vector city',()=>{
 });
 
 test('buildings retain only two percent transparency to map and overlay light',()=>{
- const calls=[],ctx={save(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(rule){calls.push([this.globalCompositeOperation,this.globalAlpha,rule]);},restore(){}};
- const target={getZoom:()=>16,getPitch:()=>48,project:([x,y])=>({x,y})};
+ const calls=[],ctx={canvas:{width:800,height:600},save(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(path,rule){calls.push([this.globalCompositeOperation,this.globalAlpha,rule]);},restore(){}};
+ const target={getCenter:()=>({lng:0,lat:45}),getBearing:()=>0,getZoom:()=>16,getPitch:()=>48,project:([x,y])=>({x,y})};
  applyBuildingOcclusion(ctx,target,[{height:12,center:[0,45],ring:[[0,0],[10,0],[10,10],[0,10]]}]);
  assert.deepEqual(calls,[['destination-out',.98,'nonzero']]);
 });
@@ -144,9 +150,9 @@ test('ground and water are opaque with the moonlit mineral shoreline color',()=>
 
 test('overlapping building masks form a union for either source ring winding',()=>{
  const polygons=[];let polygon;
- const ctx={save(){},beginPath(){},moveTo(x,y){polygon=[[x,y]];polygons.push(polygon);},lineTo(x,y){polygon.push([x,y]);},closePath(){},fill(rule){assert.equal(rule,'nonzero');},restore(){}};
+ const ctx={canvas:{width:800,height:600},save(){},beginPath(){},moveTo(x,y){polygon=[[x,y]];polygons.push(polygon);},lineTo(x,y){polygon.push([x,y]);},closePath(){},fill(path,rule){polygons.push(...path.polygons);assert.equal(rule,'nonzero');},restore(){}};
  const ring=[[0,0],[10,0],[10,10],[0,10]];
- applyBuildingOcclusion(ctx,{getZoom:()=>16,getPitch:()=>48,project:([x,y])=>({x,y})},[
+ applyBuildingOcclusion(ctx,{getCenter:()=>({lng:0,lat:45}),getBearing:()=>0,getZoom:()=>16,getPitch:()=>48,project:([x,y])=>({x,y})},[
   {height:12,center:[0,45],ring},{height:18,center:[0,45],ring:[...ring].reverse()},
  ]);
  assert.equal(polygons.length,4);
@@ -154,4 +160,23 @@ test('overlapping building masks form a union for either source ring winding',()
   const area=points.reduce((sum,a,i)=>{const b=points[(i+1)%points.length];return sum+a[0]*b[1]-b[0]*a[1];},0);
   assert.ok(area>0,'roof and wall winding must agree so overlap cannot punch holes');
  }
+});
+
+ test('building occlusion reuses its path until the camera or geometry changes',()=>{
+ let projections=0,lng=0;const paths=[];
+ const ctx={canvas:{width:800,height:600},save(){},restore(){},fill:path=>paths.push(path)};
+ const target={getCenter:()=>({lng,lat:45}),getBearing:()=>0,getZoom:()=>16,getPitch:()=>48,project:([x,y])=>{projections++;return {x,y};}};
+ const buildings=[{height:12,center:[0,45],ring:[[0,0],[10,0],[10,10],[0,10]]}];
+ applyBuildingOcclusion(ctx,target,buildings);const initial=projections;
+ applyBuildingOcclusion(ctx,target,buildings);assert.equal(projections,initial);assert.equal(paths[0],paths[1]);
+ lng=1;applyBuildingOcclusion(ctx,target,buildings);assert.ok(projections>initial);assert.notEqual(paths[1],paths[2]);
+ applyBuildingOcclusion(ctx,target,[...buildings]);assert.notEqual(paths[2],paths[3]);
+ });
+
+test('3D terrain and hillshade use separate tile state with the same elevation data',()=>{
+ const style=mapzSurfaceStyle({terrainStrength:.5,demTiles:['dem://tiles']});
+ const relief=style.layers.find(layer=>layer.id==='land-relief');
+ assert.notEqual(relief.source,style.terrain.source);
+ assert.deepEqual(style.sources[relief.source],style.sources[style.terrain.source]);
+ assert.notEqual(style.sources[relief.source],style.sources[style.terrain.source]);
 });
