@@ -41,9 +41,11 @@ test("Railway rejects a changed source with no exact owner-approved handoff", as
   assert.throws(() => evaluateRailwayDesignBuild(local, live, [{ ...proposal, payload: { ...payload, sourceChanges: [{ ...payload.sourceChanges[0], after: "tampered" }] } }], revision), /exact approved/);
 });
 
-test("Railway bootstrap only permits the pinned unmodified source graph", async () => {
-  const result = await verifyRailwayDesignBuild({ revision, fetcher: async () => { throw new Error("not deployed"); }, attempts: 1 });
-  assert.equal(result.bootstrap, true);
+test("Railway rejects unavailable live evidence after the pinned source graph changes", async () => {
+  await assert.rejects(
+    verifyRailwayDesignBuild({ revision, fetcher: async () => { throw new Error("not deployed"); }, attempts: 1 }),
+    /Live design evidence is unavailable/,
+  );
 });
 
 test("Railway waits for the exact Foundation preparation before building changed source", async t => {
