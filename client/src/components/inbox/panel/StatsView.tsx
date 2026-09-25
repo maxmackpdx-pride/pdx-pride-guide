@@ -109,6 +109,112 @@ type AdStatsSummary = {
   avgCtr: number;
 };
 
+type ActionFlowStage = {
+  label: string;
+  value: number;
+};
+
+type ActionFlowLaneProps = {
+  label: string;
+  accent: string;
+  stages: ActionFlowStage[];
+  rate: number | null;
+  rateLabel: string;
+};
+
+function ActionFlowLane({ label, accent, stages, rate, rateLabel }: ActionFlowLaneProps) {
+  const start = stages[0]?.value ?? 0;
+
+  return (
+    <li className="inbox-exp-action-flow__lane" style={{ "--inbox-exp-flow-accent": accent } as CSSProperties}>
+      <div className="inbox-exp-action-flow__lane-head">
+        <span className="inbox-exp-action-flow__lane-label">{label}</span>
+        <span className="inbox-exp-action-flow__rate">
+          <strong>{rate == null ? "—" : `${rate}%`}</strong>
+          <span>{rateLabel}</span>
+        </span>
+      </div>
+      <ol
+        className="inbox-exp-action-flow__stages"
+        style={{ "--inbox-exp-flow-stage-count": stages.length } as CSSProperties}
+        aria-label={`${label} action stages`}
+      >
+        {stages.map((stage) => {
+          const relativeWidth = start > 0 ? Math.max(3, Math.min(100, (stage.value / start) * 100)) : 0;
+          return (
+            <li className="inbox-exp-action-flow__stage" key={stage.label}>
+              <span className="inbox-exp-action-flow__stage-label">{stage.label}</span>
+              <strong className="inbox-exp-action-flow__stage-value">{stage.value}</strong>
+              <span className="inbox-exp-action-flow__track" aria-hidden="true">
+                <span className="inbox-exp-action-flow__fill" style={{ width: `${relativeWidth}%` }} />
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </li>
+  );
+}
+
+function ActionFlow({ metrics }: { metrics: NonNullable<Metrics["productExperience"]> }) {
+  const medianSeconds = metrics.timeToContent.medianMs == null ? null : metrics.timeToContent.medianMs / 1000;
+
+  return (
+    <section className="inbox-exp-action-flow" aria-labelledby="owner-action-flow-title">
+      <div className="inbox-exp-action-flow__head">
+        <div>
+          <div className="inbox-exp-action-flow__eyebrow">OWNER VIEW · {metrics.windowDays} DAYS</div>
+          <h3 className="inbox-exp-action-flow__title" id="owner-action-flow-title">ACTION FLOW</h3>
+        </div>
+        <div className="inbox-exp-action-flow__speed">
+          <strong>{medianSeconds == null ? "—" : `${medianSeconds.toFixed(1)}s`}</strong>
+          <span>MEDIAN TO CONTENT · N={metrics.timeToContent.samples}</span>
+        </div>
+      </div>
+      <p className="inbox-exp-action-flow__copy">
+        Where members begin an action, where they finish, and where the clearest drop-off needs attention.
+      </p>
+      <ul className="inbox-exp-action-flow__lanes">
+        <ActionFlowLane
+          label="POSTING"
+          accent={C.limeSoft}
+          stages={[
+            { label: "STARTED", value: metrics.posting.attempts },
+            { label: "COMPLETED", value: metrics.posting.completions },
+          ]}
+          rate={metrics.posting.completionRate}
+          rateLabel="COMPLETION"
+        />
+        <ActionFlowLane
+          label="CONTACT"
+          accent={C.cyan}
+          stages={[
+            { label: "STARTED", value: metrics.contact.attempts },
+            { label: "COMPLETED", value: metrics.contact.completions },
+          ]}
+          rate={metrics.contact.completionRate}
+          rateLabel="COMPLETION"
+        />
+        <ActionFlowLane
+          label="REPORTING"
+          accent={C.magenta}
+          stages={[
+            { label: "SAW REPORT", value: metrics.reportDiscovery.seen },
+            { label: "OPENED", value: metrics.reportDiscovery.opened },
+            { label: "COMPLETED", value: metrics.reportDiscovery.completed },
+          ]}
+          rate={metrics.reportDiscovery.discoveryRate}
+          rateLabel="DISCOVERY"
+        />
+      </ul>
+      <div className="inbox-exp-action-flow__integrity">
+        <span>COUNTER CHECK</span>
+        <strong>{metrics.counterMismatches === 0 ? "ALL COUNTERS MATCH" : `${metrics.counterMismatches} MISMATCH${metrics.counterMismatches === 1 ? "" : "ES"}`}</strong>
+      </div>
+    </section>
+  );
+}
+
 export default function StatsView() {
   const { user } = useAuth();
   const fullStats = !!(user?.canViewUsers || user?.isPrimaryOwner);
@@ -250,28 +356,7 @@ export default function StatsView() {
 
           {m.productExperience && (
             <>
-              <div className="inbox-exp-stats-title">PRODUCT EXPERIENCE · {m.productExperience.windowDays} DAYS</div>
-              <p className="inbox-exp-stats-copy">Completion rates include their attempt counts so low-volume signals stay honest.</p>
-              <div className="inbox-exp-stats-grid">
-                <Tile
-                  value={m.productExperience.timeToContent.medianMs == null ? "—" : `${(m.productExperience.timeToContent.medianMs / 1000).toFixed(1)}s`}
-                  label={`TIME TO CONTENT · N=${m.productExperience.timeToContent.samples}`}
-                />
-                <Tile
-                  value={m.productExperience.posting.completionRate == null ? "—" : `${m.productExperience.posting.completionRate}%`}
-                  label={`POST COMPLETION · ${m.productExperience.posting.completions}/${m.productExperience.posting.attempts}`}
-                />
-                <Tile
-                  value={m.productExperience.contact.completionRate == null ? "—" : `${m.productExperience.contact.completionRate}%`}
-                  label={`CONTACT COMPLETION · ${m.productExperience.contact.completions}/${m.productExperience.contact.attempts}`}
-                />
-                <Tile
-                  value={m.productExperience.reportDiscovery.discoveryRate == null ? "—" : `${m.productExperience.reportDiscovery.discoveryRate}%`}
-                  label={`REPORT DISCOVERY · ${m.productExperience.reportDiscovery.opened}/${m.productExperience.reportDiscovery.seen}`}
-                />
-                <Tile value={m.productExperience.reportDiscovery.completed} label="REPORTS COMPLETED" />
-                <Tile value={m.productExperience.counterMismatches} label="COUNTER MISMATCHES" />
-              </div>
+              <ActionFlow metrics={m.productExperience} />
             </>
           )}
 
