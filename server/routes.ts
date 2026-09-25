@@ -805,6 +805,7 @@ function publicGiftingPost(post: any, viewerUserId?: number) {
     selectedUserId: isPoster
       ? allSafeInterests.find((interest: any) => interest.id === selectedInterestId)?.userId || null
       : null,
+    viewerInterested: !!viewerInterest,
     viewerSelected: !!viewerInterest && viewerInterest.id === selectedInterestId,
   };
 }
@@ -3229,7 +3230,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const post = storage.getGiftingPost(Number(req.params.id));
       if (!post) return res.status(404).json({ error: "Not found" });
       if ((post.post_type || post.postType) !== "GIFT") return res.status(400).json({ error: "Use the In Search Of offer flow for In Search Of posts." });
-      const note = String(req.body.note || "").trim();
+      const openGrab = String(post.pickup_preference ?? post.pickupPreference ?? "").toLowerCase().includes("open grab");
+      const note = String(req.body.note || "").trim() || (openGrab ? "I'm on my way to grab it." : "");
       if (!note) return res.status(400).json({ error: "A short note is required." });
       if (moderationGate(res, "Gifting interest note", { note })) return;
       const interest = storage.addGiftingInterest(insertGiftingInterestSchema.parse({

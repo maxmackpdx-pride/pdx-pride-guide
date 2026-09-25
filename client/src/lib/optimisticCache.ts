@@ -160,7 +160,7 @@ export function applyHousingRequest(
 
 type GiftLike = {
   id?: number;
-  viewerSelected?: boolean;
+  viewerInterested?: boolean;
   interestCount?: number;
 };
 
@@ -168,10 +168,10 @@ export function patchGiftingRaise(data: unknown, postId: number): unknown {
   if (!Array.isArray(data)) return data;
   return data.map((post: GiftLike) => {
     if (post?.id !== postId) return post;
-    if (post.viewerSelected) return post;
+    if (post.viewerInterested) return post;
     return {
       ...post,
-      viewerSelected: true,
+      viewerInterested: true,
       interestCount: Number(post.interestCount ?? 0) + 1,
     };
   });

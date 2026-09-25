@@ -94,7 +94,7 @@ export default function SpottedCard({
         <span className="board-spotted-card__ticks" aria-hidden="true">”</span>
         <div className="board-spotted-card__meta">
           <span className="board-spotted-card__kind" style={{ color: MC_GLASS }}>{source?.label || "That one spot by the…"}</span>
-          <span className="board-spotted-card__time">{spottedTimeAgo(post.createdAt)}</span>
+          <span className="board-spotted-card__time">{post.isDemo ? "Demo post" : spottedTimeAgo(post.createdAt)}</span>
         </div>
         <h4 className="board-spotted-card__title">{displayTitle}</h4>
         <p className="board-spotted-card__body">{post.body}</p>
@@ -102,7 +102,7 @@ export default function SpottedCard({
           <span className="board-spotted-card__place">{spottedPlace(post)}</span>
           {!post.isMine && !isClosed && <span className="board-spotted-card__cta" style={{ color: MC_GLASS }}>Reply <ArrowRight size={14} aria-hidden="true" /></span>}
         </div>
-        {source && <span className="board-spotted-card__source">↳ From {source.label} card · {source.label === "Placez" ? "Portland stock photo" : source.label === "Eventz" ? "Event flyer" : "Destination art"}</span>}
+        {source && <span className="board-spotted-card__source">From {source.label}</span>}
         <span className="board-spotted-card__open">View and reply <span aria-hidden="true"><ArrowUpRight size={14} aria-hidden="true" /></span></span>
       </article>
     );

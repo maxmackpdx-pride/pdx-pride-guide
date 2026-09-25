@@ -129,24 +129,25 @@ test("housing saved patch is a flip, not a forced true", () => {
 test("gifting raise-hand bumps count once; rollback restores both", () => {
   const qc = client();
   const posts = [
-    { id: 2, viewerSelected: false, interestCount: 1 },
-    { id: 3, viewerSelected: false, interestCount: 0 },
+    { id: 2, viewerInterested: false, viewerSelected: false, interestCount: 1 },
+    { id: 3, viewerInterested: false, viewerSelected: false, interestCount: 0 },
   ];
   qc.setQueryData([...GIFTING_KEY], posts);
   const snap = qc.getQueriesData({ queryKey: [...GIFTING_KEY] });
   applyGiftingRaise(qc, 2);
   applyGiftingRaise(qc, 2);
   const raised = qc.getQueryData([...GIFTING_KEY]) as typeof posts;
-  assert.equal(raised[0].viewerSelected, true);
+  assert.equal(raised[0].viewerInterested, true);
+  assert.equal(raised[0].viewerSelected, false);
   assert.equal(raised[0].interestCount, 2);
   for (const [key, data] of snap) qc.setQueryData(key, data);
   const restored = qc.getQueryData([...GIFTING_KEY]) as typeof posts;
-  assert.equal(restored[0].viewerSelected, false);
+  assert.equal(restored[0].viewerInterested, false);
   assert.equal(restored[0].interestCount, 1);
 });
 
-test("gifting raise on already-selected row does not increment", () => {
-  const next = patchGiftingRaise([{ id: 1, viewerSelected: true, interestCount: 3 }], 1) as Array<{
+test("gifting raise on already-interested row does not increment", () => {
+  const next = patchGiftingRaise([{ id: 1, viewerInterested: true, viewerSelected: false, interestCount: 3 }], 1) as Array<{
     interestCount: number;
   }>;
   assert.equal(next[0].interestCount, 3);

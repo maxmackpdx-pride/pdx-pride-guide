@@ -38,6 +38,7 @@ export type GiftingPost = {
   posterAvatarRing?: string | null;
   avatarChoice?: number;
   interestCount: number;
+  viewerInterested?: boolean;
   viewerSelected?: boolean;
   isMine?: boolean;
   interests?: Array<{ id: number; userId: number; note: string; status: string; username: string; displayName?: string; photoUrl?: string | null; avatarChoice?: number; avatarRing?: string | null }>;
@@ -141,8 +142,9 @@ export function giftingMotifVariant(post: GiftingPost): "gift" | "search" {
 
 function cardStatus(post: GiftingPost) {
   if (post.status === "PENDING") return "Pending admin review";
-  if (post.viewerSelected && post.postType === "GIFT") return "Hand raised";
-  if (post.viewerSelected && post.postType === "ISO") return "Offer sent";
+  if (post.viewerSelected) return "Selected · check your inbox";
+  if (post.viewerInterested && post.postType === "GIFT") return "Hand raised";
+  if (post.viewerInterested && post.postType === "ISO") return "Offer sent";
   if (post.postType === "ISO") return "Open · make an offer";
   if (isOpenGrabPost(post)) return "First come · grab it";
   if (post.interestCount >= 3) return "3 of 3 hands up";
@@ -150,8 +152,9 @@ function cardStatus(post: GiftingPost) {
 }
 
 function cardCta(post: GiftingPost) {
-  if (post.viewerSelected && post.postType === "GIFT") return "Hand raised";
-  if (post.viewerSelected && post.postType === "ISO") return "Offer sent";
+  if (post.viewerSelected) return "Selected";
+  if (post.viewerInterested && post.postType === "GIFT") return "Hand raised";
+  if (post.viewerInterested && post.postType === "ISO") return "Offer sent";
   if (post.postType === "ISO") return "Offer it";
   if (isOpenGrabPost(post)) return "Grab it";
   if (post.interestCount >= 3) return "Full";
@@ -380,11 +383,11 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
                 onClick={() => submitResponse(post.postType === "GIFT" ? "interest" : "offer")}
                 disabled={
                   actionMutation.isPending
-                  || post.viewerSelected
+                  || post.viewerInterested
                   || (!grab && post.postType === "GIFT" && post.interestCount >= 3)
                 }
               >
-                {post.viewerSelected
+                {post.viewerInterested
                   ? post.postType === "GIFT" ? "Hand raised" : "Offer sent"
                   : grab
                     ? "On my way, grab it"
