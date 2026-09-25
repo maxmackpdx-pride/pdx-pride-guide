@@ -36,3 +36,11 @@ test('mobile grouping uses a larger screen radius near city zoom',()=>{
  assert.equal(clusterWaypoints(spaced,project,9).length,2);
  assert.equal(clusterWaypoints(spaced,project,9,undefined,{mobile:true}).length,1);
 });
+test('corridor zoom separates activities while nearby destinations of the same kind stay clustered',()=>{
+ for(const zoom of [7,7.5,8,9,10,13.9])for(const mobile of [false,true]){
+  const groups=clusterWaypoints(points,project,zoom,undefined,{mobile});
+  assert.deepEqual(groups.map(g=>[g.kind,g.members.map(p=>p.id)]),[['trail',['a','b']],['beach',['c']]]);
+ }
+ assert.equal(clusterWaypoints(points,project,6.99)[0].kind,'mixed');
+ assert.equal(clusterWaypoints(points,project,7,'a').length,3);
+});

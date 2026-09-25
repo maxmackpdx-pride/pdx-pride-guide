@@ -14,7 +14,7 @@
 .outzide-shell .waypoint-cluster .waypoint-head{
   width:39px;height:39px;left:-19px;bottom:27px;border-radius:50%;
   color:var(--c);background:#071819f5;border:2px solid var(--c);
-  box-shadow:0 2px 10px #000b;
+  box-shadow:0 2px 10px #000b;transform:none;
 }
 .outzide-shell .waypoint-cluster .waypoint-label{bottom:71px;left:20px;color:var(--ink)}
 .outzide-shell .waypoint-cluster .cluster-total{
@@ -23,3 +23,10 @@
 }
 .outzide-shell .waypoint-cluster .waypoint-head::before,
 .outzide-shell .waypoint-cluster .waypoint-head::after{display:none}
+
+/* Activity clusters keep the category visible alongside their count. */
+.outzide-shell .activity-cluster .waypoint-head{
+  display:flex;align-items:center;justify-content:center;width:auto;min-width:58px;left:-29px;padding:0 6px;gap:4px;border-radius:20px;
+}
+.outzide-shell .activity-cluster .waypoint-head svg{width:22px;height:22px;transform:none;flex:none;color:var(--c)}
+.outzide-shell .activity-cluster .cluster-total{font-size:14px}

@@ -1,9 +1,9 @@
-// Cluster by projected screen distance. Regional views group all destination
-// types so nearby categories don't pile up; closer views retain type detail.
+// Cluster by projected screen distance. Broad overviews group destination
+// types; the Portland / Salem corridor (zoom 7+) separates activity groups.
 export function clusterWaypoints(places, project, zoom, selectedId, {mobile=false}={}) {
   const groups=[];
   const radius=zoom>=14?0:zoom<8?(mobile?138:116):zoom<10?(mobile?112:92):(mobile?88:72);
-  const mixedKinds=zoom<10;
+  const mixedKinds=zoom<7;
   for(const place of [...places].sort((a,b)=>a.id.localeCompare(b.id))){
     if(!Number.isFinite(place.lat)||!Number.isFinite(place.lng))continue;
     const point=project([place.lng,place.lat]);
