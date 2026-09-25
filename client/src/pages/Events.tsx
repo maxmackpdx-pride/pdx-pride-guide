@@ -829,7 +829,7 @@ export default function Events() {
             </Button>
           </div>
         ) : viewMode === "grid" ? (
-          <ScrollReveal delay={50}>
+          <div className="events-card-feed">
           <div className="events-poster-grid">
             {visibleGridItems.map((item, i) => {
               if (item.kind === "affiliate") {
@@ -869,9 +869,9 @@ export default function Events() {
               );
             })}
           </div>
-          </ScrollReveal>
+          </div>
         ) : (
-          <ScrollReveal delay={50}>
+          <div className="events-card-feed events-card-feed--list">
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {visibleListEvents.map((e, i) => (
               <ListingCard
@@ -887,7 +887,7 @@ export default function Events() {
               />
             ))}
           </div>
-          </ScrollReveal>
+          </div>
         )}
 
         {hasMoreVisibleItems && (

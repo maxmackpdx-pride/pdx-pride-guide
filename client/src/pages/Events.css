@@ -63,3 +63,51 @@
  .events-page .pdxBoard__action {min-height:44px;height:auto}
  .events-page .pdxBoard__meta {padding:12px}
 }
+
+/* A feed can be thousands of pixels tall. Never promote it as one reveal
+   texture; individual cards already own their entrance treatment. */
+.events-page .events-card-feed .scroll-reveal--visible {
+  will-change: auto;
+}
+
+@media (max-width: 767px), (hover: none) and (pointer: coarse) {
+  /* Mobile WebKit must not retain a composited surface for every loaded card.
+     Keep offscreen cards in layout, but skip their paint and animation work. */
+  .events-page .events-poster-grid > .scroll-reveal,
+  .events-page .events-poster-grid > .ds-listing-card,
+  .events-page .events-card-feed--list > div > .scroll-reveal {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 650px;
+    overflow-clip-margin: 32px;
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+  .events-page .events-card-feed--list > div > .scroll-reveal {
+    contain-intrinsic-size: auto 200px;
+  }
+
+  /* Static day-color edges and shadows retain the card treatment without
+     repeated full-card masked/blurred surfaces or animated claim masks. */
+  .events-page .events-card-feed .pdxBoard__shine,
+  .events-page .events-card-feed .pdxBoard__action--claim::before,
+  .events-page .events-card-feed .pdxBoard__action--claim::after,
+  .events-page .events-card-feed .pdxBoard__titleLine::before {
+    display: none;
+  }
+  .events-page .events-card-feed .pdxBoard--event-grid {
+    border-color: var(--day-c) !important;
+  }
+  .events-page .events-card-feed .pdxBoard,
+  .events-page .events-card-feed .pdxBoard__meta,
+  .events-page .events-card-feed .pdxRow {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    animation: none !important;
+  }
+  .events-page .events-card-feed .pdxBoard__divider {
+    animation: none;
+    filter: none;
+  }
+}
