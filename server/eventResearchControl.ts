@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { sqlite, storage } from "./storage";
 import { eventDedupeKey } from "@shared/eventDedupe";
+import { isFounderApprovedEndEstimate } from "@shared/qsearchFounderEndEstimates";
 import { qsearchDiscoveryPlan, requiredQsearchPaths } from "@shared/qsearchDiscovery";
 
 type JsonObject = Record<string, unknown>;
@@ -770,7 +771,8 @@ function evaluateCandidateDecisionGate(input: {
   }
   const evidence = [...latestBySource.values()].filter(item => item.authority_level === "primary");
   const matching = (field: string) => evidence.filter(item => item.field === field && JSON.stringify(parseJson(item.observed_value_json, null)) === JSON.stringify(values[field]));
-  const missingEvidence = fields.filter(field => !evidence.some(item => item.field === field));
+  const founderEstimatedEnd = isFounderApprovedEndEstimate(candidateKey, values);
+  const missingEvidence = fields.filter(field => !(field === "dateEnd" && founderEstimatedEnd) && !evidence.some(item => item.field === field));
   const mismatchedEvidence = fields.filter(field => evidence.some(item => item.field === field) && !matching(field).length);
   const conflictingEvidence = fields.filter(field => evidence.some(item => item.field === field && JSON.stringify(parseJson(item.observed_value_json, null)) !== JSON.stringify(values[field])));
   // Tucker's publication rule: ordinary details need one current primary
@@ -779,7 +781,8 @@ function evaluateCandidateDecisionGate(input: {
   // gates still apply to every candidate.
   const highRiskFields = new Set(["dateStart", "dateEnd", "venueName", "address", "status", "posterImageUrl"]);
   const insufficientIndependentVerification = fields.filter(field =>
-    highRiskFields.has(field) && new Set(matching(field).map(item => item.source_identity)).size < 2
+    highRiskFields.has(field) && !(field === "dateEnd" && founderEstimatedEnd)
+      && new Set(matching(field).map(item => item.source_identity)).size < 2
   );
   const conflicts = sqlite.prepare(`SELECT id, field FROM agent_event_conflicts WHERE candidate_key = ? AND status = 'open' AND material = 1`).all(candidateKey) as Array<{ id: string; field: string }>;
   const reviews = sqlite.prepare(`SELECT id FROM agent_review_queue WHERE candidate_key = ? AND status = 'open'`).all(candidateKey) as Array<{ id: string }>;
@@ -791,6 +794,7 @@ function evaluateCandidateDecisionGate(input: {
     missingRequiredFields, invalidCandidateFields, missingEvidence, mismatchedEvidence, conflictingEvidence,
     materialConflicts: conflicts.map(item => item.field), openReviewItems: reviews.map(item => item.id),
     insufficientIndependentVerification, unpassedMistakeTests: failedTests.map(item => item.test_key),
+    founderEstimatedEnd,
     duplicateEventId: duplicate?.id || null,
     evidenceReceiptIds: evidence.filter(item => fields.includes(item.field)).map(item => item.id),
   };

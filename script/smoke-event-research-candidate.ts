@@ -68,6 +68,21 @@ seed(ordinarySingleSourceKey,{
 },[sources[1]]);
 assert.equal(gate({...gateInput,candidateKey:ordinarySingleSourceKey}).publishable,true,
   "one primary source is enough for ordinary details when high-risk fields have two matching sources");
+const founderEstimateKey="onyx-pnw-come-together-bar-night-2026-10-22";
+const founderEstimateEvent={...event,title:"ONYX Come Together bar-night fixture",venueName:"Eagle Portland",address:"835 N Lombard St, Portland, OR 97217",dateStart:"2026-10-22T19:00:00-07:00",dateEnd:"2026-10-23T01:30:00-07:00"};
+const {dateEnd: _founderEnd, ...founderVerifiedFields}=founderEstimateEvent;
+seed(founderEstimateKey,founderVerifiedFields);
+assert.equal(gate({...gateInput,candidateKey:founderEstimateKey,proposedValues:founderEstimateEvent}).publishable,true,
+  "Tucker's exact ONYX cutoff may replace only independent end-time proof");
+assert.equal(gate({...gateInput,candidateKey:founderEstimateKey,proposedValues:{...founderEstimateEvent,dateEnd:"2026-10-23T02:00:00-07:00"}}).publishable,false,
+  "the founder exception does not authorize another end time");
+const unrelatedEstimateKey="candidate:unrelated-estimated-end";
+seed(unrelatedEstimateKey,founderVerifiedFields);
+assert.equal(gate({...gateInput,candidateKey:unrelatedEstimateKey,proposedValues:founderEstimateEvent}).publishable,false,
+  "the founder exception does not spread to other events");
+seed(founderEstimateKey,{dateEnd:"2026-10-22T21:00:00-07:00"},[sources[0]]);
+assert.equal(gate({...gateInput,candidateKey:founderEstimateKey,proposedValues:founderEstimateEvent}).publishable,false,
+  "a conflicting end-time observation still requires review");
 seed(candidateKey,{title:"New contradiction from the first source"},[sources[0]]);
 assert.equal(gate().publishable,false,"new same-source contradiction supersedes older agreement, including equal checkedAt timestamps");
 seed(candidateKey,{title:event.title},[sources[0]]);
