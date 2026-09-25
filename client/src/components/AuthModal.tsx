@@ -1,8 +1,9 @@
 import { useState, useCallback, useMemo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { motion, useMotionValue, useTransform } from "framer-motion";
-import { ArrowRight, AtSign, Lock, Mail, User, X } from "lucide-react";
+import { AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion";
+import { ArrowLeft, ArrowRight, AtSign, Lock, Mail, User, X } from "lucide-react";
 import { EyeToggleIcon } from "@/components/ui/animated-state-icons";
+import { MultiStepProgress } from "@/components/ui/multistep-form";
 import { useAuth } from "@/context/AuthContext";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { prefersStillMotion } from "@/lib/motion";
@@ -80,6 +81,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
   const [resetRequested, setResetRequested] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [registerStep, setRegisterStep] = useState(0);
   const { login, register } = useAuth();
   const handleClose = useCallback(() => onClose(), [onClose]);
   const dialogRef = useModalA11y({ onClose: handleClose });
@@ -118,6 +120,21 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (registerStep === 0) {
+      if (username.trim().length < 3 || !email.trim()) return;
+      setRegisterStep(1);
+      return;
+    }
+    if (registerStep === 1) {
+      if (password.length < 6 || password !== confirmPassword) {
+        setError(password !== confirmPassword ? "Passwords do not match." : "Password must be at least 6 characters.");
+        return;
+      }
+      if (COMMUNITY_STANDARDS_GATE_ENABLED) {
+        setRegisterStep(2);
+        return;
+      }
+    }
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -308,7 +325,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                     <button
                       key={t}
                       type="button"
-                      onClick={() => { setTab(t); setError(""); setConfirmPassword(""); }}
+                      onClick={() => { setTab(t); setError(""); }}
                       aria-pressed={on}
                       className="zay-auth-tab pdx-glass-rebind flex-1 rounded-full border-2 bg-transparent px-4 py-[10px] text-[0.78rem] uppercase transition-all duration-200"
                       style={{
@@ -444,92 +461,109 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                   </form>
                 ) : (
                   <form onSubmit={handleRegister} className="space-y-3">
-                    <Field
-                      icon={<AtSign className="h-4 w-4" />}
-                      accent="#c8fa3c"
-                      focused={focusedInput === "username"}
-                      onFocus={() => setFocusedInput("username")}
-                      onBlur={() => setFocusedInput(null)}
-                      type="text"
-                      value={username}
-                      onChange={e => setUsername(e.target.value)}
-                      required
-                      placeholder="Username"
-                      minLength={3}
-                    />
-                    <Field
-                      icon={<User className="h-4 w-4" />}
-                      accent="#c8fa3c"
-                      focused={focusedInput === "displayName"}
-                      onFocus={() => setFocusedInput("displayName")}
-                      onBlur={() => setFocusedInput(null)}
-                      type="text"
-                      value={displayName}
-                      onChange={e => setDisplayName(e.target.value)}
-                      placeholder="Display name (optional)"
-                    />
-                    <Field
-                      icon={<Mail className="h-4 w-4" />}
-                      accent="#c8fa3c"
-                      focused={focusedInput === "email"}
-                      onFocus={() => setFocusedInput("email")}
-                      onBlur={() => setFocusedInput(null)}
-                      type="email"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      required
-                      placeholder="you@example.com"
-                      autoComplete="email"
-                    />
-                    <Field
-                      icon={<Lock className="h-4 w-4" />}
-                      accent="#c8fa3c"
-                      focused={focusedInput === "password"}
-                      onFocus={() => setFocusedInput("password")}
-                      onBlur={() => setFocusedInput(null)}
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      required
-                      placeholder="Password (6+ characters)"
-                      minLength={6}
-                      autoComplete="new-password"
-                      trailing={eyeToggle}
-                    />
-                    <Field
-                      icon={<Lock className="h-4 w-4" />}
-                      accent="#c8fa3c"
-                      focused={focusedInput === "confirm"}
-                      onFocus={() => setFocusedInput("confirm")}
-                      onBlur={() => setFocusedInput(null)}
-                      type={showPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={e => setConfirmPassword(e.target.value)}
-                      required
-                      placeholder="Repeat password"
-                      minLength={6}
-                      autoComplete="new-password"
-                    />
-                    {COMMUNITY_STANDARDS_GATE_ENABLED ? (
-                      <div className="pt-1 [&_a]:text-[color:var(--panel-cyan,#19e3ff)]">
-                        <CommunityStandardsSignupBlock
-                          agreed={agreedStandards}
-                          onAgreedChange={setAgreedStandards}
-                        />
-                      </div>
-                    ) : null}
+                    <div className="relative h-28 overflow-hidden rounded-xl border border-white/10 sm:h-32">
+                      <img src="/home/festival-posters-wall.jpg" alt="Portland community event posters" className="h-full w-full object-cover" />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 to-transparent" />
+                      <span className="absolute bottom-3 left-4 text-xs font-bold uppercase tracking-[.15em] text-white" style={{ fontFamily: "var(--font-display)" }}>Your place in the mix</span>
+                      <span className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px]" style={{ background: `linear-gradient(90deg, ${BEAM.join(", ")})` }} aria-hidden />
+                    </div>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <h3 className="text-lg font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
+                        {registerStep === 0 ? "Your account" : registerStep === 1 ? "Set your password" : "Community standards"}
+                      </h3>
+                      <span className="rounded-full border border-[#c8fa3c]/40 bg-[#c8fa3c]/10 px-2.5 py-1 text-xs text-[#c8fa3c]" style={{ fontFamily: "var(--font-mono, ui-monospace, monospace)" }}>{registerStep + 1} / {COMMUNITY_STANDARDS_GATE_ENABLED ? 3 : 2}</span>
+                    </div>
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.div
+                        key={registerStep}
+                        initial={still ? false : { opacity: 0, x: 24 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={still ? undefined : { opacity: 0, x: -24 }}
+                        transition={{ duration: still ? 0 : 0.22 }}
+                        className="space-y-3"
+                      >
+                        {registerStep === 0 && (
+                          <>
+                            <p className="text-sm text-white/65">Choose how people will find you.</p>
+                            <Field
+                              icon={<AtSign className="h-4 w-4" />}
+                              accent="#c8fa3c" focused={focusedInput === "username"}
+                              onFocus={() => setFocusedInput("username")} onBlur={() => setFocusedInput(null)}
+                              type="text" value={username} onChange={e => setUsername(e.target.value)}
+                              required placeholder="Username" aria-label="Username" minLength={3} autoComplete="username"
+                            />
+                            <Field
+                              icon={<User className="h-4 w-4" />}
+                              accent="#c8fa3c" focused={focusedInput === "displayName"}
+                              onFocus={() => setFocusedInput("displayName")} onBlur={() => setFocusedInput(null)}
+                              type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
+                              placeholder="Display name (optional)" aria-label="Display name (optional)" autoComplete="nickname"
+                            />
+                            <Field
+                              icon={<Mail className="h-4 w-4" />}
+                              accent="#c8fa3c" focused={focusedInput === "email"}
+                              onFocus={() => setFocusedInput("email")} onBlur={() => setFocusedInput(null)}
+                              type="email" value={email} onChange={e => setEmail(e.target.value)}
+                              required placeholder="you@example.com" aria-label="Email address" autoComplete="email"
+                            />
+                          </>
+                        )}
+                        {registerStep === 1 && (
+                          <>
+                            <p className="text-sm text-white/65">Make a password for your account.</p>
+                            <Field
+                              icon={<Lock className="h-4 w-4" />}
+                              accent="#c8fa3c" focused={focusedInput === "password"}
+                              onFocus={() => setFocusedInput("password")} onBlur={() => setFocusedInput(null)}
+                              type={showPassword ? "text" : "password"} value={password}
+                              onChange={e => setPassword(e.target.value)} required
+                              placeholder="Password (6+ characters)" aria-label="Password" minLength={6}
+                              autoComplete="new-password" trailing={eyeToggle}
+                            />
+                            <Field
+                              icon={<Lock className="h-4 w-4" />}
+                              accent="#c8fa3c" focused={focusedInput === "confirm"}
+                              onFocus={() => setFocusedInput("confirm")} onBlur={() => setFocusedInput(null)}
+                              type={showPassword ? "text" : "password"} value={confirmPassword}
+                              onChange={e => setConfirmPassword(e.target.value)} required
+                              placeholder="Repeat password" aria-label="Repeat password" minLength={6}
+                              autoComplete="new-password"
+                            />
+                          </>
+                        )}
+                        {registerStep === 2 && COMMUNITY_STANDARDS_GATE_ENABLED && (
+                          <div className="pt-1 [&_a]:text-[color:var(--panel-cyan,#19e3ff)]">
+                            <CommunityStandardsSignupBlock agreed={agreedStandards} onAgreedChange={setAgreedStandards} />
+                          </div>
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
                     {error && <ErrorNote>{error}</ErrorNote>}
-                    <SubmitButton
-                      type="submit"
-                      accent="#c8fa3c"
-                      disabled={loading || (COMMUNITY_STANDARDS_GATE_ENABLED && !agreedStandards)}
-                    >
-                      {submitLabel("Join Zaylist", "Joining...")}
-                    </SubmitButton>
+                    <MultiStepProgress
+                      steps={COMMUNITY_STANDARDS_GATE_ENABLED ? ["Your account", "Password", "Community"] : ["Your account", "Password"]}
+                      currentStep={registerStep}
+                      onBack={step => { setRegisterStep(step); setError(""); }}
+                    />
+                    <div className="flex items-center gap-3">
+                      {registerStep > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => { setRegisterStep(registerStep - 1); setError(""); }}
+                          className="flex h-11 items-center gap-1 rounded-xl border border-white/20 px-4 text-sm text-white/75 hover:border-white/40 hover:text-white"
+                        >
+                          <ArrowLeft className="h-4 w-4" /> Back
+                        </button>
+                      )}
+                      <SubmitButton
+                        type="submit"
+                        accent="#c8fa3c"
+                        disabled={loading || (registerStep === 2 && COMMUNITY_STANDARDS_GATE_ENABLED && !agreedStandards)}
+                      >
+                        {loading ? "Joining..." : registerStep === (COMMUNITY_STANDARDS_GATE_ENABLED ? 2 : 1) ? "Join Zaylist" : "Continue"}
+                      </SubmitButton>
+                    </div>
                     <SwapNote
-                      question="Already have an account?"
-                      action="Log in"
-                      accent="#19e3ff"
+                      question="Already have an account?" action="Log in" accent="#19e3ff"
                       onClick={() => { setTab("login"); setError(""); }}
                     />
                   </form>
