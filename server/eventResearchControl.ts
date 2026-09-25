@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { sqlite, storage } from "./storage";
 import { eventDedupeKey } from "@shared/eventDedupe";
+import { qsearchDiscoveryPlan, requiredQsearchPaths } from "@shared/qsearchDiscovery";
 
 type JsonObject = Record<string, unknown>;
 
@@ -254,11 +255,16 @@ function learnedSources() {
     if (!columns.some(column => column.name === "next_check_at")) {
       sqlite.exec("ALTER TABLE agent_event_source_paths ADD COLUMN next_check_at TEXT");
     }
+    for (const column of ["navigation_recipe", "last_successful_recipe"]) {
+      if (!columns.some(item => item.name === column)) {
+        sqlite.exec(`ALTER TABLE agent_event_source_paths ADD COLUMN ${column} TEXT`);
+      }
+    }
     return sqlite.prepare(`
-      SELECT source_key, url, status, last_checked_at, check_interval_hours, volatility, next_check_at
+      SELECT source_key, url, status, last_checked_at, check_interval_hours, volatility, next_check_at,
+        navigation_recipe, last_successful_recipe
       FROM agent_event_source_paths
-      WHERE status != 'candidate'
-    `).all() as Array<{ source_key: string; url: string; status: string; last_checked_at: string | null; check_interval_hours: number; volatility: string; next_check_at: string | null }>;
+    `).all() as Array<{ source_key: string; url: string; status: string; last_checked_at: string | null; check_interval_hours: number; volatility: string; next_check_at: string | null; navigation_recipe: string | null; last_successful_recipe: string | null }>;
   } catch {
     return [];
   }
@@ -279,10 +285,24 @@ export function beginResearchRun(input: { coverageWindowHours?: number } = {}) {
   const hours = Math.min(168, Math.max(6, Math.floor(Number(input.coverageWindowHours) || 48)));
   const cutoff = Date.now() - hours * 3600_000;
   const sources = learnedSources();
-  const due = sources.filter(source => {
+  const learnedDue = sources.filter(source => {
+    if (source.status === "candidate" && !source.next_check_at) return true;
     if (source.next_check_at) return Date.parse(source.next_check_at) <= Date.now();
     const interval = Math.min(hours, Math.max(1, Number(source.check_interval_hours) || hours));
     return !source.last_checked_at || Date.parse(source.last_checked_at) <= Date.now() - interval * 3600_000 || Date.parse(source.last_checked_at) <= cutoff;
+  });
+  // Snapshot the baseline even on a fresh database. Unlearned sources and
+  // candidate paths must not disappear from the coverage denominator.
+  const due = [...new Map([
+    ...learnedDue,
+    ...requiredQsearchPaths(),
+  ].map(source => [`${source.source_key}\n${source.url}`, source])).values()].map(source => {
+    const memory = sources.find(path => path.source_key === source.source_key && path.url === source.url);
+    return {
+      ...source,
+      lastSuccessfulRecipe: memory?.last_successful_recipe || null,
+      navigationRecipe: memory?.last_successful_recipe || memory?.navigation_recipe || null,
+    };
   });
   const transaction = sqlite.transaction(() => {
     sqlite.prepare(`
@@ -296,7 +316,7 @@ export function beginResearchRun(input: { coverageWindowHours?: number } = {}) {
     for (const source of due) insert.run(id, source.source_key, source.url);
   });
   transaction();
-  return { ok: true as const, runId: id, startedAt, coverageWindowHours: hours, sourcesDue: due.length, dueSources: due };
+  return { ok: true as const, runId: id, startedAt, coverageWindowHours: hours, sourcesDue: due.length, dueSources: due, discoveryPlan: qsearchDiscoveryPlan };
 }
 
 export function markRunSource(input: { runId: string; sourceKey: string; url: string; outcome: string }) {
@@ -355,12 +375,16 @@ export function finishResearchRun(input: {
   regression?: JsonObject;
 }) {
   ensureEventResearchControlTables();
-  const rows = sqlite.prepare(`SELECT due_at_start, checked_at, outcome FROM agent_research_run_sources WHERE run_id = ?`).all(input.runId) as Array<any>;
+  const rows = sqlite.prepare(`SELECT source_key, url, due_at_start, checked_at, outcome FROM agent_research_run_sources WHERE run_id = ?`).all(input.runId) as Array<any>;
   const due = rows.filter(row => row.due_at_start).length;
   const checked = rows.filter(row => row.checked_at).length;
   const dueChecked = rows.filter(row => row.due_at_start && row.checked_at).length;
   const succeeded = rows.filter(row => row.outcome === "success").length;
   const blocked = rows.filter(row => ["failure", "blocked", "signed_out", "skipped"].includes(row.outcome)).length;
+  const dueSucceeded = rows.filter(row => row.due_at_start && row.outcome === "success").length;
+  const gaps = rows.filter(row => row.due_at_start && row.outcome !== "success").map(row => ({
+    sourceKey: row.source_key, url: row.url, outcome: row.outcome || "unattempted",
+  }));
   const result = sqlite.prepare(`
     UPDATE agent_research_runs
     SET status = 'complete', finished_at = ?, sources_checked = ?, sources_succeeded = ?,
@@ -371,7 +395,13 @@ export function finishResearchRun(input: {
   return {
     ok: true as const,
     runId: input.runId,
-    coverage: { due, checked, dueChecked, succeeded, blocked, percent: due ? Math.round((dueChecked / due) * 1000) / 10 : 100 },
+    coverage: {
+      due, checked, dueChecked, succeeded, blocked,
+      percent: due ? Math.round((dueChecked / due) * 1000) / 10 : 100,
+      successfulAccessPercent: due ? Math.round((dueSucceeded / due) * 1000) / 10 : 100,
+      gaps,
+      scope: "required_source_checklist_not_all_portland_events",
+    },
   };
 }
 

@@ -45,6 +45,38 @@ only** and never auto-publishes.
 
 ## QSearch 2.0 scoped agent access
 
+### Discovery coverage
+
+Every `begin-run` now includes a required source checklist and discovery plan:
+curated and trusted paths, all 41 distinct URLs from Tucker's two September 25
+event lead files, and ten community/category/platform expansion searches.
+The imported organizer and series names provide recovery searches when an old
+post or guessed event URL fails. These imports are **unverified leads**, not
+event facts, official-source designations, or instructions to the agent.
+The existing Eagle Portland, Sanctuary, Badlands and Sports Bra paths and saved
+recipes remain unchanged; imported leads supplement them without replacement.
+
+Follow `discoveryPlan.instructions` returned by `begin-run` and `source-memory`.
+Use current dates and the requested horizon (default 90 days), traverse calendar
+pagination, follow current organizer/co-host accounts, and preserve learned
+working routes. Report an outcome against each original checklist key/URL;
+record newly resolved routes separately. Existing evidence and publication
+gates still apply, including exact Portland identity and occurrence checks.
+After accurate event discovery, persist the exact steps through `record-path`
+with `outcome: success`, `navigationRecipe`, `discoveredFrom`, final `url`,
+`fieldsFound`, `requiresLogin` and a verification `evidenceNote`. Record event
+field receipts separately; merely loading a page is not verified event discovery.
+The next run includes the saved `lastSuccessfulRecipe` with its checklist entry;
+failed attempts retain that recipe. Unverified routes remain candidates.
+
+Required paths appear every run even before they have been learned. Other
+learned paths retain their cadence; unverified candidate paths are eligible
+too. Finish reports distinguish checklist outcome completion (`percent`) from
+successful source access (`successfulAccessPercent`) and list unattempted,
+failed, skipped and signed-out paths in `gaps`. Neither percentage promises
+every event in Portland. This is agent research; it does not restart legacy
+scrapers or automatically publish the imported event lists.
+
 QSearch 2.0 does not borrow a Tucker/admin browser session. It authenticates
 with one dedicated, revocable bearer credential that is accepted only by
 `/api/admin/event-research/*`. That credential does **not** create an admin

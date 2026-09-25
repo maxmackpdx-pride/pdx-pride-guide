@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { requiredQsearchPaths } from "../shared/qsearchDiscovery";
 import { sqlite, storage } from "../server/storage";
 import { getEventResearchSourceMemory, recordEventResearchPath } from "../server/eventResearchMemory";
 import {
@@ -46,6 +47,9 @@ sqlite.prepare(`
 const run = beginResearchRun({ coverageWindowHours: 48 });
 assert.equal(run.ok, true);
 assert.ok(run.sourcesDue >= 1);
+for (const path of requiredQsearchPaths()) {
+  assert.ok(run.dueSources?.some(source => source.source_key === path.source_key && source.url === path.url), "unlearned baseline sources are due on every run");
+}
 assert.equal(markRunSource({ runId: run.runId, sourceKey: "official-test", url: "https://example.com/events", outcome: "success" }).ok, true);
 assert.equal(setSourceSchedule({ sourceKey: "official-test", url: "https://example.com/events", checkIntervalHours: 12, volatility: "high" }).ok, true);
 assert.equal(recordEventResearchPath({ runId: run.runId, sourceKey: "healing-test", label: "Healing Test", url: "https://example.com/healing", outcome: "success", navigationRecipe: "official calendar > events" }).ok, true);
@@ -60,8 +64,34 @@ assert.equal(healedPath?.status, "active");
 assert.equal(healedPath?.lastSuccessfulRecipe, "official calendar > current events");
 const finished = finishResearchRun({ runId: run.runId, eventsAudited: 12, summary: { discovered: 2 }, regression: { passed: 5, failed: 0 } });
 assert.equal(finished.ok, true);
-if (finished.ok) assert.equal(finished.coverage.percent, 100);
+if (finished.ok) {
+  assert.ok(finished.coverage.percent < 100, "unchecked imported paths prevent a false complete-coverage report");
+  assert.ok(finished.coverage.gaps.some(path => path.outcome === "unattempted"));
+}
 assert.equal(finishResearchRun({ runId: run.runId }).ok, false, "a run cannot finish twice");
+
+recordEventResearchPath({ sourceKey: "candidate-test", label: "Unverified candidate", url: "https://example.com/candidate", outcome: "candidate" });
+sqlite.prepare("UPDATE agent_event_source_paths SET last_checked_at = ?, next_check_at = NULL WHERE source_key = ?").run("2026-01-01T00:00:00.000Z", "candidate-test");
+const importedPath = requiredQsearchPaths().find(path => path.source_key.startsWith("lead-"))!;
+const workingRecipe = "Official calendar > select current month > next page > exact event > ticket details";
+recordEventResearchPath({ sourceKey: importedPath.source_key, label: importedPath.label, url: importedPath.url, outcome: "success", navigationRecipe: workingRecipe, fieldsFound: ["title", "dateStart", "venueName"], evidenceNote: "Fixture: exact current occurrence facts checked against official page" });
+recordEventResearchPath({ sourceKey: importedPath.source_key, label: importedPath.label, url: importedPath.url, outcome: "failure", navigationRecipe: "broken replacement", error: "404" });
+const repeatRun = beginResearchRun();
+assert.equal(repeatRun.ok, true);
+assert.ok(repeatRun.dueSources?.some(path => path.source_key === "candidate-test"), "candidate discoveries remain eligible for research");
+const remembered = repeatRun.dueSources?.find(path => path.source_key === importedPath.source_key && path.url === importedPath.url);
+assert.equal(remembered?.lastSuccessfulRecipe, workingRecipe, "the next run receives the working recipe despite a later failure");
+assert.equal(remembered?.navigationRecipe, workingRecipe);
+for (const path of repeatRun.dueSources || []) {
+  assert.equal(markRunSource({ runId: repeatRun.runId!, sourceKey: path.source_key, url: path.url, outcome: "signed_out" }).ok, true);
+}
+const blockedRun = finishResearchRun({ runId: repeatRun.runId! });
+assert.equal(blockedRun.ok, true);
+if (blockedRun.ok) {
+  assert.equal(blockedRun.coverage.percent, 100, "all checklist outcomes recorded");
+  assert.equal(blockedRun.coverage.successfulAccessPercent, 0, "signed-out sources never count as successful access");
+  assert.equal(blockedRun.coverage.gaps.length, blockedRun.coverage.due);
+}
 
 const identity = upsertEntityIdentity({
   entityKey: "venue:sports-bra-portland",

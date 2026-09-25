@@ -2,6 +2,7 @@ import { winterPrideWatches, winterEventScope, explicitWinterPrideEvent } from '
 import { INGEST_SOURCES } from "@shared/ingestSources";
 import { eventDedupeKey } from "@shared/eventDedupe";
 import { TRUSTED_VENUES } from "@shared/trustedVenues";
+import { qsearchDiscoveryPlan, requiredQsearchPaths } from "@shared/qsearchDiscovery";
 import { createHash, randomUUID } from "node:crypto";
 import { sqlite, storage } from "./storage";
 import { ensureEventResearchControlTables, evaluateDecisionGate, markRunSource, persistMutationEvidence } from "./eventResearchControl";
@@ -1055,6 +1056,7 @@ export function getEventResearchSourceMemory() {
       archiveCommit: "bcb28c4d4550e6f29cc6882bc37481784adb1926",
     },
     winterPrideWatches,
+    discoveryPlan: { ...qsearchDiscoveryPlan, requiredPaths: requiredQsearchPaths() },
     rules: {
       winterResortEvents: winterEventScope,
       sportsBra: "founder_locked_dedicated_lesbian_lgbtq_venue_official_calendar_establishes_relevance_exact_portland_identity_required_archived_direct_scraper_blocked_browser_research_allowed",
