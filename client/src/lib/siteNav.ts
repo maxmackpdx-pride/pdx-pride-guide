@@ -72,6 +72,27 @@ export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/z", label: "Z/ List", accent: "violet" },
 ];
 
+/** Phone header groups site info and all five boards into two dropdowns. */
+export const MOBILE_TOP_NAV: NavEntry[] = [
+  {
+    type: "dropdown",
+    id: "home",
+    label: "Home",
+    accent: "lime",
+    items: [
+      { href: "/", label: "Home", accent: "lime" },
+      { href: "/about", label: "About", accent: "magenta" },
+    ],
+  },
+  {
+    type: "dropdown",
+    id: "boards",
+    label: "Boards",
+    accent: "magenta",
+    items: [...BOARD_NAV, { href: "/the-hauz", label: "Houz", accent: "blue" }],
+  },
+];
+
 export type PageHeaderMeta = {
   section: string;
   title: string;

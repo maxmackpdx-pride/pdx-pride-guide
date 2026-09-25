@@ -17,7 +17,7 @@ import { MobileLiquidGlass } from "@/components/ui/mobile-liquid-glass";
 import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
 import { counterpartyAvatar } from "@/lib/inboxAvatar";
 import { contextLabelOf, contextTypeOf, notifyContextTag } from "@/lib/inboxContext";
-import { BOARD_NAV, PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
+import { BOARD_NAV, MOBILE_TOP_NAV, PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
 import type { NavAccent } from "@/lib/siteNav";
 import type { AuthUser } from "@/context/AuthContext";
 import type { ApiMessageRow } from "@/components/inbox/types";
@@ -717,7 +717,7 @@ export default function Nav() {
           </Link>
 
           <div className="hub-mtop site-hub-mtop" aria-label="Mobile navigation">
-            <nav aria-label="Mobile top navigation"><CompactNavigation location={location} entries={PRIMARY_NAV.filter(entry => entry.type === "link" && (entry.href === "/" || entry.href === "/about"))} onNavigate={() => { closeMenu(); dismissMobileNavOverlays(); }} /></nav>
+            <nav aria-label="Mobile top navigation"><CompactNavigation location={location} entries={MOBILE_TOP_NAV} textOnly onNavigate={() => { closeMenu(); dismissMobileNavOverlays(); }} /></nav>
             <div className="hub-mtop__spacer" />
             {(user || localDemo) && (
               <CompactHubLink

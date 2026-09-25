@@ -55,6 +55,7 @@
   .site-header--glass .site-hub-mtop .znav-rail { display:flex; width:100%; gap:4px; }
   .site-header--glass .site-hub-mtop .znav-item { flex:1; padding:0; margin:0; }
   .site-header--glass .site-hub-mtop .znav-control { min-height:46px; height:46px; padding:0 8px; }
+  .site-header--glass .site-hub-mtop .znav-control--text { width:100%; flex-direction:row; gap:4px; }
   .site-header--glass .site-hub-mtop .znav-icon-row { display:none; }
   .site-header--glass .site-hub-mtop .znav-caption { font:700 15px/1 var(--font-display); letter-spacing:.025em; }
   .site-header--glass .site-hub-mtop .znav-hub { flex:1; margin:0; }
