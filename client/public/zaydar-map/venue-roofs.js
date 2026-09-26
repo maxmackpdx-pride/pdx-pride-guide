@@ -33,8 +33,8 @@ function distToRing(lng,lat,ring){
  return best;
 }
 
-/** Prefer footprint containment, then nearest edge, then centroid. */
-export function matchBuilding(buildings,coordinates,maxDist=.0014){
+/** Prefer footprint containment, then nearest edge, then centroid. Wider search for street GPS. */
+export function matchBuilding(buildings,coordinates,maxDist=.0022){
  if(!Array.isArray(coordinates)||coordinates.length<2)return null;
  const [lng,lat]=coordinates;
  let inside=null,edge=null,edgeDist=maxDist,center=null,centerDist=maxDist;
@@ -53,6 +53,19 @@ export function matchBuilding(buildings,coordinates,maxDist=.0014){
  return inside||edge||center;
 }
 
+/** Placez only — no boards, housing, mizzed, pure events. */
+export function isPlacezRow(row){
+ if(!row)return false;
+ if(row.kind==='event')return false;
+ if(row.housingModel)return false;
+ const family=row.waypointFamily||'';
+ if(family==='mizzed'||family==='houz'||family==='giftz'||family==='gigz'||family==='board')return false;
+ if(row.kind==='place'||row.kind==='places')return true;
+ if(row.type==='bar'||row.type==='adult'||row.type==='cafe'||row.type==='club')return true;
+ if(!family||family==='places'||family==='placez')return true;
+ return false;
+}
+
 export function createVenueRoofs(map){
  if(!map.getSource('venue-roofs')){
   map.addSource('venue-roofs',{type:'geojson',data:EMPTY});
@@ -60,7 +73,7 @@ export function createVenueRoofs(map){
    id:'venue-roofs',
    type:'fill-extrusion',
    source:'venue-roofs',
-   minzoom:14,
+   minzoom:13.5,
    paint:{
     'fill-extrusion-color':['get','color'],
     'fill-extrusion-height':['get','height'],
@@ -72,21 +85,23 @@ export function createVenueRoofs(map){
  }
  return {
   update(buildings,features,amount){
-   const list=[],used=new Set();
+   const list=[],used=new Map();
    for(const feature of features||[]){
-    const color=feature.properties?.color,c=feature.geometry?.coordinates;
+    const props=feature.properties||{};
+    if(!isPlacezRow(props))continue;
+    const color=props.color,c=feature.geometry?.coordinates;
     if(!color||!Array.isArray(c)||c.length<2)continue;
     const best=matchBuilding(buildings,c);
     if(!best)continue;
     const key=`${best.center[0].toFixed(6)}:${best.center[1].toFixed(6)}:${best.height}`;
-    if(used.has(key))continue;
-    used.add(key);
-    list.push({
+    // Last Placez on a building wins the tint; every Placez still snaps to that roof.
+    used.set(key,{
      type:'Feature',
      properties:{color,height:Math.max(8,Number(best.height)||9)+1.2},
      geometry:{type:'Polygon',coordinates:[best.ring]}
     });
    }
+   for(const feature of used.values())list.push(feature);
    map.getSource('venue-roofs')?.setData({type:'FeatureCollection',features:list});
    if(map.getLayer('venue-roofs')){
     map.setPaintProperty('venue-roofs','fill-extrusion-opacity',Math.max(0,Math.min(.95,amount*.95)));
