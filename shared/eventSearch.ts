@@ -23,7 +23,9 @@ function distance(a: string, b: string): number {
   return rows[a.length][b.length];
 }
 function closeWord(query: string, candidate: string): boolean {
-  const limit = query.length >= 8 ? 2 : query.length >= 4 ? 1 : 0;
+  // A one-letter difference in a short word changes its meaning too easily:
+  // "bear" must not match "gear" and bury Bearracuda results.
+  const limit = query.length >= 8 ? 2 : query.length >= 5 ? 1 : 0;
   return limit > 0 && Math.abs(query.length-candidate.length) <= limit && distance(query, candidate) <= limit;
 }
 const cache = new WeakMap<SearchableEvent, string[]>();
