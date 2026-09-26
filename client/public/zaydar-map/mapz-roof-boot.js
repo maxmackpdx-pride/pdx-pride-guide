@@ -1,4 +1,4 @@
-import {createVenueRoofs,extrusionAmount} from './venue-roofs.js?v=20260925-roof-waypoints';
+import {createVenueRoofs,extrusionAmount} from './venue-roofs.js?v=20260926-flow-cut';
 import {createBridgeWaterLayer,bridgeGlowSpans} from './bridge-water-glow.js';
 import {PORTLAND_BRIDGE_MODELS} from './st-johns-bridge.js?v=20260921-layer-join';
 
@@ -49,6 +49,20 @@ function sync(map){
  if(!map)return;
  if(map._venueRoofs)map._venueRoofs.update(buildingsFrom(map),window.__mapzVenueFeatures||[],extrusionAmount(map));
  attachBridgeGlow(map);
+}
+
+// Venue ground pools use a ~88px radial. Cut flow 70% on flat, kill on roofs.
+if(!window.__mapzSpillScale){
+ window.__mapzSpillScale=true;
+ const original=CanvasRenderingContext2D.prototype.createRadialGradient;
+ CanvasRenderingContext2D.prototype.createRadialGradient=function(x0,y0,r0,x1,y1,r1){
+  if(r1>40&&r1<160){
+   const amount=window.__mapzMap?extrusionAmount(window.__mapzMap):0;
+   const scale=amount>0.18?0:0.3;
+   return original.call(this,x0,y0,r0*scale,x1,y1,r1*scale);
+  }
+  return original.call(this,x0,y0,r0,x1,y1,r1);
+ };
 }
 
 if(window.maplibregl?.Map&&!window.__mapzRoofBoot){
