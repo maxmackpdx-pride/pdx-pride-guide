@@ -570,6 +570,19 @@ export default function PlaceModal({
           />
 
           <div className="place-modal-panel__identity-text">
+          <h2
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 900,
+              textTransform: "uppercase",
+              fontSize: "clamp(2.45rem, 9vw, 4.1rem)",
+              lineHeight: 1.02,
+              color: "var(--text-hi)",
+              margin: isGrandOpeningActive(place.grandOpeningDate) ? "0 0 4px" : "0 0 10px",
+            }}
+          >
+            {place.name}
+          </h2>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 10 }}>
             {isGrandOpeningActive(place.grandOpeningDate) && (
               <Badge color="yellow" glow size="sm" admission={undefined} day={undefined} category={undefined}>
@@ -586,19 +599,7 @@ export default function PlaceModal({
               {categoryLabel}
             </Badge>
           </div>
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 900,
-              textTransform: "uppercase",
-              fontSize: "1.9rem",
-              lineHeight: 1.02,
-              color: "var(--text-hi)",
-              margin: isGrandOpeningActive(place.grandOpeningDate) ? "0 0 4px" : "0 0 14px",
-            }}
-          >
-            {place.name}
-          </h2>
+
           {isGrandOpeningActive(place.grandOpeningDate) && formatGrandOpeningDate(place.grandOpeningDate) && (
             <div
               style={{
@@ -727,22 +728,6 @@ export default function PlaceModal({
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
-
-          {promoters.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-              {promoters.map(p => (
-                <span
-                  key={p.id}
-                  style={{
-                    padding: "3px 10px", borderRadius: 999, fontSize: "0.78rem",
-                    border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, color: accent,
-                  }}
-                >
-                  @{p.username}
-                </span>
-              ))}
             </div>
           )}
 
@@ -880,6 +865,7 @@ export default function PlaceModal({
                     {displayed.hours && <div className="place-modal-panel__fact"><Icon d={CLOCK} />{displayed.hours}</div>}
                     {address && <div className="place-modal-panel__fact"><Icon d={PIN} />{address}</div>}
                     {displayed.phone && <div className="place-modal-panel__fact"><Icon d={PHONE} /><a href={telHref(displayed.phone)}>{displayed.phone}</a></div>}
+                    {displayed.instagram && <div className="place-modal-panel__fact"><Icon d={IG} /><a href={displayed.instagram.startsWith("http") ? displayed.instagram : `https://instagram.com/${displayed.instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer">{displayed.instagram}</a></div>}
                   </div>
                   {(address || displayed.phone) && (
                     <div className="place-modal-panel__quick-actions">
@@ -903,7 +889,7 @@ export default function PlaceModal({
                 </div>
               )}
 
-              {(displayed.website || displayed.instagram || displayed.donateUrl) && (
+              {(displayed.website || displayed.donateUrl) && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 18, marginBottom: 16 }}>
                   {displayed.donateUrl && (
                     <a href={displayed.donateUrl} target="_blank" rel="noopener noreferrer" style={linkStyle}>
@@ -915,21 +901,6 @@ export default function PlaceModal({
                     <a href={displayed.website} target="_blank" rel="noopener noreferrer" style={linkStyle}>
                       <Icon d={GLOBE} />
                       Website
-                    </a>
-                  )}
-                  {displayed.instagram && (
-                    <a
-                      href={
-                        displayed.instagram.startsWith("http")
-                          ? displayed.instagram
-                          : `https://instagram.com/${displayed.instagram.replace(/^@/, "")}`
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={linkStyle}
-                    >
-                      <Icon d={IG} />
-                      {displayed.instagram}
                     </a>
                   )}
                 </div>
@@ -1005,6 +976,12 @@ export default function PlaceModal({
           </div>
 
           <div className="place-modal-panel__community-room">
+            {promoters.length > 0 && (
+              <div className="place-modal-panel__promoters">
+                <span>Event promoters</span>
+                {promoters.map(p => <span key={p.id}>@{p.username}</span>)}
+              </div>
+            )}
             <div className="place-modal-panel__tabs" role="tablist" aria-label="Place activity">
               {tabs.map(t => (
                 <button

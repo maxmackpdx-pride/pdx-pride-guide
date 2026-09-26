@@ -25,7 +25,7 @@ import { formatPacificDateTime } from "@/lib/countdown";
 import { eventPath } from "@shared/eventSlug";
 import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
 import { timeAgo } from "@/lib/boardFeed";
-import { Lock, Pencil, Share2 } from "lucide-react";
+import { CalendarDays, Lock, MapPin, Pencil, Share2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DashboardEventEditForm } from "@/components/dashboard/DashboardEventEditor";
 import {
@@ -230,6 +230,7 @@ function EventModalInner({
   const [showCalPicker, setShowCalPicker] = useState(false);
   const [attendanceFormOpen, setAttendanceFormOpen] = useState(false);
   const [posterOrientation, setPosterOrientation] = useState<"portrait" | "landscape">("portrait");
+  const [showStickyCta, setShowStickyCta] = useState(false);
   const [socialTab, setSocialTab] = useState<"attendance" | "missed">("attendance");
   const [editing, setEditing] = useState(false);
   const [eventForm, setEventForm] = useState<EventEditFormState | null>(null);
@@ -452,6 +453,14 @@ function EventModalInner({
   const isPastEvent = eventTiming === "past";
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   useEffect(() => setPosterOrientation("portrait"), [posterUrl]);
+  useEffect(() => {
+    const hero = heroRef.current;
+    const scroll = scrollRef.current;
+    if (!hero || !scroll) return;
+    const observer = new IntersectionObserver(([entry]) => setShowStickyCta(!entry.isIntersecting), { root: scroll, threshold: 0 });
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, [event.id, posterOrientation]);
   const dayCode = String(event.dayOfWeek || "").toUpperCase().slice(0, 3);
   const dayColor = DAY_TEXT_COLORS[dayCode as keyof typeof DAY_TEXT_COLORS] || "var(--text-hi)";
   // Border + glow accent: the day color, or a neutral neon for events with no
@@ -508,7 +517,7 @@ function EventModalInner({
   const dateLine = formatPacificDateTime(event.dateStart, {
     weekday: "long", month: "long", day: "numeric",
   });
-  const timeLine = `${formatPacificDateTime(event.dateStart, { hour: "2-digit", minute: "2-digit" })} to ${endTime}${event.neighborhood ? ` · ${event.neighborhood}` : ""}`;
+  const timeLine = `${formatPacificDateTime(event.dateStart, { hour: "2-digit", minute: "2-digit" })}${event.dateEnd ? ` to ${endTime}` : ""}`;
   const venueHref =
     externalPageUrl(eventWithLinks.venueWebsite)
     || externalPageUrl(resolveVenueWebsite(event.venueName));
@@ -921,19 +930,23 @@ function EventModalInner({
               {displayTitle}
             </h2>
             <div className="event-modal__hero-date" aria-label={`${startTime} to ${endTime}`}>
+              <CalendarDays aria-hidden="true" />
+              <div>
               <span ref={dateRef}>{dateLine}</span>
               <span ref={timeRef}>{timeLine}</span>
+              </div>
             </div>
             {(event.venueName || event.address) && (
               <div className="event-modal__hero-venue">
-                {event.venueName && <strong>{event.venueName}</strong>}
-                {event.address && <span>{event.address}</span>}
+                <MapPin aria-hidden="true" />
+                <div>{event.venueName && <strong>{event.venueName}</strong>}{event.address && <span>{event.address}</span>}</div>
               </div>
             )}
             {event.ageRequirement && event.ageRequirement !== "UNVERIFIED" && (
               <div className="event-modal__hero-age">{AGE_LABELS[event.ageRequirement]}</div>
             )}
-            {!editing && <button type="button" className="event-modal__hero-rsvp" onClick={jumpToAttendance}>{isPastEvent ? "See who went" : "Interested?"}</button>}
+            {!editing && <div className="event-modal__hero-actions">
+              <button type="button" className="event-modal__hero-rsvp" onClick={jumpToAttendance}><CalendarDays aria-hidden="true" />{isPastEvent ? "I Was There" : "I'll Be There"}</button>
             {primaryLink && !editing ? (
               <a
                 href={primaryLink.href}
@@ -945,6 +958,7 @@ function EventModalInner({
                 {primaryLink.label}
               </a>
             ) : null}
+            </div>}
             {(() => {
               const createdAt = event.createdAt || "";
               const updatedAt = (event as Event & { updatedAt?: string }).updatedAt || "";
@@ -989,14 +1003,6 @@ function EventModalInner({
               <p className="event-modal__description">{event.description}</p>
             </section>
           )}
-          <EventLocationMap
-            event={event}
-            primary={accentColor}
-            complementary={oppositeColor}
-            scheduled={rsvp.myEventIds.has(event.id)}
-            schedulePending={rsvp.isRsvpPending(event.id)}
-            onSchedule={() => rsvp.toggleRsvp(event.id)}
-          />
           {eventSocialTabs}
           <div className="event-modal__social-room">{eventSocialPanel}</div>
 
@@ -1203,6 +1209,14 @@ function EventModalInner({
             )}
           </div>
 
+          <EventLocationMap
+            event={event}
+            primary={accentColor}
+            complementary={oppositeColor}
+            scheduled={rsvp.myEventIds.has(event.id)}
+            schedulePending={rsvp.isRsvpPending(event.id)}
+            onSchedule={() => rsvp.toggleRsvp(event.id)}
+          />
           <div className="event-modal__actions">
             {canEditEvent && (
               <button
@@ -1428,7 +1442,7 @@ function EventModalInner({
         </div>
         </div>
 
-        {!editing && !attendanceFormOpen && (
+        {!editing && !attendanceFormOpen && showStickyCta && (
           <div className="event-modal__sticky-cta" data-testid="event-modal-sticky-cta">
             <button
               type="button"

@@ -733,3 +733,65 @@ html.calm-mode .event-modal--approved .event-modal__footer,
   .event-modal--approved .event-modal--poster-landscape .event-modal__hero-content { padding: 285px 20px 18px; }
   .event-modal--approved .event-modal--poster-portrait .event-modal__hero-content { padding: 18px 20px; }
 }
+
+/* Selected card layout: poster first, details immediately after, controls in the card. */
+.event-modal--approved .event-modal__chrome .detail-actions { width: 100%; }
+.event-modal--approved .event-modal__chrome .detail-actions > button[aria-label="Share event"] { margin-right: auto; }
+.event-modal--approved .event-modal__chrome .detail-actions > button[aria-label="Close event"] { border-radius: 50%; border-color: #ccff00; color: #ccff00; }
+.event-modal--approved .event-modal--poster-portrait.event-modal__hero { min-height: 0; }
+.event-modal--approved .event-modal--poster-portrait .event-modal__poster-img {
+  width: 100% !important;
+  height: clamp(290px, 80vw, 510px) !important;
+  max-height: 510px !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+}
+.event-modal--approved .event-modal--poster-portrait .event-modal__poster-fade {
+  inset: 0 0 auto;
+  height: clamp(290px, 80vw, 510px);
+  background: linear-gradient(180deg, transparent 75%, #050506 100%);
+}
+.event-modal--approved .event-modal--poster-portrait .event-modal__hero-content { padding: 0 28px 24px; }
+.event-modal--approved .event-modal--poster-portrait .event-modal__title { margin-top: -3px; }
+.event-modal--approved .event-modal__hero-date,
+.event-modal--approved .event-modal__hero-venue { display: flex; flex-direction: row; align-items: flex-start; gap: 16px; width: 100%; max-width: 100%; }
+.event-modal--approved .event-modal__hero-date { margin: 0 0 14px; }
+.event-modal--approved .event-modal__hero-date > svg,
+.event-modal--approved .event-modal__hero-venue > svg { width: 27px; height: 27px; flex: none; color: var(--c); stroke-width: 2.2; }
+.event-modal--approved .event-modal__hero-date > div,
+.event-modal--approved .event-modal__hero-venue > div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.event-modal--approved .event-modal__hero-date span:first-child { color: var(--c); }
+.event-modal--approved .event-modal__hero-date span:last-child { color: #eee; font: 500 .96rem var(--font-body); letter-spacing: 0; text-transform: none; }
+.event-modal--approved .event-modal__hero-venue { margin: 0 0 10px; }
+.event-modal--approved .event-modal__hero-venue strong { color: #fff; font: 900 1.2rem/1.1 var(--font-display); letter-spacing: .025em; text-transform: uppercase; }
+.event-modal--approved .event-modal__hero-venue span { color: #aaa; font: 500 .96rem/1.35 var(--font-body); }
+.event-modal--approved .event-modal__hero-age { margin: 5px 0 0; padding: 8px 0; color: #eee; font-size: .9rem; }
+.event-modal--approved .event-modal__hero-actions { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; margin-top: 14px; }
+.event-modal--approved .event-modal__hero-rsvp { display: inline-flex; align-items: center; justify-content: center; gap: 12px; margin: 0; min-height: 60px; color: #050506; background: #ccff00; font-size: 1.3rem; box-shadow: 0 0 20px -7px #ccff00; }
+.event-modal--approved .event-modal__hero-rsvp svg { width: 25px; height: 25px; }
+.event-modal--approved .event-modal__hero-actions .event-modal__tickets-mid.pdx-glass-btn {
+  display: inline-flex !important;
+  width: 100% !important;
+  min-height: 56px !important;
+  box-sizing: border-box;
+  margin: 0 !important;
+  justify-content: center;
+  border: 2px solid #19e3ff !important;
+  color: #19e3ff !important;
+  background: transparent !important;
+  font: 900 1.1rem var(--font-display) !important;
+  text-transform: uppercase;
+}
+.event-modal--approved .event-modal__hero-block { margin-top: 20px; }
+.event-modal--approved .event-modal__body > .event-location-map { margin: 18px 0 22px; }
+.event-modal--approved .event-modal__body { padding-top: 0 !important; }
+.event-modal--approved .event-modal__trust { margin: 16px 0 0; }
+@media (min-width: 520px) {
+  .event-modal--approved .event-modal--poster-landscape .event-modal__hero-actions { grid-template-columns: 1.25fr .85fr; }
+}
+@media (max-width: 640px) {
+  .event-modal--approved .event-modal--poster-portrait .event-modal__hero-content { padding: 0 20px 22px; }
+  .event-modal--approved .event-modal__hero-date > svg,
+  .event-modal--approved .event-modal__hero-venue > svg { width: 24px; height: 24px; }
+  .event-modal--approved .event-modal__hero-rsvp { min-height: 54px; }
+}
