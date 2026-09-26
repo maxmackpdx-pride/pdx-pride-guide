@@ -89,7 +89,7 @@ export function createVenueRoofs(map){
    }
    map.getSource('venue-roofs')?.setData({type:'FeatureCollection',features:list});
    if(map.getLayer('venue-roofs')){
-    map.setPaintProperty('venue-roofs','fill-extrusion-opacity',Math.max(0,Math.min(.88,amount*.88)));
+    map.setPaintProperty('venue-roofs','fill-extrusion-opacity',Math.max(0,Math.min(.95,amount*.95)));
    }
   }
  };

@@ -1,5 +1,5 @@
 // Small reusable light materials. Rendering needs only image draws, not live filters.
-import {extrusionAmount} from './venue-roofs.js?v=20260925-roof-waypoints';
+import {extrusionAmount} from './venue-roofs.js?v=20260926-roof-match';
 export function createHologramMaterials(colors) {
   const beams = new Map(), orbs = new Map();
   const width = 128, height = 320;
@@ -56,14 +56,18 @@ export function createHologramMaterials(colors) {
 export function projectorGroundScale(zoom){
   const value=Math.max(0,Math.min(1,(zoom-12)/3));
   const amount=window.__mapzMap?extrusionAmount(window.__mapzMap):0;
-  return (.28+.72*value*value*(3-2*value))*(1-amount);
+  // No ground disks once marks sit on roofs. Flat map keeps a tight 30% spill.
+  if(amount>0.18)return 0;
+  return (.28+.72*value*value*(3-2*value))*0.3*(1-amount);
 }
 
 export function drawProjectionBeam(ctx, texture, anchor, logoX, top, halfWidth) {
   const height = anchor.y - top;
   if (height <= 1) return;
+  // Flow radius cut 70% so the colored building reads first.
+  const w = halfWidth * 0.3;
   ctx.save();
-  ctx.transform(1, 0, (anchor.x - logoX) / height, 1, logoX - halfWidth, top);
-  ctx.drawImage(texture, 0, 0, halfWidth * 2, height);
+  ctx.transform(1, 0, (anchor.x - logoX) / height, 1, logoX - w, top);
+  ctx.drawImage(texture, 0, 0, w * 2, height);
   ctx.restore();
 }

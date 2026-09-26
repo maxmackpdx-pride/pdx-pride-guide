@@ -1,4 +1,4 @@
-import {extrusionAmount,roofAnchor} from './venue-roofs.js?v=20260925-roof-waypoints';
+import {extrusionAmount,roofAnchor} from './venue-roofs.js?v=20260926-roof-match';
 
 function cityAmount(){
  return window.__mapzMap?extrusionAmount(window.__mapzMap):0;
@@ -39,10 +39,13 @@ export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1){
  ctx.restore();
 }
 export function drawWaypointFoot(ctx,geometry,color,materials,drawBeam,alpha=1,selected=false){
+ const amount=cityAmount();
+ // Roof mode: no ground disk or orb. Building color is the footprint.
+ if(amount>0.18)return;
  const {x,bottom,anchorY}=geometry;
- const disk=1-cityAmount();
+ const disk=1-amount;
  ctx.save();ctx.globalAlpha=alpha*(selected?.9:.55)*disk;
- drawBeam(ctx,materials.beams.get(color),{x,y:anchorY},x,bottom,selected?20:10);
+ drawBeam(ctx,materials.beams.get(color),{x,y:anchorY},x,bottom,selected?6:3);
  const size=selected?44:28,orb=materials.orbs.get(color);
  if(orb){ctx.globalAlpha=alpha*(selected?1:.75)*disk;ctx.drawImage(orb,x-size/2,anchorY-size/2,size,size);}
  ctx.restore();
