@@ -59,7 +59,21 @@
 <link href="./vendor/maplibre-gl-5.6.2.css" rel="stylesheet">
 <link href="./studio.css?v=20260925-map-boot" rel="stylesheet">
 <link rel="stylesheet" href="../outzide-map/assets/map-continuity.css?v=2"></head><body>
-<div id="map-status" role="status" aria-live="polite">Preparing Portland…</div>
+<div id="map-status" role="status" aria-live="polite">your super gay city is loading…</div>
+<script>
+(function(){
+  var el=document.getElementById('map-status');
+  var copy='your super gay city is loading…';
+  if(!el)return;
+  var proto=Object.getOwnPropertyDescriptor(Node.prototype,'textContent');
+  if(!proto||!proto.set)return;
+  Object.defineProperty(el,'textContent',{
+    configurable:true,
+    get:function(){return proto.get.call(this);},
+    set:function(value){proto.set.call(this,value==='Preparing Portland…'?copy:value);}
+  });
+})();
+</script>
 <div id="map"></div><canvas id="waypoint-lights" aria-label="Interactive Placez markers and floating event holograms"></canvas><div id="hologram-labels" aria-live="off"></div>
 <div id="exploration-status" role="status" aria-live="polite"></div>
 <div class="credit">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openfreemap.org">OpenFreeMap</a> · OpenMapTiles · <a href="https://mapterhorn.com/attribution">Mapterhorn</a></div>
