@@ -1,13 +1,16 @@
-.zaydar-demo-notice{
+.zaydar-map-demo p.zaydar-demo-notice{
   position:absolute;
   z-index:9;
   top:46%;
   left:50%;
+  right:auto;
+  bottom:auto;
   transform:translate(-50%,-50%);
   max-width:min(16rem,calc(100% - 3rem));
   margin:0;
   padding:0;
   border:0;
+  border-radius:0;
   background:none;
   box-shadow:none;
   text-align:center;
@@ -16,10 +19,10 @@
   letter-spacing:.01em;
   text-shadow:0 1px 2px #000c,0 0 18px #0008;
 }
-.zaydar-demo-notice span{
+.zaydar-map-demo p.zaydar-demo-notice span{
   display:block;
 }
-.zaydar-demo-notice button{
+.zaydar-map-demo p.zaydar-demo-notice button{
   display:inline-block;
   margin-top:.7rem;
   padding:.45rem .9rem;
@@ -27,7 +30,7 @@
   border-radius:999px;
   background:transparent;
   color:var(--z-cyan,#19e3ff);
-  font:700 .72rem/1 Barlow Condensed,Arial Narrow,sans-serif;
+  font:700 .72rem/1 "Barlow Condensed",Arial Narrow,sans-serif;
   letter-spacing:.08em;
   text-transform:uppercase;
 }
