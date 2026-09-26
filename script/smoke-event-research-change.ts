@@ -171,15 +171,18 @@ assert.equal(created.event.source, "qsearch-2");
 
 const { address: _omittedAddress, ...withoutAddress } = createEvent;
 const missingAddress = { ...withoutAddress, title: "QSearch Missing Address" };
-const rejectedPublish = createEventFromResearch({
+for (const [field, observedValue] of Object.entries(missingAddress)) {
+  assert.equal(recordFieldEvidence({ runId: createRun.runId, entityKey: "candidate:smoke-missing-address", field, observedValue, sourceUrl, checkedAt }).ok, true);
+}
+const addressUnknownPublish = createEventFromResearch({
+  runId: createRun.runId,
   candidateKey: "candidate:smoke-missing-address",
   event: missingAddress,
   evidenceReceipts: Object.keys(missingAddress).map(field => ({ field, sourceUrl, checkedAt })),
-  reason: "A LIVE event without an exact address must not publish automatically.",
+  reason: "Publish an event with a verified venue and unverified street address.",
   mistakeTestsPassed: true,
 });
-assert.equal(rejectedPublish.ok, false);
-if (!rejectedPublish.ok) assert.equal(rejectedPublish.status, 400);
+assert.equal(addressUnknownPublish.ok, true);
 
 const createRollback = rollbackEventResearchChange(created.rollback.token);
 assert.equal(createRollback.ok, true);

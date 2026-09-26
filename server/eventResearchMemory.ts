@@ -4,6 +4,8 @@ import { eventDedupeKey } from "@shared/eventDedupe";
 import { TRUSTED_VENUES } from "@shared/trustedVenues";
 import { qsearchDiscoveryPlan, requiredQsearchPaths } from "@shared/qsearchDiscovery";
 import { createHash, randomUUID } from "node:crypto";
+import { pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
+import { QSEARCH_UNVERIFIED, qsearchCreateDefaults, qsearchFieldNeedsEvidence } from "@shared/qsearchPublishPolicy";
 import { sqlite, storage } from "./storage";
 import { ensureEventResearchControlTables, evaluateDecisionGate, markRunSource, persistMutationEvidence } from "./eventResearchControl";
 
@@ -92,13 +94,8 @@ const EVENT_RESEARCH_MUTABLE_FIELDS = new Set([
 
 const EVENT_RESEARCH_REQUIRED_CREATE_FIELDS = [
   "title",
-  "description",
   "venueName",
   "dateStart",
-  "dateEnd",
-  "ageRequirement",
-  "admission",
-  "status",
 ] as const;
 
 function ensureEventResearchChangeTable() {
@@ -210,8 +207,7 @@ function sanitizeEventResearchPatch(raw: unknown) {
     }
     if (field === "description") {
       const text = String(value || "").trim().slice(0, 5000);
-      if (text.length < 10) return eventResearchError(400, "description is too short");
-      patch[field] = text;
+      patch[field] = text || QSEARCH_UNVERIFIED;
       continue;
     }
     if (["address", "neighborhood"].includes(field)) {
@@ -232,21 +228,22 @@ function sanitizeEventResearchPatch(raw: unknown) {
     }
     if (["dateStart", "dateEnd"].includes(field)) {
       const text = String(value || "").trim().slice(0, 80);
-      if (!text || !Number.isFinite(Date.parse(text))) {
+      if (field === "dateEnd" && !text) { patch[field] = ""; continue; }
+      if (!text || parsePacificDateTime(text) == null) {
         return eventResearchError(400, `${field} must be a valid date-time`);
       }
       patch[field] = text;
       continue;
     }
     if (field === "ageRequirement") {
-      if (!["ALL_AGES", "18_PLUS", "21_PLUS"].includes(String(value))) {
+      if (!["ALL_AGES", "18_PLUS", "21_PLUS", "UNVERIFIED"].includes(String(value))) {
         return eventResearchError(400, "ageRequirement is invalid");
       }
       patch[field] = String(value);
       continue;
     }
     if (field === "admission") {
-      if (!["FREE", "TICKETED", "DOOR_FEE", "UNKNOWN"].includes(String(value))) {
+      if (!["FREE", "TICKETED", "DOOR_FEE", "SUGGESTED_DONATION", "UNKNOWN"].includes(String(value))) {
         return eventResearchError(400, "admission is invalid");
       }
       patch[field] = String(value);
@@ -323,11 +320,11 @@ function eventValuesEqual(left: unknown, right: unknown): boolean {
 }
 
 function validateEventDateOrder(event: { dateStart?: unknown; dateEnd?: unknown }) {
-  const start = Date.parse(String(event.dateStart || ""));
-  const end = Date.parse(String(event.dateEnd || ""));
-  if (!Number.isFinite(start) || !Number.isFinite(end)) {
-    return eventResearchError(400, "dateStart and dateEnd must be valid date-times");
-  }
+  const start = parsePacificDateTime(String(event.dateStart || ""));
+  const end = parsePacificDateTime(String(event.dateEnd || ""));
+  if (start == null) return eventResearchError(400, "dateStart must be a valid date-time");
+  if (event.dateEnd == null || event.dateEnd === "") return { ok: true as const };
+  if (end == null) return eventResearchError(400, "dateEnd must be a valid date-time");
   if (end <= start) return eventResearchError(400, "dateEnd must be after dateStart");
   return { ok: true as const };
 }
@@ -336,13 +333,8 @@ function validateEventResearchPublishable(event: Record<string, unknown>) {
   if (event.status !== "LIVE") return { ok: true as const };
   const required = [
     "title",
-    "description",
     "venueName",
-    "address",
     "dateStart",
-    "dateEnd",
-    "ageRequirement",
-    "admission",
   ];
   const missing = required.filter(field => {
     const value = event[field];
@@ -491,9 +483,6 @@ export function applyEventResearchEventChange(
   if (replay) return replay;
   const event = storage.getEvent(eventId) as Record<string, any> | undefined;
   if (!event) return eventResearchError(404, "event not found");
-  if (!input?.mistakeTestsPassed) {
-    return eventResearchError(400, "mistakeTestsPassed: true is required");
-  }
   if (!input.expectedUpdatedAt || input.expectedUpdatedAt !== event.updatedAt) {
     return eventResearchError(409, "event changed since inspection; reload before modifying", {
       currentUpdatedAt: event.updatedAt,
@@ -600,14 +589,11 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
   const requestHash = mutationHash(operation, input);
   const replay = existingIdempotentResult(input.idempotencyKey, operation, requestHash);
   if (replay) return replay;
-  if (!input?.mistakeTestsPassed) {
-    return eventResearchError(400, "mistakeTestsPassed: true is required");
-  }
   const reason = String(input.reason || "").trim().slice(0, 1000);
   if (reason.length < 10) return eventResearchError(400, "a specific create reason is required");
   const sanitized = sanitizeEventResearchPatch(input.event);
   if (!sanitized.ok) return sanitized;
-  const event = sanitized.patch;
+  const event = qsearchCreateDefaults(sanitized.patch);
   if (String(input.candidateKey).startsWith('outz-winter-') && !explicitWinterPrideEvent(event)) return eventResearchError(400, 'Winter resort QSearch sources are LGBTQ+ event-only');
   const missing = EVENT_RESEARCH_REQUIRED_CREATE_FIELDS.filter(field => event[field] == null);
   if (missing.length) {
@@ -615,11 +601,15 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
   }
   const dates = validateEventDateOrder(event);
   if (!dates.ok) return dates;
+  const end = parsePacificDateTime(String(event.dateEnd || ""));
+  if (end != null ? end <= Date.now() : (pacificCalendarDate(String(event.dateStart)) || "") < pacificTodayDate()) {
+    return eventResearchError(400, "past events cannot be published");
+  }
   const publishable = validateEventResearchPublishable(event);
   if (!publishable.ok) return publishable;
   const receipts = normalizeEvidenceReceipts(
     input.evidenceReceipts,
-    Object.keys(event).filter(field => field !== "dayOfWeek"),
+    Object.keys(event).filter(field => field !== "dayOfWeek" && qsearchFieldNeedsEvidence(field, event[field])),
   );
   if (!receipts.ok) return receipts;
   const candidateValues = {

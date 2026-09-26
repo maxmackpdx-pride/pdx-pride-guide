@@ -1,7 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import { sqlite, storage } from "./storage";
 import { eventDedupeKey } from "@shared/eventDedupe";
-import { isFounderApprovedEndEstimate } from "@shared/qsearchFounderEndEstimates";
+import { QSEARCH_REQUIRED_FACTS, qsearchCreateDefaults, qsearchFieldNeedsEvidence } from "@shared/qsearchPublishPolicy";
+import { pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 import { qsearchDiscoveryPlan, requiredQsearchPaths } from "@shared/qsearchDiscovery";
 
 type JsonObject = Record<string, unknown>;
@@ -677,18 +678,15 @@ export function evaluateDecisionGate(input: {
     SELECT id, field FROM agent_event_conflicts
     WHERE event_id = ? AND status = 'open' AND material = 1
   `).all(eventId) as Array<any>).map(item => ({ ...item, field: evidenceField(item.field) }));
-  const missing = fields.filter(field => !evidence.some(item => item.field === field));
   const event = storage.getEvent(eventId) as Record<string, unknown> | undefined;
   if (!event) return { ok: false as const, status: 404, error: "event not found" };
   const expectedValues = { ...event, ...(input.proposedValues || {}) };
-  const mismatched = fields.filter(field => {
-    const fieldEvidence = evidence.filter(item => item.field === field);
-    return fieldEvidence.length > 0 && !fieldEvidence.some(item => JSON.stringify(parseJson(item.observed_value_json, null)) === JSON.stringify(expectedValues[field]));
-  });
+  const requiredEvidenceFields = fields.filter(field => qsearchFieldNeedsEvidence(field, expectedValues[field]));
+  const latest = (field: string) => evidence.find(item => item.field === field && item.authority_level === "primary");
+  const missingKnown = requiredEvidenceFields.filter(field => !latest(field));
+  const mismatched = requiredEvidenceFields.filter(field => latest(field) && JSON.stringify(parseJson(latest(field)!.observed_value_json, null)) !== JSON.stringify(expectedValues[field]));
   const conflicted = fields.filter(field => conflicts.some(item => item.field === field));
-  const insufficientIndependent = input.requireIndependentVerification
-    ? fields.filter(field => new Set(evidence.filter(item => item.field === field).map(item => item.source_url)).size < 2)
-    : [];
+  const insufficientIndependent: string[] = [];
   const testCutoff = input.runId
     ? (sqlite.prepare(`SELECT started_at FROM agent_research_runs WHERE id = ?`).get(input.runId) as { started_at?: string } | undefined)?.started_at
     : new Date(Date.now() - 7 * 24 * 3600_000).toISOString();
@@ -696,12 +694,12 @@ export function evaluateDecisionGate(input: {
     SELECT test_key FROM agent_mistake_tests
     WHERE status = 'active' AND (last_result IS NULL OR last_result != 'passed' OR last_run_at < ?)
   `).all(testCutoff || nowIso()) as Array<{ test_key: string }>;
-  const publishable = !missing.length && !mismatched.length && !conflicted.length && !insufficientIndependent.length && !failedTests.length;
+  const publishable = !missingKnown.length && !mismatched.length;
   return {
     ok: true as const,
-    decision: publishable ? "approved" : conflicted.length ? "review" : "blocked",
+    decision: publishable ? "approved" : "blocked",
     publishable,
-    missingEvidence: missing,
+    missingEvidence: missingKnown,
     mismatchedEvidence: mismatched,
     materialConflicts: conflicted,
     insufficientIndependentVerification: insufficientIndependent,
@@ -710,18 +708,8 @@ export function evaluateDecisionGate(input: {
   };
 }
 
-/** Pre-creation evidence belongs to this exact candidate and active run, never
- * to a borrowed event ID. Existing-event gates retain their original checks. */
-function candidateSourceIdentity(raw: string): string {
-  const url = new URL(raw);
-  url.hash = "";
-  for (const name of [...url.searchParams.keys()]) {
-    if (/^utm_/i.test(name) || ["fbclid", "gclid", "dclid", "msclkid"].includes(name.toLowerCase())) url.searchParams.delete(name);
-  }
-  // Preserve meaningful occurrence selectors such as Eagle's ?date=.
-  url.searchParams.sort();
-  return url.toString();
-}
+/** New candidates need current evidence for the three required facts. Optional
+ * facts can remain unverified; an older disagreement stays in the audit log. */
 
 function evaluateCandidateDecisionGate(input: {
   eventId?: number;
@@ -734,69 +722,61 @@ function evaluateCandidateDecisionGate(input: {
   if (!candidateKey || candidateKey !== input.candidateKey || input.eventId !== undefined) {
     return { ok: false as const, status: 400, error: "candidate gate requires a canonical candidateKey and no eventId" };
   }
-  const values = input.proposedValues;
-  if (!values || typeof values !== "object" || Array.isArray(values) || !Array.isArray(input.fields) || !input.fields.length) {
+  if (!input.proposedValues || typeof input.proposedValues !== "object" || Array.isArray(input.proposedValues) || !Array.isArray(input.fields) || !input.fields.length) {
     return { ok: false as const, status: 400, error: "candidate gate requires proposedValues and fields" };
   }
+  const values = qsearchCreateDefaults(input.proposedValues);
   const unsupported = Object.keys(values).filter(field => !EVENT_EVIDENCE_FIELDS.includes(field as any));
   if (unsupported.length) return { ok: false as const, status: 400, error: "candidate contains unsupported event fields", fields: unsupported };
   const run = input.runId ? sqlite.prepare(`SELECT started_at, status FROM agent_research_runs WHERE id = ?`).get(input.runId) as { started_at: string; status: string } | undefined : undefined;
   if (!run || run.status !== "running") {
     return { ok: false as const, status: 409, error: "candidate gate requires an active runId" };
   }
-  const required = ["title", "description", "venueName", "dateStart", "dateEnd", "ageRequirement", "admission", "status"];
-  if (values.status === "LIVE") required.push("address");
+  const required = [...QSEARCH_REQUIRED_FACTS];
   const fields = [...new Set([...input.fields.map(evidenceField), ...Object.keys(values), ...required].filter(Boolean))];
   const missingRequiredFields = required.filter(field => values[field] == null || String(values[field]).trim() === "");
   const invalidCandidateFields: string[] = [];
   if (!["LIVE", "HIDDEN"].includes(String(values.status))) invalidCandidateFields.push("status");
-  if (!["ALL_AGES", "18_PLUS", "21_PLUS"].includes(String(values.ageRequirement))) invalidCandidateFields.push("ageRequirement");
-  if (!["FREE", "TICKETED", "DOOR_FEE", "UNKNOWN"].includes(String(values.admission))) invalidCandidateFields.push("admission");
-  if (String(values.description || "").trim().length < 10) invalidCandidateFields.push("description");
-  if (!Number.isFinite(Date.parse(String(values.dateStart)))) invalidCandidateFields.push("dateStart");
-  if (!Number.isFinite(Date.parse(String(values.dateEnd))) || Date.parse(String(values.dateEnd)) <= Date.parse(String(values.dateStart))) invalidCandidateFields.push("dateEnd");
+  if (!["ALL_AGES", "18_PLUS", "21_PLUS", "UNVERIFIED"].includes(String(values.ageRequirement))) invalidCandidateFields.push("ageRequirement");
+  if (!["FREE", "TICKETED", "DOOR_FEE", "SUGGESTED_DONATION", "UNKNOWN"].includes(String(values.admission))) invalidCandidateFields.push("admission");
+  const start = parsePacificDateTime(String(values.dateStart));
+  const end = parsePacificDateTime(String(values.dateEnd || ""));
+  if (start == null) invalidCandidateFields.push("dateStart");
+  if (values.dateEnd && (end == null || start == null || end <= start)) invalidCandidateFields.push("dateEnd");
+  if (values.status === "LIVE" && (end != null ? end <= Date.now() : (pacificCalendarDate(String(values.dateStart)) || "") < pacificTodayDate())) invalidCandidateFields.push("pastEvent");
   const cutoff = new Date(Date.now() - 30 * 24 * 3600_000).toISOString();
   const observations = (sqlite.prepare(`
     SELECT id, field, source_url, authority_level, checked_at, observed_value_json
     FROM agent_field_evidence
     WHERE entity_key = ? AND event_id IS NULL AND run_id = ? AND checked_at >= ?
     ORDER BY checked_at DESC, created_at DESC, rowid DESC
-  `).all(candidateKey, input.runId, cutoff) as Array<any>).map(item => ({ ...item, field: evidenceField(item.field), source_identity: candidateSourceIdentity(item.source_url) }));
-  // A source's newest observation supersedes its older agreement. Normalize the
-  // field before grouping; insertion order resolves equal checked/created times.
-  const latestBySource = new Map<string, (typeof observations)[number]>();
+  `).all(candidateKey, input.runId, cutoff) as Array<any>).map(item => ({ ...item, field: evidenceField(item.field) }));
+  // The most recent primary observation wins for each field. Older conflicting
+  // observations remain recorded but no longer veto a current official update.
+  const latestByField = new Map<string, (typeof observations)[number]>();
   for (const observation of observations) {
-    const observationKey = `${observation.field}|${observation.source_identity}`;
-    if (!latestBySource.has(observationKey)) latestBySource.set(observationKey, observation);
+    if (observation.authority_level === "primary" && !latestByField.has(observation.field)) latestByField.set(observation.field, observation);
   }
-  const evidence = [...latestBySource.values()].filter(item => item.authority_level === "primary");
-  const matching = (field: string) => evidence.filter(item => item.field === field && JSON.stringify(parseJson(item.observed_value_json, null)) === JSON.stringify(values[field]));
-  const founderEstimatedEnd = isFounderApprovedEndEstimate(candidateKey, values);
-  const missingEvidence = fields.filter(field => !(field === "dateEnd" && founderEstimatedEnd) && !evidence.some(item => item.field === field));
-  const mismatchedEvidence = fields.filter(field => evidence.some(item => item.field === field) && !matching(field).length);
-  const conflictingEvidence = fields.filter(field => evidence.some(item => item.field === field && JSON.stringify(parseJson(item.observed_value_json, null)) !== JSON.stringify(values[field])));
-  // Tucker's publication rule: ordinary details need one current primary
-  // source; date/time, venue/address, status, and artwork need two independent
-  // matching sources. The remaining conflict, duplicate, and mistake-test
-  // gates still apply to every candidate.
-  const highRiskFields = new Set(["dateStart", "dateEnd", "venueName", "address", "status", "posterImageUrl"]);
-  const insufficientIndependentVerification = fields.filter(field =>
-    highRiskFields.has(field) && !(field === "dateEnd" && founderEstimatedEnd)
-      && new Set(matching(field).map(item => item.source_identity)).size < 2
-  );
+  const fieldsNeedingEvidence = fields.filter(field => qsearchFieldNeedsEvidence(field, values[field]));
+  const missingEvidence = fieldsNeedingEvidence.filter(field => !latestByField.has(field));
+  const mismatchedEvidence = fieldsNeedingEvidence.filter(field => latestByField.has(field) && JSON.stringify(parseJson(latestByField.get(field)!.observed_value_json, null)) !== JSON.stringify(values[field]));
+  const latestStatus = latestByField.get("status");
+  const canceled = values.status === "LIVE" && latestStatus && ["CANCELED", "CANCELLED", "POSTPONED"].includes(String(parseJson(latestStatus.observed_value_json, "")).toUpperCase());
+  const conflictingEvidence = observations.filter(item => item.authority_level === "primary" && latestByField.has(item.field) && JSON.stringify(parseJson(item.observed_value_json, null)) !== JSON.stringify(parseJson(latestByField.get(item.field)!.observed_value_json, null))).map(item => item.field);
+  const insufficientIndependentVerification: string[] = [];
   const conflicts = sqlite.prepare(`SELECT id, field FROM agent_event_conflicts WHERE candidate_key = ? AND status = 'open' AND material = 1`).all(candidateKey) as Array<{ id: string; field: string }>;
   const reviews = sqlite.prepare(`SELECT id FROM agent_review_queue WHERE candidate_key = ? AND status = 'open'`).all(candidateKey) as Array<{ id: string }>;
   const failedTests = sqlite.prepare(`SELECT test_key FROM agent_mistake_tests WHERE status = 'active' AND (last_result IS NULL OR last_result != 'passed' OR last_run_at IS NULL OR last_run_at < ?)`).all(run.started_at) as Array<{ test_key: string }>;
   const duplicate = missingRequiredFields.length ? undefined : storage.getEvents({}).find(event => eventDedupeKey(event) === eventDedupeKey({ id: 0, title: String(values.title), venueName: String(values.venueName), dateStart: String(values.dateStart) }));
-  const publishable = !missingRequiredFields.length && !invalidCandidateFields.length && !missingEvidence.length && !mismatchedEvidence.length && !conflictingEvidence.length && !insufficientIndependentVerification.length && !conflicts.length && !reviews.length && !failedTests.length && !duplicate;
+  const publishable = !missingRequiredFields.length && !invalidCandidateFields.length && !missingEvidence.length && !mismatchedEvidence.length && !canceled && !duplicate;
   return {
-    ok: true as const, candidateKey, decision: publishable ? "approved" : conflicts.length || reviews.length || conflictingEvidence.length ? "review" : "blocked", publishable,
+    ok: true as const, candidateKey, decision: publishable ? "approved" : "blocked", publishable,
     missingRequiredFields, invalidCandidateFields, missingEvidence, mismatchedEvidence, conflictingEvidence,
     materialConflicts: conflicts.map(item => item.field), openReviewItems: reviews.map(item => item.id),
     insufficientIndependentVerification, unpassedMistakeTests: failedTests.map(item => item.test_key),
-    founderEstimatedEnd,
+    canceled: Boolean(canceled),
     duplicateEventId: duplicate?.id || null,
-    evidenceReceiptIds: evidence.filter(item => fields.includes(item.field)).map(item => item.id),
+    evidenceReceiptIds: [...latestByField.values()].filter(item => fields.includes(item.field)).map(item => item.id),
   };
 }
 

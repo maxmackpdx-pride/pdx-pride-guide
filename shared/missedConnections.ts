@@ -141,7 +141,9 @@ export function getEventScheduleTiming(
   const start = parsePacificDateTime(dateStart);
   if (start == null) return "past";
   if (now < start) return "upcoming";
-  const end = parsePacificDateTime(dateEnd) ?? start;
+  // An unverified end is not a claim that the event ends when it starts.
+  // Keep it visible for a day while clearly displaying its end as unknown.
+  const end = parsePacificDateTime(dateEnd) ?? start + 24 * 60 * 60 * 1000;
   if (now < end) return "live";
   return "past";
 }

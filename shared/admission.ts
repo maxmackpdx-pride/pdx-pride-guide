@@ -43,7 +43,7 @@ export const ADMISSION_DISPLAY_LABELS: Record<AdmissionType, string> = {
   TICKETED: "Ticketed",
   DOOR_FEE: "Door fee",
   SUGGESTED_DONATION: "Donation",
-  UNKNOWN: "See listing",
+  UNKNOWN: "Unverified",
 };
 
 /** Default when ingest cannot prove free/ticketed/door - never invent FREE. */

@@ -181,7 +181,7 @@ function eventInWindow(e: EventListing, window: string, windows: DateWindows): b
   if (window === "ALL") return true;
   if (window === "TONIGHT") {
     const start = parsePacificDateTime(e.dateStart);
-    const end = parsePacificDateTime(e.dateEnd) ?? start;
+    const end = parsePacificDateTime(e.dateEnd) ?? (start == null ? null : start + 24 * 60 * 60 * 1000);
     return start != null && end != null && start < windows.tonightEnd && end > windows.tonightStart;
   }
   const d = pacificCalendarDate(e.dateStart);
@@ -225,7 +225,7 @@ function sortEvents(events: EventListing[], sortMode: SortMode): EventListing[] 
     case "start_time":
       return sorted.sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
     case "end_time":
-      return sorted.sort((a, b) => new Date(a.dateEnd).getTime() - new Date(b.dateEnd).getTime());
+      return sorted.sort((a, b) => (parsePacificDateTime(a.dateEnd) ?? Infinity) - (parsePacificDateTime(b.dateEnd) ?? Infinity));
     case "day_start":
       return sorted.sort((a, b) => {
         const dayA = DAY_SORT_ORDER[a.dayOfWeek ?? ""] ?? 99;

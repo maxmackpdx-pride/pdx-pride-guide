@@ -30,8 +30,8 @@ export function formatGridCardWhen(event: Event): string {
     day: "numeric",
   });
   const start = clock(event.dateStart);
-  const end = event.dateEnd ? clock(event.dateEnd) : "";
-  return [dateLabel, [start, end].filter(Boolean).join(" to ")].filter(Boolean).join(" · ");
+  const end = event.dateEnd ? clock(event.dateEnd) : "End unverified";
+  return [dateLabel, `${start} to ${end}`].filter(Boolean).join(" · ");
 }
 
 export function listingTypeTags(event: Event, max = 2): string[] {

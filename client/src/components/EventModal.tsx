@@ -131,12 +131,14 @@ const ADMISSION_LABELS: Record<string, string> = {
   TICKETED: "Ticketed",
   DOOR_FEE: "Door fee",
   SUGGESTED_DONATION: "Donation",
+  UNKNOWN: "Admission unverified",
 };
 
 const AGE_LABELS: Record<string, string> = {
   ALL_AGES: "All ages",
   "18_PLUS": "18+",
   "21_PLUS": "21+",
+  UNVERIFIED: "Age unverified",
 };
 
 function eventTypeLabels(event: Event): string[] {
@@ -500,7 +502,7 @@ function EventModalInner({
   const startTime = formatPacificDateTime(event.dateStart, {
     weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
   });
-  const endTime = formatPacificDateTime(event.dateEnd, { hour: "2-digit", minute: "2-digit" });
+  const endTime = event.dateEnd ? formatPacificDateTime(event.dateEnd, { hour: "2-digit", minute: "2-digit" }) : "End unverified";
   const dateLine = formatPacificDateTime(event.dateStart, {
     weekday: "long", month: "long", day: "numeric",
   });
