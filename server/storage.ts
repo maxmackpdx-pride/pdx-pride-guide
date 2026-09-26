@@ -8106,6 +8106,11 @@ function runBootMigrationsOnce() {
     `).run();
     recordBootMigration("retire_gigz_post_6_and_legacy_admin_2026_09_v1");
   }
+
+  if (!hasBootMigration("eagle_portland_instagram_2026_09_v1")) {
+    sqlite.prepare(`UPDATE businesses SET instagram = '@eagleportland' WHERE name = 'Eagle Portland' AND (instagram IS NULL OR instagram <> '@eagleportland')`).run();
+    recordBootMigration("eagle_portland_instagram_2026_09_v1");
+  }
 }
 
 function parseEnvAdminLists() {

@@ -261,12 +261,13 @@
   cursor: default;
 }
 
-/* ── Place-first map well ───────────────────────────────────
-   Open cards lead with location. Maps keep the canonical debossed
-   treatment and never receive an outer neon bloom. */
+/* Location stays in the card below the essentials. */
 .place-modal-panel__map {
   position: relative;
-  height: clamp(220px, 38vw, 280px);
+  height: 220px;
+  margin: 0 24px 22px;
+  border: 1px solid #27232b;
+  border-radius: 14px;
   overflow: hidden;
   background: var(--map-surface-bg, #06060a);
   border-bottom: 1px solid #000;
@@ -336,11 +337,28 @@
 /* ── Body content ─────────────────────────────────────────── */
 .place-modal-panel__logo {
   display: block;
-  width: 100%;
-  height: 140px;
+  width: min(38%, 180px);
+  height: 118px;
   object-fit: contain;
-  margin: 0 auto 20px;
+  margin: 0;
 }
+
+.place-modal-panel__identity { display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.place-modal-panel__identity > div:first-of-type { flex: 1; min-width: 0; }
+.place-modal-panel__identity h2 { overflow-wrap: anywhere; }
+.place-modal-panel__facts { margin: 4px 0 16px; }
+.place-modal-panel__fact { display: flex; align-items: center; gap: 12px; min-height: 44px; border-top: 1px solid #26232b; color: var(--text-mid); font: 500 0.94rem/1.4 var(--font-body); }
+.place-modal-panel__fact:last-child { border-bottom: 1px solid #26232b; }
+.place-modal-panel__fact svg { flex: none; color: var(--c); }
+.place-modal-panel__fact a { color: inherit; text-decoration: none; }
+.place-modal-panel__quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 0 0 18px; }
+.place-modal-panel__quick-actions a { display: grid; place-items: center; min-height: 48px; border: 1px solid var(--c); border-radius: 10px; color: #050506; background: var(--c); font: 900 0.9rem var(--font-display); text-transform: uppercase; text-decoration: none; }
+.place-modal-panel__quick-actions a + a { color: var(--c); background: transparent; }
+.place-modal-panel__description-wrap { margin: 0 0 16px; }
+.place-modal-panel__description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; margin: 0; color: var(--text-mid); font: 400 0.95rem/1.6 var(--font-body); }
+.place-modal-panel__description--expanded { display: block; }
+.place-modal-panel__read-more { margin: 7px 0 0; padding: 4px 0; border: 0; background: none; color: var(--c); font: 800 0.9rem var(--font-body); cursor: pointer; }
+@media (max-width: 640px) { .place-modal-panel__map { height: 190px; margin: 0 20px 20px; } }
 
 .place-modal-panel__body {
   position: relative;

@@ -222,6 +222,9 @@ export default function PlaceModal({
   const [savedOverrides, setSavedOverrides] = useState<Partial<Business> | null>(null);
   const [tab, setTab] = useState<ModalTab>("events");
   const [sharing, setSharing] = useState(false);
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
+  const [descriptionClipped, setDescriptionClipped] = useState(false);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
   const [open, setOpen] = useState(false);
   const [flipVars, setFlipVars] = useState<React.CSSProperties | null>(null);
   const useFlip = Boolean(originRect && originRect.width > 0 && originRect.height > 0);
@@ -234,7 +237,19 @@ export default function PlaceModal({
     setTab("events");
     setEditing(false);
     setSavedOverrides(null);
+    setDescriptionExpanded(false);
   }, [place?.id]);
+
+  useEffect(() => {
+    if (!place || editing) return;
+    const node = descriptionRef.current;
+    if (!node) return;
+    const measure = () => setDescriptionClipped(node.scrollHeight > node.clientHeight + 2);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [place?.id, place?.description, savedOverrides?.description, editing, descriptionExpanded]);
 
   // Little→big FLIP: map final panel onto source card, then animate to identity.
   // Keep open=false until after the inverted transform is applied (same frame as paint).
@@ -536,30 +551,9 @@ export default function PlaceModal({
         </DetailActions>
 
         <div>
-          <div className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
-            <DirectoryMap
-              businesses={hasMapCoordinates ? [displayed] : []}
-              height="100%"
-              showKey={false}
-              interactive
-              focusBusiness={hasMapCoordinates}
-              rasterBasemap
-              accent={accent}
-            />
-            <div className="place-modal-panel__map-label">
-              <MapPinned size={14} aria-hidden="true" />
-              <span>
-                {hasMapCoordinates
-                  ? multiLoc
-                    ? `${locations.length} locations`
-                    : place.neighborhood || "Portland"
-                  : "Portland overview"}
-              </span>
-            </div>
-          </div>
-
           <div className="place-modal-panel__body">
 
+          <div className="place-modal-panel__identity">
           <img
             key={`${place.id}:${place.name}:${place.imageUrl}`}
             className="place-modal-panel__logo"
@@ -575,6 +569,7 @@ export default function PlaceModal({
             }}
           />
 
+          <div className="place-modal-panel__identity-text">
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 10 }}>
             {isGrandOpeningActive(place.grandOpeningDate) && (
               <Badge color="yellow" glow size="sm" admission={undefined} day={undefined} category={undefined}>
@@ -622,25 +617,13 @@ export default function PlaceModal({
             </div>
           )}
 
+          </div>
+          </div>
+
           <div className="place-modal-panel__details-room">
 
-          {address && (
-            <div style={{ ...rowStyle, marginBottom: multiLoc ? 10 : 6, flexWrap: "wrap", gap: 10 }}>
-              <span style={{ display: "inline-flex", alignItems: "flex-start", gap: 8 }}>
-                <Icon d={PIN} />
-                {address}
-              </span>
-              {!multiLoc && (
-                <span style={{ display: "inline-flex", gap: 12 }}>
-                  <a href={placeGoogleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, fontSize: "0.8rem" }}>
-                    Google Maps
-                  </a>
-                  <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, fontSize: "0.8rem" }}>
-                    Apple Maps
-                  </a>
-                </span>
-              )}
-            </div>
+          {multiLoc && address && (
+            <div className="place-modal-panel__fact"><Icon d={PIN} />{address}</div>
           )}
 
           {multiLoc && !editing && (
@@ -892,36 +875,32 @@ export default function PlaceModal({
             <>
               {/* Primary hours/phone only for single-location; multi-loc lists them per storefront. */}
               {!multiLoc && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 14 }}>
-                  {displayed.hours && (
-                    <div style={rowStyle}>
-                      <Icon d={CLOCK} />
-                      {displayed.hours}
+                <>
+                  <div className="place-modal-panel__facts">
+                    {displayed.hours && <div className="place-modal-panel__fact"><Icon d={CLOCK} />{displayed.hours}</div>}
+                    {address && <div className="place-modal-panel__fact"><Icon d={PIN} />{address}</div>}
+                    {displayed.phone && <div className="place-modal-panel__fact"><Icon d={PHONE} /><a href={telHref(displayed.phone)}>{displayed.phone}</a></div>}
+                  </div>
+                  {(address || displayed.phone) && (
+                    <div className="place-modal-panel__quick-actions">
+                      {address && <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer">Directions</a>}
+                      {displayed.phone && <a href={telHref(displayed.phone)}>Call</a>}
                     </div>
                   )}
-                  {displayed.phone && (
-                    <div style={rowStyle}>
-                      <Icon d={PHONE} />
-                      <a href={telHref(displayed.phone)} style={{ color: "inherit", textDecoration: "none" }}>
-                        {displayed.phone}
-                      </a>
-                    </div>
-                  )}
-                </div>
+                </>
               )}
 
               {displayed.description && (
-                <p
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "0.95rem",
-                    lineHeight: 1.6,
-                    color: "var(--text-mid)",
-                    margin: "0 0 16px",
-                  }}
-                >
-                  {displayed.description}
-                </p>
+                <div className="place-modal-panel__description-wrap">
+                  <p ref={descriptionRef} className={`place-modal-panel__description${descriptionExpanded ? " place-modal-panel__description--expanded" : ""}`}>
+                    {displayed.description}
+                  </p>
+                  {(descriptionClipped || descriptionExpanded) && (
+                    <button type="button" className="place-modal-panel__read-more" onClick={() => setDescriptionExpanded(value => !value)}>
+                      {descriptionExpanded ? "Read less" : "Read more"}
+                    </button>
+                  )}
+                </div>
               )}
 
               {(displayed.website || displayed.instagram || displayed.donateUrl) && (
@@ -1001,6 +980,28 @@ export default function PlaceModal({
             </>
           )}
 
+          </div>
+
+          <div className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
+            <DirectoryMap
+              businesses={hasMapCoordinates ? [displayed] : []}
+              height="100%"
+              showKey={false}
+              interactive
+              focusBusiness={hasMapCoordinates}
+              rasterBasemap
+              accent={accent}
+            />
+            <div className="place-modal-panel__map-label">
+              <MapPinned size={14} aria-hidden="true" />
+              <span>
+                {hasMapCoordinates
+                  ? multiLoc
+                    ? `${locations.length} locations`
+                    : place.neighborhood || "Portland"
+                  : "Portland overview"}
+              </span>
+            </div>
           </div>
 
           <div className="place-modal-panel__community-room">
