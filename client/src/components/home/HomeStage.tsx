@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "wouter";
-import { Pause, Play } from "lucide-react";
 import AuthModal from "@/components/AuthModal";
 import HomeFlight from "@/components/home/HomeFlight";
 import { useAuth } from "@/context/AuthContext";
@@ -23,10 +22,6 @@ export type { HomeStageBoardKey, HomeStageCardData, HomeStageSamples };
 export { useHomeStageSamples, HomeStageCard };
 
 const WORDMARK = "/brand/family/zaylist-primary.svg";
-const HOME_TRACK_PARTS = Array.from(
-  { length: 7 },
-  (_, index) => `/audio/fuck-meta-remastered.part${String(index).padStart(2, "0")}.m4a.part`,
-);
 const IDENTITY_LINES = [
   "Find your people",
   "Share what matters",
@@ -45,70 +40,11 @@ export default function HomeStage({ afterWelcome }: Props) {
   const { calmMode } = useTheme();
   const { user } = useAuth();
   const logoRef = useRef<HTMLImageElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
   const [logoReady, setLogoReady] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState(0);
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
-  const [musicPlaying, setMusicPlaying] = useState(false);
-  const [musicReady, setMusicReady] = useState(false);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    let cancelled = false;
-    let objectUrl = "";
-
-    void Promise.all(HOME_TRACK_PARTS.map(async url => {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Track part failed: ${response.status}`);
-      return response.arrayBuffer();
-    })).then(parts => {
-      if (cancelled) return;
-      objectUrl = URL.createObjectURL(new Blob(parts, { type: "audio/mp4" }));
-      audio.src = objectUrl;
-      audio.load();
-      setMusicReady(true);
-    }).catch(() => setMusicReady(false));
-
-    return () => {
-      cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, []);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !musicReady) return;
-    audio.volume = 0.42;
-
-    let armed = true;
-    const start = () => {
-      if (!armed || !audio.paused) return;
-      void audio.play().then(() => { armed = false; }).catch(() => {});
-    };
-    const startFromInteraction = (event: Event) => {
-      if ((event.target as Element | null)?.closest?.(".home-front__music")) return;
-      start();
-    };
-
-    start();
-    window.addEventListener("pointerdown", startFromInteraction, { capture: true });
-    window.addEventListener("keydown", startFromInteraction, { capture: true });
-    return () => {
-      window.removeEventListener("pointerdown", startFromInteraction, { capture: true });
-      window.removeEventListener("keydown", startFromInteraction, { capture: true });
-      audio.pause();
-    };
-  }, [musicReady]);
-
-  const toggleMusic = async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (audio.paused) await audio.play().catch(() => {});
-    else audio.pause();
-  };
 
   useEffect(() => {
     let cancelled = false, firstPaint = 0, secondPaint = 0;
@@ -185,18 +121,6 @@ export default function HomeStage({ afterWelcome }: Props) {
               </div>
             </div>
           </div>
-        </div>
-        <div className="home-front__music" aria-label="Fuck Meta music player">
-          <audio
-            ref={audioRef}
-            onPlay={() => setMusicPlaying(true)}
-            onPause={() => setMusicPlaying(false)}
-            onEnded={() => setMusicPlaying(false)}
-          />
-          <button type="button" disabled={!musicReady} onClick={() => void toggleMusic()} aria-label={musicPlaying ? "Pause Fuck Meta" : "Play Fuck Meta"}>
-            {musicPlaying ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
-            <span>{musicReady ? (musicPlaying ? "Pause" : "Play") : "Loading"}</span>
-          </button>
         </div>
         {afterWelcome}
       </section>

@@ -39,7 +39,10 @@ function warp(value: number, center: number, strength: number, inverse = false) 
 }
 const smooth = (value: number) => { const t=Math.max(0,Math.min(1,value)); return t*t*t*(t*(t*6-15)+10); };
 const MAX_HOLOGRAMS = 8;
-type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number };
+// These recognizable venue marks stay as logos. Other venues occasionally use
+// the same black-core, color-ring waypoint treatment as the live map.
+const FEATURED_LOGO_IDS = new Set(["1-0", "2-0", "5-0", "28-0", "33-0"]);
+type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number; waypoint: boolean };
 type Point = { x: number; y: number; z: number; tone: number; beamExcluded?: boolean; brightRoad?: boolean; hoverGlow?: { strength:number; lift:number; hue:number; core:number; lastLit:number }; glow?: { strength: number; lastLit: number; r: number; g: number; b: number } };
 function sphere(u: number, v: number, tone = 0): Point {
   const longitude = warp(u,-.15,5) * Math.PI, latitude = equatorialLatitude(v) * Math.PI / 2;
@@ -113,7 +116,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     };
     // Previous frame footprints keep the dot pass beneath beams and artwork.
     let beamFootprints: { ax:number; ay:number; x:number; y:number; halfWidth:number; strength:number; rgb:number[] }[] = [];
-    const venues: { point: Point; image: HTMLCanvasElement; color: string; phase: number }[] = [];
+    const venues: { id: string; product: boolean; point: Point; image: HTMLCanvasElement; color: string; phase: number }[] = [];
     type AtlasEntry = {id:string; coordinates:[number,number];color:string;phase:number;product:boolean;x:number;y:number;w:number;h:number};
     const atlas=new Image();atlas.decoding="async";
     atlas.src='/home-globe/holograms.webp';
@@ -126,7 +129,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         image.getContext('2d')?.drawImage(atlas,row.x,row.y,row.w,row.h,0,0,row.w,row.h);
         const [lon,lat]=row.coordinates;
         const point=row.product?PRODUCT_WAYPOINTS.find(p=>p.id===row.id)?.point:placePoint({lat,lon});
-        if(point)venues.push({point,image,color:row.color,phase:row.phase});
+        if(point)venues.push({id:row.id,product:row.product,point,image,color:row.color,phase:row.phase});
       }
       draw();
     }).catch(()=>{ /* The globe remains visible if the optional artwork fails. */ });
@@ -353,7 +356,10 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
             if(score>bestScore){best=index;bestScore=score;}
           });
           const venue=candidates.splice(best,1)[0];
-          states.set(venue.phase,{progress:initialReveal || still?1:0,openedAt:elapsed,closing:false,offsetX:0,offsetY:0});
+          const waypoint = !venue.product && !FEATURED_LOGO_IDS.has(venue.id)
+            && ![...states.values()].some(state => state.waypoint)
+            && Math.random() < .12;
+          states.set(venue.phase,{progress:initialReveal || still?1:0,openedAt:elapsed,closing:false,offsetX:0,offsetY:0,waypoint});
           nextOpen.current=elapsed+250;
         }
       }
@@ -369,7 +375,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const visibility=opening*smooth(anchor.z/.18);
         const fullSize = Math.min(width < 600 ? 86 : 144, radius * .52) * .8;
         const fullFit = Math.min(fullSize/image.width,fullSize*.65/image.height);
-        const fullW=image.width*fullFit, fullH=image.height*fullFit;
+        const fullW=state.waypoint?26:image.width*fullFit, fullH=state.waypoint?26:image.height*fullFit;
         const head = project(venue.point,1.06);
         // Side-facing anchors also use the pockets below the wordmark corners.
         // Protect the actual rotating words, leaving the empty ends of its row open.
@@ -397,7 +403,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         // Size, opacity and lift share one eased curve, landing at the exact pin.
         const x=anchor.x+(preferred.x+state.offsetX-anchor.x)*opening;
         const y=anchor.y+(preferred.y+state.offsetY-anchor.y)*opening;
-        const size=fullSize*opening,w=fullW*opening,h=fullH*opening;
+        const size=(state.waypoint?fullW:fullSize)*opening,w=fullW*opening,h=fullH*opening;
         beamFootprints.push({ax:anchor.x,ay:anchor.y,x,y,halfWidth:size*.38,strength:visibility,
           rgb:[1,3,5].map(start=>parseInt(color.slice(start,start+2),16))});
         renderedCount++;
@@ -413,7 +419,19 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.globalAlpha = visibility;
         context.imageSmoothingEnabled=true; context.imageSmoothingQuality="high";
         context.shadowBlur=0;
-        context.drawImage(image,x-w/2,y-h/2,w,h);
+        if (state.waypoint) {
+          // Match mapTheme's round pin: black core, neon category ring, inset
+          // shading and no outer bloom. Slightly larger on the moving globe.
+          const pinRadius=w/2;
+          context.fillStyle=color;
+          context.beginPath();context.arc(x,y,pinRadius,0,Math.PI*2);context.fill();
+          context.fillStyle='#000';
+          context.beginPath();context.arc(x,y,Math.max(0,pinRadius-4*opening),0,Math.PI*2);context.fill();
+        } else {
+          // Only Camp gets a brief flicker; the other venue logos stay steady.
+          if (venue.id==='28-0' && !still) context.globalAlpha*=.82+.18*Math.pow(Math.max(0,Math.sin(elapsed/390)),12);
+          context.drawImage(image,x-w/2,y-h/2,w,h);
+        }
         context.shadowBlur=0;
         const corner=5*opening, left=x-w/2-5,right=x+w/2+5,top=y-h/2-5,bottom=y+h/2+5;
         context.beginPath();
