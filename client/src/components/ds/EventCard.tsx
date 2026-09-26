@@ -13,7 +13,7 @@ const CSS = `
   --c: var(--_day);
   --dc: var(--_day);
   position:relative; isolation:isolate; display:grid; grid-template-columns:112px minmax(0,1fr) minmax(116px,auto);
-  gap:20px; align-items:center; min-height:168px; padding:16px;
+  gap:22px; align-items:center; min-height:168px; padding:18px;
   background:linear-gradient(145deg,rgba(255,255,255,.07),transparent 28%),#09090b;
   border:1px solid color-mix(in srgb,var(--_day) 58%,#202027); border-left:5px solid var(--_day);
   border-radius:14px; text-decoration:none; color:inherit; overflow:hidden;
@@ -158,7 +158,7 @@ html.calm-mode .pdxRow,
   .pdxRow__claim{ display:none; }
 }
 @media (max-width:720px){
-  .pdxRow{ grid-template-columns:82px minmax(0,1fr); gap:13px; min-height:142px; padding:13px; }
+  .pdxRow{ grid-template-columns:82px minmax(0,1fr); gap:14px; min-height:142px; padding:14px; }
   .pdxRow__thumb{ width:82px; height:110px; }
   .pdxRow__title{ font-size:clamp(1.55rem,8vw,2.35rem); }
   .pdxRow__aside{ grid-column:1 / -1; flex-direction:row; align-items:center; justify-content:space-between; flex-wrap:wrap; }

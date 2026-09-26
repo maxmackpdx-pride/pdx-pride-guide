@@ -2725,7 +2725,7 @@ html.calm-mode .hz-tag--adult {
 @property --hz-board-edge-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 @keyframes hzBoardEdgeOrbit { to { --hz-board-edge-angle: 360deg; } }
 .hz-board-rail__item::after { content: ""; position: absolute; z-index: 3; inset: 0; padding: 2px; border-radius: 20px; pointer-events: none; background: conic-gradient(from var(--hz-board-edge-angle), var(--hz-edge-color) 0deg, color-mix(in srgb, var(--hz-edge-color) 68%, #fff) 75deg, color-mix(in srgb, var(--hz-edge-color) 72%, #000) 190deg, var(--hz-edge-color) 280deg, #f8fbff 332deg, var(--hz-edge-color) 360deg); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: hzBoardEdgeOrbit 22s linear infinite; }
-.hz-board-rail .hz-card { z-index: 1; min-height: 530px; height: 100%; gap: 12px; padding: 18px; border: 1px solid #18181d; border-radius: 20px; background: #141b21; box-shadow: 0 0 0 2px #000, 0 18px 35px -27px var(--c); }
+.hz-board-rail .hz-card { z-index: 1; min-height: 530px; height: 100%; gap: 16px; padding: 20px; border: 1px solid #18181d; border-radius: 20px; background: #141b21; box-shadow: 0 0 0 2px #000, 0 18px 35px -27px var(--c); }
 .hz-board-rail .hz-card:hover { transform: none; }
 @media (prefers-reduced-motion: reduce) { .hz-board-rail__item::after { animation: none; } }
 html.calm-mode .hz-board-rail__item::after, :root[data-calm="true"] .hz-board-rail__item::after { animation: none; }
@@ -2742,4 +2742,4 @@ html.calm-mode .hz-board-rail__item::after, :root[data-calm="true"] .hz-board-ra
 .hz-board-actions .hz-board-post { margin-left: 0; }
 .hz-board-link-error { position: fixed; z-index: 90; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: calc(100vw - 30px); padding: 14px 18px; border: 1px solid var(--board-housing,#00ffff); border-radius: 10px; background: #14242a; color: white; box-shadow: 0 15px 40px #000a; }
 .hz-board-link-error button { margin-left: 12px; color: #72eaf1; border: 0; background: none; cursor: pointer; }
-@media (max-width: 767px) { .hz-board-section { padding: 22px 0 28px; } .hz-board-section__head { flex-direction: column; align-items: flex-start; gap: 13px; } .hz-board-rail__item { flex-basis: min(82vw,320px); } .hz-board-rail .hz-card { min-height: 510px; padding: 16px; } .hz-board-rail .hz-well { height: 210px; } .hz-board-rail .hz-well__cap .hz-mono { display: initial; } }
+@media (max-width: 767px) { .hz-board-section { padding: 22px 0 28px; } .hz-board-section__head { flex-direction: column; align-items: flex-start; gap: 13px; } .hz-board-rail__item { flex-basis: min(82vw,320px); } .hz-board-rail .hz-card { min-height: 510px; padding: 18px; } .hz-board-rail .hz-well { height: 210px; } .hz-board-rail .hz-well__cap .hz-mono { display: initial; } }

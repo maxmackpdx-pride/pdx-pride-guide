@@ -10638,7 +10638,7 @@ html.calm-mode .board-detail-backdrop {
   background: #0b0b0b;
   border: 2px solid var(--spotted-accent, #FF00CC);
   border-radius: 14px;
-  padding: 22px 20px 16px;
+  padding: 24px 22px 18px;
   margin-bottom: 14px;
   overflow: hidden;
   box-shadow: none;
@@ -16207,7 +16207,7 @@ html.calm-mode .board-stats-band,
 }
 
 .board-listing-card--makeover .board-listing-card__main {
-  padding: 13px 15px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -16224,7 +16224,7 @@ html.calm-mode .board-stats-band,
 }
 
 .board-listing-card--makeover .board-listing-card__title {
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   font-size: 1.16rem;
   font-weight: 800;
   line-height: 1.04;
@@ -16236,7 +16236,7 @@ html.calm-mode .board-stats-band,
 
 .board-listing-card--makeover .board-listing-card__footer {
   margin-top: auto;
-  padding-top: 12px;
+  padding-top: 14px;
   border-top: none;
 }
 
@@ -17094,7 +17094,7 @@ html.calm-mode .category-constellation__orb {
   background: #0c0c0f;
   /* Neon edge from glass.css; left bar optional via glass rules */
   border-radius: 14px;
-  padding: 20px 20px 17px;
+  padding: 22px 22px 19px;
   cursor: pointer;
   overflow: hidden;
   transition:

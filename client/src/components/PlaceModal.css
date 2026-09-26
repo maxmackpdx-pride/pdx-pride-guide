@@ -719,8 +719,8 @@ html.calm-mode .place-modal-panel__sheen {
   text-transform: uppercase;
 }
 .place-modal-panel__inner > .detail-actions > button[aria-label^="Close"] { border-radius: 50%; border-color: var(--neon-yellow, #ffee00); color: var(--neon-yellow, #ffee00); }
-.place-modal-panel__body { padding-top: 22px; padding-bottom: 18px; }
-.place-modal-panel__identity { min-height: 165px; margin-bottom: 20px; }
+.place-modal-panel__body { padding: 24px 28px 24px; }
+.place-modal-panel__identity { min-height: 165px; margin-bottom: 24px; }
 .place-modal-panel__identity-text { flex: 1 1 58%; min-width: 0; }
 .place-modal-panel__logo { width: min(40%, 210px); height: 180px; flex: none; }
 .place-modal-panel__identity-text h2 { max-width: 100%; letter-spacing: .005em; }
@@ -732,25 +732,25 @@ html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__details-room {
   background: transparent;
   box-shadow: none;
 }
-.place-modal-panel__facts { margin: 0 0 18px; }
-.place-modal-panel__fact { min-height: 62px; gap: 16px; padding: 8px 0; box-sizing: border-box; color: #eee; font: 500 1.05rem/1.35 var(--font-body); }
+.place-modal-panel__facts { margin: 0 0 16px; }
+.place-modal-panel__fact { min-height: 62px; gap: 16px; padding: 10px 0; box-sizing: border-box; color: #eee; font: 500 1.05rem/1.35 var(--font-body); }
 .place-modal-panel__fact svg { width: 24px; height: 24px; stroke: #f5f5f4; opacity: 1; }
-.place-modal-panel__quick-actions { grid-template-columns: 1fr; gap: 10px; margin: 20px 0 24px; }
+.place-modal-panel__quick-actions { grid-template-columns: 1fr; gap: 12px; margin: 18px 0 28px; }
 .place-modal-panel__quick-actions a { min-height: 60px; border-radius: 11px; font-size: 1.2rem; letter-spacing: .025em; box-shadow: 0 0 18px -7px var(--c); }
 .place-modal-panel__quick-actions a + a { box-shadow: none; }
 .place-modal-panel__description { max-height: 4.8em; display: block; font-size: 1.05rem; line-height: 1.6; }
 .place-modal-panel__description--expanded { max-height: none; }
 .place-modal-panel__read-more { font-size: 1rem; }
-.place-modal-panel__map { height: 300px; margin: 0 24px 24px; border-color: color-mix(in srgb, var(--c) 55%, #25212a); }
+.place-modal-panel__map { height: 300px; margin: 0 28px 28px; border-color: color-mix(in srgb, var(--c) 55%, #25212a); }
 .place-modal-panel__promoters { display: flex; flex-wrap: wrap; gap: 6px 10px; padding: 10px 12px 14px; color: var(--text-lo); font: 700 .72rem var(--font-body); }
 .place-modal-panel__promoters > span:first-child { flex-basis: 100%; color: var(--c); font: 800 .68rem var(--font-display); letter-spacing: .1em; text-transform: uppercase; }
 @media (max-width: 640px) {
   .place-modal-panel__inner > .detail-actions { padding: 16px 16px 4px; gap: 6px; }
   .place-modal-panel__inner > .detail-actions > button[aria-label^="Share"] { min-width: 106px; }
-  .place-modal-panel__body { padding: 18px 20px 16px; }
+  .place-modal-panel__body { padding: 20px 22px 22px; }
   .place-modal-panel__logo { width: 42%; height: 145px; }
   .place-modal-panel__identity { min-height: 145px; }
   .place-modal-panel__identity-text h2 { font-size: clamp(2.3rem, 10vw, 3.8rem) !important; }
-  .place-modal-panel__map { height: 220px; margin: 0 20px 20px; }
+  .place-modal-panel__map { height: 220px; margin: 0 22px 22px; }
   .place-modal-panel__fact { min-height: 56px; font-size: .98rem; }
 }

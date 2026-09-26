@@ -34,8 +34,8 @@ const CSS = `
 .pdxPlace .pdxPlace__body{
   position:relative; z-index:1; border-radius:16px; overflow:hidden;
   box-shadow:var(--glass-card-shadow), var(--neon-bloom);
-  padding:18px 16px 16px;
-  display:flex; flex-direction:column; gap:12px;
+  padding:20px 18px 18px;
+  display:flex; flex-direction:column; gap:14px;
   transition:filter .16s ease, box-shadow .16s ease, border-color .16s ease;
 }
 /* Rainbow / specialty edge (nonprofit, healthcare, realestate).
