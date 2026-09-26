@@ -1,3 +1,4 @@
+import BoardShareButton from "@/components/BoardShareButton";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Bookmark, Plus, RotateCcw, Search, ShieldCheck, Tag, X } from "lucide-react";
@@ -9,6 +10,7 @@ import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import { Button } from "@/components/ds";
 import SellzListingCard, { type SellzPost } from "@/components/board/SellzListingCard";
 import BoardFollowButton from "@/components/BoardFollowButton";
+import { shareCardUrl } from "@shared/shareCards";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { timeAgo } from "@/lib/boardFeed";
 import "./PrideWork.css";
@@ -37,7 +39,7 @@ function SellzGrid({ posts, saved, selectedId, onSelect }: { posts: SellzPost[];
 }
 
 export default function Sellz() {
-  usePageSeo("SELLZ | Zaylist", "Buy and sell with Portland's queer community. Simple listings, real people, local handoffs.");
+  usePageSeo("SELLZ | Zaylist", "Buy and sell with Portland's queer community. Simple listings, real people, local handoffs.", { image: shareCardUrl("sellz"), imageAlt: "Sellz logo on Zaylist" });
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
@@ -177,7 +179,7 @@ export default function Sellz() {
 
   return <main className="gigz-page sellz-page sellz-board-page">
     <div className="gigz-shell">
-      <div className="gigz-identity"><img src="/brand/family/sellz.svg" alt="Sellz" /><span>Good stuff. New hands.</span></div>
+      <div className="gigz-identity board-share-header"><BoardShareButton title="Sellz" path="/sellz" /><img src="/brand/family/sellz.svg" alt="Sellz" /><span>Good stuff. New hands.</span></div>
       <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE MARKETPLACE</div><h1>Find your next good thing<span>.</span></h1><p>Buy and sell with your community. Message, agree, and hand off directly.</p></div>
         <div className="sellz-board-actions"><BoardFollowButton board="sellz" /><button type="button" className="gigz-post" onClick={openForm}><Plus size={17} /> Sell something <ArrowUpRight size={16} /></button></div>
       </div>

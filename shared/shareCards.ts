@@ -19,10 +19,11 @@ export const SHARE_CARD_FILES = {
   home: "zaylist-social-portland-nightlife-v2.png",
   events: "zaylist-events-1200x630.png",
   schedule: "zaylist-events-1200x630.png",
-  housing: "zaylist-housing-1200x630.png",
-  spotted: "zaylist-missed-connections-1200x630.png",
-  prideWork: "zaylist-gig-board-1200x630.png",
-  gifting: "zaylist-gifting-1200x630.png",
+  housing: "zaylist-hauz-logo-v2.png",
+  spotted: "zaylist-mizzed-logo-v2.png",
+  prideWork: "zaylist-gigz-logo-v2.png",
+  sellz: "zaylist-sellz-logo-v2.png",
+  gifting: "zaylist-giftz-logo-v2.png",
   nudeBeaches: "zaylist-nude-beaches-1200x630.png",
   outzide: "outzide-social-northwest-v1.png",
   next: "zaylist-next-1200x630.png",
@@ -52,6 +53,7 @@ export function shareCardKeyForPath(pathname: string): ShareCardKey | null {
   if (path === "/the-hauz" || path.startsWith("/the-hauz/") || path === "/hausing" || path.startsWith("/hausing/")) return "housing";
   if (path === "/spotted") return "spotted";
   if (path === "/pride-work" || path === "/gigs") return "prideWork";
+  if (path === "/sellz") return "sellz";
   if (path === "/gifting") return "gifting";
   if (path === "/nude-beaches" || path.startsWith("/nude-beaches/")) return "nudeBeaches";
   if (path === "/outzide" || path.startsWith("/outzide/")) return "outzide";

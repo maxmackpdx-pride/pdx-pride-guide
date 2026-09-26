@@ -289,6 +289,10 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "Legal | Zaylist",
     description: "Terms of use, privacy policy, and community guidelines for Zaylist.",
   },
+  "/sellz": {
+    title: "SELLZ | Zaylist",
+    description: "Buy and sell with Portland's queer community. Simple listings, real people, local handoffs.",
+  },
   "/gifting": {
     title: "GIFTZ | Zaylist",
     description: "Free queer GIFTZ board for Portland. Post gifts and in-search-of requests across PDX.",
@@ -652,7 +656,9 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
             ? `${liveProfile.displayName || liveProfile.username} on Zaylist`
             : boardShareKey === "outzide"
               ? "Outzide by Zaylist — Northwest mountain, river, rainbow trails and outdoor waypoints"
-              : "Zaylist. EVENTZ, PLACEZ, GIGZ, community, all year.",
+              : boardShareKey && ["housing", "spotted", "prideWork", "gifting", "sellz"].includes(boardShareKey)
+                ? `${routeSeo.title} — board logo`
+                : "Zaylist. EVENTZ, PLACEZ, GIGZ, community, all year.",
     ),
     type: ogType,
     // Board share cards + dynamic OG are PNG; legacy jpeg only if something else sneaks in

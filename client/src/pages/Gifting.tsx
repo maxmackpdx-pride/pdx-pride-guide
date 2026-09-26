@@ -1,3 +1,4 @@
+import BoardShareButton from "@/components/BoardShareButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Gift, MapPin, Plus, Search, X } from "lucide-react";
@@ -221,7 +222,7 @@ export default function Gifting() {
 
   return <main className="gigz-page giftz-page gifting-page">
     <div className="gigz-shell">
-      <div className="gigz-identity"><img src="/brand/family/giftz.svg" alt="Giftz" /><span>Pass it on. Find what you need.</span></div>
+      <div className="gigz-identity board-share-header"><BoardShareButton title="Giftz" path="/gifting" /><img src="/brand/family/giftz.svg" alt="Giftz" /><span>Pass it on. Find what you need.</span></div>
       <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE BOARD</div><h1>Good things move around<span>.</span></h1><p>Give what you can. Find what you need. Keep it free.</p></div>
         <div className="giftz-actions"><BoardFollowButton board="giftz" /><button type="button" className="gigz-post" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
       </div>

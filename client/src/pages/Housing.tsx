@@ -1,3 +1,4 @@
+import BoardShareButton from "@/components/BoardShareButton";
 import { ArrowDown } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 import { ArrowRight } from "lucide-react";
@@ -367,7 +368,7 @@ export default function Housing() {
         <span className="hz-hero__scrim" aria-hidden="true" />
         <div className="hz-pad">
           <div className="hz-wrap">
-            <SectionBreadcrumb section="The Haüz" />
+            <div className="hz-board-share-row"><SectionBreadcrumb section="The Haüz" /><BoardShareButton title="The Haüz" path="/the-hauz" /></div>
             <h1 className="hz-title hz-hero__title hz-hero__title--brand">
               <img className="hz-hero__brand-logo" src="/brand/family/the-hauz.svg" alt="THE HAÜZ" />
               <span className="hz-beta">Beta</span>

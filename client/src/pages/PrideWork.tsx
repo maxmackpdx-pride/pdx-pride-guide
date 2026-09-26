@@ -1,3 +1,4 @@
+import BoardShareButton from "@/components/BoardShareButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -158,7 +159,7 @@ export default function PrideWork() {
   const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/pride-work?post=${id}`); window.setTimeout(() => document.getElementById("gigz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
   return <main className="gigz-page">
     <div className="gigz-shell">
-      <div className="gigz-identity"><img src="/brand/family/gigz.svg" alt="Gigz" /><span>Work with your people.</span><BoardFollowButton board="gigz" /></div>
+      <div className="gigz-identity board-share-header"><BoardShareButton title="Gigz" path="/pride-work" /><img src="/brand/family/gigz.svg" alt="Gigz" /><span>Work with your people.</span><BoardFollowButton board="gigz" /></div>
       <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE BOARD</div><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
       <div className="gigz-filter"><label>Search Gigz<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search roles, skills, gigs" /></label><label><input type="checkbox" checked={remoteOnly} onChange={e => setRemoteOnly(e.target.checked)} /> Remote only</label>{user && <label><input type="checkbox" checked={onlyMine} onChange={e => setOnlyMine(e.target.checked)} /> My Gigz</label>}</div>
       {isLoading ? <BoardFeedSkeleton label="Loading Gigz posts" shape="board" count={3} /> : isError ? <div className="gigz-empty" role="alert">Could not load posts. <button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>Try again</button></div> : opportunities.length ? <GigRail posts={opportunities} kind="gigs" selected={selectedId} onSelect={select} /> : <div className="gigz-empty">No open gigs yet. <button onClick={() => openForm("POSTING_GIG")}>Post a gig</button></div>}
