@@ -229,6 +229,7 @@ function EventModalInner({
   const [showAddCoHost, setShowAddCoHost] = useState(false);
   const [showCalPicker, setShowCalPicker] = useState(false);
   const [attendanceFormOpen, setAttendanceFormOpen] = useState(false);
+  const [posterOrientation, setPosterOrientation] = useState<"portrait" | "landscape">("portrait");
   const [socialTab, setSocialTab] = useState<"attendance" | "missed">("attendance");
   const [editing, setEditing] = useState(false);
   const [eventForm, setEventForm] = useState<EventEditFormState | null>(null);
@@ -450,6 +451,7 @@ function EventModalInner({
   const eventTiming = getEventScheduleTiming(event.dateStart, event.dateEnd);
   const isPastEvent = eventTiming === "past";
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
+  useEffect(() => setPosterOrientation("portrait"), [posterUrl]);
   const dayCode = String(event.dayOfWeek || "").toUpperCase().slice(0, 3);
   const dayColor = DAY_TEXT_COLORS[dayCode as keyof typeof DAY_TEXT_COLORS] || "var(--text-hi)";
   // Border + glow accent: the day color, or a neutral neon for events with no
@@ -907,8 +909,8 @@ function EventModalInner({
         </div>
 
         <div className="event-modal__scroll" ref={scrollRef}>
-        <section ref={heroRef} className="event-modal__poster event-modal__hero" aria-labelledby="event-modal-title">
-          <img ref={posterImageRef} src={posterUrl} alt="" className="event-modal__poster-img" />
+        <section ref={heroRef} className={`event-modal__poster event-modal__hero event-modal--poster-${posterOrientation}`} aria-labelledby="event-modal-title">
+          <img ref={posterImageRef} src={posterUrl} alt="" className="event-modal__poster-img" onLoad={e => setPosterOrientation(e.currentTarget.naturalHeight > e.currentTarget.naturalWidth * 1.08 ? "portrait" : "landscape")} />
           <span className="event-modal__poster-fade" aria-hidden="true" />
           <span className="event-modal__poster-scan" aria-hidden="true" />
           <div className="event-modal__hero-content" ref={heroContentRef}>
@@ -922,14 +924,16 @@ function EventModalInner({
               <span ref={dateRef}>{dateLine}</span>
               <span ref={timeRef}>{timeLine}</span>
             </div>
-            <EventLocationMap
-              event={event}
-              primary={accentColor}
-              complementary={oppositeColor}
-              scheduled={rsvp.myEventIds.has(event.id)}
-              schedulePending={rsvp.isRsvpPending(event.id)}
-              onSchedule={() => rsvp.toggleRsvp(event.id)}
-            />
+            {(event.venueName || event.address) && (
+              <div className="event-modal__hero-venue">
+                {event.venueName && <strong>{event.venueName}</strong>}
+                {event.address && <span>{event.address}</span>}
+              </div>
+            )}
+            {event.ageRequirement && event.ageRequirement !== "UNVERIFIED" && (
+              <div className="event-modal__hero-age">{AGE_LABELS[event.ageRequirement]}</div>
+            )}
+            {!editing && <button type="button" className="event-modal__hero-rsvp" onClick={jumpToAttendance}>{isPastEvent ? "See who went" : "Interested?"}</button>}
             {primaryLink && !editing ? (
               <a
                 href={primaryLink.href}
@@ -985,6 +989,14 @@ function EventModalInner({
               <p className="event-modal__description">{event.description}</p>
             </section>
           )}
+          <EventLocationMap
+            event={event}
+            primary={accentColor}
+            complementary={oppositeColor}
+            scheduled={rsvp.myEventIds.has(event.id)}
+            schedulePending={rsvp.isRsvpPending(event.id)}
+            onSchedule={() => rsvp.toggleRsvp(event.id)}
+          />
           {eventSocialTabs}
           <div className="event-modal__social-room">{eventSocialPanel}</div>
 
