@@ -1,4 +1,5 @@
 import {forwardRef,useCallback,useEffect,useImperativeHandle,useLayoutEffect,useMemo,useRef,useState} from 'react';
+import './ZaydarBootNotice.css';
 
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 export type MapView={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
@@ -6,8 +7,8 @@ type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:str
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
 type CanvasProps={initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};
-const MAP_SRC='/zaydar-map/index.html?v=20260925-map-boot4';
-const BOOT_COPY='your super gay city is loading…';
+const MAP_SRC='/zaydar-map/index.html?v=20260925-map-boot5';
+const BOOT_COPY='Your super gay city is loading.';
 const MAX_3D_ATTEMPTS=3;
 const ALIVE_PHASES=new Set(['map-created','map-loaded','first-frame']);
 
@@ -20,8 +21,6 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
  const fail=useCallback((reason:string)=>{
   if(failed.current)return;
   const fatal=String(reason).startsWith('3D error:');
-  // Style load or MapLibre construction means the city is coming. Remounting
-  // a live iframe is what left the painted map under a false failure banner.
   if(!fatal&&(firstFrame||ready||ALIVE_PHASES.has(phase)))return;
   failed.current=true;latest.current.onFailure(reason);
  },[firstFrame,phase,ready]);
@@ -30,7 +29,6 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
   let timer:number|undefined;
   const arm=()=>{
    window.clearTimeout(timer);
-   // Background tabs cannot render frames. Do not count suspended time as a failure.
    if(document.hidden)return;
    const delay=phase==='loading'?25000:60000;
    timer=window.setTimeout(()=>fail(`No visible 3D frame after ${phase}.`),delay);
@@ -74,8 +72,6 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
  return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}`} title="Zaylist interactive Portland metro map" className="zaydar-demo-canvas" onLoad={()=>post('hello')}/>;
 });
 
-// Leaflet is deliberately disconnected. Its component is retained separately,
-// but this route never imports, mounts, preloads, or falls back to it.
 export default forwardRef<ZaydarHandle,CanvasProps>(function ZaydarCanvas(props,ref){
  const activeControl=useRef<ZaydarHandle>(null),lastView=useRef<MapView|null>(props.initialCamera || null);
  const attempts=useRef(0),seenCity=useRef(false);
@@ -86,19 +82,19 @@ export default forwardRef<ZaydarHandle,CanvasProps>(function ZaydarCanvas(props,
   console.warn("Map loading failed:", reason);
   attempts.current+=1;
   if(attempts.current<MAX_3D_ATTEMPTS){
-   setNotice('The map is taking longer than expected. Trying again…');
+   setNotice('The map is taking longer than expected. Trying again.');
    setGeneration(value=>value+1);
-  }else{setStopped(true);setNotice('The map couldn’t load. You can still browse listings in Map controls.');}
+  }else{setStopped(true);setNotice('The map couldn\u2019t load. You can still browse listings in Map controls.');}
  };
  useImperativeHandle(ref,()=>({send:(type,data={})=>activeControl.current?.send(type,data)}),[]);
  useEffect(()=>{
   seenCity.current=false;
-  const later=window.setTimeout(()=>{if(!seenCity.current&&!stopped)setNotice('Loading map…');},12000);
+  const later=window.setTimeout(()=>{if(!seenCity.current&&!stopped)setNotice('Loading map.');},12000);
   return()=>window.clearTimeout(later);
  },[generation,stopped]);
  const offerReload=stopped||notice.startsWith('Loading')||notice.startsWith('The map');
  return <>
   <Zaydar3D key={generation} ref={activeControl} {...props} attempt={generation} initialView={lastView.current} onFailure={recover} onVisible={()=>{seenCity.current=true;setNotice('');}} onView={reportView}/>
-  {notice&&<p className="zaydar-demo-notice" role={stopped?'alert':'status'}>{notice}{offerReload?' ':''}{offerReload&&<button onClick={retry}>Reload map</button>}</p>}
+  {notice&&<p className="zaydar-demo-notice" role={stopped?'alert':'status'}><span>{notice}</span>{offerReload&&<button onClick={retry}>Reload map</button>}</p>}
  </>;
 });

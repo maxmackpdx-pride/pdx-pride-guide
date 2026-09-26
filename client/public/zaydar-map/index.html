@@ -3,6 +3,7 @@
 <script>
 (function(){
  var failed=false,visible=false;
+ if(parent!==window)document.documentElement.dataset.embedded='1';
  function tell(type,payload){if(parent!==window)parent.postMessage(Object.assign({source:'zaydar-demo',type:type},payload||{}),location.origin);}
  function phase(value){
   if(value==='first-frame')visible=true;
@@ -57,23 +58,9 @@
 <link rel="preload" href="./vendor/maplibre-contour-0.1.0.js" as="script">
 <link rel="modulepreload" href="./river-flight.js?v=20260925-map-boot">
 <link href="../home-flight/vendor/maplibre-gl-5.6.2.css" rel="stylesheet">
-<link href="./studio.css?v=20260925-map-boot" rel="stylesheet">
+<link href="./studio.css?v=20260925-map-boot5" rel="stylesheet">
 <link rel="stylesheet" href="../outzide-map/assets/map-continuity.css?v=2"></head><body>
-<div id="map-status" role="status" aria-live="polite">your super gay city is loading…</div>
-<script>
-(function(){
-  var el=document.getElementById('map-status');
-  var copy='your super gay city is loading…';
-  if(!el)return;
-  var proto=Object.getOwnPropertyDescriptor(Node.prototype,'textContent');
-  if(!proto||!proto.set)return;
-  Object.defineProperty(el,'textContent',{
-    configurable:true,
-    get:function(){return proto.get.call(this);},
-    set:function(value){proto.set.call(this,value==='Preparing Portland…'?copy:value);}
-  });
-})();
-</script>
+<div id="map-status" role="status" aria-live="polite"></div>
 <div id="map"></div><canvas id="waypoint-lights" aria-label="Interactive Placez markers and floating event holograms"></canvas><div id="hologram-labels" aria-live="off"></div>
 <div id="exploration-status" role="status" aria-live="polite"></div>
 <div class="credit">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openfreemap.org">OpenFreeMap</a> · OpenMapTiles · <a href="https://mapterhorn.com/attribution">Mapterhorn</a></div>

@@ -17,6 +17,7 @@ body::after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;back
 .credit a:hover{color:#fff}
 #map-status{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;max-width:calc(100% - 40px);padding:14px 20px;border:1px solid #b3cbe226;border-radius:12px;background:#080e19ed;text-align:center;font-size:13px;line-height:1.5;letter-spacing:.015em;box-shadow:0 12px 40px #0006}
 #map-status:empty{display:none}
+html[data-embedded]:not([data-map-error]) #map-status{display:none}
 aside{position:fixed;left:max(20px,env(safe-area-inset-left));bottom:max(20px,env(safe-area-inset-bottom));z-index:4;font-size:12px}
 details{width:174px;border:1px solid #aac8e32b;border-radius:16px;background:linear-gradient(135deg,#182433ed,#08101bed);box-shadow:0 8px 28px #0005,inset 0 1px #ffffff09}
 details[open]{width:278px;max-width:calc(100vw - 40px)}
@@ -34,12 +35,9 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 :focus-visible{outline:2px solid #c8e3ff;outline-offset:5px;border-radius:4px}
 @media(max-width:600px){aside{left:12px;bottom:max(12px,env(safe-area-inset-bottom))}details[open]{max-width:calc(100vw - 24px)}.credit{font-size:9px;right:10px}#exploration-status{bottom:66px;width:max-content;max-width:calc(100vw - 24px)}body:has(details[open]) #exploration-status{bottom:280px}}
 @media(prefers-reduced-motion:reduce){.chevron{transition:none}}
-
-/* Keep face stacks on the floating HOÜS artwork, independent of title wrapping. */
 .standalone-hologram-faces--anchored{position:absolute;transform:translate(-50%,-50%) scale(var(--face-scale));transform-origin:center;margin-top:0;padding-left:0;white-space:nowrap;pointer-events:none}
 .standalone-hologram-face{width:var(--face-size,18px);height:var(--face-size,18px);flex-shrink:0;margin-left:calc(var(--face-size,18px)*-.28)}
 .standalone-hologram-face:first-child{margin-left:0}
-
 .map-hover-highlight{position:fixed;z-index:4;pointer-events:none;transform:translate(-50%,-50%);border:1px solid color-mix(in srgb,var(--hover-color) 70%,white);box-shadow:0 0 9px color-mix(in srgb,var(--hover-color) 35%,transparent),inset 0 0 7px color-mix(in srgb,var(--hover-color) 16%,transparent);background:color-mix(in srgb,var(--hover-color) 5%,transparent)}
 .map-hover-highlight[hidden]{display:none}
 @media (hover:hover) and (pointer:fine){

@@ -1,0 +1,33 @@
+.zaydar-demo-notice{
+  position:absolute;
+  z-index:9;
+  top:46%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  max-width:min(16rem,calc(100% - 3rem));
+  margin:0;
+  padding:0;
+  border:0;
+  background:none;
+  box-shadow:none;
+  text-align:center;
+  color:#e1e7ef;
+  font:500 1.05rem/1.25 Barlow,Inter,system-ui,sans-serif;
+  letter-spacing:.01em;
+  text-shadow:0 1px 2px #000c,0 0 18px #0008;
+}
+.zaydar-demo-notice span{
+  display:block;
+}
+.zaydar-demo-notice button{
+  display:inline-block;
+  margin-top:.7rem;
+  padding:.45rem .9rem;
+  border:1px solid color-mix(in srgb,var(--z-cyan,#19e3ff) 70%,transparent);
+  border-radius:999px;
+  background:transparent;
+  color:var(--z-cyan,#19e3ff);
+  font:700 .72rem/1 Barlow Condensed,Arial Narrow,sans-serif;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
