@@ -1,8 +1,14 @@
-// Outzide's 28/44 px outlined head and short projection, shared by Mapz's
-// non-event worlds. Screen dimensions stay constant; only the map anchor moves.
+import {extrusionAmount,roofAnchor} from './venue-roofs.js?v=20260925-roof-waypoints';
+
+function cityAmount(){
+ return window.__mapzMap?extrusionAmount(window.__mapzMap):0;
+}
+
 export function waypointGeometry(anchor,selected=false,roofLift=0){
- const size=selected?44:28,beamHeight=Math.max(selected?70:25,roofLift);
- return {x:anchor.x,y:anchor.y-beamHeight-size/2,size,bottom:anchor.y-beamHeight,anchorY:anchor.y};
+ const amount=cityAmount();
+ const origin=roofAnchor(anchor,roofLift,amount);
+ const size=selected?44:28,beamHeight=Math.max(selected?70:25,roofLift*(1-amount));
+ return {x:origin.x,y:origin.y-beamHeight-size/2,size,bottom:origin.y-beamHeight,anchorY:origin.y};
 }
 const heads=new Map(),ink=new WeakMap();
 function headSprite(color,selected){
@@ -15,7 +21,6 @@ function headSprite(color,selected){
  ctx.beginPath();ctx.roundRect(pad+.5,pad+.5,size-1,size-1,6);ctx.fill();ctx.stroke();
  const result={canvas,pad,size};heads.set(key,result);return result;
 }
-// Tint once per loaded glyph/color. Venue artwork is always white.
 function tintedIcon(image,color){
  let colors=ink.get(image);if(!colors){colors=new Map();ink.set(image,colors);}
  if(colors.has(color))return colors.get(color);
@@ -35,15 +40,13 @@ export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1){
 }
 export function drawWaypointFoot(ctx,geometry,color,materials,drawBeam,alpha=1,selected=false){
  const {x,bottom,anchorY}=geometry;
- ctx.save();ctx.globalAlpha=alpha*(selected?.9:.55);
+ const disk=1-cityAmount();
+ ctx.save();ctx.globalAlpha=alpha*(selected?.9:.55)*disk;
  drawBeam(ctx,materials.beams.get(color),{x,y:anchorY},x,bottom,selected?20:10);
  const size=selected?44:28,orb=materials.orbs.get(color);
- if(orb){ctx.globalAlpha=alpha*(selected?1:.75);ctx.drawImage(orb,x-size/2,anchorY-size/2,size,size);}
+ if(orb){ctx.globalAlpha=alpha*(selected?1:.75)*disk;ctx.drawImage(orb,x-size/2,anchorY-size/2,size,size);}
  ctx.restore();
 }
-
-// One staggered 3–5 second cadence per geographic marker, using the existing
-// map clock. No timers, texture updates, or movement of the waypoint itself.
 export function waypointLogoInterval(phase){return 3+2*(.5+.5*Math.sin(phase*1.731));}
 export function showWaypointLogo(seconds,phase,reducedMotion=false){
  if(reducedMotion)return true;

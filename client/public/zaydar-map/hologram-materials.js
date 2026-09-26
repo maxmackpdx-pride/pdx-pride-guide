@@ -1,4 +1,5 @@
 // Small reusable light materials. Rendering needs only image draws, not live filters.
+import {extrusionAmount} from './venue-roofs.js?v=20260925-roof-waypoints';
 export function createHologramMaterials(colors) {
   const beams = new Map(), orbs = new Map();
   const width = 128, height = 320;
@@ -30,8 +31,6 @@ export function createHologramMaterials(colors) {
     const painter = orb.getContext('2d');
     const shade = amount => `rgb(${rgb.map(channel => Math.round(channel * amount)).join(',')})`;
     painter.save(); painter.translate(32, 32); painter.rotate(-.08);
-    // Idle waypoints read as low, Saturn-like scanner disks instead of balls.
-    // The ring stays wider than the core so the silhouette remains obvious at map scale.
     painter.shadowColor = color; painter.shadowBlur = 9;
     painter.globalAlpha = .22; painter.strokeStyle = color; painter.lineWidth = 6;
     painter.beginPath(); painter.ellipse(0, 0, 27, 7.5, 0, 0, Math.PI * 2); painter.stroke();
@@ -43,7 +42,6 @@ export function createHologramMaterials(colors) {
     painter.globalAlpha = 1; painter.fillStyle = glow;
     painter.beginPath(); painter.ellipse(0, 0, 10, 5.7, 0, 0, Math.PI * 2); painter.fill();
     painter.strokeStyle = color; painter.lineWidth = 1; painter.stroke();
-    // Repaint the near half of the ring across the planet to create real overlap.
     painter.shadowBlur = 2; painter.globalAlpha = .95; painter.lineWidth = 1.5;
     painter.beginPath(); painter.ellipse(0, 0, 27, 7.5, 0, 0, Math.PI); painter.stroke();
     painter.restore();
@@ -57,14 +55,14 @@ export function createHologramMaterials(colors) {
 
 export function projectorGroundScale(zoom){
   const value=Math.max(0,Math.min(1,(zoom-12)/3));
-  return .28+.72*value*value*(3-2*value);
+  const amount=window.__mapzMap?extrusionAmount(window.__mapzMap):0;
+  return (.28+.72*value*value*(3-2*value))*(1-amount);
 }
 
 export function drawProjectionBeam(ctx, texture, anchor, logoX, top, halfWidth) {
   const height = anchor.y - top;
   if (height <= 1) return;
   ctx.save();
-  // Shear the material toward the real address; only the hologram head can wander.
   ctx.transform(1, 0, (anchor.x - logoX) / height, 1, logoX - halfWidth, top);
   ctx.drawImage(texture, 0, 0, halfWidth * 2, height);
   ctx.restore();
