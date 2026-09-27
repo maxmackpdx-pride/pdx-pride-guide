@@ -6213,6 +6213,27 @@ function runBootMigrationsOnce() {
     recordBootMigration("dedupe_pid_night1_midtown_hidden_v1");
   }
 
+  // The newly published Double XX listing supersedes the generic Gear listing
+  // for the same CC Slaughters party on September 26. Keep the old row for admin history.
+  if (!hasBootMigration("hide_duplicate_cc_gear_sep26_v1")) {
+    const keeper = sqlite.prepare(`
+      SELECT id FROM events WHERE id = 813 AND status = 'LIVE'
+        AND title = 'Double XX Gear Night' AND venue_name = 'CC Slaughters'
+        AND substr(date_start, 1, 16) = '2026-09-26T21:00'
+    `).get() as { id: number } | undefined;
+    if (keeper) {
+      sqlite.prepare(`
+        UPDATE events SET status = 'HIDDEN',
+          admin_notes = COALESCE(NULLIF(trim(admin_notes), '') || ' | ', '') ||
+            'Duplicate of Double XX Gear Night (event 813) on 2026-09-26.'
+        WHERE id = 636 AND status = 'LIVE' AND title = 'Gear'
+          AND venue_name = 'CC Slaughters'
+          AND substr(date_start, 1, 16) = '2026-09-26T21:00'
+      `).run();
+    }
+    recordBootMigration("hide_duplicate_cc_gear_sep26_v1");
+  }
+
   // Community correction: Either/Or was sold; no longer queer-owned (still queer-friendly).
   if (!hasBootMigration("either_or_not_queer_owned_v1")) {
     sqlite

@@ -114,7 +114,7 @@ function GigRail({ posts, kind, selected, onSelect }: {
           return <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
             {isTalent ? <button type="button" className="gigz-talent" style={{ "--gigz-accent": ["#b984ff", "#bbff54", "#ff8bb8", "#8edfff"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ${poster}: ${post.title}`}>
               <span className="gigz-talent__status"><span><i /> Available for gigs</span><small>{post.username === "hausing_demo" ? "DEMO LISTING" : `Posted ${timeAgo(post.createdAt)}`}</small></span>
-              <span className="gigz-talent__portrait">{post.posterPhotoUrl || post.imageUrl ? <img src={post.posterPhotoUrl || post.imageUrl || ""} alt="" loading="lazy" /> : <UserAvatar photoUrl={post.posterPhotoUrl} avatarChoice={post.avatarChoice} avatarRing={post.posterAvatarRing} displayName={poster} username={post.username} size={150} />}</span>
+              {post.username?.toLowerCase() !== "tucker_pdmax" && <span className="gigz-talent__portrait">{post.posterPhotoUrl || post.imageUrl ? <img src={post.posterPhotoUrl || post.imageUrl || ""} alt="" loading="lazy" /> : <UserAvatar photoUrl={post.posterPhotoUrl} avatarChoice={post.avatarChoice} avatarRing={post.posterAvatarRing} displayName={poster} username={post.username} size={150} />}</span>}
               <strong>{poster}</strong><span className="gigz-talent__role">{post.title}</span>
               <span className="gigz-talent__location"><MapPin size={14} /> {post.isRemote ? "Remote" : post.location || "Portland"}</span>
               <span className="gigz-talent__hire">View and message <ArrowUpRight size={18} /></span>
@@ -304,7 +304,7 @@ export function GigListingCard({
             <span className="gig-talent-card__time">Posted {timeAgo(gig.createdAt)}</span>
           </div>
           <div className="gig-talent-card__identity">
-            <UserAvatar
+            {gig.username?.toLowerCase() !== "tucker_pdmax" && <UserAvatar
               photoUrl={gig.posterPhotoUrl}
               avatarChoice={gig.avatarChoice}
               avatarRing={gig.posterAvatarRing}
@@ -313,7 +313,7 @@ export function GigListingCard({
               href={profileHref}
               onClick={e => e.stopPropagation()}
               size={76}
-            />
+            />}
             <div>
               <h4 className="gig-talent-card__name">{talentName}</h4>
               <p className="gig-talent-card__role">{gig.title}</p>
