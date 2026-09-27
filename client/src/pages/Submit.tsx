@@ -1233,6 +1233,20 @@ export default function Submit() {
       </div>
 
       {mode === "landing" && (
+        <section className="submit-participate" aria-labelledby="submit-participate-title">
+          <div className="submit-participate__copy">
+            <span className="submit-participate__kicker">For the community</span>
+            <h2 id="submit-participate-title">Want to participate?</h2>
+            <p>Help keep Portland’s queer scene visible. Find an event to attend, or tell us about one missing from Zaylist.</p>
+          </div>
+          <div className="submit-participate__actions">
+            <a className="submit-participate__button submit-participate__button--primary" href="/events">Find an event</a>
+            <button className="submit-participate__button" type="button" onClick={() => goMode("suggest")}>Share a missing event</button>
+          </div>
+        </section>
+      )}
+
+      {mode === "landing" && (
         <BoardCloseSeam
           line="Submit it. Claim it. Keep the nights ours."
           url="zaylist.com/submit"
