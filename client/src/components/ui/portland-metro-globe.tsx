@@ -419,7 +419,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
             const svg=globeWaypointSvg(waypointLogo,venue.color);
             if(svg){
               venue.waypointImage.onload=draw;
-              venue.waypointImage.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" '));
+              venue.waypointImage.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
             }
           }
           states.set(venue.phase,{progress:initialReveal || still?1:0,openedAt:elapsed,closing:false,offsetX:0,offsetY:0,waypoint,waypointLogo});
