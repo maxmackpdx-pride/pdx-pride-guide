@@ -133,7 +133,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         if(!row.product){
           const html=waypointHtml({id:"venue",badgeId:row.isBar?"bar":"venue",color:row.color,size:42});
           const svg=html.match(/<svg[\s\S]*?<\/svg>/)?.[0];
-          if(svg){waypointImage.onload=draw;waypointImage.src=`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;}
+          if(svg){waypointImage.onload=draw;waypointImage.src=`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" '))}`;}
         }
         if(point)venues.push({id:row.id,product:row.product,point,image,waypointImage,color:row.color,phase:row.phase});
       }
