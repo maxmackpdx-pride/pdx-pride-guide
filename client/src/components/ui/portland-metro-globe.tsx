@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { waypointHtml } from "@/lib/livingMapWaypoints";
+import { waypointHtml, type WaypointId } from "@/lib/livingMapWaypoints";
+import { directoryFallbackLogo } from "@/lib/directoryLogos";
 import hologramData from "./portland-globe-holograms.json";
 
 // A deliberately enlarged metro wrapped over a sphere, not an Earth-scale globe.
@@ -42,6 +43,7 @@ const smooth = (value: number) => { const t=Math.max(0,Math.min(1,value)); retur
 const MAX_HOLOGRAMS = 8;
 // These venue marks and Zaylist family logos keep their original artwork.
 const FEATURED_LOGO_IDS = new Set(["1-0", "2-0", "5-0", "28-0", "33-0", "41-0"]);
+const PLACE_ICON: Record<string, WaypointId> = { bar: "bar", restaurant: "venue", cafe: "cafe", venue: "venue", shop: "shop", hotel: "hauz", campground: "park" };
 type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number; waypoint: boolean };
 type Point = { x: number; y: number; z: number; tone: number; beamExcluded?: boolean; brightRoad?: boolean; hoverGlow?: { strength:number; lift:number; hue:number; core:number; lastLit:number }; glow?: { strength: number; lastLit: number; r: number; g: number; b: number } };
 function sphere(u: number, v: number, tone = 0): Point {
@@ -74,6 +76,18 @@ const PRODUCT_WAYPOINTS: Venue[] = [
     equatorialLatitude((Math.random()-.5)*.6,true)),
 }));
 
+const OUTZIDE_SOURCE = [
+  { id: "outzide-rooster-rock", name: "Rooster Rock", logo: "/outzide-map/assets/motifs/places/rooster-rock.svg", color: "#ff00cc" },
+  { id: "outzide-sauvie-island", name: "Sauvie Island", logo: "/outzide-map/assets/motifs/places/sauvie-island.svg", color: "#ff00cc" },
+  { id: "outzide-silver-falls", name: "Silver Falls State Park", logo: "/outzide-map/assets/motifs/places/silver-falls.svg", color: "#39ff14" },
+  { id: "outzide-cape-lookout", name: "Cape Lookout State Park", logo: "/outzide-map/assets/motifs/places/cape-lookout.svg", color: "#f2ca78" },
+  { id: "outzide-beacon-rock", name: "Beacon Rock State Park", logo: "/outzide-map/assets/motifs/places/beacon-rock.svg", color: "#39ff14" },
+];
+const OUTZIDE_WAYPOINTS: Venue[] = OUTZIDE_SOURCE.map((waypoint, index) => ({
+  ...waypoint, coordinates: [0, 0], logoMode: "alpha",
+  point: sphere(warp(-1+(index+.2+Math.random()*.6)/(OUTZIDE_SOURCE.length/2),-.15,5,true),
+    equatorialLatitude((Math.random()-.5)*.6,true)),
+}));
 
 export function PortlandMetroGlobe({ active, still }: { active: boolean; still: boolean }) {
   const mode=useRef({active,still});
@@ -116,8 +130,18 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     };
     // Previous frame footprints keep the dot pass beneath beams and artwork.
     let beamFootprints: { ax:number; ay:number; x:number; y:number; halfWidth:number; strength:number; rgb:number[] }[] = [];
+    const fallbackLogoCache=new Map<string,Promise<string>>();
+    const fallbackLogoData=(type:string)=>{
+      const cached=fallbackLogoCache.get(type);if(cached)return cached;
+      const pending=new Promise<string>(resolve=>{
+        const source=new Image();
+        source.onload=()=>{try{const canvas=document.createElement("canvas");canvas.width=source.naturalWidth;canvas.height=source.naturalHeight;canvas.getContext("2d")?.drawImage(source,0,0);resolve(canvas.toDataURL("image/png"));}catch{resolve("");}};
+        source.onerror=()=>resolve("");source.src=directoryFallbackLogo(type);
+      });
+      fallbackLogoCache.set(type,pending);return pending;
+    };
     const venues: { id: string; product: boolean; point: Point; image: HTMLCanvasElement; waypointImage: HTMLImageElement; color: string; phase: number }[] = [];
-    type AtlasEntry = {id:string; coordinates:[number,number];color:string;phase:number;product:boolean;isBar?:boolean;x:number;y:number;w:number;h:number};
+    type AtlasEntry = {id:string; coordinates:[number,number];color:string;phase:number;product:boolean;isBar?:boolean;placeType?:string|null;x:number;y:number;w:number;h:number};
     const atlas=new Image();atlas.decoding="async";
     atlas.src='/home-globe/holograms.webp';
     // Coordinates and labels ship with the app; no map service or data fetch.
@@ -131,12 +155,32 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const point=row.product?PRODUCT_WAYPOINTS.find(p=>p.id===row.id)?.point:placePoint({lat,lon});
         const waypointImage=new Image();
         if(!row.product){
-          const html=waypointHtml({id:"venue",badgeId:row.isBar?"bar":"venue",color:row.color,size:42});
-          const svg=html.match(/<svg[\s\S]*?<\/svg>/)?.[0];
-          if(svg){waypointImage.onload=draw;waypointImage.src=`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" '))}`;}
+          const placeType=row.placeType||(row.isBar?"bar":"venue");
+          const placeIcon=PLACE_ICON[placeType]||"venue";
+          void fallbackLogoData(placeType).then(logoUrl=>{
+            const html=waypointHtml({id:logoUrl?"venue":placeIcon,badgeId:logoUrl?placeIcon:undefined,color:row.color,size:42,logoUrl:logoUrl||undefined});
+            const svg=html.match(/<svg[\s\S]*?<\/svg>/)?.[0];
+            if(svg){waypointImage.onload=draw;waypointImage.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg.replace("<svg ", "<svg xmlns=\"http://www.w3.org/2000/svg\" "));}
+          });
         }
         if(point)venues.push({id:row.id,product:row.product,point,image,waypointImage,color:row.color,phase:row.phase});
       }
+      OUTZIDE_WAYPOINTS.forEach((waypoint,index)=>{
+        const art=new Image();art.decoding="async";
+        art.onload=()=>{
+          const image=document.createElement("canvas");image.width=image.height=256;
+          const ink=image.getContext("2d");if(!ink)return;
+          const scale=Math.min(248/art.naturalWidth,248/art.naturalHeight);
+          const w=art.naturalWidth*scale,h=art.naturalHeight*scale;
+          ink.drawImage(art,(256-w)/2,(256-h)/2,w,h);
+          const pixels=ink.getImageData(0,0,256,256);
+          for(let i=0;i<pixels.data.length;i+=4)if(pixels.data[i+3])pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=255;
+          ink.putImageData(pixels,0,0);
+          if(waypoint.point)venues.push({id:waypoint.id,product:true,point:waypoint.point,image,waypointImage:new Image(),color:waypoint.color||"#00ffff",phase:230+index*2.39996});
+          draw();
+        };
+        art.src=waypoint.logo||"";
+      });
       draw();
     }).catch(()=>{ /* The globe remains visible if the optional artwork fails. */ });
     const texture = new Image();
