@@ -6,10 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 import HomeStageCard from "@/components/home/HomeStageCard";
-import HomeWorldCard from "@/components/home/HomeWorldCard";
-import { WorldFanCarousel } from "@/components/home/WorldFanCarousel";
+import TonightPanel from "@/components/home/TonightPanel";
 import { HandwritingText } from "@/components/ui/handwriting-text";
-import { WORLDS } from "@/lib/homeWorlds";
 import {
   useHomeStageSamples,
   type HomeStageBoardKey,
@@ -42,7 +40,6 @@ export default function HomeStage({ afterWelcome }: Props) {
   const logoRef = useRef<HTMLImageElement>(null);
   const [logoReady, setLogoReady] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [selectedWorld, setSelectedWorld] = useState(0);
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
 
@@ -126,56 +123,7 @@ export default function HomeStage({ afterWelcome }: Props) {
       </section>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
-      <section className="home-front__worlds" id="home-worlds" aria-labelledby="home-worlds-title">
-        <span className="home-front__worlds-fx" aria-hidden="true">
-          <i className="home-front__worlds-orb home-front__worlds-orb--a" />
-          <i className="home-front__worlds-orb home-front__worlds-orb--b" />
-          <i className="home-front__worlds-orb home-front__worlds-orb--c" />
-          <span className="home-front__worlds-grid" />
-        </span>
-        <header className="home-front__worlds-head">
-          <h2 id="home-worlds-title">
-            <span>You&apos;re</span>
-            {" "}not<br />looking for{" "}
-            <span className="home-front__content-word">
-              <span className="home-front__content-word-core">Content</span>
-              <span className="home-front__content-word-a" aria-hidden="true">Content</span>
-              <span className="home-front__content-word-b" aria-hidden="true">Content</span>
-            </span>
-            .
-          </h2>
-          <p>Queer Portland, connected. Find your night out, your next escape, and your people. Pick a place to start; it’s all part of Zaylist.</p>
-        </header>
-        <WorldFanCarousel
-          total={WORLDS.length}
-          selected={selectedWorld}
-          onSelect={setSelectedWorld}
-          className="home-front__deck"
-          label="You&apos;re not looking for content."
-          autoplayMs={5600}
-          labelOf={index => WORLDS[index].title}
-          accentOf={index => WORLDS[index].accent}
-        >
-          {WORLDS.map((world, index) => {
-            /*
-             * Only the front card and its two neighbours run their own motion.
-             * Ten slides all rotating flyers and marquees at once is the thing
-             * that made this rail stutter.
-             */
-            const dist = Math.min(
-              Math.abs(index - selectedWorld),
-              WORLDS.length - Math.abs(index - selectedWorld),
-            );
-            return (
-              <HomeWorldCard
-                key={world.key}
-                world={world}
-                hot={dist <= 1}
-              />
-            );
-          })}
-        </WorldFanCarousel>
-      </section>
+      <TonightPanel />
     </div>
   );
 }
