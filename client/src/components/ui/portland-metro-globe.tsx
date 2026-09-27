@@ -140,8 +140,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       });
       fallbackLogoCache.set(type,pending);return pending;
     };
-    const venues: { id: string; product: boolean; point: Point; image: HTMLCanvasElement; waypointImage: HTMLImageElement; color: string; phase: number }[] = [];
-    type AtlasEntry = {id:string; coordinates:[number,number];color:string;phase:number;product:boolean;isBar?:boolean;placeType?:string|null;x:number;y:number;w:number;h:number};
+    const venues: { id: string; product: boolean; point: Point; image: HTMLCanvasElement; waypointImage: HTMLImageElement; color: string; phase: number; logoKey:string }[] = [];
+    type AtlasEntry = {id:string; coordinates:[number,number];color:string;phase:number;product:boolean;isBar?:boolean;placeType?:string|null;logoKey?:string;x:number;y:number;w:number;h:number};
     const atlas=new Image();atlas.decoding="async";
     atlas.src='/home-globe/holograms.webp';
     // Coordinates and labels ship with the app; no map service or data fetch.
@@ -163,7 +163,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
             if(svg){waypointImage.onload=draw;waypointImage.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg.replace("<svg ", "<svg xmlns=\"http://www.w3.org/2000/svg\" "));}
           });
         }
-        if(point)venues.push({id:row.id,product:row.product,point,image,waypointImage,color:row.color,phase:row.phase});
+        if(point)venues.push({id:row.id,product:row.product,point,image,waypointImage,color:row.color,phase:row.phase,logoKey:(row.logoKey||row.id).toLowerCase()});
       }
       OUTZIDE_WAYPOINTS.forEach((waypoint,index)=>{
         const art=new Image();art.decoding="async";
@@ -174,9 +174,11 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           const w=art.naturalWidth*scale,h=art.naturalHeight*scale;
           ink.drawImage(art,(256-w)/2,(256-h)/2,w,h);
           const pixels=ink.getImageData(0,0,256,256);
-          for(let i=0;i<pixels.data.length;i+=4)if(pixels.data[i+3])pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=255;
+          const tint=waypoint.color||"#00ffff";
+          const tintRgb=[parseInt(tint.slice(1,3),16),parseInt(tint.slice(3,5),16),parseInt(tint.slice(5,7),16)];
+          for(let i=0;i<pixels.data.length;i+=4)if(pixels.data[i+3]){pixels.data[i]=tintRgb[0];pixels.data[i+1]=tintRgb[1];pixels.data[i+2]=tintRgb[2];}
           ink.putImageData(pixels,0,0);
-          if(waypoint.point)venues.push({id:waypoint.id,product:true,point:waypoint.point,image,waypointImage:new Image(),color:waypoint.color||"#00ffff",phase:230+index*2.39996});
+          if(waypoint.point)venues.push({id:waypoint.id,product:true,point:waypoint.point,image,waypointImage:new Image(),color:waypoint.color||"#00ffff",phase:230+index*2.39996,logoKey:(waypoint.logo||waypoint.id).toLowerCase()});
           draw();
         };
         art.src=waypoint.logo||"";
@@ -391,11 +393,16 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         }
         const initialReveal = states.size===0 && lastShown.current.size===0;
         const candidates = projected.filter(venue=>venue.anchor.z>.3 && !states.has(venue.phase));
+        // Identical logo assets can rotate in later, but never share the screen.
+        const activeLogoKeys=()=>new Set([...states.keys()].map(key=>projected.find(item=>item.phase===key)?.logoKey).filter((key):key is string=>!!key));
         // Farthest-first picks keep the open set distributed over the visible
         // geography, while a cooldown gives other venues a turn.
         while (states.size<MAX_HOLOGRAMS && candidates.length && (initialReveal || still || elapsed>=nextOpen.current)) {
+          const openLogoKeys=activeLogoKeys();
+          const eligible=candidates.filter(venue=>!openLogoKeys.has(venue.logoKey));
+          if(!eligible.length)break;
           let best=0, bestScore=-Infinity;
-          candidates.forEach((venue,index)=>{
+          eligible.forEach((venue,index)=>{
             const distance=states.size ? Math.min(...[...states.keys()].map(key=>{
               const other=projected.find(item=>item.phase===key);
               return other ? Math.hypot(venue.anchor.x-other.anchor.x,venue.anchor.y-other.anchor.y)/radius : 2;
@@ -405,7 +412,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
             const score=distance-cooldown;
             if(score>bestScore){best=index;bestScore=score;}
           });
-          const venue=candidates.splice(best,1)[0];
+          const venue=eligible[best];
+          candidates.splice(candidates.indexOf(venue),1);
           const waypoint = !venue.product && !FEATURED_LOGO_IDS.has(venue.id);
           states.set(venue.phase,{progress:initialReveal || still?1:0,openedAt:elapsed,closing:false,offsetX:0,offsetY:0,waypoint});
           nextOpen.current=elapsed+250;
