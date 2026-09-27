@@ -1,4 +1,14 @@
 const EMPTY={type:'FeatureCollection',features:[]};
+// Keep the tint's faces in front of the vector-tile extrusion. Coplanar faces
+// flicker as the depth buffer changes precision during zoom and pitch.
+function tintShell(ring,center){
+ const meters=.35,lat=center[1]*Math.PI/180;
+ const dx=meters/(111320*Math.cos(lat)),dy=meters/111320;
+ return ring.map(([lng,latitude])=>[
+  lng+(lng>=center[0]?dx:-dx),
+  latitude+(latitude>=center[1]?dy:-dy)
+ ]);
+}
 
 export function extrusionAmount(target){
  const zoom=Math.max(0,Math.min(1,(target.getZoom()-14.25)/1.1));
@@ -97,14 +107,23 @@ export function createVenueRoofs(map){
     // Last Placez on a building wins the tint; every Placez still snaps to that roof.
     used.set(key,{
      type:'Feature',
-     properties:{color,height:Math.max(8,Number(best.height)||9)+1.2},
-     geometry:{type:'Polygon',coordinates:[best.ring]}
+     properties:{color,height:Math.max(8,Number(best.height)||9)+.5},
+     geometry:{type:'Polygon',coordinates:[tintShell(best.ring,best.center)]}
     });
    }
-   for(const feature of used.values())list.push(feature);
-   map.getSource('venue-roofs')?.setData({type:'FeatureCollection',features:list});
+   for(const [key,feature] of [...used].sort(([a],[b])=>a.localeCompare(b)))list.push(feature);
+   const data={type:'FeatureCollection',features:list};
+   const key=JSON.stringify(data);
+   if(key!==this.dataKey){
+    this.dataKey=key;
+    map.getSource('venue-roofs')?.setData(data);
+   }
    if(map.getLayer('venue-roofs')){
-    map.setPaintProperty('venue-roofs','fill-extrusion-opacity',Math.max(0,Math.min(.95,amount*.95)));
+    const opacity=Math.max(0,Math.min(1,amount));
+    if(opacity!==this.opacity){
+     this.opacity=opacity;
+     map.setPaintProperty('venue-roofs','fill-extrusion-opacity',opacity);
+    }
    }
   }
  };
