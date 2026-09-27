@@ -6,6 +6,7 @@ import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
 import { moderateFields, moderationMessage } from "@shared/contentModeration";
 import { redgifsMedia } from "@shared/communityMedia";
+import { eventMentionsDirectoryGroup } from "./qsearch/directoryBrands";
 import { parsePacificDateTime } from "@shared/missedConnections";
 
 const now = () => new Date().toISOString();
@@ -84,7 +85,12 @@ export function linkQSearchCandidateEvent(candidateId:string,eventId:number){
   try{const brands=JSON.parse(row.brands_json);if(Array.isArray(brands))linkQSearchCommunityEvent(eventId,brands);}catch{/* Malformed archived candidate. */}
 }
 function communityEvents(id:string){
-  const rows=sqlite.prepare(`SELECT DISTINCT e.id,e.title,e.date_start dateStart,e.date_end dateEnd,e.venue_name venueName,e.poster_image_url posterImageUrl FROM community_relationships r JOIN events e ON e.id=CAST(r.target_id AS INTEGER) WHERE r.community_id=? AND r.target_type='event' AND e.status='LIVE' AND e.is_public=1 AND e.is_private=0 ORDER BY e.date_start DESC LIMIT 180`).all(id) as Array<{id:number;title:string;dateStart:string;dateEnd:string;venueName:string;posterImageUrl:string|null}>;
+  // Match published listings that never had a QSearch candidate as well as explicit links.
+  const group = sqlite.prepare("SELECT b.name,b.type FROM communities c JOIN businesses b ON b.id=c.source_business_id WHERE c.id=? AND b.active=1").get(id) as {name:string;type:string}|undefined;
+  const linked = new Set((sqlite.prepare("SELECT target_id FROM community_relationships WHERE community_id=? AND target_type='event'").all(id) as Array<{target_id:string}>).map(row=>Number(row.target_id)));
+  const rows = (sqlite.prepare(`SELECT id,title,description,date_start dateStart,date_end dateEnd,venue_name venueName,poster_image_url posterImageUrl FROM events WHERE status='LIVE' AND is_public=1 AND is_private=0 ORDER BY date_start DESC`).all() as Array<{id:number;title:string;description:string;dateStart:string;dateEnd:string;venueName:string;posterImageUrl:string|null}>)
+    .filter(event=>linked.has(event.id)||Boolean(group&&eventMentionsDirectoryGroup(event,group)))
+    .map(({description,...event})=>event);
   const upcoming:Array<typeof rows[number]&{url:string}>=[],past:typeof upcoming=[];
   for(const row of rows){const end=parsePacificDateTime(row.dateEnd||row.dateStart)??Date.parse(row.dateEnd||row.dateStart);const entry={...row,url:eventPath(row.id,row.title)};(Number.isFinite(end)&&end<Date.now()?past:upcoming).push(entry);}
   upcoming.sort((a,b)=>a.dateStart.localeCompare(b.dateStart));
@@ -132,8 +138,8 @@ export function registerCommunityRoutes(app:Express,requireAuth:RequestHandler){
     const row=bySlug(req.params.slug);
     if(!row||!readable(row,req.session.userId))return res.status(404).json({error:"Community not found"});
     const state=claimState(row);
-    if(!state.isClaimable)return res.status(409).json({error:"This community is already owned or cannot be claimed."});
-    if(state.hasPendingClaim)return res.status(409).json({error:"This community already has a pending claim."});
+    if(!state.isClaimable)return res.status(409).json({error:"This page already has a manager or is not available to manage."});
+    if(state.hasPendingClaim)return res.status(409).json({error:"A request to manage this page is already under review."});
     const reason=text(req.body?.claimReason,500);
     if(reason.length<10)return res.status(400).json({error:"Tell us how you're connected to this community (10+ characters)."});
     if(!allowed({claimReason:reason},res))return;

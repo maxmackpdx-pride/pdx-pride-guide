@@ -1,4 +1,3 @@
-import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -6,7 +5,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest, parseApiError, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
-import AuthModal from "@/components/AuthModal";
+import CommunityPageInvitation from "@/components/CommunityPageInvitation";
 import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import SpectrumLoader from "@/components/SpectrumLoader";
 import { communityLogo } from "@shared/communityLogos";
@@ -19,21 +18,12 @@ export default function ZIndex() {
   const [, navigate] = useLocation();
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
-  const [claimSlug, setClaimSlug] = useState<string | null>(null);
-  const [claimReason, setClaimReason] = useState("");
-  const [claimError, setClaimError] = useState("");
-  const [showAuth, setShowAuth] = useState(false);
   const [draft, setDraft] = useState({ name: "", description: "", neighborhood: "", visibility: "public", membershipPolicy: "open" });
   const communities = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"] });
   const create = useMutation({
     mutationFn: async () => (await apiRequest("POST", "/api/communities", draft)).json(),
     onSuccess: async (item: CommunitySummary) => { await queryClient.invalidateQueries({ queryKey: ["/api/communities"] }); navigate(`/z/${item.slug}`); },
     onError: err => setError(parseApiError(err, "Community could not be created.")),
-  });
-  const claim = useMutation({
-    mutationFn: async () => (await apiRequest("POST", `/api/communities/${encodeURIComponent(claimSlug || "")}/claim`, { claimReason })).json(),
-    onSuccess: async () => { setClaimSlug(null); setClaimReason(""); setClaimError(""); await queryClient.invalidateQueries({ queryKey: ["/api/communities"] }); },
-    onError: err => setClaimError(parseApiError(err, "Could not submit this claim.")),
   });
   return <div className="z-communities">
     <header className="z-communities__hero">
@@ -63,16 +53,8 @@ export default function ZIndex() {
           <div className="z-community-card__meta"><span>{community.memberCount} {community.memberCount === 1 ? "member" : "members"}</span>{community.neighborhood ? <span>{community.neighborhood}</span> : null}</div>
         </div>
         </Link>
-        {community.isClaimable ? <div className="z-community-card__claim-area">
-          {community.hasPendingClaim ? <span className="z-community-card__claim-pending">Claim pending review</span> : claimSlug === community.slug ? <form onSubmit={event => { event.preventDefault(); claim.mutate(); }}>
-            <label htmlFor={`claim-${community.id}`}>How are you connected to {community.name}?</label>
-            <textarea id={`claim-${community.id}`} value={claimReason} onChange={event => setClaimReason(event.target.value)} minLength={10} maxLength={500} required autoFocus />
-            {claimError ? <p role="alert">{claimError}</p> : null}
-            <div><button type="submit" disabled={claim.isPending}>SEND FOR REVIEW</button><button type="button" onClick={() => { setClaimSlug(null); setClaimReason(""); setClaimError(""); }}>CANCEL</button></div>
-          </form> : <button type="button" className="z-community-card__claim" onClick={() => { if (!user) { setShowAuth(true); return; } setClaimSlug(community.slug); setClaimReason(""); setClaimError(""); }}>Claim me <ArrowRight size={14} aria-hidden="true" /></button>}
-        </div> : null}
+        <CommunityPageInvitation community={community}/>
       </article>; })}
     </section>
-    {showAuth ? <AuthModal onClose={() => setShowAuth(false)} /> : null}
   </div>;
 }

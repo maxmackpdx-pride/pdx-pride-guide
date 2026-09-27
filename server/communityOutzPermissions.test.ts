@@ -149,3 +149,24 @@ test("destination wall edits and deletion enforce ownership and deletion removes
   assert.equal(sqlite.prepare("SELECT COUNT(*) n FROM outz_wall_comments WHERE post_id=?").get(post.id)?.n, 0);
   assert.equal(updateOutzWallPost(post.id, author, "Revive"), false);
 });
+
+test("Z/List matches legacy group events without exposing private or draft listings", () => {
+  const groupId=Number(sqlite.prepare("INSERT INTO businesses (name,type,description,active) VALUES ('Bearracuda','group','Synthetic matching group',1)").run().lastInsertRowid);
+  const response=call("post", "/api/communities", user("matching"), {name:"Matching regression",description:"Test matching outside the candidate pipeline"});
+  assert.equal(response.status,201,JSON.stringify(response.result));
+  const group=response.result;
+  sqlite.prepare("UPDATE communities SET source_business_id=? WHERE id=?").run(groupId,group.id);
+  const insert=sqlite.prepare("INSERT INTO events (title,description,venue_name,date_start,date_end,status,is_public,is_private) VALUES (?,?,?,?,?,?,?,?)");
+  const future=new Date(Date.now()+86400000).toISOString();
+  const add=(title:string,status='LIVE',pub=1,priv=0)=>Number(insert.run(title,'A group night','A different venue',future,future,status,pub,priv).lastInsertRowid);
+  const eventId=add('Bearracuda Portland: future party');
+  const hidden=add('Bearracuda private event','LIVE',0,1);
+  const draft=add('Bearracuda draft event','DRAFT');
+  const unrelated=add('Unrelated party');
+  linkQSearchCommunityEvent(eventId,[{businessId:groupId,role:'group'}]);
+  const legacy=add('Bearracuda Seattle future party');
+  const upcoming=call('get','/api/communities/:slug',undefined,{}, {slug:group.slug}).result.events.upcoming;
+  assert.equal(upcoming.filter((event:any)=>event.id===eventId).length,1);
+  assert.ok(upcoming.some((event:any)=>event.id===legacy));
+  assert.ok(!upcoming.some((event:any)=>[hidden,draft,unrelated].includes(event.id)));
+});

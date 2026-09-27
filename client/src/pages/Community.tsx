@@ -1,3 +1,4 @@
+import CommunityPageInvitation from "@/components/CommunityPageInvitation";
 import { ArrowUpRight } from "lucide-react";
 import PageRecovery from "@/components/PageRecovery";
 import { useState } from "react";
@@ -123,6 +124,7 @@ export default function Community({ params }: { params: { communitySlug: string 
         {item.canManage ? <Button onClick={() => setManaging(value => !value)}>{managing ? "CLOSE MODERATOR DESK" : "MANAGE COMMUNITY"}</Button> : null}</div>
       </div>
     </header>
+    <CommunityPageInvitation community={item}/>
     {error ? <p className="z-community-detail__error" role="alert">{error}</p> : null}
     {notice ? <p role="status">{notice}</p> : null}
     <nav className="z-community-tabs" aria-label="Community content">{(["posts","upcoming","past"] as const).map(tab => <button type="button" key={tab} aria-current={feedTab===tab?"page":undefined} onClick={() => setFeedTab(tab)}>{tab==="posts"?"Posts":tab==="upcoming"?`Upcoming events (${item.events.upcoming.length})`:`Past events (${item.events.past.length})`}</button>)}</nav>
@@ -142,7 +144,7 @@ export default function Community({ params }: { params: { communitySlug: string 
       </article>)}</div> : <div className="z-community-events">{(feedTab==="upcoming"?item.events.upcoming:item.events.past).length ? (feedTab==="upcoming"?item.events.upcoming:item.events.past).map(renderEvent) : <p className="z-community-posts__empty">{feedTab==="upcoming"?"No upcoming events connected yet.":"No past events connected yet."}</p>}</div>}
     </main><aside>
       <section className="z-community-panel"><h2>RULES</h2><ol>{item.rules.map(rule => <li key={rule}>{rule}</li>)}</ol></section>
-      <section className="z-community-panel"><h2>MODERATORS</h2>{item.moderators.length ? item.moderators.map(mod => <Link key={mod.id} href={`/u/${mod.username}`}>{mod.displayName || mod.username}</Link>) : <p>Managed by Zaylist until ownership is claimed.</p>}</section>
+      <section className="z-community-panel"><h2>MODERATORS</h2>{item.moderators.length ? item.moderators.map(mod => <Link key={mod.id} href={`/u/${mod.username}`}>{mod.displayName || mod.username}</Link>) : <p>This page is listed by ZayList. Group organizers are welcome to run it here.</p>}</section>
       <section className="z-community-panel"><h2>RELATED PRODUCTS</h2>{item.related.map(entry => <Link key={`${entry.type}-${entry.id}`} href={entry.url}><strong>{entry.type === "event" ? "EVENTZ" : entry.type === "sellz" ? "SELLZ" : entry.type === "gig" ? "GIGZ" : entry.type === "place" ? "PLACE" : "GUIDE"}:</strong> {entry.name}</Link>)}{item.related.length === 0 ? <p>No related products yet.</p> : null}</section>
     </aside></div>
     {managing ? <section className="z-community-panel z-community-manage"><h2>MODERATOR DESK</h2>
