@@ -99,3 +99,12 @@ html.calm-mode .outzide-shell,html.calm-mode .zaydar-map-demo,[data-calm=true] .
 .outzide-shell .search input{font-size:16px;min-height:44px}
 .outzide-shell :is(button,a,input,select):focus-visible{outline:2px solid var(--cyan,#19e3ff);outline-offset:3px}
 .outzide-shell .empty{padding:32px 20px;text-align:center;line-height:1.65}
+
+/* Keep the map navigation below the region label and above mobile safe areas. */
+.outzide-shell .map-stage .map-top{inset:22px;z-index:700}
+.outzide-shell .map-stage .map-controls{position:absolute;right:0;bottom:0}
+.outzide-shell .maplibregl-ctrl-bottom-right{right:68px}
+@media(max-width:760px){
+ .outzide-shell .map-stage .map-top{inset:10px 10px calc(22px + env(safe-area-inset-bottom,0px))}
+ .outzide-shell .maplibregl-ctrl-bottom-right{right:60px}
+}
