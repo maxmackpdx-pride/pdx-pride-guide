@@ -61,7 +61,7 @@ const smooth = (value: number) => { const t=Math.max(0,Math.min(1,value)); retur
 const MAX_HOLOGRAMS = 8;
 // These venue marks and Zaylist family logos keep their original artwork.
 const FEATURED_LOGO_IDS = new Set(["1-0", "2-0", "5-0", "28-0", "33-0", "41-0"]);
-const RANDOM_PLACEZ_LOGOS: WaypointId[] = ["bar", "club", "venue", "park", "cafe", "shop", "bath", "adult", "trail"];
+const RANDOM_PLACEZ_LOGOS: WaypointId[] = ["bar", "venue", "cafe", "shop", "adult"];
 type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number; waypoint: boolean; waypointLogo?: WaypointId };
 type Point = { x: number; y: number; z: number; tone: number; beamExcluded?: boolean; brightRoad?: boolean; hoverGlow?: { strength:number; lift:number; hue:number; core:number; lastLit:number }; glow?: { strength: number; lastLit: number; r: number; g: number; b: number } };
 function sphere(u: number, v: number, tone = 0): Point {
