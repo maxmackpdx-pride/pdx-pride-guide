@@ -1,3 +1,4 @@
+import { PiChatsCircleLight } from "react-icons/pi";
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import { Check } from "lucide-react";
@@ -25,7 +26,7 @@ import { formatPacificDateTime } from "@/lib/countdown";
 import { eventPath } from "@shared/eventSlug";
 import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
 import { timeAgo } from "@/lib/boardFeed";
-import { CalendarDays, Lock, MapPin, Pencil, Share2 } from "lucide-react";
+import { CalendarDays, CalendarPlus, ChevronRight, Ellipsis, FileText, Lock, MapPin, Pencil, Share2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DashboardEventEditForm } from "@/components/dashboard/DashboardEventEditor";
 import {
@@ -43,6 +44,7 @@ import { DAY_COLORS, DAY_TEXT_COLORS } from "@shared/eventWeek";
 import EventLocationMap from "./EventLocationMap";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import "./EventModal.approved.css";
+import "./EventModal.reference.css";
 
 type EventWithLinks = Event & {
   venueWebsite?: string | null;
@@ -231,6 +233,9 @@ function EventModalInner({
   const [attendanceFormOpen, setAttendanceFormOpen] = useState(false);
   const [posterOrientation, setPosterOrientation] = useState<"portrait" | "landscape">("portrait");
   const [showStickyCta, setShowStickyCta] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [socialOpen, setSocialOpen] = useState(false);
   const [socialTab, setSocialTab] = useState<"attendance" | "missed">("attendance");
   const [editing, setEditing] = useState(false);
   const [eventForm, setEventForm] = useState<EventEditFormState | null>(null);
@@ -247,8 +252,6 @@ function EventModalInner({
   const heroContentRef = useRef<HTMLDivElement>(null);
   const tagsRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const dateRef = useRef<HTMLSpanElement>(null);
-  const timeRef = useRef<HTMLSpanElement>(null);
   const handleClose = useCallback(() => onClose(), [onClose]);
   const dialogRef = useModalA11y({ onClose: handleClose });
 
@@ -299,90 +302,6 @@ function EventModalInner({
     setInviteNote("");
   }, [event.id]);
 
-  useLayoutEffect(() => {
-    const host = heroContentRef.current;
-    const title = titleRef.current;
-    if (!host || !title) return;
-
-    let cancelled = false;
-    const fitLine = (line: HTMLElement | null, min: number, max: number) => {
-      if (!line?.parentElement) return;
-      const parentStyles = getComputedStyle(line.parentElement);
-      const targetWidth = line.parentElement.clientWidth
-        - (Number.parseFloat(parentStyles.paddingLeft) || 0)
-        - (Number.parseFloat(parentStyles.paddingRight) || 0);
-      if (!targetWidth) return;
-      const styles = getComputedStyle(line);
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-      if (!context) return;
-      context.font = `${styles.fontStyle} ${styles.fontWeight} 100px ${styles.fontFamily}`;
-      const source = line.textContent?.trim() || "";
-      const currentSize = Number.parseFloat(styles.fontSize) || 100;
-      const trackingAtBasis = (Number.parseFloat(styles.letterSpacing) || 0) / currentSize * 100;
-      const measured = Math.max(1, context.measureText(source).width + Math.max(0, source.length - 1) * trackingAtBasis);
-      let size = Math.max(min, Math.min(max, targetWidth / measured * 100));
-      line.style.fontSize = `${size.toFixed(2)}px`;
-      const range = document.createRange();
-      range.selectNodeContents(line);
-      let rendered = range.getBoundingClientRect().width;
-      const panelTransform = getComputedStyle(line.closest(".event-modal") || line).transform;
-      if (panelTransform !== "none") {
-        const matrix = new DOMMatrixReadOnly(panelTransform);
-        rendered /= Math.hypot(matrix.a, matrix.b) || 1;
-      }
-      if (rendered > 0) size = Math.max(min, Math.min(max, size * targetWidth / rendered));
-      line.style.fontSize = `${size.toFixed(2)}px`;
-    };
-
-    const fit = () => {
-      if (cancelled) return;
-      const maxTitle = Math.min(86, Math.max(54, host.clientWidth * 0.16));
-      delete title.dataset.dynamicOutOfRange;
-      const titleFits = (size: number) => {
-        title.style.fontSize = `${size}px`;
-        const lineHeight = size * 0.86;
-        return title.scrollHeight <= lineHeight * 2 + 2 && title.scrollWidth <= title.clientWidth + 1;
-      };
-      const solveTitle = (minimum: number) => {
-        let low = minimum;
-        let high = maxTitle;
-        for (let i = 0; i < 12; i += 1) {
-          const size = (low + high) / 2;
-          if (titleFits(size)) low = size;
-          else high = size;
-        }
-        return low;
-      };
-      let titleSize = solveTitle(24);
-      if (!titleFits(titleSize)) {
-        title.dataset.dynamicOutOfRange = "true";
-        titleSize = solveTitle(20);
-      } else {
-        title.dataset.dynamicOutOfRange = "false";
-      }
-      title.style.fontSize = `${titleSize.toFixed(2)}px`;
-
-      const detailMax = Math.max(18, titleSize / 2);
-      fitLine(dateRef.current, 8, detailMax);
-      fitLine(timeRef.current, 8, detailMax);
-
-      const hero = heroRef.current;
-      if (hero) {
-        const fadeStart = Math.max(0, hero.clientHeight - 170);
-        hero.style.setProperty("--event-open-fade-start", `${fadeStart.toFixed(2)}px`);
-      }
-    };
-
-    const ready = document.fonts?.ready || Promise.resolve();
-    void ready.then(() => requestAnimationFrame(fit));
-    const observer = new ResizeObserver(fit);
-    observer.observe(host);
-    return () => {
-      cancelled = true;
-      observer.disconnect();
-    };
-  }, [event]);
 
   useEffect(() => {
     const scroller = scrollRef.current;
@@ -433,9 +352,10 @@ function EventModalInner({
   }, [event.id]);
 
   const jumpToAttendance = () => {
+    setSocialOpen(true);
     setSocialTab("attendance");
     requestAnimationFrame(() => {
-      socialTabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      socialTabsRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
     });
   };
 
@@ -515,7 +435,7 @@ function EventModalInner({
   });
   const endTime = event.dateEnd ? formatPacificDateTime(event.dateEnd, { hour: "2-digit", minute: "2-digit" }) : "End unverified";
   const dateLine = formatPacificDateTime(event.dateStart, {
-    weekday: "long", month: "long", day: "numeric",
+    weekday: "short", month: "short", day: "numeric",
   });
   const timeLine = `${formatPacificDateTime(event.dateStart, { hour: "2-digit", minute: "2-digit" })}${event.dateEnd ? ` to ${endTime}` : ""}`;
   const venueHref =
@@ -671,6 +591,7 @@ function EventModalInner({
       return;
     }
     setEventForm(eventToEditForm(event));
+    setDetailsOpen(true);
     setEditing(true);
   };
 
@@ -876,7 +797,7 @@ function EventModalInner({
     <div className="event-modal-overlay" onClick={handleClose}>
       <div
         ref={dialogRef}
-        className={`event-modal event-modal--approved pdx-glass-rebind${flipVars ? " event-modal--flip" : ""}${flipOpen ? " event-modal--open" : ""}`}
+        className={`event-modal event-modal--approved event-modal--reference pdx-glass-rebind${flipVars ? " event-modal--flip" : ""}${flipOpen ? " event-modal--open" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={event.title}
@@ -884,6 +805,7 @@ function EventModalInner({
         onClick={e => e.stopPropagation()}
         data-testid="event-modal"
         style={{
+          "--event-title-size": `${Math.min(84, Math.max(54, 1450 / displayTitle.length))}px`,
           "--event-accent": accentColor,
           "--c": accentColor,
           "--event-ink": dayInk,
@@ -930,23 +852,18 @@ function EventModalInner({
               {displayTitle}
             </h2>
             <div className="event-modal__hero-date" aria-label={`${startTime} to ${endTime}`}>
-              <CalendarDays aria-hidden="true" />
-              <div>
-              <span ref={dateRef}>{dateLine}</span>
-              <span ref={timeRef}>{timeLine}</span>
-              </div>
+              <span>{dateLine} · {formatPacificDateTime(event.dateStart, { hour: "numeric", minute: "2-digit" }).replace(":00", "")}</span>
             </div>
-            {(event.venueName || event.address) && (
-              <div className="event-modal__hero-venue">
-                <MapPin aria-hidden="true" />
-                <div>{event.venueName && <strong>{event.venueName}</strong>}{event.address && <span>{event.address}</span>}</div>
-              </div>
-            )}
-            {event.ageRequirement && event.ageRequirement !== "UNVERIFIED" && (
-              <div className="event-modal__hero-age">{AGE_LABELS[event.ageRequirement]}</div>
-            )}
+            <div className="event-modal__venue-line">
+              {(event.venueName || event.address) && <div className="event-modal__hero-venue">
+                <MapPin aria-hidden="true" /><strong>{event.venueName || event.address}</strong>
+              </div>}
+              {event.ageRequirement && event.ageRequirement !== "UNVERIFIED" && (
+                <span className="event-modal__hero-age">{AGE_LABELS[event.ageRequirement]}</span>
+              )}
+            </div>
             {!editing && <div className="event-modal__hero-actions">
-              <button type="button" className="event-modal__hero-rsvp" onClick={jumpToAttendance}><CalendarDays aria-hidden="true" />{isPastEvent ? "I Was There" : "I'll Be There"}</button>
+              <button type="button" className="event-modal__hero-rsvp" onClick={jumpToAttendance}><CalendarPlus aria-hidden="true" />{isPastEvent ? "I Was There" : "I’m Going"}</button>
             {primaryLink && !editing ? (
               <a
                 href={primaryLink.href}
@@ -955,33 +872,32 @@ function EventModalInner({
                 className="event-modal__tickets-mid pdx-glass-btn pdx-glass-btn--solid"
                 data-testid="button-event-tickets-primary"
               >
-                {primaryLink.label}
+                Event link <ArrowUpRight size={20} aria-hidden="true" />
               </a>
             ) : null}
             </div>}
-            {(() => {
-              const createdAt = event.createdAt || "";
-              const updatedAt = (event as Event & { updatedAt?: string }).updatedAt || "";
-              const lines: string[] = [];
-              if (hasMeaningfulUpdate(createdAt, updatedAt)) {
-                const updatedLine = formatUpdatedTrustLine(updatedAt);
-                if (updatedLine) lines.push(updatedLine);
-              }
-              if (isIngestSource(event.source) && createdAt) {
-                const first = timeAgo(createdAt);
-                if (first) lines.push(`First listed ${first}`);
-              }
-              return lines.length ? (
-                <div className="event-modal__trust" data-testid="event-modal-trust">
-                  {lines.map((line) => <span key={line}>{line}</span>)}
-                </div>
-              ) : null;
-            })()}
+
 
           </div>
         </section>
 
         <div className="event-modal__body">
+          <section className="event-modal__connection-feature" aria-labelledby="event-connection-title">
+            <div className="event-modal__connection-eyebrow"><PiChatsCircleLight aria-hidden="true" /> Mizzed Connections</div>
+            <img className="event-modal__connection-rings" src="/brand/event-card/connection-rings.webp" alt="" aria-hidden="true" />
+            <h3 id="event-connection-title">Caught your eye?</h3>
+            <p>Find that face from the crowd.</p>
+            <button type="button" aria-expanded={socialOpen && socialTab === "missed"} onClick={() => {
+              setSocialOpen(true);
+              setSocialTab("missed");
+              requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
+            }}>Who caught your eye? <ArrowUpRight size={22} aria-hidden="true" /></button>
+          </section>
+          {socialOpen && <div className="event-modal__social-room">{eventSocialTabs}{eventSocialPanel}</div>}
+          <details className="event-modal__disclosure" open={detailsOpen} onToggle={e => setDetailsOpen(e.currentTarget.open)}>
+            <summary><FileText aria-hidden="true" />Event details<ChevronRight aria-hidden="true" /></summary>
+            <div className="event-modal__disclosure-content">
+              <p className="event-modal__description">{dateLine} · {timeLine}</p>
           <section ref={tagsRef} className="event-modal__hero-block" aria-labelledby="event-modal-tags-label">
             <div className="event-modal__kicker" id="event-modal-tags-label">Tags</div>
             <div className="event-modal__approved-tags">
@@ -1003,9 +919,24 @@ function EventModalInner({
               <p className="event-modal__description">{event.description}</p>
             </section>
           )}
-          {eventSocialTabs}
-          <div className="event-modal__social-room">{eventSocialPanel}</div>
-
+            {(() => {
+              const createdAt = event.createdAt || "";
+              const updatedAt = (event as Event & { updatedAt?: string }).updatedAt || "";
+              const lines: string[] = [];
+              if (hasMeaningfulUpdate(createdAt, updatedAt)) {
+                const updatedLine = formatUpdatedTrustLine(updatedAt);
+                if (updatedLine) lines.push(updatedLine);
+              }
+              if (isIngestSource(event.source) && createdAt) {
+                const first = timeAgo(createdAt);
+                if (first) lines.push(`First listed ${first}`);
+              }
+              return lines.length ? (
+                <div className="event-modal__trust" data-testid="event-modal-trust">
+                  {lines.map((line) => <span key={line}>{line}</span>)}
+                </div>
+              ) : null;
+            })()}
           {editing && eventForm ? (
             <DashboardEventEditForm
               embedded
@@ -1209,14 +1140,6 @@ function EventModalInner({
             )}
           </div>
 
-          <EventLocationMap
-            event={event}
-            primary={accentColor}
-            complementary={oppositeColor}
-            scheduled={rsvp.myEventIds.has(event.id)}
-            schedulePending={rsvp.isRsvpPending(event.id)}
-            onSchedule={() => rsvp.toggleRsvp(event.id)}
-          />
           <div className="event-modal__actions">
             {canEditEvent && (
               <button
@@ -1439,6 +1362,20 @@ function EventModalInner({
           )}
           </>
           )}
+            </div>
+          </details>
+          <details className="event-modal__disclosure" onToggle={e => setLocationOpen(e.currentTarget.open)}>
+            <summary><MapPin aria-hidden="true" />Location &amp; directions<ChevronRight aria-hidden="true" /></summary>
+            <div className="event-modal__disclosure-content">
+              {event.address && <p className="event-modal__description">{event.address}</p>}
+              {locationOpen && <EventLocationMap event={event} primary={accentColor} complementary={oppositeColor}
+                scheduled={rsvp.myEventIds.has(event.id)} schedulePending={rsvp.isRsvpPending(event.id)}
+                onSchedule={() => rsvp.toggleRsvp(event.id)} />}
+            </div>
+          </details>
+          <div className="event-modal__more">
+            <button type="button" aria-label="More event information" aria-expanded={detailsOpen} onClick={() => setDetailsOpen(!detailsOpen)}><Ellipsis size={34} aria-hidden="true" /></button>
+          </div>
         </div>
         </div>
 
@@ -1468,8 +1405,9 @@ function EventModalInner({
                 type="button"
                 className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--mizzed pdx-glass-rebind"
                 onClick={() => {
+                  setSocialOpen(true);
                   setSocialTab("missed");
-                  requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+                  requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
                 }}
               >
                 MIZZED CONNECTION
