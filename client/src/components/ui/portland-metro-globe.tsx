@@ -419,7 +419,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const visibility=opening*smooth(anchor.z/.18);
         const fullSize = Math.min(width < 600 ? 86 : 144, radius * .52) * .8;
         const fullFit = Math.min(fullSize/image.width,fullSize*.65/image.height);
-        const fullW=state.waypoint?26:image.width*fullFit, fullH=state.waypoint?26:image.height*fullFit;
+        const fullW=state.waypoint?52:image.width*fullFit, fullH=state.waypoint?52:image.height*fullFit;
         const head = project(venue.point,1.06);
         // Side-facing anchors also use the pockets below the wordmark corners.
         // Protect the actual rotating words, leaving the empty ends of its row open.
