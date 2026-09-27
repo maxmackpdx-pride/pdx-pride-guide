@@ -5,6 +5,25 @@ import hologramData from "./portland-globe-holograms.json";
 // A deliberately enlarged metro wrapped over a sphere, not an Earth-scale globe.
 // Built-up land-use and water mask: OpenFreeMap / OpenMapTiles / OSM,
 // z13 geography cropped to the screenshot bounds below; parks stay empty.
+
+
+function globeWaypointSvg(id: WaypointId, color: string) {
+  const marker = waypointHtml({ id, color, size: 42 });
+  const glyph = marker.match(/<g transform="([^"]+)" fill="#fff" stroke="#fff" color="#fff">([\s\S]*?)<\/g>/);
+  const glyphMarkup = glyph
+    ? `<g transform="translate(-2 -2) ${glyph[1]}" fill="${color}" stroke="${color}" color="${color}">${glyph[2]}</g>`
+    : "";
+  const glowId = `globe-${id.replace(/[^a-z0-9-]/gi, "")}-glow`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="66" viewBox="0 0 56 66">
+    <defs><filter id="${glowId}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <path d="M28 51v9" stroke="${color}" stroke-width="1.8" stroke-linecap="round" opacity=".9"/>
+    <ellipse cx="28" cy="63" rx="7" ry="2" fill="${color}" opacity=".8"/>
+    <ellipse cx="28" cy="63" rx="12" ry="4" fill="${color}" opacity=".16"/>
+    <rect x="4" y="3" width="48" height="48" rx="10" fill="#05090d" fill-opacity=".96" stroke="${color}" stroke-width="2.2" filter="url(#${glowId})"/>
+    ${glyphMarkup}
+  </svg>`;
+}
+
 const COLORS = ["#00ffff", "#ff00cc", "#ccff00", "#ff6600", "#ab75ff"];
 type Venue = { id: string; name: string; coordinates: [number, number]; logo?: string; logoMode?: string; color?: string; point?: Point };
 // Screenshot crop, approximated from Eagle, downtown, I-205 and Sellwood.
@@ -397,7 +416,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           if(waypoint){
             const available=RANDOM_PLACEZ_LOGOS.filter(id=>!openLogoKeys.has(`placez:${id}`));
             waypointLogo=available[Math.floor(Math.random()*available.length)]||RANDOM_PLACEZ_LOGOS[0];
-            const svg=waypointHtml({id:waypointLogo,color:venue.color,size:42}).match(/<svg[\s\S]*?<\/svg>/)?.[0];
+            const svg=globeWaypointSvg(waypointLogo,venue.color);
             if(svg){
               venue.waypointImage.onload=draw;
               venue.waypointImage.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" '));
@@ -419,7 +438,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const visibility=opening*smooth(anchor.z/.18);
         const fullSize = Math.min(width < 600 ? 86 : 144, radius * .52) * .8;
         const fullFit = Math.min(fullSize/image.width,fullSize*.65/image.height);
-        const fullW=state.waypoint?52:image.width*fullFit, fullH=state.waypoint?52:image.height*fullFit;
+        const fullW=state.waypoint?56:image.width*fullFit, fullH=state.waypoint?66:image.height*fullFit;
         const head = project(venue.point,1.06);
         // Side-facing anchors also use the pockets below the wordmark corners.
         // Protect the actual rotating words, leaving the empty ends of its row open.
