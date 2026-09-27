@@ -26,23 +26,33 @@ test('Placez clusters retain geographic bounds for fit-to-view taps',async()=>{
   assert.match(renderer,/map\.fitBounds\(hit\.clusterBounds/);
 });
 
-test('non-event markers use the Outzide template while preserving roof clearance',async()=>{
+test('non-event markers use assigned roof heights and preserve equal roof clearance',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+  const roofBoot=await readFile(new URL('../client/public/zaydar-map/mapz-roof-boot.js',import.meta.url),'utf8');
   assert.match(renderer,/waypointGeometry\(p,selected,placezHoverLift\(target,feature,surfaces\)\)/);
-  assert.match(renderer,/const buildingVisibility=smoothRange\(12,15,target\.getZoom\(\)\)/);
+  assert.match(renderer,/const buildingVisibility=extrusionAmount\(target\)/);
+  assert.match(renderer,/window\.__mapzPlaceRoofHeights\?\.get\(key\)/);
+  assert.match(roofBoot,/roofHeights\.set\(key,Math\.max\(8,Number\(best\.height\)\|\|9\)\+\.5\)/);
   assert.doesNotMatch(renderer,/createWorldWaypointLayer|createHousingHologramLayer/);
   assert.match(renderer,/String\(a\.feature\.properties\.key\)\.localeCompare/);
 });
 
-test('waypoint heads stay at their map anchor and clear roof heights at every scale',async()=>{
+test('waypoint heads keep equal roof clearance while following different roof heights',async()=>{
   const {waypointGeometry}=await import('../client/public/zaydar-map/waypoint-markers.js');
-  for(const selected of [false,true])for(const roof of [0,12,45,200]){
-    const first=waypointGeometry({x:100,y:300},selected,roof);
-    const moved=waypointGeometry({x:290,y:185},selected,roof);
-    assert.equal(moved.x-first.x,190);assert.equal(moved.y-first.y,-115);
-    assert.equal(first.size,selected?44:28);
-    assert.ok(first.bottom<=300-roof);
-    assert.equal(first.y+first.size/2,first.bottom);
+  const previousWindow=globalThis.window;
+  globalThis.window={__mapzMap:{getZoom:()=>15.35,getPitch:()=>34}};
+  try{
+    for(const selected of [false,true])for(const roof of [8,12,45,200]){
+      const first=waypointGeometry({x:100,y:300},selected,roof);
+      const moved=waypointGeometry({x:290,y:185},selected,roof);
+      assert.equal(moved.x-first.x,190);assert.equal(moved.y-first.y,-115);
+      assert.equal(first.size,selected?44:28);
+      assert.equal(300-first.bottom,roof);
+      assert.equal(first.y+first.size/2,first.bottom);
+    }
+  }finally{
+    if(previousWindow===undefined)delete globalThis.window;
+    else globalThis.window=previousWindow;
   }
 });
 

@@ -19,7 +19,8 @@ import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260921-layer-join';
-import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo} from './waypoint-markers.js?v=20260926-place-beam';
+import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo} from './waypoint-markers.js?v=20260927-roof-clearance';
+import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
@@ -135,8 +136,13 @@ function updateSurfaces(target){
   if(light&&distance<reach)reflections.push({building,light});
  }
  const roofs=new Map(),nearbyBuildings=createSpatialIndex(buildings,building=>building.center);
- for(const feature of lightFeatures){let roof=9;const c=feature.geometry.coordinates;
-  for(const building of nearbyBuildings(c))if(Math.hypot((building.center[0]-c[0])*.7,building.center[1]-c[1])<.00075)roof=Math.max(roof,building.height);
+ for(const feature of lightFeatures){
+  const c=feature.geometry.coordinates,key=`${Number(c[0]).toFixed(6)},${Number(c[1]).toFixed(6)}`;
+  const matchedRoof=window.__mapzPlaceRoofHeights?.get(key);
+  let roof=Number.isFinite(matchedRoof)?matchedRoof:9;
+  if(!Number.isFinite(matchedRoof)){
+   for(const building of nearbyBuildings(c))if(Math.hypot((building.center[0]-c[0])*.7,building.center[1]-c[1])<.00075)roof=Math.max(roof,building.height);
+  }
   roofs.set(feature.properties.phase,roof);
  }
  // Keep a street fallback even above 12.75: building tiles can be sparse or
@@ -179,10 +185,9 @@ const PLACEZ_ROOF_CLEARANCE_METERS=4;
 function placezHoverLift(target,feature,surfaces){
  const coordinates=feature.geometry.coordinates;
  const roof=surfaces.roofs?.get(feature.properties.phase)??PLACEZ_HOVER_METERS;
- // Buildings enter the style at zoom 12. Keep overview markers near the
- // ground, then smoothly raise each one just above its tallest nearby roof as
- // those extrusions become useful visual context.
- const buildingVisibility=smoothRange(12,15,target.getZoom());
+ // Match the waypoint to the same extrusion progress as its building. At full
+ // extrusion, every Placez marker stays exactly four meters above its roof.
+ const buildingVisibility=extrusionAmount(target);
  const roofHeight=Math.max(PLACEZ_HOVER_METERS,roof+PLACEZ_ROOF_CLEARANCE_METERS);
  const hoverMeters=PLACEZ_HOVER_METERS+(roofHeight-PLACEZ_HOVER_METERS)*buildingVisibility;
  const metersPerPixel=40075016.686*Math.cos(coordinates[1]*Math.PI/180)/(512*Math.pow(2,target.getZoom()));

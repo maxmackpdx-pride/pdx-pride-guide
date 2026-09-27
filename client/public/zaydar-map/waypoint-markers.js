@@ -5,8 +5,10 @@ function cityAmount(){
 export function waypointGeometry(origin,selected=false,roofLift=0){
  const amount=cityAmount();
  const size=selected?44:28;
- // Shaft length from disk/roof up to the head. Shorter on roofs so the mark sits on the building.
- const beamHeight=Math.max(selected?56:22,roofLift*(1-amount*0.35)+amount*18);
+ // Keep the same clearance above every roof. The waypoint's height follows
+ // the assigned roof; the visibility floor fades out as buildings extrude.
+ const minimumHeight=(selected?56:22)*(1-amount);
+ const beamHeight=Math.max(roofLift,minimumHeight);
  return {x:origin.x,y:origin.y-beamHeight-size/2,size,bottom:origin.y-beamHeight,anchorY:origin.y};
 }
 function headSprite(color,selected){

@@ -33,7 +33,7 @@ function coordKey(c){
 
 /** Build GPS → roof-center snaps for Placez only. */
 function rebuildPlaceSnaps(map){
- const snaps=new Map();
+ const snaps=new Map(),roofHeights=new Map();
  const buildings=buildingsFrom(map);
  const features=window.__mapzVenueFeatures||[];
  for(const feature of features){
@@ -42,9 +42,13 @@ function rebuildPlaceSnaps(map){
   if(!Array.isArray(c)||c.length<2)continue;
   const best=matchBuilding(buildings,c);
   if(!best)continue;
-  snaps.set(coordKey(c),best.center);
+  const key=coordKey(c);
+  snaps.set(key,best.center);
+  // Match the waypoint to the exact building whose roof it snaps to.
+  roofHeights.set(key,Math.max(8,Number(best.height)||9)+.5);
  }
  window.__mapzPlaceSnaps=snaps;
+ window.__mapzPlaceRoofHeights=roofHeights;
  return {buildings,snaps};
 }
 
