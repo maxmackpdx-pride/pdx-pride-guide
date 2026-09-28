@@ -17,10 +17,9 @@ import HubProfile from "./sections/HubProfile";
 import HubEvents, { type HubEventRow, type HubEventsFocus } from "./sections/HubEvents";
 import HubPeople from "./sections/HubPeople";
 import HubSettings from "./sections/HubSettings";
-import HubAdminOverview from "./sections/HubAdminOverview";
 import HubAdminKeys from "./sections/HubAdminKeys";
 import HubWeatherForecast from "./sections/HubWeatherForecast";
-import HubAdminTable, { getAdminTableMeta } from "./sections/HubAdminTable";
+import { getAdminTableMeta } from "./sections/HubAdminTable";
 import {
   HUB_ADMIN_TABLE_SECTIONS,
   hubSectionToAdminTab,
@@ -33,7 +32,6 @@ function isHubNextMoveLive(row: HubEventRow, nowMs = Date.now()): boolean {
   if (row.dateStart || row.dateEnd) {
     return !isEventSchedulePast(row.dateStart, row.dateEnd, nowMs);
   }
-  // No schedule → don't invent a “next” night (avoid stale demo / partial rows).
   return false;
 }
 
@@ -67,7 +65,6 @@ export type HubV2Props = {
   section: HubSection;
   onSectionChange: (section: HubSection) => void;
   initialPostType?: "text" | "photo";
-  /** Inbox Posts deep-link: `?view=posts&section=events|checkins`. */
   eventsFocusSection?: HubEventsFocus | null;
 };
 
@@ -168,8 +165,8 @@ function HubRightRail({
           </div>
           {suggestions.length === 0 && (
             <p className="kick hub-people-rail__empty-copy">
-              You&apos;re following the scene by default. Unfollow anyone on their
-              profile or from their posts - they&apos;ll show up here to re-follow.
+              You're following the scene by default. Unfollow anyone on their
+              profile or from their posts - they'll show up here to re-follow.
             </p>
           )}
         </div>
@@ -217,7 +214,6 @@ export default function HubV2({
   errorBanner,
   section,
   onSectionChange,
-  initialPostType,
   eventsFocusSection = null,
 }: HubV2Props) {
   const { calmMode, toggleCalmMode } = useTheme();
@@ -228,16 +224,12 @@ export default function HubV2({
     ? `/u/${encodeURIComponent(user.username)}`
     : null;
 
-  // Profile rail / ?section=profile without edit → real public profile, not HubProfile stub.
-  // Keep HubProfile only for edit deep-link (?edit=profile / onEditProfile).
   useEffect(() => {
     if (section === "profile" && !editMode && publicProfilePath) {
       navigate(publicProfilePath);
     }
   }, [section, editMode, publicProfilePath, navigate]);
 
-  // Legacy deep-links (?section=admin / tbl-*) → real /admin page once.
-  // Do not reverse-bounce from Admin back here or history.pushState will thrash.
   useEffect(() => {
     if (section !== "admin" && !HUB_ADMIN_TABLE_SECTIONS.includes(section)) return;
     const tab = section === "admin" ? "overview" : hubSectionToAdminTab(section);
@@ -287,7 +279,8 @@ export default function HubV2({
       { value: postsCount, label: "Posts" },
     ];
 
-  const tableMeta = HUB_ADMIN_TABLE_SECTIONS.includes(section) ? getAdminTableMeta(section) : null;
+  void getAdminTableMeta;
+  void stats;
 
   const center = (
     <>
@@ -322,7 +315,6 @@ export default function HubV2({
       )}
       {section === "people" && <HubPeople key="people" />}
       {section === "settings" && <HubSettings key="settings" onLogout={onLogout} />}
-      {/* Admin overview / tables only on /admin - not mixed into member hub. */}
     </>
   );
 
@@ -331,16 +323,6 @@ export default function HubV2({
       pendingCount={pendingCount}
       ownerCount={ownerCount}
       isPrimaryOwner={isPrimaryOwner}
-    />
-  ) : null;
-
-  /** Mobile lower drawer: Darkroom glitch still in the old “You hold the keys” slot. */
-  const keysExtraDrawer = isAdmin ? (
-    <HubAdminKeys
-      pendingCount={pendingCount}
-      ownerCount={ownerCount}
-      isPrimaryOwner={isPrimaryOwner}
-      darkroomMedia
     />
   ) : null;
 
@@ -360,7 +342,7 @@ export default function HubV2({
       searchValue={searchQ}
       onSearchChange={setSearchQ}
       sideExtra={keysExtra}
-      sideExtraDrawer={keysExtraDrawer}
+      hideMobileDrawer
       rightRail={
         <HubRightRail
           upcoming={upcoming}
