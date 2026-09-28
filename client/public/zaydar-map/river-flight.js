@@ -5,7 +5,7 @@ import {faceStackHtml} from '../outzide-map/assets/community-ui.js?v=map-continu
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
 import {createTerrainSampler,TERRAIN_STRENGTH} from './terrain-elevation.js';
 import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260925-smooth-map';
-import {createBuildingModelLayer} from './building-models.js?v=20260925-smooth-map';
+import {createBuildingModelLayer} from './building-models.js?v=20260928-big-pink-garage-height';
 import {createBuildingChrome} from './nightlife-materials.js?v=20260925-smooth-map';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
 import {createBridgeLayer} from '../home-flight/bridge-roads.js?v=20260921-layer-join';

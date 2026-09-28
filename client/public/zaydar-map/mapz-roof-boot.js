@@ -13,16 +13,22 @@ function rowsToFeatures(rows){
 function buildingsFrom(map){
  const out=[],seen=new Set();
  let feats=[];
- try{feats=map.querySourceFeatures('terrain',{sourceLayer:'building'})||[];}catch{}
+ try{
+  feats=map.__zaydarBuildingModels?.surfaceFeatures?.()||[];
+  if(!feats.length)feats=map.querySourceFeatures('terrain',{sourceLayer:'building'})||[];
+ }catch{}
  for(const feature of feats){
-  const ring=feature.geometry?.type==='Polygon'?feature.geometry.coordinates[0]:feature.geometry?.type==='MultiPolygon'?feature.geometry.coordinates[0][0]:null;
-  if(!ring?.length)continue;
-  const key=ring[0].join(',')+':'+ring.length;
-  if(seen.has(key))continue;
-  seen.add(key);
-  const center=ring.reduce((acc,point)=>[acc[0]+point[0]/ring.length,acc[1]+point[1]/ring.length],[0,0]);
-  const raw=Number(feature.properties?.render_height||feature.properties?.height);
-  out.push({center,height:Number.isFinite(raw)&&raw>0?raw:9,ring});
+  const polygons=feature.geometry?.type==='Polygon'?[feature.geometry.coordinates]:feature.geometry?.type==='MultiPolygon'?feature.geometry.coordinates:[];
+  for(const polygon of polygons){
+   const ring=polygon[0];
+   if(!ring?.length)continue;
+   const key=ring[0].join(',')+':'+ring.length;
+   if(seen.has(key))continue;
+   seen.add(key);
+   const center=ring.reduce((acc,point)=>[acc[0]+point[0]/ring.length,acc[1]+point[1]/ring.length],[0,0]);
+   const raw=Number(feature.properties?.render_height||feature.properties?.height);
+   out.push({center,height:Number.isFinite(raw)&&raw>0?raw:9,ring});
+  }
  }
  return out;
 }
@@ -127,6 +133,7 @@ if(window.maplibregl?.Map&&!window.__mapzRoofBoot){
    window.__mapzMap=this;
    window.__mapzPatchProject?.(this);
    this.once('load',()=>{
+    this.__mapzRefreshBuildingSurfaces=()=>sync(this);
     this._venueRoofs=createVenueRoofs(this);
     sync(this);
     this.on('idle',()=>{attachBridgeGlow(this);rebuildPlaceSnaps(this);});
