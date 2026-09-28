@@ -16,6 +16,7 @@ import { fetchIngestSource } from "../fetchSource";
 import { parseSquarespaceJson } from "../parseSquarespace";
 import { isPastEventListing } from "../dates";
 import { inferAdmissionFromText } from "../admissionInfer";
+import { isHawksLockerSpecial, withHawksLockerSpecial } from '../../hawksLockerSpecial';
 
 const HAWKS_VENUE = "Hawks PDX";
 const HAWKS_ADDRESS = "335 SE 99th Ave, Portland, OR 97216";
@@ -101,7 +102,7 @@ export function applyHawksPolicy(draft: IngestEventDraft): IngestEventDraft {
   return {
     ...draft,
     title,
-    description,
+    description: withHawksLockerSpecial(description),
     venueName: weakVenue ? HAWKS_VENUE : draft.venueName,
     address: draft.address?.trim() ? draft.address : HAWKS_ADDRESS,
     neighborhood: draft.neighborhood?.trim() ? draft.neighborhood : HAWKS_NEIGHBORHOOD,
@@ -175,7 +176,7 @@ export async function fetchHawksDrafts(
     drafts = drafts.filter(d => !isPastEventListing(d));
   }
 
-  drafts = drafts.map(applyHawksPolicy);
+  drafts = drafts.map(applyHawksPolicy).filter(d => !isHawksLockerSpecial(d.title));
 
   // De-dupe by title|day
   const seen = new Set<string>();

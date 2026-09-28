@@ -1,6 +1,7 @@
 // Source: Tucker's ten Hawks screenshots supplied 2026-09-28.
 // Supplied Thursday schedule takes precedence over the older public calendar.
 // Date-only starts preserve unknown event times without inventing midnight starts.
+import { withHawksLockerSpecial } from './hawksLockerSpecial';
 export const HAWKS_SOURCE = 'https://hawkspdx.com/';
 export function hawksThroughApril2027() {
  const events: Array<{title:string;dateStart:string;dateEnd:string;dayOfWeek:string;description:string;admission:string}> = [];
@@ -8,7 +9,6 @@ export function hawksThroughApril2027() {
  for(let d=new Date('2026-09-28T12:00:00Z');date(d)<='2027-04-30';d=new Date(d.getTime()+86400000)) {
   const day=date(d),w=d.getUTCDay(),nth=Math.floor((d.getUTCDate()-1)/7)+1;
   const add=(title:string,start:string,end:string,description:string,free=false)=>events.push({title,dateStart:day+(start?`T${start}`:''),dateEnd:end?`${date(new Date(d.getTime()+(end<=start?86400000:0)))}T${end}`:'',dayOfWeek:['SUN','MON','TUE','WED','THU','FRI','SAT'][w],admission:free?'FREE':'DOOR_FEE',description:description+(start?'':' Event time unconfirmed; contact Hawks before attending.')+(free?' Free testing; confirm clinic access requirements with Hawks.':' Hawks is a private members-only venue. Ages 18+; valid ID and active membership required. Room or locker charges apply.')});
-  add('Happy Hour Locker Special','10:00','18:00','Daily: $7 for a six-hour locker rental, available 10 a.m.–6 p.m. Only active long-term or VIP members qualify. Specialty-day admission rules still apply.');
   if(w===2||w===3) add('Midweek Hump','','','Tuesday and Wednesday membership special: double long-term memberships for the same price.');
   if(w===1) add('Bear Mondays','','','Monday male-only night for bears, cubs, otters, chubs and admirers.');
   if(w===2) {
@@ -29,5 +29,5 @@ export function hawksThroughApril2027() {
   }
   if(w===0) add('Bi Sundays & Nude Yoga','','','Sunday gathering for bisexual, pansexual and gender-expansive community. Includes courtyard nude yoga; yoga time unconfirmed.');
  }
- return events;
+ return events.map(event => ({ ...event, description: withHawksLockerSpecial(event.description) }));
 }

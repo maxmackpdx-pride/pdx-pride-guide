@@ -1,10 +1,11 @@
 import { hawksReviewedTimes20260928 } from "./hawksReviewedTimes20260928";
+import { correctHawksLockerSpecial } from './correctHawksLockerSpecial';
 import type Database from "better-sqlite3";
 import { hawksThroughApril2027, HAWKS_SOURCE } from "./hawksThroughApril2027";
 
 export const HAWKS_REVIEWED_MIGRATION = "hawks_reviewed_246_times_2026_09_28_v1";
 export function seedHawksReviewedTimes20260928(sqlite: Database.Database, now = new Date()) {
-  return sqlite.transaction(() => {
+  const added = sqlite.transaction(() => {
     if (sqlite.prepare("SELECT 1 FROM boot_migrations WHERE id = ?").get(HAWKS_REVIEWED_MIGRATION)) return 0;
     const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
     const existing = sqlite.prepare("SELECT title, date_start FROM events WHERE lower(venue_name) IN ('hawks pdx', 'hawks')").all() as Array<{title: string; date_start: string}>;
@@ -40,4 +41,7 @@ export function seedHawksReviewedTimes20260928(sqlite: Database.Database, now = 
     console.info(`[boot] ${HAWKS_REVIEWED_MIGRATION}: added ${added} unclaimed Hawks occurrences`);
     return added;
   })();
+  // This correction must also run on installations where the original seed ran.
+  correctHawksLockerSpecial(sqlite, now);
+  return added;
 }
