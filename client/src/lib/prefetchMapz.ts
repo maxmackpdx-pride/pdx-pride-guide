@@ -3,7 +3,8 @@ const MAPZ_ASSETS=[
  {href:'/home-flight/vendor/maplibre-gl-5.6.2.css',as:'style'},
  {href:'/zaydar-map/vendor/maplibre-contour-0.1.0.js',as:'script'},
  {href:'/zaydar-map/studio.css?v=20260925-map-boot',as:'style'},
- {href:'/zaydar-map/river-flight.js?v=20260925-map-boot',rel:'modulepreload'},
+ {href:'/zaydar-map/river-flight.js?v=20260928-big-pink-garage-height',rel:'modulepreload'},
+ {href:'/zaydar-map/mapz-roof-boot.js?v=20260928-cheap-bridge-glow',rel:'modulepreload'},
 ] as const;
 
 let started=false;

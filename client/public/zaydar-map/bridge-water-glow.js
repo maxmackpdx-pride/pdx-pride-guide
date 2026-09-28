@@ -1,4 +1,5 @@
 import {sampleBridgeRoad} from './bridge-fit.js?v=20260921-layer-join';
+import {PORTLAND_BRIDGE_MODELS} from './st-johns-bridge.js?v=20260921-layer-join';
 
 export const BRIDGE_GLOW_PALETTES={
  rainbow:['#ff145c','#ff7b16','#ffe42b','#19ff79','#08d5ff','#7250ff','#ed28ff'],
@@ -18,7 +19,6 @@ export const BRIDGE_GLOW_THEMES={
 export const BRIDGE_GLOW_SATURATION=1.5*1.2;
 export const BRIDGE_GLOW_BRIGHTNESS=1.3;
 export function saturateBridgeColor(rgb,gain=BRIDGE_GLOW_SATURATION){
- // Scale HSV saturation without raising value/brightness; clamp to display gamut.
  const high=Math.max(...rgb),low=Math.min(...rgb),range=high-low;
  if(!range)return [...rgb];
  const scale=Math.min(gain,high/range);
@@ -30,6 +30,65 @@ export function bridgeGlowColor(palette,fraction){
  const index=Math.min(stops.length-2,Math.floor(position)),mix=position-index;
  const a=parseInt(stops[index].slice(1),16),b=parseInt(stops[index+1].slice(1),16);
  return saturateBridgeColor([16,8,0].map(shift=>((a>>shift)&255)*(1-mix)+((b>>shift)&255)*mix));
+}
+
+function bridgeSpanLine(model){
+ const rad=model.bearing*Math.PI/180,half=model.length/2;
+ const east=Math.sin(rad)*half,north=Math.cos(rad)*half;
+ const lonPerM=1/(111320*Math.cos(model.center[1]*Math.PI/180));
+ const latPerM=1/111320;
+ return [
+  [model.center[0]-east*lonPerM,model.center[1]-north*latPerM],
+  [model.center[0]+east*lonPerM,model.center[1]+north*latPerM],
+ ];
+}
+
+export function bridgeGlowGradient(palette){
+ const stops=BRIDGE_GLOW_PALETTES[palette]||BRIDGE_GLOW_PALETTES.rainbow;
+ const expr=['interpolate',['linear'],['line-progress']];
+ stops.forEach((hex,index)=>expr.push(index/(stops.length-1),hex));
+ return expr;
+}
+
+/** Static GeoJSON spans. No water query, no custom shader, no idle rebuild. */
+export function bridgeGlowLineCollections(){
+ const byTheme={};
+ for(const model of PORTLAND_BRIDGE_MODELS){
+  if(model.disabled||!Object.hasOwn(BRIDGE_GLOW_THEMES,model.id))continue;
+  const palette=BRIDGE_GLOW_THEMES[model.id];
+  (byTheme[palette]??=[]).push({
+   type:'Feature',
+   properties:{id:model.id,palette},
+   geometry:{type:'LineString',coordinates:bridgeSpanLine(model)},
+  });
+ }
+ return byTheme;
+}
+
+export function installCheapBridgeGlow(map){
+ if(!map||map.__mapzCheapBridgeGlow||!map.getStyle())return;
+ const collections=bridgeGlowLineCollections();
+ const before=['waterway','buildings','skyline','bridge-decks'].find(id=>map.getLayer(id));
+ for(const [palette,features] of Object.entries(collections)){
+  const sourceId=`mapz-bridge-glow-${palette}`;
+  if(!map.getSource(sourceId)){
+   map.addSource(sourceId,{type:'geojson',lineMetrics:true,data:{type:'FeatureCollection',features}});
+  }
+  if(!map.getLayer(sourceId)){
+   const layer={
+    id:sourceId,type:'line',source:sourceId,minzoom:12.2,maxzoom:18,
+    layout:{'line-cap':'round','line-join':'round'},
+    paint:{
+     'line-width':['interpolate',['linear'],['zoom'],12,4,15,14,17,22],
+     'line-blur':['interpolate',['linear'],['zoom'],12,3,15,10,17,16],
+     'line-opacity':['interpolate',['linear'],['zoom'],12,.2,14.5,.48,17,.36],
+     'line-gradient':bridgeGlowGradient(palette),
+    },
+   };
+   if(before)map.addLayer(layer,before);else map.addLayer(layer);
+  }
+ }
+ map.__mapzCheapBridgeGlow=true;
 }
 
 /** Sample the same fitted road as the real bridge, never a screen-space guess. */
@@ -97,8 +156,6 @@ function paintWaterPatch(canvas,mask,patch,polygons){
   for(const ring of polygon.rings){ring.forEach((p,i)=>{const q=pixel(p);if(i)water.lineTo(q.x,q.y);else water.moveTo(q.x,q.y);});water.closePath();}
   water.fillStyle='#fff';water.fill('evenodd');
  }
- // A white alpha mask creates one continuous colored reflection without
- // neighboring colored stamps washing each other toward white.
  for(const point of patch.points){
   const p=pixel(point);ctx.save();ctx.translate(p.x,p.y);ctx.scale(patch.along*sx,patch.across*sy);
   const feather=ctx.createRadialGradient(0,0,0,0,0,1);
@@ -121,78 +178,10 @@ export function createBridgeWaterLayer(maplibre,elevation=()=>0){
  let waterSignature='',projectedWater=[],geometrySignature='';
  return {
   id:'bridge-water-reflections',type:'custom',renderingMode:'3d',count:0,signature:'',dirty:false,
-  update(spans,waterFeatures){
-   const collected=collectWater(waterFeatures),nextWaterSignature=collected.map(([key])=>key).join('|');
-   const patches=spans.map(span=>bridgeWaterPatch(span,project,waterHeight));
-   const nextGeometrySignature=JSON.stringify(patches.map(patch=>[patch.span.id,patch.span.palette,patch.corners,patch.points]));
-   if(nextWaterSignature===waterSignature&&nextGeometrySignature===geometrySignature)return;
-   geometrySignature=nextGeometrySignature;
-   // Project each unique water polygon once per source change, not once per
-   // bridge or camera update. Stable views do no masking or texture uploads.
-   if(nextWaterSignature!==waterSignature){
-    waterSignature=nextWaterSignature;
-    projectedWater=collected.map(([key,polygon])=>{const rings=polygon.map(ring=>ring.map(project));return {key,rings,bounds:pointBounds(rings[0])};});
-   }
-   const entries=patches.map(patch=>{const polygons=waterRings(projectedWater,patch);return {patch,polygons,key:JSON.stringify([patch.span.palette,patch.corners,patch.points,polygons.map(p=>p.key)])};});
-   const signature=entries.map(entry=>entry.key).join('|');if(signature===this.signature)return;
-   this.signature=signature;
-   atlas.width=COLUMNS*(TILE_WIDTH+2*GUTTER);atlas.height=Math.max(1,Math.ceil(entries.length/COLUMNS))*(TILE_HEIGHT+2*GUTTER);
-   const ctx=atlas.getContext('2d'),vertices=[],active=new Set();
-   entries.forEach(({patch,polygons,key},index)=>{
-    active.add(patch.span.id);let cached=cache.get(patch.span.id);
-    if(cached?.key!==key){
-     paintWaterPatch(tile,mask,patch,polygons);
-     const image=cached?.image??document.createElement('canvas');image.width=TILE_WIDTH;image.height=TILE_HEIGHT;image.getContext('2d').drawImage(tile,0,0);
-     cached={key,image};cache.set(patch.span.id,cached);
-    }
-    const x=(index%COLUMNS)*(TILE_WIDTH+2*GUTTER)+GUTTER,y=Math.floor(index/COLUMNS)*(TILE_HEIGHT+2*GUTTER)+GUTTER;
-    ctx.drawImage(cached.image,x,y);
-    const uv=[[x/atlas.width,y/atlas.height],[(x+TILE_WIDTH)/atlas.width,y/atlas.height],[x/atlas.width,(y+TILE_HEIGHT)/atlas.height],[(x+TILE_WIDTH)/atlas.width,(y+TILE_HEIGHT)/atlas.height]];
-    for(const i of [0,1,2,2,1,3]){const p=patch.corners[i];vertices.push(p.x,p.y,p.z,...uv[i]);}
-   });
-   for(const [id,cached] of cache)if(!active.has(id)){cached.image.width=cached.image.height=1;cache.delete(id);}
-   this.vertices=new Float32Array(vertices);this.dirty=true;this.map?.triggerRepaint();
-  },
-  onAdd(map,gl){
-   this.map=map;
-   const compile=(type,source)=>{const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(shader));return shader;};
-   const vertex=compile(gl.VERTEX_SHADER,`#version 300 es
-    in vec3 a_position;in vec2 a_uv;uniform mat4 u_matrix;out vec2 v_uv;
-    void main(){gl_Position=u_matrix*vec4(a_position,1.);v_uv=a_uv;}`);
-   const fragment=compile(gl.FRAGMENT_SHADER,`#version 300 es
-    precision highp float;in vec2 v_uv;uniform sampler2D u_glow;out vec4 color;
-    void main(){vec4 glow=texture(u_glow,v_uv);float alpha=glow.a*.52; if(alpha<.001)discard;color=vec4(glow.rgb*alpha*${BRIDGE_GLOW_BRIGHTNESS.toFixed(2)},alpha);}`);
-   this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);gl.deleteShader(vertex);gl.deleteShader(fragment);
-   if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));
-   this.matrix=gl.getUniformLocation(this.program,'u_matrix');this.sampler=gl.getUniformLocation(this.program,'u_glow');
-   this.buffer=gl.createBuffer();this.vao=gl.createVertexArray();this.texture=gl.createTexture();
-   gl.bindVertexArray(this.vao);gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);
-   for(const [name,size,offset] of [['a_position',3,0],['a_uv',2,12]]){const attribute=gl.getAttribLocation(this.program,name);gl.enableVertexAttribArray(attribute);gl.vertexAttribPointer(attribute,size,gl.FLOAT,false,20,offset);}
-   gl.bindVertexArray(null);this.dirty=!!this.vertices;
-  },
-  render(gl,input){
-   if(!this.vertices?.length&&!this.count)return;
-   const activeTexture=gl.getParameter(gl.ACTIVE_TEXTURE);gl.activeTexture(gl.TEXTURE0);const boundTexture=gl.getParameter(gl.TEXTURE_BINDING_2D);gl.bindTexture(gl.TEXTURE_2D,this.texture);
-   if(this.dirty){
-    gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);gl.bufferData(gl.ARRAY_BUFFER,this.vertices,gl.STATIC_DRAW);this.count=this.vertices.length/5;
-    const premultiply=gl.getParameter(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL),flip=gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
-    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,atlas);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,premultiply);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,flip);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);this.dirty=false;
-   }
-   const matrix=input.defaultProjectionData.mainMatrix,local=localMatrix;
-   for(let row=0;row<4;row++){local[row]=matrix[row]*unit;local[4+row]=matrix[4+row]*unit;local[8+row]=matrix[8+row]*unit;local[12+row]=matrix[row]*origin.x+matrix[4+row]*origin.y+matrix[12+row];}
-   gl.useProgram(this.program);gl.bindVertexArray(this.vao);gl.uniformMatrix4fv(this.matrix,false,local);gl.uniform1i(this.sampler,0);
-   const depth=gl.getParameter(gl.DEPTH_WRITEMASK),cull=gl.isEnabled(gl.CULL_FACE);
-   // Water plane only: no upward curtain, billboard, or depth-writing overlay.
-   gl.depthMask(false);gl.disable(gl.CULL_FACE);gl.drawArrays(gl.TRIANGLES,0,this.count);
-   gl.depthMask(depth);if(cull)gl.enable(gl.CULL_FACE);gl.bindVertexArray(null);
-   gl.bindTexture(gl.TEXTURE_2D,boundTexture);gl.activeTexture(activeTexture);
-  },
-  onRemove(map,gl){
-   gl.deleteBuffer(this.buffer);gl.deleteVertexArray(this.vao);gl.deleteTexture(this.texture);gl.deleteProgram(this.program);
+  update(){return;},
+  onAdd(){},
+  render(){},
+  onRemove(){
    for(const canvas of [atlas,tile,mask,...[...cache.values()].map(v=>v.image)])canvas.width=canvas.height=1;
    cache.clear();projectedWater=[];waterSignature='';geometrySignature='';this.vertices=null;this.count=0;this.map=null;this.signature='';
   },

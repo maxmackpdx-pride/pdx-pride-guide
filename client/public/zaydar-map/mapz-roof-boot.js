@@ -1,6 +1,5 @@
 import {createVenueRoofs,extrusionAmount,matchBuilding,isPlacezRow} from './venue-roofs.js?v=20260926-placez-roofs';
-import {createBridgeWaterLayer,bridgeGlowSpans} from './bridge-water-glow.js';
-import {PORTLAND_BRIDGE_MODELS} from './st-johns-bridge.js?v=20260921-layer-join';
+import {installCheapBridgeGlow} from './bridge-water-glow.js?v=20260928-cheap-bridge-glow';
 
 function rowsToFeatures(rows){
  return (rows||[]).filter(row=>Array.isArray(row.coordinates)&&row.coordinates.length>=2&&row.color).map(row=>({
@@ -50,30 +49,11 @@ function rebuildPlaceSnaps(map){
   if(!best)continue;
   const key=coordKey(c);
   snaps.set(key,best.center);
-  // Match the waypoint to the exact building whose roof it snaps to.
   roofHeights.set(key,Math.max(8,Number(best.height)||9)+.5);
  }
  window.__mapzPlaceSnaps=snaps;
  window.__mapzPlaceRoofHeights=roofHeights;
  return {buildings,snaps};
-}
-
-function attachBridgeGlow(map){
- if(!map)return;
- if(!map._bridgeWater){
-  map._bridgeWater=createBridgeWaterLayer(window.maplibregl,coordinate=>{
-   try{return map.queryTerrainElevation(coordinate)||0;}catch{return 0;}
-  });
- }
- if(!map.getLayer('bridge-water-reflections')){
-  const before=['bridge-decks','skyline','buildings'].find(id=>map.getLayer(id));
-  if(before)map.addLayer(map._bridgeWater,before);
-  else if(map.getStyle())map.addLayer(map._bridgeWater);
- }
- if(!map.getLayer('bridge-water-reflections'))return;
- let water=[];
- try{water=map.querySourceFeatures('terrain',{sourceLayer:'water'})||[];}catch{}
- map._bridgeWater.update(bridgeGlowSpans(PORTLAND_BRIDGE_MODELS),water);
 }
 
 function sync(map){
@@ -83,10 +63,9 @@ function sync(map){
   const placeFeatures=(window.__mapzVenueFeatures||[]).filter(f=>isPlacezRow(f.properties||{}));
   map._venueRoofs.update(buildings,placeFeatures,extrusionAmount(map));
  }
- attachBridgeGlow(map);
+ installCheapBridgeGlow(map);
 }
 
-// Project Placez through their roof center so waypoints rise from the building.
 if(!window.__mapzProjectSnap){
  window.__mapzProjectSnap=true;
  const patch=function(map){
@@ -110,7 +89,6 @@ if(!window.__mapzProjectSnap){
  window.__mapzPatchProject=patch;
 }
 
-// Venue ground pools use a ~88px radial. Cut flow 70% on flat, kill on roofs.
 if(!window.__mapzSpillScale){
  window.__mapzSpillScale=true;
  const original=CanvasRenderingContext2D.prototype.createRadialGradient;
@@ -136,7 +114,7 @@ if(window.maplibregl?.Map&&!window.__mapzRoofBoot){
     this.__mapzRefreshBuildingSurfaces=()=>sync(this);
     this._venueRoofs=createVenueRoofs(this);
     sync(this);
-    this.on('idle',()=>{attachBridgeGlow(this);rebuildPlaceSnaps(this);});
+    this.on('idle',()=>rebuildPlaceSnaps(this));
     this.on('moveend',()=>sync(this));
     this.on('sourcedata',event=>{
      if(event.sourceId==='terrain'&&event.isSourceLoaded)sync(this);
