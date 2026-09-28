@@ -1,8 +1,8 @@
 @font-face { font-family: 'Home Discover Barlow'; src: url('/fonts/home-discover/barlow-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Home Discover Mono'; src: url('/fonts/home-discover/jetbrains-mono-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
 /* Scoped Radix neutral roles from the approved Foundation preview. Product accents and glass recipes remain shared. */
-.home-discover { --discover-text:#eeeeee; --discover-muted:#b4b4b4; --discover-border:#3a3a3a; --c:var(--neon-yellow); }
-.home-discover-trigger, .home-discover__close, .home-discover__filter {
+.home-discover.pdx-glass-rebind { --discover-text:#eeeeee; --discover-muted:#b4b4b4; --discover-border:#3a3a3a; --c:var(--neon-yellow); }
+.home-discover-trigger.pdx-glass-rebind, .home-discover__close.pdx-glass-rebind, .home-discover__filter.pdx-glass-rebind {
   --c:var(--neon-yellow); display:inline-flex; align-items:center; justify-content:center; gap:8px;
   min-height:44px; border-radius:22px; border:1px solid color-mix(in srgb,var(--c) 55%,#484848);
   background:var(--btn-glow-bg); box-shadow:var(--btn-glow-shadow); color:var(--c);
@@ -24,12 +24,12 @@
 .home-discover__seam { position:absolute; top:0; left:8px; right:8px; height:2px; pointer-events:none; background:var(--refract-seam-gradient); }
 .home-discover__header { display:flex; justify-content:space-between; align-items:center; }
 .home-discover__eyebrow { font:400 11px/1.5 'Home Discover Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--discover-muted); }
-.home-discover__close { --c:var(--discover-muted); width:44px; height:44px; padding:0; }
+.home-discover__close.pdx-glass-rebind { --c:var(--discover-muted); width:44px; height:44px; padding:0; }
 .home-discover .home-discover__title { font:900 36px/1 var(--font-display); text-transform:uppercase; letter-spacing:.005em; color:var(--discover-text); margin:16px 0 24px; }
 .home-discover__filters { display:grid; grid-template-columns:.9fr 1.2fr .9fr 1.1fr; gap:4px; margin-bottom:20px; }
-.home-discover__filter { --c:var(--discover-muted); min-width:0; padding:10px 8px; gap:4px; letter-spacing:.035em; }
+.home-discover__filter.pdx-glass-rebind { --c:var(--discover-muted); min-width:0; padding:10px 8px; gap:4px; letter-spacing:.035em; }
 .home-discover__filter svg { flex-shrink:0; }
-.home-discover__filter[aria-pressed=true] { --c:var(--neon-yellow); border-color:var(--c); color:var(--c); }
+.home-discover__filter.pdx-glass-rebind[aria-pressed=true] { --c:var(--neon-yellow); border-color:var(--c); color:var(--c); }
 .home-discover__destinations { display:grid; }
 .home-discover a.home-discover__choice { display:flex; align-items:center; gap:16px; min-height:76px; text-decoration:none; color:var(--discover-text); padding:16px 8px; border:0; border-bottom:1px solid var(--discover-border); background:transparent; transition:background .15s ease; }
 .home-discover a.home-discover__choice:last-child { border-bottom:0; }
