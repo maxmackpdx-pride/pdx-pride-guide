@@ -11,7 +11,6 @@ export const BRIDGE_GLOW_THEMES={
  broadway:'rainbow',steel:'trans',burnside:'lesbian',morrison:'rainbow',
  hawthorne:'trans',marquam:'lesbian','tilikum-crossing':'rainbow',
  'ross-island':'lesbian',sellwood:'trans',fremont:'lesbian',
- interstate:'trans',
 };
 
 export const BRIDGE_GLOW_SATURATION=1.5*1.2;
@@ -30,22 +29,53 @@ export function bridgeGlowColor(palette,fraction){
  return saturateBridgeColor([16,8,0].map(shift=>((a>>shift)&255)*(1-mix)+((b>>shift)&255)*mix));
 }
 
-function bridgeSpanLine(model){
- const rad=model.bearing*Math.PI/180,half=model.length/2;
- const east=Math.sin(rad)*half,north=Math.cos(rad)*half;
+function bridgeSpanLine(model,start=0.22,end=0.78){
+ const rad=model.bearing*Math.PI/180;
  const lonPerM=1/(111320*Math.cos(model.center[1]*Math.PI/180));
  const latPerM=1/111320;
- return [
-  [model.center[0]-east*lonPerM,model.center[1]-north*latPerM],
-  [model.center[0]+east*lonPerM,model.center[1]+north*latPerM],
- ];
+ const point=t=>{
+  const along=(t-0.5)*model.length;
+  return [model.center[0]+Math.sin(rad)*along*lonPerM,model.center[1]+Math.cos(rad)*along*latPerM];
+ };
+ return [point(start),point(end)];
 }
 
-function fittedGlowLine(model,features){
+function pointInRing(point,ring){
+ let inside=false;
+ for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+  const a=ring[i],b=ring[j];
+  const hit=((a[1]>point[1])!==(b[1]>point[1]))&&(point[0]<(b[0]-a[0])*(point[1]-a[1])/((b[1]-a[1])||1e-12)+a[0]);
+  if(hit)inside=!inside;
+ }
+ return inside;
+}
+function pointInWater(point,polygons){
+ for(const polygon of polygons){
+  if(!polygon[0]?.length||!pointInRing(point,polygon[0]))continue;
+  let hole=false;
+  for(let i=1;i<polygon.length;i++)if(pointInRing(point,polygon[i])){hole=true;break;}
+  if(!hole)return true;
+ }
+ return false;
+}
+
+function fittedGlowLine(model,features,water){
  const fit=model.fit||(features?.length?fitBridgeRoad(features,model,()=>0):null);
- if(!fit)return bridgeSpanLine(model);
- const steps=Math.max(12,Math.min(36,Math.ceil(fit.length/24)));
- return Array.from({length:steps+1},(_,i)=>sampleBridgeRoad(fit,i/steps).coordinate);
+ const raw=fit
+  ? Array.from({length:Math.max(16,Math.min(40,Math.ceil((fit.length||model.length)/20)))+1},(_,i)=>sampleBridgeRoad(fit,i/(Math.max(16,Math.min(40,Math.ceil((fit.length||model.length)/20))))).coordinate)
+  : Array.from({length:17},(_,i)=>bridgeSpanLine(model,0,1) && null).filter(Boolean);
+ const samples=fit
+  ? Array.from({length:25},(_,i)=>sampleBridgeRoad(fit,i/24).coordinate)
+  : Array.from({length:17},(_,i)=>{
+   const t=i/16,rad=model.bearing*Math.PI/180,along=(t-0.5)*model.length;
+   const lonPerM=1/(111320*Math.cos(model.center[1]*Math.PI/180));
+   return [model.center[0]+Math.sin(rad)*along*lonPerM,model.center[1]+Math.cos(rad)*along*latPerM];
+  });
+ const latPerM=1/111320;
+ let kept=water?.length?samples.filter(point=>pointInWater(point,water)):samples.slice(Math.floor(samples.length*0.22),Math.ceil(samples.length*0.78));
+ if(kept.length<2)kept=samples.slice(Math.floor(samples.length*0.28),Math.ceil(samples.length*0.72));
+ if(kept.length<2)return bridgeSpanLine(model);
+ return kept;
 }
 
 export function bridgeGlowGradient(palette){
@@ -55,7 +85,7 @@ export function bridgeGlowGradient(palette){
  return expr;
 }
 
-export function bridgeGlowLineCollections(features){
+export function bridgeGlowLineCollections(features,water){
  const byTheme={};
  for(const model of PORTLAND_BRIDGE_MODELS){
   if(model.disabled||!Object.hasOwn(BRIDGE_GLOW_THEMES,model.id))continue;
@@ -63,7 +93,7 @@ export function bridgeGlowLineCollections(features){
   (byTheme[palette]??=[]).push({
    type:'Feature',
    properties:{id:model.id,palette},
-   geometry:{type:'LineString',coordinates:fittedGlowLine(model,features)},
+   geometry:{type:'LineString',coordinates:fittedGlowLine(model,features,water)},
   });
  }
  return byTheme;
@@ -72,7 +102,20 @@ export function bridgeGlowLineCollections(features){
 function transportationBridges(map){
  try{
   return (map.querySourceFeatures('terrain',{sourceLayer:'transportation'})||[])
-   .filter(feature=>feature.properties?.brunnel==='bridge');
+   .filter(feature=>feature.properties?.brunnel==='bridge'&&!['rail','path'].includes(feature.properties?.class));
+ }catch{
+  return [];
+ }
+}
+function waterPolygons(map){
+ try{
+  const features=map.querySourceFeatures('terrain',{sourceLayer:'water'})||[];
+  const polygons=[];
+  for(const feature of features){
+   const rings=feature.geometry?.type==='Polygon'?[feature.geometry.coordinates]:feature.geometry?.type==='MultiPolygon'?feature.geometry.coordinates:[];
+   for(const polygon of rings)if(polygon[0]?.length>3)polygons.push(polygon);
+  }
+  return polygons;
  }catch{
   return [];
  }
@@ -81,8 +124,9 @@ function transportationBridges(map){
 export function installCheapBridgeGlow(map){
  if(!map||!map.getStyle())return;
  const features=transportationBridges(map);
- const collections=bridgeGlowLineCollections(features);
- const before=['waterway','buildings','skyline','bridge-decks'].find(id=>map.getLayer(id));
+ const water=waterPolygons(map);
+ const collections=bridgeGlowLineCollections(features,water);
+ const before=['bridge-decks','skyline','buildings'].find(id=>map.getLayer(id));
  for(const [palette,rows] of Object.entries(collections)){
   const sourceId=`mapz-bridge-glow-${palette}`;
   const data={type:'FeatureCollection',features:rows};
@@ -93,12 +137,12 @@ export function installCheapBridgeGlow(map){
   }
   if(!map.getLayer(sourceId)){
    const layer={
-    id:sourceId,type:'line',source:sourceId,minzoom:12.2,maxzoom:18,
-    layout:{'line-cap':'round','line-join':'round'},
+    id:sourceId,type:'line',source:sourceId,minzoom:12.4,maxzoom:17.4,
+    layout:{'line-cap':'butt','line-join':'round'},
     paint:{
-     'line-width':['interpolate',['linear'],['zoom'],12,3,15,10,17,16],
-     'line-blur':['interpolate',['linear'],['zoom'],12,2.5,15,8,17,12],
-     'line-opacity':['interpolate',['linear'],['zoom'],12,.22,14.5,.5,17,.38],
+     'line-width':['interpolate',['linear'],['zoom'],12.4,6,15,16,17,22],
+     'line-blur':['interpolate',['linear'],['zoom'],12.4,4,15,11,17,14],
+     'line-opacity':['interpolate',['linear'],['zoom'],12.4,.18,14.8,.42,17.2,.28],
      'line-gradient':bridgeGlowGradient(palette),
     },
    };
