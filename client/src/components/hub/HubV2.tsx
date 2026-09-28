@@ -19,7 +19,6 @@ import HubPeople from "./sections/HubPeople";
 import HubSettings from "./sections/HubSettings";
 import HubAdminKeys from "./sections/HubAdminKeys";
 import HubWeatherForecast from "./sections/HubWeatherForecast";
-import { getAdminTableMeta } from "./sections/HubAdminTable";
 import {
   HUB_ADMIN_TABLE_SECTIONS,
   hubSectionToAdminTab,
@@ -27,7 +26,6 @@ import {
 } from "./types";
 import { isEventSchedulePast, parsePacificDateTime } from "@shared/missedConnections";
 
-/** Upcoming nights only for the right-rail “Your next moves” list. */
 function isHubNextMoveLive(row: HubEventRow, nowMs = Date.now()): boolean {
   if (row.dateStart || row.dateEnd) {
     return !isEventSchedulePast(row.dateStart, row.dateEnd, nowMs);
@@ -279,9 +277,6 @@ export default function HubV2({
       { value: postsCount, label: "Posts" },
     ];
 
-  void getAdminTableMeta;
-  void stats;
-
   const center = (
     <>
       {errorBanner}
@@ -342,7 +337,7 @@ export default function HubV2({
       searchValue={searchQ}
       onSearchChange={setSearchQ}
       sideExtra={keysExtra}
-      hideMobileDrawer
+      sideExtraDrawer={null}
       rightRail={
         <HubRightRail
           upcoming={upcoming}
