@@ -552,7 +552,7 @@ export default function ZaydarMapDemo() {
           return {...row,lat:points[0]?.lat,lng:points[0]?.lng,_mapPoints:points,locationLabel:row.neighborhood||"Confirmed address"};
         }
         const mapPoint=boardMapPoints.find(point=>point.board===world && point.postId===Number(row.id));
-        const located=locateWorldRow({...row,mapPoint},world,places as unknown as WorldRow[],events as unknown as WorldRow[]);
+        const located=locateWorldRow({...row,mapPoint} as WorldRow,world,places as unknown as WorldRow[],events as unknown as WorldRow[]);
         const distance=located.lat!=null&&located.lng!=null
           ? `${roughDistanceMiles(viewerPoint || {lat:mapCenter[0],lng:mapCenter[1]},{lat:Number(located.lat),lng:Number(located.lng)})}${viewerPoint ? "" : " from map center"}` : "";
         return {...located,locationLabel:distance ? `${located.locationLabel} · ${distance}` : located.locationLabel,_board:board[world]};
