@@ -18,29 +18,42 @@ const areaName = (value: unknown) => {
   return ({se:"southeast",ne:"northeast",sw:"southwest",nw:"northwest",n:"north",pearl:"pearl district","old town chinatown":"old town"} as Record<string,string>)[name] || name;
 };
 
-/** Public venue coordinates are exact; neighborhood-only posts use a shared,
- * explicitly approximate area marker. Never geocode a private handoff address. */
+/** Board markers use a coarse grid by default. A map point appears only
+ * when its author explicitly shared one; never geocode handoff text. */
+const coarsePoint = (point: {lat:number;lng:number}) => ({
+  lat: Math.round(point.lat / 0.025) * 0.025,
+  lng: Math.round(point.lng / 0.025) * 0.025,
+});
+export function roughDistanceMiles(from: {lat:number;lng:number}, to: {lat:number;lng:number}): string {
+  const radians = (v:number) => v * Math.PI / 180;
+  const dLat = radians(to.lat - from.lat), dLng = radians(to.lng - from.lng);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(radians(from.lat)) * Math.cos(radians(to.lat)) * Math.sin(dLng / 2) ** 2;
+  const miles = 3959 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return miles < 1 ? "Under 1 mi away" : `About ${Math.round(miles)} mi away`;
+}
 export function locateWorldRow(row: WorldRow, world: MapWorld, places: WorldRow[], events: WorldRow[]): WorldRow {
   if (world === "gigz" && row.isRemote) return {...row, lat:null, lng:null, locationLabel:"Remote"};
-  const point = mapCoordinates(row.lat, row.lng);
-  if (point) return {...row, ...point, locationLabel: row.locationLabel || "Mapped location"};
+  const shared = mapCoordinates(row.mapPoint?.lat, row.mapPoint?.lng);
+  if (shared) return {...row, ...shared, approximate:false, locationLabel:"Shared map point"};
+  const own = mapCoordinates(row.lat, row.lng);
+  if (own) return {...row, ...coarsePoint(own), approximate:true, locationLabel:"Approximate area"};
   if (world === "mizzed" || world === "gigz") {
     const event = world === "mizzed" ? events.find(event => event.id === row.eventId) : undefined;
     const eventPoint = mapCoordinates(row.eventLat ?? event?.lat, row.eventLng ?? event?.lng);
-    if (eventPoint) return {...row, ...eventPoint, locationLabel: row.eventVenue || event?.venueName || "Event venue"};
+    if (eventPoint) return {...row, ...coarsePoint(eventPoint), approximate:true, locationLabel:"Near event · approximate"};
     const name = normalizeDirectoryName(String(row.eventVenue || row.venueHint || row.location || ""));
     const place = places.find(place => ((row.placeId || row.businessId) && Number(place.id) === Number(row.placeId || row.businessId)) || (name && normalizeDirectoryName(place.name) === name));
     const venuePoint = place && mapCoordinates(place.lat,place.lng);
-    if (venuePoint) return {...row, ...venuePoint, locationLabel:place.name};
+    if (venuePoint) return {...row, ...coarsePoint(venuePoint), approximate:true, locationLabel:"Near venue · approximate"};
   }
   const area = areaName(row.neighborhood || (world === "gigz" ? row.location : world === "mizzed" ? row.venueHint : ""));
-  const candidates = area ? places.filter(place => areaName(place.neighborhood) === area).flatMap(place => {
-    const point=mapCoordinates(place.lat,place.lng); return point ? [point] : [];
-  }) : [];
-  if (candidates.length) {
+  const candidates=area?places.filter(place=>areaName(place.neighborhood)===area).flatMap(place=>{
+    const point=mapCoordinates(place.lat,place.lng);return point?[point]:[];
+  }):[];
+  if(candidates.length){
     const lat=(Math.min(...candidates.map(p=>p.lat))+Math.max(...candidates.map(p=>p.lat)))/2;
     const lng=(Math.min(...candidates.map(p=>p.lng))+Math.max(...candidates.map(p=>p.lng)))/2;
-    return {...row,lat,lng,approximate:true,locationLabel:`${row.neighborhood || row.location || row.venueHint} area · approximate`};
+    return {...row,...coarsePoint({lat,lng}),approximate:true,locationLabel:`${row.neighborhood||row.location||row.venueHint} area · approximate`};
   }
   return {...row,lat:null,lng:null,locationLabel:"No mapped location"};
 }

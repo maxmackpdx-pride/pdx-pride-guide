@@ -10,7 +10,7 @@ import ZaydarLayerSheet, { type ZaydarLayer, type ZaydarLayerId } from "@/compon
 import MapWorldPanel from "@/components/MapWorldPanel";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import MapComposerOverlay from "@/components/MapComposerOverlay";
-import {readMapCamera,filterWorldRows,locateWorldRow,WORLD_DETAIL_KEYS,type MapWorld,type WorldRow,type MapBounds} from "@/lib/mapWorlds";
+import {readMapCamera,filterWorldRows,locateWorldRow,roughDistanceMiles,WORLD_DETAIL_KEYS,type MapWorld,type WorldRow,type MapBounds} from "@/lib/mapWorlds";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
 import ZaydarCanvas, { type MapSelectionRect, type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { ChevronRight, LocateFixed } from "lucide-react";
@@ -357,6 +357,7 @@ export default function ZaydarMapDemo() {
   const composeWorldValue=params.get("compose");
   const composeWorld=(["places","mizzed","gigz","giftz","sellz"].includes(composeWorldValue||"")?composeWorldValue:null) as MapWorld|null;
   const [mapCenter, setMapCenter] = useState<[number, number]>([45.523, -122.676]);
+  const [viewerPoint, setViewerPoint] = useState<{lat:number;lng:number} | null>(null);
   const [cardOriginRect, setCardOriginRect] = useState<EventModalOriginRect | PlaceModalOriginRect | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const requestedPrivateAction=["compose","houzCompose","gigz.view","giftz.view","sellz.view","mizzed.view"].map(key=>params.get(key)||"").join("|");
@@ -433,6 +434,7 @@ export default function ZaydarMapDemo() {
       const point: [number, number] = [position.coords.latitude, position.coords.longitude];
       if(point[0]<45.2||point[0]>45.85||point[1]<-123.15||point[1]>-122.15){setLocateError("You’re outside this Portland metro demo.");setLocating(false);return;}
       setMapCenter(point);
+      setViewerPoint({lat:point[0],lng:point[1]});
       mapRef.current?.send("locate", { coordinates: [point[1], point[0]], avatar: locationAvatar });
       setLocating(false);
     }, () => {
@@ -444,6 +446,7 @@ export default function ZaydarMapDemo() {
   const { data: communities = EMPTY_COMMUNITIES } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
   const { data: places = EMPTY_PLACES, isLoading: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
   const { data: housingRaw, isLoading: housingLoading, isError: housingError, refetch: retryHousing } = useQuery<unknown>({ queryKey: ["/api/housing", "map"], queryFn: () => apiRequest("GET", "/api/housing").then(r => r.json()) });
+  const { data: boardMapPoints = [] } = useQuery<Array<{board:string;postId:number;lat:number;lng:number}>>({queryKey:["/api/board-map-locations"],queryFn:()=>apiRequest("GET","/api/board-map-locations").then(r=>r.json())});
   const { data: mizzed = [], isLoading: mizzedLoading, isError: mizzedError, refetch: retryMizzed } = useQuery<MissedConnectionPost[]>({ queryKey: ["/api/missed-connections"], queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()) });
   const { data: gigs = EMPTY_ROWS, isLoading: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
   const { data: gifts = EMPTY_ROWS, isLoading: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
@@ -455,12 +458,16 @@ export default function ZaydarMapDemo() {
   const savedSellzSet=useMemo(()=>new Set(savedSellz.data||[]),[savedSellz.data]);
   useEffect(()=>{
     return queryClient.getQueryCache().subscribe(event=>{
-      if(event.type==="updated" && event.action.type==="invalidate" && ["/api/gigs","/api/gifting","/api/sellz","/api/missed-connections"].includes(String(event.query.queryKey[0]))) {
+      if(event.type==="updated" && event.action.type==="invalidate" && ["/api/gigs","/api/gifting","/api/sellz","/api/missed-connections","/api/housing"].includes(String(event.query.queryKey[0]))) {
         void queryClient.invalidateQueries({queryKey:["map-worlds-mine"]});
+        void queryClient.invalidateQueries({queryKey:["/api/board-map-locations"]});
       }
     });
   },[]);
-  const housing = useMemo(() => stampHauzMapPoints(Array.isArray(housingRaw) ? housingRaw as MapRow[] : (housingRaw && typeof housingRaw === "object" && Array.isArray((housingRaw as { posts?: unknown[] }).posts) ? (housingRaw as { posts: MapRow[] }).posts : [])), [housingRaw]);
+  const housing = useMemo(() => stampHauzMapPoints(Array.isArray(housingRaw) ? housingRaw as MapRow[] : (housingRaw && typeof housingRaw === "object" && Array.isArray((housingRaw as { posts?: unknown[] }).posts) ? (housingRaw as { posts: MapRow[] }).posts : [])).map(row => {
+    const shared=boardMapPoints.find(point=>point.board==="houz"&&point.postId===Number(row.id));
+    return shared ? {...row,lat:shared.lat,lng:shared.lng,mapPoint:shared} : row;
+  }), [housingRaw,boardMapPoints]);
   const housingStats = !Array.isArray(housingRaw) && housingRaw && typeof housingRaw === "object" ? (housingRaw as HousingBoardResponse).stats : undefined;
   const goOverlay = useCallback((key: OverlayKey | null, id?: number) => {
     const hasOverlay = [...OVERLAY_KEYS,"compose","houzCompose"].some(key => mapSearchParams().has(key));
@@ -544,15 +551,20 @@ export default function ZaydarMapDemo() {
           const points=placeMarks([row as Place]);
           return {...row,lat:points[0]?.lat,lng:points[0]?.lng,_mapPoints:points,locationLabel:row.neighborhood||"Confirmed address"};
         }
-        return {...locateWorldRow(row as WorldRow,world,places as unknown as WorldRow[],events as unknown as WorldRow[]),_board:board[world]};
+        const mapPoint=boardMapPoints.find(point=>point.board===world && point.postId===Number(row.id));
+        const located=locateWorldRow({...row,mapPoint},world,places as unknown as WorldRow[],events as unknown as WorldRow[]);
+        const distance=located.lat!=null&&located.lng!=null
+          ? `${roughDistanceMiles(viewerPoint || {lat:mapCenter[0],lng:mapCenter[1]},{lat:Number(located.lat),lng:Number(located.lng)})}${viewerPoint ? "" : " from map center"}` : "";
+        return {...located,locationLabel:distance ? `${located.locationLabel} · ${distance}` : located.locationLabel,_board:board[world]};
       })];
     })) as unknown as Record<MapWorld,WorldRow[]>;
-  },[places,mizzed,gigs,gifts,sells,mineQueries[0].data,mineQueries[1].data,mineQueries[2].data,mineQueries[3].data,params]);
+  },[places,mizzed,gigs,gifts,sells,mineQueries[0].data,mineQueries[1].data,mineQueries[2].data,mineQueries[3].data,params,boardMapPoints,viewerPoint,mapCenter]);
   const filteredWorlds=useMemo(()=>Object.fromEntries((Object.keys(locatedWorlds) as MapWorld[]).map(world=>[world,filterWorldRows(locatedWorlds[world],world,params,savedSellzSet)])) as Record<MapWorld,WorldRow[]>,[locatedWorlds,params,savedSellzSet]);
   const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>placeTypes.includes(zaydarPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes]);
   const visibleHousing = useMemo(() => housing
     .filter(row => (!housingType || row.type === housingType) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
-    .map(row => ({ ...row, _board: "The HAÜZ" })), [housing, housingType, housingSaved, housingTags, q]);
+    .map(row => ({ ...row, _board: "The HAÜZ", locationLabel: row.lat != null && row.lng != null
+      ? `${row.mapPoint ? "Shared map point" : "Approximate area"} · ${roughDistanceMiles(viewerPoint || {lat:mapCenter[0],lng:mapCenter[1]},{lat:Number(row.lat),lng:Number(row.lng)})}${viewerPoint ? "" : " from map center"}` : row.mapPoint ? "Shared map point" : "Approximate area" })), [housing, housingType, housingSaved, housingTags, q, viewerPoint, mapCenter]);
   const marks = useMemo<Mark[]>(() => [
     ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
     ...(showPlaces ? placeMarks(mapPlaces) : []),
@@ -588,7 +600,7 @@ export default function ZaydarMapDemo() {
       {rows.slice(0, kind === "houz" ? 50 : 5).map((row, index) => {
         const isPlace = kind === "places";
         const title = isPlace ? String(row.name || "Place") : boardTitle(row);
-        const meta = isPlace ? `${zaydarTypeLabel(String(row.type || "venue"))} · ${String(row.neighborhood || "Portland")}` : kind === "houz" ? `${(HOUSING_TYPE_LABEL[row.type as HousingType] || "Housing")} · ${Array.isArray(row.areas) && row.areas.length ? row.areas.join(", ") : "Portland"}` : `${String(row._board || "Boards")} · ${String(row.neighborhood || "Portland")}`;
+        const meta = isPlace ? `${zaydarTypeLabel(String(row.type || "venue"))} · ${String(row.neighborhood || "Portland")}` : kind === "houz" ? `${(HOUSING_TYPE_LABEL[row.type as HousingType] || "Housing")} · ${row.locationLabel}` : `${String(row._board || "Boards")} · ${String(row.locationLabel || "Approximate area")}`;
         const fallback = isPlace ? directoryFallbackLogo(String(row.type)) : boardIcon(row);
         const photo = isPlace ? resolveDirectoryLogo(String(row.name), typeof row.imageUrl === "string" ? row.imageUrl : undefined) : firstImage(kind === "houz" ? row.photos : row.photoUrls) || firstImage(row.imageUrl);
         return <button type="button" className="zaydar-layer-row" key={`${kind}-${row._board || ""}-${row.id ?? index}`} onClick={event => isPlace ? openMark(placeMarks([row as Place])[0] || { key: `p-${row.id}`, kind: "place", lat: Number(row.lat), lng: Number(row.lng), item: row as Place }, event.currentTarget) : openBoardRow(row, event.currentTarget)}>
@@ -682,7 +694,7 @@ export default function ZaydarMapDemo() {
       (row._board==='Mizzed'&&Number(row.placeId)===p.id)||
       (venueName&&normalizeDirectoryName(p.name)===normalizeDirectoryName(venueName))):undefined;
     const venuePoint=venue?placeMarks([venue]).sort((a,b)=>Math.hypot(a.lat-mark.lat,a.lng-mark.lng)-Math.hypot(b.lat-mark.lat,b.lng-mark.lng))[0]:undefined;
-    const venueAnchor=venue&&venuePoint?{key:`directory-${venue.id}`,coordinates:[venuePoint.lng,venuePoint.lat],name:venue.name,
+    const venueAnchor=(event||place||row.mapPoint)&&venue&&venuePoint?{key:`directory-${venue.id}`,coordinates:[venuePoint.lng,venuePoint.lat],name:venue.name,
       color:zaydarPlaceColor(venue),type:zaydarPlaceType(venue),typeIcon:zaydarTypeIcon(zaydarPlaceType(venue)),
       waypointLogo:resolveDirectoryLogo(venue.name,venue.imageUrl)?.replace(/\.png(?=\?|$)/,'-white.png'),logo:''}:undefined;
     const type=place?zaydarPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');

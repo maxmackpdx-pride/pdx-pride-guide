@@ -247,6 +247,12 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       });
     }
 
+    const mapPoint = req.body?.mapLocation;
+    if (mapPoint != null && (typeof mapPoint.lat !== "number" || typeof mapPoint.lng !== "number" ||
+        !Number.isFinite(mapPoint.lat) || !Number.isFinite(mapPoint.lng) ||
+        !withinHousingBounds(mapPoint.lat, mapPoint.lng))) {
+      return res.status(400).json({ error: "Shared map point must be in THE HAÜZ region." });
+    }
     const postId = createHousingPost(db, {
       userId,
       type,
@@ -286,6 +292,10 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       lng,
     });
 
+    if (mapPoint) {
+      db.prepare("INSERT OR REPLACE INTO board_map_locations (board,post_id,lat,lng) VALUES ('houz',?,?,?)")
+        .run(postId, mapPoint.lat, mapPoint.lng);
+    }
     res.json(getHousingPost(db, postId, userId));
   });
 

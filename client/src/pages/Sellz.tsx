@@ -14,6 +14,7 @@ import { shareCardUrl } from "@shared/shareCards";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { timeAgo } from "@/lib/boardFeed";
 import "./PrideWork.css";
+import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
 import "./Sellz.css";
 
 const CATEGORIES = ["Clothing", "Drag", "Leather and gear", "Home", "Furniture", "Electronics", "Art", "Tickets", "Tools", "Outdoor", "Collectibles", "Other"];
@@ -209,6 +210,7 @@ export function SellzComposer({onClose, onPosted}: {onClose: () => void; onPoste
   const {toast} = useToast();
   const [form, setForm] = useState<any>(blank);
   const [photos, setPhotos] = useState<FileList | null>(null);
+  const [mapLocation, setMapLocation] = useState<BoardMapPoint | null>(null);
   const create = useMutation({
     mutationFn: async () => {
       let photoUrls: string[] = [];
@@ -223,7 +225,7 @@ export function SellzComposer({onClose, onPosted}: {onClose: () => void; onPoste
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, photoUrls }),
+        body: JSON.stringify({ ...form, photoUrls, mapLocation }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || response.statusText);
@@ -235,10 +237,11 @@ export function SellzComposer({onClose, onPosted}: {onClose: () => void; onPoste
       onPosted(data.id);
       setForm(blank);
       setPhotos(null);
+      setMapLocation(null);
       toast({ title: "Your listing is live" });
     },
     onError: (error: any) => toast({ title: "Could not post", description: error.message, variant: "destructive" }),
   });
 
-  return <section id="sellz-form" className="gifting-form board-path-card pdx-glass-rebind"><button className="gifting-close" onClick={onClose} aria-label="Close"><X /></button><p className="board-section-kicker board-section-kicker--lime">New listing</p><h2 className="display section-heading">Sell something</h2><div className="gifting-form-grid"><label className="span">Title<input className="board-text-field" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="What are you selling?" /></label><label className="span">Description<textarea className="board-text-field" rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Useful details, dimensions, flaws, what is included." /></label><label>Price<input className="board-text-field" inputMode="decimal" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="$" /></label><label>Category<select className="board-text-field" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{CATEGORIES.map(value => <option key={value}>{value}</option>)}</select></label><label>Condition<select className="board-text-field" value={form.condition} onChange={e => setForm({ ...form, condition: e.target.value })}>{CONDITIONS.map(value => <option key={value}>{value}</option>)}</select></label><label>Neighborhood<input className="board-text-field" value={form.neighborhood} onChange={e => setForm({ ...form, neighborhood: e.target.value })} /></label><label>Handoff<select className="board-text-field" value={form.pickupPreference} onChange={e => setForm({ ...form, pickupPreference: e.target.value })}>{PICKUP.map(value => <option key={value}>{value}</option>)}</select></label><label className="span">Photos, up to 6<input type="file" accept="image/*" multiple onChange={e => setPhotos(e.target.files)} /></label></div><label className="gifting-rules"><input type="checkbox" checked={form.negotiable} onChange={e => setForm({ ...form, negotiable: e.target.checked })} />Open to offers</label><label className="gifting-rules"><input type="checkbox" checked={form.acceptRules} onChange={e => setForm({ ...form, acceptRules: e.target.checked })} />I own this item, described it honestly, and agree to the marketplace rules.</label><Button variant="solid" accent="green" size="lg" disabled={create.isPending || !form.acceptRules || !form.title || !form.price} onClick={() => create.mutate()}>{create.isPending ? "Posting…" : "Post listing"}</Button></section>;
+  return <section id="sellz-form" className="gifting-form board-path-card pdx-glass-rebind"><button className="gifting-close" onClick={onClose} aria-label="Close"><X /></button><p className="board-section-kicker board-section-kicker--lime">New listing</p><h2 className="display section-heading">Sell something</h2><div className="gifting-form-grid"><label className="span">Title<input className="board-text-field" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="What are you selling?" /></label><label className="span">Description<textarea className="board-text-field" rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Useful details, dimensions, flaws, what is included." /></label><label>Price<input className="board-text-field" inputMode="decimal" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="$" /></label><label>Category<select className="board-text-field" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{CATEGORIES.map(value => <option key={value}>{value}</option>)}</select></label><label>Condition<select className="board-text-field" value={form.condition} onChange={e => setForm({ ...form, condition: e.target.value })}>{CONDITIONS.map(value => <option key={value}>{value}</option>)}</select></label><label>Neighborhood<input className="board-text-field" value={form.neighborhood} onChange={e => setForm({ ...form, neighborhood: e.target.value })} /></label><label>Handoff<select className="board-text-field" value={form.pickupPreference} onChange={e => setForm({ ...form, pickupPreference: e.target.value })}>{PICKUP.map(value => <option key={value}>{value}</option>)}</select></label><BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} /><label className="span">Photos, up to 6<input type="file" accept="image/*" multiple onChange={e => setPhotos(e.target.files)} /></label></div><label className="gifting-rules"><input type="checkbox" checked={form.negotiable} onChange={e => setForm({ ...form, negotiable: e.target.checked })} />Open to offers</label><label className="gifting-rules"><input type="checkbox" checked={form.acceptRules} onChange={e => setForm({ ...form, acceptRules: e.target.checked })} />I own this item, described it honestly, and agree to the marketplace rules.</label><Button variant="solid" accent="green" size="lg" disabled={create.isPending || !form.acceptRules || !form.title || !form.price} onClick={() => create.mutate()}>{create.isPending ? "Posting…" : "Post listing"}</Button></section>;
 }

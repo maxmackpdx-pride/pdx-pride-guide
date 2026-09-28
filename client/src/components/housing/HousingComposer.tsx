@@ -35,6 +35,7 @@ import {
   type OutdoorOption,
   type ParkingOption,
 } from "@shared/housing";
+import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
 import { HousingIcon } from "@/components/housing/HousingIcon";
 import { HousingWell } from "@/components/housing/HousingWell";
 import { Btn, Chip, Mono, SectionTitle, accentStyle } from "@/components/housing/HousingPrimitives";
@@ -299,6 +300,7 @@ export function HousingComposer({
 }): JSX.Element {
   const [type, setType] = useState<HousingType | "PM" | null>(initialType ?? null);
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
+  const [mapLocation, setMapLocation] = useState<BoardMapPoint | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [members, setMembers] = useState<PendingMember[]>([]);
   const [pm, setPm] = useState<PmForm>(EMPTY_PM);
@@ -395,6 +397,7 @@ export function HousingComposer({
       body: draft.body.trim(),
       photos,
       areas: draft.areas,
+      mapLocation,
       // The server re-validates these against the post type, so what lands here
       // is a request, not the final list.
       tags: draft.tags,
@@ -926,6 +929,8 @@ export function HousingComposer({
           onRemove={(v) => patch({ areas: draft.areas.filter((a) => a !== v) })}
           hint="Where the place is, or where you are looking. Add as many as you want."
         />
+
+        <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} />
 
         {isManaged ? (
           <>

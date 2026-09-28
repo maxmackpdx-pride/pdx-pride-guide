@@ -26,6 +26,7 @@ import SafetyGuide from "@/components/SafetyGuide";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import { trackProductEvent } from "@/lib/analytics";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
+import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
 import "./PrideWork.css";
 
 const gigSchema = z.object({
@@ -459,6 +460,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
   const {user} = useAuth();
   const {toast} = useToast();
   const [acceptRules, setAcceptRules] = useState(false);
+  const [mapLocation, setMapLocation] = useState<BoardMapPoint | null>(null);
   const [venueQuery, setVenueQuery] = useState("");
   const [linkedBusiness, setLinkedBusiness] = useState<{ id: number; name: string } | null>(null);
   const [venueBranch, setVenueBranch] = useState<"idle" | "private" | "newBusiness">("idle");
@@ -523,7 +525,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
   const mutation = useMutation({
     mutationFn: (data: GigFormData) => {
       trackProductEvent("post_attempt", "gigz");
-      return apiRequest("POST", "/api/gigs", { ...data, acceptRules: true }).then(r => r.json());
+      return apiRequest("POST", "/api/gigs", { ...data, mapLocation, acceptRules: true }).then(r => r.json());
     },
     onSuccess: (_data, variables) => {
       trackProductEvent("post_completed", "gigz");
@@ -536,6 +538,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
       });
       form.reset();
       setAcceptRules(false);
+      setMapLocation(null);
       onPosted(_data.id);
       setLinkedBusiness(null);
       setVenueBranch("idle");
@@ -683,6 +686,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
                 </>
               ) : null}
 
+              <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} />
               {postType === "POSTING_GIG" && isEligiblePoster && (
                 <div className="span" style={{ border: "1px solid #262626", borderRadius: 8, padding: 14 }}>
                   <p className="board-copy-sm" style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)" }}>

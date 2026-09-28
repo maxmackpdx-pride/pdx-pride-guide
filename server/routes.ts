@@ -3091,6 +3091,29 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   const boardFollowKey = (value: unknown): "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | null =>
     value === "gigz" || value === "giftz" || value === "sellz" || value === "mizzed" || value === "houz" ? value : null;
+  // Exact board map points exist only after an explicit choice by the author.
+  sqlite.exec(`CREATE TABLE IF NOT EXISTS board_map_locations (
+    board TEXT NOT NULL, post_id INTEGER NOT NULL, lat REAL NOT NULL, lng REAL NOT NULL,
+    PRIMARY KEY (board, post_id)
+  )`);
+  const validateBoardMapLocation = (value: unknown) => {
+    if (value == null) return null;
+    if (typeof value !== "object") throw new Error("Invalid map point.");
+    const point = value as { lat?: unknown; lng?: unknown };
+    if (typeof point.lat !== "number" || typeof point.lng !== "number" ||
+        !Number.isFinite(point.lat) || !Number.isFinite(point.lng) ||
+        point.lat < 45.2 || point.lat > 45.85 || point.lng < -123.15 || point.lng > -122.15) {
+      throw new Error("Map point must be within the Portland metro area.");
+    }
+    return { lat: point.lat, lng: point.lng };
+  };
+  const saveBoardMapLocation = (board: string, postId: number, point: {lat:number;lng:number} | null) => {
+    if (point) sqlite.prepare("INSERT OR REPLACE INTO board_map_locations (board,post_id,lat,lng) VALUES (?,?,?,?)")
+      .run(board, postId, point.lat, point.lng);
+  };
+  app.get("/api/board-map-locations", (_req, res) => {
+    res.json(sqlite.prepare("SELECT board, post_id AS postId, lat, lng FROM board_map_locations").all());
+  });
   app.get("/api/boards/:board/follow", (req, res) => {
     const board = boardFollowKey(req.params.board);
     if (!board) return res.status(400).json({ error: "Unknown board" });
@@ -3115,6 +3138,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         compensation: req.body.compensation,
         location: req.body.location,
       })) return;
+      const validatedMapPoint = validateBoardMapLocation(req.body.mapLocation);
       const data = insertGigPostSchema.parse(req.body);
       assertGigBoardAllowed(req.body, data);
       const userId = req.session.userId!;
@@ -3126,6 +3150,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         if (!business || !business.active) return res.status(400).json({ error: "That venue is not available to link." });
       }
       const gig = storage.createGigPost({ ...data, userId } as any);
+      saveBoardMapLocation("gigz", gig.id, validatedMapPoint);
       res.json(gig);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -3234,6 +3259,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       })) return;
       const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.slice(0, 2) : [];
       const postType = req.body.postType === "ISO" ? "ISO" : "GIFT";
+      const validatedMapPoint = validateBoardMapLocation(req.body.mapLocation);
       const data = insertGiftingPostSchema.parse({
         userId: req.session.userId!,
         postType,
@@ -3245,6 +3271,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         photoUrls: JSON.stringify(photoUrls),
       });
       const post = storage.createGiftingPost(data);
+      saveBoardMapLocation("giftz", post.id, validatedMapPoint);
       res.json({ ...post, message: "Your GIFTZ post is live." });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -3423,6 +3450,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
       if (moderationGate(res, "SELLZ marketplace", { title: req.body.title, description: req.body.description })) return;
       const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.slice(0, 6) : [];
+      const validatedMapPoint = validateBoardMapLocation(req.body.mapLocation);
       const post = storage.createSellzPost(insertSellzPostSchema.parse({
         userId: req.session.userId!,
         title: String(req.body.title || "").trim(),
@@ -3435,6 +3463,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         pickupPreference: String(req.body.pickupPreference || "Message to coordinate").trim(),
         photoUrls: JSON.stringify(photoUrls),
       }));
+      saveBoardMapLocation("sellz", post.id, validatedMapPoint);
       res.json(publicSellzPost(post, req.session.userId!));
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -4507,9 +4536,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
         };
       }
 
+      const validatedMapPoint = validateBoardMapLocation(req.body.mapLocation);
       const data = insertMissedConnectionSchema.parse(payload);
       if (data.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
       const created = storage.createMissedConnection(data);
+      if (boardScope) saveBoardMapLocation("mizzed", created.id, validatedMapPoint);
       res.json({
         ...created,
         eventTitle: eventMeta?.title ?? null,

@@ -19,6 +19,7 @@ import { timeAgo } from "@/lib/boardFeed";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import type { CSSProperties } from "react";
 import "./PrideWork.css";
+import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
 import "./Gifting.css";
 
 const CATEGORIES = [
@@ -257,6 +258,7 @@ export function GiftComposer({initialType = "GIFT", onClose, onPosted}: {initial
   const postingOpen = status.data?.postingOpen === true;
   const [form, setForm] = useState<typeof blankForm>({ ...blankForm, postType: initialType });
   const [photos, setPhotos] = useState<FileList | null>(null);
+  const [mapLocation, setMapLocation] = useState<BoardMapPoint | null>(null);
   const createMutation = useMutation({
     mutationFn: async () => {
       trackProductEvent("post_attempt", "gifz");
@@ -272,7 +274,7 @@ export function GiftComposer({initialType = "GIFT", onClose, onPosted}: {initial
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ ...form, photoUrls }),
+        body: JSON.stringify({ ...form, photoUrls, mapLocation }),
       });
       if (!res.ok) throw new Error((await res.text()) || res.statusText);
       return res;
@@ -285,6 +287,7 @@ export function GiftComposer({initialType = "GIFT", onClose, onPosted}: {initial
       toast({ title: "Posted", description: body.message });
       setForm(blankForm);
       setPhotos(null);
+      setMapLocation(null);
       onPosted(body.id);
     },
     onError: (err: any) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
@@ -320,6 +323,7 @@ export function GiftComposer({initialType = "GIFT", onClose, onPosted}: {initial
               No selling, trading, exact addresses, unsafe items, or hookup behavior. Keep it free, keep it kind, keep it moving. Posts go live right away and are removed if they break the rules.
             </p>
             <div className="gifting-form-grid">
+              <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} />
               <label>
                 Post type
                 <select className="board-text-field" value={form.postType} onChange={e => setForm({ ...form, postType: e.target.value })}>
