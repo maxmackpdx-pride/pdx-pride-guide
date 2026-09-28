@@ -1,6 +1,6 @@
 export const PORTLAND_LANDMARK_MIN_ZOOM=14;
 
-const asset=name=>new URL(`./models/landmarks/${name}.glb?v=20260920-portland-landmarks-v2`,import.meta.url).href;
+const asset=name=>new URL(`./models/landmarks/${name}.glb?v=20260928-white-stag-v3`,import.meta.url).href;
 export const PORTLAND_LANDMARKS=[
   {id:'benson-bubbler',label:'Benson Bubbler',url:asset('benson-bubbler'),center:[-122.67925,45.51923],dimensions:[1.17,1.17,1],bearing:0,scale:1.75},
   {id:'chinatown-friendship-gate',label:'Chinatown Friendship Gate',url:asset('chinatown-friendship-gate'),center:[-122.67444,45.52331],dimensions:[19.9,3.84,11.324],bearing:0,scale:1.75},
