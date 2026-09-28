@@ -7,16 +7,12 @@ import {
 } from "@/lib/portlandWeather";
 import WeatherIcon from "@/components/hub/WeatherIcon";
 
-const ROTATE_MS = 2800;
-
 /**
  * 7-day Portland forecast for the hub feed.
- * - Live Open-Meteo data with WMO weather symbols
- * - Always today + the following 6 days (Pacific)
- * - Auto-rotates highlight across the 7 days
+ * Stays pinned on today unless the viewer taps another day.
  */
 export default function HubWeatherForecast() {
-  const [rotateIdx, setRotateIdx] = useState(0);
+  const [selectedIdx, setSelectedIdx] = useState(0);
 
   const {
     data: weather,
@@ -33,26 +29,17 @@ export default function HubWeatherForecast() {
 
   const days = weather?.forecast ?? [];
   const n = days.length;
+  const todayIdx = Math.max(0, days.findIndex((d) => d.highlight));
 
-  // Cycle highlight through all 7 days
   useEffect(() => {
-    if (n < 2) return;
-    const t = window.setInterval(() => {
-      setRotateIdx(i => (i + 1) % n);
-    }, ROTATE_MS);
-    return () => window.clearInterval(t);
-  }, [n]);
+    if (n === 0) return;
+    setSelectedIdx(todayIdx);
+  }, [n, todayIdx]);
 
-  // Keep index in range when data reloads
-  useEffect(() => {
-    if (n > 0 && rotateIdx >= n) setRotateIdx(0);
-  }, [n, rotateIdx]);
-
-  const featured: PortlandForecastDay | null = n > 0 ? days[rotateIdx % n] : null;
+  const featured: PortlandForecastDay | null = n > 0 ? days[Math.min(selectedIdx, n - 1)] : null;
   const heroIcon = featured?.icon ?? weather?.currentIcon ?? "partly-cloudy";
   const heroStyle = weatherStyle(featured?.code ?? weather?.currentCode ?? 1);
 
-  // While rotating: show that day's high + condition; still note "now" on today's live temp when featured is today
   const showLiveNow = Boolean(
     weather
     && featured
@@ -110,14 +97,14 @@ export default function HubWeatherForecast() {
             role="list"
           >
             {days.map((day, i) => {
-              const active = i === rotateIdx % n;
+              const active = i === Math.min(selectedIdx, n - 1);
               return (
                 <button
                   key={day.iso || day.day + day.dateLabel}
                   type="button"
                   role="listitem"
                   className={`hub-v2-weather__day${active ? " is-hot" : ""}${day.highlight ? " is-today" : ""}`}
-                  onClick={() => setRotateIdx(i)}
+                  onClick={() => setSelectedIdx(i)}
                   aria-pressed={active}
                   aria-label={`${day.day} ${day.dateLabel}: ${day.condition}, high ${day.high}°, low ${day.low}°`}
                 >
