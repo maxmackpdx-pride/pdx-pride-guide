@@ -4,7 +4,7 @@ const asset=name=>new URL(`./models/landmarks/${name}.glb?v=20260928-white-stag-
 export const PORTLAND_LANDMARKS=[
   {id:'benson-bubbler',label:'Benson Bubbler',url:asset('benson-bubbler'),center:[-122.67925,45.51923],dimensions:[1.17,1.17,1],bearing:0,scale:1.75},
   {id:'chinatown-friendship-gate',label:'Chinatown Friendship Gate',url:asset('chinatown-friendship-gate'),center:[-122.67444,45.52331],dimensions:[19.9,3.84,11.324],bearing:0,scale:1.75},
-  {id:'darcelle-plaza-rainbow-hydrants',label:'Darcelle Plaza rainbow hydrants',url:asset('darcelle-plaza-rainbow-hydrants'),center:[-122.67992,45.52143],dimensions:[5.3,.755,1.09],bearing:90,scale:1.75},
+  {id:'darcelle-plaza-rainbow-hydrants',label:'Darcelle Plaza rainbow hydrants',url:asset('darcelle-plaza-rainbow-hydrants'),center:[-122.67992,45.52143],dimensions:[5.3,.755,1.09],bearing:90,scale:7},
   {id:'darcelle-xv-marquee',label:'Darcelle XV marquee',url:asset('darcelle-xv-marquee'),center:[-122.67305,45.52475],dimensions:[4.68,.985,2.095],bearing:-90,scale:1.75,baseOffset:3},
   {id:'harvey-milk-street-sign',label:'SW Harvey Milk street sign',url:asset('harvey-milk-street-sign'),center:[-122.68330,45.52230],dimensions:[2.1,.245,2.985],bearing:0,scale:1.75},
   {id:'paul-bunyan-kenton',label:'Paul Bunyan statue',url:asset('paul-bunyan-kenton'),center:[-122.68662,45.58383],dimensions:[3.5,2.818,9.45],bearing:180,scale:1.75},

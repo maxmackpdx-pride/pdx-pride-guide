@@ -31,7 +31,10 @@ test('all nine Portland landmarks keep true meter dimensions and lightweight loc
 test('landmarks use requested scale, fixed GPS anchors, and the R2-D2 scan/static shader',async()=>{
   const welcome=PORTLAND_LANDMARKS.find(landmark=>landmark.id==='white-stag-portland-sign');
   assert.equal(welcome.scale,3);assert.deepEqual(welcome.center,[-122.67052,45.52339]);
-  assert.ok(PORTLAND_LANDMARKS.filter(landmark=>landmark!==welcome).every(landmark=>landmark.scale===1.75&&landmark.center.every(Number.isFinite)));
+  const hydrants=PORTLAND_LANDMARKS.find(landmark=>landmark.id==='darcelle-plaza-rainbow-hydrants');
+  assert.equal(hydrants.scale,7);
+  assert.deepEqual(hydrants.center,[-122.67992,45.52143]);
+  assert.ok(PORTLAND_LANDMARKS.filter(landmark=>landmark!==welcome&&landmark!==hydrants).every(landmark=>landmark.scale===1.75&&landmark.center.every(Number.isFinite)));
   const layer=await readFile(new URL('../client/public/zaydar-map/portland-landmarks.js',import.meta.url),'utf8'),renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   assert.match(layer,/float scan=/);assert.match(layer,/float snow=/);assert.match(layer,/float dropout=/);assert.match(layer,/disable\(gl\.DEPTH_TEST\)/);assert.match(layer,/depthMask\(false\)/);
   assert.match(renderer,/map\.addLayer\(portlandLandmarks\)/);
