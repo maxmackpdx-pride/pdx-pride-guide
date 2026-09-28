@@ -10,6 +10,7 @@ function rowsToFeatures(rows){
 }
 
 function buildingsFrom(map){
+ if(window.__mapzSurfaceBuildings?.length)return window.__mapzSurfaceBuildings;
  const out=[],seen=new Set();
  let feats=[];
  try{
@@ -36,7 +37,6 @@ function coordKey(c){
  return `${Number(c[0]).toFixed(6)},${Number(c[1]).toFixed(6)}`;
 }
 
-/** Build GPS → roof-center snaps for Placez only. */
 function rebuildPlaceSnaps(map){
  const snaps=new Map(),roofHeights=new Map();
  const buildings=buildingsFrom(map);
@@ -87,19 +87,6 @@ if(!window.__mapzProjectSnap){
   };
  };
  window.__mapzPatchProject=patch;
-}
-
-if(!window.__mapzSpillScale){
- window.__mapzSpillScale=true;
- const original=CanvasRenderingContext2D.prototype.createRadialGradient;
- CanvasRenderingContext2D.prototype.createRadialGradient=function(x0,y0,r0,x1,y1,r1){
-  if(r1>40&&r1<160){
-   const amount=window.__mapzMap?extrusionAmount(window.__mapzMap):0;
-   const scale=amount>0.18?0:0.3;
-   return original.call(this,x0,y0,r0*scale,x1,y1,r1*scale);
-  }
-  return original.call(this,x0,y0,r0,x1,y1,r1);
- };
 }
 
 if(window.maplibregl?.Map&&!window.__mapzRoofBoot){
