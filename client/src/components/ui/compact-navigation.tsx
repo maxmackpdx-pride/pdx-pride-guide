@@ -75,12 +75,10 @@ export function CompactHubLink({ active, unreadCount = 0, onNavigate, textOnly =
   </Link>;
 }
 
-/** Z/List takes the former top Hub slot. Same chrome, destination is /z. */
-export function CompactZListLink({ active, onNavigate, textOnly = false }: { active: boolean; onNavigate: () => void; textOnly?: boolean }) {
-  return <Link href="/z" className={`znav-control znav-hub pdx-glass-rebind${textOnly ? " znav-control--text" : ""}${active ? " is-active" : ""}`} data-accent="blue" aria-current={active ? "page" : undefined} aria-label="Z/List" onClick={onNavigate}>
-    <ButtonGlassOptics />
-    {!textOnly && <span className="znav-icon-row"><Compass size={20} strokeWidth={1.8} aria-hidden="true" /></span>}
-    <span className="znav-caption" aria-hidden="true">Z/List</span>
+/** Top-rail Z/Lists wordmark. White type, no pill or circle. */
+export function CompactZListLink({ active, onNavigate }: { active: boolean; onNavigate: () => void; textOnly?: boolean }) {
+  return <Link href="/z" className={`znav-zlists${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined} aria-label="Z/Lists" onClick={onNavigate}>
+    Z/Lists
   </Link>;
 }
 
