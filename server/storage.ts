@@ -1,3 +1,4 @@
+import { seedApprovedEvents20260928 } from "./seedApprovedEvents20260928";
 import { eventRetentionCutoff, isExpiredEvent } from "./eventRetention";
 import { hashPassword, verifyPassword, isLegacyPasswordHash } from "./passwords";
 export { hashPassword, verifyPassword, isLegacyPasswordHash } from "./passwords";
@@ -8132,6 +8133,8 @@ function runBootMigrationsOnce() {
     sqlite.prepare(`UPDATE businesses SET instagram = '@eagleportland' WHERE name = 'Eagle Portland' AND (instagram IS NULL OR instagram <> '@eagleportland')`).run();
     recordBootMigration("eagle_portland_instagram_2026_09_v1");
   }
+
+  seedApprovedEvents20260928(sqlite);
 }
 
 function parseEnvAdminLists() {
