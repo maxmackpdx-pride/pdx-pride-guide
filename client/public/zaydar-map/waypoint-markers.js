@@ -2,13 +2,14 @@ const heads=new Map(),ink=new WeakMap();
 function cityAmount(){
  try{return window.__mapzMap?Math.max(0,Math.min(1,(window.__mapzMap.getZoom()-14.25)/1.1))*Math.max(0,Math.min(1,(window.__mapzMap.getPitch()-16)/18)):0;}catch{return 0;}
 }
+const WAYPOINT_BEAM_HEIGHT_SCALE=2;
 export function waypointGeometry(origin,selected=false,roofLift=0){
  const amount=cityAmount();
  const size=selected?44:28;
- // Keep the same clearance above every roof. The waypoint's height follows
- // the assigned roof; the visibility floor fades out as buildings extrude.
+ // Double the waypoint shaft and head lift while keeping the beam anchored
+ // to its roof or ground point. Fade the visibility floor as buildings extrude.
  const minimumHeight=(selected?56:22)*(1-amount);
- const beamHeight=Math.max(roofLift,minimumHeight);
+ const beamHeight=Math.max(roofLift,minimumHeight)*WAYPOINT_BEAM_HEIGHT_SCALE;
  return {x:origin.x,y:origin.y-beamHeight-size/2,size,bottom:origin.y-beamHeight,anchorY:origin.y};
 }
 function headSprite(color,selected){
