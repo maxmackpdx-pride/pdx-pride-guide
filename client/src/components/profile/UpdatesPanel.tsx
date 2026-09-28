@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import { Heart, MessageCircle } from "lucide-react";
+import ZLineIcon from "@/components/ZLineIcon";
 import { useCallback, useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
@@ -348,7 +348,7 @@ export default function UpdatesPanel({
                   aria-label={`Like this post (${likes})`}
                 >
                   <span className="pp-updates__engage-ico" aria-hidden="true">
-                    <Heart size={18} fill="currentColor" />
+                    <ZLineIcon name="favorite" size={18} filled />
                   </span>
                   <span className="pp-updates__engage-n">{likes}</span>
                   <span className="pp-updates__engage-lbl">LIKE</span>
@@ -356,7 +356,7 @@ export default function UpdatesPanel({
               ) : (
                 <span className="pp-updates__engage pp-updates__engage--like is-static">
                   <span className="pp-updates__engage-ico" aria-hidden="true">
-                    <Heart size={18} fill="currentColor" />
+                    <ZLineIcon name="favorite" size={18} filled />
                   </span>
                   <span className="pp-updates__engage-n">{likes}</span>
                 </span>
@@ -379,7 +379,7 @@ export default function UpdatesPanel({
                   }
                 >
                   <span className="pp-updates__engage-ico" aria-hidden="true">
-                    <MessageCircle size={18} />
+                    <ZLineIcon name="message" size={18} />
                   </span>
                   <span className="pp-updates__engage-n">{replies}</span>
                   <span className="pp-updates__engage-lbl">
@@ -389,7 +389,7 @@ export default function UpdatesPanel({
               ) : (
                 <span className="pp-updates__engage pp-updates__engage--reply is-static">
                   <span className="pp-updates__engage-ico" aria-hidden="true">
-                    <MessageCircle size={18} />
+                    <ZLineIcon name="message" size={18} />
                   </span>
                   <span className="pp-updates__engage-n">{replies}</span>
                 </span>

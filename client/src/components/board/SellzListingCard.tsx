@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Images } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -96,7 +96,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
           {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" /> : <Tag size={54} aria-hidden="true" />}
           <span className={`sellz-card__availability${post.status !== "ACTIVE" ? " sellz-card__availability--inactive" : ""}${post.status === "RESERVED" ? " sellz-card__availability--reserved" : ""}`}>{statusLabel}</span>
           {saved ? <span className="sellz-card__saved"><Bookmark size={11} fill="currentColor" aria-hidden="true" /> Saved</span> : null}
-          {post.photoUrls?.length > 1 ? <span className="board-listing-card__thumb-badge">▦ {post.photoUrls.length}</span> : null}
+          {post.photoUrls?.length > 1 ? <span className="board-listing-card__thumb-badge"><Images size={12} aria-hidden="true" /> {post.photoUrls.length}</span> : null}
         </div>
         <div className="board-listing-card__main">
           <div className="board-listing-card__tags"><span className="board-listing-card__kind board-listing-card__kind--text">{post.category}</span><span className="board-listing-card__time">{timeAgo(post.createdAt)}</span></div>

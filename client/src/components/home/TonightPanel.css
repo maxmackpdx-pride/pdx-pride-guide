@@ -36,7 +36,7 @@
 }
 .home-tonight__subhead { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 20px; }
 .home-tonight__subhead p { margin: 0; color: var(--text-lo, #b7b7c0); font: 600 11px/1.4 var(--font-mono, monospace); letter-spacing: .07em; text-transform: uppercase; }
-.home-tonight__all { flex: none; color: var(--neon-cyan, #00ffff); font: 800 13px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .08em; text-decoration: none; text-transform: uppercase; }
+.home-tonight__all { flex: none; display: inline-flex; align-items: center; gap: 3px; color: var(--neon-cyan, #00ffff); font: 800 13px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .08em; text-decoration: none; text-transform: uppercase; }
 .home-tonight__all:hover { color: #fff; }
 .home-tonight__rail {
   display: flex; gap: 16px; overflow-x: auto; padding: 8px 3px 20px;

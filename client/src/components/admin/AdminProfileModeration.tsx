@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, parseApiError, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -89,7 +90,7 @@ export default function AdminProfileModeration({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >
-        {open ? "Close moderation" : "Moderate account ▾"}
+        {open ? "Close moderation" : <>Moderate account <ChevronDown size={15} aria-hidden="true" /></>}
       </button>
       {(suspended || shadowBanned) && (
         <div className="pp-admin-mod__flags">

@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import { Check, X } from "lucide-react";
+import { Check, Circle, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
@@ -3143,7 +3143,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                                 }}
                               >
                                 <span className="qsearch__series-radio" aria-hidden>
-                                  {(seriesMode[c.id] || defaultSeriesMode(c)) === "one" ? "●" : "○"}
+                                  <Circle size={15} fill={(seriesMode[c.id] || defaultSeriesMode(c)) === "one" ? "currentColor" : "none"} />
                                 </span>
                                 <span>
                                   One occurrence only
@@ -3163,7 +3163,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                                 }}
                               >
                                 <span className="qsearch__series-radio" aria-hidden>
-                                  {(seriesMode[c.id] || defaultSeriesMode(c)) === "series" ? "●" : "○"}
+                                  <Circle size={15} fill={(seriesMode[c.id] || defaultSeriesMode(c)) === "series" ? "currentColor" : "none"} />
                                 </span>
                                 <span>
                                   Full series - create all {c.recurringCount} nights

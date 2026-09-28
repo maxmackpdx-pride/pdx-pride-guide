@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React from "react";
+import { Sparkle } from "lucide-react";
 
 const CSS = `
 .pdxMarquee{
@@ -33,7 +34,7 @@ if (typeof document !== "undefined" && !document.getElementById("pdx-marquee-css
 export function Marquee({
   items = ["Pride Weekend", "July 16–19", "Keep Portland Weird", "Take Care of Each Other"],
   color = "pink",
-  separator = "✦",
+  separator = <Sparkle size={14} fill="currentColor" />,
   speed = 26,
   className = "",
   ...rest

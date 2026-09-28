@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { Sparkle } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -250,7 +251,7 @@ export default function Resume() {
           {marqueeItems.map((item, i) => (
             <span key={`${item}-${i}`} className="resume-marquee__item">
               {item}
-              <span className="resume-marquee__star">✦</span>
+              <span className="resume-marquee__star"><Sparkle size={14} fill="currentColor" /></span>
             </span>
           ))}
         </div>
@@ -367,7 +368,7 @@ export default function Resume() {
             <p className="resume-close__note">
               Pride is a protest. Take care of each other.
               <span className="resume-close__star" aria-hidden="true">
-                ✦
+                <Sparkle size={14} fill="currentColor" />
               </span>
               <Link href="/">zaylist.com</Link>
             </p>

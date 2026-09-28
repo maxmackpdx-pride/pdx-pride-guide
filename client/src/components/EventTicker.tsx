@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Sparkle } from "lucide-react";
 
 export type EventTickerItem = {
   id: number | string;
@@ -69,7 +70,7 @@ export default function EventTicker({ items: sourceItems, direction = "left", cl
         {items.map((item, index) => (
           <span className="event-ticker-item" key={`${item.id}-${index}`} title={item.title}>
             {item.title}
-            <span className="event-ticker-sep" aria-hidden="true">✦</span>
+            <span className="event-ticker-sep" aria-hidden="true"><Sparkle size={12} fill="currentColor" /></span>
           </span>
         ))}
       </div>

@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Images } from "lucide-react";
 import GiftPostEditor from "./GiftPostEditor";
 import { useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -307,7 +307,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
           )}
           {grab && <span className="board-listing-card__grab-badge">Grab</span>}
           {!grab && (post.photoUrls?.length || 0) > 0 && (
-            <span className="board-listing-card__thumb-badge">▦ {post.photoUrls.length}</span>
+            <span className="board-listing-card__thumb-badge"><Images size={12} aria-hidden="true" /> {post.photoUrls.length}</span>
           )}
         </div>
         <div className="board-listing-card__main">

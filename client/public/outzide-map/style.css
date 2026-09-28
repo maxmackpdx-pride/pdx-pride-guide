@@ -114,3 +114,5 @@ html,body{height:100%;overflow:hidden;background:#080c0c}main,.workspace{positio
  body.mobile-light .map-label,
  body.mobile-light .map-controls button{box-shadow:none}
 }
+
+.stars button{display:inline-flex;align-items:center;justify-content:center}.stars button[aria-pressed=true] svg{fill:currentColor}.field-place-link svg{vertical-align:middle;margin-right:3px}

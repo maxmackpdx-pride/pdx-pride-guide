@@ -516,7 +516,7 @@ export default function AdminIngestPanel({ onCommitted }: { onCommitted?: () => 
 
           {preview && preview.events.length === 0 && (
             <p className="text-white/50 text-sm">
-              Nothing parsed from that site. Try a curated ★ feed, or paste an .ics / Eventbrite page.
+              Nothing parsed from that site. Try a curated <Star size={13} fill="currentColor" aria-hidden="true" /> feed, or paste an .ics / Eventbrite page.
             </p>
           )}
         </div>

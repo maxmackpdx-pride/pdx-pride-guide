@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link } from "wouter";
-import { ArrowLeft, ArrowRight, ArrowUpRight, CalendarDays, MapPin, Plus, Share2, Trash2, X, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, CalendarDays, MapPin, Plus, Share2, Sparkle, Trash2, X, Zap } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -325,7 +325,7 @@ export function GigListingCard({
             <button type="button" onClick={() => openTalentReply(`Hi ${talentFirstName}, I’d like to hire you for `)}>Hire {talentFirstName} <ArrowUpRight size={14} aria-hidden="true" /></button>
             <button type="button" onClick={() => openTalentReply()}>Message</button>
           </div>
-          <div className="gig-talent-card__footer"><span aria-hidden="true">✦</span>{availabilityDetail}</div>
+          <div className="gig-talent-card__footer"><span aria-hidden="true"><Sparkle size={13} fill="currentColor" /></span>{availabilityDetail}</div>
         </>
       ) : (
         <>

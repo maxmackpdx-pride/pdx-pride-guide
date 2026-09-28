@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ChevronDown } from "lucide-react";
 import { FilterChip, StickerBadge } from "@/components/ds";
 
 const STICKER_DS_COLOR = {
@@ -106,7 +107,7 @@ export function BoardSelectField({
       <select className="board-select" value={value} onChange={e => onChange(e.target.value)}>
         {children}
       </select>
-      <span className="board-select-caret" aria-hidden="true">▼</span>
+      <span className="board-select-caret" aria-hidden="true"><ChevronDown size={14} /></span>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { Event } from "@shared/schema";
@@ -51,7 +52,7 @@ export default function TonightPanel() {
           </h2>
           <div className="home-tonight__subhead">
             <p>{tonight.length ? `Tonight · Portland · ${tonight.length} ${tonight.length === 1 ? "event" : "events"}` : "Tonight · Portland"}</p>
-            <Link href="/events" className="home-tonight__all">All Eventz <span aria-hidden="true">↗</span></Link>
+            <Link href="/events" className="home-tonight__all">All Eventz <ArrowUpRight size={15} aria-hidden="true" /></Link>
           </div>
         </header>
 

@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import ZLineIcon from "@/components/ZLineIcon";
 import { useMemo, useState } from "react";
 import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -145,7 +145,7 @@ export default function SpottedCardGrid({
           }}
           aria-expanded={composeOpen}
         >
-          {composeOpen ? <><X size={16} aria-hidden="true" /> Cancel</> : <><Plus size={16} aria-hidden="true" /> Saw someone? Write a note</>}
+          {composeOpen ? <><X size={16} aria-hidden="true" /> Cancel</> : <><ZLineIcon name="add" size={16} /> Saw someone? Write a note</>}
         </button>
       )}
 

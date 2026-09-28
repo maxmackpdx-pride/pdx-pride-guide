@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { useId, type ReactNode } from "react";
 import { DashboardItemSkeleton } from "./DashboardThreadSkeleton";
 
@@ -60,7 +60,7 @@ export default function DashboardDrawer({
               VIEW ALL <ArrowRight size={14} aria-hidden="true" />
             </a>
           )}
-          <span className="dash-drawer-chevron" style={{ color }} aria-hidden="true">▾</span>
+          <span className="dash-drawer-chevron" style={{ color }} aria-hidden="true"><ChevronDown size={16} /></span>
         </span>
       </button>
       {open && (

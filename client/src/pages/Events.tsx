@@ -33,7 +33,7 @@ import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
 import { eventPath, eventUrl } from "@shared/eventSlug";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
-import { List, Grid } from "lucide-react";
+import { List, Grid, ChevronDown } from "lucide-react";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
 
@@ -735,7 +735,7 @@ export default function Events() {
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                           ))}
                         </select>
-                        <span className="board-select-caret">▼</span>
+                        <span className="board-select-caret" aria-hidden="true"><ChevronDown size={14} /></span>
                       </div>
                     </label>
                   )}

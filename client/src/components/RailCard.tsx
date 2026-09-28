@@ -1,4 +1,5 @@
-import { Heart, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import ZLineIcon from "@/components/ZLineIcon";
 import type { EventListing } from "@shared/multiDayEvents";
 import { DAY_COLORS, DAY_TEXT_COLORS, fmtClock, hexA } from "@shared/eventWeek";
 import type { ScheduleEvent } from "@/lib/scheduleEvents";
@@ -78,7 +79,7 @@ export default function RailCard({
         overflow: "visible",
       }}
     >
-      <Heart size={16} fill={rsvped ? "currentColor" : "none"} aria-hidden="true" />
+      <ZLineIcon name="favorite" size={16} filled={rsvped} />
     </button>
   );
 
@@ -192,7 +193,7 @@ export default function RailCard({
             whiteSpace: "nowrap",
           }}
         >
-          ● LIVE NOW
+          <span aria-hidden="true" style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "currentColor", verticalAlign: "middle" }} /> LIVE NOW
           <LiveWave />
         </div>
       )}
@@ -288,7 +289,7 @@ export default function RailCard({
         </div>
         {!sm && (
           <div style={{ fontFamily: "var(--font-body)", fontSize: 10.5, fontWeight: 600, color: "rgba(255,255,255,.6)", marginTop: 6 }}>
-            <Heart size={11} fill="currentColor" aria-hidden="true" /> {event.going} going
+            <ZLineIcon name="favorite" size={11} filled /> {event.going} going
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import BrowseStatus from "@/components/BrowseStatus";
-import { Check, Heart, X } from "lucide-react";
+import { Check, X } from "lucide-react";
+import ZLineIcon from "@/components/ZLineIcon";
 /* ============================================================
    Zaylist | Schedule
    Festival-timeline redesign of /schedule. The whole week side by
@@ -433,7 +434,7 @@ export default function Schedule({
       x.fillText('ZAYLIST', 74, H - 96);
       x.fillStyle = '#FF00CC';
       x.font = '700 27px "Barlow Condensed", sans-serif';
-      x.fillText('PRIDE IS A PROTEST. TAKE CARE OF EACH OTHER. ✦', 74, H - 56);
+      x.fillText('PRIDE IS A PROTEST. TAKE CARE OF EACH OTHER.', 74, H - 56);
       const blob: Blob | null = await new Promise((res) => c.toBlob(res, 'image/png'));
       if (!blob) throw new Error('toBlob failed');
       const url = URL.createObjectURL(blob);
@@ -444,7 +445,7 @@ export default function Schedule({
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 4000);
-      flashToast('Saved to downloads ✦ ready for Stories');
+      flashToast('Saved to downloads, ready for Stories');
     } catch {
       flashToast('Export hit a snag. Try again');
     } finally {
@@ -596,7 +597,7 @@ export default function Schedule({
           showQuick,
           showCheck: rsvp && !showQuick,
           live,
-          quickIcon: <Heart size={16} fill={rsvp ? "currentColor" : "none"} aria-hidden="true" />,
+          quickIcon: <ZLineIcon name="favorite" size={16} filled={rsvp} />,
           overlayStyle: S({
             position: 'absolute',
             inset: 0,

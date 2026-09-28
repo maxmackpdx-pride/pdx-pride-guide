@@ -250,7 +250,7 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
 
 function renderCategory(c: Category): string {
   const rows = c.rows.length === 0
-    ? `<p class="none">Nothing pending 🎉</p>`
+    ? `<p class="none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg> Nothing pending</p>`
     : c.rows
         .map((r) => `
           <div class="item">
@@ -300,6 +300,7 @@ export function renderAdminReportHtml(data: ReturnType<typeof buildAdminReport>)
   h2 .dot { width: 9px; height: 9px; border-radius: 999px; display: inline-block; }
   h2 .count { margin-left: auto; background: #16161a; color: #fff; border-radius: 999px; font-size: 12px; padding: 2px 9px; }
   .none { color: #8a8a92; font-style: italic; margin: 0 0 4px 17px; }
+  .none svg { vertical-align: -2px; }
   .item { background: #fff; border: 1px solid #e2e2e6; border-radius: 10px; padding: 12px 14px; margin: 0 0 8px; }
   .item-head { font-weight: 650; font-size: 15px; }
   .item-meta { color: #6a6a72; font-size: 12.5px; margin-top: 2px; }
@@ -314,7 +315,7 @@ export function renderAdminReportHtml(data: ReturnType<typeof buildAdminReport>)
 </head><body>
   <div class="wrap">
     <header>
-      <h1>🏳️‍🌈 Backlog Report</h1>
+      <h1>Backlog Report</h1>
       <span class="gen">Generated ${esc(fmt(data.generatedAt))} PT</span>
     </header>
     <p class="total"><b>${data.total}</b> item${data.total === 1 ? "" : "s"} awaiting you${data.ownerDesk ? "" : " (admin queue)"} · ${data.adminTotal} in the shared queue${data.ownerDesk ? ` · ${data.ownerDesk.count} on the Owner Desk` : ""}</p>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl, { type Map as MapLibreMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { CalendarPlus, Check, Map as MapIcon } from "lucide-react";
+import { CalendarPlus, Check, ChevronDown, Map as MapIcon } from "lucide-react";
 import { CopyStateIcon } from "@/components/ui/animated-state-icons";
 import type { Event } from "@shared/schema";
 import { appleMapsUrl, googleMapsUrl } from "@/lib/eventLinks";
@@ -121,7 +121,7 @@ export default function EventLocationMap({
         {!event.isPrivate && (
           <div className="event-location-map__directions">
             <button type="button" aria-expanded={directionsOpen} onClick={() => setDirectionsOpen(value => !value)}>
-              Directions <span aria-hidden="true">▾</span>
+              Directions <ChevronDown size={15} aria-hidden="true" />
             </button>
             {directionsOpen && (
               <div className="event-location-map__directions-menu">
