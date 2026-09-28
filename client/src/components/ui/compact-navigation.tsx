@@ -3,16 +3,11 @@ import { Link } from "wouter";
 import { motion, useReducedMotion } from "framer-motion";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Home, Info, CalendarDays, MapPin, Map, TreePine, Layers, House, LayoutGrid, PanelsTopLeft, ChevronDown, Menu, X, MessageCircle, type LucideIcon } from "lucide-react";
+import { Home, Info, CalendarDays, MapPin, Map, TreePine, Layers, House, LayoutGrid, PanelsTopLeft, Compass, ChevronDown, Menu, X, MessageCircle, type LucideIcon } from "lucide-react";
 import { PRIMARY_NAV, navLinkActive, type NavEntry } from "@/lib/siteNav";
 import { MOBILE_NAV_DISMISS, dismissMobileNavOverlays } from "@/lib/mobileNavDismiss";
 import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
 
-// 21st arunachalam/Bottom Nav Bar (8343): spring width/opacity label reveal.
-// https://21st.dev/@arunachalam/components/bottom-nav-bar
-// Combined with soralabs/Dock Nav (19177)'s focused-item interaction, then
-// adapted to Tucker's Caption Dock + Split Rail selection (2026-09-08).
-// Real routes and Radix disclosures replace the catalog's local tab selection.
 const ICONS: Record<string, LucideIcon> = {
   Home, About: Info, Eventz: CalendarDays, Placez: MapPin, Mapz: Map,
   OutZide: TreePine, "Z/ List": Layers, "The Haüz": House, Boards: LayoutGrid,
@@ -77,6 +72,15 @@ export function CompactHubLink({ active, unreadCount = 0, onNavigate, textOnly =
     {!textOnly && <span className="znav-icon-row"><PanelsTopLeft size={20} strokeWidth={1.8} aria-hidden="true" />{unreadCount > 0 && <span className="znav-hub-badge" aria-hidden="true">{unreadCount > 99 ? "99+" : unreadCount}</span>}</span>}
     <span className="znav-caption" aria-hidden="true">Hub</span>
     {textOnly && unreadCount > 0 && <span className="znav-hub-badge" aria-hidden="true">{unreadCount > 99 ? "99+" : unreadCount}</span>}
+  </Link>;
+}
+
+/** Z/List takes the former top Hub slot. Same chrome, destination is /z. */
+export function CompactZListLink({ active, onNavigate, textOnly = false }: { active: boolean; onNavigate: () => void; textOnly?: boolean }) {
+  return <Link href="/z" className={`znav-control znav-hub pdx-glass-rebind${textOnly ? " znav-control--text" : ""}${active ? " is-active" : ""}`} data-accent="blue" aria-current={active ? "page" : undefined} aria-label="Z/List" onClick={onNavigate}>
+    <ButtonGlassOptics />
+    {!textOnly && <span className="znav-icon-row"><Compass size={20} strokeWidth={1.8} aria-hidden="true" /></span>}
+    <span className="znav-caption" aria-hidden="true">Z/List</span>
   </Link>;
 }
 
