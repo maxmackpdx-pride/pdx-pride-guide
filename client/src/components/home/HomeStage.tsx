@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link } from "wouter";
-import AuthModal from "@/components/AuthModal";
+import HomeDiscover from "@/components/home/HomeDiscover";
 import HomeFlight from "@/components/home/HomeFlight";
-import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 import HomeStageCard from "@/components/home/HomeStageCard";
@@ -36,10 +34,9 @@ type Props = {
 
 export default function HomeStage({ afterWelcome }: Props) {
   const { calmMode } = useTheme();
-  const { user } = useAuth();
   const logoRef = useRef<HTMLImageElement>(null);
   const [logoReady, setLogoReady] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
+  const [showDiscover, setShowDiscover] = useState(false);
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
 
@@ -76,7 +73,7 @@ export default function HomeStage({ afterWelcome }: Props) {
   return (
     <div className="home-front" id="top">
       <section className="home-front__welcome" aria-labelledby="home-front-title">
-        <HomeFlight enabled={logoReady} paused={showAuth} />
+        <HomeFlight enabled={logoReady} paused={showDiscover} />
         <div className="home-front__backdrop-dim" aria-hidden="true" />
         <div className="home-front__hero">
           <div className="home-front__brand-group">
@@ -108,20 +105,13 @@ export default function HomeStage({ afterWelcome }: Props) {
                 </span>
               </p>
               <div className="home-front__hero-actions">
-                {user ? (
-                  <Link href="/dashboard" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind home-front__auth">Open your Hub</Link>
-                ) : (
-                  <button type="button" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind home-front__auth" onClick={() => setShowAuth(true)} aria-haspopup="dialog">
-                    Log in / Sign up
-                  </button>
-                )}
+                <HomeDiscover open={showDiscover} onOpenChange={setShowDiscover} />
               </div>
             </div>
           </div>
         </div>
         {afterWelcome}
       </section>
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
       <TonightPanel />
     </div>

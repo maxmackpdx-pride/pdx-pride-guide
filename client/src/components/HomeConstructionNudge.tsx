@@ -37,7 +37,12 @@ export default function HomeConstructionNudge() {
   useEffect(() => {
     const forced = forcedPreview();
     if (!forced && alreadyDismissed()) return;
-    const t = window.setTimeout(() => setOpen(true), forced ? 0 : 650);
+    const t = window.setTimeout(() => {
+      // Do not interrupt a visitor who already opened a homepage dialog.
+      // Competing focus traps can otherwise leave both overlays unusable.
+      if (document.querySelector('[role="dialog"], dialog[open]')) return;
+      setOpen(true);
+    }, forced ? 0 : 650);
     return () => window.clearTimeout(t);
   }, []);
 

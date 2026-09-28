@@ -1,0 +1,48 @@
+@font-face { font-family: 'Home Discover Barlow'; src: url('/fonts/home-discover/barlow-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Home Discover Mono'; src: url('/fonts/home-discover/jetbrains-mono-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+/* Scoped Radix neutral roles from the approved Foundation preview. Product accents and glass recipes remain shared. */
+.home-discover { --discover-text:#eeeeee; --discover-muted:#b4b4b4; --discover-border:#3a3a3a; --c:var(--neon-yellow); }
+.home-discover-trigger, .home-discover__close, .home-discover__filter {
+  --c:var(--neon-yellow); display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:44px; border-radius:22px; border:1px solid color-mix(in srgb,var(--c) 55%,#484848);
+  background:var(--btn-glow-bg); box-shadow:var(--btn-glow-shadow); color:var(--c);
+  font:700 14px/1 var(--font-display); letter-spacing:.06em; text-transform:uppercase;
+  cursor:pointer; transition:filter .15s ease,transform .15s ease;
+}
+.home-front .home-discover-trigger { width:208px; height:48px; min-height:48px; flex-shrink:0; padding:12px 24px; font-size:18px; pointer-events:auto; }
+.home-discover-trigger:hover, .home-discover__close:hover, .home-discover__filter:hover { filter:brightness(1.15); }
+.home-discover-trigger:active, .home-discover__close:active, .home-discover__filter:active { transform:translateY(1px); }
+.home-discover-trigger:focus-visible, .home-discover button:focus-visible, .home-discover a:focus-visible { outline:2px solid var(--neon-cyan); outline-offset:4px; }
+.home-discover-backdrop { position:fixed; inset:0; z-index:250; background:rgba(0,0,0,.73); backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
+.home-discover.pdx-liquid-overlay {
+  position:fixed; z-index:251; top:50%; left:50%; transform:translate(-50%,-50%); box-sizing:border-box;
+  width:min(520px,calc(100vw - 24px)); max-height:calc(100svh - 32px); overflow:auto; overscroll-behavior:contain;
+  padding:20px 24px 16px; border:var(--glass-card-neutral-border); border-radius:var(--glass-card-radius);
+  box-shadow:var(--glass-card-neutral-shadow); color:var(--discover-text); font:400 16px/1.5 'Home Discover Barlow',sans-serif;
+}
+.home-discover *, .home-discover-trigger { box-sizing:border-box; }
+.home-discover__seam { position:absolute; top:0; left:8px; right:8px; height:2px; pointer-events:none; background:var(--refract-seam-gradient); }
+.home-discover__header { display:flex; justify-content:space-between; align-items:center; }
+.home-discover__eyebrow { font:400 11px/1.5 'Home Discover Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--discover-muted); }
+.home-discover__close { --c:var(--discover-muted); width:44px; height:44px; padding:0; }
+.home-discover .home-discover__title { font:900 36px/1 var(--font-display); text-transform:uppercase; letter-spacing:.005em; color:var(--discover-text); margin:16px 0 24px; }
+.home-discover__filters { display:grid; grid-template-columns:.9fr 1.2fr .9fr 1.1fr; gap:4px; margin-bottom:20px; }
+.home-discover__filter { --c:var(--discover-muted); min-width:0; padding:10px 8px; gap:4px; letter-spacing:.035em; }
+.home-discover__filter svg { flex-shrink:0; }
+.home-discover__filter[aria-pressed=true] { --c:var(--neon-yellow); border-color:var(--c); color:var(--c); }
+.home-discover__destinations { display:grid; }
+.home-discover a.home-discover__choice { display:flex; align-items:center; gap:16px; min-height:76px; text-decoration:none; color:var(--discover-text); padding:16px 8px; border:0; border-bottom:1px solid var(--discover-border); background:transparent; transition:background .15s ease; }
+.home-discover a.home-discover__choice:last-child { border-bottom:0; }
+.home-discover a.home-discover__choice:hover { background:var(--btn-glow-bg); text-decoration:none; }
+.home-discover__icon { flex-shrink:0; width:28px; color:var(--c); }
+.home-discover__copy { min-width:0; }
+.home-discover__copy strong { font:700 20px/1.1 var(--font-display); text-transform:uppercase; letter-spacing:.025em; color:var(--discover-text); display:block; }
+.home-discover__copy>span { font-size:14px; line-height:1.4; color:var(--discover-muted); display:block; margin-top:4px; }
+.home-discover__arrow { margin-left:auto; flex-shrink:0; color:var(--c); }
+.home-discover__footer { border-top:1px solid var(--discover-border); padding-top:16px; margin:16px 0 0; font-size:14px; color:var(--discover-muted); text-align:center; }
+@media(max-width:700px) { .home-discover.pdx-liquid-overlay { padding:16px; } }
+@media(max-width:420px) { .home-discover__filters { grid-template-columns:1fr 1fr; gap:8px; } .home-discover .home-discover__title { font-size:32px; } .home-discover a.home-discover__choice { gap:12px; min-height:80px; } .home-discover__copy strong { font-size:19px; } }
+html.calm-mode .home-discover, html[data-calm=true] .home-discover { background:#050506!important; backdrop-filter:none!important; -webkit-backdrop-filter:none!important; box-shadow:var(--chrome-keyline),var(--chrome-bevel-dark); }
+html.calm-mode .home-discover-backdrop, html[data-calm=true] .home-discover-backdrop { backdrop-filter:none; -webkit-backdrop-filter:none; }
+html.calm-mode .home-discover *, html[data-calm=true] .home-discover *, html.calm-mode .home-discover-trigger, html[data-calm=true] .home-discover-trigger { animation:none!important; transition:none!important; --neon-bloom:0 0 0 transparent; --btn-glow-shadow:var(--chrome-keyline),var(--chrome-bevel-dark); }
+@media(prefers-reduced-motion:reduce) { .home-discover *, .home-discover-trigger { animation:none!important; transition:none!important; --neon-bloom:0 0 0 transparent; --btn-glow-shadow:var(--chrome-keyline),var(--chrome-bevel-dark); } .home-discover.pdx-liquid-overlay { background:#050506!important; backdrop-filter:none!important; -webkit-backdrop-filter:none!important; box-shadow:var(--chrome-keyline),var(--chrome-bevel-dark); } .home-discover-backdrop { backdrop-filter:none; -webkit-backdrop-filter:none; } }
