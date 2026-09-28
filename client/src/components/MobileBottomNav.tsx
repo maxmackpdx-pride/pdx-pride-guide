@@ -14,16 +14,10 @@ import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
 import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
-import { HologramWaypoint as MapzMark } from "@/components/ui/hero-z-hologram";
-import { CalendarDays, Compass, MessageCircle } from "lucide-react";
+import { CalendarDays, Map, MessageCircle, PanelsTopLeft } from "lucide-react";
 
 const MOBILE_ICON = 19;
 
-/**
- * "Your Hub" rows in the Hub sheet. Each is a real /dashboard section, in the
- * order the nav handoff lists them. Messages is not a section: it opens the
- * inbox sheet, so it is rendered separately with its badge.
- */
 const HUB_SHEET_LINKS = [
   { section: "feed", label: "Feed", icon: <path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z" /> },
   { section: "profile", label: "Profile", icon: <><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></> },
@@ -101,11 +95,11 @@ export default function MobileBottomNav() {
     return () => { window.removeEventListener("keydown", onKey); desktop.removeEventListener("change", onResize); };
   }, []);
 
-  const zListActive = navLinkActive(location, "/z");
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const outzActive = navLinkActive(location, OUTZ_INDEX);
-  const activeIndex = open || showAuth ? 4 : eventsOpen ? 0 : navLinkActive(location, "/map") ? 2 : outzActive ? 3 : zListActive ? 1 : eventsActive ? 0 : -1;
   const hubActive = navLinkActive(location, "/dashboard");
+  const mapActive = navLinkActive(location, "/map");
+  const activeIndex = open || showAuth ? 4 : eventsOpen ? 0 : hubActive ? 2 : outzActive ? 3 : mapActive ? 1 : eventsActive ? 0 : -1;
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
 
@@ -250,27 +244,29 @@ export default function MobileBottomNav() {
           </button>
 
           <Link
-            href="/z"
-            className={tabClass(zListActive, "blue")}
-            data-accent="blue"
-            aria-label="Z/List"
-            aria-current={zListActive ? "page" : undefined}
-            onClick={handleNavLink}
-          >
-            <span className="znav-icon-row"><Compass size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Z/List</span>
-          </Link>
-
-          <Link
             href="/map"
-            className={`${tabClass(navLinkActive(location, "/map"), "cyan")} znav-mapz`}
+            className={tabClass(mapActive, "cyan")}
             data-accent="cyan"
             aria-label="Mapz"
             title="Mapz"
-            aria-current={navLinkActive(location, "/map") ? "page" : undefined}
+            aria-current={mapActive ? "page" : undefined}
             onClick={handleNavLink}
           >
-            <MapzMark />
+            <span className="znav-icon-row"><Map size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Mapz</span>
+          </Link>
+
+          <Link
+            href="/dashboard"
+            className={`${tabClass(hubActive, "cyan")} znav-mapz`}
+            data-accent="cyan"
+            aria-label="Hub"
+            title="Hub"
+            aria-current={hubActive ? "page" : undefined}
+            onClick={handleNavLink}
+          >
+            <span className="znav-icon-row"><PanelsTopLeft size={22} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Hub</span>
           </Link>
 
           <Link
