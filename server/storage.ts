@@ -1,3 +1,4 @@
+import { seedSteamThroughApril2027 } from "./seedSteamThroughApril2027";
 import { seedApprovedEvents20260928 } from "./seedApprovedEvents20260928";
 import { eventRetentionCutoff, isExpiredEvent } from "./eventRetention";
 import { hashPassword, verifyPassword, isLegacyPasswordHash } from "./passwords";
@@ -8135,6 +8136,7 @@ function runBootMigrationsOnce() {
   }
 
   seedApprovedEvents20260928(sqlite);
+  seedSteamThroughApril2027(sqlite);
 }
 
 function parseEnvAdminLists() {
