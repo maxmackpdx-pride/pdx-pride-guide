@@ -7,12 +7,25 @@ import hologramData from "./portland-globe-holograms.json";
 // z13 geography cropped to the screenshot bounds below; parks stay empty.
 
 
-function globeWaypointSvg(id: WaypointId, color: string) {
-  const marker = waypointHtml({ id, color, size: 42 });
+type OutzideGlobeGlyph = "trail" | "fishing" | "watercamp" | "boating" | "camp";
+type GlobeWaypointId = WaypointId | `outzide-${OutzideGlobeGlyph}`;
+const OUTZIDE_GLYPHS: Record<OutzideGlobeGlyph, string> = {
+  trail: '<path d="M4 3h7v7l3 3 5 1a3 3 0 0 1 2 3v3H3v-7l1-3V3ZM3 17h18M6 20v1M10 20v1M15 20v1M19 20v1M8 7h3M8 10h3M10 12l2-1M12 14l2-1"/>',
+  fishing: '<path d="M3 12q7-9 14-1l4-4v10l-4-4q-7 8-14-1ZM13 7q-2 5 0 10M8 7l2-3 3 3"/><circle cx="6.5" cy="11" r=".7"/>',
+  watercamp: '<path d="m4 15 7-12 7 12H4Zm5 0 2-5 2 5M2 18.5q2.5-2 5 0t5 0 5 0 5 0M2 22q2.5-2 5 0t5 0 5 0 5 0"/>',
+  boating: '<path d="M3 15h18l-4 5H7l-4-5ZM12 3v12M10 5l-6 8h6V5ZM14 7l6 6h-6V7ZM2 22q2.5-2 5 0t5 0 5 0 5 0"/>',
+  camp: '<path d="m2 19 7-15 7 15H2Z M7 19l2-6 2 6M7 3l4 4M18 17c-3-2-2-4 0-6 0 2 2 2 2 0 3 3 3 5 0 6M16 20l6 2M16 22l6-2"/>',
+};
+
+function globeWaypointSvg(id: GlobeWaypointId, color: string) {
+  const outzideId = id.startsWith("outzide-") ? id.slice(8) as OutzideGlobeGlyph : undefined;
+  const marker = outzideId ? "" : waypointHtml({ id: id as WaypointId, color, size: 42 });
   const glyph = marker.match(/<g transform="([^"]+)" fill="#fff" stroke="#fff" color="#fff">([\s\S]*?)<\/g>/);
-  const glyphMarkup = glyph
-    ? `<g transform="translate(-2 -2) ${glyph[1]}" fill="${color}" stroke="${color}" color="${color}">${glyph[2]}</g>`
-    : "";
+  const glyphMarkup = outzideId
+    ? `<g transform="translate(16 15)" fill="${color}" stroke="${color}" color="${color}">${OUTZIDE_GLYPHS[outzideId]}</g>`
+    : glyph
+      ? `<g transform="translate(-2 -2) ${glyph[1]}" fill="${color}" stroke="${color}" color="${color}">${glyph[2]}</g>`
+      : "";
   const glowId = `globe-${id.replace(/[^a-z0-9-]/gi, "")}-glow`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="66" viewBox="0 0 56 66">
     <defs><filter id="${glowId}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
@@ -61,8 +74,8 @@ const smooth = (value: number) => { const t=Math.max(0,Math.min(1,value)); retur
 const MAX_HOLOGRAMS = 8;
 // These venue marks and Zaylist family logos keep their original artwork.
 const FEATURED_LOGO_IDS = new Set(["1-0", "2-0", "5-0", "28-0", "33-0", "41-0"]);
-const RANDOM_PLACEZ_LOGOS: WaypointId[] = ["bar", "venue", "cafe", "shop", "adult"];
-type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number; waypoint: boolean; waypointLogo?: WaypointId };
+const RANDOM_GLOBE_WAYPOINTS: GlobeWaypointId[] = ["bar", "venue", "cafe", "shop", "adult", "outzide-trail", "outzide-fishing", "outzide-watercamp", "outzide-boating", "outzide-camp"];
+type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number; waypoint: boolean; waypointLogo?: GlobeWaypointId };
 type Point = { x: number; y: number; z: number; tone: number; beamExcluded?: boolean; brightRoad?: boolean; hoverGlow?: { strength:number; lift:number; hue:number; core:number; lastLit:number }; glow?: { strength: number; lastLit: number; r: number; g: number; b: number } };
 function sphere(u: number, v: number, tone = 0): Point {
   const longitude = warp(u,-.15,5) * Math.PI, latitude = equatorialLatitude(v) * Math.PI / 2;
@@ -385,7 +398,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           for(const [key,state] of states){
             const item=projected.find(venue=>venue.phase===key);
             if(!item)continue;
-            keys.add(state.waypointLogo?`placez:${state.waypointLogo}`:`asset:${item.logoKey}`);
+            keys.add(state.waypointLogo?`glyph:${state.waypointLogo}`:`asset:${item.logoKey}`);
           }
           return keys;
         };
@@ -393,9 +406,9 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         // geography, while a cooldown gives other venues a turn.
         while (states.size<MAX_HOLOGRAMS && candidates.length && (initialReveal || still || elapsed>=nextOpen.current)) {
           const openLogoKeys=activeLogoKeys();
-          const availablePlacezLogos=RANDOM_PLACEZ_LOGOS.filter(id=>!openLogoKeys.has(`placez:${id}`));
+          const availableWaypoints=RANDOM_GLOBE_WAYPOINTS.filter(id=>!openLogoKeys.has(`glyph:${id}`));
           const eligible=candidates.filter(venue=>isWaypointCandidate(venue)
-            ? availablePlacezLogos.length>0
+            ? availableWaypoints.length>0
             : !openLogoKeys.has(`asset:${venue.logoKey}`));
           if(!eligible.length)break;
           let best=0, bestScore=-Infinity;
@@ -412,10 +425,10 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           const venue=eligible[best];
           candidates.splice(candidates.indexOf(venue),1);
           const waypoint = isWaypointCandidate(venue);
-          let waypointLogo: WaypointId | undefined;
+          let waypointLogo: GlobeWaypointId | undefined;
           if(waypoint){
-            const available=RANDOM_PLACEZ_LOGOS.filter(id=>!openLogoKeys.has(`placez:${id}`));
-            waypointLogo=available[Math.floor(Math.random()*available.length)]||RANDOM_PLACEZ_LOGOS[0];
+            const available=RANDOM_GLOBE_WAYPOINTS.filter(id=>!openLogoKeys.has(`glyph:${id}`));
+            waypointLogo=available[Math.floor(Math.random()*available.length)]||RANDOM_GLOBE_WAYPOINTS[0];
             const svg=globeWaypointSvg(waypointLogo,venue.color);
             if(svg){
               venue.waypointImage.onload=draw;
