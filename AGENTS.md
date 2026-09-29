@@ -36,8 +36,19 @@ repository-specific facts and safeguards.
 Production deploys use GitHub `master` -> GitHub Actions -> Railway. Do not use
 `railway up`, `railway sandbox`, create a replacement Railway project, or upload the
 application tree from the CLI. Before shipping, synchronize safely with `origin/master`,
-commit only the intended diff, push, wait for Railway `SUCCESS`, and probe the affected
-live path when useful. Keep the `domain-redirects` and `domain-redirects-apex` services.
+commit only the intended diff, then push the current commit with
+`git push origin HEAD:master`. Claude and Grok project configs allow this exact
+non-force command. Wait for Railway `SUCCESS` and probe the affected live path when
+useful. Keep the `domain-redirects` and `domain-redirects-apex` services.
+
+Claude Code cloud sessions must use the single-repository setup documented in
+`CLAUDE.md`; multi-repository cloud sessions do not load the repo's permission rules.
+For Claude Routines, enable **Allow unrestricted branch pushes** for this repository in
+the Routine's own Permissions settings. Repo instructions cannot grant that account-side
+branch permission. Grok Build reads the committed `.grok/config.toml` rule. In either
+cloud, if the provider still refuses the exact push, identify the missing provider-side
+permission before implementation. Never ship by force-pushing.
+
 Use the connected GitHub integration to publish an approved release when terminal Git
 authentication is unavailable. Create blobs for exactly the intended files (base64 for
 binary assets), create a tree based on the current `origin/master` tree, verify its SHA
