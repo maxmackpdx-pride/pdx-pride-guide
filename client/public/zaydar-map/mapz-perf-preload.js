@@ -1,8 +1,21 @@
-/* Phone pixel cap and cheap first style. Do not snapshot overlays during pan:
-   a 2D freeze cannot follow a pitched 3D camera and leaves doubled pins. */
+/* Phone pixel cap and cheap first style.
+   Pins stay on lng/lat via live project() — never a 2D snapshot. */
 (function(){
  var coarse=typeof matchMedia==='function'&&matchMedia('(pointer:coarse)').matches;
  var pixelRatio=Math.min(window.devicePixelRatio||1,coarse?1.5:2);
+ function lockPinLayer(){
+  var frozen=document.getElementById('waypoint-lights-frozen');
+  if(frozen)frozen.remove();
+  ['waypoint-lights','hologram-labels'].forEach(function(id){
+   var el=document.getElementById(id);
+   if(!el)return;
+   el.style.transform='';
+   el.style.transformOrigin='';
+   el.style.willChange='';
+   el.style.visibility='';
+   el.style.pointerEvents='';
+  });
+ }
  if(window.maplibregl?.Map&&!window.__mapzPerfMap){
   window.__mapzPerfMap=true;
   var Original=window.maplibregl.Map;
@@ -29,6 +42,10 @@
      next.style=style;
     }
     super(next);
+    this.on('load',lockPinLayer);
+    this.on('movestart',lockPinLayer);
+    this.on('move',lockPinLayer);
+    this.on('moveend',lockPinLayer);
    }
   };
  }
@@ -48,4 +65,5 @@
    };
   };
  }
+ document.addEventListener('DOMContentLoaded',lockPinLayer);
 })();
