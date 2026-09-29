@@ -1,5 +1,5 @@
 import {fitBridgeRoad,sampleBridgeRoad} from './bridge-fit.js?v=20260921-layer-join';
-import {PORTLAND_BRIDGE_MODELS} from './st-johns-bridge.js?v=20260921-layer-join';
+import {PORTLAND_BRIDGE_MODELS} from './st-johns-bridge.js?v=20260929-mesh';
 
 export const BRIDGE_GLOW_PALETTES={
  rainbow:['#ff145c','#ff7b16','#ffe42b','#19ff79','#08d5ff','#7250ff','#ed28ff'],

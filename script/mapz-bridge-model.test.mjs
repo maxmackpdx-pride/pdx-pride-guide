@@ -8,9 +8,9 @@ const modelUrl=new URL('../client/public/zaydar-map/models/st-johns-bridge.glb',
 
 test('St. Johns model asset retains the supplied geometry and real-world scale',async()=>{
   const file=await readFile(modelUrl),buffer=file.buffer.slice(file.byteOffset,file.byteOffset+file.byteLength);
-  assert.equal(createHash('sha256').update(file).digest('hex'),'7c7e29a6dd2313b892b1ff53e8e78d68e24cbc6c91a57ca2468379231805ab6e');
+  assert.equal(createHash('sha256').update(file).digest('hex'),'560527ba2054dbfb89b668ad66f97b9429e9c98c87c3ce054ba95c61076d5e3e');
   const model=parseStJohnsBridgeGlb(buffer);
-  assert.equal(model.count,193284);
+  assert.equal(model.count,72816);
   assert.ok(Math.abs(model.bounds.length-ST_JOHNS_LENGTH_METERS)<1e-6);
   assert.ok(Math.abs(model.scale-630/630.4)<1e-6);
   let covariance=0;
@@ -30,11 +30,11 @@ test('St. Johns placement follows its OSM core alignment and building zoom thres
 
 test('all supplied Portland bridge models retain their authored meter scale',async()=>{
   const expected={
-    'bnsf-5-1':[50364,545],'bnsf-9-6':[77688,864],broadway:[31212,499.6],burnside:[15948,248.2],fremont:[87636,664],
+    broadway:[31212,499.6],burnside:[15948,248.2],fremont:[87636,664],
     'glenn-jackson':[29052,3588],hawthorne:[28872,422.9],interstate:[90360,1086],marquam:[24984,326],morrison:[15012,239.7],
     'ross-island':[33444,562],sellwood:[32292,609],steel:[41328,252],'tilikum-crossing':[22980,532],
   };
-  assert.equal(PORTLAND_BRIDGE_MODELS.length,15);
+  assert.equal(PORTLAND_BRIDGE_MODELS.length,13);
   for(const definition of PORTLAND_BRIDGE_MODELS.slice(1)){
     const file=await readFile(new URL(`../client/public/zaydar-map/models/${definition.id}.glb`,import.meta.url));
     const model=parseBridgeGlb(file.buffer.slice(file.byteOffset,file.byteOffset+file.byteLength),definition.bearing,definition.length);
@@ -57,6 +57,8 @@ test('procedural bridge decks remain enabled as connected model approaches',asyn
   const source=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   assert.match(source,/portlandBridges\.update\(allBridgeFeatures\)/);
   assert.match(source,/bridgeLayer\.update\(bridgeFeatures\)/);
+  assert.match(source,/landmarkBuildings\.bridges=portlandBridges/);
+  assert.doesNotMatch(source,/map\.addLayer\(portlandBridges/);
   assert.doesNotMatch(source,/bridgeLayer\.update\([^\n]*isStJohnsBridgeFeature/);
 });
 

@@ -5,7 +5,7 @@ import {faceStackHtml} from '../outzide-map/assets/community-ui.js?v=map-continu
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
 import {createTerrainSampler} from './terrain-elevation.js';
 import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260925-smooth-map';
-import {createBuildingModelLayer} from './building-models.js?v=20260928-big-pink-garage-height';
+import {createBuildingModelLayer} from './building-models.js?v=20260929-mesh';
 import {createBuildingChrome} from './nightlife-materials.js?v=20260925-smooth-map';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
 import {createBridgeLayer} from '../home-flight/bridge-roads.js?v=20260921-layer-join';
@@ -18,7 +18,7 @@ import {createHologramMaterials,drawProjectionBeam,projectorGroundScale} from '.
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
-import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260921-layer-join';
+import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
 import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo} from './waypoint-markers.js?v=20260928-double-beams';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
@@ -91,7 +91,7 @@ const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
 function installSceneExtras(){
  map.addLayer(groundLightPools,'buildings');
  map.addLayer(bridgeLayer,'skyline');
- map.addLayer(portlandBridges,'skyline');
+ landmarkBuildings.bridges=portlandBridges;
  map.addLayer(landmarkBuildings,'skyline');
  map.addLayer(portlandLandmarks);
  map.addLayer(citySparkles);
@@ -389,11 +389,11 @@ function buildingGlitter(target,surfaces){
  const buildings=overview?(surfaces.buildings??[]):(surfaces.buildings??[]).filter(building=>building.height<=3);
  // A stable sample of every visible building naturally follows city density.
  // At overview scale one point per roof spreads the field instead of clustering it.
- let points=roofSparkles(buildings,overview?(coarse?4200:7200):(coarse?(flat?2100:1400):(flat?3000:2400)),{
-  sampleModulo:overview?2:4,lightsPerRoof:overview?1:5,bloomPercent:3,distribute:overview,
+ let points=roofSparkles(buildings,overview?(coarse?1680:2880):(coarse?(flat?840:560):(flat?1200:960)),{
+  sampleModulo:overview?5:10,lightsPerRoof:overview?1:5,bloomPercent:3,distribute:true,
  });
- if(overview&&(target.getZoom()<12.75||points.length<500)){
-  const streets=streetSparkles(surfaces.overviewRoads??[],coarse?4200:7200,{bloomPercent:3,sampleModulo:2});
+ if(overview&&(target.getZoom()<12.75||points.length<200)){
+  const streets=streetSparkles(surfaces.overviewRoads??[],coarse?1680:2880,{bloomPercent:3,sampleModulo:5});
   if(streets.length)points=streets;
  }
  points=whiteSparkles(points,30);

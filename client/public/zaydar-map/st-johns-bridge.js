@@ -4,13 +4,11 @@ export const ST_JOHNS_BEARING=54.24624408372691;
 export const ST_JOHNS_LENGTH_METERS=630;
 export const ST_JOHNS_MIN_ZOOM=12;
 
-const asset=(name)=>new URL(`./models/${name}.glb?v=20260920-portland-bridges`,import.meta.url).href;
+const asset=(name)=>new URL(`./models/${name}.glb?v=20260929-stjohns`,import.meta.url).href;
 
 /** Supplied GPS anchors select the crossing; loaded road geometry supplies final center and bearing. */
 export const PORTLAND_BRIDGE_MODELS=[
   {id:'st-johns',label:'St. Johns',center:ST_JOHNS_CENTER,bearing:ST_JOHNS_BEARING,length:ST_JOHNS_LENGTH_METERS,url:asset('st-johns-bridge')},
-  {id:'bnsf-5-1',label:'BNSF 5.1',center:[-122.74750,45.57667],bearing:90,length:545,url:asset('bnsf-5-1')},
-  {id:'bnsf-9-6',label:'BNSF 9.6',center:[-122.69085,45.62473],bearing:90,length:864,url:asset('bnsf-9-6')},
   {id:'broadway',label:'Broadway',center:[-122.67417,45.53194],bearing:90,length:499.6,url:asset('broadway')},
   {id:'burnside',label:'Burnside',center:[-122.66750,45.52306],bearing:90,length:248.2,url:asset('burnside')},
   {id:'fremont',label:'Fremont',center:[-122.68306,45.53778],bearing:90,length:664,url:asset('fremont')},
@@ -183,22 +181,29 @@ export function createPortlandBridgeLayer(maplibre,elevation=()=>0,definitions=P
     onAdd(map,gl){
       this.map=map;this.disposed=false;const compile=(type,source)=>{const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(shader));return shader;};
       const vertex=compile(gl.VERTEX_SHADER,`#version 300 es
-        in vec3 a_position;in vec3 a_normal;in float a_shade;uniform mat4 u_matrix;out vec3 v_normal;out float v_shade;
+        layout(location=0) in vec3 a_position;layout(location=1) in vec3 a_normal;layout(location=2) in float a_shade;uniform mat4 u_matrix;out vec3 v_normal;out float v_shade;
         void main(){gl_Position=u_matrix*vec4(a_position,1.);v_normal=a_normal;v_shade=a_shade;}`);
       const fragment=compile(gl.FRAGMENT_SHADER,`#version 300 es
-        precision highp float;in vec3 v_normal;in float v_shade;out vec4 color;
-        void main(){vec3 normal=normalize(v_normal);vec3 light=normalize(vec3(-.42,.28,.86));float diffuse=.64+.36*max(dot(normal,light),0.);float reflection=.1*pow(1.-abs(normal.z),3.);vec3 slate=vec3(60.,85.,101.)/255.;color=vec4(slate*(diffuse*v_shade+reflection),1.);}`);
-      this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);gl.deleteShader(vertex);gl.deleteShader(fragment);if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));this.matrix=gl.getUniformLocation(this.program,'u_matrix');
+        precision highp float;in vec3 v_normal;in float v_shade;uniform vec3 u_base;uniform float u_reflect;uniform float u_gain;out vec4 color;
+        void main(){vec3 n=normalize(v_normal);float light=.64+.36*max(dot(n,normalize(vec3(-.42,.28,.86))),0.);vec3 lit=u_base*(light*v_shade+u_reflect*pow(1.-abs(n.z),3.));color=vec4(lit*u_gain,u_gain);}`);
+      this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);gl.deleteShader(vertex);gl.deleteShader(fragment);if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));this.matrix=gl.getUniformLocation(this.program,'u_matrix');this.lit={matrix:this.matrix,base:gl.getUniformLocation(this.program,'u_base'),reflect:gl.getUniformLocation(this.program,'u_reflect'),gain:gl.getUniformLocation(this.program,'u_gain')};
     },
-    upload(gl,model){model.buffer=gl.createBuffer();model.vao=gl.createVertexArray();gl.bindVertexArray(model.vao);gl.bindBuffer(gl.ARRAY_BUFFER,model.buffer);gl.bufferData(gl.ARRAY_BUFFER,model.vertices,gl.STATIC_DRAW);for(const [name,size,offset] of [['a_position',3,0],['a_normal',3,12],['a_shade',1,24]]){const location=gl.getAttribLocation(this.program,name);gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,size,gl.FLOAT,false,28,offset);}gl.bindVertexArray(null);model.vertices=null;model.dirty=false;},
-    render(gl,input){
+    adopt(map){this.map=map;this.adopted=true;},
+    upload(gl,model){model.buffer=gl.createBuffer();model.vao=gl.createVertexArray();gl.bindVertexArray(model.vao);gl.bindBuffer(gl.ARRAY_BUFFER,model.buffer);gl.bufferData(gl.ARRAY_BUFFER,model.vertices,gl.STATIC_DRAW);for(const [loc,size,offset] of [[0,3,0],[1,3,12],[2,1,24]]){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,28,offset);}gl.bindVertexArray(null);model.vertices=null;model.dirty=false;},
+    drawLit(gl,input,program,locs){
+      if(!this.map)return;
       this.syncRailSurfaces();
       const visible=models.filter(model=>this.visible(model));for(const model of visible)if(!model.count)this.load(model);const ready=visible.filter(model=>model.count);if(!ready.length)return;
-      const cull=gl.isEnabled(gl.CULL_FACE),blend=gl.isEnabled(gl.BLEND);gl.disable(gl.CULL_FACE);gl.disable(gl.BLEND);gl.useProgram(this.program);
-      for(const model of ready){if(model.dirty){if(model.buffer){gl.deleteBuffer(model.buffer);gl.deleteVertexArray(model.vao);}this.upload(gl,model);}const origin=maplibre.MercatorCoordinate.fromLngLat(model.center),unit=origin.meterInMercatorCoordinateUnits(),base=model.fit?.terrainAnchored?0:Math.max(0,elevation(model.center)||0),matrix=input.defaultProjectionData.mainMatrix,local=new Float32Array(16);for(let row=0;row<4;row++){local[row]=matrix[row]*unit;local[4+row]=matrix[4+row]*unit;local[8+row]=matrix[8+row]*unit;local[12+row]=matrix[row]*origin.x+matrix[4+row]*origin.y+matrix[8+row]*base*unit+matrix[12+row];}gl.bindVertexArray(model.vao);gl.uniformMatrix4fv(this.matrix,false,local);gl.drawArrays(gl.TRIANGLES,0,model.count);}
+      gl.useProgram(program);gl.uniform3f(locs.base,60/255,85/255,101/255);gl.uniform1f(locs.reflect,.1);gl.uniform1f(locs.gain,1);
+      for(const model of ready){if(model.dirty||!model.buffer){if(model.buffer){gl.deleteBuffer(model.buffer);gl.deleteVertexArray(model.vao);}this.upload(gl,model);}const origin=maplibre.MercatorCoordinate.fromLngLat(model.center),unit=origin.meterInMercatorCoordinateUnits(),base=model.fit?.terrainAnchored?0:Math.max(0,elevation(model.center)||0),matrix=input.defaultProjectionData.mainMatrix,local=new Float32Array(16);for(let row=0;row<4;row++){local[row]=matrix[row]*unit;local[4+row]=matrix[4+row]*unit;local[8+row]=matrix[8+row]*unit;local[12+row]=matrix[row]*origin.x+matrix[4+row]*origin.y+matrix[8+row]*base*unit+matrix[12+row];}gl.bindVertexArray(model.vao);gl.uniformMatrix4fv(locs.matrix,false,local);gl.drawArrays(gl.TRIANGLES,0,model.count);}
+    },
+    render(gl,input){
+      const cull=gl.isEnabled(gl.CULL_FACE),blend=gl.isEnabled(gl.BLEND);gl.disable(gl.CULL_FACE);gl.disable(gl.BLEND);
+      this.drawLit(gl,input,this.program,this.lit);
       if(cull)gl.enable(gl.CULL_FACE);if(blend)gl.enable(gl.BLEND);gl.bindVertexArray(null);
     },
-    onRemove(map,gl){this.disposed=true;for(const [id,filter] of this.railFilters??[])if(map.getLayer(id))map.setFilter(id,filter);for(const model of models){if(model.buffer)gl.deleteBuffer(model.buffer);if(model.vao)gl.deleteVertexArray(model.vao);model.vertices=null;model.sourceBuffer=null;model.count=0;}gl.deleteProgram(this.program);this.map=null;}
+    releaseGpu(gl){this.disposed=true;if(this.map)for(const [id,filter] of this.railFilters??[])if(this.map.getLayer(id))this.map.setFilter(id,filter);for(const model of models){if(model.buffer)gl.deleteBuffer(model.buffer);if(model.vao)gl.deleteVertexArray(model.vao);model.vertices=null;model.sourceBuffer=null;model.count=0;}if(!this.adopted&&this.program)gl.deleteProgram(this.program);this.map=null;},
+    onRemove(map,gl){this.releaseGpu(gl);}
   };
 }
 
