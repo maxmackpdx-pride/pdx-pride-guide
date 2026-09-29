@@ -1,0 +1,4 @@
+[permission]
+rules = [
+  { action = "allow", tool = "bash", pattern = "git push origin HEAD:master" },
+]
