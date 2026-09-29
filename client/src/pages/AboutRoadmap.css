@@ -2677,7 +2677,10 @@
         }
         .chapter:has(.stop.done) .stop,
         .chapter:has(.stop.done) .stop.system {
-          width: 70%;
+          /* Full column on phones: both trails already run in the left
+             gutter, so the node stays on its rail and the copy gets the width. */
+          width: auto;
+          justify-self: stretch;
           padding: 25px 0;
         }
         .chapter:has(.stop.done) .stop h3 {
@@ -3454,6 +3457,10 @@
         }
         .story-system-tag { justify-content: flex-start; }
         .roadmap-phase__summary { top: var(--phase-sticky-top); min-height: 82px; }
+        .founder-faq summary {
+          padding-block: 14px;
+          font-size: 26px;
+        }
         .tech-stack-panel h2 { margin-bottom: 36px; }
         .ending { grid-template-columns: 1fr; gap: 52px; }
         .founder-grid,
