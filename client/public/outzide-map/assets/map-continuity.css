@@ -108,3 +108,102 @@ html.calm-mode .outzide-shell,html.calm-mode .zaydar-map-demo,[data-calm=true] .
  .outzide-shell .map-stage .map-top{inset:10px 10px calc(22px + env(safe-area-inset-bottom,0px))}
  .outzide-shell .maplibregl-ctrl-bottom-right{right:60px}
 }
+
+/* Shared drawer + dock anatomy (Map family guide, ZF-MAP-FAMILY-2026-09-22).
+   One frame for both rooms: dark #050706 rim, layered glass, 18px docks and drawers,
+   12px control groups. Each room keeps its own ink and highlight. No outer bloom. */
+.outzide-shell,.zaydar-map-demo{
+ --map-ui-rim:#050706;--map-ui-blur:24px;
+ --map-ui-hair:color-mix(in srgb,var(--map-ui-light) 20%,transparent);
+ --map-ui-glass:linear-gradient(145deg,color-mix(in srgb,var(--map-ui-light) 12%,transparent),transparent 58%),color-mix(in srgb,var(--map-ui-ink) 86%,transparent);
+ --map-ui-shadow-nav:0 0 0 1px var(--map-ui-rim),0 4px 12px #0005,inset 0 1px 0 #ffffff10;
+ --map-ui-shadow-panel:0 0 0 1px var(--map-ui-rim),0 16px 44px #0008,inset 0 1px 0 #ffffff16;
+}
+.outzide-shell{--map-ui-light:#a9bc98}
+.zaydar-map-demo{--map-ui-ink:#090b13;--map-ui-light:#94b5cf}
+
+/* Tool docks: zoom, locate, labels, fire, 3D. */
+.outzide-shell .map-controls,.zaydar-map-demo .zaydar-demo-navigation{
+ border:1px solid var(--map-ui-rim);border-radius:var(--map-ui-panel);background:var(--map-ui-glass);
+ box-shadow:var(--map-ui-shadow-nav);backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);-webkit-backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);
+}
+.zaydar-map-demo .zaydar-demo-navigation .zaydar-control-labels{font:700 12px/1 var(--font-display,"Barlow Condensed",sans-serif);letter-spacing:.04em;text-transform:uppercase}
+
+/* Chips that sit on the map: region lockup, map key, drawer launcher. */
+.outzide-shell .map-key-toggle,.zaydar-map-demo .zaydar-map-controls-launcher,.zaydar-map-demo .zaydar-map-lockup{
+ border:1px solid var(--map-ui-rim);border-radius:var(--map-ui-radius);background:var(--map-ui-glass);
+ box-shadow:var(--map-ui-shadow-nav);backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);-webkit-backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);
+}
+.zaydar-map-demo .zaydar-map-controls-launcher{min-height:var(--map-ui-control);gap:9px;padding:0 14px;font-size:15px;letter-spacing:.04em;transition:background var(--map-ui-motion)}
+.zaydar-map-demo .zaydar-map-controls-launcher:hover,.outzide-shell .map-key-toggle:hover{background:linear-gradient(#ffffff0a,#ffffff0a),var(--map-ui-glass)}
+.zaydar-map-demo .zaydar-map-controls-launcher[aria-expanded=true]{color:var(--map-ui-accent);box-shadow:var(--map-ui-shadow-nav),inset 0 -1px var(--map-ui-accent)}
+@media(min-width:960px){.zaydar-map-demo .zaydar-map-lockup{top:18px;left:18px}}
+
+/* Drawers: Mapz map controls and OutZide browse. */
+.outzide-shell .discovery,.zaydar-map-demo .zaydar-layer-sheet{
+ border:1px solid var(--map-ui-rim);border-radius:var(--map-ui-panel);background:var(--map-ui-glass);
+ box-shadow:var(--map-ui-shadow-panel);backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);-webkit-backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);
+}
+.zaydar-map-demo .zaydar-layer-sheet>.z-glass__edge{opacity:.32}
+
+/* Drawer head: condensed caps title, hairline seam, 44px close. */
+.outzide-shell .discovery .search-panel-header,.zaydar-map-demo .zaydar-layer-sheet__title{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px;
+ padding:6px 7px 6px 16px;border-bottom:1px solid var(--map-ui-hair);
+}
+.outzide-shell .discovery .search-panel-header{margin-bottom:10px}
+.outzide-shell .discovery .search-panel-header strong,.zaydar-map-demo .zaydar-layer-sheet__title>span{
+ display:flex;align-items:center;gap:10px;color:var(--map-ui-text);
+ font:700 18px/1 var(--display,var(--font-display,"Barlow Condensed",sans-serif));letter-spacing:.05em;text-transform:uppercase;
+}
+.outzide-shell .discovery .search-panel-header strong::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--map-ui-accent);flex:none}
+.zaydar-map-demo .zaydar-layer-sheet__title>span>svg{color:var(--map-ui-accent)}
+.outzide-shell .discovery .search-panel-header button,.zaydar-map-demo .zaydar-layer-sheet__title button{
+ display:grid;place-items:center;width:44px;height:44px;min-height:44px;padding:0;
+ border:1px solid var(--map-ui-hair);border-radius:var(--map-ui-radius);background:#ffffff08;color:var(--map-ui-text);
+ font-size:inherit;transition:background var(--map-ui-motion),border-color var(--map-ui-motion);
+}
+.outzide-shell .discovery .search-panel-header button:hover,.zaydar-map-demo .zaydar-layer-sheet__title button:hover{background:#ffffff14;border-color:color-mix(in srgb,var(--map-ui-light) 34%,transparent)}
+
+/* Mapz drawer body: same seams and chip language as OutZide. */
+.zaydar-map-demo .zaydar-layer-sheet__sections{gap:4px;padding:10px 8px;border-right:1px solid var(--map-ui-hair);scrollbar-width:none}
+.zaydar-map-demo .zaydar-layer-section{min-height:46px;padding:8px 10px;border:0;border-radius:10px;font-size:16px;letter-spacing:.02em;transition:background var(--map-ui-motion)}
+.zaydar-map-demo .zaydar-layer-section:hover{background:#ffffff08}
+.zaydar-map-demo .zaydar-layer-section[aria-pressed=true]{
+ border:0;background:color-mix(in srgb,var(--layer-color) 10%,transparent);
+ box-shadow:inset 2px 0 var(--layer-color),inset 0 1px #ffffff0c;
+}
+.zaydar-map-demo .zaydar-layer-section__dot{width:6px;height:6px}
+.zaydar-map-demo .zaydar-layer-sheet__body{padding:14px 16px 16px}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-panel__heading{margin:4px 0 10px}
+.zaydar-map-demo .zaydar-layer-panel__heading small{font:500 10px/1.4 var(--mono,"IBM Plex Mono",ui-monospace,monospace);letter-spacing:.14em;color:color-mix(in srgb,var(--map-ui-light) 80%,#fff)}
+.zaydar-map-demo .zaydar-layer-visibility{padding:0 12px;margin-bottom:12px;border:1px solid var(--map-ui-hair);border-radius:var(--map-ui-radius);background:#0003}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail{gap:6px;margin:0 0 12px;padding:0}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail button{
+ min-height:40px;padding:6px 12px;border:1px solid var(--map-ui-hair);background:#ffffff06;color:#c3d3e0;
+ font-size:13px;letter-spacing:.04em;transition:background var(--map-ui-motion),color var(--map-ui-motion);
+}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail button:hover{color:#fff;background:#ffffff10}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail button[aria-pressed=true]{
+ color:#fff;border-color:color-mix(in srgb,var(--active-layer-color) 40%,transparent);
+ background:color-mix(in srgb,var(--active-layer-color) 12%,transparent);box-shadow:inset 0 -2px var(--active-layer-color);
+}
+.zaydar-map-demo .zaydar-layer-list{border-color:var(--map-ui-hair);background:#0003}
+.zaydar-map-demo .zaydar-layer-row{border-bottom-color:var(--map-ui-hair);transition:background var(--map-ui-motion)}
+.zaydar-map-demo .zaydar-layer-row:hover{background:#ffffff08}
+.zaydar-map-demo .zaydar-layer-sheet__body{scrollbar-color:color-mix(in srgb,var(--map-ui-light) 45%,transparent) transparent}
+.zaydar-map-demo .zaydar-layer-sheet__footer{gap:8px;padding:10px 12px;border-top:1px solid var(--map-ui-hair);background:color-mix(in srgb,var(--map-ui-ink) 72%,transparent)}
+.zaydar-map-demo .zaydar-layer-sheet__footer>a,.zaydar-map-demo .zaydar-layer-sheet__back{border-color:var(--map-ui-hair);border-radius:var(--map-ui-radius);background:#ffffff06;letter-spacing:.04em;transition:background var(--map-ui-motion)}
+.zaydar-map-demo .zaydar-layer-sheet__footer>a{color:var(--active-layer-color);border-color:color-mix(in srgb,var(--active-layer-color) 45%,transparent)}
+.zaydar-map-demo .zaydar-layer-sheet__footer>a:hover,.zaydar-map-demo .zaydar-layer-sheet__back:hover{background:#ffffff12}
+@media(max-width:599px){
+ .zaydar-map-demo .zaydar-layer-sheet__sections{padding:8px;border-right:0;border-bottom:1px solid var(--map-ui-hair)}
+ .zaydar-map-demo .zaydar-layer-section{justify-content:center;min-height:44px;padding:6px 3px;font-size:15px}
+ .zaydar-map-demo .zaydar-layer-section[aria-pressed=true]{box-shadow:inset 0 -2px var(--layer-color)}
+ .zaydar-map-demo .zaydar-layer-sheet__body{padding:12px}
+}
+@media(prefers-reduced-transparency:reduce){
+ .outzide-shell :is(.map-key-toggle,.discovery),.zaydar-map-demo :is(.zaydar-map-controls-launcher,.zaydar-map-lockup,.zaydar-layer-sheet,.zaydar-demo-navigation){background:var(--map-ui-ink)}
+}
+/* Keep search, options and list on the drawer head's 16px left datum. */
+.outzide-shell .discovery .search{margin-inline:16px}
