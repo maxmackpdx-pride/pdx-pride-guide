@@ -16,6 +16,7 @@ import { timeAgo } from "@/lib/boardFeed";
 import "./PrideWork.css";
 import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
 import "./Sellz.css";
+import { roomTitle } from "@/lib/rooms";
 
 const CATEGORIES = ["Clothing", "Drag", "Leather and gear", "Home", "Furniture", "Electronics", "Art", "Tickets", "Tools", "Outdoor", "Collectibles", "Other"];
 const CONDITIONS = ["New", "Like new", "Good", "Fair", "For parts"];
@@ -40,7 +41,7 @@ function SellzGrid({ posts, saved, selectedId, onSelect }: { posts: SellzPost[];
 }
 
 export default function Sellz() {
-  usePageSeo("SELLZ | Zaylist", "Buy and sell with Portland's queer community. Simple listings, real people, local handoffs.", { image: shareCardUrl("sellz"), imageAlt: "Sellz logo on Zaylist" });
+  usePageSeo(roomTitle("sellz"), "Buy and sell with Portland's queer community. Simple listings, real people, local handoffs.", { image: shareCardUrl("sellz"), imageAlt: "Sellz logo on Zaylist" });
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);

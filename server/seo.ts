@@ -298,7 +298,7 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     description: "Free queer GIFTZ board for Portland. Post gifts and in-search-of requests across PDX.",
   },
   "/pride-work": {
-    title: "GIGZ: Gigs & Jobs | Zaylist",
+    title: "GIGZ | Zaylist",
     description: "Portland queer gig board and work listings. Post a gig or find work in PDX.",
   },
   "/spotted": {
@@ -317,16 +317,20 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "Dashboard | Zaylist",
     description: "Your Zaylist profile, submissions, GIGZ, GIFTZ, and event check-ins.",
   },
+  "/map": {
+    title: "MAPZ | Zaylist",
+    description: "Portland on one map: tonight's events, places, and posts from every room.",
+  },
   "/directory": {
     title: "OUR PLACEZ | Zaylist",
     description: "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
   },
   "/z": {
-    title: "Z/ Communities | Zaylist",
+    title: "Z/LISTS | Zaylist",
     description: "Portland queer communities with real memberships, rules, moderators, posts, and related events.",
   },
   "/outzide": {
-    title: "Outzide | Northwest field map | Zaylist",
+    title: "OUTZIDE | Zaylist",
     description: "Explore trails, campgrounds, hot springs, beaches and community stays across Oregon and Washington.",
   },
   "/schedule": {
@@ -347,11 +351,11 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     description: "See what is next on Zaylist: THE HAÜZ, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
   },
   "/gigs": {
-    title: "GIGZ: Gigs & Jobs | Zaylist",
+    title: "GIGZ | Zaylist",
     description: "Portland queer gig board and work listings. Post a gig or find work in PDX.",
   },
   "/the-hauz": {
-    title: "THE HAÜZ · Housing board | Zaylist",
+    title: "THE HAÜZ | Zaylist",
     description:
       "Rooms, roommates, and people building a household together in queer Portland. A community board, not a listings site.",
   },

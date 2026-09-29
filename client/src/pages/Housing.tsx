@@ -55,6 +55,7 @@ import "./Housing.css";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
 import { trackProductEvent } from "@/lib/analytics";
+import { roomTitle } from "@/lib/rooms";
 
 const SIGNS: Array<{ label: string; cls: string }> = [
   { label: "FOR RENT", cls: "s1" },
@@ -108,7 +109,7 @@ function HousingRail({ type, eyebrow, title, description, action, posts, handler
 export default function Housing() {
   const contentStartedAt = useRef(performance.now());
   usePageSeo(
-    "THE HAÜZ · Housing board",
+    roomTitle("hauz"),
     "Rooms, roommates, and people building a household together in queer Portland. A community board, not a listings site.",
     { image: shareCardUrl("housing"), imageAlt: "THE HAÜZ - housing board on Zaylist" },
   );

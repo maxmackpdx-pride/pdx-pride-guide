@@ -28,6 +28,7 @@ import { trackProductEvent } from "@/lib/analytics";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
 import "./PrideWork.css";
+import { roomTitle } from "@/lib/rooms";
 
 const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
@@ -135,7 +136,7 @@ function GigRail({ posts, kind, selected, onSelect }: {
 }
 
 export default function PrideWork() {
-  usePageSeo("GIGZ: Jobs & gigs | Zaylist", "Find gigs and workers for Portland nights. Post or browse GIGZ.", { image: shareCardUrl("prideWork"), imageAlt: "GIGZ on Zaylist" });
+  usePageSeo(roomTitle("gigz"), "Find gigs and workers for Portland nights. Post or browse GIGZ.", { image: shareCardUrl("prideWork"), imageAlt: "GIGZ on Zaylist" });
   const { user } = useAuth();
   const [formOpen, setFormOpen] = useState(false);
   const [composeType, setComposeType] = useState<GigFormData["postType"]>("POSTING_GIG");

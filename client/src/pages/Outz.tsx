@@ -7,6 +7,7 @@ import {useAuth} from "@/context/AuthContext";
 import { useEffect, useRef, useState } from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
+import { roomTitle } from "@/lib/rooms";
 
 /** Keep the field map's canvas, dialogs and styles isolated from the site shell. */
 export type OutzDiscoveryPlace = { id: string; name: string; region: string; kind: string; short: string; accent: string; cardAccent?: string; note: string; href: string; lat?: number; lng?: number; logo?: string };
@@ -19,7 +20,7 @@ export default function Outz() {
     const data = await response.json();
     return data.places.find((place: {id: string; name: string}) => place.id === sharedId) as {id: string; name: string} | undefined ?? null;
   }});
-  usePageSeo(sharedPlace ? sharedPlace.name + ' | OutZide by Zaylist' : "Outzide | Northwest field map | Zaylist", "Explore trails, campgrounds, hot springs, beaches and community stays across Oregon and Washington.", {
+  usePageSeo(roomTitle("outz", sharedPlace?.name), "Explore trails, campgrounds, hot springs, beaches and community stays across Oregon and Washington.", {
     image: sharedId ? 'https://www.zaylist.com/api/og/outzide/' + encodeURIComponent(sharedId) + '?v=1' : shareCardUrl("outzide"),
     url: sharedId ? 'https://www.zaylist.com' + outzSharePath(sharedId) : undefined,
     imageAlt: "OutZide by Zaylist — Northwest mountain, river, rainbow trails and outdoor waypoints",

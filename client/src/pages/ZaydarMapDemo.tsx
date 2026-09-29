@@ -12,6 +12,8 @@ import BoardFollowButton from "@/components/BoardFollowButton";
 import MapComposerOverlay from "@/components/MapComposerOverlay";
 import {readMapCamera,filterWorldRows,locateWorldRow,roughDistanceMiles,WORLD_DETAIL_KEYS,type MapWorld,type WorldRow,type MapBounds} from "@/lib/mapWorlds";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
+import { usePageSeo } from "@/hooks/usePageSeo";
+import { roomTitle } from "@/lib/rooms";
 import ZaydarCanvas, { type MapSelectionRect, type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { ChevronRight, LocateFixed } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -306,6 +308,7 @@ function useDesktop() {
 }
 
 export default function ZaydarMapDemo() {
+  usePageSeo(roomTitle("mapz"), "Portland on one map: tonight's events, places, and posts from every room.");
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const search = useSearch();

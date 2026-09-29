@@ -2,7 +2,10 @@
  * Nav accent names. Each maps to an existing token pair in index.css, so calm
  * mode desaturates the nav for free rather than needing its own overrides.
  */
-export type NavAccent = "lime" | "magenta" | "cyan" | "blue" | "orange" | "violet" | "green";
+export type NavAccent =
+  | "lime" | "magenta" | "cyan" | "blue" | "orange" | "violet" | "green"
+  /* Room accents resolve to --room-* in ds/tokens/rooms.css. */
+  | "gigz" | "giftz" | "sellz" | "hauz" | "mizzed";
 
 export type NavLinkItem = { href: string; label: string; accent?: NavAccent };
 
@@ -26,11 +29,14 @@ export type NavEntry =
 
 /** The shared Boards dropdown: housing and Z/ List are independent destinations. */
 export const BOARD_NAV: NavLinkItem[] = [
-  { href: "/spotted", label: "Mizzed", accent: "magenta" },
-  { href: "/gifting", label: "Giftz", accent: "green" },
-  { href: "/sellz", label: "Sellz", accent: "orange" },
-  { href: "/pride-work", label: "Gigz", accent: "violet" },
+  { href: "/spotted", label: "Mizzed", accent: "mizzed" },
+  { href: "/gifting", label: "Giftz", accent: "giftz" },
+  { href: "/sellz", label: "Sellz", accent: "sellz" },
+  { href: "/pride-work", label: "Gigz", accent: "gigz" },
 ];
+
+/** Every board room, including THE HAÜZ, for the Boards menus. */
+export const BOARDS_MENU: NavLinkItem[] = [...BOARD_NAV, { href: "/the-hauz", label: "The Haüz", accent: "hauz" }];
 
 /**
  * Primary nav - labels match on-page titles where possible.
@@ -40,7 +46,6 @@ export const BOARD_NAV: NavLinkItem[] = [
  */
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/", label: "Home", accent: "lime" },
-  { type: "link", href: "/about", label: "About", accent: "magenta" },
   {
     type: "dropdown",
     id: "events",
@@ -69,6 +74,8 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/outzide/sauvie-island", label: "Sauvie Island", accent: "orange" },
     ],
   },
+  /* Guests reach every room from the top row; About lives in the footer. */
+  { type: "dropdown", id: "boards", label: "Boards", accent: "magenta", items: BOARDS_MENU },
   { type: "link", href: "/z", label: "Z/Lists", accent: "violet" },
 ];
 
@@ -89,7 +96,7 @@ export const MOBILE_TOP_NAV: NavEntry[] = [
     id: "boards",
     label: "Boards",
     accent: "magenta",
-    items: [...BOARD_NAV, { href: "/the-hauz", label: "Houz", accent: "blue" }],
+    items: BOARDS_MENU,
   },
   { type: "link", href: "/z", label: "Z/Lists", accent: "violet" },
 ];
@@ -105,6 +112,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/schedule": { section: "EVENTZ", title: "My Schedule" },
   "/pride-work": { section: "Boards", title: "GIGZ" },
   "/gifting": { section: "Boards", title: "GIFTZ" },
+  "/sellz": { section: "Boards", title: "SELLZ" },
   "/the-hauz": { section: "Boards", title: "THE HAÜZ" },
   "/spotted": { section: "Boards", title: "MIZZED CONNECTION" },
   "/directory": { section: "PLACEZ", title: "OUR PLACEZ" },

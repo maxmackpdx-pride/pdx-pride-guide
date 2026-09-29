@@ -41,6 +41,7 @@ import { DAY_SORT_ORDER } from "@shared/eventWeek";
 import { isEventSchedulePast, pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 import "./Events.css";
 import { shareCardUrl } from "@shared/shareCards";
+import { roomTitle } from "@/lib/rooms";
 
 const PACIFIC = "America/Los_Angeles";
 const GRID_RENDER_BATCH = 40;
@@ -442,9 +443,7 @@ export default function Events() {
 
   const shareEvent = selectedEvent || routeEvent || null;
   usePageSeo(
-    shareEvent
-      ? `${shareEvent.title} | EVENTZ | Zaylist`
-      : "EVENTZ | Zaylist",
+    roomTitle("eventz", shareEvent?.title),
     shareEvent
       ? truncateSeo(
           `${shareEvent.venueName || "Portland"}${shareEvent.neighborhood ? ` · ${shareEvent.neighborhood}` : ""}. ${shareEvent.description || ""}`,

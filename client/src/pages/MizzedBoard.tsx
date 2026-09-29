@@ -13,6 +13,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import { mizzedSource } from "@/lib/mizzedSource";
 import "./MizzedBoard.css";
+import { roomTitle } from "@/lib/rooms";
 
 type Category = "all" | "events" | "placez" | "outzide" | "spot";
 const filters: Array<{ id: Category; label: string }> = [
@@ -25,7 +26,7 @@ function category(post: MissedConnectionPost): Category {
 }
 
 export default function MizzedBoard() {
-  usePageSeo("Mizzed connections | Zaylist", "Anonymous connections from Eventz, Placez, OutZide and around Portland.", { image: shareCardUrl("spotted"), imageAlt: "Mizzed connections on Zaylist" });
+  usePageSeo(roomTitle("mizzed"), "Anonymous connections from Eventz, Placez, OutZide and around Portland.", { image: shareCardUrl("spotted"), imageAlt: "Mizzed connections on Zaylist" });
   const { user } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const initialParams = useMemo(() => new URLSearchParams(window.location.search), []);

@@ -11,9 +11,10 @@ import SpectrumLoader from "@/components/SpectrumLoader";
 import { communityLogo } from "@shared/communityLogos";
 import type { CommunitySummary } from "@shared/community";
 import "./ZIndex.css";
+import { roomTitle } from "@/lib/rooms";
 
 export default function ZIndex() {
-  usePageSeo("Z/ List · Communities | Zaylist", "Find your people in queer Portland. Join communities, share conversations, and make plans together on Zaylist.");
+  usePageSeo(roomTitle("zlists"), "Find your people in queer Portland. Join communities, share conversations, and make plans together on Zaylist.");
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [creating, setCreating] = useState(false);

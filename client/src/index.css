@@ -884,6 +884,12 @@ body::before {
    token and the text lifts to a tint of it. */
 [data-accent="blue"] { --nav-c: var(--neon-blue, #0044ff); --nav-c-ink: #5a8bff; }
 [data-accent="violet"] { --nav-c: var(--neon-violet, #8800ff); --nav-c-ink: #c9a3ff; }
+/* Room accents come from the room registry (ds/tokens/rooms.css). */
+[data-accent="gigz"] { --nav-c: var(--room-gigz); --nav-c-ink: var(--room-gigz-ink); }
+[data-accent="giftz"] { --nav-c: var(--room-giftz); --nav-c-ink: var(--room-giftz); }
+[data-accent="sellz"] { --nav-c: var(--room-sellz); --nav-c-ink: var(--room-sellz); }
+[data-accent="hauz"] { --nav-c: var(--room-hauz); --nav-c-ink: var(--room-hauz); }
+[data-accent="mizzed"] { --nav-c: var(--room-mizzed); --nav-c-ink: var(--room-mizzed); }
 
 .site-nav-link,
 .site-nav-dropdown__trigger {

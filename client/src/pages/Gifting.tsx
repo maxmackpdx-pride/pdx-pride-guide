@@ -21,6 +21,7 @@ import type { CSSProperties } from "react";
 import "./PrideWork.css";
 import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
 import "./Gifting.css";
+import { roomTitle } from "@/lib/rooms";
 
 const CATEGORIES = [
   "Clothing", "Party Closet", "Costumes and Theme Wear", "Circuit Party Wear", "Drag",
@@ -84,7 +85,7 @@ function GiftRail({ posts, type, selected, onSelect }: {
 export default function Gifting() {
   const contentStartedAt = useRef(performance.now());
   usePageSeo(
-    "GIFTZ | Zaylist",
+    roomTitle("giftz"),
     "Give and find free stuff for the scene - all year on GIFTZ.",
     { image: shareCardUrl("gifting"), imageAlt: "GIFTZ on Zaylist" },
   );

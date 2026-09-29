@@ -1,0 +1,15 @@
+/* Room accent registry. One hue per room, read by the nav, home worlds, map
+   layers and room pages. Each points at an existing palette token, so calm
+   mode and retunes reach every room without their own overrides. */
+:root {
+  --room-eventz: var(--neon-cyan, #00ffff);
+  --room-placez: var(--panel-cyan, #19e3ff);
+  --room-hauz: var(--neon-cyan, #00ffff);
+  --room-giftz: var(--board-gifting, #ccff00);
+  --room-gigz: var(--board-gigs, #6e3dff);
+  --room-sellz: var(--green-acid, #39ff14);
+  --room-outz: var(--neon-orange, #ff6600);
+  --room-mizzed: var(--board-spotted, #ff00cc);
+  /* Gigz purple is too dark for label ink; text lifts to a tint of it. */
+  --room-gigz-ink: #b06bff;
+}

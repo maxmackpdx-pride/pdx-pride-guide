@@ -16,6 +16,7 @@ import { parsePacificDateTime } from "@shared/missedConnections";
 import type { CommunityDetail, CommunityEvent, CommunityPost } from "@shared/community";
 import RedgifsMedia from "@/components/RedgifsMedia";
 import "./ZIndex.css";
+import { roomTitle } from "@/lib/rooms";
 
 export default function Community({ params }: { params: { communitySlug: string } }) {
   const slug = params.communitySlug.toLowerCase();
@@ -46,7 +47,7 @@ export default function Community({ params }: { params: { communitySlug: string 
   const key = `/api/communities/${encodeURIComponent(slug)}`;
   const community = useQuery<CommunityDetail>({ queryKey: [key], retry: false });
   const manage = useQuery<any>({ queryKey: [`${key}/manage`], enabled: managing });
-  usePageSeo(community.data ? `${community.data.name} | Z/ Communities` : "Z/ Community | Zaylist", community.data?.description || "A Zaylist community.");
+  usePageSeo(roomTitle("zlists", community.data?.name), community.data?.description || "A Zaylist community.");
   const refresh = async () => { await queryClient.invalidateQueries({ queryKey: [key] }); await queryClient.invalidateQueries({ queryKey: ["/api/communities"] }); };
   const membership = useMutation({
     mutationFn: async () => community.data?.viewerRole ? apiRequest("DELETE", `${key}/membership`) : apiRequest("POST", `${key}/join`, {}),
