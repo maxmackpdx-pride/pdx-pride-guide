@@ -1,5 +1,5 @@
 // Tucker approved all 11 groups on 2026-09-28. 17 listings including two festival ranges.
-// Official source links retained; no inferred end times or prices. Null posters use weekday defaults.
+// Original organizer/venue artwork, visually verified and bundled locally; source URLs retained.
 export const discoveredQueerEvents20260928 = [
   {
     "title": "PDX Rated",
@@ -22,7 +22,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": true,
     "nudityOk": true,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/pdx-rated.webp",
+    "posterSourceUrl": "https://cdn.prod.website-files.com/61e6fdab63acd785c481dbcf/69d076916f8e790a90304095_0a9b15e4-53f2-44f1-a189-cc644d6b5056.webp"
   },
   {
     "title": "PDX Rated",
@@ -45,7 +46,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": true,
     "nudityOk": true,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/pdx-rated.webp",
+    "posterSourceUrl": "https://cdn.prod.website-files.com/61e6fdab63acd785c481dbcf/69d076916f8e790a90304095_0a9b15e4-53f2-44f1-a189-cc644d6b5056.webp"
   },
   {
     "title": "PDX Rated",
@@ -68,7 +70,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": true,
     "nudityOk": true,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/pdx-rated.webp",
+    "posterSourceUrl": "https://cdn.prod.website-files.com/61e6fdab63acd785c481dbcf/69d076916f8e790a90304095_0a9b15e4-53f2-44f1-a189-cc644d6b5056.webp"
   },
   {
     "title": "Dyke Nite",
@@ -91,7 +94,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/dyke-nite.webp",
+    "posterSourceUrl": "https://cdn.prod.website-files.com/61e6fdab63acd785c481dbcf/69c2b770e82de3ced63fb82b_5ae554f3-56c1-480a-aadd-37ff9bc063f0.webp"
   },
   {
     "title": "Dyke Nite",
@@ -114,7 +118,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/dyke-nite.webp",
+    "posterSourceUrl": "https://cdn.prod.website-files.com/61e6fdab63acd785c481dbcf/69c2b770e82de3ced63fb82b_5ae554f3-56c1-480a-aadd-37ff9bc063f0.webp"
   },
   {
     "title": "Witches Ball of the West",
@@ -137,7 +142,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/witches-ball.webp",
+    "posterSourceUrl": "https://cdn.prod.website-files.com/61e6fdab63acd785c481dbcf/6a0348c46657082a730d9bc0_152df6df-f1f1-4844-8d94-1c78888c6330.webp"
   },
   {
     "title": "Haunted Honey × Sapphic PDX",
@@ -160,7 +166,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/haunted-honey.webp",
+    "posterSourceUrl": "https://cdn.prod.website-files.com/61e6fdab63acd785c481dbcf/6aad8cc653022b5ce45c5165_02543d5f-034e-413a-b54f-73c62e4fdece.webp"
   },
   {
     "title": "Shock Show in Space",
@@ -183,7 +190,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/shock-show-in-space.png",
+    "posterSourceUrl": "https://cstpdx.com/wp-content/uploads/2026/09/XO-Shock-Show-Space.png"
   },
   {
     "title": "Fright Night: A Halloween Circus",
@@ -206,7 +214,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/fright-night.jpg",
+    "posterSourceUrl": "https://albertarosetheatre.com/wp-content/uploads/2026/09/night-flights-2026-fright-night-a-halloween-circus.jfif"
   },
   {
     "title": "Fright Night: A Halloween Circus",
@@ -229,7 +238,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/fright-night.jpg",
+    "posterSourceUrl": "https://albertarosetheatre.com/wp-content/uploads/2026/09/night-flights-2026-fright-night-a-halloween-circus.jfif"
   },
   {
     "title": "Fright Night: A Halloween Circus",
@@ -252,7 +262,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/fright-night.jpg",
+    "posterSourceUrl": "https://albertarosetheatre.com/wp-content/uploads/2026/09/night-flights-2026-fright-night-a-halloween-circus.jfif"
   },
   {
     "title": "Fright Night: A Halloween Circus",
@@ -275,7 +286,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/fright-night.jpg",
+    "posterSourceUrl": "https://albertarosetheatre.com/wp-content/uploads/2026/09/night-flights-2026-fright-night-a-halloween-circus.jfif"
   },
   {
     "title": "Dapperlesque: A Gender-Bending Burlesque Cabaret",
@@ -298,7 +310,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/dapperlesque.jpg",
+    "posterSourceUrl": "https://albertarosetheatre.com/wp-content/uploads/2026/08/dapperlesque-villain-era-a-gender-bending-burlesque-cabaret-1.jfif"
   },
   {
     "title": "The Big Trans Comedy Show",
@@ -321,7 +334,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/big-trans-comedy.jpg",
+    "posterSourceUrl": "https://albertarosetheatre.com/wp-content/uploads/2026/09/the-big-trans-comedy-show.jfif"
   },
   {
     "title": "Mx. Dahlia Belle: Affirmed (A Live Comedy Taping)",
@@ -344,7 +358,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/dahlia-belle-affirmed.jpg",
+    "posterSourceUrl": "https://cdn.etix.com/etix/performance-image/performance_image_1200w/2c715cb5fa8c3bae216ff076a333d9ca.jpg"
   },
   {
     "title": "Stage Fright Festival",
@@ -367,7 +382,8 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/stage-fright.webp",
+    "posterSourceUrl": "https://images.squarespace-cdn.com/content/v1/66ec6f7a0012414ab9213f60/74f8932d-9a07-4e98-88da-ea9926a46700/e-21e+-+Edited.jpg"
   },
   {
     "title": "QDoc Film Festival",
@@ -390,6 +406,7 @@ export const discoveredQueerEvents20260928 = [
     "isHouseParty": false,
     "isSexPositive": false,
     "nudityOk": false,
-    "posterImageUrl": null
+    "posterImageUrl": "/event-posters/approved-2026-09-28/qdoc.jpg",
+    "posterSourceUrl": "https://img1.wsimg.com/isteam/ip/b40d649c-5286-4fad-acd8-008160816fbc/QDOC_STD_1.png"
   }
 ];
