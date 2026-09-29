@@ -1,7 +1,7 @@
 import type { MouseEvent, ReactNode } from "react";
 import UserAvatar from "@/components/UserAvatar";
 import { avatarHrefFor } from "@/lib/avatarLinks";
-import { isHousingDemoAuthor } from "@/lib/housingDemo";
+import { demoListingCover, isDemoListingAuthor } from "@/lib/demoListingCover";
 import type { HubFeedItem } from "@shared/hubFeed";
 
 function stopCardNav(e: MouseEvent) {
@@ -23,12 +23,17 @@ type Props = {
 };
 
 export default function HubFeedBoardFace({ item, when, openLabel, openControl }: Props) {
-  const kicker = [KIND_KICKER[item.kind] || item.badge, item.badge && item.badge !== KIND_KICKER[item.kind] ? item.badge : null]
+  const isDemo = isDemoListingAuthor(item.author);
+  const kicker = [
+    KIND_KICKER[item.kind] || item.badge,
+    isDemo ? "DEMO" : null,
+    !isDemo && item.badge && item.badge !== KIND_KICKER[item.kind] ? item.badge : null,
+  ]
     .filter(Boolean)
     .join(" · ");
   const title = item.title || item.action;
   const initial = (item.author.displayName || "?").trim().charAt(0).toUpperCase();
-  const isDemo = item.kind === "housing" && isHousingDemoAuthor(item.author);
+  const cover = demoListingCover(title, item.photoUrl);
 
   return (
     <div className="hub-feed-board">
@@ -39,9 +44,9 @@ export default function HubFeedBoardFace({ item, when, openLabel, openControl }:
       ) : null}
 
       <div className="hub-feed-board__well">
-        {item.photoUrl ? (
+        {cover ? (
           <img
-            src={item.photoUrl}
+            src={cover}
             alt={title ? `${title} photo` : `Photo shared by ${item.author.displayName}`}
             loading="lazy"
           />
@@ -54,7 +59,7 @@ export default function HubFeedBoardFace({ item, when, openLabel, openControl }:
         <h3 className="hub-feed-board__well-title">{title}</h3>
       </div>
 
-      <div className="kick hub-feed-board__kicker">{kicker}{when ? ` · ${when}` : ""}</div>
+      <div className="kick hub-feed-board__kicker">{kicker}{!isDemo && when ? ` · ${when}` : ""}</div>
 
       {item.text ? <p className="hub-feed-board__text">{item.text}</p> : null}
 
