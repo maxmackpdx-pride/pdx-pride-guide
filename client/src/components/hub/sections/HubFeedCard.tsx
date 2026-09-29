@@ -21,6 +21,7 @@ import type { Event } from "@shared/schema";
 import FeedEventDeck from "./FeedEventDeck";
 import RedgifsMedia from "@/components/RedgifsMedia";
 import { isHousingDemoAuthor } from "@/lib/housingDemo";
+import HubFeedBoardFace from "./HubFeedBoardFace";
 import "./hub-feed-layout.css";
 
 function stopCardNav(e: MouseEvent) {
@@ -199,6 +200,11 @@ export default function HubFeedCard({ item }: Props) {
     || item.kind === "community"
   ) && !!item.title;
   const isBoard = (item.kind === "gig" || item.kind === "gifting") && item.boardPostId != null;
+  const isListingFace =
+    item.kind === "housing"
+    || item.kind === "gig"
+    || item.kind === "gifting"
+    || item.kind === "sellz";
   const canNavigateCard = Boolean(
     href
     && !isSpotted
@@ -255,12 +261,184 @@ export default function HubFeedCard({ item }: Props) {
     "card",
     "fitem",
     "hub-feed-card",
+    "pdx-glass-card",
+    "pdx-glass-rebind",
     item.pinned ? "hub-feed-card--pin" : "",
     glow ? "hub-feed-card--accent" : "",
     (isSpotted || isBoard || canNavigateCard) ? "hub-feed-card--clickable" : "",
     (isGlowCard || isLooking) ? "fitem--glow" : "",
     isLooking ? "hub-feed-card--looking" : "",
+    isListingFace ? "hub-feed-card--listing" : "",
   ].filter(Boolean).join(" ");
+
+  const openControl = (isSpotted || isBoard) ? (
+    <button
+      type="button"
+      className="hub-feed-card__open hub-feed-board__open"
+      onClick={(e) => {
+        e.stopPropagation();
+        openCard();
+      }}
+    >
+      {openLabelFor(item)} <span aria-hidden="true"><ArrowRight size={14} aria-hidden="true" /></span>
+    </button>
+  ) : canNavigateCard && href ? (
+    <Link href={href} className="hub-feed-card__open hub-feed-board__open" onClick={stopCardNav}>
+      {openLabelFor(item)} <span aria-hidden="true"><ArrowRight size={14} aria-hidden="true" /></span>
+    </Link>
+  ) : null;
+
+  const listingFace = isListingFace ? (
+    <HubFeedBoardFace
+      item={item}
+      when={when}
+      openLabel={openLabelFor(item)}
+      openControl={openControl}
+    />
+  ) : null;
+
+  const socialFace = (
+    <div className="hub-feed-card__row">
+      <UserAvatar
+        photoUrl={item.author.photoUrl}
+        avatarChoice={item.author.avatarChoice}
+        avatarRing={item.author.avatarRing}
+        displayName={item.author.displayName}
+        username={item.author.username ?? undefined}
+        logoFit={item.author.venueLogo}
+        href={avatarHrefFor(item.author)}
+        onClick={stopCardNav}
+        size={44}
+      />
+      <div className="hub-feed-card__main">
+        <div className="hub-feed-card__head">
+          <div className="hub-feed-card__identity">
+            <div className="hub-feed-card__author">{item.author.displayName}</div>
+            {authorKarma != null && (
+              <div className="kick hub-feed-card__karma" aria-label={`${authorKarma} author karma`}>
+                {authorKarma} karma
+              </div>
+            )}
+            <div className="kick hub-feed-card__meta">
+              <span>{item.action}</span>
+              {when && (
+                <>
+                  <span aria-hidden="true"> · </span>
+                  {item.createdAt && !item.pinned ? (
+                    <time dateTime={item.createdAt}>{when}</time>
+                  ) : (
+                    <span>{when}</span>
+                  )}
+                </>
+              )}
+            </div>
+            {item.postedBy && (
+              <div className="hub-feed-card__postedby">
+                <UserAvatar
+                  photoUrl={item.postedBy.photoUrl}
+                  avatarChoice={item.postedBy.avatarChoice}
+                  avatarRing={item.postedBy.avatarRing}
+                  displayName={item.postedBy.displayName}
+                  username={item.postedBy.username ?? undefined}
+                  href={avatarHrefFor(item.postedBy)}
+                  onClick={stopCardNav}
+                  size={20}
+                />
+                <span className="kick hub-feed-card__postedby-name">
+                  Posted by {item.postedBy.displayName}
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="hub-feed-card__head-actions">
+            <ChangeBadge label={item.changeLabel} className="hub-feed-card__change" />
+            {isDemoHousing && (
+              <span className="kick hub-feed-card__demo" aria-label="Demo listing">DEMO</span>
+            )}
+            {item.badge && (
+              <span
+                className="kick hub-feed-card__badge pdx-glass-rebind"
+                style={{ "--hub-feed-accent": badgeColor, "--c": badgeColor } as CSSProperties}
+              >
+                {item.badge}
+              </span>
+            )}
+            {showFollowShortcut && !isFollowing && (
+              <button
+                type="button"
+                className="foll hub-feed-card__foll pdx-glass-rebind"
+                disabled={followMutation.isPending}
+                aria-busy={followMutation.isPending}
+                data-testid="feed-follow-shortcut"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  followMutation.mutate(true);
+                }}
+              >
+                Follow
+              </button>
+            )}
+          </div>
+        </div>
+        {showSubject && (
+          <h4 className="hub-feed-card__subject">{item.title}</h4>
+        )}
+        {item.text && (
+          <p className="hub-feed-card__body">{item.text}</p>
+        )}
+        {item.photoUrl && (
+          <img
+            src={item.photoUrl}
+            alt={item.title ? `${item.title} photo` : `Photo shared by ${item.author.displayName}`}
+            className="hub-feed-card__photo"
+            loading="lazy"
+          />
+        )}
+        {item.mediaUrl && <RedgifsMedia url={item.mediaUrl} title={item.title || "Community post"}/>}
+        {eventBlock}
+        {beachBlock}
+        {ctaBlock}
+        {engagement && (
+          <div
+            className="hub-feed-card__engagement"
+            aria-label="Community response"
+            onClick={stopCardNav}
+          >
+            <div className="hub-feed-card__vote-group">
+              <button
+                type="button"
+                className={`hub-feed-card__vote${engagement.viewerVote === 1 ? " is-on" : ""}`}
+                aria-label="Upvote this post"
+                aria-pressed={engagement.viewerVote === 1}
+                disabled={voteMutation.isPending}
+                onClick={() => voteMutation.mutate(engagement.viewerVote === 1 ? 0 : 1)}
+              >
+                <span aria-hidden="true"><ArrowUp size={14} aria-hidden="true" /></span>
+              </button>
+              <output className="hub-feed-card__score" aria-live="polite" aria-label={`${engagement.score} net votes`}>
+                {engagement.score}
+              </output>
+              <button
+                type="button"
+                className={`hub-feed-card__vote${engagement.viewerVote === -1 ? " is-on is-down" : ""}`}
+                aria-label="Downvote this post"
+                aria-pressed={engagement.viewerVote === -1}
+                disabled={voteMutation.isPending}
+                onClick={() => voteMutation.mutate(engagement.viewerVote === -1 ? 0 : -1)}
+              >
+                <span aria-hidden="true"><ArrowDown size={14} aria-hidden="true" /></span>
+              </button>
+            </div>
+            <span className="kick hub-feed-card__replies">
+              {engagement.replies} {engagement.replies === 1 ? "reply" : "replies"}
+            </span>
+          </div>
+        )}
+        {openControl}
+      </div>
+    </div>
+  );
 
   const body = (
     <article
@@ -269,6 +447,7 @@ export default function HubFeedCard({ item }: Props) {
       onClick={(isSpotted || isBoard || canNavigateCard) ? openCard : undefined}
       aria-label={`${item.author.displayName}: ${item.action}`}
     >
+      <span className="pdx-refract-seam" aria-hidden="true" />
       {isSpotted ? (
         <div>
           <div className="hub-feed-mc__head">
@@ -295,164 +474,7 @@ export default function HubFeedCard({ item }: Props) {
             <ArrowRight size={14} aria-hidden="true" />
           </div>
         </div>
-      ) : (
-      <div className="hub-feed-card__row">
-        <UserAvatar
-          photoUrl={item.author.photoUrl}
-          avatarChoice={item.author.avatarChoice}
-          avatarRing={item.author.avatarRing}
-          displayName={item.author.displayName}
-          username={item.author.username ?? undefined}
-          logoFit={item.author.venueLogo}
-          href={avatarHrefFor(item.author)}
-          onClick={stopCardNav}
-          size={44}
-        />
-        <div className="hub-feed-card__main">
-          <div className="hub-feed-card__head">
-            <div className="hub-feed-card__identity">
-              <div className="hub-feed-card__author">{item.author.displayName}</div>
-              {authorKarma != null && (
-                <div className="kick hub-feed-card__karma" aria-label={`${authorKarma} author karma`}>
-                  {authorKarma} karma
-                </div>
-              )}
-              <div className="kick hub-feed-card__meta">
-                <span>{item.action}</span>
-                {when && (
-                  <>
-                    <span aria-hidden="true"> · </span>
-                    {item.createdAt && !item.pinned ? (
-                      <time dateTime={item.createdAt}>{when}</time>
-                    ) : (
-                      <span>{when}</span>
-                    )}
-                  </>
-                )}
-              </div>
-              {item.postedBy && (
-                <div className="hub-feed-card__postedby">
-                  <UserAvatar
-                    photoUrl={item.postedBy.photoUrl}
-                    avatarChoice={item.postedBy.avatarChoice}
-                    avatarRing={item.postedBy.avatarRing}
-                    displayName={item.postedBy.displayName}
-                    username={item.postedBy.username ?? undefined}
-                    href={avatarHrefFor(item.postedBy)}
-                    onClick={stopCardNav}
-                    size={20}
-                  />
-                  <span className="kick hub-feed-card__postedby-name">
-                    Posted by {item.postedBy.displayName}
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="hub-feed-card__head-actions">
-              <ChangeBadge label={item.changeLabel} className="hub-feed-card__change" />
-              {isDemoHousing && (
-                <span className="kick hub-feed-card__demo" aria-label="Demo listing">DEMO</span>
-              )}
-              {item.badge && (
-                <span
-                  className="kick hub-feed-card__badge pdx-glass-rebind"
-                  style={{ "--hub-feed-accent": badgeColor, "--c": badgeColor } as CSSProperties}
-                >
-                  {item.badge}
-                </span>
-              )}
-              {showFollowShortcut && !isFollowing && (
-                <button
-                  type="button"
-                  className="foll hub-feed-card__foll pdx-glass-rebind"
-                  disabled={followMutation.isPending}
-                  aria-busy={followMutation.isPending}
-                  data-testid="feed-follow-shortcut"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    followMutation.mutate(true);
-                  }}
-                >
-                  Follow
-                </button>
-              )}
-            </div>
-          </div>
-          {showSubject && (
-            <h4 className="hub-feed-card__subject">{item.title}</h4>
-          )}
-          {item.text && (
-            <p className="hub-feed-card__body">{item.text}</p>
-          )}
-          {item.photoUrl && (
-            <img
-              src={item.photoUrl}
-              alt={item.title ? `${item.title} photo` : `Photo shared by ${item.author.displayName}`}
-              className="hub-feed-card__photo"
-              loading="lazy"
-            />
-          )}
-          {item.mediaUrl && <RedgifsMedia url={item.mediaUrl} title={item.title || "Community post"}/>}
-          {eventBlock}
-          {beachBlock}
-          {ctaBlock}
-          {engagement && (
-            <div
-              className="hub-feed-card__engagement"
-              aria-label="Community response"
-              onClick={stopCardNav}
-            >
-              <div className="hub-feed-card__vote-group">
-                <button
-                  type="button"
-                  className={`hub-feed-card__vote${engagement.viewerVote === 1 ? " is-on" : ""}`}
-                  aria-label="Upvote this post"
-                  aria-pressed={engagement.viewerVote === 1}
-                  disabled={voteMutation.isPending}
-                  onClick={() => voteMutation.mutate(engagement.viewerVote === 1 ? 0 : 1)}
-                >
-                  <span aria-hidden="true"><ArrowUp size={14} aria-hidden="true" /></span>
-                </button>
-                <output className="hub-feed-card__score" aria-live="polite" aria-label={`${engagement.score} net votes`}>
-                  {engagement.score}
-                </output>
-                <button
-                  type="button"
-                  className={`hub-feed-card__vote${engagement.viewerVote === -1 ? " is-on is-down" : ""}`}
-                  aria-label="Downvote this post"
-                  aria-pressed={engagement.viewerVote === -1}
-                  disabled={voteMutation.isPending}
-                  onClick={() => voteMutation.mutate(engagement.viewerVote === -1 ? 0 : -1)}
-                >
-                  <span aria-hidden="true"><ArrowDown size={14} aria-hidden="true" /></span>
-                </button>
-              </div>
-              <span className="kick hub-feed-card__replies">
-                {engagement.replies} {engagement.replies === 1 ? "reply" : "replies"}
-              </span>
-            </div>
-          )}
-          {(isSpotted || isBoard) && (
-            <button
-              type="button"
-              className="hub-feed-card__open"
-              onClick={(e) => {
-                e.stopPropagation();
-                openCard();
-              }}
-            >
-              {openLabelFor(item)} <span aria-hidden="true"><ArrowRight size={14} aria-hidden="true" /></span>
-            </button>
-          )}
-          {canNavigateCard && href && (
-            <Link href={href} className="hub-feed-card__open" onClick={stopCardNav}>
-              {openLabelFor(item)} <span aria-hidden="true"><ArrowRight size={14} aria-hidden="true" /></span>
-            </Link>
-          )}
-        </div>
-      </div>
-      )}
+      ) : listingFace ? listingFace : socialFace}
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
       {modalEvent && (
         <EventModal
