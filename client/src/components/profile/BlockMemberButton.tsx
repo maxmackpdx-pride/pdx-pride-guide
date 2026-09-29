@@ -1,13 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { confirmSheet } from "@/components/ConfirmSheet";
 
 export default function BlockMemberButton({ username, blocked }: { username: string; blocked: boolean }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!blocked && !window.confirm(`Block @${username}? You will no longer be able to contact each other, and this conversation will leave your inbox.`)) {
+      if (!blocked && !(await confirmSheet({ kicker: "PROFILE · BLOCK", title: `Block @${username}?`, body: "You won't be able to contact each other, and your conversation leaves your inbox. They aren't notified.", confirmLabel: "Block", destructive: true }))) {
         return null;
       }
       const res = await apiRequest(blocked ? "DELETE" : "POST", `/api/users/${encodeURIComponent(username)}/block`);

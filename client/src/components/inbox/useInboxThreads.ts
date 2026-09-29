@@ -9,6 +9,7 @@ import { categoryFromContext, formatThreadTime } from "./mapContext";
 import type { ApiMessageRow, Folder, LineupDecision, Thread, ThreadMessage, ThreadReveal } from "./types";
 import { GUIDE_PUBLIC_HANDLE, isGuideSystemUsername } from "@shared/peopleHub";
 import { trackProductEvent } from "@/lib/analytics";
+import { confirmSheet } from "@/components/ConfirmSheet";
 
 const ARCHIVE_KEY = "pdx-inbox-archived-v1";
 
@@ -133,7 +134,7 @@ export function useInboxThreads(activeThreadId: string | null) {
 
   const blockMember = useCallback(async (username: string) => {
     if (!username || username === "Anonymous") return false;
-    if (!window.confirm(`Block @${username}? You will no longer be able to contact each other, and this conversation will leave your inbox.`)) return false;
+    if (!(await confirmSheet({ kicker: "INBOX · BLOCK", title: `Block @${username}?`, body: "You won't be able to contact each other, and this conversation leaves your inbox. They aren't notified.", confirmLabel: "Block", destructive: true }))) return false;
     const response = await fetch(`/api/users/${encodeURIComponent(username)}/block`, {
       method: "POST", credentials: "include",
     });

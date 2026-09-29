@@ -14,6 +14,8 @@ import { shareCardUrl } from "@shared/shareCards";
 import { mizzedSource } from "@/lib/mizzedSource";
 import "./MizzedBoard.css";
 import { roomTitle } from "@/lib/rooms";
+import BoardCloseSeam from "@/components/BoardCloseSeam";
+import RoomDoorways from "@/components/RoomDoorways";
 
 type Category = "all" | "events" | "placez" | "outzide" | "spot";
 const filters: Array<{ id: Category; label: string }> = [
@@ -65,5 +67,7 @@ export default function MizzedBoard() {
     </>}
     {selected && <SpottedDetailModal postId={selected.id} title={selected.title} body={selected.body} place={selected.placeName || selected.eventTitle || selected.venueHint || "Around town"} kindLabel={mizzedSource(selected)?.label || "That one spot by the…"} kindColor="#ff37c2" isMine={selected.isMine} status={selected.status} source={mizzedSource(selected)} onClose={() => setSelected(null)} />}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+    <RoomDoorways current="mizzed" />
+    <BoardCloseSeam line="Say the thing." url="zaylist.com/spotted" />
   </main>;
 }

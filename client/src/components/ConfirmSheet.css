@@ -1,0 +1,90 @@
+/* ConfirmSheet: bottom sheet on phones, centered on desktop. Both actions are glow plates;
+   a destructive step is never the screen's primary, so there is no solid. */
+.confirm-sheet__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.confirm-sheet {
+  --c: var(--panel-cyan, #19e3ff);
+  position: fixed;
+  z-index: 1401;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 22px 22px 20px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
+  box-shadow: 0 0 0 2px #000, 0 34px 66px -24px rgba(0, 0, 0, 0.95), var(--neon-bloom, 0 0 18px -4px color-mix(in srgb, var(--c) 8%, transparent)), inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12));
+  color: #eeeeee;
+  font-family: var(--font-body, Inter, sans-serif);
+}
+
+.confirm-sheet__kicker {
+  font: 500 11px/1.2 var(--font-mono, ui-monospace, monospace);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #b4b4b4;
+  margin-bottom: 10px;
+}
+
+.confirm-sheet__title {
+  margin: 0;
+  font: 800 28px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  text-transform: uppercase;
+  color: #eeeeee;
+}
+
+.confirm-sheet__body {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #b4b4b4;
+}
+
+.confirm-sheet__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.confirm-sheet__btn {
+  --button-c: #484848;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 22px;
+  border: 1px solid var(--button-c);
+  background: #000;
+  color: #eeeeee;
+  font: 700 16px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 10px 16px -12px rgba(0, 0, 0, 0.9);
+}
+
+.confirm-sheet__btn:focus-visible {
+  outline: 3px solid var(--neon-cyan, #00ffff);
+  outline-offset: 2px;
+}
+
+.confirm-sheet__btn--danger {
+  --button-c: var(--neon-red, #ff2400);
+  color: var(--neon-red, #ff2400);
+}
+
+@media (max-width: 600px) {
+  .confirm-sheet {
+    top: auto;
+    bottom: 12px;
+    transform: translateX(-50%);
+  }
+}

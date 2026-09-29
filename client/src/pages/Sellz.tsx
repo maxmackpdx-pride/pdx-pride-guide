@@ -11,6 +11,8 @@ import { Button } from "@/components/ds";
 import SellzListingCard, { type SellzPost } from "@/components/board/SellzListingCard";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import BoardStatsBar from "@/components/BoardStatsBar";
+import BoardCloseSeam from "@/components/BoardCloseSeam";
+import RoomDoorways from "@/components/RoomDoorways";
 import { shareCardUrl } from "@shared/shareCards";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { timeAgo } from "@/lib/boardFeed";
@@ -213,6 +215,8 @@ export default function Sellz() {
       <p className="sellz-board-rules">No weapons · no illegal goods · no counterfeit goods · no in-app payments</p>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     </div>
+    <RoomDoorways current="sellz" />
+    <BoardCloseSeam line="Good stuff. New hands." url="zaylist.com/sellz" />
   </main>;
 }
 

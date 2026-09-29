@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { confirmSheet } from "@/components/ConfirmSheet";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHeader from "@/components/PageHeader";
@@ -577,11 +578,15 @@ export default function Dashboard() {
             onPostUpdate={() => editingEvent && hostUpdateMutation.mutate({ eventId: editingEvent.id, body: hostUpdate })}
             onDelete={
               isAdmin
-                ? () => {
+                ? async () => {
                     if (!editingEvent) return;
-                    const ok = window.confirm(
-                      `Delete “${editingEvent.title}”?\n\nThis hides it from the public site (status → HIDDEN). You can restore it from Admin → Events.`,
-                    );
+                    const ok = await confirmSheet({
+                      kicker: "EVENTZ · DELETE",
+                      title: `Delete “${editingEvent.title}”?`,
+                      body: "It comes off the public site (status HIDDEN). You can restore it from Admin, Events.",
+                      confirmLabel: "Delete",
+                      destructive: true,
+                    });
                     if (!ok) return;
                     eventDeleteMutation.mutate(editingEvent.id);
                   }

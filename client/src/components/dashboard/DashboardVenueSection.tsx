@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { confirmSheet } from "@/components/ConfirmSheet";
 import ImageUploader from "@/components/ImageUploader";
 import DashboardDrawer, { DashboardItemRow } from "./DashboardDrawer";
 import "./DashboardVenueSection.css";
@@ -118,10 +119,14 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
                           type="button"
                           className="dvs-glass-btn dvs-glass-btn--danger pdx-glass-rebind"
                           disabled={blockMutation.isPending}
-                          onClick={() => {
-                            const ok = window.confirm(
-                              `Block @${p.username} from posting events at ${business.name}? Their existing events here will be flagged for admin review.`,
-                            );
+                          onClick={async () => {
+                            const ok = await confirmSheet({
+                              kicker: "YOUR VENUE · BLOCK",
+                              title: `Block @${p.username}?`,
+                              body: `They can't post events at ${business.name}. Their events here get flagged for admin review.`,
+                              confirmLabel: "Block",
+                              destructive: true,
+                            });
                             if (ok) blockMutation.mutate(p.id);
                           }}
                         >

@@ -54,6 +54,7 @@ import { Btn, CloseSeam, LiveDot, Mono, SectionTitle } from "@/components/housin
 import "./Housing.css";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
+import RoomDoorways from "@/components/RoomDoorways";
 import { trackProductEvent } from "@/lib/analytics";
 import { roomTitle } from "@/lib/rooms";
 
@@ -465,6 +466,7 @@ export default function Housing() {
       </div>
 
       <SafetyGuide context="housing" />
+      <RoomDoorways current="hauz" />
       <CloseSeam line="Post it. Scroll it. Chat." url="zaylist.com/the-hauz" />
 
       {selectedPostId !== null && selectedQuery.isError && !selectedInFeed && <div className="hz-board-link-error" role="alert">This post is unavailable. <button type="button" onClick={() => { setSelectedPostId(null); setSelectedIntent(null); }}>Back to the board</button></div>}

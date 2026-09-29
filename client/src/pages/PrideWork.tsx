@@ -25,6 +25,8 @@ import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import BoardStatsBar from "@/components/BoardStatsBar";
+import BoardCloseSeam from "@/components/BoardCloseSeam";
+import RoomDoorways from "@/components/RoomDoorways";
 import { trackProductEvent } from "@/lib/analytics";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
@@ -184,6 +186,8 @@ export default function PrideWork() {
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <SafetyGuide context="gigs" />
     </div>
+    <RoomDoorways current="gigz" />
+    <BoardCloseSeam line="Work with your people." url="zaylist.com/pride-work" />
   </main>;
 }
 

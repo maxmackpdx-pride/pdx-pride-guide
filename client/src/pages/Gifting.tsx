@@ -15,6 +15,8 @@ import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import BoardStatsBar from "@/components/BoardStatsBar";
+import BoardCloseSeam from "@/components/BoardCloseSeam";
+import RoomDoorways from "@/components/RoomDoorways";
 import { trackProductEvent } from "@/lib/analytics";
 import { timeAgo } from "@/lib/boardFeed";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
@@ -260,6 +262,8 @@ export default function Gifting() {
       <SafetyGuide context="gifts" />
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     </div>
+    <RoomDoorways current="giftz" />
+    <BoardCloseSeam line="Pass it on. Find what you need." url="zaylist.com/gifting" />
   </main>;
 }
 

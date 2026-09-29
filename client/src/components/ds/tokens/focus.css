@@ -1,0 +1,11 @@
+/* One keyboard focus ring in every room: 3px neon cyan, 2px offset.
+   :where() keeps specificity at zero, so a component's own ring still wins.
+   Calm mode keeps it; focus is platform, not room. */
+:root {
+  --focus-ring-color: var(--neon-cyan, #00ffff);
+}
+
+:where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"]), [role="button"], [role="link"], [role="menuitem"], [role="tab"]):focus-visible {
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}

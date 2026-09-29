@@ -1,0 +1,69 @@
+/* Next-door rail: shared layout and tiles; each tile wears its own room accent. */
+.room-doorways {
+  width: min(100%, var(--zl-frame, 1180px));
+  margin: 56px auto 56px;
+  padding: 0 var(--zl-gutter, 20px);
+  box-sizing: border-box;
+}
+
+.room-doorways__title {
+  margin: 0 0 16px;
+  font: 800 30px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  text-transform: uppercase;
+  color: #eeeeee;
+}
+
+.room-doorways__title span { color: var(--c); }
+
+.room-doorways__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.room-doorways__door {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 0 16px;
+  overflow: hidden;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #eeeeee;
+  min-height: 44px;
+}
+
+.room-doorways__bar {
+  display: block;
+  height: 4px;
+  background: var(--c);
+}
+
+.room-doorways__name,
+.room-doorways__line,
+.room-doorways__go {
+  padding: 0 16px;
+}
+
+.room-doorways__name {
+  font: 800 26px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  text-transform: uppercase;
+}
+
+.room-doorways__line {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #b4b4b4;
+}
+
+.room-doorways__go {
+  margin-top: auto;
+  font: 500 11px/1.2 var(--font-mono, ui-monospace, monospace);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink, var(--c));
+}
+
+@media (max-width: 760px) {
+  .room-doorways__grid { grid-template-columns: 1fr; }
+}
