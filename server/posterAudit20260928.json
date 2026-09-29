@@ -1,0 +1,3372 @@
+[
+  {
+    "id": 111,
+    "title": "Sapphic Takeover Thursday! Women's Day at Hawks",
+    "venueName": "Hawks PDX",
+    "date": "2026-07-16",
+    "previousPoster": "/posters/hawks-sapphic-takeover.png",
+    "posterImageUrl": "/placeholders/event-day-thu.svg",
+    "reason": "Sapphic flyer advertises Thursday May 14, not this July/August date. Current archive reuses the same outdated flyer; no correct replacement found.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events/2026/4/15/sapphic-takeover-thursday-woomens-day-at-hawks-3xg6b-ln269-m5a29-rjtcg-f38rl"
+  },
+  {
+    "id": 51,
+    "title": "Midtown Beer Garden Pride",
+    "venueName": "Midtown Beer Garden",
+    "date": "2026-07-17",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/midtown-1.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://portlandpride.org/2026-portland-pride-official-events/midtown-beer-garden-2"
+  },
+  {
+    "id": 74,
+    "title": "Betty's Pride Weekend Party (feat. Uffie)",
+    "venueName": "White Owl Social Club",
+    "date": "2026-07-17",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/betty.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.eventbrite.com/e/betty-a-queer-dance-party-pride-edition-w-special-guest-uffie-tickets-1992300888589"
+  },
+  {
+    "id": 43,
+    "title": "LGBTQIA2S+ Maker's Market",
+    "venueName": "Maker's Market at Waterfront Festival",
+    "date": "2026-07-18",
+    "previousPoster": "/posters/markets-made-with-pride.jpg",
+    "posterImageUrl": "/placeholders/event-day-sat.svg",
+    "reason": "Removed Hotel Zags June 13 market flyer from Waterfront July 18\u201319 market. No matching market-specific poster found on Pride Northwest.",
+    "sourceUrl": "https://portlandpride.org/2026-portland-pride-official-events"
+  },
+  {
+    "id": 47,
+    "title": "Dyke March Portland Pride",
+    "venueName": "Downtown Portland",
+    "date": "2026-07-18",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/dyke-0.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://portlandpride.org/2026-portland-pride-official-events/2026-portland-dyke-march"
+  },
+  {
+    "id": 3,
+    "title": "INFERNO PRIDE PORTLAND 2026",
+    "venueName": "Formerly Opaline",
+    "date": "2026-07-18",
+    "previousPoster": "/posters/inferno-pride-portland.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/inferno-2.jpg",
+    "reason": "Replaced the July 19, 2025 flyer with the July 18, 2026 Pride flyer.",
+    "sourceUrl": "https://queersocialclub.com/events-portland/inferno-a-hot-flash-production-pride-edition-1"
+  },
+  {
+    "id": 41,
+    "title": "BAZ MOTO PRIDE BEYOND THE PARK",
+    "venueName": "Midtown Beer Garden",
+    "date": "2026-07-19",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/midtown-0.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://portlandpride.org/2026-portland-pride-official-events/midtown-beer-garden-2"
+  },
+  {
+    "id": 152,
+    "title": "SAPPHIC TAKEOVER THURSDAY! Women's Day at Hawks!",
+    "venueName": "Hawks PDX",
+    "date": "2026-07-23",
+    "previousPoster": "https://images.squarespace-cdn.com/content/v1/598f8fd1f43b5572af3d9c14/1776302100939-UYOL3KSJJ83K5BBXECY8/Sapphic+Version+Two+Post-Ready.png",
+    "posterImageUrl": "/placeholders/event-day-thu.svg",
+    "reason": "Sapphic flyer advertises Thursday May 14, not this July/August date. Current archive reuses the same outdated flyer; no correct replacement found.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events/2026/4/15/sapphic-takeover-thursday-woomens-day-at-hawks-3xg6b-ln269-m5a29-rjtcg-clzj8-5e4b3"
+  },
+  {
+    "id": 446,
+    "title": "Drag Queen Bingo with Nicole Onoscopi",
+    "venueName": "CC Slaughters",
+    "date": "2026-07-27",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-10.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 488,
+    "title": "Game On",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-07-28",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-106.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-28ebc3e679cd3555e1dc.png"
+  },
+  {
+    "id": 452,
+    "title": "Tuesday at CC Slaughters",
+    "venueName": "CC Slaughters",
+    "date": "2026-07-28",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-9.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 458,
+    "title": "amateur night at CC's",
+    "venueName": "CC Slaughters",
+    "date": "2026-07-29",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-12.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 464,
+    "title": "night",
+    "venueName": "CC Slaughters",
+    "date": "2026-07-30",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-trans_uhh_licious_advertical_web.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 153,
+    "title": "SAPPHIC TAKEOVER THURSDAY! Women's Day at Hawks!",
+    "venueName": "Hawks PDX",
+    "date": "2026-07-30",
+    "previousPoster": "https://images.squarespace-cdn.com/content/v1/598f8fd1f43b5572af3d9c14/1776302100939-UYOL3KSJJ83K5BBXECY8/Sapphic+Version+Two+Post-Ready.png",
+    "posterImageUrl": "/placeholders/event-day-thu.svg",
+    "reason": "Sapphic flyer advertises Thursday May 14, not this July/August date. Current archive reuses the same outdated flyer; no correct replacement found.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events/2026/4/15/sapphic-takeover-thursday-woomens-day-at-hawks-3xg6b-ln269-m5a29-rjtcg-f38rl-3tncn"
+  },
+  {
+    "id": 496,
+    "title": "Drag Bingo with Peachy Springs",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-07-30",
+    "previousPoster": "/placeholders/event-day-thu.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-108.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-af5847ce6f7af205b026.webp"
+  },
+  {
+    "id": 470,
+    "title": "live piano and singing No Cover 21+",
+    "venueName": "CC Slaughters",
+    "date": "2026-07-31",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-queens_keys_advertical_web.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 159,
+    "title": "TranSocial \u2014 The FIRST Saturday of the month. Now 24 HOURS!",
+    "venueName": "Hawks PDX",
+    "date": "2026-08-01",
+    "previousPoster": "https://images.squarespace-cdn.com/content/v1/598f8fd1f43b5572af3d9c14/1758662685525-8LAK32MGVCIER3KGIJ5R/Square+Trans+Social.png",
+    "posterImageUrl": "/placeholders/event-day-sat.svg",
+    "reason": "TranSocial flyer says until 6 AM, conflicting with the reviewed 9 AM end time. No matching updated-hours flyer found.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events/2025/10/4/53yqj4l2yeqt0ltqwsug3oj0mkracm-xbh6y-9z9r8-nywd4-2gynz-765pe-rtk8h-gz4sy-zpjg3"
+  },
+  {
+    "id": 476,
+    "title": "! Starring Rogue Storm Safari, Coco Gem Holiday, and Devlin Lynn Phoenixx Every 2nd Saturday",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-01",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-16.jpg",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 482,
+    "title": "Sunday at CC Slaughters",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-02",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-keyed_up_advertical_web.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 447,
+    "title": "Drag Queen Bingo with Nicole Onoscopi",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-03",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-10.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 489,
+    "title": "Game On",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-08-04",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-106.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-28ebc3e679cd3555e1dc.png"
+  },
+  {
+    "id": 453,
+    "title": "Tuesday at CC Slaughters",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-04",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-9.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 459,
+    "title": "amateur night at CC's",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-05",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-12.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 465,
+    "title": "night",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-06",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-trans_uhh_licious_advertical_web.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 544,
+    "title": "SAPPHIC TAKEOVER THURSDAY! Women's Day at Hawks!",
+    "venueName": "Hawks PDX",
+    "date": "2026-08-06",
+    "previousPoster": "https://images.squarespace-cdn.com/content/v1/598f8fd1f43b5572af3d9c14/1776302100939-UYOL3KSJJ83K5BBXECY8/Sapphic+Version+Two+Post-Ready.png",
+    "posterImageUrl": "/placeholders/event-day-thu.svg",
+    "reason": "Sapphic flyer advertises Thursday May 14, not this July/August date. Current archive reuses the same outdated flyer; no correct replacement found.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events/2026/4/15/sapphic-takeover-thursday-woomens-day-at-hawks-3xg6b-ln269-m5a29-rjtcg-clzj8-5e4b3-g88lk"
+  },
+  {
+    "id": 497,
+    "title": "Drag Bingo with Peachy Springs",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-08-06",
+    "previousPoster": "/placeholders/event-day-thu.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-108.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-af5847ce6f7af205b026.webp"
+  },
+  {
+    "id": 471,
+    "title": "live piano and singing No Cover 21+",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-07",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-queens_keys_advertical_web.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 477,
+    "title": "! Starring Rogue Storm Safari, Coco Gem Holiday, and Devlin Lynn Phoenixx Every 2nd Saturday",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-08",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-16.jpg",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 483,
+    "title": "Sunday at CC Slaughters",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-09",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-keyed_up_advertical_web.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 448,
+    "title": "Drag Queen Bingo with Nicole Onoscopi",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-10",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-10.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 490,
+    "title": "Game On",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-08-11",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-106.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-28ebc3e679cd3555e1dc.png"
+  },
+  {
+    "id": 454,
+    "title": "Tuesday at CC Slaughters",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-11",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-9.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 460,
+    "title": "amateur night at CC's",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-12",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-12.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 466,
+    "title": "night",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-13",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-trans_uhh_licious_advertical_web.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 498,
+    "title": "Drag Bingo with Peachy Springs",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-08-13",
+    "previousPoster": "/placeholders/event-day-thu.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-108.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-af5847ce6f7af205b026.webp"
+  },
+  {
+    "id": 443,
+    "title": "K9 Campout",
+    "venueName": "Triangle Recreation Camp",
+    "date": "2026-08-14",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/k9.jpg",
+    "reason": "Official K9 Campout artwork from the event website; no separate dated flyer published there.",
+    "sourceUrl": "https://k9campout.com/"
+  },
+  {
+    "id": 472,
+    "title": "live piano and singing No Cover 21+",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-14",
+    "previousPoster": "https://ccslaughterspdx.com/wp-content/uploads/2026/07/ONLINE_ADVERTICAL_ADVERTICAL_ONLINE.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-queens_keys_advertical_web.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 478,
+    "title": "! Starring Rogue Storm Safari, Coco Gem Holiday, and Devlin Lynn Phoenixx Every 2nd Saturday",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-15",
+    "previousPoster": "/uploads/qsearch-flyer-9e5cd31755a201ba561c.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-16.jpg",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 484,
+    "title": "Sunday at CC Slaughters",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-16",
+    "previousPoster": "/uploads/qsearch-flyer-9e5cd31755a201ba561c.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-keyed_up_advertical_web.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 449,
+    "title": "Drag Queen Bingo with Nicole Onoscopi",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-17",
+    "previousPoster": "/uploads/qsearch-flyer-9e5cd31755a201ba561c.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-10.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 491,
+    "title": "Game On",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-08-18",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-106.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-28ebc3e679cd3555e1dc.png"
+  },
+  {
+    "id": 455,
+    "title": "Tuesday at CC Slaughters",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-18",
+    "previousPoster": "/uploads/qsearch-flyer-9e5cd31755a201ba561c.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-9.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 461,
+    "title": "amateur night at CC's",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-19",
+    "previousPoster": "/uploads/qsearch-flyer-9e5cd31755a201ba561c.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-12.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 467,
+    "title": "night",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-20",
+    "previousPoster": "/uploads/qsearch-flyer-9e5cd31755a201ba561c.png",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-trans_uhh_licious_advertical_web.png",
+    "reason": "Removed unrelated Oregon State Leather Contest Aug 7\u20138 poster; replaced with the matching official weekly show artwork.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 499,
+    "title": "Drag Bingo with Peachy Springs",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-08-20",
+    "previousPoster": "/placeholders/event-day-thu.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-108.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-af5847ce6f7af205b026.webp"
+  },
+  {
+    "id": 473,
+    "title": "The Queens Keys",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-21",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-queens_keys_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 635,
+    "title": "Gear",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-22",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-8.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 485,
+    "title": "Keyed Up Karaoke!",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-23",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-keyed_up_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 450,
+    "title": "Monday Game-Day",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-24",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 492,
+    "title": "Game On",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-08-25",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-106.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-28ebc3e679cd3555e1dc.png"
+  },
+  {
+    "id": 456,
+    "title": "Rager",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-25",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-9.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 575,
+    "title": "Hand Up People's Pantry",
+    "venueName": "Q Center",
+    "date": "2026-08-26",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-78.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.pdxqcenter.org/event-details/hand-up-peoples-pantry-2026-07-29-13-30"
+  },
+  {
+    "id": 462,
+    "title": "Hump Wednesday",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-26",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-12.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 587,
+    "title": "SAPPHIC TAKEOVER THURSDAY! Women's Day at Hawks!",
+    "venueName": "Hawks PDX",
+    "date": "2026-08-27",
+    "previousPoster": "/uploads/qsearch-flyer-d2b89ad668a2da766e67.png",
+    "posterImageUrl": "/placeholders/event-day-thu.svg",
+    "reason": "Sapphic flyer advertises Thursday May 14, not this July/August date. Current archive reuses the same outdated flyer; no correct replacement found.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events/2026/4/15/sapphic-takeover-thursday-woomens-day-at-hawks-3xg6b-ln269-m5a29-rjtcg-f38rl-3tncn-93g6l"
+  },
+  {
+    "id": 500,
+    "title": "Drag Bingo with Peachy Springs",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-08-27",
+    "previousPoster": "/placeholders/event-day-thu.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-108.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-af5847ce6f7af205b026.webp"
+  },
+  {
+    "id": 468,
+    "title": "Trans-UHH-Licious",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-27",
+    "previousPoster": "/placeholders/event-day-thu.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-trans_uhh_licious_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 474,
+    "title": "The Queens Keys",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-28",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-queens_keys_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 486,
+    "title": "Keyed Up Karaoke!",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-30",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-keyed_up_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 451,
+    "title": "Monday Game-Day",
+    "venueName": "CC Slaughters",
+    "date": "2026-08-31",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 493,
+    "title": "Game On",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-09-01",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-106.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-28ebc3e679cd3555e1dc.png"
+  },
+  {
+    "id": 457,
+    "title": "Rager",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-01",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-9.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 463,
+    "title": "Hump Wednesday",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-02",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-12.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 501,
+    "title": "Drag Bingo with Peachy Springs",
+    "venueName": "Camp Bar PDX",
+    "date": "2026-09-03",
+    "previousPoster": "/placeholders/event-day-thu.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/existing-108.webp",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.zaylist.com/uploads/qsearch-flyer-af5847ce6f7af205b026.webp"
+  },
+  {
+    "id": 469,
+    "title": "Trans-UHH-Licious",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-03",
+    "previousPoster": "/placeholders/event-day-thu.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-trans_uhh_licious_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 475,
+    "title": "The Queens Keys",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-04",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-queens_keys_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 487,
+    "title": "Keyed Up Karaoke!",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-06",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-keyed_up_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 533,
+    "title": "Monday Game-Day",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-07",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 563,
+    "title": "Rager",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-08",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-9.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 553,
+    "title": "Hump Wednesday",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-09",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-12.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 562,
+    "title": "The Queens Keys",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-11",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-queens_keys_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 565,
+    "title": "Black Magic",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-12",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-16.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 566,
+    "title": "Keyed Up Karaoke!",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-13",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-keyed_up_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 559,
+    "title": "Monday Game-Day",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-14",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 564,
+    "title": "Rager",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-15",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-9.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 560,
+    "title": "Hump Wednesday",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-16",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-12.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 633,
+    "title": "Keyed Up Karaoke!",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-20",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-keyed_up_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 626,
+    "title": "Rager",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-22",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-9.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 628,
+    "title": "Hump Wednesday",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-23",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-12.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 503,
+    "title": "BROADWAY'S FINEST Drag Brunch",
+    "venueName": "Stag PDX",
+    "date": "2026-09-26",
+    "previousPoster": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1187456872%2F1849716196323%2F1%2Foriginal.20260623-054357?crop=focalpoint&fit=crop&h=230&w=460&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=ccaeebcea4da9dd3eb6547d457b0c4c4",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/stag.jpg",
+    "reason": "Replaced clipped thumbnail with full September 26 flyer.",
+    "sourceUrl": "https://www.eventbrite.com/e/broadways-finest-drag-brunch-tickets-1994403783404"
+  },
+  {
+    "id": 634,
+    "title": "Keyed Up Karaoke!",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-27",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-keyed_up_advertical_web.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 1169,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-09-28",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1170,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-09-29",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 863,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-09-29",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1415,
+    "title": "Radical Rubdown",
+    "venueName": "Steam Portland",
+    "date": "2026-09-29",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/steam-events-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://www.steamportland.com/events"
+  },
+  {
+    "id": 627,
+    "title": "Rager",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-29",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-9.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 1172,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-09-30",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1173,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-09-30",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 629,
+    "title": "Hump Wednesday",
+    "venueName": "CC Slaughters",
+    "date": "2026-09-30",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/cc-12.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://ccslaughterspdx.com/"
+  },
+  {
+    "id": 1174,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-02",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1176,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-04",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1177,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-05",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1178,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-06",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 873,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-06",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 171,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-10-06",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-10-06/"
+  },
+  {
+    "id": 1180,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-07",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1181,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-07",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1182,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-09",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1183,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-10",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1184,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-11",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1185,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-12",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1186,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-13",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 883,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-13",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 172,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-10-13",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-10-13/"
+  },
+  {
+    "id": 1188,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-14",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1189,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-14",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1190,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-16",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1192,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-18",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1193,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-19",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1194,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-20",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 893,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-20",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 173,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-10-20",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-10-20/"
+  },
+  {
+    "id": 1196,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-21",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1197,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-21",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1198,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-23",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1199,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-24",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 504,
+    "title": "BROADWAY'S FINEST Drag Brunch",
+    "venueName": "Stag PDX",
+    "date": "2026-10-24",
+    "previousPoster": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1187456872%2F1849716196323%2F1%2Foriginal.20260623-054357?crop=focalpoint&fit=crop&h=230&w=460&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=ccaeebcea4da9dd3eb6547d457b0c4c4",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/stag-oct.jpg",
+    "reason": "Replaced reused September thumbnail with the October 24 flyer.",
+    "sourceUrl": "https://www.eventbrite.com/e/broadways-finest-drag-brunch-tickets-1994403808479"
+  },
+  {
+    "id": 1200,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-25",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1201,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-26",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1202,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-27",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 903,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-27",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 174,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-10-27",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-10-27/"
+  },
+  {
+    "id": 1204,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-28",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1205,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-28",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1206,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-30",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1207,
+    "title": "5th Saturday Puppy Pileup",
+    "venueName": "Hawks PDX",
+    "date": "2026-10-31",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1208,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-01",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1209,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-02",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1210,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-03",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 913,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-03",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 191,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-11-03",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-11-03/"
+  },
+  {
+    "id": 1212,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-04",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1213,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-04",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1214,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-06",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1216,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-08",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1217,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-09",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1218,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-10",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 923,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-10",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 192,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-11-10",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-11-10/"
+  },
+  {
+    "id": 1220,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-11",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1221,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-11",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1222,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-13",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1223,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-14",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1224,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-15",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1225,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-16",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1226,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-17",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 933,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-17",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 193,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-11-17",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-11-17/"
+  },
+  {
+    "id": 1228,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-18",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1229,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-18",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1230,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-20",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1232,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-22",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1233,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-23",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1234,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-24",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 943,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-24",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 194,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-11-24",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-11-24/"
+  },
+  {
+    "id": 1236,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-25",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1237,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-25",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1238,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-27",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1239,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-28",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1240,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-29",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1241,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-11-30",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1242,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-01",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 953,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-01",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 195,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-12-01",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-12-01/"
+  },
+  {
+    "id": 1244,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-02",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1245,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-02",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1246,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-04",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1248,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-06",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1249,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-07",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1250,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-08",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 963,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-08",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 196,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-12-08",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-12-08/"
+  },
+  {
+    "id": 1252,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-09",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1253,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-09",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1254,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-11",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1255,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-12",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1256,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-13",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1257,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-14",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1258,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-15",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 973,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-15",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 197,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-12-15",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-12-15/"
+  },
+  {
+    "id": 1260,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-16",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1261,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-16",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1262,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-18",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1264,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-20",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1265,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-21",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1266,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-22",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 983,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-22",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 198,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-12-22",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-12-22/"
+  },
+  {
+    "id": 1268,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-23",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1269,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-23",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1270,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-25",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1271,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-26",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1272,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-27",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1273,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-28",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1274,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-29",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 993,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-29",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 199,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2026-12-29",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2026-12-29/"
+  },
+  {
+    "id": 1276,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-30",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1277,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2026-12-30",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1278,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-01",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1280,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-03",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1281,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-04",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1282,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-05",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1003,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-05",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 200,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2027-01-05",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2027-01-05/"
+  },
+  {
+    "id": 1284,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-06",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1285,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-06",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1286,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-08",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1287,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-09",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1288,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-10",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1289,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-11",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1290,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-12",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1013,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-12",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 201,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2027-01-12",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2027-01-12/"
+  },
+  {
+    "id": 1292,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-13",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1293,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-13",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1294,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-15",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1296,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-17",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1297,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-18",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1298,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-19",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1023,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-19",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 202,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2027-01-19",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2027-01-19/"
+  },
+  {
+    "id": 1300,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-20",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1301,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-20",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1302,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-22",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1303,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-23",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1304,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-24",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1305,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-25",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1306,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-26",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1033,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-26",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 203,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2027-01-26",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2027-01-26/"
+  },
+  {
+    "id": 1308,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-27",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1309,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-27",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1310,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-29",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1311,
+    "title": "5th Saturday Puppy Pileup",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-30",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1312,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-01-31",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1313,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-01",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1314,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-02",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1043,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-02",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 204,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2027-02-02",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2027-02-02/"
+  },
+  {
+    "id": 1316,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-03",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1317,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-03",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1318,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-05",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1320,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-07",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1321,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-08",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1322,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-09",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1053,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-09",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 205,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2027-02-09",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2027-02-09/"
+  },
+  {
+    "id": 1324,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-10",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1325,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-10",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1326,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-12",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1327,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-13",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1328,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-14",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1329,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-15",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1330,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-16",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1063,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-16",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 206,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2027-02-16",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2027-02-16/"
+  },
+  {
+    "id": 1332,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-17",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1333,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-17",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1334,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-19",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1336,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-21",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1337,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-22",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1338,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-23",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1073,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-23",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 207,
+    "title": "Champagne's Catch A Rising Star \ud83c\udf1f",
+    "venueName": "Darcelle XV Showplace",
+    "date": "2027-02-23",
+    "previousPoster": "/uploads/qsearch-flyer-018d8848576d7a778ed4.jpg",
+    "posterImageUrl": "/placeholders/event-day-tue.svg",
+    "reason": "Only available Darcelle flyer explicitly says March\u2013September; no season-correct October\u2013February flyer found on venue calendar or performer site.",
+    "sourceUrl": "https://darcellexv.com/event/champagnes-catch-a-rising-star-%f0%9f%8c%9f/2027-02-23/"
+  },
+  {
+    "id": 1340,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-24",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1341,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-24",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1342,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-26",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1343,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-27",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1344,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-02-28",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1345,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-01",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1346,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-02",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1083,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-02",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1348,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-03",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1349,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-03",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1350,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-05",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1352,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-07",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1353,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-08",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1354,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-09",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1093,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-09",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1356,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-10",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1357,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-10",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1358,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-12",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1359,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-13",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1360,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-14",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1361,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-15",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1362,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-16",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1103,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-16",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1364,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-17",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1365,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-17",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1366,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-19",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1368,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-21",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1369,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-22",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1370,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-23",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1113,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-23",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1372,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-24",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1373,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-24",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1374,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-26",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1375,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-27",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1376,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-28",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1377,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-29",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1378,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-30",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1123,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-30",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1380,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-31",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1381,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-03-31",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1382,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-02",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1384,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-04",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1385,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-05",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1386,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-06",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1133,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-06",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1388,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-07",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1389,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-07",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1390,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-09",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1391,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-10",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1392,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-11",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1393,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-12",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1394,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-13",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1143,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-13",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1396,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-14",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1397,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-14",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1398,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-16",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1400,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-18",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1401,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-19",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1402,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-20",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1153,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-20",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1404,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-21",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1405,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-21",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1406,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-23",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1407,
+    "title": "Saturday Bears and Cubs",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-24",
+    "previousPoster": "/placeholders/event-day-sat.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-10.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1408,
+    "title": "Bi Sundays & Nude Yoga",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-25",
+    "previousPoster": "/placeholders/event-day-sun.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1409,
+    "title": "Bear Mondays",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-26",
+    "previousPoster": "/placeholders/event-day-mon.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-2.jpg",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1410,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-27",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1163,
+    "title": "Tuesday Community Health Clinic",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-27",
+    "previousPoster": "/placeholders/event-day-tue.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-4.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1412,
+    "title": "Midweek Hump",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-28",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-3.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/calendar-events"
+  },
+  {
+    "id": 1413,
+    "title": "OMEN Wednesdays! (M4M)",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-28",
+    "previousPoster": "/placeholders/event-day-wed.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-6.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  },
+  {
+    "id": 1414,
+    "title": "GENDER GLOW Fridays!",
+    "venueName": "Hawks PDX",
+    "date": "2027-04-30",
+    "previousPoster": "/placeholders/event-day-fri.svg",
+    "posterImageUrl": "/event-posters/audit-2026-09-28/hawks-archive-5.png",
+    "reason": "Matched official event/series artwork; date-independent artwork applies to the recurring series.",
+    "sourceUrl": "https://hawkspdx.com/hawks-events?category=Weekly"
+  }
+]
