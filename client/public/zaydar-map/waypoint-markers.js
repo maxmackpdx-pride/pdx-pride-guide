@@ -80,11 +80,14 @@ function ringAlpha(selected){
 }
 export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1,family='place'){
  const {x,y,size}=geometry,shell=family||'place';
- const body=bodySprite(color,size,shell),ring=ringSprite(color,size,shell);
- const left=x-size/2-body.pad,top=y-size/2-body.pad;
+ // Two sprite sizes per color and shell (rest, selected), scaled at draw time,
+ // so the cache stays as small as the old two-size orb set.
+ const base=selected?57:42,k=size/base;
+ const body=bodySprite(color,base,shell),ring=ringSprite(color,base,shell);
+ const left=x-size/2-body.pad*k,top=y-size/2-body.pad*k;
  ctx.save();ctx.shadowBlur=0;
- ctx.globalAlpha=alpha*ringAlpha(selected);ctx.drawImage(ring.canvas,left,top,ring.box,ring.tall);
- ctx.globalAlpha=alpha;ctx.drawImage(body.canvas,left,top,body.box,body.tall);
+ ctx.globalAlpha=alpha*ringAlpha(selected);ctx.drawImage(ring.canvas,left,top,ring.box*k,ring.tall*k);
+ ctx.globalAlpha=alpha;ctx.drawImage(body.canvas,left,top,body.box*k,body.tall*k);
  const image=logo||icon;
  // White glyph at 58% of the head, as in the waypoint pack.
  if(image){const glyphSize=size*.58;ctx.drawImage(tintedIcon(image,'#FFFFFF'),x-glyphSize/2,y-glyphSize/2,glyphSize,glyphSize);}
