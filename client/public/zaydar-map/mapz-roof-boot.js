@@ -1,3 +1,4 @@
+import {createSurfaceWork} from './surface-work.js';
 import {createVenueRoofs,extrusionAmount,matchBuilding,isPlacezRow} from './venue-roofs.js?v=20260926-placez-roofs';
 import {installCheapBridgeGlow} from './bridge-water-glow.js?v=20260929-mesh';
 
@@ -41,11 +42,13 @@ function rebuildPlaceSnaps(map){
  const snaps=new Map(),roofHeights=new Map();
  const buildings=buildingsFrom(map);
  const features=window.__mapzVenueFeatures||[];
+ const matches=new Map();
  for(const feature of features){
   if(!isPlacezRow(feature.properties||{}))continue;
   const c=feature.geometry?.coordinates;
   if(!Array.isArray(c)||c.length<2)continue;
   const best=matchBuilding(buildings,c);
+  matches.set(feature,best);
   if(!best)continue;
   const key=coordKey(c);
   snaps.set(key,best.center);
@@ -53,17 +56,18 @@ function rebuildPlaceSnaps(map){
  }
  window.__mapzPlaceSnaps=snaps;
  window.__mapzPlaceRoofHeights=roofHeights;
- return {buildings,snaps};
+ return {buildings,snaps,matches};
 }
 
-function sync(map){
+function sync(map,{geometry=false,glow=false}={}){
  if(!map)return;
- const {buildings}=rebuildPlaceSnaps(map);
+ if(geometry||!map.__mapzRoofGeometry)map.__mapzRoofGeometry=rebuildPlaceSnaps(map);
+ const {buildings,matches}=map.__mapzRoofGeometry;
  if(map._venueRoofs){
   const placeFeatures=(window.__mapzVenueFeatures||[]).filter(f=>isPlacezRow(f.properties||{}));
-  map._venueRoofs.update(buildings,placeFeatures,extrusionAmount(map));
+  map._venueRoofs.update(buildings,placeFeatures,extrusionAmount(map),matches);
  }
- installCheapBridgeGlow(map);
+ if(glow)installCheapBridgeGlow(map);
 }
 
 if(!window.__mapzProjectSnap){
@@ -98,13 +102,15 @@ if(window.maplibregl?.Map&&!window.__mapzRoofBoot){
    window.__mapzMap=this;
    window.__mapzPatchProject?.(this);
    this.once('load',()=>{
-    this.__mapzRefreshBuildingSurfaces=()=>sync(this);
+    const work=createSurfaceWork(dirty=>sync(this,dirty));
+    this.__mapzSurfaceWork=work;
+    this.__mapzRefreshBuildingSurfaces=()=>work.schedule({geometry:true});
     this._venueRoofs=createVenueRoofs(this);
-    sync(this);
-    this.on('idle',()=>rebuildPlaceSnaps(this));
-    this.on('moveend',()=>sync(this));
+    work.schedule({geometry:true,glow:true});
+    this.on('moveend',()=>work.schedule({geometry:true,glow:true}));
+    this.once('remove',()=>work.dispose());
     this.on('sourcedata',event=>{
-     if(event.sourceId==='terrain'&&event.isSourceLoaded)sync(this);
+     if(event.sourceId==='terrain'&&event.sourceDataType==='content'&&event.isSourceLoaded)work.schedule({geometry:true,glow:true});
     });
    });
   }
@@ -115,6 +121,6 @@ window.addEventListener('message',event=>{
  if(event.origin!==location.origin||event.data?.source!=='zaydar-host')return;
  if(event.data.type==='data'&&Array.isArray(event.data.rows)){
   window.__mapzVenueFeatures=rowsToFeatures(event.data.rows);
-  sync(window.__mapzMap);
+  window.__mapzMap?.__mapzSurfaceWork?.schedule({geometry:true});
  }
 });

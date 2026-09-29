@@ -1,10 +1,10 @@
+import {mapzAssets} from './mapzAssets';
 const MAPZ_ASSETS=[
- {href:'/home-flight/vendor/maplibre-gl-5.6.2.js',as:'script'},
- {href:'/home-flight/vendor/maplibre-gl-5.6.2.css',as:'style'},
- {href:'/zaydar-map/vendor/maplibre-contour-0.1.0.js',as:'script'},
- {href:'/zaydar-map/studio.css?v=20260925-map-boot',as:'style'},
- {href:'/zaydar-map/river-flight.js?v=20260928-verification',rel:'modulepreload'},
- {href:'/zaydar-map/mapz-roof-boot.js?v=20260928-verification',rel:'modulepreload'},
+ {href:mapzAssets.maplibre,as:'script'},
+ {href:mapzAssets.maplibreCss,as:'style'},
+ {href:mapzAssets.contour,as:'script'},
+ {href:mapzAssets.style,as:'style'},
+ {href:mapzAssets.script,rel:'modulepreload'},
 ] as const;
 
 let started=false;

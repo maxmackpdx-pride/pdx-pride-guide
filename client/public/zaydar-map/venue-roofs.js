@@ -94,14 +94,14 @@ export function createVenueRoofs(map){
   });
  }
  return {
-  update(buildings,features,amount){
+  update(buildings,features,amount,matches){
    const list=[],used=new Map();
    for(const feature of features||[]){
     const props=feature.properties||{};
     if(!isPlacezRow(props))continue;
     const color=props.color,c=feature.geometry?.coordinates;
     if(!color||!Array.isArray(c)||c.length<2)continue;
-    const best=matchBuilding(buildings,c);
+    const best=matches?.has(feature)?matches.get(feature):matchBuilding(buildings,c);
     if(!best)continue;
     const key=`${best.center[0].toFixed(6)}:${best.center[1].toFixed(6)}:${best.height}`;
     // Last Placez on a building wins the tint; every Placez still snaps to that roof.

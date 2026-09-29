@@ -131,10 +131,14 @@ function waterPolygons(map){
  }
 }
 
+const glowInputs=new WeakMap();
 export function installCheapBridgeGlow(map){
  if(!map||!map.getStyle())return;
  const features=transportationBridges(map);
  const water=waterPolygons(map);
+ const signature=JSON.stringify([features,water]);
+ if(glowInputs.get(map)===signature&&map.getLayer('mapz-bridge-glow-rainbow'))return;
+ glowInputs.set(map,signature);
  const collections=bridgeGlowLineCollections(features,water);
  const before=['bridge-decks','skyline','buildings'].find(id=>map.getLayer(id));
  for(const [palette,rows] of Object.entries(collections)){

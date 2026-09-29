@@ -1,4 +1,5 @@
 import express from 'express';
+import { mapzPrecompressed } from './mapzStatic';
 import type { Express } from 'express';
 import fs from "node:fs";
 import path from "node:path";
@@ -63,6 +64,7 @@ export function serveStatic(app: Express) {
   // Hashed build assets are content-addressed - cache forever. A hash miss
   // (stale page after a deploy) must 404, not fall through to the SPA HTML,
   // so the client can detect it and reload.
+  app.use(mapzPrecompressed(distPath));
   app.use("/assets", express.static(path.join(distPath, "assets"), {
     index: false,
     immutable: true,

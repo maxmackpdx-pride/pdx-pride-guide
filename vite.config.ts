@@ -1,9 +1,10 @@
-import { defineConfig } from "vite";
+import { defineConfig, type UserConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 import fs from "node:fs";
 import { createHash } from "node:crypto";
+import { prepareMapz } from "./script/mapz-build";
 
 // Fingerprint the complete standalone map, including its relative imports and artwork.
 const flightSource = path.resolve(import.meta.dirname, "client/public/home-flight");
@@ -18,7 +19,9 @@ function hashFlight(directory: string) {
 hashFlight(flightSource);
 const flightBase = `/assets/zaydar-${flightHash.digest("hex").slice(0, 16)}`;
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(async ({ command }):Promise<UserConfig> => {
+ const mapz = command === "build" ? await prepareMapz(path.resolve(import.meta.dirname, "client/public")) : null;
+ return ({
   plugins: [
     react(),
     {
@@ -28,6 +31,7 @@ export default defineConfig(({ command }) => ({
         const output = path.resolve(import.meta.dirname, "dist/public");
         fs.cpSync(flightSource, path.join(output, flightBase), { recursive: true });
         fs.writeFileSync(path.join(output, "zaydar-manifest.json"), JSON.stringify({ base: flightBase }));
+        mapz?.write(output);
       },
     },
     VitePWA({
@@ -75,6 +79,7 @@ export default defineConfig(({ command }) => ({
   },
   // Shared modules may reference process.env on the server; avoid browser TDZ.
   define: {
+    __MAPZ_ASSETS__: JSON.stringify(mapz?.assets ?? {script:"/zaydar-map/river-flight.js?v=20260929-branch",maplibre:"/home-flight/vendor/maplibre-gl-5.6.2.js",maplibreCss:"/home-flight/vendor/maplibre-gl-5.6.2.css",contour:"/zaydar-map/vendor/maplibre-contour-0.1.0.js",style:"/zaydar-map/studio.css?v=20260925-map-boot5",perf:"/zaydar-map/mapz-perf-preload.js?v=20260929-fast"}),
     __ZAYDAR_BASE__: JSON.stringify(command === "build" ? flightBase : "/home-flight"),
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || "development"),
   },
@@ -85,4 +90,5 @@ export default defineConfig(({ command }) => ({
     },
     // Middleware mode is configured in server/vite.ts (hmr on same HTTP port).
   },
-}));
+});
+});

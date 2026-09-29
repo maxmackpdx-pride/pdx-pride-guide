@@ -1,3 +1,4 @@
+import {prioritizeModels} from './model-priority.js';
 import {fitBridgeRoad,sampleBridgeRoad,railBridgeFootprint} from './bridge-fit.js?v=20260921-layer-join';
 export const ST_JOHNS_CENTER=[-122.76327215,45.58579725];
 export const ST_JOHNS_BEARING=54.24624408372691;
@@ -193,7 +194,7 @@ export function createPortlandBridgeLayer(maplibre,elevation=()=>0,definitions=P
     drawLit(gl,input,program,locs){
       if(!this.map)return;
       this.syncRailSurfaces();
-      const visible=models.filter(model=>this.visible(model));for(const model of visible)if(!model.count)this.load(model);const ready=visible.filter(model=>model.count);if(!ready.length)return;
+      const visible=models.filter(model=>this.visible(model));for(const model of prioritizeModels(this.map,visible))if(!model.count)this.load(model);const ready=visible.filter(model=>model.count);if(!ready.length)return;
       gl.useProgram(program);gl.uniform3f(locs.base,60/255,85/255,101/255);gl.uniform1f(locs.reflect,.1);gl.uniform1f(locs.gain,1);
       for(const model of ready){if(model.dirty||!model.buffer){if(model.buffer){gl.deleteBuffer(model.buffer);gl.deleteVertexArray(model.vao);}this.upload(gl,model);}const origin=maplibre.MercatorCoordinate.fromLngLat(model.center),unit=origin.meterInMercatorCoordinateUnits(),base=model.fit?.terrainAnchored?0:Math.max(0,elevation(model.center)||0),matrix=input.defaultProjectionData.mainMatrix,local=new Float32Array(16);for(let row=0;row<4;row++){local[row]=matrix[row]*unit;local[4+row]=matrix[4+row]*unit;local[8+row]=matrix[8+row]*unit;local[12+row]=matrix[row]*origin.x+matrix[4+row]*origin.y+matrix[8+row]*base*unit+matrix[12+row];}gl.bindVertexArray(model.vao);gl.uniformMatrix4fv(locs.matrix,false,local);gl.drawArrays(gl.TRIANGLES,0,model.count);}
     },

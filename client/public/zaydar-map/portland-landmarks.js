@@ -1,3 +1,4 @@
+import {prioritizeModels} from './model-priority.js';
 export const PORTLAND_LANDMARK_MIN_ZOOM=14;
 
 const asset=name=>new URL(`./models/landmarks/${name}.glb?v=20260928-white-stag-v3`,import.meta.url).href;
@@ -88,7 +89,7 @@ export function createPortlandLandmarkLayer(maplibre,elevation=()=>0,reduced={ma
       for(const [name,size,offset] of [['a_position',3,0],['a_normal',3,12],['a_color',3,24]]){const location=gl.getAttribLocation(this.program,name);gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,size,gl.FLOAT,false,36,offset);}gl.bindVertexArray(null);model.vertices=null;model.dirty=false;
     },
     render(gl,input){
-      const visible=models.filter(model=>this.visible(model));for(const model of visible)if(!model.count)this.load(model);const ready=visible.filter(model=>model.count);if(!ready.length)return;
+      const visible=models.filter(model=>this.visible(model));for(const model of prioritizeModels(this.map,visible))if(!model.count)this.load(model);const ready=visible.filter(model=>model.count);if(!ready.length)return;
       const depth=gl.isEnabled(gl.DEPTH_TEST),cull=gl.isEnabled(gl.CULL_FACE),blend=gl.isEnabled(gl.BLEND),depthMask=gl.getParameter(gl.DEPTH_WRITEMASK),srcRgb=gl.getParameter(gl.BLEND_SRC_RGB),dstRgb=gl.getParameter(gl.BLEND_DST_RGB),srcAlpha=gl.getParameter(gl.BLEND_SRC_ALPHA),dstAlpha=gl.getParameter(gl.BLEND_DST_ALPHA);
       gl.disable(gl.CULL_FACE);gl.disable(gl.DEPTH_TEST);gl.depthMask(false);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(this.program);const seconds=reduced.matches?0:performance.now()/1000;gl.uniform1f(this.time,seconds);
       for(let index=0;index<ready.length;index++){
