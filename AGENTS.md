@@ -12,6 +12,12 @@ repository-specific facts and safeguards.
 - A request to **push/ship/deploy/go live** authorizes the complete production pipeline;
   do not pause for a redundant second confirmation.
 - Keep unrelated user and agent work unstaged and untouched.
+- For a task that includes **push/ship/deploy**, inspect the session's permitted
+  write paths before implementation. Confirm there is an authorized way to advance
+  `master` through terminal Git or the connected GitHub integration. If neither
+  path is available, report the exact block immediately and preserve the work
+  only if Tucker then asks for a local or branch-only change. Never equate a
+  successful temporary-branch push with production shipment.
 
 ## Repository and production
 
