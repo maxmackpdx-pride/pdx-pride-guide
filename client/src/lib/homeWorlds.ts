@@ -359,7 +359,7 @@ export const DEMO_POSTINGS: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPo
   giftz: [
     {
       id: "demo-giftz-1",
-      href: "/gifting",
+      href: "/giftz",
       kicker: "On the board now",
       title: "Free moving boxes (about 20)",
       line: "SE Portland. Take them all, they are clean and flat.",
@@ -370,7 +370,7 @@ export const DEMO_POSTINGS: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPo
     },
     {
       id: "demo-giftz-2",
-      href: "/gifting",
+      href: "/giftz",
       kicker: "On the board now",
       title: "Kid's bike, age 6",
       line: "Outgrown, good condition, needs a new home before the garage sale.",
@@ -383,7 +383,7 @@ export const DEMO_POSTINGS: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPo
   gigz: [
     {
       id: "demo-gigz-1",
-      href: "/pride-work",
+      href: "/gigz",
       kicker: "Hiring",
       title: "Coat check, two people, 9pm to 2am",
       line: "Paid cash at the end of the night. Tips are yours.",
@@ -394,7 +394,7 @@ export const DEMO_POSTINGS: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPo
     },
     {
       id: "demo-gigz-2",
-      href: "/pride-work",
+      href: "/gigz",
       kicker: "Looking",
       title: "DJ available weekends",
       line: "Two years spinning house and ballroom sets for queer parties citywide.",
@@ -407,7 +407,7 @@ export const DEMO_POSTINGS: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPo
   mizzed: [
     {
       id: "demo-mizzed-1",
-      href: "/spotted",
+      href: "/mizzed",
       kicker: "Missed connections",
       title: "Blue buzzcut, back patio, two waters",
       line: "You gave one to me. I did not get your name.",
@@ -419,7 +419,7 @@ export const DEMO_POSTINGS: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPo
     },
     {
       id: "demo-mizzed-2",
-      href: "/spotted",
+      href: "/mizzed",
       kicker: "Found",
       title: "Left at the bar on 12th",
       line: "You forgot your jacket, I'm holding onto it at the front bar.",

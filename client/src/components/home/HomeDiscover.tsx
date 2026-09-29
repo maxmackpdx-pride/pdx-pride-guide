@@ -7,9 +7,9 @@ import "./HomeDiscover.css";
 const destinations = [
   { icon: CalendarDays, title: "A night out", description: "Find events worth showing up for.", href: "/events", accent: "var(--neon-cyan)" },
   { icon: Trees, title: "An outdoor escape", description: "Get out. Find your next adventure.", href: "/outzide", accent: "var(--neon-orange)" },
-  { icon: Heart, title: "That person you noticed", description: "Maybe they noticed you, too.", href: "/spotted", accent: "var(--board-spotted)" },
+  { icon: Heart, title: "That person you noticed", description: "Maybe they noticed you, too.", href: "/mizzed", accent: "var(--board-spotted)" },
   { icon: House, title: "A roommate", description: "Find your people. Share a place.", href: "/the-hauz", accent: "var(--neon-cyan)" },
-  { icon: Gift, title: "Something to give", description: "Give it a new home. Find something free.", href: "/gifting", accent: "var(--board-gifting)" },
+  { icon: Gift, title: "Something to give", description: "Give it a new home. Find something free.", href: "/giftz", accent: "var(--board-gifting)" },
   { icon: Tags, title: "Something to buy or sell", description: "Find what you need. Pass something on.", href: "/sellz", accent: "var(--neon-green)" },
 ];
 const groups = [

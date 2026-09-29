@@ -29,10 +29,10 @@ export type NavEntry =
 
 /** The shared Boards dropdown: housing and Z/ List are independent destinations. */
 export const BOARD_NAV: NavLinkItem[] = [
-  { href: "/spotted", label: "Mizzed", accent: "mizzed" },
-  { href: "/gifting", label: "Giftz", accent: "giftz" },
+  { href: "/mizzed", label: "Mizzed", accent: "mizzed" },
+  { href: "/giftz", label: "Giftz", accent: "giftz" },
   { href: "/sellz", label: "Sellz", accent: "sellz" },
-  { href: "/pride-work", label: "Gigz", accent: "gigz" },
+  { href: "/gigz", label: "Gigz", accent: "gigz" },
 ];
 
 /** Every board room, including THE HAÜZ, for the Boards menus. */
@@ -110,11 +110,11 @@ export type PageHeaderMeta = {
 export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/events": { section: "EVENTZ", title: "EVENTZ" },
   "/schedule": { section: "EVENTZ", title: "My Schedule" },
-  "/pride-work": { section: "Boards", title: "GIGZ" },
-  "/gifting": { section: "Boards", title: "GIFTZ" },
+  "/gigz": { section: "Boards", title: "GIGZ" },
+  "/giftz": { section: "Boards", title: "GIFTZ" },
   "/sellz": { section: "Boards", title: "SELLZ" },
   "/the-hauz": { section: "Boards", title: "THE HAÜZ" },
-  "/spotted": { section: "Boards", title: "MIZZED CONNECTION" },
+  "/mizzed": { section: "Boards", title: "MIZZED CONNECTION" },
   "/directory": { section: "PLACEZ", title: "OUR PLACEZ" },
   "/outzide": { section: "OutZide", title: "OutZide" },
   "/outzide/rooster-rock": { section: "OutZide", title: "Rooster Rock" },

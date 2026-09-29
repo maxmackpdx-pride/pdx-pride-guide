@@ -13,7 +13,7 @@ export default function RiverBratsSpotted({ beachId }: Props) {
         <p className="rb-panel__lede">
           Post who you spotted at the beach. You stay anonymous on the board - replies open a private
           inbox thread, and you only reveal when you&apos;re both ready. Notes also show on the main{" "}
-          <a href="/spotted">MIZZED CONNECTION</a> board.
+          <a href="/mizzed">MIZZED CONNECTION</a> board.
         </p>
       </div>
       <MissedConnectionsPanel mode="beach" beachId={beachId} compact makeover />

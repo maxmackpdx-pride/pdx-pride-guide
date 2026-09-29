@@ -102,15 +102,15 @@ const ACCENT: Record<HomeStageBoardKey, string> = {
 
 /** Path helpers matching live routes (used by cards + tests). */
 export function giftingPostPath(id: number): string {
-  return `/gifting?post=${id}`;
+  return `/giftz?post=${id}`;
 }
 
 export function gigPostPath(id: number): string {
-  return `/pride-work?post=${id}`;
+  return `/gigz?post=${id}`;
 }
 
 export function spottedPostPath(id: number): string {
-  return `/spotted?post=${id}`;
+  return `/mizzed?post=${id}`;
 }
 
 export function housingPostPath(id: number): string {
@@ -335,7 +335,7 @@ export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
   },
   gifting: {
     key: "gifting",
-    href: "/gifting",
+    href: "/giftz",
     kicker: "On the board now",
     title: "Free moving boxes (about 20)",
     line: "SE Portland. Take them all, they are clean and flat.",
@@ -347,7 +347,7 @@ export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
   },
   gigs: {
     key: "gigs",
-    href: "/pride-work",
+    href: "/gigz",
     kicker: "Hiring",
     title: "Coat check, two people, 9pm to 2am",
     line: "Paid cash at the end of the night. Tips are yours.",
@@ -359,7 +359,7 @@ export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
   },
   spotted: {
     key: "spotted",
-    href: "/spotted",
+    href: "/mizzed",
     kicker: "Missed connections",
     title: "Blue buzzcut, back patio, two waters",
     line: "You gave one to me. I did not get your name.",

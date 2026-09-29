@@ -126,7 +126,7 @@ export default function PostsView({ onNavigate }: { onNavigate?: (href: string) 
       key: `gifting-${g.id}`,
       title: g.title || "GIFTZ post",
       meta: `GIFTZ · ${g.status || "Live"}`,
-      actions: [{ label: "EDIT", href: "/gifting" }],
+      actions: [{ label: "EDIT", href: "/giftz" }],
     })),
   );
   const sellz = useMine<any>("/api/sellz/mine", (rows) =>
@@ -142,7 +142,7 @@ export default function PostsView({ onNavigate }: { onNavigate?: (href: string) 
       key: `spotted-${s.id}`,
       title: s.title || s.body?.slice(0, 40) || "Missed connection post",
       meta: s.status === "ACTIVE" ? "MIZZED CONNECTION · Live" : "MIZZED CONNECTION · Pending review",
-      actions: [{ label: "EDIT", href: "/spotted" }],
+      actions: [{ label: "EDIT", href: "/mizzed" }],
     })),
   );
   const claimed = useMine<any>("/api/events/mine/claimed", (rows) =>

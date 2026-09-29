@@ -26,7 +26,7 @@ import { spottedKind, spottedPlace } from "@/components/SpottedCard";
 import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import type { Business } from "@/pages/Directory";
 import { DIRECTORY_TYPE_LABELS, directoryTypeColor } from "@shared/directoryTheme";
-import { directoryFallbackLogo, normalizeDirectoryName, resolveDirectoryLogo } from "@/lib/directoryLogos";
+import { directoryFallbackLogo, resolveDirectoryLogo } from "@/lib/directoryLogos";
 import { EVENT_WEEK_DAY_OPTIONS, RSVP_COLOR } from "@shared/eventWeek";
 import { HOUSING_ACCENT_VAR, HOUSING_TYPE_KICKER, type HousingType } from "@shared/housing";
 import { carpoolDirectionLabel, formatRiverBratsHour } from "@shared/riverBrats";
@@ -51,14 +51,13 @@ const FORMING_COVER = "/hausing/forming-no-place.svg";
 const MAP_CREATE_LINKS = [
   { label: "Eventz", href: "/submit", color: "#ccff00" },
   { label: "Placez", href: "/directory?add=1", color: "#19e3ff" },
-  { label: "Mizzed", href: "/spotted", color: "#ff00cc" },
+  { label: "Mizzed", href: "/mizzed", color: "#ff00cc" },
   { label: "HAÜZ", href: "/the-hauz/new", color: "#00ffff" },
-  { label: "Gigz", href: "/pride-work", color: "#6e3dff" },
-  { label: "Giftz", href: "/gifting", color: "#ccff00" },
+  { label: "Gigz", href: "/gigz", color: "#6e3dff" },
+  { label: "Giftz", href: "/giftz", color: "#ccff00" },
   { label: "Sellz", href: "/sellz", color: "#39ff14" },
 ] as const;
 const MAP_KEY_ITEMS: ReadonlyArray<{ label: string; id: WaypointId; color: string; note: string; badgeId?: WaypointId; scoop?: string; avatarUrl?: string }> = [
-  { label: "Eventz", id: "eventz", color: "#ff00cc", scoop: "10P", note: "Ticket shell · day color · host and venue logos · white start time" },
   { label: "Placez", id: "venue", badgeId: "cafe", color: "#00ffff", note: "Venue logo in the Placez shell; corner icon identifies the place type" },
   { label: "Zenegades", id: "zenegade", color: "#ff2400", scoop: "42M", note: "Red long-form waypoint with countdown to start" },
   { label: "AfterZ", id: "afterz", color: "#ffee00", note: "Yellow long-form after-hours waypoint" },
@@ -81,25 +80,6 @@ function dayAccent(day: string | null | undefined): string {
 function dayText(day: string | null | undefined): string {
   const code = String(day || "").slice(0, 3).toUpperCase();
   return EVENT_WEEK_DAY_OPTIONS.find(option => option.value === code)?.textColor || RSVP_COLOR;
-}
-
-function phraseIncludes(haystack: string, needle: string): boolean {
-  const words = (value: string) => value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
-  const phrase = words(needle);
-  return phrase.length >= 3 && ` ${words(haystack)} `.includes(` ${phrase} `);
-}
-
-function eventBrandLogos(event: Event, places: Place[]): { primary?: string; alternate?: string } {
-  const eventCopy = `${event.title} ${event.description || ""}`;
-  const host = places
-    .filter(place => place.type === "group" && phraseIncludes(eventCopy, place.name))
-    .sort((a, b) => b.name.length - a.name.length)[0];
-  const hostLogo = host ? resolveDirectoryLogo(host.name, host.imageUrl) : null;
-  const venueKey = normalizeDirectoryName(event.venueName || "");
-  const venue = places.find(place => place.type !== "group" && normalizeDirectoryName(place.name) === venueKey);
-  const venueLogo = resolveDirectoryLogo(event.venueName || "", venue?.imageUrl);
-  if (hostLogo) return { primary: hostLogo, alternate: venueLogo && venueLogo !== hostLogo ? venueLogo : undefined };
-  return { primary: venueLogo || undefined };
 }
 
 function firstImage(value: unknown): string | null {
@@ -502,8 +482,8 @@ export default function LivingMap() {
   const loading = eventsLoading || placesLoading;
   const failed = eventsError || placesError;
   const boardRows = [
-    ...gigs.map(row => ({ ...row, _board: "Gigz", _href: row.id ? `/pride-work?post=${row.id}` : "/pride-work" })),
-    ...gifts.map(row => ({ ...row, _board: "Giftz", _href: row.id ? `/gifting?post=${row.id}` : "/gifting" })),
+    ...gigs.map(row => ({ ...row, _board: "Gigz", _href: row.id ? `/gigz?post=${row.id}` : "/gigz" })),
+    ...gifts.map(row => ({ ...row, _board: "Giftz", _href: row.id ? `/giftz?post=${row.id}` : "/giftz" })),
     ...sells.map(row => ({ ...row, _board: "Sellz", _href: row.id ? `/sellz?post=${row.id}` : "/sellz" })),
   ];
   const visibleBoards = useMemo(() => boardRows.filter(row => rowMatchesQuery(row, q)), [boardRows, q]);
@@ -572,11 +552,11 @@ export default function LivingMap() {
   const genericRail = (id: RailId) => {
     const config: Record<RailId, { label: string; rows: MapRow[]; loading: boolean; error?: boolean; retry?: () => void; href: (row: MapRow) => string }> = {
       placez: { label: "Nearby Placez", rows: nearbyPlaces as MapRow[], loading: placesLoading, error: placesError, retry: () => { void retryPlaces(); }, href: row => placePath(Number(row.id), String(row.name || "place")) },
-      mizzed: { label: "Mizzed Connections", rows: visibleMizzed, loading: mizzedLoading, error: mizzedError, retry: () => { void retryMizzed(); }, href: row => row.id ? `/spotted?post=${row.id}` : "/spotted" },
+      mizzed: { label: "Mizzed Connections", rows: visibleMizzed, loading: mizzedLoading, error: mizzedError, retry: () => { void retryMizzed(); }, href: row => row.id ? `/mizzed?post=${row.id}` : "/mizzed" },
       outz: { label: "OutZide Nearby", rows: nearbyOutz, loading: outzLoading, error: outzError, retry: () => { void retryOutz(); }, href: row => outzPlaceHref({ id: String(row.id), name: String(row.name || "OutZide") }) },
       housing: { label: "Housing", rows: visibleHousing, loading: housingLoading, error: housingError, retry: () => { void retryHousing(); }, href: row => row.id ? `/the-hauz/${row.id}` : "/the-hauz" },
       carpool: { label: "Carpool", rows: carpools.filter(row => rowMatchesQuery(row, q)), loading: carpoolsLoading, error: carpoolsError, retry: () => { void retryCarpools(); }, href: () => "/outzide" },
-      boards: { label: "Gigz · Giftz · Sellz", rows: visibleBoards, loading: gigsLoading || giftsLoading || sellsLoading, error: gigsError || giftsError || sellsError, retry: () => { void retryGigs(); void retryGifts(); void retrySells(); }, href: row => String(row._href || "/pride-work") },
+      boards: { label: "Gigz · Giftz · Sellz", rows: visibleBoards, loading: gigsLoading || giftsLoading || sellsLoading, error: gigsError || giftsError || sellsError, retry: () => { void retryGigs(); void retryGifts(); void retrySells(); }, href: row => String(row._href || "/gigz") },
     };
     const item = config[id];
     const railIndex = railOrder.indexOf(id);
@@ -659,16 +639,13 @@ export default function LivingMap() {
         <TileLayer url={cartoDarkTileUrl()} attribution={CARTO_ATTRIBUTION} subdomains="abcd" maxZoom={20} />
         <MapReader onZoom={setZoom} onCenter={setMapCenter} onBounds={setMapBounds} />
         {marks.map(mark => {
+          // Events get no pin: on the day of the event, the hologram is the signal.
+          if (mark.kind === "event") return null;
           const chosen = selected === mark.key;
           const item = mark.item;
           let icon;
           let markerLabel = "Map listing";
-          if (mark.kind === "event") {
-            const event = item as Event;
-            const eventLogos = eventBrandLogos(event, places);
-            markerLabel = event.title;
-            icon = waypointIcon({ id: "eventz", size: waypointSize(zoom, chosen), scoop: hour(event.dateStart), color: dayAccent(event.dayOfWeek), logoUrl: eventLogos.primary, alternateLogoUrl: eventLogos.alternate, selected: chosen });
-          } else if (mark.kind === "place") {
+          if (mark.kind === "place") {
             const place = item as Place;
             const placeColor = directoryTypeColor(place.type);
             markerLabel = place.name;

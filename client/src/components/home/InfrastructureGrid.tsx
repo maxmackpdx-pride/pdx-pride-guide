@@ -23,21 +23,21 @@ export type InfraCard = {
 /** Canonical infrastructure tiles (About "Necessary homosexual infrastructure"). */
 export const INFRASTRUCTURE_CARDS: readonly InfraCard[] = [
   {
-    href: "/pride-work",
+    href: "/gigz",
     title: "GIGZ",
     description:
       "Do you offer a trade, need work, or want to put your talents out there? Check gigs.",
     accent: "var(--board-gigs)",
   },
   {
-    href: "/gifting",
+    href: "/giftz",
     title: "GIFTZ",
     description:
       "Need something for Pride week or have old Pride gear collecting dust? Hit GIFTZ.",
     accent: "#CCFF00",
   },
   {
-    href: "/spotted",
+    href: "/mizzed",
     title: "Missed connections",
     description:
       "Trying to find someone after a Pride event? That's why MIZZED CONNECTION posts exists.",

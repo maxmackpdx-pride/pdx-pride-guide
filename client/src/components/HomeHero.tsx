@@ -380,7 +380,7 @@ export default function HomeHero() {
         <Link href="/events" className="home-hero__btn home-hero__btn--primary" data-testid="hero-cta-events">
           View all events <ArrowRight size={14} aria-hidden="true" />
         </Link>
-        <Link href="/spotted" className="home-hero__btn home-hero__btn--mizzed" data-testid="hero-cta-mizzed">
+        <Link href="/mizzed" className="home-hero__btn home-hero__btn--mizzed" data-testid="hero-cta-mizzed">
           MIZZED CONNECTION <ArrowRight size={14} aria-hidden="true" />
         </Link>
       </div>

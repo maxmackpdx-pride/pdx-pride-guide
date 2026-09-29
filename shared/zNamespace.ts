@@ -5,7 +5,7 @@ export const Z_PREFIX = "z";
 export const LEGACY_Z_PRODUCT_REDIRECTS: Readonly<Record<string, string>> = {
   "/z/happening": "/events", "/z/hauz": "/the-hauz",
   "/z/placez": "/directory", "/z/directory": "/directory", "/z/places": "/directory",
-  "/z/gifz": "/gifting", "/z/gigz": "/pride-work", "/z/mizzed": "/spotted",
+  "/z/gifz": "/giftz", "/z/gigz": "/gigz", "/z/mizzed": "/mizzed",
   "/z/sellz": "/sellz", "/z/sell": "/sellz", "/z/market": "/sellz",
   "/z/dark": "/next", "/z/darkroom": "/next", "/z/zaydark": "/next",
   "/z/out": "/outzide", "/z/out/rooster-rock": "/outzide/rooster-rock",

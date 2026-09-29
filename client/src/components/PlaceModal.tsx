@@ -1114,13 +1114,13 @@ export default function PlaceModal({
                       </div>
                     </div>
                   ))}
-                  <Link href="/spotted" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
+                  <Link href="/mizzed" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
                     View MIZZED CONNECTION board <ArrowRight size={14} aria-hidden="true" />
                   </Link>
                 </div>
               )
             )}
-            {tab === "missed" && <Link href={`/spotted/new?place=${place.id}`} onClick={onClose} style={{ ...linkStyle, marginTop: 12 }}>Post a connection from this Placez card <ArrowRight size={14} aria-hidden="true" /></Link>}
+            {tab === "missed" && <Link href={`/mizzed/new?place=${place.id}`} onClick={onClose} style={{ ...linkStyle, marginTop: 12 }}>Post a connection from this Placez card <ArrowRight size={14} aria-hidden="true" /></Link>}
 
             {tab === "gigs" && (
               gigs.length === 0 ? (
@@ -1137,7 +1137,7 @@ export default function PlaceModal({
                       </div>
                     </div>
                   ))}
-                  <Link href="/pride-work" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
+                  <Link href="/gigz" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
                     View GIGZ <ArrowRight size={14} aria-hidden="true" />
                   </Link>
                 </div>

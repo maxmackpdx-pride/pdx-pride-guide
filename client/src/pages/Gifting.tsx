@@ -235,7 +235,7 @@ export default function Gifting() {
 
   return <main className="gigz-page giftz-page gifting-page">
     <div className="gigz-shell">
-      <div className="gigz-identity board-share-header"><BoardShareButton title="Giftz" path="/gifting" /><img src="/brand/family/giftz.svg" alt="Giftz" /><span>Pass it on. Find what you need.</span></div>
+      <div className="gigz-identity board-share-header"><BoardShareButton title="Giftz" path="/giftz" /><img src="/brand/family/giftz.svg" alt="Giftz" /><span>Pass it on. Find what you need.</span></div>
       {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE BOARD</div><h1>Good things move around<span>.</span></h1><p>Give what you can. Find what you need. Keep it free.</p></div>
         <div className="giftz-actions"><BoardFollowButton board="giftz" /><button type="button" className="gigz-post gigz-post--primary" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
@@ -263,7 +263,7 @@ export default function Gifting() {
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     </div>
     <RoomDoorways current="giftz" />
-    <BoardCloseSeam line="Pass it on. Find what you need." url="zaylist.com/gifting" />
+    <BoardCloseSeam line="Pass it on. Find what you need." url="zaylist.com/giftz" />
   </main>;
 }
 

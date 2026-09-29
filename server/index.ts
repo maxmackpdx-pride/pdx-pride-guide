@@ -63,8 +63,12 @@ app.use((req, res, next) => {
 // Retired public paths → canonical boards. 301 so crawlers and old links
 // collapse. Do not rewrite static files under /hausing/demo.
 const PATH_ALIASES: Record<string, string> = {
-  "/gigs": "/pride-work",
-  "/missed-connections": "/spotted",
+  // Rooms moved to their own names; old addresses keep working forever.
+  "/pride-work": "/gigz",
+  "/gifting": "/giftz",
+  "/spotted": "/mizzed",
+  "/gigs": "/gigz",
+  "/missed-connections": "/mizzed",
   "/access-safety": "/access",
   "/darkroom": "/next",
   "/hausing": "/the-hauz",
@@ -74,9 +78,9 @@ const PATH_ALIASES: Record<string, string> = {
   "/z/placez": "/directory",
   "/z/directory": "/directory",
   "/z/places": "/directory",
-  "/z/gifz": "/gifting",
-  "/z/gigz": "/pride-work",
-  "/z/mizzed": "/spotted",
+  "/z/gifz": "/giftz",
+  "/z/gigz": "/gigz",
+  "/z/mizzed": "/mizzed",
   "/z/sellz": "/sellz",
   "/z/sell": "/sellz",
   "/z/market": "/sellz",
@@ -97,10 +101,10 @@ const legacyCategorySlug = (value: string) => value === "21+" ? "21-plus" : valu
 const LEGACY_Z_CATEGORY_REDIRECTS: Record<string, string> = Object.fromEntries([
   ...EVENT_TYPE_FILTERS.map(label => [`/z/happening/${legacyCategorySlug(label)}`, `/events?type=${encodeURIComponent(label)}`]),
   ...HOUSING_TYPES.map(key => [`/z/hauz/${legacyCategorySlug(HOUSING_TYPE_KICKER[key])}`, `/the-hauz?type=${encodeURIComponent(key)}`]),
-  ["/z/gifz/offered", "/gifting?type=GIFT"],
-  ["/z/gifz/in-search-of", "/gifting?type=ISO"],
-  ["/z/gigz/gigs-offered", "/pride-work?type=POSTING_GIG"],
-  ["/z/gigz/talent-available", "/pride-work?type=LOOKING_FOR_WORK"],
+  ["/z/gifz/offered", "/giftz?type=GIFT"],
+  ["/z/gifz/in-search-of", "/giftz?type=ISO"],
+  ["/z/gigz/gigs-offered", "/gigz?type=POSTING_GIG"],
+  ["/z/gigz/talent-available", "/gigz?type=LOOKING_FOR_WORK"],
   ...Object.entries(DIRECTORY_TYPE_LABELS).filter(([key]) => key !== "group")
     .map(([key, label]) => [`/z/placez/${legacyCategorySlug(label)}`, `/directory?type=${encodeURIComponent(key)}`]),
 ]);
@@ -134,7 +138,7 @@ app.use((req, res, next) => {
     const [, prefix, rest] = legacyZProduct;
     const base: Record<string, string> = {
       happening: "/events", hauz: "/the-hauz", placez: "/directory", directory: "/directory",
-      places: "/directory", gifz: "/gifting", gigz: "/pride-work", mizzed: "/spotted",
+      places: "/directory", gifz: "/giftz", gigz: "/gigz", mizzed: "/mizzed",
       sellz: "/sellz", sell: "/sellz", market: "/sellz", dark: "/next", darkroom: "/next",
       zaydark: "/next", out: "/outzide",
     };
@@ -146,6 +150,12 @@ app.use((req, res, next) => {
 
   const nested = lower.match(/^\/(hausing|housing)\/(.+)$/);
   if (nested) return res.redirect(301, `/the-hauz/${nested[2]}${qs}`);
+
+  const renamedRoom = lower.match(/^\/(pride-work|gifting|spotted)\/(.+)$/);
+  if (renamedRoom) {
+    const room: Record<string, string> = { "pride-work": "/gigz", gifting: "/giftz", spotted: "/mizzed" };
+    return res.redirect(301, `${room[renamedRoom[1]]}/${renamedRoom[2]}${qs}`);
+  }
 
   next();
 });

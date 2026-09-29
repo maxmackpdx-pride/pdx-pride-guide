@@ -8785,7 +8785,7 @@ function buildHubFeedPinnedItems(
           avatarChoice: gig.avatarChoice,
           avatarRing: gig.posterAvatarRing,
         }),
-        link: `/pride-work?post=${gig.id}`,
+        link: `/gigz?post=${gig.id}`,
         boardPostId: gig.id,
         pinned: true,
       });
@@ -11822,7 +11822,7 @@ export const storage: IStorage = {
       return {
         count: Number(row?.cnt) || 0,
         mode: "native" as const,
-        nativeHref: "/spotted",
+        nativeHref: "/mizzed",
       };
     }
     // GIFTING: interest counts are not public reply bodies.
@@ -11833,7 +11833,7 @@ export const storage: IStorage = {
     return {
       count: Number(row?.cnt) || 0,
       mode: "native" as const,
-      nativeHref: `/gifting?post=${id}`,
+      nativeHref: `/giftz?post=${id}`,
     };
   },
   ensureSiteAdminGrant(userId, grantedByUserId, note = null, createdAt = new Date().toISOString()) {
@@ -15713,7 +15713,7 @@ export const storage: IStorage = {
           avatarRing: post.posterAvatarRing,
         }),
         // Deep-link opens the free board with this exact post expanded.
-        link: `/gifting?post=${post.id}`,
+        link: `/giftz?post=${post.id}`,
         boardPostId: post.id,
         viewerFollowsBoard: followsGiftz,
       });
@@ -15783,7 +15783,7 @@ export const storage: IStorage = {
           avatarRing: gig.posterAvatarRing,
         }),
         // Deep-link opens GIGZ with this exact post expanded.
-        link: `/pride-work?post=${gig.id}`,
+        link: `/gigz?post=${gig.id}`,
         boardPostId: gig.id,
         viewerFollowsBoard: followsGigz,
       });
@@ -15823,7 +15823,7 @@ export const storage: IStorage = {
         // No event embed: tapping opens the MIZZED CONNECTION detail card
         // (see `spotted`), it does not deep-link to an event.
         event: null,
-        link: "/spotted",
+        link: "/mizzed",
         spotted: { id: row.id, kindLabel: kind.label, kindColor: kind.color },
         viewerFollowsBoard: followsMizzed,
       });

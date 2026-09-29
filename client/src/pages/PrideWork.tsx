@@ -169,10 +169,10 @@ export default function PrideWork() {
     { num: realLive.filter(g => Date.parse(g.createdAt) >= weekAgo).length, label: "New this week", color: "var(--neon-yellow)" },
     { num: realLive.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Available to hire", color: "var(--panel-cyan)" },
   ];
-  const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/pride-work?post=${id}`); window.setTimeout(() => document.getElementById("gigz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
+  const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/gigz?post=${id}`); window.setTimeout(() => document.getElementById("gigz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
   return <main className="gigz-page">
     <div className="gigz-shell">
-      <div className="gigz-identity board-share-header"><BoardShareButton title="Gigz" path="/pride-work" /><img src="/brand/family/gigz.svg" alt="Gigz" /><span>Work with your people.</span><BoardFollowButton board="gigz" /></div>
+      <div className="gigz-identity board-share-header"><BoardShareButton title="Gigz" path="/gigz" /><img src="/brand/family/gigz.svg" alt="Gigz" /><span>Work with your people.</span><BoardFollowButton board="gigz" /></div>
       {!isLoading && !isError && !onlyMine && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE BOARD</div><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post gigz-post--primary" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
       <div className="gigz-filter"><label>Search Gigz<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search roles, skills, gigs" /></label><label><input type="checkbox" checked={remoteOnly} onChange={e => setRemoteOnly(e.target.checked)} /> Remote only</label>{user && <label><input type="checkbox" checked={onlyMine} onChange={e => setOnlyMine(e.target.checked)} /> My Gigz</label>}</div>
@@ -181,13 +181,13 @@ export default function PrideWork() {
         {!isLoading && !isError && (talent.length ? <GigRail posts={talent} kind="talent" selected={selectedId} onSelect={select} /> : <div className="gigz-empty">No one has posted availability yet. <button onClick={() => openForm("LOOKING_FOR_WORK")}>Post yours</button></div>)}
       </div>
       {onlyMine && visible.some(g => g.status === "CLOSED") && <section className="gigz-closed"><h2>Completed posts</h2><p>These are visible only to you. Open one to edit or relist it.</p><div>{visible.filter(g => g.status === "CLOSED").map(g => <button type="button" key={g.id} onClick={() => select(g.id)}>{g.title} <ArrowUpRight size={16} /></button>)}</div></section>}
-      {selected && <section id="gigz-detail" className="gigz-detail" aria-label="Selected Gigz post"><button className="gigz-detail__close" onClick={() => { setSelectedId(null); window.history.replaceState(null, "", "/pride-work"); }} aria-label="Close details"><X size={18} /></button><GigListingCard gig={selected} accent="var(--board-gigs)" expanded skills={selected.skills?.split(",").map(s => s.trim()).filter(Boolean) || []} isLooking={selected.postType === "LOOKING_FOR_WORK"} onToggle={() => {}} /></section>}
+      {selected && <section id="gigz-detail" className="gigz-detail" aria-label="Selected Gigz post"><button className="gigz-detail__close" onClick={() => { setSelectedId(null); window.history.replaceState(null, "", "/gigz"); }} aria-label="Close details"><X size={18} /></button><GigListingCard gig={selected} accent="var(--board-gigs)" expanded skills={selected.skills?.split(",").map(s => s.trim()).filter(Boolean) || []} isLooking={selected.postType === "LOOKING_FOR_WORK"} onToggle={() => {}} /></section>}
       {formOpen && <GigComposer initialType={composeType} onClose={() => setFormOpen(false)} onPosted={id => { setFormOpen(false); setSelectedId(id); }} />}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <SafetyGuide context="gigs" />
     </div>
     <RoomDoorways current="gigz" />
-    <BoardCloseSeam line="Work with your people." url="zaylist.com/pride-work" />
+    <BoardCloseSeam line="Work with your people." url="zaylist.com/gigz" />
   </main>;
 }
 

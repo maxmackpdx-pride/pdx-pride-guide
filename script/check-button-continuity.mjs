@@ -10,7 +10,7 @@ const read = locator => locator.evaluate(el => {
 try {
  for (const width of [1440,390]) {
   const page=await browser.newPage({viewport:{width,height:900}});
-  await page.goto(base+'/pride-work',{waitUntil:'domcontentloaded'});
+  await page.goto(base+'/gigz',{waitUntil:'domcontentloaded'});
   // Board post actions are the quiet utility-layer button; the lime fill lives on the auth submit.
   const action=page.getByRole('button',{name:'Post a gig',exact:true});await action.waitFor();
   await page.waitForTimeout(200);

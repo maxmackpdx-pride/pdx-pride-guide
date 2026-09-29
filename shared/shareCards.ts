@@ -51,10 +51,10 @@ export function shareCardKeyForPath(pathname: string): ShareCardKey | null {
   }
   if (path === "/schedule") return "schedule";
   if (path === "/the-hauz" || path.startsWith("/the-hauz/") || path === "/hausing" || path.startsWith("/hausing/")) return "housing";
-  if (path === "/spotted") return "spotted";
-  if (path === "/pride-work" || path === "/gigs") return "prideWork";
+  if (path === "/mizzed") return "spotted";
+  if (path === "/gigz" || path === "/gigs") return "prideWork";
   if (path === "/sellz") return "sellz";
-  if (path === "/gifting") return "gifting";
+  if (path === "/giftz") return "gifting";
   if (path === "/nude-beaches" || path.startsWith("/nude-beaches/")) return "nudeBeaches";
   if (path === "/outzide" || path.startsWith("/outzide/")) return "outzide";
   if (path === "/next" || path === "/darkroom") return "next";

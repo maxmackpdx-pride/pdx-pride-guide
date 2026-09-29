@@ -212,9 +212,9 @@ export function buildSitemapXml(events: SeoEvent[]) {
     "/events",
     "/schedule",
     "/directory",
-    "/gifting",
-    "/pride-work",
-    "/spotted",
+    "/giftz",
+    "/gigz",
+    "/mizzed",
     "/the-hauz",
     "/about",
     "/contact",
@@ -293,15 +293,15 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "SELLZ | Zaylist",
     description: "Buy and sell with Portland's queer community. Simple listings, real people, local handoffs.",
   },
-  "/gifting": {
+  "/giftz": {
     title: "GIFTZ | Zaylist",
     description: "Free queer GIFTZ board for Portland. Post gifts and in-search-of requests across PDX.",
   },
-  "/pride-work": {
+  "/gigz": {
     title: "GIGZ | Zaylist",
     description: "Portland queer gig board and work listings. Post a gig or find work in PDX.",
   },
-  "/spotted": {
+  "/mizzed": {
     title: "MIZZED CONNECTION | Zaylist",
     description: "Missed connections from Portland's queer scene. Reconnect with someone you spotted out.",
   },

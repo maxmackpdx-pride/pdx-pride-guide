@@ -137,13 +137,21 @@ function AppLayout() {
             <Route path="/schedule">{() => <Schedule />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />
-            <Route path="/pride-work/new">{() => <MapWorldRedirect world="gigz" />}</Route>
-            <Route path="/pride-work" component={PrideWork} />
+            <Route path="/gigz/new">{() => <MapWorldRedirect world="gigz" />}</Route>
+            <Route path="/gigz" component={PrideWork} />
             <Route path="/gigs">
-              {() => <Redirect to="/pride-work" />}
+              {() => <Redirect to="/gigz" />}
             </Route>
-            <Route path="/gifting/new">{() => <MapWorldRedirect world="giftz" />}</Route>
-            <Route path="/gifting" component={Gifting} />
+            {/* Old room addresses; the server 301s them too. Keep query strings (?post=). */}
+            <Route path={/^\/(pride-work|gifting|spotted)(\/.*)?$/i}>
+              {() => {
+                const [, room, rest = ""] = window.location.pathname.match(/^\/(pride-work|gifting|spotted)(\/.*)?$/i) || [];
+                const to = ({ "pride-work": "/gigz", gifting: "/giftz", spotted: "/mizzed" } as Record<string, string>)[String(room).toLowerCase()] || "/";
+                return <Redirect to={`${to}${rest}${window.location.search}`} replace />;
+              }}
+            </Route>
+            <Route path="/giftz/new">{() => <MapWorldRedirect world="giftz" />}</Route>
+            <Route path="/giftz" component={Gifting} />
             <Route path="/sellz/new">{() => <MapWorldRedirect world="sellz" />}</Route>
             <Route path="/sellz" component={Sellz} />
             <Route path="/sellz/" component={Sellz} />
@@ -187,8 +195,8 @@ function AppLayout() {
             <Route path="/settings/notifications" component={NotificationSettings} />
             <Route path="/reset-password" component={ResetPassword} />
             <Route path="/inbox" component={Inbox} />
-            <Route path="/spotted/new" component={MizzedBoard} />
-            <Route path="/spotted" component={MizzedBoard} />
+            <Route path="/mizzed/new" component={MizzedBoard} />
+            <Route path="/mizzed" component={MizzedBoard} />
             <Route path="/directory/new">{() => <MapWorldRedirect world="places" />}</Route>
             <Route path="/directory/:id/:slug?">{params => <MapWorldRedirect world="places" recordId={params.id} />}</Route>
 

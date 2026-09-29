@@ -107,9 +107,9 @@ function isThreadType(type: string | null): boolean {
 }
 
 function nativeHrefFor(type: string | null, postId: number): string | null {
-  if (type === "SPOTTED") return "/spotted";
-  if (type === "GIFTING") return `/gifting?post=${postId}`;
-  if (type === "GIG") return `/pride-work?post=${postId}`;
+  if (type === "SPOTTED") return "/mizzed";
+  if (type === "GIFTING") return `/giftz?post=${postId}`;
+  if (type === "GIG") return `/gigz?post=${postId}`;
   return null;
 }
 
