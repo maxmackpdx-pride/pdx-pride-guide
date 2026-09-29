@@ -67,7 +67,10 @@
       delete style.sources.contours;
      }
      if(Array.isArray(style.layers)){
-      style.layers=style.layers.filter(function(layer){return layer.id!=='land-relief'&&layer.id!=='elevation-contours';});
+      style.layers=style.layers.filter(function(layer){
+       if(layer.source==='contours'||layer.source==='elevation'||layer.source==='hillshade-elevation')return false;
+       return layer.id!=='land-relief'&&layer.id!=='elevation-contours';
+      });
      }
      next.style=style;
     }
