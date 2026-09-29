@@ -20,6 +20,8 @@ import { ChangeBadge } from "@/components/ds/ChangeBadge";
 import type { Event } from "@shared/schema";
 import FeedEventDeck from "./FeedEventDeck";
 import RedgifsMedia from "@/components/RedgifsMedia";
+import { isHousingDemoAuthor } from "@/lib/housingDemo";
+import "./hub-feed-layout.css";
 
 function stopCardNav(e: MouseEvent) {
   e.stopPropagation();
@@ -78,14 +80,12 @@ export default function HubFeedCard({ item }: Props) {
   const [boardOpen, setBoardOpen] = useState(false);
   const [modalEvent, setModalEvent] = useState<Event | null>(null);
   const [openingEventId, setOpeningEventId] = useState<number | null>(null);
-  // Soft-launch: everyone follows everyone - Unfollow unless they already dropped them.
   const [followOverride, setFollowOverride] = useState<boolean | null>(null);
   const [voteOverride, setVoteOverride] = useState<VoteResponse | null>(null);
   const badgeColor = hubFeedBadgeColor(item.kind);
   const href = item.link || eventHref(item);
   const when = item.pinned ? "On the board" : item.createdAt ? timeAgo(item.createdAt) : "";
 
-  // Person to follow/unfollow: real author or "posted by" host behind venue/event identity
   const followTarget =
     item.postedBy?.username && !item.postedBy.anonymous
       ? item.postedBy
@@ -97,8 +97,8 @@ export default function HubFeedCard({ item }: Props) {
     !!user &&
     !!followUsername &&
     user.username?.toLowerCase() === followUsername.toLowerCase();
+  const isDemoHousing = item.kind === "housing" && isHousingDemoAuthor(item.author);
   const showFollowShortcut = Boolean(user && followUsername && !isSelf && item.kind !== "community");
-  // Prefer server field; soft-launch default is following
   const isFollowing =
     followOverride !== null
       ? followOverride
@@ -165,7 +165,6 @@ export default function HubFeedCard({ item }: Props) {
     },
   });
 
-  /** Open the real event modal in place - stay on the feed (no navigation). */
   const openEventInPlace = async (eventId: number) => {
     if (openingEventId != null) return;
     setOpeningEventId(eventId);
@@ -175,7 +174,6 @@ export default function HubFeedCard({ item }: Props) {
       const full = (await res.json()) as Event;
       setModalEvent(full);
     } catch {
-      // Fallback: deep-link only if the modal payload can't load
       const embed = eventRowsForItem(item).find((e) => e.id === eventId);
       if (embed) {
         window.location.assign(eventPath(embed.id, embed.title, embed.dayOfWeek));
@@ -185,18 +183,14 @@ export default function HubFeedCard({ item }: Props) {
     }
   };
 
-  // Board posts glow in SoT §2.4 deep-glass board accents.
   const BOARD_ACCENTS: Record<string, string> = {
     gig: "var(--board-gigs)",
     gifting: "#CCFF00",
     spotted: "#FF00CC",
-    // HAUSING runs on the board's softened cyan.
     housing: "var(--panel-cyan)",
   };
   const glow = BOARD_ACCENTS[item.kind];
   const isSpotted = item.kind === "spotted";
-  // Board posts with an author (gigs, gifts) show the post title as a bold
-  // subject line, matching the board's expanded card.
   const showSubject = (
     item.kind === "gig"
     || item.kind === "gifting"
@@ -204,8 +198,6 @@ export default function HubFeedCard({ item }: Props) {
     || item.kind === "housing"
     || item.kind === "community"
   ) && !!item.title;
-  // GIGZ and GIFTZ reuse the shared board overlay. SELLZ has its own listing
-  // surface and keeps the canonical `/sellz?post=id` navigation path.
   const isBoard = (item.kind === "gig" || item.kind === "gifting") && item.boardPostId != null;
   const canNavigateCard = Boolean(
     href
@@ -229,7 +221,6 @@ export default function HubFeedCard({ item }: Props) {
   };
 
   const bundledEvents = eventRowsForItem(item);
-  // Same-day event listings share one horizontal poster carousel.
   const eventBlock = bundledEvents.length > 0
     ? <FeedEventDeck events={bundledEvents} onOpen={openEventInPlace} />
     : null;
@@ -248,13 +239,8 @@ export default function HubFeedCard({ item }: Props) {
     </button>
   ) : null;
 
-  // Rainbow top seam only on glowing board cards in the feed (gig / gift / MC),
-  // not plain activity rows (RSVP, check-in, announcements).
   const isGlowCard = Boolean(glow) || isSpotted || isBoard;
-
-  // Looking gigs always keep the full rainbow top bar (§2.13 hub items).
   const isLooking = item.badge === "Looking" || (item.kind === "gig" && /looking/i.test(item.badge || ""));
-
   const feedAccent = glow || (!isSpotted ? badgeColor : undefined);
   const accentStyle = feedAccent
     ? ({
@@ -272,7 +258,6 @@ export default function HubFeedCard({ item }: Props) {
     item.pinned ? "hub-feed-card--pin" : "",
     glow ? "hub-feed-card--accent" : "",
     (isSpotted || isBoard || canNavigateCard) ? "hub-feed-card--clickable" : "",
-    // Looking always gets the rainbow top seam (fitem--glow::before engine)
     (isGlowCard || isLooking) ? "fitem--glow" : "",
     isLooking ? "hub-feed-card--looking" : "",
   ].filter(Boolean).join(" ");
@@ -305,7 +290,10 @@ export default function HubFeedCard({ item }: Props) {
               {item.place} · Anonymous
             </div>
           )}
-          <div className="kick hub-feed-mc__reply">Reply privately <ArrowRight size={14} aria-hidden="true" /></div>
+          <div className="kick hub-feed-mc__reply">
+            <span>Reply privately</span>
+            <ArrowRight size={14} aria-hidden="true" />
+          </div>
         </div>
       ) : (
       <div className="hub-feed-card__row">
@@ -322,7 +310,7 @@ export default function HubFeedCard({ item }: Props) {
         />
         <div className="hub-feed-card__main">
           <div className="hub-feed-card__head">
-            <div className="hub-feed-card__main">
+            <div className="hub-feed-card__identity">
               <div className="hub-feed-card__author">{item.author.displayName}</div>
               {authorKarma != null && (
                 <div className="kick hub-feed-card__karma" aria-label={`${authorKarma} author karma`}>
@@ -362,28 +350,33 @@ export default function HubFeedCard({ item }: Props) {
             </div>
             <div className="hub-feed-card__head-actions">
               <ChangeBadge label={item.changeLabel} className="hub-feed-card__change" />
-              {showFollowShortcut && (
+              {isDemoHousing && (
+                <span className="kick hub-feed-card__demo" aria-label="Demo listing">DEMO</span>
+              )}
+              {item.badge && (
+                <span
+                  className="kick hub-feed-card__badge pdx-glass-rebind"
+                  style={{ "--hub-feed-accent": badgeColor, "--c": badgeColor } as CSSProperties}
+                >
+                  {item.badge}
+                </span>
+              )}
+              {showFollowShortcut && !isFollowing && (
                 <button
                   type="button"
-                  className={`foll hub-feed-card__foll${isFollowing ? " on" : ""} pdx-glass-rebind`}
+                  className="foll hub-feed-card__foll pdx-glass-rebind"
                   disabled={followMutation.isPending}
                   aria-busy={followMutation.isPending}
                   data-testid="feed-follow-shortcut"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    followMutation.mutate(!isFollowing);
+                    followMutation.mutate(true);
                   }}
                 >
-                  {isFollowing ? "Unfollow" : "Follow"}
+                  Follow
                 </button>
               )}
-              <span
-                className="kick hub-feed-card__badge pdx-glass-rebind"
-                style={{ "--hub-feed-accent": badgeColor, "--c": badgeColor } as CSSProperties}
-              >
-                {item.badge}
-              </span>
             </div>
           </div>
           {showSubject && (
@@ -471,8 +464,6 @@ export default function HubFeedCard({ item }: Props) {
     </article>
   );
 
-  // Missed-connection cards open the board's detail card in place (same overlay
-  // you get tapping a post on the board), rather than deep-linking away.
   if (isSpotted) {
     return (
       <>
@@ -492,8 +483,6 @@ export default function HubFeedCard({ item }: Props) {
     );
   }
 
-  // Gig/gift cards open the real board card as an overlay in place, so closing
-  // returns to the exact feed scroll spot (no navigation).
   if (isBoard) {
     return (
       <>
