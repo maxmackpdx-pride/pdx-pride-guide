@@ -68,6 +68,92 @@
 .hub-feed-mc__place {
   overflow-wrap: anywhere;
 }
+
+.hub-feed-board {
+  position: relative;
+}
+.hub-feed-board__demo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 3;
+}
+.hub-feed-board__row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+.hub-feed-board__thumb {
+  flex: none;
+  width: 92px;
+  min-height: 92px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--c, #19e3ff) 55%, #111), #0a0a0c);
+  border: 1px solid #000;
+}
+.hub-feed-board__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.hub-feed-board__ghost {
+  width: 100%;
+  height: 100%;
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 800 34px/1 var(--font-display);
+  color: #fff;
+  text-shadow: 0 2px 0 #000;
+}
+.hub-feed-board__copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hub-feed-board__kicker {
+  color: color-mix(in srgb, var(--c, #19e3ff) 80%, #fff);
+}
+.hub-feed-board__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: #fff;
+}
+.hub-feed-board__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--board-text, #e6e3da);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hub-feed-board__who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--board-muted, #999);
+}
+.hub-feed-board__open {
+  margin-top: 4px;
+  align-self: flex-start;
+  color: color-mix(in srgb, var(--c, #19e3ff) 90%, #fff);
+}
+
 @media (max-width: 720px) {
   .hub-feed-card__head-actions {
     width: 100%;
@@ -75,7 +161,8 @@
     margin-left: 0;
     margin-top: 2px;
   }
-  .hub-feed-card__foll.foll {
-    padding: 5px 11px;
+  .hub-feed-board__thumb {
+    width: 78px;
+    min-height: 78px;
   }
 }
