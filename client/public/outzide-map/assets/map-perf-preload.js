@@ -24,7 +24,7 @@
    src.style.visibility='hidden';
    return frozen;
   }
-  map.on('movestart',function(){
+  map.on('dragstart',function(){
    if(!dragging())return;
    var center=map.getCenter();
    start={lng:center.lng,lat:center.lat,zoom:map.getZoom(),bearing:map.getBearing(),point:map.project(center)};

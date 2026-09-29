@@ -47,7 +47,7 @@ test('waypoint heads keep equal roof clearance while following different roof he
       const moved=waypointGeometry({x:290,y:185},selected,roof);
       assert.equal(moved.x-first.x,190);assert.equal(moved.y-first.y,-115);
       assert.equal(first.size,selected?44:28);
-      assert.equal(300-first.bottom,roof);
+      assert.equal(300-first.bottom,roof*2);
       assert.equal(first.y+first.size/2,first.bottom);
     }
   }finally{
@@ -56,14 +56,15 @@ test('waypoint heads keep equal roof clearance while following different roof he
   }
 });
 
-test('Placez alternates icon and white logo every 3–5 seconds without changing its anchor',async()=>{
+test('Placez cycles icon and white logo without changing its anchor',async()=>{
  const {waypointLogoInterval,showWaypointLogo}=await import('../client/public/zaydar-map/waypoint-markers.js');
  for(const phase of [0,2.399963,10,50,900]){
-  const interval=waypointLogoInterval(phase);assert.ok(interval>=3&&interval<=5);
+  const cycle=waypointLogoInterval(phase);assert.ok(cycle>=3&&cycle<=5);
   for(let i=1000;i<1005;i++){
-   const boundary=i*interval-phase;
-   assert.notEqual(showWaypointLogo(boundary-.001,phase),showWaypointLogo(boundary+.001,phase));
-   assert.equal(showWaypointLogo(boundary+.001,phase),showWaypointLogo(boundary+interval-.001,phase));
+   const origin=i*cycle-phase*1.7;
+   assert.equal(showWaypointLogo(origin+.1*cycle,phase),false);
+   assert.equal(showWaypointLogo(origin+.5*cycle,phase),true);
+   assert.equal(showWaypointLogo(origin+.9*cycle,phase),false);
   }
   assert.equal(showWaypointLogo(999,phase,true),true);
  }

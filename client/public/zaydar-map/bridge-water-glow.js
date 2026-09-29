@@ -10,7 +10,7 @@ export const BRIDGE_GLOW_THEMES={
  'st-johns':'rainbow',
  broadway:'rainbow',steel:'trans',burnside:'lesbian',morrison:'rainbow',
  hawthorne:'trans',marquam:'lesbian','tilikum-crossing':'rainbow',
- 'ross-island':'lesbian',sellwood:'trans',fremont:'lesbian',
+ 'ross-island':'lesbian',sellwood:'trans',fremont:'lesbian',interstate:'trans',
 };
 
 export const BRIDGE_GLOW_SATURATION=1.5*1.2;
@@ -27,17 +27,6 @@ export function bridgeGlowColor(palette,fraction){
  const index=Math.min(stops.length-2,Math.floor(position)),mix=position-index;
  const a=parseInt(stops[index].slice(1),16),b=parseInt(stops[index+1].slice(1),16);
  return saturateBridgeColor([16,8,0].map(shift=>((a>>shift)&255)*(1-mix)+((b>>shift)&255)*mix));
-}
-
-function bridgeSpanLine(model,start=0.22,end=0.78){
- const rad=model.bearing*Math.PI/180;
- const lonPerM=1/(111320*Math.cos(model.center[1]*Math.PI/180));
- const latPerM=1/111320;
- const point=t=>{
-  const along=(t-0.5)*model.length;
-  return [model.center[0]+Math.sin(rad)*along*lonPerM,model.center[1]+Math.cos(rad)*along*latPerM];
- };
- return [point(start),point(end)];
 }
 
 function pointInRing(point,ring){
@@ -59,23 +48,43 @@ function pointInWater(point,polygons){
  return false;
 }
 
-function fittedGlowLine(model,features,water){
+// Split at shoreline and island boundaries; never reconnect across dry land.
+export function clipGlowLineToWater(samples, water) {
+ const lines=[];
+ let current=null;
+ for(let i=1;i<samples.length;i++){
+  const a=samples[i-1],b=samples[i],dx=b[0]-a[0],dy=b[1]-a[1],cuts=[0,1];
+  for(const polygon of water)for(const ring of polygon)for(let j=0;j<ring.length;j++){
+   const c=ring[j],d=ring[(j+1)%ring.length],ex=d[0]-c[0],ey=d[1]-c[1];
+   const cross=dx*ey-dy*ex;
+   if(Math.abs(cross)<1e-16)continue;
+   const cx=c[0]-a[0],cy=c[1]-a[1];
+   const t=(cx*ey-cy*ex)/cross,u=(cx*dy-cy*dx)/cross;
+   if(t>0&&t<1&&u>=0&&u<=1)cuts.push(t);
+  }
+  cuts.sort((x,y)=>x-y);
+  const point=t=>[a[0]+dx*t,a[1]+dy*t];
+  for(let j=1;j<cuts.length;j++){
+   if(cuts[j]-cuts[j-1]<1e-10)continue;
+   if(!pointInWater(point((cuts[j]+cuts[j-1])/2),water)){current=null;continue;}
+   const from=point(cuts[j-1]),to=point(cuts[j]);
+   if(!current){current=[from];lines.push(current);}
+   current.push(to);
+  }
+ }
+ return lines;
+}
+
+function fittedGlowLines(model,features,water){
  const fit=model.fit||(features?.length?fitBridgeRoad(features,model,()=>0):null);
- const raw=fit
-  ? Array.from({length:Math.max(16,Math.min(40,Math.ceil((fit.length||model.length)/20)))+1},(_,i)=>sampleBridgeRoad(fit,i/(Math.max(16,Math.min(40,Math.ceil((fit.length||model.length)/20))))).coordinate)
-  : Array.from({length:17},(_,i)=>bridgeSpanLine(model,0,1) && null).filter(Boolean);
  const samples=fit
   ? Array.from({length:25},(_,i)=>sampleBridgeRoad(fit,i/24).coordinate)
   : Array.from({length:17},(_,i)=>{
    const t=i/16,rad=model.bearing*Math.PI/180,along=(t-0.5)*model.length;
    const lonPerM=1/(111320*Math.cos(model.center[1]*Math.PI/180));
-   return [model.center[0]+Math.sin(rad)*along*lonPerM,model.center[1]+Math.cos(rad)*along*latPerM];
+   return [model.center[0]+Math.sin(rad)*along*lonPerM,model.center[1]+Math.cos(rad)*along*1/111320];
   });
- const latPerM=1/111320;
- let kept=water?.length?samples.filter(point=>pointInWater(point,water)):samples.slice(Math.floor(samples.length*0.22),Math.ceil(samples.length*0.78));
- if(kept.length<2)kept=samples.slice(Math.floor(samples.length*0.28),Math.ceil(samples.length*0.72));
- if(kept.length<2)return bridgeSpanLine(model);
- return kept;
+ return clipGlowLineToWater(samples,water||[]);
 }
 
 export function bridgeGlowGradient(palette){
@@ -90,10 +99,11 @@ export function bridgeGlowLineCollections(features,water){
  for(const model of PORTLAND_BRIDGE_MODELS){
   if(model.disabled||!Object.hasOwn(BRIDGE_GLOW_THEMES,model.id))continue;
   const palette=BRIDGE_GLOW_THEMES[model.id];
-  (byTheme[palette]??=[]).push({
+  const rows=byTheme[palette]??=[];
+  for(const coordinates of fittedGlowLines(model,features,water))rows.push({
    type:'Feature',
    properties:{id:model.id,palette},
-   geometry:{type:'LineString',coordinates:fittedGlowLine(model,features,water)},
+   geometry:{type:'LineString',coordinates},
   });
  }
  return byTheme;

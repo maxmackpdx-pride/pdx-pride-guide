@@ -12,13 +12,15 @@ const {locateWorldRow,filterWorldRows,legacyWorldMapHref,readMapCamera,inMapBoun
 const {housingDisplayName}=await moduleFrom('../shared/housing.ts');
 const places=[{id:1,name:'Test Venue',lat:45.52,lng:-122.67,neighborhood:'Pearl District'},{id:2,name:'Other Venue',lat:45.54,lng:-122.69,neighborhood:'Pearl District'}];
 
-test('world locations prefer public venues and keep remote/private addresses off pins',()=>{
+test('board locations are approximate unless explicitly shared and remote/private addresses stay off pins',()=>{
   const exact=locateWorldRow({id:3,venueHint:'Test Venue'},'mizzed',places,[]);
-  assert.equal(exact.lat,45.52);
+  assert.ok(Math.abs(exact.lat-45.525)<1e-6); assert.equal(exact.approximate,true);
   const event=locateWorldRow({id:4,eventId:20,eventLat:45.51,eventLng:-122.66},'mizzed',places,[]);
-  assert.equal(event.lat,45.51);
+  assert.ok(Math.abs(event.lat-45.5)<1e-6); assert.equal(event.approximate,true);
   const area=locateWorldRow({id:5,neighborhood:'Pearl',pickupPreference:'Private apartment address'},'giftz',places,[]);
-  assert.equal(area.approximate,true);assert.match(area.locationLabel,/approximate/);assert.ok(Math.abs(area.lat-45.53)<1e-6);
+  assert.equal(area.approximate,true);assert.match(area.locationLabel,/approximate/);assert.ok(Math.abs(area.lat-45.525)<1e-6);
+  const shared=locateWorldRow({id:8,mapPoint:{lat:45.5123,lng:-122.6789}},'giftz',places,[]);
+  assert.equal(shared.lat,45.5123);assert.equal(shared.lng,-122.6789);assert.equal(shared.approximate,false);
   const missing=locateWorldRow({id:6,neighborhood:'Unknown',address:'Private address'},'sellz',places,[]);
   assert.equal(missing.lat,null);
   const remote=locateWorldRow({id:7,isRemote:true,lat:45.5,lng:-122.6},'gigz',places,[]);

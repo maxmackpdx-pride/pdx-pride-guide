@@ -1,3 +1,4 @@
+import { publicBoardMapLocations } from './boardMapLocations';
 import {getOutzClosures} from './outzClosures';
 import { schedulePushForActivity } from './push/dispatch';
 import { getWinterConditions } from './outzWinter';
@@ -3112,7 +3113,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       .run(board, postId, point.lat, point.lng);
   };
   app.get("/api/board-map-locations", (_req, res) => {
-    res.json(sqlite.prepare("SELECT board, post_id AS postId, lat, lng FROM board_map_locations").all());
+    res.setHeader("Cache-Control", "no-store");
+    res.json(publicBoardMapLocations(sqlite));
   });
   app.get("/api/boards/:board/follow", (req, res) => {
     const board = boardFollowKey(req.params.board);

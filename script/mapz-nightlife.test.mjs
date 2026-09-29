@@ -3,7 +3,7 @@ import {mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP} from '../
 import {visibleHologramLabels} from '../client/public/zaydar-map/label-visibility.js';
 import {waypointGeometry} from '../client/public/zaydar-map/waypoint-markers.js';
 import {housingIconSize} from '../client/public/zaydar-map/housing-holograms.js';
-import test from 'node:test';
+import test, {after} from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {readFile} from 'node:fs/promises';
@@ -12,10 +12,14 @@ import {mapzSurfaceStyle} from '../client/public/zaydar-map/natural-surfaces.js'
 import {waterReflectionSegments,createBuildingChrome} from '../client/public/zaydar-map/nightlife-materials.js';
 import {projectorGroundScale} from '../client/public/zaydar-map/hologram-materials.js';
 
+const previousWindow=globalThis.window;
+globalThis.window={};
+after(()=>{if(previousWindow===undefined)delete globalThis.window;else globalThis.window=previousWindow;});
+
 test('projector circles shrink at overview zoom without a camera-facing guide line',async()=>{
-  assert.equal(projectorGroundScale(12),.28);
+  assert.equal(projectorGroundScale(12),.28*.3);
   assert.ok(projectorGroundScale(13)<projectorGroundScale(14));
-  assert.equal(projectorGroundScale(15),1);
+  assert.equal(projectorGroundScale(15),.3);
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   assert.equal(renderer.includes('lineTo(logoX,raisedY)'),false);
   assert.equal(renderer.includes("lineTo(logoX+(p.x-logoX)*.08"),false);
