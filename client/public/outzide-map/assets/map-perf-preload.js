@@ -26,6 +26,8 @@
   }
   map.on('dragstart',function(){
    if(!dragging())return;
+   // A pitched camera is perspective. A flat snapshot slides off the pins.
+   if(map.getPitch()>0.5)return;
    var center=map.getCenter();
    start={lng:center.lng,lat:center.lat,zoom:map.getZoom(),bearing:map.getBearing(),point:map.project(center)};
    ensureFrozen();
