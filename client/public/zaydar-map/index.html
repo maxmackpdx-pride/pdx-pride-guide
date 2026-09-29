@@ -2,14 +2,20 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zaydar · Interactive map</title>
 <script>
 (function(){
- var failed=false,visible=false;
+ var failed=false,currentPhase='document',visible=false;
  if(parent!==window)document.documentElement.dataset.embedded='1';
  function tell(type,payload){if(parent!==window)parent.postMessage(Object.assign({source:'zaydar-demo',type:type},payload||{}),location.origin);}
  function phase(value){
+  currentPhase=value;
   if(value==='first-frame')visible=true;
   document.documentElement.dataset.mapPhase=value;
   tell('phase',{phase:value});
  }
+ function replay(){tell('phase',{phase:currentPhase});if(visible)tell('first-frame');}
+ window.addEventListener('message',function(event){
+  if(event.origin!==location.origin||event.source!==parent||event.data?.source!=='zaydar-host')return;
+  if(event.data.type==='hello')replay();
+ });
  function fatal(message){
   if(failed)return;
   failed=true;

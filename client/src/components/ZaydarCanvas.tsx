@@ -7,7 +7,7 @@ type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:str
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
 type CanvasProps={initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};
-const MAP_SRC='/zaydar-map/index.html?v=20260928-pin-lock';
+const MAP_SRC='/zaydar-map/index.html?v=20260929-boot';
 const BOOT_COPY='Your super gay city is loading.';
 const MAX_3D_ATTEMPTS=3;
 const ALIVE_PHASES=new Set(['map-created','map-loaded','first-frame']);
@@ -30,7 +30,7 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
   const arm=()=>{
    window.clearTimeout(timer);
    if(document.hidden)return;
-   const delay=phase==='loading'?25000:60000;
+   const delay=phase==='loading'?50000:70000;
    timer=window.setTimeout(()=>fail(`No visible 3D frame after ${phase}.`),delay);
   };
   arm();document.addEventListener('visibilitychange',arm);
