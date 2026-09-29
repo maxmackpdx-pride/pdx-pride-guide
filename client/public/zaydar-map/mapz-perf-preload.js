@@ -1,52 +1,8 @@
-/* Runs after MapLibre + contour, before river-flight.
-   Phone pixel cap, cheap first style, iOS-style pan. */
+/* Phone pixel cap and cheap first style. Do not snapshot overlays during pan:
+   a 2D freeze cannot follow a pitched 3D camera and leaves doubled pins. */
 (function(){
  var coarse=typeof matchMedia==='function'&&matchMedia('(pointer:coarse)').matches;
  var pixelRatio=Math.min(window.devicePixelRatio||1,coarse?1.5:2);
- function attachIosPan(map){
-  if(map.__mapzIosPan)return;
-  map.__mapzIosPan=true;
-  var start=null,frozen=null;
-  function live(){return document.getElementById('waypoint-lights');}
-  function dragging(){return !!(map.dragPan&&map.dragPan.isEnabled&&map.dragPan.isEnabled());}
-  function ensureFrozen(){
-   var src=live();
-   if(!src||!src.width)return null;
-   if(!frozen){
-    frozen=document.createElement('canvas');
-    frozen.id='waypoint-lights-frozen';
-    frozen.setAttribute('aria-hidden','true');
-    frozen.style.cssText='position:fixed;inset:0;z-index:2;width:100vw;height:100vh;pointer-events:none;';
-    src.parentNode.insertBefore(frozen,src.nextSibling);
-   }
-   if(frozen.width!==src.width||frozen.height!==src.height){frozen.width=src.width;frozen.height=src.height;}
-   frozen.getContext('2d').drawImage(src,0,0);
-   frozen.style.display='block';
-   src.style.visibility='hidden';
-   return frozen;
-  }
-  map.on('dragstart',function(){
-   if(!dragging())return;
-   var center=map.getCenter();
-   start={lng:center.lng,lat:center.lat,zoom:map.getZoom(),bearing:map.getBearing(),point:map.project(center)};
-   ensureFrozen();
-  });
-  map.on('render',function(){
-   if(!start||!dragging())return;
-   var origin=map.project([start.lng,start.lat]);
-   var scale=Math.pow(2,map.getZoom()-start.zoom);
-   var rotate=map.getBearing()-start.bearing;
-   var t='translate('+origin.x+'px,'+origin.y+'px) rotate('+rotate+'deg) scale('+scale+') translate('+(-start.point.x)+'px,'+(-start.point.y)+'px)';
-   if(frozen){frozen.style.transformOrigin='0 0';frozen.style.transform=t;}
-  });
-  function clearFreeze(){
-   start=null;
-   var src=live();
-   if(src)src.style.visibility='';
-   if(frozen){frozen.style.display='none';frozen.style.transform='';}
-  }
-  map.on('moveend',clearFreeze);
- }
  if(window.maplibregl?.Map&&!window.__mapzPerfMap){
   window.__mapzPerfMap=true;
   var Original=window.maplibregl.Map;
@@ -73,7 +29,6 @@
      next.style=style;
     }
     super(next);
-    attachIosPan(this);
    }
   };
  }
