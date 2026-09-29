@@ -647,9 +647,8 @@
 .sellz-board-page .gigz-eyebrow,
 .sellz-board-page .gigz-section-head h1 span { color: #39ff14; }
 .sellz-board-page .gigz-eyebrow:before { background: #39ff14; }
-.sellz-board-page .gigz-post,
+.sellz-board-page .gigz-post { --button-c: var(--room-sellz, #39ff14); }
 .sellz-board-page .board-follow-button { border-color: #318d31; color: #d5fbd0; }
-.sellz-board-page .gigz-post:hover,
 .sellz-board-page .board-follow-button:hover:not(:disabled) { background: #1b321b; }
 .sellz-board-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .sellz-board-actions .board-follow-button { margin-bottom: 5px; }

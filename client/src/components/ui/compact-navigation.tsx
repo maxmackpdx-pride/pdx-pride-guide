@@ -45,16 +45,18 @@ export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV,
       const key = entryKey(entry);
       const Icon = ICONS[entry.label];
       const active = entryActive(entry, location);
+      // A folder like Boards borrows the accent of the room you're in.
+      const accent = entry.type === "dropdown" ? entry.items.find(item => navLinkActive(location, item.href))?.accent ?? entry.accent : entry.accent;
       const expanded = open === key || (focused ? focused === key : active);
       const content = textOnly ? <><ButtonGlassOptics /><span className="znav-caption">{entry.label}</span>{entry.type === "dropdown" && <ChevronDown className="znav-chevron" size={13} aria-hidden="true" />}</> : <><ButtonGlassOptics /><span className="znav-icon-row"><Icon size={20} strokeWidth={1.8} aria-hidden="true" />
         <motion.span initial={false} animate={{ width: expanded ? 66 : 0, opacity: expanded ? 1 : 0, marginLeft: expanded ? 7 : 0 }} transition={quiet ? { duration: 0 } : { width: { type: "spring", stiffness: 350, damping: 32 }, opacity: { duration: 0.19 }, marginLeft: { duration: 0.19 } }} className="znav-expanding-label">{entry.label}</motion.span>
         {entry.type === "dropdown" && <ChevronDown className="znav-chevron" size={11} aria-hidden="true" />}
       </span><span className="znav-caption" aria-hidden="true">{entry.label}</span></>;
       const className = `znav-control pdx-glass-rebind${textOnly ? " znav-control--text" : ""}${active ? " is-active" : ""}${open === key ? " is-open" : ""}`;
-      return <div key={key} className={`znav-item${entry.label === "About" ? " znav-item--split" : ""}`} data-accent={entry.accent}>
+      return <div key={key} className={`znav-item${entry.label === "About" ? " znav-item--split" : ""}`} data-accent={accent}>
         {entry.type === "link" ? <Link href={entry.href} className={className} data-accent={entry.accent} aria-label={entry.label} aria-current={active ? "page" : undefined} onMouseEnter={() => setFocused(key)} onFocus={() => setFocused(key)} onBlur={() => setFocused(null)} onClick={onNavigate}>{content}</Link> :
           <DropdownMenu.Root open={open === key} onOpenChange={value => { if (value) dismissMobileNavOverlays(); setOpen(value ? key : null); }}>
-            <DropdownMenu.Trigger className={className} data-accent={entry.accent} aria-label={entry.label} onMouseEnter={() => setFocused(key)} onFocus={() => setFocused(key)} onBlur={() => setFocused(null)}>{content}</DropdownMenu.Trigger>
+            <DropdownMenu.Trigger className={className} data-accent={accent} aria-label={entry.label} onMouseEnter={() => setFocused(key)} onFocus={() => setFocused(key)} onBlur={() => setFocused(null)}>{content}</DropdownMenu.Trigger>
             <DropdownMenu.Portal><DropdownMenu.Content className="znav-dropdown pdx-liquid-overlay" aria-label={entry.label} sideOffset={10} align={entry.id === "boards" ? "end" : "start"} collisionPadding={12}>
               {entry.eyebrow && <DropdownMenu.Label className="znav-eyebrow">{entry.eyebrow}</DropdownMenu.Label>}
               {entry.items.map(item => <DropdownMenu.Item asChild key={item.href}><Link href={item.href} className="znav-menu-link pdx-glass-rebind" data-accent={item.accent ?? entry.accent} aria-current={navLinkActive(location, item.href) ? "page" : undefined} onClick={onNavigate}>{item.label}</Link></DropdownMenu.Item>)}

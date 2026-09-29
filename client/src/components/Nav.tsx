@@ -83,15 +83,18 @@ function NavDropdown({
   onToggle: () => void;
   onClose: () => void;
 }) {
-  const active = items.some(item => location === item.href || location.startsWith(`${item.href}/`));
+  const activeItem = items.find(item => location === item.href || location.startsWith(`${item.href}/`));
+  const active = Boolean(activeItem);
+  // A folder like Boards borrows the accent of the room you're in.
+  const triggerAccent = activeItem?.accent ?? accent;
   const panelId = `site-nav-dropdown-${id}`;
 
   return (
-    <div className={`site-nav-dropdown${open ? " open" : ""}`} data-accent={accent}>
+    <div className={`site-nav-dropdown${open ? " open" : ""}`} data-accent={triggerAccent}>
       <button
         type="button"
         className={`site-nav-dropdown__trigger${active ? " active" : ""}`}
-        data-accent={accent}
+        data-accent={triggerAccent}
         aria-expanded={open}
         aria-haspopup="menu"
         aria-controls={panelId}

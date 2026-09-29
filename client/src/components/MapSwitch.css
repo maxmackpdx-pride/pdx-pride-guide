@@ -1,0 +1,68 @@
+/* Mapz / OutZide switch. Same spot on both maps; each map lights its own half
+   in its own ink (Mapz light #94b5cf, OutZide orange). */
+.map-switch {
+  position: absolute;
+  z-index: 6;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 22px;
+  border: 1px solid #050706;
+  background: rgba(0, 0, 0, 0.82);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 28px -18px #000;
+}
+
+.map-switch__option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 40px;
+  min-width: 44px;
+  padding: 0 22px;
+  border-radius: 18px;
+  font: 700 15px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
+  color: #aeb7c4;
+  transition: color var(--dur-fast, 150ms), background-color var(--dur-fast, 150ms);
+}
+
+.map-switch__option:hover { color: #eeeeee; }
+
+.map-switch__option:focus-visible {
+  outline: 2px solid var(--neon-cyan, #00ffff);
+  outline-offset: 2px;
+}
+
+.map-switch__option--mapz[aria-current="page"] {
+  color: #eeeeee;
+  background: rgba(148, 181, 207, 0.16);
+  box-shadow: inset 0 0 0 1px #94b5cf;
+}
+
+.map-switch__option--outz[aria-current="page"] {
+  color: #eeeeee;
+  background: color-mix(in srgb, var(--neon-orange, #ff6600) 16%, transparent);
+  box-shadow: inset 0 0 0 1px var(--neon-orange, #ff6600);
+}
+
+/* Phones: sit under the map's own top-left lockup instead of colliding with it. */
+@media (max-width: 767px) {
+  .map-switch {
+    top: 62px;
+    left: 12px;
+    transform: none;
+  }
+
+  .map-switch__option {
+    min-height: 36px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+}

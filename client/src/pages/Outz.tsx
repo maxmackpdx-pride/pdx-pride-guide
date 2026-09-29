@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import { roomTitle } from "@/lib/rooms";
+import MapSwitch from "@/components/MapSwitch";
 
 /** Keep the field map's canvas, dialogs and styles isolated from the site shell. */
 export type OutzDiscoveryPlace = { id: string; name: string; region: string; kind: string; short: string; accent: string; cardAccent?: string; note: string; href: string; lat?: number; lng?: number; logo?: string };
@@ -105,6 +106,7 @@ export default function Outz() {
   }, [attempt, sharedId]);
   if(sharedId && !sharePending && (shareError || !sharedPlace))return <PageRecovery section="OutZide" title={shareError ? "This destination couldn’t load" : "Destination not found"} description="Browse Outzide to find a destination, or try this link again." href="/outzide" label="Browse Outzide" missing={!shareError} retry={shareError ? () => {void retryShare();} : undefined}/>;
   return <><div style={{ position: "relative" }}>
+    <MapSwitch current="outz" />
     {!mapReady && <div style={{ position: "absolute", inset: "12px 12px auto", zIndex: 2, background: "var(--ink-900, #08090b)", borderRadius: 16 }}><BrowseStatus
       title={mapSlow ? "Outzide is taking longer than expected" : "Loading Outzide…"}
       description={mapSlow ? "Try loading the field guide again." : "Getting destinations and the map ready."}

@@ -1,5 +1,5 @@
 import {eventNight} from './event-night.js';
-import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER} from './venue-attachments.js';
+import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER} from './venue-attachments.js?v=20260929-gig-branch';
 import { visibleHologramLabels } from './label-visibility.js?v=20260925-venue-nights';
 import {faceStackHtml} from '../outzide-map/assets/community-ui.js?v=map-continuity-1';
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
@@ -81,7 +81,10 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 // Roads and raised decks share one material and physical widths; the custom
 // mesh adds thin sides and gradual approaches without another canvas/context.
 const surfaceCache=new WeakMap();
-const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const reducedMedia=matchMedia('(prefers-reduced-motion: reduce)');
+// Calm mode (html.calm-mode on the site, stored as pdx-calm-mode) stills the map like reduced motion.
+const calmOn=()=>{try{return localStorage.getItem('pdx-calm-mode')==='true'}catch{return false}};
+const reduced={get matches(){return reducedMedia.matches||calmOn()},addEventListener:(...args)=>reducedMedia.addEventListener(...args),removeEventListener:(...args)=>reducedMedia.removeEventListener(...args)};
 const bridgeLayer=createBridgeLayer(maplibregl,terrainHeight,true);
 const landmarkBuildings=createBuildingModelLayer(maplibregl);
 const portlandBridges=createPortlandBridgeLayer(maplibregl,terrainHeight);

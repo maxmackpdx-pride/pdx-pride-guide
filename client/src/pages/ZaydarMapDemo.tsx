@@ -16,6 +16,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { roomTitle } from "@/lib/rooms";
 import ZaydarCanvas, { type MapSelectionRect, type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { ChevronRight, LocateFixed } from "lucide-react";
+import MapSwitch from "@/components/MapSwitch";
 import { useAuth } from "@/context/AuthContext";
 
 
@@ -749,6 +750,7 @@ export default function ZaydarMapDemo() {
       <input ref={timeInputRef} className="zaydar-map-time-input" type="datetime-local" min={dateTimeLocalValue(clockNow)} value={previewDateTime} onChange={event => setPreviewDateTime(event.target.value)} aria-label="Future map date and time" />
       {previewDateTime && <button type="button" className="zaydar-map-live" onClick={() => setPreviewDateTime("")}>Live</button>}
     </div>
+    <MapSwitch current="mapz" />
     <div className="zaydar-demo-navigation pdx-glass-rebind" aria-label="Map controls">
       <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in" title="Zoom in">+</button>
       <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:-1})} aria-label="Zoom out" title="Zoom out">−</button>

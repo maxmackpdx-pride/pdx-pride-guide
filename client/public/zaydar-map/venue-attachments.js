@@ -2,11 +2,14 @@ export const MIZZED_NOTIFICATION_LIFETIME=8*24*60*60*1000;
 export const EVENT_WAYPOINT_GAP=24;
 export const TONIGHT_HEIGHT_MULTIPLIER=1.2;
 
+// A Mizzed connection, or a gig posted at a place, branches off that place's
+// waypoint for 8 days and then leaves the map. The post itself stays in its room.
 export function mizzedNotificationActive(row,now=Date.now()){
- if(row.waypointFamily!=='mizzed')return true;
+ const branchGig=row.waypointFamily==='gigz'&&Boolean(row.venueWaypointKey||row.venueAnchor);
+ if(row.waypointFamily!=='mizzed'&&!branchGig)return true;
  const created=Date.parse(row.createdAt),closes=Date.parse(row.closesAt);
  return Number.isFinite(created)&&now>=created&&now<created+MIZZED_NOTIFICATION_LIFETIME
-  &&(!Number.isFinite(closes)||now<closes)&&(!row.status||row.status==='ACTIVE');
+  &&(!Number.isFinite(closes)||now<closes)&&(!row.status||row.status==='ACTIVE'||row.status==='LIVE');
 }
 
 // Keep a real venue waypoint even when the Placez layer is hidden. Never infer

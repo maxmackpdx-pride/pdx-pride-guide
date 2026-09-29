@@ -10,6 +10,7 @@ import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import { Button } from "@/components/ds";
 import SellzListingCard, { type SellzPost } from "@/components/board/SellzListingCard";
 import BoardFollowButton from "@/components/BoardFollowButton";
+import BoardStatsBar from "@/components/BoardStatsBar";
 import { shareCardUrl } from "@shared/shareCards";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { timeAgo } from "@/lib/boardFeed";
@@ -152,6 +153,14 @@ export default function Sellz() {
   const resultsError = ownerView ? mineIsError : isError;
 
   const activeCount = posts.filter(post => post.status === "ACTIVE").length;
+  // Live counts from the room's own query. Demo rows never count; zero stays visible.
+  const realPosts = posts.filter(post => post.username !== "hausing_demo");
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const roomStats = [
+    { num: realPosts.filter(post => post.status === "ACTIVE").length, label: "For sale", color: "var(--room-sellz)" },
+    { num: realPosts.filter(post => post.status === "ACTIVE" && Date.parse(post.createdAt) >= weekAgo).length, label: "New this week", color: "var(--neon-yellow)" },
+    { num: realPosts.filter(post => post.status === "RESERVED").length, label: "Reserved", color: "var(--panel-cyan)" },
+  ];
   const filtersActive = Boolean(search.trim() || category !== "ALL" || condition !== "ALL" || price !== "ALL" || view !== "ALL" || sort !== "NEWEST");
   const activeListings = filtered.filter(post => post.status === "ACTIVE" || post.status === "RESERVED");
   const inactiveMine = ownerView ? filtered.filter(post => post.status !== "ACTIVE" && post.status !== "RESERVED") : [];
@@ -182,8 +191,9 @@ export default function Sellz() {
   return <main className="gigz-page sellz-page sellz-board-page">
     <div className="gigz-shell">
       <div className="gigz-identity board-share-header"><BoardShareButton title="Sellz" path="/sellz" /><img src="/brand/family/sellz.svg" alt="Sellz" /><span>Good stuff. New hands.</span></div>
+      {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE MARKETPLACE</div><h1>Find your next good thing<span>.</span></h1><p>Buy and sell with your community. Message, agree, and hand off directly.</p></div>
-        <div className="sellz-board-actions"><BoardFollowButton board="sellz" /><button type="button" className="gigz-post" onClick={openForm}><Plus size={17} /> Sell something <ArrowUpRight size={16} /></button></div>
+        <div className="sellz-board-actions"><BoardFollowButton board="sellz" /><button type="button" className="gigz-post gigz-post--primary" onClick={openForm}><Plus size={17} /> Sell something <ArrowUpRight size={16} /></button></div>
       </div>
       <div className="sellz-board-filters" aria-label="Filter Sellz listings">
         <label>Search Sellz<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search listings and neighborhoods" /></label>

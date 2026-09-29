@@ -24,6 +24,7 @@ import type { CSSProperties } from "react";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
 import BoardFollowButton from "@/components/BoardFollowButton";
+import BoardStatsBar from "@/components/BoardStatsBar";
 import { trackProductEvent } from "@/lib/analytics";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
@@ -158,11 +159,20 @@ export default function PrideWork() {
   const opportunities = visible.filter(g => g.postType === "POSTING_GIG" && g.status === "LIVE");
   const talent = visible.filter(g => g.postType === "LOOKING_FOR_WORK" && g.status === "LIVE");
   const selected = gigs.find(g => g.id === selectedId);
+  // Live counts from the room's own query. Demo rows never count; zero stays visible.
+  const realLive = gigs.filter(g => g.status === "LIVE" && g.username !== "hausing_demo");
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const roomStats = [
+    { num: realLive.filter(g => g.postType === "POSTING_GIG").length, label: "Open gigz", color: "var(--room-gigz-ink)" },
+    { num: realLive.filter(g => Date.parse(g.createdAt) >= weekAgo).length, label: "New this week", color: "var(--neon-yellow)" },
+    { num: realLive.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Available to hire", color: "var(--panel-cyan)" },
+  ];
   const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/pride-work?post=${id}`); window.setTimeout(() => document.getElementById("gigz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
   return <main className="gigz-page">
     <div className="gigz-shell">
       <div className="gigz-identity board-share-header"><BoardShareButton title="Gigz" path="/pride-work" /><img src="/brand/family/gigz.svg" alt="Gigz" /><span>Work with your people.</span><BoardFollowButton board="gigz" /></div>
-      <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE BOARD</div><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
+      {!isLoading && !isError && !onlyMine && <BoardStatsBar variant="band" stats={roomStats} />}
+      <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE BOARD</div><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post gigz-post--primary" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
       <div className="gigz-filter"><label>Search Gigz<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search roles, skills, gigs" /></label><label><input type="checkbox" checked={remoteOnly} onChange={e => setRemoteOnly(e.target.checked)} /> Remote only</label>{user && <label><input type="checkbox" checked={onlyMine} onChange={e => setOnlyMine(e.target.checked)} /> My Gigz</label>}</div>
       {isLoading ? <BoardFeedSkeleton label="Loading Gigz posts" shape="board" count={3} /> : isError ? <div className="gigz-empty" role="alert">Could not load posts. <button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>Try again</button></div> : opportunities.length ? <GigRail posts={opportunities} kind="gigs" selected={selectedId} onSelect={select} /> : <div className="gigz-empty">No open gigs yet. <button onClick={() => openForm("POSTING_GIG")}>Post a gig</button></div>}
       <div className="gigz-talent-zone"><div className="gigz-section-head"><div><div className="gigz-eyebrow">THE PEOPLE</div><h2>Available to hire<span>.</span></h2><p>Meet people ready to bring your next idea to life.</p></div><button type="button" className="gigz-post" onClick={() => openForm("LOOKING_FOR_WORK")}><Plus size={17} /> Post your availability <ArrowUpRight size={16} /></button></div>

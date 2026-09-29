@@ -6,6 +6,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { useAuth } from "@/context/AuthContext";
 import MessageModal from "@/pages/profile/MessageModal";
 import type { MemberProfileData } from "@/pages/profile/types";
+import "./IdentityPeek.css";
 
 type IdentityPeekProps = {
   trigger: ReactNode;

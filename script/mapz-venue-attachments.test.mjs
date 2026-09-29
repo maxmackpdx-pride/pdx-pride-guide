@@ -31,6 +31,13 @@ test('Mizzed signs expire exactly eight days after posting and respect earlier c
  const parent={x:200,y:300,size:28};const a=extensionGeometry(parent),b=extensionGeometry(parent,1,true);
  assert.equal(a.y,parent.y);assert.ok(a.right<parent.x-parent.size/2);assert.ok(b.right<a.x-a.size/2);
 });
+test('gigs posted at a place branch for eight days; gigs without a place stay',()=>{
+ const created=Date.parse('2026-09-25T21:00:00Z'),row={waypointFamily:'gigz',createdAt:new Date(created).toISOString(),status:'LIVE',venueWaypointKey:'p-4'};
+ assert.equal(mizzedNotificationActive(row,created+MIZZED_NOTIFICATION_LIFETIME-1),true);
+ assert.equal(mizzedNotificationActive(row,created+MIZZED_NOTIFICATION_LIFETIME),false);
+ const {venueWaypointKey,...loose}=row;
+ assert.equal(mizzedNotificationActive(loose,created+MIZZED_NOTIFICATION_LIFETIME*4),true);
+});
 test('dense same-venue holograms separate without moving down onto their waypoint',async()=>{
  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
  const context=vm.createContext({});vm.runInContext(renderer.slice(renderer.indexOf('function separateHolograms('),renderer.indexOf('function hologramVariation(')),context);

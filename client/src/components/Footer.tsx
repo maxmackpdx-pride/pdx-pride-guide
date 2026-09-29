@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { FeedbackButton } from "./FeedbackForm";
 import PushNotificationToggle from "./PushNotificationToggle";
+import CalmModeToggle from "./CalmModeToggle";
 import SplitFlapSignoff from "./SplitFlapSignoff";
 import TipSupport from "./TipSupport";
 
@@ -70,6 +71,7 @@ export default function Footer() {
             <div className="site-footer__controls">
               <FeedbackButton />
               <PushNotificationToggle />
+              <CalmModeToggle compact />
             </div>
           </div>
 

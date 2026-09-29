@@ -20,7 +20,7 @@ export default function EventLinkChoiceMenu({
   if (!open) return null;
 
   return (
-    <div className={`event-link-choice-menu${floating ? " event-link-choice-menu--floating" : ""}`} role="menu" aria-label={title}>
+    <div className={`event-link-choice-menu${floating ? " event-link-choice-menu--floating pdx-liquid-overlay" : ""}`} role="menu" aria-label={title}>
       <div className="event-link-choice-menu__title">{title}</div>
       {options.map(opt => (
         <button

@@ -14,6 +14,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
 import BoardFollowButton from "@/components/BoardFollowButton";
+import BoardStatsBar from "@/components/BoardStatsBar";
 import { trackProductEvent } from "@/lib/analytics";
 import { timeAgo } from "@/lib/boardFeed";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
@@ -207,6 +208,14 @@ export default function Gifting() {
   const offered = filtered.filter(post => isActivePost(post) && post.postType === "GIFT");
   const requested = filtered.filter(post => isActivePost(post) && post.postType === "ISO");
   const inactiveMine = onlyMine ? filtered.filter(post => post.isMine && !isActivePost(post)) : [];
+  // Live counts from the room's own query. Demo rows never count; zero stays visible.
+  const realActive = posts.filter(post => isActivePost(post) && post.username !== "hausing_demo");
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const roomStats = [
+    { num: realActive.filter(post => post.postType === "GIFT").length, label: "Offered", color: "var(--room-giftz)" },
+    { num: realActive.filter(post => post.postType === "ISO").length, label: "In search of", color: "var(--room-mizzed)" },
+    { num: realActive.filter(post => Date.parse(post.createdAt) >= weekAgo).length, label: "New this week", color: "var(--panel-cyan)" },
+  ];
   const selected = posts.find(post => post.id === expandedId);
   const select = (id: number) => {
     setExpandedId(id);
@@ -225,8 +234,9 @@ export default function Gifting() {
   return <main className="gigz-page giftz-page gifting-page">
     <div className="gigz-shell">
       <div className="gigz-identity board-share-header"><BoardShareButton title="Giftz" path="/gifting" /><img src="/brand/family/giftz.svg" alt="Giftz" /><span>Pass it on. Find what you need.</span></div>
+      {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE BOARD</div><h1>Good things move around<span>.</span></h1><p>Give what you can. Find what you need. Keep it free.</p></div>
-        <div className="giftz-actions"><BoardFollowButton board="giftz" /><button type="button" className="gigz-post" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
+        <div className="giftz-actions"><BoardFollowButton board="giftz" /><button type="button" className="gigz-post gigz-post--primary" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
       </div>
       {!postingOpen && giftingStatus && <p className="giftz-posting-status" role="status">{giftingStatus.message}</p>}
       <div className="giftz-filters" aria-label="Filter Giftz posts">

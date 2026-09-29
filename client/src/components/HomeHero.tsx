@@ -278,6 +278,7 @@ export default function HomeHero() {
             src={heroWordmark}
             alt=""
             className="home-hero__wordmark home-hero__wordmark-glitch"
+            hero
           />
           <img
             src={heroWordmark}
