@@ -556,6 +556,7 @@ function authUserResponse(req: any, user: any) {
     avatarRing: user.avatarRing || "none", avatarCrop: user.avatarCrop || null,
     bio: user.bio, photoUrl: user.photoUrl,
     coverImageUrl: user.coverImageUrl || null, coverCrop: user.coverCrop || null,
+    calmMode: typeof user.calmMode === "boolean" ? user.calmMode : null,
     googleLinked: !!user.googleId,
     promoterStatus: user.promoterStatus || "none",
     pronouns: user.pronouns || null,
@@ -4858,6 +4859,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/push/vapid-public-key", (_req, res) => {
     if (!isPushConfigured()) return res.json({ configured: false, publicKey: null });
     res.json({ configured: true, publicKey: getVapidPublicKey() });
+  });
+
+  app.put("/api/users/me/calm", requireAuth, (req, res) => {
+    const parsed = z.object({ calmMode: z.boolean() }).safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: "calmMode must be true or false" });
+    sqlite.prepare(`UPDATE users SET calm_mode = ? WHERE id = ?`).run(parsed.data.calmMode ? 1 : 0, req.session.userId!);
+    res.json({ calmMode: parsed.data.calmMode });
   });
 
   app.get("/api/users/me/notification-prefs", requireAuth, (req, res) => {

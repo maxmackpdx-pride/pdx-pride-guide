@@ -17,6 +17,8 @@ export interface AuthUser {
   photoUrl: string | null;
   coverImageUrl?: string | null;
   coverCrop?: string | null;
+  /** Account calm mode; null when the member has never chosen. */
+  calmMode?: boolean | null;
   googleLinked: boolean;
   promoterStatus?: "none" | "pending" | "approved" | "rejected";
   isAdmin?: boolean;

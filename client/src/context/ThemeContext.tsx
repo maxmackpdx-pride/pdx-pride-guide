@@ -3,11 +3,13 @@ import { createContext, useContext, useEffect, useState } from "react";
 interface ThemeContextValue {
   calmMode: boolean;
   toggleCalmMode: () => void;
+  setCalmMode: (value: boolean) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
   calmMode: false,
   toggleCalmMode: () => {},
+  setCalmMode: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -26,7 +28,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [calmMode]);
 
   return (
-    <ThemeContext.Provider value={{ calmMode, toggleCalmMode: () => setCalmMode(x => !x) }}>
+    <ThemeContext.Provider value={{ calmMode, toggleCalmMode: () => setCalmMode(x => !x), setCalmMode }}>
       {children}
     </ThemeContext.Provider>
   );

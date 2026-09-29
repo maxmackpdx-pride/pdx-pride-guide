@@ -415,6 +415,8 @@ export const users = sqliteTable("users", {
   banner: text("banner"), // 'accent-gradient' | 'sticker-wall' | 'pride-guide-social'
   coverImageUrl: text("cover_image_url"),
   coverCrop: text("cover_crop"),
+  /** Calm mode saved to the account. Null means the member never chose; the device value applies. */
+  calmMode: integer("calm_mode", { mode: "boolean" }),
   pup: text("pup"), // JSON {name,hood,role,lookingFor} | null - member-only, opt-in pup identity
   googleId: text("google_id").unique(),
   status: text("status").notNull().default("active"),

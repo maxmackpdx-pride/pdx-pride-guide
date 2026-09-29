@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import CalmModeToggle from "@/components/CalmModeToggle";
 import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronDown, House, Inbox, Search, Settings, Trash2, UserRound, UsersRound } from "lucide-react";
@@ -814,6 +815,8 @@ export default function Nav() {
                 <UserAvatar href={LOCAL_DEMO_PROFILE_PATH} username="tucker_pdmax" title="Local demo profile" size={38} onClick={closeMenu} />
               </div>
             )}
+
+            {!user && !authLoading && <CalmModeToggle minimal />}
 
             {!user && !localDemo && !authLoading && (
               <button

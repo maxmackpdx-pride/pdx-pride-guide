@@ -849,6 +849,7 @@ try { sqlite.exec(`ALTER TABLE users ADD COLUMN accent_color TEXT`); } catch(e) 
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN banner TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN cover_image_url TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN cover_crop TEXT`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN calm_mode INTEGER`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN pup TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN username_changed_at TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN community_standards_version TEXT`); } catch(e) {}
