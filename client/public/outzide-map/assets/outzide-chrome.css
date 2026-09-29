@@ -1,10 +1,13 @@
 /* Outzide chrome aligned to the Mapz dock. Activity icons and colors stay. */
 .outzide-shell{
-  --oz-dock:env(safe-area-inset-bottom,0px);
+  --oz-dock:calc(108px + env(safe-area-inset-bottom,0px));
   --oz-top:max(12px, env(safe-area-inset-top, 0px));
 }
 .outzide-shell[data-mobile-dock="expanded"]{
-  --oz-dock:calc(78px + env(safe-area-inset-bottom,0px));
+  --oz-dock:calc(108px + env(safe-area-inset-bottom,0px));
+}
+.outzide-shell[data-mobile-dock="collapsed"]{
+  --oz-dock:calc(28px + env(safe-area-inset-bottom,0px));
 }
 .outzide-shell .oz-top{
   position:fixed;z-index:1100;top:var(--oz-top);left:12px;right:12px;
@@ -26,13 +29,13 @@
 .outzide-shell #updates-button[aria-expanded=true]{color:var(--orange);box-shadow:var(--map-ui-shadow-nav,none),inset 0 -2px var(--orange)}
 
 .outzide-shell .map-stage .map-top{
-  position:fixed;z-index:830;inset:auto 12px calc(var(--oz-dock) + 10px) auto !important;
+  position:fixed;z-index:830;inset:auto 12px calc(var(--oz-dock) + 16px) auto !important;
   top:auto !important;left:auto !important;width:auto;height:auto;padding:0;background:none;border:0;box-shadow:none;
 }
 .outzide-shell .map-controls{position:static}
 .outzide-shell .map-controls #fire-toggle{width:44px;padding:0}
 .outzide-shell .drawer-launcher{
-  position:fixed;z-index:840;left:12px;bottom:calc(var(--oz-dock) + 10px);
+  position:fixed;z-index:840;left:12px;bottom:calc(var(--oz-dock) + 16px);
   display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 16px;
   border:1px solid var(--map-ui-rim,#050706);border-radius:16px;
   background:var(--map-ui-glass,#101a16ee);color:var(--ink);
@@ -47,10 +50,9 @@
   min-height:0;overflow:hidden;width:auto !important;height:auto !important;
 }
 .outzide-shell[data-drawer=open] .discovery{display:flex !important}
-/* ID beats the older half-height list sheet and the 52px map handle. */
 .outzide-shell[data-drawer=open] .workspace.view-map #outz-browse-content{
   left:10px !important;right:10px !important;top:auto !important;
-  bottom:calc(var(--oz-dock) + 8px) !important;
+  bottom:calc(var(--oz-dock) + 12px) !important;
   width:auto !important;height:auto !important;
   max-height:min(68dvh,640px) !important;
   overflow:hidden !important;border-radius:18px !important;
@@ -138,4 +140,4 @@
 .outzide-shell[data-drawer=open] .map-bottom,
 .outzide-shell[data-drawer=open] #selection-dock{visibility:hidden}
 .outzide-shell #selection-dock{bottom:calc(var(--oz-dock) + 74px)}
-.outzide-shell .map-bottom{left:12px;right:78px;bottom:calc(var(--oz-dock) + 12px)}
+.outzide-shell .map-bottom{left:12px;right:78px;bottom:calc(var(--oz-dock) + 16px)}

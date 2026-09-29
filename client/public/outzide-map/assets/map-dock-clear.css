@@ -1,0 +1,27 @@
+/* Keep map choices off the app dock on both Outzide and Mapz. */
+.outzide-shell,
+.zaydar-map-demo{
+  --map-dock-clear:calc(108px + env(safe-area-inset-bottom,0px));
+}
+@media(max-width:960px){
+  .outzide-shell{
+    --oz-dock:var(--map-dock-clear);
+  }
+  .outzide-shell .drawer-launcher,
+  .outzide-shell .map-stage .map-top{
+    bottom:calc(var(--map-dock-clear) + 12px);
+  }
+  .outzide-shell .map-stage .map-top{
+    inset:auto 12px calc(var(--map-dock-clear) + 12px) auto !important;
+  }
+  .outzide-shell .map-bottom{
+    bottom:calc(var(--map-dock-clear) + 14px);
+  }
+  .outzide-shell #selection-dock{
+    bottom:calc(var(--map-dock-clear) + 76px);
+  }
+  .zaydar-map-demo .zaydar-map-controls-launcher,
+  .zaydar-map-demo .zaydar-demo-navigation{
+    bottom:calc(var(--map-dock-clear) + 8px);
+  }
+}
