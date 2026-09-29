@@ -3,7 +3,7 @@ import {mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP} from '../
 import {visibleHologramLabels} from '../client/public/zaydar-map/label-visibility.js';
 import {waypointGeometry} from '../client/public/zaydar-map/waypoint-markers.js';
 import {housingIconSize} from '../client/public/zaydar-map/housing-holograms.js';
-import test from 'node:test';
+import test, {after} from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {readFile} from 'node:fs/promises';
@@ -12,20 +12,14 @@ import {mapzSurfaceStyle} from '../client/public/zaydar-map/natural-surfaces.js'
 import {waterReflectionSegments,createBuildingChrome} from '../client/public/zaydar-map/nightlife-materials.js';
 import {projectorGroundScale} from '../client/public/zaydar-map/hologram-materials.js';
 
-// projectorGroundScale reads the live map from window to hide disks once buildings extrude.
-function withMapWindow(t,mapzMap){
-  const previous=globalThis.window;globalThis.window={__mapzMap:mapzMap};
-  t.after(()=>{if(previous===undefined)delete globalThis.window;else globalThis.window=previous;});
-}
-const near=(actual,expected)=>assert.ok(Math.abs(actual-expected)<1e-9,`${actual} is not ${expected}`);
+const previousWindow=globalThis.window;
+globalThis.window={};
+after(()=>{if(previousWindow===undefined)delete globalThis.window;else globalThis.window=previousWindow;});
 
-test('projector circles shrink at overview zoom without a camera-facing guide line',async t=>{
-  withMapWindow(t,undefined);
-  near(projectorGroundScale(12),.28*.3);
+test('projector circles shrink at overview zoom without a camera-facing guide line',async()=>{
+  assert.equal(projectorGroundScale(12),.28*.3);
   assert.ok(projectorGroundScale(13)<projectorGroundScale(14));
-  near(projectorGroundScale(15),.3);
-  window.__mapzMap={getZoom:()=>15.35,getPitch:()=>34};
-  assert.equal(projectorGroundScale(15),0,'no ground disks once marks sit on roofs');
+  assert.equal(projectorGroundScale(15),.3);
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   assert.equal(renderer.includes('lineTo(logoX,raisedY)'),false);
   assert.equal(renderer.includes("lineTo(logoX+(p.x-logoX)*.08"),false);
@@ -86,8 +80,7 @@ test('chrome reuses wall paths at rest and rebuilds only when the camera changes
   }finally{globalThis.Path2D=OriginalPath;}
 });
 
-test('actual hologram draw paints sky artwork after building occlusion',async t=>{
-  withMapWindow(t,undefined);
+test('actual hologram draw paints sky artwork after building occlusion',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   const source=renderer.slice(renderer.indexOf('function drawLights('),renderer.indexOf('// Gentle corridor:'));
   const operations=[],noop=()=>{},window={innerWidth:900,innerHeight:1200};

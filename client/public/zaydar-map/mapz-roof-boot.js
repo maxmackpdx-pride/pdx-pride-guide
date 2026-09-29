@@ -1,5 +1,5 @@
 import {createVenueRoofs,extrusionAmount,matchBuilding,isPlacezRow} from './venue-roofs.js?v=20260926-placez-roofs';
-import {installCheapBridgeGlow} from './bridge-water-glow.js?v=20260929-glow-no-fit';
+import {installCheapBridgeGlow} from './bridge-water-glow.js?v=20260928-verification';
 
 function rowsToFeatures(rows){
  return (rows||[]).filter(row=>Array.isArray(row.coordinates)&&row.coordinates.length>=2&&row.color).map(row=>({

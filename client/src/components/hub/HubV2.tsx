@@ -338,6 +338,7 @@ export default function HubV2({
       onSearchChange={setSearchQ}
       sideExtra={keysExtra}
       sideExtraDrawer={null}
+      hideMobileDrawer
       rightRail={
         <HubRightRail
           upcoming={upcoming}

@@ -86,6 +86,7 @@ export type HubV2ShellProps = {
   sideExtra?: ReactNode;
   /** Mobile drawer footer slot (defaults to sideExtra). Use for Darkroom media, etc. */
   sideExtraDrawer?: ReactNode;
+  hideMobileDrawer?: boolean;
   /** Optional top-of-main toolbar (refresh, etc.) - stays inside the same shell. */
   mainToolbar?: ReactNode;
 };
@@ -110,9 +111,10 @@ export default function HubV2Shell({
   calmMode,
   sideExtra,
   sideExtraDrawer,
+  hideMobileDrawer = false,
   mainToolbar,
 }: HubV2ShellProps) {
-  const drawerExtra = sideExtraDrawer ?? sideExtra;
+  const drawerExtra = sideExtraDrawer === undefined ? sideExtra : sideExtraDrawer;
   const [location, navigate] = useLocation();
   const { openSheet } = useInboxSheet();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -636,7 +638,7 @@ export default function HubV2Shell({
         )}
       </div>
 
-      {mobileDrawer}
+      {!hideMobileDrawer && mobileDrawer}
     </div>
   );
 }

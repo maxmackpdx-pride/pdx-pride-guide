@@ -8,7 +8,6 @@
   map.__mapzIosPan=true;
   var start=null,frozen=null;
   function live(){return document.getElementById('waypoint-lights');}
-  function labels(){return document.getElementById('hologram-labels');}
   function dragging(){return !!(map.dragPan&&map.dragPan.isEnabled&&map.dragPan.isEnabled());}
   function ensureFrozen(){
    var src=live();
@@ -26,13 +25,11 @@
    src.style.visibility='hidden';
    return frozen;
   }
-  map.on('movestart',function(){
+  map.on('dragstart',function(){
    if(!dragging())return;
    var center=map.getCenter();
    start={lng:center.lng,lat:center.lat,zoom:map.getZoom(),bearing:map.getBearing(),point:map.project(center)};
    ensureFrozen();
-   var lab=labels();
-   if(lab){lab.style.willChange='transform';lab.style.pointerEvents='none';}
   });
   map.on('render',function(){
    if(!start||!dragging())return;
@@ -41,19 +38,15 @@
    var rotate=map.getBearing()-start.bearing;
    var t='translate('+origin.x+'px,'+origin.y+'px) rotate('+rotate+'deg) scale('+scale+') translate('+(-start.point.x)+'px,'+(-start.point.y)+'px)';
    if(frozen){frozen.style.transformOrigin='0 0';frozen.style.transform=t;}
-   var lab=labels();
-   if(lab){lab.style.transformOrigin='0 0';lab.style.transform=t;}
   });
   function clearFreeze(){
    start=null;
    var src=live();
    if(src)src.style.visibility='';
    if(frozen){frozen.style.display='none';frozen.style.transform='';}
-   var lab=labels();
-   if(lab){lab.style.transform='';lab.style.willChange='';lab.style.pointerEvents='';}
   }
   map.on('moveend',clearFreeze);
- });
+ }
  if(window.maplibregl?.Map&&!window.__mapzPerfMap){
   window.__mapzPerfMap=true;
   var Original=window.maplibregl.Map;
