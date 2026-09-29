@@ -7,18 +7,31 @@ Project decisions, reasoning, and current state live in the private repo
 Read it before proposing architecture, naming, product scope, or design
 direction.
 
-## Cowork / cloud sessions must include both repos
+## Cowork / cloud release access
 
-If this session cannot `git push` (`authorized repository set` / proxy 403),
-it started without the repo as a source. PAT-in-URL will not fix it.
-
-Start (or restart) the session with **both** sources:
+Start cloud sessions with both repositories as sources:
 
 - `maxmackpdx-pride/pdx-pride-guide`
 - `maxmackpdx-pride/zaylist-foundation-library`
 
 Direct link:
 https://claude.ai/code?repositories=maxmackpdx-pride/pdx-pride-guide,maxmackpdx-pride/zaylist-foundation-library
+
+Before implementing a request that includes **push/ship/deploy**, check that this
+session can advance `master` through an authorized write path. Read the session's
+branch and permission restrictions first. A successful push to a `claude/*` branch
+does not prove that `master` is writable. Do not make a test push to production.
+
+If terminal Git is blocked, use the connected GitHub integration as described in
+`AGENTS.md`, when it is available and authorized. If neither path can advance
+`master`, tell Tucker immediately, before implementation, which permission is
+missing and how to change the cloud session setting. Do not promise a production
+push, finish on a temporary branch, and ask him to merge it manually.
+
+A proxy 403 or `authorized repository set` error can mean a source was omitted.
+A branch-only or auto-mode production restriction is a different issue and must
+be resolved in the cloud session's permissions. Repository instructions cannot
+override a session-level denial. PAT-in-URL does not resolve either restriction.
 
 Full write-path notes: Foundation skill `zaylist-github-push`.
 
