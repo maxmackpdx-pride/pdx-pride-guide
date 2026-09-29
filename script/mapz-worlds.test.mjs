@@ -14,7 +14,9 @@ const places=[{id:1,name:'Test Venue',lat:45.52,lng:-122.67,neighborhood:'Pearl 
 
 test('board locations are approximate unless explicitly shared and remote/private addresses stay off pins',()=>{
   const exact=locateWorldRow({id:3,venueHint:'Test Venue'},'mizzed',places,[]);
-  assert.ok(Math.abs(exact.lat-45.525)<1e-6); assert.equal(exact.approximate,true);
+  assert.equal(exact.lat,45.52);assert.equal(exact.lng,-122.67);assert.equal(exact.approximate,false);
+  const gig=locateWorldRow({id:9,businessId:1,location:'SE Portland'},'gigz',places,[]);
+  assert.equal(gig.lat,45.52);assert.equal(gig.lng,-122.67);assert.equal(gig.approximate,false);
   const event=locateWorldRow({id:4,eventId:20,eventLat:45.51,eventLng:-122.66},'mizzed',places,[]);
   assert.ok(Math.abs(event.lat-45.5)<1e-6); assert.equal(event.approximate,true);
   const area=locateWorldRow({id:5,neighborhood:'Pearl',pickupPreference:'Private apartment address'},'giftz',places,[]);

@@ -689,12 +689,14 @@ export default function ZaydarMapDemo() {
     const brands=event?eventBrandLogos(event,places):null;
     const color=event?zaydarEventColor(event,places):place?zaydarPlaceColor(place):boardColor(row);
     const connectionEvent=row._board==='Mizzed'?events.find(e=>e.id===Number(row.eventId)):undefined;
-    const venueName=event?.venueName||connectionEvent?.venueName||String(row.eventVenue||row.venueHint||'');
-    const venue=event||row._board==='Mizzed'?places.find(p=>
-      (row._board==='Mizzed'&&Number(row.placeId)===p.id)||
+    const linkedBoard=row._board==='Mizzed'||row._board==='Gigz';
+    const venueName=event?.venueName||connectionEvent?.venueName||String(row.eventVenue||row.venueHint||row.placeName||(row._board==='Gigz'?row.location:'')||'');
+    const linkedId=Number(row.placeId||row.businessId);
+    const venue=event||linkedBoard?places.find(p=>
+      (linkedBoard&&Number.isFinite(linkedId)&&linkedId===p.id)||
       (venueName&&normalizeDirectoryName(p.name)===normalizeDirectoryName(venueName))):undefined;
     const venuePoint=venue?placeMarks([venue]).sort((a,b)=>Math.hypot(a.lat-mark.lat,a.lng-mark.lng)-Math.hypot(b.lat-mark.lat,b.lng-mark.lng))[0]:undefined;
-    const venueAnchor=(event||place||row.mapPoint)&&venue&&venuePoint?{key:`directory-${venue.id}`,coordinates:[venuePoint.lng,venuePoint.lat],name:venue.name,
+    const venueAnchor=venue&&venuePoint?{key:`directory-${venue.id}`,coordinates:[venuePoint.lng,venuePoint.lat],name:venue.name,
       color:zaydarPlaceColor(venue),type:zaydarPlaceType(venue),typeIcon:zaydarTypeIcon(zaydarPlaceType(venue)),
       waypointLogo:resolveDirectoryLogo(venue.name,venue.imageUrl)?.replace(/\.png(?=\?|$)/,'-white.png'),logo:''}:undefined;
     const type=place?zaydarPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');

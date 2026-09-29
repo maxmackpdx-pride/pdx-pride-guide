@@ -41,10 +41,11 @@ export function locateWorldRow(row: WorldRow, world: MapWorld, places: WorldRow[
     const event = world === "mizzed" ? events.find(event => event.id === row.eventId) : undefined;
     const eventPoint = mapCoordinates(row.eventLat ?? event?.lat, row.eventLng ?? event?.lng);
     if (eventPoint) return {...row, ...coarsePoint(eventPoint), approximate:true, locationLabel:"Near event · approximate"};
-    const name = normalizeDirectoryName(String(row.eventVenue || row.venueHint || row.location || ""));
+    const name = normalizeDirectoryName(String(row.eventVenue || row.venueHint || row.placeName || row.location || ""));
     const place = places.find(place => ((row.placeId || row.businessId) && Number(place.id) === Number(row.placeId || row.businessId)) || (name && normalizeDirectoryName(place.name) === name));
     const venuePoint = place && mapCoordinates(place.lat,place.lng);
-    if (venuePoint) return {...row, ...coarsePoint(venuePoint), approximate:true, locationLabel:"Near venue · approximate"};
+    // A venue-linked post hangs off that waypoint. A coarse cell reads as a second pin.
+    if (venuePoint) return {...row, lat:venuePoint.lat, lng:venuePoint.lng, approximate:false, locationLabel:String(place.name)};
   }
   const area = areaName(row.neighborhood || (world === "gigz" ? row.location : world === "mizzed" ? row.venueHint : ""));
   const candidates=area?places.filter(place=>areaName(place.neighborhood)===area).flatMap(place=>{

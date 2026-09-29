@@ -402,7 +402,7 @@ function buildingGlitter(target,surfaces){
 const logoFocus=createLogoFocus();
 const hologramLayouts=new WeakMap();
 const logoSpacing=1.15;
-const hologramLiftScale=.7*TONIGHT_HEIGHT_MULTIPLIER;
+const hologramLiftScale=.7*TONIGHT_HEIGHT_MULTIPLIER*.8;
 const hologramArtworkScale=3.15;
 const hologramLabelWidth=68.4;
 const logoFit=logo=>Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height);
@@ -549,7 +549,7 @@ function drawLights(fade,target=map,surface=lights){
  const venueItems=new Map(ordered.filter(item=>item.feature.properties.kind==='place').map(item=>[item.feature.properties.key,item]));
  const venueGeometry=item=>{const parent=venueItems.get(item.feature.properties.venueWaypointKey)||item;return waypointGeometry(parent.p,parent.feature.properties.key===selectedKey,placezHoverLift(target,parent.feature,surfaces));};
  const protectedVenues=new Set(ordered.map(item=>item.feature.properties.venueWaypointKey).filter(Boolean));
- const placeClusters=clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel&&!protectedVenues.has(item.feature.properties.key)&&!(item.feature.properties.waypointFamily==='mizzed'&&item.feature.properties.venueWaypointKey)),selectedKey,target.getZoom(),width,height);
+ const placeClusters=clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel&&!protectedVenues.has(item.feature.properties.key)&&!(['mizzed','gigz'].includes(item.feature.properties.waypointFamily)&&item.feature.properties.venueWaypointKey)),selectedKey,target.getZoom(),width,height);
  for(const item of beacons){
   const phase=item.feature.properties.phase;
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
@@ -640,16 +640,18 @@ function drawLights(fade,target=map,surface=lights){
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.56);
   const beamHalfWidth=61.25*beaconScale;
   const emergence=isBar?emergenceFor(feature):0;
-  if(feature.properties.waypointFamily==='mizzed'&&feature.properties.venueWaypointKey){
+  const branchFamily=feature.properties.waypointFamily;
+  if((branchFamily==='mizzed'||branchFamily==='gigz')&&feature.properties.venueWaypointKey){
    if(pass===0)continue;
    const parent=venueGeometry({feature,p}),key=feature.properties.venueWaypointKey,index=extensionSlots.get(key)||0;
    extensionSlots.set(key,index+1);
    const selected=feature.properties.key===selectedKey,geometry=extensionGeometry(parent,index,selected);
+   const branchLabel=branchFamily==='gigz'?'Gigz':'Mizzed';
    lightsContext.save();lightsContext.globalAlpha=coreAlpha;lightsContext.strokeStyle=color;lightsContext.lineWidth=2;
    lightsContext.beginPath();lightsContext.moveTo(geometry.startX,parent.y);lightsContext.lineTo(geometry.right,parent.y);lightsContext.stroke();lightsContext.restore();
    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,coreAlpha);
-   hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:geometry.size/2+6,name:feature.properties.name,category:'Mizzed',color});
-   if(selected)drawSelectedMarkerLabel(lightsContext,geometry.x,geometry.y+geometry.size/2-14,feature.properties.name,'Mizzed',color,width);
+   hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:geometry.size/2+6,name:feature.properties.name,category:branchLabel,color});
+   if(selected)drawSelectedMarkerLabel(lightsContext,geometry.x,geometry.y+geometry.size/2-14,feature.properties.name,branchLabel,color,width);
    continue;
   }
   if(feature.properties.kind!=='event'){
