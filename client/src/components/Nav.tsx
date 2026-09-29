@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronDown, House, Inbox, Search, Settings, Trash2, UserRound, UsersRound } from "lucide-react";
 import { MenuCloseIcon } from "@/components/ui/animated-state-icons";
-import { CompactHubLink, CompactZListLink, CompactNavigation } from "@/components/ui/compact-navigation";
+import { CompactHubLink, CompactNavigation } from "@/components/ui/compact-navigation";
 import GlitchLogo from "@/components/GlitchLogo";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
@@ -717,17 +717,8 @@ export default function Nav() {
           </Link>
 
           <div className="hub-mtop site-hub-mtop" aria-label="Mobile navigation">
-            <nav aria-label="Mobile top navigation"><CompactNavigation location={location} entries={MOBILE_TOP_NAV} textOnly onNavigate={() => { closeMenu(); dismissMobileNavOverlays(); }} /></nav>
+            <nav aria-label="Mobile top navigation"><CompactNavigation location={location} entries={MOBILE_TOP_NAV} textOnly onNavigate={() => { closeMenu(); setMobileProfileOpen(false); dismissMobileNavOverlays(); }} /></nav>
             <div className="hub-mtop__spacer" />
-            {
-              <CompactZListLink
-                active={location === "/z" || location.startsWith("/z/")}
-                onNavigate={() => {
-                  setMobileProfileOpen(false);
-                  dismissMobileNavOverlays();
-                }}
-              />
-            }
             {authLoading && !user ? (
               <span className="hub-mtop__mode-btn" role="status" aria-label="Checking your session">…</span>
             ) : user ? (

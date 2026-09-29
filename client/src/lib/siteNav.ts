@@ -69,10 +69,10 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/outzide/sauvie-island", label: "Sauvie Island", accent: "orange" },
     ],
   },
-  { type: "link", href: "/z", label: "Z/ List", accent: "violet" },
+  { type: "link", href: "/z", label: "Z/Lists", accent: "violet" },
 ];
 
-/** Phone header groups site info and all five boards into two dropdowns. */
+/** Phone header shares two dropdowns and the Z/Lists destination in one rail. */
 export const MOBILE_TOP_NAV: NavEntry[] = [
   {
     type: "dropdown",
@@ -91,6 +91,7 @@ export const MOBILE_TOP_NAV: NavEntry[] = [
     accent: "magenta",
     items: [...BOARD_NAV, { href: "/the-hauz", label: "Houz", accent: "blue" }],
   },
+  { type: "link", href: "/z", label: "Z/Lists", accent: "violet" },
 ];
 
 export type PageHeaderMeta = {
