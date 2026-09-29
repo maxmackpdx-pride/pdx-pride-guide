@@ -9,7 +9,7 @@ direction.
 
 ## Cowork / cloud release access
 
-Start cloud sessions with both repositories as sources:
+For general cloud work, include both repositories as sources:
 
 - `maxmackpdx-pride/pdx-pride-guide`
 - `maxmackpdx-pride/zaylist-foundation-library`
@@ -17,21 +17,27 @@ Start cloud sessions with both repositories as sources:
 Direct link:
 https://claude.ai/code?repositories=maxmackpdx-pride/pdx-pride-guide,maxmackpdx-pride/zaylist-foundation-library
 
-Before implementing a request that includes **push/ship/deploy**, check that this
-session can advance `master` through an authorized write path. Read the session's
-branch and permission restrictions first. A successful push to a `claude/*` branch
-does not prove that `master` is writable. Do not make a test push to production.
+### Claude cloud production sessions
 
-If terminal Git is blocked, use the connected GitHub integration as described in
-`AGENTS.md`, when it is available and authorized. If neither path can advance
-`master`, tell Tucker immediately, before implementation, which permission is
-missing and how to change the cloud session setting. Do not promise a production
-push, finish on a temporary branch, and ask him to merge it manually.
+For a session that must push production, select `pdx-pride-guide` as its only
+repository. Claude Code cloud sessions with multiple repositories do not load
+project permission rules from `.claude/settings.json`. The committed project rule
+allows only the exact non-force command `git push origin HEAD:master`; the session
+still must follow the user's explicit ship instruction and synchronize safely
+with `origin/master` first.
 
-A proxy 403 or `authorized repository set` error can mean a source was omitted.
-A branch-only or auto-mode production restriction is a different issue and must
-be resolved in the cloud session's permissions. Repository instructions cannot
-override a session-level denial. PAT-in-URL does not resolve either restriction.
+For a Claude Code Routine, edit the Routine and enable **Allow unrestricted branch
+pushes** for the `pdx-pride-guide` repository under Permissions. This is a
+per-Routine account setting. Without it, Claude's cloud GitHub proxy accepts pushes
+only to `claude/*` branches. A repo file cannot change this account-side switch.
+Also confirm the GitHub connection has write access to this repository. Keep the
+normal production branch protection and Railway checks.
+
+If a single-repository interactive cloud session still blocks the exact allowed
+push, inspect the session's permission mode and any organization managed policy.
+A project allow rule cannot override managed restrictions or the Routine's
+branch-push setting. Report the specific denial before doing implementation work.
+Do not finish a requested shipment on a temporary branch for Tucker to merge.
 
 Full write-path notes: Foundation skill `zaylist-github-push`.
 
