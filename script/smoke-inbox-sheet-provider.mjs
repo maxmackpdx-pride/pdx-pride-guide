@@ -108,19 +108,22 @@ try {
   );
 
   record(
-    "Single host, no overlay when closed (desktop)",
-    (await hostCount(page)) === 1 && (await overlayCount(page)) === 0,
+    // The sheet host mounts lazily on first open, so a closed page may have none.
+    "At most one host, no overlay when closed (desktop)",
+    (await hostCount(page)) <= 1 && (await overlayCount(page)) === 0,
     `hosts=${await hostCount(page)} overlays=${await overlayCount(page)}`,
   );
 
   await page.locator(".floating-inbox__fab").click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
+  await page.waitForTimeout(300); // let the 0.2s backdrop fade-in finish
   const rect = await overlayRect(page);
   const desktopBackdrop = await backdropVisible(page);
   await page.screenshot({ path: join(OUT, "01-desktop-fab-open.png"), fullPage: true });
   record(
-    "Desktop FAB opens sheet bottom-right, no backdrop",
-    rect && rect.right > 900 && rect.top > 80 && rect.width < 700 && !desktopBackdrop,
+    // Desktop dims and blurs the page behind the sheet so it reads as above it.
+    "Desktop FAB opens sheet bottom-right over a blurred backdrop",
+    rect && rect.right > 900 && rect.top > 80 && rect.width < 700 && desktopBackdrop,
     `rect=${JSON.stringify(rect)} backdrop=${desktopBackdrop}`,
   );
 
@@ -148,18 +151,18 @@ try {
   );
 
   await page.locator(".site-auth--desktop .site-profile-menu__caret").click({ timeout: 10000 });
-  await page.getByRole("menuitem", { name: /Inbox/i }).click();
+  await page.getByRole("menuitem", { name: /^Messages/i }).click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   await page.screenshot({ path: join(OUT, "02-nav-profile-inbox.png"), fullPage: true });
   record(
-    "Nav profile Inbox opens sheet (no /inbox nav)",
+    "Nav profile Messages opens sheet (no /inbox nav)",
     !page.url().includes("/inbox") && (await overlayCount(page)) === 1,
     `url=${page.url()}`,
   );
 
   await page.goto(`${BASE}/dashboard`, { waitUntil: "domcontentloaded" });
   await waitForAppStable(page);
-  await page.locator(".hub-v2-nav").getByRole("button", { name: "Messages" }).click();
+  await page.locator(".hub-v2-nav").getByRole("button", { name: /^Messages/ }).click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   await page.screenshot({ path: join(OUT, "03-hub-sidebar-inbox.png"), fullPage: true });
   record(
@@ -194,8 +197,11 @@ try {
   // Hub mobile inbox (Hub V2 horizontal nav strip)
   await page.goto(`${BASE}/dashboard`, { waitUntil: "domcontentloaded" });
   await waitForAppStable(page);
-  await page.locator(".hub-v2-nav").waitFor({ state: "visible", timeout: 10000 });
-  await page.locator(".hub-v2-nav").getByRole("button", { name: "Messages" }).click();
+  // On phones the hub sections live in a slide-out menu; open it first.
+  await page.getByRole("button", { name: "Open hub menu" }).click();
+  const mobileHubMessages = page.getByRole("dialog", { name: "Hub menu" }).locator(".hub-v2-nav button", { hasText: /^Messages/ });
+  await mobileHubMessages.waitFor({ state: "visible", timeout: 10000 });
+  await mobileHubMessages.click();
   await page.locator(".inbox-overlay").waitFor({ state: "visible", timeout: 10000 });
   await page.screenshot({ path: join(OUT, "05-hub-mobile-inbox.png"), fullPage: true });
   record(

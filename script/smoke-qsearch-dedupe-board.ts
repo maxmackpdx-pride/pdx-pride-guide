@@ -79,10 +79,10 @@ function fakeEvent(id: number, title: string, dateStart: string, status: string 
 }
 
 // --- strong match helper ---
-const karaoke = draft({ title: "Karaoke", dateStart: "2026-07-22T20:00:00" });
-const board = [fakeEvent(132, "Karaoke", "2026-07-22T20:00:00")];
+const karaoke = draft({ title: "Karaoke", dateStart: "2099-07-22T20:00:00" });
+const board = [fakeEvent(132, "Karaoke", "2099-07-22T20:00:00")];
 assert(!!strongCatalogDuplicate(karaoke, board), "Karaoke matches LIVE #132");
-assert(!strongCatalogDuplicate(draft({ title: "Brand New Night", dateStart: "2026-09-01T21:00:00" }), board), "new title not a dup");
+assert(!strongCatalogDuplicate(draft({ title: "Brand New Night", dateStart: "2099-09-01T21:00:00" }), board), "new title not a dup");
 
 // --- one-off already on board → not queued ---
 const rawOne = [
@@ -93,7 +93,7 @@ const rawOne = [
     sourceUrl: "https://www.eagleportland.com/what-s-happening",
   },
   {
-    draft: draft({ title: "Brand New Night", dateStart: "2026-09-01T21:00:00" }),
+    draft: draft({ title: "Brand New Night", dateStart: "2099-09-01T21:00:00" }),
     sourceId: "eagle-events",
     sourceLabel: "Trusted · Eagle Portland",
     sourceUrl: "https://www.eagleportland.com/what-s-happening",
@@ -150,8 +150,8 @@ const none = buildScanCandidates(seriesRaw, allCoveredBoard, [], { includePastEv
 assert(none.length === 0, "fully covered series does not enter Review");
 
 // applyCatalogCoverage null for pure dup (use FUTURE date - past nights are dropped)
-const karaokeFuture = draft({ title: "Karaoke", dateStart: "2026-09-15T20:00:00" });
-const boardFuture = [fakeEvent(132, "Karaoke", "2026-09-15T20:00:00")];
+const karaokeFuture = draft({ title: "Karaoke", dateStart: "2099-09-15T20:00:00" });
+const boardFuture = [fakeEvent(132, "Karaoke", "2099-09-15T20:00:00")];
 const pureDup = buildScanCandidates(
   [
     {

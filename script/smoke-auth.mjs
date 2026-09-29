@@ -21,10 +21,20 @@ export async function smokeLogin(request, base, {
   throw new Error(`Login failed: ${lastBody}`);
 }
 
-/** Disable PWA service-worker reloads that close the inbox mid-test on preview:local. */
+/** Disable PWA service-worker reloads that close the inbox mid-test on preview:local, and skip first-visit pop-ups. */
 export async function prepareSmokeContext(context) {
   await context.addInitScript(() => {
     window.__PDX_LOCAL_PREVIEW__ = 1;
+    // Returning members already dismissed the one-time pop-ups (rebrand welcome,
+    // per-member glow ring nudge); their backdrops would otherwise swallow every
+    // click. Keep in sync with HomeConstructionNudge and PrideGlowNudge keys.
+    try {
+      const nativeGetItem = Storage.prototype.getItem;
+      Storage.prototype.getItem = function (key) {
+        if (/^pgpdx:(construction-nudge|glow-nudge):/.test(String(key))) return "1";
+        return nativeGetItem.call(this, key);
+      };
+    } catch {}
     const sw = navigator.serviceWorker;
     if (!sw) return;
     const nativeRegister = sw.register.bind(sw);

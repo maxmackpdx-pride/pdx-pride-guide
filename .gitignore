@@ -19,3 +19,5 @@ foundation/**/private/
 
 # Local server runtime uploads (mirrored flyers)
 uploads/
+# Smoke test screenshots
+script/smoke-output*/
