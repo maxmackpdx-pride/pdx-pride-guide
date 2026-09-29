@@ -7,7 +7,7 @@ type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:str
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
 type CanvasProps={initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};
-const MAP_SRC='/zaydar-map/index.html?v=20260929-boot';
+const MAP_SRC='/zaydar-map/index.html?v=20260929-fast';
 const BOOT_COPY='Your super gay city is loading.';
 const MAX_3D_ATTEMPTS=3;
 const ALIVE_PHASES=new Set(['map-created','map-loaded','first-frame']);
@@ -87,11 +87,6 @@ export default forwardRef<ZaydarHandle,CanvasProps>(function ZaydarCanvas(props,
   }else{setStopped(true);setNotice('The map couldn\u2019t load. You can still browse listings in Map controls.');}
  };
  useImperativeHandle(ref,()=>({send:(type,data={})=>activeControl.current?.send(type,data)}),[]);
- useEffect(()=>{
-  seenCity.current=false;
-  const later=window.setTimeout(()=>{if(!seenCity.current&&!stopped)setNotice('Loading map.');},12000);
-  return()=>window.clearTimeout(later);
- },[generation,stopped]);
  const offerReload=stopped||notice.startsWith('Loading')||notice.startsWith('The map');
  return <>
   <Zaydar3D key={generation} ref={activeControl} {...props} attempt={generation} initialView={lastView.current} onFailure={recover} onVisible={()=>{seenCity.current=true;setNotice('');}} onView={reportView}/>

@@ -3,7 +3,7 @@ import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOIN
 import { visibleHologramLabels } from './label-visibility.js?v=20260925-venue-nights';
 import {faceStackHtml} from '../outzide-map/assets/community-ui.js?v=map-continuity-1';
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
-import {createTerrainSampler,TERRAIN_STRENGTH} from './terrain-elevation.js';
+import {createTerrainSampler} from './terrain-elevation.js';
 import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260925-smooth-map';
 import {createBuildingModelLayer} from './building-models.js?v=20260928-big-pink-garage-height';
 import {createBuildingChrome} from './nightlife-materials.js?v=20260925-smooth-map';
@@ -26,13 +26,18 @@ import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
 startup.phase('script');
 const maxExploreZoom=17.75;
-const elevation=new mlcontour.DemSource({id:'mapz-elevation',url:'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',encoding:'terrarium',maxzoom:13,worker:true,cacheSize:64});
-elevation.setupMaplibre(maplibregl);
-const surfaceStyle=mapzSurfaceStyle({
- terrainStrength:TERRAIN_STRENGTH,
- demTiles:[elevation.sharedDemProtocolUrl],
- contourTiles:[elevation.contourProtocolUrl({multiplier:3.28084,thresholds:{10:[500,2000],12:[100,500],14:[50,200],15:[20,100]},contourLayer:'contours',elevationKey:'ele',levelKey:'level'})],
-});
+// First paint is the vector city. DEM workers were blocking the phone boot
+// and the preload already dropped terrain from this first style.
+const surfaceStyle=mapzSurfaceStyle({terrainStrength:0});
+delete surfaceStyle.terrain;
+if(surfaceStyle.sources){
+ delete surfaceStyle.sources.elevation;
+ delete surfaceStyle.sources['hillshade-elevation'];
+ delete surfaceStyle.sources.contours;
+}
+if(Array.isArray(surfaceStyle.layers)){
+ surfaceStyle.layers=surfaceStyle.layers.filter(layer=>layer.id!=='land-relief'&&layer.id!=='elevation-contours'&&layer.source!=='elevation'&&layer.source!=='hillshade-elevation'&&layer.source!=='contours');
+}
 // The home city materials, extended with DEM hillshade and Mapz surface treatments.
 // MapLibre creates and checks its own WebGL context. A separate retained probe
 // needlessly consumes another context on phones and can prevent the real one.
@@ -93,6 +98,14 @@ function installSceneExtras(){
 }
 map.on('load',()=>{
  loaded=true;startup.phase('map-loaded');cameraDirty=true;updateSceneStatus();scheduleFrame();
+ if(parent!==window)revealTime=3;
+ const markBase=()=>{
+  if(baseFrameRendered||!loaded)return;
+  const canvas=map.getCanvas();
+  if(canvas.width>0&&canvas.height>0){baseFrameRendered=true;scheduleFrame();}
+ };
+ map.once('idle',markBase);
+ window.setTimeout(markBase,800);
 });
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
@@ -1012,15 +1025,6 @@ map.on('error',event=>{
 });
 setTimeout(()=>{if(!loaded)status.textContent='Portland is still loading…';},8000);
 let firstFrameSent=false,baseFrameRendered=false;
-map.on('render',()=>{
- // A loaded style or an opacity change alone is not evidence of a city frame.
- // Wait for actual vector geography in a rendered, non-zero canvas.
- if(baseFrameRendered||!loaded)return;
- const canvas=map.getCanvas();
- if(canvas.width>0&&canvas.height>0&&map.queryRenderedFeatures({layers:['streets','water','skyline']}).length){
-  baseFrameRendered=true;scheduleFrame();
- }
-});
 function draw(now){
  frame=0;
  if(disposed||document.hidden)return;
