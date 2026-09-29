@@ -89,7 +89,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   const surface={width:900,height:1200,getContext:()=>ctx},map={getZoom:()=>15.5,project:()=>({x:450,y:700})};
   const color='#FF00CC',feature={geometry:{coordinates:[-122.675,45.52]},properties:{key:'demo',kind:'event',demoOpen:true,name:'Musical Mondays',time:'9:00 PM',logo:'logo',phase:1,color,heightScale:1}};
   const logo={width:120,height:60,padding:1,outlined:'sky-logo',image:'artwork',silhouette:'mask'};
-  const context=vm.createContext({window,parent:window,document:{getElementById:()=>null},map,lights:surface,devicePixelRatio:1,Intl,Date,Map,Set,Math,
+  const context=vm.createContext({window,parent:window,performance,rises:new Map(),folds:new Map(),lastBeaconKeys:new Set(),riseAmount:()=>1,foldAmount:()=>1,document:{getElementById:()=>null},map,lights:surface,devicePixelRatio:1,Intl,Date,Map,Set,Math,
     eventNight,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
     updateSurfaces:()=>({buildings:[{}],reflections:[]}),waterBloom:{draw:noop},drawUserLocationGlow:noop,
     citySparkles:{update:noop},buildingGlitter:()=>[],opacityControl:{value:1},motionDelta:1/30,pulseTime:1,
@@ -102,7 +102,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     logoPointerOffset:()=>({x:0,y:0}),separateHolograms:noop,
     venueLogos:new Map([['logo',logo]]),logoFocus:{update:noop,active:new Map()},logoFit:()=>.2,logoMotionSeed:0,
     adultVenueColor:'#FF0000',hologramMaterials:{beams:new Map([[color,{}]])},drawProjectionBeam:()=>operations.push('beam'),
-    waypointGeometry,placezHoverLift:()=>15,typeIcons:new Map(),drawWaypointFoot:()=>operations.push('waypoint-beam'),drawWaypointHead:()=>operations.push('waypoint-head'),waypointFamilyShell:()=>'place',waypointSwapGlitch:()=>0,drawClusterCount:noop,
+    waypointGeometry,placezHoverLift:()=>15,typeIcons:new Map(),drawWaypointFoot:()=>operations.push('waypoint-beam'),drawWaypointHead:()=>operations.push('waypoint-head'),waypointFamilyShell:()=>'place',waypointSwapGlitch:()=>0,noteSelectedWaypoint:noop,drawClusterCount:noop,
     projectorGroundScale,housingIconSize,visibleHologramLabels,
     applyBuildingOcclusion:()=>operations.push('building-mask'),buildingChrome:{draw:()=>operations.push('chrome')},
     mapHover:{update:noop},hoverTargets:[],logoPointer:{active:false},

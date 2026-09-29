@@ -16,13 +16,21 @@ export function waypointHeadSize(selected=false,zoom=mapZoom()){
 const WAYPOINT_BEAM_HEIGHT_SCALE=2;
 /** Shell tip hangs below the head box by this share of the size (livingMapWaypoints r*.68). */
 const TIP=.34;
-export function waypointGeometry(origin,selected=false,roofLift=0){
- const amount=cityAmount();
- const size=waypointHeadSize(selected);
+// Select motion (board 48): 42 to 57 with the lift, 180ms ease-out, both ways.
+const SELECT_MS=180;let selection={key:null,prev:null,at:-1e9};
+export function noteSelectedWaypoint(key,now=performance.now()){if(key!==selection.key)selection={key,prev:selection.key,at:now};}
+function selectedAmount(selected,key){
+ if(key==null||stillMotion()||(key!==selection.key&&key!==selection.prev))return selected?1:0;
+ const t=Math.min(1,(performance.now()-selection.at)/SELECT_MS),eased=1-(1-t)**3;
+ return selected?eased:1-eased;
+}
+export function waypointGeometry(origin,selected=false,roofLift=0,key=null){
+ const amount=cityAmount(),picked=selectedAmount(selected,key);
+ const rest=waypointHeadSize(false),size=rest+(waypointHeadSize(true)-rest)*picked;
  // Double the waypoint shaft and head lift while keeping the beam anchored
  // to its roof or ground point. Fade the visibility floor as buildings extrude.
  // The head rises out of its hologram: selected lifts higher.
- const minimumHeight=(selected?64:22)*(1-amount);
+ const minimumHeight=(22+42*picked)*(1-amount);
  const beamHeight=Math.max(roofLift,minimumHeight)*WAYPOINT_BEAM_HEIGHT_SCALE;
  return {x:origin.x,y:origin.y-beamHeight-size*TIP-size/2,size,bottom:origin.y-beamHeight,anchorY:origin.y};
 }
@@ -124,7 +132,7 @@ export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1,f
  const glyph=size*.58;
  if(logo)drawGlyph(ctx,logo,x,y,glyph,extra.glitch||0);
  else if(extra.label){
-  ctx.fillStyle='#FFFFFF';ctx.font=`800 ${glyph*9.2/24}px "Barlow Condensed","Arial Narrow",sans-serif`;
+  ctx.fillStyle='#FFFFFF';ctx.font=`800 ${glyph*9.2/24*1.4}px "Barlow Condensed","Arial Narrow",sans-serif`;
   ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(extra.label,x+(extra.glitch?size*.05:0),y+1);
  }
  else if(icon)drawGlyph(ctx,icon,x,y,glyph,extra.glitch||0);

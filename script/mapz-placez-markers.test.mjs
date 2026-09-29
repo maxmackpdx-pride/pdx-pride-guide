@@ -29,7 +29,7 @@ test('Placez clusters retain geographic bounds for fit-to-view taps',async()=>{
 test('non-event markers use assigned roof heights and preserve equal roof clearance',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   const roofBoot=await readFile(new URL('../client/public/zaydar-map/mapz-roof-boot.js',import.meta.url),'utf8');
-  assert.match(renderer,/waypointGeometry\(p,selected,placezHoverLift\(target,feature,surfaces\)\)/);
+  assert.match(renderer,/waypointGeometry\(p,selected,placezHoverLift\(target,feature,surfaces\),feature\.properties\.key\)/);
   assert.match(renderer,/const buildingVisibility=extrusionAmount\(target\)/);
   assert.match(renderer,/window\.__mapzPlaceRoofHeights\?\.get\(key\)/);
   assert.match(roofBoot,/roofHeights\.set\(key,Math\.max\(8,Number\(best\.height\)\|\|9\)\+\.5\)/);

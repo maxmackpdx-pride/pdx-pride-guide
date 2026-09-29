@@ -751,6 +751,8 @@ export default function ZaydarMapDemo() {
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?eventTimeLabel(event.dateStart):undefined};
   }), [marks, places, events, demoEventIds, attendance, bloomKeys, tokenEpoch]);
+  // Board 49: the status line says how many holograms are up tonight. No badge on the pin.
+  const tonightCount = useMemo(() => { const night = eventNight(viewTimestamp); return sceneRows.filter(row => row.kind === "event" && row.eventNight === night).length; }, [sceneRows, viewTimestamp]);
   const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{
@@ -774,10 +776,11 @@ export default function ZaydarMapDemo() {
       window.clearTimeout(cameraWriteTimer.current);
       cameraWriteTimer.current=window.setTimeout(()=>updateParams(p=>{p.set("lat",view.center[0].toFixed(5));p.set("lng",view.center[1].toFixed(5));p.set("zoom",view.zoom.toFixed(2));}),500);
     }} />
-    <div className="zaydar-map-lockup pdx-glass-rebind" aria-label={`${regionLabel}, ${mapTimeLabel}`}>
+    <div className="zaydar-map-lockup pdx-glass-rebind" aria-label={`${regionLabel}, ${mapTimeLabel}${tonightCount ? `, ${tonightCount} tonight` : ""}`}>
       <strong>{regionLabel}</strong>
       <button type="button" className="zaydar-map-time" onClick={() => { const input=timeInputRef.current;if(!input)return;if(input.showPicker)input.showPicker();else input.click(); }} aria-label="Choose a future map date and time">{mapTimeLabel}</button>
       <input ref={timeInputRef} className="zaydar-map-time-input" type="datetime-local" min={dateTimeLocalValue(clockNow)} value={previewDateTime} onChange={event => setPreviewDateTime(event.target.value)} aria-label="Future map date and time" />
+      {tonightCount > 0 && <span className="zaydar-map-tonight">{tonightCount} TONIGHT</span>}
       {previewDateTime && <button type="button" className="zaydar-map-live" onClick={() => setPreviewDateTime("")}>Live</button>}
     </div>
     <MapSwitch current="mapz" />

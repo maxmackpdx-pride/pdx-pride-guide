@@ -19,7 +19,7 @@ import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20260930-pack-heads';
+import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20260930-pack-heads';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -513,6 +513,7 @@ function drawUserLocationAvatar(ctx,target,fade){
 }
 function drawLights(fade,target=map,surface=lights){
  hitTargets=[];
+ noteSelectedWaypoint(selectedKey);
  const eventLabels=[];
  const cameraMoving=Boolean(target.isMoving?.());
  const tonight=eventNight(viewTime);
@@ -546,11 +547,15 @@ function drawLights(fade,target=map,surface=lights){
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
  const reveal=smoothRange(14.5,16.5,target.getZoom());
  // Every event in the active Portland night launches, including shared venues.
- const beacons=ordered.filter(v=>(v.feature.properties.kind==='event'&&(activeTonight(v.feature)||v.feature.properties.key===selectedKey))&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height);
+ const frameNow=performance.now();
+ const liveBeaconKeys=new Set(ordered.filter(v=>v.feature.properties.kind==='event'&&(activeTonight(v.feature)||v.feature.properties.key===selectedKey)).map(v=>v.feature.properties.key));
+ if(!reduced.matches)for(const key of lastBeaconKeys)if(!liveBeaconKeys.has(key)&&!folds.has(key))folds.set(key,frameNow+RISE_MS);
+ lastBeaconKeys=liveBeaconKeys;
+ const beacons=ordered.filter(v=>{const key=v.feature.properties.key;return (liveBeaconKeys.has(key)||folds.has(key)&&foldAmount(key,frameNow)>0)&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height;});
  beacons.sort((a,b)=>String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
  const expandedKeys=new Set(beacons.map(item=>item.feature.properties.key));
  const venueItems=new Map(ordered.filter(item=>item.feature.properties.kind==='place').map(item=>[item.feature.properties.key,item]));
- const venueGeometry=item=>{const parent=venueItems.get(item.feature.properties.venueWaypointKey)||item;return waypointGeometry(parent.p,parent.feature.properties.key===selectedKey,placezHoverLift(target,parent.feature,surfaces));};
+ const venueGeometry=item=>{const parent=venueItems.get(item.feature.properties.venueWaypointKey)||item;return waypointGeometry(parent.p,parent.feature.properties.key===selectedKey,placezHoverLift(target,parent.feature,surfaces),parent.feature.properties.key);};
  const protectedVenues=new Set(ordered.map(item=>item.feature.properties.venueWaypointKey).filter(Boolean));
  const placeClusters=clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel&&!protectedVenues.has(item.feature.properties.key)&&!(['mizzed','gigz'].includes(item.feature.properties.waypointFamily)&&item.feature.properties.venueWaypointKey)),selectedKey,target.getZoom(),width,height);
  for(const item of beacons){
@@ -633,6 +638,9 @@ function drawLights(fade,target=map,surface=lights){
   }
   for(const {feature,p,offset,neighbors=0} of ordered){
   const {color,phase}=feature.properties;
+  // Rise and fold scale the pin up out of its ground point; everything else is untouched.
+  const riseLift=Math.min(riseAmount(feature.properties.key,frameNow),foldAmount(feature.properties.key,frameNow));
+  lightsContext.setTransform(dpr,0,0,dpr*riseLift,0,p.y*dpr*(1-riseLift));
   const bloomScale=feature.properties.type==='nonprofit'?.4:1;
   const isBar=expandedKeys.has(feature.properties.key);
   const hover=reduced.matches||cameraMoving?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
@@ -660,7 +668,7 @@ function drawLights(fade,target=map,surface=lights){
    const cluster=placeClusters.byKey.get(feature.properties.key);
    if(cluster&&cluster.leader.feature.properties.key!==feature.properties.key)continue;
    const selected=feature.properties.key===selectedKey;
-   const geometry=waypointGeometry(p,selected,placezHoverLift(target,feature,surfaces));
+   const geometry=waypointGeometry(p,selected,placezHoverLift(target,feature,surfaces),feature.properties.key);
    if(pass===0)drawWaypointFoot(lightsContext,geometry,color,hologramMaterials,drawProjectionBeam,coreAlpha,selected);
    else{
     // Heads remain readable above buildings; their beam is masked at street level.
@@ -675,7 +683,7 @@ function drawLights(fade,target=map,surface=lights){
   }
   if(!isBar){
    const selected=feature.properties.key===selectedKey;
-   const geometry=waypointGeometry(p,selected,placezHoverLift(target,feature,surfaces));
+   const geometry=waypointGeometry(p,selected,placezHoverLift(target,feature,surfaces),feature.properties.key);
    if(pass===0)drawWaypointFoot(lightsContext,geometry,color,hologramMaterials,drawProjectionBeam,coreAlpha,selected);
    else{
     drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,coreAlpha,'place');
@@ -856,6 +864,7 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.drawImage(hologramMaterials.orbs.get(color),p.x-12.5,raisedY-12.5,25,25);
   }
  }
+ lightsContext.setTransform(dpr,0,0,dpr,0,0);
  }
  drawUserLocationAvatar(lightsContext,target,fade);
  // Titles live in this same document and frame cadence as their canvas logos.
@@ -957,6 +966,19 @@ function downtownZoom(latitude){
 }
 const status=document.querySelector('#map-status');
 let selectedKey=null,hitTargets=[],viewTime=Date.now();
+// Motion kit (board 48): a newly shown pin rises out of the ground once; a hologram
+// whose night ends folds back down into its venue. Calm and reduced motion skip both.
+const rises=new Map(),folds=new Map(),RISE_MS=500;let lastBeaconKeys=new Set(),listingsShown=false;
+function riseAmount(key,now){
+ const start=rises.get(key);if(start==null)return 1;
+ const t=(now-start)/RISE_MS;if(t>=1||reduced.matches){rises.delete(key);return 1;}
+ return 1-(1-t)**3;
+}
+function foldAmount(key,now){
+ const end=folds.get(key);if(end==null)return 1;
+ if(now>=end||reduced.matches){folds.delete(key);return 0;}
+ return (end-now)/RISE_MS;
+}
 const mapElement=document.querySelector('#map'),opacityControl=document.querySelector('#map-opacity'),pauseControl=document.querySelector('#pause-flight'),speedControl=document.querySelector('#speed');
 let loaded=false,elapsed=0,travel=0,last=0,frame=0,exitAt=null,disposed=false,cameraDirty=true,revealTime=0,loopWaiting=false;
 const frameInterval=1000/30;
@@ -1145,6 +1167,10 @@ async function setListings(rows){
  const colors=[...new Set([...baseColors,adultVenueColor,...rows.map(row=>row.color)])];
  for(const color of colors)ensureLightSprite(color);
  const nextPalette=colors.slice().sort().join(',');if(nextPalette!==paletteKey){hologramMaterials.dispose();hologramMaterials=createHologramMaterials(colors);paletteKey=nextPalette;}
+ // First load paints as it always has; later additions (a layer turned on) rise once.
+ const shownKeys=new Set(lightFeatures.map(feature=>feature.properties.key)),riseStart=performance.now();
+ if(listingsShown&&!reduced.matches)for(const row of rows)if(!shownKeys.has(row.key))rises.set(row.key,riseStart);
+ listingsShown=true;
  lightFeatures=rows.map(row=>{if(!phases.has(row.key))phases.set(row.key,sequence++*2.399963);return {type:'Feature',geometry:{type:'Point',coordinates:row.coordinates},properties:{...row,isBar:true,heightScale:waypointHeightScale(row.coordinates),phase:phases.get(row.key)}};});
  refreshNearbyLights();assetsReady=true;updateSceneStatus();scheduleFrame();
  const center=map.getCenter();const queue=[...lightFeatures].sort((a,b)=>Math.hypot(a.geometry.coordinates[0]-center.lng,a.geometry.coordinates[1]-center.lat)-Math.hypot(b.geometry.coordinates[0]-center.lng,b.geometry.coordinates[1]-center.lat));
