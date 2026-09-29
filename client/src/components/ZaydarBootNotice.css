@@ -34,3 +34,7 @@
   letter-spacing:.08em;
   text-transform:uppercase;
 }
+/* Zoom stack is + / − / locate only. The map iframe used to hide LABELS after load. */
+.zaydar-map-demo .zaydar-demo-navigation .zaydar-control-labels{
+  display:none;
+}
