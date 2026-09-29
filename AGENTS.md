@@ -45,9 +45,20 @@ Claude Code cloud sessions must use the single-repository setup documented in
 `CLAUDE.md`; multi-repository cloud sessions do not load the repo's permission rules.
 For Claude Routines, enable **Allow unrestricted branch pushes** for this repository in
 the Routine's own Permissions settings. Repo instructions cannot grant that account-side
-branch permission. Grok Build reads the committed `.grok/config.toml` rule. In either
-cloud, if the provider still refuses the exact push, identify the missing provider-side
-permission before implementation. Never ship by force-pushing.
+branch permission.
+
+Grok Build reads the committed `.grok/config.toml` rule. Grok Bot uses a different
+cloud computer and permission system: connect its GitHub connector with write access to
+this repository, then configure a narrow Auto-review rule for
+`git push origin HEAD:master` in the repository checkout. Grok Bot's personal
+Auto-review rules sync from the current desktop to its cloud computer; a matching
+**Ask first** rule or a locked team rule still blocks the push. Do not assume the Grok
+Build project file changes Grok Bot settings.
+
+GitHub currently reports `master` as unprotected. Keep this direct push non-force and
+run the Railway and live-site checks after each authorized shipment. If either provider
+still refuses the exact push, identify the missing provider-side permission before
+implementation. Never ship by force-pushing.
 
 Use the connected GitHub integration to publish an approved release when terminal Git
 authentication is unavailable. Create blobs for exactly the intended files (base64 for
