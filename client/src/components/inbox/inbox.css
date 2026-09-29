@@ -251,12 +251,12 @@ html.calm-mode .inbox-shell-loading__pulse,
       linear-gradient(160deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 42%) padding-box,
       radial-gradient(circle at 50% 38%, #0a1430 0%, #050506 72%) padding-box,
       linear-gradient(145deg, #061a66 0%, #1a4dff 55%, #3d7cff 100%) border-box !important;
+    /* Composes the same 8% bloom as every other lit control; attention is the badge. */
     box-shadow:
       0 0 0 2px #000,
       0 6px 20px rgba(0, 0, 0, 0.5),
       inset 0 1.5px 0 rgba(255, 255, 255, 0.3),
-      0 0 20px -6px #061a66,
-      0 0 16px -4px #1a4dff !important;
+      0 0 18px -4px color-mix(in srgb, #1a4dff 8%, transparent) !important;
     transition: transform 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
   }
 
@@ -265,9 +265,7 @@ html.calm-mode .inbox-shell-loading__pulse,
       0 0 0 2px #000,
       0 6px 20px rgba(0, 0, 0, 0.5),
       inset 0 1.5px 0 rgba(255, 255, 255, 0.3),
-      0 0 26px -4px #061a66,
-      0 0 18px -2px #1a4dff,
-      0 0 10px -1px #3d7cff !important;
+      0 0 18px -4px color-mix(in srgb, #1a4dff 8%, transparent) !important;
   }
 
   .floating-inbox__fab:hover {
@@ -276,8 +274,7 @@ html.calm-mode .inbox-shell-loading__pulse,
       0 0 0 2px #000,
       0 10px 26px rgba(0, 0, 0, 0.5),
       inset 0 1.5px 0 rgba(255, 255, 255, 0.38),
-      0 0 28px -4px #061a66,
-      0 0 20px -3px #1a4dff !important;
+      0 0 18px -4px color-mix(in srgb, #1a4dff 8%, transparent) !important;
   }
 
   .floating-inbox__fab--dragging,

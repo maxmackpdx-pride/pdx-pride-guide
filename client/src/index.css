@@ -2717,6 +2717,11 @@ a.event-host-name.event-host-name--link:hover {
   --fab-neon-rgb: 26 77 255;
 }
 
+@keyframes floating-inbox-halo-once {
+  0%, 100% { opacity: 0; transform: scale(1); }
+  45% { opacity: 0.6; transform: scale(1.14); }
+}
+
 @keyframes floating-inbox-halo-pulse {
   0%, 100% {
     opacity: 0.38;
@@ -2740,13 +2745,15 @@ a.event-host-name.event-host-name--link:hover {
   }
 
   /* Idle: soft static neon. Pulse only with .floating-inbox--attention */
+  /* Glow by the rule: at rest the halo is off and the FAB composes the 8% bloom.
+     A new message pulses the halo once when it lands; the badge carries the count. */
   .floating-inbox__halo {
     position: absolute;
     inset: -10px;
     border-radius: 50%;
     background: var(--fab-neon, #ff00cc);
     filter: blur(14px);
-    opacity: 0.32;
+    opacity: 0;
     pointer-events: none;
     animation: none;
     z-index: 0;
@@ -2754,8 +2761,8 @@ a.event-host-name.event-host-name--link:hover {
   }
 
   .floating-inbox--attention .floating-inbox__halo {
-    opacity: 0.55;
-    animation: floating-inbox-halo-pulse 2.6s ease-in-out infinite;
+    opacity: 0;
+    animation: floating-inbox-halo-once 2.6s ease-in-out 1;
   }
 
   /* Glass disc: same deep translucent recipe as mobile dock, neon rim keeps FAB colors */
@@ -2781,8 +2788,7 @@ a.event-host-name.event-host-name--link:hover {
     box-shadow:
       0 0 0 1px #000,
       0 0 0 2px color-mix(in srgb, var(--fab-neon, #1a4dff) 28%, transparent),
-      0 0 18px rgb(var(--fab-neon-rgb, 26 77 255) / 0.55),
-      0 0 36px rgb(var(--fab-neon-rgb, 26 77 255) / 0.28),
+      0 0 18px -4px color-mix(in srgb, var(--fab-neon, #1a4dff) 8%, transparent),
       0 8px 22px rgba(0, 0, 0, 0.5),
       inset 0 1px 0 rgba(255, 255, 255, 0.14),
       inset 0 -10px 18px -12px rgb(var(--fab-neon-rgb, 26 77 255) / 0.35);
@@ -2794,8 +2800,7 @@ a.event-host-name.event-host-name--link:hover {
     box-shadow:
       0 0 0 1px #000,
       0 0 0 2px color-mix(in srgb, var(--fab-neon, #1a4dff) 42%, transparent),
-      0 0 26px rgb(var(--fab-neon-rgb, 26 77 255) / 0.72),
-      0 0 48px rgb(var(--fab-neon-rgb, 26 77 255) / 0.38),
+      0 0 18px -4px color-mix(in srgb, var(--fab-neon, #1a4dff) 8%, transparent),
       0 8px 22px rgba(0, 0, 0, 0.5),
       inset 0 1px 0 rgba(255, 255, 255, 0.18),
       inset 0 -10px 18px -12px rgb(var(--fab-neon-rgb, 26 77 255) / 0.45);
@@ -2807,8 +2812,7 @@ a.event-host-name.event-host-name--link:hover {
     box-shadow:
       0 0 0 1px #000,
       0 0 0 2px color-mix(in srgb, var(--fab-neon, #1a4dff) 48%, transparent),
-      0 0 32px rgb(var(--fab-neon-rgb, 26 77 255) / 0.78),
-      0 0 52px rgb(var(--fab-neon-rgb, 26 77 255) / 0.4),
+      0 0 18px -4px color-mix(in srgb, var(--fab-neon, #1a4dff) 8%, transparent),
       0 12px 28px rgba(0, 0, 0, 0.5),
       inset 0 1px 0 rgba(255, 255, 255, 0.18),
       inset 0 -10px 18px -12px rgb(var(--fab-neon-rgb, 26 77 255) / 0.4);

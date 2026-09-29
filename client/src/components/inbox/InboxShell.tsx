@@ -8,6 +8,7 @@ import ThreadAvatar from "./ThreadAvatar";
 import { useInboxThreads } from "./useInboxThreads";
 import { quickRepliesFor } from "./quickReplies";
 import type { Category, Folder, Thread } from "./types";
+import { inboxRoomTag } from "@/lib/rooms";
 import {
   ArchiveIcon,
   BackIcon,
@@ -35,23 +36,25 @@ export interface InboxProps {
   chromeAccent?: "lime" | "cyan" | "pink";
 }
 
+// Room threads read their tag and color from the room registry (lib/rooms).
+const roomTag = (category: Category) => inboxRoomTag(category, { label: "", color: "" });
 const CATC: Record<Category, string> = {
   messages: "var(--cyan)",
-  spotted: "var(--pink)",
-  gigs: "var(--cyan)",
-  gifting: "var(--neon-yellow, #ccff00)",
-  sellz: "var(--green, #39ff14)",
-  housing: "var(--panel-cyan, #19e3ff)",
+  spotted: roomTag("spotted").color,
+  gigs: roomTag("gigs").color,
+  gifting: roomTag("gifting").color,
+  sellz: roomTag("sellz").color,
+  housing: roomTag("housing").color,
   hosts: "var(--amber)",
   checkins: "var(--green)",
 };
 const BADGE: Record<Category, string> = {
   messages: "Message",
-  spotted: "MIZZED CONNECTION",
-  gigs: "Gig",
-  gifting: "GIFTZ",
-  sellz: "SELLZ",
-  housing: "THE HAÜZ",
+  spotted: roomTag("spotted").label,
+  gigs: roomTag("gigs").label,
+  gifting: roomTag("gifting").label,
+  sellz: roomTag("sellz").label,
+  housing: roomTag("housing").label,
   hosts: "Host",
   checkins: "Check-in",
 };

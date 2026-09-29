@@ -9,6 +9,7 @@ import { useInboxThreads } from "../useInboxThreads";
 import type { Folder } from "../types";
 import { C } from "./sheet";
 import "../inbox-experiment.css";
+import { inboxRoomTag } from "@/lib/rooms";
 
 const CAT_TAG: Record<string, { label: string; color: string }> = {
   messages: { label: "MESSAGE", color: C.cyan },
@@ -23,7 +24,7 @@ const CAT_TAG: Record<string, { label: string; color: string }> = {
 };
 
 function tagFor(cat: string) {
-  return CAT_TAG[cat] || { label: "MESSAGE", color: C.limeSoft };
+  return inboxRoomTag(cat, CAT_TAG[cat] || { label: "MESSAGE", color: C.limeSoft });
 }
 
 export type GroupChatRow = {

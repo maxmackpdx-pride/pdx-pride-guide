@@ -4,22 +4,20 @@ export function contextTypeOf(
   return msg?.contextType || msg?.context_type;
 }
 
+/** Thread badge. Room threads use the same room name as notifications (lib/rooms). */
 export function inboxContextBadge(contextType?: string | null): string | null {
   const ctx = String(contextType || "").toUpperCase();
   if (ctx === "EVENT_TALENT_REQUEST") return "LINEUP REQUEST";
-  if (ctx === "MISSED_CONNECTION") return "MISSED CONNECTION";
   if (ctx === "EVENT_INVITE") return "EVENT INVITE";
   if (ctx === "HOST_UPDATE" || ctx === "HOST_MESSAGE") return "HOST UPDATE";
-  if (ctx === "GIFTING") return "GIFTING";
-  if (ctx === "SELLZ") return "SELLZ";
-  if (ctx === "GIG") return "GIG WORK";
   if (ctx === "RIVER_BRATS_CHECKIN" || ctx === "BEACH_CARPOOL") return "RIVER BRATS";
-  return null;
+  const room = notifyContextTag(ctx);
+  return ["MIZZED", "GIGZ", "GIFTZ", "SELLZ"].includes(room) ? room : null;
 }
 
 export function notifyContextTag(contextType?: string | null): string {
   const ctx = String(contextType || "").toUpperCase();
-  if (ctx === "MISSED_CONNECTION") return "MIZZED CONNECTION";
+  if (ctx === "MISSED_CONNECTION") return "MIZZED";
   if (ctx === "GIG" || ctx === "EVENT_TALENT" || ctx === "EVENT_TALENT_REQUEST") {
     return "GIGZ";
   }

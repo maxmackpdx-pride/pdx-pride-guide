@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import type { Thread } from "../types";
 import { C } from "./sheet";
 import "../inbox-experiment.css";
+import { inboxRoomTag } from "@/lib/rooms";
 
 const CAT_TAG: Record<string, { label: string; color: string }> = {
   messages: { label: "MESSAGE", color: C.cyan },
@@ -14,7 +15,7 @@ const CAT_TAG: Record<string, { label: string; color: string }> = {
 };
 
 function tagFor(cat: string) {
-  return CAT_TAG[cat] || { label: "ADMIN", color: C.magenta };
+  return inboxRoomTag(cat, CAT_TAG[cat] || { label: "ADMIN", color: C.magenta });
 }
 
 /** Shared guide-admin Inbox / Sent list under floating inbox → Admin. */

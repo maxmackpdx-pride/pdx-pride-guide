@@ -28,6 +28,21 @@ export const ROOMS: Record<RoomKey, Room> = {
   zlists: { name: "Z/LISTS", nav: "Z/Lists", accent: "var(--neon-violet)", route: "/z" },
 };
 
+/** Inbox thread categories that belong to a room. */
+const INBOX_ROOM: Record<string, RoomKey> = { spotted: "mizzed", gigs: "gigz", gifting: "giftz", sellz: "sellz", housing: "hauz" };
+/** Short room tag for thread rows, notifications and badges. */
+const ROOM_TAG: Partial<Record<RoomKey, string>> = { mizzed: "MIZZED", gigz: "GIGZ", giftz: "GIFTZ", sellz: "SELLZ", hauz: "THE HAÜZ" };
+
+/**
+ * One lookup for the tag a thread wears: the room's short name in the room's
+ * accent. Threads that don't come from a room keep their plain label.
+ */
+export function inboxRoomTag(category: string, fallback: { label: string; color: string }): { label: string; color: string } {
+  const key = INBOX_ROOM[category];
+  if (!key) return fallback;
+  return { label: ROOM_TAG[key] ?? ROOMS[key].name, color: key === "gigz" ? "var(--room-gigz-ink)" : ROOMS[key].accent };
+}
+
 /** Tab title pattern: "ROOM | Zaylist", or "Item | ROOM | Zaylist" on a detail view. */
 export function roomTitle(key: RoomKey, item?: string | null): string {
   const room = ROOMS[key].name;
