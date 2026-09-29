@@ -16,3 +16,6 @@ dist/
 # Foundation docs with private context intentionally excluded
 foundation/business/private/
 foundation/**/private/
+
+# Local server runtime uploads (mirrored flyers)
+uploads/

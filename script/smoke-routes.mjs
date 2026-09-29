@@ -32,9 +32,9 @@ const ROUTES = [
   ["/the-hauz", "/the-hauz"],
   ["/the-hauz/new", "/the-hauz/new"],
   ["/spotted", "/spotted"],
-  ["/directory", "/directory"],
-  ["/nude-beaches", "/z/out/rooster-rock"],
-  ["/next", "/next"],
+  ["/directory", "/map"],
+  ["/nude-beaches", "/outzide/rooster-rock"],
+  ["/next", "/about"],
   ["/about", "/about"],
   ["/resume", "/resume"],
   ["/contact", "/contact"],
@@ -51,12 +51,14 @@ const ROUTES = [
   ["/gigs", "/pride-work"],
   ["/housing", "/the-hauz"],
   ["/hausing", "/the-hauz"],
-  ["/darkroom", "/next"],
+  ["/darkroom", "/about"],
   ["/missed-connections", "/spotted"],
   ["/access-safety", "/access"],
   // Unknown path must reach the 404 page without crashing.
   ["/definitely-not-a-real-page", null],
 ];
+// The server answers unknown paths with a real 404, which the browser logs.
+const EXPECTED_404 = new Set(["/definitely-not-a-real-page"]);
 
 /**
  * Detail routes need real ids, so they are discovered from the API at run time
@@ -84,7 +86,7 @@ async function detailRoutes() {
 const IGNORE_CONSOLE = [
   /favicon/i,
   /Failed to load resource.*googletagmanager/i,
-  /net::ERR_(INTERNET_DISCONNECTED|NAME_NOT_RESOLVED|TUNNEL)/i,
+  /net::ERR_(INTERNET_DISCONNECTED|NAME_NOT_RESOLVED|TUNNEL|CERT_AUTHORITY_INVALID)/i,
   // /api/auth/me answers 401 for every signed-out visitor. That is the
   // contract, not a fault, and it fires on every route.
   /Failed to load resource.*status of 401/i,
@@ -116,6 +118,7 @@ for (const [route, expected] of ALL_ROUTES) {
     if (msg.type() !== "error") return;
     const text = msg.text();
     if (IGNORE_CONSOLE.some((re) => re.test(text))) return;
+    if (EXPECTED_404.has(route) && /status of 404/.test(text)) return;
     problems.push(`console: ${text.slice(0, 160)}`);
   });
   page.on("response", (res) => {

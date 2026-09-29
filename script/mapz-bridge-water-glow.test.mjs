@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {BRIDGE_GLOW_PALETTES,BRIDGE_GLOW_SATURATION,BRIDGE_GLOW_BRIGHTNESS,saturateBridgeColor,bridgeGlowColor,bridgeGlowSpans,bridgeWaterPatch,createBridgeWaterLayer} from '../client/public/zaydar-map/bridge-water-glow.js';
+import {BRIDGE_GLOW_PALETTES,BRIDGE_GLOW_SATURATION,BRIDGE_GLOW_BRIGHTNESS,saturateBridgeColor,bridgeGlowColor,bridgeGlowSpans,bridgeGlowGradient,bridgeGlowLineCollections,installCheapBridgeGlow} from '../client/public/zaydar-map/bridge-water-glow.js';
 import {fitBridgeRoad} from '../client/public/zaydar-map/bridge-fit.js';
 import {PORTLAND_BRIDGE_MODELS} from '../client/public/zaydar-map/st-johns-bridge.js';
 import {createRequire} from 'node:module';
@@ -24,11 +24,11 @@ test('bridge gradients interpolate the rainbow, trans and lesbian flag stops con
  assert.deepEqual(bridgeGlowColor('trans',.2),bridgeGlowColor('trans',.8));
 });
 
-test('only major crossings from Sellwood through St Johns and I-5 get colored underglow',()=>{
+test('only major crossings from Sellwood through St Johns get colored underglow; the disabled Interstate stays dark',()=>{
  const spans=bridgeGlowSpans(PORTLAND_BRIDGE_MODELS.map(model=>({...model,fit:fixture()})));
- assert.deepEqual(spans.map(s=>s.id).sort(),['st-johns','broadway','burnside','fremont','hawthorne','interstate','marquam','morrison','ross-island','sellwood','steel','tilikum-crossing'].sort());
+ assert.deepEqual(spans.map(s=>s.id).sort(),['st-johns','broadway','burnside','fremont','hawthorne','marquam','morrison','ross-island','sellwood','steel','tilikum-crossing'].sort());
  assert.deepEqual(new Set(spans.map(s=>s.palette)),new Set(['rainbow','trans','lesbian']));
- assert.deepEqual(bridgeGlowSpans([{id:'broadway',fit:null},{id:'unknown-overpass',fit:fixture()}]),[]);
+ assert.deepEqual(bridgeGlowSpans([{id:'broadway',fit:null},{id:'interstate',fit:fixture()},{id:'unknown-overpass',fit:fixture()}]),[]);
 });
 
 test('glow follows fitted roads and retains geographic color direction when tile lines reverse',()=>{
@@ -41,7 +41,7 @@ test('glow follows fitted roads and retains geographic color direction when tile
   assert.ok(match);assert.ok(Math.abs(match.fraction-sample.fraction)<1e-8);
 
  }
- assert.ok(bridgeGlowSpans([{id:'interstate',fit:fixture(false,4000)}])[0].samples.length<=73);
+ assert.ok(bridgeGlowSpans([{id:'st-johns',fit:fixture(false,4000)}])[0].samples.length<=73);
 });
 
 test('extra 20 percent vibrancy preserves neutral white and brightness increases separately',()=>{
@@ -51,90 +51,89 @@ test('extra 20 percent vibrancy preserves neutral white and brightness increases
  const rgb=saturateBridgeColor([10,100,240]);assert.equal(Math.max(...rgb),240);assert.equal(Math.min(...rgb),0);
 });
 
-function canvasFixture(t){
- const canvases=[];
- const document={createElement(){
-  const canvas={width:1,height:1},calls=[],stack=[];
-  const ctx={globalAlpha:1,globalCompositeOperation:'source-over',
-   save(){stack.push([this.globalAlpha,this.globalCompositeOperation]);},
-   restore(){[this.globalAlpha,this.globalCompositeOperation]=stack.pop();},
-   translate(){},scale(){},beginPath(){this.rings=0;},moveTo(){this.rings++;},lineTo(){},closePath(){},
-   fill(rule){calls.push(['fill',this.globalCompositeOperation,rule,this.rings]);},fillRect(){calls.push(['rect',this.globalCompositeOperation]);},
-   drawImage(source){calls.push(['image',this.globalCompositeOperation,source]);},
-   createRadialGradient(){return {addColorStop(){}};},createLinearGradient(){return {addColorStop(){}};},
-  };
-  canvas.getContext=()=>ctx;canvas.calls=calls;canvases.push(canvas);return canvas;
- }};
- const previous=globalThis.document;globalThis.document=document;t.after(()=>{globalThis.document=previous;});
- return canvases;
-}
-
-const water=[{geometry:{type:'Polygon',coordinates:[
+const water=[[
  [[-122.68,45.51],[-122.66,45.51],[-122.66,45.53],[-122.68,45.53],[-122.68,45.51]],
  [[-122.671,45.519],[-122.670,45.519],[-122.670,45.520],[-122.671,45.520],[-122.671,45.519]],
-]}}];
+]];
 
-test('reflection texture clips water and islands, and every vertex stays at water level',t=>{
- const canvases=canvasFixture(t),layer=createBridgeWaterLayer({MercatorCoordinate},()=>3);
- const spans=bridgeGlowSpans([{id:'broadway',fit:fixture()}]);layer.update(spans,water);
- const heights=[];for(let i=2;i<layer.vertices.length;i+=5)heights.push(layer.vertices[i]);
- assert.equal(heights.length,6);assert.ok(heights.every(z=>Math.abs(z-3.1)<.002));
- assert.ok(canvases.some(c=>c.calls.some(call=>call[0]==='fill'&&call[2]==='evenodd'&&call[3]===2)),'island hole belongs to the water mask');
- const painted=canvases.find(c=>c.calls.some(call=>call[0]==='rect'&&call[1]==='source-in'));
- assert.equal(painted.calls.at(-1)[1],'destination-in','only the water portion of the gradient survives');
- assert.ok(canvases[0].width*canvases[0].height*4<2*1024*1024,'shared atlas stays below 2MB');
- const patch=bridgeWaterPatch(spans[0],([x,y])=>({x,y}),()=>4);
- assert.ok(patch.corners.every(p=>p.z===4.1),'bridge deck height never becomes reflection height');
+test('glow gradients run each flag along the line and unknown palettes fall back to rainbow',()=>{
+ for(const [name,colors] of Object.entries(BRIDGE_GLOW_PALETTES)){
+  const expr=bridgeGlowGradient(name);
+  assert.deepEqual(expr.slice(0,3),['interpolate',['linear'],['line-progress']]);
+  assert.equal(expr.length,3+colors.length*2);
+  assert.equal(expr[3],0);assert.equal(expr.at(-2),1);
+  assert.deepEqual(expr.filter((_,i)=>i>=3&&i%2===0),colors);
+ }
+ assert.deepEqual(bridgeGlowGradient('unknown'),bridgeGlowGradient('rainbow'));
 });
 
-function mockGl(){
- const gl={},calls={uploads:0,textures:0,matrices:[],draws:[],depth:[],shaders:[]};
- for(const name of ['ARRAY_BUFFER','STATIC_DRAW','DEPTH_WRITEMASK','CULL_FACE','TRIANGLES','ACTIVE_TEXTURE','TEXTURE0','TEXTURE_BINDING_2D','TEXTURE_2D','UNPACK_PREMULTIPLY_ALPHA_WEBGL','UNPACK_FLIP_Y_WEBGL','RGBA','UNSIGNED_BYTE','TEXTURE_MIN_FILTER','TEXTURE_MAG_FILTER','LINEAR','TEXTURE_WRAP_S','TEXTURE_WRAP_T','CLAMP_TO_EDGE','VERTEX_SHADER','FRAGMENT_SHADER','COMPILE_STATUS','LINK_STATUS','FLOAT'])gl[name]=name;
- for(const name of ['bindBuffer','useProgram','bindVertexArray','uniform1i','disable','enable','activeTexture','bindTexture','pixelStorei','texParameteri','deleteBuffer','deleteVertexArray','deleteTexture','deleteProgram','compileShader','attachShader','linkProgram','deleteShader','enableVertexAttribArray','vertexAttribPointer'])gl[name]=()=>{};
- for(const name of ['createShader','createProgram','createBuffer','createVertexArray','createTexture'])gl[name]=()=>({});
- gl.shaderSource=(_,source)=>calls.shaders.push(source);gl.getShaderParameter=gl.getProgramParameter=()=>true;gl.getUniformLocation=(_,name)=>name;gl.getAttribLocation=()=>0;
- gl.bufferData=()=>calls.uploads++;gl.texImage2D=()=>calls.textures++;
- gl.uniformMatrix4fv=(_location,_transpose,matrix)=>calls.matrices.push(matrix.slice());
- gl.getParameter=name=>name===gl.DEPTH_WRITEMASK;gl.isEnabled=()=>true;gl.depthMask=value=>calls.depth.push(value);
- gl.drawArrays=(mode,first,count)=>calls.draws.push({mode,count});
- return {gl,calls};
+test('glow lines still draw for every themed bridge before road tiles load',()=>{
+ const collections=bridgeGlowLineCollections([],[]);
+ const rows=Object.values(collections).flat();
+ assert.ok(rows.length>0);
+ for(const [palette,features] of Object.entries(collections)){
+  assert.ok(Object.hasOwn(BRIDGE_GLOW_PALETTES,palette));
+  for(const feature of features){
+   assert.equal(feature.properties.palette,palette);
+   assert.equal(feature.geometry.type,'LineString');
+   assert.ok(feature.geometry.coordinates.length>=2);
+   assert.ok(feature.geometry.coordinates.flat().every(Number.isFinite));
+  }
+ }
+ const ids=new Set(rows.map(row=>row.properties.id));
+ for(const model of PORTLAND_BRIDGE_MODELS)if(model.disabled)assert.ok(!ids.has(model.id),model.id+' is disabled');
+});
+
+test('glow keeps only the part of a bridge that crosses water, and skips island holes',()=>{
+ const model=PORTLAND_BRIDGE_MODELS.find(m=>m.id==='broadway'&&!m.disabled);
+ const [lng,lat]=model.center,d=.05;
+ const eastRiver=[[[lng,lat-d],[lng+d,lat-d],[lng+d,lat+d],[lng,lat+d],[lng,lat-d]]];
+ const line=rows=>rows.find(f=>f.properties.id==='broadway').geometry.coordinates;
+ const east=line(bridgeGlowLineCollections([],[eastRiver]).rainbow);
+ assert.ok(east.length>=2);assert.ok(east.every(([x])=>x>=lng),'west bank stays dark');
+ const full=line(bridgeGlowLineCollections([],[[[[lng-d,lat-d],[lng+d,lat-d],[lng+d,lat+d],[lng-d,lat+d],[lng-d,lat-d]]]]).rainbow);
+ const [hx,hy]=full[Math.floor(full.length/2)],h=1e-5;
+ const island=[[[lng-d,lat-d],[lng+d,lat-d],[lng+d,lat+d],[lng-d,lat+d],[lng-d,lat-d]],[[hx-h,hy-h],[hx+h,hy-h],[hx+h,hy+h],[hx-h,hy+h],[hx-h,hy-h]]];
+ const skipped=line(bridgeGlowLineCollections([],[island]).rainbow);
+ assert.equal(skipped.length,full.length-1);assert.ok(!skipped.some(([x,y])=>x===hx&&y===hy),'island point is dropped');
+});
+
+function mockMap(layerIds=['water','buildings','bridge-decks','skyline']){
+ const layers=[...layerIds],sources=new Map(),calls={setData:0};
+ return {calls,layers,sources,
+  getStyle:()=>({}),getLayer:id=>layers.includes(id)?{id}:undefined,
+  getSource:id=>sources.get(id),
+  addSource(id,source){sources.set(id,{...source,setData(){calls.setData++;}});},
+  addLayer(layer,before){before?layers.splice(layers.indexOf(before),0,layer.id):layers.push(layer.id);this[`layer:${layer.id}`]=layer;},
+  querySourceFeatures:()=>[],
+ };
 }
 
-test('camera changes only the shared map matrix, never the reflection coordinates or textures',t=>{
- canvasFixture(t);const layer=createBridgeWaterLayer({MercatorCoordinate},()=>0),{gl,calls}=mockGl();
- layer.onAdd({triggerRepaint(){}},gl);
- const spans=bridgeGlowSpans([{id:'broadway',fit:fixture()}]);layer.update(spans,water);const vertices=layer.vertices.slice();
- const camera=(scale,angle=0,pan=0)=>({defaultProjectionData:{mainMatrix:[scale*Math.cos(angle),scale*Math.sin(angle),0,0,-scale*Math.sin(angle),scale*Math.cos(angle),0,0,0,0,scale,0,pan,-pan,0,1]}});
- layer.render(gl,camera(4096));layer.update(spans,water);layer.render(gl,camera(1024,.5,2));
- assert.deepEqual(layer.vertices,vertices);assert.equal(calls.uploads,1);assert.equal(calls.textures,1);
- assert.equal(calls.draws.length,2);assert.ok(calls.draws.every(d=>d.count===6));
- assert.notDeepEqual(calls.matrices[0],calls.matrices[1]);assert.deepEqual(calls.depth,[false,true,false,true]);
- assert.ok(calls.shaders.every(s=>s.includes('#version 300 es')));
- assert.ok(calls.shaders.some(s=>s.includes('glow.rgb*alpha*1.30')));
- layer.update([],[]);layer.render(gl,camera(1024));assert.equal(layer.count,0,'removed bridges leave no stale reflection');
- layer.onRemove({},gl);assert.equal(layer.count,0);assert.equal(layer.vertices,null);
+test('cheap glow installs one line-metric source per flag underneath the bridge decks',()=>{
+ const map=mockMap();installCheapBridgeGlow(map);
+ const ids=[...map.sources.keys()];
+ assert.ok(ids.length>0);assert.equal(map.__mapzCheapBridgeGlow,true);
+ for(const id of ids){
+  assert.equal(map.sources.get(id).lineMetrics,true,'line-gradient needs line metrics');
+  assert.ok(map.layers.indexOf(id)<map.layers.indexOf('bridge-decks'),id+' draws under the decks');
+  assert.equal(map[`layer:${id}`].paint['line-gradient'][2][0],'line-progress');
+ }
+ const before=map.layers.length;installCheapBridgeGlow(map);
+ assert.equal(map.layers.length,before,'repeat syncs never duplicate layers');
+ assert.equal(map.calls.setData,ids.length,'repeat syncs refresh data in place');
 });
 
-test('water polygons project once across bridges and stay cached for repeated updates',t=>{
- canvasFixture(t);let projections=0;
- const counted={MercatorCoordinate:{fromLngLat(coordinate){projections++;return MercatorCoordinate.fromLngLat(coordinate);}}};
- const layer=createBridgeWaterLayer(counted),fit=fixture();
- const spans=bridgeGlowSpans(['broadway','burnside','morrison'].map(id=>({id,fit})));
- const ring=Array.from({length:1001},(_,i)=>{const a=i/1000*Math.PI*2;return [center[0]+.01*Math.cos(a),center[1]+.01*Math.sin(a)];});
- const polygon={geometry:{type:'Polygon',coordinates:[ring]}};
- projections=0;layer.update(spans,[polygon,polygon]);const first=projections;
- projections=0;layer.update(spans,[polygon]);const repeated=projections;
- assert.equal(first-repeated,ring.length,'duplicates and additional bridges must not repeat geographic water projection');
- assert.ok(repeated<100,'unchanged updates only project the small bridge footprints');
+test('cheap glow waits for a style and survives failed tile queries',()=>{
+ installCheapBridgeGlow(null);
+ const empty=mockMap();empty.getStyle=()=>null;installCheapBridgeGlow(empty);assert.equal(empty.sources.size,0);
+ const broken=mockMap(['buildings']);broken.querySourceFeatures=()=>{throw new Error('tiles');};
+ installCheapBridgeGlow(broken);assert.ok(broken.sources.size>0);
+ assert.ok([...broken.sources.keys()].every(id=>broken.layers.indexOf(id)<broken.layers.indexOf('buildings')));
 });
 
-test('water reflections render underneath both bridge decks and models',async()=>{
- const source=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
- const layers=['water','buildings','skyline'],context={map:{addLayer(layer,before){layers.splice(layers.indexOf(before),0,layer.id);}},
-  ambientSignals:{install(){}},groundLightPools:{id:'pools'},bridgeLayer:{id:'bridge-decks'},bridgeWater:{id:'bridge-water-reflections'},portlandBridges:{id:'models'},landmarkBuildings:{id:'landmarks'},portlandLandmarks:{id:'icons'},citySparkles:{id:'sparkles'}};
- vm.runInNewContext(source.slice(source.indexOf('function installSceneExtras('),source.indexOf("map.on('load'"))+';installSceneExtras();',context);
- assert.ok(layers.indexOf('water')<layers.indexOf('bridge-water-reflections'));
- assert.ok(layers.indexOf('bridge-water-reflections')<layers.indexOf('bridge-decks'));
- assert.ok(layers.indexOf('bridge-water-reflections')<layers.indexOf('models'));
- assert.doesNotMatch(source,/surfaces\.bridgeGlow/,'reflection is no longer painted on the screen overlay');
+test('bridge glow is installed from the roof sync, not the retired reflection layer',async()=>{
+ const boot=await readFile(new URL('../client/public/zaydar-map/mapz-roof-boot.js',import.meta.url),'utf8');
+ const flight=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+ assert.match(boot,/installCheapBridgeGlow\(map\)/);
+ assert.doesNotMatch(flight,/bridgeWater|surfaces\.bridgeGlow/);
 });

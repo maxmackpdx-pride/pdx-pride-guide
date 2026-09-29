@@ -60,6 +60,7 @@ function pointInWater(point,polygons){
 }
 
 function fittedGlowLine(model,features,water){
+ const latPerM=1/111320;
  const fit=model.fit||(features?.length?fitBridgeRoad(features,model,()=>0):null);
  const raw=fit
   ? Array.from({length:Math.max(16,Math.min(40,Math.ceil((fit.length||model.length)/20)))+1},(_,i)=>sampleBridgeRoad(fit,i/(Math.max(16,Math.min(40,Math.ceil((fit.length||model.length)/20))))).coordinate)
@@ -71,7 +72,6 @@ function fittedGlowLine(model,features,water){
    const lonPerM=1/(111320*Math.cos(model.center[1]*Math.PI/180));
    return [model.center[0]+Math.sin(rad)*along*lonPerM,model.center[1]+Math.cos(rad)*along*latPerM];
   });
- const latPerM=1/111320;
  let kept=water?.length?samples.filter(point=>pointInWater(point,water)):samples.slice(Math.floor(samples.length*0.22),Math.ceil(samples.length*0.78));
  if(kept.length<2)kept=samples.slice(Math.floor(samples.length*0.28),Math.ceil(samples.length*0.72));
  if(kept.length<2)return bridgeSpanLine(model);

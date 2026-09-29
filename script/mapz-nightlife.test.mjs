@@ -12,10 +12,20 @@ import {mapzSurfaceStyle} from '../client/public/zaydar-map/natural-surfaces.js'
 import {waterReflectionSegments,createBuildingChrome} from '../client/public/zaydar-map/nightlife-materials.js';
 import {projectorGroundScale} from '../client/public/zaydar-map/hologram-materials.js';
 
-test('projector circles shrink at overview zoom without a camera-facing guide line',async()=>{
-  assert.equal(projectorGroundScale(12),.28);
+// projectorGroundScale reads the live map from window to hide disks once buildings extrude.
+function withMapWindow(t,mapzMap){
+  const previous=globalThis.window;globalThis.window={__mapzMap:mapzMap};
+  t.after(()=>{if(previous===undefined)delete globalThis.window;else globalThis.window=previous;});
+}
+const near=(actual,expected)=>assert.ok(Math.abs(actual-expected)<1e-9,`${actual} is not ${expected}`);
+
+test('projector circles shrink at overview zoom without a camera-facing guide line',async t=>{
+  withMapWindow(t,undefined);
+  near(projectorGroundScale(12),.28*.3);
   assert.ok(projectorGroundScale(13)<projectorGroundScale(14));
-  assert.equal(projectorGroundScale(15),1);
+  near(projectorGroundScale(15),.3);
+  window.__mapzMap={getZoom:()=>15.35,getPitch:()=>34};
+  assert.equal(projectorGroundScale(15),0,'no ground disks once marks sit on roofs');
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   assert.equal(renderer.includes('lineTo(logoX,raisedY)'),false);
   assert.equal(renderer.includes("lineTo(logoX+(p.x-logoX)*.08"),false);
@@ -76,7 +86,8 @@ test('chrome reuses wall paths at rest and rebuilds only when the camera changes
   }finally{globalThis.Path2D=OriginalPath;}
 });
 
-test('actual hologram draw paints sky artwork after building occlusion',async()=>{
+test('actual hologram draw paints sky artwork after building occlusion',async t=>{
+  withMapWindow(t,undefined);
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   const source=renderer.slice(renderer.indexOf('function drawLights('),renderer.indexOf('// Gentle corridor:'));
   const operations=[],noop=()=>{},window={innerWidth:900,innerHeight:1200};
