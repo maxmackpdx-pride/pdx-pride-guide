@@ -58,16 +58,27 @@ test('waypoint heads keep equal roof clearance while following different roof he
   }
 });
 
-test('Placez cycles icon and white logo without changing its anchor',async()=>{
- const {waypointLogoInterval,showWaypointLogo}=await import('../client/public/zaydar-map/waypoint-markers.js');
+test('Placez swaps logo and type every 7 seconds with a short glitch',async()=>{
+ const {WAYPOINT_SWAP_SECONDS,showWaypointLogo,waypointSwapGlitch}=await import('../client/public/zaydar-map/waypoint-markers.js');
+ assert.equal(WAYPOINT_SWAP_SECONDS,7);
  for(const phase of [0,2.399963,10,50,900]){
-  const cycle=waypointLogoInterval(phase);assert.ok(cycle>=3&&cycle<=5);
-  for(let i=1000;i<1005;i++){
-   const origin=i*cycle-phase*1.7;
-   assert.equal(showWaypointLogo(origin+.1*cycle,phase),false);
-   assert.equal(showWaypointLogo(origin+.5*cycle,phase),true);
-   assert.equal(showWaypointLogo(origin+.9*cycle,phase),false);
-  }
-  assert.equal(showWaypointLogo(999,phase,true),true);
+  const origin=-phase*1.7+14*1000;
+  assert.equal(showWaypointLogo(origin+1,phase),true);
+  assert.equal(showWaypointLogo(origin+6.9,phase),true);
+  assert.equal(showWaypointLogo(origin+7.1,phase),false);
+  assert.equal(showWaypointLogo(origin+13.9,phase),false);
+  assert.ok(waypointSwapGlitch(origin+7.02,phase)>0);
+  assert.equal(waypointSwapGlitch(origin+7.5,phase),0);
+  assert.equal(showWaypointLogo(origin+10,phase,true),true);
+  assert.equal(waypointSwapGlitch(origin+7.02,phase,true),0);
  }
+});
+
+test('adult Placez wear the 18+ ticket shell; boards keep their families',async()=>{
+ const {waypointFamilyShell}=await import('../client/public/zaydar-map/waypoint-markers.js');
+ assert.equal(waypointFamilyShell('places','adult'),'ticket');
+ assert.equal(waypointFamilyShell('places','bar'),'place');
+ assert.equal(waypointFamilyShell('houz'),'house');
+ assert.equal(waypointFamilyShell('mizzed'),'speech');
+ assert.equal(waypointFamilyShell('gigz'),'shield');
 });

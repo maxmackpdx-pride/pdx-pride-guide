@@ -50,7 +50,7 @@ export const WAYPOINT_COLOR: Record<WaypointId, string> = {
   shop: "#ffb23d",
   bath: "#0044ff",
   adult: "#ff00cc",
-  gigz: "#8800ff",
+  gigz: "#6e3dff",
   sells: "#39ff14",
   giftz: "#ccff00",
   plus: "#ff2400",

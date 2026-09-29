@@ -13,7 +13,7 @@ import MapComposerOverlay from "@/components/MapComposerOverlay";
 import {readMapCamera,filterWorldRows,locateWorldRow,roughDistanceMiles,WORLD_DETAIL_KEYS,type MapWorld,type WorldRow,type MapBounds} from "@/lib/mapWorlds";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { roomTitle } from "@/lib/rooms";
+import { ROOMS, roomTitle } from "@/lib/rooms";
 import ZaydarCanvas, { type MapSelectionRect, type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { ChevronRight, LocateFixed } from "lucide-react";
 import MapSwitch from "@/components/MapSwitch";
@@ -67,6 +67,26 @@ function zaydarPlaceType(place: Pick<Place,'name'|'type'>) { return ADULT_VENUES
 function zaydarPlaceColor(place: Pick<Place,'name'|'type'>) {
   return ADULT_VENUES.has(normalizeDirectoryName(place.name)) ? '#FF0000' : directoryTypeColor(place.type);
 }
+const WEEKDAY_TOKENS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+/** Day color for an event night, read from the --day-* tokens so calm mode applies. */
+function nightDayColor(night: string | undefined): string | undefined {
+  if (!night) return undefined;
+  const weekday = new Date(`${night}T12:00:00Z`).getUTCDay();
+  return getComputedStyle(document.documentElement).getPropertyValue(`--day-${WEEKDAY_TOKENS[weekday]}`).trim() || undefined;
+}
+/** Venues with events on two or more distinct nights in the next week wear the bloom ring. */
+function bloomVenues(events: Event[], now = Date.now()): Set<string> {
+  const nights = new Map<string, Set<string>>();
+  for (const event of events) {
+    const starts = parsePacificDateTime(event.dateStart);
+    if (!starts || starts < now - 6 * 3600_000 || starts > now + 7 * 86_400_000 || !event.venueName) continue;
+    const key = normalizeDirectoryName(event.venueName);
+    if (!nights.has(key)) nights.set(key, new Set());
+    nights.get(key)!.add(eventNight(starts));
+  }
+  return new Set(Array.from(nights).filter(([, set]) => set.size >= 2).map(([key]) => key));
+}
+
 function zaydarEventColor(event: Event, places: Place[]) {
   const venueKey=normalizeDirectoryName(event.venueName || '');
   let tags: string[]=[];try { const parsed=JSON.parse(event.eventTypes || '[]'); if(Array.isArray(parsed))tags=parsed; } catch {}
@@ -200,7 +220,7 @@ function boardColor(row: MapRow): string {
   if (String(row._board) === "The HAÜZ") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
   if(row._board === "Mizzed") return "#FF00CC";
   const kind = boardKind(row);
-  if (kind === "gig") return "#8800FF";
+  if (kind === "gig") return "#6E3DFF";
   if (kind === "gifting") return "#CCFF00";
   return "#39FF14";
 }
@@ -674,17 +694,25 @@ export default function ZaydarMapDemo() {
     <details className="zaydar-houz-about"><summary>How HAÜZ works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
   </section>;
   const layers: ZaydarLayer[] = [
-    { id: "events", label: "Eventz", color: "#FF00CC", enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
-    { id:"places",label:"Placez",color:"#00FFFF",enabled:showPlaces,onToggle:()=>toggleLayer("hidePlaces"),panel:worldPanels.places,viewMore:[] },
-    { id:"mizzed",label:"Mizzed",color:"#FF00CC",enabled:showMizzed,onToggle:()=>toggleLayer("hideMizzed"),panel:worldPanels.mizzed,viewMore:[{label:"Browse all Mizzed",href:"/mizzed"}] },
-    { id:"gigz",label:"Gigz",color:"#8800FF",enabled:showGigz,onToggle:()=>toggleLayer("hideGigz"),panel:worldPanels.gigz,viewMore:[{label:"Browse all Gigz",href:"/gigz"}] },
-    { id:"giftz",label:"Giftz",color:"#CCFF00",enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[{label:"Browse all Giftz",href:"/giftz"}] },
-    { id:"sellz",label:"Sellz",color:"#39FF14",enabled:showSellz,onToggle:()=>toggleLayer("hideSellz"),panel:worldPanels.sellz,viewMore:[{label:"Browse all Sellz",href:"/sellz"}] },
-    { id: "houz", label: "Haüz", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "Browse all Haüz", href: "/the-hauz" }] },
+    { id: "events", label: ROOMS.eventz.nav, color: ROOMS.eventz.accent, enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
+    { id:"places",label:ROOMS.placez.nav,color:ROOMS.placez.accent,enabled:showPlaces,onToggle:()=>toggleLayer("hidePlaces"),panel:worldPanels.places,viewMore:[] },
+    { id:"mizzed",label:ROOMS.mizzed.nav,color:ROOMS.mizzed.accent,enabled:showMizzed,onToggle:()=>toggleLayer("hideMizzed"),panel:worldPanels.mizzed,viewMore:[{label:"Browse all Mizzed",href:"/mizzed"}] },
+    { id:"gigz",label:ROOMS.gigz.nav,color:"var(--room-gigz-ink)",enabled:showGigz,onToggle:()=>toggleLayer("hideGigz"),panel:worldPanels.gigz,viewMore:[{label:"Browse all Gigz",href:"/gigz"}] },
+    { id:"giftz",label:ROOMS.giftz.nav,color:ROOMS.giftz.accent,enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[{label:"Browse all Giftz",href:"/giftz"}] },
+    { id:"sellz",label:ROOMS.sellz.nav,color:ROOMS.sellz.accent,enabled:showSellz,onToggle:()=>toggleLayer("hideSellz"),panel:worldPanels.sellz,viewMore:[{label:"Browse all Sellz",href:"/sellz"}] },
+    { id: "houz", label: ROOMS.hauz.nav, color: ROOMS.hauz.accent, enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "Browse all Haüz", href: "/the-hauz" }] },
   ];
 
   useAttendanceSummariesLive();
   const {data:attendance={}}=useQuery<Record<number,{count:number;preview:Array<{initials:string;photoUrl?:string|null}>}>>({queryKey:["/api/events/attendance-summaries"],queryFn:()=>apiRequest("GET","/api/events/attendance-summaries").then(r=>r.json()),refetchInterval:60000});
+  // Day colors are tokens; re-read them after calm mode flips the class on <html>.
+  const [tokenEpoch, setTokenEpoch] = useState(0);
+  useEffect(() => {
+    const observer = new MutationObserver(() => setTokenEpoch(n => n + 1));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  const bloomKeys = useMemo(() => bloomVenues(events), [events]);
   const sceneRows = useMemo(() => marks.map(mark => {
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
@@ -718,9 +746,11 @@ export default function ZaydarMapDemo() {
       alternateLogoKey:brands?.alternateDirectoryId?`directory-${brands.alternateDirectoryId}`:undefined,
       eventDay:event?portlandCalendarDay(event.dateStart):undefined,
       eventNight:event?eventNight(parsePacificDateTime(event.dateStart)??NaN):undefined,
+      dayColor:event?nightDayColor(eventNight(parsePacificDateTime(event.dateStart)??NaN)):undefined,
+      bloom:place?bloomKeys.has(normalizeDirectoryName(place.name)):undefined,
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?eventTimeLabel(event.dateStart):undefined};
-  }), [marks, places, events, demoEventIds, attendance]);
+  }), [marks, places, events, demoEventIds, attendance, bloomKeys, tokenEpoch]);
   const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{

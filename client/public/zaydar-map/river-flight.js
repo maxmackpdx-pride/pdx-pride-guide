@@ -19,7 +19,7 @@ import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointFamilyShell} from './waypoint-markers.js?v=20260929-pack-shells';
+import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20260930-pack-heads';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -665,7 +665,9 @@ function drawLights(fade,target=map,surface=lights){
    else{
     // Heads remain readable above buildings; their beam is masked at street level.
     const logo=feature.properties.kind==='place'&&feature.properties.waypointLogo?venueLogos.get(feature.properties.waypointLogo)?.image:null;
-    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,logo&&showWaypointLogo(pulseTime,phase,reduced.matches)?logo:null,selected,coreAlpha,waypointFamilyShell(feature.properties.waypointFamily));
+    const shell=waypointFamilyShell(feature.properties.waypointFamily,feature.properties.type);
+    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,logo&&showWaypointLogo(pulseTime,phase,reduced.matches)?logo:null,selected,coreAlpha,shell,
+     {bloom:feature.properties.bloom,label:shell==='ticket'?'18+':null,glitch:logo?waypointSwapGlitch(pulseTime,phase,reduced.matches):0});
     if(cluster?.members.length>1)drawClusterCount(lightsContext,geometry.x,geometry.y,cluster.members.length,color,geometry.size);
     hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color,clusterBounds:cluster?.members.length>1?cluster.bounds:null,clusterKeys:cluster?.members.map(member=>member.feature.properties.key),clusterWorld:feature.properties.waypointFamily});
    }
@@ -730,7 +732,8 @@ function drawLights(fade,target=map,surface=lights){
     lightsContext.fillRect(Math.min(p.x,logoX)-halfWidth,y,Math.abs(p.x-logoX)+halfWidth*2,line%3===0?1.3:.7);
    }
    lightsContext.restore();
-   lightsContext.strokeStyle=color;
+   // The ground ring wears the event's day, so a cluster of Friday holograms reads as Friday from above.
+   lightsContext.strokeStyle=feature.properties.dayColor||color;
    lightsContext.globalAlpha=(fade*pulse)*bloomScale;lightsContext.lineWidth=1.2;
    lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,15.75*groundScale,6.125*groundScale,0,0,Math.PI*2);lightsContext.stroke();
    const projectorAngle=reduced.matches?phase:pulseTime*.14+phase;
@@ -1130,9 +1133,6 @@ function clusterPlaceMarkers(items,selected,zoom,width,height){
 }
 function drawClusterCount(ctx,x,y,count,color,size=28){
  ctx.save();ctx.translate(x+size/2-1.5,y-size/2+1.5);ctx.fillStyle='#071018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,10.5,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 11px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),0,.5);ctx.restore();
-}
-function drawSelectedMarkerLabel(ctx,x,y,name,type,color,width){
- const label=String(name||type||'Place');ctx.save();ctx.font='600 12px Inter,Arial,sans-serif';const labelWidth=Math.min(190,ctx.measureText(label).width+22);const labelX=Math.max(labelWidth/2+8,Math.min(width-labelWidth/2-8,x));ctx.fillStyle='#050b12e8';ctx.strokeStyle=color;ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(labelX-labelWidth/2,y+17,labelWidth,28,10);ctx.fill();ctx.stroke();ctx.fillStyle='#f4fbff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,labelX,y+31,labelWidth-16);ctx.restore();
 }
 let sequence=0,phases=new Map(),dataGeneration=0,paletteKey='';
 async function setListings(rows){
