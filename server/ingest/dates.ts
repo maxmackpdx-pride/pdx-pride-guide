@@ -50,11 +50,12 @@ export function toPacificWallClock(value: string | Date | null | undefined): str
     } else if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw)) {
       const t = new Date(raw).getTime();
       ms = Number.isFinite(t) ? t : null;
-    } else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(raw)) {
-      // Already wall-clock-ish - normalize seconds.
-      const m = raw.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})(?::(\d{2}))?/);
+    } else if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(raw)) {
+      // Already wall-clock-ish - normalize seconds. Tribe feeds send local
+      // "2026-09-12 20:00:00"; never let the server's time zone reinterpret it.
+      const m = raw.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(?::(\d{2}))?/);
       if (!m) return null;
-      return `${m[1]}:${m[2] ?? "00"}`;
+      return `${m[1]}T${m[2]}:${m[3] ?? "00"}`;
     } else if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
       return `${raw}T00:00:00`;
     } else {

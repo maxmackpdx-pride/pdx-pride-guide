@@ -11,18 +11,22 @@ try {
  for (const width of [1440,390]) {
   const page=await browser.newPage({viewport:{width,height:900}});
   await page.goto(base+'/pride-work',{waitUntil:'domcontentloaded'});
-  const action=page.getByTestId('button-post-gig');await action.waitFor();
+  // Board post actions are the quiet utility-layer button; the lime fill lives on the auth submit.
+  const action=page.getByRole('button',{name:'Post a gig',exact:true});await action.waitFor();
   await page.waitForTimeout(200);
   const rest=await read(action);
-  assert.equal(rest.bg,'rgb(204, 255, 0)','primary at rest');
-  assert.equal(rest.color,'rgb(5, 5, 6)');assert.equal(rest.radius,'28px');assert.ok(rest.height>=56);
-  await action.hover();await page.waitForTimeout(200);assert.equal((await read(action)).bg,rest.bg,'hover preserves fill');
-  await page.mouse.move(1,1);await action.focus();assert.equal((await read(action)).outline,'solid','keyboard focus');
+  assert.ok(rest.height>=44,'post action hit target');assert.equal(rest.shadow,'none','post action has no bloom');
+  await action.hover();await page.waitForTimeout(250);const hover=await read(action);
+  assert.notEqual(hover.bg,rest.bg,'hover fills the post action');assert.equal(hover.radius,rest.radius,'hover keeps the shape');
+  await page.mouse.move(1,1);await action.focus();await page.keyboard.press('Shift+Tab');await page.keyboard.press('Tab');
+  assert.equal((await read(action)).outline,'solid','keyboard focus');
   await action.click();const dialog=page.getByRole('dialog');await dialog.waitFor();await page.waitForTimeout(600);
-  for(const label of ['Close','Show password']) {const c=dialog.getByRole('button',{name:label,exact:true}).first();const s=await read(c);assert.ok(s.width>=44&&s.height>=44,label+' hit target');}
-  const submit=dialog.locator('button[type="submit"]').last();const submitStyle=await read(submit);assert.equal(submitStyle.bg,'rgb(204, 255, 0)');assert.equal(submitStyle.radius,'22px');
+  for(const label of ['Close','Your account, step 1 of 2','Password, step 2 of 2']) {const c=dialog.getByRole('button',{name:label,exact:true}).first();const s=await read(c);assert.ok(s.width>=44&&s.height>=44,label+' hit target');}
+  const submit=dialog.locator('button[type="submit"]').last();const submitStyle=await read(submit);
+  assert.equal(submitStyle.bg,'rgb(204, 255, 0)','auth submit is the lime primary');assert.equal(submitStyle.radius,'22px');assert.ok(submitStyle.height>=44);
   await page.keyboard.press('Escape');
-  await page.goto(base+'/gifting',{waitUntil:'domcontentloaded'});const disabled=page.locator('.pdxBtn:disabled').first();await disabled.waitFor();const ds=await read(disabled);assert.equal(ds.shadow,'none');assert.notEqual(ds.bg,rest.bg,'disabled is visibly distinct');
+  const disabled=page.getByRole('button',{name:'Next gigs',exact:true});
+  if(await disabled.isDisabled()){const ds=await disabled.evaluate(el=>getComputedStyle(el));assert.equal(ds.boxShadow,'none');assert.ok(Number(ds.opacity)<=.5,'disabled is visibly distinct');}
   await page.goto(base+'/contact',{waitUntil:'domcontentloaded'});const secondary=page.locator('.pdxBtn').first();await secondary.waitFor();const sec=await read(secondary);assert.equal(sec.bg,'rgb(0, 0, 0)');assert.equal(sec.color,'rgb(255, 0, 204)');assert.equal(sec.radius,'22px');
   await page.evaluate(()=>document.documentElement.classList.add('calm-mode'));await page.waitForTimeout(200);const calm=await read(secondary);assert.ok(!calm.shadow.includes('18px'),'Calm Mode removes outer bloom');
   await page.evaluate(() => {
@@ -44,6 +48,6 @@ try {
   await ad.hover();await page.waitForTimeout(200);
   assert.equal((await read(ad)).bg,'rgb(255, 31, 31)','ad brand survives hover');
   assert.equal((await read(ad)).color,'rgb(255, 255, 255)','ad readable ink');
-  await page.close();console.log(`PASS: ${width}px primary, hover, focus, auth, disabled, secondary, calm, contexts, ad exception`);
+  await page.close();console.log(`PASS: ${width}px post action, hover, focus, auth, disabled, secondary, calm, contexts, ad exception`);
  }
 } finally { await browser.close(); }

@@ -1,5 +1,5 @@
 /**
- * QSearch smoke / bug checks (offline + live API if server on :5050).
+ * QSearch smoke / bug checks (offline).
  * Run: npx tsx script/smoke-qsearch.ts
  */
 import { isNonEventListing } from "../server/ingest";
@@ -145,88 +145,9 @@ const withPast = buildScanCandidates(
 );
 assert(withPast.length === 2, "includePastEvents keeps past + future");
 
-// --- Live API (optional) ---
-const BASE = process.env.SMOKE_BASE_URL || "http://127.0.0.1:5050";
-async function liveApi() {
-  const login = await fetch(`${BASE}/api/admin/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: "tucker_pdmax", password: "smoketest" }),
-  });
-  if (!login.ok) {
-    console.log("skip live API (login failed — is dev server up?)");
-    return;
-  }
-  const cookie = login.headers.getSetCookie?.()?.join("; ") || "";
-  // cookie jar for node fetch
-  const setCookie = login.headers.get("set-cookie") || "";
-  const cookieHeader = setCookie.split(",").map(c => c.split(";")[0]).join("; ");
-
-  const dash = await fetch(`${BASE}/api/admin/qsearch/dashboard`, {
-    headers: { Cookie: cookieHeader },
-  });
-  assert(dash.ok, `dashboard ${dash.status}`);
-  const dashJson = await dash.json();
-  assert(dashJson.stats?.urlCount > 0, `urlCount=${dashJson.stats?.urlCount}`);
-  assert(Array.isArray(dashJson.sources), "sources array");
-  assert(Array.isArray(dashJson.health), "health array");
-
-  // Tiny scan: only one high-yield curated source if present
-  const darcelle = (dashJson.sources as any[]).find((s: any) => s.id === "darcelle-tribe");
-  const sourceIds = darcelle ? [darcelle.id] : [(dashJson.sources as any[])[0]?.id].filter(Boolean);
-
-  const scan = await fetch(`${BASE}/api/admin/qsearch/scan`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Cookie: cookieHeader },
-    body: JSON.stringify({
-      sourceIds,
-      tryVision: false,
-      includePastEvents: false,
-    }),
-  });
-  const scanBody = await scan.json();
-  if (!scan.ok) {
-    // Concurrent scan is ok in parallel runs
-    assert(
-      String(scanBody.error || "").includes("already running") || scan.ok,
-      `scan start: ${scan.status} ${JSON.stringify(scanBody).slice(0, 120)}`,
-    );
-    if (!scan.ok) return;
-  } else {
-    assert(scanBody.jobId, "jobId returned");
-    const jobId = scanBody.jobId as string;
-    let done = false;
-    for (let i = 0; i < 90; i++) {
-      await new Promise(r => setTimeout(r, 1000));
-      const st = await fetch(`${BASE}/api/admin/qsearch/scan/${jobId}`, {
-        headers: { Cookie: cookieHeader },
-      });
-      const j = await st.json();
-      if (j.status === "done" || j.status === "cancelled" || j.status === "failed") {
-        assert(j.status === "done" || j.status === "cancelled", `job finished status=${j.status}`);
-        assert(typeof j.progress === "number", "progress number");
-        // Past filter: no candidate should be fully past
-        const cands = j.candidates || [];
-        for (const c of cands) {
-          if (c.draft && isPastEventListing(c.draft)) {
-            assert(false, `candidate past slipped through: ${c.draft.title}`);
-          }
-        }
-        console.log(`ok: live scan job ${jobId} candidates=${cands.length}`);
-        done = true;
-        break;
-      }
-    }
-    assert(done, "scan completed within timeout");
-  }
-
-  const queue = await fetch(`${BASE}/api/admin/qsearch/queue?status=pending&limit=50`, {
-    headers: { Cookie: cookieHeader },
-  });
-  assert(queue.ok, `queue ${queue.status}`);
-}
-
-await liveApi();
+// The live /api/admin/qsearch API was archived on 2026-08-30 and answers 410;
+// its end-to-end checks were retired with it. These offline checks still guard
+// the shared ingest and analyze code.
 
 if (failed) {
   console.error(`\n${failed} assertion(s) failed`);

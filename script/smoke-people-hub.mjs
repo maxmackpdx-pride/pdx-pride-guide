@@ -73,11 +73,14 @@ try {
 
   for (const tab of ["following", "followers", "discover"]) {
     const res = await page.request.get(`${BASE}/api/users/me/people/${tab}`);
-    const list = await res.json();
+    const body = await res.json();
+    // Following carries followed places next to people so venue follows show in the hub.
+    const list = tab === "following" ? body?.people : body;
+    const placesOk = tab !== "following" || Array.isArray(body?.places);
     record(
       `people/${tab} returns array`,
-      res.ok() && hasPeopleShape(list),
-      `count=${Array.isArray(list) ? list.length : "invalid"}`,
+      res.ok() && hasPeopleShape(list) && placesOk,
+      `count=${Array.isArray(list) ? list.length : "invalid"}${tab === "following" ? ` places=${Array.isArray(body?.places) ? body.places.length : "invalid"}` : ""}`,
     );
   }
 
@@ -94,7 +97,7 @@ try {
     record("follow from discover", followRes.ok() && followBody.isFollowing === true, `@${target.username}`);
 
     const followingRes = await page.request.get(`${BASE}/api/users/me/people/following`);
-    const following = await followingRes.json();
+    const following = (await followingRes.json())?.people ?? [];
     const listed = following.some((p) => p.username === target.username && p.isFollowing);
     record("following list includes new follow", listed, `followingCount=${following.length}`);
 
@@ -110,6 +113,7 @@ try {
   await page.goto(`${BASE}/dashboard?section=people`, { waitUntil: "domcontentloaded", timeout: 30000 });
   await page.waitForResponse((r) => r.url().includes("/api/auth/me") && r.ok(), { timeout: 15000 }).catch(() => {});
 
+  await page.getByRole("heading", { name: "People" }).waitFor({ timeout: 15000 }).catch(() => {});
   const hasPeopleHeading = await page.getByRole("heading", { name: "People" }).isVisible();
   const hasFollowingTab = await page.getByRole("button", { name: "Following" }).isVisible();
   const hasFollowersTab = await page.getByRole("button", { name: "Followers" }).isVisible();

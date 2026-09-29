@@ -158,45 +158,67 @@ export function mergeMapCoordinates<T extends MapCoordinateFields>(
   return { ...fields, lat: coords.lat, lng: coords.lng };
 }
 
-function buildGeocodeQuery(address?: string | null, venueName?: string | null): string | null {
-  const parts = [address, venueName].map(v => String(v || "").trim()).filter(Boolean);
-  if (!parts.length) return null;
+function portlandQuery(parts: string[]): string {
   const joined = parts.join(", ");
   if (/portland|,\s*or\b/i.test(joined)) return joined;
   return `${joined}, Portland, OR`;
 }
 
+/**
+ * Nominatim finds "Name, street" but returns nothing for "street, Name", and a
+ * name it does not know sinks an otherwise good address. Try the venue name
+ * first, then the bare address, then the bare name.
+ */
+export function buildGeocodeQueries(address?: string | null, venueName?: string | null): string[] {
+  const street = String(address || "").trim();
+  const name = String(venueName || "").trim();
+  const queries = [
+    street && name && !street.toLowerCase().includes(name.toLowerCase()) ? portlandQuery([name, street]) : "",
+    street ? portlandQuery([street]) : "",
+    name && !street ? portlandQuery([name]) : "",
+  ].filter(Boolean);
+  return Array.from(new Set(queries));
+}
+
+// Nominatim's usage policy allows one request per second.
+const NOMINATIM_GAP_MS = 1100;
+
 export async function geocodePortlandLocation(
   address?: string | null,
   venueName?: string | null,
+  deps: { fetchImpl?: typeof fetch; wait?: (ms: number) => Promise<void> } = {},
 ): Promise<MapCoordinates | null> {
-  const query = buildGeocodeQuery(address, venueName);
-  if (!query) return null;
+  const fetchImpl = deps.fetchImpl ?? fetch;
+  const wait = deps.wait ?? ((ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms)));
+  const queries = buildGeocodeQueries(address, venueName);
+  for (let i = 0; i < queries.length; i++) {
+    if (i > 0) await wait(NOMINATIM_GAP_MS);
+    try {
+      const url = new URL("https://nominatim.openstreetmap.org/search");
+      url.searchParams.set("q", queries[i]);
+      url.searchParams.set("format", "json");
+      url.searchParams.set("limit", "1");
 
-  try {
-    const url = new URL("https://nominatim.openstreetmap.org/search");
-    url.searchParams.set("q", query);
-    url.searchParams.set("format", "json");
-    url.searchParams.set("limit", "1");
+      const response = await fetchImpl(url, {
+        headers: { "User-Agent": "Zaylist/1.0 (map-sync)" },
+      });
+      if (!response.ok) return null;
 
-    const response = await fetch(url, {
-      headers: { "User-Agent": "Zaylist/1.0 (map-sync)" },
-    });
-    if (!response.ok) return null;
+      const results = await response.json() as Array<{ lat?: string; lon?: string }>;
+      const hit = results[0];
+      if (!hit?.lat || !hit.lon) continue;
 
-    const results = await response.json() as Array<{ lat?: string; lon?: string }>;
-    const hit = results[0];
-    if (!hit?.lat || !hit.lon) return null;
-
-    const lat = Number(hit.lat);
-    const lng = Number(hit.lon);
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-    // Never accept a "Portland" geocode that lands outside the metro
-    if (!isInPortlandMetro(lat, lng)) return null;
-    return { lat, lng };
-  } catch {
-    return null;
+      const lat = Number(hit.lat);
+      const lng = Number(hit.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+      // Never accept a "Portland" geocode that lands outside the metro
+      if (!isInPortlandMetro(lat, lng)) continue;
+      return { lat, lng };
+    } catch {
+      return null;
+    }
   }
+  return null;
 }
 
 export async function resolvePersistedMapCoordinates(
