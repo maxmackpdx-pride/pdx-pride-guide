@@ -1,3 +1,4 @@
+import { seedDiscoveredQueerEvents20260928 } from "./seedDiscoveredQueerEvents20260928";
 import { seedHawksReviewedTimes20260928 } from "./seedHawksReviewedTimes20260928";
 import { seedHawksThroughApril2027 } from "./seedHawksThroughApril2027";
 import { seedApprovedEvents20260928 } from "./seedApprovedEvents20260928";
@@ -8139,6 +8140,7 @@ function runBootMigrationsOnce() {
   seedApprovedEvents20260928(sqlite);
   seedHawksThroughApril2027(sqlite);
   seedHawksReviewedTimes20260928(sqlite);
+  seedDiscoveredQueerEvents20260928(sqlite);
 }
 
 function parseEnvAdminLists() {
