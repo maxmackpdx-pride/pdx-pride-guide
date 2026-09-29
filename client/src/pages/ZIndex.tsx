@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { apiRequest, parseApiError, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
 import CommunityPageInvitation from "@/components/CommunityPageInvitation";
-import SectionBreadcrumb from "@/components/SectionBreadcrumb";
+import PageHeader from "@/components/PageHeader";
 import SpectrumLoader from "@/components/SpectrumLoader";
 import { communityLogo } from "@shared/communityLogos";
 import type { CommunitySummary } from "@shared/community";
@@ -27,12 +27,13 @@ export default function ZIndex() {
     onError: err => setError(parseApiError(err, "Community could not be created.")),
   });
   return <div className="z-communities">
-    <header className="z-communities__hero">
-      <SectionBreadcrumb section="Communities" />
-      <h1><span>Z/</span> List</h1>
-      <p className="z-communities__intro">Find your people. Join a conversation, share what matters, and make plans together. Every community has its own voice and its own rules.</p>
-      {user ? <Button accent="cyan" onClick={() => setCreating(value => !value)} aria-expanded={creating} aria-controls="z-community-create">{creating ? "CANCEL" : "CREATE A COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO CREATE</Button></Link>}
-    </header>
+    <PageHeader
+      section="Communities"
+      title="Z/ List"
+      titleAccent="rainbow"
+      lede="Find your people. Join a conversation, share what matters, and make plans together. Every community has its own voice and its own rules."
+      actions={user ? <Button accent="cyan" onClick={() => setCreating(value => !value)} aria-expanded={creating} aria-controls="z-community-create">{creating ? "CANCEL" : "CREATE A COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO CREATE</Button></Link>}
+    />
     {creating ? <form id="z-community-create" className="z-community-panel z-community-create" onSubmit={event => { event.preventDefault(); create.mutate(); }} aria-busy={create.isPending}>
       <h2>CREATE A COMMUNITY</h2><p>The creator becomes the owner and is responsible for rules and moderation.</p>
       <label>Name<input value={draft.name} onChange={event => setDraft({ ...draft, name: event.target.value })} minLength={3} maxLength={100} required /></label>
