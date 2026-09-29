@@ -1,26 +1,67 @@
-const heads=new Map(),ink=new WeakMap();
+const bodies=new Map(),rings=new Map(),ink=new WeakMap();
 function cityAmount(){
  try{return window.__mapzMap?Math.max(0,Math.min(1,(window.__mapzMap.getZoom()-14.25)/1.1))*Math.max(0,Math.min(1,(window.__mapzMap.getPitch()-16)/18)):0;}catch{return 0;}
 }
+function mapZoom(){try{return window.__mapzMap?window.__mapzMap.getZoom():13;}catch{return 13;}}
+const reducedMedia=typeof matchMedia==='function'?matchMedia('(prefers-reduced-motion: reduce)'):null;
+function stillMotion(){
+ if(reducedMedia?.matches)return true;
+ try{return localStorage.getItem('pdx-calm-mode')==='true';}catch{return false;}
+}
+/** Waypoint pack sizes: 31 at rest, growing to 42 at zoom 16+, 57 when selected. */
+export function waypointHeadSize(selected=false,zoom=mapZoom()){
+ if(selected)return 57;
+ return Math.round(31+11*Math.max(0,Math.min(1,(zoom-12)/4)));
+}
 const WAYPOINT_BEAM_HEIGHT_SCALE=2;
+/** Shell tip hangs below the head box by this share of the size (livingMapWaypoints r*.68). */
+const TIP=.34;
 export function waypointGeometry(origin,selected=false,roofLift=0){
  const amount=cityAmount();
- const size=selected?44:28;
+ const size=waypointHeadSize(selected);
  // Double the waypoint shaft and head lift while keeping the beam anchored
  // to its roof or ground point. Fade the visibility floor as buildings extrude.
- const minimumHeight=(selected?56:22)*(1-amount);
+ // The head rises out of its hologram: selected lifts higher.
+ const minimumHeight=(selected?64:22)*(1-amount);
  const beamHeight=Math.max(roofLift,minimumHeight)*WAYPOINT_BEAM_HEIGHT_SCALE;
- return {x:origin.x,y:origin.y-beamHeight-size/2,size,bottom:origin.y-beamHeight,anchorY:origin.y};
+ return {x:origin.x,y:origin.y-beamHeight-size*TIP-size/2,size,bottom:origin.y-beamHeight,anchorY:origin.y};
 }
-function headSprite(color,selected){
- const key=color+selected;if(heads.has(key))return heads.get(key);
- const size=selected?44:28,pad=selected?16:10,dpr=2;
- const canvas=document.createElement('canvas');canvas.width=canvas.height=(size+pad*2)*dpr;
+/** Shell outlines, ported from client/src/lib/livingMapWaypoints.ts shellPath(). */
+function shellPath(family,cx,cy,r){
+ const x0=cx-r,x1=cx+r,y0=cy-r,y1=cy+r,q=r*.2;
+ if(family==='house')return `M${x0+q},${cy-r*.15} ${cx},${y0} ${x1-q},${cy-r*.15}V${y1-q}L${cx},${y1+r*.68} ${x0+q},${y1-q}Z`;
+ if(family==='speech')return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}L${x1-q},${y1}H${cx+q},${cx},${y1+r*.68} ${cx-q},${y1}H${x0+q}L${x0},${y1-q}V${y0+q}Z`;
+ if(family==='long')return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${cy+r*.45}L${cx},${y1+r*.68} ${x0},${cy+r*.45}V${y0+q}Z`;
+ // place and shield share the chamfered head with an integrated tip
+ return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}L${cx},${y1+r*.68} ${x0},${y1-q}V${y0+q}Z`;
+}
+/** Which shell a map row wears. The EVENTZ ticket is retired: events use the place shell. */
+export function waypointFamilyShell(waypointFamily){
+ if(waypointFamily==='houz')return 'house';
+ if(waypointFamily==='mizzed')return 'speech';
+ if(waypointFamily==='gigz'||waypointFamily==='giftz'||waypointFamily==='sellz')return 'shield';
+ return 'place';
+}
+function spriteBox(size){const pad=Math.ceil(size*.3),dpr=2;return {pad,dpr,box:size+pad*2,tall:size*(1+TIP)+pad*2};}
+function bodySprite(color,size,family){
+ const key=color+'|'+size+'|'+family;if(bodies.has(key))return bodies.get(key);
+ const {pad,dpr,box,tall}=spriteBox(size),sw=Math.max(1,size*.0425),r=size/2-sw/2,c=pad+size/2;
+ const canvas=document.createElement('canvas');canvas.width=box*dpr;canvas.height=Math.ceil(tall*dpr);
  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
- ctx.fillStyle='#111a15';ctx.strokeStyle=color;ctx.lineWidth=1;
- ctx.shadowColor=color+(selected?'80':'40');ctx.shadowBlur=selected?20:12;
- ctx.beginPath();ctx.roundRect(pad+.5,pad+.5,size-1,size-1,6);ctx.fill();ctx.stroke();
- const result={canvas,pad,size};heads.set(key,result);return result;
+ const path=new Path2D(shellPath(family,c,c,r));
+ // OLED black body, neon ring, the platform's 8% bloom.
+ ctx.shadowColor=color+'14';ctx.shadowBlur=18;
+ ctx.fillStyle='#050506';ctx.fill(path);
+ ctx.shadowBlur=0;ctx.strokeStyle=color;ctx.lineWidth=sw;ctx.lineJoin='round';ctx.stroke(path);
+ const result={canvas,pad,box,tall};bodies.set(key,result);return result;
+}
+function ringSprite(color,size,family){
+ const key=color+'|'+size+'|'+family;if(rings.has(key))return rings.get(key);
+ const {pad,dpr,box,tall}=spriteBox(size),sw=Math.max(1,size*.0425),r=size/2-sw/2,c=pad+size/2;
+ const canvas=document.createElement('canvas');canvas.width=box*dpr;canvas.height=Math.ceil(tall*dpr);
+ const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+ ctx.strokeStyle=color;ctx.lineWidth=sw*1.6*2.2;ctx.lineJoin='round';ctx.filter='blur(2px)';ctx.stroke(new Path2D(shellPath(family,c,c,r)));
+ const result={canvas,pad,box,tall};rings.set(key,result);return result;
 }
 function tintedIcon(image,color){
  let colors=ink.get(image);if(!colors){colors=new Map();ink.set(image,colors);}
@@ -31,12 +72,22 @@ function tintedIcon(image,color){
  ctx.globalCompositeOperation='source-in';ctx.fillStyle=color;ctx.fillRect(0,0,96,96);
  colors.set(color,canvas);return canvas;
 }
-export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1){
- const {x,y,size}=geometry,{canvas,pad}=headSprite(color,selected);
- ctx.save();ctx.globalAlpha=alpha;ctx.shadowBlur=0;
- ctx.drawImage(canvas,x-size/2-pad,y-size/2-pad,size+pad*2,size+pad*2);
+/** Glow ring: breathes .18 to .42 over 3.8s at rest; selected holds .45; calm and reduced motion hold .28. */
+function ringAlpha(selected){
+ if(selected)return .45;
+ if(stillMotion())return .28;
+ return .3+.12*Math.sin(performance.now()/1000*Math.PI*2/3.8);
+}
+export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1,family='place'){
+ const {x,y,size}=geometry,shell=family||'place';
+ const body=bodySprite(color,size,shell),ring=ringSprite(color,size,shell);
+ const left=x-size/2-body.pad,top=y-size/2-body.pad;
+ ctx.save();ctx.shadowBlur=0;
+ ctx.globalAlpha=alpha*ringAlpha(selected);ctx.drawImage(ring.canvas,left,top,ring.box,ring.tall);
+ ctx.globalAlpha=alpha;ctx.drawImage(body.canvas,left,top,body.box,body.tall);
  const image=logo||icon;
- if(image){const glyphSize=logo?size-8:selected?26:19;ctx.drawImage(tintedIcon(image,logo?'#FFFFFF':color),x-glyphSize/2,y-glyphSize/2,glyphSize,glyphSize);}
+ // White glyph at 58% of the head, as in the waypoint pack.
+ if(image){const glyphSize=size*.58;ctx.drawImage(tintedIcon(image,'#FFFFFF'),x-glyphSize/2,y-glyphSize/2,glyphSize,glyphSize);}
  ctx.restore();
 }
 /** Placez shaft: much narrower than event hologram beams (~61px). Rises from roof or disk. */

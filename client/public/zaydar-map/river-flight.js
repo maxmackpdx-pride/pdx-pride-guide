@@ -19,7 +19,7 @@ import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo} from './waypoint-markers.js?v=20260928-double-beams';
+import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointFamilyShell} from './waypoint-markers.js?v=20260929-pack-shells';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -652,9 +652,8 @@ function drawLights(fade,target=map,surface=lights){
    const branchLabel=branchFamily==='gigz'?'Gigz':'Mizzed';
    lightsContext.save();lightsContext.globalAlpha=coreAlpha;lightsContext.strokeStyle=color;lightsContext.lineWidth=2;
    lightsContext.beginPath();lightsContext.moveTo(geometry.startX,parent.y);lightsContext.lineTo(geometry.right,parent.y);lightsContext.stroke();lightsContext.restore();
-   drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,coreAlpha);
+   drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,coreAlpha,waypointFamilyShell(branchFamily));
    hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:geometry.size/2+6,name:feature.properties.name,category:branchLabel,color});
-   if(selected)drawSelectedMarkerLabel(lightsContext,geometry.x,geometry.y+geometry.size/2-14,feature.properties.name,branchLabel,color,width);
    continue;
   }
   if(feature.properties.kind!=='event'){
@@ -666,9 +665,8 @@ function drawLights(fade,target=map,surface=lights){
    else{
     // Heads remain readable above buildings; their beam is masked at street level.
     const logo=feature.properties.kind==='place'&&feature.properties.waypointLogo?venueLogos.get(feature.properties.waypointLogo)?.image:null;
-    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,logo&&showWaypointLogo(pulseTime,phase,reduced.matches)?logo:null,selected,coreAlpha);
+    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,logo&&showWaypointLogo(pulseTime,phase,reduced.matches)?logo:null,selected,coreAlpha,waypointFamilyShell(feature.properties.waypointFamily));
     if(cluster?.members.length>1)drawClusterCount(lightsContext,geometry.x,geometry.y,cluster.members.length,color,geometry.size);
-    if(selected)drawSelectedMarkerLabel(lightsContext,geometry.x,geometry.y+geometry.size/2-14,feature.properties.name,feature.properties.type,color,width);
     hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color,clusterBounds:cluster?.members.length>1?cluster.bounds:null,clusterKeys:cluster?.members.map(member=>member.feature.properties.key),clusterWorld:feature.properties.waypointFamily});
    }
    continue;
@@ -678,8 +676,7 @@ function drawLights(fade,target=map,surface=lights){
    const geometry=waypointGeometry(p,selected,placezHoverLift(target,feature,surfaces));
    if(pass===0)drawWaypointFoot(lightsContext,geometry,color,hologramMaterials,drawProjectionBeam,coreAlpha,selected);
    else{
-    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,coreAlpha);
-    if(selected)drawSelectedMarkerLabel(lightsContext,geometry.x,geometry.y+geometry.size/2-14,feature.properties.name,feature.properties.type,color,width);
+    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,coreAlpha,'place');
     hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color});
    }
    continue;

@@ -45,10 +45,12 @@ test('waypoint heads keep equal roof clearance while following different roof he
     for(const selected of [false,true])for(const roof of [8,12,45,200]){
       const first=waypointGeometry({x:100,y:300},selected,roof);
       const moved=waypointGeometry({x:290,y:185},selected,roof);
-      assert.equal(moved.x-first.x,190);assert.equal(moved.y-first.y,-115);
-      assert.equal(first.size,selected?44:28);
+      assert.equal(moved.x-first.x,190);assert.ok(Math.abs(moved.y-first.y+115)<1e-9);
+      // Waypoint pack sizes: 31 at rest growing to 42 by zoom 16, 57 selected.
+      assert.equal(first.size,selected?57:40);
       assert.equal(300-first.bottom,roof*2);
-      assert.equal(first.y+first.size/2,first.bottom);
+      // The shell's integrated tip (34% of the size) touches the top of the beam.
+      assert.ok(Math.abs(first.y+first.size/2+first.size*.34-first.bottom)<1e-9);
     }
   }finally{
     if(previousWindow===undefined)delete globalThis.window;

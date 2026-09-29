@@ -34,7 +34,7 @@ test('labels and Placez markers stay locked to the map during camera movement',a
   assert.match(renderer,/const cameraMoving=Boolean\(target\.isMoving\?\.\(\)\)/);
   assert.match(renderer,/reduced\.matches\|\|cameraMoving\?0:/);
   assert.match(renderer,/r:Math\.max\(22,geometry\.size\/2\+8\)/);
-  assert.match(renderer,/if\(!isBar\)\{[\s\S]*?drawWaypointHead\(lightsContext,geometry,color,typeIcons\.get\(feature\.properties\.typeIcon\)\?\.light,null,selected,coreAlpha\)/);
+  assert.match(renderer,/if\(!isBar\)\{[\s\S]*?drawWaypointHead\(lightsContext,geometry,color,typeIcons\.get\(feature\.properties\.typeIcon\)\?\.light,null,selected,coreAlpha,'place'\)/);
   assert.doesNotMatch(renderer,/drawDiscoveryOrb/);
   assert.match(renderer,/map\.isMoving\(\)\?1000\/60:frameInterval/);
 });
@@ -102,7 +102,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     logoPointerOffset:()=>({x:0,y:0}),separateHolograms:noop,
     venueLogos:new Map([['logo',logo]]),logoFocus:{update:noop,active:new Map()},logoFit:()=>.2,logoMotionSeed:0,
     adultVenueColor:'#FF0000',hologramMaterials:{beams:new Map([[color,{}]])},drawProjectionBeam:()=>operations.push('beam'),
-    waypointGeometry,placezHoverLift:()=>15,typeIcons:new Map(),drawWaypointFoot:()=>operations.push('waypoint-beam'),drawWaypointHead:()=>operations.push('waypoint-head'),drawSelectedMarkerLabel:noop,drawClusterCount:noop,
+    waypointGeometry,placezHoverLift:()=>15,typeIcons:new Map(),drawWaypointFoot:()=>operations.push('waypoint-beam'),drawWaypointHead:()=>operations.push('waypoint-head'),waypointFamilyShell:()=>'place',drawSelectedMarkerLabel:noop,drawClusterCount:noop,
     projectorGroundScale,housingIconSize,visibleHologramLabels,
     applyBuildingOcclusion:()=>operations.push('building-mask'),buildingChrome:{draw:()=>operations.push('chrome')},
     mapHover:{update:noop},hoverTargets:[],logoPointer:{active:false},
