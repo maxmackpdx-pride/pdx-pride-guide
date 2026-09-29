@@ -1,4 +1,4 @@
-/** Seeded HAÜZ liquidity posts that must always show a DEMO tag. */
+/** Seeded demo authors that must always show a DEMO tag. */
 const DEMO_USERNAMES = new Set(["hausing_demo", "rowan"]);
 
 export function isHousingDemoAuthor(author?: {
