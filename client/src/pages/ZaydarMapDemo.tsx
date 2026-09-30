@@ -244,8 +244,7 @@ function housingAreaLabel(row: MapRow): string {
 }
 
 function housingDemo(row: MapRow): boolean {
-  const author = row.author;
-  return Boolean(author && typeof author === "object" && (author as { username?: unknown }).username === "hausing_demo");
+  return row.isDemo === true;
 }
 
 function milesBetween(a: [number, number], b: [number, number]) {

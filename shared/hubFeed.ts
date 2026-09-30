@@ -87,6 +87,8 @@ export type HubFeedItem = {
   boardPostId?: number | null;
   /** The viewer follows this post's board. */
   viewerFollowsBoard?: boolean;
+  /** Seeded demo content (server-marked; board 18). */
+  isDemo?: boolean;
   photoUrl?: string | null;
   mediaUrl?: string | null;
   /** Pinned scene cards sit below live activity; new posts stack above them. */

@@ -13,6 +13,7 @@
  *  2. No money moves. Rent and deposit columns are display text, nothing more.
  */
 import type { Database } from "better-sqlite3";
+import { isDemoAuthor } from "@shared/demo";
 import {
   housingDisplayName,
   type AffordabilityBadge,
@@ -340,6 +341,7 @@ export function shapePosts(db: Database, rows: PostRow[], opts: ShapeOpts = {}):
       id: r.id,
       type,
       author: toAuthor(authors.get(r.user_id)),
+      isDemo: isDemoAuthor(toAuthor(authors.get(r.user_id))),
       createdAt: r.created_at,
       updatedAt: r.updated_at || r.created_at,
       postedLabel: postedLabel(r.created_at),

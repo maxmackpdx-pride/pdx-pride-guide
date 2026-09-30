@@ -1,4 +1,5 @@
 import { publicBoardMapLocations } from './boardMapLocations';
+import { isDemoAuthor } from "@shared/demo";
 import {getOutzClosures} from './outzClosures';
 import { schedulePushForActivity } from './push/dispatch';
 import { getWinterConditions } from './outzWinter';
@@ -797,6 +798,7 @@ function publicGiftingPost(post: any, viewerUserId?: number) {
     reportCount: post.reportCount ?? post.report_count ?? 0,
     createdAt: post.createdAt ?? post.created_at,
     username: post.username,
+    isDemo: isDemoAuthor({ username: post.username, displayName: post.displayName }),
     displayName: post.displayName,
     posterPhotoUrl: post.posterPhotoUrl,
     avatarChoice: post.avatarChoice,
@@ -841,6 +843,7 @@ function publicSellzPost(post: any, viewerUserId?: number) {
     createdAt: post.createdAt ?? post.created_at,
     interestCount: Number(post.interestCount || 0), interests: safeInterests,
     username: post.username, displayName: post.displayName,
+    isDemo: isDemoAuthor({ username: post.username, displayName: post.displayName }),
     posterPhotoUrl: post.posterPhotoUrl, avatarChoice: post.avatarChoice,
     posterAvatarRing: post.posterAvatarRing || "none", isMine,
     viewerSelected: safeInterests.some((interest: any) => interest.userId === viewerUserId && interest.id === selectedInterestId),
@@ -860,6 +863,7 @@ function publicGigPost(gig: any, viewerUserId?: number) {
   return {
     ...safe,
     isMine: viewerUserId ? gig.userId === viewerUserId : false,
+    isDemo: isDemoAuthor({ username: gig.username, displayName: gig.name }),
   };
 }
 
@@ -4113,7 +4117,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       viewerUserId: req.session.userId,
       viewerIsAdmin: sessionIsAdmin(req),
     });
-    res.json(feed);
+    const flag = <T extends { author?: { username?: string | null; displayName?: string | null } | null }>(item: T) => ({ ...item, isDemo: isDemoAuthor(item.author) });
+    res.json({ ...feed, items: feed.items.map(flag), pinned: feed.pinned?.map(flag) });
   });
 
   app.get("/api/hub/feed/post-options", requireAuth, (req, res) => {

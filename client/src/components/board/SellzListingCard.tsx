@@ -19,6 +19,8 @@ import { timeAgo } from "@/lib/timeAgo";
 
 export type SellzInterest = { id: number; userId: number; note: string; offerCents?: number | null; status: string; username: string; displayName?: string | null };
 export type SellzPost = {
+  /** Seeded demo content, marked by the server (board 18). */
+  isDemo?: boolean;
   id: number; userId: number; title: string; description: string; category: string; condition: string;
   priceCents: number; negotiable: boolean; neighborhood: string; pickupPreference: string; photoUrls: string[];
   status: string; createdAt: string; expiresAt: string; interestCount: number; isMine: boolean; viewerSelected?: boolean;
@@ -81,7 +83,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
     else { await navigator.clipboard.writeText(url); toast({ title: "Link copied" }); }
   };
   const style = { "--listing-accent": ACCENT, "--c": ACCENT, "--_c": ACCENT } as CSSProperties;
-  const isDemo = post.username === "hausing_demo";
+  const isDemo = post.isDemo;
   const statusLabel = post.status === "ACTIVE" ? "Available" : post.status.charAt(0) + post.status.slice(1).toLowerCase();
   useEffect(() => {
     if (!expanded || !saved || !user) return;

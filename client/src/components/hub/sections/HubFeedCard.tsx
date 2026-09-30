@@ -1,4 +1,5 @@
 import { ArrowDown } from "lucide-react";
+import { DemoTag } from "@/components/ds";
 import { ArrowUp } from "lucide-react";
 import { ArrowRight } from "lucide-react";
 import { useState, type CSSProperties, type MouseEvent } from "react";
@@ -20,7 +21,6 @@ import { ChangeBadge } from "@/components/ds/ChangeBadge";
 import type { Event } from "@shared/schema";
 import FeedEventDeck from "./FeedEventDeck";
 import RedgifsMedia from "@/components/RedgifsMedia";
-import { isHousingDemoAuthor } from "@/lib/housingDemo";
 import HubFeedBoardFace from "./HubFeedBoardFace";
 import "./hub-feed-layout.css";
 
@@ -98,7 +98,7 @@ export default function HubFeedCard({ item }: Props) {
     !!user &&
     !!followUsername &&
     user.username?.toLowerCase() === followUsername.toLowerCase();
-  const isDemoHousing = item.kind === "housing" && isHousingDemoAuthor(item.author);
+  const isDemoHousing = item.kind === "housing" && !!item.isDemo;
   const showFollowShortcut = Boolean(user && followUsername && !isSelf && item.kind !== "community");
   const isFollowing =
     followOverride !== null
@@ -352,9 +352,7 @@ export default function HubFeedCard({ item }: Props) {
           </div>
           <div className="hub-feed-card__head-actions">
             <ChangeBadge label={item.changeLabel} className="hub-feed-card__change" />
-            {isDemoHousing && (
-              <span className="kick hub-feed-card__demo" aria-label="Demo listing">DEMO</span>
-            )}
+            {isDemoHousing && <DemoTag />}
             {item.badge && (
               <span
                 className="kick hub-feed-card__badge pdx-glass-rebind"

@@ -291,6 +291,8 @@ export type HousingPostView = {
   id: number;
   type: HousingType;
   author: HousingAuthor;
+  /** Seeded demo listing (server-marked; board 18). */
+  isDemo?: boolean;
   createdAt: string;
   updatedAt: string;
   postedLabel: string;

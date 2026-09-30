@@ -40,18 +40,6 @@
 .hub-feed-card__body {
   margin: 8px 0 0;
 }
-.hub-feed-card__demo {
-  flex: none;
-  font-size: 10px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: #000;
-  background: #c8fa3c;
-  border: 1px solid #000;
-  border-radius: 5px;
-  padding: 2px 7px;
-  font-weight: 800;
-}
 .hub-feed-card__open {
   display: inline-flex;
   align-items: center;

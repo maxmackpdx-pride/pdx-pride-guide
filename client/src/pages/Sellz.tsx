@@ -36,7 +36,7 @@ function SellzGrid({ posts, saved, selectedId, onSelect }: { posts: SellzPost[];
     {posts.map((post, index) => <button type="button" key={post.id} className="gigz-opportunity sellz-listing" style={{ "--gigz-accent": ["#39ff14", "#83e35d", "#a5fb6e", "#49cb92"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selectedId === post.id} aria-label={`View listing: ${post.title}`}>
       {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <span className="sellz-listing__fallback" aria-hidden="true"><Tag size={65} strokeWidth={1.2} /></span>}
       <span className="gigz-opportunity__shade" />
-      <span className="gigz-opportunity__top"><span><em>{post.category}</em><small>{post.username === "hausing_demo" ? "DEMO LISTING" : `${post.status === "ACTIVE" ? "Available" : post.status.toLowerCase()} · ${timeAgo(post.createdAt)}`}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
+      <span className="gigz-opportunity__top"><span><em>{post.category}</em><small>{post.isDemo ? "DEMO LISTING" : `${post.status === "ACTIVE" ? "Available" : post.status.toLowerCase()} · ${timeAgo(post.createdAt)}`}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
       <span className="gigz-opportunity__bottom"><strong>{post.title}</strong><span>{post.condition} · {post.neighborhood || "Portland"}</span><em>{money(post.priceCents)}{post.negotiable ? " OBO" : ""}</em></span>
       {saved.has(post.id) && <span className="sellz-listing__saved"><Bookmark size={13} fill="currentColor" /> Saved</span>}
     </button>)}
@@ -156,7 +156,7 @@ export default function Sellz() {
 
   const activeCount = posts.filter(post => post.status === "ACTIVE").length;
   // Live counts from the room's own query. Demo rows never count; zero stays visible.
-  const realPosts = posts.filter(post => post.username !== "hausing_demo");
+  const realPosts = posts.filter(post => !post.isDemo);
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const roomStats = [
     { num: realPosts.filter(post => post.status === "ACTIVE").length, label: "For sale", color: "var(--room-sellz)" },

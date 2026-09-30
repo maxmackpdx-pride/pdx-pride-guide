@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { ChangeBadge } from "@/components/ds/ChangeBadge";
-import { isHousingDemoAuthor } from "@/lib/housingDemo";
 import {
   AFFORDABILITY_BADGE_LABEL,
   FORMING_FLAVOR_LABEL,
@@ -90,7 +89,7 @@ function CardShell({
       }}
     >
       <span className="pdx-refract-seam" aria-hidden="true" />
-      {isHousingDemoAuthor(post.author) ? (
+      {post.isDemo ? (
         <span className="hz-demo-sticker" aria-hidden="true">DEMO</span>
       ) : null}
       {post.saved && post.lastChangeLabel ? (

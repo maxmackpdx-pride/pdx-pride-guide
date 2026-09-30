@@ -21,6 +21,7 @@ export { StatPill } from "./StatPill";
 export { StickerBadge } from "./StickerBadge";
 export { ChangeBadge } from "./ChangeBadge";
 export { RoomKicker } from "./RoomKicker";
+export { DemoTag } from "./DemoTag";
 
 /** Deep-glass SoT helpers (docs/handoffs/deep-glass-2026-07-16/) */
 export {

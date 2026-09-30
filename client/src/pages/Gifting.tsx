@@ -69,10 +69,10 @@ function GiftRail({ posts, type, selected, onSelect }: {
         {posts.map((post, index) => <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
           {type === "GIFT" ? <button type="button" className="gigz-opportunity giftz-offer" style={{ "--gigz-accent": ["#ccff00", "#a4d84a", "#e1ff80", "#89d69d"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gift: ${post.title}`}>
             {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <span className="giftz-offer__fallback" aria-hidden="true"><Gift size={76} strokeWidth={1.2} /></span>}
-            <span className="gigz-opportunity__shade" /><span className="gigz-opportunity__top"><span><em>{post.category || "GIFT OFFERED"}</em><small>{post.username === "hausing_demo" ? "DEMO LISTING" : `Gift offered · ${timeAgo(post.createdAt)}`}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
+            <span className="gigz-opportunity__shade" /><span className="gigz-opportunity__top"><span><em>{post.category || "GIFT OFFERED"}</em><small>{post.isDemo ? "DEMO LISTING" : `Gift offered · ${timeAgo(post.createdAt)}`}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
             <span className="gigz-opportunity__bottom"><strong>{post.title}</strong><span>{post.neighborhood || "Portland"} · {post.pickupPreference || "Message to coordinate"}</span><em>FREE</em></span>
           </button> : <button type="button" className="gigz-talent giftz-iso" style={{ "--gigz-accent": ["#ccff00", "#b9eb75", "#e0ff87"][index % 3] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ISO: ${post.title}`}>
-            <span className="gigz-talent__status"><span><i /> In search of</span><small>{post.username === "hausing_demo" ? "DEMO LISTING" : `Posted ${timeAgo(post.createdAt)}`}</small></span>
+            <span className="gigz-talent__status"><span><i /> In search of</span><small>{post.isDemo ? "DEMO LISTING" : `Posted ${timeAgo(post.createdAt)}`}</small></span>
             <span className="gigz-talent__portrait">{post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <Search size={66} strokeWidth={1.2} aria-hidden="true" />}</span>
             <strong>{post.title}</strong><span className="giftz-iso__category">{post.category || "COMMUNITY REQUEST"}</span>
             <span className="gigz-talent__location"><MapPin size={14} />{post.neighborhood || "Portland"} · {post.pickupPreference || "Message to coordinate"}</span>
@@ -212,7 +212,7 @@ export default function Gifting() {
   const requested = filtered.filter(post => isActivePost(post) && post.postType === "ISO");
   const inactiveMine = onlyMine ? filtered.filter(post => post.isMine && !isActivePost(post)) : [];
   // Live counts from the room's own query. Demo rows never count; zero stays visible.
-  const realActive = posts.filter(post => isActivePost(post) && post.username !== "hausing_demo");
+  const realActive = posts.filter(post => isActivePost(post) && !post.isDemo);
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const roomStats = [
     { num: realActive.filter(post => post.postType === "GIFT").length, label: "Offered", color: "var(--room-giftz)" },

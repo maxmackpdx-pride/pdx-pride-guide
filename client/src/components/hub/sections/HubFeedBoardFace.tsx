@@ -1,7 +1,8 @@
 import type { MouseEvent, ReactNode } from "react";
+import { DemoTag } from "@/components/ds";
 import UserAvatar from "@/components/UserAvatar";
 import { avatarHrefFor } from "@/lib/avatarLinks";
-import { demoListingCover, isDemoListingAuthor } from "@/lib/demoListingCover";
+import { demoListingCover } from "@/lib/demoListingCover";
 import type { HubFeedItem } from "@shared/hubFeed";
 
 function stopCardNav(e: MouseEvent) {
@@ -23,7 +24,7 @@ type Props = {
 };
 
 export default function HubFeedBoardFace({ item, when, openLabel, openControl }: Props) {
-  const isDemo = isDemoListingAuthor(item.author);
+  const isDemo = !!item.isDemo;
   const kicker = [
     KIND_KICKER[item.kind] || item.badge,
     isDemo ? "DEMO" : null,
@@ -37,11 +38,7 @@ export default function HubFeedBoardFace({ item, when, openLabel, openControl }:
 
   return (
     <div className="hub-feed-board">
-      {isDemo ? (
-        <span className="kick hub-feed-card__demo hub-feed-board__demo" aria-label="Demo listing">
-          DEMO
-        </span>
-      ) : null}
+      {isDemo ? <DemoTag className="hub-feed-board__demo" /> : null}
 
       <div className="hub-feed-board__well">
         {cover ? (

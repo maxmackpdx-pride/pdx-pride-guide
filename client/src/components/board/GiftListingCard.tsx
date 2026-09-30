@@ -21,6 +21,8 @@ import { isOpenGrabPost } from "@/lib/boardFeed";
 import { timeAgo } from "@/lib/timeAgo";
 
 export type GiftingPost = {
+  /** Seeded demo content, marked by the server (board 18). */
+  isDemo?: boolean;
   id: number;
   userId: number;
   postType: "GIFT" | "ISO";
@@ -264,7 +266,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
     "--_c": accent,
     position: "relative",
   } as CSSProperties;
-  const isDemo = post.username === "hausing_demo";
+  const isDemo = post.isDemo;
 
   return (
     <article

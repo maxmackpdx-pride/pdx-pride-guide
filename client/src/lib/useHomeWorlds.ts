@@ -361,7 +361,7 @@ export function useHomeWorlds(): HomeWorldsData {
     const hauzLive = newestFirst(
       (housing?.posts ?? []).filter(
         (post: HousingPostView) =>
-          post.author?.username !== "hausing_demo" && isActiveStatus(post.status, ["ARCHIVED", "HIDDEN", "CLOSED"]),
+          !post.isDemo && isActiveStatus(post.status, ["ARCHIVED", "HIDDEN", "CLOSED"]),
       ),
       post => post.createdAt,
     )
@@ -371,7 +371,7 @@ export function useHomeWorlds(): HomeWorldsData {
     const giftzLive = newestFirst(
       gifting.filter(
         post =>
-          post.username !== "hausing_demo" &&
+          !post.isDemo &&
           isActiveStatus(post.status, ["GIFTED", "FOUND", "EXPIRED", "PENDING", "REJECTED", "HIDDEN"]),
       ),
       post => post.createdAt,
@@ -382,7 +382,7 @@ export function useHomeWorlds(): HomeWorldsData {
     const gigzLive = newestFirst(
       gigs.filter(
         post =>
-          post.username !== "hausing_demo" &&
+          !post.isDemo &&
           isActiveStatus(post.status, ["FILLED", "FOUND", "EXPIRED", "PENDING", "REJECTED", "HIDDEN", "CLOSED"]),
       ),
       post => post.createdAt,

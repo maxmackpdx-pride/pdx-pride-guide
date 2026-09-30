@@ -50,6 +50,8 @@ export type HomeStageCardData = {
 export type HomeStageSamples = Partial<Record<HomeStageBoardKey, HomeStageCardData>>;
 
 export type GiftingRow = {
+  /** Seeded demo content, marked by the server (board 18). */
+  isDemo?: boolean;
   id: number;
   postType: "GIFT" | "ISO" | string;
   title: string;
@@ -64,6 +66,8 @@ export type GiftingRow = {
 };
 
 export type GigRow = {
+  /** Seeded demo content, marked by the server (board 18). */
+  isDemo?: boolean;
   id: number;
   postType: "LOOKING_FOR_WORK" | "POSTING_GIG" | string;
   title: string;
@@ -139,14 +143,14 @@ function clip(s: string, max = 110): string {
 }
 
 function isActiveGifting(p: GiftingRow): boolean {
-  return p.username !== "hausing_demo" &&
+  return !p.isDemo &&
     !["GIFTED", "FOUND", "EXPIRED", "PENDING", "REJECTED", "HIDDEN"].includes(
       (p.status || "").toUpperCase(),
     );
 }
 
 function isActiveGig(p: GigRow): boolean {
-  return p.username !== "hausing_demo" &&
+  return !p.isDemo &&
     !["FILLED", "FOUND", "EXPIRED", "PENDING", "REJECTED", "HIDDEN", "CLOSED"].includes(
       (p.status || "").toUpperCase(),
     );
@@ -304,7 +308,7 @@ export function buildHomeStageSamples(input: {
     out.events = mapEventSample(first, going);
   }
 
-  const housing = input.housingPosts?.find((post) => post.author?.username !== "hausing_demo");
+  const housing = input.housingPosts?.find((post) => !post.isDemo);
   if (housing) out.housing = mapHousingSample(housing);
 
   const gift = (input.gifting ?? []).find(isActiveGifting);
