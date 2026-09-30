@@ -648,7 +648,6 @@
 .sellz-board-page .board-follow-button { border-color: #318d31; color: #d5fbd0; }
 .sellz-board-page .board-follow-button:hover:not(:disabled) { background: #1b321b; }
 .sellz-board-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.sellz-board-actions .board-follow-button { margin-bottom: 5px; }
 .sellz-board-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin: 0 0 14px; color: #b8d5b7; font-size: 13px; }
 .sellz-board-filters label { display: flex; flex: 1 1 130px; flex-direction: column; gap: 6px; min-width: 125px; }
 .sellz-board-filters label:first-child { flex: 2 1 225px; }
@@ -675,5 +674,5 @@
 .sellz-inactive button span { margin-left: 8px; color: #39ff14; font-size: 11px; text-transform: capitalize; }
 .sellz-board-rules { color: #899786; font-size: 12px; letter-spacing: .06em; margin: 46px 0 0; }
 @media (max-width: 900px) { .sellz-listing-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 700px) { .sellz-listing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .sellz-board-page .sellz-listing { height: 310px; } .sellz-listing .gigz-opportunity__top, .sellz-listing .gigz-opportunity__bottom { left: 12px; right: 12px; } .sellz-listing .gigz-opportunity__top { top: 13px; } .sellz-listing .gigz-opportunity__bottom { bottom: 16px; } .sellz-listing .gigz-opportunity__bottom strong { font-size: 20px; } .sellz-listing .gigz-opportunity__bottom > span { margin-top: 9px; font-size: 11px; } .sellz-listing .gigz-opportunity__bottom em { margin-top: 9px; } .sellz-listing .gigz-opportunity__arrow { width: 28px; height: 28px; } .sellz-listing:has(.sellz-listing__saved) .gigz-opportunity__bottom { bottom: 40px; } .sellz-board-actions .board-follow-button { margin-top: 9px; } }
+@media (max-width: 700px) { .sellz-listing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .sellz-board-page .sellz-listing { height: 310px; } .sellz-listing .gigz-opportunity__top, .sellz-listing .gigz-opportunity__bottom { left: 12px; right: 12px; } .sellz-listing .gigz-opportunity__top { top: 13px; } .sellz-listing .gigz-opportunity__bottom { bottom: 16px; } .sellz-listing .gigz-opportunity__bottom strong { font-size: 20px; } .sellz-listing .gigz-opportunity__bottom > span { margin-top: 9px; font-size: 11px; } .sellz-listing .gigz-opportunity__bottom em { margin-top: 9px; } .sellz-listing .gigz-opportunity__arrow { width: 28px; height: 28px; } .sellz-listing:has(.sellz-listing__saved) .gigz-opportunity__bottom { bottom: 40px; } }
 @media (max-width: 390px) { .sellz-listing .gigz-opportunity__top em { font-size: 9px; } .sellz-listing .gigz-opportunity__bottom strong { font-size: 18px; } }

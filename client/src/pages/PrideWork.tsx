@@ -13,7 +13,8 @@ import AuthModal from "@/components/AuthModal";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
-import { Button, RoomKicker } from "@/components/ds";
+import { Button, FilterChip, RoomKicker } from "@/components/ds";
+import BrowseToolbar from "@/components/BrowseToolbar";
 import ImageUploader from "@/components/ImageUploader";
 import { timeAgo } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -174,7 +175,7 @@ export default function PrideWork() {
       <RoomPlate room="gigz" />
       {!isLoading && !isError && !onlyMine && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><RoomKicker room="gigz" as="div">The board</RoomKicker><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post gigz-post--primary" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
-      <div className="gigz-filter"><label>Search Gigz<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search roles, skills, gigs" /></label><label><input type="checkbox" checked={remoteOnly} onChange={e => setRemoteOnly(e.target.checked)} /> Remote only</label>{user && <label><input type="checkbox" checked={onlyMine} onChange={e => setOnlyMine(e.target.checked)} /> My Gigz</label>}</div>
+      <BrowseToolbar label="Filter Gigz" className="board-toolbar"><label>Search Gigz<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search roles, skills, gigs" /></label><FilterChip className="board-chip pdx-glass-rebind" selected={remoteOnly} onToggle={() => setRemoteOnly(value => !value)}>Remote</FilterChip>{user && <FilterChip className="board-chip pdx-glass-rebind" selected={onlyMine} onToggle={() => setOnlyMine(value => !value)}>My Gigz</FilterChip>}{(search || remoteOnly || onlyMine) && <button type="button" className="board-toolbar__clear" onClick={() => { setSearch(""); setRemoteOnly(false); setOnlyMine(false); }}>Clear filters</button>}</BrowseToolbar>
       {isLoading ? <BoardFeedSkeleton label="Loading Gigz posts" shape="board" count={3} /> : isError ? <div className="gigz-empty pdx-glass-rebind" role="alert">Could not load posts. <button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>Try again</button></div> : opportunities.length ? <GigRail posts={opportunities} kind="gigs" selected={selectedId} onSelect={select} /> : <div className="gigz-empty pdx-glass-rebind">No open gigs yet. <button onClick={() => openForm("POSTING_GIG")}>Post a gig</button></div>}
       <div className="gigz-talent-zone"><div className="gigz-section-head"><div><RoomKicker room="gigz" as="div">The people</RoomKicker><h2>Available to hire<span>.</span></h2><p>Meet people ready to bring your next idea to life.</p></div><button type="button" className="gigz-post" onClick={() => openForm("LOOKING_FOR_WORK")}><Plus size={17} /> Post your availability <ArrowUpRight size={16} /></button></div>
         {!isLoading && !isError && (talent.length ? <GigRail posts={talent} kind="talent" selected={selectedId} onSelect={select} /> : <div className="gigz-empty pdx-glass-rebind">No one has posted availability yet. <button onClick={() => openForm("LOOKING_FOR_WORK")}>Post yours</button></div>)}

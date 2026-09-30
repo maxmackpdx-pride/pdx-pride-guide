@@ -8,7 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import GiftListingCard, { type GiftingPost } from "@/components/board/GiftListingCard";
-import { Button, RoomKicker } from "@/components/ds";
+import { Button, FilterChip, RoomKicker } from "@/components/ds";
+import BrowseToolbar from "@/components/BrowseToolbar";
 import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
@@ -240,15 +241,15 @@ export default function Gifting() {
         <div className="giftz-actions"><button type="button" className="gigz-post gigz-post--primary" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
       </div>
       {!postingOpen && giftingStatus && <p className="giftz-posting-status" role="status">{giftingStatus.message}</p>}
-      <div className="giftz-filters" aria-label="Filter Giftz posts">
+      <BrowseToolbar label="Filter Giftz posts" className="board-toolbar">
         <label>Search Giftz<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search titles and details" /></label>
         <label>Show<select value={filter} onChange={event => setFilter(event.target.value)}><option value="ALL">Offered & ISO</option><option value="GIFT">Gifts offered</option><option value="ISO">In search of</option><option value="GRAB">Open grab</option></select></label>
         <label>Category<select value={category} onChange={event => setCategory(event.target.value)}><option value="ALL">All categories</option>{CATEGORIES.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
         <label>Neighborhood<input type="search" value={neighborhood} onChange={event => setNeighborhood(event.target.value)} placeholder="Anywhere nearby" /></label>
-        {user && <label className="giftz-filters__check"><input type="checkbox" checked={onlyMine} onChange={event => setOnlyMine(event.target.checked)} /> My posts</label>}
+        {user && <FilterChip className="board-chip pdx-glass-rebind" selected={onlyMine} onToggle={() => setOnlyMine(value => !value)}>My posts</FilterChip>}
         <label>Sort<select value={sort} onChange={event => setSort(event.target.value)}><option value="RECENT">Recently posted</option><option value="LONGEST">Longest up</option></select></label>
-        {(filter !== "ALL" || search || category !== "ALL" || neighborhood || onlyMine || sort !== "RECENT") && <button type="button" onClick={clearFilters}>Clear filters</button>}
-      </div>
+        {(filter !== "ALL" || search || category !== "ALL" || neighborhood || onlyMine || sort !== "RECENT") && <button type="button" className="board-toolbar__clear" onClick={clearFilters}>Clear filters</button>}
+      </BrowseToolbar>
       {isError ? <div className="gigz-empty pdx-glass-rebind" role="alert">Could not load Giftz posts. <button type="button" onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })}>Try again</button></div> : <>
         {isLoading ? <BoardFeedSkeleton label="Loading gifts offered" shape="board" count={3} /> : offered.length ? <GiftRail posts={offered} type="GIFT" selected={expandedId} onSelect={select} /> : <div className="gigz-empty pdx-glass-rebind">No gifts offered match right now. {postingOpen && <button type="button" onClick={() => openForm("GIFT")}>Post a gift</button>}</div>}
         <div className="gigz-talent-zone"><div className="gigz-section-head"><div><RoomKicker room="giftz" as="div">In search of</RoomKicker><h2>On someone’s wish list<span>.</span></h2><p>See what neighbors are looking for. You might have just the thing.</p></div><button type="button" className="gigz-post" disabled={!postingOpen} onClick={() => openForm("ISO")}><Plus size={17} /> Post an ISO <ArrowUpRight size={16} /></button></div>
