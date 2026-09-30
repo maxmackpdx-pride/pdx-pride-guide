@@ -1143,3 +1143,107 @@
     flex-direction: row;
   }
 }
+
+/* Resources type hierarchy: display headings, readable body, quiet metadata. */
+.resources-page .rg-eyebrow,
+.rg-overlay .rg-eyebrow {
+  font-size: 11px;
+  line-height: 1.45;
+  letter-spacing: 0.09em;
+}
+.rg-intro h1 {
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+.rg-intro > p,
+.rg-results-head p {
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 58ch;
+}
+.rg-intro > p {
+  max-width: 340px;
+}
+.rg-step h2 {
+  font-size: clamp(30px, 3vw, 38px);
+  line-height: 1.1;
+  margin-top: 8px;
+  margin-bottom: 20px;
+}
+.rg-results-head h2 {
+  font-size: clamp(36px, 4vw, 48px);
+  line-height: 1.08;
+  text-wrap: balance;
+  margin-bottom: 16px;
+}
+.rg-options button {
+  font-size: 18px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+.rg-mode button {
+  font-size: 20px;
+}
+.rg-search-trigger,
+.rg-text-link,
+.rg-intro .rg-help,
+.rg-reassurance p,
+.rg-resource-phone {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.rg-results .rg-count,
+.rg-card .rg-scope {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.rg-card .rg-scope {
+  max-width: 160px;
+}
+.rg-card h3 {
+  font-size: clamp(30px, 3.2vw, 38px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.rg-card p,
+.rg-food-list summary {
+  font-size: 16px;
+  line-height: 1.6;
+}
+.rg-description,
+.rg-expanded .rg-description {
+  max-height: none;
+  overflow: visible;
+  mask-image: none;
+}
+.rg-food-list .rg-food-note {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.rg-expand {
+  font-size: 14px;
+}
+@media (max-width: 600px) {
+  .rg-intro h1 {
+    font-size: clamp(30px, 9.4vw, 54px);
+    line-height: 1.03;
+  }
+  .rg-intro-top > .rg-eyebrow {
+    font-size: 10px;
+  }
+  .rg-options button {
+    font-size: 17px;
+  }
+  .rg-mode button {
+    font-size: 18px;
+  }
+  .rg-card {
+    gap: 16px;
+  }
+}
