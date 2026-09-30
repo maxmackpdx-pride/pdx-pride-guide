@@ -170,10 +170,10 @@ function SafetyNotice() {
   );
 }
 
-function Support() {
+function Support({ showSafety = true }: { showSafety?: boolean }) {
   return (
     <div className="rg-support">
-      <SafetyNotice />
+      {showSafety && <SafetyNotice />}
       <div className="rg-talk">
         <span className="rg-eyebrow">Find local services</span>
         <h3>Start with 211info.</h3>
@@ -305,6 +305,8 @@ export default function Resources() {
   const [mode, setMode] = useState<"directory" | "talk">("directory");
   const [searchOpen, setSearchOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
+  const [safetyAnswer, setSafetyAnswer] = useState<"yes" | "no" | null>(null);
+  const supportTrigger = useRef<HTMLElement | null>(null);
   const [detail, setDetail] = useState<Row | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   useEffect(() => {
@@ -435,14 +437,33 @@ export default function Resources() {
                 </button>
                 <button
                   aria-pressed={mode === "talk"}
-                  onClick={() => setMode("talk")}
+                  aria-expanded={mode === "talk"}
+                  aria-controls="resource-safety-check"
+                  onClick={() => { setMode("talk"); setSafetyAnswer(null); }}
                 >
                   Talk to someone
                 </button>
               </div>
+              {mode === "talk" && (
+                <div id="resource-safety-check" className="rg-safety-check" role="group" aria-labelledby="resource-safety-question">
+                  <h3 id="resource-safety-question">Are you safe right now?</h3>
+                  <p>Choose what you need. You can change your answer.</p>
+                  <div>
+                    <button className="pdxBtn" aria-pressed={safetyAnswer === "yes"} onClick={() => {
+                      setSafetyAnswer("yes");
+                      requestAnimationFrame(() => { resultsRef.current?.scrollIntoView({ behavior: "auto", block: "start" }); resultsRef.current?.focus({ preventScroll: true }); });
+                    }}>Yes, I’m safe</button>
+                    <button className="pdxBtn" aria-pressed={safetyAnswer === "no"} onClick={(event) => {
+                      supportTrigger.current = event.currentTarget;
+                      setSafetyAnswer("no");
+                      setSupportOpen(true);
+                    }}>No, I need help now</button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-          <div className="rg-step">
+          {mode === "directory" && <div className="rg-step">
             <span className="rg-step-number" aria-hidden="true">
               02
             </span>
@@ -479,7 +500,7 @@ export default function Resources() {
                 Show all resources
               </button>
             </div>
-          </div>
+          </div>}
           <div className="rg-reassurance">
             <span aria-hidden="true">↳</span>
             <p>
@@ -488,7 +509,7 @@ export default function Resources() {
             </p>
           </div>
         </aside>
-        <div
+        {(mode === "directory" || safetyAnswer === "yes") && <div
           className="rg-results"
           ref={resultsRef}
           tabIndex={-1}
@@ -521,7 +542,7 @@ export default function Resources() {
               : `${rows.length} resource cards${rows.some((row) => row.org === FOOD_RESOURCE) ? " · includes 8 food pantries" : ""}`}
           </p>
           {mode === "talk" ? (
-            <Support />
+            <Support showSafety={false} />
           ) : (
             <div className="rg-cards">
               {rows.map((row) => (
@@ -533,7 +554,7 @@ export default function Resources() {
               ))}
             </div>
           )}
-        </div>
+        </div>}
       </section>
       <aside className="rg-urgent rg-wrap" aria-label="Immediate support">
         <strong>Need help now?</strong>
@@ -634,22 +655,24 @@ export default function Resources() {
         </Dialog.Portal>
       </Dialog.Root>
 
-      <Dialog.Root open={supportOpen} onOpenChange={setSupportOpen}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="rg-overlay-backdrop" />
-          <Dialog.Content className="rg-overlay rg-support-dialog">
-            <Dialog.Close className="rg-close" aria-label="Close support lines">
-              <X size={20} />
-            </Dialog.Close>
-            <span className="rg-eyebrow">Immediate support</span>
-            <Dialog.Title>Someone to talk to.</Dialog.Title>
-            <Dialog.Description className="sr-only">
-              Local services and crisis support lines.
-            </Dialog.Description>
-            <Support />
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      <Drawer.Root open={supportOpen} onOpenChange={setSupportOpen} direction={mobile ? "bottom" : "right"} shouldScaleBackground={false} dismissible closeThreshold={0.2}>
+        <Drawer.Portal>
+          <Drawer.Overlay className="rg-overlay-backdrop" />
+          <Drawer.Content
+            className={`rg-overlay rg-drawer ${mobile ? "rg-drawer-mobile" : "rg-drawer-desktop"}`}
+            style={{ "--resource-accent": "#FF2400" } as CSSProperties}
+            onCloseAutoFocus={(event) => { if (supportTrigger.current?.isConnected) { event.preventDefault(); supportTrigger.current.focus(); } }}
+          >
+            <Drawer.Handle className="rg-drawer-handle" aria-label="Drag to close safety support" />
+            <Drawer.Close className="rg-close" aria-label="Close safety support"><X size={20} /></Drawer.Close>
+            <div className="rg-drawer-body">
+              <Drawer.Title className="sr-only">Immediate safety and support</Drawer.Title>
+              <Drawer.Description className="sr-only">Call 911 for immediate danger, or choose a crisis support line. Includes Oregon safety information.</Drawer.Description>
+              <Support />
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
 
       <Drawer.Root
         open={detailOpen}

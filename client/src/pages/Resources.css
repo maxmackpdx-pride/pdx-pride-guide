@@ -1485,3 +1485,16 @@ html.calm-mode .rg-options button,
 /* Preserve the lettering within Perfect Pair's filled badge until its white cutout is ready. */
 .rg-directory-card .pdxPlace__logo[src$="/pairs-with-pride.png"],
 .rg-detail-logo .rg-logo[src$="/pairs-with-pride.png"] { filter: grayscale(1); }
+
+.rg-safety-check { margin-top: 16px; padding-top: 18px; border-top: 1px solid var(--rg-line); animation: rgSafetyReveal 180ms ease-out; }
+.rg-safety-check h3 { font: 800 25px/1.15 var(--font-display); text-transform: uppercase; color: #fff; }
+.rg-safety-check p { color: var(--res-muted); font-size: 14px; line-height: 1.5; margin: 8px 0 14px; }
+.rg-safety-check > div { display: flex; flex-wrap: wrap; gap: 10px; }
+.rg-safety-check .pdxBtn { min-height: 44px; flex: 1 1 160px; white-space: normal; --c: var(--neon-yellow); }
+.rg-safety-check .pdxBtn:last-child { --c: #ff2400; color: #fff !important; }
+.rg-safety-check .pdxBtn[aria-pressed="true"] { outline: 2px solid var(--c); outline-offset: 3px; }
+@keyframes rgSafetyReveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@media(prefers-reduced-motion: reduce) { .rg-safety-check { animation: none; } }
+/* White label ink on orange, red, blue, and purple category tags. */
+.rg-directory-card .pdxPlace__cat:is([data-category-id="safety"], [data-category-id="legal"], [data-category-id="arts"], [data-category-id="youth"], [data-category-id="harm-reduction"]) .pdxBadge,
+.rg-safety-prompt .pdxPlace__cat .pdxBadge { color: #fff !important; }
