@@ -95,7 +95,7 @@ export function WebGLShader() {
     };
     const animate = (now: number) => {
       if (lastTime)
-        uniforms.time.value += Math.min((now - lastTime) / 1000, 0.1) * 0.3;
+        uniforms.time.value += Math.min((now - lastTime) / 1000, 0.1) * 0.15;
       lastTime = now;
       render();
       frame = requestAnimationFrame(animate);
