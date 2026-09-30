@@ -45,3 +45,19 @@ test('dense same-venue holograms separate without moving down onto their waypoin
  context.items=items;vm.runInContext('separateHolograms(items,390,760)',context);
  for(let i=0;i<items.length;i++){assert.ok(items[i].y<=400);for(let j=0;j<i;j++)assert.ok(Math.abs(items[i].x-items[j].x)>=90||Math.abs(items[i].y-items[j].y)>=160);}
 });
+
+test('branches count down in days, step down after day four, and cap at three heads',async()=>{
+ const {branchDaysLeft,branchStrength,branchSlot}=await import('../client/public/zaydar-map/venue-attachments.js');
+ const posted=Date.parse('2026-07-13T20:00:00Z'),row={createdAt:new Date(posted).toISOString()},day=86400000;
+ assert.equal(branchDaysLeft(row,posted+1),8);
+ assert.equal(branchDaysLeft(row,posted+2*day+1),6);
+ assert.equal(branchDaysLeft(row,posted+8*day),0);
+ assert.equal(branchStrength(row,posted+3*day),1);
+ assert.equal(branchStrength(row,posted+4*day),1);
+ assert.ok(branchStrength(row,posted+6*day)<1&&branchStrength(row,posted+6*day)>.55);
+ assert.ok(Math.abs(branchStrength(row,posted+8*day)-.55)<1e-9);
+ assert.deepEqual([0,1,2].map(i=>branchSlot(i,3).kind),['head','head','head']);
+ assert.deepEqual(branchSlot(3,5),{kind:'chip',more:2});
+ assert.deepEqual(branchSlot(3,4),{kind:'chip',more:1});
+ assert.equal(branchSlot(4,5).kind,'hidden');
+});

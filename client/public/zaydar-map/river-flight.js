@@ -1,5 +1,5 @@
 import {eventNight} from './event-night.js';
-import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER} from './venue-attachments.js?v=20260929-gig-branch';
+import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
 import { visibleHologramLabels } from './label-visibility.js?v=20260925-venue-nights';
 import {faceStackHtml} from '../outzide-map/assets/community-ui.js?v=map-continuity-1';
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
@@ -625,7 +625,8 @@ function drawLights(fade,target=map,surface=lights){
   item.offset.x=x;item.offset.y=y;
  }
  // Only loaded artwork actually on camera can receive a tracking frame.
- const extensionSlots=new Map();
+ const extensionSlots=new Map(),branchCounts=new Map();
+ for(const {feature} of ordered){const row=feature.properties;if((row.waypointFamily==='mizzed'||row.waypointFamily==='gigz')&&row.venueWaypointKey)branchCounts.set(row.venueWaypointKey,(branchCounts.get(row.venueWaypointKey)||0)+1);}
  const visibleLogos=fade>.01?beacons.filter(item=>venueLogos.has(item.feature.properties.logo)&&item.x>0&&item.x<width&&item.y>0&&item.y<height):[];
  logoFocus.update(pulseTime,visibleLogos.map(item=>item.feature.properties.phase));
  for(const pass of [0,1]){
@@ -656,12 +657,24 @@ function drawLights(fade,target=map,surface=lights){
    if(pass===0)continue;
    const parent=venueGeometry({feature,p}),key=feature.properties.venueWaypointKey,index=extensionSlots.get(key)||0;
    extensionSlots.set(key,index+1);
+   const slot=branchSlot(index,branchCounts.get(key)||1);
+   if(slot.kind==='hidden')continue;
    const selected=feature.properties.key===selectedKey,geometry=extensionGeometry(parent,index,selected);
-   const branchLabel=branchFamily==='gigz'?'Gigz':'Mizzed';
-   lightsContext.save();lightsContext.globalAlpha=coreAlpha;lightsContext.strokeStyle=color;lightsContext.lineWidth=2;
+   // Branches grow sideways out of their place once, instead of rising from the ground.
+   const grow=riseAmount(feature.properties.key,frameNow);
+   lightsContext.setTransform(dpr*grow,0,0,dpr*grow,dpr*geometry.startX*(1-grow),dpr*parent.y*(1-grow));
+   const strength=coreAlpha*branchStrength(feature.properties,viewTime);
+   lightsContext.save();lightsContext.globalAlpha=strength;lightsContext.strokeStyle=color;lightsContext.lineWidth=2;
    lightsContext.beginPath();lightsContext.moveTo(geometry.startX,parent.y);lightsContext.lineTo(geometry.right,parent.y);lightsContext.stroke();lightsContext.restore();
-   drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,coreAlpha,waypointFamilyShell(branchFamily));
-   hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:geometry.size/2+6,name:feature.properties.name,category:branchLabel,color});
+   if(slot.kind==='chip'){
+    const parentItem=venueItems.get(key),ink=parentItem?.feature.properties.color||color;
+    drawBranchChip(lightsContext,geometry.x,geometry.y,`+${slot.more}`,ink,strength);
+    hitTargets.push({key,x:geometry.x,y:geometry.y,r:18,name:parentItem?.feature.properties.name,category:'More posts',color:ink});
+    continue;
+   }
+   const days=branchDaysLeft(feature.properties,viewTime);
+   drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,strength,waypointFamilyShell(branchFamily),{scoop:days?`${days}D`:null});
+   hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:geometry.size/2+6,name:feature.properties.name,category:branchFamily==='gigz'?'Gigz':'Mizzed',color});
    continue;
   }
   if(feature.properties.kind!=='event'){
@@ -1152,6 +1165,14 @@ function clusterPlaceMarkers(items,selected,zoom,width,height){
   for(const member of members)byKey.set(member.feature.properties.key,cluster);
  }
  return {byKey};
+}
+/** "+N" chip for a place's fourth branch slot: ink plate, the place's color, white count. */
+function drawBranchChip(ctx,x,y,text,color,alpha){
+ ctx.save();ctx.globalAlpha=alpha;ctx.font='700 11px ui-monospace,SFMono-Regular,Menlo,monospace';
+ const width=Math.max(26,ctx.measureText(text).width+12),height=20;
+ ctx.beginPath();ctx.roundRect(x-width/2,y-height/2,width,height,8);ctx.fillStyle='#0c0c0f';ctx.fill();
+ ctx.lineWidth=1.5;ctx.strokeStyle=color;ctx.stroke();
+ ctx.fillStyle='#FFFFFF';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,x,y+.5);ctx.restore();
 }
 function drawClusterCount(ctx,x,y,count,color,size=28){
  ctx.save();ctx.translate(x+size/2-1.5,y-size/2+1.5);ctx.fillStyle='#071018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,10.5,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 11px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),0,.5);ctx.restore();

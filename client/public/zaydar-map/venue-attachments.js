@@ -31,3 +31,22 @@ export function extensionGeometry(parent,index=0,selected=false){
  const right=parent.x-parent.size/2-gap-index*(44+gap);
  return {x:right-size/2,y:parent.y,size,right,startX:parent.x-parent.size/2};
 }
+
+const DAY=24*60*60*1000;
+/** Whole days a branch has left on the map (8 at posting, 1 on its last day). */
+export function branchDaysLeft(row,now=Date.now()){
+ const created=Date.parse(row.createdAt);if(!Number.isFinite(created))return 0;
+ return Math.max(0,Math.ceil((created+MIZZED_NOTIFICATION_LIFETIME-now)/DAY));
+}
+/** Full strength for four days, then it steps down so fresh posts read first. */
+export function branchStrength(row,now=Date.now()){
+ const created=Date.parse(row.createdAt);if(!Number.isFinite(created))return 1;
+ const age=(now-created)/DAY;
+ return age<=4?1:1-.45*Math.min(1,(age-4)/4);
+}
+export const BRANCH_HEADS=3;
+/** Up to three heads per place; a fourth slot becomes a "+N" chip for the rest. */
+export function branchSlot(index,count){
+ if(index<BRANCH_HEADS)return {kind:'head'};
+ return index===BRANCH_HEADS?{kind:'chip',more:count-BRANCH_HEADS}:{kind:'hidden'};
+}
