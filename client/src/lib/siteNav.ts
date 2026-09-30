@@ -78,6 +78,7 @@ export const PRIMARY_NAV: NavEntry[] = [
   { type: "dropdown", id: "boards", label: "Boards", accent: "magenta", items: BOARDS_MENU },
   /* Nonprofits, hotlines, and LGBTQ+ groups (moved off Placez 2026-09-30). */
   { type: "link", href: "/resources", label: "Resources", accent: "green" },
+  { type: "link", href: "/z", label: "Z/Lists", accent: "violet" },
 ];
 
 /** Phone header shares two dropdowns and Resources in one rail. */
