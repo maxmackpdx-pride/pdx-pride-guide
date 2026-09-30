@@ -29,6 +29,8 @@ import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
 import { FOOD_PANTRIES, FOOD_RESOURCE } from "@/lib/foodPantries";
+import DirectoryMap from "@/components/DirectoryMap";
+import { placeGoogleMapsUrl } from "@/lib/placeLinks";
 import { PlaceCard } from "@/components/ds/PlaceCard";
 import { WebGLShader } from "@/components/ui/web-gl-shader";
 import "@fontsource/barlow/latin-400.css";
@@ -511,6 +513,7 @@ export default function Resources() {
           <Dialog.Overlay className="rg-overlay-backdrop" />
           <Dialog.Content
             className="rg-overlay rg-command"
+            style={{ "--resource-accent": detail?.category.color || "#00FFFF" } as CSSProperties}
             onCloseAutoFocus={(event) => {
               if (detailOpen) event.preventDefault();
             }}
@@ -603,6 +606,8 @@ export default function Resources() {
         onOpenChange={setDetailOpen}
         direction={mobile ? "bottom" : "right"}
         shouldScaleBackground={false}
+        dismissible
+        closeThreshold={0.2}
       >
         <Drawer.Portal>
           <Drawer.Overlay className="rg-overlay-backdrop" />
@@ -618,7 +623,7 @@ export default function Resources() {
                   ?.focus();
             }}
           >
-            {mobile && (
+            {(
               <Drawer.Handle
                 className="rg-drawer-handle"
                 aria-label="Drag to close resource"
@@ -670,6 +675,24 @@ export default function Resources() {
                   <a className="rg-resource-phone" href={detail.org.phone}>
                     {detail.org.phoneLabel}
                   </a>
+                )}
+                {detail.org.addr && (
+                  <section className="rg-resource-map" aria-label={`Location map for ${detail.org.name}`}>
+                    <div className="rg-resource-map-canvas" data-vaul-no-drag>
+                      <DirectoryMap
+                        businesses={[]}
+                        height="100%"
+                        showKey={false}
+                        interactive={false}
+                        rasterBasemap
+                        accent={detail.category.color}
+                      />
+                      <span className="rg-resource-map-label">Portland overview · exact address below</span>
+                    </div>
+                    <a className="pdxBtn" href={placeGoogleMapsUrl({ address: detail.org.addr, name: detail.org.name })} target="_blank" rel="noopener noreferrer">
+                      Directions to {detail.org.addr} <ArrowUpRight size={16} />
+                    </a>
+                  </section>
                 )}
                 <div className="rg-detail-actions">
                   {detail.org.url && (
