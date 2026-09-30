@@ -346,6 +346,14 @@ export default function Resources() {
         >
           Need help now? Support lines <ArrowUpRight size={14} />
         </button>
+        <button
+          className="rg-search-trigger"
+          onClick={() => setSearchOpen(true)}
+        >
+          <Search size={19} />
+          <span>Search everything</span>
+          <kbd>⌘ K</kbd>
+        </button>
       </header>
       <section className="rg-layout rg-wrap">
         <aside className="rg-controls" aria-label="Choose resources">
@@ -456,14 +464,7 @@ export default function Resources() {
               </a>
             </aside>
           )}
-          <button
-            className="rg-search-trigger"
-            onClick={() => setSearchOpen(true)}
-          >
-            <Search size={19} />
-            <span>Search everything</span>
-            <kbd>⌘ K</kbd>
-          </button>
+
           <p className="rg-count" aria-live="polite">
             {mode === "talk"
               ? "Support lines"

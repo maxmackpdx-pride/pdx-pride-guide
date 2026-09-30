@@ -1098,3 +1098,15 @@
     rgba(0, 0, 0, 0.94) 100%
   );
 }
+
+.rg-intro > .rg-search-trigger {
+  margin-top: 24px;
+}
+@media (min-width: 1101px) {
+  .rg-intro > p {
+    bottom: 120px;
+  }
+  .rg-intro .rg-help {
+    bottom: 89px;
+  }
+}
