@@ -22,7 +22,7 @@ function Sheet({ options, onDone }: { options: ConfirmSheetOptions; onDone: (ok:
     <Dialog.Root open={open} onOpenChange={value => { if (!value) finish(false); }}>
       <Dialog.Portal>
         <Dialog.Overlay className="confirm-sheet__scrim" />
-        <Dialog.Content className="confirm-sheet pdx-liquid-overlay" onOpenAutoFocus={event => {
+        <Dialog.Content className="confirm-sheet pdx-liquid-overlay pdx-glass-rebind" onOpenAutoFocus={event => {
           // The safe choice takes focus first.
           event.preventDefault();
           (event.currentTarget as HTMLElement).querySelector<HTMLButtonElement>(".confirm-sheet__cancel")?.focus();

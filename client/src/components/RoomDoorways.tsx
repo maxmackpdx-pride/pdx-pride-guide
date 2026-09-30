@@ -19,7 +19,7 @@ const NEXT_DOOR: Record<DoorRoom, DoorRoom[]> = {
 /** "Next door" rail above a room's footer, so no room is a dead end. Reads the room registry and home worlds. */
 export default function RoomDoorways({ current }: { current: DoorRoom }) {
   return (
-    <section className="room-doorways" aria-labelledby="room-doorways-title" style={{ "--c": ROOMS[current].accent } as CSSProperties}>
+    <section className="room-doorways pdx-glass-rebind" aria-labelledby="room-doorways-title" style={{ "--c": ROOMS[current].accent } as CSSProperties}>
       <h2 id="room-doorways-title" className="room-doorways__title">Next door<span aria-hidden="true">.</span></h2>
       <div className="room-doorways__grid">
         {NEXT_DOOR[current].map(key => {
