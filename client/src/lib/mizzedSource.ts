@@ -1,25 +1,29 @@
 import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 
-const PORTLAND_IMAGES: Record<string, string> = {
-  bar: "https://images.unsplash.com/photo-1599648918338-9bae2cbf3155?w=900&q=85",
-  cafe: "https://images.unsplash.com/photo-1656596991280-e7029666071e?w=900&q=85",
-  nightlife: "https://images.unsplash.com/photo-1517592640034-4d5804694660?w=900&q=85",
-};
+/** Portland stock photos (Unsplash license), served from /stock/portland so nothing hot-links. */
+const STOCK = "/stock/portland";
+const PORTLAND_STOCK = ["neon-sign", "skyline-sunset", "bridge-skyline", "downtown-street", "waterfront-blossoms", "shopfront", "nightlife", "bar", "cafe"]
+  .map(name => `${STOCK}/${name}.jpg`);
+
+/** A Portland photo that stays the same for a given post. */
+export function portlandStockImage(seed: number): string {
+  return PORTLAND_STOCK[Math.abs(Math.trunc(seed)) % PORTLAND_STOCK.length];
+}
 
 export function placezStockImage(type?: string | null): string {
   const category = String(type || "").toLowerCase();
-  if (category.includes("cafe") || category.includes("coffee") || category.includes("restaurant")) return PORTLAND_IMAGES.cafe;
-  if (category.includes("bar") || category.includes("pub")) return PORTLAND_IMAGES.bar;
-  return PORTLAND_IMAGES.nightlife;
+  if (category.includes("cafe") || category.includes("coffee") || category.includes("restaurant")) return `${STOCK}/cafe.jpg`;
+  if (category.includes("bar") || category.includes("pub")) return `${STOCK}/bar.jpg`;
+  return `${STOCK}/nightlife.jpg`;
 }
 
 export function mizzedSource(post: MissedConnectionPost) {
   if (post.eventId) return {
     label: "Eventz",
     title: post.eventTitle || "Eventz card",
-    image: post.eventPosterUrl || null,
+    image: post.eventPosterUrl || portlandStockImage(post.id),
     href: `/events?event=${post.eventId}`,
-    note: "Flyer from the linked Eventz card",
+    note: post.eventPosterUrl ? "Flyer from the linked Eventz card" : "Portland stock photo. This event has no flyer yet.",
   };
   if (post.placeId) return {
     label: "Placez",
@@ -36,4 +40,9 @@ export function mizzedSource(post: MissedConnectionPost) {
     note: "Artwork from the linked OutZide destination",
   };
   return null;
+}
+
+/** The picture on a Mizzed post: the event flyer when it's tied to one, otherwise Portland. */
+export function mizzedArt(post: MissedConnectionPost): string {
+  return mizzedSource(post)?.image || portlandStockImage(post.id);
 }

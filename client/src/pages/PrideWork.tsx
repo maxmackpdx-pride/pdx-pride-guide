@@ -658,7 +658,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
                 />
               </label>
 
-              {postType === "POSTING_GIG" && <div className="span gigz-cover-upload"><span>Cover photo (optional)</span><ImageUploader endpoint="/api/upload/poster" currentUrl={form.watch("imageUrl")} onUploaded={url => form.setValue("imageUrl", url)} label="Choose a cover photo" /><small>Use a photo you have permission to share. Posts without one use the Gigz artwork.</small></div>}
+              <div className="span gigz-cover-upload"><span>Photo (optional)</span><ImageUploader endpoint="/api/upload/poster" currentUrl={form.watch("imageUrl")} onUploaded={url => form.setValue("imageUrl", url)} label="Add a photo" /><small>An event flyer or the venue logo works best. Use something you have permission to share; posts without one use the Gigz artwork.</small></div>
 
               <label className="span">
                 Location

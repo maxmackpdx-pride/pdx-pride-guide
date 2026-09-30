@@ -6,7 +6,7 @@ import type { MissedConnectionPost } from "./MissedConnectionsPanel";
 import { shareMissedConnectionStory } from "@/lib/shareMissedConnection";
 import { useToast } from "@/hooks/use-toast";
 import { BoardGlassMotif } from "@/components/board/GiftListingCard";
-import { mizzedSource } from "@/lib/mizzedSource";
+import { mizzedArt, mizzedSource } from "@/lib/mizzedSource";
 
 const ACCENT_CYCLE = ["#19E3FF", "#FF00CC", "#39FF14", "#A855F7", "#FF6600"];
 /** Deep-glass board accent for MIZZED CONNECTION (SoT §2.4). */
@@ -89,7 +89,7 @@ export default function SpottedCard({
         tabIndex={0}
       >
         {post.isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
-        {source?.image ? <div className={`board-spotted-card__art${source.label === "OutZide" ? " board-spotted-card__art--motif" : ""}`}><img src={source.image} alt="" loading="lazy" /></div> : <BoardGlassMotif variant="quote" />}
+        <div className={`board-spotted-card__art${source?.label === "OutZide" ? " board-spotted-card__art--motif" : ""}`}><img src={mizzedArt(post)} alt="" loading="lazy" /></div>
         {/* Corner tick marks (design board cards) */}
         <span className="board-spotted-card__ticks" aria-hidden="true">”</span>
         <div className="board-spotted-card__meta">

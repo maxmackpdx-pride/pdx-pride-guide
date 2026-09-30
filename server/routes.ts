@@ -3263,6 +3263,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       })) return;
       const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.slice(0, 2) : [];
       const postType = req.body.postType === "ISO" ? "ISO" : "GIFT";
+      // A gift offer needs a photo; an in-search-of post has nothing to show yet.
+      if (postType === "GIFT" && !photoUrls.length) throw new Error("Add at least one photo.");
       const validatedMapPoint = validateBoardMapLocation(req.body.mapLocation);
       const data = insertGiftingPostSchema.parse({
         userId: req.session.userId!,
@@ -3454,6 +3456,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
       if (moderationGate(res, "SELLZ marketplace", { title: req.body.title, description: req.body.description })) return;
       const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.slice(0, 6) : [];
+      if (!photoUrls.length) throw new Error("Add at least one photo.");
       const validatedMapPoint = validateBoardMapLocation(req.body.mapLocation);
       const post = storage.createSellzPost(insertSellzPostSchema.parse({
         userId: req.session.userId!,

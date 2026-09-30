@@ -385,14 +385,15 @@ export function GiftComposer({initialType = "GIFT", onClose, onPosted}: {initial
                 </select>
               </label>
               <label className="span">
-                Photos, up to 2
-                <input type="file" accept="image/*" multiple onChange={e => setPhotos(e.target.files)} />
+                {form.postType === "GIFT" ? "Photos (at least 1, up to 2)" : "Photos, up to 2"}
+                <input type="file" accept="image/*" multiple required={form.postType === "GIFT"} onChange={e => setPhotos(e.target.files)} />
+                {form.postType === "GIFT" && <small className="board-copy-sm">Gifts need a real photo so people know what they're picking up.</small>}
               </label>
             </div>
             <ComposerRules checked={form.acceptRules} onChange={acceptRules => setForm({ ...form, acceptRules })}>
               I agree: keep it free, keep it kind, keep it moving.
             </ComposerRules>
-            <ComposerSubmit busy={createMutation.isPending} disabled={!postingOpen || !form.acceptRules} onClick={submitPost}>Post it</ComposerSubmit>
+            <ComposerSubmit busy={createMutation.isPending} disabled={!postingOpen || !form.acceptRules || (form.postType === "GIFT" && !photos?.length)} onClick={submitPost}>Post it</ComposerSubmit>
           </RoomComposer>
   </>;
 }
