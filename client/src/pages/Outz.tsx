@@ -109,7 +109,7 @@ export default function Outz() {
   return <><div style={{ position: "relative" }}>
     <MapSwitch current="outz" /><RoomPlate room="outz" compact />
     {!mapReady && <div style={{ position: "absolute", inset: "12px 12px auto", zIndex: 2, background: "var(--ink-900, #08090b)", borderRadius: 16 }}><BrowseStatus
-      title={mapSlow ? "Outzide is taking longer than expected" : "Loading Outzide…"}
+      title={mapSlow ? "Outzide is taking longer than expected" : "Get out. Get dirty."}
       description={mapSlow ? "Try loading the field guide again." : "Getting destinations and the map ready."}
       onAction={retryMap} actionLabel="Reload Outzide" /></div>}
     <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=20260930-maps&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "") + (new URLSearchParams(window.location.search).get("wall") === "1" ? "&wall=1" : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} /></div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
