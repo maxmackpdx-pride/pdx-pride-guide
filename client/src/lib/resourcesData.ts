@@ -19,6 +19,7 @@ export type ResourceOrg = {
   alt?: string;
   altLabel?: string;
   logo?: string;
+  logoSurface?: "light";
   mark?: string;
   sourceChecked?: string;
   sourceUrl?: string;
@@ -47,6 +48,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "orgs": [
       {
         "name": "Pivot at Prism Health · Free HIV & STI Testing",
+        "logoSurface": "light",
+        "logo": "/resources-logos/pivot-at-prism-health-free-hiv-sti-testing.png",
         "scope": "SE Portland · N Portland",
         "mark": "PIVOT",
         "desc": "Free, confidential HIV, syphilis, chlamydia, and gonorrhea testing through CAP Northwest. Appointment required. Choose the Belmont or Morris location when booking; CAP asks you to select “no insurance” in its scheduler. This is the Pivot testing program, not all Prism clinical care.",
@@ -59,6 +62,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "CAP Testing 4 All · Free HIV Testing",
+        "logoSurface": "light",
+        "logo": "/resources-logos/cap-testing-4-all-free-hiv-testing.png",
         "scope": "Old Town · Walk-in",
         "mark": "CAP",
         "desc": "Free HIV testing at CAP Northwest’s Portland office. Walk in Monday or Wednesday, 10am–4pm; no appointment needed. This location lists HIV testing only. Check CAP’s service page for schedule changes.",
@@ -71,6 +76,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Multnomah County · Free Outreach Testing",
+        "logoSurface": "light",
+        "logo": "/resources-logos/multnomah-county-free-outreach-testing.svg",
         "scope": "Multnomah County · Mobile sites",
         "mark": "MCHD",
         "desc": "Free HIV, hepatitis C, and syphilis testing at community outreach locations. No appointment or ID needed. Call for the current van schedule. The county’s regular STI Clinic is a separate service with a listed $50 fee; no one is refused there for inability to pay.",
@@ -82,6 +89,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Oregon Free HIV & Syphilis Lab Testing",
+        "logo": "/resources-logos/oregon-free-hiv-syphilis-lab-testing.svg",
         "scope": "Oregon residents · Age 18+",
         "mark": "OHA",
         "desc": "Oregon Health Authority’s STDcheck program offers free HIV and syphilis tests for Oregon residents age 18 and older. Choose a participating lab, then call 800-456-2323 and press 1 to request the free Oregon tests. Other STI tests cost extra; do not buy a paid panel to use this program.",
@@ -102,6 +110,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Evergreen Urgent Care",
+        "logoSurface": "light",
+        "logo": "/resources-logos/evergreen-urgent-care.png",
         "scope": "NW Portland · Walk-in",
         "desc": "LGBTQIA+ friendly urgent care. Walk in for illness and injury, full STI panels and confidential sexual health testing, UTI care, labs, and X-ray. Takes insurance, Medicaid, and Medicare.",
         "addr": "2250 NW Flanders St, Ste 109 · Mon–Fri 8–8, Sat 9–6",
@@ -111,6 +121,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Cascade AIDS Project (CAP) & Our House",
+        "logoSurface": "light",
+        "logo": "/resources-logos/cascade-aids-project-cap-our-house.png",
         "scope": "Old Town",
         "desc": "The Northwest's leading HIV services org since 1983. Prevention, testing, supportive housing, and LGBTQ+ health care, plus Our House residential care for people living with HIV.",
         "url": "https://www.capnw.org/",
@@ -134,6 +146,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Quest Center for Integrative Health",
+        "logoSurface": "light",
+        "logo": "/resources-logos/quest-center-for-integrative-health.png",
         "mark": "QC",
         "scope": "Portland",
         "desc": "Community health center with LGBTQ+ services, counseling, and wellness classes.",
@@ -151,6 +165,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Trans Advocacy & Care Team (TACT)",
+        "logo": "/resources-logos/trans-advocacy-care-team-tact.png",
         "scope": "National · Virtual",
         "desc": "Free, virtual peer counseling for trans people.",
         "url": "https://yourtact.org"
@@ -168,6 +183,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "orgs": [
       {
         "name": "Marsha's Folx | Bradley Angle",
+        "logoSurface": "light",
+        "logo": "/resources-logos/marsha-s-folx-bradley-angle.png",
         "mark": "MF",
         "scope": "Portland",
         "desc": "One of the only culturally specific domestic violence programs for LGBTQIA+ survivors in Oregon. Advocacy and referrals, safety planning, food, clothing, and toiletries, and free support groups. Check the program website for the current schedule.",
@@ -189,6 +206,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Rahab's Sisters",
+        "logoSurface": "light",
+        "logo": "/resources-logos/rahab-s-sisters.png",
         "scope": "Portland",
         "desc": "Housing support, health care, and community services for marginalized people.",
         "url": "https://rahabs-sisters.org"
@@ -201,6 +220,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Beyond These Walls",
+        "logo": "/resources-logos/beyond-these-walls.png",
         "scope": "National",
         "desc": "Serving and advocating for incarcerated LGBTQ+ people.",
         "url": "https://beyondthesewallslgbt.org"
@@ -218,6 +238,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "orgs": [
       {
         "name": "Oregon State Bar",
+        "logoSurface": "light",
+        "logo": "/resources-logos/oregon-state-bar.png",
         "sub": "Lawyer Referral Service & Modest Means",
         "scope": "Statewide",
         "desc": "Get matched with a lawyer. Modest Means connects moderate-income Oregonians with reduced-fee attorneys, with a first consult of up to 30 minutes for no more than $35.",
@@ -244,6 +266,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Intersect NW",
+        "logo": "/resources-logos/intersect-nw.png",
         "scope": "Oregon",
         "desc": "Gender justice collaborative that strengthens the organizations doing this work.",
         "url": "https://intersectnorthwest.org"
@@ -279,6 +302,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Trans Youth Care Collective",
+        "logo": "/resources-logos/trans-youth-care-collective.png",
         "mark": "TYCC",
         "scope": "Oregon",
         "desc": "Trans-led organization offering support groups.",
@@ -293,6 +317,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Bridge City Mentors",
+        "logo": "/resources-logos/bridge-city-mentors.jpg",
         "scope": "NE Portland",
         "desc": "Black and LGBTQ-affiliated mentoring and advocacy organization supporting individuals and communities across the Portland metro since 2016.",
         "addr": "2636 NE Sandy Blvd, Suite E",
@@ -306,6 +331,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "P:EAR",
+        "logo": "/resources-logos/p-ear.png",
         "scope": "Portland",
         "desc": "Arts programming and mentorship for unhoused and at-risk youth.",
         "url": "https://www.pearmentor.org"
@@ -323,12 +349,15 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "orgs": [
       {
         "name": "Q Center",
+        "logo": "/resources-logos/q-center.png",
         "scope": "Portland",
         "desc": "2SLGBTQIA+ community center with an art gallery, library, support groups, resource hub, emergency assistance, and space rentals.",
         "url": "https://www.pdxqcenter.org"
       },
       {
         "name": "Westside Q Center",
+        "logoSurface": "light",
+        "logo": "/resources-logos/westside-q-center.png",
         "scope": "Washington County",
         "desc": "LGBTQIA+ services and regular programs in Portland's western suburbs.",
         "url": "https://westsideqrc.org"
@@ -353,12 +382,15 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Lesbian Culture Club",
+        "logoSurface": "light",
+        "logo": "/resources-logos/lesbian-culture-club.svg",
         "scope": "Portland",
         "desc": "Queer community for lesbians, trans people, nonbinary people, and anyone who feels at home there.",
         "url": "https://lesbiancultureclub.com"
       },
       {
         "name": "Queer Social Club",
+        "logo": "/resources-logos/queer-social-club.png",
         "scope": "Portland",
         "desc": "Community-driven event calendars for queer happenings in Portland and the greater Pacific Northwest.",
         "url": "https://queersocialclub.com"
@@ -392,12 +424,15 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "orgs": [
       {
         "name": "PFLAG Portland",
+        "logoSurface": "light",
+        "logo": "/resources-logos/pflag-portland.png",
         "scope": "Portland",
         "desc": "Family support and education for the parents and loved ones of LGBTQ+ people.",
         "url": "https://pflagpdx.org/"
       },
       {
         "name": "PDX Transparent",
+        "logo": "/resources-logos/pdx-transparent.svg",
         "mark": "PT",
         "scope": "Portland",
         "desc": "Support for parents of trans youth, with virtual chapters too.",
@@ -405,6 +440,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Friendly House",
+        "logoSurface": "light",
+        "logo": "/resources-logos/friendly-house.svg",
         "sub": "Elder Pride Services · SAGE Metro Portland",
         "scope": "Portland",
         "desc": "Services for LGBTQ+ older adults, including housing help and case management, as Portland's affiliate of SAGE, the national LGBT elder organization.",
@@ -412,6 +449,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "NAYA",
+        "logoSurface": "light",
+        "logo": "/resources-logos/naya.png",
         "sub": "Two-Spirit Safe Space Alliance",
         "scope": "Portland",
         "desc": "Indigenous LGBTQIA2S+ support groups and cultural events at the Native American Youth and Family Center.",
@@ -419,12 +458,14 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "UTOPIA PDX",
+        "logo": "/resources-logos/utopia-pdx.png",
         "scope": "Portland",
         "desc": "Community organization for queer and trans Pacific Islanders.",
         "url": "https://www.utopiaportland.org/"
       },
       {
         "name": "Northwest Gender Alliance",
+        "logo": "/resources-logos/northwest-gender-alliance.png",
         "scope": "Portland metro",
         "desc": "Social support and education for transgender and gender-expansive people.",
         "url": "https://www.nwgenderalliance.org/"
@@ -442,6 +483,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "orgs": [
       {
         "name": "Oregon Pride in Business",
+        "logoSurface": "light",
+        "logo": "/resources-logos/oregon-pride-in-business.png",
         "mark": "ORPIB",
         "sub": "ORPIB",
         "scope": "Oregon",
@@ -462,6 +505,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Portland Small Business Development Center",
+        "logo": "/resources-logos/portland-small-business-development-center.jpg",
         "mark": "SBDC",
         "scope": "Portland",
         "desc": "Small-business advising and training for Portland-area entrepreneurs.",
@@ -505,6 +549,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Regional Arts & Culture Council",
+        "logoSurface": "light",
+        "logo": "/resources-logos/regional-arts-culture-council.png",
         "mark": "RACC",
         "scope": "Portland",
         "desc": "Portland arts funder, including the Portland Arts Project Grant for individual artists and arts organizations.",
@@ -537,12 +583,15 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Ori Gallery",
+        "logo": "/resources-logos/ori-gallery.png",
         "scope": "Portland",
         "desc": "Trans and queer artists of color gallery and organizing space offering free and low-cost classes and workshops.",
         "url": "https://oriartgallery.org"
       },
       {
         "name": "Independent Publishing Resource Center",
+        "logoSurface": "light",
+        "logo": "/resources-logos/independent-publishing-resource-center.png",
         "mark": "IPRC",
         "scope": "Portland",
         "desc": "Printmaking, publishing, and literary arts center.",
@@ -562,6 +611,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Radical Faerie Arts Fest",
+        "logo": "/resources-logos/radical-faerie-arts-fest.jpg",
         "mark": "RFAF",
         "scope": "Portland",
         "desc": "Artist-centered market and audience-building model for queer artists.",
@@ -569,12 +619,15 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Fertile Ground Festival",
+        "logoSurface": "light",
+        "logo": "/resources-logos/fertile-ground-festival.png",
         "scope": "Portland",
         "desc": "Portland platform for new and developing performance work.",
         "url": "https://fertilegroundpdx.org"
       },
       {
         "name": "Portland Area Theatre Alliance",
+        "logo": "/resources-logos/portland-area-theatre-alliance.png",
         "mark": "PATA",
         "scope": "Portland",
         "desc": "Auditions, listings, and theatre events for the Portland area.",
@@ -607,6 +660,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "orgs": [
       {
         "name": "Rainbow Youth",
+        "logo": "/resources-logos/rainbow-youth.png",
         "scope": "Salem",
         "desc": "LGBTQIA+ youth support in Marion and Polk counties.",
         "url": "https://rainbowyouth.org"
@@ -666,6 +720,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "orgs": [
       {
         "name": "Multnomah County Harm Reduction",
+        "logoSurface": "light",
+        "logo": "/resources-logos/multnomah-county-harm-reduction.svg",
         "scope": "East Portland · County services",
         "mark": "MCHD",
         "desc": "Sterile supplies, syringe disposal, naloxone, fentanyl test strips, sexual-health services, and connections to care. Free overdose rescue kits and test strips are available through syringe services for people who use drugs. Call for the current clinic and supply schedule.",
@@ -712,6 +768,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Just in Case Oregon · Free Naloxone",
+        "logoSurface": "light",
+        "logo": "/resources-logos/just-in-case-oregon-free-naloxone.png",
         "scope": "Oregon · Mail delivery",
         "mark": "JIC",
         "desc": "Free naloxone mailed in plain packaging to an Oregon mailing address. No prescription, ID check, or insurance required. The current program supplies four doses and instructions. Order ahead so it is available when needed; this is not an emergency-delivery service.",

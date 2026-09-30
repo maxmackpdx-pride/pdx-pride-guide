@@ -410,6 +410,10 @@ export function PlaceCard({
   category = "bars",
   donateUrl,
   categoryLabel,
+  accentColor,
+  shareUrl,
+  phoneHref,
+  footer,
   address,
   hours,
   phone,
@@ -421,6 +425,7 @@ export function PlaceCard({
   events = /** @type {PlaceEvent[]} */ ([]),
   logoUrl,
   fallbackLogoUrl,
+  logoFallback,
   isNonprofit = false,
   lat,
   lng,
@@ -438,6 +443,10 @@ export function PlaceCard({
   category?: string;
   donateUrl?: string;
   categoryLabel?: string;
+  accentColor?: string;
+  shareUrl?: string;
+  phoneHref?: string;
+  footer?: React.ReactNode;
   address?: string;
   hours?: string;
   phone?: string;
@@ -450,6 +459,7 @@ export function PlaceCard({
   events?: Array<{ day?: string; date?: string; title?: string; href?: string }>;
   logoUrl?: string;
   fallbackLogoUrl?: string;
+  logoFallback?: React.ReactNode;
   isNonprofit?: boolean;
   lat?: number | null;
   lng?: number | null;
@@ -471,9 +481,9 @@ export function PlaceCard({
   const isRealEstate = category === "realestate";
   const isCampground = category === "campgrounds";
   const isGroup = category === "groups";
-  const accent = isNonprofit
+  const accent = accentColor || (isNonprofit
     ? "var(--cyan)"
-    : (CAT_COLOR[category] || "var(--pink)");
+    : (CAT_COLOR[category] || "var(--pink)"));
   const edge = isNonprofit
     ? RAINBOW_EDGE
     : isHealthcare
@@ -495,10 +505,10 @@ export function PlaceCard({
 
   const handleShare = async (e) => {
     e.stopPropagation();
-    if (businessId == null) return;
+    if (businessId == null && !shareUrl) return;
     setSharing(true);
     try {
-      await sharePageLink(placePath(businessId, name), name);
+      await sharePageLink(shareUrl || placePath(businessId, name), name);
     } catch (err) {
       if (err?.name !== "AbortError") console.error(err);
     } finally {
@@ -545,6 +555,7 @@ export function PlaceCard({
               onError={() => setLogoFailed(true)}
             />
           )}
+          {!showLogo && !showFallback && logoFallback}
           {showFallback && (
             <img
               className="pdxPlace__logo pdxPlace__logo--fallback"
@@ -591,7 +602,7 @@ export function PlaceCard({
             {!isCompact && phone && (
               <div className="pdxPlace__row">
                 <Icon d={PHONE} />
-                <a href={telHref(phone)} onClick={e => e.stopPropagation()}>{phone}</a>
+                <a href={phoneHref || telHref(phone)} onClick={e => e.stopPropagation()}>{phone}</a>
               </div>
             )}
           </div>
@@ -703,6 +714,7 @@ export function PlaceCard({
           />
         )}
         </div>
+        {footer}
       </div>
     </article>
   );

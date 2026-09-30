@@ -1337,3 +1337,17 @@ html.calm-mode .rg-options button,
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* Resources uses the shared directory card; keep original category and logo colors. */
+.rg-directory-card { margin: 0; min-width: 0; }
+.rg-directory-card .pdxPlace__body { height: 100%; }
+.rg-directory-card .pdxPlace__logo { mix-blend-mode: normal; filter: none; }
+.rg-directory-card .pdxPlace__cat .pdxBadge { background: var(--c); border-color: var(--c); color: #080808; }
+.rg-directory-card .pdxPlace__actions { opacity: 1; pointer-events: auto; }
+.rg-directory-card .pdxPlace__share { min-height: 44px; min-width: 44px; }
+.rg-directory-footer { display: flex; flex-direction: column; gap: 14px; margin-top: auto; }
+.rg-directory-footer .pdxBtn { min-height: 44px; }
+.rg-directory-card:focus-within { outline: 2px solid var(--c); outline-offset: 4px; }
+
+.rg-directory-card--light-logo .pdxPlace__logo,
+.rg-logo--light { background: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; }

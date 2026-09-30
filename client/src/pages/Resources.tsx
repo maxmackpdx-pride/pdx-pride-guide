@@ -13,7 +13,6 @@ import {
   ArrowUpRight,
   LifeBuoy,
   BriefcaseBusiness,
-  ChevronDown,
   Heart,
   House,
   Mountain,
@@ -30,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
 import { FOOD_PANTRIES, FOOD_RESOURCE } from "@/lib/foodPantries";
+import { PlaceCard } from "@/components/ds/PlaceCard";
 import { WebGLShader } from "@/components/ui/web-gl-shader";
 import "@fontsource/barlow/latin-400.css";
 import "@fontsource/barlow/latin-500.css";
@@ -99,7 +99,7 @@ function Mark({ org }: { org: ResourceOrg }) {
       .join("");
   return org.logo ? (
     <img
-      className="rg-logo"
+      className={`rg-logo${org.logoSurface === "light" ? " rg-logo--light" : ""}`}
       src={org.logo}
       alt={`${org.name} logo`}
       loading="lazy"
@@ -172,64 +172,37 @@ function ResourceCard({
   row: Row;
   onOpen: (row: Row) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
   const { org, category } = row;
   return (
-    <article
-      className={`rg-card pdx-glass-card pdx-glass-rebind${expanded ? " rg-expanded" : ""}`}
-      style={{ "--c": category.color, "--dir-gm": 8 } as CSSProperties}
-    >
-      <div className="rg-card-top">
-        <Mark org={org} />
-        <span className="rg-eyebrow rg-scope">{org.scope}</span>
-      </div>
-      <span className="rg-eyebrow rg-category">{category.name}</span>
-      <h3>{org.name}</h3>
-      <p className="rg-description">{org.desc}</p>
-      {org.sourceChecked && (
-        <a
-          className="rg-source-check"
-          href={org.sourceUrl || org.url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Service page checked {org.sourceChecked} <ArrowUpRight size={13} />
-        </a>
-      )}
-      {org.phone && (
-        <a className="rg-resource-phone" href={org.phone}>
-          {org.phoneLabel}
-        </a>
-      )}
-      {org === FOOD_RESOURCE && <FoodPantryList />}
-      {expanded && org !== FOOD_RESOURCE && (
-        <div className="rg-extra">
-          <span className="rg-eyebrow">How to start</span>
-          <p>{category.use}</p>
-          {org.addr && (
-            <>
-              <span className="rg-eyebrow">Location</span>
-              <p>{org.addr}</p>
-            </>
+    <PlaceCard
+      name={org.name}
+      categoryLabel={category.name}
+      accentColor={category.color}
+      logoUrl={org.logo}
+      logoFallback={<Mark org={{ ...org, logo: undefined }} />}
+      address={org.addr}
+      phone={org.phoneLabel}
+      phoneHref={org.phone}
+      description={org.desc}
+      website={org.url}
+      shareUrl={org.url || "https://www.zaylist.com/resources"}
+      className={`rg-directory-card pdxPlace--clickable${org.logoSurface === "light" ? " rg-directory-card--light-logo" : ""}`}
+      onClick={() => onOpen(row)}
+      footer={
+        <div className="rg-directory-footer" onClick={(event) => event.stopPropagation()}>
+          <span className="rg-eyebrow">{org.scope}</span>
+          {org.sourceChecked && (
+            <a className="rg-source-check" href={org.sourceUrl || org.url} target="_blank" rel="noopener noreferrer">
+              Service page checked {org.sourceChecked} <ArrowUpRight size={13} />
+            </a>
           )}
-        </div>
-      )}
-      {org !== FOOD_RESOURCE && (
-        <div className="rg-card-actions">
+          {org === FOOD_RESOURCE && <FoodPantryList />}
           <button className="pdxBtn" onClick={() => onOpen(row)}>
-            Connect <ArrowUpRight size={16} />
-          </button>
-          <button
-            className="rg-expand"
-            aria-expanded={expanded}
-            onClick={() => setExpanded(!expanded)}
-          >
-            {expanded ? "Less detail" : "Read more"}
-            <ChevronDown size={18} />
+            All details & contact <ArrowUpRight size={16} />
           </button>
         </div>
-      )}
-    </article>
+      }
+    />
   );
 }
 
@@ -675,6 +648,8 @@ export default function Resources() {
                 )}
                 {detail.org === FOOD_RESOURCE && <FoodPantryList />}
                 <div className="rg-detail-meta">
+                  <span className="rg-eyebrow">How to start</span>
+                  <p>{detail.category.use}</p>
                   <span className="rg-eyebrow">Where they serve</span>
                   <p>{detail.org.scope}</p>
                   {detail.org.addr && (
