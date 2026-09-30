@@ -40,6 +40,7 @@ import MessageModal from "./profile/MessageModal";
 import { profileCssVars } from "@/components/profile/profileHelpers";
 import { copyTextToClipboard } from "@/lib/copyText";
 import "./MemberProfile.css";
+import "./ProfileFoundation.css";
 
 export default function MemberProfile() {
   const [routeMatch, routeParams] = useRoute("/u/:username");
@@ -275,8 +276,8 @@ export default function MemberProfile() {
 
   return (
     <div
-      className="pp-page pp-page--reimagined profile-page"
-      style={profileCssVars(accent)}
+      className="pp-page pp-page--reimagined profile-page pp-foundation pdx-glass-rebind"
+      style={{ ...profileCssVars(accent), "--c": accent } as React.CSSProperties}
     >
       <div className="pp-shell">
         <ProfileHero
@@ -323,7 +324,7 @@ export default function MemberProfile() {
           onEventClick={(e) => openEvent(e.id)}
         />
 
-        <div className="pp-split">
+        <div className={`pp-split${!isOwner && !data.top8?.length && !bigOne ? " pp-split--single" : ""}`}>
           <div className="pp-split__left">
             <ProfileTop8
               entries={data.top8 ?? []}

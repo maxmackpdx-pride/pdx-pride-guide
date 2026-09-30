@@ -104,7 +104,7 @@ export default function ProfileHero({
   );
 
   return (
-    <section className="pp-hero pp-hero--reimagined">
+    <section className="pp-hero pp-hero--reimagined pdx-glass-rebind">
       {data.coverImageUrl ? (
         <div className="pp-hero__banner pp-hero__banner--custom">
           <img
@@ -175,7 +175,7 @@ export default function ProfileHero({
               <>
                 <button
                   type="button"
-                  className={`pp-btn pp-btn--follow${isFollowing ? " is-on" : ""}`}
+                  className={`pp-btn pdx-glass-rebind pp-btn--follow${isFollowing ? " is-on" : ""}`}
                   onClick={onFollow}
                   disabled={followPending || blockStatus.interactionBlocked}
                   data-testid="profile-follow"
@@ -241,7 +241,7 @@ export default function ProfileHero({
                 copied={copied}
                 onClose={onShareToggle}
                 onCopy={onCopy}
-                onMessage={!isOwner ? onMessage : undefined}
+                onMessage={!isOwner && !blockStatus.interactionBlocked ? onMessage : undefined}
                 profileUrl={profileUrl}
                 displayName={displayName}
                 anchorRef={shareRef}

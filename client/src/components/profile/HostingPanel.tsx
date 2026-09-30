@@ -1,3 +1,4 @@
+import { GoingEventCard } from "./ProfileEventRail";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import type { CSSProperties, KeyboardEvent } from "react";
 import { admissionDisplayLabel } from "@shared/admission";
@@ -173,7 +174,7 @@ function HostingRail({
         <CarouselContent>
           {events.map(event => (
             <CarouselItem key={event.id} className="hp-archive__item">
-              <HostingCard event={event} past onEventClick={onEventClick} />
+              <GoingEventCard event={event} past onClick={onEventClick} />
             </CarouselItem>
           ))}
         </CarouselContent>

@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import ZLineIcon from "@/components/ZLineIcon";
-import { useCallback, useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent, type CSSProperties } from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import BoardPostOverlay from "@/components/board/BoardPostOverlay";
@@ -552,6 +552,7 @@ export default function UpdatesPanel({
             "fitem",
             glow ? "fitem--glow" : "",
             "pp-updates__card",
+            "pdx-glass-rebind",
             expanded ? "is-expanded" : "",
             isBoardCard ? "pp-updates__card--board" : "",
             clickable ? "pp-updates__card--btn" : "",
@@ -559,12 +560,7 @@ export default function UpdatesPanel({
             .filter(Boolean)
             .join(" ");
 
-          const cardStyle = glow
-            ? {
-                border: `1px solid ${glow}`,
-                boxShadow: `0 0 22px -9px ${glow}`,
-              }
-            : undefined;
+          const cardStyle = { "--c": badgeColor || "var(--profile-acc)" } as CSSProperties;
 
           const cardProps = {
             className: cardClass,

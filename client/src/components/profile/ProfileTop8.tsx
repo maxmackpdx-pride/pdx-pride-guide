@@ -55,7 +55,7 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onR
               return (
                 <article
                   key={`u-${e.id}`}
-                  className="pp-top8__tile"
+                  className="pp-top8__tile pdx-glass-rebind"
                 >
                   <span className="pp-top8__rank display">{rank}</span>
                   <Link href={`/u/${encodeURIComponent(e.username)}`} className="pp-top8__avatar" aria-label={`View ${e.displayName}'s profile`}>
@@ -97,7 +97,7 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onR
                 <button
                   key={`b-${e.id}`}
                   type="button"
-                  className="pp-top8__tile pp-top8__tile--place"
+                  className="pp-top8__tile pp-top8__tile--place pdx-glass-rebind"
                   aria-label={`Open ${e.name} directory card`}
                   onClick={(ev) => onPlaceClick(e, ev.currentTarget)}
                 >
@@ -109,7 +109,7 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onR
               <Link
                 key={`b-${e.id}`}
                 href={placePath(e.id, e.name)}
-                className="pp-top8__tile pp-top8__tile--place"
+                className="pp-top8__tile pp-top8__tile--place pdx-glass-rebind"
               >
                 {placeInner}
               </Link>

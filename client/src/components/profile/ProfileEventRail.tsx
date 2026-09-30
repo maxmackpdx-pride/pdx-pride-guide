@@ -98,12 +98,15 @@ type GoingCardProps = {
   event: ProfileEvent;
   onClick?: (event: ProfileEvent) => void;
   goingAvatars?: ProfileUserChip[];
+  past?: boolean;
 };
 
-export function GoingEventCard({ event, onClick, goingAvatars = [] }: GoingCardProps) {
+export function GoingEventCard({ event, onClick, goingAvatars = [], past = false }: GoingCardProps) {
   const day = eventDayCssVar(event);
   const code = eventDayCode(event);
-  const when = fmtRailWhen(event);
+  const when = past && event.dateStart && Number.isFinite(Date.parse(event.dateStart))
+    ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(event.dateStart))
+    : fmtRailWhen(event);
   const poster = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   const category = event.eventTypes?.find(Boolean)?.replaceAll("_", " ").toUpperCase() || null;
   const admission = event.admission ? admissionDisplayLabel(event.admission)?.toUpperCase() : null;
@@ -125,9 +128,9 @@ export function GoingEventCard({ event, onClick, goingAvatars = [] }: GoingCardP
       <span className="pp-event-rail__scrim" aria-hidden="true" />
       <span className="pp-event-rail__content">
         <span className="pp-event-rail__tags" aria-label="Event tags">
-          {code ? <span className="pp-event-rail__tag pp-event-rail__tag--day">{code}</span> : null}
-          {category ? <span className={`pp-event-rail__tag pp-event-rail__tag--neutral${/^SEX[ _-]?POSITIVE$/i.test(category) ? " pp-event-rail__tag--complementary" : ""}`}>{category}</span> : null}
-          {detail ? <span className={`pp-event-rail__tag pp-event-rail__tag--detail${event.admission === "DOOR_FEE" ? " pp-event-rail__tag--complementary" : ""}`}>{detail}</span> : null}
+          {code ? <span className="pp-event-rail__tag pp-event-rail__tag--day">{past ? `PAST · ${code}` : code}</span> : null}
+          {!past && category ? <span className={`pp-event-rail__tag pp-event-rail__tag--neutral${/^SEX[ _-]?POSITIVE$/i.test(category) ? " pp-event-rail__tag--complementary" : ""}`}>{category}</span> : null}
+          {!past && detail ? <span className={`pp-event-rail__tag pp-event-rail__tag--detail${event.admission === "DOOR_FEE" ? " pp-event-rail__tag--complementary" : ""}`}>{detail}</span> : null}
         </span>
         {when ? <span className="pp-event-rail__when">{when}</span> : null}
         <span className="display pp-event-rail__title">{event.title}</span>
@@ -141,9 +144,9 @@ export function GoingEventCard({ event, onClick, goingAvatars = [] }: GoingCardP
     return (
       <button
         type="button"
-        role="listitem"
         className="pp-event-rail__card pp-event-rail__card--btn pdx-glass-rebind"
         style={style}
+        aria-label={`Open ${event.title}`}
         onClick={() => onClick(event)}
       >
         {inner}
@@ -152,7 +155,7 @@ export function GoingEventCard({ event, onClick, goingAvatars = [] }: GoingCardP
   }
 
   return (
-    <article role="listitem" className="pp-event-rail__card pdx-glass-rebind" style={style}>
+    <article className="pp-event-rail__card pdx-glass-rebind" style={style}>
       {inner}
     </article>
   );
@@ -167,7 +170,7 @@ type RailShellProps = {
 /** Horizontal rail shell used by Going (and reusable elsewhere). */
 export function ProfileEventRailShell({ children, className = "", ariaLabel }: RailShellProps) {
   return (
-    <div className={`pp-event-rail__track ${className}`.trim()} role="list" aria-label={ariaLabel}>
+    <div className={`pp-event-rail__track ${className}`.trim()} role="region" tabIndex={0} aria-label={ariaLabel}>
       {children}
     </div>
   );

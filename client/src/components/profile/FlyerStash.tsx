@@ -280,7 +280,7 @@ export default function FlyerStash({
           <CarouselContent>
             {base.map(f => (
               <CarouselItem key={f.id} className="flyer-stash__slide">
-                <button type="button" className="flyer-stash__flyer" onClick={() => onEventClick?.(f.event)}
+                <button type="button" className="flyer-stash__flyer pdx-glass-rebind" onClick={() => onEventClick?.(f.event)}
                   disabled={!onEventClick} aria-label={`Open ${f.title} at ${f.venue}`}>
                   <div className="flyer-stash__art">
                     {f.posterUrl ? <img src={f.posterUrl} alt="" loading="lazy" decoding="async" />
