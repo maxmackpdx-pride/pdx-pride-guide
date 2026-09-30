@@ -317,6 +317,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "TransActive Gender Project",
+        "logo": "/resources-logos/transactive-gender-project.png",
         "sub": "At Lewis & Clark",
         "scope": "Portland",
         "desc": "Gender-focused peer support groups.",
@@ -332,6 +333,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Pairs With Pride",
+        "logo": "/resources-logos/pairs-with-pride.png",
         "scope": "Oregon",
         "desc": "Intergenerational mentoring for LGBTQ+ youth.",
         "url": "https://perfectpair.org/pairs-with-pride"
@@ -658,7 +660,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "mark": "PDXB",
         "scope": "Portland",
         "desc": "Portland theatre community listserv for opportunities and discussion.",
-        "url": "https://groups.io"
+        "url": "https://groups.io/g/pdxbackstage"
       },
       {
         "name": "Backstage",
@@ -703,6 +705,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Mid-Willamette Trans Support Network",
+        "logo": "/resources-logos/mid-willamette-trans-support-network.png",
         "mark": "MWTSN",
         "scope": "Linn · Benton · Lincoln",
         "desc": "Grassroots peer support for trans and nonbinary people in the valley.",

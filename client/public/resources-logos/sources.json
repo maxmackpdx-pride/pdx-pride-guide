@@ -1,20 +1,20 @@
 [
   {
-    "name": "Pivot at Prism Health · Free HIV & STI Testing",
+    "name": "Pivot at Prism Health \u00b7 Free HIV & STI Testing",
     "logo": "/resources-logos/pivot-at-prism-health-free-hiv-sti-testing.png",
     "sourcePage": "https://www.capnw.org/get-tested/",
     "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5d79a1b111bad12f87bb3532/214ea043-d800-478f-9120-47aef8b42c90/Artboard+10.png?format=1500w",
     "checked": "2026-09-30"
   },
   {
-    "name": "CAP Testing 4 All · Free HIV Testing",
+    "name": "CAP Testing 4 All \u00b7 Free HIV Testing",
     "logo": "/resources-logos/cap-testing-4-all-free-hiv-testing.png",
     "sourcePage": "https://www.capnw.org/get-tested/",
     "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5d79a1b111bad12f87bb3532/214ea043-d800-478f-9120-47aef8b42c90/Artboard+10.png?format=1500w",
     "checked": "2026-09-30"
   },
   {
-    "name": "Multnomah County · Free Outreach Testing",
+    "name": "Multnomah County \u00b7 Free Outreach Testing",
     "logo": "/resources-logos/multnomah-county-free-outreach-testing.svg",
     "sourcePage": "https://multco.us/services/hiv-testing",
     "sourceAsset": "https://multco.us/themes/custom/multnomah_gov_theme/assets/images/logo.svg",
@@ -252,7 +252,7 @@
     "checked": "2026-09-30"
   },
   {
-    "name": "Just in Case Oregon · Free Naloxone",
+    "name": "Just in Case Oregon \u00b7 Free Naloxone",
     "logo": "/resources-logos/just-in-case-oregon-free-naloxone.png",
     "sourcePage": "https://justincaseoregon.org/",
     "sourceAsset": "https://justincaseoregon.org/brand/jico-logo-horizontal-color.png",
@@ -343,7 +343,7 @@
     "checked": "2026-09-30"
   },
   {
-    "name": "HIV Alliance · Syringe Services",
+    "name": "HIV Alliance \u00b7 Syringe Services",
     "logo": "/resources-logos/hiv-alliance-syringe-services.png",
     "sourcePage": "https://hivalliance.org",
     "sourceAsset": "https://hivalliance.org/wp-content/uploads/2024/09/HIVA-logo-reversed.png",
@@ -376,5 +376,29 @@
     "sourcePage": "https://www.transponderoregon.org",
     "sourceAsset": "Inline SVG: TransPonder Logo",
     "checked": "2026-09-30"
+  },
+  {
+    "name": "Mid-Willamette Trans Support Network",
+    "logo": "/resources-logos/mid-willamette-trans-support-network.png",
+    "sourcePage": "https://midwillamettetsn.wixsite.com/oursite",
+    "sourceAsset": "https://static.wixstatic.com/media/d3d37d_b47f1171e29d4266bd9e6d66adf355b9~mv2.png",
+    "checked": "2026-09-30",
+    "note": "Official site logo"
+  },
+  {
+    "name": "Pairs With Pride",
+    "logo": "/resources-logos/pairs-with-pride.png",
+    "sourcePage": "https://perfectpair.org/pairs-with-pride",
+    "sourceAsset": "https://static.wixstatic.com/media/6be6cf_0156d6e957714f4da4c28196fec8f053~mv2.png",
+    "checked": "2026-09-30",
+    "note": "Parent organization logo"
+  },
+  {
+    "name": "TransActive Gender Project",
+    "logo": "/resources-logos/transactive-gender-project.png",
+    "sourcePage": "https://graduate.lclark.edu/programs/continuing_education/transactive/",
+    "sourceAsset": "https://graduate.lclark.edu/live/resource/image/_i/themes/global/assets/logos/logo-grad-color-horizontal.rev.1770764746.png",
+    "checked": "2026-09-30",
+    "note": "Parent organization logo"
   }
 ]

@@ -1482,3 +1482,6 @@ html.calm-mode .rg-options button,
 .rg-directory-card .pdxPlace__cat[data-category-id="safety"] .pdxBadge { color: #fff !important; }
 .resources-page .rg-share,
 .rg-directory-card .pdxPlace__share { color: #fff !important; }
+/* Preserve the lettering within Perfect Pair's filled badge until its white cutout is ready. */
+.rg-directory-card .pdxPlace__logo[src$="/pairs-with-pride.png"],
+.rg-detail-logo .rg-logo[src$="/pairs-with-pride.png"] { filter: grayscale(1); }
