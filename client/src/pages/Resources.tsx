@@ -329,9 +329,11 @@ export default function Resources() {
           </button>
         </div>
         <h1>
-          Find your people.
+          Find your <em className="rg-word-people">people</em>.
           <br />
-          <em>Find your possibility.</em>
+          Find your <em>possibility</em>.
+          <br />
+          Find your <em className="rg-word-hope">hope</em>.
         </h1>
         <p>
           Make art. Find community. Build something.

@@ -92,6 +92,12 @@
 .rg-intro h1 em {
   color: var(--neon-yellow);
 }
+.rg-intro h1 .rg-word-people {
+  color: var(--neon-cyan);
+}
+.rg-intro h1 .rg-word-hope {
+  color: var(--neon-magenta);
+}
 .rg-intro > p {
   position: absolute;
   bottom: 46px;
