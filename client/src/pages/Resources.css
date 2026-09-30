@@ -1471,3 +1471,14 @@ html.calm-mode .rg-options button,
 /* EOCIL's supplied logo is opaque; retain it until a clean cutout is ready. */
 .rg-directory-card .pdxPlace__logo[src$="/eastern-oregon-center-for-independent-living.png"],
 .rg-detail-logo .rg-logo[src$="/eastern-oregon-center-for-independent-living.png"] { filter: none; }
+
+.rg-safety-prompt a.rg-safety-emergency {
+  font-family: var(--font-display) !important;
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  min-height: 56px !important;
+  letter-spacing: .025em;
+}
+.rg-directory-card .pdxPlace__cat[data-category-id="safety"] .pdxBadge { color: #fff !important; }
+.resources-page .rg-share,
+.rg-directory-card .pdxPlace__share { color: #fff !important; }

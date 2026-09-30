@@ -144,18 +144,19 @@ function SafetyNotice() {
         <a className="rg-safety-source" href="https://calltosafety.org/services/" target="_blank" rel="noopener noreferrer">Support options & service details <ArrowUpRight size={13} /></a>
       </div>
       <details className="rg-safety-law">
-        <summary>What does Oregon law mean by domestic violence?</summary>
+        <summary>Domestic violence in Oregon — what counts?</summary>
         <div>
-          <p>Under ORS 135.230, used in criminal pretrial-release law, domestic violence is abuse between family or household members. Abuse includes:</p>
+          <p>Oregon law covers abuse in certain family or household relationships. Under ORS 135.230, this includes:</p>
           <ul>
-            <li>Trying to cause physical injury, or causing it intentionally, knowingly, or recklessly.</li>
-            <li>Intentionally, knowingly, or recklessly making someone fear serious physical injury that is about to happen.</li>
-            <li>Sexual abuse as defined in Oregon’s criminal statutes.</li>
+            <li>Hurting someone physically, or trying to.</li>
+            <li>Making someone fear serious physical harm that is about to happen.</li>
+            <li>Sexual abuse.</li>
           </ul>
-          <p>The covered relationships include spouses and former spouses; adult relatives by blood or marriage; people who live or have lived together; people who have had a sexually intimate relationship; and unmarried parents of a minor child.</p>
-          <p>For Family Abuse Prevention Act restraining orders, ORS 107.705 uses a separate definition and relationship rules. Whether you qualify depends on more than this summary.</p>
-          <p>You can seek support without deciding whether your experience meets a legal definition. An advocate or legal aid provider can help explain your options.</p>
+          <p>The law includes requirements about intent or recklessness and the relationship between the people involved. The full rules are linked below.</p>
+          <p><strong>What about roommates?</strong> Sharing an address alone does not automatically qualify you for a family-abuse restraining order (FAPA). That order has specific family or intimate-relationship requirements. Other protections may apply, depending on what happened.</p>
+          <p>If a roommate, partner, or anyone else is hurting or threatening you, you can ask for help. You don’t need to know the legal label first. Call to Safety or a legal aid provider can help you explore your options.</p>
           <div className="rg-safety-law-links">
+            <a href="https://oregonlawhelp.org/topics/safety/restraining-orders-oregon/oregons-five-restraining-orders/family-abuse-restraining-order-fapa" target="_blank" rel="noopener noreferrer">Who can get a family-abuse restraining order? ↗</a>
             <a href="https://www.oregonlegislature.gov/bills_laws/ors/ors135.html" target="_blank" rel="noopener noreferrer">Read ORS 135.230 ↗</a>
             <a href="https://www.oregonlegislature.gov/bills_laws/ors/ors107.html" target="_blank" rel="noopener noreferrer">Read ORS 107.705 ↗</a>
             <a href="https://www.courts.oregon.gov/programs/family/domestic-violence/Pages/restraining.aspx" target="_blank" rel="noopener noreferrer">Oregon Courts: restraining orders ↗</a>
