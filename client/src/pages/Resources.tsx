@@ -383,7 +383,7 @@ export default function Resources() {
               02
             </span>
             <div>
-              <span className="rg-eyebrow rg-muted">Make it yours</span>
+              <span className="rg-eyebrow rg-muted">Explore categories</span>
               <h2>I'm looking for…</h2>
               <div
                 className="rg-options"

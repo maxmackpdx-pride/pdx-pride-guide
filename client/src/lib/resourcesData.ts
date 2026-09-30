@@ -142,6 +142,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "OHSU Transgender Health Program",
+        "logo": "/resources-logos/ohsu-transgender-health-program.svg",
+        "logoSurface": "light",
         "scope": "Portland",
         "desc": "Specialized gender-affirming medical care and surgery.",
         "url": "https://www.ohsu.edu/transgender-health"
@@ -254,6 +256,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "OGALLA",
+        "logo": "/resources-logos/ogalla.jpg",
+        "url": "https://www.ogalla.org/",
         "sub": "The LGBT Bar Association of Oregon",
         "scope": "Statewide",
         "desc": "LGBTQ+ lawyers, judges, legal workers, and law students since 1991. Runs the Bill & Ann Shepherd Legal Scholarship Fund and helped win marriage equality in Oregon."
@@ -400,6 +404,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Oregon Queer History Project",
+        "logo": "/resources-logos/oregon-queer-history-project.jpg",
         "mark": "GLAPN",
         "sub": "GLAPN",
         "scope": "Oregon",
@@ -502,6 +507,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "CASH Oregon",
+        "logo": "/resources-logos/cash-oregon.svg",
+        "logoSurface": "light",
         "scope": "Portland",
         "desc": "Free tax preparation for people earning $70,000 or less.",
         "url": "https://cashoregon.org"
@@ -528,6 +535,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Business Oregon",
+        "logo": "/resources-logos/business-oregon.png",
         "scope": "Oregon",
         "desc": "Oregon's economic development agency, with grant and fellowship programs for artists and creative businesses.",
         "url": "https://www.oregon.gov/biz"
@@ -561,13 +569,17 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Multnomah County Cultural Coalition",
+        "logoSurface": "light",
+        "logo": "/resources-logos/multnomah-county-cultural-coalition.png",
         "mark": "MCCC",
         "scope": "Multnomah County",
         "desc": "Cultural-enrichment organization supporting Multnomah County residents and local arts work.",
-        "url": "https://www.multculturalcoalition.org"
+        "url": "https://www.multcoculturalcoalition.org"
       },
       {
         "name": "Oregon Arts Commission",
+        "logoSurface": "light",
+        "logo": "/resources-logos/oregon-arts-commission.png",
         "scope": "Oregon",
         "desc": "State grants for Oregon artists and organizations, including individual artist fellowships.",
         "url": "https://www.oregonartscommission.org"
@@ -691,6 +703,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Rogue Action Center",
+        "logoSurface": "light",
+        "logo": "/resources-logos/rogue-action-center.png",
         "scope": "Josephine · Jackson",
         "desc": "Advocacy and direct services for LGBTQ+ communities in Southern Oregon.",
         "url": "https://rogueactioncenter.org"

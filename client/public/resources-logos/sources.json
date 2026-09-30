@@ -257,5 +257,61 @@
     "sourcePage": "https://justincaseoregon.org/",
     "sourceAsset": "https://justincaseoregon.org/brand/jico-logo-horizontal-color.png",
     "checked": "2026-09-30"
+  },
+  {
+    "name": "Business Oregon",
+    "logo": "/resources-logos/business-oregon.png",
+    "sourcePage": "https://www.oregon.gov/biz",
+    "sourceAsset": "https://www.oregon.gov/biz/SiteAssets/logoColored.png",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Oregon Arts Commission",
+    "logo": "/resources-logos/oregon-arts-commission.png",
+    "sourcePage": "https://www.oregon.gov/biz",
+    "sourceAsset": "https://www.oregon.gov/biz/aboutus/artscommission/resources/commission_logos/Arts%20Logos/OAC-logo.png",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Rogue Action Center",
+    "logo": "/resources-logos/rogue-action-center.png",
+    "sourcePage": "https://rogueactioncenter.org",
+    "sourceAsset": "https://static.wixstatic.com/media/85835d_a40ad4eb7571461eb88663dc03873830~mv2.png",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Oregon Queer History Project",
+    "logo": "/resources-logos/oregon-queer-history-project.jpg",
+    "sourcePage": "https://glapn.org",
+    "sourceAsset": "https://glapn.org/0000-OQHC_transition/OQHC%20x200px.jpg",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "OGALLA",
+    "logo": "/resources-logos/ogalla.jpg",
+    "sourcePage": "https://www.ogalla.org/",
+    "sourceAsset": "https://images.squarespace-cdn.com/content/v1/641bc574c72ca25e9491779d/b37efbbb-6ed0-469c-b97c-1478430d78ac/OGALLA_Full_Color_Horizontal%404x.jpg?format=1500w",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Multnomah County Cultural Coalition",
+    "logo": "/resources-logos/multnomah-county-cultural-coalition.png",
+    "sourcePage": "https://www.multcoculturalcoalition.org/",
+    "sourceAsset": "https://images.squarespace-cdn.com/content/v1/6894f10d2c3ea10337a5df37/7c5e6fd1-9da0-49b8-91cb-e35a8b0a0bbc/MCCC+logo+300.png?format=1500w",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "CASH Oregon",
+    "logo": "/resources-logos/cash-oregon.svg",
+    "sourcePage": "https://cashoregon.org/",
+    "sourceAsset": "Inline header SVG",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "OHSU Transgender Health Program",
+    "logo": "/resources-logos/ohsu-transgender-health-program.svg",
+    "sourcePage": "https://www.ohsu.edu/transgender-health",
+    "sourceAsset": "Inline header SVG",
+    "checked": "2026-09-30"
   }
 ]

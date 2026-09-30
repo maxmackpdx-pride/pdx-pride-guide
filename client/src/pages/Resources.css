@@ -1354,3 +1354,30 @@ html.calm-mode .rg-options button,
 
 .rg-detail-tags { display: flex; flex-wrap: wrap; gap: 10px 16px; }
 .rg-directory-card .pdxPlace__badges { flex-wrap: wrap; }
+
+/* White logo treatment; preserve the original source assets. */
+.rg-directory-card .pdxPlace__logo,
+.rg-detail-logo .rg-logo {
+  background: transparent;
+  padding: 0;
+  filter: brightness(0) invert(1);
+  mix-blend-mode: normal;
+}
+
+/* Keep opaque source marks legible until their transparent replacements are ready. */
+.rg-directory-card .pdxPlace__logo[src$="/bridge-city-mentors.jpg"],
+.rg-detail-logo .rg-logo[src$="/bridge-city-mentors.jpg"],
+.rg-directory-card .pdxPlace__logo[src$="/business-oregon.png"],
+.rg-detail-logo .rg-logo[src$="/business-oregon.png"],
+.rg-directory-card .pdxPlace__logo[src$="/ogalla.jpg"],
+.rg-detail-logo .rg-logo[src$="/ogalla.jpg"],
+.rg-directory-card .pdxPlace__logo[src$="/oregon-queer-history-project.jpg"],
+.rg-detail-logo .rg-logo[src$="/oregon-queer-history-project.jpg"],
+.rg-directory-card .pdxPlace__logo[src$="/portland-area-theatre-alliance.png"],
+.rg-detail-logo .rg-logo[src$="/portland-area-theatre-alliance.png"],
+.rg-directory-card .pdxPlace__logo[src$="/portland-small-business-development-center.jpg"],
+.rg-detail-logo .rg-logo[src$="/portland-small-business-development-center.jpg"],
+.rg-directory-card .pdxPlace__logo[src$="/radical-faerie-arts-fest.jpg"],
+.rg-detail-logo .rg-logo[src$="/radical-faerie-arts-fest.jpg"],
+.rg-directory-card .pdxPlace__logo[src$="/rainbow-youth.png"],
+.rg-detail-logo .rg-logo[src$="/rainbow-youth.png"] { filter: none; }
