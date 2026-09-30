@@ -1,20 +1,20 @@
 [
   {
-    "name": "Pivot at Prism Health \u00b7 Free HIV & STI Testing",
+    "name": "Pivot at Prism Health · Free HIV & STI Testing",
     "logo": "/resources-logos/pivot-at-prism-health-free-hiv-sti-testing.png",
     "sourcePage": "https://www.capnw.org/get-tested/",
     "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5d79a1b111bad12f87bb3532/214ea043-d800-478f-9120-47aef8b42c90/Artboard+10.png?format=1500w",
     "checked": "2026-09-30"
   },
   {
-    "name": "CAP Testing 4 All \u00b7 Free HIV Testing",
+    "name": "CAP Testing 4 All · Free HIV Testing",
     "logo": "/resources-logos/cap-testing-4-all-free-hiv-testing.png",
     "sourcePage": "https://www.capnw.org/get-tested/",
     "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5d79a1b111bad12f87bb3532/214ea043-d800-478f-9120-47aef8b42c90/Artboard+10.png?format=1500w",
     "checked": "2026-09-30"
   },
   {
-    "name": "Multnomah County \u00b7 Free Outreach Testing",
+    "name": "Multnomah County · Free Outreach Testing",
     "logo": "/resources-logos/multnomah-county-free-outreach-testing.svg",
     "sourcePage": "https://multco.us/services/hiv-testing",
     "sourceAsset": "https://multco.us/themes/custom/multnomah_gov_theme/assets/images/logo.svg",
@@ -252,7 +252,7 @@
     "checked": "2026-09-30"
   },
   {
-    "name": "Just in Case Oregon \u00b7 Free Naloxone",
+    "name": "Just in Case Oregon · Free Naloxone",
     "logo": "/resources-logos/just-in-case-oregon-free-naloxone.png",
     "sourcePage": "https://justincaseoregon.org/",
     "sourceAsset": "https://justincaseoregon.org/brand/jico-logo-horizontal-color.png",
@@ -312,6 +312,41 @@
     "logo": "/resources-logos/ohsu-transgender-health-program.svg",
     "sourcePage": "https://www.ohsu.edu/transgender-health",
     "sourceAsset": "Inline header SVG",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Pride Foundation",
+    "logo": "/resources-logos/pride-foundation.svg",
+    "sourcePage": "https://pridefoundation.org",
+    "sourceAsset": "https://pridefoundation.org/wp-content/uploads/2018/09/logo-pride-foundation-white.svg",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Portland Playhouse",
+    "logo": "/resources-logos/portland-playhouse.png",
+    "sourcePage": "https://www.portlandplayhouse.org",
+    "sourceAsset": "https://portlandplayhouse.org/wp-content/uploads/2018/11/pp_logo_white.png",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Portland Queer Arts Foundation",
+    "logo": "/resources-logos/portland-queer-arts-foundation.png",
+    "sourcePage": "https://portlandqueerarts.foundation",
+    "sourceAsset": "https://portlandqueerarts.foundation/wp-content/themes/pqa/assets/images/brand-assets/logos/Foundation-Logo-Horizontal-Dark-TransparentBG-1024.png",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Emergence",
+    "logo": "/resources-logos/emergence.svg",
+    "sourcePage": "https://4emergence.com",
+    "sourceAsset": "https://www.4emergence.com/wp-content/uploads/2022/05/logo-emergence.svg",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "HIV Alliance · Syringe Services",
+    "logo": "/resources-logos/hiv-alliance-syringe-services.png",
+    "sourcePage": "https://hivalliance.org",
+    "sourceAsset": "https://hivalliance.org/wp-content/uploads/2024/09/HIVA-logo-reversed.png",
     "checked": "2026-09-30"
   }
 ]

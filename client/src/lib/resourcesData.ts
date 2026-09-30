@@ -501,6 +501,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Pride Foundation",
+        "logo": "/resources-logos/pride-foundation.svg",
         "scope": "Pacific Northwest",
         "desc": "Philanthropic foundation offering scholarships for LGBTQ+ students across the Northwest.",
         "url": "https://pridefoundation.org"
@@ -553,6 +554,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "orgs": [
       {
         "name": "Portland Queer Arts Foundation",
+        "logo": "/resources-logos/portland-queer-arts-foundation.png",
         "mark": "PQAF",
         "scope": "Portland",
         "desc": "Funds queer artists and projects, and keeps a resource guide for grants, services, spaces, and community organizations.",
@@ -620,6 +622,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Portland Playhouse",
+        "logo": "/resources-logos/portland-playhouse.png",
         "scope": "Portland",
         "desc": "Theatre apprenticeship and education, including its Apprentice Program.",
         "url": "https://www.portlandplayhouse.org"
@@ -689,6 +692,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Emergence",
+        "logo": "/resources-logos/emergence.svg",
         "mark": "EM",
         "scope": "Eugene",
         "desc": "Recovery services for LGBTQ+ people.",
@@ -778,6 +782,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "HIV Alliance · Syringe Services",
+        "logo": "/resources-logos/hiv-alliance-syringe-services.png",
         "scope": "Washington County · Other Oregon counties",
         "mark": "HIVA",
         "desc": "Syringe exchange, safer-use supplies, naloxone distribution and training, and harm-reduction support. The provider maintains location-by-location schedules, including Washington County. Check the current schedule for the site you plan to visit.",
