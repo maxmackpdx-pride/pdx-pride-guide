@@ -25,7 +25,7 @@ const PLATE: Record<PlateRoom, { mark: string; line?: string; follow: Followable
 export default function RoomPlate({ room, compact = false }: { room: PlateRoom; compact?: boolean }) {
   const plate = PLATE[room], meta = ROOMS[room as RoomKey];
   const actions = <div className="room-plate__actions">
-    <BoardShareButton title={plate.share} path={meta.route} />
+    <BoardShareButton title={plate.share} path={meta.route} card={{ room: meta.name, mark: plate.mark, line: plate.line }} />
     <BoardFollowButton board={plate.follow} />
   </div>;
   const style = { "--c": room === "gigz" ? "var(--room-gigz-ink)" : meta.accent } as CSSProperties;
