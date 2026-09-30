@@ -30,6 +30,12 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
 import { FOOD_PANTRIES, FOOD_RESOURCE } from "@/lib/foodPantries";
 import { WebGLShader } from "@/components/ui/web-gl-shader";
+import "@fontsource/barlow/latin-400.css";
+import "@fontsource/barlow/latin-500.css";
+import "@fontsource/barlow/latin-600.css";
+import "@fontsource/barlow/latin-700.css";
+import "@fontsource/jetbrains-mono/latin-400.css";
+import "@fontsource/jetbrains-mono/latin-600.css";
 import "./Resources.css";
 
 const ICONS = [

@@ -1261,3 +1261,67 @@
     font-size: 20px;
   }
 }
+
+/* Guide-aligned type roles, scoped to Resources and its portaled overlays. */
+.resources-page,
+.rg-overlay {
+  --font-body: "Barlow", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+.resources-page p,
+.rg-overlay p,
+.rg-food-list summary,
+.rg-command [cmdk-input] {
+  font-family: var(--font-body);
+  line-height: var(--lh-body);
+  letter-spacing: 0.025em;
+}
+.rg-step h2 {
+  font-size: var(--display-3);
+}
+.rg-results-head h2 {
+  font-size: var(--display-2);
+}
+.rg-card h3 {
+  font-size: var(--title-lg);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-title);
+}
+.resources-page h2,
+.resources-page h3,
+.rg-overlay h2,
+.rg-overlay h3 {
+  text-transform: uppercase;
+}
+.rg-results .rg-count,
+.rg-card .rg-scope,
+.rg-food-list .rg-food-note,
+.rg-overlay .rg-command-hint {
+  font-size: var(--meta);
+  line-height: var(--lh-meta);
+}
+.rg-all,
+.rg-expand,
+.rg-help {
+  min-height: 44px;
+  min-width: 44px;
+}
+.rg-close {
+  width: 44px;
+  height: 44px;
+}
+html.calm-mode .rg-options button,
+:root[data-calm="true"] .rg-options button {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  background: var(--res-help-surface);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rg-options button {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+    background: var(--res-help-surface);
+  }
+}
