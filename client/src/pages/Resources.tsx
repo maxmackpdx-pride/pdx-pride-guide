@@ -20,10 +20,12 @@ import {
   Scale,
   Search,
   ShieldCheck,
+  Share2,
   Star,
   Users,
   X,
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
 import { FOOD_PANTRIES, FOOD_RESOURCE } from "@/lib/foodPantries";
@@ -208,6 +210,36 @@ function ResourceCard({
 }
 
 export default function Resources() {
+  const { toast } = useToast();
+  const [sharing, setSharing] = useState(false);
+  async function shareResources() {
+    const url = "https://www.zaylist.com/resources";
+    setSharing(true);
+    try {
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: "Resources | Zaylist", url });
+          return;
+        } catch (error) {
+          if (error instanceof Error && error.name === "AbortError") return;
+        }
+      }
+      await navigator.clipboard.writeText(url);
+      toast({
+        title: "Link copied",
+        description: "Share Zaylist Resources with someone.",
+      });
+    } catch {
+      toast({
+        title: "Couldn't copy the link",
+        description: url,
+        variant: "destructive",
+      });
+    } finally {
+      setSharing(false);
+    }
+  }
+
   usePageSeo(
     "Resources | Zaylist",
     "Art, community, opportunity, care, and support for queer and trans Oregon. Explore local organizations and food pantries to find your next connection.",
@@ -278,7 +310,19 @@ export default function Resources() {
     <div className="resources-page">
       <WebGLShader />
       <header className="rg-intro rg-wrap">
-        <span className="rg-eyebrow">Resources / All the ways we show up</span>
+        <div className="rg-intro-top">
+          <span className="rg-eyebrow">
+            Resources / All the ways we show up
+          </span>
+          <button
+            className="pdxBtn rg-share"
+            onClick={shareResources}
+            disabled={sharing}
+            aria-label="Share Resources"
+          >
+            <Share2 size={16} aria-hidden="true" /> Share
+          </button>
+        </div>
         <h1>
           Find your people.
           <br />

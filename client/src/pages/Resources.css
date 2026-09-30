@@ -1020,3 +1020,17 @@
   pointer-events: none;
   z-index: -1;
 }
+
+.rg-intro-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.rg-intro-top > .rg-eyebrow {
+  min-width: 0;
+}
+.rg-share {
+  flex-shrink: 0;
+  min-height: 44px;
+}
