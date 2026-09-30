@@ -3,14 +3,14 @@ import { Link } from "wouter";
 import { motion, useReducedMotion } from "framer-motion";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Home, Info, CalendarDays, MapPin, Map, TreePine, Layers, House, LayoutGrid, PanelsTopLeft, ChevronDown, Menu, X, MessageCircle, type LucideIcon } from "lucide-react";
+import { Home, Info, CalendarDays, MapPin, Map, TreePine, Layers, House, LayoutGrid, PanelsTopLeft, ChevronDown, Menu, X, MessageCircle, LifeBuoy, type LucideIcon } from "lucide-react";
 import { PRIMARY_NAV, navLinkActive, type NavEntry } from "@/lib/siteNav";
 import { MOBILE_NAV_DISMISS, dismissMobileNavOverlays } from "@/lib/mobileNavDismiss";
 import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
 
 const ICONS: Record<string, LucideIcon> = {
   Home, About: Info, Eventz: CalendarDays, Placez: MapPin, Mapz: Map,
-  OutZide: TreePine, "Z/Lists": Layers, "The Haüz": House, Boards: LayoutGrid,
+  OutZide: TreePine, "Z/Lists": Layers, "The Haüz": House, Boards: LayoutGrid, Resources: LifeBuoy,
 };
 const entryKey = (entry: NavEntry) => entry.type === "link" ? entry.href : entry.id;
 const entryActive = (entry: NavEntry, location: string) => entry.type === "link"

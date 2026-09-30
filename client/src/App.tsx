@@ -63,6 +63,7 @@ const Sellz = lazyWithReload(() => import("./pages/Sellz"));
 const Housing = lazyWithReload(() => import("./pages/Housing"));
 const HousingNew = lazyWithReload(() => import("./pages/HousingNew"));
 const About = lazyWithReload(() => import("./pages/About"));
+const Resources = lazyWithReload(() => import("./pages/Resources"));
 const Resume = lazyWithReload(() => import("./pages/Resume"));
 const Legal = lazyWithReload(() => import("./pages/Legal"));
 const Contact = lazyWithReload(() => import("./pages/Contact"));
@@ -180,6 +181,7 @@ function AppLayout() {
             <Route path="/housing">
               {() => <Redirect to="/the-hauz" />}
             </Route>
+            <Route path="/resources" component={Resources} />
             <Route path="/about" component={About} />
             <Route path="/aboutz" component={About} />
             <Route path="/resume" component={Resume} />

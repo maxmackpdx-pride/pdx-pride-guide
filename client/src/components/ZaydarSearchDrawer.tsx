@@ -4,7 +4,8 @@ import {NavGlassLayers,navGlassPointer} from './ui/nav-glass';
 import {Search,SlidersHorizontal,X,ChevronRight,ChevronDown} from 'lucide-react';
 import {DIRECTORY_TYPE_LABELS,directoryTypeColor} from '@shared/directoryTheme';
 
-export const ZAYDAR_PLACE_TYPES=['all','bar','restaurant','cafe','venue','shop','service','hotel','nonprofit','healthcare','realestate','campground','adult'];
+/* Nonprofits moved to /resources (2026-09-30); Placez keeps places to go and spend. */
+export const ZAYDAR_PLACE_TYPES=['all','bar','restaurant','cafe','venue','shop','service','hotel','healthcare','realestate','campground','adult'];
 export const ZAYDAR_PLACE_TYPE_OPTIONS=ZAYDAR_PLACE_TYPES.filter(type=>type!=='all');
 export const zaydarTypeIcon=(type:string)=>`/zaydar-map/icons/types/${ZAYDAR_PLACE_TYPES.includes(type)?type:'venue'}.svg`;
 export const zaydarTypeLabel=(type:string)=>type==='all'?'All placez':type==='adult'?'Adult':DIRECTORY_TYPE_LABELS[type]||'Venues';

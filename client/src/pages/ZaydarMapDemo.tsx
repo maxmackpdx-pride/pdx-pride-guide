@@ -593,7 +593,7 @@ export default function ZaydarMapDemo() {
     })) as unknown as Record<MapWorld,WorldRow[]>;
   },[places,mizzed,gigs,gifts,sells,mineQueries[0].data,mineQueries[1].data,mineQueries[2].data,mineQueries[3].data,params,boardMapPoints,viewerPoint,mapCenter]);
   const filteredWorlds=useMemo(()=>Object.fromEntries((Object.keys(locatedWorlds) as MapWorld[]).map(world=>[world,filterWorldRows(locatedWorlds[world],world,params,savedSellzSet)])) as Record<MapWorld,WorldRow[]>,[locatedWorlds,params,savedSellzSet]);
-  const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>placeTypes.includes(zaydarPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes]);
+  const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>(place as Place).type!=='nonprofit'&&placeTypes.includes(zaydarPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes]);
   const visibleHousing = useMemo(() => housing
     .filter(row => (!housingType || row.type === housingType) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
     .map(row => ({ ...row, _board: "The HAÜZ", locationLabel: row.lat != null && row.lng != null

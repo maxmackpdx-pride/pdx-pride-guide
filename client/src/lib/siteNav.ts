@@ -76,10 +76,12 @@ export const PRIMARY_NAV: NavEntry[] = [
   },
   /* Guests reach every room from the top row; About lives in the footer. */
   { type: "dropdown", id: "boards", label: "Boards", accent: "magenta", items: BOARDS_MENU },
+  /* Nonprofits, hotlines, and LGBTQ+ groups (moved off Placez 2026-09-30). */
+  { type: "link", href: "/resources", label: "Resources", accent: "green" },
   { type: "link", href: "/z", label: "Z/Lists", accent: "violet" },
 ];
 
-/** Phone header shares two dropdowns and the Z/Lists destination in one rail. */
+/** Phone header shares two dropdowns, Resources, and the Z/Lists destination in one rail. */
 export const MOBILE_TOP_NAV: NavEntry[] = [
   {
     type: "dropdown",
@@ -98,6 +100,7 @@ export const MOBILE_TOP_NAV: NavEntry[] = [
     accent: "magenta",
     items: BOARDS_MENU,
   },
+  { type: "link", href: "/resources", label: "Resources", accent: "green" },
   { type: "link", href: "/z", label: "Z/Lists", accent: "violet" },
 ];
 
@@ -129,6 +132,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/dashboard": { section: "Account", title: "Your Hub" },
   "/settings/notifications": { section: "Account", title: "Notification settings" },
   "/z": { section: "Zaylist", title: "Z/ List" },
+  "/resources": { section: "Resources", title: "Resources" },
 };
 
 /**

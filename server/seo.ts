@@ -217,6 +217,7 @@ export function buildSitemapXml(events: SeoEvent[]) {
     "/mizzed",
     "/the-hauz",
     "/about",
+    "/resources",
     "/contact",
     "/sponsors",
     "/access",
@@ -272,6 +273,10 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/resume": {
     title: "Tucker Max Resume | Zaylist",
     description: "Sales and operations leader with 12+ years in big tech and EV brands, now producing live events and building community platforms in Portland.",
+  },
+  "/resources": {
+    title: "Resources | Zaylist",
+    description: "Nonprofits, hotlines, and LGBTQ+ groups for queer and trans Oregon: health care, safety, legal help, youth, community, funding, and more.",
   },
   "/contact": {
     title: "Contact | Zaylist",
