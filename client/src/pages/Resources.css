@@ -1498,3 +1498,6 @@ html.calm-mode .rg-options button,
 /* White label ink on orange, red, blue, and purple category tags. */
 .rg-directory-card .pdxPlace__cat:is([data-category-id="safety"], [data-category-id="legal"], [data-category-id="arts"], [data-category-id="youth"], [data-category-id="harm-reduction"]) .pdxBadge,
 .rg-safety-prompt .pdxPlace__cat .pdxBadge { color: #fff !important; }
+
+.rg-drawer .rg-food-finder { --c: var(--neon-yellow); --action-accent: var(--neon-yellow); width: 100%; min-height: 58px !important; margin-top: 24px; font: 800 23px/1.15 var(--font-display) !important; white-space: normal; }
+.rg-drawer .rg-food-finder-caption { margin: 10px 0 22px; font-size: 13px; line-height: 1.5; color: var(--res-caption); }

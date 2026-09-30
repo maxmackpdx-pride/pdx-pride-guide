@@ -256,7 +256,6 @@ function ResourceCard({
               Service page checked {org.sourceChecked} <ArrowUpRight size={13} />
             </a>
           )}
-          {org === FOOD_RESOURCE && <FoodPantryList />}
           <button className={`pdxBtn${["safety", "legal", "arts"].includes(category.id) ? " rg-contact-white" : ""}`} onClick={() => onOpen(row)}>
             All details & contact <ArrowUpRight size={16} />
           </button>
@@ -731,7 +730,15 @@ export default function Resources() {
                     <ArrowUpRight size={13} />
                   </a>
                 )}
-                {detail.org === FOOD_RESOURCE && <FoodPantryList />}
+                {detail.org === FOOD_RESOURCE && (
+                  <>
+                    <a className="pdxBtn pdxBtn--solid rg-food-finder" href="https://foodfinder.oregonfoodbank.org/" target="_blank" rel="noopener noreferrer">
+                      Find food near you <ArrowUpRight size={22} aria-hidden="true" />
+                    </a>
+                    <p className="rg-food-finder-caption">Oregon Food Bank’s Food Finder · Search by location, day, and food type.</p>
+                    <FoodPantryList />
+                  </>
+                )}
                 <div className="rg-detail-meta">
                   <span className="rg-eyebrow">How to start</span>
                   <p>{detail.category.use}</p>
