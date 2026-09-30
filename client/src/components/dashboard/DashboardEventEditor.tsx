@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { roomToast } from "@/lib/roomToast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import ImageUploader from "@/components/ImageUploader";
 import EventTypeTag from "@/components/EventTypeTag";
@@ -71,7 +72,7 @@ export function DashboardEventEditForm({
       setCoHostUsername("");
       refetchHosts();
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast(roomToast("eventz", "didn't save", err.message)),
   });
 
   const toggleType = (t: string) => setEventForm(f => ({

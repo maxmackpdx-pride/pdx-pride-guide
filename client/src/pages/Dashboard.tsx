@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { roomToast } from "@/lib/roomToast";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -271,7 +272,7 @@ export default function Dashboard() {
       });
       setHostUpdate("");
     },
-    onError: () => toast({ title: "Error", description: "Could not post host update.", variant: "destructive" }),
+    onError: () => toast(roomToast("eventz", "didn't post", "Could not post host update.")),
   });
 
   const eventEditMutation = useMutation({
@@ -294,7 +295,7 @@ export default function Dashboard() {
       setEditingEvent(null);
       setEventForm(null);
     },
-    onError: () => toast({ title: "Error", description: "Could not save event.", variant: "destructive" }),
+    onError: () => toast(roomToast("eventz", "didn't save", "Could not save event.")),
   });
 
   const eventDeleteMutation = useMutation({
@@ -338,7 +339,7 @@ export default function Dashboard() {
       setEditingGig(null);
       toast({ title: "Gig post updated" });
     },
-    onError: () => toast({ title: "Error", description: "Could not update gig post.", variant: "destructive" }),
+    onError: () => toast(roomToast("gigz", "didn't save", "Could not update gig post.")),
   });
 
   useEffect(() => {

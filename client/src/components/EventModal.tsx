@@ -1,4 +1,5 @@
 import { PiChatsCircleLight } from "react-icons/pi";
+import { roomToast } from "@/lib/roomToast";
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import { Check } from "lucide-react";
@@ -456,7 +457,7 @@ function EventModalInner({
       setModForm({ name: "", email: "", proof: "" });
     },
     onError: () => {
-      toast({ title: "Error", description: "Could not submit request.", variant: "destructive" });
+      toast(roomToast("eventz", "didn't send", "Could not submit request."));
     },
   });
 
@@ -508,7 +509,7 @@ function EventModalInner({
         setHostDrawer("noHost");
         return;
       }
-      toast({ title: "Error", description: err.message || "Could not send message.", variant: "destructive" });
+      toast(roomToast("eventz", "didn't send", err.message || "Could not send message."));
     },
   });
 

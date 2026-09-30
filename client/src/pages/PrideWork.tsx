@@ -1,4 +1,5 @@
 import RoomPlate from "@/components/board/RoomPlate";
+import { roomToast } from "@/lib/roomToast";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -561,7 +562,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
     },
     onError: (err: unknown) => {
       const message = err instanceof Error ? err.message : "Could not submit post.";
-      toast({ title: "Error", description: message, variant: "destructive" });
+      toast(roomToast("gigz", "didn't post", message));
     },
   });
 

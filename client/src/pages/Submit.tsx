@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { roomToast } from "@/lib/roomToast";
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import ImageUploader from "@/components/ImageUploader";
@@ -398,7 +399,7 @@ export default function Submit() {
     },
     onError: (err: Error) => {
       setFormError(err.message);
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast(roomToast("eventz", "didn't send", err.message));
     },
   });
 
@@ -494,7 +495,7 @@ export default function Submit() {
     },
     onError: (err: Error) => {
       setFormError(err.message);
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast(roomToast("eventz", "didn't send", err.message));
     },
   });
 
@@ -526,7 +527,7 @@ export default function Submit() {
         const payload = await r.json().catch(() => ({}));
         const message = payload.error || "Could not submit promoter application. Please try again.";
         setFormError(message);
-        toast({ title: "Error", description: message, variant: "destructive" });
+        toast(roomToast("eventz", "didn't send", message));
         return;
       }
     }

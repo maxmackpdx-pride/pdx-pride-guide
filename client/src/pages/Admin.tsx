@@ -1,4 +1,5 @@
 import { Sprout } from "lucide-react";
+import { roomToast } from "@/lib/roomToast";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useLocation } from "wouter";
@@ -775,7 +776,7 @@ export default function Admin() {
       toast({ title: "Approved", description: "Submission approved successfully." });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err?.message || "Could not approve submission.", variant: "destructive" });
+      toast(roomToast("admin", "didn't go through", err?.message || "Could not approve submission."));
     },
   });
 
@@ -787,7 +788,7 @@ export default function Admin() {
       toast({ title: "Rejected", description: "Submission rejected." });
     },
     onError: () => {
-      toast({ title: "Error", description: "Could not reject submission.", variant: "destructive" });
+      toast(roomToast("admin", "didn't go through", "Could not reject submission."));
     },
   });
 
@@ -803,7 +804,7 @@ export default function Admin() {
       toast({ title: "Merged", description: "Submission merged into the existing event. Promoter attached as host." });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err?.message || "Could not merge submission.", variant: "destructive" });
+      toast(roomToast("admin", "didn't go through", err?.message || "Could not merge submission."));
     },
   });
 
@@ -838,7 +839,7 @@ export default function Admin() {
       toast({ title: "Promoter assigned", description: "They now host this event and were notified." });
     },
     onError: (err) => {
-      toast({ title: "Error", description: parseApiError(err, "Could not assign promoter."), variant: "destructive" });
+      toast(roomToast("admin", "didn't go through", parseApiError(err, "Could not assign promoter.")));
     },
   });
 
@@ -856,7 +857,7 @@ export default function Admin() {
       toast({ title: "Promoter removed", description: "Event is back in the claimable pool." });
     },
     onError: (err) => {
-      toast({ title: "Error", description: parseApiError(err, "Could not remove promoter."), variant: "destructive" });
+      toast(roomToast("admin", "didn't go through", parseApiError(err, "Could not remove promoter.")));
     },
   });
 
@@ -871,7 +872,7 @@ export default function Admin() {
       toast({ title: "Event updated", description: "Changes are live." });
     },
     onError: () => {
-      toast({ title: "Error", description: "Could not save changes.", variant: "destructive" });
+      toast(roomToast("admin", "didn't save", "Could not save changes."));
     },
   });
 
@@ -888,7 +889,7 @@ export default function Admin() {
       toast({ title: action === "approve" ? "Request Approved" : "Request Rejected" });
     },
     onError: () => {
-      toast({ title: "Error", description: "Could not resolve request.", variant: "destructive" });
+      toast(roomToast("admin", "didn't go through", "Could not resolve request."));
     },
   });
 
@@ -913,7 +914,7 @@ export default function Admin() {
       toast({ title: "Gig post updated", description: "Changes are live on GIGZ." });
     },
     onError: () => {
-      toast({ title: "Error", description: "Could not save gig post.", variant: "destructive" });
+      toast(roomToast("admin", "didn't save", "Could not save gig post."));
     },
   });
 
@@ -995,7 +996,7 @@ export default function Admin() {
       invalidateInboxQueries();
       toast({ title: "Promoter approved", description: "User can now submit new events." });
     },
-    onError: () => toast({ title: "Error", description: "Could not approve promoter.", variant: "destructive" }),
+    onError: () => toast(roomToast("admin", "didn't go through", "Could not approve promoter.")),
   });
 
   const denyPromoterMutation = useMutation({
@@ -1004,7 +1005,7 @@ export default function Admin() {
       invalidateInboxQueries();
       toast({ title: "Promoter denied" });
     },
-    onError: () => toast({ title: "Error", description: "Could not deny promoter.", variant: "destructive" }),
+    onError: () => toast(roomToast("admin", "didn't go through", "Could not deny promoter.")),
   });
 
   const approveTalentMutation = useMutation({
@@ -1013,7 +1014,7 @@ export default function Admin() {
       invalidateInboxQueries();
       toast({ title: "Talent approved", description: "Lineup tag is now live." });
     },
-    onError: () => toast({ title: "Error", description: "Could not approve talent.", variant: "destructive" }),
+    onError: () => toast(roomToast("admin", "didn't go through", "Could not approve talent.")),
   });
 
   const denyTalentMutation = useMutation({
@@ -1022,7 +1023,7 @@ export default function Admin() {
       invalidateInboxQueries();
       toast({ title: "Talent request denied" });
     },
-    onError: () => toast({ title: "Error", description: "Could not deny talent.", variant: "destructive" }),
+    onError: () => toast(roomToast("admin", "didn't go through", "Could not deny talent.")),
   });
 
   const grantAdminMutation = useMutation({
@@ -1034,11 +1035,7 @@ export default function Admin() {
       toast({ title: "Site admin added", description: "They can open /admin while logged into their site account." });
     },
     onError: (err: unknown) => {
-      toast({
-        title: "Error",
-        description: parseApiError(err, "Could not add site admin."),
-        variant: "destructive",
-      });
+      toast(roomToast("admin", "didn't go through", parseApiError(err, "Could not add site admin.")));
     },
   });
 
@@ -1051,7 +1048,7 @@ export default function Admin() {
       setUserSearchResults(prev => prev.map(u => u.id === vars.userId ? { ...u, promoterStatus: vars.status } : u));
       toast({ title: `Status set to ${vars.status}` });
     },
-    onError: () => toast({ title: "Error", description: "Could not update status.", variant: "destructive" }),
+    onError: () => toast(roomToast("admin", "didn't go through", "Could not update status.")),
   });
 
   const setUsernameMutation = useMutation({
@@ -1064,7 +1061,7 @@ export default function Admin() {
       setFixUsernameValue("");
       toast({ title: "Username updated", description: `Set to @${vars.username}` });
     },
-    onError: () => toast({ title: "Error", description: "Could not update username.", variant: "destructive" }),
+    onError: () => toast(roomToast("admin", "didn't go through", "Could not update username.")),
   });
 
   const setSubAdminMutation = useMutation({
@@ -1075,7 +1072,7 @@ export default function Admin() {
       setUserSearchResults(prev => prev.map(u => u.id === vars.userId ? { ...u, subAdmin: vars.grant } : u));
       toast({ title: vars.grant ? "Sub-admin granted" : "Sub-admin revoked" });
     },
-    onError: () => toast({ title: "Error", description: "Could not update sub-admin status.", variant: "destructive" }),
+    onError: () => toast(roomToast("admin", "didn't go through", "Could not update sub-admin status.")),
   });
 
   const businessClaimMutation = useMutation({
@@ -1087,7 +1084,7 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
       toast({ title: "Venue claim updated" });
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast(roomToast("admin", "didn't save", err.message)),
   });
 
   const businessSubmissionMutation = useMutation({
@@ -1100,7 +1097,7 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/events/ingest/sources"] });
       toast({ title: "New venue submission updated" });
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast(roomToast("admin", "didn't save", err.message)),
   });
 
   const businessLogoRequestMutation = useMutation({
@@ -1111,7 +1108,7 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
       toast({ title: "Logo request updated" });
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast(roomToast("admin", "didn't save", err.message)),
   });
 
   const assignVenueOwnerMutation = useMutation({
@@ -1135,7 +1132,7 @@ export default function Admin() {
       toast({ title: "Owner assigned", description: "They now own this directory venue and were notified." });
     },
     onError: (err) => {
-      toast({ title: "Error", description: parseApiError(err, "Could not assign owner."), variant: "destructive" });
+      toast(roomToast("admin", "didn't go through", parseApiError(err, "Could not assign owner.")));
     },
   });
 
@@ -1155,7 +1152,7 @@ export default function Admin() {
       toast({ title: "Owner removed", description: "Venue is unassigned and open for claims again." });
     },
     onError: (err) => {
-      toast({ title: "Error", description: parseApiError(err, "Could not remove owner."), variant: "destructive" });
+      toast(roomToast("admin", "didn't go through", parseApiError(err, "Could not remove owner.")));
     },
   });
 
@@ -1228,11 +1225,7 @@ export default function Admin() {
       toast({ title: "Site admin removed" });
     },
     onError: (err: unknown) => {
-      toast({
-        title: "Error",
-        description: parseApiError(err, "Could not remove site admin."),
-        variant: "destructive",
-      });
+      toast(roomToast("admin", "didn't go through", parseApiError(err, "Could not remove site admin.")));
     },
   });
 

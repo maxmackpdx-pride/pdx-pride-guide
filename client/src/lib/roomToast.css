@@ -1,0 +1,2 @@
+/* Board 25: the toast kicker. Toaster renders the title first inside its grid. */
+.room-toast > div > :first-child { font: 500 11px/1.3 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }

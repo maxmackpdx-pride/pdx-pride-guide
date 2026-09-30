@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { roomToast } from "@/lib/roomToast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
@@ -105,7 +106,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
       setHostUsername("");
       invalidate();
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast(roomToast("eventz", "didn't save", err.message)),
   });
 
   const selfMutation = useMutation({
@@ -127,7 +128,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
       });
       invalidate();
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast(roomToast("eventz", "didn't save", err.message)),
   });
 
   const approveMutation = useMutation({
@@ -139,7 +140,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
           return p;
         }),
     onSuccess: () => { toast({ title: "Approved" }); invalidate(); },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast(roomToast("eventz", "didn't save", err.message)),
   });
 
   const rejectMutation = useMutation({
@@ -151,7 +152,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
           return p;
         }),
     onSuccess: () => { toast({ title: "Declined" }); invalidate(); },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast(roomToast("eventz", "didn't save", err.message)),
   });
 
   const removeMutation = useMutation({
@@ -163,7 +164,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
           return p;
         }),
     onSuccess: () => { toast({ title: "Removed from lineup" }); invalidate(); },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast(roomToast("eventz", "didn't save", err.message)),
   });
 
   const canSelfTag = user && mode === "view" && !hideSelfTag;

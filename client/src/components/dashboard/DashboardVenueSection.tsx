@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { roomToast } from "@/lib/roomToast";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -46,7 +47,7 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
       queryClient.invalidateQueries({ queryKey: [`/api/directory/${business.id}/promoters`] });
       toast({ title: "Promoter blocked", description: "Their existing events here were flagged for admin review." });
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast(roomToast("placez", "didn't save", err.message)),
   });
 
   const logoRequestMutation = useMutation({
@@ -55,7 +56,7 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
       setLogoCandidate("");
       toast({ title: "Logo submitted", description: "Sent to the site admin for conversion. Your current logo stays live until it's approved." });
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => toast(roomToast("placez", "didn't save", err.message)),
   });
 
   const cardStyle = { "--c": CYAN } as CSSProperties;
