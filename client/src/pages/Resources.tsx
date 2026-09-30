@@ -123,7 +123,7 @@ function Mark({ org }: { org: ResourceOrg }) {
 
 function SafetyNotice() {
   return (
-    <aside className="pdxPlace pdx-glass-rebind rg-safety-prompt" style={{ "--c": "var(--neon-orange)", "--_c": "var(--neon-orange)" } as CSSProperties} aria-label="Urgent safety help">
+    <aside className="pdxPlace pdx-glass-rebind rg-safety-prompt" style={{ "--c": "#FF2400", "--_c": "#FF2400" } as CSSProperties} aria-label="Urgent safety help">
       <div className="pdxPlace__body pdx-glass-card pdx-glass-rebind">
         <div className="pdxPlace__sheen pdx-glass-sheen--specular" aria-hidden="true" />
         <div className="pdxPlace__seam pdx-refract-seam" aria-hidden="true" />

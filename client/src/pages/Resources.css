@@ -1459,3 +1459,12 @@ html.calm-mode .rg-options button,
 .rg-safety-law-links a { color: var(--neon-orange); }
 
 .rg-directory-footer .pdxBtn.rg-contact-white { color: #fff !important; }
+
+/* Safety identity: red shell, orange actions, white information. */
+.rg-safety-prompt .pdxPlace__body { border-color: #ff2400; }
+.rg-safety-prompt .pdxPlace__cat { --c: var(--neon-orange); }
+.rg-safety-prompt .rg-safety-heading > svg { color: var(--neon-orange); }
+.rg-safety-prompt .rg-safety-heading h3,
+.rg-safety-prompt .rg-safety-lead,
+.rg-safety-prompt .rg-safety-support h4 { color: #fff; }
+.rg-safety-prompt .rg-safety-crisis { color: #fff !important; }
