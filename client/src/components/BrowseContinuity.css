@@ -13,6 +13,8 @@
 .browse-status p{max-width:52ch;margin:0 auto;color:var(--text-mid,#b6bbc4);font-size:15px;line-height:1.65}
 .browse-status__actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:20px}
 .detail-actions{position:relative;z-index:4;pointer-events:auto;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0}
+.detail-actions__room{margin-right:auto;display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid #1c1c22;border-radius:22px;background:#0c0c0f;color:#fff;font:600 11px/1 var(--font-mono);letter-spacing:.14em;text-decoration:none;white-space:nowrap}
+.detail-actions__room:hover{border-color:currentColor}
 .detail-actions>button{gap:8px;min-height:44px;flex-shrink:0}
 .detail-actions>button.detail-actions__close{width:44px;padding:0;flex-shrink:0}
 .detail-actions>button:focus-visible{outline:2px solid var(--cyan,#19e3ff);outline-offset:3px}

@@ -1,4 +1,5 @@
 import {eventNight} from '../../public/zaydar-map/event-night.js';
+import { DetailRoomLinkContext, type DetailRoomLinkValue } from "@/components/DetailRoomLink";
 import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
@@ -539,6 +540,15 @@ export default function ZaydarMapDemo() {
   const selectedMizzed = mizzedId ? mizzedDetail.data || mizzed.find(post => post.id === mizzedId) : null;
   const boardKey = (["gig", "gift", "sell", "sellz"] as const).find(key => mapRecordId(params.get(key)) !== null);
   const boardOverlay = boardKey ? { kind: boardFromParam(boardKey)!, postId: mapRecordId(params.get(boardKey))! } : null;
+  // Board 36: a sheet opened on the map links back to its own room.
+  const boardRoom = boardOverlay ? ROOMS[boardOverlay.kind === "gig" ? "gigz" : boardOverlay.kind === "gifting" ? "giftz" : "sellz"] : null;
+  const detailRoomLink: DetailRoomLinkValue =
+    selectedEvent ? { room: ROOMS.eventz.name, href: `/events/${selectedEvent.id}` }
+    : selectedPlace ? { room: ROOMS.placez.name, href: `/directory/${selectedPlace.id}` }
+    : boardOverlay && boardRoom ? { room: boardRoom.name, href: `${boardRoom.route}?post=${boardOverlay.postId}` }
+    : selectedMizzed ? { room: "MIZZED", href: `${ROOMS.mizzed.route}?post=${selectedMizzed.id}` }
+    : selectedHouz ? { room: ROOMS.hauz.name, href: `${ROOMS.hauz.route}?post=${selectedHouz.id}` }
+    : null;
   const missingPlace = placeId !== null && !placesLoading && !selectedPlace;
   const updateEvent = (event: Event) => {
     queryClient.setQueryData<Event[]>(["/api/events"], rows => rows?.map(row => row.id === event.id ? event : row));
@@ -794,12 +804,14 @@ export default function ZaydarMapDemo() {
     <ZaydarLayerSheet layers={layers} active={activeLayer} onActiveChange={changeLayer} />
     {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="zaydar-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
     {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="zaydar-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
+    <DetailRoomLinkContext.Provider value={detailRoomLink}>
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
     {mizzedId && !selectedMizzed && <p className="zaydar-demo-notice" role={mizzedDetail.isError?"alert":"status"}>{mizzedDetail.isError?"This connection is unavailable or could not load.":"Loading connection…"} <button onClick={()=>void mizzedDetail.refetch()}>Retry</button> <button onClick={closeOverlays}>Back to map</button></p>}
     {selectedMizzed && <SpottedDetailModal key={selectedMizzed.id} isMine={selectedMizzed.isMine} status={selectedMizzed.status} postId={selectedMizzed.id} title={selectedMizzed.title} body={selectedMizzed.body} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={closeOverlays} />}
     {selectedHouz && <HousingPostOverlay key={selectedHouz.id} post={selectedHouz} userId={user?.id} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => {setCardOriginRect(null);goOverlay("houz", postId);}} />}
+    </DetailRoomLinkContext.Provider>
     {user && houzCompose && <HousingComposerOverlay initialType={houzCompose} viewerDisplayName={user.displayName} onClose={() => updateParams(p => p.delete("houzCompose"))} onPosted={postId => { updateParams(p => { p.delete("houzCompose"); clearMapOverlay(p); p.set("houz", String(postId)); }); }} />}
     {user && composeWorld && <MapComposerOverlay key={composeWorld} world={composeWorld} onClose={closeOverlays} onPosted={id=>{void queryClient.invalidateQueries({queryKey:["map-worlds-mine"]});setLocation(mapHref(p=>{p.delete("compose");clearMapOverlay(p);p.set(WORLD_DETAIL_KEYS[composeWorld],String(id));p.set("layer",composeWorld);}),{replace:true,state:window.history.state});}}/>}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}
