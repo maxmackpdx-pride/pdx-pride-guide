@@ -1110,3 +1110,36 @@
     bottom: 89px;
   }
 }
+
+/* Filters lead the directory; cards adapt to their own available width. */
+.rg-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.rg-controls {
+  position: static;
+  width: 100%;
+}
+.rg-results {
+  container-type: inline-size;
+  min-width: 0;
+}
+.rg-cards {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+@container (min-width: 720px) {
+  .rg-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 601px) {
+  .rg-options {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+  .rg-mode {
+    max-width: 480px;
+    flex-direction: row;
+  }
+}
