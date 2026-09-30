@@ -48,8 +48,8 @@
   background:
     radial-gradient(circle at 12% 18%, rgba(136, 0, 255, 0.16), transparent 28%),
     radial-gradient(circle at 78% 12%, rgba(25, 227, 255, 0.12), transparent 30%),
-    linear-gradient(180deg, #050506 0%, #09090c 100%);
-  border-bottom: 1px solid #1c1c22;
+    linear-gradient(180deg, var(--z-black) 0%, #09090c 100%);
+  border-bottom: 1px solid var(--panel-border);
 }
 
 .directory-browser-header__identity {
@@ -154,7 +154,7 @@
 }
 
 .directory-browser-category {
-  --_c: #19e3ff;
+  --_c: var(--panel-cyan);
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -193,7 +193,7 @@
 
 .directory-browser-category--active strong {
   background: var(--_c);
-  color: #050506;
+  color: var(--z-black);
 }
 
 .directory-browser-category:focus-visible {
@@ -373,7 +373,7 @@
     linear-gradient(90deg, rgba(5,5,6,.97) 0%, rgba(5,5,6,.78) 48%, rgba(5,5,6,.44) 100%),
     radial-gradient(circle at 82% 36%, rgba(25,227,255,.2), transparent 31%),
     radial-gradient(circle at 68% 72%, rgba(255,31,160,.2), transparent 34%),
-    #050506;
+    var(--z-black);
   animation: pdxHeroIn 0.48s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
 }
 
@@ -521,7 +521,7 @@
   border: 0;
   border-radius: 10px;
   background: var(--panel-cyan, #19e3ff);
-  color: #050506;
+  color: var(--z-black);
   font: 900 .82rem/1 var(--font-display, sans-serif);
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -578,7 +578,7 @@
 
 .directory-hero__mantra {
   margin: 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -595,7 +595,7 @@
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   background: var(--panel-band, #070708);
   margin-top: clamp(28px, 4vw, 48px);
-  border-block: 1px solid #1c1c22;
+  border-block: 1px solid var(--panel-border);
   animation: pdxHeroIn 0.48s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) 0.07s both;
 }
 
@@ -624,11 +624,11 @@
 
 .directory-stats-band__label {
   margin-top: 8px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--text-lo);
 }
 
 /* ── Category band rail ───────────────────────────────────── */
@@ -658,11 +658,11 @@
 }
 
 .directory-bands__hint {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #666;
+  color: var(--text-faint);
 }
 
 .directory-bands__rail {
@@ -673,7 +673,7 @@
 }
 
 .directory-band.pdx-glass-rebind {
-  --_c: #19e3ff;
+  --_c: var(--panel-cyan);
   --c: var(--_c);
   text-align: left;
   min-height: 118px;
@@ -733,7 +733,7 @@
 .directory-band__label {
   display: block;
   margin-top: 9px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -813,11 +813,11 @@
 }
 
 .directory-map-key--dock .directory-map-key__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #666;
+  color: var(--text-faint);
   flex: none;
 }
 
@@ -838,7 +838,7 @@
 }
 
 .directory-map-key--dock .directory-map-key__label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -852,7 +852,7 @@
   border-radius: 50%;
   flex: none;
   background: #000;
-  border: 3px solid #19e3ff;
+  border: 3px solid var(--panel-cyan);
   box-shadow: 0 0 0 1px #000, inset 0 1px 2px rgba(0, 0, 0, 0.85);
 }
 
@@ -879,13 +879,13 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--panel-lime, #c8fa3c);
-  background: #0c0c0f;
-  border: 1px solid #1c1c22;
+  background: var(--panel-card);
+  border: 1px solid var(--panel-border);
   border-radius: 8px;
   padding: 8px 11px;
   white-space: nowrap;
@@ -949,11 +949,11 @@
 }
 
 .directory-dock__hint {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #666;
+  color: var(--text-faint);
 }
 
 /* Reach the composer from the top of the board, not only from the band at the
@@ -973,7 +973,7 @@
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: transparent;
   color: var(--neon-yellow, #ccff00);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -1226,7 +1226,7 @@
     var(--dir-glass-fill);
   box-shadow:
     var(--dir-glass-shadow),
-    0 0 24px -16px #ccff00;
+    0 0 24px -16px var(--neon-yellow);
   backdrop-filter: blur(16px) saturate(var(--dir-glass-sat));
   -webkit-backdrop-filter: blur(16px) saturate(var(--dir-glass-sat));
   margin-left: var(--dir-pad-x);
@@ -1333,7 +1333,7 @@ html.calm-mode .directory-stage__map-seam,
 :root[data-calm="true"] .directory-stage__map-seam {
   animation: none;
   opacity: 0.85;
-  background: color-mix(in srgb, #19e3ff 40%, #2a2a32);
+  background: color-mix(in srgb, var(--panel-cyan) 40%, #2a2a32);
 }
 
 html.calm-mode .directory-page .pdxPlace:not(.pdxPlace--edge) .pdxPlace__body,

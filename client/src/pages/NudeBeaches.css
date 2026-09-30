@@ -34,7 +34,7 @@
   background: transparent;
   padding-block: clamp(20px, 3vw, 28px) clamp(40px, 6vw, 72px);
   margin-top: clamp(20px, 3vw, 28px);
-  border-top: 1px solid #1c1c22;
+  border-top: 1px solid var(--panel-border);
 }
 
 .nude-beaches-page .nude-beach-logistics .board-active-feed__inner {
@@ -151,10 +151,10 @@
   -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
 }
 
-.nude-rooster-status.nude-live-card--good { --nb-rim: #39ff14; border-top-color: color-mix(in srgb, #39ff14 75%, #2a2a32); }
+.nude-rooster-status.nude-live-card--good { --nb-rim: var(--green-acid); border-top-color: color-mix(in srgb, var(--green-acid) 75%, #2a2a32); }
 .nude-rooster-status.nude-live-card--warn { --nb-rim: #ffb347; border-top-color: color-mix(in srgb, #ffb347 75%, #2a2a32); }
 .nude-rooster-status.nude-live-card--bad { --nb-rim: #ff4d4d; border-top-color: color-mix(in srgb, #ff4d4d 75%, #2a2a32); }
-.nude-rooster-status.nude-live-card--neutral { --nb-rim: #19e3ff; border-top-color: color-mix(in srgb, #19e3ff 75%, #2a2a32); }
+.nude-rooster-status.nude-live-card--neutral { --nb-rim: var(--panel-cyan); border-top-color: color-mix(in srgb, var(--panel-cyan) 75%, #2a2a32); }
 
 .nude-rooster-status__head {
   display: flex;
@@ -183,7 +183,7 @@
   align-items: center;
   padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid #333;
+  border: 1px solid var(--ink-border-strong);
   background: #121218;
   color: #fff;
   font-family: var(--font-display), sans-serif;
@@ -249,7 +249,7 @@
 }
 
 .nude-metric-tile__label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -276,21 +276,21 @@
 .nude-panel {
   margin-top: 28px;
   padding-top: 24px;
-  border-top: 1px solid #1c1c22;
+  border-top: 1px solid var(--panel-border);
 }
 
 .nude-panel__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 14px;
 }
 
-.nude-panel__kicker--cyan { color: #19e3ff; }
-.nude-panel__kicker--magenta { color: #ff1fa0; }
+.nude-panel__kicker--cyan { color: var(--panel-cyan); }
+.nude-panel__kicker--magenta { color: var(--panel-magenta); }
 .nude-panel__kicker--orange { color: var(--neon-orange, #FF6600); }
-.nude-panel__kicker--lime { color: #ccff00; }
+.nude-panel__kicker--lime { color: var(--neon-yellow); }
 
 .nude-live-card.pdx-glass-rebind {
   /* Top-rim island; status modifiers recolor --nb-rim only */
@@ -310,14 +310,14 @@
   -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
 }
 
-.nude-live-card--good { --nb-rim: #39ff14; border-top-color: color-mix(in srgb, #39ff14 75%, #2a2a32); }
+.nude-live-card--good { --nb-rim: var(--green-acid); border-top-color: color-mix(in srgb, var(--green-acid) 75%, #2a2a32); }
 .nude-live-card--warn { --nb-rim: #ffb347; border-top-color: color-mix(in srgb, #ffb347 75%, #2a2a32); }
 .nude-live-card--bad { --nb-rim: #ff4d4d; border-top-color: color-mix(in srgb, #ff4d4d 75%, #2a2a32); }
 /* Neutral/river: cyan top rim */
-.nude-live-card--neutral { --nb-rim: #19e3ff; border-top-color: color-mix(in srgb, #19e3ff 75%, #2a2a32); }
+.nude-live-card--neutral { --nb-rim: var(--panel-cyan); border-top-color: color-mix(in srgb, var(--panel-cyan) 75%, #2a2a32); }
 
 .nude-live-card__label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -351,7 +351,7 @@
 .nude-live-card__link {
   display: inline-block;
   margin-top: 8px;
-  color: #19e3ff;
+  color: var(--panel-cyan);
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
@@ -419,8 +419,8 @@
 }
 
 .nude-resource-link--primary.pdx-glass-rebind {
-  --c: #ff6600;
-  border-left: 4px solid #ff6600;
+  --c: var(--neon-orange);
+  border-left: 4px solid var(--neon-orange);
 }
 
 .nude-resource-link__title {
@@ -638,8 +638,8 @@
 
 .nude-beaches-page .nude-beaches-tab-bar .events-tab--sauvie-island.active,
 .nude-beaches-page .nude-beaches-tab-bar .events-tab--sauvie-island:hover {
-  color: #39ff14;
-  border-bottom-color: #39ff14;
+  color: var(--green-acid);
+  border-bottom-color: var(--green-acid);
 }
 
 /* ---- ANIMATION APPLICATIONS (entrance + motion) ---- */
@@ -656,8 +656,8 @@
   --stats-bloom-c: transparent;
   animation: board-hero-in 0.48s var(--ease-out) 0.07s both;
   background: #050505;
-  border-top: 2px solid #1c1c22;
-  border-bottom: 2px solid #1c1c22;
+  border-top: 2px solid var(--panel-border);
+  border-bottom: 2px solid var(--panel-border);
   box-shadow: none;
 }
 
@@ -670,7 +670,7 @@
 }
 
 .nude-beaches-page .board-stats-band__item--rule {
-  border-right: 2px solid #1c1c22;
+  border-right: 2px solid var(--panel-border);
 }
 
 /* Live metric tiles - resting bloom is glass; pdxPulse demoted to hover */
@@ -786,16 +786,16 @@ html.calm-mode .board-close-seam {
 }
 
 .nude-beaches-page:not(.nude-beaches-page--sauvie) .nude-map-btn.pdx-glass-rebind {
-  --c: #ff6600;
+  --c: var(--neon-orange);
 }
 
 .nude-beaches-page--sauvie .nude-map-btn.pdx-glass-rebind {
-  --c: #39ff14;
+  --c: var(--green-acid);
 }
 
 /* Primary = canonical solid glass button: black ring.pdx-glass-rebind, restrained inset sheen.pdx-glass-rebind, no outer bloom. */ .nude-map-btn--primary.pdx-glass-rebind {
   --c: var(--nb-accent, #ff6600);
-  color: #050506;
+  color: var(--z-black);
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 42%), var(--c);
   border: 1px solid #000;
   box-shadow:
@@ -814,22 +814,22 @@ html.calm-mode .board-close-seam {
 }
 
 .nude-beaches-page--sauvie .nude-map-btn--primary.pdx-glass-rebind {
-  --c: #39ff14;
+  --c: var(--green-acid);
 }
 
 /* ===================================================================
    Trip-logistics section (.nb-log-*) - Sauvie + Rooster bottom half
    =================================================================== */
 .nb-log__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   margin: 0 0 12px;
 }
-.nb-log__kicker--green { color: #39ff14; }
-.nb-log__kicker--orange { color: #ff6600; }
-.nb-log__kicker--farm { color: #ff8c00; }
+.nb-log__kicker--green { color: var(--green-acid); }
+.nb-log__kicker--orange { color: var(--neon-orange); }
+.nb-log__kicker--farm { color: var(--panel-orange); }
 .nb-log__kicker--section { margin-top: 44px; }
 
 .nb-log__title {
@@ -882,13 +882,13 @@ html.calm-mode .board-close-seam {
 }
 
 /* Step cards (numbered "Before you go") */ .nb-log-step.pdx-glass-rebind {
-  --c: #39ff14;
-  --nb-rim: #39ff14;
+  --c: var(--green-acid);
+  --nb-rim: var(--green-acid);
   position: relative;
   display: flex;
   flex-direction: column;
   border: 1px solid #2a2a32;
-  border-top-color: color-mix(in srgb, #39ff14 68%, #2a2a32);
+  border-top-color: color-mix(in srgb, var(--green-acid) 68%, #2a2a32);
   background: var(--nb-island-bg, var(--glass-card-bg, #050506));
   border-radius: 12px;
   padding: 22px;
@@ -908,7 +908,7 @@ html.calm-mode .board-close-seam {
   font-family: var(--font-display), sans-serif;
   font-weight: 900;
   font-size: 18px;
-  color: #39ff14;
+  color: var(--green-acid);
   background: rgba(57, 255, 20, 0.12);
   border: 1px solid rgba(57, 255, 20, 0.4);
   margin-bottom: 16px;
@@ -932,7 +932,7 @@ html.calm-mode .board-close-seam {
 .nb-log-step__link {
   display: inline-block;
   margin-top: 14px;
-  color: #19e3ff;
+  color: var(--panel-cyan);
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -940,15 +940,15 @@ html.calm-mode .board-close-seam {
 .nb-log-step__link:hover { text-decoration: underline; }
 
 /* Rule tiles (checkmark) - top-rim green; keep left accent stripe */ .nb-log-rule.pdx-glass-rebind {
-  --c: #39ff14;
-  --nb-rim: #39ff14;
+  --c: var(--green-acid);
+  --nb-rim: var(--green-acid);
   position: relative;
   display: flex;
   gap: 12px;
   align-items: flex-start;
   border: 1px solid #2a2a32;
-  border-top-color: color-mix(in srgb, #39ff14 68%, #2a2a32);
-  border-left: 3px solid #39ff14;
+  border-top-color: color-mix(in srgb, var(--green-acid) 68%, #2a2a32);
+  border-left: 3px solid var(--green-acid);
   background: var(--nb-island-bg, var(--glass-card-bg, #050506));
   border-radius: 10px;
   padding: 14px 16px;
@@ -959,7 +959,7 @@ html.calm-mode .board-close-seam {
 .nb-log-rule__icon {
   flex: none;
   margin-top: 2px;
-  color: #39ff14;
+  color: var(--green-acid);
 }
 .nb-log-rule__text {
   margin: 0;
@@ -969,12 +969,12 @@ html.calm-mode .board-close-seam {
 }
 
 /* Farm-stop link cards */ .nb-log-farm.pdx-glass-rebind {
-  --c: #ff8c00;
-  --nb-rim: #ff8c00;
+  --c: var(--panel-orange);
+  --nb-rim: var(--panel-orange);
   position: relative;
   display: block;
   border: 1px solid #2a2a32;
-  border-top-color: color-mix(in srgb, #ff8c00 68%, #2a2a32);
+  border-top-color: color-mix(in srgb, var(--panel-orange) 68%, #2a2a32);
   background: var(--nb-island-bg, var(--glass-card-bg, #050506));
   border-radius: 10px;
   padding: 16px 18px;
@@ -1001,7 +1001,7 @@ html.calm-mode .board-close-seam {
   color: #fff;
 }
 .nb-log-farm__arrow {
-  color: #ff8c00;
+  color: var(--panel-orange);
   font-size: 16px;
 }
 .nb-log-farm__desc {
@@ -1012,11 +1012,11 @@ html.calm-mode .board-close-seam {
 }
 
 /* Rooster fee tiles */ .nb-log-fee.pdx-glass-rebind {
-  --c: #ff6600;
-  --nb-rim: #ff6600;
+  --c: var(--neon-orange);
+  --nb-rim: var(--neon-orange);
   position: relative;
   border: 1px solid #2a2a32;
-  border-top-color: color-mix(in srgb, #ff6600 68%, #2a2a32);
+  border-top-color: color-mix(in srgb, var(--neon-orange) 68%, #2a2a32);
   background: var(--nb-island-bg, var(--glass-card-bg, #050506)) !important;
   border-radius: 12px;
   padding: 18px 20px;
@@ -1027,7 +1027,7 @@ html.calm-mode .board-close-seam {
 }
 .nb-log-fee:hover { filter: brightness(1.06) saturate(1.06); }
 .nb-log-fee__label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1059,7 +1059,7 @@ html.calm-mode .board-close-seam {
   gap: 8px;
   max-width: min(220px, 58%);
   background: rgba(5, 5, 7, 0.88);
-  border: 1px solid #24242c;
+  border: 1px solid var(--panel-border-2);
   border-radius: 7px;
   padding: 7px 10px;
   backdrop-filter: blur(3px);
@@ -1088,7 +1088,7 @@ html.calm-mode .board-close-seam {
 .nude-beaches-map__chip-sub {
   display: block;
   margin-top: 2px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.58rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1117,8 +1117,8 @@ html.calm-mode .nude-beaches-map__chip-dot {
 
 .nude-beaches-page.events-page.board-page--makeover .nude-beaches-tab-bar .events-tab--sauvie-island.active,
 .nude-beaches-page.events-page.board-page--makeover .nude-beaches-tab-bar .events-tab--sauvie-island:hover {
-  color: #39ff14;
-  border-bottom-color: #39ff14;
+  color: var(--green-acid);
+  border-bottom-color: var(--green-acid);
 }
 
 /* Sauvie stats - green for swim + air; wind stays cyan */
@@ -1129,37 +1129,37 @@ html.calm-mode .nude-beaches-map__chip-dot {
 
 .nude-beaches-page--sauvie .board-stats-band__item:nth-child(1) .board-stats-band__num,
 .nude-beaches-page--sauvie .board-stats-band__item:nth-child(2) .board-stats-band__num {
-  color: #39ff14;
+  color: var(--green-acid);
   text-shadow: 0 0 22px rgba(57, 255, 20, 0.35);
 }
 
 .nude-beaches-page--sauvie .board-stats-band__item:nth-child(3) .board-stats-band__num {
-  color: #19e3ff;
+  color: var(--panel-cyan);
   text-shadow: 0 0 22px rgba(25, 227, 255, 0.35);
 }
 
 .nude-beaches-page--sauvie .nude-refresh-bar .pdxBtn {
-  --_c: #39ff14;
+  --_c: var(--green-acid);
   --_sh: transparent;
   --_shx: transparent;
 }
 
 .nude-beaches-page:not(.nude-beaches-page--sauvie) .nude-refresh-bar .pdxBtn {
-  --_c: #ff6600;
+  --_c: var(--neon-orange);
   --_sh: transparent;
   --_shx: transparent;
 }
 
 /* ═══════════════════════════════════════════════════════════ Islands · Nude Beaches - top-rim neon only (10-islands.png) Rooster → orange #FF6600 · Sauvie → green #39FF14 River level → cyan #19E3FF top rim Discrete stacked islands; no full-perimeter bloom shell. ═══════════════════════════════════════════════════════════ */ .nude-beaches-page.pdx-glass-rebind:not(.nude-beaches-page--sauvie) {
-  --nb-accent: #ff6600;
-  --nb-rim: #ff6600;
-  --c: #ff6600;
+  --nb-accent: var(--neon-orange);
+  --nb-rim: var(--neon-orange);
+  --c: var(--neon-orange);
 }
 
 .nude-beaches-page--sauvie.pdx-glass-rebind {
-  --nb-accent: #39ff14;
-  --nb-rim: #39ff14;
-  --c: #39ff14;
+  --nb-accent: var(--green-acid);
+  --nb-rim: var(--green-acid);
+  --c: var(--green-acid);
 }
 
 /*
@@ -1215,13 +1215,13 @@ html.calm-mode .nude-beaches-map__chip-dot {
 }
 
 .nude-beaches-page .nb-hub__level {
-  --nb-rim: #19e3ff;
-  border-top-color: color-mix(in srgb, #19e3ff 70%, #2a2a32) !important;
+  --nb-rim: var(--panel-cyan);
+  border-top-color: color-mix(in srgb, var(--panel-cyan) 70%, #2a2a32) !important;
 }
 
 .nude-beaches-page .nb-hub__level--bad {
-  --nb-rim: #ff8c00;
-  border-top-color: color-mix(in srgb, #ff8c00 70%, #2a2a32) !important;
+  --nb-rim: var(--panel-orange);
+  border-top-color: color-mix(in srgb, var(--panel-orange) 70%, #2a2a32) !important;
 }
 
 /* Soften glass fill so OLED tint is island-colored but not neon-hot */ .nude-beaches-page .nude-live-card.pdx-glass-rebind,
@@ -1243,8 +1243,8 @@ html.calm-mode .nude-beaches-map__chip-dot {
 /* Status: recolor top rim only (still top-rim language) */
 .nude-beaches-page .nude-live-card--good,
 .nude-beaches-page .nude-rooster-status.nude-live-card--good {
-  --nb-rim: #39ff14;
-  border-top-color: color-mix(in srgb, #39ff14 75%, #2a2a32) !important;
+  --nb-rim: var(--green-acid);
+  border-top-color: color-mix(in srgb, var(--green-acid) 75%, #2a2a32) !important;
 }
 .nude-beaches-page .nude-live-card--warn,
 .nude-beaches-page .nude-rooster-status.nude-live-card--warn {
@@ -1258,8 +1258,8 @@ html.calm-mode .nude-beaches-map__chip-dot {
 }
 .nude-beaches-page .nude-live-card--neutral,
 .nude-beaches-page .nude-rooster-status.nude-live-card--neutral {
-  --nb-rim: #19e3ff;
-  border-top-color: color-mix(in srgb, #19e3ff 75%, #2a2a32) !important;
+  --nb-rim: var(--panel-cyan);
+  border-top-color: color-mix(in srgb, var(--panel-cyan) 75%, #2a2a32) !important;
 }
 
 /* Logistics container is a section wrapper, not a card */
@@ -1273,12 +1273,12 @@ html.calm-mode .nude-beaches-map__chip-dot {
 
 .nb-log--rooster .nb-log-fee.pdx-glass-rebind,
 .nb-log--rooster .nude-map-btn--primary.pdx-glass-rebind {
-  --c: #ff6600;
+  --c: var(--neon-orange);
 }
 
 .nb-log--sauvie .nb-log-step.pdx-glass-rebind,
 .nb-log--sauvie .nb-log-rule.pdx-glass-rebind {
-  --c: #39ff14;
+  --c: var(--green-acid);
 }
 
 /* Corner sheen on every logistics / live tile */
@@ -1333,10 +1333,10 @@ html.calm-mode .nude-map-btn--primary {
    ═══════════════════════════════════════════════════════════ */
 
 .nude-beaches-page:not(.nude-beaches-page--sauvie) {
-  --nb-btn: #ff6600;
+  --nb-btn: var(--neon-orange);
 }
 .nude-beaches-page--sauvie {
-  --nb-btn: #39ff14;
+  --nb-btn: var(--green-acid);
 }
 
 /* DS brutal buttons (Refresh, carpool, etc.): soft glass outline.pdx-glass-rebind, island accent */ .nude-beaches-page .pdxBtn.pdx-glass-rebind,
@@ -1388,7 +1388,7 @@ html.calm-mode .nude-map-btn--primary {
 /* Solid variant → glass fill (island accent) with soft white edge, not solid neon border */
 .nude-beaches-page .pdxBtn--solid,
 .nude-beaches-page .btn-neon.solid {
-  color: #050506 !important;
+  color: var(--z-black) !important;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 42%),
     var(--_c) !important;
   border: 1px solid rgba(255, 255, 255, 0.28) !important;
@@ -1399,7 +1399,7 @@ html.calm-mode .nude-map-btn--primary {
 
 .nude-beaches-page .pdxBtn--solid:hover,
 .nude-beaches-page .btn-neon.solid:hover {
-  color: #050506 !important;
+  color: var(--z-black) !important;
   filter: brightness(1.06);
   border-color: rgba(255, 255, 255, 0.4) !important;
 }
@@ -1449,7 +1449,7 @@ html.calm-mode .nude-map-btn--primary {
   border: 1px solid #000 !important;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 42%),
     var(--c) !important;
-  color: #050506 !important;
+  color: var(--z-black) !important;
   box-shadow:
     0 0 0 1px #000,
     inset 0 1px 0 rgba(255, 255, 255, 0.65),

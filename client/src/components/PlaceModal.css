@@ -408,7 +408,7 @@
 
 .place-modal-events__hint {
   margin: 0 0 8px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -486,7 +486,7 @@
 
 .place-modal-past__hint {
   margin: 0 0 10px;
-  font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -581,7 +581,7 @@
   left: 8px;
   bottom: 8px;
   z-index: 2;
-  font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.58rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -616,7 +616,7 @@
 }
 
 .place-modal-past__host {
-  font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.58rem;
   font-weight: 600;
   letter-spacing: 0.06em;

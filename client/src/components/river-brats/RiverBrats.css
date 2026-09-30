@@ -49,7 +49,7 @@
 }
 
 .river-brats__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -213,7 +213,7 @@
 
 .rb-carpool-start__prompt {
   margin: 0 0 12px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -257,7 +257,7 @@
 }
 
 .rb-compose__label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -437,7 +437,7 @@
   padding: 3px 8px;
   border-radius: 999px;
   border: 1px solid #333;
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -537,7 +537,7 @@
 }
 
 .rb-visibility__legend {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -601,7 +601,7 @@
 }
 
 .rb-card__you-pill {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -856,7 +856,7 @@ html.calm-mode .rb-dm-panel {
 }
 
 .rb-checkin__poster-kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -890,7 +890,7 @@ html.calm-mode .rb-dm-panel {
 }
 
 .rb-date-chip {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -927,7 +927,7 @@ html.calm-mode .rb-dm-panel {
   flex-wrap: wrap;
   gap: 8px 10px;
   margin: 18px 0 16px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.06em;
   color: #b8b4ab;
@@ -970,7 +970,7 @@ html.calm-mode .rb-dm-panel {
   border: 1px solid rgba(204, 255, 0, 0.55);
   background: rgba(204, 255, 0, 0.14);
   color: var(--neon-yellow, #ccff00);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -1074,7 +1074,7 @@ html.calm-mode .rb-dm-panel {
 
 .rb-checkin__field-label {
   display: block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1203,7 +1203,7 @@ html.calm-mode .rb-dm-panel {
 
 .rb-checkin__withdraw.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1245,7 +1245,7 @@ html.calm-mode .rb-dm-panel {
 }
 
 .rb-checkin__plan-next-kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1375,7 +1375,7 @@ html.calm-mode .rb-dm-panel {
 }
 
 .rb-group-chat__status {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1388,7 +1388,7 @@ html.calm-mode .rb-dm-panel {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 9.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1412,7 +1412,7 @@ html.calm-mode .rb-dm-panel {
 
 .rb-group-chat__day-marker {
   text-align: center;
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1660,7 +1660,7 @@ html.calm-mode .rb-dm-panel {
 }
 
 .rb-checkin__self-meta {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1674,7 +1674,7 @@ html.calm-mode .rb-dm-panel {
   padding: 0;
   border: none;
   background: none;
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1695,7 +1695,7 @@ html.calm-mode .rb-dm-panel {
 }
 
 .rb-checkin__self-placeholder {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.06em;
   color: #8c8980;
@@ -1714,7 +1714,7 @@ html.calm-mode .rb-dm-panel {
 
 .rb-checkin__going-count {
   margin-left: 10px;
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;

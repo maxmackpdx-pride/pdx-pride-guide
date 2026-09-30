@@ -5,7 +5,7 @@
   position: relative;
   isolation: isolate;
   height: calc(100dvh - var(--site-header-height, 120px));
-  background: #050506;
+  background: var(--z-black);
   overflow: hidden;
 }
 .living-map-canvas,
@@ -76,7 +76,7 @@
   position: relative;
   width: 9px;
   height: 9px;
-  border: 2px solid #050506;
+  border: 2px solid var(--z-black);
   border-radius: 50%;
   background: var(--wp);
   box-shadow:
@@ -159,7 +159,7 @@
   }
 }
 .living-map-drawer.pdx-glass-rebind {
-  --c: #19e3ff;
+  --c: var(--panel-cyan);
   position: absolute;
   z-index: 700;
   top: 0;
@@ -202,7 +202,7 @@
   font: 500 1rem var(--font-body);
 }
 .living-map-search:focus-within {
-  box-shadow: 0 0 0 3px #00ffff;
+  box-shadow: 0 0 0 3px var(--neon-cyan);
 }
 .living-map-search input::placeholder {
   color: #85858b;
@@ -228,13 +228,13 @@
   cursor: pointer;
 }
 .living-map-chips button.is-on {
-  border-color: #ccff00;
-  background: #ccff00;
-  color: #050506;
+  border-color: var(--neon-yellow);
+  background: var(--neon-yellow);
+  color: var(--z-black);
 }
 .living-map-chips button.cyan.is-on {
-  border-color: #00ffff;
-  background: #00ffff;
+  border-color: var(--neon-cyan);
+  background: var(--neon-cyan);
 }
 .living-map-state {
   min-height: 80px;
@@ -245,7 +245,7 @@
 }
 .living-map-state button {
   margin-left: 8px;
-  color: #00ffff;
+  color: var(--neon-cyan);
   background: none;
   border: 0;
   text-decoration: underline;
@@ -265,7 +265,7 @@
   padding: 8px 12px;
   border: 1px solid #9abb00;
   border-radius: 8px;
-  color: #ccff00;
+  color: var(--neon-yellow);
 }
 .living-map-rail {
   display: grid;
@@ -278,7 +278,7 @@
   scrollbar-width: none;
 }
 .living-map-card.pdx-glass-rebind {
-  --c: #ccff00;
+  --c: var(--neon-yellow);
   position: relative;
   display: flex;
   min-height: 180px;
@@ -366,14 +366,14 @@
 .living-map-coming {
   max-width: 440px;
   padding: 26px;
-  border: 1px solid #ff2400;
+  border: 1px solid var(--neon-red);
   border-radius: 16px;
   background: #09090b;
   color: #fff;
   box-shadow: 0 20px 70px #000;
 }
 .living-map-coming small {
-  color: #ff2400;
+  color: var(--neon-red);
   font: 800 0.7rem var(--font-mono, monospace);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -389,10 +389,10 @@
 .living-map-coming button {
   min-height: 44px;
   padding: 0 18px;
-  border: 1px solid #ff2400;
+  border: 1px solid var(--neon-red);
   border-radius: 9px;
-  background: #ff2400;
-  color: #050506;
+  background: var(--neon-red);
+  color: var(--z-black);
   font: 900 0.9rem var(--font-display);
   text-transform: uppercase;
   cursor: pointer;
@@ -482,7 +482,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
 }
 .living-map-time b {
   flex: none;
-  color: #00ffff;
+  color: var(--neon-cyan);
   font: 900 0.72rem var(--font-display);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -493,22 +493,22 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   padding: 0 14px;
   border: 3px solid #000;
   border-radius: 10px;
-  outline: 1px solid #ccff00;
+  outline: 1px solid var(--neon-yellow);
   background: #09090b;
-  color: #ccff00;
+  color: var(--neon-yellow);
   font: 900 0.78rem var(--font-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .living-map-time button.is-on {
-  background: #ccff00;
-  color: #050506;
+  background: var(--neon-yellow);
+  color: var(--z-black);
 }
 .living-map-time input {
   min-height: 42px;
   color: #fff;
-  background: #111;
-  border: 1px solid #ccff00;
+  background: var(--ink-850);
+  border: 1px solid var(--neon-yellow);
   border-radius: 8px;
   padding: 0 8px;
 }
@@ -534,7 +534,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   width: 54px;
   height: 5px;
   border-radius: 999px;
-  background: #00ffff;
+  background: var(--neon-cyan);
   box-shadow: 0 0 12px rgba(0, 255, 255, 0.55);
 }
 .living-map-handle--closed {
@@ -545,7 +545,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   bottom: 78px;
   transform: translateX(-50%);
   border-radius: 999px;
-  background: #050506;
+  background: var(--z-black);
 }
 .living-map-feed-section {
   min-width: 0;
@@ -558,10 +558,10 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
 .living-map-reorder button {
   width: 32px;
   height: 32px;
-  border: 1px solid #00ffff;
+  border: 1px solid var(--neon-cyan);
   border-radius: 7px;
-  background: #050506;
-  color: #00ffff;
+  background: var(--z-black);
+  color: var(--neon-cyan);
   font-weight: 900;
   cursor: pointer;
 }
@@ -586,32 +586,32 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   border: 3px solid #000;
   border-radius: 8px;
   outline: 0;
-  background: #ccff00;
-  color: #050506;
+  background: var(--neon-yellow);
+  color: var(--z-black);
   font-weight: 900;
 }
 .living-map-time > button:nth-of-type(1) {
-  background: #ff00cc;
+  background: var(--neon-magenta);
 }
 .living-map-time > button:nth-of-type(2) {
-  background: #00ffff;
+  background: var(--neon-cyan);
 }
 .living-map-time > button:nth-of-type(3) {
-  background: #8800ff;
+  background: var(--neon-violet);
 }
 .living-map-time > button.is-on {
-  background: #ccff00;
-  color: #050506;
+  background: var(--neon-yellow);
+  color: var(--z-black);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
 }
 .living-map-time > button:nth-of-type(1).is-on {
-  background: #ff00cc;
+  background: var(--neon-magenta);
 }
 .living-map-time > button:nth-of-type(2).is-on {
-  background: #00ffff;
+  background: var(--neon-cyan);
 }
 .living-map-time > button:nth-of-type(3).is-on {
-  background: #8800ff;
+  background: var(--neon-violet);
 }
 .living-map-date-range {
   display: flex;
@@ -629,35 +629,35 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
 }
 .living-map-date-range input {
   min-height: 44px;
-  border-color: #8800ff;
+  border-color: var(--neon-violet);
 }
 
 /* Layer tags stay flat OLED with their semantic neon edge. */
 .living-map-chips button.pdx-glass-rebind {
-  --c: #ccff00;
+  --c: var(--neon-yellow);
   min-height: 44px;
   border: 0;
   border-radius: 8px;
-  background: #050506;
+  background: var(--z-black);
   color: var(--c);
   box-shadow: inset 0 0 0 1.5px var(--c);
 }
 .living-map-chips button.pdx-glass-rebind:nth-child(2) {
-  --c: #19e3ff;
+  --c: var(--panel-cyan);
 }
 .living-map-chips button.pdx-glass-rebind:nth-child(3) {
-  --c: #ff2400;
+  --c: var(--neon-red);
 }
 .living-map-chips button.pdx-glass-rebind:nth-child(4) {
-  --c: #ff2400;
+  --c: var(--neon-red);
 }
 .living-map-chips button.pdx-glass-rebind:nth-child(5) {
-  --c: #ffee00;
+  --c: var(--yellow);
 }
 .living-map-chips button.is-on,
 .living-map-chips button.cyan.is-on {
   border-color: transparent;
-  background: #050506;
+  background: var(--z-black);
   color: var(--c);
   box-shadow: inset 0 0 0 2px var(--c);
 }
@@ -710,7 +710,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   width: 72px;
   height: 6px;
   border-radius: 999px;
-  background: #00ffff;
+  background: var(--neon-cyan);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.16),
     0 0 15px rgba(0, 255, 255, 0.68);
@@ -752,7 +752,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
 .living-map-chips button.is-on,
 .living-map-chips button.cyan.is-on {
   background: var(--c);
-  color: #050506;
+  color: var(--z-black);
   box-shadow:
     inset 0 0 0 3px #000,
     var(--neon-bloom);
@@ -764,7 +764,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
 .living-map-coming button:focus-visible,
 .living-map-handle:focus-visible,
 .living-map-rail-empty button:focus-visible {
-  outline: 2px solid #050506;
+  outline: 2px solid var(--z-black);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px var(--c, #00ffff);
 }
@@ -782,17 +782,17 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
 .living-map-rail-empty button {
   min-height: 44px;
   margin-left: 6px;
-  border: 1px solid #00ffff;
+  border: 1px solid var(--neon-cyan);
   border-radius: 8px;
-  background: #050506;
-  color: #00ffff;
+  background: var(--z-black);
+  color: var(--neon-cyan);
   font: 900 0.78rem var(--font-display);
   text-transform: uppercase;
   cursor: pointer;
 }
 .living-map-view-all {
   margin-left: auto;
-  color: #19e3ff;
+  color: var(--panel-cyan);
   font: 900 0.7rem var(--font-display);
   letter-spacing: 0.1em;
   text-decoration: none;
@@ -801,7 +801,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
 .living-map-view-all:hover,
 .living-map-view-all:focus-visible {
   color: #fff;
-  text-shadow: 0 0 10px #19e3ff;
+  text-shadow: 0 0 10px var(--panel-cyan);
 }
 
 @media (max-width: 767px) {
@@ -850,7 +850,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
 }
 
 .living-map-screen-rail.pdx-glass-rebind {
-  --c: #19e3ff;
+  --c: var(--panel-cyan);
   position: absolute;
   z-index: 650;
   right: calc(var(--living-map-drawer-width) + var(--living-map-inset) * 2);
@@ -891,7 +891,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   align-items: center;
   gap: 9px;
   padding: 6px 10px 6px 6px;
-  border: 1px solid color-mix(in srgb, var(--c) 52%, #333);
+  border: 1px solid color-mix(in srgb, var(--c) 52%, var(--ink-border-strong));
   border-radius: 12px;
   background: rgba(5, 5, 6, 0.86);
   color: #fff;
@@ -947,7 +947,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   padding: 0;
   border: 0;
   background: transparent;
-  color: #19e3ff;
+  color: var(--panel-cyan);
   filter: drop-shadow(0 0 7px rgba(25, 227, 255, 0.72));
   cursor: pointer;
 }
@@ -955,13 +955,13 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   color: #fff;
 }
 .living-map-locate button:focus-visible {
-  outline: 2px solid #19e3ff;
+  outline: 2px solid var(--panel-cyan);
   outline-offset: 2px;
 }
 .living-map-locate button svg {
   width: 28px;
   height: 28px;
-  fill: #050506;
+  fill: var(--z-black);
   stroke-width: 2.5;
 }
 .living-map-locate span {
@@ -976,7 +976,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
 }
 
 .living-map-create.pdx-glass-rebind {
-  --c: #ccff00;
+  --c: var(--neon-yellow);
   grid-area: create;
   display: grid;
   justify-items: start;
@@ -1002,7 +1002,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   border: 2px solid #000;
   border-radius: 50%;
   background: var(--c);
-  color: #050506;
+  color: var(--z-black);
   box-shadow:
     var(--chrome-keyline), var(--chrome-bevel), var(--chrome-floor),
     var(--neon-bloom);
@@ -1048,7 +1048,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   transition-delay: 0s;
 }
 .living-map-create__option.pdx-glass-rebind {
-  --c: #19e3ff;
+  --c: var(--panel-cyan);
   display: flex;
   align-items: center;
   gap: 7px;
@@ -1056,7 +1056,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   padding: 0 13px;
   border: 1px solid var(--c);
   border-radius: 10px;
-  background: #050506;
+  background: var(--z-black);
   color: var(--c);
   box-shadow: var(--btn-glow-shadow);
   font: 900 0.78rem/1 var(--font-display);
@@ -1083,7 +1083,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
 }
 .living-map-create__trigger:focus-visible,
 .living-map-create__option:focus-visible {
-  outline: 3px solid #19e3ff;
+  outline: 3px solid var(--panel-cyan);
   outline-offset: 3px;
 }
 
@@ -1117,10 +1117,10 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   min-width: 58px;
   min-height: 44px;
   padding: 0 14px;
-  border: 1px solid #00ffff;
+  border: 1px solid var(--neon-cyan);
   border-radius: 10px;
-  background: #050506;
-  color: #00ffff;
+  background: var(--z-black);
+  color: var(--neon-cyan);
   box-shadow: var(--chrome-keyline), var(--chrome-bevel);
   font: 900 0.78rem var(--font-display);
   letter-spacing: 0.12em;
@@ -1161,7 +1161,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   height: 44px;
   border: 0;
   border-radius: 50%;
-  background: #111;
+  background: var(--ink-850);
   color: #fff;
   font-size: 1.5rem;
   cursor: pointer;
@@ -1204,7 +1204,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
 }
 .living-map-key__trigger:focus-visible,
 .living-map-key__head button:focus-visible {
-  outline: 3px solid #00ffff;
+  outline: 3px solid var(--neon-cyan);
   outline-offset: 3px;
 }
 
@@ -1227,8 +1227,8 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   height: 58px;
   border: 2px solid #000;
   border-radius: 50%;
-  background: #19e3ff;
-  color: #050506;
+  background: var(--panel-cyan);
+  color: var(--z-black);
   box-shadow:
     var(--chrome-keyline), var(--chrome-bevel), var(--chrome-floor),
     var(--neon-bloom);
@@ -1289,7 +1289,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   width: max-content;
   margin: 0;
   padding: 7px 12px;
-  border-left: 3px solid #19e3ff;
+  border-left: 3px solid var(--panel-cyan);
   background: rgba(5, 5, 6, 0.86);
   color: #fff;
   box-shadow: 8px 0 22px rgba(0, 0, 0, 0.48);
@@ -1357,7 +1357,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   }
 }
 .living-map-mobile-filters__rail .living-map-zaydark-toggle.pdx-glass-rebind {
-  --c: #ff2400;
+  --c: var(--neon-red);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1366,7 +1366,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   padding: 5px 8px 5px 12px;
   border: 1px solid var(--c);
   border-radius: 10px;
-  background: #050506;
+  background: var(--z-black);
   box-shadow: var(--btn-glow-shadow);
   cursor: pointer;
 }
@@ -1487,7 +1487,7 @@ html.calm-mode .living-map-card.pdx-glass-rebind::before,
   place-items: center;
   border: 1px solid #303036;
   border-radius: 50%;
-  background: #111;
+  background: var(--ink-850);
   color: #fff;
   cursor: pointer;
 }

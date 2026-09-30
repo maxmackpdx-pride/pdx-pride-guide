@@ -3047,7 +3047,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 }
 
 .inbox-group-chat__badge {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 0.08em;
   font-weight: 700;
@@ -3067,7 +3067,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 
 .inbox-group-chat__pin-label {
   display: block;
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.6rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -8254,7 +8254,7 @@ html.calm-mode .attendance-cluster-cta__btn,
 
 .event-chat-panel__pin-label {
   display: block;
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.6rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -8279,7 +8279,7 @@ html.calm-mode .attendance-cluster-cta__btn,
   background: none;
   border: 1px dashed rgba(204, 255, 0, 0.4);
   color: var(--neon-yellow, #ccff00);
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -9090,7 +9090,7 @@ html.calm-mode .event-modal--flip.event-modal--open,
 /* Section kickers (FLAGS / TAGS / ABOUT) - mono uppercase SoT */
 .event-modal__kicker,
 .event-modal__block .event-modal__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -15449,7 +15449,7 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   display: flex;
   align-items: center;
   gap: 9px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -15472,7 +15472,7 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
 .board-running__nav {
   display: flex;
   gap: 20px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -15595,7 +15595,7 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
 
 .board-hero__kicker {
   margin: 0 0 18px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -15860,7 +15860,7 @@ html.calm-mode .board-stats-band,
 .board-stats-band__label {
   display: block;
   margin-top: 11px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: clamp(9px, 1.1vw, 11px);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -16036,7 +16036,7 @@ html.calm-mode .board-stats-band,
 
 .board-how--makeover .gifting-footer-line {
   margin-top: 22px !important;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  font-family: var(--font-mono) !important;
   font-size: 11.5px !important;
   letter-spacing: 0.12em !important;
   text-transform: uppercase;
@@ -16065,7 +16065,7 @@ html.calm-mode .board-stats-band,
 }
 
 .board-active-feed__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -16085,7 +16085,7 @@ html.calm-mode .board-stats-band,
 }
 
 .board-active-feed__count {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -16153,7 +16153,7 @@ html.calm-mode .board-stats-band,
   position: absolute;
   left: 8px;
   bottom: 8px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -16208,7 +16208,7 @@ html.calm-mode .board-stats-band,
 }
 
 .board-listing-card--makeover .board-listing-card__cta {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -16418,7 +16418,7 @@ html.calm-mode .board-stats-band,
 }
 
 .board-close__url {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -16497,7 +16497,7 @@ html.calm-mode .board-stats-band,
 .board-how--makeover .missed-footer-line {
   max-width: 1180px;
   margin: 22px auto 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -16521,7 +16521,7 @@ html.calm-mode .board-stats-band,
 .board-path-card--talent { border-left: 4px solid #19e3ff; }
 .board-path-card--host { border-left: 4px solid #b06bff; }
 .board-path-card__label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -16574,7 +16574,7 @@ html.calm-mode .board-stats-band,
 }
 
 .events-page.board-page--makeover .events-tab {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-weight: 700;
   font-size: 12px;
   letter-spacing: 0.14em;
@@ -16642,7 +16642,7 @@ html.calm-mode .board-stats-band,
   background: none;
   border: none;
   color: #8c8980;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -16704,7 +16704,7 @@ html.calm-mode .board-stats-band,
 }
 
 .category-constellation__kicker {
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -16799,7 +16799,7 @@ html.calm-mode .board-stats-band,
 }
 
 .category-constellation__orb-label {
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -17082,14 +17082,14 @@ html.calm-mode .category-constellation__orb {
   position: relative;
 }
 .board-spotted-card__kind {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 .board-spotted-card__time {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -17133,7 +17133,7 @@ html.calm-mode .category-constellation__orb {
   min-width: 0;
 }
 .board-spotted-card__cta {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -17217,7 +17217,7 @@ html.calm-mode .board-detail-modal,
 }
 
 .board-detail-modal__meta-line {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -17290,7 +17290,7 @@ html.calm-mode .board-detail-modal,
 }
 
 .board-detail-modal__kind {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -17348,7 +17348,7 @@ html.calm-mode .board-detail-modal,
 .submit-status-chip {
   display: inline-block;
   align-self: flex-start;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.63rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -17438,7 +17438,7 @@ html.calm-mode .board-detail-modal,
 }
 
 .submit-paths__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -17541,7 +17541,7 @@ html.calm-mode .board-detail-modal,
 }
 
 .submit-clarifier__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;

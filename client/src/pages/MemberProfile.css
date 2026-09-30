@@ -116,7 +116,7 @@
   background:
     radial-gradient(130% 120% at 18% -12%, color-mix(in srgb, var(--profile-acc) 60%, transparent), transparent 58%),
     radial-gradient(120% 120% at 100% 0%, color-mix(in srgb, var(--profile-acc) 26%, transparent), transparent 55%),
-    linear-gradient(160deg, color-mix(in srgb, var(--profile-acc) 20%, #0b0b0b), #060606 80%);
+    linear-gradient(160deg, color-mix(in srgb, var(--profile-acc) 20%, var(--ink-800)), #060606 80%);
 }
 
 .pp-hero__banner-dots {
@@ -1358,8 +1358,8 @@ main:has(.pp-page--reimagined) {
 .pp-stats--reimagined {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid #1c1c22;
-  border-bottom: 1px solid #1c1c22;
+  border-top: 1px solid var(--panel-border);
+  border-bottom: 1px solid var(--panel-border);
   margin: 0;
   padding: 0;
   width: 100%;
@@ -1380,7 +1380,7 @@ main:has(.pp-page--reimagined) {
   top: 18%;
   bottom: 18%;
   width: 1px;
-  background: #1c1c22;
+  background: var(--panel-border);
 }
 
 .pp-stats--reimagined .pp-stats__item {
@@ -1529,7 +1529,7 @@ main:has(.pp-page--reimagined) {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -1574,8 +1574,8 @@ main:has(.pp-page--reimagined) {
   margin: 0;
   padding: 12px 8px 10px;
   border-radius: 12px;
-  background: #0d0d10;
-  border: 1px solid #1c1c22;
+  background: var(--panel-card-2);
+  border: 1px solid var(--panel-border);
   text-decoration: none;
   color: inherit;
   font: inherit;
@@ -1587,12 +1587,12 @@ main:has(.pp-page--reimagined) {
 }
 .pp-top8__tile:hover {
   transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--profile-acc, #ff00cc) 60%, #1c1c22);
+  border-color: color-mix(in srgb, var(--profile-acc, #ff00cc) 60%, var(--panel-border));
   box-shadow: 0 10px 26px -12px rgba(0, 0, 0, 0.8),
     0 0 18px -8px var(--profile-acc, #ff00cc);
 }
 .pp-top8__tile:focus-within {
-  border-color: color-mix(in srgb, var(--profile-acc, #ff00cc) 70%, #1c1c22);
+  border-color: color-mix(in srgb, var(--profile-acc, #ff00cc) 70%, var(--panel-border));
 }
 .pp-top8__rank {
   position: absolute;
@@ -1616,7 +1616,7 @@ main:has(.pp-page--reimagined) {
   transform: translateY(-4px);
 }
 .pp-top8__avatar:focus-visible {
-  box-shadow: 0 0 0 2px #050506, 0 0 0 4px var(--profile-acc, #ff00cc);
+  box-shadow: 0 0 0 2px var(--z-black), 0 0 0 4px var(--profile-acc, #ff00cc);
 }
 .pp-top8__avatar--logo {
   width: 64px;
@@ -1624,7 +1624,7 @@ main:has(.pp-page--reimagined) {
   border-radius: 50%;
   overflow: hidden;
   background: #08080a;
-  border: 1px solid #24242c;
+  border: 1px solid var(--panel-border-2);
   align-items: center;
   justify-content: center;
 }
@@ -1667,7 +1667,7 @@ main:has(.pp-page--reimagined) {
   align-items: center;
   appearance: none;
   background: var(--btn-glow-bg);
-  border: 1px solid color-mix(in srgb, var(--profile-acc, #ff00cc) 42%, #111);
+  border: 1px solid color-mix(in srgb, var(--profile-acc, #ff00cc) 42%, var(--ink-850));
   border-radius: 8px;
   box-shadow: var(--btn-glow-shadow);
   color: var(--profile-acc, #ff00cc);
@@ -1686,7 +1686,7 @@ main:has(.pp-page--reimagined) {
 .pp-top8__action:hover { filter: brightness(1.12); text-decoration: none; }
 .pp-top8__action:focus-visible { outline: 2px solid var(--profile-acc, #ff00cc); outline-offset: 2px; }
 .pp-top8__meta {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.6rem;
   letter-spacing: 0.04em;
   color: var(--text-lo, #8c8980);
@@ -1702,7 +1702,7 @@ main:has(.pp-page--reimagined) {
   width: 100%;
   padding: 20px;
   border-radius: 12px;
-  border: 1px dashed color-mix(in srgb, var(--profile-acc, #ff00cc) 40%, #24242c);
+  border: 1px dashed color-mix(in srgb, var(--profile-acc, #ff00cc) 40%, var(--panel-border-2));
   background: #0b0b0d;
   color: var(--profile-acc, #ff00cc);
   cursor: pointer;
@@ -1715,7 +1715,7 @@ main:has(.pp-page--reimagined) {
   text-transform: uppercase;
 }
 .pp-top8__empty-hint {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.66rem;
   letter-spacing: 0.06em;
   color: var(--text-lo, #8c8980);
@@ -1734,7 +1734,7 @@ main:has(.pp-page--reimagined) {
 }
 .pp-top8__owner-hint {
   margin: 10px 0 0;
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1764,7 +1764,7 @@ main:has(.pp-page--reimagined) {
   display: flex;
   flex-direction: column;
   background: #0b0b0d;
-  border: 1px solid #24242c;
+  border: 1px solid var(--panel-border-2);
   border-radius: 18px;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7),
     0 0 40px -12px var(--profile-acc, #ff00cc);
@@ -1775,7 +1775,7 @@ main:has(.pp-page--reimagined) {
   align-items: center;
   gap: 10px;
   padding: 16px 18px;
-  border-bottom: 1px solid #1c1c22;
+  border-bottom: 1px solid var(--panel-border);
 }
 .top8ed__title {
   flex: 1;
@@ -1786,7 +1786,7 @@ main:has(.pp-page--reimagined) {
   color: #fff;
 }
 .top8ed__count {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--profile-acc, #ff00cc);
 }
@@ -1794,14 +1794,14 @@ main:has(.pp-page--reimagined) {
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  border: 1px solid #2b2b2b;
+  border: 1px solid var(--ink-border);
   background: #141418;
   color: #fff;
   cursor: pointer;
 }
 .top8ed__current {
   padding: 10px 12px;
-  border-bottom: 1px solid #1c1c22;
+  border-bottom: 1px solid var(--panel-border);
   overflow-y: auto;
   max-height: 220px;
 }
@@ -1853,7 +1853,7 @@ main:has(.pp-page--reimagined) {
   white-space: nowrap;
 }
 .top8ed__row-sub {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.64rem;
   color: var(--text-lo, #8c8980);
 }
@@ -1862,7 +1862,7 @@ main:has(.pp-page--reimagined) {
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  border: 1px solid #2b2b2b;
+  border: 1px solid var(--ink-border);
   background: #141418;
   color: #ddd;
   cursor: pointer;
@@ -1879,7 +1879,7 @@ main:has(.pp-page--reimagined) {
   border-radius: 50%;
   overflow: hidden;
   background: #08080a;
-  border: 1px solid #24242c;
+  border: 1px solid var(--panel-border-2);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1907,8 +1907,8 @@ main:has(.pp-page--reimagined) {
   flex: 1;
   padding: 8px;
   border-radius: 9px;
-  border: 1px solid #24242c;
-  background: #0d0d10;
+  border: 1px solid var(--panel-border-2);
+  background: var(--panel-card-2);
   color: var(--text-lo, #8c8980);
   font-family: var(--font-display);
   font-weight: 800;
@@ -1920,13 +1920,13 @@ main:has(.pp-page--reimagined) {
 .top8ed__tab.is-on {
   border-color: var(--profile-acc, #ff00cc);
   color: #fff;
-  background: color-mix(in srgb, var(--profile-acc, #ff00cc) 12%, #0d0d10);
+  background: color-mix(in srgb, var(--profile-acc, #ff00cc) 12%, var(--panel-card-2));
 }
 .top8ed__input {
   width: 100%;
   padding: 11px 13px;
   border-radius: 10px;
-  border: 1px solid #24242c;
+  border: 1px solid var(--panel-border-2);
   background: #08080a;
   color: #fff;
   font-family: var(--font-body);
@@ -1959,7 +1959,7 @@ main:has(.pp-page--reimagined) {
 }
 .top8ed__hint {
   padding: 12px 6px;
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.68rem;
   color: var(--text-lo, #8c8980);
 }
@@ -1967,13 +1967,13 @@ main:has(.pp-page--reimagined) {
   display: flex;
   gap: 10px;
   padding: 12px 14px;
-  border-top: 1px solid #1c1c22;
+  border-top: 1px solid var(--panel-border);
 }
 .top8ed__cancel {
   flex: 1;
   padding: 11px;
   border-radius: 10px;
-  border: 1px solid #2b2b2b;
+  border: 1px solid var(--ink-border);
   background: transparent;
   color: #bbb;
   font-family: var(--font-display);

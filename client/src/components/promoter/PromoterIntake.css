@@ -50,7 +50,7 @@
 }
 
 .pi-intake__meta {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: none;
@@ -137,7 +137,7 @@
 }
 
 .pi-paths__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -258,7 +258,7 @@
   display: inline-block;
   align-self: flex-start;
   margin-top: 5px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.63rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;

@@ -12,7 +12,7 @@
 
 .adult-gate__kicker {
   margin: 0;
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.66rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;

@@ -130,7 +130,7 @@
 }
 
 .nb-hub__swim-sampled {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.06em;
   color: #8a8a8a;
@@ -202,7 +202,7 @@
 
 .nb-hub__weather-label,
 .nb-hub__weather-stat-label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -379,7 +379,7 @@ html.calm-mode .nb-hub__section--pulse {
 
 .nb-hub__range-label {
   display: block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;

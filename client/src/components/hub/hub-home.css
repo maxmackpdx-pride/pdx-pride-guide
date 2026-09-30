@@ -430,7 +430,7 @@ html.calm-mode .hub-keys,
 }
 
 .hub-weather__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -539,7 +539,7 @@ html.calm-mode .hub-keys,
 }
 
 .hub-weather__day-label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 9.5px;
   letter-spacing: 0.06em;
   color: #888;
@@ -547,7 +547,7 @@ html.calm-mode .hub-keys,
 }
 
 .hub-weather__day-date {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 8.5px;
   letter-spacing: 0.02em;
   color: #555;
@@ -637,7 +637,7 @@ html.calm-mode .hub-keys,
 .hub-pride-live__kicker {
   display: block;
   margin: 6px 0 12px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;

@@ -44,7 +44,7 @@
 .sellz-market-results__kicker {
   margin: 0 0 10px;
   color: var(--green-acid, #39ff14);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.16em;

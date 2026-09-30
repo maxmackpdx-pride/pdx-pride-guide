@@ -1328,7 +1328,7 @@ button.qsearch__stat.is-active {
 }
 
 .qsearch__trusted-mode {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--qs-cyan);
   background: rgba(25, 227, 255, 0.08);
