@@ -1,202 +1,581 @@
-import type React from "react";
-import { useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { Link } from "wouter";
-import { ChevronLeft, ChevronRight, MapPin, Plus, Search } from "lucide-react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { Drawer } from "vaul";
+import { Command } from "cmdk";
+import {
+  ArrowUpRight,
+  BriefcaseBusiness,
+  ChevronDown,
+  Heart,
+  House,
+  Mountain,
+  Palette,
+  Scale,
+  Search,
+  ShieldCheck,
+  Star,
+  Users,
+  X,
+} from "lucide-react";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { RESOURCE_CATEGORIES, type ResourceCategory, type ResourceOrg } from "@/lib/resourcesData";
+import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
 import "./Resources.css";
 
-const TOTAL = RESOURCE_CATEGORIES.reduce((n, c) => n + c.orgs.length, 0);
-
-/** Monogram fallback until a real logo file is added: an acronym in the name, else initials. */
-function initials(name: string) {
-  const paren = name.match(/\(([A-Z][A-Z&:]{1,6})\)/);
-  if (paren) return paren[1];
-  const first = name.split(/[\s/|]+/)[0].replace(/[^A-Za-z:]/g, "");
-  if (first.length >= 2 && first.length <= 6 && first === first.toUpperCase()) return first;
-  const skip = new Set(["the", "of", "for", "and", "&", "a"]);
-  return name
-    .replace(/\(.*?\)/g, "")
-    .split(/[\s/|,-]+/)
-    .filter(w => w && !skip.has(w.toLowerCase()))
-    .slice(0, 3)
-    .map(w => w.charAt(0).toUpperCase())
-    .join("");
-}
-
-function matches(org: ResourceOrg, cat: ResourceCategory, words: string[]) {
-  if (!words.length) return true;
-  const hay = [org.name, org.sub, org.desc, org.scope, cat.name].join(" ").toLowerCase();
-  return words.every(w => hay.includes(w));
-}
-
+const ICONS = [
+  Heart,
+  ShieldCheck,
+  Scale,
+  Star,
+  Users,
+  House,
+  BriefcaseBusiness,
+  Palette,
+  Mountain,
+];
+const LABELS = [
+  "Health & care",
+  "Safety & basic needs",
+  "Rights & advocacy",
+  "Youth support",
+  "Community",
+  "Family & elders",
+  "Work & money",
+  "Arts & spaces",
+  "Around Oregon",
+];
+const ROWS = RESOURCE_CATEGORIES.flatMap((category) =>
+  category.orgs.map((org) => ({ org, category })),
+);
+type Row = (typeof ROWS)[number];
 const HOTLINES = [
-  { num: "988", who: "Suicide & Crisis Lifeline", note: "Call or text, day or night.", tel: "988", c: "#FF2400" },
-  { num: "503-235-5333", who: "Call to Safety", note: "24/7 domestic and sexual violence line, Portland metro.", tel: "5032355333", c: "#FF2400" },
-  { num: "866-488-7386", who: "The Trevor Project", note: "24/7 for LGBTQ+ young people under 25.", tel: "18664887386", c: "#FF6600" },
-  { num: "877-565-8860", who: "Trans Lifeline", note: "Peer support by and for trans people.", tel: "18775658860", c: "#FF00CC" },
+  {
+    name: "988",
+    description: "Suicide & Crisis Lifeline · call or text",
+    tel: "988",
+  },
+  { name: "Call to Safety", description: "503-235-5333", tel: "5032355333" },
+  {
+    name: "The Trevor Project",
+    description: "866-488-7386",
+    tel: "18664887386",
+  },
+  { name: "Trans Lifeline", description: "877-565-8860", tel: "18775658860" },
 ];
 
-function OrgCard({ org, color }: { org: ResourceOrg; color: string }) {
-  return (
-    <article className="res-card" role="listitem" style={{ "--res-accent": color } as React.CSSProperties}>
-      <div className="res-card__top">
-        {org.logo
-          ? <img className="res-card__logo" src={org.logo} alt={`${org.name} logo`} loading="lazy" decoding="async" />
-          : <span className="res-card__mark" aria-hidden="true">{org.mark || initials(org.name)}</span>}
-        <span className="res-mono res-card__scope">{org.scope}</span>
-      </div>
-      <h3 className="res-card__name">{org.name}</h3>
-      {org.sub && <p className="res-card__sub">{org.sub}</p>}
-      <p className="res-card__desc">{org.desc}</p>
-      {org.addr && <p className="res-card__addr"><MapPin size={13} aria-hidden="true" />{org.addr}</p>}
-      <div className="res-card__acts">
-        {org.url && <a className="res-btn" href={org.url} target="_blank" rel="noopener noreferrer">{org.cta || "Visit site"}</a>}
-        {org.alt && <a className="res-btn res-btn--quiet" href={org.alt} {...(org.alt.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{org.altLabel}</a>}
-      </div>
-    </article>
+function Mark({ org }: { org: ResourceOrg }) {
+  const letters =
+    org.mark ||
+    org.name
+      .replace(/\(.*?\)/g, "")
+      .split(/\s+/)
+      .filter(
+        (w) => !["the", "and", "of", "for", "&"].includes(w.toLowerCase()),
+      )
+      .slice(0, 3)
+      .map((w) => w[0])
+      .join("");
+  return org.logo ? (
+    <img
+      className="rg-logo"
+      src={org.logo}
+      alt={`${org.name} logo`}
+      loading="lazy"
+    />
+  ) : (
+    <span className="rg-mark" aria-hidden="true">
+      {letters}
+    </span>
   );
 }
 
-function CategorySection({ cat, index, orgs, filtered }: { cat: ResourceCategory; index: number; orgs: ResourceOrg[]; filtered: boolean }) {
-  const railRef = useRef<HTMLDivElement>(null);
-  const scroll = (dir: number) => {
-    const el = railRef.current;
-    if (el) el.scrollBy({ left: dir * Math.max(280, el.clientWidth * 0.85), behavior: "smooth" });
-  };
+function Support() {
   return (
-    <section className="res-sec" id={cat.id} style={{ "--res-accent": cat.color } as React.CSSProperties} aria-labelledby={`${cat.id}-title`}>
-      <div className="res-sec__head">
-        <div>
-          <span className="res-mono res-sec__eyebrow">
-            {String(index + 1).padStart(2, "0")} / {orgs.length} {orgs.length === 1 ? "organization" : "organizations"}{filtered ? " matching" : ""}
-          </span>
-          <h2 className="res-sec__title" id={`${cat.id}-title`}><span className="res-sec__dot" aria-hidden="true" />{cat.name}</h2>
-          <p className="res-sec__for">{cat.forr}</p>
-        </div>
-        <div className="res-sec__nav">
-          <button type="button" className="res-arrow" aria-label={`Scroll ${cat.name} back`} onClick={() => scroll(-1)}><ChevronLeft size={18} aria-hidden="true" /></button>
-          <button type="button" className="res-arrow" aria-label={`Scroll ${cat.name} forward`} onClick={() => scroll(1)}><ChevronRight size={18} aria-hidden="true" /></button>
-        </div>
+    <div className="rg-support">
+      <div className="rg-talk">
+        <span className="rg-eyebrow">Find local services</span>
+        <h3>Start with 211info.</h3>
+        <p>
+          A connection to housing, food, health care, and other services in
+          Oregon and SW Washington.
+        </p>
+        <a className="pdxBtn pdxBtn--solid" href="tel:211">
+          Call 211 <ArrowUpRight size={16} />
+        </a>
       </div>
-      <div className="res-rail" ref={railRef} role="list" aria-label={cat.name}>
-        {orgs.map(org => <OrgCard key={org.name} org={org} color={cat.color} />)}
+      <div className="rg-hotlines">
+        {HOTLINES.map((h) => (
+          <a href={`tel:${h.tel}`} key={h.tel}>
+            <strong>{h.name}</strong>
+            <span>{h.description}</span>
+            <ArrowUpRight size={18} />
+          </a>
+        ))}
       </div>
-      <details className="res-more">
-        <summary className="res-mono"><Plus size={14} aria-hidden="true" />What these are and how to use them</summary>
-        <dl className="res-more__grid">
-          <div><dt className="res-mono">What they are</dt><dd>{cat.what}</dd></div>
-          <div><dt className="res-mono">How they help</dt><dd>{cat.help}</dd></div>
-          <div><dt className="res-mono">What they're for</dt><dd>{cat.forr}</dd></div>
-          <div><dt className="res-mono">How to use them</dt><dd>{cat.use}</dd></div>
-        </dl>
-      </details>
-    </section>
+      <p className="rg-emergency">In immediate danger? Call 911.</p>
+    </div>
+  );
+}
+
+function ResourceCard({
+  row,
+  onOpen,
+}: {
+  row: Row;
+  onOpen: (row: Row) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const { org, category } = row;
+  return (
+    <article
+      className={`rg-card pdx-glass-card pdx-glass-rebind${expanded ? " rg-expanded" : ""}`}
+      style={{ "--c": category.color, "--dir-gm": 8 } as CSSProperties}
+    >
+      <div className="rg-card-top">
+        <Mark org={org} />
+        <span className="rg-eyebrow rg-scope">{org.scope}</span>
+      </div>
+      <span className="rg-eyebrow rg-category">{category.name}</span>
+      <h3>{org.name}</h3>
+      <p className="rg-description">{org.desc}</p>
+      {expanded && (
+        <div className="rg-extra">
+          <span className="rg-eyebrow">How to start</span>
+          <p>{category.use}</p>
+          {org.addr && (
+            <>
+              <span className="rg-eyebrow">Location</span>
+              <p>{org.addr}</p>
+            </>
+          )}
+        </div>
+      )}
+      <div className="rg-card-actions">
+        <button className="pdxBtn" onClick={() => onOpen(row)}>
+          Connect <ArrowUpRight size={16} />
+        </button>
+        <button
+          className="rg-expand"
+          aria-expanded={expanded}
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? "Less detail" : "Read more"}
+          <ChevronDown size={18} />
+        </button>
+      </div>
+    </article>
   );
 }
 
 export default function Resources() {
   usePageSeo(
     "Resources | Zaylist",
-    "Nonprofits, hotlines, and LGBTQ+ groups for queer and trans Oregon: health care, safety, legal help, youth, community, funding, and more.",
+    "Art, community, opportunity, care, and support for queer and trans Oregon. Explore 67 organizations and find your next connection.",
   );
-  const [q, setQ] = useState("");
-  const [cat, setCat] = useState("all");
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [mode, setMode] = useState<"directory" | "talk">("directory");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [detail, setDetail] = useState<Row | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [mobile, setMobile] = useState(
+    () => window.matchMedia("(max-width: 600px)").matches,
+  );
+  const detailTrigger = useRef<HTMLElement | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const category = RESOURCE_CATEGORIES.find((c) => c.id === categoryId);
+  const rows = useMemo(
+    () =>
+      categoryId ? ROWS.filter((r) => r.category.id === categoryId) : ROWS,
+    [categoryId],
+  );
 
-  const words = useMemo(() => q.trim().toLowerCase().split(/\s+/).filter(Boolean), [q]);
-  const groups = useMemo(() => RESOURCE_CATEGORIES
-    .map((c, i) => ({ c, i, orgs: c.orgs.filter(o => matches(o, c, words)) }))
-    .filter(g => (cat === "all" || g.c.id === cat) && g.orgs.length > 0), [words, cat]);
-  const shown = groups.reduce((n, g) => n + g.orgs.length, 0);
-  const tabs = [{ id: "all", name: "All", color: "#19e3ff", n: TOTAL }, ...RESOURCE_CATEGORIES.map(c => ({ id: c.id, name: c.name, color: c.color, n: c.orgs.length }))];
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 600px)");
+    const change = () => setMobile(media.matches);
+    media.addEventListener("change", change);
+    return () => media.removeEventListener("change", change);
+  }, []);
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key.toLowerCase() === "k" &&
+        !detailOpen &&
+        !supportOpen
+      ) {
+        event.preventDefault();
+        setSearchOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [detailOpen, supportOpen]);
+  function choose(id: string | null) {
+    setCategoryId(id);
+    setMode("directory");
+  }
+  function openDetail(row: Row) {
+    detailTrigger.current = document.activeElement as HTMLElement;
+    setDetail(row);
+    setDetailOpen(true);
+  }
+  function selectSearchCategory(id: string) {
+    choose(id);
+    setSearchOpen(false);
+    requestAnimationFrame(() =>
+      resultsRef.current?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+        block: "start",
+      }),
+    );
+  }
 
   return (
     <div className="resources-page">
-      <header className="res-hdr">
-        <div className="res-aur" aria-hidden="true">
-          <span className="res-orb res-orb--mon" /><span className="res-orb res-orb--wed" /><span className="res-orb res-orb--thu" />
-          <span className="res-orb res-orb--fri" /><span className="res-orb res-orb--sat" /><span className="res-orb res-orb--sun" />
-        </div>
-        <span className="res-mono res-hdr__eyebrow">Zaylist / Resources</span>
-        <h1 className="res-hdr__title">Resources</h1>
-        <div className="res-hdr__row">
-          <p className="res-hdr__lede">Nonprofits, hotlines, and LGBTQ+ groups for queer and trans Oregon, with Portland first. Find care, get safe, get legal help, get funded, find your people, or give back.</p>
-          <p className="res-mono res-hdr__mantra">Reach out · show up · keep each other alive</p>
-        </div>
-        <p className="res-hdr__places">Looking for bars, food, shops, or venues? <Link href="/directory">Our Placez</Link></p>
+      <header className="rg-intro rg-wrap">
+        <span className="rg-eyebrow">Resources / All the ways we show up</span>
+        <h1>
+          Find your people.
+          <br />
+          <em>Find your possibility.</em>
+        </h1>
+        <p>
+          Make art. Find community. Build something.
+          <br />
+          Get support. There's more than one way forward.
+        </p>
+        <button
+          className="rg-text-link rg-help"
+          onClick={() => setSupportOpen(true)}
+        >
+          Need help now? Support lines <ArrowUpRight size={14} />
+        </button>
       </header>
-
-      <section className="res-help" aria-labelledby="res-help-title">
-        <div className="res-help__head">
-          <h2 className="res-help__title" id="res-help-title">Need help now?</h2>
-          <span className="res-mono res-help__tag">Free · confidential</span>
-        </div>
-        <div className="res-help__grid">
-          <div className="res-hl res-hl--211">
-            <span className="res-mono res-hl__kick">Not sure who to call · Oregon &amp; SW Washington</span>
-            <span className="res-hl__num">211info</span>
-            <p>Free connection to 7,000+ health and social service programs, in 150+ languages. Housing, food, utilities, and more. Text your zip to 898211.</p>
-            <div className="res-card__acts">
-              <a className="res-btn" href="tel:211" style={{ "--res-accent": "#00FFFF" } as React.CSSProperties}>Call 211</a>
-              <a className="res-btn res-btn--quiet" href="https://www.211info.org" target="_blank" rel="noopener noreferrer">Search</a>
+      <section className="rg-layout rg-wrap">
+        <aside className="rg-controls" aria-label="Choose resources">
+          <div className="rg-step">
+            <span className="rg-step-number" aria-hidden="true">
+              01
+            </span>
+            <div>
+              <span className="rg-eyebrow">Start here</span>
+              <h2>What brings you in?</h2>
+              <div className="rg-mode">
+                <button
+                  aria-pressed={mode === "directory"}
+                  onClick={() => setMode("directory")}
+                >
+                  Find a resource
+                </button>
+                <button
+                  aria-pressed={mode === "talk"}
+                  onClick={() => setMode("talk")}
+                >
+                  Talk to someone
+                </button>
+              </div>
             </div>
           </div>
-          {HOTLINES.map(h => (
-            <a key={h.tel} className="res-hl" href={`tel:${h.tel}`} style={{ "--res-accent": h.c } as React.CSSProperties}>
-              <span className="res-hl__num">{h.num}</span>
-              <span className="res-hl__who">{h.who}</span>
-              <p>{h.note}</p>
-            </a>
-          ))}
+          <div className="rg-step">
+            <span className="rg-step-number" aria-hidden="true">
+              02
+            </span>
+            <div>
+              <span className="rg-eyebrow rg-muted">Make it yours</span>
+              <h2>I'm looking for…</h2>
+              <div
+                className="rg-options"
+                role="group"
+                aria-label="Resource categories"
+              >
+                {RESOURCE_CATEGORIES.map((c, i) => {
+                  const Icon = ICONS[i];
+                  return (
+                    <button
+                      key={c.id}
+                      aria-pressed={categoryId === c.id}
+                      style={{ "--res-accent": c.color } as CSSProperties}
+                      onClick={() => choose(c.id)}
+                    >
+                      <Icon size={18} />
+                      <span>{LABELS[i]}</span>
+                      <i aria-hidden="true" />
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                className="rg-text-link rg-all"
+                onClick={() => choose(null)}
+              >
+                Show all resources
+              </button>
+            </div>
+          </div>
+          <div className="rg-reassurance">
+            <span aria-hidden="true">↳</span>
+            <p>
+              Not sure? <a href="tel:211">Call 211info</a> for help finding a
+              starting point.
+            </p>
+          </div>
+        </aside>
+        <div className="rg-results" ref={resultsRef}>
+          <div className="rg-results-head">
+            <span className="rg-eyebrow">03 / Make a connection</span>
+            <h2>
+              {mode === "talk"
+                ? "A person on the other end."
+                : category
+                  ? `${category.name}.`
+                  : "A world of possibilities."}
+            </h2>
+            <p>
+              {mode === "talk"
+                ? "Choose the support line that fits what you need."
+                : category
+                  ? category.forr
+                  : "Art, community, opportunity, care, and support. Choose a category to find your next connection."}
+            </p>
+          </div>
+          <button
+            className="rg-search-trigger"
+            onClick={() => setSearchOpen(true)}
+          >
+            <Search size={19} />
+            <span>Search everything</span>
+            <kbd>⌘ K</kbd>
+          </button>
+          <p className="rg-count" aria-live="polite">
+            {mode === "talk" ? "Support lines" : `${rows.length} organizations`}
+          </p>
+          {mode === "talk" ? (
+            <Support />
+          ) : (
+            <div className="rg-cards">
+              {rows.map((row) => (
+                <ResourceCard
+                  key={row.org.name}
+                  row={row}
+                  onOpen={openDetail}
+                />
+              ))}
+            </div>
+          )}
         </div>
-        <p className="res-mono res-help__911">In immediate danger? Call 911.</p>
       </section>
-
-      <div className="res-browse">
-        <label className="res-search">
-          <Search size={20} aria-hidden="true" />
-          <span className="sr-only">Search resources</span>
-          <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Search: HIV testing, legal, Eugene, youth…" />
-          {q && <button type="button" className="res-clear" onClick={() => setQ("")}>Clear</button>}
-        </label>
-        <div className="res-chips" role="tablist" aria-label="Filter by category">
-          {tabs.map(t => (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              aria-selected={cat === t.id}
-              className={`res-chip${cat === t.id ? " res-chip--on" : ""}`}
-              style={{ "--_c": t.color } as React.CSSProperties}
-              onClick={() => setCat(t.id)}
-            >
-              {t.name}<strong>{t.n}</strong>
-            </button>
-          ))}
-        </div>
-        <div className="res-browse__meta">
-          <span className="res-mono res-browse__count" aria-live="polite">{shown} of {TOTAL} organizations</span>
-          <span className="res-mono res-browse__hint">Swipe each row</span>
-        </div>
-      </div>
-
-      {groups.map(g => <CategorySection key={g.c.id} cat={g.c} index={g.i} orgs={g.orgs} filtered={words.length > 0} />)}
-
-      {groups.length === 0 && (
-        <section className="res-empty">
-          <h2 className="res-foot__title">Nothing matches that yet</h2>
-          <p>Try a broader word, pick All, or call 211 and they'll point you to the right place.</p>
-          <button type="button" className="res-clear" onClick={() => { setQ(""); setCat("all"); }}>Show everything</button>
-        </section>
-      )}
-
-      <footer className="res-foot">
+      <aside className="rg-urgent rg-wrap" aria-label="Immediate support">
+        <strong>Need help now?</strong>
+        {HOTLINES.map((h) => (
+          <a key={h.tel} href={`tel:${h.tel}`}>
+            <b>{h.name}</b>
+            <span>{h.description}</span>
+            <ArrowUpRight size={18} />
+          </a>
+        ))}
+        <small>In immediate danger? Call 911.</small>
+      </aside>
+      <footer className="rg-footer rg-wrap">
         <div>
-          <div className="res-foot__title">Know a group that belongs here?</div>
-          <p>Send us the name and website and we'll take a look.</p>
+          <span className="rg-eyebrow">
+            Built by community. Kept by community.
+          </span>
+          <h2>Know someone we should know?</h2>
         </div>
-        <Link className="res-cta" href="/contact">Suggest a resource<Plus size={18} aria-hidden="true" /></Link>
+        <Link className="pdxBtn" href="/contact">
+          Suggest a resource <ArrowUpRight size={16} />
+        </Link>
       </footer>
+
+      <Dialog.Root open={searchOpen} onOpenChange={setSearchOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="rg-overlay-backdrop" />
+          <Dialog.Content
+            className="rg-overlay rg-command"
+            onCloseAutoFocus={(event) => {
+              if (detailOpen) event.preventDefault();
+            }}
+          >
+            <Dialog.Title className="sr-only">
+              Search community resources
+            </Dialog.Title>
+            <Dialog.Description className="sr-only">
+              Search interests and organizations across the entire resource
+              directory.
+            </Dialog.Description>
+            <Dialog.Close className="rg-close" aria-label="Close search">
+              <X size={20} />
+            </Dialog.Close>
+            <Command>
+              <Command.Input
+                aria-label="Search all resources"
+                placeholder="Art, grants, groups, studios, support…"
+              />
+              <Command.List>
+                <Command.Empty>
+                  No matches. Try art, youth, work, or an organization name.
+                </Command.Empty>
+                <Command.Group heading="Explore an interest">
+                  {RESOURCE_CATEGORIES.map((c) => (
+                    <Command.Item
+                      key={c.id}
+                      value={`category ${c.name}`}
+                      onSelect={() => selectSearchCategory(c.id)}
+                    >
+                      {c.name}
+                      <ArrowUpRight size={16} />
+                    </Command.Item>
+                  ))}
+                </Command.Group>
+                <Command.Group heading="Organizations">
+                  {ROWS.map((row) => (
+                    <Command.Item
+                      key={row.org.name}
+                      value={row.org.name}
+                      keywords={[
+                        row.org.desc,
+                        row.org.scope,
+                        row.category.name,
+                      ]}
+                      onSelect={() => {
+                        setSearchOpen(false);
+                        openDetail(row);
+                      }}
+                    >
+                      <span>
+                        {row.org.name}
+                        <small>{row.category.name}</small>
+                      </span>
+                      <ArrowUpRight size={16} />
+                    </Command.Item>
+                  ))}
+                </Command.Group>
+              </Command.List>
+            </Command>
+            <p className="rg-command-hint">
+              ↑ ↓ to move · Enter to open · Esc to close
+            </p>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
+      <Dialog.Root open={supportOpen} onOpenChange={setSupportOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="rg-overlay-backdrop" />
+          <Dialog.Content className="rg-overlay rg-support-dialog">
+            <Dialog.Close className="rg-close" aria-label="Close support lines">
+              <X size={20} />
+            </Dialog.Close>
+            <span className="rg-eyebrow">Immediate support</span>
+            <Dialog.Title>Someone to talk to.</Dialog.Title>
+            <Dialog.Description className="sr-only">
+              Local services and crisis support lines.
+            </Dialog.Description>
+            <Support />
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
+      <Drawer.Root
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        direction={mobile ? "bottom" : "right"}
+        shouldScaleBackground={false}
+      >
+        <Drawer.Portal>
+          <Drawer.Overlay className="rg-overlay-backdrop" />
+          <Drawer.Content
+            className={`rg-overlay rg-drawer ${mobile ? "rg-drawer-mobile" : "rg-drawer-desktop"}`}
+            onCloseAutoFocus={(event) => {
+              event.preventDefault();
+              const target = detailTrigger.current;
+              if (target?.isConnected) target.focus();
+              else
+                document
+                  .querySelector<HTMLButtonElement>(".rg-search-trigger")
+                  ?.focus();
+            }}
+          >
+            {mobile && (
+              <Drawer.Handle
+                className="rg-drawer-handle"
+                aria-label="Drag to close resource"
+              />
+            )}
+            <Drawer.Close className="rg-close" aria-label="Close resource">
+              <X size={20} />
+            </Drawer.Close>
+            {detail && (
+              <div className="rg-drawer-body">
+                <span
+                  className="rg-eyebrow"
+                  style={{ color: detail.category.color }}
+                >
+                  {detail.category.name}
+                </span>
+                <div className="rg-detail-logo">
+                  <Mark org={detail.org} />
+                </div>
+                <Drawer.Title>{detail.org.name}</Drawer.Title>
+                {detail.org.sub && <p>{detail.org.sub}</p>}
+                <Drawer.Description>{detail.org.desc}</Drawer.Description>
+                <div className="rg-detail-meta">
+                  <span className="rg-eyebrow">Where they serve</span>
+                  <p>{detail.org.scope}</p>
+                  {detail.org.addr && (
+                    <>
+                      <span className="rg-eyebrow">Location</span>
+                      <p>{detail.org.addr}</p>
+                    </>
+                  )}
+                </div>
+                <div className="rg-detail-actions">
+                  {detail.org.url && (
+                    <a
+                      className="pdxBtn pdxBtn--solid"
+                      style={
+                        {
+                          "--action-accent": detail.category.color,
+                        } as CSSProperties
+                      }
+                      href={detail.org.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {detail.org.cta || "Visit website"}
+                      <ArrowUpRight size={16} />
+                    </a>
+                  )}
+                  {detail.org.alt && (
+                    <a
+                      className="pdxBtn"
+                      href={detail.org.alt}
+                      {...(detail.org.alt.startsWith("http")
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
+                    >
+                      {detail.org.altLabel}
+                    </a>
+                  )}
+                </div>
+                <small>
+                  Check the organization's website for current hours, services,
+                  and eligibility.
+                </small>
+              </div>
+            )}
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
     </div>
   );
 }

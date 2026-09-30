@@ -1,5 +1,6 @@
 /* Scoped Resources palette; preserves the supplied page artwork. */
-.resources-page {
+.resources-page,
+.rg-overlay {
   --res-canvas: #0a0a0a;
   --res-text: #f5f2eb;
   --res-divider: #1c1c22;
