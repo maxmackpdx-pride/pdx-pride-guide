@@ -1397,3 +1397,36 @@ html.calm-mode .rg-options button,
 .rg-resource-map-label { position: absolute; left: 10px; top: 10px; z-index: 500; padding: 6px 9px; background: #08080be6; color: var(--resource-accent); font-size: 11px; pointer-events: none; }
 .rg-resource-map > a { white-space: normal; min-height: 44px; }
 @media (prefers-reduced-motion: reduce) { .rg-drawer { box-shadow: none; } }
+
+/* Mode switch borrows the category tags' compact uppercase shape. */
+.rg-mode {
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  border-color: color-mix(in srgb, var(--neon-yellow) 28%, var(--rg-line));
+}
+.rg-mode button {
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.rg-mode button[aria-pressed="true"] {
+  background: var(--neon-yellow);
+  border-color: var(--neon-yellow);
+  color: var(--z-black);
+}
+.rg-mode button[aria-pressed="false"] { color: var(--res-text); }
+.rg-mode button[aria-pressed="false"]:hover {
+  color: var(--neon-yellow);
+  border-color: color-mix(in srgb, var(--neon-yellow) 35%, transparent);
+}
+.rg-mode button:focus-visible { outline: 2px solid var(--neon-yellow); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .rg-mode button { transition: none; } }
