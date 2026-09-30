@@ -1,0 +1,37 @@
+/* Scoped Resources palette; preserves the supplied page artwork. */
+.resources-page {
+  --res-canvas: #0a0a0a;
+  --res-text: #f5f2eb;
+  --res-divider: #1c1c22;
+  --res-surface: #09090c;
+  --res-cyan: #19e3ff;
+  --res-lede: #d9d5cc;
+  --res-magenta: #ff1fa0;
+  --res-muted: #aaa69e;
+  --res-link-border: #444;
+  --res-help-surface: #070708;
+  --res-caption: #8a8680;
+  --res-neutral: #b8b8c2;
+  --res-hotline-surface: #0c0c10;
+  --res-hotline-border: #26262d;
+  --res-hotline-text: #a8a49c;
+  --res-input-surface: #0b0b0f;
+  --res-control-border: #303039;
+  --res-search-icon: #9a968e;
+  --res-placeholder: #77736c;
+  --res-secondary-text: #c4c0b6;
+  --res-scrollbar: #34343d;
+  --res-chip-border: #2b2b32;
+  --res-chip-text: #b7b3aa;
+  --res-badge-surface: #17171c;
+  --res-badge-text: #85817a;
+  --res-lime: #c8fa3c;
+  --res-hint: #66625c;
+  --res-section-border: #16161b;
+  --res-dot-surface: #09090d;
+  --res-arrow: #e4e0d8;
+  --res-detail-label: #eeeae2;
+  --res-card-border: #101014;
+  --res-address: #98948c;
+  --res-quiet-text: #d4d0c8;
+}

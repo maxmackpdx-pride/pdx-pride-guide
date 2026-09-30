@@ -78,10 +78,9 @@ export const PRIMARY_NAV: NavEntry[] = [
   { type: "dropdown", id: "boards", label: "Boards", accent: "magenta", items: BOARDS_MENU },
   /* Nonprofits, hotlines, and LGBTQ+ groups (moved off Placez 2026-09-30). */
   { type: "link", href: "/resources", label: "Resources", accent: "green" },
-  { type: "link", href: "/z", label: "Z/Lists", accent: "violet" },
 ];
 
-/** Phone header shares two dropdowns, Resources, and the Z/Lists destination in one rail. */
+/** Phone header shares two dropdowns and Resources in one rail. */
 export const MOBILE_TOP_NAV: NavEntry[] = [
   {
     type: "dropdown",
@@ -101,7 +100,6 @@ export const MOBILE_TOP_NAV: NavEntry[] = [
     items: BOARDS_MENU,
   },
   { type: "link", href: "/resources", label: "Resources", accent: "green" },
-  { type: "link", href: "/z", label: "Z/Lists", accent: "violet" },
 ];
 
 export type PageHeaderMeta = {
