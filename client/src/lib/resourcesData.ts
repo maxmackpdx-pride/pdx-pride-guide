@@ -20,6 +20,8 @@ export type ResourceOrg = {
   altLabel?: string;
   logo?: string;
   mark?: string;
+  sourceChecked?: string;
+  sourceUrl?: string;
 };
 
 export type ResourceCategory = {
@@ -43,6 +45,52 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "forr": "Primary and walk-in urgent care, testing and HIV services, gender-affirming care and surgery, counseling, harm reduction, and peer support.",
     "use": "Check the org's site for current hours and services, then call or walk in. Ask what to bring to your first visit.",
     "orgs": [
+      {
+        "name": "Pivot at Prism Health · Free HIV & STI Testing",
+        "scope": "SE Portland · N Portland",
+        "mark": "PIVOT",
+        "desc": "Free, confidential HIV, syphilis, chlamydia, and gonorrhea testing through CAP Northwest. Appointment required. Choose the Belmont or Morris location when booking; CAP asks you to select “no insurance” in its scheduler. This is the Pivot testing program, not all Prism clinical care.",
+        "addr": "2236 SE Belmont St · 15 N Morris St",
+        "phone": "tel:+19712797033",
+        "phoneLabel": "Testing appointments: 971-279-7033",
+        "url": "https://www.capnw.org/get-tested/",
+        "cta": "Testing & appointments",
+        "sourceChecked": "September 30, 2026"
+      },
+      {
+        "name": "CAP Testing 4 All · Free HIV Testing",
+        "scope": "Old Town · Walk-in",
+        "mark": "CAP",
+        "desc": "Free HIV testing at CAP Northwest’s Portland office. Walk in Monday or Wednesday, 10am–4pm; no appointment needed. This location lists HIV testing only. Check CAP’s service page for schedule changes.",
+        "addr": "520 NW Davis St, Suite 215",
+        "phone": "tel:+15032235907",
+        "phoneLabel": "Call CAP: 503-223-5907",
+        "url": "https://www.capnw.org/get-tested/",
+        "cta": "Current testing schedule",
+        "sourceChecked": "September 30, 2026"
+      },
+      {
+        "name": "Multnomah County · Free Outreach Testing",
+        "scope": "Multnomah County · Mobile sites",
+        "mark": "MCHD",
+        "desc": "Free HIV, hepatitis C, and syphilis testing at community outreach locations. No appointment or ID needed. Call for the current van schedule. The county’s regular STI Clinic is a separate service with a listed $50 fee; no one is refused there for inability to pay.",
+        "phone": "tel:+15039883700",
+        "phoneLabel": "Current outreach schedule: 503-988-3700",
+        "url": "https://multco.us/services/hiv-testing",
+        "cta": "County testing details",
+        "sourceChecked": "September 30, 2026"
+      },
+      {
+        "name": "Oregon Free HIV & Syphilis Lab Testing",
+        "scope": "Oregon residents · Age 18+",
+        "mark": "OHA",
+        "desc": "Oregon Health Authority’s STDcheck program offers free HIV and syphilis tests for Oregon residents age 18 and older. Choose a participating lab, then call 800-456-2323 and press 1 to request the free Oregon tests. Other STI tests cost extra; do not buy a paid panel to use this program.",
+        "phone": "tel:+18004562323",
+        "phoneLabel": "Request free tests: 800-456-2323, press 1",
+        "url": "https://www.oregon.gov/oha/PH/DiseasesConditions/HIVSTDViralHepatitis/HIVPrevention/Pages/index.aspx",
+        "cta": "Free testing instructions",
+        "sourceChecked": "September 30, 2026"
+      },
       {
         "name": "Prism Health",
         "logo": "/resources-logos/prism-health.png",
@@ -604,6 +652,72 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "desc": "Rural 2SLGBTQIA+ organizing and support.",
         "url": "https://www.facebook.com/wallowalgbtq",
         "cta": "Visit page"
+      }
+    ]
+  },
+  {
+    "id": "harm-reduction",
+    "name": "Harm Reduction",
+    "color": "var(--neon-orange)",
+    "what": "Practical supplies, overdose prevention, testing, and nonjudgmental support.",
+    "help": "Support for your health and choices, without requiring abstinence.",
+    "forr": "Naloxone, safer-use supplies, syringe services, drug checking, and peer support. Meet yourself where you are.",
+    "use": "Use the linked provider page or call for current hours, supply availability, and service eligibility.",
+    "orgs": [
+      {
+        "name": "Multnomah County Harm Reduction",
+        "scope": "East Portland · County services",
+        "mark": "MCHD",
+        "desc": "Sterile supplies, syringe disposal, naloxone, fentanyl test strips, sexual-health services, and connections to care. Free overdose rescue kits and test strips are available through syringe services for people who use drugs. Call for the current clinic and supply schedule.",
+        "addr": "12425 NE Glisan St",
+        "phone": "tel:+15039880577",
+        "phoneLabel": "Harm Reduction Clinic: 503-988-0577",
+        "url": "https://multco.us/services/syringe-exchange",
+        "sourceUrl": "https://multco.us/info/overdose-prevention",
+        "cta": "Services & locations",
+        "sourceChecked": "September 30, 2026"
+      },
+      {
+        "name": "Outside In · Substance User Engagement",
+        "scope": "Portland · Clackamas County",
+        "logo": "/resources-logos/outside-in.png",
+        "desc": "Syringe services, naloxone, on-demand HIV, hepatitis C and syphilis testing, and drug checking using mass spectrometry. Downtown hours are Monday–Friday, noon–5pm. Call for testing availability and other service locations.",
+        "addr": "1219 SW Main St, Portland",
+        "phone": "tel:+15035353826",
+        "phoneLabel": "Call the team: 503-535-3826",
+        "url": "https://outsidein.org/health-services/substance-user-engagement-services/",
+        "cta": "Services & schedule",
+        "sourceChecked": "September 30, 2026"
+      },
+      {
+        "name": "Marie Equi · Harm Reduction & Peer Support",
+        "scope": "SE Portland · LGBTQAI2S+",
+        "logo": "/resources-logos/marie-equi.png",
+        "desc": "Narcan, harm-reduction supplies and education, and culturally affirming peer support for trans, queer, intersex, and gender-diverse people. The service center focuses on unhoused and low-income LGBTQAI2S+ communities. Monday–Thursday, 10am–4pm; not a crisis-response service.",
+        "addr": "4434 SE 25th Ave, Portland",
+        "phone": "tel:+15034592584",
+        "phoneLabel": "Call the center: 503-459-2584",
+        "url": "https://www.marieequi.center/service-center",
+        "cta": "Service center details",
+        "sourceChecked": "September 30, 2026"
+      },
+      {
+        "name": "HIV Alliance · Syringe Services",
+        "scope": "Washington County · Other Oregon counties",
+        "mark": "HIVA",
+        "desc": "Syringe exchange, safer-use supplies, naloxone distribution and training, and harm-reduction support. The provider maintains location-by-location schedules, including Washington County. Check the current schedule for the site you plan to visit.",
+        "url": "https://hivalliance.org/services/syringe-services/",
+        "cta": "Locations & schedules",
+        "sourceChecked": "September 30, 2026"
+      },
+      {
+        "name": "Just in Case Oregon · Free Naloxone",
+        "scope": "Oregon · Mail delivery",
+        "mark": "JIC",
+        "desc": "Free naloxone mailed in plain packaging to an Oregon mailing address. No prescription, ID check, or insurance required. The current program supplies four doses and instructions. Order ahead so it is available when needed; this is not an emergency-delivery service.",
+        "url": "https://justincaseoregon.org/",
+        "cta": "Request free naloxone",
+        "sourceChecked": "September 30, 2026"
       }
     ]
   }

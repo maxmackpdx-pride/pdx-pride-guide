@@ -883,7 +883,7 @@
     width: 6px;
     height: 6px;
   }
-  .rg-options button:last-child {
+  .rg-options button:last-child:nth-child(odd) {
     grid-column: 1/-1;
   }
   .rg-reassurance {
@@ -1324,4 +1324,16 @@ html.calm-mode .rg-options button,
     box-shadow: none;
     background: var(--res-help-surface);
   }
+}
+
+.resources-page .rg-source-check,
+.rg-overlay .rg-source-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: var(--res-muted);
+  font: var(--meta)/var(--lh-meta) var(--font-body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

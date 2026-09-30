@@ -11,6 +11,7 @@ import { Drawer } from "vaul";
 import { Command } from "cmdk";
 import {
   ArrowUpRight,
+  LifeBuoy,
   BriefcaseBusiness,
   ChevronDown,
   Heart,
@@ -48,6 +49,7 @@ const ICONS = [
   BriefcaseBusiness,
   Palette,
   Mountain,
+  LifeBuoy,
 ];
 const LABELS = [
   "Health & care",
@@ -59,6 +61,7 @@ const LABELS = [
   "Work & money",
   "Arts & spaces",
   "Around Oregon",
+  "Harm reduction",
 ];
 const ROWS = RESOURCE_CATEGORIES.flatMap((category) =>
   (category.id === "safety"
@@ -183,6 +186,16 @@ function ResourceCard({
       <span className="rg-eyebrow rg-category">{category.name}</span>
       <h3>{org.name}</h3>
       <p className="rg-description">{org.desc}</p>
+      {org.sourceChecked && (
+        <a
+          className="rg-source-check"
+          href={org.sourceUrl || org.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Service page checked {org.sourceChecked} <ArrowUpRight size={13} />
+        </a>
+      )}
       {org.phone && (
         <a className="rg-resource-phone" href={org.phone}>
           {org.phoneLabel}
@@ -649,6 +662,17 @@ export default function Resources() {
                 <Drawer.Title>{detail.org.name}</Drawer.Title>
                 {detail.org.sub && <p>{detail.org.sub}</p>}
                 <Drawer.Description>{detail.org.desc}</Drawer.Description>
+                {detail.org.sourceChecked && (
+                  <a
+                    className="rg-source-check"
+                    href={detail.org.sourceUrl || detail.org.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Service page checked {detail.org.sourceChecked}{" "}
+                    <ArrowUpRight size={13} />
+                  </a>
+                )}
                 {detail.org === FOOD_RESOURCE && <FoodPantryList />}
                 <div className="rg-detail-meta">
                   <span className="rg-eyebrow">Where they serve</span>
