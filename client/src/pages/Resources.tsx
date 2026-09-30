@@ -33,6 +33,7 @@ import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
 import { FOOD_PANTRIES, FOOD_RESOURCE } from "@/lib/foodPantries";
 import DirectoryMap from "@/components/DirectoryMap";
 import { placeGoogleMapsUrl } from "@/lib/placeLinks";
+import { Badge } from "@/components/ds/Badge";
 import { PlaceCard } from "@/components/ds/PlaceCard";
 import { WebGLShader } from "@/components/ui/web-gl-shader";
 import "@fontsource/barlow/latin-400.css";
@@ -122,20 +123,24 @@ function Mark({ org }: { org: ResourceOrg }) {
 
 function SafetyNotice() {
   return (
-    <aside className="rg-safety-prompt" aria-label="Urgent safety help">
+    <aside className="pdxPlace pdx-glass-rebind rg-safety-prompt" style={{ "--c": "var(--neon-orange)", "--_c": "var(--neon-orange)" } as CSSProperties} aria-label="Urgent safety help">
+      <div className="pdxPlace__body pdx-glass-card pdx-glass-rebind">
+        <div className="pdxPlace__sheen pdx-glass-sheen--specular" aria-hidden="true" />
+        <div className="pdxPlace__seam pdx-refract-seam" aria-hidden="true" />
+        <div className="rg-safety-content">
       <div className="rg-safety-heading">
         <ShieldAlert size={28} aria-hidden="true" />
         <div>
-          <span className="rg-eyebrow">Immediate safety</span>
+          <span className="pdxPlace__cat"><Badge color="var(--neon-orange)" size="sm">Immediate safety</Badge></span>
           <h3>In immediate danger?</h3>
         </div>
       </div>
       <p className="rg-safety-lead">If you or someone else is in danger right now, call 911 if you can do so safely.</p>
-      <a className="rg-safety-emergency" href="tel:911"><Phone size={18} aria-hidden="true" /> Call 911</a>
+      <a className="pdxBtn pdxBtn--solid rg-safety-emergency" href="tel:911"><Phone size={18} aria-hidden="true" /> Call 911</a>
       <div className="rg-safety-support">
         <h4>You don’t have to figure this out alone.</h4>
         <p>For domestic or sexual violence support, talk with a Call to Safety advocate. Free, confidential, and available 24/7. You can call even if you’re unsure what to call your experience.</p>
-        <a className="rg-safety-crisis" href="tel:+15032355333"><Phone size={18} aria-hidden="true" /><span>Call to Safety<strong>503-235-5333</strong></span><ArrowUpRight size={18} aria-hidden="true" /></a>
+        <a className="pdxBtn rg-safety-crisis" href="tel:+15032355333"><Phone size={18} aria-hidden="true" /><span>Call to Safety<strong>503-235-5333</strong></span><ArrowUpRight size={18} aria-hidden="true" /></a>
         <a className="rg-safety-source" href="https://calltosafety.org/services/" target="_blank" rel="noopener noreferrer">Support options & service details <ArrowUpRight size={13} /></a>
       </div>
       <details className="rg-safety-law">
@@ -158,6 +163,8 @@ function SafetyNotice() {
           <small>General legal information, not individual legal advice. Sources checked September 30, 2026.</small>
         </div>
       </details>
+        </div>
+      </div>
     </aside>
   );
 }
