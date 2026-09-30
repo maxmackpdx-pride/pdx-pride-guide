@@ -3413,14 +3413,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   box-shadow: 0 10px 26px rgba(0,0,0,0.58);
 }
 
-/* Inbox - compact utility hero (messages are the focus) */
 
-.inbox-page-lede {
-  margin: 0 0 18px;
-  color: #9d9a92;
-  font-size: 0.88rem;
-  line-height: 1.55;
-}
 
 /* Events page - compact title hero, roomier map */
 .events-map-row {
@@ -5312,11 +5305,6 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 
   .gifting-photo {
     height: 210px;
-  }
-
-  .inbox-page-lede {
-    font-size: 0.82rem;
-    margin-bottom: 14px;
   }
 
   .events-filter-row {
