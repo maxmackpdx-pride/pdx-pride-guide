@@ -7,13 +7,14 @@ import "./RoomPlate.css";
 type PlateRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "hauz" | "eventz" | "outz";
 
 /** Marks come from the family library, never retyped. Lines are the room's own voice. */
-const PLATE: Record<PlateRoom, { mark: string; line?: string; follow: FollowableRoom; share: string }> = {
+const PLATE: Record<PlateRoom, { mark: string; line?: string; follow: FollowableRoom; share: string; heroOwnsMark?: boolean }> = {
   gigz: { mark: "/brand/family/gigz.svg", line: "Work with your people.", follow: "gigz", share: "Gigz" },
   giftz: { mark: "/brand/family/giftz.svg", line: "Pass it on. Find what you need.", follow: "giftz", share: "Giftz" },
   sellz: { mark: "/brand/family/sellz.svg", line: "Good stuff. New hands.", follow: "sellz", share: "Sellz" },
   mizzed: { mark: "/brand/family/mizzed-connection.svg", line: "You were the one over by the…", follow: "mizzed", share: "Mizzed Connections" },
   hauz: { mark: "/brand/family/the-hauz.svg", line: "Find people that know the know.", follow: "houz", share: "The Haüz" },
-  eventz: { mark: "/brand/family/eventz.png", follow: "eventz", share: "Eventz" },
+  // The EVENTZ hero is its neon logo, so the plate carries only the actions there.
+  eventz: { mark: "/brand/family/eventz.png", follow: "eventz", share: "Eventz", heroOwnsMark: true },
   outz: { mark: "/brand/family/outz.svg", follow: "outz", share: "OutZide" },
 };
 
@@ -31,7 +32,7 @@ export default function RoomPlate({ room, compact = false }: { room: PlateRoom; 
   const style = { "--c": room === "gigz" ? "var(--room-gigz-ink)" : meta.accent } as CSSProperties;
   if (compact) return <div className="room-plate room-plate--compact pdx-glass-rebind" style={style}>{actions}</div>;
   return <div className="room-plate pdx-glass-rebind" style={style}>
-    <img className="room-plate__mark" src={plate.mark} alt={meta.name} />
+    {plate.heroOwnsMark ? null : <img className="room-plate__mark" src={plate.mark} alt={meta.name} />}
     {plate.line ? <span className="room-plate__line">{plate.line}</span> : null}
     {actions}
   </div>;
