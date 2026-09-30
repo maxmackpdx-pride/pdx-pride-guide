@@ -382,6 +382,7 @@ export default function Resources() {
                   return (
                     <button
                       key={c.id}
+                      className="pdx-glass-rebind"
                       aria-pressed={categoryId === c.id}
                       style={{ "--res-accent": c.color } as CSSProperties}
                       onClick={() => choose(c.id)}
