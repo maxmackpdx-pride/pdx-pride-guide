@@ -1,4 +1,4 @@
-/* A readable archive: full poster artwork, captions, and quiet collector stats. */
+/* Borderless flyer stream with collector progress alongside it. */
 .flyer-stash {
   --stash-accent: var(--profile-acc, var(--neon-cyan));
   width: 100%;
@@ -38,22 +38,14 @@
 .flyer-stash__blurb { margin: 0; color: var(--text-lo); font-size: 12px; line-height: 1.6; }
 .flyer-stash__gallery { min-width: 0; }
 .flyer-stash__gallery-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 12px; color: var(--text-lo); font: 700 13px/1 var(--font-display); text-transform: uppercase; letter-spacing: .06em; }
-.flyer-stash__controls { display: flex; gap: 8px; }
-.flyer-stash__slide { flex-basis: 260px; padding-block: 4px 12px; }
-.flyer-stash__flyer { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 0; border: 1px solid var(--ink-border-faint); border-radius: 14px; overflow: hidden; background: var(--ink-900); color: var(--text-hi); text-align: left; cursor: pointer; }
-.flyer-stash__flyer:disabled { cursor: default; }
-.flyer-stash__art { width: 100%; aspect-ratio: 3 / 4; display: grid; place-items: center; background: var(--ink-950, var(--ink-900)); overflow: hidden; }
-.flyer-stash__art img { width: 100%; height: 100%; object-fit: contain; }
-.flyer-stash__fallback { padding: 20px; font: 800 30px/1 var(--font-display); text-transform: uppercase; overflow-wrap: anywhere; color: var(--stash-accent); }
-.flyer-stash__caption { display: flex; flex-direction: column; gap: 6px; padding: 16px; width: 100%; }
-.flyer-stash__caption h3 { margin: 0; font: 800 22px/1.05 var(--font-display); text-transform: uppercase; overflow-wrap: anywhere; }
-.flyer-stash__caption > span:not(.flyer-stash__role), .flyer-stash__caption time { font-size: 12px; line-height: 1.4; color: var(--text-lo); }
-.flyer-stash__flyer:hover { border-color: var(--stash-accent); }
-.flyer-stash__flyer:focus-visible, .flyer-stash__cta:focus-visible { outline: 2px solid var(--stash-accent); outline-offset: -3px; }
+.flyer-stash__stream { width: 100%; height: clamp(280px, 42vw, 560px); }
+.flyer-stash__pause, .flyer-stash__missing { border: 0; padding: 10px 0; min-height: 44px; background: transparent; color: var(--text-hi); cursor: pointer; }
+.flyer-stash__missing { display: block; text-align: left; }
+.flyer-stash__missing:disabled { cursor: default; }
+.flyer-stash__pause:focus-visible, .flyer-stash__missing:focus-visible, .flyer-stash__cta:focus-visible { outline: 2px solid var(--stash-accent); outline-offset: 2px; }
 @media (max-width: 767px) {
   .flyer-stash__grid { display: flex; flex-direction: column; gap: 20px; }
   .flyer-stash__gallery { order: -1; width: 100%; }
-  .flyer-stash__slide { flex-basis: 78%; }
   .flyer-stash__collector { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
   .flyer-stash__collector-label, .flyer-stash__blurb { grid-column: 1 / -1; }
   .flyer-stash__collector > * { min-width: 0; }

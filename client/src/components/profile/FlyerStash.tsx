@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "wouter";
-import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { ImageStreamHero } from "@/components/ui/image-stream-hero";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent } from "./types";
 import "./FlyerStash.css";
@@ -157,6 +157,8 @@ export default function FlyerStash({
 }: Props) {
   const base = useMemo(() => buildFlyers(events), [events]);
   const n = base.length;
+  const [paused, setPaused] = useState(false);
+  const streamFlyers = base.filter(f => f.posterUrl);
   const stats = useMemo(() => {
     const count = n;
     const worked = base.filter((f) => f.worked);
@@ -269,34 +271,33 @@ export default function FlyerStash({
           </p>
         </aside>
 
-        <Carousel className="flyer-stash__gallery" opts={{ align: "start", duration: 0 }} aria-label="Saved flyers">
+        <div className="flyer-stash__gallery" aria-label="Saved flyers">
           <div className="flyer-stash__gallery-head">
             <span>{stats.count} saved flyers</span>
-            <div className="flyer-stash__controls">
-              <CarouselPrevious className="!static !translate-y-0 h-11 w-11" />
-              <CarouselNext className="!static !translate-y-0 h-11 w-11" />
-            </div>
+            {streamFlyers.length > 0 && (
+              <button type="button" className="flyer-stash__pause" aria-pressed={paused}
+                onClick={() => setPaused(value => !value)}>
+                {paused ? "Play flyers" : "Pause flyers"}
+              </button>
+            )}
           </div>
-          <CarouselContent>
-            {base.map(f => (
-              <CarouselItem key={f.id} className="flyer-stash__slide">
-                <button type="button" className="flyer-stash__flyer pdx-glass-rebind" onClick={() => onEventClick?.(f.event)}
-                  disabled={!onEventClick} aria-label={`Open ${f.title} at ${f.venue}`}>
-                  <div className="flyer-stash__art">
-                    {f.posterUrl ? <img src={f.posterUrl} alt="" loading="lazy" decoding="async" />
-                      : <span className="flyer-stash__fallback">{f.title}</span>}
-                  </div>
-                  <div className="flyer-stash__caption">
-                    <span className="flyer-stash__role" style={{ color: f.roleColor }}>{f.roleLabel}{f.rare ? " · RARE" : ""}</span>
-                    <h3>{f.title}</h3>
-                    <span>{f.venue}</span>
-                    <time>{f.when || f.date}</time>
-                  </div>
-                </button>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+          {streamFlyers.length > 0 && (
+            <ImageStreamHero
+              className="flyer-stash__stream"
+              images={streamFlyers.map(f => ({ src: f.posterUrl!, alt: `${f.title} at ${f.venue}` }))}
+              cards={Math.max(9, streamFlyers.length)}
+              path={{ cardRadius: 0 }}
+              paused={paused}
+              onImageClick={onEventClick ? index => onEventClick(streamFlyers[index].event) : undefined}
+            />
+          )}
+          {base.filter(f => !f.posterUrl).map(f => (
+            <button key={f.id} type="button" className="flyer-stash__missing"
+              disabled={!onEventClick} onClick={() => onEventClick?.(f.event)}>
+              {f.title} · {f.venue}
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );
