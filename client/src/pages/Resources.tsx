@@ -20,6 +20,8 @@ import {
   Scale,
   Search,
   ShieldCheck,
+  ShieldAlert,
+  Phone,
   Share2,
   Star,
   Users,
@@ -118,9 +120,52 @@ function Mark({ org }: { org: ResourceOrg }) {
   );
 }
 
+function SafetyNotice() {
+  return (
+    <aside className="rg-safety-prompt" aria-label="Urgent safety help">
+      <div className="rg-safety-heading">
+        <ShieldAlert size={28} aria-hidden="true" />
+        <div>
+          <span className="rg-eyebrow">Immediate safety</span>
+          <h3>In immediate danger?</h3>
+        </div>
+      </div>
+      <p className="rg-safety-lead">If you or someone else is in danger right now, call 911 if you can do so safely.</p>
+      <a className="rg-safety-emergency" href="tel:911"><Phone size={18} aria-hidden="true" /> Call 911</a>
+      <div className="rg-safety-support">
+        <h4>You don’t have to figure this out alone.</h4>
+        <p>For domestic or sexual violence support, talk with a Call to Safety advocate. Free, confidential, and available 24/7. You can call even if you’re unsure what to call your experience.</p>
+        <a className="rg-safety-crisis" href="tel:+15032355333"><Phone size={18} aria-hidden="true" /><span>Call to Safety<strong>503-235-5333</strong></span><ArrowUpRight size={18} aria-hidden="true" /></a>
+        <a className="rg-safety-source" href="https://calltosafety.org/services/" target="_blank" rel="noopener noreferrer">Support options & service details <ArrowUpRight size={13} /></a>
+      </div>
+      <details className="rg-safety-law">
+        <summary>What does Oregon law mean by domestic violence?</summary>
+        <div>
+          <p>Under ORS 135.230, used in criminal pretrial-release law, domestic violence is abuse between family or household members. Abuse includes:</p>
+          <ul>
+            <li>Trying to cause physical injury, or causing it intentionally, knowingly, or recklessly.</li>
+            <li>Intentionally, knowingly, or recklessly making someone fear serious physical injury that is about to happen.</li>
+            <li>Sexual abuse as defined in Oregon’s criminal statutes.</li>
+          </ul>
+          <p>The covered relationships include spouses and former spouses; adult relatives by blood or marriage; people who live or have lived together; people who have had a sexually intimate relationship; and unmarried parents of a minor child.</p>
+          <p>For Family Abuse Prevention Act restraining orders, ORS 107.705 uses a separate definition and relationship rules. Whether you qualify depends on more than this summary.</p>
+          <p>You can seek support without deciding whether your experience meets a legal definition. An advocate or legal aid provider can help explain your options.</p>
+          <div className="rg-safety-law-links">
+            <a href="https://www.oregonlegislature.gov/bills_laws/ors/ors135.html" target="_blank" rel="noopener noreferrer">Read ORS 135.230 ↗</a>
+            <a href="https://www.oregonlegislature.gov/bills_laws/ors/ors107.html" target="_blank" rel="noopener noreferrer">Read ORS 107.705 ↗</a>
+            <a href="https://www.courts.oregon.gov/programs/family/domestic-violence/Pages/restraining.aspx" target="_blank" rel="noopener noreferrer">Oregon Courts: restraining orders ↗</a>
+          </div>
+          <small>General legal information, not individual legal advice. Sources checked September 30, 2026.</small>
+        </div>
+      </details>
+    </aside>
+  );
+}
+
 function Support() {
   return (
     <div className="rg-support">
+      <SafetyNotice />
       <div className="rg-talk">
         <span className="rg-eyebrow">Find local services</span>
         <h3>Start with 211info.</h3>
@@ -141,7 +186,6 @@ function Support() {
           </a>
         ))}
       </div>
-      <p className="rg-emergency">In immediate danger? Call 911.</p>
     </div>
   );
 }
@@ -450,19 +494,7 @@ export default function Resources() {
             </p>
           </div>
           {mode === "directory" && categoryId === "safety" && (
-            <aside className="rg-safety-prompt" aria-label="Urgent safety help">
-              <p>
-                <strong>In immediate danger?</strong>{" "}
-                <a href="tel:911">Call 911.</a>
-              </p>
-              <p>
-                For domestic or sexual violence support, call the 24/7 crisis
-                line:
-              </p>
-              <a className="pdxBtn" href="tel:+15032355333">
-                Call to Safety · 503-235-5333 <ArrowUpRight size={16} />
-              </a>
-            </aside>
+            <SafetyNotice />
           )}
 
           <p className="rg-count" aria-live="polite">
