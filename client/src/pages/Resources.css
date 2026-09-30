@@ -1250,10 +1250,11 @@
 
 .rg-options button {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 22px;
+  font-weight: var(--fw-bold);
+  font-size: var(--chrome-lg);
   line-height: 1.05;
-  letter-spacing: -0.015em;
+  letter-spacing: var(--tracking-chrome);
+  text-transform: uppercase;
 }
 @media (max-width: 600px) {
   .rg-options button {
