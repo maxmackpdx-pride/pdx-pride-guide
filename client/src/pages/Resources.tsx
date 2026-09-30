@@ -244,7 +244,7 @@ function ResourceCard({
       phoneHref={org.phone}
       description={org.desc}
       website={org.url}
-      shareUrl={org.url || "https://www.zaylist.com/resources"}
+      shareUrl={`https://www.zaylist.com/resources?resource=${encodeURIComponent(org.name)}`}
       className={`rg-directory-card pdxPlace--clickable${org.logoSurface === "light" ? " rg-directory-card--light-logo" : ""}`}
       onClick={() => onOpen(row)}
       footer={
@@ -306,6 +306,16 @@ export default function Resources() {
   const [supportOpen, setSupportOpen] = useState(false);
   const [detail, setDetail] = useState<Row | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("resource");
+    if (!requested) return;
+    const row = ROWS.find(({ org }) => org.name === requested);
+    if (row) {
+      setDetail(row);
+      setDetailOpen(true);
+    }
+  }, []);
+
   const [mobile, setMobile] = useState(
     () => window.matchMedia("(max-width: 600px)").matches,
   );

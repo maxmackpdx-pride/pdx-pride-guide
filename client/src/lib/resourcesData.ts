@@ -413,6 +413,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Oregon Department of Veterans' Affairs",
+        "logo": "/resources-logos/oregon-department-of-veterans-affairs.svg",
         "mark": "ODVA",
         "sub": "LGBTQ+ veterans resources",
         "scope": "Statewide",
@@ -530,6 +531,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Prosper Portland",
+        "logo": "/resources-logos/prosper-portland.svg",
         "scope": "Portland",
         "desc": "City-backed programs supporting Portland small businesses and creatives.",
         "url": "https://prosperportland.us"
@@ -685,6 +687,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "TransPonder",
+        "logo": "/resources-logos/transponder.svg",
         "mark": "TP",
         "scope": "Eugene · Virtual",
         "desc": "Support, resources, and education for the transgender community, with peer groups and social gatherings.",
@@ -715,6 +718,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Eastern Oregon Center for Independent Living",
+        "logo": "/resources-logos/eastern-oregon-center-for-independent-living.png",
         "mark": "EOCIL",
         "sub": "EOCIL",
         "scope": "Eastern Oregon",

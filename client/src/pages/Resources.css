@@ -1468,3 +1468,6 @@ html.calm-mode .rg-options button,
 .rg-safety-prompt .rg-safety-lead,
 .rg-safety-prompt .rg-safety-support h4 { color: #fff; }
 .rg-safety-prompt .rg-safety-crisis { color: #fff !important; }
+/* EOCIL's supplied logo is opaque; retain it until a clean cutout is ready. */
+.rg-directory-card .pdxPlace__logo[src$="/eastern-oregon-center-for-independent-living.png"],
+.rg-detail-logo .rg-logo[src$="/eastern-oregon-center-for-independent-living.png"] { filter: none; }

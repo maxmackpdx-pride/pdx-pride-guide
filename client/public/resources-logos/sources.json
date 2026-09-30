@@ -348,5 +348,33 @@
     "sourcePage": "https://hivalliance.org",
     "sourceAsset": "https://hivalliance.org/wp-content/uploads/2024/09/HIVA-logo-reversed.png",
     "checked": "2026-09-30"
+  },
+  {
+    "name": "Eastern Oregon Center for Independent Living",
+    "logo": "/resources-logos/eastern-oregon-center-for-independent-living.png",
+    "sourcePage": "https://eocil.org",
+    "sourceAsset": "https://eocil.org/assets/eocil-logo.png",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Prosper Portland",
+    "logo": "/resources-logos/prosper-portland.svg",
+    "sourcePage": "https://prosperportland.us",
+    "sourceAsset": "https://prosperportland.us/wp-content/uploads/2024/11/ProsperPortland_FullColor_Banner.svg",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Oregon Department of Veterans' Affairs",
+    "logo": "/resources-logos/oregon-department-of-veterans-affairs.svg",
+    "sourcePage": "https://www.oregon.gov/odva",
+    "sourceAsset": "https://www.oregon.gov/ODVA/Style%20Library/Images/ODVA-Logo.svg",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "TransPonder",
+    "logo": "/resources-logos/transponder.svg",
+    "sourcePage": "https://www.transponderoregon.org",
+    "sourceAsset": "Inline SVG: TransPonder Logo",
+    "checked": "2026-09-30"
   }
 ]
