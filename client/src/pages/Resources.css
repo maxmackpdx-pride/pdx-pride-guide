@@ -207,7 +207,7 @@
 .rg-options button svg {
   flex: none;
   width: 17px;
-  color: var(--res-caption);
+  color: var(--res-accent);
 }
 .rg-options button[aria-pressed="true"] {
   border-color: var(--res-accent);
