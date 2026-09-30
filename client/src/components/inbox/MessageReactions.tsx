@@ -251,41 +251,6 @@ function useLongPressReactions({
 }
 
 /**
- * Wrap any bubble markup so long-press / right-click opens the reaction tray.
- */
-export function LongPressReactable({
-  messageId,
-  self,
-  reactions,
-  disabled,
-  onToggle,
-  children,
-  className,
-}: {
-  messageId: string | number;
-  self?: boolean;
-  reactions?: Array<{ code: string; count: number; mine: boolean }>;
-  disabled?: boolean;
-  onToggle: (code: MessageReactionCode) => void | Promise<void>;
-  children: ReactNode;
-  className?: string;
-}) {
-  const rxn = useLongPressReactions({ reactions, disabled, onToggle });
-  return (
-    <div
-      ref={rxn.wrapRef}
-      className={`msg-rxn-wrap${self ? " msg-rxn-wrap--self" : " msg-rxn-wrap--other"}${className ? ` ${className}` : ""}`}
-      data-message-id={messageId}
-      {...rxn.bind}
-    >
-      {rxn.tray}
-      {children}
-      {rxn.chips}
-    </div>
-  );
-}
-
-/**
  * Inbox overlay bubble with long-press reactions (👍 👎 😂 😢 ❤️ 💔 GAY!).
  * Social posts keep separate ♥ / 💬 engagement.
  */

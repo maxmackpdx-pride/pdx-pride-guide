@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { RoomKicker } from "@/components/ds";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import {
   Briefcase,
   CalendarDays,
@@ -25,7 +25,7 @@ import "./hub-shell.css";
 
 export type HubMode = "member" | "admin";
 
-export type MemberView = "home" | "inbox" | "posts";
+export type MemberView = "home" | "posts";
 export type AdminViewKey =
   | "overview"
   | "qsearch"
@@ -203,10 +203,8 @@ export default function HubShell({
   onLogout,
   children,
 }: Props) {
-  const [location] = useLocation();
   const { open: sheetOpen, openSheet } = useInboxSheet();
-  const onInboxPage = location === "/inbox" || location.startsWith("/inbox?");
-  const inboxNavActive = sheetOpen || onInboxPage || memberView === "inbox";
+  const inboxNavActive = sheetOpen;
   const adminTabHref = `/admin?tab=${encodeURIComponent(adminView)}`;
   const alertTotal = pendingCount + (isPrimaryOwner ? ownerCount : 0);
   const moreViews = MORE_VIEWS.filter(v => {
@@ -299,10 +297,7 @@ export default function HubShell({
                 <button
                   type="button"
                   className={`hub-side__nav-btn${navBtnClass(inboxNavActive, "cyan")}`}
-                  onClick={() => {
-                    if (onInboxPage) return;
-                    openSheet();
-                  }}
+                  onClick={() => openSheet()}
                 >
                   <Inbox size={18} strokeWidth={2.2} aria-hidden />
                   <span className="label">Inbox</span>

@@ -8,7 +8,7 @@ import {
 import { useInboxThreads } from "../useInboxThreads";
 import type { Folder } from "../types";
 import { C } from "./sheet";
-import "../inbox-experiment.css";
+import "../inbox.css";
 import { inboxRoomTag } from "@/lib/rooms";
 
 const CAT_TAG: Record<string, { label: string; color: string }> = {

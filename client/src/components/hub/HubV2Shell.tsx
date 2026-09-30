@@ -209,7 +209,6 @@ export default function HubV2Shell({
   };
 
   const openPersonalInbox = () => {
-    if (location === "/inbox" || location.startsWith("/inbox?")) return;
     openSheet({ view: "inbox", account: "personal" });
     closeMobileDrawer();
   };

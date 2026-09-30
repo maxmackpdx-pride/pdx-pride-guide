@@ -33,12 +33,10 @@
   scrollbar-width: none;
 }
 
-.msg-rxn-wrap--self .msg-rxn__tray,
 .msg-rxn-wrap.inbox-exp-bubble-wrap--self .msg-rxn__tray {
   right: 0;
 }
 
-.msg-rxn-wrap--other .msg-rxn__tray,
 .msg-rxn-wrap.inbox-exp-bubble-wrap--other .msg-rxn__tray {
   left: 0;
 }
@@ -116,12 +114,10 @@
   max-width: 88%;
 }
 
-.msg-rxn-wrap--self .msg-rxn__chips,
 .inbox-exp-bubble-wrap--self .msg-rxn__chips {
   justify-content: flex-end;
 }
 
-.msg-rxn-wrap--other .msg-rxn__chips,
 .inbox-exp-bubble-wrap--other .msg-rxn__chips {
   justify-content: flex-start;
 }

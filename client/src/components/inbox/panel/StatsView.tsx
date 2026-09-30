@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import MemberGrowthChart from "@/components/admin/MemberGrowthChart";
 import { useAuth } from "@/context/AuthContext";
 import "@/components/admin/admin-stats.css";
-import "../inbox-experiment.css";
+import "../inbox.css";
 import { C, hbars } from "./sheet";
 
 type Traffic = {

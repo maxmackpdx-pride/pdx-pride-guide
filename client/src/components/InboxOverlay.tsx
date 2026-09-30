@@ -24,7 +24,7 @@ import AuthModal from "@/components/AuthModal";
 import type { EventListing } from "@shared/multiDayEvents";
 import type { MessageReactionCode } from "@shared/messageReactions";
 import { isLocalDemo } from "@/lib/localDemo";
-import "@/components/inbox/inbox-experiment.css";
+import "@/components/inbox/inbox.css";
 import "@/components/inbox/message-reactions.css";
 
 type View = "inbox" | "posts" | "stats";
@@ -159,13 +159,6 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  useEffect(() => {
-    if (!open || !initialThreadId) return;
-    setView("inbox");
-    setAccount("personal");
-    setActiveId(initialThreadId);
-  }, [open, initialThreadId]);
-
   // Close on outside press - but never on the same gesture that opened the
   // sheet (FAB / Messages tab). Also ignore the floating FAB itself so open
   // can toggle cleanly without an instant close.
@@ -233,6 +226,15 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     setQuery("");
   }, [open, initialView, initialAccount, isAdmin, isOwner, pendingAdmin.count, pendingAdmin.ownerCount]);
 
+  // After the reset above, so a thread passed in (the /inbox?thread= door, a
+  // notification row) is the one that opens.
+  useEffect(() => {
+    if (!open || !initialThreadId) return;
+    setView("inbox");
+    setAccount("personal");
+    setActiveId(initialThreadId);
+  }, [open, initialThreadId]);
+
   useEffect(() => {
     setQueueFolder("active");
     setActiveGroup(null);
@@ -250,7 +252,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     return (
       <>
         <div
-          className="inbox-overlay inbox-overlay--experiment pdx-liquid-overlay"
+          className="inbox-overlay pdx-liquid-overlay pdx-glass-rebind"
           role="dialog"
           aria-modal="true"
           aria-label="Inbox demo"
@@ -379,7 +381,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     <>
       <div className="inbox-overlay__backdrop" onClick={onClose} aria-hidden="true" />
       <div
-        className="inbox-overlay inbox-overlay--experiment pdx-liquid-overlay"
+        className="inbox-overlay pdx-liquid-overlay pdx-glass-rebind"
         data-action-context={account === "owner" ? "owner" : account === "admin" ? "admin" : "hub"}
         role="dialog"
         aria-modal="true"

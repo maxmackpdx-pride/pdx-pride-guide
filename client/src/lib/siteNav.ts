@@ -128,7 +128,6 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/submit": { section: "Eventz", title: "Submit an Event" },
   "/dashboard": { section: "Account", title: "Your Hub" },
   "/settings/notifications": { section: "Account", title: "Notification settings" },
-  "/inbox": { section: "Account", title: "Inbox" },
   "/z": { section: "Zaylist", title: "Z/ List" },
 };
 

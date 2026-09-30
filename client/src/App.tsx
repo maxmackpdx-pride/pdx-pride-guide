@@ -71,7 +71,6 @@ const AccessSafety = lazyWithReload(() => import("./pages/AccessSafety"));
 const Admin = lazyWithReload(() => import("./pages/Admin"));
 const Dashboard = lazyWithReload(() => import("./pages/Dashboard"));
 const NotificationSettings = lazyWithReload(() => import("./pages/NotificationSettings"));
-const Inbox = lazyWithReload(() => import("./pages/Inbox"));
 const MizzedBoard = lazyWithReload(() => import("./pages/MizzedBoard"));
 const Directory = lazyWithReload(() => import("./pages/Directory"));
 const RoosterRock = lazyWithReload(() => import("./pages/RoosterRock"));
@@ -87,7 +86,7 @@ const NotFound = lazyWithReload(() => import("./pages/not-found"));
 
 function isHubPath(path: string) {
   const bare = path.split("?")[0];
-  return bare === "/dashboard" || bare === "/admin" || bare === "/inbox";
+  return bare === "/dashboard" || bare === "/admin";
 }
 
 function isProfilePath(path: string) {
@@ -195,7 +194,7 @@ function AppLayout() {
             <Route path="/dashboard" component={Dashboard} />
             <Route path="/settings/notifications" component={NotificationSettings} />
             <Route path="/reset-password" component={ResetPassword} />
-            <Route path="/inbox" component={Inbox} />
+            <Route path="/inbox" component={Home} />
             <Route path="/mizzed/new" component={MizzedBoard} />
             <Route path="/mizzed" component={MizzedBoard} />
             <Route path="/directory/new">{() => <MapWorldRedirect world="places" />}</Route>

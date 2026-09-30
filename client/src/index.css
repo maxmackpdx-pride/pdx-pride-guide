@@ -2687,32 +2687,8 @@ a.event-host-name.event-host-name--link:hover {
   display: none;
 }
 
-/* Blue neon family (dark → bright) - matches deep-glass inbox drawer */
-.floating-inbox--blue-deep {
-  --fab-neon: #0a2a9c;
-  --fab-neon-rgb: 10 42 156;
-}
-
+/* The inbox is one color: the deep-glass drawer blue. */
 .floating-inbox--blue {
-  --fab-neon: #1a4dff;
-  --fab-neon-rgb: 26 77 255;
-}
-
-.floating-inbox--blue-bright {
-  --fab-neon: #3d7cff;
-  --fab-neon-rgb: 61 124 255;
-}
-
-.floating-inbox--cyan-blue {
-  --fab-neon: #1966ff;
-  --fab-neon-rgb: 25 102 255;
-}
-
-/* Legacy class names → map into blue spectrum (avoid orange/magenta FAB) */
-.floating-inbox--orange,
-.floating-inbox--cyan,
-.floating-inbox--magenta,
-.floating-inbox--yellow {
   --fab-neon: #1a4dff;
   --fab-neon-rgb: 26 77 255;
 }
@@ -2931,28 +2907,9 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   flex-direction: column;
   overflow: hidden;
   box-sizing: border-box;
-  /* Frameless floating panel, Directory-listing surface + border language. */
-  background: var(--surface-card);
-  border: 2px solid var(--neon-blue);
+  /* Surface, rim and shadow live in components/inbox/inbox.css. */
   border-radius: 22px;
-  /* The long, soft drop is what makes it read as a layer above the page
-     rather than a panel pinned into it. The accent lives on the 2px rim and
-     the 8% --neon-bloom; the 46px + 14px full-strength blue halo it replaced
-     was the retired glow frame. */
-  box-shadow:
-    0 40px 90px -20px rgba(0, 0, 0, 0.85),
-    0 8px 28px -12px rgba(0, 0, 0, 0.7),
-    var(--neon-bloom);
   animation: inbox-overlay-in 0.2s var(--ease-out, ease-out);
-}
-
-/* Calm collapses --neon-bloom to `none`, which is not a valid shadow list
-   item, so calm re-states the depth on its own. */
-html.calm-mode .inbox-overlay,
-:root[data-calm="true"] .inbox-overlay {
-  box-shadow:
-    0 40px 90px -20px rgba(0, 0, 0, 0.85),
-    0 8px 28px -12px rgba(0, 0, 0, 0.7);
 }
 
 /* Group chat thread chrome (lives inside .inbox-overlay, not a side drawer). */
@@ -3314,11 +3271,6 @@ html.calm-mode .inbox-overlay,
     border-radius: 18px;
     border-left-width: 2px;
     box-shadow: var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.55)), var(--neon-bloom);
-  }
-
-  html.calm-mode .inbox-sheet-host .inbox-overlay,
-  :root[data-calm="true"] .inbox-sheet-host .inbox-overlay {
-    box-shadow: var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.55));
   }
 }
 
@@ -18135,15 +18087,6 @@ html.calm-mode .board-detail-modal,
   .board-how__toggle svg { transition: none; }
 }
 
-/* Scroll affordance uses masks only; controls remain native scroll content. */
-.pdx-scroll-fade-x { --fade: 26px; scrollbar-width: thin; }
-.pdx-scroll-fade-x.has-start { mask-image: linear-gradient(90deg, transparent, #000 var(--fade), #000); -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--fade), #000); }
-.pdx-scroll-fade-x.has-end { mask-image: linear-gradient(90deg, #000, #000 calc(100% - var(--fade)), transparent); -webkit-mask-image: linear-gradient(90deg, #000, #000 calc(100% - var(--fade)), transparent); }
-.pdx-scroll-fade-x.has-start.has-end { mask-image: linear-gradient(90deg, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent); }
-
-@media (prefers-reduced-motion: reduce) {
-  .pdx-scroll-fade-x { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
-}
 .z-board-address {
   position: relative;
   z-index: 12;

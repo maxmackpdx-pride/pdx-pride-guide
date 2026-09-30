@@ -2,6 +2,8 @@ const STORAGE_KEY = "pdx-floating-inbox-bottom";
 const MIN_BOTTOM_PX = 24;
 const DEFAULT_BOTTOM_PERCENT = 30;
 const FAB_SIZE_PX = 60;
+// Board 30: a dropped FAB snaps to the dock's 8px rhythm.
+const SNAP_PX = 8;
 
 export function defaultFloatingInboxBottom(viewportHeight = window.innerHeight): number {
   return Math.round(viewportHeight * (DEFAULT_BOTTOM_PERCENT / 100));
@@ -33,7 +35,7 @@ export function readFloatingInboxBottom(viewportHeight = window.innerHeight): nu
 }
 
 export function writeFloatingInboxBottom(value: number, viewportHeight = window.innerHeight): number {
-  const clamped = clampFloatingInboxBottom(value, viewportHeight);
+  const clamped = clampFloatingInboxBottom(Math.round(value / SNAP_PX) * SNAP_PX, viewportHeight);
   try {
     localStorage.setItem(STORAGE_KEY, String(clamped));
   } catch {

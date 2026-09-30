@@ -10,7 +10,7 @@ import { DIRECTORY_TYPES, DIRECTORY_TYPE_ADMIN_LABELS } from "@shared/directoryT
 import { publicHttpUrl } from "@shared/safeHttpUrl";
 import type { QueueFolder } from "../types";
 import { C, MONO } from "./sheet";
-import "../inbox-experiment.css";
+import "../inbox.css";
 
 type QueueRowKind =
   | "submission"

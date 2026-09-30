@@ -231,10 +231,9 @@
  * the calmer utility layer (boards, hub, admin). These are the utility layer's
  * surfaces, hairlines, lit-plate chrome, and seam heights.
  *
- * They already existed scoped to `.hub-root` (client/src/components/hub/hub-v2.css)
- * and `.inbox-overlay--experiment`. Those scoped copies carry identical values and
- * still win on specificity, so promoting them to :root is additive: it gives every
- * other surface (HAUSING, future boards) the same vocabulary without a local copy.
+ * They started scoped to `.hub-root` (client/src/components/hub/hub-v2.css) and
+ * the inbox sheet. The inbox now reads the card and hairline values from here;
+ * the copies left in those scopes are the ones whose calm values differ.
  *
  * Source of truth: design-system/tokens/colors.css + effects.css + layout.css
  */

@@ -17,8 +17,7 @@ const DRAG_THRESHOLD_PX = 8;
 /**
  * Desktop-only floating inbox FAB. Toggles the shared InboxOverlay via
  * InboxSheetProvider. Drag vertically to reposition; default sits 30% up from
- * the bottom edge. Hidden on mobile (bottom nav owns inbox there) and on /inbox
- * (full shell page).
+ * the bottom edge. Hidden on mobile (bottom nav owns inbox there).
  * Local demo (localhost / Vite): FAB is always shown so chrome can be demoed
  * without a session; the sheet prompts to sign in for real threads.
  */
@@ -40,7 +39,6 @@ export default function FloatingInbox() {
     startBottom: 0,
   });
 
-  const onInboxPage = location === "/inbox" || location.startsWith("/inbox?");
   // On the maps the control rack owns the right edge; the FAB sits just inside it.
   const onMap = /^\/(map|outzide)(\/|$|\?)/.test(location);
 
@@ -146,7 +144,7 @@ export default function FloatingInbox() {
   );
 
   // Production: members only. Local demo: always show FAB (guest opens glass shell).
-  if ((!user && !localDemo) || onInboxPage) return null;
+  if (!user && !localDemo) return null;
 
   const anchorStyle = {
     bottom: `${bottomPx}px`,

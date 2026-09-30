@@ -3,7 +3,7 @@ import { useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { C } from "./sheet";
-import "../inbox-experiment.css";
+import "../inbox.css";
 
 type PostAction = { label: string; href?: string };
 
