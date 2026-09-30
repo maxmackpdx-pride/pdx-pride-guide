@@ -5,7 +5,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Drawer } from "vaul";
 import { Command } from "cmdk";
@@ -121,12 +121,12 @@ function Mark({ org }: { org: ResourceOrg }) {
   );
 }
 
-function SafetyNotice() {
+function SafetyNotice({ openCard = false }: { openCard?: boolean }) {
   return (
-    <aside className="pdxPlace pdx-glass-rebind rg-safety-prompt" style={{ "--c": "#FF2400", "--_c": "#FF2400" } as CSSProperties} aria-label="Urgent safety help">
-      <div className="pdxPlace__body pdx-glass-card pdx-glass-rebind">
-        <div className="pdxPlace__sheen pdx-glass-sheen--specular" aria-hidden="true" />
-        <div className="pdxPlace__seam pdx-refract-seam" aria-hidden="true" />
+    <aside className={openCard ? "rg-safety-prompt rg-safety-open" : "pdxPlace pdx-glass-rebind rg-safety-prompt"} style={{ "--c": "#FF2400", "--_c": "#FF2400" } as CSSProperties} aria-label="Urgent safety help">
+      <div className={openCard ? "rg-safety-open-body" : "pdxPlace__body pdx-glass-card pdx-glass-rebind"}>
+        {!openCard && <div className="pdxPlace__sheen pdx-glass-sheen--specular" aria-hidden="true" />}
+        {!openCard && <div className="pdxPlace__seam pdx-refract-seam" aria-hidden="true" />}
         <div className="rg-safety-content">
       <div className="rg-safety-heading">
         <ShieldAlert size={28} aria-hidden="true" />
@@ -170,10 +170,10 @@ function SafetyNotice() {
   );
 }
 
-function Support({ showSafety = true }: { showSafety?: boolean }) {
+function Support({ showSafety = true, openCard = false }: { showSafety?: boolean; openCard?: boolean }) {
   return (
-    <div className="rg-support">
-      {showSafety && <SafetyNotice />}
+    <div className={openCard ? "rg-support rg-support-open" : "rg-support"}>
+      {showSafety && <SafetyNotice openCard={openCard} />}
       <div className="rg-talk">
         <span className="rg-eyebrow">Find local services</span>
         <h3>Start with 211info.</h3>
@@ -245,7 +245,7 @@ function ResourceCard({
       phoneHref={org.phone}
       description={org.desc}
       website={org.url}
-      shareUrl={`https://www.zaylist.com/resources?resource=${encodeURIComponent(org.name)}`}
+      shareUrl={`https://www.zaylist.com/rezources?resource=${encodeURIComponent(org.name)}`}
       className={`rg-directory-card pdxPlace--clickable${org.logoSurface === "light" ? " rg-directory-card--light-logo" : ""}`}
       onClick={() => onOpen(row)}
       footer={
@@ -266,15 +266,19 @@ function ResourceCard({
 }
 
 export default function Resources() {
+  const [location, navigate] = useLocation();
+  useEffect(() => {
+    if (location === "/resources") navigate(`/rezources${window.location.search}${window.location.hash}`, { replace: true });
+  }, [location, navigate]);
   const { toast } = useToast();
   const [sharing, setSharing] = useState(false);
   async function shareResources() {
-    const url = "https://www.zaylist.com/resources";
+    const url = "https://www.zaylist.com/rezources";
     setSharing(true);
     try {
       if (navigator.share) {
         try {
-          await navigator.share({ title: "Resources | Zaylist", url });
+          await navigator.share({ title: "ReZources | Zaylist", url });
           return;
         } catch (error) {
           if (error instanceof Error && error.name === "AbortError") return;
@@ -283,7 +287,7 @@ export default function Resources() {
       await navigator.clipboard.writeText(url);
       toast({
         title: "Link copied",
-        description: "Share Zaylist Resources with someone.",
+        description: "Share Zaylist ReZources with someone.",
       });
     } catch {
       toast({
@@ -297,7 +301,7 @@ export default function Resources() {
   }
 
   usePageSeo(
-    "Resources | Zaylist",
+    "ReZources | Zaylist",
     "Art, community, opportunity, care, and support for queer and trans Oregon. Explore local organizations and food pantries to find your next connection.",
   );
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -380,13 +384,13 @@ export default function Resources() {
       <header className="rg-intro rg-wrap">
         <div className="rg-intro-top">
           <span className="rg-eyebrow">
-            Resources / All the ways we show up
+            ReZources / All the ways we show up
           </span>
           <button
             className="pdxBtn rg-share"
             onClick={shareResources}
             disabled={sharing}
-            aria-label="Share Resources"
+            aria-label="Share ReZources"
           >
             <Share2 size={16} aria-hidden="true" /> Share
           </button>
@@ -419,7 +423,7 @@ export default function Resources() {
         </button>
       </header>
       <section className="rg-layout rg-wrap">
-        <aside className="rg-controls" aria-label="Choose resources">
+        <aside className="rg-controls" aria-label="Choose ReZources">
           <div className="rg-step">
             <span className="rg-step-number" aria-hidden="true">
               01
@@ -496,7 +500,7 @@ export default function Resources() {
                 aria-pressed={categoryId === null && mode === "directory"}
                 onClick={() => selectSearchCategory(null)}
               >
-                Show all resources
+                Show all ReZources
               </button>
             </div>
           </div>}
@@ -589,7 +593,7 @@ export default function Resources() {
             }}
           >
             <Dialog.Title className="sr-only">
-              Search community resources
+              Search community ReZources
             </Dialog.Title>
             <Dialog.Description className="sr-only">
               Search interests and organizations across the entire resource
@@ -600,7 +604,7 @@ export default function Resources() {
             </Dialog.Close>
             <Command>
               <Command.Input
-                aria-label="Search all resources"
+                aria-label="Search all ReZources"
                 placeholder="Art, grants, groups, studios, support…"
               />
               <Command.List>
@@ -667,7 +671,7 @@ export default function Resources() {
             <div className="rg-drawer-body">
               <Drawer.Title className="sr-only">Immediate safety and support</Drawer.Title>
               <Drawer.Description className="sr-only">Call 911 for immediate danger, or choose a crisis support line. Includes Oregon safety information.</Drawer.Description>
-              <Support />
+              <Support openCard />
             </div>
           </Drawer.Content>
         </Drawer.Portal>

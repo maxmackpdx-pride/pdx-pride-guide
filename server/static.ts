@@ -9,7 +9,7 @@ import { homeBootLogoHtml } from "../shared/homeBoot";
 const APP_PATHS = new Set([
   "/", "/map-demo", "/index.html", "/z", "/events", "/map", "/schedule", "/submit", "/gigz", "/giftz", "/sellz",
   "/gigz/new", "/giftz/new", "/sellz/new", "/mizzed/new",
-  "/the-hauz", "/the-hauz/new", "/about", "/aboutz", "/resources", "/resume", "/contact", "/sponsors", "/access", "/legal",
+  "/the-hauz", "/the-hauz/new", "/about", "/aboutz", "/resources", "/rezources", "/resume", "/contact", "/sponsors", "/access", "/legal",
   "/admin", "/dashboard", "/settings/notifications", "/reset-password", "/inbox", "/mizzed", "/directory", "/outzide", "/design-preview", "/design-system/specimen", "/next", "/darkroom",
 ]);
 function isAppPath(pathname: string) {

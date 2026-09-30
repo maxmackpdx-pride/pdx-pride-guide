@@ -75,6 +75,7 @@ const TRACKED_PREFIXES = [
   "/giftz",
   "/about",
   "/resources",
+  "/rezources",
   "/contact",
   "/directory",
   "/mizzed",

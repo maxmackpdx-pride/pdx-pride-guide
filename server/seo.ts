@@ -217,7 +217,7 @@ export function buildSitemapXml(events: SeoEvent[]) {
     "/mizzed",
     "/the-hauz",
     "/about",
-    "/resources",
+    "/rezources",
     "/contact",
     "/sponsors",
     "/access",
@@ -253,7 +253,7 @@ ${eventUrls}
 
 export function buildCanonicalUrl(requestPath: string) {
   const path = (requestPath.split("?")[0]?.split("#")[0] || "/").trim() || "/";
-  const normalized = path.startsWith("/") ? path : `/${path}`;
+  const normalized = path === "/resources" ? "/rezources" : path.startsWith("/") ? path : `/${path}`;
   return normalized === "/" ? `${SITE_URL}/` : `${SITE_URL}${normalized}`;
 }
 
@@ -274,8 +274,8 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "Tucker Max Resume | Zaylist",
     description: "Sales and operations leader with 12+ years in big tech and EV brands, now producing live events and building community platforms in Portland.",
   },
-  "/resources": {
-    title: "Resources | Zaylist",
+  "/rezources": {
+    title: "ReZources | Zaylist",
     description: "Nonprofits, hotlines, and LGBTQ+ groups for queer and trans Oregon: health care, safety, legal help, youth, community, funding, and more.",
   },
   "/contact": {

@@ -1501,3 +1501,26 @@ html.calm-mode .rg-options button,
 
 .rg-drawer .rg-food-finder { --c: var(--neon-yellow); --action-accent: var(--neon-yellow); width: 100%; min-height: 58px !important; margin-top: 24px; font: 800 23px/1.15 var(--font-display) !important; white-space: normal; }
 .rg-drawer .rg-food-finder-caption { margin: 10px 0 22px; font-size: 13px; line-height: 1.5; color: var(--res-caption); }
+
+/* Safety drawer uses the same single surface and text rhythm as resource drawers. */
+.rg-support-open .rg-safety-prompt { margin-bottom: 24px; }
+.rg-support-open .rg-safety-support h4,
+.rg-support-open .rg-talk h3 {
+  font: 700 23px/1.2 var(--font-display);
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  color: #fff;
+  margin: 0 0 12px;
+}
+.rg-support-open .rg-safety-support p,
+.rg-support-open .rg-safety-law p,
+.rg-support-open .rg-safety-law ul,
+.rg-support-open .rg-talk p { font-size: 14px; line-height: 1.7; color: #fff; }
+.rg-support-open .rg-talk {
+  padding: 24px 0;
+  background: transparent;
+  border-top-color: var(--res-control-border);
+}
+.rg-support-open .rg-talk .rg-eyebrow { display: block; margin-bottom: 12px; }
+.rg-support-open .rg-hotlines span { font-size: 14px; line-height: 1.5; color: #fff; }
+.rg-support-open .rg-safety-law summary { font: 700 20px/1.3 var(--font-display); text-transform: uppercase; }

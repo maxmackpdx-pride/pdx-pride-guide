@@ -182,6 +182,7 @@ function AppLayout() {
               {() => <Redirect to="/the-hauz" />}
             </Route>
             <Route path="/resources" component={Resources} />
+            <Route path="/rezources" component={Resources} />
             <Route path="/about" component={About} />
             <Route path="/aboutz" component={About} />
             <Route path="/resume" component={Resume} />
