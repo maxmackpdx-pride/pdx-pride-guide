@@ -1,0 +1,23 @@
+/*
+ * Map chrome (boards 41 to 44): one skeleton, two inks.
+ * Rim, shadow, radii, targets and status are shared. A map sets data-map on its
+ * shell and gets its ink, light and accent. Maps never take the 8% bloom.
+ */
+:root {
+  --status-closed: var(--neon-red, #ff2400);
+  --status-caution: var(--amber, #ffb23d);
+  --status-open: var(--green-acid, #39ff14);
+}
+[data-map] {
+  --map-chrome-radius: 18px;
+  --map-control-radius: 12px;
+  --map-target: 44px;
+  --map-rim: #050706;
+  --map-shadow: 0 0 0 1px var(--map-rim), 0 16px 44px #0008, inset 0 1px 0 #ffffff16;
+  --map-panel: linear-gradient(145deg, color-mix(in srgb, var(--map-light) 13%, transparent), transparent 58%), color-mix(in srgb, var(--map-ink) 90%, transparent);
+  /* Selected means "you are here": the map's light, never the boards' lime. */
+  --map-selected-tint: color-mix(in srgb, var(--map-light) 14%, transparent);
+  --map-selected-line: inset 0 -2px 0 var(--map-light);
+}
+[data-map="mapz"] { --map-ink: #090b13; --map-light: #94b5cf; --map-accent: var(--panel-cyan, #19e3ff); }
+[data-map="outzide"] { --map-ink: #101a16; --map-light: #a9bc98; --map-accent: #ff8c00; }

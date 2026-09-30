@@ -16,7 +16,7 @@ import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { ROOMS, roomTitle } from "@/lib/rooms";
 import ZaydarCanvas, { type MapSelectionRect, type ZaydarHandle } from "@/components/ZaydarCanvas";
-import { ChevronRight, LocateFixed } from "lucide-react";
+import { ChevronRight, Layers, LocateFixed, Search } from "lucide-react";
 import MapSwitch from "@/components/MapSwitch";
 import { useAuth } from "@/context/AuthContext";
 
@@ -774,7 +774,12 @@ export default function ZaydarMapDemo() {
     })?.key||null;
     setSelected(key);
   },[marks,params,placeId,eventId]);
-  return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
+  const openMapSearch = () => {
+    // Events have no search box; Placez does. A layer that has one keeps it.
+    if (!activeLayer || activeLayer === "events" || activeLayer === "houz") changeLayer("places");
+    requestAnimationFrame(() => document.querySelector<HTMLInputElement>(".zaydar-layer-sheet input[type=search]")?.focus());
+  };
+  return <section ref={pageRef} className="living-map-page zaydar-map-demo" data-map="mapz" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
     <ZaydarCanvas initialCamera={initialCamera} ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
       if(!["places","mizzed","gigz","giftz","sellz"].includes(world))return;
       if(zoom<16.8){mapRef.current?.send("fit",{bounds});return;}
@@ -794,10 +799,16 @@ export default function ZaydarMapDemo() {
       {previewDateTime && <button type="button" className="zaydar-map-live" onClick={() => setPreviewDateTime("")}>Live</button>}
     </div>
     <MapSwitch current="mapz" />
+    {/* Board 42: one rack on both maps. Search, layers, locate; then zoom; then the map's own slot. */}
     <div className="zaydar-demo-navigation pdx-glass-rebind" aria-label="Map controls">
+      <button type="button" className="zaydar-control-icon" onClick={openMapSearch} aria-label="Search the map" title="Search"><Search size={20} aria-hidden="true"/></button>
+      <button type="button" className="zaydar-control-icon" onClick={()=>changeLayer(activeLayer?null:"events")} aria-label="Layers" title="Layers" aria-expanded={activeLayer!==null}><Layers size={20} aria-hidden="true"/></button>
+      <button className="zaydar-control-location" onClick={locateMe} aria-label="Locate me" title="Locate me" aria-busy={locating} disabled={locating}><LocateFixed size={22} aria-hidden="true"/></button>
+      <span className="zaydar-control-gap" aria-hidden="true" />
       <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in" title="Zoom in">+</button>
       <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:-1})} aria-label="Zoom out" title="Zoom out">−</button>
-      <button className="zaydar-control-location" onClick={locateMe} aria-label="Locate me" title="Locate me" aria-busy={locating} disabled={locating}><LocateFixed size={22} aria-hidden="true"/></button>
+      <span className="zaydar-control-gap" aria-hidden="true" />
+      <button type="button" className="zaydar-control-tonight" aria-pressed={timeFilter === "tonight"} onClick={() => setTimeFilter(timeFilter === "tonight" ? "default" : "tonight")} title="Tonight only">Tonight</button>
       <button className="zaydar-control-labels" title="Show map labels" aria-label="Show map labels" aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
     </div>
     {locateError&&<p className="zaydar-demo-notice" role="status">{locateError}</p>}

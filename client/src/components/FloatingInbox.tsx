@@ -41,6 +41,8 @@ export default function FloatingInbox() {
   });
 
   const onInboxPage = location === "/inbox" || location.startsWith("/inbox?");
+  // On the maps the control rack owns the right edge; the FAB sits just inside it.
+  const onMap = /^\/(map|outzide)(\/|$|\?)/.test(location);
 
   useEffect(() => {
     const onResize = () => {
@@ -163,6 +165,7 @@ export default function FloatingInbox() {
         "floating-inbox",
         `floating-inbox--${neon.id}`,
         needsAttention ? "floating-inbox--attention" : "",
+        onMap ? "floating-inbox--map" : "",
       ]
         .filter(Boolean)
         .join(" ")}

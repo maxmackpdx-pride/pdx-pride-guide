@@ -2743,6 +2743,9 @@ a.event-host-name.event-host-name--link:hover {
     width: 60px;
     height: 60px;
   }
+  .floating-inbox.floating-inbox--map {
+    right: 90px;
+  }
 
   /* Idle: soft static neon. Pulse only with .floating-inbox--attention */
   /* Glow by the rule: at rest the halo is off and the FAB composes the 8% bloom.
