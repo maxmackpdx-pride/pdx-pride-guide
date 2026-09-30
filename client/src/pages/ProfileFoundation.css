@@ -174,3 +174,18 @@
 .pp-foundation .pp-updates__dot { box-shadow: none; }
 .pp-foundation .safety-guide { margin-top: 32px; padding: 24px 0; background: none; border: 0; border-block: 1px solid var(--panel-border-2); border-radius: 0; box-shadow: none; }
 .pp-foundation .pp-adventures__card { background: var(--glass-card-bg); border: var(--glass-card-border); box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark), var(--neon-bloom); }
+
+/* Supplied draggable grid, fitted to real profile sections rather than square demo tiles. */
+.pp-widget-board__toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.pp-widget-board__toolbar p { flex: 1 1 240px; color: var(--text-lo); font: 400 13px/1.5 var(--font-body); }
+.pp-widget-board__toolbar > div { display: flex; gap: 8px; }
+.pp-widget-board__toolbar button { min-height: 44px; padding: 0 16px; border: 1px solid var(--profile-acc-t); color: var(--profile-acc-t); border-radius: 22px; font: 700 14px/1 var(--font-display); text-transform: uppercase; background: var(--btn-glow-bg); }
+.pp-foundation .pp-widget-grid [data-slot="widget"] { min-width: 0; box-shadow: none !important; }
+.pp-foundation .pp-widget-grid [data-slot="widget"] > div { padding: 20px; background: var(--glass-card-bg); color: var(--text-hi); border: 1px solid var(--panel-border-2); box-shadow: none; }
+.pp-foundation .pp-widget-grid.is-editing [data-slot="widget"] { outline: 1px dashed var(--profile-acc-t); outline-offset: 3px; }
+.pp-foundation .pp-widget-grid [data-slot="widget"]:focus-visible { outline: 2px solid var(--profile-acc-t); outline-offset: 4px; }
+.pp-foundation .pp-widget-grid :is(.hp-panel, .pp-top8, .flyer-stash, .pp-adventures) { margin: 0; padding: 0; border-top: 0; }
+.pp-foundation .pp-widget-grid .pp-updates__rail { overflow: visible; }
+@media (max-width: 600px) {
+  .pp-foundation .pp-widget-grid [data-slot="widget"] > div { padding: 14px; }
+}

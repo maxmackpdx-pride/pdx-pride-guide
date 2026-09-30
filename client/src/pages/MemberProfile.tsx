@@ -41,6 +41,7 @@ import { profileCssVars } from "@/components/profile/profileHelpers";
 import { copyTextToClipboard } from "@/lib/copyText";
 import "./MemberProfile.css";
 import "./ProfileFoundation.css";
+import ProfileWidgetGrid, { type ProfileSection } from "@/components/profile/ProfileWidgetGrid";
 
 export default function MemberProfile() {
   const [routeMatch, routeParams] = useRoute("/u/:username");
@@ -317,15 +318,16 @@ export default function MemberProfile() {
           <Marquee items={marqueeItems} speed={30} className="pp-marquee pp-marquee--accent" />
         </div>
 
-        <HostingPanel
-          upcoming={hosting.upcoming}
-          past={hosting.past}
-          displayName={data.displayName}
-          onEventClick={(e) => openEvent(e.id)}
-        />
-
-        <div className={`pp-split${!isOwner && !data.top8?.length && !bigOne ? " pp-split--single" : ""}`}>
-          <div className="pp-split__left">
+        <ProfileWidgetGrid key={username} username={username} sections={[
+          ...(hosting.upcoming.length || hosting.past.length ? [{ id: "hosting", label: "Hosting", size: "wide", content: (
+            <HostingPanel
+              upcoming={hosting.upcoming}
+              past={hosting.past}
+              displayName={data.displayName}
+              onEventClick={(e) => openEvent(e.id)}
+            />
+          ) } as ProfileSection] : []),
+          ...(isOwner || data.top8?.length ? [{ id: "top8", label: "Top 8", size: "sm", content: (
             <ProfileTop8
               entries={data.top8 ?? []}
               isOwner={isOwner}
@@ -334,25 +336,8 @@ export default function MemberProfile() {
               onRequireAuth={() => setShowAuth(true)}
               onPlaceClick={openPlaceFromTop8}
             />
-            {bigOne && (
-              <TheBigOne
-                event={bigOne}
-                goingCount={
-                  summaryForEvent(attendanceSummaries, bigOne.id)?.count ?? bigOne.goingCount
-                }
-                goingAvatars={chipsForEvent(attendanceSummaries, bigOne.id, 4)}
-                isGoing={myEventIds.has(bigOne.id)}
-                onRsvp={() => toggleRsvp(bigOne.id)}
-                onOpen={() => openEvent(bigOne.id)}
-              />
-            )}
-          </div>
-          <div className="pp-split__right">
-            <GoingRail
-              events={going.upcoming}
-              attendanceSummaries={attendanceSummaries}
-              onEventClick={(e) => openEvent(e.id)}
-            />
+          ) } as ProfileSection] : []),
+          ...(posts.length ? [{ id: "updates", label: "Updates", size: "sm", content: (
             <UpdatesPanel
               posts={posts}
               author={{
@@ -363,16 +348,36 @@ export default function MemberProfile() {
                 username: data.username,
               }}
             />
-          </div>
-        </div>
-
-        {/* Full shell width (not locked in the left split column) */}
-        <FlyerStash
-          events={stashEvents}
-          onEventClick={(e) => openEvent(e.id)}
-        />
-
-        {isOwner && <OutzAdventures adventures={apiData.outzAdventures} />}
+          ) } as ProfileSection] : []),
+          ...(bigOne ? [{ id: "big-one", label: "The Big One", size: "sm", content: (
+            <TheBigOne
+              event={bigOne!}
+              goingCount={
+                summaryForEvent(attendanceSummaries, bigOne!.id)?.count ?? bigOne!.goingCount
+              }
+              goingAvatars={chipsForEvent(attendanceSummaries, bigOne!.id, 4)}
+              isGoing={myEventIds.has(bigOne!.id)}
+              onRsvp={() => toggleRsvp(bigOne!.id)}
+              onOpen={() => openEvent(bigOne!.id)}
+            />
+          ) } as ProfileSection] : []),
+          ...(going.upcoming.length ? [{ id: "going", label: "Going", size: "sm", content: (
+            <GoingRail
+              events={going.upcoming}
+              attendanceSummaries={attendanceSummaries}
+              onEventClick={(e) => openEvent(e.id)}
+            />
+          ) } as ProfileSection] : []),
+          ...(stashEvents.length ? [{ id: "stash", label: "The Stash", size: "wide", content: (
+            <FlyerStash
+              events={stashEvents}
+              onEventClick={(e) => openEvent(e.id)}
+            />
+          ) } as ProfileSection] : []),
+          ...(isOwner ? [{ id: "outz", label: "Outz adventures", size: "wide", content: (
+            <OutzAdventures adventures={apiData.outzAdventures} />
+          ) } as ProfileSection] : []),
+        ]} />
 
         {!isOwner && <SafetyGuide context="profile" compact />}
         <ProfileFooter username={data.username} />
