@@ -39,7 +39,7 @@ const HOTLINES = [
 
 function OrgCard({ org, color }: { org: ResourceOrg; color: string }) {
   return (
-    <article className="res-card" role="listitem" style={{ "--c": color } as React.CSSProperties}>
+    <article className="res-card" role="listitem" style={{ "--res-accent": color } as React.CSSProperties}>
       <div className="res-card__top">
         {org.logo
           ? <img className="res-card__logo" src={org.logo} alt={`${org.name} logo`} loading="lazy" decoding="async" />
@@ -65,7 +65,7 @@ function CategorySection({ cat, index, orgs, filtered }: { cat: ResourceCategory
     if (el) el.scrollBy({ left: dir * Math.max(280, el.clientWidth * 0.85), behavior: "smooth" });
   };
   return (
-    <section className="res-sec" id={cat.id} style={{ "--c": cat.color } as React.CSSProperties} aria-labelledby={`${cat.id}-title`}>
+    <section className="res-sec" id={cat.id} style={{ "--res-accent": cat.color } as React.CSSProperties} aria-labelledby={`${cat.id}-title`}>
       <div className="res-sec__head">
         <div>
           <span className="res-mono res-sec__eyebrow">
@@ -137,12 +137,12 @@ export default function Resources() {
             <span className="res-hl__num">211info</span>
             <p>Free connection to 7,000+ health and social service programs, in 150+ languages. Housing, food, utilities, and more. Text your zip to 898211.</p>
             <div className="res-card__acts">
-              <a className="res-btn" href="tel:211" style={{ "--c": "#00FFFF" } as React.CSSProperties}>Call 211</a>
+              <a className="res-btn" href="tel:211" style={{ "--res-accent": "#00FFFF" } as React.CSSProperties}>Call 211</a>
               <a className="res-btn res-btn--quiet" href="https://www.211info.org" target="_blank" rel="noopener noreferrer">Search</a>
             </div>
           </div>
           {HOTLINES.map(h => (
-            <a key={h.tel} className="res-hl" href={`tel:${h.tel}`} style={{ "--c": h.c } as React.CSSProperties}>
+            <a key={h.tel} className="res-hl" href={`tel:${h.tel}`} style={{ "--res-accent": h.c } as React.CSSProperties}>
               <span className="res-hl__num">{h.num}</span>
               <span className="res-hl__who">{h.who}</span>
               <p>{h.note}</p>
