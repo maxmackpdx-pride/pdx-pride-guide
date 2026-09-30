@@ -12,10 +12,8 @@ import AuthModal from "./AuthModal";
 import StankTicketGate from "./StankTicketGate";
 import UserAvatar from "@/components/UserAvatar";
 import SiteSearch, { useSiteSearchHotkey } from "@/components/SiteSearch";
-import { Divider } from "@/components/ds";
-import { navGlassPointer } from "@/components/ui/nav-glass";
-import { MobileLiquidGlass } from "@/components/ui/mobile-liquid-glass";
 import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
+import { NavShell } from "@/components/ui/nav-shell";
 import { counterpartyAvatar } from "@/lib/inboxAvatar";
 import { contextLabelOf, contextTypeOf, notifyContextTag } from "@/lib/inboxContext";
 import { BOARD_NAV, MOBILE_TOP_NAV, PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
@@ -709,8 +707,7 @@ export default function Nav() {
 
   return (
     <>
-      <header ref={headerRef} className="site-header site-header--real-seam site-header--compact site-header--caption-split z-glass site-header--glass" data-seam="bottom" data-map-surface={location.startsWith("/map") || location.startsWith("/outzide") || undefined} onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}>
-        <MobileLiquidGlass quiet={false} />
+      <NavShell ref={headerRef} mapSurface={location.startsWith("/map") || location.startsWith("/outzide")} loading={seamLoading}>
         <div className="site-header-inner">
           <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">
             <GlitchLogo
@@ -841,13 +838,7 @@ export default function Nav() {
             </button>
           </div>
         </div>
-        <Divider
-          seam
-          thin
-          loading={seamLoading}
-          className="site-header-rainbow-seam"
-        />
-      </header>
+      </NavShell>
 
       {showStankTicketGate && (
         <StankTicketGate
