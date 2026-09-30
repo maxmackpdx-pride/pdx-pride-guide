@@ -1,3 +1,8 @@
+import { useAuth } from "@/context/AuthContext";
+import AdminProfilePhotoReject from "@/components/admin/AdminProfilePhotoReject";
+import AdminProfileModeration from "@/components/admin/AdminProfileModeration";
+import ReportAccount from "@/components/profile/ReportAccount";
+import { coverCropToImgStyle } from "@/lib/coverCrop";
 import type React from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
@@ -20,6 +25,7 @@ export default function ProfileHero({
   data: MemberProfileData;
   actionRow: React.ReactNode;
 }) {
+  const { user: viewer } = useAuth();
   const isPromoter = !!data.showPromoterVariant;
   const displayName = data.displayName || data.username;
   const memberYear = data.memberSince && !Number.isNaN(new Date(data.memberSince).getTime())
@@ -31,7 +37,9 @@ export default function ProfileHero({
 
   return (
     <section className={`mp-hero${isPromoter ? " mp-hero--promoter" : ""}`}>
-      {bannerImageSrc ? (
+      {data.coverImageUrl ? (
+        <img className="mp-hero__banner-img" src={data.coverImageUrl} alt="" style={coverCropToImgStyle(data.coverCrop)} />
+      ) : bannerImageSrc ? (
         <img className="mp-hero__banner-img" src={bannerImageSrc} alt="" />
       ) : (
         <>
@@ -53,6 +61,9 @@ export default function ProfileHero({
               username={data.username}
               size={104}
             />
+            {data.viewerIsAdmin && !data.isOwner && data.photoUrl && <AdminProfilePhotoReject username={data.username} />}
+            {data.viewerIsAdmin && !data.isOwner && <AdminProfileModeration username={data.username} accountStatus={data.accountStatus} shadowBanned={!!data.shadowBanned} canDeleteAccount={!!viewer?.isPrimaryOwner} />}
+            {!data.isOwner && viewer && !data.viewerIsAdmin && <ReportAccount username={data.username} />}
           </div>
           <div className="mp-hero__main">
             <div className="mp-hero__badgerow">

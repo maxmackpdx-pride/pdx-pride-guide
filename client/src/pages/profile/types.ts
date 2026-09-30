@@ -170,6 +170,8 @@ export type MemberProfileData = {
   isSiteOwner?: boolean;
   /** True when the signed-in viewer is a site admin viewing someone else's profile. */
   viewerIsAdmin?: boolean;
+  accountStatus?: string | null;
+  shadowBanned?: boolean;
   isFollowing?: boolean;
   blockStatus?: { blockedByViewer: boolean; blockedViewer: boolean; interactionBlocked: boolean };
   activity?: {
