@@ -38,9 +38,6 @@
   display:none;
 }
 @media(max-width:960px){
-  .zaydar-map-demo{
-    --map-dock-clear:calc(108px + env(safe-area-inset-bottom,0px));
-  }
   .zaydar-map-demo .zaydar-map-controls-launcher,
   .zaydar-map-demo .zaydar-demo-navigation{
     bottom:calc(var(--map-dock-clear) + 8px);

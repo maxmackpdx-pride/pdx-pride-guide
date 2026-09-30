@@ -211,6 +211,8 @@
   --map-chrome-radius: 18px;
   --map-control-radius: 12px;
   --map-target: 44px;
+  /* Phones: keep map controls clear of the app dock. */
+  --map-dock-clear: calc(108px + env(safe-area-inset-bottom, 0px));
   --map-rim: #050706;
   --map-shadow: 0 0 0 1px var(--map-rim), 0 16px 44px #0008, inset 0 1px 0 #ffffff16;
   --map-panel: linear-gradient(145deg, color-mix(in srgb, var(--map-light) 13%, transparent), transparent 58%), color-mix(in srgb, var(--map-ink) 90%, transparent);
