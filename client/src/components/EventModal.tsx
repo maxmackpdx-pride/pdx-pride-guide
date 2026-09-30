@@ -26,7 +26,7 @@ import { downloadIcsFile, googleCalendarUrl } from "@/lib/eventLinks";
 import { formatPacificDateTime } from "@/lib/countdown";
 import { eventPath } from "@shared/eventSlug";
 import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
-import { timeAgo } from "@/lib/boardFeed";
+import { timeAgo } from "@/lib/timeAgo";
 import { CalendarDays, CalendarPlus, ChevronRight, Ellipsis, FileText, Lock, MapPin, Pencil, Share2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DashboardEventEditForm } from "@/components/dashboard/DashboardEventEditor";

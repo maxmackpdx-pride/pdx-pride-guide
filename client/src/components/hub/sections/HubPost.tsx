@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ds";
 import ImageUploader from "@/components/ImageUploader";
 import { useToast } from "@/hooks/use-toast";
-import { timeAgo } from "@/lib/boardFeed";
+import { timeAgo } from "@/lib/timeAgo";
 import type { HubFeedPost } from "@shared/schema";
 
 type PostType = "text" | "photo";

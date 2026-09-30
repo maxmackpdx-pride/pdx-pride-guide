@@ -15,7 +15,7 @@ import BoardCloseSeam from "@/components/BoardCloseSeam";
 import RoomDoorways from "@/components/RoomDoorways";
 import { shareCardUrl } from "@shared/shareCards";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { timeAgo } from "@/lib/boardFeed";
+import { timeAgo } from "@/lib/timeAgo";
 import "./PrideWork.css";
 import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
 import "./Sellz.css";

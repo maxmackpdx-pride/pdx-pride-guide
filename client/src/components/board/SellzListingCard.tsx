@@ -15,7 +15,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
-import { timeAgo } from "@/lib/boardFeed";
+import { timeAgo } from "@/lib/timeAgo";
 
 export type SellzInterest = { id: number; userId: number; note: string; offerCents?: number | null; status: string; username: string; displayName?: string | null };
 export type SellzPost = {

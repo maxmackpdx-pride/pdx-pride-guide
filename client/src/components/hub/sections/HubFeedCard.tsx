@@ -12,7 +12,7 @@ import EventModal from "@/components/EventModal";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { avatarHrefFor } from "@/lib/avatarLinks";
-import { timeAgo } from "@/lib/boardFeed";
+import { timeAgo } from "@/lib/timeAgo";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { eventPath } from "@shared/eventSlug";
 import { hubFeedBadgeColor, type HubFeedEventEmbed, type HubFeedItem } from "@shared/hubFeed";

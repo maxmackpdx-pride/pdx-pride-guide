@@ -1,6 +1,6 @@
 import type React from "react";
 import { RoomKicker } from "@/components/ds";
-import { timeAgo } from "../helpers";
+import { timeAgoCoarse } from "@/lib/timeAgo";
 import type { MemberProfileData } from "../types";
 
 type BoardCard = {
@@ -45,7 +45,7 @@ export default function BoardTab({ data }: { data: MemberProfileData }) {
               <div className="mp-board-card__head">
                 <span className="mp-board-card__pill" style={{ background: c.hex }}>{c.board}</span>
                 <span className="mp-board-card__where">{c.where}</span>
-                {c.createdAt && <span className="mp-board-card__ago">{timeAgo(c.createdAt)}</span>}
+                {c.createdAt && <span className="mp-board-card__ago">{timeAgoCoarse(c.createdAt)}</span>}
               </div>
               <p className="mp-board-card__text">{c.text}</p>
             </div>

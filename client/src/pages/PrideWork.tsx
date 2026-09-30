@@ -18,7 +18,7 @@ import { memberProfileHref } from "@/lib/avatarLinks";
 import { Button, FilterChip, RoomKicker } from "@/components/ds";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import ImageUploader from "@/components/ImageUploader";
-import { timeAgo } from "@/lib/boardFeed";
+import { timeAgo } from "@/lib/timeAgo";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { GIG_BOARD_RULES_SUMMARY, validateGigPostContent } from "@shared/boardModeration";
 import type { Business } from "@/pages/Directory";

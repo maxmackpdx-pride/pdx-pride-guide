@@ -24,7 +24,7 @@ import { eventPath, slugifyEventTitle } from "@shared/eventSlug";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { eventsUpNext, dayColorVar } from "@/lib/homeEvents";
 import { listingPosterUrl, formatListingWhen } from "@/lib/dsEvent";
-import { timeAgo } from "@/lib/boardFeed";
+import { timeAgo } from "@/lib/timeAgo";
 import type { AttendanceSummaryMap } from "@/components/profile/mapAttendancePreviewToChips";
 
 export type HomeStageBoardKey = "events" | "housing" | "gifting" | "gigs" | "spotted";

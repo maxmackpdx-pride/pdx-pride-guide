@@ -69,16 +69,6 @@ export function fmtEventWhen(dateStart?: string | null): string {
   return d.toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
-export function timeAgo(iso?: string | null): string {
-  if (!iso) return "";
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return "";
-  const days = Math.floor((Date.now() - then) / 86_400_000);
-  if (days <= 0) return "today";
-  if (days < 7) return `${days}d ago`;
-  if (days < 30) return `${Math.floor(days / 7)}w ago`;
-  return new Date(iso).toLocaleDateString([], { month: "short", day: "numeric" });
-}
 
 /* ── Calm mode / reduced motion ─────────────────────────────────────────── */
 

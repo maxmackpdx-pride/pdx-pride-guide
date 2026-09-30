@@ -17,7 +17,8 @@ import { useAuth } from "@/context/AuthContext";
 import type { CSSProperties, MouseEvent } from "react";
 import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
-import { isOpenGrabPost, timeAgo } from "@/lib/boardFeed";
+import { isOpenGrabPost } from "@/lib/boardFeed";
+import { timeAgo } from "@/lib/timeAgo";
 
 export type GiftingPost = {
   id: number;

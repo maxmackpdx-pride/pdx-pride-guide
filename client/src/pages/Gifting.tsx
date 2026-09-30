@@ -19,7 +19,7 @@ import BoardStatsBar from "@/components/BoardStatsBar";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import RoomDoorways from "@/components/RoomDoorways";
 import { trackProductEvent } from "@/lib/analytics";
-import { timeAgo } from "@/lib/boardFeed";
+import { timeAgo } from "@/lib/timeAgo";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import type { CSSProperties } from "react";
 import "./PrideWork.css";
