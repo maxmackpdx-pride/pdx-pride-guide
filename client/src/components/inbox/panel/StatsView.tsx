@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { RoomKicker } from "@/components/ds";
 import { useQuery } from "@tanstack/react-query";
 import MemberGrowthChart from "@/components/admin/MemberGrowthChart";
 import { useAuth } from "@/context/AuthContext";
@@ -286,10 +287,7 @@ export default function StatsView() {
     <div className="inbox-exp-stats">
       {fullStats && (
         <>
-          <div className="inbox-exp-kicker inbox-exp-kicker--green">
-            <span className="inbox-exp-kicker__ld" aria-hidden />
-            SITE PULSE
-          </div>
+          <RoomKicker accent="var(--green-acid, #39ff14)" as="div">Site pulse</RoomKicker>
           <div className="inbox-exp-stats-pulse">
             <div className="inbox-exp-stats-pulse__label">LIVE RIGHT NOW</div>
             <div className="inbox-exp-stats-pulse__row">

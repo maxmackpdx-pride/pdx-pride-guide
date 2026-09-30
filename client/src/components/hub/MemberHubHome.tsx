@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
-import { Button, StatPill } from "@/components/ds";
+import { Button, StatPill, RoomKicker } from "@/components/ds";
 import { dashVarToDsAccent } from "@/lib/dsColors";
 import DashboardWidgets from "@/components/dashboard/DashboardWidgets";
 import "./hub-home.css";
@@ -125,7 +125,7 @@ export default function MemberHubHome({
           style={{ ["--c" as string]: "var(--panel-magenta, #ff1fa0)" }}
         >
           <div>
-            <p className="hub-keys__kicker">You hold the keys</p>
+            <RoomKicker>You hold the keys</RoomKicker>
             <p className="hub-keys__copy">
               <span className="hub-keys__n">{pendingCount}</span>
               {" "}in the shared review queue

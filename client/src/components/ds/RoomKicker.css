@@ -1,0 +1,21 @@
+/* Board 05: one kicker. Purple ink uses the lightened step for contrast (rooms.css). */
+.room-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font: 500 11px/1.3 var(--font-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--c, var(--text-lo, #999));
+}
+.room-kicker__dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--c, var(--text-lo, #999));
+  box-shadow: 0 0 6px color-mix(in srgb, var(--c, #999) 60%, transparent);
+}
+.room-kicker__sep { color: var(--text-lo, #999); }
+html.calm-mode .room-kicker__dot { box-shadow: none; }

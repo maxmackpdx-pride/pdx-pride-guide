@@ -1,4 +1,5 @@
 import type React from "react";
+import { RoomKicker } from "@/components/ds";
 import { useProfileAudioPlayer, formatAudioTime } from "@/hooks/useProfileAudioPlayer";
 import type { MemberProfileData, ProfileMediaItem } from "../types";
 
@@ -88,7 +89,7 @@ export default function MediaTab({ data }: { data: MemberProfileData }) {
   if (!media) {
     return (
       <div>
-        <div className="mp-section-kicker">{kicker}</div>
+        <RoomKicker as="div">{kicker}</RoomKicker>
         <h2 className="display mp-section-title">Media</h2>
         <div className="mp-empty">
           <div className="display mp-empty__title">Nothing here yet</div>
@@ -100,7 +101,7 @@ export default function MediaTab({ data }: { data: MemberProfileData }) {
 
   return (
     <div>
-      <div className="mp-section-kicker">{kicker}</div>
+      <RoomKicker as="div">{kicker}</RoomKicker>
       <h2 className="display mp-section-title">Media</h2>
 
       <div className="mp-media-featured">

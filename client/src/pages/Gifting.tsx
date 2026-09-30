@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import GiftListingCard, { type GiftingPost } from "@/components/board/GiftListingCard";
-import { Button } from "@/components/ds";
+import { Button, RoomKicker } from "@/components/ds";
 import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
@@ -237,7 +237,7 @@ export default function Gifting() {
     <div className="gigz-shell">
       <div className="gigz-identity board-share-header"><BoardShareButton title="Giftz" path="/giftz" /><img src="/brand/family/giftz.svg" alt="Giftz" /><span>Pass it on. Find what you need.</span></div>
       {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
-      <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE BOARD</div><h1>Good things move around<span>.</span></h1><p>Give what you can. Find what you need. Keep it free.</p></div>
+      <div className="gigz-section-head"><div><RoomKicker room="giftz" as="div">The board</RoomKicker><h1>Good things move around<span>.</span></h1><p>Give what you can. Find what you need. Keep it free.</p></div>
         <div className="giftz-actions"><BoardFollowButton board="giftz" /><button type="button" className="gigz-post gigz-post--primary" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
       </div>
       {!postingOpen && giftingStatus && <p className="giftz-posting-status" role="status">{giftingStatus.message}</p>}
@@ -252,7 +252,7 @@ export default function Gifting() {
       </div>
       {isError ? <div className="gigz-empty" role="alert">Could not load Giftz posts. <button type="button" onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })}>Try again</button></div> : <>
         {isLoading ? <BoardFeedSkeleton label="Loading gifts offered" shape="board" count={3} /> : offered.length ? <GiftRail posts={offered} type="GIFT" selected={expandedId} onSelect={select} /> : <div className="gigz-empty">No gifts offered match right now. {postingOpen && <button type="button" onClick={() => openForm("GIFT")}>Post a gift</button>}</div>}
-        <div className="gigz-talent-zone"><div className="gigz-section-head"><div><div className="gigz-eyebrow">IN SEARCH OF</div><h2>On someone’s wish list<span>.</span></h2><p>See what neighbors are looking for. You might have just the thing.</p></div><button type="button" className="gigz-post" disabled={!postingOpen} onClick={() => openForm("ISO")}><Plus size={17} /> Post an ISO <ArrowUpRight size={16} /></button></div>
+        <div className="gigz-talent-zone"><div className="gigz-section-head"><div><RoomKicker room="giftz" as="div">In search of</RoomKicker><h2>On someone’s wish list<span>.</span></h2><p>See what neighbors are looking for. You might have just the thing.</p></div><button type="button" className="gigz-post" disabled={!postingOpen} onClick={() => openForm("ISO")}><Plus size={17} /> Post an ISO <ArrowUpRight size={16} /></button></div>
           {!isLoading && (requested.length ? <GiftRail posts={requested} type="ISO" selected={expandedId} onSelect={select} /> : <div className="gigz-empty">No ISO posts match right now. {postingOpen && <button type="button" onClick={() => openForm("ISO")}>Post what you need</button>}</div>)}
         </div>
       </>}
@@ -330,7 +330,7 @@ export function GiftComposer({initialType = "GIFT", onClose, onPosted}: {initial
             <button type="button" className="gifting-close" onClick={onClose} aria-label="Close form">
               <X size={18} />
             </button>
-            <div className="board-section-kicker board-section-kicker--lime">New post</div>
+            <RoomKicker room="giftz" as="div">New post</RoomKicker>
             <h2 className="display section-heading">
               {form.postType === "ISO" ? "Post an in search of" : "Post a gift"}
             </h2>

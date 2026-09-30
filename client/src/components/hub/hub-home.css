@@ -121,16 +121,6 @@
   -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
 }
 
-.hub-keys__kicker {
-  font-family: var(--font-display), sans-serif;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--panel-magenta, var(--neon-magenta, #ff00cc));
-  margin: 0 0 5px;
-}
-
 .hub-keys__copy {
   margin: 0;
   font-size: 14.5px;

@@ -228,8 +228,6 @@
         0 0 14px -4px color-mix(in srgb,var(--panel-magenta,#ff1fa0) 50%,transparent),
         inset 0 1px 0 color-mix(in srgb,var(--panel-magenta,#ff1fa0) 50%,rgba(255,255,255,.12)) !important;
     }
-    .hub-v2-side-extra .hub-keys__kicker,
-    .hub-v2-side-extra--drawer .hub-keys__kicker{color:var(--panel-magenta)}
     .hub-v2-side-extra .hub-keys__n,
     .hub-v2-side-extra--drawer .hub-keys__n{color:var(--panel-magenta)}
     .hub-v2-side-extra .hub-keys__n--purple,

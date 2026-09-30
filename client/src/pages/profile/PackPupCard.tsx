@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { RoomKicker } from "@/components/ds";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import type { MemberProfileData, PackLinkUser } from "./types";
@@ -48,7 +49,7 @@ export default function PackPupCard({
 
   return (
     <div className="mp-pack-card">
-      <div className="mp-section-kicker" style={{ color: "var(--neon-magenta)" }}>Pack &amp; pup life</div>
+      <RoomKicker accent="var(--neon-magenta)" as="div">Pack &amp; pup life</RoomKicker>
       <h3 className="display mp-pack-card__name">{pup.name}</h3>
       <div className="mp-pack-facts">
         <div><div className="mp-pack-facts__label">Pup name</div><div className="mp-pack-facts__value">{pup.name}</div></div>

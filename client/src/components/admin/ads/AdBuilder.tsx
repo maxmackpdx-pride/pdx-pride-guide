@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { RoomKicker } from "@/components/ds";
 import { useMemo, useState } from "react";
 import FeedAdCard from "@/components/ads/FeedAdCard";
 import PosterAdCard from "@/components/ads/PosterAdCard";
@@ -251,7 +252,7 @@ export default function AdBuilder({ onSaved }: Props) {
     <div className="ad-mgr__builder">
       <div className="ad-mgr__form">
         <section className="ad-mgr__card">
-          <h3 className="ad-mgr__kicker">01 · Start from a live template</h3>
+          <RoomKicker as="h3">01 · Start from a live template</RoomKicker>
           <p className="ad-mgr__help">
             Templates match the ads already on the <strong className="cb">events grid</strong> and{" "}
             <strong className="nb">news feed</strong> after the deep-glass refresh. Edit copy, color, and media -
@@ -280,7 +281,7 @@ export default function AdBuilder({ onSaved }: Props) {
         </section>
 
         <section className="ad-mgr__card">
-          <h3 className="ad-mgr__kicker">02 · Business & copy</h3>
+          <RoomKicker as="h3">02 · Business & copy</RoomKicker>
           <div className="ad-mgr__grid2">
             <div className="ad-mgr__field">
               <label>Business name</label>
@@ -353,7 +354,7 @@ export default function AdBuilder({ onSaved }: Props) {
         </section>
 
         <section className="ad-mgr__card">
-          <h3 className="ad-mgr__kicker">03 · Color & glow</h3>
+          <RoomKicker as="h3">03 · Color & glow</RoomKicker>
           <p className="ad-mgr__help" style={{ marginTop: 0 }}>
             Primary drives the glass edge, chip, and Shop Now fill - same as live cards (CockBlock{" "}
             <span style={{ color: AD_BRAND_PRIMARY.cockblock }}>#ff1f1f</span>, Mr. S{" "}
@@ -392,7 +393,7 @@ export default function AdBuilder({ onSaved }: Props) {
         </section>
 
         <section className="ad-mgr__card">
-          <h3 className="ad-mgr__kicker">04 · Media</h3>
+          <RoomKicker as="h3">04 · Media</RoomKicker>
           <div className="ad-mgr__toggle-row">
             <button
               type="button"
@@ -470,7 +471,7 @@ export default function AdBuilder({ onSaved }: Props) {
         </section>
 
         <section className="ad-mgr__card">
-          <h3 className="ad-mgr__kicker">05 · Placement & rules</h3>
+          <RoomKicker as="h3">05 · Placement & rules</RoomKicker>
           {draft.format === "feed" ? (
             <>
               <div className="ad-mgr__toggle-row">

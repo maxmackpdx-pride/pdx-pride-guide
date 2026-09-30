@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { RoomKicker } from "@/components/ds";
 import type { NudeBeachTab, NudeBeachesSnapshot } from "@shared/nudeBeaches";
 import {
   swimSummaryDetail,
@@ -63,7 +64,7 @@ function WeatherSectionHead({
 
   return (
     <div className="nb-hub__weather-head">
-      <div className="nb-hub__kicker">Weather</div>
+      <RoomKicker room="outz" as="div">Weather</RoomKicker>
       <span
         className="nb-hub__weather-hero-icon"
         style={{ color: "#ffc14a", filter: `drop-shadow(${style.sunGlow})` }}
@@ -126,7 +127,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
         } pdx-glass-rebind`}
       >
         <div className="nb-hub__level-head">
-          <div className="nb-hub__kicker">River level</div>
+          <RoomKicker room="outz" as="div">River level</RoomKicker>
           {live.crossingBand ? <span className="nb-hub__badge">{live.crossingBand}</span> : null}
         </div>
         <div className="nb-hub__level-value">
@@ -215,7 +216,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
         className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass} nb-hub__section--water pdx-glass-rebind`}
         style={{ ["--nb-rim" as string]: swimColor }}
       >
-        <div className="nb-hub__kicker">Water quality</div>
+        <RoomKicker room="outz" as="div">Water quality</RoomKicker>
         <div className="nb-hub__swim-head">
           <span
             className="nb-hub__swim-value"
@@ -237,7 +238,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
       </section>
 
       <section className="nb-hub__section pdx-glass-rebind">
-        <div className="nb-hub__kicker">Parking permits</div>
+        <RoomKicker room="outz" as="div">Parking permits</RoomKicker>
         <p className="nb-hub__summary">
           {live.parkingNote ||
             "Mandatory on summer weekends through Labor Day. Buy a daily day pass online - seasonal sold-out is not the same as day passes gone."}
@@ -259,7 +260,7 @@ export default function NudeBeachesHubPanel({ tab, snapshot }: Props) {
   if (!snapshot) {
     return (
       <div className="nb-hub nb-hub--loading pdx-glass-rebind" aria-hidden>
-        <div className="nb-hub__kicker">Loading conditions…</div>
+        <RoomKicker room="outz" as="div">Loading conditions…</RoomKicker>
       </div>
     );
   }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
-import { EventCard, PosterCard } from "@/components/ds";
+import { EventCard, PosterCard, RoomKicker } from "@/components/ds";
 import { eventPath } from "@shared/eventSlug";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
@@ -67,7 +67,7 @@ export default function EventsTab({ data }: { data: MemberProfileData }) {
       <div>
         <div className="mp-tab-head">
           <div>
-            <div className="mp-section-kicker">{data.displayName || data.username} presents</div>
+            <RoomKicker as="div">{data.displayName || data.username} presents</RoomKicker>
             <h2 className="display mp-section-title">Hosting</h2>
           </div>
           <SegmentToggle value={hostFilter} onChange={setHostFilter} />
@@ -113,7 +113,7 @@ export default function EventsTab({ data }: { data: MemberProfileData }) {
 
         <div className="mp-tab-head" style={{ marginTop: 32 }}>
           <div>
-            <div className="mp-section-kicker" style={{ color: "var(--neon-cyan)" }}>Out on the town</div>
+            <RoomKicker accent="var(--neon-cyan)" as="div">Out on the town</RoomKicker>
             <h2 className="display mp-section-title">Going to</h2>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function EventsTab({ data }: { data: MemberProfileData }) {
     <div>
       <div className="mp-tab-head">
         <div>
-          <div className="mp-section-kicker" style={{ color: "var(--neon-cyan)" }}>On the calendar</div>
+          <RoomKicker accent="var(--neon-cyan)" as="div">On the calendar</RoomKicker>
           <h2 className="display mp-section-title">Events</h2>
         </div>
         <SegmentToggle value={memFilter} onChange={setMemFilter} />

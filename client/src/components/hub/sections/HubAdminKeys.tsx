@@ -1,4 +1,4 @@
-import { Button } from "@/components/ds";
+import { Button, RoomKicker } from "@/components/ds";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import "../hub-home.css";
 
@@ -74,7 +74,7 @@ export default function HubAdminKeys({
       style={{ ["--c" as string]: "var(--panel-magenta, #ff1fa0)" }}
     >
       <div>
-        <p className="hub-keys__kicker">You hold the keys</p>
+        <RoomKicker>You hold the keys</RoomKicker>
         <p className="hub-keys__copy">
           <span className="hub-keys__n">{pendingCount}</span>
           {" "}in the shared review queue

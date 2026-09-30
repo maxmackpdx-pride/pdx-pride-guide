@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import { RoomKicker } from "@/components/ds";
 import { useMemo, useState, type CSSProperties } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
@@ -1411,20 +1412,14 @@ export default function QueueView({
     );
   };
 
-  const kickerClass =
-    mode === "admin"
-      ? "inbox-exp-kicker inbox-exp-kicker--magenta"
-      : "inbox-exp-kicker inbox-exp-kicker--purple";
+  const kickerAccent = mode === "admin" ? "var(--board-spotted, #ff00cc)" : "var(--room-gigz-ink, #b06bff)";
 
   const queueScopeClass =
     mode === "admin" ? "inbox-exp-admin" : mode === "owner" ? "inbox-exp-owner" : undefined;
 
   return (
     <div className={queueScopeClass}>
-      <div className={kickerClass}>
-        <span className="inbox-exp-kicker__ld" aria-hidden />
-        {kicker}
-      </div>
+      <RoomKicker accent={kickerAccent} as="div">{kicker}</RoomKicker>
 
       {/* Always-visible map of every queue surface (counts stay visible at 0). */}
       {mode === "admin" && !completed && (

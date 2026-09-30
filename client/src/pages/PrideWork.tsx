@@ -13,7 +13,7 @@ import AuthModal from "@/components/AuthModal";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
-import { Button } from "@/components/ds";
+import { Button, RoomKicker } from "@/components/ds";
 import ImageUploader from "@/components/ImageUploader";
 import { timeAgo } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -174,10 +174,10 @@ export default function PrideWork() {
     <div className="gigz-shell">
       <div className="gigz-identity board-share-header"><BoardShareButton title="Gigz" path="/gigz" /><img src="/brand/family/gigz.svg" alt="Gigz" /><span>Work with your people.</span><BoardFollowButton board="gigz" /></div>
       {!isLoading && !isError && !onlyMine && <BoardStatsBar variant="band" stats={roomStats} />}
-      <div className="gigz-section-head"><div><div className="gigz-eyebrow">THE BOARD</div><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post gigz-post--primary" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
+      <div className="gigz-section-head"><div><RoomKicker room="gigz" as="div">The board</RoomKicker><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post gigz-post--primary" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
       <div className="gigz-filter"><label>Search Gigz<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search roles, skills, gigs" /></label><label><input type="checkbox" checked={remoteOnly} onChange={e => setRemoteOnly(e.target.checked)} /> Remote only</label>{user && <label><input type="checkbox" checked={onlyMine} onChange={e => setOnlyMine(e.target.checked)} /> My Gigz</label>}</div>
       {isLoading ? <BoardFeedSkeleton label="Loading Gigz posts" shape="board" count={3} /> : isError ? <div className="gigz-empty" role="alert">Could not load posts. <button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>Try again</button></div> : opportunities.length ? <GigRail posts={opportunities} kind="gigs" selected={selectedId} onSelect={select} /> : <div className="gigz-empty">No open gigs yet. <button onClick={() => openForm("POSTING_GIG")}>Post a gig</button></div>}
-      <div className="gigz-talent-zone"><div className="gigz-section-head"><div><div className="gigz-eyebrow">THE PEOPLE</div><h2>Available to hire<span>.</span></h2><p>Meet people ready to bring your next idea to life.</p></div><button type="button" className="gigz-post" onClick={() => openForm("LOOKING_FOR_WORK")}><Plus size={17} /> Post your availability <ArrowUpRight size={16} /></button></div>
+      <div className="gigz-talent-zone"><div className="gigz-section-head"><div><RoomKicker room="gigz" as="div">The people</RoomKicker><h2>Available to hire<span>.</span></h2><p>Meet people ready to bring your next idea to life.</p></div><button type="button" className="gigz-post" onClick={() => openForm("LOOKING_FOR_WORK")}><Plus size={17} /> Post your availability <ArrowUpRight size={16} /></button></div>
         {!isLoading && !isError && (talent.length ? <GigRail posts={talent} kind="talent" selected={selectedId} onSelect={select} /> : <div className="gigz-empty">No one has posted availability yet. <button onClick={() => openForm("LOOKING_FOR_WORK")}>Post yours</button></div>)}
       </div>
       {onlyMine && visible.some(g => g.status === "CLOSED") && <section className="gigz-closed"><h2>Completed posts</h2><p>These are visible only to you. Open one to edit or relist it.</p><div>{visible.filter(g => g.status === "CLOSED").map(g => <button type="button" key={g.id} onClick={() => select(g.id)}>{g.title} <ArrowUpRight size={16} /></button>)}</div></section>}
@@ -597,9 +597,9 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
             >
               <X size={18} />
             </button>
-            <div className="board-section-kicker" style={{ color: formAccent }}>
+            <RoomKicker room="gigz" accent={formAccent} as="div">
               {postType === "POSTING_GIG" ? "New gig" : "New availability"}
-            </div>
+            </RoomKicker>
             <h2 className="display section-heading">
               {postType === "POSTING_GIG" ? "Post a gig" : "Post your availability"}
             </h2>

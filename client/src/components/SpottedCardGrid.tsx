@@ -10,7 +10,7 @@ import BoardActiveSection, { BoardFilterChip, BoardSelectField, BoardTextField }
 import ScrollReveal from "./ScrollReveal";
 import SpottedCard, { spottedKind, spottedPlace } from "./SpottedCard";
 import SpottedDetailModal from "./SpottedDetailModal";
-import { Button } from "@/components/ds";
+import { Button, RoomKicker } from "@/components/ds";
 import type { LinkableMissedConnectionEvent, MissedConnectionPost } from "./MissedConnectionsPanel";
 import { placezStockImage } from "@/lib/mizzedSource";
 
@@ -122,7 +122,7 @@ export default function SpottedCardGrid({
         <button type="button" className="gifting-close" onClick={() => setComposeOpen(false)} aria-label="Close form">
           <X size={18} />
         </button>
-        <div className="board-section-kicker board-section-kicker--magenta">New MIZZED CONNECTION posts</div>
+        <RoomKicker room="mizzed" as="div">New posts</RoomKicker>
         <h2 className="display section-heading">Post a MIZZED CONNECTION</h2>
         <p className="board-copy-sm">
           Keep it kind and specific. No full names, no outing anyone, PG-13. You stay anonymous. This posts to the public board, but every reply is private.

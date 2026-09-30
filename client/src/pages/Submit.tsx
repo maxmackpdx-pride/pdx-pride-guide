@@ -17,7 +17,7 @@ import BoardStatsBar from "@/components/BoardStatsBar";
 import { BoardFilterChip } from "@/components/BoardActiveSection";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import ScrollReveal from "@/components/ScrollReveal";
-import { Button } from "@/components/ds";
+import { Button, RoomKicker } from "@/components/ds";
 import PromoterIntake, {
   type PromoterIntakeAction,
   type PromoterIntakeActionKey,
@@ -752,7 +752,7 @@ export default function Submit() {
                 <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>
                   <ArrowLeft size={14} aria-hidden="true" /> Back to hub
                 </button>
-                <div className="board-section-kicker board-section-kicker--lime">Submit an event</div>
+                <RoomKicker room="eventz" as="div">Submit an event</RoomKicker>
                 <h2 className="display section-heading">Add your event</h2>
                 <div className="submit-chip-note">
                   <StatusChipEl chip={submitChip} />
@@ -1002,7 +1002,7 @@ export default function Submit() {
         ) : (
           <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
             <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}><ArrowLeft size={14} aria-hidden="true" /> Back to hub</button>
-            <div className="board-section-kicker" style={{ color: "var(--panel-purple, #b06bff)" }}>Promoter verification</div>
+            <RoomKicker room="eventz" accent="var(--panel-purple, #b06bff)" as="div">Promoter verification</RoomKicker>
             <h2 className="display section-heading">Apply as promoter</h2>
             <p className="board-copy-sm">
               Get verified once. After that, every event you post goes live with no review. One-time application, reviewed by a human.
@@ -1080,7 +1080,7 @@ export default function Submit() {
         ) : (
           <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
             <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}><ArrowLeft size={14} aria-hidden="true" /> Back to hub</button>
-            <div className="board-section-kicker board-section-kicker--magenta">Community tip</div>
+            <RoomKicker room="eventz" accent="var(--board-spotted, #ff00cc)" as="div">Community tip</RoomKicker>
             <h2 className="display section-heading">Spotted an event</h2>
             <p className="board-copy-sm">
               Saw a Pride event we are missing? Tip us off. You just need a free account, no promoter status required. We review every tip, approved ones go live as unclaimed listings.
@@ -1163,7 +1163,7 @@ export default function Submit() {
         ) : (
           <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
             <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}><ArrowLeft size={14} aria-hidden="true" /> Back to hub</button>
-            <div className="board-section-kicker board-section-kicker--cyan">Host your listing</div>
+            <RoomKicker room="placez" as="div">Host your listing</RoomKicker>
             <h2 className="display section-heading">Claim an event</h2>
             <div className="submit-chip-note" style={{ marginBottom: 22 }}>
               <StatusChipEl chip={claimChip} />

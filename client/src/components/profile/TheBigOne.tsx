@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { RoomKicker } from "@/components/ds";
 import type { CSSProperties } from "react";
 import { dayAccentToken } from "@/lib/dsColors";
 import { formatPacificDateTime, parsePacificEventTime, useCountdown } from "@/lib/countdown";
@@ -165,13 +166,7 @@ export default function TheBigOne({
       style={{ "--tbo-day": dayColor, "--tbo-day-ink": dayInk, "--tbo-opposite": DAY_OPPOSITE[dayCode] || "#CCFF00", "--c": dayColor } as CSSProperties}
       aria-label={`The Big One: ${event.title}`}
     >
-      <div className="tbo__kicker">
-        <span className="tbo__kicker-text">The Big One</span>
-        <span className="tbo__kicker-sep" aria-hidden="true">
-          ·
-        </span>
-        <span className="tbo__kicker-sub">Up next</span>
-      </div>
+      <RoomKicker accent={dayColor} as="div">The Big One · Up next</RoomKicker>
 
       <div className={`tbo__card pdx-glass-rebind${onOpen ? " tbo__card--clickable" : ""}`}>
         {/* Poster: top-anchored, crop bottom not sides */}

@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { RoomKicker } from "@/components/ds";
 import { ChevronDown } from "lucide-react";
 
 export type BoardStep = {
@@ -18,6 +19,8 @@ type BoardHowItWorksProps = {
   id?: string;
   className?: string;
 };
+
+const KICKER_TONE = { lime: "var(--board-gifting, #ccff00)", cyan: "var(--panel-cyan, #19e3ff)", magenta: "var(--board-spotted, #ff00cc)", purple: "var(--room-gigz-ink, #b06bff)" } as const;
 
 export default function BoardHowItWorks({
   kicker = "How it works",
@@ -47,7 +50,7 @@ export default function BoardHowItWorks({
       className={`board-how board-how--inline board-how--makeover diag board-how--disclosure${expanded ? " is-expanded" : " is-compact"} ${className}`.trim()}
     >
       <div className="board-how__intro">
-        <div className={`board-section-kicker board-section-kicker--${kickerTone}`}>{kicker}</div>
+        <RoomKicker accent={KICKER_TONE[kickerTone]} as="div">{kicker}</RoomKicker>
         <h2 className="display section-heading board-how__title">{title}</h2>
         {expanded && <p className="board-copy">{lede}</p>}
         <button

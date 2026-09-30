@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { RoomKicker } from "@/components/ds";
 import { Link, useLocation } from "wouter";
 import {
   Briefcase,
@@ -285,7 +286,7 @@ export default function HubShell({
 
           {mode === "member" ? (
             <>
-              <div className="hub-side__kicker">Your account</div>
+              <RoomKicker as="div">Your account</RoomKicker>
               <nav className="hub-side__nav">
                 <button
                   type="button"
@@ -320,7 +321,7 @@ export default function HubShell({
             </>
           ) : (
             <>
-              <div className="hub-side__kicker">Admin</div>
+              <RoomKicker as="div">Admin</RoomKicker>
               <nav className="hub-side__nav">
                 {ADMIN_PRIMARY_NAV.map(item => {
                   const Icon = item.icon;

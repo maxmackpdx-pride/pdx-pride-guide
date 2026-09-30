@@ -1964,18 +1964,13 @@
       }
       .founder-motif--community { top: 72px; right: -28px; transform: rotate(8deg); }
       .founder-motif--safety { top: 56%; left: -62px; transform: rotate(-8deg); }
-      .founder-kicker,
-      .founder-open__status,
+            .founder-open__status,
       .founder-project__meta,
       .founder-values__mark,
       .founder-faq__kicker {
         font: 700 10px/1.25 JetBrains Mono, monospace;
         letter-spacing: .14em;
         text-transform: uppercase;
-      }
-      .founder-kicker {
-        margin-bottom: 18px;
-        color: var(--system);
       }
       .founder-title {
         max-width: 980px;
@@ -2924,7 +2919,6 @@
       }
 
       .hero > .eyebrow,
-      .founder-kicker,
       .founder-open__status,
       .founder-project__meta,
       .founder-faq__kicker,
@@ -2934,8 +2928,7 @@
         letter-spacing: var(--label-track);
       }
 
-      .founder-kicker,
-      .founder-faq__kicker {
+            .founder-faq__kicker {
         margin-bottom: 14px;
       }
 
@@ -2946,7 +2939,6 @@
       .analytics-counter__live,
       .analytics-counter__label,
       .idea-field label,
-      .founder-kicker,
       .founder-open__status,
       .founder-project__meta,
       .founder-faq__kicker {
@@ -3241,7 +3233,6 @@
       .analytics-counter__label,
       .analytics-counter__live,
       .idea-field label,
-      .founder-kicker,
       .founder-open__status,
       .founder-project__meta,
       .founder-values__mark,
@@ -3506,7 +3497,6 @@
       .tech-stack-item,
       .idea-note,
       .idea-field label,
-      .founder-kicker,
       .founder-title small,
       .founder-avatar__handle,
       .founder-links a,

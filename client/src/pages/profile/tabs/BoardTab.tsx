@@ -1,4 +1,5 @@
 import type React from "react";
+import { RoomKicker } from "@/components/ds";
 import { timeAgo } from "../helpers";
 import type { MemberProfileData } from "../types";
 
@@ -35,7 +36,7 @@ export default function BoardTab({ data }: { data: MemberProfileData }) {
 
   return (
     <div>
-      <div className="mp-section-kicker" style={{ color: "var(--neon-magenta)" }}>In the community</div>
+      <RoomKicker accent="var(--neon-magenta)" as="div">In the community</RoomKicker>
       <h2 className="display mp-section-title">Board posts</h2>
       {cards.length > 0 ? (
         <div className="mp-board-list">

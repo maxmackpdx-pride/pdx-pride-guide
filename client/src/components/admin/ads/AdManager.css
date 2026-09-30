@@ -142,15 +142,6 @@
   padding: 20px 22px;
 }
 
-.ad-mgr__kicker {
-  margin: 0 0 10px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #19e3ff;
-}
-
 .ad-mgr__help {
   margin: 0 0 14px;
   color: #a8a49c;

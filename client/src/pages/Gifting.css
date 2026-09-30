@@ -1,6 +1,5 @@
 .giftz-page .gigz-identity img{width:155px}
-.giftz-page .gigz-eyebrow,.giftz-page .gigz-section-head h1 span,.giftz-page .gigz-section-head h2 span{color:#ccff00}
-.giftz-page .gigz-eyebrow:before{background:#ccff00}
+.giftz-page .gigz-section-head h1 span,.giftz-page .gigz-section-head h2 span{color:#ccff00}
 .giftz-page .gigz-talent-zone{background:radial-gradient(ellipse 80% 70% at 48% 44%,#34431f51,#171d1344 50%,transparent)}
 .giftz-page .gigz-post{--button-c:var(--room-giftz,#ccff00)}
 .giftz-page .board-follow-button{border-color:#648536;color:#e8f5c0}

@@ -101,15 +101,6 @@
     0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
-.hub-side__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #555;
-  padding: 2px 8px 8px;
-}
-
 .hub-side__nav {
   display: flex;
   flex-direction: column;

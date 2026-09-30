@@ -2,7 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { Check, Link2, Mail } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
-import { PlaceCard } from "@/components/ds";
+import { PlaceCard, RoomKicker } from "@/components/ds";
 import { TYPE_LABELS, TYPE_TO_DS_CATEGORY } from "@/pages/Directory";
 import PackPupCard from "../PackPupCard";
 import { parseSocialLinks, socialCardsFor } from "../helpers";
@@ -107,7 +107,7 @@ export default function AboutTab({
   return (
     <div className="mp-about">
       <section className="mp-about__section">
-        <div className="mp-section-kicker">About</div>
+        <RoomKicker as="div">About</RoomKicker>
         {bio ? (
           <p className="mp-about__bio">
             {bioShown}{" "}
@@ -124,7 +124,7 @@ export default function AboutTab({
 
       <section className="mp-about__section">
         <div className="mp-about__row-head">
-          <div className="mp-section-kicker">Talents</div>
+          <RoomKicker as="div">Talents</RoomKicker>
           {isOwner && (
             <button type="button" className="mp-about__edit-btn" onClick={() => setEditingTalents(true)}>Edit</button>
           )}
@@ -150,7 +150,7 @@ export default function AboutTab({
         <>
           <section className="mp-about__section">
             <div className="mp-about__row-head">
-              <div className="mp-section-kicker">What we stand for</div>
+              <RoomKicker as="div">What we stand for</RoomKicker>
               {isOwner && (
                 <button type="button" className="mp-about__edit-btn" onClick={() => setEditingStandFor(true)}>Edit</button>
               )}
@@ -181,7 +181,7 @@ export default function AboutTab({
 
           {business && (
             <section className="mp-about__section">
-              <div className="mp-section-kicker">Our place</div>
+              <RoomKicker as="div">Our place</RoomKicker>
               <PlaceCard
                 name={business.name}
                 category={TYPE_TO_DS_CATEGORY[business.type] || "venues"}
@@ -203,7 +203,7 @@ export default function AboutTab({
           )}
 
           <section className="mp-about__section">
-            <div className="mp-section-kicker">Find us</div>
+            <RoomKicker as="div">Find us</RoomKicker>
             {findCards.length > 0 ? (
               <div className="mp-find-list">
                 {findCards.map(c => (
@@ -230,7 +230,7 @@ export default function AboutTab({
       ) : (
         <>
           <section className="mp-about__section">
-            <div className="mp-section-kicker">Identity</div>
+            <RoomKicker as="div">Identity</RoomKicker>
             <div className="mp-facts-grid">
               {data.pronouns && <div><div className="mp-facts-grid__label">Pronouns</div><div className="mp-facts-grid__value">{data.pronouns}</div></div>}
               {data.location && <div><div className="mp-facts-grid__label">Neighborhood</div><div className="mp-facts-grid__value">{data.location}</div></div>}
@@ -239,7 +239,7 @@ export default function AboutTab({
           </section>
 
           <section className="mp-about__section">
-            <div className="mp-section-kicker">Find me</div>
+            <RoomKicker as="div">Find me</RoomKicker>
             {findCards.length > 0 ? (
               <div className="mp-find-list">
                 {findCards.map(c => (
@@ -257,7 +257,7 @@ export default function AboutTab({
 
           {roles.length > 0 && (
             <section className="mp-about__section">
-              <div className="mp-section-kicker">Badges</div>
+              <RoomKicker as="div">Badges</RoomKicker>
               <ChipRow items={roles} color="var(--neon-cyan)" />
             </section>
           )}

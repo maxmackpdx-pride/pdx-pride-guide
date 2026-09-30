@@ -12659,7 +12659,6 @@ html.calm-mode .hub-people-row__foll,
 html.calm-mode .ld,
 html.calm-mode .sw.on,
 html.calm-mode .hub-rail-card__kick--cyan,
-html.calm-mode .hub-keys__kicker,
 html.calm-mode .hub-keys__n,
 html.calm-mode .navi.on svg,
 html.calm-mode .seg.on {
@@ -14569,16 +14568,6 @@ html.calm-mode .directory-card__owned-badge {
   margin-bottom: 48px;
 }
 
-.mp-section-kicker {
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
 .mp-section-title {
   font-size: 2rem;
   line-height: 1.1;
@@ -15971,17 +15960,7 @@ html.calm-mode .board-stats-band,
 }
 
 /* Section kickers */
-.board-section-kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
 
-.board-section-kicker--lime { color: #ccff00; }
-.board-section-kicker--cyan { color: #19e3ff; }
-.board-section-kicker--magenta { color: #ff1fa0; }
 
 /* How it works makeover */
 .board-how--makeover {
@@ -16559,8 +16538,6 @@ html.calm-mode .board-stats-band,
 .board-hero--green .board-hero__title-accent {
   color: transparent;
 }
-
-.board-section-kicker--purple { color: #b06bff; }
 
 .board-how__footer-line,
 .board-how--makeover .gifting-footer-line,

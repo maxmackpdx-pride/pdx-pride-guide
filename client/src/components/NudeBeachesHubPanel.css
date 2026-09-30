@@ -114,15 +114,6 @@
   margin-top: 0;
 }
 
-.nb-hub__kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #8a8a8a;
-  margin-bottom: 10px;
-}
-
 .nb-hub__swim-head {
   display: flex;
   align-items: baseline;
@@ -152,10 +143,6 @@
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 2px;
-}
-
-.nb-hub__weather-head .nb-hub__kicker {
-  margin-bottom: 0;
 }
 
 .nb-hub__weather-hero-icon {
