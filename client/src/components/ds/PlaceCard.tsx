@@ -410,6 +410,7 @@ export function PlaceCard({
   category = "bars",
   donateUrl,
   categoryLabel,
+  categoryTags,
   accentColor,
   shareUrl,
   phoneHref,
@@ -443,6 +444,7 @@ export function PlaceCard({
   category?: string;
   donateUrl?: string;
   categoryLabel?: string;
+  categoryTags?: Array<{ id: string; name: string; color: string }>;
   accentColor?: string;
   shareUrl?: string;
   phoneHref?: string;
@@ -573,15 +575,17 @@ export function PlaceCard({
                 <Badge color="yellow" glow size="sm">Grand Opening</Badge>
               </span>
             )}
-            <span className="pdxPlace__cat">
-              <Badge
-                category={isNonprofit ? undefined : category}
-                color={isNonprofit ? "paper" : undefined}
-                size="sm"
-              >
-                {categoryLabel}
-              </Badge>
-            </span>
+            {categoryTags?.length ? categoryTags.map((tag) => (
+              <span className="pdxPlace__cat" key={tag.id}>
+                <Badge color={tag.color} size="sm">{tag.name}</Badge>
+              </span>
+            )) : (
+              <span className="pdxPlace__cat">
+                <Badge category={isNonprofit ? undefined : category} color={isNonprofit ? "paper" : undefined} size="sm">
+                  {categoryLabel}
+                </Badge>
+              </span>
+            )}
           </div>
 
           <div className="pdxPlace__name">{name}</div>

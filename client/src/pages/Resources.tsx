@@ -70,6 +70,11 @@ const ROWS = RESOURCE_CATEGORIES.flatMap((category) =>
   ).map((org) => ({ org, category })),
 );
 type Row = (typeof ROWS)[number];
+function categoriesFor(row: Row) {
+  return RESOURCE_CATEGORIES.filter((category) =>
+    category.id === row.category.id || row.org.categoryIds?.includes(category.id),
+  );
+}
 const HOTLINES = [
   {
     name: "988",
@@ -177,6 +182,7 @@ function ResourceCard({
     <PlaceCard
       name={org.name}
       categoryLabel={category.name}
+      categoryTags={categoriesFor(row)}
       accentColor={category.color}
       logoUrl={org.logo}
       logoFallback={<Mark org={{ ...org, logo: undefined }} />}
@@ -255,7 +261,7 @@ export default function Resources() {
   const category = RESOURCE_CATEGORIES.find((c) => c.id === categoryId);
   const rows = useMemo(
     () =>
-      categoryId ? ROWS.filter((r) => r.category.id === categoryId) : ROWS,
+      categoryId ? ROWS.filter((r) => categoriesFor(r).some((c) => c.id === categoryId)) : ROWS,
     [categoryId],
   );
 
@@ -551,7 +557,7 @@ export default function Resources() {
                         ...(row.org === FOOD_RESOURCE
                           ? FOOD_PANTRIES.map((p) => p.name)
                           : []),
-                        row.category.name,
+                        ...categoriesFor(row).map((c) => c.name),
                       ]}
                       onSelect={() => {
                         setSearchOpen(false);
@@ -560,7 +566,7 @@ export default function Resources() {
                     >
                       <span>
                         {row.org.name}
-                        <small>{row.category.name}</small>
+                        <small>{categoriesFor(row).map((c) => c.name).join(" · ")}</small>
                       </span>
                       <ArrowUpRight size={16} />
                     </Command.Item>
@@ -623,12 +629,13 @@ export default function Resources() {
             </Drawer.Close>
             {detail && (
               <div className="rg-drawer-body">
-                <span
-                  className="rg-eyebrow"
-                  style={{ color: detail.category.color }}
-                >
-                  {detail.category.name}
-                </span>
+                <div className="rg-detail-tags">
+                  {categoriesFor(detail).map((category) => (
+                    <span key={category.id} className="rg-eyebrow" style={{ color: category.color }}>
+                      {category.name}
+                    </span>
+                  ))}
+                </div>
                 <div className="rg-detail-logo">
                   <Mark org={detail.org} />
                 </div>

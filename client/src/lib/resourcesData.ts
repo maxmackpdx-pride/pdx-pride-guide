@@ -8,6 +8,7 @@
  */
 export type ResourceOrg = {
   name: string;
+  categoryIds?: string[];
   sub?: string;
   scope: string;
   desc: string;
@@ -131,6 +132,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "The Marie Equi Center",
+        "categoryIds": ["health", "harm-reduction"],
         "logo": "/resources-logos/marie-equi.png",
         "scope": "SE Portland",
         "desc": "Trauma-informed, culturally affirming health and social services for trans, queer, intersex, and gender-diverse communities. Peer support, harm reduction, and housing advocacy.",
@@ -155,6 +157,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Outside In",
+        "categoryIds": ["health", "harm-reduction"],
         "logo": "/resources-logos/outside-in.png",
         "scope": "Downtown",
         "desc": "Health care and social services for young people experiencing homelessness since 1968, including the QueerZone drop-in: an LGBTQ-affirming clinic with gender-affirming care, meals, showers, and housing help.",
@@ -735,6 +738,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Outside In · Substance User Engagement",
+        "categoryIds": ["health", "harm-reduction"],
         "scope": "Portland · Clackamas County",
         "logo": "/resources-logos/outside-in.png",
         "desc": "Syringe services, naloxone, on-demand HIV, hepatitis C and syphilis testing, and drug checking using mass spectrometry. Downtown hours are Monday–Friday, noon–5pm. Call for testing availability and other service locations.",
@@ -747,6 +751,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Marie Equi · Harm Reduction & Peer Support",
+        "categoryIds": ["health", "harm-reduction"],
         "scope": "SE Portland · LGBTQAI2S+",
         "logo": "/resources-logos/marie-equi.png",
         "desc": "Narcan, harm-reduction supplies and education, and culturally affirming peer support for trans, queer, intersex, and gender-diverse people. The service center focuses on unhoused and low-income LGBTQAI2S+ communities. Monday–Thursday, 10am–4pm; not a crisis-response service.",
