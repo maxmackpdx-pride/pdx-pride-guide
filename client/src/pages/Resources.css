@@ -1247,3 +1247,16 @@
     gap: 16px;
   }
 }
+
+.rg-options button {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+}
+@media (max-width: 600px) {
+  .rg-options button {
+    font-size: 20px;
+  }
+}
