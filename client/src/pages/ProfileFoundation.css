@@ -44,7 +44,7 @@
 .pp-foundation .pp-hero__chip--pronouns { border-radius: 8px; min-height: 32px; display: inline-flex; align-items: center; font: 700 13px/1 var(--font-display); padding-inline: 10px; }
 .pp-foundation .pp-hero.pp-hero--reimagined .pp-hero__actions { grid-column: 1 / -1; justify-content: flex-start; flex-wrap: wrap; gap: 10px; margin: 4px 0 0; width: auto; }
 .pp-foundation .pp-hero__actions .pp-btn { min-height: 44px; border-radius: 22px; padding: 0 18px; font: 700 15px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--profile-acc-t); color: var(--profile-acc-t); background: var(--btn-glow-bg); box-shadow: var(--btn-glow-shadow); transform: none; }
-.pp-foundation .pp-hero__actions .pp-btn--follow { --c: var(--neon-yellow); border-color: var(--neon-yellow); background: var(--neon-yellow); color: var(--ink-900); box-shadow: var(--chrome-keyline), var(--chrome-bevel), var(--chrome-floor), var(--neon-bloom); }
+.pp-foundation .pp-hero__actions .pp-btn--follow.pdx-glass-rebind { --c: var(--neon-yellow); border-color: var(--neon-yellow); background: var(--neon-yellow); color: var(--ink-900); box-shadow: var(--chrome-keyline), var(--chrome-bevel), var(--chrome-floor), var(--neon-bloom); }
 .pp-foundation .pp-hero__actions .pp-btn--follow.is-on { background: var(--btn-glow-bg); color: var(--neon-yellow); }
 .pp-foundation .pp-hero__actions .pp-btn--accent-swatch { width: 44px; min-width: 44px; padding: 0; }
 .pp-foundation .pp-hero__actions .pp-btn:disabled { opacity: .5; cursor: not-allowed; }
