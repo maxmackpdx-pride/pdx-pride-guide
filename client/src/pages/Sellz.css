@@ -257,11 +257,6 @@
   padding-top: 26px;
 }
 
-.sellz-page .gifting-form.pdx-glass-rebind {
-  --c: #39ff14;
-  border-color: color-mix(in srgb, #39ff14 60%, #000);
-}
-
 .sellz-market-results {
   padding-top: clamp(30px, 5vw, 52px);
   padding-bottom: clamp(44px, 7vw, 72px);

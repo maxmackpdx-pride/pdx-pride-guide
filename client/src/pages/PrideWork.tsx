@@ -1,4 +1,5 @@
 import RoomPlate from "@/components/board/RoomPlate";
+import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { roomToast } from "@/lib/roomToast";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -581,34 +582,14 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
 
   const postType = form.watch("postType");
   const formAccent = postType === "LOOKING_FOR_WORK" ? "#19e3ff" : "#b06bff";
-  const formAccentName = postType === "LOOKING_FOR_WORK" ? "cyan" : "purple";
 
   return (
-          <section
-            id="gigs-form"
-            className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind"
-            data-testid="form-pride-work"
-            style={{ borderColor: formAccent, boxShadow: `0 0 30px -14px ${formAccent}` }}
-          >
-            <button
-              type="button"
-              className="gifting-close"
-              onClick={onClose}
-              aria-label="Close form"
-            >
-              <X size={18} />
-            </button>
-            <RoomKicker room="gigz" accent={formAccent} as="div">
-              {postType === "POSTING_GIG" ? "New gig" : "New availability"}
-            </RoomKicker>
-            <h2 className="display section-heading">
-              {postType === "POSTING_GIG" ? "Post a gig" : "Post your availability"}
-            </h2>
-            <p className="board-copy-sm">
-              {postType === "POSTING_GIG"
-                ? "Role, pay, and timing. Spell it out. Goes live right away. Keep it Pride-related, paid when possible, and community-safe."
-                : "Tell hosts what you do, when you are free, and what you are looking for. Goes live so organizers can find you on the board."}
-            </p>
+          <RoomComposer id="gigs-form" room="gigz" accent={formAccent} testId="form-pride-work" onClose={onClose}
+            kicker={postType === "POSTING_GIG" ? "New gig" : "New availability"}
+            title={postType === "POSTING_GIG" ? "Post a gig" : "Post your availability"}
+            intro={postType === "POSTING_GIG"
+              ? "Role, pay, and timing. Spell it out. Goes live right away. Keep it Pride-related, paid when possible, and community-safe."
+              : "Tell hosts what you do, when you are free, and what you are looking for. Goes live so organizers can find you on the board."}>
             <form onSubmit={form.handleSubmit(submitGig)} className="gifting-form-grid">
               <label className="span">
                 Post type
@@ -813,25 +794,14 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
               <p className="span board-copy-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
                 {GIG_BOARD_RULES_SUMMARY}
               </p>
-              <label className="span gifting-rules">
-                <input type="checkbox" checked={acceptRules} onChange={e => setAcceptRules(e.target.checked)} />
+              <ComposerRules className="span" checked={acceptRules} onChange={setAcceptRules}>
                 I agree: work and gigs only, PG-13, no personals. Paid when possible, community-safe.
-              </label>
+              </ComposerRules>
 
               <div className="span">
-                <Button
-                  type="submit"
-                  variant="solid"
-                  accent={formAccentName}
-                  size="lg"
-                  arrow
-                  data-testid="button-submit-gig"
-                  disabled={mutation.isPending || !acceptRules}
-                >
-                  {mutation.isPending ? "Posting…" : "Post it"}
-                </Button>
+                <ComposerSubmit type="submit" testId="button-submit-gig" busy={mutation.isPending} disabled={!acceptRules}>Post it</ComposerSubmit>
               </div>
             </form>
-          </section>
+          </RoomComposer>
   );
 }

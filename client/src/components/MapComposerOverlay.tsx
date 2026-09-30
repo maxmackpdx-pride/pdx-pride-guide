@@ -1,7 +1,7 @@
 import { Suspense, lazy, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import RoomComposer from "@/components/board/RoomComposer";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { apiRequest } from "@/lib/queryClient";
 import { WORLD_COLORS, WORLD_NAMES, type MapWorld } from "@/lib/mapWorlds";
@@ -21,7 +21,7 @@ export default function MapComposerOverlay({world,onClose,onPosted}:{world:MapWo
       {world==="gigz" && <GigComposer onClose={onClose} onPosted={onPosted}/>}
       {world==="giftz" && <GiftComposer onClose={onClose} onPosted={onPosted}/>}
       {world==="sellz" && <SellzComposer onClose={onClose} onPosted={onPosted}/>}
-      {world==="mizzed" && <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind"><button className="gifting-close" onClick={onClose} aria-label="Close form"><X size={18}/></button><h2 className="display section-heading">Post a Mizzed Connection</h2><p>Keep it kind and specific. No full names or outing. Replies stay private.</p>{events.isError && <p role="alert">Events could not load. <button onClick={()=>void events.refetch()}>Retry</button></p>}<MizzedComposer linkableEvents={events.data||[]} onPosted={onPosted}/></section>}
+      {world==="mizzed" && <RoomComposer id="map-mizzed-form" room="mizzed" kicker="New post" title="Post a Mizzed Connection" intro="Keep it kind and specific. No full names or outing. Replies stay private." onClose={onClose}>{events.isError && <p role="alert">Events could not load. <button onClick={()=>void events.refetch()}>Retry</button></p>}<MizzedComposer linkableEvents={events.data||[]} onPosted={onPosted}/></RoomComposer>}
     </Suspense>
   </div></div>,document.body);
 }

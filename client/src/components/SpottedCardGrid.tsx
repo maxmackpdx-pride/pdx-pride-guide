@@ -1,4 +1,5 @@
 import ZLineIcon from "@/components/ZLineIcon";
+import RoomComposer from "@/components/board/RoomComposer";
 import { useMemo, useState } from "react";
 import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -10,7 +11,7 @@ import BoardActiveSection, { BoardFilterChip, BoardSelectField, BoardTextField }
 import ScrollReveal from "./ScrollReveal";
 import SpottedCard, { spottedKind, spottedPlace } from "./SpottedCard";
 import SpottedDetailModal from "./SpottedDetailModal";
-import { Button, RoomKicker } from "@/components/ds";
+import { Button } from "@/components/ds";
 import type { LinkableMissedConnectionEvent, MissedConnectionPost } from "./MissedConnectionsPanel";
 import { placezStockImage } from "@/lib/mizzedSource";
 
@@ -118,17 +119,10 @@ export default function SpottedCardGrid({
 
   const composeSection = makeover && composeOpen && (
     <ScrollReveal>
-      <section id="spotted-form" className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind" style={{ borderColor: "#ff1fa0", boxShadow: "0 0 30px -14px #ff1fa0" }}>
-        <button type="button" className="gifting-close" onClick={() => setComposeOpen(false)} aria-label="Close form">
-          <X size={18} />
-        </button>
-        <RoomKicker room="mizzed" as="div">New posts</RoomKicker>
-        <h2 className="display section-heading">Post a MIZZED CONNECTION</h2>
-        <p className="board-copy-sm">
-          Keep it kind and specific. No full names, no outing anyone, PG-13. You stay anonymous. This posts to the public board, but every reply is private.
-        </p>
+      <RoomComposer id="spotted-form" room="mizzed" kicker="New post" title="Post a MIZZED CONNECTION" onClose={() => setComposeOpen(false)}
+        intro="Keep it kind and specific. No full names, no outing anyone, PG-13. You stay anonymous. This posts to the public board, but every reply is private.">
         {<MizzedComposer linkableEvents={linkableEvents} onPosted={() => setComposeOpen(false)} />}
-      </section>
+      </RoomComposer>
     </ScrollReveal>
   );
 

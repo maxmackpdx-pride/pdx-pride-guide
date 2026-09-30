@@ -40,7 +40,7 @@
 .zaydar-layer-row[data-selected=true]{outline:1px solid var(--active-layer-color);outline-offset:-1px;background:#ffffff0a}
 .zaydar-world-unlocated{margin:14px 0}.zaydar-world-unlocated summary{cursor:pointer;padding:10px 0}
 .map-world-composer{width:min(760px,calc(100vw - 24px));max-height:90dvh;overflow:auto;position:relative;border-radius:18px;background:#080c10}
-.map-world-composer>.gifting-form-panel,.map-world-composer .gifting-form,.map-world-composer .directory-form-panel{margin:0;max-width:none;padding:28px 22px}
+.map-world-composer>.gifting-form-panel,.map-world-composer .directory-form-panel{margin:0;max-width:none;padding:28px 22px}
 .map-world-composer .gifting-close{position:absolute;right:12px;top:12px}
 
 /* Coordinated map drawer: all seven worlds remain available without horizontal overflow. */

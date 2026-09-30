@@ -1,0 +1,21 @@
+/* Board 17: the composer sheet wears its room rim and the platform's 8% bloom. */
+.room-composer.pdx-glass-rebind { border-color: var(--c); box-shadow: var(--neon-bloom, 0 0 18px -4px color-mix(in srgb, var(--c) 8%, transparent)); }
+/* The rules line and every checkbox or radio label read on one line, box first. */
+.room-composer :is(.gifting-rules, label:has(> input[type=checkbox]), label:has(> input[type=radio])) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  text-align: left;
+}
+.room-composer :is(input[type=checkbox], input[type=radio]) {
+  order: -1;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--c);
+}

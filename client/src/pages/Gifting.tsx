@@ -1,4 +1,5 @@
 import RoomPlate from "@/components/board/RoomPlate";
+import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Gift, MapPin, Plus, Search, X } from "lucide-react";
@@ -8,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import GiftListingCard, { type GiftingPost } from "@/components/board/GiftListingCard";
-import { Button, FilterChip, RoomKicker } from "@/components/ds";
+import { FilterChip, RoomKicker } from "@/components/ds";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -326,17 +327,9 @@ export function GiftComposer({initialType = "GIFT", onClose, onPosted}: {initial
 
   return <>
     {status.isPending ? <p role="status">Checking posting availability…</p> : status.isError ? <p role="alert">Posting availability could not load. <button onClick={() => void status.refetch()}>Retry</button></p> : !postingOpen ? <p role="status">{status.data?.message}</p> : null}
-          <section id="gifting-form" className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
-            <button type="button" className="gifting-close" onClick={onClose} aria-label="Close form">
-              <X size={18} />
-            </button>
-            <RoomKicker room="giftz" as="div">New post</RoomKicker>
-            <h2 className="display section-heading">
-              {form.postType === "ISO" ? "Post an in search of" : "Post a gift"}
-            </h2>
-            <p className="board-copy-sm">
-              No selling, trading, exact addresses, unsafe items, or hookup behavior. Keep it free, keep it kind, keep it moving. Posts go live right away and are removed if they break the rules.
-            </p>
+          <RoomComposer id="gifting-form" room="giftz" kicker="New post" onClose={onClose}
+            title={form.postType === "ISO" ? "Post an in search of" : "Post a gift"}
+            intro="No selling, trading, exact addresses, unsafe items, or hookup behavior. Keep it free, keep it kind, keep it moving. Posts go live right away and are removed if they break the rules.">
             <div className="gifting-form-grid">
               <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} />
               <label>
@@ -396,24 +389,10 @@ export function GiftComposer({initialType = "GIFT", onClose, onPosted}: {initial
                 <input type="file" accept="image/*" multiple onChange={e => setPhotos(e.target.files)} />
               </label>
             </div>
-            <label className="gifting-rules">
-              <input
-                type="checkbox"
-                checked={form.acceptRules}
-                onChange={e => setForm({ ...form, acceptRules: e.target.checked })}
-              />
+            <ComposerRules checked={form.acceptRules} onChange={acceptRules => setForm({ ...form, acceptRules })}>
               I agree: keep it free, keep it kind, keep it moving.
-            </label>
-            <Button
-              variant="solid"
-              accent="lime"
-              size="lg"
-              arrow
-              disabled={!postingOpen || createMutation.isPending || !form.acceptRules}
-              onClick={submitPost}
-            >
-              {createMutation.isPending ? "Posting…" : "Post it"}
-            </Button>
-          </section>
+            </ComposerRules>
+            <ComposerSubmit busy={createMutation.isPending} disabled={!postingOpen || !form.acceptRules} onClick={submitPost}>Post it</ComposerSubmit>
+          </RoomComposer>
   </>;
 }
