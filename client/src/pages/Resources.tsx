@@ -256,7 +256,7 @@ function ResourceCard({
             </a>
           )}
           {org === FOOD_RESOURCE && <FoodPantryList />}
-          <button className="pdxBtn" onClick={() => onOpen(row)}>
+          <button className={`pdxBtn${["safety", "legal", "arts"].includes(category.id) ? " rg-contact-white" : ""}`} onClick={() => onOpen(row)}>
             All details & contact <ArrowUpRight size={16} />
           </button>
         </div>

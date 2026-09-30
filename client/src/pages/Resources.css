@@ -1457,3 +1457,5 @@ html.calm-mode .rg-options button,
 .rg-safety-prompt .pdxBtn { --c: var(--neon-orange); --action-accent: var(--neon-orange); }
 .rg-safety-support h4 { text-transform: uppercase; font-weight: 700; }
 .rg-safety-law-links a { color: var(--neon-orange); }
+
+.rg-directory-footer .pdxBtn.rg-contact-white { color: #fff !important; }
