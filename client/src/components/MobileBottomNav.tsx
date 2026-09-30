@@ -9,7 +9,7 @@ import {
   dismissMobileNavOverlays,
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
-import { EVENTS_NAV, OUTZ_INDEX, navLinkActive } from "@/lib/siteNav";
+import { EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
@@ -96,10 +96,10 @@ export default function MobileBottomNav() {
   }, []);
 
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
-  const outzActive = navLinkActive(location, OUTZ_INDEX);
   const hubActive = navLinkActive(location, "/dashboard");
-  const mapActive = navLinkActive(location, "/map");
-  const activeIndex = open || showAuth ? 4 : eventsOpen ? 0 : hubActive ? 2 : outzActive ? 3 : mapActive ? 1 : eventsActive ? 0 : -1;
+  const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
+  const zlistsActive = navLinkActive(location, "/z");
+  const activeIndex = open || showAuth ? 4 : eventsOpen ? 0 : hubActive ? 2 : mapActive ? 3 : zlistsActive ? 1 : eventsActive ? 0 : -1;
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
 
@@ -244,16 +244,16 @@ export default function MobileBottomNav() {
           </button>
 
           <Link
-            href="/map"
-            className={tabClass(mapActive, "cyan")}
-            data-accent="cyan"
-            aria-label="Mapz"
-            title="Mapz"
-            aria-current={mapActive ? "page" : undefined}
+            href="/z"
+            className={tabClass(zlistsActive, "purple")}
+            data-accent="violet"
+            aria-label="Z/LISTS"
+            title="Z/LISTS"
+            aria-current={zlistsActive ? "page" : undefined}
             onClick={handleNavLink}
           >
             <span className="znav-icon-row"><Map size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Mapz</span>
+            <span className="znav-caption">Z/LISTS</span>
           </Link>
 
           <Link
@@ -270,11 +270,12 @@ export default function MobileBottomNav() {
           </Link>
 
           <Link
-            href={OUTZ_INDEX}
-            className={tabClass(outzActive, "orange")}
+            href="/map"
+            className={tabClass(mapActive, "orange")}
             data-accent="orange"
-            aria-current={outzActive ? "page" : undefined}
-            aria-label="OutZide"
+            aria-current={mapActive ? "page" : undefined}
+            aria-label="MAPZ"
+            title="MAPZ"
             onClick={handleNavLink}
           >
             <span className="znav-icon-row">
@@ -291,7 +292,7 @@ export default function MobileBottomNav() {
                 </g>
               </svg>
             </span>
-            <span className="znav-caption">OutZide</span>
+            <span className="znav-caption">MAPZ</span>
           </Link>
 
           <button
