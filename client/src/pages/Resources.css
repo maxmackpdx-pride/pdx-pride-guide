@@ -11,6 +11,8 @@
   line-height: 1.5;
 }
 .resources-page {
+  position: relative;
+  isolation: isolate;
   background:
     radial-gradient(
       ellipse 700px 600px at 88% 280px,
@@ -1007,4 +1009,14 @@
   font-size: 11px;
   color: var(--res-muted);
   margin-bottom: 10px;
+}
+
+.rg-stream-background {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: -1;
 }

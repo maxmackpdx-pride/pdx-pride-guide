@@ -27,6 +27,7 @@ import {
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
 import { FOOD_PANTRIES, FOOD_RESOURCE } from "@/lib/foodPantries";
+import { WebGLShader } from "@/components/ui/web-gl-shader";
 import "./Resources.css";
 
 const ICONS = [
@@ -275,6 +276,7 @@ export default function Resources() {
 
   return (
     <div className="resources-page">
+      <WebGLShader />
       <header className="rg-intro rg-wrap">
         <span className="rg-eyebrow">Resources / All the ways we show up</span>
         <h1>
