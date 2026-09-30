@@ -1,4 +1,4 @@
-import BoardShareButton from "@/components/BoardShareButton";
+import RoomPlate from "@/components/board/RoomPlate";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -23,7 +23,6 @@ import { BoardGlassMotif } from "@/components/board/GiftListingCard";
 import type { CSSProperties } from "react";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
-import BoardFollowButton from "@/components/BoardFollowButton";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import RoomDoorways from "@/components/RoomDoorways";
@@ -172,7 +171,7 @@ export default function PrideWork() {
   const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/gigz?post=${id}`); window.setTimeout(() => document.getElementById("gigz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
   return <main className="gigz-page">
     <div className="gigz-shell">
-      <div className="gigz-identity board-share-header"><BoardShareButton title="Gigz" path="/gigz" /><img src="/brand/family/gigz.svg" alt="Gigz" /><span>Work with your people.</span><BoardFollowButton board="gigz" /></div>
+      <RoomPlate room="gigz" />
       {!isLoading && !isError && !onlyMine && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><RoomKicker room="gigz" as="div">The board</RoomKicker><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post gigz-post--primary" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
       <div className="gigz-filter"><label>Search Gigz<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search roles, skills, gigs" /></label><label><input type="checkbox" checked={remoteOnly} onChange={e => setRemoteOnly(e.target.checked)} /> Remote only</label>{user && <label><input type="checkbox" checked={onlyMine} onChange={e => setOnlyMine(e.target.checked)} /> My Gigz</label>}</div>

@@ -1,4 +1,5 @@
 import { createEventSearch } from "@shared/eventSearch";
+import RoomPlate from "@/components/board/RoomPlate";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
@@ -602,6 +603,7 @@ export default function Events() {
 
   return (
     <div className="zine-page events-page board-page board-page--makeover">
+      <div className="room-plate-shell"><RoomPlate room="eventz" /></div>
       <EventsHero eventCount={upcomingCount} stats={heroStats} />
 
       <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} />

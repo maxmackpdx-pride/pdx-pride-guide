@@ -1,4 +1,4 @@
-import BoardShareButton from "@/components/BoardShareButton";
+import RoomPlate from "@/components/board/RoomPlate";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Bookmark, Plus, RotateCcw, Search, ShieldCheck, Tag, X } from "lucide-react";
@@ -9,7 +9,6 @@ import AuthModal from "@/components/AuthModal";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import { Button, RoomKicker } from "@/components/ds";
 import SellzListingCard, { type SellzPost } from "@/components/board/SellzListingCard";
-import BoardFollowButton from "@/components/BoardFollowButton";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import RoomDoorways from "@/components/RoomDoorways";
@@ -192,10 +191,10 @@ export default function Sellz() {
 
   return <main className="gigz-page sellz-page sellz-board-page">
     <div className="gigz-shell">
-      <div className="gigz-identity board-share-header"><BoardShareButton title="Sellz" path="/sellz" /><img src="/brand/family/sellz.svg" alt="Sellz" /><span>Good stuff. New hands.</span></div>
+      <RoomPlate room="sellz" />
       {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><RoomKicker room="sellz" as="div">The marketplace</RoomKicker><h1>Find your next good thing<span>.</span></h1><p>Buy and sell with your community. Message, agree, and hand off directly.</p></div>
-        <div className="sellz-board-actions"><BoardFollowButton board="sellz" /><button type="button" className="gigz-post gigz-post--primary" onClick={openForm}><Plus size={17} /> Sell something <ArrowUpRight size={16} /></button></div>
+        <div className="sellz-board-actions"><button type="button" className="gigz-post gigz-post--primary" onClick={openForm}><Plus size={17} /> Sell something <ArrowUpRight size={16} /></button></div>
       </div>
       <div className="sellz-board-filters" aria-label="Filter Sellz listings">
         <label>Search Sellz<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search listings and neighborhoods" /></label>

@@ -1,4 +1,4 @@
-import BoardShareButton from "@/components/BoardShareButton";
+import RoomPlate from "@/components/board/RoomPlate";
 import { ArrowDown } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 import { ArrowRight } from "lucide-react";
@@ -30,7 +30,6 @@ import {
   snapshotQueries,
 } from "@/lib/optimisticCache";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
-import BoardFollowButton from "@/components/BoardFollowButton";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -333,6 +332,7 @@ export default function Housing() {
         <Mono accent>THE HAÜZ · Housing board</Mono>
       </div>
       <div className="pdx-seam hz-seam--head" aria-hidden="true" />
+      <div className="hz-pad"><div className="hz-wrap"><RoomPlate room="hauz" /></div></div>
 
       {/* Hero */}
       <div className="hz-hero">
@@ -370,9 +370,9 @@ export default function Housing() {
         <span className="hz-hero__scrim" aria-hidden="true" />
         <div className="hz-pad">
           <div className="hz-wrap">
-            <div className="hz-board-share-row"><SectionBreadcrumb section="The Haüz" /><BoardShareButton title="The Haüz" path="/the-hauz" /></div>
+            <SectionBreadcrumb section="The Haüz" />
             <h1 className="hz-title hz-hero__title hz-hero__title--brand">
-              <img className="hz-hero__brand-logo" src="/brand/family/the-hauz.svg" alt="THE HAÜZ" />
+              <span className="sr-only">The Haüz</span>
               <span className="hz-beta">Beta</span>
             </h1>
             <p className="hz-hero__lede">
@@ -386,7 +386,6 @@ export default function Housing() {
             <div className="hz-board-actions">
               <a className="hz-chip hz-chip--btn" href="#housing-listings">Browse the listings <ArrowDown size={14} aria-hidden="true" /></a>
               <button type="button" className="hz-chip hz-chip--btn hz-board-post" onClick={() => { if (requireAuth()) navigate("/the-hauz/new"); }}>Post to The Haüz <ArrowUpRight size={14} aria-hidden="true" /></button>
-              <BoardFollowButton board="houz" />
             </div>
           </div>
         </div>

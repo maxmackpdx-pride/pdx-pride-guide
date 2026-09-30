@@ -643,7 +643,6 @@
 
 /* The standalone Sellz board shares the Gigz and Giftz card language. */
 .sellz-board-page { background: #09090d; color: #faf8fc; min-height: 100vh; }
-.sellz-board-page .gigz-identity img { width: 155px; }
 .sellz-board-page .gigz-section-head h1 span { color: #39ff14; }
 .sellz-board-page .gigz-post { --button-c: var(--room-sellz, #39ff14); }
 .sellz-board-page .board-follow-button { border-color: #318d31; color: #d5fbd0; }

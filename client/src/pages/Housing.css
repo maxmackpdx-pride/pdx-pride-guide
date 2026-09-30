@@ -260,14 +260,6 @@
   gap: 12px;
 }
 
-.hz-hero__brand-logo {
-  display: block;
-  width: min(100%, 620px);
-  height: auto;
-  object-fit: contain;
-  object-position: left center;
-}
-
 .hz-beta {
   display: inline-block;
   transform: rotate(-7deg);
@@ -2701,11 +2693,9 @@ html.calm-mode .hz-tag--adult {
 }
 
 .hz-hero__title--brand { flex-wrap:wrap; min-width:0; }
-.hz-hero__brand-logo { min-width:0; max-width:100%; }
 .hz-beta { flex-shrink:0; }
 @media(max-width:767px) {
  .hz .hz-hero__title--brand { gap:8px; margin-top:8px; }
- .hz .hz-hero__brand-logo { width:min(100%,420px); }
  .hz .hz-beta { margin:0 0 8px; transform:none; }
 }
 /* The Haüz board presents each post type as its own right-to-left rail. */

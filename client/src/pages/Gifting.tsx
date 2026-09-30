@@ -1,4 +1,4 @@
-import BoardShareButton from "@/components/BoardShareButton";
+import RoomPlate from "@/components/board/RoomPlate";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Gift, MapPin, Plus, Search, X } from "lucide-react";
@@ -13,7 +13,6 @@ import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
-import BoardFollowButton from "@/components/BoardFollowButton";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import RoomDoorways from "@/components/RoomDoorways";
@@ -235,10 +234,10 @@ export default function Gifting() {
 
   return <main className="gigz-page giftz-page gifting-page">
     <div className="gigz-shell">
-      <div className="gigz-identity board-share-header"><BoardShareButton title="Giftz" path="/giftz" /><img src="/brand/family/giftz.svg" alt="Giftz" /><span>Pass it on. Find what you need.</span></div>
+      <RoomPlate room="giftz" />
       {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><RoomKicker room="giftz" as="div">The board</RoomKicker><h1>Good things move around<span>.</span></h1><p>Give what you can. Find what you need. Keep it free.</p></div>
-        <div className="giftz-actions"><BoardFollowButton board="giftz" /><button type="button" className="gigz-post gigz-post--primary" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
+        <div className="giftz-actions"><button type="button" className="gigz-post gigz-post--primary" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
       </div>
       {!postingOpen && giftingStatus && <p className="giftz-posting-status" role="status">{giftingStatus.message}</p>}
       <div className="giftz-filters" aria-label="Filter Giftz posts">

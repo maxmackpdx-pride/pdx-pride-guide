@@ -6,7 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 
-export default function BoardFollowButton({ board }: { board: "gigz" | "giftz" | "sellz" | "mizzed" | "houz" }) {
+export type FollowableRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | "eventz" | "outz";
+
+export default function BoardFollowButton({ board }: { board: FollowableRoom }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
@@ -21,7 +23,7 @@ export default function BoardFollowButton({ board }: { board: "gigz" | "giftz" |
     enabled: !!user,
   });
   const following = !!status.data?.isFollowing;
-  const boardName = { gigz: "Gigz", giftz: "Giftz", sellz: "Sellz", mizzed: "Mizzed", houz: "Haüz" }[board];
+  const boardName = { gigz: "Gigz", giftz: "Giftz", sellz: "Sellz", mizzed: "Mizzed", houz: "Haüz", eventz: "Eventz", outz: "OutZide" }[board];
   const mutation = useMutation({
     mutationFn: async (follow: boolean) => {
       const response = await fetch(`/api/boards/${board}/follow`, {

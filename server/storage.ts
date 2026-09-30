@@ -961,17 +961,17 @@ sqlite.exec(`
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS board_follows (
     user_id INTEGER NOT NULL,
-    board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz', 'mizzed', 'houz')),
+    board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz', 'mizzed', 'houz', 'eventz', 'outz')),
     created_at TEXT NOT NULL,
     PRIMARY KEY (user_id, board)
   );
 `);
 const boardFollowsSchema = sqlite.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'board_follows'").get() as { sql: string } | undefined;
-if (boardFollowsSchema && (!boardFollowsSchema.sql.includes("'mizzed'") || !boardFollowsSchema.sql.includes("'houz'"))) {
+if (boardFollowsSchema && (!boardFollowsSchema.sql.includes("'mizzed'") || !boardFollowsSchema.sql.includes("'houz'") || !boardFollowsSchema.sql.includes("'outz'"))) {
   sqlite.transaction(() => {
     sqlite.exec(`CREATE TABLE board_follows_new (
       user_id INTEGER NOT NULL,
-      board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz', 'mizzed', 'houz')),
+      board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz', 'mizzed', 'houz', 'eventz', 'outz')),
       created_at TEXT NOT NULL,
       PRIMARY KEY (user_id, board)
     )`);
@@ -980,10 +980,12 @@ if (boardFollowsSchema && (!boardFollowsSchema.sql.includes("'mizzed'") || !boar
     sqlite.exec("ALTER TABLE board_follows_new RENAME TO board_follows");
   })();
 }
-export function isFollowingBoard(userId: number, board: "gigz" | "giftz" | "sellz" | "mizzed" | "houz"): boolean {
+/** Rooms a member can follow. Following widens what that room puts in the Hub feed. */
+export type FollowableRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | "eventz" | "outz";
+export function isFollowingBoard(userId: number, board: FollowableRoom): boolean {
   return !!sqlite.prepare("SELECT 1 FROM board_follows WHERE user_id = ? AND board = ?").get(userId, board);
 }
-export function setBoardFollowing(userId: number, board: "gigz" | "giftz" | "sellz" | "mizzed" | "houz", follow: boolean): void {
+export function setBoardFollowing(userId: number, board: FollowableRoom, follow: boolean): void {
   if (follow) {
     sqlite.prepare("INSERT OR IGNORE INTO board_follows (user_id, board, created_at) VALUES (?, ?, ?)")
       .run(userId, board, new Date().toISOString());
@@ -15542,6 +15544,8 @@ export const storage: IStorage = {
     const followsSellz = viewerUserId != null && isFollowingBoard(viewerUserId, "sellz");
     const followsMizzed = viewerUserId != null && isFollowingBoard(viewerUserId, "mizzed");
     const followsHouz = viewerUserId != null && isFollowingBoard(viewerUserId, "houz");
+    const followsEventz = viewerUserId != null && isFollowingBoard(viewerUserId, "eventz");
+    const followsOutz = viewerUserId != null && isFollowingBoard(viewerUserId, "outz");
     const viewerIsAdmin = !!opts.viewerIsAdmin;
     const cursor = opts.cursor?.trim() || null;
 
@@ -15630,6 +15634,7 @@ export const storage: IStorage = {
         author: feedAuthor,
         event: hubFeedEventEmbed(evt, goingCounts[evt.id]?.count, poster),
         link: null,
+        viewerFollowsBoard: followsEventz,
       });
     }
     items.push(...condenseHubFeedEventItems(rawEventItems));
@@ -15862,20 +15867,21 @@ export const storage: IStorage = {
       });
     }
 
-    // Destination wall posts enter the Hub only for members following that spot.
+    // Destination wall posts enter the Hub for members following that spot, or all of OutZide.
     // Chats and check-in notes stay in their existing destination rooms.
     if (viewerUserId != null) {
       const destinationPosts = sqlite.prepare(`
         SELECT p.id, p.place_id AS placeId, p.user_id AS userId, p.post_kind AS postKind,
-               p.body, p.created_at AS createdAt, f.place_name AS placeName,
+               p.body, p.created_at AS createdAt,
+               COALESCE(f.place_name, (SELECT place_name FROM outz_destination_follows WHERE place_id = p.place_id LIMIT 1), p.place_id) AS placeName,
                u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
                u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
         FROM outz_wall_posts p
-        JOIN outz_destination_follows f ON f.place_id = p.place_id AND f.user_id = ?
+        LEFT JOIN outz_destination_follows f ON f.place_id = p.place_id AND f.user_id = ?
         JOIN users u ON u.id = p.user_id
-        WHERE datetime(p.created_at) >= datetime('now', '-30 days')
+        WHERE datetime(p.created_at) >= datetime('now', '-30 days') AND (f.user_id IS NOT NULL OR ?)
         ORDER BY p.created_at DESC LIMIT 40
-      `).all(viewerUserId) as any[];
+      `).all(viewerUserId, followsOutz ? 1 : 0) as any[];
       for (const row of destinationPosts) {
         if (row.userId !== viewerUserId && storage.isMemberInteractionBlocked(viewerUserId, row.userId)) continue;
         items.push({
@@ -15887,6 +15893,7 @@ export const storage: IStorage = {
           createdAt: row.createdAt,
           author: hubFeedAuthorFromUser(row),
           link: `/outzide?place=${encodeURIComponent(row.placeId)}&wall=1`,
+          viewerFollowsBoard: followsOutz,
         });
       }
     }

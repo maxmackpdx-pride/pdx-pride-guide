@@ -1,4 +1,5 @@
 import BrowseStatus from "@/components/BrowseStatus";
+import RoomPlate from "@/components/board/RoomPlate";
 import PageRecovery from "@/components/PageRecovery";
 import { useQuery } from "@tanstack/react-query";
 import { outzShareId, outzSharePath } from "@shared/outzShare";
@@ -106,7 +107,7 @@ export default function Outz() {
   }, [attempt, sharedId]);
   if(sharedId && !sharePending && (shareError || !sharedPlace))return <PageRecovery section="OutZide" title={shareError ? "This destination couldn’t load" : "Destination not found"} description="Browse Outzide to find a destination, or try this link again." href="/outzide" label="Browse Outzide" missing={!shareError} retry={shareError ? () => {void retryShare();} : undefined}/>;
   return <><div style={{ position: "relative" }}>
-    <MapSwitch current="outz" />
+    <MapSwitch current="outz" /><RoomPlate room="outz" compact />
     {!mapReady && <div style={{ position: "absolute", inset: "12px 12px auto", zIndex: 2, background: "var(--ink-900, #08090b)", borderRadius: 16 }}><BrowseStatus
       title={mapSlow ? "Outzide is taking longer than expected" : "Loading Outzide…"}
       description={mapSlow ? "Try loading the field guide again." : "Getting destinations and the map ready."}

@@ -17,18 +17,3 @@
 .board-share-button:hover { background: #ffffff18; }
 .board-share-button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 .board-share-button:disabled { opacity: .6; cursor: wait; }
-.gigz-identity.board-share-header,
-.mizzed-board__identity.board-share-header {
-  position: relative;
-  padding-right: 110px;
-}
-.board-share-header > .board-share-button { position: absolute; right: 0; top: 24px; }
-.hz-board-share-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-@media (max-width: 600px) {
-  .gigz-identity.board-share-header,
-  .mizzed-board__identity.board-share-header { flex-wrap: wrap; gap: 12px; padding-top: 18px; padding-bottom: 18px; }
-  .board-share-header > .board-share-button { top: 18px; }
-  .gigz-identity.board-share-header > span,
-  .mizzed-board__identity.board-share-header > span { flex-basis: 100%; padding-left: 0; border-left: 0; }
-  .mizzed-board__identity.board-share-header img { max-width: 100%; }
-}

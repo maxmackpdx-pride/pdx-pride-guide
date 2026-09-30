@@ -23,7 +23,7 @@ import {
   prideDayFromDate,
   EVENT_WEEK_END_DATE,
 } from "@shared/eventWeek";
-import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts, normalizeAttendanceVisibility, isFollowingBoard, setBoardFollowing } from "./storage";
+import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts, normalizeAttendanceVisibility, isFollowingBoard, setBoardFollowing, type FollowableRoom } from "./storage";
 import { isTransactionalEmailConfigured, sendOwnerDeskNotification, sendPasswordResetEmail } from "./email";
 import {
   adminSearchForViewer,
@@ -3091,8 +3091,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(gigs);
   });
 
-  const boardFollowKey = (value: unknown): "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | null =>
-    value === "gigz" || value === "giftz" || value === "sellz" || value === "mizzed" || value === "houz" ? value : null;
+  const FOLLOWABLE_ROOMS: readonly FollowableRoom[] = ["gigz", "giftz", "sellz", "mizzed", "houz", "eventz", "outz"];
+  const boardFollowKey = (value: unknown): FollowableRoom | null =>
+    FOLLOWABLE_ROOMS.includes(value as FollowableRoom) ? value as FollowableRoom : null;
   // Exact board map points exist only after an explicit choice by the author.
   sqlite.exec(`CREATE TABLE IF NOT EXISTS board_map_locations (
     board TEXT NOT NULL, post_id INTEGER NOT NULL, lat REAL NOT NULL, lng REAL NOT NULL,
