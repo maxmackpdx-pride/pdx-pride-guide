@@ -1,28 +1,37 @@
 /* Shared map furniture; category palettes and hologram materials stay local. */
-.outzide-shell{
+.outzide-shell,.zaydar-map-demo {
  --map-ui-control:var(--map-target);--map-ui-radius:var(--map-control-radius);--map-ui-panel:var(--map-chrome-radius);
  --map-ui-drawer:440px;--map-ui-motion:220ms;--map-ui-ease:cubic-bezier(.22,.8,.25,1);
  --map-ui-blur:18px;--map-ui-edge:#d3e7dc26;
 }
 .outzide-shell{--map-ui-ink:var(--map-ink);--map-ui-accent:var(--map-accent);--map-ui-text:var(--ink);--map-ui-muted:var(--muted)}
-.outzide-shell .map-controls{
+.zaydar-map-demo{--map-ui-ink:var(--map-ink);--map-ui-accent:var(--map-accent);--map-ui-text:#eaf2fa;--map-ui-muted:#b0bfcd}
+.outzide-shell .map-controls,.zaydar-map-demo .zaydar-demo-navigation{
  width:54px;padding:4px;gap:3px;border-radius:15px;border:1px solid var(--map-ui-edge);
  background:color-mix(in srgb,var(--map-ui-ink) 84%,transparent);box-shadow:0 0 0 1px var(--map-rim),inset 0 1px #ffffff10;
  backdrop-filter:blur(var(--map-ui-blur)) saturate(1.22);
 }
-.outzide-shell .map-controls button{
+.outzide-shell .map-controls button,.zaydar-map-demo .zaydar-demo-navigation button{
  width:var(--map-ui-control);height:var(--map-ui-control);min-width:var(--map-ui-control);min-height:var(--map-ui-control);
  padding:0;border:0;border-radius:10px;background:transparent;color:var(--map-ui-text);box-shadow:none;
  display:grid;place-items:center;transition:background var(--map-ui-motion),color var(--map-ui-motion);
 }
 .outzide-shell .map-controls #fire-toggle{width:44px}
-.outzide-shell .map-controls button:hover{background:#ffffff0d}
-.outzide-shell .map-controls button[aria-pressed=true]{color:var(--map-light);background:var(--map-selected-tint);box-shadow:var(--map-selected-line)}
-.outzide-shell .map-controls button:focus-visible{outline:2px solid var(--map-ui-accent);outline-offset:-2px}
-.outzide-shell .discovery{border-radius:var(--map-ui-panel);backdrop-filter:blur(var(--map-ui-blur)) saturate(1.22);transition-duration:var(--map-ui-motion);transition-timing-function:var(--map-ui-ease)}
+.outzide-shell .map-controls button:hover,.zaydar-map-demo .zaydar-demo-navigation button:hover{background:#ffffff0d}
+.outzide-shell .map-controls button[aria-pressed=true],.zaydar-map-demo .zaydar-demo-navigation :is(button[aria-pressed=true],button[aria-expanded=true]){color:var(--map-light);background:var(--map-selected-tint);box-shadow:var(--map-selected-line)}
+.outzide-shell .map-controls .rack-gap,.zaydar-map-demo .zaydar-control-gap{display:block;height:1px;margin:3px 6px;background:#ffffff1a}
+.outzide-shell .map-controls button:focus-visible,.zaydar-map-demo .zaydar-demo-navigation button:focus-visible{outline:2px solid var(--map-ui-accent);outline-offset:-2px}
+.outzide-shell .discovery,.zaydar-map-demo .zaydar-layer-sheet{border-radius:var(--map-ui-panel);backdrop-filter:blur(var(--map-ui-blur)) saturate(1.22);transition-duration:var(--map-ui-motion);transition-timing-function:var(--map-ui-ease)}
+.zaydar-map-demo .zaydar-layer-chip{border-radius:var(--map-ui-radius);background:transparent;border-color:transparent;box-shadow:none}
+.zaydar-map-demo .zaydar-layer-chip[data-enabled=true]{background:color-mix(in srgb,var(--layer-color) 6%,var(--map-ui-ink));border-color:transparent;box-shadow:none}
+.zaydar-map-demo .zaydar-layer-chip__toggle[aria-pressed=true]{box-shadow:inset 0 -1px var(--layer-color)}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail button{border-radius:var(--map-ui-radius);border-color:transparent;background:transparent;min-height:44px}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail button[aria-pressed=true]{background:#ffffff08;box-shadow:inset 0 -1px var(--active-layer-color)}
 .map-applied-filters{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
 .map-applied-filters button{min-height:36px;padding:6px 9px;border:1px solid var(--map-ui-edge);border-radius:8px;background:none;color:var(--map-ui-text);font-size:12px}
-.outzide-shell .search{border-radius:999px;background:#0004;border-color:var(--map-ui-edge)}
+.zaydar-map-demo .zaydar-layer-sheet__close{width:auto;gap:6px;display:flex;padding:0 10px;border-radius:var(--map-ui-radius);font-size:12px;white-space:nowrap}
+.zaydar-map-demo .zaydar-world-filters label:first-child{grid-column:1/-1}
+.zaydar-map-demo .zaydar-world-filters input[type=search],.outzide-shell .search{border-radius:999px;background:#0004;border-color:var(--map-ui-edge)}
 .outzide-shell #detail .detail-tabs button{min-height:48px;font:600 12px var(--mono);letter-spacing:.04em;background:transparent;border-radius:0}
 .outzide-shell #detail .detail-tools button{border-radius:9px;border-color:color-mix(in srgb,var(--c) 65%,transparent)}
 .outzide-shell .detail-footer{display:flex;gap:8px;flex-shrink:0;padding:12px 16px;border-top:1px solid color-mix(in srgb,var(--c) 30%,transparent);background:#08110ed9}
@@ -34,7 +43,7 @@
 .checkin-face:first-child{margin-left:0}.checkin-face img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.face-overflow{width:auto;min-width:27px;padding:0 4px;background:#e4ead9;color:#172119}
 .outzide-shell .waypoint-icon .face-stack{left:50%;top:-24px;transform:translateX(-50%)}
 .outzide-shell .waypoint-count{min-width:21px;height:21px;font:700 11px/19px Inter,Arial,sans-serif;border-width:1.5px}
-@media(min-width:960px){.outzide-shell .discovery{width:var(--map-ui-drawer)}}
+@media(min-width:960px){.outzide-shell .discovery{width:var(--map-ui-drawer)}.zaydar-map-demo .zaydar-layer-sheet{width:var(--map-ui-drawer)}}
 @media(max-width:760px){
  .outzide-shell .workspace .discovery{display:flex;position:fixed;inset:auto 10px 16px;width:auto;height:min(64dvh,600px);max-height:calc(100dvh - 150px);border-radius:18px;transition:height var(--map-ui-motion) var(--map-ui-ease)}
  .outzide-shell .workspace.view-map .discovery{height:52px;overflow:hidden}
@@ -46,20 +55,22 @@
  .outzide-shell .map-bottom{bottom:80px}
  .outzide-shell:has(#detail[open]) .discovery{visibility:hidden}
 }
-@media(prefers-reduced-motion:reduce){.outzide-shell{--map-ui-motion:0ms}}
-html.calm-mode .outzide-shell,[data-calm=true] .outzide-shell{--map-ui-motion:0ms}
+@media(prefers-reduced-motion:reduce){.outzide-shell,.zaydar-map-demo{--map-ui-motion:0ms}}
+html.calm-mode .outzide-shell,html.calm-mode .zaydar-map-demo,[data-calm=true] .outzide-shell,[data-calm=true] .zaydar-map-demo{--map-ui-motion:0ms}
 .outzide-shell .waypoint-icon .face-stack{top:auto;bottom:60px}
 .outzide-shell .waypoint-icon.special .face-stack{bottom:76px}
 .outzide-shell .waypoint-icon.selected .face-stack{bottom:122px}
 @media(max-width:760px){.outzide-shell:has(#active-map-filters) .workspace .discovery{top:auto}}
 
 /* A little more map showing through the shared glass, without fading content. */
-.outzide-shell :is(.topbar,.fieldbar,.discovery,.map-legend,#selection-dock,#trail-feed){
+.outzide-shell :is(.topbar,.fieldbar,.discovery,.map-legend,#selection-dock,#trail-feed),
+.zaydar-map-demo .zaydar-layer-sheet{
  background:linear-gradient(145deg,#deefe70b,transparent 58%),color-mix(in srgb,var(--map-ui-ink) 82%,transparent);
 }
 .outzide-shell #detail:not(.winter-card){background:color-mix(in srgb,var(--map-ui-ink) 84%,transparent)}
 @media(prefers-reduced-transparency:reduce){
- .outzide-shell :is(.topbar,.fieldbar,.discovery,.map-controls,.map-legend,#selection-dock,#trail-feed,#detail){background:var(--map-ui-ink)}
+ .outzide-shell :is(.topbar,.fieldbar,.discovery,.map-controls,.map-legend,#selection-dock,#trail-feed,#detail),
+ .zaydar-map-demo :is(.zaydar-layer-sheet,.zaydar-demo-navigation){background:var(--map-ui-ink)}
 }
 @media(prefers-reduced-transparency:no-preference){.outzide-shell #detail.winter-card{background:linear-gradient(130deg,#263d4380,#0d2021c2 28%,#102122d1)}}
 /* Field Feed keeps identity beside the post and separates authors from notices. */
@@ -102,7 +113,7 @@ html.calm-mode .outzide-shell,[data-calm=true] .outzide-shell{--map-ui-motion:0m
 /* Shared drawer + dock anatomy (Map family guide, ZF-MAP-FAMILY-2026-09-22).
    One frame for both rooms: dark #050706 rim, layered glass, 18px docks and drawers,
    12px control groups. Each room keeps its own ink and highlight. No outer bloom. */
-.outzide-shell{
+.outzide-shell,.zaydar-map-demo{
  --map-ui-rim:var(--map-rim);--map-ui-blur:24px;
  --map-ui-hair:color-mix(in srgb,var(--map-ui-light) 20%,transparent);
  --map-ui-glass:linear-gradient(145deg,color-mix(in srgb,var(--map-ui-light) 12%,transparent),transparent 58%),color-mix(in srgb,var(--map-ui-ink) 86%,transparent);
@@ -110,48 +121,90 @@ html.calm-mode .outzide-shell,[data-calm=true] .outzide-shell{--map-ui-motion:0m
  --map-ui-shadow-panel:0 0 0 1px var(--map-ui-rim),0 16px 44px #0008,inset 0 1px 0 #ffffff16;
 }
 .outzide-shell{--map-ui-light:var(--map-light)}
+.zaydar-map-demo{--map-ui-ink:var(--map-ink);--map-ui-light:var(--map-light)}
 
 /* Tool docks: zoom, locate, labels, fire, 3D. */
-.outzide-shell .map-controls{
+.outzide-shell .map-controls,.zaydar-map-demo .zaydar-demo-navigation{
  border:1px solid var(--map-ui-rim);border-radius:var(--map-ui-panel);background:var(--map-ui-glass);
  box-shadow:var(--map-ui-shadow-nav);backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);-webkit-backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);
 }
+.zaydar-map-demo .zaydar-demo-navigation :is(.zaydar-control-labels,.zaydar-control-tonight){font:700 12px/1 var(--font-display,"Barlow Condensed",sans-serif);letter-spacing:.04em;text-transform:uppercase}
 
 /* Chips that sit on the map: region lockup, map key, drawer launcher. */
-.outzide-shell .map-key-toggle{
+.outzide-shell .map-key-toggle,.zaydar-map-demo .zaydar-map-controls-launcher,.zaydar-map-demo .zaydar-map-lockup{
  border:1px solid var(--map-ui-rim);border-radius:var(--map-ui-radius);background:var(--map-ui-glass);
  box-shadow:var(--map-ui-shadow-nav);backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);-webkit-backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);
 }
-.outzide-shell .map-key-toggle:hover{background:linear-gradient(#ffffff0a,#ffffff0a),var(--map-ui-glass)}
+.zaydar-map-demo .zaydar-map-controls-launcher{min-height:var(--map-ui-control);gap:9px;padding:0 14px;font-size:15px;letter-spacing:.04em;transition:background var(--map-ui-motion)}
+.zaydar-map-demo .zaydar-map-controls-launcher:hover,.outzide-shell .map-key-toggle:hover{background:linear-gradient(#ffffff0a,#ffffff0a),var(--map-ui-glass)}
+.zaydar-map-demo .zaydar-map-controls-launcher[aria-expanded=true]{color:var(--map-light);background:linear-gradient(var(--map-selected-tint),var(--map-selected-tint)),var(--map-ui-glass);box-shadow:var(--map-ui-shadow-nav),var(--map-selected-line)}
+@media(min-width:960px){.zaydar-map-demo .zaydar-map-lockup{top:18px;left:18px}}
 
 /* Drawers: Mapz map controls and OutZide browse. */
-.outzide-shell .discovery{
+.outzide-shell .discovery,.zaydar-map-demo .zaydar-layer-sheet{
  border:1px solid var(--map-ui-rim);border-radius:var(--map-ui-panel);background:var(--map-ui-glass);
  box-shadow:var(--map-ui-shadow-panel);backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);-webkit-backdrop-filter:blur(var(--map-ui-blur)) saturate(1.15);
 }
+.zaydar-map-demo .zaydar-layer-sheet>.z-glass__edge{opacity:.32}
 
 /* Drawer head: condensed caps title, hairline seam, 44px close. */
-.outzide-shell .discovery .search-panel-header{
+.outzide-shell .discovery .search-panel-header,.zaydar-map-demo .zaydar-layer-sheet__title{
  display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px;
  padding:6px 7px 6px 16px;border-bottom:1px solid var(--map-ui-hair);
 }
 .outzide-shell .discovery .search-panel-header{margin-bottom:10px}
-.outzide-shell .discovery .search-panel-header strong{
+.outzide-shell .discovery .search-panel-header strong,.zaydar-map-demo .zaydar-layer-sheet__title>span{
  display:flex;align-items:center;gap:10px;color:var(--map-ui-text);
  font:700 18px/1 var(--display,var(--font-display,"Barlow Condensed",sans-serif));letter-spacing:.05em;text-transform:uppercase;
 }
 .outzide-shell .discovery .search-panel-header strong::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--map-ui-accent);flex:none}
-.outzide-shell .discovery .search-panel-header button{
+.zaydar-map-demo .zaydar-layer-sheet__title>span>svg{color:var(--map-ui-accent)}
+.outzide-shell .discovery .search-panel-header button,.zaydar-map-demo .zaydar-layer-sheet__title button{
  display:grid;place-items:center;width:44px;height:44px;min-height:44px;padding:0;
  border:1px solid var(--map-ui-hair);border-radius:var(--map-ui-radius);background:#ffffff08;color:var(--map-ui-text);
  font-size:inherit;transition:background var(--map-ui-motion),border-color var(--map-ui-motion);
 }
-.outzide-shell .discovery .search-panel-header button:hover{background:#ffffff14;border-color:color-mix(in srgb,var(--map-ui-light) 34%,transparent)}
+.outzide-shell .discovery .search-panel-header button:hover,.zaydar-map-demo .zaydar-layer-sheet__title button:hover{background:#ffffff14;border-color:color-mix(in srgb,var(--map-ui-light) 34%,transparent)}
 
 /* Mapz drawer body: same seams and chip language as OutZide. */
-
+.zaydar-map-demo .zaydar-layer-sheet__sections{gap:4px;padding:10px 8px;border-right:1px solid var(--map-ui-hair);scrollbar-width:none}
+.zaydar-map-demo .zaydar-layer-section{min-height:46px;padding:8px 10px;border:0;border-radius:10px;font-size:16px;letter-spacing:.02em;transition:background var(--map-ui-motion)}
+.zaydar-map-demo .zaydar-layer-section:hover{background:#ffffff08}
+.zaydar-map-demo .zaydar-layer-section[aria-pressed=true]{
+ border:0;background:color-mix(in srgb,var(--layer-color) 10%,transparent);
+ box-shadow:inset 2px 0 var(--layer-color),inset 0 1px #ffffff0c;
+}
+.zaydar-map-demo .zaydar-layer-section__dot{width:6px;height:6px}
+.zaydar-map-demo .zaydar-layer-sheet__body{padding:14px 16px 16px}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-panel__heading{margin:4px 0 10px}
+.zaydar-map-demo .zaydar-layer-panel__heading small{font:500 10px/1.4 var(--mono,"IBM Plex Mono",ui-monospace,monospace);letter-spacing:.14em;color:color-mix(in srgb,var(--map-ui-light) 80%,#fff)}
+.zaydar-map-demo .zaydar-layer-visibility{padding:0 12px;margin-bottom:12px;border:1px solid var(--map-ui-hair);border-radius:var(--map-ui-radius);background:#0003}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail{gap:6px;margin:0 0 12px;padding:0}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail button{
+ min-height:40px;padding:6px 12px;border:1px solid var(--map-ui-hair);background:#ffffff06;color:#c3d3e0;
+ font-size:13px;letter-spacing:.04em;transition:background var(--map-ui-motion),color var(--map-ui-motion);
+}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail button:hover{color:#fff;background:#ffffff10}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail button[aria-pressed=true]{
+ color:#fff;border-color:color-mix(in srgb,var(--active-layer-color) 40%,transparent);
+ background:color-mix(in srgb,var(--active-layer-color) 12%,transparent);box-shadow:inset 0 -2px var(--active-layer-color);
+}
+.zaydar-map-demo .zaydar-layer-list{border-color:var(--map-ui-hair);background:#0003}
+.zaydar-map-demo .zaydar-layer-row{border-bottom-color:var(--map-ui-hair);transition:background var(--map-ui-motion)}
+.zaydar-map-demo .zaydar-layer-row:hover{background:#ffffff08}
+.zaydar-map-demo .zaydar-layer-sheet__body{scrollbar-color:color-mix(in srgb,var(--map-ui-light) 45%,transparent) transparent}
+.zaydar-map-demo .zaydar-layer-sheet__footer{gap:8px;padding:10px 12px;border-top:1px solid var(--map-ui-hair);background:color-mix(in srgb,var(--map-ui-ink) 72%,transparent)}
+.zaydar-map-demo .zaydar-layer-sheet__footer>a,.zaydar-map-demo .zaydar-layer-sheet__back{border-color:var(--map-ui-hair);border-radius:var(--map-ui-radius);background:#ffffff06;letter-spacing:.04em;transition:background var(--map-ui-motion)}
+.zaydar-map-demo .zaydar-layer-sheet__footer>a{color:var(--active-layer-color);border-color:color-mix(in srgb,var(--active-layer-color) 45%,transparent)}
+.zaydar-map-demo .zaydar-layer-sheet__footer>a:hover,.zaydar-map-demo .zaydar-layer-sheet__back:hover{background:#ffffff12}
+@media(max-width:599px){
+ .zaydar-map-demo .zaydar-layer-sheet__sections{padding:8px;border-right:0;border-bottom:1px solid var(--map-ui-hair)}
+ .zaydar-map-demo .zaydar-layer-section{justify-content:center;min-height:44px;padding:6px 3px;font-size:15px}
+ .zaydar-map-demo .zaydar-layer-section[aria-pressed=true]{box-shadow:inset 0 -2px var(--layer-color)}
+ .zaydar-map-demo .zaydar-layer-sheet__body{padding:12px}
+}
 @media(prefers-reduced-transparency:reduce){
- .outzide-shell :is(.map-key-toggle,.discovery){background:var(--map-ui-ink)}
+ .outzide-shell :is(.map-key-toggle,.discovery),.zaydar-map-demo :is(.zaydar-map-controls-launcher,.zaydar-map-lockup,.zaydar-layer-sheet,.zaydar-demo-navigation){background:var(--map-ui-ink)}
 }
 /* Keep search, options and list on the drawer head's 16px left datum. */
 .outzide-shell .discovery .search{margin-inline:16px}

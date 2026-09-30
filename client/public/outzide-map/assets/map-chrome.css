@@ -1,6 +1,7 @@
-/* Map chrome skeleton and inks come from ds/tokens/map.css via zaylist-tokens.css (body[data-map="outzide"]). */
+/* Map chrome skeleton and inks come from ds/tokens/map.css (data-map on each map's shell). */
 /* Outzide's layered glass, contained in Mapz's dark dock rim. */
-.outzide-shell :is(.topbar,.fieldbar,.discovery,.map-controls,.map-legend,#selection-dock) {
+.outzide-shell :is(.topbar,.fieldbar,.discovery,.map-controls,.map-legend,#selection-dock),
+.living-map-page :is(.living-map-drawer.pdx-glass-rebind,.living-map-screen-rail.pdx-glass-rebind,.living-map-key__panel,.living-map-mobile-filters__rail) {
   background: var(--map-panel);
   border: 1px solid var(--map-rim);
   border-radius: var(--map-chrome-radius);
@@ -29,14 +30,15 @@
   box-shadow: var(--map-selected-line),inset 0 1px 0 #ffffff16;
 }
 .outzide-shell .header-actions #updates-button { padding: 8px 12px; border: 1px solid #ffffff18; background: #0002; }
-.outzide-shell .search { border-radius: 999px; background: #0004; border-color: #ffffff26; }
-.outzide-shell .search:focus-within { box-shadow: 0 0 0 2px var(--map-accent); }
+.outzide-shell .search,
+.living-map-page .living-map-search { border-radius: 999px; background: #0004; border-color: #ffffff26; }
+.outzide-shell .search:focus-within,
+.living-map-page .living-map-search:focus-within { box-shadow: 0 0 0 2px var(--map-accent); }
 .outzide-shell .search input:focus-visible { outline: none; }
 .outzide-shell .map-controls { width: 54px; padding: 4px; gap: 3px; align-items: stretch; border-radius: 15px; }
 .outzide-shell .map-controls button { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 10px; background: transparent; box-shadow: none; align-self: center; }
 .outzide-shell .map-controls #fire-toggle { width: 44px; padding: 0; align-self: center; border-bottom: 1px solid #ffffff20; border-radius: 9px 9px 4px 4px; }
 .outzide-shell .map-controls button:hover { background: #ffffff0d; }
-.outzide-shell .map-controls .rack-gap { display: block; height: 1px; margin: 3px 6px; background: #ffffff1a; }
 .outzide-shell .map-controls button:focus-visible { outline-offset: -2px; }
 .outzide-shell .map-bottom { align-items: flex-start; }
 .outzide-shell .map-key-toggle { order: 2; pointer-events: auto; background: var(--map-ink); border: 1px solid var(--map-rim); box-shadow: var(--map-shadow); border-radius: var(--map-control-radius); min-height: 44px; font-size: 13px; }
@@ -45,6 +47,19 @@
 .outzide-shell .map-hint { order: 3; border-radius: 8px; background: #101a16cc; }
 .outzide-shell #selection-dock { overflow: hidden; }
 .outzide-shell #selection-dock button { border-radius: inherit; }
+/* Keep Mapz's category/day colors; borrow Outzide's calm glass behind content. */
+.living-map-page .living-map-screen-rail__items button {
+  background: linear-gradient(120deg,color-mix(in srgb,var(--c) 9%,transparent),#090b13cc);
+  box-shadow: inset 0 1px 0 #ffffff0c;
+}
+.living-map-page .living-map-screen-rail__items button:hover {
+  box-shadow: inset 0 1px 0 #ffffff20,0 0 10px color-mix(in srgb,var(--c) 20%,transparent);
+}
+.living-map-page :is(.living-map-key__head,.living-map-filter-panel-head) { background: #090b13e8; border-bottom-color: #ffffff1a; }
+.living-map-page .living-map-drawer-scroll { scrollbar-width: thin; scrollbar-color: #546273 transparent; }
+.living-map-page :is(.living-map-chips,.living-map-time) { scroll-padding-inline: 4px; }
+.living-map-page .living-map-chips button { border-radius: var(--map-control-radius); }
+.living-map-page .living-map-chips button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 @media(max-width:760px) {
   .outzide-shell .topbar { gap: 5px; border-radius: 14px; }
   .outzide-shell .topbar nav { padding: 2px; gap: 0; }

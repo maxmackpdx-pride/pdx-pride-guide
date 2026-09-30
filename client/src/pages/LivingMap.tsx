@@ -633,7 +633,7 @@ export default function LivingMap() {
     </button>
   );
 
-  return <section ref={pageRef} className={`living-map-page${!desktop && !mobileDrawerPeek ? " has-expanded-drawer" : ""}`} style={mapHeight === undefined ? undefined : { height: mapHeight, "--living-map-height": `${mapHeight}px` } as CSSProperties} aria-label="Zaylist living map">
+  return <section ref={pageRef} data-map="mapz" className={`living-map-page${!desktop && !mobileDrawerPeek ? " has-expanded-drawer" : ""}`} style={mapHeight === undefined ? undefined : { height: mapHeight, "--living-map-height": `${mapHeight}px` } as CSSProperties} aria-label="Zaylist living map">
     <div className="living-map-canvas">
       <MapContainer ref={mapRef} center={[45.523, -122.676]} zoom={13} minZoom={10} zoomSnap={0.25} zoomDelta={0.5} maxBounds={[[45.35, -122.92], [45.70, -122.42]]} className="living-map-leaflet" attributionControl>
         <TileLayer url={cartoDarkTileUrl()} attribution={CARTO_ATTRIBUTION} subdomains="abcd" maxZoom={20} />
