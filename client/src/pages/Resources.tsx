@@ -56,7 +56,7 @@ const LABELS = [
 ];
 const ROWS = RESOURCE_CATEGORIES.flatMap((category) =>
   (category.id === "safety"
-    ? [FOOD_RESOURCE, ...category.orgs]
+    ? [...category.orgs, FOOD_RESOURCE]
     : category.orgs
   ).map((org) => ({ org, category })),
 );
@@ -177,6 +177,11 @@ function ResourceCard({
       <span className="rg-eyebrow rg-category">{category.name}</span>
       <h3>{org.name}</h3>
       <p className="rg-description">{org.desc}</p>
+      {org.phone && (
+        <a className="rg-resource-phone" href={org.phone}>
+          {org.phoneLabel}
+        </a>
+      )}
       {org === FOOD_RESOURCE && <FoodPantryList />}
       {expanded && org !== FOOD_RESOURCE && (
         <div className="rg-extra">
@@ -434,6 +439,21 @@ export default function Resources() {
                   : "Art, community, opportunity, care, and support. Choose a category to find your next connection."}
             </p>
           </div>
+          {mode === "directory" && categoryId === "safety" && (
+            <aside className="rg-safety-prompt" aria-label="Urgent safety help">
+              <p>
+                <strong>In immediate danger?</strong>{" "}
+                <a href="tel:911">Call 911.</a>
+              </p>
+              <p>
+                For domestic or sexual violence support, call the 24/7 crisis
+                line:
+              </p>
+              <a className="pdxBtn" href="tel:+15032355333">
+                Call to Safety · 503-235-5333 <ArrowUpRight size={16} />
+              </a>
+            </aside>
+          )}
           <button
             className="rg-search-trigger"
             onClick={() => setSearchOpen(true)}
@@ -631,6 +651,11 @@ export default function Resources() {
                     </>
                   )}
                 </div>
+                {detail.org.phone && (
+                  <a className="rg-resource-phone" href={detail.org.phone}>
+                    {detail.org.phoneLabel}
+                  </a>
+                )}
                 <div className="rg-detail-actions">
                   {detail.org.url && (
                     <a

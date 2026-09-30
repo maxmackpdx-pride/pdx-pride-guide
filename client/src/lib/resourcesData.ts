@@ -12,6 +12,8 @@ export type ResourceOrg = {
   scope: string;
   desc: string;
   addr?: string;
+  phone?: string;
+  phoneLabel?: string;
   url?: string;
   cta?: string;
   alt?: string;
@@ -120,8 +122,10 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "name": "Marsha's Folx | Bradley Angle",
         "mark": "MF",
         "scope": "Portland",
-        "desc": "One of the only culturally specific domestic violence programs for LGBTQIA+ survivors in Oregon. Advocacy and referrals, safety planning, food, clothing, and toiletries, and free support groups every Tuesday.",
-        "addr": "lgbtq@bradleyangle.org · 503-281-2442",
+        "desc": "One of the only culturally specific domestic violence programs for LGBTQIA+ survivors in Oregon. Advocacy and referrals, safety planning, food, clothing, and toiletries, and free support groups. Check the program website for the current schedule.",
+        "addr": "5432 N Albina Ave, Portland",
+        "phone": "tel:+15032321528;ext=302",
+        "phoneLabel": "Bradley Angle intake: 503-232-1528 ext. 302",
         "url": "https://www.bradleyangle.org/marshas-folx",
         "alt": "mailto:lgbtq@bradleyangle.org",
         "altLabel": "Email"
