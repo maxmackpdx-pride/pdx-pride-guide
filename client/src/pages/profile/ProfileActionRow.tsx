@@ -1,7 +1,3 @@
-import { Link } from "wouter";
-import { useAuth } from "@/context/AuthContext";
-import BlockMemberButton from "@/components/profile/BlockMemberButton";
-import "@/components/profile/ProfileHero.css";
 import { useState } from "react";
 import { Check, Palette, Share2, Ticket } from "lucide-react";
 import { Button } from "@/components/ds";
@@ -46,8 +42,6 @@ export default function ProfileActionRow({
   onOpenMessage: () => void;
   ticketHref?: string | null;
 }) {
-  const { user: viewer } = useAuth();
-  const blocked = !!data.blockStatus?.interactionBlocked;
   const [accentOpen, setAccentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
@@ -61,7 +55,7 @@ export default function ProfileActionRow({
           type="button"
           className={`mp-follow-btn${following ? " mp-follow-btn--on" : ""}`}
           onClick={onFollow}
-          disabled={followPending || blocked}
+          disabled={followPending}
           data-testid="profile-follow"
         >
           {following && <CheckIcon />}
@@ -69,10 +63,7 @@ export default function ProfileActionRow({
         </button>
       )}
 
-      {isOwner && <Link href="/dashboard?edit=profile" className="mp-share-btn">Edit profile</Link>}
-      {!isOwner && !blocked && <button type="button" className="mp-share-btn" onClick={onOpenMessage}>Message</button>}
-      {!isOwner && viewer && !data.viewerIsAdmin && <BlockMemberButton username={username} blocked={!!data.blockStatus?.blockedByViewer} />}
-      {isOwner && <div className="mp-action-popover-wrap">
+      <div className="mp-action-popover-wrap">
         <button
           type="button"
           className="mp-accent-btn"
@@ -90,7 +81,7 @@ export default function ProfileActionRow({
             onSave={patch => onSavePatch(patch)}
           />
         )}
-      </div>}
+      </div>
 
       <div className="mp-action-popover-wrap">
         <button
@@ -106,7 +97,7 @@ export default function ProfileActionRow({
           <SharePopover
             profileUrl={profileUrl}
             onClose={() => setShareOpen(false)}
-            onOpenMessage={isOwner || blocked ? undefined : onOpenMessage}
+            onOpenMessage={isOwner ? undefined : onOpenMessage}
           />
         )}
       </div>

@@ -1,4 +1,3 @@
-import AuthModal from "@/components/AuthModal";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -48,7 +47,7 @@ export default function EventsTab({ data }: { data: MemberProfileData }) {
   const [memFilter, setMemFilter] = useState<"upcoming" | "past">("upcoming");
   const [pastExpanded, setPastExpanded] = useState(false);
 
-  const { toggleRsvp, showAuth, setShowAuth } = useEventRsvp();
+  const { toggleRsvp } = useEventRsvp();
   const { data: attendanceSummaries = {} } = useQuery<Record<string, AttendanceSummary>>({
     queryKey: ["/api/events/attendance-summaries"],
     queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
@@ -66,7 +65,6 @@ export default function EventsTab({ data }: { data: MemberProfileData }) {
   if (isPromoter) {
     return (
       <div>
-        {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
         <div className="mp-tab-head">
           <div>
             <RoomKicker as="div">{data.displayName || data.username} presents</RoomKicker>
