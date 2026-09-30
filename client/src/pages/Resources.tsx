@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
+import { FOOD_PANTRIES, FOOD_RESOURCE } from "@/lib/foodPantries";
 import "./Resources.css";
 
 const ICONS = [
@@ -51,7 +52,10 @@ const LABELS = [
   "Around Oregon",
 ];
 const ROWS = RESOURCE_CATEGORIES.flatMap((category) =>
-  category.orgs.map((org) => ({ org, category })),
+  (category.id === "safety"
+    ? [FOOD_RESOURCE, ...category.orgs]
+    : category.orgs
+  ).map((org) => ({ org, category })),
 );
 type Row = (typeof ROWS)[number];
 const HOTLINES = [
@@ -123,6 +127,32 @@ function Support() {
   );
 }
 
+function FoodPantryList() {
+  return (
+    <div className="rg-food-list">
+      <p className="rg-food-note">
+        Hours checked September 30, 2026 · Portland time. Check the provider’s
+        site for closures before visiting.
+      </p>
+      {FOOD_PANTRIES.map((pantry) => (
+        <details key={pantry.name}>
+          <summary>
+            <strong>{pantry.name}</strong>
+            <span>{pantry.hours}</span>
+          </summary>
+          <div className="rg-food-visit">
+            <p>{pantry.address}</p>
+            <p>{pantry.note}</p>
+            <a href={pantry.url} target="_blank" rel="noopener noreferrer">
+              Visit official site <ArrowUpRight size={14} />
+            </a>
+          </div>
+        </details>
+      ))}
+    </div>
+  );
+}
+
 function ResourceCard({
   row,
   onOpen,
@@ -144,7 +174,8 @@ function ResourceCard({
       <span className="rg-eyebrow rg-category">{category.name}</span>
       <h3>{org.name}</h3>
       <p className="rg-description">{org.desc}</p>
-      {expanded && (
+      {org === FOOD_RESOURCE && <FoodPantryList />}
+      {expanded && org !== FOOD_RESOURCE && (
         <div className="rg-extra">
           <span className="rg-eyebrow">How to start</span>
           <p>{category.use}</p>
@@ -156,19 +187,21 @@ function ResourceCard({
           )}
         </div>
       )}
-      <div className="rg-card-actions">
-        <button className="pdxBtn" onClick={() => onOpen(row)}>
-          Connect <ArrowUpRight size={16} />
-        </button>
-        <button
-          className="rg-expand"
-          aria-expanded={expanded}
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? "Less detail" : "Read more"}
-          <ChevronDown size={18} />
-        </button>
-      </div>
+      {org !== FOOD_RESOURCE && (
+        <div className="rg-card-actions">
+          <button className="pdxBtn" onClick={() => onOpen(row)}>
+            Connect <ArrowUpRight size={16} />
+          </button>
+          <button
+            className="rg-expand"
+            aria-expanded={expanded}
+            onClick={() => setExpanded(!expanded)}
+          >
+            {expanded ? "Less detail" : "Read more"}
+            <ChevronDown size={18} />
+          </button>
+        </div>
+      )}
     </article>
   );
 }
@@ -176,7 +209,7 @@ function ResourceCard({
 export default function Resources() {
   usePageSeo(
     "Resources | Zaylist",
-    "Art, community, opportunity, care, and support for queer and trans Oregon. Explore 67 organizations and find your next connection.",
+    "Art, community, opportunity, care, and support for queer and trans Oregon. Explore local organizations and food pantries to find your next connection.",
   );
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [mode, setMode] = useState<"directory" | "talk">("directory");
@@ -226,17 +259,18 @@ export default function Resources() {
     setDetail(row);
     setDetailOpen(true);
   }
-  function selectSearchCategory(id: string) {
+  function selectSearchCategory(id: string | null) {
     choose(id);
     setSearchOpen(false);
-    requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      resultsRef.current?.focus({ preventScroll: true });
       resultsRef.current?.scrollIntoView({
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
           ? "instant"
           : "smooth",
         block: "start",
-      }),
-    );
+      });
+    });
   }
 
   return (
@@ -315,7 +349,8 @@ export default function Resources() {
               </div>
               <button
                 className="rg-text-link rg-all"
-                onClick={() => choose(null)}
+                aria-pressed={categoryId === null && mode === "directory"}
+                onClick={() => selectSearchCategory(null)}
               >
                 Show all resources
               </button>
@@ -329,7 +364,12 @@ export default function Resources() {
             </p>
           </div>
         </aside>
-        <div className="rg-results" ref={resultsRef}>
+        <div
+          className="rg-results"
+          ref={resultsRef}
+          tabIndex={-1}
+          aria-label="Resource results"
+        >
           <div className="rg-results-head">
             <span className="rg-eyebrow">03 / Make a connection</span>
             <h2>
@@ -356,7 +396,9 @@ export default function Resources() {
             <kbd>⌘ K</kbd>
           </button>
           <p className="rg-count" aria-live="polite">
-            {mode === "talk" ? "Support lines" : `${rows.length} organizations`}
+            {mode === "talk"
+              ? "Support lines"
+              : `${rows.length} resource cards${rows.some((row) => row.org === FOOD_RESOURCE) ? " · includes 8 food pantries" : ""}`}
           </p>
           {mode === "talk" ? (
             <Support />
@@ -444,6 +486,9 @@ export default function Resources() {
                       keywords={[
                         row.org.desc,
                         row.org.scope,
+                        ...(row.org === FOOD_RESOURCE
+                          ? FOOD_PANTRIES.map((p) => p.name)
+                          : []),
                         row.category.name,
                       ]}
                       onSelect={() => {
@@ -528,6 +573,7 @@ export default function Resources() {
                 <Drawer.Title>{detail.org.name}</Drawer.Title>
                 {detail.org.sub && <p>{detail.org.sub}</p>}
                 <Drawer.Description>{detail.org.desc}</Drawer.Description>
+                {detail.org === FOOD_RESOURCE && <FoodPantryList />}
                 <div className="rg-detail-meta">
                   <span className="rg-eyebrow">Where they serve</span>
                   <p>{detail.org.scope}</p>

@@ -969,3 +969,42 @@
     transition: none;
   }
 }
+
+.rg-all[aria-pressed="true"] {
+  color: var(--neon-yellow);
+}
+.rg-all[aria-pressed="true"]::after {
+  content: " ✓";
+}
+.rg-food-list details {
+  border-top: 1px solid var(--rg-line);
+  padding: 12px 0;
+}
+.rg-food-list summary {
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.rg-food-list summary strong {
+  color: var(--res-text);
+}
+.rg-food-list summary span {
+  display: block;
+  color: var(--res-muted);
+  margin-top: 4px;
+}
+.rg-food-visit {
+  padding-top: 8px;
+}
+.rg-food-visit a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--neon-yellow);
+  min-height: 44px;
+}
+.rg-food-list .rg-food-note {
+  font-size: 11px;
+  color: var(--res-muted);
+  margin-bottom: 10px;
+}
