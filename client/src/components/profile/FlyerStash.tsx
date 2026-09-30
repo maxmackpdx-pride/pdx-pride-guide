@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "wouter";
-import AnimatedCardStack from "@/components/ui/animate-card-animation";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent } from "./types";
 import "./FlyerStash.css";
@@ -25,22 +25,6 @@ type WorkMeta = {
   ladder: string[] | null;
 };
 
-const DAY_COLOR: Record<string, string> = {
-  MON: "#8800FF",
-  TUE: "#0044FF",
-  WED: "#FFEE00",
-  THU: "#00FFFF",
-  FRI: "#FF00CC",
-  SAT: "#39FF14",
-  SUN: "#FF6600",
-};
-
-const TAG: Record<string, { bg: string; fg: string }> = {
-  FREE: { bg: "rgba(204,255,0,0.14)", fg: "#CCFF00" },
-  TICKETED: { bg: "rgba(0,255,255,0.14)", fg: "#19e3ff" },
-  DONATION: { bg: "rgba(255,178,61,0.16)", fg: "#FFB23D" },
-};
-
 const WORK: Record<StashRole, WorkMeta> = {
   DJ: { label: "DJ SET", color: "#19e3ff", xp: 70, ladder: ["BEDROOM DJ", "OPENER", "RESIDENT DJ", "HEADLINE DJ", "PDX SOUND LEGEND"] },
   DRAG: { label: "DRAG", color: "#FF00CC", xp: 70, ladder: ["BABY QUEEN", "LOCAL LEGEND", "STAGE MOTHER", "HEADLINER", "PDX DRAG ROYALTY"] },
@@ -56,7 +40,6 @@ const WORK: Record<StashRole, WorkMeta> = {
 
 const SCENE_LADDER = ["FRESH FACE", "REGULAR", "SCENE STAPLE", "PARTY GREMLIN", "PDX SCENE ROYALTY"];
 const XP_TIERS = [0, 150, 350, 600, 900];
-const CYCLE_MS = 2600;
 
 export type FlyerStashEvent = ProfileEvent & {
   /** When known: worker role. Hosted past events map to MC. Default WENT. */
@@ -73,29 +56,17 @@ type BuiltFlyer = {
   id: number;
   title: string;
   venue: string;
-  day: string;
   date: string;
   when: string;
-  admission: string;
   rare: boolean;
   role: StashRole;
-  color: string;
-  tagBg: string;
-  tagFg: string;
   roleLabel: string;
   roleColor: string;
-  roleBg: string;
-  roleFg: string;
   worked: boolean;
   pts: number;
   posterUrl: string | null;
   event: ProfileEvent;
 };
-
-function normalizeDay(raw?: string | null): string {
-  const d = String(raw || "").trim().toUpperCase().slice(0, 3);
-  return DAY_COLOR[d] ? d : "";
-}
 
 function formatShortDate(iso?: string | null): string {
   if (!iso) return "";
@@ -117,15 +88,6 @@ function formatPastWhen(iso?: string | null): string {
   if (hour == null || minute == null) return date;
   const h = Number(hour);
   return `${date} · ${h % 12 || 12}:${minute}${h < 12 ? "am" : "pm"}`;
-}
-
-function normalizeAdmission(raw?: string | null): string {
-  const a = String(raw || "").toUpperCase();
-  if (!a) return "TICKETED";
-  if (a.includes("TICKET") || a.includes("PAID") || a === "COVER" || a.includes("DOOR") || a === "DOOR_FEE") return "TICKETED";
-  if (a.includes("DONAT")) return "DONATION";
-  if (a.includes("FREE") || a.includes("NO COVER") || a === "NC") return "FREE";
-  return TAG[a] ? a : "TICKETED";
 }
 
 function normalizeRole(raw?: string | null): StashRole {
@@ -160,32 +122,22 @@ function titleFor(xp: number, ladder: string[]): { name: string; next: number | 
 
 function buildFlyers(events: FlyerStashEvent[]): BuiltFlyer[] {
   return events.map((e) => {
-    const day = normalizeDay(e.dayOfWeek);
-    const admission = normalizeAdmission(e.admission);
     const role = normalizeRole(e.stashRole);
     const w = WORK[role];
     const rare = !!e.featured;
     const worked = role !== "WENT";
     const pts = w.xp + (rare ? 25 : 0);
-    const tag = TAG[admission] || TAG.FREE;
     const posterUrl = resolveEventPosterUrl(e.id, e.posterImageUrl, e.dayOfWeek) || null;
     return {
       id: e.id,
       title: e.title || "Untitled",
       venue: e.venueName || "Portland",
-      day: day || "NITE",
       date: formatShortDate(e.dateStart),
       when: formatPastWhen(e.dateStart),
-      admission: admission === "DONATION" ? "DONATE" : admission,
       rare,
       role,
-      color: DAY_COLOR[day] || "#ffffff",
-      tagBg: tag.bg,
-      tagFg: tag.fg,
       roleLabel: w.label,
       roleColor: w.color,
-      roleBg: worked ? w.color : "transparent",
-      roleFg: worked ? "#0a0a0a" : w.color,
       worked,
       pts,
       posterUrl,
@@ -195,7 +147,7 @@ function buildFlyers(events: FlyerStashEvent[]): BuiltFlyer[] {
 }
 
 /**
- * The Stash: fanned auto-cycling flyer deck + collector XP panel.
+ * The Stash: browsable flyer collection with collector progress.
  * Drop-in replacement for the bottom past-events flyer grid only.
  */
 export default function FlyerStash({
@@ -205,15 +157,6 @@ export default function FlyerStash({
 }: Props) {
   const base = useMemo(() => buildFlyers(events), [events]);
   const n = base.length;
-  const [active, setActive] = useState(0);
-
-
-  useEffect(() => {
-    setActive(0);
-  }, [n]);
-
-  const act = n > 0 ? ((active % n) + n) % n : 0;
-
   const stats = useMemo(() => {
     const count = n;
     const worked = base.filter((f) => f.worked);
@@ -262,10 +205,8 @@ export default function FlyerStash({
       rank: r.name,
       progressPct: `${Math.max(0, Math.min(100, progressPct))}%`,
       toNextLabel,
-      frontTitle: base[act]?.title || "",
-      posLabel: n ? `${act + 1} / ${n}` : "0 / 0",
     };
-  }, [base, n, act]);
+  }, [base, n]);
 
   if (!n) return null;
 
@@ -324,87 +265,38 @@ export default function FlyerStash({
             Collect more <ArrowRight size={14} aria-hidden="true" />
           </Link>
           <p className="flyer-stash__blurb">
-            Every gig you work drops its flyer here and earns XP. The role you log most sets which title you climb, so DJ nights build a DJ name. Rare headliners shimmer and pay bonus XP.
+            Flyers from past events you hosted or attended, with your collector progress kept alongside them.
           </p>
         </aside>
 
-        <div
-          className="flyer-stash__stage"
-
-        >
-          <div className="flyer-stash__stage-dots" aria-hidden />
-          <div className="flyer-stash__front-label">Front · {stats.frontTitle}</div>
-
-          <AnimatedCardStack
-            items={base}
-            active={act}
-            getKey={(flyer) => flyer.id}
-            onAdvance={() => setActive((a) => a + 1)}
-            renderCard={(f) => (
-              <button
-                type="button"
-                className="flyer-stash__card"
-                style={{ borderColor: f.color }}
-                onClick={() => onEventClick?.(f.event)}
-                aria-label={`Open ${f.title} at ${f.venue}`}
-              >
-                <div className="flyer-stash__card-daybar" style={{ background: f.color }} />
-                {f.posterUrl ? (
-                  <img className="flyer-stash__card-poster" src={f.posterUrl} alt="" decoding="async" />
-                ) : null}
-                {f.rare ? (
-                  <>
-                    <div className="flyer-stash__card-holo" aria-hidden />
-                    <div className="flyer-stash__card-rare">RARE</div>
-                  </>
-                ) : null}
-                <div className="flyer-stash__card-body">
-                  <div className="flyer-stash__card-top">
-                    <div className="flyer-stash__card-day" style={{ color: f.color }}>
-                      {f.day}
-                      {f.date ? ` · ${f.date}` : ""}
-                    </div>
-                    <span
-                      className="flyer-stash__card-role"
-                      style={{
-                        background: f.roleBg,
-                        color: f.roleFg,
-                        borderColor: f.roleColor,
-                      }}
-                    >
-                      {f.roleLabel}
-                    </span>
-                  </div>
-                  <div className="flyer-stash__card-title">{f.title}</div>
-                  <div className="flyer-stash__card-foot">
-                    <div className="flyer-stash__card-venue">{f.venue}</div>
-                    {f.when && <div className="flyer-stash__card-when">{f.when}</div>}
-                  </div>
-                </div>
-              </button>
-            )}
-          />
-
-          <div className="flyer-stash__controls">
-            <button
-              type="button"
-              className="flyer-stash__nav"
-              aria-label="Previous flyer"
-              onClick={() => setActive((a) => a - 1)}
-            >
-              ‹
-            </button>
-            <div className="flyer-stash__pos">{stats.posLabel}</div>
-            <button
-              type="button"
-              className="flyer-stash__nav"
-              aria-label="Next flyer"
-              onClick={() => setActive((a) => a + 1)}
-            >
-              ›
-            </button>
+        <Carousel className="flyer-stash__gallery" opts={{ align: "start", duration: 0 }} aria-label="Saved flyers">
+          <div className="flyer-stash__gallery-head">
+            <span>{stats.count} saved flyers</span>
+            <div className="flyer-stash__controls">
+              <CarouselPrevious className="!static !translate-y-0 h-11 w-11" />
+              <CarouselNext className="!static !translate-y-0 h-11 w-11" />
+            </div>
           </div>
-        </div>
+          <CarouselContent>
+            {base.map(f => (
+              <CarouselItem key={f.id} className="flyer-stash__slide">
+                <button type="button" className="flyer-stash__flyer" onClick={() => onEventClick?.(f.event)}
+                  disabled={!onEventClick} aria-label={`Open ${f.title} at ${f.venue}`}>
+                  <div className="flyer-stash__art">
+                    {f.posterUrl ? <img src={f.posterUrl} alt="" loading="lazy" decoding="async" />
+                      : <span className="flyer-stash__fallback">{f.title}</span>}
+                  </div>
+                  <div className="flyer-stash__caption">
+                    <span className="flyer-stash__role" style={{ color: f.roleColor }}>{f.roleLabel}{f.rare ? " · RARE" : ""}</span>
+                    <h3>{f.title}</h3>
+                    <span>{f.venue}</span>
+                    <time>{f.when || f.date}</time>
+                  </div>
+                </button>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
       </div>
     </section>
   );

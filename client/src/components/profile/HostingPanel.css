@@ -151,24 +151,7 @@
   .hp-card__banner { width: 76px; height: 92px; }
   .hp-card__action { grid-column: 1 / -1; width: 100%; box-sizing: border-box; }
   .hp-card__tag { min-height: 26px; padding-inline: 7px; }
-  .hp-rail--past {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x proximity;
-    scroll-padding-inline: 2px;
-    padding: 4px 4px 18px;
-    -webkit-overflow-scrolling: touch;
-  }
-  .hp-rail--past > [role="listitem"] {
-    flex: 0 0 min(82vw, 325px);
-    min-width: 0;
-    scroll-snap-align: start;
-  }
-  .hp-rail--past .hp-card { width: 100%; height: 100%; }
-  .hp-rail--past:focus-visible { outline: 2px solid var(--day-sat); outline-offset: 2px; }
+
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -185,3 +168,14 @@ html.calm-mode .hp-card.is-clickable:focus-visible {
   transform: none;
   box-shadow: 0 0 0 2px #000, 0 16px 34px rgba(0, 0, 0, 0.66);
 }
+
+/* Past hosting stays horizontal on desktop and touch screens. */
+.hp-archive { min-width: 0; }
+.hp-archive__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.hp-archive__head .hp-section__label { margin: 0; padding: 0; border: 0; }
+.hp-archive__controls { display: flex; gap: 8px; }
+.hp-archive__item { flex-basis: min(85%, 380px); padding-block: 4px 12px; }
+.hp-archive .hp-card { height: 100%; width: 100%; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; }
+.hp-archive .hp-card__banner { width: 76px; height: 100px; }
+.hp-archive .hp-card__action { grid-column: 1 / -1; }
+.hp-archive .hp-card__title { font-size: 26px; }

@@ -1,3 +1,4 @@
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import type { CSSProperties, KeyboardEvent } from "react";
 import { admissionDisplayLabel } from "@shared/admission";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
@@ -159,6 +160,27 @@ function HostingRail({
   emptyCopy: string;
   onEventClick?: (event: ProfileEvent) => void;
 }) {
+  if (past && events.length) {
+    return (
+      <Carousel className="hp-section hp-archive" opts={{ align: "start", duration: 0 }} aria-label="Past events">
+        <div className="hp-archive__head">
+          <div className="hp-section__label display">{label} · {events.length}</div>
+          <div className="hp-archive__controls">
+            <CarouselPrevious className="!static !translate-y-0 h-11 w-11" />
+            <CarouselNext className="!static !translate-y-0 h-11 w-11" />
+          </div>
+        </div>
+        <CarouselContent>
+          {events.map(event => (
+            <CarouselItem key={event.id} className="hp-archive__item">
+              <HostingCard event={event} past onEventClick={onEventClick} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+    );
+  }
+
   return (
     <div className="hp-section">
       <div className="hp-section__label display" id={`hp-label-${past ? "past" : "next"}`}>
