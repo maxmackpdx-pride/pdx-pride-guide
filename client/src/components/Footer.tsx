@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { FeedbackButton } from "./FeedbackForm";
 import PushNotificationToggle from "./PushNotificationToggle";
 import CalmModeToggle from "./CalmModeToggle";
@@ -73,36 +74,25 @@ export default function Footer() {
           </Link>
           <p className="site-footer__tagline">
             <strong>Queer Portland, connected.</strong>
-            Nights out, everyday places, outdoor escapes, and people to share them with.
-            Built by Tucker, right here.
           </p>
         </div>
 
-        <div className="site-footer__grid">
+        <Accordion type="single" collapsible className="site-footer__grid">
           <nav className="site-footer__nav" aria-label="Footer">
             {FOOTER_FOLDERS.map((folder) => (
-              <div key={folder.id} className={`site-footer__col site-footer__col--${folder.id}`}>
-                <section className="site-footer__desktop" aria-labelledby={`footer-${folder.id}`}>
-                  <h2 id={`footer-${folder.id}`} className="site-footer__col-title">{folder.title}</h2>
-                  <FooterLinks folder={folder} />
-                </section>
-                <details className="site-footer__mobile">
-                  <summary className="site-footer__col-title">
-                    {folder.title}<span className="site-footer__col-toggle" aria-hidden="true">+</span>
-                  </summary>
-                  <FooterLinks folder={folder} />
-                </details>
-              </div>
+              <AccordionItem key={folder.id} value={folder.id} className={`site-footer__col site-footer__col--${folder.id}`}>
+                <AccordionTrigger className="site-footer__col-title">{folder.title}</AccordionTrigger>
+                <AccordionContent><FooterLinks folder={folder} /></AccordionContent>
+              </AccordionItem>
             ))}
           </nav>
-          <div className="site-footer__support">
-            <h2 className="site-footer__col-title">Community comes first.</h2>
-            <TipSupport variant="footer" />
-          </div>
-        </div>
+          <AccordionItem value="support" className="site-footer__col site-footer__support">
+            <AccordionTrigger className="site-footer__col-title">Support Zaylist</AccordionTrigger>
+            <AccordionContent><TipSupport variant="footer" /></AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         <div className="site-footer__utility">
-          <p className="site-footer__utility-label">Make yourself at home.</p>
           <div className="site-footer__controls">
             <FeedbackButton />
             <PushNotificationToggle />
