@@ -581,7 +581,7 @@ export function PlaceCard({
               </span>
             )}
             {categoryTags?.length ? categoryTags.map((tag) => (
-              <span className="pdxPlace__cat" data-category-id={tag.id} key={tag.id} style={{ "--c": tag.color }}>
+              <span className="pdxPlace__cat pdx-glass-rebind" data-category-id={tag.id} key={tag.id} style={{ "--c": tag.color }}>
                 <Badge color={tag.color} size="sm">{tag.name}</Badge>
               </span>
             )) : (

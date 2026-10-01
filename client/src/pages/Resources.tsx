@@ -161,7 +161,7 @@ function Mark({ org }: { org: ResourceOrg }) {
 
 function SupportNumber({ name, number, tel }: { name: string; number: string; tel: string }) {
   return (
-    <a className="pdxBtn rg-safety-crisis" href={`tel:${tel}`}>
+    <a className="pdx-glass-rebind pdxBtn rg-safety-crisis" href={`tel:${tel}`}>
       <Phone size={18} aria-hidden="true" />
       <span>{name}<strong>{number}</strong></span>
       <ArrowUpRight size={18} aria-hidden="true" />
@@ -199,7 +199,7 @@ function SafetyNotice({ openCard = false }: { openCard?: boolean }) {
       <div className="rg-safety-heading">
         {openCard && <ShieldAlert size={28} aria-hidden="true" />}
         <div>
-          {openCard ? <span className="pdxPlace__cat"><Badge color="var(--neon-orange)" size="sm">Immediate safety</Badge></span> : <span className="rg-safety-kicker"><ShieldAlert size={24} aria-hidden="true" />Immediate safety</span>}
+          {openCard ? <span className="pdxPlace__cat pdx-glass-rebind"><Badge color="var(--neon-orange)" size="sm">Immediate safety</Badge></span> : <span className="rg-safety-kicker"><ShieldAlert size={24} aria-hidden="true" />Immediate safety</span>}
           <h3>In immediate danger?</h3>
         </div>
         {!openCard && <div className="rg-safety-motif" aria-hidden="true">
@@ -212,7 +212,7 @@ function SafetyNotice({ openCard = false }: { openCard?: boolean }) {
         </div>}
       </div>
       <p className="rg-safety-lead">If you or someone else is in danger right now, call 911 if you can do so safely.</p>
-      <a className="pdxBtn pdxBtn--solid rg-safety-emergency" href="tel:911"><Phone size={18} aria-hidden="true" /> Call 911</a>
+      <a className="pdx-glass-rebind pdxBtn pdxBtn--solid rg-safety-emergency" href="tel:911"><Phone size={18} aria-hidden="true" /> Call 911</a>
       {!openCard && <button type="button" className="rg-safety-expand" aria-expanded={expanded} aria-controls={detailsId} onClick={() => setExpanded(!expanded)}>
         <span className="rg-safety-expand-copy">
           <strong>{expanded ? "Hide safety & support options" : "Show safety & support options"}</strong>
@@ -323,7 +323,7 @@ function Support({ showSafety = true, openCard = false }: { showSafety?: boolean
           A connection to housing, food, health care, and other services in
           Oregon and SW Washington.
         </p>
-        <a className="pdxBtn pdxBtn--solid" href="tel:211">
+        <a className="pdx-glass-rebind pdxBtn pdxBtn--solid" href="tel:211">
           Call 211 <ArrowUpRight size={16} />
         </a>
       </div>}
@@ -376,13 +376,13 @@ function ResourceLocationMap({ org, color, initiallyOpen = false }: { org: Resou
     neighborhood: null, lat: location.lat, lng: location.lng,
   }] : []);
   return <section className="rg-resource-map" style={{ "--resource-accent": color } as CSSProperties} aria-label={`Locations for ${org.name}`} onClick={(event) => event.stopPropagation()}>
-    <button className="pdxBtn rg-map-toggle" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Hide map & directions" : "Map & directions"}</button>
+    <button className="pdx-glass-rebind pdxBtn rg-map-toggle" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Hide map & directions" : "Map & directions"}</button>
     {open && <>
       {pins.length > 0 && <div className="rg-resource-map-canvas" data-vaul-no-drag>
         <DirectoryMap businesses={pins} height="100%" showKey={false} interactive={false} focusBusiness rasterBasemap accent={color} />
       </div>}
       {pins.length > 0 && <small className="rg-map-credit">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> · © <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a></small>}
-      {locations.map((location) => <a key={location.address} className="pdxBtn" href={placeGoogleMapsUrl({ address: location.address, name: location.name })} target="_blank" rel="noopener noreferrer">{location.address} <ArrowUpRight size={16} /></a>)}
+      {locations.map((location) => <a key={location.address} className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: location.address, name: location.name })} target="_blank" rel="noopener noreferrer">{location.address} <ArrowUpRight size={16} /></a>)}
     </>}
   </section>;
 }
@@ -442,7 +442,7 @@ const ResourceCard = memo(function ResourceCard({
       onClick={() => onOpen(row)}
       footer={
         <div className="rg-directory-footer" onClick={(event) => event.stopPropagation()}>
-          <button className={`pdxBtn${["safety", "legal", "arts", "youth", "harm-reduction"].includes(category.id) ? " rg-contact-white" : ""}`} aria-label={`View details for ${org.name}`} onClick={() => onOpen(row)}>
+          <button className={`pdx-glass-rebind pdxBtn${["safety", "legal", "arts", "youth", "harm-reduction"].includes(category.id) ? " rg-contact-white" : ""}`} aria-label={`View details for ${org.name}`} onClick={() => onOpen(row)}>
             View details <ArrowUpRight size={16} />
           </button>
         </div>
@@ -592,7 +592,7 @@ export default function Resources() {
             ReZources / All the ways we show up
           </span>
           <button
-            className="pdxBtn rg-share"
+            className="pdx-glass-rebind pdxBtn rg-share"
             onClick={shareResources}
             disabled={sharing}
             aria-label="Share ReZources"
@@ -616,7 +616,7 @@ export default function Resources() {
               <span className="rg-eyebrow"><span className="rg-step-number" aria-hidden="true">01</span>Start here</span>
               <h2>What do you need?</h2>
               <LayoutGroup id="rezources-mode">
-              <div className="rg-mode rg-mode--animated">
+              <div className="rg-mode rg-mode--animated pdx-glass-rebind">
                 <button
                   aria-pressed={intentChosen && mode === "directory"}
                   onClick={() => { setIntentChosen(true); setMode("directory"); }}
@@ -641,11 +641,11 @@ export default function Resources() {
                   <h3 id="resource-safety-question">Are you safe right now?</h3>
                   <p>Choose what you need. You can change your answer.</p>
                   <div>
-                    <button className="pdxBtn" aria-pressed={safetyAnswer === "yes"} onClick={() => {
+                    <button className="pdx-glass-rebind pdxBtn" aria-pressed={safetyAnswer === "yes"} onClick={() => {
                       setSafetyAnswer("yes");
                       requestAnimationFrame(() => { resultsRef.current?.scrollIntoView({ behavior: "auto", block: "start" }); resultsRef.current?.focus({ preventScroll: true }); });
                     }}>Yes, I’m safe</button>
-                    <button className="pdxBtn" aria-pressed={safetyAnswer === "no"} onClick={(event) => {
+                    <button className="pdx-glass-rebind pdxBtn" aria-pressed={safetyAnswer === "no"} onClick={(event) => {
                       supportTrigger.current = event.currentTarget;
                       setSafetyAnswer("no");
                       setSupportOpen(true);
@@ -765,7 +765,7 @@ export default function Resources() {
           </span>
           <h2>Know someone we should know?</h2>
         </div>
-        <Link className="pdxBtn" href="/contact">
+        <Link className="pdx-glass-rebind pdxBtn" href="/contact">
           Suggest a resource <ArrowUpRight size={16} />
         </Link>
       </footer>}
@@ -890,7 +890,7 @@ export default function Resources() {
         <Drawer.Portal>
           <Drawer.Overlay className="rg-overlay-backdrop" />
           <Drawer.Content
-            className={`rg-overlay rg-drawer rg-resource-detail rg-safety-drawer rg-category-safety ${mobile ? "rg-drawer-mobile" : "rg-drawer-desktop"}`}
+            className={`pdx-glass-rebind rg-overlay rg-drawer rg-resource-detail rg-safety-drawer rg-category-safety ${mobile ? "rg-drawer-mobile" : "rg-drawer-desktop"}`}
             style={{ "--resource-accent": "var(--neon-red)" } as CSSProperties}
             onCloseAutoFocus={(event) => { if (supportTrigger.current?.isConnected) { event.preventDefault(); supportTrigger.current.focus(); } }}
           >
@@ -916,7 +916,7 @@ export default function Resources() {
         <Drawer.Portal>
           <Drawer.Overlay className="rg-overlay-backdrop" />
           <Drawer.Content
-            className={`rg-overlay rg-drawer rg-resource-detail rg-category-${(detail?.sectionCategory ?? detail?.category)?.id || "health"} ${mobile ? "rg-drawer-mobile" : "rg-drawer-desktop"}`}
+            className={`pdx-glass-rebind rg-overlay rg-drawer rg-resource-detail rg-category-${(detail?.sectionCategory ?? detail?.category)?.id || "health"} ${mobile ? "rg-drawer-mobile" : "rg-drawer-desktop"}`}
             data-quiet-motion={quietMotion ? "true" : undefined}
             style={{
               "--resource-accent": (detail?.sectionCategory ?? detail?.category)?.color || "var(--neon-cyan)",
@@ -977,7 +977,7 @@ export default function Resources() {
                 )}
                 {detail.org === FOOD_RESOURCE && (
                   <>
-                    <a className="pdxBtn pdxBtn--solid rg-food-finder" href="https://foodfinder.oregonfoodbank.org/" target="_blank" rel="noopener noreferrer">
+                    <a className="pdx-glass-rebind pdxBtn pdxBtn--solid rg-food-finder" href="https://foodfinder.oregonfoodbank.org/" target="_blank" rel="noopener noreferrer">
                       Find food near you <ArrowUpRight size={22} aria-hidden="true" />
                     </a>
                     <p className="rg-food-finder-caption">Oregon Food Bank’s Food Finder · Search by location, day, and food type.</p>
@@ -993,7 +993,7 @@ export default function Resources() {
                         <p>{location.address}</p>
                         {location.hours && <p>{location.hours}</p>}
                         {location.phone && <ResourcePhone org={detail.org} href={location.phone} label={location.name} />}
-                        <a className="pdxBtn" href={placeGoogleMapsUrl({ address: location.address, name: location.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>
+                        <a className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: location.address, name: location.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>
                         {location.sourceUrl && <a className="rg-safety-source" href={location.sourceUrl} target="_blank" rel="noopener noreferrer">Official location details <ArrowUpRight size={13} /></a>}
                       </div>
                     ))}
@@ -1010,8 +1010,8 @@ export default function Resources() {
                         {program.addr && <p>{program.addr}</p>}
                         {program.hours && <p>{program.hours}</p>}
                         {program.phone && <ResourcePhone org={program} />}
-                        {program.addr && <a className="pdxBtn" href={placeGoogleMapsUrl({ address: program.addr, name: detail.org.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>}
-                        {program.url && <a className="pdxBtn" href={program.url} target="_blank" rel="noopener noreferrer">{program.cta || "Program details"} <ArrowUpRight size={16} /></a>}
+                        {program.addr && <a className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: program.addr, name: detail.org.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>}
+                        {program.url && <a className="pdx-glass-rebind pdxBtn" href={program.url} target="_blank" rel="noopener noreferrer">{program.cta || "Program details"} <ArrowUpRight size={16} /></a>}
                         {program.sourceChecked && <a className="rg-safety-source" href={program.sourceUrl || program.url} target="_blank" rel="noopener noreferrer">Service page checked {program.sourceChecked} <ArrowUpRight size={13} /></a>}
                       </div>
                     ))}
@@ -1043,10 +1043,10 @@ export default function Resources() {
                 {detail.org.phone && <ResourcePhone org={detail.org} />}
                 <ResourceLocationMap key={detail.org.name} org={detail.org} color={(detail.sectionCategory ?? detail.category).color} />
                 <div className="rg-detail-actions">
-                  {detail.org.email && <a className="pdxBtn" href={`mailto:${detail.org.email}`}>Email {detail.org.email} <ArrowUpRight size={16} /></a>}
+                  {detail.org.email && <a className="pdx-glass-rebind pdxBtn" href={`mailto:${detail.org.email}`}>Email {detail.org.email} <ArrowUpRight size={16} /></a>}
                   {detail.org.url && (
                     <a
-                      className="pdxBtn pdxBtn--solid"
+                      className="pdx-glass-rebind pdxBtn pdxBtn--solid"
                       style={
                         {
                           "--action-accent": (detail.sectionCategory ?? detail.category).color,
@@ -1062,7 +1062,7 @@ export default function Resources() {
                   )}
                   {detail.org.alt?.startsWith("tel:") ? <ResourcePhone org={detail.org} href={detail.org.alt} label={detail.org.altLabel} /> : detail.org.alt && (
                     <a
-                      className="pdxBtn"
+                      className="pdx-glass-rebind pdxBtn"
                       href={detail.org.alt}
                       {...(detail.org.alt.startsWith("http")
                         ? { target: "_blank", rel: "noopener noreferrer" }

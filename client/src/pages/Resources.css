@@ -179,7 +179,7 @@
 .rg-options {
   display: grid;
 }
-.rg-options button {
+.rg-options button.pdx-glass-rebind {
   --c: var(--res-accent);
   display: flex;
   align-items: center;
@@ -1008,7 +1008,7 @@
 .rg-intro-top > .rg-eyebrow {
   min-width: 0;
 }
-.rg-share {
+.rg-share.pdx-glass-rebind {
   --c: var(--neon-yellow);
   flex-shrink: 0;
   min-height: 44px;
@@ -1391,7 +1391,7 @@ html.calm-mode .rg-options button,
 .rg-safety-content { position: relative; z-index: 1; }
 .rg-safety-heading > svg { color: var(--c); flex-shrink: 0; }
 .rg-safety-heading h3 { font-size: 28px; font-weight: 900; letter-spacing: .01em; margin-top: 10px; }
-.rg-safety-prompt .pdxBtn { --c: var(--neon-orange); --action-accent: var(--neon-orange); }
+.rg-safety-prompt .pdxBtn.pdx-glass-rebind { --c: var(--neon-orange); --action-accent: var(--neon-orange); }
 .rg-safety-support h4 { text-transform: uppercase; font-weight: 700; }
 .rg-safety-law-links a { color: var(--neon-orange); }
 
@@ -1399,7 +1399,7 @@ html.calm-mode .rg-options button,
 
 /* Safety identity: red shell, orange actions, white information. */
 .rg-safety-prompt .pdxPlace__body { border-color: var(--neon-red); }
-.rg-safety-prompt .pdxPlace__cat { --c: var(--neon-orange); }
+.rg-safety-prompt .pdxPlace__cat.pdx-glass-rebind { --c: var(--neon-orange); }
 .rg-safety-prompt .rg-safety-heading > svg { color: var(--neon-orange); }
 .rg-safety-prompt .rg-safety-heading h3,
 .rg-safety-prompt .rg-safety-lead,
@@ -1427,8 +1427,8 @@ html.calm-mode .rg-options button,
 .rg-safety-check h3 { font: 800 25px/1.15 var(--font-display); text-transform: uppercase; color: var(--text-hi); }
 .rg-safety-check p { color: var(--res-muted); font-size: 14px; line-height: 1.5; margin: 8px 0 14px; }
 .rg-safety-check > div { display: flex; flex-wrap: wrap; gap: 10px; }
-.rg-safety-check .pdxBtn { min-height: 44px; flex: 1 1 160px; white-space: normal; --c: var(--neon-yellow); }
-.rg-safety-check .pdxBtn:last-child { --c: var(--neon-red); color: var(--text-hi) !important; }
+.rg-safety-check .pdxBtn.pdx-glass-rebind { min-height: 44px; flex: 1 1 160px; white-space: normal; --c: var(--neon-yellow); }
+.rg-safety-check .pdxBtn.pdx-glass-rebind:last-child { --c: var(--neon-red); color: var(--text-hi) !important; }
 .rg-safety-check .pdxBtn[aria-pressed="true"] { outline: 2px solid var(--c); outline-offset: 3px; }
 @keyframes rgSafetyReveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 @media(prefers-reduced-motion: reduce) { .rg-safety-check { animation: none; } }
@@ -1436,7 +1436,7 @@ html.calm-mode .rg-options button,
 .rg-directory-card .pdxPlace__cat:is([data-category-id="legal"], [data-category-id="arts"]) .pdxBadge,
 .rg-directory-card .pdxPlace__cat[data-category-id="oregon"] .pdxBadge { color: var(--text-hi) !important; }
 
-.rg-drawer .rg-food-finder { --c: var(--neon-yellow); --action-accent: var(--neon-yellow); width: 100%; min-height: 58px !important; margin-top: 24px; font: 800 23px/1.15 var(--font-display) !important; white-space: normal; }
+.rg-drawer .rg-food-finder.pdx-glass-rebind { --c: var(--neon-yellow); --action-accent: var(--neon-yellow); width: 100%; min-height: 58px !important; margin-top: 24px; font: 800 23px/1.15 var(--font-display) !important; white-space: normal; }
 .rg-drawer .rg-food-finder-caption { margin: 10px 0 22px; font-size: 13px; line-height: 1.5; color: var(--res-caption); }
 
 /* Safety drawer uses the same single surface and text rhythm as resource drawers. */
@@ -1463,7 +1463,7 @@ html.calm-mode .rg-options button,
 .rg-support-open .rg-safety-law summary { font: 700 20px/1.3 var(--font-display); text-transform: uppercase; }
 
 .rg-support-numbers { display: grid; gap: 12px; }
-.rg-support .rg-safety-crisis {
+.rg-support .rg-safety-crisis.pdx-glass-rebind {
   --c: var(--neon-orange);
   --action-accent: var(--neon-orange);
   color: var(--text-hi) !important;
@@ -1495,7 +1495,7 @@ html.calm-mode .rg-options button,
 .rg-org-section { padding: 18px 0; border-bottom: 1px solid var(--res-control-border); }
 .rg-org-section h4 { font: 700 20px/1.2 var(--font-display); text-transform: uppercase; color: var(--res-text); margin: 0 0 10px; }
 .rg-org-section p { margin-bottom: 12px; }
-.rg-org-section .pdxBtn { --c: var(--resource-accent); color: var(--text-hi); margin: 8px 10px 8px 0; }
+.rg-org-section .pdxBtn.pdx-glass-rebind { --c: var(--resource-accent); color: var(--text-hi); margin: 8px 10px 8px 0; }
 .rg-org-section .rg-safety-source { display: flex; }
 
 /* Resource service labels are descriptive, not extra filters. */
@@ -1518,7 +1518,7 @@ html.calm-mode .rg-options button,
 .rg-empty { color: var(--res-secondary-text); grid-column: 1 / -1; padding: 16px 0; }
 
 .rg-phone-block { width: 100%; margin: 18px 0; }
-.rg-phone-block .rg-safety-crisis { --c: var(--resource-accent); --action-accent: var(--resource-accent); color: var(--text-hi) !important; border-radius: 999px; text-align: left; white-space: normal; min-height: 76px; padding: 14px 22px; }
+.rg-phone-block .rg-safety-crisis.pdx-glass-rebind { --c: var(--resource-accent); --action-accent: var(--resource-accent); color: var(--text-hi) !important; border-radius: 999px; text-align: left; white-space: normal; min-height: 76px; padding: 14px 22px; }
 .rg-phone-block .rg-safety-crisis span { font: 600 15px/1.3 var(--font-display); letter-spacing: .05em; text-transform: uppercase; }
 .rg-phone-block .rg-safety-crisis strong { font: 800 25px/1.2 var(--font-display); letter-spacing: .01em; margin-top: 4px; }
 .rg-phone-block .rg-safety-crisis > svg { flex-shrink: 0; width: 22px; height: 22px; }
@@ -1589,7 +1589,7 @@ html.calm-mode .rg-options button,
 }
 
 .rg-directory-footer .rg-resource-map { width: 100%; margin: 0; }
-.rg-resource-map .rg-map-toggle { width: 100%; --c: var(--resource-accent); color: var(--text-hi); }
+.rg-resource-map .rg-map-toggle.pdx-glass-rebind { width: 100%; --c: var(--resource-accent); color: var(--text-hi); }
 .rg-resource-map-canvas > .directory-map-wrap { height: 100%; }
 
 .rg-detail-primary, .rg-detail-secondary { min-width: 0; }
@@ -1623,7 +1623,7 @@ html.calm-mode .rg-options button,
 .rg-directory-card .pdxPlace__logo[src$="/business-oregon-official.png"],
 .rg-detail-logo .rg-logo[src$="/business-oregon-official.png"] { filter: invert(1); }
 
-.rg-resource-map .pdxBtn { --c: var(--resource-accent); color: var(--text-hi); }
+.rg-resource-map .pdxBtn.pdx-glass-rebind { --c: var(--resource-accent); color: var(--text-hi); }
 
 /* Give these combined icon/wordmarks enough room for their built-in titles. */
 .rg-detail-logo .rg-logo:is([src$="/energy-support-title.svg"], [src$="/housing-support-title.svg"]) {
@@ -1677,7 +1677,7 @@ html.calm-mode .rg-options button,
 .rg-detail-tags { gap: 8px; }
 .rg-detail-tags .pdxBadge { min-height: 32px; padding: 6px 10px !important; border-radius: 8px !important; font: 700 14px/1.15 var(--font-display); letter-spacing: var(--tracking-chrome); white-space: normal; }
 .rg-detail-tags .rg-category-tag + .rg-category-tag .pdxBadge { background: var(--panel-card) !important; border: 1px solid var(--_c) !important; color: var(--text-hi) !important; }
-.rg-detail-actions > .pdxBtn:not([href^="tel:"]), .rg-org-section > .pdxBtn:not([href^="tel:"]) { --c: var(--resource-accent); min-height: 44px; border-radius: 22px; padding: 12px 16px; }
+.rg-detail-actions > .pdxBtn.pdx-glass-rebind:not([href^="tel:"]), .rg-org-section > .pdxBtn.pdx-glass-rebind:not([href^="tel:"]) { --c: var(--resource-accent); min-height: 44px; border-radius: 22px; padding: 12px 16px; }
 .rg-detail-actions > a:not([href^="tel:"]), .rg-org-section .rg-safety-source { --action-accent: var(--resource-accent); border-color: var(--resource-accent); }
 .resources-page .rg-search-trigger, .rg-command [cmdk-input] { background: var(--res-input-surface); border: 1px solid var(--res-control-border); border-radius: 22px; min-height: 48px; padding: 12px 16px; }
 .resources-page .rg-search-trigger:focus-visible, .rg-command [cmdk-input]:focus-visible { outline: 2px solid var(--neon-yellow); outline-offset: 3px; }
@@ -2920,7 +2920,7 @@ html.calm-mode .rg-options button,
 }
 
 /* Search-like glass and filter-like edges, with the shared sliding selection intact. */
-.resources-page .rg-step--intent .rg-mode {
+.resources-page .rg-step--intent .rg-mode.pdx-glass-rebind {
  --c: var(--neon-yellow);
  background: var(--glass-card-bg);
  backdrop-filter: blur(16px);
@@ -3651,7 +3651,7 @@ html.calm-mode .rg-options button,
 .resources-page .rg-rail-track { display: flex; gap: 36px; touch-action: pan-y pinch-zoom; }
 .resources-page .rg-rail-track > .rg-card-reveal { flex: 0 0 min(440px, calc((100% - 36px) / 2)); min-width: 0; }
 .resources-page .rg-rail-track img { user-select: none; -webkit-user-drag: none; }
-.resources-page .rg-rail-actions button { --c: var(--rail-accent); }
+.resources-page .rg-rail-actions button.pdx-glass-rebind { --c: var(--rail-accent); }
 .resources-page .rg-rail-actions button:disabled { opacity: .3; cursor: default; }
 .resources-page .rg-rail-progress {
   height: 3px; width: min(240px, 60%); margin: 12px auto 0;
@@ -3793,7 +3793,7 @@ html.calm-mode .rg-options button,
 }
 
 /* Bulk selection uses the intent slider's glass outline and inner spacing. */
-.resources-page .rg-options .rg-selection-control {
+.resources-page .rg-options .rg-selection-control.pdx-glass-rebind {
   --c: var(--neon-yellow);
   background: var(--glass-card-bg);
   border: 1px solid color-mix(in srgb, var(--neon-yellow) 55%, var(--res-control-border));
@@ -3873,7 +3873,7 @@ html.calm-mode .rg-options button,
   line-height: 1.6;
   text-wrap: balance;
 }
-.resources-page .rg-footer .pdxBtn {
+.resources-page .rg-footer .pdxBtn.pdx-glass-rebind {
   --c: var(--neon-cyan);
   min-height: 56px;
   min-width: 260px;

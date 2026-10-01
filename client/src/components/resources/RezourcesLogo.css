@@ -14,70 +14,46 @@
   71% { transform: scaleX(.8); }
   74% { transform: scaleX(1); }
 }
-.rg-logo-z-glitch {
-  pointer-events: none;
-  opacity: 0;
-  animation: rg-logo-z-sketch 14.7s steps(1, end) infinite;
-}
-@keyframes rg-logo-z-sketch {
-  0%, 68%, 70%, 100% { opacity: 0; translate: 0 0; }
-  68.3% { opacity: .9; translate: 4px 0; }
-  68.8% { opacity: .7; translate: -3px 2px; }
-  69.3% { opacity: .85; translate: 2px -1px; }
-}
-[data-quiet-motion] .rg-logo-ink-reveal { animation: none; }
-@media (prefers-reduced-motion: reduce) {
-  .rg-logo-ink-reveal { animation: none; }
-  .rg-logo-z-glitch { display: none; animation: none; }
-}
-
 .rg-logo-color-window { opacity: .13; pointer-events: none; mix-blend-mode: screen; }
 .rg-logo-color-depth {
   translate: var(--logo-color-x, 0px) var(--logo-color-y, 0px);
   transition: translate 350ms ease-out;
 }
 .rg-logo-object-hit { pointer-events: fill; }
-.rg-logo-object-swing { transform-origin: var(--object-pivot); pointer-events: none; }
-.rg-logo-object:hover .rg-logo-object-swing { animation: rg-logo-object-swing 3s ease-in-out; }
-@keyframes rg-logo-object-swing {
-  0%, 100% { rotate: 0deg; }
-  22% { rotate: 3.2deg; }
-  48% { rotate: -2.3deg; }
-  72% { rotate: 1deg; }
-}
-[data-quiet-motion] .rg-logo-object-swing { animation: none !important; }
-[data-quiet-motion] .rg-logo-color-depth { translate: none; transition: none; }
-@media (prefers-reduced-motion: reduce) {
-  .rg-logo-object-swing { animation: none !important; }
-  .rg-logo-color-depth { translate: none; transition: none; }
-}
-
-.rg-board-logo-frame.rg-z-logo {
+.rg-logo-object-swing { pointer-events: none; }
+.rg-logo-surface {
+  transform-origin: 50% 50%;
+  transform-box: view-box;
   transform: perspective(900px) translate(calc(var(--logo-color-x, 0px) * .2), calc(var(--logo-color-y, 0px) * .25)) rotateX(var(--logo-tilt-x, 0deg)) rotateY(var(--logo-tilt-y, 0deg));
   transition: transform 280ms ease-out;
 }
-.rg-logo-z-depth {
-  pointer-events: none;
-  translate: calc(var(--logo-color-x, 0px) * -.4) calc(var(--logo-color-y, 0px) * -.5);
-  transition: translate 350ms ease-out;
-  filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--z-black) 35%, transparent));
-}
-.rg-z-eraser {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: rg-z-erase-redraw 14.7s linear infinite;
-}
-@keyframes rg-z-erase-redraw {
-  0%, 58%, 78%, 100% { stroke-dashoffset: 1; }
-  65%, 68% { stroke-dashoffset: 0; }
-  71% { stroke-dashoffset: .35; }
-  73% { stroke-dashoffset: .55; }
-}
-[data-quiet-motion].rg-z-logo { transform: none; }
-[data-quiet-motion] .rg-logo-z-depth { translate: none; }
-[data-quiet-motion] .rg-z-eraser { animation: none; stroke-dashoffset: 1; }
+.rg-logo-z-depth { pointer-events: none; }
+[data-quiet-motion] .rg-logo-ink-reveal { animation: none; }
+[data-quiet-motion] .rg-logo-surface { transform: none; transition: none; }
+[data-quiet-motion] .rg-logo-color-depth { translate: none; transition: none; }
 @media (prefers-reduced-motion: reduce) {
-  .rg-board-logo-frame.rg-z-logo { transform: none; transition: none; }
-  .rg-logo-z-depth { translate: none; transition: none; }
-  .rg-z-eraser { animation: none; stroke-dashoffset: 1; }
+  .rg-logo-ink-reveal { animation: none; }
+  .rg-logo-surface, .rg-logo-object-swing { transform: none !important; transition: none; }
+  .rg-logo-color-depth { translate: none; transition: none; }
 }
+
+/* Pixel bursts are clipped to blue paint; white Z strokes remain untouched. */
+.rg-blue-z-pixels { opacity: 0; pointer-events: none; animation: rg-blue-z-pixels 10.7s steps(1, end) infinite; }
+@keyframes rg-blue-z-pixels {
+  0%, 68%, 75%, 100% { opacity: 0; }
+  68.5%, 70% { opacity: .95; }
+  69%, 72% { opacity: .35; }
+  73% { opacity: .8; }
+}
+@media (prefers-reduced-motion: reduce) { .rg-blue-z-pixels { display: none; animation: none; } }
+
+.rg-logo-shimmer-window { pointer-events: none; }
+.rg-logo-letter-shimmer { opacity: 0; animation: rg-logo-letter-shimmer 19s ease-in-out infinite; }
+@keyframes rg-logo-letter-shimmer {
+  0%, 76% { opacity: 0; translate: 0 0; }
+  78% { opacity: .5; translate: 0 0; }
+  91% { opacity: .5; translate: 1980px 0; }
+  92%, 100% { opacity: 0; translate: 1980px 0; }
+}
+[data-quiet-motion] .rg-logo-letter-shimmer { display: none; animation: none; }
+@media (prefers-reduced-motion: reduce) { .rg-logo-letter-shimmer { display: none; animation: none; } }
