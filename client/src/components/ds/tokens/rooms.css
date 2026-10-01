@@ -2,6 +2,7 @@
    layers and room pages. Each points at an existing palette token, so calm
    mode and retunes reach every room without their own overrides. */
 :root {
+  --room-zlists: var(--neon-violet);
   --room-eventz: var(--neon-cyan, #00ffff);
   --room-placez: var(--panel-cyan, #19e3ff);
   --room-hauz: var(--neon-cyan, #00ffff);

@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import "./BoardStatsBar.css";
 import CountUpValue from "@/components/CountUpValue";
 
 type Stat = {
@@ -42,7 +43,7 @@ export default function BoardStatsBar({
     const cols = Math.max(1, stats.length);
     return (
       <section
-        className="board-stats-band"
+        className="board-stats-band pdx-glass-rebind"
         aria-label="Board stats"
         data-cols={cols}
         style={{ ["--board-stats-cols" as string]: cols } as CSSProperties}

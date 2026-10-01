@@ -51,3 +51,5 @@
 }
 /* Rooms without their own shell (EVENTZ, HAÜZ) hold the plate on the board rhythm. */
 .room-plate-shell { position: relative; z-index: 2; max-width: 1500px; margin: 0 auto; padding: 0 clamp(22px, 5vw, 76px); }
+
+.room-plate__eyebrow { color:var(--text-body); font:14px/1.5 var(--font-mono); text-transform:uppercase; letter-spacing:.08em; margin-bottom:24px; }

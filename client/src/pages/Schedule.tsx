@@ -159,7 +159,7 @@ export default function Schedule({
   embed = false,
 }: ScheduleProps) {
   const { user } = useAuth();
-  const [view, setViewState] = useState<View>('all');
+  const [view, setViewState] = useState<View>(() => new URLSearchParams(window.location.search).get('view') === 'mine' ? 'mine' : 'all');
   const [viewBootstrapped, setViewBootstrapped] = useState(false);
   const [fAdm, setFAdm] = useState<FilterMap>({});
   const [fType, setFType] = useState<FilterMap>({});
@@ -1459,7 +1459,7 @@ export default function Schedule({
       }}
     >
       {!embed && <ScheduleHero stats={heroStats} />}
-      <DiscoveryFlow enabled={!embed} room="my week" accent="var(--neon-cyan)" initiallyOpen={Boolean(window.location.search)} choices={[
+      <DiscoveryFlow enabled={!embed} room="my week" accent="var(--neon-cyan)" initiallyOpen={Boolean(window.location.search)} initialChoiceId={view} choices={[
         {id:'all',label:'Explore the week',onChoose:()=>setView('all')},
         {id:'mine',label:'My schedule',onChoose:()=>setView('mine')},
       ]}>

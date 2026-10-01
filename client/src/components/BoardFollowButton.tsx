@@ -4,6 +4,7 @@ import { Bell, BellOff } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import "./BoardShareButton.css";
 import AuthModal from "@/components/AuthModal";
 
 export type FollowableRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | "eventz" | "outz" | "rezources";
@@ -41,7 +42,7 @@ export default function BoardFollowButton({ board }: { board: FollowableRoom }) 
     onError: () => toast({ title: "Could not update follow", description: "Try again in a moment.", variant: "destructive" }),
   });
   return <>
-    <button type="button" className="board-follow-button" data-board={board} aria-pressed={following} disabled={!!user && (status.isPending || mutation.isPending)} onClick={() => !user ? setShowAuth(true) : status.isError ? void status.refetch() : mutation.mutate(!following)}>
+    <button type="button" className="board-follow-button pdx-glass-rebind" data-board={board} aria-pressed={following} disabled={!!user && (status.isPending || mutation.isPending)} onClick={() => !user ? setShowAuth(true) : status.isError ? void status.refetch() : mutation.mutate(!following)}>
       {following ? <BellOff size={17} aria-hidden="true" /> : <Bell size={17} aria-hidden="true" />}
       {status.isError ? "Retry follow status" : following ? `Following ${boardName}` : `Follow ${boardName}`}
     </button>

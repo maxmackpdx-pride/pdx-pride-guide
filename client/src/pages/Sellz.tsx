@@ -180,7 +180,6 @@ export default function Sellz() {
   const openForm = () => {
     if (!user) return setShowAuth(true);
     setFormOpen(true);
-    setTimeout(() => document.getElementById("sellz-form")?.scrollIntoView({ behavior: "smooth" }), 20);
   };
   const select = (id: number) => {
     setExpandedId(id);
@@ -199,15 +198,15 @@ export default function Sellz() {
     <BoardShader room="sellz" />
     <div className="gigz-shell">
       <RoomPlate room="sellz" />
-      <DiscoveryFlow room="Sellz" accent="var(--room-sellz)" title="What are you here for?" intro="Browse local listings or put something up for sale in your community." initiallyOpen={Boolean(window.location.search)} choices={[
+      {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
+      <DiscoveryFlow onViewAll={clearFilters} room="Sellz" accent="var(--room-sellz)" title="What are you here for?" intro="Browse local listings or put something up for sale in your community." initiallyOpen={Boolean(window.location.search)} choices={[
         { id: 'browse', label: 'Find something', description: 'Search and filter local listings', scrollToResults: true },
         { id: 'sell', label: 'Sell something', description: 'Create a listing', onChoose: openForm },
       ]}>
-      {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><RoomKicker room="sellz" as="div">The marketplace</RoomKicker><h1>Find your next good thing<span>.</span></h1><p>Buy and sell with your community. Message, agree, and hand off directly.</p></div>
         <div className="sellz-board-actions"><button type="button" className="gigz-post gigz-post--primary" onClick={openForm}><Plus size={17} /> Sell something <ArrowUpRight size={16} /></button></div>
       </div>
-      <FilterSurvey label="Sellz" question="What are you looking for?" value={view} onChange={value => user || value === "ALL" ? setView(value as View) : setShowAuth(true)} accent="var(--room-sellz)" options={[{value:"ALL",label:"Browse listings"},{value:"SAVED",label:"Saved items"},{value:"MINE",label:"My listings"}]}>
+      <FilterSurvey startStep={2} eyebrow="Refine your search" label="Sellz" question="What are you looking for?" value={view} onChange={value => user || value === "ALL" ? setView(value as View) : setShowAuth(true)} accent="var(--room-sellz)" options={[{value:"ALL",label:"Browse listings"},{value:"SAVED",label:"Saved items"},{value:"MINE",label:"My listings"}]}>
       <div className="sellz-board-filters" aria-label="Filter Sellz listings">
         <label>Search Sellz<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search listings and neighborhoods" /></label>
         <label>View<select value={view} onChange={event => { const value = event.target.value as View; user || value === "ALL" ? setView(value) : setShowAuth(true); }}><option value="ALL">All listings</option><option value="SAVED">Saved</option><option value="MINE">My listings</option></select></label>

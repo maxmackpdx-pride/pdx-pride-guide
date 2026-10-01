@@ -1,0 +1,59 @@
+/* ReZources' editorial rhythm across discovery rooms. Map canvases keep their
+   geometry; these shared rules address only reading surfaces and controls. */
+:root {
+  --section-gap:64px;
+  --section-heading:clamp(32px, 3.6vw, 43.2px);
+  --section-body:18px;
+  --section-label:14px;
+}
+html body .board-shader-page {
+  --font-mono:"JetBrains Mono", ui-monospace, monospace;
+  font-family:var(--font-body);
+  line-height:1.6;
+}
+html body .board-shader-page .room-plate:not(.room-plate--compact) {
+  gap:24px; padding:48px 0 0; border:0; text-align:center;
+}
+html body .board-shader-page .room-plate__actions { gap:12px; }
+html body .board-shader-page .room-plate__line { max-width:56ch; font:var(--section-body)/1.7 var(--font-body); color:var(--text-body); }
+html body .board-shader-page .room-plate__mark { width:min(100%,760px); max-height:300px; }
+html body .board-shader-page .discovery-survey { padding-block:var(--section-gap); }
+html body .board-shader-page .discovery-kicker { color:var(--page-accent); font:var(--section-label)/1.5 var(--font-mono); }
+html body .board-shader-page :is(.discovery-survey h2, .z-communities__results-head h2, .gigz-section-head h2, .hz-board-section__head h2) {
+  font:800 var(--section-heading)/1.15 var(--font-display); letter-spacing:-.015em;
+}
+html body .board-shader-page :is(.discovery-intro, .z-communities__intro) { font:var(--section-body)/1.7 var(--font-body); max-width:56ch; }
+html body .board-shader-page .discovery-choices { margin-top:32px; }
+html body .board-shader-page .discovery-choices button[aria-pressed=true] { box-shadow:inset 0 0 0 1px var(--page-accent); background:color-mix(in srgb,var(--page-accent) 15%,var(--z-black)); }
+html body .board-shader-page :is(button,a,input,select,textarea,summary):focus-visible { outline:2px solid var(--chrome-focus,var(--neon-cyan)); outline-offset:4px; }
+html body .board-shader-page :is(.gigz-detail, .mizzed-board__composer, .z-community-panel) { font-family:var(--font-body); line-height:1.6; }
+html body .z-communities .z-community-card { --dir-gm:8; border-radius:12px; }
+html body .z-communities .z-community-card h2 { font:800 26px/1.2 var(--font-display); }
+html body .z-communities .z-community-card__body > p:not(.z-community-card__address) { font:17px/1.7 var(--font-body); }
+html body .z-communities .z-community-card__meta { font:var(--section-label)/1.4 var(--font-mono); }
+html body .z-communities .z-community-card__address { font-size:12px; }
+html body .z-communities .z-communities__search { margin:var(--section-gap) auto; }
+html body .z-communities .z-communities__results-head { margin-bottom:40px; }
+html body .mizzed-board .mizzed-board__filters button { min-height:44px; border-radius:12px; font:700 16px/1.4 var(--font-display); background:var(--glass-card-bg); color:var(--text-heading); }
+html body .mizzed-board .mizzed-board__filters button[aria-pressed=true] { border-color:var(--room-mizzed); background:color-mix(in srgb,var(--room-mizzed) 15%,var(--z-black)); color:var(--text-heading); }
+/* Map controls use the same dark glass with neutral, bloom-free framing. */
+html body :is(.zaydar-demo-navigation, .map-switch) { --dir-gm:0; background:var(--glass-card-neutral-bg); border:var(--glass-card-neutral-border); box-shadow:var(--glass-card-neutral-shadow); border-radius:18px; }
+html body .zaydar-demo-navigation button { min-width:44px; min-height:44px; border-radius:12px; }
+html body .zaydar-demo-navigation button[aria-pressed=true],
+html body .map-switch__option[aria-current=page] { border-color:var(--room-eventz); background:color-mix(in srgb,var(--room-eventz) 15%,var(--z-black)); color:var(--text-heading); box-shadow:inset 0 0 0 1px var(--room-eventz); }
+html body .map-switch__option--outz[aria-current=page] { border-color:var(--room-outz); background:color-mix(in srgb,var(--room-outz) 15%,var(--z-black)); box-shadow:inset 0 0 0 1px var(--room-outz); }
+html body :is(.map-switch a,.zaydar-demo-navigation button):focus-visible { outline:2px solid var(--chrome-focus,var(--neon-cyan)); outline-offset:4px; }
+@media(max-width:600px) {
+  :root { --section-gap:48px; --section-body:17px; }
+  html body .board-shader-page .room-plate:not(.room-plate--compact) { padding-top:32px; }
+  html body .board-shader-page .discovery-survey { padding-inline:16px; }
+}
+
+html body .z-community-detail { --page-accent:var(--room-zlists); }
+html body .z-community-detail :is(.z-community-panel,.z-community-detail__hero,.z-community-feed__compose,.z-community-posts > article) { --c:var(--room-zlists); --dir-gm:8; border-radius:12px; background:var(--glass-card-bg); }
+html body .z-community-detail__tools button { min-width:44px; min-height:44px; border-radius:18px; }
+html body .z-community-detail .z-community-post__title { font-family:var(--font-display); font-size:26px; line-height:1.2; }
+html body .z-community-detail .z-community-post__body { font:17px/1.7 var(--font-body); }
+html body .z-community-detail .z-community-reply .z-community-post__title { font-size:20px; }
+html body .z-community-detail .z-community-reply .z-community-post__body { font-size:15px; }
+html body .z-community-detail :is(input,textarea,select) { font-family:var(--font-body); font-size:16px; line-height:1.5; }

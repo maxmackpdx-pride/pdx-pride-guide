@@ -1,3 +1,5 @@
+import BoardShader from "@/components/board/BoardShader";
+import "@/components/BoardShareButton.css";
 import CommunityPageInvitation from "@/components/CommunityPageInvitation";
 import { ArrowUpRight } from "lucide-react";
 import PageRecovery from "@/components/PageRecovery";
@@ -115,13 +117,14 @@ export default function Community({ params }: { params: { communitySlug: string 
       {reportPostId === entry.id ? <form onSubmit={event => { event.preventDefault(); act.mutate({ method: "POST", path: `/posts/${entry.id}/report`, body: { reason: reportReason } }); }}><label>Why are you reporting this message?<textarea value={reportReason} onChange={event => setReportReason(event.target.value)} minLength={5} maxLength={500} required/></label><Button type="submit" disabled={act.isPending}>SEND REPORT</Button><Button type="button" onClick={() => setReportPostId(null)}>CANCEL</Button></form> : null}
     </>;
   }
-  return <div className="z-communities z-community-detail">
+  return <div className="z-communities z-community-detail board-shader-page" data-shader-room="zlists">
+    <BoardShader room="zlists" />
     <div className="z-community-detail__toolbar"><Link href="/z" className="z-community-detail__back"><ArrowLeft size={19}/> Z/ LIST</Link><div className="z-community-detail__tools"><button type="button" aria-label="Search posts" aria-expanded={searchOpen} onClick={() => { setFeedTab("posts"); setSearchOpen(value => !value); }}><Search size={19}/></button><button type="button" aria-label="Create post" onClick={() => { setFeedTab("posts"); setComposerOpen(true); document.querySelector(".z-community-feed__compose")?.scrollIntoView({ behavior: "smooth" }); }}><Plus size={20}/></button><button type="button" aria-label="Share community" onClick={() => void share(pageUrl)}><Share2 size={19}/></button></div></div>
     <header className="z-community-detail__hero">
       <div className="z-community-detail__image" style={logo ? { backgroundImage: `url(${logo})`, backgroundSize: item.slug === "yes-coach-productions" && (!item.imageUrl || item.imageUrl === "/directory-logos/Yes_Coach_Productions.png") ? "75% auto" : !item.imageUrl || logo === "/community-logos/pink-ponies.jpeg" ? "contain" : undefined, backgroundColor: !item.imageUrl && item.slug === "lesbian-culture-club" ? "#f5f1e9" : undefined } : undefined}>{!logo ? <span aria-hidden="true">Z/</span> : null}</div>
       <div className="z-community-detail__identity"><p className="z-community-card__address">z/{item.slug}</p><h1>{item.name}</h1><p className="z-community-detail__count">{item.memberCount} {item.memberCount === 1 ? "member" : "members"} · {item.posts.length} recent {item.posts.length === 1 ? "post" : "posts"}</p><p className="z-community-detail__description">{item.description}</p><div className="z-community-detail__membership">
         {user ? item.viewerMembershipStatus === "pending" ? <Button disabled accent="cyan">REQUEST PENDING</Button> : item.viewerRole === "owner" ? <p>You own this community. <button type="button" onClick={() => { setManaging(true); setTimeout(() => document.getElementById("community-members")?.scrollIntoView({ behavior: "smooth" }), 0); }}>Transfer ownership in Members</button> before leaving.</p> : <Button onClick={() => membership.mutate()} disabled={membership.isPending} accent="cyan">{item.viewerRole ? "LEAVE COMMUNITY" : item.membershipPolicy === "request" ? "REQUEST TO JOIN" : "JOIN COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO JOIN</Button></Link>}
-        {item.viewerRole ? <button type="button" className="z-community-follow" aria-pressed={item.viewerFollowing} disabled={follow.isPending} onClick={() => follow.mutate(!item.viewerFollowing)}>{item.viewerFollowing ? <Check size={17}/> : <Plus size={17}/>} {item.viewerFollowing ? "Following feed" : "Follow feed"}</button> : null}
+        {item.viewerRole ? <button type="button" className="z-community-follow pdx-glass-rebind" aria-pressed={item.viewerFollowing} disabled={follow.isPending} onClick={() => follow.mutate(!item.viewerFollowing)}>{item.viewerFollowing ? <Check size={17}/> : <Plus size={17}/>} {item.viewerFollowing ? "Following feed" : "Follow feed"}</button> : null}
         {item.canManage ? <Button onClick={() => setManaging(value => !value)}>{managing ? "CLOSE MODERATOR DESK" : "MANAGE COMMUNITY"}</Button> : null}</div>
       </div>
     </header>

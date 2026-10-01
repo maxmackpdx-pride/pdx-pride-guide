@@ -1,4 +1,5 @@
-import BoardAtmosphere from '@/components/board/BoardAtmosphere';
+import BoardStatsBar from "@/components/BoardStatsBar";
+import BoardShader from '@/components/board/BoardShader';
 import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
 import { ArrowDown } from "lucide-react";
@@ -325,8 +326,8 @@ export default function Housing() {
   };
 
   return (
-    <div className="hz pdx-glass-rebind">
-      <BoardAtmosphere room="hauz" side="left" />
+    <div className="hz pdx-glass-rebind board-shader-page" data-shader-room="hauz">
+      <BoardShader room="hauz" />
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />
 
@@ -335,6 +336,11 @@ export default function Housing() {
         <Mono accent>THE HAÜZ · Housing board</Mono>
       </div>
       <div className="hz-pad"><div className="hz-wrap"><RoomPlate room="hauz" /></div></div>
+      {!isLoading && !isError && <BoardStatsBar variant="band" stats={[
+        {num:posts.length,label:"Matching listings",color:"var(--room-hauz)"},
+        {num:posts.filter(post => post.type === "OFFERING").length,label:"Offering a home",color:"var(--room-hauz)"},
+        {num:posts.filter(post => post.type === "LOOKING" || post.type === "FORMING").length,label:"People & households",color:"var(--room-hauz)"},
+      ]} />}
 
       <DiscoveryFlow room="The Haüz" accent="var(--room-hauz)" title="What are you here to do?" intro="Find a place or the people to share one with." initiallyOpen={Boolean(window.location.search) || Boolean(selectedPostId)} initialChoiceId={({ OFFERING: 'home', LOOKING: 'all', FORMING: 'household', MANAGED: 'all', ALL: 'all', SAVED: 'all' } as Record<HousingFilter, string>)[filter]} choices={[
         { id: 'home', label: 'Find a home', description: 'Rooms offered by households', scrollToResults: true, scrollTargetId: 'housing-listings', onChoose: () => browseHousing('OFFERING') },

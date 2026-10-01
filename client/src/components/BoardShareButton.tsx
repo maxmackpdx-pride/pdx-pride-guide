@@ -79,7 +79,7 @@ export default function BoardShareButton({ title, path, card }: { title: string;
       setSharing(false);
     }
   };
-  return <button ref={button} type="button" className="board-share-button" aria-label={copied ? "Link copied" : `Share ${title}`} disabled={sharing} onClick={() => void share()}>
+  return <button ref={button} type="button" className="board-share-button pdx-glass-rebind" aria-label={copied ? "Link copied" : `Share ${title}`} disabled={sharing} onClick={() => void share()}>
     {copied ? <CopyStateIcon copied size={17} /> : <Share2 size={17} aria-hidden="true" />} Share
   </button>;
 }

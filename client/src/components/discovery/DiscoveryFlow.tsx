@@ -6,24 +6,17 @@ import './DiscoveryFlow.css';
 
 export type DiscoveryChoice = { id: string; label: string; description?: string; disabled?: boolean; scrollToResults?: boolean; scrollTargetId?: string; onChoose?: () => void };
 /** ReZources' progressive opening, with each room retaining its own data and actions. */
-export default function DiscoveryFlow({ room, accent, choices, children, initiallyOpen = false, initialChoiceId, title = 'What do you need?', intro = 'Choose a starting point. You can change it any time.', enabled = true, keepMounted = false }: {
+export default function DiscoveryFlow({ room, accent, choices, children, initiallyOpen = false, initialChoiceId, title = 'What do you need?', intro = 'Choose a starting point. You can change it any time.', enabled = true, keepMounted = false, onViewAll }: {
   room: string; accent: string; choices: DiscoveryChoice[]; children: ReactNode;
-  initiallyOpen?: boolean; initialChoiceId?: string; title?: string; intro?: string; enabled?: boolean; keepMounted?: boolean;
+  initiallyOpen?: boolean; initialChoiceId?: string; title?: string; intro?: string; enabled?: boolean; keepMounted?: boolean; onViewAll?: () => void;
 }) {
   const id = useId();
-  const roomKey = room.toLowerCase();
-  const complement = roomKey.includes('event') || roomKey.includes('hauz') ? 'var(--neon-orange)'
-    : roomKey.includes('gift') ? 'var(--neon-violet)'
-    : roomKey.includes('gig') ? 'var(--neon-yellow)'
-    : roomKey.includes('sell') ? 'var(--neon-magenta)'
-    : roomKey.includes('mizz') ? 'var(--neon-green)'
-    : 'var(--neon-orange)';
   const [selected, setSelected] = useState<string | null>(initiallyOpen ? initialChoiceId ?? choices[0]?.id ?? null : null);
   const reduced = useReducedMotion();
   const { calmMode } = useTheme();
   const quiet = Boolean(reduced || calmMode);
   if (!enabled) return <>{children}</>;
-  return <div className="discovery-flow" style={{ '--discovery-accent': accent, '--discovery-kicker-accent': complement } as CSSProperties}>
+  return <div className="discovery-flow" style={{ '--discovery-accent': accent, '--discovery-kicker-accent': accent } as CSSProperties}>
     <section className="discovery-survey" aria-labelledby={`${id}-title`}>
       <p className="discovery-kicker"><span aria-hidden="true">01</span> Start here</p>
       <h2 id={`${id}-title`}>{title}</h2>
@@ -44,9 +37,14 @@ export default function DiscoveryFlow({ room, accent, choices, children, initial
           <strong>{choice.label}</strong>{choice.description && <span>{choice.description}</span>}
         </ResourceFilterButton>)}
       </div>
+      <button type="button" className="discovery-skip" onClick={() => {
+        const browse = choices.find(choice => choice.id === 'all' || choice.id === 'browse') ?? choices[0];
+        setSelected(browse?.id ?? 'all');
+        if (onViewAll) onViewAll(); else browse?.onChoose?.();
+      }}>Skip to view all</button>
     </section>
     <div id={`${id}-results`} className="discovery-results" hidden={!selected}>
-      {(selected || keepMounted) && <motion.div initial={quiet ? false : { opacity: 0, y: 12 }} animate={{ opacity: selected ? 1 : 0, y: selected || quiet ? 0 : 12 }} transition={{ duration: quiet ? 0 : .35 }}>
+      {(selected || keepMounted) && <motion.div key={keepMounted ? id : selected} initial={quiet ? false : { opacity: 0, y: 24 }} animate={{ opacity: selected ? 1 : 0, y: selected || quiet ? 0 : 12 }} transition={{ duration: quiet ? 0 : .4 }}>
         <p className="discovery-kicker discovery-kicker--results"><span aria-hidden="true">02</span> Explore {room}</p>
         {children}
       </motion.div>}

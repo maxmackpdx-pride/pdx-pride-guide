@@ -1,3 +1,4 @@
+import "@/components/discovery/DiscoveryFlow.css";
 import {
   memo,
   useCallback,
@@ -578,6 +579,7 @@ export default function Resources() {
                 </button>
               </div>
               </LayoutGroup>
+              <button type="button" className="discovery-skip" onClick={() => { setIntentChosen(true); setMode("directory"); setCategoryIds(RESOURCE_CATEGORIES.map(c => c.id)); setDirectoryRevealed(true); }}>Skip to view all</button>
               <AnimatePresence initial={false}>
               {mode === "talk" && (
                 <motion.div key="safety-check" initial={quietMotion ? false : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: quietMotion ? 0 : 0.24, ease: "easeInOut" }} id="resource-safety-check" className="rg-safety-check" role="group" aria-labelledby="resource-safety-question">

@@ -35,3 +35,13 @@
 .events-page.board-shader-page::before { content: none; }
 .hz.board-shader-page .hz-wash,
 .hz.board-shader-page .hz-grain { display: none; }
+
+.board-shader-page[data-shader-room="zlists"] { --board-shader-color:var(--room-zlists); }
+/* Room CSS may load after this module; the background belongs to this shell. */
+html body .board-shader-page[data-shader-room] {
+  --page-accent:var(--board-shader-color);
+  --font-body:Inter, system-ui, sans-serif;
+  background:radial-gradient(ellipse 700px 600px at 88% 280px, color-mix(in srgb,var(--board-shader-color) 20%,transparent),transparent 85%),var(--z-black);
+}
+html body .board-shader-page[data-shader-room] > .rg-stream-background { position:fixed; z-index:-3; }
+html body .board-shader-page[data-shader-room] > .board-shader-veil { position:fixed; z-index:-1; }

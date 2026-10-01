@@ -1,5 +1,4 @@
 import BoardHero from "@/components/BoardHero";
-import BoardExploreActions from "@/components/BoardExploreActions";
 
 type Props = {
   eventCount: number;
@@ -10,8 +9,7 @@ export default function EventsHero({ eventCount }: Props) {
       <BoardHero
         className="board-hero--room"
         accent="cyan"
-        section="Eventz"
-        kicker="Zaylist / Eventz · Portland, all year"
+        kicker="Eventz / Portland, all year"
         title={
           <img
             key={eventCount > 0 ? "eventz-hero-ready" : "eventz-hero-pending"}
@@ -21,7 +19,6 @@ export default function EventsHero({ eventCount }: Props) {
           />
         }
         lede="Find your next night out, daytime hang, or community gathering. Browse the flyers, check the details, and make a plan."
-        actions={<BoardExploreActions showSchedule scheduleLead />}
       />
   );
 }

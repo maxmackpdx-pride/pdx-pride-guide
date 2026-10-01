@@ -45,3 +45,6 @@
   :is(.events-page, .giftz-page, .gigz-page, .sellz-board-page, .hz.pdx-glass-rebind) .discovery-choices strong { font-size:16px; }
   :is(.events-page, .giftz-page, .gigz-page, .sellz-board-page, .hz.pdx-glass-rebind) .discovery-choices button > span:not(.discovery-lens) { font-size:13px; }
 }
+
+.discovery-skip { display: block; margin: 24px auto 0; padding: 10px 16px; min-height: 44px; background: transparent; border: 0; color: var(--text-hi); font: inherit; text-decoration: underline; text-underline-offset: 5px; cursor: pointer; }
+.discovery-skip:focus-visible { outline: 2px solid var(--discovery-accent, var(--neon-cyan)); outline-offset: 4px; border-radius: 12px; }

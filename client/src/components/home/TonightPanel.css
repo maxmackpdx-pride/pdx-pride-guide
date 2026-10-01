@@ -60,8 +60,8 @@
 .tonight-card__sheen { opacity: .35; position: absolute; inset: 0; pointer-events: none; z-index: 1; }
 .tonight-card button { font: inherit; cursor: pointer; }
 .tonight-card__open { display: flex; flex-direction: column; flex: 1; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
-.tonight-card__art { position: relative; width: 100%; height: 210px; background: var(--ink-900); overflow: hidden; }
-.tonight-card__art img { width: 100%; height: 100%; object-fit: contain; }
+.tonight-card__art { position: relative; width: 100%; background: var(--ink-900); overflow: hidden; }
+.tonight-card__art img { display: block; width: 100%; height: auto; aspect-ratio: auto 4 / 5; }
 .tonight-card__day { position: absolute; left: 16px; bottom: 12px; padding: 6px 9px; background: rgba(0,0,0,.9); border: 1px solid var(--c); border-radius: 6px; color: var(--text-hi); font: 700 11px/1.3 var(--font-mono, monospace); text-transform: uppercase; }
 .tonight-card__body { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 16px; flex: 1; width: 100%; padding: 22px; box-sizing: border-box; }
 .tonight-card__body p { margin: 0; }

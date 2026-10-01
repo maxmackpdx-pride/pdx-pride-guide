@@ -1,3 +1,4 @@
+import BoardShader from "@/components/board/BoardShader";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -31,12 +32,13 @@ export default function ZIndex() {
     onSuccess: async (item: CommunitySummary) => { await queryClient.invalidateQueries({ queryKey: ["/api/communities"] }); navigate(`/z/${item.slug}`); },
     onError: err => setError(parseApiError(err, "Community could not be created.")),
   });
-  return <div className="z-communities">
+  return <div className="z-communities board-shader-page" data-shader-room="zlists">
+    <BoardShader room="zlists" />
     <header className="z-communities__hero">
       <span className="z-communities__eyebrow">Z/ LISTS / FIND YOUR PEOPLE</span>
       <h1><span>Z/</span> List</h1>
       <p className="z-communities__intro">Find your people. Join a conversation, share what matters, and make plans together. Every community has its own voice and its own rules.</p>
-      {user ? <Button accent="cyan" onClick={() => setCreating(value => !value)} aria-expanded={creating} aria-controls="z-community-create">{creating ? "CANCEL" : "CREATE A COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO CREATE</Button></Link>}
+      {user ? <Button accent="purple" onClick={() => setCreating(value => !value)} aria-expanded={creating} aria-controls="z-community-create">{creating ? "CANCEL" : "CREATE A COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="purple">SIGN IN TO CREATE</Button></Link>}
     </header>
     <div className="z-communities__search">
       <Search size={20} aria-hidden="true" />
@@ -63,16 +65,17 @@ export default function ZIndex() {
     </div>
     {!communities.isLoading && !communities.isError && searchQuery && visibleCommunities.length === 0 && (communities.data?.length || 0) > 0 ? <p className="z-communities__no-match">No communities match “{searchQuery}”. Try another name or neighborhood.</p> : null}
     <section className="z-communities__grid" aria-label="Communities">
-      {visibleCommunities.map(community => { const logo = communityLogo(community); return <article key={community.id} className="z-community-card">
+      {visibleCommunities.map(community => { const logo = communityLogo(community); return <article key={community.id} className="z-community-card pdx-glass-rebind pdx-glass-card">
         <span className="pdx-refract-seam" aria-hidden="true" />
         <Link href={`/z/${community.slug}`} className="z-community-card__link">
         <div className="z-community-card__image" style={logo ? { backgroundImage: `url(${logo})`, backgroundSize: community.slug === "yes-coach-productions" && (!community.imageUrl || community.imageUrl === "/directory-logos/Yes_Coach_Productions.png") ? "75% auto" : !community.imageUrl || logo === "/community-logos/pink-ponies.jpeg" ? "contain" : undefined, backgroundColor: !community.imageUrl && community.slug === "lesbian-culture-club" ? "#f5f1e9" : undefined } : undefined}>{!logo ? <span aria-hidden="true">Z/</span> : null}</div>
         <div className="z-community-card__body">
           <p className="z-community-card__address">z/{community.slug}</p><h2>{community.name}</h2><p>{community.description}</p>
           <div className="z-community-card__meta"><span>{community.memberCount} {community.memberCount === 1 ? "member" : "members"}</span>{community.neighborhood ? <span>{community.neighborhood}</span> : null}</div>
+        <span className="z-community-card__open">Explore community <span aria-hidden="true">↗</span></span>
         </div>
         </Link>
-        <CommunityPageInvitation community={community}/>
+        {community.sourcePlaceId && !community.canManage ? <details className="z-community-card__options"><summary>Page options</summary><CommunityPageInvitation community={community}/></details> : null}
       </article>; })}
     </section>
   </div>;

@@ -1,0 +1,34 @@
+/* Mizzed Connections counter bar is the interior-page standard. Home owns its
+   own composition. Local --page-accent supplies the room's frame color. */
+html body :not(.home-page) > .board-stats-band.pdx-glass-rebind {
+  --c:var(--page-accent, var(--room-eventz));
+  --dir-gm:8;
+  max-width:880px;
+  width:calc(100% - 32px);
+  margin:36px auto 0;
+  padding:0;
+  border:1px solid color-mix(in srgb,var(--c) 45%,var(--z-black));
+  border-radius:14px;
+  background:var(--glass-card-bg);
+  box-shadow:var(--glass-card-shadow);
+  overflow:hidden;
+  animation:none;
+}
+html body .board-stats-band.pdx-glass-rebind .board-stats-band__inner { width:100%; max-width:none; padding:0; display:grid; grid-template-columns:repeat(var(--board-stats-cols,3),minmax(0,1fr)); }
+html body .board-stats-band.pdx-glass-rebind .board-stats-band__item { padding:18px 20px; text-align:center; border-bottom:0; }
+html body .board-stats-band.pdx-glass-rebind .board-stats-band__item--rule { border-right:1px solid color-mix(in srgb,var(--c) 30%,var(--z-black)); }
+html body .board-stats-band.pdx-glass-rebind .board-stats-band__num { font:800 30px/1.2 var(--font-display); }
+html body .board-stats-band.pdx-glass-rebind .board-stats-band__label { margin-top:6px; color:var(--text-body); font:12px/1.4 var(--font-mono); }
+.resources-page { --page-accent:var(--neon-yellow); }
+@media(max-width:600px) {
+  html body :not(.home-page) > .board-stats-band.pdx-glass-rebind { margin-top:24px; }
+  html body .board-stats-band.pdx-glass-rebind .board-stats-band__item { padding:14px 8px; }
+  html body .board-stats-band.pdx-glass-rebind .board-stats-band__num { font-size:24px; }
+  html body .board-stats-band.pdx-glass-rebind .board-stats-band__label { font-size:10px; letter-spacing:.03em; }
+}
+
+@media(max-width:600px) {
+  html body .board-stats-band.pdx-glass-rebind[data-cols="4"] .board-stats-band__inner { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  html body .board-stats-band.pdx-glass-rebind[data-cols="4"] .board-stats-band__item:nth-child(2) { border-right:0; }
+  html body .board-stats-band.pdx-glass-rebind[data-cols="4"] .board-stats-band__item:nth-child(-n+2) { border-bottom:1px solid color-mix(in srgb,var(--c) 30%,var(--z-black)); }
+}

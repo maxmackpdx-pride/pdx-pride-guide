@@ -137,7 +137,7 @@ const fragmentShader = `
 `;
 
 /** Prime-color waves with locally loaded drafting lines. */
-export function WebGLShader({ accent, direction = 1, blueprintUrl = "/resources-art/drafting-lines.svg" }: { accent?: string; direction?: -1 | 1; blueprintUrl?: string | null } = {}) {
+export function WebGLShader({ accent, palette = "prime", direction = 1, blueprintUrl = "/resources-art/drafting-lines.svg" }: { accent?: string; palette?: "prime" | "week"; direction?: -1 | 1; blueprintUrl?: string | null } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -167,7 +167,16 @@ export function WebGLShader({ accent, direction = 1, blueprintUrl = "/resources-
     let blueprintTexture: THREE.Texture | undefined;
     let disposed = false;
     const beamColor = accent ? new THREE.Color(styles.color).convertLinearToSRGB() : null;
-    const beam = (token: string, fallback: string) => beamColor ?? color(token, fallback);
+    const weekTokens: Record<string, string> = {
+      "--neon-cyan": "--day-thu", "--neon-yellow": "--day-wed",
+      "--neon-magenta": "--day-fri", "--neon-orange": "--day-sun",
+      "--neon-violet": "--day-mon", "--neon-green": "--day-sat", "--neon-blue": "--day-tue",
+    };
+    const beam = (token: string, fallback: string) => {
+      if (beamColor) return beamColor;
+      if (palette === "week" && token === "--neon-red") return new THREE.Color(0, 0, 0);
+      return color(palette === "week" ? weekTokens[token] : token, fallback);
+    };
     const uniforms = {
       blueprint: { value: emptyBlueprint as THREE.Texture },
       resolution: { value: new THREE.Vector2() },
@@ -284,7 +293,7 @@ export function WebGLShader({ accent, direction = 1, blueprintUrl = "/resources-
       material.dispose();
       renderer.dispose();
     };
-  }, [accent, direction, blueprintUrl]);
+  }, [accent, palette, direction, blueprintUrl]);
 
   return (
     <canvas

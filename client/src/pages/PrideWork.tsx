@@ -167,7 +167,6 @@ export default function PrideWork() {
   const openForm = (type: GigFormData["postType"]) => {
     if (!user) { setShowAuth(true); return; }
     setComposeType(type); setFormOpen(true);
-    window.setTimeout(() => document.getElementById("gigs-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 30);
   };
   const visible = useMemo(() => gigs.filter(g => (!remoteOnly || g.isRemote) && (!onlyMine || g.isMine) && (!search.trim() || [g.title, g.description, g.name, g.skills, g.location, g.compensation].some(v => v?.toLowerCase().includes(search.trim().toLowerCase())))), [gigs, remoteOnly, onlyMine, search]);
   const opportunities = visible.filter(g => surveyKind !== "talent" && g.postType === "POSTING_GIG" && g.status === "LIVE");
@@ -187,14 +186,14 @@ export default function PrideWork() {
     <BoardShader room="gigz" />
     <div className="gigz-shell">
       <RoomPlate room="gigz" />
-      <DiscoveryFlow room="Gigz" accent="var(--room-gigz)" title="What kind of connection?" intro="Find work or collaborators, post an opportunity, or let people know what you can do." initiallyOpen={Boolean(window.location.search)} choices={[
+      {!isLoading && !isError && !onlyMine && <BoardStatsBar variant="band" stats={roomStats} />}
+      <DiscoveryFlow onViewAll={() => { setSearch(""); setRemoteOnly(false); setOnlyMine(false); setSurveyKind("all"); }} room="Gigz" accent="var(--room-gigz)" title="What kind of connection?" intro="Find work or collaborators, post an opportunity, or let people know what you can do." initiallyOpen={Boolean(window.location.search)} choices={[
         { id: 'browse', label: 'Find gigs & people', description: 'Explore work and talent', scrollToResults: true },
         { id: 'hire', label: 'Post a gig', description: 'Find someone for your project', onChoose: () => openForm('POSTING_GIG') },
         { id: 'work', label: 'Offer my skills', description: 'Let people know you are available', onChoose: () => openForm('LOOKING_FOR_WORK') },
       ]}>
-      {!isLoading && !isError && !onlyMine && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><RoomKicker room="gigz" as="div">The board</RoomKicker><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post gigz-post--primary" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
-      <FilterSurvey label="Gigz" question="What do you need?" value={surveyKind} onChange={setSurveyKind} accent="var(--room-gigz-ink)" options={[{value:"all",label:"Explore Gigz"},{value:"gigs",label:"Find a gig"},{value:"talent",label:"Find talent"}]}>
+      <FilterSurvey startStep={2} eyebrow="Refine your search" label="Gigz" question="What do you need?" value={surveyKind} onChange={setSurveyKind} accent="var(--room-gigz-ink)" options={[{value:"all",label:"Explore Gigz"},{value:"gigs",label:"Find a gig"},{value:"talent",label:"Find talent"}]}>
         <BrowseToolbar label="Filter Gigz" className="board-toolbar"><label>Search Gigz<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search roles, skills, gigs" /></label><FilterChip className="board-chip pdx-glass-rebind" selected={remoteOnly} onToggle={() => setRemoteOnly(value => !value)}>Remote</FilterChip>{user && <FilterChip className="board-chip pdx-glass-rebind" selected={onlyMine} onToggle={() => setOnlyMine(value => !value)}>My Gigz</FilterChip>}{(search || remoteOnly || onlyMine) && <button type="button" className="board-toolbar__clear" onClick={() => { setSearch(""); setRemoteOnly(false); setOnlyMine(false); }}>Clear filters</button>}</BrowseToolbar>
       </FilterSurvey>
       {surveyKind !== "talent" && (isLoading ? <BoardFeedSkeleton label="Loading Gigz posts" shape="board" count={3} /> : isError ? <div className="gigz-empty pdx-glass-rebind" role="alert">Could not load posts. <button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>Try again</button></div> : opportunities.length ? <GigRail posts={opportunities} kind="gigs" selected={selectedId} onSelect={select} /> : <div className="gigz-empty pdx-glass-rebind">No open gigs yet. <button onClick={() => openForm("POSTING_GIG")}>Post a gig</button></div>)}

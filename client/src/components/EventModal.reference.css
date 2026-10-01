@@ -102,3 +102,9 @@ html[data-zaylist-cards] .event-modal.event-modal--reference,
 .event-modal.event-modal--reference .event-modal__hero-date > span:first-child { font-weight: 800; letter-spacing: .015em; }
 .event-modal.event-modal--reference .event-modal__connection-feature > button { font-size: clamp(15px, 4.3cqw, 22px); letter-spacing: -.025em; }
 .event-modal.event-modal--reference .event-modal__disclosure summary { font-size: clamp(15px, 4.2cqw, 22px); letter-spacing: -.02em; }
+
+/* Match the ReZources backdrop while preserving the Eventz dialog layout. */
+.event-modal-overlay:has(.event-modal--reference) {
+  background: color-mix(in srgb, var(--z-black) 65%, transparent);
+  backdrop-filter: blur(6px);
+}

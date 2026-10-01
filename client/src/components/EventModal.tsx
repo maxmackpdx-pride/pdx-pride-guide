@@ -5,7 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ds";
 import DetailActions from "./DetailActions";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { Link, useLocation } from "wouter";
@@ -244,8 +244,6 @@ function EventModalInner({
   const [invitePast, setInvitePast] = useState(true);
   const [inviteFollowers, setInviteFollowers] = useState(true);
   const [inviteNote, setInviteNote] = useState("");
-  const [flipOpen, setFlipOpen] = useState(false);
-  const [flipVars, setFlipVars] = useState<React.CSSProperties | null>(null);
   const socialTabsRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const posterImageRef = useRef<HTMLImageElement>(null);
@@ -255,43 +253,6 @@ function EventModalInner({
   const titleRef = useRef<HTMLHeadingElement>(null);
   const { dialogRef, requestClose: handleClose } = useOpenCardClose(onClose);
 
-  useLayoutEffect(() => {
-    let cancelled = false;
-    setFlipOpen(false);
-    const panel = dialogRef.current;
-    const calm = document.documentElement.classList.contains("calm-mode") ||
-      document.documentElement.dataset.calm === "true";
-
-    const openAfterPaint = () => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (!cancelled) setFlipOpen(true);
-        });
-      });
-    };
-
-    if (!panel || !originRect || prefersReducedMotion() || calm) {
-      setFlipVars(null);
-      openAfterPaint();
-      return () => { cancelled = true; };
-    }
-
-    const finalRect = panel.getBoundingClientRect();
-    if (finalRect.width < 8 || finalRect.height < 8 || originRect.width < 8 || originRect.height < 8) {
-      setFlipVars(null);
-      openAfterPaint();
-      return () => { cancelled = true; };
-    }
-
-    setFlipVars({
-      ["--em-sx" as string]: String(originRect.width / finalRect.width),
-      ["--em-sy" as string]: String(originRect.height / finalRect.height),
-      ["--em-tx" as string]: `${originRect.left - finalRect.left}px`,
-      ["--em-ty" as string]: `${originRect.top - finalRect.top}px`,
-    });
-    openAfterPaint();
-    return () => { cancelled = true; };
-  }, [event.id, originRect, dialogRef]);
 
   useEffect(() => {
     setEditing(false);
@@ -797,7 +758,7 @@ function EventModalInner({
     <div className="event-modal-overlay" onClick={handleClose}>
       <div
         ref={dialogRef}
-        className={`event-modal event-modal--approved event-modal--reference pdx-glass-rebind${flipVars ? " event-modal--flip" : ""}${flipOpen ? " event-modal--open" : ""}`}
+        className="event-modal event-modal--approved event-modal--reference pdx-glass-rebind"
         role="dialog"
         aria-modal="true"
         aria-label={event.title}
@@ -810,7 +771,6 @@ function EventModalInner({
           "--c": accentColor,
           "--event-ink": dayInk,
           "--event-opposite": oppositeColor,
-          ...flipVars,
         } as React.CSSProperties}
       >
         <div className="event-modal__chrome">

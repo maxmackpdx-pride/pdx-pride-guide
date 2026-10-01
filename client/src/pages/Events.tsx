@@ -1,4 +1,6 @@
-import { WebGLShader } from '@/components/ui/web-gl-shader';
+import DiscoveryFlow from "@/components/discovery/DiscoveryFlow";
+import { eventsTonightWindow, isEventTonight } from "@shared/eventsTonight";
+import BoardShader from "@/components/board/BoardShader";
 import { createEventSearch } from "@shared/eventSearch";
 import RoomPlate from "@/components/board/RoomPlate";
 import BrowseToolbar from "@/components/BrowseToolbar";
@@ -126,11 +128,11 @@ type DateWindows = {
 
 function buildDateWindows(nowMs: number): DateWindows {
   const today = pacificTodayDate(nowMs);
-  const tomorrow = pacDate((parsePacificDateTime(`${today}T12:00:00`) ?? nowMs) + 86400000);
+  const tonight = eventsTonightWindow(nowMs);
   return {
     today,
-    tonightStart: parsePacificDateTime(`${today}T18:00:00`) ?? nowMs,
-    tonightEnd: parsePacificDateTime(`${tomorrow}T06:00:00`) ?? nowMs,
+    tonightStart: tonight.start,
+    tonightEnd: tonight.end,
     weekend: weekendDates(nowMs),
     thisWeek: weekDates(nowMs, 0),
     nextWeek: weekDates(nowMs, 1),
@@ -186,8 +188,8 @@ function eventInWindow(e: EventListing, window: string, windows: DateWindows): b
   if (window === "ALL") return true;
   if (window === "TONIGHT") {
     const start = parsePacificDateTime(e.dateStart);
-    const end = parsePacificDateTime(e.dateEnd) ?? (start == null ? null : start + 24 * 60 * 60 * 1000);
-    return start != null && end != null && start < windows.tonightEnd && end > windows.tonightStart;
+    const end = parsePacificDateTime(e.dateEnd);
+    return start != null && start < windows.tonightEnd && (end != null && end > start ? end > windows.tonightStart : start >= windows.tonightStart);
   }
   const d = pacificCalendarDate(e.dateStart);
   if (!d) return false;
@@ -302,36 +304,28 @@ function readSearchParam(key: string) {
   return new URLSearchParams(window.location.search).get(key)?.trim() || "";
 }
 
-function EventsTabBar({
-  activeTab,
-  onSelect,
-}: {
-  activeTab: "board" | "schedule";
-  onSelect: (tab: "board" | "schedule") => void;
-}) {
-  return (
-    <nav className="events-tab-bar events-page-tab-bar" aria-label="Events view">
-      <button
-        type="button"
-        className={`events-tab${activeTab === "board" ? " active" : ""}`}
-        onClick={() => onSelect("board")}
-        data-testid="events-tab-board"
-      >
-        The Board
-      </button>
-      <button
-        type="button"
-        className={`events-tab${activeTab === "schedule" ? " active" : ""}`}
-        onClick={() => onSelect("schedule")}
-        data-testid="events-tab-schedule"
-      >
-        The Schedule
-      </button>
-    </nav>
-  );
-}
-
 export default function Events() {
+  const [leaving, setLeaving] = useState(false);
+  const navigationTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(navigationTimer.current), []);
+  const goToEventAction = (path: string) => {
+    const quiet = window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('calm-mode') || document.documentElement.dataset.calm === 'true';
+    setLeaving(true);
+    clearTimeout(navigationTimer.current);
+    navigationTimer.current = setTimeout(() => setLocation(path), quiet ? 0 : 220);
+  };
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const refresh = () => setNow(Date.now());
+    const timer = window.setTimeout(refresh, Math.max(1, eventsTonightWindow(now).nextReset - Date.now()));
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [now]);
   const { user } = useAuth();
   const isMobile = useIsMobile() || (typeof window !== "undefined" && window.innerWidth < 768);
   const [routeMatch, routeParams] = useRoute("/events/:id/:slug?");
@@ -489,12 +483,12 @@ export default function Events() {
     });
   }, [routeEventId, routeDay, routeMatch, events, routeEvent]);
 
-  const liveEvents = useMemo(() => events.filter(e => !isPastListing(e)), [events]);
-  const pastEvents = useMemo(() => events.filter(isPastListing), [events]);
+  const liveEvents = useMemo(() => events.filter(e => !isPastListing(e)), [events, now]);
+  const pastEvents = useMemo(() => events.filter(isPastListing), [events, now]);
   const poolEvents = pastView ? pastEvents : liveEvents;
 
   // Date-window chips: All / Today / Tonight / week windows / months
-  const dayChips = useMemo(() => buildDayChips(poolEvents, pastView, Date.now()), [poolEvents, pastView]);
+  const dayChips = useMemo(() => buildDayChips(poolEvents, pastView, now), [poolEvents, pastView, now]);
   const activeChipLabel = dayChips.find(c => c.key === activeDay)?.label ?? null;
   // If the selected window no longer exists in the pool (e.g. after toggling Past), fall back to All.
   useEffect(() => {
@@ -502,8 +496,8 @@ export default function Events() {
   }, [dayChips, activeDay, isLoading]);
 
   const filtered = useMemo(
-    () => sortEvents(filterBoardEvents(events, activeDay, activeFilters, searchQuery, pastView, Date.now()), sortMode),
-    [events, activeDay, activeFilters, searchQuery, sortMode, pastView],
+    () => sortEvents(filterBoardEvents(events, activeDay, activeFilters, searchQuery, pastView, now), sortMode),
+    [events, activeDay, activeFilters, searchQuery, sortMode, pastView, now],
   );
 
   const posterServeQuery = useQuery<{ ads: AdServePayload[] }>({
@@ -562,16 +556,6 @@ export default function Events() {
   const upcomingCount = liveEvents.length;
 
   const heroStats = useMemo(() => {
-    const parseTags = (raw: string) => {
-      try {
-        const parsed = JSON.parse(raw || "[]");
-        return Array.isArray(parsed) ? parsed.map((t: unknown) => String(t)) : [];
-      } catch {
-        return [];
-      }
-    };
-    const isDanceParty = (e: EventListing) =>
-      parseTags(e.eventTypes).some(tag => tag.trim().toUpperCase().replace(/[\s-]+/g, "_").includes("DANCE"));
     // Hero counts track the live board (upcoming + now), not ended listings.
     const unclaimedIds = new Set(
       liveEvents.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
@@ -579,9 +563,9 @@ export default function Events() {
     return [
       { num: upcomingCount, label: "Upcoming events", color: "var(--room-eventz)" },
       { num: unclaimedIds.size, label: "Ready to claim", color: "var(--neon-yellow)" },
-      { num: liveEvents.filter(isDanceParty).length, label: "Dance parties", color: "var(--neon-orange)" },
+      { num: events.filter(e => isEventTonight(e, now)).length, label: "Events tonight", color: "var(--neon-orange)" },
     ];
-  }, [liveEvents, upcomingCount]);
+  }, [liveEvents, upcomingCount, events, now]);
 
   const hasActiveFilters =
     activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0 || pastView;
@@ -605,12 +589,18 @@ export default function Events() {
   }
 
   return (
-    <div className="zine-page events-page board-page board-page--makeover">
-      <WebGLShader />
+    <div className="zine-page events-page board-page board-page--makeover board-shader-page" data-shader-room="eventz" data-leaving={leaving || undefined}>
+      <BoardShader room="eventz" />
       <EventsHero eventCount={upcomingCount} />
       <div className="room-plate-shell"><RoomPlate room="eventz" /></div>
       <BoardStatsBar stats={heroStats} variant="band" showLive={false} />
-      <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} />
+      <DiscoveryFlow room="Eventz" accent="var(--room-eventz)" title="Find your next plan." intro="Find an event, build your schedule, or share something happening." initiallyOpen={Boolean(window.location.search) || routeMatch} initialChoiceId={activeTab}
+        onViewAll={() => { setActiveTab('board'); setActiveDay('ALL'); setActiveFilters([]); setSearchQuery(''); setPastView(false); }} choices={[
+          { id: 'board', label: 'Find an event', description: 'Browse the flyers', onChoose: () => setActiveTab('board') },
+          { id: 'schedule', label: 'Explore the calendar', description: 'See your week', onChoose: () => setActiveTab('schedule') },
+          { id: 'mine', label: 'My Schedule', description: 'Plans you’ve saved', onChoose: () => goToEventAction('/schedule?view=mine') },
+          { id: 'submit', label: 'Submit an Event', description: 'Share what’s happening', onChoose: () => goToEventAction('/submit?mode=submit') },
+        ]}>
 
       {activeTab === "schedule" ? (
         <ScrollReveal delay={50}>
@@ -660,7 +650,7 @@ export default function Events() {
                   </span>
                 </div>
               </div>
-              <FilterSurvey label="Eventz" question="When do you want to go?" value={activeDay} onChange={setActiveDay} accent="var(--neon-yellow)" options={dayChips.filter(chip => !/^\d{4}-/.test(chip.key)).map(chip => ({value:chip.key,label:chip.label}))}>
+              <FilterSurvey label="Eventz" question="When do you want to go?" value={activeDay} onChange={setActiveDay} accent="var(--room-eventz)" startStep={2} eyebrow="Choose a date" options={dayChips.filter(chip => !/^\d{4}-/.test(chip.key)).map(chip => ({value:chip.key,label:chip.label}))}>
               <BrowseToolbar label="Search and filter Eventz" className="board-active-feed__controls">
                 <div className="board-filter-row events-filter-row">
                   <details className="events-more-filters">
@@ -903,6 +893,8 @@ export default function Events() {
         </div>
       </section>
       )}
+
+      </DiscoveryFlow>
 
       {selectedEvent && (
         <EventModal

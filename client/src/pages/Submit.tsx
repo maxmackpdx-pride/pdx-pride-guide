@@ -186,7 +186,7 @@ export default function Submit() {
   const claimPathEventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1] || "";
   const initialMode: PageMode = (claimPathEventId || params.get("mode") === "claim")
     ? "claim"
-    : params.get("mode") === "apply" ? "apply" : "landing";
+    : params.get("mode") === "apply" ? "apply" : params.get("mode") === "submit" ? "submit" : "landing";
   const venueForApply = params.get("venue") || "";
 
   const [mode, setMode] = useState<PageMode>(initialMode);

@@ -1,4 +1,4 @@
-import BoardAtmosphere from '@/components/board/BoardAtmosphere';
+import BoardShader from '@/components/board/BoardShader';
 import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
@@ -205,7 +205,6 @@ export default function Gifting() {
     setComposeType(postType);
     setComposePickup(pickupPreference);
     setFormOpen(true);
-    window.setTimeout(() => document.getElementById("gifting-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20);
   };
 
   const clearFilters = () => {
@@ -243,21 +242,21 @@ export default function Gifting() {
     window.history.replaceState(null, "", url.pathname + url.search);
   };
 
-  return <main className="gigz-page giftz-page gifting-page">
-    <BoardAtmosphere room="giftz" side="left" />
+  return <main className="gigz-page giftz-page gifting-page board-shader-page" data-shader-room="giftz">
+    <BoardShader room="giftz" />
     <div className="gigz-shell">
       <RoomPlate room="giftz" />
-      <DiscoveryFlow room="Giftz" accent="var(--room-giftz)" title="How can we help?" intro="Browse free things from neighbors, offer something, or ask the community for what you need." initiallyOpen choices={[
+      {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
+      <DiscoveryFlow room="Giftz" accent="var(--room-giftz)" title="How can we help?" intro="Browse free things from neighbors, offer something, or ask the community for what you need." onViewAll={clearFilters} choices={[
         { id: 'browse', label: 'Find a gift', description: 'Browse what neighbors are giving', scrollToResults: true, onChoose: () => setFilter('GIFT') },
         { id: 'give', label: 'Give something', description: giftingStatusPending ? 'Checking availability' : postingOpen ? 'Post a free gift' : 'Posting is paused', disabled: !postingOpen, onChoose: () => openForm('GIFT') },
         { id: 'request', label: 'Ask for something', description: giftingStatusPending ? 'Checking availability' : postingOpen ? 'Post what you need' : 'Posting is paused', disabled: !postingOpen, onChoose: () => openForm('ISO') },
       ]}>
-      {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><RoomKicker room="giftz" as="div">The board</RoomKicker><h1>Good things move around<span>.</span></h1><p>Give what you can. Find what you need. Keep it free.</p></div>
         <div className="giftz-actions"><button type="button" className="gigz-post gigz-post--primary" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
       </div>
       {!postingOpen && giftingStatus && <p className="giftz-posting-status" role="status">{giftingStatus.message}</p>}
-      <FilterSurvey label="Giftz" question="What are you looking for?" value={filter} onChange={setFilter} accent="var(--room-giftz)" options={[{value:"ALL",label:"Explore Giftz"},{value:"GIFT",label:"Gifts offered"},{value:"ISO",label:"In search of"},{value:"GRAB",label:"Open grab"}]}>
+      <FilterSurvey startStep={2} eyebrow="Refine your search" label="Giftz" question="What are you looking for?" value={filter} onChange={setFilter} accent="var(--room-giftz)" options={[{value:"ALL",label:"Explore Giftz"},{value:"GIFT",label:"Gifts offered"},{value:"ISO",label:"In search of"},{value:"GRAB",label:"Open grab"}]}>
       <BrowseToolbar label="Filter Giftz posts" className="board-toolbar">
         <label>Search Giftz<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search titles and details" /></label>
         <label>Show<select value={filter} onChange={event => setFilter(event.target.value)}><option value="ALL">Offered & ISO</option><option value="GIFT">Gifts offered</option><option value="ISO">In search of</option><option value="GRAB">Open grab</option></select></label>
