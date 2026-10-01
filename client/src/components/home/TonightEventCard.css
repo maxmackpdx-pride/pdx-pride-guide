@@ -111,3 +111,8 @@
 .home-tonight .rail-card-room { height:34px; flex:none; display:flex; align-items:center; }
 .rail-card-room__logo { display:block; width:120px; height:34px; object-fit:contain; object-position:left center; }
 .rail-card-room__logo--white { object-fit:cover; object-position:center; filter:brightness(0) invert(1); }
+
+/* Compact copy spacing for the 240px homepage cards. */
+.home-tonight .tonight-card__body { padding:18px; gap:10px; }
+.home-tonight .tonight-card__body h3 { font-size:28px; }
+.home-tonight .tonight-card__footer { margin-inline:18px; padding:12px 0 16px; }
