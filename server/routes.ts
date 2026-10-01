@@ -1886,7 +1886,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // Homepage counters need three numbers, not the full event, directory, and
-  // attendance payloads. In particular, /api/directory enriches every place
+  // user payloads. In particular, /api/directory enriches every place
   // with events, promoters, boards, followers, and viewer state; using it for
   // a count made the strip wait several seconds on otherwise unnecessary work.
   app.get("/api/home/stats", (_req, res) => {
@@ -1900,11 +1900,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
       return end >= now && start <= windowEnd;
     }).length;
     const placesCount = storage.getBusinesses().length;
-    const goingCount = Object.values(storage.getAttendanceSummaries())
-      .reduce((sum, summary) => sum + (summary?.count ?? 0), 0);
+    const signupWindowStart = new Date(now - 90 * 24 * 60 * 60 * 1000).toISOString();
+    const newUsers90Days = (sqlite.prepare(
+      "SELECT COUNT(*) AS count FROM users WHERE created_at >= ? AND created_at <= ?",
+    ).get(signupWindowStart, new Date(now).toISOString()) as { count: number }).count;
 
     res.set("Cache-Control", "public, max-age=30, stale-while-revalidate=120");
-    res.json({ eventCount, placesCount, goingCount });
+    res.json({ eventCount, placesCount, newUsers90Days });
   });
 
   // ── Next-page waypoint likes: anonymous "excited for this" counter ──────────

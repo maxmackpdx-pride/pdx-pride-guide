@@ -13,7 +13,7 @@ import { shareCardUrl } from "@shared/shareCards";
 type HomeStats = {
   eventCount: number;
   placesCount: number;
-  goingCount: number;
+  newUsers90Days: number;
 };
 
 /**
@@ -39,7 +39,7 @@ export default function Home() {
 
   const eventCount = stats?.eventCount ?? 0;
   const placesCount = stats?.placesCount ?? 0;
-  const goingCount = stats?.goingCount ?? 0;
+  const newUsers90Days = stats?.newUsers90Days ?? 0;
 
   return (
     <div className="home-main-stage">
@@ -50,8 +50,8 @@ export default function Home() {
             <HomeStatStrip
               eventCount={eventCount}
               placesCount={placesCount}
-              goingCount={goingCount}
-              pending={{ events: statsPending, places: statsPending, going: statsPending }}
+              newUsers90Days={newUsers90Days}
+              pending={{ events: statsPending, places: statsPending, users: statsPending }}
               error={statsError}
             />
           </div>

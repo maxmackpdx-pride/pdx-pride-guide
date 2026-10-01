@@ -4,9 +4,9 @@ import CountUpValue from "@/components/CountUpValue";
 type Props = {
   eventCount: number;
   placesCount: number;
-  goingCount: number;
+  newUsers90Days: number;
   /** Per stat: true until the real number has arrived from the API. */
-  pending?: { events?: boolean; places?: boolean; going?: boolean };
+  pending?: { events?: boolean; places?: boolean; users?: boolean };
   error?: boolean;
 };
 
@@ -44,9 +44,9 @@ function StatValue({
 
 /**
  * Three-column stat band under the home hero:
- * events in the next 7 days · directory places · RSVPs going.
+ * events in the next 7 days · directory places · new users within 90 days.
  */
-export default function HomeStatStrip({ eventCount, placesCount, goingCount, pending, error = false }: Props) {
+export default function HomeStatStrip({ eventCount, placesCount, newUsers90Days, pending, error = false }: Props) {
   return (
     <div className="home-stat-strip" aria-label="Live site stats">
       <div className="home-stat-strip__cell home-stat-strip__cell--events">
@@ -78,15 +78,15 @@ export default function HomeStatStrip({ eventCount, placesCount, goingCount, pen
       </div>
       <div className="home-stat-strip__cell home-stat-strip__cell--last home-stat-strip__cell--going">
         <StatValue
-          pending={!!pending?.going}
+          pending={!!pending?.users}
           error={error}
-          label={`${goingCount} going to events`}
+          label={`${newUsers90Days} new users within 90 days`}
           gradClass="home-stat-strip__grad--going"
         >
-          {goingCount}
+          {newUsers90Days}
         </StatValue>
         <div className="home-stat-strip__label home-stat-strip__grad home-stat-strip__grad--going">
-          Going to events
+          New users within 90 days
         </div>
       </div>
     </div>
