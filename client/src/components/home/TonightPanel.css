@@ -58,3 +58,7 @@
 
 .home-tonight__all { min-height: 44px; }
 .home-tonight__all:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
+.home-tonight__atmosphere { position:absolute; inset:0; z-index:-1; overflow:hidden; pointer-events:none; isolation:isolate; }
+.home-tonight__atmosphere > .rg-stream-background { position:absolute; inset:0; width:100%; height:100%; z-index:-3; filter:brightness(.85); }
+.home-tonight__atmosphere > .board-shader-veil { position:absolute; height:100%; }

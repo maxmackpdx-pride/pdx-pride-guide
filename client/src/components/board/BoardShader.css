@@ -19,7 +19,7 @@
   z-index: -3;
   filter: brightness(.85);
 }
-.board-shader-page > .board-shader-veil {
+:is(.board-shader-page,.home-tonight__atmosphere) > .board-shader-veil {
   position: fixed;
   inset: 0;
   width: 100%;

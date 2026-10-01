@@ -1,3 +1,5 @@
+import { WebGLShader } from "@/components/ui/web-gl-shader";
+import "@/components/board/BoardShader.css";
 import { useSavedEvents } from "@/hooks/useSavedEvents";
 import { useAuth } from "@/context/AuthContext";
 import { useMemo, useState } from "react";
@@ -48,12 +50,13 @@ export default function TonightPanel() {
 
   return (
     <section className="home-tonight" aria-labelledby="home-tonight-title">
+      <div className="home-tonight__atmosphere" aria-hidden="true"><WebGLShader /><span className="board-shader-veil" /></div>
       <div className="home-tonight__inner">
         <header className="home-tonight__head">
           <p className="home-tonight__eyebrow">Tonight · Portland</p>
           <h2 id="home-tonight-title">
-            <span><b>You&apos;re</b> not</span>
-            <span>looking for content.</span>
+            <span>You&apos;re <b>no</b>t</span>
+            <span>looking for <b>content</b>.</span>
           </h2>
           <div className="home-tonight__subhead">
             <p>{tonight.length ? `Tonight · Portland · ${tonight.length} ${tonight.length === 1 ? "event" : "events"}` : "Tonight · Portland"}</p>
