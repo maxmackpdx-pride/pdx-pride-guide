@@ -27,7 +27,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
             href={venmoUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="site-footer__coffee-btn tip-support__btn tip-support__btn--coffee-grad tip-support__btn--lime-glass pdx-glass-rebind"
+            className="site-footer__tip-action site-footer__tip-action--primary pdx-glass-rebind"
             data-testid="footer-buy-coffee-venmo"
             aria-label={`Buy me a coffee on Venmo @${venmoHandle}`}
           >
@@ -38,7 +38,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
               href={stripePaymentLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="site-footer__coffee-btn tip-support__btn tip-support__btn--lime-glass tip-support__btn--stripe-footer pdx-glass-rebind"
+              className="site-footer__tip-action pdx-glass-rebind"
               data-testid="footer-buy-coffee-stripe"
               aria-label="Tip with card or Apple Pay"
             >

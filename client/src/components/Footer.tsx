@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { FeedbackButton } from "./FeedbackForm";
 import PushNotificationToggle from "./PushNotificationToggle";
 import CalmModeToggle from "./CalmModeToggle";
@@ -50,71 +51,60 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
   },
 ];
 
+function FooterLinks({ folder }: { folder: (typeof FOOTER_FOLDERS)[number] }) {
+  return (
+    <ul className="site-footer__list">
+      {folder.links.map(([href, label]) => (
+        <li key={`${folder.id}-${label}`}>
+          <Link href={href} className="site-footer__link">{label}</Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="site-footer__inner">
-        {/* Spread grid: brand | nav columns | support */}
-        <div className="site-footer__grid">
-          <div className="site-footer__brand-col">
-            <img
-              src="/brand/family/zaylist-primary.svg"
-              alt="Zaylist"
-              className="site-footer__logo"
-              width={1200}
-              height={423}
-              decoding="async"
-            />
-            <p className="site-footer__tagline">
-              Queer Portland, connected. Nights out, everyday places, outdoor escapes, and people to share them with. Built by Tucker, right here.
-            </p>
-            <div className="site-footer__controls">
-              <FeedbackButton />
-              <PushNotificationToggle />
-              <CalmModeToggle compact />
-            </div>
-          </div>
-
-          <nav className="site-footer__nav" aria-label="Footer">
-            {FOOTER_FOLDERS.map((folder) => (
-              <details key={folder.id} className="site-footer__col">
-                <summary className="site-footer__col-title display">
-                  {folder.title}
-                  <span className="site-footer__col-toggle" aria-hidden="true">+</span>
-                </summary>
-                <div className="site-footer__dropup">
-                  <ul className="site-footer__list">
-                    {folder.links.map(([href, label]) => (
-                      <li key={`${folder.id}-${label}`}>
-                        <Link href={href} className="site-footer__link">
-                          {label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </details>
-            ))}
-          </nav>
-
-          <div className="site-footer__support">
-            <TipSupport variant="footer" />
-          </div>
+        <div className="site-footer__intro">
+          <Link href="/" className="site-footer__brand-link" aria-label="Zaylist home">
+            <img src="/brand/family/zaylist-primary.svg" alt="Zaylist"
+              className="site-footer__logo" width={1200} height={423} decoding="async" />
+          </Link>
+          <p className="site-footer__tagline">
+            <strong>Queer Portland, connected.</strong>
+          </p>
         </div>
 
-        <div className="site-footer__bottom">
-          <div className="site-footer__flap">
-            <SplitFlapSignoff />
+        <Accordion type="single" collapsible className="site-footer__grid">
+          <nav className="site-footer__nav" aria-label="Footer">
+            {FOOTER_FOLDERS.map((folder) => (
+              <AccordionItem key={folder.id} value={folder.id} className={`site-footer__col site-footer__col--${folder.id}`}>
+                <AccordionTrigger className="site-footer__col-title">{folder.title}</AccordionTrigger>
+                <AccordionContent><FooterLinks folder={folder} /></AccordionContent>
+              </AccordionItem>
+            ))}
+          </nav>
+          <AccordionItem value="support" className="site-footer__col site-footer__support">
+            <AccordionTrigger className="site-footer__col-title">Support Zaylist</AccordionTrigger>
+            <AccordionContent><TipSupport variant="footer" /></AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        <div className="site-footer__utility">
+          <div className="site-footer__controls">
+            <FeedbackButton />
+            <PushNotificationToggle />
+            <CalmModeToggle compact />
           </div>
+        </div>
+        <div className="site-footer__bottom">
+          <div className="site-footer__flap"><SplitFlapSignoff /></div>
           <div className="site-footer__legal">
-            <span>Made in Portland. Independently built. Community comes first.</span>
-            <span className="site-footer__legal-sep" aria-hidden="true">
-              ·
-            </span>
-            <span>© 2026 Zaylist · Free to Browse · Independently Run</span>
-            <Link href="/legal" className="site-footer__legal-link">
-              Legal
-            </Link>
+            <span>Made in Portland. Independently built.</span>
+            <span>© {new Date().getFullYear()} Zaylist · Free to Browse · Independently Run</span>
+            <Link href="/legal" className="site-footer__legal-link">Legal</Link>
           </div>
         </div>
       </div>
