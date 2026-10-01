@@ -98,10 +98,10 @@ test('waypoint outlines and glow retain category colors even with stale rainbow 
  const strokes=[];
  const canvasContext={scale(){},fill(){},stroke(){strokes.push(this.strokeStyle);}};
  const context=vm.createContext({
-  document:{createElement:()=>({getContext:()=>canvasContext})},
+  motionPreference:{matches:false},document:{createElement:()=>({getContext:()=>canvasContext})},
   Path2D:class {},performance:{now:()=>1000},
  });
- vm.runInContext(source.replace(/export /g,''),context);
+ vm.runInContext(source.replace(/^import .*;\n/gm,'').replace(/export /g,''),context);
  const ctx={save(){},restore(){},drawImage(){}};
  context.ctx=ctx;
  for(const color of ['#FF0000','#00FFFF','#FF6600','#8800FF'])for(const selected of [false,true]){

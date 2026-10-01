@@ -1,13 +1,10 @@
+import {motionPreference} from './motion-preference.js';
 const bodies=new Map(),rings=new Map(),ink=new WeakMap();
 function cityAmount(){
  try{return window.__mapzMap?Math.max(0,Math.min(1,(window.__mapzMap.getZoom()-14.25)/1.1))*Math.max(0,Math.min(1,(window.__mapzMap.getPitch()-16)/18)):0;}catch{return 0;}
 }
 function mapZoom(){try{return window.__mapzMap?window.__mapzMap.getZoom():13;}catch{return 13;}}
-const reducedMedia=typeof matchMedia==='function'?matchMedia('(prefers-reduced-motion: reduce)'):null;
-function stillMotion(){
- if(reducedMedia?.matches)return true;
- try{return localStorage.getItem('pdx-calm-mode')==='true';}catch{return false;}
-}
+function stillMotion(){return motionPreference.matches;}
 /** Waypoint pack sizes: 31 at rest, growing to 42 at zoom 16+, 57 when selected. */
 export function waypointHeadSize(selected=false,zoom=mapZoom()){
  if(selected)return 57;
