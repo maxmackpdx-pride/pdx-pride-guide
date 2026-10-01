@@ -74,7 +74,7 @@ function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; 
       if (hovering.current || settling.current || document.hidden) return;
       const now = performance.now();
       const blend = Math.min(1, (now - idleResumedAt.current) / 3000);
-      angle.set(Math.sin((now - started) / (6000 + index * 500) + phase) * .06 / weight * blend);
+      angle.set(Math.sin((now - started) / (6000 + index * 500) + phase) * .075 / weight * blend);
     };
     tick();
     const timer = window.setInterval(tick, 150);
@@ -89,7 +89,7 @@ function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; 
       swing.current?.stop();
       // Bounded, progressively smaller arcs; pointer speed never adds energy.
       const direction = OBJECTS.findIndex(item => item.id === object.id) % 2 === 0 ? 1 : -1;
-      const amplitude = direction * .32 / weight;
+      const amplitude = direction * .4 / weight;
       swing.current = animate(angle, [angle.get(), amplitude, -amplitude * .5, amplitude * .18, 0], {
         duration: 18, times: [0, .22, .55, .82, 1], ease: 'easeInOut',
         onComplete: () => { idleResumedAt.current = performance.now(); settling.current = false; },
