@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef } from 'react';
+import { useEffect, useId, useRef, type CSSProperties } from 'react';
 import { useSpring } from 'framer-motion';
 import { rezourcesLetterPaths } from './rezourcesLetterPaths';
 import './RezourcesLogo.css';
@@ -30,24 +30,46 @@ const ART = '/brand/family/rezources.svg';
 
 function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; id: string; quiet: boolean }) {
   const weight = object.id.startsWith('scales-') ? 1.3 : object.id === 'rent' ? .7 : 1;
-  const angle = useSpring(0, { stiffness: 32, damping: 5, mass: weight * 1.6 });
+  const angle = useSpring(0, { stiffness: 28, damping: 10, mass: weight * 1.6 });
   const moving = useRef<SVGGElement>(null);
-  useEffect(() => angle.on('change', value => {
-    // Horizontal shear leaves every y-coordinate unchanged. For the sign,
-    // use its sloped attachment line so both hook points remain stationary.
-    const slope = object.id === 'rent' ? -17 / 112 : 0;
-    const pivotY = Number.parseFloat(object.pivot.split(' ')[1]);
-    const intercept = object.id === 'rent' ? 455 - slope * 374 : pivotY;
-    const shear = Math.tan(value * Math.PI / 180);
-    moving.current?.setAttribute('transform', `matrix(${1 - slope * shear} 0 ${shear} 1 ${-intercept * shear} 0)`);
-  }), [angle, object.id, object.pivot]);
+  const strings = useRef<SVGPathElement>(null);
+  const drop = object.id === 'rent' ? 8 : 10;
+  const anchors = object.id === 'rent'
+    ? [[397, 451], [476, 439]]
+    : [object.pivot.split(' ').map(Number.parseFloat)];
+  const stringPath = (dx: number) => anchors.map(([x, y]) => `M${x} ${y} L${x + dx} ${y + drop}`).join(' ');
+  useEffect(() => {
+    const update = (value: number) => {
+      // Rigid horizontal translation: scale and vertical position never animate.
+      const dx = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : Math.sin(value * Math.PI / 180) * 90;
+      moving.current?.setAttribute('transform', `translate(${dx} ${drop})`);
+      strings.current?.setAttribute('d', stringPath(dx));
+    };
+    update(angle.get());
+    return angle.on('change', update);
+  }, [angle, object.id, object.pivot]);
+  const hovering = useRef(false);
   const lastPointer = useRef<{ x: number; time: number } | null>(null);
-  useEffect(() => { if (quiet) angle.jump(0); }, [quiet, angle]);
+  useEffect(() => {
+    if (quiet) { angle.jump(0); return; }
+    const index = OBJECTS.findIndex(item => item.id === object.id);
+    const phase = index * Math.PI * 2 / OBJECTS.length + Math.PI / 4;
+    const started = performance.now();
+    const tick = () => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { angle.jump(0); return; }
+      if (hovering.current || document.hidden) return;
+      angle.set(Math.sin((performance.now() - started) / (2200 + index * 170) + phase) * .08 / weight);
+    };
+    tick();
+    const timer = window.setInterval(tick, 150);
+    return () => window.clearInterval(timer);
+  }, [quiet, angle, object.id, weight]);
   return <g className="rg-logo-object"
     onPointerEnter={event => {
       if (quiet || event.pointerType !== 'mouse') return;
+      hovering.current = true;
       lastPointer.current = { x: event.clientX, time: performance.now() };
-      angle.set((Math.sign(event.movementX) || 1) * 1.32 / weight);
+      angle.set((Math.sign(event.movementX) || 1) * .7 / weight);
     }}
     onPointerMove={event => {
       if (quiet || event.pointerType !== 'mouse') return;
@@ -55,12 +77,13 @@ function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; 
       if (lastPointer.current) {
         const velocity = (event.clientX - lastPointer.current.x) / Math.max(16, now - lastPointer.current.time);
         if (Math.abs(event.clientX - lastPointer.current.x) > .25)
-          angle.set(Math.max(-1.43, Math.min(1.43, velocity * .88)) / weight);
+          angle.set(Math.max(-.78, Math.min(.78, velocity * .48)) / weight);
       }
       lastPointer.current = { x: event.clientX, time: now };
     }}
-    onPointerLeave={() => { lastPointer.current = null; angle.set(0); }}>
-    <g ref={moving} className="rg-logo-object-swing">
+    onPointerLeave={() => { hovering.current = false; lastPointer.current = null; angle.set(0); }}>
+    <path ref={strings} d={stringPath(0)} className="rg-logo-hanging-strings" />
+    <g ref={moving} className="rg-logo-object-swing" style={{ "--logo-drop": `${drop}px` } as CSSProperties} transform={`translate(0 ${drop})`}>
       <image href={ART} width="1792" height="1008" clipPath={`url(#${id}-${object.id})`} />
     </g>
     <path d={object.path} fill="transparent" className="rg-logo-object-hit" />
@@ -70,7 +93,7 @@ function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; 
 export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }) {
   const frame = useRef<HTMLHeadingElement>(null);
   const id = useId().replace(/:/g, '');
-  const rhythms = useMemo(() => SKETCH_REGIONS.map(() => ({ duration: 13 + Math.random() * 9, delay: -Math.random() * 18 })), []);
+  const rhythms = SKETCH_REGIONS.map((_, i) => ({ duration: 80, delay: -i * 10 }));
   return (
     <h1 ref={frame} className="rg-board-logo-frame rg-z-logo" data-quiet-motion={quietMotion || undefined}
       onPointerMove={event => {
@@ -99,6 +122,9 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
           </mask>
           {SKETCH_REGIONS.map((r, i) => <clipPath key={i} id={`${id}-ink-${i}`}><rect {...r} className="rg-logo-ink-reveal" style={{ animationDuration: `${rhythms[i].duration}s`, animationDelay: `${rhythms[i].delay}s` }} /></clipPath>)}
           {OBJECTS.map(o => <clipPath key={o.id} id={`${id}-${o.id}`}><path d={o.path} /></clipPath>)}
+          <clipPath id={`${id}-blue-smear-bands`}>
+            <path d="M540 290H760V304H540Z M530 330H740V348H530Z M520 375H700V390H520Z M330 618H530V636H330Z M320 657H510V674H320Z M310 700H460V715H310Z" />
+          </clipPath>
           <clipPath id={`${id}-blue-z`}><path d={BLUE_Z} /></clipPath>
           <mask id={`${id}-moving-letters`} maskUnits="userSpaceOnUse" x="0" y="0" width="1792" height="1008" style={{ maskType: 'luminance' }}>
             {rezourcesLetterPaths.map((d, i) => <path key={i} d={d} fill="white" fillRule="evenodd" />)}
@@ -141,6 +167,11 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
         <g className="rg-logo-z-depth" clipPath={`url(#${id}-z-shape)`}>
           <image href={ART} width="1792" height="1008" />
         </g>
+        {!quietMotion && <g clipPath={`url(#${id}-blue-z)`} aria-hidden="true">
+          <g clipPath={`url(#${id}-blue-smear-bands)`}>
+            <image className="rg-blue-z-smear" href={ART} width="1792" height="1008" />
+          </g>
+        </g>}
         {!quietMotion && <g clipPath={`url(#${id}-blue-z)`} className="rg-blue-z-pixels" aria-hidden="true">
           {Array.from({ length: 22 }, (_, i) => <rect key={i} x={330 + (i * 47) % 390} y={245 + (i * 61) % 490} width={24 + i % 3 * 12} height={8 + i % 2 * 8} fill={i % 3 === 0 ? 'var(--z-black)' : i % 2 ? 'var(--neon-cyan)' : 'var(--neon-blue)'} />)}
         </g>}

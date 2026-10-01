@@ -7,12 +7,10 @@
 }
 /* Long quiet holds, a gradual eraser pass, then an uneven pencil redraw. */
 @keyframes rg-logo-ink-draw {
-  0%, 54%, 100% { transform: scaleX(1); }
-  61%, 63% { transform: scaleX(0); }
-  65% { transform: scaleX(.18); }
-  67%, 68% { transform: scaleX(.44); }
-  71% { transform: scaleX(.8); }
-  74% { transform: scaleX(1); }
+  0%, 93%, 99%, 100% { transform: scaleX(1); }
+  95%, 96% { transform: scaleX(0); }
+  97% { transform: scaleX(.35); }
+  98% { transform: scaleX(.75); }
 }
 .rg-logo-color-window { opacity: .13; pointer-events: none; mix-blend-mode: screen; }
 .rg-logo-color-depth {
@@ -33,27 +31,46 @@
 [data-quiet-motion] .rg-logo-color-depth { translate: none; transition: none; }
 @media (prefers-reduced-motion: reduce) {
   .rg-logo-ink-reveal { animation: none; }
-  .rg-logo-surface, .rg-logo-object-swing { transform: none !important; transition: none; }
+  .rg-logo-surface { transform: none !important; transition: none; }
   .rg-logo-color-depth { translate: none; transition: none; }
 }
 
 /* Pixel bursts are clipped to blue paint; white Z strokes remain untouched. */
-.rg-blue-z-pixels { opacity: 0; pointer-events: none; animation: rg-blue-z-pixels 10.7s steps(1, end) infinite; }
+.rg-blue-z-pixels { opacity: 0; pointer-events: none; animation: rg-blue-z-pixels 80s steps(1, end) infinite; }
 @keyframes rg-blue-z-pixels {
-  0%, 68%, 75%, 100% { opacity: 0; }
-  68.5%, 70% { opacity: .95; }
-  69%, 72% { opacity: .35; }
-  73% { opacity: .8; }
+  0%, 1%, 2%, 100% { opacity: 0; }
+  1.25% { opacity: .3; }
+  1.5% { opacity: .1; }
+  1.75% { opacity: .2; }
 }
 @media (prefers-reduced-motion: reduce) { .rg-blue-z-pixels { display: none; animation: none; } }
 
 .rg-logo-shimmer-window { pointer-events: none; }
-.rg-logo-letter-shimmer { opacity: 0; animation: rg-logo-letter-shimmer 19s ease-in-out infinite; }
+.rg-logo-letter-shimmer { opacity: 0; animation: rg-logo-letter-shimmer 80s ease-in-out infinite; }
 @keyframes rg-logo-letter-shimmer {
-  0%, 76% { opacity: 0; translate: 0 0; }
-  78% { opacity: .5; translate: 0 0; }
-  91% { opacity: .5; translate: 1980px 0; }
-  92%, 100% { opacity: 0; translate: 1980px 0; }
+  0%, 4% { opacity: 0; translate: 0 0; }
+  5% { opacity: .3; translate: 0 0; }
+  8% { opacity: .3; translate: 1980px 0; }
+  9%, 100% { opacity: 0; translate: 1980px 0; }
 }
 [data-quiet-motion] .rg-logo-letter-shimmer { display: none; animation: none; }
 @media (prefers-reduced-motion: reduce) { .rg-logo-letter-shimmer { display: none; animation: none; } }
+
+.rg-blue-z-smear { pointer-events: none; opacity: 0; animation: rg-blue-z-smear 80s steps(1, end) infinite; }
+@keyframes rg-blue-z-smear {
+  0%, 1%, 2%, 100% { opacity: 0; translate: 0 0; }
+  1.2% { opacity: .6; translate: 4px 0; }
+  1.4% { opacity: .4; translate: -3px 0; }
+  1.7% { opacity: .5; translate: 2px 0; }
+}
+@media (prefers-reduced-motion: reduce) { .rg-blue-z-smear { display: none; animation: none; } }
+
+.rg-logo-hanging-strings {
+  fill: none;
+  stroke: color-mix(in srgb, var(--text-heading) 65%, var(--neon-yellow));
+  stroke-width: 1.5;
+  opacity: .65;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) { .rg-logo-object-swing { transform: translate(0, var(--logo-drop)) !important; } }
