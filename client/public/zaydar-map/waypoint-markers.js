@@ -37,15 +37,13 @@ export function waypointGeometry(origin,selected=false,roofLift=0,key=null){
 /** Shell outlines, ported from client/src/lib/livingMapWaypoints.ts shellPath(). */
 function shellPath(family,cx,cy,r){
  const x0=cx-r,x1=cx+r,y0=cy-r,y1=cy+r,q=r*.2;
- if(family==='ticket')return `M${x0+q},${y0}H${cx-q}Q${cx},${y0+q} ${cx+q},${y0}H${x1-q}V${cy-q}Q${x1-q*.7},${cy} ${x1},${cy+q}V${y1}H${x0}V${cy+q}Q${x0+q*.7},${cy} ${x0},${cy-q}V${y0}Z`;
  if(family==='house')return `M${x0+q},${cy-r*.15} ${cx},${y0} ${x1-q},${cy-r*.15}V${y1-q}L${cx},${y1+r*.68} ${x0+q},${y1-q}Z`;
  if(family==='speech')return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}L${x1-q},${y1}H${cx+q},${cx},${y1+r*.68} ${cx-q},${y1}H${x0+q}L${x0},${y1-q}V${y0+q}Z`;
  // place and shield share the chamfered head with an integrated tip
  return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}L${cx},${y1+r*.68} ${x0},${y1-q}V${y0+q}Z`;
 }
-/** Which shell a map row wears. The EVENTZ ticket is retired; the ticket shell now marks 18+ Placez. */
-export function waypointFamilyShell(waypointFamily,type){
- if(type==='adult')return 'ticket';
+/** Adult Placez use the same shell and logo/type glyphs as other Placez. Never restore an age-label marker. */
+export function waypointFamilyShell(waypointFamily){
  if(waypointFamily==='houz')return 'house';
  if(waypointFamily==='mizzed')return 'speech';
  if(waypointFamily==='gigz'||waypointFamily==='giftz'||waypointFamily==='sellz')return 'shield';
@@ -58,18 +56,12 @@ function shellInk(ctx,color,bloom,size,pad){
  const gradient=ctx.createLinearGradient(pad,pad,pad+size,pad+size);
  BLOOM_STOPS.forEach((stop,i)=>gradient.addColorStop(i/(BLOOM_STOPS.length-1),stop));return gradient;
 }
-// The ticket has no integrated tip; the pack hangs a separate pointer under it.
-function ticketTip(ctx,c,r,size){
- const attachY=c+r*.62,tipY=c+r+size*TIP,tipW=size*.3;
- ctx.beginPath();ctx.moveTo(c-tipW,attachY);ctx.lineTo(c+tipW,attachY);ctx.lineTo(c,tipY);ctx.closePath();ctx.fill();
-}
 function bodySprite(color,size,family,bloom){
  const key=color+'|'+size+'|'+family+'|'+bloom;if(bodies.has(key))return bodies.get(key);
  const {pad,dpr,box,tall}=spriteBox(size),sw=Math.max(1,size*.0425),r=size/2-sw/2,c=pad+size/2;
  const canvas=document.createElement('canvas');canvas.width=box*dpr;canvas.height=Math.ceil(tall*dpr);
  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
  const path=new Path2D(shellPath(family,c,c,r)),ink=shellInk(ctx,color,bloom,size,pad);
- if(family==='ticket'){ctx.fillStyle=ink;ticketTip(ctx,c,r,size);}
  // OLED black body, neon ring, the platform's 8% bloom.
  ctx.shadowColor=color+'14';ctx.shadowBlur=18;
  ctx.fillStyle='#050506';ctx.fill(path);
@@ -116,7 +108,7 @@ function drawScoop(ctx,x,y,size,color,text){
 }
 /**
  * One waypoint head. extra: {bloom} rainbow ring for 2+ night venues, {scoop} a time
- * disc label under the head, {glitch} 0..1 swap glitch, {label} text glyph (18+).
+ * disc label under the head, {glitch} 0..1 swap glitch.
  */
 export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1,family='place',extra={}){
  const {x,y,size}=geometry,shell=family||'place',bloom=Boolean(extra.bloom);
@@ -131,10 +123,6 @@ export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1,f
  // White glyph at 58% of the head, as in the waypoint pack.
  const glyph=size*.58;
  if(logo)drawGlyph(ctx,logo,x,y,glyph,extra.glitch||0);
- else if(extra.label){
-  ctx.fillStyle='#FFFFFF';ctx.font=`800 ${glyph*9.2/24*1.4}px "Barlow Condensed","Arial Narrow",sans-serif`;
-  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(extra.label,x+(extra.glitch?size*.05:0),y+1);
- }
  else if(icon)drawGlyph(ctx,icon,x,y,glyph,extra.glitch||0);
  if(extra.scoop)drawScoop(ctx,x,y,size,color,extra.scoop);
  ctx.restore();

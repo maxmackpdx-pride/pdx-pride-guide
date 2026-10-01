@@ -74,11 +74,20 @@ test('Placez swaps logo and type every 7 seconds with a short glitch',async()=>{
  }
 });
 
-test('adult Placez wear the 18+ ticket shell; boards keep their families',async()=>{
+test('adult Placez use normal Placez markers; boards keep their families',async()=>{
  const {waypointFamilyShell}=await import('../client/public/zaydar-map/waypoint-markers.js');
- assert.equal(waypointFamilyShell('places','adult'),'ticket');
+ assert.equal(waypointFamilyShell('places','adult'),'place');
+ assert.equal(waypointFamilyShell(undefined,'adult'),'place');
  assert.equal(waypointFamilyShell('places','bar'),'place');
  assert.equal(waypointFamilyShell('houz'),'house');
  assert.equal(waypointFamilyShell('mizzed'),'speech');
  assert.equal(waypointFamilyShell('gigz'),'shield');
+});
+
+
+test('Mapz cannot replace a place glyph with the retired age label',async()=>{
+ const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+ const markers=await readFile(new URL('../client/public/zaydar-map/waypoint-markers.js',import.meta.url),'utf8');
+ assert.doesNotMatch(renderer,/18\+|label:shell/);
+ assert.doesNotMatch(markers,/extra\.label|ticket/);
 });
