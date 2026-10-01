@@ -21,9 +21,9 @@
 }
 @keyframes rg-logo-z-sketch {
   0%, 68%, 70%, 100% { opacity: 0; translate: 0 0; }
-  68.3% { opacity: .65; translate: 2px 0; }
-  68.8% { opacity: .4; translate: -2px 1px; }
-  69.3% { opacity: .55; translate: 1px -1px; }
+  68.3% { opacity: .9; translate: 4px 0; }
+  68.8% { opacity: .7; translate: -3px 2px; }
+  69.3% { opacity: .85; translate: 2px -1px; }
 }
 [data-quiet-motion] .rg-logo-ink-reveal { animation: none; }
 @media (prefers-reduced-motion: reduce) {
@@ -38,16 +38,46 @@
 }
 .rg-logo-object-hit { pointer-events: fill; }
 .rg-logo-object-swing { transform-origin: var(--object-pivot); pointer-events: none; }
-.rg-logo-object:hover .rg-logo-object-swing { animation: rg-logo-object-swing 2.4s ease-in-out; }
+.rg-logo-object:hover .rg-logo-object-swing { animation: rg-logo-object-swing 3s ease-in-out; }
 @keyframes rg-logo-object-swing {
   0%, 100% { rotate: 0deg; }
-  22% { rotate: 1deg; }
-  48% { rotate: -.7deg; }
-  72% { rotate: .3deg; }
+  22% { rotate: 3.2deg; }
+  48% { rotate: -2.3deg; }
+  72% { rotate: 1deg; }
 }
 [data-quiet-motion] .rg-logo-object-swing { animation: none !important; }
 [data-quiet-motion] .rg-logo-color-depth { translate: none; transition: none; }
 @media (prefers-reduced-motion: reduce) {
   .rg-logo-object-swing { animation: none !important; }
   .rg-logo-color-depth { translate: none; transition: none; }
+}
+
+.rg-board-logo-frame.rg-z-logo {
+  transform: perspective(900px) translate(calc(var(--logo-color-x, 0px) * .2), calc(var(--logo-color-y, 0px) * .25)) rotateX(var(--logo-tilt-x, 0deg)) rotateY(var(--logo-tilt-y, 0deg));
+  transition: transform 280ms ease-out;
+}
+.rg-logo-z-depth {
+  pointer-events: none;
+  translate: calc(var(--logo-color-x, 0px) * -.4) calc(var(--logo-color-y, 0px) * -.5);
+  transition: translate 350ms ease-out;
+  filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--z-black) 35%, transparent));
+}
+.rg-z-eraser {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: rg-z-erase-redraw 14.7s linear infinite;
+}
+@keyframes rg-z-erase-redraw {
+  0%, 58%, 78%, 100% { stroke-dashoffset: 1; }
+  65%, 68% { stroke-dashoffset: 0; }
+  71% { stroke-dashoffset: .35; }
+  73% { stroke-dashoffset: .55; }
+}
+[data-quiet-motion].rg-z-logo { transform: none; }
+[data-quiet-motion] .rg-logo-z-depth { translate: none; }
+[data-quiet-motion] .rg-z-eraser { animation: none; stroke-dashoffset: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .rg-board-logo-frame.rg-z-logo { transform: none; transition: none; }
+  .rg-logo-z-depth { translate: none; transition: none; }
+  .rg-z-eraser { animation: none; stroke-dashoffset: 1; }
 }

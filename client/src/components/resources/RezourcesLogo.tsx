@@ -18,6 +18,7 @@ const OBJECTS = [
   { id: 'cabbage', path: 'M1583 606L1626 578L1665 605L1695 630L1748 673L1781 710L1774 807L1730 853L1640 860L1560 826L1521 782L1513 704L1544 650Z', pivot: '1631px 606px' },
   { id: 'scales', path: 'M897 219L920 219L927 271L1007 281L1039 385L1020 402L948 402L944 374L981 305L924 302L925 462L942 488L942 515L873 515L873 488L892 462L897 301L840 303L874 374L874 394L817 404L780 388L785 371L815 286L889 274Z', pivot: '909px 285px' },
 ];
+const Z_SHAPE = 'M407 328H653L577 400H407Z M748 237L698 337L601 455L412 610L348 729L319 761L400 608L510 472L582 398L664 315Z M424 609H672L675 695H346Z';
 const ART = '/brand/family/rezources.svg';
 export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }) {
   const frame = useRef<HTMLHeadingElement>(null);
@@ -28,10 +29,14 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
       onPointerMove={event => {
         if (quietMotion || event.pointerType !== 'mouse') return;
         const bounds = event.currentTarget.getBoundingClientRect();
+        event.currentTarget.style.setProperty('--logo-tilt-x', `${-((event.clientY - bounds.top) / bounds.height - .5) * 1.6}deg`);
+        event.currentTarget.style.setProperty('--logo-tilt-y', `${((event.clientX - bounds.left) / bounds.width - .5) * 2}deg`);
         event.currentTarget.style.setProperty('--logo-color-x', `${((event.clientX - bounds.left) / bounds.width - .5) * 20}px`);
         event.currentTarget.style.setProperty('--logo-color-y', `${((event.clientY - bounds.top) / bounds.height - .5) * 12}px`);
       }}
       onPointerLeave={() => {
+        frame.current?.style.setProperty('--logo-tilt-x', '0deg');
+        frame.current?.style.setProperty('--logo-tilt-y', '0deg');
         frame.current?.style.setProperty('--logo-color-x', '0px');
         frame.current?.style.setProperty('--logo-color-y', '0px');
       }}>
@@ -39,6 +44,7 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
         <defs>
           <mask id={`${id}-still`} maskUnits="userSpaceOnUse" x="0" y="0" width="1792" height="1008" style={{ maskType: 'luminance' }}>
             <rect width="1792" height="1008" fill="white" />
+            <path d={Z_SHAPE} fill="black" />
             {SKETCH_REGIONS.map((r, i) => <rect key={i} {...r} fill="black" />)}
             {OBJECTS.map(o => <path key={o.id} d={o.path} fill="black" />)}
           </mask>
@@ -55,6 +61,11 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
             <stop offset=".7" stopColor="var(--neon-blue)" />
             <stop offset="1" stopColor="var(--neon-magenta)" />
           </linearGradient>
+          <clipPath id={`${id}-z-shape`}><path d={Z_SHAPE} /></clipPath>
+          <mask id={`${id}-z-erase`} maskUnits="userSpaceOnUse" x="0" y="0" width="1792" height="1008" style={{ maskType: 'luminance' }}>
+            <rect width="1792" height="1008" fill="white" />
+            <path className="rg-z-eraser" d="M438 353H625 M586 417H643 M371 659H635" fill="none" stroke="black" strokeWidth="16" pathLength="1" />
+          </mask>
           <clipPath id={`${id}-z-slices`}>
             <path d="M440 349H621L610 362H440Z M580 414H640L631 426H570Z M386 653H617V663H380Z" />
           </clipPath>
@@ -70,9 +81,14 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
           </g>
           <path d={o.path} fill="transparent" className="rg-logo-object-hit" />
         </g>)}
+        <g className="rg-logo-z-depth">
+          <g clipPath={`url(#${id}-z-shape)`} mask={`url(#${id}-z-erase)`}>
+            <image href={ART} width="1792" height="1008" />
+          </g>
         {!quietMotion && <g clipPath={`url(#${id}-z-slices)`} className="rg-logo-z-glitch">
           <image href={ART} width="1792" height="1008" />
         </g>}
+        </g>
       </svg>
     </h1>
   );
