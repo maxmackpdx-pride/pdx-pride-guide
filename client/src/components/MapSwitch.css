@@ -34,6 +34,8 @@
 }
 
 .map-switch__option:hover { color: #eeeeee; }
+.map-switch__option--outz { color: var(--room-outz, var(--neon-orange)); }
+.map-switch__option--outz:hover { color: var(--room-outz, var(--neon-orange)); background: color-mix(in srgb, var(--room-outz, var(--neon-orange)) 12%, transparent); }
 
 .map-switch__option:focus-visible {
   outline: 2px solid var(--neon-cyan, #00ffff);
@@ -47,7 +49,7 @@
 }
 
 .map-switch__option--outz[aria-current="page"] {
-  color: #eeeeee;
+  color: var(--room-outz, var(--neon-orange));
   background: color-mix(in srgb, var(--neon-orange, #ff6600) 16%, transparent);
   box-shadow: inset 0 0 0 1px var(--neon-orange, #ff6600);
 }

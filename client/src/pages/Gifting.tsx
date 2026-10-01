@@ -289,8 +289,8 @@ export default function Gifting() {
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       </DiscoveryFlow>
     </div>
-    <RoomDoorways current="giftz" />
     <BoardCloseSeam line="Pass it on. Find what you need." url="zaylist.com/giftz" />
+    <RoomDoorways current="giftz" />
   </main>;
 }
 

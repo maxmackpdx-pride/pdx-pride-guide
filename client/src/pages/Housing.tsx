@@ -436,8 +436,8 @@ export default function Housing() {
       {selectedPost && <HousingPostOverlay key={selectedPost.id} post={selectedPost} userId={user?.id} initialDetail initialIntent={selectedIntent} sharePath={postId => `/the-hauz/${postId}`} onClose={() => { setSelectedPostId(null); setSelectedIntent(null); }} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => { setSelectedIntent(null); setSelectedPostId(postId); }} />}
 
       </DiscoveryFlow>
-      <RoomDoorways current="hauz" />
       <CloseSeam line="Post it. Scroll it. Chat." url="zaylist.com/the-hauz" />
+      <RoomDoorways current="hauz" />
       {showAuth ? <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" /> : null}
     </div>
   );

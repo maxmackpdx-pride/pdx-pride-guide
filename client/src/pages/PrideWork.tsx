@@ -208,8 +208,8 @@ export default function PrideWork() {
       <SafetyGuide context="gigs" />
       </DiscoveryFlow>
     </div>
-    <RoomDoorways current="gigz" />
     <BoardCloseSeam line="Work with your people." url="zaylist.com/gigz" />
+    <RoomDoorways current="gigz" />
   </main>;
 }
 

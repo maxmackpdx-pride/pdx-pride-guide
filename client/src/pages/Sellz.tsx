@@ -228,8 +228,8 @@ export default function Sellz() {
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       </DiscoveryFlow>
     </div>
-    <RoomDoorways current="sellz" />
     <BoardCloseSeam line="Good stuff. New hands." url="zaylist.com/sellz" />
+    <RoomDoorways current="sellz" />
   </main>;
 }
 
