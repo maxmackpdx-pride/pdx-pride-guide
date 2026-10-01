@@ -8,7 +8,7 @@ import { pacificTodayDate } from "@shared/missedConnections";
 import { apiRequest } from "@/lib/queryClient";
 import { buildScheduleEvents } from "@/lib/scheduleEvents";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
-import RailCard from "@/components/RailCard";
+import TonightEventCard from "./TonightEventCard";
 import EventModal from "@/components/EventModal";
 import AuthModal from "@/components/AuthModal";
 import "./TonightPanel.css";
@@ -52,7 +52,7 @@ export default function TonightPanel() {
           </h2>
           <div className="home-tonight__subhead">
             <p>{tonight.length ? `Tonight · Portland · ${tonight.length} ${tonight.length === 1 ? "event" : "events"}` : "Tonight · Portland"}</p>
-            <Link href="/events" className="home-tonight__all">All Eventz <ArrowUpRight size={15} aria-hidden="true" /></Link>
+            <Link href="/events" className="home-tonight__all">All EVENTZ <ArrowUpRight size={15} aria-hidden="true" /></Link>
           </div>
         </header>
 
@@ -62,12 +62,12 @@ export default function TonightPanel() {
               const listing = listingById.get(event.id);
               if (!listing) return null;
               return <div role="listitem" className="home-tonight__item" key={event.scheduleKey}>
-                <RailCard event={event} listing={listing} rsvped={myEventIds.has(event.id)} onToggleRsvp={toggleRsvp} onOpen={setSelectedEvent} />
+                <TonightEventCard event={event} listing={listing} rsvped={myEventIds.has(event.id)} onToggleRsvp={toggleRsvp} onOpen={setSelectedEvent} />
               </div>;
             })}
           </div>
         ) : (
-          <p className="home-tonight__empty">Nothing listed for tonight yet. Check Eventz for what&apos;s coming up.</p>
+          <p className="home-tonight__empty">Nothing listed for tonight yet. Check EVENTZ for what&apos;s coming up.</p>
         )}
       </div>
       {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} onEventUpdated={setSelectedEvent} />}
