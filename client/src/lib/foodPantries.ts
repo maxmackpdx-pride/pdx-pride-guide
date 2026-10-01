@@ -37,7 +37,7 @@ export const FOOD_PANTRIES = [
     hours:
       "Thu & Fri 3–6pm; Tue 3–5:30pm by accessibility appointment (waitlist).",
     address: "1838 SW Jefferson St",
-    note: "Thu/Fri lottery: arrive 2–2:30pm; last shopping arrival 5:45pm. Income and Downtown/NW ZIP eligibility apply.",
+    note: "Provider lists Thu/Fri closing at 6pm; Food Finder lists 5:30pm. Call 503-221-1224 to confirm before traveling. Lottery arrival 2–2:30pm. Downtown/NW ZIP and income eligibility apply.",
     url: "https://www.fumcpdx.org/serve/pantry",
   },
   {
@@ -67,5 +67,68 @@ export const FOOD_RESOURCE: ResourceOrg = {
   name: "Food banks & pantries",
   scope: "Portland area · 8 providers",
   mark: "FOOD",
-  desc: "Free groceries across Portland, together in one place. Select a pantry for its address, visit details, and official site.",
+  locations: [
+  {
+    "name": "Sunshine Division — SE",
+    "address": "12436 SE Stark St, Portland, OR 97233",
+    "lat": 45.5188663,
+    "lng": -122.5351289
+  },
+  {
+    "name": "Sunshine Division — NW",
+    "address": "2121 NW Front Ave, Portland, OR 97209",
+    "lat": 45.5379072,
+    "lng": -122.6894358
+  },
+  {
+    "name": "Northeast Emergency Food Program",
+    "address": "4800 NE 72nd Ave, Portland, OR 97218",
+    "lat": 45.558035,
+    "lng": -122.5885249
+  },
+  {
+    "name": "PACS Food Pantry",
+    "address": "11020 NE Halsey St, Portland, OR 97220",
+    "lat": 45.5331677,
+    "lng": -122.5495952
+  },
+  {
+    "name": "SnowCap",
+    "address": "17805 SE Stark St, Portland, OR 97233",
+    "lat": 45.519888,
+    "lng": -122.4798273
+  },
+  {
+    "name": "Lift UP — Preston’s Pantry",
+    "address": "1838 SW Jefferson St, Portland, OR 97201",
+    "lat": 45.5175364,
+    "lng": -122.6935156
+  },
+  {
+    "name": "St. Johns Food Share",
+    "address": "8100 N Lombard St, Portland, OR 97203",
+    "lat": 45.5892188,
+    "lng": -122.749351
+  },
+  {
+    "name": "Mainspring",
+    "address": "3500 NE 82nd Ave, Portland, OR 97220",
+    "lat": 45.5482928,
+    "lng": -122.578474
+  },
+  {
+    "name": "The Pantry of Greater Portland",
+    "address": "2374 SW Vermont St, Portland, OR 97219",
+    "lat": 45.4733653,
+    "lng": -122.7002762
+  }
+],
+  logo: "/resources-logos/oregon-food-bank.svg",
+  serviceTags: ["Nutrition", "Free groceries"],
+  url: "https://foodfinder.oregonfoodbank.org/",
+  cta: "Find food near you",
+  sourceUrl: "https://www.oregonfoodbank.org/find-support",
+  sourceChecked: "September 30, 2026",
+  howToStart: "Use Oregon Food Bank’s Food Finder for current locations and schedules. Check each pantry’s visit instructions before going.",
+  desc: "Find free groceries through Oregon Food Bank’s network across Oregon and Southwest Washington. No proof of income or documentation is required by the network. Eight Portland-area pantry options are listed below; appointments, service areas and schedules vary.",
 };

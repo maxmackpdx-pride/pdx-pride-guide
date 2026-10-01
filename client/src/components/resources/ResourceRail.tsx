@@ -1,0 +1,48 @@
+import { useEffect, useState, useMemo, type CSSProperties, type ReactNode } from "react";
+import useEmblaCarousel from "embla-carousel-react";
+import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
+import { motion, useSpring } from "framer-motion";
+
+// Adapted from 21st's Appica Carousel and Designali Scroll Progress patterns.
+// The rail owns navigation and clipping; resource cards keep their own design.
+export function ResourceRail({ id, title, color, count, quiet, children }: {
+  id: string; title: string; color: string; count: number; quiet: boolean; children: ReactNode;
+}) {
+  const plugins = useMemo(() => [WheelGesturesPlugin()], []);
+  const [viewport, api] = useEmblaCarousel({ direction: "rtl", align: "center", startIndex: Math.floor(count / 2), containScroll: "trimSnaps", duration: quiet ? 0 : 25 }, plugins);
+  const [position, setPosition] = useState({ progress: 0, previous: false, next: false, overflow: false });
+  const progress = useSpring(0, { stiffness: 200, damping: 40 });
+  useEffect(() => {
+    if (!api) return;
+    const update = () => {
+      const value = Math.max(0, Math.min(1, api.scrollProgress()));
+      const next = { progress: Math.round(value * 100) / 100, previous: api.canScrollPrev(), next: api.canScrollNext(), overflow: api.scrollSnapList().length > 1 };
+      setPosition(current => current.progress === next.progress && current.previous === next.previous && current.next === next.next && current.overflow === next.overflow ? current : next);
+      if (quiet) progress.jump(value); else progress.set(value);
+    };
+    api.scrollTo(Math.floor((api.scrollSnapList().length - 1) / 2), true);
+    update();
+    api.on("scroll", update).on("select", update).on("reInit", update);
+    return () => { api.off("scroll", update).off("select", update).off("reInit", update); };
+  }, [api, quiet, progress]);
+  return <section className="rg-resource-rail-section" aria-labelledby={`${id}-title`} style={{ "--rail-accent": color } as CSSProperties}>
+    <header className="rg-rail-heading">
+      <span className="rg-eyebrow">Explore ReZources</span>
+      <h2 id={`${id}-title`}>{title}</h2>
+      <p>{count} {count === 1 ? "resource" : "resources"}</p>
+
+    </header>
+    <div className="rg-resource-rail" id={id} ref={viewport} dir="rtl" tabIndex={0}
+      data-fade-left={position.next} data-fade-right={position.previous}
+      aria-label={`${title} resources, drag or use arrow keys`} onKeyDown={event => {
+        if (event.target !== event.currentTarget) return;
+        if (event.key === "ArrowLeft") { event.preventDefault(); api?.scrollNext(quiet); }
+        if (event.key === "ArrowRight") { event.preventDefault(); api?.scrollPrev(quiet); }
+      }}>
+      <div className="rg-rail-track">{children}</div>
+    </div>
+    {position.overflow && <div className="rg-rail-progress" role="progressbar" aria-label={`${title} rail position`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(position.progress * 100)}>
+      <motion.div style={{ scaleX: progress }} />
+    </div>}
+  </section>;
+}

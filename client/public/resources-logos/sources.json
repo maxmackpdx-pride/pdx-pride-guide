@@ -1,20 +1,20 @@
 [
   {
-    "name": "Pivot at Prism Health \u00b7 Free HIV & STI Testing",
+    "name": "Pivot at Prism Health · Free HIV & STI Testing",
     "logo": "/resources-logos/pivot-at-prism-health-free-hiv-sti-testing.png",
     "sourcePage": "https://www.capnw.org/get-tested/",
     "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5d79a1b111bad12f87bb3532/214ea043-d800-478f-9120-47aef8b42c90/Artboard+10.png?format=1500w",
     "checked": "2026-09-30"
   },
   {
-    "name": "CAP Testing 4 All \u00b7 Free HIV Testing",
+    "name": "CAP Testing 4 All · Free HIV Testing",
     "logo": "/resources-logos/cap-testing-4-all-free-hiv-testing.png",
     "sourcePage": "https://www.capnw.org/get-tested/",
     "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5d79a1b111bad12f87bb3532/214ea043-d800-478f-9120-47aef8b42c90/Artboard+10.png?format=1500w",
     "checked": "2026-09-30"
   },
   {
-    "name": "Multnomah County \u00b7 Free Outreach Testing",
+    "name": "Multnomah County · Free Outreach Testing",
     "logo": "/resources-logos/multnomah-county-free-outreach-testing.svg",
     "sourcePage": "https://multco.us/services/hiv-testing",
     "sourceAsset": "https://multco.us/themes/custom/multnomah_gov_theme/assets/images/logo.svg",
@@ -78,10 +78,11 @@
   },
   {
     "name": "Oregon State Bar",
-    "logo": "/resources-logos/oregon-state-bar.png",
+    "logo": "/resources-logos/oregon-state-bar-transparent.png",
     "sourcePage": "https://www.osbar.org/public/ris",
     "sourceAsset": "https://www.osbar.org/_images/_/index/new/publiclogo.png",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent monochrome conversion; original retained."
   },
   {
     "name": "Intersect NW",
@@ -99,10 +100,11 @@
   },
   {
     "name": "Bridge City Mentors",
-    "logo": "/resources-logos/bridge-city-mentors.jpg",
+    "logo": "/resources-logos/bridge-city-mentors-transparent.png",
     "sourcePage": "https://bridgecitymentors.com/",
     "sourceAsset": "https://bridgecitymentors.com/wp-content/uploads/2020/05/cropped-whitebacklogo-scaled-1.jpg",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent monochrome conversion; original retained."
   },
   {
     "name": "P:EAR",
@@ -120,10 +122,11 @@
   },
   {
     "name": "Westside Q Center",
-    "logo": "/resources-logos/westside-q-center.png",
+    "logo": "/resources-logos/westside-q-center-transparent.png",
     "sourcePage": "https://westsideqrc.org",
     "sourceAsset": "https://westsideqrc.org/assets/img/logo-header.png",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent monochrome conversion; original retained."
   },
   {
     "name": "Lesbian Culture Club",
@@ -134,10 +137,11 @@
   },
   {
     "name": "Queer Social Club",
-    "logo": "/resources-logos/queer-social-club.png",
+    "logo": "/resources-logos/queer-social-club-transparent.png",
     "sourcePage": "https://queersocialclub.com",
     "sourceAsset": "https://images.squarespace-cdn.com/content/v1/62155dfcfc6583248de4ebac/829441f5-8535-4984-921f-3ab48f9e9c1f/QSC+Email+Banner+%282%29.png?format=1500w",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent conversion from official source; rendered monochrome white. Original retained."
   },
   {
     "name": "PFLAG Portland",
@@ -162,10 +166,11 @@
   },
   {
     "name": "NAYA",
-    "logo": "/resources-logos/naya.png",
+    "logo": "/resources-logos/naya-transparent.png",
     "sourcePage": "https://nayapdx.org/services/two-spirit-safe-space-alliance",
     "sourceAsset": "https://cdn.prod.website-files.com/6786f6413e94faa2908eb35e/680ff42d5b359199f1b37946_NAYA%20Web%20Logo%20(1).png",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent monochrome conversion; original retained."
   },
   {
     "name": "UTOPIA PDX",
@@ -190,10 +195,11 @@
   },
   {
     "name": "Portland Small Business Development Center",
-    "logo": "/resources-logos/portland-small-business-development-center.jpg",
+    "logo": "/resources-logos/portland-small-business-development-center-transparent.png",
     "sourcePage": "https://oregonsbdc.org",
     "sourceAsset": "https://oregonsbdc.org/wp-content/uploads/2023/01/Oregon_SBDC-Logo-Header.jpg",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent monochrome conversion; original retained."
   },
   {
     "name": "Regional Arts & Culture Council",
@@ -218,10 +224,11 @@
   },
   {
     "name": "Radical Faerie Arts Fest",
-    "logo": "/resources-logos/radical-faerie-arts-fest.jpg",
+    "logo": "/resources-logos/radical-faerie-arts-fest-transparent.png",
     "sourcePage": "https://www.radfaf.org",
     "sourceAsset": "https://images.squarespace-cdn.com/content/v1/63e9327ea475597f7bbac5f8/ef1f5897-2f71-4f89-9bc7-6ece72bd14df/RADFAF+LOGO+FINAL6.jpg?format=1500w",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent monochrome conversion; original retained."
   },
   {
     "name": "Fertile Ground Festival",
@@ -232,17 +239,19 @@
   },
   {
     "name": "Portland Area Theatre Alliance",
-    "logo": "/resources-logos/portland-area-theatre-alliance.png",
+    "logo": "/resources-logos/portland-area-theatre-alliance-transparent.png",
     "sourcePage": "https://portlandtheatre.com",
     "sourceAsset": "https://portlandtheatre.com/wp-content/uploads/2022/08/PATA-Logo-Red.png",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent conversion from official source; rendered monochrome white. Original retained."
   },
   {
     "name": "Rainbow Youth",
-    "logo": "/resources-logos/rainbow-youth.png",
+    "logo": "/resources-logos/rainbow-youth-transparent.png",
     "sourcePage": "https://rainbowyouth.org",
     "sourceAsset": "https://rainbowyouth.org/wp-content/uploads/2025/08/newest-Rainbow-Youth-logo-Update-8.14-355x200.png",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent conversion from official source; rendered monochrome white. Original retained."
   },
   {
     "name": "Multnomah County Harm Reduction",
@@ -252,7 +261,7 @@
     "checked": "2026-09-30"
   },
   {
-    "name": "Just in Case Oregon \u00b7 Free Naloxone",
+    "name": "Just in Case Oregon · Free Naloxone",
     "logo": "/resources-logos/just-in-case-oregon-free-naloxone.png",
     "sourcePage": "https://justincaseoregon.org/",
     "sourceAsset": "https://justincaseoregon.org/brand/jico-logo-horizontal-color.png",
@@ -281,17 +290,19 @@
   },
   {
     "name": "Oregon Queer History Project",
-    "logo": "/resources-logos/oregon-queer-history-project.jpg",
+    "logo": "/resources-logos/oregon-queer-history-transparent.png",
     "sourcePage": "https://glapn.org",
     "sourceAsset": "https://glapn.org/0000-OQHC_transition/OQHC%20x200px.jpg",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent conversion from official source; rendered monochrome white. Original retained."
   },
   {
     "name": "OGALLA",
-    "logo": "/resources-logos/ogalla.jpg",
+    "logo": "/resources-logos/ogalla-transparent.png",
     "sourcePage": "https://www.ogalla.org/",
     "sourceAsset": "https://images.squarespace-cdn.com/content/v1/641bc574c72ca25e9491779d/b37efbbb-6ed0-469c-b97c-1478430d78ac/OGALLA_Full_Color_Horizontal%404x.jpg?format=1500w",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent conversion from official source; rendered monochrome white. Original retained."
   },
   {
     "name": "Multnomah County Cultural Coalition",
@@ -343,7 +354,7 @@
     "checked": "2026-09-30"
   },
   {
-    "name": "HIV Alliance \u00b7 Syringe Services",
+    "name": "HIV Alliance · Syringe Services",
     "logo": "/resources-logos/hiv-alliance-syringe-services.png",
     "sourcePage": "https://hivalliance.org",
     "sourceAsset": "https://hivalliance.org/wp-content/uploads/2024/09/HIVA-logo-reversed.png",
@@ -351,10 +362,11 @@
   },
   {
     "name": "Eastern Oregon Center for Independent Living",
-    "logo": "/resources-logos/eastern-oregon-center-for-independent-living.png",
+    "logo": "/resources-logos/eastern-oregon-center-for-independent-living-transparent.png",
     "sourcePage": "https://eocil.org",
     "sourceAsset": "https://eocil.org/assets/eocil-logo.png",
-    "checked": "2026-09-30"
+    "checked": "2026-09-30",
+    "treatment": "Image-tool transparent monochrome conversion; original retained."
   },
   {
     "name": "Prosper Portland",
@@ -387,11 +399,12 @@
   },
   {
     "name": "Pairs With Pride",
-    "logo": "/resources-logos/pairs-with-pride.png",
+    "logo": "/resources-logos/pairs-with-pride-transparent.png",
     "sourcePage": "https://perfectpair.org/pairs-with-pride",
     "sourceAsset": "https://static.wixstatic.com/media/6be6cf_0156d6e957714f4da4c28196fec8f053~mv2.png",
     "checked": "2026-09-30",
-    "note": "Parent organization logo"
+    "note": "Parent organization logo",
+    "treatment": "Image-tool transparent monochrome conversion; original retained."
   },
   {
     "name": "TransActive Gender Project",
@@ -400,5 +413,129 @@
     "sourceAsset": "https://graduate.lclark.edu/live/resource/image/_i/themes/global/assets/logos/logo-grad-color-horizontal.rev.1770764746.png",
     "checked": "2026-09-30",
     "note": "Parent organization logo"
+  },
+  {
+    "name": "Sincere Studio",
+    "logo": "/resources-logos/sincere-studio.svg",
+    "sourcePage": "https://www.sincerestudiopdx.org/",
+    "sourceAsset": "https://static.parastorage.com/fonts/v2/d5ddaef6-a301-4149-9555-5a6ac46057b3/v1/gatore.latin.woff2",
+    "checked": "2026-09-30",
+    "note": "Official header text wordmark: Gatore regular, uppercase, 0.225em letter spacing. Glyph outlines exported as white SVG; not an independently designed logo."
+  },
+  {
+    "name": "Future Prairie",
+    "logo": "/resources-logos/future-prairie.svg",
+    "sourcePage": "https://www.futureprairie.com/",
+    "sourceAsset": "https://cdn2.editmysite.com/fonts/Quattrocento_Sans/bold.woff2",
+    "checked": "2026-09-30",
+    "note": "Official header text wordmark: Quattrocento Sans 700, uppercase, 0.04em tracking. White SVG glyph outlines."
+  },
+  {
+    "name": "Food banks & pantries",
+    "logo": "/resources-logos/oregon-food-bank.svg",
+    "sourcePage": "https://www.oregonfoodbank.org/",
+    "sourceAsset": "Official inline SVG header logo",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "PDXBackstage",
+    "logo": "/resources-logos/pdxbackstage-wordmark.svg",
+    "sourcePage": "https://groups.io/g/pdxbackstage",
+    "checked": "2026-09-30",
+    "treatment": "Zaylist directory name-only wordmark using bundled Barlow Condensed; not an official organization logo. Public group page has a generic cover photograph."
+  },
+  {
+    "name": "People Like Us",
+    "logo": "/resources-logos/people-like-us-transparent.png",
+    "sourcePage": "https://wallowalgbtq.org/",
+    "sourceAsset": "https://images.squarespace-cdn.com/content/v1/67a4fb016ab977696a2b9918/546ae17e-39bb-4256-8245-1d844414948d/WC+LGBTQIA+logo.png",
+    "checked": "2026-09-30",
+    "treatment": "Image-tool monochrome transparent adaptation of the official Wallowa County LGBTQIA+ mark; rendered white by card CSS."
+  },
+  {
+    "name": "Hand Up Project",
+    "logo": "/resources-logos/hand-up-project-transparent.png",
+    "sourcePage": "https://handupproject.org/",
+    "sourceAsset": "https://storage.googleapis.com/production-sitelio-v1-0-1/511/247511/hMTwksti/3d7f61feb9d64429ab2b54b545896295",
+    "checked": "2026-09-30",
+    "treatment": "Image-tool monochrome transparent adaptation of official circular emblem; rendered white by card CSS."
+  },
+  {
+    "name": "Foundation for Contemporary Arts",
+    "logo": "/resources-logos/foundation-for-contemporary-arts.svg",
+    "sourcePage": "https://www.foundationforcontemporaryarts.org/",
+    "checked": "2026-09-30",
+    "treatment": "Official website text wordmark in Futura PT Medium, converted to white SVG glyph outlines and wrapped to two lines for the directory logo well."
+  },
+  {
+    "name": "Backstage",
+    "logo": "/resources-logos/backstage.svg",
+    "sourcePage": "https://www.backstage.com/",
+    "sourceAsset": "https://d3uscstcbhvk7k.cloudfront.net/static/images/2025-Backstage-Media-Kit.b6876e613ee1.pdf",
+    "checked": "2026-09-30",
+    "treatment": "Official vector wordmark from page 1 of the 2025 media kit; native path geometry retained and fill set to white."
+  },
+  {
+    "name": "Business Oregon",
+    "file": "business-oregon-official.png",
+    "source": "https://www.oregon.gov/biz/PublishingImages/Icons/bizOR_logo_black_TM.png",
+    "note": "Official transparent header asset, unchanged; CSS inversion preserves interior lettering.",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Virginia Garcia · Beaverton Wellness Center",
+    "logo": "/resources-logos/virginia-garcia.png",
+    "sourcePage": "https://virginiagarcia.org/location/beaverton-wellness-center/",
+    "sourceAsset": "https://virginiagarcia.org/wp-content/uploads/Nav-Logo-Full-Color@2x.png",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "YWCA Clark County · SafeChoice",
+    "logo": "/resources-logos/ywca-clark.png",
+    "sourcePage": "https://www.ywcaclarkcounty.org/safechoice-domestic-violence-program",
+    "sourceAsset": "https://images.squarespace-cdn.com/content/v1/6524a50efc22a87d5ae084ef/ced32d0f-0cff-4d99-b2a6-a3bd0b1a3a41/AssociationLogo_Clark-County-1.png?format=1500w",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Share Vancouver",
+    "logo": "/resources-logos/share-vancouver.png",
+    "sourcePage": "https://sharevancouver.org/about-us/",
+    "sourceAsset": "https://sharevancouver.org/wp-content/uploads/2020/09/Share-Logo-White.png",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Beaverton Resource Center",
+    "logo": "/resources-logos/brc.png",
+    "sourcePage": "https://beavertonresourcecenter.org/what-we-do-1",
+    "sourceAsset": "https://img1.wsimg.com/isteam/ip/5ed746d6-e6c4-498d-b93d-1abd0b2e0fad/BRC-Mark_FNL_FULL-COLOR_HORIZ-1-cf8125e.png",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Queer Youth Resource Center",
+    "logo": "/resources-logos/qyrc.png",
+    "sourcePage": "https://www.qyrcvancouverwa.org/",
+    "sourceAsset": "https://images.squarespace-cdn.com/content/v1/58ec48a76b8f5b270c1381ca/5f68fcc2-5d4a-4f25-b4a2-5c7d8838e3be/QUEER+YOUTH+LOGO+WHITE.png?format=1500w",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "HomePlate Youth Services",
+    "logo": "/resources-logos/homeplate.png",
+    "sourcePage": "https://www.homeplateyouth.org/drop-in",
+    "sourceAsset": "https://images.squarespace-cdn.com/content/v1/613fa13d8568b45dd0d152ce/a254c378-fd40-4059-847c-4c9375051e91/HomePlate_logo_green-w-purple_horizontal.png?format=1500w",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "PFLAG Vancouver",
+    "logo": "/resources-logos/pflag-vancouver.svg",
+    "sourcePage": "https://vancouver.pflag.org/meeting-info/",
+    "sourceAsset": "https://vancouver.pflag.org/ (inline header SVG)",
+    "checked": "2026-09-30"
+  },
+  {
+    "name": "Family Peace Center of Washington County",
+    "logo": "/resources-logos/family-peace.png",
+    "sourcePage": "https://www.fpcwc.org/services",
+    "sourceAsset": "https://images.squarespace-cdn.com/content/v1/6888186f959ab0384a074d6f/1753749640516-Z2Q3JV5MDV6899GD53FJ/fjcwc-logo-no-text.png?format=1500w",
+    "checked": "2026-09-30"
   }
 ]

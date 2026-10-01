@@ -16,7 +16,7 @@
   background:
     radial-gradient(
       ellipse 700px 600px at 88% 280px,
-      rgba(27, 37, 0, 0.2),
+      color-mix(in srgb, var(--neon-yellow) 20%, transparent),
       transparent 85%
     ),
     var(--z-black);
@@ -84,7 +84,6 @@
 .rg-intro h1 {
   font-weight: 900;
   font-size: clamp(43px, 4.6vw, 66px);
-  line-height: 0.91;
   margin-top: 20px;
   max-width: 820px;
   text-transform: uppercase;
@@ -104,13 +103,12 @@
   right: 48px;
   font-size: 12px;
   line-height: 1.75;
-  max-width: 310px;
 }
 .rg-text-link {
   background: none;
   border: 0;
   padding: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-heading) 25%, transparent);
   font-size: 12px;
   min-height: 30px;
   display: inline-flex;
@@ -125,15 +123,12 @@
   font-size: 11px;
 }
 .rg-layout {
-  display: grid;
   grid-template-columns: 440px minmax(0, 1fr);
-  gap: 70px;
   border-top: 1px solid var(--rg-line);
   padding-top: 38px;
   padding-bottom: 55px;
 }
 .rg-controls {
-  position: sticky;
   align-self: start;
   top: calc(var(--site-header-height, 100px) + 16px);
 }
@@ -165,7 +160,6 @@
   margin-top: 2px;
 }
 .rg-step h2 {
-  font-size: 28px;
   margin: 6px 0 18px;
 }
 .rg-step .rg-eyebrow {
@@ -174,47 +168,32 @@
 .rg-mode {
   display: flex;
   border: 1px solid var(--rg-line);
-  border-radius: 28px;
-  padding: 4px;
   background: var(--res-help-surface);
 }
 .rg-mode button {
-  border: 0;
   background: none;
-  min-height: 42px;
-  border-radius: 24px;
-  padding: 0 17px;
   flex: 1;
   font: 700 17px var(--font-display);
   color: var(--res-muted);
 }
-.rg-mode button[aria-pressed="true"] {
-  background: var(--neon-yellow);
-  color: var(--z-black);
-}
 .rg-options {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
 }
 .rg-options button {
   --c: var(--res-accent);
   display: flex;
   align-items: center;
   text-align: left;
-  gap: 10px;
   min-height: 58px;
-  padding: 10px 12px;
   background: var(--glass-card-bg);
   backdrop-filter: blur(12px) saturate(1.15);
   -webkit-backdrop-filter: blur(12px) saturate(1.15);
   border: 1px solid color-mix(in srgb, var(--res-accent) 25%, var(--rg-line));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    inset 0 1px 0 color-mix(in srgb, var(--text-heading) 13%, transparent),
     inset 0 -10px 18px -16px
       color-mix(in srgb, var(--res-accent) 45%, transparent),
-    0 5px 12px -8px rgba(0, 0, 0, 0.8);
-  border-radius: 11px;
+    0 5px 12px -8px color-mix(in srgb, var(--z-black) 80%, transparent);
   font: 700 16px/1.1 var(--font-display);
   color: var(--res-text);
 }
@@ -276,7 +255,6 @@
   padding-bottom: 27px;
 }
 .rg-results-head h2 {
-  font-size: 43px;
   margin: 12px 0;
 }
 .rg-results-head p {
@@ -310,8 +288,6 @@
   font-size: 10px;
 }
 .rg-results .rg-count {
-  font: 9px var(--font-mono);
-  color: var(--res-muted);
   text-transform: uppercase;
   margin: 20px 0;
 }
@@ -357,17 +333,12 @@
   font-size: 8px;
   letter-spacing: 0.06em;
   text-align: right;
-  max-width: 125px;
   color: var(--res-muted);
 }
 .rg-card .rg-category {
   font-size: 9px;
   color: var(--c);
   letter-spacing: 0.08em;
-}
-.rg-card h3 {
-  font-size: 34px;
-  line-height: 1.04;
 }
 .rg-card p {
   font-size: 13px;
@@ -376,7 +347,7 @@
 .rg-description {
   max-height: 4.95em;
   overflow: hidden;
-  mask-image: linear-gradient(rgba(0, 0, 0, 1) 65%, transparent);
+  mask-image: linear-gradient(color-mix(in srgb, var(--z-black) 100%, transparent) 65%, transparent);
   transition: max-height 0.3s ease;
 }
 .rg-expanded .rg-description {
@@ -384,7 +355,7 @@
   mask-image: none;
 }
 .rg-extra {
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid color-mix(in srgb, var(--text-heading) 15%, transparent);
   padding-top: 17px;
 }
 .rg-extra .rg-eyebrow {
@@ -409,7 +380,6 @@
   background: none;
   min-height: 44px;
   color: var(--res-secondary-text);
-  font-size: 12px;
   padding: 8px;
   display: flex;
   gap: 14px;
@@ -527,7 +497,7 @@
 .rg-overlay-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: color-mix(in srgb, var(--z-black) 65%, transparent);
   backdrop-filter: blur(6px);
   z-index: 2500;
 }
@@ -543,7 +513,7 @@
   border-radius: 22px;
   box-shadow:
     0 0 0 2px var(--z-oled),
-    0 30px 100px rgba(0, 0, 0, 0.9);
+    0 30px 100px color-mix(in srgb, var(--z-black) 90%, transparent);
 }
 .rg-overlay p {
   color: var(--res-secondary-text);
@@ -556,8 +526,6 @@
   top: 13px;
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
   border: 1px solid var(--res-control-border);
   background: var(--z-black);
   color: var(--res-text);
@@ -712,7 +680,6 @@
 .rg-drawer-handle {
   margin: 14px auto 0;
   flex: none;
-  background: var(--res-caption);
 }
 @media (max-width: 1180px) {
   .rg-wrap {
@@ -818,9 +785,7 @@
     padding-bottom: 26px;
   }
   .rg-intro h1 {
-    font-size: clamp(37px, 7vw, 51px);
     margin-top: 17px;
-    line-height: 0.93;
   }
   .rg-intro > p {
     font-size: 12px;
@@ -862,7 +827,6 @@
     border-radius: 25px;
   }
   .rg-mode button {
-    font-size: 16px;
     padding: 0 12px;
     border-radius: 22px;
   }
@@ -871,7 +835,6 @@
     gap: 7px;
   }
   .rg-options button {
-    font-size: 15px;
     gap: 7px;
     min-height: 58px;
     padding: 9px;
@@ -1022,7 +985,6 @@
   min-height: 44px;
 }
 .rg-food-list .rg-food-note {
-  font-size: 11px;
   color: var(--res-muted);
   margin-bottom: 10px;
 }
@@ -1080,16 +1042,11 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.4) 0%,
-    rgba(0, 0, 0, 0.35) 25%,
-    rgba(0, 0, 0, 0.25) 50%,
-    rgba(0, 0, 0, 0.12) 65%,
-    rgba(0, 0, 0, 0.85) 70%,
-    rgba(0, 0, 0, 0.96) 85%,
-    rgba(0, 0, 0, 0.99) 100%
-  );
+  background: color-mix(in srgb, var(--z-black) 90%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  mask-image: linear-gradient(to bottom, black 0%, black 10%, color-mix(in srgb, var(--z-black) 66.6667%, transparent) 40%, color-mix(in srgb, var(--z-black) 33.3333%, transparent) 50%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 10%, color-mix(in srgb, var(--z-black) 66.6667%, transparent) 40%, color-mix(in srgb, var(--z-black) 33.3333%, transparent) 50%, transparent 100%);
 }
 
 .rg-intro > .rg-search-trigger {
@@ -1158,24 +1115,14 @@
   max-width: 340px;
 }
 .rg-step h2 {
-  font-size: clamp(30px, 3vw, 38px);
   line-height: 1.1;
   margin-top: 8px;
   margin-bottom: 20px;
 }
 .rg-results-head h2 {
-  font-size: clamp(36px, 4vw, 48px);
   line-height: 1.08;
   text-wrap: balance;
   margin-bottom: 16px;
-}
-.rg-options button {
-  font-size: 18px;
-  line-height: 1.15;
-  font-weight: 700;
-}
-.rg-mode button {
-  font-size: 20px;
 }
 .rg-search-trigger,
 .rg-text-link,
@@ -1197,9 +1144,6 @@
   max-width: 160px;
 }
 .rg-card h3 {
-  font-size: clamp(30px, 3.2vw, 38px);
-  font-weight: 700;
-  line-height: 1.12;
   letter-spacing: -0.01em;
   text-wrap: balance;
   overflow-wrap: anywhere;
@@ -1230,9 +1174,6 @@
   .rg-intro-top > .rg-eyebrow {
     font-size: 10px;
   }
-  .rg-options button {
-    font-size: 17px;
-  }
   .rg-mode button {
     font-size: 18px;
   }
@@ -1250,9 +1191,6 @@
   text-transform: uppercase;
 }
 @media (max-width: 600px) {
-  .rg-options button {
-    font-size: 20px;
-  }
 }
 
 /* Guide-aligned type roles, scoped to Resources and its portaled overlays. */
@@ -1335,17 +1273,16 @@ html.calm-mode .rg-options button,
 .rg-directory-card { margin: 0; min-width: 0; }
 .rg-directory-card .pdxPlace__body { height: 100%; }
 .rg-directory-card .pdxPlace__logo { mix-blend-mode: normal; filter: none; }
-.rg-directory-card .pdxPlace__cat .pdxBadge { color: #080808; }
+.rg-directory-card .pdxPlace__cat .pdxBadge { color: var(--z-black); }
 .rg-directory-card .pdxPlace__actions { opacity: 1; pointer-events: auto; }
 .rg-directory-card .pdxPlace__share { min-height: 44px; min-width: 44px; }
-.rg-directory-footer { display: flex; flex-direction: column; gap: 14px; margin-top: auto; }
-.rg-directory-footer .pdxBtn { min-height: 44px; }
+.rg-directory-footer { display: flex; flex-direction: column; margin-top: auto; }
 .rg-directory-card:focus-within { outline: 2px solid var(--c); outline-offset: 4px; }
 
 .rg-directory-card--light-logo .pdxPlace__logo,
-.rg-logo--light { background: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; }
+.rg-logo--light { background: var(--text-hi); padding: 12px; border-radius: 8px; box-sizing: border-box; }
 
-.rg-detail-tags { display: flex; flex-wrap: wrap; gap: 10px 16px; }
+.rg-detail-tags { display: flex; flex-wrap: wrap; }
 .rg-directory-card .pdxPlace__badges { flex-wrap: wrap; }
 
 /* White logo treatment; preserve the original source assets. */
@@ -1377,9 +1314,9 @@ html.calm-mode .rg-options button,
 
 /* Resource detail shell: subtle category bloom and touch dismissal affordance. */
 .rg-drawer {
-  border: 1px solid color-mix(in srgb, var(--resource-accent) 38%, #27272b);
-  box-shadow: 0 0 20px color-mix(in srgb, var(--resource-accent) 13%, transparent),
-    0 0 54px color-mix(in srgb, var(--resource-accent) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--resource-accent) 38%, var(--res-control-border));
+  box-shadow: 0 24px 64px color-mix(in srgb, var(--z-black) 65%, transparent),
+    0 0 16px -6px color-mix(in srgb, var(--resource-accent) 8%, transparent);
 }
 .rg-drawer-desktop { display: flex; flex-direction: column; overflow: hidden; }
 .rg-drawer-desktop .rg-drawer-handle { position: absolute; left: 8px; top: 50%; width: 4px; height: 44px; margin: 0; }
@@ -1387,7 +1324,7 @@ html.calm-mode .rg-options button,
 .rg-drawer-handle { touch-action: none; background: var(--resource-accent); }
 .rg-resource-map { margin: 24px 0; display: grid; gap: 12px; }
 .rg-resource-map-canvas { position: relative; height: 220px; border-radius: 16px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--resource-accent) 40%, transparent); }
-.rg-resource-map-label { position: absolute; left: 10px; top: 10px; z-index: 500; padding: 6px 9px; background: #08080be6; color: var(--resource-accent); font-size: 11px; pointer-events: none; }
+.rg-resource-map-label { position: absolute; left: 10px; top: 10px; z-index: 500; padding: 6px 9px; background: color-mix(in srgb, var(--z-black) 90%, transparent); color: var(--resource-accent); font-size: 11px; pointer-events: none; }
 .rg-resource-map > a { white-space: normal; min-height: 44px; }
 @media (prefers-reduced-motion: reduce) { .rg-drawer { box-shadow: none; } }
 
@@ -1426,24 +1363,24 @@ html.calm-mode .rg-options button,
 
 /* Safety information has a clear emergency action before support and legal detail. */
 .rg-safety-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
-.rg-safety-heading > svg, .rg-safety-heading .rg-eyebrow { color: #ffac70; }
+.rg-safety-heading > svg, .rg-safety-heading .rg-eyebrow { color: var(--neon-orange); }
 .rg-safety-heading h3 { margin: 4px 0 0; font: 800 clamp(26px, 4vw, 34px)/1.05 var(--font-display); text-transform: uppercase; }
-.rg-safety-prompt .rg-safety-lead { font-size: 16px; line-height: 1.5; color: #f6f4ef; }
+.rg-safety-prompt .rg-safety-lead { font-size: 16px; line-height: 1.5; color: var(--res-text); }
 .rg-safety-emergency { display: flex; width: 100%; min-height: 48px; font-size: 18px; }
-.rg-safety-support { margin-top: 24px; padding-top: 22px; border-top: 1px solid #ffffff25; }
+.rg-safety-support { margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--res-control-border); }
 .rg-safety-support h4 { font: 700 21px/1.2 var(--font-display); margin-bottom: 10px; }
-.rg-safety-prompt p { line-height: 1.6; color: #d2ceca; }
+.rg-safety-prompt p { line-height: 1.6; color: var(--res-secondary-text); }
 .rg-safety-crisis { display: flex; width: 100%; gap: 12px; min-height: 64px; padding: 12px 16px; }
 .rg-safety-crisis span { flex: 1; font-size: 14px; }
 .rg-safety-crisis strong { display: block; font-size: 20px; line-height: 1.4; }
-.rg-safety-source { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 12px; color: #d2ceca; text-decoration: underline; }
-.rg-safety-law { border-top: 1px solid #ffffff25; margin-top: 16px; padding-top: 12px; }
+.rg-safety-source { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 12px; color: var(--res-secondary-text); text-decoration: underline; }
+.rg-safety-law { border-top: 1px solid var(--res-control-border); margin-top: 16px; padding-top: 12px; }
 .rg-safety-law summary { padding: 12px 0; cursor: pointer; font-weight: 600; font-size: 15px; line-height: 1.4; }
-.rg-safety-law ul { list-style: disc; padding-left: 22px; margin: 12px 0 16px; color: #d2ceca; font-size: 14px; line-height: 1.6; }
+.rg-safety-law ul { list-style: disc; padding-left: 22px; margin: 12px 0 16px; color: var(--res-secondary-text); font-size: 14px; line-height: 1.6; }
 .rg-safety-law li + li { margin-top: 8px; }
 .rg-safety-law-links { display: grid; gap: 4px; margin-bottom: 12px; }
-.rg-safety-law-links a { color: #00ffff; text-decoration: underline; min-height: 44px; display: flex; align-items: center; font-size: 13px; }
-.rg-safety-law small { color: #a9a5a1; font-size: 12px; line-height: 1.5; }
+.rg-safety-law-links a { text-decoration: underline; min-height: 44px; display: flex; align-items: center; font-size: 13px; }
+.rg-safety-law small { color: var(--res-caption); font-size: 12px; line-height: 1.5; }
 .rg-safety-prompt a:focus-visible, .rg-safety-law summary:focus-visible { outline: 2px solid var(--neon-yellow); outline-offset: 4px; }
 .rg-support > .rg-safety-prompt { grid-column: 1 / -1; }
 
@@ -1458,16 +1395,16 @@ html.calm-mode .rg-options button,
 .rg-safety-support h4 { text-transform: uppercase; font-weight: 700; }
 .rg-safety-law-links a { color: var(--neon-orange); }
 
-.rg-directory-footer .pdxBtn.rg-contact-white { color: #fff !important; }
+.rg-directory-footer .pdxBtn.rg-contact-white { color: var(--text-hi) !important; }
 
 /* Safety identity: red shell, orange actions, white information. */
-.rg-safety-prompt .pdxPlace__body { border-color: #ff2400; }
+.rg-safety-prompt .pdxPlace__body { border-color: var(--neon-red); }
 .rg-safety-prompt .pdxPlace__cat { --c: var(--neon-orange); }
 .rg-safety-prompt .rg-safety-heading > svg { color: var(--neon-orange); }
 .rg-safety-prompt .rg-safety-heading h3,
 .rg-safety-prompt .rg-safety-lead,
-.rg-safety-prompt .rg-safety-support h4 { color: #fff; }
-.rg-safety-prompt .rg-safety-crisis { color: #fff !important; }
+.rg-safety-prompt .rg-safety-support h4 { color: var(--text-hi); }
+.rg-safety-prompt .rg-safety-crisis { color: var(--text-hi) !important; }
 /* EOCIL's supplied logo is opaque; retain it until a clean cutout is ready. */
 .rg-directory-card .pdxPlace__logo[src$="/eastern-oregon-center-for-independent-living.png"],
 .rg-detail-logo .rg-logo[src$="/eastern-oregon-center-for-independent-living.png"] { filter: none; }
@@ -1479,25 +1416,25 @@ html.calm-mode .rg-options button,
   min-height: 56px !important;
   letter-spacing: .025em;
 }
-.rg-directory-card .pdxPlace__cat[data-category-id="safety"] .pdxBadge { color: #fff !important; }
+.rg-directory-card .pdxPlace__cat[data-category-id="safety"] .pdxBadge { color: var(--z-black) !important; }
 .resources-page .rg-share,
-.rg-directory-card .pdxPlace__share { color: #fff !important; }
+.rg-directory-card .pdxPlace__share { color: var(--text-hi) !important; }
 /* Preserve the lettering within Perfect Pair's filled badge until its white cutout is ready. */
 .rg-directory-card .pdxPlace__logo[src$="/pairs-with-pride.png"],
 .rg-detail-logo .rg-logo[src$="/pairs-with-pride.png"] { filter: grayscale(1); }
 
-.rg-safety-check { margin-top: 16px; padding-top: 18px; border-top: 1px solid var(--rg-line); animation: rgSafetyReveal 180ms ease-out; }
-.rg-safety-check h3 { font: 800 25px/1.15 var(--font-display); text-transform: uppercase; color: #fff; }
+.rg-safety-check { margin-top: 16px; padding-top: 18px; border-top: 1px solid var(--rg-line); }
+.rg-safety-check h3 { font: 800 25px/1.15 var(--font-display); text-transform: uppercase; color: var(--text-hi); }
 .rg-safety-check p { color: var(--res-muted); font-size: 14px; line-height: 1.5; margin: 8px 0 14px; }
 .rg-safety-check > div { display: flex; flex-wrap: wrap; gap: 10px; }
 .rg-safety-check .pdxBtn { min-height: 44px; flex: 1 1 160px; white-space: normal; --c: var(--neon-yellow); }
-.rg-safety-check .pdxBtn:last-child { --c: #ff2400; color: #fff !important; }
+.rg-safety-check .pdxBtn:last-child { --c: var(--neon-red); color: var(--text-hi) !important; }
 .rg-safety-check .pdxBtn[aria-pressed="true"] { outline: 2px solid var(--c); outline-offset: 3px; }
 @keyframes rgSafetyReveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 @media(prefers-reduced-motion: reduce) { .rg-safety-check { animation: none; } }
-/* White label ink on orange, red, blue, and purple category tags. */
-.rg-directory-card .pdxPlace__cat:is([data-category-id="safety"], [data-category-id="legal"], [data-category-id="arts"], [data-category-id="youth"], [data-category-id="harm-reduction"]) .pdxBadge,
-.rg-safety-prompt .pdxPlace__cat .pdxBadge { color: #fff !important; }
+/* Dark category fills retain white ink; orange uses black ink. */
+.rg-directory-card .pdxPlace__cat:is([data-category-id="legal"], [data-category-id="arts"]) .pdxBadge,
+.rg-directory-card .pdxPlace__cat[data-category-id="oregon"] .pdxBadge { color: var(--text-hi) !important; }
 
 .rg-drawer .rg-food-finder { --c: var(--neon-yellow); --action-accent: var(--neon-yellow); width: 100%; min-height: 58px !important; margin-top: 24px; font: 800 23px/1.15 var(--font-display) !important; white-space: normal; }
 .rg-drawer .rg-food-finder-caption { margin: 10px 0 22px; font-size: 13px; line-height: 1.5; color: var(--res-caption); }
@@ -1509,18 +1446,2448 @@ html.calm-mode .rg-options button,
   font: 700 23px/1.2 var(--font-display);
   letter-spacing: .01em;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--text-hi);
   margin: 0 0 12px;
 }
 .rg-support-open .rg-safety-support p,
 .rg-support-open .rg-safety-law p,
 .rg-support-open .rg-safety-law ul,
-.rg-support-open .rg-talk p { font-size: 14px; line-height: 1.7; color: #fff; }
+.rg-support-open .rg-talk p { font-size: 14px; line-height: 1.7; color: var(--text-hi); }
 .rg-support-open .rg-talk {
   padding: 24px 0;
   background: transparent;
   border-top-color: var(--res-control-border);
 }
 .rg-support-open .rg-talk .rg-eyebrow { display: block; margin-bottom: 12px; }
-.rg-support-open .rg-hotlines span { font-size: 14px; line-height: 1.5; color: #fff; }
+.rg-support-open .rg-hotlines span { font-size: 14px; line-height: 1.5; color: var(--text-hi); }
 .rg-support-open .rg-safety-law summary { font: 700 20px/1.3 var(--font-display); text-transform: uppercase; }
+
+.rg-support-numbers { display: grid; gap: 12px; }
+.rg-support .rg-safety-crisis {
+  --c: var(--neon-orange);
+  --action-accent: var(--neon-orange);
+  color: var(--text-hi) !important;
+  text-align: left;
+  white-space: normal;
+}
+.rg-support .rg-safety-crisis span { font-size: 14px; }
+.rg-support .rg-safety-crisis strong { font: 700 20px/1.4 var(--font-display); }
+
+.rg-emergency-numbers { margin-top: 12px; }
+
+.rg-talk-options { max-width: 680px; }
+.rg-talk-intro, .rg-talk-option p { color: var(--text-hi); font-size: 14px; line-height: 1.7; }
+.rg-talk-group { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--res-control-border); }
+.rg-talk-group h3 { font: 700 23px/1.2 var(--font-display); text-transform: uppercase; letter-spacing: .01em; margin: 0 0 18px; color: var(--text-hi); }
+.rg-talk-option p { margin: 10px 0 6px; }
+.rg-talk-options small { display: block; color: var(--res-caption); font-size: 12px; line-height: 1.5; }
+.rg-talk-option { padding-bottom: 12px; }
+
+.rg-multiselect-hint { margin: 10px 0 18px; color: var(--res-caption); font-size: 14px; }
+
+
+
+.rg-options .rg-all { grid-column: 1 / -1; margin-top: 4px; }
+.rg-options .rg-all::after { content: none; }
+
+.rg-board-logo { display: block; height: auto; margin: 22px 0 26px; }
+.rg-org-locations h3, .rg-org-programs h3 { font: 700 23px/1.2 var(--font-display); text-transform: uppercase; }
+.rg-org-section { padding: 18px 0; border-bottom: 1px solid var(--res-control-border); }
+.rg-org-section h4 { font: 700 20px/1.2 var(--font-display); text-transform: uppercase; color: var(--res-text); margin: 0 0 10px; }
+.rg-org-section p { margin-bottom: 12px; }
+.rg-org-section .pdxBtn { --c: var(--resource-accent); color: var(--text-hi); margin: 8px 10px 8px 0; }
+.rg-org-section .rg-safety-source { display: flex; }
+
+/* Resource service labels are descriptive, not extra filters. */
+.rg-service-tags { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0 12px; }
+.rg-service-tags .pdxBadge { color: var(--z-black); }
+.rg-category-safety .pdxBtn { color: var(--text-hi) !important; }
+.rg-category-safety .rg-service-tags .pdxBadge { background: var(--neon-orange); border-color: var(--neon-orange); color: var(--z-black); }
+
+.rg-directory-card .pdxPlace__cat:is([data-category-id="safety"], [data-category-id="harm-reduction"]) .pdxBadge,
+.rg-safety-prompt .pdxPlace__cat .pdxBadge { background: var(--neon-orange); border-color: var(--neon-orange); color: var(--z-black) !important; }
+:is(.rg-category-safety, .rg-category-youth, .rg-category-legal, .rg-category-arts, .rg-category-harm-reduction) .pdxBtn { color: var(--text-hi) !important; }
+.rg-category-youth .rg-service-tags .pdxBadge { background: var(--neon-orange); border-color: var(--neon-orange); color: var(--z-black); }
+
+.rg-options .rg-selection-control { display: grid; border: 1px solid var(--res-control-border); overflow: hidden; padding: 0; color: var(--text-hi); background: var(--res-input-surface); }
+.rg-selection-control label { display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 12px 8px; cursor: pointer; }
+.rg-selection-control label + label { border-left: 1px solid var(--res-control-border); }
+.rg-selection-control label:has(input:checked) { background: color-mix(in srgb, var(--neon-yellow) 12%, transparent); color: var(--neon-yellow); }
+.rg-selection-control input { margin: 0; accent-color: var(--neon-yellow); }
+.rg-selection-control label:focus-within { outline: 2px solid var(--neon-yellow); outline-offset: -3px; }
+.rg-empty { color: var(--res-secondary-text); grid-column: 1 / -1; padding: 16px 0; }
+
+.rg-phone-block { width: 100%; margin: 18px 0; }
+.rg-phone-block .rg-safety-crisis { --c: var(--resource-accent); --action-accent: var(--resource-accent); color: var(--text-hi) !important; border-radius: 999px; text-align: left; white-space: normal; min-height: 76px; padding: 14px 22px; }
+.rg-phone-block .rg-safety-crisis span { font: 600 15px/1.3 var(--font-display); letter-spacing: .05em; text-transform: uppercase; }
+.rg-phone-block .rg-safety-crisis strong { font: 800 25px/1.2 var(--font-display); letter-spacing: .01em; margin-top: 4px; }
+.rg-phone-block .rg-safety-crisis > svg { flex-shrink: 0; width: 22px; height: 22px; }
+.rg-phone-block .rg-phone-note { margin: 8px 22px 0; font-size: 13px; color: var(--res-secondary-text); }
+
+.rg-detail-tags .pdxBadge { color: var(--z-black); }
+.rg-category-tag:is([data-category-id="legal"], [data-category-id="arts"]) .pdxBadge,
+:is(.rg-category-legal, .rg-category-arts) .rg-service-tags .pdxBadge { color: var(--text-hi); }
+
+.rg-category-harm-reduction .rg-service-tags .pdxBadge { background: var(--neon-orange); border-color: var(--neon-orange); color: var(--z-black); }
+
+/* Category and service tags share one row and the same Badge component. */
+:is(.rg-directory-card, .rg-detail-tags) [data-category-id^="service-legal-"] .pdxBadge,
+:is(.rg-directory-card, .rg-detail-tags) [data-category-id^="service-arts-"] .pdxBadge { color: var(--text-hi); }
+:is(.rg-directory-card, .rg-detail-tags) [data-category-id="youth"] .pdxBadge,
+:is(.rg-directory-card, .rg-detail-tags) [data-category-id^="service-youth-"] .pdxBadge { background: var(--text-hi); border-color: var(--text-hi); color: var(--neon-red) !important; }
+.rg-category-youth .pdxPlace__body { border-color: var(--neon-red); }
+.rg-category-youth .pdxPlace__meta svg { color: var(--neon-red); }
+.rg-options button[style*="--res-accent: var(--text-hi)"] { border-color: var(--neon-red); color: var(--text-hi); }
+.rg-options button[style*="--res-accent: var(--text-hi)"] > svg { color: var(--neon-red); }
+
+/* ReZources: eight refinements from the guide's spacing, type and motion scales. */
+/* 1. Filter tiles use the 4px spacing scale and shared panel radius. */
+.rg-options { gap: var(--space-3); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.rg-options button { min-width: 0; gap: var(--space-2); padding: var(--space-3); border-radius: var(--radius-panel); }
+.rg-options button > svg { width: 20px; height: 20px; }
+
+/* 2. Bulk selection belongs to the same control family. */
+.rg-options .rg-selection-control { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; border-radius: var(--radius-panel); }
+.rg-selection-control label { gap: var(--space-2); font: var(--fw-bold) var(--chrome-md)/1.2 var(--font-display); letter-spacing: var(--tracking-chrome); }
+.rg-selection-control input { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* 3. Search is chrome, with a consistent icon and a generous touch target. */
+.resources-page .rg-search-trigger { padding: var(--space-3) var(--space-4); gap: var(--space-3); font: var(--fw-bold) var(--chrome-lg)/1.2 var(--font-display); letter-spacing: var(--tracking-chrome); text-transform: uppercase; }
+.rg-search-trigger > svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* 4. Result totals use the metadata role rather than competing with headings. */
+.rg-results .rg-count { font: var(--fw-medium) var(--meta)/var(--lh-meta) var(--font-body); color: var(--res-secondary-text); font-variant-numeric: tabular-nums; margin-block: var(--space-3) var(--space-6); }
+
+/* 5. Shared directory-card footers keep the card's spacing rhythm. */
+.rg-directory-footer { gap: var(--gap-card); }
+.rg-directory-footer .pdxBtn { min-height: 48px; }
+
+/* 6. Controls react at the guide's fast duration, with static calm equivalents. */
+.rg-options button, .rg-search-trigger, .rg-selection-control label { transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out); }
+.rg-options button:active, .rg-search-trigger:active { transform: scale(var(--press-scale)); }
+@media (prefers-reduced-motion: reduce) {
+  .rg-options button, .rg-search-trigger, .rg-selection-control label { transition: none; }
+  .rg-options button:active, .rg-search-trigger:active { transform: none; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) :is(.rg-options button, .rg-search-trigger, .rg-selection-control label) { transition: none; transform: none; }
+
+/* 7. Open cards only: distinguish the organization title from readable prose. */
+.rg-detail-primary > h2 { font-size: var(--display-2); font-weight: var(--fw-black); line-height: var(--lh-title); letter-spacing: var(--tracking-display); text-wrap: balance; overflow-wrap: anywhere; margin-bottom: var(--space-4); }
+.rg-detail-primary > p { font-size: var(--body-md); line-height: var(--lh-body); letter-spacing: var(--tracking-normal); }
+.rg-drawer .rg-org-section h4 { font-size: var(--title-md); line-height: var(--lh-title); font-weight: var(--fw-bold); margin-bottom: var(--space-3); }
+
+/* 8. Open cards only: consistent separation for programs, hours and contact actions. */
+.rg-drawer .rg-org-section { padding-block: var(--space-6); }
+.rg-drawer .rg-detail-meta { margin-block: var(--space-6); padding-top: var(--space-6); }
+.rg-drawer .rg-detail-meta p { margin: var(--space-2) 0 var(--space-4); }
+.rg-drawer .rg-phone-block { margin-block: var(--space-6); }
+.rg-drawer .rg-detail-actions { gap: var(--space-3); margin-block: var(--space-6); }
+@media (max-width: 600px) {
+  .rg-options button { font-size: var(--chrome-md); }
+  .rg-options button > span { min-width: 0; flex: 1; }
+  .rg-options button > i { flex-shrink: 0; }
+}
+
+.rg-directory-footer .rg-resource-map { width: 100%; margin: 0; }
+.rg-resource-map .rg-map-toggle { width: 100%; --c: var(--resource-accent); color: var(--text-hi); }
+.rg-resource-map-canvas > .directory-map-wrap { height: 100%; }
+
+.rg-detail-primary, .rg-detail-secondary { min-width: 0; }
+@media (min-width: 900px) {
+  .rg-resource-detail.rg-drawer-desktop { width: min(1040px, 94vw); }
+  .rg-resource-detail .rg-drawer-body { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: var(--space-8); align-items: start; padding: var(--space-12) var(--space-8) var(--space-8); }
+  .rg-resource-detail .rg-detail-secondary { border-left: 1px solid var(--res-control-border); padding-left: var(--space-8); }
+  .rg-resource-detail .rg-detail-secondary .rg-detail-meta { margin-top: 0; padding-top: 0; border-top: 0; }
+  .rg-resource-detail .rg-detail-logo .rg-logo { max-width: 100%; max-height: 120px; }
+}
+/* Full-width logo headers and a uniform closed-card footprint. */
+.resources-page .rg-cards { grid-auto-rows: 1fr; align-items: stretch; }
+.resources-page .rg-directory-card { height: 100%; }
+.resources-page .rg-directory-card .pdxPlace__body { padding: 0 0 var(--space-5); height: 100%; }
+.resources-page .rg-directory-card .pdxPlace__media {
+  height: 168px;
+  flex: 0 0 168px;
+  width: 100%;
+  margin: 0;
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 5%, transparent), transparent 100%);
+}
+.resources-page .rg-directory-card .pdxPlace__main { margin-inline: var(--space-5); }
+.resources-page .rg-directory-card .rg-directory-footer { margin-inline: var(--space-5); }
+
+/* Leave room for the floating close control above mobile card content. */
+.rg-resource-detail.rg-drawer-mobile .rg-detail-tags { padding-right: var(--space-8); }
+
+/* Official transparent asset includes white counters inside its black mark. */
+.rg-directory-card .pdxPlace__logo[src$="/business-oregon-official.png"],
+.rg-detail-logo .rg-logo[src$="/business-oregon-official.png"] { filter: invert(1); }
+
+.rg-resource-map .pdxBtn { --c: var(--resource-accent); color: var(--text-hi); }
+
+/* Give these combined icon/wordmarks enough room for their built-in titles. */
+.rg-detail-logo .rg-logo:is([src$="/energy-support-title.svg"], [src$="/housing-support-title.svg"]) {
+  width: 100%;
+  max-width: 320px;
+  max-height: 120px;
+}
+
+/* ReZources closed previews follow the Places family: identity, short preview, action. */
+.resources-page .rg-directory-card { --font-body: "Inter", system-ui, sans-serif; }
+.resources-page .rg-directory-card .pdxPlace__main { flex: 0 0 auto; }
+.resources-page .rg-directory-card .pdxPlace__name {
+  order: -1;
+  font-family: var(--font-display);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.resources-page .rg-directory-card .pdxPlace__rows:empty { display: none; }
+.resources-page .rg-directory-card .pdxPlace__badges { gap: var(--space-2); }
+.resources-page .rg-directory-card .pdxPlace__cat .pdxBadge {
+  min-height: 32px;
+  padding: 6px 10px !important;
+  border-radius: 8px !important;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  line-height: 1.15;
+  font-weight: 700 !important;
+  letter-spacing: var(--tracking-chrome);
+  white-space: normal;
+}
+.resources-page .rg-directory-card .pdxPlace__cat + .pdxPlace__cat .pdxBadge {
+  background: var(--panel-card) !important;
+  border: 1px solid var(--c) !important;
+  color: var(--text-hi) !important;
+}
+.resources-page .rg-directory-card .pdxPlace__desc {
+  font-family: var(--font-body);
+  color: var(--res-secondary-text);
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.resources-page .rg-directory-footer { padding-top: var(--space-2); }
+.resources-page .rg-directory-footer .pdxBtn { height: 44px; min-height: 44px; border-radius: 22px; }
+
+/* Continuity with the Places family; preserve the approved telephone controls. */
+.resources-page, .rg-overlay { --font-body: "Inter", system-ui, sans-serif; }
+.rg-phone-block, .rg-safety-crisis, .rg-safety-emergency { --font-body: "Barlow", sans-serif; }
+.rg-detail-tags { gap: 8px; }
+.rg-detail-tags .pdxBadge { min-height: 32px; padding: 6px 10px !important; border-radius: 8px !important; font: 700 14px/1.15 var(--font-display); letter-spacing: var(--tracking-chrome); white-space: normal; }
+.rg-detail-tags .rg-category-tag + .rg-category-tag .pdxBadge { background: var(--panel-card) !important; border: 1px solid var(--_c) !important; color: var(--text-hi) !important; }
+.rg-detail-actions > .pdxBtn:not([href^="tel:"]), .rg-org-section > .pdxBtn:not([href^="tel:"]) { --c: var(--resource-accent); min-height: 44px; border-radius: 22px; padding: 12px 16px; }
+.rg-detail-actions > a:not([href^="tel:"]), .rg-org-section .rg-safety-source { --action-accent: var(--resource-accent); border-color: var(--resource-accent); }
+.resources-page .rg-search-trigger, .rg-command [cmdk-input] { background: var(--res-input-surface); border: 1px solid var(--res-control-border); border-radius: 22px; min-height: 48px; padding: 12px 16px; }
+.resources-page .rg-search-trigger:focus-visible, .rg-command [cmdk-input]:focus-visible { outline: 2px solid var(--neon-yellow); outline-offset: 3px; }
+.rg-eyebrow, .rg-source-check { font-size: 12px; line-height: 1.5; }
+.rg-org-locations, .rg-org-programs { margin-top: 24px; }
+.rg-org-section h4 { margin-bottom: 12px; }
+.rg-detail-tags { margin-bottom: 16px; }
+.resources-page .rg-share, .resources-page .pdxPlace__share { min-height: 44px; padding-inline: 16px; gap: 8px; font: 700 14px/1.2 var(--font-display); }
+.resources-page .rg-share svg, .resources-page .pdxPlace__share svg { width: 16px; height: 16px; }
+.resources-page .rg-share:focus-visible, .resources-page .pdxPlace__share:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.rg-board-logo { width: min(100%, 800px); margin-block: 16px 24px; }
+
+/* Use the PlaceCard's existing glass shell once; keep its category bloom restrained. */
+.resources-page .rg-directory-card .pdxPlace__body { --dir-gm: 8; }
+.resources-page .rg-directory-card .pdxPlace__mediaGlow { opacity: .25; }
+.resources-page .rg-directory-card .pdxPlace__name { font-weight: 700; }
+.rg-resource-detail .rg-detail-primary > p { letter-spacing: normal; }
+.resources-page .rg-directory-card .pdxPlace__media { padding: 32px 24px 20px; }
+.resources-page .rg-directory-card .pdxPlace__logo { max-width: 100%; max-height: 116px; width: 100%; height: 116px; object-fit: contain; }
+.rg-resource-detail .rg-detail-logo .rg-logo { width: 100%; max-width: 360px; max-height: 144px; object-fit: contain; }
+.rg-resource-detail .rg-detail-logo { padding: 16px 24px; }
+
+/* Keep the illustrated hero compact; only empty asset margins are framed out. */
+.resources-page .rg-intro { padding-top: 32px; background: linear-gradient(to bottom, color-mix(in srgb, var(--z-black) 72%, transparent), color-mix(in srgb, var(--z-black) 52%, transparent) 75%, transparent); }
+.rg-board-logo-frame { width: min(100%, 640px); aspect-ratio: 2.5; overflow: hidden; margin: 24px 0 20px; }
+.rg-board-logo-frame .rg-board-logo { width: 100%; height: auto; margin: 0; transform: translateY(-16%); }
+.resources-page .rg-intro h1 { font-size: clamp(36px, 3.6vw, 52px); line-height: 1.02; margin: 0 0 16px; }
+.resources-page .rg-intro > p { position: static; max-width: 560px; margin: 0; font-size: 15px; line-height: 1.6; letter-spacing: normal; }
+.resources-page .rg-intro .rg-help { position: static; margin: 12px 0 0; }
+.resources-page .rg-intro > .rg-search-trigger { margin-top: 24px; }
+@media (max-width: 600px) {
+ .rg-board-logo-frame { margin-block: 20px 16px; }
+ .resources-page .rg-intro-top { gap: 12px; }
+ .resources-page .rg-intro-top > .rg-eyebrow { max-width: 190px; }
+}
+
+/* Board-style desktop composition: artwork and message share the hero row. */
+@media (min-width: 900px) {
+  .resources-page .rg-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    column-gap: clamp(32px, 4vw, 56px);
+    row-gap: 16px;
+    padding-block: 32px;
+    background: none;
+  }
+  .resources-page .rg-intro-top { grid-column: 1 / -1; margin-bottom: 16px; }
+  .resources-page .rg-board-logo-frame {
+    grid-column: 1;
+    grid-row: 2 / 5;
+    width: 100%;
+    align-self: center;
+    margin: 0;
+  }
+  .resources-page .rg-intro h1 {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: end;
+    margin: 16px 0 0;
+    font-size: clamp(38px, 3.5vw, 52px);
+  }
+  .resources-page .rg-intro > p {
+    grid-column: 2;
+    grid-row: 3;
+    font-size: 16px;
+    line-height: 1.55;
+    max-width: 42ch;
+  }
+  .resources-page .rg-intro .rg-help {
+    grid-column: 2;
+    grid-row: 4;
+    justify-self: start;
+    margin: 0 0 16px;
+  }
+  .resources-page .rg-intro > .rg-search-trigger { grid-column: 1 / -1; margin-top: 16px; }
+}
+
+/* One spacing rhythm: 8px within groups, 24px between groups, 40px between sections. */
+.resources-page .rg-wrap { padding-inline: clamp(20px, 4vw, 48px); }
+.resources-page .rg-step { gap: 16px; padding-bottom: 32px; }
+.resources-page .rg-step > div { min-width: 0; }
+.resources-page .rg-step h2 { margin: 8px 0 20px; }
+.resources-page .rg-multiselect-hint { margin: -8px 0 16px; }
+.resources-page .rg-options { gap: 12px; }
+.resources-page .rg-options button { height: auto; }
+.resources-page .rg-reassurance { padding-top: 24px; gap: 16px; }
+.resources-page .rg-results-head h2 { margin-block: 12px 16px; }
+.resources-page .rg-directory-card .pdxPlace__main,
+.resources-page .rg-directory-card .rg-directory-footer { margin-inline: 24px; }
+.rg-resource-detail .rg-detail-primary > p + p { margin-top: 12px; }
+.rg-resource-detail .rg-source-check { display: inline-flex; margin-top: 16px; gap: 8px; }
+.rg-resource-detail .rg-detail-logo { margin-block: 8px 24px; }
+@media (max-width: 600px) {
+ .resources-page .rg-step { grid-template-columns: 24px minmax(0, 1fr); gap: 12px; padding-bottom: 28px; }
+ .resources-page .rg-step-number { width: 24px; height: 24px; }
+ .resources-page .rg-step:first-child::before { left: 11px; top: 32px; }
+ .resources-page .rg-options { gap: 8px; }
+ .rg-resource-detail.rg-drawer-mobile .rg-drawer-body { padding: 48px 24px 32px; padding-bottom: max(32px, env(safe-area-inset-bottom)); }
+}
+
+.resources-page .rg-intro h1 .rg-word-hope {
+  background: linear-gradient(100deg, var(--neon-magenta) 0%, var(--neon-orange) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Shared-highlight motion adapted from ibelick/animated-tabs on 21st.dev. */
+.rg-mode--animated button { position: relative; isolation: isolate; }
+.rg-mode--animated button[aria-pressed="true"] { background: transparent; border-color: transparent; }
+.rg-mode-highlight { position: absolute; inset: -1px; border-radius: inherit; background: var(--neon-yellow); pointer-events: none; z-index: -1; }
+.rg-mode-label { position: relative; }
+.rg-safety-check { animation: none; }
+.rg-count-change { display: inline-block; animation: rgCountChange 160ms ease-out; }
+@keyframes rgCountChange { from { opacity: .5; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .rg-count-change { animation: none; } }
+:is(html.calm-mode, :root[data-calm="true"]) .rg-count-change { animation: none; }
+
+/* Dark Arts and Rights tags keep readable white labels in both card states. */
+.resources-page .rg-directory-card .pdxPlace__cat:is([data-category-id="arts"], [data-category-id="legal"]) .pdxBadge,
+.rg-detail-tags .rg-category-tag:is([data-category-id="arts"], [data-category-id="legal"]) .pdxBadge {
+  color: var(--text-hi) !important;
+}
+
+/* Selection controls label contrast; icons and borders retain category identity. */
+.resources-page .rg-options button[data-category-id][aria-pressed="true"] > span {
+  color: var(--text-hi);
+}
+
+/* Give open cards breathing room without enlarging their contact controls. */
+.rg-overlay.rg-drawer-desktop .rg-drawer-body {
+  padding-top: 72px;
+  padding-bottom: 64px;
+}
+.rg-overlay.rg-drawer-mobile .rg-drawer-body {
+  padding-top: 48px;
+}
+.rg-overlay.rg-drawer-desktop .rg-drawer-body { padding-inline: 48px; width: 100%; }
+.rg-overlay.rg-drawer-mobile .rg-drawer-body { padding-inline: 24px; width: 100%; }
+
+/* Position the message as one unit rather than stretching its individual rows. */
+.resources-page .rg-intro-message { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; min-width: 0; }
+.resources-page .rg-intro-message h1 { margin: 0; }
+.resources-page .rg-intro-message p { margin: 0; max-width: 42ch; font-size: 16px; line-height: 1.55; letter-spacing: normal; text-wrap: pretty; }
+.resources-page .rg-intro-message .rg-help { position: static; margin: 4px 0 0; }
+@media (min-width: 900px) {
+ .resources-page .rg-intro .rg-board-logo-frame { grid-row: 2; }
+ .resources-page .rg-intro-message { grid-column: 2; grid-row: 2; align-self: center; padding-block: 16px; }
+}
+@media (max-width: 600px) {
+}
+@media (min-width: 900px) {
+  .resources-page .rg-intro-message {
+    align-items: flex-end;
+    text-align: right;
+  }
+  .resources-page .rg-intro-message .rg-help { align-self: flex-end; }
+}
+
+@media (min-width: 900px) {
+  .resources-page .rg-intro-message { transform: translateY(clamp(24px, 3vw, 40px)); }
+}
+.rg-safety-expand {
+  display: flex; align-items: center; justify-content: center; width: 100%;
+  min-height: 44px; margin-top: 12px; padding: 8px 16px;
+  border: 0; background: transparent; color: var(--text-hi);
+  font: 700 14px/1.3 var(--font-display); text-transform: uppercase; letter-spacing: .04em;
+  cursor: pointer;
+}
+
+/* Keep wide wordmarks clear of the card edges without shrinking compact marks. */
+.resources-page .rg-directory-card .pdxPlace__media {
+  padding-inline: clamp(32px, 8%, 48px);
+}
+.rg-resource-detail .rg-detail-logo {
+  padding-inline: clamp(32px, 8%, 48px);
+}
+
+/* These source canvases have generous internal margins; size the visible mark optically. */
+.resources-page .rg-directory-card .pdxPlace__logo:is([src$="/oregon-state-bar-transparent.png"], [src$="/ogalla-transparent.png"]),
+.rg-resource-detail .rg-detail-logo .rg-logo:is([src$="/oregon-state-bar-transparent.png"], [src$="/ogalla-transparent.png"]) {
+  transform: scale(1.65);
+  transform-origin: center;
+}
+
+/* Open cards respond to their own usable space, including short windows. */
+.rg-overlay.rg-drawer { container-type: inline-size; overflow: hidden; }
+.rg-overlay.rg-drawer .rg-drawer-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  display: block;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-block: clamp(48px, 8dvh, 72px) clamp(32px, 7dvh, 64px);
+  padding-inline: clamp(24px, 4vw, 48px);
+}
+.rg-resource-detail .rg-detail-secondary { padding-left: 0; border-left: 0; }
+.rg-resource-detail .rg-detail-secondary .rg-detail-meta { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--res-control-border); }
+@container (min-width: 850px) {
+  .rg-overlay.rg-drawer .rg-drawer-body:has(.rg-detail-primary) { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .rg-resource-detail .rg-detail-secondary { border-left: 1px solid var(--res-control-border); padding-left: 32px; }
+  .rg-resource-detail .rg-detail-secondary .rg-detail-meta { margin-top: 0; padding-top: 0; border-top: 0; }
+}
+.rg-overlay.rg-drawer-mobile .rg-drawer-body { padding: 48px 24px calc(32px + env(safe-area-inset-bottom, 0px)); }
+@media (max-height: 500px) {
+  .rg-overlay.rg-drawer .rg-drawer-body { padding-top: 40px; padding-bottom: 24px; }
+}
+
+/* Content-sized sheets, bounded by the viewport; long content scrolls inside. */
+.rg-overlay.rg-drawer-desktop {
+  top: 16px;
+  bottom: auto;
+}
+.rg-overlay.rg-drawer-desktop .rg-drawer-body {
+  height: auto;
+}
+.rg-overlay.rg-drawer-mobile {
+  height: auto;
+}
+
+/* A compact safety banner with one clear urgent action and a disclosure row. */
+.rg-safety-summary .pdxPlace__body { padding: 24px 28px; }
+.rg-safety-summary .pdxPlace__seam { display: none; }
+.rg-safety-summary .rg-safety-content { display: grid; grid-template-columns: minmax(0, 1fr) 240px; column-gap: 32px; row-gap: 12px; }
+.rg-safety-summary .rg-safety-heading { margin: 0; gap: 16px; align-items: center; }
+.rg-safety-summary .rg-safety-heading h3 { margin-top: 8px; }
+.rg-safety-summary .pdxPlace__cat .pdxBadge { font-size: 12px; letter-spacing: .06em; }
+.rg-safety-summary .rg-safety-lead { grid-column: 1; margin: 0; max-width: 58ch; font-size: 15px; }
+.rg-safety-summary .rg-safety-emergency { grid-column: 2; grid-row: 1 / 3; align-self: center; margin: 0; }
+.rg-safety-summary .rg-safety-expand { grid-column: 1 / -1; justify-content: space-between; gap: 16px; border-top: 1px solid var(--res-control-border); padding: 16px 0 0; margin-top: 8px; text-align: left; font-size: 15px; }
+.rg-safety-expand[aria-expanded="true"] svg { transform: rotate(180deg); }
+.rg-safety-summary .rg-safety-content > div[id] { grid-column: 1 / -1; }
+@media (max-width: 700px) {
+ .rg-safety-summary .pdxPlace__body { padding: 20px; }
+ .rg-safety-summary .rg-safety-content { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+ .rg-safety-summary .rg-safety-emergency { grid-column: 1; grid-row: auto; }
+ .rg-safety-summary .rg-safety-heading h3 { font-size: 26px; }
+ .rg-safety-summary .rg-safety-expand { margin-top: 0; }
+}
+
+/* Give search its own centered breathing room within the hero. */
+.resources-page .rg-intro > .rg-search-trigger {
+  width: 70%;
+  justify-self: center;
+  margin: 40px auto 24px;
+}
+@media (max-width: 600px) {
+  .resources-page .rg-intro > .rg-search-trigger kbd { display: none; }
+}
+
+/* Clear selection and concise result previews. */
+.resources-page .rg-options button[data-category-id][aria-pressed="false"] > span { color: var(--text-lo); }
+.resources-page .rg-options button[data-category-id] > i { display: grid; place-items: center; width: 18px; height: 18px; flex: 0 0 18px; border: 1px solid currentColor; border-radius: 4px; background: transparent; }
+.resources-page .rg-options button[data-category-id] > i svg { width: 14px; height: 14px; color: var(--text-hi); }
+.rg-command [cmdk-item] > span { min-width: 0; }
+.rg-command [cmdk-item] .rg-search-service { white-space: normal; line-height: 1.4; margin-top: 4px; }
+.rg-command [cmdk-item] .rg-search-location { color: var(--text-lo); font-size: 12px; margin-top: 4px; white-space: normal; }
+.rg-overlay.rg-drawer .rg-close { position: absolute; top: 12px; right: 12px; z-index: 10; width: 44px; height: 44px; background: var(--z-black); }
+.rg-overlay.rg-drawer .rg-drawer-body { scroll-padding-block: 64px 32px; }
+.rg-overlay.rg-drawer-mobile .rg-drawer-body { padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+
+/* Optical corrections measured from transparent source-canvas bounds. */
+.resources-page .rg-directory-card .pdxPlace__logo[src="/resources-logos/pflag-portland.png"],
+.rg-resource-detail .rg-detail-logo .rg-logo[src="/resources-logos/pflag-portland.png"] { transform: scale(1.10); transform-origin: center; }
+.resources-page .rg-directory-card .pdxPlace__logo[src="/resources-logos/oregon-pride-in-business.png"],
+.rg-resource-detail .rg-detail-logo .rg-logo[src="/resources-logos/oregon-pride-in-business.png"] { transform: scale(1.19); transform-origin: center; }
+.resources-page .rg-directory-card .pdxPlace__logo[src="/resources-logos/portland-area-theatre-alliance-transparent.png"],
+.rg-resource-detail .rg-detail-logo .rg-logo[src="/resources-logos/portland-area-theatre-alliance-transparent.png"] { transform: scale(1.11); transform-origin: center; }
+
+/* Responsive composition: deliberate desktop columns and a full-width mobile chooser. */
+.resources-page .rg-wrap { max-width: 1248px; }
+.resources-page .rg-results-head { padding-bottom: 20px; }
+@media (min-width: 1000px) {
+ .resources-page .rg-intro { column-gap: 48px; padding-top: 32px; }
+ .resources-page .rg-controls[data-mode="directory"] { display: grid; grid-template-columns: minmax(280px, .75fr) minmax(0, 1.65fr); column-gap: 48px; row-gap: 24px; align-items: start; }
+ .resources-page .rg-step--intent { grid-column: 1; grid-row: 1; padding-bottom: 0; }
+ .resources-page .rg-step--intent::before { display: none; }
+ .resources-page .rg-step--categories { grid-column: 2; grid-row: 1 / 3; padding-bottom: 0; }
+ .resources-page .rg-controls[data-mode="directory"] > .rg-reassurance { grid-column: 1; grid-row: 2; align-self: start; margin: 0 0 0 52px; padding-top: 20px; }
+ .resources-page .rg-controls .rg-mode { width: 100%; max-width: none; }
+ .resources-page .rg-controls .rg-mode button { min-height: 48px; }
+ .resources-page .rg-layout { gap: 48px; padding-top: 32px; }
+ .resources-page .rg-options button { min-height: 56px; padding: 12px; }
+ .resources-page .rg-cards { gap: 28px; }
+ .resources-page .rg-directory-card .pdxPlace__media { height: 176px; flex-basis: 176px; }
+}
+@media (min-width: 601px) and (max-width: 999px) {
+ .resources-page .rg-wrap { padding-inline: 32px; }
+ .resources-page .rg-intro-message { max-width: 560px; }
+ .resources-page .rg-layout { gap: 32px; }
+ .resources-page .rg-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+ .resources-page .rg-wrap { padding-inline: 20px; }
+ .resources-page .rg-intro { padding-top: 20px; padding-bottom: 12px; background: none; }
+ .resources-page .rg-board-logo-frame { margin: 16px auto 20px; }
+ .resources-page .rg-intro-message { gap: 12px; }
+ .resources-page .rg-intro-message h1 { font-size: clamp(32px, 8.7vw, 40px); }
+ .resources-page .rg-intro-message p { line-height: 1.5; }
+ .resources-page .rg-intro > .rg-search-trigger { min-width: min(100%, 248px); gap: 8px; }
+ .resources-page .rg-layout { padding-top: 24px; }
+ .resources-page .rg-step { column-gap: 12px; row-gap: 0; }
+ .resources-page .rg-step h2 { font-size: 26px; margin-block: 6px 16px; }
+ .resources-page .rg-step--categories > div > :is(.rg-eyebrow,h2,.rg-multiselect-hint) { grid-column: 2; }
+ .resources-page .rg-options button { line-height: 1.2; }
+ .resources-page .rg-options button > svg { width: 18px; height: 18px; }
+ .resources-page .rg-options button[data-category-id] > i { width: 16px; height: 16px; flex-basis: 16px; }
+ .resources-page .rg-reassurance { margin: 0; padding-top: 20px; }
+ .resources-page .rg-results-head h2 { font-size: 34px; margin-block: 8px 12px; }
+ .resources-page .rg-directory-card .pdxPlace__media { height: 156px; flex-basis: 156px; padding-block: 28px 16px; }
+ .resources-page .rg-directory-card .pdxPlace__main, .resources-page .rg-directory-card .rg-directory-footer { margin-inline: 20px; }
+ .resources-page .rg-directory-card .pdxPlace__name { font-size: 26px; }
+ .resources-page .rg-directory-card .pdxPlace__body { gap: 16px; }
+ .resources-page .rg-selection-control label { padding-inline: 8px; }
+}
+@media (min-width: 1000px) {
+ .resources-page .rg-controls[data-mode="directory"] { grid-template-rows: min-content 1fr; }
+}
+
+/* Shared readable type roles and a consistent section rhythm. */
+.resources-page .rg-eyebrow, .rg-resource-detail .rg-eyebrow { font: 600 12px/1.5 var(--font-mono); letter-spacing: .08em; }
+.resources-page .rg-intro-top > .rg-eyebrow { font-size: 12px; }
+.resources-page .rg-reassurance p, .resources-page .rg-multiselect-hint,
+.resources-page .rg-count, .rg-resource-detail .rg-source-check,
+.rg-resource-detail .rg-safety-source { font: 400 14px/1.55 var(--font-body); letter-spacing: normal; }
+.resources-page .rg-directory-card .pdxPlace__desc { font-size: 16px; }
+.rg-resource-detail .rg-detail-primary > p, .rg-resource-detail .rg-org-section > p,
+.rg-resource-detail .rg-detail-meta > p { font-size: 16px; line-height: 1.6; letter-spacing: normal; }
+.rg-resource-detail .rg-detail-primary > h2 { font-size: clamp(32px, 3.2vw, 44px); }
+.rg-resource-detail .rg-org-section h4 { font: 700 22px/1.2 var(--font-display); }
+.resources-page .rg-results-head { margin-bottom: 8px; }
+.rg-resource-detail .rg-org-locations, .rg-resource-detail .rg-org-programs { margin-top: 32px; }
+
+/* Floating card shell, centered on desktop and inset from the viewport. */
+.rg-overlay.rg-drawer {
+ --rg-shell-accent: var(--resource-accent);
+ border: 1px solid color-mix(in srgb, var(--rg-shell-accent) 60%, var(--res-control-border));
+ box-shadow: 0 24px 64px color-mix(in srgb, var(--z-black) 65%, transparent), inset 0 1px 0 color-mix(in srgb, var(--text-hi) 18%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--rg-shell-accent) 24%, transparent);
+}
+.rg-overlay.rg-drawer-desktop { height: fit-content; border-radius: 24px; }
+.rg-overlay.rg-drawer:not(.rg-safety-drawer):is(.rg-category-youth, .rg-category-mental-health) { --rg-shell-accent: var(--neon-cyan); }
+.rg-overlay.rg-drawer:not(.rg-safety-drawer):is(.rg-category-youth, .rg-category-mental-health) .rg-drawer-handle { background: var(--neon-cyan); }
+.rg-overlay.rg-drawer:not(.rg-safety-drawer):is(.rg-category-youth, .rg-category-mental-health) .rg-detail-meta { border-color: color-mix(in srgb, var(--neon-cyan) 30%, transparent); }
+.rg-overlay.rg-drawer:not(.rg-safety-drawer):is(.rg-category-youth, .rg-category-mental-health) .rg-detail-meta > .rg-eyebrow { color: var(--neon-cyan); }
+@media (max-width: 600px) {
+ .resources-page .rg-layout { gap: 32px; }
+}
+@media (max-height: 500px) and (min-width: 601px) {
+ .rg-overlay.rg-drawer-desktop { inset-block: 12px; max-height: calc(100dvh - 24px); }
+ .rg-overlay.rg-drawer-desktop .rg-drawer-body { max-height: calc(100dvh - 26px); }
+}
+
+/* Let display type and supporting copy breathe without changing phone controls. */
+.resources-page .rg-intro-message h1 { line-height: 1.15; letter-spacing: .005em; }
+.resources-page .rg-step h2,
+.resources-page .rg-results-head h2 { line-height: 1.2; letter-spacing: .01em; }
+.resources-page .rg-directory-card .pdxPlace__name {
+  letter-spacing: .015em;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+.resources-page .rg-directory-card .pdxPlace__desc { letter-spacing: normal; }
+.rg-resource-detail .rg-detail-primary > h2 { letter-spacing: .01em; margin-bottom: 24px; text-wrap: pretty; }
+.rg-resource-detail .rg-org-section h4,
+.rg-resource-detail .rg-org-locations h3,
+.rg-resource-detail .rg-org-programs h3 { line-height: 1.3; letter-spacing: .015em; }
+.rg-resource-detail .rg-detail-primary > p,
+.rg-resource-detail .rg-org-section > p,
+.rg-resource-detail .rg-detail-meta > p { line-height: 1.75; margin-bottom: 16px; }
+
+/* Keep the entire open-card shell in view; content scrolls within its bounds. */
+.rg-overlay.rg-drawer-desktop {
+  inset: max(16px, env(safe-area-inset-top, 0px)) 0 max(16px, env(safe-area-inset-bottom, 0px));
+  margin: auto;
+  width: min(1120px, calc(100% - 32px));
+  max-width: calc(100% - 32px);
+  max-height: calc(100dvh - max(16px, env(safe-area-inset-top, 0px)) - max(16px, env(safe-area-inset-bottom, 0px)));
+  box-sizing: border-box;
+}
+.rg-overlay.rg-drawer-desktop .rg-drawer-body {
+  max-height: calc(100dvh - max(16px, env(safe-area-inset-top, 0px)) - max(16px, env(safe-area-inset-bottom, 0px)) - 2px);
+}
+.rg-overlay.rg-drawer-mobile {
+  left: max(8px, env(safe-area-inset-left, 0px));
+  right: max(8px, env(safe-area-inset-right, 0px));
+  bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  width: auto;
+  max-width: calc(100% - 16px);
+  border-radius: 24px;
+  max-height: calc(100dvh - max(16px, env(safe-area-inset-top, 0px)) - max(8px, env(safe-area-inset-bottom, 0px)));
+}
+.rg-overlay.rg-drawer-mobile .rg-drawer-body {
+  max-height: calc(100dvh - max(16px, env(safe-area-inset-top, 0px)) - max(8px, env(safe-area-inset-bottom, 0px)) - 32px);
+}
+
+/* Full-width chooser removes the empty desktop sidebar and preserves stable mode placement. */
+.resources-page .rg-step--categories, .resources-page .rg-safety-check { overflow: hidden; }
+@media (min-width: 1000px) {
+ .resources-page .rg-controls[data-mode] { display: flex; flex-direction: column; gap: 24px; }
+ .resources-page .rg-controls .rg-step { width: 100%; padding-bottom: 0; }
+ .resources-page .rg-step--intent > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 480px); column-gap: 32px; align-items: center; }
+ .resources-page .rg-step--intent .rg-eyebrow { grid-column: 1; }
+ .resources-page .rg-step--intent h2 { grid-column: 1; margin-bottom: 0; }
+ .resources-page .rg-controls .rg-mode { grid-column: 2; grid-row: 1 / 3; flex-direction: row; }
+ .resources-page .rg-safety-check { grid-column: 1 / -1; }
+ .resources-page .rg-controls[data-mode="directory"] > .rg-reassurance,
+ .resources-page .rg-controls[data-mode="talk"] > .rg-reassurance { width: calc(100% - 52px); margin: 0 0 0 52px; padding-top: 16px; }
+ .resources-page .rg-reassurance p { max-width: none; }
+ .resources-page .rg-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+ .resources-page .rg-options .rg-selection-control { grid-column: 2 / -1; margin-top: 0; }
+}
+
+/* Center the filter matrix on the page, independent of the numbered heading rail. */
+@media (min-width: 601px) {
+ .resources-page .rg-step--categories > div { display: contents; }
+ .resources-page .rg-step--categories > div > :is(.rg-eyebrow, h2, .rg-multiselect-hint) { grid-column: 2; }
+ .resources-page .rg-step--categories { row-gap: 0; }
+ .resources-page .rg-step--categories .rg-options { grid-column: 1 / -1; width: 100%; margin-top: 8px; }
+}
+@media (min-width: 1000px) {
+ .resources-page .rg-controls[data-mode] > .rg-reassurance { width: 100%; margin-inline: 0; }
+}
+
+/* Larger reading scale, with room around each type role. Phone controls retain their recipe. */
+.resources-page .rg-eyebrow, .rg-resource-detail .rg-eyebrow,
+.resources-page .rg-intro-top > .rg-eyebrow { font-size: 14px; line-height: 1.6; }
+.resources-page .rg-intro-message p,
+.resources-page .rg-directory-card .pdxPlace__desc,
+.rg-resource-detail .rg-detail-primary > p,
+.rg-resource-detail .rg-org-section > p,
+.rg-resource-detail .rg-detail-meta > p { font-size: 18px; line-height: 1.7; }
+.resources-page .rg-reassurance p, .resources-page .rg-multiselect-hint,
+.resources-page .rg-count, .rg-resource-detail .rg-source-check,
+.rg-resource-detail .rg-safety-source,
+.rg-safety-check p, .rg-talk-intro, .rg-talk-option p,
+.rg-support-open .rg-talk p { font-size: 16px; line-height: 1.65; }
+.resources-page .rg-step h2 { font-size: 31px; line-height: 1.25; }
+.resources-page .rg-directory-card .pdxPlace__name { font-size: 31px; }
+.rg-resource-detail .rg-org-section h4 { font-size: 25px; }
+.rg-resource-detail .rg-org-locations h3, .rg-resource-detail .rg-org-programs h3,
+.rg-talk-group h3 { font-size: 26px; line-height: 1.35; margin-bottom: 22px; }
+.rg-safety-check h3 { font-size: 28px; line-height: 1.3; }
+.rg-safety-summary .rg-safety-heading h3 { font-size: 31px; line-height: 1.25; }
+.rg-safety-summary .rg-safety-lead, .rg-safety-summary .rg-safety-expand { font-size: 17px; line-height: 1.6; }
+.resources-page .rg-options button { font-size: 18px; min-height: 64px; padding: 16px; }
+.resources-page .rg-options button > span { line-height: 1.4; letter-spacing: .03em; }
+.resources-page .rg-selection-control label { font-size: 18px; min-height: 60px; padding: 16px 12px; line-height: 1.4; }
+.resources-page .rg-mode button { font-size: 18px; line-height: 1.4; padding: 14px 18px; }
+.resources-page .rg-search-trigger { font-size: 20px; min-height: 56px; padding-block: 16px; }
+.resources-page .rg-share, .resources-page .pdxPlace__share { font-size: 16px; }
+.rg-resource-detail .rg-detail-tags .pdxBadge,
+.resources-page .rg-directory-card .pdxPlace__cat .pdxBadge { font-size: 16px; min-height: 36px; line-height: 1.4; padding: 8px 12px !important; }
+.resources-page .rg-directory-card .pdxPlace__body { gap: 20px; padding-bottom: 28px; }
+.rg-talk-options small, .rg-drawer .rg-food-finder-caption { font-size: 15px; line-height: 1.65; }
+@media (max-width: 600px) {
+ .resources-page .rg-intro-top > .rg-eyebrow { font-size: 13px; }
+ .resources-page .rg-intro-message p { font-size: 17px; }
+ .resources-page .rg-step h2, .resources-page .rg-directory-card .pdxPlace__name { font-size: 29px; }
+ .rg-resource-detail .rg-org-section h4 { font-size: 23px; }
+ .rg-safety-summary .rg-safety-heading h3 { font-size: 29px; }
+ .resources-page .rg-options button { font-size: 16px; min-height: 72px; }
+ .resources-page .rg-selection-control label { font-size: 15px; padding: 14px 8px; }
+ .resources-page .rg-mode button { font-size: 16px; padding: 14px 10px; }
+ .resources-page .rg-intro > .rg-search-trigger { font-size: 18px; }
+ .resources-page .rg-directory-card .pdxPlace__body { padding-bottom: 24px; }
+}
+
+/* Intent switch and category filters share one responsive label scale. */
+.resources-page { --rg-filter-label-size: 18px; }
+.resources-page .rg-mode button,
+.resources-page .rg-options button {
+ font-family: var(--font-display);
+ font-size: var(--rg-filter-label-size);
+ font-weight: 700;
+ line-height: 1.4;
+ letter-spacing: .03em;
+}
+@media (max-width: 600px) {
+ .resources-page { --rg-filter-label-size: 16px; }
+}
+
+/* Beam Search inspiration: https://21st.dev/@arihantcodes_1f7b8c4d/components/beam-search
+   Adapted to the existing command search, Zaylist tokens, and calm-mode behavior. */
+.resources-page .rg-intro > .rg-search-trigger {
+ position: relative;
+ isolation: isolate;
+ overflow: hidden;
+ padding: 18px 24px;
+ background: var(--glass-card-bg);
+ backdrop-filter: blur(16px);
+ box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 8%, transparent);
+ transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.resources-page .rg-search-trigger::after {
+ content: "";
+ position: absolute;
+ pointer-events: none;
+ bottom: 0;
+ left: 0;
+ width: 40%;
+ height: 2px;
+ opacity: 0;
+ background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-yellow), transparent);
+ transition: opacity 180ms ease;
+}
+.resources-page .rg-search-trigger:is(:hover, :focus-visible) {
+ border-color: color-mix(in srgb, var(--neon-yellow) 65%, var(--res-control-border));
+}
+.resources-page .rg-search-trigger:is(:hover, :focus-visible)::after {
+ opacity: 1;
+ animation: rg-search-beam 2.8s ease-in-out infinite alternate;
+}
+@keyframes rg-search-beam { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+.resources-page .rg-search-trigger kbd { padding: 6px 8px; border-radius: 6px; font-size: 12px; }
+@media (max-width: 600px) {
+ .resources-page .rg-intro > .rg-search-trigger { padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .resources-page .rg-search-trigger::after { animation: none !important; transition: none; left: 30%; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .resources-page .rg-search-trigger::after { animation: none !important; transition: none; left: 30%; }
+
+/* Reduce closed-card hover movement by 80%, without changing layout dimensions. */
+.resources-page .rg-directory-card.pdxPlace--clickable:hover { transform: translateY(-1.2px) !important; }
+@media (prefers-reduced-motion: reduce) {
+ .resources-page .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .resources-page .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; }
+
+/* Balanced search and chooser composition across desktop and mobile. */
+.resources-page .rg-intro > .rg-search-trigger { margin-block: 96px 72px; }
+.resources-page .rg-controls .rg-step { column-gap: 16px; row-gap: 0; }
+.resources-page .rg-step--categories > div { display: block; }
+.resources-page .rg-step--categories .rg-options { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.resources-page .rg-options .rg-selection-control { grid-column: 1 / -1; }
+.resources-page .rg-step h2 { margin-block: 8px 12px; }
+.resources-page .rg-multiselect-hint { margin-block: 0; }
+.resources-page .rg-step--intent > div { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.resources-page .rg-step--intent .rg-mode { flex-direction: row; }
+.resources-page .rg-step--intent .rg-safety-check { width: min(100%, 640px); text-align: left; }
+.resources-page .rg-step--intent::before { display: none; }
+@media (max-width: 600px) {
+ .resources-page .rg-intro > .rg-search-trigger { margin-block: 48px 40px; }
+ .resources-page .rg-controls[data-mode] { display: flex; flex-direction: column; }
+ .resources-page .rg-controls .rg-step { grid-template-columns: 24px minmax(0, 1fr); column-gap: 12px; padding-bottom: 0; }
+ .resources-page .rg-step--intent > div { align-items: flex-start; text-align: left; }
+ .resources-page .rg-step--intent .rg-mode { width: 100%; }
+ .resources-page .rg-options button { gap: 8px; padding: 14px 10px; }
+ .resources-page .rg-options button > span { min-width: 0; overflow-wrap: anywhere; }
+ .resources-page .rg-options button > svg, .resources-page .rg-options button > i { flex-shrink: 0; }
+ .resources-page .rg-controls[data-mode] > .rg-reassurance { margin-left: 36px; }
+}
+@media (min-width: 601px) {
+ .resources-page .rg-controls .rg-step { padding-right: 52px; box-sizing: border-box; }
+ .resources-page .rg-controls[data-mode] > .rg-reassurance { width: calc(100% - 104px); }
+}
+@media (max-width: 600px) {
+ .resources-page .rg-step--categories > div { display: contents; }
+ .resources-page .rg-step--categories .rg-options { grid-column: 1 / -1; }
+ .resources-page .rg-controls[data-mode] > .rg-reassurance { width: 100%; margin-inline: 0; }
+}
+
+/* The board logo is the sole centered hero heading. */
+.resources-page .rg-intro .rg-board-logo-frame {
+ grid-column: 1 / -1;
+ justify-self: center;
+ width: min(100%, 640px);
+ margin: 24px auto 20px;
+}
+
+/* Readable intent labels and consistent chooser spacing. */
+.resources-page .rg-step--intent .rg-mode {
+ padding: 6px;
+ gap: 6px;
+ background: var(--z-black);
+}
+.resources-page .rg-controls .rg-mode button {
+ padding: 16px 20px;
+ font-size: 20px;
+ font-weight: 700;
+ line-height: 1.4;
+ letter-spacing: .045em;
+ text-shadow: none;
+}
+.resources-page .rg-mode button[aria-pressed="true"] { color: var(--z-black); }
+.resources-page .rg-mode button[aria-pressed="false"] { color: var(--text-hi); }
+.resources-page .rg-mode-label { display: block; text-wrap: balance; }
+.resources-page .rg-controls .rg-step h2 { margin-block: 10px 12px; }
+.resources-page .rg-step--categories .rg-multiselect-hint { margin-block: 0; line-height: 1.65; }
+.resources-page .rg-step--categories .rg-options { margin-top: 24px; gap: 14px; }
+.resources-page .rg-step--intent .rg-safety-check { margin-top: 28px; padding-top: 28px; padding-bottom: 4px; }
+.resources-page .rg-safety-check p { margin-block: 12px 24px; }
+.resources-page .rg-safety-check > div { gap: 16px; }
+.resources-page .rg-controls[data-mode] > .rg-reassurance { padding-top: 24px; }
+@media (max-width: 600px) {
+ .resources-page .rg-step--intent .rg-mode { padding: 5px; gap: 4px; }
+ .resources-page .rg-controls .rg-mode button { font-size: 18px; padding: 14px 8px; letter-spacing: .025em; }
+ .resources-page .rg-step--categories .rg-options { margin-top: 20px; gap: 10px; }
+ .resources-page .rg-step--intent .rg-safety-check { margin-top: 24px; padding-top: 24px; }
+ .resources-page .rg-controls[data-mode] > .rg-reassurance { padding-top: 20px; }
+}
+
+/* One centered hierarchy from search through category selection. */
+.resources-page .rg-controls[data-mode] {
+ position: relative;
+ isolation: isolate;
+}
+.resources-page .rg-controls::before {
+ content: "";
+ position: absolute;
+ inset: -24px -16px;
+ z-index: -1;
+ pointer-events: none;
+ background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--z-black) 64%, transparent), color-mix(in srgb, var(--z-black) 36%, transparent) 55%, transparent 85%);
+}
+.resources-page .rg-controls .rg-step {
+ display: grid;
+ grid-template-columns: minmax(0, 1fr);
+ padding: 0;
+ gap: 0;
+}
+.resources-page .rg-controls .rg-step > div { display: contents; }
+.resources-page .rg-controls .rg-step-number {
+ grid-column: 1;
+ grid-row: 1;
+ justify-self: center;
+ align-self: center;
+ margin-right: 192px;
+}
+.resources-page .rg-controls .rg-step--categories .rg-step-number { margin-right: 266px; }
+.resources-page .rg-controls .rg-step .rg-eyebrow {
+ grid-column: 1;
+ grid-row: 1;
+ justify-self: center;
+ min-height: 32px;
+ display: flex;
+ align-items: center;
+}
+.resources-page .rg-controls .rg-step h2 {
+ grid-column: 1;
+ text-align: center;
+ margin: 12px 0 0;
+}
+.resources-page .rg-controls .rg-multiselect-hint {
+ grid-column: 1;
+ text-align: center;
+ margin: 12px 0 0;
+}
+.resources-page .rg-step--intent .rg-mode {
+ grid-column: 1;
+ grid-row: auto;
+ justify-self: center;
+ width: min(100%, 560px);
+ border-radius: 18px;
+ border-color: color-mix(in srgb, var(--neon-yellow) 28%, var(--res-control-border));
+}
+.resources-page .rg-controls .rg-mode button { min-height: 52px; border-radius: 12px; }
+.resources-page .rg-intro > .rg-search-trigger {
+ border-radius: 18px;
+ min-height: 66px;
+ margin-bottom: 24px;
+ border-color: color-mix(in srgb, var(--neon-yellow) 28%, var(--res-control-border));
+}
+.resources-page .rg-intro { padding-bottom: 0; }
+.resources-page .rg-layout { padding-top: 24px; }
+.resources-page .rg-controls .rg-step--categories .rg-options { grid-column: 1; }
+.resources-page .rg-controls[data-mode] > .rg-reassurance { margin-inline: 0; }
+.resources-page .rg-step--intent .rg-safety-check { grid-column: 1; justify-self: center; }
+@media (max-width: 600px) {
+ .resources-page .rg-controls::before { inset-inline: -8px; }
+ .resources-page .rg-controls .rg-step-number { margin-right: 192px; }
+ .resources-page .rg-controls .rg-step--categories .rg-step-number { margin-right: 266px; }
+ .resources-page .rg-controls .rg-step .rg-eyebrow { padding-left: 30px; }
+ .resources-page .rg-intro > .rg-search-trigger { width: 100%; max-width: 560px; margin-bottom: 24px; }
+ .resources-page .rg-controls .rg-mode button { min-height: 54px; }
+}
+
+.resources-page .rg-controls .rg-step--categories > div > :is(.rg-eyebrow, h2, .rg-multiselect-hint),
+.resources-page .rg-controls .rg-step--intent > div > .rg-eyebrow { grid-column: 1; }
+.resources-page .rg-controls .rg-step .rg-eyebrow { padding-left: 0; gap: 12px; }
+.resources-page .rg-controls .rg-step .rg-eyebrow .rg-step-number { margin: 0; flex: 0 0 auto; }
+
+/* Page-wide type roles and spacing: labels → headings → copy → actions. */
+.resources-page, .rg-resource-detail {
+ --rg-section-space: 64px;
+ --rg-group-space: 32px;
+ --rg-copy-space: 16px;
+}
+.resources-page .rg-layout { gap: var(--rg-section-space); padding-bottom: var(--rg-section-space); }
+.resources-page .rg-controls[data-mode] { display: flex; flex-direction: column; height: auto; gap: 48px; }
+.resources-page .rg-controls > * { flex-shrink: 0; }
+.resources-page .rg-controls .rg-step .rg-eyebrow,
+.resources-page .rg-results-head > .rg-eyebrow,
+.resources-page .rg-footer .rg-eyebrow { font-size: 14px; line-height: 1.6; letter-spacing: .08em; }
+.resources-page .rg-controls .rg-step h2 { font-size: 34px; line-height: 1.25; letter-spacing: .01em; margin-top: 16px; }
+.resources-page .rg-controls .rg-multiselect-hint { margin-top: 16px; font-size: 18px; line-height: 1.65; }
+.resources-page .rg-step--intent .rg-mode { margin-top: 28px; }
+.resources-page .rg-controls .rg-step--categories .rg-options { margin-top: 32px; gap: 16px; }
+.resources-page .rg-options .rg-selection-control { margin-top: 16px; }
+.resources-page .rg-controls[data-mode] > .rg-reassurance {
+ position: static; width: 100%; height: auto; margin: 0;
+ padding: 24px 0; align-items: flex-start; gap: 16px;
+}
+.resources-page .rg-reassurance p { margin: 0; font-size: 16px; line-height: 1.7; }
+.resources-page .rg-reassurance > span { line-height: 1; padding-top: 4px; flex-shrink: 0; }
+.resources-page .rg-results { padding-top: 0; border-top: 0; }
+.resources-page .rg-results-head { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; padding: 0; margin: 0 0 32px; }
+.resources-page .rg-results-head h2 { font-size: clamp(36px, 3.2vw, 44px); line-height: 1.2; margin: 0; }
+.resources-page .rg-results-head p { margin: 0; font-size: 18px; line-height: 1.7; max-width: 62ch; }
+.resources-page .rg-results .rg-count { margin-block: 28px 24px; font-size: 16px; line-height: 1.6; }
+.resources-page .rg-cards { gap: 32px; }
+.resources-page .rg-directory-card .pdxPlace__main { gap: 16px; }
+.resources-page .rg-directory-card .pdxPlace__name { margin: 0; line-height: 1.3; }
+.resources-page .rg-directory-card .pdxPlace__desc { margin: 0; line-height: 1.7; }
+.resources-page .rg-directory-card .rg-directory-footer { padding-top: 8px; }
+.resources-page .rg-footer { padding-block: 40px 56px; gap: 32px; }
+.resources-page .rg-footer h2 { margin-top: 16px; font-size: 32px; line-height: 1.3; }
+.rg-resource-detail .rg-detail-primary > h2 { margin-block: 24px; line-height: 1.25; }
+.rg-resource-detail .rg-detail-primary > p { margin-block: 0 24px; line-height: 1.75; }
+.rg-resource-detail .rg-org-section { padding-block: 28px; }
+.rg-resource-detail .rg-org-section h4 { margin-bottom: 16px; line-height: 1.35; }
+.rg-resource-detail .rg-org-section > p { margin-block: 16px 24px; }
+@media (max-width: 600px) {
+ .resources-page, .rg-resource-detail { --rg-section-space: 40px; --rg-group-space: 24px; }
+ .resources-page .rg-controls[data-mode] { gap: 36px; }
+ .resources-page .rg-controls .rg-step h2 { font-size: 30px; margin-top: 12px; }
+ .resources-page .rg-controls .rg-multiselect-hint { font-size: 17px; margin-top: 12px; }
+ .resources-page .rg-step--intent .rg-mode { margin-top: 24px; }
+ .resources-page .rg-controls .rg-step--categories .rg-options { margin-top: 24px; gap: 12px; }
+ .resources-page .rg-options .rg-selection-control { margin-top: 12px; }
+ .resources-page .rg-controls[data-mode] > .rg-reassurance { padding-block: 20px 0; }
+ .resources-page .rg-results-head { gap: 12px; margin-bottom: 28px; }
+ .resources-page .rg-results-head p { font-size: 17px; }
+ .resources-page .rg-cards { gap: 24px; }
+ .resources-page .rg-footer { padding-block: 32px 48px; gap: 24px; }
+}
+/* Clear the former sticky-sidebar offset now that controls are in normal flow. */
+.resources-page .rg-controls[data-mode] { inset: auto; }
+
+/* Even spacing around the enlarged logo, with a narrower centered search. */
+.resources-page .rg-intro {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ gap: 48px;
+}
+.resources-page .rg-intro .rg-intro-top { width: 100%; margin: 0; }
+.resources-page .rg-intro .rg-board-logo-frame {
+ width: min(100%, 800px);
+ max-width: 800px;
+ margin: 0;
+ align-self: center;
+}
+.resources-page .rg-intro > .rg-search-trigger {
+ width: 49%;
+ min-width: 0;
+ max-width: none;
+ margin: 0 auto 24px;
+}
+.resources-page .rg-layout { border-top: 0; }
+@media (max-width: 600px) {
+ .resources-page .rg-intro { gap: 32px; }
+ .resources-page .rg-intro > .rg-search-trigger { width: 70%; max-width: 392px; }
+}
+
+/* Give both chooser heading groups generous, deliberate breathing room. */
+.resources-page .rg-controls .rg-step .rg-eyebrow { margin-top: 32px; }
+.resources-page .rg-controls .rg-step h2 { margin-top: 24px; }
+.resources-page .rg-step--intent .rg-mode { margin-top: 48px; }
+.resources-page .rg-controls .rg-multiselect-hint { margin-top: 20px; }
+.resources-page .rg-controls .rg-step--categories .rg-options { margin-top: 48px; }
+@media (max-width: 600px) {
+ .resources-page .rg-controls .rg-step .rg-eyebrow { margin-top: 24px; }
+ .resources-page .rg-controls .rg-step h2 { margin-top: 20px; }
+ .resources-page .rg-step--intent .rg-mode { margin-top: 36px; }
+ .resources-page .rg-controls .rg-multiselect-hint { margin-top: 16px; }
+ .resources-page .rg-controls .rg-step--categories .rg-options { margin-top: 36px; }
+}
+
+/* Background shading belongs to the viewport, never the content-width sections. */
+.resources-page .rg-intro { background: transparent; }
+.resources-page .rg-controls::before { content: none; }
+.resources-page::before {
+ position: fixed;
+ inset: 0;
+ width: 100%;
+ height: 100dvh;
+}
+
+/* Main page headings share the All ReZources scale; cards retain their own type. */
+.resources-page { --rg-title-size: clamp(36px, 3.2vw, 44px); }
+.resources-page .rg-controls .rg-step h2,
+.resources-page .rg-results-head h2,
+.resources-page .rg-footer h2 {
+ font-size: var(--rg-title-size);
+ line-height: 1.2;
+ letter-spacing: .01em;
+}
+
+.resources-page .rg-intro > .rg-search-trigger {
+ justify-content: center;
+ text-align: center;
+}
+.resources-page .rg-search-trigger > span { flex: 0 1 auto; }
+
+/* Narrow the category controls as a centered group. */
+.resources-page .rg-controls .rg-step--categories .rg-options {
+ width: 75%;
+ justify-self: center;
+ margin-inline: auto;
+}
+@media (max-width: 600px) {
+ .resources-page .rg-controls .rg-step--categories .rg-options { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Approved line-height roles; closed cards and phone buttons keep their recipes. */
+.resources-page .rg-controls .rg-step h2,
+.resources-page .rg-results-head h2,
+.resources-page .rg-footer h2,
+.rg-resource-detail .rg-detail-primary > h2 { line-height: 1.6; }
+.resources-page .rg-safety-check h3,
+.rg-safety-summary .rg-safety-heading h3,
+.rg-resource-detail .rg-org-section h4,
+.rg-resource-detail .rg-org-locations h3,
+.rg-resource-detail .rg-org-programs h3,
+.rg-talk-group h3,
+.resources-page .rg-controls .rg-mode button,
+.resources-page .rg-options button,
+.resources-page .rg-options button > span,
+.resources-page .rg-selection-control label,
+.resources-page .rg-intro > .rg-search-trigger { line-height: 1.4; }
+.resources-page .rg-controls .rg-multiselect-hint,
+.resources-page .rg-reassurance p,
+.resources-page .rg-results-head p,
+.resources-page .rg-safety-check p,
+.rg-safety-summary .rg-safety-lead,
+.rg-resource-detail .rg-detail-primary > p,
+.rg-resource-detail .rg-detail-meta > p,
+.rg-resource-detail .rg-org-section > p,
+.rg-talk-intro, .rg-talk-option p,
+.rg-support-open .rg-talk p { line-height: 1.7; }
+
+/* Approved ReZources type scale. Closed-card typography and phone controls are separate. */
+.resources-page, .rg-overlay {
+ --rg-title-size: 40px;
+ --rg-subheading-size: 26px;
+ --rg-control-size: 20px;
+ --rg-body-size: 18px;
+ --rg-small-size: 14px;
+}
+.resources-page .rg-controls .rg-step h2,
+.resources-page .rg-results-head h2,
+.resources-page .rg-footer h2,
+.rg-resource-detail .rg-detail-primary > h2 { font-size: var(--rg-title-size); line-height: 1.6; }
+.resources-page .rg-safety-check h3,
+.rg-safety-summary .rg-safety-heading h3,
+.rg-resource-detail .rg-org-section h4,
+.rg-resource-detail .rg-org-locations h3,
+.rg-resource-detail .rg-org-programs h3,
+.rg-talk-group h3,
+.rg-resource-detail .rg-safety-heading h3,
+.rg-resource-detail .rg-safety-support h4 { font-size: var(--rg-subheading-size); line-height: 1.4; }
+.resources-page .rg-controls .rg-mode button,
+.resources-page .rg-options button,
+.resources-page .rg-selection-control label,
+.resources-page .rg-intro > .rg-search-trigger { font-size: var(--rg-control-size); line-height: 1.4; }
+.resources-page .rg-controls .rg-multiselect-hint,
+.resources-page .rg-reassurance p,
+.resources-page .rg-results-head p,
+.resources-page .rg-safety-check p,
+.rg-safety-summary .rg-safety-lead,
+.rg-resource-detail .rg-detail-primary > p,
+.rg-resource-detail .rg-detail-meta > p,
+.rg-resource-detail .rg-org-section > p,
+.rg-talk-intro, .rg-talk-option p,
+.rg-support-open .rg-talk p { font-size: var(--rg-body-size); line-height: 1.7; }
+.resources-page .rg-intro-top > .rg-eyebrow,
+.resources-page .rg-controls .rg-step .rg-eyebrow,
+.resources-page .rg-results-head > .rg-eyebrow,
+.resources-page .rg-footer .rg-eyebrow,
+.resources-page .rg-results .rg-count,
+.rg-resource-detail .rg-eyebrow,
+.rg-resource-detail .rg-detail-tags .pdxBadge,
+.rg-resource-detail .rg-source-check,
+.rg-resource-detail .rg-safety-source { font-size: var(--rg-small-size); }
+@media (max-width: 600px) {
+ .resources-page, .rg-overlay {
+  --rg-title-size: 36px;
+  --rg-subheading-size: 24px;
+  --rg-control-size: 18px;
+  --rg-body-size: 17px;
+ }
+}
+
+/* Centered safety composition and consistent card interior spacing. */
+.resources-page .rg-safety-summary .pdxPlace__body { padding: 40px; }
+.resources-page .rg-safety-summary .rg-safety-content {
+ grid-template-columns: minmax(0, 1fr);
+ gap: 24px;
+ justify-items: center;
+ text-align: center;
+}
+.resources-page .rg-safety-summary .rg-safety-heading { justify-content: center; gap: 12px; }
+.resources-page .rg-safety-summary .rg-safety-heading > svg { align-self: center; }
+.resources-page .rg-safety-summary .pdxPlace__cat { justify-content: center; }
+.resources-page .rg-safety-summary .rg-safety-heading h3 { margin-top: 12px; }
+.resources-page .rg-safety-summary .rg-safety-lead { max-width: 58ch; margin: 0; }
+.resources-page .rg-safety-summary .rg-safety-emergency { grid-column: 1; grid-row: auto; width: min(100%, 280px); justify-self: center; }
+.resources-page .rg-safety-summary .rg-safety-expand { width: 100%; justify-content: center; padding-top: 24px; margin-top: 8px; gap: 12px; }
+.resources-page .rg-safety-summary .rg-safety-content > div[id] { width: 100%; text-align: left; }
+.resources-page .rg-directory-card .pdxPlace__main,
+.resources-page .rg-directory-card .rg-directory-footer { margin-inline: 28px; }
+.resources-page .rg-directory-card .pdxPlace__body { gap: 24px; padding-bottom: 28px; }
+.resources-page .rg-directory-card .pdxPlace__main { gap: 20px; }
+.resources-page .rg-directory-card .rg-directory-footer { padding-top: 4px; }
+.rg-overlay.rg-drawer-desktop .rg-drawer-body { padding: 64px 48px 48px; }
+.rg-resource-detail .rg-detail-tags { gap: 10px; margin-bottom: 24px; }
+.rg-resource-detail .rg-detail-meta { padding-top: 24px; }
+@media (max-width: 600px) {
+ .resources-page .rg-safety-summary .pdxPlace__body { padding: 28px 24px; }
+ .resources-page .rg-safety-summary .rg-safety-content { gap: 20px; }
+ .resources-page .rg-safety-summary .rg-safety-heading { flex-direction: column; }
+ .resources-page .rg-directory-card .pdxPlace__main,
+ .resources-page .rg-directory-card .rg-directory-footer { margin-inline: 24px; }
+ .resources-page .rg-directory-card .pdxPlace__body { gap: 20px; padding-bottom: 24px; }
+ .resources-page .rg-directory-card .pdxPlace__main { gap: 16px; }
+ .rg-overlay.rg-drawer-mobile .rg-drawer-body { padding: 48px 24px calc(40px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (max-height: 500px) and (min-width: 601px) {
+ .rg-overlay.rg-drawer-desktop .rg-drawer-body { padding-block: 48px 28px; }
+}
+
+/* Shared alignment, geometry, and glass treatment throughout the board. */
+.resources-page {
+ --rg-control-radius: 18px;
+ --rg-card-radius: 24px;
+}
+.resources-page .rg-results-head { align-items: center; text-align: center; }
+.resources-page .rg-results .rg-count { text-align: center; }
+.resources-page .rg-intro > .rg-search-trigger,
+.resources-page .rg-step--intent .rg-mode,
+.resources-page .rg-options button,
+.resources-page .rg-options .rg-selection-control { border-radius: var(--rg-control-radius); }
+.resources-page :is(.rg-directory-card, .rg-safety-summary),
+.resources-page :is(.rg-directory-card, .rg-safety-summary) > .pdxPlace__body { border-radius: var(--rg-card-radius); }
+.resources-page :is(.rg-directory-card, .rg-safety-summary) > .pdxPlace__body {
+ --dir-gm: 8;
+ background: var(--glass-card-bg);
+ border: var(--glass-card-border);
+ box-shadow: var(--glass-card-shadow);
+ backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));
+ -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));
+}
+.resources-page .rg-directory-card .pdxPlace__media { border-radius: 23px 23px 0 0; }
+.resources-page .rg-directory-card .pdxPlace__mediaGlow { opacity: .2; }
+.resources-page .rg-directory-card .pdxPlace__logo {
+ max-width: 360px;
+ object-position: center;
+ margin-inline: auto;
+}
+.rg-resource-detail .rg-detail-logo { display: flex; align-items: center; justify-content: center; min-height: 176px; }
+.rg-resource-detail .rg-detail-logo .rg-logo { object-position: center; margin-inline: auto; }
+.resources-page .rg-intro-top > .rg-eyebrow,
+.resources-page .rg-controls .rg-step .rg-eyebrow,
+.resources-page .rg-results-head > .rg-eyebrow,
+.resources-page .rg-footer .rg-eyebrow,
+.resources-page .rg-results .rg-count,
+.rg-resource-detail .rg-eyebrow,
+.rg-resource-detail .rg-source-check,
+.rg-resource-detail .rg-safety-source {
+ font-family: var(--font-mono);
+ font-size: 14px;
+ font-weight: 500;
+ line-height: 1.6;
+ letter-spacing: .06em;
+ color: var(--res-secondary-text);
+}
+
+/* Reference-led immediate safety panel, using Zaylist display and body fonts. */
+.resources-page .rg-safety-summary .pdxPlace__body { padding: clamp(28px, 4vw, 48px); }
+.resources-page .rg-safety-summary .rg-safety-content { justify-items: start; text-align: left; gap: 24px; }
+.resources-page .rg-safety-summary .rg-safety-heading { display: block; width: 100%; }
+.resources-page .rg-safety-summary .rg-safety-kicker {
+ display: inline-flex;
+ align-items: center;
+ gap: 12px;
+ padding: 10px 14px;
+ border: 1px solid var(--neon-orange);
+ border-radius: 8px;
+ color: var(--neon-orange);
+ font: 600 16px/1.4 var(--font-mono);
+ letter-spacing: .04em;
+ text-transform: uppercase;
+}
+.resources-page .rg-safety-summary .rg-safety-heading h3 {
+ margin-top: 24px;
+ font-family: var(--font-display);
+ font-size: clamp(40px, 5.5vw, 72px);
+ font-weight: 800;
+ line-height: 1.12;
+ letter-spacing: .005em;
+ text-transform: uppercase;
+}
+.resources-page .rg-safety-summary .rg-safety-lead { max-width: 72ch; }
+.resources-page .rg-safety-summary .rg-safety-emergency {
+ width: min(100%, 480px);
+ min-height: 72px !important;
+ justify-self: start;
+ margin-top: 8px;
+ flex-direction: row-reverse;
+ gap: 20px;
+}
+.resources-page .rg-safety-summary .rg-safety-expand {
+ justify-content: space-between;
+ text-align: left;
+ margin-top: 16px;
+ padding-top: 24px;
+ font-family: var(--font-display);
+ font-size: 20px;
+ line-height: 1.4;
+ color: var(--res-secondary-text);
+}
+@media (max-width: 600px) {
+ .resources-page .rg-safety-summary .pdxPlace__body { padding: 28px 24px; }
+ .resources-page .rg-safety-summary .rg-safety-content { gap: 20px; }
+ .resources-page .rg-safety-summary .rg-safety-heading h3 { font-size: 40px; margin-top: 20px; }
+ .resources-page .rg-safety-summary .rg-safety-kicker { font-size: 14px; gap: 8px; }
+ .resources-page .rg-safety-summary .rg-safety-emergency { width: 100%; min-height: 64px !important; }
+ .resources-page .rg-safety-summary .rg-safety-expand { font-size: 18px; }
+}
+
+/* Padded safety emblem with fine blueprint construction marks. */
+.resources-page .rg-safety-summary .rg-safety-heading {
+ display: flex;
+ flex-direction: row;
+ justify-content: space-between;
+ align-items: center;
+ gap: 32px;
+}
+.resources-page .rg-safety-summary .rg-safety-heading > div:first-child { min-width: 0; flex: 1; }
+.rg-safety-motif {
+ position: relative;
+ flex: 0 0 clamp(120px, 16vw, 180px);
+ aspect-ratio: 1;
+ display: grid;
+ place-items: center;
+ padding: 32px;
+ color: var(--neon-orange);
+}
+.rg-safety-draft { position: absolute; inset: 0; width: 100%; height: 100%; stroke: var(--text-hi); stroke-width: .75; opacity: .3; }
+.rg-safety-motif-mark { width: 100%; height: 100%; filter: drop-shadow(0 0 8px color-mix(in srgb, var(--neon-orange) 18%, transparent)); }
+@media (max-width: 600px) {
+ .resources-page .rg-safety-summary .rg-safety-heading { gap: 12px; }
+ .rg-safety-motif { flex-basis: 76px; padding: 16px; }
+}
+
+/* Larger drafting emblem occupies the right side down to the action baseline. */
+@media (min-width: 900px) {
+ .resources-page .rg-safety-summary .rg-safety-content { position: relative; }
+ .resources-page .rg-safety-summary .rg-safety-heading { position: static; padding-right: 38%; }
+ .resources-page .rg-safety-summary .rg-safety-heading h3 { font-size: clamp(40px, 4.5vw, 64px); }
+ .resources-page .rg-safety-summary .rg-safety-lead { width: 60%; }
+ .resources-page .rg-safety-summary .rg-safety-emergency { max-width: 58%; }
+ .resources-page .rg-safety-summary .rg-safety-motif {
+  position: absolute;
+  right: 0;
+  top: 12px;
+  width: 36%;
+  max-width: 360px;
+  padding: 48px;
+  pointer-events: none;
+ }
+}
+@media (min-width: 601px) and (max-width: 899px) {
+ .rg-safety-motif { flex-basis: 220px; padding: 36px; }
+}
+@media (max-width: 600px) {
+ .resources-page .rg-safety-summary .rg-safety-heading { flex-wrap: wrap; }
+ .resources-page .rg-safety-summary .rg-safety-heading > div:first-child { flex-basis: 100%; }
+ .rg-safety-motif { flex: 0 0 152px; padding: 26px; margin: 8px auto; }
+}
+
+/* Double the emergency call label from 28px to 56px. */
+.rg-safety-prompt a.rg-safety-emergency {
+ font-size: 56px !important;
+ line-height: 1.15 !important;
+ height: auto;
+ padding-block: 16px;
+}
+
+/* An explicit disclosure action and readable expanded safety information. */
+.resources-page .rg-safety-summary .rg-safety-expand {
+ padding: 20px 24px;
+ border: 1px solid color-mix(in srgb, var(--neon-orange) 60%, var(--res-control-border));
+ border-radius: 14px;
+ background: color-mix(in srgb, var(--neon-orange) 6%, var(--z-black));
+ color: var(--text-hi);
+ min-height: 80px;
+ margin-top: 12px;
+}
+.rg-safety-expand-copy { display: flex; flex-direction: column; gap: 8px; text-align: left; min-width: 0; }
+.rg-safety-expand-copy strong { font: 700 20px/1.4 var(--font-display); letter-spacing: .03em; }
+.rg-safety-expand-copy small { font: 400 16px/1.7 var(--font-body); color: var(--res-secondary-text); text-transform: none; letter-spacing: normal; }
+.rg-safety-expand-indicator { display: grid; place-items: center; flex: 0 0 36px; height: 36px; border: 1px solid var(--neon-orange); border-radius: 50%; font: 400 28px/1 var(--font-body); color: var(--neon-orange); }
+.resources-page .rg-safety-summary .rg-safety-expand:hover { background: color-mix(in srgb, var(--neon-orange) 12%, var(--z-black)); }
+.resources-page .rg-safety-summary .rg-safety-expand:focus-visible { outline: 2px solid var(--neon-orange); outline-offset: 4px; }
+.resources-page .rg-safety-summary .rg-safety-content > div[id]:not([hidden]) { padding-top: 8px; }
+.resources-page .rg-safety-summary .rg-safety-law { margin-top: 0; padding-block: 24px; }
+.resources-page .rg-safety-summary .rg-safety-law summary { font: 700 24px/1.4 var(--font-display); cursor: pointer; padding-block: 8px; }
+.resources-page .rg-safety-summary .rg-safety-law :is(p,li),
+.resources-page .rg-safety-summary .rg-safety-support > p { font: 400 18px/1.7 var(--font-body); letter-spacing: normal; }
+.resources-page .rg-safety-summary .rg-safety-law p { margin-block: 16px; }
+.resources-page .rg-safety-summary .rg-safety-law li + li { margin-top: 8px; }
+.resources-page .rg-safety-summary .rg-safety-support { margin-top: 8px; padding-top: 28px; }
+.resources-page .rg-safety-summary .rg-safety-support h4 { font: 700 26px/1.4 var(--font-display); margin: 0 0 16px; }
+.resources-page .rg-safety-summary .rg-safety-support > p { margin-bottom: 24px; }
+.resources-page .rg-safety-summary .rg-safety-source { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 14px; line-height: 1.7; }
+@media (max-width: 600px) {
+ .resources-page .rg-safety-summary .rg-safety-expand { padding: 16px; gap: 12px; }
+ .rg-safety-expand-copy strong { font-size: 18px; }
+ .rg-safety-expand-copy small { font-size: 14px; }
+ .resources-page .rg-safety-summary .rg-safety-law :is(p,li),
+ .resources-page .rg-safety-summary .rg-safety-support > p { font-size: 17px; }
+ .resources-page .rg-safety-summary .rg-safety-support h4 { font-size: 24px; }
+}
+
+/* Safety card: exactly five type sizes, including the emergency action. */
+.resources-page .rg-safety-summary { font-size: 18px; }
+.resources-page .rg-safety-summary .rg-safety-heading h3 { font-size: 40px; }
+.resources-page .rg-safety-summary a.rg-safety-emergency { font-size: 56px !important; }
+.resources-page .rg-safety-summary .rg-safety-law summary,
+.resources-page .rg-safety-summary .rg-safety-support h4 { font-size: 24px; }
+.resources-page .rg-safety-summary .rg-safety-lead,
+.resources-page .rg-safety-summary .rg-safety-expand,
+.resources-page .rg-safety-summary .rg-safety-expand-copy strong,
+.resources-page .rg-safety-summary .rg-safety-law :is(p,li),
+.resources-page .rg-safety-summary .rg-safety-support > p,
+.resources-page .rg-safety-summary .rg-safety-crisis strong { font-size: 18px; }
+.resources-page .rg-safety-summary .rg-safety-kicker,
+.resources-page .rg-safety-summary .rg-safety-expand-copy small,
+.resources-page .rg-safety-summary .rg-safety-source,
+.resources-page .rg-safety-summary .rg-safety-law-links a,
+.resources-page .rg-safety-summary .rg-safety-crisis span,
+.resources-page .rg-safety-summary .rg-phone-note { font-size: 14px; }
+.resources-page .rg-safety-summary .rg-safety-expand-indicator { font-size: 24px; }
+.resources-page .rg-safety-summary .rg-safety-crisis strong { font-size: 24px; }
+.resources-page .rg-safety-summary .rg-safety-law small { font-size: 14px; }
+
+/* Restore the large danger headline and a quiet red safety signal. */
+.resources-page .rg-safety-summary .rg-safety-heading h3 { font-size: clamp(40px, 5.5vw, 72px); }
+@media (min-width: 900px) {
+ .resources-page .rg-safety-summary .rg-safety-heading h3 { font-size: clamp(40px, 4.5vw, 64px); }
+}
+@media (max-width: 600px) {
+ .resources-page .rg-safety-summary .rg-safety-heading h3 { font-size: 40px; }
+}
+.resources-page .rg-safety-summary .rg-safety-kicker {
+ background: color-mix(in srgb, var(--neon-red) 32%, var(--z-black));
+ border-color: var(--neon-red);
+ color: var(--text-hi);
+ animation: rg-safety-tag-glow 5s ease-in-out infinite;
+}
+@keyframes rg-safety-tag-glow {
+ 0%, 100% { box-shadow: 0 0 4px color-mix(in srgb, var(--neon-red) 8%, transparent); }
+ 50% { box-shadow: 0 0 14px color-mix(in srgb, var(--neon-red) 24%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+ .resources-page .rg-safety-summary .rg-safety-kicker { animation: none; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .resources-page .rg-safety-summary .rg-safety-kicker { animation: none; }
+
+/* Balance the emblem against the heading, action, and right card inset. */
+@media (min-width: 900px) {
+ .resources-page .rg-safety-summary .rg-safety-content { grid-template-columns: minmax(0, 1fr) minmax(240px, 36%); column-gap: 40px; }
+ .resources-page .rg-safety-summary .rg-safety-heading { display: contents; padding-right: 0; }
+ .resources-page .rg-safety-summary .rg-safety-heading > div:first-child { grid-column: 1; grid-row: 1; }
+ .resources-page .rg-safety-summary .rg-safety-lead { grid-column: 1; grid-row: 2; width: 100%; }
+ .resources-page .rg-safety-summary .rg-safety-emergency { grid-column: 1; grid-row: 3; max-width: 100%; }
+ .resources-page .rg-safety-summary .rg-safety-motif {
+  position: relative;
+  inset: auto;
+  grid-column: 2;
+  grid-row: 1 / 4;
+  align-self: center;
+  justify-self: center;
+  width: 100%;
+  max-width: 340px;
+  padding: 48px;
+  margin: 0;
+ }
+}
+
+/* Safety red accents use the canonical Zaylist protest-red token (var(--neon-red)). */
+.resources-page .rg-safety-summary > .pdxPlace__body {
+ border-color: var(--neon-red);
+}
+.resources-page .rg-safety-summary .rg-safety-kicker {
+ border-color: var(--neon-red);
+ background: var(--neon-red);
+ color: var(--text-hi);
+}
+
+/* Add 20% vertical room to the measured closed-card footprints. */
+.resources-page .rg-directory-card { min-height: 629px; }
+@media (min-width: 601px) and (max-width: 999px) {
+ .resources-page .rg-directory-card { min-height: 571px; }
+}
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card { min-height: 630px; }
+}
+
+/* Scroll reveals frame the unchanged closed-card component. */
+.resources-page .rg-card-reveal { min-width: 0; height: 100%; }
+.resources-page .rg-card-reveal .rg-directory-card { animation: none; }
+
+/* 30% more space above closed-card logos; preserve the artwork's available height. */
+.resources-page .rg-directory-card .pdxPlace__media {
+ padding-top: 41.6px;
+ height: 177.6px;
+ flex-basis: 177.6px;
+}
+@media (min-width: 1000px) {
+ .resources-page .rg-directory-card .pdxPlace__media { height: 185.6px; flex-basis: 185.6px; }
+}
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card .pdxPlace__media { padding-top: 36.4px; height: 164.4px; flex-basis: 164.4px; }
+}
+
+/* At least 10% more separation between closed-card content sections. */
+.resources-page .rg-directory-card .pdxPlace__body { gap: 27px; }
+.resources-page .rg-directory-card .pdxPlace__main { gap: 22px; }
+.resources-page .rg-directory-card .rg-directory-footer { padding-top: 5px; }
+.resources-page .rg-directory-card .pdxPlace__badges { gap: 9px; }
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card .pdxPlace__body { gap: 22px; }
+ .resources-page .rg-directory-card .pdxPlace__main { gap: 18px; }
+}
+
+/* Search-like glass and filter-like edges, with the shared sliding selection intact. */
+.resources-page .rg-step--intent .rg-mode {
+ --c: var(--neon-yellow);
+ background: var(--glass-card-bg);
+ backdrop-filter: blur(16px);
+ -webkit-backdrop-filter: blur(16px);
+ border: 1px solid color-mix(in srgb, var(--neon-yellow) 55%, var(--res-control-border));
+ border-radius: var(--rg-control-radius);
+ box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 8%, transparent);
+ padding: 6px;
+ gap: 6px;
+}
+.resources-page .rg-controls .rg-mode button {
+ border-radius: 12px;
+ border: 1px solid transparent;
+ font-weight: 700;
+ letter-spacing: .03em;
+}
+.resources-page .rg-mode--animated button[aria-pressed="true"] { background: transparent; border-color: transparent; }
+.resources-page .rg-mode-highlight {
+ background: var(--neon-yellow);
+ box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 22%, transparent);
+ border: 1px solid var(--neon-yellow);
+}
+.resources-page .rg-mode button[aria-pressed="false"]:hover {
+ color: var(--text-hi);
+ border-color: color-mix(in srgb, var(--neon-yellow) 40%, transparent);
+ background: color-mix(in srgb, var(--neon-yellow) 5%, transparent);
+}
+.resources-page .rg-mode button:focus-visible { outline: 2px solid var(--neon-yellow); outline-offset: -3px; }
+
+/* Keep the title, tags, and description together immediately above View details. */
+.resources-page .rg-directory-card .pdxPlace__media {
+ flex: 1 0 177.6px;
+ height: auto;
+ align-items: center;
+ padding-block: 32px;
+}
+.resources-page .rg-directory-card .pdxPlace__main { flex: 0 0 auto; }
+.resources-page .rg-directory-card .rg-directory-footer { flex: 0 0 auto; margin-top: 0; }
+@media (min-width: 1000px) {
+ .resources-page .rg-directory-card .pdxPlace__media { flex-basis: 185.6px; }
+}
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card .pdxPlace__media { flex-basis: 164.4px; padding-block: 28px; }
+}
+.resources-page .rg-directory-card .pdxPlace__media { padding-block: 41.6px; }
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card .pdxPlace__media { padding-block: 36.4px; }
+}
+
+/* Give Share breathing room without crowding card edges. */
+.resources-page .rg-directory-card .pdxPlace__actions { top: 16px; right: 16px; }
+.resources-page .rg-share,
+.resources-page .rg-directory-card .pdxPlace__share { padding: 12px 20px; min-height: 44px; }
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card .pdxPlace__actions { top: 12px; right: 12px; }
+}
+
+/* Increase resource-card gutters by 13%. */
+.resources-page .rg-cards { gap: 36.16px; }
+@media (max-width: 600px) {
+ .resources-page .rg-cards { gap: 27.12px; }
+}
+
+/* Larger closed-card titles with an even content rhythm. */
+.resources-page .rg-directory-card .pdxPlace__name { font-size: 33px; line-height: 1.3; margin: 0; }
+.resources-page .rg-directory-card .pdxPlace__main { gap: 24px; }
+.resources-page .rg-directory-card .pdxPlace__desc { margin: 0; }
+.resources-page .rg-directory-card .rg-directory-footer { padding-top: 0; }
+.resources-page .rg-directory-card .pdxPlace__body { gap: 24px; }
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card .pdxPlace__name { font-size: 31px; }
+ .resources-page .rg-directory-card .pdxPlace__main,
+ .resources-page .rg-directory-card .pdxPlace__body { gap: 20px; }
+}
+.resources-page .rg-directory-card .pdxPlace__main,
+.resources-page .rg-directory-card .pdxPlace__body { gap: 27px; }
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card .pdxPlace__main,
+ .resources-page .rg-directory-card .pdxPlace__body { gap: 22px; }
+}
+
+/* Give compact organization marks more presence in the existing logo well. */
+.resources-page .rg-directory-card .pdxPlace__logo {
+ height: 156px;
+ max-height: 156px;
+ max-width: 100%;
+}
+.resources-page .rg-directory-card .pdxPlace__logo:is([src$="/oregon-state-bar-transparent.png"], [src$="/ogalla-transparent.png"]) { transform: scale(1.9); }
+.resources-page .rg-directory-card .pdxPlace__logo:is([src$="/basic-rights.png"], [src$="/intersect-nw.png"]) { height: 176px; max-height: 176px; }
+
+/* Halve the lower card glow while preserving the top reflection and edge. */
+.resources-page :is(.rg-directory-card, .rg-safety-summary) > .pdxPlace__body {
+ --glass-card-bg:
+  linear-gradient(133deg, color-mix(in srgb, var(--text-heading) 7%, transparent), color-mix(in srgb, var(--text-heading) 1.75%, transparent) 14%, transparent 38%),
+  radial-gradient(80% 62% at 108% 112%, color-mix(in srgb, var(--text-heading) 2.75%, transparent), color-mix(in srgb, var(--c) 2.25%, transparent) 42%, transparent 72%),
+  radial-gradient(115% 90% at 50% -18%, color-mix(in srgb, var(--c) 8%, transparent), transparent 58%),
+  color-mix(in srgb, var(--ink-900) 88%, transparent);
+}
+.resources-page :is(.rg-directory-card, .rg-safety-summary) .pdx-glass-sheen--specular { opacity: .5; }
+
+/* Closed-card interior: 20% more side clearance, 10% more bottom padding. */
+.resources-page .rg-directory-card .pdxPlace__main,
+.resources-page .rg-directory-card .rg-directory-footer { margin-inline: 33.6px; }
+.resources-page .rg-directory-card .pdxPlace__media { padding-inline: clamp(38.4px, 9.6%, 57.6px); }
+.resources-page .rg-directory-card .pdxPlace__body { padding-bottom: 30.8px; }
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card .pdxPlace__main,
+ .resources-page .rg-directory-card .rg-directory-footer { margin-inline: 28.8px; }
+ .resources-page .rg-directory-card .pdxPlace__body { padding-bottom: 26.4px; }
+}
+
+.resources-page .rg-directory-card .pdxPlace__logo[src$="/ohsu-transgender-health-program.svg"] {
+ transform: scale(1.4);
+ transform-origin: center;
+}
+
+.resources-page .rg-directory-card .pdxPlace__logo[src$="/pride-northwest.png"] {
+ transform: scale(1.3);
+ transform-origin: center;
+}
+
+.resources-page .rg-directory-card .pdxPlace__logo[src$="/oregon-arts-commission.png"] {
+ transform: scale(1.3);
+ transform-origin: center;
+}
+
+.resources-page .rg-directory-card .pdxPlace__logo[src$="/ori-gallery.png"] {
+ transform: scale(1.3);
+ transform-origin: center;
+}
+
+/* Darker viewport shading, with the lower 30% fully clear. */
+.resources-page::before {
+ background: var(--z-black);
+ mask-image: linear-gradient(to bottom, black 0%, black 10%, color-mix(in srgb, var(--z-black) 85.8%, transparent) 40%, color-mix(in srgb, var(--z-black) 42.9%, transparent) 50%, color-mix(in srgb, var(--z-black) 10%, transparent) 70%, color-mix(in srgb, var(--z-black) 10%, transparent) 100%);
+ -webkit-mask-image: linear-gradient(to bottom, black 0%, black 10%, color-mix(in srgb, var(--z-black) 85.8%, transparent) 40%, color-mix(in srgb, var(--z-black) 42.9%, transparent) 50%, color-mix(in srgb, var(--z-black) 10%, transparent) 70%, color-mix(in srgb, var(--z-black) 10%, transparent) 100%);
+}
+/* Double the space above and below the main board logo. */
+.resources-page .rg-intro { gap: 96px; }
+@media (max-width: 600px) {
+ .resources-page .rg-intro { gap: 64px; }
+}
+
+/* Clear card identities: intact names, natural wrapping, and aligned title space. */
+.resources-page .rg-directory-card .pdxPlace__name {
+ display: block;
+ -webkit-line-clamp: unset;
+ line-clamp: unset;
+ overflow: visible;
+ overflow-wrap: break-word;
+ word-break: normal;
+ text-wrap: pretty;
+ font-weight: 700;
+ line-height: 1.25;
+ letter-spacing: .015em;
+ min-height: 2.5em;
+ max-height: none;
+ margin: 0;
+}
+
+/* Fixed-height previews: aligned larger titles, middle tags, anchored copy. */
+.resources-page .rg-directory-card { height: 629px; }
+.resources-page .rg-directory-card .pdxPlace__body { height: 100%; box-sizing: border-box; gap: 20px; }
+.resources-page .rg-directory-card .pdxPlace__media { flex: 0 0 185.6px; height: 185.6px; }
+.resources-page .rg-directory-card .pdxPlace__main { flex: 1 1 0; min-height: 0; gap: 12px; }
+.resources-page .rg-directory-card .pdxPlace__name {
+ font-size: 57.75px;
+ line-height: 1.12;
+ flex: 0 0 2.24em;
+ height: 2.24em;
+ min-height: 0;
+ display: -webkit-box;
+ -webkit-box-orient: vertical;
+ -webkit-line-clamp: 2;
+ line-clamp: 2;
+ overflow: hidden;
+ overflow-wrap: anywhere;
+}
+.resources-page .rg-directory-card .pdxPlace__badges { flex: 1 1 auto; align-content: center; }
+.resources-page .rg-directory-card .pdxPlace__desc { flex: 0 0 auto; margin-top: auto; }
+.resources-page .rg-directory-card .rg-directory-footer { flex: 0 0 auto; margin-top: 0; }
+@media (min-width: 601px) and (max-width: 999px) {
+ .resources-page .rg-directory-card { height: 571px; }
+ .resources-page .rg-directory-card .pdxPlace__body { gap: 16px; }
+ .resources-page .rg-directory-card .pdxPlace__media { flex-basis: 177.6px; height: 177.6px; }
+ .resources-page .rg-directory-card .pdxPlace__main { gap: 8px; }
+}
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card { height: 630px; }
+ .resources-page .rg-directory-card .pdxPlace__media { flex-basis: 164.4px; height: 164.4px; }
+ .resources-page .rg-directory-card .pdxPlace__name { font-size: 54.25px; }
+}
+
+/* Single aligned title line and more generous horizontal breathing room. */
+.resources-page .rg-directory-card .pdxPlace__main,
+.resources-page .rg-directory-card .rg-directory-footer { margin-inline: 40.32px; }
+.resources-page .rg-directory-card .pdxPlace__media { padding-inline: clamp(46.08px, 11.52%, 69.12px); }
+.resources-page .rg-directory-card .pdxPlace__name {
+ font-size: 53.75px;
+ display: block;
+ white-space: nowrap;
+ text-overflow: ellipsis;
+ overflow: hidden;
+ -webkit-line-clamp: unset;
+ line-clamp: unset;
+ flex-basis: 1.12em;
+ height: 1.12em;
+}
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card .pdxPlace__main,
+ .resources-page .rg-directory-card .rg-directory-footer { margin-inline: 34.56px; }
+ .resources-page .rg-directory-card .pdxPlace__name { font-size: 50.25px; }
+}
+
+/* Event-style disclosures keep resource details compact and easy to scan. */
+.rg-detail-disclosure { border: 1px solid color-mix(in srgb, var(--rg-shell-accent, var(--neon-cyan)) 35%, transparent); border-radius: 16px; margin-block: 20px; background: color-mix(in srgb, var(--z-black) 24%, transparent); overflow: hidden; }
+.rg-detail-disclosure > summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; cursor: pointer; list-style: none; font-family: var(--font-display); font-size: 24px; line-height: 1.4; color: var(--text-heading); }
+.rg-detail-disclosure > summary::-webkit-details-marker { display: none; }
+.rg-detail-disclosure > summary svg { flex: none; color: var(--neon-cyan); transition: transform .2s ease; }
+.rg-detail-disclosure[open] > summary svg { transform: rotate(180deg); }
+.rg-detail-disclosure > summary:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: -4px; }
+.rg-detail-disclosure .rg-disclosure-content { padding: 8px 24px 24px; }
+.rg-overlay.rg-drawer-desktop {
+ --rg-viewport-gap: clamp(24px, 6vh, 64px);
+ inset-block: var(--rg-viewport-gap);
+ max-height: calc(100dvh - var(--rg-viewport-gap) * 2);
+}
+.rg-overlay.rg-drawer-desktop .rg-drawer-body { height: auto; max-height: calc(100dvh - var(--rg-viewport-gap) * 2 - 2px); }
+@media (max-width: 600px) {
+ .rg-detail-disclosure > summary { font-size: 22px; padding: 18px 20px; }
+ .rg-detail-disclosure .rg-disclosure-content { padding: 8px 20px 20px; }
+}
+@media (prefers-reduced-motion: reduce) { .rg-detail-disclosure > summary svg { transition: none; } }
+
+/* Original category-colored cybernetic linework, under the logo and reading layer. */
+.resources-page .rg-directory-card .rg-card-motif {
+ position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0;
+ color: var(--c); pointer-events: none; opacity: .48;
+ mask-image: linear-gradient(transparent 4%, black 24%, black 56%, transparent 83%);
+}
+.rg-card-motif .rg-motif-mesh { opacity: .3; }
+.rg-card-motif .rg-motif-nodes { opacity: .75; }
+.rg-card-motif .rg-motif-object { filter: drop-shadow(0 0 3px currentColor); }
+.resources-page .rg-directory-card .pdxPlace__media { z-index: 1; }
+.resources-page .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 250px; height: 250px; }
+.resources-page .rg-directory-card .pdxPlace__name {
+ font-size: 30px; line-height: 1.2; height: auto; flex: 0 0 auto;
+ white-space: normal; text-wrap: balance; overflow-wrap: normal; text-align: center;
+}
+@media (max-width: 999px) {
+ .resources-page .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 230px; height: 230px; }
+ .resources-page .rg-directory-card .pdxPlace__name { font-size: 28px; }
+}
+/* Reserve the share-button band above the artwork and wordmark. */
+.resources-page .rg-directory-card .pdxPlace__media,
+.resources-page .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media {
+ flex-basis: 250px; height: 250px; padding-top: 64px; padding-bottom: 24px;
+}
+.resources-page .rg-directory-card .pdxPlace__media .pdxPlace__logo { max-height: 100%; }
+@media (min-width: 601px) and (max-width: 999px) {
+ .resources-page .rg-directory-card .pdxPlace__media,
+ .resources-page .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 210px; height: 210px; }
+}
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card .pdxPlace__media,
+ .resources-page .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 230px; height: 230px; }
+}
+
+/* Bottom-anchored reading block and larger details control. */
+.resources-page .rg-directory-card .pdxPlace__main { flex: 0 0 auto; margin-top: auto; gap: 16px; }
+.resources-page .rg-directory-card .pdxPlace__badges { flex: 0 0 auto; align-content: start; }
+.resources-page .rg-directory-card .pdxPlace__desc { margin-top: 0; }
+.resources-page .rg-directory-card .rg-directory-footer .pdxBtn {
+ height: 57.2px; min-height: 57.2px; font-size: 17.888px; border-radius: 28.6px;
+}
+.resources-page .rg-directory-card .rg-directory-footer .pdxBtn svg { width: 20.8px; height: 20.8px; }
+
+/* Program titles share the tags' left edge. */
+.resources-page .rg-directory-card .pdxPlace__name { text-align: left; }
+
+/* A small optical nudge without changing the logo well or content layout. */
+.resources-page .rg-directory-card .pdxPlace__logo { top: 12px; }
+
+/* Raise and enlarge the decorative artwork inside the existing card clip. */
+.resources-page .rg-directory-card .rg-card-motif {
+ transform: translateY(-20%) scale(1.3);
+ transform-origin: center;
+}
+
+/* Bradley Angle's wings use a custom vertical offset. */
+.resources-page .rg-directory-card .rg-card-motif[data-motif="safety-Marsha's Folx | Bradley Angle"] {
+ transform: translateY(-11%) scale(1.3);
+}
+
+/* TACT: raise its custom motif placement by eight percentage points. */
+.resources-page .rg-directory-card .rg-card-motif[data-motif="health-Trans Advocacy & Care Team (TACT)"] {
+ transform: translateY(-13%) scale(1.3);
+}
+
+/* Keep OHSU's tall symbol and wordmark fully inside the logo well. */
+.resources-page .rg-directory-card .pdxPlace__media .pdxPlace__logo[src$="/ohsu-transgender-health-program.svg"] {
+ transform: none; height: 156px; max-height: 156px; width: auto; object-fit: contain;
+}
+@media (max-width: 999px) {
+ .resources-page .rg-directory-card .pdxPlace__media .pdxPlace__logo[src$="/ohsu-transgender-health-program.svg"] { height: 120px; max-height: 120px; }
+}
+
+/* Individually measured artwork, optically centered independently of source whitespace. */
+.resources-page .rg-directory-card[data-optical-logo] {
+ --rg-optical-center: 154px;
+ --rg-optical-height-scale: 1;
+ --rg-optical-side-space: 80.64px;
+}
+.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo {
+ position: absolute;
+ left: 50%; top: calc(var(--rg-optical-center) + var(--rg-optical-nudge, 0px));
+ width: min(calc((100% - var(--rg-optical-side-space)) * var(--rg-optical-width, 1)), calc(var(--rg-optical-height-width, 180px) * var(--rg-optical-height-scale)));
+ height: auto; max-width: none; max-height: none;
+ transform: translate(var(--rg-optical-x, -50%), var(--rg-optical-y, -50%));
+ object-fit: contain;
+}
+@media (min-width: 601px) and (max-width: 999px) {
+ .resources-page .rg-directory-card[data-optical-logo] { --rg-optical-center: 139px; --rg-optical-height-scale: .8; }
+}
+@media (max-width: 600px) {
+ .resources-page .rg-directory-card[data-optical-logo] { --rg-optical-center: 146px; --rg-optical-height-scale: .88; --rg-optical-side-space: 69.12px; }
+}
+
+/* Safety uses the same original wireframe treatment behind its existing content. */
+.resources-page .rg-safety-summary .rg-card-motif {
+ position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0;
+ pointer-events: none; color: var(--neon-red); opacity: .2;
+ mask-image: linear-gradient(110deg, transparent 0%, black 55%, black 90%, transparent);
+}
+.resources-page .rg-safety-summary .rg-safety-content { position: relative; z-index: 1; }
+.resources-page :is(.rg-directory-card, .rg-safety-summary) .rg-card-motif {
+ translate: var(--rg-parallax-x, 0px) var(--rg-parallax-y, 0px);
+ transition: translate 260ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+ .resources-page :is(.rg-directory-card, .rg-safety-summary) .rg-card-motif { translate: none; transition: none; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .rg-card-motif { translate: none !important; transition: none !important; }
+/* Depth belongs to the artwork; keep the reading surface stationary on hover. */
+.resources-page .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; }
+.resources-page .rg-directory-card.pdxPlace--clickable:hover > .pdxPlace__body { transform: none !important; }
+
+/* Balance visible logo whitespace against the actual title/tag position. */
+.resources-page .rg-directory-card[data-optical-logo] { --rg-logo-flow-gap: 20px; }
+.resources-page .rg-directory-card[data-optical-logo] > .pdxPlace__body { gap: var(--rg-logo-flow-gap); }
+.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media {
+ flex: 1 1 0; height: auto; min-height: 0; padding-block: 0;
+ container-type: size; overflow: visible;
+}
+.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo {
+ top: calc(50% + var(--rg-logo-flow-gap) / 2);
+ width: min(
+  calc((100% - var(--rg-optical-side-space)) * var(--rg-optical-width, 1)),
+  calc(var(--rg-optical-height-width, 180px) * var(--rg-optical-height-scale)),
+  calc(max(32px, 100cqh + var(--rg-logo-flow-gap) - 128px) * var(--rg-optical-source-ratio, 1))
+ );
+}
+@media (min-width: 601px) and (max-width: 999px) {
+ .resources-page .rg-directory-card[data-optical-logo] { --rg-logo-flow-gap: 16px; }
+}
+
+/* Gentle mouse-following card depth with the motif drifting in opposition. */
+.resources-page .rg-directory-card.pdxPlace--clickable,
+.resources-page .rg-directory-card.pdxPlace--clickable:hover {
+ transform: perspective(900px) translate3d(var(--rg-card-shift-x, 0px), var(--rg-card-shift-y, 0px), 0) rotateX(var(--rg-card-tilt-x, 0deg)) rotateY(var(--rg-card-tilt-y, 0deg)) !important;
+ transition: transform 280ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+ .resources-page .rg-directory-card.pdxPlace--clickable,
+ .resources-page .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; transition: none; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .resources-page .rg-directory-card.pdxPlace--clickable { transform: none !important; transition: none; }
+
+/* Low-amplitude ambient movement lives inside the hover/scroll parallax layer. */
+.rg-card-motif .rg-motif-drift,
+.rg-card-motif .rg-motif-breathe { transform-box: view-box; transform-origin: 50% 50%; }
+.rg-card-motif .rg-motif-drift { animation: rg-motif-drift 32s ease-in-out infinite; }
+.rg-card-motif .rg-motif-breathe { animation: rg-motif-breathe 36s ease-in-out infinite; }
+@keyframes rg-motif-drift {
+ 0%, 100% { transform: translate(-3px, 1px); }
+ 33% { transform: translate(2px, -3px); }
+ 66% { transform: translate(4px, 2px); }
+}
+@keyframes rg-motif-breathe {
+ 0%, 100% { transform: scale(.99); }
+ 50% { transform: scale(1.025); }
+}
+@media (prefers-reduced-motion: reduce) {
+ .rg-card-motif .rg-motif-drift,
+ .rg-card-motif .rg-motif-breathe { animation: none !important; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .rg-card-motif :is(.rg-motif-drift, .rg-motif-breathe) { animation: none !important; }
+
+/* Lower Trans Youth Care Collective's motif by ten percentage points. */
+.resources-page .rg-directory-card .rg-card-motif[data-motif="youth-Trans Youth Care Collective"] {
+ transform: translateY(-10%) scale(1.3);
+}
+
+/* Lower Westside Queer Resource Center's motif by ten percentage points. */
+.resources-page .rg-directory-card .rg-card-motif[data-motif="community-Westside Q Center"] {
+ transform: translateY(-10%) scale(1.3);
+}
+
+/* Fine construction detail adds depth without increasing the overall bloom. */
+.rg-card-motif .rg-motif-depth { opacity: .22; }
+.rg-card-motif .rg-motif-inner-edge { opacity: .35; }
+.rg-card-motif .rg-motif-circuits { opacity: .4; }
+.rg-card-motif .rg-motif-calibration { opacity: .25; }
+.rg-card-motif .rg-motif-signal-trace {
+ opacity: .42; stroke-linecap: round;
+ animation: rg-motif-signal-trace 40s linear infinite;
+}
+@keyframes rg-motif-signal-trace { to { stroke-dashoffset: -100; } }
+@media (prefers-reduced-motion: reduce) {
+ .rg-card-motif .rg-motif-signal-trace { animation: none !important; opacity: .2; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .rg-card-motif .rg-motif-signal-trace { animation: none !important; opacity: .2; }
+
+/* One glass face carries all content; the moving illustration stays behind it. */
+.resources-page .rg-directory-card > .pdxPlace__body { isolation: isolate; }
+.resources-page .rg-directory-card .rg-card-motif { z-index: 0; }
+.resources-page .rg-directory-card .pdxPlace__sheen,
+.resources-page .rg-directory-card > .pdxPlace__body::after { z-index: 2; pointer-events: none; }
+.resources-page .rg-directory-card .pdxPlace__media,
+.resources-page .rg-directory-card .pdxPlace__main,
+.resources-page .rg-directory-card .rg-directory-footer { position: relative; z-index: 3; }
+.resources-page .rg-directory-card .pdxPlace__actions { z-index: 4; }
+/* Spring values own the surface motion, avoiding a second easing layer. */
+.resources-page .rg-directory-card.pdxPlace--clickable,
+.resources-page .rg-directory-card.pdxPlace--clickable:hover { transition: none; }
+
+/* Keep source edges crisp; only the shadow behind the mark is softly diffused. */
+.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo {
+ filter: brightness(0) invert(1) drop-shadow(0 2px 4px color-mix(in srgb, var(--z-black) 70%, transparent));
+ backface-visibility: hidden;
+}
+.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo[src$="/business-oregon-official.png"] {
+ filter: invert(1) drop-shadow(0 2px 4px color-mix(in srgb, var(--z-black) 70%, transparent));
+}
+.resources-page .rg-directory-card.pdxPlace--clickable:hover > .pdxPlace__body { filter: none !important; }
+.resources-page .rg-options button {
+ transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+
+/* Equal hero-to-chooser rhythm; search belongs immediately before results. */
+.resources-page .rg-intro { --rg-logo-space: 96px; gap: var(--rg-logo-space); padding-bottom: var(--rg-logo-space); }
+.resources-page .rg-layout { padding-top: 0; }
+.resources-page .rg-controls .rg-step--intent .rg-eyebrow { margin-top: 0; }
+.resources-page .rg-search-section { grid-column: 1 / -1; width: 100%; padding-block: 32px; }
+.resources-page .rg-search-section .rg-search-trigger {
+ width: 49%; min-width: 0; max-width: none; margin: 0 auto;
+ justify-content: center; min-height: 66px; border-radius: var(--rg-control-radius);
+ font-size: var(--rg-control-size); line-height: 1.4;
+ border-color: color-mix(in srgb, var(--neon-yellow) 28%, var(--res-control-border));
+}
+@media (max-width: 600px) {
+ .resources-page .rg-intro { --rg-logo-space: 64px; }
+ .resources-page .rg-search-section { padding-block: 24px; }
+ .resources-page .rg-search-section .rg-search-trigger { width: 90%; max-width: 392px; }
+}
+
+/* Prism: lower the artwork seven percentage points from the shared placement. */
+.resources-page .rg-directory-card .rg-card-motif[data-motif="health-Prism Health"] {
+ transform: translateY(-13%) scale(1.3);
+}
+
+.resources-page .rg-bottom-help {
+ display: flex; justify-content: center; text-align: center;
+ padding: 28px 24px 40px; margin: 0 auto; gap: 0;
+ border: 0; color: var(--res-secondary-text);
+}
+.resources-page .rg-bottom-help p { margin: 0; font-size: 14px; line-height: 1.7; }
+.resources-page .rg-bottom-help a { text-underline-offset: 4px; }
+@media (max-width: 600px) {
+ .resources-page .rg-bottom-help { padding: 24px 24px 32px; }
+ .resources-page .rg-bottom-help p { max-width: 300px; }
+}
+
+/* Resource search stays centered while Radix keeps exit animations mounted. */
+.rg-command[data-state="open"] { animation: rg-search-open 280ms cubic-bezier(.16,1,.3,1) both; }
+.rg-command[data-state="closed"] { animation: rg-search-close 200ms cubic-bezier(.4,0,1,1) both; pointer-events: none; }
+.rg-search-backdrop[data-state="open"] { animation: rg-search-fade-in 280ms ease-out both; }
+.rg-search-backdrop[data-state="closed"] { animation: rg-search-fade-out 200ms ease-in both; }
+@keyframes rg-search-open {
+ from { opacity: 0; transform: translate(-50%, calc(-50% + 12px)) scale(.975); }
+ to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes rg-search-close {
+ from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+ to { opacity: 0; transform: translate(-50%, calc(-50% + 8px)) scale(.985); }
+}
+@keyframes rg-search-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rg-search-fade-out { from { opacity: 1; } to { opacity: 0; } }
+:is(.rg-command, .rg-search-backdrop)[data-quiet-motion="true"] { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+ .rg-command[data-state], .rg-search-backdrop[data-state] { animation: none; }
+}
+.resources-page .rg-directory-card .rg-directory-footer .pdxBtn { color: var(--text-heading) !important; }
+
+/* Sharper shells and the same restrained rainbow rule used across Zaylist. */
+.resources-page { --rg-card-radius: 12px; }
+.resources-page .rg-directory-card .pdxPlace__media { border-radius: 11px 11px 0 0; }
+.resources-page .rg-directory-card .pdxPlace__seam { display: none; }
+.resources-page .rg-card-top-rule {
+ position: absolute; inset: 0 7px auto; height: 2px;
+ z-index: 6; pointer-events: none; opacity: .75;
+}
+.rg-overlay.rg-resource-detail { border-radius: 12px; }
+.rg-overlay.rg-resource-detail::before {
+ content: ""; position: absolute; inset: 0 7px auto; z-index: 6;
+ height: 2px; opacity: .75; filter: blur(.2px);
+ background: var(--refract-seam-gradient); background-size: 200% 100%;
+ animation: dirRefract 7s linear infinite; pointer-events: none;
+ mask: linear-gradient(90deg, transparent, var(--z-black) 14%, var(--z-black) 86%, transparent);
+ -webkit-mask: linear-gradient(90deg, transparent, var(--z-black) 14%, var(--z-black) 86%, transparent);
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+ .resources-page .rg-card-top-rule, .rg-overlay.rg-resource-detail::before { animation: none !important; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .rg-overlay.rg-resource-detail::before { animation: none; }
+
+/* Edge shading belongs behind the reflective glass and its foreground content. */
+.resources-page .rg-card-vignette {
+ position: absolute; inset: 0; z-index: 1; border-radius: inherit;
+ pointer-events: none;
+ background: radial-gradient(ellipse at 50% 42%, transparent 24%, color-mix(in srgb, var(--z-black) 12%, transparent) 58%, color-mix(in srgb, var(--z-black) 46%, transparent) 100%);
+}
+.resources-page .rg-safety-summary .pdxPlace__sheen { z-index: 2; }
+.resources-page .rg-safety-summary :is(.rg-safety-content, .rg-safety-disclosure) { position: relative; z-index: 3; }
+
+/* Flat monochrome emblem: retain all colored artwork as white, without depth effects. */
+.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo[src$="/family-peace.png"],
+.rg-detail-logo .rg-logo[src$="/family-peace.png"] {
+ filter: grayscale(1) brightness(.65) contrast(20) invert(1);
+}
+
+/* A dedicated trans-services badge, distinct from general category colors. */
+.resources-page .rg-directory-card .pdxPlace__cat[data-category-id="trans-friends"] .pdxBadge,
+.rg-detail-tags .rg-category-tag[data-category-id="trans-friends"] .pdxBadge {
+  background:
+    linear-gradient(var(--ink-900), var(--ink-900)) padding-box,
+    linear-gradient(to left, var(--res-trans-blue) 0%, var(--res-trans-pink) 25%, var(--text-heading) 50%, var(--res-trans-pink) 75%, var(--res-trans-blue) 100%) border-box !important;
+  border: 1px solid transparent !important;
+  color: var(--text-heading) !important;
+  box-shadow: -2px 0 7px color-mix(in srgb, var(--res-trans-pink) 18%, transparent), 2px 0 7px color-mix(in srgb, var(--res-trans-blue) 18%, transparent);
+  text-shadow: none;
+}
+
+/* Two overlapping artwork planes retain the shared hover and scroll depth. */
+.rg-card-motif .rg-motif-layer--mesh {
+  translate: calc(var(--rg-parallax-x, 0px) * -.25) calc(var(--rg-parallax-y, 0px) * -.25);
+}
+.rg-card-motif .rg-motif-layer--object {
+  translate: calc(var(--rg-parallax-x, 0px) * .15) calc(var(--rg-parallax-y, 0px) * .15);
+}
+.rg-card-motif .rg-motif-layer { transition: translate 260ms ease-out; }
+.rg-card-motif .rg-motif-object-drift {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: rg-motif-object-drift 41s ease-in-out infinite;
+}
+@keyframes rg-motif-object-drift {
+  0%, 100% { transform: translate(2px, -2px); }
+  35% { transform: translate(-4px, 2px); }
+  70% { transform: translate(1px, 4px); }
+}
+.resources-page .rg-safety-summary {
+  transform: perspective(900px) translate3d(var(--rg-card-shift-x, 0px), var(--rg-card-shift-y, 0px), 0) rotateX(var(--rg-card-tilt-x, 0deg)) rotateY(var(--rg-card-tilt-y, 0deg));
+  transition: transform 280ms ease-out;
+}
+/* Give outlined orange category tags a little more definition. */
+.resources-page .rg-directory-card .pdxPlace__cat:is([data-category-id="safety"], [data-category-id="harm-reduction"]) .pdxBadge,
+.rg-detail-tags .rg-category-tag:is([data-category-id="safety"], [data-category-id="harm-reduction"]) .pdxBadge {
+  border-width: 2px !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rg-card-motif .rg-motif-layer { translate: none; transition: none; }
+  .rg-card-motif .rg-motif-object-drift { animation: none !important; }
+  .resources-page .rg-safety-summary { transform: none; transition: none; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .rg-card-motif .rg-motif-layer { translate: none !important; transition: none; }
+:is(html.calm-mode, :root[data-calm="true"]) .rg-card-motif .rg-motif-object-drift { animation: none !important; }
+:is(html.calm-mode, :root[data-calm="true"]) .resources-page .rg-safety-summary { transform: none; transition: none; }
+
+/* Intersect NW: a larger, slightly lower logo and closer artwork framing. */
+.resources-page .rg-directory-card[data-optical-logo="Intersect NW"] .pdxPlace__media .pdxPlace__logo {
+  top: calc(55% + var(--rg-logo-flow-gap) / 2);
+  scale: 1.2;
+}
+.resources-page .rg-directory-card .rg-card-motif[data-motif$="-Intersect NW"] {
+  transform: translateY(-20%) scale(1.495);
+}
+
+/* Strong black lettering for the red safety tag and filled safety badges. */
+.resources-page .rg-safety-summary .rg-safety-kicker {
+  background: var(--neon-red);
+  color: var(--z-black);
+  font-weight: 800;
+}
+.resources-page .rg-directory-card .pdxPlace__cat[data-category-id="safety"]:first-child .pdxBadge,
+.rg-detail-tags .rg-category-tag[data-category-id="safety"]:first-child .pdxBadge,
+.rg-safety-prompt .pdxPlace__cat .pdxBadge {
+  color: var(--z-black) !important;
+  font-weight: 800 !important;
+}
+
+/* A soft cast shadow follows the same spring values as the glass surface. */
+.resources-page :is(.rg-directory-card, .rg-safety-summary) {
+  box-shadow:
+    calc(var(--rg-card-shift-x, 0px) * -2) calc(9px - var(--rg-card-shift-y, 0px) * 2) 22px -8px color-mix(in srgb, var(--z-black) 38%, transparent);
+}
+
+/* Keep the floor shadow and accent bloom close to the resource-card rim. */
+.resources-page :is(.rg-directory-card, .rg-safety-summary) > .pdxPlace__body,
+.resources-page .rg-safety-summary {
+  --glass-card-shadow:
+    0 0 0 2px var(--z-black),
+    0 12px 30px -18px color-mix(in srgb, var(--z-black) 95%, transparent),
+    0 0 18px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 8) * .91%), transparent),
+    0 0 10px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 8) * .91%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, color-mix(in srgb, var(--text-heading) 12%, transparent)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 28%, transparent);
+}
+.resources-page :is(.rg-directory-card, .rg-safety-summary) {
+  box-shadow: calc(var(--rg-card-shift-x, 0px) * -2) calc(4px - var(--rg-card-shift-y, 0px) * 2) 16px -8px color-mix(in srgb, var(--z-black) 38%, transparent);
+}
+
+/* The 911 surface shares the resource cards' layered glass and motif framing. */
+.resources-page .rg-safety-summary > .pdxPlace__body { isolation: isolate; }
+.resources-page .rg-safety-summary .rg-card-motif {
+  opacity: .48;
+  mask-image: linear-gradient(transparent 4%, black 24%, black 56%, transparent 83%);
+  transform: translateY(-20%) scale(1.3);
+  transform-origin: center;
+}
+.resources-page .rg-safety-summary .pdxPlace__sheen,
+.resources-page .rg-safety-summary > .pdxPlace__body::after { z-index: 2; pointer-events: none; }
+.resources-page .rg-safety-summary { transition: none; }
+
+/* Soften the background only; foreground glass, logos, and text stay crisp. */
+.resources-page .rg-stream-background { filter: brightness(.85); }
+.resources-page::before {
+  backdrop-filter: blur(13.8px);
+  -webkit-backdrop-filter: blur(13.8px);
+}
+
+/* Desktop hero enlargement; the dark veil sits above every background effect. */
+@media (min-width: 901px) {
+  .resources-page .rg-intro .rg-board-logo-frame {
+    width: min(100%, 880px);
+    max-width: 880px;
+  }
+}
+.resources-page .rg-stream-background { z-index: -3; }
+.resources-page::before {
+  z-index: -1;
+  mask-image: linear-gradient(to bottom, var(--z-black) 0%, var(--z-black) 10%, color-mix(in srgb, var(--z-black) 98%, transparent) 20%, color-mix(in srgb, var(--z-black) 93%, transparent) 30%, color-mix(in srgb, var(--z-black) 82%, transparent) 40%, color-mix(in srgb, var(--z-black) 66%, transparent) 50%, color-mix(in srgb, var(--z-black) 48%, transparent) 60%, color-mix(in srgb, var(--z-black) 30%, transparent) 70%, color-mix(in srgb, var(--z-black) 19%, transparent) 80%, color-mix(in srgb, var(--z-black) 13%, transparent) 90%, color-mix(in srgb, var(--z-black) 13%, transparent) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-black) 0%, var(--z-black) 10%, color-mix(in srgb, var(--z-black) 98%, transparent) 20%, color-mix(in srgb, var(--z-black) 93%, transparent) 30%, color-mix(in srgb, var(--z-black) 82%, transparent) 40%, color-mix(in srgb, var(--z-black) 66%, transparent) 50%, color-mix(in srgb, var(--z-black) 48%, transparent) 60%, color-mix(in srgb, var(--z-black) 30%, transparent) 70%, color-mix(in srgb, var(--z-black) 19%, transparent) 80%, color-mix(in srgb, var(--z-black) 13%, transparent) 90%, color-mix(in srgb, var(--z-black) 13%, transparent) 100%);
+}
+
+/* Editorial spacing: 16px within heading groups, 32px to controls,
+   64px between sections, and balanced 80px whitespace around the hero. */
+.resources-page .rg-intro {
+  --rg-logo-space: 80px;
+  gap: var(--rg-logo-space);
+  padding-bottom: var(--rg-logo-space);
+}
+.resources-page .rg-layout { gap: 0; padding-bottom: 0; }
+.resources-page .rg-controls[data-mode] { gap: 64px; }
+.resources-page .rg-controls .rg-step .rg-eyebrow { margin: 0; }
+.resources-page .rg-controls .rg-step h2 { margin: 16px 0 0; }
+.resources-page .rg-controls .rg-multiselect-hint { margin: 16px 0 0; }
+.resources-page .rg-step--intent .rg-mode { margin-top: 32px; width: min(100%, 560px); }
+.resources-page .rg-controls .rg-step--categories .rg-options { margin-top: 32px; }
+.resources-page .rg-search-section { padding-block: 64px; }
+.resources-page .rg-search-section .rg-search-trigger { width: min(100%, 560px); }
+.resources-page .rg-bottom-help { padding-top: 24px; padding-bottom: 40px; }
+@media (max-width: 600px) {
+  .resources-page .rg-intro { --rg-logo-space: 48px; }
+  .resources-page .rg-controls[data-mode] { gap: 48px; }
+  .resources-page .rg-step--intent .rg-mode { margin-top: 24px; width: min(100%, 392px); }
+  .resources-page .rg-controls .rg-step--categories .rg-options { margin-top: 24px; }
+  .resources-page .rg-search-section { padding-block: 48px; }
+  .resources-page .rg-search-section .rg-search-trigger { width: min(100%, 392px); }
+}
+
+/* Category rails keep full-size cards on a horizontal, right-to-left track. */
+.resources-page .rg-resource-rails { display: grid; gap: 64px; min-width: 0; }
+.resources-page .rg-resource-rail-section { min-width: 0; }
+.resources-page .rg-rail-heading { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 80px; }
+.resources-page .rg-rail-heading .rg-eyebrow { margin: 0; font-size: 14px; line-height: 1.6; letter-spacing: .08em; }
+.resources-page .rg-rail-heading h2 { margin: 16px 0 0; font-size: var(--rg-title-size, 40px); line-height: 1.6; }
+.resources-page .rg-rail-heading p { margin: 8px 0 0; font-size: 14px; line-height: 1.7; color: var(--res-secondary-text); }
+.resources-page .rg-rail-actions { display: flex; gap: 12px; margin-top: 16px; }
+.resources-page .rg-rail-actions button { width: 48px; min-height: 44px; font-size: 24px; }
+.resources-page .rg-resource-rail {
+  display: grid; grid-auto-flow: column; grid-auto-columns: min(440px, calc((100% - 36px) / 2));
+  gap: 36px; overflow-x: auto; overflow-y: hidden; min-width: 0;
+  padding: 16px 8px 32px; scroll-padding-inline: 8px; scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: var(--res-scrollbar) transparent;
+}
+.resources-page .rg-resource-rail > .rg-card-reveal { scroll-snap-align: start; height: auto; }
+.resources-page .rg-resource-rail .rg-directory-card { margin: 0; }
+@media (max-width: 719px) {
+  .resources-page .rg-resource-rails { gap: 48px; }
+  .resources-page .rg-rail-heading { margin-bottom: 64px; }
+  .resources-page .rg-rail-heading h2 { font-size: 36px; }
+  .resources-page .rg-resource-rail { grid-auto-columns: 94%; gap: 27px; }
+}
+
+/* Native card artwork stays intact inside the draggable, masked viewport. */
+.resources-page .rg-resource-rail {
+  display: block; overflow: hidden; padding: 16px 12px 24px;
+  scroll-snap-type: none; cursor: grab; touch-action: pan-y pinch-zoom;
+  --rail-fade-left: var(--z-black); --rail-fade-right: var(--z-black);
+  mask-image: linear-gradient(to right, var(--rail-fade-left), var(--z-black) 32px, var(--z-black) calc(100% - 32px), var(--rail-fade-right));
+}
+.resources-page .rg-resource-rail[data-fade-left="true"] { --rail-fade-left: transparent; }
+.resources-page .rg-resource-rail[data-fade-right="true"] { --rail-fade-right: transparent; }
+.resources-page .rg-resource-rail:active { cursor: grabbing; }
+.resources-page .rg-rail-track { display: flex; gap: 36px; touch-action: pan-y pinch-zoom; }
+.resources-page .rg-rail-track > .rg-card-reveal { flex: 0 0 min(440px, calc((100% - 36px) / 2)); min-width: 0; }
+.resources-page .rg-rail-track img { user-select: none; -webkit-user-drag: none; }
+.resources-page .rg-rail-actions button { --c: var(--rail-accent); }
+.resources-page .rg-rail-actions button:disabled { opacity: .3; cursor: default; }
+.resources-page .rg-rail-progress {
+  height: 3px; width: min(240px, 60%); margin: 12px auto 0;
+  background: var(--res-control-border); border-radius: 3px; overflow: hidden;
+}
+.resources-page .rg-rail-progress > div { height: 100%; background: var(--rail-accent); transform-origin: right; }
+.resources-page .rg-category-wash,
+.resources-page .rg-category-edge { position: absolute; inset: 0; border-radius: inherit; background: var(--rg-category-gradient); pointer-events: none; }
+.resources-page .rg-category-wash { z-index: 0; opacity: .09; }
+.resources-page .rg-category-edge {
+  z-index: 5; padding: 1px;
+  mask: linear-gradient(var(--z-black) 0 0) content-box, linear-gradient(var(--z-black) 0 0);
+  mask-composite: exclude;
+  -webkit-mask: linear-gradient(var(--z-black) 0 0) content-box, linear-gradient(var(--z-black) 0 0);
+  -webkit-mask-composite: xor;
+}
+.resources-page .rg-directory-card[data-multi-category="true"] > .pdxPlace__body { border-color: transparent; }
+@media (max-width: 719px) {
+  .resources-page .rg-rail-track { gap: 27px; }
+  .resources-page .rg-rail-track > .rg-card-reveal { flex-basis: 94%; }
+}
+
+/* Survey copy needs a clear pause before the next interactive group. */
+.resources-page .rg-controls .rg-step--categories .rg-options { margin-top: 56px; }
+.resources-page .rg-step--intent .rg-mode { margin-top: 48px; }
+.resources-page .rg-safety-check > p { margin-bottom: 40px; }
+.resources-page .rg-safety-check > div { gap: 16px; }
+@media (max-width: 600px) {
+  .resources-page .rg-controls .rg-step--categories .rg-options { margin-top: 40px; }
+  .resources-page .rg-step--intent .rg-mode { margin-top: 36px; }
+  .resources-page .rg-safety-check > p { margin-bottom: 32px; }
+}
+
+/* Open-card continuity: retain the resource's artwork, accent, and reading rhythm. */
+.rg-resource-detail .rg-detail-art { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.rg-resource-detail .rg-detail-art .rg-card-motif { width: 100%; height: 100%; color: var(--resource-accent); opacity: .12; transform: scale(1.3); }
+.rg-resource-detail .rg-category-wash { position: absolute; inset: 0; background: var(--rg-category-gradient); opacity: .045; }
+.rg-resource-detail > .rg-category-edge {
+  position: absolute; inset: 0; z-index: 5; border-radius: inherit; padding: 1px;
+  background: var(--rg-category-gradient); pointer-events: none;
+  mask: linear-gradient(var(--z-black) 0 0) content-box, linear-gradient(var(--z-black) 0 0);
+  mask-composite: exclude;
+  -webkit-mask: linear-gradient(var(--z-black) 0 0) content-box, linear-gradient(var(--z-black) 0 0);
+  -webkit-mask-composite: xor;
+}
+.rg-resource-detail .rg-drawer-body { position: relative; z-index: 1; scrollbar-width: thin; scrollbar-color: var(--res-scrollbar) transparent; }
+.rg-resource-detail .rg-detail-logo { margin: 0 0 32px; padding: 16px 24px; }
+.rg-resource-detail .rg-detail-logo .rg-logo { filter: brightness(0) invert(1) drop-shadow(0 2px 4px var(--z-black)); }
+.rg-resource-detail .rg-detail-primary > h2 { margin: 0 0 24px; text-align: left; }
+.rg-resource-detail .rg-detail-tags { justify-content: flex-start; gap: 9px; margin: 0 0 24px; }
+.rg-resource-detail .rg-detail-primary > p { margin: 0 0 24px; }
+.rg-resource-detail .rg-detail-disclosure { border-radius: 12px; margin-block: 24px; }
+.rg-resource-detail .rg-detail-disclosure > summary svg { color: var(--resource-accent); }
+.rg-resource-detail .rg-detail-actions { gap: 16px; margin-top: 32px; }
+.rg-resource-detail .rg-detail-actions .pdxBtn:not([href^="tel:"]) { border-radius: 22px; min-height: 48px; color: var(--text-heading); }
+.rg-resource-detail .rg-source-check { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 24px; line-height: 1.7; }
+.rg-resource-detail[data-state="open"] { animation: rg-detail-enter 320ms cubic-bezier(.16,1,.3,1); }
+.rg-resource-detail[data-state="closed"] { animation: rg-detail-exit 220ms cubic-bezier(.4,0,1,1); }
+@keyframes rg-detail-enter { from { opacity: 0; scale: .97; } to { opacity: 1; scale: 1; } }
+@keyframes rg-detail-exit { from { opacity: 1; scale: 1; } to { opacity: 0; scale: .98; } }
+.rg-resource-detail[data-quiet-motion="true"] { animation: none; }
+@media (prefers-reduced-motion: reduce) { .rg-resource-detail[data-state] { animation: none; } }
+@media (max-width: 600px) { .rg-resource-detail .rg-detail-logo { margin-bottom: 24px; padding: 12px 16px; } }
+/* Preserve the two logos whose internal black/white details need a special treatment. */
+.rg-resource-detail .rg-detail-logo .rg-logo[src$="/family-peace.png"] { filter: grayscale(1) brightness(.65) contrast(20) invert(1); }
+.rg-resource-detail .rg-detail-logo .rg-logo[src$="/business-oregon-official.png"] { filter: invert(1) drop-shadow(0 2px 4px var(--z-black)); }
+
+/* One top-left → bottom-right palette for rim, artwork, and card action. */
+.resources-page .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn,
+.resources-page .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn:hover {
+  border: 1px solid transparent;
+  background: linear-gradient(color-mix(in srgb, var(--z-black) 92%, transparent), color-mix(in srgb, var(--z-black) 92%, transparent)) padding-box, var(--rg-category-gradient) border-box;
+  color: var(--text-heading) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-heading) 8%, transparent);
+}
+/* Override Vaul's direction animation while retaining its drag/dismiss behavior. */
+.rg-resource-detail[data-state="open"] { animation: rg-detail-enter 320ms cubic-bezier(.16,1,.3,1) !important; }
+.rg-resource-detail[data-state="closed"] { animation: rg-detail-exit 220ms cubic-bezier(.4,0,1,1) !important; }
+.rg-resource-detail[data-quiet-motion="true"] { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .rg-resource-detail[data-state] { animation: none !important; } }
+
+/* Quiet search dividers and balanced rail headings without arrow controls. */
+.resources-page .rg-search-section { position: relative; margin-block: 48px; padding-block: 32px; }
+.resources-page .rg-search-section::before,
+.resources-page .rg-search-section::after {
+  content: ""; position: absolute; left: 50%; translate: -50% 0;
+  width: min(720px, 100%); height: 1px; background: var(--res-divider); pointer-events: none;
+}
+.resources-page .rg-search-section::before { top: 0; }
+.resources-page .rg-search-section::after { bottom: 0; }
+.resources-page .rg-resource-rails { gap: 40px; }
+.resources-page .rg-rail-heading { margin-bottom: 64px; }
+@media (max-width: 600px) {
+  .resources-page .rg-search-section { margin-block: 32px; padding-block: 24px; }
+}
+@media (max-width: 719px) {
+  .resources-page .rg-resource-rails { gap: 24px; }
+  .resources-page .rg-rail-heading { margin-bottom: 48px; }
+}
+
+/* Mount detailed SVG artwork only near the viewport, preserving card geometry. */
+.rg-motif-slot { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+
+/* More legible survey markers and an 8% increase to page-level titles. */
+.resources-page { --rg-title-size: 43.2px; }
+.resources-page .rg-controls .rg-step .rg-eyebrow,
+.resources-page .rg-rail-heading .rg-eyebrow,
+.resources-page .rg-results-head > .rg-eyebrow { font-size: 16px; gap: 14px; text-shadow: 0 2px 4px var(--z-black); }
+.resources-page .rg-controls .rg-step-number {
+  width: 36px; height: 36px; min-width: 36px; font-size: 16px;
+  border: 1.5px solid var(--neon-yellow); color: var(--neon-yellow);
+  background: var(--res-canvas); box-shadow: 0 3px 8px color-mix(in srgb, var(--z-black) 60%, transparent);
+}
+.resources-page .rg-controls .rg-step h2,
+.resources-page .rg-results-head h2,
+.resources-page .rg-rail-heading h2,
+.resources-page .rg-footer h2 { font-size: var(--rg-title-size); text-shadow: 0 2px 5px var(--z-black); }
+.resources-page .rg-controls .rg-step h2 { margin-top: 20px; }
+@media (max-width: 600px) {
+  .resources-page { --rg-title-size: 38.88px; }
+  .resources-page .rg-controls .rg-step-number { width: 32px; height: 32px; min-width: 32px; }
+}
+
+.resources-page [data-art-visible="false"] .rg-card-top-rule { animation-play-state: paused; }
+.resources-page .rg-rail-track.is-wheel-dragging { cursor: grabbing; }
+
+/* Consistent title separation from the animated glass and background artwork. */
+.resources-page :is(h1, h2, h3, h4),
+.resources-page .rg-directory-card .pdxPlace__name,
+.rg-resource-detail :is(h1, h2, h3, h4) {
+  text-shadow: 0 2px 5px color-mix(in srgb, var(--z-black) 85%, transparent);
+}
+
+/* Soft filter depth follows the existing spring-driven surface movement. */
+.resources-page .rg-options button {
+  box-shadow:
+    0 4px 10px -3px color-mix(in srgb, var(--z-black) 65%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--text-heading) 8%, transparent);
+}
+
+/* Bulk selection uses the intent slider's glass outline and inner spacing. */
+.resources-page .rg-options .rg-selection-control {
+  --c: var(--neon-yellow);
+  background: var(--glass-card-bg);
+  border: 1px solid color-mix(in srgb, var(--neon-yellow) 55%, var(--res-control-border));
+  border-radius: var(--rg-control-radius);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 8%, transparent);
+  padding: 6px; gap: 6px;
+}
+.resources-page .rg-selection-control label { border-radius: 12px; border: 1px solid transparent; }
+
+/* Richer diagonal neon: luminous transitions and rim light around a dark center. */
+.resources-page .rg-directory-card[data-multi-category="true"] .rg-category-wash {
+  opacity: .2;
+  mask-image: radial-gradient(ellipse at 50% 45%, transparent 16%, color-mix(in srgb, var(--z-black) 45%, transparent) 55%, var(--z-black) 100%);
+}
+.resources-page .rg-directory-card[data-multi-category="true"] .rg-category-edge { padding: 1.5px; }
+.resources-page .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn,
+.resources-page .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn:hover {
+  background: linear-gradient(color-mix(in srgb, var(--z-black) 86%, transparent), color-mix(in srgb, var(--z-black) 94%, transparent)) padding-box, var(--rg-category-gradient) border-box;
+}
+.rg-resource-detail .rg-category-wash { opacity: .065; }
+
+/* Section-colored cards: crisp rims, quieter bloom and legible red badges. */
+.resources-page .rg-directory-card > .pdxPlace__body,
+.resources-page .rg-safety-summary {
+  border: 1.5px solid var(--c);
+}
+.resources-page .rg-directory-card .pdxPlace__cat[data-category-id="youth"] .pdxBadge,
+.rg-detail-tags .rg-category-tag[data-category-id="youth"] .pdxBadge {
+  background: var(--z-black) !important;
+  border: 2px solid var(--neon-red) !important;
+  color: var(--text-heading) !important;
+  text-shadow: none;
+  font-weight: 700 !important;
+}
+/* Wider desktop rails reveal roughly another card and a half. */
+@media (min-width: 1100px) {
+  .resources-page .rg-resource-rails {
+    width: calc(100vw - 48px);
+    margin-inline: calc((100% - (100vw - 48px)) / 2);
+  }
+  .resources-page .rg-rail-track > .rg-card-reveal {
+    flex-basis: max(300px, calc((100% - 90px) / 3.5));
+  }
+}
+
+.resources-page :is(.rg-directory-card, .rg-safety-summary) > .pdxPlace__body,
+.resources-page .rg-safety-summary {
+  --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--c) 5.6%, transparent);
+}
+.resources-page :is(.rg-directory-card, .rg-safety-summary) .pdx-glass-sheen--specular { opacity: .35; }
+
+/* A centered closing invitation follows the survey's editorial rhythm. */
+.resources-page .rg-footer {
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 32px;
+  margin-top: 64px;
+  padding-block: 64px 56px;
+  border-top: 1px solid var(--res-control-border);
+}
+.resources-page .rg-footer > div { max-width: 740px; }
+.resources-page .rg-footer .rg-eyebrow {
+  display: block;
+  margin: 0;
+  color: var(--neon-yellow);
+  font-size: 16px;
+  line-height: 1.4;
+  letter-spacing: .08em;
+  text-shadow: 0 2px 4px var(--z-black);
+}
+.resources-page .rg-footer h2 {
+  margin: 20px 0 0;
+  font-size: var(--rg-title-size);
+  line-height: 1.6;
+  text-wrap: balance;
+}
+.resources-page .rg-footer .pdxBtn {
+  --c: var(--neon-cyan);
+  min-height: 56px;
+  min-width: 260px;
+  padding: 14px 28px;
+  gap: 12px;
+  font-size: 20px;
+  line-height: 1.4;
+  color: var(--text-heading);
+  border: 1.5px solid var(--neon-cyan);
+  background: var(--glass-card-bg);
+  border-radius: 16px;
+}
+@media (max-width: 719px) {
+  .resources-page .rg-footer { margin-top: 40px; padding-block: 48px 32px; gap: 28px; }
+  .resources-page .rg-footer .rg-eyebrow { max-width: 280px; margin-inline: auto; }
+  .resources-page .rg-footer .pdxBtn { min-width: 0; width: min(100%, 320px); font-size: 18px; }
+}

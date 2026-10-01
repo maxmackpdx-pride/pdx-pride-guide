@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useLocation } from "wouter";
+import { createPortal } from "react-dom";
 import { MessageCircle, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
@@ -75,6 +76,8 @@ export default function FloatingInbox() {
 
   const onPointerDown = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>) => {
+      if (!event.isPrimary || event.button !== 0) return;
+      event.currentTarget.setPointerCapture(event.pointerId);
       dragRef.current = {
         active: true,
         moved: false,
@@ -82,8 +85,8 @@ export default function FloatingInbox() {
         startY: event.clientY,
         startBottom: bottomPx,
       };
-      // Capture only after a real drag starts - capturing on down can swallow
-      // the open gesture on some browsers / trackpads.
+      // Keep vertical drags captured even when the pointer leaves the button.
+      // Pointer-up still opens the inbox when the drag threshold is not reached.
     },
     [bottomPx],
   );
@@ -111,6 +114,7 @@ export default function FloatingInbox() {
   const onPointerUp = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>) => {
       const drag = dragRef.current;
+      if (!drag.active || drag.pointerId !== event.pointerId) return;
       const wasDrag = drag.moved;
 
       finishDrag(event.pointerId);
@@ -157,7 +161,7 @@ export default function FloatingInbox() {
   // Local guest: soft attention so the demo FAB is easy to spot.
   const needsAttention = !open && (attentionCount > 0 || (localDemo && !user));
 
-  return (
+  return createPortal(
     <div
       className={[
         "floating-inbox",
@@ -199,6 +203,7 @@ export default function FloatingInbox() {
           </span>
         )}
       </button>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -1,38 +1,41 @@
-/* Scoped Resources palette; preserves the supplied page artwork. */
+/* ReZources aliases consume the shared Zaylist palette. */
 .resources-page,
 .rg-overlay {
-  --res-canvas: #0a0a0a;
-  --res-text: #f5f2eb;
-  --res-divider: #1c1c22;
-  --res-surface: #09090c;
-  --res-cyan: #19e3ff;
-  --res-lede: #d9d5cc;
-  --res-magenta: #ff1fa0;
-  --res-muted: #aaa69e;
-  --res-link-border: #444;
-  --res-help-surface: #070708;
-  --res-caption: #8a8680;
-  --res-neutral: #b8b8c2;
-  --res-hotline-surface: #0c0c10;
-  --res-hotline-border: #26262d;
-  --res-hotline-text: #a8a49c;
-  --res-input-surface: #0b0b0f;
-  --res-control-border: #303039;
-  --res-search-icon: #9a968e;
-  --res-placeholder: #77736c;
-  --res-secondary-text: #c4c0b6;
-  --res-scrollbar: #34343d;
-  --res-chip-border: #2b2b32;
-  --res-chip-text: #b7b3aa;
-  --res-badge-surface: #17171c;
-  --res-badge-text: #85817a;
-  --res-lime: #c8fa3c;
-  --res-hint: #66625c;
-  --res-section-border: #16161b;
-  --res-dot-surface: #09090d;
-  --res-arrow: #e4e0d8;
-  --res-detail-label: #eeeae2;
-  --res-card-border: #101014;
-  --res-address: #98948c;
-  --res-quiet-text: #d4d0c8;
+  /* Identity colors: the trans flag intentionally retains its exact palette. */
+  --res-trans-blue: #5bcefa;
+  --res-trans-pink: #f5a9b8;
+  --res-canvas: var(--z-black);
+  --res-text: var(--text-hi);
+  --res-divider: var(--ink-border-faint);
+  --res-surface: var(--ink-800);
+  --res-cyan: var(--neon-cyan);
+  --res-lede: var(--text-body);
+  --res-magenta: var(--neon-magenta);
+  --res-muted: var(--text-body-muted);
+  --res-link-border: var(--ink-border-strong);
+  --res-help-surface: var(--ink-900);
+  --res-caption: var(--text-lo);
+  --res-neutral: var(--text-lo);
+  --res-hotline-surface: var(--ink-800);
+  --res-hotline-border: var(--ink-border);
+  --res-hotline-text: var(--text-body-muted);
+  --res-input-surface: var(--ink-850);
+  --res-control-border: var(--ink-border);
+  --res-search-icon: var(--text-lo);
+  --res-placeholder: var(--text-lo);
+  --res-secondary-text: var(--text-body);
+  --res-scrollbar: var(--ink-border-strong);
+  --res-chip-border: var(--ink-border);
+  --res-chip-text: var(--text-body-muted);
+  --res-badge-surface: var(--ink-750);
+  --res-badge-text: var(--text-lo);
+  --res-lime: var(--neon-yellow);
+  --res-hint: var(--text-faint);
+  --res-section-border: var(--ink-border-faint);
+  --res-dot-surface: var(--ink-800);
+  --res-arrow: var(--text-hi);
+  --res-detail-label: var(--text-hi);
+  --res-card-border: var(--ink-border-faint);
+  --res-address: var(--text-lo);
+  --res-quiet-text: var(--text-body);
 }

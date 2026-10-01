@@ -570,9 +570,9 @@ export default function DirectoryMap({
         center={initialCenter}
         zoom={initialZoom}
         style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
-        maxBounds={isBackdrop ? undefined : PORTLAND_BOUNDS}
+        maxBounds={isBackdrop || focusBusiness ? undefined : PORTLAND_BOUNDS}
         maxBoundsViscosity={1.0}
-        minZoom={isBackdrop ? undefined : PORTLAND_MIN_ZOOM}
+        minZoom={isBackdrop || focusBusiness ? undefined : PORTLAND_MIN_ZOOM}
         dragging={isInteractive}
         scrollWheelZoom={isInteractive}
         doubleClickZoom={isInteractive}

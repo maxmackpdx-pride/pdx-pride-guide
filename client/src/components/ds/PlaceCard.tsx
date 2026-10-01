@@ -407,6 +407,8 @@ const CAL = <><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4
  *  Default = tall little card (profiles / sandbox). */
 export function PlaceCard({
   name,
+  displayName,
+  decoration,
   category = "bars",
   donateUrl,
   categoryLabel,
@@ -441,6 +443,8 @@ export function PlaceCard({
   ...rest
 }: {
   name: string;
+  displayName?: string | null;
+  decoration?: React.ReactNode;
   category?: string;
   donateUrl?: string;
   categoryLabel?: string;
@@ -528,6 +532,7 @@ export function PlaceCard({
       {...rest}
     >
       <div className="pdxPlace__body pdx-glass-card pdx-glass-rebind">
+        {decoration}
         <div className="pdxPlace__sheen pdx-glass-sheen--specular" aria-hidden="true" />
         <div className="pdxPlace__seam pdx-refract-seam" aria-hidden="true" />
         <div className="pdxPlace__actions">
@@ -588,7 +593,7 @@ export function PlaceCard({
             )}
           </div>
 
-          <div className="pdxPlace__name">{name}</div>
+          {(displayName === null && showLogo) ? null : <div className="pdxPlace__name">{showLogo ? (displayName ?? name) : name}</div>}
           {!isCompact && grandOpening && grandOpeningDate && (
             <div className="pdxPlace__grandDate">{grandOpeningDate}</div>
           )}

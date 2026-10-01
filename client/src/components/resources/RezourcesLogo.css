@@ -1,0 +1,22 @@
+.rg-board-logo-frame.rg-z-logo { position: relative; isolation: isolate; }
+.rg-board-logo-frame .rg-board-logo.rg-sketch-motion {
+  position: absolute; inset: 0 auto auto 0;
+  pointer-events: none; user-select: none;
+  opacity: .18;
+  animation: rg-sketch-drift 12s ease-in-out infinite;
+}
+/* Original 1792 × 1008 artwork: drafting bands clear of letters and illustrations. */
+.rg-sketch-motion--top { clip-path: polygon(12% 22%, 38% 22%, 38% 27%, 12% 27%); }
+.rg-sketch-motion--bottom {
+  clip-path: polygon(12% 78%, 82% 78%, 82% 81%, 12% 81%);
+  animation-delay: -6s !important;
+  animation-direction: reverse !important;
+}
+@keyframes rg-sketch-drift {
+  0%, 100% { translate: 0 0; opacity: .12; }
+  35% { translate: .8px -.4px; opacity: .32; }
+  70% { translate: -.6px .5px; opacity: .2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rg-board-logo-frame .rg-sketch-motion { display: none; animation: none; }
+}
