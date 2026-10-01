@@ -29,7 +29,11 @@ const ROOM_LOGO: Record<DoorRoom, string> = {
 export default function RoomDoorways({ current }: { current: DoorRoom }) {
   return (
     <section className="room-doorways pdx-glass-rebind" aria-labelledby="room-doorways-title" style={{ "--c": ROOMS[current].accent } as CSSProperties}>
-      <h2 id="room-doorways-title" className="room-doorways__title">Next door<span aria-hidden="true">.</span></h2>
+      <div className="room-doorways__head">
+        <span className="room-doorways__eyebrow">Keep exploring</span>
+        <h2 id="room-doorways-title" className="room-doorways__title">Next door<span aria-hidden="true">.</span></h2>
+        <p>Find another way into the community.</p>
+      </div>
       <div className="room-doorways__grid">
         {NEXT_DOOR[current].map(key => {
           const room = ROOMS[key as RoomKey];

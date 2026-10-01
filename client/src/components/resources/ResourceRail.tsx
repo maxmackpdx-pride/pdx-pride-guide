@@ -5,8 +5,8 @@ import { motion, useSpring } from "framer-motion";
 
 // Adapted from 21st's Appica Carousel and Designali Scroll Progress patterns.
 // The rail owns navigation and clipping; resource cards keep their own design.
-export function ResourceRail({ id, title, color, count, quiet, children, room = "ReZources", itemName = "resource" }: {
-  id: string; title: string; color: string; count: number; quiet: boolean; children: ReactNode; room?: string; itemName?: string;
+export function ResourceRail({ id, title, color, count, quiet, children, room = "ReZources", itemName = "resource", focusIndex }: {
+  id: string; title: string; color: string; count: number; quiet: boolean; children: ReactNode; room?: string; itemName?: string; focusIndex?: number;
 }) {
   const plugins = useMemo(() => [WheelGesturesPlugin()], []);
   const [viewport, api] = useEmblaCarousel({ direction: "rtl", align: "center", startIndex: Math.floor(count / 2), containScroll: "trimSnaps", duration: quiet ? 0 : 25 }, plugins);
@@ -25,6 +25,10 @@ export function ResourceRail({ id, title, color, count, quiet, children, room = 
     api.on("scroll", update).on("select", update).on("reInit", update);
     return () => { api.off("scroll", update).off("select", update).off("reInit", update); };
   }, [api, quiet, progress]);
+  useEffect(() => {
+    if (!api || focusIndex === undefined || focusIndex < 0) return;
+    api.scrollTo(focusIndex, true);
+  }, [api, focusIndex]);
   return <section className="rg-resource-rail-section" aria-labelledby={`${id}-title`} style={{ "--rail-accent": color } as CSSProperties}>
     <header className="rg-rail-heading">
       <span className="rg-eyebrow">Explore {room}</span>

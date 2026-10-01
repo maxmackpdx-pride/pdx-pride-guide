@@ -1,6 +1,5 @@
 import BoardAtmosphere from '@/components/board/BoardAtmosphere';
 import { RoomKicker } from "@/components/ds";
-import FilterSurvey from "@/components/FilterSurvey";
 import RoomPlate from "@/components/board/RoomPlate";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";

@@ -1,4 +1,3 @@
-import BoardAtmosphere from '@/components/board/BoardAtmosphere';
 import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
@@ -9,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link } from "wouter";
-import { ArrowLeft, ArrowRight, ArrowUpRight, CalendarDays, MapPin, Plus, Share2, Sparkle, Trash2, X, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, CalendarDays, MapPin, Plus, Share2, Sparkle, Trash2, Zap } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -20,6 +19,8 @@ import { memberProfileHref } from "@/lib/avatarLinks";
 import { Button, FilterChip, RoomKicker } from "@/components/ds";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
+import BoardShader from "@/components/board/BoardShader";
+import OpenBoardCard from "@/components/board/OpenBoardCard";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import ImageUploader from "@/components/ImageUploader";
 import { timeAgo } from "@/lib/timeAgo";
@@ -180,9 +181,10 @@ export default function PrideWork() {
     { num: realLive.filter(g => Date.parse(g.createdAt) >= weekAgo).length, label: "New this week", color: "var(--neon-yellow)" },
     { num: realLive.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Available to hire", color: "var(--panel-cyan)" },
   ];
-  const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/gigz?post=${id}`); window.setTimeout(() => document.getElementById("gigz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
-  return <main className="gigz-page">
-    <BoardAtmosphere room="gigz" side="left" />
+  const closeDetail = () => { setSelectedId(null); window.history.replaceState(null, "", "/gigz"); };
+  const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/gigz?post=${id}`); };
+  return <main className="gigz-page board-shader-page" data-shader-room="gigz">
+    <BoardShader room="gigz" />
     <div className="gigz-shell">
       <RoomPlate room="gigz" />
       <DiscoveryFlow room="Gigz" accent="var(--room-gigz)" title="What kind of connection?" intro="Find work or collaborators, post an opportunity, or let people know what you can do." initiallyOpen={Boolean(window.location.search)} choices={[
@@ -200,7 +202,7 @@ export default function PrideWork() {
         {!isLoading && !isError && (talent.length ? <GigRail posts={talent} kind="talent" selected={selectedId} onSelect={select} /> : <div className="gigz-empty pdx-glass-rebind">No one has posted availability yet. <button onClick={() => openForm("LOOKING_FOR_WORK")}>Post yours</button></div>)}
       </div>}
       {onlyMine && visible.some(g => g.status === "CLOSED") && <section className="gigz-closed"><h2>Completed posts</h2><p>These are visible only to you. Open one to edit or relist it.</p><div>{visible.filter(g => g.status === "CLOSED").map(g => <button type="button" key={g.id} onClick={() => select(g.id)}>{g.title} <ArrowUpRight size={16} /></button>)}</div></section>}
-      {selected && <section id="gigz-detail" className="gigz-detail" aria-label="Selected Gigz post"><button className="gigz-detail__close" onClick={() => { setSelectedId(null); window.history.replaceState(null, "", "/gigz"); }} aria-label="Close details"><X size={18} /></button><GigListingCard gig={selected} accent="var(--board-gigs)" expanded skills={selected.skills?.split(",").map(s => s.trim()).filter(Boolean) || []} isLooking={selected.postType === "LOOKING_FOR_WORK"} onToggle={() => {}} /></section>}
+      {selected && <OpenBoardCard key={selected.id} label="Selected Gigz post" accent="var(--board-gigs)" onClose={closeDetail}><GigListingCard gig={selected} accent="var(--board-gigs)" expanded skills={selected.skills?.split(",").map(s => s.trim()).filter(Boolean) || []} isLooking={selected.postType === "LOOKING_FOR_WORK"} onToggle={() => {}} /></OpenBoardCard>}
       {formOpen && <GigComposer initialType={composeType} onClose={() => setFormOpen(false)} onPosted={id => { setFormOpen(false); setSelectedId(id); }} />}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <SafetyGuide context="gigs" />

@@ -3915,3 +3915,10 @@ html.calm-mode .rg-options button,
 .resources-page .rg-intro .rg-intro-actions { width:100%; justify-content:center; margin-top:-56px; gap:12px; }
 .resources-page .rg-intro-actions :is(.board-share-button,.board-follow-button) { min-height:44px; border-radius:18px; padding-inline:18px; }
 @media(max-width:600px){ .resources-page .rg-intro .rg-intro-actions { margin-top:-24px; } }
+
+/* With discovery search in the site header, keep one intentional pause before the survey. */
+.resources-page .rg-intro { padding-bottom: 0; }
+.resources-page .rg-layout { padding-top: clamp(64px, 7vw, 104px); }
+@media (max-width: 600px) {
+  .resources-page .rg-layout { padding-top: 56px; }
+}

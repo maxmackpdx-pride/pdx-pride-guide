@@ -1,4 +1,5 @@
 import BoardHero from "@/components/BoardHero";
+import BoardExploreActions from "@/components/BoardExploreActions";
 
 type Props = {
   eventCount: number;
@@ -19,7 +20,8 @@ export default function EventsHero({ eventCount }: Props) {
             alt="EVENTZ"
           />
         }
-        lede="Dance floors, daytime hangs, and community gatherings. Find an event, plan your week, or add one for everyone to see."
+        lede="Find your next night out, daytime hang, or community gathering. Browse the flyers, check the details, and make a plan."
+        actions={<BoardExploreActions showSchedule scheduleLead />}
       />
   );
 }

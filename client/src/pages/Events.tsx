@@ -1,5 +1,4 @@
-import BoardAtmosphere from '@/components/board/BoardAtmosphere';
-import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
+import { WebGLShader } from '@/components/ui/web-gl-shader';
 import { createEventSearch } from "@shared/eventSearch";
 import RoomPlate from "@/components/board/RoomPlate";
 import BrowseToolbar from "@/components/BrowseToolbar";
@@ -24,7 +23,6 @@ import PosterAdCard from "@/components/ads/PosterAdCard";
 import type { AdServePayload } from "@/lib/adTypes";
 import EventsHero from "@/components/EventsHero";
 import BoardStatsBar from "@/components/BoardStatsBar";
-import RoomDoorways from "@/components/RoomDoorways";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import EventTypeTag from "../components/EventTypeTag";
@@ -608,16 +606,10 @@ export default function Events() {
 
   return (
     <div className="zine-page events-page board-page board-page--makeover">
-      <BoardAtmosphere room="eventz" side="right" />
-      <div className="room-plate-shell"><RoomPlate room="eventz" /></div>
+      <WebGLShader />
       <EventsHero eventCount={upcomingCount} />
-
-      <DiscoveryFlow room="Eventz" accent="var(--room-eventz)" title="What brings you out?" intro="Find something happening, see the full board, plan your week, or share an event." initiallyOpen={Boolean(window.location.search || selectedEvent)} choices={[
-        {id:'events',label:'Find an event',description:'Browse and filter the board',scrollToResults:true,onChoose:()=>setActiveTab('board')},
-        {id:'all',label:'Show all events',description:'Reset filters and see everything',scrollToResults:true,onChoose:()=>{setActiveTab('board');setActiveDay('ALL');setActiveFilters([]);setSearchQuery('');setPastView(false);window.history.replaceState(window.history.state,'','/events');}},
-        {id:'schedule',label:'Plan my week',description:'Build a personal lineup',scrollToResults:true,onChoose:()=>setActiveTab('schedule')},
-        {id:'post',label:'Post an event',description:'Add your event to Zaylist',onChoose:()=>setLocation('/submit')},
-      ]}>
+      <div className="room-plate-shell"><RoomPlate room="eventz" /></div>
+      <BoardStatsBar stats={heroStats} variant="band" showLive={false} />
       <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} />
 
       {activeTab === "schedule" ? (
@@ -631,7 +623,6 @@ export default function Events() {
       ) : (
       <section className="events-board-feed board-active-feed diag">
         <div className="board-active-feed__inner">
-          <BoardStatsBar stats={heroStats} variant="band" showLive={false} />
           <ScrollReveal delay={40}>
             <div className="events-board-feed__sticky">
               <div className="board-active-feed__head">
@@ -672,21 +663,6 @@ export default function Events() {
               <FilterSurvey label="Eventz" question="When do you want to go?" value={activeDay} onChange={setActiveDay} accent="var(--neon-yellow)" options={dayChips.filter(chip => !/^\d{4}-/.test(chip.key)).map(chip => ({value:chip.key,label:chip.label}))}>
               <BrowseToolbar label="Search and filter Eventz" className="board-active-feed__controls">
                 <div className="board-filter-row events-filter-row">
-                  {dayChips.filter(chip => !/^\d{4}-/.test(chip.key)).map((chip, i) => {
-                    const selected = activeDay === chip.key;
-                    return (
-                      <FilterChip
-                        key={chip.key}
-                        selected={selected}
-                        fill={selected}
-                        accent={windowAccent(chip.key, i)}
-                        onToggle={() => setActiveDay(chip.key)}
-                        data-testid={`filter-day-${chip.key}`}
-                      >
-                        {chip.label}
-                      </FilterChip>
-                    );
-                  })}
                   <details className="events-more-filters">
                     <summary>More filters{activeFilters.length || pastView || /^\d{4}-/.test(activeDay) ? ` · ${activeFilters.length + Number(pastView) + Number(/^\d{4}-/.test(activeDay))} active` : ""}</summary>
                     <div className="events-more-filters__content">
@@ -928,8 +904,6 @@ export default function Events() {
       </section>
       )}
 
-      </DiscoveryFlow>
-      <RoomDoorways current="eventz" />
       {selectedEvent && (
         <EventModal
           event={selectedEvent}

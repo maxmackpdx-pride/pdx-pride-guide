@@ -1,12 +1,13 @@
-import BoardAtmosphere from '@/components/board/BoardAtmosphere';
 import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
 import FilterSurvey from "@/components/FilterSurvey";
+import BoardShader from "@/components/board/BoardShader";
+import OpenBoardCard from "@/components/board/OpenBoardCard";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, Bookmark, Plus, RotateCcw, Search, ShieldCheck, Tag, X } from "lucide-react";
+import { ArrowUpRight, Bookmark, Plus, RotateCcw, Search, ShieldCheck, Tag } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -186,7 +187,6 @@ export default function Sellz() {
     const url = new URL(window.location.href);
     url.searchParams.set("post", String(id));
     window.history.replaceState(null, "", url.pathname + url.search);
-    setTimeout(() => document.getElementById("sellz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40);
   };
   const closeDetail = () => {
     setExpandedId(null);
@@ -195,8 +195,8 @@ export default function Sellz() {
     window.history.replaceState(null, "", url.pathname + url.search);
   };
 
-  return <main className="gigz-page sellz-page sellz-board-page">
-    <BoardAtmosphere room="sellz" side="right" />
+  return <main className="gigz-page sellz-page sellz-board-page board-shader-page" data-shader-room="sellz">
+    <BoardShader room="sellz" />
     <div className="gigz-shell">
       <RoomPlate room="sellz" />
       <DiscoveryFlow room="Sellz" accent="var(--room-sellz)" title="What are you here for?" intro="Browse local listings or put something up for sale in your community." initiallyOpen={Boolean(window.location.search)} choices={[
@@ -223,7 +223,7 @@ export default function Sellz() {
       {missingLinkedPost && <div role="status" className="gigz-empty pdx-glass-rebind">This shared listing is no longer available. It may have been sold or removed.</div>}
       {resultsLoading ? <BoardFeedSkeleton label="Loading Sellz listings" shape="board" count={4} /> : resultsError ? <div className="gigz-empty pdx-glass-rebind" role="alert">Could not load Sellz. <button type="button" onClick={() => void (ownerView ? refetchMine() : refetch())}>Try again</button></div> : activeListings.length ? <SellzGrid posts={activeListings} saved={saved} selectedId={expandedId} onSelect={select} /> : <div className="gigz-empty pdx-glass-rebind"><Search size={30} /><p>{view === "SAVED" ? "You have no matching saved listings." : view === "MINE" ? "You have no matching active listings." : "Nothing matches yet. Try broader filters or start a listing."}</p><button type="button" onClick={filtersActive ? clearFilters : openForm}>{filtersActive ? "Clear filters" : "Sell something"}</button></div>}
       {inactiveMine.length > 0 && <section className="sellz-inactive" aria-label="Your other listings"><h2>Your other listings</h2><p>Review and manage completed or pending listings.</p><div>{inactiveMine.map(post => <button type="button" key={post.id} onClick={() => select(post.id)}>{post.title} <span>{post.status}</span></button>)}</div></section>}
-      {selected && <section id="sellz-detail" className="gigz-detail sellz-detail" aria-label="Selected Sellz listing"><button type="button" className="gigz-detail__close" onClick={closeDetail} aria-label="Close details"><X size={18} /></button><SellzListingCard key={selected.id} post={selected} saved={saved.has(selected.id)} expanded onToggle={closeDetail} onRequireAuth={() => setShowAuth(true)} onDeleted={closeDetail} /></section>}
+      {selected && <OpenBoardCard key={selected.id} label="Selected Sellz listing" accent="var(--room-sellz)" onClose={closeDetail}>{requestClose => <SellzListingCard post={selected} saved={saved.has(selected.id)} expanded onToggle={requestClose} onRequireAuth={() => setShowAuth(true)} onDeleted={closeDetail} />}</OpenBoardCard>}
       <p className="sellz-board-rules">No weapons · no illegal goods · no counterfeit goods · no in-app payments</p>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       </DiscoveryFlow>

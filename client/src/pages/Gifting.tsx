@@ -14,6 +14,7 @@ import GiftListingCard, { type GiftingPost } from "@/components/board/GiftListin
 import { FilterChip, RoomKicker } from "@/components/ds";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
+import OpenBoardCard from "@/components/board/OpenBoardCard";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -234,7 +235,6 @@ export default function Gifting() {
     const url = new URL(window.location.href);
     url.searchParams.set("post", String(id));
     window.history.replaceState(null, "", url.pathname + url.search);
-    window.setTimeout(() => document.getElementById("giftz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40);
   };
   const closeDetail = () => {
     setExpandedId(null);
@@ -283,7 +283,7 @@ export default function Gifting() {
         </section>}
       </div>}
       {!isLoading && !isError && inactiveMine.length > 0 && <section className="giftz-inactive" aria-label="Your other posts"><h2>Your other posts</h2><p>Pending and completed posts are here so you can review and manage them.</p><div>{inactiveMine.map(post => <button type="button" key={post.id} onClick={() => select(post.id)}>{post.title} <span>{post.status}</span></button>)}</div></section>}
-      {selected && <section id="giftz-detail" className="gigz-detail giftz-detail" aria-label="Selected Giftz post"><button type="button" className="gigz-detail__close" onClick={closeDetail} aria-label="Close details"><X size={18} /></button><GiftListingCard post={selected} expanded onToggle={closeDetail} onRequireAuth={() => setShowAuth(true)} onDeleted={closeDetail} /></section>}
+      {selected && <OpenBoardCard key={selected.id} label="Selected Giftz post" accent="var(--room-giftz)" onClose={closeDetail}>{requestClose => <GiftListingCard post={selected} expanded onToggle={requestClose} onRequireAuth={() => setShowAuth(true)} onDeleted={closeDetail} />}</OpenBoardCard>}
       {formOpen && <GiftComposer key={`${composeType}-${composePickup || "standard"}`} initialType={composeType} initialPickupPreference={composePickup} onClose={() => setFormOpen(false)} onPosted={id => { setFormOpen(false); select(id); }} />}
       <SafetyGuide context="gifts" />
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}

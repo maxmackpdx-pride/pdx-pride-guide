@@ -12,9 +12,7 @@ import {
 import { Link, useLocation } from "wouter";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { useTheme } from "@/context/ThemeContext";
-import * as Dialog from "@radix-ui/react-dialog";
 import { Drawer } from "vaul";
-import { Command } from "cmdk";
 import {
   ArrowUpRight,
   ChevronDown,
@@ -26,7 +24,6 @@ import {
   Brain,
   Palette,
   Scale,
-  Search,
   ShieldCheck,
   ShieldAlert,
   Phone,
@@ -115,23 +112,6 @@ const HOTLINES = [
   },
   { name: "Trans Lifeline", description: "877-565-8860", tel: "18775658860" },
 ];
-
-function resourceSearchFilter(value: string, query: string, keywords: string[] = []) {
-  const normalize = (text: string) => text.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-  const needle = normalize(query);
-  if (!needle) return 1;
-  const title = normalize(value);
-  const fields = [title, ...keywords.map(normalize)];
-  // Phone formatting should not affect a match.
-  if (/^[\d\s()+.\-]+$/.test(query) && query.replace(/\D/g, "").length >= 3) {
-    const digits = query.replace(/\D/g, "");
-    return fields.some((field) => field.replace(/\D/g, "").includes(digits)) ? 1 : 0;
-  }
-  if (title.includes(needle)) return 1;
-  if (fields.some((field) => field.includes(needle))) return 0.8;
-  const words = fields.join(" ").split(/\s+/);
-  return needle.split(/\s+/).every((term) => words.some((word) => word.startsWith(term))) ? 0.5 : 0;
-}
 
 function Mark({ org }: { org: ResourceOrg }) {
   const letters =
@@ -474,8 +454,6 @@ export default function Resources() {
 
   const [directoryRevealed, setDirectoryRevealed] = useState(false);
   const [mode, setMode] = useState<"directory" | "talk">("directory");
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
   const [supportOpen, setSupportOpen] = useState(false);
   const [safetyAnswer, setSafetyAnswer] = useState<"yes" | "no" | null>(null);
@@ -491,6 +469,17 @@ export default function Resources() {
       setDetailOpen(true);
     }
   }, []);
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("find");
+    if (!requested) return;
+    const row = ROWS.find(({ org }) => org.name === requested || org.aliases?.includes(requested));
+    if (!row) return;
+    setIntentChosen(true);
+    setDirectoryRevealed(true);
+    setCategoryIds([row.category.id]);
+    setMode("directory");
+    setSearchTarget(row.org.name);
+  }, [location]);
 
   const [mobile, setMobile] = useState(
     () => window.matchMedia("(max-width: 600px)").matches,
@@ -504,47 +493,12 @@ export default function Resources() {
       ROWS.filter((r) => categoriesFor(r).some((c) => categoryIds.includes(c.id))),
     [categoryIds],
   );
-  const searchMatches = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const seen = new Set<string>();
-    return ROWS.flatMap((row) => {
-      if (seen.has(row.org.name)) return [];
-      seen.add(row.org.name);
-      const org = row.org;
-      const score = resourceSearchFilter(org.name, searchQuery, [
-        ...(org.aliases || []), org.desc, org.scope,
-        ...(org.serviceTags || []),
-        ...categoriesFor(row).map((category) => category.name),
-        ...(org.programs || []).flatMap((program) => [program.name, program.desc]),
-        ...(org.locations || []).flatMap((place) => [place.name, place.address]),
-        ...(org === FOOD_RESOURCE ? FOOD_PANTRIES.map((pantry) => pantry.name) : []),
-      ]);
-      return score ? [{ row, score }] : [];
-    }).sort((a, b) => b.score - a.score || a.row.org.name.localeCompare(b.row.org.name)).slice(0, 7);
-  }, [searchQuery]);
-
   useEffect(() => {
     const media = window.matchMedia("(max-width: 600px)");
     const change = () => setMobile(media.matches);
     media.addEventListener("change", change);
     return () => media.removeEventListener("change", change);
   }, []);
-  useEffect(() => {
-    const key = (event: KeyboardEvent) => {
-      if (
-        (event.metaKey || event.ctrlKey) &&
-        event.key.toLowerCase() === "k" &&
-        !detailOpen &&
-        !supportOpen
-      ) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        setSearchOpen((o) => !o);
-      }
-    };
-    window.addEventListener("keydown", key, true);
-    return () => window.removeEventListener("keydown", key, true);
-  }, [detailOpen, supportOpen]);
   const showResults = intentChosen && (mode === "directory" ? directoryRevealed : safetyAnswer === "yes");
   function choose(id: string | null) {
     setDirectoryRevealed(true);
@@ -581,15 +535,6 @@ export default function Resources() {
     frame = requestAnimationFrame(findCard);
     return () => { cancelAnimationFrame(frame); window.clearTimeout(settleTimer); };
   }, [searchTarget, showResults, quietMotion]);
-  function selectSearchResource(row: Row) {
-    setIntentChosen(true);
-    setDirectoryRevealed(true);
-    setCategoryIds([row.category.id]);
-    setMode("directory");
-    setSearchOpen(false);
-    setSearchQuery("");
-    setSearchTarget(row.org.name);
-  }
   return (
     <div className="resources-page">
       <WebGLShader />
@@ -607,12 +552,6 @@ export default function Resources() {
           </div>
 
       </header>
-      <div className="rg-search-section rg-search-section--hero rg-wrap">
-        <button className="rg-search-trigger" onClick={() => setSearchOpen(true)}>
-          <Search size={19} />
-          <span>SEARCH REZOURCES</span>
-        </button>
-      </div>
       <section className="rg-layout rg-wrap">
         <aside className="rg-controls" data-mode={mode} aria-label="Choose ReZources">
           <div className="rg-step rg-step--intent">
@@ -752,7 +691,7 @@ export default function Resources() {
                 const group = rows.filter(row => categoriesFor(row).some(c => c.id === type.id));
                 if (!group.length) return null;
                 const railId = `resource-rail-${type.id}`;
-                return <ResourceRail key={type.id} id={railId} title={type.name} color={type.color} count={group.length} quiet={Boolean(quietMotion)}>
+                return <ResourceRail key={type.id} id={railId} title={type.name} color={type.color} count={group.length} quiet={Boolean(quietMotion)} focusIndex={searchTarget ? group.findIndex(row => row.org.name === searchTarget) : undefined}>
                   {group.map(row => <div className="rg-card-reveal" key={row.org.name} dir="ltr" tabIndex={-1} data-resource-search-card={row.org.name}>
                     <ResourceCard row={{ ...row, sectionCategory: type }} onOpen={openDetail} />
                   </div>)}
@@ -777,64 +716,6 @@ export default function Resources() {
       <div className="rg-reassurance rg-bottom-help rg-wrap">
         <p>Not sure? <a href="tel:211">Call 211info</a> for help finding a starting point.</p>
       </div>
-
-      <Dialog.Root open={searchOpen} onOpenChange={(open) => { setSearchOpen(open); if (!open) setSearchQuery(""); }}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="rg-overlay-backdrop rg-search-backdrop" data-quiet-motion={quietMotion ? "true" : undefined} />
-          <Dialog.Content
-            className="rg-overlay rg-command"
-            data-quiet-motion={quietMotion ? "true" : undefined}
-            onCloseAutoFocus={(event) => {
-              if (detailOpen) event.preventDefault();
-            }}
-          >
-            <Dialog.Title className="sr-only">
-              Search community ReZources
-            </Dialog.Title>
-            <Dialog.Description className="sr-only">
-              Type to find a ReZources card, then select a suggestion to go to it.
-            </Dialog.Description>
-            <Dialog.Close className="rg-close" aria-label="Close search">
-              <X size={20} />
-            </Dialog.Close>
-            <Command shouldFilter={false}>
-              <Command.Input
-                aria-label="Search ReZources cards"
-                placeholder="Search organizations or services…"
-                value={searchQuery}
-                onValueChange={setSearchQuery}
-              />
-              <Command.List>
-                {!searchQuery.trim() ? (
-                  <p className="rg-search-prompt">Start typing a name, service, or place to see matching cards.</p>
-                ) : searchMatches.length === 0 ? (
-                  <p className="rg-search-prompt">No matching ReZources cards. Try another name or service.</p>
-                ) : (
-                <Command.Group heading="Matching ReZources">
-                  {searchMatches.map(({ row }) => (
-                    <Command.Item
-                      key={row.org.name}
-                      value={row.org.name}
-                      onSelect={() => selectSearchResource(row)}
-                    >
-                      <span>
-                        {row.org.name}
-                        <small className="rg-search-service">{(row.org.serviceTags?.length ? row.org.serviceTags : categoriesFor(row).map((c) => c.name)).join(" · ")}</small>
-                        <small className="rg-search-location">{row.org.scope}</small>
-                      </span>
-                      <ArrowUpRight size={16} />
-                    </Command.Item>
-                  ))}
-                </Command.Group>
-                )}
-              </Command.List>
-            </Command>
-            <p className="rg-command-hint">
-              ↑ ↓ to move · Enter to find card · Esc to close
-            </p>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
 
       <Drawer.Root open={supportOpen} onOpenChange={setSupportOpen} direction={mobile ? "bottom" : "right"} shouldScaleBackground={false} dismissible closeThreshold={0.2}>
         <Drawer.Portal>
@@ -879,7 +760,7 @@ export default function Resources() {
               if (target?.isConnected) target.focus();
               else
                 document
-                  .querySelector<HTMLButtonElement>(".rg-search-trigger")
+                  .querySelector<HTMLButtonElement>(".rg-mode button")
                   ?.focus();
             }}
           >

@@ -33,6 +33,16 @@
   overflow: hidden;
 }
 
+/* The survey already introduces the board; keep the revealed actions compact. */
+.hz-entry-actions { padding-block: 12px 36px; text-align: center; }
+.hz-entry-actions h1 { margin: 0; color: var(--board-text); font: 800 clamp(30px, 3vw, 40px)/1.35 var(--font-display); text-transform: uppercase; }
+.hz-entry-actions p { max-width: 58ch; margin: 12px auto 24px; color: var(--text-body); font: 18px/1.7 var(--font-body); }
+.hz-entry-actions .hz-board-actions { justify-content: center; }
+.hz-entry-actions__more { width: fit-content; max-width: 100%; margin: 20px auto 0; color: var(--text-body); }
+.hz-entry-actions__more summary { min-height: 44px; padding: 10px 16px; cursor: pointer; font: 700 16px/1.4 var(--font-display); }
+.hz-entry-actions__more summary:focus-visible { outline: 2px solid var(--room-hauz); outline-offset: 3px; }
+.hz-entry-actions__more .hz-board-actions { margin-top: 12px; }
+
 .hz-wash {
   position: absolute;
   inset: 0;

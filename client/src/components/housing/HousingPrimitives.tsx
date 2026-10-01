@@ -203,7 +203,6 @@ export function accentStyle(type: HousingType): CSSProperties {
 export function CloseSeam({ line, url }: { line: string; url: string }) {
   return (
     <>
-      <div className="pdx-seam" aria-hidden="true" />
       <div className="hz-close">
         <Mono>{line}</Mono>
         <Mono micro>{url}</Mono>

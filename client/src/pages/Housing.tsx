@@ -6,9 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import BrowseToolbar from "@/components/BrowseToolbar";
-import FilterSurvey from "@/components/FilterSurvey";
 import BrowseStatus from "@/components/BrowseStatus";
-import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import { SearchInput } from "@/components/ds";
 /**
  * HAUSING - the Housing board.
@@ -59,13 +57,6 @@ import SafetyGuide from "@/components/SafetyGuide";
 import RoomDoorways from "@/components/RoomDoorways";
 import { trackProductEvent } from "@/lib/analytics";
 import { roomTitle } from "@/lib/rooms";
-
-const SIGNS: Array<{ label: string; cls: string }> = [
-  { label: "FOR RENT", cls: "s1" },
-  { label: "NEED ROOMMATES", cls: "s2" },
-  { label: "FORMING HOUSE", cls: "s3" },
-  { label: "LOOKING FOR ROOM", cls: "s4" },
-];
 
 const RAILS: Array<{ type: HousingType; eyebrow: string; title: string; description: string; action: string }> = [
   { type: "OFFERING", eyebrow: "ROOMS WITH PEOPLE IN THEM", title: "Rooms offered", description: "Meet the household before you message.", action: "Post a room" },
@@ -350,70 +341,28 @@ export default function Housing() {
         { id: 'household', label: 'Find my people', description: 'Households forming and room seekers open to forming one', scrollToResults: true, scrollTargetId: 'housing-listings', onChoose: () => browseHousing('FORMING') },
         { id: 'all', label: 'Explore all', description: 'Browse the full board', scrollToResults: true, scrollTargetId: 'housing-listings', onChoose: () => browseHousing('ALL') },
       ]}>
-      {/* Hero */}
-      <div className="hz-hero">
-        <span className="hz-hero__fx" aria-hidden="true" />
-        <div className="hz-signs" aria-hidden="true">
-          {SIGNS.map(({ label, cls }) => (
-            <svg
-              key={cls}
-              className={`hz-sign hz-sign--${cls}`}
-              viewBox="0 0 240 92"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3.4"
-              strokeLinejoin="round"
-            >
-              <rect x="6" y="6" width="228" height="80" rx="7" />
-              <path d="M6 26h228" />
-              <text
-                x="120"
-                y="66"
-                textAnchor="middle"
-                fill="currentColor"
-                stroke="none"
-                fontFamily="var(--font-display)"
-                fontWeight="900"
-                fontSize={label.length > 12 ? 26 : 34}
-                letterSpacing="1.5"
-              >
-                {label}
-              </text>
-            </svg>
-          ))}
-        </div>
-        <span className="hz-hero__dots" aria-hidden="true" />
-        <span className="hz-hero__scrim" aria-hidden="true" />
-        <div className="hz-pad">
-          <div className="hz-wrap">
-            <SectionBreadcrumb section="The Haüz" />
-            <h1 className="hz-title hz-hero__title hz-hero__title--brand">
-              <span className="sr-only">The Haüz</span>
-              <span className="hz-beta">Beta</span>
-            </h1>
-            <p className="hz-hero__lede">
-              Rooms, roommates, and people building a household together. It is a community board, not a
-              listings site. No fees, no applications, no money through Zaylist. You post, you scroll, you
-              chat.
-            </p>
-            <div className="hz-hero__mantra">
-              <Mono>Find a room · form a Haüz · find a home</Mono>
-            </div>
+      <section className="hz-entry-actions hz-pad" aria-label="The Haüz actions">
+        <div className="hz-wrap">
+          <h1>Browse homes and people</h1>
+          <p>Rooms, roommates, and people building a household together. No fees, applications, or payments through Zaylist.</p>
+          <div className="hz-board-actions">
+            <a className="hz-chip hz-chip--btn" href="#housing-listings">Browse listings <ArrowDown size={14} aria-hidden="true" /></a>
+            <button type="button" className="hz-chip hz-chip--btn hz-board-post" onClick={() => { if (requireAuth()) navigate("/the-hauz/new"); }}>Post to The Haüz <ArrowUpRight size={14} aria-hidden="true" /></button>
+            <button type="button" className="hz-chip hz-chip--btn" onClick={() => openCompose("PM")}>Property managers · Contact Tucker</button>
+          </div>
+          <details className="hz-entry-actions__more">
+            <summary>Choose a post type</summary>
             <div className="hz-board-actions">
-              <a className="hz-chip hz-chip--btn" href="#housing-listings">Browse the listings <ArrowDown size={14} aria-hidden="true" /></a>
-              <button type="button" className="hz-chip hz-chip--btn hz-board-post" onClick={() => { if (requireAuth()) navigate("/the-hauz/new"); }}>Post to The Haüz <ArrowUpRight size={14} aria-hidden="true" /></button>
               <button type="button" className="hz-chip hz-chip--btn" onClick={() => openCompose("OFFERING")}>Offer a room</button>
               <button type="button" className="hz-chip hz-chip--btn" onClick={() => openCompose("LOOKING")}>Find housing</button>
               <button type="button" className="hz-chip hz-chip--btn" onClick={() => openCompose("FORMING")}>Build a Haüz</button>
-              <button type="button" className="hz-chip hz-chip--btn" onClick={() => openCompose("PM")}>Property managers · Connect with Tucker</button>
             </div>
-          </div>
+          </details>
         </div>
-      </div>
+      </section>
 
       <div className="hz-pad hz-pad--tight">
         <div className="hz-wrap">
-          <FilterSurvey label="The Haüz" question="What kind of home are you looking for?" value={filter} onChange={value => setFilter(value as HousingFilter)} accent="var(--room-hauz)" options={HOUSING_FILTERS.map(value => ({value,label:HOUSING_FILTER_LABEL[value]}))}>
           <BrowseToolbar label="Search and filter The Haüz">
           <SearchInput id="housing-search" label="Search The Haüz" aria-label="Search The Haüz" placeholder="Search household names and headlines" value={searchQuery} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} onClear={() => setSearchQuery("")} />
           <div className="hz-filter" id="housing-listings" tabIndex={-1} style={{ scrollMarginTop: "calc(var(--site-header-height, 0px) + 16px)" }}>
@@ -437,7 +386,6 @@ export default function Housing() {
           <HousingTagFilter applied={tags} onApply={setTags} />
           {(searchQuery || tags.length > 0 || filter !== "ALL") && <button type="button" className="events-clear-filters" onClick={() => { setSearchQuery(""); setTags([]); setFilter("ALL"); }}>Clear filters</button>}
           </BrowseToolbar>
-          </FilterSurvey>
         </div>
       </div>
 

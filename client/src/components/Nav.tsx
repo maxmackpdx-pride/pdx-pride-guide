@@ -720,6 +720,9 @@ export default function Nav() {
           <div className="hub-mtop site-hub-mtop" aria-label="Mobile navigation">
             <nav aria-label="Mobile top navigation"><CompactNavigation location={location} entries={MOBILE_TOP_NAV} textOnly onNavigate={() => { closeMenu(); setMobileProfileOpen(false); dismissMobileNavOverlays(); }} /></nav>
             <div className="hub-mtop__spacer" />
+            <button type="button" className="site-search-trigger site-search-trigger--mobile" onClick={() => setSearchOpen(true)} aria-label="Search Zaylist" title="Search Zaylist" data-testid="site-search-trigger-mobile">
+              <Search size={20} aria-hidden="true" />
+            </button>
             {authLoading && !user ? (
               <span className="hub-mtop__mode-btn" role="status" aria-label="Checking your session">…</span>
             ) : user ? (
@@ -769,7 +772,7 @@ export default function Nav() {
               type="button"
               className="site-search-trigger site-search-trigger--desktop-nav"
               onClick={() => setSearchOpen(true)}
-              aria-label="Search events and places"
+              aria-label="Search Zaylist"
               title="Search (⌘K)"
               data-testid="site-search-trigger"
             >

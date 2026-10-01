@@ -1,324 +1,185 @@
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent as ReactKeyboardEvent,
-} from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useLocation } from "wouter";
-import { Search, X } from "lucide-react";
+import { ArrowUpRight, Search, X } from "lucide-react";
+import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
+import { FOOD_PANTRIES, FOOD_RESOURCE } from "@/lib/foodPantries";
+import { PRIMARY_NAV } from "@/lib/siteNav";
 
-type SearchEventHit = {
-  id: string | number;
-  title: string;
-  subtitle: string;
-  href: string;
+type SearchHit = { key: string; label: string; subtitle: string; detail?: string; href: string };
+type SearchGroup = { label: string; hits: SearchHit[] };
+type PlatformHit = { id: string; type: string; name: string; summary?: string | null; url: string; venueName?: string; neighborhood?: string; placeType?: string; location?: string; category?: string; memberCount?: number };
+type SiteSearchProps = { open: boolean; onClose: () => void };
+
+const PLATFORM_TYPES = "event,place,community,listing,gig,guide,profile,organization";
+const GROUP_LABELS: Record<string, string> = {
+  event: "EVENTZ", place: "PLACEZ", community: "Z/LISTS", listing: "SELLZ", gig: "GIGZ",
+  guide: "GUIDES", profile: "PEOPLE", organization: "ORGANIZATIONS",
 };
+const GROUP_ORDER = ["ReZources", "EVENTZ", "PLACEZ", "Z/LISTS", "SELLZ", "GIGZ", "GUIDES", "PEOPLE", "ORGANIZATIONS", "PAGES"];
+const RESOURCE_ROWS = RESOURCE_CATEGORIES.flatMap((category) =>
+  (category.id === "safety" ? [...category.orgs, FOOD_RESOURCE] : category.orgs).map((org) => ({ org, category })),
+);
+const PAGE_LINKS = PRIMARY_NAV.flatMap((entry) => entry.type === "link" ? [{ label: entry.label, href: entry.href }] : entry.items);
 
-type SearchPlaceHit = {
-  id: string | number;
-  name: string;
-  subtitle: string;
-  href: string;
-};
-
-type SearchResponse = {
-  q: string;
-  events: SearchEventHit[];
-  places: SearchPlaceHit[];
-  communities: Array<{ id: string; name: string; subtitle: string; href: string }>;
-};
-
-type FlatResult =
-  | { kind: "event"; key: string; label: string; subtitle: string; href: string }
-  | { kind: "place"; key: string; label: string; subtitle: string; href: string }
-  | { kind: "community"; key: string; label: string; subtitle: string; href: string };
-
-type SiteSearchProps = {
-  open: boolean;
-  onClose: () => void;
-};
-
-function useDebouncedValue<T>(value: T, ms: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const t = window.setTimeout(() => setDebounced(value), ms);
-    return () => window.clearTimeout(t);
-  }, [value, ms]);
-  return debounced;
+function normalized(text: string) {
+  return text.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+function resourceScore(org: ResourceOrg, categoryName: string, query: string) {
+  const needle = normalized(query);
+  const fields = [org.name, ...(org.aliases || []), org.desc, org.scope, categoryName,
+    ...(org.serviceTags || []), ...(org.programs || []).flatMap((program) => [program.name, program.desc]),
+    ...(org.locations || []).flatMap((place) => [place.name, place.address]),
+    ...(org === FOOD_RESOURCE ? FOOD_PANTRIES.map((pantry) => pantry.name) : []),
+  ].map(normalized);
+  if (/^[\d\s()+.\-]+$/.test(query) && query.replace(/\D/g, "").length >= 3) {
+    const digits = query.replace(/\D/g, "");
+    return fields.some((field) => field.replace(/\D/g, "").includes(digits)) ? 1 : 0;
+  }
+  if (fields[0].includes(needle)) return 1;
+  if (fields.some((field) => field.includes(needle))) return 0.8;
+  const words = fields.join(" ").split(/\s+/);
+  return needle.split(/\s+/).every((term) => words.some((word) => word.startsWith(term))) ? 0.5 : 0;
+}
+function resourceHits(query: string): SearchHit[] {
+  if (query.length < 2) return [];
+  const seen = new Set<string>();
+  return RESOURCE_ROWS.flatMap(({ org, category }) => {
+    if (seen.has(org.name)) return [];
+    seen.add(org.name);
+    const score = resourceScore(org, category.name, query);
+    return score ? [{ score, org, category }] : [];
+  }).sort((a, b) => b.score - a.score || a.org.name.localeCompare(b.org.name)).slice(0, 8).map(({ org, category }) => ({
+    key: `resource-${org.name}`, label: org.name,
+    subtitle: (org.serviceTags?.length ? org.serviceTags : [category.name]).join(" · "),
+    detail: org.scope, href: `/rezources?find=${encodeURIComponent(org.name)}`,
+  }));
+}
+function platformGroups(objects: PlatformHit[]): SearchGroup[] {
+  const groups = new Map<string, SearchHit[]>();
+  for (const item of objects) {
+    const label = GROUP_LABELS[item.type];
+    if (!label || !item.url) continue;
+    const subtitle = item.type === "event" ? [item.venueName, item.neighborhood].filter(Boolean).join(" · ")
+      : item.type === "place" || item.type === "organization" ? [item.neighborhood, item.placeType].filter(Boolean).join(" · ")
+      : item.type === "community" ? `${item.memberCount ?? 0} members`
+      : item.type === "gig" ? item.location || "" : item.type === "listing" ? item.category || "" : item.summary || "";
+    const hits = groups.get(label) || [];
+    hits.push({ key: `${item.type}-${item.id}`, label: item.name, subtitle, href: item.url });
+    groups.set(label, hits);
+  }
+  return [...groups].map(([label, hits]) => ({ label, hits }));
 }
 
-/**
- * Global site search: EVENTZ + directory places + Communities.
- * Open via prop, Cmd/Ctrl+K from Nav, or the header search button.
- */
+/** Sitewide search, opened from the nav or with Cmd/Ctrl+K. */
 export default function SiteSearch({ open, onClose }: SiteSearchProps) {
   const [, setLocation] = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
   const [query, setQuery] = useState("");
-  const debouncedQ = useDebouncedValue(query.trim(), 200);
-  const [data, setData] = useState<SearchResponse | null>(null);
+  const [debouncedQ, setDebouncedQ] = useState("");
+  const [objects, setObjects] = useState<PlatformHit[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!open) return;
-    setQuery("");
-    setData(null);
-    setActiveIndex(0);
-    const t = window.setTimeout(() => inputRef.current?.focus(), 30);
-    return () => window.clearTimeout(t);
+    setQuery(""); setDebouncedQ(""); setObjects([]); setActiveIndex(0);
+    const timer = window.setTimeout(() => inputRef.current?.focus(), 30);
+    return () => window.clearTimeout(timer);
   }, [open]);
-
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
+    const timer = window.setTimeout(() => setDebouncedQ(query.trim()), 180);
+    return () => window.clearTimeout(timer);
+  }, [query, open]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); onClose(); }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
-
   useEffect(() => {
-    if (!open) return;
-    if (debouncedQ.length < 2) {
-      setData(null);
-      setLoading(false);
-      abortRef.current?.abort();
-      return;
-    }
-    abortRef.current?.abort();
-    const ac = new AbortController();
-    abortRef.current = ac;
+    if (!open || debouncedQ.length < 2) { setObjects([]); setLoading(false); return; }
+    const controller = new AbortController();
     setLoading(true);
-    fetch(`/api/v1/search?q=${encodeURIComponent(debouncedQ)}&types=event,place,community&limit=24`, {
-      credentials: "include",
-      signal: ac.signal,
+    fetch(`/api/v1/search?q=${encodeURIComponent(debouncedQ)}&types=${PLATFORM_TYPES}&limit=100`, {
+      credentials: "include", signal: controller.signal,
     })
-      .then((r) => (r.ok ? r.json() : { data: [] }))
-      .then((payload: any) => {
-        if (ac.signal.aborted) return;
-        const objects = Array.isArray(payload?.data) ? payload.data : [];
-        const json: SearchResponse = {
-          q: debouncedQ,
-          events: objects.filter((item: any) => item.type === "event").map((item: any) => ({ id: item.id, title: item.name, subtitle: [item.venueName, item.neighborhood].filter(Boolean).join(" · "), href: item.url })),
-          places: objects.filter((item: any) => item.type === "place").map((item: any) => ({ id: item.id, name: item.name, subtitle: [item.neighborhood, item.placeType].filter(Boolean).join(" · "), href: item.url })),
-          communities: objects.filter((item: any) => item.type === "community").map((item: any) => ({ id: item.id, name: item.name, subtitle: [item.neighborhood, `${item.memberCount} members`].filter(Boolean).join(" · "), href: item.url })),
-        };
-        setData(json);
-        setActiveIndex(0);
-      })
-      .catch((err) => {
-        if (err?.name === "AbortError") return;
-        setData({ q: debouncedQ, events: [], places: [], communities: [] });
-      })
-      .finally(() => {
-        if (!ac.signal.aborted) setLoading(false);
-      });
-    return () => ac.abort();
+      .then((response) => response.ok ? response.json() : { data: [] })
+      .then((payload) => { if (!controller.signal.aborted) setObjects(Array.isArray(payload?.data) ? payload.data : []); })
+      .catch((error) => { if (error?.name !== "AbortError") setObjects([]); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
   }, [debouncedQ, open]);
 
-  const flat: FlatResult[] = useMemo(() => {
-    if (!data) return [];
-    const out: FlatResult[] = [];
-    for (const e of data.events || []) {
-      out.push({
-        kind: "event",
-        key: `event-${e.id}`,
-        label: e.title,
-        subtitle: e.subtitle,
-        href: e.href,
-      });
-    }
-    for (const p of data.places || []) {
-      out.push({
-        kind: "place",
-        key: `place-${p.id}`,
-        label: p.name,
-        subtitle: p.subtitle,
-        href: p.href,
-      });
-    }
-    for (const community of data.communities || []) {
-      out.push({ kind: "community", key: `community-${community.id}`, label: community.name, subtitle: community.subtitle, href: community.href });
-    }
-    return out;
-  }, [data]);
-
-  const go = useCallback(
-    (href: string) => {
-      onClose();
-      setLocation(href);
-    },
-    [onClose, setLocation],
-  );
-
-  const onKeyDown = (e: ReactKeyboardEvent) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIndex((i) => (flat.length ? (i + 1) % flat.length : 0));
+  const groups = useMemo<SearchGroup[]>(() => {
+    if (query.trim().length < 2) return [];
+    const resource = resourceHits(query.trim());
+    const pages = PAGE_LINKS.filter((page) => normalized(page.label).includes(normalized(query.trim()))).map((page) => ({
+      key: `page-${page.href}`, label: page.label, subtitle: "Page", href: page.href,
+    }));
+    const all = [...platformGroups(objects), ...(resource.length ? [{ label: "ReZources", hits: resource }] : []), ...(pages.length ? [{ label: "PAGES", hits: pages }] : [])];
+    return all.sort((a, b) => GROUP_ORDER.indexOf(a.label) - GROUP_ORDER.indexOf(b.label));
+  }, [objects, query]);
+  const flat = useMemo(() => groups.flatMap((group) => group.hits), [groups]);
+  useEffect(() => setActiveIndex(0), [query]);
+  const go = useCallback((href: string) => {
+    onClose();
+    if (href.startsWith("/rezources?find=") && window.location.pathname === "/rezources") {
+      window.location.assign(href);
       return;
     }
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIndex((i) => (flat.length ? (i - 1 + flat.length) % flat.length : 0));
-      return;
-    }
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const hit = flat[activeIndex];
-      if (hit) go(hit.href);
-    }
+    setLocation(href);
+  }, [onClose, setLocation]);
+  const onKeyDown = (event: ReactKeyboardEvent) => {
+    if (event.key === "ArrowDown") { event.preventDefault(); setActiveIndex((index) => flat.length ? (index + 1) % flat.length : 0); }
+    if (event.key === "ArrowUp") { event.preventDefault(); setActiveIndex((index) => flat.length ? (index - 1 + flat.length) % flat.length : 0); }
+    if (event.key === "Enter") { event.preventDefault(); if (flat[activeIndex]) go(flat[activeIndex].href); }
   };
-
   if (!open) return null;
 
-  const showEmpty = debouncedQ.length >= 2 && !loading && flat.length === 0;
-  const events = data?.events || [];
-  const places = data?.places || [];
-  const communities = data?.communities || [];
-
-  return (
-    <div className="site-search" role="presentation">
-      <div className="site-search__backdrop" onClick={onClose} data-testid="site-search-backdrop" />
-      <div
-        className="site-search__panel pdx-glass pdx-liquid-overlay"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Search Zaylist"
-        data-testid="site-search-panel"
-      >
-        <div className="site-search__head">
-          <Search size={18} className="site-search__icon" aria-hidden="true" />
-          <input
-            ref={inputRef}
-            type="search"
-            className="site-search__input"
-            placeholder="Search EVENTZ, PLACEZ, and communities…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={onKeyDown}
-            aria-controls={listId}
-            aria-autocomplete="list"
-            data-testid="site-search-input"
-            autoComplete="off"
-            spellCheck={false}
-          />
-          <kbd className="site-search__kbd" aria-hidden="true">
-            esc
-          </kbd>
-          <button
-            type="button"
-            className="site-search__close"
-            onClick={onClose}
-            aria-label="Close search"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <div id={listId} className="site-search__body" role="listbox">
-          {debouncedQ.length < 2 && (
-            <p className="site-search__hint">Type at least 2 characters. Search EVENTZ, PLACEZ, and communities.</p>
-          )}
-          {loading && <p className="site-search__hint">Searching…</p>}
-          {showEmpty && <p className="site-search__hint">No matches for “{debouncedQ}”.</p>}
-
-          {events.length > 0 && (
-            <section className="site-search__group">
-              <h3 className="site-search__group-title">EVENTZ</h3>
-              <ul className="site-search__list">
-                {events.map((e) => {
-                  const idx = flat.findIndex((f) => f.key === `event-${e.id}`);
-                  const active = idx === activeIndex;
-                  return (
-                    <li key={e.id}>
-                      <button
-                        type="button"
-                        role="option"
-                        aria-selected={active}
-                        className={`site-search__item${active ? " is-active" : ""}`}
-                        onMouseEnter={() => setActiveIndex(idx)}
-                        onClick={() => go(e.href)}
-                        data-testid={`site-search-event-${e.id}`}
-                      >
-                        <span className="site-search__item-label">{e.title}</span>
-                        {e.subtitle && (
-                          <span className="site-search__item-sub">{e.subtitle}</span>
-                        )}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          )}
-
-          {places.length > 0 && (
-            <section className="site-search__group">
-              <h3 className="site-search__group-title">PLACEZ</h3>
-              <ul className="site-search__list">
-                {places.map((p) => {
-                  const idx = flat.findIndex((f) => f.key === `place-${p.id}`);
-                  const active = idx === activeIndex;
-                  return (
-                    <li key={p.id}>
-                      <button
-                        type="button"
-                        role="option"
-                        aria-selected={active}
-                        className={`site-search__item${active ? " is-active" : ""}`}
-                        onMouseEnter={() => setActiveIndex(idx)}
-                        onClick={() => go(p.href)}
-                        data-testid={`site-search-place-${p.id}`}
-                      >
-                        <span className="site-search__item-label">{p.name}</span>
-                        {p.subtitle && (
-                          <span className="site-search__item-sub">{p.subtitle}</span>
-                        )}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          )}
-          {communities.length > 0 && (
-            <section className="site-search__group">
-              <h3 className="site-search__group-title">Communities</h3>
-              <ul className="site-search__list">
-                {communities.map((community) => {
-                  const idx = flat.findIndex((item) => item.key === `community-${community.id}`);
-                  const active = idx === activeIndex;
-                  return <li key={community.id}><button type="button" role="option" aria-selected={active} className={`site-search__item${active ? " is-active" : ""}`} onMouseEnter={() => setActiveIndex(idx)} onClick={() => go(community.href)}><span className="site-search__item-label">{community.name}</span>{community.subtitle ? <span className="site-search__item-sub">{community.subtitle}</span> : null}</button></li>;
-                })}
-              </ul>
-            </section>
-          )}
-        </div>
+  return <div className="site-search" role="presentation">
+    <div className="site-search__backdrop" onClick={onClose} data-testid="site-search-backdrop" />
+    <div className="site-search__panel" role="dialog" aria-modal="true" aria-label="Search Zaylist" data-testid="site-search-panel">
+      <div className="site-search__head">
+        <Search size={19} className="site-search__icon" aria-hidden="true" />
+        <input ref={inputRef} type="search" className="site-search__input" placeholder="Search all of Zaylist…" aria-label="Search all of Zaylist"
+          value={query} onChange={(event) => { setQuery(event.target.value); setObjects([]); }} onKeyDown={onKeyDown} aria-controls={listId}
+          aria-autocomplete="list" data-testid="site-search-input" autoComplete="off" spellCheck={false} />
+        <button type="button" className="site-search__close" onClick={onClose} aria-label="Close search"><X size={20} /></button>
       </div>
+      <div id={listId} className="site-search__body" role="listbox" aria-label="Search results">
+        {query.trim().length < 2 && <p className="site-search__hint">Search ReZources, EVENTZ, PLACEZ, Boards, people, and pages.</p>}
+        {loading && <p className="site-search__hint" role="status">Searching…</p>}
+        {query.trim().length >= 2 && !loading && flat.length === 0 && <p className="site-search__hint">No matches for “{query.trim()}”.</p>}
+        {groups.map((group) => <section className="site-search__group" key={group.label}>
+          <h3 className="site-search__group-title">{group.label}</h3>
+          <ul className="site-search__list">{group.hits.map((hit) => {
+            const index = flat.findIndex((item) => item.key === hit.key);
+            const active = index === activeIndex;
+            return <li key={hit.key}><button type="button" role="option" aria-selected={active}
+              className={`site-search__item${active ? " is-active" : ""}`} onMouseEnter={() => setActiveIndex(index)} onClick={() => go(hit.href)}>
+              <span className="site-search__item-copy"><span className="site-search__item-label">{hit.label}</span>
+                {hit.subtitle && <small className="site-search__item-sub">{hit.subtitle}</small>}
+                {hit.detail && <small className="site-search__item-detail">{hit.detail}</small>}</span>
+              <ArrowUpRight size={16} aria-hidden="true" /></button></li>;
+          })}</ul>
+        </section>)}
+      </div>
+      <p className="site-search__footer">↑ ↓ to move · Enter to open · Esc to close</p>
     </div>
-  );
+  </div>;
 }
 
-/** Global Cmd/Ctrl+K listener; call from Nav (or root). */
 export function useSiteSearchHotkey(onOpen: () => void) {
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey)) return;
-      if (e.key !== "k" && e.key !== "K") return;
-      const target = e.target as HTMLElement | null;
-      const tag = target?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || target?.isContentEditable) return;
-      e.preventDefault();
-      onOpen();
+    const onKey = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "k") return;
+      const target = event.target as HTMLElement | null;
+      if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable) return;
+      event.preventDefault(); onOpen();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
