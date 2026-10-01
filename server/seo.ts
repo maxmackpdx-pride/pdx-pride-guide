@@ -210,6 +210,7 @@ export function buildSitemapXml(events: SeoEvent[]) {
   const staticPaths = [
     "/",
     "/events",
+    "/boards",
     "/schedule",
     "/directory",
     "/giftz",
@@ -265,6 +266,10 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/events": {
     title: "EVENTZ | Zaylist",
     description: "Every Portland queer event in one place. Find the party, back the spaces that host it, all year round.",
+  },
+  "/boards": {
+    title: "Boards | Zaylist",
+    description: "Explore Zaylist's community boards for housing, gifts, selling, work, missed connections, and groups.",
   },
   "/about": {
     title: "About Zaylist | Portland's Queer Events Guide",
