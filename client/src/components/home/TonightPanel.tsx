@@ -1,3 +1,5 @@
+import { useSavedEvents } from "@/hooks/useSavedEvents";
+import { useAuth } from "@/context/AuthContext";
 import { useMemo, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "wouter";
@@ -15,7 +17,9 @@ import "./TonightPanel.css";
 
 export default function TonightPanel() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const { myEventIds, toggleRsvp, showAuth, setShowAuth } = useEventRsvp();
+  const { showAuth, setShowAuth } = useEventRsvp();
+  const { user } = useAuth();
+  const { savedIds, toggleSave } = useSavedEvents();
   const { data: listings = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then((r) => r.json()),
@@ -62,7 +66,7 @@ export default function TonightPanel() {
               const listing = listingById.get(event.id);
               if (!listing) return null;
               return <div role="listitem" className="home-tonight__item" key={event.scheduleKey}>
-                <TonightEventCard event={event} listing={listing} rsvped={myEventIds.has(event.id)} onToggleRsvp={toggleRsvp} onOpen={setSelectedEvent} />
+                <TonightEventCard event={event} listing={listing} rsvped={savedIds.has(event.id)} onToggleRsvp={id => user ? toggleSave(id) : setShowAuth(true)} onOpen={setSelectedEvent} />
               </div>;
             })}
           </div>

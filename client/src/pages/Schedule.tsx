@@ -1,3 +1,4 @@
+import { useSavedEvents } from "@/hooks/useSavedEvents";
 import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import { ArrowLeft } from "lucide-react";
 import BrowseStatus from "@/components/BrowseStatus";
@@ -159,6 +160,7 @@ export default function Schedule({
   embed = false,
 }: ScheduleProps) {
   const { user } = useAuth();
+  const { savedIds } = useSavedEvents();
   const [view, setViewState] = useState<View>(() => new URLSearchParams(window.location.search).get('view') === 'mine' ? 'mine' : 'all');
   const [viewBootstrapped, setViewBootstrapped] = useState(false);
   const [fAdm, setFAdm] = useState<FilterMap>({});
@@ -210,12 +212,12 @@ export default function Schedule({
 
   /** Beach blocks always count as “mine” (personal River Brats plans). */
   const myScheduleIds = useMemo(() => {
-    const s = new Set(myEventIds);
+    const s = new Set([...myEventIds, ...savedIds]);
     for (const b of myBeachCheckIns) {
       if (b?.id != null) s.add(-Math.abs(Number(b.id)));
     }
     return s;
-  }, [myEventIds, myBeachCheckIns]);
+  }, [myEventIds, savedIds, myBeachCheckIns]);
 
   const scheduleEvents = useMemo(
     () => buildScheduleEvents(listings, attendanceSummaries, user ? myBeachCheckIns : []),
@@ -258,11 +260,11 @@ export default function Schedule({
 
   useEffect(() => {
     if (viewBootstrapped || !user) return;
-    if (myEventIds.size > 0 || myBeachCheckIns.length > 0) {
+    if (myEventIds.size > 0 || savedIds.size > 0 || myBeachCheckIns.length > 0) {
       setViewState('mine');
       setViewBootstrapped(true);
     }
-  }, [user, myEventIds.size, myBeachCheckIns.length, viewBootstrapped]);
+  }, [user, myEventIds.size, savedIds.size, myBeachCheckIns.length, viewBootstrapped]);
 
   /* ---- lifecycle -------------------------------------------------- */
 

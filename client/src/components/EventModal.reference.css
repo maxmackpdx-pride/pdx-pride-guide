@@ -147,3 +147,35 @@ html[data-zaylist-cards] .event-modal.event-modal--reference,
 .event-modal.event-modal--reference .event-modal__chrome .detail-actions > .pdxBtn { border: 1px solid color-mix(in srgb, var(--event-accent) 40%, transparent); border-radius: 14px; background: var(--glass-card-bg); color: var(--text-heading); box-shadow: none; }
 .event-modal.event-modal--reference .event-modal__chrome .detail-actions > .pdxBtn::before,
 .event-modal.event-modal--reference .event-modal__chrome .detail-actions > .pdxBtn::after { display: none; }
+
+/* Attendance follows the card's weekday color and the Call 911 display face. */
+.event-modal.event-modal--reference :is(.event-modal__hero-rsvp, .attendance-cluster-cta__btn, .event-modal__sticky-cta .zay-rsvp) {
+  --c: var(--event-accent);
+  background: var(--event-accent) !important;
+  border: 1px solid var(--event-accent) !important;
+  color: var(--event-ink, var(--z-black)) !important;
+  font-family: var(--font-display) !important;
+  font-weight: 900 !important;
+  font-size: clamp(24px, 6.5cqw, 32px) !important;
+  line-height: 1.15 !important;
+  letter-spacing: .025em;
+  min-height: 56px;
+  white-space: normal;
+  box-shadow: none !important;
+}
+.event-modal.event-modal--reference .event-modal__save,
+.event-modal.event-modal--reference .event-modal__actions .event-modal__action-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  box-sizing: border-box; width: 100%; min-height: 52px; padding: 14px 16px;
+  border: 1px solid color-mix(in srgb,var(--event-accent) 50%,transparent) !important;
+  border-radius: 14px; background: color-mix(in srgb,var(--event-accent) 8%,var(--z-black)) !important;
+  color: var(--text-heading) !important; font: 600 17px/1.4 var(--font-body); text-transform: none; letter-spacing: normal;
+  box-shadow: inset 0 1px 0 color-mix(in srgb,var(--text-heading) 7%,transparent) !important; cursor: pointer;
+}
+.event-modal.event-modal--reference .event-modal__save[aria-pressed=true] { border-color: var(--event-accent) !important; background: color-mix(in srgb,var(--event-accent) 20%,var(--z-black)) !important; }
+.event-modal.event-modal--reference :is(.event-modal__save,.event-modal__actions .event-modal__action-btn):hover:not(:disabled) { border-color: var(--event-accent) !important; background: color-mix(in srgb,var(--event-accent) 16%,var(--z-black)) !important; }
+.event-modal.event-modal--reference .event-modal__actions { display: grid; grid-template-columns: 1fr; gap: 12px; margin-block: 24px; }
+.event-modal.event-modal--reference .event-modal__actions .event-link-choice-anchor { width: 100%; }
+.event-modal.event-modal--reference .event-modal__actions .event-modal__action-btn::before,
+.event-modal.event-modal--reference .event-modal__actions .event-modal__action-btn::after { display: none; }
+.event-modal.event-modal--reference .event-modal__save:disabled { opacity: .6; cursor: wait; }

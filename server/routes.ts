@@ -1,3 +1,4 @@
+import { createEventSaves } from "./eventSaves";
 import { publicBoardMapLocations } from './boardMapLocations';
 import { isDemoAuthor } from "@shared/demo";
 import {getOutzClosures} from './outzClosures';
@@ -1167,6 +1168,7 @@ function notifyAttendanceUpdate(eventId: number) {
 }
 
 export function registerRoutes(httpServer: Server, app: Express) {
+  const eventSaves = createEventSaves(sqlite);
   assertProductionPersistence();
   assertProductionSecrets();
 
@@ -2234,6 +2236,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Could not post comment" });
     }
+  });
+
+  app.get("/api/events/mine/saved", requireAuth, (req, res) => {
+    res.json(eventSaves.ids(req.session.userId!));
+  });
+  app.put("/api/events/:id/save", requireAuth, (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id)) return res.status(404).json({ error: "Event not found" });
+    const event = storage.getEvent(id);
+    const archive = isTuckerHostedArchiveId(id) && getTuckerHostedArchiveRow(id);
+    if (!archive && (!event || event.status !== "LIVE" || !isPublicEventVisibleUnderPrideCap(event))) return res.status(404).json({ error: "Event not found" });
+    eventSaves.save(req.session.userId!, id);
+    res.json({ saved: true });
+  });
+  app.delete("/api/events/:id/save", requireAuth, (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id)) return res.status(400).json({ error: "Invalid event" });
+    eventSaves.remove(req.session.userId!, id);
+    res.json({ saved: false });
   });
 
   app.get("/api/events/:id", (req, res) => {

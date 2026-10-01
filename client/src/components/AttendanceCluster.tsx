@@ -363,7 +363,7 @@ export default function AttendanceCluster({
                 disabled={mutation.isPending || removeMutation.isPending}
                 className="display attendance-cluster-cta__btn pdx-glass-rebind"
               >
-                {myAttendance ? <>Going <Check size={14} aria-hidden="true" /></> : "I'll be there"}
+                {myAttendance ? <>Going <Check size={14} aria-hidden="true" /></> : "I am interested"}
               </button>
               {myAttendance && myPhrase && (
                 <span className="attendance-cluster-cta__status">

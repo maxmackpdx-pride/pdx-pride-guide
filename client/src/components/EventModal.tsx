@@ -1,3 +1,4 @@
+import { useSavedEvents } from "@/hooks/useSavedEvents";
 import { PiChatsCircleLight } from "react-icons/pi";
 import { roomToast } from "@/lib/roomToast";
 import { ArrowRight } from "lucide-react";
@@ -27,7 +28,7 @@ import { formatPacificDateTime } from "@/lib/countdown";
 import { eventPath } from "@shared/eventSlug";
 import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
 import { timeAgo } from "@/lib/timeAgo";
-import { CalendarDays, CalendarPlus, ChevronRight, Ellipsis, FileText, Lock, MapPin, Pencil, Share2 } from "lucide-react";
+import { Bookmark, MessageCircle, CalendarDays, CalendarPlus, ChevronRight, Ellipsis, FileText, Lock, MapPin, Pencil, Share2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DashboardEventEditForm } from "@/components/dashboard/DashboardEventEditor";
 import {
@@ -251,6 +252,7 @@ function EventModalInner({
   const heroContentRef = useRef<HTMLDivElement>(null);
   const tagsRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const saves = useSavedEvents();
   const { dialogRef, requestClose: handleClose } = useOpenCardClose(onClose);
 
 
@@ -708,7 +710,7 @@ function EventModalInner({
         className={`event-modal__tab${socialTab === "attendance" ? " active" : ""}`}
         onClick={() => setSocialTab("attendance")}
       >
-        {isPastEvent ? "Who Was There" : "I'll Be There"}
+        {isPastEvent ? "Who Was There" : "I am interested"}
       </button>
       {!isPastEvent && (
         <button
@@ -823,7 +825,8 @@ function EventModalInner({
               )}
             </div>
             {!editing && <div className="event-modal__hero-actions">
-              <button type="button" className="event-modal__hero-rsvp" onClick={jumpToAttendance}><CalendarPlus aria-hidden="true" />{isPastEvent ? "I Was There" : "I’m Going"}</button>
+              <button type="button" className="event-modal__hero-rsvp" onClick={jumpToAttendance}><CalendarPlus aria-hidden="true" />{isPastEvent ? "I Was There" : "I am interested"}</button>
+              <button type="button" className="event-modal__save" aria-pressed={saves.savedIds.has(event.id)} disabled={saves.pending || saves.loading} onClick={() => user ? saves.toggleSave(event.id) : setShowAuth(true)}><Bookmark size={20} aria-hidden="true" fill={saves.savedIds.has(event.id) ? "currentColor" : "none"} />{saves.savedIds.has(event.id) ? "Saved to My Schedule" : "Save to My Schedule"}</button>
             {primaryLink && !editing ? (
               <a
                 href={primaryLink.href}
@@ -1120,7 +1123,7 @@ function EventModalInner({
                   onClick={() => setShowCalPicker(v => !v)}
                   className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn pdx-glass-rebind"
                 >
-                  Add to Calendar
+                  <CalendarPlus size={20} aria-hidden="true" /> Add to Calendar
                 </button>
                 <EventLinkChoiceMenu
                   floating
@@ -1154,7 +1157,7 @@ function EventModalInner({
               }}
               className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn pdx-glass-rebind"
             >
-              Message the Host
+              <MessageCircle size={20} aria-hidden="true" /> Message the Host
             </button>
           </div>
 
@@ -1347,19 +1350,13 @@ function EventModalInner({
               data-testid="button-ill-be-there-sticky"
               onClick={jumpToAttendance}
             >
-              {isPastEvent ? "I Was There" : "I'll Be There"}
+              {isPastEvent ? "I Was There" : "I am interested"}
             </button>
-            {!isPastEvent && (
-              <button
-                type="button"
-                className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--secondary pdx-glass-rebind"
-                aria-pressed={rsvp.myEventIds.has(event.id)}
-                disabled={rsvp.isRsvpPending(event.id)}
-                onClick={() => rsvp.toggleRsvp(event.id)}
-              >
-                {rsvp.myEventIds.has(event.id) ? <>Interested <Check size={14} aria-hidden="true" /></> : "I Am Interested"}
-              </button>
-            )}
+            <button type="button" className="event-modal__save"
+              aria-pressed={saves.savedIds.has(event.id)} disabled={saves.pending || saves.loading}
+              onClick={() => user ? saves.toggleSave(event.id) : setShowAuth(true)}>
+              <Bookmark size={18} aria-hidden="true" />{saves.savedIds.has(event.id) ? "Saved" : "Save"}
+            </button>
             {isPastEvent && (
               <button
                 type="button"
