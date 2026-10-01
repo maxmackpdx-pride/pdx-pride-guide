@@ -13,7 +13,7 @@
   }
   /* Share the full liquid-glass surface across both mobile bars.
      Button wells and the existing edge/seam layers retain their own styles. */
-  .site-header.site-header--glass,
+  header.site-header.site-header--glass,
   nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock {
     background:rgba(1,4,8,.27);
   }
