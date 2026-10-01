@@ -2,14 +2,14 @@ import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import DetailActions from "./DetailActions";
 import type React from "react";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
-import { useModalA11y } from "@/hooks/useModalA11y";
+import { useOpenCardClose } from "@/hooks/useOpenCardClose";
 import { Badge } from "@/components/ds";
 import { MapPinned, Share2 } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
@@ -228,9 +228,8 @@ export default function PlaceModal({
   const [open, setOpen] = useState(false);
   const [flipVars, setFlipVars] = useState<React.CSSProperties | null>(null);
   const useFlip = Boolean(originRect && originRect.width > 0 && originRect.height > 0);
-  const handleClose = useCallback(() => onClose(), [onClose]);
-  // Single ref for a11y + FLIP measure (avoid readonly RefObject.current assign).
-  const panelRef = useModalA11y({ open: !!place, onClose: handleClose, enabled: !!place });
+  // Single ref for a11y, close motion, and FLIP measurement.
+  const { dialogRef: panelRef, requestClose: handleClose } = useOpenCardClose(onClose, !!place);
 
   // Fresh tab when opening a different place
   useEffect(() => {
@@ -516,7 +515,7 @@ export default function PlaceModal({
   // like Camp never load clipped off-screen or trapped in a non-scrolling flex box.
   return createPortal(
     <div
-      onClick={onClose}
+      onClick={handleClose}
       role="presentation"
       className={`place-modal-overlay${open ? " place-modal-overlay--open" : ""}`}
     >
@@ -540,7 +539,7 @@ export default function PlaceModal({
         <div className="place-modal-panel__seam dir-refract" aria-hidden="true" />
 
         <div className="place-modal-panel__inner">
-        <DetailActions label="place" onClose={onClose} onShare={handleShare} sharing={sharing}>
+        <DetailActions label="place" onClose={handleClose} onShare={handleShare} sharing={sharing}>
           <VenueFollowButton
             businessId={place.id}
             initialFollowing={Boolean(place.isFollowing)}

@@ -1,14 +1,15 @@
 import { ArrowUpRight } from "lucide-react";
 import DetailActions from "@/components/DetailActions";
-import { useCallback, useState, type CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useModalA11y } from "@/hooks/useModalA11y";
+import { useOpenCardClose } from "@/hooks/useOpenCardClose";
 import { Button } from "@/components/ds";
 import { BoardGlassMotif } from "@/components/board/GiftListingCard";
+import "@/components/board/OpenBoardCard.css";
 
 /**
  * The MIZZED CONNECTION detail card - the same overlay you get when you tap a
@@ -46,8 +47,7 @@ export default function SpottedDetailModal({
 }: SpottedDetailModalProps) {
   const { toast } = useToast();
   const [replyBody, setReplyBody] = useState("");
-  const handleClose = useCallback(() => onClose(), [onClose]);
-  const dialogRef = useModalA11y({ onClose: handleClose });
+  const { dialogRef, requestClose } = useOpenCardClose(onClose);
 
   const [editing,setEditing]=useState(false);
   const [editTitle,setEditTitle]=useState(title);
@@ -90,19 +90,20 @@ export default function SpottedDetailModal({
   // Portal to <body> so the fixed-position overlay escapes any transformed
   // ancestor (e.g. the feed's ScrollReveal wrappers) and centers on the viewport.
   return createPortal(
-    <div className="board-detail-backdrop" onClick={onClose}>
+    <div className="board-detail-backdrop" onClick={requestClose}>
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={title || "Missed connection"}
         tabIndex={-1}
-        className="board-detail-modal board-detail-modal--spotted board-detail-modal--glass"
+        className="board-detail-modal board-detail-modal--spotted board-detail-modal--glass board-open-card--shared"
         onClick={e => e.stopPropagation()}
         style={glassVars}
       >
+        <span className="board-open-card__rule" aria-hidden="true" />
         <BoardGlassMotif variant="quote-pair" />
-        <DetailActions label="listing" onClose={onClose} />
+        <DetailActions label="listing" onClose={requestClose} />
         <div className="board-detail-modal__meta" style={{ position: "relative", zIndex: 1 }}>
           <span className="board-detail-modal__live-dot" aria-hidden="true" />
           <span className="board-detail-modal__meta-line" style={{ color: kindColor || MC_GLASS }}>

@@ -19,6 +19,7 @@ import { Button, FilterChip, RoomKicker } from "@/components/ds";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
 import BoardShader from "@/components/board/BoardShader";
+import OpenBoardCard from "@/components/board/OpenBoardCard";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import ImageUploader from "@/components/ImageUploader";
 import { timeAgo } from "@/lib/timeAgo";
@@ -179,7 +180,7 @@ export default function PrideWork() {
     { num: realLive.filter(g => Date.parse(g.createdAt) >= weekAgo).length, label: "New this week", color: "var(--neon-yellow)" },
     { num: realLive.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Available to hire", color: "var(--panel-cyan)" },
   ];
-  const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/gigz?post=${id}`); window.setTimeout(() => document.getElementById("gigz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
+  const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/gigz?post=${id}`); };
   return <main className="gigz-page board-shader-page" data-shader-room="gigz">
     <BoardShader room="gigz" />
     <div className="gigz-shell">
@@ -194,7 +195,7 @@ export default function PrideWork() {
         {!isLoading && !isError && (talent.length ? <GigRail posts={talent} kind="talent" selected={selectedId} onSelect={select} /> : <div className="gigz-empty pdx-glass-rebind">No one has posted availability yet. <button onClick={() => openForm("LOOKING_FOR_WORK")}>Post yours</button></div>)}
       </div>}
       {onlyMine && visible.some(g => g.status === "CLOSED") && <section className="gigz-closed"><h2>Completed posts</h2><p>These are visible only to you. Open one to edit or relist it.</p><div>{visible.filter(g => g.status === "CLOSED").map(g => <button type="button" key={g.id} onClick={() => select(g.id)}>{g.title} <ArrowUpRight size={16} /></button>)}</div></section>}
-      {selected && <section id="gigz-detail" className="gigz-detail" aria-label="Selected Gigz post"><button className="gigz-detail__close" onClick={() => { setSelectedId(null); window.history.replaceState(null, "", "/gigz"); }} aria-label="Close details"><X size={18} /></button><GigListingCard gig={selected} accent="var(--board-gigs)" expanded skills={selected.skills?.split(",").map(s => s.trim()).filter(Boolean) || []} isLooking={selected.postType === "LOOKING_FOR_WORK"} onToggle={() => {}} /></section>}
+      {selected && <OpenBoardCard key={selected.id} label="Selected Gigz post" accent="var(--board-gigs)" onClose={() => { setSelectedId(null); window.history.replaceState(null, "", "/gigz"); }}><GigListingCard gig={selected} accent="var(--board-gigs)" expanded skills={selected.skills?.split(",").map(s => s.trim()).filter(Boolean) || []} isLooking={selected.postType === "LOOKING_FOR_WORK"} onToggle={() => {}} /></OpenBoardCard>}
       {formOpen && <GigComposer initialType={composeType} onClose={() => setFormOpen(false)} onPosted={id => { setFormOpen(false); setSelectedId(id); }} />}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <SafetyGuide context="gigs" />

@@ -5,7 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ds";
 import DetailActions from "./DetailActions";
-import { useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { Link, useLocation } from "wouter";
@@ -14,7 +14,7 @@ import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
-import { useModalA11y } from "@/hooks/useModalA11y";
+import { useOpenCardClose } from "@/hooks/useOpenCardClose";
 import type { Event } from "@shared/schema";
 import AttendanceCluster from "./AttendanceCluster";
 import MissedConnectionsPanel from "./MissedConnectionsPanel";
@@ -253,8 +253,7 @@ function EventModalInner({
   const heroContentRef = useRef<HTMLDivElement>(null);
   const tagsRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const handleClose = useCallback(() => onClose(), [onClose]);
-  const dialogRef = useModalA11y({ onClose: handleClose });
+  const { dialogRef, requestClose: handleClose } = useOpenCardClose(onClose);
 
   useLayoutEffect(() => {
     let cancelled = false;
@@ -815,7 +814,7 @@ function EventModalInner({
         } as React.CSSProperties}
       >
         <div className="event-modal__chrome">
-          <DetailActions label="event" onClose={onClose} onShare={async () => {
+          <DetailActions label="event" onClose={handleClose} onShare={async () => {
                 try {
                   const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek), event.title);
                   toast({ title: shareToastTitle(result, "event") });

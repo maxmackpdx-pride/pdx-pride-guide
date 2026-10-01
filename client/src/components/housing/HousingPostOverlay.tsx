@@ -28,6 +28,7 @@ import {
 } from "@/lib/optimisticCache";
 import { trackProductEvent } from "@/lib/analytics";
 import "@/pages/Housing.css";
+import "@/components/board/OpenBoardCard.css";
 
 type Props = {
   post: HousingPostView;
@@ -211,7 +212,8 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
 
   return createPortal(
     <div className="board-detail-backdrop" onClick={requestClose}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} HAÜZ ${detail ? "details" : "card"}`} tabIndex={-1} className="hz pdx-glass-rebind" style={panelStyle} onClick={(event) => event.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} HAÜZ ${detail ? "details" : "card"}`} tabIndex={-1} className="hz pdx-glass-rebind board-open-card--shared" style={panelStyle} onClick={(event) => event.stopPropagation()}>
+        <span className="board-open-card__rule" aria-hidden="true" />
         <div style={{ position: "relative", zIndex: 30, padding: 12 }}><DetailActions label="Haüz listing" onClose={requestClose} /></div>
         <div key={detail ? "detail" : "card"} className="houz-overlay-content">
           {detail ? <HousingDetail post={post} h={detailHandlers} isOwner={isOwner} workspace={post.type === "FORMING" ? <HousingWorkspace post={post} onOpenThread={() => openSheet({ view: "inbox" })} /> : undefined} /> : <HousingCard post={post} h={cardHandlers} />}
