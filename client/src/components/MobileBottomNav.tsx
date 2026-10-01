@@ -99,7 +99,7 @@ export default function MobileBottomNav() {
   const hubActive = navLinkActive(location, "/dashboard");
   const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
   const zlistsActive = navLinkActive(location, "/z");
-  const activeIndex = open || showAuth ? 4 : eventsOpen ? 0 : hubActive ? 2 : mapActive ? 3 : zlistsActive ? 1 : eventsActive ? 0 : -1;
+  const activeIndex = open || showAuth ? 4 : eventsOpen ? 0 : hubActive ? 2 : mapActive ? 1 : zlistsActive ? 3 : eventsActive ? 0 : -1;
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
 
@@ -244,32 +244,6 @@ export default function MobileBottomNav() {
           </button>
 
           <Link
-            href="/z"
-            className={tabClass(zlistsActive, "purple")}
-            data-accent="violet"
-            aria-label="Z/LISTS"
-            title="Z/LISTS"
-            aria-current={zlistsActive ? "page" : undefined}
-            onClick={handleNavLink}
-          >
-            <span className="znav-icon-row"><Map size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Z/LISTS</span>
-          </Link>
-
-          <Link
-            href="/dashboard"
-            className={`${tabClass(hubActive, "cyan")} znav-mapz`}
-            data-accent="cyan"
-            aria-label="Hub"
-            title="Hub"
-            aria-current={hubActive ? "page" : undefined}
-            onClick={handleNavLink}
-          >
-            <span className="znav-icon-row"><PanelsTopLeft size={22} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Hub</span>
-          </Link>
-
-          <Link
             href="/map"
             className={tabClass(mapActive, "orange")}
             data-accent="orange"
@@ -293,6 +267,32 @@ export default function MobileBottomNav() {
               </svg>
             </span>
             <span className="znav-caption">MAPZ</span>
+          </Link>
+
+          <Link
+            href="/dashboard"
+            className={`${tabClass(hubActive, "cyan")} znav-mapz`}
+            data-accent="cyan"
+            aria-label="Hub"
+            title="Hub"
+            aria-current={hubActive ? "page" : undefined}
+            onClick={handleNavLink}
+          >
+            <span className="znav-icon-row"><PanelsTopLeft size={22} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Hub</span>
+          </Link>
+
+          <Link
+            href="/z"
+            className={tabClass(zlistsActive, "purple")}
+            data-accent="violet"
+            aria-label="Z/LISTS"
+            title="Z/LISTS"
+            aria-current={zlistsActive ? "page" : undefined}
+            onClick={handleNavLink}
+          >
+            <span className="znav-icon-row"><Map size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Z/LISTS</span>
           </Link>
 
           <button
