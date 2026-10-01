@@ -642,7 +642,7 @@ export default function ZaydarMapDemo() {
         if (kind && Number.isFinite(postId)) { goOverlay(boardParam(kind), postId); }
       }
     }
-  }, [goOverlay]);
+  }, [goOverlay, setLocation]);
   const openBoardRow = (row: MapRow, target?: Element | null) => openMark({ key: mapListingKey(row._board,row.id), kind: "board", lat: Number(row.lat), lng: Number(row.lng), item: row }, target);
   const panelRows = (rows: MapRow[], kind: "places" | "boards" | "houz") => (
     <div className="zaydar-layer-list">
@@ -823,7 +823,7 @@ export default function ZaydarMapDemo() {
   };
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" data-map="mapz" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
     <ZaydarCanvas initialCamera={initialCamera} ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
-      if(!["places","mizzed","gigz","giftz","sellz"].includes(world))return;
+      if(!["places","rezources","mizzed","gigz","giftz","sellz"].includes(world))return;
       if(zoom<16.8){mapRef.current?.send("fit",{bounds});return;}
       const ids=world==='rezources' ? keys.join(',') : marks.filter(mark=>keys.includes(mark.key)).map(mark=>(mark.item as MapRow).id).join(',');
       updateParams(p=>{p.set("layer",world);p.set(`${world}.ids`,ids);});

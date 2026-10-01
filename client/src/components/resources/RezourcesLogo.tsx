@@ -16,7 +16,7 @@ const SKETCH_REGIONS = [
 const OBJECTS = [
   { id: 'rent', path: 'M374 455L486 438L503 523L391 550Z', pivot: '430px 446.5px' },
   { id: 'apple', path: 'M29 620L101 601L149 619L183 641L207 684L211 752L186 785L129 797L70 775L49 706L31 682Z', pivot: '132px 623px' },
-  { id: 'cabbage', path: 'M1583 606L1626 578L1665 605L1695 630L1748 673L1781 710L1774 807L1730 853L1640 860L1560 826L1521 782L1513 704L1544 650Z', pivot: '1631px 606px' },
+  { id: 'disco-ball', path: 'M1635 575C1699 576 1751 623 1777 680C1801 743 1775 820 1726 852C1681 884 1604 876 1553 839C1500 801 1485 736 1512 670C1532 620 1575 591 1635 575Z', pivot: '1635px 578px' },
   { id: 'scales-left', path: 'M824 302H834L863 370L872 374L871 391L844 402L811 400L782 387L783 374L792 370Z', pivot: '828px 302px' },
   { id: 'scales-right', path: 'M988 302H998L1027 369L1038 376L1033 392L1003 402L974 398L949 388L950 374L959 369Z', pivot: '993px 302px' },
 ];
@@ -27,6 +27,7 @@ const BLUE_Z = 'M580 399L746 237L696 340L638 410Z M346 695L407 610H496L426 695L3
 const CROSS = 'M1226 458H1273V483H1298V531H1273V556H1226V531H1199V483H1226Z';
 const FIXED_DETAILS = CROSS + ' M384 418H407V449H384Z M461 403H485V438H461Z M895 219H925V473H895Z M875 463H943V516H875Z M815 273H1008V301H815Z';
 const ART = '/brand/family/rezources.svg';
+const DISCO_ART = '/brand/family/rezources-disco-ball.png';
 
 function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[number]; id: string; quiet: boolean; beePass: number }) {
   const weight = object.id.startsWith('scales-') ? 1.3 : object.id === 'rent' ? .7 : 1;
@@ -84,14 +85,14 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
   useEffect(() => {
     if (!beePass || quiet) return;
     // Alternate which hanging pieces respond so each pass feels incidental.
-    const touched = beePass % 2 ? ['apple', 'scales-right'] : ['rent', 'scales-left', 'cabbage'];
+    const touched = beePass % 2 ? ['apple', 'scales-right'] : ['rent', 'scales-left', 'disco-ball'];
     if (!touched.includes(object.id)) return;
-    const delay = ({ apple: 800, rent: 1700, 'scales-left': 3000, 'scales-right': 3550, cabbage: 6100 } as Record<string, number>)[object.id];
+    const delay = ({ apple: 800, rent: 1700, 'scales-left': 3000, 'scales-right': 3550, 'disco-ball': 6100 } as Record<string, number>)[object.id];
     const timer = window.setTimeout(() => {
       if (hovering.current || document.hidden || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       swing.current?.stop();
       settling.current = true;
-      const direction = object.id === 'scales-right' || object.id === 'cabbage' ? -1 : 1;
+      const direction = object.id === 'scales-right' || object.id === 'disco-ball' ? -1 : 1;
       const amplitude = direction * .8 / weight;
       swing.current = animate(angle, [angle.get(), amplitude, -amplitude * .45, amplitude * .14, 0], {
         duration: 5.5, times: [0, .18, .48, .76, 1], ease: 'easeInOut',
@@ -133,7 +134,9 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
     }}>
     <path ref={strings} d={stringPath(0)} className="rg-logo-hanging-strings" />
     <g ref={moving} className="rg-logo-object-swing" style={{ "--logo-drop": `${drop}px` } as CSSProperties} transform={`translate(0 ${drop})`}>
-      <image href={ART} width="1792" height="1008" clipPath={`url(#${id}-${object.id})`} />
+      {object.id === 'disco-ball'
+        ? <image href={DISCO_ART} x="1498" y="579" width="286" height="291" clipPath={`url(#${id}-${object.id})`} />
+        : <image href={ART} width="1792" height="1008" clipPath={`url(#${id}-${object.id})`} />}
     </g>
     <path d={object.path} fill="transparent" className="rg-logo-object-hit" />
   </g>;
