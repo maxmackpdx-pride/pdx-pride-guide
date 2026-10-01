@@ -75,19 +75,6 @@ function nightDayColor(night: string | undefined): string | undefined {
   const weekday = new Date(`${night}T12:00:00Z`).getUTCDay();
   return getComputedStyle(document.documentElement).getPropertyValue(`--day-${WEEKDAY_TOKENS[weekday]}`).trim() || undefined;
 }
-/** Venues with events on two or more distinct nights in the next week wear the bloom ring. */
-function bloomVenues(events: Event[], now = Date.now()): Set<string> {
-  const nights = new Map<string, Set<string>>();
-  for (const event of events) {
-    const starts = parsePacificDateTime(event.dateStart);
-    if (!starts || starts < now - 6 * 3600_000 || starts > now + 7 * 86_400_000 || !event.venueName) continue;
-    const key = normalizeDirectoryName(event.venueName);
-    if (!nights.has(key)) nights.set(key, new Set());
-    nights.get(key)!.add(eventNight(starts));
-  }
-  return new Set(Array.from(nights).filter(([, set]) => set.size >= 2).map(([key]) => key));
-}
-
 function zaydarEventColor(event: Event, places: Place[]) {
   const venueKey=normalizeDirectoryName(event.venueName || '');
   let tags: string[]=[];try { const parsed=JSON.parse(event.eventTypes || '[]'); if(Array.isArray(parsed))tags=parsed; } catch {}
@@ -721,7 +708,6 @@ export default function ZaydarMapDemo() {
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();
   }, []);
-  const bloomKeys = useMemo(() => bloomVenues(events), [events]);
   const sceneRows = useMemo(() => marks.map(mark => {
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
@@ -756,10 +742,9 @@ export default function ZaydarMapDemo() {
       eventDay:event?portlandCalendarDay(event.dateStart):undefined,
       eventNight:event?eventNight(parsePacificDateTime(event.dateStart)??NaN):undefined,
       dayColor:event?nightDayColor(eventNight(parsePacificDateTime(event.dateStart)??NaN)):undefined,
-      bloom:place?bloomKeys.has(normalizeDirectoryName(place.name)):undefined,
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?eventTimeLabel(event.dateStart):undefined};
-  }), [marks, places, events, demoEventIds, attendance, bloomKeys, tokenEpoch]);
+  }), [marks, places, events, demoEventIds, attendance, tokenEpoch]);
   // Board 49: the status line says how many holograms are up tonight. No badge on the pin.
   const tonightCount = useMemo(() => { const night = eventNight(viewTimestamp); return sceneRows.filter(row => row.kind === "event" && row.eventNight === night).length; }, [sceneRows, viewTimestamp]);
   const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};

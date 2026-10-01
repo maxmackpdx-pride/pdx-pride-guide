@@ -91,3 +91,22 @@ test('Mapz cannot replace a place glyph with the retired age label',async()=>{
  assert.doesNotMatch(renderer,/18\+|label:shell/);
  assert.doesNotMatch(markers,/extra\.label|ticket/);
 });
+
+
+test('waypoint outlines and glow retain category colors even with stale rainbow metadata',async()=>{
+ const source=await readFile(new URL('../client/public/zaydar-map/waypoint-markers.js',import.meta.url),'utf8');
+ const strokes=[];
+ const canvasContext={scale(){},fill(){},stroke(){strokes.push(this.strokeStyle);}};
+ const context=vm.createContext({
+  document:{createElement:()=>({getContext:()=>canvasContext})},
+  Path2D:class {},performance:{now:()=>1000},
+ });
+ vm.runInContext(source.replace(/export /g,''),context);
+ const ctx={save(){},restore(){},drawImage(){}};
+ context.ctx=ctx;
+ for(const color of ['#FF0000','#00FFFF','#FF6600','#8800FF'])for(const selected of [false,true]){
+  strokes.length=0;
+  vm.runInContext(`drawWaypointHead(ctx,{x:100,y:100,size:42},'${color}',null,null,${selected},1,'place',{bloom:true})`,context);
+  assert.deepEqual(strokes,[color,color]);
+ }
+});
