@@ -47,7 +47,7 @@ function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; 
     onPointerEnter={event => {
       if (quiet || event.pointerType !== 'mouse') return;
       lastPointer.current = { x: event.clientX, time: performance.now() };
-      angle.set((Math.sign(event.movementX) || 1) * 1.2 / weight);
+      angle.set((Math.sign(event.movementX) || 1) * 1.32 / weight);
     }}
     onPointerMove={event => {
       if (quiet || event.pointerType !== 'mouse') return;
@@ -55,7 +55,7 @@ function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; 
       if (lastPointer.current) {
         const velocity = (event.clientX - lastPointer.current.x) / Math.max(16, now - lastPointer.current.time);
         if (Math.abs(event.clientX - lastPointer.current.x) > .25)
-          angle.set(Math.max(-1.3, Math.min(1.3, velocity * .8)) / weight);
+          angle.set(Math.max(-1.43, Math.min(1.43, velocity * .88)) / weight);
       }
       lastPointer.current = { x: event.clientX, time: now };
     }}
