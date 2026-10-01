@@ -27,7 +27,7 @@ export type NavEntry =
       eyebrow?: string;
     };
 
-/** The shared Boards dropdown: housing and Z/ List are independent destinations. */
+/** Board rooms available from the Boards landing page. */
 export const BOARD_NAV: NavLinkItem[] = [
   { href: "/mizzed", label: "Mizzed", accent: "mizzed" },
   { href: "/giftz", label: "Giftz", accent: "giftz" },
@@ -35,7 +35,7 @@ export const BOARD_NAV: NavLinkItem[] = [
   { href: "/gigz", label: "Gigz", accent: "gigz" },
 ];
 
-/** Every board room, including THE HAÜZ, for the Boards menus. */
+/** Every board room, including THE HAÜZ. */
 export const BOARDS_MENU: NavLinkItem[] = [...BOARD_NAV, { href: "/the-hauz", label: "The Haüz", accent: "hauz" }];
 
 /**
@@ -46,26 +46,14 @@ export const BOARDS_MENU: NavLinkItem[] = [...BOARD_NAV, { href: "/the-hauz", la
  */
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/", label: "Home", accent: "lime" },
-  {
-    type: "dropdown",
-    id: "events",
-    label: "Eventz",
-    accent: "cyan",
-    items: [
-      { href: "/events", label: "All Eventz", accent: "cyan" },
-      { href: "/schedule", label: "My Schedule", accent: "lime" },
-      { href: "/submit", label: "Submit an Event", accent: "orange" },
-    ],
-  },
+  { type: "link", href: "/events", label: "Eventz", accent: "cyan" },
   { type: "link", href: "/map", label: "Mapz", accent: "blue" },
-  /* Board rooms stay grouped here; OutZide remains available through Mapz. */
-  { type: "dropdown", id: "boards", label: "Boards", accent: "magenta", items: BOARDS_MENU },
+  { type: "link", href: "/boards", label: "Boards", accent: "magenta" },
   /* Nonprofits, hotlines, and LGBTQ+ groups (moved off Placez 2026-09-30). */
   { type: "link", href: "/rezources", label: "ReZources", accent: "green" },
-  { type: "link", href: "/z", label: "Z/Lists", accent: "violet" },
 ];
 
-/** Phone header shares two dropdowns and Resources in one rail. */
+/** Phone header keeps the same direct Boards destination. */
 export const MOBILE_TOP_NAV: NavEntry[] = [
   {
     type: "dropdown",
@@ -77,14 +65,7 @@ export const MOBILE_TOP_NAV: NavEntry[] = [
       { href: "/about", label: "About", accent: "magenta" },
     ],
   },
-  {
-    type: "dropdown",
-    id: "boards",
-    label: "Boards",
-    accent: "magenta",
-    items: BOARDS_MENU,
-  },
-  { type: "link", href: "/rezources", label: "ReZources", accent: "green" },
+  { type: "link", href: "/boards", label: "Boards", accent: "magenta" },
 ];
 
 export type PageHeaderMeta = {
@@ -94,6 +75,7 @@ export type PageHeaderMeta = {
 
 /** Breadcrumb section + H1 title for interior pages. */
 export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
+  "/boards": { section: "Boards", title: "BOARDS" },
   "/events": { section: "EVENTZ", title: "EVENTZ" },
   "/schedule": { section: "EVENTZ", title: "My Schedule" },
   "/gigz": { section: "Boards", title: "GIGZ" },

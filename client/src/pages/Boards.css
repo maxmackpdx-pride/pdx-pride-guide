@@ -1,0 +1,80 @@
+.boards-index {
+  position: relative;
+  isolation: isolate;
+  min-height: 100%;
+  padding: clamp(48px, 6vw, 80px) max(24px, calc((100vw - 1240px) / 2)) 96px;
+  overflow: hidden;
+  color: var(--text-heading);
+  background: var(--z-black);
+}
+.boards-index > .rg-stream-background { position: fixed; inset: 0; z-index: -3; width: 100%; height: 100dvh; opacity: .65; pointer-events: none; }
+.boards-index__veil { position: absolute; inset: 0; z-index: -2; pointer-events: none; background: linear-gradient(to bottom, var(--z-black), color-mix(in srgb, var(--z-black) 78%, transparent) 35%, color-mix(in srgb, var(--z-black) 84%, transparent)); }
+.boards-index__intro { max-width: 720px; margin: 0 auto 56px; text-align: center; }
+.boards-index__eyebrow { display: block; color: var(--neon-yellow); font: 700 14px/1.4 var(--font-mono); letter-spacing: .14em; }
+.boards-index__intro h1 { margin: 20px 0 12px; font: 800 clamp(36px, 4.2vw, 52px)/1.2 var(--font-display); text-transform: uppercase; text-shadow: 0 3px 18px var(--z-black); }
+.boards-index__intro p { margin: 0; color: var(--text-body); font: 18px/1.7 var(--font-body); }
+.boards-index__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; max-width: 1240px; margin-inline: auto; }
+.boards-index__card {
+  position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 440px;
+  padding: 32px; overflow: hidden; isolation: isolate; color: var(--text-heading); text-decoration: none;
+  border: 1.5px solid var(--card-accent); border-radius: 10px;
+  background: color-mix(in srgb, var(--card-accent) 8%, var(--z-black));
+  box-shadow: 0 0 0 2px var(--z-black), 0 16px 32px -26px var(--card-accent);
+  backdrop-filter: blur(var(--glass-card-blur));
+  transform: perspective(900px) translate3d(var(--rg-card-shift-x, 0px), var(--rg-card-shift-y, 0px), 0) rotateX(var(--rg-card-tilt-x, 0deg)) rotateY(var(--rg-card-tilt-y, 0deg));
+  transition: transform .28s ease-out, box-shadow .28s ease-out, border-color .28s ease-out;
+}
+.boards-index__card::before { content: ""; position: absolute; inset: 0 0 auto; z-index: 4; height: 3px; background: linear-gradient(90deg, transparent, var(--card-accent), transparent); pointer-events: none; }
+.boards-index__card:hover { box-shadow: 0 0 0 2px var(--z-black), 0 20px 36px -20px var(--card-accent); }
+.boards-index__card:focus-visible { outline: 3px solid var(--card-accent); outline-offset: 4px; }
+.boards-index__card .rg-motif-slot { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.boards-index__card .rg-card-motif { position: absolute; inset: -5%; width: 110%; height: 110%; color: var(--card-accent); opacity: .7; filter: drop-shadow(0 0 8px color-mix(in srgb, var(--card-accent) 32%, transparent)); pointer-events: none; }
+.boards-index__card[data-board="hauz"] .rg-card-motif { top: -20%; }
+.boards-index__card .rg-motif-mesh { opacity: .36; }
+.boards-index__card .rg-motif-nodes { opacity: .72; }
+.boards-index__card .rg-motif-circuits { opacity: .44; }
+.boards-index__card .rg-motif-calibration { opacity: .3; }
+.boards-index__card .rg-motif-depth { opacity: .24; }
+.boards-index__card .rg-motif-inner-edge { opacity: .4; }
+.boards-index__card .rg-motif-object { filter: drop-shadow(0 0 4px currentColor); }
+.boards-index__card .rg-motif-layer--mesh { translate: calc(var(--rg-parallax-x, 0px) * -.25) calc(var(--rg-parallax-y, 0px) * -.25); }
+.boards-index__card .rg-motif-layer--object { translate: calc(var(--rg-parallax-x, 0px) * .15) calc(var(--rg-parallax-y, 0px) * .15); }
+.boards-index__card .rg-motif-layer { transition: translate .26s ease-out; }
+.boards-index__card .rg-motif-drift { transform-box: view-box; transform-origin: 50% 50%; animation: boards-mesh-drift 32s ease-in-out infinite; }
+.boards-index__card .rg-motif-object-drift { transform-box: view-box; transform-origin: 50% 50%; animation: boards-object-drift 41s ease-in-out infinite; }
+.boards-index__card .rg-motif-breathe { transform-box: view-box; transform-origin: 50% 50%; animation: boards-breathe 36s ease-in-out infinite; }
+.boards-index__card .rg-motif-signal-trace { animation: boards-signal 36s linear infinite; }
+.boards-index__card-vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 12%, color-mix(in srgb, var(--z-black) 42%, transparent) 78%), linear-gradient(to bottom, transparent 40%, color-mix(in srgb, var(--z-black) 88%, transparent) 100%); }
+.boards-index__card-glass { position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit; background: linear-gradient(135deg, color-mix(in srgb, var(--text-heading) 6%, transparent), transparent 25%, color-mix(in srgb, var(--z-black) 14%, transparent) 70%); box-shadow: inset 0 1px color-mix(in srgb, var(--text-heading) 28%, transparent), inset 0 -1px color-mix(in srgb, var(--card-accent) 24%, transparent); }
+.boards-index__card-number { position: relative; z-index: 3; align-self: flex-end; color: var(--card-accent); font: 700 14px/1.4 var(--font-mono); letter-spacing: .1em; }
+.boards-index__card-logo { position: absolute; inset: 58px 32px 150px; z-index: 3; display: grid; place-items: center; pointer-events: none; }
+.boards-index__card-logo img { display: block; width: min(76%, 370px); max-height: 132px; object-fit: contain; filter: drop-shadow(0 3px 5px var(--z-black)) drop-shadow(0 0 12px color-mix(in srgb, var(--z-black) 75%, transparent)); }
+.boards-index__card-wordmark { color: var(--text-heading); font: 900 clamp(42px, 5vw, 64px)/1 var(--font-display); text-shadow: 0 3px 7px var(--z-black); white-space: nowrap; }
+.boards-index__card-wordmark i { color: var(--card-accent); font-style: normal; }
+.boards-index__card-copy { position: relative; z-index: 3; max-width: 38ch; margin-top: auto; }
+.boards-index__card-copy > span { color: var(--text-heading); font: 18px/1.7 var(--font-body); text-shadow: 0 2px 8px var(--z-black); }
+.boards-index__card-action { position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; margin-top: 20px; padding: 10px 18px; border: 1px solid var(--card-accent); border-radius: 999px; background: color-mix(in srgb, var(--z-black) 82%, transparent); color: var(--text-heading); font: 800 16px/1.4 var(--font-display); letter-spacing: .04em; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-accent) 18%, transparent); }
+.boards-index__card-action svg { color: var(--card-accent); transition: transform .25s var(--ease-out); }
+.boards-index__card:hover .boards-index__card-action svg { transform: translate(3px, -3px); }
+@keyframes boards-mesh-drift { 0%,100% { transform: translate(-3px,1px); } 33% { transform: translate(2px,-3px); } 66% { transform: translate(4px,2px); } }
+@keyframes boards-object-drift { 0%,100% { transform: translate(2px,-2px); } 35% { transform: translate(-4px,2px); } 70% { transform: translate(1px,4px); } }
+@keyframes boards-breathe { 0%,100% { transform: scale(.99); } 50% { transform: scale(1.025); } }
+@keyframes boards-signal { to { stroke-dashoffset: -100; } }
+@media (max-width: 700px) {
+  .boards-index { padding: 40px 20px 64px; }
+  .boards-index__intro { margin-bottom: 36px; }
+  .boards-index__intro p { font-size: 17px; }
+  .boards-index__grid { grid-template-columns: 1fr; gap: 20px; }
+  .boards-index__card { min-height: 350px; padding: 22px; }
+  .boards-index__card-logo { inset: 52px 22px 134px; }
+  .boards-index__card-logo img { max-height: 94px; }
+  .boards-index__card-wordmark { font-size: 48px; }
+  .boards-index__card-copy > span { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boards-index__card, .boards-index__card-action svg, .boards-index__card .rg-motif-layer { transition: none; }
+  .boards-index__card, .boards-index__card:hover .boards-index__card-action svg { transform: none; }
+  .boards-index__card .rg-card-motif :is(.rg-motif-drift,.rg-motif-object-drift,.rg-motif-breathe,.rg-motif-signal-trace) { animation: none; }
+}
+html.calm-mode .boards-index__card, :root[data-calm="true"] .boards-index__card { transform: none; }
+html.calm-mode .boards-index__card .rg-card-motif :is(.rg-motif-drift,.rg-motif-object-drift,.rg-motif-breathe,.rg-motif-signal-trace), :root[data-calm="true"] .boards-index__card .rg-card-motif :is(.rg-motif-drift,.rg-motif-object-drift,.rg-motif-breathe,.rg-motif-signal-trace) { animation: none; }

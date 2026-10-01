@@ -4,14 +4,10 @@ import './BoardAtmosphere.css';
 type Room = 'eventz' | 'hauz' | 'giftz' | 'gigz' | 'sellz' | 'mizzed';
 
 /** Quiet drafting sketches replace generic backdrop objects in each board. */
-const sketches: Record<Room, string[]> = {
+const sketches: Record<Exclude<Room, 'hauz'>, string[]> = {
   eventz: [
     'M90 305 L200 58 L310 305 Z M135 305 L200 118 L265 305 M60 320 H340 M75 108 Q200 30 325 108 M86 144 Q200 75 314 144',
     'M140 180 L95 160 M260 180 L305 160 M154 218 L97 228 M246 218 L303 228 M180 120 L200 94 L220 120',
-  ],
-  hauz: [
-    'M50 215 L200 85 L350 215 M82 190 V340 H318 V190 M155 340 V245 H245 V340 M110 230 H145 V265 H110 Z M255 230 H290 V265 H255 Z',
-    'M45 237 L200 110 L355 237 M65 350 H335 M188 240 V330 M212 240 V330 M190 215 H210',
   ],
   giftz: [
     'M84 175 H316 V335 H84 Z M70 145 H330 V180 H70 Z M188 145 V335 M212 145 V335 M200 145 C125 128 108 90 145 75 C180 63 198 117 200 145 C202 117 220 63 255 75 C292 90 275 128 200 145',
@@ -33,13 +29,13 @@ const sketches: Record<Room, string[]> = {
 
 export default function BoardAtmosphere({ room, side }: { room: Room; side: 'left' | 'right' }) {
   return <div className={`board-atmosphere board-atmosphere--${side}`} style={{ '--board-atmosphere-color': `var(--room-${room})` } as React.CSSProperties} aria-hidden="true">
-    <WebGLShader accent={`var(--room-${room})`} blueprintUrl={null} direction={side === 'right' ? -1 : 1} />
+    <WebGLShader accent={`var(--room-${room})`} blueprintUrl={room === 'hauz' ? '/resources-art/hauz-moving-day.svg' : null} direction={side === 'right' ? -1 : 1} />
     <svg className="board-atmosphere__contours" viewBox="0 0 1000 600" preserveAspectRatio="none" fill="none" role="presentation">
       <path d="M-80 370 C180 180 310 235 525 360 S845 570 1080 320" />
       <path d="M-80 395 C180 205 310 260 525 385 S845 595 1080 345" />
       <path d="M-80 425 C180 235 310 290 525 415 S845 625 1080 375" />
     </svg>
-    {room !== 'giftz' && <svg className="board-atmosphere__sketch" viewBox="0 0 400 400" fill="none" role="presentation">
+    {room !== 'giftz' && room !== 'hauz' && <svg className="board-atmosphere__sketch" viewBox="0 0 400 400" fill="none" role="presentation">
       <g stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d={sketches[room][0]} />
         <path d={sketches[room][1]} strokeWidth="1.2" opacity=".65" />

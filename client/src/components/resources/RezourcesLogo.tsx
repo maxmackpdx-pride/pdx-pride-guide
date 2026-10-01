@@ -13,10 +13,13 @@ const SKETCH_REGIONS = [
   { x: 1340, y: 678, width: 115, height: 30 },
   { x: 665, y: 180, width: 14, height: 91 },
 ];
+// Keep the full-sized source illustration hidden after shrinking the separate disco ball.
+const DISCO_SOURCE_PATH = 'M1635 575C1699 576 1751 623 1777 680C1801 743 1775 820 1726 852C1681 884 1604 876 1553 839C1500 801 1485 736 1512 670C1532 620 1575 591 1635 575Z';
+const RENT_SOURCE_PATH = 'M365 405L493 397L516 531L383 559L365 405Z';
 const OBJECTS = [
-  { id: 'rent', path: 'M374 455L486 438L503 523L391 550Z', pivot: '430px 446.5px' },
+  { id: 'rent', path: 'M408 422L541 422L559 545L415 548Z', pivot: '460px 358px' },
   { id: 'apple', path: 'M29 620L101 601L149 619L183 641L207 684L211 752L186 785L129 797L70 775L49 706L31 682Z', pivot: '132px 623px' },
-  { id: 'disco-ball', path: 'M1636.4 570C1687.6 570.8 1729.2 608.4 1750 654C1769.2 704.4 1748.4 766 1709.2 791.6C1673.2 817.2 1611.6 810.8 1570.8 781.2C1528.4 750.8 1516.4 698.8 1538 646C1554 606 1588.4 582.8 1636.4 570Z', pivot: '1636px 572px' },
+  { id: 'disco-ball', path: 'M1601.4 545C1652.6 545.8 1694.2 583.4 1715 629C1734.2 679.4 1713.4 741 1674.2 766.6C1638.2 792.2 1576.6 785.8 1535.8 756.2C1493.4 725.8 1481.4 673.8 1503 621C1519 581 1553.4 557.8 1601.4 545Z', pivot: '1601px 547px' },
   { id: 'scales-left', path: 'M824 302H834L863 370L872 374L871 391L844 402L811 400L782 387L783 374L792 370Z', pivot: '828px 302px' },
   { id: 'scales-right', path: 'M988 302H998L1027 369L1038 376L1033 392L1003 402L974 398L949 388L950 374L959 369Z', pivot: '993px 302px' },
 ];
@@ -25,7 +28,7 @@ const Z_SOURCE = 'M407 328H653L577 400H407Z M748 237L698 337L601 455L412 610L348
 const Z_SHAPE = 'M407 328H653L577 400H461Z M748 237L698 337L601 455L412 610L348 729L319 761L400 608L510 472L582 398L664 315Z M424 609H672L610 695H346Z';
 const BLUE_Z = 'M580 399L746 237L696 340L638 410Z M346 695L407 610H496L426 695L322 758Z';
 const CROSS = 'M1226 458H1273V483H1298V531H1273V556H1226V531H1199V483H1226Z';
-const FIXED_DETAILS = CROSS + ' M384 418H407V449H384Z M461 403H485V438H461Z M895 219H925V473H895Z M875 463H943V516H875Z M815 273H1008V301H815Z';
+const FIXED_DETAILS = CROSS + ' M895 219H925V473H895Z M875 463H943V516H875Z M815 273H1008V301H815Z';
 const ART = '/brand/family/rezources.svg';
 const DISCO_ART = '/brand/family/rezources-disco-ball.png';
 const LATE_RENT_ART = '/brand/family/rezources-late-rent.png';
@@ -33,27 +36,35 @@ const ROOSTER_ROCK_ART = '/brand/family/rezources-rooster-rock.png';
 const EVICTION_ART = '/brand/family/rezources-eviction.png';
 
 function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[number]; id: string; quiet: boolean; beePass: number }) {
-  const weight = object.id.startsWith('scales-') ? 1.3 : object.id === 'rent' ? .7 : 1;
+  const weight = object.id.startsWith('scales-') ? 1.3 : object.id === 'rent' ? .5 : 1;
   const angle = useMotionValue(0);
   const swing = useRef<{ stop: () => void } | null>(null);
   const settling = useRef(false);
   const idleResumedAt = useRef(0);
   const moving = useRef<SVGGElement>(null);
   const strings = useRef<SVGPathElement>(null);
-  const drop = object.id === 'rent' ? 8 : 10;
-  const anchors = object.id === 'rent'
-    ? [[410, 451], [489, 439]]
-    : [object.pivot.split(' ').map(Number.parseFloat)];
+  const drop = object.id === 'rent' ? 0 : 10;
+  const anchors = [object.pivot.split(' ').map(Number.parseFloat)];
   const stringPath = (dx: number) => anchors.map(([x, y]) => `M${x} ${y} L${x + dx} ${y + drop}`).join(' ');
+  const rentWirePath = (degrees: number) => {
+    const [x, y] = anchors[0];
+    const radians = degrees * Math.PI / 180;
+    const endpoints = [[435, 428], [534, 438]];
+    return endpoints.map(([endX, endY]) => {
+      const dx = endX - x;
+      const dy = endY - y;
+      return `M${x} ${y} L${x + dx * Math.cos(radians) - dy * Math.sin(radians)} ${y + dx * Math.sin(radians) + dy * Math.cos(radians)}`;
+    }).join(' ');
+  };
   useEffect(() => {
     const update = (value: number) => {
       const degrees = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : value;
       const radians = degrees * Math.PI / 180;
       if (object.id === 'rent') {
-        // The board stays rigid beneath two fixed hooks.
-        const dx = Math.sin(radians) * 90;
-        moving.current?.setAttribute('transform', `translate(${dx} ${drop})`);
-        strings.current?.setAttribute('d', stringPath(dx));
+        // Two wires meet at a fixed nail on the Z; only the sign rocks below it.
+        const [x, y] = anchors[0];
+        moving.current?.setAttribute('transform', `rotate(${degrees} ${x} ${y})`);
+        strings.current?.setAttribute('d', rentWirePath(degrees));
       } else {
         // A rigid pendulum: the pivot never translates or follows the logo tilt.
         const [x, y] = anchors[0];
@@ -135,12 +146,12 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
         onComplete: () => { idleResumedAt.current = performance.now(); settling.current = false; },
       });
     }}>
-    {object.id !== 'disco-ball' && <path ref={strings} d={stringPath(0)} className="rg-logo-hanging-strings" />}
+    {object.id !== 'disco-ball' && <path ref={strings} d={object.id === 'rent' ? rentWirePath(0) : stringPath(0)} className="rg-logo-hanging-strings" />}
     <g ref={moving} className="rg-logo-object-swing" style={{ "--logo-drop": `${drop}px` } as CSSProperties} transform={`translate(0 ${drop})`}>
       {object.id === 'rent'
         ? <image href={LATE_RENT_ART} x="390" y="410" width="190" height="138" />
         : object.id === 'disco-ball'
-        ? <image href={DISCO_ART} x="1527" y="573" width="229" height="233" clipPath={`url(#${id}-${object.id})`} />
+        ? <image href={DISCO_ART} x="1492" y="548" width="229" height="233" clipPath={`url(#${id}-${object.id})`} />
         : <image href={ART} width="1792" height="1008" clipPath={`url(#${id}-${object.id})`} />}
     </g>
     <path d={object.path} fill="transparent" className="rg-logo-object-hit" />
@@ -192,7 +203,7 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
             <path d={Z_SOURCE} fill="black" />
             {rezourcesLetterPaths.map((d, i) => <path key={i} d={d} fill="black" fillRule="evenodd" />)}
             {SKETCH_REGIONS.map((r, i) => <rect key={i} {...r} fill="black" />)}
-            {OBJECTS.map(o => <path key={o.id} d={o.path} fill="black" />)}
+            {OBJECTS.map(o => <path key={o.id} d={o.id === 'disco-ball' ? DISCO_SOURCE_PATH : o.id === 'rent' ? RENT_SOURCE_PATH : o.path} fill="black" />)}
             <path d={FIXED_DETAILS} fill="white" />
           </mask>
           {SKETCH_REGIONS.map((r, i) => <clipPath key={i} id={`${id}-ink-${i}`}><rect {...r} className="rg-logo-ink-reveal" style={{ animationDuration: `${rhythms[i].duration}s`, animationDelay: `${rhythms[i].delay}s`, transformOrigin: ['left center', 'right center', 'center', 'right center', 'left center', 'center', 'center bottom'][i] }} /></clipPath>)}
@@ -204,12 +215,12 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
           <mask id={`${id}-moving-letters`} maskUnits="userSpaceOnUse" x="0" y="0" width="1792" height="1008" style={{ maskType: 'luminance' }}>
             {rezourcesLetterPaths.map((d, i) => <path key={i} d={d} fill="white" fillRule="evenodd" />)}
             <path d={Z_SOURCE} fill="black" />
-            {OBJECTS.map(o => <path key={o.id} d={o.path} fill="black" />)}
+            {OBJECTS.map(o => <path key={o.id} d={o.id === 'disco-ball' ? DISCO_SOURCE_PATH : o.id === 'rent' ? RENT_SOURCE_PATH : o.path} fill="black" />)}
             <path d={FIXED_DETAILS} fill="black" />
           </mask>
           <mask id={`${id}-letters`} maskUnits="userSpaceOnUse" x="0" y="0" width="1792" height="1008" style={{ maskType: 'luminance' }}>
             {rezourcesLetterPaths.map((d, i) => <path key={i} d={d} fill="white" fillRule="evenodd" stroke="black" strokeWidth="7" />)}
-            {OBJECTS.map(o => <path key={o.id} d={o.path} fill="black" />)}
+            {OBJECTS.map(o => <path key={o.id} d={o.id === 'disco-ball' ? DISCO_SOURCE_PATH : o.id === 'rent' ? RENT_SOURCE_PATH : o.path} fill="black" />)}
             <path d={FIXED_DETAILS} fill="black" />
           </mask>
           <linearGradient id={`${id}-color`} x1="0" y1="0" x2="1" y2=".5">
@@ -234,10 +245,9 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
           <path pathLength="1" d="M395 835H1145 M395 825V845 M1145 825V845 M618 827V843 M857 827V843 M1052 827V843" />
         </g>
         <g className="rg-logo-underlay" aria-hidden="true">
-          <path d={OBJECTS[0].path} fill="var(--neon-orange)" opacity=".82" />
           <path d="M805 509Q898 519 1000 505L1037 511Q918 531 800 521Z" fill="color-mix(in srgb, var(--neon-orange) 76%, var(--z-black))" stroke="var(--neon-yellow)" strokeWidth="3" />
           <path d="M819 511Q923 526 1021 511" fill="none" stroke="var(--neon-yellow)" strokeWidth="2" opacity=".62" />
-          <path d="M1639 412C1634 466 1638 525 1636 571" fill="none" stroke="var(--text-heading)" strokeWidth="2.6" opacity=".7" />
+          <path d="M1605 412C1603 455 1600 507 1601 546" fill="none" stroke="var(--text-heading)" strokeWidth="2.6" opacity=".7" />
           <image href={ROOSTER_ROCK_ART} x="1300" y="270" width="300" height="220" transform="rotate(-11 1450 380)" />
         </g>
         <image href={ART} width="1792" height="1008" mask={`url(#${id}-still)`} />
@@ -273,6 +283,10 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
         {!quietMotion && <g clipPath={`url(#${id}-blue-z)`} className="rg-blue-z-pixels" aria-hidden="true">
           {Array.from({ length: 22 }, (_, i) => <rect key={i} x={330 + (i * 47) % 390} y={245 + (i * 61) % 490} width={24 + i % 3 * 12} height={8 + i % 2 * 8} fill={i % 3 === 0 ? 'var(--z-black)' : i % 2 ? 'var(--neon-cyan)' : 'var(--neon-blue)'} />)}
         </g>}
+        <g aria-hidden="true" className="rg-logo-rent-nail">
+          <circle cx="460" cy="358" r="7" fill="var(--z-black)" stroke="var(--neon-orange)" strokeWidth="2" />
+          <circle cx="460" cy="358" r="2" fill="var(--text-heading)" />
+        </g>
         {OBJECTS.filter(o => o.id === 'rent').map(o => <HangingObject key={o.id} object={o} id={id} quiet={quietMotion} beePass={beePass} />)}
         <image href={EVICTION_ART} x="700" y="590" width="190" height="169" aria-hidden="true" />
         <text className="rg-logo-trademark" x="1700" y="416" aria-hidden="true">™</text>

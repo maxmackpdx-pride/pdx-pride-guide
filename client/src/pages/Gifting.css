@@ -38,3 +38,24 @@
 .giftz-section .gigz-rail{margin:0}
 .giftz-section .gigz-rail__controls{margin-bottom:0}
 @media(max-width:760px){.giftz-sections{gap:18px}.giftz-section{padding:18px;border-radius:16px}.giftz-section__head{align-items:start;flex-direction:column;gap:14px}}
+
+/* One opening question, then compact browsing controls. Keep the existing board
+   filters available without making visitors answer the same question twice. */
+.giftz-page .gigz-shell > .board-stats-band{margin:clamp(24px,3vw,40px) 0 0}
+.giftz-stats-status{margin:8px 0 0;color:var(--text-body);font:14px/1.5 var(--font-body);text-align:center}
+.giftz-page .discovery-survey{padding-top:clamp(48px,5vw,72px)}
+.giftz-page .discovery-kicker--results{margin-bottom:24px}
+.giftz-browse{display:grid;gap:16px;margin:30px 0 0;padding:22px;border:1px solid color-mix(in srgb,var(--room-giftz) 32%,var(--panel-border));border-radius:14px;background:color-mix(in srgb,var(--glass-card-bg) 88%,var(--z-black));box-shadow:var(--glass-card-shadow)}
+.giftz-browse__types{display:flex;flex-wrap:wrap;gap:8px}
+.giftz-browse__types button{min-height:44px;padding:9px 16px;border:1px solid color-mix(in srgb,var(--room-giftz) 30%,var(--panel-border));border-radius:8px;background:var(--z-black);color:var(--text-heading);font:800 15px/1.4 var(--font-display);text-transform:uppercase;cursor:pointer;transition:background .2s ease,border-color .2s ease}
+.giftz-browse__types button:hover,.giftz-browse__types button[aria-pressed=true]{border-color:var(--room-giftz);background:color-mix(in srgb,var(--room-giftz) 15%,var(--z-black))}
+.giftz-browse :is(button,summary,input,select):focus-visible{outline:2px solid var(--room-giftz);outline-offset:3px}
+.giftz-browse__search label{display:grid;gap:7px;color:var(--text-body);font:700 14px/1.4 var(--font-body)}
+.giftz-browse__search input{width:100%;min-height:48px;padding:10px 14px;border:1px solid var(--panel-border);border-radius:8px;background:var(--z-black);color:var(--text-heading);font:16px/1.4 var(--font-body)}
+.giftz-browse__more{border-top:1px solid var(--panel-border);padding-top:12px}
+.giftz-browse__more summary{display:flex;align-items:center;justify-content:space-between;min-height:44px;cursor:pointer;color:var(--text-heading);font:800 15px/1.4 var(--font-display);text-transform:uppercase;list-style:none}
+.giftz-browse__more summary::-webkit-details-marker{display:none}
+.giftz-browse__more[open] summary svg{transform:rotate(180deg)}
+.giftz-browse__more .board-toolbar{margin:14px 0 0}
+.giftz-browse__clear{justify-self:start;min-height:44px;color:var(--room-giftz);font:700 14px/1.4 var(--font-body);text-decoration:underline;text-underline-offset:4px}
+@media(max-width:760px){.giftz-page .gigz-shell > .board-stats-band{margin-top:22px}.giftz-browse{padding:16px;margin-top:24px}.giftz-browse__types button{flex:1 1 calc(50% - 4px);padding-inline:8px}}

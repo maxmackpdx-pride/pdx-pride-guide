@@ -58,6 +58,7 @@ const ZaydarMapDemo = lazyWithReload(() => import("./pages/ZaydarMapDemo"));
 const Schedule = lazyWithReload(() => import("./pages/Schedule"));
 const Submit = lazyWithReload(() => import("./pages/Submit"));
 const PrideWork = lazyWithReload(() => import("./pages/PrideWork"));
+const Boards = lazyWithReload(() => import("./pages/Boards"));
 const Gifting = lazyWithReload(() => import("./pages/Gifting"));
 const Sellz = lazyWithReload(() => import("./pages/Sellz"));
 const Housing = lazyWithReload(() => import("./pages/Housing"));
@@ -133,6 +134,7 @@ function AppLayout() {
             <Route path="/" component={Home} />
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
+            <Route path="/boards" component={Boards} />
             <Route path="/map-demo" component={ZaydarMapDemo} />
             <Route path="/map" component={ZaydarMapDemo} />
             <Route path="/schedule">{() => <Schedule />}</Route>

@@ -3922,3 +3922,15 @@ html.calm-mode .rg-options button,
 @media (max-width: 600px) {
   .resources-page .rg-layout { padding-top: 56px; }
 }
+
+/* Keep the intro, action row, and first choice on one measured spacing rhythm. */
+.resources-page .rg-intro { --rg-logo-space: clamp(48px, 6vw, 64px); }
+.resources-page .rg-intro .rg-intro-actions { margin-top: -18px; }
+.resources-page .rg-layout { padding-top: clamp(48px, 6vw, 72px); }
+.resources-page .rg-step--intent .rg-mode { margin-top: 40px; }
+@media (max-width: 600px) {
+  .resources-page .rg-intro { --rg-logo-space: 40px; }
+  .resources-page .rg-intro .rg-intro-actions { margin-top: -16px; }
+  .resources-page .rg-layout { padding-top: 48px; }
+  .resources-page .rg-step--intent .rg-mode { margin-top: 32px; }
+}

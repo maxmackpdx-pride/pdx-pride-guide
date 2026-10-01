@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450" fill="none">
+  <!-- Twelve hand-drafted moving-day marks, one per shader atlas cell. -->
+  <g stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" opacity=".74">
+    <g transform="translate(0 0)">
+      <path d="M25 75 75 32l50 43M37 65v61h76V65M66 126V90h20v36M43 77h14v15H43zM96 77h11v15H96z"/>
+      <path d="M21 77 75 28l54 49M34 130h82" stroke-width=".9" opacity=".5"/>
+    </g>
+    <g transform="translate(150 0)">
+      <path d="M26 63h98v65H26zM26 63l18-21h65l15 21M75 43v85M60 62l15 14 15-14M35 116h31"/>
+      <path d="M20 134h110M30 67h93" stroke-width=".9" opacity=".5"/>
+    </g>
+    <g transform="translate(300 0)">
+      <circle cx="48" cy="63" r="18"/><circle cx="48" cy="63" r="8"/>
+      <path d="M66 66 117 113l-10 10-11-12-9 8-10-10 9-8-24-23"/>
+      <path d="M29 83 18 94M117 113l12 11" stroke-width=".9" opacity=".5"/>
+    </g>
+    <g transform="translate(450 0)">
+      <path d="M40 117V49h69v68M35 117h80M48 49c6-24 46-24 53 0M50 80h48M45 117l-6 18M104 117l6 18"/>
+      <path d="M33 133h84M57 44h37" stroke-width=".9" opacity=".5"/>
+    </g>
+    <g transform="translate(0 150)">
+      <path d="M73 123V88M73 91C45 89 29 68 39 45c18 0 32 10 34 29M76 85c3-27 17-42 38-38 7 21-7 38-35 42M45 124h57l-9 15H54z"/>
+      <path d="M73 108 55 86M76 108l20-27M35 48c13 1 27 14 34 29" stroke-width=".9" opacity=".5"/>
+    </g>
+    <g transform="translate(150 150)">
+      <path d="M75 30v66M43 55c7-33 57-33 64 0H43zM55 96h40M75 96v31M51 130h48M64 41h23"/>
+      <path d="M37 59h76M46 135h58" stroke-width=".9" opacity=".5"/>
+    </g>
+    <g transform="translate(300 150)">
+      <path d="M41 33v89h70M41 36h17v67h53M59 56h46M65 57v29M75 86h30M52 122a10 10 0 1 0 20 0M95 122a10 10 0 1 0 20 0"/>
+      <path d="M34 29v98M60 51h54" stroke-width=".9" opacity=".5"/>
+    </g>
+    <g transform="translate(450 150)">
+      <path d="M29 98h94v25H29zM34 98V60h82v38M48 74h54M43 122v13M109 122v13M35 58q38-26 78 0"/>
+      <path d="M23 138h106M52 80h48" stroke-width=".9" opacity=".5"/>
+    </g>
+    <g transform="translate(0 300)">
+      <path d="M42 25h67v111H42zM51 33h49v95H51zM91 81h5M42 137h67M26 138h98"/>
+      <path d="M29 35h10M112 35h10M30 128h10M112 128h10" stroke-width=".9" opacity=".5"/>
+    </g>
+    <g transform="translate(150 300)">
+      <path d="M21 63h83l22 27v34H21zM104 64v27h22M39 124a12 12 0 1 0 24 0M91 124a12 12 0 1 0 24 0M32 79h36M23 112h101"/>
+      <path d="M16 130h117M81 57h29" stroke-width=".9" opacity=".5"/>
+    </g>
+    <g transform="translate(300 300)">
+      <path d="M41 49h68v76H41zM55 49V34h40v15M50 125v10M99 125v10M72 50v76M60 70h25"/>
+      <path d="M35 138h80M48 46h65" stroke-width=".9" opacity=".5"/>
+    </g>
+    <g transform="translate(450 300)">
+      <path d="M45 43q30-28 60 0v76H45zM39 119h72M50 48h50M54 77h42M59 83v30M86 83v30"/>
+      <path d="M34 123h82M48 34q26-22 54 0" stroke-width=".9" opacity=".5"/>
+    </g>
+  </g>
+</svg>

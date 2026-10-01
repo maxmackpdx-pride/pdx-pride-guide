@@ -14,7 +14,7 @@ import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
 import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
-import { CalendarDays, Map, MessageCircle, PanelsTopLeft } from "lucide-react";
+import { CalendarDays, HeartHandshake, MessageCircle, PanelsTopLeft } from "lucide-react";
 
 const MOBILE_ICON = 19;
 
@@ -56,13 +56,11 @@ export default function MobileBottomNav() {
   const { user } = useAuth();
   const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
-  const [eventsOpen, setEventsOpen] = useState(false);
   const [hubOpen, setHubOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const overlayOpen = eventsOpen || hubOpen || open || showAuth;
+  const overlayOpen = hubOpen || open || showAuth;
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
-    if (except !== "events") setEventsOpen(false);
     if (except !== "hub-sheet") setHubOpen(false);
     if (except !== "inbox") closeSheet();
   }, [closeSheet]);
@@ -77,12 +75,11 @@ export default function MobileBottomNav() {
   }, [closeLocalSheets]);
 
   useEffect(() => {
-    setEventsOpen(false);
     setHubOpen(false);
   }, [location]);
 
   useEffect(() => {
-    const close = () => { setEventsOpen(false); setHubOpen(false); };
+    const close = () => setHubOpen(false);
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         close();
@@ -98,23 +95,14 @@ export default function MobileBottomNav() {
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const hubActive = navLinkActive(location, "/dashboard");
   const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
-  const zlistsActive = navLinkActive(location, "/z");
-  const activeIndex = open || showAuth ? 4 : eventsOpen ? 0 : hubActive ? 2 : mapActive ? 1 : zlistsActive ? 3 : eventsActive ? 0 : -1;
+  const resourcesActive = navLinkActive(location, "/rezources");
+  const activeIndex = open || showAuth ? 4 : hubActive ? 2 : mapActive ? 1 : resourcesActive ? 3 : eventsActive ? 0 : -1;
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
 
   const dismissExcept = (except?: MobileNavDismissDetail["except"]) => {
     closeLocalSheets(except);
     dismissMobileNavOverlays(except);
-  };
-
-  const handleEvents = () => {
-    if (eventsOpen) {
-      setEventsOpen(false);
-      return;
-    }
-    dismissExcept("events");
-    setEventsOpen(true);
   };
 
   const localDemo = isLocalDemo();
@@ -138,25 +126,6 @@ export default function MobileBottomNav() {
 
   return createPortal(
     <>
-      {eventsOpen && (
-        <>
-          <div className="hub-more-backdrop" onClick={() => setEventsOpen(false)} aria-hidden="true" />
-          <div className="hub-more-sheet hub-more-sheet--site pdx-liquid-overlay" data-accent="cyan" role="dialog" aria-label="Eventz">
-            <h3>Eventz</h3>
-            {EVENTS_NAV.map(item => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`}
-                onClick={() => setEventsOpen(false)}
-              >
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
-
       {hubOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setHubOpen(false)} aria-hidden="true" />
@@ -230,18 +199,17 @@ export default function MobileBottomNav() {
       )}
 
       <MobileDockShell activeIndex={activeIndex} overlayOpen={overlayOpen} location={location} attentionCount={user ? attentionCount : 0}>
-          <button
-            type="button"
-            className={tabClass(eventsActive || eventsOpen, "cyan")}
+          <Link
+            href="/events"
+            className={tabClass(eventsActive, "cyan")}
             data-accent="cyan"
-            aria-expanded={eventsOpen}
-            aria-haspopup="dialog"
+            aria-current={eventsActive ? "page" : undefined}
             aria-label="Eventz"
-            onClick={handleEvents}
+            onClick={handleNavLink}
           >
             <span className="znav-icon-row"><CalendarDays size={20} strokeWidth={1.8} aria-hidden="true" /></span>
             <span className="znav-caption">Eventz</span>
-          </button>
+          </Link>
 
           <Link
             href="/map"
@@ -283,16 +251,16 @@ export default function MobileBottomNav() {
           </Link>
 
           <Link
-            href="/z"
-            className={tabClass(zlistsActive, "purple")}
-            data-accent="violet"
-            aria-label="Z/LISTS"
-            title="Z/LISTS"
-            aria-current={zlistsActive ? "page" : undefined}
+            href="/rezources"
+            className={tabClass(resourcesActive, "green")}
+            data-accent="green"
+            aria-label="ReZources"
+            title="ReZources"
+            aria-current={resourcesActive ? "page" : undefined}
             onClick={handleNavLink}
           >
-            <span className="znav-icon-row"><Map size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Z/LISTS</span>
+            <span className="znav-icon-row"><HeartHandshake size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">ReZources</span>
           </Link>
 
           <button

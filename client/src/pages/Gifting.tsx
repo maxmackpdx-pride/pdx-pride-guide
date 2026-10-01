@@ -4,7 +4,7 @@ import RoomPlate from "@/components/board/RoomPlate";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Gift, MapPin, Plus, Search, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, ChevronDown, Gift, MapPin, Plus, Search, X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +13,6 @@ import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import GiftListingCard, { type GiftingPost } from "@/components/board/GiftListingCard";
 import { FilterChip, RoomKicker } from "@/components/ds";
 import BrowseToolbar from "@/components/BrowseToolbar";
-import FilterSurvey from "@/components/FilterSurvey";
 import OpenBoardCard from "@/components/board/OpenBoardCard";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import { isOpenGrabPost } from "@/lib/boardFeed";
@@ -114,6 +113,10 @@ export default function Gifting() {
   const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
   const [onlyMine, setOnlyMine] = useState(() => new URLSearchParams(window.location.search).get("mine") === "1");
   const [sort, setSort] = useState(() => new URLSearchParams(window.location.search).get("sort") === "oldest" ? "LONGEST" : "RECENT");
+  const [openFromLink] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return ["type", "category", "neighborhood", "q", "mine", "sort", "post"].some(key => params.has(key));
+  });
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const deepLinkHandled = useRef(false);
 
@@ -228,6 +231,7 @@ export default function Gifting() {
     { num: realActive.filter(post => post.postType === "ISO").length, label: "In search of", color: "var(--room-mizzed)" },
     { num: realActive.filter(post => Date.parse(post.createdAt) >= weekAgo).length, label: "New this week", color: "var(--panel-cyan)" },
   ];
+  const visibleStats = isLoading || isError ? roomStats.map(stat => ({ ...stat, num: "—" })) : roomStats;
   const selected = posts.find(post => post.id === expandedId);
   const select = (id: number) => {
     setExpandedId(id);
@@ -246,9 +250,10 @@ export default function Gifting() {
     <BoardShader room="giftz" />
     <div className="gigz-shell">
       <RoomPlate room="giftz" />
-      {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
-      <DiscoveryFlow room="Giftz" accent="var(--room-giftz)" title="How can we help?" intro="Browse free things from neighbors, offer something, or ask the community for what you need." onViewAll={clearFilters} choices={[
-        { id: 'browse', label: 'Find a gift', description: 'Browse what neighbors are giving', scrollToResults: true, onChoose: () => setFilter('GIFT') },
+      <BoardStatsBar variant="band" stats={visibleStats} />
+      {isError && <p className="giftz-stats-status" role="status">Counts are unavailable right now.</p>}
+      <DiscoveryFlow room="Giftz" accent="var(--room-giftz)" title="What brings you to Giftz?" intro="Everything here is free. Choose a way in, then narrow the listings if you need to." initiallyOpen={openFromLink} onViewAll={clearFilters} choices={[
+        { id: 'browse', label: 'Browse Giftz', description: 'See gifts, open grabs, and requests', scrollToResults: true, onChoose: () => setFilter('ALL') },
         { id: 'give', label: 'Give something', description: giftingStatusPending ? 'Checking availability' : postingOpen ? 'Post a free gift' : 'Posting is paused', disabled: !postingOpen, onChoose: () => openForm('GIFT') },
         { id: 'request', label: 'Ask for something', description: giftingStatusPending ? 'Checking availability' : postingOpen ? 'Post what you need' : 'Posting is paused', disabled: !postingOpen, onChoose: () => openForm('ISO') },
       ]}>
@@ -256,17 +261,24 @@ export default function Gifting() {
         <div className="giftz-actions"><button type="button" className="gigz-post gigz-post--primary" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
       </div>
       {!postingOpen && giftingStatus && <p className="giftz-posting-status" role="status">{giftingStatus.message}</p>}
-      <FilterSurvey startStep={2} eyebrow="Refine your search" label="Giftz" question="What are you looking for?" value={filter} onChange={setFilter} accent="var(--room-giftz)" options={[{value:"ALL",label:"Explore Giftz"},{value:"GIFT",label:"Gifts offered"},{value:"ISO",label:"In search of"},{value:"GRAB",label:"Open grab"}]}>
-      <BrowseToolbar label="Filter Giftz posts" className="board-toolbar">
-        <label>Search Giftz<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search titles and details" /></label>
-        <label>Show<select value={filter} onChange={event => setFilter(event.target.value)}><option value="ALL">Offered & ISO</option><option value="GIFT">Gifts offered</option><option value="ISO">In search of</option><option value="GRAB">Open grab</option></select></label>
-        <label>Category<select value={category} onChange={event => setCategory(event.target.value)}><option value="ALL">All categories</option>{CATEGORIES.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
-        <label>Neighborhood<input type="search" value={neighborhood} onChange={event => setNeighborhood(event.target.value)} placeholder="Anywhere nearby" /></label>
-        {user && <FilterChip className="board-chip pdx-glass-rebind" selected={onlyMine} onToggle={() => setOnlyMine(value => !value)}>My posts</FilterChip>}
-        <label>Sort<select value={sort} onChange={event => setSort(event.target.value)}><option value="RECENT">Recently posted</option><option value="LONGEST">Longest up</option></select></label>
-        {(filter !== "ALL" || search || category !== "ALL" || neighborhood || onlyMine || sort !== "RECENT") && <button type="button" className="board-toolbar__clear" onClick={clearFilters}>Clear filters</button>}
-      </BrowseToolbar>
-      </FilterSurvey>
+      <div className="giftz-browse" aria-label="Explore Giftz listings">
+        <div className="giftz-browse__types" role="group" aria-label="Show listings">
+          {([['ALL', 'All'], ['GIFT', 'Gifts offered'], ['GRAB', 'Open grab'], ['ISO', 'In search of']] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}</button>)}
+        </div>
+        <BrowseToolbar label="Search Giftz posts" className="giftz-browse__search">
+          <label>Search listings<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search gifts and requests" /></label>
+        </BrowseToolbar>
+        <details className="giftz-browse__more">
+          <summary>More filters <ChevronDown size={18} aria-hidden="true" /></summary>
+          <BrowseToolbar label="Refine Giftz posts" className="board-toolbar">
+            <label>Category<select value={category} onChange={event => setCategory(event.target.value)}><option value="ALL">All categories</option>{CATEGORIES.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+            <label>Neighborhood<input type="search" value={neighborhood} onChange={event => setNeighborhood(event.target.value)} placeholder="Anywhere nearby" /></label>
+            {user && <FilterChip className="board-chip pdx-glass-rebind" selected={onlyMine} onToggle={() => setOnlyMine(value => !value)}>My posts</FilterChip>}
+            <label>Sort<select value={sort} onChange={event => setSort(event.target.value)}><option value="RECENT">Recently posted</option><option value="LONGEST">Longest up</option></select></label>
+          </BrowseToolbar>
+        </details>
+        {(filter !== "ALL" || search || category !== "ALL" || neighborhood || onlyMine || sort !== "RECENT") && <button type="button" className="giftz-browse__clear" onClick={clearFilters}>Clear filters</button>}
+      </div>
       {isError ? <div className="gigz-empty pdx-glass-rebind" role="alert">Could not load Giftz posts. <button type="button" onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })}>Try again</button></div> : <div className="giftz-sections" aria-label="Giftz listings">
         {(filter === "ALL" || filter === "GIFT") && <section className="giftz-section" aria-labelledby="giftz-offered-title">
           <div className="giftz-section__head"><div><span className="giftz-section__eyebrow">01 / GIVE & FIND</span><h2 id="giftz-offered-title">Gifts offered</h2><p>Free things from neighbors, ready for a new home.</p></div><span className="giftz-section__count">{offered.length} available</span></div>
