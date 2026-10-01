@@ -11,16 +11,19 @@
     background:linear-gradient(150deg,rgba(210,231,240,.035),transparent 38%);
     backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
   }
-  /* Match the top navbar's full glass surface in the dock's open space.
+  /* Share the full liquid-glass surface across both mobile bars.
      Button wells and the existing edge/seam layers retain their own styles. */
+  .site-header.site-header--glass,
   nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock {
     background:rgba(1,4,8,.27);
   }
+  .site-header > .z-mobile-glass-lite,
   .z-mobile-dock > .z-mobile-glass-lite {
     background:linear-gradient(164deg,rgba(123,182,201,.12),rgba(7,13,20,.12) 38%,rgba(4,8,12,.38) 66%,rgba(57,102,144,.1));
     backdrop-filter:blur(9px) saturate(1.25);
     -webkit-backdrop-filter:blur(9px) saturate(1.25);
   }
+  .site-header.site-header--glass > .site-header-rainbow-seam.pdxSeam { opacity:.5; }
   .site-header.site-header--glass > .z-glass__edge,
   .z-mobile-dock > .z-glass__edge {
     border-color:rgba(172,207,231,.18);
@@ -85,6 +88,6 @@
   html.calm-mode .z-mobile-glass-lite,
   html[data-calm="true"] .z-mobile-glass-lite { background:#080c12;backdrop-filter:none;-webkit-backdrop-filter:none; }
   @media(prefers-reduced-motion:reduce) { .z-mobile-dock .z-dock-glitch > span { animation:none;opacity:0; } }
-  @media(prefers-reduced-transparency:reduce) { .z-mobile-glass-lite { background:#080c12;backdrop-filter:none;-webkit-backdrop-filter:none; } }
-  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .z-mobile-glass-lite { background:#080c12; } }
+  @media(prefers-reduced-transparency:reduce) { .site-header > .z-mobile-glass-lite, .z-mobile-dock > .z-mobile-glass-lite { background:#080c12;backdrop-filter:none;-webkit-backdrop-filter:none; } }
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .site-header > .z-mobile-glass-lite, .z-mobile-dock > .z-mobile-glass-lite { background:#080c12; } }
 }
