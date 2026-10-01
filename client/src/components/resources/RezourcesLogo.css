@@ -36,7 +36,7 @@
 }
 
 /* Pixel bursts are clipped to blue paint; white Z strokes remain untouched. */
-.rg-blue-z-pixels { opacity: 0; pointer-events: none; animation: rg-blue-z-pixels 80s steps(1, end) infinite; }
+.rg-blue-z-pixels { opacity: 0; pointer-events: none; animation: rg-blue-z-pixels 32s steps(1, end) infinite; }
 @keyframes rg-blue-z-pixels {
   0%, 1%, 2%, 100% { opacity: 0; }
   1.25% { opacity: .3; }
@@ -46,7 +46,7 @@
 @media (prefers-reduced-motion: reduce) { .rg-blue-z-pixels { display: none; animation: none; } }
 
 .rg-logo-shimmer-window { pointer-events: none; }
-.rg-logo-letter-shimmer { opacity: 0; animation: rg-logo-letter-shimmer 80s ease-in-out infinite; }
+.rg-logo-letter-shimmer { opacity: 0; animation: rg-logo-letter-shimmer 28s ease-in-out infinite; }
 @keyframes rg-logo-letter-shimmer {
   0%, 4% { opacity: 0; translate: 0 0; }
   5% { opacity: .3; translate: 0 0; }
@@ -56,7 +56,7 @@
 [data-quiet-motion] .rg-logo-letter-shimmer { display: none; animation: none; }
 @media (prefers-reduced-motion: reduce) { .rg-logo-letter-shimmer { display: none; animation: none; } }
 
-.rg-blue-z-smear { pointer-events: none; opacity: 0; animation: rg-blue-z-smear 80s steps(1, end) infinite; }
+.rg-blue-z-smear { pointer-events: none; opacity: 0; animation: rg-blue-z-smear 32s steps(1, end) infinite; }
 @keyframes rg-blue-z-smear {
   0%, 1%, 2%, 100% { opacity: 0; translate: 0 0; }
   1.2% { opacity: .6; translate: 4px 0; }
@@ -74,3 +74,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) { .rg-logo-object-swing { transform: translate(0, var(--logo-drop)) !important; } }
+
+.rg-logo-trademark {
+  fill: var(--text-heading);
+  font-family: inherit;
+  font-size: 28px;
+  font-weight: 500;
+  pointer-events: none;
+}

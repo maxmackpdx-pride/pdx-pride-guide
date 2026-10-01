@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, type CSSProperties } from 'react';
-import { useSpring } from 'framer-motion';
+import { animate, useMotionValue } from 'framer-motion';
 import { rezourcesLetterPaths } from './rezourcesLetterPaths';
 import './RezourcesLogo.css';
 
@@ -30,7 +30,10 @@ const ART = '/brand/family/rezources.svg';
 
 function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; id: string; quiet: boolean }) {
   const weight = object.id.startsWith('scales-') ? 1.3 : object.id === 'rent' ? .7 : 1;
-  const angle = useSpring(0, { stiffness: 28, damping: 10, mass: weight * 1.6 });
+  const angle = useMotionValue(0);
+  const swing = useRef<{ stop: () => void } | null>(null);
+  const settling = useRef(false);
+  const idleResumedAt = useRef(0);
   const moving = useRef<SVGGElement>(null);
   const strings = useRef<SVGPathElement>(null);
   const drop = object.id === 'rent' ? 8 : 10;
@@ -40,48 +43,74 @@ function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; 
   const stringPath = (dx: number) => anchors.map(([x, y]) => `M${x} ${y} L${x + dx} ${y + drop}`).join(' ');
   useEffect(() => {
     const update = (value: number) => {
-      // Rigid horizontal translation: scale and vertical position never animate.
-      const dx = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : Math.sin(value * Math.PI / 180) * 90;
-      moving.current?.setAttribute('transform', `translate(${dx} ${drop})`);
-      strings.current?.setAttribute('d', stringPath(dx));
+      const degrees = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : value;
+      const radians = degrees * Math.PI / 180;
+      if (object.id === 'rent') {
+        // The board stays rigid beneath two fixed hooks.
+        const dx = Math.sin(radians) * 90;
+        moving.current?.setAttribute('transform', `translate(${dx} ${drop})`);
+        strings.current?.setAttribute('d', stringPath(dx));
+      } else {
+        // A rigid pendulum: the pivot never translates or follows the logo tilt.
+        const [x, y] = anchors[0];
+        moving.current?.setAttribute('transform', `rotate(${degrees} ${x} ${y}) translate(0 ${drop})`);
+        strings.current?.setAttribute('d', `M${x} ${y} L${x - Math.sin(radians) * drop} ${y + Math.cos(radians) * drop}`);
+      }
     };
     update(angle.get());
     return angle.on('change', update);
   }, [angle, object.id, object.pivot]);
   const hovering = useRef(false);
-  const lastPointer = useRef<{ x: number; time: number } | null>(null);
+
   useEffect(() => {
-    if (quiet) { angle.jump(0); return; }
+    if (quiet) { swing.current?.stop(); angle.set(0); return; }
     const index = OBJECTS.findIndex(item => item.id === object.id);
     const phase = index * Math.PI * 2 / OBJECTS.length + Math.PI / 4;
     const started = performance.now();
     const tick = () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { angle.jump(0); return; }
-      if (hovering.current || document.hidden) return;
-      angle.set(Math.sin((performance.now() - started) / (2200 + index * 170) + phase) * .08 / weight);
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        swing.current?.stop(); settling.current = false; angle.set(0); return;
+      }
+      if (hovering.current || settling.current || document.hidden) return;
+      const now = performance.now();
+      const blend = Math.min(1, (now - idleResumedAt.current) / 3000);
+      angle.set(Math.sin((now - started) / (6000 + index * 500) + phase) * .06 / weight * blend);
     };
     tick();
     const timer = window.setInterval(tick, 150);
-    return () => window.clearInterval(timer);
+    return () => { window.clearInterval(timer); swing.current?.stop(); };
   }, [quiet, angle, object.id, weight]);
   return <g className="rg-logo-object"
     onPointerEnter={event => {
       if (quiet || event.pointerType !== 'mouse') return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       hovering.current = true;
-      lastPointer.current = { x: event.clientX, time: performance.now() };
-      angle.set((Math.sign(event.movementX) || 1) * .7 / weight);
+      settling.current = true;
+      swing.current?.stop();
+      // Bounded, progressively smaller arcs; pointer speed never adds energy.
+      const direction = OBJECTS.findIndex(item => item.id === object.id) % 2 === 0 ? 1 : -1;
+      const amplitude = direction * .32 / weight;
+      swing.current = animate(angle, [angle.get(), amplitude, -amplitude * .5, amplitude * .18, 0], {
+        duration: 18, times: [0, .22, .55, .82, 1], ease: 'easeInOut',
+        onComplete: () => { idleResumedAt.current = performance.now(); settling.current = false; },
+      });
     }}
-    onPointerMove={event => {
-      if (quiet || event.pointerType !== 'mouse') return;
-      const now = performance.now();
-      if (lastPointer.current) {
-        const velocity = (event.clientX - lastPointer.current.x) / Math.max(16, now - lastPointer.current.time);
-        if (Math.abs(event.clientX - lastPointer.current.x) > .25)
-          angle.set(Math.max(-.78, Math.min(.78, velocity * .48)) / weight);
+    onPointerLeave={() => {
+      hovering.current = false;
+      swing.current?.stop();
+      if (quiet || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        angle.set(0);
+        settling.current = false;
+        return;
       }
-      lastPointer.current = { x: event.clientX, time: now };
-    }}
-    onPointerLeave={() => { hovering.current = false; lastPointer.current = null; angle.set(0); }}>
+      const current = angle.get();
+      settling.current = true;
+      // Restart at zero velocity immediately, then settle through smaller arcs.
+      swing.current = animate(angle, [current, -current * .5, current * .18, 0], {
+        duration: 20, times: [0, .45, .78, 1], ease: 'easeInOut',
+        onComplete: () => { idleResumedAt.current = performance.now(); settling.current = false; },
+      });
+    }}>
     <path ref={strings} d={stringPath(0)} className="rg-logo-hanging-strings" />
     <g ref={moving} className="rg-logo-object-swing" style={{ "--logo-drop": `${drop}px` } as CSSProperties} transform={`translate(0 ${drop})`}>
       <image href={ART} width="1792" height="1008" clipPath={`url(#${id}-${object.id})`} />
@@ -93,7 +122,13 @@ function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; 
 export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }) {
   const frame = useRef<HTMLHeadingElement>(null);
   const id = useId().replace(/:/g, '');
-  const rhythms = SKETCH_REGIONS.map((_, i) => ({ duration: 80, delay: -i * 10 }));
+  // Uneven, repeatable offsets avoid synchronized redraws and rerender jumps.
+  const rhythms = [
+    { duration: 31, delay: -17 }, { duration: 43, delay: -29 },
+    { duration: 37, delay: -9 }, { duration: 47, delay: -38 },
+    { duration: 29, delay: -6 }, { duration: 41, delay: -22 },
+    { duration: 35, delay: -31 },
+  ];
   return (
     <h1 ref={frame} className="rg-board-logo-frame rg-z-logo" data-quiet-motion={quietMotion || undefined}
       onPointerMove={event => {
@@ -110,7 +145,7 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
         frame.current?.style.setProperty('--logo-color-x', '0px');
         frame.current?.style.setProperty('--logo-color-y', '0px');
       }}>
-      <svg className="rg-board-logo rg-logo-motion" viewBox="0 0 1792 1008" role="img" aria-label="ReZources">
+      <svg className="rg-board-logo rg-logo-motion" viewBox="0 0 1792 1008" role="img" aria-label="ReZources trademark">
         <defs>
           <mask id={`${id}-still`} maskUnits="userSpaceOnUse" x="0" y="0" width="1792" height="1008" style={{ maskType: 'luminance' }}>
             <rect width="1792" height="1008" fill="white" />
@@ -120,7 +155,7 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
             {OBJECTS.map(o => <path key={o.id} d={o.path} fill="black" />)}
             <path d={FIXED_DETAILS} fill="white" />
           </mask>
-          {SKETCH_REGIONS.map((r, i) => <clipPath key={i} id={`${id}-ink-${i}`}><rect {...r} className="rg-logo-ink-reveal" style={{ animationDuration: `${rhythms[i].duration}s`, animationDelay: `${rhythms[i].delay}s` }} /></clipPath>)}
+          {SKETCH_REGIONS.map((r, i) => <clipPath key={i} id={`${id}-ink-${i}`}><rect {...r} className="rg-logo-ink-reveal" style={{ animationDuration: `${rhythms[i].duration}s`, animationDelay: `${rhythms[i].delay}s`, transformOrigin: ['left center', 'right center', 'center', 'right center', 'left center', 'center', 'center bottom'][i] }} /></clipPath>)}
           {OBJECTS.map(o => <clipPath key={o.id} id={`${id}-${o.id}`}><path d={o.path} /></clipPath>)}
           <clipPath id={`${id}-blue-smear-bands`}>
             <path d="M540 290H760V304H540Z M530 330H740V348H530Z M520 375H700V390H520Z M330 618H530V636H330Z M320 657H510V674H320Z M310 700H460V715H310Z" />
@@ -175,6 +210,7 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
         {!quietMotion && <g clipPath={`url(#${id}-blue-z)`} className="rg-blue-z-pixels" aria-hidden="true">
           {Array.from({ length: 22 }, (_, i) => <rect key={i} x={330 + (i * 47) % 390} y={245 + (i * 61) % 490} width={24 + i % 3 * 12} height={8 + i % 2 * 8} fill={i % 3 === 0 ? 'var(--z-black)' : i % 2 ? 'var(--neon-cyan)' : 'var(--neon-blue)'} />)}
         </g>}
+        <text className="rg-logo-trademark" x="1700" y="416" aria-hidden="true">™</text>
       </svg>
     </h1>
   );
