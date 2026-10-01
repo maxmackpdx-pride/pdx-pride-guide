@@ -93,7 +93,8 @@ export default function HomeStage({ afterWelcome }: Props) {
                 />
               </div>
             </div>
-            <div className="home-front__welcome-copy">
+          </div>
+          <div className="home-front__welcome-copy">
               <p className="home-front__identity-line">
                 <span key={identityLine} className="home-front__identity-cycle" data-still={stillIdentity}>
                   <HandwritingText
@@ -107,7 +108,6 @@ export default function HomeStage({ afterWelcome }: Props) {
               <div className="home-front__hero-actions">
                 <HomeDiscover open={showDiscover} onOpenChange={setShowDiscover} />
               </div>
-            </div>
           </div>
         </div>
         {afterWelcome}

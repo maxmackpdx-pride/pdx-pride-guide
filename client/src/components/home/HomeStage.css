@@ -121,3 +121,28 @@ html.calm-mode .home-front__worlds-grid,:root[data-calm="true"] .home-front__wor
 .home-front__flight--globe { background:#000; }
 .home-front__metro-globe { position:absolute; inset:0; display:block; width:100%; height:100%; cursor:default; touch-action:pan-y; }
 .home-front__flight--globe .home-front__flight-credit { font-size:9px; opacity:.8; }
+
+/* Keep the front door in the space between the wordmark and counter bar. */
+.home-front__hero { flex-direction:column; }
+.home-front__brand-group { flex:1; min-height:0; justify-content:center; transform:none; }
+.home-front__welcome-copy { margin:0 0 clamp(18px,3svh,30px); }
+.home-front__hero-actions { margin-top:clamp(12px,2svh,20px); }
+
+/* A brief left-to-right glint, followed by a long quiet interval. */
+.home-front__mark-art { position:relative; }
+.home-front__mark-art::after {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(110deg,transparent 43%,rgba(255,255,255,.12) 47%,rgba(255,255,255,.8) 50%,rgba(255,255,255,.12) 53%,transparent 57%);
+  background-size:300% 100%; background-position:100% 0;
+  mask:url("/brand/family/zaylist-primary.svg") center / contain no-repeat;
+  -webkit-mask:url("/brand/family/zaylist-primary.svg") center / contain no-repeat;
+  opacity:0; animation:home-wordmark-shimmer 14s ease-in-out 3s infinite;
+}
+@keyframes home-wordmark-shimmer {
+  0% { background-position:100% 0; opacity:0; }
+  2% { opacity:1; }
+  16% { background-position:0% 0; opacity:1; }
+  18%,100% { background-position:0% 0; opacity:0; }
+}
+@media(prefers-reduced-motion:reduce) { .home-front__mark-art::after { animation:none; } }
+:is(html.calm-mode,:root[data-calm="true"]) .home-front__mark-art::after { animation:none; }
