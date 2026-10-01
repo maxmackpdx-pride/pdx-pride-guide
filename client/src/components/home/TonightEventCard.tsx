@@ -11,7 +11,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
   return <article className="tonight-card pdx-glass-card pdx-glass-rebind" style={{ "--c": dayAccentToken(event.day), "--dir-gm": 8 } as CSSProperties}>
     <div className="tonight-card__sheen pdx-glass-sheen--specular" aria-hidden="true" />
     <button className="tonight-card__open" type="button" onClick={() => onOpen(listing)} aria-label={`Open ${event.title}`}>
-      <div className="tonight-card__art"><img src={event.posterUrl} alt="" loading="lazy" /><span className="tonight-card__day">Tonight · {event.day}</span></div>
+      <div className="tonight-card__art"><img src={event.posterUrl} alt="" loading="lazy" /></div>
       <div className="tonight-card__body">
         <p className="tonight-card__time"><Clock3 size={15} aria-hidden="true" />{clock.format(event.startMs)} – {clock.format(event.endMs)}</p>
         <h3>{event.title}</h3>

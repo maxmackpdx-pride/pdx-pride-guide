@@ -1,6 +1,9 @@
 import { useSavedEvents } from "@/hooks/useSavedEvents";
 import { useAuth } from "@/context/AuthContext";
 import { useMemo, useState } from "react";
+import { useReducedMotion } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
+import { ResourceRail } from "@/components/resources/ResourceRail";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +19,8 @@ import AuthModal from "@/components/AuthModal";
 import "./TonightPanel.css";
 
 export default function TonightPanel() {
+  const { calmMode } = useTheme();
+  const reducedMotion = useReducedMotion();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const { showAuth, setShowAuth } = useEventRsvp();
   const { user } = useAuth();
@@ -61,15 +66,15 @@ export default function TonightPanel() {
         </header>
 
         {tonight.length ? (
-          <div className="home-tonight__rail" role="list" aria-label="Events happening tonight">
+          <ResourceRail id="home-tonight-rail" title="Events happening tonight" color="var(--room-eventz)" count={tonight.length} quiet={Boolean(calmMode || reducedMotion)} room="Eventz" itemName="event">
             {tonight.map((event) => {
               const listing = listingById.get(event.id);
               if (!listing) return null;
-              return <div role="listitem" className="home-tonight__item" key={event.scheduleKey}>
+              return <div className="home-tonight__item" dir="ltr" key={event.scheduleKey}>
                 <TonightEventCard event={event} listing={listing} rsvped={savedIds.has(event.id)} onToggleRsvp={id => user ? toggleSave(id) : setShowAuth(true)} onOpen={setSelectedEvent} />
               </div>;
             })}
-          </div>
+          </ResourceRail>
         ) : (
           <p className="home-tonight__empty">Nothing listed for tonight yet. Check EVENTZ for what&apos;s coming up.</p>
         )}

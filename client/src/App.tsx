@@ -232,7 +232,7 @@ function AppLayout() {
           </Suspense>
         </RouteBoundary>
       </main>
-      {!hideFooter && <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />}
+      {!hideFooter && <div className="site-pre-footer-edge" aria-hidden="true" />}
       {!hideFooter && <Footer />}
     </div>
   );

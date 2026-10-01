@@ -38,31 +38,46 @@
 .home-tonight__subhead p { margin: 0; color: var(--text-lo, #b7b7c0); font: 600 11px/1.4 var(--font-mono, monospace); letter-spacing: .07em; text-transform: uppercase; }
 .home-tonight__all { flex: none; display: inline-flex; align-items: center; gap: 3px; color: var(--neon-cyan, #00ffff); font: 800 13px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .08em; text-decoration: none; text-transform: uppercase; }
 .home-tonight__all:hover { color: #fff; }
-.home-tonight__rail {
-  display: flex; gap: 24px; overflow-x: auto; padding: 12px 4px 28px;
-  scroll-snap-type: x mandatory; overscroll-behavior-inline: contain; scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,.2) transparent; -webkit-overflow-scrolling: touch;
+/* Use the same draggable, centered rail and edge rules as ReZources. */
+.home-tonight .rg-resource-rail-section { min-width: 0; }
+.home-tonight .rg-rail-heading { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.home-tonight .rg-resource-rail {
+  overflow: hidden; padding: 16px 12px 24px; cursor: grab; touch-action: pan-y pinch-zoom;
+  --rail-fade-left: var(--z-black); --rail-fade-right: var(--z-black);
+  mask-image: linear-gradient(to right, var(--rail-fade-left), var(--z-black) 32px, var(--z-black) calc(100% - 32px), var(--rail-fade-right));
 }
-.home-tonight__item { flex: 0 0 clamp(280px, 29vw, 340px); display: flex; scroll-snap-align: start; }
+.home-tonight .rg-resource-rail[data-fade-left="true"] { --rail-fade-left: transparent; }
+.home-tonight .rg-resource-rail[data-fade-right="true"] { --rail-fade-right: transparent; }
+.home-tonight .rg-resource-rail:active { cursor: grabbing; }
+.home-tonight .rg-resource-rail:focus-visible { outline: 2px solid var(--rail-accent); outline-offset: 3px; }
+.home-tonight .rg-rail-track { display: flex; gap: 36px; touch-action: pan-y pinch-zoom; }
+.home-tonight__item { flex: 0 0 min(440px, calc((100% - 36px) / 2)); min-width: 0; display: flex; }
+.home-tonight .rg-rail-track img { user-select: none; -webkit-user-drag: none; }
+.home-tonight .rg-rail-progress { height: 3px; width: min(240px, 60%); margin: 12px auto 0; background: var(--border-default); border-radius: 3px; overflow: hidden; }
+.home-tonight .rg-rail-progress > div { height: 100%; background: var(--rail-accent); transform-origin: right; }
+@media (min-width: 1100px) {
+  .home-tonight .rg-resource-rail-section { width: calc(100vw - 48px); margin-inline: calc((100% - (100vw - 48px)) / 2); }
+  .home-tonight__item { flex-basis: max(300px, calc((100% - 90px) / 3.5)); }
+}
+@media (max-width: 719px) {
+  .home-tonight .rg-rail-track { gap: 27px; }
+  .home-tonight__item { flex-basis: 94%; }
+}
 .home-tonight__empty { margin: 0; padding: 18px 0; color: var(--text-lo, #b7b7c0); font: 500 14px/1.5 var(--font-body, sans-serif); }
 @media (max-width: 620px) {
   .home-tonight { padding: 28px 0 40px; }
   .home-tonight__head { margin-bottom: 20px; }
   .home-tonight__head h2 { font-size: clamp(38px, 10vw, 54px); }
   .home-tonight__subhead { margin-top: 14px; }
-  .home-tonight__rail { gap: 12px; margin-right: calc(-1 * var(--zl-gutter, 16px)); padding-right: var(--zl-gutter, 16px); }
-  .home-tonight__item { flex-basis: min(320px, 85vw); }
 }
-@media (prefers-reduced-motion: reduce) { .home-tonight__rail { scroll-behavior: auto; } }
 
 /* Resource-inspired glass objects with event-specific artwork and metadata. */
 .home-tonight .tonight-card { display: flex; flex-direction: column; width: 100%; isolation: isolate; border: 1.5px solid var(--c); border-radius: var(--glass-card-radius, 14px); overflow: hidden; }
 .tonight-card__sheen { opacity: .35; position: absolute; inset: 0; pointer-events: none; z-index: 1; }
 .tonight-card button { font: inherit; cursor: pointer; }
 .tonight-card__open { display: flex; flex-direction: column; flex: 1; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
-.tonight-card__art { position: relative; width: 100%; background: var(--ink-900); overflow: hidden; }
-.tonight-card__art img { display: block; width: 100%; height: auto; aspect-ratio: auto 4 / 5; }
-.tonight-card__day { position: absolute; left: 16px; bottom: 12px; padding: 6px 9px; background: rgba(0,0,0,.9); border: 1px solid var(--c); border-radius: 6px; color: var(--text-hi); font: 700 11px/1.3 var(--font-mono, monospace); text-transform: uppercase; }
+.tonight-card__art { position: relative; width: 100%; overflow: hidden; }
+.tonight-card__art img { display: block; width: 100%; height: auto; aspect-ratio: auto 4 / 5; mask-image: linear-gradient(to bottom, var(--z-black) 68%, transparent 100%); }
 .tonight-card__body { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 16px; flex: 1; width: 100%; padding: 22px; box-sizing: border-box; }
 .tonight-card__body p { margin: 0; }
 .tonight-card__time { display: flex; align-items: center; gap: 8px; color: var(--text-hi); font: 600 12px/1.5 var(--font-mono, monospace); }

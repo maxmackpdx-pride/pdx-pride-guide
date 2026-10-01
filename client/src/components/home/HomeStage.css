@@ -123,9 +123,9 @@ html.calm-mode .home-front__worlds-grid,:root[data-calm="true"] .home-front__wor
 .home-front__flight--globe .home-front__flight-credit { font-size:9px; opacity:.8; }
 
 /* Keep the front door in the space between the wordmark and counter bar. */
-.home-front__hero { flex-direction:column; }
-.home-front__brand-group { flex:1; min-height:0; justify-content:center; transform:none; }
-.home-front__welcome-copy { margin:0 0 clamp(18px,3svh,30px); }
+.home-front__hero { flex-direction:column; bottom:calc(var(--home-foreground-bottom,196px) - 12px); }
+.home-front__brand-group { flex:none; min-height:0; padding-top:clamp(16px,8svh,80px); justify-content:center; transform:none; }
+.home-front__welcome-copy { flex:1; min-height:0; margin:0; display:flex; flex-direction:column; justify-content:center; }
 .home-front__hero-actions { margin-top:clamp(12px,2svh,20px); }
 
 /* A brief left-to-right glint, followed by a long quiet interval. */
