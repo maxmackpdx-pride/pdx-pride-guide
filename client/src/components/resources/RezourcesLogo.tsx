@@ -28,6 +28,9 @@ const CROSS = 'M1226 458H1273V483H1298V531H1273V556H1226V531H1199V483H1226Z';
 const FIXED_DETAILS = CROSS + ' M384 418H407V449H384Z M461 403H485V438H461Z M895 219H925V473H895Z M875 463H943V516H875Z M815 273H1008V301H815Z';
 const ART = '/brand/family/rezources.svg';
 const DISCO_ART = '/brand/family/rezources-disco-ball.png';
+const LATE_RENT_ART = '/brand/family/rezources-late-rent.png';
+const ROOSTER_ROCK_ART = '/brand/family/rezources-rooster-rock.png';
+const EVICTION_ART = '/brand/family/rezources-eviction.png';
 
 function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[number]; id: string; quiet: boolean; beePass: number }) {
   const weight = object.id.startsWith('scales-') ? 1.3 : object.id === 'rent' ? .7 : 1;
@@ -39,7 +42,7 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
   const strings = useRef<SVGPathElement>(null);
   const drop = object.id === 'rent' ? 8 : 10;
   const anchors = object.id === 'rent'
-    ? [[397, 451], [476, 439]]
+    ? [[410, 451], [489, 439]]
     : [object.pivot.split(' ').map(Number.parseFloat)];
   const stringPath = (dx: number) => anchors.map(([x, y]) => `M${x} ${y} L${x + dx} ${y + drop}`).join(' ');
   useEffect(() => {
@@ -132,9 +135,11 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
         onComplete: () => { idleResumedAt.current = performance.now(); settling.current = false; },
       });
     }}>
-    <path ref={strings} d={stringPath(0)} className="rg-logo-hanging-strings" />
+    {object.id !== 'disco-ball' && <path ref={strings} d={stringPath(0)} className="rg-logo-hanging-strings" />}
     <g ref={moving} className="rg-logo-object-swing" style={{ "--logo-drop": `${drop}px` } as CSSProperties} transform={`translate(0 ${drop})`}>
-      {object.id === 'disco-ball'
+      {object.id === 'rent'
+        ? <image href={LATE_RENT_ART} x="390" y="410" width="190" height="138" />
+        : object.id === 'disco-ball'
         ? <image href={DISCO_ART} x="1498" y="579" width="286" height="291" clipPath={`url(#${id}-${object.id})`} />
         : <image href={ART} width="1792" height="1008" clipPath={`url(#${id}-${object.id})`} />}
     </g>
@@ -221,6 +226,20 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
           </linearGradient>
           <clipPath id={`${id}-z-shape`}><path d={Z_SHAPE} /></clipPath>
         </defs>
+        <g className="rg-logo-blueprint" aria-hidden="true">
+          <path pathLength="1" d="M250 193H721 M250 184V202 M721 184V202 M270 193L281 187 M270 193L281 199 M701 187L712 193L701 199" />
+          <path pathLength="1" d="M770 246H1067 M770 235V258 M1067 235V258 M800 246L811 239 M800 246L811 253 M1026 239L1037 246L1026 253" />
+          <path pathLength="1" d="M1285 744H1673 M1285 733V755 M1673 733V755 M1308 744L1319 738 M1308 744L1319 750 M1640 738L1651 744L1640 750" />
+          <path pathLength="1" d="M1730 314V695 M1720 314H1740 M1720 695H1740 M1730 340L1724 351 M1730 340L1736 351 M1724 658L1730 669L1736 658" />
+          <path pathLength="1" d="M395 835H1145 M395 825V845 M1145 825V845 M618 827V843 M857 827V843 M1052 827V843" />
+        </g>
+        <g className="rg-logo-underlay" aria-hidden="true">
+          <path d={OBJECTS[0].path} fill="var(--neon-orange)" opacity=".82" />
+          <path d="M805 509Q898 519 1000 505L1037 511Q918 531 800 521Z" fill="color-mix(in srgb, var(--neon-orange) 76%, var(--z-black))" stroke="var(--neon-yellow)" strokeWidth="3" />
+          <path d="M819 511Q923 526 1021 511" fill="none" stroke="var(--neon-yellow)" strokeWidth="2" opacity=".62" />
+          <path d="M1639 412C1634 466 1638 525 1635 590" fill="none" stroke="var(--text-heading)" strokeWidth="2.6" opacity=".7" />
+          <image href={ROOSTER_ROCK_ART} x="1300" y="270" width="300" height="220" transform="rotate(-11 1450 380)" />
+        </g>
         <image href={ART} width="1792" height="1008" mask={`url(#${id}-still)`} />
         <g className="rg-logo-surface">
         <image href={ART} width="1792" height="1008" mask={`url(#${id}-moving-letters)`} />
@@ -232,7 +251,7 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
           <rect className="rg-logo-letter-shimmer" x="-260" y="395" width="240" height="225" fill={`url(#${id}-shimmer)`} />
         </g>
         </g>
-        {OBJECTS.map(o => <HangingObject key={o.id} object={o} id={id} quiet={quietMotion} beePass={beePass} />)}
+        {OBJECTS.filter(o => o.id !== 'rent').map(o => <HangingObject key={o.id} object={o} id={id} quiet={quietMotion} beePass={beePass} />)}
         {!quietMotion && beePass > 0 && <g key={beePass} className="rg-logo-bee-flight" aria-hidden="true">
           <g className="rg-logo-bee">
             <ellipse cx="-5" cy="-8" rx="8" ry="5" fill="var(--text-heading)" opacity=".72" />
@@ -254,6 +273,8 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
         {!quietMotion && <g clipPath={`url(#${id}-blue-z)`} className="rg-blue-z-pixels" aria-hidden="true">
           {Array.from({ length: 22 }, (_, i) => <rect key={i} x={330 + (i * 47) % 390} y={245 + (i * 61) % 490} width={24 + i % 3 * 12} height={8 + i % 2 * 8} fill={i % 3 === 0 ? 'var(--z-black)' : i % 2 ? 'var(--neon-cyan)' : 'var(--neon-blue)'} />)}
         </g>}
+        {OBJECTS.filter(o => o.id === 'rent').map(o => <HangingObject key={o.id} object={o} id={id} quiet={quietMotion} beePass={beePass} />)}
+        <image href={EVICTION_ART} x="700" y="590" width="190" height="169" aria-hidden="true" />
         <text className="rg-logo-trademark" x="1700" y="416" aria-hidden="true">™</text>
       </svg>
     </h1>

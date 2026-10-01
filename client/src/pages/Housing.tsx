@@ -50,7 +50,7 @@ import { parseHousingTagFilter } from "@shared/housingTags";
 import { HousingCard, type HousingCardHandlers } from "@/components/housing/HousingCards";
 import { GlowEffect } from "@/components/ui/glow-effect";
 import { HousingTagFilter } from "@/components/housing/HousingTagFilter";
-import { Btn, CloseSeam, LiveDot, Mono, SectionTitle } from "@/components/housing/HousingPrimitives";
+import { Btn, CloseSeam, Mono, SectionTitle } from "@/components/housing/HousingPrimitives";
 import "./Housing.css";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
@@ -330,10 +330,6 @@ export default function Housing() {
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />
 
-      <div className="hz-run">
-        <LiveDot />
-        <Mono accent>THE HAÜZ · Housing board</Mono>
-      </div>
       <div className="hz-pad"><div className="hz-wrap"><RoomPlate room="hauz" /></div></div>
 
       <DiscoveryFlow room="The Haüz" accent="var(--room-hauz)" title="What are you here to do?" intro="Find a place or the people to share one with." initiallyOpen={Boolean(window.location.search) || Boolean(selectedPostId)} initialChoiceId={({ OFFERING: 'home', LOOKING: 'all', FORMING: 'household', MANAGED: 'all', ALL: 'all', SAVED: 'all' } as Record<HousingFilter, string>)[filter]} choices={[

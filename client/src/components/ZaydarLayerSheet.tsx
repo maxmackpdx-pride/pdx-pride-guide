@@ -10,6 +10,17 @@ export type ZaydarLayer = {
   onToggle?: () => void; panel: ReactNode; viewMore: { label: string; href: string }[];
 };
 
+const LAYER_LOGOS: Record<ZaydarLayerId, string> = {
+  events: "/brand/family/eventz.png",
+  places: "/brand/family/our-placez.svg",
+  rezources: "/brand/family/rezources.svg",
+  mizzed: "/brand/family/mizzed-connection.svg",
+  gigz: "/brand/family/gigz.svg",
+  giftz: "/brand/family/giftz.svg",
+  sellz: "/brand/family/sellz.svg",
+  houz: "/brand/family/the-hauz.svg",
+};
+
 export default function ZaydarLayerSheet({ layers, active, onActiveChange: setActive }: { layers: ZaydarLayer[]; active: ZaydarLayerId | null; onActiveChange: (id: ZaydarLayerId | null) => void }) {
   const lastActive = useRef<ZaydarLayerId>("events");
   const launcher = useRef<HTMLButtonElement>(null);
@@ -69,7 +80,8 @@ export default function ZaydarLayerSheet({ layers, active, onActiveChange: setAc
             style={{ "--layer-color": layer.color } as CSSProperties}
             aria-pressed={active === layer.id} aria-controls={`${panelId}-${layer.id}`} onClick={() => setActive(layer.id)}>
             <span className="zaydar-layer-section__dot" aria-hidden="true" />
-            <span>{layer.label}</span><ChevronRight size={14} aria-hidden="true" />
+            <img className="zaydar-layer-section__logo" src={LAYER_LOGOS[layer.id]} alt="" aria-hidden="true" />
+            <span className="sr-only">{layer.label}</span><ChevronRight size={14} aria-hidden="true" />
           </button>)}
         </div>
         <div className="zaydar-layer-sheet__content">
@@ -78,6 +90,7 @@ export default function ZaydarLayerSheet({ layers, active, onActiveChange: setAc
             id={`${panelId}-${layer.id}`} className="zaydar-layer-sheet__body" hidden={active !== layer.id}
             aria-label={`${layer.label} options`} onScroll={event => { positions.current.set(layer.id, event.currentTarget.scrollTop); }}>
             <div className="zaydar-layer-sheet__panel">
+              <div className="zaydar-layer-sheet__brand" aria-hidden="true"><small>In this view</small><img src={LAYER_LOGOS[layer.id]} alt="" /></div>
               {layer.onToggle && <label className="zaydar-layer-visibility">
                 <input type="checkbox" checked={layer.enabled} onChange={layer.onToggle} />Show {layer.label} pins on map
               </label>}

@@ -39,7 +39,7 @@ export default function BoardAtmosphere({ room, side }: { room: Room; side: 'lef
       <path d="M-80 395 C180 205 310 260 525 385 S845 595 1080 345" />
       <path d="M-80 425 C180 235 310 290 525 415 S845 625 1080 375" />
     </svg>
-    <svg className="board-atmosphere__sketch" viewBox="0 0 400 400" fill="none" role="presentation">
+    {room !== 'giftz' && <svg className="board-atmosphere__sketch" viewBox="0 0 400 400" fill="none" role="presentation">
       <g stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d={sketches[room][0]} />
         <path d={sketches[room][1]} strokeWidth="1.2" opacity=".65" />
@@ -49,6 +49,6 @@ export default function BoardAtmosphere({ room, side }: { room: Room; side: 'lef
         <path d="M30 40 H370 M30 360 H370 M40 30 V370 M360 30 V370" />
         <path d="M30 40 l13 -10 M30 40 l13 10 M370 360 l-13 -10 M370 360 l-13 10" />
       </g>
-    </svg>
+    </svg>}
   </div>;
 }

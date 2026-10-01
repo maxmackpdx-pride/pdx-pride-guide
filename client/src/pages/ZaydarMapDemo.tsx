@@ -1,6 +1,5 @@
 import ResourceMapPanel from '@/components/ResourceMapPanel';
 import { RESOURCE_MAP_ENTRIES, resourceMapHref, resourceMapKey, type ResourceMapEntry } from '@/lib/resourceMap';
-import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import {eventNight} from '../../public/zaydar-map/event-night.js';
 import { DetailRoomLinkContext, type DetailRoomLinkValue } from "@/components/DetailRoomLink";
 import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
@@ -650,10 +649,6 @@ export default function ZaydarMapDemo() {
   );
   const eventPanel = <section className="zaydar-layer-panel" aria-labelledby="map-eventz-title">
     <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-eventz-title">Eventz</h2></div>
-    <DiscoveryFlow room="Eventz" accent="var(--active-layer-color)" initiallyOpen={timeFilter !== 'default' || Boolean(eventTag)} choices={[
-      {id:'upcoming',label:'Find an event',onChoose:()=>setTimeFilter('default')},
-      {id:'tonight',label:'Go out tonight',onChoose:()=>setTimeFilter('tonight')},
-    ]}>
     <div className="zaydar-layer-rail" role="group" aria-label="Event filters">
       <button type="button" aria-pressed={timeFilter === "tonight"} onClick={() => setTimeFilter(timeFilter === "tonight" ? "default" : "tonight")}>Tonight</button>
       <button type="button" aria-pressed={timeFilter === "soon"} onClick={() => setTimeFilter(timeFilter === "soon" ? "default" : "soon")}>Soon</button>
@@ -676,7 +671,6 @@ export default function ZaydarMapDemo() {
       {!visibleEvents.length && <p className="zaydar-layer-empty" role="status">No events match these filters. <button type="button" onClick={() => { setTimeFilter("default"); setEventTag(null); }}>Show upcoming events</button></p>}
     </div>}
     <details className="zaydar-layer-rsvps"><summary>Your RSVPs</summary><ZaydarUpcomingRsvps events={events} loading={eventsLoading} onSignIn={() => setShowAuth(true)} onOpen={(event,target) => openMark({key:`e-${event.id}-${event.dateStart}`,kind:"event",lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)} /></details>
-    </DiscoveryFlow>
   </section>;
   const openComposer=(world:MapWorld)=>{
     if(!user){setShowAuth(true);return;}
@@ -686,17 +680,12 @@ export default function ZaydarMapDemo() {
     const isMine=params.get(`${world}.view`)==="mine";
     const state={places:[placesLoading,placesError,retryPlaces],mizzed:[mizzedLoading,mizzedError,retryMizzed],gigz:[gigsLoading,gigsError,retryGigs],giftz:[giftsLoading,giftsError,retryGifts],sellz:[sellsLoading,sellsError,retrySells]}[world];
     const rows=world==="places"?mapPlaces as unknown as WorldRow[]:filteredWorlds[world];
-    return [world,<MapWorldPanel key={world} world={world} rows={rows} allRows={locatedWorlds[world]} bounds={mapBounds} params={params} setParam={(key,value)=>updateParams(p=>{if(value)p.set(key,value);else p.delete(key);})} onClearFilters={()=>updateParams(p=>{[...p.keys()].filter(key=>key.startsWith(world+".")).forEach(key=>p.delete(key));})} onCreate={()=>openComposer(world)} selectedId={mapRecordId(params.get(WORLD_DETAIL_KEYS[world]))} loading={isMine?mineWorlds[world]?.isLoading:Boolean(state[0])} error={isMine?mineWorlds[world]?.isError:Boolean(state[1])} retry={()=>{if(isMine)void mineWorlds[world]?.refetch();else void (state[2] as ()=>unknown)();}} onOpen={(row,target)=>world==="places"?openMark(placeMarks([row as Place])[0]||{key:`p-${row.id}`,kind:"place",lat:NaN,lng:NaN,item:row as Place},target):openBoardRow(row,target)} placeTypes={world==="places"?placeTypes:undefined} onPlaceTypeSurvey={world==="places"?type=>updateParams(p=>p.set("placeTypes",(type==="all"?ZAYDAR_PLACE_TYPE_OPTIONS:[type]).join(","))):undefined}>
+    return [world,<MapWorldPanel key={world} world={world} rows={rows} allRows={locatedWorlds[world]} bounds={mapBounds} params={params} setParam={(key,value)=>updateParams(p=>{if(value)p.set(key,value);else p.delete(key);})} onClearFilters={()=>updateParams(p=>{[...p.keys()].filter(key=>key.startsWith(world+".")).forEach(key=>p.delete(key));})} onCreate={()=>openComposer(world)} selectedId={mapRecordId(params.get(WORLD_DETAIL_KEYS[world]))} loading={isMine?mineWorlds[world]?.isLoading:Boolean(state[0])} error={isMine?mineWorlds[world]?.isError:Boolean(state[1])} retry={()=>{if(isMine)void mineWorlds[world]?.refetch();else void (state[2] as ()=>unknown)();}} onOpen={(row,target)=>world==="places"?openMark(placeMarks([row as Place])[0]||{key:`p-${row.id}`,kind:"place",lat:NaN,lng:NaN,item:row as Place},target):openBoardRow(row,target)}>
       {world==="places" && <div className="zaydar-layer-rail" role="group" aria-label="Place categories">{ZAYDAR_PLACE_TYPE_OPTIONS.map(type=><button key={type} aria-pressed={placeTypes.includes(type)} onClick={()=>updateParams(p=>p.set("placeTypes",(placeTypes.includes(type)?placeTypes.filter(item=>item!==type):[...placeTypes,type]).join(",")))}>{zaydarTypeLabel(type)}</button>)}</div>}
     </MapWorldPanel>];
   })) as Record<MapWorld,React.ReactNode>;
   const houzPanel = <section className="zaydar-layer-panel" aria-labelledby="map-houz-title">
     <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">Haüz</h2></div>
-    <DiscoveryFlow room="Haüz" accent="var(--active-layer-color)" initiallyOpen={Boolean(housingType || housingSaved || housingTags.length)} choices={[
-      {id:'home',label:'Find a home',onChoose:()=>setHousingType('OFFERING')},
-      {id:'household',label:'Find my people',onChoose:()=>setHousingType('FORMING')},
-      {id:'all',label:'Explore all',onChoose:()=>setHousingType(null)},
-    ]}>
     <BoardFollowButton board="houz" />
     {housingStats && <div className="zaydar-houz-stats" aria-label="HAÜZ board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
     <button type="button" className="zaydar-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to HAÜZ</button>
@@ -714,7 +703,6 @@ export default function ZaydarMapDemo() {
     {housingLoading ? <p role="status">Loading HAÜZ…</p> : housingError ? <p role="alert">HAÜZ could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
     <p className="zaydar-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
     <details className="zaydar-houz-about"><summary>How HAÜZ works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
-    </DiscoveryFlow>
   </section>;
   const layers: ZaydarLayer[] = [
     { id: "events", label: ROOMS.eventz.nav, color: ROOMS.eventz.accent, enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },

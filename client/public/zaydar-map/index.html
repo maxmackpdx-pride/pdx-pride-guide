@@ -22,7 +22,8 @@
   var detail=String(message||'Unknown 3D startup error');
   document.documentElement.dataset.mapError=detail;
   var status=document.getElementById('map-status');
-  if(status)status.textContent='3D error: '+detail;
+  // The host provides the retry/fallback notice; avoid stacking iframe diagnostics over it.
+  if(status)status.hidden=true;
   tell('fatal',{message:detail});
  }
  window.__zaydarStartup={phase:phase,fatal:fatal};phase('document');

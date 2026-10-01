@@ -381,6 +381,7 @@ html.calm-mode .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption,
 .site-header--glass .site-header-inner { position:relative; z-index:1; height:70px; min-height:70px; padding:6px 12px; gap:16px; }
 .site-header--glass .site-header-rainbow-seam { display:none; }
 .site-header--glass .znav-control { min-height:58px; border-radius:22px; color:#aeb7c4; position:relative; }
+.site-header--glass .znav-control > .z-button-optics { position:absolute; inset:1px; pointer-events:none; }
 .site-header--glass .znav-control .znav-icon-row { border:0; background:none; box-shadow:none; }
 .site-header--glass .znav-control:is(.is-active,.is-open),.site-header--glass .znav-hub { color:var(--c,#19e3ff); }
 .site-header--glass .znav-control:is(.is-active,.is-open),.site-header--glass .znav-hub,

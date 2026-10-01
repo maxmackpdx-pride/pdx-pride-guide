@@ -13,7 +13,7 @@ export default function DiscoveryFlow({ room, accent, choices, children, initial
   const id = useId();
   const roomKey = room.toLowerCase();
   const complement = roomKey.includes('event') || roomKey.includes('hauz') ? 'var(--neon-orange)'
-    : roomKey.includes('gift') ? 'var(--neon-violet)'
+    : roomKey.includes('gift') ? 'color-mix(in srgb, var(--neon-violet) 50%, var(--text-heading))'
     : roomKey.includes('gig') ? 'var(--neon-yellow)'
     : roomKey.includes('sell') ? 'var(--neon-magenta)'
     : roomKey.includes('mizz') ? 'var(--neon-green)'

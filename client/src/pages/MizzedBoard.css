@@ -1,4 +1,7 @@
 .mizzed-board{max-width:1480px;margin:auto;padding:0 clamp(20px,5vw,76px) 64px;color:#faf5fa;min-height:70vh}
+.mizzed-board__step{display:flex;align-items:center;gap:12px;margin:0 0 24px;color:var(--neon-green);font:700 16px/1.4 var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
+.mizzed-board__step span{display:grid;place-items:center;flex:none;width:36px;height:36px;border:1px solid currentColor;border-radius:50%;background:var(--z-black)}
+.mizzed-board__head .mizzed-board__step{color:var(--neon-green);margin:0 0 24px}
 .mizzed-board__head{display:flex;align-items:end;justify-content:space-between;gap:24px;padding:44px 0 25px}.mizzed-board__head h1{margin:12px 0;font-size:clamp(35px,4.5vw,56px);letter-spacing:-.045em;line-height:1.06}.mizzed-board__head h1 span{color:#ff43bd}.mizzed-board__head p{color:#bdb1bd;font-size:16px;margin:0 0 14px}.mizzed-board__head small{color:#e1b5d6;font-size:13px}
 .mizzed-board__post{display:inline-flex;align-items:center;gap:10px;white-space:nowrap;border:1px solid #b45d9d;border-radius:10px;padding:13px 15px;color:#fbd4ee;background:#311b30;font-weight:800}.mizzed-board__post:hover{background:#542748}
 .mizzed-board__actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px}
@@ -63,6 +66,7 @@ html.calm-mode .mizzed-board__item::after, :root[data-calm="true"] .mizzed-board
 .mizzed-board__filters button:focus-visible { outline: 2px solid var(--room-mizzed); outline-offset: 3px; }
 .mizzed-board__browse { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding: 30px 0 18px; border-top: 1px solid color-mix(in srgb, var(--text-heading) 14%, transparent); }
 .mizzed-board__browse h2 { margin: 10px 0 0; font-size: clamp(27px, 3vw, 38px); line-height: 1.1; letter-spacing: -.03em; font-weight: 850; }
+.mizzed-board__browse .mizzed-board__step { margin-bottom:16px; }
 .mizzed-board__browse h2 span { color: var(--room-mizzed); }
 .mizzed-board__browse > span { color: var(--text-body); font-size: 14px; white-space: nowrap; }
 .mizzed-board__filters button { font-size: 14px; }
