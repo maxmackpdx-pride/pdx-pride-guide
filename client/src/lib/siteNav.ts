@@ -58,23 +58,7 @@ export const PRIMARY_NAV: NavEntry[] = [
     ],
   },
   { type: "link", href: "/map", label: "Mapz", accent: "blue" },
-  {
-    type: "dropdown",
-    id: "outz",
-    label: "OutZide",
-    accent: "orange",
-    eyebrow: "Most Visited",
-    /*
-     * OUTZ has an index plus two named outdoor destinations, so the group
-     * provides a clear way to browse all currently published spots.
-     */
-    items: [
-      { href: "/outzide", label: "All OutZide", accent: "orange" },
-      { href: "/outzide/rooster-rock", label: "Rooster Rock", accent: "orange" },
-      { href: "/outzide/sauvie-island", label: "Sauvie Island", accent: "orange" },
-    ],
-  },
-  /* Guests reach every room from the top row; About lives in the footer. */
+  /* Board rooms stay grouped here; OutZide remains available through Mapz. */
   { type: "dropdown", id: "boards", label: "Boards", accent: "magenta", items: BOARDS_MENU },
   /* Nonprofits, hotlines, and LGBTQ+ groups (moved off Placez 2026-09-30). */
   { type: "link", href: "/rezources", label: "ReZources", accent: "green" },

@@ -1,3 +1,4 @@
+import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import BrowseStatus from "@/components/BrowseStatus";
 import RoomPlate from "@/components/board/RoomPlate";
 import PageRecovery from "@/components/PageRecovery";
@@ -28,8 +29,18 @@ export default function Outz() {
     imageAlt: "OutZide by Zaylist — Northwest mountain, river, rainbow trails and outdoor waypoints",
   });
   const frame = useRef<HTMLIFrameElement>(null);
-  const [attempt, setAttempt] = useState(0);
   const [mapReady, setMapReady] = useState(false);
+  const [discoveryView, setDiscoveryView] = useState<'map'|'list'|null>(sharedId || window.location.search ? 'map' : null);
+  useEffect(() => {
+    if (!discoveryView) return;
+    const timer = window.setTimeout(() => {
+      frame.current?.contentDocument?.querySelector<HTMLButtonElement>(`button[data-view="${discoveryView}"]`)?.click();
+      window.dispatchEvent(new Event('resize'));
+      frame.current?.contentWindow?.dispatchEvent(new Event('resize'));
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [discoveryView, mapReady]);
+  const [attempt, setAttempt] = useState(0);
   const [mapSlow, setMapSlow] = useState(false);
   const retryMap = () => { setMapReady(false); setMapSlow(false); setAttempt(value => value + 1); };
   useEffect(() => {
@@ -108,9 +119,14 @@ export default function Outz() {
   if(sharedId && !sharePending && (shareError || !sharedPlace))return <PageRecovery section="OutZide" title={shareError ? "This destination couldn’t load" : "Destination not found"} description="Browse Outzide to find a destination, or try this link again." href="/outzide" label="Browse Outzide" missing={!shareError} retry={shareError ? () => {void retryShare();} : undefined}/>;
   return <><div style={{ position: "relative" }}>
     <MapSwitch current="outz" /><RoomPlate room="outz" compact />
+    <DiscoveryFlow room="OutZide" accent="var(--room-outz)" keepMounted initiallyOpen={Boolean(sharedId || window.location.search)} intro="Find your next outdoor destination, then narrow by region and type." choices={[
+      {id:'list',label:'Find a destination',onChoose:()=>setDiscoveryView('list')},
+      {id:'map',label:'Explore the map',onChoose:()=>setDiscoveryView('map')},
+    ]}>
+    <div style={{position:'relative'}}>
     {!mapReady && <div style={{ position: "absolute", inset: "12px 12px auto", zIndex: 2, background: "var(--ink-900, #08090b)", borderRadius: 16 }}><BrowseStatus
       title={mapSlow ? "Outzide is taking longer than expected" : "Get out. Get dirty."}
       description={mapSlow ? "Try loading the field guide again." : "Getting destinations and the map ready."}
       onAction={retryMap} actionLabel="Reload Outzide" /></div>}
-    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=20260930-maps&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "") + (new URLSearchParams(window.location.search).get("wall") === "1" ? "&wall=1" : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} /></div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
+    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=20260930-maps&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "") + (new URLSearchParams(window.location.search).get("wall") === "1" ? "&wall=1" : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} /></div></DiscoveryFlow></div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
 }

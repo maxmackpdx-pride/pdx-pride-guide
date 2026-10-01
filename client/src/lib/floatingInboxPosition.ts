@@ -1,45 +1,63 @@
-const STORAGE_KEY = "pdx-floating-inbox-bottom";
-const MIN_BOTTOM_PX = 24;
-const DEFAULT_BOTTOM_PERCENT = 30;
-const FAB_SIZE_PX = 60;
-// Board 30: a dropped FAB snaps to the dock's 8px rhythm.
-const SNAP_PX = 8;
+const STORAGE_KEY = "pdx-floating-inbox-corner";
 
-export function defaultFloatingInboxBottom(viewportHeight = window.innerHeight): number {
-  return Math.round(viewportHeight * (DEFAULT_BOTTOM_PERCENT / 100));
-}
+export const FLOATING_INBOX_SIZE_PX = 72;
+export const FLOATING_INBOX_EDGE_PX = 32;
 
-export function maxFloatingInboxBottom(viewportHeight = window.innerHeight): number {
-  return Math.max(MIN_BOTTOM_PX, viewportHeight - FAB_SIZE_PX - 96);
-}
+export type FloatingInboxCorner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+export type FloatingInboxPosition = { x: number; y: number };
 
-export function clampFloatingInboxBottom(
-  value: number,
+export function positionForFloatingInboxCorner(
+  corner: FloatingInboxCorner,
+  viewportWidth = window.innerWidth,
   viewportHeight = window.innerHeight,
-): number {
-  return Math.min(maxFloatingInboxBottom(viewportHeight), Math.max(MIN_BOTTOM_PX, Math.round(value)));
+): FloatingInboxPosition {
+  return {
+    x: corner.endsWith("right")
+      ? Math.max(FLOATING_INBOX_EDGE_PX, viewportWidth - FLOATING_INBOX_SIZE_PX - FLOATING_INBOX_EDGE_PX)
+      : FLOATING_INBOX_EDGE_PX,
+    y: corner.startsWith("bottom")
+      ? Math.max(FLOATING_INBOX_EDGE_PX, viewportHeight - FLOATING_INBOX_SIZE_PX - FLOATING_INBOX_EDGE_PX)
+      : FLOATING_INBOX_EDGE_PX,
+  };
 }
 
-export function readFloatingInboxBottom(viewportHeight = window.innerHeight): number {
+export function clampFloatingInboxPosition(
+  position: FloatingInboxPosition,
+  viewportWidth = window.innerWidth,
+  viewportHeight = window.innerHeight,
+): FloatingInboxPosition {
+  return {
+    x: Math.max(FLOATING_INBOX_EDGE_PX, Math.min(position.x, viewportWidth - FLOATING_INBOX_SIZE_PX - FLOATING_INBOX_EDGE_PX)),
+    y: Math.max(FLOATING_INBOX_EDGE_PX, Math.min(position.y, viewportHeight - FLOATING_INBOX_SIZE_PX - FLOATING_INBOX_EDGE_PX)),
+  };
+}
+
+export function nearestFloatingInboxCorner(
+  position: FloatingInboxPosition,
+  viewportWidth = window.innerWidth,
+  viewportHeight = window.innerHeight,
+): FloatingInboxCorner {
+  const vertical = position.y + FLOATING_INBOX_SIZE_PX / 2 < viewportHeight / 2 ? "top" : "bottom";
+  const horizontal = position.x + FLOATING_INBOX_SIZE_PX / 2 < viewportWidth / 2 ? "left" : "right";
+  return `${vertical}-${horizontal}`;
+}
+
+export function readFloatingInboxCorner(): FloatingInboxCorner {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw == null) return clampFloatingInboxBottom(defaultFloatingInboxBottom(viewportHeight), viewportHeight);
-    const parsed = Number(raw);
-    if (!Number.isFinite(parsed)) {
-      return clampFloatingInboxBottom(defaultFloatingInboxBottom(viewportHeight), viewportHeight);
+    const value = localStorage.getItem(STORAGE_KEY);
+    if (value === "top-left" || value === "top-right" || value === "bottom-left" || value === "bottom-right") {
+      return value;
     }
-    return clampFloatingInboxBottom(parsed, viewportHeight);
   } catch {
-    return clampFloatingInboxBottom(defaultFloatingInboxBottom(viewportHeight), viewportHeight);
+    // Storage can be unavailable in private mode.
   }
+  return "bottom-right";
 }
 
-export function writeFloatingInboxBottom(value: number, viewportHeight = window.innerHeight): number {
-  const clamped = clampFloatingInboxBottom(Math.round(value / SNAP_PX) * SNAP_PX, viewportHeight);
+export function writeFloatingInboxCorner(corner: FloatingInboxCorner): void {
   try {
-    localStorage.setItem(STORAGE_KEY, String(clamped));
+    localStorage.setItem(STORAGE_KEY, corner);
   } catch {
     // Ignore quota / private-mode failures.
   }
-  return clamped;
 }

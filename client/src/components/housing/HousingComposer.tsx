@@ -108,12 +108,14 @@ type PmForm = {
   siteUrl: string;
   businessLicense: string;
   directoryBusinessId: string;
+  note: string;
 };
 const EMPTY_PM: PmForm = {
   company: "",
   siteUrl: "",
   businessLicense: "",
   directoryBusinessId: "",
+  note: "",
 };
 
 /** Board chrome accent for the type picker, which belongs to no single type. */
@@ -494,6 +496,7 @@ export function HousingComposer({
             const n = Number(raw);
             return Number.isFinite(n) && n > 0 ? n : null;
           })(),
+          note: pm.note.trim(),
         }),
       });
       const data = (await res.json().catch(() => null)) as {
@@ -508,8 +511,8 @@ export function HousingComposer({
       setPmSent(true);
       setNotice(
         data?.alreadyPending
-          ? "You already have an application pending. We will email you when it is reviewed."
-          : "Application sent. We will review it and email you.",
+          ? "Your application is already with Tucker. We will email you when it is reviewed."
+          : "Sent to Tucker's Owner Desk. We will email you when it is reviewed.",
       );
     } catch {
       setNotice("We could not send that right now. Your details are still here, so try again.");
@@ -718,6 +721,19 @@ export function HousingComposer({
                   </small>
                 </div>
               </div>
+              <div className="hz-field">
+                <label htmlFor="hz-manager-note"><Mono micro>Message for Tucker (optional)</Mono></label>
+                <textarea
+                  id="hz-manager-note"
+                  className="hz-input"
+                  style={{ width: "100%" }}
+                  maxLength={1000}
+                  rows={4}
+                  value={pm.note}
+                  placeholder="Tell Tucker about your properties or what you need help with."
+                  onChange={(e) => setPm((p) => ({ ...p, note: e.target.value }))}
+                />
+              </div>
               <div className="hz-flag hz-flag--note">
                 <span>
                   <b style={{ color: "var(--text-hi)" }}>Verification is free and required</b>
@@ -745,7 +761,7 @@ export function HousingComposer({
                 <span style={{ marginLeft: "auto" }} />
                 <Btn kind="solid" disabled={busy || pmSent} onClick={submitPmApplication}>
                   <HousingIcon name="verified" />
-                  {pmSent ? "Sent" : "Send the application"}
+                  {pmSent ? "Sent" : "Send to Tucker's Owner Desk"}
                 </Btn>
               </div>
             </div>
@@ -1165,8 +1181,8 @@ export function HousingComposer({
                 onChange={(e) => patch({ openToHaus: e.target.checked })}
               />
               <span>
-                <b style={{ color: "var(--text-hi)" }}>Open to forming or joining a HAÜZ</b>
-                <p>A chip on your post, not a commitment. You can change it whenever.</p>
+                <b style={{ color: "var(--text-hi)" }}>Open to forming a HAÜZ</b>
+                <p>Your room search will also appear with people forming a Haüz. You can change this whenever.</p>
               </span>
             </label>
           </>

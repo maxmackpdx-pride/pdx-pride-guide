@@ -5,8 +5,8 @@ import { motion, useSpring } from "framer-motion";
 
 // Adapted from 21st's Appica Carousel and Designali Scroll Progress patterns.
 // The rail owns navigation and clipping; resource cards keep their own design.
-export function ResourceRail({ id, title, color, count, quiet, children }: {
-  id: string; title: string; color: string; count: number; quiet: boolean; children: ReactNode;
+export function ResourceRail({ id, title, color, count, quiet, children, room = "ReZources", itemName = "resource" }: {
+  id: string; title: string; color: string; count: number; quiet: boolean; children: ReactNode; room?: string; itemName?: string;
 }) {
   const plugins = useMemo(() => [WheelGesturesPlugin()], []);
   const [viewport, api] = useEmblaCarousel({ direction: "rtl", align: "center", startIndex: Math.floor(count / 2), containScroll: "trimSnaps", duration: quiet ? 0 : 25 }, plugins);
@@ -27,14 +27,14 @@ export function ResourceRail({ id, title, color, count, quiet, children }: {
   }, [api, quiet, progress]);
   return <section className="rg-resource-rail-section" aria-labelledby={`${id}-title`} style={{ "--rail-accent": color } as CSSProperties}>
     <header className="rg-rail-heading">
-      <span className="rg-eyebrow">Explore ReZources</span>
+      <span className="rg-eyebrow">Explore {room}</span>
       <h2 id={`${id}-title`}>{title}</h2>
-      <p>{count} {count === 1 ? "resource" : "resources"}</p>
+      <p>{count} {itemName}{count === 1 ? "" : "s"}</p>
 
     </header>
     <div className="rg-resource-rail" id={id} ref={viewport} dir="rtl" tabIndex={0}
       data-fade-left={position.next} data-fade-right={position.previous}
-      aria-label={`${title} resources, drag or use arrow keys`} onKeyDown={event => {
+      aria-label={`${title} ${itemName}s, drag or use arrow keys`} onKeyDown={event => {
         if (event.target !== event.currentTarget) return;
         if (event.key === "ArrowLeft") { event.preventDefault(); api?.scrollNext(quiet); }
         if (event.key === "ArrowRight") { event.preventDefault(); api?.scrollPrev(quiet); }

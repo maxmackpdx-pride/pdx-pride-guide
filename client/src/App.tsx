@@ -201,9 +201,9 @@ function AppLayout() {
             <Route path="/mizzed/new" component={MizzedBoard} />
             <Route path="/mizzed" component={MizzedBoard} />
             <Route path="/directory/new">{() => <MapWorldRedirect world="places" />}</Route>
-            <Route path="/directory/:id/:slug?">{params => <MapWorldRedirect world="places" recordId={params.id} />}</Route>
+            <Route path="/directory/:id/:slug?" component={Directory} />
 
-            <Route path="/directory">{() => <MapWorldRedirect world="places" />}</Route>
+            <Route path="/directory" component={Directory} />
             <Route path="/nude-beaches">
               {() => {
                 const tab = new URLSearchParams(window.location.search).get("tab");

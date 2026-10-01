@@ -1,8 +1,9 @@
+import BoardAtmosphere from '@/components/board/BoardAtmosphere';
+import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import { createEventSearch } from "@shared/eventSearch";
 import RoomPlate from "@/components/board/RoomPlate";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
-import BoardShader from "@/components/board/BoardShader";
 import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
 import type React from "react";
@@ -22,6 +23,8 @@ import AffiliatePosterCard from "@/components/AffiliatePosterCard";
 import PosterAdCard from "@/components/ads/PosterAdCard";
 import type { AdServePayload } from "@/lib/adTypes";
 import EventsHero from "@/components/EventsHero";
+import BoardStatsBar from "@/components/BoardStatsBar";
+import RoomDoorways from "@/components/RoomDoorways";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import EventTypeTag from "../components/EventTypeTag";
@@ -576,9 +579,9 @@ export default function Events() {
       liveEvents.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
     );
     return [
-      { num: upcomingCount, label: "Upcoming events", color: "#19e3ff" },
-      { num: unclaimedIds.size, label: "Total unclaimed", color: "#ccff00" },
-      { num: liveEvents.filter(isDanceParty).length, label: "Total dance parties", color: "#ff8c00" },
+      { num: upcomingCount, label: "Upcoming events", color: "var(--room-eventz)" },
+      { num: unclaimedIds.size, label: "Ready to claim", color: "var(--neon-yellow)" },
+      { num: liveEvents.filter(isDanceParty).length, label: "Dance parties", color: "var(--neon-orange)" },
     ];
   }, [liveEvents, upcomingCount]);
 
@@ -604,11 +607,17 @@ export default function Events() {
   }
 
   return (
-    <div className="zine-page events-page board-page board-page--makeover board-shader-page" data-shader-room="eventz">
-      <BoardShader room="eventz" />
+    <div className="zine-page events-page board-page board-page--makeover">
+      <BoardAtmosphere room="eventz" side="right" />
       <div className="room-plate-shell"><RoomPlate room="eventz" /></div>
-      <EventsHero eventCount={upcomingCount} stats={heroStats} />
+      <EventsHero eventCount={upcomingCount} />
 
+      <DiscoveryFlow room="Eventz" accent="var(--room-eventz)" title="What brings you out?" intro="Find something happening, see the full board, plan your week, or share an event." initiallyOpen={Boolean(window.location.search || selectedEvent)} choices={[
+        {id:'events',label:'Find an event',description:'Browse and filter the board',scrollToResults:true,onChoose:()=>setActiveTab('board')},
+        {id:'all',label:'Show all events',description:'Reset filters and see everything',scrollToResults:true,onChoose:()=>{setActiveTab('board');setActiveDay('ALL');setActiveFilters([]);setSearchQuery('');setPastView(false);window.history.replaceState(window.history.state,'','/events');}},
+        {id:'schedule',label:'Plan my week',description:'Build a personal lineup',scrollToResults:true,onChoose:()=>setActiveTab('schedule')},
+        {id:'post',label:'Post an event',description:'Add your event to Zaylist',onChoose:()=>setLocation('/submit')},
+      ]}>
       <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} />
 
       {activeTab === "schedule" ? (
@@ -622,6 +631,7 @@ export default function Events() {
       ) : (
       <section className="events-board-feed board-active-feed diag">
         <div className="board-active-feed__inner">
+          <BoardStatsBar stats={heroStats} variant="band" showLive={false} />
           <ScrollReveal delay={40}>
             <div className="events-board-feed__sticky">
               <div className="board-active-feed__head">
@@ -918,6 +928,8 @@ export default function Events() {
       </section>
       )}
 
+      </DiscoveryFlow>
+      <RoomDoorways current="eventz" />
       {selectedEvent && (
         <EventModal
           event={selectedEvent}

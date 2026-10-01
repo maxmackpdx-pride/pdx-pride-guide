@@ -55,7 +55,7 @@ export default function BoardStatsBar({
             >
               <span
                 className="board-stats-band__num"
-                style={{ color: stat.color, textShadow: `0 0 22px ${stat.color}52` }}
+                style={{ color: stat.color, textShadow: `0 0 22px color-mix(in srgb, ${stat.color} 32%, transparent)` }}
               >
                 <StatNum num={stat.num} />
               </span>
@@ -72,7 +72,7 @@ export default function BoardStatsBar({
       <div className="board-stats-bar__inner">
         {stats.map(stat => (
           <div key={stat.label} className="board-stats-bar__item">
-            <span className="board-stats-bar__num" style={{ color: stat.color, textShadow: `0 0 22px ${stat.color}66` }}>
+            <span className="board-stats-bar__num" style={{ color: stat.color, textShadow: `0 0 22px color-mix(in srgb, ${stat.color} 40%, transparent)` }}>
               <StatNum num={stat.num} />
             </span>
             <span className="board-stats-bar__label">{stat.label}</span>

@@ -1715,11 +1715,6 @@
   line-height: var(--lh-display);
 }
 
-/* Header seam: thick under the running head, thin between sections. */
-.hz-seam--head {
-  height: var(--seam-h-thick, 2.7px);
-}
-
 .hz-note {
   display: flex;
   gap: 10px;

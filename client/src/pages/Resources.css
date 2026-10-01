@@ -1602,9 +1602,9 @@ html.calm-mode .rg-options button,
 }
 /* Full-width logo headers and a uniform closed-card footprint. */
 .resources-page .rg-cards { grid-auto-rows: 1fr; align-items: stretch; }
-.resources-page .rg-directory-card { height: 100%; }
-.resources-page .rg-directory-card .pdxPlace__body { padding: 0 0 var(--space-5); height: 100%; }
-.resources-page .rg-directory-card .pdxPlace__media {
+:is(.resources-page, .placez-card-surface) .rg-directory-card { height: 100%; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { padding: 0 0 var(--space-5); height: 100%; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media {
   height: 168px;
   flex: 0 0 168px;
   width: 100%;
@@ -1613,8 +1613,8 @@ html.calm-mode .rg-options button,
   overflow: hidden;
   background: linear-gradient(180deg, color-mix(in srgb, var(--c) 5%, transparent), transparent 100%);
 }
-.resources-page .rg-directory-card .pdxPlace__main { margin-inline: var(--space-5); }
-.resources-page .rg-directory-card .rg-directory-footer { margin-inline: var(--space-5); }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { margin-inline: var(--space-5); }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { margin-inline: var(--space-5); }
 
 /* Leave room for the floating close control above mobile card content. */
 .rg-resource-detail.rg-drawer-mobile .rg-detail-tags { padding-right: var(--space-8); }
@@ -1633,9 +1633,9 @@ html.calm-mode .rg-options button,
 }
 
 /* ReZources closed previews follow the Places family: identity, short preview, action. */
-.resources-page .rg-directory-card { --font-body: "Inter", system-ui, sans-serif; }
-.resources-page .rg-directory-card .pdxPlace__main { flex: 0 0 auto; }
-.resources-page .rg-directory-card .pdxPlace__name {
+:is(.resources-page, .placez-card-surface) .rg-directory-card { --font-body: "Inter", system-ui, sans-serif; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { flex: 0 0 auto; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name {
   order: -1;
   font-family: var(--font-display);
   display: -webkit-box;
@@ -1644,9 +1644,9 @@ html.calm-mode .rg-options button,
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
-.resources-page .rg-directory-card .pdxPlace__rows:empty { display: none; }
-.resources-page .rg-directory-card .pdxPlace__badges { gap: var(--space-2); }
-.resources-page .rg-directory-card .pdxPlace__cat .pdxBadge {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__rows:empty { display: none; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__badges { gap: var(--space-2); }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__cat .pdxBadge {
   min-height: 32px;
   padding: 6px 10px !important;
   border-radius: 8px !important;
@@ -1657,12 +1657,12 @@ html.calm-mode .rg-options button,
   letter-spacing: var(--tracking-chrome);
   white-space: normal;
 }
-.resources-page .rg-directory-card .pdxPlace__cat + .pdxPlace__cat .pdxBadge {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__cat + .pdxPlace__cat .pdxBadge {
   background: var(--panel-card) !important;
   border: 1px solid var(--c) !important;
   color: var(--text-hi) !important;
 }
-.resources-page .rg-directory-card .pdxPlace__desc {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__desc {
   font-family: var(--font-body);
   color: var(--res-secondary-text);
   -webkit-line-clamp: 2;
@@ -1691,12 +1691,12 @@ html.calm-mode .rg-options button,
 .rg-board-logo { width: min(100%, 800px); margin-block: 16px 24px; }
 
 /* Use the PlaceCard's existing glass shell once; keep its category bloom restrained. */
-.resources-page .rg-directory-card .pdxPlace__body { --dir-gm: 8; }
-.resources-page .rg-directory-card .pdxPlace__mediaGlow { opacity: .25; }
-.resources-page .rg-directory-card .pdxPlace__name { font-weight: 700; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { --dir-gm: 8; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__mediaGlow { opacity: .25; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name { font-weight: 700; }
 .rg-resource-detail .rg-detail-primary > p { letter-spacing: normal; }
-.resources-page .rg-directory-card .pdxPlace__media { padding: 32px 24px 20px; }
-.resources-page .rg-directory-card .pdxPlace__logo { max-width: 100%; max-height: 116px; width: 100%; height: 116px; object-fit: contain; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { padding: 32px 24px 20px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo { max-width: 100%; max-height: 116px; width: 100%; height: 116px; object-fit: contain; }
 .rg-resource-detail .rg-detail-logo .rg-logo { width: 100%; max-width: 360px; max-height: 144px; object-fit: contain; }
 .rg-resource-detail .rg-detail-logo { padding: 16px 24px; }
 
@@ -1765,8 +1765,8 @@ html.calm-mode .rg-options button,
 .resources-page .rg-options button { height: auto; }
 .resources-page .rg-reassurance { padding-top: 24px; gap: 16px; }
 .resources-page .rg-results-head h2 { margin-block: 12px 16px; }
-.resources-page .rg-directory-card .pdxPlace__main,
-.resources-page .rg-directory-card .rg-directory-footer { margin-inline: 24px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { margin-inline: 24px; }
 .rg-resource-detail .rg-detail-primary > p + p { margin-top: 12px; }
 .rg-resource-detail .rg-source-check { display: inline-flex; margin-top: 16px; gap: 8px; }
 .rg-resource-detail .rg-detail-logo { margin-block: 8px 24px; }
@@ -1798,7 +1798,7 @@ html.calm-mode .rg-options button,
 :is(html.calm-mode, :root[data-calm="true"]) .rg-count-change { animation: none; }
 
 /* Dark Arts and Rights tags keep readable white labels in both card states. */
-.resources-page .rg-directory-card .pdxPlace__cat:is([data-category-id="arts"], [data-category-id="legal"]) .pdxBadge,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__cat:is([data-category-id="arts"], [data-category-id="legal"]) .pdxBadge,
 .rg-detail-tags .rg-category-tag:is([data-category-id="arts"], [data-category-id="legal"]) .pdxBadge {
   color: var(--text-hi) !important;
 }
@@ -1850,7 +1850,7 @@ html.calm-mode .rg-options button,
 }
 
 /* Keep wide wordmarks clear of the card edges without shrinking compact marks. */
-.resources-page .rg-directory-card .pdxPlace__media {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media {
   padding-inline: clamp(32px, 8%, 48px);
 }
 .rg-resource-detail .rg-detail-logo {
@@ -1858,7 +1858,7 @@ html.calm-mode .rg-options button,
 }
 
 /* These source canvases have generous internal margins; size the visible mark optically. */
-.resources-page .rg-directory-card .pdxPlace__logo:is([src$="/oregon-state-bar-transparent.png"], [src$="/ogalla-transparent.png"]),
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo:is([src$="/oregon-state-bar-transparent.png"], [src$="/ogalla-transparent.png"]),
 .rg-resource-detail .rg-detail-logo .rg-logo:is([src$="/oregon-state-bar-transparent.png"], [src$="/ogalla-transparent.png"]) {
   transform: scale(1.65);
   transform-origin: center;
@@ -1943,11 +1943,11 @@ html.calm-mode .rg-options button,
 .rg-overlay.rg-drawer-mobile .rg-drawer-body { padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
 
 /* Optical corrections measured from transparent source-canvas bounds. */
-.resources-page .rg-directory-card .pdxPlace__logo[src="/resources-logos/pflag-portland.png"],
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo[src="/resources-logos/pflag-portland.png"],
 .rg-resource-detail .rg-detail-logo .rg-logo[src="/resources-logos/pflag-portland.png"] { transform: scale(1.10); transform-origin: center; }
-.resources-page .rg-directory-card .pdxPlace__logo[src="/resources-logos/oregon-pride-in-business.png"],
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo[src="/resources-logos/oregon-pride-in-business.png"],
 .rg-resource-detail .rg-detail-logo .rg-logo[src="/resources-logos/oregon-pride-in-business.png"] { transform: scale(1.19); transform-origin: center; }
-.resources-page .rg-directory-card .pdxPlace__logo[src="/resources-logos/portland-area-theatre-alliance-transparent.png"],
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo[src="/resources-logos/portland-area-theatre-alliance-transparent.png"],
 .rg-resource-detail .rg-detail-logo .rg-logo[src="/resources-logos/portland-area-theatre-alliance-transparent.png"] { transform: scale(1.11); transform-origin: center; }
 
 /* Responsive composition: deliberate desktop columns and a full-width mobile chooser. */
@@ -1965,7 +1965,7 @@ html.calm-mode .rg-options button,
  .resources-page .rg-layout { gap: 48px; padding-top: 32px; }
  .resources-page .rg-options button { min-height: 56px; padding: 12px; }
  .resources-page .rg-cards { gap: 28px; }
- .resources-page .rg-directory-card .pdxPlace__media { height: 176px; flex-basis: 176px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { height: 176px; flex-basis: 176px; }
 }
 @media (min-width: 601px) and (max-width: 999px) {
  .resources-page .rg-wrap { padding-inline: 32px; }
@@ -1990,10 +1990,10 @@ html.calm-mode .rg-options button,
  .resources-page .rg-options button[data-category-id] > i { width: 16px; height: 16px; flex-basis: 16px; }
  .resources-page .rg-reassurance { margin: 0; padding-top: 20px; }
  .resources-page .rg-results-head h2 { font-size: 34px; margin-block: 8px 12px; }
- .resources-page .rg-directory-card .pdxPlace__media { height: 156px; flex-basis: 156px; padding-block: 28px 16px; }
- .resources-page .rg-directory-card .pdxPlace__main, .resources-page .rg-directory-card .rg-directory-footer { margin-inline: 20px; }
- .resources-page .rg-directory-card .pdxPlace__name { font-size: 26px; }
- .resources-page .rg-directory-card .pdxPlace__body { gap: 16px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { height: 156px; flex-basis: 156px; padding-block: 28px 16px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main, :is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { margin-inline: 20px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name { font-size: 26px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { gap: 16px; }
  .resources-page .rg-selection-control label { padding-inline: 8px; }
 }
 @media (min-width: 1000px) {
@@ -2006,7 +2006,7 @@ html.calm-mode .rg-options button,
 .resources-page .rg-reassurance p, .resources-page .rg-multiselect-hint,
 .resources-page .rg-count, .rg-resource-detail .rg-source-check,
 .rg-resource-detail .rg-safety-source { font: 400 14px/1.55 var(--font-body); letter-spacing: normal; }
-.resources-page .rg-directory-card .pdxPlace__desc { font-size: 16px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__desc { font-size: 16px; }
 .rg-resource-detail .rg-detail-primary > p, .rg-resource-detail .rg-org-section > p,
 .rg-resource-detail .rg-detail-meta > p { font-size: 16px; line-height: 1.6; letter-spacing: normal; }
 .rg-resource-detail .rg-detail-primary > h2 { font-size: clamp(32px, 3.2vw, 44px); }
@@ -2037,12 +2037,12 @@ html.calm-mode .rg-options button,
 .resources-page .rg-intro-message h1 { line-height: 1.15; letter-spacing: .005em; }
 .resources-page .rg-step h2,
 .resources-page .rg-results-head h2 { line-height: 1.2; letter-spacing: .01em; }
-.resources-page .rg-directory-card .pdxPlace__name {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name {
   letter-spacing: .015em;
   -webkit-line-clamp: 3;
   line-clamp: 3;
 }
-.resources-page .rg-directory-card .pdxPlace__desc { letter-spacing: normal; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__desc { letter-spacing: normal; }
 .rg-resource-detail .rg-detail-primary > h2 { letter-spacing: .01em; margin-bottom: 24px; text-wrap: pretty; }
 .rg-resource-detail .rg-org-section h4,
 .rg-resource-detail .rg-org-locations h3,
@@ -2108,7 +2108,7 @@ html.calm-mode .rg-options button,
 .resources-page .rg-eyebrow, .rg-resource-detail .rg-eyebrow,
 .resources-page .rg-intro-top > .rg-eyebrow { font-size: 14px; line-height: 1.6; }
 .resources-page .rg-intro-message p,
-.resources-page .rg-directory-card .pdxPlace__desc,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__desc,
 .rg-resource-detail .rg-detail-primary > p,
 .rg-resource-detail .rg-org-section > p,
 .rg-resource-detail .rg-detail-meta > p { font-size: 18px; line-height: 1.7; }
@@ -2118,7 +2118,7 @@ html.calm-mode .rg-options button,
 .rg-safety-check p, .rg-talk-intro, .rg-talk-option p,
 .rg-support-open .rg-talk p { font-size: 16px; line-height: 1.65; }
 .resources-page .rg-step h2 { font-size: 31px; line-height: 1.25; }
-.resources-page .rg-directory-card .pdxPlace__name { font-size: 31px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name { font-size: 31px; }
 .rg-resource-detail .rg-org-section h4 { font-size: 25px; }
 .rg-resource-detail .rg-org-locations h3, .rg-resource-detail .rg-org-programs h3,
 .rg-talk-group h3 { font-size: 26px; line-height: 1.35; margin-bottom: 22px; }
@@ -2132,20 +2132,20 @@ html.calm-mode .rg-options button,
 .resources-page .rg-search-trigger { font-size: 20px; min-height: 56px; padding-block: 16px; }
 .resources-page .rg-share, .resources-page .pdxPlace__share { font-size: 16px; }
 .rg-resource-detail .rg-detail-tags .pdxBadge,
-.resources-page .rg-directory-card .pdxPlace__cat .pdxBadge { font-size: 16px; min-height: 36px; line-height: 1.4; padding: 8px 12px !important; }
-.resources-page .rg-directory-card .pdxPlace__body { gap: 20px; padding-bottom: 28px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__cat .pdxBadge { font-size: 16px; min-height: 36px; line-height: 1.4; padding: 8px 12px !important; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { gap: 20px; padding-bottom: 28px; }
 .rg-talk-options small, .rg-drawer .rg-food-finder-caption { font-size: 15px; line-height: 1.65; }
 @media (max-width: 600px) {
  .resources-page .rg-intro-top > .rg-eyebrow { font-size: 13px; }
  .resources-page .rg-intro-message p { font-size: 17px; }
- .resources-page .rg-step h2, .resources-page .rg-directory-card .pdxPlace__name { font-size: 29px; }
+ .resources-page .rg-step h2, :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name { font-size: 29px; }
  .rg-resource-detail .rg-org-section h4 { font-size: 23px; }
  .rg-safety-summary .rg-safety-heading h3 { font-size: 29px; }
  .resources-page .rg-options button { font-size: 16px; min-height: 72px; }
  .resources-page .rg-selection-control label { font-size: 15px; padding: 14px 8px; }
  .resources-page .rg-mode button { font-size: 16px; padding: 14px 10px; }
  .resources-page .rg-intro > .rg-search-trigger { font-size: 18px; }
- .resources-page .rg-directory-card .pdxPlace__body { padding-bottom: 24px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { padding-bottom: 24px; }
 }
 
 /* Intent switch and category filters share one responsive label scale. */
@@ -2204,11 +2204,11 @@ html.calm-mode .rg-options button,
 :is(html.calm-mode, :root[data-calm="true"]) .resources-page .rg-search-trigger::after { animation: none !important; transition: none; left: 30%; }
 
 /* Reduce closed-card hover movement by 80%, without changing layout dimensions. */
-.resources-page .rg-directory-card.pdxPlace--clickable:hover { transform: translateY(-1.2px) !important; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover { transform: translateY(-1.2px) !important; }
 @media (prefers-reduced-motion: reduce) {
- .resources-page .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; }
 }
-:is(html.calm-mode, :root[data-calm="true"]) .resources-page .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; }
+:is(html.calm-mode, :root[data-calm="true"]) :is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; }
 
 /* Balanced search and chooser composition across desktop and mobile. */
 .resources-page .rg-intro > .rg-search-trigger { margin-block: 96px 72px; }
@@ -2392,10 +2392,10 @@ html.calm-mode .rg-options button,
 .resources-page .rg-results-head p { margin: 0; font-size: 18px; line-height: 1.7; max-width: 62ch; }
 .resources-page .rg-results .rg-count { margin-block: 28px 24px; font-size: 16px; line-height: 1.6; }
 .resources-page .rg-cards { gap: 32px; }
-.resources-page .rg-directory-card .pdxPlace__main { gap: 16px; }
-.resources-page .rg-directory-card .pdxPlace__name { margin: 0; line-height: 1.3; }
-.resources-page .rg-directory-card .pdxPlace__desc { margin: 0; line-height: 1.7; }
-.resources-page .rg-directory-card .rg-directory-footer { padding-top: 8px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { gap: 16px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name { margin: 0; line-height: 1.3; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__desc { margin: 0; line-height: 1.7; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { padding-top: 8px; }
 .resources-page .rg-footer { padding-block: 40px 56px; gap: 32px; }
 .resources-page .rg-footer h2 { margin-top: 16px; font-size: 32px; line-height: 1.3; }
 .rg-resource-detail .rg-detail-primary > h2 { margin-block: 24px; line-height: 1.25; }
@@ -2591,11 +2591,11 @@ html.calm-mode .rg-options button,
 .resources-page .rg-safety-summary .rg-safety-emergency { grid-column: 1; grid-row: auto; width: min(100%, 280px); justify-self: center; }
 .resources-page .rg-safety-summary .rg-safety-expand { width: 100%; justify-content: center; padding-top: 24px; margin-top: 8px; gap: 12px; }
 .resources-page .rg-safety-summary .rg-safety-content > div[id] { width: 100%; text-align: left; }
-.resources-page .rg-directory-card .pdxPlace__main,
-.resources-page .rg-directory-card .rg-directory-footer { margin-inline: 28px; }
-.resources-page .rg-directory-card .pdxPlace__body { gap: 24px; padding-bottom: 28px; }
-.resources-page .rg-directory-card .pdxPlace__main { gap: 20px; }
-.resources-page .rg-directory-card .rg-directory-footer { padding-top: 4px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { margin-inline: 28px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { gap: 24px; padding-bottom: 28px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { gap: 20px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { padding-top: 4px; }
 .rg-overlay.rg-drawer-desktop .rg-drawer-body { padding: 64px 48px 48px; }
 .rg-resource-detail .rg-detail-tags { gap: 10px; margin-bottom: 24px; }
 .rg-resource-detail .rg-detail-meta { padding-top: 24px; }
@@ -2603,10 +2603,10 @@ html.calm-mode .rg-options button,
  .resources-page .rg-safety-summary .pdxPlace__body { padding: 28px 24px; }
  .resources-page .rg-safety-summary .rg-safety-content { gap: 20px; }
  .resources-page .rg-safety-summary .rg-safety-heading { flex-direction: column; }
- .resources-page .rg-directory-card .pdxPlace__main,
- .resources-page .rg-directory-card .rg-directory-footer { margin-inline: 24px; }
- .resources-page .rg-directory-card .pdxPlace__body { gap: 20px; padding-bottom: 24px; }
- .resources-page .rg-directory-card .pdxPlace__main { gap: 16px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { margin-inline: 24px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { gap: 20px; padding-bottom: 24px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { gap: 16px; }
  .rg-overlay.rg-drawer-mobile .rg-drawer-body { padding: 48px 24px calc(40px + env(safe-area-inset-bottom, 0px)); }
 }
 @media (max-height: 500px) and (min-width: 601px) {
@@ -2634,9 +2634,9 @@ html.calm-mode .rg-options button,
  backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));
  -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));
 }
-.resources-page .rg-directory-card .pdxPlace__media { border-radius: 23px 23px 0 0; }
-.resources-page .rg-directory-card .pdxPlace__mediaGlow { opacity: .2; }
-.resources-page .rg-directory-card .pdxPlace__logo {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { border-radius: 23px 23px 0 0; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__mediaGlow { opacity: .2; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo {
  max-width: 360px;
  object-position: center;
  margin-inline: auto;
@@ -2884,12 +2884,12 @@ html.calm-mode .rg-options button,
 }
 
 /* Add 20% vertical room to the measured closed-card footprints. */
-.resources-page .rg-directory-card { min-height: 629px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card { min-height: 629px; }
 @media (min-width: 601px) and (max-width: 999px) {
- .resources-page .rg-directory-card { min-height: 571px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card { min-height: 571px; }
 }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card { min-height: 630px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card { min-height: 630px; }
 }
 
 /* Scroll reveals frame the unchanged closed-card component. */
@@ -2897,26 +2897,26 @@ html.calm-mode .rg-options button,
 .resources-page .rg-card-reveal .rg-directory-card { animation: none; }
 
 /* 30% more space above closed-card logos; preserve the artwork's available height. */
-.resources-page .rg-directory-card .pdxPlace__media {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media {
  padding-top: 41.6px;
  height: 177.6px;
  flex-basis: 177.6px;
 }
 @media (min-width: 1000px) {
- .resources-page .rg-directory-card .pdxPlace__media { height: 185.6px; flex-basis: 185.6px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { height: 185.6px; flex-basis: 185.6px; }
 }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card .pdxPlace__media { padding-top: 36.4px; height: 164.4px; flex-basis: 164.4px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { padding-top: 36.4px; height: 164.4px; flex-basis: 164.4px; }
 }
 
 /* At least 10% more separation between closed-card content sections. */
-.resources-page .rg-directory-card .pdxPlace__body { gap: 27px; }
-.resources-page .rg-directory-card .pdxPlace__main { gap: 22px; }
-.resources-page .rg-directory-card .rg-directory-footer { padding-top: 5px; }
-.resources-page .rg-directory-card .pdxPlace__badges { gap: 9px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { gap: 27px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { gap: 22px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { padding-top: 5px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__badges { gap: 9px; }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card .pdxPlace__body { gap: 22px; }
- .resources-page .rg-directory-card .pdxPlace__main { gap: 18px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { gap: 22px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { gap: 18px; }
 }
 
 /* Search-like glass and filter-like edges, with the shared sliding selection intact. */
@@ -2951,31 +2951,31 @@ html.calm-mode .rg-options button,
 .resources-page .rg-mode button:focus-visible { outline: 2px solid var(--neon-yellow); outline-offset: -3px; }
 
 /* Keep the title, tags, and description together immediately above View details. */
-.resources-page .rg-directory-card .pdxPlace__media {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media {
  flex: 1 0 177.6px;
  height: auto;
  align-items: center;
  padding-block: 32px;
 }
-.resources-page .rg-directory-card .pdxPlace__main { flex: 0 0 auto; }
-.resources-page .rg-directory-card .rg-directory-footer { flex: 0 0 auto; margin-top: 0; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { flex: 0 0 auto; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { flex: 0 0 auto; margin-top: 0; }
 @media (min-width: 1000px) {
- .resources-page .rg-directory-card .pdxPlace__media { flex-basis: 185.6px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { flex-basis: 185.6px; }
 }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card .pdxPlace__media { flex-basis: 164.4px; padding-block: 28px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { flex-basis: 164.4px; padding-block: 28px; }
 }
-.resources-page .rg-directory-card .pdxPlace__media { padding-block: 41.6px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { padding-block: 41.6px; }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card .pdxPlace__media { padding-block: 36.4px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { padding-block: 36.4px; }
 }
 
 /* Give Share breathing room without crowding card edges. */
-.resources-page .rg-directory-card .pdxPlace__actions { top: 16px; right: 16px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__actions { top: 16px; right: 16px; }
 .resources-page .rg-share,
-.resources-page .rg-directory-card .pdxPlace__share { padding: 12px 20px; min-height: 44px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__share { padding: 12px 20px; min-height: 44px; }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card .pdxPlace__actions { top: 12px; right: 12px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__actions { top: 12px; right: 12px; }
 }
 
 /* Increase resource-card gutters by 13%. */
@@ -2985,31 +2985,31 @@ html.calm-mode .rg-options button,
 }
 
 /* Larger closed-card titles with an even content rhythm. */
-.resources-page .rg-directory-card .pdxPlace__name { font-size: 33px; line-height: 1.3; margin: 0; }
-.resources-page .rg-directory-card .pdxPlace__main { gap: 24px; }
-.resources-page .rg-directory-card .pdxPlace__desc { margin: 0; }
-.resources-page .rg-directory-card .rg-directory-footer { padding-top: 0; }
-.resources-page .rg-directory-card .pdxPlace__body { gap: 24px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name { font-size: 33px; line-height: 1.3; margin: 0; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { gap: 24px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__desc { margin: 0; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { padding-top: 0; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { gap: 24px; }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card .pdxPlace__name { font-size: 31px; }
- .resources-page .rg-directory-card .pdxPlace__main,
- .resources-page .rg-directory-card .pdxPlace__body { gap: 20px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name { font-size: 31px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { gap: 20px; }
 }
-.resources-page .rg-directory-card .pdxPlace__main,
-.resources-page .rg-directory-card .pdxPlace__body { gap: 27px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { gap: 27px; }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card .pdxPlace__main,
- .resources-page .rg-directory-card .pdxPlace__body { gap: 22px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { gap: 22px; }
 }
 
 /* Give compact organization marks more presence in the existing logo well. */
-.resources-page .rg-directory-card .pdxPlace__logo {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo {
  height: 156px;
  max-height: 156px;
  max-width: 100%;
 }
-.resources-page .rg-directory-card .pdxPlace__logo:is([src$="/oregon-state-bar-transparent.png"], [src$="/ogalla-transparent.png"]) { transform: scale(1.9); }
-.resources-page .rg-directory-card .pdxPlace__logo:is([src$="/basic-rights.png"], [src$="/intersect-nw.png"]) { height: 176px; max-height: 176px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo:is([src$="/oregon-state-bar-transparent.png"], [src$="/ogalla-transparent.png"]) { transform: scale(1.9); }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo:is([src$="/basic-rights.png"], [src$="/intersect-nw.png"]) { height: 176px; max-height: 176px; }
 
 /* Halve the lower card glow while preserving the top reflection and edge. */
 .resources-page :is(.rg-directory-card, .rg-safety-summary) > .pdxPlace__body {
@@ -3022,32 +3022,32 @@ html.calm-mode .rg-options button,
 .resources-page :is(.rg-directory-card, .rg-safety-summary) .pdx-glass-sheen--specular { opacity: .5; }
 
 /* Closed-card interior: 20% more side clearance, 10% more bottom padding. */
-.resources-page .rg-directory-card .pdxPlace__main,
-.resources-page .rg-directory-card .rg-directory-footer { margin-inline: 33.6px; }
-.resources-page .rg-directory-card .pdxPlace__media { padding-inline: clamp(38.4px, 9.6%, 57.6px); }
-.resources-page .rg-directory-card .pdxPlace__body { padding-bottom: 30.8px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { margin-inline: 33.6px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { padding-inline: clamp(38.4px, 9.6%, 57.6px); }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { padding-bottom: 30.8px; }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card .pdxPlace__main,
- .resources-page .rg-directory-card .rg-directory-footer { margin-inline: 28.8px; }
- .resources-page .rg-directory-card .pdxPlace__body { padding-bottom: 26.4px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { margin-inline: 28.8px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { padding-bottom: 26.4px; }
 }
 
-.resources-page .rg-directory-card .pdxPlace__logo[src$="/ohsu-transgender-health-program.svg"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo[src$="/ohsu-transgender-health-program.svg"] {
  transform: scale(1.4);
  transform-origin: center;
 }
 
-.resources-page .rg-directory-card .pdxPlace__logo[src$="/pride-northwest.png"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo[src$="/pride-northwest.png"] {
  transform: scale(1.3);
  transform-origin: center;
 }
 
-.resources-page .rg-directory-card .pdxPlace__logo[src$="/oregon-arts-commission.png"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo[src$="/oregon-arts-commission.png"] {
  transform: scale(1.3);
  transform-origin: center;
 }
 
-.resources-page .rg-directory-card .pdxPlace__logo[src$="/ori-gallery.png"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo[src$="/ori-gallery.png"] {
  transform: scale(1.3);
  transform-origin: center;
 }
@@ -3065,7 +3065,7 @@ html.calm-mode .rg-options button,
 }
 
 /* Clear card identities: intact names, natural wrapping, and aligned title space. */
-.resources-page .rg-directory-card .pdxPlace__name {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name {
  display: block;
  -webkit-line-clamp: unset;
  line-clamp: unset;
@@ -3082,11 +3082,11 @@ html.calm-mode .rg-options button,
 }
 
 /* Fixed-height previews: aligned larger titles, middle tags, anchored copy. */
-.resources-page .rg-directory-card { height: 629px; }
-.resources-page .rg-directory-card .pdxPlace__body { height: 100%; box-sizing: border-box; gap: 20px; }
-.resources-page .rg-directory-card .pdxPlace__media { flex: 0 0 185.6px; height: 185.6px; }
-.resources-page .rg-directory-card .pdxPlace__main { flex: 1 1 0; min-height: 0; gap: 12px; }
-.resources-page .rg-directory-card .pdxPlace__name {
+:is(.resources-page, .placez-card-surface) .rg-directory-card { height: 629px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { height: 100%; box-sizing: border-box; gap: 20px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { flex: 0 0 185.6px; height: 185.6px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { flex: 1 1 0; min-height: 0; gap: 12px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name {
  font-size: 57.75px;
  line-height: 1.12;
  flex: 0 0 2.24em;
@@ -3099,26 +3099,26 @@ html.calm-mode .rg-options button,
  overflow: hidden;
  overflow-wrap: anywhere;
 }
-.resources-page .rg-directory-card .pdxPlace__badges { flex: 1 1 auto; align-content: center; }
-.resources-page .rg-directory-card .pdxPlace__desc { flex: 0 0 auto; margin-top: auto; }
-.resources-page .rg-directory-card .rg-directory-footer { flex: 0 0 auto; margin-top: 0; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__badges { flex: 1 1 auto; align-content: center; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__desc { flex: 0 0 auto; margin-top: auto; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { flex: 0 0 auto; margin-top: 0; }
 @media (min-width: 601px) and (max-width: 999px) {
- .resources-page .rg-directory-card { height: 571px; }
- .resources-page .rg-directory-card .pdxPlace__body { gap: 16px; }
- .resources-page .rg-directory-card .pdxPlace__media { flex-basis: 177.6px; height: 177.6px; }
- .resources-page .rg-directory-card .pdxPlace__main { gap: 8px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card { height: 571px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__body { gap: 16px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { flex-basis: 177.6px; height: 177.6px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { gap: 8px; }
 }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card { height: 630px; }
- .resources-page .rg-directory-card .pdxPlace__media { flex-basis: 164.4px; height: 164.4px; }
- .resources-page .rg-directory-card .pdxPlace__name { font-size: 54.25px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card { height: 630px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { flex-basis: 164.4px; height: 164.4px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name { font-size: 54.25px; }
 }
 
 /* Single aligned title line and more generous horizontal breathing room. */
-.resources-page .rg-directory-card .pdxPlace__main,
-.resources-page .rg-directory-card .rg-directory-footer { margin-inline: 40.32px; }
-.resources-page .rg-directory-card .pdxPlace__media { padding-inline: clamp(46.08px, 11.52%, 69.12px); }
-.resources-page .rg-directory-card .pdxPlace__name {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { margin-inline: 40.32px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { padding-inline: clamp(46.08px, 11.52%, 69.12px); }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name {
  font-size: 53.75px;
  display: block;
  white-space: nowrap;
@@ -3130,9 +3130,9 @@ html.calm-mode .rg-options button,
  height: 1.12em;
 }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card .pdxPlace__main,
- .resources-page .rg-directory-card .rg-directory-footer { margin-inline: 34.56px; }
- .resources-page .rg-directory-card .pdxPlace__name { font-size: 50.25px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { margin-inline: 34.56px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name { font-size: 50.25px; }
 }
 
 /* Event-style disclosures keep resource details compact and easy to scan. */
@@ -3156,7 +3156,7 @@ html.calm-mode .rg-options button,
 @media (prefers-reduced-motion: reduce) { .rg-detail-disclosure > summary svg { transition: none; } }
 
 /* Original category-colored cybernetic linework, under the logo and reading layer. */
-.resources-page .rg-directory-card .rg-card-motif {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-card-motif {
  position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0;
  color: var(--c); pointer-events: none; opacity: .48;
  mask-image: linear-gradient(transparent 4%, black 24%, black 56%, transparent 83%);
@@ -3164,77 +3164,77 @@ html.calm-mode .rg-options button,
 .rg-card-motif .rg-motif-mesh { opacity: .3; }
 .rg-card-motif .rg-motif-nodes { opacity: .75; }
 .rg-card-motif .rg-motif-object { filter: drop-shadow(0 0 3px currentColor); }
-.resources-page .rg-directory-card .pdxPlace__media { z-index: 1; }
-.resources-page .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 250px; height: 250px; }
-.resources-page .rg-directory-card .pdxPlace__name {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { z-index: 1; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 250px; height: 250px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name {
  font-size: 30px; line-height: 1.2; height: auto; flex: 0 0 auto;
  white-space: normal; text-wrap: balance; overflow-wrap: normal; text-align: center;
 }
 @media (max-width: 999px) {
- .resources-page .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 230px; height: 230px; }
- .resources-page .rg-directory-card .pdxPlace__name { font-size: 28px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 230px; height: 230px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name { font-size: 28px; }
 }
 /* Reserve the share-button band above the artwork and wordmark. */
-.resources-page .rg-directory-card .pdxPlace__media,
-.resources-page .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media,
+:is(.resources-page, .placez-card-surface) .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media {
  flex-basis: 250px; height: 250px; padding-top: 64px; padding-bottom: 24px;
 }
-.resources-page .rg-directory-card .pdxPlace__media .pdxPlace__logo { max-height: 100%; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media .pdxPlace__logo { max-height: 100%; }
 @media (min-width: 601px) and (max-width: 999px) {
- .resources-page .rg-directory-card .pdxPlace__media,
- .resources-page .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 210px; height: 210px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media,
+ :is(.resources-page, .placez-card-surface) .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 210px; height: 210px; }
 }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card .pdxPlace__media,
- .resources-page .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 230px; height: 230px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media,
+ :is(.resources-page, .placez-card-surface) .rg-directory-card:not(:has(.pdxPlace__name)) .pdxPlace__media { flex-basis: 230px; height: 230px; }
 }
 
 /* Bottom-anchored reading block and larger details control. */
-.resources-page .rg-directory-card .pdxPlace__main { flex: 0 0 auto; margin-top: auto; gap: 16px; }
-.resources-page .rg-directory-card .pdxPlace__badges { flex: 0 0 auto; align-content: start; }
-.resources-page .rg-directory-card .pdxPlace__desc { margin-top: 0; }
-.resources-page .rg-directory-card .rg-directory-footer .pdxBtn {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { flex: 0 0 auto; margin-top: auto; gap: 16px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__badges { flex: 0 0 auto; align-content: start; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__desc { margin-top: 0; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer .pdxBtn {
  height: 57.2px; min-height: 57.2px; font-size: 17.888px; border-radius: 28.6px;
 }
-.resources-page .rg-directory-card .rg-directory-footer .pdxBtn svg { width: 20.8px; height: 20.8px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer .pdxBtn svg { width: 20.8px; height: 20.8px; }
 
 /* Program titles share the tags' left edge. */
-.resources-page .rg-directory-card .pdxPlace__name { text-align: left; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name { text-align: left; }
 
 /* A small optical nudge without changing the logo well or content layout. */
-.resources-page .rg-directory-card .pdxPlace__logo { top: 12px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__logo { top: 12px; }
 
 /* Raise and enlarge the decorative artwork inside the existing card clip. */
-.resources-page .rg-directory-card .rg-card-motif {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-card-motif {
  transform: translateY(-20%) scale(1.3);
  transform-origin: center;
 }
 
 /* Bradley Angle's wings use a custom vertical offset. */
-.resources-page .rg-directory-card .rg-card-motif[data-motif="safety-Marsha's Folx | Bradley Angle"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-card-motif[data-motif="safety-Marsha's Folx | Bradley Angle"] {
  transform: translateY(-11%) scale(1.3);
 }
 
 /* TACT: raise its custom motif placement by eight percentage points. */
-.resources-page .rg-directory-card .rg-card-motif[data-motif="health-Trans Advocacy & Care Team (TACT)"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-card-motif[data-motif="health-Trans Advocacy & Care Team (TACT)"] {
  transform: translateY(-13%) scale(1.3);
 }
 
 /* Keep OHSU's tall symbol and wordmark fully inside the logo well. */
-.resources-page .rg-directory-card .pdxPlace__media .pdxPlace__logo[src$="/ohsu-transgender-health-program.svg"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media .pdxPlace__logo[src$="/ohsu-transgender-health-program.svg"] {
  transform: none; height: 156px; max-height: 156px; width: auto; object-fit: contain;
 }
 @media (max-width: 999px) {
- .resources-page .rg-directory-card .pdxPlace__media .pdxPlace__logo[src$="/ohsu-transgender-health-program.svg"] { height: 120px; max-height: 120px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media .pdxPlace__logo[src$="/ohsu-transgender-health-program.svg"] { height: 120px; max-height: 120px; }
 }
 
 /* Individually measured artwork, optically centered independently of source whitespace. */
-.resources-page .rg-directory-card[data-optical-logo] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] {
  --rg-optical-center: 154px;
  --rg-optical-height-scale: 1;
  --rg-optical-side-space: 80.64px;
 }
-.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo {
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo {
  position: absolute;
  left: 50%; top: calc(var(--rg-optical-center) + var(--rg-optical-nudge, 0px));
  width: min(calc((100% - var(--rg-optical-side-space)) * var(--rg-optical-width, 1)), calc(var(--rg-optical-height-width, 180px) * var(--rg-optical-height-scale)));
@@ -3243,10 +3243,10 @@ html.calm-mode .rg-options button,
  object-fit: contain;
 }
 @media (min-width: 601px) and (max-width: 999px) {
- .resources-page .rg-directory-card[data-optical-logo] { --rg-optical-center: 139px; --rg-optical-height-scale: .8; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] { --rg-optical-center: 139px; --rg-optical-height-scale: .8; }
 }
 @media (max-width: 600px) {
- .resources-page .rg-directory-card[data-optical-logo] { --rg-optical-center: 146px; --rg-optical-height-scale: .88; --rg-optical-side-space: 69.12px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] { --rg-optical-center: 146px; --rg-optical-height-scale: .88; --rg-optical-side-space: 69.12px; }
 }
 
 /* Safety uses the same original wireframe treatment behind its existing content. */
@@ -3265,17 +3265,17 @@ html.calm-mode .rg-options button,
 }
 :is(html.calm-mode, :root[data-calm="true"]) .rg-card-motif { translate: none !important; transition: none !important; }
 /* Depth belongs to the artwork; keep the reading surface stationary on hover. */
-.resources-page .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; }
-.resources-page .rg-directory-card.pdxPlace--clickable:hover > .pdxPlace__body { transform: none !important; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover > .pdxPlace__body { transform: none !important; }
 
 /* Balance visible logo whitespace against the actual title/tag position. */
-.resources-page .rg-directory-card[data-optical-logo] { --rg-logo-flow-gap: 20px; }
-.resources-page .rg-directory-card[data-optical-logo] > .pdxPlace__body { gap: var(--rg-logo-flow-gap); }
-.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media {
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] { --rg-logo-flow-gap: 20px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] > .pdxPlace__body { gap: var(--rg-logo-flow-gap); }
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] .pdxPlace__media {
  flex: 1 1 0; height: auto; min-height: 0; padding-block: 0;
  container-type: size; overflow: visible;
 }
-.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo {
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo {
  top: calc(50% + var(--rg-logo-flow-gap) / 2);
  width: min(
   calc((100% - var(--rg-optical-side-space)) * var(--rg-optical-width, 1)),
@@ -3284,20 +3284,20 @@ html.calm-mode .rg-options button,
  );
 }
 @media (min-width: 601px) and (max-width: 999px) {
- .resources-page .rg-directory-card[data-optical-logo] { --rg-logo-flow-gap: 16px; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] { --rg-logo-flow-gap: 16px; }
 }
 
 /* Gentle mouse-following card depth with the motif drifting in opposition. */
-.resources-page .rg-directory-card.pdxPlace--clickable,
-.resources-page .rg-directory-card.pdxPlace--clickable:hover {
+:is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable,
+:is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover {
  transform: perspective(900px) translate3d(var(--rg-card-shift-x, 0px), var(--rg-card-shift-y, 0px), 0) rotateX(var(--rg-card-tilt-x, 0deg)) rotateY(var(--rg-card-tilt-y, 0deg)) !important;
  transition: transform 280ms ease-out;
 }
 @media (prefers-reduced-motion: reduce) {
- .resources-page .rg-directory-card.pdxPlace--clickable,
- .resources-page .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; transition: none; }
+ :is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable,
+ :is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover { transform: none !important; transition: none; }
 }
-:is(html.calm-mode, :root[data-calm="true"]) .resources-page .rg-directory-card.pdxPlace--clickable { transform: none !important; transition: none; }
+:is(html.calm-mode, :root[data-calm="true"]) :is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable { transform: none !important; transition: none; }
 
 /* Low-amplitude ambient movement lives inside the hover/scroll parallax layer. */
 .rg-card-motif .rg-motif-drift,
@@ -3320,12 +3320,12 @@ html.calm-mode .rg-options button,
 :is(html.calm-mode, :root[data-calm="true"]) .rg-card-motif :is(.rg-motif-drift, .rg-motif-breathe) { animation: none !important; }
 
 /* Lower Trans Youth Care Collective's motif by ten percentage points. */
-.resources-page .rg-directory-card .rg-card-motif[data-motif="youth-Trans Youth Care Collective"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-card-motif[data-motif="youth-Trans Youth Care Collective"] {
  transform: translateY(-10%) scale(1.3);
 }
 
 /* Lower Westside Queer Resource Center's motif by ten percentage points. */
-.resources-page .rg-directory-card .rg-card-motif[data-motif="community-Westside Q Center"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-card-motif[data-motif="community-Westside Q Center"] {
  transform: translateY(-10%) scale(1.3);
 }
 
@@ -3345,27 +3345,27 @@ html.calm-mode .rg-options button,
 :is(html.calm-mode, :root[data-calm="true"]) .rg-card-motif .rg-motif-signal-trace { animation: none !important; opacity: .2; }
 
 /* One glass face carries all content; the moving illustration stays behind it. */
-.resources-page .rg-directory-card > .pdxPlace__body { isolation: isolate; }
-.resources-page .rg-directory-card .rg-card-motif { z-index: 0; }
-.resources-page .rg-directory-card .pdxPlace__sheen,
-.resources-page .rg-directory-card > .pdxPlace__body::after { z-index: 2; pointer-events: none; }
-.resources-page .rg-directory-card .pdxPlace__media,
-.resources-page .rg-directory-card .pdxPlace__main,
-.resources-page .rg-directory-card .rg-directory-footer { position: relative; z-index: 3; }
-.resources-page .rg-directory-card .pdxPlace__actions { z-index: 4; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card > .pdxPlace__body { isolation: isolate; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-card-motif { z-index: 0; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__sheen,
+:is(.resources-page, .placez-card-surface) .rg-directory-card > .pdxPlace__body::after { z-index: 2; pointer-events: none; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { position: relative; z-index: 3; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__actions { z-index: 4; }
 /* Spring values own the surface motion, avoiding a second easing layer. */
-.resources-page .rg-directory-card.pdxPlace--clickable,
-.resources-page .rg-directory-card.pdxPlace--clickable:hover { transition: none; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable,
+:is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover { transition: none; }
 
 /* Keep source edges crisp; only the shadow behind the mark is softly diffused. */
-.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo {
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo {
  filter: brightness(0) invert(1) drop-shadow(0 2px 4px color-mix(in srgb, var(--z-black) 70%, transparent));
  backface-visibility: hidden;
 }
-.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo[src$="/business-oregon-official.png"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo[src$="/business-oregon-official.png"] {
  filter: invert(1) drop-shadow(0 2px 4px color-mix(in srgb, var(--z-black) 70%, transparent));
 }
-.resources-page .rg-directory-card.pdxPlace--clickable:hover > .pdxPlace__body { filter: none !important; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover > .pdxPlace__body { filter: none !important; }
 .resources-page .rg-options button {
  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
 }
@@ -3388,7 +3388,7 @@ html.calm-mode .rg-options button,
 }
 
 /* Prism: lower the artwork seven percentage points from the shared placement. */
-.resources-page .rg-directory-card .rg-card-motif[data-motif="health-Prism Health"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-card-motif[data-motif="health-Prism Health"] {
  transform: translateY(-13%) scale(1.3);
 }
 
@@ -3423,12 +3423,12 @@ html.calm-mode .rg-options button,
 @media (prefers-reduced-motion: reduce) {
  .rg-command[data-state], .rg-search-backdrop[data-state] { animation: none; }
 }
-.resources-page .rg-directory-card .rg-directory-footer .pdxBtn { color: var(--text-heading) !important; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer .pdxBtn { color: var(--text-heading) !important; }
 
 /* Sharper shells and the same restrained rainbow rule used across Zaylist. */
 .resources-page { --rg-card-radius: 12px; }
-.resources-page .rg-directory-card .pdxPlace__media { border-radius: 11px 11px 0 0; }
-.resources-page .rg-directory-card .pdxPlace__seam { display: none; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media { border-radius: 11px 11px 0 0; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__seam { display: none; }
 .resources-page .rg-card-top-rule {
  position: absolute; inset: 0 7px auto; height: 2px;
  z-index: 6; pointer-events: none; opacity: .75;
@@ -3459,13 +3459,13 @@ html.calm-mode .rg-options button,
 .resources-page .rg-safety-summary :is(.rg-safety-content, .rg-safety-disclosure) { position: relative; z-index: 3; }
 
 /* Flat monochrome emblem: retain all colored artwork as white, without depth effects. */
-.resources-page .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo[src$="/family-peace.png"],
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo[src$="/family-peace.png"],
 .rg-detail-logo .rg-logo[src$="/family-peace.png"] {
  filter: grayscale(1) brightness(.65) contrast(20) invert(1);
 }
 
 /* A dedicated trans-services badge, distinct from general category colors. */
-.resources-page .rg-directory-card .pdxPlace__cat[data-category-id="trans-friends"] .pdxBadge,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__cat[data-category-id="trans-friends"] .pdxBadge,
 .rg-detail-tags .rg-category-tag[data-category-id="trans-friends"] .pdxBadge {
   background:
     linear-gradient(var(--ink-900), var(--ink-900)) padding-box,
@@ -3499,7 +3499,7 @@ html.calm-mode .rg-options button,
   transition: transform 280ms ease-out;
 }
 /* Give outlined orange category tags a little more definition. */
-.resources-page .rg-directory-card .pdxPlace__cat:is([data-category-id="safety"], [data-category-id="harm-reduction"]) .pdxBadge,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__cat:is([data-category-id="safety"], [data-category-id="harm-reduction"]) .pdxBadge,
 .rg-detail-tags .rg-category-tag:is([data-category-id="safety"], [data-category-id="harm-reduction"]) .pdxBadge {
   border-width: 2px !important;
 }
@@ -3513,11 +3513,11 @@ html.calm-mode .rg-options button,
 :is(html.calm-mode, :root[data-calm="true"]) .resources-page .rg-safety-summary { transform: none; transition: none; }
 
 /* Intersect NW: a larger, slightly lower logo and closer artwork framing. */
-.resources-page .rg-directory-card[data-optical-logo="Intersect NW"] .pdxPlace__media .pdxPlace__logo {
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo="Intersect NW"] .pdxPlace__media .pdxPlace__logo {
   top: calc(55% + var(--rg-logo-flow-gap) / 2);
   scale: 1.2;
 }
-.resources-page .rg-directory-card .rg-card-motif[data-motif$="-Intersect NW"] {
+:is(.resources-page, .placez-card-surface) .rg-directory-card .rg-card-motif[data-motif$="-Intersect NW"] {
   transform: translateY(-20%) scale(1.495);
 }
 
@@ -3527,7 +3527,7 @@ html.calm-mode .rg-options button,
   color: var(--z-black);
   font-weight: 800;
 }
-.resources-page .rg-directory-card .pdxPlace__cat[data-category-id="safety"]:first-child .pdxBadge,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__cat[data-category-id="safety"]:first-child .pdxBadge,
 .rg-detail-tags .rg-category-tag[data-category-id="safety"]:first-child .pdxBadge,
 .rg-safety-prompt .pdxPlace__cat .pdxBadge {
   color: var(--z-black) !important;
@@ -3668,7 +3668,7 @@ html.calm-mode .rg-options button,
   -webkit-mask: linear-gradient(var(--z-black) 0 0) content-box, linear-gradient(var(--z-black) 0 0);
   -webkit-mask-composite: xor;
 }
-.resources-page .rg-directory-card[data-multi-category="true"] > .pdxPlace__body { border-color: transparent; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-multi-category="true"] > .pdxPlace__body { border-color: transparent; }
 @media (max-width: 719px) {
   .resources-page .rg-rail-track { gap: 27px; }
   .resources-page .rg-rail-track > .rg-card-reveal { flex-basis: 94%; }
@@ -3720,8 +3720,8 @@ html.calm-mode .rg-options button,
 .rg-resource-detail .rg-detail-logo .rg-logo[src$="/business-oregon-official.png"] { filter: invert(1) drop-shadow(0 2px 4px var(--z-black)); }
 
 /* One top-left → bottom-right palette for rim, artwork, and card action. */
-.resources-page .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn,
-.resources-page .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn:hover {
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn,
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn:hover {
   border: 1px solid transparent;
   background: linear-gradient(color-mix(in srgb, var(--z-black) 92%, transparent), color-mix(in srgb, var(--z-black) 92%, transparent)) padding-box, var(--rg-category-gradient) border-box;
   color: var(--text-heading) !important;
@@ -3778,9 +3778,14 @@ html.calm-mode .rg-options button,
 .resources-page [data-art-visible="false"] .rg-card-top-rule { animation-play-state: paused; }
 .resources-page .rg-rail-track.is-wheel-dragging { cursor: grabbing; }
 
+/* Search starts with a prompt, then offers a short list of matching cards. */
+.rg-command [cmdk-list] { max-height: min(460px, 55dvh); }
+.rg-command .rg-search-prompt { margin: 0; padding: 22px 18px; color: var(--res-caption); font-size: 16px; line-height: 1.5; }
+.resources-page .rg-card-reveal.rg-search-hit { outline: 2px solid var(--neon-yellow); outline-offset: 4px; border-radius: 12px; }
+
 /* Consistent title separation from the animated glass and background artwork. */
 .resources-page :is(h1, h2, h3, h4),
-.resources-page .rg-directory-card .pdxPlace__name,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name,
 .rg-resource-detail :is(h1, h2, h3, h4) {
   text-shadow: 0 2px 5px color-mix(in srgb, var(--z-black) 85%, transparent);
 }
@@ -3804,23 +3809,23 @@ html.calm-mode .rg-options button,
 .resources-page .rg-selection-control label { border-radius: 12px; border: 1px solid transparent; }
 
 /* Richer diagonal neon: luminous transitions and rim light around a dark center. */
-.resources-page .rg-directory-card[data-multi-category="true"] .rg-category-wash {
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-multi-category="true"] .rg-category-wash {
   opacity: .2;
   mask-image: radial-gradient(ellipse at 50% 45%, transparent 16%, color-mix(in srgb, var(--z-black) 45%, transparent) 55%, var(--z-black) 100%);
 }
-.resources-page .rg-directory-card[data-multi-category="true"] .rg-category-edge { padding: 1.5px; }
-.resources-page .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn,
-.resources-page .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn:hover {
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-multi-category="true"] .rg-category-edge { padding: 1.5px; }
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn,
+:is(.resources-page, .placez-card-surface) .rg-directory-card[data-multi-category="true"] .rg-directory-footer .pdxBtn:hover {
   background: linear-gradient(color-mix(in srgb, var(--z-black) 86%, transparent), color-mix(in srgb, var(--z-black) 94%, transparent)) padding-box, var(--rg-category-gradient) border-box;
 }
 .rg-resource-detail .rg-category-wash { opacity: .065; }
 
 /* Section-colored cards: crisp rims, quieter bloom and legible red badges. */
-.resources-page .rg-directory-card > .pdxPlace__body,
+:is(.resources-page, .placez-card-surface) .rg-directory-card > .pdxPlace__body,
 .resources-page .rg-safety-summary {
   border: 1.5px solid var(--c);
 }
-.resources-page .rg-directory-card .pdxPlace__cat[data-category-id="youth"] .pdxBadge,
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__cat[data-category-id="youth"] .pdxBadge,
 .rg-detail-tags .rg-category-tag[data-category-id="youth"] .pdxBadge {
   background: var(--z-black) !important;
   border: 2px solid var(--neon-red) !important;
@@ -3898,3 +3903,15 @@ html.calm-mode .rg-options button,
 @media (max-width: 600px) {
   .resources-page .rg-search-section--hero { margin-block: 40px 56px; padding-block: 20px; }
 }
+
+/* Match the board header's Share / Follow pair while preserving the ReZources logo. */
+.resources-page .rg-intro-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:8px; }
+.resources-page .rg-intro-actions :is(.board-share-button,.board-follow-button) { min-height:44px; --follow-accent:var(--neon-yellow); }
+@media(max-width:600px){ .resources-page .rg-intro-actions { justify-content:center; width:100%; } }
+
+/* Haüz framing: centered identity, then one shared Share / Follow action row. */
+.resources-page .rg-intro-top { justify-content:center; text-align:center; }
+.resources-page .rg-intro-top > .rg-eyebrow { max-width:none; }
+.resources-page .rg-intro .rg-intro-actions { width:100%; justify-content:center; margin-top:-56px; gap:12px; }
+.resources-page .rg-intro-actions :is(.board-share-button,.board-follow-button) { min-height:44px; border-radius:18px; padding-inline:18px; }
+@media(max-width:600px){ .resources-page .rg-intro .rg-intro-actions { margin-top:-24px; } }

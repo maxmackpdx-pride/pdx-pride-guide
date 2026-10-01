@@ -1,5 +1,8 @@
 "use client";
 
+const LOOP_SECONDS = 1200;
+const LOOP_RADIANS = Math.PI * 2;
+
 import { useEffect, useRef, type CSSProperties } from "react";
 import * as THREE from "three";
 
@@ -27,8 +30,8 @@ const fragmentShader = `
   float waveDistance(vec2 p, float phase, float offset, float bend) {
     float d = length(p) * 0.045;
     float x = p.x * (1.0 + d * bend);
-    float curve = sin(x * 0.85 + time * direction + phase) * 0.48
-                + sin(x * 0.34 - time * direction * 0.4 + phase) * 0.12 + offset;
+    float curve = sin(x * 0.85 + time * direction * 10.0 + phase) * 0.48
+                + sin(x * 0.34 - time * direction * 4.0 + phase) * 0.12 + offset;
     return p.y + curve;
   }
 
@@ -78,7 +81,8 @@ const fragmentShader = `
   }
 
   float blueprintBand(vec2 p, float band) {
-    float drift = time * direction * 0.25;
+    // Twelve 1.35-unit cells cross the viewport in one seamless loop.
+    float drift = time * direction * (16.2 / 6.28318530718);
     float cell = floor((p.x + drift + band * 0.47) / 1.35);
     float anchorX = (cell + 0.5) * 1.35 - drift - band * 0.47;
     vec4 edges = waveEdges(anchorX);
@@ -133,7 +137,7 @@ const fragmentShader = `
 `;
 
 /** Prime-color waves with locally loaded drafting lines. */
-export function WebGLShader({ accent, direction = 1 }: { accent?: string; direction?: -1 | 1 } = {}) {
+export function WebGLShader({ accent, direction = 1, blueprintUrl = "/resources-art/drafting-lines.svg" }: { accent?: string; direction?: -1 | 1; blueprintUrl?: string | null } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -203,7 +207,7 @@ export function WebGLShader({ accent, direction = 1 }: { accent?: string; direct
     const render = () => {
       if (!lost) renderer.render(scene, camera);
     };
-    new THREE.TextureLoader().load("/resources-art/drafting-lines.svg", (texture) => {
+    if (blueprintUrl) new THREE.TextureLoader().load(blueprintUrl, (texture) => {
       if (disposed) { texture.dispose(); return; }
       blueprintTexture = texture;
       texture.minFilter = THREE.LinearFilter;
@@ -217,7 +221,7 @@ export function WebGLShader({ accent, direction = 1 }: { accent?: string; direct
       if (now - lastPaint < 1000 / 30) { frame = requestAnimationFrame(animate); return; }
       lastPaint = now;
       if (lastTime)
-        uniforms.time.value += Math.min((now - lastTime) / 1000, 0.1) * 0.0525;
+        uniforms.time.value = (uniforms.time.value + Math.min((now - lastTime) / 1000, 0.1) * LOOP_RADIANS / LOOP_SECONDS) % LOOP_RADIANS;
       lastTime = now;
       render();
       frame = requestAnimationFrame(animate);
@@ -280,7 +284,7 @@ export function WebGLShader({ accent, direction = 1 }: { accent?: string; direct
       material.dispose();
       renderer.dispose();
     };
-  }, [accent, direction]);
+  }, [accent, direction, blueprintUrl]);
 
   return (
     <canvas

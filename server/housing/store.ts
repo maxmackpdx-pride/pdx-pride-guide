@@ -448,8 +448,12 @@ export function listHousingPosts(db: Database, opts: ListOpts = {}): HousingPost
   // Off-market managed listings leave the board.
   where.push("p.gone = 0");
   if (opts.type) {
-    where.push("p.type = ?");
-    args.push(opts.type);
+    if (opts.type === "FORMING") {
+      where.push("(p.type = 'FORMING' OR (p.type = 'LOOKING' AND p.open_to_haus = 1))");
+    } else {
+      where.push("p.type = ?");
+      args.push(opts.type);
+    }
   }
   if (opts.savedOnly) {
     if (!opts.viewerId) return [];

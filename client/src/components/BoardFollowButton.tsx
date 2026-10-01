@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 
-export type FollowableRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | "eventz" | "outz";
+export type FollowableRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | "eventz" | "outz" | "rezources";
 
 export default function BoardFollowButton({ board }: { board: FollowableRoom }) {
   const { user } = useAuth();
@@ -23,7 +23,7 @@ export default function BoardFollowButton({ board }: { board: FollowableRoom }) 
     enabled: !!user,
   });
   const following = !!status.data?.isFollowing;
-  const boardName = { gigz: "Gigz", giftz: "Giftz", sellz: "Sellz", mizzed: "Mizzed", houz: "Haüz", eventz: "Eventz", outz: "OutZide" }[board];
+  const boardName = { gigz: "Gigz", giftz: "Giftz", sellz: "Sellz", mizzed: "Mizzed", houz: "Haüz", eventz: "Eventz", outz: "OutZide", rezources: "ReZources" }[board];
   const mutation = useMutation({
     mutationFn: async (follow: boolean) => {
       const response = await fetch(`/api/boards/${board}/follow`, {
@@ -36,7 +36,7 @@ export default function BoardFollowButton({ board }: { board: FollowableRoom }) 
     onSuccess: data => {
       queryClient.setQueryData(queryKey, data);
       queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
-      toast({ title: data.isFollowing ? `Following ${boardName}` : `Unfollowed ${boardName}`, description: data.isFollowing ? "New posts appear in your Hub’s Following boards feed." : undefined });
+      toast({ title: data.isFollowing ? `Following ${boardName}` : `Unfollowed ${boardName}`, description: data.isFollowing ? board === "rezources" ? "ReZources is in your followed sections." : "New posts appear in your Hub’s Following boards feed." : undefined });
     },
     onError: () => toast({ title: "Could not update follow", description: "Try again in a moment.", variant: "destructive" }),
   });

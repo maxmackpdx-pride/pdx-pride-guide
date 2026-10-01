@@ -1,3 +1,5 @@
+import BoardAtmosphere from '@/components/board/BoardAtmosphere';
+import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { roomToast } from "@/lib/roomToast";
@@ -18,7 +20,6 @@ import { memberProfileHref } from "@/lib/avatarLinks";
 import { Button, FilterChip, RoomKicker } from "@/components/ds";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
-import BoardShader from "@/components/board/BoardShader";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import ImageUploader from "@/components/ImageUploader";
 import { timeAgo } from "@/lib/timeAgo";
@@ -180,10 +181,15 @@ export default function PrideWork() {
     { num: realLive.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Available to hire", color: "var(--panel-cyan)" },
   ];
   const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/gigz?post=${id}`); window.setTimeout(() => document.getElementById("gigz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
-  return <main className="gigz-page board-shader-page" data-shader-room="gigz">
-    <BoardShader room="gigz" />
+  return <main className="gigz-page">
+    <BoardAtmosphere room="gigz" side="left" />
     <div className="gigz-shell">
       <RoomPlate room="gigz" />
+      <DiscoveryFlow room="Gigz" accent="var(--room-gigz)" title="What kind of connection?" intro="Find work or collaborators, post an opportunity, or let people know what you can do." initiallyOpen={Boolean(window.location.search)} choices={[
+        { id: 'browse', label: 'Find gigs & people', description: 'Explore work and talent', scrollToResults: true },
+        { id: 'hire', label: 'Post a gig', description: 'Find someone for your project', onChoose: () => openForm('POSTING_GIG') },
+        { id: 'work', label: 'Offer my skills', description: 'Let people know you are available', onChoose: () => openForm('LOOKING_FOR_WORK') },
+      ]}>
       {!isLoading && !isError && !onlyMine && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><RoomKicker room="gigz" as="div">The board</RoomKicker><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post gigz-post--primary" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
       <FilterSurvey label="Gigz" question="What do you need?" value={surveyKind} onChange={setSurveyKind} accent="var(--room-gigz-ink)" options={[{value:"all",label:"Explore Gigz"},{value:"gigs",label:"Find a gig"},{value:"talent",label:"Find talent"}]}>
@@ -198,6 +204,7 @@ export default function PrideWork() {
       {formOpen && <GigComposer initialType={composeType} onClose={() => setFormOpen(false)} onPosted={id => { setFormOpen(false); setSelectedId(id); }} />}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <SafetyGuide context="gigs" />
+      </DiscoveryFlow>
     </div>
     <RoomDoorways current="gigz" />
     <BoardCloseSeam line="Work with your people." url="zaylist.com/gigz" />

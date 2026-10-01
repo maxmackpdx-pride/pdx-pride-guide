@@ -30,12 +30,10 @@ import {
   ShieldCheck,
   ShieldAlert,
   Phone,
-  Share2,
   Star,
   Users,
   X,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
 import { FOOD_PANTRIES, FOOD_RESOURCE } from "@/lib/foodPantries";
@@ -44,6 +42,8 @@ import { placeGoogleMapsUrl } from "@/lib/placeLinks";
 import { Badge } from "@/components/ds/Badge";
 import { ResourceFilterButton } from "@/components/resources/ResourceFilterButton";
 import { RezourcesLogo } from "@/components/resources/RezourcesLogo";
+import BoardShareButton from "@/components/BoardShareButton";
+import BoardFollowButton from "@/components/BoardFollowButton";
 import { resourceLogoLayout } from "@/components/resources/resourceLogoLayout";
 import { ResourceRail } from "@/components/resources/ResourceRail";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
@@ -459,36 +459,6 @@ export default function Resources() {
   useEffect(() => {
     if (location === "/resources") navigate(`/rezources${window.location.search}${window.location.hash}`, { replace: true });
   }, [location, navigate]);
-  const { toast } = useToast();
-  const [sharing, setSharing] = useState(false);
-  async function shareResources() {
-    const url = "https://www.zaylist.com/rezources";
-    setSharing(true);
-    try {
-      if (navigator.share) {
-        try {
-          await navigator.share({ title: "ReZources | Zaylist", url });
-          return;
-        } catch (error) {
-          if (error instanceof Error && error.name === "AbortError") return;
-        }
-      }
-      await navigator.clipboard.writeText(url);
-      toast({
-        title: "Link copied",
-        description: "Share Zaylist ReZources with someone.",
-      });
-    } catch {
-      toast({
-        title: "Couldn't copy the link",
-        description: url,
-        variant: "destructive",
-      });
-    } finally {
-      setSharing(false);
-    }
-  }
-
   usePageSeo(
     "ReZources | Zaylist",
     "Art, community, opportunity, care, and support for queer and trans Oregon. Explore local organizations and food pantries to find your next connection.",
@@ -505,6 +475,8 @@ export default function Resources() {
   const [directoryRevealed, setDirectoryRevealed] = useState(false);
   const [mode, setMode] = useState<"directory" | "talk">("directory");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTarget, setSearchTarget] = useState<string | null>(null);
   const [supportOpen, setSupportOpen] = useState(false);
   const [safetyAnswer, setSafetyAnswer] = useState<"yes" | "no" | null>(null);
   const supportTrigger = useRef<HTMLElement | null>(null);
@@ -532,6 +504,24 @@ export default function Resources() {
       ROWS.filter((r) => categoriesFor(r).some((c) => categoryIds.includes(c.id))),
     [categoryIds],
   );
+  const searchMatches = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const seen = new Set<string>();
+    return ROWS.flatMap((row) => {
+      if (seen.has(row.org.name)) return [];
+      seen.add(row.org.name);
+      const org = row.org;
+      const score = resourceSearchFilter(org.name, searchQuery, [
+        ...(org.aliases || []), org.desc, org.scope,
+        ...(org.serviceTags || []),
+        ...categoriesFor(row).map((category) => category.name),
+        ...(org.programs || []).flatMap((program) => [program.name, program.desc]),
+        ...(org.locations || []).flatMap((place) => [place.name, place.address]),
+        ...(org === FOOD_RESOURCE ? FOOD_PANTRIES.map((pantry) => pantry.name) : []),
+      ]);
+      return score ? [{ row, score }] : [];
+    }).sort((a, b) => b.score - a.score || a.row.org.name.localeCompare(b.row.org.name)).slice(0, 7);
+  }, [searchQuery]);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 600px)");
@@ -566,23 +556,40 @@ export default function Resources() {
     setDetail(row);
     setDetailOpen(true);
   }, []);
-  function selectSearchCategory(id: string | null) {
+  useEffect(() => {
+    if (!searchTarget || !showResults) return;
+    let frame = 0;
+    let settleTimer = 0;
+    let tries = 0;
+    const findCard = () => {
+      const card = Array.from(document.querySelectorAll<HTMLElement>("[data-resource-search-card]"))
+        .find((item) => item.dataset.resourceSearchCard === searchTarget);
+      if (!card && tries++ < 90) { frame = requestAnimationFrame(findCard); return; }
+      if (card) {
+        // Let the survey reveal and dialog close finish before positioning the card.
+        settleTimer = window.setTimeout(() => {
+          card.scrollIntoView({ behavior: quietMotion ? "instant" : "smooth", block: "center", inline: "center" });
+          card.focus({ preventScroll: true });
+          card.classList.add("rg-search-hit");
+          window.setTimeout(() => card.classList.remove("rg-search-hit"), 2200);
+          setSearchTarget(null);
+        }, quietMotion ? 0 : 420);
+      } else {
+        setSearchTarget(null);
+      }
+    };
+    frame = requestAnimationFrame(findCard);
+    return () => { cancelAnimationFrame(frame); window.clearTimeout(settleTimer); };
+  }, [searchTarget, showResults, quietMotion]);
+  function selectSearchResource(row: Row) {
     setIntentChosen(true);
     setDirectoryRevealed(true);
-    setCategoryIds(id === null ? RESOURCE_CATEGORIES.map((c) => c.id) : [id]);
+    setCategoryIds([row.category.id]);
     setMode("directory");
     setSearchOpen(false);
-    requestAnimationFrame(() => {
-      resultsRef.current?.focus({ preventScroll: true });
-      resultsRef.current?.scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "instant"
-          : "smooth",
-        block: "start",
-      });
-    });
+    setSearchQuery("");
+    setSearchTarget(row.org.name);
   }
-
   return (
     <div className="resources-page">
       <WebGLShader />
@@ -591,16 +598,13 @@ export default function Resources() {
           <span className="rg-eyebrow">
             ReZources / All the ways we show up
           </span>
-          <button
-            className="pdx-glass-rebind pdxBtn rg-share"
-            onClick={shareResources}
-            disabled={sharing}
-            aria-label="Share ReZources"
-          >
-            <Share2 size={16} aria-hidden="true" /> Share
-          </button>
+
         </div>
         <RezourcesLogo quietMotion={Boolean(quietMotion)} />
+          <div className="rg-intro-actions">
+            <BoardShareButton title="ReZources" path="/rezources" card={{ room: "ReZources", mark: "/brand/family/rezources.svg", line: "All the ways we show up." }} />
+            <BoardFollowButton board="rezources" />
+          </div>
 
       </header>
       <div className="rg-search-section rg-search-section--hero rg-wrap">
@@ -749,7 +753,7 @@ export default function Resources() {
                 if (!group.length) return null;
                 const railId = `resource-rail-${type.id}`;
                 return <ResourceRail key={type.id} id={railId} title={type.name} color={type.color} count={group.length} quiet={Boolean(quietMotion)}>
-                  {group.map(row => <div className="rg-card-reveal" key={row.org.name} dir="ltr">
+                  {group.map(row => <div className="rg-card-reveal" key={row.org.name} dir="ltr" tabIndex={-1} data-resource-search-card={row.org.name}>
                     <ResourceCard row={{ ...row, sectionCategory: type }} onOpen={openDetail} />
                   </div>)}
                 </ResourceRail>;
@@ -774,7 +778,7 @@ export default function Resources() {
         <p>Not sure? <a href="tel:211">Call 211info</a> for help finding a starting point.</p>
       </div>
 
-      <Dialog.Root open={searchOpen} onOpenChange={setSearchOpen}>
+      <Dialog.Root open={searchOpen} onOpenChange={(open) => { setSearchOpen(open); if (!open) setSearchQuery(""); }}>
         <Dialog.Portal>
           <Dialog.Overlay className="rg-overlay-backdrop rg-search-backdrop" data-quiet-motion={quietMotion ? "true" : undefined} />
           <Dialog.Content
@@ -788,85 +792,30 @@ export default function Resources() {
               Search community ReZources
             </Dialog.Title>
             <Dialog.Description className="sr-only">
-              Search only ReZources: organizations, services, categories, and support lines.
+              Type to find a ReZources card, then select a suggestion to go to it.
             </Dialog.Description>
             <Dialog.Close className="rg-close" aria-label="Close search">
               <X size={20} />
             </Dialog.Close>
-            <Command filter={resourceSearchFilter}>
+            <Command shouldFilter={false}>
               <Command.Input
-                aria-label="Search all ReZources"
-                placeholder="Search ReZources: services, organizations, support…"
+                aria-label="Search ReZources cards"
+                placeholder="Search organizations or services…"
+                value={searchQuery}
+                onValueChange={setSearchQuery}
               />
               <Command.List>
-                <Command.Empty>
-                  No matches. Try art, youth, work, or an organization name.
-                </Command.Empty>
-                <Command.Group heading="Explore an interest">
-                  {RESOURCE_CATEGORIES.map((c) => (
-                    <Command.Item
-                      key={c.id}
-                      value={`category ${c.name}`}
-                      keywords={[c.id, LABELS[RESOURCE_CATEGORIES.indexOf(c)], c.what, c.help, c.forr, c.use]}
-                      onSelect={() => selectSearchCategory(c.id)}
-                    >
-                      {c.name}
-                      <ArrowUpRight size={16} />
-                    </Command.Item>
-                  ))}
-                </Command.Group>
-                <Command.Group heading="Talk & phone support">
-                  {TALK_GROUPS.flatMap((group) => group.lines).map((line) => (
-                    <Command.Item key={line.tel} value={`phone ${line.name}`} keywords={[line.number, line.tel, line.number.replace(/\D/g, ""), line.note, line.hours]}
-                      onSelect={() => {
-                        setSearchOpen(false);
-                        setIntentChosen(true);
-                        setMode("talk");
-                        setSafetyAnswer("yes");
-                        requestAnimationFrame(() => {
-                          const target = document.getElementById(`talk-${line.tel}`);
-                          target?.focus({ preventScroll: true });
-                          target?.scrollIntoView({ block: "center" });
-                        });
-                      }}>
-                      <span>{line.name}<small>{line.number}</small></span>
-                      <ArrowUpRight size={16} />
-                    </Command.Item>
-                  ))}
-                </Command.Group>
-                <Command.Group heading="Organizations">
-                  {ROWS.map((row) => (
+                {!searchQuery.trim() ? (
+                  <p className="rg-search-prompt">Start typing a name, service, or place to see matching cards.</p>
+                ) : searchMatches.length === 0 ? (
+                  <p className="rg-search-prompt">No matching ReZources cards. Try another name or service.</p>
+                ) : (
+                <Command.Group heading="Matching ReZources">
+                  {searchMatches.map(({ row }) => (
                     <Command.Item
                       key={row.org.name}
                       value={row.org.name}
-                      keywords={[
-                        row.org.desc,
-                        ...(row.org.transSpecialist ? ["TRANS FRIENDS", "transgender", "trans support"] : []),
-                        ...(row.org.aliases || []),
-                        ...(row.org.locations || []).flatMap((location) => [location.name, location.address, location.hours || "", location.phone || ""]),
-                        ...(row.org.programs || []).flatMap((program) => [program.name, program.desc, program.addr || "", program.phone || "", program.phoneLabel || "", program.url || ""]),
-                        row.org.scope,
-                        row.org.sub || "",
-                        row.org.addr || "",
-                        row.org.hours || "",
-                        row.org.email || "",
-                        row.org.mailingAddress || "",
-                        row.org.phone || "",
-                        (row.org.phone || "").replace(/\D/g, ""),
-                        row.org.phoneLabel || "",
-                        row.org.url || "",
-                        row.org.cta || "",
-                        row.org.altLabel || "",
-                        ...(row.org === FOOD_RESOURCE
-                          ? FOOD_PANTRIES.flatMap((p) => [p.name, p.address, p.hours, p.note])
-                          : []),
-                        ...categoriesFor(row).map((c) => c.name),
-                        ...(row.org.serviceTags || []),
-                      ]}
-                      onSelect={() => {
-                        setSearchOpen(false);
-                        openDetail(row);
-                      }}
+                      onSelect={() => selectSearchResource(row)}
                     >
                       <span>
                         {row.org.name}
@@ -877,10 +826,11 @@ export default function Resources() {
                     </Command.Item>
                   ))}
                 </Command.Group>
+                )}
               </Command.List>
             </Command>
             <p className="rg-command-hint">
-              ↑ ↓ to move · Enter to open · Esc to close
+              ↑ ↓ to move · Enter to find card · Esc to close
             </p>
           </Dialog.Content>
         </Dialog.Portal>

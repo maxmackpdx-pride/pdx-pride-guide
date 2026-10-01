@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type CSSProperties } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 import { animate, useMotionValue } from 'framer-motion';
 import { rezourcesLetterPaths } from './rezourcesLetterPaths';
 import './RezourcesLogo.css';
@@ -28,7 +28,7 @@ const CROSS = 'M1226 458H1273V483H1298V531H1273V556H1226V531H1199V483H1226Z';
 const FIXED_DETAILS = CROSS + ' M384 418H407V449H384Z M461 403H485V438H461Z M895 219H925V473H895Z M875 463H943V516H875Z M815 273H1008V301H815Z';
 const ART = '/brand/family/rezources.svg';
 
-function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; id: string; quiet: boolean }) {
+function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[number]; id: string; quiet: boolean; beePass: number }) {
   const weight = object.id.startsWith('scales-') ? 1.3 : object.id === 'rent' ? .7 : 1;
   const angle = useMotionValue(0);
   const swing = useRef<{ stop: () => void } | null>(null);
@@ -80,6 +80,26 @@ function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; 
     const timer = window.setInterval(tick, 150);
     return () => { window.clearInterval(timer); swing.current?.stop(); };
   }, [quiet, angle, object.id, weight]);
+
+  useEffect(() => {
+    if (!beePass || quiet) return;
+    // Alternate which hanging pieces respond so each pass feels incidental.
+    const touched = beePass % 2 ? ['apple', 'scales-right'] : ['rent', 'scales-left', 'cabbage'];
+    if (!touched.includes(object.id)) return;
+    const delay = ({ apple: 800, rent: 1700, 'scales-left': 3000, 'scales-right': 3550, cabbage: 6100 } as Record<string, number>)[object.id];
+    const timer = window.setTimeout(() => {
+      if (hovering.current || document.hidden || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      swing.current?.stop();
+      settling.current = true;
+      const direction = object.id === 'scales-right' || object.id === 'cabbage' ? -1 : 1;
+      const amplitude = direction * .8 / weight;
+      swing.current = animate(angle, [angle.get(), amplitude, -amplitude * .45, amplitude * .14, 0], {
+        duration: 5.5, times: [0, .18, .48, .76, 1], ease: 'easeInOut',
+        onComplete: () => { idleResumedAt.current = performance.now(); settling.current = false; },
+      });
+    }, delay);
+    return () => window.clearTimeout(timer);
+  }, [beePass, quiet, object.id, angle, weight]);
   return <g className="rg-logo-object"
     onPointerEnter={event => {
       if (quiet || event.pointerType !== 'mouse') return;
@@ -122,6 +142,18 @@ function HangingObject({ object, id, quiet }: { object: typeof OBJECTS[number]; 
 export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }) {
   const frame = useRef<HTMLHeadingElement>(null);
   const id = useId().replace(/:/g, '');
+  const [beePass, setBeePass] = useState(0);
+  useEffect(() => {
+    if (quietMotion) { setBeePass(0); return; }
+    const fly = () => {
+      if (!document.hidden && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        setBeePass(pass => pass + 1);
+      }
+    };
+    const first = window.setTimeout(fly, 8000);
+    const repeat = window.setInterval(fly, 32000);
+    return () => { window.clearTimeout(first); window.clearInterval(repeat); };
+  }, [quietMotion]);
   // Uneven, repeatable offsets avoid synchronized redraws and rerender jumps.
   const rhythms = [
     { duration: 31, delay: -17 }, { duration: 43, delay: -29 },
@@ -181,7 +213,7 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
           </linearGradient>
           <linearGradient id={`${id}-shimmer`}>
             <stop offset="0" stopColor="var(--text-heading)" stopOpacity="0" />
-            <stop offset=".5" stopColor="var(--text-heading)" stopOpacity=".3" />
+            <stop offset=".5" stopColor="var(--text-heading)" stopOpacity=".7" />
             <stop offset="1" stopColor="var(--text-heading)" stopOpacity="0" />
           </linearGradient>
           <clipPath id={`${id}-z-shape`}><path d={Z_SHAPE} /></clipPath>
@@ -197,7 +229,16 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
           <rect className="rg-logo-letter-shimmer" x="-260" y="395" width="240" height="225" fill={`url(#${id}-shimmer)`} />
         </g>
         </g>
-        {OBJECTS.map(o => <HangingObject key={o.id} object={o} id={id} quiet={quietMotion} />)}
+        {OBJECTS.map(o => <HangingObject key={o.id} object={o} id={id} quiet={quietMotion} beePass={beePass} />)}
+        {!quietMotion && beePass > 0 && <g key={beePass} className="rg-logo-bee-flight" aria-hidden="true">
+          <g className="rg-logo-bee">
+            <ellipse cx="-5" cy="-8" rx="8" ry="5" fill="var(--text-heading)" opacity=".72" />
+            <ellipse cx="6" cy="-9" rx="8" ry="5" fill="var(--text-heading)" opacity=".72" />
+            <ellipse rx="14" ry="9" fill="var(--neon-yellow)" stroke="var(--z-black)" strokeWidth="2" />
+            <path d="M-4 -8v16 M5 -7v14" stroke="var(--z-black)" strokeWidth="3" />
+            <circle cx="12" cy="-2" r="1.5" fill="var(--z-black)" />
+          </g>
+        </g>}
         {SKETCH_REGIONS.map((_, i) => <image key={i} href={ART} width="1792" height="1008" clipPath={`url(#${id}-ink-${i})`} />)}
         <g className="rg-logo-z-depth" clipPath={`url(#${id}-z-shape)`}>
           <image href={ART} width="1792" height="1008" />

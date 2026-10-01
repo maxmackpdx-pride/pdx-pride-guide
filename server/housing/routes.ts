@@ -83,6 +83,11 @@ type Deps = {
   uploadPhotos: RequestHandler;
   /** The existing platform moderation queue. Housing adds categories, not a system. */
   createModerationRequest?: (data: any) => void;
+  createOwnerDeskItem?: (data: {
+    kind: string; title: string; summary: string; body: string;
+    contactName?: string | null; contactEmail?: string | null;
+    pageUrl?: string; metaJson?: Record<string, unknown>;
+  }) => void;
   /**
    * The existing messaging system. Housing adds a consent gate on top of it and
    * does NOT introduce a second inbox or thread model.
@@ -936,6 +941,26 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       directoryBusinessId,
       note: asStr(req.body?.note, 1000) || "",
     });
+    try {
+      deps.createOwnerDeskItem?.({
+        kind: "property_manager_application",
+        title: `Property manager: ${company}`,
+        summary: `${company} wants to connect about managed housing`,
+        body: [
+          `Company: ${company}`,
+          `Website: ${siteUrl}`,
+          businessLicense ? `Business license: ${businessLicense}` : null,
+          directoryBusinessId ? `Directory business ID: ${directoryBusinessId}` : null,
+          asStr(req.body?.note, 1000) ? `Message: ${asStr(req.body?.note, 1000)}` : null,
+        ].filter(Boolean).join("\n"),
+        contactName: user?.displayName || user?.username || "Property manager",
+        contactEmail: user?.email || null,
+        pageUrl: "/the-hauz",
+        metaJson: { applicationId: id, userId },
+      });
+    } catch {
+      /* the application is recorded and remains available for review */
+    }
     // Applications go to the owner, same as the promoter application.
     if (deps.createModerationRequest) {
       try {

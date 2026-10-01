@@ -4,7 +4,7 @@ import { ChevronRight, SlidersHorizontal, X } from "lucide-react";
 import SmoothDrawer from "./ui/smooth-drawer";
 import { NavGlassLayers, navGlassPointer } from "./ui/nav-glass";
 
-export type ZaydarLayerId = "events" | "places" | "mizzed" | "gigz" | "giftz" | "sellz" | "houz";
+export type ZaydarLayerId = "events" | "places" | "rezources" | "mizzed" | "gigz" | "giftz" | "sellz" | "houz";
 export type ZaydarLayer = {
   id: ZaydarLayerId; label: string; color: string; enabled: boolean;
   onToggle?: () => void; panel: ReactNode; viewMore: { label: string; href: string }[];
@@ -56,7 +56,7 @@ export default function ZaydarLayerSheet({ layers, active, onActiveChange: setAc
     <SmoothDrawer id={panelId} hidden={!open} className="zaydar-layer-sheet z-glass is-open"
       data-seam="top" data-no-pull-to-refresh onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}
       aria-label="Map controls and sections"
-      style={{ "--active-layer-color": activeLayer?.color || "#00FFFF" } as CSSProperties}
+      style={{ "--active-layer-color": activeLayer?.color || "var(--neon-cyan)" } as CSSProperties}
       onKeyDown={event => { if (event.key === "Escape" && open) { event.stopPropagation(); closePanel(); } }}>
       <NavGlassLayers />
       <div className="zaydar-layer-sheet__title">

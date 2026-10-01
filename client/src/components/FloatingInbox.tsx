@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
-import { useLocation } from "wouter";
 import { createPortal } from "react-dom";
 import { MessageCircle, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
 import {
-  clampFloatingInboxBottom,
-  readFloatingInboxBottom,
-  writeFloatingInboxBottom,
+  clampFloatingInboxPosition,
+  nearestFloatingInboxCorner,
+  positionForFloatingInboxCorner,
+  readFloatingInboxCorner,
+  writeFloatingInboxCorner,
 } from "@/lib/floatingInboxPosition";
 import { pickFloatingInboxNeon } from "@/lib/floatingInboxNeon";
 import { isLocalDemo } from "@/lib/localDemo";
@@ -17,17 +18,17 @@ const DRAG_THRESHOLD_PX = 8;
 
 /**
  * Desktop-only floating inbox FAB. Toggles the shared InboxOverlay via
- * InboxSheetProvider. Drag vertically to reposition; default sits 30% up from
- * the bottom edge. Hidden on mobile (bottom nav owns inbox there).
+ * InboxSheetProvider. Drag to move it between screen corners; it starts at the
+ * bottom right. Hidden on mobile (bottom nav owns inbox there).
  * Local demo (localhost / Vite): FAB is always shown so chrome can be demoed
  * without a session; the sheet prompts to sign in for real threads.
  */
 export default function FloatingInbox() {
   const { user } = useAuth();
-  const [location] = useLocation();
   const { open, toggleSheet } = useInboxSheet();
   const { total: attentionCount, unread, actionQueue } = useInboxAttentionCount();
-  const [bottomPx, setBottomPx] = useState(() => readFloatingInboxBottom());
+  const [corner, setCorner] = useState(() => readFloatingInboxCorner());
+  const [position, setPosition] = useState(() => positionForFloatingInboxCorner(readFloatingInboxCorner()));
   const [dragging, setDragging] = useState(false);
   const [neon, setNeon] = useState(() => pickFloatingInboxNeon());
   const localDemo = isLocalDemo();
@@ -36,20 +37,19 @@ export default function FloatingInbox() {
     active: false,
     moved: false,
     pointerId: -1,
+    startX: 0,
     startY: 0,
-    startBottom: 0,
+    startPosition: position,
+    currentPosition: position,
   });
-
-  // On the maps the control rack owns the right edge; the FAB sits just inside it.
-  const onMap = /^\/(map|outzide)(\/|$|\?)/.test(location);
 
   useEffect(() => {
     const onResize = () => {
-      setBottomPx(current => clampFloatingInboxBottom(current));
+      setPosition(positionForFloatingInboxCorner(corner));
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, []);
+  }, [corner]);
 
   useEffect(() => {
     const onPageShow = (event: PageTransitionEvent) => {
@@ -70,7 +70,10 @@ export default function FloatingInbox() {
     setDragging(false);
 
     if (drag.moved) {
-      setBottomPx(current => writeFloatingInboxBottom(current));
+      const nextCorner = nearestFloatingInboxCorner(drag.currentPosition);
+      setCorner(nextCorner);
+      setPosition(positionForFloatingInboxCorner(nextCorner));
+      writeFloatingInboxCorner(nextCorner);
     }
   }, []);
 
@@ -82,21 +85,24 @@ export default function FloatingInbox() {
         active: true,
         moved: false,
         pointerId: event.pointerId,
+        startX: event.clientX,
         startY: event.clientY,
-        startBottom: bottomPx,
+        startPosition: position,
+        currentPosition: position,
       };
-      // Keep vertical drags captured even when the pointer leaves the button.
+      // Keep drags captured even when the pointer leaves the button.
       // Pointer-up still opens the inbox when the drag threshold is not reached.
     },
-    [bottomPx],
+    [position],
   );
 
   const onPointerMove = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
     const drag = dragRef.current;
     if (!drag.active || drag.pointerId !== event.pointerId) return;
 
-    const deltaY = drag.startY - event.clientY;
-    if (!drag.moved && Math.abs(deltaY) < DRAG_THRESHOLD_PX) return;
+    const deltaX = event.clientX - drag.startX;
+    const deltaY = event.clientY - drag.startY;
+    if (!drag.moved && Math.hypot(deltaX, deltaY) < DRAG_THRESHOLD_PX) return;
 
     if (!drag.moved) {
       drag.moved = true;
@@ -108,7 +114,12 @@ export default function FloatingInbox() {
       }
     }
 
-    setBottomPx(clampFloatingInboxBottom(drag.startBottom + deltaY));
+    const nextPosition = clampFloatingInboxPosition({
+      x: drag.startPosition.x + deltaX,
+      y: drag.startPosition.y + deltaY,
+    });
+    drag.currentPosition = nextPosition;
+    setPosition(nextPosition);
   }, []);
 
   const onPointerUp = useCallback(
@@ -151,7 +162,8 @@ export default function FloatingInbox() {
   if (!user && !localDemo) return null;
 
   const anchorStyle = {
-    bottom: `${bottomPx}px`,
+    left: `${position.x}px`,
+    top: `${position.y}px`,
     "--fab-neon": neon.color,
     "--fab-neon-rgb": neon.rgb,
   } as CSSProperties;
@@ -167,7 +179,6 @@ export default function FloatingInbox() {
         "floating-inbox",
         `floating-inbox--${neon.id}`,
         needsAttention ? "floating-inbox--attention" : "",
-        onMap ? "floating-inbox--map" : "",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -187,13 +198,13 @@ export default function FloatingInbox() {
         aria-expanded={open}
         aria-label={
           open
-            ? "Close inbox. Drag up or down to reposition."
+            ? "Close inbox. Drag to move to another corner."
             : attentionCount > 0
-              ? `Open inbox, ${unread} unread message${unread === 1 ? "" : "s"}${actionQueue > 0 ? `, ${actionQueue} in queue` : ""}. Drag up or down to reposition.`
-              : "Open inbox. Drag up or down to reposition."
+              ? `Open inbox, ${unread} unread message${unread === 1 ? "" : "s"}${actionQueue > 0 ? `, ${actionQueue} in queue` : ""}. Drag to move to another corner.`
+              : "Open inbox. Drag to move to another corner."
         }
       >
-        {open ? <X size={24} /> : <MessageCircle size={24} />}
+        {open ? <X size={29} /> : <MessageCircle size={29} />}
         {!open && attentionCount > 0 && (
           <span
             className={`floating-inbox__fab-badge${actionQueue > 0 && unread === 0 ? " floating-inbox__fab-badge--queue" : ""}`}

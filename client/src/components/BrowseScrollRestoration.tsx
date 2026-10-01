@@ -19,10 +19,13 @@ export default function BrowseScrollRestoration() {
   useEffect(() => {
     let stopped = false;
     let frame = 0;
-    const target = positions.get(path) || 0;
+    // ReZources is a guided entry: every visit starts at its centered hero.
+    const startAtTop = path === "/rezources" || path === "/resources";
+    if (startAtTop) positions.delete(path);
+    const target = startAtTop ? 0 : positions.get(path) || 0;
     const remember = () => {
       if (!stopped || document.body.style.position === "fixed") return;
-      positions.set(path, window.scrollY);
+      if (!startAtTop) positions.set(path, window.scrollY);
       if (positions.size > 40) positions.delete(positions.keys().next().value!);
     };
     const stop = () => { stopped = true; observer.disconnect(); cancelAnimationFrame(frame); };

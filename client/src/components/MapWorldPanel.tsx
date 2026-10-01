@@ -1,3 +1,5 @@
+import DiscoveryFlow from './discovery/DiscoveryFlow';
+import PlaceDiscoveryCard from './discovery/PlaceDiscoveryCard';
 import BrowseToolbar from "./BrowseToolbar";
 import BrowseStatus from "./BrowseStatus";
 import BoardFollowButton from "./BoardFollowButton";
@@ -29,12 +31,17 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
   const surveyValue = world === "places" ? (placeTypes?.length === 1 ? placeTypes[0] : "all") : get(surveyKey);
   const inView=rows.filter(row=>{const point=mapCoordinates(row.lat,row.lng);return Array.isArray(row._mapPoints) && row._mapPoints.length ? row._mapPoints.some((p:{lat:number;lng:number})=>inMapBounds(p,bounds)) : point && inMapBounds(point,bounds);});
   const unlocated=rows.filter(row=>!mapCoordinates(row.lat,row.lng));
-  const renderRows=(items:WorldRow[])=>items.map(row=><button type="button" className="zaydar-layer-row pdx-glass-rebind" style={{"--c": world === "places" ? zaydarTypeColor(String(row.type || "venue")) : "var(--panel-cyan)"} as CSSProperties} data-selected={Number(row.id)===selectedId} aria-pressed={Number(row.id)===selectedId} key={row.id} onClick={e=>onOpen(row,e.currentTarget)}>
-    {world === "places" && <span className="zaydar-layer-row__mark" aria-hidden="true"><img src={zaydarTypeIcon(String(row.type || "venue"))} alt="" loading="lazy" /></span>}
+  const renderRows=(items:WorldRow[])=>items.map(row=>world === "places" ? <PlaceDiscoveryCard key={row.id} place={{ ...row, id:Number(row.id), name:String(row.name || 'Place'), type:String(row.type || 'venue') }} onOpen={target=>onOpen(row,target)} onRequireAuth={onCreate} /> : <button type="button" className="zaydar-layer-row" data-selected={Number(row.id)===selectedId} aria-pressed={Number(row.id)===selectedId} key={row.id} onClick={e=>onOpen(row,e.currentTarget)}>
     <span className="zaydar-layer-row__copy"><strong>{(world === "gigz" ? row.title || row.name : row.name || row.title) || String(row.body || "").slice(0,80)}</strong><small>{row.locationLabel || row.neighborhood || "Mapped location"}{world === "sellz" ? ` · $${(Number(row.priceCents)/100).toFixed(2)}` : ""}</small></span><ChevronRight size={18} aria-hidden="true" />
   </button>);
   return <section className="zaydar-layer-panel" aria-label={`${name} in this map`}>
     <div className="zaydar-layer-panel__heading"><small>In this view</small><h2>{name}</h2></div>
+    <DiscoveryFlow room={name} accent="var(--active-layer-color)" initiallyOpen={applied.length > 0 || selectedId !== null}
+      intro="Choose a starting point, then narrow the listings on your map."
+      choices={[
+        {id:'browse',label:world === 'places' ? 'Find a place' : world === 'gigz' ? 'Find gigs & people' : world === 'giftz' ? 'Find a gift' : world === 'sellz' ? 'Find something' : 'Find a connection'},
+        {id:'post',label:world === 'places' ? 'Add a place' : `Post to ${name}`,onChoose:onCreate},
+      ]}>
     {(world === "gigz" || world === "giftz" || world === "sellz" || world === "mizzed") && <BoardFollowButton board={world} />}
     <button type="button" className="zaydar-houz-post" onClick={onCreate}><Plus size={16} aria-hidden="true"/> {world==="places"?"Add a place":`Post to ${name}`}</button>
     <FilterSurvey surface="globe" label={name} question={world === "places" ? "What kind of place?" : "What are you looking for?"} options={surveyOptions.map(([value,label])=>({value,label,...(world === "places" ? {icon:zaydarTypeIcon(value === "all" ? "all" : value),color:zaydarTypeColor(value)} : {})}))} value={surveyValue} onChange={value=>world === "places" ? onPlaceTypeSurvey?.(value) : set(surveyKey,value)} accent={world === "places" ? "var(--panel-cyan)" : "var(--neon-yellow)"}>
@@ -63,5 +70,6 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
       {!inView.length && !unlocated.length && <BrowseStatus title={`No ${name} in this view`} description="Move the map or broaden your filters to see more listings." onAction={applied.length ? onClearFilters : undefined} actionLabel="Clear filters" />}
       {unlocated.length>0 && <details className="zaydar-world-unlocated" open={world === "gigz" ? true : undefined}><summary>{unlocated.length} remote or without a mapped location</summary><p className="zaydar-layer-location-note">These posts cannot be filtered by the map viewport.</p><div className="zaydar-layer-list">{renderRows(unlocated.slice(0,limit))}</div>{unlocated.length>limit && <button onClick={()=>setLimit(n=>n+40)}>Show more</button>}</details>}
     </>}
+    </DiscoveryFlow>
   </section>;
 }

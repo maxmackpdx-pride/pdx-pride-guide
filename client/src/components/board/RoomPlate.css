@@ -1,22 +1,33 @@
 /* Board 02: one plate, same anatomy and height in every room. */
 .room-plate {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 24px;
-  min-height: 120px;
+  padding: 32px 0 28px;
   border-bottom: 1px solid #ffffff25;
 }
-.room-plate__mark { height: 54px; width: auto; max-width: min(240px, 45vw); object-fit: contain; flex: none; }
-.room-plate__line {
-  padding-left: 24px;
-  border-left: 1px solid #ffffff50;
-  color: #aaa4b2;
-  font-size: 15px;
-  font-weight: 600;
+.room-plate__mark {
+  display: block;
+  width: min(76vw, 760px);
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+  object-position: center;
 }
-.room-plate__actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
+.room-plate__line {
+  color: var(--text-body, #aaa4b2);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+}
+.room-plate__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.room-plate--eventz { padding: 14px 0 0; border: 0; }
 /* On a map the map is the hero: the plate is just the pair, beside the map switch. */
 .room-plate--compact {
+  flex-direction: row;
   position: absolute;
   z-index: 6;
   top: 14px;
@@ -31,9 +42,9 @@
 .room-plate--compact .room-plate__actions { gap: 4px; }
 .room-plate--compact :is(.board-share-button, .board-follow-button) { min-height: 40px; border-radius: 18px; }
 @media (max-width: 767px) {
-  .room-plate { min-height: 92px; gap: 12px; flex-wrap: wrap; padding: 16px 0; }
-  .room-plate__mark { height: 40px; }
-  .room-plate__line { display: none; }
+  .room-plate { gap: 16px; padding: 24px 0; }
+  .room-plate__mark { width: min(90vw, 520px); }
+  .room-plate__line { font-size: 17px; }
   .room-plate--compact { top: 62px; left: auto; right: 12px; }
   /* Icon-only on phones; the words stay for screen readers. */
   .room-plate--compact :is(.board-share-button, .board-follow-button) { width: 40px; padding: 0; justify-content: center; font-size: 0; gap: 0; }

@@ -23,3 +23,18 @@
 .giftz-inactive button span{color:#ccff00;margin-left:8px;font-size:11px;text-transform:capitalize}
 @media(max-width:760px){.giftz-actions{align-items:stretch}}
 .giftz-page.gifting-page{background:#09090d;color:#faf8fc;min-height:100vh}
+
+.giftz-sections{display:grid;gap:28px;margin:32px 0 42px}
+.giftz-section{min-width:0;padding:28px;border:1px solid color-mix(in srgb,var(--room-giftz) 42%,transparent);border-radius:22px;background:linear-gradient(145deg,color-mix(in srgb,var(--room-giftz) 12%,var(--z-black)),var(--glass-card-bg) 62%);box-shadow:0 18px 48px color-mix(in srgb,var(--z-black) 20%,transparent)}
+.giftz-section--grab{border-color:color-mix(in srgb,var(--neon-orange) 48%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--neon-orange) 12%,var(--z-black)),var(--glass-card-bg) 62%)}
+.giftz-section--iso{border-color:color-mix(in srgb,var(--room-giftz) 42%,transparent)}
+.giftz-section__head{display:flex;justify-content:space-between;align-items:end;gap:22px;margin-bottom:23px}
+.giftz-section__eyebrow{display:block;margin-bottom:8px;color:var(--room-giftz);font:700 11px/1.4 var(--font-mono,monospace);letter-spacing:.14em;text-transform:uppercase}
+.giftz-section--grab .giftz-section__eyebrow{color:var(--neon-orange)}
+.giftz-section__head h2{margin:0;color:var(--text-heading);font:800 clamp(25px,3vw,36px)/1.1 var(--font-display,sans-serif);text-transform:uppercase}
+.giftz-section__head p{margin:8px 0 0;color:var(--text-body);line-height:1.5}
+.giftz-section__count{flex:none;padding:8px 12px;border:1px solid color-mix(in srgb,var(--room-giftz) 40%,transparent);border-radius:999px;color:var(--text-heading);font:700 12px/1.2 var(--font-mono,monospace);text-transform:uppercase;white-space:nowrap}
+.giftz-section--grab .giftz-section__count{border-color:color-mix(in srgb,var(--neon-orange) 50%,transparent);color:var(--neon-orange)}
+.giftz-section .gigz-rail{margin:0}
+.giftz-section .gigz-rail__controls{margin-bottom:0}
+@media(max-width:760px){.giftz-sections{gap:18px}.giftz-section{padding:18px;border-radius:16px}.giftz-section__head{align-items:start;flex-direction:column;gap:14px}}

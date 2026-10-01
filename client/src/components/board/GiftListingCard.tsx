@@ -235,7 +235,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/map?layer=giftz&gift=${post.id}`;
+    const url = `${window.location.origin}/giftz?post=${post.id}`;
     const canShare = typeof navigator.share === "function";
     try {
       if (canShare) await navigator.share({ title: post.title, url });
@@ -258,6 +258,18 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
     if (!beginInFlight(raisePendingRef.current, post.id)) return;
     actionMutation.mutate({ url: `/api/gifting/${post.id}/${endpoint}`, data: { note: trimmed } });
     setNote("");
+  };
+
+  const submitReport = () => {
+    if (!user) return onRequireAuth();
+    const reason = reportText.trim();
+    if (!reason) return toast({ title: "Add a reason for your report", variant: "destructive" });
+    actionMutation.mutate({ url: `/api/gifting/${post.id}/report`, data: { reason } }, {
+      onSuccess: () => {
+        setReportText("");
+        toast({ title: "Report sent" });
+      },
+    });
   };
 
   const glassVars = {
@@ -468,7 +480,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
               value={reportText}
               onChange={e => setReportText(e.target.value)}
             />
-            <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/report`, data: { reason: reportText } })}>
+            <button type="button" disabled={actionMutation.isPending} onClick={submitReport}>
               Send report
             </button>
           </details>

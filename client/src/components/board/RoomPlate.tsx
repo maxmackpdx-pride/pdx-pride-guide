@@ -31,7 +31,7 @@ export default function RoomPlate({ room, compact = false }: { room: PlateRoom; 
   </div>;
   const style = { "--c": room === "gigz" ? "var(--room-gigz-ink)" : meta.accent } as CSSProperties;
   if (compact) return <div className="room-plate room-plate--compact pdx-glass-rebind" style={style}>{actions}</div>;
-  return <div className="room-plate pdx-glass-rebind" style={style}>
+  return <div className={`room-plate room-plate--${room} pdx-glass-rebind`} style={style}>
     {plate.heroOwnsMark ? null : <img className="room-plate__mark" src={plate.mark} alt={meta.name} />}
     {plate.line ? <span className="room-plate__line">{plate.line}</span> : null}
     {actions}

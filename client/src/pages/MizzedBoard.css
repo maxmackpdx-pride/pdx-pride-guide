@@ -25,3 +25,57 @@
 .mizzed-board__item .board-spotted-card:hover { transform: none; }
 @media (prefers-reduced-motion: reduce) { .mizzed-board__item::after { animation: none; } }
 html.calm-mode .mizzed-board__item::after, :root[data-calm="true"] .mizzed-board__item::after { animation: none; }
+
+/* Keep the board's browse and posting flow, with the same heading and count rhythm as the other rooms. */
+.mizzed-board .board-stats-band {
+  max-width: 880px;
+  margin: 36px auto 0;
+  border: 1px solid color-mix(in srgb, var(--room-mizzed) 45%, var(--z-black));
+  border-radius: 14px;
+  background: var(--glass-card-bg);
+  box-shadow: var(--glass-card-shadow);
+  overflow: hidden;
+}
+.mizzed-board .board-stats-band__inner { width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mizzed-board .board-stats-band__item,
+.mizzed-board .board-stats-band__item:first-child,
+.mizzed-board .board-stats-band__item:last-child { padding: 18px 20px; text-align: center; }
+.mizzed-board .board-stats-band__item--rule { border-right: 1px solid color-mix(in srgb, var(--room-mizzed) 30%, var(--z-black)); }
+.mizzed-board .board-stats-band__num { font-size: 30px; line-height: 1.2; }
+.mizzed-board .board-stats-band__label { font-size: 12px; line-height: 1.4; margin-top: 6px; color: var(--text-body); }
+.mizzed-board__head { padding: 46px 0 32px; }
+.mizzed-board__head h1 { font-size: clamp(32px, 3.7vw, 53px); letter-spacing: -2px; font-weight: 850; }
+.mizzed-board__head p { font-size: 16px; color: var(--text-body); }
+.mizzed-board__head small { font-size: 14px; line-height: 1.5; }
+.mizzed-board__post {
+  min-height: 44px;
+  border: 1px solid var(--room-mizzed);
+  border-radius: 22px;
+  padding: 0 20px;
+  background: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--room-mizzed) 16%, transparent), transparent 60%), var(--z-black);
+  color: var(--text-heading);
+  font: 700 17px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+.mizzed-board__post:hover { background: color-mix(in srgb, var(--room-mizzed) 16%, var(--z-black)); }
+.mizzed-board__post:focus-visible,
+.mizzed-board__filters button:focus-visible { outline: 2px solid var(--room-mizzed); outline-offset: 3px; }
+.mizzed-board__browse { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding: 30px 0 18px; border-top: 1px solid color-mix(in srgb, var(--text-heading) 14%, transparent); }
+.mizzed-board__browse h2 { margin: 10px 0 0; font-size: clamp(27px, 3vw, 38px); line-height: 1.1; letter-spacing: -.03em; font-weight: 850; }
+.mizzed-board__browse h2 span { color: var(--room-mizzed); }
+.mizzed-board__browse > span { color: var(--text-body); font-size: 14px; white-space: nowrap; }
+.mizzed-board__filters button { font-size: 14px; }
+.mizzed-board__item .board-spotted-card__body { font-size: 14px; }
+.mizzed-board__controls span { font-size: 12px; }
+@media (max-width: 700px) {
+  .mizzed-board .board-stats-band { margin-top: 24px; }
+  .mizzed-board .board-stats-band__item,
+  .mizzed-board .board-stats-band__item:first-child,
+  .mizzed-board .board-stats-band__item:last-child { padding: 14px 8px; }
+  .mizzed-board .board-stats-band__num { font-size: 24px; }
+  .mizzed-board .board-stats-band__label { font-size: 10px; }
+  .mizzed-board__head { padding: 35px 0 30px; }
+  .mizzed-board__head p { font-size: 14px; }
+  .mizzed-board__browse { align-items: start; }
+}

@@ -1,6 +1,7 @@
+import BoardAtmosphere from '@/components/board/BoardAtmosphere';
+import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
 import FilterSurvey from "@/components/FilterSurvey";
-import BoardShader from "@/components/board/BoardShader";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
@@ -194,10 +195,14 @@ export default function Sellz() {
     window.history.replaceState(null, "", url.pathname + url.search);
   };
 
-  return <main className="gigz-page sellz-page sellz-board-page board-shader-page" data-shader-room="sellz">
-    <BoardShader room="sellz" />
+  return <main className="gigz-page sellz-page sellz-board-page">
+    <BoardAtmosphere room="sellz" side="right" />
     <div className="gigz-shell">
       <RoomPlate room="sellz" />
+      <DiscoveryFlow room="Sellz" accent="var(--room-sellz)" title="What are you here for?" intro="Browse local listings or put something up for sale in your community." initiallyOpen={Boolean(window.location.search)} choices={[
+        { id: 'browse', label: 'Find something', description: 'Search and filter local listings', scrollToResults: true },
+        { id: 'sell', label: 'Sell something', description: 'Create a listing', onChoose: openForm },
+      ]}>
       {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><RoomKicker room="sellz" as="div">The marketplace</RoomKicker><h1>Find your next good thing<span>.</span></h1><p>Buy and sell with your community. Message, agree, and hand off directly.</p></div>
         <div className="sellz-board-actions"><button type="button" className="gigz-post gigz-post--primary" onClick={openForm}><Plus size={17} /> Sell something <ArrowUpRight size={16} /></button></div>
@@ -221,6 +226,7 @@ export default function Sellz() {
       {selected && <section id="sellz-detail" className="gigz-detail sellz-detail" aria-label="Selected Sellz listing"><button type="button" className="gigz-detail__close" onClick={closeDetail} aria-label="Close details"><X size={18} /></button><SellzListingCard key={selected.id} post={selected} saved={saved.has(selected.id)} expanded onToggle={closeDetail} onRequireAuth={() => setShowAuth(true)} onDeleted={closeDetail} /></section>}
       <p className="sellz-board-rules">No weapons · no illegal goods · no counterfeit goods · no in-app payments</p>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
+      </DiscoveryFlow>
     </div>
     <RoomDoorways current="sellz" />
     <BoardCloseSeam line="Good stuff. New hands." url="zaylist.com/sellz" />

@@ -2713,14 +2713,10 @@ a.event-host-name.event-host-name--link:hover {
   .floating-inbox {
     display: block;
     position: fixed;
-    right: calc(32px + env(safe-area-inset-right, 0px));
     /* Above site header (100) / hub chrome so the FAB is always tappable */
     z-index: 120;
-    width: 60px;
-    height: 60px;
-  }
-  .floating-inbox.floating-inbox--map {
-    right: 90px;
+    width: 72px;
+    height: 72px;
   }
 
   /* Idle: soft static neon. Pulse only with .floating-inbox--attention */
@@ -2747,8 +2743,8 @@ a.event-host-name.event-host-name--link:hover {
   /* Glass disc: same deep translucent recipe as mobile dock, neon rim keeps FAB colors */
   .floating-inbox__fab {
     position: relative;
-    width: 60px;
-    height: 60px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
     display: flex;
     align-items: center;

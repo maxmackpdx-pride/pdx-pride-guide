@@ -49,12 +49,31 @@
 .rg-logo-letter-shimmer { opacity: 0; animation: rg-logo-letter-shimmer 28s ease-in-out infinite; }
 @keyframes rg-logo-letter-shimmer {
   0%, 4% { opacity: 0; translate: 0 0; }
-  5% { opacity: .3; translate: 0 0; }
-  8% { opacity: .3; translate: 1980px 0; }
-  9%, 100% { opacity: 0; translate: 1980px 0; }
+  5% { opacity: .68; translate: 0 0; }
+  11% { opacity: .68; translate: 1980px 0; }
+  12%, 100% { opacity: 0; translate: 1980px 0; }
 }
 [data-quiet-motion] .rg-logo-letter-shimmer { display: none; animation: none; }
 @media (prefers-reduced-motion: reduce) { .rg-logo-letter-shimmer { display: none; animation: none; } }
+
+.rg-logo-bee-flight {
+  pointer-events: none;
+  animation: rg-logo-bee-flight 7s ease-in-out both;
+}
+.rg-logo-bee { transform-origin: center; animation: rg-logo-bee-bob .28s ease-in-out 25 alternate; }
+@keyframes rg-logo-bee-flight {
+  0% { opacity: 0; translate: 45px 650px; }
+  6% { opacity: .9; }
+  18% { translate: 260px 550px; }
+  31% { translate: 495px 460px; }
+  47% { translate: 850px 350px; }
+  59% { translate: 1040px 390px; }
+  78% { translate: 1420px 530px; }
+  94% { opacity: .9; }
+  100% { opacity: 0; translate: 1760px 650px; }
+}
+@keyframes rg-logo-bee-bob { to { transform: translateY(-3px) rotate(-4deg); } }
+@media (prefers-reduced-motion: reduce) { .rg-logo-bee-flight, .rg-logo-bee { display: none; animation: none; } }
 
 .rg-blue-z-smear { pointer-events: none; opacity: 0; animation: rg-blue-z-smear 32s steps(1, end) infinite; }
 @keyframes rg-blue-z-smear {

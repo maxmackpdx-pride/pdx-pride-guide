@@ -1,3 +1,5 @@
+import { PLACE_ACCENTS } from './discovery/placeTokens';
+import { ResourceCardMotif } from './resources/ResourceCardMotif';
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import DetailActions from "./DetailActions";
@@ -382,29 +384,7 @@ export default function PlaceModal({
   const isRealEstate = place.type === "realestate" || category === "realestate";
   const isCampground = place.type === "campground" || category === "campgrounds";
   const isGroup = place.type === "group" || category === "groups";
-  const accent = isNonprofit
-    ? "var(--cyan)"
-    : isHealthcare
-      ? "#FF00CC"
-      : isRealEstate
-        ? "#1A4DFF"
-        : isCampground
-          ? "#39FF14"
-          : isGroup
-            ? "#FFD700"
-            : ({
-            bars: "var(--pink)",
-            food: "var(--orange)",
-            cafes: "var(--green)",
-            venues: "var(--cyan)",
-            services: "var(--purple)",
-            shops: "var(--amber)",
-            hotels: "var(--blue)",
-            healthcare: "#FF00CC",
-            realestate: "#1A4DFF",
-            campgrounds: "#39FF14",
-            groups: "#FFD700",
-          } as Record<string, string>)[category] || "var(--pink)";
+  const accent = PLACE_ACCENTS[place.type] || 'var(--neon-cyan)';
   const edge = isNonprofit
     ? NONPROFIT_RAINBOW_EDGE
     : isHealthcare
@@ -535,6 +515,7 @@ export default function PlaceModal({
           ...(flipVars || {}),
         }}
       >
+        <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={place.type === 'healthcare' ? 'health' : place.type === 'venue' ? 'arts' : 'community'} /></div>
         <div className="place-modal-panel__glow" aria-hidden="true" />
         <div className="place-modal-panel__sheen" aria-hidden="true" />
         <div className="place-modal-panel__seam dir-refract" aria-hidden="true" />

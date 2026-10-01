@@ -21,9 +21,14 @@ const silhouettes: Record<string, string> = {
  shield: "M200 145 L310 185 V250 Q300 325 200 365 Q100 325 90 250 V185 Z M150 250 L185 285 L255 210",
  bolt: "M225 140 L110 280 H185 L165 370 L295 215 H215 Z",
  network: "M200 155 L300 220 L270 330 H130 L100 220 Z M200 155 L270 330 L100 220 H300 L130 330 Z",
+ gift: "M92 215 H308 V365 H92 Z M78 185 H322 V220 H78 Z M190 185 V365 M210 185 V365 M200 185 C135 165 130 105 162 112 C184 117 198 158 200 185 C202 158 216 117 238 112 C270 105 265 165 200 185",
+ microphone: "M145 135 H255 V232 Q255 285 200 285 Q145 285 145 232 Z M115 240 Q200 340 285 240 M200 310 V365 M145 365 H255",
+ receipt: "M90 125 H260 L310 175 V365 H90 Z M260 125 V175 H310 M120 230 H270 M120 265 H250 M120 300 H225",
 };
 
 function themeFor(name: string, category: string) {
+ const roomTheme = ({ eventz:"stage", hauz:"home", giftz:"gift", gigz:"microphone", sellz:"receipt", mizzed:"heart" } as Record<string,string>)[category];
+ if (roomTheme) return roomTheme;
  const n = name.toLowerCase();
  if (/bradley|beyond these|faerie/.test(n)) return "wings";
  if (/housing|house|living room|werq|pantr/.test(n)) return "home";
@@ -114,7 +119,7 @@ export const ResourceCardMotif = memo(function ResourceCardMotif(props: { name: 
   if (!motifObserver) motifObserver = new IntersectionObserver(entries => {
    for (const entry of entries) motifVisibility.get(entry.target)?.(entry.isIntersecting);
   }, { rootMargin: "200px" });
-  const card = element.closest<HTMLElement>(".rg-directory-card, .rg-safety-summary");
+  const card = element.closest<HTMLElement>(".rg-directory-card, .rg-safety-summary, .room-doorways__door");
   if (card) card.dataset.artVisible = "false";
   motifVisibility.set(element, visible => {
    if (card) card.dataset.artVisible = String(visible);

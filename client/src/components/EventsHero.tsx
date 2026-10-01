@@ -1,17 +1,11 @@
 import BoardHero from "@/components/BoardHero";
-import BoardExploreActions from "@/components/BoardExploreActions";
-import BoardStatsBar from "@/components/BoardStatsBar";
-
-type Stat = { num: number; label: string; color: string };
 
 type Props = {
   eventCount: number;
-  stats: Stat[];
 };
 
-export default function EventsHero({ eventCount, stats }: Props) {
+export default function EventsHero({ eventCount }: Props) {
   return (
-    <>
       <BoardHero
         className="board-hero--room"
         accent="cyan"
@@ -25,10 +19,7 @@ export default function EventsHero({ eventCount, stats }: Props) {
             alt="EVENTZ"
           />
         }
-        lede="Find your next night out, daytime hang, or community gathering. Browse the flyers, check the details, and make a plan."
-        actions={<BoardExploreActions showSchedule scheduleLead />}
+        lede="Dance floors, daytime hangs, and community gatherings. Find an event, plan your week, or add one for everyone to see."
       />
-      <BoardStatsBar stats={stats} variant="band" showLive={false} />
-    </>
   );
 }

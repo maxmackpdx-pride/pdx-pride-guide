@@ -961,17 +961,17 @@ sqlite.exec(`
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS board_follows (
     user_id INTEGER NOT NULL,
-    board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz', 'mizzed', 'houz', 'eventz', 'outz')),
+    board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz', 'mizzed', 'houz', 'eventz', 'outz', 'rezources')),
     created_at TEXT NOT NULL,
     PRIMARY KEY (user_id, board)
   );
 `);
 const boardFollowsSchema = sqlite.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'board_follows'").get() as { sql: string } | undefined;
-if (boardFollowsSchema && (!boardFollowsSchema.sql.includes("'mizzed'") || !boardFollowsSchema.sql.includes("'houz'") || !boardFollowsSchema.sql.includes("'outz'"))) {
+if (boardFollowsSchema && (!boardFollowsSchema.sql.includes("'mizzed'") || !boardFollowsSchema.sql.includes("'houz'") || !boardFollowsSchema.sql.includes("'outz'") || !boardFollowsSchema.sql.includes("'rezources'"))) {
   sqlite.transaction(() => {
     sqlite.exec(`CREATE TABLE board_follows_new (
       user_id INTEGER NOT NULL,
-      board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz', 'mizzed', 'houz', 'eventz', 'outz')),
+      board TEXT NOT NULL CHECK (board IN ('gigz', 'giftz', 'sellz', 'mizzed', 'houz', 'eventz', 'outz', 'rezources')),
       created_at TEXT NOT NULL,
       PRIMARY KEY (user_id, board)
     )`);
@@ -981,7 +981,7 @@ if (boardFollowsSchema && (!boardFollowsSchema.sql.includes("'mizzed'") || !boar
   })();
 }
 /** Rooms a member can follow. Following widens what that room puts in the Hub feed. */
-export type FollowableRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | "eventz" | "outz";
+export type FollowableRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | "eventz" | "outz" | "rezources";
 export function isFollowingBoard(userId: number, board: FollowableRoom): boolean {
   return !!sqlite.prepare("SELECT 1 FROM board_follows WHERE user_id = ? AND board = ?").get(userId, board);
 }
@@ -13973,7 +13973,14 @@ export const storage: IStorage = {
   reopenGiftingPost(postId, userId) {
     const post = this.getGiftingPost(postId);
     if (!post || Number(post.user_id) !== userId) throw new Error("Not your post");
-    sqlite.prepare(`UPDATE gifting_interests SET status = 'DECLINED' WHERE post_id = ? AND status = 'SELECTED'`).run(postId);
+    const selected = sqlite.prepare(`SELECT id FROM gifting_interests WHERE post_id = ? AND status = 'SELECTED' LIMIT 1`).get(postId) as { id: number } | undefined;
+    if (selected) {
+      sqlite.prepare(`UPDATE gifting_interests SET status = 'DECLINED' WHERE id = ?`).run(selected.id);
+    } else if (Number(post.interestCount || 0) >= 3 && (post.post_type || post.postType) === "GIFT") {
+      // A full gift must release an existing hand before another person can respond.
+      const lastInterest = sqlite.prepare(`SELECT id FROM gifting_interests WHERE post_id = ? AND status = 'INTERESTED' ORDER BY created_at DESC, id DESC LIMIT 1`).get(postId) as { id: number } | undefined;
+      if (lastInterest) sqlite.prepare(`UPDATE gifting_interests SET status = 'DECLINED' WHERE id = ?`).run(lastInterest.id);
+    }
     db.update(giftingPosts).set({
       status: post.post_type === "ISO" ? "LOOKING" : "REOPENED",
       selectedInterestId: null,

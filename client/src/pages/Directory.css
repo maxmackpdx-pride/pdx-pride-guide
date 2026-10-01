@@ -1389,3 +1389,40 @@ html.calm-mode .directory-page .board-empty,
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
 }
+
+/* ReZources is the approved Placez discovery composition. */
+.directory-page.resources-page { padding-inline:clamp(16px,4vw,56px); }
+.directory-page.resources-page .directory-browser-header { max-width:1152px; margin-inline:auto; display:block; }
+.directory-page.resources-page .directory-browser-header__identity { display:block; text-align:center; padding-block:64px 32px; }
+.directory-page.resources-page .directory-browser-header__identity h1 { margin:0 auto; max-width:820px; }
+.directory-page.resources-page .directory-browser-header__wordmark { width:100%; height:auto; max-height:360px; object-fit:contain; }
+.directory-page.resources-page .directory-browser-header__lede { margin:20px auto 0; max-width:54ch; font-size:18px; line-height:1.7; }
+.directory-page.resources-page .directory-browser-search { margin-block:32px 48px; }
+.directory-page.resources-page .directory-browser-categories { justify-content:center; gap:14px; margin-block:32px 64px; }
+.directory-page.resources-page .directory-browser-category { min-height:52px; padding:14px 20px; font:700 20px/1.4 var(--font-display); }
+.directory-page.resources-page .directory-browser-results__head { text-align:center; display:block; margin-bottom:48px; }
+.directory-page.resources-page .directory-browser-results__title { font-size:43.2px; line-height:1.6; }
+.directory-page.resources-page .directory-browser-results__status { justify-content:center; }
+.placez-map-link { display:flex; width:max-content; max-width:100%; margin:0 auto 32px; }
+.directory-page.resources-page .directory-add-band { max-width:1000px; margin:64px auto; text-align:center; display:flex; flex-direction:column; gap:24px; }
+@media(max-width:600px){.directory-page.resources-page .directory-browser-header__identity{padding-block:32px 16px}.directory-page.resources-page .directory-browser-results__title{font-size:36px}.directory-page.resources-page .directory-browser-header__lede{font-size:17px}.directory-page.resources-page .directory-browser-category{font-size:18px}}
+.directory-page.resources-page .directory-browser-header { padding:32px 0; overflow:visible; background:none; border:0; }
+.directory-page.resources-page .directory-browser-search { display:flex; flex-direction:column; align-items:stretch; gap:24px; width:100%; padding:24px; }
+.directory-page.resources-page .directory-browser-search__field { width:100%; min-width:0; }
+.directory-page.resources-page .directory-browser-search__filters { display:flex; flex-wrap:wrap; align-items:end; gap:20px; }
+.directory-page.resources-page .directory-browser-search__filters > * { flex:1 1 180px; min-width:0; }
+.directory-page.resources-page .placez-map-link { margin:0 auto 40px; }
+@media(max-width:600px){.directory-page.resources-page .directory-browser-search{padding:20px 16px}.directory-page.resources-page .directory-browser-search__filters>*{flex-basis:100%}}
+.directory-page .directory-browser-categories { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; max-width:960px; margin:40px auto 64px; }
+.directory-page .directory-browser-category { min-width:0; min-height:56px; padding:16px 20px; border:1px solid var(--_c); border-radius:8px; background:var(--glass-card-bg); box-shadow:var(--glass-card-shadow); color:var(--text-heading); font:800 20px/1.4 var(--font-display); }
+.directory-page .directory-browser-category--active { background:color-mix(in srgb,var(--_c) 13%,var(--z-black)); }
+.directory-page .directory-browser-search__field>span,.directory-page .directory-browser-search__select>span { font:14px/1.4 var(--font-mono,monospace); }
+@media(max-width:700px){.directory-page .directory-browser-categories{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:32px auto 48px}.directory-page .directory-browser-category{font-size:18px;padding:14px 12px}}
+/* Placez reflects the ReZources field in the opposite horizontal direction. */
+.directory-page.resources-page .rg-stream-background { z-index:0; filter:brightness(.72); }
+.directory-page.resources-page .placez-shader-contours { position:fixed; inset:0; z-index:0; width:100%; height:100%; pointer-events:none; stroke-width:1.5; opacity:.24; filter:drop-shadow(0 0 8px currentColor); }
+.placez-shader-contours__cyan { stroke:var(--neon-cyan); }
+.placez-shader-contours__magenta { stroke:var(--neon-magenta); }
+.placez-shader-contours__yellow { stroke:var(--neon-yellow); }
+.directory-page.resources-page .directory-add-band { position:relative; z-index:1; }
+.directory-page.resources-page::before { pointer-events:none; }

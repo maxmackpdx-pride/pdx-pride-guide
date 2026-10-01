@@ -1,3 +1,4 @@
+import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import { ArrowLeft } from "lucide-react";
 import BrowseStatus from "@/components/BrowseStatus";
 import { Check, X } from "lucide-react";
@@ -1457,9 +1458,13 @@ export default function Schedule({
         fontFamily: 'var(--font-body)',
       }}
     >
+      {!embed && <ScheduleHero stats={heroStats} />}
+      <DiscoveryFlow enabled={!embed} room="my week" accent="var(--neon-cyan)" initiallyOpen={Boolean(window.location.search)} choices={[
+        {id:'all',label:'Explore the week',onChoose:()=>setView('all')},
+        {id:'mine',label:'My schedule',onChoose:()=>setView('mine')},
+      ]}>
       {!embed && (
       <>
-      <ScheduleHero stats={heroStats} />
 
       {/* ---- Sticky toolbar ---- */}
       <ScrollReveal delay={30}>
@@ -1725,6 +1730,7 @@ export default function Schedule({
         )
       )}
 
+      </DiscoveryFlow>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
       {!embed && (

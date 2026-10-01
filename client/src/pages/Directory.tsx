@@ -1,3 +1,10 @@
+import { WebGLShader } from '@/components/ui/web-gl-shader';
+import { ResourceFilterButton } from '@/components/resources/ResourceFilterButton';
+import { PLACE_ACCENTS as TYPE_COLORS } from '@/components/discovery/placeTokens';
+import PlaceDiscoveryCard from '@/components/discovery/PlaceDiscoveryCard';
+import { ResourceRail } from '@/components/resources/ResourceRail';
+import { useTheme } from '@/context/ThemeContext';
+import { useReducedMotion } from 'framer-motion';
 import BrowseStatus from "@/components/BrowseStatus";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
@@ -23,7 +30,6 @@ import { isGrandOpeningActive } from "@shared/grandOpening";
 import type { BusinessLocation } from "@shared/businessLocations";
 import { resolveBusinessLocations } from "@shared/businessLocations";
 import {
-  DIRECTORY_TYPE_COLORS as TYPE_COLORS,
   DIRECTORY_TYPE_LABELS as TYPE_LABELS,
 } from "@shared/directoryTheme";
 
@@ -368,7 +374,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   }, [visibleBusinesses]);
 
   const categoryBands = useMemo(() => {
-    return CATEGORY_ORDER
+    return (isSpaces ? ["group"] : CATEGORY_ORDER)
       .map(key => ({
         key,
         label: TYPE_LABELS[key],
@@ -376,7 +382,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         count: categoryCounts[key] ?? 0,
       }))
       .filter(c => c.count > 0);
-  }, [categoryCounts]);
+  }, [categoryCounts, isSpaces]);
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -446,8 +452,16 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     ? "Loading…"
     : `${filtered.length} ${isSpaces ? (filtered.length === 1 ? "squad" : "squadz") : (filtered.length === 1 ? "PLACE" : "PLACEZ")}`;
 
+  const { calmMode } = useTheme();
+  const reducedMotion = useReducedMotion();
   return (
-    <div className={`zine-page directory-page board-page board-page--makeover directory-page--v2${isSpaces ? " directory-page--spaces" : ""}`}>
+    <div className={`zine-page directory-page board-page board-page--makeover directory-page--v2 resources-page${isSpaces ? " directory-page--spaces" : ""}`}>
+      <WebGLShader direction={-1} />
+      <svg className="placez-shader-contours" viewBox="0 0 1000 600" preserveAspectRatio="none" fill="none" aria-hidden="true">
+        <path className="placez-shader-contours__cyan" d="M1080 185 C790 350 710 295 500 220 S165 75 -80 310" />
+        <path className="placez-shader-contours__magenta" d="M1080 360 C795 165 670 225 470 375 S165 580 -80 370" />
+        <path className="placez-shader-contours__yellow" d="M1080 420 C785 225 680 285 470 425 S165 635 -80 430" />
+      </svg>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <header className="directory-browser-header">
         <SectionBreadcrumb section={isSpaces ? "My Squadz" : "Our Placez"} />
@@ -467,6 +481,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
           </p>
         </div>
 
+        {!isSpaces && <a className="placez-map-link pdx-glass-rebind pdxBtn" href="/map?layer=places">Explore Placez on Mapz ↗</a>}
         <FilterSurvey label={isSpaces ? "My Squadz" : "Placez"} question={isSpaces ? "Where is your community?" : "What kind of place do you need?"} value={isSpaces ? activeNeighborhood : activeType} onChange={isSpaces ? setActiveNeighborhood : handleSelectCategory} accent="var(--panel-cyan)" options={isSpaces ? neighborhoodsInUse.map(value=>({value,label:value === "ALL" ? "All areas" : value})) : [{value:"ALL",label:"All Placez",count:visibleBusinesses.length},...categoryBands.map(category=>({value:category.key,label:category.label,color:category.color,count:category.count}))]}>
         <BrowseToolbar label="Search and filter places" className="directory-browser-search pdx-glass-card pdx-glass-rebind">
           <label className="directory-browser-search__field">
@@ -523,18 +538,18 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
         {!isSpaces && (
           <div className="directory-browser-categories" role="group" aria-label="Filter by category">
-            <button
+            <ResourceFilterButton quietMotion={Boolean(calmMode || reducedMotion)}
               type="button"
               className={`directory-browser-category${activeType === "ALL" ? " directory-browser-category--active" : ""}`}
-              style={{ ["--_c" as string]: "#19e3ff" }}
+              style={{ ["--_c" as string]: "var(--neon-cyan)" }}
               aria-pressed={activeType === "ALL"}
               onClick={() => handleSelectCategory("ALL")}
             >
               <span>All</span>
               <strong>{visibleBusinesses.length}</strong>
-            </button>
+            </ResourceFilterButton>
             {categoryBands.map(category => (
-              <button
+              <ResourceFilterButton quietMotion={Boolean(calmMode || reducedMotion)}
                 key={category.key}
                 type="button"
                 className={`directory-browser-category${activeType === category.key ? " directory-browser-category--active" : ""}`}
@@ -544,11 +559,11 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               >
                 <span>{category.label}</span>
                 <strong>{category.count}</strong>
-              </button>
+              </ResourceFilterButton>
             ))}
           </div>
         )}
-      </header>
+
 
       {formOpen && <ScrollReveal><DirectoryAddPlaceForm isSpaces={isSpaces} onClose={()=>setFormOpen(false)}/></ScrollReveal>}
 
@@ -586,19 +601,19 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
             <Button variant="solid" accent="cyan" onClick={openAddForm}><Plus size={16} /> {isSpaces ? "Add a squad" : "Add a place"}</Button>
           </BrowseStatus>
         ) : (
-          <div className="directory-browser-grid">
-            {filtered.map(biz => (
-              <DirectoryCard
-                key={biz.id}
-                biz={biz}
-                onClick={(el) => openPlace(biz, el)}
-                onRequireAuth={() => setShowAuth(true)}
-              />
-            ))}
+          <div className="placez-resource-rails">
+            {(activeType === 'ALL' ? categoryBands : categoryBands.filter(category=>category.key===activeType)).map(category => {
+              const places = filtered.filter(place=>place.type===category.key);
+              if (!places.length) return null;
+              return <ResourceRail room={isSpaces ? "Squadz" : "Placez"} itemName={isSpaces ? "squad" : "place"} key={category.key} id={`placez-${category.key}`} title={category.label} color={TYPE_COLORS[category.key] || 'var(--neon-cyan)'} count={places.length} quiet={Boolean(calmMode || reducedMotion)}>
+                {places.map(biz=><div className="rg-card-reveal" dir="ltr" key={biz.id}><DirectoryCard biz={biz} onClick={el=>openPlace(biz,el)} onRequireAuth={()=>setShowAuth(true)}/></div>)}
+              </ResourceRail>;
+            })}
           </div>
         )}
       </section>
 
+      </header>
       {/* Add-a-place band */}
       <section
         className="directory-add-band pdx-glass pdx-glass-rebind"
@@ -672,55 +687,5 @@ function DirectoryCard({
   onClick?: (el: HTMLElement) => void;
   onRequireAuth?: () => void;
 }) {
-  const upcomingEvents = biz.upcomingEvents ?? [];
-  const locations =
-    Array.isArray(biz.locations) && biz.locations.length > 0
-      ? biz.locations
-      : resolveBusinessLocations(biz);
-  const multiLoc = locations.length > 1;
-  // Multi-loc cards: neighborhood + "N locations" instead of dumping one address.
-  const address = multiLoc
-    ? [biz.neighborhood, `${locations.length} locations`].filter(Boolean).join(" · ") ||
-      `${locations.length} locations`
-    : [biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined;
-  const isNonprofit = biz.type === "nonprofit";
-  const grandOpening = isGrandOpeningActive(biz.grandOpeningDate);
-  const logoUrl = resolveDirectoryLogo(biz.name, biz.imageUrl) || undefined;
-  const fallbackLogoUrl = directoryFallbackLogo(biz.type);
-  return (
-    <PlaceCard
-      name={biz.name}
-      variant="full"
-      onClick={(e: React.MouseEvent<HTMLElement>) => {
-        onClick?.(e.currentTarget);
-      }}
-      category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-      className="pdxPlace--clickable pdx-glass-rebind rg-directory-card placez-rezource-card"
-      decoration={<><span className="placez-card-vignette" aria-hidden="true" /><ResourceCardMotif name={biz.name} category={biz.type} /></>}
-      isNonprofit={isNonprofit}
-      logoUrl={logoUrl}
-      fallbackLogoUrl={fallbackLogoUrl}
-      categoryLabel={TYPE_LABELS[biz.type] || biz.type}
-      address={address}
-      description={biz.description}
-      hours={multiLoc ? undefined : biz.hours || undefined}
-      phone={multiLoc ? undefined : biz.phone || undefined}
-      website={biz.website || undefined}
-      instagram={biz.instagram || undefined}
-      donateUrl={biz.donateUrl || undefined}
-      lat={multiLoc ? null : biz.lat}
-      lng={multiLoc ? null : biz.lng}
-      grandOpening={grandOpening}
-      businessId={biz.id}
-      isFollowing={Boolean(biz.isFollowing)}
-      onRequireAuth={onRequireAuth}
-      promoters={biz.promoters || []}
-      events={upcomingEvents.map(event => ({
-        day: event.dayOfWeek || undefined,
-        date: formatDirectoryEventWhen(event),
-        title: event.title,
-        href: eventPath(event.id, event.title, event.dayOfWeek),
-      }))}
-    />
-  );
+  return <PlaceDiscoveryCard place={biz} onOpen={element => onClick?.(element)} onRequireAuth={onRequireAuth} />;
 }

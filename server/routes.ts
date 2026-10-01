@@ -3097,7 +3097,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(gigs);
   });
 
-  const FOLLOWABLE_ROOMS: readonly FollowableRoom[] = ["gigz", "giftz", "sellz", "mizzed", "houz", "eventz", "outz"];
+  const FOLLOWABLE_ROOMS: readonly FollowableRoom[] = ["gigz", "giftz", "sellz", "mizzed", "houz", "eventz", "outz", "rezources"];
   const boardFollowKey = (value: unknown): FollowableRoom | null =>
     FOLLOWABLE_ROOMS.includes(value as FollowableRoom) ? value as FollowableRoom : null;
   // Exact board map points exist only after an explicit choice by the author.
@@ -7874,6 +7874,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     getUserById: (id) => storage.getUserById(id),
     uploadPhotos: upload.array("photos", 8),
     createModerationRequest: (data) => storage.createModerationRequest(data),
+    createOwnerDeskItem: (data) => storage.createOwnerDeskItem(data),
     sendMessage: (from, to, subject, body, opts) => storage.sendMessage(from, to, subject, body, opts),
   });
 

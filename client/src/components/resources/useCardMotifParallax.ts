@@ -30,7 +30,7 @@ export function useCardMotifParallax() {
  const { calmMode } = useTheme();
  useEffect(() => {
   const svg = ref.current;
-  const card = svg?.closest<HTMLElement>(".rg-directory-card, .rg-safety-summary");
+  const card = svg?.closest<HTMLElement>(".rg-directory-card, .rg-safety-summary, .room-doorways__door");
   if (!svg || !card || reduced || calmMode) return;
   if (!observer) {
    observer = new IntersectionObserver(changes => {

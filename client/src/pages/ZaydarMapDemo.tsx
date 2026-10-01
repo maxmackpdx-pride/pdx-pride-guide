@@ -1,3 +1,6 @@
+import ResourceMapPanel from '@/components/ResourceMapPanel';
+import { RESOURCE_MAP_ENTRIES, resourceMapHref, resourceMapKey, type ResourceMapEntry } from '@/lib/resourceMap';
+import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import {eventNight} from '../../public/zaydar-map/event-night.js';
 import { DetailRoomLinkContext, type DetailRoomLinkValue } from "@/components/DetailRoomLink";
 import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
@@ -54,7 +57,7 @@ import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 
 type Place = Business;
 type BoardKind = "gig" | "gifting" | "sellz";
-type Mark = { key: string; kind: "event" | "place" | "board"; lat: number; lng: number; item: Event | Place | MapRow };
+type Mark = { key: string; kind: "event" | "place" | "board" | "resource"; lat: number; lng: number; item: Event | Place | MapRow | ResourceMapEntry };
 type MapRow = Record<string, unknown> & { id?: number | string; title?: string; name?: string };
 const EMPTY_EVENTS: Event[] = [];
 const EMPTY_PLACES: Place[] = [];
@@ -350,7 +353,7 @@ export default function ZaydarMapDemo() {
     if (value !== "custom") { p.delete("from"); p.delete("to"); }
   });
   const layerValue = params.get("layer");
-  const activeLayer = layerValue === "boards" || layerValue === "stuff" ? "giftz" : ["events", "places", "mizzed", "gigz", "giftz", "sellz", "houz"].includes(layerValue || "") ? layerValue as ZaydarLayerId : null;
+  const activeLayer = layerValue === "boards" || layerValue === "stuff" ? "giftz" : ["events", "places", "rezources", "mizzed", "gigz", "giftz", "sellz", "houz"].includes(layerValue || "") ? layerValue as ZaydarLayerId : null;
   const changeLayer = useCallback((next: ZaydarLayerId | null) => {
     const current = mapSearchParams().get("layer");
     setLocation(mapHref(p => { if (next) p.set("layer", next); else p.delete("layer"); }), {
@@ -358,9 +361,17 @@ export default function ZaydarMapDemo() {
       state: window.history.state,
     });
   }, [setLocation]);
-  const showEvents = params.get("hideEvents") !== "1", showPlaces = params.get("hidePlaces") !== "1";
+  const showEvents = params.get("hideEvents") !== "1", showPlaces = params.get("hidePlaces") !== "1", showResources = params.get("hideResources") !== "1";
   const showGigz = params.get("hideGigz") !== "1", showGiftz = params.get("hideGiftz") !== "1" && params.get("hideStuff") !== "1", showSellz = params.get("hideSellz") !== "1" && params.get("hideStuff") !== "1", showMizzed = params.get("hideMizzed") !== "1", showHouz = params.get("hideHouz") !== "1";
   const toggleLayer = (key: string) => updateParams(p => { if (p.get(key) === "1") p.delete(key); else p.set(key, "1"); });
+  const resourceQuery = params.get('resources.q') || '';
+  const resourceCategory = params.get('resources.category') || '';
+  const selectedResourceKeys = (params.get('resources.ids') || '').split(',').filter(Boolean);
+  const visibleResources = useMemo(() => RESOURCE_MAP_ENTRIES.filter(({ org, categories }) => {
+    if (resourceCategory && !categories.some(item => item.id === resourceCategory || org.categoryIds?.includes(resourceCategory))) return false;
+    return [org.name, org.desc, org.scope, org.addr, ...categories.map(item => item.name), ...(org.serviceTags || [])]
+      .join(' ').toLowerCase().includes(resourceQuery.trim().toLowerCase());
+  }), [resourceQuery, resourceCategory]);
   const housingValue = params.get("housingType");
   const housingType = ["OFFERING", "LOOKING", "FORMING", "MANAGED"].includes(housingValue || "") ? housingValue as HousingType : null;
   const setHousingType = (value: HousingType | null) => updateParams(p => { if (value) p.set("housingType", value); else p.delete("housingType"); });
@@ -595,23 +606,28 @@ export default function ZaydarMapDemo() {
   const filteredWorlds=useMemo(()=>Object.fromEntries((Object.keys(locatedWorlds) as MapWorld[]).map(world=>[world,filterWorldRows(locatedWorlds[world],world,params,savedSellzSet)])) as Record<MapWorld,WorldRow[]>,[locatedWorlds,params,savedSellzSet]);
   const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>(place as Place).type!=='nonprofit'&&placeTypes.includes(zaydarPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes]);
   const visibleHousing = useMemo(() => housing
-    .filter(row => (!housingType || row.type === housingType) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
+    .filter(row => (!housingType || row.type === housingType || (housingType === "FORMING" && row.type === "LOOKING" && row.openToHaus === true)) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
     .map(row => ({ ...row, _board: "The HAÜZ", locationLabel: row.lat != null && row.lng != null
       ? `${row.mapPoint ? "Shared map point" : "Approximate area"} · ${roughDistanceMiles(viewerPoint || {lat:mapCenter[0],lng:mapCenter[1]},{lat:Number(row.lat),lng:Number(row.lng)})}${viewerPoint ? "" : " from map center"}` : row.mapPoint ? "Shared map point" : "Approximate area" })), [housing, housingType, housingSaved, housingTags, q, viewerPoint, mapCenter]);
   const marks = useMemo<Mark[]>(() => [
     ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
     ...(showPlaces ? placeMarks(mapPlaces) : []),
+    ...(showResources ? visibleResources.flatMap(entry => entry.locations.flatMap((location, index) => {
+      const key = resourceMapKey(entry.org.name, index);
+      return selectedResourceKeys.length && !selectedResourceKeys.includes(key) ? [] : [{ key, kind: 'resource' as const, lat: location.lat, lng: location.lng, item: entry }];
+    })) : []),
     ...(showGigz ? rowMarks(filteredWorlds.gigz, "board") : []),
     ...(showMizzed ? rowMarks(filteredWorlds.mizzed, "board") : []),
     ...(showGiftz ? rowMarks(filteredWorlds.giftz, "board") : []),
     ...(showSellz ? rowMarks(filteredWorlds.sellz, "board") : []),
     ...(showHouz ? rowMarks(visibleHousing, "board") : []),
-  ], [showEvents, showPlaces, showGigz, showGiftz, showSellz, showMizzed, showHouz, visibleEvents, mapPlaces, filteredWorlds, visibleHousing]);
+  ], [showEvents, showPlaces, showResources, showGigz, showGiftz, showSellz, showMizzed, showHouz, visibleEvents, mapPlaces, visibleResources, selectedResourceKeys.join(","), filteredWorlds, visibleHousing]);
 
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
     setSelected(mark.key);
     setCardOriginRect(originRect(target || null));
-    if (mark.kind === "event") { goOverlay("event", (mark.item as Event).id); }
+    if (mark.kind === "resource") { setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name)); }
+    else if (mark.kind === "event") { goOverlay("event", (mark.item as Event).id); }
     else if (mark.kind === "place") { goOverlay("place", (mark.item as Place).id); }
     else {
       const row = mark.item as MapRow;
@@ -647,6 +663,10 @@ export default function ZaydarMapDemo() {
   );
   const eventPanel = <section className="zaydar-layer-panel" aria-labelledby="map-eventz-title">
     <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-eventz-title">Eventz</h2></div>
+    <DiscoveryFlow room="Eventz" accent="var(--active-layer-color)" initiallyOpen={timeFilter !== 'default' || Boolean(eventTag)} choices={[
+      {id:'upcoming',label:'Find an event',onChoose:()=>setTimeFilter('default')},
+      {id:'tonight',label:'Go out tonight',onChoose:()=>setTimeFilter('tonight')},
+    ]}>
     <div className="zaydar-layer-rail" role="group" aria-label="Event filters">
       <button type="button" aria-pressed={timeFilter === "tonight"} onClick={() => setTimeFilter(timeFilter === "tonight" ? "default" : "tonight")}>Tonight</button>
       <button type="button" aria-pressed={timeFilter === "soon"} onClick={() => setTimeFilter(timeFilter === "soon" ? "default" : "soon")}>Soon</button>
@@ -669,6 +689,7 @@ export default function ZaydarMapDemo() {
       {!visibleEvents.length && <p className="zaydar-layer-empty" role="status">No events match these filters. <button type="button" onClick={() => { setTimeFilter("default"); setEventTag(null); }}>Show upcoming events</button></p>}
     </div>}
     <details className="zaydar-layer-rsvps"><summary>Your RSVPs</summary><ZaydarUpcomingRsvps events={events} loading={eventsLoading} onSignIn={() => setShowAuth(true)} onOpen={(event,target) => openMark({key:`e-${event.id}-${event.dateStart}`,kind:"event",lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)} /></details>
+    </DiscoveryFlow>
   </section>;
   const openComposer=(world:MapWorld)=>{
     if(!user){setShowAuth(true);return;}
@@ -684,6 +705,11 @@ export default function ZaydarMapDemo() {
   })) as Record<MapWorld,React.ReactNode>;
   const houzPanel = <section className="zaydar-layer-panel" aria-labelledby="map-houz-title">
     <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">Haüz</h2></div>
+    <DiscoveryFlow room="Haüz" accent="var(--active-layer-color)" initiallyOpen={Boolean(housingType || housingSaved || housingTags.length)} choices={[
+      {id:'home',label:'Find a home',onChoose:()=>setHousingType('OFFERING')},
+      {id:'household',label:'Find my people',onChoose:()=>setHousingType('FORMING')},
+      {id:'all',label:'Explore all',onChoose:()=>setHousingType(null)},
+    ]}>
     <BoardFollowButton board="houz" />
     {housingStats && <div className="zaydar-houz-stats" aria-label="HAÜZ board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
     <button type="button" className="zaydar-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to HAÜZ</button>
@@ -701,10 +727,17 @@ export default function ZaydarMapDemo() {
     {housingLoading ? <p role="status">Loading HAÜZ…</p> : housingError ? <p role="alert">HAÜZ could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
     <p className="zaydar-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
     <details className="zaydar-houz-about"><summary>How HAÜZ works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
+    </DiscoveryFlow>
   </section>;
   const layers: ZaydarLayer[] = [
     { id: "events", label: ROOMS.eventz.nav, color: ROOMS.eventz.accent, enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
-    { id:"places",label:ROOMS.placez.nav,color:ROOMS.placez.accent,enabled:showPlaces,onToggle:()=>toggleLayer("hidePlaces"),panel:worldPanels.places,viewMore:[] },
+    { id:"places",label:ROOMS.placez.nav,color:ROOMS.placez.accent,enabled:showPlaces,onToggle:()=>toggleLayer("hidePlaces"),panel:worldPanels.places,viewMore:[{label:"Browse all Placez",href:"/directory"}] },
+    { id:'rezources',label:'ReZources',color:'var(--neon-yellow)',enabled:showResources,onToggle:()=>toggleLayer('hideResources'),
+      panel:<ResourceMapPanel bounds={mapBounds} query={resourceQuery} category={resourceCategory}
+        selectedKeys={selectedResourceKeys} onClearSelection={()=>updateParams(p=>p.delete('resources.ids'))}
+        onQuery={value=>updateParams(p=>{if(value)p.set('resources.q',value);else p.delete('resources.q');p.delete('resources.ids');})}
+        onCategory={value=>updateParams(p=>{if(value)p.set('resources.category',value);else p.delete('resources.category');p.delete('resources.ids');})} />,
+      viewMore:[{label:'Browse all ReZources',href:'/rezources'}] },
     { id:"mizzed",label:ROOMS.mizzed.nav,color:ROOMS.mizzed.accent,enabled:showMizzed,onToggle:()=>toggleLayer("hideMizzed"),panel:worldPanels.mizzed,viewMore:[{label:"Browse all Mizzed",href:"/mizzed"}] },
     { id:"gigz",label:ROOMS.gigz.nav,color:"var(--room-gigz-ink)",enabled:showGigz,onToggle:()=>toggleLayer("hideGigz"),panel:worldPanels.gigz,viewMore:[{label:"Browse all Gigz",href:"/gigz"}] },
     { id:"giftz",label:ROOMS.giftz.nav,color:ROOMS.giftz.accent,enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[{label:"Browse all Giftz",href:"/giftz"}] },
@@ -723,6 +756,15 @@ export default function ZaydarMapDemo() {
   }, []);
   const bloomKeys = useMemo(() => bloomVenues(events), [events]);
   const sceneRows = useMemo(() => marks.map(mark => {
+    if (mark.kind === 'resource') {
+      const entry = mark.item as ResourceMapEntry;
+      const category = entry.categories[0];
+      const token = category.color.match(/var\((--[^)]+)\)/)?.[1];
+      const color = token ? getComputedStyle(document.documentElement).getPropertyValue(token).trim() || '#CCFF00' : '#CCFF00';
+      return { key:mark.key, kind:'resource', waypointFamily:'rezources', type:'service', typeIcon:zaydarTypeIcon('service'),
+        coordinates:[mark.lng,mark.lat], name:entry.org.name, color,
+        logo:entry.org.logo || '/zaydar-map/icons/types/service.svg', locationLabel:entry.org.scope };
+    }
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
     const row=mark.item as MapRow;
@@ -762,11 +804,12 @@ export default function ZaydarMapDemo() {
   }), [marks, places, events, demoEventIds, attendance, bloomKeys, tokenEpoch]);
   // Board 49: the status line says how many holograms are up tonight. No badge on the pin.
   const tonightCount = useMemo(() => { const night = eventNight(viewTimestamp); return sceneRows.filter(row => row.kind === "event" && row.eventNight === night).length; }, [sceneRows, viewTimestamp]);
-  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
+  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name));return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{
-      if(mark.kind==="place")return Number(mark.item.id)===placeId;
-      if(mark.kind==="event")return Number(mark.item.id)===eventId;
+      if(mark.kind==="resource")return false;
+      if(mark.kind==="place")return Number((mark.item as Place).id)===placeId;
+      if(mark.kind==="event")return Number((mark.item as Event).id)===eventId;
       const row=mark.item as MapRow;
       const key=row._board==="Mizzed"?"mizzed":row._board==="The HAÜZ"?"houz":boardKind(row)?boardParam(boardKind(row)!):"";
       return key && Number(row.id)===mapRecordId(params.get(key));
@@ -782,7 +825,7 @@ export default function ZaydarMapDemo() {
     <ZaydarCanvas initialCamera={initialCamera} ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
       if(!["places","mizzed","gigz","giftz","sellz"].includes(world))return;
       if(zoom<16.8){mapRef.current?.send("fit",{bounds});return;}
-      const ids=marks.filter(mark=>keys.includes(mark.key)).map(mark=>mark.item.id).join(",");
+      const ids=world==='rezources' ? keys.join(',') : marks.filter(mark=>keys.includes(mark.key)).map(mark=>(mark.item as MapRow).id).join(',');
       updateParams(p=>{p.set("layer",world);p.set(`${world}.ids`,ids);});
     }} onView={view=>{
       cameraState.current=view;

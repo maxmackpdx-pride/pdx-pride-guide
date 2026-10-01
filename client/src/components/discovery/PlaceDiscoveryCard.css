@@ -1,0 +1,9 @@
+.placez-card-surface { min-width:0; width:100%; }
+.placez-card-surface .placez-discovery-card .pdxPlace__actions { opacity:1; pointer-events:auto; transform:none; gap:8px; }
+.placez-card-surface .placez-discovery-card .pdxPlace__name { min-height:0; max-height:2.4em; overflow:hidden; }
+.placez-card-surface .placez-discovery-card .pdxPlace__main { margin-inline:28px; }
+.placez-card-surface .placez-discovery-card .rg-directory-footer { margin-inline:28px; }
+.placez-discovery-meta { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; color:var(--text-body); font:14px/1.7 var(--font-body); margin:0 0 14px; }
+.placez-discovery-meta span { display:inline-flex; align-items:center; gap:6px; }
+.placez-card-surface .placez-discovery-footer .pdxBtn { color:var(--text-heading); }
+.zaydar-layer-list > .placez-card-surface { margin-block:12px; }

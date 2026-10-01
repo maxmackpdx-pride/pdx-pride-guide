@@ -1,3 +1,5 @@
+import BoardAtmosphere from '@/components/board/BoardAtmosphere';
+import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
 import { ArrowDown } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
@@ -5,7 +7,6 @@ import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
-import BoardShader from "@/components/board/BoardShader";
 import BrowseStatus from "@/components/BrowseStatus";
 import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import { SearchInput } from "@/components/ds";
@@ -224,6 +225,9 @@ export default function Housing() {
   });
   const demoPosts = demoBoard?.posts ?? [];
   const displayedPosts = posts.length ? posts : showDemoSeed ? demoPosts : [];
+  const postsForRail = (type: HousingType) => displayedPosts.filter(post =>
+    post.type === type || (type === "FORMING" && post.type === "LOOKING" && post.openToHaus),
+  );
   const selectedInFeed = displayedPosts.find(post => post.id === selectedPostId);
   const selectedQuery = useQuery<HousingPostView>({
     queryKey: ["/api/housing", selectedPostId],
@@ -323,10 +327,15 @@ export default function Housing() {
     if (!requireAuth()) return;
     navigate(`/the-hauz/new?type=${type.toLowerCase()}`);
   };
+  const browseHousing = (type: HousingFilter) => {
+    setSearchQuery("");
+    setTags([]);
+    setFilter(type);
+  };
 
   return (
-    <div className="hz pdx-glass-rebind board-shader-page" data-shader-room="hauz">
-      <BoardShader room="hauz" />
+    <div className="hz pdx-glass-rebind">
+      <BoardAtmosphere room="hauz" side="left" />
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />
 
@@ -334,9 +343,13 @@ export default function Housing() {
         <LiveDot />
         <Mono accent>THE HAÜZ · Housing board</Mono>
       </div>
-      <div className="pdx-seam hz-seam--head" aria-hidden="true" />
       <div className="hz-pad"><div className="hz-wrap"><RoomPlate room="hauz" /></div></div>
 
+      <DiscoveryFlow room="The Haüz" accent="var(--room-hauz)" title="What are you here to do?" intro="Find a place or the people to share one with." initiallyOpen={Boolean(window.location.search) || Boolean(selectedPostId)} initialChoiceId={({ OFFERING: 'home', LOOKING: 'all', FORMING: 'household', MANAGED: 'all', ALL: 'all', SAVED: 'all' } as Record<HousingFilter, string>)[filter]} choices={[
+        { id: 'home', label: 'Find a home', description: 'Rooms offered by households', scrollToResults: true, scrollTargetId: 'housing-listings', onChoose: () => browseHousing('OFFERING') },
+        { id: 'household', label: 'Find my people', description: 'Households forming and room seekers open to forming one', scrollToResults: true, scrollTargetId: 'housing-listings', onChoose: () => browseHousing('FORMING') },
+        { id: 'all', label: 'Explore all', description: 'Browse the full board', scrollToResults: true, scrollTargetId: 'housing-listings', onChoose: () => browseHousing('ALL') },
+      ]}>
       {/* Hero */}
       <div className="hz-hero">
         <span className="hz-hero__fx" aria-hidden="true" />
@@ -384,11 +397,15 @@ export default function Housing() {
               chat.
             </p>
             <div className="hz-hero__mantra">
-              <Mono>Find a room · find people · find a home</Mono>
+              <Mono>Find a room · form a Haüz · find a home</Mono>
             </div>
             <div className="hz-board-actions">
               <a className="hz-chip hz-chip--btn" href="#housing-listings">Browse the listings <ArrowDown size={14} aria-hidden="true" /></a>
               <button type="button" className="hz-chip hz-chip--btn hz-board-post" onClick={() => { if (requireAuth()) navigate("/the-hauz/new"); }}>Post to The Haüz <ArrowUpRight size={14} aria-hidden="true" /></button>
+              <button type="button" className="hz-chip hz-chip--btn" onClick={() => openCompose("OFFERING")}>Offer a room</button>
+              <button type="button" className="hz-chip hz-chip--btn" onClick={() => openCompose("LOOKING")}>Find housing</button>
+              <button type="button" className="hz-chip hz-chip--btn" onClick={() => openCompose("FORMING")}>Build a Haüz</button>
+              <button type="button" className="hz-chip hz-chip--btn" onClick={() => openCompose("PM")}>Property managers · Connect with Tucker</button>
             </div>
           </div>
         </div>
@@ -459,23 +476,24 @@ export default function Housing() {
                   </div>
                 ) : null}
               </div>
-              {RAILS.filter(rail => filter === "ALL" || filter === "SAVED" || filter === rail.type).map(rail => <HousingRail key={rail.type} {...rail} posts={displayedPosts.filter(post => post.type === rail.type)} handlers={handlers} onCompose={openCompose} />)}
+              {RAILS.filter(rail => filter === "ALL" || filter === "SAVED" || filter === rail.type).map(rail => <HousingRail key={rail.type} {...rail} posts={postsForRail(rail.type)} handlers={handlers} onCompose={openCompose} />)}
             </div>
           ) : (
             <div className="hz-board-rails">
-              {RAILS.filter(rail => filter === "ALL" || filter === "SAVED" || filter === rail.type).map(rail => <HousingRail key={rail.type} {...rail} posts={displayedPosts.filter(post => post.type === rail.type)} handlers={handlers} onCompose={openCompose} />)}
+              {RAILS.filter(rail => filter === "ALL" || filter === "SAVED" || filter === rail.type).map(rail => <HousingRail key={rail.type} {...rail} posts={postsForRail(rail.type)} handlers={handlers} onCompose={openCompose} />)}
             </div>
           )}
         </div>
       </div>
 
       <SafetyGuide context="housing" />
-      <RoomDoorways current="hauz" />
-      <CloseSeam line="Post it. Scroll it. Chat." url="zaylist.com/the-hauz" />
 
       {selectedPostId !== null && selectedQuery.isError && !selectedInFeed && <div className="hz-board-link-error" role="alert">This post is unavailable. <button type="button" onClick={() => { setSelectedPostId(null); setSelectedIntent(null); }}>Back to the board</button></div>}
       {selectedPost && <HousingPostOverlay key={selectedPost.id} post={selectedPost} userId={user?.id} initialDetail initialIntent={selectedIntent} sharePath={postId => `/the-hauz/${postId}`} onClose={() => { setSelectedPostId(null); setSelectedIntent(null); }} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => { setSelectedIntent(null); setSelectedPostId(postId); }} />}
 
+      </DiscoveryFlow>
+      <RoomDoorways current="hauz" />
+      <CloseSeam line="Post it. Scroll it. Chat." url="zaylist.com/the-hauz" />
       {showAuth ? <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" /> : null}
     </div>
   );
