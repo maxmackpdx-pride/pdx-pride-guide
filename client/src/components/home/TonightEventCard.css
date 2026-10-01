@@ -94,7 +94,6 @@
 :is(html.calm-mode,:root[data-calm="true"]) .home-tonight .tonight-card { transition: none; transform: none !important; }
 
 @media(max-width:600px) {
-  .home-tonight .tonight-card__art { aspect-ratio:1; }
   .home-tonight .tonight-card__body { padding:18px; gap:12px; }
   .home-tonight .tonight-card__body h3 { font-size:28px; }
   .home-tonight .tonight-card__footer { margin-inline:18px; gap:8px; }
@@ -112,7 +111,8 @@
 .rail-card-room__logo { display:block; width:120px; height:34px; object-fit:contain; object-position:left center; }
 .rail-card-room__logo--white { object-fit:cover; object-position:center; filter:brightness(0) invert(1); }
 
-/* Compact copy spacing for the 240px homepage cards. */
+/* Screenshot reference: 240px rail cards with compact 8:5 artwork on every screen. */
+.home-tonight .tonight-card__art { aspect-ratio:8 / 5; }
 .home-tonight .tonight-card__body { padding:18px; gap:10px; }
 .home-tonight .tonight-card__body h3 { font-size:28px; }
 .home-tonight .tonight-card__footer { margin-inline:18px; padding:12px 0 16px; }
