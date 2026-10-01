@@ -3392,3 +3392,8 @@ html.calm-mode .home-next-preview__orb,
   }
   .home-next-preview__card:last-child .home-next-preview__beta { right: 5px; }
 }
+
+/* Fit the event spectrum to the glyphs, including the animated number. */
+.home-stat-strip__grad--events { width:fit-content; max-width:100%; background-image:linear-gradient(90deg,var(--day-mon),var(--day-tue),var(--day-thu),var(--day-sat),var(--day-wed),var(--day-sun),var(--day-fri)); }
+.home-stat-strip__grad--events .pdxCountUp,
+.home-stat-strip__grad--events .pdxCountUp__num { display:inline-block; background-image:inherit; }

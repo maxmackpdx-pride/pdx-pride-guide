@@ -1,5 +1,4 @@
 import { WebGLShader } from "@/components/ui/web-gl-shader";
-import "@/components/board/BoardShader.css";
 import { useSavedEvents } from "@/hooks/useSavedEvents";
 import { useAuth } from "@/context/AuthContext";
 import { useMemo, useState } from "react";
@@ -50,7 +49,7 @@ export default function TonightPanel() {
 
   return (
     <section className="home-tonight" aria-labelledby="home-tonight-title">
-      <div className="home-tonight__atmosphere" aria-hidden="true"><WebGLShader /><span className="board-shader-veil" /></div>
+      <div className="home-tonight__atmosphere" aria-hidden="true"><WebGLShader /></div>
       <div className="home-tonight__inner">
         <header className="home-tonight__head">
           <p className="home-tonight__eyebrow">Tonight · Portland</p>
