@@ -3617,6 +3617,11 @@ html.calm-mode .rg-options button,
 /* Category rails keep full-size cards on a horizontal, right-to-left track. */
 .resources-page .rg-resource-rails { display: grid; gap: 64px; min-width: 0; }
 .resources-page .rg-resource-rail-section { min-width: 0; }
+.resources-page .rg-resource-rail-placeholder { height: 685px; }
+@media (min-width: 720px) { .resources-page .rg-resource-rail-placeholder { height: 520px; } }
+@media (max-width: 600px) {
+  .resources-page .rg-card-motif :is(.rg-motif-drift, .rg-motif-breathe, .rg-motif-object-drift, .rg-motif-signal-trace) { animation: none !important; }
+}
 .resources-page .rg-rail-heading { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 80px; }
 .resources-page .rg-rail-heading .rg-eyebrow { margin: 0; font-size: 14px; line-height: 1.6; letter-spacing: .08em; }
 .resources-page .rg-rail-heading h2 { margin: 16px 0 0; font-size: var(--rg-title-size, 40px); line-height: 1.6; }

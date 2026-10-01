@@ -37,6 +37,7 @@
 .home-tonight .rg-resource-rail:focus-visible { outline: 2px solid var(--rail-accent); outline-offset: 3px; }
 .home-tonight .rg-rail-track { display: flex; gap: 36px; touch-action: pan-y pinch-zoom; }
 .home-tonight__item { flex: 0 0 min(440px, calc((100% - 36px) / 2)); min-width: 0; display: flex; }
+.home-tonight .tonight-card__art { aspect-ratio: 8 / 5; }
 .home-tonight .rg-rail-track img { user-select: none; -webkit-user-drag: none; }
 .home-tonight .rg-rail-progress { height: 3px; width: min(240px, 60%); margin: 12px auto 0; background: var(--border-default); border-radius: 3px; overflow: hidden; }
 .home-tonight .rg-rail-progress > div { height: 100%; background: var(--rail-accent); transform-origin: right; }
@@ -47,6 +48,7 @@
 @media (max-width: 719px) {
   .home-tonight .rg-rail-track { gap: 27px; }
   .home-tonight__item { flex-basis: 94%; }
+  .home-tonight .tonight-card__art { aspect-ratio: 8 / 5; }
 }
 .home-tonight__empty { margin: 0; padding: 18px 0; color: var(--text-lo, #b7b7c0); font: 500 14px/1.5 var(--font-body, sans-serif); }
 @media (max-width: 620px) {

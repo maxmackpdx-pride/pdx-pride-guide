@@ -538,7 +538,7 @@ export default function Resources() {
   }, [searchTarget, showResults, quietMotion]);
   return (
     <div className="resources-page">
-      <WebGLShader />
+      <WebGLShader waveSpeed={0.7} />
       <header className="rg-intro rg-wrap">
         <div className="rg-intro-top">
           <span className="rg-eyebrow">
@@ -546,7 +546,7 @@ export default function Resources() {
           </span>
 
         </div>
-        <RezourcesLogo quietMotion={Boolean(quietMotion)} />
+        <RezourcesLogo quietMotion={Boolean(quietMotion || mobile)} />
           <div className="rg-intro-actions">
             <BoardShareButton title="ReZources" path="/rezources" card={{ room: "ReZources", mark: "/brand/family/rezources.svg", line: "All the ways we show up." }} />
             <BoardFollowButton board="rezources" />
@@ -693,8 +693,8 @@ export default function Resources() {
                 const group = rows.filter(row => categoriesFor(row).some(c => c.id === type.id));
                 if (!group.length) return null;
                 const railId = `resource-rail-${type.id}`;
-                return <ResourceRail key={type.id} id={railId} title={type.name} color={type.color} count={group.length} quiet={Boolean(quietMotion)} focusIndex={searchTarget ? group.findIndex(row => row.org.name === searchTarget) : undefined}>
-                  {group.map(row => <div className="rg-card-reveal" key={row.org.name} dir="ltr" tabIndex={-1} data-resource-search-card={row.org.name}>
+                return <ResourceRail key={type.id} id={railId} title={type.name} color={type.color} count={group.length} quiet={Boolean(quietMotion)} focusIndex={searchTarget ? group.findIndex(row => row.org.name === searchTarget) : undefined} deferOnMobile>
+                  {() => group.map(row => <div className="rg-card-reveal" key={row.org.name} dir="ltr" tabIndex={-1} data-resource-search-card={row.org.name}>
                     <ResourceCard row={{ ...row, sectionCategory: type }} onOpen={openDetail} />
                   </div>)}
                 </ResourceRail>;

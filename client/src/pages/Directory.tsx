@@ -461,7 +461,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   const reducedMotion = useReducedMotion();
   return (
     <div className={`zine-page directory-page board-page board-page--makeover directory-page--v2 resources-page${isSpaces ? " directory-page--spaces" : ""}`}>
-      <WebGLShader direction={-1} />
+      <WebGLShader direction={-1} waveSpeed={0.7} />
       <svg className="placez-shader-contours" viewBox="0 0 1000 600" preserveAspectRatio="none" fill="none" aria-hidden="true">
         <path className="placez-shader-contours__cyan" d="M1080 185 C790 350 710 295 500 220 S165 75 -80 310" />
         <path className="placez-shader-contours__magenta" d="M1080 360 C795 165 670 225 470 375 S165 580 -80 370" />

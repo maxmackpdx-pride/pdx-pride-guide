@@ -96,7 +96,7 @@ export default function MobileBottomNav() {
   const hubActive = navLinkActive(location, "/dashboard");
   const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
   const placesActive = navLinkActive(location, "/directory");
-  const activeIndex = open || showAuth ? 4 : hubActive ? 2 : mapActive ? 1 : placesActive ? 3 : eventsActive ? 0 : -1;
+  const activeIndex = open || showAuth ? 4 : hubActive ? 2 : placesActive ? 1 : mapActive ? 3 : eventsActive ? 0 : -1;
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
 
@@ -212,6 +212,32 @@ export default function MobileBottomNav() {
           </Link>
 
           <Link
+            href="/directory"
+            className={tabClass(placesActive, "cyan")}
+            data-accent="cyan"
+            aria-label="Placez"
+            title="Placez"
+            aria-current={placesActive ? "page" : undefined}
+            onClick={handleNavLink}
+          >
+            <span className="znav-icon-row"><MapPin size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Placez</span>
+          </Link>
+
+          <Link
+            href="/dashboard"
+            className={`${tabClass(hubActive, "cyan")} znav-mapz`}
+            data-accent="cyan"
+            aria-label="Hub"
+            title="Hub"
+            aria-current={hubActive ? "page" : undefined}
+            onClick={handleNavLink}
+          >
+            <span className="znav-icon-row"><PanelsTopLeft size={22} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Hub</span>
+          </Link>
+
+          <Link
             href="/map"
             className={tabClass(mapActive, "orange")}
             data-accent="orange"
@@ -235,32 +261,6 @@ export default function MobileBottomNav() {
               </svg>
             </span>
             <span className="znav-caption">MAPZ</span>
-          </Link>
-
-          <Link
-            href="/dashboard"
-            className={`${tabClass(hubActive, "cyan")} znav-mapz`}
-            data-accent="cyan"
-            aria-label="Hub"
-            title="Hub"
-            aria-current={hubActive ? "page" : undefined}
-            onClick={handleNavLink}
-          >
-            <span className="znav-icon-row"><PanelsTopLeft size={22} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Hub</span>
-          </Link>
-
-          <Link
-            href="/directory"
-            className={tabClass(placesActive, "cyan")}
-            data-accent="cyan"
-            aria-label="Placez"
-            title="Placez"
-            aria-current={placesActive ? "page" : undefined}
-            onClick={handleNavLink}
-          >
-            <span className="znav-icon-row"><MapPin size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Placez</span>
           </Link>
 
           <button

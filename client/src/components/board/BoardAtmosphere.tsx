@@ -29,7 +29,7 @@ const sketches: Record<Exclude<Room, 'hauz'>, string[]> = {
 
 export default function BoardAtmosphere({ room, side }: { room: Room; side: 'left' | 'right' }) {
   return <div className={`board-atmosphere board-atmosphere--${side}`} style={{ '--board-atmosphere-color': `var(--room-${room})` } as React.CSSProperties} aria-hidden="true">
-    <WebGLShader accent={`var(--room-${room})`} blueprintUrl={room === 'hauz' ? '/resources-art/hauz-moving-day.svg' : null} direction={side === 'right' ? -1 : 1} />
+    <WebGLShader accent={`var(--room-${room})`} blueprintUrl={room === 'hauz' ? '/resources-art/hauz-moving-day.svg' : null} direction={side === 'right' ? -1 : 1} waveSpeed={0.7} />
     <svg className="board-atmosphere__contours" viewBox="0 0 1000 600" preserveAspectRatio="none" fill="none" role="presentation">
       <path d="M-80 370 C180 180 310 235 525 360 S845 570 1080 320" />
       <path d="M-80 395 C180 205 310 260 525 385 S845 595 1080 345" />

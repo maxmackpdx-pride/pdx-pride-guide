@@ -51,7 +51,7 @@ export default function Boards() {
   usePageSeo("Boards | Zaylist", "Choose a Zaylist board for housing, gifts, selling, work, missed connections, or communities.");
 
   return <div className="boards-index">
-    <WebGLShader palette="week" direction={1} />
+    <WebGLShader palette="week" direction={1} waveSpeed={0.7} />
     <div className="boards-index__veil" aria-hidden="true" />
     <header className="boards-index__intro">
       <span className="boards-index__eyebrow">BOARDS / FIND YOUR ROOM</span>

@@ -5,6 +5,7 @@ const LOOP_RADIANS = Math.PI * 2;
 
 import { useEffect, useRef, type CSSProperties } from "react";
 import * as THREE from "three";
+import "./web-gl-shader.css";
 
 const vertexShader = `
   attribute vec3 position;
@@ -128,21 +129,28 @@ const fragmentShader = `
     for (int i = 0; i < 4; i++) {
       whiteInk += sketch(p, extraWaves[i].x, extraWaves[i].y, extraWaves[i].z) * 0.5;
     }
+    #ifdef USE_BLUEPRINT
     float drafting = blueprintBand(p, 0.0)
                  + blueprintBand(p, 1.0)
                  + blueprintBand(p, 2.0);
+    #else
+    float drafting = 0.0;
+    #endif
     color = mix(color, vec3(1.0), min(whiteInk + drafting * 0.90, 0.78));
     gl_FragColor = vec4(color, 1.0);
   }
 `;
 
 /** Prime-color waves with locally loaded drafting lines. */
-export function WebGLShader({ accent, palette = "prime", direction = 1, blueprintUrl = null }: { accent?: string; palette?: "prime" | "week"; direction?: -1 | 1; blueprintUrl?: string | null } = {}) {
+export function WebGLShader({ accent, palette = "prime", direction = 1, blueprintUrl = null, waveSpeed = 1 }: { accent?: string; palette?: "prime" | "week"; direction?: -1 | 1; blueprintUrl?: string | null; waveSpeed?: number } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    // The full-screen fragment pass can stall mobile GPUs, especially beside
+    // ReZources' card rails. CSS paints the same soft wave surface on phones.
+    if (waveSpeed < 1 && window.matchMedia("(max-width: 719px), (pointer: coarse)").matches) return;
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
@@ -200,7 +208,9 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
     const geometry = new THREE.PlaneGeometry(2, 2);
     const material = new THREE.RawShaderMaterial({
       vertexShader,
-      fragmentShader,
+      // Most rooms use only the wave/sketch lines. Avoid the costly blueprint
+      // sampling path entirely unless a room supplies an image for it.
+      fragmentShader: `${blueprintUrl ? "#define USE_BLUEPRINT\n" : ""}${fragmentShader}`,
       uniforms,
       depthTest: false,
       depthWrite: false,
@@ -226,11 +236,11 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
       render();
     });
     const animate = (now: number) => {
-      // Slow atmospheric motion needs only 30fps, including high-refresh screens.
+      // Keep desktop motion smooth without redrawing on every high-refresh frame.
       if (now - lastPaint < 1000 / 30) { frame = requestAnimationFrame(animate); return; }
       lastPaint = now;
       if (lastTime)
-        uniforms.time.value = (uniforms.time.value + Math.min((now - lastTime) / 1000, 0.1) * LOOP_RADIANS / LOOP_SECONDS) % LOOP_RADIANS;
+        uniforms.time.value = (uniforms.time.value + Math.min((now - lastTime) / 1000, 0.1) * waveSpeed * LOOP_RADIANS / LOOP_SECONDS) % LOOP_RADIANS;
       lastTime = now;
       render();
       frame = requestAnimationFrame(animate);
@@ -293,14 +303,14 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
       material.dispose();
       renderer.dispose();
     };
-  }, [accent, palette, direction, blueprintUrl]);
+  }, [accent, palette, direction, blueprintUrl, waveSpeed]);
 
   return (
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="rg-stream-background"
-      style={accent ? { color: accent } as CSSProperties : undefined}
+      className={`rg-stream-background${waveSpeed < 1 ? " rg-stream-background--mobile-fallback" : ""}`}
+      style={accent ? { color: accent, "--rg-mobile-primary": accent, "--rg-mobile-secondary": accent, "--rg-mobile-tertiary": accent } as CSSProperties : undefined}
     />
   );
 }
