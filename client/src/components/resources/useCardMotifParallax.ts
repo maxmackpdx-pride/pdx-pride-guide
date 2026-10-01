@@ -11,10 +11,11 @@ function schedule() {
  if (frame) return;
  frame = requestAnimationFrame(() => {
   frame = 0;
-  for (const card of visible) {
+  // Read every rectangle before writing styles, avoiding a layout flush per card.
+  const positions = [...visible].map(card => ({ card, rect: card.getBoundingClientRect() }));
+  for (const { card, rect } of positions) {
    const entry = entries.get(card);
    if (!entry) continue;
-   const rect = card.getBoundingClientRect();
    const scroll = Math.max(-1, Math.min(1, (innerHeight / 2 - rect.top - rect.height / 2) / (innerHeight / 2 + rect.height / 2)));
    entry.svg.style.setProperty("--rg-parallax-x", `${entry.x.toFixed(2)}px`);
    entry.svg.style.setProperty("--rg-parallax-y", `${(scroll * 7 + entry.y).toFixed(2)}px`);

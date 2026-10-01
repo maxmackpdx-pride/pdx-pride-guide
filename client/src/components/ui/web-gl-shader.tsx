@@ -3,7 +3,7 @@
 const LOOP_SECONDS = 1200;
 const LOOP_RADIANS = Math.PI * 2;
 
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import * as THREE from "three";
 import "./web-gl-shader.css";
 
@@ -36,15 +36,14 @@ const fragmentShader = `
     return p.y + curve;
   }
 
-  float stream(vec2 p, float phase, float offset, float bend) {
-    float distanceToStream = abs(waveDistance(p, phase, offset, bend));
+  float stream(float distanceToWave) {
+    float distanceToStream = abs(distanceToWave);
     return 0.009 / (distanceToStream + 0.008)
          + 0.04 * exp(-distanceToStream * 4.0);
   }
 
   // Paired drafting contours follow the same wave, with a quiet pencil wobble.
-  float sketch(vec2 p, float phase, float offset, float bend) {
-    float distanceToWave = waveDistance(p, phase, offset, bend);
+  float sketch(vec2 p, float phase, float distanceToWave) {
     float pixel = 2.0 / min(resolution.x, resolution.y);
     float wobble = sin(p.x * 19.0 + phase) * 0.0025
                  + sin(p.x * 37.0 - phase) * 0.0012;
@@ -112,22 +111,31 @@ const fragmentShader = `
   void main() {
     vec2 p = (gl_FragCoord.xy * 2.0 - resolution)
            / min(resolution.x, resolution.y);
-    vec3 color = cyan    * stream(p, 0.0, -0.65,  1.0)
-               + yellow  * stream(p, 1.3, -0.22, -0.5)
-               + magenta * stream(p, 2.6,  0.22,  0.5)
-               + orange  * stream(p, 3.9,  0.65, -1.0)
-               + violet * stream(p, extraWaves[0].x, extraWaves[0].y, extraWaves[0].z)
-               + red * stream(p, extraWaves[1].x, extraWaves[1].y, extraWaves[1].z)
-               + green * stream(p, extraWaves[2].x, extraWaves[2].y, extraWaves[2].z)
-               + blue * stream(p, extraWaves[3].x, extraWaves[3].y, extraWaves[3].z);
-    // Keep the Prime neon threads visible without washing out text.
-    color = (1.0 - exp(-color * 1.25)) * 0.7;
-    float whiteInk = sketch(p, 0.0, -0.65, 1.0)
-                   + sketch(p, 1.3, -0.22, -0.5)
-                   + sketch(p, 2.6, 0.22, 0.5)
-                   + sketch(p, 3.9, 0.65, -1.0);
+    // Each wave feeds both its neon stream and drafting contours.
+    // Reuse the distance instead of evaluating the same trigonometry twice.
+    float distances[8];
+    distances[0] = waveDistance(p, 0.0, -0.65, 1.0);
+    distances[1] = waveDistance(p, 1.3, -0.22, -0.5);
+    distances[2] = waveDistance(p, 2.6, 0.22, 0.5);
+    distances[3] = waveDistance(p, 3.9, 0.65, -1.0);
     for (int i = 0; i < 4; i++) {
-      whiteInk += sketch(p, extraWaves[i].x, extraWaves[i].y, extraWaves[i].z) * 0.5;
+      distances[i + 4] = waveDistance(p, extraWaves[i].x, extraWaves[i].y, extraWaves[i].z);
+    }
+    vec3 color = cyan * stream(distances[0])
+               + yellow * stream(distances[1])
+               + magenta * stream(distances[2])
+               + orange * stream(distances[3])
+               + violet * stream(distances[4])
+               + red * stream(distances[5])
+               + green * stream(distances[6])
+               + blue * stream(distances[7]);
+    color = (1.0 - exp(-color * 1.25)) * 0.7;
+    float whiteInk = sketch(p, 0.0, distances[0])
+                   + sketch(p, 1.3, distances[1])
+                   + sketch(p, 2.6, distances[2])
+                   + sketch(p, 3.9, distances[3]);
+    for (int i = 0; i < 4; i++) {
+      whiteInk += sketch(p, extraWaves[i].x, distances[i + 4]) * 0.5;
     }
     #ifdef USE_BLUEPRINT
     float drafting = blueprintBand(p, 0.0)
@@ -144,13 +152,22 @@ const fragmentShader = `
 /** Prime-color waves with locally loaded drafting lines. */
 export function WebGLShader({ accent, palette = "prime", direction = 1, blueprintUrl = null, waveSpeed = 1, lowPower = false }: { accent?: string; palette?: "prime" | "week"; direction?: -1 | 1; blueprintUrl?: string | null; waveSpeed?: number; lowPower?: boolean } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [mobileFallback, setMobileFallback] = useState(() =>
+    window.matchMedia("(max-width: 719px), (pointer: coarse)").matches);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 719px), (pointer: coarse)");
+    const sync = () => setMobileFallback(media.matches);
+    media.addEventListener("change", sync);
+    sync();
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     // The full-screen fragment pass can stall mobile GPUs, especially beside
     // ReZources' card rails. CSS paints the same soft wave surface on phones.
-    if (waveSpeed < 1 && window.matchMedia("(max-width: 719px), (pointer: coarse)").matches) return;
+    if (waveSpeed < 1 && mobileFallback) return;
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
@@ -225,8 +242,9 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
     let lastTime = 0;
     let lastPaint = 0;
     let lost = false;
+    let visible = false;
     const render = () => {
-      if (!lost) renderer.render(scene, camera);
+      if (!disposed && !lost && visible && !document.hidden) renderer.render(scene, camera);
     };
     if (blueprintUrl) new THREE.TextureLoader().load(blueprintUrl, (texture) => {
       if (disposed) { texture.dispose(); return; }
@@ -255,7 +273,7 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
       cancelAnimationFrame(frame);
       clearTimeout(timer);
       lastTime = 0;
-      if (document.hidden || lost) return;
+      if (document.hidden || lost || !visible) return;
       if (
         motion.matches ||
         document.documentElement.classList.contains("calm-mode") ||
@@ -287,6 +305,13 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
       attributes: true,
       attributeFilter: ["class", "data-calm"],
     });
+    const intersection = new IntersectionObserver(([entry]) => {
+      const next = entry.isIntersecting;
+      if (next === visible) return;
+      visible = next;
+      syncAnimation();
+    });
+    intersection.observe(canvas);
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
     canvas.addEventListener("webglcontextlost", onLost);
@@ -302,6 +327,7 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
       cancelAnimationFrame(frame);
       clearTimeout(timer);
       observer.disconnect();
+      intersection.disconnect();
       calmObserver.disconnect();
       canvas.removeEventListener("webglcontextlost", onLost);
       canvas.removeEventListener("webglcontextrestored", onRestored);
@@ -311,7 +337,7 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
       material.dispose();
       renderer.dispose();
     };
-  }, [accent, palette, direction, blueprintUrl, waveSpeed, lowPower]);
+  }, [accent, palette, direction, blueprintUrl, waveSpeed, lowPower, mobileFallback]);
 
   return (
     <canvas

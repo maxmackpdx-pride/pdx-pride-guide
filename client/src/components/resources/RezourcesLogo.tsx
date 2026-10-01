@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
-import { animate, useMotionValue } from 'framer-motion';
+import { animate, useInView, useMotionValue } from 'framer-motion';
 import { rezourcesLetterPaths } from './rezourcesLetterPaths';
 import './RezourcesLogo.css';
 
@@ -78,7 +78,7 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
   const hovering = useRef(false);
 
   useEffect(() => {
-    if (quiet) { swing.current?.stop(); angle.set(0); return; }
+    if (quiet) { swing.current?.stop(); settling.current = false; hovering.current = false; angle.set(0); return; }
     const index = OBJECTS.findIndex(item => item.id === object.id);
     const phase = index * Math.PI * 2 / OBJECTS.length + Math.PI / 4;
     const started = performance.now();
@@ -158,8 +158,16 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
   </g>;
 }
 
-export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }) {
+export function RezourcesLogo({ quietMotion: requestedQuietMotion = false }: { quietMotion?: boolean }) {
   const frame = useRef<HTMLHeadingElement>(null);
+  const inView = useInView(frame);
+  const [documentVisible, setDocumentVisible] = useState(() => !document.hidden);
+  useEffect(() => {
+    const sync = () => setDocumentVisible(!document.hidden);
+    document.addEventListener('visibilitychange', sync);
+    return () => document.removeEventListener('visibilitychange', sync);
+  }, []);
+  const quietMotion = requestedQuietMotion || !inView || !documentVisible;
   const id = useId().replace(/:/g, '');
   const [beePass, setBeePass] = useState(0);
   useEffect(() => {

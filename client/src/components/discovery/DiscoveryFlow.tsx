@@ -1,4 +1,4 @@
-import { useId, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTheme } from '@/context/ThemeContext';
 import { ResourceFilterButton } from '@/components/resources/ResourceFilterButton';
@@ -11,6 +11,8 @@ export default function DiscoveryFlow({ room, accent, choices, children, initial
   initiallyOpen?: boolean; initialChoiceId?: string; title?: string; intro?: string; enabled?: boolean; keepMounted?: boolean; onViewAll?: () => void;
 }) {
   const id = useId();
+  const scrollTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(scrollTimer.current), []);
   const [selected, setSelected] = useState<string | null>(initiallyOpen ? initialChoiceId ?? choices[0]?.id ?? null : null);
   const reduced = useReducedMotion();
   const { calmMode } = useTheme();
@@ -26,9 +28,10 @@ export default function DiscoveryFlow({ room, accent, choices, children, initial
           disabled={choice.disabled}
           aria-pressed={selected === choice.id} aria-controls={`${id}-results`}
           onClick={() => {
+            clearTimeout(scrollTimer.current);
             setSelected(choice.id);
             choice.onChoose?.();
-            if (choice.scrollToResults) window.setTimeout(() => {
+            if (choice.scrollToResults) scrollTimer.current = setTimeout(() => {
               (document.getElementById(choice.scrollTargetId || '') || document.getElementById(`${id}-results`))
                 ?.scrollIntoView({ behavior: quiet ? 'auto' : 'smooth', block: 'start' });
             }, quiet ? 0 : 420);
@@ -38,6 +41,7 @@ export default function DiscoveryFlow({ room, accent, choices, children, initial
         </ResourceFilterButton>)}
       </div>
       <button type="button" className="discovery-skip" onClick={() => {
+        clearTimeout(scrollTimer.current);
         const browse = choices.find(choice => choice.id === 'all' || choice.id === 'browse') ?? choices[0];
         setSelected(browse?.id ?? 'all');
         if (onViewAll) onViewAll(); else browse?.onChoose?.();
