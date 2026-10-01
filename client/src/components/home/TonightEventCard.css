@@ -111,17 +111,19 @@
 .rail-card-room__logo { display:block; width:120px; height:34px; object-fit:contain; object-position:left center; }
 .rail-card-room__logo--white { object-fit:cover; object-position:center; filter:brightness(0) invert(1); }
 
-/* Screenshot reference: 240px rail cards with compact 8:5 artwork on every screen. */
-.home-tonight .tonight-card__art { aspect-ratio:8 / 5; }
+/* One art zone for every closed card: 4:5, edge to edge from the top, and the
+   bottom quarter fades into the card. The body rises into that fade so the
+   art and the copy read as one surface. */
+.tonight-card__art { aspect-ratio:4 / 5; }
+.tonight-card__art > img:not(.today-location__brand) {
+  object-fit:cover;
+  object-position:top center;
+  mask-image:linear-gradient(to bottom,var(--z-oled) 75%,color-mix(in srgb,var(--z-oled) 22%,transparent) 90%,transparent 100%);
+  -webkit-mask-image:linear-gradient(to bottom,var(--z-oled) 75%,color-mix(in srgb,var(--z-oled) 22%,transparent) 90%,transparent 100%);
+}
+.tonight-card__art + .tonight-card__body { margin-top:-31.25%; }
+.tonight-card__art + .tonight-card__body .rail-card-room__logo { filter:drop-shadow(0 2px 6px var(--z-oled)) drop-shadow(0 0 2px var(--z-oled)); }
+.tonight-card__art + .tonight-card__body .rail-card-room__logo--white { filter:brightness(0) invert(1) drop-shadow(0 2px 6px var(--z-oled)) drop-shadow(0 0 2px var(--z-oled)); }
 .home-tonight .tonight-card__body { padding:18px; gap:10px; }
 .home-tonight .tonight-card__body h3 { font-size:28px; }
 .home-tonight .tonight-card__footer { margin-inline:18px; padding:12px 0 16px; }
-
-/* Show the complete flyer inside the established compact card footprint. */
-.tonight-card__art--flyer { background:var(--z-oled); }
-.tonight-card__art--flyer img {
-  object-fit:contain;
-  object-position:center;
-  mask-image:linear-gradient(to bottom,var(--z-oled) 96%,transparent 100%);
-  -webkit-mask-image:linear-gradient(to bottom,var(--z-oled) 96%,transparent 100%);
-}

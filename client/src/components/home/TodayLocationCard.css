@@ -1,6 +1,16 @@
 .today-location__art .rg-motif-slot { position: absolute; inset: 0; color: var(--c); }
 .today-location__art .rg-card-motif { width: 100%; height: 100%; color: var(--c); opacity: .65; }
-.tonight-card__art .today-location__brand { position: absolute; inset: 0; margin: auto; width: 82%; height: 42%; object-fit: contain; object-position: center; mask-image: none; filter: brightness(0) invert(1) drop-shadow(0 3px 8px var(--z-oled)); }
 .today-location .tonight-card__footer { min-height: 44px; }
-.tonight-card__art .today-location__brand { filter:none; }
-.tonight-card__art .today-location__brand--business { filter:brightness(0) invert(1); }
+/* Logos sit in the clear part of the art zone (above the fade), centered a
+   touch above its middle so they read as centered under the top controls. */
+.tonight-card__art .today-location__brand {
+  position: absolute; left: 10%; right: 10%; top: 19%; width: 80%; height: 40%; margin: 0;
+  object-fit: contain; object-position: center; mask-image: none; -webkit-mask-image: none;
+  filter: drop-shadow(0 3px 8px var(--z-oled));
+}
+.tonight-card__art .today-location__brand--business { filter: brightness(0) invert(1); }
+/* OutZide art is square line art with its sign at the top: keep it whole and inset below the card controls. */
+.today-location__art > img:not(.today-location__brand) {
+  position: absolute; left: 9%; top: 17%; width: 82%; height: auto; aspect-ratio: 1;
+  object-fit: contain; object-position: center;
+}
