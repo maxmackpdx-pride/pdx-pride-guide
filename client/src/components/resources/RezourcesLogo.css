@@ -5,14 +5,14 @@
   transform-origin: left center;
   animation: rg-logo-ink-draw 17s linear infinite;
 }
-/* Long quiet holds, a quick erasure, then an uneven pencil redraw. */
+/* Long quiet holds, a gradual eraser pass, then an uneven pencil redraw. */
 @keyframes rg-logo-ink-draw {
-  0%, 57%, 100% { transform: scaleX(1); }
-  58%, 61% { transform: scaleX(0); }
-  63% { transform: scaleX(.18); }
-  65%, 66% { transform: scaleX(.44); }
-  69% { transform: scaleX(.8); }
-  71% { transform: scaleX(1); }
+  0%, 54%, 100% { transform: scaleX(1); }
+  61%, 63% { transform: scaleX(0); }
+  65% { transform: scaleX(.18); }
+  67%, 68% { transform: scaleX(.44); }
+  71% { transform: scaleX(.8); }
+  74% { transform: scaleX(1); }
 }
 .rg-logo-z-glitch {
   pointer-events: none;
@@ -29,4 +29,25 @@
 @media (prefers-reduced-motion: reduce) {
   .rg-logo-ink-reveal { animation: none; }
   .rg-logo-z-glitch { display: none; animation: none; }
+}
+
+.rg-logo-color-window { opacity: .13; pointer-events: none; mix-blend-mode: screen; }
+.rg-logo-color-depth {
+  translate: var(--logo-color-x, 0px) var(--logo-color-y, 0px);
+  transition: translate 350ms ease-out;
+}
+.rg-logo-object-hit { pointer-events: fill; }
+.rg-logo-object-swing { transform-origin: var(--object-pivot); pointer-events: none; }
+.rg-logo-object:hover .rg-logo-object-swing { animation: rg-logo-object-swing 2.4s ease-in-out; }
+@keyframes rg-logo-object-swing {
+  0%, 100% { rotate: 0deg; }
+  22% { rotate: 1deg; }
+  48% { rotate: -.7deg; }
+  72% { rotate: .3deg; }
+}
+[data-quiet-motion] .rg-logo-object-swing { animation: none !important; }
+[data-quiet-motion] .rg-logo-color-depth { translate: none; transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .rg-logo-object-swing { animation: none !important; }
+  .rg-logo-color-depth { translate: none; transition: none; }
 }
