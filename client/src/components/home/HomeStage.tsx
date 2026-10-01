@@ -113,6 +113,7 @@ export default function HomeStage({ afterWelcome }: Props) {
         {afterWelcome}
       </section>
 
+      <div className="site-pre-footer-edge" aria-hidden="true" />
       <TonightPanel />
     </div>
   );

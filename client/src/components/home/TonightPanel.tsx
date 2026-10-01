@@ -48,13 +48,9 @@ export default function TonightPanel() {
 
   return (
     <section className="home-tonight" aria-labelledby="home-tonight-title">
-      <div className="home-tonight__fx" aria-hidden="true">
-        <span className="home-tonight__glow" />
-        <span className="home-tonight__grid" />
-      </div>
       <div className="home-tonight__inner">
         <header className="home-tonight__head">
-          <p className="home-tonight__eyebrow"><i />Tonight · Portland</p>
+          <p className="home-tonight__eyebrow">Tonight · Portland</p>
           <h2 id="home-tonight-title">
             <span><b>You&apos;re</b> not</span>
             <span>looking for content.</span>
