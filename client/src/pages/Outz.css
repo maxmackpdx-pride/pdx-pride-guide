@@ -76,7 +76,7 @@
 .outz-dir-row:last-child { border-bottom: none; }
 .outz-dir-row:not(.outz-dir-row--head):hover { background: var(--surface-card-hover, #141414); }
 .outz-dir-row--head {
-  color: var(--text-faint, #666); font-family: var(--font-mono, monospace); font-size: 11px;
+  color: var(--text-lo, #999); font-family: var(--font-mono, monospace); font-size: 12px;
   letter-spacing: var(--tracking-mono, .04em); text-transform: uppercase;
 }
 .outz-dir-row b {
@@ -86,6 +86,7 @@
 .outz-dir-row__kind { font-family: var(--font-mono, monospace); font-size: 12px; text-transform: uppercase; }
 .outz-dir-row__source { color: var(--text-lo, #999); font-size: 12px; }
 .outz-dir-row__open {
+  align-items: center; display: inline-flex; min-height: 44px;
   color: var(--cyan, #00ffff); font-family: var(--font-display, sans-serif); font-size: 13px;
   font-weight: 700; text-decoration: none; text-transform: uppercase; white-space: nowrap;
 }
@@ -93,7 +94,7 @@
 
 /* ---------- source ledger ---------- */
 .outz-ledger__label {
-  color: var(--text-faint, #666); font-family: var(--font-mono, monospace); font-size: 11px;
+  color: var(--text-lo, #999); font-family: var(--font-mono, monospace); font-size: 12px;
   letter-spacing: var(--tracking-mono, .04em); margin: 0 0 16px; text-transform: uppercase;
 }
 .outz-ledger { display: flex; flex-wrap: wrap; gap: 16px 32px; }

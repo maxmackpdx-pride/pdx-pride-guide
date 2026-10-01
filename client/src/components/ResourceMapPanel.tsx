@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { ArrowUpRight, MapPin } from 'lucide-react';
-import DiscoveryFlow from './discovery/DiscoveryFlow';
 import { RESOURCE_CATEGORIES } from '@/lib/resourcesData';
 import { RESOURCE_MAP_ENTRIES, resourceMapHref, resourceMapKey, type ResourceMapEntry } from '@/lib/resourceMap';
 import { inMapBounds, type MapBounds } from '@/lib/mapWorlds';
@@ -32,9 +31,6 @@ export default function ResourceMapPanel({ bounds, query, category, onQuery, onC
   </a>;
   return <section className="zaydar-layer-panel resource-map-panel" aria-label="ReZources on this map">
     <div className="zaydar-layer-panel__heading"><small>In this view</small><h2>ReZources</h2></div>
-    <DiscoveryFlow room="ReZources" accent="var(--active-layer-color)" initiallyOpen={Boolean(query || category)}
-      intro="Find verified help, care, community and opportunities near you."
-      choices={[{ id: 'browse', label: 'Find a ReZource' }, { id: 'care', label: 'Health & care', onChoose: () => onCategory('health') }, { id: 'safety', label: 'Safety & basic needs', onChoose: () => onCategory('safety') }]}>
       <div className="resource-map-controls">
         <label>Search ReZources<input type="search" value={query} onChange={event => { onQuery(event.target.value); setLimit(40); }} placeholder="Organization, service, or need" /></label>
         <label>Category<select value={category} onChange={event => { onCategory(event.target.value); setLimit(40); }}>
@@ -51,6 +47,5 @@ export default function ResourceMapPanel({ bounds, query, category, onQuery, onC
         <p>These providers have no verified map coordinates. Their details and contact options are still available.</p>
         <div className="resource-map-results">{withoutPin.map(renderEntry)}</div>
       </details>}
-    </DiscoveryFlow>
   </section>;
 }

@@ -77,7 +77,7 @@ export default function MizzedBoard() {
     </>}
     {selected && <SpottedDetailModal postId={selected.id} title={selected.title} body={selected.body} place={selected.placeName || selected.eventTitle || selected.venueHint || "Around town"} kindLabel={mizzedSource(selected)?.label || "That one spot by the…"} kindColor="#ff37c2" isMine={selected.isMine} status={selected.status} source={mizzedSource(selected)} onClose={() => setSelected(null)} />}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
-    <RoomDoorways current="mizzed" />
     <BoardCloseSeam line="Say the thing." url="zaylist.com/mizzed" />
+    <RoomDoorways current="mizzed" />
   </main>;
 }

@@ -114,7 +114,7 @@
 .directory-browser-search__select > span {
   padding-left: 3px;
   color: #aaa69e;
-  font: 700 10px/1 var(--font-mono, monospace);
+  font: 700 12px/1.25 var(--font-mono, monospace);
   letter-spacing: .15em;
   text-transform: uppercase;
 }
@@ -173,7 +173,7 @@
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 13px;
   border: 1px solid #2b2b32;
   border-radius: 999px;
@@ -194,8 +194,8 @@
   padding: 0 5px;
   border-radius: 999px;
   background: #17171c;
-  color: #85817a;
-  font: 700 10px/1 var(--font-mono, monospace);
+  color: var(--text-lo, #999);
+  font: 700 12px/1 var(--font-mono, monospace);
 }
 
 .directory-browser-category:hover,
@@ -235,7 +235,7 @@
 .directory-browser-results__eyebrow {
   margin: 0 0 7px;
   color: var(--panel-cyan, #19e3ff);
-  font: 700 10px/1 var(--font-mono, monospace);
+  font: 700 12px/1.25 var(--font-mono, monospace);
   letter-spacing: .18em;
   text-transform: uppercase;
 }
@@ -253,13 +253,13 @@
   justify-content: flex-end;
   gap: 12px;
   color: var(--panel-lime, #c8fa3c);
-  font: 700 10px/1 var(--font-mono, monospace);
+  font: 700 12px/1.25 var(--font-mono, monospace);
   letter-spacing: .14em;
   text-transform: uppercase;
 }
 
 .directory-browser-results__status button {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 12px;
   border: 1px solid #303039;
   border-radius: 999px;
@@ -552,14 +552,15 @@
   align-items: center;
   gap: 8px 14px;
   padding: 15px 4px 0;
-  color: #747078;
-  font: 700 10px/1 var(--font-mono, monospace);
+  color: var(--text-lo, #999);
+  font: 700 12px/1.35 var(--font-mono, monospace);
   letter-spacing: .1em;
   text-transform: uppercase;
 }
 
 .directory-discovery__quick button {
-  padding: 0;
+  min-height: 40px;
+  padding: 6px 2px;
   border: 0;
   background: none;
   color: #c9c5bc;

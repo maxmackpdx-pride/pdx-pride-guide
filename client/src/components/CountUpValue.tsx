@@ -75,7 +75,9 @@ export default function CountUpValue({
     }
     const start = performance.now();
     const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / ms);
+      // The first RAF timestamp can precede performance.now() from this frame.
+      // Clamp both ends so a positive count never briefly renders negative.
+      const t = Math.max(0, Math.min(1, (now - start) / ms));
       const p = 1 - Math.pow(1 - t, 3);
       setDisplay(Math.round(from + (to - from) * p));
       if (t < 1) rafRef.current = requestAnimationFrame(tick);

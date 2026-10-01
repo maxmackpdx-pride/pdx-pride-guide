@@ -88,7 +88,7 @@
   --text-body-muted: #c8c4bb;
   --text-mid: #e6e3da;
   --text-lo: #999999;
-  --text-faint: #666666;
+  --text-faint: var(--text-lo);
   --text-meta: var(--text-lo);
   /* Loop-safe bookend cyan — required when background-size/animation scrolls the bar */
   --rainbow-bar: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));

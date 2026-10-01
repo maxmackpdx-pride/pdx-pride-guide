@@ -51,7 +51,7 @@ import { parseHousingTagFilter } from "@shared/housingTags";
 import { HousingCard, type HousingCardHandlers } from "@/components/housing/HousingCards";
 import { GlowEffect } from "@/components/ui/glow-effect";
 import { HousingTagFilter } from "@/components/housing/HousingTagFilter";
-import { Btn, CloseSeam, LiveDot, Mono, SectionTitle } from "@/components/housing/HousingPrimitives";
+import { Btn, CloseSeam, Mono, SectionTitle } from "@/components/housing/HousingPrimitives";
 import "./Housing.css";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
@@ -331,10 +331,6 @@ export default function Housing() {
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />
 
-      <div className="hz-run">
-        <LiveDot />
-        <Mono accent>THE HAÜZ · Housing board</Mono>
-      </div>
       <div className="hz-pad"><div className="hz-wrap"><RoomPlate room="hauz" /></div></div>
       {!isLoading && !isError && <BoardStatsBar variant="band" stats={[
         {num:posts.length,label:"Matching listings",color:"var(--room-hauz)"},
@@ -446,8 +442,8 @@ export default function Housing() {
       {selectedPost && <HousingPostOverlay key={selectedPost.id} post={selectedPost} userId={user?.id} initialDetail initialIntent={selectedIntent} sharePath={postId => `/the-hauz/${postId}`} onClose={() => { setSelectedPostId(null); setSelectedIntent(null); }} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => { setSelectedIntent(null); setSelectedPostId(postId); }} />}
 
       </DiscoveryFlow>
-      <RoomDoorways current="hauz" />
       <CloseSeam line="Post it. Scroll it. Chat." url="zaylist.com/the-hauz" />
+      <RoomDoorways current="hauz" />
       {showAuth ? <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" /> : null}
     </div>
   );
