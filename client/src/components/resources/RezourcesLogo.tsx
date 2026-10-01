@@ -16,7 +16,7 @@ const SKETCH_REGIONS = [
 const OBJECTS = [
   { id: 'rent', path: 'M374 455L486 438L503 523L391 550Z', pivot: '430px 446.5px' },
   { id: 'apple', path: 'M29 620L101 601L149 619L183 641L207 684L211 752L186 785L129 797L70 775L49 706L31 682Z', pivot: '132px 623px' },
-  { id: 'disco-ball', path: 'M1635 575C1699 576 1751 623 1777 680C1801 743 1775 820 1726 852C1681 884 1604 876 1553 839C1500 801 1485 736 1512 670C1532 620 1575 591 1635 575Z', pivot: '1635px 578px' },
+  { id: 'disco-ball', path: 'M1636.4 570C1687.6 570.8 1729.2 608.4 1750 654C1769.2 704.4 1748.4 766 1709.2 791.6C1673.2 817.2 1611.6 810.8 1570.8 781.2C1528.4 750.8 1516.4 698.8 1538 646C1554 606 1588.4 582.8 1636.4 570Z', pivot: '1636px 572px' },
   { id: 'scales-left', path: 'M824 302H834L863 370L872 374L871 391L844 402L811 400L782 387L783 374L792 370Z', pivot: '828px 302px' },
   { id: 'scales-right', path: 'M988 302H998L1027 369L1038 376L1033 392L1003 402L974 398L949 388L950 374L959 369Z', pivot: '993px 302px' },
 ];
@@ -140,7 +140,7 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
       {object.id === 'rent'
         ? <image href={LATE_RENT_ART} x="390" y="410" width="190" height="138" />
         : object.id === 'disco-ball'
-        ? <image href={DISCO_ART} x="1498" y="579" width="286" height="291" clipPath={`url(#${id}-${object.id})`} />
+        ? <image href={DISCO_ART} x="1527" y="573" width="229" height="233" clipPath={`url(#${id}-${object.id})`} />
         : <image href={ART} width="1792" height="1008" clipPath={`url(#${id}-${object.id})`} />}
     </g>
     <path d={object.path} fill="transparent" className="rg-logo-object-hit" />
@@ -237,7 +237,7 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
           <path d={OBJECTS[0].path} fill="var(--neon-orange)" opacity=".82" />
           <path d="M805 509Q898 519 1000 505L1037 511Q918 531 800 521Z" fill="color-mix(in srgb, var(--neon-orange) 76%, var(--z-black))" stroke="var(--neon-yellow)" strokeWidth="3" />
           <path d="M819 511Q923 526 1021 511" fill="none" stroke="var(--neon-yellow)" strokeWidth="2" opacity=".62" />
-          <path d="M1639 412C1634 466 1638 525 1635 590" fill="none" stroke="var(--text-heading)" strokeWidth="2.6" opacity=".7" />
+          <path d="M1639 412C1634 466 1638 525 1636 571" fill="none" stroke="var(--text-heading)" strokeWidth="2.6" opacity=".7" />
           <image href={ROOSTER_ROCK_ART} x="1300" y="270" width="300" height="220" transform="rotate(-11 1450 380)" />
         </g>
         <image href={ART} width="1792" height="1008" mask={`url(#${id}-still)`} />
