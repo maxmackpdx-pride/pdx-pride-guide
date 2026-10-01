@@ -1,4 +1,8 @@
 .filter-survey { --survey-accent: var(--neon-yellow); padding: 24px 0 28px; border-block: 1px solid color-mix(in srgb, var(--survey-accent) 18%, rgb(37 37 44)); color: rgb(245 242 235); }
+.filter-survey[data-surface="globe"] { --c: var(--survey-accent); position: relative; isolation: isolate; overflow: hidden; margin: 14px 0 18px; padding: 25px 14px 21px; border: 1px solid color-mix(in srgb, var(--survey-accent) 42%, var(--glass-card-border-color, rgb(52 52 59))); border-radius: var(--glass-card-radius, 16px); background: var(--glass-card-bg); box-shadow: var(--glass-card-shadow), inset 0 1px 0 rgb(255 255 255 / 12%); }
+.filter-survey[data-surface="globe"]::after { content: ""; position: absolute; inset: auto 11px 0; height: 1px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--survey-accent) 50%, transparent), transparent); pointer-events: none; }
+.filter-survey[data-surface="globe"] .filter-survey__top-rule.pdx-rainbow-rule { position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 2; }
+.filter-survey[data-surface="globe"] .filter-survey__options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .filter-survey__step { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 16px; position: relative; }
 .filter-survey__step + .filter-survey__step { padding-top: 23px; }
 .filter-survey__step:first-child::after { content: ""; position: absolute; width: 1px; left: 15px; top: 42px; bottom: -23px; background: rgb(52 52 59); }
@@ -20,6 +24,7 @@
 .filter-survey__details[hidden] { display: none; }
 .filter-survey button:focus-visible { outline: 2px solid var(--survey-accent); outline-offset: 3px; }
 @media (max-width: 600px) { .filter-survey { padding: 20px 0 22px; } .filter-survey__step { grid-template-columns: 30px minmax(0, 1fr); gap: 10px; } .filter-survey__number { width: 28px; height: 28px; } .filter-survey__step:first-child::after { left: 13px; } .filter-survey__options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; } .filter-survey__option.pdx-glass-rebind { min-height: 58px; padding: 9px; } }
+@media (max-width: 600px) { .filter-survey[data-surface="globe"] { padding: 23px 10px 18px; } }
 @media (prefers-reduced-motion: reduce) { .filter-survey__details-toggle svg { transition: none; } }
 
 /* ReZources artwork behind non-flyer rail cards; the existing card geometry and copy stay in place. */

@@ -9,7 +9,7 @@ export type FilterSurveyOption = { value: string; label: string; color?: string;
 
 /** The ReZources choice-first pattern, adapted to a board's existing filters. */
 export default function FilterSurvey({
-  label, question, options, value, onChange, children, accent = "var(--neon-yellow)",
+  label, question, options, value, onChange, children, accent = "var(--neon-yellow)", surface,
 }: {
   label: string;
   question: string;
@@ -18,12 +18,14 @@ export default function FilterSurvey({
   onChange: (value: string) => void;
   children?: ReactNode;
   accent?: string;
+  surface?: "globe";
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const reducedMotion = useReducedMotion();
   const { calmMode } = useTheme();
   const detailId = useId();
-  return <section className="filter-survey" style={{ "--survey-accent": accent } as CSSProperties} aria-label={`${label} discovery questions`}>
+  return <section className="filter-survey" data-surface={surface} style={{ "--survey-accent": accent } as CSSProperties} aria-label={`${label} discovery questions`}>
+    {surface === "globe" && <span className="filter-survey__top-rule pdx-rainbow-rule" aria-hidden="true" />}
     <div className="filter-survey__step">
       <span className="filter-survey__number" aria-hidden="true">01</span>
       <div className="filter-survey__content">
