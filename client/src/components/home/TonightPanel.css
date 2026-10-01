@@ -36,7 +36,7 @@
 .home-tonight .rg-resource-rail:active { cursor: grabbing; }
 .home-tonight .rg-resource-rail:focus-visible { outline: 2px solid var(--rail-accent); outline-offset: 3px; }
 .home-tonight .rg-rail-track { display: flex; gap: 29px; touch-action: pan-y pinch-zoom; }
-.home-tonight__item { flex: 0 0 clamp(240px, 24vw, 288px); min-width: 0; display: flex; }
+.home-tonight__item { flex: 0 0 clamp(264px, 26vw, 320px); min-width: 0; display: flex; }
 .home-tonight .rg-rail-track img { user-select: none; -webkit-user-drag: none; }
 .home-tonight .rg-rail-progress { height: 3px; width: min(240px, 60%); margin: 12px auto 0; background: var(--border-default); border-radius: 3px; overflow: hidden; }
 .home-tonight .rg-rail-progress > div { height: 100%; background: var(--rail-accent); transform-origin: right; }
@@ -45,7 +45,7 @@
 }
 @media (max-width: 719px) {
   .home-tonight .rg-rail-track { gap: 22px; }
-  .home-tonight__item { flex-basis: clamp(240px, 67.2vw, 288px); }
+  .home-tonight__item { flex-basis: clamp(264px, 74vw, 320px); }
 }
 /* The poster and frame scale down together; labels keep the nav's type floor. */
 .home-tonight .tonight-card { border-radius: 19px; }
@@ -91,4 +91,10 @@
 .home-tonight__atmosphere::after {
   content:""; position:absolute; inset:0; pointer-events:none;
   background:linear-gradient(to bottom,var(--z-oled) 0%,color-mix(in srgb,var(--z-oled) 55%,transparent) 90px,transparent 260px);
+}
+/* Phone: keep footer labels on one line. Save/Follow sizes to its label; View takes the rest. */
+@media (max-width: 600px) {
+  .home-tonight .tonight-card__footer button { white-space: nowrap; padding-inline: 10px !important; letter-spacing: .02em !important; }
+  .home-tonight .tonight-card__footer button:first-child { flex: 0 0 auto; }
+  .home-tonight .tonight-card__footer .tonight-card__view { flex: 1 1 auto; }
 }

@@ -338,11 +338,11 @@ export default function Housing() {
         {num:posts.filter(post => post.type === "LOOKING" || post.type === "FORMING").length,label:"People & households",color:"var(--room-hauz)"},
       ]} />}
 
-      <DiscoveryFlow room="The Haüz" accent="var(--room-hauz)" title="What are you here to do?" intro="Find a place or the people to share one with." initiallyOpen={Boolean(window.location.search) || Boolean(selectedPostId)} initialChoiceId={({ OFFERING: 'home', LOOKING: 'all', FORMING: 'household', MANAGED: 'all', ALL: 'all', SAVED: 'all' } as Record<HousingFilter, string>)[filter]} choices={[
+      <DiscoveryFlow room="The Haüz" accent="var(--room-hauz)" title="What are you here to do?" intro="Find a place or the people to share one with." initiallyOpen={Boolean(window.location.search) || Boolean(selectedPostId)} initialChoiceId={({ OFFERING: 'home', LOOKING: 'browse', FORMING: 'household', MANAGED: 'browse', ALL: 'browse', SAVED: 'browse' } as Record<HousingFilter, string>)[filter]} choices={[
         { id: 'home', label: 'Find a home', description: 'Rooms offered by households', scrollToResults: true, scrollTargetId: 'housing-listings', onChoose: () => browseHousing('OFFERING') },
         { id: 'household', label: 'Find my people', description: 'Households forming and room seekers open to forming one', scrollToResults: true, scrollTargetId: 'housing-listings', onChoose: () => browseHousing('FORMING') },
-        { id: 'all', label: 'Explore all', description: 'Browse the full board', scrollToResults: true, scrollTargetId: 'housing-listings', onChoose: () => browseHousing('ALL') },
-      ]}>
+        { id: 'post', label: 'Post a room', description: 'Offer a room in your place', onChoose: () => openCompose('OFFERING') },
+      ]} onViewAll={() => browseHousing('ALL')}>
       <section className="hz-entry-actions hz-pad" aria-label="The Haüz actions">
         <div className="hz-wrap">
           <h1>Browse homes and people</h1>

@@ -1,4 +1,4 @@
-import { useId, useState, type CSSProperties } from "react";
+import { useId, useRef, useState, type CSSProperties } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, BriefcaseBusiness, CalendarDays, Gift, Heart, House, MapPinned, Tags, Trees, Users, LifeBuoy, X } from "lucide-react";
@@ -33,6 +33,9 @@ export default function HomeDiscover({ open, onOpenChange }: { open: boolean; on
   const { calmMode } = useTheme();
   const quiet = Boolean(reduced || calmMode);
   const shown = group === null ? [] : group === "all" ? destinations : groups[group].indices.map(index => destinations[index]);
+  // After a pick, glide down to the front doors once they finish opening.
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const showDoors = () => resultsRef.current?.scrollIntoView({ behavior: quiet ? "auto" : "smooth", block: "start" });
   return (
     <Dialog.Root open={open} onOpenChange={next => { if (next) setGroup(null); onOpenChange(next); }}>
       <Dialog.Trigger asChild>
@@ -61,9 +64,9 @@ export default function HomeDiscover({ open, onOpenChange }: { open: boolean; on
             </div>
           </LayoutGroup>
           <button type="button" className="home-discover__skip" aria-controls={`${id}-destinations`} onClick={() => setGroup("all")}>Skip to view all</button>
-          <div id={`${id}-destinations`}>
+          <div id={`${id}-destinations`} ref={resultsRef} style={{ scrollMarginTop: 24 }}>
             <AnimatePresence initial={false} mode="wait">
-              {group !== null && <motion.section key={group} className="home-discover__results" aria-label="Your front doors" initial={quiet ? false : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: quiet ? 0 : .24, ease: "easeInOut" }}>
+              {group !== null && <motion.section key={group} className="home-discover__results" aria-label="Your front doors" initial={quiet ? false : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: quiet ? 0 : .24, ease: "easeInOut" }} onAnimationComplete={definition => { if ((definition as { opacity?: number }).opacity === 1) showDoors(); }}>
                 <p className="home-discover__eyebrow"><b aria-hidden="true">02</b> {group === "all" ? "All front doors" : "Your way in"}</p>
                 <div className="home-discover__destinations">
                   {shown.map(item => {

@@ -222,6 +222,13 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 .events-page .events-card-feed--list .tonight-card { display:grid; grid-template-columns:minmax(0,1fr) auto; }
 .events-page .events-card-feed--list .tonight-card__open { display:grid; grid-template-columns:160px minmax(0,1fr); }
 .events-page .events-card-feed--list .tonight-card__art img { height:100%; object-fit:cover; }
+/* In a list row the flyer sits beside the copy, so it fades to the right instead. */
+.events-page .events-card-feed--list .tonight-card__art { aspect-ratio:auto; }
+.events-page .events-card-feed--list .tonight-card__art + .tonight-card__body { margin-top:0; }
+.events-page .events-card-feed--list .tonight-card__art > img:not(.today-location__brand) {
+  mask-image:linear-gradient(to right,var(--z-oled) 75%,transparent 100%);
+  -webkit-mask-image:linear-gradient(to right,var(--z-oled) 75%,transparent 100%);
+}
 .events-page .events-card-feed--list .tonight-card__footer { flex-direction:column; justify-content:center; border-top:0; }
 @media(max-width:600px) {
   .events-page .events-card-feed--list .tonight-card { display:flex; }

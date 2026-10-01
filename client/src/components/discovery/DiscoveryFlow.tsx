@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useTheme } from '@/context/ThemeContext';
 import { ResourceFilterButton } from '@/components/resources/ResourceFilterButton';
 import './DiscoveryFlow.css';
@@ -17,6 +17,10 @@ export default function DiscoveryFlow({ room, accent, choices, children, initial
   const reduced = useReducedMotion();
   const { calmMode } = useTheme();
   const quiet = Boolean(reduced || calmMode);
+  // The next step waits below and rises in once it reaches the lower part of the screen.
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const reached = useInView(resultsRef, { once: true, margin: '0px 0px -15% 0px' });
+  const revealed = Boolean(selected) || reached;
   if (!enabled) return <>{children}</>;
   return <div className="discovery-flow" style={{ '--discovery-accent': accent, '--discovery-kicker-accent': accent } as CSSProperties}>
     <section className="discovery-survey" aria-labelledby={`${id}-title`}>
@@ -42,13 +46,17 @@ export default function DiscoveryFlow({ room, accent, choices, children, initial
       </div>
       <button type="button" className="discovery-skip" onClick={() => {
         clearTimeout(scrollTimer.current);
-        const browse = choices.find(choice => choice.id === 'all' || choice.id === 'browse') ?? choices[0];
+        const browse = choices.find(choice => choice.id === 'all' || choice.id === 'browse') ?? (onViewAll ? undefined : choices[0]);
         setSelected(browse?.id ?? 'all');
         if (onViewAll) onViewAll(); else browse?.onChoose?.();
+        // Skip lands on the listings, with the same pause as a choice.
+        scrollTimer.current = setTimeout(() => {
+          document.getElementById(`${id}-results`)?.scrollIntoView({ behavior: quiet ? 'auto' : 'smooth', block: 'start' });
+        }, quiet ? 0 : 420);
       }}>Skip to view all</button>
     </section>
-    <div id={`${id}-results`} className="discovery-results" hidden={!selected}>
-      {(selected || keepMounted) && <motion.div key={keepMounted ? id : selected} initial={quiet ? false : { opacity: 0, y: 24 }} animate={{ opacity: selected ? 1 : 0, y: selected || quiet ? 0 : 12 }} transition={{ duration: quiet ? 0 : .4 }}>
+    <div id={`${id}-results`} ref={resultsRef} className="discovery-results">
+      {<motion.div key={keepMounted ? id : 'results'} initial={quiet ? false : { opacity: 0, y: 24 }} animate={{ opacity: revealed ? 1 : 0, y: revealed || quiet ? 0 : 24 }} transition={{ duration: quiet ? 0 : .4 }} style={{ pointerEvents: revealed ? undefined : 'none' }}>
         <p className="discovery-kicker discovery-kicker--results"><span aria-hidden="true">02</span> Explore {room}</p>
         {children}
       </motion.div>}

@@ -3712,8 +3712,12 @@ function seedDemoBoardsContent() {
   gift.run(demoId, "GIFT", "Gently used Pride flags and bunting", "Left over from last year and still bright. Would love them to go to someone who will fly them proud.", "Decor", "NE Portland", "Meet up nearby", JSON.stringify(["/hausing/demo/gift-flags.jpg"]), FUTURE, OLD);
   gift.run(demoId, "ISO", "ISO: a working mini fridge for a new place", "Just moved into a studio and could really use a small fridge. Can pick up anywhere in town, happy to trade baked goods.", "Appliances", "N Portland", "Can pick up", JSON.stringify(["/hausing/demo/gift-fridge.jpg"]), FUTURE, OLD);
 
-  // SELLZ (3). Marked demo in the card chrome, with product photography so
-  // the market board shows its intended populated state.
+  seedDemoSellz(demoId, OLD, FUTURE);
+}
+
+/** SELLZ (3). Marked demo in the card chrome, with product photography so
+    the market board shows its intended populated state. */
+function seedDemoSellz(demoId: number, OLD: string, FUTURE: string) {
   sqlite.prepare(`DELETE FROM sellz_posts WHERE user_id = ?`).run(demoId);
   const sellz = sqlite.prepare(
     `INSERT INTO sellz_posts (user_id, title, description, category, condition, price_cents, negotiable, neighborhood, pickup_preference, photo_urls, status, expires_at, created_at)
@@ -3912,6 +3916,18 @@ function runBootMigrationsOnce() {
       console.warn("[boot] seed_demo_boards_mc_venues_v1 skipped:", err instanceof Error ? err.message : err);
     }
     recordBootMigration("seed_demo_boards_mc_venues_v1");
+  }
+  // Sellz demos joined seedDemoBoardsContent after its migrations had already
+  // run in production, so they were never created there. Seed them once.
+  if (!hasBootMigration("seed_demo_sellz_v1")) {
+    try {
+      const demoId = getOrCreateDemoUser(new Date().toISOString());
+      const existing = demoId == null ? 0 : (sqlite.prepare(`SELECT COUNT(*) AS n FROM sellz_posts WHERE user_id = ?`).get(demoId) as { n: number }).n;
+      if (demoId != null && existing === 0) seedDemoSellz(demoId, "2020-01-01T00:00:00.000Z", "2027-12-31T00:00:00.000Z");
+    } catch (err) {
+      console.warn("[boot] seed_demo_sellz_v1 skipped:", err instanceof Error ? err.message : err);
+    }
+    recordBootMigration("seed_demo_sellz_v1");
   }
   if (!hasBootMigration("verified_event_overrides_v1")) {
     applyVerifiedEventOverrides();

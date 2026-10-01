@@ -1,2 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 .detail-waypoint{position:absolute;top:16px;left:16px;z-index:5;width:44px;height:44px;padding:8px;background:color-mix(in srgb,var(--z-oled) 80%,transparent);border:1px solid currentColor;border-radius:12px}.detail-waypoint svg{width:100%;height:100%}
 body.home-card-embed{background:var(--z-oled)!important}body.home-card-embed> :not(#detail):not(#utility):not(#toast):not(script){display:none!important}body.home-card-embed #detail{position:fixed!important;inset:0!important;margin:0!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border:0!important;border-radius:0!important;transform:none!important;box-shadow:none!important;background:var(--z-oled)!important}body.home-card-embed #detail::backdrop{background:var(--z-oled)}body.home-card-embed #detail .detail-tools{padding-right:52px}body.home-card-embed #detail .close{display:none}body.home-card-embed #detail-content{max-height:none!important;overflow:auto!important}body.home-card-embed .detail-footer button,body.home-card-embed .detail-footer a{text-transform:uppercase}
+
+/* Home open card: the same hierarchy as the other Zaylist open cards.
+   Art on top, clear of the controls, then room label, title and region,
+   one primary action, and quiet links. OutZide's colors, texture and tabs stay. */
+body.home-card-embed #detail{font-family:'Barlow',var(--body)}
+body.home-card-embed .detail-hero{display:flex;flex-direction:column;padding:0 24px 20px;min-height:0}
+body.home-card-embed .detail-hero>.detail-art{position:relative;right:auto;top:auto;order:-1;align-self:center;width:min(78%,300px);height:200px;margin:64px 0 -8px;object-fit:contain;opacity:.95;mask-image:linear-gradient(to bottom,#000 75%,transparent);-webkit-mask-image:linear-gradient(to bottom,#000 75%,transparent)}
+body.home-card-embed .detail-waypoint{top:16px;left:16px}
+body.home-card-embed .detail-tools{top:16px;right:68px;padding-right:0}
+body.home-card-embed .detail-tools .minimize{display:none}
+body.home-card-embed .detail-hero .eyebrow{margin:0 0 8px;padding-right:0;color:var(--c);font:600 12px/1.4 'JetBrains Mono',var(--mono);letter-spacing:.14em;text-transform:uppercase}
+body.home-card-embed .detail-hero h2{margin:0 0 8px;padding-right:0;max-width:none;font:800 38px/1.02 var(--display);text-transform:uppercase;text-wrap:balance}
+body.home-card-embed .detail-hero .region{font:400 16px/1.5 'Barlow',var(--body);color:var(--text-mid,#e6e3da)}
+body.home-card-embed .detail-tabs [role=tab]{font-family:'JetBrains Mono',var(--mono)}
+body.home-card-embed .action-row button{border:1px solid color-mix(in srgb,var(--c) 55%,transparent);border-radius:22px;background:radial-gradient(130% 140% at 50% -10%,color-mix(in srgb,var(--c) 16%,transparent),transparent 60%),#000;color:var(--text-hi,#fff);font:700 .86rem/1.2 var(--display);letter-spacing:.06em;text-transform:uppercase;min-height:44px}
+/* One compact row: Directions (primary) and Follow, with Mapz and official details as small links. Share lives in the header. */
+body.home-card-embed #detail .detail-footer{display:flex!important;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:10px 16px 12px;overflow:visible}
+body.home-card-embed #detail .detail-footer>[data-action=share-place]{display:none}
+body.home-card-embed #detail .detail-footer>.directions-choice{order:1;position:relative;width:auto!important;margin:0!important}
+body.home-card-embed #detail .detail-footer>[data-action=follow-destination]{order:2}
+body.home-card-embed #detail .detail-footer>[data-action=view-mapz]{order:3;margin-left:auto}
+body.home-card-embed #detail .detail-footer>a{order:4}
+body.home-card-embed #detail .detail-footer>.directions-choice>summary,body.home-card-embed #detail .detail-footer>[data-action=follow-destination]{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:22px;font:700 14px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;list-style:none;white-space:nowrap}
+body.home-card-embed #detail .detail-footer>.directions-choice>summary::-webkit-details-marker{display:none}
+body.home-card-embed #detail .detail-footer>.directions-choice>summary{background:var(--c);border:1px solid var(--c);color:#000}
+body.home-card-embed #detail .detail-footer>[data-action=follow-destination]{background:#000;border:1px solid color-mix(in srgb,var(--c) 60%,transparent);color:var(--text-hi,#fff)}
+body.home-card-embed #detail .detail-footer>[data-action=follow-destination][aria-pressed=true]{background:color-mix(in srgb,var(--c) 20%,#000);border-color:var(--c)}
+body.home-card-embed #detail .detail-footer>[data-action=view-mapz],body.home-card-embed #detail .detail-footer>a{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 4px;border:0;background:none;color:var(--text-lo,#999);font:600 11px/1 'JetBrains Mono',var(--mono);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;cursor:pointer}
+body.home-card-embed #detail .detail-footer>[data-action=view-mapz]:hover,body.home-card-embed #detail .detail-footer>a:hover{color:var(--text-hi,#fff)}
+body.home-card-embed #detail .detail-footer>.directions-choice>.directions-options{position:absolute;bottom:calc(100% + 8px);left:0;z-index:6;min-width:240px}
+@media(max-width:480px){body.home-card-embed #detail .detail-footer>.directions-choice,body.home-card-embed #detail .detail-footer>[data-action=follow-destination]{flex:1 1 0}body.home-card-embed #detail .detail-footer>.directions-choice>summary{width:100%;box-sizing:border-box}body.home-card-embed #detail .detail-footer>[data-action=view-mapz]{margin-left:0}}
+body.home-card-embed #detail .detail-tools .minimize,body.home-card-embed #detail .drawer-handle{display:none!important}
+/* A linked trail map takes the top of the card; the line art steps aside. */
+.detail-hero>.detail-hero-map{position:relative;display:block;height:220px;margin:0 0 16px;border-radius:14px;overflow:hidden;border:1px solid color-mix(in srgb,var(--c) 35%,transparent)}
+body.home-card-embed .detail-hero>.detail-hero-map{order:-1;height:300px;margin:0 -24px 20px;border-radius:0;border:0;border-bottom:1px solid color-mix(in srgb,var(--c) 35%,transparent)}
+body.home-card-embed #detail .detail-hero>#card-trail-map.detail-hero-map{width:calc(100% + 48px);max-width:none;border-radius:0!important}
+#detail .detail-hero-map .maplibregl-ctrl-bottom-right,#detail .detail-hero-map .maplibregl-ctrl-bottom-left{bottom:0!important}
+#detail .detail-hero-map .maplibregl-ctrl-bottom-right{right:0!important}
+#detail .detail-hero-map .maplibregl-ctrl-attrib{font-size:10px;background:color-mix(in srgb,var(--z-oled,#000) 70%,transparent)}
+#detail .detail-hero-map .maplibregl-ctrl-bottom-right{left:52px}
+#detail .detail-hero-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib{max-width:none;margin:0}
