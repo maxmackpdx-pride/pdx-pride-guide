@@ -35,8 +35,8 @@
 .home-tonight .rg-resource-rail[data-fade-right="true"] { --rail-fade-right: transparent; }
 .home-tonight .rg-resource-rail:active { cursor: grabbing; }
 .home-tonight .rg-resource-rail:focus-visible { outline: 2px solid var(--rail-accent); outline-offset: 3px; }
-.home-tonight .rg-rail-track { display: flex; gap: 36px; touch-action: pan-y pinch-zoom; }
-.home-tonight__item { flex: 0 0 clamp(300px, 30vw, 360px); min-width: 0; display: flex; }
+.home-tonight .rg-rail-track { display: flex; gap: 29px; touch-action: pan-y pinch-zoom; }
+.home-tonight__item { flex: 0 0 clamp(240px, 24vw, 288px); min-width: 0; display: flex; }
 .home-tonight .rg-rail-track img { user-select: none; -webkit-user-drag: none; }
 .home-tonight .rg-rail-progress { height: 3px; width: min(240px, 60%); margin: 12px auto 0; background: var(--border-default); border-radius: 3px; overflow: hidden; }
 .home-tonight .rg-rail-progress > div { height: 100%; background: var(--rail-accent); transform-origin: right; }
@@ -44,8 +44,34 @@
   .home-tonight .rg-resource-rail-section { width: calc(100vw - 48px); margin-inline: calc((100% - (100vw - 48px)) / 2); }
 }
 @media (max-width: 719px) {
-  .home-tonight .rg-rail-track { gap: 27px; }
-  .home-tonight__item { flex-basis: min(84vw, 360px); }
+  .home-tonight .rg-rail-track { gap: 22px; }
+  .home-tonight__item { flex-basis: clamp(240px, 67.2vw, 288px); }
+}
+/* The poster and frame scale down together; labels keep the nav's type floor. */
+.home-tonight .tonight-card { border-radius: 19px; }
+.home-tonight .home-card-waypoint { width: 36px; height: 36px; left: 12px; top: 12px; }
+.home-tonight .home-card-waypoint > svg { width: 26px; height: 26px; }
+.home-tonight .tonight-card__body { padding: 15px; gap: 8px; }
+.home-tonight .tonight-card__body h3 { font-size: 24px; }
+.home-tonight .rail-card-room { height: 28px; font-size: 16px; }
+.home-tonight .rail-card-room__logo { width: 96px; height: 28px; }
+.home-tonight .tonight-card__time,
+.home-tonight .tonight-card__venue,
+.home-tonight .tonight-card__venue small,
+.home-tonight .tonight-card__tags span { font-size: 16px; }
+.home-tonight .tonight-card__venue { height: 68px; min-height: 68px; }
+.home-tonight .tonight-card__footer { margin-inline: 15px; gap: 8px; padding: 10px 0 14px; }
+.home-tonight .tonight-card__footer button,
+.home-tonight .tonight-card .rail-card-share { font-size: 16px !important; }
+.home-tonight .tonight-card .rail-card-share { top: 13px; right: 13px; padding-inline: 10px; }
+@media (max-width: 959px) {
+  .home-tonight .rail-card-room,
+  .home-tonight .tonight-card__time,
+  .home-tonight .tonight-card__venue,
+  .home-tonight .tonight-card__venue small,
+  .home-tonight .tonight-card__tags span,
+  .home-tonight .tonight-card__footer button,
+  .home-tonight .tonight-card .rail-card-share { font-size: 15px !important; }
 }
 .home-tonight__empty { margin: 0; padding: 18px 0; color: var(--text-lo, #b7b7c0); font: 500 14px/1.5 var(--font-body, sans-serif); }
 @media (max-width: 620px) {
