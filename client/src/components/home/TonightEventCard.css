@@ -116,3 +116,12 @@
 .home-tonight .tonight-card__body { padding:18px; gap:10px; }
 .home-tonight .tonight-card__body h3 { font-size:28px; }
 .home-tonight .tonight-card__footer { margin-inline:18px; padding:12px 0 16px; }
+
+/* Show the complete flyer inside the established compact card footprint. */
+.tonight-card__art--flyer { background:var(--z-oled); }
+.tonight-card__art--flyer img {
+  object-fit:contain;
+  object-position:center;
+  mask-image:linear-gradient(to bottom,var(--z-oled) 96%,transparent 100%);
+  -webkit-mask-image:linear-gradient(to bottom,var(--z-oled) 96%,transparent 100%);
+}
