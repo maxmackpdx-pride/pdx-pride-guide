@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { dayAccentToken, dayInkToken, dayComplementToken } from "@/lib/dsColors";
 import React from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import LiveWave from "@/components/LiveWave";
@@ -174,12 +175,6 @@ if (typeof document !== "undefined") {
   s.textContent = CSS;
 }
 
-const DAY_BASE = { MON:"var(--day-mon)", TUE:"var(--day-tue)", WED:"var(--day-wed)",
-  THU:"var(--day-thu)", FRI:"var(--day-fri)", SAT:"var(--day-sat)", SUN:"var(--day-sun)" };
-const DAY_INK = { MON:"#fff", TUE:"#fff", WED:"#050506", THU:"#050506",
-  FRI:"#050506", SAT:"#050506", SUN:"#050506" };
-const DAY_OPPOSITE = { MON:"#CCFF00", TUE:"#FF6600", WED:"#8800FF", THU:"#FF6600",
-  FRI:"#CCFF00", SAT:"#FF3030", SUN:"#00FFFF" };
 const ADM_LABEL = { FREE:"Free", TICKETED:"Ticketed", DOOR_FEE:"Door fee", SUGGESTED_DONATION:"Donation" };
 const AGE_LABEL = { ALL_AGES:"All ages", "18_PLUS":"18+", "21_PLUS":"21+" };
 
@@ -212,9 +207,9 @@ export function EventCard({
   className = "", style = {}, ...rest
 }: any) {
   const Tag = href ? "a" : "div";
-  const base = DAY_BASE[day] || "#fff";
-  const dayInk = DAY_INK[day] || "#050506";
-  const opposite = DAY_OPPOSITE[day] || "#CCFF00";
+  const base = dayAccentToken(day);
+  const dayInk = dayInkToken(day);
+  const opposite = dayComplementToken(day);
   const typeSlice = types.slice(0, 2);
   const metaBits = buildMetaBits(admission, age, typeSlice);
   const stop = (e) => { e.preventDefault(); e.stopPropagation(); };

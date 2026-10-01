@@ -1,13 +1,8 @@
 // @ts-nocheck
+import { dayAccentToken, dayInkToken, dayComplementToken } from "@/lib/dsColors";
 import React, { useLayoutEffect, useRef } from "react";
 import "./event-grid-card.css";
 
-const DAY_BASE = {
-  MON: "var(--day-mon)", TUE: "var(--day-tue)", WED: "var(--day-wed)",
-  THU: "var(--day-thu)", FRI: "var(--day-fri)", SAT: "var(--day-sat)", SUN: "var(--day-sun)",
-};
-const DAY_CONTRAST = { MON: "#fff", TUE: "#fff", WED: "#050506", THU: "#050506", FRI: "#050506", SAT: "#050506", SUN: "#050506" };
-const DAY_SECONDARY = { MON: "#ccff00", TUE: "#ff7a00", WED: "#8f5cff", THU: "#ff7a00", FRI: "#ccff00", SAT: "#ff2d3d", SUN: "#00ffff" };
 const measureCanvas = typeof document !== "undefined" ? document.createElement("canvas") : null;
 const measureContext = measureCanvas?.getContext("2d") || null;
 function measureTitle(value: string) {
@@ -95,9 +90,9 @@ export function PosterCard({
   showLink, showDetailsLink, dense,
   className = "", style = {}, ...rest
 }: any) {
-  const base = DAY_BASE[day] || "#fff";
-  const contrast = DAY_CONTRAST[day] || "#050506";
-  const secondary = DAY_SECONDARY[day] || "#00ffff";
+  const base = dayAccentToken(day);
+  const contrast = dayInkToken(day);
+  const secondary = dayComplementToken(day);
   const visibleTypes = types.slice(0, 3);
   const showMoreInfo = showDetailsLink !== false;
   const stop = (event: React.SyntheticEvent) => { event.preventDefault(); event.stopPropagation(); };

@@ -1,5 +1,7 @@
 import { useSavedEvents } from "@/hooks/useSavedEvents";
-import { PiChatsCircleLight } from "react-icons/pi";
+import { ResourceCardMotif } from "./resources/ResourceCardMotif";
+import "./RoomDoorways.css";
+import { dayAccentToken, dayTextToken, dayInkToken, dayComplementToken } from "@/lib/dsColors";
 import { roomToast } from "@/lib/roomToast";
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
@@ -42,7 +44,7 @@ import { resolveVenueWebsite } from "@shared/venueLinks";
 import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { getEventScheduleTiming } from "@shared/missedConnections";
 import type { EventTalentRow } from "@shared/eventTalent";
-import { DAY_COLORS, DAY_TEXT_COLORS } from "@shared/eventWeek";
+import { DAY_COLORS } from "@shared/eventWeek";
 import EventLocationMap from "./EventLocationMap";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import "./EventModal.approved.css";
@@ -108,16 +110,6 @@ const modAccent: Record<Exclude<ModerationMode, null>, string> = {
   remove: "var(--text-lo)",
   flag: "var(--neon-orange)",
   transfer: "var(--neon-yellow)",
-};
-
-const DAY_INK: Record<string, string> = {
-  MON: "#FFFFFF",
-  TUE: "#FFFFFF",
-  WED: "#050506",
-  THU: "#050506",
-  FRI: "#050506",
-  SAT: "#050506",
-  SUN: "#050506",
 };
 
 const DAY_OPPOSITE: Record<string, string> = {
@@ -345,12 +337,12 @@ function EventModalInner({
     return () => observer.disconnect();
   }, [event.id, posterOrientation]);
   const dayCode = String(event.dayOfWeek || "").toUpperCase().slice(0, 3);
-  const dayColor = DAY_TEXT_COLORS[dayCode as keyof typeof DAY_TEXT_COLORS] || "var(--text-hi)";
+  const dayColor = dayTextToken(dayCode);
   // Border + glow accent: the day color, or a neutral neon for events with no
   // weekday (so they don't get a stark white frame).
-  const accentColor = DAY_COLORS[dayCode as keyof typeof DAY_COLORS] || "#19E3FF";
-  const dayInk = DAY_INK[dayCode] || "#050506";
-  const oppositeColor = DAY_OPPOSITE[dayCode] || "#CCFF00";
+  const accentColor = dayAccentToken(dayCode);
+  const dayInk = dayInkToken(dayCode);
+  const oppositeColor = dayComplementToken(dayCode);
   const eventWithLinks = event as EventWithLinks;
   const primaryLink = resolveEventPrimaryLink(eventWithLinks);
   const displayTitle = event.title.replace(/^\s*SOLD\s*OUT\s*[·\-:|]*\s*/i, "").trim() || event.title;
@@ -845,16 +837,21 @@ function EventModalInner({
         </section>
 
         <div className="event-modal__body">
-          <section className="event-modal__connection-feature" aria-labelledby="event-connection-title">
-            <div className="event-modal__connection-eyebrow"><PiChatsCircleLight aria-hidden="true" /> Mizzed Connections</div>
-            <img className="event-modal__connection-rings" src="/brand/event-card/connection-rings.webp" alt="" aria-hidden="true" />
-            <h3 id="event-connection-title">That person you noticed</h3>
-            <p>Maybe they noticed you, too.</p>
-            <button type="button" aria-expanded={socialOpen && socialTab === "missed"} onClick={() => {
-              setSocialOpen(true);
-              setSocialTab("missed");
-              requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
-            }}>Who caught your eye? <ArrowUpRight size={22} aria-hidden="true" /></button>
+          <section className="event-modal__mizzed-door" aria-label="Mizzed Connection">
+            <button type="button" className="room-doorways__door pdx-glass-card pdx-glass-rebind"
+              style={{ "--c": "var(--room-mizzed)", "--ink": "var(--room-mizzed)" } as React.CSSProperties}
+              aria-expanded={socialOpen && socialTab === "missed"} onClick={() => {
+                setSocialOpen(true);
+                setSocialTab("missed");
+                requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
+              }}>
+              <ResourceCardMotif name="MIZZED CONNECTION" category="mizzed" />
+              <span className="room-doorways__vignette" aria-hidden="true" />
+              <span className="room-doorways__glass" aria-hidden="true" />
+              <img className="room-doorways__logo" src="/brand/family/mizzed-connection.svg" alt="Mizzed Connection" loading="lazy" decoding="async" />
+              <span className="room-doorways__line"><strong>That person you noticed</strong><br />Maybe they noticed you, too.</span>
+              <span className="room-doorways__go">Who caught your eye? <span aria-hidden="true">↗</span></span>
+            </button>
           </section>
           {socialOpen && <div className="event-modal__social-room">{eventSocialTabs}{eventSocialPanel}</div>}
           <details className="event-modal__disclosure" open={detailsOpen} onToggle={e => setDetailsOpen(e.currentTarget.open)}>
@@ -1331,7 +1328,7 @@ function EventModalInner({
             <summary><MapPin aria-hidden="true" />Location &amp; directions<ChevronRight aria-hidden="true" /></summary>
             <div className="event-modal__disclosure-content">
               {event.address && <p className="event-modal__description">{event.address}</p>}
-              {locationOpen && <EventLocationMap event={event} primary={accentColor} complementary={oppositeColor}
+              {locationOpen && <EventLocationMap event={event} primary={DAY_COLORS[dayCode as keyof typeof DAY_COLORS] || "#00FFFF"} complementary={DAY_OPPOSITE[dayCode] || "#CCFF00"}
                 scheduled={rsvp.myEventIds.has(event.id)} schedulePending={rsvp.isRsvpPending(event.id)}
                 onSchedule={() => rsvp.toggleRsvp(event.id)} />}
             </div>

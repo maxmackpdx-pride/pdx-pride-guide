@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { ArrowUpRight, Clock3, MapPin } from "lucide-react";
-import { DAY_COLORS } from "@shared/eventWeek";
+import { dayAccentToken } from "@/lib/dsColors";
 import type { RailCardProps } from "@/components/RailCard";
 import ZLineIcon from "@/components/ZLineIcon";
 
@@ -8,7 +8,7 @@ const clock = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles"
 
 export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp, onOpen }: RailCardProps) {
   const admission = event.adm === "FREE" ? "Free" : event.adm === "SUGGESTED_DONATION" ? "Suggested donation" : "Ticketed";
-  return <article className="tonight-card pdx-glass-card pdx-glass-rebind" style={{ "--c": DAY_COLORS[event.day], "--dir-gm": 8 } as CSSProperties}>
+  return <article className="tonight-card pdx-glass-card pdx-glass-rebind" style={{ "--c": dayAccentToken(event.day), "--dir-gm": 8 } as CSSProperties}>
     <div className="tonight-card__sheen pdx-glass-sheen--specular" aria-hidden="true" />
     <button className="tonight-card__open" type="button" onClick={() => onOpen(listing)} aria-label={`Open ${event.title}`}>
       <div className="tonight-card__art"><img src={event.posterUrl} alt="" loading="lazy" /><span className="tonight-card__day">Tonight · {event.day}</span></div>

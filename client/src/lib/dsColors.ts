@@ -10,6 +10,24 @@ export function dayAccentToken(day: string): string {
   return "var(--neon-yellow)";
 }
 
+/** Readable text and complementary accents shared by every event-card view. */
+export function dayTextToken(day: string): string {
+  const code = day.toUpperCase();
+  return code === "MON" || code === "TUE" ? `var(--day-${code.toLowerCase()}-text)` : dayAccentToken(code);
+}
+
+export function dayInkToken(day: string): string {
+  return ["MON", "TUE"].includes(day.toUpperCase()) ? "var(--text-heading)" : "var(--z-black)";
+}
+
+export function dayComplementToken(day: string): string {
+  const tokens: Record<string, string> = {
+    MON: "yellow", TUE: "orange", WED: "violet", THU: "orange",
+    FRI: "yellow", SAT: "red", SUN: "cyan",
+  };
+  return `var(--neon-${tokens[day.toUpperCase()] || "yellow"})`;
+}
+
 const HEX_TO_DS_ACCENT: Record<string, string> = {
   "#CCFF00": "lime",
   "#C8FA3C": "lime",

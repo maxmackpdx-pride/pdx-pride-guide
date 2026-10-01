@@ -36,7 +36,7 @@
   gap: 20px;
 }
 
-.room-doorways .room-doorways__door {
+:is(.room-doorways, .event-modal__mizzed-door) .room-doorways__door {
   position: relative;
   isolation: isolate;
   display: flex;
@@ -55,33 +55,33 @@
   transition: transform 280ms ease-out, box-shadow 280ms ease-out;
 }
 
-.room-doorways .room-doorways__door:hover { box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text-heading) 10%,transparent),0 22px 34px -20px color-mix(in srgb,var(--c) 28%,transparent) !important; }
-.room-doorways .room-doorways__door:focus-visible { outline:2px solid var(--c); outline-offset:4px; }
-.room-doorways .room-doorways__door::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none; background:radial-gradient(ellipse at 78% 38%,color-mix(in srgb,var(--c) 12%,transparent),transparent 58%),linear-gradient(to top,var(--z-black),transparent 60%); }
+:is(.room-doorways, .event-modal__mizzed-door) .room-doorways__door:hover { box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text-heading) 10%,transparent),0 22px 34px -20px color-mix(in srgb,var(--c) 28%,transparent) !important; }
+:is(.room-doorways, .event-modal__mizzed-door) .room-doorways__door:focus-visible { outline:2px solid var(--c); outline-offset:4px; }
+:is(.room-doorways, .event-modal__mizzed-door) .room-doorways__door::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none; background:radial-gradient(ellipse at 78% 38%,color-mix(in srgb,var(--c) 12%,transparent),transparent 58%),linear-gradient(to top,var(--z-black),transparent 60%); }
 
-.room-doorways .rg-motif-slot { position:absolute; inset:0; z-index:0; pointer-events:none; }
-.room-doorways .rg-card-motif {
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-slot { position:absolute; inset:0; z-index:0; pointer-events:none; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-card-motif {
   position:absolute; inset:0; width:100%; height:100%; color:var(--c); opacity:.48;
   transform:translateY(-20%) scale(1.3); transform-origin:center;
   translate:var(--rg-parallax-x, 0px) var(--rg-parallax-y, 0px);
   transition:translate 260ms ease-out;
   mask-image:linear-gradient(transparent 4%, black 24%, black 56%, transparent 83%);
 }
-.room-doorways .rg-motif-mesh { opacity:.3; }
-.room-doorways .rg-motif-nodes { opacity:.75; }
-.room-doorways .rg-motif-object { filter:drop-shadow(0 0 3px currentColor); }
-.room-doorways .rg-motif-depth { opacity:.22; }
-.room-doorways .rg-motif-inner-edge { opacity:.35; }
-.room-doorways .rg-motif-circuits { opacity:.4; }
-.room-doorways .rg-motif-calibration { opacity:.25; }
-.room-doorways .rg-motif-signal-trace { opacity:.42; stroke-linecap:round; animation:door-motif-signal-trace 40s linear infinite; }
-.room-doorways .rg-motif-layer { transition:translate 260ms ease-out; }
-.room-doorways .rg-motif-layer--mesh { translate:calc(var(--rg-parallax-x, 0px) * -.25) calc(var(--rg-parallax-y, 0px) * -.25); }
-.room-doorways .rg-motif-layer--object { translate:calc(var(--rg-parallax-x, 0px) * .15) calc(var(--rg-parallax-y, 0px) * .15); }
-.room-doorways :is(.rg-motif-drift, .rg-motif-breathe, .rg-motif-object-drift) { transform-box:view-box; transform-origin:50% 50%; }
-.room-doorways .rg-motif-drift { animation:door-motif-drift 32s ease-in-out infinite; }
-.room-doorways .rg-motif-breathe { animation:door-motif-breathe 36s ease-in-out infinite; }
-.room-doorways .rg-motif-object-drift { animation:door-motif-object-drift 41s ease-in-out infinite; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-mesh { opacity:.3; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-nodes { opacity:.75; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-object { filter:drop-shadow(0 0 3px currentColor); }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-depth { opacity:.22; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-inner-edge { opacity:.35; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-circuits { opacity:.4; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-calibration { opacity:.25; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-signal-trace { opacity:.42; stroke-linecap:round; animation:door-motif-signal-trace 40s linear infinite; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-layer { transition:translate 260ms ease-out; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-layer--mesh { translate:calc(var(--rg-parallax-x, 0px) * -.25) calc(var(--rg-parallax-y, 0px) * -.25); }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-layer--object { translate:calc(var(--rg-parallax-x, 0px) * .15) calc(var(--rg-parallax-y, 0px) * .15); }
+:is(.room-doorways, .event-modal__mizzed-door) :is(.rg-motif-drift, .rg-motif-breathe, .rg-motif-object-drift) { transform-box:view-box; transform-origin:50% 50%; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-drift { animation:door-motif-drift 32s ease-in-out infinite; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-breathe { animation:door-motif-breathe 36s ease-in-out infinite; }
+:is(.room-doorways, .event-modal__mizzed-door) .rg-motif-object-drift { animation:door-motif-object-drift 41s ease-in-out infinite; }
 @keyframes door-motif-drift { 0%,100% { transform:translate(-3px,1px); } 33% { transform:translate(2px,-3px); } 66% { transform:translate(4px,2px); } }
 @keyframes door-motif-breathe { 0%,100% { transform:scale(.99); } 50% { transform:scale(1.025); } }
 @keyframes door-motif-object-drift { 0%,100% { transform:translate(2px,-2px); } 35% { transform:translate(-4px,2px); } 70% { transform:translate(1px,4px); } }
@@ -130,15 +130,21 @@
 
 @media (max-width: 760px) {
   .room-doorways__grid { grid-template-columns: 1fr; }
-  .room-doorways .room-doorways__door { min-height:236px; padding:20px; }
+  :is(.room-doorways, .event-modal__mizzed-door) .room-doorways__door { min-height:236px; padding:20px; }
   .room-doorways__logo { height:80px; }
 }
 @media(prefers-reduced-motion:reduce){
- .room-doorways .room-doorways__door { transform:none; transition:none; }
- .room-doorways .rg-card-motif, .room-doorways .rg-motif-layer { translate:none; transition:none; }
- .room-doorways :is(.rg-motif-drift, .rg-motif-breathe, .rg-motif-object-drift, .rg-motif-signal-trace) { animation:none !important; }
+ :is(.room-doorways, .event-modal__mizzed-door) .room-doorways__door { transform:none; transition:none; }
+ :is(.room-doorways, .event-modal__mizzed-door) .rg-card-motif, :is(.room-doorways, .event-modal__mizzed-door) .rg-motif-layer { translate:none; transition:none; }
+ :is(.room-doorways, .event-modal__mizzed-door) :is(.rg-motif-drift, .rg-motif-breathe, .rg-motif-object-drift, .rg-motif-signal-trace) { animation:none !important; }
 }
-:is(html.calm-mode, :root[data-calm="true"]) .room-doorways .room-doorways__door { transform:none; transition:none; }
-:is(html.calm-mode, :root[data-calm="true"]) .room-doorways .rg-card-motif,
-:is(html.calm-mode, :root[data-calm="true"]) .room-doorways .rg-motif-layer { translate:none; transition:none; }
-:is(html.calm-mode, :root[data-calm="true"]) .room-doorways :is(.rg-motif-drift, .rg-motif-breathe, .rg-motif-object-drift, .rg-motif-signal-trace) { animation:none !important; }
+:is(html.calm-mode, :root[data-calm="true"]) :is(.room-doorways, .event-modal__mizzed-door) .room-doorways__door { transform:none; transition:none; }
+:is(html.calm-mode, :root[data-calm="true"]) :is(.room-doorways, .event-modal__mizzed-door) .rg-card-motif,
+:is(html.calm-mode, :root[data-calm="true"]) :is(.room-doorways, .event-modal__mizzed-door) .rg-motif-layer { translate:none; transition:none; }
+:is(html.calm-mode, :root[data-calm="true"]) :is(.room-doorways, .event-modal__mizzed-door) :is(.rg-motif-drift, .rg-motif-breathe, .rg-motif-object-drift, .rg-motif-signal-trace) { animation:none !important; }
+
+/* The event invitation shares the Next Door tile without the rail layout. */
+.event-modal__mizzed-door { margin: 28px 0; }
+.event-modal__mizzed-door .room-doorways__door { width: 100%; text-align: left; cursor: pointer; }
+.event-modal__mizzed-door .room-doorways__line { display: block; }
+.event-modal__mizzed-door .room-doorways__line strong { font: 800 26px/1.2 var(--font-display); text-transform: uppercase; color: var(--text-heading); }
