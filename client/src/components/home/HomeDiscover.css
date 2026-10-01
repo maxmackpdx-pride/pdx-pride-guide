@@ -3,8 +3,8 @@
 .home-front .home-discover-trigger.pdx-glass-rebind {
   --c:var(--neon-cyan); position:relative; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; gap:24px;
   width:250px; min-height:62px; flex-shrink:0; padding:12px 26px; border:1px solid #3c474b; border-radius:18px;
-  background:radial-gradient(130% 140% at 50% -10%,color-mix(in srgb,var(--c) 16%,transparent),transparent 60%),var(--z-oled);
-  color:var(--text-heading); box-shadow:0 2px 0 color-mix(in srgb,var(--c) 40%,var(--z-oled)),inset 0 1px 0 #ffffff47,inset 0 -8px 14px -8px #ffffff0f,0 0 18px -4px color-mix(in srgb,var(--c) 8%,transparent);
+  background:var(--btn-glow-bg);
+  color:var(--text-heading); box-shadow:var(--btn-glow-shadow);
   cursor:pointer; pointer-events:auto; transition:transform .2s ease,filter .2s ease;
 }
 .home-front .home-discover-trigger::before { content:""; position:absolute; inset:0 12px auto; height:.75px; background:linear-gradient(90deg,var(--day-mon),var(--day-tue),var(--day-thu),var(--day-sat),var(--day-wed),var(--day-sun),var(--day-fri)); pointer-events:none; }
