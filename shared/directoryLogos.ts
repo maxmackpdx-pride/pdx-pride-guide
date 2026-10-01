@@ -240,7 +240,8 @@ export function resolveDirectoryLogo(
       }
     }
   }
-  if (norm === "lesbiancultureclub" || norm === "scoreportland") {
+  if (norm === "lesbiancultureclub") return withLogoCacheBust("/directory-logos/place-lesbiancultureclub-primary.svg");
+  if (norm === "scoreportland") {
     return withLogoCacheBust(`/directory-logos/place-${norm}.svg`);
   }
   if (stem) return withLogoCacheBust(`/directory-logos/${stem}.png`);

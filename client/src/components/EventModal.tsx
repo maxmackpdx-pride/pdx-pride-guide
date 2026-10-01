@@ -817,6 +817,7 @@ function EventModalInner({
               )}
             </div>
             {!editing && <div className="event-modal__hero-actions">
+              <a className="event-modal__tickets-mid pdx-glass-btn pdx-glass-btn--solid" href={event.lat != null && event.lng != null ? `/map?layer=events&lat=${event.lat}&lng=${event.lng}&zoom=15` : `/map?layer=events&q=${encodeURIComponent(event.title)}`}>View on Mapz <ArrowUpRight size={20} aria-hidden="true" /></a>
               <button type="button" className="event-modal__hero-rsvp" onClick={jumpToAttendance}><CalendarPlus aria-hidden="true" />{isPastEvent ? "I Was There" : "I am interested"}</button>
               <button type="button" className="event-modal__save" aria-pressed={saves.savedIds.has(event.id)} disabled={saves.pending || saves.loading} onClick={() => user ? saves.toggleSave(event.id) : setShowAuth(true)}><Bookmark size={20} aria-hidden="true" fill={saves.savedIds.has(event.id) ? "currentColor" : "none"} />{saves.savedIds.has(event.id) ? "Saved to My Schedule" : "Save to My Schedule"}</button>
             {primaryLink && !editing ? (

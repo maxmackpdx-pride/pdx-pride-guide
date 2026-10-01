@@ -1,3 +1,4 @@
+import CardWaypoint from "./home/CardWaypoint";
 import { PLACE_ACCENTS } from './discovery/placeTokens';
 import { ResourceCardMotif } from './resources/ResourceCardMotif';
 import { ArrowRight } from "lucide-react";
@@ -455,6 +456,7 @@ export default function PlaceModal({
         <div className="place-modal-panel__seam dir-refract" aria-hidden="true" />
 
         <div className="place-modal-panel__inner">
+        <CardWaypoint kind={place.type} inline />
         <DetailActions label="place" onClose={handleClose} onShare={handleShare} sharing={sharing}>
           <VenueFollowButton
             businessId={place.id}
@@ -784,6 +786,7 @@ export default function PlaceModal({
                   </div>
                   {(address || displayed.phone) && (
                     <div className="place-modal-panel__quick-actions">
+                      <Link href={place.lat != null && place.lng != null ? `/map?layer=places&lat=${place.lat}&lng=${place.lng}&zoom=15` : `/map?layer=places&q=${encodeURIComponent(place.name)}`}>View on Mapz</Link>
                       {address && <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer">Directions</a>}
                       {displayed.phone && <a href={telHref(displayed.phone)}>Call</a>}
                     </div>

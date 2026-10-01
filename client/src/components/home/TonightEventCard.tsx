@@ -21,7 +21,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
     <button className="tonight-card__open" type="button" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>
       <div className="tonight-card__art"><img src={listingPosterUrl(listing)} alt="" loading="lazy" /></div>
       <div className="tonight-card__body">
-        <p className="rail-card-room">Eventz</p>
+        <p className="rail-card-room"><img className="rail-card-room__logo rail-card-room__logo--white" src="/brand/family/eventz.png" alt="Eventz" /></p>
         <p className="tonight-card__time"><Clock3 size={15} aria-hidden="true" />{event ? `${clock.format(event.startMs)} – ${clock.format(event.endMs)}` : formatGridCardWhen(listing)}</p>
         <h3 title={listing.title}>{listing.title}</h3>
         <p className="tonight-card__venue"><MapPin size={16} aria-hidden="true" /><span>{listing.venueName}<small>{listing.neighborhood || "Portland"}</small></span></p>
