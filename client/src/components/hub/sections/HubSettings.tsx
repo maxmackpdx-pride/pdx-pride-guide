@@ -1,7 +1,22 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ds";
+import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import DashboardNotificationPrefs from "@/components/DashboardNotificationPrefs";
+
+function ToggleSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      className={`sw${on ? " on" : ""}`}
+      onClick={onToggle}
+      aria-pressed={on}
+      aria-label={on ? "Disable calm mode" : "Enable calm mode"}
+    >
+      <span className="knob" />
+    </button>
+  );
+}
 
 type Props = {
   onLogout: () => void;
@@ -13,6 +28,7 @@ type Props = {
  * Fake privacy/follow toggles removed until backend exists.
  */
 export default function HubSettings({ onLogout }: Props) {
+  const { calmMode, toggleCalmMode } = useTheme();
   const { user } = useAuth();
   const isAdmin = Boolean(user?.isAdmin);
 
@@ -20,6 +36,29 @@ export default function HubSettings({ onLogout }: Props) {
     <div className="reveal hub-settings">
       <div className="kick hub-settings__hero-kick">Make it yours</div>
       <h1 className="h1">Settings</h1>
+
+      <div className="card hub-settings__card hub-settings__card--tight pdx-glass-rebind">
+        <div className="kick hub-settings__section-kick">Notifications</div>
+        <p className="hub-settings__lede">
+          Choose the device push alerts you receive. Messages and account notices remain available in your inbox.
+        </p>
+        <div className="hub-settings__prefs">
+          <DashboardNotificationPrefs isAdmin={isAdmin} embedded />
+        </div>
+      </div>
+
+      <div className="card hub-settings__card hub-settings__card--tight pdx-glass-rebind">
+        <div className="kick hub-settings__section-kick">Appearance</div>
+        <div className="hub-settings__row">
+          <div className="hub-settings__row-copy">
+            <div className="hub-settings__row-title">Calm mode</div>
+            <div className="hub-settings__row-desc">
+              Silence grain, glitch, and glows. Flag rings stay. Saves on this device.
+            </div>
+          </div>
+          <ToggleSwitch on={calmMode} onToggle={toggleCalmMode} />
+        </div>
+      </div>
 
       <div className="card hub-settings__card hub-settings__card--comfortable pdx-glass-rebind">
         <div className="kick hub-settings__section-kick hub-settings__section-kick--privacy">Privacy</div>

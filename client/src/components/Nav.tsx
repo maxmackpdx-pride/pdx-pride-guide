@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import CalmModeToggle from "@/components/CalmModeToggle";
 import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronDown, House, Inbox, Search, Settings, Trash2, UserRound, UsersRound } from "lucide-react";
@@ -816,6 +817,7 @@ export default function Nav() {
               </div>
             )}
 
+            {!user && !authLoading && <CalmModeToggle minimal />}
 
             {!user && !localDemo && !authLoading && (
               <button
