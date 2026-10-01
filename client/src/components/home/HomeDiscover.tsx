@@ -1,7 +1,7 @@
 import { useId, useState, type CSSProperties } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight, BriefcaseBusiness, CalendarDays, Gift, Heart, House, MapPinned, Tags, Trees, Users, LifeBuoy, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BriefcaseBusiness, CalendarDays, Gift, Heart, House, MapPinned, Tags, Trees, Users, LifeBuoy, X } from "lucide-react";
 import { Link } from "wouter";
 import { useTheme } from "@/context/ThemeContext";
 import { ResourceFilterButton } from "@/components/resources/ResourceFilterButton";
@@ -37,7 +37,7 @@ export default function HomeDiscover({ open, onOpenChange }: { open: boolean; on
     <Dialog.Root open={open} onOpenChange={next => { if (next) setGroup(null); onOpenChange(next); }}>
       <Dialog.Trigger asChild>
         <button type="button" className="home-discover-trigger pdx-glass-rebind">
-          <span><small>Start here</small><strong>Find your next</strong></span><ArrowUpRight size={24} aria-hidden="true" />
+          <strong>Start here</strong><ArrowRight size={25} aria-hidden="true" />
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
