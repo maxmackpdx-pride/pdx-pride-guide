@@ -142,7 +142,7 @@ const fragmentShader = `
 `;
 
 /** Prime-color waves with locally loaded drafting lines. */
-export function WebGLShader({ accent, palette = "prime", direction = 1, blueprintUrl = null, waveSpeed = 1 }: { accent?: string; palette?: "prime" | "week"; direction?: -1 | 1; blueprintUrl?: string | null; waveSpeed?: number } = {}) {
+export function WebGLShader({ accent, palette = "prime", direction = 1, blueprintUrl = null, waveSpeed = 1, lowPower = false }: { accent?: string; palette?: "prime" | "week"; direction?: -1 | 1; blueprintUrl?: string | null; waveSpeed?: number; lowPower?: boolean } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -220,6 +220,8 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
     scene.add(mesh);
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const frameInterval = 1000 / (lowPower ? 15 : 30);
     let lastTime = 0;
     let lastPaint = 0;
     let lost = false;
@@ -235,18 +237,23 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
       uniforms.blueprint.value = texture;
       render();
     });
+    const scheduleFrame = () => {
+      if (lowPower) timer = setTimeout(() => { frame = requestAnimationFrame(animate); }, frameInterval);
+      else frame = requestAnimationFrame(animate);
+    };
     const animate = (now: number) => {
       // Keep desktop motion smooth without redrawing on every high-refresh frame.
-      if (now - lastPaint < 1000 / 30) { frame = requestAnimationFrame(animate); return; }
+      if (now - lastPaint < frameInterval) { scheduleFrame(); return; }
       lastPaint = now;
       if (lastTime)
         uniforms.time.value = (uniforms.time.value + Math.min((now - lastTime) / 1000, 0.1) * waveSpeed * LOOP_RADIANS / LOOP_SECONDS) % LOOP_RADIANS;
       lastTime = now;
       render();
-      frame = requestAnimationFrame(animate);
+      scheduleFrame();
     };
     const syncAnimation = () => {
       cancelAnimationFrame(frame);
+      clearTimeout(timer);
       lastTime = 0;
       if (document.hidden || lost) return;
       if (
@@ -258,7 +265,7 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
       else frame = requestAnimationFrame(animate);
     };
     const resize = () => {
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, canvas.clientWidth <= 600 ? 1 : 1.25));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, canvas.clientWidth <= 600 ? 1 : 1.25) * (lowPower ? 0.7 : 1));
       renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
       renderer.getDrawingBufferSize(uniforms.resolution.value);
       render();
@@ -293,6 +300,7 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
       blueprintTexture?.dispose();
       emptyBlueprint.dispose();
       cancelAnimationFrame(frame);
+      clearTimeout(timer);
       observer.disconnect();
       calmObserver.disconnect();
       canvas.removeEventListener("webglcontextlost", onLost);
@@ -303,7 +311,7 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
       material.dispose();
       renderer.dispose();
     };
-  }, [accent, palette, direction, blueprintUrl, waveSpeed]);
+  }, [accent, palette, direction, blueprintUrl, waveSpeed, lowPower]);
 
   return (
     <canvas

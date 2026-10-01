@@ -538,7 +538,7 @@ export default function Resources() {
   }, [searchTarget, showResults, quietMotion]);
   return (
     <div className="resources-page">
-      <WebGLShader waveSpeed={0.7} />
+      <WebGLShader waveSpeed={0.7} lowPower />
       <header className="rg-intro rg-wrap">
         <div className="rg-intro-top">
           <span className="rg-eyebrow">
@@ -693,7 +693,7 @@ export default function Resources() {
                 const group = rows.filter(row => categoriesFor(row).some(c => c.id === type.id));
                 if (!group.length) return null;
                 const railId = `resource-rail-${type.id}`;
-                return <ResourceRail key={type.id} id={railId} title={type.name} color={type.color} count={group.length} quiet={Boolean(quietMotion)} focusIndex={searchTarget ? group.findIndex(row => row.org.name === searchTarget) : undefined} deferOnMobile>
+                return <ResourceRail key={type.id} id={railId} title={type.name} color={type.color} count={group.length} quiet={Boolean(quietMotion)} focusIndex={searchTarget ? group.findIndex(row => row.org.name === searchTarget) : undefined} deferOnMobile deferUntilVisible>
                   {() => group.map(row => <div className="rg-card-reveal" key={row.org.name} dir="ltr" tabIndex={-1} data-resource-search-card={row.org.name}>
                     <ResourceCard row={{ ...row, sectionCategory: type }} onOpen={openDetail} />
                   </div>)}

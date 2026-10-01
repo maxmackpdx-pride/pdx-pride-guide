@@ -5,31 +5,33 @@ import { motion, useSpring } from "framer-motion";
 
 // Adapted from 21st's Appica Carousel and Designali Scroll Progress patterns.
 // The rail owns navigation and clipping; resource cards keep their own design.
-export function ResourceRail({ id, title, color, count, quiet, children, room = "ReZources", itemName = "resource", focusIndex, deferOnMobile = false }: {
-  id: string; title: string; color: string; count: number; quiet: boolean; children: ReactNode | (() => ReactNode); room?: string; itemName?: string; focusIndex?: number; deferOnMobile?: boolean;
+export function ResourceRail({ id, title, color, count, quiet, children, room = "ReZources", itemName = "resource", focusIndex, deferOnMobile = false, deferUntilVisible = false }: {
+  id: string; title: string; color: string; count: number; quiet: boolean; children: ReactNode | (() => ReactNode); room?: string; itemName?: string; focusIndex?: number; deferOnMobile?: boolean; deferUntilVisible?: boolean;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
-  const [ready, setReady] = useState(!deferOnMobile);
+  const [ready, setReady] = useState(!deferOnMobile && !deferUntilVisible);
   useEffect(() => {
-    if (!deferOnMobile) return;
+    if (!deferOnMobile && !deferUntilVisible) return;
     const section = sectionRef.current;
     const media = window.matchMedia('(max-width: 719px), (pointer: coarse)');
     let observer: IntersectionObserver | undefined;
     const sync = () => {
       observer?.disconnect();
-      if (!media.matches || (focusIndex !== undefined && focusIndex >= 0) || !section || !('IntersectionObserver' in window)) {
+      if ((!media.matches && !deferUntilVisible) || (focusIndex !== undefined && focusIndex >= 0) || !section || !('IntersectionObserver' in window)) {
         setReady(true);
         return;
       }
       observer = new IntersectionObserver(entries => {
-        if (entries[0]) setReady(entries[0].isIntersecting);
-      }, { rootMargin: '20px 0px' });
+        if (entries[0]) setReady(current => media.matches && deferOnMobile
+          ? entries[0].isIntersecting
+          : current || entries[0].isIntersecting);
+      }, { rootMargin: media.matches ? '20px 0px' : '300px 0px' });
       observer.observe(section);
     };
     sync();
     media.addEventListener('change', sync);
     return () => { observer?.disconnect(); media.removeEventListener('change', sync); };
-  }, [focusIndex, deferOnMobile]);
+  }, [focusIndex, deferOnMobile, deferUntilVisible]);
   const plugins = useMemo(() => [WheelGesturesPlugin()], []);
   const [viewport, api] = useEmblaCarousel({ direction: "rtl", align: "center", startIndex: Math.floor(count / 2), containScroll: "trimSnaps", duration: quiet ? 0 : 25 }, plugins);
   const [position, setPosition] = useState({ progress: 0, previous: false, next: false, overflow: false });
