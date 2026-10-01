@@ -23,7 +23,7 @@
 .home-discover[data-state=closed] { animation:home-discover-exit 220ms cubic-bezier(.4,0,1,1); }
 @keyframes home-discover-enter { from { opacity:0; scale:.97; } to { opacity:1; scale:1; } }
 @keyframes home-discover-exit { to { opacity:0; scale:.98; } }
-.home-discover__seam { position:absolute; top:0; left:18px; right:18px; height:2px; pointer-events:none; background:var(--refract-seam-gradient); }
+.home-discover__seam.pdx-rainbow-rule { position:absolute; top:0; left:0; right:0; height:3px; pointer-events:none; }
 .home-discover__header { display:flex; justify-content:space-between; align-items:center; gap:16px; }
 .home-discover__eyebrow { display:flex; align-items:center; gap:12px; margin:0; font:600 12px/1.5 var(--font-mono); letter-spacing:.08em; text-transform:uppercase; color:var(--neon-yellow); }
 .home-discover__eyebrow b { display:grid; place-items:center; width:32px; height:32px; border:1px solid currentColor; border-radius:50%; font-weight:400; }

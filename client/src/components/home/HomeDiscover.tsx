@@ -43,7 +43,7 @@ export default function HomeDiscover({ open, onOpenChange }: { open: boolean; on
       <Dialog.Portal>
         <Dialog.Overlay className="home-discover-backdrop" />
         <Dialog.Content className="home-discover pdx-glass-rebind pdx-liquid-overlay" aria-describedby={`${id}-description`}>
-          <span className="home-discover__seam" aria-hidden="true" />
+          <span className="home-discover__seam pdx-rainbow-rule" aria-hidden="true" />
           <header className="home-discover__header">
             <span className="home-discover__eyebrow"><b aria-hidden="true">01</b> Start here</span>
             <Dialog.Close className="home-discover__close pdx-glass-rebind" aria-label="Close"><X size={20} aria-hidden="true" /></Dialog.Close>
