@@ -29,7 +29,8 @@ const Z_SHAPE = 'M407 328H653L577 400H461Z M748 237L698 337L601 455L412 610L348 
 const BLUE_Z = 'M580 399L746 237L696 340L638 410Z M346 695L407 610H496L426 695L322 758Z';
 const CROSS = 'M1226 458H1273V483H1298V531H1273V556H1226V531H1199V483H1226Z';
 const FIXED_DETAILS = CROSS + ' M895 219H925V473H895Z M875 463H943V516H875Z M815 273H1008V301H815Z';
-const ART = '/brand/family/rezources.svg';
+// Rasterize the detailed source once at its native size; animated clips reuse pixels.
+const ART = '/brand/family/rezources.png';
 const DISCO_ART = '/brand/family/rezources-disco-ball.png';
 const LATE_RENT_ART = '/brand/family/rezources-late-rent.png';
 const ROOSTER_ROCK_ART = '/brand/family/rezources-rooster-rock.png';

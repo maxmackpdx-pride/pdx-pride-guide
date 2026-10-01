@@ -13,7 +13,7 @@ export type ZaydarLayer = {
 const LAYER_LOGOS: Record<ZaydarLayerId, string> = {
   events: "/brand/family/eventz.png",
   places: "/brand/family/our-placez.svg",
-  rezources: "/brand/family/rezources.svg",
+  rezources: "/brand/family/rezources.png",
   mizzed: "/brand/family/mizzed-connection.svg",
   gigz: "/brand/family/gigz.svg",
   giftz: "/brand/family/giftz.svg",
