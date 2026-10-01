@@ -24,7 +24,7 @@ export default function FilterSurvey({
   const reducedMotion = useReducedMotion();
   const { calmMode } = useTheme();
   const detailId = useId();
-  return <section className="filter-survey" data-surface={surface} style={{ "--survey-accent": accent } as CSSProperties} aria-label={`${label} discovery questions`}>
+  return <section className={surface === "globe" ? "filter-survey pdx-glass-rebind" : "filter-survey"} data-surface={surface} style={{ "--survey-accent": accent } as CSSProperties} aria-label={`${label} discovery questions`}>
     {surface === "globe" && <span className="filter-survey__top-rule pdx-rainbow-rule" aria-hidden="true" />}
     <div className="filter-survey__step">
       <span className="filter-survey__number" aria-hidden="true">01</span>

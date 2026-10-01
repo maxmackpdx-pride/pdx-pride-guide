@@ -23,7 +23,7 @@ export default function OpenBoardCard({ label, accent, onClose, children }: Prop
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className="board-open-card"
+        className="board-open-card pdx-glass-rebind"
         style={{ "--c": accent, "--listing-accent": accent } as CSSProperties}
         onClick={event => event.stopPropagation()}
       >
