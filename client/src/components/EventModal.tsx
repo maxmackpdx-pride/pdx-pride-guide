@@ -845,8 +845,8 @@ function EventModalInner({
           <section className="event-modal__connection-feature" aria-labelledby="event-connection-title">
             <div className="event-modal__connection-eyebrow"><PiChatsCircleLight aria-hidden="true" /> Mizzed Connections</div>
             <img className="event-modal__connection-rings" src="/brand/event-card/connection-rings.webp" alt="" aria-hidden="true" />
-            <h3 id="event-connection-title">Caught your eye?</h3>
-            <p>Find that face from the crowd.</p>
+            <h3 id="event-connection-title">That person you noticed</h3>
+            <p>Maybe they noticed you, too.</p>
             <button type="button" aria-expanded={socialOpen && socialTab === "missed"} onClick={() => {
               setSocialOpen(true);
               setSocialTab("missed");

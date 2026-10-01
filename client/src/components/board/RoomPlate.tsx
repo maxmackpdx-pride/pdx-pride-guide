@@ -11,7 +11,7 @@ const PLATE: Record<PlateRoom, { mark: string; line?: string; follow: Followable
   gigz: { mark: "/brand/family/gigz.svg", line: "Work with your people.", follow: "gigz", share: "Gigz" },
   giftz: { mark: "/brand/family/giftz.svg", line: "Pass it on. Find what you need.", follow: "giftz", share: "Giftz" },
   sellz: { mark: "/brand/family/sellz.svg", line: "Good stuff. New hands.", follow: "sellz", share: "Sellz" },
-  mizzed: { mark: "/brand/family/mizzed-connection.svg", line: "You were the one over by the…", follow: "mizzed", share: "Mizzed Connections" },
+  mizzed: { mark: "/brand/family/mizzed-connection.svg", line: "That person you noticed.", follow: "mizzed", share: "Mizzed Connections" },
   hauz: { mark: "/brand/family/the-hauz.svg", line: "Find people that know the know.", follow: "houz", share: "The Haüz" },
   // The EVENTZ hero is its neon logo, so the plate carries only the actions there.
   eventz: { mark: "/brand/family/eventz.png", follow: "eventz", share: "Eventz", heroOwnsMark: true },

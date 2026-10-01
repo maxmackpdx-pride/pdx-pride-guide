@@ -242,14 +242,14 @@ export default function MissedConnectionsPanel({
     <section style={{ background: "#0a0a0a", border: "2px solid #FF00CC", padding: 20, marginBottom: 28 }}>
       <h2 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>WRITE A NOTE</h2>
       <p className="board-copy-sm" style={{ marginBottom: 14 }}>
-        Tie it to a Pride event, write your own spot, or post around town. You stay anonymous on the board.
+        Tell them where you crossed paths—at an event, a favorite spot, or somewhere around town. You stay anonymous on the board.
       </p>
       <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" maxLength={80} />
       <textarea
         style={{ ...inputStyle, minHeight: 120, resize: "vertical", marginTop: 10 }}
         value={form.body}
         onChange={e => setForm(f => ({ ...f, body: e.target.value.slice(0, 500) }))}
-        placeholder="What happened? Keep it kind, specific, and under 500 characters."
+        placeholder="Where did you notice them? Share the moment. Keep it kind, specific, and under 500 characters."
         maxLength={500}
       />
       <div style={{ color: form.body.length >= 500 ? "#FF2400" : "#555", fontSize: "0.75rem", marginTop: 4 }}>{form.body.length}/500</div>
@@ -281,8 +281,8 @@ export default function MissedConnectionsPanel({
   ) : posts.length === 0 ? (
     boardLayout && mode === "board" ? (
       <div className="board-empty board-empty--prototype">
-        <p className="display section-heading">Nobody's said anything yet</p>
-        <p className="board-copy-sm">You made eye contact on the MAX and did nothing about it. Same. Post the note. Worst case, nothing happens, which is exactly what's happening now.</p>
+        <p className="display section-heading">That person you noticed</p>
+        <p className="board-copy-sm">Maybe they noticed you, too. Leave a note about where you crossed paths and what you remember.</p>
       </div>
     ) : (
       <div style={{ color: "#9d9a92", padding: compact ? "12px 0" : "32px 0" }}>
@@ -364,7 +364,7 @@ export default function MissedConnectionsPanel({
             style={{ ...inputStyle, minHeight: 90, resize: "vertical", marginTop: 8 }}
             value={form.body}
             onChange={e => setForm(f => ({ ...f, body: e.target.value.slice(0, 500) }))}
-            placeholder="What happened?"
+            placeholder="Where did you notice them? What do you remember?"
             maxLength={500}
           />
           <button
