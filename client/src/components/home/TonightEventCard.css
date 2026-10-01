@@ -100,3 +100,10 @@
   .home-tonight .tonight-card__footer { margin-inline:18px; gap:8px; }
   .home-tonight .tonight-card__footer button { min-width:0; flex:1; }
 }
+
+/* Keep the decorative drawing visible across the card, beneath readable content. */
+.tonight-card > .rg-motif-slot { position:absolute; inset:0; z-index:0; color:var(--c); pointer-events:none; }
+.tonight-card > .rg-motif-slot .rg-card-motif { width:100%; height:100%; opacity:.42; }
+.tonight-card__open { position:relative; z-index:2; }
+.tonight-card__body { background:linear-gradient(transparent,color-mix(in srgb,var(--z-oled) 48%,transparent)); }
+.tonight-card .rg-motif-object { fill:none; }

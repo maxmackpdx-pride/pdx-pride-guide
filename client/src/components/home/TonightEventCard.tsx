@@ -4,6 +4,7 @@ import { dayAccentToken } from "@/lib/dsColors";
 import type { RailCardProps } from "@/components/RailCard";
 import { formatGridCardWhen, listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import "./TonightEventCard.css";
+import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import RailShareButton from "./RailShareButton";
 import { eventPath } from "@shared/eventSlug";
 import ZLineIcon from "@/components/ZLineIcon";
@@ -14,6 +15,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
   const admission = listing.admission === "FREE" ? "Free" : listing.admission === "SUGGESTED_DONATION" ? "Suggested donation" : listing.admission === "DOOR_FEE" ? "Door fee" : "Ticketed";
   const age = listing.ageRequirement === "21_PLUS" ? "21+" : listing.ageRequirement === "18_PLUS" ? "18+" : "All ages";
   return <article className="tonight-card pdx-glass-card pdx-glass-rebind" style={{ "--c": dayAccentToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
+    <ResourceCardMotif name={listing.title} category="eventz" />
     <RailShareButton href={eventPath(listing.id, listing.title, listing.dayOfWeek)} title={listing.title} />
     <div className="tonight-card__sheen pdx-glass-sheen--specular" aria-hidden="true" />
     <button className="tonight-card__open" type="button" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>

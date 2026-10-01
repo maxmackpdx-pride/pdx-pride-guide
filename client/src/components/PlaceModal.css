@@ -833,3 +833,4 @@ html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__details-room {
   background:linear-gradient(133deg,color-mix(in srgb,var(--text-heading) 15%,transparent),color-mix(in srgb,var(--text-heading) 3%,transparent) 12%,transparent 34%),
     radial-gradient(70% 55% at 108% 112%,color-mix(in srgb,var(--text-heading) 3%,transparent),color-mix(in srgb,var(--c) 3.6%,transparent) 30%,transparent 62%);
 }
+.place-modal-panel__identity .place-modal-panel__logo { filter:brightness(0) invert(1)!important; }

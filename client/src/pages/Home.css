@@ -3401,3 +3401,7 @@ html.calm-mode .home-next-preview__orb,
 .home-stat-strip__grad--events .pdxCountUp__num {
   background-image:none; color:var(--neon-cyan); -webkit-text-fill-color:var(--neon-cyan);
 }
+
+.home-stat-strip .home-stat-strip__grad--going {
+  background:none; color:var(--neon-magenta); -webkit-text-fill-color:var(--neon-magenta);
+}

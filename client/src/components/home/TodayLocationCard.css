@@ -2,3 +2,5 @@
 .today-location__art .rg-card-motif { width: 100%; height: 100%; color: var(--c); opacity: .65; }
 .tonight-card__art .today-location__brand { position: absolute; inset: 0; margin: auto; width: 82%; height: 42%; object-fit: contain; object-position: center; mask-image: none; filter: brightness(0) invert(1) drop-shadow(0 3px 8px var(--z-oled)); }
 .today-location .tonight-card__footer { min-height: 44px; }
+.tonight-card__art .today-location__brand { filter:none; }
+.tonight-card__art .today-location__brand--business { filter:brightness(0) invert(1); }

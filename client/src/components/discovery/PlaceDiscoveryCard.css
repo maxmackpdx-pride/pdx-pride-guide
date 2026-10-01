@@ -43,3 +43,4 @@
     color-mix(in srgb,var(--z-black) 72%,transparent);
   --glass-sheen-specular:radial-gradient(70% 55% at 108% 112%,color-mix(in srgb,var(--text-heading) 1.5%,transparent),color-mix(in srgb,var(--c) 1.8%,transparent) 40%,transparent 70%);
 }
+.placez-card-surface .placez-discovery-card .pdxPlace__logo { filter:brightness(0) invert(1)!important; }

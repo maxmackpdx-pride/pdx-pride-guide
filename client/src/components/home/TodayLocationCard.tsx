@@ -5,6 +5,7 @@ import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import { PLACE_ACCENTS } from "@/components/discovery/placeTokens";
 import { DIRECTORY_TYPE_LABELS } from "@shared/directoryTheme";
 import VenueFollowButton from "@/components/VenueFollowButton";
+import { resolveDirectoryLogo, directoryFallbackLogo } from "@/lib/directoryLogos";
 import RailShareButton from "./RailShareButton";
 import "./TonightEventCard.css";
 import type { Business } from "@/pages/Directory";
@@ -22,13 +23,15 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
   const kind = location.place?.type || "community";
   const accent = isPlace ? PLACE_ACCENTS[kind] || "var(--neon-cyan)" : `var(${OUTZ_TOKENS[location.kind || ""] || "--neon-yellow"})`;
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(location.key.replace(/^outz:/, ""));
+  const businessLogo = isPlace ? resolveDirectoryLogo(location.name, location.place?.imageUrl) || directoryFallbackLogo(kind) : null;
   const label = isPlace ? DIRECTORY_TYPE_LABELS[kind] || "Placez" : OUTZ_LABELS[location.kind || ""] || "Destination";
   return <article className="tonight-card today-location pdx-glass-card pdx-glass-rebind" style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
+    {isPlace && <ResourceCardMotif name={location.name} category={`place-${kind}`} />}
     <RailShareButton href={location.href} title={location.name} />
     <button type="button" className="tonight-card__open" aria-label={`Open ${location.name}`} onClick={() => navigate(location.href)}>
       <div className="tonight-card__art today-location__art">
-        {isPlace ? <ResourceCardMotif name={location.name} category={`place-${kind}`} /> : <img src={art} alt="" loading="lazy" />}
-        <img className="today-location__brand" src={isPlace ? "/brand/family/our-placez.svg" : "/brand/outzide.png"} alt={location.room} />
+        {!isPlace && <img src={art} alt="" loading="lazy" />}
+        <img className={`today-location__brand${isPlace ? " today-location__brand--business" : ""}`} src={businessLogo || "/brand/outzide.png"} alt={isPlace ? `${location.name} logo` : "OutZide"} onError={event => { if (isPlace) { event.currentTarget.onerror = null; event.currentTarget.src = directoryFallbackLogo(kind); } }} />
       </div>
       <div className="tonight-card__body">
         <p className="rail-card-room">{location.room}</p>

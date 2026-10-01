@@ -1505,3 +1505,4 @@ html.calm-mode .directory-page .board-empty,
   background:linear-gradient(to bottom,var(--z-oled) 0%,color-mix(in srgb,var(--z-oled) 85%,transparent) 30%,color-mix(in srgb,var(--z-oled) 45%,transparent) 65%,transparent 100%);
 }
 .directory-page.resources-page::before { opacity:1; }
+.placez-reference-logo img { filter:brightness(0) invert(1); }
