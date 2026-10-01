@@ -1,4 +1,6 @@
 import RoomPlate from "@/components/board/RoomPlate";
+import FilterSurvey from "@/components/FilterSurvey";
+import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -34,6 +36,7 @@ const money = (cents: number) => new Intl.NumberFormat("en-US", { style: "curren
 function SellzGrid({ posts, saved, selectedId, onSelect }: { posts: SellzPost[]; saved: Set<number>; selectedId: number | null; onSelect: (id: number) => void }) {
   return <div className="sellz-listing-grid">
     {posts.map((post, index) => <button type="button" key={post.id} className="gigz-opportunity sellz-listing" style={{ "--gigz-accent": ["#39ff14", "#83e35d", "#a5fb6e", "#49cb92"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selectedId === post.id} aria-label={`View listing: ${post.title}`}>
+      <ResourceCardMotif name={post.title} category="money" />
       {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <span className="sellz-listing__fallback" aria-hidden="true"><Tag size={65} strokeWidth={1.2} /></span>}
       <span className="gigz-opportunity__shade" />
       <span className="gigz-opportunity__top"><span><em>{post.category}</em><small>{post.isDemo ? "DEMO LISTING" : `${post.status === "ACTIVE" ? "Available" : post.status.toLowerCase()} · ${timeAgo(post.createdAt)}`}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
@@ -197,6 +200,7 @@ export default function Sellz() {
       <div className="gigz-section-head"><div><RoomKicker room="sellz" as="div">The marketplace</RoomKicker><h1>Find your next good thing<span>.</span></h1><p>Buy and sell with your community. Message, agree, and hand off directly.</p></div>
         <div className="sellz-board-actions"><button type="button" className="gigz-post gigz-post--primary" onClick={openForm}><Plus size={17} /> Sell something <ArrowUpRight size={16} /></button></div>
       </div>
+      <FilterSurvey label="Sellz" question="What are you looking for?" value={view} onChange={value => user || value === "ALL" ? setView(value as View) : setShowAuth(true)} accent="var(--room-sellz)" options={[{value:"ALL",label:"Browse listings"},{value:"SAVED",label:"Saved items"},{value:"MINE",label:"My listings"}]}>
       <div className="sellz-board-filters" aria-label="Filter Sellz listings">
         <label>Search Sellz<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search listings and neighborhoods" /></label>
         <label>View<select value={view} onChange={event => { const value = event.target.value as View; user || value === "ALL" ? setView(value) : setShowAuth(true); }}><option value="ALL">All listings</option><option value="SAVED">Saved</option><option value="MINE">My listings</option></select></label>
@@ -206,6 +210,7 @@ export default function Sellz() {
         <label>Sort<select value={sort} onChange={event => setSort(event.target.value as Sort)}><option value="NEWEST">Newest</option><option value="PRICE_LOW">Price: low to high</option><option value="PRICE_HIGH">Price: high to low</option></select></label>
         {filtersActive && <button type="button" onClick={clearFilters}><RotateCcw size={14} /> Clear filters</button>}
       </div>
+      </FilterSurvey>
       <div className="sellz-board-summary">{activeCount > 0 && <span>{activeCount} available · {activeListings.length} showing</span>}<span><ShieldCheck size={15} /> No checkout or in-app payments</span></div>
       {formOpen && <SellzComposer onClose={() => setFormOpen(false)} onPosted={id => { setFormOpen(false); select(id); }} />}
       {missingLinkedPost && <div role="status" className="gigz-empty pdx-glass-rebind">This shared listing is no longer available. It may have been sold or removed.</div>}

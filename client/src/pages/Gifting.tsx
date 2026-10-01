@@ -11,6 +11,8 @@ import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import GiftListingCard, { type GiftingPost } from "@/components/board/GiftListingCard";
 import { FilterChip, RoomKicker } from "@/components/ds";
 import BrowseToolbar from "@/components/BrowseToolbar";
+import FilterSurvey from "@/components/FilterSurvey";
+import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
@@ -68,10 +70,12 @@ function GiftRail({ posts, type, selected, onSelect }: {
       <CarouselContent className="gigz-rail__track">
         {posts.map((post, index) => <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
           {type === "GIFT" ? <button type="button" className="gigz-opportunity giftz-offer" style={{ "--gigz-accent": ["#ccff00", "#a4d84a", "#e1ff80", "#89d69d"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gift: ${post.title}`}>
+            <ResourceCardMotif name={post.title} category="community" />
             {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <span className="giftz-offer__fallback" aria-hidden="true"><Gift size={76} strokeWidth={1.2} /></span>}
             <span className="gigz-opportunity__shade" /><span className="gigz-opportunity__top"><span><em>{post.category || "GIFT OFFERED"}</em><small>{post.isDemo ? "DEMO LISTING" : `Gift offered · ${timeAgo(post.createdAt)}`}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
             <span className="gigz-opportunity__bottom"><strong>{post.title}</strong><span>{post.neighborhood || "Portland"} · {post.pickupPreference || "Message to coordinate"}</span><em>FREE</em></span>
           </button> : <button type="button" className="gigz-talent giftz-iso" style={{ "--gigz-accent": ["#ccff00", "#b9eb75", "#e0ff87"][index % 3] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ISO: ${post.title}`}>
+            <ResourceCardMotif name={post.title} category="community" />
             <span className="gigz-talent__status"><span><i /> In search of</span><small>{post.isDemo ? "DEMO LISTING" : `Posted ${timeAgo(post.createdAt)}`}</small></span>
             <span className="gigz-talent__portrait">{post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <Search size={66} strokeWidth={1.2} aria-hidden="true" />}</span>
             <strong>{post.title}</strong><span className="giftz-iso__category">{post.category || "COMMUNITY REQUEST"}</span>
@@ -242,6 +246,7 @@ export default function Gifting() {
         <div className="giftz-actions"><button type="button" className="gigz-post gigz-post--primary" disabled={!postingOpen} onClick={() => openForm("GIFT")}><Plus size={17} />{giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}<ArrowUpRight size={16} /></button></div>
       </div>
       {!postingOpen && giftingStatus && <p className="giftz-posting-status" role="status">{giftingStatus.message}</p>}
+      <FilterSurvey label="Giftz" question="What are you looking for?" value={filter} onChange={setFilter} accent="var(--room-giftz)" options={[{value:"ALL",label:"Explore Giftz"},{value:"GIFT",label:"Gifts offered"},{value:"ISO",label:"In search of"},{value:"GRAB",label:"Open grab"}]}>
       <BrowseToolbar label="Filter Giftz posts" className="board-toolbar">
         <label>Search Giftz<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search titles and details" /></label>
         <label>Show<select value={filter} onChange={event => setFilter(event.target.value)}><option value="ALL">Offered & ISO</option><option value="GIFT">Gifts offered</option><option value="ISO">In search of</option><option value="GRAB">Open grab</option></select></label>
@@ -251,6 +256,7 @@ export default function Gifting() {
         <label>Sort<select value={sort} onChange={event => setSort(event.target.value)}><option value="RECENT">Recently posted</option><option value="LONGEST">Longest up</option></select></label>
         {(filter !== "ALL" || search || category !== "ALL" || neighborhood || onlyMine || sort !== "RECENT") && <button type="button" className="board-toolbar__clear" onClick={clearFilters}>Clear filters</button>}
       </BrowseToolbar>
+      </FilterSurvey>
       {isError ? <div className="gigz-empty pdx-glass-rebind" role="alert">Could not load Giftz posts. <button type="button" onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })}>Try again</button></div> : <>
         {isLoading ? <BoardFeedSkeleton label="Loading gifts offered" shape="board" count={3} /> : offered.length ? <GiftRail posts={offered} type="GIFT" selected={expandedId} onSelect={select} /> : <div className="gigz-empty pdx-glass-rebind">No gifts offered match right now. {postingOpen && <button type="button" onClick={() => openForm("GIFT")}>Post a gift</button>}</div>}
         <div className="gigz-talent-zone"><div className="gigz-section-head"><div><RoomKicker room="giftz" as="div">In search of</RoomKicker><h2>On someone’s wish list<span>.</span></h2><p>See what neighbors are looking for. You might have just the thing.</p></div><button type="button" className="gigz-post" disabled={!postingOpen} onClick={() => openForm("ISO")}><Plus size={17} /> Post an ISO <ArrowUpRight size={16} /></button></div>

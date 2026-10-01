@@ -34,6 +34,20 @@
   overflow-x: clip;
 }
 
+/* ReZources' layered artwork and logo floor, on the existing PlaceCard shape. */
+.directory-page .placez-rezource-card .pdxPlace__body { isolation: isolate; }
+.directory-page .placez-rezource-card .rg-motif-slot { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.directory-page .placez-rezource-card .rg-card-motif { width: 100%; height: 100%; color: var(--c); opacity: .13; transform: scale(1.2); }
+.directory-page .placez-rezource-card .pdxPlace__media { min-height: 170px; }
+.directory-page .placez-rezource-card .pdxPlace__mediaGlow { opacity: .24; }
+.directory-page .placez-rezource-card .pdxPlace__logo { max-height: 130px; mix-blend-mode: normal; filter: drop-shadow(0 9px 16px rgb(0 0 0 / 53%)); }
+.directory-page .placez-rezource-card .pdxPlace__name { font-size: clamp(1.5rem, 2vw, 2rem); line-height: 1.1; }
+.directory-page .placez-rezource-card .pdxPlace__actions { opacity: 1; pointer-events: auto; }
+.directory-page .placez-rezource-card .pdxPlace__share { min-height: 44px; }
+.directory-page .placez-card-vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at 50% 38%, transparent 25%, rgb(0 0 0 / 53%) 100%); }
+.directory-page .placez-rezource-card :is(.pdxPlace__compactRow,.pdxPlace__actions) { position: relative; z-index: 2; }
+@media (prefers-reduced-motion: reduce) { .directory-page .placez-rezource-card .rg-card-motif * { animation: none !important; } }
+
 /* ============================================================
    Directory browser layout
    Search leads. Filters support it. Listings follow immediately.

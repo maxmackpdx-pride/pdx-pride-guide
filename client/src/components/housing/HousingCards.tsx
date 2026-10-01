@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import { ChangeBadge } from "@/components/ds/ChangeBadge";
 import {
   AFFORDABILITY_BADGE_LABEL,
@@ -88,6 +89,7 @@ function CardShell({
         }
       }}
     >
+      <ResourceCardMotif name={post.displayName || post.headline || "The Haüz"} category="family" />
       <span className="pdx-refract-seam" aria-hidden="true" />
       {post.isDemo ? (
         <span className="hz-demo-sticker" aria-hidden="true">DEMO</span>

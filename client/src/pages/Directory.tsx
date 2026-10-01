@@ -1,5 +1,6 @@
 import BrowseStatus from "@/components/BrowseStatus";
 import BrowseToolbar from "@/components/BrowseToolbar";
+import FilterSurvey from "@/components/FilterSurvey";
 import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import type React from "react";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
@@ -34,6 +35,7 @@ import {
   pushDirectoryRecent,
 } from "@/lib/directoryRecent";
 import PlaceModal from "@/components/PlaceModal";
+import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import "./Directory.css";
 
 export type DirectoryEventSummary = {
@@ -465,6 +467,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
           </p>
         </div>
 
+        <FilterSurvey label={isSpaces ? "My Squadz" : "Placez"} question={isSpaces ? "Where is your community?" : "What kind of place do you need?"} value={isSpaces ? activeNeighborhood : activeType} onChange={isSpaces ? setActiveNeighborhood : handleSelectCategory} accent="var(--panel-cyan)" options={isSpaces ? neighborhoodsInUse.map(value=>({value,label:value === "ALL" ? "All areas" : value})) : [{value:"ALL",label:"All Placez",count:visibleBusinesses.length},...categoryBands.map(category=>({value:category.key,label:category.label,color:category.color,count:category.count}))]}>
         <BrowseToolbar label="Search and filter places" className="directory-browser-search pdx-glass-card pdx-glass-rebind">
           <label className="directory-browser-search__field">
             <span>Search {isSpaces ? "MY SQUADZ" : "OUR PLACEZ"}</span>
@@ -516,6 +519,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
             </Button>
           </div>
         </BrowseToolbar>
+        </FilterSurvey>
 
         {!isSpaces && (
           <div className="directory-browser-categories" role="group" aria-label="Filter by category">
@@ -691,7 +695,8 @@ function DirectoryCard({
         onClick?.(e.currentTarget);
       }}
       category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-      className="pdxPlace--clickable pdx-glass-rebind"
+      className="pdxPlace--clickable pdx-glass-rebind rg-directory-card placez-rezource-card"
+      decoration={<><span className="placez-card-vignette" aria-hidden="true" /><ResourceCardMotif name={biz.name} category={biz.type} /></>}
       isNonprofit={isNonprofit}
       logoUrl={logoUrl}
       fallbackLogoUrl={fallbackLogoUrl}

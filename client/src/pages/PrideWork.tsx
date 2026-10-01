@@ -17,6 +17,8 @@ import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
 import { Button, FilterChip, RoomKicker } from "@/components/ds";
 import BrowseToolbar from "@/components/BrowseToolbar";
+import FilterSurvey from "@/components/FilterSurvey";
+import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import ImageUploader from "@/components/ImageUploader";
 import { timeAgo } from "@/lib/timeAgo";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -122,6 +124,7 @@ function GigRail({ posts, kind, selected, onSelect }: {
           const poster = post.displayName || post.name;
           return <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
             {isTalent ? <button type="button" className="gigz-talent" style={{ "--gigz-accent": ["#b984ff", "#bbff54", "#ff8bb8", "#8edfff"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ${poster}: ${post.title}`}>
+              <ResourceCardMotif name={post.title} category="money" />
               <span className="gigz-talent__status"><span><i /> Available for gigs</span><small>{post.isDemo ? "DEMO LISTING" : `Posted ${timeAgo(post.createdAt)}`}</small></span>
               {post.username?.toLowerCase() !== "tucker_pdmax" && <span className="gigz-talent__portrait">{post.posterPhotoUrl || post.imageUrl ? <img src={post.posterPhotoUrl || post.imageUrl || ""} alt="" loading="lazy" /> : <UserAvatar photoUrl={post.posterPhotoUrl} avatarChoice={post.avatarChoice} avatarRing={post.posterAvatarRing} displayName={poster} username={post.username} size={150} />}</span>}
               <strong>{poster}</strong><span className="gigz-talent__role">{post.title}</span>
@@ -129,6 +132,7 @@ function GigRail({ posts, kind, selected, onSelect }: {
               <span className="gigz-talent__hire">View and message <ArrowUpRight size={18} /></span>
               <span className="gigz-talent__caption"><Zap size={15} /> {post.compensation || post.skills || "Available for work"}</span>
             </button> : <button type="button" className="gigz-opportunity" style={{ "--gigz-accent": ["#bb8aff", "#75c9ef", "#ffb477", "#f39ace", "#c7fa89"][index % 5] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gig: ${post.title}`}>
+              <ResourceCardMotif name={post.title} category="arts" />
               {post.imageUrl ? <img src={post.imageUrl} alt="" loading="lazy" /> : <span className="gigz-opportunity__fallback" aria-hidden="true">GIGZ</span>}
               <span className="gigz-opportunity__shade" />
               <span className="gigz-opportunity__top"><span><em>{post.skills?.split(",")[0]?.trim() || "OPPORTUNITY"}</em><small>{post.isDemo ? "DEMO LISTING" : `Gig posted · ${timeAgo(post.createdAt)}`}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
@@ -150,6 +154,7 @@ export default function PrideWork() {
   const [showAuth, setShowAuth] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(() => Number(new URLSearchParams(window.location.search).get("post")) || null);
   const [search, setSearch] = useState("");
+  const [surveyKind, setSurveyKind] = useState("all");
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [onlyMine, setOnlyMine] = useState(() => new URLSearchParams(window.location.search).get("mine") === "1");
   const { data: gigs = [], isLoading, isError } = useQuery<GigPost[]>({
@@ -162,8 +167,8 @@ export default function PrideWork() {
     window.setTimeout(() => document.getElementById("gigs-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 30);
   };
   const visible = useMemo(() => gigs.filter(g => (!remoteOnly || g.isRemote) && (!onlyMine || g.isMine) && (!search.trim() || [g.title, g.description, g.name, g.skills, g.location, g.compensation].some(v => v?.toLowerCase().includes(search.trim().toLowerCase())))), [gigs, remoteOnly, onlyMine, search]);
-  const opportunities = visible.filter(g => g.postType === "POSTING_GIG" && g.status === "LIVE");
-  const talent = visible.filter(g => g.postType === "LOOKING_FOR_WORK" && g.status === "LIVE");
+  const opportunities = visible.filter(g => surveyKind !== "talent" && g.postType === "POSTING_GIG" && g.status === "LIVE");
+  const talent = visible.filter(g => surveyKind !== "gigs" && g.postType === "LOOKING_FOR_WORK" && g.status === "LIVE");
   const selected = gigs.find(g => g.id === selectedId);
   // Live counts from the room's own query. Demo rows never count; zero stays visible.
   const realLive = gigs.filter(g => g.status === "LIVE" && !g.isDemo);
@@ -179,11 +184,13 @@ export default function PrideWork() {
       <RoomPlate room="gigz" />
       {!isLoading && !isError && !onlyMine && <BoardStatsBar variant="band" stats={roomStats} />}
       <div className="gigz-section-head"><div><RoomKicker room="gigz" as="div">The board</RoomKicker><h1>Gigz worth showing up for<span>.</span></h1><p>Find the next project, shift, or collaboration.</p></div><button type="button" className="gigz-post gigz-post--primary" onClick={() => openForm("POSTING_GIG")}><Plus size={17} /> Post a gig <ArrowUpRight size={16} /></button></div>
-      <BrowseToolbar label="Filter Gigz" className="board-toolbar"><label>Search Gigz<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search roles, skills, gigs" /></label><FilterChip className="board-chip pdx-glass-rebind" selected={remoteOnly} onToggle={() => setRemoteOnly(value => !value)}>Remote</FilterChip>{user && <FilterChip className="board-chip pdx-glass-rebind" selected={onlyMine} onToggle={() => setOnlyMine(value => !value)}>My Gigz</FilterChip>}{(search || remoteOnly || onlyMine) && <button type="button" className="board-toolbar__clear" onClick={() => { setSearch(""); setRemoteOnly(false); setOnlyMine(false); }}>Clear filters</button>}</BrowseToolbar>
-      {isLoading ? <BoardFeedSkeleton label="Loading Gigz posts" shape="board" count={3} /> : isError ? <div className="gigz-empty pdx-glass-rebind" role="alert">Could not load posts. <button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>Try again</button></div> : opportunities.length ? <GigRail posts={opportunities} kind="gigs" selected={selectedId} onSelect={select} /> : <div className="gigz-empty pdx-glass-rebind">No open gigs yet. <button onClick={() => openForm("POSTING_GIG")}>Post a gig</button></div>}
-      <div className="gigz-talent-zone"><div className="gigz-section-head"><div><RoomKicker room="gigz" as="div">The people</RoomKicker><h2>Available to hire<span>.</span></h2><p>Meet people ready to bring your next idea to life.</p></div><button type="button" className="gigz-post" onClick={() => openForm("LOOKING_FOR_WORK")}><Plus size={17} /> Post your availability <ArrowUpRight size={16} /></button></div>
+      <FilterSurvey label="Gigz" question="What do you need?" value={surveyKind} onChange={setSurveyKind} accent="var(--room-gigz-ink)" options={[{value:"all",label:"Explore Gigz"},{value:"gigs",label:"Find a gig"},{value:"talent",label:"Find talent"}]}>
+        <BrowseToolbar label="Filter Gigz" className="board-toolbar"><label>Search Gigz<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search roles, skills, gigs" /></label><FilterChip className="board-chip pdx-glass-rebind" selected={remoteOnly} onToggle={() => setRemoteOnly(value => !value)}>Remote</FilterChip>{user && <FilterChip className="board-chip pdx-glass-rebind" selected={onlyMine} onToggle={() => setOnlyMine(value => !value)}>My Gigz</FilterChip>}{(search || remoteOnly || onlyMine) && <button type="button" className="board-toolbar__clear" onClick={() => { setSearch(""); setRemoteOnly(false); setOnlyMine(false); }}>Clear filters</button>}</BrowseToolbar>
+      </FilterSurvey>
+      {surveyKind !== "talent" && (isLoading ? <BoardFeedSkeleton label="Loading Gigz posts" shape="board" count={3} /> : isError ? <div className="gigz-empty pdx-glass-rebind" role="alert">Could not load posts. <button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>Try again</button></div> : opportunities.length ? <GigRail posts={opportunities} kind="gigs" selected={selectedId} onSelect={select} /> : <div className="gigz-empty pdx-glass-rebind">No open gigs yet. <button onClick={() => openForm("POSTING_GIG")}>Post a gig</button></div>)}
+      {surveyKind !== "gigs" && <div className="gigz-talent-zone"><div className="gigz-section-head"><div><RoomKicker room="gigz" as="div">The people</RoomKicker><h2>Available to hire<span>.</span></h2><p>Meet people ready to bring your next idea to life.</p></div><button type="button" className="gigz-post" onClick={() => openForm("LOOKING_FOR_WORK")}><Plus size={17} /> Post your availability <ArrowUpRight size={16} /></button></div>
         {!isLoading && !isError && (talent.length ? <GigRail posts={talent} kind="talent" selected={selectedId} onSelect={select} /> : <div className="gigz-empty pdx-glass-rebind">No one has posted availability yet. <button onClick={() => openForm("LOOKING_FOR_WORK")}>Post yours</button></div>)}
-      </div>
+      </div>}
       {onlyMine && visible.some(g => g.status === "CLOSED") && <section className="gigz-closed"><h2>Completed posts</h2><p>These are visible only to you. Open one to edit or relist it.</p><div>{visible.filter(g => g.status === "CLOSED").map(g => <button type="button" key={g.id} onClick={() => select(g.id)}>{g.title} <ArrowUpRight size={16} /></button>)}</div></section>}
       {selected && <section id="gigz-detail" className="gigz-detail" aria-label="Selected Gigz post"><button className="gigz-detail__close" onClick={() => { setSelectedId(null); window.history.replaceState(null, "", "/gigz"); }} aria-label="Close details"><X size={18} /></button><GigListingCard gig={selected} accent="var(--board-gigs)" expanded skills={selected.skills?.split(",").map(s => s.trim()).filter(Boolean) || []} isLooking={selected.postType === "LOOKING_FOR_WORK"} onToggle={() => {}} /></section>}
       {formOpen && <GigComposer initialType={composeType} onClose={() => setFormOpen(false)} onPosted={id => { setFormOpen(false); setSelectedId(id); }} />}

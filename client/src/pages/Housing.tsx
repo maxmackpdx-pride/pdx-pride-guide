@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import BrowseToolbar from "@/components/BrowseToolbar";
+import FilterSurvey from "@/components/FilterSurvey";
 import BrowseStatus from "@/components/BrowseStatus";
 import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import { SearchInput } from "@/components/ds";
@@ -393,6 +394,7 @@ export default function Housing() {
 
       <div className="hz-pad hz-pad--tight">
         <div className="hz-wrap">
+          <FilterSurvey label="The Haüz" question="What kind of home are you looking for?" value={filter} onChange={value => setFilter(value as HousingFilter)} accent="var(--room-hauz)" options={HOUSING_FILTERS.map(value => ({value,label:HOUSING_FILTER_LABEL[value]}))}>
           <BrowseToolbar label="Search and filter The Haüz">
           <SearchInput id="housing-search" label="Search The Haüz" aria-label="Search The Haüz" placeholder="Search household names and headlines" value={searchQuery} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} onClear={() => setSearchQuery("")} />
           <div className="hz-filter" id="housing-listings" tabIndex={-1} style={{ scrollMarginTop: "calc(var(--site-header-height, 0px) + 16px)" }}>
@@ -416,6 +418,7 @@ export default function Housing() {
           <HousingTagFilter applied={tags} onApply={setTags} />
           {(searchQuery || tags.length > 0 || filter !== "ALL") && <button type="button" className="events-clear-filters" onClick={() => { setSearchQuery(""); setTags([]); setFilter("ALL"); }}>Clear filters</button>}
           </BrowseToolbar>
+          </FilterSurvey>
         </div>
       </div>
 

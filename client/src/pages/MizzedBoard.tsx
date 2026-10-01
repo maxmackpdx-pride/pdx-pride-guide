@@ -1,4 +1,5 @@
 import { RoomKicker } from "@/components/ds";
+import FilterSurvey from "@/components/FilterSurvey";
 import RoomPlate from "@/components/board/RoomPlate";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -60,9 +61,9 @@ export default function MizzedBoard() {
       <div className="mizzed-board__actions"><button className="mizzed-board__post" onClick={openComposer}><Plus size={17} /> Post to Mizzed <ArrowRight size={17} /></button></div>
     </section>
     {compose && user && <section className="mizzed-board__composer" id="mizzed-composer"><button className="mizzed-board__dismiss" type="button" onClick={() => setCompose(false)}>Close</button><h2>Post to Mizzed</h2><p>Choose where it happened. The post stays anonymous, and replies arrive privately.</p><MizzedComposer linkableEvents={events} initialSource={initialSource} onPosted={() => { setCompose(false); void refetch(); }} /></section>}
-    <div className="mizzed-board__filters" role="group" aria-label="Filter connections by source">{filters.map(option => <button type="button" key={option.id} aria-pressed={filter === option.id} onClick={() => setFilter(option.id)}>{option.label}</button>)}</div>
+    <FilterSurvey label="Mizzed" question="Where did you cross paths?" value={filter} onChange={value => setFilter(value as Category)} accent="var(--room-mizzed)" options={filters.map(option => ({value:option.id,label:option.label}))} />
     {isLoading ? <p role="status">Loading connections…</p> : isError ? <p role="alert">Connections could not load. <button onClick={() => void refetch()}>Try again</button></p> : visible.length === 0 ? <div className="mizzed-board__empty"><h2>No connections here yet</h2><p>Someone has to make the first move.</p><button onClick={openComposer}>Post to Mizzed</button></div> : <>
-      <div className="mizzed-board__rail" ref={rail} dir="rtl" aria-label="Mizzed connections">{visible.map(post => <div dir="ltr" className="mizzed-board__item" key={post.id} id={`board-post-${post.id}`}><SpottedCard post={post} accentColor="#ff37c2" onReply={() => setSelected(post)} makeover /></div>)}</div>
+      <div className="mizzed-board__rail" ref={rail} dir="rtl" aria-label="Mizzed connections">{visible.map((post, index) => <div dir="ltr" className="mizzed-board__item" key={post.id} id={`board-post-${post.id}`}><SpottedCard post={post} accentColor="#ff37c2" onReply={() => setSelected(post)} makeover motifIndex={index} /></div>)}</div>
       <div className="mizzed-board__controls"><span>SWIPE TO EXPLORE</span><button type="button" aria-label="Previous connections" onClick={() => rail.current?.scrollBy({ left: 350, behavior: "smooth" })}><ArrowLeft size={19}/></button><button type="button" aria-label="Next connections" onClick={() => rail.current?.scrollBy({ left: -350, behavior: "smooth" })}><ArrowRight size={19}/></button></div>
     </>}
     {selected && <SpottedDetailModal postId={selected.id} title={selected.title} body={selected.body} place={selected.placeName || selected.eventTitle || selected.venueHint || "Around town"} kindLabel={mizzedSource(selected)?.label || "That one spot by the…"} kindColor="#ff37c2" isMine={selected.isMine} status={selected.status} source={mizzedSource(selected)} onClose={() => setSelected(null)} />}

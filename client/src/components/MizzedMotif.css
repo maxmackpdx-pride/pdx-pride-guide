@@ -1,0 +1,8 @@
+.mizzed-motif { display: block; width: 100%; height: 100%; background: radial-gradient(ellipse at 55% 45%, rgb(80 32 70) 0%, rgb(26 14 32) 48%, rgb(8 8 13) 100%); }
+.mizzed-motif__mesh { opacity: .14; }
+.mizzed-motif__drawing { opacity: .85; filter: drop-shadow(0 0 7px rgb(255 0 204 / 53%)); animation: mizzed-motif-breathe 11s ease-in-out infinite alternate; }
+.mizzed-motif__points { opacity: .65; }
+.mizzed-board__item .board-spotted-card__art--motif .board-spotted-card__uploaded-art { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; object-fit: contain; background: rgb(8 8 13 / 80%); filter: none; }
+@keyframes mizzed-motif-breathe { from { opacity: .55; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .mizzed-motif__drawing { animation: none; } }
+html.calm-mode .mizzed-motif__drawing, :root[data-calm="true"] .mizzed-motif__drawing { animation: none; }

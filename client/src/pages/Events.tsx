@@ -1,6 +1,7 @@
 import { createEventSearch } from "@shared/eventSearch";
 import RoomPlate from "@/components/board/RoomPlate";
 import BrowseToolbar from "@/components/BrowseToolbar";
+import FilterSurvey from "@/components/FilterSurvey";
 import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
 import type React from "react";
@@ -656,6 +657,7 @@ export default function Events() {
                   </span>
                 </div>
               </div>
+              <FilterSurvey label="Eventz" question="When do you want to go?" value={activeDay} onChange={setActiveDay} accent="var(--neon-yellow)" options={dayChips.filter(chip => !/^\d{4}-/.test(chip.key)).map(chip => ({value:chip.key,label:chip.label}))}>
               <BrowseToolbar label="Search and filter Eventz" className="board-active-feed__controls">
                 <div className="board-filter-row events-filter-row">
                   {dayChips.filter(chip => !/^\d{4}-/.test(chip.key)).map((chip, i) => {
@@ -780,6 +782,7 @@ export default function Events() {
                   </button>
                 )}
               </BrowseToolbar>
+              </FilterSurvey>
             </div>
           </ScrollReveal>
 

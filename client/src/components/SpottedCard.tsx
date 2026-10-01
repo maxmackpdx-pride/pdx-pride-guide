@@ -6,7 +6,8 @@ import type { MissedConnectionPost } from "./MissedConnectionsPanel";
 import { shareMissedConnectionStory } from "@/lib/shareMissedConnection";
 import { useToast } from "@/hooks/use-toast";
 import { BoardGlassMotif } from "@/components/board/GiftListingCard";
-import { mizzedArt, mizzedSource } from "@/lib/mizzedSource";
+import { mizzedSource } from "@/lib/mizzedSource";
+import MizzedMotif from "@/components/MizzedMotif";
 
 const ACCENT_CYCLE = ["#19E3FF", "#FF00CC", "#39FF14", "#A855F7", "#FF6600"];
 /** Deep-glass board accent for MIZZED CONNECTION (SoT §2.4). */
@@ -52,12 +53,14 @@ export default function SpottedCard({
   onReply,
   animDelay = 0,
   makeover = false,
+  motifIndex = 0,
 }: {
   post: MissedConnectionPost;
   accentColor: string;
   onReply: () => void;
   animDelay?: number;
   makeover?: boolean;
+  motifIndex?: number;
 }) {
   const location = post.eventTitle || post.eventVenue || post.venueHint || "Around Town";
   const isClosed = post.status === "CLOSED" || post.status === "ARCHIVED";
@@ -89,7 +92,10 @@ export default function SpottedCard({
         tabIndex={0}
       >
         {post.isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
-        <div className={`board-spotted-card__art${source?.label === "OutZide" ? " board-spotted-card__art--motif" : ""}`}><img src={mizzedArt(post)} alt="" loading="lazy" /></div>
+        <div className="board-spotted-card__art board-spotted-card__art--motif">
+          <MizzedMotif index={motifIndex} />
+          {post.eventPosterUrl && <img className="board-spotted-card__uploaded-art" src={post.eventPosterUrl} alt="" loading="lazy" />}
+        </div>
         {/* Corner tick marks (design board cards) */}
         <span className="board-spotted-card__ticks" aria-hidden="true">”</span>
         <div className="board-spotted-card__meta">
