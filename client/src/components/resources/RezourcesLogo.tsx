@@ -223,6 +223,10 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
             {OBJECTS.map(o => <path key={o.id} d={o.id === 'disco-ball' ? DISCO_SOURCE_PATH : o.id === 'rent' ? RENT_SOURCE_PATH : o.path} fill="black" />)}
             <path d={FIXED_DETAILS} fill="black" />
           </mask>
+          <linearGradient id={`${id}-e-repair`} gradientUnits="userSpaceOnUse" x1="309" y1="408" x2="446" y2="608">
+            <stop stopColor="var(--neon-orange)" />
+            <stop offset="1" stopColor="var(--neon-yellow)" />
+          </linearGradient>
           <linearGradient id={`${id}-color`} x1="0" y1="0" x2="1" y2=".5">
             <stop offset="0" stopColor="var(--neon-orange)" />
             <stop offset=".3" stopColor="var(--neon-yellow)" />
@@ -250,6 +254,8 @@ export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }
           <path d="M1605 412C1603 455 1600 507 1601 546" fill="none" stroke="var(--text-heading)" strokeWidth="2.6" opacity=".7" />
           <image href={ROOSTER_ROCK_ART} x="1300" y="270" width="300" height="220" transform="rotate(-11 1450 380)" />
         </g>
+        {/* Restore the E beneath the relocated rent sign before layering the original texture. */}
+        <path d={rezourcesLetterPaths[1]} fill={`url(#${id}-e-repair)`} />
         <image href={ART} width="1792" height="1008" mask={`url(#${id}-still)`} />
         <g className="rg-logo-surface">
         <image href={ART} width="1792" height="1008" mask={`url(#${id}-moving-letters)`} />

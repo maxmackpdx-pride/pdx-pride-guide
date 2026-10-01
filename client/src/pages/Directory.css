@@ -1427,3 +1427,81 @@ html.calm-mode .directory-page .board-empty,
 .placez-shader-contours__yellow { stroke:var(--neon-yellow); }
 .directory-page.resources-page .directory-add-band { position:relative; z-index:1; }
 .directory-page.resources-page::before { pointer-events:none; }
+
+/* Placez front door: the same choice, refine, reveal rhythm as ReZources. */
+.directory-page .directory-browser-header { width:min(100% - 40px,1120px); margin:0 auto; padding-top:40px; }
+.directory-page .directory-browser-header__identity { text-align:center; max-width:760px; margin:0 auto 28px; }
+.directory-page .directory-browser-header__wordmark { width:min(100%,420px); max-height:190px; object-fit:contain; }
+.directory-page .directory-browser-header__lede { max-width:620px; margin:16px auto; color:var(--text-body); font:400 18px/1.65 var(--font-body); }
+.directory-page .filter-survey { max-width:960px; margin:32px auto 48px; padding:32px; border:1px solid color-mix(in srgb,var(--neon-cyan) 25%,var(--z-black)); border-radius:24px; background:rgba(0,0,0,.86); }
+.directory-page .filter-survey__number { display:grid; }
+.directory-page .filter-survey__step { display:grid; grid-template-columns:32px minmax(0,1fr); gap:20px; }
+.directory-page .filter-survey h2 { font:800 clamp(30px,4vw,44px)/1.05 var(--font-display); text-transform:uppercase; margin:10px 0 16px; }
+.directory-page .filter-survey__eyebrow { font:600 11px/1.5 var(--font-mono); color:var(--neon-cyan); }
+.directory-page .filter-survey__intro { font:400 16px/1.65 var(--font-body); color:var(--text-body); max-width:650px; margin:0 0 28px; }
+.directory-page .filter-survey__options { grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.directory-page .filter-survey__option.pdx-glass-rebind { min-height:88px; padding:18px; border-radius:18px; font:800 20px/1.1 var(--font-display); text-transform:uppercase; }
+.directory-page .filter-survey__option-copy { flex:1; }
+.directory-page .filter-survey__option-description { display:block; margin-top:7px; font:400 14px/1.4 var(--font-body); text-transform:none; color:var(--text-body); }
+.directory-page .filter-survey__option small { font:600 12px/1 var(--font-mono); }
+.directory-page .filter-survey__option[aria-pressed="true"] { border-color:var(--res-accent); }
+.directory-page .filter-survey__details-toggle { min-height:64px; }
+.directory-page .filter-survey__details-toggle strong { font:800 22px/1.2 var(--font-display); text-transform:uppercase; }
+.directory-page .directory-browser-search { padding:20px; border-radius:18px; }
+.directory-page .directory-browser-search input,.directory-page .directory-browser-search select { min-height:48px; font:500 15px/1.4 var(--font-body); border-radius:12px; background:var(--z-oled); color:var(--text-heading); border:1px solid color-mix(in srgb,var(--neon-cyan) 35%,var(--border-default)); }
+.directory-page .directory-browser-categories { gap:10px; margin-block:24px; }
+.directory-page .directory-browser-category { min-height:44px; border-radius:12px; font:700 14px/1.2 var(--font-display); }
+.directory-browser-results[hidden] { display:none !important; }
+@media(max-width:600px) {
+ .directory-page .directory-browser-header { width:calc(100% - 24px); padding-top:24px; }
+ .directory-page .filter-survey { padding:22px 16px; margin-block:24px; }
+ .directory-page .filter-survey__step { grid-template-columns:minmax(0,1fr); gap:10px; }
+ .directory-page .filter-survey__step:first-child::after { display:none; }
+ .directory-page .filter-survey__options { grid-template-columns:1fr; }
+ .directory-page .filter-survey__option.pdx-glass-rebind { min-height:76px; }
+}
+.directory-page.resources-page .directory-browser-header__identity { padding-block:20px 12px; }
+.directory-page.resources-page .directory-browser-header__wordmark { width:min(100%,420px); max-height:190px; }
+.directory-page .filter-survey__content { display:flex; flex-direction:column; align-items:stretch; }
+.directory-page .filter-survey__options { order:1; }
+.directory-page .filter-survey .discovery-skip { align-self:flex-start; margin:0 0 22px; min-height:44px; }
+.directory-page.resources-page .directory-browser-categories { gap:10px; margin-block:24px; }
+.directory-page.resources-page .directory-browser-category { min-height:44px; font:700 16px/1.2 var(--font-display); }
+.directory-page.resources-page .directory-browser-search { margin-block:16px 0; }
+.directory-page.resources-page .directory-browser-header__wordmark { display:block; margin-inline:auto; }
+
+.directory-page.resources-page::before { background:var(--discovery-atmosphere-fade); mask-image:none; -webkit-mask-image:none; backdrop-filter:none; -webkit-backdrop-filter:none; z-index:1; }
+.directory-page.resources-page .rg-stream-background { filter:none; }
+.directory-page .filter-survey { background:var(--glass-card-bg); border:var(--glass-card-border); box-shadow:var(--glass-card-shadow); }
+.directory-page .filter-survey__option-copy { color:var(--res-accent); }
+.directory-page .filter-survey__option-description { color:var(--text-body); }
+.directory-page .directory-browser-search input,.directory-page .directory-browser-search select { background:var(--z-oled); border-color:var(--border-default); }
+
+/* Reuse the ReZources front-door structure and its dimensions directly. */
+.directory-page.resources-page { padding-inline:16px; }
+.directory-page.resources-page .directory-browser-header { width:100%; max-width:1248px; padding:0; position:relative; z-index:2; }
+.directory-page .placez-reference-intro.rg-intro { width:100%; box-sizing:border-box; padding:32px 48px 0; gap:var(--rg-logo-space); }
+.directory-page.resources-page .placez-reference-intro h1.placez-reference-logo { margin:0 auto; align-self:center; }
+.placez-reference-logo img { display:block; width:100%; height:auto; max-height:none; object-fit:contain; transform:translateY(-10%); }
+.directory-page.resources-page .placez-reference-start { margin-top:0; }
+.directory-page .placez-reference-start .rg-controls { width:100%; }
+.directory-page .placez-reference-map { min-height:44px; padding:12px 20px; border:1px solid var(--neon-yellow); border-radius:18px; color:var(--text-heading); background:var(--z-oled); font:700 14px/1.2 var(--font-display); text-transform:uppercase; text-decoration:none; display:inline-flex; align-items:center; box-sizing:border-box; }
+.directory-page .filter-survey { max-width:1152px; background:transparent; border:0; box-shadow:none; padding:0 48px; margin:64px auto; }
+.directory-page .filter-survey__step { grid-template-columns:1fr; text-align:center; }
+.directory-page .filter-survey__step::after { display:none; }
+.directory-page .filter-survey__number { margin:auto; }
+.directory-page .filter-survey__intro { margin:0 auto 32px; }
+.directory-page .filter-survey__options { gap:16px; text-align:left; }
+.directory-page .filter-survey__option.pdx-glass-rebind { font-size:var(--rg-control-size); line-height:1.4; padding:16px 20px; }
+@media(max-width:600px) {
+ .directory-page .placez-reference-intro.rg-intro { padding:24px 16px 0; gap:40px; }
+
+
+ .directory-page .filter-survey { padding:0 16px; margin-block:40px; }
+}
+
+/* Darken the shader behind the front-door copy without flattening the glass. */
+.directory-page.resources-page::before {
+  background:linear-gradient(to bottom,var(--z-oled) 0%,color-mix(in srgb,var(--z-oled) 85%,transparent) 30%,color-mix(in srgb,var(--z-oled) 45%,transparent) 65%,transparent 100%);
+}
+.directory-page.resources-page::before { opacity:1; }

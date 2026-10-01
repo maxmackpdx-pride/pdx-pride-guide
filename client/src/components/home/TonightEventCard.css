@@ -1,10 +1,10 @@
 /* Resource-inspired glass objects with event-specific artwork and metadata. */
-.tonight-card { display: flex; flex-direction: column; width: 100%; isolation: isolate; border: 1.5px solid var(--c); border-radius: var(--glass-card-radius, 14px); overflow: hidden; }
+.tonight-card { display: flex; flex-direction: column; width: 100%; isolation: isolate; border: var(--glass-card-border); border-radius: 24px; box-shadow: var(--glass-card-shadow); overflow: hidden; }
 .tonight-card__sheen { opacity: .35; position: absolute; inset: 0; pointer-events: none; z-index: 1; }
 .tonight-card button { font: inherit; cursor: pointer; }
 .tonight-card__open { display: flex; flex-direction: column; flex: 1; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
-.tonight-card__art { position: relative; width: 100%; overflow: hidden; }
-.tonight-card__art img { display: block; width: 100%; height: auto; aspect-ratio: auto 4 / 5; mask-image: linear-gradient(to bottom, var(--z-black) 68%, transparent 100%); }
+.tonight-card__art { position: relative; width: 100%; aspect-ratio: 4 / 5; flex: none; overflow: hidden; }
+.tonight-card__art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; mask-image: linear-gradient(to bottom, var(--z-black) 68%, transparent 100%); }
 .tonight-card__body { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 16px; flex: 1; width: 100%; padding: 22px; box-sizing: border-box; }
 .tonight-card__body p { margin: 0; }
 .tonight-card__time { display: flex; align-items: center; gap: 8px; color: var(--text-hi); font: 600 12px/1.5 var(--font-mono, monospace); }
@@ -25,10 +25,78 @@
 
 /* Keep the shared optical shell while giving copy a stable dark field. */
 .tonight-card.pdx-glass-rebind {
+  --glass-card-shadow:
+    0 0 0 2px var(--z-black),
+    0 12px 30px -18px color-mix(in srgb,var(--z-black) 95%,transparent),
+    0 0 18px -8px color-mix(in srgb,var(--c) 7.28%,transparent),
+    0 0 10px -5px color-mix(in srgb,var(--c) 7.28%,transparent),
+    inset 0 1px 0 color-mix(in srgb,var(--c) 55%,color-mix(in srgb,var(--text-heading) 12%,transparent)),
+    inset 0 0 34px -26px color-mix(in srgb,var(--c) 28%,transparent);
   background:var(--glass-card-bg) !important;
-  background-color:color-mix(in srgb,var(--z-black) 96%,transparent) !important;
+  background-color:var(--z-oled) !important;
+  border:var(--glass-card-border) !important;
+  box-shadow:var(--glass-card-shadow) !important;
 }
 .tonight-card .tonight-card__venue { color:var(--text-heading); }
 .tonight-card .tonight-card__venue small { color:var(--text-body); }
 .tonight-card .tonight-card__tags span { background:color-mix(in srgb,var(--z-black) 82%,transparent); border-color:color-mix(in srgb,var(--c) 55%,transparent); }
 .tonight-card .tonight-card__save { background:var(--btn-glow-bg); box-shadow:var(--btn-glow-shadow); }
+
+/* Fixed poster and text slots keep every closed card aligned. */
+.tonight-card__time { min-height: 3em; }
+.tonight-card__body h3 {
+  height: 3.06em; flex: none;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.tonight-card__venue { min-height: 4.2em; }
+
+.tonight-card { position: relative; }
+.rail-card-share { position:absolute; top:16px; right:16px; z-index:4; display:flex; align-items:center; gap:7px; min-height:44px; padding:10px 14px; border:1px solid var(--c); border-radius:10px; background:var(--z-oled); color:var(--text-heading); }
+.tonight-card .rail-card-share { font:700 14px/1 var(--font-display); text-transform:uppercase; }
+.rail-card-share:hover { box-shadow:var(--btn-glow-shadow); }
+.home-tonight__item > .tonight-card { height:100%; }
+
+/* Homepage rail: one hierarchy and interaction language for every room. */
+.rail-card-room { display: none; }
+.home-tonight .rail-card-room {
+  display: block; color: var(--c); font: 800 14px/1.2 var(--font-display);
+  letter-spacing: .08em; text-transform: uppercase;
+}
+.home-tonight .tonight-card__body { gap: 16px; padding: 24px; }
+.home-tonight .tonight-card__tags span { text-transform: uppercase; letter-spacing: .035em; }
+.home-tonight .tonight-card__time { align-items: flex-start; min-height: 36px; }
+.home-tonight .tonight-card__time svg { margin-top: 2px; }
+.home-tonight .tonight-card__venue { height: 60px; min-height: 60px; overflow: hidden; }
+.home-tonight .tonight-card__venue > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.home-tonight .tonight-card__footer { margin-inline: 24px; gap: 10px; }
+.home-tonight .tonight-card__footer button {
+  height: 44px !important; min-width: 88px; padding: 8px 12px !important;
+  border-radius: 10px !important; font: 700 14px/1.2 var(--font-display) !important;
+  letter-spacing: .035em !important; color: var(--text-heading) !important;
+  border: 1px solid color-mix(in srgb,var(--c) 55%,transparent) !important;
+  background: var(--btn-glow-bg) !important;
+}
+.home-tonight .tonight-card__footer .tonight-card__view { margin-left: auto; }
+.home-tonight .tonight-card__footer button[aria-pressed="true"] {
+  border-color: var(--c) !important;
+  background: color-mix(in srgb,var(--c) 20%,var(--z-oled)) !important;
+}
+.home-tonight .tonight-card { transition: transform 180ms ease; }
+@media (hover:hover) {
+  .home-tonight .tonight-card:hover { transform: translateY(-3px); }
+}
+.home-tonight .tonight-card button:focus-visible { outline: 2px solid var(--text-heading); outline-offset: -4px; }
+.home-tonight .tonight-card__footer button:hover, .home-tonight .rail-card-share:hover { color: var(--c) !important; text-decoration: none; }
+@media (prefers-reduced-motion:reduce) {
+  .home-tonight .tonight-card { transition: none; transform: none !important; }
+}
+:is(html.calm-mode,:root[data-calm="true"]) .home-tonight .tonight-card { transition: none; transform: none !important; }
+
+@media(max-width:600px) {
+  .home-tonight .tonight-card__art { aspect-ratio:1; }
+  .home-tonight .tonight-card__body { padding:18px; gap:12px; }
+  .home-tonight .tonight-card__body h3 { font-size:28px; }
+  .home-tonight .tonight-card__footer { margin-inline:18px; gap:8px; }
+  .home-tonight .tonight-card__footer button { min-width:0; flex:1; }
+}

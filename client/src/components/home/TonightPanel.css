@@ -65,5 +65,5 @@
 /* Let the shader emerge gradually below the dark heading area. */
 .home-tonight__atmosphere::after {
   content:""; position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(to bottom,var(--z-black) 0%,color-mix(in srgb,var(--z-black) 78%,transparent) 26%,color-mix(in srgb,var(--z-black) 32%,transparent) 62%,transparent 100%);
+  background:var(--discovery-atmosphere-fade);
 }

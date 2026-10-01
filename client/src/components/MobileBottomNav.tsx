@@ -14,7 +14,7 @@ import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
 import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
-import { CalendarDays, HeartHandshake, MessageCircle, PanelsTopLeft } from "lucide-react";
+import { CalendarDays, MapPin, MessageCircle, PanelsTopLeft } from "lucide-react";
 
 const MOBILE_ICON = 19;
 
@@ -95,8 +95,8 @@ export default function MobileBottomNav() {
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const hubActive = navLinkActive(location, "/dashboard");
   const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
-  const resourcesActive = navLinkActive(location, "/rezources");
-  const activeIndex = open || showAuth ? 4 : hubActive ? 2 : mapActive ? 1 : resourcesActive ? 3 : eventsActive ? 0 : -1;
+  const placesActive = navLinkActive(location, "/directory");
+  const activeIndex = open || showAuth ? 4 : hubActive ? 2 : mapActive ? 1 : placesActive ? 3 : eventsActive ? 0 : -1;
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
 
@@ -251,16 +251,16 @@ export default function MobileBottomNav() {
           </Link>
 
           <Link
-            href="/rezources"
-            className={tabClass(resourcesActive, "green")}
-            data-accent="green"
-            aria-label="ReZources"
-            title="ReZources"
-            aria-current={resourcesActive ? "page" : undefined}
+            href="/directory"
+            className={tabClass(placesActive, "cyan")}
+            data-accent="cyan"
+            aria-label="Placez"
+            title="Placez"
+            aria-current={placesActive ? "page" : undefined}
             onClick={handleNavLink}
           >
-            <span className="znav-icon-row"><HeartHandshake size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">ReZources</span>
+            <span className="znav-icon-row"><MapPin size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Placez</span>
           </Link>
 
           <button

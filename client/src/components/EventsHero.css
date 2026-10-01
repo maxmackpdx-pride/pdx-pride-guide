@@ -1,0 +1,18 @@
+.eventz-neon-logo { position:relative; display:block; width:min(100%,760px); margin-inline:auto; isolation:isolate; }
+.eventz-neon-logo__bloom {
+  position:absolute; inset:0; pointer-events:none;
+  background:url('/brand/family/eventz.png') center / contain no-repeat;
+  mask-image:linear-gradient(to right, transparent calc(var(--letter-start) - 1%), var(--z-oled) calc(var(--letter-start) + 1%), var(--z-oled) calc(var(--letter-end) - 1%), transparent calc(var(--letter-end) + 1%));
+  filter:blur(4px); mix-blend-mode:screen; opacity:.16;
+  animation:eventz-letter-breathe var(--breath-duration) ease-in-out var(--breath-delay) infinite;
+}
+.eventz-neon-logo__bloom--1,
+.eventz-neon-logo__bloom--4 {
+  animation:eventz-letter-breathe var(--breath-duration) ease-in-out var(--breath-delay) infinite, eventz-letter-flicker 23.7s linear -9.3s infinite;
+}
+.eventz-neon-logo__bloom--4 { animation-duration:var(--breath-duration),31.1s; animation-delay:var(--breath-delay),-19.6s; }
+@keyframes eventz-letter-breathe { 0%,100% { opacity:.09; } 43% { opacity:.29; } 67% { opacity:.21; } }
+/* Brief dips affect only the extra bloom; the readable artwork stays steady. */
+@keyframes eventz-letter-flicker { 0%,72%,73.2%,100% { filter:blur(4px) brightness(1); } 72.35%,72.85% { filter:blur(4px) brightness(.3); } 72.6% { filter:blur(4px) brightness(.85); } }
+@media (prefers-reduced-motion:reduce) { .eventz-neon-logo__bloom { animation:none; opacity:.14; } }
+html.calm-mode .eventz-neon-logo__bloom { animation:none; opacity:.14; }

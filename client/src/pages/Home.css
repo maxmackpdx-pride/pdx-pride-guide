@@ -1541,7 +1541,7 @@ html.calm-mode .home-main-stage .pg-note--spot {
   font-size: 13px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--neon-cyan, #00ffff);
+  color: var(--neon-cyan);
 }
 
 .home-boards__dot {
@@ -1979,7 +1979,9 @@ html.calm-mode .home-boards__card {
 }
 
 .home-stat-strip__grad--events {
-  background-image: linear-gradient(90deg, #ff19d6 0%, var(--neon-orange) 100%);
+  background-image: none;
+  color: var(--neon-cyan);
+  -webkit-text-fill-color: var(--neon-cyan);
 }
 
 .home-stat-strip__grad--places {
@@ -2579,7 +2581,7 @@ html.calm-mode .home-beach-widget,
   font-size: 15px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--neon-cyan, #00ffff);
+  color: var(--neon-cyan);
   border: 2px solid var(--neon-cyan, #00ffff);
   padding: 11px 20px;
   border-radius: 3px;
@@ -2868,7 +2870,7 @@ html.calm-mode .home-main-stage .home-hero__grain {
   align-items: center;
   gap: 12px;
   margin: 0 0 14px;
-  color: var(--neon-cyan, #00ffff);
+  color: var(--neon-cyan);
   font-family: var(--font-display, "Barlow Condensed", sans-serif);
   font-size: var(--chrome-md, 1rem);
   font-weight: var(--fw-bold, 700);

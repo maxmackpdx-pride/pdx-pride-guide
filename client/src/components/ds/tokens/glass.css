@@ -1091,3 +1091,6 @@ html.calm-mode .pdx-glass-card--neutral,
       rgba(5, 5, 8, 0.97) !important;
   }
 }
+
+/* Shared discovery atmosphere: OLED heading, clear lower canvas. */
+:root { --discovery-atmosphere-fade:linear-gradient(to bottom,var(--z-oled) 0%,color-mix(in srgb,var(--z-oled) 65%,transparent) 12%,color-mix(in srgb,var(--z-oled) 15%,transparent) 30%,transparent 48%); }

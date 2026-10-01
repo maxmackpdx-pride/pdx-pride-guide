@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import DetailActions from "./DetailActions";
 import type React from "react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
@@ -34,7 +34,7 @@ import { directoryFallbackLogo, resolveDirectoryLogo } from "@shared/directoryLo
 import DirectoryMap from "@/components/DirectoryMap";
 import "./PlaceModal.css";
 
-/** Source-card rect for little→big FLIP expand. */
+/** Source-card rect retained for compatibility with directory callers. */
 export type PlaceModalOriginRect = {
   top: number;
   left: number;
@@ -98,12 +98,6 @@ const DAY_COLOR: Record<string, string> = {
   SAT: "var(--day-sat, var(--green, #39ff14))",
   SUN: "var(--day-sun, var(--orange, #ff6600))",
 };
-
-function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined") return false;
-  if (document.documentElement.classList.contains("calm-mode")) return true;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
 
 /** Nonprofit card border - full-spectrum rainbow instead of a single category color. */
 const NONPROFIT_RAINBOW_EDGE =
@@ -208,12 +202,11 @@ export default function PlaceModal({
   place,
   onClose,
   onRequireAuth,
-  originRect = null,
 }: {
   place: Business | null;
   onClose: () => void;
   onRequireAuth: () => void;
-  /** Bounding rect of the directory card that was clicked - drives little→big expand. */
+  /** Retained for callers; opening now uses the shared centered scale/fade. */
   originRect?: PlaceModalOriginRect | null;
 }) {
   const { toast } = useToast();
@@ -228,9 +221,6 @@ export default function PlaceModal({
   const [descriptionClipped, setDescriptionClipped] = useState(false);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const [open, setOpen] = useState(false);
-  const [flipVars, setFlipVars] = useState<React.CSSProperties | null>(null);
-  const useFlip = Boolean(originRect && originRect.width > 0 && originRect.height > 0);
-  // Single ref for a11y, close motion, and FLIP measurement.
   const { dialogRef: panelRef, requestClose: handleClose } = useOpenCardClose(onClose, !!place);
 
   // Fresh tab when opening a different place
@@ -252,67 +242,13 @@ export default function PlaceModal({
     return () => observer.disconnect();
   }, [place?.id, place?.description, savedOverrides?.description, editing, descriptionExpanded]);
 
-  // Little→big FLIP: map final panel onto source card, then animate to identity.
-  // Keep open=false until after the inverted transform is applied (same frame as paint).
-  useLayoutEffect(() => {
+  // Match ReZources: a centered scale/fade, independent of the source card.
+  useEffect(() => {
     if (!place) return;
-    let cancelled = false;
     setOpen(false);
-
-    const reduce = prefersReducedMotion();
-    const panel = panelRef.current;
-
-    const armOpen = () => {
-      if (cancelled) return;
-      requestAnimationFrame(() => {
-        if (cancelled) return;
-        requestAnimationFrame(() => {
-          if (!cancelled) setOpen(true);
-        });
-      });
-    };
-
-    if (!panel) {
-      setFlipVars(null);
-      armOpen();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    if (reduce || !useFlip || !originRect) {
-      setFlipVars(null);
-      armOpen();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    // Measure final layout while still closed (enter/flip start state)
-    const last = panel.getBoundingClientRect();
-    if (last.width < 8 || last.height < 8) {
-      setFlipVars(null);
-      armOpen();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    const sx = originRect.width / last.width;
-    const sy = originRect.height / last.height;
-    const tx = originRect.left - last.left;
-    const ty = originRect.top - last.top;
-    setFlipVars({
-      ["--pm-sx" as string]: String(sx),
-      ["--pm-sy" as string]: String(sy),
-      ["--pm-tx" as string]: `${tx}px`,
-      ["--pm-ty" as string]: `${ty}px`,
-    });
-    armOpen();
-    return () => {
-      cancelled = true;
-    };
-  }, [place?.id, useFlip, originRect]);
+    const frame = requestAnimationFrame(() => setOpen(true));
+    return () => cancelAnimationFrame(frame);
+  }, [place?.id]);
 
   const saveMutation = useMutation({
     mutationFn: (fields: EditableFields | OwnerEditableFields) => {
@@ -485,7 +421,7 @@ export default function PlaceModal({
     "place-modal-panel",
     "pdx-glass-rebind",
     useSpecialEdge ? "place-modal-panel--edge" : "",
-    useFlip ? "place-modal-panel--flip" : "place-modal-panel--enter",
+    "place-modal-panel--enter",
     open ? "place-modal-panel--open" : "",
   ]
     .filter(Boolean)
@@ -511,10 +447,9 @@ export default function PlaceModal({
           ["--c" as string]: accent,
           ["--_c" as string]: accent,
           ...(useSpecialEdge ? { ["--_edge" as string]: edge } : {}),
-          ...(flipVars || {}),
         }}
       >
-        <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={place.type === 'healthcare' ? 'health' : place.type === 'venue' ? 'arts' : 'community'} /></div>
+        <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={`place-${place.type}`} /></div>
         <div className="place-modal-panel__glow" aria-hidden="true" />
         <div className="place-modal-panel__sheen" aria-hidden="true" />
         <div className="place-modal-panel__seam dir-refract" aria-hidden="true" />

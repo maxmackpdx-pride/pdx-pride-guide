@@ -47,6 +47,7 @@ export const BOARDS_MENU: NavLinkItem[] = [...BOARD_NAV, { href: "/the-hauz", la
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/", label: "Home", accent: "lime" },
   { type: "link", href: "/events", label: "Eventz", accent: "cyan" },
+  { type: "link", href: "/directory", label: "Placez", accent: "cyan" },
   { type: "link", href: "/map", label: "Mapz", accent: "blue" },
   { type: "link", href: "/boards", label: "Boards", accent: "magenta" },
   /* Nonprofits, hotlines, and LGBTQ+ groups (moved off Placez 2026-09-30). */
@@ -66,6 +67,7 @@ export const MOBILE_TOP_NAV: NavEntry[] = [
     ],
   },
   { type: "link", href: "/boards", label: "Boards", accent: "magenta" },
+  { type: "link", href: "/rezources", label: "ReZources", accent: "green" },
 ];
 
 export type PageHeaderMeta = {

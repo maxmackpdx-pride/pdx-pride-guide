@@ -7,3 +7,39 @@
 .placez-discovery-meta span { display:inline-flex; align-items:center; gap:6px; }
 .placez-card-surface .placez-discovery-footer .pdxBtn { color:var(--text-heading); }
 .zaydar-layer-list > .placez-card-surface { margin-block:12px; }
+
+/* A closed card is an invitation; practical details live in the open card. */
+.placez-card-surface .placez-discovery-card .pdxPlace__body { gap:20px; border-radius:24px; }
+.placez-card-surface .placez-discovery-card .pdxPlace__media { height:200px; min-height:200px; padding:48px 28px 16px; }
+.placez-card-surface .placez-discovery-card .pdxPlace__logo { max-height:120px; width:auto; max-width:100%; object-fit:contain; }
+.placez-card-surface .placez-discovery-card .pdxPlace__main { margin-inline:24px; }
+.placez-card-surface .placez-discovery-card .pdxPlace__name { margin-top:14px; font:800 30px/1.05 var(--font-display); height:2.1em; max-height:2.1em; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.placez-card-surface .placez-discovery-card .pdxPlace__rows:empty { display:none; }
+.placez-card-surface .placez-discovery-card .rg-directory-footer { margin:0 24px; padding-top:18px; border-top:1px solid color-mix(in srgb,var(--c) 25%,transparent); }
+.placez-discovery-meta { font:500 13px/1.5 var(--font-body); margin-bottom:12px; }
+.placez-card-surface .placez-discovery-footer .pdxBtn { width:100%; min-height:44px; font:700 14px/1 var(--font-display); text-transform:uppercase; }
+.placez-card-surface .placez-discovery-card .rg-card-motif { opacity:.55; }
+.placez-card-surface .placez-discovery-card .pdxPlace__media { box-sizing:border-box; flex:none; max-height:200px; }
+
+/* Stable footer position regardless of title, badges, or neighborhood length. */
+.placez-card-surface .placez-discovery-card .pdxPlace__body {
+  display:flex; flex-direction:column; min-height:560px; height:100%; box-sizing:border-box;
+}
+.placez-card-surface .placez-discovery-card .rg-directory-footer {
+  margin-top:auto; flex:none;
+}
+.placez-card-surface .placez-discovery-meta {
+  height:3em; flex:none; overflow:hidden; display:-webkit-box;
+  -webkit-box-orient:vertical; -webkit-line-clamp:2;
+}
+.placez-card-surface .placez-discovery-footer .pdxBtn { height:44px; box-sizing:border-box; }
+
+/* Bottom reflection reduced to 30%; preserve top light and edge contrast. */
+.placez-card-surface .placez-discovery-card > .pdxPlace__body {
+  --glass-card-bg:
+    linear-gradient(133deg,color-mix(in srgb,var(--text-heading) 7%,transparent),color-mix(in srgb,var(--text-heading) 1.75%,transparent) 14%,transparent 38%),
+    radial-gradient(80% 62% at 108% 112%,color-mix(in srgb,var(--text-heading) 1.65%,transparent),color-mix(in srgb,var(--c) 1.35%,transparent) 42%,transparent 72%),
+    radial-gradient(115% 90% at 50% -18%,color-mix(in srgb,var(--c) 8%,transparent),transparent 58%),
+    color-mix(in srgb,var(--z-black) 72%,transparent);
+  --glass-sheen-specular:radial-gradient(70% 55% at 108% 112%,color-mix(in srgb,var(--text-heading) 1.5%,transparent),color-mix(in srgb,var(--c) 1.8%,transparent) 40%,transparent 70%);
+}

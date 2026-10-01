@@ -62,18 +62,23 @@ export default function TonightPanel() {
     queryFn: () => apiRequest("GET", "/api/directory").then((r) => r.json()),
     staleTime: 60_000,
   });
+  const { data: outzDetails } = useQuery<{ places: { id: string; art: string; region: string }[] }>({
+    queryKey: ["/outzide-map/places.json"],
+    queryFn: () => apiRequest("GET", "/outzide-map/places.json").then(r => r.json()),
+    staleTime: 3600_000,
+  });
   const dayEvents = useMemo(() => listings
     .filter((event) => pacificCalendarDate(event.dateStart) === today)
     .sort((a, b) => (parsePacificDateTime(a.dateStart) ?? 0) - (parsePacificDateTime(b.dateStart) ?? 0)), [listings, today]);
   const locations = useMemo(() => {
     const outside: TodayLocation[] = dailyPicks(outzCatalog, today, row => row.id).map(row => ({
-      key: `outz:${row.id}`, name: row.name, room: "OutZide", detail: "Outdoor destination", href: outzSharePath(row.id),
+      key: `outz:${row.id}`, name: row.name, room: "OutZide", detail: outzDetails?.places.find(place => place.id === row.id)?.region || "Outdoor destination", kind: row.kind, art: outzDetails?.places.find(place => place.id === row.id)?.art, href: outzSharePath(row.id),
     }));
     const indoors: TodayLocation[] = dailyPicks(places.filter(row => row.status !== "CLOSED"), today, row => String(row.id)).map(row => ({
-      key: `place:${row.id}`, name: row.name, room: "Placez", detail: row.neighborhood || row.address || "Portland metro", href: placePath(row.id, row.name),
+      key: `place:${row.id}`, name: row.name, room: "Placez", place: row, detail: row.neighborhood || row.address || "Portland metro", href: placePath(row.id, row.name),
     }));
     return Array.from({ length: Math.max(outside.length, indoors.length) }, (_, index) => [outside[index], indoors[index]]).flat().filter((row): row is TodayLocation => Boolean(row));
-  }, [places, today]);
+  }, [places, today, outzDetails]);
   const railItems = useMemo(() => {
     type Item = { event: typeof dayEvents[number]; location?: never } | { location: TodayLocation; event?: never };
     const items: Item[] = [];
@@ -109,7 +114,7 @@ export default function TonightPanel() {
         {railItems.length ? (
           <ResourceRail id="home-tonight-rail" title="Explore today" color="var(--room-eventz)" count={railItems.length} quiet={Boolean(calmMode || reducedMotion)} room="Zaylist" itemName="card">
             {railItems.map((item) => {
-              if (item.location) return <div className="home-tonight__item" dir="ltr" key={item.location.key}><TodayLocationCard location={item.location} /></div>;
+              if (item.location) return <div className="home-tonight__item" dir="ltr" key={item.location.key}><TodayLocationCard location={item.location} onRequireAuth={() => setShowAuth(true)} /></div>;
               const event = item.event;
               return <div className="home-tonight__item" dir="ltr" key={event.listingInstanceKey || `${event.id}:${event.dateStart}`}>
                 <TonightEventCard listing={event} rsvped={savedIds.has(event.id)} onToggleRsvp={id => user ? toggleSave(id) : setShowAuth(true)} onOpen={setSelectedEvent} />

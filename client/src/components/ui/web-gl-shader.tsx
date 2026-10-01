@@ -137,7 +137,7 @@ const fragmentShader = `
 `;
 
 /** Prime-color waves with locally loaded drafting lines. */
-export function WebGLShader({ accent, palette = "prime", direction = 1, blueprintUrl = "/resources-art/drafting-lines.svg" }: { accent?: string; palette?: "prime" | "week"; direction?: -1 | 1; blueprintUrl?: string | null } = {}) {
+export function WebGLShader({ accent, palette = "prime", direction = 1, blueprintUrl = null }: { accent?: string; palette?: "prime" | "week"; direction?: -1 | 1; blueprintUrl?: string | null } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

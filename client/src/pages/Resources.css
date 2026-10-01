@@ -3934,3 +3934,13 @@ html.calm-mode .rg-options button,
   .resources-page .rg-layout { padding-top: 48px; }
   .resources-page .rg-step--intent .rg-mode { margin-top: 32px; }
 }
+
+/* Share Zaylist's clear discovery atmosphere; no frosted veil. */
+.resources-page::before { background:var(--discovery-atmosphere-fade); mask-image:none; -webkit-mask-image:none; backdrop-filter:none; -webkit-backdrop-filter:none; }
+.resources-page .rg-stream-background { filter:none; }
+
+/* OLED-to-clear veil above the shader, below the page content. */
+.resources-page::before {
+  opacity:1;
+  background:linear-gradient(to bottom,var(--z-oled) 0%,color-mix(in srgb,var(--z-oled) 85%,transparent) 30%,color-mix(in srgb,var(--z-oled) 45%,transparent) 65%,transparent 100%);
+}

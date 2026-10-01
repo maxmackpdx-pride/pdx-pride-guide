@@ -1,4 +1,6 @@
-import type { CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { animate, useMotionValue, useReducedMotion } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
 import { Link } from "wouter";
 import { ArrowUpRight } from "lucide-react";
 import { WebGLShader } from "@/components/ui/web-gl-shader";
@@ -16,21 +18,52 @@ const BOARD_CARDS: Array<{ room: RoomKey; mark?: string; description: string; ac
   { room: "zlists", description: "Find your people, join a conversation, and make plans together.", action: "EXPLORE Z/LIST" },
 ];
 
+
+function MountedBoardCard({ children, room, action }: { children: ReactNode; room: RoomKey; action: string }) {
+  const card = useRef<HTMLAnchorElement>(null);
+  const angle = useMotionValue(0);
+  const motion = useRef<ReturnType<typeof animate> | null>(null);
+  const reduced = useReducedMotion();
+  const { calmMode } = useTheme();
+  useEffect(() => {
+    const unsubscribe = angle.on("change", value => card.current?.style.setProperty("--pin-angle", `${value}deg`));
+    return () => { unsubscribe(); motion.current?.stop(); };
+  }, [angle]);
+  useEffect(() => { if (reduced || calmMode) { motion.current?.stop(); angle.set(0); } }, [reduced, calmMode, angle]);
+  const sway = () => {
+    if (reduced || calmMode) return;
+    motion.current?.stop();
+    motion.current = animate(angle, [angle.get(), -2.4, 2.4, -2.4], { duration:6.4, ease:"easeInOut", repeat:Infinity, repeatType:"reverse" });
+  };
+  const settle = () => {
+    motion.current?.stop();
+    if (reduced || calmMode) { angle.set(0); return; }
+    motion.current = animate(angle, 0, { type:"spring", stiffness:12, damping:2.5, mass:1.4, restDelta:.015, restSpeed:.015 });
+  };
+  return <div className="boards-index__mounted" style={{ "--card-accent":ROOMS[room].accent } as CSSProperties}
+    onPointerEnter={event => { if(event.pointerType === "mouse") sway(); }} onPointerLeave={settle} onFocus={sway} onBlur={settle}>
+    <span className="boards-index__mount" aria-hidden="true" />
+    <Link ref={card} className="boards-index__card" href={ROOMS[room].route} data-board={room} aria-label={action}>{children}</Link>
+  </div>;
+}
+
 export default function Boards() {
   usePageSeo("Boards | Zaylist", "Choose a Zaylist board for housing, gifts, selling, work, missed connections, or communities.");
 
   return <div className="boards-index">
-    <WebGLShader />
+    <WebGLShader palette="week" direction={1} />
     <div className="boards-index__veil" aria-hidden="true" />
     <header className="boards-index__intro">
       <span className="boards-index__eyebrow">BOARDS / FIND YOUR ROOM</span>
-      <h1>Where do you want to go?</h1>
+      <h1>A modern bulletin board for chosen{"\u00a0"}fam.</h1>
       <p>Pick a board to browse what people have posted or add your own.</p>
     </header>
+    <div className="boards-index__noticeboard">
+    <span className="boards-index__plate" aria-hidden="true">ZAYLIST / COMMUNITY NETWORK</span>
     <section className="boards-index__grid" aria-label="Choose a board">
       {BOARD_CARDS.map(({ room, mark, description, action }, index) => {
         const meta = ROOMS[room];
-        return <Link className="boards-index__card" href={meta.route} key={room} data-board={room} aria-label={action} style={{ "--card-accent": meta.accent } as CSSProperties}>
+        return <MountedBoardCard key={room} room={room} action={action}>
           <ResourceCardMotif name={meta.name} category={room} />
           <span className="boards-index__card-vignette" aria-hidden="true" />
           <span className="boards-index__card-glass" aria-hidden="true" />
@@ -40,8 +73,9 @@ export default function Boards() {
             <span>{description}</span>
           </span>
           <span className="boards-index__card-action">{action} <ArrowUpRight size={18} aria-hidden="true" /></span>
-        </Link>;
+        </MountedBoardCard>;
       })}
     </section>
+    </div>
   </div>;
 }

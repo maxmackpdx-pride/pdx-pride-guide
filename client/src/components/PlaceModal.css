@@ -769,3 +769,67 @@ html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__details-room {
 .placez-detail-motif svg { width:100%; height:100%; }
 .place-modal-panel__description { font-size:18px; line-height:1.7; }
 @media(max-width:600px){.place-modal-overlay{align-items:flex-end;padding:env(safe-area-inset-top,12px) 8px 0}.place-modal-panel.pdx-glass-rebind{width:100%;max-width:none;max-height:calc(100dvh - 24px);border-radius:16px 16px 0 0}.place-modal-panel__inner{max-height:calc(100dvh - 27px);padding-bottom:env(safe-area-inset-bottom,16px)}.place-modal-panel__body{padding:24px 22px 32px;font-size:17px}.place-modal-panel__identity-text h2{font-size:36px!important}.place-modal-panel__description{font-size:17px}}
+
+/* Clear identity, practical details, then community activity. */
+.place-modal-panel.pdx-glass-rebind { border-radius:24px; background-color:var(--z-oled); }
+.place-modal-panel__identity { flex-direction:row; align-items:center; gap:24px; padding-bottom:28px; border-bottom:1px solid color-mix(in srgb,var(--c) 30%,transparent); }
+.place-modal-panel__identity .place-modal-panel__logo { width:160px; height:140px; align-self:center; }
+.place-modal-panel__identity-text h2 { font-size:clamp(30px,4vw,42px) !important; line-height:1.05 !important; }
+.place-modal-panel__facts { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.place-modal-panel__fact { min-width:0; min-height:64px; padding:14px; border:1px solid color-mix(in srgb,var(--c) 20%,transparent); border-radius:12px; background:rgba(0,0,0,.85); font:500 15px/1.5 var(--font-body); overflow-wrap:anywhere; }
+.place-modal-panel__fact svg { flex:none; width:18px; height:18px; stroke:var(--c); }
+.place-modal-panel__quick-actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
+.place-modal-panel__quick-actions a { min-height:48px; font:800 16px/1 var(--font-display); text-transform:uppercase; box-shadow:none; }
+.place-modal-panel__description-wrap { padding:20px 0; border-top:1px solid color-mix(in srgb,var(--c) 20%,transparent); }
+.place-modal-panel__description { font:400 16px/1.65 var(--font-body); }
+.placez-detail-motif { height:420px; opacity:.18; }
+.place-modal-panel__inner > .detail-actions > button[aria-label^="Share"] { border-color:var(--c); color:var(--text-heading); border-radius:10px; }
+@media(max-width:600px) {
+ .place-modal-panel__identity { flex-direction:column; align-items:flex-start; gap:18px; }
+ .place-modal-panel__identity .place-modal-panel__logo { width:180px; height:120px; }
+ .place-modal-panel__facts { grid-template-columns:1fr; }
+ .place-modal-panel.pdx-glass-rebind { border-radius:24px 24px 0 0; }
+}
+
+/* The closed Placez card, opened in the center with ReZources motion. */
+.place-modal-overlay { justify-content:center; align-items:center; padding:24px; }
+.place-modal-panel.pdx-glass-rebind { width:min(100%,680px); max-width:680px; max-height:calc(100dvh - 48px); border:var(--glass-card-border); border-radius:24px; background:var(--glass-card-bg); background-color:var(--z-oled); box-shadow:var(--glass-card-shadow); transform-origin:center; }
+.place-modal-panel__inner { max-height:calc(100dvh - 50px); }
+.place-modal-panel--enter { opacity:0; transform:none; scale:.97; }
+.place-modal-panel--enter.place-modal-panel--open { opacity:1; transform:none; scale:1; transition:none; animation:placez-resource-enter 320ms cubic-bezier(.16,1,.3,1); }
+@keyframes placez-resource-enter { from { opacity:0; scale:.97; } to { opacity:1; scale:1; } }
+.place-modal-panel__inner { opacity:1; transition:none; }
+.place-modal-panel__identity { flex-direction:column; align-items:stretch; gap:24px; padding-bottom:24px; }
+.place-modal-panel__identity .place-modal-panel__logo { width:min(100%,300px); max-width:300px; height:160px; align-self:center; object-fit:contain; }
+.place-modal-panel__identity-text h2 { font:800 36px/1.05 var(--font-display) !important; margin-bottom:16px !important; }
+.place-modal-panel__body { padding:24px 32px 32px; }
+.placez-detail-motif { inset:64px 0 auto; height:360px; opacity:.3; mask-image:linear-gradient(var(--z-oled) 55%,transparent); }
+.place-modal-panel__facts { display:flex; flex-direction:column; gap:0; }
+.place-modal-panel__fact { border:0; border-radius:0; border-bottom:1px solid color-mix(in srgb,var(--c) 16%,transparent); background:transparent; min-height:48px; padding:12px 0; }
+.place-modal-panel__quick-actions a { border-radius:12px; }
+.place-modal-panel__inner > .detail-actions { background:rgba(0,0,0,.94); }
+@media(max-width:600px) {
+ .place-modal-overlay { align-items:center; padding:16px 12px; }
+ .place-modal-panel.pdx-glass-rebind { max-height:calc(100dvh - 32px); border-radius:24px; }
+ .place-modal-panel__inner { max-height:calc(100dvh - 34px); }
+ .place-modal-panel__body { padding:20px 24px 28px; }
+ .place-modal-panel__identity-text h2 { font-size:30px !important; }
+ .place-modal-panel__identity .place-modal-panel__logo { height:130px; }
+}
+@media(prefers-reduced-motion:reduce) { .place-modal-panel--enter.place-modal-panel--open { animation:none; } }
+:is(html.calm-mode,:root[data-calm="true"]) .place-modal-panel--enter.place-modal-panel--open { animation:none; }
+
+/* Bottom reflection reduced to 30%; preserve top light and edge contrast. */
+.place-modal-panel.pdx-glass-rebind {
+  --glass-card-bg:
+    linear-gradient(133deg,color-mix(in srgb,var(--text-heading) 7%,transparent),color-mix(in srgb,var(--text-heading) 1.75%,transparent) 14%,transparent 38%),
+    radial-gradient(80% 62% at 108% 112%,color-mix(in srgb,var(--text-heading) 1.65%,transparent),color-mix(in srgb,var(--c) 1.35%,transparent) 42%,transparent 72%),
+    radial-gradient(115% 90% at 50% -18%,color-mix(in srgb,var(--c) 8%,transparent),transparent 58%),
+    color-mix(in srgb,var(--z-black) 72%,transparent);
+  --glass-sheen-specular:radial-gradient(70% 55% at 108% 112%,color-mix(in srgb,var(--text-heading) 1.5%,transparent),color-mix(in srgb,var(--c) 1.8%,transparent) 40%,transparent 70%);
+}
+
+.place-modal-panel__sheen {
+  background:linear-gradient(133deg,color-mix(in srgb,var(--text-heading) 15%,transparent),color-mix(in srgb,var(--text-heading) 3%,transparent) 12%,transparent 34%),
+    radial-gradient(70% 55% at 108% 112%,color-mix(in srgb,var(--text-heading) 3%,transparent),color-mix(in srgb,var(--c) 3.6%,transparent) 30%,transparent 62%);
+}

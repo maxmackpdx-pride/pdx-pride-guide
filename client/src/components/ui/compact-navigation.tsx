@@ -10,7 +10,7 @@ import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
 
 const ICONS: Record<string, LucideIcon> = {
   Home, About: Info, Eventz: CalendarDays, Placez: MapPin, Mapz: Map,
-  OutZide: TreePine, "Z/Lists": Layers, "The Haüz": House, Boards: LayoutGrid, Resources: LifeBuoy,
+  OutZide: TreePine, "Z/Lists": Layers, "The Haüz": House, Boards: LayoutGrid, Resources: LifeBuoy, ReZources: LifeBuoy,
 };
 const entryKey = (entry: NavEntry) => entry.type === "link" ? entry.href : entry.id;
 const entryActive = (entry: NavEntry, location: string) => entry.type === "link"

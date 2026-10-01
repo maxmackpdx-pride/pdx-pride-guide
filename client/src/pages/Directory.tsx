@@ -1,10 +1,11 @@
+import BoardShareButton from "@/components/BoardShareButton";
 import { WebGLShader } from '@/components/ui/web-gl-shader';
 import { ResourceFilterButton } from '@/components/resources/ResourceFilterButton';
 import { PLACE_ACCENTS as TYPE_COLORS } from '@/components/discovery/placeTokens';
 import PlaceDiscoveryCard from '@/components/discovery/PlaceDiscoveryCard';
 import { ResourceRail } from '@/components/resources/ResourceRail';
 import { useTheme } from '@/context/ThemeContext';
-import { useReducedMotion } from 'framer-motion';
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'framer-motion';
 import BrowseStatus from "@/components/BrowseStatus";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
@@ -189,12 +190,14 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
   const { user } = useAuth();
   const { toast } = useToast();
+  const [placeIntent, setPlaceIntent] = useState(false);
+  const [discoveryChosen, setDiscoveryChosen] = useState(() => /[?&](type|category|neighborhood|q|place)=/.test(window.location.search));
   const [showAuth, setShowAuth] = useState(false);
   const [formOpen, setFormOpen] = useState(() => new URLSearchParams(window.location.search).get("add") === "1");
   const [activeType, setActiveType] = useState(() => {
     if (isSpaces) return "group";
     const t = new URLSearchParams(window.location.search).get("type");
-    return t && t !== "group" && t in TYPE_LABELS ? t : "ALL";
+    return t?.split(",").filter(type => type !== "group" && type in TYPE_LABELS).join(",") || "ALL";
   });
   const [activeNeighborhood, setActiveNeighborhood] = useState(() => new URLSearchParams(window.location.search).get("neighborhood") || "ALL");
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
@@ -388,7 +391,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     const q = searchQuery.trim().toLowerCase();
     return visibleBusinesses
       .filter(b => {
-        if (activeType !== "ALL" && b.type !== activeType) return false;
+        if (activeType !== "ALL" && !activeType.split(",").includes(b.type)) return false;
         if (activeNeighborhood !== "ALL" && browseNeighborhood(b.neighborhood) !== browseNeighborhood(activeNeighborhood)) return false;
         if (q) {
           const haystack = [
@@ -421,7 +424,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   const neighborhoodsInUse = useMemo(() => {
     const seen = new Set(
       visibleBusinesses
-        .filter(b => activeType === "ALL" || b.type === activeType)
+        .filter(b => activeType === "ALL" || activeType.split(",").includes(b.type))
         .map(b => browseNeighborhood(b.neighborhood))
         .filter((n): n is string => Boolean(n)),
     );
@@ -433,7 +436,13 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   }, [activeType, visibleBusinesses]);
 
   const handleSelectCategory = (key: string) => {
-    setActiveType(key);
+    setDiscoveryChosen(true);
+    setActiveType(current => {
+      if (key === "ALL" || isSpaces) return key;
+      const selected = current === "ALL" ? [] : current.split(",");
+      const next = selected.includes(key) ? selected.filter(type => type !== key) : [...selected, key];
+      return next.join(",") || "ALL";
+    });
     setActiveNeighborhood("ALL");
     setSelectedPlace(null);
   };
@@ -442,11 +451,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     if (!user) { setShowAuth(true); return; }
     setFormOpen(true);
   };
-  useEffect(() => {
-    if (!formOpen) return;
-    const timer=window.setTimeout(() => document.getElementById("directory-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
-    return ()=>window.clearTimeout(timer);
-  }, [formOpen]);
+
 
   const resultLine = isError ? "Results unavailable" : isLoading
     ? "Loading…"
@@ -463,26 +468,34 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         <path className="placez-shader-contours__yellow" d="M1080 420 C785 225 680 285 470 425 S165 635 -80 430" />
       </svg>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-      <header className="directory-browser-header">
-        <SectionBreadcrumb section={isSpaces ? "My Squadz" : "Our Placez"} />
-        <div className="directory-browser-header__identity">
-          <h1>
-          <img
-            className="directory-browser-header__wordmark"
-            src={isSpaces ? "/brand/family/my-squadz.svg" : "/brand/family/our-placez.svg"}
-            alt={isSpaces ? "MY SQUADZ" : "OUR PLACEZ"}
-            decoding="async"
-          />
-          </h1>
-          <p className="directory-browser-header__lede">
-            {isSpaces
-              ? "Find queer clubs, crews, nonprofits, and community groups across Portland."
-              : "Find Portland bars, food, shops, services, care, and spaces that are ours or truly for us."}
-          </p>
+      <motion.header initial={{ opacity: 0, y: calmMode || reducedMotion ? 0 : 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: calmMode || reducedMotion ? 0 : .4 }} className="directory-browser-header">
+        <div className="placez-reference-intro rg-intro rg-wrap">
+          <div className="rg-intro-top"><span className="rg-eyebrow">{isSpaces ? "MY SQUADZ / FIND YOUR PEOPLE" : "PLACEZ / FIND YOUR PLACE"}</span></div>
+          <h1 className="rg-board-logo-frame placez-reference-logo"><img src={isSpaces ? "/brand/family/my-squadz.svg" : "/brand/family/our-placez.svg"} alt={isSpaces ? "My Squadz" : "Our Placez"} /></h1>
+          <div className="rg-intro-actions">
+            <BoardShareButton title={isSpaces ? "My Squadz" : "Placez"} path={isSpaces ? "/spaces" : "/directory"} />
+            <a className="placez-reference-map" href="/map?layer=places">Explore on Mapz ↗</a>
+          </div>
         </div>
-
-        {!isSpaces && <a className="placez-map-link pdx-glass-rebind pdxBtn" href="/map?layer=places">Explore Placez on Mapz ↗</a>}
-        <FilterSurvey label={isSpaces ? "My Squadz" : "Placez"} question={isSpaces ? "Where is your community?" : "What kind of place do you need?"} value={isSpaces ? activeNeighborhood : activeType} onChange={isSpaces ? setActiveNeighborhood : handleSelectCategory} accent="var(--panel-cyan)" options={isSpaces ? neighborhoodsInUse.map(value=>({value,label:value === "ALL" ? "All areas" : value})) : [{value:"ALL",label:"All Placez",count:visibleBusinesses.length},...categoryBands.map(category=>({value:category.key,label:category.label,color:category.color,count:category.count}))]}>
+        <section className="rg-layout rg-wrap placez-reference-start">
+          <div className="rg-controls"><div className="rg-step rg-step--intent"><div>
+            <span className="rg-eyebrow"><span className="rg-step-number" aria-hidden="true">01</span>Start here</span>
+            <h2>What do you need?</h2>
+            <LayoutGroup id="placez-intent"><div className="rg-mode rg-mode--animated pdx-glass-rebind">
+              <button type="button" aria-pressed={placeIntent && !formOpen} onClick={()=>{setPlaceIntent(true);setFormOpen(false);}}>
+                {placeIntent && !formOpen && <motion.span className="rg-mode-highlight" layoutId={calmMode || reducedMotion ? undefined : "placez-mode"} transition={{type:"spring",bounce:0,duration:.25}}/>}
+                <span className="rg-mode-label">Find a place</span>
+              </button>
+              <button type="button" aria-pressed={formOpen} onClick={openAddForm}>
+                {formOpen && <motion.span className="rg-mode-highlight" layoutId={calmMode || reducedMotion ? undefined : "placez-mode"} transition={{type:"spring",bounce:0,duration:.25}}/>}
+                <span className="rg-mode-label">Add a place</span>
+              </button>
+            </div></LayoutGroup>
+            <button type="button" className="discovery-skip" onClick={()=>{setPlaceIntent(true);handleSelectCategory("ALL");}}>Skip to view all</button>
+          </div></div></div>
+        </section>
+        <AnimatePresence initial={false}>{(placeIntent || formOpen || discoveryChosen) && <motion.div key="placez-choices" initial={{opacity:0,height:0}} animate={{opacity:1,height:"auto"}} exit={{opacity:0,height:0}} transition={{duration:calmMode || reducedMotion ? 0 : .24}}>
+        {formOpen ? <motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}}><DirectoryAddPlaceForm isSpaces={isSpaces} onClose={()=>setFormOpen(false)}/></motion.div> : <FilterSurvey eyebrow="Choose your places" startStep={2} description="Pick one or more categories. Your places appear below. Choose All Placez to browse everything." detailsLabel="Search by name or neighborhood" selectedValues={isSpaces ? undefined : activeType.split(",")} label={isSpaces ? "My Squadz" : "Placez"} question={isSpaces ? "Where is your community?" : "Which places would you like to explore?"} value={isSpaces ? activeNeighborhood : activeType} onChange={value => { if (value === "ADD") { openAddForm(); return; } if (isSpaces) { setActiveNeighborhood(value); setDiscoveryChosen(true); } else handleSelectCategory(value); }} accent="var(--panel-cyan)" options={isSpaces ? neighborhoodsInUse.map(value=>({value,label:value === "ALL" ? "All areas" : value})) : [{value:"ALL",label:"All Placez",count:visibleBusinesses.length},...categoryBands.map(category=>({value:category.key,label:category.label,color:category.color,count:category.count,description:({bar:"Find your next night out",restaurant:"Sit down for something good",cafe:"Coffee and a place to pause",venue:"Shows, stages, and gathering spaces",shop:"Shop small and local",service:"Find help from local pros",healthcare:"Find care that fits you",nonprofit:"Connect with community support",realestate:"Find your next home",campground:"Make room for an adventure",hotel:"Find somewhere to stay"} as Record<string,string>)[category.key]})),{value:"ADD",label:"Add a place",description:"Share a place with your community",color:"var(--neon-yellow)"}]}>
         <BrowseToolbar label="Search and filter places" className="directory-browser-search pdx-glass-card pdx-glass-rebind">
           <label className="directory-browser-search__field">
             <span>Search {isSpaces ? "MY SQUADZ" : "OUR PLACEZ"}</span>
@@ -491,35 +504,18 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               aria-label={isSpaces ? "Search MY SQUADZ" : "Search OUR PLACEZ"}
               placeholder={isSpaces ? "Name, group, or keyword" : "Search by name, category, neighborhood, or what you need"}
               value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setSearchQuery(e.target.value); setDiscoveryChosen(true); }}
               onClear={() => setSearchQuery("")}
               data-testid="directory-search"
             />
           </label>
 
           <div className="directory-browser-search__filters">
-            {!isSpaces && (
-              <label className="directory-browser-search__select">
-                <span>Category</span>
-                <select
-                  value={activeType}
-                  onChange={e => handleSelectCategory(e.target.value)}
-                  aria-label="Filter by category"
-                >
-                  <option value="ALL">All categories</option>
-                  {categoryBands.map(category => (
-                    <option key={category.key} value={category.key}>
-                      {category.label} ({category.count})
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
             <label className="directory-browser-search__select">
               <span>Neighborhood</span>
               <select
                 value={activeNeighborhood}
-                onChange={e => setActiveNeighborhood(e.target.value)}
+                onChange={e => { setActiveNeighborhood(e.target.value); setDiscoveryChosen(true); }}
                 aria-label="Filter by neighborhood"
               >
                 {neighborhoodsInUse.map(neighborhood => (
@@ -529,14 +525,13 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                 ))}
               </select>
             </label>
-            <Button variant="solid" accent="yellow" size="md" onClick={openAddForm} data-testid="directory-top-add">
-              <Plus size={15} /> {isSpaces ? "Add a squad" : "Add a place"}
-            </Button>
+
           </div>
         </BrowseToolbar>
-        </FilterSurvey>
+        </FilterSurvey>}
+        </motion.div>}</AnimatePresence>
 
-        {!isSpaces && (
+        {discoveryChosen && !isSpaces && (
           <div className="directory-browser-categories" role="group" aria-label="Filter by category">
             <ResourceFilterButton quietMotion={Boolean(calmMode || reducedMotion)}
               type="button"
@@ -552,9 +547,9 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               <ResourceFilterButton quietMotion={Boolean(calmMode || reducedMotion)}
                 key={category.key}
                 type="button"
-                className={`directory-browser-category${activeType === category.key ? " directory-browser-category--active" : ""}`}
+                className={`directory-browser-category${activeType.split(",").includes(category.key) ? " directory-browser-category--active" : ""}`}
                 style={{ ["--_c" as string]: category.color }}
-                aria-pressed={activeType === category.key}
+                aria-pressed={activeType.split(",").includes(category.key)}
                 onClick={() => handleSelectCategory(category.key)}
               >
                 <span>{category.label}</span>
@@ -565,14 +560,14 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         )}
 
 
-      {formOpen && <ScrollReveal><DirectoryAddPlaceForm isSpaces={isSpaces} onClose={()=>setFormOpen(false)}/></ScrollReveal>}
 
-      <section id="directory-results" className="directory-browser-results" aria-label={isSpaces ? "MY SQUADZ" : "PLACEZ"}>
+
+      <motion.section key={discoveryChosen ? "revealed" : "hidden"} hidden={!discoveryChosen} initial={{ opacity: 0, y: calmMode || reducedMotion ? 0 : 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: calmMode || reducedMotion ? 0 : .4 }} id="directory-results" className="directory-browser-results" aria-label={isSpaces ? "MY SQUADZ" : "PLACEZ"}>
         <div className="directory-browser-results__head">
           <div>
             <p className="directory-browser-results__eyebrow">Browse Portland</p>
             <h2 className="directory-browser-results__title">
-              {activeType === "ALL" ? (isSpaces ? "All squadz" : "All PLACEZ") : TYPE_LABELS[activeType]}
+              {activeType === "ALL" ? (isSpaces ? "All squadz" : "All PLACEZ") : activeType.split(",").map(type => TYPE_LABELS[type]).join(" + ")}
             </h2>
           </div>
           <div className="directory-browser-results__status">
@@ -602,7 +597,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
           </BrowseStatus>
         ) : (
           <div className="placez-resource-rails">
-            {(activeType === 'ALL' ? categoryBands : categoryBands.filter(category=>category.key===activeType)).map(category => {
+            {(activeType === 'ALL' ? categoryBands : categoryBands.filter(category=>activeType.split(",").includes(category.key))).map(category => {
               const places = filtered.filter(place=>place.type===category.key);
               if (!places.length) return null;
               return <ResourceRail room={isSpaces ? "Squadz" : "Placez"} itemName={isSpaces ? "squad" : "place"} key={category.key} id={`placez-${category.key}`} title={category.label} color={TYPE_COLORS[category.key] || 'var(--neon-cyan)'} count={places.length} quiet={Boolean(calmMode || reducedMotion)}>
@@ -611,26 +606,9 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
             })}
           </div>
         )}
-      </section>
+      </motion.section>
 
-      </header>
-      {/* Add-a-place band */}
-      <section
-        className="directory-add-band pdx-glass pdx-glass-rebind"
-        style={{ ["--_c" as string]: "var(--neon-yellow, #ccff00)" }}
-        aria-label="Add a place"
-      >
-        <div className="directory-add-band__copy">
-          <p className="directory-add-band__title">{isSpaces ? "Is your squad on Zaylist?" : "Is your place on Zaylist?"}</p>
-          <p className="directory-add-band__lede">
-            {isSpaces ? "Members can list queer clubs, crews, nonprofits, and community groups. Organizers can claim a listing and keep it current." : "Members can list spots that are ours or truly for us. Owners can claim a listing and keep the hours honest."}
-          </p>
-        </div>
-        <Button variant="solid" accent="yellow" size="lg" arrow onClick={openAddForm} data-testid="directory-add-place">
-          {isSpaces ? "Add a squad" : "Add a place"}
-        </Button>
-      </section>
-
+      </motion.header>
       {selectedPlace && (
         <PlaceModal
           key={selectedPlace.id}

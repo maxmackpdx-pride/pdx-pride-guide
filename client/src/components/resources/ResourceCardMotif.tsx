@@ -1,3 +1,4 @@
+import "./ResourceCardMotif.css";
 import { resourceGradientStops } from "./resourceGradient";
 import { distinctResourceMotifs } from "./distinctResourceMotifs";
 import { memo, useId, useRef, useState, useEffect } from "react";
@@ -6,6 +7,13 @@ import { useCardMotifParallax } from "./useCardMotifParallax";
 // Decorative, deterministic artwork: every organization gets a distinct mesh.
 // Paths are original drawings, not altered organization logos.
 const silhouettes: Record<string, string> = {
+ cocktail: "M100 170 H300 L200 275 Z M200 275 V355 M155 355 H245 M230 170 L255 120 H300",
+ dining: "M95 140 V225 Q125 255 155 225 V140 M125 140 V355 M285 140 Q235 185 260 245 H285 V355 M285 140 V245",
+ coffee: "M100 220 H270 V300 Q185 370 100 300 Z M270 230 H305 Q345 270 270 290 M90 345 H290 M145 190 Q120 160 150 130 M215 190 Q190 160 220 130",
+ shopping: "M100 210 H300 L320 355 H80 Z M150 220 V180 A50 50 0 0 1 250 180 V220",
+ hotel: "M90 190 V350 M310 190 V350 M90 290 H310 M100 230 H300 V290 H100 Z M120 200 H185 V230 H120 Z M215 200 H280 V230 H215 Z",
+ tools: "M130 135 Q80 190 145 220 L270 345 L305 310 L180 185 Q195 130 155 125 L160 175 L125 180 Z",
+ camp: "M70 345 L200 145 L330 345 Z M145 345 L200 250 L255 345 M75 360 H325 M285 135 L300 115 M305 155 H335",
  wings: "M200 290 Q155 170 35 155 Q70 228 165 263 Q90 220 48 220 Q95 280 180 285 Q120 266 85 292 Q153 323 200 290 M200 290 Q245 170 365 155 Q330 228 235 263 Q310 220 352 220 Q305 280 220 285 Q280 266 315 292 Q247 323 200 290",
  home: "M85 250 L200 150 L315 250 M110 230 V345 H290 V230 M174 345 V270 H226 V345 M130 257 H154 V286 H130 Z M246 257 H270 V286 H246 Z",
  bridge: "M45 300 H355 M105 300 V175 H120 V300 M280 300 V175 H295 V300 M55 275 Q112 165 200 255 Q288 165 345 275 M150 235 V300 M200 255 V300 M250 235 V300",
@@ -27,6 +35,8 @@ const silhouettes: Record<string, string> = {
 };
 
 function themeFor(name: string, category: string) {
+ const businessTheme = ({bar:"cocktail",restaurant:"dining",cafe:"coffee",venue:"stage",service:"tools",shop:"shopping",hotel:"hotel",nonprofit:"heart",healthcare:"pulse",realestate:"home",group:"network",campground:"camp"} as Record<string,string>)[category.replace(/^place-/, "")];
+ if (category.startsWith("place-") && businessTheme) return businessTheme;
  const roomTheme = ({ eventz:"stage", hauz:"home", giftz:"gift", gigz:"microphone", sellz:"receipt", mizzed:"heart", zlists:"network" } as Record<string,string>)[category];
  if (roomTheme) return roomTheme;
  const n = name.toLowerCase();
@@ -53,7 +63,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
  const nodes=Array.from({length:30},(_,i)=>({x:20+random()*360,y:125+random()*290,r:i%7===0?2.4:1.1}));
  const theme=themeFor(name,category);
- const silhouette = distinctResourceMotifs[name] ?? silhouettes[theme];
+ const silhouette = category.startsWith("place-") ? silhouettes[theme] : distinctResourceMotifs[name] ?? silhouettes[theme];
  const tilt=(random()-.5)*12;
  const cycle = 28 + Math.round(random() * 8);
  const phase = -Math.round(random() * cycle);
