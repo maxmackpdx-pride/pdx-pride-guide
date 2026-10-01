@@ -3891,3 +3891,10 @@ html.calm-mode .rg-options button,
   .resources-page .rg-footer .rg-eyebrow { max-width: 280px; margin-inline: auto; }
   .resources-page .rg-footer .pdxBtn { min-width: 0; width: min(100%, 320px); font-size: 18px; }
 }
+
+/* Search sits closer to the logo, with a longer pause before Start Here. */
+.resources-page .rg-intro { padding-bottom: 0; }
+.resources-page .rg-search-section--hero { margin-block: 64px 88px; padding-block: 24px; }
+@media (max-width: 600px) {
+  .resources-page .rg-search-section--hero { margin-block: 40px 56px; padding-block: 20px; }
+}

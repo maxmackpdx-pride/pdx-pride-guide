@@ -603,6 +603,12 @@ export default function Resources() {
         <RezourcesLogo quietMotion={Boolean(quietMotion)} />
 
       </header>
+      <div className="rg-search-section rg-search-section--hero rg-wrap">
+        <button className="rg-search-trigger" onClick={() => setSearchOpen(true)}>
+          <Search size={19} />
+          <span>SEARCH REZOURCES</span>
+        </button>
+      </div>
       <section className="rg-layout rg-wrap">
         <aside className="rg-controls" data-mode={mode} aria-label="Choose ReZources">
           <div className="rg-step rg-step--intent">
@@ -724,15 +730,7 @@ export default function Resources() {
             <SafetyNotice />
           )}
 
-          {mode === "directory" && (<div className="rg-search-section">
-        <button
-          className="rg-search-trigger"
-          onClick={() => setSearchOpen(true)}
-        >
-          <Search size={19} />
-          <span>SEARCH REZOURCES</span>
-        </button>
-        </div>)}
+
 
           <p className="rg-count" aria-live="polite">
             <span key={`${mode}-${rows.length}`} className={quietMotion ? undefined : "rg-count-change"}>
