@@ -7,11 +7,12 @@ on:
     paths-ignore:
       - "reports/**"
 
-# Queue deploys — cancel-in-progress caused overlapping Railway deploys that
-# showed up as CRASHED/REMOVED in the dashboard and failed GitHub Actions runs.
+# Preserve waiting checks as well as active checks. Railway remains the sole
+# deployment trigger; this workflow never cancels, removes, or redeploys a release.
 concurrency:
   group: railway-production
   cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: read
@@ -35,6 +36,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=dev
 
+      - name: Deployment verification regression tests
+        run: node --test script/verify-live-deployment.test.mjs
+
       - name: Pre-ship design and bundle guards
         run: npm run ship
 
@@ -44,23 +48,4 @@ jobs:
       - name: Verify Railway deployment
         env:
           COMMIT_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          HEALTH_URL="https://www.zaylist.com/api/health"
-
-          for i in $(seq 1 90); do
-            response=$(curl -fsS --max-time 20 "$HEALTH_URL" 2>/dev/null || true)
-            live_sha=$(printf '%s' "$response" | jq -r '.gitSha // empty' 2>/dev/null || true)
-            deployment_id=$(printf '%s' "$response" | jq -r '.deploymentId // empty' 2>/dev/null || true)
-            echo "Poll $i: live=${live_sha:-unavailable} expected=$COMMIT_SHA deployment=${deployment_id:-unknown}"
-
-            if [ "$live_sha" = "$COMMIT_SHA" ]; then
-              echo "Railway production deployment verified at $deployment_id"
-              exit 0
-            fi
-
-            sleep 10
-          done
-
-          echo "Timed out waiting for Railway production to serve $COMMIT_SHA"
-          exit 1
+        run: node script/verify-live-deployment.mjs

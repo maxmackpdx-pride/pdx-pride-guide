@@ -51,7 +51,8 @@ test('the actual startup reaches MapLibre construction, with only one graphics c
   maplibregl:{Map:class{constructor(value){options=value;throw reached;}}}
  }),error=>error===reached);
  assert.ok(options.pitch>0);
- assert.equal(options.style.terrain.exaggeration,.5);
+ assert.equal(options.style.terrain,undefined);
+ assert.equal(options.style.sources.elevation,undefined);
  assert.deepEqual(validateStyleMin(options.style).map(error=>error.message),[]);
 });
 
@@ -93,25 +94,21 @@ test('explicit context loss remains recoverable even after a visible frame',()=>
  assert.equal(b.messages.filter(message=>message.type==='fatal').length,1);
 });
 
-test('a blank rendered canvas is not accepted as the city first frame',()=>{
- let onRender,frames=0;
- const canvas={width:390,height:720};
- let features=[];
+test('base-city readiness uses idle or its bounded fallback without terrain or feature queries',()=>{
+ let onLoad,onIdle,fallback,frames=0;
+ const canvas={width:0,height:0};
  const context=vm.createContext({
-  loaded:true,scheduleFrame:()=>frames++,
-  map:{on:(type,fn)=>{assert.equal(type,'render');onRender=fn;},getCanvas:()=>canvas,queryRenderedFeatures:()=>features}
+  loaded:false,baseFrameRendered:false,cameraDirty:false,revealTime:0,
+  startup:{phase(){}},updateSceneStatus(){},scheduleFrame:()=>frames++,parent:{},
+  window:{setTimeout(fn,delay){assert.equal(delay,800);fallback=fn;}},
+  map:{on(type,fn){assert.equal(type,'load');onLoad=fn;},once(type,fn){assert.equal(type,'idle');onIdle=fn;},getCanvas:()=>canvas},
  });
- const start=renderer.indexOf('let firstFrameSent=false,baseFrameRendered=false;');
- const end=renderer.indexOf('function draw(now)',start);
- assert.ok(start>=0&&end>start);
+ const start=renderer.indexOf("map.on('load',()=>{");
+ const end=renderer.indexOf('function updateSurfaces(',start);
  vm.runInContext(renderer.slice(start,end),context);
- onRender();
- assert.equal(vm.runInContext('baseFrameRendered',context),false);
- assert.equal(frames,0);
- features=[{layer:{id:'water'}}];canvas.width=0;
- onRender();
- assert.equal(vm.runInContext('baseFrameRendered',context),false);
- canvas.width=390;onRender();
- assert.equal(vm.runInContext('baseFrameRendered',context),true);
- assert.equal(frames,1);
+ onLoad();assert.equal(context.loaded,true);assert.equal(frames,1);
+ onIdle();assert.equal(context.baseFrameRendered,false);
+ canvas.width=390;canvas.height=720;
+ fallback();assert.equal(context.baseFrameRendered,true);assert.equal(frames,2);
+ onIdle();assert.equal(frames,2,'readiness must only be announced once');
 });

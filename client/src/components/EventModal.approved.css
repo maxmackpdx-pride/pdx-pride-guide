@@ -76,6 +76,14 @@ html[data-zaylist-cards] .event-modal.event-modal--approved,
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+/* Deep links use the same soft reveal as ReZources; card-origin FLIP stays intact. */
+.event-modal.event-modal--approved:not(.event-modal--flip) {
+  animation: eventOpenCardEnter 320ms cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes eventOpenCardEnter { from { opacity: 0; scale: .97; } to { opacity: 1; scale: 1; } }
+@media (prefers-reduced-motion: reduce) { .event-modal.event-modal--approved:not(.event-modal--flip) { animation: none; } }
+:is(html.calm-mode, :root[data-calm="true"]) .event-modal.event-modal--approved:not(.event-modal--flip) { animation: none; }
+
 .event-modal--approved .event-modal__chrome {
   position: absolute !important;
   z-index: 50 !important;

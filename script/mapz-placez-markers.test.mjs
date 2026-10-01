@@ -74,11 +74,39 @@ test('Placez swaps logo and type every 7 seconds with a short glitch',async()=>{
  }
 });
 
-test('adult Placez wear the 18+ ticket shell; boards keep their families',async()=>{
+test('adult Placez use normal Placez markers; boards keep their families',async()=>{
  const {waypointFamilyShell}=await import('../client/public/zaydar-map/waypoint-markers.js');
- assert.equal(waypointFamilyShell('places','adult'),'ticket');
+ assert.equal(waypointFamilyShell('places','adult'),'place');
+ assert.equal(waypointFamilyShell(undefined,'adult'),'place');
  assert.equal(waypointFamilyShell('places','bar'),'place');
  assert.equal(waypointFamilyShell('houz'),'house');
  assert.equal(waypointFamilyShell('mizzed'),'speech');
  assert.equal(waypointFamilyShell('gigz'),'shield');
+});
+
+
+test('Mapz cannot replace a place glyph with the retired age label',async()=>{
+ const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+ const markers=await readFile(new URL('../client/public/zaydar-map/waypoint-markers.js',import.meta.url),'utf8');
+ assert.doesNotMatch(renderer,/18\+|label:shell/);
+ assert.doesNotMatch(markers,/extra\.label|ticket/);
+});
+
+
+test('waypoint outlines and glow retain category colors even with stale rainbow metadata',async()=>{
+ const source=await readFile(new URL('../client/public/zaydar-map/waypoint-markers.js',import.meta.url),'utf8');
+ const strokes=[];
+ const canvasContext={scale(){},fill(){},stroke(){strokes.push(this.strokeStyle);}};
+ const context=vm.createContext({
+  motionPreference:{matches:false},document:{createElement:()=>({getContext:()=>canvasContext})},
+  Path2D:class {},performance:{now:()=>1000},
+ });
+ vm.runInContext(source.replace(/^import .*;\n/gm,'').replace(/export /g,''),context);
+ const ctx={save(){},restore(){},drawImage(){}};
+ context.ctx=ctx;
+ for(const color of ['#FF0000','#00FFFF','#FF6600','#8800FF'])for(const selected of [false,true]){
+  strokes.length=0;
+  vm.runInContext(`drawWaypointHead(ctx,{x:100,y:100,size:42},'${color}',null,null,${selected},1,'place',{bloom:true})`,context);
+  assert.deepEqual(strokes,[color,color]);
+ }
 });

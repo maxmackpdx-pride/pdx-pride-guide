@@ -1,13 +1,10 @@
+import {motionPreference} from './motion-preference.js';
 const bodies=new Map(),rings=new Map(),ink=new WeakMap();
 function cityAmount(){
  try{return window.__mapzMap?Math.max(0,Math.min(1,(window.__mapzMap.getZoom()-14.25)/1.1))*Math.max(0,Math.min(1,(window.__mapzMap.getPitch()-16)/18)):0;}catch{return 0;}
 }
 function mapZoom(){try{return window.__mapzMap?window.__mapzMap.getZoom():13;}catch{return 13;}}
-const reducedMedia=typeof matchMedia==='function'?matchMedia('(prefers-reduced-motion: reduce)'):null;
-function stillMotion(){
- if(reducedMedia?.matches)return true;
- try{return localStorage.getItem('pdx-calm-mode')==='true';}catch{return false;}
-}
+function stillMotion(){return motionPreference.matches;}
 /** Waypoint pack sizes: 31 at rest, growing to 42 at zoom 16+, 57 when selected. */
 export function waypointHeadSize(selected=false,zoom=mapZoom()){
  if(selected)return 57;
@@ -37,51 +34,37 @@ export function waypointGeometry(origin,selected=false,roofLift=0,key=null){
 /** Shell outlines, ported from client/src/lib/livingMapWaypoints.ts shellPath(). */
 function shellPath(family,cx,cy,r){
  const x0=cx-r,x1=cx+r,y0=cy-r,y1=cy+r,q=r*.2;
- if(family==='ticket')return `M${x0+q},${y0}H${cx-q}Q${cx},${y0+q} ${cx+q},${y0}H${x1-q}V${cy-q}Q${x1-q*.7},${cy} ${x1},${cy+q}V${y1}H${x0}V${cy+q}Q${x0+q*.7},${cy} ${x0},${cy-q}V${y0}Z`;
  if(family==='house')return `M${x0+q},${cy-r*.15} ${cx},${y0} ${x1-q},${cy-r*.15}V${y1-q}L${cx},${y1+r*.68} ${x0+q},${y1-q}Z`;
  if(family==='speech')return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}L${x1-q},${y1}H${cx+q},${cx},${y1+r*.68} ${cx-q},${y1}H${x0+q}L${x0},${y1-q}V${y0+q}Z`;
  // place and shield share the chamfered head with an integrated tip
  return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}L${cx},${y1+r*.68} ${x0},${y1-q}V${y0+q}Z`;
 }
-/** Which shell a map row wears. The EVENTZ ticket is retired; the ticket shell now marks 18+ Placez. */
-export function waypointFamilyShell(waypointFamily,type){
- if(type==='adult')return 'ticket';
+/** Adult Placez use the same shell and logo/type glyphs as other Placez. Never restore an age-label marker. */
+export function waypointFamilyShell(waypointFamily){
  if(waypointFamily==='houz')return 'house';
  if(waypointFamily==='mizzed')return 'speech';
  if(waypointFamily==='gigz'||waypointFamily==='giftz'||waypointFamily==='sellz')return 'shield';
  return 'place';
 }
-const BLOOM_STOPS=['#ff00cc','#ccff00','#00ffff','#8800ff','#ff00cc'];
 function spriteBox(size){const pad=Math.ceil(size*.3),dpr=2;return {pad,dpr,box:size+pad*2,tall:size*(1+TIP)+pad*2};}
-function shellInk(ctx,color,bloom,size,pad){
- if(!bloom)return color;
- const gradient=ctx.createLinearGradient(pad,pad,pad+size,pad+size);
- BLOOM_STOPS.forEach((stop,i)=>gradient.addColorStop(i/(BLOOM_STOPS.length-1),stop));return gradient;
-}
-// The ticket has no integrated tip; the pack hangs a separate pointer under it.
-function ticketTip(ctx,c,r,size){
- const attachY=c+r*.62,tipY=c+r+size*TIP,tipW=size*.3;
- ctx.beginPath();ctx.moveTo(c-tipW,attachY);ctx.lineTo(c+tipW,attachY);ctx.lineTo(c,tipY);ctx.closePath();ctx.fill();
-}
-function bodySprite(color,size,family,bloom){
- const key=color+'|'+size+'|'+family+'|'+bloom;if(bodies.has(key))return bodies.get(key);
+function bodySprite(color,size,family){
+ const key=color+'|'+size+'|'+family;if(bodies.has(key))return bodies.get(key);
  const {pad,dpr,box,tall}=spriteBox(size),sw=Math.max(1,size*.0425),r=size/2-sw/2,c=pad+size/2;
  const canvas=document.createElement('canvas');canvas.width=box*dpr;canvas.height=Math.ceil(tall*dpr);
  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
- const path=new Path2D(shellPath(family,c,c,r)),ink=shellInk(ctx,color,bloom,size,pad);
- if(family==='ticket'){ctx.fillStyle=ink;ticketTip(ctx,c,r,size);}
+ const path=new Path2D(shellPath(family,c,c,r));
  // OLED black body, neon ring, the platform's 8% bloom.
  ctx.shadowColor=color+'14';ctx.shadowBlur=18;
  ctx.fillStyle='#050506';ctx.fill(path);
- ctx.shadowBlur=0;ctx.strokeStyle=ink;ctx.lineWidth=sw;ctx.lineJoin='round';ctx.stroke(path);
+ ctx.shadowBlur=0;ctx.strokeStyle=color;ctx.lineWidth=sw;ctx.lineJoin='round';ctx.stroke(path);
  const result={canvas,pad,box,tall};bodies.set(key,result);return result;
 }
-function ringSprite(color,size,family,bloom){
- const key=color+'|'+size+'|'+family+'|'+bloom;if(rings.has(key))return rings.get(key);
+function ringSprite(color,size,family){
+ const key=color+'|'+size+'|'+family;if(rings.has(key))return rings.get(key);
  const {pad,dpr,box,tall}=spriteBox(size),sw=Math.max(1,size*.0425),r=size/2-sw/2,c=pad+size/2;
  const canvas=document.createElement('canvas');canvas.width=box*dpr;canvas.height=Math.ceil(tall*dpr);
  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
- ctx.strokeStyle=shellInk(ctx,color,bloom,size,pad);ctx.lineWidth=sw*1.6*2.2;ctx.lineJoin='round';ctx.filter='blur(2px)';ctx.stroke(new Path2D(shellPath(family,c,c,r)));
+ ctx.strokeStyle=color;ctx.lineWidth=sw*1.6*2.2;ctx.lineJoin='round';ctx.filter='blur(2px)';ctx.stroke(new Path2D(shellPath(family,c,c,r)));
  const result={canvas,pad,box,tall};rings.set(key,result);return result;
 }
 function tintedIcon(image,color){
@@ -115,15 +98,15 @@ function drawScoop(ctx,x,y,size,color,text){
  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,x,cy+1);
 }
 /**
- * One waypoint head. extra: {bloom} rainbow ring for 2+ night venues, {scoop} a time
- * disc label under the head, {glitch} 0..1 swap glitch, {label} text glyph (18+).
+ * One waypoint head, always in its assigned category color. extra: {scoop} a time
+ * disc label under the head, {glitch} 0..1 swap glitch.
  */
 export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1,family='place',extra={}){
- const {x,y,size}=geometry,shell=family||'place',bloom=Boolean(extra.bloom);
+ const {x,y,size}=geometry,shell=family||'place';
  // Two sprite sizes per color and shell (rest, selected), scaled at draw time,
  // so the cache stays as small as the old two-size orb set.
  const base=selected?57:42,k=size/base;
- const body=bodySprite(color,base,shell,bloom),ring=ringSprite(color,base,shell,bloom);
+ const body=bodySprite(color,base,shell),ring=ringSprite(color,base,shell);
  const left=x-size/2-body.pad*k,top=y-size/2-body.pad*k;
  ctx.save();ctx.shadowBlur=0;
  ctx.globalAlpha=alpha*ringAlpha(selected);ctx.drawImage(ring.canvas,left,top,ring.box*k,ring.tall*k);
@@ -131,10 +114,6 @@ export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1,f
  // White glyph at 58% of the head, as in the waypoint pack.
  const glyph=size*.58;
  if(logo)drawGlyph(ctx,logo,x,y,glyph,extra.glitch||0);
- else if(extra.label){
-  ctx.fillStyle='#FFFFFF';ctx.font=`800 ${glyph*9.2/24*1.4}px "Barlow Condensed","Arial Narrow",sans-serif`;
-  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(extra.label,x+(extra.glitch?size*.05:0),y+1);
- }
  else if(icon)drawGlyph(ctx,icon,x,y,glyph,extra.glitch||0);
  if(extra.scoop)drawScoop(ctx,x,y,size,color,extra.scoop);
  ctx.restore();

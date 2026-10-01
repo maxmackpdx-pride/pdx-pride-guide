@@ -3,13 +3,14 @@ import { useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useModalA11y } from "@/hooks/useModalA11y";
+import { useOpenCardClose } from "@/hooks/useOpenCardClose";
 import { X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import GiftListingCard, { cardAccent, type GiftingPost } from "./GiftListingCard";
 import { GigListingCard, type GigPost } from "@/pages/PrideWork";
 import SellzListingCard, { type SellzPost } from "./SellzListingCard";
+import "./OpenBoardCard.css";
 
 /**
  * Opens a board post (gig or gift) as an overlay on top of whatever's behind
@@ -31,7 +32,7 @@ type Props = {
 
 export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
   const [showAuth, setShowAuth] = useState(false);
-  const dialogRef = useModalA11y({ onClose, enabled: !showAuth });
+  const { dialogRef, requestClose } = useOpenCardClose(onClose, !showAuth);
 
   const {user}=useAuth();
   const endpoint=kind==="gig"?"/api/gigs":kind==="gifting"?"/api/gifting":"/api/sellz";
@@ -87,18 +88,19 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
 
   return createPortal(
     <>
-      <div className="board-detail-backdrop" onClick={onClose}>
+      <div className="board-detail-backdrop" onClick={requestClose}>
         <div
           ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label={kind === "gig" ? "Gigz listing" : kind === "gifting" ? "Giftz listing" : "Sellz listing"}
           tabIndex={-1}
-          className="board-post-overlay board-post-overlay--glass"
+          className="board-post-overlay board-post-overlay--glass board-open-card--shared"
           onClick={e => e.stopPropagation()}
           style={panelStyle}
         >
-          <DetailActions label="listing" onClose={onClose} />
+          <span className="board-open-card__rule" aria-hidden="true" />
+          <DetailActions label="listing" onClose={requestClose} />
           {card ?? (
             <div className="board-listing-card board-listing-card--makeover pdx-glass-rebind" style={{ padding: 28, textAlign: "center", "--listing-accent": accent, "--c": accent } as CSSProperties}>
               <p className="board-copy-sm" role={query.isError ? "alert" : "status"}>{query.isLoading ? "Loading…" : query.isError ? "This listing could not load." : "This listing is no longer available."}</p>

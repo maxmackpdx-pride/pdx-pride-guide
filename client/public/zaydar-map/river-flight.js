@@ -1,3 +1,4 @@
+import {motionPreference as reduced} from './motion-preference.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
 import { visibleHologramLabels } from './label-visibility.js?v=20260925-venue-nights';
@@ -19,7 +20,7 @@ import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20260930-pack-heads';
+import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20261001-category-colors';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -81,10 +82,6 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 // Roads and raised decks share one material and physical widths; the custom
 // mesh adds thin sides and gradual approaches without another canvas/context.
 const surfaceCache=new WeakMap();
-const reducedMedia=matchMedia('(prefers-reduced-motion: reduce)');
-// Calm mode (html.calm-mode on the site, stored as pdx-calm-mode) stills the map like reduced motion.
-const calmOn=()=>{try{return localStorage.getItem('pdx-calm-mode')==='true'}catch{return false}};
-const reduced={get matches(){return reducedMedia.matches||calmOn()},addEventListener:(...args)=>reducedMedia.addEventListener(...args),removeEventListener:(...args)=>reducedMedia.removeEventListener(...args)};
 const bridgeLayer=createBridgeLayer(maplibregl,terrainHeight,true);
 const landmarkBuildings=createBuildingModelLayer(maplibregl);
 const portlandBridges=createPortlandBridgeLayer(maplibregl,terrainHeight);
@@ -686,9 +683,9 @@ function drawLights(fade,target=map,surface=lights){
    else{
     // Heads remain readable above buildings; their beam is masked at street level.
     const logo=feature.properties.kind==='place'&&feature.properties.waypointLogo?venueLogos.get(feature.properties.waypointLogo)?.image:null;
-    const shell=waypointFamilyShell(feature.properties.waypointFamily,feature.properties.type);
+    const shell=waypointFamilyShell(feature.properties.waypointFamily);
     drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,logo&&showWaypointLogo(pulseTime,phase,reduced.matches)?logo:null,selected,coreAlpha,shell,
-     {bloom:feature.properties.bloom,label:shell==='ticket'?'18+':null,glitch:logo?waypointSwapGlitch(pulseTime,phase,reduced.matches):0});
+     {glitch:logo?waypointSwapGlitch(pulseTime,phase,reduced.matches):0});
     if(cluster?.members.length>1)drawClusterCount(lightsContext,geometry.x,geometry.y,cluster.members.length,color,geometry.size);
     hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color,clusterBounds:cluster?.members.length>1?cluster.bounds:null,clusterKeys:cluster?.members.map(member=>member.feature.properties.key),clusterWorld:feature.properties.waypointFamily});
    }
@@ -1129,7 +1126,7 @@ window.addEventListener('pagehide',()=>{
  disposed=true;clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);
  cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);
  exploration.dispose();
- assetController.abort();reduced.removeEventListener('change',onReducedChange);window.removeEventListener('resize',onSceneResize);
+ assetController.abort();reduced.removeEventListener('change',onReducedChange);reduced.dispose();window.removeEventListener('resize',onSceneResize);
  for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);
  mapHover.dispose();
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
