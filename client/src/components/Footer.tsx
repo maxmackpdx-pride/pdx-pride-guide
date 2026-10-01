@@ -50,71 +50,71 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
   },
 ];
 
+function FooterLinks({ folder }: { folder: (typeof FOOTER_FOLDERS)[number] }) {
+  return (
+    <ul className="site-footer__list">
+      {folder.links.map(([href, label]) => (
+        <li key={`${folder.id}-${label}`}>
+          <Link href={href} className="site-footer__link">{label}</Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="site-footer__inner">
-        {/* Spread grid: brand | nav columns | support */}
-        <div className="site-footer__grid">
-          <div className="site-footer__brand-col">
-            <img
-              src="/brand/family/zaylist-primary.svg"
-              alt="Zaylist"
-              className="site-footer__logo"
-              width={1200}
-              height={423}
-              decoding="async"
-            />
-            <p className="site-footer__tagline">
-              Queer Portland, connected. Nights out, everyday places, outdoor escapes, and people to share them with. Built by Tucker, right here.
-            </p>
-            <div className="site-footer__controls">
-              <FeedbackButton />
-              <PushNotificationToggle />
-              <CalmModeToggle compact />
-            </div>
-          </div>
+        <div className="site-footer__intro">
+          <Link href="/" className="site-footer__brand-link" aria-label="Zaylist home">
+            <img src="/brand/family/zaylist-primary.svg" alt="Zaylist"
+              className="site-footer__logo" width={1200} height={423} decoding="async" />
+          </Link>
+          <p className="site-footer__tagline">
+            <strong>Queer Portland, connected.</strong>
+            Nights out, everyday places, outdoor escapes, and people to share them with.
+            Built by Tucker, right here.
+          </p>
+        </div>
 
+        <div className="site-footer__grid">
           <nav className="site-footer__nav" aria-label="Footer">
             {FOOTER_FOLDERS.map((folder) => (
-              <details key={folder.id} className="site-footer__col">
-                <summary className="site-footer__col-title display">
-                  {folder.title}
-                  <span className="site-footer__col-toggle" aria-hidden="true">+</span>
-                </summary>
-                <div className="site-footer__dropup">
-                  <ul className="site-footer__list">
-                    {folder.links.map(([href, label]) => (
-                      <li key={`${folder.id}-${label}`}>
-                        <Link href={href} className="site-footer__link">
-                          {label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </details>
+              <div key={folder.id} className={`site-footer__col site-footer__col--${folder.id}`}>
+                <section className="site-footer__desktop" aria-labelledby={`footer-${folder.id}`}>
+                  <h2 id={`footer-${folder.id}`} className="site-footer__col-title">{folder.title}</h2>
+                  <FooterLinks folder={folder} />
+                </section>
+                <details className="site-footer__mobile">
+                  <summary className="site-footer__col-title">
+                    {folder.title}<span className="site-footer__col-toggle" aria-hidden="true">+</span>
+                  </summary>
+                  <FooterLinks folder={folder} />
+                </details>
+              </div>
             ))}
           </nav>
-
           <div className="site-footer__support">
+            <h2 className="site-footer__col-title">Community comes first.</h2>
             <TipSupport variant="footer" />
           </div>
         </div>
 
-        <div className="site-footer__bottom">
-          <div className="site-footer__flap">
-            <SplitFlapSignoff />
+        <div className="site-footer__utility">
+          <p className="site-footer__utility-label">Make yourself at home.</p>
+          <div className="site-footer__controls">
+            <FeedbackButton />
+            <PushNotificationToggle />
+            <CalmModeToggle compact />
           </div>
+        </div>
+        <div className="site-footer__bottom">
+          <div className="site-footer__flap"><SplitFlapSignoff /></div>
           <div className="site-footer__legal">
-            <span>Made in Portland. Independently built. Community comes first.</span>
-            <span className="site-footer__legal-sep" aria-hidden="true">
-              ·
-            </span>
-            <span>© 2026 Zaylist · Free to Browse · Independently Run</span>
-            <Link href="/legal" className="site-footer__legal-link">
-              Legal
-            </Link>
+            <span>Made in Portland. Independently built.</span>
+            <span>© {new Date().getFullYear()} Zaylist · Free to Browse · Independently Run</span>
+            <Link href="/legal" className="site-footer__legal-link">Legal</Link>
           </div>
         </div>
       </div>
