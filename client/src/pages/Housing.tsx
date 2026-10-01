@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
+import BoardShader from "@/components/board/BoardShader";
 import BrowseStatus from "@/components/BrowseStatus";
 import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import { SearchInput } from "@/components/ds";
@@ -324,7 +325,8 @@ export default function Housing() {
   };
 
   return (
-    <div className="hz pdx-glass-rebind">
+    <div className="hz pdx-glass-rebind board-shader-page" data-shader-room="hauz">
+      <BoardShader room="hauz" />
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />
 

@@ -18,6 +18,7 @@ import { memberProfileHref } from "@/lib/avatarLinks";
 import { Button, FilterChip, RoomKicker } from "@/components/ds";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
+import BoardShader from "@/components/board/BoardShader";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import ImageUploader from "@/components/ImageUploader";
 import { timeAgo } from "@/lib/timeAgo";
@@ -179,7 +180,8 @@ export default function PrideWork() {
     { num: realLive.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Available to hire", color: "var(--panel-cyan)" },
   ];
   const select = (id: number) => { setSelectedId(id); window.history.replaceState(null, "", `/gigz?post=${id}`); window.setTimeout(() => document.getElementById("gigz-detail")?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
-  return <main className="gigz-page">
+  return <main className="gigz-page board-shader-page" data-shader-room="gigz">
+    <BoardShader room="gigz" />
     <div className="gigz-shell">
       <RoomPlate room="gigz" />
       {!isLoading && !isError && !onlyMine && <BoardStatsBar variant="band" stats={roomStats} />}

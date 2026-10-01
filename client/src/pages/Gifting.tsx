@@ -12,6 +12,7 @@ import GiftListingCard, { type GiftingPost } from "@/components/board/GiftListin
 import { FilterChip, RoomKicker } from "@/components/ds";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
+import BoardShader from "@/components/board/BoardShader";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -238,7 +239,8 @@ export default function Gifting() {
     window.history.replaceState(null, "", url.pathname + url.search);
   };
 
-  return <main className="gigz-page giftz-page gifting-page">
+  return <main className="gigz-page giftz-page gifting-page board-shader-page" data-shader-room="giftz">
+    <BoardShader room="giftz" />
     <div className="gigz-shell">
       <RoomPlate room="giftz" />
       {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}

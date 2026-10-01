@@ -2,6 +2,7 @@ import { createEventSearch } from "@shared/eventSearch";
 import RoomPlate from "@/components/board/RoomPlate";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
+import BoardShader from "@/components/board/BoardShader";
 import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
 import type React from "react";
@@ -603,7 +604,8 @@ export default function Events() {
   }
 
   return (
-    <div className="zine-page events-page board-page board-page--makeover">
+    <div className="zine-page events-page board-page board-page--makeover board-shader-page" data-shader-room="eventz">
+      <BoardShader room="eventz" />
       <div className="room-plate-shell"><RoomPlate room="eventz" /></div>
       <EventsHero eventCount={upcomingCount} stats={heroStats} />
 

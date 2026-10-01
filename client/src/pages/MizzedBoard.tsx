@@ -1,5 +1,6 @@
 import { RoomKicker } from "@/components/ds";
 import FilterSurvey from "@/components/FilterSurvey";
+import BoardShader from "@/components/board/BoardShader";
 import RoomPlate from "@/components/board/RoomPlate";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -54,7 +55,8 @@ export default function MizzedBoard() {
     if (id && posts.length) setSelected(posts.find(post => post.id === id) || null);
   }, [posts]);
   const openComposer = () => { if (!user) { setShowAuth(true); return; } setCompose(true); window.setTimeout(() => document.getElementById("mizzed-composer")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); };
-  return <main className="mizzed-board" id="top">
+  return <main className="mizzed-board board-shader-page" data-shader-room="mizzed" id="top">
+    <BoardShader room="mizzed" />
     <RoomPlate room="mizzed" />
     <section className="mizzed-board__head" aria-labelledby="mizzed-title">
       <div><RoomKicker room="mizzed" as="div">The board</RoomKicker><h1 id="mizzed-title">Mizzed connections<span>.</span></h1><p>That moment you can't stop thinking about. See if they remember it too.</p><small>Anonymous posts · Private replies · Reveal when you're both ready</small></div>

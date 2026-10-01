@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import * as THREE from "three";
 
 const vertexShader = `
@@ -12,6 +12,7 @@ const fragmentShader = `
   precision highp float;
   uniform vec2 resolution;
   uniform float time;
+  uniform float direction;
   uniform vec3 cyan;
   uniform vec3 yellow;
   uniform vec3 magenta;
@@ -26,8 +27,8 @@ const fragmentShader = `
   float waveDistance(vec2 p, float phase, float offset, float bend) {
     float d = length(p) * 0.045;
     float x = p.x * (1.0 + d * bend);
-    float curve = sin(x * 0.85 + time + phase) * 0.48
-                + sin(x * 0.34 - time * 0.4 + phase) * 0.12 + offset;
+    float curve = sin(x * 0.85 + time * direction + phase) * 0.48
+                + sin(x * 0.34 - time * direction * 0.4 + phase) * 0.12 + offset;
     return p.y + curve;
   }
 
@@ -77,7 +78,7 @@ const fragmentShader = `
   }
 
   float blueprintBand(vec2 p, float band) {
-    float drift = time * 0.25;
+    float drift = time * direction * 0.25;
     float cell = floor((p.x + drift + band * 0.47) / 1.35);
     float anchorX = (cell + 0.5) * 1.35 - drift - band * 0.47;
     vec4 edges = waveEdges(anchorX);
@@ -132,7 +133,7 @@ const fragmentShader = `
 `;
 
 /** Prime-color waves with locally loaded drafting lines. */
-export function WebGLShader() {
+export function WebGLShader({ accent, direction = 1 }: { accent?: string; direction?: -1 | 1 } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -161,18 +162,21 @@ export function WebGLShader() {
     emptyBlueprint.needsUpdate = true;
     let blueprintTexture: THREE.Texture | undefined;
     let disposed = false;
+    const beamColor = accent ? new THREE.Color(styles.color).convertLinearToSRGB() : null;
+    const beam = (token: string, fallback: string) => beamColor ?? color(token, fallback);
     const uniforms = {
       blueprint: { value: emptyBlueprint as THREE.Texture },
       resolution: { value: new THREE.Vector2() },
       time: { value: 0 },
-      cyan: { value: color("--neon-cyan", "#00FFFF") },
-      yellow: { value: color("--neon-yellow", "#CCFF00") },
-      magenta: { value: color("--neon-magenta", "#FF00CC") },
-      orange: { value: color("--neon-orange", "#FF6600") },
-      violet: { value: color("--neon-violet", "#8800FF") },
-      red: { value: color("--neon-red", "#FF2400") },
-      green: { value: color("--neon-green", "#39FF14") },
-      blue: { value: color("--neon-blue", "#0044FF") },
+      direction: { value: direction },
+      cyan: { value: beam("--neon-cyan", "#00FFFF") },
+      yellow: { value: beam("--neon-yellow", "#CCFF00") },
+      magenta: { value: beam("--neon-magenta", "#FF00CC") },
+      orange: { value: beam("--neon-orange", "#FF6600") },
+      violet: { value: beam("--neon-violet", "#8800FF") },
+      red: { value: beam("--neon-red", "#FF2400") },
+      green: { value: beam("--neon-green", "#39FF14") },
+      blue: { value: beam("--neon-blue", "#0044FF") },
       // Randomize once per mount, spreading the extra colors across the viewport.
       extraWaves: { value: [-0.8, -0.3, 0.3, 0.8]
         .map(offset => new THREE.Vector3(Math.random() * Math.PI * 2,
@@ -276,13 +280,14 @@ export function WebGLShader() {
       material.dispose();
       renderer.dispose();
     };
-  }, []);
+  }, [accent, direction]);
 
   return (
     <canvas
       ref={canvasRef}
       aria-hidden="true"
       className="rg-stream-background"
+      style={accent ? { color: accent } as CSSProperties : undefined}
     />
   );
 }

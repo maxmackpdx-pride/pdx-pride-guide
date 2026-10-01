@@ -1,0 +1,37 @@
+.board-shader-page[data-shader-room] {
+  --board-shader-color: var(--room-eventz);
+  position: relative;
+  isolation: isolate;
+  background: radial-gradient(ellipse 700px 600px at 88% 280px, color-mix(in srgb, var(--board-shader-color) 20%, transparent), transparent 85%), var(--z-black);
+}
+.board-shader-page[data-shader-room="gigz"] { --board-shader-color: var(--room-gigz); }
+.board-shader-page[data-shader-room="giftz"] { --board-shader-color: var(--room-giftz); }
+.board-shader-page[data-shader-room="sellz"] { --board-shader-color: var(--room-sellz); }
+.board-shader-page[data-shader-room="mizzed"] { --board-shader-color: var(--room-mizzed); }
+.board-shader-page[data-shader-room="hauz"] { --board-shader-color: var(--room-hauz); }
+.board-shader-page > .rg-stream-background {
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -3;
+  filter: brightness(.85);
+}
+.board-shader-page > .board-shader-veil {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--z-black);
+  mask-image: linear-gradient(to bottom, var(--z-black) 0%, var(--z-black) 10%, color-mix(in srgb, var(--z-black) 98%, transparent) 20%, color-mix(in srgb, var(--z-black) 93%, transparent) 30%, color-mix(in srgb, var(--z-black) 82%, transparent) 40%, color-mix(in srgb, var(--z-black) 66%, transparent) 50%, color-mix(in srgb, var(--z-black) 48%, transparent) 60%, color-mix(in srgb, var(--z-black) 30%, transparent) 70%, color-mix(in srgb, var(--z-black) 19%, transparent) 80%, color-mix(in srgb, var(--z-black) 13%, transparent) 90%, color-mix(in srgb, var(--z-black) 13%, transparent) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-black) 0%, var(--z-black) 10%, color-mix(in srgb, var(--z-black) 98%, transparent) 20%, color-mix(in srgb, var(--z-black) 93%, transparent) 30%, color-mix(in srgb, var(--z-black) 82%, transparent) 40%, color-mix(in srgb, var(--z-black) 66%, transparent) 50%, color-mix(in srgb, var(--z-black) 48%, transparent) 60%, color-mix(in srgb, var(--z-black) 30%, transparent) 70%, color-mix(in srgb, var(--z-black) 19%, transparent) 80%, color-mix(in srgb, var(--z-black) 13%, transparent) 90%, color-mix(in srgb, var(--z-black) 13%, transparent) 100%);
+  backdrop-filter: blur(13.8px);
+  -webkit-backdrop-filter: blur(13.8px);
+}
+.events-page.board-shader-page::before { content: none; }
+.hz.board-shader-page .hz-wash,
+.hz.board-shader-page .hz-grain { display: none; }

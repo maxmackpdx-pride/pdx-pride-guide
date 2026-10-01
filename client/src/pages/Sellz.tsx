@@ -1,5 +1,6 @@
 import RoomPlate from "@/components/board/RoomPlate";
 import FilterSurvey from "@/components/FilterSurvey";
+import BoardShader from "@/components/board/BoardShader";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
@@ -193,7 +194,8 @@ export default function Sellz() {
     window.history.replaceState(null, "", url.pathname + url.search);
   };
 
-  return <main className="gigz-page sellz-page sellz-board-page">
+  return <main className="gigz-page sellz-page sellz-board-page board-shader-page" data-shader-room="sellz">
+    <BoardShader room="sellz" />
     <div className="gigz-shell">
       <RoomPlate room="sellz" />
       {!isLoading && !isError && <BoardStatsBar variant="band" stats={roomStats} />}
