@@ -19,7 +19,9 @@ import { listingKey, type EventListing } from "@shared/multiDayEvents";
 import { admissionFromFilterTag } from "@shared/admission";
 import { EVENT_TYPE_FILTERS, isEventTypeFilterLabel } from "@shared/eventTypeTags";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
-import ListingCard from "@/components/ds/adapters/ListingCard";
+import TonightEventCard from "@/components/home/TonightEventCard";
+import { useSavedEvents } from "@/hooks/useSavedEvents";
+import AuthModal from "@/components/AuthModal";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
 import PosterAdCard from "@/components/ads/PosterAdCard";
 import type { AdServePayload } from "@/lib/adTypes";
@@ -327,6 +329,8 @@ export default function Events() {
     };
   }, [now]);
   const { user } = useAuth();
+  const { savedIds, toggleSave } = useSavedEvents();
+  const [showSaveAuth, setShowSaveAuth] = useState(false);
   const isMobile = useIsMobile() || (typeof window !== "undefined" && window.innerWidth < 768);
   const [routeMatch, routeParams] = useRoute("/events/:id/:slug?");
   const [location, setLocation] = useLocation();
@@ -835,16 +839,10 @@ export default function Events() {
               }
               const e = item.event;
               return (
-                <ListingCard
-                  key={listingKey(e)}
-                  event={e}
-                  onClick={(originRect) => openEvent(e, originRect)}
-                  viewMode="grid"
-                  revealDelay={(i % 8) * 70}
-                  attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
-                  myTalent={myTalentByEvent[e.id] ?? myTalentByEvent[String(e.id)]}
-                  selfUserId={user?.id}
-                  shareHref={eventPath(e.id, e.title, e.dayOfWeek)}
+                <TonightEventCard
+                  key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)}
+                  onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
+                  onOpen={listing => openEvent(listing)}
                 />
               );
             })}
@@ -854,17 +852,11 @@ export default function Events() {
           <div className="events-card-feed events-card-feed--list">
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {visibleListEvents.map((e, i) => (
-              <ListingCard
-                key={listingKey(e)}
-                event={e}
-                onClick={(originRect) => openEvent(e, originRect)}
-                viewMode="list"
-                revealDelay={(i % 8) * 55}
-                attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
-                myTalent={myTalentByEvent[e.id] ?? myTalentByEvent[String(e.id)]}
-                selfUserId={user?.id}
-                shareHref={eventPath(e.id, e.title, e.dayOfWeek)}
-              />
+              <TonightEventCard
+                  key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)}
+                  onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
+                  onOpen={listing => openEvent(listing)}
+                />
             ))}
           </div>
           </div>
@@ -896,6 +888,7 @@ export default function Events() {
 
       </DiscoveryFlow>
 
+      {showSaveAuth && <AuthModal onClose={() => setShowSaveAuth(false)} />}
       {selectedEvent && (
         <EventModal
           event={selectedEvent}

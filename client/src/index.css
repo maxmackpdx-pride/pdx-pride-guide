@@ -58,7 +58,7 @@
   --day-multi: linear-gradient(90deg, #8800FF, #0044FF, #FFEE00, #00FFFF, #FF00CC, #39FF14, #FF6600);
 
   --font-display: 'Barlow Condensed', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-body: 'Barlow', sans-serif;
   --font-board-display: 'Barlow Condensed', sans-serif;
   --font-board-mono: var(--font-mono);
   --site-header-height: 120px;

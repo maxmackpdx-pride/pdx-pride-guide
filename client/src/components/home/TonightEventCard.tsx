@@ -2,26 +2,29 @@ import type { CSSProperties } from "react";
 import { ArrowUpRight, Clock3, MapPin } from "lucide-react";
 import { dayAccentToken } from "@/lib/dsColors";
 import type { RailCardProps } from "@/components/RailCard";
+import { formatGridCardWhen, listingDay, listingPosterUrl } from "@/lib/dsEvent";
+import "./TonightEventCard.css";
 import ZLineIcon from "@/components/ZLineIcon";
 
 const clock = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit" });
 
-export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp, onOpen }: RailCardProps) {
-  const admission = event.adm === "FREE" ? "Free" : event.adm === "SUGGESTED_DONATION" ? "Suggested donation" : "Ticketed";
-  return <article className="tonight-card pdx-glass-card pdx-glass-rebind" style={{ "--c": dayAccentToken(event.day), "--dir-gm": 8 } as CSSProperties}>
+export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp, onOpen }: Omit<RailCardProps, "event"> & { event?: RailCardProps["event"] }) {
+  const admission = listing.admission === "FREE" ? "Free" : listing.admission === "SUGGESTED_DONATION" ? "Suggested donation" : listing.admission === "DOOR_FEE" ? "Door fee" : "Ticketed";
+  const age = listing.ageRequirement === "21_PLUS" ? "21+" : listing.ageRequirement === "18_PLUS" ? "18+" : "All ages";
+  return <article className="tonight-card pdx-glass-card pdx-glass-rebind" style={{ "--c": dayAccentToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
     <div className="tonight-card__sheen pdx-glass-sheen--specular" aria-hidden="true" />
-    <button className="tonight-card__open" type="button" onClick={() => onOpen(listing)} aria-label={`Open ${event.title}`}>
-      <div className="tonight-card__art"><img src={event.posterUrl} alt="" loading="lazy" /></div>
+    <button className="tonight-card__open" type="button" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>
+      <div className="tonight-card__art"><img src={listingPosterUrl(listing)} alt="" loading="lazy" /></div>
       <div className="tonight-card__body">
-        <p className="tonight-card__time"><Clock3 size={15} aria-hidden="true" />{clock.format(event.startMs)} – {clock.format(event.endMs)}</p>
-        <h3>{event.title}</h3>
-        <p className="tonight-card__venue"><MapPin size={16} aria-hidden="true" /><span>{event.venue}<small>{event.hood}</small></span></p>
-        <div className="tonight-card__tags"><span>{admission}</span><span>{event.age === "all-ages" ? "All ages" : event.age}</span></div>
+        <p className="tonight-card__time"><Clock3 size={15} aria-hidden="true" />{event ? `${clock.format(event.startMs)} – ${clock.format(event.endMs)}` : formatGridCardWhen(listing)}</p>
+        <h3>{listing.title}</h3>
+        <p className="tonight-card__venue"><MapPin size={16} aria-hidden="true" /><span>{listing.venueName}<small>{listing.neighborhood || "Portland"}</small></span></p>
+        <div className="tonight-card__tags"><span>{admission}</span><span>{age}</span></div>
       </div>
     </button>
     <footer className="tonight-card__footer">
-      <button type="button" className="tonight-card__save" aria-pressed={rsvped} aria-label={`${rsvped ? "Remove" : "Add"} ${event.title} ${rsvped ? "from" : "to"} my schedule`} onClick={() => onToggleRsvp(event.id)}><ZLineIcon name="favorite" size={18} filled={rsvped} />{rsvped ? "Saved" : "Save"}</button>
-      <button type="button" className="tonight-card__view" onClick={() => onOpen(listing)} aria-label={`View ${event.title}`}>View event <ArrowUpRight size={17} aria-hidden="true" /></button>
+      <button type="button" className="tonight-card__save" aria-pressed={rsvped} aria-label={`${rsvped ? "Remove" : "Add"} ${listing.title} ${rsvped ? "from" : "to"} my schedule`} onClick={() => onToggleRsvp(listing.id)}><ZLineIcon name="favorite" size={18} filled={rsvped} />{rsvped ? "Saved" : "Save"}</button>
+      <button type="button" className="tonight-card__view" onClick={() => onOpen(listing)} aria-label={`View ${listing.title}`}>View event <ArrowUpRight size={17} aria-hidden="true" /></button>
     </footer>
   </article>;
 }

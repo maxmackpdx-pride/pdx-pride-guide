@@ -398,7 +398,7 @@ html.calm-mode .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption,
   border-radius:50%; background:radial-gradient(ellipse,rgba(0,0,0,.96) 30%,rgba(0,0,0,.72) 55%,transparent 78%);
   filter:blur(10px);
 }
-.site-header--glass .site-brand-lockup { filter:drop-shadow(0 2px 4px #000); }
+.site-header--glass .site-brand-lockup { filter:drop-shadow(0 2px 4px var(--z-oled)); }
 .site-header--glass .site-login-button { min-height:44px; border-radius:22px; white-space:nowrap; }
 .site-header--glass .znav-control:focus-visible { outline-offset:-3px; }
 @media (hover:hover) {
@@ -515,3 +515,6 @@ html.calm-mode .z-glass__blur,html[data-calm="true"] .z-glass__blur { backdrop-f
 html.calm-mode .z-glass__pointer,html[data-calm="true"] .z-glass__pointer { display:none; }
 @media (prefers-reduced-transparency:reduce) { .site-header.site-header--glass,.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass { background:#080c12; } .z-glass__blur,.z-glass__blur[data-refract] { backdrop-filter:none; -webkit-backdrop-filter:none; } }
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .site-header.site-header--glass,.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass { background:#080c12; } }
+
+.site-header--glass button.site-brand--desktop { border:0; padding:0; background:transparent; cursor:pointer; }
+.site-header--glass button.site-brand--desktop:focus-visible { outline:2px solid var(--neon-cyan); outline-offset:4px; border-radius:8px; }

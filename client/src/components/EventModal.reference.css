@@ -169,7 +169,7 @@ html[data-zaylist-cards] .event-modal.event-modal--reference,
   box-sizing: border-box; width: 100%; min-height: 52px; padding: 14px 16px;
   border: 1px solid color-mix(in srgb,var(--event-accent) 50%,transparent) !important;
   border-radius: 14px; background: color-mix(in srgb,var(--event-accent) 8%,var(--z-black)) !important;
-  color: var(--text-heading) !important; font: 600 17px/1.4 var(--font-body); text-transform: none; letter-spacing: normal;
+  color: var(--text-heading) !important; font: 700 17px/1.4 var(--font-display); text-transform: uppercase; letter-spacing: .025em;
   box-shadow: inset 0 1px 0 color-mix(in srgb,var(--text-heading) 7%,transparent) !important; cursor: pointer;
 }
 .event-modal.event-modal--reference .event-modal__save[aria-pressed=true] { border-color: var(--event-accent) !important; background: color-mix(in srgb,var(--event-accent) 20%,var(--z-black)) !important; }
@@ -179,3 +179,20 @@ html[data-zaylist-cards] .event-modal.event-modal--reference,
 .event-modal.event-modal--reference .event-modal__actions .event-modal__action-btn::before,
 .event-modal.event-modal--reference .event-modal__actions .event-modal__action-btn::after { display: none; }
 .event-modal.event-modal--reference .event-modal__save:disabled { opacity: .6; cursor: wait; }
+
+/* Foundation display voice for action labels; the Mizzed card keeps body copy. */
+.event-modal.event-modal--reference :is(
+  button:not(.room-doorways__door),
+  .pdx-glass-btn,
+  .pdxBtn,
+  .room-doorways__go,
+  .event-modal__disclosure summary
+) {
+  font-family: var(--font-display) !important;
+  text-transform: uppercase !important;
+  letter-spacing: .025em !important;
+}
+.event-modal.event-modal--reference .event-modal__hero-actions .event-modal__tickets-mid.pdx-glass-btn {
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+}

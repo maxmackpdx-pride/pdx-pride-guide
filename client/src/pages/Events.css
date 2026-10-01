@@ -216,3 +216,17 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 @keyframes eventz-destination-enter { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .events-page[data-leaving] > .discovery-flow, .schedule-page, .submit-page { animation: none; } }
 :is(html.calm-mode, :root[data-calm="true"]) :is(.events-page[data-leaving] > .discovery-flow, .schedule-page, .submit-page) { animation: none; }
+
+/* The same poster/glass card serves the homepage and Eventz feed. */
+.events-page .events-poster-grid { grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr)); gap:24px; }
+.events-page .events-card-feed--list .tonight-card { display:grid; grid-template-columns:minmax(0,1fr) auto; }
+.events-page .events-card-feed--list .tonight-card__open { display:grid; grid-template-columns:160px minmax(0,1fr); }
+.events-page .events-card-feed--list .tonight-card__art img { height:100%; object-fit:cover; }
+.events-page .events-card-feed--list .tonight-card__footer { flex-direction:column; justify-content:center; border-top:0; }
+@media(max-width:600px) {
+  .events-page .events-card-feed--list .tonight-card { display:flex; }
+  .events-page .events-card-feed--list .tonight-card__open { grid-template-columns:100px minmax(0,1fr); }
+  .events-page .events-card-feed--list .tonight-card__body { padding:16px; gap:12px; }
+  .events-page .events-card-feed--list .tonight-card__body h3 { font-size:25px; }
+  .events-page .events-card-feed--list .tonight-card__footer { flex-direction:row; border-top:1px solid color-mix(in srgb,var(--c) 25%,transparent); }
+}

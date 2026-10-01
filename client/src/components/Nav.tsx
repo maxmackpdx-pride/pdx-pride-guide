@@ -535,6 +535,7 @@ function NotifyMenu({
 
 export default function Nav() {
   const [location] = useLocation();
+  const isHome = location.split("?")[0] === "/";
   const { user, logout, loading: authLoading } = useAuth();
   const { openSheet } = useInboxSheet();
   const [showAuth, setShowAuth] = useState(false);
@@ -709,13 +710,13 @@ export default function Nav() {
     <>
       <NavShell ref={headerRef} mapSurface={location.startsWith("/map") || location.startsWith("/outzide")} loading={seamLoading}>
         <div className="site-header-inner">
-          <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">
+          {!isHome && <button type="button" className="site-brand site-brand--desktop" aria-label="Search Zaylist" title="Search (⌘K)" onClick={openSearch}>
             <GlitchLogo
               src="/brand/family/zaylist-primary.svg"
               alt="Zaylist"
               className="site-brand-lockup"
             />
-          </Link>
+          </button>}
 
           <div className="hub-mtop site-hub-mtop" aria-label="Mobile navigation">
             <nav aria-label="Mobile top navigation"><CompactNavigation location={location} entries={MOBILE_TOP_NAV} textOnly onNavigate={() => { closeMenu(); setMobileProfileOpen(false); dismissMobileNavOverlays(); }} /></nav>
@@ -768,7 +769,7 @@ export default function Nav() {
               <CompactNavigation textOnly location={location} onNavigate={closeMenu} />
             </div>
 
-            <button
+            {isHome && <button
               type="button"
               className="site-search-trigger site-search-trigger--desktop-nav"
               onClick={() => setSearchOpen(true)}
@@ -778,7 +779,7 @@ export default function Nav() {
             >
               <Search size={18} aria-hidden="true" />
               <span className="site-search-trigger__label">Search</span>
-            </button>
+            </button>}
 
             {(user || localDemo) && (
               <div className="site-auth site-auth--desktop">

@@ -7,7 +7,7 @@
   color:var(--text-heading); box-shadow:0 2px 0 color-mix(in srgb,var(--c) 40%,var(--z-oled)),inset 0 1px 0 #ffffff47,inset 0 -8px 14px -8px #ffffff0f,0 0 18px -4px color-mix(in srgb,var(--c) 8%,transparent);
   cursor:pointer; pointer-events:auto; transition:transform .2s ease,filter .2s ease;
 }
-.home-front .home-discover-trigger::before { content:""; position:absolute; inset:0 0 auto; height:3px; background:linear-gradient(90deg,var(--day-mon),var(--day-tue),var(--day-thu),var(--day-sat),var(--day-wed),var(--day-sun),var(--day-fri)); pointer-events:none; }
+.home-front .home-discover-trigger::before { content:""; position:absolute; inset:0 12px auto; height:.75px; background:linear-gradient(90deg,var(--day-mon),var(--day-tue),var(--day-thu),var(--day-sat),var(--day-wed),var(--day-sun),var(--day-fri)); pointer-events:none; }
 .home-discover-trigger strong { font:900 25px/1 var(--font-display); text-transform:uppercase; }
 .home-discover-trigger > svg { color:var(--neon-cyan); flex:none; }
 .home-front .home-discover-trigger:hover { transform:translateY(-2px); filter:brightness(1.12); }

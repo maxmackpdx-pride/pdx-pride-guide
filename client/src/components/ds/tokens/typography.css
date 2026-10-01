@@ -1,14 +1,14 @@
 /* ============================================================
    Zaylist, TYPOGRAPHY
    Display : Barlow Condensed 700 to 900, UPPERCASE, tight.
-   Body    : Inter.
+   Body    : Barlow. Mono : JetBrains Mono.
    ============================================================ */
 
 :root {
   /* ---- FAMILIES ------------------------------------------ */
   --font-display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
-  --font-body:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono:    ui-monospace, 'SFMono-Regular', 'Menlo', monospace; /* technical only */
+  --font-body:    'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
 
   /* ---- WEIGHTS ------------------------------------------- */
   --fw-regular: 400;  /* @kind font */
