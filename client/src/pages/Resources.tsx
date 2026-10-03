@@ -43,7 +43,7 @@ import { RezourcesLogo } from "@/components/resources/RezourcesLogo";
 import BoardShareButton from "@/components/BoardShareButton";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import { resourceLogoLayout } from "@/components/resources/resourceLogoLayout";
-import { ResourceRail } from "@/components/resources/ResourceRail";
+import { CardSticky, ContainerScroll } from "@/components/ui/cards-stack";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import { PlaceCard } from "@/components/ds/PlaceCard";
 import { WebGLShader } from "@/components/ui/web-gl-shader";
@@ -456,6 +456,7 @@ export default function Resources() {
   const [directoryRevealed, setDirectoryRevealed] = useState(false);
   const [mode, setMode] = useState<"directory" | "talk">("directory");
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
+  const [showAllCards, setShowAllCards] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [safetyAnswer, setSafetyAnswer] = useState<"yes" | "no" | null>(null);
   const supportTrigger = useRef<HTMLElement | null>(null);
@@ -479,6 +480,7 @@ export default function Resources() {
     setDirectoryRevealed(true);
     setCategoryIds([row.category.id]);
     setMode("directory");
+    setShowAllCards(true);
     setSearchTarget(row.org.name);
   }, [location]);
 
@@ -579,7 +581,7 @@ export default function Resources() {
                 </button>
               </div>
               </LayoutGroup>
-              <button type="button" className="discovery-skip" onClick={() => { setIntentChosen(true); setMode("directory"); setCategoryIds(RESOURCE_CATEGORIES.map(c => c.id)); setDirectoryRevealed(true); }}>Skip to view all</button>
+              <button type="button" className="discovery-skip" onClick={() => { setIntentChosen(true); setMode("directory"); setCategoryIds(RESOURCE_CATEGORIES.map(c => c.id)); setDirectoryRevealed(true); setShowAllCards(true); }}>Skip to view all</button>
               <AnimatePresence initial={false}>
               {mode === "talk" && (
                 <motion.div key="safety-check" initial={quietMotion ? false : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: quietMotion ? 0 : 0.24, ease: "easeInOut" }} id="resource-safety-check" className="rg-safety-check" role="group" aria-labelledby="resource-safety-question">
@@ -687,19 +689,45 @@ export default function Resources() {
           {mode === "talk" ? (
             <TalkOptions />
           ) : (
-            <div className="rg-resource-rails">
-              {rows.length === 0 && <p className="rg-empty">Choose a category above, or select all to see every resource.</p>}
-              {selectedCategories.map((type) => {
-                const group = rows.filter(row => categoriesFor(row).some(c => c.id === type.id));
-                if (!group.length) return null;
-                const railId = `resource-rail-${type.id}`;
-                return <ResourceRail key={type.id} id={railId} title={type.name} color={type.color} count={group.length} quiet={Boolean(quietMotion)} focusIndex={searchTarget ? group.findIndex(row => row.org.name === searchTarget) : undefined} deferOnMobile deferUntilVisible>
-                  {() => group.map(row => <div className="rg-card-reveal" key={row.org.name} dir="ltr" tabIndex={-1} data-resource-search-card={row.org.name}>
-                    <ResourceCard row={{ ...row, sectionCategory: type }} onOpen={openDetail} />
-                  </div>)}
-                </ResourceRail>;
-              })}
-            </div>
+            <>
+              {rows.length > 0 && <div className="rg-stack-controls">
+                <span>{showAllCards ? "Browse every card" : "Scroll through the card stacks"}</span>
+                <button type="button" className="pdx-glass-rebind pdxBtn" aria-pressed={showAllCards} onClick={() => {
+                  setShowAllCards(value => !value);
+                  requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "instant", block: "start" }));
+                }}>
+                  {showAllCards ? "Show stacks" : "Skip stacks · view all"}
+                </button>
+              </div>}
+              <div className="rg-resource-stacks" data-view-all={showAllCards}>
+                {rows.length === 0 && <p className="rg-empty">Choose a category above, or select all to see every resource.</p>}
+                {selectedCategories.map((type) => {
+                  const group = rows.filter(row => categoriesFor(row).some(c => c.id === type.id));
+                  if (!group.length) return null;
+                  const sectionId = `resource-stack-${type.id}`;
+                  return <section key={type.id} className="rg-resource-stack-section" aria-labelledby={`${sectionId}-title`}>
+                    <header className="rg-rail-heading">
+                      <span className="rg-eyebrow">Explore ReZources</span>
+                      <h2 id={`${sectionId}-title`}>{type.name}</h2>
+                      <p>{group.length} resource{group.length === 1 ? "" : "s"}</p>
+                    </header>
+                    <ContainerScroll id={sectionId} className="rg-stack-track">
+                      {group.map((row, index) => <CardSticky
+                        key={row.org.name}
+                        index={index}
+                        incrementY={2}
+                        className="rg-card-reveal rg-stack-card"
+                        tabIndex={-1}
+                        data-resource-search-card={row.org.name}
+                        style={{ top: `calc(var(--rg-stack-top) + ${index * 2}px)` }}
+                      >
+                        <ResourceCard row={{ ...row, sectionCategory: type }} onOpen={openDetail} />
+                      </CardSticky>)}
+                    </ContainerScroll>
+                  </section>;
+                })}
+              </div>
+            </>
           )}
         </motion.div>}
       </section>
