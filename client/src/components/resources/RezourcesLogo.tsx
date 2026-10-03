@@ -29,7 +29,10 @@ const Z_SHAPE = 'M407 328H653L577 400H461Z M748 237L698 337L601 455L412 610L348 
 const BLUE_Z = 'M580 399L746 237L696 340L638 410Z M346 695L407 610H496L426 695L322 758Z';
 const CROSS = 'M1226 458H1273V483H1298V531H1273V556H1226V531H1199V483H1226Z';
 const SCALE_BODY = 'M895 219H925V473H895Z M875 463H943V516H875Z M815 273H1008V301H815Z';
+const SCALE_UPPER = 'M895 219H925V473H895Z M815 273H1008V301H815Z';
+const SCALE_BASE = 'M875 463H943V516H875Z';
 const SCALE_DROP = 90;
+const SCALE_BASE_DROP = -25;
 const FIXED_DETAILS = CROSS;
 // Rasterize the detailed source once at its native size; animated clips reuse pixels.
 const ART = '/brand/family/rezources.png';
@@ -221,6 +224,8 @@ export function RezourcesLogo({ quietMotion: requestedQuietMotion = false }: { q
           {SKETCH_REGIONS.map((r, i) => <clipPath key={i} id={`${id}-ink-${i}`}><rect {...r} className="rg-logo-ink-reveal" style={{ animationDuration: `${rhythms[i].duration}s`, animationDelay: `${rhythms[i].delay}s`, transformOrigin: ['left center', 'right center', 'center', 'right center', 'left center', 'center', 'center bottom'][i] }} /></clipPath>)}
           {OBJECTS.map(o => <clipPath key={o.id} id={`${id}-${o.id}`}><path d={o.path} /></clipPath>)}
           <clipPath id={`${id}-scale-body`}><path d={SCALE_BODY} /></clipPath>
+          <clipPath id={`${id}-scale-upper`}><path d={SCALE_UPPER} /></clipPath>
+          <clipPath id={`${id}-scale-base`}><path d={SCALE_BASE} /></clipPath>
           <clipPath id={`${id}-blue-smear-bands`}>
             <path d="M540 290H760V304H540Z M530 330H740V348H530Z M520 375H700V390H520Z M330 618H530V636H330Z M320 657H510V674H320Z M310 700H460V715H310Z" />
           </clipPath>
@@ -269,9 +274,10 @@ export function RezourcesLogo({ quietMotion: requestedQuietMotion = false }: { q
         </g>
         <g className="rg-logo-underlay" aria-hidden="true">
           <g transform={`translate(0 ${SCALE_DROP})`}>
-            <path d="M805 509Q898 519 1000 505L1037 511Q918 531 800 521Z" fill="color-mix(in srgb, var(--neon-orange) 76%, var(--z-black))" stroke="var(--neon-yellow)" strokeWidth="3" />
-            <path d="M819 511Q923 526 1021 511" fill="none" stroke="var(--neon-yellow)" strokeWidth="2" opacity=".62" />
-            <g clipPath={`url(#${id}-scale-body)`}>
+            <g clipPath={`url(#${id}-scale-upper)`}>
+              <image href={ART} width="1792" height="1008" />
+            </g>
+            <g transform={`translate(0 ${SCALE_BASE_DROP})`} clipPath={`url(#${id}-scale-base)`}>
               <image href={ART} width="1792" height="1008" />
             </g>
           </g>
