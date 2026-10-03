@@ -42,9 +42,9 @@ export default function BoardFollowButton({ board }: { board: FollowableRoom }) 
     onError: () => toast({ title: "Could not update follow", description: "Try again in a moment.", variant: "destructive" }),
   });
   return <>
-    <button type="button" className="board-follow-button pdx-glass-rebind" data-board={board} aria-pressed={following} disabled={!!user && (status.isPending || mutation.isPending)} onClick={() => !user ? setShowAuth(true) : status.isError ? void status.refetch() : mutation.mutate(!following)}>
+    <button type="button" className="board-follow-button pdx-glass-rebind" data-board={board} aria-pressed={following} aria-label={status.isError ? `Retry ${boardName} follow status` : following ? `Following ${boardName}` : `Follow ${boardName}`} disabled={!!user && (status.isPending || mutation.isPending)} onClick={() => !user ? setShowAuth(true) : status.isError ? void status.refetch() : mutation.mutate(!following)}>
       {following ? <BellOff size={17} aria-hidden="true" /> : <Bell size={17} aria-hidden="true" />}
-      {status.isError ? "Retry follow status" : following ? `Following ${boardName}` : `Follow ${boardName}`}
+      {status.isError ? "Retry follow status" : following ? "Following" : "Follow"}
     </button>
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
   </>;
