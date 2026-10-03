@@ -546,7 +546,7 @@ export default function Resources() {
           </span>
 
         </div>
-        <RezourcesLogo quietMotion={Boolean(quietMotion || mobile)} />
+        <RezourcesLogo quietMotion={Boolean(quietMotion)} />
           <div className="rg-intro-actions">
             <BoardShareButton title="ReZources" path="/rezources" card={{ room: "ReZources", mark: "/brand/family/rezources.png", line: "All the ways we show up." }} />
             <BoardFollowButton board="rezources" />
