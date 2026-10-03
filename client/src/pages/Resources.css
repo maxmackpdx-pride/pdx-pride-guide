@@ -2493,7 +2493,50 @@ html.calm-mode .rg-options button,
  margin-inline: auto;
 }
 @media (max-width: 600px) {
- .resources-page .rg-controls .rg-step--categories .rg-options { grid-template-columns: minmax(0, 1fr); }
+ .resources-page .rg-controls .rg-step--categories .rg-options {
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+ }
+ .resources-page .rg-options button[data-category-id] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  align-content: start;
+  align-items: start;
+  gap: 8px;
+  min-height: 106px;
+  padding: 14px;
+ }
+ .resources-page .rg-options button[data-category-id] > svg {
+  grid-column: 1;
+  grid-row: 1;
+  width: 20px;
+  height: 20px;
+ }
+ .resources-page .rg-options button[data-category-id] > i {
+  grid-column: 2;
+  grid-row: 1;
+  margin-left: 0;
+ }
+ .resources-page .rg-options button[data-category-id] > span {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  align-self: start;
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: .015em;
+  overflow-wrap: normal;
+  text-wrap: balance;
+ }
+}
+@media (min-width: 560px) and (max-width: 600px) {
+ .resources-page .rg-controls .rg-step--categories .rg-options {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+ }
+ .resources-page .rg-options .rg-selection-control {
+  grid-column: 2 / -1;
+  margin-top: 0;
+ }
 }
 
 /* Approved line-height roles; closed cards and phone buttons keep their recipes. */
