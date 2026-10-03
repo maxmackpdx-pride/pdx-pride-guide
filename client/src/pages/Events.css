@@ -67,7 +67,7 @@
   height: 100%;
   z-index: 0;
   pointer-events: none;
-  filter: brightness(.85);
+  filter: contrast(1.35) saturate(1.12);
 }
 .events-page::before {
   content: "";
