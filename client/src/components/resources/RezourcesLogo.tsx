@@ -28,7 +28,9 @@ const Z_SOURCE = 'M407 328H653L577 400H407Z M748 237L698 337L601 455L412 610L348
 const Z_SHAPE = 'M407 328H653L577 400H461Z M748 237L698 337L601 455L412 610L348 729L319 761L400 608L510 472L582 398L664 315Z M424 609H672L610 695H346Z';
 const BLUE_Z = 'M580 399L746 237L696 340L638 410Z M346 695L407 610H496L426 695L322 758Z';
 const CROSS = 'M1226 458H1273V483H1298V531H1273V556H1226V531H1199V483H1226Z';
-const FIXED_DETAILS = CROSS + ' M895 219H925V473H895Z M875 463H943V516H875Z M815 273H1008V301H815Z';
+const SCALE_BODY = 'M895 219H925V473H895Z M875 463H943V516H875Z M815 273H1008V301H815Z';
+const SCALE_DROP = 90;
+const FIXED_DETAILS = CROSS;
 // Rasterize the detailed source once at its native size; animated clips reuse pixels.
 const ART = '/brand/family/rezources.png';
 const DISCO_ART = '/brand/family/rezources-disco-ball.png';
@@ -213,10 +215,12 @@ export function RezourcesLogo({ quietMotion: requestedQuietMotion = false }: { q
             {rezourcesLetterPaths.map((d, i) => <path key={i} d={d} fill="black" fillRule="evenodd" />)}
             {SKETCH_REGIONS.map((r, i) => <rect key={i} {...r} fill="black" />)}
             {OBJECTS.map(o => <path key={o.id} d={o.id === 'disco-ball' ? DISCO_SOURCE_PATH : o.id === 'rent' ? RENT_SOURCE_PATH : o.path} fill="black" />)}
+            <path d={SCALE_BODY} fill="black" />
             <path d={FIXED_DETAILS} fill="white" />
           </mask>
           {SKETCH_REGIONS.map((r, i) => <clipPath key={i} id={`${id}-ink-${i}`}><rect {...r} className="rg-logo-ink-reveal" style={{ animationDuration: `${rhythms[i].duration}s`, animationDelay: `${rhythms[i].delay}s`, transformOrigin: ['left center', 'right center', 'center', 'right center', 'left center', 'center', 'center bottom'][i] }} /></clipPath>)}
           {OBJECTS.map(o => <clipPath key={o.id} id={`${id}-${o.id}`}><path d={o.path} /></clipPath>)}
+          <clipPath id={`${id}-scale-body`}><path d={SCALE_BODY} /></clipPath>
           <clipPath id={`${id}-blue-smear-bands`}>
             <path d="M540 290H760V304H540Z M530 330H740V348H530Z M520 375H700V390H520Z M330 618H530V636H330Z M320 657H510V674H320Z M310 700H460V715H310Z" />
           </clipPath>
@@ -225,16 +229,22 @@ export function RezourcesLogo({ quietMotion: requestedQuietMotion = false }: { q
             {rezourcesLetterPaths.map((d, i) => <path key={i} d={d} fill="white" fillRule="evenodd" />)}
             <path d={Z_SOURCE} fill="black" />
             {OBJECTS.map(o => <path key={o.id} d={o.id === 'disco-ball' ? DISCO_SOURCE_PATH : o.id === 'rent' ? RENT_SOURCE_PATH : o.path} fill="black" />)}
+            <path d={SCALE_BODY} fill="black" />
             <path d={FIXED_DETAILS} fill="black" />
           </mask>
           <mask id={`${id}-letters`} maskUnits="userSpaceOnUse" x="0" y="0" width="1792" height="1008" style={{ maskType: 'luminance' }}>
             {rezourcesLetterPaths.map((d, i) => <path key={i} d={d} fill="white" fillRule="evenodd" stroke="black" strokeWidth="7" />)}
             {OBJECTS.map(o => <path key={o.id} d={o.id === 'disco-ball' ? DISCO_SOURCE_PATH : o.id === 'rent' ? RENT_SOURCE_PATH : o.path} fill="black" />)}
+            <path d={SCALE_BODY} fill="black" />
             <path d={FIXED_DETAILS} fill="black" />
           </mask>
           <linearGradient id={`${id}-e-repair`} gradientUnits="userSpaceOnUse" x1="309" y1="408" x2="446" y2="608">
             <stop stopColor="var(--neon-orange)" />
             <stop offset="1" stopColor="var(--neon-yellow)" />
+          </linearGradient>
+          <linearGradient id={`${id}-u-repair`} gradientUnits="userSpaceOnUse" x1="875" y1="408" x2="943" y2="573">
+            <stop stopColor="#75cd79" />
+            <stop offset="1" stopColor="#08ccc5" />
           </linearGradient>
           <linearGradient id={`${id}-color`} x1="0" y1="0" x2="1" y2=".5">
             <stop offset="0" stopColor="var(--neon-orange)" />
@@ -258,14 +268,23 @@ export function RezourcesLogo({ quietMotion: requestedQuietMotion = false }: { q
           <path pathLength="1" d="M395 835H1145 M395 825V845 M1145 825V845 M618 827V843 M857 827V843 M1052 827V843" />
         </g>
         <g className="rg-logo-underlay" aria-hidden="true">
-          <path d="M805 509Q898 519 1000 505L1037 511Q918 531 800 521Z" fill="color-mix(in srgb, var(--neon-orange) 76%, var(--z-black))" stroke="var(--neon-yellow)" strokeWidth="3" />
-          <path d="M819 511Q923 526 1021 511" fill="none" stroke="var(--neon-yellow)" strokeWidth="2" opacity=".62" />
+          <g transform={`translate(0 ${SCALE_DROP})`}>
+            <path d="M805 509Q898 519 1000 505L1037 511Q918 531 800 521Z" fill="color-mix(in srgb, var(--neon-orange) 76%, var(--z-black))" stroke="var(--neon-yellow)" strokeWidth="3" />
+            <path d="M819 511Q923 526 1021 511" fill="none" stroke="var(--neon-yellow)" strokeWidth="2" opacity=".62" />
+            <g clipPath={`url(#${id}-scale-body)`}>
+              <image href={ART} width="1792" height="1008" />
+            </g>
+          </g>
           <path d="M1605 412C1603 455 1600 507 1601 546" fill="none" stroke="var(--text-heading)" strokeWidth="2.6" opacity=".7" />
           <image href={ROOSTER_ROCK_ART} x="1300" y="270" width="300" height="220" transform="rotate(-11 1450 380)" />
         </g>
         {/* Restore the E beneath the relocated rent sign before layering the original texture. */}
         <path d={rezourcesLetterPaths[1]} fill={`url(#${id}-e-repair)`} />
         <image href={ART} width="1792" height="1008" mask={`url(#${id}-still)`} />
+        {/* Fill the U where the original scale post was removed. */}
+        <g clipPath={`url(#${id}-scale-body)`}>
+          <path d={rezourcesLetterPaths[3]} fill={`url(#${id}-u-repair)`} />
+        </g>
         <g className="rg-logo-surface">
         <image href={ART} width="1792" height="1008" mask={`url(#${id}-moving-letters)`} />
 
@@ -276,7 +295,9 @@ export function RezourcesLogo({ quietMotion: requestedQuietMotion = false }: { q
           <rect className="rg-logo-letter-shimmer" x="-260" y="395" width="240" height="225" fill={`url(#${id}-shimmer)`} />
         </g>
         </g>
-        {OBJECTS.filter(o => o.id !== 'rent').map(o => <HangingObject key={o.id} object={o} id={id} quiet={quietMotion} beePass={beePass} />)}
+        {OBJECTS.filter(o => o.id !== 'rent').map(o => o.id.startsWith('scales-')
+          ? <g key={o.id} transform={`translate(0 ${SCALE_DROP})`}><HangingObject object={o} id={id} quiet={quietMotion} beePass={beePass} /></g>
+          : <HangingObject key={o.id} object={o} id={id} quiet={quietMotion} beePass={beePass} />)}
         {!quietMotion && beePass > 0 && <g key={beePass} className="rg-logo-bee-flight" aria-hidden="true">
           <g className="rg-logo-bee">
             <ellipse cx="-5" cy="-8" rx="8" ry="5" fill="var(--text-heading)" opacity=".72" />
@@ -303,7 +324,7 @@ export function RezourcesLogo({ quietMotion: requestedQuietMotion = false }: { q
           <circle cx="460" cy="358" r="2" fill="var(--text-heading)" />
         </g>
         {OBJECTS.filter(o => o.id === 'rent').map(o => <HangingObject key={o.id} object={o} id={id} quiet={quietMotion} beePass={beePass} />)}
-        <image href={EVICTION_ART} x="700" y="590" width="190" height="169" aria-hidden="true" />
+        <image href={EVICTION_ART} x="565" y="605" width="190" height="169" aria-hidden="true" />
         <text className="rg-logo-trademark" x="1700" y="416" aria-hidden="true">™</text>
       </svg>
     </h1>
