@@ -2543,7 +2543,7 @@ html.calm-mode .rg-options button,
 .resources-page .rg-controls .rg-step h2,
 .resources-page .rg-results-head h2,
 .resources-page .rg-footer h2,
-.rg-resource-detail .rg-detail-primary > h2 { line-height: 1.6; }
+.rg-resource-detail .rg-detail-primary > h2 { line-height: 1.2; }
 .resources-page .rg-safety-check h3,
 .rg-safety-summary .rg-safety-heading h3,
 .rg-resource-detail .rg-org-section h4,
@@ -2577,7 +2577,7 @@ html.calm-mode .rg-options button,
 .resources-page .rg-controls .rg-step h2,
 .resources-page .rg-results-head h2,
 .resources-page .rg-footer h2,
-.rg-resource-detail .rg-detail-primary > h2 { font-size: var(--rg-title-size); line-height: 1.6; }
+.rg-resource-detail .rg-detail-primary > h2 { font-size: var(--rg-title-size); line-height: 1.2; }
 .resources-page .rg-safety-check h3,
 .rg-safety-summary .rg-safety-heading h3,
 .rg-resource-detail .rg-org-section h4,
@@ -3639,6 +3639,7 @@ html.calm-mode .rg-options button,
   padding-bottom: var(--rg-logo-space);
 }
 .resources-page .rg-layout { gap: 0; padding-bottom: 0; }
+.resources-page .rg-results { margin-top: 64px; }
 .resources-page .rg-controls[data-mode] { gap: 64px; }
 .resources-page .rg-controls .rg-step .rg-eyebrow { margin: 0; }
 .resources-page .rg-controls .rg-step h2 { margin: 16px 0 0; }
@@ -3650,6 +3651,7 @@ html.calm-mode .rg-options button,
 .resources-page .rg-bottom-help { padding-top: 24px; padding-bottom: 40px; }
 @media (max-width: 600px) {
   .resources-page .rg-intro { --rg-logo-space: 48px; }
+  .resources-page .rg-results { margin-top: 48px; }
   .resources-page .rg-controls[data-mode] { gap: 48px; }
   .resources-page .rg-step--intent .rg-mode { margin-top: 24px; width: min(100%, 392px); }
   .resources-page .rg-controls .rg-step--categories .rg-options { margin-top: 24px; }
@@ -3734,6 +3736,7 @@ html.calm-mode .rg-options button,
 }
 @media (max-width: 719px) {
   .resources-page .rg-resource-stacks { gap: 56px; }
+  .resources-page .rg-stack-controls { position: static; }
   .resources-page .rg-stack-controls span { display: none; }
   .resources-page .rg-resource-stack-section .rg-rail-heading { margin-bottom: 28px; }
   .resources-page .rg-stack-track { gap: 18px; padding-bottom: min(28vh, 200px); }
@@ -3741,11 +3744,11 @@ html.calm-mode .rg-options button,
 }
 .resources-page .rg-rail-heading { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 80px; }
 .resources-page .rg-rail-heading .rg-eyebrow { margin: 0; font-size: 14px; line-height: 1.6; letter-spacing: .08em; }
-.resources-page .rg-rail-heading h2 { margin: 16px 0 0; font-size: var(--rg-title-size, 40px); line-height: 1.6; }
+.resources-page .rg-rail-heading h2 { margin: 16px 0 0; font-size: 34px; line-height: 1.2; }
 .resources-page .rg-rail-heading p { margin: 8px 0 0; font-size: 14px; line-height: 1.7; color: var(--res-secondary-text); }
 @media (max-width: 719px) {
   .resources-page .rg-rail-heading { margin-bottom: 64px; }
-  .resources-page .rg-rail-heading h2 { font-size: 36px; }
+  .resources-page .rg-rail-heading h2 { font-size: 30px; }
 }
 .resources-page .rg-category-wash,
 .resources-page .rg-category-edge { position: absolute; inset: 0; border-radius: inherit; background: var(--rg-category-gradient); pointer-events: none; }
@@ -3843,19 +3846,20 @@ html.calm-mode .rg-options button,
 .resources-page .rg-controls .rg-step .rg-eyebrow,
 .resources-page .rg-rail-heading .rg-eyebrow,
 .resources-page .rg-results-head > .rg-eyebrow { font-size: 16px; gap: 14px; text-shadow: 0 2px 4px var(--z-black); }
-.resources-page .rg-controls .rg-step-number {
+.resources-page :is(.rg-controls, .rg-results-head) .rg-step-number {
   width: 36px; height: 36px; min-width: 36px; font-size: 16px;
   border: 1.5px solid var(--neon-yellow); color: var(--neon-yellow);
   background: var(--res-canvas); box-shadow: 0 3px 8px color-mix(in srgb, var(--z-black) 60%, transparent);
 }
+.resources-page .rg-results-step { display: inline-flex; align-items: center; justify-content: center; gap: 14px; }
 .resources-page .rg-controls .rg-step h2,
 .resources-page .rg-results-head h2,
-.resources-page .rg-rail-heading h2,
 .resources-page .rg-footer h2 { font-size: var(--rg-title-size); text-shadow: 0 2px 5px var(--z-black); }
+.resources-page .rg-rail-heading h2 { text-shadow: 0 2px 5px var(--z-black); }
 .resources-page .rg-controls .rg-step h2 { margin-top: 20px; }
 @media (max-width: 600px) {
   .resources-page { --rg-title-size: 38.88px; }
-  .resources-page .rg-controls .rg-step-number { width: 32px; height: 32px; min-width: 32px; }
+  .resources-page :is(.rg-controls, .rg-results-head) .rg-step-number { width: 32px; height: 32px; min-width: 32px; }
 }
 
 .resources-page [data-art-visible="false"] .rg-card-top-rule { animation-play-state: paused; }
@@ -3946,7 +3950,7 @@ html.calm-mode .rg-options button,
 .resources-page .rg-footer h2 {
   margin: 20px 0 0;
   font-size: var(--rg-title-size);
-  line-height: 1.6;
+  line-height: 1.2;
   text-wrap: balance;
 }
 .resources-page .rg-footer .pdxBtn.pdx-glass-rebind {

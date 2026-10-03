@@ -657,7 +657,7 @@ export default function Resources() {
           aria-label="Resource results"
         >
           <div className="rg-results-head">
-            <span className="rg-eyebrow">03 / Make a connection</span>
+            <span className="rg-eyebrow rg-results-step"><span className="rg-step-number" aria-hidden="true">03</span>Make a connection</span>
             <h2>
               {mode === "talk"
                 ? "A person on the other end."
