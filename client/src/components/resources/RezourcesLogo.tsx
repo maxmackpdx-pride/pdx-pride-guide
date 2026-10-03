@@ -42,7 +42,7 @@ const ROOSTER_ROCK_ART = '/brand/family/rezources-rooster-rock.png';
 const EVICTION_ART = '/brand/family/rezources-eviction.png';
 
 function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[number]; id: string; quiet: boolean; beePass: number }) {
-  const weight = object.id.startsWith('scales-') ? 1.3 : object.id === 'rent' ? .5 : 1;
+  const idleAmplitude = object.id.startsWith('scales-') ? 2 : object.id === 'rent' ? 1.4 : object.id === 'disco-ball' ? 1.1 : 1.6;
   const angle = useMotionValue(0);
   const swing = useRef<{ stop: () => void } | null>(null);
   const settling = useRef(false);
@@ -95,12 +95,13 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
       if (hovering.current || settling.current || document.hidden) return;
       const now = performance.now();
       const blend = Math.min(1, (now - idleResumedAt.current) / 3000);
-      angle.set(Math.sin((now - started) / (6000 + index * 500) + phase) * .075 / weight * blend);
+      const period = 9000 + index * 900;
+      angle.set(Math.sin((now - started) * Math.PI * 2 / period + phase) * idleAmplitude * blend);
     };
     tick();
     const timer = window.setInterval(tick, 150);
     return () => { window.clearInterval(timer); swing.current?.stop(); };
-  }, [quiet, angle, object.id, weight]);
+  }, [quiet, angle, object.id, idleAmplitude]);
 
   useEffect(() => {
     if (!beePass || quiet) return;
@@ -113,14 +114,14 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
       swing.current?.stop();
       settling.current = true;
       const direction = object.id === 'scales-right' || object.id === 'disco-ball' ? -1 : 1;
-      const amplitude = direction * .8 / weight;
+      const amplitude = direction * idleAmplitude * 1.3;
       swing.current = animate(angle, [angle.get(), amplitude, -amplitude * .45, amplitude * .14, 0], {
         duration: 5.5, times: [0, .18, .48, .76, 1], ease: 'easeInOut',
         onComplete: () => { idleResumedAt.current = performance.now(); settling.current = false; },
       });
     }, delay);
     return () => window.clearTimeout(timer);
-  }, [beePass, quiet, object.id, angle, weight]);
+  }, [beePass, quiet, object.id, angle, idleAmplitude]);
   return <g className="rg-logo-object"
     onPointerEnter={event => {
       if (quiet || event.pointerType !== 'mouse') return;
@@ -130,7 +131,7 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
       swing.current?.stop();
       // Bounded, progressively smaller arcs; pointer speed never adds energy.
       const direction = OBJECTS.findIndex(item => item.id === object.id) % 2 === 0 ? 1 : -1;
-      const amplitude = direction * .4 / weight;
+      const amplitude = direction * idleAmplitude * 1.15;
       swing.current = animate(angle, [angle.get(), amplitude, -amplitude * .5, amplitude * .18, 0], {
         duration: 18, times: [0, .22, .55, .82, 1], ease: 'easeInOut',
         onComplete: () => { idleResumedAt.current = performance.now(); settling.current = false; },
@@ -154,6 +155,7 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
     }}>
     {object.id !== 'disco-ball' && <path ref={strings} d={object.id === 'rent' ? rentWirePath(0) : stringPath(0)} className="rg-logo-hanging-strings" />}
     <g ref={moving} className="rg-logo-object-swing" style={{ "--logo-drop": `${drop}px` } as CSSProperties} transform={`translate(0 ${drop})`}>
+      <path d={object.path} className="rg-logo-object-shadow" transform="translate(8 11)" filter={`url(#${id}-object-shadow)`} />
       {object.id === 'rent'
         ? <image href={LATE_RENT_ART} x="390" y="410" width="190" height="138" />
         : object.id === 'disco-ball'
@@ -223,6 +225,9 @@ export function RezourcesLogo({ quietMotion: requestedQuietMotion = false }: { q
           </mask>
           {SKETCH_REGIONS.map((r, i) => <clipPath key={i} id={`${id}-ink-${i}`}><rect {...r} className="rg-logo-ink-reveal" style={{ animationDuration: `${rhythms[i].duration}s`, animationDelay: `${rhythms[i].delay}s`, transformOrigin: ['left center', 'right center', 'center', 'right center', 'left center', 'center', 'center bottom'][i] }} /></clipPath>)}
           {OBJECTS.map(o => <clipPath key={o.id} id={`${id}-${o.id}`}><path d={o.path} /></clipPath>)}
+          <filter id={`${id}-object-shadow`} x="-30%" y="-30%" width="160%" height="180%">
+            <feGaussianBlur stdDeviation="7" />
+          </filter>
           <clipPath id={`${id}-scale-body`}><path d={SCALE_BODY} /></clipPath>
           <clipPath id={`${id}-scale-upper`}><path d={SCALE_UPPER} /></clipPath>
           <clipPath id={`${id}-scale-base`}><path d={SCALE_BASE} /></clipPath>

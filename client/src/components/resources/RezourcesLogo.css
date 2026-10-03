@@ -26,6 +26,7 @@
 }
 .rg-logo-object-hit { pointer-events: fill; }
 .rg-logo-object-swing { pointer-events: none; }
+.rg-logo-object-shadow { fill: var(--z-black); opacity: .72; pointer-events: none; }
 .rg-logo-surface {
   transform-origin: 50% 50%;
   transform-box: view-box;
