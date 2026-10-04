@@ -75,7 +75,7 @@ test('startup bridge surfaces the original error and deduplicates it',()=>{
  const errors=b.messages.filter(message=>message.type==='fatal');
  assert.equal(errors.length,1);
  assert.match(errors[0].message,/reading 'paint'/);
- assert.match(b.status.textContent,/reading 'paint'/);
+ assert.equal(b.status.hidden,true);
  assert.equal(b.dataset.mapError,errors[0].message);
 });
 

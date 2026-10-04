@@ -16,7 +16,8 @@ const [host,fallback,page,html,renderer,home,routes,app,bootLoader]=await Promis
 
 test('Mapz and the home flyover share the same natural surface renderer',()=>{
  assert.match(renderer,/mapzSurfaceStyle/);
- assert.match(renderer,/mlcontour\.DemSource/);
+ assert.match(renderer,/terrainStrength:0/);
+ assert.doesNotMatch(renderer,/mlcontour\.DemSource/);
  assert.match(html,/maplibre-contour-0\.1\.0\.js/);
  assert.match(home,/import \{mapzSurfaceStyle,createWaterBloom\} from '\.\.\/zaydar-map\/natural-surfaces\.js/);
  assert.match(home,/mlcontour\.DemSource/);
@@ -32,7 +33,8 @@ test('3D recovery waits for a rendered city frame and preserves the actual error
  assert.match(host,/event\.data\.message/);
  assert.doesNotMatch(host,/type==='booted'/);
  assert.match(renderer,/tell\('first-frame'\)/);
- assert.match(renderer,/queryRenderedFeatures\(\{layers:\['streets','water','skyline'\]\}\)/);
+ assert.match(renderer,/map\.once\('idle',markBase\)/);
+ assert.match(renderer,/canvas\.width>0&&canvas\.height>0/);
  assert.match(renderer,/ready&&baseFrameRendered&&!firstFrameSent/);
  assert.doesNotMatch(renderer,/webglProbe/);
 });
