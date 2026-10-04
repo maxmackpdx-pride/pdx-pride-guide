@@ -122,13 +122,13 @@ html.calm-mode .home-front__worlds-grid,:root[data-calm="true"] .home-front__wor
 .home-front__metro-globe { position:absolute; inset:0; display:block; width:100%; height:100%; cursor:default; touch-action:pan-y; }
 .home-front__flight--globe .home-front__flight-credit { font-size:9px; opacity:.8; }
 
-/* Place the wordmark 15% of the hero height above the globe equator. */
-.home-front__hero { --home-equator:35%; inset:0; flex-direction:column; }
+/* Place the wordmark 10% of the hero height above the globe equator. */
+.home-front__hero { --home-equator:40%; inset:0; flex-direction:column; }
 .home-front__brand-group { position:absolute; top:var(--home-equator); padding:0; transform:translateY(-50%); }
 .home-front__welcome-copy { position:absolute; top:calc(var(--home-equator) + var(--home-logo-height) / 2); bottom:var(--home-foreground-bottom,196px); min-height:0; margin:0; display:flex; flex-direction:column; justify-content:center; }
 .home-front__hero-actions { margin-top:clamp(12px,2svh,20px); }
 @media(max-width:599px) {
-  .home-front__hero { --home-equator:calc((100% + var(--home-header-height,86px) - var(--home-foreground-bottom,196px)) / 2 - 15%); }
+  .home-front__hero { --home-equator:calc((100% + var(--home-header-height,86px) - var(--home-foreground-bottom,196px)) / 2 - 10%); }
 }
 
 /* A brief left-to-right glint, followed by a long quiet interval. */

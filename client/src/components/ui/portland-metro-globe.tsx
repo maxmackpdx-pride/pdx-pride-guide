@@ -89,8 +89,8 @@ function placePoint(place: { lat: number; lon: number }) {
 const RIVERS = [
   { name: "Willamette River", lat: 45.552, lon: -122.688 },
 ];
-// Face the venue-rich reference view, with Portland left of center.
-const INITIAL_YAW = -warp((tileX(START_LOCATION.lon)-CENTER[0])/SPAN[0],-.15,5)*Math.PI + .47;
+// Start the visible map roughly one fifth of the globe radius farther left.
+const INITIAL_YAW = -warp((tileX(START_LOCATION.lon)-CENTER[0])/SPAN[0],-.15,5)*Math.PI + .27;
 const MARKERS = PLACES.map(place => ({ ...place, point: placePoint(place) }));
 // Decorative product waypoints, not real listings or claimed venue locations.
 // One per longitude sector keeps the random anchors spread around the globe.
