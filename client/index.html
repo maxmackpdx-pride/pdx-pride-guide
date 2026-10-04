@@ -42,23 +42,25 @@
       <button type="button" id="boot-reload-btn" style="background:#C8FA3C;color:#000;border:none;border-radius:6px;padding:10px 24px;font-weight:700;cursor:pointer;font-size:14px;">Reload app</button>
     </div>
     <script>
-      // Installed PWA users can get a stale precached shell after deploy.
-      // Clear service worker caches once, then reload with fresh index.html + bundles.
+      // A tab can retain an old shell after deploy. Clear its worker caches,
+      // then retry boot with the current index.html and bundles.
       (function () {
         var key = "bundle-reload";
+        var reloadCooldownMs = 60000;
 
         function clearCachesAndReload() {
-          // Arm the one-shot guard and LEAVE it armed across the reload. Clearing
-          // it here meant the reloaded page saw no guard, so a still-stale asset
-          // reloaded again, forever - the home screen loading over and over.
-          // Same key and same rule as lazyWithReload.ts: one auto-reload per tab
-          // session. After that the boot fallback shows and the button below is
-          // the only way to retry.
+          // Keep the guard across reload so a still-stale asset cannot loop.
+          // Allow a later deploy to recover in the same tab after the cooldown.
+          var finished = false;
           var finish = function () {
-            try { sessionStorage.setItem(key, "1"); } catch (err) { /* private mode */ }
+            if (finished) return;
+            finished = true;
+            try { sessionStorage.setItem(key, String(Date.now())); } catch (err) { /* private mode */ }
             window.location.reload();
           };
           if ("serviceWorker" in navigator) {
+            // Safari can leave worker cleanup pending; never strand the boot screen.
+            window.setTimeout(finish, 4000);
             navigator.serviceWorker.getRegistrations()
               .then(function (regs) {
                 return Promise.all(regs.map(function (reg) { return reg.unregister(); }));
@@ -78,7 +80,7 @@
 
         function alreadyReloaded() {
           try {
-            return sessionStorage.getItem(key) === "1";
+            return Date.now() - Number(sessionStorage.getItem(key) || 0) < reloadCooldownMs;
           } catch (err) {
             // Private mode with storage blocked: never auto-reload, because the
             // guard cannot be remembered and every attempt would repeat.
@@ -88,7 +90,7 @@
 
         function appAlreadyBooted() {
           var root = document.getElementById("root");
-          return !!(root && root.childElementCount > 0);
+          return !!(root && root.childElementCount > 0 && !root.querySelector(":scope > [data-home-boot]"));
         }
 
         window.addEventListener(
