@@ -1,5 +1,6 @@
 import {forwardRef,useCallback,useEffect,useImperativeHandle,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import './ZaydarBootNotice.css';
+import MapBootLoader from './MapBootLoader';
 
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 export type MapView={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
@@ -8,9 +9,7 @@ export type MapSelectionRect={left:number;top:number;width:number;height:number}
 type CanvasProps={initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};
 const MAP_SRC='/zaydar-map/index.html?v=20260930-maps';
-const BOOT_COPY='Your super gay city is loading.';
 const MAX_3D_ATTEMPTS=3;
-const ALIVE_PHASES=new Set(['map-created','map-loaded','first-frame']);
 
 const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onCluster,onMode,onView},ref){
  const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onCluster,onMode,onView});latest.current={onFailure,onVisible,onSelect,onCluster,onMode,onView};
@@ -21,26 +20,26 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
  const fail=useCallback((reason:string)=>{
   if(failed.current)return;
   const fatal=String(reason).startsWith('3D error:');
-  if(!fatal&&(firstFrame||ready||ALIVE_PHASES.has(phase)))return;
+  if(!fatal&&firstFrame)return;
   failed.current=true;latest.current.onFailure(reason);
- },[firstFrame,phase,ready]);
+ },[firstFrame]);
  useEffect(()=>{
-  if(firstFrame||ready)return;
+  if(firstFrame)return;
   let timer:number|undefined;
   const arm=()=>{
    window.clearTimeout(timer);
    if(document.hidden)return;
-   const delay=phase==='loading'?50000:70000;
+   const delay=phase==='loading'?25000:35000;
    timer=window.setTimeout(()=>fail(`No visible 3D frame after ${phase}.`),delay);
   };
   arm();document.addEventListener('visibilitychange',arm);
   return()=>{window.clearTimeout(timer);document.removeEventListener('visibilitychange',arm);};
- },[phase,firstFrame,ready,fail]);
+ },[phase,firstFrame,fail]);
  useLayoutEffect(()=>{const receive=(event:MessageEvent)=>{
   if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='zaydar-demo')return;
-  if(event.data.type==='phase'&&typeof event.data.phase==='string'){setPhase(event.data.phase);if(event.data.phase==='map-created'||event.data.phase==='map-loaded'||event.data.phase==='first-frame')latest.current.onVisible();}
+  if(event.data.type==='phase'&&typeof event.data.phase==='string')setPhase(event.data.phase);
   if(event.data.type==='first-frame'){failed.current=false;setFirstFrame(true);latest.current.onVisible();}
-  if(event.data.type==='ready'){setReady(true);latest.current.onVisible();}
+  if(event.data.type==='ready')setReady(true);
   if(event.data.type==='view')latest.current.onView(event.data);
   if(event.data.type==='fatal'){
    const detail=typeof event.data.message==='string'?event.data.message.slice(0,300):'Unknown graphics error.';
@@ -74,22 +73,21 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
 
 export default forwardRef<ZaydarHandle,CanvasProps>(function ZaydarCanvas(props,ref){
  const activeControl=useRef<ZaydarHandle>(null),lastView=useRef<MapView|null>(props.initialCamera || null);
- const attempts=useRef(0),seenCity=useRef(false);
- const [generation,setGeneration]=useState(0),[notice,setNotice]=useState(BOOT_COPY),[stopped,setStopped]=useState(false);
+ const attempts=useRef(0),visible=useRef(false);
+ const [generation,setGeneration]=useState(0),[bootError,setBootError]=useState(''),[stopped,setStopped]=useState(false),[shown,setShown]=useState(false);
  const reportView=(view:MapView)=>{lastView.current=view;props.onView(view);};
- const retry=()=>{attempts.current=0;seenCity.current=false;setStopped(false);setNotice(BOOT_COPY);setGeneration(value=>value+1);};
+ const retry=()=>{attempts.current=0;visible.current=false;setStopped(false);setShown(false);setBootError('');setGeneration(value=>value+1);};
  const recover=(reason:string)=>{
   console.warn("Map loading failed:", reason);
   attempts.current+=1;
   if(attempts.current<MAX_3D_ATTEMPTS){
-   setNotice('The map is taking longer than expected. Trying again.');
+   visible.current=false;setShown(false);
    setGeneration(value=>value+1);
-  }else{setStopped(true);setNotice('The map couldn\u2019t load. You can still browse listings in Map controls.');}
+  }else{setStopped(true);setBootError('The map couldn’t load. Try loading it again.');}
  };
  useImperativeHandle(ref,()=>({send:(type,data={})=>activeControl.current?.send(type,data)}),[]);
- const offerReload=stopped||notice.startsWith('Loading')||notice.startsWith('The map');
  return <>
-  <Zaydar3D key={generation} ref={activeControl} {...props} attempt={generation} initialView={lastView.current} onFailure={recover} onVisible={()=>{seenCity.current=true;setNotice('');}} onView={reportView}/>
-  {notice&&<p className="zaydar-demo-notice" role={stopped?'alert':'status'}><span>{notice}</span>{offerReload&&<button onClick={retry}>Reload map</button>}</p>}
+  <Zaydar3D key={generation} ref={activeControl} {...props} attempt={generation} initialView={lastView.current} onFailure={recover} onVisible={()=>{if(visible.current)return;visible.current=true;setShown(true);window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'mapz'}}));}} onView={reportView}/>
+  {!shown&&<MapBootLoader map="mapz" overlay error={stopped?bootError:undefined} onRetry={stopped?retry:undefined}/>}
  </>;
 });

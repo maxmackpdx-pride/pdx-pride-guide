@@ -2,7 +2,7 @@
    in its own ink (Mapz light #94b5cf, OutZide orange). */
 .map-switch {
   position: absolute;
-  z-index: 6;
+  z-index: 10;
   top: 14px;
   left: 50%;
   transform: translateX(-50%);

@@ -802,6 +802,7 @@ export default function ZaydarMapDemo() {
       updateParams(p=>{p.set("layer",world);p.set(`${world}.ids`,ids);});
     }} onView={view=>{
       cameraState.current=view;
+      try { sessionStorage.setItem("mapz.lastCamera", JSON.stringify({lat:view.center[0],lng:view.center[1],zoom:view.zoom})); } catch { /* Browsing still works without storage. */ }
       setMapBounds(view.bounds);setMapCenter(current => current[0] === view.center[0] && current[1] === view.center[1] ? current : view.center);
       window.clearTimeout(cameraWriteTimer.current);
       cameraWriteTimer.current=window.setTimeout(()=>updateParams(p=>{p.set("lat",view.center[0].toFixed(5));p.set("lng",view.center[1].toFixed(5));p.set("zoom",view.zoom.toFixed(2));}),500);

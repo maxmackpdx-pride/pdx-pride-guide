@@ -1,6 +1,5 @@
-import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
-import BrowseStatus from "@/components/BrowseStatus";
 import RoomPlate from "@/components/board/RoomPlate";
+import MapBootLoader from "@/components/MapBootLoader";
 import PageRecovery from "@/components/PageRecovery";
 import { useQuery } from "@tanstack/react-query";
 import { outzShareId, outzSharePath } from "@shared/outzShare";
@@ -30,19 +29,23 @@ export default function Outz() {
   });
   const frame = useRef<HTMLIFrameElement>(null);
   const [mapReady, setMapReady] = useState(false);
-  const [discoveryView, setDiscoveryView] = useState<'map'|'list'|null>(sharedId || window.location.search ? 'map' : null);
+  const [listReady, setListReady] = useState(false);
+  const [restoreView] = useState<'map'|'list'>(() => {
+    try { const query = new URLSearchParams(window.location.search); return !sharedId && !query.get('place') && query.get('restore') === '1' && sessionStorage.getItem('outzide.lastView') === 'list' ? 'list' : 'map'; }
+    catch { return 'map'; }
+  });
   useEffect(() => {
-    if (!discoveryView) return;
+    if (!listReady || restoreView !== 'list') return;
     const timer = window.setTimeout(() => {
-      frame.current?.contentDocument?.querySelector<HTMLButtonElement>(`button[data-view="${discoveryView}"]`)?.click();
+      frame.current?.contentDocument?.querySelector<HTMLButtonElement>('button[data-view="list"]')?.click();
       window.dispatchEvent(new Event('resize'));
       frame.current?.contentWindow?.dispatchEvent(new Event('resize'));
     }, 80);
     return () => window.clearTimeout(timer);
-  }, [discoveryView, mapReady]);
+  }, [listReady, restoreView]);
   const [attempt, setAttempt] = useState(0);
   const [mapSlow, setMapSlow] = useState(false);
-  const retryMap = () => { setMapReady(false); setMapSlow(false); setAttempt(value => value + 1); };
+  const retryMap = () => { setMapReady(false); setListReady(false); setMapSlow(false); setAttempt(value => value + 1); };
   useEffect(() => {
     if (mapReady) return;
     const timer = window.setTimeout(() => setMapSlow(true), 15000);
@@ -56,7 +59,8 @@ export default function Outz() {
     const receive=(event:MessageEvent)=>{
       if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='outzide-map')return;
       if(event.data.type==='ready')publish();
-      if(event.data.type==='browse-ready')setMapReady(true);
+      if(event.data.type==='list-ready')setListReady(true);
+      if(event.data.type==='browse-ready'){setMapReady(true);window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'outz'}}));}
       if(event.data.type==='browse-error')setMapSlow(true);
       if(event.data.type==='require-auth'){setRequested(true);publish();if(!loading&&!user)setShowAuth(true);}
     };
@@ -117,16 +121,9 @@ export default function Outz() {
     return () => { iframe.removeEventListener("load", attach); window.removeEventListener("zaylist:mobile-dock", syncDock); detachScroll(); };
   }, [attempt, sharedId]);
   if(sharedId && !sharePending && (shareError || !sharedPlace))return <PageRecovery section="OutZide" title={shareError ? "This destination couldn’t load" : "Destination not found"} description="Browse Outzide to find a destination, or try this link again." href="/outzide" label="Browse Outzide" missing={!shareError} retry={shareError ? () => {void retryShare();} : undefined}/>;
-  return <><div style={{ position: "relative" }}>
+  return <><div className="outz-map-page" style={{ position: "relative" }}>
     <MapSwitch current="outz" /><RoomPlate room="outz" compact />
-    <DiscoveryFlow room="OutZide" accent="var(--room-outz)" keepMounted initiallyOpen={Boolean(sharedId || window.location.search)} intro="Find your next outdoor destination, then narrow by region and type." choices={[
-      {id:'list',label:'Find a destination',onChoose:()=>setDiscoveryView('list')},
-      {id:'map',label:'Explore the map',onChoose:()=>setDiscoveryView('map')},
-    ]}>
-    <div style={{position:'relative'}}>
-    {!mapReady && <div style={{ position: "absolute", inset: "12px 12px auto", zIndex: 2, background: "var(--ink-900, #08090b)", borderRadius: 16 }}><BrowseStatus
-      title={mapSlow ? "Outzide is taking longer than expected" : "Get out. Get dirty."}
-      description={mapSlow ? "Try loading the field guide again." : "Getting destinations and the map ready."}
-      onAction={retryMap} actionLabel="Reload Outzide" /></div>}
-    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=20260930-maps&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (new URLSearchParams(window.location.search).get("mapOnly") === "1" ? "&mapOnly=1" : "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "") + (new URLSearchParams(window.location.search).get("wall") === "1" ? "&wall=1" : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} /></div></DiscoveryFlow></div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
+    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=20260930-maps&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (new URLSearchParams(window.location.search).get("mapOnly") === "1" ? "&mapOnly=1" : "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "") + (new URLSearchParams(window.location.search).get("wall") === "1" ? "&wall=1" : "") + (new URLSearchParams(window.location.search).get("restore") === "1" && !sharedId ? "&restore=1" : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} />
+    {!mapReady && !(listReady && restoreView === 'list') && <MapBootLoader map="outz" overlay error={mapSlow ? "Outzide is taking longer than expected." : undefined} onRetry={mapSlow ? retryMap : undefined} onBrowse={mapSlow && listReady ? () => {frame.current?.contentDocument?.querySelector<HTMLButtonElement>('button[data-view="list"]')?.click();setMapReady(true);} : undefined}/>}
+  </div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
 }

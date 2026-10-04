@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 
-const [host,fallback,page,html,renderer,home,routes,app]=await Promise.all([
+const [host,fallback,page,html,renderer,home,routes,app,bootLoader]=await Promise.all([
  readFile(new URL('../client/src/components/ZaydarCanvas.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/src/components/ZaydarFallback.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/src/pages/ZaydarMapDemo.tsx',import.meta.url),'utf8'),
@@ -11,6 +11,7 @@ const [host,fallback,page,html,renderer,home,routes,app]=await Promise.all([
  readFile(new URL('../client/public/home-flight/river-flight.js',import.meta.url),'utf8'),
  readFile(new URL('../server/routes.ts',import.meta.url),'utf8'),
  readFile(new URL('../client/src/App.tsx',import.meta.url),'utf8'),
+ readFile(new URL('../client/src/components/MapBootLoader.tsx',import.meta.url),'utf8'),
 ]);
 
 test('Mapz and the home flyover share the same natural surface renderer',()=>{
@@ -26,8 +27,8 @@ test('Mapz and the home flyover share the same natural surface renderer',()=>{
 test('3D recovery waits for a rendered city frame and preserves the actual error',()=>{
  assert.match(host,/event\.data\.type==='first-frame'/);
  assert.match(host,/MAX_3D_ATTEMPTS=3/);
- assert.match(host,/phase==='loading'\?25000:60000/);
- assert.match(host,/Trying again/);
+ assert.match(host,/phase==='loading'\?25000:35000/);
+ assert.doesNotMatch(host,/map-created'\|\|event\.data\.phase==='map-loaded'.*onVisible/);
  assert.match(host,/event\.data\.message/);
  assert.doesNotMatch(host,/type==='booted'/);
  assert.match(renderer,/tell\('first-frame'\)/);
@@ -48,7 +49,8 @@ test('2D is retained but disconnected from both the map host and toggle',()=>{
  assert.doesNotMatch(page,/ZaydarFallback|setRenderer|Switch to.*2D/);
  assert.match(host,/<Zaydar3D key=\{generation\}/);
  assert.match(fallback,/preferCanvas/);
- assert.match(host,/>Reload map<\/button>/);
+ assert.match(host,/<MapBootLoader map="mapz" overlay/);
+ assert.match(bootLoader,/>Reload map<\/button>/);
 });
 
 test('Mapz browsing is public while posting and private views require authentication',()=>{

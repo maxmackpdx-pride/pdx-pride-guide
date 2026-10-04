@@ -1,0 +1,32 @@
+.map-boot-loader {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  width: 100%;
+  min-height: calc(100dvh - var(--site-header-height, 120px));
+  padding: 32px 24px calc(32px + var(--site-mobile-nav-height, 0px));
+  background: var(--z-black);
+  color: var(--text-heading);
+  text-align: center;
+}
+.map-boot-loader--overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  min-height: 0;
+}
+.map-boot-loader .spectrum-loader__ring { width: 64px; height: 64px; }
+.map-boot-loader__message {
+  margin: 0;
+  font: 700 clamp(18px, 4.5vw, 24px)/1.3 var(--font-display, sans-serif);
+  letter-spacing: .02em;
+  text-wrap: balance;
+}
+.map-boot-loader__error { max-width: 32ch; margin: 0; font: 600 18px/1.45 var(--font-body, sans-serif); }
+.map-boot-loader__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.map-boot-loader__actions button { min-height: 44px; padding: 10px 16px; border: 1px solid currentColor; border-radius: 12px; background: transparent; color: inherit; cursor: pointer; }
+.map-boot-loader__actions button:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 3px; }
+@media (min-width: 768px) { .map-boot-loader { padding-bottom: 32px; } }
