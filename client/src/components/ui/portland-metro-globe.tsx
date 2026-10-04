@@ -164,11 +164,22 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     const venues: { id: string; product: boolean; point: Point; image: HTMLCanvasElement; waypointImage: HTMLImageElement; color: string; phase: number; logoKey:string }[] = [];
     type AtlasEntry = {id:string; coordinates:[number,number];color:string;phase:number;product:boolean;logoKey?:string;x:number;y:number;w:number;h:number};
     const atlas=new Image();atlas.decoding="async";
-    atlas.src='/home-globe/holograms.webp';
-    // Coordinates and labels ship with the app; no map service or data fetch.
-    void atlas.decode().then(()=>{
+    let atlasReady=false, fallbackWaypointsAdded=false, atlasAttempts=0, atlasRetry=0;
+    const addFallbackWaypoints=()=>{
+      if(disposed||fallbackWaypointsAdded)return;
+      fallbackWaypointsAdded=true;
+      OUTZIDE_WAYPOINTS.forEach((waypoint,index)=>{
+        const image=document.createElement("canvas");image.width=image.height=256;
+        if(waypoint.point)venues.push({id:waypoint.id,product:false,point:waypoint.point,image,
+          waypointImage:new Image(),color:waypoint.color||"#00ffff",phase:230+index*2.39996,logoKey:waypoint.id});
+      });
+      draw();
+    };
+    const populateAtlas=()=>{
+      if(disposed||atlasReady||!atlas.naturalWidth)return;
+      atlasReady=true;
+      window.clearTimeout(atlasRetry);
       const rows=hologramData as AtlasEntry[];
-      if(disposed)return;
       for(const row of rows){
         const image=document.createElement("canvas");image.width=row.w;image.height=row.h;
         image.getContext("2d")?.drawImage(atlas,row.x,row.y,row.w,row.h,0,0,row.w,row.h);
@@ -177,13 +188,20 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const waypointImage=new Image();
         if(point)venues.push({id:row.id,product:row.product,point,image,waypointImage,color:row.color,phase:row.phase,logoKey:(row.logoKey||row.id).toLowerCase()});
       }
-      OUTZIDE_WAYPOINTS.forEach((waypoint,index)=>{
-        const image=document.createElement("canvas");image.width=image.height=256;
-        if(waypoint.point)venues.push({id:waypoint.id,product:false,point:waypoint.point,image,
-          waypointImage:new Image(),color:waypoint.color||"#00ffff",phase:230+index*2.39996,logoKey:waypoint.id});
-      });
+      addFallbackWaypoints();
       draw();
-    }).catch(()=>{ /* The globe remains visible if the optional artwork fails. */ });
+    };
+    const loadAtlas=()=>{ atlas.src=`/home-globe/holograms.webp${atlasAttempts?`?retry=${atlasAttempts}`:""}`; };
+    atlas.onload=populateAtlas;
+    atlas.onerror=()=>{
+      if(disposed||atlasAttempts>=2)return;
+      atlasAttempts+=1;
+      atlasRetry=window.setTimeout(loadAtlas,atlasAttempts*800);
+    };
+    // Safari can leave Image.decode() pending after a cached-page reload.
+    // The load event and a small waypoint fallback keep the globe populated.
+    loadAtlas();
+    const fallbackTimer=window.setTimeout(addFallbackWaypoints,2500);
     const texture = new Image();
     const draw = () => {
       if (!width || !height) return;
@@ -563,7 +581,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     };
     if (active) frame = requestAnimationFrame(animate);
     redrawRef.current = () => { if(still || !active)draw(); };
-    return () => { disposed = true; cancelAnimationFrame(frame); observer.disconnect(); redrawRef.current = () => {}; syncAnimation.current=()=>{}; };
+    return () => { disposed = true; window.clearTimeout(atlasRetry); window.clearTimeout(fallbackTimer); cancelAnimationFrame(frame); observer.disconnect(); redrawRef.current = () => {}; syncAnimation.current=()=>{}; };
   }, []);
   useEffect(()=>{mode.current={active,still};syncAnimation.current();},[active,still]);
 
