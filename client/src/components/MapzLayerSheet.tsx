@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
 import { Link } from "wouter";
-import { ChevronRight, SlidersHorizontal, X } from "lucide-react";
+import { ChevronRight, SlidersHorizontal } from "lucide-react";
 import SmoothDrawer from "./ui/smooth-drawer";
 import { NavGlassLayers, navGlassPointer } from "./ui/nav-glass";
 
@@ -23,8 +23,6 @@ const LAYER_LOGOS: Record<MapzLayerId, string> = {
 
 export default function MapzLayerSheet({ layers, active, onActiveChange: setActive }: { layers: MapzLayer[]; active: MapzLayerId | null; onActiveChange: (id: MapzLayerId | null) => void }) {
   const lastActive = useRef<MapzLayerId>("events");
-  const launcher = useRef<HTMLButtonElement>(null);
-  const closeButton = useRef<HTMLButtonElement>(null);
   const panels = useRef(new Map<MapzLayerId, HTMLDivElement>());
   const positions = useRef(new Map<MapzLayerId, number>());
   const visited = useRef(new Set<MapzLayerId>());
@@ -39,11 +37,6 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
     const panel = panels.current.get(active);
     if (panel) panel.scrollTop = positions.current.get(active) || 0;
   }, [active]);
-  useEffect(() => { if (open) closeButton.current?.focus({ preventScroll: true }); }, [open]);
-  const closePanel = () => {
-    setActive(null);
-    launcher.current?.focus({ preventScroll: true });
-  };
   useEffect(() => {
     const root = document.documentElement;
     root.dataset.zaylistDrawer = open ? "open" : "compact";
@@ -60,19 +53,13 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
   }, [setActive]);
 
   return <>
-    <button ref={launcher} type="button" className="mapz-map-controls-launcher z-glass"
-      aria-expanded={open} aria-controls={panelId} onClick={() => open ? closePanel() : setActive(lastActive.current)}>
-      <SlidersHorizontal size={18} aria-hidden="true" /><span>Map controls</span><ChevronRight size={16} aria-hidden="true" />
-    </button>
     <SmoothDrawer id={panelId} hidden={!open} className="mapz-layer-sheet z-glass is-open"
       data-seam="top" data-no-pull-to-refresh onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}
       aria-label="Map controls and sections"
-      style={{ "--active-layer-color": activeLayer?.color || "var(--neon-cyan)" } as CSSProperties}
-      onKeyDown={event => { if (event.key === "Escape" && open) { event.stopPropagation(); closePanel(); } }}>
+      style={{ "--active-layer-color": activeLayer?.color || "var(--neon-cyan)" } as CSSProperties}>
       <NavGlassLayers />
       <div className="mapz-layer-sheet__title">
         <span><SlidersHorizontal size={18} aria-hidden="true" />Map controls</span>
-        <button ref={closeButton} type="button" aria-label="Close map controls" onClick={closePanel}><X size={20} aria-hidden="true" /></button>
       </div>
       <div className="mapz-layer-sheet__workspace">
         <div className="mapz-layer-sheet__sections" role="group" aria-label="Map sections">
