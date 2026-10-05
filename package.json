@@ -24,7 +24,8 @@
     "design:publication": "tsx script/design-product-publication.ts",
     "design:railway-gate": "tsx script/verify-railway-design-build.ts",
     "db:push": "node script/prepare-local-db.mjs && DATABASE_PATH=.local/data.db drizzle-kit push",
-    "git:worktree-prune": "bash script/prune-stale-worktrees.sh"
+    "git:worktree-prune": "bash script/prune-stale-worktrees.sh",
+    "git:closeout": "bash script/check-git-closeout.sh"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.3.0",

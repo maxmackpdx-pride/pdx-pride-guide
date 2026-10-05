@@ -113,6 +113,19 @@ Verification must be proportional to the change:
 
 ## Required task closeout
 
+The canonical `master` checkout is the integration and release lane, not a shared
+implementation workspace. Start code, UI, map, and asset work in a dedicated Git
+worktree/branch. Use the canonical checkout only to inspect, fast-forward, integrate a
+verified commit, and ship. A task may edit the canonical checkout directly only when
+Tucker explicitly asks to fix that checkout or when completing already-present work;
+in either case, that task owns immediate closeout before doing anything else.
+
+Before starting new work, run `npm run git:closeout`. If it reports existing changes,
+do not add more work to the pile: identify and close out the existing owner/task first.
+Run the same command again before the final response. A successful check is the evidence
+that the checkout is clean, on `master`, aligned with `origin/master`, and not using the
+tracked root database as runtime state.
+
 Before ending any task that touched this repository, leave every file in one explicit
 state:
 
