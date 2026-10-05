@@ -79,29 +79,17 @@ const LABELS = [
   "Mental health & peer support",
   "Harm reduction",
 ];
-const CATEGORY_COPY: Record<string, string> = {
-  health: "Find care that understands you, from everyday visits to HIV services.",
-  safety: "Find food, housing support, and help when safety feels uncertain.",
-  legal: "Get help understanding your rights and finding someone in your corner.",
-  youth: "Find affirming support, mentors, and spaces for young people.",
-  community: "Meet people, find your people, and build local connections.",
-  family: "Find support for chosen family, elders, and cultural connection.",
-  money: "Explore work, financial help, and ways to grow your business.",
-  arts: "Find creative spaces, funding, and people to make with.",
-  "mental-health": "Connect with counseling, peer support, and someone who gets it.",
-  "harm-reduction": "Find practical tools and judgment-free support for safer choices.",
-};
-const CATEGORY_HEADLINES: Record<string, string> = {
-  health: "Care that gets you.",
-  safety: "Support for right now.",
-  legal: "Know your rights.",
-  youth: "Room to grow.",
-  community: "Find your people.",
-  family: "Care across generations.",
-  money: "Make your next move.",
-  arts: "Make space for art.",
-  "mental-health": "You can talk about it.",
-  "harm-reduction": "Support without judgment.",
+const CATEGORY_COPY: Record<string, { headline: string; description: string }> = {
+  health: { headline: "Care that gets you.", description: "Find affirming care, testing, and everyday health support." },
+  safety: { headline: "Support for right now.", description: "Find food, housing help, and a safer next step." },
+  legal: { headline: "Know your rights.", description: "Connect with advocacy and legal guidance." },
+  youth: { headline: "Room to grow.", description: "Find mentors, support, and welcoming spaces for young people." },
+  community: { headline: "Find your people.", description: "Meet neighbors and build local connections." },
+  family: { headline: "Care across generations.", description: "Support for chosen family, elders, and cultural connection." },
+  money: { headline: "Make your next move.", description: "Explore jobs, financial help, and business support." },
+  arts: { headline: "Make space for art.", description: "Find creative spaces, funding, and collaborators." },
+  "mental-health": { headline: "You can talk about it.", description: "Connect with counseling and peer support." },
+  "harm-reduction": { headline: "Support without judgment.", description: "Find practical tools and safer-use support." },
 };
 const ROWS = RESOURCE_CATEGORIES.flatMap((category) =>
   (category.id === "safety"
@@ -480,8 +468,7 @@ export default function Resources() {
   const [directoryRevealed, setDirectoryRevealed] = useState(false);
   const [mode, setMode] = useState<"directory" | "talk">("directory");
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
-  const [activeCategoryId, setActiveCategoryId] = useState(RESOURCE_CATEGORIES[0].id);
-  const categoryStackRef = useRef<HTMLDivElement>(null);
+  const [showAllCards, setShowAllCards] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [safetyAnswer, setSafetyAnswer] = useState<"yes" | "no" | null>(null);
   const supportTrigger = useRef<HTMLElement | null>(null);
@@ -505,6 +492,7 @@ export default function Resources() {
     setDirectoryRevealed(true);
     setCategoryIds([row.category.id]);
     setMode("directory");
+    setShowAllCards(true);
     setSearchTarget(row.org.name);
   }, [location]);
 
@@ -514,7 +502,6 @@ export default function Resources() {
   const detailTrigger = useRef<HTMLElement | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const selectedCategories = RESOURCE_CATEGORIES.filter((c) => categoryIds.includes(c.id));
-  const activeCategory = RESOURCE_CATEGORIES.find((c) => c.id === activeCategoryId) ?? RESOURCE_CATEGORIES[0];
   const category = selectedCategories.length === 1 ? selectedCategories[0] : undefined;
   const rows = useMemo(
     () =>
@@ -527,27 +514,6 @@ export default function Resources() {
     media.addEventListener("change", change);
     return () => media.removeEventListener("change", change);
   }, []);
-  useEffect(() => {
-    if (!intentChosen || mode !== "directory") return;
-    const updateActiveCategory = () => {
-      const cards = categoryStackRef.current?.querySelectorAll<HTMLElement>("[data-category-stack-card]");
-      if (!cards) return;
-      let active = RESOURCE_CATEGORIES[0].id;
-      cards.forEach((card) => {
-        if (card.getBoundingClientRect().top <= window.innerHeight * 0.55) {
-          active = card.dataset.categoryStackCard || active;
-        }
-      });
-      setActiveCategoryId((current) => current === active ? current : active);
-    };
-    window.addEventListener("scroll", updateActiveCategory, { passive: true });
-    window.addEventListener("resize", updateActiveCategory);
-    updateActiveCategory();
-    return () => {
-      window.removeEventListener("scroll", updateActiveCategory);
-      window.removeEventListener("resize", updateActiveCategory);
-    };
-  }, [intentChosen, mode]);
   const showResults = intentChosen && (mode === "directory" ? directoryRevealed : safetyAnswer === "yes");
   function choose(id: string | null) {
     setDirectoryRevealed(true);
@@ -627,7 +593,7 @@ export default function Resources() {
                 </button>
               </div>
               </LayoutGroup>
-              <button type="button" className="discovery-skip" onClick={() => { setIntentChosen(true); setMode("directory"); setCategoryIds(RESOURCE_CATEGORIES.map(c => c.id)); setDirectoryRevealed(true); }}>Skip to view all</button>
+              <button type="button" className="discovery-skip" onClick={() => { setIntentChosen(true); setMode("directory"); setCategoryIds(RESOURCE_CATEGORIES.map(c => c.id)); setDirectoryRevealed(true); setShowAllCards(false); }}>Skip to view all</button>
               <AnimatePresence initial={false}>
               {mode === "talk" && (
                 <motion.div key="safety-check" initial={quietMotion ? false : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: quietMotion ? 0 : 0.24, ease: "easeInOut" }} id="resource-safety-check" className="rg-safety-check" role="group" aria-labelledby="resource-safety-question">
@@ -651,35 +617,34 @@ export default function Resources() {
           </div>
           <AnimatePresence initial={false}>
           {intentChosen && mode === "directory" && <motion.div key="categories" initial={quietMotion ? false : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: quietMotion ? 0 : 0.24, ease: "easeInOut" }} className="rg-step rg-step--categories">
-            <div className="rg-category-layout">
-              <div className="rg-category-story">
-                <span className="rg-eyebrow rg-muted"><span className="rg-step-number" aria-hidden="true">02</span>Explore categories</span>
-                <h2>{CATEGORY_HEADLINES[activeCategory.id]}</h2>
-                <p>{CATEGORY_COPY[activeCategory.id]}</p>
-                <p className="rg-multiselect-hint">Choose one or more categories.</p>
-              </div>
-              <div className="rg-category-selection">
-                <ContainerScroll ref={categoryStackRef} className="rg-category-stack-track" role="group" aria-label="Resource categories">
-                  {RESOURCE_CATEGORIES.map((c, i) => {
-                    const Icon = ICONS[i];
-                    return <CardSticky key={c.id} index={i} incrementY={12} incrementZ={1} className="rg-category-stack-card" data-category-stack-card={c.id} style={{ top: `calc(var(--rg-category-card-top, var(--site-header-height, 72px) + 20px) + ${i * 12}px)` }}>
-                      <ResourceFilterButton
-                        quietMotion={Boolean(quietMotion)}
-                        data-category-id={c.id}
-                        className="pdx-glass-rebind rg-category-stack-button"
-                        aria-pressed={categoryIds.includes(c.id)}
-                        style={{ "--res-accent": c.color } as CSSProperties}
-                        onClick={() => { setActiveCategoryId(c.id); choose(c.id); }}
-                        onFocus={() => setActiveCategoryId(c.id)}
-                        onMouseEnter={() => setActiveCategoryId(c.id)}
-                      >
-                        <span className="rg-category-stack-top"><span className="rg-category-stack-title"><Icon size={22} aria-hidden="true" />{LABELS[i]}</span><span className="rg-category-stack-number" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span></span>
-                        <span className="rg-category-stack-status">{categoryIds.includes(c.id) ? <><Check size={16} aria-hidden="true" /> Selected</> : "Choose category"}</span>
-                      </ResourceFilterButton>
-                    </CardSticky>;
-                  })}
-                </ContainerScroll>
-              <div className="rg-options"><div className="pdx-glass-rebind rg-all rg-selection-control" role="group" aria-label="Select resource categories">
+            <div>
+              <span className="rg-eyebrow rg-muted"><span className="rg-step-number" aria-hidden="true">02</span>Explore categories</span>
+              <h2>I'm looking for…</h2>
+              <p className="rg-multiselect-hint">Choose one or more categories.</p>
+              <div
+                className="rg-options"
+                role="group"
+                aria-label="Resource categories"
+              >
+                {RESOURCE_CATEGORIES.map((c, i) => {
+                  const Icon = ICONS[i];
+                  return (
+                    <ResourceFilterButton
+                      quietMotion={Boolean(quietMotion)}
+                      key={c.id}
+                      data-category-id={c.id}
+                      className="pdx-glass-rebind"
+                      aria-pressed={categoryIds.includes(c.id)}
+                      style={{ "--res-accent": c.color } as CSSProperties}
+                      onClick={() => choose(c.id)}
+                    >
+                      <Icon size={18} />
+                      <span>{LABELS[i]}</span>
+                      <i aria-hidden="true">{categoryIds.includes(c.id) && <Check size={14} />}</i>
+                    </ResourceFilterButton>
+                  );
+                })}
+              <div className="pdx-glass-rebind rg-all rg-selection-control" role="group" aria-label="Select resource categories">
                 <label>
                   <input type="checkbox" checked={categoryIds.length === RESOURCE_CATEGORIES.length} onChange={() => { setDirectoryRevealed(true); setCategoryIds(RESOURCE_CATEGORIES.map((c) => c.id)); }} />
                   <span>SELECT ALL</span>
@@ -688,7 +653,6 @@ export default function Resources() {
                   <input type="checkbox" checked={categoryIds.length === 0} onChange={() => { setDirectoryRevealed(true); setCategoryIds([]); }} />
                   <span>DESELECT ALL</span>
                 </label>
-              </div>
               </div>
               </div>
             </div>
@@ -738,7 +702,16 @@ export default function Resources() {
             <TalkOptions />
           ) : (
             <>
-              <div className="rg-resource-stacks" data-view-all="true">
+              {rows.length > 0 && <div className="rg-stack-controls">
+                <span>{showAllCards ? "Browse every card" : "Scroll through the card stacks"}</span>
+                <button type="button" className="pdx-glass-rebind pdxBtn" aria-pressed={showAllCards} onClick={() => {
+                  setShowAllCards(value => !value);
+                  requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "instant", block: "start" }));
+                }}>
+                  {showAllCards ? "Show stacks" : "Skip stacks · view all"}
+                </button>
+              </div>}
+              <div className="rg-resource-stacks" data-view-all={showAllCards}>
                 {rows.length === 0 && <p className="rg-empty">Choose a category above, or select all to see every resource.</p>}
                 {selectedCategories.map((type) => {
                   const group = rows.filter(row => categoriesFor(row).some(c => c.id === type.id));
@@ -746,20 +719,24 @@ export default function Resources() {
                   const sectionId = `resource-stack-${type.id}`;
                   return <section key={type.id} className="rg-resource-stack-section" aria-labelledby={`${sectionId}-title`}>
                     <header className="rg-rail-heading">
-                      <span className="rg-eyebrow">Explore ReZources</span>
-                      <h2 id={`${sectionId}-title`}>{type.name}</h2>
-                      <p>{group.length} resource{group.length === 1 ? "" : "s"}</p>
+                      <span className="rg-eyebrow">{type.name}</span>
+                      <h2 id={`${sectionId}-title`}>{CATEGORY_COPY[type.id].headline}</h2>
+                      <p className="rg-rail-copy">{CATEGORY_COPY[type.id].description}</p>
+                      <p className="rg-rail-count">{group.length} resource{group.length === 1 ? "" : "s"}</p>
                     </header>
-                    <div id={sectionId} className="rg-stack-track">
-                      {group.map((row) => <div
+                    <ContainerScroll id={sectionId} className="rg-stack-track">
+                      {group.map((row, index) => <CardSticky
                         key={row.org.name}
+                        index={index}
+                        incrementY={12}
                         className="rg-card-reveal rg-stack-card"
                         tabIndex={-1}
                         data-resource-search-card={row.org.name}
+                        style={{ top: `calc(var(--rg-stack-top) + ${Math.min(index, 4) * 12}px)` }}
                       >
                         <ResourceCard row={{ ...row, sectionCategory: type }} onOpen={openDetail} />
-                      </div>)}
-                    </div>
+                      </CardSticky>)}
+                    </ContainerScroll>
                   </section>;
                 })}
               </div>
