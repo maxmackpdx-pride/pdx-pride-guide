@@ -3403,10 +3403,9 @@ html.calm-mode .rg-options button,
 /* Keep source edges crisp; only the shadow behind the mark is softly diffused. */
 :is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo {
  filter: brightness(0) invert(1) drop-shadow(0 2px 4px color-mix(in srgb, var(--z-black) 70%, transparent));
- backface-visibility: hidden;
 }
 :is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] .pdxPlace__media .pdxPlace__logo[src$="/business-oregon-official.png"] {
- filter: invert(1) drop-shadow(0 2px 4px color-mix(in srgb, var(--z-black) 70%, transparent));
+ filter: brightness(0) invert(1) drop-shadow(0 2px 4px color-mix(in srgb, var(--z-black) 70%, transparent));
 }
 :is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover > .pdxPlace__body { filter: none !important; }
 .resources-page .rg-options button {
@@ -4106,22 +4105,38 @@ html.calm-mode .rg-options button,
     min-height: 0;
   }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__body {
-    gap: 12px;
+    gap: 10px;
     padding-bottom: 16px;
   }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card :is(.pdxPlace__main, .rg-directory-footer) {
     margin-inline: 17px;
   }
-  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__name { font-size: 25px; }
-  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__desc { font-size: 14px; }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__name { font-size: 22px; }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__cat .pdxBadge {
+    font-size: 14px;
+    min-height: 32px;
+    line-height: 1.25;
+    padding: 6px 9px !important;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__desc { font-size: 13px; line-height: 1.5; }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .rg-directory-footer .pdxBtn {
+    height: 48px;
+    min-height: 48px;
+    font-size: 15.5px;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__share { font-size: 14px; }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__media {
-    height: 107px;
-    flex-basis: 107px;
-    padding-block: 18px;
+    height: 150px;
+    min-height: 150px;
+    flex-basis: 150px;
+    padding-block: 16px;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .rg-directory-card[data-optical-logo] {
+    --rg-optical-center: 75px;
   }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__logo {
     height: auto;
-    max-height: 86px;
+    max-height: 112px;
   }
   .resources-page .rg-rail-heading .rg-rail-swipe-hint {
     display: block;
