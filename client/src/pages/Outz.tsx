@@ -60,11 +60,11 @@ export default function Outz() {
       if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='outzide-map')return;
       if(event.data.type==='ready')publish();
       if(event.data.type==='list-ready')setListReady(true);
-      if(event.data.type==='browse-ready'){setMapReady(true);window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'outz'}}));}
+      if(event.data.type==='list-ready'||event.data.type==='browse-ready'){setMapReady(true);window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'outz'}}));}
       if(event.data.type==='browse-error')setMapSlow(true);
       if(event.data.type==='require-auth'){setRequested(true);publish();if(!loading&&!user)setShowAuth(true);}
     };
-    window.addEventListener('message',receive);publish();
+    window.addEventListener('message',receive);publish();frame.current?.contentWindow?.postMessage({source:'outzide-host',type:'hello'},window.location.origin);
     if(requested&&!loading&&!user)setShowAuth(true);
     if(user){setShowAuth(false);setRequested(false);}
     return()=>window.removeEventListener('message',receive);
@@ -123,7 +123,7 @@ export default function Outz() {
   if(sharedId && !sharePending && (shareError || !sharedPlace))return <PageRecovery section="OutZide" title={shareError ? "This destination couldn’t load" : "Destination not found"} description="Browse Outzide to find a destination, or try this link again." href="/outzide" label="Browse Outzide" missing={!shareError} retry={shareError ? () => {void retryShare();} : undefined}/>;
   return <><div className="outz-map-page" style={{ position: "relative" }}>
     <MapSwitch current="outz" /><RoomPlate room="outz" compact />
-    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=20261005-first-frame&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (new URLSearchParams(window.location.search).get("mapOnly") === "1" ? "&mapOnly=1" : "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "") + (new URLSearchParams(window.location.search).get("wall") === "1" ? "&wall=1" : "") + (new URLSearchParams(window.location.search).get("restore") === "1" && !sharedId ? "&restore=1" : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} />
+    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=20261005-outz-ready&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (new URLSearchParams(window.location.search).get("mapOnly") === "1" ? "&mapOnly=1" : "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "") + (new URLSearchParams(window.location.search).get("wall") === "1" ? "&wall=1" : "") + (new URLSearchParams(window.location.search).get("restore") === "1" && !sharedId ? "&restore=1" : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} />
     {!mapReady && !(listReady && restoreView === 'list') && <MapBootLoader map="outz" overlay error={mapSlow ? "Outzide is taking longer than expected." : undefined} onRetry={mapSlow ? retryMap : undefined} onBrowse={mapSlow && listReady ? () => {frame.current?.contentDocument?.querySelector<HTMLButtonElement>('button[data-view="list"]')?.click();setMapReady(true);} : undefined}/>}
   </div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
 }
