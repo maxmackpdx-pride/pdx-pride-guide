@@ -53,7 +53,7 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
   }, [setActive]);
 
   return <>
-    <SmoothDrawer id={panelId} hidden={!open} className="mapz-layer-sheet z-glass is-open"
+    <SmoothDrawer id={panelId} hidden={!open} className="mapz-layer-sheet z-glass pdx-glass-rebind is-open"
       data-seam="top" data-no-pull-to-refresh onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}
       aria-label="Map controls and sections"
       style={{ "--active-layer-color": activeLayer?.color || "var(--neon-cyan)" } as CSSProperties}>

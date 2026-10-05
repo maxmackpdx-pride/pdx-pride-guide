@@ -50,7 +50,10 @@ html body :is(.map-switch a,.mapz-demo-navigation button):focus-visible { outlin
 }
 
 html body .z-community-detail { --page-accent:var(--room-zlists); }
-html body .z-community-detail :is(.z-community-panel,.z-community-detail__hero,.z-community-feed__compose,.z-community-posts > article) { --c:var(--room-zlists); --dir-gm:8; border-radius:12px; background:var(--glass-card-bg); }
+html body .z-community-detail .z-community-panel.pdx-glass-rebind,
+html body .z-community-detail .z-community-detail__hero.pdx-glass-rebind,
+html body .z-community-detail .z-community-feed__compose.pdx-glass-rebind,
+html body .z-community-detail .z-community-posts > article.pdx-glass-rebind { --c:var(--room-zlists); --dir-gm:8; border-radius:12px; background:var(--glass-card-bg); }
 html body .z-community-detail__tools button { min-width:44px; min-height:44px; border-radius:18px; }
 html body .z-community-detail .z-community-post__title { font-family:var(--font-display); font-size:26px; line-height:1.2; }
 html body .z-community-detail .z-community-post__body { font:17px/1.7 var(--font-body); }

@@ -107,7 +107,7 @@
 }
 
 /* Shared reading order: identity, summary, metadata, then the destination. */
-.z-communities .z-community-card { --c:var(--room-zlists); display:flex; flex-direction:column; }
+.z-communities .z-community-card.pdx-glass-rebind { --c:var(--room-zlists); display:flex; flex-direction:column; }
 .z-communities .z-community-card__link { display:flex; flex-direction:column; flex:1; }
 .z-communities .z-community-card__body { display:flex; flex-direction:column; flex:1; }
 .z-community-card__open { display:flex; align-items:center; justify-content:space-between; min-height:44px; margin-top:24px; padding:10px 16px; border:1px solid var(--room-zlists); border-radius:18px; font:700 16px/1.4 var(--font-display); text-transform:uppercase; background:var(--glass-card-bg); }

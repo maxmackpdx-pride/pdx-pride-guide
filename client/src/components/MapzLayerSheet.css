@@ -142,8 +142,8 @@
 .mapz-layer-sheet .mapz-layer-visibility { min-height:48px; margin-bottom:24px; font-size:14px; line-height:1.4; color:var(--text-body); }
 
 /* Mapz drawer uses the approved family marks and the shared black/neon palette. */
-.mapz-map-demo .mapz-layer-sheet,
-.mapz-map-demo .mapz-layer-sheet.is-open {
+.mapz-map-demo .mapz-layer-sheet.pdx-glass-rebind,
+.mapz-map-demo .mapz-layer-sheet.pdx-glass-rebind.is-open {
   --c: var(--active-layer-color);
   border-color: color-mix(in srgb, var(--active-layer-color) 65%, var(--z-black));
   background: var(--glass-card-bg);
