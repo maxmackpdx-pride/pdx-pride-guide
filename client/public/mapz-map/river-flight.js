@@ -565,9 +565,11 @@ function drawLights(fade,target=map,surface=lights){
   const driftY=reduced.matches||cameraMoving?0:15*Math.sin(pulseTime*.12+phase*1.6)-22*item.attention;
   item.scaleGoal=emergenceFor(item.feature)*presentationScale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
-  const anchor=venueGeometry(item);item.maxY=anchor.y-anchor.size/2-EVENT_WAYPOINT_GAP-item.boundsGoal.halfHeight;
+  const sameDay=activeTonight(item.feature);
+  const anchor=venueGeometry(item);item.maxY=anchor.y-anchor.size/2-EVENT_WAYPOINT_GAP-item.boundsGoal.halfHeight-(sameDay?84:0);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
-  item.x=item.p.x+driftX*zoomScale;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale)*effectiveHologramLift;
+  const dayLift=sameDay?1.55:1;
+  item.x=item.p.x+driftX*zoomScale;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)*dayLift+driftY*zoomScale)*effectiveHologramLift;
   item.neighbors=beacons.filter(v=>v!==item&&Math.hypot(v.p.x-item.p.x,v.p.y-item.p.y)<220).length;
   item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25*effectiveHologramLift:0;
  }
@@ -740,7 +742,7 @@ function drawLights(fade,target=map,surface=lights){
    const scanY=beamAnchor.y-beamHeight*scanPosition;
    const sweep=lightsContext.createLinearGradient(0,scanY-9,0,scanY+9);
    sweep.addColorStop(0,color+'00');sweep.addColorStop(.5,color+'b0');sweep.addColorStop(1,color+'00');
-   lightsContext.globalAlpha=(fade*beamAlpha*.38*smoothRange(0,.14,1-scanPosition))*bloomScale;lightsContext.fillStyle=sweep;
+   const sameDayMagic=activeTonight(feature)?1.7:1;lightsContext.globalAlpha=(fade*beamAlpha*.38*sameDayMagic*smoothRange(0,.14,1-scanPosition))*bloomScale;lightsContext.fillStyle=sweep;
    lightsContext.fillRect(Math.min(p.x,logoX)-halfWidth,scanY-9,Math.abs(p.x-logoX)+halfWidth*2,18);
    const staticTick=reduced.matches?0:Math.floor(pulseTime*(3.2+.6*Math.sin(phase))+phase*7);
    for(let line=0;line<7;line++){
@@ -861,7 +863,7 @@ function drawLights(fade,target=map,surface=lights){
     if(!reduced.matches){
      const band=(Math.sin(pulseTime*.31+phase*5.1)*.5+.5)*logo.height;
      const bandHeight=Math.max(1,logo.height*.008);
-     lightsContext.globalAlpha=coreAlpha*.07;
+     lightsContext.globalAlpha=coreAlpha*(activeTonight(feature)?.2:.07);
      lightsContext.drawImage(logo.silhouette,logo.left,logo.top+band,logo.width,Math.min(bandHeight,logo.height-band),-w/2,-34-h/2+band*scale,w,Math.min(bandHeight,logo.height-band)*scale);
     }
     lightsContext.restore();
