@@ -529,6 +529,50 @@ export default function Resources() {
     return () => media.removeEventListener("change", change);
   }, []);
   const showResults = intentChosen && (mode === "directory" ? directoryRevealed : safetyAnswer === "yes");
+  useEffect(() => {
+    if (!showResults || mode !== "directory" || showAllCards) return;
+    const tracks = Array.from(resultsRef.current?.querySelectorAll<HTMLElement>(".rg-stack-track") ?? []);
+    const activeCards = new Map<HTMLElement, HTMLElement>();
+    let frame = 0;
+    const updateActiveCards = () => {
+      frame = 0;
+      for (const track of tracks) {
+        const rect = track.getBoundingClientRect();
+        const visibleTop = Math.max(rect.top, 0);
+        const visibleBottom = Math.min(rect.bottom, window.innerHeight);
+        let active: HTMLElement | null = null;
+        if (visibleBottom > visibleTop && rect.right > 0 && rect.left < window.innerWidth) {
+          const x = Math.max(1, Math.min(window.innerWidth - 2, rect.left + rect.width / 2));
+          const y = (visibleTop + visibleBottom) / 2;
+          const card = document.elementFromPoint(x, y)?.closest<HTMLElement>(".rg-stack-card");
+          if (card && track.contains(card)) active = card;
+        }
+        const previous = activeCards.get(track);
+        if (previous === active) continue;
+        previous?.removeAttribute("data-stack-active");
+        if (active) {
+          active.setAttribute("data-stack-active", "true");
+          activeCards.set(track, active);
+        } else activeCards.delete(track);
+      }
+    };
+    const scheduleUpdate = () => {
+      if (!frame) frame = requestAnimationFrame(updateActiveCards);
+    };
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    for (const track of tracks) track.addEventListener("scroll", scheduleUpdate, { passive: true });
+    scheduleUpdate();
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      for (const track of tracks) {
+        track.removeEventListener("scroll", scheduleUpdate);
+        activeCards.get(track)?.removeAttribute("data-stack-active");
+      }
+    };
+  }, [showResults, mode, showAllCards, rows]);
   function choose(id: string | null) {
     setDirectoryRevealed(true);
     setCategoryIds((ids) => id === null ? [] : ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id]);

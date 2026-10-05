@@ -3705,6 +3705,10 @@ html.calm-mode .rg-options button,
   scroll-margin-top: var(--rg-stack-top);
 }
 .resources-page .rg-stack-card .rg-directory-card { margin: 0; }
+.resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card:not([data-stack-active="true"])
+  :is(.rg-motif-drift, .rg-motif-object-drift, .rg-motif-breathe, .rg-motif-signal-trace, .rg-card-top-rule) {
+  animation-play-state: paused;
+}
 .resources-page .rg-resource-stacks[data-view-all="true"] .rg-stack-track {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
