@@ -4078,26 +4078,27 @@ html.calm-mode .rg-options button,
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    gap: 0;
+    gap: 18px;
     overflow-x: auto;
     overflow-y: hidden;
     padding: 4px var(--rg-mobile-card-inset) 20px;
     scroll-snap-type: x mandatory;
-    scroll-padding-inline-start: var(--rg-mobile-card-inset);
+    scroll-padding-inline: 0;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
     perspective: none !important;
   }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card {
-    position: sticky;
-    left: var(--rg-mobile-card-inset);
+    position: relative;
+    left: auto;
     top: auto !important;
+    z-index: auto !important;
     flex: 0 0 var(--rg-mobile-card-width);
     width: auto;
-    height: auto;
+    height: 480px;
     margin-left: 0;
     align-self: stretch;
-    scroll-snap-align: start;
+    scroll-snap-align: center;
     scroll-snap-stop: always;
   }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .rg-directory-card {
@@ -4111,20 +4112,29 @@ html.calm-mode .rg-options button,
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card :is(.pdxPlace__main, .rg-directory-footer) {
     margin-inline: 17px;
   }
-  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__name { font-size: 22px; }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__name { font-size: 24px; line-height: 1.18; }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__cat .pdxBadge {
-    font-size: 14px;
-    min-height: 32px;
+    font-size: 12px;
+    min-height: 30px;
     line-height: 1.25;
     padding: 6px 9px !important;
   }
-  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__desc { font-size: 13px; line-height: 1.5; }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__desc { font-size: 14px; line-height: 1.5; }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .rg-directory-footer .pdxBtn {
     height: 48px;
     min-height: 48px;
     font-size: 15.5px;
   }
-  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__share { font-size: 14px; }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__share {
+    min-height: 44px;
+    padding: 8px 10px;
+    gap: 5px;
+    font-size: 12px;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__share svg {
+    width: 14px;
+    height: 14px;
+  }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__media {
     height: 150px;
     min-height: 150px;
