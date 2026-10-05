@@ -1,6 +1,8 @@
 import "@/components/discovery/DiscoveryFlow.css";
 import {
+  lazy,
   memo,
+  Suspense,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -35,7 +37,6 @@ import {
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
 import { FOOD_PANTRIES, FOOD_RESOURCE } from "@/lib/foodPantries";
-import DirectoryMap from "@/components/DirectoryMap";
 import { placeGoogleMapsUrl } from "@/lib/placeLinks";
 import { Badge } from "@/components/ds/Badge";
 import { ResourceFilterButton } from "@/components/resources/ResourceFilterButton";
@@ -46,7 +47,7 @@ import { resourceLogoLayout } from "@/components/resources/resourceLogoLayout";
 import { CardSticky, ContainerScroll } from "@/components/ui/cards-stack";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import { PlaceCard } from "@/components/ds/PlaceCard";
-import { WebGLShader } from "@/components/ui/web-gl-shader";
+import "@/components/ui/web-gl-shader.css";
 import "@fontsource/barlow/latin-400.css";
 import "@fontsource/barlow/latin-500.css";
 import "@fontsource/barlow/latin-600.css";
@@ -54,6 +55,9 @@ import "@fontsource/barlow/latin-700.css";
 import "@fontsource/jetbrains-mono/latin-400.css";
 import "@fontsource/jetbrains-mono/latin-600.css";
 import "./Resources.css";
+
+const ResourceDirectoryMap = lazy(() => import("@/components/DirectoryMap"));
+const ResourceBackgroundShader = lazy(() => import("@/components/ui/web-gl-shader").then(({ WebGLShader }) => ({ default: WebGLShader })));
 
 const ICONS = [
   Heart,
@@ -372,7 +376,9 @@ function ResourceLocationMap({ org, color, initiallyOpen = false }: { org: Resou
     <button className="pdx-glass-rebind pdxBtn rg-map-toggle" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Hide map & directions" : "Map & directions"}</button>
     {open && <>
       {pins.length > 0 && <div className="rg-resource-map-canvas" data-vaul-no-drag>
-        <DirectoryMap businesses={pins} height="100%" showKey={false} interactive={false} focusBusiness rasterBasemap accent={color} />
+        <Suspense fallback={<span className="rg-map-loading" role="status">Loading map…</span>}>
+          <ResourceDirectoryMap businesses={pins} height="100%" showKey={false} interactive={false} focusBusiness rasterBasemap accent={color} />
+        </Suspense>
       </div>}
       {pins.length > 0 && <small className="rg-map-credit">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> · © <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a></small>}
       {locations.map((location) => <a key={location.address} className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: location.address, name: location.name })} target="_blank" rel="noopener noreferrer">{location.address} <ArrowUpRight size={16} /></a>)}
@@ -448,6 +454,14 @@ export default function Resources() {
   const { calmMode } = useTheme();
   const reducedMotion = useReducedMotion();
   const quietMotion = calmMode || reducedMotion;
+  const [lightweightBackground, setLightweightBackground] = useState(() =>
+    window.matchMedia("(max-width: 719px), (pointer: coarse)").matches);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 719px), (pointer: coarse)");
+    const sync = () => setLightweightBackground(media.matches);
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
   const [location, navigate] = useLocation();
   useEffect(() => {
     if (location === "/resources") navigate(`/rezources${window.location.search}${window.location.hash}`, { replace: true });
@@ -552,7 +566,9 @@ export default function Resources() {
   }, [searchTarget, showResults, quietMotion]);
   return (
     <div className="resources-page">
-      <WebGLShader waveSpeed={0.7} lowPower />
+      {lightweightBackground
+        ? <div className="rg-stream-background rg-stream-background--mobile-fallback" aria-hidden="true" />
+        : <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>}
       <header className="rg-intro rg-wrap">
         <div className="rg-intro-top">
           <span className="rg-eyebrow">
@@ -723,8 +739,13 @@ export default function Resources() {
                       <h2 id={`${sectionId}-title`}>{CATEGORY_COPY[type.id].headline}</h2>
                       <p className="rg-rail-copy">{CATEGORY_COPY[type.id].description}</p>
                       <p className="rg-rail-count">{group.length} resource{group.length === 1 ? "" : "s"}</p>
+                      {group.length > 1 && <p className="rg-rail-swipe-hint">Swipe left to browse cards</p>}
                     </header>
-                    <ContainerScroll id={sectionId} className="rg-stack-track">
+                    <ContainerScroll id={sectionId} className="rg-stack-track" role="region" aria-label={`${type.name} resource cards`} tabIndex={0} onKeyDown={(event) => {
+                      if (showAllCards || !window.matchMedia("(max-width: 719px)").matches || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+                      event.preventDefault();
+                      event.currentTarget.scrollBy({ left: (event.key === "ArrowRight" ? 1 : -1) * event.currentTarget.clientWidth * .85, behavior: quietMotion ? "instant" : "smooth" });
+                    }}>
                       {group.map((row, index) => <CardSticky
                         key={row.org.name}
                         index={index}

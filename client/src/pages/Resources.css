@@ -4042,3 +4042,152 @@ html.calm-mode .rg-options button,
   .resources-page .rg-rail-heading .rg-rail-copy { font-size: 16px; margin-top: 14px; }
   .resources-page .rg-rail-heading .rg-rail-count { margin-top: 12px; }
 }
+
+/* On phones, the same resource cards form a left-swiping, overlapping stack. */
+.resources-page .rg-rail-swipe-hint { display: none; }
+@media (max-width: 719px) {
+  .resources-page .rg-controls .rg-step--categories .rg-options {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-track {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 20px 20px 2px;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline-start: 2px;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    perspective: none !important;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card {
+    position: relative;
+    top: auto !important;
+    z-index: auto !important;
+    flex: 0 0 min(86vw, 360px);
+    width: auto;
+    height: auto;
+    margin-left: -16px;
+    align-self: stretch;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card:first-child { margin-left: 0; }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .rg-directory-card {
+    height: 100%;
+    min-height: 0;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__media {
+    height: 140px;
+    flex-basis: 140px;
+    padding-block: 24px;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__logo {
+    height: auto;
+    max-height: 108px;
+  }
+  .resources-page .rg-rail-heading .rg-rail-swipe-hint {
+    display: block;
+    margin-top: 12px;
+    color: var(--neon-yellow);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+}
+
+/* Keep urgent help immediately visible without making it a full-screen card. */
+@media (max-width: 719px) {
+  .resources-page .rg-safety-summary > .pdxPlace__body {
+    min-width: 0;
+    padding: 16px;
+  }
+  .resources-page .rg-safety-summary { transform: none; }
+  .resources-page .rg-safety-summary .rg-safety-content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    justify-items: stretch;
+    gap: 10px 12px;
+    text-align: left;
+  }
+  .resources-page .rg-safety-summary .rg-safety-heading {
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
+    width: auto;
+    padding: 0;
+    margin: 0;
+  }
+  .resources-page .rg-safety-summary .rg-safety-heading h3 {
+    margin: 8px 0 0;
+    font-size: clamp(22px, 5.8vw, 28px);
+    line-height: 1.05;
+  }
+  .resources-page .rg-safety-summary .rg-safety-kicker {
+    padding: 6px 8px;
+    gap: 6px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .resources-page .rg-safety-summary .rg-safety-kicker svg { width: 15px; height: 15px; }
+  .resources-page .rg-safety-summary .rg-safety-motif { display: none; }
+  .resources-page .rg-safety-summary .rg-safety-lead {
+    grid-column: 1;
+    grid-row: 2;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .resources-page .rg-safety-summary a.rg-safety-emergency {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    align-self: center;
+    justify-self: end;
+    width: auto;
+    min-width: 92px;
+    min-height: 52px !important;
+    max-width: none;
+    margin: 0;
+    padding: 10px 12px;
+    gap: 6px;
+    flex-direction: row-reverse;
+    font-size: 22px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap;
+  }
+  .resources-page .rg-safety-summary .rg-safety-emergency svg { width: 16px; height: 16px; }
+  .resources-page .rg-safety-summary .rg-safety-expand {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    min-height: 44px;
+    margin: 2px 0 0;
+    padding: 8px 0 0;
+    border: 0;
+    border-top: 1px solid color-mix(in srgb, var(--neon-orange) 45%, transparent);
+    border-radius: 0;
+    background: transparent;
+    gap: 8px;
+  }
+  .resources-page .rg-safety-summary .rg-safety-expand-copy { gap: 0; }
+  .resources-page .rg-safety-summary .rg-safety-expand-copy strong { font-size: 14px; line-height: 1.2; }
+  .resources-page .rg-safety-summary .rg-safety-expand-copy small { display: none; }
+  .resources-page .rg-safety-summary .rg-safety-expand-indicator {
+    flex-basis: 28px;
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+  }
+  .resources-page .rg-safety-summary .rg-safety-content > div[id] { grid-column: 1 / -1; grid-row: 4; }
+}
+
+/* 211 uses the same display face for actions and body face for guidance. */
+.resources-page .rg-talk h3,
+.resources-page .rg-talk .pdxBtn { font-family: var(--font-display); }
+.resources-page .rg-talk > p { font-family: var(--font-body); }
