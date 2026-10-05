@@ -72,9 +72,6 @@ export default function Footer() {
             <img src="/brand/family/zaylist-primary.svg" alt="Zaylist"
               className="site-footer__logo" width={1200} height={423} decoding="async" />
           </Link>
-          <p className="site-footer__tagline">
-            <strong>Queer Portland, connected.</strong>
-          </p>
         </div>
 
         <Accordion type="single" collapsible className="site-footer__grid">
