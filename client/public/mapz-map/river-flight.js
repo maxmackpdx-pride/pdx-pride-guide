@@ -20,7 +20,7 @@ import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20261005-orb-60';
+import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20261005-pin-gap';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -404,7 +404,7 @@ function buildingGlitter(target,surfaces){
 const logoFocus=createLogoFocus();
 const hologramLayouts=new WeakMap();
 const logoSpacing=1.15;
-const hologramLiftScale=.7*TONIGHT_HEIGHT_MULTIPLIER*.8;
+const hologramLiftScale=.7*TONIGHT_HEIGHT_MULTIPLIER*.8*1.15;
 const hologramArtworkScale=3.15;
 const hologramLabelWidth=68.4;
 const logoFit=logo=>Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height);
@@ -561,8 +561,8 @@ function drawLights(fade,target=map,surface=lights){
   const phase=item.feature.properties.phase;
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
   item.attention=reduced.matches?.5:.5+.5*Math.sin(pulseTime*(.13+.025*Math.sin(phase))+phase*1.83);
-  const driftX=reduced.matches||cameraMoving?0:29*Math.sin(pulseTime*(.17+.025*Math.cos(phase))+phase)+9*Math.sin(pulseTime*.09+phase*2.4);
-  const driftY=reduced.matches||cameraMoving?0:15*Math.sin(pulseTime*.12+phase*1.6)-22*item.attention;
+  const driftX=0;
+  const driftY=0;
   item.scaleGoal=emergenceFor(item.feature)*presentationScale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);

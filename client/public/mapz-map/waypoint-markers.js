@@ -10,7 +10,6 @@ export function waypointHeadSize(selected=false,zoom=mapZoom()){
  if(selected)return 57;
  return Math.round(31+11*Math.max(0,Math.min(1,(zoom-12)/4)));
 }
-const WAYPOINT_BEAM_HEIGHT_SCALE=2;
 /** Shell tip hangs below the head box by this share of the size (livingMapWaypoints r*.68). */
 const TIP=.34;
 // Select motion (board 48): 42 to 57 with the lift, 180ms ease-out, both ways.
@@ -24,11 +23,12 @@ function selectedAmount(selected,key){
 export function waypointGeometry(origin,selected=false,roofLift=0,key=null){
  const amount=cityAmount(),picked=selectedAmount(selected,key);
  const rest=waypointHeadSize(false),size=rest+(waypointHeadSize(true)-rest)*picked;
- // Double the waypoint shaft and head lift while keeping the beam anchored
- // to its roof or ground point. Fade the visibility floor as buildings extrude.
- // The head rises out of its hologram: selected lifts higher.
- const minimumHeight=(22+42*picked)*(1-amount);
- const beamHeight=Math.max(roofLift,minimumHeight)*WAYPOINT_BEAM_HEIGHT_SCALE;
+ // No 3D buildings: a small ground gap, a little taller when zoomed out.
+ // Buildings up: the shaft comes out of the roof, not a doubled screen floor.
+ const zoom=mapZoom();
+ const zoomOut=1-Math.max(0,Math.min(1,(zoom-11.5)/3));
+ const groundGap=(18+10*picked)+8*zoomOut;
+ const beamHeight=amount>0.18?Math.max(roofLift,groundGap):groundGap;
  return {x:origin.x,y:origin.y-beamHeight-size*TIP-size/2,size,bottom:origin.y-beamHeight,anchorY:origin.y};
 }
 /** Shell outlines, ported from client/src/lib/livingMapWaypoints.ts shellPath(). */
