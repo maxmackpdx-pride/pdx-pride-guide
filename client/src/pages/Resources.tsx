@@ -73,6 +73,7 @@ const ICONS = [
   Brain,
   LifeBuoy,
 ];
+const STACK_ROTATIONS = [-8, 4, -3, 5, -4, 6, 3, -6, 2, -5];
 const LABELS = [
   "Health & care",
   "Safety & basic needs",
@@ -485,6 +486,7 @@ export default function Resources() {
   const [mode, setMode] = useState<"directory" | "talk">("directory");
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
   const [showAllCards, setShowAllCards] = useState(false);
+  const [mobileExpandedCard, setMobileExpandedCard] = useState<string | null>(null);
   const [supportOpen, setSupportOpen] = useState(false);
   const [safetyAnswer, setSafetyAnswer] = useState<"yes" | "no" | null>(null);
   const supportTrigger = useRef<HTMLElement | null>(null);
@@ -533,10 +535,13 @@ export default function Resources() {
   const showResults = intentChosen && (mode === "directory" ? directoryRevealed : safetyAnswer === "yes");
   const scrollResourceRail = useCallback((track: HTMLElement | null, direction: number) => {
     if (!track) return;
-    const card = track.querySelector<HTMLElement>(".rg-stack-card");
-    const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
+    const cards = track.querySelectorAll<HTMLElement>(".rg-stack-card");
+    const card = cards[0];
+    const step = cards.length > 1
+      ? cards[1].offsetLeft - card.offsetLeft
+      : (card?.offsetWidth ?? track.clientWidth * .85) + (Number.parseFloat(getComputedStyle(track).columnGap) || 0);
     track.scrollBy({
-      left: direction * ((card?.offsetWidth ?? track.clientWidth * .85) + gap),
+      left: direction * step,
       behavior: quietMotion ? "instant" : "smooth",
     });
   }, [quietMotion]);
@@ -794,13 +799,15 @@ export default function Resources() {
                       <h2 id={`${sectionId}-title`}>{CATEGORY_COPY[type.id].headline}</h2>
                       <p className="rg-rail-copy">{CATEGORY_COPY[type.id].description}</p>
                       <p className="rg-rail-count">{group.length} resource{group.length === 1 ? "" : "s"}</p>
-                      {group.length > 1 && <p className="rg-rail-swipe-hint">Swipe left to browse cards</p>}
+                      {group.length > 1 && <p className="rg-rail-swipe-hint">Swipe left · tap a card to preview</p>}
                       {!showAllCards && group.length > 1 && <div className="rg-rail-nav" role="group" aria-label={`${type.name} rail controls`}>
                         <button type="button" aria-label={`Previous ${type.name} resource`} onClick={() => scrollResourceRail(document.getElementById(sectionId), -1)}><ChevronLeft aria-hidden="true" /></button>
                         <button type="button" aria-label={`Next ${type.name} resource`} onClick={() => scrollResourceRail(document.getElementById(sectionId), 1)}><ChevronRight aria-hidden="true" /></button>
                       </div>}
                     </header>
-                    <ContainerScroll id={sectionId} className="rg-stack-track" role="region" aria-label={`${type.name} resource cards`} tabIndex={0} onKeyDown={(event) => {
+                    <ContainerScroll id={sectionId} className="rg-stack-track" role="region" aria-label={`${type.name} resource cards`} tabIndex={0} onScroll={() => {
+                      if (mobileExpandedCard) setMobileExpandedCard(null);
+                    }} onKeyDown={(event) => {
                       if (showAllCards || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
                       event.preventDefault();
                       scrollResourceRail(event.currentTarget, event.key === "ArrowRight" ? 1 : -1);
@@ -810,7 +817,21 @@ export default function Resources() {
                         className="sticky rg-card-reveal rg-stack-card"
                         tabIndex={-1}
                         data-resource-search-card={row.org.name}
-                        style={{ top: `calc(var(--rg-stack-top) + ${Math.min(index, 4) * 12}px)`, zIndex: index * 10 }}
+                        data-mobile-expanded={mobileExpandedCard === `${type.id}:${row.org.name}` ? "true" : undefined}
+                        onClickCapture={(event) => {
+                          if (showAllCards || !window.matchMedia("(max-width: 719px) and (pointer: coarse)").matches) return;
+                          if (event.target instanceof Element && event.target.closest("button, a")) return;
+                          const cardKey = `${type.id}:${row.org.name}`;
+                          if (mobileExpandedCard !== cardKey) {
+                            event.stopPropagation();
+                            setMobileExpandedCard(cardKey);
+                          }
+                        }}
+                        style={{
+                          top: `calc(var(--rg-stack-top) + ${Math.min(index, 4) * 12}px)`,
+                          zIndex: index * 10,
+                          "--rg-fan-rotation": `${STACK_ROTATIONS[index % STACK_ROTATIONS.length]}deg`,
+                        } as CSSProperties}
                       >
                         <ResourceCard row={{ ...row, sectionCategory: type }} onOpen={openDetail} />
                       </div>)}

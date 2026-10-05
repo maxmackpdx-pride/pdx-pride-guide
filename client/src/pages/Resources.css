@@ -3708,7 +3708,7 @@ html.calm-mode .rg-options button,
 }
 .resources-page .rg-stack-card .rg-directory-card { margin: 0; }
 @media (max-width: 719px) {
-  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card:not([data-stack-active="true"])
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card:not([data-stack-active="true"]):not([data-mobile-expanded="true"])
     :is(.rg-motif-drift, .rg-motif-object-drift, .rg-motif-breathe, .rg-motif-signal-trace, .rg-card-top-rule) {
     animation-play-state: paused;
   }
@@ -3797,6 +3797,41 @@ html.calm-mode .rg-options button,
   }
   .resources-page .rg-rail-nav button:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 3px; }
   .resources-page .rg-rail-nav svg { width: 20px; height: 20px; }
+}
+@media (min-width: 720px) and (hover: hover) {
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-track {
+    --rg-fan-overlap: clamp(110px, 12vw, 150px);
+    --rg-fan-push: calc(var(--rg-fan-overlap) + 28px);
+    gap: 0;
+    padding: 52px 32px 72px;
+    scroll-snap-type: none;
+    scroll-padding-inline-start: 32px;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card {
+    margin-right: calc(-1 * var(--rg-fan-overlap));
+    transform: rotate(var(--rg-fan-rotation, 0deg));
+    transition: transform 450ms cubic-bezier(.22, 1, .36, 1);
+    transform-origin: center;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card:last-child { margin-right: 0; }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card:has(~ .rg-stack-card:is(:hover, :focus-within)) {
+    transform: translateX(calc(-1 * var(--rg-fan-push))) rotate(var(--rg-fan-rotation, 0deg));
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card:is(:hover, :focus-within) ~ .rg-stack-card {
+    transform: translateX(var(--rg-fan-push)) rotate(var(--rg-fan-rotation, 0deg));
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card:is(:hover, :focus-within) {
+    z-index: 1000 !important;
+    transform: translateY(-24px) rotate(0deg) scale(1.025);
+  }
+}
+@media (min-width: 1000px) and (hover: hover) {
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-track {
+    --rg-deck-width: min(calc(100vw - 48px), 1800px);
+    width: var(--rg-deck-width);
+    max-width: none;
+    margin-left: calc((100% - var(--rg-deck-width)) / 2);
+  }
 }
 @media (max-width: 719px) {
   .resources-page .rg-rail-nav { display: none; }
@@ -4143,7 +4178,7 @@ html.calm-mode .rg-options button,
     gap: 18px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 4px var(--rg-mobile-card-inset) 20px;
+    padding: 18px var(--rg-mobile-card-inset) 28px;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 0;
     overscroll-behavior-x: contain;
@@ -4162,6 +4197,12 @@ html.calm-mode .rg-options button,
     align-self: stretch;
     scroll-snap-align: center;
     scroll-snap-stop: always;
+    transition: transform 240ms cubic-bezier(.22, 1, .36, 1);
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card[data-mobile-expanded="true"] {
+    z-index: 1000 !important;
+    transform: translateY(-10px) scale(1.04);
+    filter: drop-shadow(0 20px 28px color-mix(in srgb, var(--neon-cyan) 30%, transparent));
   }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .rg-directory-card {
     height: 100%;
@@ -4217,6 +4258,16 @@ html.calm-mode .rg-options button,
     font-size: 13px;
     line-height: 1.4;
   }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card {
+  transform: none !important;
+  transition: none !important;
 }
 
 /* Keep urgent help immediately visible without making it a full-screen card. */
