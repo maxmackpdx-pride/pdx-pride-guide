@@ -86,7 +86,6 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
           </div>)}
           <div className="mapz-layer-sheet__footer">
             {activeLayer?.viewMore.map(link => <Link key={link.href} className="mapz-layer-sheet__more" href={link.href}>{link.label}<ChevronRight size={18} aria-hidden="true" /></Link>)}
-            <button type="button" className="mapz-layer-sheet__back" onClick={closePanel}>Back to map</button>
           </div>
         </div>
       </div>
