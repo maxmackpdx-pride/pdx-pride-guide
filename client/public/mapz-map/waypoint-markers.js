@@ -133,7 +133,8 @@ export function drawWaypointFoot(ctx,geometry,color,materials,drawBeam,alpha=1,s
   const disk=1-amount;
   ctx.globalAlpha=alpha*(selected?.9:.55)*disk;
   drawBeam(ctx,materials.beams.get(color),{x,y:anchorY},x,bottom,placeHalf,1);
-  const size=selected?44:28,orb=materials.orbs.get(color);
+  // 60% smaller than the 44/28 ground orbs. Heads and shafts stay put.
+  const size=selected?18:11,orb=materials.orbs.get(color);
   if(orb){ctx.globalAlpha=alpha*(selected?1:.75)*disk;ctx.drawImage(orb,x-size/2,anchorY-size/2,size,size);}
  }
  ctx.restore();
