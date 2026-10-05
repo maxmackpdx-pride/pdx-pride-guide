@@ -533,7 +533,7 @@ function drawLights(fade,target=map,surface=lights){
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
  const reflectionSources=lightFeatures.filter(feature=>feature.properties.kind==='event');if(userLocation)reflectionSources.unshift(userLocation.feature);
- waterBloom.draw(lightsContext,target,width,height,fade,pulseTime,reduced.matches,reflectionSources);
+ if(!cameraMoving)waterBloom.draw(lightsContext,target,width,height,fade,pulseTime,reduced.matches,reflectionSources);
  drawUserLocationGlow(lightsContext,target,fade);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
  const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
@@ -572,7 +572,7 @@ function drawLights(fade,target=map,surface=lights){
   item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25*effectiveHologramLift:0;
  }
  // Relax overlapping logo bounds, with restrained displacement from each fixed anchor.
- for(let iteration=0;iteration<12;iteration++)for(let i=0;i<beacons.length;i++)for(let j=i+1;j<beacons.length;j++){
+ if(!cameraMoving)for(let iteration=0;iteration<12;iteration++)for(let i=0;i<beacons.length;i++)for(let j=i+1;j<beacons.length;j++){
   const a=beacons[i],b=beacons[j],dx=b.x-a.x,dy=b.y-a.y;
   const gapX=a.boundsGoal.halfWidth+b.boundsGoal.halfWidth,gapY=a.boundsGoal.halfHeight+b.boundsGoal.halfHeight;
   if(Math.abs(dx)<gapX&&Math.abs(dy)<gapY){
@@ -613,7 +613,7 @@ function drawLights(fade,target=map,surface=lights){
  item.y=item.p.y+(item.y-item.p.y)*emergence;
  }
  // Apply anchor limits before collision resolution; never clamp separated heads back together.
- separateHolograms(beacons,width,height);
+ if(!cameraMoving)separateHolograms(beacons,width,height);
  // Keep the pointer's temporary offset separate so it cannot accumulate into drift.
  for(const item of beacons){
   const x=item.x-item.p.x-item.offset.avoidX,y=item.y-item.p.y+item.hover-item.offset.avoidY;
@@ -631,9 +631,7 @@ function drawLights(fade,target=map,surface=lights){
   if(pass===1){
    // Ground light and projection beams sit behind solid buildings. Floating
    // logo artwork is drawn afterward, in the sky, and is never punched out.
-   applyBuildingOcclusion(lightsContext,target,surfaces.buildings??[]);
-   buildingChrome.draw(lightsContext,target,surfaces.buildings??[],fade);
-   drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
+   if(!cameraMoving){applyBuildingOcclusion(lightsContext,target,surfaces.buildings??[]);buildingChrome.draw(lightsContext,target,surfaces.buildings??[],fade);drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);}
   }
   for(const {feature,p,offset,neighbors=0} of ordered){
   const {color,phase}=feature.properties;
@@ -1066,7 +1064,7 @@ let firstFrameSent=false,baseFrameRendered=false;
 function draw(now){
  frame=0;
  if(disposed||document.hidden)return;
- const activeFrameInterval=map.isMoving()?1000/60:frameInterval;
+ const activeFrameInterval=map.isMoving()?(matchMedia('(pointer:coarse)').matches?1000/30:1000/45):frameInterval;
  if(last&&now-last<activeFrameInterval-1){scheduleFrame();return;}
  const dt=last?Math.min((now-last)/1000,.1):0;last=now;
  motionDelta=dt;
