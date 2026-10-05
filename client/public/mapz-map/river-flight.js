@@ -420,7 +420,7 @@ function hologramBounds(feature,scale){
 function separateHolograms(items,width,height){
  const overlaps=(a,b)=>Math.abs(a.x-b.x)<a.halfWidth+b.halfWidth&&Math.abs(a.y-b.y)<a.halfHeight+b.halfHeight;
  const topLimit=item=>item.p&&item.p.y>=-80&&item.p.y<=height&&item.p.x>=0&&item.p.x<=width?20+item.halfHeight:-Infinity;
- const keepTopVisible=()=>{for(const item of items)item.y=Math.min(item.maxY??Infinity,Math.max(topLimit(item),item.y));};
+ const keepTopVisible=()=>{for(const item of items)item.y=Math.max(topLimit(item),item.y)};
  keepTopVisible();
  // Enforce spacing on the final animated positions, after easing and screen-edge pull.
  for(let pass=0;pass<18;pass++){
@@ -447,11 +447,11 @@ function separateHolograms(items,width,height){
     const dx=item.halfWidth+other.halfWidth+1,dy=item.halfHeight+other.halfHeight+1;
     candidates.push({x:other.x-dx,y:item.y},{x:other.x+dx,y:item.y},{x:item.x,y:other.y-dy},{x:item.x,y:other.y+dy});
    }
-   const free=candidates.filter(candidate=>candidate.y>=Math.min(topLimit(item),item.maxY??Infinity)&&candidate.y<=(item.maxY??Infinity)&&placed.every(other=>!overlaps({...item,...candidate},other)));
+   const free=candidates.filter(candidate=>candidate.y>=topLimit(item)&&placed.every(other=>!overlaps({...item,...candidate},other)));
    const cost=point=>Math.hypot(point.x-item.x,point.y-item.y)+2*(Math.max(0,item.halfWidth-point.x,point.x+item.halfWidth-width)+Math.max(0,item.halfHeight-point.y,point.y+item.halfHeight-height+120));
    free.sort((a,b)=>cost(a)-cost(b));
    // If the top is full, use a lower slot rather than clipping the logo crown.
-   const slot=free[0]??{x:item.x,y:Math.min(item.maxY??Infinity,...placed.map(other=>other.y-other.halfHeight))-item.halfHeight-1};
+   const slot=free[0]??{x:item.x,y:Math.min(...placed.map(other=>other.y-other.halfHeight))-item.halfHeight-1};
    item.x=slot.x;item.y=slot.y;
   }
   placed.push(item);
@@ -565,11 +565,9 @@ function drawLights(fade,target=map,surface=lights){
   const driftY=reduced.matches||cameraMoving?0:15*Math.sin(pulseTime*.12+phase*1.6)-22*item.attention;
   item.scaleGoal=emergenceFor(item.feature)*presentationScale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
-  const sameDay=activeTonight(item.feature);
-  const anchor=venueGeometry(item);item.maxY=anchor.y-anchor.size/2-EVENT_WAYPOINT_GAP-item.boundsGoal.halfHeight-(sameDay?84:0);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
-  const dayLift=sameDay?1.55:1;
-  item.x=item.p.x+driftX*zoomScale;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)*dayLift+driftY*zoomScale)*effectiveHologramLift;
+  // No pin ceiling. Lift comes from hologramLiftScale, heightScale, and tonight's multiplier.
+  item.x=item.p.x+driftX*zoomScale;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale)*effectiveHologramLift;
   item.neighbors=beacons.filter(v=>v!==item&&Math.hypot(v.p.x-item.p.x,v.p.y-item.p.y)<220).length;
   item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25*effectiveHologramLift:0;
  }
@@ -615,7 +613,6 @@ function drawLights(fade,target=map,surface=lights){
  item.y=item.p.y+(item.y-item.p.y)*emergence;
  }
  // Apply anchor limits before collision resolution; never clamp separated heads back together.
- for(const item of beacons)item.y=Math.min(item.y,item.maxY);
  separateHolograms(beacons,width,height);
  // Keep the pointer's temporary offset separate so it cannot accumulate into drift.
  for(const item of beacons){
