@@ -20,7 +20,7 @@ import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20261005-day-165';
+import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20261005-flare';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -720,8 +720,8 @@ function drawLights(fade,target=map,surface=lights){
    const top=hologramTop,halfWidth=beamHalfWidth;
    lightsContext.globalAlpha=(Math.min(1,fade*pulse*beamAlpha*(color===adultVenueColor?1:1.2)))*bloomScale;
    const venueHead=venueGeometry({feature,p}),beamAnchor={x:venueHead.x,y:venueHead.y-venueHead.size/2};
-   drawProjectionBeam(lightsContext,hologramMaterials.beams.get(color),beamAnchor,logoX,top,halfWidth);
-   lightsContext.beginPath();lightsContext.moveTo(beamAnchor.x-2,beamAnchor.y);lightsContext.lineTo(logoX-halfWidth,top);lightsContext.lineTo(logoX+halfWidth,top);lightsContext.lineTo(beamAnchor.x+2,beamAnchor.y);lightsContext.closePath();
+   drawProjectionBeam(lightsContext,hologramMaterials.beams.get(color),beamAnchor,logoX,top,halfWidth,1);
+   const beamBase=Math.max(6,halfWidth*.22);lightsContext.beginPath();lightsContext.moveTo(beamAnchor.x-beamBase,beamAnchor.y);lightsContext.lineTo(logoX-halfWidth,top);lightsContext.lineTo(logoX+halfWidth,top);lightsContext.lineTo(beamAnchor.x+beamBase,beamAnchor.y);lightsContext.closePath();
    // Sparse TV interference stays inside the beam, underneath the crisp logo.
    lightsContext.save();lightsContext.clip();
    // Layered projection bands: a slow rising scan, fine ribbing, and broken signal lines.
@@ -732,13 +732,13 @@ function drawLights(fade,target=map,surface=lights){
     const row=((band/24)+scanPosition)%1,y=top+beamHeight*row;
     lightsContext.globalAlpha=(fade*beamAlpha*smoothRange(0,.14,row)*(.025+.035*Math.sin(band*1.9+phase)**2))*bloomScale;
     lightsContext.fillStyle=band%4===0?(color===adultVenueColor?'#160000':'#050918'):color;
-    lightsContext.fillRect(Math.min(p.x,logoX)-halfWidth,y,Math.abs(p.x-logoX)+halfWidth*2,band%4===0?1.4:.7);
+    const rowT=beamHeight? (y-top)/beamHeight:0,rowHalf=halfWidth*(1-rowT)+beamBase*rowT,rowX=logoX*(1-rowT)+beamAnchor.x*rowT;lightsContext.fillRect(rowX-rowHalf,y,rowHalf*2,band%4===0?1.4:.7);
    }
    const scanY=beamAnchor.y-beamHeight*scanPosition;
    const sweep=lightsContext.createLinearGradient(0,scanY-9,0,scanY+9);
    sweep.addColorStop(0,color+'00');sweep.addColorStop(.5,color+'b0');sweep.addColorStop(1,color+'00');
    const sameDayMagic=activeTonight(feature)?1.7:1;lightsContext.globalAlpha=(fade*beamAlpha*.38*sameDayMagic*smoothRange(0,.14,1-scanPosition))*bloomScale;lightsContext.fillStyle=sweep;
-   lightsContext.fillRect(Math.min(p.x,logoX)-halfWidth,scanY-9,Math.abs(p.x-logoX)+halfWidth*2,18);
+   const scanT=beamHeight?(scanY-top)/beamHeight:0,scanHalf=halfWidth*(1-scanT)+beamBase*scanT,scanX=logoX*(1-scanT)+beamAnchor.x*scanT;lightsContext.fillRect(scanX-scanHalf,scanY-9,scanHalf*2,18);
    const staticTick=reduced.matches?0:Math.floor(pulseTime*(3.2+.6*Math.sin(phase))+phase*7);
    for(let line=0;line<7;line++){
     const seed=Math.sin(phase*23.7+line*91.3+staticTick*7.1)*43758.5453;
@@ -746,7 +746,7 @@ function drawLights(fade,target=map,surface=lights){
     const y=top+height*(.12+.78*noise);
     lightsContext.globalAlpha=(fade*beamAlpha*(.055+.055*noise))*bloomScale;
     lightsContext.fillStyle=line%3===0?(color===adultVenueColor?'#100000':'#020510'):color;
-    lightsContext.fillRect(Math.min(p.x,logoX)-halfWidth,y,Math.abs(p.x-logoX)+halfWidth*2,line%3===0?1.3:.7);
+    const noiseT=beamHeight?(y-top)/beamHeight:0,noiseHalf=halfWidth*(1-noiseT)+beamBase*noiseT,noiseX=logoX*(1-noiseT)+beamAnchor.x*noiseT;lightsContext.fillRect(noiseX-noiseHalf,y,noiseHalf*2,line%3===0?1.3:.7);
    }
    lightsContext.restore();
    // The ground ring wears the event's day, so a cluster of Friday holograms reads as Friday from above.
@@ -1099,7 +1099,7 @@ function draw(now){
  if(ready&&baseFrameRendered&&!firstFrameSent){
   firstFrameSent=true;startup.phase('first-frame');tell('first-frame');
   // Optional GPU layers must not prevent the first base-city frame.
-  window.setTimeout(()=>{if(!disposed)installSceneExtras();},0);
+  map.once('idle',()=>{if(!disposed){installSceneExtras();if(!matchMedia('(pointer:coarse)').matches){try{map.setPixelRatio(Math.min(devicePixelRatio||1,2));}catch{/* Keep the boot ratio. */}}}});
  }
  if(!reduced.matches||!ready)scheduleFrame();
 }

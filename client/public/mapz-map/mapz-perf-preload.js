@@ -2,7 +2,7 @@
    Pins stay on lng/lat via live project() — never a 2D snapshot. */
 (function(){
  var coarse=typeof matchMedia==='function'&&matchMedia('(pointer:coarse)').matches;
- var pixelRatio=Math.min(window.devicePixelRatio||1,coarse?1.5:2);
+ var pixelRatio=coarse?1.25:1;
  function lockPinLayer(){
   var frozen=document.getElementById('waypoint-lights-frozen');
   if(frozen)frozen.remove();
