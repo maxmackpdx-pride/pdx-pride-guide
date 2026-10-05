@@ -4074,44 +4074,54 @@ html.calm-mode .rg-options button,
     line-height: 1.12;
   }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-track {
+    --rg-mobile-card-width: min(68vw, 306px);
+    --rg-mobile-card-inset: calc((100% - var(--rg-mobile-card-width)) / 2);
     display: flex;
     flex-direction: row;
     align-items: stretch;
     gap: 0;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 4px 20px 20px 2px;
+    padding: 4px var(--rg-mobile-card-inset) 20px;
     scroll-snap-type: x mandatory;
-    scroll-padding-inline-start: 2px;
+    scroll-padding-inline-start: var(--rg-mobile-card-inset);
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
     perspective: none !important;
   }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card {
-    position: relative;
+    position: sticky;
+    left: var(--rg-mobile-card-inset);
     top: auto !important;
-    z-index: auto !important;
-    flex: 0 0 min(80vw, 360px);
+    flex: 0 0 var(--rg-mobile-card-width);
     width: auto;
     height: auto;
-    margin-left: -28px;
+    margin-left: 0;
     align-self: stretch;
     scroll-snap-align: start;
     scroll-snap-stop: always;
   }
-  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card:first-child { margin-left: 0; }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .rg-directory-card {
     height: 100%;
     min-height: 0;
   }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__body {
+    gap: 12px;
+    padding-bottom: 16px;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card :is(.pdxPlace__main, .rg-directory-footer) {
+    margin-inline: 17px;
+  }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__name { font-size: 25px; }
+  .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__desc { font-size: 14px; }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__media {
-    height: 140px;
-    flex-basis: 140px;
-    padding-block: 24px;
+    height: 107px;
+    flex-basis: 107px;
+    padding-block: 18px;
   }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__logo {
     height: auto;
-    max-height: 108px;
+    max-height: 86px;
   }
   .resources-page .rg-rail-heading .rg-rail-swipe-hint {
     display: block;
