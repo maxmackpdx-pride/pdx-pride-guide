@@ -44,7 +44,7 @@ import { RezourcesLogo } from "@/components/resources/RezourcesLogo";
 import BoardShareButton from "@/components/BoardShareButton";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import { resourceLogoLayout } from "@/components/resources/resourceLogoLayout";
-import { CardSticky, ContainerScroll } from "@/components/ui/cards-stack";
+import { ContainerScroll } from "@/components/ui/cards-stack";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import { PlaceCard } from "@/components/ds/PlaceCard";
 import "@/components/ui/web-gl-shader.css";
@@ -746,17 +746,15 @@ export default function Resources() {
                       event.preventDefault();
                       event.currentTarget.scrollBy({ left: (event.key === "ArrowRight" ? 1 : -1) * event.currentTarget.clientWidth * .85, behavior: quietMotion ? "instant" : "smooth" });
                     }}>
-                      {group.map((row, index) => <CardSticky
+                      {group.map((row, index) => <div
                         key={row.org.name}
-                        index={index}
-                        incrementY={12}
-                        className="rg-card-reveal rg-stack-card"
+                        className="sticky rg-card-reveal rg-stack-card"
                         tabIndex={-1}
                         data-resource-search-card={row.org.name}
-                        style={{ top: `calc(var(--rg-stack-top) + ${Math.min(index, 4) * 12}px)` }}
+                        style={{ top: `calc(var(--rg-stack-top) + ${Math.min(index, 4) * 12}px)`, zIndex: index * 10 }}
                       >
                         <ResourceCard row={{ ...row, sectionCategory: type }} onOpen={openDetail} />
-                      </CardSticky>)}
+                      </div>)}
                     </ContainerScroll>
                   </section>;
                 })}

@@ -4050,6 +4050,25 @@ html.calm-mode .rg-options button,
     width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .resources-page .rg-options button[data-category-id] {
+    min-height: 132px;
+    padding: 18px;
+  }
+  .resources-page .rg-options button[data-category-id] > svg {
+    width: 26px;
+    height: 26px;
+  }
+  .resources-page .rg-options button[data-category-id] > span {
+    font-size: 18px;
+    line-height: 1.25;
+  }
+  .resources-page .rg-options button[data-category-id][aria-pressed="false"] > span {
+    color: var(--text-hi);
+  }
+  .resources-page .rg-rail-heading h2 {
+    font-size: clamp(36px, 9vw, 42px);
+    line-height: 1.12;
+  }
   .resources-page .rg-resource-stacks[data-view-all="false"] .rg-stack-track {
     display: flex;
     flex-direction: row;
@@ -4068,10 +4087,10 @@ html.calm-mode .rg-options button,
     position: relative;
     top: auto !important;
     z-index: auto !important;
-    flex: 0 0 min(86vw, 360px);
+    flex: 0 0 min(80vw, 360px);
     width: auto;
     height: auto;
-    margin-left: -16px;
+    margin-left: -28px;
     align-self: stretch;
     scroll-snap-align: start;
     scroll-snap-stop: always;
