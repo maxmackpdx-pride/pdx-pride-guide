@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 
-const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
 
 test('the map location avatar matches the nav bloom and is thirty percent larger',()=>{
  assert.match(renderer,/const USER_LOCATION_AVATAR_SCALE=1\.3/);

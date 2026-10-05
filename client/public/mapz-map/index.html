@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zaydar · Interactive map</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mapz · Interactive map</title>
 <script>
 (function(){
  var failed=false,currentPhase='document',visible=false;
  if(parent!==window)document.documentElement.dataset.embedded='1';
- function tell(type,payload){if(parent!==window)parent.postMessage(Object.assign({source:'zaydar-demo',type:type},payload||{}),location.origin);}
+ function tell(type,payload){if(parent!==window)parent.postMessage(Object.assign({source:'mapz-demo',type:type},payload||{}),location.origin);}
  function phase(value){
   currentPhase=value;
   if(value==='first-frame')visible=true;
@@ -13,7 +13,7 @@
  }
  function replay(){tell('phase',{phase:currentPhase});if(visible)tell('first-frame');}
  window.addEventListener('message',function(event){
-  if(event.origin!==location.origin||event.source!==parent||event.data?.source!=='zaydar-host')return;
+  if(event.origin!==location.origin||event.source!==parent||event.data?.source!=='mapz-host')return;
   if(event.data.type==='hello')replay();
  });
  function fatal(message){
@@ -26,7 +26,7 @@
   if(status)status.hidden=true;
   tell('fatal',{message:detail});
  }
- window.__zaydarStartup={phase:phase,fatal:fatal};phase('document');
+ window.__mapzStartup={phase:phase,fatal:fatal};phase('document');
  window.addEventListener('error',function(event){
   if(visible)return;
   if(event instanceof ErrorEvent)fatal(event.message||'3D script error');
@@ -52,10 +52,10 @@
   window.addEventListener('touchmove',collapseDock,{capture:true,passive:true});
   try{
     var doc=parent.document;
-    if(doc&&!doc.getElementById('zaydar-map-shell-overrides')){
+    if(doc&&!doc.getElementById('mapz-map-shell-overrides')){
       var style=doc.createElement('style');
-      style.id='zaydar-map-shell-overrides';
-      style.textContent='.zaydar-map-demo .zaydar-demo-navigation .zaydar-control-labels{display:none!important}';
+      style.id='mapz-map-shell-overrides';
+      style.textContent='.mapz-map-demo .mapz-demo-navigation .mapz-control-labels{display:none!important}';
       doc.head.appendChild(style);
     }
   }catch(err){}
@@ -63,7 +63,7 @@
 </script>
 <link rel="preload" href="../home-flight/vendor/maplibre-gl-5.6.2.js" as="script">
 <link rel="preload" href="./vendor/maplibre-contour-0.1.0.js" as="script">
-<link rel="modulepreload" href="./river-flight.js?v=20260930-maps">
+<link rel="modulepreload" href="./river-flight.js?v=20261004-mapz-rename">
 <link rel="modulepreload" href="./mapz-roof-boot.js?v=20260929-mesh">
 <link rel="modulepreload" href="./natural-surfaces.js?v=20260925-smooth-map">
 <link rel="modulepreload" href="./building-models.js?v=20260929-mesh">
@@ -96,4 +96,4 @@
 <script src="../home-flight/vendor/maplibre-gl-5.6.2.js"></script><script src="./vendor/maplibre-contour-0.1.0.js"></script>
 <script src="./mapz-perf-preload.js?v=20260929-fast"></script>
 <script type="module" src="./mapz-roof-boot.js?v=20260929-mesh"></script>
-<script type="module" src="./river-flight.js?v=20260930-maps"></script></body></html>
+<script type="module" src="./river-flight.js?v=20261004-mapz-rename"></script></body></html>

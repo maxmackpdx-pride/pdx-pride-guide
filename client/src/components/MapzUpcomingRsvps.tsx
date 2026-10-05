@@ -16,7 +16,7 @@ type CheckIn={eventId:number;message?:string;visibility?:string;isAnonymous?:boo
 type Action='options'|'rsvp'|'host'|'attendees'|'venue'|'mizzed'|null;
 const dateLabel=(value:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(parsePacificDateTime(value)??value));
 
-export default function ZaydarUpcomingRsvps({events,loading,onOpen,onSignIn}:{events:Event[];loading:boolean;onOpen:(event:Event,target:HTMLElement)=>void;onSignIn:()=>void}){
+export default function MapzUpcomingRsvps({events,loading,onOpen,onSignIn}:{events:Event[];loading:boolean;onOpen:(event:Event,target:HTMLElement)=>void;onSignIn:()=>void}){
  const {user}=useAuth();
  const preview=Boolean((window as unknown as {__PDX_LOCAL_PREVIEW__?:number}).__PDX_LOCAL_PREVIEW__);
  const [now,setNow]=useState(Date.now);
@@ -26,7 +26,7 @@ export default function ZaydarUpcomingRsvps({events,loading,onOpen,onSignIn}:{ev
  // The server's host list includes co-hosts and is the same authority used by host updates.
  const hosted=useQuery<Event[]>({queryKey:['/api/events/mine/claimed'],queryFn:()=>apiRequest('GET','/api/events/mine/claimed').then(r=>r.json()),enabled:!!user&&!preview});
  const missingIds=(checkIns.data||[]).map(row=>row.eventId).filter(id=>!events.some(event=>event.id===id));
- const missing=useQuery<Event[]>({queryKey:['zaydar-rsvp-events',user?.id,...missingIds],queryFn:async()=>{
+ const missing=useQuery<Event[]>({queryKey:['mapz-rsvp-events',user?.id,...missingIds],queryFn:async()=>{
   const rows=await Promise.all(missingIds.map(async id=>{const response=await fetch(`/api/events/${id}`,{credentials:'include'});if(response.status===404)return null;if(!response.ok)throw new Error('Could not load your event');return response.json() as Promise<Event>;}));
   return rows.filter((event):event is Event=>event!==null);
  },enabled:!preview&&!!user&&missingIds.length>0});
@@ -35,14 +35,14 @@ export default function ZaydarUpcomingRsvps({events,loading,onOpen,onSignIn}:{ev
  const samples=future.filter((event,index,array)=>array.findIndex(other=>other.title===event.title)===index).slice(0,3);
  const rows=preview?samples.filter(event=>!removed.includes(event.id)):future.filter(event=>checkIns.data?.some(row=>row.eventId===event.id));
  const waiting=loading||(!preview&&!!user&&(checkIns.isLoading||(missingIds.length>0&&missing.isLoading)));
- return <section className="zaydar-upcoming" aria-labelledby="zaydar-upcoming-title">
-  <h2 id="zaydar-upcoming-title">Upcoming RSVPs</h2>
-  {preview&&<p className="zaydar-rsvp-note">Sample RSVPs · includes a host preview. Your RSVPs are unchanged.</p>}
-  {!preview&&!user?<p className="zaydar-rsvp-note"><button type="button" onClick={onSignIn}>Sign in</button> to see your upcoming RSVPs.</p>:<>
-   {waiting&&<p role="status" className="zaydar-rsvp-note">Loading your events…</p>}
-   {!preview&&(checkIns.isError||missing.isError)&&<p role="alert" className="zaydar-rsvp-note">Couldn’t load your RSVPs. <button type="button" onClick={()=>{void checkIns.refetch();if(missingIds.length)void missing.refetch();}}>Retry</button></p>}
-   {!waiting&&!rows.length&&!checkIns.isError&&!missing.isError&&<p className="zaydar-rsvp-note">Your next plans will appear here when you RSVP to an event.</p>}
-   <div className="zaydar-rsvp-list">{rows.map(event=><RsvpRow key={event.id} event={event} checkIn={checkIns.data?.find(row=>row.eventId===event.id)} preview={preview} host={preview?event.id===samples[1]?.id:Boolean(hosted.data?.some(row=>row.id===event.id))} claimed={Boolean(event.claimedBy)||(preview&&event.id===samples[1]?.id)} onOpen={onOpen} onRemove={()=>setRemoved(ids=>[...ids,event.id])}/>)}</div>
+ return <section className="mapz-upcoming" aria-labelledby="mapz-upcoming-title">
+  <h2 id="mapz-upcoming-title">Upcoming RSVPs</h2>
+  {preview&&<p className="mapz-rsvp-note">Sample RSVPs · includes a host preview. Your RSVPs are unchanged.</p>}
+  {!preview&&!user?<p className="mapz-rsvp-note"><button type="button" onClick={onSignIn}>Sign in</button> to see your upcoming RSVPs.</p>:<>
+   {waiting&&<p role="status" className="mapz-rsvp-note">Loading your events…</p>}
+   {!preview&&(checkIns.isError||missing.isError)&&<p role="alert" className="mapz-rsvp-note">Couldn’t load your RSVPs. <button type="button" onClick={()=>{void checkIns.refetch();if(missingIds.length)void missing.refetch();}}>Retry</button></p>}
+   {!waiting&&!rows.length&&!checkIns.isError&&!missing.isError&&<p className="mapz-rsvp-note">Your next plans will appear here when you RSVP to an event.</p>}
+   <div className="mapz-rsvp-list">{rows.map(event=><RsvpRow key={event.id} event={event} checkIn={checkIns.data?.find(row=>row.eventId===event.id)} preview={preview} host={preview?event.id===samples[1]?.id:Boolean(hosted.data?.some(row=>row.id===event.id))} claimed={Boolean(event.claimedBy)||(preview&&event.id===samples[1]?.id)} onOpen={onOpen} onRemove={()=>setRemoved(ids=>[...ids,event.id])}/>)}</div>
   </>}
  </section>;
 }
@@ -86,23 +86,23 @@ export function RsvpRow({event,checkIn,preview,host,claimed,onOpen,onRemove,rece
  },onError:err=>{const message=parseApiError(err,'Could not save. Please try again.');setError(message==='NO_CONTACT'?'This event has no host or venue owner to message yet.':message);}});
  const invite=async()=>{try{const path=eventPath(event.id,event.title);const result=await shareEventLink(preview?`https://www.zaylist.com${path}`:path,event.title,`Join me at ${event.title}`);toast({title:shareToastTitle(result,'event')});close();}catch(err){if((err as DOMException).name!=='AbortError')setError('Could not share this event. Please try again.');}};
  const title=action==='rsvp'?'Change RSVP':action==='host'?'Message the host':action==='attendees'?'Post message for attendees':action==='venue'?'Message venue':action==='mizzed'?'Mizzed Connection':'Event options';
- return <article className={`zaydar-rsvp-row${claimed?' is-claimed':''}`} onKeyDown={e=>{if(e.key==='Escape'&&action){e.stopPropagation();close();}}}>
-  <div className="zaydar-rsvp-summary">
-   <button type="button" className="zaydar-rsvp-event" onClick={e=>onOpen(event,e.currentTarget)}>
-    <img className="zaydar-rsvp-poster" src={resolveEventPosterUrl(event.id,event.posterImageUrl,event.dayOfWeek)} onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src=EVENT_PLACEHOLDER_PENDING;}} alt="" loading="lazy"/>
+ return <article className={`mapz-rsvp-row${claimed?' is-claimed':''}`} onKeyDown={e=>{if(e.key==='Escape'&&action){e.stopPropagation();close();}}}>
+  <div className="mapz-rsvp-summary">
+   <button type="button" className="mapz-rsvp-event" onClick={e=>onOpen(event,e.currentTarget)}>
+    <img className="mapz-rsvp-poster" src={resolveEventPosterUrl(event.id,event.posterImageUrl,event.dayOfWeek)} onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src=EVENT_PLACEHOLDER_PENDING;}} alt="" loading="lazy"/>
     <span><strong>{event.title}</strong><time dateTime={event.dateStart}>{dateLabel(event.dateStart)}</time><small>{event.venueName}</small>{claimed&&<em>{previewContact==='venue'?'Venue preview':previewContact==='host'||preview&&host?'Host preview':host?'You’re hosting':'Claimed event'}</em>}</span>
    </button>
-   <button type="button" ref={optionsButton} className="zaydar-rsvp-options" aria-label={`Options for ${event.title}`} aria-expanded={action!==null} aria-controls={`rsvp-options-${event.id}`} onClick={()=>action?close():open('options')}><MoreHorizontal size={23}/></button>
+   <button type="button" ref={optionsButton} className="mapz-rsvp-options" aria-label={`Options for ${event.title}`} aria-expanded={action!==null} aria-controls={`rsvp-options-${event.id}`} onClick={()=>action?close():open('options')}><MoreHorizontal size={23}/></button>
   </div>
-  {action&&<div className="zaydar-rsvp-panel" id={`rsvp-options-${event.id}`}>
-   <div className="zaydar-rsvp-panel-heading"><h3 ref={panelTitle} tabIndex={-1}>{title}</h3><button type="button" onClick={close} aria-label="Close event options"><X size={19}/></button></div>
-   {action==='options'?<div className="zaydar-rsvp-actions">
+  {action&&<div className="mapz-rsvp-panel" id={`rsvp-options-${event.id}`}>
+   <div className="mapz-rsvp-panel-heading"><h3 ref={panelTitle} tabIndex={-1}>{title}</h3><button type="button" onClick={close} aria-label="Close event options"><X size={19}/></button></div>
+   {action==='options'?<div className="mapz-rsvp-actions">
     {!recent&&<><button type="button" onClick={()=>open('rsvp')}><Check size={17}/>Change RSVP</button><button type="button" onClick={()=>void invite()}><Share2 size={17}/>Invite</button></>}
     {claimed&&host&&<button type="button" onClick={()=>open('attendees')}><Megaphone size={17}/>Post message for attendees</button>}
     {!recent&&event.isPublic&&!event.isPrivate&&!host&&<button type="button" onClick={()=>open('host')}><MessageCircle size={17}/>Message the host</button>}
     {recent&&<>
      {!preview&&contacts.isLoading&&<p role="status">Checking venue and host…</p>}
-     {!preview&&contacts.isError&&<p className="zaydar-rsvp-note">Venue and host contacts unavailable. <button type="button" onClick={()=>void contacts.refetch()}>Retry</button></p>}
+     {!preview&&contacts.isError&&<p className="mapz-rsvp-note">Venue and host contacts unavailable. <button type="button" onClick={()=>void contacts.refetch()}>Retry</button></p>}
      {canMessageVenue&&<button type="button" onClick={()=>open('venue')}><MessageCircle size={17}/>Message venue</button>}
      {canMessageHost&&<button type="button" onClick={()=>open('host')}><MessageCircle size={17}/>Message the host</button>}
      <button type="button" onClick={()=>open('mizzed')}><Heart size={17}/>Mizzed Connection</button>
@@ -110,15 +110,15 @@ export function RsvpRow({event,checkIn,preview,host,claimed,onOpen,onRemove,rece
    </div>:action==='rsvp'?<form onSubmit={e=>{e.preventDefault();mutation.mutate('save');}}>
     <label>RSVP<select value={phrase} onChange={e=>setPhrase(e.target.value)}>{!ATTENDANCE_PHRASES.some(p=>p.label===phrase)&&<option>{phrase}</option>}{ATTENDANCE_PHRASES.filter(p=>p.key!=='I_WAS_HERE').map(p=><option key={p.key} value={p.label}>{p.label}</option>)}</select></label>
     <label>Who can see you<select value={visibility} onChange={e=>setVisibility(e.target.value)}><option value="public">Public</option><option value="friends">Friends only</option><option value="anonymous">Anonymous</option></select></label>
-    <div className="zaydar-rsvp-form-actions"><button disabled={mutation.isPending} type="submit"><CalendarDays size={16}/>{mutation.isPending?'Saving…':preview?'Apply to preview':'Save RSVP'}</button><button disabled={mutation.isPending} type="button" onClick={()=>mutation.mutate('remove')}>Remove RSVP</button></div>
+    <div className="mapz-rsvp-form-actions"><button disabled={mutation.isPending} type="submit"><CalendarDays size={16}/>{mutation.isPending?'Saving…':preview?'Apply to preview':'Save RSVP'}</button><button disabled={mutation.isPending} type="button" onClick={()=>mutation.mutate('remove')}>Remove RSVP</button></div>
    </form>:<form onSubmit={e=>{e.preventDefault();mutation.mutate(action as 'host'|'venue'|'attendees'|'mizzed');}}>
     <p>{action==='attendees'?'This update appears on the event and notifies its attendees. Replies go to your inbox.':action==='mizzed'?'Post a Mizzed Connection for this event. Replies arrive privately in your inbox; identity stays anonymous until you both reveal.':`Send a private message to ${action==='venue'?(contacts.data?.venueName||event.venueName):'the event host'}. Replies go to your inbox.`}</p>
     {action==='mizzed'&&<label>Title (optional)<input value={postTitle} onChange={e=>setPostTitle(e.target.value)} maxLength={80} placeholder="A moment you remember…"/></label>}
     <label>Message<textarea autoFocus rows={3} maxLength={action==='mizzed'?500:1000} value={body} onChange={e=>setBody(e.target.value)} placeholder={action==='attendees'?'An update for your attendees…':action==='mizzed'?'Where did you cross paths?':action==='venue'?'Ask the venue…':'Ask the host…'}/></label>
-    {preview&&<p className="zaydar-rsvp-note">Preview only. Messages won’t be sent.</p>}
-    <button className="zaydar-rsvp-submit" type="submit" disabled={preview||mutation.isPending||!body.trim()}>{mutation.isPending?'Sending…':action==='attendees'?'Post message':action==='mizzed'?'Post Mizzed Connection':'Send message'}</button>
+    {preview&&<p className="mapz-rsvp-note">Preview only. Messages won’t be sent.</p>}
+    <button className="mapz-rsvp-submit" type="submit" disabled={preview||mutation.isPending||!body.trim()}>{mutation.isPending?'Sending…':action==='attendees'?'Post message':action==='mizzed'?'Post Mizzed Connection':'Send message'}</button>
    </form>}
-   {error&&<p role="alert" className="zaydar-rsvp-error">{error}</p>}
+   {error&&<p role="alert" className="mapz-rsvp-error">{error}</p>}
   </div>}
  </article>;
 }

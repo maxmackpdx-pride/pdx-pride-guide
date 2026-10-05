@@ -28,12 +28,12 @@ test('map delivery negotiates lossless Brotli/gzip and preserves identity fallba
 
 test('built Mapz uses one canonical module, exact preload URLs, and lossless models',()=>{
  const root='dist/public';const {base,assets}=JSON.parse(fs.readFileSync(path.join(root,'mapz-manifest.json')));
- const html=fs.readFileSync(path.join(root,'zaydar-map/index.html'),'utf8');
+ const html=fs.readFileSync(path.join(root,'mapz-map/index.html'),'utf8');
  assert.equal((html.match(/<script type="module"/g)||[]).length,1);
  assert.ok(html.includes(`rel="modulepreload" href="${assets.script}"`));
  for(const value of Object.values(assets))assert.ok(html.includes(value));
  assert.ok(!html.includes('river-flight.js'));assert.ok(!html.includes('mapz-roof-boot.js'));
  const bundle=fs.readFileSync(path.join(root,assets.script),'utf8');assert.ok(!/from\s*["']\.\.?\//.test(bundle));
- function verify(relative){for(const entry of fs.readdirSync(path.join('client/public/zaydar-map',relative),{withFileTypes:true})){const name=path.join(relative,entry.name);if(entry.isDirectory())verify(name);else{const source=fs.readFileSync(path.join('client/public/zaydar-map',name)),built=fs.readFileSync(path.join(root,base,name));assert.deepEqual(built,source);if(name.endsWith('.glb')){assert.deepEqual(brotliDecompressSync(fs.readFileSync(path.join(root,base,name+'.br'))),source);assert.deepEqual(gunzipSync(fs.readFileSync(path.join(root,base,name+'.gz'))),source);}}}}
+ function verify(relative){for(const entry of fs.readdirSync(path.join('client/public/mapz-map',relative),{withFileTypes:true})){const name=path.join(relative,entry.name);if(entry.isDirectory())verify(name);else{const source=fs.readFileSync(path.join('client/public/mapz-map',name)),built=fs.readFileSync(path.join(root,base,name));assert.deepEqual(built,source);if(name.endsWith('.glb')){assert.deepEqual(brotliDecompressSync(fs.readFileSync(path.join(root,base,name+'.br'))),source);assert.deepEqual(gunzipSync(fs.readFileSync(path.join(root,base,name+'.gz'))),source);}}}}
  verify('models');
 });

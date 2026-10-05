@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {visibleHologramLabels} from '../client/public/zaydar-map/label-visibility.js';
+import {visibleHologramLabels} from '../client/public/mapz-map/label-visibility.js';
 const label = (key,x,y) => ({key,x,y,width:70,scale:1,logoY:y-30,logoWidth:40,logoHeight:30,opacity:1});
 test('selected event wins when titles collide regardless of input order',()=>{
   const labels=[label('other',200,200),label('selected',210,200)];

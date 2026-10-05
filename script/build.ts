@@ -1,6 +1,7 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
 import { rm, readFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
 import { writeDesignComponentSourceEvidence } from "./design-component-source-evidence";
 import { writeOutzideTokens } from "./build-outzide-tokens.mjs";
 import { assertNav } from "./nav-tripwire";
@@ -35,6 +36,7 @@ const allowlist = [
 ];
 
 async function buildAll() {
+  execFileSync(process.execPath, ["--test", "script/mapz-startup.test.mjs", "script/mapz-tiles.test.mjs"], { stdio: "inherit" });
   await rm("dist", { recursive: true, force: true });
   const evidence = await writeDesignComponentSourceEvidence();
   console.log(`sealed ${evidence.sources.length} canonical design source checksums`);

@@ -1,10 +1,10 @@
-import {attachVenueRows} from '../client/public/zaydar-map/venue-attachments.js';
-import {eventNight} from '../client/public/zaydar-map/event-night.js';
+import {attachVenueRows} from '../client/public/mapz-map/venue-attachments.js';
+import {eventNight} from '../client/public/mapz-map/event-night.js';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
-const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
 const source=renderer.slice(renderer.indexOf('async function setListings(rows)'),renderer.indexOf("window.addEventListener('message',event=>",renderer.indexOf('async function setListings(rows)')));
 test('live waypoint updates preserve coordinates and remove filtered-out pins',async()=>{
  const context=vm.createContext({Map,Set,Intl,Date,Promise,setTimeout,console,

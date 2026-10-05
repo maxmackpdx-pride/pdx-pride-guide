@@ -20,14 +20,14 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
   const categories=Array.from(new Set([...allRows.map(row=>row.category),get("category")].filter(Boolean))).sort();
   const inView=rows.filter(row=>{const point=mapCoordinates(row.lat,row.lng);return Array.isArray(row._mapPoints) && row._mapPoints.length ? row._mapPoints.some((p:{lat:number;lng:number})=>inMapBounds(p,bounds)) : point && inMapBounds(point,bounds);});
   const unlocated=rows.filter(row=>!mapCoordinates(row.lat,row.lng));
-  const renderRows=(items:WorldRow[])=>items.map(row=>world === "places" ? <PlaceDiscoveryCard key={row.id} place={{ ...row, id:Number(row.id), name:String(row.name || 'Place'), type:String(row.type || 'venue') }} onOpen={target=>onOpen(row,target)} onRequireAuth={onCreate} /> : <button type="button" className="zaydar-layer-row" data-selected={Number(row.id)===selectedId} aria-pressed={Number(row.id)===selectedId} key={row.id} onClick={e=>onOpen(row,e.currentTarget)}>
-    <span className="zaydar-layer-row__copy"><strong>{(world === "gigz" ? row.title || row.name : row.name || row.title) || String(row.body || "").slice(0,80)}</strong><small>{row.locationLabel || row.neighborhood || "Mapped location"}{world === "sellz" ? ` · $${(Number(row.priceCents)/100).toFixed(2)}` : ""}</small></span><ChevronRight size={18} aria-hidden="true" />
+  const renderRows=(items:WorldRow[])=>items.map(row=>world === "places" ? <PlaceDiscoveryCard key={row.id} place={{ ...row, id:Number(row.id), name:String(row.name || 'Place'), type:String(row.type || 'venue') }} onOpen={target=>onOpen(row,target)} onRequireAuth={onCreate} /> : <button type="button" className="mapz-layer-row" data-selected={Number(row.id)===selectedId} aria-pressed={Number(row.id)===selectedId} key={row.id} onClick={e=>onOpen(row,e.currentTarget)}>
+    <span className="mapz-layer-row__copy"><strong>{(world === "gigz" ? row.title || row.name : row.name || row.title) || String(row.body || "").slice(0,80)}</strong><small>{row.locationLabel || row.neighborhood || "Mapped location"}{world === "sellz" ? ` · $${(Number(row.priceCents)/100).toFixed(2)}` : ""}</small></span><ChevronRight size={18} aria-hidden="true" />
   </button>);
-  return <section className="zaydar-layer-panel" aria-label={`${name} in this map`}>
-    <div className="zaydar-layer-panel__heading"><small>In this view</small><h2>{name}</h2></div>
+  return <section className="mapz-layer-panel" aria-label={`${name} in this map`}>
+    <div className="mapz-layer-panel__heading"><small>In this view</small><h2>{name}</h2></div>
     {(world === "gigz" || world === "giftz" || world === "sellz" || world === "mizzed") && <BoardFollowButton board={world} />}
-    <button type="button" className="zaydar-houz-post" onClick={onCreate}><Plus size={16} aria-hidden="true"/> {world==="places"?"Add a place":`Post to ${name}`}</button>
-    <BrowseToolbar label={`Search and filter ${name}`} className="zaydar-world-filters">
+    <button type="button" className="mapz-houz-post" onClick={onCreate}><Plus size={16} aria-hidden="true"/> {world==="places"?"Add a place":`Post to ${name}`}</button>
+    <BrowseToolbar label={`Search and filter ${name}`} className="mapz-world-filters">
       <label>Search {name}<input type="search" value={get("q")} onChange={e=>set("q",e.target.value)} placeholder={`Search ${name}`} /></label>
       {world === "gigz" && <button type="button" aria-expanded={filtersOpen} onClick={()=>setFiltersOpen(value=>!value)}>{filtersOpen ? "Hide filters" : "More filters"}</button>}
       {(world !== "gigz" || filtersOpen) && <>
@@ -41,15 +41,15 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
       {world !== "places" && select("sort","Sort",[["","Newest"],["oldest","Oldest"],...(world==="mizzed"?[["CLOSING","Closing soon"] as [string,string]]:[]),...(world==="sellz"?[["PRICE_LOW","Price: low to high"],["PRICE_HIGH","Price: high to low"]] as Array<[string,string]>:[])])}
       </>}
     </BrowseToolbar>
-    {get("ids") && <p className="zaydar-layer-location-note">Showing this waypoint’s posts. <button onClick={()=>set("ids","")}>Show all in view</button></p>}
+    {get("ids") && <p className="mapz-layer-location-note">Showing this waypoint’s posts. <button onClick={()=>set("ids","")}>Show all in view</button></p>}
     {applied.length>0&&<div className="map-applied-filters" aria-label="Applied filters"><button type="button" onClick={onClearFilters}>Clear filters</button>{applied.map(([key,value])=><button key={key} type="button" onClick={()=>setParam(key,"")} aria-label={"Remove "+key.split(".")[1]+" filter"}>{key.endsWith(".ids")?"Selected waypoint":key.endsWith(".owned")?"Queer owned":key.endsWith(".remote")?"Remote friendly":value.replaceAll("_"," ")} ×</button>)}</div>}
     {children}
     {loading ? <p role="status">Loading {name}…</p> : error ? <BrowseStatus error title={`${name} couldn’t load`} description="Your map and filters are still here. Try loading the listings again." onAction={retry} /> : <>
-      <p role="status" className="zaydar-layer-location-note">{inView.length} in view{!bounds ? " · waiting for map bounds" : ""}</p>
-      <div className="zaydar-layer-list">{renderRows(inView.slice(0,limit))}</div>
+      <p role="status" className="mapz-layer-location-note">{inView.length} in view{!bounds ? " · waiting for map bounds" : ""}</p>
+      <div className="mapz-layer-list">{renderRows(inView.slice(0,limit))}</div>
       {inView.length>limit && <button onClick={()=>setLimit(n=>n+40)}>Show more ({inView.length-limit})</button>}
       {!inView.length && !unlocated.length && <BrowseStatus title={`No ${name} in this view`} description="Move the map or broaden your filters to see more listings." onAction={applied.length ? onClearFilters : undefined} actionLabel="Clear filters" />}
-      {unlocated.length>0 && <details className="zaydar-world-unlocated" open={world === "gigz" ? true : undefined}><summary>{unlocated.length} remote or without a mapped location</summary><p className="zaydar-layer-location-note">These posts cannot be filtered by the map viewport.</p><div className="zaydar-layer-list">{renderRows(unlocated.slice(0,limit))}</div>{unlocated.length>limit && <button onClick={()=>setLimit(n=>n+40)}>Show more</button>}</details>}
+      {unlocated.length>0 && <details className="mapz-world-unlocated" open={world === "gigz" ? true : undefined}><summary>{unlocated.length} remote or without a mapped location</summary><p className="mapz-layer-location-note">These posts cannot be filtered by the map viewport.</p><div className="mapz-layer-list">{renderRows(unlocated.slice(0,limit))}</div>{unlocated.length>limit && <button onClick={()=>setLimit(n=>n+40)}>Show more</button>}</details>}
     </>}
   </section>;
 }

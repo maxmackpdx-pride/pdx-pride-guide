@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createPortlandLandmarkLayer} from '../client/public/zaydar-map/portland-landmarks.js';
+import {createPortlandLandmarkLayer} from '../client/public/mapz-map/portland-landmarks.js';
 
 test('landmark elevation translates its base without scaling or tilting its model',()=>{
   let elevation=0;const matrices=[];

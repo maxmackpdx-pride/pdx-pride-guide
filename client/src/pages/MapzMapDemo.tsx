@@ -1,6 +1,6 @@
 import ResourceMapPanel from '@/components/ResourceMapPanel';
 import { RESOURCE_MAP_ENTRIES, resourceMapHref, resourceMapKey, type ResourceMapEntry } from '@/lib/resourceMap';
-import {eventNight} from '../../public/zaydar-map/event-night.js';
+import {eventNight} from '../../public/mapz-map/event-night.js';
 import { DetailRoomLinkContext, type DetailRoomLinkValue } from "@/components/DetailRoomLink";
 import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
@@ -8,16 +8,16 @@ import { useQuery, useQueries } from "@tanstack/react-query";
 
 
 import { useLocation, useSearch } from "wouter";
-import { ZAYDAR_PLACE_TYPE_OPTIONS, zaydarTypeIcon, zaydarTypeLabel } from "@/components/ZaydarSearchDrawer";
-import ZaydarLayerSheet, { type ZaydarLayer, type ZaydarLayerId } from "@/components/ZaydarLayerSheet";
+import { MAPZ_PLACE_TYPE_OPTIONS, mapzTypeIcon, mapzTypeLabel } from "@/components/MapzSearchDrawer";
+import MapzLayerSheet, { type MapzLayer, type MapzLayerId } from "@/components/MapzLayerSheet";
 import MapWorldPanel from "@/components/MapWorldPanel";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import MapComposerOverlay from "@/components/MapComposerOverlay";
 import {readMapCamera,filterWorldRows,locateWorldRow,roughDistanceMiles,WORLD_DETAIL_KEYS,type MapWorld,type WorldRow,type MapBounds} from "@/lib/mapWorlds";
-import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
+import MapzUpcomingRsvps from "@/components/MapzUpcomingRsvps";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { ROOMS, roomTitle } from "@/lib/rooms";
-import ZaydarCanvas, { type MapSelectionRect, type ZaydarHandle } from "@/components/ZaydarCanvas";
+import MapzCanvas, { type MapSelectionRect, type MapzHandle } from "@/components/MapzCanvas";
 import { ChevronRight, Layers, LocateFixed, Search } from "lucide-react";
 import MapSwitch from "@/components/MapSwitch";
 import { useAuth } from "@/context/AuthContext";
@@ -49,8 +49,8 @@ import { EVENT_PLACEHOLDER_PENDING, resolveEventPosterUrl } from "@shared/eventP
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { AVATAR_EMOJI_OPTIONS, normalizeAvatarRing } from "@shared/avatarRings";
 import "./LivingMap.css";
-import "./ZaydarMapDemo.css";
-import "@/components/ZaydarLayerSheet.css";
+import "./MapzMapDemo.css";
+import "@/components/MapzLayerSheet.css";
 import "../../public/outzide-map/assets/map-continuity.css";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 
@@ -64,10 +64,10 @@ const EMPTY_ROWS: MapRow[] = [];
 const EMPTY_COMMUNITIES: CommunitySummary[] = [];
 const FORMING_COVER = "/hausing/forming-no-place.svg";
 
-// Preserve the adult locations already marked red in the Zaydar studio snapshot.
+// Preserve the adult locations already marked red in the Mapz studio snapshot.
 const ADULT_VENUES = new Set(['Sanctuary Club','Hawks PDX','FANTASY','Steam Portland','Club Privata','The Velvet Rope'].map(normalizeDirectoryName));
-function zaydarPlaceType(place: Pick<Place,'name'|'type'>) { return ADULT_VENUES.has(normalizeDirectoryName(place.name)) ? 'adult' : place.type; }
-function zaydarPlaceColor(place: Pick<Place,'name'|'type'>) {
+function mapzPlaceType(place: Pick<Place,'name'|'type'>) { return ADULT_VENUES.has(normalizeDirectoryName(place.name)) ? 'adult' : place.type; }
+function mapzPlaceColor(place: Pick<Place,'name'|'type'>) {
   return ADULT_VENUES.has(normalizeDirectoryName(place.name)) ? '#FF0000' : directoryTypeColor(place.type);
 }
 const WEEKDAY_TOKENS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
@@ -77,12 +77,12 @@ function nightDayColor(night: string | undefined): string | undefined {
   const weekday = new Date(`${night}T12:00:00Z`).getUTCDay();
   return getComputedStyle(document.documentElement).getPropertyValue(`--day-${WEEKDAY_TOKENS[weekday]}`).trim() || undefined;
 }
-function zaydarEventColor(event: Event, places: Place[]) {
+function mapzEventColor(event: Event, places: Place[]) {
   const venueKey=normalizeDirectoryName(event.venueName || '');
   let tags: string[]=[];try { const parsed=JSON.parse(event.eventTypes || '[]'); if(Array.isArray(parsed))tags=parsed; } catch {}
   if(event.isSexPositive || event.nudityOk || tags.some(tag=>['SEX_POSITIVE','NUDITY_OK','KINK'].includes(tag)) || ADULT_VENUES.has(venueKey))return '#FF0000';
   const venue=places.find(place=>place.type!=='group' && normalizeDirectoryName(place.name)===venueKey);
-  return venue?zaydarPlaceColor(venue):directoryTypeColor('venue');
+  return venue?mapzPlaceColor(venue):directoryTypeColor('venue');
 }
 
 function phraseIncludes(haystack: string, needle: string): boolean {
@@ -216,11 +216,11 @@ function boardColor(row: MapRow): string {
 }
 
 function boardIcon(row: MapRow): string {
-  if (String(row._board) === "The HAÜZ") return `/zaydar-map/icons/housing-${({LOOKING:"looking",FORMING:"forming",OFFERING:"offering",MANAGED:"managed"} as Record<string,string>)[String(row.type)]||"looking"}.svg`;
-  if(row._board === "Mizzed")return "/zaydar-map/icons/mizzed.svg";
+  if (String(row._board) === "The HAÜZ") return `/mapz-map/icons/housing-${({LOOKING:"looking",FORMING:"forming",OFFERING:"offering",MANAGED:"managed"} as Record<string,string>)[String(row.type)]||"looking"}.svg`;
+  if(row._board === "Mizzed")return "/mapz-map/icons/mizzed.svg";
   const kind = boardKind(row);
-  if (kind === "gig") return "/zaydar-map/icons/gigz.svg";
-  return kind === "gifting" ? "/zaydar-map/icons/giftz.svg" : "/zaydar-map/icons/sellz.svg";
+  if (kind === "gig") return "/mapz-map/icons/gigz.svg";
+  return kind === "gifting" ? "/mapz-map/icons/giftz.svg" : "/mapz-map/icons/sellz.svg";
 }
 
 function boardTitle(row: MapRow): string {
@@ -317,7 +317,7 @@ function useDesktop() {
   return desktop;
 }
 
-export default function ZaydarMapDemo() {
+export default function MapzMapDemo() {
   usePageSeo(roomTitle("mapz"), "Portland on one map: tonight's events, places, and posts from every room.");
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
@@ -339,8 +339,8 @@ export default function ZaydarMapDemo() {
     if (value !== "custom") { p.delete("from"); p.delete("to"); }
   });
   const layerValue = params.get("layer");
-  const activeLayer = layerValue === "boards" || layerValue === "stuff" ? "giftz" : ["events", "places", "rezources", "mizzed", "gigz", "giftz", "sellz", "houz"].includes(layerValue || "") ? layerValue as ZaydarLayerId : null;
-  const changeLayer = useCallback((next: ZaydarLayerId | null) => {
+  const activeLayer = layerValue === "boards" || layerValue === "stuff" ? "giftz" : ["events", "places", "rezources", "mizzed", "gigz", "giftz", "sellz", "houz"].includes(layerValue || "") ? layerValue as MapzLayerId : null;
+  const changeLayer = useCallback((next: MapzLayerId | null) => {
     const current = mapSearchParams().get("layer");
     setLocation(mapHref(p => { if (next) p.set("layer", next); else p.delete("layer"); }), {
       replace: Boolean(current) || !next,
@@ -368,7 +368,7 @@ export default function ZaydarMapDemo() {
   const composeValue = params.get("houzCompose");
   const houzCompose = composeValue === "PM" || ["OFFERING", "LOOKING", "FORMING", "MANAGED"].includes(composeValue || "") ? composeValue as HousingType | "PM" : null;
   const placeTypesParam = params.get("placeTypes");
-  const placeTypes = useMemo(() => placeTypesParam !== null ? placeTypesParam.split(",") : [...ZAYDAR_PLACE_TYPE_OPTIONS], [placeTypesParam]);
+  const placeTypes = useMemo(() => placeTypesParam !== null ? placeTypesParam.split(",") : [...MAPZ_PLACE_TYPE_OPTIONS], [placeTypesParam]);
   const eventTag = params.get("tag");
   const setEventTag = (value: string | null) => updateParams(p => { if (value) p.set("tag", value); else p.delete("tag"); });
   const [clockNow, setClockNow] = useState(() => Date.now());
@@ -385,7 +385,7 @@ export default function ZaydarMapDemo() {
   useEffect(()=>{if(!authLoading && !user && requestedPrivateAction.replaceAll("|","").length)setShowAuth(true);},[authLoading,user,requestedPrivateAction]);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState("");
-  const mapRef = useRef<ZaydarHandle | null>(null);
+  const mapRef = useRef<MapzHandle | null>(null);
   useEffect(()=>{
     const restore=()=>{
       window.clearTimeout(cameraWriteTimer.current);
@@ -590,7 +590,7 @@ export default function ZaydarMapDemo() {
     })) as unknown as Record<MapWorld,WorldRow[]>;
   },[places,mizzed,gigs,gifts,sells,mineQueries[0].data,mineQueries[1].data,mineQueries[2].data,mineQueries[3].data,params,boardMapPoints,viewerPoint,mapCenter]);
   const filteredWorlds=useMemo(()=>Object.fromEntries((Object.keys(locatedWorlds) as MapWorld[]).map(world=>[world,filterWorldRows(locatedWorlds[world],world,params,savedSellzSet)])) as Record<MapWorld,WorldRow[]>,[locatedWorlds,params,savedSellzSet]);
-  const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>(place as Place).type!=='nonprofit'&&placeTypes.includes(zaydarPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes]);
+  const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>(place as Place).type!=='nonprofit'&&placeTypes.includes(mapzPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes]);
   const visibleHousing = useMemo(() => housing
     .filter(row => (!housingType || row.type === housingType || (housingType === "FORMING" && row.type === "LOOKING" && row.openToHaus === true)) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
     .map(row => ({ ...row, _board: "The HAÜZ", locationLabel: row.lat != null && row.lng != null
@@ -631,46 +631,46 @@ export default function ZaydarMapDemo() {
   }, [goOverlay, setLocation]);
   const openBoardRow = (row: MapRow, target?: Element | null) => openMark({ key: mapListingKey(row._board,row.id), kind: "board", lat: Number(row.lat), lng: Number(row.lng), item: row }, target);
   const panelRows = (rows: MapRow[], kind: "places" | "boards" | "houz") => (
-    <div className="zaydar-layer-list">
+    <div className="mapz-layer-list">
       {rows.slice(0, kind === "houz" ? 50 : 5).map((row, index) => {
         const isPlace = kind === "places";
         const title = isPlace ? String(row.name || "Place") : boardTitle(row);
-        const meta = isPlace ? `${zaydarTypeLabel(String(row.type || "venue"))} · ${String(row.neighborhood || "Portland")}` : kind === "houz" ? `${(HOUSING_TYPE_LABEL[row.type as HousingType] || "Housing")} · ${row.locationLabel}` : `${String(row._board || "Boards")} · ${String(row.locationLabel || "Approximate area")}`;
+        const meta = isPlace ? `${mapzTypeLabel(String(row.type || "venue"))} · ${String(row.neighborhood || "Portland")}` : kind === "houz" ? `${(HOUSING_TYPE_LABEL[row.type as HousingType] || "Housing")} · ${row.locationLabel}` : `${String(row._board || "Boards")} · ${String(row.locationLabel || "Approximate area")}`;
         const fallback = isPlace ? directoryFallbackLogo(String(row.type)) : boardIcon(row);
         const photo = isPlace ? resolveDirectoryLogo(String(row.name), typeof row.imageUrl === "string" ? row.imageUrl : undefined) : firstImage(kind === "houz" ? row.photos : row.photoUrls) || firstImage(row.imageUrl);
-        return <button type="button" className="zaydar-layer-row" key={`${kind}-${row._board || ""}-${row.id ?? index}`} onClick={event => isPlace ? openMark(placeMarks([row as Place])[0] || { key: `p-${row.id}`, kind: "place", lat: Number(row.lat), lng: Number(row.lng), item: row as Place }, event.currentTarget) : openBoardRow(row, event.currentTarget)}>
+        return <button type="button" className="mapz-layer-row" key={`${kind}-${row._board || ""}-${row.id ?? index}`} onClick={event => isPlace ? openMark(placeMarks([row as Place])[0] || { key: `p-${row.id}`, kind: "place", lat: Number(row.lat), lng: Number(row.lng), item: row as Place }, event.currentTarget) : openBoardRow(row, event.currentTarget)}>
           <img src={photo || fallback} alt="" loading="lazy" onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = fallback; }} />
-          <span className="zaydar-layer-row__copy"><strong>{title}</strong><small>{meta}</small></span>
+          <span className="mapz-layer-row__copy"><strong>{title}</strong><small>{meta}</small></span>
           <ChevronRight size={18} aria-hidden="true" />
         </button>;
       })}
-      {!rows.length && <p className="zaydar-layer-empty" role="status">No {kind === "houz" ? "housing listings" : kind === "places" ? "nearby places" : "listings"} match these filters.</p>}
+      {!rows.length && <p className="mapz-layer-empty" role="status">No {kind === "houz" ? "housing listings" : kind === "places" ? "nearby places" : "listings"} match these filters.</p>}
     </div>
   );
-  const eventPanel = <section className="zaydar-layer-panel" aria-labelledby="map-eventz-title">
-    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-eventz-title">Eventz</h2></div>
-    <div className="zaydar-layer-rail" role="group" aria-label="Event filters">
+  const eventPanel = <section className="mapz-layer-panel" aria-labelledby="map-eventz-title">
+    <div className="mapz-layer-panel__heading"><small>Map layer</small><h2 id="map-eventz-title">Eventz</h2></div>
+    <div className="mapz-layer-rail" role="group" aria-label="Event filters">
       <button type="button" aria-pressed={timeFilter === "tonight"} onClick={() => setTimeFilter(timeFilter === "tonight" ? "default" : "tonight")}>Tonight</button>
       <button type="button" aria-pressed={timeFilter === "soon"} onClick={() => setTimeFilter(timeFilter === "soon" ? "default" : "soon")}>Soon</button>
       {eventTags.map(tag => <button type="button" key={tag} aria-pressed={eventTag === tag} onClick={() => setEventTag(eventTag === tag ? null : tag)}>{tag.replaceAll("_", " ")}</button>)}
       <button type="button" aria-pressed={timeFilter === "default" && !eventTag} onClick={() => { setTimeFilter("default"); setEventTag(null); }}>All upcoming</button>
     </div>
     {(timeFilter!=="default"||eventTag) && <div className="map-applied-filters" aria-label="Applied event filters">{timeFilter!=="default"&&<button onClick={()=>setTimeFilter("default")} aria-label="Remove date filter">{timeFilter} ×</button>}{eventTag&&<button onClick={()=>setEventTag(null)} aria-label="Remove event type filter">{eventTag.replaceAll("_"," ")} ×</button>}<button onClick={()=>{setTimeFilter("default");setEventTag(null);}}>Clear all</button></div>}
-    {demoEventIds.size>0 && <p className="zaydar-layer-location-note">Demo examples use saved event listings and their original dates.</p>}
-    {eventsLoading ? <p role="status">Loading Eventz…</p> : eventsError ? <p role="alert">Eventz could not load. <button type="button" onClick={() => void retryEvents()}>Try again</button></p> : <div className="zaydar-layer-list">
+    {demoEventIds.size>0 && <p className="mapz-layer-location-note">Demo examples use saved event listings and their original dates.</p>}
+    {eventsLoading ? <p role="status">Loading Eventz…</p> : eventsError ? <p role="alert">Eventz could not load. <button type="button" onClick={() => void retryEvents()}>Try again</button></p> : <div className="mapz-layer-list">
       {visibleEvents.slice(0, 5).map(event => {
         const starts = parsePacificDateTime(event.dateStart) || Date.now();
         const isToday = portlandCalendarDay(starts) === portlandCalendarDay(Date.now());
-        return <button type="button" className="zaydar-layer-row" key={`${event.id}-${event.dateStart}`} onClick={click => openMark({ key: `e-${event.id}-${event.dateStart}`, kind: "event", lat: event.lat!, lng: event.lng!, item: event }, click.currentTarget)}>
+        return <button type="button" className="mapz-layer-row" key={`${event.id}-${event.dateStart}`} onClick={click => openMark({ key: `e-${event.id}-${event.dateStart}`, kind: "event", lat: event.lat!, lng: event.lng!, item: event }, click.currentTarget)}>
           <img src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} alt="" loading="lazy" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = EVENT_PLACEHOLDER_PENDING; }} />
-          <span className="zaydar-layer-row__copy"><strong>{event.title}</strong><small>{event.venueName}</small></span>
+          <span className="mapz-layer-row__copy"><strong>{event.title}</strong><small>{event.venueName}</small></span>
           <time dateTime={event.dateStart}>{!isToday && <small>{eventDateLabel(event.dateStart)}</small>}{eventTimeLabel(event.dateStart)}</time>
           <ChevronRight size={17} aria-hidden="true" />
         </button>;
       })}
-      {!visibleEvents.length && <p className="zaydar-layer-empty" role="status">No events match these filters. <button type="button" onClick={() => { setTimeFilter("default"); setEventTag(null); }}>Show upcoming events</button></p>}
+      {!visibleEvents.length && <p className="mapz-layer-empty" role="status">No events match these filters. <button type="button" onClick={() => { setTimeFilter("default"); setEventTag(null); }}>Show upcoming events</button></p>}
     </div>}
-    <details className="zaydar-layer-rsvps"><summary>Your RSVPs</summary><ZaydarUpcomingRsvps events={events} loading={eventsLoading} onSignIn={() => setShowAuth(true)} onOpen={(event,target) => openMark({key:`e-${event.id}-${event.dateStart}`,kind:"event",lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)} /></details>
+    <details className="mapz-layer-rsvps"><summary>Your RSVPs</summary><MapzUpcomingRsvps events={events} loading={eventsLoading} onSignIn={() => setShowAuth(true)} onOpen={(event,target) => openMark({key:`e-${event.id}-${event.dateStart}`,kind:"event",lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)} /></details>
   </section>;
   const openComposer=(world:MapWorld)=>{
     if(!user){setShowAuth(true);return;}
@@ -681,30 +681,30 @@ export default function ZaydarMapDemo() {
     const state={places:[placesLoading,placesError,retryPlaces],mizzed:[mizzedLoading,mizzedError,retryMizzed],gigz:[gigsLoading,gigsError,retryGigs],giftz:[giftsLoading,giftsError,retryGifts],sellz:[sellsLoading,sellsError,retrySells]}[world];
     const rows=world==="places"?mapPlaces as unknown as WorldRow[]:filteredWorlds[world];
     return [world,<MapWorldPanel key={world} world={world} rows={rows} allRows={locatedWorlds[world]} bounds={mapBounds} params={params} setParam={(key,value)=>updateParams(p=>{if(value)p.set(key,value);else p.delete(key);})} onClearFilters={()=>updateParams(p=>{[...p.keys()].filter(key=>key.startsWith(world+".")).forEach(key=>p.delete(key));})} onCreate={()=>openComposer(world)} selectedId={mapRecordId(params.get(WORLD_DETAIL_KEYS[world]))} loading={isMine?mineWorlds[world]?.isLoading:Boolean(state[0])} error={isMine?mineWorlds[world]?.isError:Boolean(state[1])} retry={()=>{if(isMine)void mineWorlds[world]?.refetch();else void (state[2] as ()=>unknown)();}} onOpen={(row,target)=>world==="places"?openMark(placeMarks([row as Place])[0]||{key:`p-${row.id}`,kind:"place",lat:NaN,lng:NaN,item:row as Place},target):openBoardRow(row,target)}>
-      {world==="places" && <div className="zaydar-layer-rail" role="group" aria-label="Place categories">{ZAYDAR_PLACE_TYPE_OPTIONS.map(type=><button key={type} aria-pressed={placeTypes.includes(type)} onClick={()=>updateParams(p=>p.set("placeTypes",(placeTypes.includes(type)?placeTypes.filter(item=>item!==type):[...placeTypes,type]).join(",")))}>{zaydarTypeLabel(type)}</button>)}</div>}
+      {world==="places" && <div className="mapz-layer-rail" role="group" aria-label="Place categories">{MAPZ_PLACE_TYPE_OPTIONS.map(type=><button key={type} aria-pressed={placeTypes.includes(type)} onClick={()=>updateParams(p=>p.set("placeTypes",(placeTypes.includes(type)?placeTypes.filter(item=>item!==type):[...placeTypes,type]).join(",")))}>{mapzTypeLabel(type)}</button>)}</div>}
     </MapWorldPanel>];
   })) as Record<MapWorld,React.ReactNode>;
-  const houzPanel = <section className="zaydar-layer-panel" aria-labelledby="map-houz-title">
-    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">Haüz</h2></div>
+  const houzPanel = <section className="mapz-layer-panel" aria-labelledby="map-houz-title">
+    <div className="mapz-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">Haüz</h2></div>
     <BoardFollowButton board="houz" />
-    {housingStats && <div className="zaydar-houz-stats" aria-label="HAÜZ board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
-    <button type="button" className="zaydar-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to HAÜZ</button>
-    <div className="zaydar-layer-rail zaydar-houz-actions" role="group" aria-label="Start a HAÜZ post">
+    {housingStats && <div className="mapz-houz-stats" aria-label="HAÜZ board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
+    <button type="button" className="mapz-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to HAÜZ</button>
+    <div className="mapz-layer-rail mapz-houz-actions" role="group" aria-label="Start a HAÜZ post">
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "OFFERING")) : setShowAuth(true)}>Offer a room</button>
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Find housing</button>
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "FORMING")) : setShowAuth(true)}>Build a HAÜZ</button>
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "PM")) : setShowAuth(true)}>List a rental</button>
     </div>
-    <div className="zaydar-layer-rail" role="group" aria-label="Housing types">
+    <div className="mapz-layer-rail" role="group" aria-label="Housing types">
       {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All HAÜZ" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
       <button type="button" aria-pressed={housingSaved} onClick={() => user ? setHousingSaved(!housingSaved) : setShowAuth(true)}>Saved</button>
     </div>
     <HousingTagFilter applied={housingTags} onApply={setHousingTags} />
     {housingLoading ? <p role="status">Loading HAÜZ…</p> : housingError ? <p role="alert">HAÜZ could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
-    <p className="zaydar-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
-    <details className="zaydar-houz-about"><summary>How HAÜZ works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
+    <p className="mapz-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
+    <details className="mapz-houz-about"><summary>How HAÜZ works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
   </section>;
-  const layers: ZaydarLayer[] = [
+  const layers: MapzLayer[] = [
     { id: "events", label: ROOMS.eventz.nav, color: ROOMS.eventz.accent, enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
     { id:"places",label:ROOMS.placez.nav,color:ROOMS.placez.accent,enabled:showPlaces,onToggle:()=>toggleLayer("hidePlaces"),panel:worldPanels.places,viewMore:[{label:"Browse all Placez",href:"/directory"}] },
     { id:'rezources',label:'ReZources',color:'var(--neon-yellow)',enabled:showResources,onToggle:()=>toggleLayer('hideResources'),
@@ -735,16 +735,16 @@ export default function ZaydarMapDemo() {
       const category = entry.categories[0];
       const token = category.color.match(/var\((--[^)]+)\)/)?.[1];
       const color = token ? getComputedStyle(document.documentElement).getPropertyValue(token).trim() || '#CCFF00' : '#CCFF00';
-      return { key:mark.key, kind:'resource', waypointFamily:'rezources', type:'service', typeIcon:zaydarTypeIcon('service'),
+      return { key:mark.key, kind:'resource', waypointFamily:'rezources', type:'service', typeIcon:mapzTypeIcon('service'),
         coordinates:[mark.lng,mark.lat], name:entry.org.name, color,
-        logo:entry.org.logo || '/zaydar-map/icons/types/service.svg', locationLabel:entry.org.scope };
+        logo:entry.org.logo || '/mapz-map/icons/types/service.svg', locationLabel:entry.org.scope };
     }
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
     const row=mark.item as MapRow;
     const isHouz=String(row._board)==='The HAÜZ';
     const brands=event?eventBrandLogos(event,places):null;
-    const color=event?zaydarEventColor(event,places):place?zaydarPlaceColor(place):boardColor(row);
+    const color=event?mapzEventColor(event,places):place?mapzPlaceColor(place):boardColor(row);
     const connectionEvent=row._board==='Mizzed'?events.find(e=>e.id===Number(row.eventId)):undefined;
     const linkedBoard=row._board==='Mizzed'||row._board==='Gigz';
     const venueName=event?.venueName||connectionEvent?.venueName||String(row.eventVenue||row.venueHint||row.placeName||(row._board==='Gigz'?row.location:'')||'');
@@ -754,13 +754,13 @@ export default function ZaydarMapDemo() {
       (venueName&&normalizeDirectoryName(p.name)===normalizeDirectoryName(venueName))):undefined;
     const venuePoint=venue?placeMarks([venue]).sort((a,b)=>Math.hypot(a.lat-mark.lat,a.lng-mark.lng)-Math.hypot(b.lat-mark.lat,b.lng-mark.lng))[0]:undefined;
     const venueAnchor=venue&&venuePoint?{key:`directory-${venue.id}`,coordinates:[venuePoint.lng,venuePoint.lat],name:venue.name,
-      color:zaydarPlaceColor(venue),type:zaydarPlaceType(venue),typeIcon:zaydarTypeIcon(zaydarPlaceType(venue)),
+      color:mapzPlaceColor(venue),type:mapzPlaceType(venue),typeIcon:mapzTypeIcon(mapzPlaceType(venue)),
       waypointLogo:resolveDirectoryLogo(venue.name,venue.imageUrl)?.replace(/\.png(?=\?|$)/,'-white.png'),logo:''}:undefined;
-    const type=place?zaydarPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');
+    const type=place?mapzPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');
     const name=event?.title||place?.name||boardTitle(row);
     const boardLogo=isHouz?firstImage(row.photos)||FORMING_COVER:firstImage(row.photoUrls)||firstImage(row.imageUrl);
-    return {venueAnchor,createdAt:row.createdAt,closesAt:row.closesAt,status:row.status,waypointLogo:place?resolveDirectoryLogo(place.name,place.imageUrl)?.replace(/\.png(?=\?|$)/,"-white.png"):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place||event?zaydarTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
-      logo:isHouz?'':brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':boardLogo||boardIcon(row)),
+    return {venueAnchor,createdAt:row.createdAt,closesAt:row.closesAt,status:row.status,waypointLogo:place?resolveDirectoryLogo(place.name,place.imageUrl)?.replace(/\.png(?=\?|$)/,"-white.png"):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place||event?mapzTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
+      logo:isHouz?'':brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/mapz-map/icons/event.svg':boardLogo||boardIcon(row)),
       alternateLogo:brands?.alternate,
       housingModel:isHouz?String(row.type||'LOOKING'):undefined,
       neighborhoodLabel:isHouz?housingAreaLabel(row):undefined,
@@ -792,10 +792,10 @@ export default function ZaydarMapDemo() {
   const openMapSearch = () => {
     // Events have no search box; Placez does. A layer that has one keeps it.
     if (!activeLayer || activeLayer === "events" || activeLayer === "houz") changeLayer("places");
-    requestAnimationFrame(() => document.querySelector<HTMLInputElement>(".zaydar-layer-sheet input[type=search]")?.focus());
+    requestAnimationFrame(() => document.querySelector<HTMLInputElement>(".mapz-layer-sheet input[type=search]")?.focus());
   };
-  return <section ref={pageRef} className="living-map-page zaydar-map-demo" data-map="mapz" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
-    <ZaydarCanvas initialCamera={initialCamera} ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
+  return <section ref={pageRef} className="living-map-page mapz-map-demo" data-map="mapz" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
+    <MapzCanvas initialCamera={initialCamera} ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
       if(!["places","rezources","mizzed","gigz","giftz","sellz"].includes(world))return;
       if(zoom<16.8){mapRef.current?.send("fit",{bounds});return;}
       const ids=world==='rezources' ? keys.join(',') : marks.filter(mark=>keys.includes(mark.key)).map(mark=>(mark.item as MapRow).id).join(',');
@@ -807,35 +807,35 @@ export default function ZaydarMapDemo() {
       window.clearTimeout(cameraWriteTimer.current);
       cameraWriteTimer.current=window.setTimeout(()=>updateParams(p=>{p.set("lat",view.center[0].toFixed(5));p.set("lng",view.center[1].toFixed(5));p.set("zoom",view.zoom.toFixed(2));}),500);
     }} />
-    <div className="zaydar-map-lockup pdx-glass-rebind" aria-label={`${regionLabel}, ${mapTimeLabel}${tonightCount ? `, ${tonightCount} tonight` : ""}`}>
+    <div className="mapz-map-lockup pdx-glass-rebind" aria-label={`${regionLabel}, ${mapTimeLabel}${tonightCount ? `, ${tonightCount} tonight` : ""}`}>
       <strong>{regionLabel}</strong>
-      <button type="button" className="zaydar-map-time" onClick={() => { const input=timeInputRef.current;if(!input)return;if(input.showPicker)input.showPicker();else input.click(); }} aria-label="Choose a future map date and time">{mapTimeLabel}</button>
-      <input ref={timeInputRef} className="zaydar-map-time-input" type="datetime-local" min={dateTimeLocalValue(clockNow)} value={previewDateTime} onChange={event => setPreviewDateTime(event.target.value)} aria-label="Future map date and time" />
-      {tonightCount > 0 && <span className="zaydar-map-tonight">{tonightCount} TONIGHT</span>}
-      {previewDateTime && <button type="button" className="zaydar-map-live" onClick={() => setPreviewDateTime("")}>Live</button>}
+      <button type="button" className="mapz-map-time" onClick={() => { const input=timeInputRef.current;if(!input)return;if(input.showPicker)input.showPicker();else input.click(); }} aria-label="Choose a future map date and time">{mapTimeLabel}</button>
+      <input ref={timeInputRef} className="mapz-map-time-input" type="datetime-local" min={dateTimeLocalValue(clockNow)} value={previewDateTime} onChange={event => setPreviewDateTime(event.target.value)} aria-label="Future map date and time" />
+      {tonightCount > 0 && <span className="mapz-map-tonight">{tonightCount} TONIGHT</span>}
+      {previewDateTime && <button type="button" className="mapz-map-live" onClick={() => setPreviewDateTime("")}>Live</button>}
     </div>
     <MapSwitch current="mapz" />
     {/* Board 42: one rack on both maps. Search, layers, locate; then zoom; then the map's own slot. */}
-    <div className="zaydar-demo-navigation pdx-glass-rebind" aria-label="Map controls">
-      <button type="button" className="zaydar-control-icon" onClick={openMapSearch} aria-label="Search the map" title="Search"><Search size={20} aria-hidden="true"/></button>
-      <button type="button" className="zaydar-control-icon" onClick={()=>changeLayer(activeLayer?null:"events")} aria-label="Layers" title="Layers" aria-expanded={activeLayer!==null}><Layers size={20} aria-hidden="true"/></button>
-      <button className="zaydar-control-location" onClick={locateMe} aria-label="Locate me" title="Locate me" aria-busy={locating} disabled={locating}><LocateFixed size={22} aria-hidden="true"/></button>
-      <span className="zaydar-control-gap" aria-hidden="true" />
-      <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in" title="Zoom in">+</button>
-      <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:-1})} aria-label="Zoom out" title="Zoom out">−</button>
-      <span className="zaydar-control-gap" aria-hidden="true" />
-      <button type="button" className="zaydar-control-tonight" aria-pressed={timeFilter === "tonight"} onClick={() => setTimeFilter(timeFilter === "tonight" ? "default" : "tonight")} title="Tonight only">Tonight</button>
-      <button className="zaydar-control-labels" title="Show map labels" aria-label="Show map labels" aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
+    <div className="mapz-demo-navigation pdx-glass-rebind" aria-label="Map controls">
+      <button type="button" className="mapz-control-icon" onClick={openMapSearch} aria-label="Search the map" title="Search"><Search size={20} aria-hidden="true"/></button>
+      <button type="button" className="mapz-control-icon" onClick={()=>changeLayer(activeLayer?null:"events")} aria-label="Layers" title="Layers" aria-expanded={activeLayer!==null}><Layers size={20} aria-hidden="true"/></button>
+      <button className="mapz-control-location" onClick={locateMe} aria-label="Locate me" title="Locate me" aria-busy={locating} disabled={locating}><LocateFixed size={22} aria-hidden="true"/></button>
+      <span className="mapz-control-gap" aria-hidden="true" />
+      <button className="mapz-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in" title="Zoom in">+</button>
+      <button className="mapz-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:-1})} aria-label="Zoom out" title="Zoom out">−</button>
+      <span className="mapz-control-gap" aria-hidden="true" />
+      <button type="button" className="mapz-control-tonight" aria-pressed={timeFilter === "tonight"} onClick={() => setTimeFilter(timeFilter === "tonight" ? "default" : "tonight")} title="Tonight only">Tonight</button>
+      <button className="mapz-control-labels" title="Show map labels" aria-label="Show map labels" aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
     </div>
-    {locateError&&<p className="zaydar-demo-notice" role="status">{locateError}</p>}
-    <ZaydarLayerSheet layers={layers} active={activeLayer} onActiveChange={changeLayer} />
-    {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="zaydar-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
-    {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="zaydar-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
+    {locateError&&<p className="mapz-demo-notice" role="status">{locateError}</p>}
+    <MapzLayerSheet layers={layers} active={activeLayer} onActiveChange={changeLayer} />
+    {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="mapz-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
+    {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="mapz-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
     <DetailRoomLinkContext.Provider value={detailRoomLink}>
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
-    {mizzedId && !selectedMizzed && <p className="zaydar-demo-notice" role={mizzedDetail.isError?"alert":"status"}>{mizzedDetail.isError?"This connection is unavailable or could not load.":"Loading connection…"} <button onClick={()=>void mizzedDetail.refetch()}>Retry</button> <button onClick={closeOverlays}>Back to map</button></p>}
+    {mizzedId && !selectedMizzed && <p className="mapz-demo-notice" role={mizzedDetail.isError?"alert":"status"}>{mizzedDetail.isError?"This connection is unavailable or could not load.":"Loading connection…"} <button onClick={()=>void mizzedDetail.refetch()}>Retry</button> <button onClick={closeOverlays}>Back to map</button></p>}
     {selectedMizzed && <SpottedDetailModal key={selectedMizzed.id} isMine={selectedMizzed.isMine} status={selectedMizzed.status} postId={selectedMizzed.id} title={selectedMizzed.title} body={selectedMizzed.body} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={closeOverlays} />}
     {selectedHouz && <HousingPostOverlay key={selectedHouz.id} post={selectedHouz} userId={user?.id} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => {setCardOriginRect(null);goOverlay("houz", postId);}} />}
     </DetailRoomLinkContext.Provider>

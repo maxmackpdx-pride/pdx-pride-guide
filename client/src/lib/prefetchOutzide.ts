@@ -6,7 +6,7 @@ export function prefetchOutzide() {
   started = true;
   void import("@/pages/Outz");
   for (const [href, rel, as] of [
-    ["/outzide-map/app.js?v=20261001-hero-map", "modulepreload", ""],
+    ["/outzide-map/app.js?v=20261004-mapz-rename", "modulepreload", ""],
     ["/outzide-map/assets/maplibre-gl-5.6.2.js", "prefetch", "script"],
     ["/outzide-map/assets/maplibre-gl-5.6.2.css", "prefetch", "style"],
     ["/outzide-map/places.json", "prefetch", "fetch"],

@@ -113,11 +113,11 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
     };
     const scroll = (event: Event) => {
       // Reading map results must not restore the full dock over the open sheet.
-      if (event.target instanceof Element && event.target.closest(".zaydar-layer-sheet")) return;
+      if (event.target instanceof Element && event.target.closest(".mapz-layer-sheet")) return;
       pendingSource = event.target;
       if (!frame) frame = requestAnimationFrame(measure);
     };
-    // Zaydar and other app surfaces scroll inside their own containers. Scroll
+    // Mapz and other app surfaces scroll inside their own containers. Scroll
     // does not bubble, so capture it here to preserve the same dock behavior.
     document.addEventListener("scroll", scroll, { passive: true, capture: true });
     const outzideScroll = (event: Event) => {

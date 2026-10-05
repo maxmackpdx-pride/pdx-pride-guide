@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {build} from 'esbuild';
-import {parseHousingHologramGlb,createWorldWaypointLayer} from '../client/public/zaydar-map/housing-holograms.js';
+import {parseHousingHologramGlb,createWorldWaypointLayer} from '../client/public/mapz-map/housing-holograms.js';
 
 async function moduleFrom(path){
   const result=await build({entryPoints:[new URL(path,import.meta.url).pathname],bundle:true,write:false,platform:'node',format:'esm'});
@@ -57,7 +57,7 @@ test('Haüz names normalize legacy suffixes without doubling them',()=>{
 });
 test('all four waypoint meshes fit the GPU budget, retain normals and use no textures',async()=>{
   for(const id of ['mizzed','gigz','giftz','sellz']){
-    const bytes=await readFile(new URL(`../client/public/zaydar-map/models/waypoints/${id}.glb`,import.meta.url));
+    const bytes=await readFile(new URL(`../client/public/mapz-map/models/waypoints/${id}.glb`,import.meta.url));
     assert.ok(bytes.byteLength<300000,id);
     const json=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString());
     assert.equal(json.images?.length||0,0,id);

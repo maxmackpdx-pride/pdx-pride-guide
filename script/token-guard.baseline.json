@@ -91,11 +91,11 @@
     "hex": 4,
     "mono": 0
   },
-  "client/src/components/ZaydarBootNotice.css": {
+  "client/src/components/MapzBootNotice.css": {
     "hex": 5,
     "mono": 0
   },
-  "client/src/components/ZaydarLayerSheet.css": {
+  "client/src/components/MapzLayerSheet.css": {
     "hex": 59,
     "mono": 0
   },
@@ -367,7 +367,7 @@
     "hex": 99,
     "mono": 0
   },
-  "client/src/pages/ZaydarMapDemo.css": {
+  "client/src/pages/MapzMapDemo.css": {
     "hex": 133,
     "mono": 0
   },

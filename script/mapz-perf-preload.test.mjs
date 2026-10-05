@@ -22,7 +22,7 @@ async function fixture(label,pitch=0){
   getElementById:id=>id==='waypoint-lights-frozen'?{remove(){removed++;}}:id==='hologram-labels'?labels:canvas,
   createElement(){frozen={style:{},setAttribute(){},getContext:()=>({drawImage(){}})};return frozen;},
  };
- const path=label==='Mapz'?'../client/public/zaydar-map/mapz-perf-preload.js':'../client/public/outzide-map/assets/map-perf-preload.js';
+ const path=label==='Mapz'?'../client/public/mapz-map/mapz-perf-preload.js':'../client/public/outzide-map/assets/map-perf-preload.js';
  vm.runInNewContext(await readFile(new URL(path,import.meta.url),'utf8'),{window,document,matchMedia:()=>({matches:true}),structuredClone});
  const map=new window.maplibregl.Map({style:{terrain:{source:'elevation'},sources:{elevation:{},terrain:{}},layers:[]}});
  assert.equal(map.options.pixelRatio,1.5);assert.equal(map.options.style.terrain,undefined);

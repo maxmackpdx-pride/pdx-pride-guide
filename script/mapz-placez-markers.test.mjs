@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
-import {standaloneDowntownPlacez} from '../client/public/zaydar-map/standalone-demo.js';
+import {standaloneDowntownPlacez} from '../client/public/mapz-map/standalone-demo.js';
 
 test('standalone demo includes the real Downtown Placez set',()=>{
   const rows=standaloneDowntownPlacez();
@@ -13,7 +13,7 @@ test('standalone demo includes the real Downtown Placez set',()=>{
 });
 
 test('Placez clusters retain geographic bounds for fit-to-view taps',async()=>{
-  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+  const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
   const start=renderer.indexOf('function clusterPlaceMarkers('),end=renderer.indexOf('function drawClusterCount(');
   const context=vm.createContext({Map,Math});vm.runInContext(renderer.slice(start,end),context);
   const item=(key,coordinates,p)=>({feature:{geometry:{coordinates},properties:{key}},p});
@@ -27,8 +27,8 @@ test('Placez clusters retain geographic bounds for fit-to-view taps',async()=>{
 });
 
 test('non-event markers use assigned roof heights and preserve equal roof clearance',async()=>{
-  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
-  const roofBoot=await readFile(new URL('../client/public/zaydar-map/mapz-roof-boot.js',import.meta.url),'utf8');
+  const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
+  const roofBoot=await readFile(new URL('../client/public/mapz-map/mapz-roof-boot.js',import.meta.url),'utf8');
   assert.match(renderer,/waypointGeometry\(p,selected,placezHoverLift\(target,feature,surfaces\),feature\.properties\.key\)/);
   assert.match(renderer,/const buildingVisibility=extrusionAmount\(target\)/);
   assert.match(renderer,/window\.__mapzPlaceRoofHeights\?\.get\(key\)/);
@@ -38,7 +38,7 @@ test('non-event markers use assigned roof heights and preserve equal roof cleara
 });
 
 test('waypoint heads keep equal roof clearance while following different roof heights',async()=>{
-  const {waypointGeometry}=await import('../client/public/zaydar-map/waypoint-markers.js');
+  const {waypointGeometry}=await import('../client/public/mapz-map/waypoint-markers.js');
   const previousWindow=globalThis.window;
   globalThis.window={__mapzMap:{getZoom:()=>15.35,getPitch:()=>34}};
   try{
@@ -59,7 +59,7 @@ test('waypoint heads keep equal roof clearance while following different roof he
 });
 
 test('Placez swaps logo and type every 7 seconds with a short glitch',async()=>{
- const {WAYPOINT_SWAP_SECONDS,showWaypointLogo,waypointSwapGlitch}=await import('../client/public/zaydar-map/waypoint-markers.js');
+ const {WAYPOINT_SWAP_SECONDS,showWaypointLogo,waypointSwapGlitch}=await import('../client/public/mapz-map/waypoint-markers.js');
  assert.equal(WAYPOINT_SWAP_SECONDS,7);
  for(const phase of [0,2.399963,10,50,900]){
   const origin=-phase*1.7+14*1000;
@@ -75,7 +75,7 @@ test('Placez swaps logo and type every 7 seconds with a short glitch',async()=>{
 });
 
 test('adult Placez use normal Placez markers; boards keep their families',async()=>{
- const {waypointFamilyShell}=await import('../client/public/zaydar-map/waypoint-markers.js');
+ const {waypointFamilyShell}=await import('../client/public/mapz-map/waypoint-markers.js');
  assert.equal(waypointFamilyShell('places','adult'),'place');
  assert.equal(waypointFamilyShell(undefined,'adult'),'place');
  assert.equal(waypointFamilyShell('places','bar'),'place');
@@ -86,15 +86,15 @@ test('adult Placez use normal Placez markers; boards keep their families',async(
 
 
 test('Mapz cannot replace a place glyph with the retired age label',async()=>{
- const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
- const markers=await readFile(new URL('../client/public/zaydar-map/waypoint-markers.js',import.meta.url),'utf8');
+ const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
+ const markers=await readFile(new URL('../client/public/mapz-map/waypoint-markers.js',import.meta.url),'utf8');
  assert.doesNotMatch(renderer,/18\+|label:shell/);
  assert.doesNotMatch(markers,/extra\.label|ticket/);
 });
 
 
 test('waypoint outlines and glow retain category colors even with stale rainbow metadata',async()=>{
- const source=await readFile(new URL('../client/public/zaydar-map/waypoint-markers.js',import.meta.url),'utf8');
+ const source=await readFile(new URL('../client/public/mapz-map/waypoint-markers.js',import.meta.url),'utf8');
  const strokes=[];
  const canvasContext={scale(){},fill(){},stroke(){strokes.push(this.strokeStyle);}};
  const context=vm.createContext({

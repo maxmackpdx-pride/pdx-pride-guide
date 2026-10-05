@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createMotionPreference} from '../client/public/zaydar-map/motion-preference.js';
+import {createMotionPreference} from '../client/public/mapz-map/motion-preference.js';
 
 test('motion checks never reread storage; host and OS changes notify and clean up',()=>{
  let reads=0,changes=0;

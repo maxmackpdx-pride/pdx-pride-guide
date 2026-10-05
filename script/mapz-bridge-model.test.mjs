@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {PORTLAND_BRIDGE_MODELS,ST_JOHNS_BEARING,ST_JOHNS_CENTER,ST_JOHNS_LENGTH_METERS,ST_JOHNS_MIN_ZOOM,estimateBridgePlacement,isStJohnsBridgeFeature,parseBridgeGlb,parseStJohnsBridgeGlb} from '../client/public/zaydar-map/st-johns-bridge.js';
+import {PORTLAND_BRIDGE_MODELS,ST_JOHNS_BEARING,ST_JOHNS_CENTER,ST_JOHNS_LENGTH_METERS,ST_JOHNS_MIN_ZOOM,estimateBridgePlacement,isStJohnsBridgeFeature,parseBridgeGlb,parseStJohnsBridgeGlb} from '../client/public/mapz-map/st-johns-bridge.js';
 
-const modelUrl=new URL('../client/public/zaydar-map/models/st-johns-bridge.glb',import.meta.url);
+const modelUrl=new URL('../client/public/mapz-map/models/st-johns-bridge.glb',import.meta.url);
 
 test('St. Johns model asset retains the supplied geometry and real-world scale',async()=>{
   const file=await readFile(modelUrl),buffer=file.buffer.slice(file.byteOffset,file.byteOffset+file.byteLength);
@@ -36,7 +36,7 @@ test('all supplied Portland bridge models retain their authored meter scale',asy
   };
   assert.equal(PORTLAND_BRIDGE_MODELS.length,13);
   for(const definition of PORTLAND_BRIDGE_MODELS.slice(1)){
-    const file=await readFile(new URL(`../client/public/zaydar-map/models/${definition.id}.glb`,import.meta.url));
+    const file=await readFile(new URL(`../client/public/mapz-map/models/${definition.id}.glb`,import.meta.url));
     const model=parseBridgeGlb(file.buffer.slice(file.byteOffset,file.byteOffset+file.byteLength),definition.bearing,definition.length);
     assert.equal(model.count,expected[definition.id][0],definition.label);
     assert.ok(Math.abs(model.bounds.length-expected[definition.id][1])<1e-3,definition.label);
@@ -54,7 +54,7 @@ test('bridge placement snaps GPS anchors to road centerlines and derives compass
 });
 
 test('procedural bridge decks remain enabled as connected model approaches',async()=>{
-  const source=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+  const source=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
   assert.match(source,/portlandBridges\.update\(allBridgeFeatures\)/);
   assert.match(source,/bridgeLayer\.update\(bridgeFeatures\)/);
   assert.match(source,/landmarkBuildings\.bridges=portlandBridges/);
@@ -62,7 +62,7 @@ test('procedural bridge decks remain enabled as connected model approaches',asyn
   assert.doesNotMatch(source,/bridgeLayer\.update\([^\n]*isStJohnsBridgeFeature/);
 });
 
-const {fitBridgeRoad,sampleBridgeRoad}=await import('../client/public/zaydar-map/bridge-fit.js');
+const {fitBridgeRoad,sampleBridgeRoad}=await import('../client/public/mapz-map/bridge-fit.js');
 const {deckHeight}=await import('../client/public/home-flight/bridge-roads.js');
 function roadFeature(points,properties={}){
  const anchor=[-122.7,45.5];
@@ -104,7 +104,7 @@ test('fitted road models omit the authored second deck and contain only finite g
 });
 
 test('rail ground strokes are hidden only after the raised replacement is ready, and restored below building zoom',async()=>{
- const {createPortlandBridgeLayer}=await import('../client/public/zaydar-map/st-johns-bridge.js');
+ const {createPortlandBridgeLayer}=await import('../client/public/mapz-map/st-johns-bridge.js');
  const layer=createPortlandBridgeLayer({},()=>0,[{id:'bnsf-test',center:[-122.7,45.5],length:600}]);
  const filters=new Map([['streets',['==',['get','class'],'rail']],['street-casings',null]]);let zoom=15;
  layer.map={getZoom:()=>zoom,getLayer:id=>filters.has(id),getFilter:id=>filters.get(id),setFilter:(id,value)=>filters.set(id,value),triggerRepaint(){}};

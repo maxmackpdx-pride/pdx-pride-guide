@@ -1,4 +1,4 @@
-import {eventNight} from '../../public/zaydar-map/event-night.js';
+import {eventNight} from '../../public/mapz-map/event-night.js';
 import { parsePacificDateTime } from "../../../shared/missedConnections";
 
 export type MapTimeFilter = "default" | "tonight" | "soon" | "weekend" | "custom";

@@ -5,14 +5,14 @@ import {Search,SlidersHorizontal,X,ChevronRight,ChevronDown} from 'lucide-react'
 import {DIRECTORY_TYPE_LABELS,directoryTypeColor} from '@shared/directoryTheme';
 
 /* Nonprofits moved to /resources (2026-09-30); Placez keeps places to go and spend. */
-export const ZAYDAR_PLACE_TYPES=['all','bar','restaurant','cafe','venue','shop','service','hotel','healthcare','realestate','campground','adult'];
-export const ZAYDAR_PLACE_TYPE_OPTIONS=ZAYDAR_PLACE_TYPES.filter(type=>type!=='all');
-export const zaydarTypeIcon=(type:string)=>`/zaydar-map/icons/types/${ZAYDAR_PLACE_TYPES.includes(type)?type:'venue'}.svg`;
-export const zaydarTypeLabel=(type:string)=>type==='all'?'All placez':type==='adult'?'Adult':DIRECTORY_TYPE_LABELS[type]||'Venues';
-export const zaydarTypeColor=(type:string)=>type==='adult'?'#FF0000':type==='all'?'#63798B':directoryTypeColor(type);
+export const MAPZ_PLACE_TYPES=['all','bar','restaurant','cafe','venue','shop','service','hotel','healthcare','realestate','campground','adult'];
+export const MAPZ_PLACE_TYPE_OPTIONS=MAPZ_PLACE_TYPES.filter(type=>type!=='all');
+export const mapzTypeIcon=(type:string)=>`/mapz-map/icons/types/${MAPZ_PLACE_TYPES.includes(type)?type:'venue'}.svg`;
+export const mapzTypeLabel=(type:string)=>type==='all'?'All placez':type==='adult'?'Adult':DIRECTORY_TYPE_LABELS[type]||'Venues';
+export const mapzTypeColor=(type:string)=>type==='adult'?'#FF0000':type==='all'?'#63798B':directoryTypeColor(type);
 
 type Props={query:string;onQuery:(query:string)=>void;placeTypes:string[];onPlaceTypes:(types:string[])=>void;filters:ReactNode;children:ReactNode};
-export default function ZaydarSearchDrawer({query,onQuery,placeTypes,onPlaceTypes,filters,children}:Props){
+export default function MapzSearchDrawer({query,onQuery,placeTypes,onPlaceTypes,filters,children}:Props){
  const [level,setLevel]=useState<'compact'|'peek'|'full'>('peek');
  const [dragHeight,setDragHeight]=useState<number|null>(null);
  const [filtersOpen,setFiltersOpen]=useState(false);
@@ -94,22 +94,22 @@ export default function ZaydarSearchDrawer({query,onQuery,placeTypes,onPlaceType
  const toggleDrawer=()=>setLevel(drawerOpen?'compact':'full');
  const toggleTypes=()=>{setTypesOpen(open=>!open);setLevel('full');};
  const togglePlaceType=(type:string)=>onPlaceTypes(placeTypes.includes(type)?placeTypes.filter(item=>item!==type):[...placeTypes,type]);
- return <SmoothDrawer ref={sheet} height={dragHeight??snapHeight} dragging={dragHeight!==null} data-no-pull-to-refresh data-seam="top" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer} className={`zaydar-search-drawer z-glass is-${level}${dockCollapsed?' dock-is-collapsed':' dock-is-expanded'}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" onKeyDown={event=>{if(event.key==='Escape'){if(typesOpen)setTypesOpen(false);else if(filtersOpen)setFiltersOpen(false);else{setLevel(track?.desktop?'peek':'compact');input.current?.blur();}}}}>
+ return <SmoothDrawer ref={sheet} height={dragHeight??snapHeight} dragging={dragHeight!==null} data-no-pull-to-refresh data-seam="top" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer} className={`mapz-search-drawer z-glass is-${level}${dockCollapsed?' dock-is-collapsed':' dock-is-expanded'}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" onKeyDown={event=>{if(event.key==='Escape'){if(typesOpen)setTypesOpen(false);else if(filtersOpen)setFiltersOpen(false);else{setLevel(track?.desktop?'peek':'compact');input.current?.blur();}}}}>
   <NavGlassLayers/>
-  <div className="zaydar-drawer-header" role="group" aria-label="Drawer search and resize controls"
+  <div className="mapz-drawer-header" role="group" aria-label="Drawer search and resize controls"
    onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={cancelDrag}
    onClickCapture={event=>{if(suppressClick.current&&event.detail>0){event.preventDefault();event.stopPropagation();suppressClick.current=false;}}}
    onClick={event=>{if(!(event.target as Element).closest('button,input,label'))setLevel(track?.desktop?(level==='full'?'peek':'full'):(drawerOpen?'compact':'full'));}}>
-  <button type="button" className="zaydar-drawer-handle" aria-label={drawerOpen?'Collapse results drawer':'Expand results drawer'} aria-expanded={drawerOpen} aria-controls="zaydar-drawer-content"
+  <button type="button" className="mapz-drawer-handle" aria-label={drawerOpen?'Collapse results drawer':'Expand results drawer'} aria-expanded={drawerOpen} aria-controls="mapz-drawer-content"
    onClick={()=>track?.desktop?setLevel(level==='full'?'peek':'full'):toggleDrawer()}
    onKeyDown={event=>{if(event.key==='ArrowUp'){event.preventDefault();setLevel('full');}if(event.key==='ArrowDown'){event.preventDefault();setLevel(level==='full'?'peek':'compact');}}}
    ><span/></button>
-  <SmoothDrawerItem className="zaydar-drawer-search-row">
-   <label className="zaydar-drawer-search"><Search size={22}/><input ref={input} type="search" aria-label="Search Zaylist" placeholder="Search Zaylist" value={query} onFocus={()=>setLevel('full')} onChange={event=>{onQuery(event.target.value);setLevel('full');}}/>{query&&<button type="button" onClick={()=>{onQuery('');input.current?.focus();}} aria-label="Clear search"><X size={18}/></button>}</label>
-   <button type="button" className="zaydar-drawer-filter" aria-label="More map filters" aria-expanded={filtersOpen} onClick={()=>{setFiltersOpen(v=>!v);setLevel('full');}}><SlidersHorizontal size={21}/></button>
+  <SmoothDrawerItem className="mapz-drawer-search-row">
+   <label className="mapz-drawer-search"><Search size={22}/><input ref={input} type="search" aria-label="Search Zaylist" placeholder="Search Zaylist" value={query} onFocus={()=>setLevel('full')} onChange={event=>{onQuery(event.target.value);setLevel('full');}}/>{query&&<button type="button" onClick={()=>{onQuery('');input.current?.focus();}} aria-label="Clear search"><X size={18}/></button>}</label>
+   <button type="button" className="mapz-drawer-filter" aria-label="More map filters" aria-expanded={filtersOpen} onClick={()=>{setFiltersOpen(v=>!v);setLevel('full');}}><SlidersHorizontal size={21}/></button>
   </SmoothDrawerItem>
   </div>
-  <SmoothDrawerGroup open={level!=='compact'||dragHeight!==null} id="zaydar-drawer-content" className="zaydar-drawer-scroll"
+  <SmoothDrawerGroup open={level!=='compact'||dragHeight!==null} id="mapz-drawer-content" className="mapz-drawer-scroll"
    onPointerDownCapture={event=>{if(event.isPrimary)contentGesture.current={pointerId:event.pointerId,x:event.clientX,y:event.clientY,scrolled:false};}}
    onPointerMoveCapture={trackContentMovement} onPointerUpCapture={trackContentMovement}
    onPointerCancelCapture={()=>{if(contentGesture.current)contentGesture.current.scrolled=true;}}
@@ -117,20 +117,20 @@ export default function ZaydarSearchDrawer({query,onQuery,placeTypes,onPlaceType
    onClickCapture={event=>{if(event.detail>0&&contentGesture.current?.scrolled){event.preventDefault();event.stopPropagation();}}}
    hidden={level==='compact'&&dragHeight===null}>
    <SmoothDrawerItem>
-    <button type="button" className="zaydar-placez-heading" aria-expanded={typesOpen} aria-controls="zaydar-place-type-menu" onClick={toggleTypes}>
+    <button type="button" className="mapz-placez-heading" aria-expanded={typesOpen} aria-controls="mapz-place-type-menu" onClick={toggleTypes}>
      <h2>Placez</h2><ChevronRight size={20} aria-hidden="true"/>
     </button>
    </SmoothDrawerItem>
-   <SmoothDrawerItem className="zaydar-place-types" id="zaydar-place-type-menu" role="group" aria-label="Placez">
-    <button type="button" className="zaydar-place-menu" aria-expanded={typesOpen} aria-controls="zaydar-place-type-menu" onClick={toggleTypes} style={{'--type-color':zaydarTypeColor('all')} as CSSProperties}>
-     <span className="zaydar-type-circle"><img draggable={false} src={zaydarTypeIcon('all')} alt=""/></span>
-     <span>{zaydarTypeLabel('all')}</span>
+   <SmoothDrawerItem className="mapz-place-types" id="mapz-place-type-menu" role="group" aria-label="Placez">
+    <button type="button" className="mapz-place-menu" aria-expanded={typesOpen} aria-controls="mapz-place-type-menu" onClick={toggleTypes} style={{'--type-color':mapzTypeColor('all')} as CSSProperties}>
+     <span className="mapz-type-circle"><img draggable={false} src={mapzTypeIcon('all')} alt=""/></span>
+     <span>{mapzTypeLabel('all')}</span>
     </button>
-    {ZAYDAR_PLACE_TYPE_OPTIONS.map(type=><button type="button" className="zaydar-place-option" hidden={!typesOpen} key={type} aria-pressed={placeTypes.includes(type)} onClick={()=>{togglePlaceType(type);setLevel('full');}} style={{'--type-color':zaydarTypeColor(type)} as CSSProperties}><span className="zaydar-type-circle"><img draggable={false} src={zaydarTypeIcon(type)} style={type==='nonprofit'?{filter:'brightness(.2)'}:undefined} alt=""/></span><span>{zaydarTypeLabel(type)}</span></button>)}
+    {MAPZ_PLACE_TYPE_OPTIONS.map(type=><button type="button" className="mapz-place-option" hidden={!typesOpen} key={type} aria-pressed={placeTypes.includes(type)} onClick={()=>{togglePlaceType(type);setLevel('full');}} style={{'--type-color':mapzTypeColor(type)} as CSSProperties}><span className="mapz-type-circle"><img draggable={false} src={mapzTypeIcon(type)} style={type==='nonprofit'?{filter:'brightness(.2)'}:undefined} alt=""/></span><span>{mapzTypeLabel(type)}</span></button>)}
    </SmoothDrawerItem>
-   {filtersOpen&&<SmoothDrawerItem className="zaydar-drawer-advanced">{filters}</SmoothDrawerItem>}
-   <SmoothDrawerItem className="zaydar-drawer-results">{children}</SmoothDrawerItem>
+   {filtersOpen&&<SmoothDrawerItem className="mapz-drawer-advanced">{filters}</SmoothDrawerItem>}
+   <SmoothDrawerItem className="mapz-drawer-results">{children}</SmoothDrawerItem>
   </SmoothDrawerGroup>
-  {track&&!track.desktop&&drawerOpen&&<button type="button" className="zaydar-drawer-close-corner" aria-label="Collapse results drawer to search" aria-controls="zaydar-drawer-content" onClick={toggleDrawer}><ChevronDown size={24}/></button>}
+  {track&&!track.desktop&&drawerOpen&&<button type="button" className="mapz-drawer-close-corner" aria-label="Collapse results drawer to search" aria-controls="mapz-drawer-content" onClick={toggleDrawer}><ChevronDown size={24}/></button>}
  </SmoothDrawer>;
 }

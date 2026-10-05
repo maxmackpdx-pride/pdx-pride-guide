@@ -24,7 +24,7 @@ import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
-const startup=window.__zaydarStartup||{phase(){},fatal(){}};
+const startup=window.__mapzStartup||{phase(){},fatal(){}};
 startup.phase('script');
 const maxExploreZoom=17.75;
 // First paint is the vector city. DEM workers were blocking the phone boot
@@ -1142,7 +1142,7 @@ window.addEventListener('pagehide',()=>{
 window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
 
 // Interactive adapter: isolated from the original studio and homepage.
-function tell(type,payload={}){if(parent!==window)parent.postMessage({source:'zaydar-demo',type,...payload},location.origin);}
+function tell(type,payload={}){if(parent!==window)parent.postMessage({source:'mapz-demo',type,...payload},location.origin);}
 function viewState(){const c=map.getCenter(),b=map.getBounds();tell('view',{center:[c.lat,c.lng],zoom:map.getZoom(),bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
 const typeIcons=new Map();
 function clusterPlaceMarkers(items,selected,zoom,width,height){
@@ -1195,7 +1195,7 @@ async function setListings(rows){
  await Promise.all(Array.from({length:3},async()=>{while(queue.length&&!disposed&&generation===dataGeneration){const f=queue.shift();if(f.properties.kind==='event'){await loadVenueLogo(f.properties.logo,f.properties.logoMode);if(f.properties.alternateLogo)await loadVenueLogo(f.properties.alternateLogo,f.properties.logoMode);}else if(f.properties.waypointLogo)await loadVenueLogo(f.properties.waypointLogo,'alpha');scheduleFrame();await new Promise(r=>setTimeout(r,0));}}));
 }
 window.addEventListener('message',event=>{
- if(event.origin!==location.origin||event.source!==parent||event.data?.source!=='zaydar-host')return;
+ if(event.origin!==location.origin||event.source!==parent||event.data?.source!=='mapz-host')return;
  const {type,...data}=event.data;
  if(type==='data'&&Array.isArray(data.rows))void setListings(data.rows);
  if(type==='select'){selectedKey=data.key;const feature=lightFeatures.find(f=>f.properties.key===selectedKey);if(feature){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:feature.geometry.coordinates,zoom:Math.max(16.5,map.getZoom()),duration:700});}scheduleFrame();}

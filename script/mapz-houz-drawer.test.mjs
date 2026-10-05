@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 
-const mapPageUrl=new URL('../client/src/pages/ZaydarMapDemo.tsx',import.meta.url);
+const mapPageUrl=new URL('../client/src/pages/MapzMapDemo.tsx',import.meta.url);
 const overlayUrl=new URL('../client/src/components/housing/HousingPostOverlay.tsx',import.meta.url);
 const composerUrl=new URL('../client/src/components/housing/HousingComposerOverlay.tsx',import.meta.url);
 

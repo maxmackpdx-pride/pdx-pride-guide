@@ -17,7 +17,7 @@ function hashFlight(directory: string) {
   }
 }
 hashFlight(flightSource);
-const flightBase = `/assets/zaydar-${flightHash.digest("hex").slice(0, 16)}`;
+const flightBase = `/assets/home-flight-${flightHash.digest("hex").slice(0, 16)}`;
 
 export default defineConfig(async ({ command }):Promise<UserConfig> => {
  const mapz = command === "build" ? await prepareMapz(path.resolve(import.meta.dirname, "client/public")) : null;
@@ -25,12 +25,12 @@ export default defineConfig(async ({ command }):Promise<UserConfig> => {
   plugins: [
     react(),
     {
-      name: "version-zaydar-assets",
+      name: "version-home-flight-assets",
       apply: "build",
       closeBundle() {
         const output = path.resolve(import.meta.dirname, "dist/public");
         fs.cpSync(flightSource, path.join(output, flightBase), { recursive: true });
-        fs.writeFileSync(path.join(output, "zaydar-manifest.json"), JSON.stringify({ base: flightBase }));
+        fs.writeFileSync(path.join(output, "home-flight-manifest.json"), JSON.stringify({ base: flightBase }));
         mapz?.write(output);
       },
     },
@@ -79,8 +79,8 @@ export default defineConfig(async ({ command }):Promise<UserConfig> => {
   },
   // Shared modules may reference process.env on the server; avoid browser TDZ.
   define: {
-    __MAPZ_ASSETS__: JSON.stringify(mapz?.assets ?? {script:"/zaydar-map/river-flight.js?v=20260929-branch",maplibre:"/home-flight/vendor/maplibre-gl-5.6.2.js",maplibreCss:"/home-flight/vendor/maplibre-gl-5.6.2.css",contour:"/zaydar-map/vendor/maplibre-contour-0.1.0.js",style:"/zaydar-map/studio.css?v=20260925-map-boot5",perf:"/zaydar-map/mapz-perf-preload.js?v=20260929-fast"}),
-    __ZAYDAR_BASE__: JSON.stringify(command === "build" ? flightBase : "/home-flight"),
+    __MAPZ_ASSETS__: JSON.stringify(mapz?.assets ?? {script:"/mapz-map/river-flight.js?v=20260929-branch",maplibre:"/home-flight/vendor/maplibre-gl-5.6.2.js",maplibreCss:"/home-flight/vendor/maplibre-gl-5.6.2.css",contour:"/mapz-map/vendor/maplibre-contour-0.1.0.js",style:"/mapz-map/studio.css?v=20260925-map-boot5",perf:"/mapz-map/mapz-perf-preload.js?v=20260929-fast"}),
+    __HOME_FLIGHT_BASE__: JSON.stringify(command === "build" ? flightBase : "/home-flight"),
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || "development"),
   },
   server: {

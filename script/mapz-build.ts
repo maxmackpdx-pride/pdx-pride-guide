@@ -7,7 +7,7 @@ import {brotliCompressSync,gzipSync} from 'node:zlib';
 // Keep the authored source modules for development; production downloads one
 // module, with the roof constructor patch evaluated before the renderer.
 export async function prepareMapz(publicRoot:string) {
- const mapRoot=path.join(publicRoot,'zaydar-map');
+ const mapRoot=path.join(publicRoot,'mapz-map');
  const result=await build({stdin:{contents:"import './mapz-roof-boot.js'; import './river-flight.js';",resolveDir:mapRoot,sourcefile:'boot.js'},bundle:true,write:false,format:'esm',target:'es2022',minify:true,metafile:true,
   plugins:[{name:'canonical-map-modules',setup(builder){builder.onResolve({filter:/^\./},args=>({path:path.resolve(args.resolveDir,args.path.split('?')[0])}));}}]});
  const files=new Map<string,Uint8Array>([
@@ -27,7 +27,7 @@ export async function prepareMapz(publicRoot:string) {
  const assets={script:base+'/boot.js',maplibre:base+'/maplibre.js',maplibreCss:base+'/maplibre.css',contour:base+'/contour.js',style:base+'/studio.css',perf:base+'/perf.js'};
  return {base,assets,inputs:Object.keys(result.metafile.inputs),write(output:string){
   for(const [name,bytes] of files){const dest=path.join(output,base,name);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.writeFileSync(dest,bytes);if(/\.(js|css|glb)$/.test(name)){fs.writeFileSync(dest+'.br',brotliCompressSync(bytes));fs.writeFileSync(dest+'.gz',gzipSync(bytes));}}
-  const htmlPath=path.join(output,'zaydar-map/index.html');
+  const htmlPath=path.join(output,'mapz-map/index.html');
   let html=fs.readFileSync(htmlPath,'utf8');
   html=html.replace(/<link rel="modulepreload"[^>]+>/g,'');
   html=html.replace(/<script type="module"[^>]+><\/script>/g,'');

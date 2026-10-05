@@ -55,7 +55,7 @@ import ResetPassword from "./pages/ResetPassword";
 
 const Events = lazyWithReload(() => import("./pages/Events"));
 const Home = lazyWithReload(() => import("./pages/Home"));
-const ZaydarMapDemo = lazyWithReload(() => import("./pages/ZaydarMapDemo"));
+const MapzMapDemo = lazyWithReload(() => import("./pages/MapzMapDemo"));
 const Schedule = lazyWithReload(() => import("./pages/Schedule"));
 const Submit = lazyWithReload(() => import("./pages/Submit"));
 const PrideWork = lazyWithReload(() => import("./pages/PrideWork"));
@@ -116,7 +116,7 @@ function AppLayout() {
   return (
     <div
       data-glass-scene
-      className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${livingMap ? " app-shell--zaydar-demo" : ""}${mapSurface ? " app-shell--map-surface" : ""}`}
+      className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${livingMap ? " app-shell--mapz-demo" : ""}${mapSurface ? " app-shell--map-surface" : ""}`}
       style={{ background: "var(--z-black, #050506)" }}
     >
       <PullToRefresh />
@@ -136,8 +136,8 @@ function AppLayout() {
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
             <Route path="/boards" component={Boards} />
-            <Route path="/map-demo" component={ZaydarMapDemo} />
-            <Route path="/map" component={ZaydarMapDemo} />
+            <Route path="/map-demo" component={MapzMapDemo} />
+            <Route path="/map" component={MapzMapDemo} />
             <Route path="/schedule">{() => <Schedule />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />

@@ -7,10 +7,10 @@ globalThis.Path2D=class {
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
-import {mapzSurfaceStyle,forestPattern,FOREST_COLORS,WOOD_FILL,GRASS_FILL,PARK_FILL,NIGHT_EARTH,BUILDING_FILL,BUILDING_OUTLINE,BUILDING_SOLIDITY,BUILDING_LIGHT_OCCLUSION,applyBuildingOcclusion,inwardDistances} from '../client/public/zaydar-map/natural-surfaces.js';
+import {mapzSurfaceStyle,forestPattern,FOREST_COLORS,WOOD_FILL,GRASS_FILL,PARK_FILL,NIGHT_EARTH,BUILDING_FILL,BUILDING_OUTLINE,BUILDING_SOLIDITY,BUILDING_LIGHT_OCCLUSION,applyBuildingOcclusion,inwardDistances} from '../client/public/mapz-map/natural-surfaces.js';
 import {vectorStyle} from '../client/public/home-flight/city-map.js';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles} from '../client/public/home-flight/roof-sparkles.js';
-import {nextFlightPitchOffset,IOS_MAP_HANDLERS,trackpadGesture,trackpadPanDelta} from '../client/public/zaydar-map/map-exploration.js';
+import {nextFlightPitchOffset,IOS_MAP_HANDLERS,trackpadGesture,trackpadPanDelta} from '../client/public/mapz-map/map-exploration.js';
 const require=createRequire(import.meta.url),mapRequire=createRequire(require.resolve('maplibre-gl'));
 const {validateStyleMin}=mapRequire('@maplibre/maplibre-gl-style-spec');
 test('hillshade and contours validate without deforming the vector city',()=>{

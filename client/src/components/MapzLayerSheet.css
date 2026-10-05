@@ -1,0 +1,228 @@
+.mapz-layer-sheet .mapz-layer-panel__heading { margin: 0 0 7px; }
+.mapz-layer-panel__heading small { display: block; color: #a9bed2; font: 500 9px/1.4 Inter, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.mapz-layer-sheet .mapz-layer-panel__heading h2 { margin: 1px 0 0; color: var(--active-layer-color); font: 800 31px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .01em; text-transform: uppercase; }
+.mapz-layer-panel > p { color: #b4c7d8; font: 400 13px/1.5 Inter, sans-serif; }
+.mapz-layer-panel > p button,
+.mapz-layer-empty button { padding: 5px; border: 0; background: none; color: #00ffff; text-decoration: underline; }
+.mapz-layer-sheet .mapz-layer-rail { display: flex; gap: 6px; overflow-x: auto; margin: 0 -2px 7px; padding: 3px 2px; scrollbar-width: none; }
+.mapz-layer-rail::-webkit-scrollbar { display: none; }
+.mapz-layer-sheet .mapz-layer-rail button { flex: none; min-height: 44px; padding: 7px 13px; border: 1px solid #6484aa50; border-radius: 20px; background: #050b1280; color: #bbd0e3; font: 700 12px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .02em; text-transform: uppercase; }
+.mapz-layer-sheet .mapz-layer-rail button[aria-pressed="true"] { color: #fff; border-color: var(--active-layer-color); background: color-mix(in srgb, var(--active-layer-color) 16%, #050b12); box-shadow: inset 0 0 10px color-mix(in srgb, var(--active-layer-color) 13%, transparent); }
+.mapz-layer-list { overflow: hidden; border: 1px solid #517b9c45; border-radius: 12px; background: #02080d75; }
+.mapz-map-demo .mapz-layer-row { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 48px; padding: 3px 7px 3px 0; border: 0; border-bottom: 1px solid #54718b45; background: none; text-align: left; }
+.mapz-layer-row:last-child { border-bottom: 0; }
+.mapz-layer-row > img { width: 49px; height: 42px; flex: none; object-fit: cover; border-radius: 7px; background: #0d1824; }
+.mapz-layer-row__copy { flex: 1; min-width: 0; }
+.mapz-layer-list .mapz-layer-row strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; overflow: hidden; font: 700 14px/1.12 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; color: #f3f6fc; letter-spacing: .01em; }
+.mapz-layer-row small { display: block; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 10px/1.3 Inter, sans-serif; color: #a9c2d7; }
+.mapz-layer-row > time { flex: none; color: #b7d8ed; text-align: right; font: 500 12px/1.2 var(--font-display, "Barlow Condensed", sans-serif); }
+.mapz-layer-row > time small { font-size: 9px; }
+.mapz-layer-row > svg { flex: none; color: #a9c2d7; }
+.mapz-layer-empty { margin: 0; padding: 20px 14px; font: 400 13px/1.5 Inter, sans-serif; color: #c1d1df; }
+.mapz-layer-rsvps { margin-top: 12px; color: #b7cede; font: 500 12px/1.4 Inter, sans-serif; }
+.mapz-layer-rsvps summary { min-height: 44px; cursor: pointer; }
+.mapz-layer-visibility { display: flex; align-items: center; gap: 8px; min-height: 44px; color: #b7cede; font: 500 12px/1.4 Inter, sans-serif; }
+.mapz-layer-visibility input { width: 18px; height: 18px; accent-color: var(--active-layer-color); }
+.mapz-layer-panel .mapz-layer-location-note { margin: 10px 0 0; font-size: 11px; }
+.mapz-houz-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0 0 9px; }
+.mapz-houz-stats span { padding: 8px 5px; border: 1px solid #a4b6c622; border-radius: 11px; background: #ffffff05; color: #9fb4c6; font: 600 9px/1.2 Inter, sans-serif; text-align: center; text-transform: uppercase; letter-spacing: .05em; }
+.mapz-houz-stats strong { display: block; margin-bottom: 2px; color: #fff; font: 800 17px/1 var(--font-display, "Barlow Condensed", sans-serif); }
+.mapz-map-demo .mapz-houz-post { width: 100%; min-height: 44px; margin: 0 0 7px; border: 1px solid color-mix(in srgb, var(--active-layer-color) 58%, transparent); border-radius: 22px; background: color-mix(in srgb, var(--active-layer-color) 11%, #07111b); color: #fff; font: 800 15px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .04em; text-transform: uppercase; }
+.mapz-layer-sheet .mapz-houz-actions { margin-bottom: 9px; }
+.mapz-houz-about { margin: 10px 0 2px; padding: 0 11px 10px; border: 1px solid #a4b6c622; border-radius: 12px; color: #a9bed2; font: 400 12px/1.5 Inter, sans-serif; }
+.mapz-houz-about summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: #e8f5fb; font: 700 13px/1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .04em; }
+.mapz-houz-about p { margin: 0 0 8px; }.mapz-houz-about ol { margin: 0 0 9px; padding-left: 18px; }.mapz-houz-about strong { color: #fff; }
+/* Existing layer drawer, with independent world controls and forms. */
+.mapz-world-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.mapz-world-filters label{display:grid;gap:5px;min-width:0;font-size:12px;color:#b9c8ce}
+.mapz-world-filters input:not([type=checkbox]),.mapz-world-filters select{width:100%;min-width:0;min-height:40px;padding:8px;border:1px solid #ffffff24;border-radius:8px;background:#090e12;color:#fff;font:inherit;font-size:14px}
+.mapz-world-filters label:has(input[type=checkbox]){display:flex;align-items:center}
+.mapz-layer-row[data-selected=true]{outline:1px solid var(--active-layer-color);outline-offset:-1px;background:#ffffff0a}
+.mapz-world-unlocated{margin:14px 0}.mapz-world-unlocated summary{cursor:pointer;padding:10px 0}
+.map-world-composer{width:min(760px,calc(100vw - 24px));max-height:90dvh;overflow:auto;position:relative;border-radius:18px;background:#080c10}
+.map-world-composer>.gifting-form-panel,.map-world-composer .directory-form-panel{margin:0;max-width:none;padding:28px 22px}
+.map-world-composer .gifting-close{position:absolute;right:12px;top:12px}
+
+/* Coordinated map drawer: all seven worlds remain available without horizontal overflow. */
+.mapz-map-demo .mapz-map-controls-launcher {
+  position:absolute;z-index:6;left:18px;bottom:18px;display:flex;align-items:center;gap:10px;
+  min-height:48px;padding:0 16px;border:1px solid #a4c8dc50;border-radius:16px;
+  background:#08121eef;color:#dcecf6;font:700 16px/1 var(--font-display,"Barlow Condensed",sans-serif);
+  text-transform:uppercase;box-shadow:inset 0 1px #e1f5ff24;
+}
+.mapz-map-demo .mapz-layer-sheet {
+  position:absolute;z-index:7;left:18px;bottom:18px;top:64px;width:min(540px,calc(100% - 92px));
+  display:flex;flex-direction:column;min-height:0;overflow:hidden;box-sizing:border-box;
+  border:1px solid #a4c8dc50;border-radius:22px;background:linear-gradient(165deg,#0f161bf5,#010408f5);
+  color:#eaf2fa;isolation:isolate;box-shadow:inset 0 1px 1px #e2f4ff33,0 8px 22px #0006;
+}
+.mapz-map-demo .mapz-layer-sheet[hidden],.mapz-layer-sheet__body[hidden]{display:none}
+.mapz-layer-sheet>.z-glass__edge{opacity:.6;pointer-events:none}
+.mapz-layer-sheet__title,.mapz-layer-sheet__workspace{position:relative;z-index:4}
+.mapz-layer-sheet__title{display:flex;align-items:center;justify-content:space-between;flex:none;padding:7px 10px 7px 18px;border-bottom:1px solid #a4c8dc24}
+.mapz-layer-sheet__title>span{display:flex;align-items:center;gap:10px;font:700 19px/1 var(--font-display,"Barlow Condensed",sans-serif);text-transform:uppercase}
+.mapz-layer-sheet__title button{display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:12px;background:#ffffff08;color:#dcecf6}
+.mapz-layer-sheet__workspace{display:flex;flex:1;min-height:0}
+.mapz-layer-sheet__sections{display:flex;flex-direction:column;gap:5px;flex:0 0 116px;padding:10px 7px;border-right:1px solid #a4c8dc24;overflow-y:auto;scrollbar-width:thin}
+.mapz-layer-section{display:flex;align-items:center;gap:7px;min-height:48px;flex-shrink:0;padding:8px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--layer-color);font:800 16px/1 var(--font-display,"Barlow Condensed",sans-serif);text-transform:uppercase;text-align:left}
+.mapz-layer-section>svg{margin-left:auto;opacity:0;flex:none}
+.mapz-layer-section[aria-pressed=true]{border-color:color-mix(in srgb,var(--layer-color) 35%,transparent);background:color-mix(in srgb,var(--layer-color) 9%,#080d13)}
+.mapz-layer-section[aria-pressed=true]>svg{opacity:1}
+.mapz-layer-section__dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+.mapz-layer-sheet__content{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0}
+.mapz-map-demo .mapz-layer-sheet__body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 16px 16px;scrollbar-width:thin;scrollbar-color:#637f92 #071018;scroll-padding-block:8px}
+.mapz-layer-sheet__footer{flex:none;display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid #a4c8dc24;background:#07111bee}
+.mapz-layer-sheet__footer>a,.mapz-layer-sheet__back{display:flex;align-items:center;justify-content:center;gap:6px;flex:1;min-height:44px;padding:8px;border:1px solid #a4c8dc35;border-radius:12px;background:#ffffff06;color:#dcecf6;text-decoration:none;font:700 14px/1.2 var(--font-display,"Barlow Condensed",sans-serif);text-transform:uppercase}
+.mapz-layer-sheet button:focus-visible,.mapz-map-controls-launcher:focus-visible{outline:2px solid #a6efff;outline-offset:-3px}
+.mapz-layer-sheet .mapz-layer-rail{flex-wrap:wrap;overflow:visible}
+.mapz-layer-sheet .mapz-world-filters input:not([type=checkbox]),.mapz-layer-sheet .mapz-world-filters select{min-height:44px;font-size:16px}
+@media(max-width:959px){
+  .mapz-map-demo .mapz-map-controls-launcher{left:70px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  html[data-mobile-dock=expanded] .mapz-map-demo .mapz-map-controls-launcher{left:12px;bottom:calc(98px + env(safe-area-inset-bottom,0px))}
+  .mapz-map-demo .mapz-layer-sheet{left:8px;bottom:calc(72px + env(safe-area-inset-bottom,0px));width:min(540px,calc(100% - 16px));top:64px}
+  html[data-mobile-dock=expanded] .mapz-map-demo .mapz-layer-sheet{bottom:calc(98px + env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:599px){
+  .mapz-layer-sheet__workspace{flex-direction:column}
+  .mapz-layer-sheet__sections{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:6px 8px;border-right:0;border-bottom:1px solid #a4c8dc24}
+  .mapz-layer-section{justify-content:center;min-height:44px;padding:6px 3px;font-size:15px;gap:4px}
+  .mapz-layer-section>svg{display:none}
+  .mapz-layer-section[aria-pressed=true]{box-shadow:inset 0 -2px var(--layer-color)}
+  .mapz-map-demo .mapz-layer-sheet__body{padding-inline:12px}
+}
+@media(max-height:540px){.mapz-map-demo .mapz-layer-sheet{top:8px}.mapz-layer-sheet__title{padding-block:2px}.mapz-layer-sheet__footer{padding-block:4px}}
+@media(min-width:960px){.mapz-map-demo .mapz-layer-sheet.is-open{width:min(540px,calc(100% - 92px))}}
+.mapz-map-demo .mapz-layer-section{color:var(--layer-color)}
+
+/* ReZources discovery treatment: bounded glass, clear hierarchy and roomy controls. */
+.mapz-map-demo .mapz-layer-sheet,
+.mapz-map-demo .mapz-layer-sheet.is-open {
+  width:min(680px,calc(100% - 92px)); border-radius:8px;
+  border:1px solid color-mix(in srgb,var(--active-layer-color) 70%,transparent);
+  background:var(--glass-card-bg); color:var(--text-body); box-shadow:var(--glass-card-shadow);
+}
+.mapz-layer-sheet__title { padding:12px 16px 12px 24px; }
+.mapz-layer-sheet__title > span { font-size:22px; line-height:1.4; }
+.mapz-layer-sheet__sections { gap:8px; padding:16px 8px; }
+.mapz-layer-section { border-radius:8px; min-height:48px; line-height:1.4; }
+.mapz-map-demo .mapz-layer-sheet__body { padding:24px; scroll-padding-block:24px; }
+.mapz-layer-sheet__footer { padding:16px; gap:12px; }
+.mapz-layer-sheet__footer>a,.mapz-layer-sheet__back { font-size:18px; line-height:1.4; color:var(--text-heading); }
+.mapz-layer-sheet .mapz-layer-panel__heading { margin:0 0 24px; }
+.mapz-layer-sheet .mapz-layer-panel__heading small { font:14px/1.4 var(--font-mono); color:var(--text-body); }
+.mapz-layer-sheet .mapz-layer-panel__heading h2 { margin-top:8px; font-size:36px; line-height:1.6; }
+.mapz-layer-sheet .discovery-survey { padding:16px 0 40px; }
+.mapz-layer-sheet .discovery-flow .discovery-survey h2 { font-size:32px; }
+.mapz-layer-sheet .discovery-choices { flex-direction:column; }
+.mapz-layer-sheet .discovery-choices button { flex:auto; min-height:56px; }
+.mapz-layer-sheet .discovery-flow .discovery-survey .discovery-intro { margin:12px 0 28px; font-size:17px; }
+.mapz-layer-sheet .discovery-kicker--results { margin-bottom:24px; }
+.mapz-layer-sheet .mapz-world-filters { margin:24px 0; gap:16px; }
+.mapz-layer-sheet .mapz-world-filters label { font:14px/1.4 var(--font-body); color:var(--text-body); gap:8px; }
+.mapz-layer-sheet .mapz-layer-rail { gap:10px; margin:24px 0; }
+.mapz-layer-sheet .mapz-layer-rail button { font-size:18px; line-height:1.4; border-radius:8px; }
+.mapz-layer-sheet .mapz-layer-list { background:var(--glass-card-bg); }
+.mapz-layer-sheet .mapz-layer-list:has(.placez-card-surface) { display:grid; gap:24px; border:0; border-radius:0; overflow:visible; background:transparent; }
+.mapz-layer-sheet .mapz-layer-row { padding:16px 12px; gap:14px; min-height:76px; }
+.mapz-layer-sheet .mapz-layer-row strong { font-size:22px; line-height:1.4; color:var(--text-heading); }
+.mapz-layer-sheet .mapz-layer-row small,.mapz-layer-sheet .mapz-layer-location-note { font-size:14px; line-height:1.7; color:var(--text-body); }
+.mapz-layer-sheet .mapz-layer-row > img { width:60px; height:60px; }
+.mapz-layer-sheet .mapz-layer-rsvps,.mapz-layer-sheet .mapz-houz-about { margin-top:24px; font-size:17px; line-height:1.7; color:var(--text-body); }
+.mapz-layer-sheet .mapz-layer-rsvps summary,.mapz-layer-sheet .mapz-houz-about summary { font-size:20px; line-height:1.4; padding-block:16px; }
+@media(max-width:959px){
+  .mapz-map-demo .mapz-layer-sheet,.mapz-map-demo .mapz-layer-sheet.is-open { width:min(680px,calc(100% - 16px)); }
+}
+@media(max-width:599px){
+  .mapz-map-demo .mapz-layer-sheet__body { padding:20px 16px; }
+  .mapz-layer-sheet__sections { padding:8px; gap:6px; }
+  .mapz-layer-sheet .mapz-world-filters { grid-template-columns:1fr; }
+  .mapz-layer-sheet__footer { padding:12px; }
+}
+.mapz-map-demo .mapz-layer-sheet { z-index:12; }
+.mapz-layer-sheet .mapz-layer-visibility { min-height:48px; margin-bottom:24px; font-size:14px; line-height:1.4; color:var(--text-body); }
+
+/* Mapz drawer uses the approved family marks and the shared black/neon palette. */
+.mapz-map-demo .mapz-layer-sheet,
+.mapz-map-demo .mapz-layer-sheet.is-open {
+  --c: var(--active-layer-color);
+  border-color: color-mix(in srgb, var(--active-layer-color) 65%, var(--z-black));
+  background: var(--glass-card-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(1.15);
+  backdrop-filter: blur(24px) saturate(1.15);
+}
+.mapz-layer-sheet__title,
+.mapz-layer-sheet__footer { background: color-mix(in srgb, var(--z-black) 90%, transparent); border-color: color-mix(in srgb, var(--active-layer-color) 26%, var(--text-lo)); }
+.mapz-layer-sheet__sections { flex-basis: 145px; border-color: color-mix(in srgb, var(--active-layer-color) 22%, var(--text-lo)); }
+.mapz-layer-section {
+  justify-content: center;
+  min-height: 64px;
+  padding: 5px 9px;
+  border: 1px solid color-mix(in srgb, var(--layer-color) 45%, var(--z-black));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--z-black) 62%, transparent);
+  cursor: pointer;
+}
+.mapz-layer-section:hover { background: color-mix(in srgb, var(--layer-color) 10%, var(--z-black)); }
+.mapz-layer-section[aria-pressed=true] {
+  border-color: var(--layer-color);
+  background: color-mix(in srgb, var(--layer-color) 13%, var(--z-black));
+  box-shadow: inset 0 0 0 1px var(--layer-color), 0 0 18px -8px var(--layer-color);
+}
+.mapz-layer-section__dot { display: none; }
+.mapz-layer-section__logo { display: block; width: 100%; max-width: 118px; height: 54px; object-fit: contain; }
+.mapz-layer-section > svg { display: none; }
+.mapz-layer-sheet__brand { margin: 0 0 10px; }
+.mapz-layer-sheet__brand small {
+  display: block;
+  color: var(--text-body);
+  font: 700 13px/1.3 var(--font-mono, monospace);
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.mapz-layer-sheet__brand img { display: block; width: min(100%, 300px); height: 138px; object-fit: contain; object-position: left center; }
+.mapz-layer-sheet .mapz-layer-panel__heading { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.mapz-layer-sheet .mapz-layer-visibility { margin-bottom: 16px; color: var(--text-heading); font-size: 15px; }
+.mapz-layer-sheet .mapz-layer-rail { margin: 14px 0; }
+.mapz-layer-sheet .mapz-layer-rail button {
+  border: 1px solid color-mix(in srgb, var(--active-layer-color) 65%, var(--text-lo));
+  border-radius: 9px;
+  background: var(--z-black);
+  color: var(--text-heading);
+  font-weight: 800;
+  cursor: pointer;
+}
+.mapz-layer-sheet .mapz-layer-rail button[aria-pressed=true] {
+  color: var(--text-heading);
+  background: color-mix(in srgb, var(--active-layer-color) 22%, var(--z-black));
+  box-shadow: inset 0 0 0 1px var(--active-layer-color), 0 0 14px -9px var(--active-layer-color);
+}
+.mapz-layer-sheet .mapz-layer-rail button:hover,
+.mapz-layer-sheet__footer > a:hover,
+.mapz-layer-sheet__back:hover,
+.mapz-map-demo .mapz-houz-post:hover { filter: brightness(1.2); }
+.mapz-map-demo .mapz-houz-post {
+  border: 1px solid var(--active-layer-color);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--active-layer-color) 20%, var(--z-black));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--active-layer-color) 35%, transparent);
+  cursor: pointer;
+}
+.mapz-layer-sheet__footer > a,
+.mapz-layer-sheet__back,
+.mapz-layer-sheet__title button {
+  border: 1px solid color-mix(in srgb, var(--active-layer-color) 55%, var(--text-lo));
+  background: var(--z-black);
+  color: var(--text-heading);
+  cursor: pointer;
+}
+.mapz-map-demo .mapz-layer-row { cursor: pointer; }
+.mapz-map-demo .mapz-layer-row:hover { background: color-mix(in srgb, var(--active-layer-color) 9%, var(--z-black)); }
+.mapz-layer-sheet .mapz-layer-list .mapz-layer-row strong { color: var(--text-heading); }
+.mapz-layer-sheet .mapz-layer-row small,
+.mapz-layer-sheet .mapz-layer-location-note { color: var(--text-body); }
+@media (max-width: 599px) {
+  .mapz-layer-sheet__sections { flex-basis: auto; }
+  .mapz-layer-section { min-height: 52px; padding: 2px; }
+  .mapz-layer-section__logo { height: 48px; max-width: 86px; }
+  .mapz-layer-sheet__brand img { width: min(100%, 250px); height: 112px; }
+}

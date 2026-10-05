@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSurfaceWork} from '../client/public/zaydar-map/surface-work.js';
-import {createVenueRoofs} from '../client/public/zaydar-map/venue-roofs.js';
-import {prioritizeModels} from '../client/public/zaydar-map/model-priority.js';
-import {installCheapBridgeGlow} from '../client/public/zaydar-map/bridge-water-glow.js';
+import {createSurfaceWork} from '../client/public/mapz-map/surface-work.js';
+import {createVenueRoofs} from '../client/public/mapz-map/venue-roofs.js';
+import {prioritizeModels} from '../client/public/mapz-map/model-priority.js';
+import {installCheapBridgeGlow} from '../client/public/mapz-map/bridge-water-glow.js';
 
 test('tile, model and listing bursts produce one update with all invalidations',()=>{
  const frames=new Map(),calls=[];let id=0;

@@ -1,5 +1,5 @@
 // node --import tsx script/mapz-boot-benchmark.mjs --root dist/public --out .local/mapz-boot/after.json
-// --map-root supplies an unchanged zaydar-map snapshot for a before run.
+// --map-root supplies an unchanged mapz-map snapshot for a before run.
 // --url measures an existing app route instead of the standalone scene.
 import {chromium,devices} from 'playwright';
 import express from 'express';
@@ -15,14 +15,14 @@ const app=express();app.use(mapzPrecompressed(root));
 app.use((req,res,next)=>{
  let file=path.resolve(root,'.'+req.path);
  if(!file.startsWith(root+path.sep))return next();
- if(args['map-root']&&req.path.startsWith('/zaydar-map/'))file=path.join(path.resolve(args['map-root']),req.path.slice('/zaydar-map/'.length));
+ if(args['map-root']&&req.path.startsWith('/mapz-map/'))file=path.join(path.resolve(args['map-root']),req.path.slice('/mapz-map/'.length));
  if(!fs.existsSync(file)||!fs.statSync(file).isFile())return next();
  if(/\.(js|css|html)$/.test(file)&&req.acceptsEncodings('gzip','identity')==='gzip'){
   res.type(path.extname(file)).set('Content-Encoding','gzip').set('Cache-Control',file.endsWith('.html')?'public, max-age=0':'public, max-age=14400').end(gzipSync(fs.readFileSync(file)));
  }else res.sendFile(file,{dotfiles:'allow'});
 });
 const server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s));});
-const url=args.url||`http://127.0.0.1:${server.address().port}/zaydar-map/index.html`;
+const url=args.url||`http://127.0.0.1:${server.address().port}/mapz-map/index.html`;
 let browser;
 try{browser=await chromium.launch({headless:args.headed!=='1',executablePath:args.browser||process.env.MAPZ_CHROME_PATH,args:args.software==='1'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]});}catch(error){server.close();throw error;}
 const results=[];
@@ -48,8 +48,8 @@ try{
    if(args.cpu==='1'){await cdp.send('Profiler.enable');await cdp.send('Profiler.start');}
    const errors=[];const onError=e=>errors.push(e.message);const onFailed=r=>errors.push(r.failure()?.errorText+' '+r.url());const onResponse=r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());};page.on('pageerror',onError);page.on('requestfailed',onFailed);page.on('response',onResponse);
    await page.goto(url,{waitUntil:'domcontentloaded',timeout:90000});
-   if(args.url&&!new URL(url).pathname.includes('/zaydar-map/index.html'))await page.waitForSelector('iframe[src*="/zaydar-map/index.html"]',{timeout:90000});
-   const frame=page.frames().find(f=>f.url().includes('/zaydar-map/index.html'))||page.mainFrame();
+   if(args.url&&!new URL(url).pathname.includes('/mapz-map/index.html'))await page.waitForSelector('iframe[src*="/mapz-map/index.html"]',{timeout:90000});
+   const frame=page.frames().find(f=>f.url().includes('/mapz-map/index.html'))||page.mainFrame();
    let result;
    try{
     await frame.waitForFunction(()=>{

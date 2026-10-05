@@ -21,7 +21,7 @@ const sourceCss = readFileSync("client/src/index.css", "utf8");
 const dashboardCss = readFileSync("client/src/components/dashboard/dashboard.css", "utf8");
 
 // A cached map document must keep every relative import and logo in its version directory.
-const flightBase = JSON.parse(readFileSync("dist/public/zaydar-manifest.json", "utf8")).base;
+const flightBase = JSON.parse(readFileSync("dist/public/home-flight-manifest.json", "utf8")).base;
 function flightFilesMatch(directory, relative = "") {
   return readdirSync(directory, { withFileTypes: true }).every(entry => {
     const source = join(directory, entry.name), child = join(relative, entry.name);
@@ -32,7 +32,7 @@ function flightFilesMatch(directory, relative = "") {
 }
 
 const checks = {
-  versionedZaydar: /^\/assets\/zaydar-[a-f0-9]{16}$/.test(flightBase) && (js.includes(flightBase) || js.includes("/home-globe/holograms.webp")) && flightFilesMatch("client/public/home-flight"),
+  versionedHomeFlight: /^\/assets\/home-flight-[a-f0-9]{16}$/.test(flightBase) && (js.includes(flightBase) || js.includes("/home-globe/holograms.webp")) && flightFilesMatch("client/public/home-flight"),
   homepageGlobe: ["holograms.webp", "portland-city-beam-density.png"].every(name => {
     const route = `/home-globe/${name}`, built = join("dist/public", route);
     return js.includes(route) && existsSync(built) && readFileSync(`client/public${route}`).equals(readFileSync(built));

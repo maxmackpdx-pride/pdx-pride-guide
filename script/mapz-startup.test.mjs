@@ -4,16 +4,30 @@ import {createRequire} from 'node:module';
 import vm from 'node:vm';
 import test from 'node:test';
 import {vectorStyle} from '../client/public/home-flight/city-map.js';
-import {mapzSurfaceStyle} from '../client/public/zaydar-map/natural-surfaces.js';
-import {TERRAIN_STRENGTH} from '../client/public/zaydar-map/terrain-elevation.js';
+import {mapzSurfaceStyle} from '../client/public/mapz-map/natural-surfaces.js';
+import {TERRAIN_STRENGTH} from '../client/public/mapz-map/terrain-elevation.js';
 // Use the validator belonging to the installed MapLibre dependency, not a
 // hand-written approximation of its zoom-expression rules.
 const require=createRequire(import.meta.url);
 const maplibreRequire=createRequire(require.resolve('maplibre-gl'));
 const {validateStyleMin}=maplibreRequire('@maplibre/maplibre-gl-style-spec');
-const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
-const html=await readFile(new URL('../client/public/zaydar-map/index.html',import.meta.url),'utf8');
+const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
+const html=await readFile(new URL('../client/public/mapz-map/index.html',import.meta.url),'utf8');
+const host=await readFile(new URL('../client/src/components/MapzCanvas.tsx',import.meta.url),'utf8');
+const roofBoot=await readFile(new URL('../client/public/mapz-map/mapz-roof-boot.js',import.meta.url),'utf8');
 const getStyle=()=>structuredClone(vectorStyle);
+test('Mapz host and iframe use the same versioned asset and message contract',()=>{
+ assert.match(host,/\/mapz-map\/index\.html\?v=20261004-mapz-rename/);
+ assert.match(host,/source:'mapz-host'/);
+ assert.match(host,/event\.data\?\.source!=='mapz-demo'/);
+ assert.match(html,/source:'mapz-demo'/);
+ assert.match(html,/event\.data\?\.source!=='mapz-host'/);
+ assert.match(html,/river-flight\.js\?v=20261004-mapz-rename/g);
+ assert.match(renderer,/source:'mapz-demo'/);
+ assert.match(renderer,/event\.data\?\.source!=='mapz-host'/);
+ assert.match(roofBoot,/event\.data\?\.source!=='mapz-host'/);
+ for(const source of [host,html,renderer,roofBoot])assert.doesNotMatch(source,/zaydar-(?:host|demo|map)|Zaydar|__zaydarStartup/i);
+});
 test('home map retains vector buildings without added terrain or backgrounds',()=>{
  const style=getStyle();
  assert.deepEqual(Object.keys(style.sources),['terrain']);
@@ -45,7 +59,7 @@ test('the actual startup reaches MapLibre construction, with only one graphics c
  const prefix=renderer.slice(renderer.indexOf('const startup='),renderer.indexOf('const waterBloom='));
  assert.throws(()=>vm.runInNewContext(prefix,{
   mapzSurfaceStyle,structuredClone,URLSearchParams,TERRAIN_STRENGTH,location:{search:'?terrain=1'},
-  window:{__zaydarStartup:{phase(){},fatal(){}}},
+  window:{__mapzStartup:{phase(){},fatal(){}}},
   mlcontour:{DemSource:class{setupMaplibre(){} get sharedDemProtocolUrl(){return 'dem://tiles';} contourProtocolUrl(){return 'contour://tiles';}}},
   // No document canvas probe should be needed before the real map is created.
   maplibregl:{Map:class{constructor(value){options=value;throw reached;}}}
@@ -65,7 +79,7 @@ function bridge(){
   document:{documentElement:{dataset},getElementById:()=>status},
   parent:{postMessage:value=>messages.push(value)}
  });
- return {handlers,messages,status,dataset,ErrorEvent,startup:window.__zaydarStartup};
+ return {handlers,messages,status,dataset,ErrorEvent,startup:window.__mapzStartup};
 }
 
 test('startup bridge surfaces the original error and deduplicates it',()=>{

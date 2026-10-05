@@ -4,11 +4,11 @@ import {readFile,access} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import vm from 'node:vm';
 import {intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles,CITY_SPARKLE_MAX_ZOOM} from '../client/public/home-flight/roof-sparkles.js';
-import {groundLightMesh,createGroundLightPools} from '../client/public/zaydar-map/ground-light-pools.js';
-import {standaloneDemoRows} from '../client/public/zaydar-map/standalone-demo.js';
+import {groundLightMesh,createGroundLightPools} from '../client/public/mapz-map/ground-light-pools.js';
+import {standaloneDemoRows} from '../client/public/mapz-map/standalone-demo.js';
 import {createCitySparkles} from '../client/public/home-flight/city-sparkles.js';
-import {DAY_LIST} from '../client/public/zaydar-map/radix-map.js';
-import {contourSignalOpacity,corridorGradient,selectSignalCorridors} from '../client/public/zaydar-map/ambient-signals.js';
+import {DAY_LIST} from '../client/public/mapz-map/radix-map.js';
+import {contourSignalOpacity,corridorGradient,selectSignalCorridors} from '../client/public/mapz-map/ambient-signals.js';
 
 const road=(coordinates,properties={})=>({geometry:{type:'LineString',coordinates},properties:{class:'minor',...properties}});
 const intersection=[
@@ -101,7 +101,7 @@ test('zoom changes only the pool projection; geometry stays anchored and never w
   assert.ok(Math.abs(matrices[0][12]/matrices[1][12]-4)<1e-6);
 });
 test('sparse building tiles keep street sparkles at overview zooms through sixteen',async()=>{
-  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+  const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
   const roads=Array.from({length:150},(_,i)=>road([[-122.675+i*.0001,45.52],[-122.675+i*.0001,45.522]]));
   const target={getCenter:()=>({lng:0,lat:45}),getBearing:()=>0,getLayer:()=>true,querySourceFeatures:(_source,{sourceLayer})=>sourceLayer==='building'?[]:roads,getZoom:()=>14,getPitch:()=>48};
   const context=vm.createContext({Map,Set,WeakMap,performance,window:{innerWidth:900,innerHeight:1200},matchMedia:()=>({matches:false}),
@@ -118,12 +118,12 @@ test('sparse building tiles keep street sparkles at overview zooms through sixte
   }
 });
 test('standalone holograms use real directory anchors and local artwork without fake event dates',async()=>{
-  const directory=JSON.parse(await readFile(new URL('../client/public/zaydar-map/waypoints.json',import.meta.url),'utf8'));
+  const directory=JSON.parse(await readFile(new URL('../client/public/mapz-map/waypoints.json',import.meta.url),'utf8'));
   const rows=standaloneDemoRows().filter(row=>row.kind==='event');assert.equal(rows.length,2);
   for(const row of rows){
     const venue=directory.find(v=>v.name.toLowerCase().startsWith(row.name.toLowerCase()));
     assert.deepEqual(row.coordinates,venue.coordinates);assert.equal(row.logo,venue.logo);assert.equal(row.demoOpen,true);
     assert.equal(row.startsAt,undefined);assert.equal(row.eventDay,undefined);
-    await access(new URL(`../client/public/zaydar-map/${row.logo}`,import.meta.url));
+    await access(new URL(`../client/public/mapz-map/${row.logo}`,import.meta.url));
   }
 });

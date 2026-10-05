@@ -3,11 +3,11 @@ import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 
 const [host,fallback,page,html,renderer,home,routes,app,bootLoader]=await Promise.all([
- readFile(new URL('../client/src/components/ZaydarCanvas.tsx',import.meta.url),'utf8'),
- readFile(new URL('../client/src/components/ZaydarFallback.tsx',import.meta.url),'utf8'),
- readFile(new URL('../client/src/pages/ZaydarMapDemo.tsx',import.meta.url),'utf8'),
- readFile(new URL('../client/public/zaydar-map/index.html',import.meta.url),'utf8'),
- readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8'),
+ readFile(new URL('../client/src/components/MapzCanvas.tsx',import.meta.url),'utf8'),
+ readFile(new URL('../client/src/components/MapzFallback.tsx',import.meta.url),'utf8'),
+ readFile(new URL('../client/src/pages/MapzMapDemo.tsx',import.meta.url),'utf8'),
+ readFile(new URL('../client/public/mapz-map/index.html',import.meta.url),'utf8'),
+ readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8'),
  readFile(new URL('../client/public/home-flight/river-flight.js',import.meta.url),'utf8'),
  readFile(new URL('../server/routes.ts',import.meta.url),'utf8'),
  readFile(new URL('../client/src/App.tsx',import.meta.url),'utf8'),
@@ -19,7 +19,7 @@ test('Mapz and the home flyover share the same natural surface renderer',()=>{
  assert.match(renderer,/terrainStrength:0/);
  assert.doesNotMatch(renderer,/mlcontour\.DemSource/);
  assert.match(html,/maplibre-contour-0\.1\.0\.js/);
- assert.match(home,/import \{mapzSurfaceStyle,createWaterBloom\} from '\.\.\/zaydar-map\/natural-surfaces\.js/);
+ assert.match(home,/import \{mapzSurfaceStyle,createWaterBloom\} from '\.\.\/mapz-map\/natural-surfaces\.js/);
  assert.match(home,/mlcontour\.DemSource/);
  assert.doesNotMatch(renderer,/api\/mapz|deck-mobile/);
  assert.doesNotMatch(routes,/registerMapzTileRoutes/);
@@ -47,17 +47,17 @@ test('3D base frame does not wait for optional waypoint assets',()=>{
 });
 
 test('2D is retained but disconnected from both the map host and toggle',()=>{
- assert.doesNotMatch(host,/ZaydarFallback|onRendererChange|failTo2D|lazy\(|Suspense/);
- assert.doesNotMatch(page,/ZaydarFallback|setRenderer|Switch to.*2D/);
- assert.match(host,/<Zaydar3D key=\{generation\}/);
+ assert.doesNotMatch(host,/MapzFallback|onRendererChange|failTo2D|lazy\(|Suspense/);
+ assert.doesNotMatch(page,/MapzFallback|setRenderer|Switch to.*2D/);
+ assert.match(host,/<Mapz3D key=\{generation\}/);
  assert.match(fallback,/preferCanvas/);
  assert.match(host,/<MapBootLoader map="mapz" overlay/);
  assert.match(bootLoader,/>Reload map<\/button>/);
 });
 
 test('Mapz browsing is public while posting and private views require authentication',()=>{
- assert.match(app,/<Route path="\/map-demo" component=\{ZaydarMapDemo\} \/>/);
- assert.match(app,/<Route path="\/map" component=\{ZaydarMapDemo\} \/>/);
+ assert.match(app,/<Route path="\/map-demo" component=\{MapzMapDemo\} \/>/);
+ assert.match(app,/<Route path="\/map" component=\{MapzMapDemo\} \/>/);
  assert.doesNotMatch(app,/SignedInLivingMap/);
  assert.doesNotMatch(page,/gateSignedOutControls|canOpenMapObjects/);
  assert.match(page,/if\(!user\)\{setShowAuth\(true\);return;\}/);

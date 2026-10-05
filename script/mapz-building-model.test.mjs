@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
-import {PORTLAND_BUILDING_MODELS,parseBuildingGlb,replacementBuildingSurfaces,BUILDING_MODEL_MIN_ZOOM} from '../client/public/zaydar-map/building-models.js';
+import {PORTLAND_BUILDING_MODELS,parseBuildingGlb,replacementBuildingSurfaces,BUILDING_MODEL_MIN_ZOOM} from '../client/public/mapz-map/building-models.js';
 const parse=m=>{const b=fs.readFileSync(new URL(m.url));return parseBuildingGlb(b.buffer.slice(b.byteOffset,b.byteOffset+b.length),m)};
 test('all eight supplied models keep filename GPS, authored meter height and finite grounded geometry',()=>{const heights=[163.38,43.3,65,38,18,72.75,32.6,49];assert.equal(PORTLAND_BUILDING_MODELS.length,8);PORTLAND_BUILDING_MODELS.forEach((m,i)=>{const p=parse(m),match=m.url.match(/_lat([\d.]+)_lon(-[\d.]+)_/);assert.deepEqual(m.center,[+match[2],+match[1]]);assert.ok(Math.abs(p.bounds.max[2]-heights[i])<.02);assert.equal(p.bounds.min[2],0);assert.ok(p.vertices.every(Number.isFinite));assert.ok(p.count<100000);for(let j=3;j<p.vertices.length;j+=7)assert.ok(Math.abs(Math.hypot(...p.vertices.slice(j,j+3))-1)<.001);});assert.equal(BUILDING_MODEL_MIN_ZOOM,12);});
 const square=(x,y,s=.00002)=>[[x-s,y-s],[x+s,y-s],[x+s,y+s],[x-s,y+s],[x-s,y-s]];

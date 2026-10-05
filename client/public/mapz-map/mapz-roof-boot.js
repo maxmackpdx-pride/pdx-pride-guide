@@ -15,7 +15,7 @@ function buildingsFrom(map){
  const out=[],seen=new Set();
  let feats=[];
  try{
-  feats=map.__zaydarBuildingModels?.surfaceFeatures?.()||[];
+  feats=map.__mapzBuildingModels?.surfaceFeatures?.()||[];
   if(!feats.length)feats=map.querySourceFeatures('terrain',{sourceLayer:'building'})||[];
  }catch{}
  for(const feature of feats){
@@ -118,7 +118,7 @@ if(window.maplibregl?.Map&&!window.__mapzRoofBoot){
 }
 
 window.addEventListener('message',event=>{
- if(event.origin!==location.origin||event.data?.source!=='zaydar-host')return;
+ if(event.origin!==location.origin||event.data?.source!=='mapz-host')return;
  if(event.data.type==='data'&&Array.isArray(event.data.rows)){
   window.__mapzVenueFeatures=rowsToFeatures(event.data.rows);
   window.__mapzMap?.__mapzSurfaceWork?.schedule({geometry:true});

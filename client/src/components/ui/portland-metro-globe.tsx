@@ -72,6 +72,7 @@ function warp(value: number, center: number, strength: number, inverse = false) 
 }
 const smooth = (value: number) => { const t=Math.max(0,Math.min(1,value)); return t*t*t*(t*(t*6-15)+10); };
 const MAX_HOLOGRAMS = 8;
+const DUPLICATE_PHASE_OFFSET = 1000;
 // These venue marks and Zaylist family logos keep their original artwork.
 const FEATURED_LOGO_IDS = new Set(["1-0", "2-0", "5-0", "28-0", "33-0", "41-0"]);
 const RANDOM_GLOBE_WAYPOINTS: GlobeWaypointId[] = ["bar", "venue", "cafe", "shop", "adult", "outzide-trail", "outzide-fishing", "outzide-watercamp", "outzide-boating", "outzide-camp"];
@@ -129,6 +130,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
   const redrawRef = useRef(() => {});
   const hologramStates = useRef(new Map<number,HologramState>());
   const lastShown = useRef(new Map<number,number>());
+  const lastShownRow = useRef(new Map<string,number>());
   const lastFrame = useRef(0);
   const nextOpen = useRef(0);
   const hover = useRef<{ x: number; y: number } | null>(null);
@@ -162,6 +164,33 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     // Previous frame footprints keep the dot pass beneath beams and artwork.
     let beamFootprints: { ax:number; ay:number; x:number; y:number; halfWidth:number; strength:number; rgb:number[] }[] = [];
     const venues: { id: string; product: boolean; point: Point; image: HTMLCanvasElement; waypointImage: HTMLImageElement; color: string; phase: number; logoKey:string }[] = [];
+    const addOpenAreaDuplicates=()=>{
+      const originals=venues.filter(venue=>venue.phase<DUPLICATE_PHASE_OFFSET);
+      const occupied=venues.map(venue=>venue.point);
+      for(const venue of originals){
+        if(venues.some(other=>other.phase===venue.phase+DUPLICATE_PHASE_OFFSET))continue;
+        let bestPoint:Point|undefined,bestScore=-Infinity;
+        // A fixed golden-angle field spreads copies across both hemispheres.
+        // Keep each copy off its source's latitude and well away from its pin.
+        for(let index=0;index<240;index++){
+          const y=-.72+1.44*((index*73%240+.5)/240);
+          if(Math.abs(y-venue.point.y)<.24)continue;
+          const longitude=index*2.399963;
+          const band=Math.sqrt(1-y*y);
+          const point:Point={x:Math.sin(longitude)*band,y,z:Math.cos(longitude)*band,tone:0};
+          const sourceDot=point.x*venue.point.x+point.y*venue.point.y+point.z*venue.point.z;
+          if(sourceDot>.45)continue;
+          const nearest=Math.min(...occupied.map(other=>
+            (point.x-other.x)**2+(point.y-other.y)**2+(point.z-other.z)**2));
+          const score=nearest+.08*(1-Math.abs(y));
+          if(score>bestScore){bestScore=score;bestPoint=point;}
+        }
+        if(!bestPoint)continue;
+        venues.push({...venue,phase:venue.phase+DUPLICATE_PHASE_OFFSET,point:bestPoint,waypointImage:new Image()});
+        occupied.push(bestPoint);
+      }
+      canvas.dataset.globeWaypoints=String(venues.length);
+    };
     type AtlasEntry = {id:string; coordinates:[number,number];color:string;phase:number;product:boolean;logoKey?:string;x:number;y:number;w:number;h:number};
     const atlas=new Image();atlas.decoding="async";
     let atlasReady=false, fallbackWaypointsAdded=false, atlasAttempts=0, atlasRetry=0;
@@ -173,6 +202,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         if(waypoint.point)venues.push({id:waypoint.id,product:false,point:waypoint.point,image,
           waypointImage:new Image(),color:waypoint.color||"#00ffff",phase:230+index*2.39996,logoKey:waypoint.id});
       });
+      addOpenAreaDuplicates();
       draw();
     };
     const populateAtlas=()=>{
@@ -189,6 +219,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         if(point)venues.push({id:row.id,product:row.product,point,image,waypointImage,color:row.color,phase:row.phase,logoKey:(row.logoKey||row.id).toLowerCase()});
       }
       addFallbackWaypoints();
+      addOpenAreaDuplicates();
       draw();
     };
     const loadAtlas=()=>{ atlas.src=`/home-globe/holograms.webp${atlasAttempts?`?retry=${atlasAttempts}`:""}`; };
@@ -406,7 +437,11 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           if (!venue) continue;
           if (!still && (venue.anchor.z<.18 || elapsed-state.openedAt>13000+(key%5)*700)) state.closing=true;
           if (!still) state.progress=Math.max(0,Math.min(1,state.progress+(state.closing?-1:1)*dt/2200));
-          if (state.closing && state.progress===0) { states.delete(key); lastShown.current.set(key,elapsed); }
+          if (state.closing && state.progress===0) {
+            states.delete(key);
+            lastShown.current.set(key,elapsed);
+            lastShownRow.current.set(venue.id,elapsed);
+          }
         }
         const initialReveal = states.size===0 && lastShown.current.size===0;
         const candidates = projected.filter(venue=>venue.anchor.z>.3 && !states.has(venue.phase));
@@ -424,10 +459,11 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         // geography, while a cooldown gives other venues a turn.
         while (states.size<MAX_HOLOGRAMS && candidates.length && (initialReveal || still || elapsed>=nextOpen.current)) {
           const openLogoKeys=activeLogoKeys();
+          const openRows=new Set([...states.keys()].map(key=>projected.find(venue=>venue.phase===key)?.id));
           const availableWaypoints=RANDOM_GLOBE_WAYPOINTS.filter(id=>!openLogoKeys.has(`glyph:${id}`));
-          const eligible=candidates.filter(venue=>isWaypointCandidate(venue)
+          const eligible=candidates.filter(venue=>!openRows.has(venue.id) && (isWaypointCandidate(venue)
             ? availableWaypoints.length>0
-            : !openLogoKeys.has(`asset:${venue.logoKey}`));
+            : !openLogoKeys.has(`asset:${venue.logoKey}`)));
           if(!eligible.length)break;
           let best=0, bestScore=-Infinity;
           eligible.forEach((venue,index)=>{
@@ -435,8 +471,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
               const other=projected.find(item=>item.phase===key);
               return other ? Math.hypot(venue.anchor.x-other.anchor.x,venue.anchor.y-other.anchor.y)/radius : 2;
             })) : venue.anchor.z;
-            const recentlyShown=lastShown.current.get(venue.phase);
-            const cooldown=recentlyShown===undefined?0:Math.max(0,1-(elapsed-recentlyShown)/30000)*2;
+            const recentlyShown=Math.max(lastShown.current.get(venue.phase)??-Infinity,lastShownRow.current.get(venue.id)??-Infinity);
+            const cooldown=Number.isFinite(recentlyShown)?Math.max(0,1-(elapsed-recentlyShown)/30000)*2:0;
             const score=distance-cooldown;
             if(score>bestScore){best=index;bestScore=score;}
           });

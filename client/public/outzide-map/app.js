@@ -80,12 +80,12 @@ function renderMarkers(){if(!map)return;markers.forEach(m=>m.remove());markers=[
 let branchKit=null,branchRows=[],branchHits=[],branchIcon=null;
 async function loadMizzedBranches(){
  try{
-  const [markersKit,attachments]=await Promise.all([import('/zaydar-map/waypoint-markers.js?v=20260930-pack-heads'),import('/zaydar-map/venue-attachments.js?v=20260930-branches')]);
+  const [markersKit,attachments]=await Promise.all([import('/mapz-map/waypoint-markers.js?v=20260930-pack-heads'),import('/mapz-map/venue-attachments.js?v=20260930-branches')]);
   const response=await fetch('/api/missed-connections',{credentials:'same-origin'});if(!response.ok)return;
   const rows=await response.json(),ids=new Set(places.map(place=>place.id));
   branchRows=(Array.isArray(rows)?rows:[]).map(row=>({...row,waypointFamily:'mizzed'})).filter(row=>row.beachId&&ids.has(row.beachId)&&attachments.mizzedNotificationActive(row));
   if(!branchRows.length)return;
-  branchIcon=new Image();branchIcon.onload=()=>drawHolograms();branchIcon.src='/zaydar-map/icons/mizzed.svg';
+  branchIcon=new Image();branchIcon.onload=()=>drawHolograms();branchIcon.src='/mapz-map/icons/mizzed.svg';
   branchKit={...markersKit,...attachments};drawHolograms();
  }catch{}
 }

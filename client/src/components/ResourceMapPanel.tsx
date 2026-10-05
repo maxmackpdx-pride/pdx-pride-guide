@@ -29,8 +29,8 @@ export default function ResourceMapPanel({ bounds, query, category, onQuery, onC
     <span className="resource-map-result__copy"><strong>{entry.org.name}</strong><small>{entry.org.scope}</small><span>{entry.categories.map(item => item.name).join(' · ')}</span></span>
     <ArrowUpRight size={19} aria-hidden="true" />
   </a>;
-  return <section className="zaydar-layer-panel resource-map-panel" aria-label="ReZources on this map">
-    <div className="zaydar-layer-panel__heading"><small>In this view</small><h2>ReZources</h2></div>
+  return <section className="mapz-layer-panel resource-map-panel" aria-label="ReZources on this map">
+    <div className="mapz-layer-panel__heading"><small>In this view</small><h2>ReZources</h2></div>
       <div className="resource-map-controls">
         <label>Search ReZources<input type="search" value={query} onChange={event => { onQuery(event.target.value); setLimit(40); }} placeholder="Organization, service, or need" /></label>
         <label>Category<select value={category} onChange={event => { onCategory(event.target.value); setLimit(40); }}>

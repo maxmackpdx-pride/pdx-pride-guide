@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import {readFile,stat} from 'node:fs/promises';
 import test from 'node:test';
-import {HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_LABELS,HOUSING_HOLOGRAM_MODELS,HOUSING_ICON_SCALE,HOUSING_ROTATION_SPEED,parseHousingHologramGlb} from '../client/public/zaydar-map/housing-holograms.js';
-import {standaloneDemoRows} from '../client/public/zaydar-map/standalone-demo.js';
+import {HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_LABELS,HOUSING_HOLOGRAM_MODELS,HOUSING_ICON_SCALE,HOUSING_ROTATION_SPEED,parseHousingHologramGlb} from '../client/public/mapz-map/housing-holograms.js';
+import {standaloneDemoRows} from '../client/public/mapz-map/standalone-demo.js';
 
 const modelFiles={
-  rent:new URL('../client/public/zaydar-map/models/housing/rent.glb',import.meta.url),
-  'forming-hauz':new URL('../client/public/zaydar-map/models/housing/forming-hauz.glb',import.meta.url),
-  'hous-purple':new URL('../client/public/zaydar-map/models/housing/hous-purple.glb',import.meta.url),
+  rent:new URL('../client/public/mapz-map/models/housing/rent.glb',import.meta.url),
+  'forming-hauz':new URL('../client/public/mapz-map/models/housing/forming-hauz.glb',import.meta.url),
+  'hous-purple':new URL('../client/public/mapz-map/models/housing/hous-purple.glb',import.meta.url),
 };
 
 function arrayBuffer(buffer){return buffer.buffer.slice(buffer.byteOffset,buffer.byteOffset+buffer.byteLength);}
@@ -37,7 +37,7 @@ test('standalone demo includes the four seeded HAÜZ listing roles at neighborho
 });
 
 test('HAÜZ projection keeps a readable event-relative envelope at every camera distance',async()=>{
-  const {housingScreenFit,housingIconSize,createHousingHologramLayer}=await import('../client/public/zaydar-map/housing-holograms.js');
+  const {housingScreenFit,housingIconSize,createHousingHologramLayer}=await import('../client/public/mapz-map/housing-holograms.js');
   const bounds={min:[-40,-10,0],max:[40,10,80]},viewport={width:1000,height:800};
   for(const distance of [.01,1,100,10000])for(const scale of [.08,.3,1,1.65]){
     const matrix=[1,0,0,0,0,.5,0,0,0,1,1,0,0,0,0,distance];

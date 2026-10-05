@@ -90,7 +90,7 @@ These were present before this task, remain untouched and are excluded from the 
 
 ## Follow-up: browser-loaded basemap
 
-- The 3D Mapz engine continues to load from the bundled `/zaydar-map/` files when the visitor opens the map.
+- The 3D Mapz engine continues to load from the bundled `/mapz-map/` files when the visitor opens the map.
 - The lightweight CARTO fallback now requests raster tiles directly from CARTO in the visitor's browser, including the configured public basemap key. It no longer sends each tile through the Zaylist Express server.
 - Removed the obsolete `/api/mapz/carto-tiles` server route and proxy module.
 - PASS: typecheck, complete client/service-worker/server production build, reference search for the removed route, and whitespace check.

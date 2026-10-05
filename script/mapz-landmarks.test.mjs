@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile,stat} from 'node:fs/promises';
 import test from 'node:test';
-import {PORTLAND_LANDMARKS,PORTLAND_LANDMARK_MIN_ZOOM,parseLandmarkGlb} from '../client/public/zaydar-map/portland-landmarks.js';
+import {PORTLAND_LANDMARKS,PORTLAND_LANDMARK_MIN_ZOOM,parseLandmarkGlb} from '../client/public/mapz-map/portland-landmarks.js';
 
 const expected={
   'benson-bubbler':[1.17,1.17,1],
@@ -19,7 +19,7 @@ const arrayBuffer=buffer=>buffer.buffer.slice(buffer.byteOffset,buffer.byteOffse
 test('all nine Portland landmarks keep true meter dimensions and lightweight local geometry',async()=>{
   assert.equal(PORTLAND_LANDMARKS.length,9);assert.equal(PORTLAND_LANDMARK_MIN_ZOOM,14);
   for(const landmark of PORTLAND_LANDMARKS){
-    const url=new URL(`../client/public/zaydar-map/models/landmarks/${landmark.id}.glb`,import.meta.url),buffer=await readFile(url),parsed=parseLandmarkGlb(arrayBuffer(buffer),landmark.dimensions);
+    const url=new URL(`../client/public/mapz-map/models/landmarks/${landmark.id}.glb`,import.meta.url),buffer=await readFile(url),parsed=parseLandmarkGlb(arrayBuffer(buffer),landmark.dimensions);
     assert.ok((await stat(url)).size<850_000,`${landmark.id} stays under 850 KB`);
     assert.ok(parsed.count<=24_000,`${landmark.id} stays under the triangle budget`);
     expected[landmark.id].forEach((value,index)=>assert.ok(Math.abs(parsed.dimensions[index]-value)<.08,`${landmark.id} dimension ${index}`));
@@ -35,7 +35,7 @@ test('landmarks use requested scale, fixed GPS anchors, and the R2-D2 scan/stati
   assert.equal(hydrants.scale,7);
   assert.deepEqual(hydrants.center,[-122.67992,45.52143]);
   assert.ok(PORTLAND_LANDMARKS.filter(landmark=>landmark!==welcome&&landmark!==hydrants).every(landmark=>landmark.scale===1.75&&landmark.center.every(Number.isFinite)));
-  const layer=await readFile(new URL('../client/public/zaydar-map/portland-landmarks.js',import.meta.url),'utf8'),renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+  const layer=await readFile(new URL('../client/public/mapz-map/portland-landmarks.js',import.meta.url),'utf8'),renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
   assert.match(layer,/float scan=/);assert.match(layer,/float snow=/);assert.match(layer,/float dropout=/);assert.match(layer,/disable\(gl\.DEPTH_TEST\)/);assert.match(layer,/depthMask\(false\)/);
   assert.match(renderer,/map\.addLayer\(portlandLandmarks\)/);
 });

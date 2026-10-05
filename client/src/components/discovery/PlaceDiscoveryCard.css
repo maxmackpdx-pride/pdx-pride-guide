@@ -6,7 +6,7 @@
 .placez-discovery-meta { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; color:var(--text-body); font:14px/1.7 var(--font-body); margin:0 0 14px; }
 .placez-discovery-meta span { display:inline-flex; align-items:center; gap:6px; }
 .placez-card-surface .placez-discovery-footer .pdxBtn { color:var(--text-heading); }
-.zaydar-layer-list > .placez-card-surface { margin-block:12px; }
+.mapz-layer-list > .placez-card-surface { margin-block:12px; }
 
 /* A closed card is an invitation; practical details live in the open card. */
 .placez-card-surface .placez-discovery-card .pdxPlace__body { gap:20px; border-radius:24px; }

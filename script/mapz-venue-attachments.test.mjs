@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
-import {eventNight} from '../client/public/zaydar-map/event-night.js';
-import {attachVenueRows,mizzedNotificationActive,extensionGeometry,MIZZED_NOTIFICATION_LIFETIME,TONIGHT_HEIGHT_MULTIPLIER} from '../client/public/zaydar-map/venue-attachments.js';
+import {eventNight} from '../client/public/mapz-map/event-night.js';
+import {attachVenueRows,mizzedNotificationActive,extensionGeometry,MIZZED_NOTIFICATION_LIFETIME,TONIGHT_HEIGHT_MULTIPLIER} from '../client/public/mapz-map/venue-attachments.js';
 
 test('night identity changes at 2am Portland, including DST and year boundaries',()=>{
  for(const [time,day] of [
@@ -39,7 +39,7 @@ test('gigs posted at a place branch for eight days; gigs without a place stay',(
  assert.equal(mizzedNotificationActive(loose,created+MIZZED_NOTIFICATION_LIFETIME*4),true);
 });
 test('dense same-venue holograms separate without moving down onto their waypoint',async()=>{
- const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+ const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
  const context=vm.createContext({});vm.runInContext(renderer.slice(renderer.indexOf('function separateHolograms('),renderer.indexOf('function hologramVariation(')),context);
  const items=Array.from({length:12},(_,i)=>({x:190,y:300,p:{x:190,y:550},halfWidth:45,halfHeight:80,attention:.5,maxY:400}));
  context.items=items;vm.runInContext('separateHolograms(items,390,760)',context);
@@ -47,7 +47,7 @@ test('dense same-venue holograms separate without moving down onto their waypoin
 });
 
 test('branches count down in days, step down after day four, and cap at three heads',async()=>{
- const {branchDaysLeft,branchStrength,branchSlot}=await import('../client/public/zaydar-map/venue-attachments.js');
+ const {branchDaysLeft,branchStrength,branchSlot}=await import('../client/public/mapz-map/venue-attachments.js');
  const posted=Date.parse('2026-07-13T20:00:00Z'),row={createdAt:new Date(posted).toISOString()},day=86400000;
  assert.equal(branchDaysLeft(row,posted+1),8);
  assert.equal(branchDaysLeft(row,posted+2*day+1),6);

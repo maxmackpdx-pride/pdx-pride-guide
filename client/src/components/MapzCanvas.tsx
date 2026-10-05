@@ -1,21 +1,21 @@
 import {forwardRef,useCallback,useEffect,useImperativeHandle,useLayoutEffect,useMemo,useRef,useState} from 'react';
-import './ZaydarBootNotice.css';
+import './MapzBootNotice.css';
 import MapBootLoader from './MapBootLoader';
 
-export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
+export type MapzHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 export type MapView={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
 type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string;avatars?:Array<{url:string;initial:string;background:string;ring:string}>};
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
 type CanvasProps={initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};
-const MAP_SRC='/zaydar-map/index.html?v=20260930-maps';
+const MAP_SRC='/mapz-map/index.html?v=20261004-mapz-rename';
 const MAX_3D_ATTEMPTS=3;
 
-const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onCluster,onMode,onView},ref){
+const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onCluster,onMode,onView},ref){
  const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onCluster,onMode,onView});latest.current={onFailure,onVisible,onSelect,onCluster,onMode,onView};
  const failed=useRef(false),restoreView=useRef(initialView);
  const [phase,setPhase]=useState('loading'),[firstFrame,setFirstFrame]=useState(false),[ready,setReady]=useState(false);
- const post=(type:string,data:Record<string,unknown>={})=>frame.current?.contentWindow?.postMessage({source:'zaydar-host',type,...data},window.location.origin);
+ const post=(type:string,data:Record<string,unknown>={})=>frame.current?.contentWindow?.postMessage({source:'mapz-host',type,...data},window.location.origin);
  useImperativeHandle(ref,()=>({send:post}),[]);
  const fail=useCallback((reason:string)=>{
   if(failed.current)return;
@@ -36,7 +36,7 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
   return()=>{window.clearTimeout(timer);document.removeEventListener('visibilitychange',arm);};
  },[phase,firstFrame,fail]);
  useLayoutEffect(()=>{const receive=(event:MessageEvent)=>{
-  if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='zaydar-demo')return;
+  if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='mapz-demo')return;
   if(event.data.type==='phase'&&typeof event.data.phase==='string')setPhase(event.data.phase);
   if(event.data.type==='first-frame'){failed.current=false;setFirstFrame(true);latest.current.onVisible();}
   if(event.data.type==='ready')setReady(true);
@@ -68,11 +68,11 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
   if(node.contentDocument?.readyState==='complete')hello();
   return()=>node.removeEventListener('load',hello);
  },[attempt]);
- return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}`} title="Zaylist interactive Portland metro map" className="zaydar-demo-canvas" onLoad={()=>post('hello')}/>;
+ return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}`} title="Zaylist interactive Portland metro map" className="mapz-demo-canvas" onLoad={()=>post('hello')}/>;
 });
 
-export default forwardRef<ZaydarHandle,CanvasProps>(function ZaydarCanvas(props,ref){
- const activeControl=useRef<ZaydarHandle>(null),lastView=useRef<MapView|null>(props.initialCamera || null);
+export default forwardRef<MapzHandle,CanvasProps>(function MapzCanvas(props,ref){
+ const activeControl=useRef<MapzHandle>(null),lastView=useRef<MapView|null>(props.initialCamera || null);
  const attempts=useRef(0),visible=useRef(false);
  const [generation,setGeneration]=useState(0),[bootError,setBootError]=useState(''),[stopped,setStopped]=useState(false),[shown,setShown]=useState(false);
  const reportView=(view:MapView)=>{lastView.current=view;props.onView(view);};
@@ -87,7 +87,7 @@ export default forwardRef<ZaydarHandle,CanvasProps>(function ZaydarCanvas(props,
  };
  useImperativeHandle(ref,()=>({send:(type,data={})=>activeControl.current?.send(type,data)}),[]);
  return <>
-  <Zaydar3D key={generation} ref={activeControl} {...props} attempt={generation} initialView={lastView.current} onFailure={recover} onVisible={()=>{if(visible.current)return;visible.current=true;setShown(true);window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'mapz'}}));}} onView={reportView}/>
+  <Mapz3D key={generation} ref={activeControl} {...props} attempt={generation} initialView={lastView.current} onFailure={recover} onVisible={()=>{if(visible.current)return;visible.current=true;setShown(true);window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'mapz'}}));}} onView={reportView}/>
   {!shown&&<MapBootLoader map="mapz" overlay error={stopped?bootError:undefined} onRetry={stopped?retry:undefined}/>}
  </>;
 });

@@ -19,5 +19,5 @@ export function prefetchMapz(){
   if('as' in asset)link.as=asset.as;
   document.head.appendChild(link);
  }
- void import('@/pages/ZaydarMapDemo');
+ void import('@/pages/MapzMapDemo');
 }

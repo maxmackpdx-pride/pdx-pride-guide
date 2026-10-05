@@ -37,12 +37,12 @@ html body .z-communities .z-communities__results-head { margin-bottom:40px; }
 html body .mizzed-board .mizzed-board__filters button { min-height:44px; border-radius:12px; font:700 16px/1.4 var(--font-display); background:var(--glass-card-bg); color:var(--text-heading); }
 html body .mizzed-board .mizzed-board__filters button[aria-pressed=true] { border-color:var(--room-mizzed); background:color-mix(in srgb,var(--room-mizzed) 15%,var(--z-black)); color:var(--text-heading); }
 /* Map controls use the same dark glass with neutral, bloom-free framing. */
-html body :is(.zaydar-demo-navigation, .map-switch) { --dir-gm:0; background:var(--glass-card-neutral-bg); border:var(--glass-card-neutral-border); box-shadow:var(--glass-card-neutral-shadow); border-radius:18px; }
-html body .zaydar-demo-navigation button { min-width:44px; min-height:44px; border-radius:12px; }
-html body .zaydar-demo-navigation button[aria-pressed=true],
+html body :is(.mapz-demo-navigation, .map-switch) { --dir-gm:0; background:var(--glass-card-neutral-bg); border:var(--glass-card-neutral-border); box-shadow:var(--glass-card-neutral-shadow); border-radius:18px; }
+html body .mapz-demo-navigation button { min-width:44px; min-height:44px; border-radius:12px; }
+html body .mapz-demo-navigation button[aria-pressed=true],
 html body .map-switch__option[aria-current=page] { border-color:var(--room-eventz); background:color-mix(in srgb,var(--room-eventz) 15%,var(--z-black)); color:var(--text-heading); box-shadow:inset 0 0 0 1px var(--room-eventz); }
 html body .map-switch__option--outz[aria-current=page] { border-color:var(--room-outz); background:color-mix(in srgb,var(--room-outz) 15%,var(--z-black)); box-shadow:inset 0 0 0 1px var(--room-outz); }
-html body :is(.map-switch a,.zaydar-demo-navigation button):focus-visible { outline:2px solid var(--chrome-focus,var(--neon-cyan)); outline-offset:4px; }
+html body :is(.map-switch a,.mapz-demo-navigation button):focus-visible { outline:2px solid var(--chrome-focus,var(--neon-cyan)); outline-offset:4px; }
 @media(max-width:600px) {
   :root { --section-gap:48px; --section-body:17px; }
   html body .board-shader-page .room-plate:not(.room-plate--compact) { padding-top:32px; }

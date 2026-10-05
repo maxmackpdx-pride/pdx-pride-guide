@@ -200,9 +200,9 @@ export function normalizeDirectoryName(name: string): string {
 }
 
 const WAYPOINT_ART_BY_STEM: Record<string, string> = {
-  "place-clubprivata": "/zaydar-map/venue-logos/club-privata-0.png",
-  "place-steamportland": "/zaydar-map/venue-logos/steam-portland-0.png",
-  "place-thevelvetrope": "/zaydar-map/venue-logos/velvet-rope-0.png",
+  "place-clubprivata": "/mapz-map/venue-logos/club-privata-0.png",
+  "place-steamportland": "/mapz-map/venue-logos/steam-portland-0.png",
+  "place-thevelvetrope": "/mapz-map/venue-logos/velvet-rope-0.png",
   Best_Coast_Barber_Co: "/directory-logos/Best_Coast_Barber_Co.png",
 };
 

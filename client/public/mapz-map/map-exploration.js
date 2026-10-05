@@ -27,7 +27,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
   }
   function cancelPan(){cancelAnimationFrame(panFrame);panFrame=0;panX=panY=0;}
   let mode='flight',idleTimer=0,returnEnd=null,disposed=false,instructionDismissed=false;
-  try{instructionDismissed=localStorage.getItem('zaydar-exploration-seen')==='1';}catch{}
+  try{instructionDismissed=localStorage.getItem('mapz-exploration-seen')==='1';}catch{}
   canvas.tabIndex=0;
   canvas.setAttribute('aria-label','Portland map. Click or drag to pause and explore.');
 
@@ -94,7 +94,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
     if(mode==='flight')return;
     if(mode==='exploring'){
       noteActivity();
-      if(!instructionDismissed){instructionDismissed=true;message.textContent='';try{localStorage.setItem('zaydar-exploration-seen','1');}catch{}}
+      if(!instructionDismissed){instructionDismissed=true;message.textContent='';try{localStorage.setItem('mapz-exploration-seen','1');}catch{}}
     }
     onMove();
   }

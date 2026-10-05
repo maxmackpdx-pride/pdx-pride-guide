@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
-import {createBuildingModelLayer} from '../client/public/zaydar-map/building-models.js';
-import {createMapExploration,IOS_MAP_HANDLERS} from '../client/public/zaydar-map/map-exploration.js';
+import {createBuildingModelLayer} from '../client/public/mapz-map/building-models.js';
+import {createMapExploration,IOS_MAP_HANDLERS} from '../client/public/mapz-map/map-exploration.js';
 
 test('new tile remainder geometry does not reparse unchanged building filters',()=>{
  const layer=createBuildingModelLayer({});
@@ -20,7 +20,7 @@ test('new tile remainder geometry does not reparse unchanged building filters',(
 });
 
 test('tile arrivals retain the complete scene and cannot bypass its refresh interval',async()=>{
- const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+ const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
  let onData,frames=0,invalidations=0,timers=0;
  const map={},cached={time:100,buildings:[{height:20}]},surfaceCache=new WeakMap([[map,cached]]);
  map.on=(name,fn)=>{assert.equal(name,'sourcedata');onData=fn;};

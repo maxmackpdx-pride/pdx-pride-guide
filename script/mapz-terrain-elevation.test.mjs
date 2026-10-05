@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createTerrainSampler, approachBaseline} from '../client/public/zaydar-map/terrain-elevation.js';
-import {groundLightMesh} from '../client/public/zaydar-map/ground-light-pools.js';
+import {createTerrainSampler, approachBaseline} from '../client/public/mapz-map/terrain-elevation.js';
+import {groundLightMesh} from '../client/public/mapz-map/ground-light-pools.js';
 
 test('shared anchors scale raw DEM once and avoid per-frame resampling', () => {
   let reads = 0;

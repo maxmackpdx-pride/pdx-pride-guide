@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {BRIDGE_GLOW_PALETTES,BRIDGE_GLOW_SATURATION,BRIDGE_GLOW_BRIGHTNESS,saturateBridgeColor,bridgeGlowColor,bridgeGlowSpans,clipGlowLineToWater,installCheapBridgeGlow,bridgeGlowGradient} from '../client/public/zaydar-map/bridge-water-glow.js';
-import {fitBridgeRoad} from '../client/public/zaydar-map/bridge-fit.js';
-import {PORTLAND_BRIDGE_MODELS} from '../client/public/zaydar-map/st-johns-bridge.js';
+import {BRIDGE_GLOW_PALETTES,BRIDGE_GLOW_SATURATION,BRIDGE_GLOW_BRIGHTNESS,saturateBridgeColor,bridgeGlowColor,bridgeGlowSpans,clipGlowLineToWater,installCheapBridgeGlow,bridgeGlowGradient} from '../client/public/mapz-map/bridge-water-glow.js';
+import {fitBridgeRoad} from '../client/public/mapz-map/bridge-fit.js';
+import {PORTLAND_BRIDGE_MODELS} from '../client/public/mapz-map/st-johns-bridge.js';
 
 const center=[-122.67,45.52];
 function fixture(reverse=false,length=600){

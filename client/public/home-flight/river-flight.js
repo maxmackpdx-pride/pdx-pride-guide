@@ -1,4 +1,4 @@
-import {createTerrainSampler,TERRAIN_STRENGTH} from '../zaydar-map/terrain-elevation.js';
+import {createTerrainSampler,TERRAIN_STRENGTH} from '../mapz-map/terrain-elevation.js';
 import {flightVisible,flightMotion,flightReady} from './host-bridge.js';
 import {createLogoFocus} from './logo-focus.js';
 import {logoCoverage} from './logo-mask.js';
@@ -8,8 +8,8 @@ import {settleValue} from './settling.js';
 import {createCitySparkles} from './city-sparkles.js';
 import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
-import {mapzSurfaceStyle,createWaterBloom} from '../zaydar-map/natural-surfaces.js?v=20260920-shared-map-materials';
-import {createBuildingChrome} from '../zaydar-map/nightlife-materials.js?v=20260920-shared-map-materials';
+import {mapzSurfaceStyle,createWaterBloom} from '../mapz-map/natural-surfaces.js?v=20260920-shared-map-materials';
+import {createBuildingChrome} from '../mapz-map/nightlife-materials.js?v=20260920-shared-map-materials';
 const elevation=new mlcontour.DemSource({id:'home-elevation',url:'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',encoding:'terrarium',maxzoom:13,worker:true,cacheSize:48});
 elevation.setupMaplibre(maplibregl);
 const surfaceStyle=mapzSurfaceStyle({
