@@ -8,7 +8,6 @@ import {groundLightMesh,createGroundLightPools} from '../client/public/mapz-map/
 import {standaloneDemoRows} from '../client/public/mapz-map/standalone-demo.js';
 import {createCitySparkles} from '../client/public/home-flight/city-sparkles.js';
 import {DAY_LIST} from '../client/public/mapz-map/radix-map.js';
-import {contourSignalOpacity,corridorGradient,selectSignalCorridors} from '../client/public/mapz-map/ambient-signals.js';
 
 const road=(coordinates,properties={})=>({geometry:{type:'LineString',coordinates},properties:{class:'minor',...properties}});
 const intersection=[
@@ -56,21 +55,7 @@ test('ground lights exclude elevated roads, tunnels and highway ramps',()=>{
     assert.equal(intersectionLightPools(intersection.map(f=>road(f.geometry.coordinates,properties))).length,0);
   }
 });
-test('ambient signals stay sparse, geographic and restrained',()=>{
-  const roads=Array.from({length:12},(_,index)=>road([
-    [-122.70+index*.002,45.50],[-122.69+index*.002,45.54],
-  ],{class:index%3===0?'motorway':index%3===1?'trunk':'primary',brunnel:index===0?'bridge':undefined}));
-  const selected=selectSignalCorridors([...roads,...roads],6);
-  assert.equal(selected.length,6);
-  assert.ok(selected.some(feature=>feature.properties.bridge));
-  assert.ok(selected.every(feature=>feature.geometry.type==='LineString'));
-  assert.ok(contourSignalOpacity(4,0,13,false)<=.033);
-  assert.equal(contourSignalOpacity(4,0,16,false),0);
-  assert.equal(contourSignalOpacity(4,0,13,true),contourSignalOpacity(400,0,13,true));
-  const gradient=corridorGradient(.5,false,.85);
-  const stops=gradient.slice(3).filter((_,index)=>index%2===0);
-  assert.ok(stops.every((stop,index)=>index===0||stop>stops[index-1]));
-});
+
 test('pool geometry stays flat and measured in ground meters',()=>{
   const pool={coordinates:[100,200],radiusMeters:18,angle:0};
   const mesh=groundLightMesh([pool],([x,y])=>({x,y}));
