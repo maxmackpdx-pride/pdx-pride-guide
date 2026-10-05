@@ -20,7 +20,7 @@ import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20261005-ready';
+import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20261005-day-165';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -567,7 +567,7 @@ function drawLights(fade,target=map,surface=lights){
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
   // No pin ceiling. Lift comes from hologramLiftScale, heightScale, and tonight's multiplier.
-  item.x=item.p.x+driftX*zoomScale;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale)*effectiveHologramLift;
+  const dayLift=activeTonight(item.feature)?1.65:1;item.x=item.p.x+driftX*zoomScale;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale)*effectiveHologramLift*dayLift;
   item.neighbors=beacons.filter(v=>v!==item&&Math.hypot(v.p.x-item.p.x,v.p.y-item.p.y)<220).length;
   item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25*effectiveHologramLift:0;
  }
