@@ -22,7 +22,7 @@ test('Mapz host and iframe use the same versioned asset and message contract',()
  assert.match(host,/event\.data\?\.source!=='mapz-demo'/);
  assert.match(html,/source:'mapz-demo'/);
  assert.match(html,/event\.data\?\.source!=='mapz-host'/);
- assert.match(html,/river-flight\.js\?v=20261005-boot-cut/g);
+ assert.match(html,/river-flight\.js\?v=20261005-pin-gap/g);
  assert.match(renderer,/source:'mapz-demo'/);
  assert.match(renderer,/event\.data\?\.source!=='mapz-host'/);
  assert.match(roofBoot,/event\.data\?\.source!=='mapz-host'/);
