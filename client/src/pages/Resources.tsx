@@ -18,6 +18,8 @@ import { useTheme } from "@/context/ThemeContext";
 import { Drawer } from "vaul";
 import {
   ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
   ChevronDown,
   Check,
   LifeBuoy,
@@ -529,6 +531,15 @@ export default function Resources() {
     return () => media.removeEventListener("change", change);
   }, []);
   const showResults = intentChosen && (mode === "directory" ? directoryRevealed : safetyAnswer === "yes");
+  const scrollResourceRail = useCallback((track: HTMLElement | null, direction: number) => {
+    if (!track) return;
+    const card = track.querySelector<HTMLElement>(".rg-stack-card");
+    const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
+    track.scrollBy({
+      left: direction * ((card?.offsetWidth ?? track.clientWidth * .85) + gap),
+      behavior: quietMotion ? "instant" : "smooth",
+    });
+  }, [quietMotion]);
   useEffect(() => {
     if (!showResults || mode !== "directory" || showAllCards) return;
     const tracks = Array.from(resultsRef.current?.querySelectorAll<HTMLElement>(".rg-stack-track") ?? []);
@@ -763,12 +774,12 @@ export default function Resources() {
           ) : (
             <>
               {rows.length > 0 && <div className="rg-stack-controls">
-                <span>{showAllCards ? "Browse every card" : "Scroll through the card stacks"}</span>
+                <span>{showAllCards ? "Browse every card" : "Browse the resource rails"}</span>
                 <button type="button" className="pdx-glass-rebind pdxBtn" aria-pressed={showAllCards} onClick={() => {
                   setShowAllCards(value => !value);
                   requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "instant", block: "start" }));
                 }}>
-                  {showAllCards ? "Show stacks" : "Skip stacks · view all"}
+                  {showAllCards ? "Show rails" : "View all cards"}
                 </button>
               </div>}
               <div className="rg-resource-stacks" data-view-all={showAllCards}>
@@ -784,11 +795,15 @@ export default function Resources() {
                       <p className="rg-rail-copy">{CATEGORY_COPY[type.id].description}</p>
                       <p className="rg-rail-count">{group.length} resource{group.length === 1 ? "" : "s"}</p>
                       {group.length > 1 && <p className="rg-rail-swipe-hint">Swipe left to browse cards</p>}
+                      {!showAllCards && group.length > 1 && <div className="rg-rail-nav" role="group" aria-label={`${type.name} rail controls`}>
+                        <button type="button" aria-label={`Previous ${type.name} resource`} onClick={() => scrollResourceRail(document.getElementById(sectionId), -1)}><ChevronLeft aria-hidden="true" /></button>
+                        <button type="button" aria-label={`Next ${type.name} resource`} onClick={() => scrollResourceRail(document.getElementById(sectionId), 1)}><ChevronRight aria-hidden="true" /></button>
+                      </div>}
                     </header>
                     <ContainerScroll id={sectionId} className="rg-stack-track" role="region" aria-label={`${type.name} resource cards`} tabIndex={0} onKeyDown={(event) => {
-                      if (showAllCards || !window.matchMedia("(max-width: 719px)").matches || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+                      if (showAllCards || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
                       event.preventDefault();
-                      event.currentTarget.scrollBy({ left: (event.key === "ArrowRight" ? 1 : -1) * event.currentTarget.clientWidth * .85, behavior: quietMotion ? "instant" : "smooth" });
+                      scrollResourceRail(event.currentTarget, event.key === "ArrowRight" ? 1 : -1);
                     }}>
                       {group.map((row, index) => <div
                         key={row.org.name}
