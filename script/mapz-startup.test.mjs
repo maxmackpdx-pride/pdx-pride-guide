@@ -76,7 +76,8 @@ function bridge(){
  const window={addEventListener:(type,fn)=>handlers.set(type,fn)};
  vm.runInNewContext(html.match(/<script>([\s\S]*?)<\/script>/)[1],{
   window,ErrorEvent,location:{origin:'https://www.zaylist.com'},
-  document:{documentElement:{dataset},getElementById:()=>status},
+  document:{documentElement:{dataset},getElementById:()=>status,
+   createElement:()=>({}),body:{appendChild(){} }},
   parent:{postMessage:value=>messages.push(value)}
  });
  return {handlers,messages,status,dataset,ErrorEvent,startup:window.__mapzStartup};
