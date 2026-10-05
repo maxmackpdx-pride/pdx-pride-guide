@@ -17,12 +17,12 @@ const host=await readFile(new URL('../client/src/components/MapzCanvas.tsx',impo
 const roofBoot=await readFile(new URL('../client/public/mapz-map/mapz-roof-boot.js',import.meta.url),'utf8');
 const getStyle=()=>structuredClone(vectorStyle);
 test('Mapz host and iframe use the same versioned asset and message contract',()=>{
- assert.match(host,/\/mapz-map\/index\.html\?v=20261004-mapz-rename/);
+ assert.match(host,/\/mapz-map\/index\.html\?v=20261005-first-frame/);
  assert.match(host,/source:'mapz-host'/);
  assert.match(host,/event\.data\?\.source!=='mapz-demo'/);
  assert.match(html,/source:'mapz-demo'/);
  assert.match(html,/event\.data\?\.source!=='mapz-host'/);
- assert.match(html,/river-flight\.js\?v=20261004-mapz-rename/g);
+ assert.match(html,/river-flight\.js\?v=20261005-first-frame/g);
  assert.match(renderer,/source:'mapz-demo'/);
  assert.match(renderer,/event\.data\?\.source!=='mapz-host'/);
  assert.match(roofBoot,/event\.data\?\.source!=='mapz-host'/);
@@ -114,7 +114,7 @@ test('base-city readiness uses idle or its bounded fallback without terrain or f
  const context=vm.createContext({
   loaded:false,baseFrameRendered:false,cameraDirty:false,revealTime:0,
   startup:{phase(){}},updateSceneStatus(){},scheduleFrame:()=>frames++,parent:{},
-  window:{setTimeout(fn,delay){assert.equal(delay,800);fallback=fn;}},
+  window:{setTimeout(fn,delay){assert.equal(delay,250);fallback=fn;}},
   map:{on(type,fn){assert.equal(type,'load');onLoad=fn;},once(type,fn){assert.equal(type,'idle');onIdle=fn;},getCanvas:()=>canvas},
  });
  const start=renderer.indexOf("map.on('load',()=>{");
