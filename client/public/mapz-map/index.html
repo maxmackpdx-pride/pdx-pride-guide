@@ -7,7 +7,7 @@
  function tell(type,payload){if(parent!==window)parent.postMessage(Object.assign({source:'mapz-demo',type:type},payload||{}),location.origin);}
  function phase(value){
   currentPhase=value;
-  if(value==='first-frame')visible=true;
+  if(value==='first-frame'){visible=true;if(!window.__mapzContour){window.__mapzContour=true;var s=document.createElement('script');s.src='./vendor/maplibre-contour-0.1.0.js';s.async=true;document.body.appendChild(s);}}
   document.documentElement.dataset.mapPhase=value;
   tell('phase',{phase:value});
  }
