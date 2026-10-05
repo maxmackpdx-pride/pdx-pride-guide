@@ -27,7 +27,7 @@ export function waypointGeometry(origin,selected=false,roofLift=0,key=null){
  // Buildings up: the shaft comes out of the roof, not a doubled screen floor.
  const zoom=mapZoom();
  const zoomOut=1-Math.max(0,Math.min(1,(zoom-11.5)/3));
- const groundGap=(18+10*picked)+8*zoomOut;
+ const groundGap=(10+6*picked)+4*zoomOut;
  const beamHeight=amount>0.18?Math.max(roofLift,groundGap):groundGap;
  return {x:origin.x,y:origin.y-beamHeight-size*TIP-size/2,size,bottom:origin.y-beamHeight,anchorY:origin.y};
 }

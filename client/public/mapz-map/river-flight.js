@@ -20,7 +20,7 @@ import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20261005-flare';
+import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20261005-gap';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -556,7 +556,8 @@ function drawLights(fade,target=map,surface=lights){
  const venueItems=new Map(ordered.filter(item=>item.feature.properties.kind==='place').map(item=>[item.feature.properties.key,item]));
  const venueGeometry=item=>{const parent=venueItems.get(item.feature.properties.venueWaypointKey)||item;return waypointGeometry(parent.p,parent.feature.properties.key===selectedKey,placezHoverLift(target,parent.feature,surfaces),parent.feature.properties.key);};
  const protectedVenues=new Set(ordered.map(item=>item.feature.properties.venueWaypointKey).filter(Boolean));
- const placeClusters=clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel&&!protectedVenues.has(item.feature.properties.key)&&!(['mizzed','gigz'].includes(item.feature.properties.waypointFamily)&&item.feature.properties.venueWaypointKey)),selectedKey,target.getZoom(),width,height);
+ const placeClusters=(cameraMoving&&frozenClusters)||clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel&&!protectedVenues.has(item.feature.properties.key)&&!(['mizzed','gigz'].includes(item.feature.properties.waypointFamily)&&item.feature.properties.venueWaypointKey)),selectedKey,target.getZoom(),width,height);
+ if(!cameraMoving)frozenClusters=placeClusters;
  for(const item of beacons){
   const phase=item.feature.properties.phase;
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
@@ -585,6 +586,8 @@ function drawLights(fade,target=map,surface=lights){
  }
  for(const item of beacons){
   // Seek screen space briefly, then release as the actual address passes out of view.
+  // While panning, stay on the projected anchor. The screen clamp is what made holograms slide.
+  if(!cameraMoving){
   const outside=Math.max(0,-item.p.x,item.p.x-width,-item.p.y,item.p.y-height);
   const keepVisible=1-smoothRange(60,230,outside);
   const marginX=Math.min(width/2,118*item.scaleGoal),marginY=Math.min(height/3,94*item.scaleGoal);
@@ -592,6 +595,7 @@ function drawLights(fade,target=map,surface=lights){
   const safeY=Math.max(32+marginY,Math.min(height-90-marginY,item.y));
   item.x+=Math.max(-180,Math.min(180,safeX-item.x))*keepVisible;
   item.y+=Math.max(-180,Math.min(180,safeY-item.y))*keepVisible;
+  }
   const key=item.feature.properties.phase,prev=layout.get(key)||{x:item.x-item.p.x,y:item.y-item.p.y,scale:item.scaleGoal,vx:0,vy:0,vs:0,avoidX:0,avoidY:0};
   settleValue(prev,'x','vx',item.x-item.p.x,2.3,motionDelta);
   settleValue(prev,'y','vy',item.y-item.p.y,2.3,motionDelta);
@@ -1144,6 +1148,7 @@ window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();
 function tell(type,payload={}){if(parent!==window)parent.postMessage({source:'mapz-demo',type,...payload},location.origin);}
 function viewState(){const c=map.getCenter(),b=map.getBounds();tell('view',{center:[c.lat,c.lng],zoom:map.getZoom(),bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
 const typeIcons=new Map();
+let frozenClusters=null;
 function clusterPlaceMarkers(items,selected,zoom,width,height){
  // Keep condensed waypoints at the broad overview, then separate them about
  // two zoom levels earlier as the camera approaches individual streets.
