@@ -104,8 +104,10 @@ map.on('load',()=>{
   const canvas=map.getCanvas();
   if(canvas.width>0&&canvas.height>0){baseFrameRendered=true;scheduleFrame();}
  };
+ // The host hides its shell on first-frame. Do not wait for idle tiles.
+ markBase();
  map.once('idle',markBase);
- window.setTimeout(markBase,800);
+ window.setTimeout(markBase,250);
 });
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
@@ -1097,7 +1099,7 @@ function draw(now){
  const visibility=Number(opacityControl.value)*fade;
  mapElement.style.opacity=visibility;
  if(overlaysReady)drawLights(visibility);
- if(ready&&baseFrameRendered&&!firstFrameSent&&visibility>0){
+ if(ready&&baseFrameRendered&&!firstFrameSent){
   firstFrameSent=true;startup.phase('first-frame');tell('first-frame');
   // Optional GPU layers must not prevent the first base-city frame.
   window.setTimeout(()=>{if(!disposed)installSceneExtras();},0);
