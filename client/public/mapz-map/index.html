@@ -36,31 +36,6 @@
  window.addEventListener('DOMContentLoaded',function(){phase('dom-ready');},{once:true});
 })();
 </script>
-<script>
-(function(){
-  var start=null, signaled=false;
-  function collapseDock(){
-    if(signaled)return;
-    signaled=true;
-    try{ parent.dispatchEvent(new CustomEvent('zaylist:collapse-mobile-dock')); }catch(err){}
-  }
-  window.addEventListener('pointerdown',function(event){start={x:event.clientX,y:event.clientY};signaled=false;},true);
-  window.addEventListener('pointermove',function(event){if(!start||signaled)return;if(Math.hypot(event.clientX-start.x,event.clientY-start.y)>=5)collapseDock();},{capture:true,passive:true});
-  window.addEventListener('pointerup',function(){start=null;signaled=false;},true);
-  window.addEventListener('pointercancel',function(){start=null;signaled=false;},true);
-  window.addEventListener('wheel',collapseDock,{capture:true,passive:true});
-  window.addEventListener('touchmove',collapseDock,{capture:true,passive:true});
-  try{
-    var doc=parent.document;
-    if(doc&&!doc.getElementById('mapz-map-shell-overrides')){
-      var style=doc.createElement('style');
-      style.id='mapz-map-shell-overrides';
-      style.textContent='.mapz-map-demo .mapz-demo-navigation .mapz-control-labels{display:none!important}';
-      doc.head.appendChild(style);
-    }
-  }catch(err){}
-})();
-</script>
 <link rel="preload" href="../home-flight/vendor/maplibre-gl-5.6.2.js" as="script">
 <link rel="preload" href="https://tiles.openfreemap.org/styles/dark" as="fetch" crossorigin>
 <link href="../home-flight/vendor/maplibre-gl-5.6.2.css" rel="stylesheet">
