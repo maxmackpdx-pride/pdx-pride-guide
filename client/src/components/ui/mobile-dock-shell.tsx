@@ -89,9 +89,18 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
-    setCollapsed(false);
-    setCollapseRequested(false);
-    scrollState.current = { y: window.scrollY, travel: 0, collapsed: false };
+    const path = location.split("?")[0];
+    const mapSurface = path === "/map" || path.startsWith("/map/") || path === "/outzide" || path.startsWith("/outzide/");
+    // Camera and filter query writes must not reopen the dock. Mapz starts collapsed.
+    if (mapSurface) {
+      scrollState.current = { y: window.scrollY, travel: 0, collapsed: true };
+      setCollapseRequested(true);
+      setCollapsed(true);
+    } else {
+      setCollapsed(false);
+      setCollapseRequested(false);
+      scrollState.current = { y: window.scrollY, travel: 0, collapsed: false };
+    }
     scrollSource.current = document;
     let frame = 0;
     let pendingSource: EventTarget | null = document;
@@ -107,7 +116,8 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
         return;
       }
       // Document pages keep one stable dock; map drawers retain their compact control.
-      if (!location.startsWith("/map") && !location.startsWith("/outzide")) return;
+      const path = location.split("?")[0];
+      if (path !== "/map" && !path.startsWith("/map/") && path !== "/outzide" && !path.startsWith("/outzide/")) return;
       scrollState.current = advanceDockScroll(scrollState.current, y, held, innerWidth >= 960);
       setCollapseRequested(scrollState.current.collapsed);
     };

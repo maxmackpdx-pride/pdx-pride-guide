@@ -339,7 +339,7 @@ export default function MapzMapDemo() {
     if (value !== "custom") { p.delete("from"); p.delete("to"); }
   });
   const layerValue = params.get("layer");
-  const activeLayer = layerValue === "boards" || layerValue === "stuff" ? "giftz" : ["events", "places", "rezources", "mizzed", "gigz", "giftz", "sellz", "houz"].includes(layerValue || "") ? layerValue as MapzLayerId : "events";
+  const activeLayer = layerValue === "boards" || layerValue === "stuff" ? "giftz" : ["events", "places", "rezources", "mizzed", "gigz", "giftz", "sellz", "houz"].includes(layerValue || "") ? layerValue as MapzLayerId : null;
   const changeLayer = useCallback((next: MapzLayerId | null) => {
     const current = mapSearchParams().get("layer");
     setLocation(mapHref(p => { if (next) p.set("layer", next); else p.delete("layer"); }), {
@@ -818,7 +818,7 @@ export default function MapzMapDemo() {
     {/* Board 42: one rack on both maps. Search, layers, locate; then zoom; then the map's own slot. */}
     <div className="mapz-demo-navigation pdx-glass-rebind" aria-label="Map controls">
       <button type="button" className="mapz-control-icon" onClick={openMapSearch} aria-label="Search the map" title="Search"><Search size={20} aria-hidden="true"/></button>
-      <button type="button" className="mapz-control-icon" onClick={()=>changeLayer(activeLayer||"events")} aria-label="Layers" title="Layers" aria-expanded={activeLayer!==null}><Layers size={20} aria-hidden="true"/></button>
+      <button type="button" className="mapz-control-icon" onClick={()=>changeLayer(activeLayer?null:"events")} aria-label={activeLayer?"Close map drawer":"Open map drawer"} title="Layers" aria-expanded={activeLayer!==null}><Layers size={20} aria-hidden="true"/></button>
       <button className="mapz-control-location" onClick={locateMe} aria-label="Locate me" title="Locate me" aria-busy={locating} disabled={locating}><LocateFixed size={22} aria-hidden="true"/></button>
       <span className="mapz-control-gap" aria-hidden="true" />
       <button className="mapz-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in" title="Zoom in">+</button>
