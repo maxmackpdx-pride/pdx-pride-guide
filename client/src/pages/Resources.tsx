@@ -17,6 +17,7 @@ import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-m
 import { useTheme } from "@/context/ThemeContext";
 import { Drawer } from "vaul";
 import {
+  ArrowLeft,
   ArrowUpRight,
   ChevronLeft,
   ChevronRight,
@@ -57,6 +58,7 @@ import "@fontsource/barlow/latin-700.css";
 import "@fontsource/jetbrains-mono/latin-400.css";
 import "@fontsource/jetbrains-mono/latin-600.css";
 import "./Resources.css";
+import "./ResourcesDoorPath.css";
 
 const ResourceDirectoryMap = lazy(() => import("@/components/DirectoryMap"));
 const ResourceBackgroundShader = lazy(() => import("@/components/ui/web-gl-shader").then(({ WebGLShader }) => ({ default: WebGLShader })));
@@ -518,6 +520,14 @@ export default function Resources() {
   const [mobile, setMobile] = useState(
     () => window.matchMedia("(max-width: 600px)").matches,
   );
+  // Phone: step 01 owns the screen until a door is chosen. Desktop keeps one page.
+  const [phoneScreen, setPhoneScreen] = useState(() => window.matchMedia("(max-width: 719px)").matches);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 719px)");
+    const change = () => setPhoneScreen(media.matches);
+    media.addEventListener("change", change);
+    return () => media.removeEventListener("change", change);
+  }, []);
   const detailTrigger = useRef<HTMLElement | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const selectedCategories = RESOURCE_CATEGORIES.filter((c) => categoryIds.includes(c.id));
@@ -533,6 +543,74 @@ export default function Resources() {
     return () => media.removeEventListener("change", change);
   }, []);
   const showResults = intentChosen && (mode === "directory" ? directoryRevealed : safetyAnswer === "yes");
+  const doorStepNext = phoneScreen && intentChosen;
+  const goBackToQuestion = useCallback(() => {
+    setIntentChosen(false);
+    setMode("directory");
+    setSafetyAnswer(null);
+  }, []);
+  // Each step has its own address: ?door=find, ?door=find&cat=health,safety, ?door=find&view=all, ?door=talk.
+  const doorUrlReady = useRef(false);
+  const lastDoorKey = useRef("");
+  const readDoorFromUrl = useCallback(() => {
+    const params = new URLSearchParams(window.location.search);
+    const door = params.get("door");
+    if (door === "talk") {
+      setIntentChosen(true); setMode("talk"); setSafetyAnswer(null);
+      return;
+    }
+    if (door === "find") {
+      const all = RESOURCE_CATEGORIES.map((c) => c.id);
+      const picked = params.get("view") === "all" ? all : (params.get("cat") || "").split(",").filter((id) => all.includes(id));
+      setIntentChosen(true); setMode("directory"); setCategoryIds(picked);
+      if (picked.length) { setDirectoryRevealed(true); setShowAllCards(false); }
+      return;
+    }
+    setIntentChosen(false); setMode("directory"); setSafetyAnswer(null);
+  }, []);
+  useEffect(() => {
+    readDoorFromUrl();
+    const timer = window.setTimeout(() => { doorUrlReady.current = true; }, 0);
+    const onPop = () => readDoorFromUrl();
+    window.addEventListener("popstate", onPop);
+    return () => { window.clearTimeout(timer); window.removeEventListener("popstate", onPop); };
+  }, [readDoorFromUrl]);
+  useEffect(() => {
+    if (!doorUrlReady.current) return;
+    const params = new URLSearchParams(window.location.search);
+    ["door", "cat", "view"].forEach((key) => params.delete(key));
+    if (intentChosen) {
+      params.set("door", mode === "talk" ? "talk" : "find");
+      if (mode === "directory") {
+        if (categoryIds.length === RESOURCE_CATEGORIES.length) params.set("view", "all");
+        else if (categoryIds.length) params.set("cat", categoryIds.join(","));
+      }
+    }
+    const search = params.toString();
+    const next = `${window.location.pathname}${search ? `?${search}` : ""}${window.location.hash}`;
+    if (next === `${window.location.pathname}${window.location.search}${window.location.hash}`) return;
+    const doorKey = intentChosen ? mode : "";
+    const doorChanged = doorKey !== lastDoorKey.current;
+    lastDoorKey.current = doorKey;
+    if (doorChanged && phoneScreen) window.history.pushState(window.history.state, "", next);
+    else window.history.replaceState(window.history.state, "", next);
+  }, [intentChosen, mode, categoryIds, phoneScreen]);
+  // Focus follows the step on phone: heading when a step opens, the chosen door when going back.
+  const focusReady = useRef(false);
+  const lastDoor = useRef<"directory" | "talk">("directory");
+  useEffect(() => {
+    if (intentChosen) lastDoor.current = mode;
+    if (!focusReady.current) { focusReady.current = true; return; }
+    if (!phoneScreen) return;
+    const frame = requestAnimationFrame(() => {
+      const root = document.querySelector(".resources-page");
+      const target = intentChosen
+        ? root?.querySelector<HTMLElement>(mode === "talk" ? '[data-step-heading="talk"]' : '[data-step-heading="find"]')
+        : root?.querySelector<HTMLElement>(`[data-door="${lastDoor.current}"]`);
+      target?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [intentChosen, mode, phoneScreen]);
   const scrollResourceRail = useCallback((track: HTMLElement | null, direction: number) => {
     if (!track) return;
     const cards = track.querySelectorAll<HTMLElement>(".rg-stack-card");
@@ -625,7 +703,7 @@ export default function Resources() {
     return () => { cancelAnimationFrame(frame); window.clearTimeout(settleTimer); };
   }, [searchTarget, showResults, quietMotion]);
   return (
-    <div className="resources-page">
+    <div className="resources-page" data-door-step={doorStepNext ? "next" : "door"}>
       {lightweightBackground
         ? <div className="rg-stream-background rg-stream-background--mobile-fallback" aria-hidden="true" />
         : <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>}
@@ -645,13 +723,16 @@ export default function Resources() {
       </header>
       <section className="rg-layout rg-wrap">
         <aside className="rg-controls" data-mode={mode} aria-label="Choose ReZources">
+          <button type="button" className="rg-door-back" aria-label="Back to the question" onClick={goBackToQuestion}><ArrowLeft size={26} aria-hidden="true" /></button>
           <div className="rg-step rg-step--intent">
             <div>
+              <div className="rg-door-block">
               <span className="rg-eyebrow"><span className="rg-step-number" aria-hidden="true">01</span>Start here</span>
               <h2>What do you need?</h2>
               <LayoutGroup id="rezources-mode">
               <div className="rg-mode rg-mode--animated pdx-glass-rebind">
                 <button
+                  data-door="directory"
                   aria-pressed={intentChosen && mode === "directory"}
                   onClick={() => { setIntentChosen(true); setMode("directory"); }}
                 >
@@ -659,6 +740,7 @@ export default function Resources() {
                   <span className="rg-mode-label">Find a resource</span>
                 </button>
                 <button
+                  data-door="talk"
                   aria-pressed={intentChosen && mode === "talk"}
                   aria-expanded={mode === "talk"}
                   aria-controls="resource-safety-check"
@@ -669,11 +751,11 @@ export default function Resources() {
                 </button>
               </div>
               </LayoutGroup>
-              <button type="button" className="discovery-skip" onClick={() => { setIntentChosen(true); setMode("directory"); setCategoryIds(RESOURCE_CATEGORIES.map(c => c.id)); setDirectoryRevealed(true); setShowAllCards(false); }}>Skip to view all</button>
+              </div>
               <AnimatePresence initial={false}>
               {mode === "talk" && (
                 <motion.div key="safety-check" initial={quietMotion ? false : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: quietMotion ? 0 : 0.24, ease: "easeInOut" }} id="resource-safety-check" className="rg-safety-check" role="group" aria-labelledby="resource-safety-question">
-                  <h3 id="resource-safety-question">Are you safe right now?</h3>
+                  <h3 id="resource-safety-question" tabIndex={-1} data-step-heading="talk">Are you safe right now?</h3>
                   <p>Choose what you need. You can change your answer.</p>
                   <div>
                     <button className="pdx-glass-rebind pdxBtn" aria-pressed={safetyAnswer === "yes"} onClick={() => {
@@ -695,7 +777,7 @@ export default function Resources() {
           {intentChosen && mode === "directory" && <motion.div key="categories" initial={quietMotion ? false : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: quietMotion ? 0 : 0.24, ease: "easeInOut" }} className="rg-step rg-step--categories">
             <div>
               <span className="rg-eyebrow rg-muted"><span className="rg-step-number" aria-hidden="true">02</span>Explore categories</span>
-              <h2>I'm looking for…</h2>
+              <h2 tabIndex={-1} data-step-heading="find">I'm looking for…</h2>
               <p className="rg-multiselect-hint">Choose one or more categories.</p>
               <div
                 className="rg-options"

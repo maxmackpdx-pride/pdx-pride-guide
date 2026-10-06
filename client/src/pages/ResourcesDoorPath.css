@@ -1,0 +1,52 @@
+/*
+ * ReZources door path. See docs/REZOURCES_DOOR_PATH.md.
+ * Step 01 owns the phone screen until a door is chosen; desktop keeps one page.
+ * Loaded after Resources.css so it can layer on top of the existing cascade.
+ */
+
+.resources-page .rg-door-back { display: none; }
+
+@keyframes rg-door-step-in {
+  from { opacity: 0; transform: translateX(32px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 719px) {
+  /* Choosing a door replaces the question screen. Back returns to it. */
+  .resources-page[data-door-step="next"] .rg-intro,
+  .resources-page[data-door-step="next"] .rg-door-block { display: none; }
+  .resources-page[data-door-step="next"] .rg-door-back {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin: 0 0 8px -8px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-hi);
+    cursor: pointer;
+  }
+  .resources-page[data-door-step="next"] .rg-door-back:focus-visible {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 2px;
+    border-radius: 12px;
+  }
+  .resources-page[data-door-step="next"] .rg-layout {
+    animation: rg-door-step-in var(--dur-slow, 360ms) var(--ease-out, cubic-bezier(.2, .8, .2, 1)) both;
+  }
+  /* Question screen: logo, Share and Follow, then the question and the doors, all inside one viewport. */
+  .resources-page[data-door-step="door"] .rg-intro { padding-bottom: 0; }
+  .resources-page[data-door-step="door"] .rg-intro .rg-intro-top { display: none; }
+  .resources-page[data-door-step="door"] .rg-layout { padding-top: 0; }
+  .resources-page[data-door-step="door"] { min-height: calc(100svh - 8px); }
+  .resources-page[data-door-step="door"] .rg-step--intent { margin-top: 28px; }
+}
+
+:is(h2, h3)[data-step-heading]:focus { outline: none; }
+
+html.calm-mode .resources-page .rg-layout,
+:root[data-calm="true"] .resources-page .rg-layout { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .resources-page .rg-layout { animation: none !important; }
+}
