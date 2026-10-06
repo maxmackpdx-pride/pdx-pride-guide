@@ -6,9 +6,9 @@ import './DiscoveryFlow.css';
 
 export type DiscoveryChoice = { id: string; label: string; description?: string; disabled?: boolean; scrollToResults?: boolean; scrollTargetId?: string; onChoose?: () => void };
 /** ReZources' progressive opening, with each room retaining its own data and actions. */
-export default function DiscoveryFlow({ room, accent, choices, children, initiallyOpen = false, initialChoiceId, title = 'What do you need?', intro = 'Choose a starting point. You can change it any time.', enabled = true, keepMounted = false, onViewAll }: {
+export default function DiscoveryFlow({ room, accent, choices, children, initiallyOpen = false, initialChoiceId, title = 'What do you need?', kicker, intro = 'Choose a starting point. You can change it any time.', enabled = true, keepMounted = false, onViewAll }: {
   room: string; accent: string; choices: DiscoveryChoice[]; children: ReactNode;
-  initiallyOpen?: boolean; initialChoiceId?: string; title?: string; intro?: string; enabled?: boolean; keepMounted?: boolean; onViewAll?: () => void;
+  initiallyOpen?: boolean; initialChoiceId?: string; title?: string; kicker?: ReactNode; intro?: string; enabled?: boolean; keepMounted?: boolean; onViewAll?: () => void;
 }) {
   const id = useId();
   const scrollTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -24,7 +24,7 @@ export default function DiscoveryFlow({ room, accent, choices, children, initial
   if (!enabled) return <>{children}</>;
   return <div className="discovery-flow" style={{ '--discovery-accent': accent, '--discovery-kicker-accent': accent } as CSSProperties}>
     <section className="discovery-survey" aria-labelledby={`${id}-title`}>
-      <p className="discovery-kicker"><span aria-hidden="true">01</span> Start here</p>
+      {kicker ? <div className="discovery-kicker discovery-kicker--custom">{kicker}</div> : <p className="discovery-kicker"><span aria-hidden="true">01</span> Start here</p>}
       <h2 id={`${id}-title`}>{title}</h2>
       <p className="discovery-intro">{intro}</p>
       <div className="discovery-choices pdx-glass-rebind" role="group" aria-label={`${room}: choose a starting point`}>

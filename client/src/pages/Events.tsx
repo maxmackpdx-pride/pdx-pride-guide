@@ -20,6 +20,7 @@ import { admissionFromFilterTag } from "@shared/admission";
 import { EVENT_TYPE_FILTERS, isEventTypeFilterLabel } from "@shared/eventTypeTags";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import TonightEventCard from "@/components/home/TonightEventCard";
+import EventsDoorOpener from "@/components/events/EventsDoorOpener";
 import { useSavedEvents } from "@/hooks/useSavedEvents";
 import AuthModal from "@/components/AuthModal";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
@@ -598,9 +599,10 @@ export default function Events() {
       <EventsHero eventCount={upcomingCount} />
       <div className="room-plate-shell"><RoomPlate room="eventz" /></div>
       <BoardStatsBar stats={heroStats} variant="band" showLive={false} />
-      <DiscoveryFlow room="Eventz" accent="var(--room-eventz)" title="Find your next plan." intro="Find an event, build your schedule, or share something happening." initiallyOpen={Boolean(window.location.search) || routeMatch} initialChoiceId={activeTab}
+      <DiscoveryFlow room="Eventz" accent="var(--room-eventz)" title="Got plans?" kicker={<EventsDoorOpener tonightCount={events.filter(e => isEventTonight(e, now)).length} now={now} />} intro="Find an event, build your schedule, or share something happening." initiallyOpen={Boolean(window.location.search) || routeMatch} initialChoiceId={activeTab}
         onViewAll={() => { setActiveTab('board'); setActiveDay('ALL'); setActiveFilters([]); setSearchQuery(''); setPastView(false); }} choices={[
-          { id: 'board', label: 'Find an event', description: 'Browse the flyers', onChoose: () => setActiveTab('board') },
+          { id: 'tonight', label: 'Tonight', description: 'What is on right now', onChoose: () => { setActiveTab('board'); setActiveDay('TONIGHT'); } },
+          { id: 'board', label: 'Another night', description: 'Browse the flyers', onChoose: () => setActiveTab('board') },
           { id: 'schedule', label: 'Explore the calendar', description: 'See your week', onChoose: () => setActiveTab('schedule') },
           { id: 'mine', label: 'My Schedule', description: 'Plans you’ve saved', onChoose: () => goToEventAction('/schedule?view=mine') },
           { id: 'submit', label: 'Submit an Event', description: 'Share what’s happening', onChoose: () => goToEventAction('/submit?mode=submit') },

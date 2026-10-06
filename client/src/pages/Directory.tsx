@@ -22,7 +22,8 @@ import DirectoryAddPlaceForm from "@/components/DirectoryAddPlaceForm";
 import AuthModal from "@/components/AuthModal";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { Plus } from "lucide-react";
+import { MapPin, Plus } from "lucide-react";
+import "./PlacezDoorOpener.css";
 import { eventPath } from "@shared/eventSlug";
 import { placePath, placeUrl, slugifyPlaceName } from "@shared/placeSlug";
 import { Button, PlaceCard, SearchInput } from "@/components/ds";
@@ -479,23 +480,25 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         </div>
         <section className="rg-layout rg-wrap placez-reference-start">
           <div className="rg-controls"><div className="rg-step rg-step--intent"><div>
-            <span className="rg-eyebrow"><span className="rg-step-number" aria-hidden="true">01</span>Start here</span>
-            <h2>What do you need?</h2>
+            {isSpaces
+              ? <span className="rg-eyebrow"><span className="rg-step-number" aria-hidden="true">01</span>Start here</span>
+              : <span className="rg-eyebrow placez-door-opener"><span className="placez-door-pin" aria-hidden="true"><MapPin size={18} /></span><span className="placez-door-opener__text"><span>Places that are ours</span>{visibleBusinesses.length > 0 && <small>{visibleBusinesses.length} places</small>}</span></span>}
+            <h2>{isSpaces ? "What do you need?" : "Where we going?"}</h2>
             <LayoutGroup id="placez-intent"><div className="rg-mode rg-mode--animated pdx-glass-rebind">
               <button type="button" aria-pressed={placeIntent && !formOpen} onClick={()=>{setPlaceIntent(true);setFormOpen(false);}}>
                 {placeIntent && !formOpen && <motion.span className="rg-mode-highlight" layoutId={calmMode || reducedMotion ? undefined : "placez-mode"} transition={{type:"spring",bounce:0,duration:.25}}/>}
-                <span className="rg-mode-label">Find a place</span>
+                <span className="rg-mode-label">{isSpaces ? "Find a place" : "Find our place"}</span>
               </button>
               <button type="button" aria-pressed={formOpen} onClick={openAddForm}>
                 {formOpen && <motion.span className="rg-mode-highlight" layoutId={calmMode || reducedMotion ? undefined : "placez-mode"} transition={{type:"spring",bounce:0,duration:.25}}/>}
                 <span className="rg-mode-label">Add a place</span>
               </button>
             </div></LayoutGroup>
-            <button type="button" className="discovery-skip" onClick={()=>{setPlaceIntent(true);handleSelectCategory("ALL");}}>Skip to view all</button>
+            
           </div></div></div>
         </section>
         <AnimatePresence initial={false}>{(placeIntent || formOpen || discoveryChosen) && <motion.div key="placez-choices" initial={{opacity:0,height:0}} animate={{opacity:1,height:"auto"}} exit={{opacity:0,height:0}} transition={{duration:calmMode || reducedMotion ? 0 : .24}}>
-        {formOpen ? <motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}}><DirectoryAddPlaceForm isSpaces={isSpaces} onClose={()=>setFormOpen(false)}/></motion.div> : <FilterSurvey eyebrow="Choose your places" startStep={2} description="Pick one or more categories. Your places appear below. Choose All Placez to browse everything." detailsLabel="Search by name or neighborhood" selectedValues={isSpaces ? undefined : activeType.split(",")} label={isSpaces ? "My Squadz" : "Placez"} question={isSpaces ? "Where is your community?" : "Which places would you like to explore?"} value={isSpaces ? activeNeighborhood : activeType} onChange={value => { if (value === "ADD") { openAddForm(); return; } if (isSpaces) { setActiveNeighborhood(value); setDiscoveryChosen(true); } else handleSelectCategory(value); }} accent="var(--panel-cyan)" options={isSpaces ? neighborhoodsInUse.map(value=>({value,label:value === "ALL" ? "All areas" : value})) : [{value:"ALL",label:"All Placez",count:visibleBusinesses.length},...categoryBands.map(category=>({value:category.key,label:category.label,color:category.color,count:category.count,description:({bar:"Find your next night out",restaurant:"Sit down for something good",cafe:"Coffee and a place to pause",venue:"Shows, stages, and gathering spaces",shop:"Shop small and local",service:"Find help from local pros",healthcare:"Find care that fits you",nonprofit:"Connect with community support",realestate:"Find your next home",campground:"Make room for an adventure",hotel:"Find somewhere to stay"} as Record<string,string>)[category.key]})),{value:"ADD",label:"Add a place",description:"Share a place with your community",color:"var(--neon-yellow)"}]}>
+        {formOpen ? <motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}}><DirectoryAddPlaceForm isSpaces={isSpaces} onClose={()=>setFormOpen(false)}/></motion.div> : <FilterSurvey eyebrow={isSpaces ? "Choose your places" : "Choose your places"} startStep={2} description={isSpaces ? "Pick one or more categories. Your places appear below. Choose All Placez to browse everything." : "Pick a few. Places for us show up below."} detailsLabel="Search by name or neighborhood" selectedValues={isSpaces ? undefined : activeType.split(",")} label={isSpaces ? "My Squadz" : "Placez"} question={isSpaces ? "Where is your community?" : "What's your kind of place?"} value={isSpaces ? activeNeighborhood : activeType} onChange={value => { if (value === "ADD") { openAddForm(); return; } if (isSpaces) { setActiveNeighborhood(value); setDiscoveryChosen(true); } else handleSelectCategory(value); }} accent="var(--panel-cyan)" options={isSpaces ? neighborhoodsInUse.map(value=>({value,label:value === "ALL" ? "All areas" : value})) : [{value:"ALL",label:"All Placez",count:visibleBusinesses.length},...categoryBands.map(category=>({value:category.key,label:category.label,color:category.color,count:category.count,description:({bar:"Find your next night out",restaurant:"Sit down for something good",cafe:"Coffee and a place to pause",venue:"Shows, stages, and gathering spaces",shop:"Shop small and local",service:"Find help from local pros",healthcare:"Find care that fits you",nonprofit:"Connect with community support",realestate:"Find your next home",campground:"Make room for an adventure",hotel:"Find somewhere to stay"} as Record<string,string>)[category.key]})),{value:"ADD",label:"Add a place",description:"Share a place with your community",color:"var(--neon-yellow)"}]}>
         <BrowseToolbar label="Search and filter places" className="directory-browser-search pdx-glass-card pdx-glass-rebind">
           <label className="directory-browser-search__field">
             <span>Search {isSpaces ? "MY SQUADZ" : "OUR PLACEZ"}</span>

@@ -1,0 +1,21 @@
+/* Placez door opener: a pin in a ring in place of the numbered step circle. */
+.placez-door-opener { display: inline-flex; align-items: center; gap: 14px; }
+.placez-door-pin {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid var(--neon-magenta, #ff00cc);
+  border-radius: 50%;
+  color: var(--neon-magenta, #ff00cc);
+}
+.placez-door-opener__text { display: inline-flex; flex-direction: column; gap: 4px; text-align: left; }
+.placez-door-opener__text small {
+  color: var(--text-lo, #999);
+  font: inherit;
+  font-size: 0.8em;
+  letter-spacing: inherit;
+}
+@media (min-width: 720px) {
+  .placez-door-pin { width: 50px; height: 50px; border-width: 2px; }
+}

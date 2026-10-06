@@ -1,0 +1,24 @@
+/* Eventz door opener: a ticket stub in today's day color in place of the numbered circle. */
+.discovery-kicker--custom { gap: 14px; }
+.events-door-stub {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 6px;
+  background: var(--stub, var(--day-tue));
+  color: #fff;
+  font: 700 13px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  -webkit-mask: radial-gradient(circle 9px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 9px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle 9px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 9px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+}
+.events-door-opener { display: inline-flex; align-items: center; gap: 14px; text-transform: uppercase; }
+.events-door-opener__text { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
+.events-door-opener__text small { display: inline-flex; align-items: center; gap: 8px; color: var(--neon-green); font-size: 0.8em; }
+.events-door-opener__text i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; animation: events-door-dot 4s ease-in-out infinite; }
+@keyframes events-door-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@media (min-width: 720px) { .events-door-stub { height: 50px; padding: 0 20px; font-size: 19px; } }
+@media (prefers-reduced-motion: reduce) { .events-door-opener__text i { animation: none; } }
+html.calm-mode .events-door-opener__text i { animation: none; }
