@@ -1502,12 +1502,12 @@ html.calm-mode .rg-options button,
 .rg-service-tags { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0 12px; }
 .rg-service-tags .pdxBadge { color: var(--z-black); }
 .rg-category-safety .pdxBtn { color: var(--text-hi) !important; }
-.rg-category-safety .rg-service-tags .pdxBadge { background: var(--neon-orange); border-color: var(--neon-orange); color: var(--z-black); }
+.rg-category-safety .rg-service-tags .pdxBadge { background: var(--neon-red); border-color: var(--neon-red); color: var(--z-black); }
 
-.rg-directory-card .pdxPlace__cat:is([data-category-id="safety"], [data-category-id="harm-reduction"]) .pdxBadge,
+.rg-directory-card .pdxPlace__cat[data-category-id="harm-reduction"] .pdxBadge,
 .rg-safety-prompt .pdxPlace__cat .pdxBadge { background: var(--neon-orange); border-color: var(--neon-orange); color: var(--z-black) !important; }
 :is(.rg-category-safety, .rg-category-youth, .rg-category-legal, .rg-category-arts, .rg-category-harm-reduction) .pdxBtn { color: var(--text-hi) !important; }
-.rg-category-youth .rg-service-tags .pdxBadge { background: var(--neon-orange); border-color: var(--neon-orange); color: var(--z-black); }
+.rg-category-youth .rg-service-tags .pdxBadge { background: var(--text-hi); border-color: var(--text-hi); color: var(--z-black); }
 
 .rg-options .rg-selection-control { display: grid; border: 1px solid var(--res-control-border); overflow: hidden; padding: 0; color: var(--text-hi); background: var(--res-input-surface); }
 .rg-selection-control label { display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 12px 8px; cursor: pointer; }
@@ -1534,11 +1534,7 @@ html.calm-mode .rg-options button,
 :is(.rg-directory-card, .rg-detail-tags) [data-category-id^="service-legal-"] .pdxBadge,
 :is(.rg-directory-card, .rg-detail-tags) [data-category-id^="service-arts-"] .pdxBadge { color: var(--text-hi); }
 :is(.rg-directory-card, .rg-detail-tags) [data-category-id="youth"] .pdxBadge,
-:is(.rg-directory-card, .rg-detail-tags) [data-category-id^="service-youth-"] .pdxBadge { background: var(--text-hi); border-color: var(--text-hi); color: var(--neon-red) !important; }
-.rg-category-youth .pdxPlace__body { border-color: var(--neon-red); }
-.rg-category-youth .pdxPlace__meta svg { color: var(--neon-red); }
-.rg-options button[style*="--res-accent: var(--text-hi)"] { border-color: var(--neon-red); color: var(--text-hi); }
-.rg-options button[style*="--res-accent: var(--text-hi)"] > svg { color: var(--neon-red); }
+:is(.rg-directory-card, .rg-detail-tags) [data-category-id^="service-youth-"] .pdxBadge { background: var(--text-hi); border-color: var(--text-hi); color: var(--z-black) !important; }
 
 /* ReZources: eight refinements from the guide's spacing, type and motion scales. */
 /* 1. Filter tiles use the 4px spacing scale and shared panel radius. */
@@ -2021,10 +2017,6 @@ html.calm-mode .rg-options button,
  box-shadow: 0 24px 64px color-mix(in srgb, var(--z-black) 65%, transparent), inset 0 1px 0 color-mix(in srgb, var(--text-hi) 18%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--rg-shell-accent) 24%, transparent);
 }
 .rg-overlay.rg-drawer-desktop { height: fit-content; border-radius: 24px; }
-.rg-overlay.rg-drawer:not(.rg-safety-drawer):is(.rg-category-youth, .rg-category-mental-health) { --rg-shell-accent: var(--neon-cyan); }
-.rg-overlay.rg-drawer:not(.rg-safety-drawer):is(.rg-category-youth, .rg-category-mental-health) .rg-drawer-handle { background: var(--neon-cyan); }
-.rg-overlay.rg-drawer:not(.rg-safety-drawer):is(.rg-category-youth, .rg-category-mental-health) .rg-detail-meta { border-color: color-mix(in srgb, var(--neon-cyan) 30%, transparent); }
-.rg-overlay.rg-drawer:not(.rg-safety-drawer):is(.rg-category-youth, .rg-category-mental-health) .rg-detail-meta > .rg-eyebrow { color: var(--neon-cyan); }
 @media (max-width: 600px) {
  .resources-page .rg-layout { gap: 32px; }
 }
@@ -4006,18 +3998,10 @@ html.calm-mode .rg-options button,
 }
 .rg-resource-detail .rg-category-wash { opacity: .065; }
 
-/* Section-colored cards: crisp rims, quieter bloom and legible red badges. */
+/* Section-colored cards: crisp rims and quieter bloom. */
 :is(.resources-page, .placez-card-surface) .rg-directory-card > .pdxPlace__body,
 .resources-page .rg-safety-summary {
   border: 1.5px solid var(--c);
-}
-:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__cat[data-category-id="youth"] .pdxBadge,
-.rg-detail-tags .rg-category-tag[data-category-id="youth"] .pdxBadge {
-  background: var(--z-black) !important;
-  border: 2px solid var(--neon-red) !important;
-  color: var(--text-heading) !important;
-  text-shadow: none;
-  font-weight: 700 !important;
 }
 .resources-page :is(.rg-directory-card, .rg-safety-summary) > .pdxPlace__body,
 .resources-page .rg-safety-summary {

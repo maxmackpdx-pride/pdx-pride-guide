@@ -111,11 +111,12 @@ function categoriesFor(row: Row) {
   );
 }
 function tagsFor(row: Row) {
-  const categoryTags = categoriesFor(row).map((tag) => ({ ...tag, color: tag.id === "safety" ? "var(--neon-orange)" : tag.color }));
+  const section = row.sectionCategory ?? row.category;
+  const categoryTags = [section, ...categoriesFor(row).filter((tag) => tag.id !== section.id)];
   const specialtyTags = row.org.transSpecialist
     ? [{ id: "trans-friends", name: "TRANS FRIENDS", color: "var(--res-trans-blue)" }]
     : [];
-  return [...categoryTags.slice(0, 1), ...specialtyTags, ...categoryTags.slice(1), ...(row.org.serviceTags || []).map((name) => ({ id: `service-${row.category.id}-${name}`, name, color: row.category.id === "safety" ? "var(--neon-orange)" : row.category.color }))];
+  return [...categoryTags, ...specialtyTags, ...(row.org.serviceTags || []).map((name) => ({ id: `service-${section.id}-${name}`, name, color: section.color }))];
 }
 
 const HOTLINES = [
@@ -790,7 +791,9 @@ export default function Resources() {
               <div className="rg-resource-stacks" data-view-all={showAllCards}>
                 {rows.length === 0 && <p className="rg-empty">Choose a category above, or select all to see every resource.</p>}
                 {selectedCategories.map((type) => {
-                  const group = rows.filter(row => categoriesFor(row).some(c => c.id === type.id));
+                  const group = rows
+                    .filter(row => categoriesFor(row).some(c => c.id === type.id))
+                    .sort((a, b) => Number(b.category.id === type.id) - Number(a.category.id === type.id));
                   if (!group.length) return null;
                   const sectionId = `resource-stack-${type.id}`;
                   return <section key={type.id} className="rg-resource-stack-section" aria-labelledby={`${sectionId}-title`}>
@@ -930,7 +933,7 @@ export default function Resources() {
                 <div className="rg-detail-tags">
                   {tagsFor(detail).map((category, index) => (
                     <span className="rg-category-tag" data-category-id={category.id} key={category.id}>
-                      <Badge variant={index === 0 ? "solid" : "outline"} color={category.id === "safety" ? "var(--neon-orange)" : category.color} size="sm">{category.name}</Badge>
+                      <Badge variant={index === 0 ? "solid" : "outline"} color={category.color} size="sm">{category.name}</Badge>
                     </span>
                   ))}
                 </div>

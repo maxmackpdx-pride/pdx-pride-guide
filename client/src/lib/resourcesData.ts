@@ -8,6 +8,7 @@
  */
 export type ResourceOrg = {
   name: string;
+  /** Directory cards use at most one additional rail for another primary service. */
   categoryIds?: string[];
   aliases?: string[];
   serviceTags?: string[];
@@ -59,16 +60,13 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "color": "var(--neon-cyan)",
     "what": "Clinics and service centers built for queer, trans, and gender-diverse people, plus HIV prevention and care.",
     "help": "Care from providers who already get it, so the visit is about your health, not about explaining yourself.",
-    "forr": "Primary and walk-in urgent care, testing and HIV services, gender-affirming care and surgery, counseling, harm reduction, and peer support.",
+    "forr": "Primary and walk-in urgent care, testing and HIV services, gender-affirming care and surgery, and health-plan enrollment.",
     "use": "Check the org's site for current hours and services, then call or walk in. Ask what to bring to your first visit.",
     "orgs": [
       {
         "name": "Virginia Garcia · Beaverton Wellness Center",
         "logo": "/resources-logos/virginia-garcia.png",
-        "categoryIds": [
-          "health",
-          "mental-health"
-        ],
+        "categoryIds": ["mental-health"],
         "scope": "Beaverton, OR · Washington County",
         "desc": "LGBTQ+ care is a stated focus of a Beaverton clinician on this team. The center also offers primary, dental, and behavioral health care, with language and payment assistance.",
         "addr": "2725 SW Cedar Hills Blvd, Suite 200, Beaverton, OR 97005",
@@ -115,10 +113,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Oregon Health Plan (OHP)",
-        "categoryIds": [
-          "health",
-          "safety"
-        ],
         "serviceTags": [
           "Enrollment",
           "Housing",
@@ -191,7 +185,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "howToStart": "Call 503-988-3700 for the testing van’s current schedule. Outreach testing is free and does not require an appointment or ID; the fixed STI Clinic is a separate service.",
         "contactSourceUrl": "https://multco.us/services/hiv-testing",
         "contactChecked": "September 30, 2026",
-        "categoryIds": []
       },
       {
         "name": "Oregon Free HIV & Syphilis Lab Testing",
@@ -211,7 +204,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "howToStart": "Choose a location using STDcheck’s Find a Lab, then call 800-456-2323 and press 1 to request the free Oregon HIV and syphilis tests. A representative will arrange your appointment.",
         "contactChecked": "September 30, 2026",
         "contactSourceUrl": "https://www.oregon.gov/oha/PH/DiseasesConditions/HIVSTDViralHepatitis/HIVPrevention/Pages/index.aspx",
-        "categoryIds": []
       },
       {
         "name": "Prism Health",
@@ -240,9 +232,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "aliases": [
           "Pivot at Prism Health · Free HIV & STI Testing"
         ],
-        "categoryIds": [
-          "health"
-        ],
+        "categoryIds": ["mental-health"],
         "phone": "tel:+15034457699",
         "phoneLabel": "Call Prism: 503-445-7699",
         "sourceUrl": "https://www.prismhealth.org/contact",
@@ -298,7 +288,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "phoneLabel": "503-479-7713",
         "contactSourceUrl": "https://evergreenurgent.com/",
         "contactChecked": "September 30, 2026",
-        "categoryIds": []
       },
       {
         "name": "CAP Northwest & Our House",
@@ -330,10 +319,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
           "Cascade AIDS Project (CAP) & Our House",
           "Cascade AIDS Project"
         ],
-        "categoryIds": [
-          "health",
-          "safety"
-        ],
+        "categoryIds": ["safety"],
         "serviceTags": [
           "Testing",
           "Housing"
@@ -398,13 +384,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "The Marie Equi Center",
-        "categoryIds": [
-          "health",
-          "harm-reduction",
-          "safety",
-          "community",
-          "mental-health"
-        ],
+        "categoryIds": ["harm-reduction"],
         "logo": "/resources-logos/marie-equi.png",
         "scope": "SE Portland",
         "desc": "Trauma-informed, culturally affirming health and social services for trans, queer, intersex, and gender-diverse communities. Peer support, harm reduction, and housing advocacy.",
@@ -455,10 +435,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Specialized gender-affirming medical care and surgery.",
         "url": "https://www.ohsu.edu/transgender-health",
-        "categoryIds": [
-          "youth",
-          "family"
-        ],
         "serviceTags": [
           "Gender-affirming care"
         ],
@@ -508,20 +484,12 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "contactChecked": "September 30, 2026",
         "lat": 45.4990592,
         "lng": -122.6116297,
-        "categoryIds": [
-          "mental-health"
-        ]
+        "categoryIds": ["mental-health"],
       },
       {
         "name": "Outside In",
         "transSpecialist": true,
-        "categoryIds": [
-          "health",
-          "harm-reduction",
-          "safety",
-          "youth",
-          "money"
-        ],
+        "categoryIds": ["youth"],
         "logo": "/resources-logos/outside-in.png",
         "scope": "Downtown",
         "desc": "Health care and social services for young people experiencing homelessness since 1968, including the QueerZone drop-in: an LGBTQ-affirming clinic with gender-affirming care, meals, showers, and housing help.",
@@ -583,113 +551,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         ],
         "contactChecked": "September 30, 2026"
       },
-      {
-        "name": "Trans Advocacy & Care Team (TACT)",
-        "transSpecialist": true,
-        "logo": "/resources-logos/trans-advocacy-care-team-tact.png",
-        "scope": "U.S. · Online · Adults 18+",
-        "desc": "Free, virtual peer counseling for trans people.",
-        "url": "https://yourtact.org",
-        "categoryIds": [
-          "community",
-          "mental-health"
-        ],
-        "serviceTags": [
-          "Peer support",
-          "Online"
-        ],
-        "categorySourceUrl": "https://yourtact.org",
-        "hours": "Peer sessions by arrangement · Waitlist may apply",
-        "howToStart": "Use the individual-counseling page to request a Gender Advocate. The team will contact you to arrange a first call. Peer support is for adults 18+; it is not therapy or a crisis service.",
-        "alt": "https://yourtact.org/individual-counseling/",
-        "altLabel": "Request peer support",
-        "contactSourceUrl": "https://yourtact.org/individual-counseling/",
-        "contactChecked": "September 30, 2026"
-      },
-      {
-        "name": "Emergence",
-        "logo": "/resources-logos/emergence.svg",
-        "mark": "EM",
-        "scope": "Eugene · Albany · Corvallis · Florence · Cottage Grove",
-        "desc": "LGBTQIA+ affirming outpatient substance-use and behavioral-health treatment, with multiple Oregon locations and telehealth options for qualifying clients.",
-        "url": "https://4emergence.com",
-        "categoryIds": [
-          "health",
-          "mental-health"
-        ],
-        "serviceTags": [
-          "Recovery"
-        ],
-        "categorySourceUrl": "https://www.4emergence.com/about-us/",
-        "phone": "tel:+15416878820",
-        "phoneLabel": "Main office & screening",
-        "addr": "78 Centennial Loop, Unit A, Eugene, OR 97401",
-        "hours": "Main office: Mon–Fri 9am–5pm · Treatment appointments vary",
-        "howToStart": "Call the main office for a phone screening and assessment. Ask which location or telehealth program fits your needs and confirm insurance coverage.",
-        "contactSourceUrl": "https://www.4emergence.com/",
-        "locations": [
-          {
-            "name": "Centennial Loop",
-            "address": "78 Centennial Loop, Unit A, Eugene, OR 97401",
-            "phone": "tel:+15416878820",
-            "sourceUrl": "https://www.4emergence.com/",
-            "lat": 44.0611117,
-            "lng": -123.0775411
-          },
-          {
-            "name": "Centennial Plaza",
-            "address": "2149 Centennial Plaza #4, Eugene, OR 97401",
-            "phone": "tel:+15417417107",
-            "sourceUrl": "https://www.4emergence.com/",
-            "lat": 44.0612057,
-            "lng": -123.0779778
-          },
-          {
-            "name": "Downtown Eugene",
-            "address": "1040 Oak St, Eugene, OR 97401",
-            "phone": "tel:+15413426987",
-            "sourceUrl": "https://www.4emergence.com/",
-            "lat": 44.0485617,
-            "lng": -123.0913215
-          },
-          {
-            "name": "Albany",
-            "address": "1856 Grand Prairie Rd SE, Albany, OR 97322",
-            "phone": "tel:+15419676597",
-            "sourceUrl": "https://www.4emergence.com/",
-            "lat": 44.6166432,
-            "lng": -123.0815687
-          },
-          {
-            "name": "Corvallis",
-            "address": "551 NW Monroe Ave, Corvallis, OR 97330",
-            "phone": "tel:+15413603918",
-            "sourceUrl": "https://www.4emergence.com/",
-            "lat": 44.565192,
-            "lng": -123.2635306
-          },
-          {
-            "name": "Florence",
-            "address": "4969 Hwy 101, Suite 3, Florence, OR 97439",
-            "phone": "tel:+15419978509",
-            "sourceUrl": "https://www.4emergence.com/",
-            "lat": 44.0096941,
-            "lng": -124.1022414
-          },
-          {
-            "name": "Cottage Grove",
-            "address": "710 Adams Ave, Cottage Grove, OR 97424",
-            "phone": "tel:+15417673057",
-            "sourceUrl": "https://www.4emergence.com/",
-            "lat": 43.7956696,
-            "lng": -123.060781
-          }
-        ],
-        "contactChecked": "September 30, 2026",
-        "lat": 44.0611117,
-        "lng": -123.0775411
-      }
-    ]
+  ]
   },
   {
     "id": "safety",
@@ -708,11 +570,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
           "FJCWC",
           "FPCWC"
         ],
-        "categoryIds": [
-          "safety",
-          "legal",
-          "family"
-        ],
+        "categoryIds": ["legal"],
         "scope": "Beaverton area & Washington County, OR · Center in Hillsboro",
         "desc": "A Washington County connection for survivor advocacy, legal aid, and housing support. Partner agencies also help survivors and families access food, clothing, and other essentials.",
         "addr": "1100 NE Compton Dr, Hillsboro, OR 97006",
@@ -745,11 +603,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       {
         "name": "YWCA Clark County · SafeChoice",
         "logo": "/resources-logos/ywca-clark.png",
-        "categoryIds": [
-          "safety",
-          "legal",
-          "family"
-        ],
         "scope": "Vancouver, WA · Clark County",
         "desc": "A dedicated LGBTQ+ advocate supports domestic violence survivors in Clark County. Free, confidential help includes a 24-hour hotline, safety planning, advocacy, and shelter services.",
         "addr": "3609 Main St, Vancouver, WA 98663",
@@ -782,10 +635,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       {
         "name": "Share Vancouver",
         "logo": "/resources-logos/share-vancouver.png",
-        "categoryIds": [
-          "safety",
-          "family"
-        ],
         "scope": "Vancouver, WA · Clark County",
         "desc": "Food and housing support in Clark County, with an explicit policy against sexual-orientation discrimination. Connect with meals, shelter access, outreach, and housing programs.",
         "addr": "2306 NE Andresen Rd, Vancouver, WA 98661",
@@ -828,11 +677,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       {
         "name": "Beaverton Resource Center",
         "logo": "/resources-logos/brc.png",
-        "categoryIds": [
-          "safety",
-          "health",
-          "family"
-        ],
         "scope": "Beaverton, OR · Surrounding communities",
         "desc": "Explicitly welcomes all sexual orientations, genders, and gender expressions. This Beaverton hub connects people with food, basic supplies, health coverage enrollment, and local help.",
         "addr": "13565 SW Walker Rd, Beaverton, OR 97005",
@@ -887,10 +731,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "url": "https://www.bradleyangle.org/marshas-folx",
         "alt": "mailto:lgbtq@bradleyangle.org",
         "altLabel": "Email",
-        "categoryIds": [
-          "legal",
-          "community"
-        ],
+        "categoryIds": ["mental-health"],
         "serviceTags": [
           "Domestic violence",
           "Housing navigation"
@@ -904,10 +745,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Eviction & housing crisis support",
-        "categoryIds": [
-          "safety",
-          "legal"
-        ],
+        "categoryIds": ["legal"],
         "serviceTags": [
           "Eviction help",
           "Rent assistance",
@@ -1021,9 +859,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       },
       {
         "name": "Energy & utility assistance",
-        "categoryIds": [
-          "safety"
-        ],
         "serviceTags": [
           "Energy assistance",
           "Bill discounts",
@@ -1110,10 +945,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "url": "https://werqt.org/",
         "alt": "https://werqt.org/donate",
         "altLabel": "Donate",
-        "categoryIds": [
-          "community",
-          "mental-health"
-        ],
+        "categoryIds": ["community"],
         "serviceTags": [
           "Relocation",
           "Peer support"
@@ -1131,9 +963,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Housing support, health care, and community services for marginalized people.",
         "url": "https://rahabs-sisters.org",
-        "categoryIds": [
-          "community"
-        ],
+        "categoryIds": ["community"],
         "serviceTags": [
           "Meals"
         ],
@@ -1158,26 +988,8 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "howToStart": "Check the People’s Pantry schedule on the official website, or call the office to confirm the current distribution location and hours. The P.O. box is for mail only.",
         "contactChecked": "September 30, 2026",
         "logo": "/resources-logos/hand-up-project-transparent.png",
-        "categoryIds": []
       },
-      {
-        "name": "Beyond These Walls",
-        "logo": "/resources-logos/beyond-these-walls.png",
-        "scope": "National",
-        "desc": "Serving and advocating for incarcerated LGBTQ+ people.",
-        "url": "https://beyondthesewallslgbt.org",
-        "categoryIds": [
-          "legal",
-          "community"
-        ],
-        "categorySourceUrl": "https://beyondthesewallslgbt.org",
-        "email": "havana@beyondthesewallslgbt.org",
-        "mailingAddress": "PO Box 13006, Portland, OR 97213",
-        "howToStart": "Contact the case manager about Care Closet, advocacy or reentry support. Use the website contact form for general inquiries.",
-        "contactSourceUrl": "https://beyondthesewallslgbt.org/contact",
-        "contactChecked": "September 30, 2026"
-      }
-    ]
+   ]
   },
   {
     "id": "legal",
@@ -1189,6 +1001,20 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "use": "Call the bar's referral line weekdays 8 to 5, or apply online for Modest Means with proof of income. Follow the advocacy groups for campaigns.",
     "orgs": [
       {
+        "name": "Beyond These Walls",
+        "logo": "/resources-logos/beyond-these-walls.png",
+        "scope": "National",
+        "desc": "Serving and advocating for incarcerated LGBTQ+ people.",
+        "url": "https://beyondthesewallslgbt.org",
+        "categoryIds": ["safety"],
+        "categorySourceUrl": "https://beyondthesewallslgbt.org",
+        "email": "havana@beyondthesewallslgbt.org",
+        "mailingAddress": "PO Box 13006, Portland, OR 97213",
+        "howToStart": "Contact the case manager about Care Closet, advocacy or reentry support. Use the website contact form for general inquiries.",
+        "contactSourceUrl": "https://beyondthesewallslgbt.org/contact",
+        "contactChecked": "September 30, 2026"
+      },
+      {
         "name": "Oregon State Bar",
         "logoSurface": "light",
         "logo": "/resources-logos/oregon-state-bar-transparent.png",
@@ -1199,11 +1025,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "cta": "Get a referral",
         "alt": "tel:+18004527636",
         "altLabel": "Toll-free: 800-452-7636",
-        "categoryIds": [
-          "safety",
-          "family",
-          "youth"
-        ],
         "serviceTags": [
           "Legal referrals"
         ],
@@ -1222,10 +1043,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "sub": "The LGBT Bar Association of Oregon",
         "scope": "Statewide",
         "desc": "LGBTQ+ lawyers, judges, legal workers, and law students since 1991. Runs the Bill & Ann Shepherd Legal Scholarship Fund and helped win marriage equality in Oregon.",
-        "categoryIds": [
-          "money",
-          "community"
-        ],
+        "categoryIds": ["community"],
         "categorySourceUrl": "https://www.ogalla.org/",
         "email": "info@ogalla.org",
         "mailingAddress": "PO Box 8211, Portland, OR 97207",
@@ -1247,7 +1065,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "mailingAddress": "P.O. Box 40625, Portland, OR 97240",
         "contactSourceUrl": "https://www.basicrights.org/contact-us",
         "contactChecked": "September 30, 2026",
-        "categoryIds": []
       },
       {
         "name": "Intersect NW",
@@ -1262,7 +1079,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "howToStart": "The organization is winding down. Use its Contact Us form for questions about the transition; check its current notice before requesting services.",
         "contactChecked": "September 30, 2026",
         "contactSourceUrl": "https://intersectnorthwest.org",
-        "categoryIds": []
       }
     ]
   },
@@ -1282,10 +1098,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "aliases": [
           "QYRC"
         ],
-        "categoryIds": [
-          "youth",
-          "community"
-        ],
+        "categoryIds": ["community"],
         "scope": "Vancouver, WA · Southwest Washington · Ages 12–24",
         "desc": "Built for LGBTQ+ youth ages 12–24 in Vancouver and Southwest Washington. Find community, local support, and help accessing gender-affirming garments.",
         "phone": "tel:+13608310745",
@@ -1320,11 +1133,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
       {
         "name": "HomePlate Youth Services",
         "logo": "/resources-logos/homeplate.png",
-        "categoryIds": [
-          "youth",
-          "safety",
-          "money"
-        ],
+        "categoryIds": ["safety"],
         "scope": "Beaverton & Hillsboro, OR · Washington County",
         "desc": "Explicitly supports LGBTQ+ youth and rejects homophobia and transphobia. Beaverton and Hillsboro drop-ins offer meals, showers, supplies, and housing, school, and job connections.",
         "addr": "12685 SW 4th St, Beaverton, OR 97005",
@@ -1373,12 +1182,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "url": "https://newavenues.org/smyrc/",
         "alt": "https://newavenues.org/donate/give-lgbtqia2s/",
         "altLabel": "Donate",
-        "categoryIds": [
-          "safety",
-          "health",
-          "community",
-          "mental-health"
-        ],
+        "categoryIds": ["safety"],
         "serviceTags": [
           "Meals",
           "Counseling"
@@ -1407,7 +1211,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "howToStart": "For current LGBTQIA2S+ youth support in Clackamas County, follow the Youth Era link below and confirm the current location and schedule. The former New Avenues program is discontinued.",
         "contactChecked": "September 30, 2026",
         "contactSourceUrl": "https://newavenues.org/thelivingroomyouth",
-        "categoryIds": []
       },
       {
         "name": "Trans Youth Care Collective",
@@ -1417,10 +1220,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Oregon",
         "desc": "Trans-led organization offering support groups.",
         "url": "https://transyouthcarecollective.com",
-        "categoryIds": [
-          "family",
-          "community"
-        ],
         "categorySourceUrl": "https://transyouthcarecollective.com",
         "addr": "4531 SE Belmont St, Portland, OR 97215",
         "alt": "https://transyouthcarecollective.com/contact-us",
@@ -1439,11 +1238,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Gender-focused peer support groups.",
         "url": "https://graduate.lclark.edu/programs/continuing_education/transactive/support-groups",
-        "categoryIds": [
-          "family",
-          "community",
-          "mental-health"
-        ],
+        "categoryIds": ["family"],
         "categorySourceUrl": "https://graduate.lclark.edu/programs/continuing_education/transactive/support-groups",
         "phone": "tel:+15037686024",
         "phoneLabel": "TransActive: 503-768-6024",
@@ -1459,9 +1254,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "desc": "Black and LGBTQ-affiliated mentoring and advocacy organization supporting individuals and communities across the Portland metro since 2016.",
         "addr": "2636 NE Sandy Blvd, Suite E, Portland, OR 97232",
         "url": "https://bridgecitymentors.com/",
-        "categoryIds": [
-          "community"
-        ],
         "categorySourceUrl": "https://bridgecitymentors.com/",
         "lat": 45.5283295,
         "lng": -122.6390186,
@@ -1478,10 +1270,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Oregon",
         "desc": "Intergenerational mentoring for LGBTQ+ youth.",
         "url": "https://perfectpair.org/pairs-with-pride",
-        "categoryIds": [
-          "family",
-          "community"
-        ],
         "categorySourceUrl": "https://perfectpair.org/pairs-with-pride",
         "email": "pairswithpride@perfectpair.org",
         "contactSourceUrl": "https://perfectpair.org/pairs-with-pride",
@@ -1494,10 +1282,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Arts programming and mentorship for unhoused and at-risk youth.",
         "url": "https://www.pearmentor.org",
-        "categoryIds": [
-          "safety",
-          "arts"
-        ],
+        "categoryIds": ["arts"],
         "serviceTags": [
           "Nutrition",
           "Mentorship"
@@ -1519,10 +1304,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Salem",
         "desc": "LGBTQIA+ youth support in Marion and Polk counties.",
         "url": "https://rainbowyouth.org",
-        "categoryIds": [
-          "youth",
-          "community"
-        ],
+        "categoryIds": ["community"],
         "categorySourceUrl": "https://rainbowyouth.org",
         "email": "info@rainbowyouth.org",
         "contactSourceUrl": "https://rainbowyouth.org/",
@@ -1541,15 +1323,26 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "use": "Not sure where to start? Start at Q Center, or Westside Q Center in Washington County. Check each calendar and go to one thing.",
     "orgs": [
       {
+        "name": "Northwest Gender Alliance",
+        "transSpecialist": true,
+        "logo": "/resources-logos/northwest-gender-alliance.png",
+        "scope": "Portland metro",
+        "desc": "Social support and education for transgender and gender-expansive people.",
+        "url": "https://www.nwgenderalliance.org/",
+        "categorySourceUrl": "https://www.nwgenderalliance.org/",
+        "email": "info@nwgenderalliance.org",
+        "mailingAddress": "PO Box 6534, Beaverton, OR 97007",
+        "contactSourceUrl": "https://www.nwgenderalliance.org/contact-us",
+        "howToStart": "Email the group for meeting details, coming-out support or educational requests. The PO box is for mail, not visits.",
+        "contactChecked": "September 30, 2026"
+      },
+      {
         "name": "Q Center",
         "logo": "/resources-logos/q-center.png",
         "scope": "Portland",
         "desc": "2SLGBTQIA+ community center with an art gallery, library, support groups, resource hub, emergency assistance, and space rentals.",
         "url": "https://www.pdxqcenter.org",
-        "categoryIds": [
-          "safety",
-          "arts"
-        ],
+        "categoryIds": ["mental-health"],
         "categorySourceUrl": "https://www.pdxqcenter.org",
         "addr": "4115 N Mississippi Ave, Portland, OR 97217",
         "phone": "tel:+15032347837",
@@ -1577,7 +1370,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "lat": 45.521572,
         "lng": -122.9873008,
         "howToStart": "Visit during published office hours, check the calendar for drop-in sessions and groups, or email the center before coming.",
-        "categoryIds": []
       },
       {
         "name": "Pride Northwest",
@@ -1594,7 +1386,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "contactSourceUrl": "https://www.pridenw.org/contact",
         "contactChecked": "September 30, 2026",
         "howToStart": "Call or email Pride Northwest about its community programs, participation or volunteer opportunities.",
-        "categoryIds": []
       },
       {
         "name": "Lesbian Culture Club",
@@ -1606,7 +1397,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "email": "hi@lesbiancultureclub.com",
         "contactSourceUrl": "https://lesbiancultureclub.com/pages/contact",
         "contactChecked": "September 30, 2026",
-        "categoryIds": []
       },
       {
         "name": "Queer Social Club",
@@ -1619,7 +1409,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "howToStart": "Browse the Portland calendar for event details. Email QSC for questions or listing corrections; check each event’s organizer link before attending.",
         "contactSourceUrl": "https://queersocialclub.com/about",
         "contactChecked": "September 30, 2026",
-        "categoryIds": []
       },
       {
         "name": "Oregon Queer History Project",
@@ -1629,9 +1418,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Oregon",
         "desc": "LGBTQIA2S+ archives of the Pacific Northwest.",
         "url": "https://glapn.org",
-        "categoryIds": [
-          "arts"
-        ],
         "categorySourceUrl": "https://glapn.org",
         "email": "info@glapn.org",
         "mailingAddress": "PO Box 3646, Portland, OR 97208-3646",
@@ -1646,9 +1432,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Statewide",
         "desc": "A safe and confidential space and resources for LGBTQ+, trans, and intersex veterans.",
         "url": "https://www.oregon.gov/odva/resources",
-        "categoryIds": [
-          "family"
-        ],
         "categorySourceUrl": "https://www.oregon.gov/odva/resources",
         "addr": "700 Summer St NE, Salem, OR 97301",
         "hours": "Headquarters: Mon–Fri 8am–5pm",
@@ -1669,14 +1452,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Eugene · Virtual",
         "desc": "Trans-led peer support and mental-health services, plus food access and free harm-reduction supplies through the Lavender Network.",
         "url": "https://www.transponderoregon.org/",
-        "categoryIds": [
-          "community",
-          "safety",
-          "family",
-          "health",
-          "harm-reduction",
-          "mental-health"
-        ],
+        "categoryIds": ["mental-health"],
         "serviceTags": [
           "Food access",
           "Peer support"
@@ -1700,11 +1476,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Linn · Benton · Lincoln",
         "desc": "Grassroots peer support for trans and nonbinary people in the valley.",
         "url": "https://midwillamettetsn.wixsite.com/oursite",
-        "categoryIds": [
-          "community",
-          "family",
-          "mental-health"
-        ],
+        "categoryIds": ["mental-health"],
         "categorySourceUrl": "https://midwillamettetsn.wixsite.com/oursite",
         "email": "midwillamettetsn@gmail.com",
         "contactSourceUrl": "https://midwillamettetsn.wixsite.com/oursite",
@@ -1724,7 +1496,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "howToStart": "RAC is closed and no longer provides services. Open its community resource list to contact another Southern Oregon organization directly.",
         "contactChecked": "September 30, 2026",
         "contactSourceUrl": "https://rogueactioncenter.org",
-        "categoryIds": []
       },
       {
         "name": "People Like Us",
@@ -1738,7 +1509,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "contactSourceUrl": "https://wallowalgbtq.org/contact",
         "contactChecked": "September 30, 2026",
         "howToStart": "Contact People Like Us for current support-group times and participation details. The PO box is for mail; meeting locations vary.",
-        "categoryIds": []
       }
     ]
   },
@@ -1758,10 +1528,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
           "PFLAG Vancouver WA",
           "PFLAG Southwest Washington"
         ],
-        "categoryIds": [
-          "family",
-          "community"
-        ],
+        "categoryIds": ["community"],
         "scope": "Vancouver, WA · Greater Vancouver area",
         "desc": "Support for LGBTQ+ people and the families and allies who love them in Vancouver, WA. Monthly peer meetings, education, and advocacy help build an affirming local community.",
         "email": "pflagvancouverwa@gmail.com",
@@ -1796,10 +1563,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Family support and education for the parents and loved ones of LGBTQ+ people.",
         "url": "https://pflagpdx.org/",
-        "categoryIds": [
-          "community",
-          "legal"
-        ],
+        "categoryIds": ["community"],
         "categorySourceUrl": "https://pflagpdx.org/",
         "phone": "tel:+15032327676",
         "phoneLabel": "PFLAG voicemail · reply in 24–48 hours",
@@ -1816,9 +1580,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Support for parents of trans youth, with virtual chapters too.",
         "url": "https://transparentusa.org/chapters-oregon",
-        "categoryIds": [
-          "community"
-        ],
+        "categoryIds": ["community"],
         "categorySourceUrl": "https://transparentusa.org/chapters-oregon",
         "hours": "Meetings: second Tuesday monthly, 6:30–8:30pm · Confirm with the chapter leader",
         "howToStart": "Use the Oregon chapter form to contact the Portland chapter leader and confirm the meeting location and participation details.",
@@ -1833,11 +1595,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Services for LGBTQ+ older adults, including housing help and case management, as Portland's affiliate of SAGE, the national LGBT elder organization.",
         "url": "https://fhpdx.org/for-adults-seniors/elder-pride-services/",
-        "categoryIds": [
-          "community",
-          "safety",
-          "legal"
-        ],
+        "categoryIds": ["safety"],
         "serviceTags": [
           "Older adults",
           "Housing navigation"
@@ -1860,12 +1618,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Indigenous LGBTQIA2S+ support groups and cultural events at the Native American Youth and Family Center.",
         "url": "https://nayapdx.org/services/two-spirit-safe-space-alliance",
-        "categoryIds": [
-          "youth",
-          "community",
-          "safety",
-          "money"
-        ],
+        "categoryIds": ["youth"],
         "serviceTags": [
           "Nutrition",
           "Housing"
@@ -1886,34 +1639,13 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Community organization for queer and trans Pacific Islanders.",
         "url": "https://www.utopiaportland.org/",
-        "categoryIds": [
-          "community",
-          "legal"
-        ],
+        "categoryIds": ["community"],
         "categorySourceUrl": "https://www.utopiaportland.org/",
         "email": "info@utopiaportland.org",
         "contactSourceUrl": "https://www.utopiaportland.org/",
         "contactChecked": "September 30, 2026"
       },
-      {
-        "name": "Northwest Gender Alliance",
-        "transSpecialist": true,
-        "logo": "/resources-logos/northwest-gender-alliance.png",
-        "scope": "Portland metro",
-        "desc": "Social support and education for transgender and gender-expansive people.",
-        "url": "https://www.nwgenderalliance.org/",
-        "categoryIds": [
-          "community",
-          "legal"
-        ],
-        "categorySourceUrl": "https://www.nwgenderalliance.org/",
-        "email": "info@nwgenderalliance.org",
-        "mailingAddress": "PO Box 6534, Beaverton, OR 97007",
-        "contactSourceUrl": "https://www.nwgenderalliance.org/contact-us",
-        "howToStart": "Email the group for meeting details, coming-out support or educational requests. The PO box is for mail, not visits.",
-        "contactChecked": "September 30, 2026"
-      }
-    ]
+   ]
   },
   {
     "id": "money",
@@ -1933,10 +1665,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Oregon",
         "desc": "Business education and networking for LGBTQ+ entrepreneurs.",
         "url": "https://www.orpib.com",
-        "categoryIds": [
-          "community",
-          "legal"
-        ],
+        "categoryIds": ["community"],
         "categorySourceUrl": "https://www.orpib.com",
         "phone": "tel:+19714423224",
         "phoneLabel": "971-442-3224",
@@ -1954,10 +1683,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Pacific Northwest",
         "desc": "Philanthropic foundation offering scholarships for LGBTQ+ students across the Northwest.",
         "url": "https://pridefoundation.org",
-        "categoryIds": [
-          "youth",
-          "arts"
-        ],
+        "categoryIds": ["youth"],
         "serviceTags": [
           "Scholarships"
         ],
@@ -1990,7 +1716,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "contactChecked": "September 30, 2026",
         "lat": 45.5292501,
         "lng": -122.6470275,
-        "categoryIds": []
       },
       {
         "name": "Portland Small Business Development Center",
@@ -2003,7 +1728,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "contactSourceUrl": "https://www.pcc.edu/small-business/",
         "howToStart": "Register for the free Intro to SBDC orientation or request business advising. Email sbdc@pcc.edu to ask which service fits your business.",
         "contactChecked": "September 30, 2026",
-        "categoryIds": []
       },
       {
         "name": "SCORE Portland",
@@ -2016,7 +1740,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "contactSourceUrl": "https://www.score.org/or/portland/",
         "contactChecked": "September 30, 2026",
         "howToStart": "Request a free mentor match online using your ZIP code. Call the Portland chapter with questions about getting started.",
-        "categoryIds": []
       },
       {
         "name": "Prosper Portland",
@@ -2035,7 +1758,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "lng": -122.6721971,
         "hours": "Call to confirm office hours and visit arrangements.",
         "howToStart": "Call the general number or use the contact form for business-support questions and referrals.",
-        "categoryIds": []
       },
       {
         "name": "Business Oregon",
@@ -2073,7 +1795,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "lat": 45.5162968,
         "lng": -122.6749311,
         "howToStart": "Call the Portland office or email Business Oregon to ask which assistance program fits your business. Confirm an appointment before visiting.",
-        "categoryIds": []
       }
     ]
   },
@@ -2093,10 +1814,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Funds queer artists and projects, and keeps a resource guide for grants, services, spaces, and community organizations.",
         "url": "https://portlandqueerarts.foundation",
-        "categoryIds": [
-          "money",
-          "community"
-        ],
+        "categoryIds": ["money"],
         "serviceTags": [
           "Artist funding"
         ],
@@ -2118,9 +1836,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Portland arts funder, including the Portland Arts Project Grant for individual artists and arts organizations.",
         "url": "https://racc.org",
-        "categoryIds": [
-          "money"
-        ],
+        "categoryIds": ["money"],
         "serviceTags": [
           "Grants"
         ],
@@ -2143,9 +1859,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Multnomah County",
         "desc": "Cultural-enrichment organization supporting Multnomah County residents and local arts work.",
         "url": "https://www.multcoculturalcoalition.org",
-        "categoryIds": [
-          "money"
-        ],
+        "categoryIds": ["money"],
         "serviceTags": [
           "Grants"
         ],
@@ -2163,9 +1877,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Oregon",
         "desc": "State grants for Oregon artists and organizations, including individual artist fellowships.",
         "url": "https://www.oregonartscommission.org",
-        "categoryIds": [
-          "money"
-        ],
+        "categoryIds": ["money"],
         "serviceTags": [
           "Grants"
         ],
@@ -2191,16 +1903,13 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "howToStart": "Use the contact form to reach the executive director about programs, participation or collaboration. Check individual event listings for times and venues.",
         "contactSourceUrl": "https://futureprairie.com/contact.html",
         "contactChecked": "September 30, 2026",
-        "categoryIds": []
       },
       {
         "name": "Foundation for Contemporary Arts",
         "scope": "National",
         "desc": "Emergency grants and opportunity grants for experimental and contemporary artists.",
         "url": "https://foundationforcontemporaryarts.org",
-        "categoryIds": [
-          "money"
-        ],
+        "categoryIds": ["money"],
         "serviceTags": [
           "Artist grants"
         ],
@@ -2220,10 +1929,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Trans and queer artists of color gallery and organizing space offering free and low-cost classes and workshops.",
         "url": "https://oriartgallery.org",
-        "categoryIds": [
-          "community",
-          "money"
-        ],
+        "categoryIds": ["community"],
         "categorySourceUrl": "https://oriartgallery.org",
         "addr": "4038 N Mississippi Ave, Portland, OR 97217",
         "hours": "Thu–Sun 1pm–6pm",
@@ -2242,9 +1948,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Printmaking, publishing, and literary arts center.",
         "url": "https://www.iprc.org",
-        "categoryIds": [
-          "community"
-        ],
         "categorySourceUrl": "https://www.iprc.org",
         "addr": "318 SE Main St, Suites 155 & 145, Portland, OR 97214",
         "hours": "Tue–Thu noon–9pm · Fri–Sat noon–6pm",
@@ -2261,9 +1964,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Sewing-focused nonprofit with tools and classes.",
         "url": "https://sincerestudiopdx.org",
-        "categoryIds": [
-          "community"
-        ],
         "serviceTags": [
           "Sewing",
           "Classes"
@@ -2290,7 +1990,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "contactChecked": "September 30, 2026",
         "lat": 45.5553246,
         "lng": -122.6593727,
-        "categoryIds": []
       },
       {
         "name": "Radical Faerie Arts Fest",
@@ -2305,7 +2004,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "howToStart": "Contact the organizer to ask whether a new festival is planned. The website displays a past May 17–21 program; those dates, hours and venue are not a confirmed upcoming schedule.",
         "contactSourceUrl": "https://www.radfaf.org/",
         "contactChecked": "September 30, 2026",
-        "categoryIds": []
       },
       {
         "name": "Fertile Ground Festival",
@@ -2318,7 +2016,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "howToStart": "Email the festival for participation, ticketing or accessibility questions. Performance times and locations vary by production.",
         "contactSourceUrl": "https://fertilegroundpdx.org/",
         "contactChecked": "September 30, 2026",
-        "categoryIds": []
       },
       {
         "name": "Portland Area Theatre Alliance",
@@ -2327,10 +2024,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Auditions, listings, and theatre events for the Portland area.",
         "url": "https://portlandtheatre.com",
-        "categoryIds": [
-          "money",
-          "community"
-        ],
+        "categoryIds": ["money"],
         "categorySourceUrl": "https://portlandtheatre.com",
         "phone": "tel:+15034496270",
         "phoneLabel": "Portland Area Theatre Alliance",
@@ -2344,9 +2038,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Portland",
         "desc": "Portland theatre community listserv for opportunities and discussion.",
         "url": "https://groups.io/g/pdxbackstage",
-        "categoryIds": [
-          "community"
-        ],
+        "categoryIds": ["money"],
         "categorySourceUrl": "https://groups.io/g/pdxbackstage",
         "logo": "/resources-logos/pdxbackstage-wordmark.svg",
         "email": "pdxbackstage+owner@groups.io",
@@ -2360,9 +2052,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "scope": "Online",
         "desc": "Casting calls and performance opportunities for working artists.",
         "url": "https://www.backstage.com",
-        "categoryIds": [
-          "money"
-        ],
+        "categoryIds": ["money"],
         "serviceTags": [
           "Casting"
         ],
@@ -2384,7 +2074,107 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "help": "Find affirming support for your emotional wellbeing.",
     "forr": "Therapy, peer counseling, support groups, and recovery services. Each provider lists its own eligibility.",
     "use": "Check whether the service is clinical therapy or peer support, then contact the provider to get started.",
-    "orgs": []
+    "orgs": [
+      {
+        "name": "Trans Advocacy & Care Team (TACT)",
+        "transSpecialist": true,
+        "logo": "/resources-logos/trans-advocacy-care-team-tact.png",
+        "scope": "U.S. · Online · Adults 18+",
+        "desc": "Free, virtual peer counseling for trans people.",
+        "url": "https://yourtact.org",
+        "serviceTags": [
+          "Peer support",
+          "Online"
+        ],
+        "categorySourceUrl": "https://yourtact.org",
+        "hours": "Peer sessions by arrangement · Waitlist may apply",
+        "howToStart": "Use the individual-counseling page to request a Gender Advocate. The team will contact you to arrange a first call. Peer support is for adults 18+; it is not therapy or a crisis service.",
+        "alt": "https://yourtact.org/individual-counseling/",
+        "altLabel": "Request peer support",
+        "contactSourceUrl": "https://yourtact.org/individual-counseling/",
+        "contactChecked": "September 30, 2026"
+      },
+      {
+        "name": "Emergence",
+        "logo": "/resources-logos/emergence.svg",
+        "mark": "EM",
+        "scope": "Eugene · Albany · Corvallis · Florence · Cottage Grove",
+        "desc": "LGBTQIA+ affirming outpatient substance-use and behavioral-health treatment, with multiple Oregon locations and telehealth options for qualifying clients.",
+        "url": "https://4emergence.com",
+        "categoryIds": ["health"],
+        "serviceTags": [
+          "Recovery"
+        ],
+        "categorySourceUrl": "https://www.4emergence.com/about-us/",
+        "phone": "tel:+15416878820",
+        "phoneLabel": "Main office & screening",
+        "addr": "78 Centennial Loop, Unit A, Eugene, OR 97401",
+        "hours": "Main office: Mon–Fri 9am–5pm · Treatment appointments vary",
+        "howToStart": "Call the main office for a phone screening and assessment. Ask which location or telehealth program fits your needs and confirm insurance coverage.",
+        "contactSourceUrl": "https://www.4emergence.com/",
+        "locations": [
+          {
+            "name": "Centennial Loop",
+            "address": "78 Centennial Loop, Unit A, Eugene, OR 97401",
+            "phone": "tel:+15416878820",
+            "sourceUrl": "https://www.4emergence.com/",
+            "lat": 44.0611117,
+            "lng": -123.0775411
+          },
+          {
+            "name": "Centennial Plaza",
+            "address": "2149 Centennial Plaza #4, Eugene, OR 97401",
+            "phone": "tel:+15417417107",
+            "sourceUrl": "https://www.4emergence.com/",
+            "lat": 44.0612057,
+            "lng": -123.0779778
+          },
+          {
+            "name": "Downtown Eugene",
+            "address": "1040 Oak St, Eugene, OR 97401",
+            "phone": "tel:+15413426987",
+            "sourceUrl": "https://www.4emergence.com/",
+            "lat": 44.0485617,
+            "lng": -123.0913215
+          },
+          {
+            "name": "Albany",
+            "address": "1856 Grand Prairie Rd SE, Albany, OR 97322",
+            "phone": "tel:+15419676597",
+            "sourceUrl": "https://www.4emergence.com/",
+            "lat": 44.6166432,
+            "lng": -123.0815687
+          },
+          {
+            "name": "Corvallis",
+            "address": "551 NW Monroe Ave, Corvallis, OR 97330",
+            "phone": "tel:+15413603918",
+            "sourceUrl": "https://www.4emergence.com/",
+            "lat": 44.565192,
+            "lng": -123.2635306
+          },
+          {
+            "name": "Florence",
+            "address": "4969 Hwy 101, Suite 3, Florence, OR 97439",
+            "phone": "tel:+15419978509",
+            "sourceUrl": "https://www.4emergence.com/",
+            "lat": 44.0096941,
+            "lng": -124.1022414
+          },
+          {
+            "name": "Cottage Grove",
+            "address": "710 Adams Ave, Cottage Grove, OR 97424",
+            "phone": "tel:+15417673057",
+            "sourceUrl": "https://www.4emergence.com/",
+            "lat": 43.7956696,
+            "lng": -123.060781
+          }
+        ],
+        "contactChecked": "September 30, 2026",
+        "lat": 44.0611117,
+        "lng": -123.0775411
+      }
+    ]
   },
   {
     "id": "harm-reduction",
@@ -2409,10 +2199,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "sourceUrl": "https://multco.us/info/overdose-prevention",
         "cta": "Services & locations",
         "sourceChecked": "September 30, 2026",
-        "categoryIds": [
-          "health",
-          "safety"
-        ],
+        "categoryIds": ["health"],
         "serviceTags": [
           "Naloxone",
           "Testing"
@@ -2436,9 +2223,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "url": "https://hivalliance.org/services/syringe-services/",
         "cta": "Locations & schedules",
         "sourceChecked": "September 30, 2026",
-        "categoryIds": [
-          "health"
-        ],
+        "categoryIds": ["health"],
         "serviceTags": [
           "Naloxone",
           "Testing"
@@ -2463,9 +2248,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "url": "https://justincaseoregon.org/",
         "cta": "Request free naloxone",
         "sourceChecked": "September 30, 2026",
-        "categoryIds": [
-          "health"
-        ],
         "serviceTags": [
           "Free naloxone",
           "Mail delivery"
@@ -2573,11 +2355,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         ],
         "contactSourceUrl": "https://eocil.org/",
         "contactChecked": "September 30, 2026",
-        "categoryIds": [
-          "health",
-          "community",
-          "safety"
-        ],
+        "categoryIds": ["safety"],
         "categorySourceUrl": "https://eocil.org/"
       }
     ]
