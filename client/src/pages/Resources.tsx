@@ -521,7 +521,6 @@ export default function Resources() {
   const detailTrigger = useRef<HTMLElement | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const selectedCategories = RESOURCE_CATEGORIES.filter((c) => categoryIds.includes(c.id));
-  const category = selectedCategories.length === 1 ? selectedCategories[0] : undefined;
   const rows = useMemo(
     () =>
       ROWS.filter((r) => categoriesFor(r).some((c) => categoryIds.includes(c.id))),
@@ -745,42 +744,20 @@ export default function Resources() {
           tabIndex={-1}
           aria-label="Resource results"
         >
-          <div className="rg-results-head">
-            <span className="rg-eyebrow rg-results-step"><span className="rg-step-number" aria-hidden="true">03</span>Make a connection</span>
-            <h2>
-              {mode === "talk"
-                ? "A person on the other end."
-                : category
-                  ? `${category.name}.`
-                  : categoryIds.length === RESOURCE_CATEGORIES.length ? "All ReZources." : categoryIds.length > 1 ? `${categoryIds.length} categories selected.` : "Choose your ReZources."}
-            </h2>
-            <p>
-              {mode === "talk"
-                ? "Choose the support line that fits what you need."
-                : category
-                  ? category.forr
-                  : categoryIds.length > 1 ? "Explore organizations, services, and people who can help." : "Art, community, opportunity, care, and support. Choose one or more categories to find your next connection."}
-            </p>
-          </div>
-          <p className="rg-count" aria-live="polite">
-            <span key={`${mode}-${rows.length}`} className={quietMotion ? undefined : "rg-count-change"}>
-            {mode === "talk"
-              ? "Support lines"
-              : `${rows.length} resource cards${rows.some((row) => row.org === FOOD_RESOURCE) ? " · includes 8 food pantries" : ""}`}
-            </span>
-          </p>
+          {mode === "talk" && <>
+            <div className="rg-results-head">
+              <span className="rg-eyebrow rg-results-step"><span className="rg-step-number" aria-hidden="true">03</span>Make a connection</span>
+              <h2>A person on the other end.</h2>
+              <p>Choose the support line that fits what you need.</p>
+            </div>
+            <p className="rg-count">Support lines</p>
+          </>}
           {mode === "talk" ? (
             <TalkOptions />
           ) : (
             <>
-              {rows.length > 0 && <div className="rg-stack-controls">
-                <span>{showAllCards ? "Browse every card" : "Browse the resource rails"}</span>
-                <button type="button" className="pdx-glass-rebind pdxBtn" aria-pressed={showAllCards} onClick={() => {
-                  setShowAllCards(value => !value);
-                  requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "instant", block: "start" }));
-                }}>
-                  {showAllCards ? "Show rails" : "View all cards"}
-                </button>
+              {showAllCards && <div className="rg-stack-controls">
+                <button type="button" className="pdx-glass-rebind pdxBtn" onClick={() => setShowAllCards(false)}>Show rails</button>
               </div>}
               <div className="rg-resource-stacks" data-view-all={showAllCards}>
                 {rows.length === 0 && <p className="rg-empty">Choose a category above, or select all to see every resource.</p>}
