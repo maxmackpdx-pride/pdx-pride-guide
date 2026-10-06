@@ -166,7 +166,7 @@ function HangingObject({ object, id, quiet, beePass }: { object: typeof OBJECTS[
   </g>;
 }
 
-export function RezourcesLogo({ quietMotion: requestedQuietMotion = false }: { quietMotion?: boolean }) {
+function RezourcesLogoDesktop({ quietMotion: requestedQuietMotion = false }: { quietMotion?: boolean }) {
   const frame = useRef<HTMLHeadingElement>(null);
   const inView = useInView(frame);
   const [documentVisible, setDocumentVisible] = useState(() => !document.hidden);
@@ -340,4 +340,31 @@ export function RezourcesLogo({ quietMotion: requestedQuietMotion = false }: { q
       </svg>
     </h1>
   );
+}
+
+export function RezourcesLogo({ quietMotion = false }: { quietMotion?: boolean }) {
+  const [mobile, setMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches,
+  );
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 767px)');
+    const update = () => setMobile(query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+
+  if (mobile) {
+    return <h1 className="rg-board-logo-frame rg-z-logo rg-z-logo--mobile">
+      <img
+        className="rg-board-logo"
+        src="/brand/family/rezources-mobile.webp"
+        alt="ReZources"
+        fetchPriority="high"
+        decoding="async"
+      />
+    </h1>;
+  }
+
+  return <RezourcesLogoDesktop quietMotion={quietMotion} />;
 }

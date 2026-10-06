@@ -4346,3 +4346,37 @@ html.calm-mode .rg-options button,
 .resources-page .rg-talk h3,
 .resources-page .rg-talk .pdxBtn { font-family: var(--font-display); }
 .resources-page .rg-talk > p { font-family: var(--font-body); }
+
+/* Keep the category chooser compact in three columns at every viewport. */
+.resources-page .rg-controls .rg-step--categories .rg-options {
+  width: min(100%, 780px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.resources-page .rg-options button[data-category-id] {
+  min-height: 52px;
+  padding: 8px 10px;
+  gap: 8px;
+  font-size: 14px;
+}
+.resources-page .rg-options button[data-category-id] > svg { width: 18px; height: 18px; }
+.resources-page .rg-options button[data-category-id] > span { font-size: inherit; line-height: 1.2; }
+.resources-page .rg-options .rg-selection-control { grid-column: 2 / -1; margin-top: 0; }
+.resources-page .rg-selection-control label { min-height: 52px; padding: 8px; font-size: 13px; }
+
+@media (max-width: 719px) {
+  .resources-page .rg-controls .rg-step--categories .rg-options { width: 100%; }
+  .resources-page .rg-options button[data-category-id] {
+    min-height: 80px;
+    padding: 8px;
+    gap: 5px;
+  }
+  .resources-page .rg-options button[data-category-id] > svg { width: 17px; height: 17px; }
+  .resources-page .rg-options button[data-category-id] > span {
+    font-size: 12px;
+    line-height: 1.15;
+    text-wrap: pretty;
+  }
+  .resources-page .rg-selection-control label { min-height: 80px; padding: 6px 4px; font-size: 11px; }
+  .resources-page .rg-selection-control input { width: 15px; height: 15px; }
+}

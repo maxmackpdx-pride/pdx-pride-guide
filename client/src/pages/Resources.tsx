@@ -639,7 +639,7 @@ export default function Resources() {
         </div>
         <RezourcesLogo quietMotion={Boolean(quietMotion)} />
           <div className="rg-intro-actions">
-            <BoardShareButton title="ReZources" path="/rezources" card={{ room: "ReZources", mark: "/brand/family/rezources.png", line: "All the ways we show up." }} />
+            <BoardShareButton title="ReZources" path="/rezources" card={{ room: "ReZources", mark: "/brand/family/rezources-mobile.webp", line: "All the ways we show up." }} />
             <BoardFollowButton board="rezources" />
           </div>
 
@@ -762,12 +762,6 @@ export default function Resources() {
                   : categoryIds.length > 1 ? "Explore organizations, services, and people who can help." : "Art, community, opportunity, care, and support. Choose one or more categories to find your next connection."}
             </p>
           </div>
-          {mode === "directory" && categoryIds.includes("safety") && (
-            <SafetyNotice />
-          )}
-
-
-
           <p className="rg-count" aria-live="polite">
             <span key={`${mode}-${rows.length}`} className={quietMotion ? undefined : "rg-count-change"}>
             {mode === "talk"
