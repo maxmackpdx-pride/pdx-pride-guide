@@ -1,4 +1,7 @@
-import {motionPreference as reduced} from './motion-preference.js';
+import {addLayers} from '../map-foundation/layers.js';
+import {captureCamera} from '../map-foundation/camera.js';
+import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../map-foundation/lifecycle.js';
+import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
 import { visibleHologramLabels } from './label-visibility.js?v=20260925-venue-nights';
@@ -29,22 +32,13 @@ startup.phase('script');
 const maxExploreZoom=17.75;
 // First paint is the vector city. DEM workers were blocking the phone boot
 // and the preload already dropped terrain from this first style.
-const surfaceStyle=mapzSurfaceStyle({terrainStrength:0});
-delete surfaceStyle.terrain;
-if(surfaceStyle.sources){
- delete surfaceStyle.sources.elevation;
- delete surfaceStyle.sources['hillshade-elevation'];
- delete surfaceStyle.sources.contours;
-}
-if(Array.isArray(surfaceStyle.layers)){
- surfaceStyle.layers=surfaceStyle.layers.filter(layer=>layer.id!=='land-relief'&&layer.id!=='elevation-contours'&&layer.source!=='elevation'&&layer.source!=='hillshade-elevation'&&layer.source!=='contours');
-}
+const surfaceStyle=vectorFirstStyle(mapzSurfaceStyle({terrainStrength:0}));
 // The home city materials, extended with DEM hillshade and Mapz surface treatments.
 // MapLibre creates and checks its own WebGL context. A separate retained probe
 // needlessly consumes another context on phones and can prevent the real one.
 let map;
 try{
- map=new maplibregl.Map({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
+ map=createMap({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
    center:[-122.676,45.523],zoom:13.5+Math.log2(1.25),pitch:48,bearing:0,
    maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:maxExploreZoom,maxPitch:72,
    style:surfaceStyle});
@@ -89,12 +83,12 @@ const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,terrainHeight,red
 const citySparkles=createCitySparkles(maplibregl,terrainHeight,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
 function installSceneExtras(){
- map.addLayer(groundLightPools,'buildings');
- map.addLayer(bridgeLayer,'skyline');
+ addLayers(map,[groundLightPools],'buildings');
+ addLayers(map,[bridgeLayer],'skyline');
  landmarkBuildings.bridges=portlandBridges;
- map.addLayer(landmarkBuildings,'skyline');
- map.addLayer(portlandLandmarks);
- map.addLayer(citySparkles);
+ addLayers(map,[landmarkBuildings],'skyline');
+ addLayers(map,[portlandLandmarks]);
+ addLayers(map,[citySparkles]);
 }
 map.on('load',()=>{
  loaded=true;startup.phase('map-loaded');cameraDirty=true;updateSceneStatus();scheduleFrame();
@@ -1050,7 +1044,8 @@ function updateSceneStatus(){
  status.textContent=assetError||(loaded?'':'Preparing Portland…');
  document.body.classList.toggle('scene-ready',loaded);
 }
-function scheduleFrame(){if(!frame&&!disposed&&!document.hidden)frame=requestAnimationFrame(draw);}
+const mapActivity=createMapActivity(map,{onChange:onVisibilityChange});
+function scheduleFrame(){if(!frame&&!disposed&&mapActivity.visible)frame=requestAnimationFrame(draw);}
 map.on('idle',()=>{
  if(loopWaiting){
   surfaceCache.delete(map);glitterCache.delete(map);hologramLayouts.delete(map);
@@ -1067,7 +1062,7 @@ setTimeout(()=>{if(!loaded)status.textContent='Portland is still loading…';},8
 let firstFrameSent=false,baseFrameRendered=false;
 function draw(now){
  frame=0;
- if(disposed||document.hidden)return;
+ if(disposed||!mapActivity.visible)return;
  const activeFrameInterval=map.isMoving()?(matchMedia('(pointer:coarse)').matches?1000/30:1000/45):frameInterval;
  if(last&&now-last<activeFrameInterval-1){scheduleFrame();return;}
  const dt=last?Math.min((now-last)/1000,.1):0;last=now;
@@ -1118,18 +1113,17 @@ function onSceneInput(){
 function onSceneResize(){cameraDirty=true;surfaceCache.delete(map);scheduleFrame();}
 function onReducedChange(){last=0;clearLogoPointer();scheduleFrame();}
 for(const control of [opacityControl,pauseControl,speedControl])control.addEventListener('input',onSceneInput);
-window.addEventListener('resize',onSceneResize,{passive:true});
+const stopSceneResize=observeMapSize(map,onSceneResize);
 reduced.addEventListener('change',onReducedChange);
 function onVisibilityChange(){
  cancelAnimationFrame(frame);frame=0;last=0;clearLogoPointer();
  scheduleFrame();
 }
-document.addEventListener('visibilitychange',onVisibilityChange);
 window.addEventListener('pagehide',()=>{
- disposed=true;clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);
+ disposed=true;clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);mapActivity.dispose();
  cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);
  exploration.dispose();
- assetController.abort();reduced.removeEventListener('change',onReducedChange);reduced.dispose();window.removeEventListener('resize',onSceneResize);
+ assetController.abort();reduced.removeEventListener('change',onReducedChange);reduced.dispose();stopSceneResize();
  for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);
  mapHover.dispose();
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
@@ -1146,7 +1140,7 @@ window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();
 
 // Interactive adapter: isolated from the original studio and homepage.
 function tell(type,payload={}){if(parent!==window)parent.postMessage({source:'mapz-demo',type,...payload},location.origin);}
-function viewState(){const c=map.getCenter(),b=map.getBounds();tell('view',{center:[c.lat,c.lng],zoom:map.getZoom(),bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
+function viewState(){const camera=captureCamera(map),b=map.getBounds();tell('view',{center:[camera.center[1],camera.center[0]],zoom:camera.zoom,bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
 const typeIcons=new Map();
 let frozenClusters=null;
 function clusterPlaceMarkers(items,selected,zoom,width,height){

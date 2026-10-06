@@ -7,8 +7,8 @@ export function prefetchOutzide() {
   void import("@/pages/Outz");
   for (const [href, rel, as] of [
     ["/outzide-map/app.js?v=20261006-keep-markers", "modulepreload", ""],
-    ["/outzide-map/assets/maplibre-gl-5.6.2.js", "prefetch", "script"],
-    ["/outzide-map/assets/maplibre-gl-5.6.2.css", "prefetch", "style"],
+    ["/home-flight/vendor/maplibre-gl-5.6.2.js", "prefetch", "script"],
+    ["/home-flight/vendor/maplibre-gl-5.6.2.css", "prefetch", "style"],
     ["/outzide-map/places.json", "prefetch", "fetch"],
     ["/outzide-map/details.json", "prefetch", "fetch"],
     ["/outzide-map/routes.json", "prefetch", "fetch"],

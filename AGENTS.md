@@ -164,7 +164,7 @@ metadata for already-missing worktree directories; it never deletes a live workt
 
 ## Map rendering
 
-Portland and OutZide share the OpenFreeMap and Mapterhorn surface. Switching changes palette and objects only. Do not replace holograms, landmark models, building chrome, waypoint heads, waypoint height, or the zoom-out sparkle field with generic symbols or a new basemap. See `docs/MAP_RENDERING.md`.
+Mapz and Outzide share `client/public/map-foundation/` for lifecycle, geographic style, camera, motion, source/layer/image registration and ordinary native pins. Portland and OutZide share the OpenFreeMap and Mapterhorn surface. Switching changes palette and objects only. Do not replace holograms, landmark models, building chrome, waypoint heads, waypoint height, or the zoom-out sparkle field with generic symbols or a new basemap. See `docs/MAP_RENDERING.md`.
 
 ## Current design traps
 

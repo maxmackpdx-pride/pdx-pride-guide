@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {readSavedCamera,saveMapCamera} from '../client/public/outzide-map/assets/map-camera.js';
+import {readSavedCamera,saveMapCamera} from '../client/public/map-foundation/camera.js';
 test('returning visitor restores center zoom tilt and bearing, including flat north-up view',()=>{
  let value=null;const storage={getItem:()=>value,setItem:(_,next)=>value=next};
  assert.equal(readSavedCamera(storage),null);

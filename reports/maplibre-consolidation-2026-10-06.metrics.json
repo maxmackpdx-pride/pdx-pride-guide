@@ -1,0 +1,2259 @@
+{
+  "baselineCommit": "619d8a763d9ee7fab5b93802f599658474457a8f",
+  "profiles": {
+    "browser": "Google Chrome 154, software SwiftShader WebGL",
+    "network": "10 Mbps, 40 ms latency",
+    "desktop": "1280x800, CPU 1x",
+    "phone": "iPhone 13 viewport/device emulation, CPU 4x",
+    "samples": "one cold/warm Mapz run and one Outzide run per profile; exploratory single samples, some concurrent local verification",
+    "outzideBaseline": "Only missing closing brace repaired; all other baseline code retained",
+    "safari": "Remote automation disabled; real Safari unavailable. WebKit native-pin test passed separately."
+  },
+  "runs": {
+    "mapzBefore": [
+      {
+        "profile": "desktop",
+        "run": 0,
+        "cache": "cold",
+        "firstFrameMs": 5533.200000001118,
+        "fullSceneMs": 25409.60000000149,
+        "longTasks": [
+          {
+            "start": 654.1000000014901,
+            "duration": 1733
+          },
+          {
+            "start": 3272.2000000011176,
+            "duration": 512
+          },
+          {
+            "start": 4517,
+            "duration": 152
+          },
+          {
+            "start": 4672.300000000745,
+            "duration": 794
+          },
+          {
+            "start": 5500.700000001118,
+            "duration": 100
+          },
+          {
+            "start": 5666.4000000003725,
+            "duration": 2567
+          },
+          {
+            "start": 8239.900000000373,
+            "duration": 693
+          },
+          {
+            "start": 8938.300000000745,
+            "duration": 861
+          },
+          {
+            "start": 9799.5,
+            "duration": 930
+          },
+          {
+            "start": 10731.800000000745,
+            "duration": 1134
+          },
+          {
+            "start": 11918.800000000745,
+            "duration": 874
+          },
+          {
+            "start": 12811.10000000149,
+            "duration": 907
+          },
+          {
+            "start": 13718.700000001118,
+            "duration": 77
+          },
+          {
+            "start": 13807.700000001118,
+            "duration": 669
+          },
+          {
+            "start": 14481.60000000149,
+            "duration": 77
+          },
+          {
+            "start": 14563.700000001118,
+            "duration": 742
+          },
+          {
+            "start": 15363,
+            "duration": 782
+          },
+          {
+            "start": 16152.900000000373,
+            "duration": 831
+          },
+          {
+            "start": 16986.60000000149,
+            "duration": 75
+          },
+          {
+            "start": 17065.5,
+            "duration": 785
+          },
+          {
+            "start": 17867.800000000745,
+            "duration": 79
+          },
+          {
+            "start": 17957,
+            "duration": 1155
+          },
+          {
+            "start": 19120,
+            "duration": 104
+          },
+          {
+            "start": 19224.300000000745,
+            "duration": 1886
+          },
+          {
+            "start": 21131.400000000373,
+            "duration": 1182
+          },
+          {
+            "start": 22323.300000000745,
+            "duration": 1035
+          },
+          {
+            "start": 23365.200000001118,
+            "duration": 1005
+          },
+          {
+            "start": 24383,
+            "duration": 1024
+          }
+        ],
+        "failures": [],
+        "performance": {
+          "ready": {
+            "time": 26360.900000000373,
+            "layouts": 0,
+            "draws": 20,
+            "heap": 207233341
+          },
+          "stationary": {
+            "time": 29987.400000000373,
+            "layouts": 0,
+            "draws": 25,
+            "heap": 92401246
+          },
+          "interaction": {
+            "time": 32069.800000000745,
+            "layouts": 0,
+            "draws": 26,
+            "heap": 140897750
+          },
+          "frameIntervals": [
+            11.499999999628926,
+            883.3999999999978
+          ],
+          "hidden": {
+            "method": "map container display:none with document still visible",
+            "start": {
+              "time": 33439.70000000112,
+              "layouts": 0,
+              "draws": 28,
+              "heap": 133301159
+            },
+            "end": {
+              "time": 35607.60000000149,
+              "layouts": 0,
+              "draws": 42,
+              "heap": 185146398
+            }
+          }
+        },
+        "panResponded": true,
+        "errors": []
+      },
+      {
+        "profile": "desktop",
+        "run": 0,
+        "cache": "warm",
+        "firstFrameMs": 2299.4000000003725,
+        "fullSceneMs": 19332.10000000149,
+        "longTasks": [
+          {
+            "start": 692.3000000007451,
+            "duration": 325
+          },
+          {
+            "start": 1025.7000000011176,
+            "duration": 118
+          },
+          {
+            "start": 1283.800000000745,
+            "duration": 100
+          },
+          {
+            "start": 1402,
+            "duration": 880
+          },
+          {
+            "start": 2282.9000000003725,
+            "duration": 85
+          },
+          {
+            "start": 4067.800000000745,
+            "duration": 1389
+          },
+          {
+            "start": 5457.5,
+            "duration": 829
+          },
+          {
+            "start": 6287.200000001118,
+            "duration": 807
+          },
+          {
+            "start": 7108.60000000149,
+            "duration": 195
+          },
+          {
+            "start": 7304.300000000745,
+            "duration": 1014
+          },
+          {
+            "start": 8369.300000000745,
+            "duration": 78
+          },
+          {
+            "start": 8447.60000000149,
+            "duration": 684
+          },
+          {
+            "start": 9156.400000000373,
+            "duration": 849
+          },
+          {
+            "start": 10060.300000000745,
+            "duration": 733
+          },
+          {
+            "start": 10794.10000000149,
+            "duration": 82
+          },
+          {
+            "start": 10887,
+            "duration": 718
+          },
+          {
+            "start": 11605.5,
+            "duration": 66
+          },
+          {
+            "start": 11686.10000000149,
+            "duration": 765
+          },
+          {
+            "start": 12451.800000000745,
+            "duration": 80
+          },
+          {
+            "start": 12557.800000000745,
+            "duration": 751
+          },
+          {
+            "start": 13315.10000000149,
+            "duration": 99
+          },
+          {
+            "start": 13414.700000001118,
+            "duration": 742
+          },
+          {
+            "start": 14173.900000000373,
+            "duration": 830
+          },
+          {
+            "start": 15014.800000000745,
+            "duration": 858
+          },
+          {
+            "start": 15878.400000000373,
+            "duration": 837
+          },
+          {
+            "start": 16734.300000000745,
+            "duration": 863
+          },
+          {
+            "start": 17597.60000000149,
+            "duration": 871
+          }
+        ],
+        "failures": [],
+        "performance": {
+          "ready": {
+            "time": 20201.5,
+            "layouts": 0,
+            "draws": 21,
+            "heap": 216467674
+          },
+          "stationary": {
+            "time": 24520.10000000149,
+            "layouts": 0,
+            "draws": 26,
+            "heap": 220685818
+          },
+          "interaction": {
+            "time": 26678.5,
+            "layouts": 0,
+            "draws": 28,
+            "heap": 150702129
+          },
+          "frameIntervals": [
+            -4.4000000014893885,
+            1050
+          ],
+          "hidden": {
+            "method": "map container display:none with document still visible",
+            "start": {
+              "time": 27193.200000001118,
+              "layouts": 0,
+              "draws": 30,
+              "heap": 158786119
+            },
+            "end": {
+              "time": 29410.60000000149,
+              "layouts": 0,
+              "draws": 45,
+              "heap": 196517279
+            }
+          }
+        },
+        "panResponded": true,
+        "errors": []
+      },
+      {
+        "profile": "phone",
+        "run": 0,
+        "cache": "cold",
+        "firstFrameMs": 1404.9000000003725,
+        "fullSceneMs": 11280.099999999627,
+        "longTasks": [
+          {
+            "start": 697.7999999988824,
+            "duration": 129
+          },
+          {
+            "start": 1168.7999999988824,
+            "duration": 237
+          },
+          {
+            "start": 1418.7999999988824,
+            "duration": 140
+          },
+          {
+            "start": 1684.9000000003725,
+            "duration": 249
+          },
+          {
+            "start": 1968,
+            "duration": 162
+          },
+          {
+            "start": 2172.5,
+            "duration": 548
+          },
+          {
+            "start": 2724.5999999996275,
+            "duration": 315
+          },
+          {
+            "start": 3051.9000000003725,
+            "duration": 152
+          },
+          {
+            "start": 3217.7999999988824,
+            "duration": 147
+          },
+          {
+            "start": 3370.7999999988824,
+            "duration": 138
+          },
+          {
+            "start": 3517.9000000003725,
+            "duration": 139
+          },
+          {
+            "start": 3668.5999999996275,
+            "duration": 134
+          },
+          {
+            "start": 3816.9000000003725,
+            "duration": 130
+          },
+          {
+            "start": 3947.9000000003725,
+            "duration": 155
+          },
+          {
+            "start": 4178.0999999996275,
+            "duration": 190
+          },
+          {
+            "start": 4385.9000000003725,
+            "duration": 129
+          },
+          {
+            "start": 4517.4000000003725,
+            "duration": 144
+          },
+          {
+            "start": 4668.5999999996275,
+            "duration": 156
+          },
+          {
+            "start": 4834.4000000003725,
+            "duration": 140
+          },
+          {
+            "start": 5009.9000000003725,
+            "duration": 99
+          },
+          {
+            "start": 5117.0999999996275,
+            "duration": 170
+          },
+          {
+            "start": 5301.299999998882,
+            "duration": 132
+          },
+          {
+            "start": 5450.5,
+            "duration": 130
+          },
+          {
+            "start": 5585.799999998882,
+            "duration": 134
+          },
+          {
+            "start": 5721.699999999255,
+            "duration": 290
+          },
+          {
+            "start": 6128.5,
+            "duration": 70
+          },
+          {
+            "start": 6204.5999999996275,
+            "duration": 144
+          },
+          {
+            "start": 6355.199999999255,
+            "duration": 160
+          },
+          {
+            "start": 6521.0999999996275,
+            "duration": 142
+          },
+          {
+            "start": 6669.5,
+            "duration": 142
+          },
+          {
+            "start": 6814,
+            "duration": 275
+          },
+          {
+            "start": 7137,
+            "duration": 163
+          },
+          {
+            "start": 7362.699999999255,
+            "duration": 118
+          },
+          {
+            "start": 7503,
+            "duration": 132
+          },
+          {
+            "start": 7643.699999999255,
+            "duration": 145
+          },
+          {
+            "start": 7800.4000000003725,
+            "duration": 157
+          },
+          {
+            "start": 7968,
+            "duration": 142
+          },
+          {
+            "start": 8117.4000000003725,
+            "duration": 146
+          },
+          {
+            "start": 8268.299999998882,
+            "duration": 147
+          },
+          {
+            "start": 8420.199999999255,
+            "duration": 143
+          },
+          {
+            "start": 8568.699999999255,
+            "duration": 143
+          },
+          {
+            "start": 8728.599999999627,
+            "duration": 121
+          },
+          {
+            "start": 8866.799999998882,
+            "duration": 151
+          },
+          {
+            "start": 9021.199999999255,
+            "duration": 149
+          },
+          {
+            "start": 9219.400000000373,
+            "duration": 115
+          },
+          {
+            "start": 9338.099999999627,
+            "duration": 158
+          },
+          {
+            "start": 9510.400000000373,
+            "duration": 145
+          },
+          {
+            "start": 9657.799999998882,
+            "duration": 156
+          },
+          {
+            "start": 9816.799999998882,
+            "duration": 152
+          },
+          {
+            "start": 9972.299999998882,
+            "duration": 157
+          },
+          {
+            "start": 10145.599999999627,
+            "duration": 173
+          },
+          {
+            "start": 10320.299999998882,
+            "duration": 161
+          },
+          {
+            "start": 10482.299999998882,
+            "duration": 159
+          },
+          {
+            "start": 10642.099999999627,
+            "duration": 159
+          },
+          {
+            "start": 10802.199999999255,
+            "duration": 158
+          },
+          {
+            "start": 10961.199999999255,
+            "duration": 159
+          },
+          {
+            "start": 11121.199999999255,
+            "duration": 157
+          }
+        ],
+        "failures": [],
+        "performance": {
+          "ready": {
+            "time": 11436.199999999255,
+            "layouts": 0,
+            "draws": 59,
+            "heap": 135325762
+          },
+          "stationary": {
+            "time": 14744.900000000373,
+            "layouts": 0,
+            "draws": 80,
+            "heap": 107508770
+          },
+          "interaction": {
+            "time": 16406.099999999627,
+            "layouts": 0,
+            "draws": 93,
+            "heap": 114415735
+          },
+          "frameIntervals": [
+            -13.099999999254578,
+            633.2999999999993,
+            183.39999999999964,
+            83.20000000000073,
+            50.100000000000364,
+            66.60000000000036,
+            50,
+            66.69999999999891,
+            83.30000000000109,
+            66.69999999999891,
+            66.70000000000073,
+            66.60000000000036,
+            83.29999999999927
+          ],
+          "hidden": {
+            "method": "map container display:none with document still visible",
+            "start": {
+              "time": 17131.599999999627,
+              "layouts": 0,
+              "draws": 96,
+              "heap": 121876480
+            },
+            "end": {
+              "time": 19235.299999998882,
+              "layouts": 0,
+              "draws": 121,
+              "heap": 137446700
+            }
+          }
+        },
+        "panResponded": true,
+        "errors": [
+          "net::ERR_ABORTED https://tiles.openfreemap.org/planet/20261004_113936_pt/14/2609/5859.pbf",
+          "net::ERR_ABORTED https://tiles.openfreemap.org/planet/20261004_113936_pt/14/2608/5860.pbf",
+          "net::ERR_ABORTED https://tiles.openfreemap.org/planet/20261004_113936_pt/14/2608/5859.pbf",
+          "net::ERR_ABORTED https://tiles.openfreemap.org/planet/20261004_113936_pt/14/2609/5860.pbf",
+          "net::ERR_ABORTED https://tiles.openfreemap.org/planet/20261004_113936_pt/14/2608/5858.pbf",
+          "net::ERR_ABORTED https://tiles.openfreemap.org/planet/20261004_113936_pt/14/2609/5858.pbf"
+        ]
+      },
+      {
+        "profile": "phone",
+        "run": 0,
+        "cache": "warm",
+        "firstFrameMs": 1128.4000000003725,
+        "fullSceneMs": 6528.4000000003725,
+        "longTasks": [
+          {
+            "start": 540.2000000011176,
+            "duration": 139
+          },
+          {
+            "start": 698,
+            "duration": 80
+          },
+          {
+            "start": 945.5,
+            "duration": 184
+          },
+          {
+            "start": 1194.9000000003725,
+            "duration": 296
+          },
+          {
+            "start": 1529.300000000745,
+            "duration": 114
+          },
+          {
+            "start": 1854.4000000003725,
+            "duration": 310
+          },
+          {
+            "start": 2164.800000000745,
+            "duration": 691
+          },
+          {
+            "start": 2857.4000000003725,
+            "duration": 178
+          },
+          {
+            "start": 3039.4000000003725,
+            "duration": 280
+          },
+          {
+            "start": 3321,
+            "duration": 146
+          },
+          {
+            "start": 3467.7000000011176,
+            "duration": 77
+          },
+          {
+            "start": 3546.10000000149,
+            "duration": 272
+          },
+          {
+            "start": 3945.4000000003725,
+            "duration": 79
+          },
+          {
+            "start": 4025.60000000149,
+            "duration": 179
+          },
+          {
+            "start": 4238.200000001118,
+            "duration": 303
+          },
+          {
+            "start": 4625.4000000003725,
+            "duration": 108
+          },
+          {
+            "start": 4757.9000000003725,
+            "duration": 142
+          },
+          {
+            "start": 4962.700000001118,
+            "duration": 109
+          },
+          {
+            "start": 5077.300000000745,
+            "duration": 156
+          },
+          {
+            "start": 5257.10000000149,
+            "duration": 147
+          },
+          {
+            "start": 5405.200000001118,
+            "duration": 160
+          },
+          {
+            "start": 5582.10000000149,
+            "duration": 133
+          },
+          {
+            "start": 5715.4000000003725,
+            "duration": 162
+          },
+          {
+            "start": 5877.9000000003725,
+            "duration": 163
+          },
+          {
+            "start": 6042.700000001118,
+            "duration": 162
+          },
+          {
+            "start": 6205.700000001118,
+            "duration": 161
+          }
+        ],
+        "failures": [],
+        "performance": {
+          "ready": {
+            "time": 6695.700000001118,
+            "layouts": 0,
+            "draws": 26,
+            "heap": 147423154
+          },
+          "stationary": {
+            "time": 9970.700000001118,
+            "layouts": 0,
+            "draws": 46,
+            "heap": 123093274
+          },
+          "interaction": {
+            "time": 11583.800000000745,
+            "layouts": 0,
+            "draws": 52,
+            "heap": 126820711
+          },
+          "frameIntervals": [
+            -12.900000001118315,
+            616.7000000000007,
+            200,
+            83.29999999999927,
+            300,
+            150
+          ],
+          "hidden": {
+            "method": "map container display:none with document still visible",
+            "start": {
+              "time": 11998.400000000373,
+              "layouts": 0,
+              "draws": 55,
+              "heap": 137042323
+            },
+            "end": {
+              "time": 14073.300000000745,
+              "layouts": 0,
+              "draws": 81,
+              "heap": 148983287
+            }
+          }
+        },
+        "panResponded": true,
+        "errors": []
+      }
+    ],
+    "mapzAfter": [
+      {
+        "profile": "desktop",
+        "run": 0,
+        "cache": "cold",
+        "firstFrameMs": 6102.300000000745,
+        "fullSceneMs": 23035.5,
+        "longTasks": [
+          {
+            "start": 752.8000000007451,
+            "duration": 1698
+          },
+          {
+            "start": 3370.2000000011176,
+            "duration": 962
+          },
+          {
+            "start": 5931.9000000003725,
+            "duration": 138
+          },
+          {
+            "start": 6071.0999999996275,
+            "duration": 103
+          },
+          {
+            "start": 6193.9000000003725,
+            "duration": 2785
+          },
+          {
+            "start": 8982.200000001118,
+            "duration": 767
+          },
+          {
+            "start": 9750.5,
+            "duration": 798
+          },
+          {
+            "start": 10583.800000000745,
+            "duration": 231
+          },
+          {
+            "start": 10816.5,
+            "duration": 1141
+          },
+          {
+            "start": 12010.800000000745,
+            "duration": 863
+          },
+          {
+            "start": 12886,
+            "duration": 910
+          },
+          {
+            "start": 13803,
+            "duration": 79
+          },
+          {
+            "start": 13885.599999999627,
+            "duration": 663
+          },
+          {
+            "start": 14549.900000000373,
+            "duration": 79
+          },
+          {
+            "start": 14640.700000001118,
+            "duration": 725
+          },
+          {
+            "start": 15366,
+            "duration": 50
+          },
+          {
+            "start": 15424.200000001118,
+            "duration": 774
+          },
+          {
+            "start": 16205.900000000373,
+            "duration": 819
+          },
+          {
+            "start": 17027.800000000745,
+            "duration": 77
+          },
+          {
+            "start": 17108.5,
+            "duration": 768
+          },
+          {
+            "start": 17889,
+            "duration": 75
+          },
+          {
+            "start": 17977.5,
+            "duration": 760
+          },
+          {
+            "start": 18742.700000001118,
+            "duration": 111
+          },
+          {
+            "start": 18854.800000000745,
+            "duration": 747
+          },
+          {
+            "start": 19622.099999999627,
+            "duration": 815
+          },
+          {
+            "start": 20445.900000000373,
+            "duration": 859
+          },
+          {
+            "start": 21311.400000000373,
+            "duration": 839
+          },
+          {
+            "start": 22158.400000000373,
+            "duration": 874
+          }
+        ],
+        "failures": [],
+        "performance": {
+          "ready": {
+            "time": 23889.800000000745,
+            "layouts": 0,
+            "draws": 20,
+            "heap": 132372436
+          },
+          "stationary": {
+            "time": 27271.900000000373,
+            "layouts": 0,
+            "draws": 25,
+            "heap": 136007896
+          },
+          "interaction": {
+            "time": 29254.700000001118,
+            "layouts": 0,
+            "draws": 26,
+            "heap": 113989029
+          },
+          "frameIntervals": [
+            2.3999999996267434,
+            833.4000000000015
+          ],
+          "hidden": {
+            "method": "map container display:none with document still visible",
+            "start": {
+              "time": 30555.099999999627,
+              "layouts": 0,
+              "draws": 27,
+              "heap": 136806333
+            },
+            "end": {
+              "time": 32557,
+              "layouts": 0,
+              "draws": 27,
+              "heap": 130516435
+            }
+          }
+        },
+        "panResponded": true,
+        "errors": [],
+        "cancellations": []
+      },
+      {
+        "profile": "desktop",
+        "run": 0,
+        "cache": "warm",
+        "firstFrameMs": 4082.800000000745,
+        "fullSceneMs": 20526.300000000745,
+        "longTasks": [
+          {
+            "start": 735.5,
+            "duration": 88
+          },
+          {
+            "start": 831.1999999992549,
+            "duration": 122
+          },
+          {
+            "start": 1102.300000000745,
+            "duration": 89
+          },
+          {
+            "start": 1193.300000000745,
+            "duration": 1136
+          },
+          {
+            "start": 4064.5,
+            "duration": 84
+          },
+          {
+            "start": 4165.300000000745,
+            "duration": 1778
+          },
+          {
+            "start": 5944,
+            "duration": 991
+          },
+          {
+            "start": 6935.5,
+            "duration": 969
+          },
+          {
+            "start": 7924.199999999255,
+            "duration": 211
+          },
+          {
+            "start": 8136.5999999996275,
+            "duration": 1152
+          },
+          {
+            "start": 9293.900000000373,
+            "duration": 53
+          },
+          {
+            "start": 9348,
+            "duration": 77
+          },
+          {
+            "start": 9425.699999999255,
+            "duration": 896
+          },
+          {
+            "start": 10347.800000000745,
+            "duration": 1012
+          },
+          {
+            "start": 11415.900000000373,
+            "duration": 910
+          },
+          {
+            "start": 12326.900000000373,
+            "duration": 84
+          },
+          {
+            "start": 12422,
+            "duration": 885
+          },
+          {
+            "start": 13308,
+            "duration": 67
+          },
+          {
+            "start": 13384.099999999627,
+            "duration": 948
+          },
+          {
+            "start": 14332.300000000745,
+            "duration": 85
+          },
+          {
+            "start": 14432.5,
+            "duration": 911
+          },
+          {
+            "start": 15360.099999999627,
+            "duration": 100
+          },
+          {
+            "start": 15460.900000000373,
+            "duration": 923
+          },
+          {
+            "start": 16403.599999999627,
+            "duration": 992
+          },
+          {
+            "start": 17407,
+            "duration": 1019
+          },
+          {
+            "start": 18432,
+            "duration": 1038
+          },
+          {
+            "start": 19481.5,
+            "duration": 1042
+          }
+        ],
+        "failures": [],
+        "performance": {
+          "ready": {
+            "time": 21540.400000000373,
+            "layouts": 0,
+            "draws": 17,
+            "heap": 131983506
+          },
+          "stationary": {
+            "time": 24645.699999999255,
+            "layouts": 0,
+            "draws": 21,
+            "heap": 134626570
+          },
+          "interaction": {
+            "time": 26990.900000000373,
+            "layouts": 0,
+            "draws": 22,
+            "heap": 124981746
+          },
+          "frameIntervals": [
+            0.30000000074505806,
+            1000
+          ],
+          "hidden": {
+            "method": "map container display:none with document still visible",
+            "start": {
+              "time": 27556.300000000745,
+              "layouts": 0,
+              "draws": 23,
+              "heap": 125545875
+            },
+            "end": {
+              "time": 29558.300000000745,
+              "layouts": 0,
+              "draws": 23,
+              "heap": 137529713
+            }
+          }
+        },
+        "panResponded": true,
+        "errors": [],
+        "cancellations": []
+      },
+      {
+        "profile": "phone",
+        "run": 0,
+        "cache": "cold",
+        "firstFrameMs": 1646.5,
+        "fullSceneMs": 10994.39999999851,
+        "longTasks": [
+          {
+            "start": 786.3999999985099,
+            "duration": 133
+          },
+          {
+            "start": 1272.3999999985099,
+            "duration": 142
+          },
+          {
+            "start": 1416.2999999988824,
+            "duration": 232
+          },
+          {
+            "start": 1752,
+            "duration": 447
+          },
+          {
+            "start": 2236.39999999851,
+            "duration": 163
+          },
+          {
+            "start": 2442.0999999996275,
+            "duration": 553
+          },
+          {
+            "start": 2998.5999999996275,
+            "duration": 400
+          },
+          {
+            "start": 3411,
+            "duration": 171
+          },
+          {
+            "start": 3589.0999999996275,
+            "duration": 178
+          },
+          {
+            "start": 3773.39999999851,
+            "duration": 146
+          },
+          {
+            "start": 3925.2999999988824,
+            "duration": 192
+          },
+          {
+            "start": 4119.39999999851,
+            "duration": 152
+          },
+          {
+            "start": 4272.39999999851,
+            "duration": 375
+          },
+          {
+            "start": 4689.199999999255,
+            "duration": 234
+          },
+          {
+            "start": 4932.0999999996275,
+            "duration": 191
+          },
+          {
+            "start": 5138.199999999255,
+            "duration": 178
+          },
+          {
+            "start": 5351.39999999851,
+            "duration": 117
+          },
+          {
+            "start": 5474.89999999851,
+            "duration": 218
+          },
+          {
+            "start": 5704.89999999851,
+            "duration": 145
+          },
+          {
+            "start": 5851.799999998882,
+            "duration": 303
+          },
+          {
+            "start": 6243.0999999996275,
+            "duration": 115
+          },
+          {
+            "start": 6391.0999999996275,
+            "duration": 126
+          },
+          {
+            "start": 6522.799999998882,
+            "duration": 166
+          },
+          {
+            "start": 6704.799999998882,
+            "duration": 141
+          },
+          {
+            "start": 6854.799999998882,
+            "duration": 144
+          },
+          {
+            "start": 7005,
+            "duration": 146
+          },
+          {
+            "start": 7153.0999999996275,
+            "duration": 150
+          },
+          {
+            "start": 7341.299999998882,
+            "duration": 278
+          },
+          {
+            "start": 7692.0999999996275,
+            "duration": 124
+          },
+          {
+            "start": 7860.39999999851,
+            "duration": 144
+          },
+          {
+            "start": 8011,
+            "duration": 180
+          },
+          {
+            "start": 8205.099999999627,
+            "duration": 182
+          },
+          {
+            "start": 8405.099999999627,
+            "duration": 167
+          },
+          {
+            "start": 8587.799999998882,
+            "duration": 154
+          },
+          {
+            "start": 8755.39999999851,
+            "duration": 170
+          },
+          {
+            "start": 8943,
+            "duration": 136
+          },
+          {
+            "start": 9087.799999998882,
+            "duration": 181
+          },
+          {
+            "start": 9275.39999999851,
+            "duration": 163
+          },
+          {
+            "start": 9487.199999999255,
+            "duration": 112
+          },
+          {
+            "start": 9605.099999999627,
+            "duration": 185
+          },
+          {
+            "start": 9804.39999999851,
+            "duration": 126
+          },
+          {
+            "start": 9938.199999999255,
+            "duration": 172
+          },
+          {
+            "start": 10121.799999998882,
+            "duration": 156
+          },
+          {
+            "start": 10295.89999999851,
+            "duration": 121
+          },
+          {
+            "start": 10421.89999999851,
+            "duration": 184
+          },
+          {
+            "start": 10620.89999999851,
+            "duration": 180
+          },
+          {
+            "start": 10803.699999999255,
+            "duration": 185
+          }
+        ],
+        "failures": [],
+        "performance": {
+          "ready": {
+            "time": 11204.799999998882,
+            "layouts": 0,
+            "draws": 46,
+            "heap": 79594328
+          },
+          "stationary": {
+            "time": 14749.699999999255,
+            "layouts": 0,
+            "draws": 63,
+            "heap": 86676952
+          },
+          "interaction": {
+            "time": 16331.199999999255,
+            "layouts": 0,
+            "draws": 70,
+            "heap": 114100246
+          },
+          "frameIntervals": [
+            -13.799999999255306,
+            733.3000000000011,
+            233.29999999999927,
+            150.10000000000036,
+            116.5,
+            83.39999999999964,
+            116.70000000000073
+          ],
+          "hidden": {
+            "method": "map container display:none with document still visible",
+            "start": {
+              "time": 16757.39999999851,
+              "layouts": 0,
+              "draws": 71,
+              "heap": 89675348
+            },
+            "end": {
+              "time": 18758.299999998882,
+              "layouts": 0,
+              "draws": 71,
+              "heap": 139812331
+            }
+          }
+        },
+        "panResponded": true,
+        "errors": [],
+        "cancellations": []
+      },
+      {
+        "profile": "phone",
+        "run": 0,
+        "cache": "warm",
+        "firstFrameMs": 1632.9000000003725,
+        "fullSceneMs": 6376.5,
+        "longTasks": [
+          {
+            "start": 573.7000000011176,
+            "duration": 141
+          },
+          {
+            "start": 731.7000000011176,
+            "duration": 179
+          },
+          {
+            "start": 1078.2000000011176,
+            "duration": 556
+          },
+          {
+            "start": 1642.300000000745,
+            "duration": 107
+          },
+          {
+            "start": 1851.5,
+            "duration": 154
+          },
+          {
+            "start": 2014.1000000014901,
+            "duration": 354
+          },
+          {
+            "start": 2383.7000000011176,
+            "duration": 580
+          },
+          {
+            "start": 2968,
+            "duration": 151
+          },
+          {
+            "start": 3120.4000000003725,
+            "duration": 83
+          },
+          {
+            "start": 3204.7000000011176,
+            "duration": 289
+          },
+          {
+            "start": 3670.7000000011176,
+            "duration": 124
+          },
+          {
+            "start": 3795.4000000003725,
+            "duration": 143
+          },
+          {
+            "start": 3976.300000000745,
+            "duration": 340
+          },
+          {
+            "start": 4409,
+            "duration": 106
+          },
+          {
+            "start": 4540.700000001118,
+            "duration": 133
+          },
+          {
+            "start": 4736.10000000149,
+            "duration": 79
+          },
+          {
+            "start": 4819.300000000745,
+            "duration": 151
+          },
+          {
+            "start": 4994.9000000003725,
+            "duration": 133
+          },
+          {
+            "start": 5129.10000000149,
+            "duration": 153
+          },
+          {
+            "start": 5298.9000000003725,
+            "duration": 138
+          },
+          {
+            "start": 5438.4000000003725,
+            "duration": 157
+          },
+          {
+            "start": 5596.300000000745,
+            "duration": 157
+          },
+          {
+            "start": 5753.4000000003725,
+            "duration": 152
+          },
+          {
+            "start": 5906.300000000745,
+            "duration": 159
+          },
+          {
+            "start": 6066.10000000149,
+            "duration": 155
+          },
+          {
+            "start": 6222.4000000003725,
+            "duration": 153
+          }
+        ],
+        "failures": [],
+        "performance": {
+          "ready": {
+            "time": 6534.200000001118,
+            "layouts": 0,
+            "draws": 25,
+            "heap": 106035746
+          },
+          "stationary": {
+            "time": 9818.400000000373,
+            "layouts": 0,
+            "draws": 46,
+            "heap": 115491730
+          },
+          "interaction": {
+            "time": 11444.300000000745,
+            "layouts": 0,
+            "draws": 52,
+            "heap": 126841975
+          },
+          "frameIntervals": [
+            -3.400000000372529,
+            633.2000000000007,
+            183.39999999999964,
+            83.29999999999927,
+            316.60000000000036,
+            150.10000000000036
+          ],
+          "hidden": {
+            "method": "map container display:none with document still visible",
+            "start": {
+              "time": 11816.200000001118,
+              "layouts": 0,
+              "draws": 53,
+              "heap": 146820311
+            },
+            "end": {
+              "time": 13820.900000000373,
+              "layouts": 0,
+              "draws": 53,
+              "heap": 123213126
+            }
+          }
+        },
+        "panResponded": true,
+        "errors": [],
+        "cancellations": [
+          "net::ERR_ABORTED https://tiles.openfreemap.org/planet/20261004_113936_pt/14/2609/5858.pbf",
+          "net::ERR_ABORTED https://tiles.openfreemap.org/planet/20261004_113936_pt/14/2608/5858.pbf"
+        ]
+      }
+    ],
+    "outzideBefore": [
+      {
+        "profile": "desktop",
+        "errors": [],
+        "diagnostic": {
+          "map": true,
+          "markers": 325,
+          "count": "385 destinations"
+        },
+        "firstMapMs": 8142,
+        "contentMs": 4232.699999999255,
+        "longTasks": [
+          {
+            "start": 3320.0999999996275,
+            "duration": 76
+          },
+          {
+            "start": 3838.39999999851,
+            "duration": 378
+          },
+          {
+            "start": 4233.5999999996275,
+            "duration": 526
+          },
+          {
+            "start": 5105.39999999851,
+            "duration": 1606
+          },
+          {
+            "start": 6763,
+            "duration": 370
+          },
+          {
+            "start": 7175.89999999851,
+            "duration": 184
+          },
+          {
+            "start": 7393.299999998882,
+            "duration": 380
+          },
+          {
+            "start": 7774.5999999996275,
+            "duration": 295
+          },
+          {
+            "start": 8143.699999999255,
+            "duration": 1002
+          },
+          {
+            "start": 9147.5,
+            "duration": 496
+          },
+          {
+            "start": 9645.5,
+            "duration": 12645
+          },
+          {
+            "start": 22291.39999999851,
+            "duration": 906
+          },
+          {
+            "start": 23198.599999999627,
+            "duration": 28417
+          },
+          {
+            "start": 51671.29999999888,
+            "duration": 6374
+          },
+          {
+            "start": 58076.89999999851,
+            "duration": 473
+          },
+          {
+            "start": 58598.39999999851,
+            "duration": 1148
+          },
+          {
+            "start": 59875.89999999851,
+            "duration": 1072
+          },
+          {
+            "start": 60963.699999999255,
+            "duration": 13262
+          },
+          {
+            "start": 75613.69999999925,
+            "duration": 16131
+          },
+          {
+            "start": 91770,
+            "duration": 17358
+          },
+          {
+            "start": 109144.19999999925,
+            "duration": 29102
+          },
+          {
+            "start": 138248.09999999963,
+            "duration": 303
+          }
+        ],
+        "ready": {
+          "time": 51670.29999999888,
+          "layouts": 3548,
+          "draws": 15,
+          "heap": 41132969
+        },
+        "stationary": {
+          "time": 91746,
+          "layouts": 12312,
+          "draws": 29,
+          "heap": 81362220
+        },
+        "motion": {
+          "frameIntervals": [
+            4.100000000005821
+          ],
+          "center": [
+            -122.62,
+            45.56
+          ],
+          "zoom": 9.5
+        },
+        "hidden": {
+          "method": "map container display:none with document still visible",
+          "before": {
+            "time": 109129.5,
+            "layouts": 13588,
+            "draws": 31,
+            "heap": 69321889
+          },
+          "after": {
+            "time": 138247.09999999963,
+            "layouts": 16174,
+            "draws": 36,
+            "heap": 66494794
+          }
+        }
+      },
+      {
+        "profile": "phone",
+        "errors": [],
+        "diagnostic": {
+          "map": true,
+          "markers": 307,
+          "count": "385 destinations"
+        },
+        "firstMapMs": 3194.2000000011176,
+        "contentMs": 2778.60000000149,
+        "longTasks": [
+          {
+            "start": 2604.2000000011176,
+            "duration": 105
+          },
+          {
+            "start": 3488.10000000149,
+            "duration": 151
+          },
+          {
+            "start": 3639.60000000149,
+            "duration": 181
+          },
+          {
+            "start": 3830.300000000745,
+            "duration": 516
+          },
+          {
+            "start": 4351,
+            "duration": 1135
+          },
+          {
+            "start": 5495,
+            "duration": 296
+          },
+          {
+            "start": 5842.9000000003725,
+            "duration": 98
+          },
+          {
+            "start": 6551.300000000745,
+            "duration": 93
+          },
+          {
+            "start": 6649,
+            "duration": 274
+          },
+          {
+            "start": 6965.300000000745,
+            "duration": 888
+          },
+          {
+            "start": 7992.10000000149,
+            "duration": 285
+          },
+          {
+            "start": 8376.300000000745,
+            "duration": 56
+          },
+          {
+            "start": 8432.900000000373,
+            "duration": 280
+          },
+          {
+            "start": 8776.5,
+            "duration": 236
+          },
+          {
+            "start": 9156.5,
+            "duration": 191
+          },
+          {
+            "start": 9384.700000001118,
+            "duration": 646
+          },
+          {
+            "start": 10185.5,
+            "duration": 188
+          },
+          {
+            "start": 10378.5,
+            "duration": 96
+          },
+          {
+            "start": 10591.300000000745,
+            "duration": 63
+          },
+          {
+            "start": 13768.700000001118,
+            "duration": 90
+          },
+          {
+            "start": 13888.300000000745,
+            "duration": 154
+          },
+          {
+            "start": 14050.700000001118,
+            "duration": 327
+          },
+          {
+            "start": 14393.300000000745,
+            "duration": 104
+          },
+          {
+            "start": 14516.800000000745,
+            "duration": 221
+          },
+          {
+            "start": 14772.400000000373,
+            "duration": 1014
+          },
+          {
+            "start": 15798.300000000745,
+            "duration": 239
+          },
+          {
+            "start": 16038.60000000149,
+            "duration": 148
+          },
+          {
+            "start": 16187.5,
+            "duration": 312
+          },
+          {
+            "start": 16548.10000000149,
+            "duration": 370
+          },
+          {
+            "start": 16918.900000000373,
+            "duration": 485
+          },
+          {
+            "start": 17457.10000000149,
+            "duration": 180
+          },
+          {
+            "start": 17644.200000001118,
+            "duration": 129
+          },
+          {
+            "start": 17861.900000000373,
+            "duration": 252
+          },
+          {
+            "start": 18153.10000000149,
+            "duration": 114
+          }
+        ],
+        "ready": {
+          "time": 9022.60000000149,
+          "layouts": 10952,
+          "draws": 31,
+          "heap": 51456184
+        },
+        "stationary": {
+          "time": 13734.800000000745,
+          "layouts": 14600,
+          "draws": 107,
+          "heap": 63267895
+        },
+        "motion": {
+          "frameIntervals": [
+            10.299999999999272,
+            16.600000000000364,
+            83.30000000000109,
+            33.399999999999636,
+            150,
+            333.2999999999993,
+            116.70000000000073,
+            249.89999999999964,
+            33.399999999999636,
+            1016.6000000000004
+          ],
+          "center": [
+            -122.62,
+            45.56
+          ],
+          "zoom": 9.5
+        },
+        "hidden": {
+          "method": "map container display:none with document still visible",
+          "before": {
+            "time": 16501.400000000373,
+            "layouts": 16874,
+            "draws": 119,
+            "heap": 99874790
+          },
+          "after": {
+            "time": 18852.10000000149,
+            "layouts": 29396,
+            "draws": 146,
+            "heap": 129900502
+          }
+        }
+      }
+    ],
+    "outzideAfter": [
+      {
+        "profile": "desktop",
+        "errors": [],
+        "diagnostic": {
+          "map": true,
+          "markers": 242,
+          "count": "385 destinations"
+        },
+        "firstMapMs": 8796.199999999255,
+        "contentMs": 4684.5,
+        "longTasks": [
+          {
+            "start": 2106,
+            "duration": 597
+          },
+          {
+            "start": 3152.5999999996275,
+            "duration": 1323
+          },
+          {
+            "start": 4489.5,
+            "duration": 151
+          },
+          {
+            "start": 4797.5999999996275,
+            "duration": 985
+          },
+          {
+            "start": 5783.799999998882,
+            "duration": 1284
+          },
+          {
+            "start": 7073,
+            "duration": 783
+          },
+          {
+            "start": 7860.9000000003725,
+            "duration": 50
+          },
+          {
+            "start": 7914.199999999255,
+            "duration": 104
+          },
+          {
+            "start": 8066.699999999255,
+            "duration": 62
+          },
+          {
+            "start": 8129.799999998882,
+            "duration": 457
+          },
+          {
+            "start": 8589.199999999255,
+            "duration": 144
+          },
+          {
+            "start": 8744.299999998882,
+            "duration": 53
+          },
+          {
+            "start": 8799.400000000373,
+            "duration": 292
+          },
+          {
+            "start": 9098.199999999255,
+            "duration": 989
+          },
+          {
+            "start": 10111,
+            "duration": 174
+          },
+          {
+            "start": 10286.099999999627,
+            "duration": 148
+          },
+          {
+            "start": 10436,
+            "duration": 1230
+          },
+          {
+            "start": 11672.900000000373,
+            "duration": 853
+          },
+          {
+            "start": 13599.599999999627,
+            "duration": 32973
+          },
+          {
+            "start": 46590,
+            "duration": 1902
+          },
+          {
+            "start": 48514.29999999888,
+            "duration": 580
+          },
+          {
+            "start": 49108.5,
+            "duration": 1007
+          },
+          {
+            "start": 50130,
+            "duration": 557
+          },
+          {
+            "start": 50722.5,
+            "duration": 1254
+          },
+          {
+            "start": 51985.699999999255,
+            "duration": 1018
+          },
+          {
+            "start": 53218.5,
+            "duration": 2335
+          },
+          {
+            "start": 55990,
+            "duration": 11848
+          },
+          {
+            "start": 67868.59999999963,
+            "duration": 60
+          },
+          {
+            "start": 67951.29999999888,
+            "duration": 386
+          },
+          {
+            "start": 68337.59999999963,
+            "duration": 11861
+          },
+          {
+            "start": 80237.5,
+            "duration": 11682
+          },
+          {
+            "start": 91920.69999999925,
+            "duration": 394
+          }
+        ],
+        "ready": {
+          "time": 46589.199999999255,
+          "layouts": 1840,
+          "draws": 24,
+          "heap": 88168406
+        },
+        "stationary": {
+          "time": 67839,
+          "layouts": 4367,
+          "draws": 39,
+          "heap": 80997920
+        },
+        "motion": {
+          "frameIntervals": [
+            8.100000000369619,
+            250
+          ],
+          "center": [
+            -122.63725235929769,
+            45.54620132801409
+          ],
+          "zoom": 9.281440868561743
+        },
+        "hidden": {
+          "method": "map container display:none with document still visible",
+          "before": {
+            "time": 80209,
+            "layouts": 5627,
+            "draws": 43,
+            "heap": 65884634
+          },
+          "after": {
+            "time": 91920.29999999888,
+            "layouts": 6442,
+            "draws": 46,
+            "heap": 75765891
+          }
+        }
+      },
+      {
+        "profile": "phone",
+        "errors": [],
+        "diagnostic": {
+          "map": true,
+          "markers": 307,
+          "count": "385 destinations"
+        },
+        "firstMapMs": 4606.4000000003725,
+        "contentMs": 2944.800000000745,
+        "longTasks": [
+          {
+            "start": 2609.2000000011176,
+            "duration": 63
+          },
+          {
+            "start": 2796.4000000003725,
+            "duration": 158
+          },
+          {
+            "start": 2954.5999999996275,
+            "duration": 54
+          },
+          {
+            "start": 3029.7000000011176,
+            "duration": 141
+          },
+          {
+            "start": 3183,
+            "duration": 366
+          },
+          {
+            "start": 3964,
+            "duration": 281
+          },
+          {
+            "start": 4611.5,
+            "duration": 600
+          },
+          {
+            "start": 5266,
+            "duration": 266
+          },
+          {
+            "start": 5533.300000000745,
+            "duration": 261
+          },
+          {
+            "start": 5810.9000000003725,
+            "duration": 2592
+          },
+          {
+            "start": 8407.900000000373,
+            "duration": 391
+          },
+          {
+            "start": 8840.200000001118,
+            "duration": 217
+          },
+          {
+            "start": 9236.300000000745,
+            "duration": 545
+          },
+          {
+            "start": 9933.599999999627,
+            "duration": 292
+          },
+          {
+            "start": 10227.800000000745,
+            "duration": 62
+          },
+          {
+            "start": 10333.300000000745,
+            "duration": 51
+          },
+          {
+            "start": 11039.099999999627,
+            "duration": 57
+          },
+          {
+            "start": 11109.900000000373,
+            "duration": 318
+          },
+          {
+            "start": 11430.700000001118,
+            "duration": 59
+          },
+          {
+            "start": 13062.800000000745,
+            "duration": 135
+          },
+          {
+            "start": 13216.700000001118,
+            "duration": 141
+          },
+          {
+            "start": 13588.5,
+            "duration": 293
+          },
+          {
+            "start": 13882.300000000745,
+            "duration": 52
+          },
+          {
+            "start": 13934.700000001118,
+            "duration": 326
+          },
+          {
+            "start": 16368.599999999627,
+            "duration": 56
+          },
+          {
+            "start": 16427.400000000373,
+            "duration": 406
+          },
+          {
+            "start": 16835.5,
+            "duration": 55
+          },
+          {
+            "start": 16892.599999999627,
+            "duration": 202
+          },
+          {
+            "start": 17097,
+            "duration": 152
+          },
+          {
+            "start": 17252.099999999627,
+            "duration": 216
+          },
+          {
+            "start": 17472.400000000373,
+            "duration": 178
+          },
+          {
+            "start": 17655.900000000373,
+            "duration": 174
+          },
+          {
+            "start": 17832.300000000745,
+            "duration": 201
+          },
+          {
+            "start": 18036.400000000373,
+            "duration": 211
+          },
+          {
+            "start": 18251.300000000745,
+            "duration": 667
+          },
+          {
+            "start": 18922,
+            "duration": 370
+          },
+          {
+            "start": 19293.400000000373,
+            "duration": 507
+          },
+          {
+            "start": 19802.300000000745,
+            "duration": 146
+          },
+          {
+            "start": 19949.400000000373,
+            "duration": 114
+          }
+        ],
+        "ready": {
+          "time": 12225.700000001118,
+          "layouts": 2323,
+          "draws": 55,
+          "heap": 113286226
+        },
+        "stationary": {
+          "time": 16364.5,
+          "layouts": 2612,
+          "draws": 104,
+          "heap": 128530466
+        },
+        "motion": {
+          "frameIntervals": [
+            -3.7999999996281986,
+            50,
+            416.6000000000022,
+            50,
+            200,
+            166.6999999999971,
+            216.70000000000073,
+            183.29999999999927,
+            183.3000000000029,
+            200
+          ],
+          "center": [
+            -122.62,
+            45.56
+          ],
+          "zoom": 9.5
+        },
+        "hidden": {
+          "method": "map container display:none with document still visible",
+          "before": {
+            "time": 18250.5,
+            "layouts": 5521,
+            "draws": 114,
+            "heap": 121131600
+          },
+          "after": {
+            "time": 21223.400000000373,
+            "layouts": 6516,
+            "draws": 118,
+            "heap": 134204815
+          }
+        }
+      }
+    ]
+  }
+}

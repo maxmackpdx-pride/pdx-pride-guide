@@ -1,3 +1,4 @@
+import {markerFrame} from '../client/public/map-foundation/lifecycle.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -9,13 +10,13 @@ const places=JSON.parse(readFileSync(new URL('../client/public/outzide-map/place
 const colors=Object.fromEntries([...css.matchAll(/(--[\w-]+):\s*(#[0-9a-f]{6})/gi)].map(m=>[m[1],m[2]]));
 
 test('every waypoint token and mixed cluster can draw without missing canvas textures',()=>{
- let draws=0;
+ let draws=0,layouts=0;
  const context={
-  places,materials:null,markers:[],
+  places,materials:null,markers:[],markerLayout:null,mapActivity:{visible:true},markerFrame,stillMotion:()=>true,branchRows:[],drawMizzedBranches(){},
   document:{documentElement:{},body:{classList:{contains:()=>false}},hidden:false},
   getComputedStyle:()=>({getPropertyValue:name=>colors[name]||''}),
   createHologramMaterials:values=>({beams:new Map(values.map(c=>[c,{color:c}])),orbs:new Map(values.map(c=>[c,{color:c}]))}),
-  map:{getContainer:()=>({clientWidth:390,clientHeight:700,getBoundingClientRect:()=>({left:0,top:0})}),getZoom:()=>7},
+  map:{getContainer:()=>({clientWidth:390,clientHeight:700,getBoundingClientRect:()=>({left:0,top:0})}),getZoom:()=>7,isMoving:()=>false},
   canvas:{width:390,height:700},mobileLightMode:true,state:{selected:null},
   matchMedia:()=>({matches:true}),fireVisible:false,steamFrame:null,
   performance:{now:()=>1000},clearTimeout:()=>{},isClosed:()=>false,
@@ -29,8 +30,9 @@ test('every waypoint token and mixed cluster can draw without missing canvas tex
  vm.runInContext(app.match(/materials=createHologramMaterials\([^;]+;/)[0],context);
  const kinds=vm.runInContext('Object.keys(waypointToken)',context);
  for(const kind of kinds){
-  context.markers=[{place:{id:kind,kind,lat:45,lng:-122,accent:vm.runInContext(`waypointColor('${kind}')`,context)},getElement:()=>({getBoundingClientRect:()=>({left:100,top:100,width:40,height:40}),style:{setProperty(){}},classList:{toggle(){}},querySelector:()=>null})}];
+  context.markerLayout=null;context.markers=[{place:{id:kind,kind,lat:45,lng:-122,accent:vm.runInContext(`waypointColor('${kind}')`,context)},getElement:()=>({getBoundingClientRect:()=>{layouts++;return {left:100,top:100,width:40,height:40}},style:{setProperty(){}},classList:{toggle(){}},querySelector:()=>null})}];
   assert.doesNotThrow(()=>vm.runInContext(app.slice(app.indexOf('function drawHolograms'),app.indexOf('function clearRoutes'))+';drawHolograms()',context),kind);
+  const measured=layouts;vm.runInContext('drawHolograms()',context);assert.equal(layouts,measured,'stationary effects reuse measured marker geometry');
  }
  assert.ok(draws>=kinds.length);
 });

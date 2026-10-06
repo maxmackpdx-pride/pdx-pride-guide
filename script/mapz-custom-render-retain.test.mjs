@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 
 const renderer=readFileSync(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
 const sparkles=readFileSync(new URL('../client/public/home-flight/roof-sparkles.js',import.meta.url),'utf8');
-const surfaces=readFileSync(new URL('../client/public/mapz-map/natural-surfaces.js',import.meta.url),'utf8');
+const surfaces=readFileSync(new URL('../client/public/map-foundation/surface.js',import.meta.url),'utf8');
 const outz=readFileSync(new URL('../client/public/outzide-map/app.js',import.meta.url),'utf8');
 const palette=readFileSync(new URL('../client/public/outzide-map/assets/outzide-night-palette.js',import.meta.url),'utf8');
 

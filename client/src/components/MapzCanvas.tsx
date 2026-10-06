@@ -8,7 +8,7 @@ type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:str
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
 type CanvasProps={initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};
-const MAP_SRC='/mapz-map/index.html?v=20261005-first-frame';
+const MAP_SRC='/mapz-map/index.html?v=20261006-shared-map';
 const MAX_3D_ATTEMPTS=3;
 
 const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onCluster,onMode,onView},ref){

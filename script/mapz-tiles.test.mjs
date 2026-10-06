@@ -2,9 +2,8 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 
-const [host,fallback,page,html,renderer,home,routes,app,bootLoader]=await Promise.all([
+const [host,page,html,renderer,home,routes,app,bootLoader]=await Promise.all([
  readFile(new URL('../client/src/components/MapzCanvas.tsx',import.meta.url),'utf8'),
- readFile(new URL('../client/src/components/MapzFallback.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/src/pages/MapzMapDemo.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/public/mapz-map/index.html',import.meta.url),'utf8'),
  readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8'),
@@ -46,11 +45,10 @@ test('3D base frame does not wait for optional waypoint assets',()=>{
  assert.match(renderer,/if\(overlaysReady\)drawLights\(visibility\)/);
 });
 
-test('2D is retained but disconnected from both the map host and toggle',()=>{
+test('Mapz retries the 3D renderer without a retired 2D architecture',()=>{
  assert.doesNotMatch(host,/MapzFallback|onRendererChange|failTo2D|lazy\(|Suspense/);
  assert.doesNotMatch(page,/MapzFallback|setRenderer|Switch to.*2D/);
  assert.match(host,/<Mapz3D key=\{generation\}/);
- assert.match(fallback,/preferCanvas/);
  assert.match(host,/<MapBootLoader map="mapz" overlay/);
  assert.match(bootLoader,/>Reload map<\/button>/);
 });

@@ -36,7 +36,7 @@ test('labels and Placez markers stay locked to the map during camera movement',a
   assert.match(renderer,/r:Math\.max\(22,geometry\.size\/2\+8\)/);
   assert.match(renderer,/if\(!isBar\)\{[\s\S]*?drawWaypointHead\(lightsContext,geometry,color,typeIcons\.get\(feature\.properties\.typeIcon\)\?\.light,null,selected,coreAlpha,'place'\)/);
   assert.doesNotMatch(renderer,/drawDiscoveryOrb/);
-  assert.match(renderer,/map\.isMoving\(\)\?1000\/60:frameInterval/);
+  assert.match(renderer,/map\.isMoving\(\)\?\(matchMedia\(\x27\(pointer:coarse\)\x27\)\.matches\?1000\/30:1000\/45\):frameInterval/);
 });
 
 test('street inlays stay on major surface roads, below buildings, without recoloring bridges',()=>{

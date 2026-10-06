@@ -46,3 +46,7 @@ governance records.
 
 Railway auto-deploys on every push to `master`. Pushing is shipping. Operational
 rules are in `AGENTS.md` and are not optional.
+
+## Map architecture
+
+Mapz and Outzide use the shared MapLibre foundation in `client/public/map-foundation/`, with separate city and outdoor scene adapters. See [map rendering, setup and troubleshooting](docs/MAP_RENDERING.md) and [measured consolidation results](reports/maplibre-consolidation-2026-10-06.md).

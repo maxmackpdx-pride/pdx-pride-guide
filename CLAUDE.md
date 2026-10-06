@@ -56,7 +56,7 @@ serve one is stale.
 - card authority + the five sources of truth:
   `zaylist-foundation-library` `public/design-system/guidelines/card-system-authority.md`
 - live-is-truth rule (this repo, must not contradict the guide): `docs/LIVE_DESIGN_STANDARD.md`
-- map artwork that must stay: `docs/MAP_RENDERING.md`
+- map architecture and artwork that must stay: `docs/MAP_RENDERING.md`; shared infrastructure is `client/public/map-foundation/`, with distinct Mapz and Outzide scene adapters.
 - board card rules: `docs/BOARD_CARD_STANDARD.md`
 - tokens: `client/src/index.css` + `client/src/components/ds/tokens/`
 - deep-glass card system: `client/src/components/ds/tokens/glass.css`
