@@ -149,3 +149,40 @@ html,body{height:100%;overflow:hidden;background:#080c0c}main,.workspace{positio
 .outz-map-controls .search-panel-header,.outz-map-controls .search,.outz-map-controls .region-switch,.outz-map-controls .explore-view-switch,.outz-map-controls .filters{display:none}
 .outz-map-controls .discovery .list-scroll{display:block}
 @media(max-width:760px){.outz-map-controls{left:12px;right:12px}}
+
+.outz-map-controls{
+  top:calc(var(--oz-top, 12px) + 60px);
+  left:12px;right:auto;bottom:calc(var(--oz-dock, 108px) + 76px);
+  width:min(560px, calc(100vw - 96px));
+  z-index:790;
+}
+.outz-map-controls__title{padding:16px 20px}
+.outz-map-controls__title button{width:44px;height:44px;padding:0}
+.outz-map-controls__sections{gap:12px;padding:16px}
+.outz-map-controls__sections button{
+  min-height:44px;height:auto;padding:12px 16px;
+}
+.outz-map-controls__sections .outz-section-icon{
+  height:52px;padding:8px;display:grid;place-items:center;background:transparent;border-color:transparent;box-shadow:none;
+}
+.outz-map-controls .waypoint-head{
+  position:static;left:auto;bottom:auto;width:28px;height:28px;
+  background:#111a15;color:var(--c);border:1px solid var(--c);
+  box-shadow:0 0 12px color-mix(in srgb, var(--c) 25%, transparent);
+  display:grid;place-items:center;border-radius:6px;
+}
+.outz-map-controls .waypoint-head svg{width:17px;height:17px}
+.outz-map-controls .waypoint-head.trail{transform:rotate(45deg);border-radius:4px}
+.outz-map-controls .waypoint-head.trail svg{transform:rotate(-45deg)}
+.outz-map-controls .waypoint-head.beach{border-radius:50%}
+.outz-map-controls .waypoint-head.camp{border-radius:9px 9px 3px 3px}
+.outz-map-controls__sections .outz-section-icon[aria-pressed=true]{border-color:transparent;box-shadow:none}
+.outz-map-controls__sections .outz-section-icon[aria-pressed=true] .waypoint-head{width:34px;height:34px;box-shadow:0 0 20px color-mix(in srgb, var(--c) 50%, transparent)}
+.outz-map-controls__content{padding:8px 0 16px}
+.outz-map-controls .list-scroll{padding:8px 20px 20px}
+.outz-map-controls .trail-feed-header{padding:16px 20px 8px}
+.outz-map-controls .trail-feed-controls{padding:0 20px 12px}
+.outz-map-controls #field-feed-items{padding:0 20px 16px}
+@media(max-width:760px){
+  .outz-map-controls{left:12px;right:12px;width:auto;bottom:calc(var(--oz-dock, 108px) + 16px)}
+}
