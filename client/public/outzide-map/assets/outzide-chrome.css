@@ -141,3 +141,7 @@
 .outzide-shell[data-drawer=open] #selection-dock{visibility:hidden}
 .outzide-shell #selection-dock{bottom:calc(var(--oz-dock) + 74px)}
 .outzide-shell .map-bottom{left:12px;right:78px;bottom:calc(var(--oz-dock) + 16px)}
+
+.outzide-shell .outz-map-controls .discovery{display:flex !important;position:static !important;inset:auto !important;width:auto !important;height:auto !important;overflow:auto}
+.outzide-shell .outz-map-controls .discovery[hidden]{display:none !important}
+.outzide-shell .outz-map-controls #results{display:block}
