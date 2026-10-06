@@ -73,7 +73,7 @@ const ICONS = [
   Brain,
   LifeBuoy,
 ];
-const STACK_ROTATIONS = [-8, 4, -3, 5, -4, 6, 3, -6, 2, -5];
+const STACK_ROTATIONS = [-3, 2, -2, 3, -2, 2, 1, -3, 1, -2];
 const LABELS = [
   "Health & care",
   "Safety & basic needs",
@@ -271,16 +271,16 @@ function SafetyNotice({ openCard = false }: { openCard?: boolean }) {
 }
 
 const TALK_GROUPS = [
+  { title: "Crisis & safety support", lines: [
+    { name: "Suicide & Crisis Lifeline", number: "988", tel: "988", note: "Call or text for emotional distress or a mental health crisis.", hours: "24/7", source: "https://988lifeline.org/" },
+    { name: "The Trevor Project", number: "866-488-7386", tel: "18664887386", note: "Crisis counselors for LGBTQ+ young people. Text START to 678678 or use online chat.", hours: "24/7", source: "https://www.thetrevorproject.org/get-help/" },
+    { name: "Call to Safety", number: "503-235-5333", tel: "15032355333", note: "Domestic and sexual violence support, including abuse by roommates. Safety planning and referrals.", hours: "24/7 · Free and confidential", source: "https://calltosafety.org/services/crisis-line/" },
+  ] },
   { title: "Queer people to talk to", lines: [
+    { name: "Trans Lifeline", number: "877-565-8860", tel: "18775658860", note: "Trans peer support for trans and questioning people. You don’t have to be in crisis.", hours: "Mon–Fri 10am–6pm PT · Check site for closures", source: "https://translifeline.org/hotline/" },
     { name: "LGBT National Hotline", number: "888-843-4564", tel: "18888434564", note: "LGBTQ+ peer support, identity, relationships, and coming out.", hours: "Mon–Fri 11am–8pm · Sat 9am–2pm PT", source: "https://lgbthotline.org/national-hotline/" },
     { name: "LGBT National Youth Talkline", number: "800-246-7743", tel: "18002467743", note: "Peer support for young people navigating identity, family, school, and relationships.", hours: "Mon–Fri 11am–8pm · Sat 9am–2pm PT", source: "https://lgbthotline.org/youth-talkline/" },
     { name: "LGBT National Senior Hotline", number: "888-234-7243", tel: "18882347243", note: "Support around LGBTQ+ aging, relationships, family, and elder abuse.", hours: "Mon–Fri 11am–8pm · Sat 9am–2pm PT", source: "https://lgbthotline.org/senior-hotline/" },
-    { name: "Trans Lifeline", number: "877-565-8860", tel: "18775658860", note: "Trans peer support for trans and questioning people. You don’t have to be in crisis.", hours: "Mon–Fri 10am–6pm PT · Check site for closures", source: "https://translifeline.org/hotline/" },
-  ] },
-  { title: "Crisis & safety support", lines: [
-    { name: "The Trevor Project", number: "866-488-7386", tel: "18664887386", note: "Crisis counselors for LGBTQ+ young people. Text START to 678678 or use online chat.", hours: "24/7", source: "https://www.thetrevorproject.org/get-help/" },
-    { name: "Suicide & Crisis Lifeline", number: "988", tel: "988", note: "Call or text for emotional distress or a mental health crisis.", hours: "24/7", source: "https://988lifeline.org/" },
-    { name: "Call to Safety", number: "503-235-5333", tel: "15032355333", note: "Domestic and sexual violence support, including abuse by roommates. Safety planning and referrals.", hours: "24/7 · Free and confidential", source: "https://calltosafety.org/services/crisis-line/" },
   ] },
   { title: "OHP & local services", lines: [
     { name: "OHP member support", number: "800-273-0557", tel: "18002730557", note: "Oregon Health Plan member questions, concerns, and complaints. For plan-specific care, contact your CCO.", hours: "TTY 711 · See official site for availability", source: "https://www.oregon.gov/oha/OHP/Pages/Contact-Us.aspx" },
@@ -289,26 +289,70 @@ const TALK_GROUPS = [
   ] },
 ];
 
+function talkLineStatus(name: string, hours: string, now: Date) {
+  if (hours.startsWith("24/7")) return { label: "Open now", open: true };
+  const schedule = name === "Trans Lifeline"
+    ? { weekdays: [1, 2, 3, 4, 5], start: 10, end: 18, saturday: null }
+    : name.startsWith("LGBT National")
+      ? { weekdays: [1, 2, 3, 4, 5], start: 11, end: 20, saturday: { start: 9, end: 14 } }
+      : name === "Apply for OHP"
+        ? { weekdays: [1, 2, 3, 4, 5], start: 7, end: 18, saturday: null }
+        : null;
+  if (!schedule) return null;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles", weekday: "short", hour: "numeric", minute: "numeric", hourCycle: "h23",
+  }).formatToParts(now);
+  const value = (type: string) => parts.find(part => part.type === type)?.value || "";
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const day = dayNames.indexOf(value("weekday"));
+  const time = Number(value("hour")) + Number(value("minute")) / 60;
+  const today = day === 6 ? schedule.saturday : schedule.weekdays.includes(day) ? schedule : null;
+  if (today && time >= today.start && time < today.end) return { label: "Open now", open: true };
+  for (let offset = 0; offset < 7; offset += 1) {
+    const nextDay = (day + offset) % 7;
+    const next = nextDay === 6 ? schedule.saturday : schedule.weekdays.includes(nextDay) ? schedule : null;
+    if (!next || (offset === 0 && time >= next.start)) continue;
+    const hour = next.start > 12 ? `${next.start - 12}pm` : `${next.start}am`;
+    return { label: `Opens ${offset === 0 ? "" : offset === 1 ? "tomorrow " : `${dayNames[nextDay]} `}${hour}`, open: false };
+  }
+  return null;
+}
+
 function TalkOptions() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
   return (
     <div className="rg-support rg-support-open rg-talk-options">
-      <p className="rg-talk-intro">Choose who you’d like to talk to. Peer support, crisis care, and health coverage help are different services—each option below tells you what to expect.</p>
       {TALK_GROUPS.map((group) => (
         <section className="rg-talk-group" key={group.title} aria-label={group.title}>
           <h3>{group.title}</h3>
           <div className="rg-support-numbers">
-            {group.lines.map((line) => (
+            {group.lines.map((line) => {
+              const status = talkLineStatus(line.name, line.hours, now);
+              return (
               <div className="rg-talk-option" id={`talk-${line.tel}`} tabIndex={-1} key={line.tel}>
-                <SupportNumber name={line.name} number={line.number} tel={line.tel} />
-                <p>{line.note}</p>
-                <small>{line.hours}</small>
+                <div className="rg-talk-option-main">
+                  <div className="rg-talk-option-copy">
+                    {status && <span className="rg-talk-status" data-open={status.open}>{status.label}</span>}
+                    <h4>{line.name === "Suicide & Crisis Lifeline" ? "988 Suicide & Crisis Lifeline" : line.name}</h4>
+                    <p>{line.note}</p>
+                    <small>{line.number} · {line.hours}</small>
+                  </div>
+                  <div className="rg-talk-option-actions">
+                    {(line.tel === "988" || line.name === "The Trevor Project") && <a className="rg-talk-text" href={line.tel === "988" ? "sms:988" : "sms:678678?body=START"}>Text</a>}
+                    <a className="rg-talk-call" href={`tel:${line.tel}`}><Phone size={16} aria-hidden="true" /> Call</a>
+                  </div>
+                </div>
                 <a className="rg-safety-source" href={line.source} target="_blank" rel="noopener noreferrer">Official service details <ArrowUpRight size={13} aria-hidden="true" /></a>
               </div>
-            ))}
+            ); })}
           </div>
         </section>
       ))}
-      <small>Numbers and service pages checked September 30, 2026. Hours are Pacific time.</small>
+      <small>Numbers and service pages checked September 30, 2026. Status follows listed Pacific hours; check providers for closures.</small>
     </div>
   );
 }
@@ -474,8 +518,23 @@ export default function Resources() {
     "ReZources | Zaylist",
     "Art, community, opportunity, care, and support for queer and trans Oregon. Explore local organizations and food pantries to find your next connection.",
   );
-  const [categoryIds, setCategoryIds] = useState<string[]>([]);
-  const [intentChosen, setIntentChosen] = useState(false);
+  const initialDoor = new URLSearchParams(window.location.search).get("door");
+  const [categoryIds, setCategoryIds] = useState<string[]>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("view") === "all"
+      ? RESOURCE_CATEGORIES.map(({ id }) => id)
+      : (params.get("cat") || "").split(",").filter(id => RESOURCE_CATEGORIES.some(category => category.id === id));
+  });
+  const [intentChosen, setIntentChosen] = useState(initialDoor === "find" || initialDoor === "talk");
+  const [introPlayed, setIntroPlayed] = useState(() => initialDoor === "find" || initialDoor === "talk" || sessionStorage.getItem("rezources-door-intro-played") === "1");
+  useEffect(() => {
+    if (introPlayed) return;
+    const timer = window.setTimeout(() => {
+      setIntroPlayed(true);
+      sessionStorage.setItem("rezources-door-intro-played", "1");
+    }, 1300);
+    return () => window.clearTimeout(timer);
+  }, [introPlayed]);
   useLayoutEffect(() => {
     const previousRestoration = window.history.scrollRestoration;
     window.history.scrollRestoration = "manual";
@@ -483,8 +542,38 @@ export default function Resources() {
     return () => { window.history.scrollRestoration = previousRestoration; };
   }, []);
 
-  const [directoryRevealed, setDirectoryRevealed] = useState(false);
-  const [mode, setMode] = useState<"directory" | "talk">("directory");
+  const [directoryRevealed, setDirectoryRevealed] = useState(initialDoor === "find");
+  const [mode, setMode] = useState<"directory" | "talk">(initialDoor === "talk" ? "talk" : "directory");
+  const lastDoor = useRef<"directory" | "talk">(initialDoor === "talk" ? "talk" : "directory");
+  const enteredFromQuestion = useRef(false);
+  const writeDoorUrl = useCallback((door: "find" | "talk" | null, ids: string[] = [], push = false) => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("door");
+    url.searchParams.delete("cat");
+    url.searchParams.delete("view");
+    if (door) url.searchParams.set("door", door);
+    if (door === "find" && ids.length) {
+      if (ids.length === RESOURCE_CATEGORIES.length) url.searchParams.set("view", "all");
+      else url.searchParams.set("cat", ids.join(","));
+    }
+    window.history[push ? "pushState" : "replaceState"]({}, "", `${url.pathname}${url.search}${url.hash}`);
+  }, []);
+  useEffect(() => {
+    const syncFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const door = params.get("door");
+      const ids = params.get("view") === "all"
+        ? RESOURCE_CATEGORIES.map(({ id }) => id)
+        : (params.get("cat") || "").split(",").filter(id => RESOURCE_CATEGORIES.some(category => category.id === id));
+      setCategoryIds(ids);
+      setIntentChosen(door === "find" || door === "talk");
+      setDirectoryRevealed(door === "find");
+      if (door === "talk" || door === "find") lastDoor.current = door === "talk" ? "talk" : "directory";
+      setMode(lastDoor.current);
+    };
+    window.addEventListener("popstate", syncFromUrl);
+    return () => window.removeEventListener("popstate", syncFromUrl);
+  }, []);
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
   const [showAllCards, setShowAllCards] = useState(false);
   const [mobileExpandedCard, setMobileExpandedCard] = useState<string | null>(null);
@@ -532,7 +621,31 @@ export default function Resources() {
     media.addEventListener("change", change);
     return () => media.removeEventListener("change", change);
   }, []);
-  const showResults = intentChosen && (mode === "directory" ? directoryRevealed : safetyAnswer === "yes");
+  const showResults = intentChosen && (mode === "directory" ? directoryRevealed : true);
+  const openDoor = (door: "find" | "talk") => {
+    enteredFromQuestion.current = !intentChosen;
+    setIntentChosen(true);
+    lastDoor.current = door === "talk" ? "talk" : "directory";
+    setMode(lastDoor.current);
+    setDirectoryRevealed(door === "find");
+    writeDoorUrl(door, door === "find" ? categoryIds : [], mobile && !intentChosen);
+    if (mobile) window.scrollTo({ top: 0, behavior: "instant" });
+    requestAnimationFrame(() => document.querySelector<HTMLElement>(door === "find" ? ".rg-step--categories h2" : ".rg-results-head h2")?.focus({ preventScroll: true }));
+  };
+  const backToQuestion = () => {
+    if (enteredFromQuestion.current) {
+      enteredFromQuestion.current = false;
+      window.history.back();
+    } else {
+      writeDoorUrl(null);
+      setIntentChosen(false);
+      setDirectoryRevealed(false);
+      setCategoryIds([]);
+      setMode(lastDoor.current);
+    }
+    window.scrollTo({ top: 0, behavior: "instant" });
+    requestAnimationFrame(() => document.querySelector<HTMLElement>(".rg-mode button[aria-pressed='true']")?.focus({ preventScroll: true }));
+  };
   const scrollResourceRail = useCallback((track: HTMLElement | null, direction: number) => {
     if (!track) return;
     const cards = track.querySelectorAll<HTMLElement>(".rg-stack-card");
@@ -591,8 +704,14 @@ export default function Resources() {
   }, [showResults, mode, showAllCards, rows]);
   function choose(id: string | null) {
     setDirectoryRevealed(true);
-    setCategoryIds((ids) => id === null ? [] : ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id]);
+    const opening = Boolean(id && !categoryIds.includes(id));
+    setCategoryIds((ids) => {
+      const next = id === null ? [] : ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
+      writeDoorUrl("find", next);
+      return next;
+    });
     setMode("directory");
+    if (mobile && id && opening) window.setTimeout(() => document.getElementById(`resource-stack-${id}`)?.scrollIntoView({ behavior: quietMotion ? "instant" : "smooth", block: "start" }), 300);
   }
   const openDetail = useCallback((row: Row) => {
     detailTrigger.current = document.activeElement as HTMLElement;
@@ -625,7 +744,7 @@ export default function Resources() {
     return () => { cancelAnimationFrame(frame); window.clearTimeout(settleTimer); };
   }, [searchTarget, showResults, quietMotion]);
   return (
-    <div className="resources-page">
+    <div className="resources-page rg-door-path" data-door={intentChosen ? mode === "talk" ? "talk" : "find" : "question"} data-intro-play={!introPlayed}>
       {lightweightBackground
         ? <div className="rg-stream-background rg-stream-background--mobile-fallback" aria-hidden="true" />
         : <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>}
@@ -652,50 +771,32 @@ export default function Resources() {
               <LayoutGroup id="rezources-mode">
               <div className="rg-mode rg-mode--animated pdx-glass-rebind">
                 <button
-                  aria-pressed={intentChosen && mode === "directory"}
-                  onClick={() => { setIntentChosen(true); setMode("directory"); }}
+                  aria-pressed={mode === "directory"}
+                  onClick={() => openDoor("find")}
                 >
-                  {intentChosen && mode === "directory" && <motion.span className="rg-mode-highlight" aria-hidden="true" layoutId={quietMotion ? undefined : "active-mode"} transition={{ type: "spring", bounce: 0, duration: 0.25 }} />}
+                  {mode === "directory" && <motion.span className="rg-mode-highlight" aria-hidden="true" layoutId={quietMotion ? undefined : "active-mode"} transition={{ type: "spring", bounce: 0, duration: 0.25 }} />}
                   <span className="rg-mode-label">Find a resource</span>
                 </button>
                 <button
-                  aria-pressed={intentChosen && mode === "talk"}
+                  aria-pressed={mode === "talk"}
                   aria-expanded={mode === "talk"}
-                  aria-controls="resource-safety-check"
-                  onClick={() => { setIntentChosen(true); setMode("talk"); setSafetyAnswer(null); }}
+                  aria-controls="resource-talk-results"
+                  onClick={() => openDoor("talk")}
                 >
                   {mode === "talk" && <motion.span className="rg-mode-highlight" aria-hidden="true" layoutId={quietMotion ? undefined : "active-mode"} transition={{ type: "spring", bounce: 0, duration: 0.25 }} />}
                   <span className="rg-mode-label">Talk to someone</span>
                 </button>
               </div>
               </LayoutGroup>
-              <button type="button" className="discovery-skip" onClick={() => { setIntentChosen(true); setMode("directory"); setCategoryIds(RESOURCE_CATEGORIES.map(c => c.id)); setDirectoryRevealed(true); setShowAllCards(false); }}>Skip to view all</button>
-              <AnimatePresence initial={false}>
-              {mode === "talk" && (
-                <motion.div key="safety-check" initial={quietMotion ? false : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: quietMotion ? 0 : 0.24, ease: "easeInOut" }} id="resource-safety-check" className="rg-safety-check" role="group" aria-labelledby="resource-safety-question">
-                  <h3 id="resource-safety-question">Are you safe right now?</h3>
-                  <p>Choose what you need. You can change your answer.</p>
-                  <div>
-                    <button className="pdx-glass-rebind pdxBtn" aria-pressed={safetyAnswer === "yes"} onClick={() => {
-                      setSafetyAnswer("yes");
-                      requestAnimationFrame(() => { resultsRef.current?.scrollIntoView({ behavior: "auto", block: "start" }); resultsRef.current?.focus({ preventScroll: true }); });
-                    }}>Yes, I’m safe</button>
-                    <button className="pdx-glass-rebind pdxBtn" aria-pressed={safetyAnswer === "no"} onClick={(event) => {
-                      supportTrigger.current = event.currentTarget;
-                      setSafetyAnswer("no");
-                      setSupportOpen(true);
-                    }}>No, I need help now</button>
-                  </div>
-                </motion.div>
-              )}
-              </AnimatePresence>
+              <button type="button" className="discovery-skip" onClick={() => { const ids = RESOURCE_CATEGORIES.map(c => c.id); setIntentChosen(true); setMode("directory"); setCategoryIds(ids); setDirectoryRevealed(true); setShowAllCards(false); writeDoorUrl("find", ids, mobile && !intentChosen); window.setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: quietMotion ? "instant" : "smooth", block: "start" }), 100); }}>Skip to view all</button>
             </div>
           </div>
           <AnimatePresence initial={false}>
-          {intentChosen && mode === "directory" && <motion.div key="categories" initial={quietMotion ? false : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: quietMotion ? 0 : 0.24, ease: "easeInOut" }} className="rg-step rg-step--categories">
+          {intentChosen && mode === "directory" && <motion.div key="categories" initial={quietMotion ? false : { opacity: 0, x: mobile ? 36 : 0, height: mobile ? "auto" : 0 }} animate={{ opacity: 1, x: 0, height: "auto" }} exit={{ opacity: 0, x: mobile ? -36 : 0, height: mobile ? "auto" : 0 }} transition={{ duration: quietMotion ? 0 : 0.24, ease: "easeInOut" }} className="rg-step rg-step--categories">
             <div>
+              <button type="button" className="rg-door-back" onClick={backToQuestion}><ChevronLeft size={20} aria-hidden="true" /> Back to the question</button>
               <span className="rg-eyebrow rg-muted"><span className="rg-step-number" aria-hidden="true">02</span>Explore categories</span>
-              <h2>I'm looking for…</h2>
+              <h2 tabIndex={-1}>I'm looking for…</h2>
               <p className="rg-multiselect-hint">Choose one or more categories.</p>
               <div
                 className="rg-options"
@@ -716,44 +817,45 @@ export default function Resources() {
                     >
                       <Icon size={18} />
                       <span>{LABELS[i]}</span>
+                      <small>{ROWS.filter(row => categoriesFor(row).some(category => category.id === c.id)).length} resources</small>
                       <i aria-hidden="true">{categoryIds.includes(c.id) && <Check size={14} />}</i>
                     </ResourceFilterButton>
                   );
                 })}
-              <div className="pdx-glass-rebind rg-all rg-selection-control" role="group" aria-label="Select resource categories">
-                <label>
-                  <input type="checkbox" checked={categoryIds.length === RESOURCE_CATEGORIES.length} onChange={() => { setDirectoryRevealed(true); setCategoryIds(RESOURCE_CATEGORIES.map((c) => c.id)); }} />
-                  <span>SELECT ALL</span>
-                </label>
-                <label>
-                  <input type="checkbox" checked={categoryIds.length === 0} onChange={() => { setDirectoryRevealed(true); setCategoryIds([]); }} />
-                  <span>DESELECT ALL</span>
-                </label>
-              </div>
+                <button type="button" className="rg-select-tile" aria-label="Select all categories" onClick={() => { const ids = RESOURCE_CATEGORIES.map(c => c.id); setDirectoryRevealed(true); setCategoryIds(ids); writeDoorUrl("find", ids); }}>
+                  <Check size={20} aria-hidden="true" /><span>Select all</span>
+                </button>
+                <button type="button" className="rg-select-tile rg-select-tile--clear" aria-label="Deselect all categories" onClick={() => { setDirectoryRevealed(true); setCategoryIds([]); writeDoorUrl("find"); }}>
+                  <X size={20} aria-hidden="true" /><span>Deselect all</span>
+                </button>
               </div>
             </div>
           </motion.div>}
           </AnimatePresence>
         </aside>
         {showResults && <motion.div
-          initial={quietMotion ? false : { opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={quietMotion ? false : { opacity: 0, x: mobile ? 36 : 0, y: mobile ? 0 : 24 }}
+          animate={{ opacity: 1, x: 0, y: 0 }}
           transition={{ duration: quietMotion ? 0 : 0.4 }}
           className="rg-results"
           ref={resultsRef}
           tabIndex={-1}
           aria-label="Resource results"
         >
+          {mode === "directory" && mobile && selectedCategories.length > 0 && <nav className="rg-selected-categories" aria-label="Selected categories">
+            <button type="button" className="rg-selected-edit" onClick={() => document.querySelector(".rg-step--categories")?.scrollIntoView({ behavior: quietMotion ? "instant" : "smooth" })}>Edit</button>
+            {selectedCategories.map(category => <button type="button" key={category.id} style={{ "--res-accent": category.color } as CSSProperties} onClick={() => document.getElementById(`resource-stack-${category.id}`)?.scrollIntoView({ behavior: quietMotion ? "instant" : "smooth" })}>{category.name} <span>{ROWS.filter(row => categoriesFor(row).some(item => item.id === category.id)).length}</span></button>)}
+          </nav>}
           {mode === "talk" && <>
             <div className="rg-results-head">
-              <span className="rg-eyebrow rg-results-step"><span className="rg-step-number" aria-hidden="true">03</span>Make a connection</span>
-              <h2>A person on the other end.</h2>
-              <p>Choose the support line that fits what you need.</p>
+              <button type="button" className="rg-door-back" onClick={backToQuestion}><ChevronLeft size={20} aria-hidden="true" /> Back to the question</button>
+              <span className="rg-eyebrow rg-results-step">Talk to someone</span>
+              <h2 tabIndex={-1}>A person on the other end.</h2>
+              <p>Choose the line that fits what you need.</p>
             </div>
-            <p className="rg-count">Support lines</p>
           </>}
           {mode === "talk" ? (
-            <TalkOptions />
+            <div id="resource-talk-results"><TalkOptions /></div>
           ) : (
             <>
               {showAllCards && <div className="rg-stack-controls">
