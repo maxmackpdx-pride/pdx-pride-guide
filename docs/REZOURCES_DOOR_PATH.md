@@ -83,8 +83,8 @@ scale 1.025, neighbors push apart. Below 1000px it stacks back to heading over c
 - **Sticky category strip** under the tiles once something is picked: an Edit pill plus one 44px pill per picked
   category (its color outline and count). Tapping jumps to that rail; the current rail's pill is tinted.
 - **Logo intro (first frame only)**: the hero logo fades in centered and large with Share and Follow below it,
-  holds, then scales down and slides to a fixed header row (logo left, Share and Follow right, 12px labels,
-  44px hit area). 01 START HERE, the question and the slider then fade in, centered in the space above the nav.
+  holds, then scales down and slides to a header row at the top of the page (logo left, Share and Follow right, 12px labels,
+  44px hit area). The row is not pinned: it scrolls away with the page like any other content. 01 START HERE, the question and the slider then fade in, centered in the space above the nav.
   Skipped when arriving by a step link and replaced by the final layout when returning to the question.
 - Bottom nav and the approved two-bar phone nav: not changed here (production nav drift awaits owner approval).
 
