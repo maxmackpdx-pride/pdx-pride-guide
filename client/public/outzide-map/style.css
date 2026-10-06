@@ -140,3 +140,12 @@ html,body{height:100%;overflow:hidden;background:#080c0c}main,.workspace{positio
 .outz-map-controls #trail-feed{position:static;inset:auto;width:auto;max-height:none;height:100%;border:0;border-radius:0;box-shadow:none;background:transparent}
 .outz-map-controls #trail-feed[hidden]{display:none}
 @media(max-width:760px){.outz-map-controls{left:12px;right:12px;width:auto;top:12px;bottom:78px}.outz-map-controls__workspace{grid-template-columns:1fr;grid-template-rows:auto 1fr}.outz-map-controls__sections{flex-direction:row;border-right:0;border-bottom:1px solid #163028}.outz-map-controls__sections button{flex:1;height:48px}}
+
+.outz-map-controls{left:16px;right:auto}
+.outz-map-controls__sections{overflow:auto}
+.outz-map-controls__sections .outz-section-icon{height:56px;display:grid;place-items:center;padding:0}
+.outz-map-controls__sections .outz-section-icon svg{width:26px;height:26px}
+.outz-map-controls__sections .outz-section-icon[aria-pressed=true]{border-color:#00ffff;color:#00ffff;box-shadow:inset 0 0 0 1px #00ffff66}
+.outz-map-controls .search-panel-header,.outz-map-controls .search,.outz-map-controls .region-switch,.outz-map-controls .explore-view-switch,.outz-map-controls .filters{display:none}
+.outz-map-controls .discovery .list-scroll{display:block}
+@media(max-width:760px){.outz-map-controls{left:12px;right:12px}}
