@@ -37,7 +37,7 @@ test('non-event markers use assigned roof heights and preserve equal roof cleara
   assert.match(renderer,/String\(a\.feature\.properties\.key\)\.localeCompare/);
 });
 
-test('waypoint heads keep equal roof clearance while following different roof heights',async()=>{
+test('waypoint heads follow roofs with the existing minimum ground gap',async()=>{
   const {waypointGeometry}=await import('../client/public/mapz-map/waypoint-markers.js');
   const previousWindow=globalThis.window;
   globalThis.window={__mapzMap:{getZoom:()=>15.35,getPitch:()=>34}};
@@ -48,7 +48,7 @@ test('waypoint heads keep equal roof clearance while following different roof he
       assert.equal(moved.x-first.x,190);assert.ok(Math.abs(moved.y-first.y+115)<1e-9);
       // Waypoint pack sizes: 31 at rest growing to 42 by zoom 16, 57 selected.
       assert.equal(first.size,selected?57:40);
-      assert.equal(300-first.bottom,roof*2);
+      assert.equal(300-first.bottom,Math.max(roof,selected?16:10));
       // The shell's integrated tip (34% of the size) touches the top of the beam.
       assert.ok(Math.abs(first.y+first.size/2+first.size*.34-first.bottom)<1e-9);
     }

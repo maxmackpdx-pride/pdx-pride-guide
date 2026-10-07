@@ -2,3 +2,7 @@
 rules = [
   { action = "allow", tool = "bash", pattern = "git push origin HEAD:master" },
 ]
+
+# Map architecture: docs/MAP_RENDERING.md is current. Shared map infrastructure
+# lives in client/public/map-foundation; preserve product-specific custom artwork
+# and Grok's stamp-based Outzide marker reuse. OpenFreeMap + Mapterhorn remain active.

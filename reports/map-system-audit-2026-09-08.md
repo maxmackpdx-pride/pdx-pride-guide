@@ -1,5 +1,7 @@
 # Map controls improvement and Astra system audit
 
+Historical audit: the disconnected Leaflet map described here was retired on 6 October 2026. This report is not current map implementation guidance. See `docs/MAP_RENDERING.md`.
+
 Requested outcome: improve on-map Filters, Locate and Key placement; have Astra independently analyze the entire map system. This work is local. No deployment was requested for this task.
 
 ## Implemented

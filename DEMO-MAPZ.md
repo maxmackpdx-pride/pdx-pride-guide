@@ -1,7 +1,7 @@
 # Mapz interactive map demo
 
 Local route: http://localhost:5198/map-demo
-Branch: demo/mapz-interactive. This is a prototype, not a replacement for /map.
+Current Mapz renderer: the `/map` route mounts `MapzMapDemo` and `MapzCanvas`. The demo route uses the same scene. Read `docs/MAP_RENDERING.md` for the current shared foundation.
 
 Run with the repository dependencies installed:
 
@@ -16,7 +16,8 @@ The page uses the existing application API and detail cards. Locally, records co
 - Page and controls: client/src/pages/MapzMapDemo.tsx and .css
 - Map adapter: client/src/components/MapzCanvas.tsx
 - Standalone renderer snapshot: client/public/mapz-map/
-- Lightweight fallback: client/src/components/MapzFallback.tsx
+- Shared infrastructure: client/public/map-foundation/
+- Recovery: MapBootLoader retries the 3D renderer.
 
 The original Demo C, homepage map, and existing /map are unchanged. The eight original materials/scene helper modules are retained verbatim. Zoom 14.5–16.5 introduces the holograms from smaller, brighter orbs; a selected listing can reveal its hologram immediately. No automatic return to flight during browsing. No drawer. Results open only when requested.
 

@@ -186,3 +186,6 @@ html,body{height:100%;overflow:hidden;background:#080c0c}main,.workspace{positio
 @media(max-width:760px){
   .outz-map-controls{left:12px;right:12px;width:auto;bottom:calc(var(--oz-dock, 108px) + 16px)}
 }
+
+/* Nested field-feed scrim must leave the owning controls reachable. */
+@media(max-width:760px){.outz-map-controls__title,.outz-map-controls__sections{position:relative;z-index:861}}

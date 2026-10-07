@@ -1,4 +1,4 @@
-import {motionPreference} from './motion-preference.js';
+import {motionPreference} from '../map-foundation/motion.js';
 const bodies=new Map(),rings=new Map(),ink=new WeakMap();
 function cityAmount(){
  try{return window.__mapzMap?Math.max(0,Math.min(1,(window.__mapzMap.getZoom()-14.25)/1.1))*Math.max(0,Math.min(1,(window.__mapzMap.getPitch()-16)/18)):0;}catch{return 0;}

@@ -25,7 +25,7 @@ async function fixture(label,pitch=0){
  const path=label==='Mapz'?'../client/public/mapz-map/mapz-perf-preload.js':'../client/public/outzide-map/assets/map-perf-preload.js';
  vm.runInNewContext(await readFile(new URL(path,import.meta.url),'utf8'),{window,document,matchMedia:()=>({matches:true}),structuredClone});
  const map=new window.maplibregl.Map({style:{terrain:{source:'elevation'},sources:{elevation:{},terrain:{}},layers:[]}});
- assert.equal(map.options.pixelRatio,1.5);assert.equal(map.options.style.terrain,undefined);
+ assert.equal(map.options.pixelRatio,label==='Mapz'?1.25:1.5);assert.equal(map.options.style.terrain,undefined);
  assert.equal(map.options.style.sources.elevation,undefined);
  return {handlers,domHandlers,canvas,labels,get frozen(){return frozen;},get removed(){return removed;}};
 }

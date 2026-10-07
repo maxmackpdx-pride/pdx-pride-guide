@@ -37,7 +37,7 @@ test('landmarks use requested scale, fixed GPS anchors, and the R2-D2 scan/stati
   assert.ok(PORTLAND_LANDMARKS.filter(landmark=>landmark!==welcome&&landmark!==hydrants).every(landmark=>landmark.scale===1.75&&landmark.center.every(Number.isFinite)));
   const layer=await readFile(new URL('../client/public/mapz-map/portland-landmarks.js',import.meta.url),'utf8'),renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
   assert.match(layer,/float scan=/);assert.match(layer,/float snow=/);assert.match(layer,/float dropout=/);assert.match(layer,/disable\(gl\.DEPTH_TEST\)/);assert.match(layer,/depthMask\(false\)/);
-  assert.match(renderer,/map\.addLayer\(portlandLandmarks\)/);
+  assert.match(renderer,/addLayers\(map,\[portlandLandmarks\]\)/);
 });
 
 test('directional landmarks face their documented real-world viewing direction',()=>{

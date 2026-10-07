@@ -1,4 +1,7 @@
-import {motionPreference as reduced} from './motion-preference.js';
+import {addLayers} from '../map-foundation/layers.js';
+import {captureCamera} from '../map-foundation/camera.js';
+import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../map-foundation/lifecycle.js';
+import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
 import { visibleHologramLabels } from './label-visibility.js?v=20260925-venue-nights';
@@ -13,9 +16,9 @@ import {createBridgeLayer} from '../home-flight/bridge-roads.js?v=20260921-layer
 import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-white-sparkles';
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
-import {createLogoFocus} from './logo-focus.js';
 import {logoCoverage} from './logo-mask.js';
-import {createHologramMaterials,drawProjectionBeam,projectorGroundScale} from './hologram-materials.js?v=20260926-place-beam';
+import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor} from './event-projection.js';
+import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
@@ -29,22 +32,13 @@ startup.phase('script');
 const maxExploreZoom=17.75;
 // First paint is the vector city. DEM workers were blocking the phone boot
 // and the preload already dropped terrain from this first style.
-const surfaceStyle=mapzSurfaceStyle({terrainStrength:0});
-delete surfaceStyle.terrain;
-if(surfaceStyle.sources){
- delete surfaceStyle.sources.elevation;
- delete surfaceStyle.sources['hillshade-elevation'];
- delete surfaceStyle.sources.contours;
-}
-if(Array.isArray(surfaceStyle.layers)){
- surfaceStyle.layers=surfaceStyle.layers.filter(layer=>layer.id!=='land-relief'&&layer.id!=='elevation-contours'&&layer.source!=='elevation'&&layer.source!=='hillshade-elevation'&&layer.source!=='contours');
-}
+const surfaceStyle=vectorFirstStyle(mapzSurfaceStyle({terrainStrength:0}));
 // The home city materials, extended with DEM hillshade and Mapz surface treatments.
 // MapLibre creates and checks its own WebGL context. A separate retained probe
 // needlessly consumes another context on phones and can prevent the real one.
 let map;
 try{
- map=new maplibregl.Map({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
+ map=createMap({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
    center:[-122.676,45.523],zoom:13.5+Math.log2(1.25),pitch:48,bearing:0,
    maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:maxExploreZoom,maxPitch:72,
    style:surfaceStyle});
@@ -89,12 +83,12 @@ const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,terrainHeight,red
 const citySparkles=createCitySparkles(maplibregl,terrainHeight,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
 function installSceneExtras(){
- map.addLayer(groundLightPools,'buildings');
- map.addLayer(bridgeLayer,'skyline');
+ addLayers(map,[groundLightPools],'buildings');
+ addLayers(map,[bridgeLayer],'skyline');
  landmarkBuildings.bridges=portlandBridges;
- map.addLayer(landmarkBuildings,'skyline');
- map.addLayer(portlandLandmarks);
- map.addLayer(citySparkles);
+ addLayers(map,[landmarkBuildings],'skyline');
+ addLayers(map,[portlandLandmarks]);
+ addLayers(map,[citySparkles]);
 }
 map.on('load',()=>{
  loaded=true;startup.phase('map-loaded');cameraDirty=true;updateSceneStatus();scheduleFrame();
@@ -401,12 +395,12 @@ function buildingGlitter(target,surfaces){
  points=whiteSparkles(points,30);
  glitterCache.set(target,{time:now,surfaces,flat,coarse,overview,points});return points;
 }
-const logoFocus=createLogoFocus();
+const eventProjection=createEventProjection();
 const hologramLayouts=new WeakMap();
 const logoSpacing=1.15;
-const hologramLiftScale=.7*TONIGHT_HEIGHT_MULTIPLIER*.8*1.15;
-const hologramArtworkScale=3.15;
-const hologramLabelWidth=68.4;
+const hologramLiftScale=.7*TONIGHT_HEIGHT_MULTIPLIER*.8*1.15*1.35;
+const hologramArtworkScale=2.7;
+const hologramLabelWidth=62;
 const logoFit=logo=>Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height);
 function hologramBounds(feature,scale){
  const logo=venueLogos.get(feature.properties.logo);
@@ -562,13 +556,13 @@ function drawLights(fade,target=map,surface=lights){
   const phase=item.feature.properties.phase;
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
   item.attention=reduced.matches?.5:.5+.5*Math.sin(pulseTime*(.13+.025*Math.sin(phase))+phase*1.83);
-  const driftX=0;
+  const driftX=eventProjectionSway(pulseTime,phase,presentationScale,reduced.matches||cameraMoving);
   const driftY=0;
   item.scaleGoal=emergenceFor(item.feature)*presentationScale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
   // No pin ceiling. Lift comes from hologramLiftScale, heightScale, and tonight's multiplier.
-  const dayLift=activeTonight(item.feature)?1.65:1;item.x=item.p.x+driftX*zoomScale;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale)*effectiveHologramLift*dayLift;
+  const dayLift=activeTonight(item.feature)?1.65:1;item.x=item.p.x+driftX;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale)*effectiveHologramLift*dayLift;
   item.neighbors=beacons.filter(v=>v!==item&&Math.hypot(v.p.x-item.p.x,v.p.y-item.p.y)<220).length;
   item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25*effectiveHologramLift:0;
  }
@@ -626,11 +620,8 @@ function drawLights(fade,target=map,surface=lights){
   if(Math.abs(y-item.offset.y)>.01)item.offset.vy=0;
   item.offset.x=x;item.offset.y=y;
  }
- // Only loaded artwork actually on camera can receive a tracking frame.
  const extensionSlots=new Map(),branchCounts=new Map();
  for(const {feature} of ordered){const row=feature.properties;if((row.waypointFamily==='mizzed'||row.waypointFamily==='gigz')&&row.venueWaypointKey)branchCounts.set(row.venueWaypointKey,(branchCounts.get(row.venueWaypointKey)||0)+1);}
- const visibleLogos=fade>.01?beacons.filter(item=>venueLogos.has(item.feature.properties.logo)&&item.x>0&&item.x<width&&item.y>0&&item.y<height):[];
- logoFocus.update(pulseTime,visibleLogos.map(item=>item.feature.properties.phase));
  for(const pass of [0,1]){
   if(pass===1){
    // Ground light and projection beams sit behind solid buildings. Floating
@@ -646,11 +637,9 @@ function drawLights(fade,target=map,surface=lights){
   const isBar=expandedKeys.has(feature.properties.key);
   const hover=reduced.matches||cameraMoving?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
-  const groundScale=projectorGroundScale(target.getZoom());
   const lift=roofLift(target,feature,surfaces),eventTop=offset?p.y+offset.y+offset.avoidY-hover:p.y-lift-hover;
   const hologramTop=eventTop,raisedY=hologramTop+178.5*beaconScale;
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.56);
-  const beamHalfWidth=61.25*beaconScale;
   const emergence=isBar?emergenceFor(feature):0;
   const branchFamily=feature.properties.waypointFamily;
   if((branchFamily==='mizzed'||branchFamily==='gigz')&&feature.properties.venueWaypointKey){
@@ -705,7 +694,7 @@ function drawLights(fade,target=map,surface=lights){
    continue;
   }
   if(pass===0)hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:28,name:feature.properties.name,category:feature.properties.type});
-  if(pass===1&&!feature.properties.venueWaypointKey){
+  if(pass===1&&!feature.properties.venueWaypointKey&&!isBar){
    const head=venueGeometry({feature,p});
    drawWaypointHead(lightsContext,head,color,typeIcons.get(feature.properties.typeIcon)?.light,null,false,coreAlpha);
   }
@@ -713,63 +702,18 @@ function drawLights(fade,target=map,surface=lights){
   lightsContext.globalAlpha=(fade*pulse*beamAlpha)*bloomScale;
   if(isBar){
    if(pass===0){
-   // Wide, flattened light spill on the ground; the upright pin's tip is the anchor.
-   lightsContext.save();lightsContext.translate(p.x,p.y);lightsContext.scale(1,.58);
-   const radius=88.2*beaconScale*(.94+.12*pulse);
-   const spill=lightsContext.createRadialGradient(0,0,0,0,0,radius);
-   spill.addColorStop(0,color+'cc');spill.addColorStop(.25,color+'88');spill.addColorStop(.6,color+'33');spill.addColorStop(1,color+'00');
-   lightsContext.fillStyle=spill;lightsContext.fillRect(-radius,-radius,radius*2,radius*2);lightsContext.restore();
-   // Project from the venue waypoint head up to the floating event artwork.
-   lightsContext.save();
-   const top=hologramTop,halfWidth=beamHalfWidth;
-   lightsContext.globalAlpha=(Math.min(1,fade*pulse*beamAlpha*(color===adultVenueColor?1:1.2)))*bloomScale;
-   const venueHead=venueGeometry({feature,p}),beamAnchor={x:venueHead.x,y:venueHead.y-venueHead.size/2};
-   drawProjectionBeam(lightsContext,hologramMaterials.beams.get(color),beamAnchor,logoX,top,halfWidth,1);
-   const beamBase=Math.max(6,halfWidth*.22);lightsContext.beginPath();lightsContext.moveTo(beamAnchor.x-beamBase,beamAnchor.y);lightsContext.lineTo(logoX-halfWidth,top);lightsContext.lineTo(logoX+halfWidth,top);lightsContext.lineTo(beamAnchor.x+beamBase,beamAnchor.y);lightsContext.closePath();
-   // Sparse TV interference stays inside the beam, underneath the crisp logo.
-   lightsContext.save();lightsContext.clip();
-   // Layered projection bands: a slow rising scan, fine ribbing, and broken signal lines.
-   // These are inexpensive canvas strokes; the original logo stays on its clear upper layer.
-   const beamHeight=beamAnchor.y-top,scanClock=reduced.matches?phase:pulseTime*(.045+.009*Math.sin(phase))+phase;
-   const scanPosition=scanClock-Math.floor(scanClock);
-   for(let band=0;band<24;band++){
-    const row=((band/24)+scanPosition)%1,y=top+beamHeight*row;
-    lightsContext.globalAlpha=(fade*beamAlpha*smoothRange(0,.14,row)*(.025+.035*Math.sin(band*1.9+phase)**2))*bloomScale;
-    lightsContext.fillStyle=band%4===0?(color===adultVenueColor?'#160000':'#050918'):color;
-    const rowT=beamHeight? (y-top)/beamHeight:0,rowHalf=halfWidth*(1-rowT)+beamBase*rowT,rowX=logoX*(1-rowT)+beamAnchor.x*rowT;lightsContext.fillRect(rowX-rowHalf,y,rowHalf*2,band%4===0?1.4:.7);
-   }
-   const scanY=beamAnchor.y-beamHeight*scanPosition;
-   const sweep=lightsContext.createLinearGradient(0,scanY-9,0,scanY+9);
-   sweep.addColorStop(0,color+'00');sweep.addColorStop(.5,color+'b0');sweep.addColorStop(1,color+'00');
-   const sameDayMagic=activeTonight(feature)?1.7:1;lightsContext.globalAlpha=(fade*beamAlpha*.38*sameDayMagic*smoothRange(0,.14,1-scanPosition))*bloomScale;lightsContext.fillStyle=sweep;
-   const scanT=beamHeight?(scanY-top)/beamHeight:0,scanHalf=halfWidth*(1-scanT)+beamBase*scanT,scanX=logoX*(1-scanT)+beamAnchor.x*scanT;lightsContext.fillRect(scanX-scanHalf,scanY-9,scanHalf*2,18);
-   const staticTick=reduced.matches?0:Math.floor(pulseTime*(3.2+.6*Math.sin(phase))+phase*7);
-   for(let line=0;line<7;line++){
-    const seed=Math.sin(phase*23.7+line*91.3+staticTick*7.1)*43758.5453;
-    const noise=seed-Math.floor(seed),height=beamAnchor.y-top;
-    const y=top+height*(.12+.78*noise);
-    lightsContext.globalAlpha=(fade*beamAlpha*(.055+.055*noise))*bloomScale;
-    lightsContext.fillStyle=line%3===0?(color===adultVenueColor?'#100000':'#020510'):color;
-    const noiseT=beamHeight?(y-top)/beamHeight:0,noiseHalf=halfWidth*(1-noiseT)+beamBase*noiseT,noiseX=logoX*(1-noiseT)+beamAnchor.x*noiseT;lightsContext.fillRect(noiseX-noiseHalf,y,noiseHalf*2,line%3===0?1.3:.7);
-   }
-   lightsContext.restore();
-   // The ground ring wears the event's day, so a cluster of Friday holograms reads as Friday from above.
-   lightsContext.strokeStyle=feature.properties.dayColor||color;
-   lightsContext.globalAlpha=(fade*pulse)*bloomScale;lightsContext.lineWidth=1.2;
-   lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,15.75*groundScale,6.125*groundScale,0,0,Math.PI*2);lightsContext.stroke();
-   const projectorAngle=reduced.matches?phase:pulseTime*.14+phase;
-   lightsContext.globalAlpha=(fade*pulse*.45)*bloomScale;lightsContext.lineWidth=.8;
-   lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,22*groundScale,8.55*groundScale,0,projectorAngle,projectorAngle+Math.PI*.72);lightsContext.stroke();
-   // Two stationary light echoes breathe at independent rates; the address stays still.
-   for(let echo=0;echo<2;echo++){
-    const breath=reduced.matches?.45:.5+.5*Math.sin(pulseTime*(.31+echo*.047)+phase*1.43-echo*1.9);
-    lightsContext.globalAlpha=(fade*pulse*beamAlpha*(.04+.15*breath*breath))*bloomScale;
-    lightsContext.lineWidth=echo?1.1:1.8;
-    lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,(27+echo*7)*groundScale,(10.5+echo*2.7)*groundScale,0,0,Math.PI*2);lightsContext.stroke();
-   }
-   lightsContext.globalAlpha=(fade*pulse)*bloomScale;
-   lightsContext.fillStyle=color===adultVenueColor?adultVenueColor:'#eaffff';lightsContext.beginPath();lightsContext.arc(p.x,p.y,Math.max(1.5,2.8*groundScale),0,Math.PI*2);lightsContext.fill();
-   lightsContext.restore();
+    // One fixed rooftop emitter; only the projection's head drifts.
+    const parent=venueItems.get(feature.properties.venueWaypointKey)||{feature,p};
+    const coordinates=parent.feature.geometry.coordinates;
+    const metersPerPixel=40075016.686*Math.cos(coordinates[1]*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
+    const roof=surfaces.roofs?.get(parent.feature.properties.phase)??9;
+    const roofPixels=roof*extrusionAmount(target)/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
+    const beamAnchor={x:parent.p.x,y:parent.p.y-roofPixels};
+    const projection=eventProjectionGeometry(beamAnchor,{x:logoX,y:hologramTop},beaconScale);
+    lightsContext.save();
+    lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*bloomScale;
+    eventProjection.draw(lightsContext,projection,pulseTime,phase,reduced.matches,eventProjectionColor(feature.properties));
+    lightsContext.restore();
    continue;
    }
 
@@ -786,60 +730,16 @@ function drawLights(fade,target=map,surface=lights){
    const artUrl=alternate?feature.properties.alternateLogo:feature.properties.logo;
    const logoKey=alternate?feature.properties.alternateLogoKey:feature.properties.logoKey;
    if(logoKey)hitTargets.push({key:logoKey,x:logoX,y:hologramCenterY,r:Math.max(24,38*beaconScale)});
-   const logo=venueLogos.get(artUrl)||venueLogos.get(feature.properties.logo),focus=logoFocus.active.get(phase);
-   if(focus&&logo){
-   const age=pulseTime-focus.start,remaining=focus.end-pulseTime;
-   const focusAlpha=coreAlpha*Math.max(0,Math.min(1,age/.12,remaining/.18));
-   const fit=logoFit(logo);
-   const acquire=reduced.matches?0:1-smoothRange(0,.65,age);
-   const search=reduced.matches?0:Math.sin(age*5+focus.seed)*acquire;
-   lightsContext.save();lightsContext.globalAlpha=focusAlpha;
-   lightsContext.lineWidth=.58;lightsContext.strokeStyle=color;lightsContext.lineJoin='round';
-   for(const side of [-1,1])for(const end of [-1,1]){
-    const x=side*(logo.width*fit/2+2.2+acquire*3)+search,y=-34+end*(logo.height*fit/2+2.2+acquire*2);
-    lightsContext.beginPath();lightsContext.moveTo(x-side*2.8,y);lightsContext.lineTo(x,y);lightsContext.lineTo(x,y-end*2.8);lightsContext.stroke();
-   }
-   // Deterministic per-venue digital fragments, each with its own clock and sequence.
-   // Keep the entire logo clear; fragments live only outside its artwork bounds.
-   const motifClock=reduced.matches?phase:pulseTime*(.38+.11*Math.sin(phase*1.37))+phase*3.7;
-   const motifStep=Math.floor(motifClock);
-   for(let bit=0;bit<12;bit++){
-    const seed=Math.sin((bit+1)*127.1+phase*91.7+motifStep*13.3)*43758.5453;
-    const random=seed-Math.floor(seed);
-    if(random<.34)continue;
-    const side=bit%2===0?-1:1;
-    const x=side*(15.5+random*3),y=-45+Math.floor(bit/2)*4.3;
-    const shimmer=.55+.45*Math.sin(motifClock*2.1+bit*1.9);
-    lightsContext.globalAlpha=focusAlpha*(.35+.55*shimmer);
-    lightsContext.fillStyle=color;
-    if(bit%3===0){
-     lightsContext.fillRect(x,y,.65,.65);lightsContext.fillRect(x+side*1.2,y,.65,.65);
-    }else{
-     lightsContext.fillRect(x,y,.35,1.2+random*1.8);
-    }
-   }
-   lightsContext.globalAlpha=focusAlpha*.8;
-   lightsContext.lineWidth=.22;
-   const orbit=reduced.matches?phase:motifClock*.7;
-   lightsContext.beginPath();lightsContext.ellipse(0,-34,20,15,0,orbit,orbit+.38);lightsContext.stroke();
-   lightsContext.beginPath();lightsContext.ellipse(0,-34,20,15,0,orbit+Math.PI,orbit+Math.PI+.22);lightsContext.stroke();
-   // A slow scanner beneath the logo suggests projection without obscuring its detail.
-   const scan=reduced.matches?0:Math.sin(pulseTime*.5+phase)*3;
-   lightsContext.globalAlpha=focusAlpha*.65;
-   lightsContext.beginPath();lightsContext.moveTo(-8+scan,-19);lightsContext.lineTo(3+scan,-19);lightsContext.stroke();
-   lightsContext.restore();
-   }
+   const logo=venueLogos.get(artUrl)||venueLogos.get(feature.properties.logo);
    if(feature.properties.time&&logo&&coreAlpha>.1){
     const fit=logoFit(logo)*renderedArtworkScale;
     const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
-    eventLabels.push({avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+12*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
+    eventLabels.push({projectionColor:eventProjectionColor(feature.properties),avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+5*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
     lightsContext.save();lightsContext.translate(0,-34);
-    const angle=reduced.matches?0:Math.sin(pulseTime*(.12+.025*Math.sin(phase))+phase*2.37+logoMotionSeed)*Math.PI/9;
-    // Horizontal yaw: keep the artwork upright while it turns left and right.
-    lightsContext.transform(Math.cos(angle),0,Math.sin(angle)*.12,1,0,0);
+    // Artwork, title and light share logoX / hologramTop. No independent logo yaw.
     lightsContext.translate(0,34);
     const scale=logoFit(logo),w=logo.width*scale,h=logo.height*scale;
     lightsContext.imageSmoothingEnabled=true;lightsContext.imageSmoothingQuality='high';
@@ -890,6 +790,12 @@ function drawLights(fade,target=map,surface=lights){
 }
 
 const labelMeasureContext=typeof document.createElement==='function'?document.createElement('canvas').getContext('2d'):{font:'',measureText:text=>({width:String(text).length*55})};
+// Refit the first labels once their actual font is ready, including Calm Mode.
+document.fonts?.load("900 100px 'Barlow Condensed'").then(()=>{
+ if(disposed)return;
+ for(const item of document.querySelectorAll('.standalone-hologram-label'))delete item.dataset.signature;
+ scheduleFrame();
+}).catch(()=>{});
 function labelRows(text,width,requiredRows){
  const words=String(text).trim().split(/\s+/).filter(Boolean),candidates=[];
  const partition=(start,rows,left)=>{
@@ -923,9 +829,9 @@ function renderHologramLabels(labels){
   let item=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='title');
   if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.dataset.labelRole='title';item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey,item));root.appendChild(item);}
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
-  item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',labelComplement(label.color));item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}`);
+  item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',label.kind==='housing'?labelComplement(label.color):label.projectionColor);item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);
-  const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.width,label.avatars]);
+  const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.projectionColor,label.width,label.avatars]);
   if(item.dataset.signature!==signature){
    item.dataset.signature=signature;item.replaceChildren();const title=document.createElement('span');title.className='standalone-hologram-title';
    const fitted=labelRows(label.name,label.width,label.kind==='housing'?2:undefined);fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
@@ -1050,7 +956,8 @@ function updateSceneStatus(){
  status.textContent=assetError||(loaded?'':'Preparing Portland…');
  document.body.classList.toggle('scene-ready',loaded);
 }
-function scheduleFrame(){if(!frame&&!disposed&&!document.hidden)frame=requestAnimationFrame(draw);}
+const mapActivity=createMapActivity(map,{onChange:onVisibilityChange});
+function scheduleFrame(){if(!frame&&!disposed&&mapActivity.visible)frame=requestAnimationFrame(draw);}
 map.on('idle',()=>{
  if(loopWaiting){
   surfaceCache.delete(map);glitterCache.delete(map);hologramLayouts.delete(map);
@@ -1067,7 +974,7 @@ setTimeout(()=>{if(!loaded)status.textContent='Portland is still loading…';},8
 let firstFrameSent=false,baseFrameRendered=false;
 function draw(now){
  frame=0;
- if(disposed||document.hidden)return;
+ if(disposed||!mapActivity.visible)return;
  const activeFrameInterval=map.isMoving()?(matchMedia('(pointer:coarse)').matches?1000/30:1000/45):frameInterval;
  if(last&&now-last<activeFrameInterval-1){scheduleFrame();return;}
  const dt=last?Math.min((now-last)/1000,.1):0;last=now;
@@ -1118,23 +1025,22 @@ function onSceneInput(){
 function onSceneResize(){cameraDirty=true;surfaceCache.delete(map);scheduleFrame();}
 function onReducedChange(){last=0;clearLogoPointer();scheduleFrame();}
 for(const control of [opacityControl,pauseControl,speedControl])control.addEventListener('input',onSceneInput);
-window.addEventListener('resize',onSceneResize,{passive:true});
+const stopSceneResize=observeMapSize(map,onSceneResize);
 reduced.addEventListener('change',onReducedChange);
 function onVisibilityChange(){
  cancelAnimationFrame(frame);frame=0;last=0;clearLogoPointer();
  scheduleFrame();
 }
-document.addEventListener('visibilitychange',onVisibilityChange);
 window.addEventListener('pagehide',()=>{
- disposed=true;clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);
+ disposed=true;clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);mapActivity.dispose();
  cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);
  exploration.dispose();
- assetController.abort();reduced.removeEventListener('change',onReducedChange);reduced.dispose();window.removeEventListener('resize',onSceneResize);
+ assetController.abort();reduced.removeEventListener('change',onReducedChange);reduced.dispose();stopSceneResize();
  for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);
  mapHover.dispose();
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
- waterBloom.dispose();hologramMaterials.dispose();
+ waterBloom.dispose();hologramMaterials.dispose();eventProjection.dispose();
  for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
@@ -1146,7 +1052,7 @@ window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();
 
 // Interactive adapter: isolated from the original studio and homepage.
 function tell(type,payload={}){if(parent!==window)parent.postMessage({source:'mapz-demo',type,...payload},location.origin);}
-function viewState(){const c=map.getCenter(),b=map.getBounds();tell('view',{center:[c.lat,c.lng],zoom:map.getZoom(),bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
+function viewState(){const camera=captureCamera(map),b=map.getBounds();tell('view',{center:[camera.center[1],camera.center[0]],zoom:camera.zoom,bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
 const typeIcons=new Map();
 let frozenClusters=null;
 function clusterPlaceMarkers(items,selected,zoom,width,height){
