@@ -5,13 +5,13 @@
   place-items: center;
   width: 34px;
   height: 34px;
-  border: 1.5px solid var(--neon-magenta, #ff00cc);
+  border: 1.5px solid var(--neon-magenta);
   border-radius: 50%;
-  color: var(--neon-magenta, #ff00cc);
+  color: var(--neon-magenta);
 }
 .placez-door-opener__text { display: inline-flex; flex-direction: column; gap: 4px; text-align: left; }
 .placez-door-opener__text small {
-  color: var(--text-lo, #999);
+  color: var(--text-lo);
   font: inherit;
   font-size: 0.8em;
   letter-spacing: inherit;

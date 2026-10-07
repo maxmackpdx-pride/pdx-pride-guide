@@ -8,11 +8,11 @@
   padding: 0 14px;
   border-radius: 6px;
   background: var(--stub, var(--day-tue));
-  color: #fff;
+  color: var(--text-heading);
   font: 700 13px/1 var(--font-mono);
   letter-spacing: 0.08em;
-  -webkit-mask: radial-gradient(circle 9px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 9px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
-  mask: radial-gradient(circle 9px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 9px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+  -webkit-mask: radial-gradient(circle 9px at 0 50%, transparent 98%, var(--z-black)) left / 51% 100% no-repeat, radial-gradient(circle 9px at 100% 50%, transparent 98%, var(--z-black)) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle 9px at 0 50%, transparent 98%, var(--z-black)) left / 51% 100% no-repeat, radial-gradient(circle 9px at 100% 50%, transparent 98%, var(--z-black)) right / 51% 100% no-repeat;
 }
 .events-door-opener { display: inline-flex; align-items: center; gap: 14px; text-transform: uppercase; }
 .events-door-opener__text { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
