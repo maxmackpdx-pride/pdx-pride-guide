@@ -17,7 +17,7 @@ import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-whi
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
 import {logoCoverage} from './logo-mask.js';
-import {createEventProjection,eventProjectionGeometry,eventProjectionSway,EVENT_PROJECTION_COLOR,EVENT_PROJECTION_CLOCK} from './event-projection.js';
+import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
@@ -712,7 +712,7 @@ function drawLights(fade,target=map,surface=lights){
     const projection=eventProjectionGeometry(beamAnchor,{x:logoX,y:hologramTop},beaconScale);
     lightsContext.save();
     lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*bloomScale;
-    eventProjection.draw(lightsContext,projection,pulseTime,phase,reduced.matches);
+    eventProjection.draw(lightsContext,projection,pulseTime,phase,reduced.matches,eventProjectionColor(feature.properties));
     lightsContext.restore();
    continue;
    }
@@ -734,7 +734,7 @@ function drawLights(fade,target=map,surface=lights){
    if(feature.properties.time&&logo&&coreAlpha>.1){
     const fit=logoFit(logo)*renderedArtworkScale;
     const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
-    eventLabels.push({avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+5*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
+    eventLabels.push({projectionColor:eventProjectionColor(feature.properties),avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+5*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
@@ -829,9 +829,9 @@ function renderHologramLabels(labels){
   let item=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='title');
   if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.dataset.labelRole='title';item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey,item));root.appendChild(item);}
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
-  item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',label.kind==='housing'?labelComplement(label.color):EVENT_PROJECTION_CLOCK);item.style.setProperty('--projection-color',EVENT_PROJECTION_COLOR);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}`);
+  item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',label.kind==='housing'?labelComplement(label.color):label.projectionColor);item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);
-  const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.width,label.avatars]);
+  const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.projectionColor,label.width,label.avatars]);
   if(item.dataset.signature!==signature){
    item.dataset.signature=signature;item.replaceChildren();const title=document.createElement('span');title.className='standalone-hologram-title';
    const fitted=labelRows(label.name,label.width,label.kind==='housing'?2:undefined);fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
