@@ -1,3 +1,4 @@
+import {eventProjectionGeometry,eventProjectionSway} from '../client/public/mapz-map/event-projection.js';
 import {eventNight} from '../client/public/mapz-map/event-night.js';
 import {mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP} from '../client/public/mapz-map/venue-attachments.js';
 import {visibleHologramLabels} from '../client/public/mapz-map/label-visibility.js';
@@ -86,11 +87,11 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   const operations=[],noop=()=>{},window={innerWidth:900,innerHeight:1200};
   const ctx=new Proxy({drawImage(image){operations.push(image);},createLinearGradient:()=>({addColorStop:noop}),
     createRadialGradient:()=>({addColorStop:noop})},{get:(target,key)=>key in target?target[key]:noop});
-  const surface={width:900,height:1200,getContext:()=>ctx},map={getZoom:()=>15.5,project:()=>({x:450,y:700})};
+  const surface={width:900,height:1200,getContext:()=>ctx},map={getZoom:()=>15.5,getPitch:()=>55,project:()=>({x:450,y:700})};
   const color='#FF00CC',feature={geometry:{coordinates:[-122.675,45.52]},properties:{key:'demo',kind:'event',demoOpen:true,name:'Musical Mondays',time:'9:00 PM',logo:'logo',phase:1,color,heightScale:1}};
   const logo={width:120,height:60,padding:1,outlined:'sky-logo',image:'artwork',silhouette:'mask'};
   const context=vm.createContext({window,parent:window,performance,rises:new Map(),folds:new Map(),lastBeaconKeys:new Set(),riseAmount:()=>1,foldAmount:()=>1,document:{getElementById:()=>null},map,lights:surface,devicePixelRatio:1,Intl,Date,Map,Set,Math,
-    eventNight,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
+    eventNight,eventProjectionGeometry,eventProjectionSway,extrusionAmount:()=>1,eventProjection:{draw:()=>operations.push('beam')},mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
     updateSurfaces:()=>({buildings:[{}],reflections:[]}),waterBloom:{draw:noop},drawUserLocationGlow:noop,
     citySparkles:{update:noop},buildingGlitter:()=>[],opacityControl:{value:1},motionDelta:1/30,pulseTime:1,
     hologramLiftScale:.7,hologramArtworkScale:3.15,hologramLayouts:new WeakMap(),hologramLabelWidth:68.4,HOUSING_EVENT_HEIGHT_RATIO:1/3,
@@ -110,7 +111,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   });
   vm.runInContext(source,context);let labels=[];context.renderHologramLabels=rows=>{labels=rows;};vm.runInContext('drawLights(1)',context);
   assert.equal(labels.length,1);assert.equal(labels[0].name,'Musical Mondays');assert.equal(labels[0].time,'9:00 PM');assert.ok(labels[0].logoY<700);
-  assert.deepEqual(operations,['beam','building-mask','chrome','building-reflections','waypoint-head','sky-logo']);
+  assert.deepEqual(operations,['beam','building-mask','chrome','building-reflections','sky-logo']);
   const anchored={...labels[0]};context.map.project=()=>({x:487,y:681});
   vm.runInContext('drawLights(1)',context);
   assert.ok(Math.abs(labels[0].x-anchored.x-37)<1e-8);
