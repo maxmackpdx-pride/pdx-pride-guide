@@ -14,10 +14,10 @@ import {createBuildingChrome} from './nightlife-materials.js?v=20260925-smooth-m
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
 import {createBridgeLayer} from '../home-flight/bridge-roads.js?v=20260921-layer-join';
 import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-white-sparkles';
-import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
+import {standaloneDemoRows,standaloneDayBeamDemo,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20261008-day-beams';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
 import {logoCoverage} from './logo-mask.js';
-import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor} from './event-projection.js';
+import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor} from './event-projection.js?v=20261008-cyber';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
@@ -285,6 +285,28 @@ async function decodeVenueLogo(url,mode){
 
   }
  }catch(error){console.warn('Venue logo unavailable',url,error);}
+}
+
+// White artwork, day-token neon outline, slightly see-through with beam-style streaks baked in.
+function dayLogo(logo,color){
+ logo.dayArt||=new Map();
+ if(logo.dayArt.has(color))return logo.dayArt.get(color);
+ const pad=logo.padding+2,w=logo.width+pad*2,h=logo.height+pad*2,canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+ const c=canvas.getContext('2d'),tint=document.createElement('canvas');tint.width=logo.width;tint.height=logo.height;
+ const t=tint.getContext('2d');t.drawImage(logo.image,0,0);t.globalCompositeOperation='source-in';t.fillStyle=color;t.fillRect(0,0,tint.width,tint.height);
+ const ring=Math.max(1.5,pad*.45);
+ c.save();c.shadowColor=color;c.shadowBlur=pad*.9;
+ for(let i=0;i<12;i++){const a=i*Math.PI/6;c.drawImage(tint,pad+Math.cos(a)*ring,pad+Math.sin(a)*ring);}
+ c.restore();
+ // Hollow the ring's interior so the white fill reads see-through over the beam.
+ c.globalCompositeOperation='destination-out';c.globalAlpha=.3;c.drawImage(logo.image,pad,pad);
+ c.globalCompositeOperation='source-over';c.globalAlpha=.86;c.drawImage(logo.image,pad,pad);
+ // Beam texture inside the letters: fine vertical filaments in the day color.
+ const fill=document.createElement('canvas');fill.width=logo.width;fill.height=logo.height;const f=fill.getContext('2d');
+ for(let x=0;x<logo.width;x+=3){f.globalAlpha=.1+.28*((x*37)%11)/11;f.fillStyle=color;f.fillRect(x,0,1,logo.height);}
+ f.globalAlpha=1;f.globalCompositeOperation='destination-in';f.drawImage(logo.image,0,0);
+ c.globalAlpha=1;c.drawImage(fill,pad,pad);
+ const out={canvas,pad};logo.dayArt.set(color,out);return out;
 }
 const logoMotionSeed=Math.random()*Math.PI*2;
 let pulseTime=0,motionDelta=1/30;
@@ -752,7 +774,7 @@ function drawLights(fade,target=map,surface=lights){
      lightsContext.restore();
     }
     lightsContext.globalAlpha=coreAlpha*(1-glitch*.4);
-    lightsContext.drawImage(logo.outlined,-w/2-padding,-34-h/2-padding,w+padding*2,h+padding*2);
+    {const art=dayLogo(logo,eventProjectionColor(feature.properties)),k=scale,ap=art.pad*k;lightsContext.drawImage(art.canvas,-w/2-ap,-34-h/2-ap,art.canvas.width*k,art.canvas.height*k);}
     if(glitch>0){
      lightsContext.save();lightsContext.globalAlpha=coreAlpha*glitch*.75;
      for(let band=0;band<3;band++){const sy=((band*.31+pulseTime*.8)%1)*logo.height,sh=Math.min(logo.height*.045,logo.height-sy);const shift=Math.sin(pulseTime*47+band*2)*glitch*1.6;lightsContext.drawImage(logo.image,0,sy,logo.width,sh,-w/2+shift,-34-h/2+sy*scale,w,sh*scale);}
@@ -1041,7 +1063,7 @@ window.addEventListener('pagehide',()=>{
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
  waterBloom.dispose();hologramMaterials.dispose();eventProjection.dispose();
- for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
+ for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic,...[...(logo.dayArt?.values()||[])].map(art=>art.canvas)])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
  if(map.getLayer(groundLightPools.id))map.removeLayer(groundLightPools.id);
@@ -1129,6 +1151,6 @@ map.on('moveend',viewState);
 map.on('webglcontextlost',()=>startup.fatal('The 3D graphics context was lost.'));
 map.on('load',()=>{
  pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));
- if(parent===window){map.jumpTo(STANDALONE_DEMO_VIEW);void setListings(standaloneDemoRows());}
+ if(parent===window){map.jumpTo(STANDALONE_DEMO_VIEW);void setListings([...standaloneDemoRows(),...(new URLSearchParams(location.search).has('daybeams')?standaloneDayBeamDemo():[])]);}
  viewState();tell('ready');
 });

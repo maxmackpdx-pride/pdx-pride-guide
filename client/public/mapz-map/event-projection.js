@@ -32,7 +32,10 @@ export function createEventProjection() {
     const painter=texture.getContext('2d'),pixels=painter.createImageData(texture.width,texture.height);
     const rgb=[1,3,5].map(index=>parseInt(color.slice(index,index+2),16));
     // The body is a volume with an elliptical opening, not a flat triangular sheet.
-    const cap=.04;
+    const cap=.04,streaks=new Float32Array(texture.width);
+    let seed=7;const rand=()=>(seed=(seed*16807)%2147483647)/2147483647;
+    for(let n=0;n<70;n++){const centre=rand()*texture.width,width=.8+rand()*3.2,power=.25+rand()*.75;
+     for(let x=Math.max(0,Math.floor(centre-width*3));x<Math.min(texture.width,centre+width*3);x++)streaks[x]=Math.min(1,streaks[x]+power*Math.exp(-(((x-centre)/width)**2)));}
     for(let y=0;y<texture.height;y++)for(let x=0;x<texture.width;x++){
       const v=y/(texture.height-1),u=x/(texture.width-1)*2-1;
       const t=Math.max(0,(v-cap)/(1-cap)),radius=Math.max(.002,1-t),across=Math.abs(u)/radius;
@@ -42,7 +45,9 @@ export function createEventProjection() {
       const volume=inBody?Math.sqrt(Math.max(0,1-across*across)):0;
       const edge=inBody?Math.exp(-(((across-.97)/.045)**2)):0;
       const rim=inCap?Math.exp(-(((Math.sqrt(ellipse)-.97)/.04)**2)):0;
-      const alpha=.025+.15*volume+.1*edge+.1*rim+.3*t**10;
+      // Soft light shafts: uneven filaments of varied width, brightest near the emitter, no grid.
+      const streak=inBody?streaks[x]*(.35+.65*(1-t)**.6)*(.4+.6*volume):0;
+      const alpha=.03+.12*volume+.1*edge+.1*rim+.3*t**10+.34*streak;
       const white=.12+.66*t**8,i=(y*texture.width+x)*4;
       for(let c=0;c<3;c++)pixels.data[i+c]=rgb[c]+(255-rgb[c])*white;
       pixels.data[i+3]=Math.round(255*alpha);
@@ -61,16 +66,43 @@ export function createEventProjection() {
       ctx.beginPath();ctx.moveTo(halfWidth,height);ctx.lineTo(0,depth);
       ctx.ellipse(halfWidth,depth,halfWidth,depth,0,Math.PI,Math.PI*2);
       ctx.closePath();ctx.clip();
-      const baseAlpha=ctx.globalAlpha,pitch=Math.max(3,height/100);
-      const offset=(clock*3+phase)%pitch;
-      ctx.globalCompositeOperation='source-over';ctx.fillStyle='#020409';ctx.globalAlpha=baseAlpha*.26;
-      for(let y=offset;y<height;y+=pitch)ctx.fillRect(0,y,halfWidth*2,.85);
-      ctx.globalCompositeOperation='screen';ctx.fillStyle=color;ctx.globalAlpha=baseAlpha*.2;
-      for(let y=offset+1;y<height;y+=pitch)ctx.fillRect(0,y,halfWidth*2,.6);
+      const baseAlpha=ctx.globalAlpha;
+      ctx.globalCompositeOperation='screen';
+      // Shimmer: the shafts slide sideways against themselves, like light through haze.
+      if(!reduced){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=baseAlpha*.35;ctx.drawImage(texture,Math.sin(clock*.6+phase)*halfWidth*.05,0,halfWidth*2,height);}
+      if(!reduced){
+       // Cyberpunk split: ghost copies of the day-token beam straddle it. No off-palette colors.
+       const split=halfWidth*(.035+.02*Math.sin(clock*1.7+phase));
+       ctx.globalAlpha=baseAlpha*.16;
+       ctx.drawImage(texture,-split,0,halfWidth*2,height);
+       ctx.drawImage(texture,split,0,halfWidth*2,height);
+       // Brief data tear: a horizontal slice jumps sideways, then snaps back.
+       const cycle=(clock*.23+phase*.41)%1;
+       if(cycle<.035){
+        const sliceY=height*((phase*3.7+Math.floor(clock*.23+phase*.41)*.37)%1),sliceH=Math.max(4,height*.05),jump=halfWidth*(cycle<.018?.28:-.2);
+        ctx.globalAlpha=baseAlpha*.7;
+        ctx.drawImage(texture,0,sliceY/height*texture.height,texture.width,sliceH/height*texture.height,jump,sliceY,halfWidth*2,sliceH);
+       }
+       // Neon flicker on the whole shaft.
+       const flick=Math.sin(clock*31+phase*9)*Math.sin(clock*7.3+phase);
+       if(flick>.93){ctx.globalAlpha=baseAlpha*.25;ctx.drawImage(texture,0,0,halfWidth*2,height);}
+      }
       const scan=(clock*.075+phase*.17)%1,scanY=height*(1-scan);
       const band=ctx.createLinearGradient(0,scanY-7,0,scanY+7);
       band.addColorStop(0,color+'00');band.addColorStop(.5,color+'80');band.addColorStop(1,color+'00');
       ctx.globalAlpha=baseAlpha*.35;ctx.fillStyle=band;ctx.fillRect(0,scanY-7,halfWidth*2,14);
+      // Cyber motion: data pulses climb the filaments and sparks drift upward, widening with the cone.
+      if(!reduced){
+       ctx.globalCompositeOperation='screen';ctx.fillStyle='#ffffff';
+       for(let k=0;k<14;k++){
+        const rise=(clock*(.05+.03*((k*7)%5)/5)+phase*.13+k*.173)%1,y=height*(1-rise);
+        const spread=Math.max(.04,1-y/height)*.0+(y/height),lane=(((k*0.618)+phase*.37)%1)*2-1,across=halfWidth+lane*halfWidth*.9*Math.min(1,spread+.08)*.9;
+        ctx.globalAlpha=baseAlpha*.7*Math.sin(Math.PI*rise);
+        ctx.fillRect(across-.6,y,1.2,k%3?3:9);
+       }
+       const flicker=.5+.5*Math.sin(clock*9+phase*3);
+       if(flicker>.93){ctx.globalAlpha=baseAlpha*.18;ctx.fillStyle=color;ctx.fillRect(0,height*((clock*.37+phase)%1),halfWidth*2,1.5);}
+      }
       ctx.restore();
       ctx.save();ctx.globalCompositeOperation='screen';
       const radius=Math.max(3,Math.min(12,halfWidth*.2));
