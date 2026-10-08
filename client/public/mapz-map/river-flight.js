@@ -17,7 +17,7 @@ import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-whi
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
 import {logoCoverage} from './logo-mask.js';
-import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor} from './event-projection.js?v=20261008-lattice';
+import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor} from './event-projection.js?v=20261008-shafts';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
