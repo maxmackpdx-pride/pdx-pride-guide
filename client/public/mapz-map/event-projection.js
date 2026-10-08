@@ -71,11 +71,11 @@ export function createEventProjection() {
       // Shimmer: the shafts slide sideways against themselves, like light through haze.
       if(!reduced){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=baseAlpha*.35;ctx.drawImage(texture,Math.sin(clock*.6+phase)*halfWidth*.05,0,halfWidth*2,height);}
       if(!reduced){
-       // Cyberpunk RGB split: magenta and cyan ghosts straddle the beam.
+       // Cyberpunk split: ghost copies of the day-token beam straddle it. No off-palette colors.
        const split=halfWidth*(.035+.02*Math.sin(clock*1.7+phase));
        ctx.globalAlpha=baseAlpha*.16;
-       ctx.drawImage(material('#ff2bd6'),-split,0,halfWidth*2,height);
-       ctx.drawImage(material('#19e6ff'),split,0,halfWidth*2,height);
+       ctx.drawImage(texture,-split,0,halfWidth*2,height);
+       ctx.drawImage(texture,split,0,halfWidth*2,height);
        // Brief data tear: a horizontal slice jumps sideways, then snaps back.
        const cycle=(clock*.23+phase*.41)%1;
        if(cycle<.035){
