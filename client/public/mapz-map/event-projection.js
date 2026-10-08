@@ -70,6 +70,23 @@ export function createEventProjection() {
       ctx.globalCompositeOperation='screen';
       // Shimmer: the shafts slide sideways against themselves, like light through haze.
       if(!reduced){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=baseAlpha*.35;ctx.drawImage(texture,Math.sin(clock*.6+phase)*halfWidth*.05,0,halfWidth*2,height);}
+      if(!reduced){
+       // Cyberpunk RGB split: magenta and cyan ghosts straddle the beam.
+       const split=halfWidth*(.035+.02*Math.sin(clock*1.7+phase));
+       ctx.globalAlpha=baseAlpha*.16;
+       ctx.drawImage(material('#ff2bd6'),-split,0,halfWidth*2,height);
+       ctx.drawImage(material('#19e6ff'),split,0,halfWidth*2,height);
+       // Brief data tear: a horizontal slice jumps sideways, then snaps back.
+       const cycle=(clock*.23+phase*.41)%1;
+       if(cycle<.035){
+        const sliceY=height*((phase*3.7+Math.floor(clock*.23+phase*.41)*.37)%1),sliceH=Math.max(4,height*.05),jump=halfWidth*(cycle<.018?.28:-.2);
+        ctx.globalAlpha=baseAlpha*.7;
+        ctx.drawImage(texture,0,sliceY/height*texture.height,texture.width,sliceH/height*texture.height,jump,sliceY,halfWidth*2,sliceH);
+       }
+       // Neon flicker on the whole shaft.
+       const flick=Math.sin(clock*31+phase*9)*Math.sin(clock*7.3+phase);
+       if(flick>.93){ctx.globalAlpha=baseAlpha*.25;ctx.drawImage(texture,0,0,halfWidth*2,height);}
+      }
       const scan=(clock*.075+phase*.17)%1,scanY=height*(1-scan);
       const band=ctx.createLinearGradient(0,scanY-7,0,scanY+7);
       band.addColorStop(0,color+'00');band.addColorStop(.5,color+'80');band.addColorStop(1,color+'00');
