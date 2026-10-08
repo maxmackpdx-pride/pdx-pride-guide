@@ -14,7 +14,7 @@ import {createBuildingChrome} from './nightlife-materials.js?v=20260925-smooth-m
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
 import {createBridgeLayer} from '../home-flight/bridge-roads.js?v=20260921-layer-join';
 import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-white-sparkles';
-import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
+import {standaloneDemoRows,standaloneDayBeamDemo,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20261008-day-beams';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
 import {logoCoverage} from './logo-mask.js';
 import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor} from './event-projection.js?v=20261008-cyber';
@@ -1129,6 +1129,6 @@ map.on('moveend',viewState);
 map.on('webglcontextlost',()=>startup.fatal('The 3D graphics context was lost.'));
 map.on('load',()=>{
  pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));
- if(parent===window){map.jumpTo(STANDALONE_DEMO_VIEW);void setListings(standaloneDemoRows());}
+ if(parent===window){map.jumpTo(STANDALONE_DEMO_VIEW);void setListings([...standaloneDemoRows(),...(new URLSearchParams(location.search).has('daybeams')?standaloneDayBeamDemo():[])]);}
  viewState();tell('ready');
 });

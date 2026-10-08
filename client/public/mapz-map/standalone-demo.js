@@ -1,3 +1,4 @@
+import {DAYS} from './radix-map.js';
 // Existing directory coordinates and artwork, used only by the standalone
 // visual demo. No sample event dates or titles enter the hosted event feed.
 export const STANDALONE_DEMO_VIEW={center:[-122.651,45.535],zoom:13.4,pitch:48,bearing:0};
@@ -37,4 +38,15 @@ export function standaloneDemoRows(){
     {key:'demo-houz-managed',kind:'housing',name:'PROPERTY FOR RENT',coordinates:[-122.6478,45.5589],color:'#8800FF',logo:'',housingModel:'MANAGED',waypointFamily:'houz',typeIcon:'./icons/housing-managed.svg',neighborhoodLabel:'NORTHEAST PORTLAND',avatars:[{url:'../avatars/bridge.webp',initial:'P',background:'#8800FF'}],demoOpen:true},
     ...standaloneDowntownPlacez(),
   ];
+}
+// Opt-in (?daybeams): one beam per Pride week night, colored by the DAYS tokens. No event dates.
+export function standaloneDayBeamDemo(){
+  const nights=[['mon','2026-07-13','Camp Bar PDX','Karaoke','8:00 PM','./venue-logos/28-0.png',[-122.682349851482,45.522423862572]],
+   ['tue','2026-07-14','Sanctuary','Game Bang!','8:00 PM','./venue-logos/33-0.png',[-122.680179337043,45.5232]],
+   ['thu','2026-07-16','Badlands','Woman Crush','10:00 PM','./venue-logos/badlands-official.png',[-122.677388010838,45.5238]],
+   ['fri','2026-07-17','Stag PDX','Friday Night','9:00 PM','./venue-logos/3-0.png',[-122.677601642236,45.52533]],
+   ['sat','2026-07-18','CC Slaughters','Saturday Social','10:00 PM','./venue-logos/1-0.png',[-122.67265978363,45.52461]]];
+  return nights.map(([day,night,venue,name,time,logo,coordinates])=>({
+    key:`demo-night-${day}`,kind:'event',name,venueName:venue,time,coordinates,logo,logoMode:'alpha',
+    dayColor:DAYS[day],demoOpen:true,color:DAYS[day]}));
 }
