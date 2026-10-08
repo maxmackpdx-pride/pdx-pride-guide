@@ -1,6 +1,43 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor} from '../client/public/mapz-map/event-projection.js';
+import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor,eventProjectionFacing,eventLightFrame} from '../client/public/mapz-map/event-projection.js';
+
+test('light film wraps through adjacent frames and Calm Mode holds the same frame',()=>{
+  assert.deepEqual(eventLightFrame(7-1/24),{frame:83,next:0,mix:.5});
+  assert.deepEqual(eventLightFrame(7),eventLightFrame(0));
+  for(const variant of [0,1,2])assert.deepEqual(eventLightFrame(2,variant,true),eventLightFrame(99,variant,true));
+});
+
+test('camera-facing artwork follows the projected axis with a bounded shared tilt',()=>{
+  const anchor={x:200,y:600};
+  const facing=x=>eventProjectionFacing(eventProjectionGeometry(anchor,{x,y:200}));
+  assert.equal(facing(200).roll,0);
+  assert.ok(facing(100).roll<0);assert.ok(facing(300).roll>0);
+  for(const x of [-1000,100,200,300,2000]){
+    const {roll,shear}=facing(x);
+    assert.ok(Math.abs(roll)<=.065);assert.ok(Math.abs(shear)<=.075);
+  }
+});
+
+test('the extracted light film has a gradual wrap and no embedded source colors',async()=>{
+  const {default:sharp}=await import('sharp');
+  for(let variant=0;variant<3;variant++){
+    const {data,info}=await sharp(new URL(`../client/public/mapz-map/textures/event-light-${variant}.webp`,import.meta.url).pathname).raw().toBuffer({resolveWithObject:true});
+    assert.deepEqual([info.width,info.height,info.channels],[512,2816,4]);
+    const delta=(a,b)=>{
+      let sum=0;
+      for(let y=0;y<256;y++)for(let x=0;x<64;x++){
+        const i=((Math.floor(a/8)*256+y)*512+(a%8)*64+x)*4;
+        const j=((Math.floor(b/8)*256+y)*512+(b%8)*64+x)*4;
+        if(data[i+3])assert.ok(data[i]===data[i+1]&&data[i+1]===data[i+2]);
+        sum+=Math.abs(data[i+3]-data[j+3]);
+      }
+      return sum/(64*256);
+    };
+    const steps=Array.from({length:83},(_,i)=>delta(i,i+1)).sort((a,b)=>a-b);
+    assert.ok(delta(83,0)<steps[Math.floor(steps.length*.95)]*1.5+1,'loop reset must be comparable to adjacent frames');
+  }
+});
 
 test('projection remains tall and narrow at phone and desktop scales and pins its apex',()=>{
   const anchor={x:170,y:600};

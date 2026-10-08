@@ -17,7 +17,7 @@ import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-whi
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
 import {logoCoverage} from './logo-mask.js';
-import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor} from './event-projection.js';
+import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor,eventProjectionFacing} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
@@ -395,7 +395,7 @@ function buildingGlitter(target,surfaces){
  points=whiteSparkles(points,30);
  glitterCache.set(target,{time:now,surfaces,flat,coarse,overview,points});return points;
 }
-const eventProjection=createEventProjection();
+const eventProjection=createEventProjection(()=>scheduleFrame());
 const hologramLayouts=new WeakMap();
 const logoSpacing=1.15;
 const hologramLiftScale=.7*TONIGHT_HEIGHT_MULTIPLIER*.8*1.15*1.35;
@@ -701,7 +701,6 @@ function drawLights(fade,target=map,surface=lights){
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
   lightsContext.globalAlpha=(fade*pulse*beamAlpha)*bloomScale;
   if(isBar){
-   if(pass===0){
     // One fixed rooftop emitter; only the projection's head drifts.
     const parent=venueItems.get(feature.properties.venueWaypointKey)||{feature,p};
     const coordinates=parent.feature.geometry.coordinates;
@@ -710,6 +709,8 @@ function drawLights(fade,target=map,surface=lights){
     const roofPixels=roof*extrusionAmount(target)/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
     const beamAnchor={x:parent.p.x,y:parent.p.y-roofPixels};
     const projection=eventProjectionGeometry(beamAnchor,{x:logoX,y:hologramTop},beaconScale);
+    const facing=eventProjectionFacing(projection);
+   if(pass===0){
     lightsContext.save();
     lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*bloomScale;
     eventProjection.draw(lightsContext,projection,pulseTime,phase,reduced.matches,eventProjectionColor(feature.properties));
@@ -722,7 +723,9 @@ function drawLights(fade,target=map,surface=lights){
    const renderedArtworkScale=hologramArtworkScale*beaconScale;
    lightsContext.save();lightsContext.globalAlpha=coreAlpha;
    // Keep every part of the hologram attached to the same map-tracked center.
-   lightsContext.translate(logoX,hologramCenterY+34*renderedArtworkScale);lightsContext.scale(renderedArtworkScale,renderedArtworkScale);
+   lightsContext.translate(logoX,hologramCenterY);lightsContext.rotate(facing.roll);
+   lightsContext.transform(1,0,facing.shear,1,0,0);
+   lightsContext.scale(renderedArtworkScale,renderedArtworkScale);lightsContext.translate(0,34);
    const canCycle=feature.properties.alternateLogo&&venueLogos.has(feature.properties.alternateLogo);
    const cycle=pulseTime/5,swapProgress=(pulseTime%5)/.48;
    const cycleIndex=Math.floor(cycle);
@@ -734,12 +737,15 @@ function drawLights(fade,target=map,surface=lights){
    if(feature.properties.time&&logo&&coreAlpha>.1){
     const fit=logoFit(logo)*renderedArtworkScale;
     const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
-    eventLabels.push({projectionColor:eventProjectionColor(feature.properties),avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+5*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
+    const labelOffset=logoHeight/2+5*beaconScale;
+    const labelX=logoX+(Math.cos(facing.roll)*facing.shear-Math.sin(facing.roll))*labelOffset;
+    const labelY=hologramCenterY+(Math.cos(facing.roll)+Math.sin(facing.roll)*facing.shear)*labelOffset;
+    eventLabels.push({facing,projectionColor:eventProjectionColor(feature.properties),avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:labelX,y:labelY,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
     lightsContext.save();lightsContext.translate(0,-34);
-    // Artwork, title and light share logoX / hologramTop. No independent logo yaw.
+    // The shared billboard tilt keeps artwork and title aligned to the beam.
     lightsContext.translate(0,34);
     const scale=logoFit(logo),w=logo.width*scale,h=logo.height*scale;
     lightsContext.imageSmoothingEnabled=true;lightsContext.imageSmoothingQuality='high';
@@ -830,6 +836,8 @@ function renderHologramLabels(labels){
   if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.dataset.labelRole='title';item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey,item));root.appendChild(item);}
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
   item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',label.kind==='housing'?labelComplement(label.color):label.projectionColor);item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}`);
+  item.style.setProperty('--label-roll',`${label.facing?.roll||0}rad`);
+  item.style.setProperty('--label-shear',`${Math.atan(label.facing?.shear||0)}rad`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);
   const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.projectionColor,label.width,label.avatars]);
   if(item.dataset.signature!==signature){

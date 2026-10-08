@@ -22,6 +22,7 @@ export async function prepareMapz(publicRoot:string) {
  // import.meta.url in bundled model loaders resolves next to boot.js.
  collect(path.join(mapRoot,'models'),'models');
  collect(path.join(mapRoot,'fonts'),'fonts');
+ collect(path.join(mapRoot,'textures'),'textures');
  const hash=createHash('sha256');for(const [name,bytes] of files)hash.update(name).update('\0').update(bytes);
  const base='/assets/mapz-'+hash.digest('hex').slice(0,16);
  const assets={script:base+'/boot.js',maplibre:base+'/maplibre.js',maplibreCss:base+'/maplibre.css',contour:base+'/contour.js',style:base+'/studio.css',perf:base+'/perf.js'};

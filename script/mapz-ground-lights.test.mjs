@@ -95,7 +95,7 @@ test('sparse building tiles keep street sparkles at overview zooms through sixte
     createSpatialIndex:()=>()=>[],intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles,CITY_SPARKLE_MAX_ZOOM,target,
   });
   vm.runInContext(renderer.slice(renderer.indexOf('function updateSurfaces('),renderer.indexOf('function drawSurfaceReflections(')),context);
-  vm.runInContext(renderer.slice(renderer.indexOf('function buildingGlitter('),renderer.indexOf('const logoFocus=')),context);
+  vm.runInContext(renderer.slice(renderer.indexOf('function buildingGlitter('),renderer.indexOf('const eventProjection=')),context);
   for(const zoom of [10,12,14,16]){
     target.getZoom=()=>zoom;
     const points=vm.runInContext('buildingGlitter(target,updateSurfaces(target))',context);
