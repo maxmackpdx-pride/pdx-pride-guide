@@ -42,7 +42,9 @@ export function createEventProjection() {
       const volume=inBody?Math.sqrt(Math.max(0,1-across*across)):0;
       const edge=inBody?Math.exp(-(((across-.97)/.045)**2)):0;
       const rim=inCap?Math.exp(-(((Math.sqrt(ellipse)-.97)/.04)**2)):0;
-      const alpha=.025+.15*volume+.1*edge+.1*rim+.3*t**10;
+      // Fine vertical filaments and a faint cross grid give the beam its projected-lattice look.
+      const strand=inBody&&(x%9===0)?.16*volume:0,gridRow=inBody&&(y%24===0)?.1*volume:0;
+      const alpha=.03+.15*volume+.1*edge+.1*rim+.3*t**10+strand*(.5+.5*t)+gridRow;
       const white=.12+.66*t**8,i=(y*texture.width+x)*4;
       for(let c=0;c<3;c++)pixels.data[i+c]=rgb[c]+(255-rgb[c])*white;
       pixels.data[i+3]=Math.round(255*alpha);
@@ -71,6 +73,18 @@ export function createEventProjection() {
       const band=ctx.createLinearGradient(0,scanY-7,0,scanY+7);
       band.addColorStop(0,color+'00');band.addColorStop(.5,color+'80');band.addColorStop(1,color+'00');
       ctx.globalAlpha=baseAlpha*.35;ctx.fillStyle=band;ctx.fillRect(0,scanY-7,halfWidth*2,14);
+      // Cyber motion: data pulses climb the filaments and sparks drift upward, widening with the cone.
+      if(!reduced){
+       ctx.globalCompositeOperation='screen';ctx.fillStyle='#ffffff';
+       for(let k=0;k<14;k++){
+        const rise=(clock*(.05+.03*((k*7)%5)/5)+phase*.13+k*.173)%1,y=height*(1-rise);
+        const spread=Math.max(.04,1-y/height)*.0+(y/height),lane=(((k*0.618)+phase*.37)%1)*2-1,across=halfWidth+lane*halfWidth*.9*Math.min(1,spread+.08)*.9;
+        ctx.globalAlpha=baseAlpha*.7*Math.sin(Math.PI*rise);
+        ctx.fillRect(across-.6,y,1.2,k%3?3:9);
+       }
+       const flicker=.5+.5*Math.sin(clock*9+phase*3);
+       if(flicker>.93){ctx.globalAlpha=baseAlpha*.18;ctx.fillStyle=color;ctx.fillRect(0,height*((clock*.37+phase)%1),halfWidth*2,1.5);}
+      }
       ctx.restore();
       ctx.save();ctx.globalCompositeOperation='screen';
       const radius=Math.max(3,Math.min(12,halfWidth*.2));
