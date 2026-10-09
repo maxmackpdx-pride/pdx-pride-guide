@@ -34,6 +34,7 @@ type FeaturedConfig = {
   slides: string[];                  // extra slideshow frames after the poster
   /** Full-screen easter egg (slideshow/countdown click). */
   easterEggUrl?: string;
+  mediaAspectRatio?: string;
 };
 
 const STANK_SLIDES = Array.from({ length: 11 }, (_, i) =>
@@ -48,6 +49,12 @@ const FEATURED: FeaturedConfig[] = [
     match: (t) => /stank\W*yes\W*coach|yes\W*coach\W*stank/i.test(t) || /\bstank\b/i.test(t),
     slides: STANK_SLIDES,
     easterEggUrl: "/easter-eggs/stank-secret-story.html",
+  },
+  {
+    key: "little-shop-of-ponies-2026",
+    mediaAspectRatio: "1239 / 1536",
+    match: (t) => /little\W+shop\W+of\W+ponies/i.test(t),
+    slides: [],
   },
   // Add more featured events here - they rotate through the non-anchor slots.
 ];
@@ -291,6 +298,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
       event={featured.event}
       slides={featured.slides}
       easterEggUrl={featured.easterEggUrl}
+      mediaAspectRatio={featured.mediaAspectRatio}
       onDismiss={() => dismissFeatured(featured.key)}
     />
   ) : null;

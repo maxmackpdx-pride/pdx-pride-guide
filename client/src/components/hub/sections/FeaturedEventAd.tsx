@@ -57,6 +57,7 @@ type Props = {
    * opens it full-screen (e.g. Stank Secret Story).
    */
   easterEggUrl?: string | null;
+  mediaAspectRatio?: string;
 };
 
 function EasterEggOverlay({
@@ -270,6 +271,7 @@ export default function FeaturedEventAd({
   onDismiss,
   slides = [],
   easterEggUrl = null,
+  mediaAspectRatio,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [eggOpen, setEggOpen] = useState(false);
@@ -337,7 +339,7 @@ export default function FeaturedEventAd({
             aria-label={easterEggUrl ? "Open secret story" : undefined}
             onClick={easterEggUrl ? openEgg : undefined}
             onKeyDown={eggKeys}
-            style={{ cursor: easterEggUrl ? "pointer" : "default" }}
+            style={{ cursor: easterEggUrl ? "pointer" : "default", aspectRatio: mediaAspectRatio }}
           >
             <span className="featured-event-ad__scan" aria-hidden="true" />
             {frames.map((f, i) => (
