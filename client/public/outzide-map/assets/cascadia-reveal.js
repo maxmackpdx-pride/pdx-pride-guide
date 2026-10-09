@@ -52,10 +52,10 @@ export function animateCascadia(render){
   frameId=requestAnimationFrame(tick);
  };
 }
-export function installCascadiaReveal(map,places=[]){
+export function installCascadiaReveal(map,places=[],{preserveCamera=false}={}){
  const extent=destinationExtent(places);
  let active=false,framing=false,entryCenter=null,camera,reveal=0;
- const sign=document.createElement('div');sign.id='cascadia-reveal';sign.hidden=true;sign.setAttribute('role','status');sign.innerHTML='<img src="assets/cascadia-wordmark.png" alt="Cascadia">';document.body.append(sign);
+ const sign=document.createElement('div');sign.id='cascadia-reveal';sign.hidden=true;sign.setAttribute('role','status');sign.innerHTML='<img loading="lazy" src="assets/cascadia-wordmark.png" alt="Cascadia">';document.body.append(sign);
  const frame=()=>{const el=map.getContainer();return cascadiaCamera(el.clientWidth,el.clientHeight,map.getPitch(),map.getBearing(),extent);};
  const layers=()=>{for(const layer of map.getStyle()?.layers||[]){if(layer.id.startsWith('i5-spectrum-'))map.setLayoutProperty(layer.id,'visibility',active?'none':'visible');if(layer.id.startsWith('cascadia-')){map.setLayoutProperty(layer.id,'visibility',active||reveal>0?'visible':'none');const opacity={'cascadia-bloom':.42,'cascadia-halo':.75,'cascadia-core':1}[layer.id];if(opacity!==undefined)map.setPaintProperty?.(layer.id,'line-opacity',opacity*reveal);}}};
  const animate=animateCascadia(value=>{
@@ -64,15 +64,16 @@ export function installCascadiaReveal(map,places=[]){
   layers();
  });
  const place=()=>{framing=true;map.stop();map.jumpTo(camera);framing=false;};
- const enter=()=>{if(framing)return;if(!active){entryCenter=map.getCenter();active=true;document.body.classList.toggle('cascadia-mode',true);sign.hidden=false;sign.setAttribute('aria-hidden','false');animate(true);layers();}place();};
- const update=()=>{if(framing)return;
+ const enter=()=>{if(framing)return;preserveCamera=false;if(!active){entryCenter=map.getCenter();active=true;document.body.classList.toggle('cascadia-mode',true);sign.hidden=false;sign.setAttribute('aria-hidden','false');animate(true);layers();}place();};
+ const update=()=>{if(framing||preserveCamera)return;
   if(map.getZoom()<=camera.zoom+.08){if(!active)enter();return;}
   if(active&&map.getZoom()>camera.zoom+.15){active=false;document.body.classList.toggle('cascadia-mode',false);sign.setAttribute('aria-hidden','true');animate(false);layers();}
  };
- const configure=()=>{if(framing)return;const el=map.getContainer();if(!el||el.clientWidth<48||el.clientHeight<48)return;framing=true;camera=frame();const maxZoom=typeof map.getMaxZoom==="function"?map.getMaxZoom():22;const zoom=Number.isFinite(camera.zoom)?Math.min(maxZoom,Math.max(-2,camera.zoom)):null;if(zoom!=null)map.setMinZoom(zoom);framing=false;if(active)place();else update();};
+ const configure=()=>{if(framing)return;const el=map.getContainer();if(!el||el.clientWidth<48||el.clientHeight<48)return;framing=true;camera=frame();const maxZoom=typeof map.getMaxZoom==="function"?map.getMaxZoom():22;const zoom=Number.isFinite(camera.zoom)?Math.min(maxZoom,Math.max(-2,camera.zoom)):null;if(zoom!=null)map.setMinZoom(preserveCamera?Math.min(zoom,map.getZoom()):zoom);framing=false;if(preserveCamera)return;if(active)place();else update();};
  const zoomOut=document.getElementById('zoom-out');if(zoomOut)zoomOut.onclick=()=>{if(map.getZoom()-1<=camera.zoom+.08)enter();else map.zoomOut();};
  document.addEventListener('click',e=>{if(active&&e.target.closest('.browse-toggle,#updates-button,[data-kind]'))map.jumpTo({center:entryCenter,zoom:Math.max(5.5,camera.zoom+1)});});
  // Wheel, trackpad and pinch trigger during movement, not only after momentum ends.
+ map.on('movestart',event=>{if(event.originalEvent)preserveCamera=false;});
  map.on('zoom',update);map.on('zoomend',update);
  map.on('moveend',()=>{if(framing||!active)return;if(map.getPitch()!==camera.pitch||map.getBearing()!==camera.bearing){configure();return;}const center=map.getCenter();if(Math.abs(center.lng-camera.center[0])>.01||Math.abs(center.lat-camera.center[1])>.01)place();});
  map.on('load',()=>{configure();layers();});map.on('resize',configure);map.on('pitchend',configure);map.on('rotateend',configure);configure();return update;

@@ -1,3 +1,4 @@
+import { readCameraParams } from "../../public/map-foundation/camera.js";
 import { mapCoordinates } from "./mapCoordinates";
 import { normalizeDirectoryName } from "./directoryLogos";
 
@@ -112,10 +113,9 @@ export function legacyWorldMapHref(world:MapWorld, search:string, recordId?:stri
   return `/map?${next}`;
 }
 
-export function readMapCamera(params:URLSearchParams):{center:[number,number];zoom:number;bounds:MapBounds}|null {
-  const lat=params.get("lat"),lng=params.get("lng"),z=params.get("zoom");
-  if(lat===null||lng===null||z===null)return null;
-  const point=mapCoordinates(lat,lng),zoom=Number(z);
-  if(!point||!Number.isFinite(zoom)||zoom<10||zoom>17.75)return null;
-  return {center:[point.lat,point.lng],zoom,bounds:{south:point.lat,north:point.lat,west:point.lng,east:point.lng}};
+export function readMapCamera(params:URLSearchParams):{center:[number,number];zoom:number;pitch:number;bearing:number;bounds:MapBounds}|null {
+  const camera=readCameraParams(params);
+  if(!camera)return null;
+  const [lng,lat]=camera.center;
+  return {center:[lat,lng],zoom:camera.zoom,pitch:camera.pitch,bearing:camera.bearing,bounds:{south:lat,north:lat,west:lng,east:lng}};
 }

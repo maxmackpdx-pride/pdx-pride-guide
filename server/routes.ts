@@ -216,7 +216,7 @@ import {
   findDirectoryMatches,
   type DirectoryMergePayload,
 } from "@shared/directoryMatch";
-import type { Event } from "@shared/schema";
+import type { Event, Business } from "@shared/schema";
 import {
   beachVenueLabel,
   isAllowedBeachCheckinDate,
@@ -299,8 +299,9 @@ function publicEvent(
   evt: any,
   pendingClaimIds: Set<number> = new Set(),
   venueWebsites?: Map<string, string> | null,
+  mapBusinesses?: Business[],
 ) {
-  const { adminNotes, submittedBy, claimedBy, ...safe } = enrichEventForMap(evt);
+  const { adminNotes, submittedBy, claimedBy, ...safe } = enrichEventForMap(evt,mapBusinesses);
   const venueWebsite =
     (evt as any).venueWebsite
     || resolveVenueWebsite(evt.venueName, venueWebsites)
@@ -1856,7 +1857,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       names.push(row.role, row.username, row.displayName ?? "");
       searchTalent.set(row.eventId, names);
     }
-    res.json(evts.map(evt => ({ ...publicEvent(evt, pendingClaimIds, websites), searchTalent: searchTalent.get(evt.id) ?? [] })));
+    const mapBusinesses=storage.getBusinesses();
+    res.json(evts.map(evt => ({ ...publicEvent(evt, pendingClaimIds, websites,mapBusinesses), searchTalent: searchTalent.get(evt.id) ?? [] })));
 
   });
 

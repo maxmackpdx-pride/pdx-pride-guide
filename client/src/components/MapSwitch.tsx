@@ -1,11 +1,22 @@
-import { Link } from "wouter";
-import { useEffect, useState } from "react";
+import { captureCamera, cameraHref, type CameraMap } from "../../public/map-foundation/camera.js";
+import { Link, useLocation } from "wouter";
+import { useEffect, useState, type MouseEvent } from "react";
 import { prefetchMapz } from "@/lib/prefetchMapz";
 import { prefetchOutzide } from "@/lib/prefetchOutzide";
 import "./MapSwitch.css";
 
 /** Portland city map and OutZide are one map family: a switch in the same spot on both maps crosses between them. */
 export default function MapSwitch({ current }: { current: "mapz" | "outz" }) {
+  const [,setLocation] = useLocation();
+  const switchMode = (event: MouseEvent, href: string) => {
+    if(event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)return;
+    const frame = document.querySelector<HTMLIFrameElement>(current === "mapz" ? ".mapz-demo-canvas" : ".outz-map-page iframe");
+    const map = (frame?.contentWindow as (Window & {__zaylistMap?: CameraMap}) | null)?.__zaylistMap;
+    if(!map)return;
+    event.preventDefault();
+    if(current === "mapz")leavingMapz();else leavingOutz();
+    setLocation(cameraHref(href,captureCamera(map)));
+  };
   const [mapzHref] = useState(() => {
     try { const path = sessionStorage.getItem("mapz.lastHref") || ""; return /^\/map(?:\?|$)/.test(path) ? path : "/map"; }
     catch { return "/map"; }
@@ -56,8 +67,8 @@ export default function MapSwitch({ current }: { current: "mapz" | "outz" }) {
   };
   return (
     <nav className="map-switch pdx-liquid-overlay" aria-label="Switch map">
-      <Link href={mapzHref} onClick={current === "outz" ? leavingOutz : undefined} className="map-switch__option map-switch__option--mapz" aria-current={current === "mapz" ? "page" : undefined}>Portland</Link>
-      <Link href={outzHref} onClick={current === "mapz" ? leavingMapz : undefined} className="map-switch__option map-switch__option--outz" aria-current={current === "outz" ? "page" : undefined}>OutZide</Link>
+      <Link href={mapzHref} onClick={current === "outz" ? event => switchMode(event,mapzHref) : undefined} className="map-switch__option map-switch__option--mapz" aria-current={current === "mapz" ? "page" : undefined}>Portland</Link>
+      <Link href={outzHref} onClick={current === "mapz" ? event => switchMode(event,outzHref) : undefined} className="map-switch__option map-switch__option--outz" aria-current={current === "outz" ? "page" : undefined}>OutZide</Link>
     </nav>
   );
 }

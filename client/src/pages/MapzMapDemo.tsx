@@ -3,7 +3,7 @@ import { RESOURCE_MAP_ENTRIES, resourceMapHref, resourceMapKey, type ResourceMap
 import {eventNight} from '../../public/mapz-map/event-night.js';
 import { DetailRoomLinkContext, type DetailRoomLinkValue } from "@/components/DetailRoomLink";
 import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
 
 
@@ -12,7 +12,7 @@ import { MAPZ_PLACE_TYPE_OPTIONS, mapzTypeIcon, mapzTypeLabel } from "@/componen
 import MapzLayerSheet, { type MapzLayer, type MapzLayerId } from "@/components/MapzLayerSheet";
 import MapWorldPanel from "@/components/MapWorldPanel";
 import BoardFollowButton from "@/components/BoardFollowButton";
-import MapComposerOverlay from "@/components/MapComposerOverlay";
+import { lazyWithReload } from "@/lib/lazyWithReload";
 import {readMapCamera,filterWorldRows,locateWorldRow,roughDistanceMiles,WORLD_DETAIL_KEYS,type MapWorld,type WorldRow,type MapBounds} from "@/lib/mapWorlds";
 import MapzUpcomingRsvps from "@/components/MapzUpcomingRsvps";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -27,15 +27,10 @@ import type { CommunitySummary } from "@shared/community";
 import type { Event } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { resolveBusinessLocations } from "@shared/businessLocations";
-import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
-import PlaceModal, { type PlaceModalOriginRect } from "@/components/PlaceModal";
-import AuthModal from "@/components/AuthModal";
-import BoardPostOverlay from "@/components/board/BoardPostOverlay";
-import SpottedDetailModal from "@/components/SpottedDetailModal";
+import type { EventModalOriginRect } from "@/components/EventModal";
+import type { PlaceModalOriginRect } from "@/components/PlaceModal";
 import { spottedKind, spottedPlace } from "@/components/SpottedCard";
 import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
-import HousingPostOverlay from "@/components/housing/HousingPostOverlay";
-import HousingComposerOverlay from "@/components/housing/HousingComposerOverlay";
 import { HousingTagFilter } from "@/components/housing/HousingTagFilter";
 import type { Business } from "@/pages/Directory";
 import { directoryTypeColor } from "@shared/directoryTheme";
@@ -53,6 +48,16 @@ import "./MapzMapDemo.css";
 import "@/components/MapzLayerSheet.css";
 import "../../public/outzide-map/assets/map-continuity.css";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
+
+// Closed detail and composer overlays do not belong on the map boot path.
+const AuthModal = lazyWithReload(() => import("@/components/AuthModal"));
+const BoardPostOverlay = lazyWithReload(() => import("@/components/board/BoardPostOverlay"));
+const SpottedDetailModal = lazyWithReload(() => import("@/components/SpottedDetailModal"));
+const HousingPostOverlay = lazyWithReload(() => import("@/components/housing/HousingPostOverlay"));
+const HousingComposerOverlay = lazyWithReload(() => import("@/components/housing/HousingComposerOverlay"));
+const EventModal = lazyWithReload(() => import("@/components/EventModal"));
+const PlaceModal = lazyWithReload(() => import("@/components/PlaceModal"));
+const MapComposerOverlay = lazyWithReload(() => import("@/components/MapComposerOverlay"));
 
 type Place = Business;
 type BoardKind = "gig" | "gifting" | "sellz";
@@ -327,6 +332,7 @@ export default function MapzMapDemo() {
     setLocation(mapHref(mutate), { replace: true, state: window.history.state });
   }, [setLocation]);
   const query = params.get("q") || "";
+  const [dataReady,setDataReady]=useState(false);
   const initialCamera=useMemo(()=>readMapCamera(new URLSearchParams(window.location.search)),[]);
   const cameraState=useRef(initialCamera);
   const cameraWriteTimer=useRef<number>();
@@ -392,7 +398,7 @@ export default function MapzMapDemo() {
       const view=readMapCamera(new URLSearchParams(window.location.search));
       const current=cameraState.current;
       if(view && (!current || Math.abs(view.center[0]-current.center[0])>.00001 || Math.abs(view.center[1]-current.center[1])>.00001 || Math.abs(view.zoom-current.zoom)>.01)) {
-        mapRef.current?.send("view",{center:view.center,zoom:view.zoom});
+        mapRef.current?.send("view",{center:view.center,zoom:view.zoom,pitch:view.pitch,bearing:view.bearing});
       }
     };
     window.addEventListener("popstate",restore);
@@ -463,17 +469,17 @@ export default function MapzMapDemo() {
       setLocating(false);
     }, { enableHighAccuracy: true, timeout: 12000 });
   }, [locationAvatar]);
-  const { data: events = EMPTY_EVENTS, isLoading: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
+  const { data: events = EMPTY_EVENTS, isPending: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
   const { data: communities = EMPTY_COMMUNITIES } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
-  const { data: places = EMPTY_PLACES, isLoading: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
-  const { data: housingRaw, isLoading: housingLoading, isError: housingError, refetch: retryHousing } = useQuery<unknown>({ queryKey: ["/api/housing", "map"], queryFn: () => apiRequest("GET", "/api/housing").then(r => r.json()) });
-  const { data: boardMapPoints = [] } = useQuery<Array<{board:string;postId:number;lat:number;lng:number}>>({queryKey:["/api/board-map-locations"],queryFn:()=>apiRequest("GET","/api/board-map-locations").then(r=>r.json())});
-  const { data: mizzed = [], isLoading: mizzedLoading, isError: mizzedError, refetch: retryMizzed } = useQuery<MissedConnectionPost[]>({ queryKey: ["/api/missed-connections"], queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()) });
-  const { data: gigs = EMPTY_ROWS, isLoading: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
-  const { data: gifts = EMPTY_ROWS, isLoading: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
-  const { data: sells = EMPTY_ROWS, isLoading: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
+  const { data: places = EMPTY_PLACES, isPending: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
+  const { data: housingRaw, isPending: housingLoading, isError: housingError, refetch: retryHousing } = useQuery<unknown>({ queryKey: ["/api/housing", "map"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/housing").then(r => r.json()) });
+  const { data: boardMapPoints = [] } = useQuery<Array<{board:string;postId:number;lat:number;lng:number}>>({queryKey:["/api/board-map-locations"],enabled:dataReady,queryFn:()=>apiRequest("GET","/api/board-map-locations").then(r=>r.json())});
+  const { data: mizzed = [], isPending: mizzedLoading, isError: mizzedError, refetch: retryMizzed } = useQuery<MissedConnectionPost[]>({ queryKey: ["/api/missed-connections"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()) });
+  const { data: gigs = EMPTY_ROWS, isPending: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
+  const { data: gifts = EMPTY_ROWS, isPending: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
+  const { data: sells = EMPTY_ROWS, isPending: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
   const mineSpecs=useMemo(()=>[["gigz","/api/gigs?mine=1"],["giftz","/api/gifting/mine"],["sellz","/api/sellz/mine"],["mizzed","/api/missed-connections/mine"]] as const,[]);
-  const mineQueries=useQueries({queries:mineSpecs.map(([world,url])=>({queryKey:["map-worlds-mine",world,user?.id],enabled:!!user,queryFn:()=>apiRequest("GET",url).then(r=>r.json()) as Promise<MapRow[]>}))});
+  const mineQueries=useQueries({queries:mineSpecs.map(([world,url])=>({queryKey:["map-worlds-mine",world,user?.id],enabled:!!user&&dataReady,queryFn:()=>apiRequest("GET",url).then(r=>r.json()) as Promise<MapRow[]>}))});
   const mineWorlds=Object.fromEntries(mineSpecs.map(([world],i)=>[world,mineQueries[i]]));
   const savedSellz=useQuery<number[]>({queryKey:["/api/sellz/saved/ids"],enabled:!!user,queryFn:()=>apiRequest("GET","/api/sellz/saved/ids").then(r=>r.json())});
   const savedSellzSet=useMemo(()=>new Set(savedSellz.data||[]),[savedSellz.data]);
@@ -720,8 +726,8 @@ export default function MapzMapDemo() {
     { id: "houz", label: ROOMS.hauz.nav, color: ROOMS.hauz.accent, enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "Browse all Haüz", href: "/the-hauz" }] },
   ];
 
-  useAttendanceSummariesLive();
-  const {data:attendance={}}=useQuery<Record<number,{count:number;preview:Array<{initials:string;photoUrl?:string|null}>}>>({queryKey:["/api/events/attendance-summaries"],queryFn:()=>apiRequest("GET","/api/events/attendance-summaries").then(r=>r.json()),refetchInterval:60000});
+  useAttendanceSummariesLive(dataReady);
+  const {data:attendance={}}=useQuery<Record<number,{count:number;preview:Array<{initials:string;photoUrl?:string|null}>}>>({queryKey:["/api/events/attendance-summaries"],enabled:dataReady,queryFn:()=>apiRequest("GET","/api/events/attendance-summaries").then(r=>r.json()),refetchInterval:60000});
   // Day colors are tokens; re-read them after calm mode flips the class on <html>.
   const [tokenEpoch, setTokenEpoch] = useState(0);
   useEffect(() => {
@@ -795,7 +801,7 @@ export default function MapzMapDemo() {
     requestAnimationFrame(() => document.querySelector<HTMLInputElement>(".mapz-layer-sheet input[type=search]")?.focus());
   };
   return <section ref={pageRef} className="living-map-page mapz-map-demo" data-map="mapz" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
-    <MapzCanvas initialCamera={initialCamera} ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
+    <MapzCanvas onBoot={()=>setDataReady(true)} initialCamera={initialCamera} ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
       if(!["places","rezources","mizzed","gigz","giftz","sellz"].includes(world))return;
       if(zoom<16.8){mapRef.current?.send("fit",{bounds});return;}
       const ids=world==='rezources' ? keys.join(',') : marks.filter(mark=>keys.includes(mark.key)).map(mark=>(mark.item as MapRow).id).join(',');
@@ -831,6 +837,7 @@ export default function MapzMapDemo() {
     <MapzLayerSheet layers={layers} active={activeLayer} onActiveChange={changeLayer} />
     {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="mapz-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
     {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="mapz-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
+    <Suspense fallback={null}>
     <DetailRoomLinkContext.Provider value={detailRoomLink}>
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
@@ -842,5 +849,6 @@ export default function MapzMapDemo() {
     {user && houzCompose && <HousingComposerOverlay initialType={houzCompose} viewerDisplayName={user.displayName} onClose={() => updateParams(p => p.delete("houzCompose"))} onPosted={postId => { updateParams(p => { p.delete("houzCompose"); clearMapOverlay(p); p.set("houz", String(postId)); }); }} />}
     {user && composeWorld && <MapComposerOverlay key={composeWorld} world={composeWorld} onClose={closeOverlays} onPosted={id=>{void queryClient.invalidateQueries({queryKey:["map-worlds-mine"]});setLocation(mapHref(p=>{p.delete("compose");clearMapOverlay(p);p.set(WORLD_DETAIL_KEYS[composeWorld],String(id));p.set("layer",composeWorld);}),{replace:true,state:window.history.state});}}/>}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}
+    </Suspense>
   </section>;
 }

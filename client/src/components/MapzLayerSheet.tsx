@@ -67,7 +67,7 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
             style={{ "--layer-color": layer.color } as CSSProperties}
             aria-pressed={active === layer.id} aria-controls={`${panelId}-${layer.id}`} onClick={() => setActive(layer.id)}>
             <span className="mapz-layer-section__dot" aria-hidden="true" />
-            <img className="mapz-layer-section__logo" src={LAYER_LOGOS[layer.id]} alt="" aria-hidden="true" />
+            <img loading="lazy" className="mapz-layer-section__logo" src={LAYER_LOGOS[layer.id]} alt="" aria-hidden="true" />
             <span className="sr-only">{layer.label}</span><ChevronRight size={14} aria-hidden="true" />
           </button>)}
         </div>

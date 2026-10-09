@@ -13,8 +13,8 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export function enrichEventForMap<T extends MapCoordinateFields>(event: T): T {
-  return mergeMapCoordinates(event, storage.getBusinesses());
+export function enrichEventForMap<T extends MapCoordinateFields>(event: T, businesses=storage.getBusinesses()): T {
+  return mergeMapCoordinates(event, businesses);
 }
 
 export async function fillEventMapCoordinates(eventId: number): Promise<void> {

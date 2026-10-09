@@ -38,3 +38,17 @@ export async function prepareMapz(publicRoot:string) {
   fs.writeFileSync(path.join(output,'mapz-manifest.json'),JSON.stringify({base,assets}));
  }};
 }
+
+// Outzide's static import graph boots in one request; authored modules remain for development.
+export async function prepareOutzide(publicRoot:string,mapz:{maplibre:string;maplibreCss:string}) {
+ const result=await build({entryPoints:[path.join(publicRoot,'outzide-map/app.js')],bundle:true,write:false,format:'esm',target:'es2022',minify:true,external:['/mapz-map/*'],
+  plugins:[{name:'canonical-outzide-modules',setup(builder){builder.onResolve({filter:/^\./},args=>({path:path.resolve(args.resolveDir,args.path.split('?')[0])}));}}]});
+ const bytes=result.outputFiles[0].contents,hash=createHash('sha256').update(bytes).digest('hex').slice(0,16);
+ const assets={script:`/assets/outzide-${hash}/boot.js`,maplibre:mapz.maplibre,maplibreCss:mapz.maplibreCss};
+ return {assets,write(output:string){
+  const file=path.join(output,assets.script);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,bytes);
+  const htmlPath=path.join(output,'outzide-map/index.html');
+  const html=fs.readFileSync(htmlPath,'utf8').replace(/app\.js\?v=[^" ]+/g,assets.script).replace(/\/home-flight\/vendor\/maplibre-gl-5\.6\.2\.js/g,assets.maplibre).replace(/\/home-flight\/vendor\/maplibre-gl-5\.6\.2\.css/g,assets.maplibreCss);
+  fs.writeFileSync(htmlPath,html);fs.writeFileSync(path.join(output,'outzide-manifest.json'),JSON.stringify({assets}));
+ }};
+}

@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {readSavedCamera,saveMapCamera} from '../client/public/map-foundation/camera.js';
+import {readSavedCamera,saveMapCamera,readCameraParams,cameraHref} from '../client/public/map-foundation/camera.js';
 test('returning visitor restores center zoom tilt and bearing, including flat north-up view',()=>{
  let value=null;const storage={getItem:()=>value,setItem:(_,next)=>value=next};
  assert.equal(readSavedCamera(storage),null);
@@ -13,4 +13,16 @@ test('blocked storage leaves map usable',()=>{
  const storage={getItem(){throw Error('denied')},setItem(){throw Error('denied')}};
  assert.equal(readSavedCamera(storage),null);
  assert.doesNotThrow(()=>saveMapCamera({getCenter:()=>({lng:0,lat:0}),getZoom:()=>6,getPitch:()=>35,getBearing:()=>0},storage));
+});
+
+test('mode links carry precise center, zoom, flat pitch and bearing and clear selections',()=>{
+ const camera={center:[-123.14235174,48.82375419],zoom:6.712375,pitch:0,bearing:-32.125};
+ for(const href of ['/map?lat=45&lng=-122&zoom=14&place=77&layer=places','/outzide?restore=1&place=old']){
+  const url=new URL(cameraHref(href,camera),'https://example.test');
+  assert.deepEqual(readCameraParams(url.searchParams),camera);
+  for(const key of ['restore','place','layer'])assert.equal(url.searchParams.has(key),false);
+ }
+});
+test('invalid camera URLs never supply a partial or nonfinite view',()=>{
+ for(const query of ['lat=45&lng=-122','lat=&lng=-122&zoom=10','lat=99&lng=-122&zoom=10','lat=45&lng=-122&zoom=Infinity','lat=45&lng=-122&zoom=10&pitch=NaN'])assert.equal(readCameraParams(new URLSearchParams(query)),null);
 });

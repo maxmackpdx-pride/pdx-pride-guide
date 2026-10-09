@@ -1,5 +1,5 @@
 import {addLayers} from '../map-foundation/layers.js';
-import {captureCamera} from '../map-foundation/camera.js';
+import {captureCamera,readCameraParams} from '../map-foundation/camera.js';
 import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../map-foundation/lifecycle.js';
 import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventNight} from './event-night.js';
@@ -29,7 +29,8 @@ import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-po
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__mapzStartup||{phase(){},fatal(){}};
 startup.phase('script');
-const maxExploreZoom=17.75;
+const maxExploreZoom=18;
+const initialCamera=readCameraParams(new URLSearchParams(location.search));
 // First paint is the vector city. DEM workers were blocking the phone boot
 // and the preload already dropped terrain from this first style.
 const surfaceStyle=vectorFirstStyle(mapzSurfaceStyle({terrainStrength:0}));
@@ -39,9 +40,10 @@ const surfaceStyle=vectorFirstStyle(mapzSurfaceStyle({terrainStrength:0}));
 let map;
 try{
  map=createMap({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
-   center:[-122.676,45.523],zoom:13.5+Math.log2(1.25),pitch:48,bearing:0,
-   maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:maxExploreZoom,maxPitch:72,
+   center:[-122.676,45.523],zoom:13.5+Math.log2(1.25),pitch:48,bearing:0,...initialCamera,
+   minZoom:-2,maxZoom:maxExploreZoom,maxPitch:75,
    style:surfaceStyle});
+ window.__zaylistMap=map;
  startup.phase('map-created');
 }catch(error){startup.fatal(error?.message||error);throw error;}
 // MapLibre query results already include terrain strength.
@@ -1010,12 +1012,14 @@ function draw(now){
  const fade=!ready||loopWaiting?0:exitAt===null?(reduced.matches?1:smoothRange(0,3,revealTime)):1-smoothRange(.5,3.5,elapsed-exitAt);
  const visibility=Number(opacityControl.value)*fade;
  mapElement.style.opacity=visibility;
- if(overlaysReady)drawLights(visibility);
  if(ready&&baseFrameRendered&&!firstFrameSent){
   firstFrameSent=true;startup.phase('first-frame');tell('first-frame');
   // Optional GPU layers must not prevent the first base-city frame.
   map.once('idle',()=>{if(!disposed){installSceneExtras();if(!matchMedia('(pointer:coarse)').matches){try{map.setPixelRatio(Math.min(devicePixelRatio||1,2));}catch{/* Keep the boot ratio. */}}}});
+  // Let the loaded vector frame paint before drawing the unchanged scene artwork.
+  scheduleFrame();return;
  }
+ if(overlaysReady)drawLights(visibility);
  if(!reduced.matches||!ready)scheduleFrame();
 }
 scheduleFrame();
@@ -1056,7 +1060,7 @@ window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();
 
 // Interactive adapter: isolated from the original studio and homepage.
 function tell(type,payload={}){if(parent!==window)parent.postMessage({source:'mapz-demo',type,...payload},location.origin);}
-function viewState(){const camera=captureCamera(map),b=map.getBounds();tell('view',{center:[camera.center[1],camera.center[0]],zoom:camera.zoom,bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
+function viewState(){const camera=captureCamera(map),b=map.getBounds();tell('view',{center:[camera.center[1],camera.center[0]],zoom:camera.zoom,pitch:camera.pitch,bearing:camera.bearing,bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
 const typeIcons=new Map();
 let frozenClusters=null;
 function clusterPlaceMarkers(items,selected,zoom,width,height){
@@ -1115,8 +1119,8 @@ window.addEventListener('message',event=>{
  if(type==='select'){selectedKey=data.key;const feature=lightFeatures.find(f=>f.properties.key===selectedKey);if(feature){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:feature.geometry.coordinates,zoom:Math.max(16.5,map.getZoom()),duration:700});}scheduleFrame();}
  if(type==='locate'){setUserLocation(data.coordinates,data.avatar);pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:data.coordinates,zoom:16,duration:700});}
  if(type==='fit'&&Array.isArray(data.bounds)){map.fitBounds(data.bounds,{padding:{top:140,bottom:150,left:72,right:72},maxZoom:17.25,duration:620});scheduleFrame();}
- if(type==='zoom'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.zoomTo(Math.max(10,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});}
- if(type==='view'&&Array.isArray(data.center)&&data.center.length===2){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.jumpTo({center:[Number(data.center[1]),Number(data.center[0])],zoom:Math.max(10,Math.min(maxExploreZoom,Number(data.zoom)||map.getZoom())),pitch:automaticPitch()});viewState();}
+ if(type==='zoom'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.zoomTo(Math.max(-2,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});}
+ if(type==='view'&&Array.isArray(data.center)&&data.center.length===2){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.jumpTo({center:[Number(data.center[1]),Number(data.center[0])],zoom:Math.max(-2,Math.min(maxExploreZoom,Number(data.zoom)||map.getZoom())),pitch:Number.isFinite(data.pitch)?data.pitch:automaticPitch(),bearing:Number.isFinite(data.bearing)?data.bearing:map.getBearing()});viewState();}
  if(type==='mode'){pauseControl.checked=data.mode!=='flight';pauseControl.dispatchEvent(new Event('input'));}
  if(type==='labels')for(const id of ['road-labels','place-labels'])if(map.getLayer(id))map.setLayoutProperty(id,'visibility',data.enabled?'visible':'none');
  if(type==='time'&&Number.isFinite(Number(data.timestamp))){viewTime=Number(data.timestamp);scheduleFrame();}

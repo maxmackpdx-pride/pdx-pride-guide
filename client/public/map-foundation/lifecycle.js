@@ -61,3 +61,33 @@ export function markerFrame(map, markers,measureHead=()=>false) {
   return {marker,element,head:head?{x:head.left-container.left+head.width/2,y:head.top-container.top+head.height/2,size:head.width}:null,anchor:{x:rect.left-container.left+rect.width/2,y:rect.top-container.top+rect.height/2}};
  });
 }
+
+// A render with loaded vector tiles is the boot gate; construction is not a frame.
+export function whenMapRendered(map) {
+ return new Promise((resolve,reject)=>{
+  const ready=()=>{if(!map.loaded())return;cleanup();requestAnimationFrame(resolve);};
+  const removed=()=>{cleanup();reject(new Error('Map removed before first frame'));};
+  const cleanup=()=>{map.off('render',ready);map.off('remove',removed);};
+  map.on('render',ready);map.on('remove',removed);map.triggerRepaint();
+ });
+}
+// Preserve loaded vector tiles and GPU state while adding the deferred surface.
+export function extendMapStyle(map,style) {
+ for(const [id,source] of Object.entries(style.sources))if(!map.getSource(id))map.addSource(id,source);
+ for(let index=style.layers.length-1;index>=0;index--){
+  const layer=style.layers[index];
+  if(!map.getLayer(layer.id))map.addLayer(layer,style.layers.slice(index+1).find(next=>map.getLayer(next.id))?.id);
+ }
+ if(style.terrain)map.setTerrain(style.terrain);
+}
+
+// Adding terrain during a flat-map ease leaves MapLibre's elevation target unset.
+export function whenMapSettled(map) {
+ return new Promise((resolve,reject)=>{
+  let frame=0;
+  const cleanup=()=>{cancelAnimationFrame(frame);map.off('moveend',check);map.off('remove',removed);};
+  const check=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>{if(map.isMoving())return;cleanup();resolve();});};
+  const removed=()=>{cleanup();reject(new Error('Map removed before movement settled'));};
+  map.on('moveend',check);map.on('remove',removed);check();
+ });
+}

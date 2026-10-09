@@ -1,3 +1,4 @@
+import {readCameraParams} from '../client/public/map-foundation/camera.js';
 import {createMap,vectorFirstStyle} from '../client/public/map-foundation/lifecycle.js';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -59,7 +60,7 @@ test('the actual startup reaches MapLibre construction, with only one graphics c
  let optionsCaptured;
  const prefix=renderer.slice(renderer.indexOf('const startup='),renderer.indexOf('const waterBloom='));
  assert.throws(()=>vm.runInNewContext(prefix,{
-  mapzSurfaceStyle,vectorFirstStyle,createMap:options=>createMap(options,{library:{Map:class{constructor(value){optionsCaptured=value;throw reached;}}}}),structuredClone,URLSearchParams,TERRAIN_STRENGTH,location:{search:'?terrain=1'},
+  readCameraParams,mapzSurfaceStyle,vectorFirstStyle,createMap:options=>createMap(options,{library:{Map:class{constructor(value){optionsCaptured=value;throw reached;}}}}),structuredClone,URLSearchParams,TERRAIN_STRENGTH,location:{search:'?terrain=1'},
   window:{__mapzStartup:{phase(){},fatal(){}}},
   mlcontour:{DemSource:class{setupMaplibre(){} get sharedDemProtocolUrl(){return 'dem://tiles';} contourProtocolUrl(){return 'contour://tiles';}}},
   // No document canvas probe should be needed before the real map is created.

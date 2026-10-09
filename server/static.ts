@@ -1,5 +1,5 @@
 import express from 'express';
-import { mapzPrecompressed } from './mapzStatic';
+import { mapzPrecompressed,staticTextPrecompressed } from './mapzStatic';
 import type { Express } from 'express';
 import fs from "node:fs";
 import path from "node:path";
@@ -38,6 +38,25 @@ export function serveStatic(app: Express) {
     if (requestPath === "/" || requestPath === "/index.html") {
       baseIndexHtml = baseIndexHtml.replace('<div id="root"></div>', `<div id="root">${homeBootLogoHtml}</div>`);
     }
+    const mapEntry=requestPath === "/map" || requestPath === "/map-demo" ? "src/pages/MapzMapDemo.tsx" : requestPath === "/outzide" ? "src/pages/Outz.tsx" : null;
+    if(mapEntry){
+      const manifest=JSON.parse(fs.readFileSync(path.join(distPath,".vite/manifest.json"),"utf8"));
+      const entry=manifest[mapEntry];
+      if(entry){
+        const css=new Set<string>();
+        const visited=new Set<string>();
+        const collect=(key:string)=>{if(visited.has(key))return;visited.add(key);const chunk=manifest[key];for(const file of chunk?.css||[])css.add(file);for(const imported of chunk?.imports||[])collect(imported);};
+        collect(mapEntry);
+        baseIndexHtml=baseIndexHtml.replace('</head>',`<link rel="modulepreload" href="/${entry.file}">${[...css].map(file=>`<link rel="preload" as="style" href="/${file}">`).join('')}</head>`);
+      }
+    }
+    if(requestPath === "/map" || requestPath === "/map-demo") {
+      const {assets}=JSON.parse(fs.readFileSync(path.join(distPath,"mapz-manifest.json"),"utf8"));
+      baseIndexHtml=baseIndexHtml.replace('</head>',`<link rel="preload" as="script" href="${assets.maplibre}"><link rel="modulepreload" href="${assets.script}"><link rel="preload" as="script" href="${assets.perf}"><link rel="preload" as="style" href="/outzide-map/assets/map-continuity.css?v=2"><link rel="preload" as="style" href="${assets.maplibreCss}"><link rel="preload" as="style" href="${assets.style}"></head>`);
+    } else if(requestPath === "/outzide") {
+      const {assets}=JSON.parse(fs.readFileSync(path.join(distPath,"outzide-manifest.json"),"utf8"));
+      baseIndexHtml=baseIndexHtml.replace('</head>',`<link rel="preload" as="script" href="${assets.maplibre}"><link rel="modulepreload" href="${assets.script}"></head>`);
+    }
     if (process.env.LOCAL_PREVIEW === "1") {
       baseIndexHtml = baseIndexHtml.replace(
         "<head>",
@@ -65,6 +84,7 @@ export function serveStatic(app: Express) {
   // (stale page after a deploy) must 404, not fall through to the SPA HTML,
   // so the client can detect it and reload.
   app.use(mapzPrecompressed(distPath));
+  app.use(staticTextPrecompressed(distPath));
   app.use("/assets", express.static(path.join(distPath, "assets"), {
     index: false,
     immutable: true,

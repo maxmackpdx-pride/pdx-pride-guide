@@ -55,10 +55,11 @@ export function getUpcomingEventsForBusiness(
   business: Business,
   listings: EventListing[],
   businesses: Business[],
+  matches = createListingMatcher(businesses),
 ): DirectoryEventSummary[] {
   return listings
     .filter(listing => isUpcomingListing(listing))
-    .filter(listing => listingMatchesBusiness(listing, business, businesses))
+    .filter(listing => matches(listing, business))
     .map(listing => toDirectoryEventSummary(listing))
     .sort((a, b) => {
       const at = parsePacificDateTime(a.dateStart) ?? 0;
@@ -84,73 +85,44 @@ export function attachUpcomingEventsToBusinesses(
  * Groups also match when title/description mentions brand aliases
  * (Coach's Pet → Yes Coach Productions; venue still Sanctuary).
  */
-function listingMatchesBusiness(
-  listing: {
-    venueName?: string | null;
-    address?: string | null;
-    lat?: number | null;
-    lng?: number | null;
-    title?: string | null;
-    description?: string | null;
-  },
-  business: Business,
-  businesses: Business[],
-): boolean {
-  const eventFields = mergeMapCoordinates(
-    {
-      venueName: listing.venueName || "",
-      address: listing.address ?? null,
-      lat: listing.lat ?? null,
-      lng: listing.lng ?? null,
-    },
-    businesses,
-  );
-
-  const candidates: Array<{ name?: string; venueName?: string; address?: string | null; lat?: number | null; lng?: number | null }> = [
-    mergeMapCoordinates(
-      {
+function createListingMatcher(businesses: Business[]) {
+  // All caches belong to this request's snapshot, never another user's payload.
+  const fields = new WeakMap<object, ReturnType<typeof mergeMapCoordinates> & { venueName: string }>();
+  const storefronts = new WeakMap<Business, Array<{ name?: string; venueName?: string; address?: string | null; lat?: number | null; lng?: number | null }>>();
+  return function listingMatchesBusiness(
+    listing: { venueName?: string | null; address?: string | null; lat?: number | null; lng?: number | null; title?: string | null; description?: string | null },
+    business: Business,
+  ): boolean {
+    let eventFields = fields.get(listing);
+    if (!eventFields) {
+      eventFields = mergeMapCoordinates({
+        venueName: listing.venueName || "",
+        address: listing.address ?? null,
+        lat: listing.lat ?? null,
+        lng: listing.lng ?? null,
+      }, businesses);
+      fields.set(listing, eventFields);
+    }
+    let candidates = storefronts.get(business);
+    if (!candidates) {
+      candidates = [mergeMapCoordinates({
         venueName: business.name,
         address: business.address,
         lat: business.lat,
         lng: business.lng,
-      },
-      businesses,
-    ),
-  ];
-
-  for (const loc of resolveBusinessLocations(business)) {
-    candidates.push({
-      name: business.name,
-      address: loc.address,
-      lat: loc.lat ?? null,
-      lng: loc.lng ?? null,
-    });
-    // Storefront label alone (e.g. "SE 82nd") rarely matches, but full
-    // "Taboo Video SE 82nd" style venue strings can include the brand name.
-    if (loc.label) {
-      candidates.push({
-        name: `${business.name} ${loc.label}`,
-        address: loc.address,
-        lat: loc.lat ?? null,
-        lng: loc.lng ?? null,
-      });
+      }, businesses)];
+      for (const loc of resolveBusinessLocations(business)) {
+        candidates.push({name: business.name, address: loc.address, lat: loc.lat ?? null, lng: loc.lng ?? null});
+        // Preserve full multi-storefront venue names such as Taboo Video SE 82nd.
+        if (loc.label) candidates.push({name: `${business.name} ${loc.label}`, address: loc.address, lat: loc.lat ?? null, lng: loc.lng ?? null});
+      }
+      storefronts.set(business, candidates);
     }
-  }
-
-  if (
-    candidates.some(biz =>
-      eventMatchesBusiness(eventFields, {
-        name: biz.name || biz.venueName,
-        address: biz.address,
-        lat: biz.lat,
-        lng: biz.lng,
-      }),
-    )
-  ) {
-    return true;
-  }
-
-  return eventMentionsDirectoryGroup(listing, business);
+    if (candidates.some(biz => eventMatchesBusiness(eventFields, {
+      name: biz.name || biz.venueName, address: biz.address, lat: biz.lat, lng: biz.lng,
+    }))) return true;
+    return eventMentionsDirectoryGroup(listing, business);
+  };
 }
 
 /** Past nights at this venue: LIVE past listings + Tucker profile archive (Sanctuary / Eagle). */
@@ -159,11 +131,12 @@ export function getPastEventsForBusiness(
   listings: EventListing[],
   businesses: Business[],
   nowMs = Date.now(),
+  matches = createListingMatcher(businesses),
 ): DirectoryEventSummary[] {
   const isYesCoach = business.name.trim().toLowerCase() === "yes coach productions";
   const livePast = listings
     .filter(listing => isPastListing(listing, nowMs))
-    .filter(listing => listingMatchesBusiness(listing, business, businesses))
+    .filter(listing => matches(listing, business))
     .map(listing => {
       const claimed = (listing.claimedBy || "").toLowerCase();
       const isTucker =
@@ -185,7 +158,7 @@ export function getPastEventsForBusiness(
     .filter(row =>
       isYesCoach
         ? !row.slug.startsWith("locker-room-")
-        : listingMatchesBusiness(row, business, businesses),
+        : matches(row, business),
     )
     .filter(row => !livePast.some(live => archiveDuplicatesLivePast(row, live)))
     .map(row => ({
@@ -223,10 +196,11 @@ export function attachEventsToBusinesses(
   events: Event[],
 ): Array<Business & { upcomingEvents: DirectoryEventSummary[]; pastEvents: DirectoryEventSummary[] }> {
   const listings = expandMultiDayEvents(events);
+  const matches = createListingMatcher(businesses), nowMs = Date.now();
   return businesses.map(business => ({
     ...business,
-    upcomingEvents: getUpcomingEventsForBusiness(business, listings, businesses),
-    pastEvents: getPastEventsForBusiness(business, listings, businesses),
+    upcomingEvents: getUpcomingEventsForBusiness(business, listings, businesses, matches),
+    pastEvents: getPastEventsForBusiness(business, listings, businesses, nowMs, matches),
   }));
 }
 
@@ -268,7 +242,7 @@ function venueTextMatchesBusiness(
   address?: string | null,
 ): boolean {
   if (!venueText && !address) return false;
-  return listingMatchesBusiness(
+  return createListingMatcher([])(
     {
       venueName: venueText || "",
       address: address ?? null,
@@ -276,7 +250,6 @@ function venueTextMatchesBusiness(
       lng: null,
     },
     business,
-    [],
   );
 }
 

@@ -3,10 +3,10 @@ import './MapzBootNotice.css';
 import MapBootLoader from './MapBootLoader';
 
 export type MapzHandle={send:(type:string,data?:Record<string,unknown>)=>void};
-export type MapView={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
+export type MapView={center:[number,number];zoom:number;pitch:number;bearing:number;bounds:{south:number;north:number;west:number;east:number}};
 type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string;avatars?:Array<{url:string;initial:string;background:string;ring:string}>};
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
-type CanvasProps={initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
+type CanvasProps={onBoot?:()=>void;initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};
 const MAP_SRC='/mapz-map/index.html?v=20261006-shared-map';
 const MAX_3D_ATTEMPTS=3;
@@ -56,7 +56,7 @@ const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({rows,selected,l
  };window.addEventListener('message',receive);return()=>window.removeEventListener('message',receive);},[fail]);
  const serialized=useMemo(()=>JSON.stringify(rows),[rows]);
  useEffect(()=>{if(ready)post('data',{rows});},[ready,serialized]);
- useEffect(()=>{if(ready&&restoreView.current)post('view',{center:restoreView.current.center,zoom:restoreView.current.zoom});},[ready]);
+ useEffect(()=>{if(ready&&restoreView.current)post('view',{center:restoreView.current.center,zoom:restoreView.current.zoom,pitch:restoreView.current.pitch,bearing:restoreView.current.bearing});},[ready]);
  useEffect(()=>{if(ready)post('select',{key:selected});},[ready,selected]);
  useEffect(()=>{if(ready)post('labels',{enabled:labelsEnabled});},[ready,labelsEnabled]);
  useEffect(()=>{if(ready)post('time',{timestamp:viewTime});},[ready,viewTime]);
@@ -68,7 +68,8 @@ const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({rows,selected,l
   if(node.contentDocument?.readyState==='complete')hello();
   return()=>node.removeEventListener('load',hello);
  },[attempt]);
- return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}`} title="Zaylist interactive Portland metro map" className="mapz-demo-canvas" onLoad={()=>post('hello')}/>;
+ const cameraParams=useMemo(()=>initialView?new URLSearchParams({lat:String(initialView.center[0]),lng:String(initialView.center[1]),zoom:String(initialView.zoom),pitch:String(initialView.pitch??48),bearing:String(initialView.bearing??0)}).toString():"",[]);
+ return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}&${cameraParams}`} title="Zaylist interactive Portland metro map" className="mapz-demo-canvas" onLoad={()=>post('hello')}/>;
 });
 
 export default forwardRef<MapzHandle,CanvasProps>(function MapzCanvas(props,ref){
@@ -87,7 +88,7 @@ export default forwardRef<MapzHandle,CanvasProps>(function MapzCanvas(props,ref)
  };
  useImperativeHandle(ref,()=>({send:(type,data={})=>activeControl.current?.send(type,data)}),[]);
  return <>
-  <Mapz3D key={generation} ref={activeControl} {...props} attempt={generation} initialView={lastView.current} onFailure={recover} onVisible={()=>{if(visible.current)return;visible.current=true;setShown(true);window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'mapz'}}));}} onView={reportView}/>
+  <Mapz3D key={generation} ref={activeControl} {...props} attempt={generation} initialView={lastView.current} onFailure={recover} onVisible={()=>{if(visible.current)return;visible.current=true;setShown(true);props.onBoot?.();window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'mapz'}}));}} onView={reportView}/>
   {!shown&&<MapBootLoader map="mapz" overlay error={stopped?bootError:undefined} onRetry={stopped?retry:undefined}/>}
  </>;
 });

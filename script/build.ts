@@ -1,6 +1,8 @@
+import { brotliCompressSync, gzipSync, constants } from "node:zlib";
+import path from "node:path";
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile } from "node:fs/promises";
+import { rm, readFile, readdir, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { writeDesignComponentSourceEvidence } from "./design-component-source-evidence";
 import { writeOutzideTokens } from "./build-outzide-tokens.mjs";
@@ -48,6 +50,18 @@ async function buildAll() {
   console.log("building client...");
   await viteBuild();
 
+  // Startup text is served directly by Express, so emit both negotiated encodings.
+  const compress = async (directory:string):Promise<void> => {
+    for(const entry of await readdir(directory,{withFileTypes:true})) {
+      const file=path.join(directory,entry.name);
+      if(entry.isDirectory()){await compress(file);continue;}
+      if(!/\.(js|css|json|svg)$/.test(file))continue;
+      const bytes=await readFile(file);
+      await writeFile(file+'.br',brotliCompressSync(bytes,{params:{[constants.BROTLI_PARAM_QUALITY]:5}}));
+      await writeFile(file+'.gz',gzipSync(bytes));
+    }
+  };
+  for(const directory of ['assets','outzide-map','map-foundation','mapz-map','home-flight/vendor'])await compress(path.join('dist/public',directory));
   console.log("building server...");
   const pkg = JSON.parse(await readFile("package.json", "utf-8"));
   const allDeps = [

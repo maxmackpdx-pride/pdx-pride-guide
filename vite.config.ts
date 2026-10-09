@@ -4,7 +4,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 import fs from "node:fs";
 import { createHash } from "node:crypto";
-import { prepareMapz } from "./script/mapz-build";
+import { prepareMapz,prepareOutzide } from "./script/mapz-build";
 
 // Fingerprint the complete standalone map, including its relative imports and artwork.
 const flightSource = path.resolve(import.meta.dirname, "client/public/home-flight");
@@ -21,6 +21,7 @@ const flightBase = `/assets/home-flight-${flightHash.digest("hex").slice(0, 16)}
 
 export default defineConfig(async ({ command }):Promise<UserConfig> => {
  const mapz = command === "build" ? await prepareMapz(path.resolve(import.meta.dirname, "client/public")) : null;
+ const outzide=mapz?await prepareOutzide(path.resolve(import.meta.dirname,"client/public"),mapz.assets):null;
  return ({
   plugins: [
     react(),
@@ -32,6 +33,7 @@ export default defineConfig(async ({ command }):Promise<UserConfig> => {
         fs.cpSync(flightSource, path.join(output, flightBase), { recursive: true });
         fs.writeFileSync(path.join(output, "home-flight-manifest.json"), JSON.stringify({ base: flightBase }));
         mapz?.write(output);
+        outzide?.write(output);
       },
     },
     VitePWA({
@@ -71,6 +73,7 @@ export default defineConfig(async ({ command }):Promise<UserConfig> => {
   base: "/",
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
+    manifest: true,
     emptyOutDir: true,
     // No manualChunks: hand-splitting leaflet created a circular chunk
     // dependency that crashed Safari with a TDZ error ("Cannot access 'Q'
@@ -79,6 +82,7 @@ export default defineConfig(async ({ command }):Promise<UserConfig> => {
   },
   // Shared modules may reference process.env on the server; avoid browser TDZ.
   define: {
+    __OUTZIDE_ASSETS__: JSON.stringify(outzide?.assets??{script:"/outzide-map/app.js?v=20261009-mode-boot",maplibre:"/home-flight/vendor/maplibre-gl-5.6.2.js",maplibreCss:"/home-flight/vendor/maplibre-gl-5.6.2.css"}),
     __MAPZ_ASSETS__: JSON.stringify(mapz?.assets ?? {script:"/mapz-map/river-flight.js?v=20260929-branch",maplibre:"/home-flight/vendor/maplibre-gl-5.6.2.js",maplibreCss:"/home-flight/vendor/maplibre-gl-5.6.2.css",contour:"/mapz-map/vendor/maplibre-contour-0.1.0.js",style:"/mapz-map/studio.css?v=20260925-map-boot5",perf:"/mapz-map/mapz-perf-preload.js?v=20260929-fast"}),
     __HOME_FLIGHT_BASE__: JSON.stringify(command === "build" ? flightBase : "/home-flight"),
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || "development"),

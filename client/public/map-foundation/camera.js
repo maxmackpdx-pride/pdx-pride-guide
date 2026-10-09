@@ -28,3 +28,20 @@ export function rememberMapCamera(map,{key='outzide.map.camera.v1',scope=globalT
  map.on('remove',dispose);
  return dispose;
 }
+
+// URLs carry the current view across modes, including a flat north-up camera.
+export function readCameraParams(params) {
+ const keys=['lng','lat','zoom'];
+ if(keys.some(key=>params.get(key)===null||params.get(key).trim()===''))return null;
+ const center=[Number(params.get('lng')),Number(params.get('lat'))];
+ const zoom=Number(params.get('zoom')),pitch=Number(params.get('pitch')??48),bearing=Number(params.get('bearing')??0);
+ if(![...center,zoom,pitch,bearing].every(Number.isFinite)||Math.abs(center[0])>180||Math.abs(center[1])>85.051129||zoom< -2||zoom>18||pitch<0||pitch>75||Math.abs(bearing)>360)return null;
+ return {center,zoom,pitch,bearing};
+}
+export function cameraHref(href,camera) {
+ const url=new URL(href,'https://map.invalid');
+ for(const [key,value] of Object.entries({lng:camera.center[0],lat:camera.center[1],zoom:camera.zoom,pitch:camera.pitch,bearing:camera.bearing}))url.searchParams.set(key,String(value));
+ // A mode switch returns to the map, with its drawers and selected listings closed.
+ for(const key of ['restore','place','event','houz','mizzed','gig','gift','sell','layer'])url.searchParams.delete(key);
+ return url.pathname+url.search;
+}
