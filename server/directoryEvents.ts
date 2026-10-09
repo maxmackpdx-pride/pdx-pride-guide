@@ -190,18 +190,30 @@ export function attachPastEventsToBusinesses<T extends Business>(
   }));
 }
 
-/** Convenience: upcoming + past in one pass over expanded listings. */
-export function attachEventsToBusinesses(
-  businesses: Business[],
-  events: Event[],
-): Array<Business & { upcomingEvents: DirectoryEventSummary[]; pastEvents: DirectoryEventSummary[] }> {
+/** Share one request snapshot and matcher across the whole directory. */
+function directoryEventBuilder(businesses: Business[], events: Event[]) {
   const listings = expandMultiDayEvents(events);
   const matches = createListingMatcher(businesses), nowMs = Date.now();
-  return businesses.map(business => ({
+  return (business: Business) => ({
     ...business,
     upcomingEvents: getUpcomingEventsForBusiness(business, listings, businesses, matches),
     pastEvents: getPastEventsForBusiness(business, listings, businesses, nowMs, matches),
-  }));
+  });
+}
+
+export function attachEventsToBusinesses(businesses: Business[], events: Event[]) {
+  return businesses.map(directoryEventBuilder(businesses, events));
+}
+
+/** Let cold map documents and assets through while catalog matching runs. */
+export async function attachEventsToBusinessesAsync(businesses: Business[], events: Event[]) {
+  const attach = directoryEventBuilder(businesses, events);
+  const rows: ReturnType<typeof attach>[] = [];
+  for (const business of businesses) {
+    rows.push(attach(business));
+    if (rows.length % 4 === 0) await new Promise<void>(resolve => setImmediate(resolve));
+  }
+  return rows;
 }
 
 export type DirectoryPromoterSummary = { id: number; username: string; displayName: string | null };

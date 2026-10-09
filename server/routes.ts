@@ -65,7 +65,7 @@ import {
   fillFieldsMapCoordinates,
   scheduleMapCoordinateBackfill,
 } from "./mapCoordinateSync";
-import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
+import { attachEventsToBusinessesAsync, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { resolveBusinessLocations } from "@shared/businessLocations";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { DIRECTORY_TYPES } from "@shared/directoryTheme";
@@ -2679,7 +2679,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── GIGS ─────────────────────────────────────────────────────────────────
   // ── Business Directory ──────────────────────────────────────────────────
-  app.get("/api/directory", (req, res) => {
+  app.get("/api/directory", async (req, res, next) => {
+    try {
     const { type, neighborhood, queerOwned } = req.query as Record<string, string>;
     const businesses = storage.getBusinesses({
       type: type || undefined,
@@ -2688,7 +2689,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
     const liveEvents = storage.getEvents({ status: "LIVE" });
     // Upcoming Pride nights + past (LIVE past + Tucker archive for Sanctuary/Eagle)
-    const withEvents = attachEventsToBusinesses(businesses, liveEvents);
+    const withEvents = await attachEventsToBusinessesAsync(businesses, liveEvents);
     const withPromoters = attachPromotersToBusinesses(withEvents, id => storage.getPromotersForBusiness(id));
     const missedConnections = storage.getMissedConnections("ACTIVE");
     const gigs = storage.getGigPosts("LIVE");
@@ -2712,6 +2713,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         followerCount: storage.getBusinessFollowerCount(biz.id),
       };
     }));
+    } catch (error) { next(error); }
   });
 
   app.post("/api/directory/:id/follow", requireAuth, (req, res) => {

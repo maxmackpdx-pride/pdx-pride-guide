@@ -66,6 +66,7 @@ test('projection remains tall and narrow at phone and desktop scales and pins it
     const a=eventProjectionGeometry(anchor,{x:160,y:600-height},scale);
     const b=eventProjectionGeometry(anchor,{x:160+eventProjectionSway(8,2,scale),y:600-height},scale);
     assert.ok(a.height/(a.halfWidth*2)>=2.8-1e-9);
+    assert.ok(Math.abs(a.height-(height+32*scale)*2/3)<1e-9,"projection height is exactly two-thirds of its previous extent");
     assert.deepEqual(a.anchor,anchor);assert.deepEqual(b.anchor,anchor);
     assert.notEqual(a.x,b.x);assert.equal(a.top,b.top);
   }
@@ -100,7 +101,7 @@ test('cone textures preserve transparency, cache each day token and release all 
         const body=v>=.04&&Math.abs(u)<=Math.max(.002,1-t),cap=u*u+((v-.04)/.04)**2<=1;
         if(!body&&!cap)assert.equal(pixels[(y*width+x)*4+3],0);
       }
-      assert.ok(pixels[(400*width+96)*4+3]>0);
+      assert.ok(Math.abs(pixels[(400*width+96)*4+3]-128)<=1,"beam body is 50% opaque, with feathered edges");
     }
     const i=(400*192+96)*4;
     assert.ok(volumes[0].pixels[i+2]>volumes[0].pixels[i]);

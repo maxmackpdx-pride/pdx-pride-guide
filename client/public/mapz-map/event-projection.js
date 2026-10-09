@@ -18,7 +18,8 @@ export function eventProjectionSway(seconds, phase, scale = 1, reduced = false) 
 }
 
 export function eventProjectionGeometry(anchor, center, scale = 1) {
-  const top = center.y - 32 * scale;
+  const previousTop = center.y - 32 * scale;
+  const top = anchor.y - (anchor.y - previousTop) * (2 / 3);
   const height = anchor.y - top;
   const halfWidth = Math.max(0, Math.min(48 * scale, height / 5.6));
   // Elliptical mouth and round cross-sections give the narrow cone real depth.
@@ -38,12 +39,12 @@ export function createEventProjection() {
     if(coverage)return;
     coverage=new Uint8ClampedArray(192*768);whites=new Float64Array(768);
     for(let y=0;y<768;y++){
-      const v=y/767,radius=Math.max(.002,1-v),topFade=Math.min(1,(v/.26)**.65),source=.18*v**12;
+      const v=y/767,radius=Math.max(.002,1-v),topFade=Math.min(1,(v/.26)**.65);
       whites[y]=.04+.48*v**10;
       for(let x=0;x<192;x++){
         const u=x/191*2-1,across=Math.abs(u)/radius;
         if(across>1||(v<.04&&u*u+((v-.04)/.04)**2>1))continue;
-        coverage[y*192+x]=Math.round(255*(.014+.035*Math.sqrt(Math.max(0,1-across*across))+source)*topFade);
+        coverage[y*192+x]=Math.round(255*(.5*Math.sqrt(Math.max(0,1-across*across)))*topFade);
       }
     }
   }

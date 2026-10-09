@@ -189,3 +189,11 @@ html,body{height:100%;overflow:hidden;background:#080c0c}main,.workspace{positio
 
 /* Nested field-feed scrim must leave the owning controls reachable. */
 @media(max-width:760px){.outz-map-controls__title,.outz-map-controls__sections{position:relative;z-index:861}}
+
+/* Owner-approved hologram lift: two-thirds of the previous height. */
+.waypoint-head{bottom:calc(25px * 2 / 3)}
+.waypoint-icon.special .waypoint-head{bottom:calc(39px * 2 / 3)}
+.waypoint-icon.selected .waypoint-head,.waypoint-icon.selected.special .waypoint-head{bottom:calc(70px * 2 / 3)}
+
+.waypoint-icon.special .waypoint-label{bottom:calc(42px - 39px / 3)}
+.waypoint-icon.selected .waypoint-label{bottom:calc(82px - 70px / 3)}

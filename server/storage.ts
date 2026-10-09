@@ -10127,12 +10127,12 @@ function recentQueueCutoffIso(days = RECENT_QUEUE_DAYS): string {
 
 export const storage: IStorage = {
   getEvents(filters) {
-    const rows = db.select().from(events).all();
-    return rows.filter(e => {
-      if (filters?.status && filters.status !== "" && e.status !== filters.status) return false;
-      if (filters?.day && e.dayOfWeek !== filters.day) return false;
-      return true;
-    });
+    // Filter in SQLite before decoding the catalog. Hidden research history must
+    // not block cold map documents when callers only request public events.
+    return db.select().from(events).where(and(
+      filters?.status ? eq(events.status, filters.status) : undefined,
+      filters?.day ? eq(events.dayOfWeek, filters.day) : undefined,
+    )).all();
   },
   countEventsBySource(source, status) {
     if (status) {

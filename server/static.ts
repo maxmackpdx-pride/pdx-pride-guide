@@ -40,6 +40,8 @@ export function serveStatic(app: Express) {
     }
     const mapEntry=requestPath === "/map" || requestPath === "/map-demo" ? "src/pages/MapzMapDemo.tsx" : requestPath === "/outzide" ? "src/pages/Outz.tsx" : null;
     if(mapEntry){
+      // The homepage globe competes with the map engine on cold map routes.
+      baseIndexHtml=baseIndexHtml.replace(/<link[^>]*href="\/home-globe\/portland-city-beam-density\.png"[^>]*>/g, "");
       const manifest=JSON.parse(fs.readFileSync(path.join(distPath,".vite/manifest.json"),"utf8"));
       const entry=manifest[mapEntry];
       if(entry){
