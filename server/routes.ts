@@ -1834,7 +1834,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // ─── EVENTS ─────────────────────────────────────────────────────────────
-  app.get("/api/events", (req, res) => {
+  app.get("/api/events", async (req, res, next) => {
+    try {
     const { day } = req.query;
     // Collapse same-day/same-time duplicates so the public board never shows the
     // same event twice (non-destructive — nothing is deleted from the DB).
@@ -1858,8 +1859,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
       searchTalent.set(row.eventId, names);
     }
     const mapBusinesses=storage.getBusinesses();
-    res.json(evts.map(evt => ({ ...publicEvent(evt, pendingClaimIds, websites,mapBusinesses), searchTalent: searchTalent.get(evt.id) ?? [] })));
+    const payload = [];
+    // Coordinate enrichment is CPU work. Keep documents and asset requests
+    // responsive while preserving this catalog snapshot and its row order.
+    for (const evt of evts) {
+      payload.push({ ...publicEvent(evt, pendingClaimIds, websites,mapBusinesses), searchTalent: searchTalent.get(evt.id) ?? [] });
+      if (payload.length % 8 === 0) await new Promise<void>(resolve => setImmediate(resolve));
+    }
+    res.json(payload);
 
+    } catch (error) { next(error); }
   });
 
   /**

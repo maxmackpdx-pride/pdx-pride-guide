@@ -9,6 +9,23 @@ import {
 } from "./eventWeek";
 
 const PACIFIC_TZ = "America/Los_Angeles";
+const PACIFIC_DATE_TIME_FORMAT = new Intl.DateTimeFormat("en-US", {
+    timeZone: PACIFIC_TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+const PACIFIC_CLOCK_FORMAT = new Intl.DateTimeFormat("en-US", {
+    timeZone: PACIFIC_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
 const PRIDE_LISTING_DAYS = new Set<string>(EVENT_WEEK_DAYS);
 
 /** During the Pride-week lock, only emit board days inside the week. */
@@ -21,16 +38,7 @@ export type EventListing = Event & { listingInstanceKey?: string };
 
 function formatPacificDateTime(ms: number): string {
   const parts: Record<string, string> = {};
-  for (const part of new Intl.DateTimeFormat("en-US", {
-    timeZone: PACIFIC_TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  }).formatToParts(new Date(ms))) {
+  for (const part of PACIFIC_DATE_TIME_FORMAT.formatToParts(new Date(ms))) {
     if (part.type !== "literal") parts[part.type] = part.value;
   }
   const hour = parts.hour === "24" ? "00" : parts.hour;
@@ -41,13 +49,7 @@ function pacificClock(value: string) {
   const ms = parsePacificDateTime(value);
   if (ms == null) return { hour: 0, minute: 0, second: 0, time: "00:00:00" };
   const parts: Record<string, string> = {};
-  for (const part of new Intl.DateTimeFormat("en-US", {
-    timeZone: PACIFIC_TZ,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  }).formatToParts(new Date(ms))) {
+  for (const part of PACIFIC_CLOCK_FORMAT.formatToParts(new Date(ms))) {
     if (part.type !== "literal") parts[part.type] = part.value;
   }
   const hour = Number(parts.hour === "24" ? "0" : parts.hour);

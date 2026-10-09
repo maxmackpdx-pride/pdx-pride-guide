@@ -4,6 +4,13 @@ const PACIFIC_OFFSET_FORMAT = new Intl.DateTimeFormat("en-US", {
   timeZone: PACIFIC_TZ,
   timeZoneName: "longOffset",
 });
+// Fixed locale and zone: reuse ICU formatters across catalog rows and requests.
+const PACIFIC_DATE_FORMAT = new Intl.DateTimeFormat("en-CA", {
+  timeZone: PACIFIC_TZ, year: "numeric", month: "2-digit", day: "2-digit",
+});
+const PACIFIC_WEEKDAY_FORMAT = new Intl.DateTimeFormat("en-US", {
+  timeZone: PACIFIC_TZ, weekday: "short",
+});
 const pacificWallTimeCache = new Map<string, number | null>();
 
 function pacificOffsetMs(epochMs: number): number {
@@ -46,21 +53,11 @@ export function parsePacificDateTime(value?: string | null): number | null {
 export function pacificCalendarDate(value?: string | null): string | null {
   const t = parsePacificDateTime(value);
   if (t == null) return null;
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: PACIFIC_TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date(t));
+  return PACIFIC_DATE_FORMAT.format(new Date(t));
 }
 
 export function pacificTodayDate(now = Date.now()): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: PACIFIC_TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date(now));
+  return PACIFIC_DATE_FORMAT.format(new Date(now));
 }
 
 export function missedConnectionClosesAt(dateStart?: string | null, dateEnd?: string | null): string | null {
@@ -213,10 +210,7 @@ export function generalSpottedClosesAt(now = Date.now()): string {
 }
 
 export function pacificDayOfWeek(now = Date.now()): string {
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: PACIFIC_TZ,
-    weekday: "short",
-  })
+  return PACIFIC_WEEKDAY_FORMAT
     .format(new Date(now))
     .replace(/\./g, "")
     .toUpperCase()
