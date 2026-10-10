@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { waypointHtml, type WaypointId } from "@/lib/livingMapWaypoints";
-import { VINE_ANCHORS, vineMesh, drawVines, hitVines } from "./ponies-globe-vines";
+import { VINE_ANCHORS, hitVines } from "./ponies-globe-vines";
+import { createVineRenderer } from "./ponies-globe-vine-renderer";
 import hologramData from "./portland-globe-holograms.json";
 
 // A deliberately enlarged metro wrapped over a sphere, not an Earth-scale globe.
@@ -150,6 +151,7 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
     let points: Point[] = [];
     const vineImage = new Image();
     let vinePixels: ImageData | null = null;
+    let vineLayer: ReturnType<typeof createVineRenderer> | null = null;
     let lastHoverFrame=performance.now();
     // Reuse small glow stamps instead of asking the renderer to blur every dot.
     const hoverSprites=new Map<number,HTMLCanvasElement>();
@@ -271,9 +273,10 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
         return { x: cx + x * radius * elevation, y: cy - p.y * radius * elevation, z };
       };
       context.clearRect(0, 0, width, height);
-      const vines = vinesEnabled ? vineMesh(cx,cy,radius,elapsed,still,yaw) : [];
-      if(vinePixels) drawVines(context,vineImage,vines.filter(vine=>vine.z<0));
-      vineHit.current=(x,y)=>!!vinePixels && hitVines(x,y,vines,vinePixels,cx,cy,radius);
+      const vines = vineLayer?.frame(radius,elapsed,still,yaw,window.devicePixelRatio || 1);
+      if(vines) context.drawImage(vines.back,cx-vines.size/2,cy-vines.size/2,vines.size,vines.size);
+      vineHit.current=(x,y)=>!!vines && !!vinePixels && hitVines(x-cx+vines.size/2,y-cy+vines.size/2,
+        vines.mesh,vinePixels,vines.size/2,vines.size/2,radius);
       // Black negative space between the populated areas and waterways.
       context.fillStyle = '#000';
       context.beginPath(); context.arc(cx, cy, radius, 0, Math.PI * 2); context.fill();
@@ -414,7 +417,7 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
         context.fillRect(p.x - .5, p.y - size, 1, size * 2);
       }
       context.globalAlpha = 1;
-      if(vinePixels) drawVines(context,vineImage,vines.filter(vine=>vine.z>=0));
+      if(vines) context.drawImage(vines.front,cx-vines.size/2,cy-vines.size/2,vines.size,vines.size);
       context.font = `${Math.max(9, Math.min(12, radius / 25))}px monospace`;
       context.textAlign = 'center';
       for (const marker of MARKERS) {
@@ -584,19 +587,26 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
       context.setTransform(dpr,0,0,dpr,0,0); draw();
     };
     const animate = (now: number) => {
+      if (document.hidden) { previous=0; frame=requestAnimationFrame(animate); return; }
       if (now - previous >= 16) {
-        if (previous) elapsed += Math.min(now-previous,64);
+        // Keep rotation tied to real visible time, even when a device drops frames.
+        if (previous) elapsed += now-previous;
         previous = now; elapsedRef.current = elapsed;
         if(!still || hover.current || points.some(p=>(p.hoverGlow?.strength ?? 0)>.005))draw();
       }
       frame = requestAnimationFrame(animate);
     };
+    const resetFrameClock = () => { previous=0; };
+    document.addEventListener('visibilitychange',resetFrameClock);
     if(vinesEnabled) {
       vineImage.onload=()=>{
         if(disposed)return;
         const sample=document.createElement("canvas");sample.width=vineImage.naturalWidth;sample.height=vineImage.naturalHeight;
         const ink=sample.getContext("2d",{willReadFrequently:true});
-        if(ink){ink.drawImage(vineImage,0,0);vinePixels=ink.getImageData(0,0,sample.width,sample.height);draw();}
+        if(ink){
+          ink.drawImage(vineImage,0,0);vinePixels=ink.getImageData(0,0,sample.width,sample.height);
+          vineLayer=createVineRenderer(vineImage,()=>{if(!disposed && (still || !active))draw();});draw();
+        }
       };
       vineImage.src="/home-globe/ponies-vines.webp";
     }
@@ -636,7 +646,7 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
     };
     if (active) frame = requestAnimationFrame(animate);
     redrawRef.current = () => { if(still || !active)draw(); };
-    return () => { disposed = true; window.clearTimeout(atlasRetry); window.clearTimeout(fallbackTimer); cancelAnimationFrame(frame); observer.disconnect(); redrawRef.current = () => {}; syncAnimation.current=()=>{}; };
+    return () => { disposed = true; vineLayer?.dispose(); document.removeEventListener('visibilitychange',resetFrameClock); window.clearTimeout(atlasRetry); window.clearTimeout(fallbackTimer); cancelAnimationFrame(frame); observer.disconnect(); redrawRef.current = () => {}; syncAnimation.current=()=>{}; };
   }, [vinesEnabled]);
   useEffect(()=>{mode.current={active,still};syncAnimation.current();},[active,still]);
 

@@ -18,12 +18,25 @@ test('Halloween restores the current panel at Portland midnight, including on an
   assert.equal(homeHalloweenActive(HALLOWEEN_END),false);
   assert.equal(homeHalloweenActive(HALLOWEEN_END+1000),false);
 });
-test('vines grow, extend past the globe and have still-mode geometry',()=>{
-  assert.equal(vineMesh(200,200,180,0,false,0).length,0);
-  const full=vineMesh(200,200,180,20000,false,0);
+test('vines appear fully formed, with leaf overhang and gentle motion only',()=>{
+  const full=vineMesh(200,200,180,0,false,0);
   assert(full.length>0);
   assert(full.some(p=>p.triangles.some(t=>t.some(v=>Math.hypot(v.x-200,v.y-200)>180))));
+  const uvExtent=(mesh:ReturnType<typeof vineMesh>)=>{
+    const vertices=mesh.flatMap(p=>p.triangles.flat());
+    return [Math.min(...vertices.map(v=>v.u)),Math.max(...vertices.map(v=>v.u)),
+      Math.min(...vertices.map(v=>v.v)),Math.max(...vertices.map(v=>v.v))];
+  };
+  assert.deepEqual(uvExtent(full),uvExtent(vineMesh(200,200,180,20000,false,0)));
+  assert.notDeepEqual(full,vineMesh(200,200,180,5000,false,0));
   assert.deepEqual(vineMesh(200,200,180,0,true,0),vineMesh(200,200,180,5000,true,0));
+});
+test('the visible vine mesh stays under its drawing budget throughout a full turn',()=>{
+  for(let i=0;i<24;i++){
+    const mesh=vineMesh(0,0,180,0,true,i*Math.PI/12);
+    assert(mesh.length<700,`Too many vine triangles: ${mesh.length}`);
+    assert(mesh.every(p=>p.z>=0||p.triangles.some(t=>t.some(v=>Math.hypot(v.x,v.y)>180))));
+  }
 });
 test('transparent vine texture does not capture globe taps',()=>{
   const mesh=vineMesh(200,200,180,20000,true,0);
