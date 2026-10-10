@@ -19,3 +19,22 @@ test('transparent vine texture does not capture globe taps',()=>{
   const mesh=vineMesh(200,200,180,20000,true,0);
   assert.equal(hitVines(200,200,mesh,{width:1536,height:1024,data:new Uint8ClampedArray(1536*1024*4)} as ImageData,200,200,180),false);
 });
+test('front-facing vine artwork preserves its texture proportions as the globe turns',()=>{
+  for(const yaw of [0,Math.PI/2,Math.PI,3*Math.PI/2]){
+    const horizontal:number[]=[],vertical:number[]=[];
+    for(const patch of vineMesh(0,0,1,0,true,yaw))for(const triangle of patch.triangles){
+      for(let i=0;i<3;i++){
+        const a=triangle[i],b=triangle[(i+1)%3];
+        if(Math.min(a.z,b.z)<.8)continue;
+        const du=Math.abs(b.u-a.u),dv=Math.abs(b.v-a.v);
+        const distance=Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
+        if(du>0&&dv===0)horizontal.push(distance/du);
+        if(dv>0&&du===0)vertical.push(distance/dv);
+      }
+    }
+    assert(horizontal.length>0&&vertical.length>0);
+    const median=(values:number[])=>values.sort((a,b)=>a-b)[Math.floor(values.length/2)];
+    const ratio=median(horizontal)/median(vertical);
+    assert(ratio>.85&&ratio<1.15,`Uneven texture scaling at yaw ${yaw}: ${ratio}`);
+  }
+});
