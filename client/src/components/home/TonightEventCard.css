@@ -127,3 +127,28 @@
 .home-tonight .tonight-card__body { padding:18px; gap:10px; }
 .home-tonight .tonight-card__body h3 { font-size:28px; }
 .home-tonight .tonight-card__footer { margin-inline:18px; padding:12px 0 16px; }
+
+/* Live badge: ON NOW, or STARTS IN with a ticking ds/Countdown-style readout.
+   Same height, inset and radius as the Share button so the two line up. */
+.tonight-card__live {
+  position: absolute; top: 16px; left: 16px; z-index: 4;
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 0 13px; box-sizing: border-box;
+  border-radius: 10px; background: var(--c); color: var(--z-black);
+  font: 900 15px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase;
+  box-shadow: 0 0 0 2px var(--z-black), var(--neon-bloom);
+  pointer-events: none;
+}
+.tonight-card__live > i { width: 8px; height: 8px; flex: none; border-radius: 999px; background: currentColor; animation: tonight-live-pulse 1.6s ease-in-out infinite; }
+.tonight-card__live--count { background: var(--z-oled); color: var(--c); border: 1.5px solid var(--c); }
+.tonight-card__live-label { font: 900 15px/1 var(--font-display); letter-spacing: .06em; color: var(--text-hi); }
+.tonight-card__live--count b {
+  font: 900 21px/1 var(--font-display); letter-spacing: .02em; font-variant-numeric: tabular-nums; color: var(--c);
+  text-shadow: 2px 2px 0 var(--z-black), -1px -1px 0 var(--z-black), 1px -1px 0 var(--z-black), 0 0 14px color-mix(in srgb, var(--c) 60%, transparent);
+}
+@keyframes tonight-live-pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .tonight-card__live > i { animation: none; } }
+:is(html.calm-mode, :root[data-calm="true"]) .tonight-card__live > i { animation: none; }
+.events-card-feed--list .tonight-card__live { top: 8px; left: 8px; min-height: 32px; padding: 0 9px; gap: 6px; font-size: 12px; }
+.events-card-feed--list .tonight-card__live-label { font-size: 12px; }
+.events-card-feed--list .tonight-card__live--count b { font-size: 15px; }

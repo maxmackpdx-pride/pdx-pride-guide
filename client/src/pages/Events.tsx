@@ -1,10 +1,9 @@
-import DiscoveryFlow from "@/components/discovery/DiscoveryFlow";
 import { eventsTonightWindow, isEventTonight } from "@shared/eventsTonight";
 import BoardShader from "@/components/board/BoardShader";
 import { createEventSearch } from "@shared/eventSearch";
 import RoomPlate from "@/components/board/RoomPlate";
 import BrowseToolbar from "@/components/BrowseToolbar";
-import FilterSurvey from "@/components/FilterSurvey";
+import EventsDrawer from "@/components/events/EventsDrawer";
 import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
 import type React from "react";
@@ -19,8 +18,8 @@ import { listingKey, type EventListing } from "@shared/multiDayEvents";
 import { admissionFromFilterTag } from "@shared/admission";
 import { EVENT_TYPE_FILTERS, isEventTypeFilterLabel } from "@shared/eventTypeTags";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
-import TonightEventCard from "@/components/home/TonightEventCard";
-import EventsDoorOpener from "@/components/events/EventsDoorOpener";
+import TonightEventCard, { type TonightCardLive } from "@/components/home/TonightEventCard";
+import ZLineIcon from "@/components/ZLineIcon";
 import { useSavedEvents } from "@/hooks/useSavedEvents";
 import AuthModal from "@/components/AuthModal";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
@@ -42,7 +41,7 @@ import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
 import { eventPath, eventUrl } from "@shared/eventSlug";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
-import { List, Grid, ChevronDown } from "lucide-react";
+import { List, Grid, ChevronDown, CalendarDays, Map as MapIcon, SlidersHorizontal } from "lucide-react";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
 
@@ -196,11 +195,26 @@ function eventInWindow(e: EventListing, window: string, windows: DateWindows): b
   }
   const d = pacificCalendarDate(e.dateStart);
   if (!d) return false;
+  if (window.startsWith("D:")) return d === window.slice(2);
   if (window === "TODAY") return d === windows.today;
   if (window === "THIS_WEEK") return windows.thisWeek.has(d);
   if (window === "NEXT_WEEK") return windows.nextWeek.has(d);
   if (window === "WEEKEND") return windows.weekend.has(d);
   return d.startsWith(window); // month key YYYY-MM
+}
+
+const WEEKDAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
+const DEFAULT_WINDOW = "TONIGHT";
+const SOON_MS = 3 * 3600000;
+
+/** ON NOW / STARTS IN state for a card, from its scheduled start and end. */
+function liveStateFor(e: EventListing, nowMs: number): TonightCardLive | null {
+  const start = parsePacificDateTime(e.dateStart);
+  if (start == null) return null;
+  const end = parsePacificDateTime(e.dateEnd);
+  if (start <= nowMs && end != null && end > nowMs) return { kind: "now" };
+  if (start > nowMs && start - nowMs <= SOON_MS) return { kind: "soon", startMs: start };
+  return null;
 }
 
 /** Board PAST = scheduled end has passed (not the 7-day MC post window). */
@@ -337,7 +351,9 @@ export default function Events() {
   const [location, setLocation] = useLocation();
   const routeEventId = routeMatch && routeParams?.id ? Number(routeParams.id) : null;
   const routeDay = useMemo(() => readSearchParam("day").toUpperCase(), [location]);
-  const [activeDay, setActiveDay] = useState(() => readSearchParam("window") || "ALL");
+  const [activeDay, setActiveDay] = useState(() => readSearchParam("window") || DEFAULT_WINDOW);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
   const [activeFilters, setActiveFilters] = useState<string[]>(() => {
     const raw = readSearchParam("type");
     return raw
@@ -374,7 +390,7 @@ export default function Events() {
   const browseQuery = useCallback(() => {
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
-    if (activeDay !== "ALL") params.set("window", activeDay);
+    if (activeDay !== DEFAULT_WINDOW) params.set("window", activeDay);
     if (activeFilters.length) params.set("type", activeFilters.join("|"));
     if (pastView) params.set("past", "1");
     if (viewMode !== "grid") params.set("view", viewMode);
@@ -405,7 +421,7 @@ export default function Events() {
   }, [browseQuery, routeMatch]);
   useEffect(() => {
     const restore = () => {
-      setActiveDay(readSearchParam("window") || "ALL");
+      setActiveDay(readSearchParam("window") || DEFAULT_WINDOW);
       setActiveFilters(readSearchParam("type").split("|").filter(isEventTypeFilterLabel));
       setPastView(readSearchParam("past") === "1");
       setSearchQuery(readSearchParam("q"));
@@ -497,13 +513,67 @@ export default function Events() {
   const activeChipLabel = dayChips.find(c => c.key === activeDay)?.label ?? null;
   // If the selected window no longer exists in the pool (e.g. after toggling Past), fall back to All.
   useEffect(() => {
-    if (!isLoading && activeDay !== "ALL" && !dayChips.some(c => c.key === activeDay)) setActiveDay("ALL");
+    if (!isLoading && activeDay !== "ALL" && !activeDay.startsWith("D:") && !dayChips.some(c => c.key === activeDay)) setActiveDay("ALL");
   }, [dayChips, activeDay, isLoading]);
 
   const filtered = useMemo(
     () => sortEvents(filterBoardEvents(events, activeDay, activeFilters, searchQuery, pastView, now), sortMode),
     [events, activeDay, activeFilters, searchQuery, sortMode, pastView, now],
   );
+
+  // One date rail: tonight plus the next six days, each with a live count.
+  const dayRail = useMemo(() => {
+    const today = pacificTodayDate(now);
+    const noon = parsePacificDateTime(`${today}T12:00:00`) ?? now;
+    return Array.from({ length: 7 }, (_, i) => {
+      const ms = noon + i * 86400000;
+      const date = pacDate(ms);
+      const code = WEEKDAY_CODES[pacWeekday(ms)] ?? "SAT";
+      const lower = code.toLowerCase();
+      const key = i === 0 ? DEFAULT_WINDOW : `D:${date}`;
+      const mon = new Intl.DateTimeFormat("en-US", { timeZone: PACIFIC, month: "short" }).format(new Date(ms)).toUpperCase();
+      const dom = Number(date.slice(8));
+      return {
+        key,
+        top: i === 0 ? "Tonight" : code,
+        sub: i === 0 ? `${code} ${dom}` : `${mon} ${dom}`,
+        color: `var(--day-${lower})`,
+        text: code === "MON" || code === "TUE" ? `var(--day-${lower}-text)` : `var(--day-${lower})`,
+        ink: code === "MON" || code === "TUE" ? "var(--text-hi)" : "var(--z-black)",
+        count: filterBoardEvents(events, key, activeFilters, searchQuery, false, now).length,
+      };
+    });
+  }, [events, activeFilters, searchQuery, now]);
+  const railKeys = useMemo(() => new Set(dayRail.map(d => d.key)), [dayRail]);
+  const moreLabel = pastView ? "Past" : railKeys.has(activeDay) ? "All +" : (activeChipLabel ?? "All +");
+
+  // Tonight reads as a timeline: on now, starting soon, tonight, late.
+  const tonightBands = useMemo(() => {
+    if (activeDay !== DEFAULT_WINDOW || pastView || sortMode !== "start_time") return null;
+    const today = pacificTodayDate(now);
+    const lateCut = parsePacificDateTime(`${today}T21:00:00`) ?? now;
+    const bands = [
+      { id: "now", label: "On now", color: "var(--neon-green)", items: [] as EventListing[] },
+      { id: "soon", label: "Starting soon", color: "var(--neon-cyan)", items: [] as EventListing[] },
+      { id: "tonight", label: "Tonight", color: "var(--neon-magenta)", items: [] as EventListing[] },
+      { id: "late", label: "Late", color: "var(--neon-violet)", items: [] as EventListing[] },
+    ];
+    for (const e of filtered) {
+      const live = liveStateFor(e, now);
+      const start = parsePacificDateTime(e.dateStart) ?? now;
+      if (live?.kind === "now") bands[0].items.push(e);
+      else if (live?.kind === "soon") bands[1].items.push(e);
+      else if (start < lateCut) bands[2].items.push(e);
+      else bands[3].items.push(e);
+    }
+    return bands.filter(b => b.items.length > 0);
+  }, [activeDay, pastView, sortMode, filtered, now]);
+
+  const mySavedUpcoming = useMemo(
+    () => liveEvents.filter(e => savedIds.has(e.id)).length,
+    [liveEvents, savedIds],
+  );
+  const drawerFilterCount = (railKeys.has(activeDay) ? 0 : 1) + Number(pastView) + Number(sortMode !== "start_time");
 
   const posterServeQuery = useQuery<{ ads: AdServePayload[] }>({
     queryKey: ["/api/ads/serve", "grid"],
@@ -599,18 +669,16 @@ export default function Events() {
       <EventsHero eventCount={upcomingCount} />
       <div className="room-plate-shell"><RoomPlate room="eventz" /></div>
       <BoardStatsBar stats={heroStats} variant="band" showLive={false} />
-      <DiscoveryFlow room="Eventz" accent="var(--room-eventz)" title="Got plans?" kicker={<EventsDoorOpener tonightCount={events.filter(e => isEventTonight(e, now)).length} now={now} />} intro="Find an event, build your schedule, or share something happening." initiallyOpen={Boolean(window.location.search) || routeMatch} initialChoiceId={activeTab}
-        onViewAll={() => { setActiveTab('board'); setActiveDay('ALL'); setActiveFilters([]); setSearchQuery(''); setPastView(false); }} choices={[
-          { id: 'tonight', label: 'Tonight', description: 'What is on right now', onChoose: () => { setActiveTab('board'); setActiveDay('TONIGHT'); } },
-          { id: 'board', label: 'Another night', description: 'Browse the flyers', onChoose: () => setActiveTab('board') },
-          { id: 'schedule', label: 'Explore the calendar', description: 'See your week', onChoose: () => setActiveTab('schedule') },
-          { id: 'mine', label: 'My Schedule', description: 'Plans you’ve saved', onChoose: () => goToEventAction('/schedule?view=mine') },
-          { id: 'submit', label: 'Submit an Event', description: 'Share what’s happening', onChoose: () => goToEventAction('/submit?mode=submit') },
-        ]}>
+
 
       {activeTab === "schedule" ? (
         <ScrollReveal delay={50}>
           <div className="events-page__body events-page__body--schedule">
+            <div className="events-schedule-switch">
+              <button type="button" className="events-tool-btn" onClick={() => setActiveTab("board")}>
+                <Grid size={18} aria-hidden="true" />Back to flyers
+              </button>
+            </div>
             <ScheduleCard>
               <Schedule embed />
             </ScheduleCard>
@@ -656,32 +724,35 @@ export default function Events() {
                   </span>
                 </div>
               </div>
-              <FilterSurvey label="Eventz" question="When do you want to go?" value={activeDay} onChange={setActiveDay} accent="var(--room-eventz)" startStep={2} eyebrow="Choose a date" options={dayChips.filter(chip => !/^\d{4}-/.test(chip.key)).map(chip => ({value:chip.key,label:chip.label}))}>
-              <BrowseToolbar label="Search and filter Eventz" className="board-active-feed__controls">
-                <div className="board-filter-row events-filter-row">
-                  <details className="events-more-filters">
-                    <summary>More filters{activeFilters.length || pastView || /^\d{4}-/.test(activeDay) ? ` · ${activeFilters.length + Number(pastView) + Number(/^\d{4}-/.test(activeDay))} active` : ""}</summary>
-                    <div className="events-more-filters__content">
-                      <div className="events-more-filters__months" role="group" aria-label="Filter by month">
-                        {dayChips.filter(chip => /^\d{4}-/.test(chip.key)).map((chip, i) => (
-                          <FilterChip key={chip.key} selected={activeDay === chip.key} fill={activeDay === chip.key}
-                            accent={windowAccent(chip.key, i)} onToggle={() => setActiveDay(chip.key)} data-testid={`filter-day-${chip.key}`}>
-                            {chip.label}
-                          </FilterChip>
-                        ))}
-                      </div>
-                  <FilterChip
-                    selected={pastView}
-                    fill={pastView}
-                    accent="var(--text-meta, #8c8980)"
-                    onToggle={() => setPastView(v => !v)}
-                    data-testid="filter-past-events"
-                    className="events-filter-chip--past"
-                    style={pastView ? { color: "var(--text-hi)" } : undefined}
+              <div className="events-browse">
+                <nav className="events-day-rail" aria-label="Pick a day">
+                  {dayRail.map(d => (
+                    <button
+                      key={d.key}
+                      type="button"
+                      className={`events-day-tab pdx-glass-rebind${d.key === DEFAULT_WINDOW ? " events-day-tab--tonight" : ""}`}
+                      aria-pressed={!pastView && activeDay === d.key}
+                      onClick={() => { setPastView(false); setActiveDay(d.key); }}
+                      style={{ "--c": d.color, "--day-text": d.text, "--day-ink": d.ink } as React.CSSProperties}
+                      data-testid={`day-tab-${d.key}`}
+                    >
+                      <span className="events-day-tab__top">{d.top}</span>
+                      <span className="events-day-tab__sub">{d.sub}</span>
+                      <span className="events-day-tab__count" aria-label={`${d.count} events`}>{d.count}</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="events-day-tab events-day-tab--more"
+                    aria-pressed={pastView || !railKeys.has(activeDay)}
+                    aria-haspopup="dialog"
+                    onClick={() => setDrawerOpen(true)}
                   >
-                    PAST{pastEvents.length > 0 ? ` · ${pastEvents.length}` : ""}
-                  </FilterChip>
-                  <div className="events-filter-divider" />
+                    <span className="events-day-tab__top">More</span>
+                    <span className="events-day-tab__sub">{moreLabel}</span>
+                  </button>
+                </nav>
+                <div className="events-chip-row" role="group" aria-label="Filter by type">
                   {EVENT_TYPE_FILTERS.map(f => (
                     <EventTypeTag
                       key={f}
@@ -692,8 +763,9 @@ export default function Events() {
                       testId={`filter-type-${f.replace(/[+ ]/g, "-")}`}
                     />
                   ))}
-                    </div>
-                  </details>
+                </div>
+              <BrowseToolbar label="Search and filter Eventz" className="board-active-feed__controls">
+                <div className="board-filter-row events-filter-row">
                   <div className="events-filter-search">
                     <SearchInput
                       id="event-search"
@@ -706,26 +778,12 @@ export default function Events() {
                       size="sm"
                     />
                   </div>
-                  <div className="events-filter-spacer" />
-                  {!isLoading && filtered.length > 0 && (
-                    <label className="events-sort">
-                      <span className="events-sort__label">Sort</span>
-                      <div className="board-select-wrap">
-                        <select
-                          className="board-select events-sort__select"
-                          value={sortMode}
-                          onChange={e => setSortMode(e.target.value as SortMode)}
-                          data-testid="events-sort"
-                          aria-label="Sort events"
-                        >
-                          {SORT_OPTIONS.map(opt => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                          ))}
-                        </select>
-                        <span className="board-select-caret" aria-hidden="true"><ChevronDown size={14} /></span>
-                      </div>
-                    </label>
-                  )}
+                  <button type="button" className="events-tool-btn" aria-haspopup="dialog" onClick={() => setDrawerOpen(true)} data-testid="events-filters-open">
+                    <SlidersHorizontal size={18} aria-hidden="true" />Filters{drawerFilterCount ? ` · ${drawerFilterCount}` : ""}
+                  </button>
+                  <Link href="/map?layer=events" className="events-tool-btn" data-testid="events-map-link">
+                    <MapIcon size={18} aria-hidden="true" />Map
+                  </Link>
                   <div className="events-view-toggle">
                     <button
                       type="button"
@@ -749,9 +807,19 @@ export default function Events() {
                     >
                       <List size={22} />
                     </button>
+                    <button
+                      type="button"
+                      data-testid="toggle-calendar-view"
+                      onClick={() => setActiveTab("schedule")}
+                      className="events-view-toggle__btn"
+                      title="Calendar view"
+                      aria-label="Show the calendar"
+                    >
+                      <CalendarDays size={22} />
+                    </button>
                   </div>
                 </div>
-                {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== "ALL") && (
+                {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== DEFAULT_WINDOW) && (
                   <button
                     type="button"
                     className="events-clear-filters"
@@ -759,14 +827,14 @@ export default function Events() {
                       setActiveFilters([]);
                       setSearchQuery("");
                       setPastView(false);
-                      setActiveDay("ALL");
+                      setActiveDay(DEFAULT_WINDOW);
                     }}
                   >
                     Clear filters
                   </button>
                 )}
               </BrowseToolbar>
-              </FilterSurvey>
+              </div>
             </div>
           </ScrollReveal>
 
@@ -814,6 +882,26 @@ export default function Events() {
                 : "Clear filters"}
             </Button>
           </div>
+        ) : tonightBands ? (
+          <div className={`events-card-feed events-bands${viewMode === "list" ? " events-card-feed--list" : ""}`}>
+            {tonightBands.map(band => (
+              <section key={band.id} className="events-band pdx-glass-rebind" style={{ "--c": band.color } as React.CSSProperties} aria-labelledby={`events-band-${band.id}`}>
+                <h3 className="events-band__head" id={`events-band-${band.id}`}>
+                  <span aria-hidden="true" />{band.label}<small>{band.items.length}</small>
+                </h3>
+                <div className={viewMode === "list" ? "events-band__list" : "events-poster-grid"}>
+                  {band.items.map(e => (
+                    <TonightEventCard
+                      key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)}
+                      liveState={liveStateFor(e, now)}
+                      onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
+                      onOpen={listing => openEvent(listing)}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
         ) : viewMode === "grid" ? (
           <div className="events-card-feed">
           <div className="events-poster-grid">
@@ -843,6 +931,7 @@ export default function Events() {
               return (
                 <TonightEventCard
                   key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)}
+                  liveState={pastView ? null : liveStateFor(e, now)}
                   onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
                   onOpen={listing => openEvent(listing)}
                 />
@@ -856,6 +945,7 @@ export default function Events() {
             {visibleListEvents.map((e, i) => (
               <TonightEventCard
                   key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)}
+                  liveState={pastView ? null : liveStateFor(e, now)}
                   onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
                   onOpen={listing => openEvent(listing)}
                 />
@@ -864,7 +954,7 @@ export default function Events() {
           </div>
         )}
 
-        {hasMoreVisibleItems && (
+        {!tonightBands && hasMoreVisibleItems && (
           <div
             ref={loadMoreRef}
             className="events-progressive-loader"
@@ -888,7 +978,64 @@ export default function Events() {
       </section>
       )}
 
-      </DiscoveryFlow>
+
+      <EventsDrawer
+        open={drawerOpen}
+        onClose={closeDrawer}
+        title="Filters"
+        meta={`${filtered.length} ${filtered.length === 1 ? "event" : "events"}`}
+        footer={(
+          <Button type="button" variant="solid" accent="cyan" onClick={closeDrawer} style={{ width: "100%" }} data-testid="events-filters-apply">
+            Show {filtered.length} {filtered.length === 1 ? "event" : "events"}
+          </Button>
+        )}
+      >
+        <div className="events-drawer__section">
+          <span className="events-drawer__label">When</span>
+          <div className="events-drawer__chips" role="group" aria-label="Filter by date">
+            {dayChips.filter(chip => chip.key !== "TODAY").map((chip, i) => (
+              <FilterChip key={chip.key} selected={activeDay === chip.key} fill={activeDay === chip.key}
+                accent={windowAccent(chip.key, i)} onToggle={() => setActiveDay(chip.key)} data-testid={`filter-day-${chip.key}`}>
+                {chip.label}
+              </FilterChip>
+            ))}
+            <FilterChip
+              selected={pastView}
+              fill={pastView}
+              accent="var(--text-meta, #8c8c8c)"
+              onToggle={() => setPastView(v => !v)}
+              data-testid="filter-past-events"
+              className="events-filter-chip--past"
+            >
+              PAST{pastEvents.length > 0 ? ` · ${pastEvents.length}` : ""}
+            </FilterChip>
+          </div>
+        </div>
+        <div className="events-drawer__section">
+          <label className="events-drawer__label" htmlFor="events-sort-select">Sort</label>
+          <div className="board-select-wrap">
+            <select
+              id="events-sort-select"
+              className="board-select events-sort__select"
+              value={sortMode}
+              onChange={e => setSortMode(e.target.value as SortMode)}
+              data-testid="events-sort"
+            >
+              {SORT_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <span className="board-select-caret" aria-hidden="true"><ChevronDown size={14} /></span>
+          </div>
+        </div>
+      </EventsDrawer>
+
+      {user && mySavedUpcoming > 0 && activeTab === "board" && !selectedEvent && (
+        <Link href="/schedule?view=mine" className="events-myschedule-pill" data-testid="events-my-schedule">
+          <ZLineIcon name="favorite" size={18} filled />
+          My Schedule · {mySavedUpcoming}
+        </Link>
+      )}
 
       {showSaveAuth && <AuthModal onClose={() => setShowSaveAuth(false)} />}
       {selectedEvent && (

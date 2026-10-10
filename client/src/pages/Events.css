@@ -237,3 +237,64 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
   .events-page .events-card-feed--list .tonight-card__body h3 { font-size:25px; }
   .events-page .events-card-feed--list .tonight-card__footer { flex-direction:row; border-top:1px solid color-mix(in srgb,var(--c) 25%,transparent); }
 }
+
+/* ── Eventz browse: one date rail, one chip row, tools, drawer (Oct 2026) ── */
+.events-page .events-browse { display: flex; flex-direction: column; gap: 16px; }
+.events-page .events-day-rail { display: flex; gap: 12px; overflow-x: auto; padding: 10px 2px 4px; scrollbar-width: none; }
+.events-page .events-day-rail::-webkit-scrollbar { display: none; }
+.events-page .events-day-tab {
+  position: relative; flex: none; min-width: 76px; min-height: 60px; padding: 0 14px; box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  border-radius: 14px; border: 1.5px solid color-mix(in srgb, var(--c) 42%, transparent);
+  background: var(--z-oled); color: var(--day-text, var(--c)); cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.events-page .events-day-tab--tonight { min-width: 108px; }
+.events-page .events-day-tab:hover { border-color: var(--c); }
+.events-page .events-day-tab[aria-pressed="true"] { background: var(--c); border-color: var(--c); color: var(--day-ink, var(--z-black)); box-shadow: var(--neon-bloom); }
+.events-page .events-day-tab:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 3px; }
+.events-page .events-day-tab__top { font: 900 21px/1 var(--font-display); text-transform: uppercase; letter-spacing: .01em; }
+.events-page .events-day-tab__sub { font: 500 10px/1 var(--font-mono, monospace); letter-spacing: .08em; text-transform: uppercase; opacity: .9; }
+/* ds/StatPill, small: the day count. */
+.events-page .events-day-tab__count {
+  position: absolute; top: -9px; right: -7px; min-width: 24px; height: 20px; padding: 0 6px; box-sizing: border-box;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; border: 2px solid var(--c); background: var(--z-oled); color: var(--c);
+  font: 700 12px/1 var(--font-display); letter-spacing: .05em; font-variant-numeric: tabular-nums;
+}
+.events-page .events-day-tab[aria-pressed="true"] .events-day-tab__count { background: var(--c); color: var(--day-ink, var(--z-black)); box-shadow: 0 0 0 2px var(--z-oled); }
+.events-page .events-day-tab--more { --c: var(--border-strong); border-style: dashed; color: var(--text-mid); }
+.events-page .events-day-tab--more[aria-pressed="true"] { background: var(--z-oled); border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: none; }
+.events-page .events-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 640px) {
+  .events-page .events-chip-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -2px; padding-inline: 2px; }
+  .events-page .events-chip-row::-webkit-scrollbar { display: none; }
+  .events-page .events-chip-row > * { flex: none; }
+}
+.events-page .events-tool-btn, .events-schedule-switch .events-tool-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 14px; box-sizing: border-box;
+  border-radius: 10px; border: 1px solid color-mix(in srgb, var(--room-eventz) 45%, transparent);
+  background: var(--btn-glow-bg); box-shadow: var(--btn-glow-shadow); color: var(--text-hi);
+  font: 700 14px/1 var(--font-display); letter-spacing: .04em; text-transform: uppercase; text-decoration: none; cursor: pointer; white-space: nowrap;
+}
+.events-page .events-tool-btn:hover { border-color: var(--room-eventz); }
+.events-schedule-switch { display: flex; margin-bottom: 16px; }
+
+/* Tonight time bands. */
+.events-page .events-bands { display: flex; flex-direction: column; gap: 40px; }
+.events-page .events-band { display: flex; flex-direction: column; gap: 16px; }
+.events-page .events-band__head { margin: 0; display: flex; align-items: center; gap: 10px; color: var(--c); font: 700 13px/1 var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase; }
+.events-page .events-band__head > span { width: 8px; height: 8px; border-radius: 999px; background: var(--c); box-shadow: 0 0 10px var(--c); }
+.events-page .events-band__head small { color: var(--text-meta); font: 500 13px/1 var(--font-mono, monospace); }
+.events-page .events-band__list { display: flex; flex-direction: column; gap: 8px; }
+
+/* My Schedule pill: always one tap to your saved plans. */
+.events-myschedule-pill {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 60; transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px; border-radius: 999px;
+  background: var(--neon-magenta); color: var(--z-black); text-decoration: none;
+  font: 800 16px/1 var(--font-display); letter-spacing: .04em; text-transform: uppercase;
+  box-shadow: 0 0 0 2px var(--z-black), 0 10px 30px -6px color-mix(in srgb, var(--z-black) 90%, transparent), var(--neon-bloom);
+}
+.events-myschedule-pill:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 3px; }
+@media (max-width: 959px) { .events-myschedule-pill { bottom: calc(96px + env(safe-area-inset-bottom)); } }
