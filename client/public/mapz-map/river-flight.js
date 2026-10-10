@@ -640,7 +640,7 @@ function drawLights(fade,target=map,surface=lights){
   const hover=reduced.matches||cameraMoving?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
   const lift=roofLift(target,feature,surfaces),eventTop=offset?p.y+offset.y+offset.avoidY-hover:p.y-lift-hover;
-  let hologramTop=eventTop;const raisedY=hologramTop+178.5*beaconScale;
+  const hologramTop=eventTop,raisedY=hologramTop+178.5*beaconScale;
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.56);
   const emergence=isBar?emergenceFor(feature):0;
   const branchFamily=feature.properties.waypointFamily;
@@ -711,10 +711,9 @@ function drawLights(fade,target=map,surface=lights){
     const roofPixels=roof*extrusionAmount(target)/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
     const beamAnchor={x:parent.p.x,y:parent.p.y-roofPixels};
     const projection=eventProjectionGeometry(beamAnchor,{x:logoX,y:hologramTop},beaconScale);
-    hologramTop=projection.top+32*beaconScale;
    if(pass===0){
     lightsContext.save();
-    lightsContext.globalAlpha=Math.min(1,fade)*bloomScale;
+    lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*bloomScale;
     eventProjection.draw(lightsContext,projection,pulseTime,phase,reduced.matches,eventProjectionColor(feature.properties));
     lightsContext.restore();
    continue;
