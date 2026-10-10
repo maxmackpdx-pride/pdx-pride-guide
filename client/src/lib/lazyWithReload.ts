@@ -18,11 +18,12 @@ export function recoverFromStaleAsset(error: unknown): boolean {
   if (typeof window === "undefined" || !isStaleAssetLoadError(error)) return false;
   if (recoveryStarted) return true;
 
-  const lastAttempt = Number(window.sessionStorage.getItem(RELOAD_KEY) || 0);
+  let lastAttempt = 0;
+  try { lastAttempt = Number(window.sessionStorage.getItem(RELOAD_KEY) || 0); } catch { /* storage may be disabled */ }
   if (Date.now() - lastAttempt < RELOAD_COOLDOWN_MS) return false;
 
+  try { window.sessionStorage.setItem(RELOAD_KEY, String(Date.now())); } catch { return false; }
   recoveryStarted = true;
-  window.sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
   void clearPwaCaches()
     .catch(() => {})
     .finally(() => window.location.reload());
@@ -35,7 +36,10 @@ export function installStaleAssetRecovery() {
   if (typeof window === "undefined") return;
   window.addEventListener("vite:preloadError", (event) => {
     const preloadEvent = event as Event & { payload?: unknown };
-    if (recoverFromStaleAsset(preloadEvent.payload)) event.preventDefault();
+    // Vite returns undefined when this event is cancelled. React.lazy then
+    // crashes reading module.default instead of reaching our import catch.
+    // Start recovery, but preserve the rejection for lazyWithReload to handle.
+    recoverFromStaleAsset(preloadEvent.payload);
   });
   window.addEventListener("unhandledrejection", (event) => {
     if (recoverFromStaleAsset(event.reason)) event.preventDefault();
@@ -46,8 +50,7 @@ export function installStaleAssetRecovery() {
 // request a chunk that no longer exists. When that happens, clear SW
 // caches and reload once instead of crashing to the error boundary.
 //
-// Do NOT clear the session key on success  -  clearing it allowed another
-// failed lazy import later in the same session to reload again (reload loop).
+// Keep the cooldown across navigation to prevent reload loops.
 export function lazyWithReload<T extends ComponentType<any>>(factory: () => Promise<{ default: T }>) {
   return lazy(() =>
     factory().catch(async (err) => {
