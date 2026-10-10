@@ -100,7 +100,8 @@ test('cone textures preserve transparency, cache each day token and release all 
         const body=v>=.04&&Math.abs(u)<=Math.max(.002,1-t),cap=u*u+((v-.04)/.04)**2<=1;
         if(!body&&!cap)assert.equal(pixels[(y*width+x)*4+3],0);
       }
-      assert.ok(pixels[(400*width+96)*4+3]>0);
+      assert.equal(pixels[(400*width+96)*4+3],64,'beam body peaks at 25% opacity');
+      for(let i=3;i<pixels.length;i+=4)assert.ok(pixels[i]<=64,'material never exceeds 25% opacity');
     }
     const i=(400*192+96)*4;
     assert.ok(volumes[0].pixels[i+2]>volumes[0].pixels[i]);
