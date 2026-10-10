@@ -666,6 +666,8 @@ try {
 // have no claimedBy to read, so the lock is recorded at the moment of the edit.
 // See mergeDraftIntoEvent in server/ingest/index.ts.
 try { sqlite.exec(`ALTER TABLE events ADD COLUMN locked_fields TEXT NOT NULL DEFAULT '[]'`); } catch {}
+try { sqlite.exec(`ALTER TABLE events ADD COLUMN last_change_label TEXT`); } catch {}
+try { sqlite.exec(`ALTER TABLE events ADD COLUMN last_change_at TEXT`); } catch {}
 
 // Add is_new, hours, phone, owner_id, grand_opening_date, status, closed_at columns to businesses if not present
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`); } catch {}
@@ -10187,6 +10189,23 @@ export const storage: IStorage = {
     // Unclaimed events have no claimedBy to read, so this is what protects an
     // admin fix. See mergeDraftIntoEvent in server/ingest/index.ts.
     const patch: Record<string, unknown> = { ...rest };
+    // Saved-post change label: tell people who saved this listing what moved.
+    {
+      const prior = db.select().from(events).where(eq(events.id, id)).get() as Record<string, unknown> | undefined;
+      if (prior) {
+        const next = rest as Record<string, unknown>;
+        const changed = (key: string) => key in next && next[key] !== undefined && String(next[key] ?? "") !== String(prior[key] ?? "");
+        const labels: string[] = [];
+        if (changed("dateStart") || changed("dateEnd")) labels.push("Time changed");
+        if (changed("venueName") || changed("address")) labels.push("Venue changed");
+        if (changed("admission") || changed("ticketUrl")) labels.push("Tickets updated");
+        if (changed("status") && String(next.status).toUpperCase() === "CANCELLED") labels.splice(0, labels.length, "Cancelled");
+        if (labels.length) {
+          patch.lastChangeLabel = labels.join(" · ");
+          patch.lastChangeAt = new Date().toISOString();
+        }
+      }
+    }
     if (opts?.source !== "sync") {
       const current = db.select().from(events).where(eq(events.id, id)).get();
       if (current) {

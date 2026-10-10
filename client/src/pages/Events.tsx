@@ -20,6 +20,8 @@ import { EVENT_TYPE_FILTERS, isEventTypeFilterLabel } from "@shared/eventTypeTag
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import TonightEventCard, { type TonightCardLive } from "@/components/home/TonightEventCard";
 import ZLineIcon from "@/components/ZLineIcon";
+import { listingPosterUrl } from "@/lib/dsEvent";
+import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
 import { useSavedEvents } from "@/hooks/useSavedEvents";
 import AuthModal from "@/components/AuthModal";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
@@ -41,7 +43,7 @@ import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
 import { eventPath, eventUrl } from "@shared/eventSlug";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
-import { List, Grid, ChevronDown, CalendarDays, Map as MapIcon, SlidersHorizontal } from "lucide-react";
+import { List, Grid, ChevronDown, ChevronRight, CalendarDays, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
 
@@ -354,6 +356,8 @@ export default function Events() {
   const [activeDay, setActiveDay] = useState(() => readSearchParam("window") || DEFAULT_WINDOW);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+  const [mapOpen, setMapOpen] = useState(false);
+  const closeMap = useCallback(() => setMapOpen(false), []);
   const [activeFilters, setActiveFilters] = useState<string[]>(() => {
     const raw = readSearchParam("type");
     return raw
@@ -781,9 +785,9 @@ export default function Events() {
                   <button type="button" className="events-tool-btn" aria-haspopup="dialog" onClick={() => setDrawerOpen(true)} data-testid="events-filters-open">
                     <SlidersHorizontal size={18} aria-hidden="true" />Filters{drawerFilterCount ? ` · ${drawerFilterCount}` : ""}
                   </button>
-                  <Link href="/map?layer=events" className="events-tool-btn" data-testid="events-map-link">
+                  <button type="button" className="events-tool-btn" aria-haspopup="dialog" onClick={() => setMapOpen(true)} data-testid="events-map-open">
                     <MapIcon size={18} aria-hidden="true" />Map
-                  </Link>
+                  </button>
                   <div className="events-view-toggle">
                     <button
                       type="button"
@@ -1027,6 +1031,42 @@ export default function Events() {
             </select>
             <span className="board-select-caret" aria-hidden="true"><ChevronDown size={14} /></span>
           </div>
+        </div>
+      </EventsDrawer>
+
+      <EventsDrawer
+        open={mapOpen}
+        onClose={closeMap}
+        title="Mapz"
+        meta={`${filtered.length} ${filtered.length === 1 ? "event" : "events"} on this view`}
+        footer={(
+          <Link href="/map?layer=events" className="events-tool-btn events-tool-btn--block" onClick={closeMap} data-testid="events-map-full">
+            <MapIcon size={18} aria-hidden="true" />Open the full map
+          </Link>
+        )}
+      >
+        <div className="events-map-list" role="list">
+          {filtered.slice(0, 40).map(e => {
+            const pinHref = e.lat != null && e.lng != null
+              ? `/map?layer=events&lat=${e.lat}&lng=${e.lng}&zoom=15`
+              : `/map?layer=events&q=${encodeURIComponent(e.title)}`;
+            const isToday = pacificCalendarDate(e.dateStart) === pacificTodayDate(now);
+            return (
+              <div className="events-map-row pdx-glass-rebind" role="listitem" key={listingKey(e)} style={{ "--c": `var(--day-${(e.dayOfWeek || "sat").toLowerCase()})` } as React.CSSProperties}>
+                <button type="button" className="events-map-row__open" onClick={() => { closeMap(); openEvent(e); }} aria-label={`Open ${e.title}`}>
+                  <img src={listingPosterUrl(e)} alt="" loading="lazy" />
+                  <span className="events-map-row__copy"><strong>{e.title}</strong><small>{e.venueName}{e.neighborhood ? ` · ${e.neighborhood}` : ""}</small></span>
+                  <time dateTime={e.dateStart}>{!isToday && <small>{eventDateLabel(e.dateStart)}</small>}{eventTimeLabel(e.dateStart)}</time>
+                  <ChevronRight size={17} aria-hidden="true" />
+                </button>
+                <Link href={pinHref} className="events-map-row__pin" aria-label={`Show ${e.title} on the map`} onClick={closeMap}>
+                  <MapPin size={18} aria-hidden="true" />
+                </Link>
+              </div>
+            );
+          })}
+          {filtered.length === 0 && <p className="board-copy-sm">Nothing on this view. Try another day.</p>}
+          {filtered.length > 40 && <p className="board-copy-sm">Showing the first 40. Open the full map for everything.</p>}
         </div>
       </EventsDrawer>
 

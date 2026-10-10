@@ -566,6 +566,8 @@ export function tuckerHostedArchiveAsEvent(row: TuckerHostedArchiveRow): Event {
     updatedAt: now,
     // Archive rows are static and never resynced, so nothing is locked.
     lockedFields: "[]",
+    lastChangeLabel: null,
+    lastChangeAt: null,
   };
 }
 

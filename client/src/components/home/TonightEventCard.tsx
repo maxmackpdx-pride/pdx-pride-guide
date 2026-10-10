@@ -8,6 +8,9 @@ import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import RailShareButton from "./RailShareButton";
 import { eventPath } from "@shared/eventSlug";
 import ZLineIcon from "@/components/ZLineIcon";
+import { ChangeBadge } from "@/components/ds/ChangeBadge";
+
+const CHANGE_WINDOW_MS = 14 * 86400000;
 
 const clock = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit" });
 
@@ -41,6 +44,9 @@ function LiveBadge({ live }: { live: TonightCardLive }) {
 
 export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp, onOpen, liveState }: Omit<RailCardProps, "event"> & { event?: RailCardProps["event"]; liveState?: TonightCardLive | null }) {
   const admission = listing.admission === "FREE" ? "Free" : listing.admission === "SUGGESTED_DONATION" ? "Suggested donation" : listing.admission === "DOOR_FEE" ? "Door fee" : "Ticketed";
+  // Saved cards show what moved since you saved them (last two weeks).
+  const changedAt = listing.lastChangeAt ? Date.parse(listing.lastChangeAt) : NaN;
+  const changeLabel = rsvped && listing.lastChangeLabel && Number.isFinite(changedAt) && Date.now() - changedAt < CHANGE_WINDOW_MS ? listing.lastChangeLabel : null;
   const age = listing.ageRequirement === "21_PLUS" ? "21+" : listing.ageRequirement === "18_PLUS" ? "18+" : "All ages";
   return <article className="tonight-card pdx-glass-card pdx-glass-rebind" style={{ "--c": dayAccentToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
     <ResourceCardMotif name={listing.title} category="eventz" />
@@ -51,6 +57,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
       <div className="tonight-card__art tonight-card__art--flyer"><img src={listingPosterUrl(listing)} alt="" loading="lazy" /></div>
       <div className="tonight-card__body">
         <p className="rail-card-room"><img className="rail-card-room__logo rail-card-room__logo--white" src="/brand/family/eventz.png" alt="Eventz" /></p>
+        {changeLabel ? <ChangeBadge label={changeLabel} className="tonight-card__change" /> : null}
         <p className="tonight-card__time"><Clock3 size={15} aria-hidden="true" />{event ? `${clock.format(event.startMs)} – ${clock.format(event.endMs)}` : formatGridCardWhen(listing)}</p>
         <h3 title={listing.title}>{listing.title}</h3>
         <p className="tonight-card__venue"><MapPin size={16} aria-hidden="true" /><span>{listing.venueName}<small>{listing.neighborhood || "Portland"}</small></span></p>

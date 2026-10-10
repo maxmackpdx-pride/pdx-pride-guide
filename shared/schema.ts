@@ -42,9 +42,13 @@ export const events = sqliteTable("events", {
    * this covers the unclaimed case, which has no owner to read.
    */
   lockedFields: text("locked_fields").notNull().default("[]"),
+  /** What changed on the listing ("Time changed", "Venue changed"). Drives the
+   *  ds/ChangeBadge on cards people have saved. Set by updateEvent only. */
+  lastChangeLabel: text("last_change_label"),
+  lastChangeAt: text("last_change_at"),
 });
 
-export const insertEventSchema = createInsertSchema(events).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertEventSchema = createInsertSchema(events).omit({ id: true, createdAt: true, updatedAt: true, lastChangeLabel: true, lastChangeAt: true });
 export type InsertEvent = z.infer<typeof insertEventSchema>;
 export type Event = typeof events.$inferSelect;
 

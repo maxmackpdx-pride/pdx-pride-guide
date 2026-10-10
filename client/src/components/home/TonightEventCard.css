@@ -152,3 +152,5 @@
 .events-card-feed--list .tonight-card__live { top: 8px; left: 8px; min-height: 32px; padding: 0 9px; gap: 6px; font-size: 12px; }
 .events-card-feed--list .tonight-card__live-label { font-size: 12px; }
 .events-card-feed--list .tonight-card__live--count b { font-size: 15px; }
+
+.tonight-card__body .tonight-card__change { align-self: flex-start; max-width: 100%; margin-bottom: -4px; }
