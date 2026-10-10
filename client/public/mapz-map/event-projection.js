@@ -17,9 +17,15 @@ export function eventProjectionSway(seconds, phase, scale = 1, reduced = false) 
   return reduced ? 0 : scale * (5 * Math.sin(seconds * .29 + phase) + 1.5 * Math.sin(seconds * .17 + phase * 1.7));
 }
 
-export function eventProjectionGeometry(anchor, center, scale = 1) {
-  const top = center.y - 32 * scale;
-  const height = anchor.y - top;
+export function eventProjectionHeightLimit(zoom, pitch) {
+  // Big Pink's GLB is 163.38m tall; allow one third more vertical rise.
+  const metersPerPixel=40075016.686*Math.cos(45.52280*Math.PI/180)/(512*Math.pow(2,zoom));
+  return Math.max(10,163.38*(4/3)/metersPerPixel*Math.sin(pitch*Math.PI/180));
+}
+
+export function eventProjectionGeometry(anchor, center, scale = 1, maxHeight = Infinity) {
+  const height = Math.max(10,Math.min(Math.max(10,maxHeight),anchor.y-(center.y-32*scale)));
+  const top = anchor.y-height;
   const halfWidth = Math.max(0, Math.min(48 * scale, height / 5.6));
   // Elliptical mouth and round cross-sections give the narrow cone real depth.
   return {anchor, x: center.x, top, height, halfWidth, depth:halfWidth * .22};

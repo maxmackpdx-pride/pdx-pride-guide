@@ -17,7 +17,7 @@ import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-whi
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
 import {logoCoverage} from './logo-mask.js';
-import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor} from './event-projection.js';
+import {createEventProjection,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
@@ -710,7 +710,8 @@ function drawLights(fade,target=map,surface=lights){
     const roof=surfaces.roofs?.get(parent.feature.properties.phase)??9;
     const roofPixels=roof*extrusionAmount(target)/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
     const beamAnchor={x:parent.p.x,y:parent.p.y-roofPixels};
-    const projection=eventProjectionGeometry(beamAnchor,{x:logoX,y:hologramTop},beaconScale);
+    const projection=eventProjectionGeometry(beamAnchor,{x:logoX,y:hologramTop},beaconScale,eventProjectionHeightLimit(target.getZoom(),target.getPitch()));
+    hologramTop=projection.top+32*beaconScale;
    if(pass===0){
     lightsContext.save();
     lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*bloomScale;

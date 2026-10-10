@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createEventProjection,eventProjectionGeometry,eventProjectionSway,eventProjectionColor} from '../client/public/mapz-map/event-projection.js';
+import {createEventProjection,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from '../client/public/mapz-map/event-projection.js';
 
 import {lightTick,lightPalette,createLightFilm} from '../client/public/mapz-map/event-light-film.js';
 import {readFile} from 'node:fs/promises';
@@ -107,4 +107,19 @@ test('cone textures preserve transparency, cache each day token and release all 
     assert.ok(volumes[1].pixels[i]>volumes[1].pixels[i+2]);
     material.dispose();for(const canvas of canvases){assert.equal(canvas.width,1);assert.equal(canvas.height,1);}
   }finally{globalThis.document=previous;}
+});
+
+
+test('beam height stays between 10px and one third above Big Pink',()=>{
+  const anchor={x:100,y:500};
+  for(const zoom of [10,14,15,16,18])for(const pitch of [0,48,75]){
+    const limit=eventProjectionHeightLimit(zoom,pitch);
+    for(const y of [600,499,200,-10000]){
+      const geometry=eventProjectionGeometry(anchor,{x:100,y},1,limit);
+      assert.ok(geometry.height>=10&&geometry.height<=limit);
+      assert.equal(geometry.top,anchor.y-geometry.height);
+    }
+  }
+  assert.ok(Math.abs(eventProjectionHeightLimit(15,48)-95)<2);
+  assert.equal(eventProjectionHeightLimit(15,0),10);
 });
