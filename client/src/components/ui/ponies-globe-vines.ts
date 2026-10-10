@@ -1,17 +1,71 @@
 // Recovered from the approved mobile vine demo. Texture triangles curve around the globe.
 type VineVertex = {x:number; y:number; z:number; u:number; v:number};
 type VinePatch = {z:number; growth:number; triangles: [VineVertex,VineVertex,VineVertex][]};
-const TU = [[0, 0, 768, 595], [880, 0, 656, 595], [0, 595, 768, 429], [880, 595, 656, 429]], kU = [[[0.36, 0.47], [0.62, 0.54], [0.38, 0.85], [0.58, 0.87]], [[0.4, 0.55], [0.61, 0.41], [0.8, 0.27], [0.35, 0.81], [0.47, 0.89]], [[0.38, 0.25], [0.32, 0.71]], [[0.2, 0.34], [0.78, 0.25], [0.82, 0.46], [0.69, 0.8]]], FU = [{"lon": 0, "lat": -0.58, "turn": -0.45, "crop": 0}, {"lon": 0.62831853, "lat": 0.48, "turn": 0.55, "crop": 1}, {"lon": 1.25663706, "lat": -0.12, "turn": -0.2, "crop": 3}, {"lon": 1.88495559, "lat": 0.66, "turn": 0.7, "crop": 2}, {"lon": 2.51327412, "lat": -0.52, "turn": -0.4, "crop": 0}, {"lon": 3.14159265, "lat": 0.12, "turn": 0.4, "crop": 1}, {"lon": 3.76991118, "lat": -0.65, "turn": -0.6, "crop": 3}, {"lon": 4.39822972, "lat": 0.5, "turn": 0.3, "crop": 2}, {"lon": 5.02654825, "lat": -0.18, "turn": -0.65, "crop": 0}, {"lon": 5.65486678, "lat": 0.64, "turn": 0.45, "crop": 1}], DU = (e: number) => e * e * (3 - 2 * e);
+const TU = [[0, 0, 768, 595], [880, 0, 656, 595], [0, 595, 768, 429], [880, 595, 656, 429]], kU = [[[0.36, 0.47], [0.62, 0.54], [0.38, 0.85], [0.58, 0.87]], [[0.4, 0.55], [0.61, 0.41], [0.8, 0.27], [0.35, 0.81], [0.47, 0.89]], [[0.38, 0.25], [0.32, 0.71]], [[0.2, 0.34], [0.78, 0.25], [0.82, 0.46], [0.69, 0.8]]];
+// Keep the original ten anchors, then fill the largest spherical gaps.
+export const VINE_ANCHORS = [
+  {"lon": 0, "lat": -0.58, "turn": -0.45, "crop": 0},
+  {"lon": 0.62831853, "lat": 0.48, "turn": 0.55, "crop": 1},
+  {"lon": 1.25663706, "lat": -0.12, "turn": -0.2, "crop": 3},
+  {"lon": 1.88495559, "lat": 0.66, "turn": 0.7, "crop": 2},
+  {"lon": 2.51327412, "lat": -0.52, "turn": -0.4, "crop": 0},
+  {"lon": 3.14159265, "lat": 0.12, "turn": 0.4, "crop": 1},
+  {"lon": 3.76991118, "lat": -0.65, "turn": -0.6, "crop": 3},
+  {"lon": 4.39822972, "lat": 0.5, "turn": 0.3, "crop": 2},
+  {"lon": 5.02654825, "lat": -0.18, "turn": -0.65, "crop": 0},
+  {"lon": 5.65486678, "lat": 0.64, "turn": 0.45, "crop": 1},
+  {"lon": 1.323634, "lat": -1.449692, "turn": -1.3, "crop": 2},
+  {"lon": 3.666818, "lat": 1.414387, "turn": -0.47, "crop": 3},
+  {"lon": 5.136257, "lat": -0.922913, "turn": 0.36, "crop": 1},
+  {"lon": 6.18386, "lat": 0.143559, "turn": 1.19, "crop": 0},
+  {"lon": 1.938428, "lat": -0.077715, "turn": -0.58, "crop": 2},
+  {"lon": 0.934458, "lat": -0.78047, "turn": 0.25, "crop": 3},
+  {"lon": 2.78914, "lat": 0.78875, "turn": 1.08, "crop": 1},
+  {"lon": 3.886069, "lat": 0.036629, "turn": -0.69, "crop": 0},
+  {"lon": 0.557342, "lat": -0.188119, "turn": 0.14, "crop": 2},
+  {"lon": 0.235918, "lat": 1.05842, "turn": 0.97, "crop": 3},
+  {"lon": 3.591612, "lat": 0.626639, "turn": -0.8, "crop": 1},
+  {"lon": 5.675845, "lat": -0.287641, "turn": 0.03, "crop": 0},
+  {"lon": 2.517042, "lat": 0.15541, "turn": 0.86, "crop": 2},
+  {"lon": 1.800076, "lat": -0.711317, "turn": -0.91, "crop": 3},
+  {"lon": 4.408991, "lat": -0.276457, "turn": -0.08, "crop": 1},
+  {"lon": 3.003785, "lat": -0.992513, "turn": 0.75, "crop": 0},
+  {"lon": 4.953185, "lat": 0.990729, "turn": -1.02, "crop": 2},
+  {"lon": 5.011725, "lat": 0.427449, "turn": -0.19, "crop": 3},
+  {"lon": 1.172135, "lat": 0.81544, "turn": 0.64, "crop": 1},
+  {"lon": 3.16165, "lat": -0.414609, "turn": -1.13, "crop": 0},
+];
+const DU = (e: number) => e * e * (3 - 2 * e);
 export function vineMesh(e: number, t: number, a: number, l: number, d: boolean, s = d ? 0 : l / 42e3) {
   let y: VinePatch[] = [];
-  for (let [H, E] of FU.entries()) {
-    let j = d ? 1 : DU(Math.max(0, Math.min(1, (l - H * 650) / 6500)));
+  for (let [H, E] of VINE_ANCHORS.entries()) {
+    let j = d ? 1 : DU(Math.max(0, Math.min(1, (l - H * 5850 / (VINE_ANCHORS.length - 1)) / 6500)));
     if (j === 0) continue;
     // One scale for both texture axes keeps leaves in their original proportions.
     // Stems hug the sphere; only leaf masks at the silhouette lift past its edge.
-    let [z, K, J, ae] = TU[E.crop], de = 0.52, pe = de * ae / J, be = Math.cos(E.turn), $ = Math.sin(E.turn), Z = (fe: number, Be: number) => {
-      let je = kU[E.crop].reduce((Tt, [Qt, xt]) => Math.max(Tt, Math.exp(-(((fe - Qt) / 0.17) ** 2) - ((Be - xt) / 0.18) ** 2)), 0), Je = d ? 0 : Math.sin(l / 1900 + H * 0.91 + Be * 1.8) * 0.007 + Math.sin(l / 3300 + H * 1.7 + fe * 2) * 0.002, Ee = (fe - 0.5) * de + je * Je, He = (0.5 - Be) * pe + je * Je * 0.55, et = Math.max(-1.45, Math.min(1.45, E.lat + Ee * $ + He * be)), mt = E.lon + (Ee * be - He * $) / Math.max(0.65, Math.cos(E.lat)) + s, ft = Math.cos(et), vt = Math.cos(mt) * ft, ut = 1.001 + je * 0.07 * (1 - Math.abs(vt)) ** 8;
-      return { x: e + Math.sin(mt) * ft * a * ut, y: t - Math.sin(et) * a * ut, z: vt, u: z + fe * J, v: K + Be * ae };
+    const [cropX, cropY, cropWidth, cropHeight] = TU[E.crop];
+    const width = 0.52, height = width * cropHeight / cropWidth;
+    const cosTurn = Math.cos(E.turn), sinTurn = Math.sin(E.turn);
+    const sinLon = Math.sin(E.lon + s), cosLon = Math.cos(E.lon + s);
+    const sinLat = Math.sin(E.lat), cosLat = Math.cos(E.lat);
+    const Z = (u: number, v: number): VineVertex => {
+      const leaf = kU[E.crop].reduce((weight, [x, y]) => Math.max(weight,
+        Math.exp(-(((u - x) / 0.17) ** 2) - ((v - y) / 0.18) ** 2)), 0);
+      const breeze = d ? 0 : Math.sin(l / 1900 + H * 0.91 + v * 1.8) * 0.007
+        + Math.sin(l / 3300 + H * 1.7 + u * 2) * 0.002;
+      const localX = (u - 0.5) * width + leaf * breeze;
+      const localY = (0.5 - v) * height + leaf * breeze * 0.55;
+      const east = localX * cosTurn - localY * sinTurn;
+      const north = localX * sinTurn + localY * cosTurn;
+      // Bend a uniformly scaled tangent patch onto the sphere, including at the poles.
+      const angle = Math.hypot(east, north), bend = angle ? Math.sin(angle) / angle : 1;
+      const normal = Math.cos(angle);
+      const x = sinLon * cosLat * normal + (cosLon * east - sinLon * sinLat * north) * bend;
+      const y = sinLat * normal + cosLat * north * bend;
+      const z = cosLon * cosLat * normal + (-sinLon * east - cosLon * sinLat * north) * bend;
+      const elevation = 1.001 + leaf * 0.07 * (1 - Math.abs(z)) ** 8;
+      return { x: e + x * a * elevation, y: t - y * a * elevation, z,
+        u: cropX + u * cropWidth, v: cropY + v * cropHeight };
     };
     for (let fe = 0; fe < 7; fe++) {
       let Be = Math.max(fe / 7, 1 - j), je = (fe + 1) / 7;

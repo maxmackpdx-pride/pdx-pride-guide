@@ -1,7 +1,17 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {HALLOWEEN_END,homeHalloweenActive} from '../client/src/lib/homeHalloween';
-import {vineMesh,hitVines} from '../client/src/components/ui/ponies-globe-vines';
+import {VINE_ANCHORS,vineMesh,hitVines} from '../client/src/components/ui/ponies-globe-vines';
+test('thirty vine clusters fill both hemispheres without crowding existing vines',()=>{
+  assert.equal(VINE_ANCHORS.length,30);
+  assert(VINE_ANCHORS.some(a=>a.lat>1.1));
+  assert(VINE_ANCHORS.some(a=>a.lat< -1.1));
+  for(let i=0;i<VINE_ANCHORS.length;i++)for(let j=i+1;j<VINE_ANCHORS.length;j++){
+    const a=VINE_ANCHORS[i],b=VINE_ANCHORS[j];
+    const cosine=Math.sin(a.lat)*Math.sin(b.lat)+Math.cos(a.lat)*Math.cos(b.lat)*Math.cos(a.lon-b.lon);
+    assert(cosine<Math.cos(.5),`Vines ${i} and ${j} are crowded`);
+  }
+});
 test('Halloween restores the current panel at Portland midnight, including on an open page',()=>{
   assert.equal(homeHalloweenActive(Date.parse('2026-10-10T00:00:00-07:00')),true);
   assert.equal(homeHalloweenActive(HALLOWEEN_END-1),true);

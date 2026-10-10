@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { waypointHtml, type WaypointId } from "@/lib/livingMapWaypoints";
-import { vineMesh, drawVines, hitVines } from "./ponies-globe-vines";
+import { VINE_ANCHORS, vineMesh, drawVines, hitVines } from "./ponies-globe-vines";
 import hologramData from "./portland-globe-holograms.json";
 
 // A deliberately enlarged metro wrapped over a sphere, not an Earth-scale globe.
@@ -641,6 +641,7 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
   useEffect(()=>{mode.current={active,still};syncAnimation.current();},[active,still]);
 
   return <> <canvas ref={canvasRef} className="home-front__metro-globe"
+    data-vine-clusters={vinesEnabled ? VINE_ANCHORS.length : 0}
     role="img" aria-label={vinesEnabled ? "Portland city globe with thin, long Pink Ponies vines spread around its surface" : "Stylized globe made from the selected Portland city map: north Portland, downtown, the inner eastside and Sellwood, with the Willamette River"}
     onPointerDown={event=>{pointerDown.current={x:event.clientX,y:event.clientY};}}
     onPointerCancel={()=>{pointerDown.current=null;}}
