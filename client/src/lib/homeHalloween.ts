@@ -26,9 +26,9 @@ function polygon(x:number,y:number,vertices:number[][]) {
   }
   return inside;
 }
-// Two identical carvings exactly pi radians apart, made from negative space in white dots.
+// Four identical carvings exactly pi/2 radians apart, made from negative space in white dots.
 export function pumpkinCarved(longitude:number, latitude:number, faceLongitude:number) {
-  const x = Math.atan2(Math.sin(2*(longitude-faceLongitude)),Math.cos(2*(longitude-faceLongitude)))/2;
+  const x = Math.atan2(Math.sin(4*(longitude-faceLongitude)),Math.cos(4*(longitude-faceLongitude)))/4;
   const eye = polygon(x,latitude,[[-.55,.14],[-.24,.5],[-.08,.14]]) || polygon(x,latitude,[[.08,.14],[.24,.5],[.55,.14]]);
   const nose = polygon(x,latitude,[[-.1,-.05],[0,.1],[.1,-.05]]);
   const mouth = polygon(x,latitude,[[-.62,-.17],[-.37,-.25],[-.28,-.16],[-.18,-.28],[.18,-.28],[.28,-.16],[.37,-.25],[.62,-.17],[.46,-.45],[.25,-.54],[.15,-.43],[-.15,-.43],[-.25,-.54],[-.46,-.45]]);

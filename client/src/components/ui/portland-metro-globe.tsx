@@ -654,7 +654,7 @@ export function PortlandMetroGlobe({ active, still, halloween = false, onOpenPon
   useEffect(()=>{mode.current={active,still};syncAnimation.current();},[active,still]);
 
   return <> <canvas ref={canvasRef} className="home-front__metro-globe"
-    role="img" aria-label={halloween ? "White-dot pumpkin globe with two opposite faces, Halloween waypoints and growing Pink Ponies vines" : "Stylized globe made from the selected Portland city map: north Portland, downtown, the inner eastside and Sellwood, with the Willamette River"}
+    role="img" aria-label={halloween ? "White-dot pumpkin globe with four evenly spaced faces, Halloween waypoints and growing Pink Ponies vines" : "Stylized globe made from the selected Portland city map: north Portland, downtown, the inner eastside and Sellwood, with the Willamette River"}
     onPointerDown={event=>{pointerDown.current={x:event.clientX,y:event.clientY};}}
     onPointerCancel={()=>{pointerDown.current=null;}}
     onPointerUp={event=>{
