@@ -22,7 +22,7 @@
   content:""; position:absolute; z-index:-1; pointer-events:none;
   background:radial-gradient(ellipse closest-side,rgba(0,0,0,.34) 0%,rgba(0,0,0,.24) 34%,rgba(0,0,0,.1) 68%,transparent 100%);
 }
-.home-front__mark::before { inset:-10% -5%; background:radial-gradient(ellipse closest-side,rgba(0,0,0,.18) 0%,rgba(0,0,0,.12) 30%,rgba(0,0,0,.05) 65%,transparent 100%); }
+.home-front__mark::before { inset:-10% -5%; background:radial-gradient(ellipse closest-side,rgba(0,0,0,.72) 0%,rgba(0,0,0,.56) 30%,rgba(0,0,0,.2) 65%,transparent 100%); }
 .home-front__mark::after {
   content:""; position:absolute; inset:-10% -5%; z-index:-1; pointer-events:none;
   /* Keep passing venue holograms sharp beneath the wordmark. */
@@ -33,15 +33,13 @@
 }
 .home-front__identity-line::before {
   inset:-.55em 12.5%;
-  background:radial-gradient(ellipse closest-side,rgba(0,0,0,.102) 0%,rgba(0,0,0,.072) 34%,rgba(0,0,0,.03) 68%,transparent 100%);
-  backdrop-filter:blur(.45px); -webkit-backdrop-filter:blur(.45px);
-  mask-image:radial-gradient(ellipse closest-side,#000 0%,#000 55%,transparent 100%);
-  -webkit-mask-image:radial-gradient(ellipse closest-side,#000 0%,#000 55%,transparent 100%);
+  background:radial-gradient(ellipse closest-side,rgba(0,0,0,.78) 0%,rgba(0,0,0,.6) 34%,rgba(0,0,0,.24) 68%,transparent 100%);
 }
 .home-front__mark img { display:block; width:100%; height:100%; object-fit:contain; }
+.home-front__mark-core { filter:drop-shadow(0 2px 2px #000) drop-shadow(0 4px 8px rgba(0,0,0,.95)); }
 .home-front__welcome-copy { position:relative; flex:none; margin-top:clamp(12px,2svh,22px); width:calc(100% - 32px); max-width:760px; }
 .home-front__identity-line { position:relative; display:flex; align-items:center; justify-content:center; width:100%; min-height:1.6em; margin:0; color:#fff; font-size:clamp(22px,3vw,34px); line-height:1; }
-.home-front__identity-script { max-width:100%; font-family:var(--font-body); filter:drop-shadow(0 1px 1px #000) drop-shadow(0 3px 4px rgba(0,0,0,.95)); }
+.home-front__identity-script { max-width:100%; font-family:var(--font-body); filter:drop-shadow(0 2px 2px #000) drop-shadow(0 3px 7px #000); }
 .home-front__hero-actions { display:flex; justify-content:center; margin-top:clamp(18px,3svh,28px); }
 .home-front__welcome > .home-hero-stats-boundary { position:absolute; inset:auto 0 0; z-index:3; }
 @media(min-width:960px) {

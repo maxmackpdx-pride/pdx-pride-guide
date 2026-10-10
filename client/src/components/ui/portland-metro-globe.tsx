@@ -31,9 +31,6 @@ function globeWaypointSvg(id: GlobeWaypointId, color: string) {
   const glowId = `globe-${id.replace(/[^a-z0-9-]/gi, "")}-glow`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="66" viewBox="0 0 56 66">
     <defs><filter id="${glowId}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-    <path d="M28 51v9" stroke="${color}" stroke-width="1.8" stroke-linecap="round" opacity=".9"/>
-    <ellipse cx="28" cy="63" rx="7" ry="2" fill="${color}" opacity=".8"/>
-    <ellipse cx="28" cy="63" rx="12" ry="4" fill="${color}" opacity=".16"/>
     <rect x="4" y="3" width="48" height="48" rx="10" fill="#05090d" fill-opacity=".96" stroke="${color}" stroke-width="2.2" filter="url(#${glowId})"/>
     ${glyphMarkup}
   </svg>`;
@@ -508,6 +505,21 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
       }
       const visible=projected.filter(venue=>states.has(venue.phase) && venue.anchor.z>0)
         .sort((a,b)=>a.phase-b.phase);
+      // Discs belong to the map surface, beneath every floating head and beam.
+      // Their size stays fixed while the artwork rises from or retracts into them.
+      context.save();
+      context.beginPath(); context.arc(cx,cy,radius,0,Math.PI*2); context.clip();
+      for (const { anchor, color, phase } of visible) {
+        if (!states.get(phase)!.waypoint) continue;
+        const surfaceVisibility=smooth(anchor.z/.18);
+        const tilt=Math.atan2(anchor.y-cy,anchor.x-cx)+Math.PI/2;
+        context.fillStyle=color;
+        context.globalAlpha=surfaceVisibility*.16;
+        context.beginPath(); context.ellipse(anchor.x,anchor.y,12,12*anchor.z,tilt,0,Math.PI*2); context.fill();
+        context.globalAlpha=surfaceVisibility*.8;
+        context.beginPath(); context.ellipse(anchor.x,anchor.y,7,7*anchor.z,tilt,0,Math.PI*2); context.fill();
+      }
+      context.restore();
       const occupied: { x: number; y: number; w: number; h: number }[] = [];
       let renderedCount=0;
       for (const venue of visible) {
