@@ -7,8 +7,9 @@ export function vineMesh(e: number, t: number, a: number, l: number, d: boolean,
   for (let [H, E] of FU.entries()) {
     let j = d ? 1 : DU(Math.max(0, Math.min(1, (l - H * 650) / 6500)));
     if (j === 0) continue;
-    let [z, K, J, ae] = TU[E.crop], de = 0.58, pe = 1.72, be = Math.cos(E.turn), $ = Math.sin(E.turn), Z = (fe: number, Be: number) => {
-      let je = kU[E.crop].reduce((Tt, [Qt, xt]) => Math.max(Tt, Math.exp(-(((fe - Qt) / 0.17) ** 2) - ((Be - xt) / 0.18) ** 2)), 0), Je = d ? 0 : Math.sin(l / 1900 + H * 0.91 + Be * 1.8) * 0.018 + Math.sin(l / 3300 + H * 1.7 + fe * 2) * 6e-3, Ee = (fe - 0.5) * de + je * Je, He = (0.5 - Be) * pe + je * Je * 0.55, et = Math.max(-1.45, Math.min(1.45, E.lat + Ee * $ + He * be)), mt = E.lon + (Ee * be - He * $) / Math.max(0.65, Math.cos(E.lat)) + s, ft = Math.cos(et), vt = Math.cos(mt) * ft, ut = 1.035 + je * 0.22;
+    // Stems hug the sphere. Only leaf masks at the silhouette lift past its edge.
+    let [z, K, J, ae] = TU[E.crop], de = 0.38, pe = 1.30, be = Math.cos(E.turn), $ = Math.sin(E.turn), Z = (fe: number, Be: number) => {
+      let je = kU[E.crop].reduce((Tt, [Qt, xt]) => Math.max(Tt, Math.exp(-(((fe - Qt) / 0.17) ** 2) - ((Be - xt) / 0.18) ** 2)), 0), Je = d ? 0 : Math.sin(l / 1900 + H * 0.91 + Be * 1.8) * 0.018 + Math.sin(l / 3300 + H * 1.7 + fe * 2) * 6e-3, Ee = (fe - 0.5) * de + je * Je, He = (0.5 - Be) * pe + je * Je * 0.55, et = Math.max(-1.45, Math.min(1.45, E.lat + Ee * $ + He * be)), mt = E.lon + (Ee * be - He * $) / Math.max(0.65, Math.cos(E.lat)) + s, ft = Math.cos(et), vt = Math.cos(mt) * ft, ut = 1.001 + je * 0.07 * (1 - Math.abs(vt)) ** 8;
       return { x: e + Math.sin(mt) * ft * a * ut, y: t - Math.sin(et) * a * ut, z: vt, u: z + fe * J, v: K + Be * ae };
     };
     for (let fe = 0; fe < 7; fe++) {

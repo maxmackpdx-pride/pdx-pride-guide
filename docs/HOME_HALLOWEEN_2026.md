@@ -6,8 +6,9 @@ white-dot rules, river labels, holograms and original waypoint rotation.
 Pumpkin faces and Halloween symbol waypoints are removed.
 
 Ten narrow, long Pink Ponies vine strips are distributed evenly in longitude,
-with alternating latitude and tilt. Each strip spans 0.58 radians in width and
-1.72 radians in length. The original texture, growth, breeze, leaf overhang,
+with alternating latitude and tilt. Each strip spans 0.38 radians in width and
+1.30 radians in length. Stems sit directly on the globe surface, with leaf lift confined to the silhouette.
+The original texture, growth, breeze, leaf overhang,
 opaque-pixel event taps and keyboard event action remain. Reduced motion shows
 fully grown stationary vines.
 
