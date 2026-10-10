@@ -149,3 +149,6 @@ html.calm-mode .home-front__worlds-grid,:root[data-calm="true"] .home-front__wor
 }
 @media(prefers-reduced-motion:reduce) { .home-front__mark-art::after { animation:none; } }
 :is(html.calm-mode,:root[data-calm="true"]) .home-front__mark-art::after { animation:none; }
+
+.home-front__vine-link { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+.home-front__vine-link:focus-visible { width:auto; height:auto; clip-path:none; padding:12px; background:var(--ink-1000); color:var(--text-primary); top:80px; left:20px; z-index:5; }

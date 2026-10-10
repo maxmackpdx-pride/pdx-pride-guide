@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { waypointHtml, type WaypointId } from "@/lib/livingMapWaypoints";
+import { HALLOWEEN_GLYPHS, HALLOWEEN_COLORS, pumpkinDots, type HalloweenGlyph } from "@/lib/homeHalloween";
+import { vineMesh, drawVines, hitVines } from "./ponies-globe-vines";
 import hologramData from "./portland-globe-holograms.json";
 
 // A deliberately enlarged metro wrapped over a sphere, not an Earth-scale globe.
@@ -8,7 +10,7 @@ import hologramData from "./portland-globe-holograms.json";
 
 
 type OutzideGlobeGlyph = "trail" | "fishing" | "watercamp" | "boating" | "camp";
-type GlobeWaypointId = WaypointId | `outzide-${OutzideGlobeGlyph}`;
+type GlobeWaypointId = `halloween-${HalloweenGlyph}` | WaypointId | `outzide-${OutzideGlobeGlyph}`;
 const OUTZIDE_GLYPHS: Record<OutzideGlobeGlyph, string> = {
   trail: '<path d="M4 3h7v7l3 3 5 1a3 3 0 0 1 2 3v3H3v-7l1-3V3ZM3 17h18M6 20v1M10 20v1M15 20v1M19 20v1M8 7h3M8 10h3M10 12l2-1M12 14l2-1"/>',
   fishing: '<path d="M3 12q7-9 14-1l4-4v10l-4-4q-7 8-14-1ZM13 7q-2 5 0 10M8 7l2-3 3 3"/><circle cx="6.5" cy="11" r=".7"/>',
@@ -18,10 +20,13 @@ const OUTZIDE_GLYPHS: Record<OutzideGlobeGlyph, string> = {
 };
 
 function globeWaypointSvg(id: GlobeWaypointId, color: string) {
+  const halloweenId = id.startsWith("halloween-") ? id.slice(10) as HalloweenGlyph : undefined;
   const outzideId = id.startsWith("outzide-") ? id.slice(8) as OutzideGlobeGlyph : undefined;
-  const marker = outzideId ? "" : waypointHtml({ id: id as WaypointId, color, size: 42 });
+  const marker = outzideId || halloweenId ? "" : waypointHtml({ id: id as WaypointId, color, size: 42 });
   const glyph = marker.match(/<g transform="([^"]+)" fill="#fff" stroke="#fff" color="#fff">([\s\S]*?)<\/g>/);
-  const glyphMarkup = outzideId
+  const glyphMarkup = halloweenId
+    ? `<g transform="translate(16 15)" fill="none" stroke="${color}" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">${HALLOWEEN_GLYPHS[halloweenId]}</g>`
+    : outzideId
     ? `<g transform="translate(16 15)" fill="${color}" stroke="${color}" color="${color}">${OUTZIDE_GLYPHS[outzideId]}</g>`
     : glyph
       ? `<g transform="translate(-2 -2) ${glyph[1]}" fill="${color}" stroke="${color}" color="${color}">${glyph[2]}</g>`
@@ -121,7 +126,7 @@ const OUTZIDE_WAYPOINTS: Venue[] = OUTZIDE_SOURCE.map((waypoint, index) => ({
     equatorialLatitude((Math.random()-.5)*.6,true)),
 }));
 
-export function PortlandMetroGlobe({ active, still }: { active: boolean; still: boolean }) {
+export function PortlandMetroGlobe({ active, still, halloween = false, onOpenPonies }: { active: boolean; still: boolean; halloween?: boolean; onOpenPonies?: () => void }) {
   const mode=useRef({active,still});
   const syncAnimation=useRef(()=>{});
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -133,9 +138,12 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
   const lastShownRow = useRef(new Map<string,number>());
   const lastFrame = useRef(0);
   const nextOpen = useRef(0);
+  const vineHit = useRef<(x:number,y:number)=>boolean>(()=>false);
+  const pointerDown = useRef<{x:number;y:number}|null>(null);
   const hover = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
+    hologramStates.current.clear();lastShown.current.clear();lastShownRow.current.clear();lastFrame.current=0;nextOpen.current=0;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext("2d");
@@ -143,7 +151,9 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     let {active,still}=mode.current;
     let disposed = false, frame = 0, previous = 0, elapsed = elapsedRef.current;
     let width = 0, height = 0;
-    let points: Point[] = [];
+    let points: Point[] = halloween ? pumpkinDots(-INITIAL_YAW) : [];
+    const vineImage = new Image();
+    let vinePixels: ImageData | null = null;
     let lastHoverFrame=performance.now();
     // Reuse small glow stamps instead of asking the renderer to blur every dot.
     const hoverSprites=new Map<number,HTMLCanvasElement>();
@@ -163,9 +173,9 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     };
     // Previous frame footprints keep the dot pass beneath beams and artwork.
     let beamFootprints: { ax:number; ay:number; x:number; y:number; halfWidth:number; strength:number; rgb:number[] }[] = [];
-    const venues: { id: string; product: boolean; point: Point; image: HTMLCanvasElement; waypointImage: HTMLImageElement; color: string; phase: number; logoKey:string }[] = [];
+    const venues: { id: string; product: boolean; point: Point; image: HTMLCanvasElement; waypointImage: HTMLImageElement; color: string; phase: number; logoKey:string; holiday?: GlobeWaypointId }[] = [];
     const addOpenAreaDuplicates=()=>{
-      const originals=venues.filter(venue=>venue.phase<DUPLICATE_PHASE_OFFSET);
+      const originals=venues.filter(venue=>venue.phase<DUPLICATE_PHASE_OFFSET && !venue.holiday);
       const occupied=venues.map(venue=>venue.point);
       for(const venue of originals){
         if(venues.some(other=>other.phase===venue.phase+DUPLICATE_PHASE_OFFSET))continue;
@@ -197,6 +207,14 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     const addFallbackWaypoints=()=>{
       if(disposed||fallbackWaypointsAdded)return;
       fallbackWaypointsAdded=true;
+      if(halloween) Object.keys(HALLOWEEN_GLYPHS).forEach((glyph,index)=>{
+        const longitude=index/10*Math.PI*2, latitude=(index%2?.32:-.32);
+        const holiday=`halloween-${glyph}` as GlobeWaypointId;
+        const image=document.createElement("canvas");image.width=image.height=256;
+        venues.push({id:holiday,product:false,point:{x:Math.sin(longitude)*Math.cos(latitude),y:Math.sin(latitude),z:Math.cos(longitude)*Math.cos(latitude),tone:0},image,
+          waypointImage:new Image(),color:HALLOWEEN_COLORS[index%3],phase:500+index,logoKey:holiday,holiday});
+      });
+      canvas.dataset.halloweenWaypoints=halloween?"10":"0";
       OUTZIDE_WAYPOINTS.forEach((waypoint,index)=>{
         const image=document.createElement("canvas");image.width=image.height=256;
         if(waypoint.point)venues.push({id:waypoint.id,product:false,point:waypoint.point,image,
@@ -265,6 +283,9 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         return { x: cx + x * radius * elevation, y: cy - p.y * radius * elevation, z };
       };
       context.clearRect(0, 0, width, height);
+      const vines = halloween ? vineMesh(cx,cy,radius,elapsed,still,yaw) : [];
+      if(vinePixels) drawVines(context,vineImage,vines.filter(vine=>vine.z<0));
+      vineHit.current=(x,y)=>!!vinePixels && hitVines(x,y,vines,vinePixels,cx,cy,radius);
       // Black negative space between the populated areas and waterways.
       context.fillStyle = '#000';
       context.beginPath(); context.arc(cx, cy, radius, 0, Math.PI * 2); context.fill();
@@ -405,9 +426,10 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillRect(p.x - .5, p.y - size, 1, size * 2);
       }
       context.globalAlpha = 1;
+      if(vinePixels) drawVines(context,vineImage,vines.filter(vine=>vine.z>=0));
       context.font = `${Math.max(9, Math.min(12, radius / 25))}px monospace`;
       context.textAlign = 'center';
-      for (const marker of MARKERS) {
+      for (const marker of halloween ? [] : MARKERS) {
         const p = project(marker.point,1.012);
         if (p.z < .12) continue;
         context.fillStyle = '#edfaff';
@@ -417,7 +439,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillStyle = '#edfaff'; context.fillText(marker.name,p.x,p.y+19);
       }
       context.font = `italic ${width < 600 ? 9 : 12}px monospace`;
-      for (const river of RIVERS) {
+      for (const river of halloween ? [] : RIVERS) {
         const p=project(placePoint(river),1.006);
         if (p.z<.25) continue;
         context.fillStyle='#8feeff';
@@ -482,7 +504,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           let waypointLogo: GlobeWaypointId | undefined;
           if(waypoint){
             const available=RANDOM_GLOBE_WAYPOINTS.filter(id=>!openLogoKeys.has(`glyph:${id}`));
-            waypointLogo=available[Math.floor(Math.random()*available.length)]||RANDOM_GLOBE_WAYPOINTS[0];
+            waypointLogo=venue.holiday || available[Math.floor(Math.random()*available.length)]||RANDOM_GLOBE_WAYPOINTS[0];
             const svg=globeWaypointSvg(waypointLogo,venue.color);
             if(svg){
               venue.waypointImage.onload=draw;
@@ -581,7 +603,17 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       }
       frame = requestAnimationFrame(animate);
     };
+    if(halloween) {
+      vineImage.onload=()=>{
+        if(disposed)return;
+        const sample=document.createElement("canvas");sample.width=vineImage.naturalWidth;sample.height=vineImage.naturalHeight;
+        const ink=sample.getContext("2d",{willReadFrequently:true});
+        if(ink){ink.drawImage(vineImage,0,0);vinePixels=ink.getImageData(0,0,sample.width,sample.height);draw();}
+      };
+      vineImage.src="/home-globe/ponies-vines.webp";
+    }
     texture.onload = () => {
+      if(halloween)return;
       if (disposed) return;
       const sample = document.createElement('canvas'); sample.width = sample.height = 1024;
       const ctx = sample.getContext('2d', { willReadFrequently: true });
@@ -608,7 +640,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       }
       draw();
     };
-    texture.src = '/home-globe/portland-city-beam-density.png';
+    if(!halloween) texture.src = '/home-globe/portland-city-beam-density.png';
     const observer = new ResizeObserver(resize); observer.observe(canvas); resize();
     syncAnimation.current=()=>{
       active=mode.current.active;still=mode.current.still;
@@ -618,11 +650,19 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     if (active) frame = requestAnimationFrame(animate);
     redrawRef.current = () => { if(still || !active)draw(); };
     return () => { disposed = true; window.clearTimeout(atlasRetry); window.clearTimeout(fallbackTimer); cancelAnimationFrame(frame); observer.disconnect(); redrawRef.current = () => {}; syncAnimation.current=()=>{}; };
-  }, []);
+  }, [halloween]);
   useEffect(()=>{mode.current={active,still};syncAnimation.current();},[active,still]);
 
-  return <canvas ref={canvasRef} className="home-front__metro-globe"
-    role="img" aria-label="Stylized globe made from the selected Portland city map: north Portland, downtown, the inner eastside and Sellwood, with the Willamette River"
+  return <> <canvas ref={canvasRef} className="home-front__metro-globe"
+    role="img" aria-label={halloween ? "White-dot pumpkin globe with two opposite faces, Halloween waypoints and growing Pink Ponies vines" : "Stylized globe made from the selected Portland city map: north Portland, downtown, the inner eastside and Sellwood, with the Willamette River"}
+    onPointerDown={event=>{pointerDown.current={x:event.clientX,y:event.clientY};}}
+    onPointerCancel={()=>{pointerDown.current=null;}}
+    onPointerUp={event=>{
+      const start=pointerDown.current;pointerDown.current=null;
+      if(!start||Math.hypot(event.clientX-start.x,event.clientY-start.y)>8)return;
+      const rect=event.currentTarget.getBoundingClientRect();
+      if(vineHit.current(event.clientX-rect.left,event.clientY-rect.top)) onOpenPonies?.();
+    }}
     onPointerMove={event => {
       if(event.pointerType==='touch')return;
       const rect=event.currentTarget.getBoundingClientRect();
@@ -630,5 +670,5 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       redrawRef.current();
     }}
     onPointerLeave={() => { hover.current=null; redrawRef.current(); }}
-  />;
+  />{halloween && <button type="button" className="home-front__vine-link" onClick={onOpenPonies}>Open Pink Ponies present Little Shop of Ponies</button>}</>;
 }
