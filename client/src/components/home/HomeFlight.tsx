@@ -57,7 +57,7 @@ export default function HomeFlight({ enabled = true, paused = false }: { enabled
     return () => { intersection.disconnect(); resize.disconnect(); root.disconnect(); motion.removeEventListener('change',sync); document.removeEventListener('visibilitychange',sync); };
   }, [enabled, paused, calmMode]);
   return <div ref={container} className="home-front__flight home-front__flight--globe">
-    {enabled && <PortlandMetroGlobe active={active && !selectedEvent} still={still} halloween={halloween} onOpenPonies={openPonies} />}
+    {enabled && <PortlandMetroGlobe active={active && !selectedEvent} still={still} vinesEnabled={halloween} onOpenPonies={openPonies} />}
     <div className="home-front__flight-credit">
       © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>
       {" · "}<a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a>

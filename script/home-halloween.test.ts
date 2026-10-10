@@ -1,27 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {HALLOWEEN_END,homeHalloweenActive,HALLOWEEN_GLYPHS,HALLOWEEN_COLORS,pumpkinCarved,pumpkinDots} from '../client/src/lib/homeHalloween';
+import {HALLOWEEN_END,homeHalloweenActive} from '../client/src/lib/homeHalloween';
 import {vineMesh,hitVines} from '../client/src/components/ui/ponies-globe-vines';
 test('Halloween restores the current panel at Portland midnight, including on an open page',()=>{
   assert.equal(homeHalloweenActive(Date.parse('2026-10-10T00:00:00-07:00')),true);
   assert.equal(homeHalloweenActive(HALLOWEEN_END-1),true);
   assert.equal(homeHalloweenActive(HALLOWEEN_END),false);
   assert.equal(homeHalloweenActive(HALLOWEEN_END+1000),false);
-});
-test('four evenly spaced pumpkin carvings share white dots',()=>{
-  for(let lon=-Math.PI;lon<=Math.PI;lon+=.07)for(let lat=-1;lat<=1;lat+=.07)
-    assert.equal(pumpkinCarved(lon,lat,.37),pumpkinCarved(lon+Math.PI/2,lat,.37));
-  assert.equal(pumpkinCarved(.37,.03,.37),true);
-  assert.equal(pumpkinCarved(.37+Math.PI,.03,.37),true);
-  assert.equal(pumpkinCarved(.37+Math.PI/2,.03,.37),true);
-  assert.equal(pumpkinCarved(.37+3*Math.PI/2,.03,.37),true);
-  assert.equal(pumpkinCarved(.37+Math.PI/4,.03,.37),false);
-  assert(pumpkinDots(.37).length>20000);
-  assert(pumpkinDots(.37).every(p=>p.tone===0));
-});
-test('ten distinct Halloween symbols use the three requested colors',()=>{
-  assert.equal(Object.keys(HALLOWEEN_GLYPHS).length,10);
-  assert.deepEqual(HALLOWEEN_COLORS,['#ab75ff','#ff6600','#39ff14']);
 });
 test('vines grow, extend past the globe and have still-mode geometry',()=>{
   assert.equal(vineMesh(200,200,180,0,false,0).length,0);

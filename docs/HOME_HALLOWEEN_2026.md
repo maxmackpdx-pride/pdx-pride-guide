@@ -1,18 +1,16 @@
-# Homepage panel 1: Halloween 2026
+# Homepage panel 1: October 2026 vines
 
-The October 10 live baseline is commit `1c837c7ebced32059149ed947d82efe2616796da`.
-The existing Portland map texture, camera, radius, hover behavior, hologram rotation,
-logo deduplication, layout and other homepage panels remain the nonseasonal path.
+The original October 10 Portland globe is restored from baseline commit
+`1c837c7ebced32059149ed947d82efe2616796da`, including its map texture,
+white-dot rules, river labels, holograms and original waypoint rotation.
+Pumpkin faces and Halloween symbol waypoints are removed.
 
-From October 10 through October 31, panel 1 uses a white-dot pumpkin with four
-identical carvings exactly 90 degrees apart. Ten distinct Halloween symbol anchors
-join the existing hologram rotation in purple, orange and green. The recovered
-Pink Ponies vine texture grows around the globe from ten staggered anchors, with leaf overhang and gentle
-breeze. Actual opaque vine pixels open the shared event modal for event 1571;
-transparent pixels and scrolling gestures do not open it. A keyboard button
-provides the same action. Reduced motion renders fully grown, stationary vines.
+Ten narrow, long Pink Ponies vine strips are distributed evenly in longitude,
+with alternating latitude and tilt. Each strip spans 0.58 radians in width and
+1.72 radians in length. The original texture, growth, breeze, leaf overhang,
+opaque-pixel event taps and keyboard event action remain. Reduced motion shows
+fully grown stationary vines.
 
-At `2026-11-01T00:00:00-07:00`, the seasonal renderer disables itself. The homepage
-checks the date every 30 seconds and on focus/visibility changes, including already
-open pages. No deployment or scheduled server mutation is needed for the return.
-The fallback is the preserved renderer, not the earlier unpublished vine draft.
+The vines expire at Portland midnight on November 1, 2026
+(`2026-11-01T00:00:00-07:00`). Open pages check every 30 seconds and on
+focus/visibility changes; the original globe continues without vines.
