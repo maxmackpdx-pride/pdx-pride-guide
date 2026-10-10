@@ -44,7 +44,7 @@ export function vineMesh(e: number, t: number, a: number, l: number, d: boolean,
     // One scale for both texture axes keeps leaves in their original proportions.
     // Stems hug the sphere; only leaf masks at the silhouette lift past its edge.
     const [cropX, cropY, cropWidth, cropHeight] = TU[E.crop];
-    const width = 0.52, height = width * cropHeight / cropWidth;
+    const width = 1.04, height = width * cropHeight / cropWidth;
     const cosTurn = Math.cos(E.turn), sinTurn = Math.sin(E.turn);
     const sinLon = Math.sin(E.lon + s), cosLon = Math.cos(E.lon + s);
     const sinLat = Math.sin(E.lat), cosLat = Math.cos(E.lat);

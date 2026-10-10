@@ -642,7 +642,7 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
 
   return <> <canvas ref={canvasRef} className="home-front__metro-globe"
     data-vine-clusters={vinesEnabled ? VINE_ANCHORS.length : 0}
-    role="img" aria-label={vinesEnabled ? "Portland city globe with thin, long Pink Ponies vines spread around its surface" : "Stylized globe made from the selected Portland city map: north Portland, downtown, the inner eastside and Sellwood, with the Willamette River"}
+    role="img" aria-label={vinesEnabled ? "Portland city globe overgrown with Pink Ponies vines wrapping around its surface" : "Stylized globe made from the selected Portland city map: north Portland, downtown, the inner eastside and Sellwood, with the Willamette River"}
     onPointerDown={event=>{pointerDown.current={x:event.clientX,y:event.clientY};}}
     onPointerCancel={()=>{pointerDown.current=null;}}
     onPointerUp={event=>{

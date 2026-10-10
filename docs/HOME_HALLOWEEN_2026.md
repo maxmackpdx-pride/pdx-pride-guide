@@ -5,11 +5,12 @@ The original October 10 Portland globe is restored from baseline commit
 white-dot rules, river labels, holograms and original waypoint rotation.
 Pumpkin faces and Halloween symbol waypoints are removed.
 
-Thirty compact Pink Ponies vine clusters are spread around the globe. The original
+Thirty overlapping Pink Ponies vine clusters are spread around the globe. The original
 ten anchors remain; twenty new anchors fill the largest gaps by spherical distance,
 including the upper and lower hemispheres. Each cluster uses the texture's native aspect ratio,
-with a width of 0.52 radians and height derived from its source crop. This keeps
-leaves small and naturally shaped instead of stretching them into tall strips.
+with a width of 1.04 radians and height derived from its source crop. Each cluster
+is twice its previous width and height, creating an overgrown canopy while keeping
+the leaves naturally shaped instead of stretching them into tall strips.
 Each cluster bends onto the sphere from its local tangent plane to preserve leaf
 proportions near the poles. All thirty grow in within the same staggered interval.
 Stems sit directly on the globe surface; leaf lift is confined to the silhouette.
