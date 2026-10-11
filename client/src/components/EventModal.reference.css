@@ -117,7 +117,17 @@ html[data-zaylist-cards] .event-modal.event-modal--reference,
   background: var(--glass-card-bg) !important;
   box-shadow: var(--glass-card-shadow) !important;
 }
-.event-modal.event-modal--reference::before { inset: 0 18px auto; height: 2px; padding: 0; border-radius: 0; background: var(--refract-seam-gradient); mask: none; -webkit-mask: none; filter: none; }
+/* Open event card seam: the dock rim, same as every closed card (glass.css). */
+.event-modal.event-modal--reference::before {
+  content: ""; position: absolute; inset: 0; width: auto; height: auto; z-index: 6; pointer-events: none;
+  padding: .75px; border-radius: inherit; box-shadow: none; transform: none; animation: none;
+  background: var(--z-spectrum, var(--refract-seam-gradient)); background-size: 100% 100%;
+  opacity: .96; filter: saturate(1.35) brightness(1.14);
+  -webkit-mask: linear-gradient(var(--z-black), transparent 26px), linear-gradient(var(--z-black) 0 0) content-box, linear-gradient(var(--z-black) 0 0);
+  -webkit-mask-composite: source-in, xor;
+  mask: linear-gradient(var(--z-black), transparent 26px), linear-gradient(var(--z-black) 0 0) content-box, linear-gradient(var(--z-black) 0 0);
+  mask-composite: intersect, exclude;
+}
 .event-modal.event-modal--reference::after { display: none; }
 .event-modal.event-modal--reference .event-modal__chrome .detail-actions > button { min-height: 44px; border-radius: 14px; box-shadow: none; }
 .event-modal.event-modal--reference .event-modal__chrome .detail-actions > button:is([aria-label="Share event"], [aria-label="Close event"]) { width: 44px; height: 44px; min-width: 44px; border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); border-radius: 14px; background: var(--glass-card-bg); color: var(--text-heading); box-shadow: none; }
