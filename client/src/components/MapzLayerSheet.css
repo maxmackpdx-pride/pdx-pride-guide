@@ -226,3 +226,29 @@
   .mapz-layer-section__logo { height: 48px; max-width: 86px; }
   .mapz-layer-sheet__brand img { width: min(100%, 250px); height: 112px; }
 }
+
+/* Dismiss: drag the grip down, or the X. Translate stays off Framer's transform. */
+.mapz-map-demo .mapz-layer-sheet {
+  translate: 0 var(--sheet-drag, 0px);
+  transition: translate 220ms cubic-bezier(.22, .8, .25, 1);
+}
+.mapz-map-demo .mapz-layer-sheet[data-dragging="true"] { transition: none; }
+.mapz-layer-sheet__dismiss {
+  position: relative;
+  z-index: 4;
+  flex: none;
+  touch-action: none;
+  cursor: grab;
+}
+.mapz-layer-sheet__grabber { display: grid; place-items: center; height: 18px; }
+.mapz-layer-sheet__grabber span {
+  width: 44px;
+  height: 4px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--active-layer-color, #9fb6c8) 55%, #8aa0b4);
+}
+.mapz-layer-sheet__title { cursor: grab; }
+.mapz-layer-sheet__close { cursor: pointer; touch-action: manipulation; }
+@media (prefers-reduced-motion: reduce) {
+  .mapz-map-demo .mapz-layer-sheet { transition: none; }
+}

@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link } from "wouter";
-import { ChevronRight, SlidersHorizontal } from "lucide-react";
+import { ChevronRight, SlidersHorizontal, X } from "lucide-react";
 import SmoothDrawer from "./ui/smooth-drawer";
 import { NavGlassLayers, navGlassPointer } from "./ui/nav-glass";
 
@@ -21,15 +21,40 @@ const LAYER_LOGOS: Record<MapzLayerId, string> = {
   houz: "/brand/family/the-hauz.svg",
 };
 
+const DISMISS_PX = 88;
+
 export default function MapzLayerSheet({ layers, active, onActiveChange: setActive }: { layers: MapzLayer[]; active: MapzLayerId | null; onActiveChange: (id: MapzLayerId | null) => void }) {
   const lastActive = useRef<MapzLayerId>("events");
   const panels = useRef(new Map<MapzLayerId, HTMLDivElement>());
   const positions = useRef(new Map<MapzLayerId, number>());
   const visited = useRef(new Set<MapzLayerId>());
+  const sheetRef = useRef<HTMLElement>(null);
+  const drag = useRef<{ id: number; y: number; moved: boolean } | null>(null);
+  const dragValue = useRef("");
+  const closeTimer = useRef<number | null>(null);
   const panelId = useId();
   const open = active !== null;
   if (active) visited.current.add(active);
   const activeLayer = layers.find(layer => layer.id === active);
+
+  const paintDrag = (value: string) => {
+    dragValue.current = value;
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    if (value) sheet.style.setProperty("--sheet-drag", value);
+    else sheet.style.removeProperty("--sheet-drag");
+  };
+
+  useLayoutEffect(() => {
+    if (!open) {
+      dragValue.current = "";
+      delete sheetRef.current?.dataset.dragging;
+    }
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    if (dragValue.current) sheet.style.setProperty("--sheet-drag", dragValue.current);
+    else sheet.style.removeProperty("--sheet-drag");
+  }, [open, active]);
 
   useLayoutEffect(() => {
     if (!active) return;
@@ -45,21 +70,78 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
   }, [open]);
   useEffect(() => () => {
     window.dispatchEvent(new CustomEvent("zaylist:drawer", { detail: { open: false, restorePrevious: true } }));
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
   }, []);
   useEffect(() => {
     const close = () => setActive(null);
     window.addEventListener("zaylist:map-sheet-close", close);
     return () => window.removeEventListener("zaylist:map-sheet-close", close);
   }, [setActive]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setActive(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, setActive]);
+
+  const closeSheet = () => {
+    paintDrag("");
+    delete sheetRef.current?.dataset.dragging;
+    setActive(null);
+  };
+
+  const beginDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    if ((event.target as Element).closest("button, a, input, label, select, textarea")) return;
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+    drag.current = { id: event.pointerId, y: event.clientY, moved: false };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    if (sheetRef.current) sheetRef.current.dataset.dragging = "true";
+  };
+  const moveDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    const state = drag.current;
+    if (!state || event.pointerId !== state.id) return;
+    const dy = Math.max(0, event.clientY - state.y);
+    if (dy > 6) state.moved = true;
+    paintDrag(`${dy}px`);
+  };
+  const endDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    const state = drag.current;
+    if (!state || event.pointerId !== state.id) return;
+    drag.current = null;
+    const dy = Math.max(0, event.clientY - state.y);
+    const sheet = sheetRef.current;
+    if (sheet) delete sheet.dataset.dragging;
+    if (dy > DISMISS_PX) {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce || !sheet) closeSheet();
+      else {
+        paintDrag(`${dy}px`);
+        requestAnimationFrame(() => paintDrag("110%"));
+        closeTimer.current = window.setTimeout(closeSheet, 200);
+      }
+      return;
+    }
+    paintDrag(`${dy}px`);
+    requestAnimationFrame(() => paintDrag(""));
+  };
 
   return <>
-    <SmoothDrawer id={panelId} hidden={!open} className="mapz-layer-sheet z-glass pdx-glass-rebind is-open"
+    <SmoothDrawer ref={sheetRef} id={panelId} hidden={!open} className="mapz-layer-sheet z-glass pdx-glass-rebind is-open"
       data-seam="top" data-no-pull-to-refresh onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}
       aria-label="Map controls and sections"
       style={{ "--active-layer-color": activeLayer?.color || "var(--neon-cyan)" } as CSSProperties}>
       <NavGlassLayers />
-      <div className="mapz-layer-sheet__title">
-        <span><SlidersHorizontal size={18} aria-hidden="true" />Map controls</span>
+      <div className="mapz-layer-sheet__dismiss"
+        onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}>
+        <div className="mapz-layer-sheet__grabber" aria-hidden="true"><span /></div>
+        <div className="mapz-layer-sheet__title">
+          <span><SlidersHorizontal size={18} aria-hidden="true" />Map controls</span>
+          <button type="button" className="mapz-layer-sheet__close" aria-label="Close map controls" onClick={closeSheet}>
+            <X size={18} aria-hidden="true" />
+          </button>
+        </div>
       </div>
       <div className="mapz-layer-sheet__workspace">
         <div className="mapz-layer-sheet__sections" role="group" aria-label="Map sections">
