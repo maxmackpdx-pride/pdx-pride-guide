@@ -298,3 +298,86 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 }
 .events-myschedule-pill:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 3px; }
 @media (max-width: 959px) { .events-myschedule-pill { bottom: calc(96px + env(safe-area-inset-bottom)); } }
+
+/* ── Eventz top bar: compact identity, actions, stat pills (replaces hero + plate + stats band) ── */
+.events-page .events-top { width: min(100%, var(--zl-frame)); margin: 0 auto; padding: 32px var(--zl-gutter) 8px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
+.events-page .events-top__row { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.events-page .events-top__id { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.events-page .events-top__kicker { margin: 0; color: var(--room-eventz); font: 500 12px/1.2 var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase; }
+.events-page .events-top__mark { --w: clamp(220px, 30vw, 420px); position: relative; width: var(--w); height: calc(var(--w) * .27); margin: 0; }
+.events-page .events-top__logo { position: absolute; left: calc(var(--w) * -.03); top: calc(var(--w) * -.115); width: calc(var(--w) * 1.03); margin: 0; }
+.events-page .events-top__logo .board-hero__brand-logo { display: block; width: 100%; height: auto; max-width: none; margin: 0; }
+.events-page .events-top__actions { display: flex; gap: 10px; flex: none; }
+.events-page .events-top__actions :is(.board-share-button, .board-follow-button) { min-height: 44px; }
+.events-page .events-top__lede { margin: 0; max-width: 640px; color: var(--text-body); font: 400 16px/1.55 var(--font-body); }
+.events-page .events-top__stats { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+/* ds/StatPill, outline. */
+.events-page .events-top__stat { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px 5px; border-radius: 999px; border: 2px solid var(--_c); color: var(--text-lo); font: 700 13px/1 var(--font-display); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+.events-page .events-top__stat b { color: var(--_c); font-weight: 800; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  .events-page .events-top { padding: 20px 16px 4px; gap: 12px; }
+  .events-page .events-top__mark { --w: 196px; }
+  .events-page .events-top__lede { display: none; }
+  .events-page .events-top__actions { gap: 8px; }
+  .events-page .events-top__actions :is(.board-share-button, .board-follow-button) { width: 44px; height: 44px; min-width: 44px; padding: 0; justify-content: center; border-radius: 999px; font-size: 0; gap: 0; }
+  .events-page .events-top__actions :is(.board-share-button, .board-follow-button) svg { width: 18px; height: 18px; }
+  .events-page .events-top__stats { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .events-page .events-top__stats::-webkit-scrollbar { display: none; }
+  .events-page .events-top__stat { font-size: 12px; padding: 5px 11px 4px; }
+}
+
+/* ── Mobile rails (board 05): full Eventz card up top, compact rails below ── */
+.events-page .events-rails { display: flex; flex-direction: column; gap: 28px; margin-inline: -16px; }
+.events-page .events-rail-sec__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 16px; margin-bottom: 12px; }
+.events-page .events-rail-sec__head h3 { margin: 0; display: flex; align-items: center; gap: 9px; color: var(--text-hi); font: 900 24px/1 var(--font-display); text-transform: uppercase; }
+.events-page .events-rail-sec__head h3 > span { width: 8px; height: 8px; border-radius: 999px; background: var(--c); box-shadow: 0 0 10px var(--c); }
+.events-page .events-rail-sec__head h3 small { color: var(--text-meta); font: 500 12px/1 var(--font-mono, monospace); }
+.events-page .events-rail-sec__actions { display: flex; gap: 6px; }
+.events-page .events-rail-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 13px; border-radius: 999px; border: 1.5px solid var(--border-strong); background: var(--z-black); color: var(--text-hi); font: 700 13px/1 var(--font-display); letter-spacing: .05em; text-transform: uppercase; cursor: pointer; }
+.events-page .events-rail-pill:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.events-page .events-rail { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; padding: 4px 16px 8px; scrollbar-width: none; }
+.events-page .events-rail::-webkit-scrollbar { display: none; }
+.events-page .events-rail__item { flex: none; scroll-snap-align: start; }
+.events-page .events-rail-sec--full .events-rail__item { width: 236px; }
+.events-page .events-rail-sec--m .events-rail__item { width: 136px; }
+.events-page .events-rail-sec--s .events-rail__item { width: 108px; }
+.events-page .events-rail--open { display: grid; overflow: visible; scroll-snap-type: none; gap: 16px 12px; }
+.events-page .events-rail-sec--full .events-rail--open { grid-template-columns: minmax(0, 1fr); }
+.events-page .events-rail-sec--m .events-rail--open { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.events-page .events-rail-sec--s .events-rail--open { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.events-page .events-rail--open .events-rail__item { width: auto; }
+
+/* Our card at rail width: same anatomy and proportions, type and chrome scaled. */
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card { border-radius: 20px; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__body { padding: 14px 14px 10px; gap: 8px; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__time { min-height: 0; font-size: 10.5px; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__body h3 { font-size: 21px; height: 2.04em; -webkit-line-clamp: 2; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__venue { min-height: 0; font-size: 12px; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__venue small { font-size: 11px; margin-top: 2px; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__tags span { padding: 3px 6px; font-size: 9.5px; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__footer { margin: 0 14px; padding: 10px 0 12px; gap: 6px; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__footer button { min-height: 38px; padding: 0 8px; font-size: 12.5px; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .rail-card-share { top: 10px; right: 10px; min-height: 32px; padding: 0 10px; font-size: 12px; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__live { top: 10px; left: 10px; min-height: 32px; padding: 0 9px; gap: 6px; font-size: 13px; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__live-label { font-size: 13px; }
+.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__live--count b { font-size: 17px; }
+
+/* Compact rail card. */
+.event-rail-card { position: relative; width: 100%; }
+.event-rail-card__open { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 0; border: 0; background: none; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.event-rail-card__open:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 16px; }
+.event-rail-card__art { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 16px; background: var(--ink-900); border: 1px solid color-mix(in srgb, var(--c) 55%, var(--z-black)); box-shadow: 0 0 0 2px var(--z-black), inset 0 1px 0 color-mix(in srgb, var(--c) 55%, transparent), var(--neon-bloom); }
+.event-rail-card--s .event-rail-card__art { aspect-ratio: 1 / 1; border-radius: 12px; }
+.event-rail-card__art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.event-rail-card__art .tonight-card__live { top: 6px; left: 6px; min-height: 26px; padding: 0 7px; gap: 5px; font-size: 11px; }
+.event-rail-card__art .tonight-card__live-label { font-size: 11px; }
+.event-rail-card__art .tonight-card__live--count b { font-size: 14px; }
+.event-rail-card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-hi); font: 800 16px/1.04 var(--font-display); text-transform: uppercase; }
+.event-rail-card--s .event-rail-card__title { font-size: 14px; }
+.event-rail-card__meta { overflow: hidden; color: var(--text-body); font: 500 12px/1.3 var(--font-body); white-space: nowrap; text-overflow: ellipsis; }
+.event-rail-card--s .event-rail-card__meta { font-size: 11px; }
+.event-rail-card__save { position: absolute; right: 8px; top: calc(136px * 1.25 - 46px); z-index: 4; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent); background: color-mix(in srgb, var(--z-black) 84%, transparent); color: var(--text-hi); box-shadow: 0 0 0 2px var(--z-black); cursor: pointer; }
+.event-rail-card--s .event-rail-card__save { top: calc(108px - 40px); right: 6px; width: 34px; height: 34px; }
+.events-rail--open .event-rail-card__save { top: 8px; }
+.event-rail-card__save[aria-pressed="true"] { background: var(--neon-magenta); border-color: var(--neon-magenta); color: var(--z-black); }
+.event-rail-card__save:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }

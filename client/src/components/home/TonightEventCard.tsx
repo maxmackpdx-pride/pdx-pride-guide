@@ -19,7 +19,7 @@ export type TonightCardLive = { kind: "now" } | { kind: "soon"; startMs: number 
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
-function LiveBadge({ live }: { live: TonightCardLive }) {
+export function LiveBadge({ live }: { live: TonightCardLive }) {
   const [tick, setTick] = useState(() => Date.now());
   useEffect(() => {
     if (live.kind !== "soon") return;

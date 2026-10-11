@@ -1103,7 +1103,7 @@ html.calm-mode .pdx-glass-card--neutral,
    bars that clipped square against rounded corners. Static in every
    mode, so calm mode and reduced motion need no special case.
    ═══════════════════════════════════════════════════════════ */
-:is(.tonight-card, .pdxBoard, .pdxRow, .board-listing-card, .board-spotted-card, .spotted-card, .schedule-event-card, .card.fitem.fitem--glow, .featured-event-ad)::before {
+:is(.tonight-card, .event-rail-card__art, .pdxBoard, .pdxRow, .board-listing-card, .board-spotted-card, .spotted-card, .schedule-event-card, .card.fitem.fitem--glow, .featured-event-ad)::before {
   content: "" !important;
   position: absolute !important;
   inset: 0 !important;

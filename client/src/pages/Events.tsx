@@ -1,7 +1,6 @@
 import { eventsTonightWindow, isEventTonight } from "@shared/eventsTonight";
 import BoardShader from "@/components/board/BoardShader";
 import { createEventSearch } from "@shared/eventSearch";
-import RoomPlate from "@/components/board/RoomPlate";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import EventsDrawer from "@/components/events/EventsDrawer";
 import BrowseStatus from "@/components/BrowseStatus";
@@ -27,8 +26,10 @@ import AuthModal from "@/components/AuthModal";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
 import PosterAdCard from "@/components/ads/PosterAdCard";
 import type { AdServePayload } from "@/lib/adTypes";
-import EventsHero from "@/components/EventsHero";
-import BoardStatsBar from "@/components/BoardStatsBar";
+import { EventzNeonLogo } from "@/components/EventsHero";
+import EventRailCard from "@/components/events/EventRailCard";
+import BoardShareButton from "@/components/BoardShareButton";
+import BoardFollowButton from "@/components/BoardFollowButton";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import EventTypeTag from "../components/EventTypeTag";
@@ -551,27 +552,55 @@ export default function Events() {
   const railKeys = useMemo(() => new Set(dayRail.map(d => d.key)), [dayRail]);
   const moreLabel = pastView ? "Past" : railKeys.has(activeDay) ? "All +" : (activeChipLabel ?? "All +");
 
-  // Tonight reads as a timeline: on now, starting soon, tonight, late.
+  // A single day reads as a timeline. Tonight: on now, starting soon, tonight,
+  // late. Any other day on the rail: daytime, evening, late.
   const tonightBands = useMemo(() => {
-    if (activeDay !== DEFAULT_WINDOW || pastView || sortMode !== "start_time") return null;
-    const today = pacificTodayDate(now);
-    const lateCut = parsePacificDateTime(`${today}T21:00:00`) ?? now;
-    const bands = [
-      { id: "now", label: "On now", color: "var(--neon-green)", items: [] as EventListing[] },
-      { id: "soon", label: "Starting soon", color: "var(--neon-cyan)", items: [] as EventListing[] },
-      { id: "tonight", label: "Tonight", color: "var(--neon-magenta)", items: [] as EventListing[] },
-      { id: "late", label: "Late", color: "var(--neon-violet)", items: [] as EventListing[] },
-    ];
+    const isTonight = activeDay === DEFAULT_WINDOW;
+    if ((!isTonight && !activeDay.startsWith("D:")) || pastView || sortMode !== "start_time") return null;
+    const date = isTonight ? pacificTodayDate(now) : activeDay.slice(2);
+    const eveningCut = parsePacificDateTime(`${date}T17:00:00`) ?? now;
+    const lateCut = parsePacificDateTime(`${date}T21:00:00`) ?? now;
+    const bands = isTonight
+      ? [
+          { id: "now", label: "On now", color: "var(--neon-green)", items: [] as EventListing[] },
+          { id: "soon", label: "Starting soon", color: "var(--neon-cyan)", items: [] as EventListing[] },
+          { id: "tonight", label: "Tonight", color: "var(--neon-magenta)", items: [] as EventListing[] },
+          { id: "late", label: "Late", color: "var(--neon-violet)", items: [] as EventListing[] },
+        ]
+      : [
+          { id: "day", label: "Daytime", color: "var(--neon-cyan)", items: [] as EventListing[] },
+          { id: "evening", label: "Evening", color: "var(--neon-magenta)", items: [] as EventListing[] },
+          { id: "late", label: "Late", color: "var(--neon-violet)", items: [] as EventListing[] },
+        ];
     for (const e of filtered) {
-      const live = liveStateFor(e, now);
       const start = parsePacificDateTime(e.dateStart) ?? now;
-      if (live?.kind === "now") bands[0].items.push(e);
-      else if (live?.kind === "soon") bands[1].items.push(e);
-      else if (start < lateCut) bands[2].items.push(e);
-      else bands[3].items.push(e);
+      if (isTonight) {
+        const live = liveStateFor(e, now);
+        if (live?.kind === "now") bands[0].items.push(e);
+        else if (live?.kind === "soon") bands[1].items.push(e);
+        else if (start < lateCut) bands[2].items.push(e);
+        else bands[3].items.push(e);
+      } else if (start < eveningCut) bands[0].items.push(e);
+      else if (start < lateCut) bands[1].items.push(e);
+      else bands[2].items.push(e);
     }
     return bands.filter(b => b.items.length > 0);
   }, [activeDay, pastView, sortMode, filtered, now]);
+
+  // Mobile rails: the first band (now + soon merged on tonight) keeps the full
+  // Eventz card at rail width; later bands use compact rail cards.
+  const railBands = useMemo(() => {
+    if (!tonightBands || !tonightBands.length) return null;
+    const merged = tonightBands.filter(b => b.id === "now" || b.id === "soon");
+    const rest = tonightBands.filter(b => b.id !== "now" && b.id !== "soon");
+    const first = merged.length
+      ? [{ id: "happening", label: "Happening now", color: "var(--neon-green)", items: merged.flatMap(b => b.items) }]
+      : [];
+    return [...first, ...rest];
+  }, [tonightBands]);
+  const [openRails, setOpenRails] = useState<Set<string>>(() => new Set());
+  useEffect(() => { setOpenRails(new Set()); }, [activeDay, activeFilters, searchQuery]);
+  const useRails = isMobile && viewMode === "grid" && railBands != null;
 
   const mySavedUpcoming = useMemo(
     () => liveEvents.filter(e => savedIds.has(e.id)).length,
@@ -640,11 +669,17 @@ export default function Events() {
       liveEvents.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
     );
     return [
-      { num: upcomingCount, label: "Upcoming events", color: "var(--room-eventz)" },
-      { num: unclaimedIds.size, label: "Ready to claim", color: "var(--neon-yellow)" },
-      { num: events.filter(e => isEventTonight(e, now)).length, label: "Events tonight", color: "var(--neon-orange)" },
+      { num: upcomingCount, label: "Upcoming", color: "var(--room-eventz)" },
+      { num: unclaimedIds.size, label: "To claim", color: "var(--neon-yellow)" },
+      { num: events.filter(e => isEventTonight(e, now)).length, label: "Tonight", color: "var(--neon-orange)" },
     ];
   }, [liveEvents, upcomingCount, events, now]);
+
+  const todayKicker = useMemo(() => {
+    const label = new Intl.DateTimeFormat("en-US", { timeZone: PACIFIC, weekday: "short", month: "short", day: "numeric" }).format(new Date(now)).replace(",", "").toUpperCase();
+    const tonight = heroStats[2]?.num ?? 0;
+    return `Eventz / ${label} · ${tonight} tonight`;
+  }, [now, heroStats]);
 
   const hasActiveFilters =
     activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0 || pastView;
@@ -670,9 +705,26 @@ export default function Events() {
   return (
     <div className="zine-page events-page board-page board-page--makeover board-shader-page" data-shader-room="eventz" data-leaving={leaving || undefined}>
       <BoardShader room="eventz" />
-      <EventsHero eventCount={upcomingCount} />
-      <div className="room-plate-shell"><RoomPlate room="eventz" /></div>
-      <BoardStatsBar stats={heroStats} variant="band" showLive={false} />
+      <header className="events-top pdx-glass-rebind" style={{ "--c": "var(--room-eventz)" } as React.CSSProperties}>
+        <div className="events-top__row">
+          <div className="events-top__id">
+            <p className="events-top__kicker">{todayKicker}</p>
+            <h1 className="events-top__mark"><EventzNeonLogo ready={upcomingCount > 0} className="events-top__logo" /></h1>
+          </div>
+          <div className="events-top__actions">
+            <BoardShareButton title="Eventz" path="/events" card={{ room: "Eventz", mark: "/brand/family/eventz.png" }} />
+            <BoardFollowButton board="eventz" />
+          </div>
+        </div>
+        <p className="events-top__lede">Portland queer nights, daytime hangs and community gatherings, all year. Save what you like and it lands in My Schedule.</p>
+        <ul className="events-top__stats" aria-label="Eventz at a glance">
+          {heroStats.map(stat => (
+            <li key={stat.label} className="events-top__stat" style={{ "--_c": stat.color } as React.CSSProperties}>
+              <b><CountUpValue value={stat.num} /></b>{stat.label}
+            </li>
+          ))}
+        </ul>
+      </header>
 
 
       {activeTab === "schedule" ? (
@@ -885,6 +937,56 @@ export default function Events() {
                 ? pastView ? "Back to live listings" : pastEvents.length > 0 ? "Explore the archive" : "Submit an event"
                 : "Clear filters"}
             </Button>
+          </div>
+        ) : useRails && railBands ? (
+          <div className="events-rails">
+            {railBands.map((band, index) => {
+              const expanded = openRails.has(band.id);
+              const size = index === 0 ? "full" : index === 1 ? "m" : "s";
+              return (
+                <section key={band.id} className={`events-rail-sec events-rail-sec--${size} pdx-glass-rebind`} style={{ "--c": band.color } as React.CSSProperties} aria-labelledby={`events-rail-${band.id}`}>
+                  <div className="events-rail-sec__head">
+                    <h3 id={`events-rail-${band.id}`}><span aria-hidden="true" />{band.label}<small>{band.items.length}</small></h3>
+                    <div className="events-rail-sec__actions">
+                      {index === 0 && (
+                        <button type="button" className="events-rail-pill" onClick={() => setMapOpen(true)}><MapIcon size={14} aria-hidden="true" />Map</button>
+                      )}
+                      {band.items.length > 2 && (
+                        <button
+                          type="button"
+                          className="events-rail-pill"
+                          aria-expanded={expanded}
+                          onClick={() => setOpenRails(prev => { const next = new Set(prev); if (next.has(band.id)) next.delete(band.id); else next.add(band.id); return next; })}
+                        >
+                          {expanded ? "Show less" : "View all"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className={expanded ? "events-rail events-rail--open" : "events-rail"} role="list">
+                    {band.items.map(e => (
+                      <div role="listitem" key={listingKey(e)} className="events-rail__item">
+                        {size === "full" ? (
+                          <TonightEventCard
+                            listing={e} rsvped={savedIds.has(e.id)}
+                            liveState={liveStateFor(e, now)}
+                            onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
+                            onOpen={listing => openEvent(listing)}
+                          />
+                        ) : (
+                          <EventRailCard
+                            listing={e} size={size} saved={savedIds.has(e.id)}
+                            liveState={liveStateFor(e, now)}
+                            onToggleSave={id => user ? toggleSave(id) : setShowSaveAuth(true)}
+                            onOpen={listing => openEvent(listing)}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
           </div>
         ) : tonightBands ? (
           <div className={`events-card-feed events-bands${viewMode === "list" ? " events-card-feed--list" : ""}`}>

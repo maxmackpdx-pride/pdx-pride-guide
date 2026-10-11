@@ -6,14 +6,11 @@ type Props = {
   eventCount: number;
 };
 
-export default function EventsHero({ eventCount }: Props) {
+/** The EVENTZ family logo with its per-letter neon breath. Used by the hero and the compact top bar. */
+export function EventzNeonLogo({ ready = true, className = "" }: { ready?: boolean; className?: string }) {
+  const eventCount = ready ? 1 : 0;
   return (
-      <BoardHero
-        className="board-hero--room"
-        accent="cyan"
-        kicker="Eventz / Portland, all year"
-        title={
-          <span className="eventz-neon-logo">
+          <span className={`eventz-neon-logo${className ? ` ${className}` : ""}`}>
             <img
               key={eventCount > 0 ? "eventz-hero-ready" : "eventz-hero-pending"}
               className="board-hero__brand-logo board-hero__brand-logo--eventz"
@@ -27,7 +24,16 @@ export default function EventsHero({ eventCount }: Props) {
               } as CSSProperties} />
             ))}
           </span>
-        }
+  );
+}
+
+export default function EventsHero({ eventCount }: Props) {
+  return (
+      <BoardHero
+        className="board-hero--room"
+        accent="cyan"
+        kicker="Eventz / Portland, all year"
+        title={<EventzNeonLogo ready={eventCount > 0} />}
         lede="Find your next night out, daytime hang, or community gathering. Browse the flyers, check the details, and make a plan."
       />
   );
