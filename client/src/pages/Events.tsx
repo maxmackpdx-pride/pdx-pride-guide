@@ -28,6 +28,7 @@ import PosterAdCard from "@/components/ads/PosterAdCard";
 import type { AdServePayload } from "@/lib/adTypes";
 import { EventzNeonLogo } from "@/components/EventsHero";
 import EventRailCard from "@/components/events/EventRailCard";
+import EventsRail from "@/components/events/EventsRail";
 import BoardShareButton from "@/components/BoardShareButton";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -926,7 +927,7 @@ export default function Events() {
                       )}
                     </div>
                   </div>
-                  <div className={expanded ? "events-rail events-rail--open" : "events-rail"} role="list">
+                  <EventsRail open={expanded} label={band.label} nudge={index === 0}>
                     {band.items.map(e => (
                       <div role="listitem" key={listingKey(e)} className="events-rail__item">
                         {size === "full" ? (
@@ -946,7 +947,7 @@ export default function Events() {
                         )}
                       </div>
                     ))}
-                  </div>
+                  </EventsRail>
                 </section>
               );
             })}

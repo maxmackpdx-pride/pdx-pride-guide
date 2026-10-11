@@ -383,3 +383,31 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 .event-rail-card__save:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }
 /* Every compact rail card is the same height: two title lines reserved. */
 .event-rail-card__title { min-height: 2.08em; }
+
+/* Rail swipe cues: edge fade + arrow where more cards wait, and a progress bar. */
+.events-page .events-rail-wrap { position: relative; }
+.events-page .events-rail-wrap.is-scrollable .events-rail { padding-bottom: 14px; }
+.events-page .events-rail-wrap::before,
+.events-page .events-rail-wrap::after {
+  content: ""; position: absolute; top: 0; bottom: 14px; width: 44px; z-index: 5; pointer-events: none;
+  opacity: 0; transition: opacity .2s ease;
+}
+.events-page .events-rail-wrap::before { left: 0; background: linear-gradient(90deg, var(--z-black), transparent); }
+.events-page .events-rail-wrap::after { right: 0; background: linear-gradient(-90deg, var(--z-black), transparent); }
+.events-page .events-rail-wrap.has-left::before,
+.events-page .events-rail-wrap.has-right::after { opacity: .9; }
+.events-page .events-rail-arrow {
+  position: absolute; top: calc(50% - 7px); z-index: 6; transform: translateY(-50%);
+  display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px;
+  border-radius: 999px; border: 1.5px solid var(--c); background: color-mix(in srgb, var(--z-black) 88%, transparent);
+  color: var(--c); box-shadow: 0 0 0 2px var(--z-black), var(--neon-bloom); cursor: pointer;
+  opacity: 0; pointer-events: none; transition: opacity .2s ease;
+}
+.events-page .events-rail-arrow--left { left: 6px; }
+.events-page .events-rail-arrow--right { right: 6px; }
+.events-page .events-rail-wrap.has-left .events-rail-arrow--left,
+.events-page .events-rail-wrap.has-right .events-rail-arrow--right { opacity: 1; pointer-events: auto; }
+.events-page .events-rail-arrow:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }
+.events-page .events-rail-progress { position: absolute; left: 16px; right: 16px; bottom: 2px; height: 3px; border-radius: 999px; background: color-mix(in srgb, var(--c) 18%, transparent); overflow: hidden; }
+.events-page .events-rail-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--c); box-shadow: 0 0 8px var(--c); transition: transform .12s linear; }
+@media (prefers-reduced-motion: reduce) { .events-page .events-rail-progress > span { transition: none; } }
