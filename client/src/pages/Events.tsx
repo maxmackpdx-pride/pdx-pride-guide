@@ -1,4 +1,4 @@
-import { eventsTonightWindow, isEventTonight } from "@shared/eventsTonight";
+import { eventsTonightWindow } from "@shared/eventsTonight";
 import BoardShader from "@/components/board/BoardShader";
 import { createEventSearch } from "@shared/eventSearch";
 import BrowseToolbar from "@/components/BrowseToolbar";
@@ -46,7 +46,6 @@ import { eventPath, eventUrl } from "@shared/eventSlug";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
 import { List, Grid, ChevronDown, ChevronRight, CalendarDays, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
-import CountUpValue from "@/components/CountUpValue";
 
 import { DAY_SORT_ORDER } from "@shared/eventWeek";
 import { isEventSchedulePast, pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
@@ -596,8 +595,16 @@ export default function Events() {
     const first = merged.length
       ? [{ id: "happening", label: "Happening now", color: "var(--neon-green)", items: merged.flatMap(b => b.items) }]
       : [];
-    return [...first, ...rest];
-  }, [tonightBands]);
+    const bands = [...first, ...rest];
+    // Tonight also previews tomorrow as its own rail.
+    if (activeDay === DEFAULT_WINDOW) {
+      const today = pacificTodayDate(now);
+      const tomorrowKey = `D:${pacDate((parsePacificDateTime(`${today}T12:00:00`) ?? now) + 86400000)}`;
+      const items = sortEvents(filterBoardEvents(events, tomorrowKey, activeFilters, searchQuery, false, now), "start_time");
+      if (items.length) bands.push({ id: "tomorrow", label: "Tomorrow", color: "var(--neon-orange)", items, dayKey: tomorrowKey } as typeof bands[number] & { dayKey: string });
+    }
+    return bands as Array<typeof bands[number] & { dayKey?: string }>;
+  }, [tonightBands, activeDay, events, activeFilters, searchQuery, now]);
   const [openRails, setOpenRails] = useState<Set<string>>(() => new Set());
   useEffect(() => { setOpenRails(new Set()); }, [activeDay, activeFilters, searchQuery]);
   const useRails = isMobile && viewMode === "grid" && railBands != null;
@@ -663,23 +670,11 @@ export default function Events() {
   // All upcoming (not-yet-ended) live events - the site is year-round now.
   const upcomingCount = liveEvents.length;
 
-  const heroStats = useMemo(() => {
-    // Hero counts track the live board (upcoming + now), not ended listings.
-    const unclaimedIds = new Set(
-      liveEvents.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
-    );
-    return [
-      { num: upcomingCount, label: "Upcoming", color: "var(--room-eventz)" },
-      { num: unclaimedIds.size, label: "To claim", color: "var(--neon-yellow)" },
-      { num: events.filter(e => isEventTonight(e, now)).length, label: "Tonight", color: "var(--neon-orange)" },
-    ];
-  }, [liveEvents, upcomingCount, events, now]);
 
   const todayKicker = useMemo(() => {
     const label = new Intl.DateTimeFormat("en-US", { timeZone: PACIFIC, weekday: "short", month: "short", day: "numeric" }).format(new Date(now)).replace(",", "").toUpperCase();
-    const tonight = heroStats[2]?.num ?? 0;
-    return `Eventz / ${label} · ${tonight} tonight`;
-  }, [now, heroStats]);
+    return `${label} · Portland`;
+  }, [now]);
 
   const hasActiveFilters =
     activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0 || pastView;
@@ -717,13 +712,6 @@ export default function Events() {
           </div>
         </div>
         <p className="events-top__lede">Portland queer nights, daytime hangs and community gatherings, all year. Save what you like and it lands in My Schedule.</p>
-        <ul className="events-top__stats" aria-label="Eventz at a glance">
-          {heroStats.map(stat => (
-            <li key={stat.label} className="events-top__stat" style={{ "--_c": stat.color } as React.CSSProperties}>
-              <b><CountUpValue value={stat.num} /></b>{stat.label}
-            </li>
-          ))}
-        </ul>
       </header>
 
 
@@ -745,41 +733,11 @@ export default function Events() {
         <div className="board-active-feed__inner">
           <ScrollReveal delay={40}>
             <div className="events-board-feed__sticky">
-              <div className="board-active-feed__head">
-                <div className="board-active-feed__kicker board-active-feed__kicker--cyan">The board</div>
-                <div className="board-active-feed__head-row">
-                  <h2 className="display section-heading board-active-feed__title">
-                    {pastView ? "Past events" : "Live listings"}
-                  </h2>
-                  <span className="board-active-feed__count" data-testid="events-count">
-                    {isError ? "Results unavailable" : isLoading ? (
-                      "Loading…"
-                    ) : hasActiveFilters && filtered.length !== poolEvents.length ? (
-                      <>
-                        <CountUpValue value={filtered.length} /> of{" "}
-                        <CountUpValue
-                          key={`${pastView ? "past" : "live"}-${poolEvents.length}`}
-                          value={poolEvents.length}
-                        />{" "}
-                        showing
-                      </>
-                    ) : (
-                      <>
-                        <CountUpValue
-                          key={`${pastView ? "past" : "live"}-${poolEvents.length}`}
-                          value={poolEvents.length}
-                        />{" "}
-                        event{poolEvents.length === 1 ? "" : "s"}
-                        {pastView ? " past" : ""}
-                      </>
-                    )}
-                    {activeChipLabel && activeDay !== "ALL" ? ` · ${activeChipLabel}` : ""}
-                    {pastEvents.length > 0 && !pastView ? (
-                      <span className="events-past-hint"> · {pastEvents.length} past</span>
-                    ) : null}
-                  </span>
+              {pastView && (
+                <div className="board-active-feed__head">
+                  <h2 className="display section-heading board-active-feed__title">Past events</h2>
                 </div>
-              </div>
+              )}
               <div className="events-browse">
                 <nav className="events-day-rail" aria-label="Pick a day">
                   {dayRail.map(d => (
@@ -942,7 +900,8 @@ export default function Events() {
           <div className="events-rails">
             {railBands.map((band, index) => {
               const expanded = openRails.has(band.id);
-              const size = index === 0 ? "full" : index === 1 ? "m" : "s";
+              // Happening now keeps the full Eventz card; every other rail uses one size.
+              const size = band.id === "happening" ? "full" : "m";
               return (
                 <section key={band.id} className={`events-rail-sec events-rail-sec--${size} pdx-glass-rebind`} style={{ "--c": band.color } as React.CSSProperties} aria-labelledby={`events-rail-${band.id}`}>
                   <div className="events-rail-sec__head">
@@ -951,7 +910,11 @@ export default function Events() {
                       {index === 0 && (
                         <button type="button" className="events-rail-pill" onClick={() => setMapOpen(true)}><MapIcon size={14} aria-hidden="true" />Map</button>
                       )}
-                      {band.items.length > 2 && (
+                      {band.dayKey ? (
+                        <button type="button" className="events-rail-pill" onClick={() => { setPastView(false); setActiveDay(band.dayKey!); }}>
+                          See the day
+                        </button>
+                      ) : band.items.length > 2 && (
                         <button
                           type="button"
                           className="events-rail-pill"

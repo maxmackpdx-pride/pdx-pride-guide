@@ -381,3 +381,5 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 .events-rail--open .event-rail-card__save { top: 8px; }
 .event-rail-card__save[aria-pressed="true"] { background: var(--neon-magenta); border-color: var(--neon-magenta); color: var(--z-black); }
 .event-rail-card__save:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }
+/* Every compact rail card is the same height: two title lines reserved. */
+.event-rail-card__title { min-height: 2.08em; }
