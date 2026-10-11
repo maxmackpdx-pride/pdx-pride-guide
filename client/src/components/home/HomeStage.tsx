@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import HomeDiscover from "@/components/home/HomeDiscover";
 import HomeFlight from "@/components/home/HomeFlight";
+import HomeBetaClock from "@/components/home/HomeBetaClock";
 import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 import HomeStageCard from "@/components/home/HomeStageCard";
@@ -78,6 +79,7 @@ export default function HomeStage({ afterWelcome }: Props) {
         <div className="home-front__hero">
           <div className="home-front__brand-group">
             <h1 id="home-front-title" className="sr-only">Zaylist</h1>
+            <HomeBetaClock />
             <div className="home-front__mark">
               <div className="home-front__mark-art">
                 <img

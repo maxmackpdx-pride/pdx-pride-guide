@@ -251,7 +251,7 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
         :Math.min(width*.48,height*.43)*.7*1.15;
       const cx=width/2,cy=mobile?headerInset+availableHeight/2:height/2;
       const canvasBounds=canvas.getBoundingClientRect();
-      const protectedAreas = ['.home-front__mark','.home-front__identity-script'].flatMap(selector=>{
+      const protectedAreas = ['.home-front__mark','.home-front__identity-script','.home-front__beta'].flatMap(selector=>{
         const element=front?.querySelector(selector);
         if(!element)return [];
         const rect=element.getBoundingClientRect();
