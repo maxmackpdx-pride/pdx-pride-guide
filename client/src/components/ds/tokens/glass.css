@@ -1103,7 +1103,12 @@ html.calm-mode .pdx-glass-card--neutral,
    bars that clipped square against rounded corners. Static in every
    mode, so calm mode and reduced motion need no special case.
    ═══════════════════════════════════════════════════════════ */
-:is(.tonight-card, .event-rail-card__art, .pdxBoard, .pdxRow, .board-listing-card, .board-spotted-card, .spotted-card, .schedule-event-card, .card.fitem.fitem--glow, .featured-event-ad)::before {
+/* .pdxBoard--event-grid is excluded: its ::before is the poster card's black
+   outer ring, and its rim comes from .pdxBoard__shine. Mounted seam elements
+   (.pdx-refract-seam, used by place, housing, hub, home, resource and
+   dashboard cards) take the same rim so every card matches the dock. */
+:is(.tonight-card, .event-rail-card__art, .pdxBoard:not(.pdxBoard--event-grid), .pdxRow, .board-listing-card, .board-spotted-card, .spotted-card, .schedule-event-card, .card.fitem.fitem--glow, .featured-event-ad)::before,
+html body .pdx-refract-seam.pdx-refract-seam {
   content: "" !important;
   position: absolute !important;
   inset: 0 !important;
