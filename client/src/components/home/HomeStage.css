@@ -17,23 +17,21 @@
 }
 .home-front__mark { position:relative; flex:none; height:var(--home-logo-height); width:calc(var(--home-logo-height) * 2393 / 824); max-width:calc(100% - 40px); }
 .home-front__mark-art { width:100%; height:100%; }
+@font-face {
+  font-family:"DSEG14 Classic";
+  src:url("/fonts/home-beta/dseg14-classic-latin-400-normal.woff2") format("woff2");
+  font-style:normal; font-weight:400; font-display:swap;
+}
 .home-front__beta {
   position:absolute; bottom:calc(100% + clamp(8px,1.5svh,16px)); left:50%; transform:translateX(-50%);
-  display:flex; align-items:center; gap:9px; padding:4px 10px 4px 4px; white-space:nowrap;
-  color:var(--text-hi); font:700 clamp(17px,1.5vw,21px)/1 var(--font-display); letter-spacing:.19em;
+  display:block; padding:6px 8px 6px 12px; white-space:nowrap;
+  color:var(--text-hi); font:400 clamp(21px,2vw,28px)/1 "DSEG14 Classic",var(--font-mono); letter-spacing:.18em;
   filter:drop-shadow(0 2px 4px var(--z-oled));
 }
 .home-front__beta::before {
   content:""; position:absolute; inset:-8px -16px; z-index:-1; pointer-events:none;
   background:radial-gradient(ellipse closest-side,color-mix(in srgb,var(--z-oled) 88%,transparent),transparent);
 }
-.home-front__beta-clock { display:block; width:clamp(34px,3.3vw,44px); height:auto; flex:none; overflow:visible; }
-.home-front__beta-clock-face { fill:color-mix(in srgb,var(--z-oled) 92%,transparent); stroke:color-mix(in srgb,var(--neon-cyan) 40%,var(--ink-border)); stroke-width:1; }
-.home-front__beta-clock-rim { fill:none; stroke:var(--neon-cyan); stroke-width:1.5; stroke-linecap:round; }
-.home-front__beta-clock-ticks { fill:none; stroke:var(--text-lo); stroke-width:1; stroke-linecap:round; }
-.home-front__beta-clock-hour { fill:none; stroke:var(--text-hi); stroke-width:2.5; stroke-linecap:round; }
-.home-front__beta-clock-minute { fill:none; stroke:var(--neon-cyan); stroke-width:1.5; stroke-linecap:round; }
-.home-front__beta-clock-pin { fill:var(--neon-cyan); }
 .home-front__mark,.home-front__identity-line { isolation:isolate; }
 .home-front__mark::before,.home-front__identity-line::before {
   content:""; position:absolute; z-index:-1; pointer-events:none;
