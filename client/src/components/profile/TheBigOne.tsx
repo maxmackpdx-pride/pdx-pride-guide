@@ -8,6 +8,7 @@ import { admissionDisplayLabel } from "@shared/admission";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent, ProfileUserChip } from "./types";
 import "./TheBigOne.css";
+import DayMotif from "@/components/events/DayMotif";
 
 const DAY_OPPOSITE: Record<string, string> = { MON:"#CCFF00", TUE:"#FF6600", WED:"#8800FF", THU:"#FF6600", FRI:"#CCFF00", SAT:"#FF3030", SUN:"#00FFFF" };
 
@@ -177,12 +178,9 @@ export default function TheBigOne({
           aria-label={onOpen ? `Open ${event.title}` : event.title}
           disabled={!onOpen}
         >
-          <img
-            className="tbo__poster-img"
-            src={poster}
-            alt=""
-            loading="lazy"
-          />
+          {poster
+            ? <img className="tbo__poster-img" src={poster} alt="" loading="lazy" />
+            : <DayMotif day={day} placement="art" />}
           <div className="tbo__poster-scrim" aria-hidden="true" />
           <div className="tbo__poster-title">
             <div className="tbo__tags" aria-label="Event tags">

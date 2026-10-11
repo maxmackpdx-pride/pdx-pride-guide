@@ -49,6 +49,7 @@ import EventLocationMap from "./EventLocationMap";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import "./EventModal.approved.css";
 import "./EventModal.reference.css";
+import DayMotif from "@/components/events/DayMotif";
 
 type EventWithLinks = Event & {
   venueWebsite?: string | null;
@@ -795,7 +796,9 @@ function EventModalInner({
 
         <div className="event-modal__scroll" ref={scrollRef}>
         <section ref={heroRef} className={`event-modal__poster event-modal__hero event-modal--poster-${posterOrientation}`} aria-labelledby="event-modal-title">
-          <img ref={posterImageRef} src={posterUrl} alt="" className="event-modal__poster-img" onLoad={e => setPosterOrientation(e.currentTarget.naturalHeight > e.currentTarget.naturalWidth * 1.08 ? "portrait" : "landscape")} />
+          {posterUrl
+            ? <img ref={posterImageRef} src={posterUrl} alt="" className="event-modal__poster-img" onLoad={e => setPosterOrientation(e.currentTarget.naturalHeight > e.currentTarget.naturalWidth * 1.08 ? "portrait" : "landscape")} />
+            : <span className="event-modal__poster-img event-modal__poster-motif"><DayMotif day={event.dayOfWeek} placement="art" /></span>}
           <span className="event-modal__poster-fade" aria-hidden="true" />
           <span className="event-modal__poster-scan" aria-hidden="true" />
           <div className="event-modal__hero-content" ref={heroContentRef}>

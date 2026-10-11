@@ -107,7 +107,7 @@ export default function RailCard({
             overflow: "hidden",
             borderLeft: `3px solid ${dc}`,
             backgroundColor: "var(--ink-800)",
-            backgroundImage: `url(${event.posterUrl})`,
+            backgroundImage: event.posterUrl ? `url(${event.posterUrl})` : "none",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -155,7 +155,7 @@ export default function RailCard({
         border: `1px solid ${hexA(dc, rsvped ? 0.85 : 0.28)}`,
         borderLeft: `${sm ? 3 : 4}px solid ${dc}`,
         backgroundColor: "var(--ink-800)",
-        backgroundImage: `url(${event.posterUrl})`,
+        backgroundImage: event.posterUrl ? `url(${event.posterUrl})` : "none",
         backgroundSize: "cover",
         backgroundPosition: "center center",
         boxShadow: rsvped ? `0 0 22px -3px ${hexA(dc, 0.85)}` : showFeatBadge ? `0 0 22px -7px ${hexA(dc, 0.6)}` : "0 6px 20px -10px rgba(0,0,0,.9)",

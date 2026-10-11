@@ -40,7 +40,8 @@ import { mapCoordinates } from "@/lib/mapCoordinates";
 import { stampHauzMapPoints } from "@/lib/hauzDemoPins";
 import { mapListingKey, matchesMapEvent, type MapTimeFilter } from "@/lib/mapLayerFilters";
 import { HOUSING_TYPE_LABEL, type HousingBoardResponse, type HousingPostView, type HousingType } from "@shared/housing";
-import { EVENT_PLACEHOLDER_PENDING, resolveEventPosterUrl } from "@shared/eventPoster";
+import { resolveEventPosterUrl } from "@shared/eventPoster";
+import EventThumb from "@/components/events/EventThumb";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { AVATAR_EMOJI_OPTIONS, normalizeAvatarRing } from "@shared/avatarRings";
 import "./LivingMap.css";
@@ -668,7 +669,7 @@ export default function MapzMapDemo() {
         const starts = parsePacificDateTime(event.dateStart) || Date.now();
         const isToday = portlandCalendarDay(starts) === portlandCalendarDay(Date.now());
         return <button type="button" className="mapz-layer-row" key={`${event.id}-${event.dateStart}`} onClick={click => openMark({ key: `e-${event.id}-${event.dateStart}`, kind: "event", lat: event.lat!, lng: event.lng!, item: event }, click.currentTarget)}>
-          <img src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} alt="" loading="lazy" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = EVENT_PLACEHOLDER_PENDING; }} />
+          <EventThumb src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} day={event.dayOfWeek} />
           <span className="mapz-layer-row__copy"><strong>{event.title}</strong><small>{event.venueName}</small></span>
           <time dateTime={event.dateStart}>{!isToday && <small>{eventDateLabel(event.dateStart)}</small>}{eventTimeLabel(event.dateStart)}</time>
           <ChevronRight size={17} aria-hidden="true" />

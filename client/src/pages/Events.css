@@ -411,3 +411,10 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 .events-page .events-rail-progress { position: absolute; left: 16px; right: 16px; bottom: 2px; height: 3px; border-radius: 999px; background: color-mix(in srgb, var(--c) 18%, transparent); overflow: hidden; }
 .events-page .events-rail-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--c); box-shadow: 0 0 8px var(--c); transition: transform .12s linear; }
 @media (prefers-reduced-motion: reduce) { .events-page .events-rail-progress > span { transition: none; } }
+
+/* Day motif on rail cards: art layer stays above it; copy rides on top. */
+.event-rail-card__open { position: relative; }
+.event-rail-card__art { z-index: 1; }
+.event-rail-card__title, .event-rail-card__meta { position: relative; z-index: 2; text-shadow: 0 1px 3px var(--z-black); }
+.event-rail-card--s .day-motif-code { font-size: 26px; }
+.event-rail-card__art:has(.tonight-card__live) .day-motif-code { display: none; }

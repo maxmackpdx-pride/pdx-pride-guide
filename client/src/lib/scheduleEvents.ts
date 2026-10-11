@@ -59,7 +59,7 @@ export type ScheduleEvent = PrideEvent & {
   /** Unique per grid block (handles multi-day listing slices). */
   scheduleKey: string;
   /** Resolved flyer URL for grid blocks and popover header. */
-  posterUrl: string;
+  posterUrl: string | null;
   /** Absolute start/end (ms) for live / up-next selectors. */
   startMs: number;
   endMs: number;

@@ -8166,6 +8166,12 @@ function runBootMigrationsOnce() {
   seedHawksReviewedTimes20260928(sqlite);
   seedDiscoveredQueerEvents20260928(sqlite);
   seedPosterAudit20260928(sqlite);
+  // Flyer rules (Oct 2026): generated day posters are retired. A stored stand-in path
+  // means "no flyer", so clear it; cards draw the day motif instead. Real flyers untouched.
+  {
+    const cleared = sqlite.prepare("UPDATE events SET poster_image_url = NULL WHERE poster_image_url LIKE '/placeholders/event-%'").run().changes;
+    if (cleared) console.info(`[boot] retired day posters: cleared ${cleared} stand-in flyer paths`);
+  }
 }
 
 function parseEnvAdminLists() {

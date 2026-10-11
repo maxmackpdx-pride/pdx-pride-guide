@@ -29,6 +29,7 @@ import type { AdServePayload } from "@/lib/adTypes";
 import { EventzNeonLogo } from "@/components/EventsHero";
 import EventRailCard from "@/components/events/EventRailCard";
 import EventsRail from "@/components/events/EventsRail";
+import ThisWeekRail, { type WeekDay } from "@/components/events/ThisWeekRail";
 import BoardShareButton from "@/components/BoardShareButton";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -53,6 +54,7 @@ import { isEventSchedulePast, pacificCalendarDate, pacificTodayDate, parsePacifi
 import "./Events.css";
 import { shareCardUrl } from "@shared/shareCards";
 import { roomTitle } from "@/lib/rooms";
+import EventThumb from "@/components/events/EventThumb";
 
 const PACIFIC = "America/Los_Angeles";
 const GRID_RENDER_BATCH = 40;
@@ -606,6 +608,23 @@ export default function Events() {
     }
     return bands as Array<typeof bands[number] & { dayKey?: string }>;
   }, [tonightBands, activeDay, events, activeFilters, searchQuery, now]);
+  // This week: one day card per weekday (today plus six), each holding that day's events.
+  const weekDays = useMemo<WeekDay[] | null>(() => {
+    if (activeDay !== DEFAULT_WINDOW || pastView) return null;
+    const today = pacificTodayDate(now);
+    const noon = parsePacificDateTime(`${today}T12:00:00`) ?? now;
+    return Array.from({ length: 7 }, (_, i) => {
+      const ms = noon + i * 86400000;
+      const date = pacDate(ms);
+      const code = WEEKDAY_CODES[pacWeekday(ms)] ?? "SAT";
+      const mon = new Intl.DateTimeFormat("en-US", { timeZone: PACIFIC, month: "short" }).format(new Date(ms)).toUpperCase();
+      const key = `D:${date}`;
+      return { key, code, mon, dom: Number(date.slice(8)), color: `var(--day-${code.toLowerCase()})`, items: sortEvents(filterBoardEvents(events, key, activeFilters, searchQuery, false, now), "start_time") };
+    });
+  }, [activeDay, pastView, events, activeFilters, searchQuery, now]);
+  const weekLiveState = useCallback((e: EventListing) => liveStateFor(e, now), [now]);
+  const weekToggleSave = useCallback((id: number) => (user ? toggleSave(id) : setShowSaveAuth(true)), [user, toggleSave]);
+  const weekOpen = useCallback((listing: EventListing) => openEvent(listing), [openEvent]);
   const [openRails, setOpenRails] = useState<Set<string>>(() => new Set());
   useEffect(() => { setOpenRails(new Set()); }, [activeDay, activeFilters, searchQuery]);
   const useRails = isMobile && viewMode === "grid" && railBands != null;
@@ -951,6 +970,7 @@ export default function Events() {
                 </section>
               );
             })}
+            {weekDays ? <ThisWeekRail days={weekDays} savedIds={savedIds} liveStateFor={weekLiveState} onToggleSave={weekToggleSave} onOpen={weekOpen} /> : null}
           </div>
         ) : tonightBands ? (
           <div className={`events-card-feed events-bands${viewMode === "list" ? " events-card-feed--list" : ""}`}>
@@ -971,6 +991,7 @@ export default function Events() {
                 </div>
               </section>
             ))}
+            {weekDays && viewMode === "grid" ? <div className="events-rails events-rails--week"><ThisWeekRail days={weekDays} savedIds={savedIds} liveStateFor={weekLiveState} onToggleSave={weekToggleSave} onOpen={weekOpen} /></div> : null}
           </div>
         ) : viewMode === "grid" ? (
           <div className="events-card-feed">
@@ -1120,7 +1141,7 @@ export default function Events() {
             return (
               <div className="events-map-row pdx-glass-rebind" role="listitem" key={listingKey(e)} style={{ "--c": `var(--day-${(e.dayOfWeek || "sat").toLowerCase()})` } as React.CSSProperties}>
                 <button type="button" className="events-map-row__open" onClick={() => { closeMap(); openEvent(e); }} aria-label={`Open ${e.title}`}>
-                  <img src={listingPosterUrl(e)} alt="" loading="lazy" />
+                  <EventThumb src={listingPosterUrl(e)} day={e.dayOfWeek} />
                   <span className="events-map-row__copy"><strong>{e.title}</strong><small>{e.venueName}{e.neighborhood ? ` · ${e.neighborhood}` : ""}</small></span>
                   <time dateTime={e.dateStart}>{!isToday && <small>{eventDateLabel(e.dateStart)}</small>}{eventTimeLabel(e.dateStart)}</time>
                   <ChevronRight size={17} aria-hidden="true" />

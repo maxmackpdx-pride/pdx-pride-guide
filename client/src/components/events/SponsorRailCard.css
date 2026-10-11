@@ -1,0 +1,33 @@
+/* Sponsor cards in the Eventz rails. Same footprint as a compact rail card. */
+.sponsor-rail-card { display: flex; flex-direction: column; gap: 6px; width: 100%; color: inherit; text-decoration: none; }
+.sponsor-rail-card:focus-visible { outline: 2px solid var(--b); outline-offset: 3px; border-radius: 16px; }
+.sponsor-rail-card__box { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; box-sizing: border-box; overflow: hidden; border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--b) 70%, var(--z-black));
+  box-shadow: 0 0 0 2px var(--z-black), 0 0 18px -6px color-mix(in srgb, var(--b) 45%, transparent); }
+.sponsor-rail-card__pill { position: absolute; top: 7px; left: 7px; z-index: 4; display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 7px; border-radius: 6px;
+  background: var(--z-oled); border: 1px solid var(--b); color: var(--text-hi); font: 700 10px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
+.sponsor-rail-card__pill i { width: 5px; height: 5px; border-radius: 99px; background: var(--b); }
+.sponsor-rail-card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; min-height: 2.08em; color: var(--text-hi); font: 800 16px/1.04 var(--font-display); text-transform: uppercase; }
+.sponsor-rail-card__meta { overflow: hidden; color: var(--b); font: 700 12px/1.3 var(--font-body); white-space: nowrap; text-overflow: ellipsis; }
+
+/* Code ticket. */
+.sponsor-rail-card__ticket { display: grid; grid-template-rows: minmax(0, 1fr) auto auto;
+  background: radial-gradient(90% 70% at 50% 0%, color-mix(in srgb, var(--b) 30%, transparent), transparent 70%), var(--z-black); }
+.sponsor-rail-card__logo { display: flex; align-items: center; justify-content: center; min-height: 0; padding: 32px 12px 8px; }
+.sponsor-rail-card__logo img { width: 100%; height: 100%; object-fit: contain; }
+.sponsor-rail-card__cut { position: relative; height: 0; margin: 0 10px; border-top: 1.5px dashed color-mix(in srgb, var(--b) 70%, transparent); }
+.sponsor-rail-card__cut::before, .sponsor-rail-card__cut::after { content: ""; position: absolute; top: -8px; width: 16px; height: 16px; border-radius: 50%; background: var(--z-black); border: 1px solid color-mix(in srgb, var(--b) 70%, var(--z-black)); }
+.sponsor-rail-card__cut::before { left: -19px; }
+.sponsor-rail-card__cut::after { right: -19px; }
+.sponsor-rail-card__deal { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 9px 8px 11px; }
+.sponsor-rail-card__deal b { color: var(--b); font: 900 25px/.9 var(--font-display); text-transform: uppercase; text-shadow: 0 0 14px color-mix(in srgb, var(--b) 60%, transparent); }
+.sponsor-rail-card__deal code { padding: 4px 6px; border: 1px solid var(--b); border-radius: 5px; color: var(--text-hi); font: 700 10px/1 var(--font-mono); letter-spacing: .12em; }
+
+/* Product spotlight. */
+.sponsor-rail-card__spot { background: var(--z-oled); box-shadow: 0 0 0 2px var(--z-black), 0 0 22px -4px color-mix(in srgb, var(--b) 55%, transparent); }
+.sponsor-rail-card__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .92; }
+.sponsor-rail-card__photo--logo { object-fit: contain; padding: 18px 14px 46px; box-sizing: border-box; opacity: 1; }
+.sponsor-rail-card__spot::after { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(transparent 45%, color-mix(in srgb, var(--z-oled) 92%, transparent)); }
+.sponsor-rail-card__spot-copy { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 3; display: flex; flex-direction: column; gap: 3px; }
+.sponsor-rail-card__spot-copy b { color: var(--text-hi); font: 900 17px/.95 var(--font-display); text-transform: uppercase; }
+.sponsor-rail-card__spot-copy small { color: var(--b); font: 700 10px/1.2 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }

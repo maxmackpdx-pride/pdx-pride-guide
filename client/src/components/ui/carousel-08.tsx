@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import DayMotif from "@/components/events/DayMotif";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
@@ -7,7 +8,9 @@ export type EventCarouselCard = {
   id: number;
   category: string;
   title: string;
-  src: string;
+  src: string | null;
+  /** Weekday code, drawn as the day motif when there is no flyer. */
+  day?: string;
   alt: string;
   venue: string;
   detail?: string;
@@ -46,8 +49,8 @@ export default function AppleCardCarousel({ cards, onOpen }: {
         <CarouselContent className="feed-event-carousel__content">
           {cards.map(card => (
             <CarouselItem key={card.id} className="feed-event-carousel__item">
-              <button type="button" className="feed-event-carousel__card" style={{ borderColor: card.color }} onClick={() => onOpen(card.id)} aria-label={`Open ${card.title}${card.venue ? ` at ${card.venue}` : ""}`}>
-                <img src={card.src} alt={card.alt} loading="lazy" decoding="async" />
+              <button type="button" className="feed-event-carousel__card" style={{ borderColor: card.color, "--c": card.color } as CSSProperties} onClick={() => onOpen(card.id)} aria-label={`Open ${card.title}${card.venue ? ` at ${card.venue}` : ""}`}>
+                {card.src ? <img src={card.src} alt={card.alt} loading="lazy" decoding="async" /> : <DayMotif day={card.day} placement="art" />}
                 <span className="feed-event-carousel__shade" aria-hidden="true" />
                 <span className="feed-event-carousel__copy">
                   <span className="feed-event-carousel__category" style={{ color: card.color }}>{card.category}</span>

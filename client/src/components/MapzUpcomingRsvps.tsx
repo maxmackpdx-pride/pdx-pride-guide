@@ -3,7 +3,8 @@ import {useMutation,useQuery} from '@tanstack/react-query';
 import {MoreHorizontal,CalendarDays,Check,Share2,MessageCircle,Megaphone,Heart,X} from 'lucide-react';
 import type {Event} from '@shared/schema';
 import {ATTENDANCE_PHRASES} from '@shared/attendancePhrases';
-import {EVENT_PLACEHOLDER_PENDING,resolveEventPosterUrl} from '@shared/eventPoster';
+import {resolveEventPosterUrl} from '@shared/eventPoster';
+import EventThumb from '@/components/events/EventThumb';
 import {getMissedConnectionWindow,parsePacificDateTime} from '@shared/missedConnections';
 import {eventPath} from '@shared/eventSlug';
 import {useAuth} from '@/context/AuthContext';
@@ -89,7 +90,7 @@ export function RsvpRow({event,checkIn,preview,host,claimed,onOpen,onRemove,rece
  return <article className={`mapz-rsvp-row${claimed?' is-claimed':''}`} onKeyDown={e=>{if(e.key==='Escape'&&action){e.stopPropagation();close();}}}>
   <div className="mapz-rsvp-summary">
    <button type="button" className="mapz-rsvp-event" onClick={e=>onOpen(event,e.currentTarget)}>
-    <img className="mapz-rsvp-poster" src={resolveEventPosterUrl(event.id,event.posterImageUrl,event.dayOfWeek)} onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src=EVENT_PLACEHOLDER_PENDING;}} alt="" loading="lazy"/>
+    <EventThumb className="mapz-rsvp-poster" src={resolveEventPosterUrl(event.id,event.posterImageUrl,event.dayOfWeek)} day={event.dayOfWeek}/>
     <span><strong>{event.title}</strong><time dateTime={event.dateStart}>{dateLabel(event.dateStart)}</time><small>{event.venueName}</small>{claimed&&<em>{previewContact==='venue'?'Venue preview':previewContact==='host'||preview&&host?'Host preview':host?'You’re hosting':'Claimed event'}</em>}</span>
    </button>
    <button type="button" ref={optionsButton} className="mapz-rsvp-options" aria-label={`Options for ${event.title}`} aria-expanded={action!==null} aria-controls={`rsvp-options-${event.id}`} onClick={()=>action?close():open('options')}><MoreHorizontal size={23}/></button>

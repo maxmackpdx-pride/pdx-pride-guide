@@ -1,0 +1,69 @@
+/* This week rail (see ThisWeekRail.tsx). Tokens only. */
+.events-week .week-day { position: relative; transition: padding-right .35s ease; }
+.events-week .week-day.is-closed { padding-right: 76px; }
+
+/* Day card: the Eventz glass shell with the day as the hero, its motif behind. */
+.events-week .week-day__card {
+  position: relative; z-index: 3; display: flex; flex-direction: column; width: 136px; aspect-ratio: 4 / 5; box-sizing: border-box;
+  padding: 0; border-radius: 16px; overflow: hidden; cursor: pointer; text-align: left; font: inherit; color: var(--text-hi);
+  border: 1px solid color-mix(in srgb, var(--c) 55%, var(--z-black));
+  background:
+    linear-gradient(133deg, color-mix(in srgb, var(--text-hi) 7%, transparent), color-mix(in srgb, var(--text-hi) 1.75%, transparent) 14%, transparent 38%),
+    radial-gradient(130% 80% at 50% 108%, color-mix(in srgb, var(--c) 48%, transparent), transparent 64%),
+    radial-gradient(115% 90% at 50% -18%, color-mix(in srgb, var(--c) 30%, transparent), transparent 62%),
+    var(--z-oled);
+  box-shadow: 0 0 0 2px var(--z-black), 0 12px 30px -18px var(--z-black), 0 0 18px -6px color-mix(in srgb, var(--c) 45%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, transparent), inset 0 0 34px -22px color-mix(in srgb, var(--c) 60%, transparent);
+}
+.events-week .week-day__card::before {
+  content: ""; position: absolute; inset: 0; z-index: 4; padding: .75px; border-radius: inherit; pointer-events: none; background: var(--z-spectrum);
+  -webkit-mask: linear-gradient(black, transparent 26px), linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
+  -webkit-mask-composite: source-in, xor;
+  mask: linear-gradient(black, transparent 26px), linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
+  mask-composite: intersect, exclude;
+}
+.events-week .week-day__card:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
+.events-week .week-day__card .day-motif--art { background: none; opacity: .7; }
+.events-week .week-day__card > :not(.day-motif) { position: relative; z-index: 3; }
+.events-week .week-day__body { flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 11px 11px 0; }
+.events-week .week-day__count { font: 600 10.5px/1.2 var(--font-mono); color: var(--text-hi); }
+.events-week .week-day__hero { display: block; margin: 4px 0 0 -1px; color: var(--c); font: 900 60px/.84 var(--font-display); text-transform: uppercase;
+  text-shadow: 0 2px 5px var(--z-black), 0 0 18px color-mix(in srgb, var(--c) 55%, transparent); }
+.events-week .week-day__date { color: var(--text-hi); font: 800 15px/1 var(--font-display); letter-spacing: .04em; text-transform: uppercase; text-shadow: 0 2px 5px var(--z-black); }
+.events-week .week-day__foot { margin: 0 9px; padding: 7px 0 9px; border-top: 1px solid color-mix(in srgb, var(--c) 25%, transparent); }
+.events-week .week-day__tap { display: flex; align-items: center; justify-content: center; gap: 5px; height: 30px; border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); background: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--c) 22%, transparent), transparent 60%), var(--z-oled);
+  color: var(--text-hi); font: 700 12.5px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase;
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--c) 40%, var(--z-oled)), inset 0 1px 0 color-mix(in srgb, var(--text-hi) 28%, transparent); }
+.events-week .week-day.is-open .week-day__tap { border-color: var(--c); background: color-mix(in srgb, var(--c) 22%, var(--z-oled)); }
+.events-week .week-day__tap svg { transition: transform .3s ease; }
+.events-week .week-day.is-open .week-day__tap svg { transform: rotate(180deg); }
+.events-week .week-day__label { position: relative; z-index: 3; display: block; margin-top: 6px; min-height: 2.08em; color: var(--text-hi); font: 800 16px/1.04 var(--font-display); text-transform: uppercase;
+ }
+
+/* Fan: the day's real rail cards, full size, tucked behind and breathing out right. */
+.events-week .week-day__fan { position: absolute; top: 0; left: 0; z-index: 1; width: 136px; pointer-events: none; border-radius: 16px; transform-origin: 0% 100%; }
+.events-week .week-day__fan--1 { animation: week-fan-1 3.2s ease-in-out infinite; }
+.events-week .week-day__fan--2 { animation: week-fan-2 3.2s ease-in-out infinite; }
+.events-week .week-day__fan--3 { animation: week-fan-3 3.2s ease-in-out infinite; }
+@keyframes week-fan-1 { 0%, 100% { transform: translateX(16px) rotate(2deg); } 50% { transform: translateX(20px) rotate(3deg); } }
+@keyframes week-fan-2 { 0%, 100% { transform: translateX(30px) rotate(3.5deg); } 50% { transform: translateX(34px) rotate(4.5deg); } }
+@keyframes week-fan-3 { 0%, 100% { transform: translateX(44px) rotate(5deg); } 50% { transform: translateX(48px) rotate(6deg); } }
+
+/* Only the flyer half of each fanned card shows; its copy would sit under the label. */
+.events-week .week-day__fan :is(.event-rail-card__title, .event-rail-card__meta, .day-motif--low) { visibility: hidden; }
+
+/* Events slide out of the day card onto the rail. */
+.events-week .week-slide { animation: week-slide .5s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes week-slide { from { opacity: 0; transform: translateX(-90px) scale(.86) rotate(-4deg); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .events-week .week-day__fan, .events-week .week-slide { animation: none; }
+  .events-week .week-day__fan--1 { transform: translateX(16px) rotate(2deg); }
+  .events-week .week-day__fan--2 { transform: translateX(30px) rotate(3.5deg); }
+  .events-week .week-day__fan--3 { transform: translateX(44px) rotate(5deg); }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .events-week :is(.week-day__fan, .week-slide) { animation: none; }
+:is(html.calm-mode, :root[data-calm="true"]) .events-week .week-day__fan--2 { transform: translateX(30px) rotate(3.5deg); }
+:is(html.calm-mode, :root[data-calm="true"]) .events-week .week-day__fan--3 { transform: translateX(44px) rotate(5deg); }
+:is(html.calm-mode, :root[data-calm="true"]) .events-week .week-day__fan--1 { transform: translateX(16px) rotate(2deg); }

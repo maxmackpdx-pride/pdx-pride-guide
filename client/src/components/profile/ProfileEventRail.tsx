@@ -4,6 +4,7 @@ import { admissionDisplayLabel } from "@shared/admission";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent, ProfileUserChip } from "./types";
 import "./ProfileEventRail.css";
+import EventFlyerArt from "@/components/events/EventFlyerArt";
 
 const DAY_CODES = new Set(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]);
 const WEEKDAY_FROM_JS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
@@ -123,7 +124,7 @@ export function GoingEventCard({ event, onClick, goingAvatars = [], past = false
   const inner = (
     <>
       <span className="pp-event-rail__art" aria-hidden="true">
-        <img src={poster} alt="" loading="lazy" decoding="async" />
+        <EventFlyerArt src={poster} day={code} />
       </span>
       <span className="pp-event-rail__scrim" aria-hidden="true" />
       <span className="pp-event-rail__content">

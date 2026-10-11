@@ -26,6 +26,7 @@ export default function FeedEventDeck({ events, onOpen }: {
       category: [day, dateLabel].filter(Boolean).join(" · ") || "EVENT",
       title: event.title,
       src: resolveEventPosterUrl(event.id, event.posterImageUrl ?? null, event.dayOfWeek),
+      day,
       alt: `${event.title} poster`,
       venue: event.venueName || "",
       detail: event.goingCount ? `${event.goingCount} going` : undefined,

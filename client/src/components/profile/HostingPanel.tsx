@@ -5,6 +5,7 @@ import { admissionDisplayLabel } from "@shared/admission";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent } from "./types";
 import "./HostingPanel.css";
+import DayMotif from "@/components/events/DayMotif";
 
 type Props = {
   upcoming: ProfileEvent[];
@@ -127,9 +128,9 @@ function HostingCard({
       aria-label={event.title}
     >
       <div className="hp-card__banner">
-        {poster && (
-          <img className="hp-card__poster" src={poster} alt="" decoding="async" loading="lazy" />
-        )}
+        {poster
+          ? <img className="hp-card__poster" src={poster} alt="" decoding="async" loading="lazy" />
+          : <DayMotif day={code} placement="art" />}
         <div className="hp-card__banner-scrim" aria-hidden="true" />
       </div>
       <div className="hp-card__body">
