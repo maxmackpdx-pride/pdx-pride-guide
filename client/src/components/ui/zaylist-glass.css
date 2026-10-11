@@ -1,6 +1,10 @@
+/* The dock's spectrum is the site seam palette; cards reuse it (glass.css, card rim seam). */
+:root,
+.z-glass {
+  --z-spectrum: linear-gradient(90deg,#19e3ff 0%,#39ff14 15%,#ffee00 32%,#ff8c00 48%,#ff1fa0 69%,#bf6bff 87%,#19e3ff 100%);
+}
 .z-glass {
   --z-cyan: #19e3ff; --z-idle: #aeb7c4; --z-core: #050506; --z-edge: rgba(172,207,231,.36);
-  --z-spectrum: linear-gradient(90deg,#19e3ff 0%,#39ff14 15%,#ffee00 32%,#ff8c00 48%,#ff1fa0 69%,#bf6bff 87%,#19e3ff 100%);
   position: relative; isolation: isolate; border-radius: 28px; color: var(--z-idle);
   background: rgba(5,5,6,.68); box-shadow: 0 0 0 1px #000, 0 12px 28px -18px #000;
   font-family: "Barlow Condensed", sans-serif;
