@@ -108,7 +108,7 @@
 .tonight-card__art--motif { position:relative; overflow:hidden; }
 .tonight-card__art--motif .day-motif--art { opacity:.8;
   -webkit-mask-image:linear-gradient(to bottom,black 70%,transparent 100%); mask-image:linear-gradient(to bottom,black 70%,transparent 100%); }
-.tonight-card__art--motif .day-motif-code { top:16px; left:18px; font-size:64px; }
+.tonight-card__art--motif .day-motif-code { top:18px; left:18px; font-size:18px; }
 
 .home-tonight .rail-card-room { height:34px; flex:none; display:flex; align-items:center; }
 .rail-card-room__logo { display:block; width:120px; height:34px; object-fit:contain; object-position:left center; }

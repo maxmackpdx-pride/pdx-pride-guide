@@ -62,7 +62,7 @@ export default function EventsRail({ open, label, nudge = false, children }: { o
     const el = ref.current;
     if (!el) return;
     const item = el.querySelector<HTMLElement>(".events-rail__item");
-    const step = item ? item.offsetWidth + 12 : el.clientWidth * 0.8;
+    const step = item ? item.offsetWidth + (parseFloat(getComputedStyle(el).columnGap) || 0) : el.clientWidth * 0.8;
     el.scrollBy({ left: dir * step, behavior: quietMotion() ? "auto" : "smooth" });
   };
 

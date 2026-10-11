@@ -1,6 +1,7 @@
 /* This week rail (see ThisWeekRail.tsx). Tokens only. */
 .events-week .week-day { position: relative; transition: padding-right .35s ease; }
-.events-week .week-day.is-closed { padding-right: 76px; }
+.events-page .events-week .week-day.is-closed { width: 240px; padding-right: 104px; }
+.events-page .events-week .events-rail { gap: 20px; }
 
 /* Day card: the Eventz glass shell with the day as the hero, its motif behind. */
 .events-week .week-day__card {
@@ -23,7 +24,7 @@
   mask-composite: intersect, exclude;
 }
 .events-week .week-day__card:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
-.events-week .week-day__card .day-motif--art { background: none; opacity: .7; }
+.events-week .week-day__card .day-motif--art { background: none; opacity: .65; }
 .events-week .week-day__card > :not(.day-motif) { position: relative; z-index: 3; }
 .events-week .week-day__body { flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 11px 11px 0; }
 .events-week .week-day__count { font: 600 10.5px/1.2 var(--font-mono); color: var(--text-hi); }
