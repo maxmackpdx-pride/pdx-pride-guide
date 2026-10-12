@@ -951,7 +951,7 @@ export default function Events() {
           <div className="events-rails">
             {railBands.map((band, index) => {
               const expanded = isMobile || openRails.has(band.id);
-              // Mobile uses full cards in two columns; desktop keeps its existing lane sizes.
+              // Keep full and compact card types while mobile wraps both into two columns.
               const size = band.id === "happening" || band.id === "next" ? "full" : "m";
               return (
                 <section key={band.id} className={`events-rail-sec events-rail-sec--${size} events-rail-sec--${band.id} pdx-glass-rebind`} style={{ "--c": band.color } as React.CSSProperties} aria-labelledby={`events-rail-${band.id}`}>
@@ -977,7 +977,7 @@ export default function Events() {
                   <EventsRail open={expanded} label={band.label} nudge={index === 0}>
                     {band.items.map(e => (
                       <div role="listitem" key={listingKey(e)} className="events-rail__item">
-                        {isMobile || size === "full" ? (
+                        {size === "full" ? (
                           <TonightEventCard
                             listing={e} rsvped={savedIds.has(e.id)}
                             liveState={liveStateFor(e, now)}
