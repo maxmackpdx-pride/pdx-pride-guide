@@ -3,7 +3,7 @@ import { ArrowUpRight, Clock3, MapPin } from "lucide-react";
 import { dayAccentToken } from "@/lib/dsColors";
 import type { ScheduleEvent } from "@/lib/scheduleEvents";
 import type { EventListing } from "@shared/multiDayEvents";
-import { formatGridCardWhen, listingDay, listingPosterUrl } from "@/lib/dsEvent";
+import { formatCardTime, formatGridCardWhen, listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import "./TonightEventCard.css";
 import DayMotif, { motifDay } from "@/components/events/DayMotif";
 import EventFlyerArt from "@/components/events/EventFlyerArt";
@@ -74,7 +74,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
       <div className="tonight-card__body">
         <p className="rail-card-room"><img className="rail-card-room__logo rail-card-room__logo--white" src="/brand/family/eventz.png" alt="Eventz" /></p>
         {changeLabel ? <ChangeBadge label={changeLabel} className="tonight-card__change" /> : null}
-        <p className="tonight-card__time"><Clock3 size={15} aria-hidden="true" />{event ? `${clock.format(event.startMs)} – ${clock.format(event.endMs)}` : formatGridCardWhen(listing)}</p>
+        <p className="tonight-card__time"><Clock3 size={15} aria-hidden="true" />{event ? `${clock.format(event.startMs)} to ${clock.format(event.endMs)}` : layout === "card" ? formatCardTime(listing) : formatGridCardWhen(listing)}</p>
         <h3 title={listing.title}>{listing.title}</h3>
         <p className="tonight-card__venue"><MapPin size={16} aria-hidden="true" /><span>{listing.venueName}<small>{listing.neighborhood || "Portland"}</small></span></p>
         <div className="tonight-card__tags"><span>{admission}</span><span>{age}</span></div>

@@ -1,6 +1,6 @@
 /* This week rail (see ThisWeekRail.tsx). Tokens only. */
 .events-week .week-day { position: relative; transition: padding-right .35s ease; }
-.events-page .events-week .week-day.is-closed { width: 240px; padding-right: 104px; }
+.events-page .events-week .week-day.is-closed { width: 196px; padding-right: 60px; }   /* card 136 + fan reach about 56 */
 .events-page .events-week .events-rail { gap: 22px; }
 
 /* Day card: the Eventz glass shell with the day as the hero, its motif behind. */

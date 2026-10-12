@@ -16,7 +16,7 @@ import type { Event } from "@shared/schema";
 import { listingKey, type EventListing } from "@shared/multiDayEvents";
 import { admissionFromFilterTag } from "@shared/admission";
 import { EVENT_TYPE_FILTERS, isEventTypeFilterLabel } from "@shared/eventTypeTags";
-import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
+import EventsRailSkeleton from "@/components/events/EventsRailSkeleton";
 import TonightEventCard, { type TonightCardLive } from "@/components/home/TonightEventCard";
 import ZLineIcon from "@/components/ZLineIcon";
 import { listingPosterUrl } from "@/lib/dsEvent";
@@ -210,7 +210,10 @@ function eventInWindow(e: EventListing, window: string, windows: DateWindows): b
 
 const WEEKDAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
 const DEFAULT_WINDOW = "TONIGHT";
-const SOON_MS = 3 * 3600000;
+function quietScroll() {
+  return typeof window === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("calm-mode");
+}
+const SOON_MS = 45 * 60000;   // "Happening now" holds what is on plus anything starting within 45 minutes
 
 /** ON NOW / STARTS IN state for a card, from its scheduled start and end. */
 function liveStateFor(e: EventListing, nowMs: number): TonightCardLive | null {
@@ -554,6 +557,29 @@ export default function Events() {
   const railKeys = useMemo(() => new Set(dayRail.map(d => d.key)), [dayRail]);
   const moreLabel = pastView ? "Past" : railKeys.has(activeDay) ? "All +" : (activeChipLabel ?? "All +");
 
+  // Day dock: once the page's day tabs scroll up under the site header, a slim
+  // copy pins there so you can switch days without scrolling back up.
+  const dayRailRef = useRef<HTMLElement>(null);
+  const [dockTop, setDockTop] = useState<number | null>(null);
+  useEffect(() => {
+    if (activeTab !== "board") { setDockTop(null); return; }
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const rail = dayRailRef.current;
+      if (!rail) { setDockTop(null); return; }
+      const header = document.querySelector(".site-header");
+      const hr = header?.getBoundingClientRect();
+      const top = hr && hr.height > 0 && hr.bottom > 0 ? Math.round(hr.bottom) + 8 : 0;
+      setDockTop(rail.getBoundingClientRect().bottom < top + 8 ? top : null);
+    };
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(measure); };
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); if (frame) cancelAnimationFrame(frame); };
+  }, [activeTab]);
+
   // A single day reads as a timeline. Today: on now, starting soon, today,
   // late. Any other day on the rail: daytime, evening, late.
   const tonightBands = useMemo(() => {
@@ -731,9 +757,50 @@ export default function Events() {
       href="/events" label="Browse Eventz" missing={missing} retry={missing ? undefined : () => { void refetchRouteEvent(); }} />;
   }
 
+  // Day tabs render in the page and again in the dock that pins under the header
+  // once the page row scrolls away.
+  const renderDayTabs = (inDock: boolean) => (
+    <>
+    {dayRail.map(d => (
+      <button
+        key={d.key}
+        type="button"
+        className={`events-day-tab pdx-glass-rebind${d.key === DEFAULT_WINDOW ? " events-day-tab--tonight" : ""}`}
+        aria-pressed={!pastView && activeDay === d.key}
+        onClick={() => {
+          setPastView(false); setActiveDay(d.key);
+          // From the dock, bring the page back to the top of that day's list.
+          const rail = dayRailRef.current;
+          if (inDock && rail) window.scrollTo({ top: rail.getBoundingClientRect().top + window.scrollY - (dockTop ?? 0) - 8, behavior: quietScroll() ? "auto" : "smooth" });
+        }}
+        style={{ "--c": d.color, "--day-text": d.text, "--day-ink": d.ink } as React.CSSProperties}
+        data-testid={inDock ? undefined : `day-tab-${d.key}`}
+      >
+        <span className="events-day-tab__top">{d.top}</span>
+        <span className="events-day-tab__sub">{d.sub}</span>
+        <span className="events-day-tab__count" aria-label={`${d.count} events`}>{d.count}</span>
+      </button>
+    ))}
+    <button
+      type="button"
+      className="events-day-tab events-day-tab--more"
+      aria-pressed={pastView || !railKeys.has(activeDay)}
+      aria-haspopup="dialog"
+      onClick={() => setDrawerOpen(true)}
+    >
+      <span className="events-day-tab__top">More</span>
+      <span className="events-day-tab__sub">{moreLabel}</span>
+    </button>
+    </>
+  );
   return (
     <div className="zine-page events-page board-page board-page--makeover board-shader-page" data-shader-room="eventz" data-leaving={leaving || undefined}>
       <BoardShader room="eventz" />
+      {dockTop != null && !drawerOpen && !mapOpen ? (
+        <nav className="events-day-dock" aria-label="Pick a day" style={{ top: dockTop } as React.CSSProperties}>
+          <div className="events-day-dock__inner events-day-rail">{renderDayTabs(true)}</div>
+        </nav>
+      ) : null}
       <header className="events-top pdx-glass-rebind" style={{ "--c": "var(--room-eventz)" } as React.CSSProperties}>
         <div className="events-top__row">
           <div className="events-top__id">
@@ -774,32 +841,8 @@ export default function Events() {
               )}
               <div className="events-browse">
                 <div className="events-day-row">
-                <nav className="events-day-rail" aria-label="Pick a day">
-                  {dayRail.map(d => (
-                    <button
-                      key={d.key}
-                      type="button"
-                      className={`events-day-tab pdx-glass-rebind${d.key === DEFAULT_WINDOW ? " events-day-tab--tonight" : ""}`}
-                      aria-pressed={!pastView && activeDay === d.key}
-                      onClick={() => { setPastView(false); setActiveDay(d.key); }}
-                      style={{ "--c": d.color, "--day-text": d.text, "--day-ink": d.ink } as React.CSSProperties}
-                      data-testid={`day-tab-${d.key}`}
-                    >
-                      <span className="events-day-tab__top">{d.top}</span>
-                      <span className="events-day-tab__sub">{d.sub}</span>
-                      <span className="events-day-tab__count" aria-label={`${d.count} events`}>{d.count}</span>
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    className="events-day-tab events-day-tab--more"
-                    aria-pressed={pastView || !railKeys.has(activeDay)}
-                    aria-haspopup="dialog"
-                    onClick={() => setDrawerOpen(true)}
-                  >
-                    <span className="events-day-tab__top">More</span>
-                    <span className="events-day-tab__sub">{moreLabel}</span>
-                  </button>
+                <nav className="events-day-rail" aria-label="Pick a day" ref={dayRailRef}>
+                  {renderDayTabs(false)}
                 </nav>
                   <div className="events-view-toggle">
                     <button
@@ -857,7 +900,7 @@ export default function Events() {
                     <MapIcon size={19} aria-hidden="true" />
                   </button>
                 </div>
-                {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== DEFAULT_WINDOW) && (
+                {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== DEFAULT_WINDOW) && !(filtered.length === 0 && !isLoading && !isError) && (
                   <button
                     type="button"
                     className="events-clear-filters"
@@ -878,7 +921,7 @@ export default function Events() {
 
           <div className="board-active-feed__body">
         {isLoading ? (
-          <BoardFeedSkeleton label="Loading events" shape="board" count={6} />
+          <EventsRailSkeleton />
         ) : isError ? (
           <BrowseStatus error title="Events couldn’t load" description="Your filters are still here. Try loading the events again." onAction={() => void refetch()} />
         ) : filtered.length === 0 ? (
@@ -886,7 +929,7 @@ export default function Events() {
             <p className="display section-heading">
               {poolEvents.length === 0
                 ? pastView ? "No past events yet" : "No upcoming events listed yet"
-                : pastView ? "No past events match" : "Nothing matches"}
+                : pastView ? "No past events match" : searchQuery.trim() ? `Nothing matches “${searchQuery.trim()}”` : activeFilters.length ? "Nothing matches those filters" : "Nothing listed that day"}
             </p>
             <p className="board-copy-sm">
               {poolEvents.length === 0
@@ -895,7 +938,7 @@ export default function Events() {
                   : pastEvents.length > 0
                     ? "There are no upcoming listings right now. Explore past events in the archive, or submit an event you know about."
                     : "There are no upcoming listings right now. Submit an event to help fill the board."
-                : "Try a broader date or filter. Search by venue, neighborhood, or title."}
+                : searchQuery.trim() ? "Check the spelling, or search a venue, neighborhood or DJ." : "Try another day, or clear the filters to see everything."}
             </p>
             <Button
               type="button"
@@ -931,9 +974,6 @@ export default function Events() {
                   <div className="events-rail-sec__head">
                     <h3 id={`events-rail-${band.id}`}><span aria-hidden="true" />{band.label}<small>{band.items.length}</small></h3>
                     <div className="events-rail-sec__actions">
-                      {index === 0 && (
-                        <button type="button" className="events-rail-pill" onClick={() => setMapOpen(true)}><MapIcon size={14} aria-hidden="true" />Map</button>
-                      )}
                       {band.dayKey ? (
                         <button type="button" className="events-rail-pill" onClick={() => { setPastView(false); setActiveDay(band.dayKey!); }}>
                           See the day

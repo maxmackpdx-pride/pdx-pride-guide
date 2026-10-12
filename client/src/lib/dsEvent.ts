@@ -34,6 +34,14 @@ export function formatGridCardWhen(event: Event): string {
   return [dateLabel, `${start} to ${end}`].filter(Boolean).join(" · ");
 }
 
+/** Big-card time line: the clock range only. The card's day motif already names the day. */
+export function formatCardTime(event: Event): string {
+  if (!event.dateStart) return "";
+  const clock = (value: string) => formatPacificDateTime(value, { hour: "numeric", minute: "2-digit" }).replace(/:00(?=\s*[AP]M)/i, "");
+  const start = clock(event.dateStart);
+  return event.dateEnd ? `${start} to ${clock(event.dateEnd)}` : start;
+}
+
 export function listingTypeTags(event: Event, max = 2): string[] {
   return getEventTypeTagsForEvent(event).slice(0, max);
 }

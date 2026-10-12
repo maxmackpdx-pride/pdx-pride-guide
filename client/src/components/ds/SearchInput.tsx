@@ -23,6 +23,12 @@ const CSS = `
   font-family:var(--font-body); font-size:var(--body-md); color:var(--text-hi);
 }
 .pdxSearch input::placeholder{ color:var(--text-faint); }
+/* One clear button and one focus ring: the pill carries focus, so the field drops
+   the browser's own search X and the global input outline. */
+.pdxSearch input::-webkit-search-cancel-button,
+.pdxSearch input::-webkit-search-decoration{ -webkit-appearance:none; appearance:none; display:none; }
+html body .pdxSearch input:focus,
+html body .pdxSearch input:focus-visible{ outline:none; box-shadow:none; }
 .pdxSearch__clear{
   border:0; background:transparent; color:var(--text-meta); cursor:pointer;
   display:flex; align-items:center; justify-content:center; flex:none;
