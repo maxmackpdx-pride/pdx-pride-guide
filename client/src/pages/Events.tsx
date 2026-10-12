@@ -599,12 +599,12 @@ export default function Events() {
       ? [{ id: "happening", label: "Happening now", color: "var(--neon-green)", items: merged.flatMap(b => b.items) }]
       : [];
     // Nothing on now: the lead rail becomes Next up. It holds the next event to start
-    // plus any others starting within the same hour, pulled out of their later rails.
+    // plus any others starting within an hour and 15 minutes of it, pulled out of their later rails.
     if (!first.length && activeDay === DEFAULT_WINDOW) {
       const startOf = (e: EventListing) => parsePacificDateTime(e.dateStart) ?? Number.MAX_SAFE_INTEGER;
       const upcoming = rest.flatMap(b => b.items).filter(e => startOf(e) >= now).sort((a, b) => startOf(a) - startOf(b));
       if (upcoming.length) {
-        const cutoff = startOf(upcoming[0]) + 3600000;
+        const cutoff = startOf(upcoming[0]) + 75 * 60000;   // an hour and 15 minutes
         const next = upcoming.filter(e => startOf(e) < cutoff);
         const taken = new Set(next);
         rest = rest.map(b => ({ ...b, items: b.items.filter(e => !taken.has(e)) })).filter(b => b.items.length > 0);
