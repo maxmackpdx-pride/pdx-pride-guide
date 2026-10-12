@@ -77,6 +77,13 @@ softened neons, mono kickers).
 The week is exactly MON Jul 13 to SUN Jul 19. Never invent an 8th day. Never use
 `#CCFF00` as a day color.
 
+### 21st connector (reference only)
+
+The 21st.dev MCP connector (`https://21st.dev/api/mcp`, OAuth, added at
+claude.ai/customize/connectors) can search generic React/shadcn components. Use it for
+structure and ideas only. Nothing from it ships as-is: restyle to the Zaylist tokens and
+check `client/src/components/ds/` first. Never put a 21st API key in the repo.
+
 ## Copy
 
 - **Never use em dashes (-) in any copy.** This applies to all user-facing text: event
