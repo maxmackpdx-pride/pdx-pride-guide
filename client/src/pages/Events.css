@@ -467,3 +467,11 @@ html body .events-page .events-poster-grid { grid-template-columns: repeat(auto-
 }
 /* More room between the day tabs and the search row. */
 .events-page .events-browse { gap: 16px; }
+/* Desktop filtered grid: four cards per row. */
+@media (min-width: 768px) {
+  html body .events-page .events-poster-grid { grid-template-columns: repeat(4, 200px); gap: 24px 20px; }
+}
+/* Search row: the field starts on the page edge like the day tabs, headings and
+   cards (no 8px inset), with more room above it. */
+html body .events-page .events-filter-row .events-filter-search { margin: 0; }
+html body .events-page .events-browse .board-active-feed__controls { margin-top: 8px; }
