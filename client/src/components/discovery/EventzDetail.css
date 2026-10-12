@@ -1,0 +1,157 @@
+/* The Eventz open card is the source for the frame, surface, motion and hierarchy. */
+@import "../EventModal.approved.css";
+@import "../EventModal.reference.css";
+
+/* Adapt place/resource content to that frame; keep each card's existing artwork. */
+.eb-detail-backdrop { z-index: 3000; }
+.eb-detail.eb-detail--resource {
+  position: fixed;
+  inset: 50% auto auto 50%;
+  translate: -50% -50%;
+  z-index: 3001;
+  margin: 0;
+  overflow: hidden;
+}
+.event-modal.eb-detail { --event-accent: var(--c); }
+.event-modal.eb-detail .event-modal__scroll {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  padding: 0 6% 32px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  scroll-padding-top: 72px;
+}
+.event-modal.eb-detail .place-modal-panel__inner { padding: 0; }
+.event-modal.eb-detail .place-modal-panel__body { padding: 0 6% 32px; }
+.event-modal.eb-detail .event-modal__chrome { z-index: 10; }
+.event-modal.eb-detail .detail-actions { padding: 0; margin: 0; display: flex; align-items: center; }
+.event-modal.eb-detail .event-modal__chrome .detail-actions > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  border-radius: 14px;
+  background: var(--glass-card-bg);
+  color: var(--text-heading);
+  box-shadow: none;
+  font-size: 0;
+  cursor: pointer;
+}
+.event-modal.eb-detail .event-modal__chrome .detail-actions > button:first-child { margin-right: auto; }
+.event-modal.eb-detail .event-modal__chrome .detail-actions > button span { display: none; }
+.event-modal.eb-detail .event-modal__chrome .detail-actions > button::before,
+.event-modal.eb-detail .event-modal__chrome .detail-actions > button::after { display: none; }
+.event-modal.eb-detail .detail-actions__room { margin-right: 8px; }
+.event-modal.eb-detail .eb-detail__art {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% / .88);
+  height: min(84cqw, 510px);
+  min-height: 0;
+  margin: 0 calc(-100% * .06 / .88);
+  padding: 64px 12% 44px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.event-modal.eb-detail .eb-detail__art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 72%, color-mix(in srgb, var(--z-black) 70%, transparent));
+  z-index: 1;
+}
+.event-modal.eb-detail .eb-detail__art :is(.placez-detail-motif, .rg-detail-art) {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  mask-image: none;
+  z-index: 0;
+}
+.event-modal.eb-detail .eb-detail__art .rg-card-motif {
+  width: 100%;
+  height: 100%;
+  color: var(--c);
+  opacity: .4;
+  transform: none;
+}
+.event-modal.eb-detail .eb-detail__art :is(.place-modal-panel__logo, .rg-logo, .rg-mark) {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  max-height: 240px;
+  object-fit: contain;
+  margin: 0;
+  align-self: center;
+}
+.event-modal.eb-detail .place-modal-panel__identity {
+  display: block;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.event-modal.eb-detail .event-modal__title {
+  font: 900 clamp(32px, 8cqw, 48px)/1.2 var(--font-display) !important;
+  letter-spacing: 0;
+  margin: 20px 0 !important;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+.event-modal.eb-detail .rg-detail-secondary { padding: 0; border: 0; }
+.event-modal.eb-detail .rg-detail-tags { padding: 0; margin: 0 0 20px; }
+.event-modal.eb-detail :is(.eb-detail__primary-action, .rg-detail-actions, .place-modal-panel__quick-actions) {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 24px 0;
+}
+.event-modal.eb-detail :is(.eb-detail__primary-action > button, .rg-detail-actions > a, .place-modal-panel__quick-actions > a) {
+  width: 100%;
+  min-height: 52px !important;
+  padding: 14px 16px !important;
+  border: 1px solid color-mix(in srgb, var(--c) 50%, transparent) !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--c) 8%, var(--z-black)) !important;
+  color: var(--text-heading) !important;
+  font: 700 17px/1.4 var(--font-display) !important;
+  letter-spacing: .025em;
+  text-transform: uppercase;
+  white-space: normal;
+  box-shadow: inset 0 1px 0 color-mix(in srgb,var(--text-heading) 7%,transparent) !important;
+}
+.event-modal.eb-detail :is(.eb-detail__primary-action > button, .rg-detail-actions > .pdxBtn--solid) {
+  min-height: 56px !important;
+  background: var(--c) !important;
+  color: var(--z-black) !important;
+  font-size: clamp(24px, 6.5cqw, 32px) !important;
+  font-weight: 900 !important;
+}
+.event-modal.eb-detail :is(.rg-detail-disclosure, .place-modal-panel__description-wrap) {
+  border: 0;
+  border-top: 1px solid color-mix(in srgb,var(--text-hi) 20%,transparent);
+  border-radius: 0;
+  margin: 0;
+  background: transparent;
+}
+.event-modal.eb-detail .rg-detail-disclosure > summary { padding: 20px 0; min-height: 64px; font-size: 18px; }
+.event-modal.eb-detail .rg-detail-disclosure .rg-disclosure-content { padding: 5px 0 20px; }
+.event-modal.eb-detail :is(.place-modal-panel__description, .rg-detail-primary > p, .rg-detail-meta > p) { font: 400 17px/1.7 var(--font-body); }
+.event-modal.eb-detail .place-modal-panel__map { margin: 24px 0; width: 100%; }
+.event-modal.eb-detail[data-state="closed"] { animation: rg-detail-exit 220ms cubic-bezier(.4,0,1,1) !important; }
+.event-modal.eb-detail[data-quiet-motion="true"] { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .event-modal.eb-detail { animation: none !important; } }

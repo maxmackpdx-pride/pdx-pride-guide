@@ -137,6 +137,7 @@ function AppLayout() {
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
             <Route path="/boards" component={Boards} />
+            <Route path="/all-boards" component={Boards} />
             <Route path="/map-demo" component={MapzMapDemo} />
             <Route path="/map" component={MapzMapDemo} />
             <Route path="/schedule">{() => <Schedule />}</Route>

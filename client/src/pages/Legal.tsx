@@ -63,7 +63,7 @@ export default function Legal() {
             {COMMUNITY_STANDARDS_BLOCKS.map((block) => (
               <article
                 key={block.heading}
-                className="about-mission-card about-mission-card--magenta"
+                className="pdx-glass-rebind about-mission-card about-mission-card--magenta"
                 style={{ padding: "20px 22px" }}
               >
                 <div className="about-mission-card__icon" aria-hidden="true">
@@ -111,7 +111,7 @@ export default function Legal() {
             {LEGAL_SUMMARY_BLOCKS.map((section) => (
               <article
                 key={section.heading}
-                className={`about-mission-card about-mission-card--${
+                className={`pdx-glass-rebind about-mission-card about-mission-card--${
                   section.heading.startsWith("Privacy") ? "lime" : "cyan"
                 }`}
               >
@@ -136,7 +136,7 @@ export default function Legal() {
                 </ul>
               </article>
             ))}
-            <article className="about-mission-card about-mission-card--orange">
+            <article className="pdx-glass-rebind about-mission-card about-mission-card--orange">
               <div className="about-mission-card__icon" aria-hidden="true">
                 <Shield size={18} />
               </div>

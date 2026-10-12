@@ -1,4 +1,7 @@
+import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
+import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import BoardShareButton from "@/components/BoardShareButton";
+import { directoryResourceName, directoryResourcePath } from "@/lib/directoryResources";
 import { WebGLShader } from '@/components/ui/web-gl-shader';
 import { ResourceFilterButton } from '@/components/resources/ResourceFilterButton';
 import { PLACE_ACCENTS as TYPE_COLORS } from '@/components/discovery/placeTokens';
@@ -9,7 +12,6 @@ import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'framer-m
 import BrowseStatus from "@/components/BrowseStatus";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
-import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import type React from "react";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -17,36 +19,33 @@ import { useRoute, useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 import DirectoryAddPlaceForm from "@/components/DirectoryAddPlaceForm";
 import AuthModal from "@/components/AuthModal";
-import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { MapPin, Plus } from "lucide-react";
+import { MapPin, Plus, Map, SlidersHorizontal } from "lucide-react";
 import "./PlacezDoorOpener.css";
-import { eventPath } from "@shared/eventSlug";
 import { placePath, placeUrl, slugifyPlaceName } from "@shared/placeSlug";
-import { Button, PlaceCard, SearchInput } from "@/components/ds";
+import { Button, SearchInput } from "@/components/ds";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { isGrandOpeningActive } from "@shared/grandOpening";
 import type { BusinessLocation } from "@shared/businessLocations";
-import { resolveBusinessLocations } from "@shared/businessLocations";
 import {
   DIRECTORY_TYPE_LABELS as TYPE_LABELS,
+  isPlacezType,
 } from "@shared/directoryTheme";
 
 import {
-  directoryFallbackLogo,
   resolveDirectoryLogo,
 } from "@/lib/directoryLogos";
 import {
   pushDirectoryRecent,
 } from "@/lib/directoryRecent";
 import PlaceModal from "@/components/PlaceModal";
-import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import "./Directory.css";
 
 export type DirectoryEventSummary = {
+  /** Used only by the isolated design preview; never marks a live event as upcoming. */
+  previewExample?: boolean;
   id: number;
   title: string;
   dateStart: string;
@@ -190,7 +189,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   );
 
   const { user } = useAuth();
-  const { toast } = useToast();
+  const [browseView, setBrowseView] = useState<BrowseView>(() => { const view = new URLSearchParams(window.location.search).get("layout"); return view === "grid" ? "grid" : "browse"; });
   const [placeIntent, setPlaceIntent] = useState(false);
   const [discoveryChosen, setDiscoveryChosen] = useState(() => /[?&](type|category|neighborhood|q|place)=/.test(window.location.search));
   const [showAuth, setShowAuth] = useState(false);
@@ -198,7 +197,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   const [activeType, setActiveType] = useState(() => {
     if (isSpaces) return "group";
     const t = new URLSearchParams(window.location.search).get("type");
-    return t?.split(",").filter(type => type !== "group" && type in TYPE_LABELS).join(",") || "ALL";
+    return t?.split(",").filter(isPlacezType).join(",") || "ALL";
   });
   const [activeNeighborhood, setActiveNeighborhood] = useState(() => new URLSearchParams(window.location.search).get("neighborhood") || "ALL");
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
@@ -229,7 +228,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   });
 
   const visibleBusinesses = useMemo(
-    () => businesses.filter(b => isSpaces ? b.type === "group" : b.type !== "group"),
+    () => businesses.filter(b => isSpaces ? b.type === "group" : isPlacezType(b.type) && !directoryResourceName(b)),
     [businesses, isSpaces],
   );
 
@@ -240,13 +239,14 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
     if (activeNeighborhood !== "ALL") params.set("neighborhood", activeNeighborhood);
     if (formOpen) params.set("add", "1");
+    if (!isSpaces && browseView !== "browse") params.set("layout", browseView);
     const incomingFrom = new URLSearchParams(window.location.search).get("from") ?? "";
     if (/^\/(z|directory)(\/|\?|$)/.test(incomingFrom) && !incomingFrom.startsWith("//")) {
       params.set("from", incomingFrom);
     }
     const next = params.toString();
     return next ? `?${next}` : "";
-  }, [activeType, isSpaces, searchQuery, activeNeighborhood, formOpen]);
+  }, [activeType, isSpaces, searchQuery, activeNeighborhood, formOpen, browseView]);
 
   useEffect(() => {
     if (routePlaceId || new URLSearchParams(window.location.search).has("place")) return;
@@ -258,7 +258,9 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     const restore = () => {
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type");
-      setActiveType(isSpaces ? "group" : type && type !== "group" && type in TYPE_LABELS ? type : "ALL");
+      setActiveType(isSpaces ? "group" : type?.split(",").filter(isPlacezType).join(",") || "ALL");
+      const view = params.get("layout");
+      setBrowseView(view === "grid" ? "grid" : "browse");
       setSearchQuery(params.get("q") || "");
       setActiveNeighborhood(params.get("neighborhood") || "ALL");
     };
@@ -322,6 +324,13 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       return;
     }
     const sourceBusiness = businesses.find(b => b.id === placeId);
+    const resourcePath = !isSpaces && sourceBusiness && directoryResourcePath(sourceBusiness);
+    if (resourcePath) {
+      setSelectedPlace(null);
+      setPlaceOriginRect(null);
+      setLocation(resourcePath, { replace: true });
+      return;
+    }
     if (!isSpaces && sourceBusiness?.type === "group") {
       setSelectedPlace(null);
       setPlaceOriginRect(null);
@@ -458,24 +467,76 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     ? "Loading…"
     : `${filtered.length} ${isSpaces ? (filtered.length === 1 ? "squad" : "squadz") : (filtered.length === 1 ? "PLACE" : "PLACEZ")}`;
 
+  const renderBrowsePlace = (biz: Business) => <div key={biz.id} className="eb-original-card">
+    <DirectoryCard biz={biz} onClick={element => openPlace(biz, element)} onRequireAuth={() => setShowAuth(true)} />
+  </div>;
+
   const { calmMode } = useTheme();
   const reducedMotion = useReducedMotion();
   return (
-    <div className={`zine-page directory-page board-page board-page--makeover directory-page--v2 resources-page${isSpaces ? " directory-page--spaces" : ""}`}>
+    <div className={isSpaces ? "zine-page directory-page board-page board-page--makeover directory-page--v2 resources-page directory-page--spaces" : "eb-page eb-page--places"}>
       <WebGLShader direction={-1} waveSpeed={0.7} />
-      <svg className="placez-shader-contours" viewBox="0 0 1000 600" preserveAspectRatio="none" fill="none" aria-hidden="true">
+      {isSpaces && <svg className="placez-shader-contours" viewBox="0 0 1000 600" preserveAspectRatio="none" fill="none" aria-hidden="true">
         <path className="placez-shader-contours__cyan" d="M1080 185 C790 350 710 295 500 220 S165 75 -80 310" />
         <path className="placez-shader-contours__magenta" d="M1080 360 C795 165 670 225 470 375 S165 580 -80 370" />
         <path className="placez-shader-contours__yellow" d="M1080 420 C785 225 680 285 470 425 S165 635 -80 430" />
-      </svg>
+      </svg>}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
+      {!isSpaces ? <>
+        <BrowseHeader title="Placez" logo="/brand/family/our-placez.svg" kicker="Portland · Find your place"
+          description="Places that are ours. Find your next night out, a place to gather, or a local business to support.">
+          <BoardShareButton title="Placez" path="/directory" />
+          <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Add a place" onClick={openAddForm}><Plus size={18} /><span>Add a place</span></button>
+        </BrowseHeader>
+        <div className="eb-frame">
+          <BrowseControls title="Placez" categories={[{id:"ALL",label:"All Placez",color:"var(--neon-cyan)",count:visibleBusinesses.length}, ...categoryBands.map(c => ({id:c.key,label:c.label,color:c.color,count:c.count}))]}
+            selected={activeType.split(",")} onSelect={handleSelectCategory} query={searchQuery} onSearch={setSearchQuery} view={browseView} onView={setBrowseView}>
+            <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("places")} aria-label="Explore places on Mapz"><Map size={19} /><span>Map</span></a>
+          </BrowseControls>
+          {formOpen && <DirectoryAddPlaceForm isSpaces={false} onClose={() => setFormOpen(false)} />}
+          <div className="eb-body">
+            <aside className="eb-side" aria-label="Placez filters">
+              <div className="eb-panel eb-desktop-panel"><h2>Filters</h2>
+                <div className="eb-side-categories" role="group" aria-label="Place types">
+                  <button type="button" aria-pressed={activeType === "ALL"} onClick={() => handleSelectCategory("ALL")}>All Placez</button>
+                  {categoryBands.map(c => <button type="button" key={c.key} aria-pressed={activeType.split(",").includes(c.key)} onClick={() => handleSelectCategory(c.key)}>{c.label}</button>)}
+                </div>
+                <label>Neighborhood<select value={activeNeighborhood} onChange={e => setActiveNeighborhood(e.target.value)} aria-label="Filter by neighborhood">
+                  {neighborhoodsInUse.map(n => <option key={n} value={n}>{n === "ALL" ? "Anywhere in Portland" : n}</option>)}
+                </select></label>
+                <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("places")}><Map size={18} />Explore on Mapz</a>
+              </div>
+              <details className="eb-panel eb-mobile-filters"><summary><SlidersHorizontal size={18} />Neighborhood{activeNeighborhood !== "ALL" ? ` · ${activeNeighborhood}` : ""}</summary>
+                <label>Neighborhood<select value={activeNeighborhood} onChange={e => setActiveNeighborhood(e.target.value)} aria-label="Filter by neighborhood">
+                  {neighborhoodsInUse.map(n => <option key={n} value={n}>{n === "ALL" ? "Anywhere in Portland" : n}</option>)}
+                </select></label>
+              </details>
+              <div className="eb-panel eb-desktop-panel"><h3>Not seeing your place?</h3><p>Share a place with your community.</p><button type="button" className="eb-tool pdx-glass-rebind" onClick={openAddForm}><Plus size={18} />Add a place</button></div>
+            </aside>
+            <section className="eb-results" aria-label="Placez results">
+              <div className="eb-result-head"><p role="status" data-testid="directory-result-count">{resultLine}</p>
+                {(searchQuery || activeType !== "ALL" || activeNeighborhood !== "ALL") && <button type="button" className="eb-clear" onClick={() => { setSearchQuery(""); setActiveType("ALL"); setActiveNeighborhood("ALL"); }}>Clear filters</button>}
+              </div>
+              {isLoading ? <BoardLoadingState label="Loading directory" /> : isError ? <BrowseStatus error title="Places couldn’t load" description="Your filters are still here. Try loading the directory again." onAction={() => void refetch()} /> : !filtered.length ?
+                <BrowseStatus title="No places match your filters" description="Try a broader search or another neighborhood." actionLabel="Clear filters" onAction={() => { setSearchQuery(""); setActiveType("ALL"); setActiveNeighborhood("ALL"); }} /> :
+                browseView === "browse" ? <div className="eb-lanes">{categoryBands.map(category => {
+                  const places = filtered.filter(place => place.type === category.key);
+                  return places.length ? <BrowseLane key={category.key} title={category.label} color={category.color} count={places.length}>
+                    {places.map(biz => renderBrowsePlace(biz))}
+                  </BrowseLane> : null;
+                })}</div> : <div className="eb-grid">{filtered.map(biz => renderBrowsePlace(biz))}</div>}
+            </section>
+          </div>
+          <footer className="eb-footer"><h2>Not seeing your place?</h2><button type="button" className="eb-tool pdx-glass-rebind" onClick={openAddForm}><Plus size={18} />Add a place</button></footer>
+        </div>
+      </> : (
       <motion.header initial={{ opacity: 0, y: calmMode || reducedMotion ? 0 : 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: calmMode || reducedMotion ? 0 : .4 }} className="directory-browser-header">
         <div className="placez-reference-intro rg-intro rg-wrap">
           <div className="rg-intro-top"><span className="rg-eyebrow">{isSpaces ? "MY SQUADZ / FIND YOUR PEOPLE" : "PLACEZ / FIND YOUR PLACE"}</span></div>
           <h1 className="rg-board-logo-frame placez-reference-logo"><img src={isSpaces ? "/brand/family/my-squadz.svg" : "/brand/family/our-placez.svg"} alt={isSpaces ? "My Squadz" : "Our Placez"} /></h1>
           <div className="rg-intro-actions">
             <BoardShareButton title={isSpaces ? "My Squadz" : "Placez"} path={isSpaces ? "/spaces" : "/directory"} />
-            <a className="placez-reference-map" href="/map?layer=places">Explore on Mapz ↗</a>
+            <a className="placez-reference-map" href={mapBrowseHref("places")}>Explore on Mapz ↗</a>
           </div>
         </div>
         <section className="rg-layout rg-wrap placez-reference-start">
@@ -611,7 +672,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         )}
       </motion.section>
 
-      </motion.header>
+      </motion.header>)}
       {selectedPlace && (
         <PlaceModal
           key={selectedPlace.id}

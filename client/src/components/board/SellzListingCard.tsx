@@ -28,7 +28,7 @@ export type SellzPost = {
   interests?: SellzInterest[];
 };
 
-const ACCENT = "#39ff14";
+const ACCENT = "var(--room-sellz)";
 const money = (cents: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);
 
 type Props = { post: SellzPost; expanded: boolean; saved: boolean; onToggle: () => void; onRequireAuth: () => void; onDeleted?: () => void };
@@ -68,6 +68,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
       queryClient.invalidateQueries({ queryKey: ["/api/sellz"] });
       queryClient.invalidateQueries({ queryKey: ["/api/sellz/mine"] });
       queryClient.invalidateQueries({ queryKey: ["/api/sellz/saved/ids"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/boards/saved"] });
     },
   });
   const act = (path: string, body?: any, method?: string) => {
@@ -94,7 +95,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
       {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
       <button className="sellz-card__open" type="button" onClick={onToggle} aria-expanded={expanded} aria-controls={`sellz-details-${post.id}`} aria-label={`${expanded ? "Close" : "Open"} listing: ${post.title}`} />
       <div className="board-listing-card__row">
-        <div className="board-listing-card__thumb" style={!post.photoUrls?.[0] ? { background: "linear-gradient(135deg,#39ff14,#0044ff)" } : undefined}>
+        <div className="board-listing-card__thumb" style={!post.photoUrls?.[0] ? { background: "linear-gradient(135deg,var(--room-sellz),var(--z-black))" } : undefined}>
           {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" /> : <Tag size={54} aria-hidden="true" />}
           <span className={`sellz-card__availability${post.status !== "ACTIVE" ? " sellz-card__availability--inactive" : ""}${post.status === "RESERVED" ? " sellz-card__availability--reserved" : ""}`}>{statusLabel}</span>
           {saved ? <span className="sellz-card__saved"><Bookmark size={11} fill="currentColor" aria-hidden="true" /> Saved</span> : null}
@@ -122,8 +123,8 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
           {post.negotiable ? <input className="board-text-field" inputMode="decimal" placeholder="Optional offer, $" value={offer} onChange={e => setOffer(e.target.value)} /> : null}
           <button type="button" onClick={() => act(`/api/sellz/${post.id}/interest`, { note, offer: offer || null })}><MessageCircle size={15} /> Message seller</button>
         </div> : null}
-        {post.isMine ? <div className="gifting-owner-panel">
-          <strong>Seller controls</strong>
+        {post.isMine ? <details className="gifting-owner-panel">
+          <summary>Manage your listing</summary>
           <div className="gifting-owner-actions">
             <button onClick={() => setEditing(value => !value)}>{editing ? "Cancel edit" : "Edit listing"}</button>
             {post.status === "ACTIVE" ? <button onClick={() => act(`/api/sellz/${post.id}/reserve`)}>Reserve</button> : <button onClick={() => act(`/api/sellz/${post.id}/reopen`)}>Reopen</button>}
@@ -141,7 +142,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
             <button onClick={() => { act(`/api/sellz/${post.id}`, edit, "PUT"); setEditing(false); }}>Save changes</button>
           </div> : null}
           {post.interests?.map(interest => <div className="gifting-interest" key={interest.id}><span><strong>@{interest.username}</strong> {interest.offerCents ? `offered ${money(interest.offerCents)}` : "asked"}: {interest.note}</span><button onClick={() => act(`/api/sellz/${post.id}/interests/${interest.id}/choose`)}>Choose buyer</button></div>)}
-        </div> : <details className="gifting-report"><summary><ShieldAlert size={14} /> Report listing</summary><textarea value={report} onChange={e => setReport(e.target.value)} /><button onClick={() => act(`/api/sellz/${post.id}/report`, { reason: report })}>Send report</button></details>}
+        </details> : <details className="gifting-report"><summary><ShieldAlert size={14} /> Report listing</summary><textarea aria-label="Reason for reporting this listing" value={report} onChange={e => setReport(e.target.value)} /><button onClick={() => act(`/api/sellz/${post.id}/report`, { reason: report })}>Send report</button></details>}
       </div> : null}
     </article>
   );

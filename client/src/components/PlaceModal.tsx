@@ -1,8 +1,9 @@
-import CardWaypoint from "./home/CardWaypoint";
+import { dayComplementToken } from "@/lib/dsColors";
 import { PLACE_ACCENTS } from './discovery/placeTokens';
 import { ResourceCardMotif } from './resources/ResourceCardMotif';
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
+import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import DetailActions from "./DetailActions";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
@@ -14,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
 import { Badge } from "@/components/ds";
-import { MapPinned, Share2 } from "lucide-react";
+import { MapPinned, Share2, ChevronRight, Info } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import {
@@ -34,6 +35,10 @@ import { resolveBusinessLocations } from "@shared/businessLocations";
 import { directoryFallbackLogo, resolveDirectoryLogo } from "@shared/directoryLogos";
 import DirectoryMap from "@/components/DirectoryMap";
 import "./PlaceModal.css";
+import "./RoomDoorways.css";
+import "./events/PlaceEventTile.css";
+import EventFlyerArt from "./events/EventFlyerArt";
+import "./discovery/EventzDetail.css";
 
 /** Source-card rect retained for compatibility with directory callers. */
 export type PlaceModalOriginRect = {
@@ -175,7 +180,7 @@ const BLANK_OWNER_FIELDS: OwnerEditableFields = {
   ...BLANK_FIELDS, name: "", address: "", type: "bar", neighborhood: "", queerOwned: false, queerFriendly: true,
 };
 
-type ModalTab = "events" | "past" | "missed" | "gigs";
+type ModalTab = "past" | "missed" | "gigs";
 
 const DAY_CODES = new Set(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]);
 
@@ -216,20 +221,25 @@ export default function PlaceModal({
   const [form, setForm] = useState<EditableFields>(BLANK_FIELDS);
   const [ownerForm, setOwnerForm] = useState<OwnerEditableFields>(BLANK_OWNER_FIELDS);
   const [savedOverrides, setSavedOverrides] = useState<Partial<Business> | null>(null);
-  const [tab, setTab] = useState<ModalTab>("events");
+  const [tab, setTab] = useState<ModalTab>("past");
   const [sharing, setSharing] = useState(false);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [descriptionClipped, setDescriptionClipped] = useState(false);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const communityRef = useRef<HTMLDivElement>(null);
+  const [detailsOpen, setDetailsOpen] = useState(true);
+  const [eventsOpen, setEventsOpen] = useState(true);
   const [open, setOpen] = useState(false);
   const { dialogRef: panelRef, requestClose: handleClose } = useOpenCardClose(onClose, !!place);
 
   // Fresh tab when opening a different place
   useEffect(() => {
-    setTab("events");
+    setTab("past");
     setEditing(false);
     setSavedOverrides(null);
     setDescriptionExpanded(false);
+    setDetailsOpen(true);
+    setEventsOpen(true);
   }, [place?.id]);
 
   useEffect(() => {
@@ -408,7 +418,6 @@ export default function PlaceModal({
   // never surfaces MIZZED CONNECTION in the directory.
   const hideMissed = categoryHidesMissedConnections(place.type, category);
   const tabs: Array<{ key: ModalTab; label: string; count: number }> = [
-    { key: "events", label: "Events", count: upcomingEvents.length },
     { key: "past", label: "Past", count: pastEvents.length },
     ...(hideMissed
       ? []
@@ -419,7 +428,7 @@ export default function PlaceModal({
   const useSpecialEdge =
     isNonprofit || isHealthcare || isRealEstate || isCampground || isGroup;
   const panelClass = [
-    "place-modal-panel",
+    "place-modal-panel event-modal event-modal--approved event-modal--reference eb-detail eb-detail--place",
     "pdx-glass-rebind",
     useSpecialEdge ? "place-modal-panel--edge" : "",
     "place-modal-panel--enter",
@@ -434,7 +443,7 @@ export default function PlaceModal({
     <div
       onClick={handleClose}
       role="presentation"
-      className={`place-modal-overlay${open ? " place-modal-overlay--open" : ""}`}
+      className={`event-modal-overlay place-modal-overlay${open ? " place-modal-overlay--open" : ""}`}
     >
       <div
         ref={panelRef}
@@ -447,30 +456,20 @@ export default function PlaceModal({
         style={{
           ["--c" as string]: accent,
           ["--_c" as string]: accent,
+          ["--event-accent" as string]: accent,
           ...(useSpecialEdge ? { ["--_edge" as string]: edge } : {}),
         }}
       >
-        <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={`place-${place.type}`} /></div>
-        <div className="place-modal-panel__glow" aria-hidden="true" />
-        <div className="place-modal-panel__sheen" aria-hidden="true" />
-        <div className="place-modal-panel__seam dir-refract" aria-hidden="true" />
-
-        <div className="place-modal-panel__inner">
-        <CardWaypoint kind={place.type} inline />
-        <DetailActions label="place" onClose={handleClose} onShare={handleShare} sharing={sharing}>
-          <VenueFollowButton
-            businessId={place.id}
-            initialFollowing={Boolean(place.isFollowing)}
-            variant="modal"
-            accent={accent}
-            onRequireAuth={onRequireAuth}
-          />
-        </DetailActions>
-
+        <div className="event-modal__chrome">
+          <DetailActions label="place" onClose={handleClose} onShare={handleShare} sharing={sharing} />
+        </div>
+        <div className="place-modal-panel__inner event-modal__scroll">
         <div>
           <div className="place-modal-panel__body">
 
           <div className="place-modal-panel__identity">
+          <div className="eb-detail__art">
+            <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={`place-${place.type}`} /></div>
           <img
             key={`${place.id}:${place.name}:${place.imageUrl}`}
             className="place-modal-panel__logo"
@@ -486,18 +485,9 @@ export default function PlaceModal({
             }}
           />
 
+          </div>
           <div className="place-modal-panel__identity-text">
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 900,
-              textTransform: "uppercase",
-              fontSize: "clamp(2.45rem, 9vw, 4.1rem)",
-              lineHeight: 1.02,
-              color: "var(--text-hi)",
-              margin: isGrandOpeningActive(place.grandOpeningDate) ? "0 0 4px" : "0 0 10px",
-            }}
-          >
+          <h2 className="event-modal__title">
             {place.name}
           </h2>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 10 }}>
@@ -538,6 +528,8 @@ export default function PlaceModal({
           </div>
           </div>
 
+          <details className="event-modal__disclosure" open={editing || detailsOpen} onToggle={event => setDetailsOpen(event.currentTarget.open)}>
+            <summary><Info aria-hidden="true" />Place details<ChevronRight aria-hidden="true" /></summary>
           <div className="place-modal-panel__details-room">
 
           {multiLoc && address && (
@@ -784,13 +776,7 @@ export default function PlaceModal({
                     {displayed.phone && <div className="place-modal-panel__fact"><Icon d={PHONE} /><a href={telHref(displayed.phone)}>{displayed.phone}</a></div>}
                     {displayed.instagram && <div className="place-modal-panel__fact"><Icon d={IG} /><a href={displayed.instagram.startsWith("http") ? displayed.instagram : `https://instagram.com/${displayed.instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer">{displayed.instagram}</a></div>}
                   </div>
-                  {(address || displayed.phone) && (
-                    <div className="place-modal-panel__quick-actions">
-                      <Link href={place.lat != null && place.lng != null ? `/map?layer=places&lat=${place.lat}&lng=${place.lng}&zoom=15` : `/map?layer=places&q=${encodeURIComponent(place.name)}`}>View on Mapz</Link>
-                      {address && <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer">Directions</a>}
-                      {displayed.phone && <a href={telHref(displayed.phone)}>Call</a>}
-                    </div>
-                  )}
+
                 </>
               )}
 
@@ -871,6 +857,40 @@ export default function PlaceModal({
 
           </div>
 
+          </details>
+
+          <div className="eb-detail__primary-action">
+            <VenueFollowButton
+              businessId={place.id}
+              initialFollowing={Boolean(place.isFollowing)}
+              variant="modal"
+              accent={accent}
+              onRequireAuth={onRequireAuth}
+            />
+          </div>
+                  {!editing && !multiLoc && (address || displayed.phone) && (
+                    <div className="place-modal-panel__quick-actions">
+                      <Link href={mapBrowseHref("places", place)}>View on Mapz</Link>
+                      {address && <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer">Directions</a>}
+                      {displayed.phone && <a href={telHref(displayed.phone)}>Call</a>}
+                    </div>
+                  )}
+          {!hideMissed && <section className="event-modal__mizzed-door" aria-label="Mizzed Connection">
+            <button type="button" className="room-doorways__door pdx-glass-card pdx-glass-rebind"
+              style={{ "--c": "var(--room-mizzed)", "--ink": "var(--room-mizzed)" } as React.CSSProperties}
+              aria-expanded={tab === "missed"} onClick={() => {
+                setTab("missed");
+                requestAnimationFrame(() => communityRef.current?.scrollIntoView({ behavior: "auto", block: "start" }));
+              }}>
+              <ResourceCardMotif name="MIZZED CONNECTION" category="mizzed" />
+              <span className="room-doorways__vignette" aria-hidden="true" />
+              <span className="room-doorways__glass" aria-hidden="true" />
+              <img className="room-doorways__logo" src="/brand/family/mizzed-connection.svg" alt="Mizzed Connection" loading="lazy" decoding="async" />
+              <span className="room-doorways__line"><strong>That person you noticed</strong><br />Maybe they noticed you, too.</span>
+              <span className="room-doorways__go">Who caught your eye? <span aria-hidden="true">↗</span></span>
+            </button>
+          </section>}
+
           <div className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
             <DirectoryMap
               businesses={hasMapCoordinates ? [displayed] : []}
@@ -893,7 +913,7 @@ export default function PlaceModal({
             </div>
           </div>
 
-          <div className="place-modal-panel__community-room">
+          <div className="place-modal-panel__community-room" ref={communityRef}>
             {promoters.length > 0 && (
               <div className="place-modal-panel__promoters">
                 <span>Event promoters</span>
@@ -916,45 +936,6 @@ export default function PlaceModal({
             </div>
 
             <div className="place-modal-panel__tab-panel" role="tabpanel">
-            {tab === "events" && (
-              upcomingEvents.length === 0 ? (
-                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No upcoming events matched to this venue yet.</p>
-              ) : (
-                <div className="place-modal-events">
-                  {upcomingEvents.length > 1 && (
-                    <p className="place-modal-events__hint">
-                      Swipe for the rest · the card stays put
-                    </p>
-                  )}
-                  <div
-                    className="place-modal-events__rail"
-                    role="list"
-                    aria-label={`Upcoming events at ${place.name}`}
-                  >
-                    {upcomingEvents.map((ev) => {
-                      const code = dayCodeFromEvent(ev);
-                      const dayAccent = DAY_COLOR[code] || "var(--cyan)";
-                      return (
-                        <Link
-                          key={ev.listingInstanceKey ?? ev.id}
-                          href={eventPath(ev.id, ev.title, ev.dayOfWeek)}
-                          onClick={onClose}
-                          role="listitem"
-                          className="place-modal-events__tile"
-                          style={{ ["--pm-day" as string]: dayAccent }}
-                        >
-                          <div className="place-modal-events__when">
-                            {formatDirectoryEventWhen(ev)}
-                          </div>
-                          <div className="place-modal-events__title">{ev.title}</div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              )
-            )}
-
             {tab === "past" && (
               pastEvents.length === 0 ? (
                 <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>
@@ -1063,6 +1044,25 @@ export default function PlaceModal({
             )}
             </div>
           </div>
+          <details className="event-modal__disclosure place-upcoming" open={eventsOpen} onToggle={event => setEventsOpen(event.currentTarget.open)}>
+            <summary><Icon d={CAL} />Upcoming events <span className="place-upcoming__count">{upcomingEvents.length}</span><ChevronRight aria-hidden="true" /></summary>
+            {upcomingEvents.some(event => event.previewExample) && <p className="place-upcoming__note">Sample event cards for this preview.</p>}
+            {upcomingEvents.length ? <div className="place-upcoming__grid" role="list" aria-label={`Upcoming events at ${place.name}`}>
+              {upcomingEvents.map(event => <Link
+                key={event.listingInstanceKey ?? event.id}
+                href={eventPath(event.id, event.title, event.dayOfWeek)}
+                onClick={onClose}
+                className="place-event-tile pdx-glass-rebind"
+                style={{ "--c": DAY_COLOR[dayCodeFromEvent(event)] || accent, "--card-secondary-override": dayComplementToken(dayCodeFromEvent(event)) } as React.CSSProperties}
+                aria-label={`View event: ${event.title}`}
+                role="listitem"
+              >
+                <EventFlyerArt src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} day={event.dayOfWeek} />
+                {event.previewExample && <span className="place-event-tile__example">Example</span>}
+                <span className="place-event-tile__shade"><strong>{event.title}</strong><small>{event.previewExample ? "Preview example" : formatDirectoryEventWhen(event)}</small></span>
+              </Link>)}
+            </div> : <p className="place-upcoming__note">No upcoming events matched to this venue yet.</p>}
+          </details>
           </div>
         </div>
         </div>{/* /.place-modal-panel__inner */}

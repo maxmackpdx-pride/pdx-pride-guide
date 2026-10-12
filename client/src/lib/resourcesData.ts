@@ -563,6 +563,14 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "use": "In crisis, call a line in Start Here. Otherwise reach out by email or through each site, and ask what support they have open right now.",
     "orgs": [
       {
+        "name": "MakeWithPDX",
+        "scope": "Portland",
+        "desc": "Queer-owned preparedness and resilience education with workshops, resources, and community programs in Portland and online.",
+        "logo": "/directory-logos/place-makewithpdx.png?v=2026-09-25-placez-white-marks",
+        "url": "https://makewithpdx.com",
+        "cta": "Visit website"
+      },
+      {
         "name": "Family Peace Center of Washington County",
         "logo": "/resources-logos/family-peace.png",
         "aliases": [
@@ -1091,6 +1099,20 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "forr": "Food, clothing, counseling, support groups, creative programs, and someone in your corner. SMYRC serves ages 13 to 24.",
     "use": "Look up drop-in hours and group times on each site before you go. Adults can back these programs by volunteering or donating.",
     "orgs": [
+      {
+        "name": "IL Youth 2 Youth",
+        "scope": "Portland",
+        "desc": "Youth arts programs at ILY2 in the Pearl District. Check the current class schedule and registration details on their site.",
+        "logo": "/directory-logos/place-ilyouth2youth.png?v=2026-09-25-placez-white-marks",
+        "url": "https://www.ilyouth2.com",
+        "cta": "Visit website",
+        "categoryIds": [
+          "arts"
+        ],
+        "addr": "925 NW Flanders St, Portland, OR 97209",
+        "lat": 45.5259733,
+        "lng": -122.6804
+      },
       {
         "name": "Queer Youth Resource Center",
         "transSpecialist": true,
@@ -1808,6 +1830,19 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "use": "Check the scope tag first: Portland, Multnomah County, Oregon, or National. Read eligibility and deadlines on each site, and sign up for classes early.",
     "orgs": [
       {
+        "name": "Portland Gay Men's Chorus",
+        "scope": "Portland",
+        "desc": "One of the oldest LGBTQ+ choruses in the country, singing for Portland since 1980 — concerts, community performances, and queer joy in four-part harmony.",
+        "logo": "/directory-logos/Portland_Gay_Mens_Chorus.png?v=2026-09-25-placez-white-marks",
+        "url": "https://www.pdxgmc.org/",
+        "cta": "Visit website",
+        "categoryIds": [
+          "community"
+        ],
+        "alt": "https://www.pdxgmc.org/support/donate/",
+        "altLabel": "Support the organization"
+      },
+      {
         "name": "Portland Queer Arts Foundation",
         "logo": "/resources-logos/portland-queer-arts-foundation.png",
         "mark": "PQAF",
@@ -2075,6 +2110,82 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "forr": "Therapy, peer counseling, support groups, and recovery services. Each provider lists its own eligibility.",
     "use": "Check whether the service is clinical therapy or peer support, then contact the provider to get started.",
     "orgs": [
+      {
+        "name": "Rebel Heart Therapy",
+        "scope": "NE Portland",
+        "desc": "Queer-staffed, identity-forward therapy practice for LGBTQIA+, poly, kinky, neurodivergent, and nonconforming people in Portland.",
+        "logo": "/directory-logos/Rebel_Heart_Therapy.png?v=2026-09-25-placez-white-marks",
+        "url": "https://www.rebelheartpdx.com/",
+        "cta": "Visit website",
+        "categoryIds": [
+          "health"
+        ],
+        "addr": "1111 NE MLK Blvd",
+        "lat": 45.53091560504,
+        "lng": -122.661755807663
+      },
+      {
+        "name": "Full Spectrum Therapy",
+        "scope": "SE Portland",
+        "desc": "Portland group therapy practice with clinicians dedicated to LGBTQ+ affirming care, gender-competent counseling, and community support.",
+        "logo": "/directory-logos/Full_Spectrum_Therapy.png?v=2026-09-25-placez-white-marks",
+        "url": "https://www.fullspectrumpdx.com/",
+        "cta": "Visit website",
+        "categoryIds": [
+          "health"
+        ],
+        "addr": "1219 SE Lafayette St",
+        "lat": 45.496837572559,
+        "lng": -122.652886718856,
+        "phone": "tel:+15037655733",
+        "phoneLabel": "(503) 765-5733"
+      },
+      {
+        "name": "Sprout Therapy PDX",
+        "scope": "NE Portland",
+        "desc": "Inclusive counseling for individuals, kids, families, and relationships of any kind, with Portland offices and Oregon telehealth. LGBTQ+ welcoming and insurance-friendly.",
+        "logo": "/directory-logos/Sprout_Therapy_PDX.png?v=2026-09-25-placez-white-marks",
+        "url": "https://sprouttherapypdx.com/",
+        "cta": "Visit website",
+        "categoryIds": [
+          "health"
+        ],
+        "addr": "6011 NE Oregon St",
+        "lat": 45.528369822677,
+        "lng": -122.602098320765
+      },
+      {
+        "name": "The Center for Couples & Sex Therapy",
+        "scope": "NE Portland",
+        "desc": "Sex-positive, gender-affirming therapy for individuals and partners covering desire, communication, identity, and relationship care in Portland and online.",
+        "logo": "/directory-logos/The_Center_for_Couples_and_Sex_Therapy.png?v=2026-09-25-placez-white-marks",
+        "url": "https://www.thecenterportland.com/",
+        "cta": "Visit website",
+        "categoryIds": [
+          "health"
+        ],
+        "addr": "2923 NE Broadway St",
+        "lat": 45.535218825725,
+        "lng": -122.635668887985,
+        "phone": "tel:+15039410856",
+        "phoneLabel": "(503) 941-0856"
+      },
+      {
+        "name": "Plus Psychiatry",
+        "scope": "SE Portland",
+        "desc": "LGBTQIA2S+ affirming psychiatric care with Jermiah Floyd, PMHNP-BC. Trauma-informed, person-centered psychotherapy and medication management in Portland, in-person and telehealth.",
+        "logo": "/directory-logos/Plus_Psychiatry.png?v=2026-09-25-placez-white-marks",
+        "url": "https://www.pluspsychiatry.com",
+        "cta": "Visit website",
+        "categoryIds": [
+          "health"
+        ],
+        "addr": "1110 SE Alder St Suite 301",
+        "lat": 45.517860237264,
+        "lng": -122.654485163503,
+        "phone": "tel:+15414144277",
+        "phoneLabel": "(541) 414-4277"
+      },
       {
         "name": "Trans Advocacy & Care Team (TACT)",
         "transSpecialist": true,

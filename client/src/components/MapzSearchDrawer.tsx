@@ -2,11 +2,11 @@ import {useEffect,useRef,useState,useLayoutEffect,type CSSProperties,type ReactN
 import SmoothDrawer,{SmoothDrawerGroup,SmoothDrawerItem} from './ui/smooth-drawer';
 import {NavGlassLayers,navGlassPointer} from './ui/nav-glass';
 import {Search,SlidersHorizontal,X,ChevronRight,ChevronDown} from 'lucide-react';
-import {DIRECTORY_TYPE_LABELS,directoryTypeColor} from '@shared/directoryTheme';
+import {DIRECTORY_TYPE_LABELS,directoryTypeColor,isPlacezType} from '@shared/directoryTheme';
 
 /* Nonprofits moved to /resources (2026-09-30); Placez keeps places to go and spend. */
 export const MAPZ_PLACE_TYPES=['all','bar','restaurant','cafe','venue','shop','service','hotel','healthcare','realestate','campground','adult'];
-export const MAPZ_PLACE_TYPE_OPTIONS=MAPZ_PLACE_TYPES.filter(type=>type!=='all');
+export const MAPZ_PLACE_TYPE_OPTIONS=MAPZ_PLACE_TYPES.filter(type=>type==='adult'||isPlacezType(type));
 export const mapzTypeIcon=(type:string)=>`/mapz-map/icons/types/${MAPZ_PLACE_TYPES.includes(type)?type:'venue'}.svg`;
 export const mapzTypeLabel=(type:string)=>type==='all'?'All placez':type==='adult'?'Adult':DIRECTORY_TYPE_LABELS[type]||'Venues';
 export const mapzTypeColor=(type:string)=>type==='adult'?'#FF0000':type==='all'?'#63798B':directoryTypeColor(type);

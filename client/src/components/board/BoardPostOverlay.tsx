@@ -4,7 +4,6 @@ import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
-import { X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import GiftListingCard, { cardAccent, type GiftingPost } from "./GiftListingCard";
@@ -20,7 +19,7 @@ import "./OpenBoardCard.css";
  * fixed overlay escapes the feed's transformed wrappers.
  *
  * Deep-glass SoT §2.4: same --glass-card recipe as board cards; accent keyed
- * to the post (Gifting #CCFF00 / Gigs var(--board-gigs)).
+ * to the post (Giftz var(--room-giftz) / Gigz var(--board-gigs)).
  */
 const GIG_ACCENT = { POSTING_GIG: "var(--board-gigs)", LOOKING_FOR_WORK: "var(--board-gigs)" } as const;
 
@@ -28,9 +27,10 @@ type Props = {
   kind: "gig" | "gifting" | "sellz";
   postId: number;
   onClose: () => void;
+  presentation?: "eventz";
 };
 
-export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
+export default function BoardPostOverlay({ kind, postId, onClose, presentation }: Props) {
   const [showAuth, setShowAuth] = useState(false);
   const { dialogRef, requestClose } = useOpenCardClose(onClose, !showAuth);
 
@@ -42,9 +42,9 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
 
   let card: ReactNode = null;
   // Accent tints the panel border + glow, matching the board card's color.
-  let accent = "#FF00CC";
+  let accent = "var(--room-mizzed)";
   if (post && kind === "gifting") {
-    accent = cardAccent(post as GiftingPost);
+    accent = presentation ? "var(--room-giftz)" : cardAccent(post as GiftingPost);
     card = (
       <GiftListingCard
         post={post as GiftingPost}
@@ -55,7 +55,7 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
       />
     );
   } else if (post && kind === "sellz") {
-    accent = "#39ff14";
+    accent = "var(--room-sellz)";
     card = <SellzListingCard post={post as SellzPost} expanded saved={saved.data?.includes(postId)||false} onToggle={() => {}} onRequireAuth={() => setShowAuth(true)} onDeleted={onClose} />;
   } else if (post && kind === "gig") {
     const gig = post as GigPost;
@@ -95,7 +95,7 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
           aria-modal="true"
           aria-label={kind === "gig" ? "Gigz listing" : kind === "gifting" ? "Giftz listing" : "Sellz listing"}
           tabIndex={-1}
-          className="board-post-overlay board-post-overlay--glass board-open-card--shared"
+          className={`board-post-overlay board-post-overlay--glass board-open-card--shared pdx-glass-rebind${presentation ? " ab-open-card" : ""}`}
           onClick={e => e.stopPropagation()}
           style={panelStyle}
         >

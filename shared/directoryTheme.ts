@@ -19,6 +19,11 @@ export const DIRECTORY_TYPES = [
 
 export type DirectoryType = (typeof DIRECTORY_TYPES)[number];
 
+/** Care and nonprofit support belong in ReZources; groups belong in Squadz. */
+export function isPlacezType(type: string): boolean {
+  return DIRECTORY_TYPES.includes(type as DirectoryType) && !["group", "nonprofit", "healthcare"].includes(type);
+}
+
 /**
  * Plain-English category names for admin surfaces. These stay literal on
  * purpose: the public board can brand a category (group reads "MY SQUADZ" on

@@ -49,7 +49,7 @@ const stop = (fn: () => void) => (e: React.MouseEvent) => {
 const SINGLE_WORD_CARD_LINE: Record<HousingPostView["type"], string> = {
   LOOKING: "LOOKING TO RENT",
   OFFERING: "JOIN OUR HAÜZ",
-  FORMING: "BUILDING A HAÜZ",
+  FORMING: "BUILDING A HOÜZ",
   MANAGED: "COMMERCIAL RENTAL HAÜZ",
 };
 

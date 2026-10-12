@@ -775,6 +775,7 @@ function EventModalInner({
           "--c": accentColor,
           "--event-ink": dayInk,
           "--event-opposite": oppositeColor,
+          "--card-secondary-override": oppositeColor,
         } as React.CSSProperties}
       >
         <div className="event-modal__chrome">

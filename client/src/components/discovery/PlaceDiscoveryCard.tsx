@@ -23,13 +23,13 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
       logoUrl={resolveDirectoryLogo(place.name, place.imageUrl) || undefined} fallbackLogoUrl={directoryFallbackLogo(place.type)}
       businessId={place.id} isFollowing={Boolean(place.isFollowing)} onRequireAuth={onRequireAuth}
       shareUrl={placeUrl(place.id, place.name)}
-      categoryTags={[{id:place.type,name:label,color:accent},...(place.queerOwned ? [{id:'owned',name:'Queer owned',color:'var(--neon-yellow)'}] : [])]}
+      categoryTags={[{id:place.type,name:label,color:accent},...(place.queerOwned ? [{id:'owned',name:'Queer owned',color:accent}] : [])]}
       className="rg-directory-card placez-discovery-card pdxPlace--clickable"
       decoration={<><div className="rg-card-vignette" aria-hidden="true"/><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true"/><ResourceCardMotif name={place.name} category={`place-${place.type}`}/></>}
       onClick={open}
-      footer={<div className="rg-directory-footer placez-discovery-footer" onClick={event=>event.stopPropagation()}>
+      footer={<div className="rg-directory-footer placez-discovery-footer">
         <p className="placez-discovery-meta">{place.neighborhood || 'Portland metro'}</p>
-        <button type="button" className="pdx-glass-rebind pdxBtn" aria-label={`View details for ${place.name}`} onClick={open}>View details <ArrowUpRight size={18}/></button>
+        <button type="button" className="pdx-glass-rebind pdxBtn" aria-label={`View details for ${place.name}`} onClick={event=>{event.stopPropagation();open(event);}}>View details <ArrowUpRight size={18}/></button>
       </div>}
     />
   </div>;

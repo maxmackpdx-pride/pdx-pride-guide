@@ -6,7 +6,7 @@ import {useAuth} from '@/context/AuthContext';
 import {useToast} from '@/hooks/use-toast';
 import AuthModal from './AuthModal';
 import {X} from 'lucide-react';
-import {DIRECTORY_TYPE_LABELS as TYPE_LABELS} from '@shared/directoryTheme';
+import {DIRECTORY_TYPE_LABELS as TYPE_LABELS, isPlacezType} from '@shared/directoryTheme';
 import '../pages/Directory.css';
 const NEIGHBORHOOD_ORDER = [
   "ALL",
@@ -329,7 +329,7 @@ return <>{showAuth&&<AuthModal onClose={()=>setShowAuth(false)} defaultTab="logi
               {!isSpaces && <label>
                 Type *
                 <select className="board-text-field" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
-                  {Object.entries(TYPE_LABELS).filter(([key]) => key !== "group").map(([key, label]) => (
+                  {Object.entries(TYPE_LABELS).filter(([key]) => isPlacezType(key)).map(([key, label]) => (
                     <option key={key} value={key}>{label}</option>
                   ))}
                 </select>

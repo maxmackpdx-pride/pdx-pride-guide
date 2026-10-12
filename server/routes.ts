@@ -1,4 +1,5 @@
 import { createEventSaves } from "./eventSaves";
+import { createBoardSaves, isSavedBoard } from "./boardSaves";
 import { publicBoardMapLocations } from './boardMapLocations';
 import { isDemoAuthor } from "@shared/demo";
 import {getOutzClosures} from './outzClosures';
@@ -1170,6 +1171,7 @@ function notifyAttendanceUpdate(eventId: number) {
 
 export function registerRoutes(httpServer: Server, app: Express) {
   const eventSaves = createEventSaves(sqlite);
+  const boardSaves = createBoardSaves(sqlite);
   assertProductionPersistence();
   assertProductionSecrets();
 
@@ -1605,6 +1607,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // Session middleware - persisted on the same SQLite volume as user data
   app.use(createSessionMiddleware(sqlite));
+  app.get('/api/boards/saved', requireAuth, (req,res)=>res.json(boardSaves.ids(req.session.userId!)));
+  app.put('/api/boards/:board/posts/:id/save', requireAuth, (req,res)=>{
+    const board=String(req.params.board), id=Number(req.params.id);
+    if(!isSavedBoard(board) || !Number.isSafeInteger(id) || id<=0) return res.status(400).json({error:'Invalid post'});
+    if(!boardSaves.isPublic(board,id)) return res.status(404).json({error:'Post not found'});
+    boardSaves.save(req.session.userId!,board,id);
+    res.json({saved:true});
+  });
+  app.delete('/api/boards/:board/posts/:id/save', requireAuth, (req,res)=>{
+    const board=String(req.params.board), id=Number(req.params.id);
+    if(!isSavedBoard(board) || !Number.isSafeInteger(id) || id<=0) return res.status(400).json({error:'Invalid post'});
+    boardSaves.remove(req.session.userId!,board,id);
+    res.json({saved:false});
+  });
+
   registerCommunityRoutes(app, requireAuth);
   registerPlatformV1(app, { requireAuth, readNotificationPrefs, updateNotificationPrefs });
 

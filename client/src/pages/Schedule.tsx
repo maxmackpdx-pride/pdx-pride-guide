@@ -1649,7 +1649,7 @@ export default function Schedule({
                       {day.blocks.map((b) => (
                         <div
                           key={b.id}
-                          className={`sch-block sch-event-card${b.rsvp ? " is-rsvp" : ""}`}
+                          className={`sch-block pdx-glass-rebind sch-event-card${b.rsvp ? " is-rsvp" : ""}`}
                           role="button"
                           tabIndex={0}
                           onClick={b.onClick}

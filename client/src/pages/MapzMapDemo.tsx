@@ -33,7 +33,8 @@ import { spottedKind, spottedPlace } from "@/components/SpottedCard";
 import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import { HousingTagFilter } from "@/components/housing/HousingTagFilter";
 import type { Business } from "@/pages/Directory";
-import { directoryTypeColor } from "@shared/directoryTheme";
+import { directoryResourceName } from "@/lib/directoryResources";
+import { directoryTypeColor, isPlacezType } from "@shared/directoryTheme";
 import { directoryFallbackLogo, normalizeDirectoryName, resolveDirectoryLogo } from "@/lib/directoryLogos";
 import { mapRecordId, clearMapOverlay } from "@/lib/mapDrawerNavigation";
 import { mapCoordinates } from "@/lib/mapCoordinates";
@@ -579,7 +580,7 @@ export default function MapzMapDemo() {
     return demoEventIds.has(e.id) || matchesMapEvent(e, timeFilter, eventTag, customStart, customEnd, viewTimestamp);
   }).sort((a, b) => (parsePacificDateTime(a.dateStart) || 0) - (parsePacificDateTime(b.dateStart) || 0)), [events, q, eventTag, timeFilter, customStart, customEnd, viewTimestamp, demoEventIds]);
   const locatedWorlds = useMemo(()=>{
-    const source:Record<MapWorld,MapRow[]>={places:places.filter(p=>p.type!=="group") as MapRow[],mizzed:mizzed as unknown as MapRow[],gigz:gigs,giftz:gifts,sellz:sells};
+    const source:Record<MapWorld,MapRow[]>={places:places.filter(p=>isPlacezType(p.type)&&!directoryResourceName(p)) as MapRow[],mizzed:mizzed as unknown as MapRow[],gigz:gigs,giftz:gifts,sellz:sells};
     const board:Record<MapWorld,string>={places:"",mizzed:"Mizzed",gigz:"Gigz",giftz:"Giftz",sellz:"Sellz"};
     return Object.fromEntries((Object.keys(source) as MapWorld[]).map(world=>{
       const rows=params.get(`${world}.view`)==="mine" ? mineWorlds[world]?.data||[] : source[world];

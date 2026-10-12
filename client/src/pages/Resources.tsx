@@ -1,3 +1,6 @@
+import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
+import { mapBrowseHref } from "@/lib/mapBrowseHref";
+import BrowseStatus from "@/components/BrowseStatus";
 import "@/components/discovery/DiscoveryFlow.css";
 import {
   lazy,
@@ -5,7 +8,6 @@ import {
   Suspense,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useId,
   useMemo,
   useRef,
@@ -13,27 +15,16 @@ import {
   type CSSProperties,
 } from "react";
 import { Link, useLocation } from "wouter";
-import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import { useTheme } from "@/context/ThemeContext";
 import { Drawer } from "vaul";
+import * as Dialog from "@radix-ui/react-dialog";
 import {
   ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
   ChevronDown,
-  Check,
-  LifeBuoy,
-  BriefcaseBusiness,
-  Heart,
-  House,
-  Brain,
-  Palette,
-  Scale,
-  ShieldCheck,
   ShieldAlert,
+  Map,
   Phone,
-  Star,
-  Users,
   X,
 } from "lucide-react";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -41,14 +32,11 @@ import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
 import { FOOD_PANTRIES, FOOD_RESOURCE } from "@/lib/foodPantries";
 import { placeGoogleMapsUrl } from "@/lib/placeLinks";
 import { Badge } from "@/components/ds/Badge";
-import { ResourceFilterButton } from "@/components/resources/ResourceFilterButton";
-import { RezourcesLogo } from "@/components/resources/RezourcesLogo";
 import BoardShareButton from "@/components/BoardShareButton";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import { resourceLogoLayout } from "@/components/resources/resourceLogoLayout";
-import { ContainerScroll } from "@/components/ui/cards-stack";
-import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import { PlaceCard } from "@/components/ds/PlaceCard";
+import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import "@/components/ui/web-gl-shader.css";
 import "@fontsource/barlow/latin-400.css";
 import "@fontsource/barlow/latin-500.css";
@@ -57,23 +45,11 @@ import "@fontsource/barlow/latin-700.css";
 import "@fontsource/jetbrains-mono/latin-400.css";
 import "@fontsource/jetbrains-mono/latin-600.css";
 import "./Resources.css";
+import "@/components/discovery/EventzDetail.css";
 
 const ResourceDirectoryMap = lazy(() => import("@/components/DirectoryMap"));
 const ResourceBackgroundShader = lazy(() => import("@/components/ui/web-gl-shader").then(({ WebGLShader }) => ({ default: WebGLShader })));
 
-const ICONS = [
-  Heart,
-  ShieldCheck,
-  Scale,
-  Star,
-  Users,
-  House,
-  BriefcaseBusiness,
-  Palette,
-  Brain,
-  LifeBuoy,
-];
-const STACK_ROTATIONS = [-3, 2, -2, 3, -2, 2, 1, -3, 1, -2];
 const LABELS = [
   "Health & care",
   "Safety & basic needs",
@@ -86,18 +62,6 @@ const LABELS = [
   "Mental health & peer support",
   "Harm reduction",
 ];
-const CATEGORY_COPY: Record<string, { headline: string; description: string }> = {
-  health: { headline: "Care that gets you.", description: "Find affirming care, testing, and everyday health support." },
-  safety: { headline: "Support for right now.", description: "Find food, housing help, and a safer next step." },
-  legal: { headline: "Know your rights.", description: "Connect with advocacy and legal guidance." },
-  youth: { headline: "Room to grow.", description: "Find mentors, support, and welcoming spaces for young people." },
-  community: { headline: "Find your people.", description: "Meet neighbors and build local connections." },
-  family: { headline: "Care across generations.", description: "Support for chosen family, elders, and cultural connection." },
-  money: { headline: "Make your next move.", description: "Explore jobs, financial help, and business support." },
-  arts: { headline: "Make space for art.", description: "Find creative spaces, funding, and collaborators." },
-  "mental-health": { headline: "You can talk about it.", description: "Connect with counseling and peer support." },
-  "harm-reduction": { headline: "Support without judgment.", description: "Find practical tools and safer-use support." },
-};
 const ROWS = RESOURCE_CATEGORIES.flatMap((category) =>
   (category.id === "safety"
     ? [...category.orgs, FOOD_RESOURCE]
@@ -434,7 +398,7 @@ function ResourceLocationMap({ org, color, initiallyOpen = false }: { org: Resou
   </section>;
 }
 
-// Keep service identifiers when the wordmark names only the parent organization.
+// Preserve the original resource card artwork and optical logo treatment.
 const RESOURCE_CARD_CAPTIONS: Record<string, string> = {
  "Family Peace Center of Washington County": "Family Peace Center",
  "Virginia Garcia · Beaverton Wellness Center": "Beaverton Wellness Center",
@@ -474,7 +438,7 @@ const ResourceCard = memo(function ResourceCard({
   return (
     <PlaceCard
       name={org.name}
-      displayName={org.logo ? (RESOURCE_CARD_CAPTIONS[org.name] ?? null) : org.name}
+      displayName={RESOURCE_CARD_CAPTIONS[org.name] ?? org.name}
       decoration={<><div className="rg-card-vignette" aria-hidden="true" /><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true" /><ResourceCardMotif name={org.name} category={category.id} /></>}
       data-optical-logo={org.name}
       style={resourceLogoLayout(org.name) as CSSProperties}
@@ -488,8 +452,8 @@ const ResourceCard = memo(function ResourceCard({
       className={`rg-directory-card rg-category-${category.id} pdxPlace--clickable${org.logoSurface === "light" ? " rg-directory-card--light-logo" : ""}`}
       onClick={() => onOpen(row)}
       footer={
-        <div className="rg-directory-footer" onClick={(event) => event.stopPropagation()}>
-          <button className={`pdx-glass-rebind pdxBtn${["safety", "legal", "arts", "youth", "harm-reduction"].includes(category.id) ? " rg-contact-white" : ""}`} aria-label={`View details for ${org.name}`} onClick={() => onOpen(row)}>
+        <div className="rg-directory-footer">
+          <button className={`pdx-glass-rebind pdxBtn${["safety", "legal", "arts", "youth", "harm-reduction"].includes(category.id) ? " rg-contact-white" : ""}`} aria-label={`View details for ${org.name}`} onClick={event => { event.stopPropagation(); onOpen(row); }}>
             View details <ArrowUpRight size={16} />
           </button>
         </div>
@@ -518,424 +482,114 @@ export default function Resources() {
     "ReZources | Zaylist",
     "Art, community, opportunity, care, and support for queer and trans Oregon. Explore local organizations and food pantries to find your next connection.",
   );
-  const initialDoor = new URLSearchParams(window.location.search).get("door");
-  const [categoryIds, setCategoryIds] = useState<string[]>(() => {
+  const readBrowseState = () => {
     const params = new URLSearchParams(window.location.search);
-    return params.get("view") === "all"
-      ? RESOURCE_CATEGORIES.map(({ id }) => id)
-      : (params.get("cat") || "").split(",").filter(id => RESOURCE_CATEGORIES.some(category => category.id === id));
-  });
-  const [intentChosen, setIntentChosen] = useState(initialDoor === "find" || initialDoor === "talk");
-  const [introPlayed, setIntroPlayed] = useState(() => initialDoor === "find" || initialDoor === "talk" || sessionStorage.getItem("rezources-door-intro-played") === "1");
-  useEffect(() => {
-    if (introPlayed) return;
-    const timer = window.setTimeout(() => {
-      setIntroPlayed(true);
-      sessionStorage.setItem("rezources-door-intro-played", "1");
-    }, 1300);
-    return () => window.clearTimeout(timer);
-  }, [introPlayed]);
-  useLayoutEffect(() => {
-    const previousRestoration = window.history.scrollRestoration;
-    window.history.scrollRestoration = "manual";
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    return () => { window.history.scrollRestoration = previousRestoration; };
-  }, []);
-
-  const [directoryRevealed, setDirectoryRevealed] = useState(initialDoor === "find");
-  const [mode, setMode] = useState<"directory" | "talk">(initialDoor === "talk" ? "talk" : "directory");
-  const lastDoor = useRef<"directory" | "talk">(initialDoor === "talk" ? "talk" : "directory");
-  const enteredFromQuestion = useRef(false);
-  const writeDoorUrl = useCallback((door: "find" | "talk" | null, ids: string[] = [], push = false) => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("door");
-    url.searchParams.delete("cat");
-    url.searchParams.delete("view");
-    if (door) url.searchParams.set("door", door);
-    if (door === "find" && ids.length) {
-      if (ids.length === RESOURCE_CATEGORIES.length) url.searchParams.set("view", "all");
-      else url.searchParams.set("cat", ids.join(","));
-    }
-    window.history[push ? "pushState" : "replaceState"]({}, "", `${url.pathname}${url.search}${url.hash}`);
-  }, []);
-  useEffect(() => {
-    const syncFromUrl = () => {
-      const params = new URLSearchParams(window.location.search);
-      const door = params.get("door");
-      const ids = params.get("view") === "all"
-        ? RESOURCE_CATEGORIES.map(({ id }) => id)
-        : (params.get("cat") || "").split(",").filter(id => RESOURCE_CATEGORIES.some(category => category.id === id));
-      setCategoryIds(ids);
-      setIntentChosen(door === "find" || door === "talk");
-      setDirectoryRevealed(door === "find");
-      if (door === "talk" || door === "find") lastDoor.current = door === "talk" ? "talk" : "directory";
-      setMode(lastDoor.current);
-    };
-    window.addEventListener("popstate", syncFromUrl);
-    return () => window.removeEventListener("popstate", syncFromUrl);
-  }, []);
-  const [searchTarget, setSearchTarget] = useState<string | null>(null);
-  const [showAllCards, setShowAllCards] = useState(false);
-  const [mobileExpandedCard, setMobileExpandedCard] = useState<string | null>(null);
+    const ids = (params.get("cat") || "").split(",").filter(id => RESOURCE_CATEGORIES.some(c => c.id === id));
+    return { ids: params.get("view") === "all" ? [] : ids, query: params.get("q") || "", layout: params.get("layout") === "grid" ? "grid" as const : "browse" as const, mode: params.get("door") === "talk" ? "talk" as const : "directory" as const };
+  };
+  const [initial] = useState(readBrowseState);
+  const [categoryIds, setCategoryIds] = useState<string[]>(initial.ids);
+  const [searchQuery, setSearchQuery] = useState(initial.query);
+  const [mode, setMode] = useState<"directory" | "talk">(initial.mode);
+  const [browseView, setBrowseView] = useState<BrowseView>(initial.layout);
   const [supportOpen, setSupportOpen] = useState(false);
-  const [safetyAnswer, setSafetyAnswer] = useState<"yes" | "no" | null>(null);
   const supportTrigger = useRef<HTMLElement | null>(null);
   const [detail, setDetail] = useState<Row | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
-  useEffect(() => {
-    const requested = new URLSearchParams(window.location.search).get("resource");
-    if (!requested) return;
-    const row = ROWS.find(({ org }) => org.name === requested || org.aliases?.includes(requested));
-    if (row) {
-      setDetail(row);
-      setDetailOpen(true);
-    }
-  }, []);
-  useEffect(() => {
-    const requested = new URLSearchParams(window.location.search).get("find");
-    if (!requested) return;
-    const row = ROWS.find(({ org }) => org.name === requested || org.aliases?.includes(requested));
-    if (!row) return;
-    setIntentChosen(true);
-    setDirectoryRevealed(true);
-    setCategoryIds([row.category.id]);
-    setMode("directory");
-    setShowAllCards(true);
-    setSearchTarget(row.org.name);
-  }, [location]);
-
-  const [mobile, setMobile] = useState(
-    () => window.matchMedia("(max-width: 600px)").matches,
-  );
   const detailTrigger = useRef<HTMLElement | null>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
-  const selectedCategories = RESOURCE_CATEGORIES.filter((c) => categoryIds.includes(c.id));
-  const rows = useMemo(
-    () =>
-      ROWS.filter((r) => categoriesFor(r).some((c) => categoryIds.includes(c.id))),
-    [categoryIds],
-  );
+  const [mobile, setMobile] = useState(() => window.matchMedia("(max-width: 600px)").matches);
   useEffect(() => {
     const media = window.matchMedia("(max-width: 600px)");
-    const change = () => setMobile(media.matches);
-    media.addEventListener("change", change);
-    return () => media.removeEventListener("change", change);
+    const sync = () => setMobile(media.matches);
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
   }, []);
-  const showResults = intentChosen && (mode === "directory" ? directoryRevealed : true);
-  const openDoor = (door: "find" | "talk") => {
-    enteredFromQuestion.current = !intentChosen;
-    setIntentChosen(true);
-    lastDoor.current = door === "talk" ? "talk" : "directory";
-    setMode(lastDoor.current);
-    setDirectoryRevealed(door === "find");
-    writeDoorUrl(door, door === "find" ? categoryIds : [], mobile && !intentChosen);
-    if (mobile) window.scrollTo({ top: 0, behavior: "instant" });
-    requestAnimationFrame(() => document.querySelector<HTMLElement>(door === "find" ? ".rg-step--categories h2" : ".rg-results-head h2")?.focus({ preventScroll: true }));
-  };
-  const backToQuestion = () => {
-    if (enteredFromQuestion.current) {
-      enteredFromQuestion.current = false;
-      window.history.back();
-    } else {
-      writeDoorUrl(null);
-      setIntentChosen(false);
-      setDirectoryRevealed(false);
-      setCategoryIds([]);
-      setMode(lastDoor.current);
-    }
-    window.scrollTo({ top: 0, behavior: "instant" });
-    requestAnimationFrame(() => document.querySelector<HTMLElement>(".rg-mode button[aria-pressed='true']")?.focus({ preventScroll: true }));
-  };
-  const scrollResourceRail = useCallback((track: HTMLElement | null, direction: number) => {
-    if (!track) return;
-    const cards = track.querySelectorAll<HTMLElement>(".rg-stack-card");
-    const card = cards[0];
-    const step = cards.length > 1
-      ? cards[1].offsetLeft - card.offsetLeft
-      : (card?.offsetWidth ?? track.clientWidth * .85) + (Number.parseFloat(getComputedStyle(track).columnGap) || 0);
-    track.scrollBy({
-      left: direction * step,
-      behavior: quietMotion ? "instant" : "smooth",
-    });
-  }, [quietMotion]);
   useEffect(() => {
-    if (!showResults || mode !== "directory" || showAllCards) return;
-    const tracks = Array.from(resultsRef.current?.querySelectorAll<HTMLElement>(".rg-stack-track") ?? []);
-    const activeCards = new Map<HTMLElement, HTMLElement>();
-    let frame = 0;
-    const updateActiveCards = () => {
-      frame = 0;
-      for (const track of tracks) {
-        const rect = track.getBoundingClientRect();
-        const visibleTop = Math.max(rect.top, 0);
-        const visibleBottom = Math.min(rect.bottom, window.innerHeight);
-        let active: HTMLElement | null = null;
-        if (visibleBottom > visibleTop && rect.right > 0 && rect.left < window.innerWidth) {
-          const x = Math.max(1, Math.min(window.innerWidth - 2, rect.left + rect.width / 2));
-          const y = (visibleTop + visibleBottom) / 2;
-          const card = document.elementFromPoint(x, y)?.closest<HTMLElement>(".rg-stack-card");
-          if (card && track.contains(card)) active = card;
-        }
-        const previous = activeCards.get(track);
-        if (previous === active) continue;
-        previous?.removeAttribute("data-stack-active");
-        if (active) {
-          active.setAttribute("data-stack-active", "true");
-          activeCards.set(track, active);
-        } else activeCards.delete(track);
-      }
+    const restore = () => {
+      const state = readBrowseState();
+      setCategoryIds(state.ids); setSearchQuery(state.query); setMode(state.mode); setBrowseView(state.layout);
     };
-    const scheduleUpdate = () => {
-      if (!frame) frame = requestAnimationFrame(updateActiveCards);
-    };
-    window.addEventListener("scroll", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", scheduleUpdate);
-    for (const track of tracks) track.addEventListener("scroll", scheduleUpdate, { passive: true });
-    scheduleUpdate();
-    return () => {
-      if (frame) cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", scheduleUpdate);
-      window.removeEventListener("resize", scheduleUpdate);
-      for (const track of tracks) {
-        track.removeEventListener("scroll", scheduleUpdate);
-        activeCards.get(track)?.removeAttribute("data-stack-active");
-      }
-    };
-  }, [showResults, mode, showAllCards, rows]);
-  function choose(id: string | null) {
-    setDirectoryRevealed(true);
-    const opening = Boolean(id && !categoryIds.includes(id));
-    setCategoryIds((ids) => {
-      const next = id === null ? [] : ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
-      writeDoorUrl("find", next);
-      return next;
-    });
-    setMode("directory");
-    if (mobile && id && opening) window.setTimeout(() => document.getElementById(`resource-stack-${id}`)?.scrollIntoView({ behavior: quietMotion ? "instant" : "smooth", block: "start" }), 300);
-  }
+    window.addEventListener("popstate", restore);
+    return () => window.removeEventListener("popstate", restore);
+  }, []);
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("cat"); url.searchParams.delete("view"); url.searchParams.delete("q"); url.searchParams.delete("layout");
+    url.searchParams.set("door", mode === "talk" ? "talk" : "find");
+    if (categoryIds.length) url.searchParams.set("cat", categoryIds.join(","));
+    if (searchQuery.trim()) url.searchParams.set("q", searchQuery.trim());
+    if (browseView !== "browse") url.searchParams.set("layout", browseView);
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+  }, [categoryIds, searchQuery, mode, browseView]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get("resource") || params.get("find");
+    const row = requested && ROWS.find(({ org }) => org.name === requested || org.aliases?.includes(requested));
+    if (row) { setDetail(row); setDetailOpen(true); }
+  }, [location]);
   const openDetail = useCallback((row: Row) => {
     detailTrigger.current = document.activeElement as HTMLElement;
-    setDetail(row);
-    setDetailOpen(true);
+    setDetail(row); setDetailOpen(true);
   }, []);
-  useEffect(() => {
-    if (!searchTarget || !showResults) return;
-    let frame = 0;
-    let settleTimer = 0;
-    let tries = 0;
-    const findCard = () => {
-      const card = Array.from(document.querySelectorAll<HTMLElement>("[data-resource-search-card]"))
-        .find((item) => item.dataset.resourceSearchCard === searchTarget);
-      if (!card && tries++ < 90) { frame = requestAnimationFrame(findCard); return; }
-      if (card) {
-        // Let the survey reveal and dialog close finish before positioning the card.
-        settleTimer = window.setTimeout(() => {
-          card.scrollIntoView({ behavior: quietMotion ? "instant" : "smooth", block: "center", inline: "center" });
-          card.focus({ preventScroll: true });
-          card.classList.add("rg-search-hit");
-          window.setTimeout(() => card.classList.remove("rg-search-hit"), 2200);
-          setSearchTarget(null);
-        }, quietMotion ? 0 : 420);
-      } else {
-        setSearchTarget(null);
-      }
-    };
-    frame = requestAnimationFrame(findCard);
-    return () => { cancelAnimationFrame(frame); window.clearTimeout(settleTimer); };
-  }, [searchTarget, showResults, quietMotion]);
+  const choose = (id: string) => {
+    setMode("directory");
+    setCategoryIds(ids => id === "ALL" ? [] : ids.includes(id) ? ids.filter(value => value !== id) : [...ids, id]);
+  };
+  const clear = () => { setSearchQuery(""); setCategoryIds([]); };
+  const rows = useMemo(() => ROWS.filter(row => {
+    if (categoryIds.length && !categoriesFor(row).some(c => categoryIds.includes(c.id))) return false;
+    const query = searchQuery.trim().toLowerCase();
+    return !query || [row.org.name, row.org.desc, row.org.sub, row.org.scope, row.org.addr, ...(row.org.aliases || []), ...(row.org.serviceTags || []), ...categoriesFor(row).map(c => c.name)].filter(Boolean).join(" ").toLowerCase().includes(query);
+  }), [categoryIds, searchQuery]);
+  const selectedCategories = RESOURCE_CATEGORIES.filter(c => !categoryIds.length || categoryIds.includes(c.id));
+  const renderCard = (row: Row) => <div key={row.org.name} className="placez-card-surface eb-original-card">
+    <ResourceCard row={row} onOpen={openDetail} />
+  </div>;
   return (
-    <div className="resources-page rg-door-path" data-door={intentChosen ? mode === "talk" ? "talk" : "find" : "question"} data-intro-play={!introPlayed}>
+    <div className="eb-page eb-page--resources">
       {lightweightBackground
         ? <div className="rg-stream-background rg-stream-background--mobile-fallback" aria-hidden="true" />
         : <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>}
-      <header className="rg-intro rg-wrap">
-        <div className="rg-intro-top">
-          <span className="rg-eyebrow">
-            ReZources / All the ways we show up
-          </span>
-
+      <BrowseHeader title="ReZources" logo="/brand/family/rezources-mobile.webp" kicker="Oregon · All the ways we show up"
+        description="Art, community, opportunity, care, and support for queer and trans Oregon. Find your next connection.">
+        <BoardShareButton title="ReZources" path="/rezources" card={{ room: "ReZources", mark: "/brand/family/rezources-mobile.webp", line: "All the ways we show up." }} />
+        <BoardFollowButton board="rezources" />
+      </BrowseHeader>
+      <div className="eb-frame">
+        <BrowseControls title="ReZources" categories={[{id:"ALL",label:"All resources",color:"var(--neon-cyan)",count:ROWS.length}, ...RESOURCE_CATEGORIES.map((c, i) => ({id:c.id,label:LABELS[i],color:c.color,count:ROWS.filter(row => categoriesFor(row).some(category => category.id === c.id)).length}))]}
+          selected={categoryIds.length ? categoryIds : ["ALL"]} onSelect={choose} query={searchQuery} onSearch={value => {setSearchQuery(value); setMode("directory");}} view={browseView} onView={value => {setBrowseView(value); setMode("directory");}}>
+          <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("rezources")} aria-label="Explore resources on Mapz"><Map size={19} /><span>Map</span></a>
+          <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Talk to someone" aria-pressed={mode === "talk"} onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} /><span>Talk to someone</span></button>
+          <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Immediate safety and support" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}><ShieldAlert size={19} /></button>
+        </BrowseControls>
+        <div className="eb-body">
+          <aside className="eb-side" aria-label="ReZources filters and support">
+            <div className="eb-panel eb-desktop-panel"><h2>Categories</h2><div className="eb-side-categories" role="group" aria-label="Filter resources">
+              <button type="button" aria-pressed={!categoryIds.length} onClick={() => choose("ALL")}>All resources</button>
+              {RESOURCE_CATEGORIES.map((c, i) => <button type="button" key={c.id} aria-pressed={categoryIds.includes(c.id)} onClick={() => choose(c.id)}>{LABELS[i]}</button>)}
+            </div></div>
+            <div className="eb-panel eb-desktop-panel"><h3>A person on the other end.</h3><p>Choose the line that fits what you need.</p>
+              <button type="button" className="eb-tool pdx-glass-rebind" onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} />{mode === "talk" ? "Back to resources" : "Talk to someone"}</button>
+              <button type="button" className="eb-clear" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}>Immediate safety & support</button>
+            </div>
+            <div className="eb-panel eb-desktop-panel"><h3>Know someone we should know?</h3><Link className="eb-tool pdx-glass-rebind" href="/contact">Suggest a resource<ArrowUpRight size={16} /></Link></div>
+          </aside>
+          <section className="eb-results" aria-label="Resource results">
+            {mode === "talk" ? <><div className="eb-result-head"><h2>A person on the other end.</h2><button type="button" className="eb-clear" onClick={() => setMode("directory")}>Back to resources</button></div><div id="resource-talk-results"><TalkOptions /></div></> : <>
+              <div className="eb-result-head"><p role="status">{rows.length} resource{rows.length === 1 ? "" : "s"}</p>{(categoryIds.length > 0 || searchQuery) && <button type="button" className="eb-clear" onClick={clear}>Clear filters</button>}</div>
+              {!rows.length ? <BrowseStatus title="No resources match your search" description="Try a broader search or another category." actionLabel="Clear filters" onAction={clear} /> : browseView === "browse" ?
+                <div className="eb-lanes">{selectedCategories.map(category => {
+                  const group = rows.filter(row => categoriesFor(row).some(c => c.id === category.id)).sort((a, b) => Number(b.category.id === category.id) - Number(a.category.id === category.id));
+                  return group.length ? <BrowseLane key={category.id} title={category.name} color={category.color} count={group.length}>{group.map(row => renderCard({...row, sectionCategory:category}))}</BrowseLane> : null;
+                })}</div> : <div className="eb-grid">{rows.map(renderCard)}</div>}
+            </>}
+          </section>
         </div>
-        <RezourcesLogo quietMotion={Boolean(quietMotion)} />
-          <div className="rg-intro-actions">
-            <BoardShareButton title="ReZources" path="/rezources" card={{ room: "ReZources", mark: "/brand/family/rezources-mobile.webp", line: "All the ways we show up." }} />
-            <BoardFollowButton board="rezources" />
-          </div>
-
-      </header>
-      <section className="rg-layout rg-wrap">
-        <aside className="rg-controls" data-mode={mode} aria-label="Choose ReZources">
-          <div className="rg-step rg-step--intent">
-            <div>
-              <span className="rg-eyebrow"><span className="rg-step-number" aria-hidden="true">01</span>Start here</span>
-              <h2>What do you need?</h2>
-              <LayoutGroup id="rezources-mode">
-              <div className="rg-mode rg-mode--animated pdx-glass-rebind">
-                <button
-                  aria-pressed={mode === "directory"}
-                  onClick={() => openDoor("find")}
-                >
-                  {mode === "directory" && <motion.span className="rg-mode-highlight" aria-hidden="true" layoutId={quietMotion ? undefined : "active-mode"} transition={{ type: "spring", bounce: 0, duration: 0.25 }} />}
-                  <span className="rg-mode-label">Find a resource</span>
-                </button>
-                <button
-                  aria-pressed={mode === "talk"}
-                  aria-expanded={mode === "talk"}
-                  aria-controls="resource-talk-results"
-                  onClick={() => openDoor("talk")}
-                >
-                  {mode === "talk" && <motion.span className="rg-mode-highlight" aria-hidden="true" layoutId={quietMotion ? undefined : "active-mode"} transition={{ type: "spring", bounce: 0, duration: 0.25 }} />}
-                  <span className="rg-mode-label">Talk to someone</span>
-                </button>
-              </div>
-              </LayoutGroup>
-              <button type="button" className="discovery-skip" onClick={() => { const ids = RESOURCE_CATEGORIES.map(c => c.id); setIntentChosen(true); setMode("directory"); setCategoryIds(ids); setDirectoryRevealed(true); setShowAllCards(false); writeDoorUrl("find", ids, mobile && !intentChosen); window.setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: quietMotion ? "instant" : "smooth", block: "start" }), 100); }}>Skip to view all</button>
-            </div>
-          </div>
-          <AnimatePresence initial={false}>
-          {intentChosen && mode === "directory" && <motion.div key="categories" initial={quietMotion ? false : { opacity: 0, x: mobile ? 36 : 0, height: mobile ? "auto" : 0 }} animate={{ opacity: 1, x: 0, height: "auto" }} exit={{ opacity: 0, x: mobile ? -36 : 0, height: mobile ? "auto" : 0 }} transition={{ duration: quietMotion ? 0 : 0.24, ease: "easeInOut" }} className="rg-step rg-step--categories">
-            <div>
-              <button type="button" className="rg-door-back" onClick={backToQuestion}><ChevronLeft size={20} aria-hidden="true" /> Back to the question</button>
-              <span className="rg-eyebrow rg-muted"><span className="rg-step-number" aria-hidden="true">02</span>Explore categories</span>
-              <h2 tabIndex={-1}>I'm looking for…</h2>
-              <p className="rg-multiselect-hint">Choose one or more categories.</p>
-              <div
-                className="rg-options"
-                role="group"
-                aria-label="Resource categories"
-              >
-                {RESOURCE_CATEGORIES.map((c, i) => {
-                  const Icon = ICONS[i];
-                  return (
-                    <ResourceFilterButton
-                      quietMotion={Boolean(quietMotion)}
-                      key={c.id}
-                      data-category-id={c.id}
-                      className="pdx-glass-rebind"
-                      aria-pressed={categoryIds.includes(c.id)}
-                      style={{ "--res-accent": c.color } as CSSProperties}
-                      onClick={() => choose(c.id)}
-                    >
-                      <Icon size={18} />
-                      <span>{LABELS[i]}</span>
-                      <small>{ROWS.filter(row => categoriesFor(row).some(category => category.id === c.id)).length} resources</small>
-                      <i aria-hidden="true">{categoryIds.includes(c.id) && <Check size={14} />}</i>
-                    </ResourceFilterButton>
-                  );
-                })}
-                <button type="button" className="rg-select-tile" aria-label="Select all categories" onClick={() => { const ids = RESOURCE_CATEGORIES.map(c => c.id); setDirectoryRevealed(true); setCategoryIds(ids); writeDoorUrl("find", ids); }}>
-                  <Check size={20} aria-hidden="true" /><span>Select all</span>
-                </button>
-                <button type="button" className="rg-select-tile rg-select-tile--clear" aria-label="Deselect all categories" onClick={() => { setDirectoryRevealed(true); setCategoryIds([]); writeDoorUrl("find"); }}>
-                  <X size={20} aria-hidden="true" /><span>Deselect all</span>
-                </button>
-              </div>
-            </div>
-          </motion.div>}
-          </AnimatePresence>
-        </aside>
-        {showResults && <motion.div
-          initial={quietMotion ? false : { opacity: 0, x: mobile ? 36 : 0, y: mobile ? 0 : 24 }}
-          animate={{ opacity: 1, x: 0, y: 0 }}
-          transition={{ duration: quietMotion ? 0 : 0.4 }}
-          className="rg-results"
-          ref={resultsRef}
-          tabIndex={-1}
-          aria-label="Resource results"
-        >
-          {mode === "directory" && mobile && selectedCategories.length > 0 && <nav className="rg-selected-categories" aria-label="Selected categories">
-            <button type="button" className="rg-selected-edit" onClick={() => document.querySelector(".rg-step--categories")?.scrollIntoView({ behavior: quietMotion ? "instant" : "smooth" })}>Edit</button>
-            {selectedCategories.map(category => <button type="button" key={category.id} style={{ "--res-accent": category.color } as CSSProperties} onClick={() => document.getElementById(`resource-stack-${category.id}`)?.scrollIntoView({ behavior: quietMotion ? "instant" : "smooth" })}>{category.name} <span>{ROWS.filter(row => categoriesFor(row).some(item => item.id === category.id)).length}</span></button>)}
-          </nav>}
-          {mode === "talk" && <>
-            <div className="rg-results-head">
-              <button type="button" className="rg-door-back" onClick={backToQuestion}><ChevronLeft size={20} aria-hidden="true" /> Back to the question</button>
-              <span className="rg-eyebrow rg-results-step">Talk to someone</span>
-              <h2 tabIndex={-1}>A person on the other end.</h2>
-              <p>Choose the line that fits what you need.</p>
-            </div>
-          </>}
-          {mode === "talk" ? (
-            <div id="resource-talk-results"><TalkOptions /></div>
-          ) : (
-            <>
-              {showAllCards && <div className="rg-stack-controls">
-                <button type="button" className="pdx-glass-rebind pdxBtn" onClick={() => setShowAllCards(false)}>Show rails</button>
-              </div>}
-              <div className="rg-resource-stacks" data-view-all={showAllCards}>
-                {rows.length === 0 && <p className="rg-empty">Choose a category above, or select all to see every resource.</p>}
-                {selectedCategories.map((type) => {
-                  const group = rows
-                    .filter(row => categoriesFor(row).some(c => c.id === type.id))
-                    .sort((a, b) => Number(b.category.id === type.id) - Number(a.category.id === type.id));
-                  if (!group.length) return null;
-                  const sectionId = `resource-stack-${type.id}`;
-                  return <section key={type.id} className="rg-resource-stack-section" aria-labelledby={`${sectionId}-title`}>
-                    <header className="rg-rail-heading">
-                      <span className="rg-eyebrow">{type.name}</span>
-                      <h2 id={`${sectionId}-title`}>{CATEGORY_COPY[type.id].headline}</h2>
-                      <p className="rg-rail-copy">{CATEGORY_COPY[type.id].description}</p>
-                      <p className="rg-rail-count">{group.length} resource{group.length === 1 ? "" : "s"}</p>
-                      {group.length > 1 && <p className="rg-rail-swipe-hint">Swipe left · tap a card to preview</p>}
-                      {!showAllCards && group.length > 1 && <div className="rg-rail-nav" role="group" aria-label={`${type.name} rail controls`}>
-                        <button type="button" aria-label={`Previous ${type.name} resource`} onClick={() => scrollResourceRail(document.getElementById(sectionId), -1)}><ChevronLeft aria-hidden="true" /></button>
-                        <button type="button" aria-label={`Next ${type.name} resource`} onClick={() => scrollResourceRail(document.getElementById(sectionId), 1)}><ChevronRight aria-hidden="true" /></button>
-                      </div>}
-                    </header>
-                    <ContainerScroll id={sectionId} className="rg-stack-track" role="region" aria-label={`${type.name} resource cards`} tabIndex={0} onScroll={() => {
-                      if (mobileExpandedCard) setMobileExpandedCard(null);
-                    }} onKeyDown={(event) => {
-                      if (showAllCards || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
-                      event.preventDefault();
-                      scrollResourceRail(event.currentTarget, event.key === "ArrowRight" ? 1 : -1);
-                    }}>
-                      {group.map((row, index) => <div
-                        key={row.org.name}
-                        className="sticky rg-card-reveal rg-stack-card"
-                        tabIndex={-1}
-                        data-resource-search-card={row.org.name}
-                        data-mobile-expanded={mobileExpandedCard === `${type.id}:${row.org.name}` ? "true" : undefined}
-                        onClickCapture={(event) => {
-                          if (showAllCards || !window.matchMedia("(max-width: 719px) and (pointer: coarse)").matches) return;
-                          if (event.target instanceof Element && event.target.closest("button, a")) return;
-                          const cardKey = `${type.id}:${row.org.name}`;
-                          if (mobileExpandedCard !== cardKey) {
-                            event.stopPropagation();
-                            setMobileExpandedCard(cardKey);
-                          }
-                        }}
-                        style={{
-                          top: `calc(var(--rg-stack-top) + ${Math.min(index, 4) * 12}px)`,
-                          zIndex: index * 10,
-                          "--rg-fan-rotation": `${STACK_ROTATIONS[index % STACK_ROTATIONS.length]}deg`,
-                        } as CSSProperties}
-                      >
-                        <ResourceCard row={{ ...row, sectionCategory: type }} onOpen={openDetail} />
-                      </div>)}
-                    </ContainerScroll>
-                  </section>;
-                })}
-              </div>
-            </>
-          )}
-        </motion.div>}
-      </section>
-      {showResults && <footer className="rg-footer rg-wrap">
-        <div>
-          <span className="rg-eyebrow">
-            Built by community. Kept by community.
-          </span>
-          <h2>Know someone we should know?</h2>
-        </div>
-        <Link className="pdx-glass-rebind pdxBtn" href="/contact">
-          Suggest a resource <ArrowUpRight size={16} />
-        </Link>
-      </footer>}
-
-      <div className="rg-reassurance rg-bottom-help rg-wrap">
-        <p>Not sure? <a href="tel:211">Call 211info</a> for help finding a starting point.</p>
+        <footer className="eb-footer"><h2>Know someone we should know?</h2><Link className="eb-tool pdx-glass-rebind" href="/contact">Suggest a resource<ArrowUpRight size={16} /></Link></footer>
+        <div className="rg-reassurance"><p>Not sure? <a href="tel:211">Call 211info</a> for help finding a starting point.</p></div>
       </div>
 
-      <Drawer.Root open={supportOpen} onOpenChange={setSupportOpen} direction={mobile ? "bottom" : "right"} shouldScaleBackground={false} dismissible closeThreshold={0.2}>
+      <Drawer.Root autoFocus open={supportOpen} onOpenChange={setSupportOpen} direction={mobile ? "bottom" : "right"} shouldScaleBackground={false} dismissible closeThreshold={0.2}>
         <Drawer.Portal>
           <Drawer.Overlay className="rg-overlay-backdrop" />
           <Drawer.Content
@@ -954,20 +608,17 @@ export default function Resources() {
         </Drawer.Portal>
       </Drawer.Root>
 
-      <Drawer.Root
+      <Dialog.Root
         open={detailOpen}
         onOpenChange={setDetailOpen}
-        direction={mobile ? "bottom" : "right"}
-        shouldScaleBackground={false}
-        dismissible
-        closeThreshold={0.2}
       >
-        <Drawer.Portal>
-          <Drawer.Overlay className="rg-overlay-backdrop" />
-          <Drawer.Content
-            className={`pdx-glass-rebind rg-overlay rg-drawer rg-resource-detail rg-category-${(detail?.sectionCategory ?? detail?.category)?.id || "health"} ${mobile ? "rg-drawer-mobile" : "rg-drawer-desktop"}`}
+        <Dialog.Portal>
+          <Dialog.Overlay className="rg-overlay-backdrop eb-detail-backdrop" />
+          <Dialog.Content
+            className={`pdx-glass-rebind rg-overlay rg-drawer rg-resource-detail event-modal event-modal--approved event-modal--reference eb-detail eb-detail--resource rg-category-${(detail?.sectionCategory ?? detail?.category)?.id || "health"}`}
             data-quiet-motion={quietMotion ? "true" : undefined}
             style={{
+              "--event-accent": (detail?.sectionCategory ?? detail?.category)?.color || "var(--neon-cyan)",
               "--resource-accent": (detail?.sectionCategory ?? detail?.category)?.color || "var(--neon-cyan)",
               "--c": (detail?.sectionCategory ?? detail?.category)?.color || "var(--neon-cyan)",
               "--rg-category-gradient": (detail?.sectionCategory ?? detail?.category)?.color || "var(--neon-cyan)",
@@ -978,31 +629,27 @@ export default function Resources() {
               if (target?.isConnected) target.focus();
               else
                 document
-                  .querySelector<HTMLButtonElement>(".rg-mode button")
+                  .querySelector<HTMLButtonElement>(".eb-category")
                   ?.focus();
             }}
           >
-            {detail && <div className="rg-detail-art" aria-hidden="true">
-              <ResourceCardMotif name={detail.org.name} category={(detail.sectionCategory ?? detail.category).id} />
-              <div className="rg-category-wash" />
-            </div>}
-            <div className="rg-category-edge" aria-hidden="true" />
-            {(
-              <Drawer.Handle
-                className="rg-drawer-handle"
-                aria-label="Drag to close resource"
-              />
-            )}
-            <Drawer.Close className="rg-close" aria-label="Close resource">
-              <X size={20} />
-            </Drawer.Close>
+            <div className="event-modal__chrome">
+              <div className="detail-actions">
+                {detail && <BoardShareButton title={detail.org.name} path={`/rezources?resource=${encodeURIComponent(detail.org.name)}`} />}
+                <Dialog.Close className="detail-actions__close" aria-label="Close resource"><X size={20} aria-hidden="true" /></Dialog.Close>
+              </div>
+            </div>
             {detail && (
-              <div className="rg-drawer-body">
+              <div className="rg-drawer-body event-modal__scroll">
                 <div className="rg-detail-primary">
-                <div className="rg-detail-logo">
+                <div className="rg-detail-logo eb-detail__art">
+                  <div className="rg-detail-art" aria-hidden="true">
+                    <ResourceCardMotif name={detail.org.name} category={(detail.sectionCategory ?? detail.category).id} />
+                    <div className="rg-category-wash" />
+                  </div>
                   <Mark org={detail.org} />
                 </div>
-                <Drawer.Title>{detail.org.name}</Drawer.Title>
+                <Dialog.Title className="event-modal__title">{detail.org.name}</Dialog.Title>
                 <div className="rg-detail-tags">
                   {tagsFor(detail).map((category, index) => (
                     <span className="rg-category-tag" data-category-id={category.id} key={category.id}>
@@ -1011,86 +658,7 @@ export default function Resources() {
                   ))}
                 </div>
 
-                {detail.org.sub && <p>{detail.org.sub}</p>}
-                <Drawer.Description>{detail.org.desc}</Drawer.Description>
-                {detail.org.sourceChecked && (
-                  <a
-                    className="rg-source-check"
-                    href={detail.org.sourceUrl || detail.org.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Service page checked {detail.org.sourceChecked}{" "}
-                    <ArrowUpRight size={13} />
-                  </a>
-                )}
-                {detail.org === FOOD_RESOURCE && (
-                  <>
-                    <a className="pdx-glass-rebind pdxBtn pdxBtn--solid rg-food-finder" href="https://foodfinder.oregonfoodbank.org/" target="_blank" rel="noopener noreferrer">
-                      Find food near you <ArrowUpRight size={22} aria-hidden="true" />
-                    </a>
-                    <p className="rg-food-finder-caption">Oregon Food Bank’s Food Finder · Search by location, day, and food type.</p>
-                    <details className="rg-detail-disclosure"><summary>Food pantries<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content"><FoodPantryList /></div></details>
-                  </>
-                )}
-                {detail.org.locations && detail.org !== FOOD_RESOURCE && (
-                  <details className="rg-org-locations rg-detail-disclosure" aria-label="Locations">
-                    <summary>Locations<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content">
-                    {detail.org.locations.map((location) => (
-                      <div className="rg-org-section" key={location.address}>
-                        <h4>{location.name}</h4>
-                        <p>{location.address}</p>
-                        {location.hours && <p>{location.hours}</p>}
-                        {location.phone && <ResourcePhone org={detail.org} href={location.phone} label={location.name} />}
-                        <a className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: location.address, name: location.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>
-                        {location.sourceUrl && <a className="rg-safety-source" href={location.sourceUrl} target="_blank" rel="noopener noreferrer">Official location details <ArrowUpRight size={13} /></a>}
-                      </div>
-                    ))}
-                  </div></details>
-                )}
-                {detail.org.programs && (
-                  <details className="rg-org-programs rg-detail-disclosure" aria-label="Programs and services">
-                    <summary>Programs & services<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content">
-                    {detail.org.programs.map((program) => (
-                      <div className="rg-org-section" key={program.name}>
-                        <h4>{program.name}</h4>
-                        <p>{program.desc}</p>
-                        <p>{program.scope}</p>
-                        {program.addr && <p>{program.addr}</p>}
-                        {program.hours && <p>{program.hours}</p>}
-                        {program.phone && <ResourcePhone org={program} />}
-                        {program.addr && <a className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: program.addr, name: detail.org.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>}
-                        {program.url && <a className="pdx-glass-rebind pdxBtn" href={program.url} target="_blank" rel="noopener noreferrer">{program.cta || "Program details"} <ArrowUpRight size={16} /></a>}
-                        {program.sourceChecked && <a className="rg-safety-source" href={program.sourceUrl || program.url} target="_blank" rel="noopener noreferrer">Service page checked {program.sourceChecked} <ArrowUpRight size={13} /></a>}
-                      </div>
-                    ))}
-                  </div></details>
-                )}
-                </div>
-                <div className="rg-detail-secondary">
-                <details className="rg-detail-disclosure"><summary>Getting started & service details<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-detail-meta rg-disclosure-content">
-                  <span className="rg-eyebrow">How to start</span>
-                  <p>{detail.org.howToStart || detail.category.use}</p>
-                  {detail.org.hours && <>
-                    <span className="rg-eyebrow">Hours</span>
-                    <p>{detail.org.hours}</p>
-                  </>}
-                  {detail.org.contactSourceUrl && <a className="rg-source-check" href={detail.org.contactSourceUrl} target="_blank" rel="noopener noreferrer">Contact details checked {detail.org.contactChecked} <ArrowUpRight size={13} /></a>}
-                  {detail.org.mailingAddress && <>
-                    <span className="rg-eyebrow">Mailing address</span>
-                    <p>{detail.org.mailingAddress}</p>
-                  </>}
-                  <span className="rg-eyebrow">Where they serve</span>
-                  <p>{detail.org.scope}</p>
-                  {detail.org.addr && !detail.org.locations && (
-                    <>
-                      <span className="rg-eyebrow">Location</span>
-                      <p>{detail.org.addr}</p>
-                    </>
-                  )}
-                </div></details>
                 {detail.org.phone && <ResourcePhone org={detail.org} />}
-                <ResourceLocationMap key={detail.org.name} org={detail.org} color={(detail.sectionCategory ?? detail.category).color} />
                 <div className="rg-detail-actions">
                   {detail.org.email && <a className="pdx-glass-rebind pdxBtn" href={`mailto:${detail.org.email}`}>Email {detail.org.email} <ArrowUpRight size={16} /></a>}
                   {detail.org.url && (
@@ -1121,6 +689,85 @@ export default function Resources() {
                     </a>
                   )}
                 </div>
+                {detail.org.sub && <p>{detail.org.sub}</p>}
+                <Dialog.Description>{detail.org.desc}</Dialog.Description>
+                {detail.org.sourceChecked && (
+                  <a
+                    className="rg-source-check"
+                    href={detail.org.sourceUrl || detail.org.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Service page checked {detail.org.sourceChecked}{" "}
+                    <ArrowUpRight size={13} />
+                  </a>
+                )}
+                {detail.org === FOOD_RESOURCE && (
+                  <>
+                    <a className="pdx-glass-rebind pdxBtn pdxBtn--solid rg-food-finder" href="https://foodfinder.oregonfoodbank.org/" target="_blank" rel="noopener noreferrer">
+                      Find food near you <ArrowUpRight size={22} aria-hidden="true" />
+                    </a>
+                    <p className="rg-food-finder-caption">Oregon Food Bank’s Food Finder · Search by location, day, and food type.</p>
+                    <details className="rg-detail-disclosure event-modal__disclosure"><summary>Food pantries<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content"><FoodPantryList /></div></details>
+                  </>
+                )}
+                {detail.org.locations && detail.org !== FOOD_RESOURCE && (
+                  <details className="rg-org-locations rg-detail-disclosure event-modal__disclosure" aria-label="Locations">
+                    <summary>Locations<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content">
+                    {detail.org.locations.map((location) => (
+                      <div className="rg-org-section" key={location.address}>
+                        <h4>{location.name}</h4>
+                        <p>{location.address}</p>
+                        {location.hours && <p>{location.hours}</p>}
+                        {location.phone && <ResourcePhone org={detail.org} href={location.phone} label={location.name} />}
+                        <a className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: location.address, name: location.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>
+                        {location.sourceUrl && <a className="rg-safety-source" href={location.sourceUrl} target="_blank" rel="noopener noreferrer">Official location details <ArrowUpRight size={13} /></a>}
+                      </div>
+                    ))}
+                  </div></details>
+                )}
+                {detail.org.programs && (
+                  <details className="rg-org-programs rg-detail-disclosure event-modal__disclosure" aria-label="Programs and services">
+                    <summary>Programs & services<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content">
+                    {detail.org.programs.map((program) => (
+                      <div className="rg-org-section" key={program.name}>
+                        <h4>{program.name}</h4>
+                        <p>{program.desc}</p>
+                        <p>{program.scope}</p>
+                        {program.addr && <p>{program.addr}</p>}
+                        {program.hours && <p>{program.hours}</p>}
+                        {program.phone && <ResourcePhone org={program} />}
+                        {program.addr && <a className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: program.addr, name: detail.org.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>}
+                        {program.url && <a className="pdx-glass-rebind pdxBtn" href={program.url} target="_blank" rel="noopener noreferrer">{program.cta || "Program details"} <ArrowUpRight size={16} /></a>}
+                        {program.sourceChecked && <a className="rg-safety-source" href={program.sourceUrl || program.url} target="_blank" rel="noopener noreferrer">Service page checked {program.sourceChecked} <ArrowUpRight size={13} /></a>}
+                      </div>
+                    ))}
+                  </div></details>
+                )}
+                </div>
+                <div className="rg-detail-secondary">
+                <details className="rg-detail-disclosure event-modal__disclosure"><summary>Getting started & service details<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-detail-meta rg-disclosure-content">
+                  <span className="rg-eyebrow">How to start</span>
+                  <p>{detail.org.howToStart || detail.category.use}</p>
+                  {detail.org.hours && <>
+                    <span className="rg-eyebrow">Hours</span>
+                    <p>{detail.org.hours}</p>
+                  </>}
+                  {detail.org.contactSourceUrl && <a className="rg-source-check" href={detail.org.contactSourceUrl} target="_blank" rel="noopener noreferrer">Contact details checked {detail.org.contactChecked} <ArrowUpRight size={13} /></a>}
+                  {detail.org.mailingAddress && <>
+                    <span className="rg-eyebrow">Mailing address</span>
+                    <p>{detail.org.mailingAddress}</p>
+                  </>}
+                  <span className="rg-eyebrow">Where they serve</span>
+                  <p>{detail.org.scope}</p>
+                  {detail.org.addr && !detail.org.locations && (
+                    <>
+                      <span className="rg-eyebrow">Location</span>
+                      <p>{detail.org.addr}</p>
+                    </>
+                  )}
+                </div></details>
+                <ResourceLocationMap key={detail.org.name} org={detail.org} color={(detail.sectionCategory ?? detail.category).color} />
                 <small>
                   Check the organization's website for current hours, services,
                   and eligibility.
@@ -1128,9 +775,9 @@ export default function Resources() {
                 </div>
               </div>
             )}
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }

@@ -1,9 +1,10 @@
+import { useAuth } from "@/context/AuthContext";
+import AuthModal from "@/components/AuthModal";
 import { ArrowUpRight } from "lucide-react";
 import DetailActions from "@/components/DetailActions";
 import { useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
@@ -16,9 +17,10 @@ import "@/components/board/OpenBoardCard.css";
  * post on the board. Shared so the hub feed can open the identical card instead
  * of bouncing to the board page. Self-contained: owns the private-reply flow.
  *
- * Deep-glass SoT §2.4: --glass-card with magenta accent (#FF00CC) + quote motif.
+ * Deep-glass SoT §2.4: --glass-card with room accent (var(--room-mizzed)) + quote motif.
  */
 export type SpottedDetailModalProps = {
+  presentation?: "eventz";
   postId: number;
   title: string;
   body: string;
@@ -31,7 +33,7 @@ export type SpottedDetailModalProps = {
   onClose: () => void;
 };
 
-const MC_GLASS = "#FF00CC";
+const MC_GLASS = "var(--room-mizzed)";
 
 export default function SpottedDetailModal({
   postId,
@@ -44,10 +46,13 @@ export default function SpottedDetailModal({
   isMine = false,
   status = "ACTIVE",
   source,
+  presentation,
 }: SpottedDetailModalProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [showAuth,setShowAuth] = useState(false);
   const [replyBody, setReplyBody] = useState("");
-  const { dialogRef, requestClose } = useOpenCardClose(onClose);
+  const { dialogRef, requestClose } = useOpenCardClose(onClose, !showAuth);
 
   const [editing,setEditing]=useState(false);
   const [editTitle,setEditTitle]=useState(title);
@@ -90,6 +95,7 @@ export default function SpottedDetailModal({
   // Portal to <body> so the fixed-position overlay escapes any transformed
   // ancestor (e.g. the feed's ScrollReveal wrappers) and centers on the viewport.
   return createPortal(
+    <>
     <div className="board-detail-backdrop" onClick={requestClose}>
       <div
         ref={dialogRef}
@@ -97,7 +103,7 @@ export default function SpottedDetailModal({
         aria-modal="true"
         aria-label={title || "Missed connection"}
         tabIndex={-1}
-        className="board-detail-modal board-detail-modal--spotted board-detail-modal--glass board-open-card--shared"
+        className={`board-detail-modal board-detail-modal--spotted board-detail-modal--glass board-open-card--shared pdx-glass-rebind${presentation ? " ab-open-card" : ""}`}
         onClick={e => e.stopPropagation()}
         style={glassVars}
       >
@@ -125,6 +131,8 @@ export default function SpottedDetailModal({
         </div> : status !== "ACTIVE" ? <p role="status">This connection is closed.</p> : <div className="board-detail-modal__actions" style={{ position: "relative", zIndex: 1 }}>
           <textarea
             className="board-text-field"
+            aria-label="Private reply"
+            maxLength={500}
             value={replyBody}
             onChange={e => setReplyBody(e.target.value)}
             rows={3}
@@ -136,7 +144,7 @@ export default function SpottedDetailModal({
               accent="magenta"
               size="md"
               disabled={!replyBody.trim() || replyMutation.isPending}
-              onClick={() => replyMutation.mutate()}
+              onClick={() => user ? replyMutation.mutate() : setShowAuth(true)}
             >
               {replyMutation.isPending ? "Sending…" : "This is me"}
             </Button>
@@ -145,18 +153,20 @@ export default function SpottedDetailModal({
               accent="magenta"
               size="md"
               disabled={!replyBody.trim() || replyMutation.isPending}
-              onClick={() => replyMutation.mutate()}
+              onClick={() => user ? replyMutation.mutate() : setShowAuth(true)}
             >
               Reply anonymously
             </Button>
           </div>
-          <p className="board-copy-sm" style={{ marginTop: 12, color: "#6a675f", fontSize: "0.72rem" }}>
+          <p className="board-copy-sm" style={{ marginTop: 12, color: "var(--text-body)", fontSize: "0.72rem" }}>
             Replies open a private, anonymous inbox thread. Reveal your profile only when you are both ready.
           </p>
-          <details><summary>Report this connection</summary><label>Reason<input className="board-text-field" value={reportReason} onChange={e=>setReportReason(e.target.value)}/></label><Button disabled={!reportReason.trim()||reportMutation.isPending} onClick={()=>reportMutation.mutate()}>Send report</Button></details>
+          <details><summary>Report this connection</summary><label>Reason<input className="board-text-field" value={reportReason} onChange={e=>setReportReason(e.target.value)}/></label><Button disabled={!reportReason.trim()||reportMutation.isPending} onClick={()=>user ? reportMutation.mutate() : setShowAuth(true)}>Send report</Button></details>
         </div>}
       </div>
-    </div>,
+    </div>
+    {showAuth && <AuthModal onClose={()=>setShowAuth(false)} defaultTab="register"/>}
+    </>,
     document.body,
   );
 }

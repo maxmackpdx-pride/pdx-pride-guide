@@ -49,9 +49,9 @@ export type GiftingPost = {
 
 /** Deep-glass board accents (SoT §2.4) - Gifting board is lime; grab keeps orange cue. */
 const ACCENT = {
-  GIFT: "#CCFF00",
-  ISO: "#CCFF00",
-  GRAB: "#ff8c00",
+  GIFT: "var(--room-giftz)",
+  ISO: "var(--room-giftz)",
+  GRAB: "var(--room-giftz)",
 } as const;
 
 /**
@@ -128,10 +128,8 @@ export function kindLabel(post: GiftingPost) {
   return "Gift";
 }
 
-export function thumbGradient(post: GiftingPost) {
-  if (isOpenGrabPost(post)) return "linear-gradient(135deg,#ff8c00,#ccff00)";
-  if (post.postType === "ISO") return "linear-gradient(135deg,#ccff00,#a8e600)";
-  return "linear-gradient(135deg,#ccff00,#9fd600)";
+export function thumbGradient(_post: GiftingPost) {
+  return "linear-gradient(135deg,var(--room-giftz),var(--z-black))";
 }
 
 export function cardAccent(post: GiftingPost) {
@@ -291,12 +289,12 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
         .filter(Boolean)
         .join(" ")}
       style={glassVars}
-      onClick={onToggle}
-      role="button"
-      tabIndex={0}
+      onClick={expanded ? undefined : onToggle}
+      role={expanded ? undefined : "button"}
+      tabIndex={expanded ? undefined : 0}
       onKeyDown={e => {
         // Don't steal Space/Enter from the reply note textarea (or any field).
-        if (e.target !== e.currentTarget) return;
+        if (expanded || e.target !== e.currentTarget) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onToggle();
@@ -366,7 +364,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
       </div>
 
       {expanded && (
-        <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
+        <div className="board-listing-card__expand">
           {post.photoUrls?.length ? (
             <div className="gifting-photo-gallery" aria-label={`${post.photoUrls.length} listing photos`}>
               {post.photoUrls.map((url, index) => (
@@ -383,6 +381,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
           {!post.isMine && !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
             <div className="gifting-response">
               <textarea
+                aria-label="Note to the poster"
                 placeholder={
                   grab
                     ? "Say hi (optional), then head over."
@@ -415,7 +414,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
             </div>
           )}
           {post.isMine && (
-            <div className="gifting-owner">
+            <details className="gifting-owner"><summary>Manage your post{post.interests?.length ? ` · ${post.interests.length} responses` : ""}</summary>
               {editing ? <GiftPostEditor post={post} onClose={()=>setEditing(false)}/> : <button onClick={()=>setEditing(true)}>Edit listing</button>}
               {post.status === "PENDING" && (
                 <p className="gifting-pending-note">
@@ -471,7 +470,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
               >
                 <X size={14} /> Delete post
               </button>
-            </div>
+            </details>
           )}
           <details className="gifting-report">
             <summary><ShieldAlert size={13} /> Report</summary>

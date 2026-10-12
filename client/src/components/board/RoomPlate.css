@@ -5,7 +5,7 @@
   align-items: center;
   gap: 24px;
   padding: 32px 0 28px;
-  border-bottom: 1px solid #ffffff25;
+  border-bottom: 1px solid color-mix(in srgb,var(--text-hi) 15%,transparent);
 }
 .room-plate__mark {
   display: block;
@@ -17,7 +17,7 @@
   object-position: center;
 }
 .room-plate__line {
-  color: var(--text-body, #aaa4b2);
+  color: var(--text-body);
   font-size: 18px;
   font-weight: 600;
   line-height: 1.5;
@@ -34,10 +34,10 @@
   left: calc(50% + 118px);
   min-height: 0;
   padding: 4px;
-  border: 1px solid #050706;
+  border: 1px solid var(--z-black);
   border-radius: 22px;
-  background: rgba(0, 0, 0, .82);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, .04), inset 0 1px 0 rgba(255, 255, 255, .08), 0 12px 28px -18px #000;
+  background: color-mix(in srgb,var(--z-oled) 82%,transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--text-hi) 4%,transparent), inset 0 1px 0 color-mix(in srgb,var(--text-hi) 8%,transparent), 0 12px 28px -18px var(--z-oled);
 }
 .room-plate--compact .room-plate__actions { gap: 4px; }
 .room-plate--compact :is(.board-share-button, .board-follow-button) { min-height: 40px; border-radius: 18px; }

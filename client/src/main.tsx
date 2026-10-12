@@ -20,6 +20,7 @@ import "./fluent2-m3-cards.css";
 import "./components/nav.css";
 import "./section-consistency.css";
 import "@/components/ds/tokens/buttons.css";
+import "@/components/ds/card-secondary.css";
 
 // Fluent 2 depth + Material 3 states, governed by Zaylist color semantics.
 document.documentElement.dataset.zaylistCards = "fluent2-m3";

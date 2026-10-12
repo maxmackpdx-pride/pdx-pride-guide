@@ -4,7 +4,7 @@ import RoomPlate from "@/components/board/RoomPlate";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, ArrowUpRight, ChevronDown, Gift, MapPin, Plus, Search, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, ChevronDown, Gift, MapPin, Plus, Search } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -70,13 +70,13 @@ function GiftRail({ posts, type, selected, onSelect }: {
   return <>
     <Carousel setApi={setApi} opts={{ align: "start", dragFree: true, direction: "rtl" }} className="gigz-rail" dir="rtl">
       <CarouselContent className="gigz-rail__track">
-        {posts.map((post, index) => <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
-          {type === "GIFT" ? <button type="button" className="gigz-opportunity giftz-offer" style={{ "--gigz-accent": ["#ccff00", "#a4d84a", "#e1ff80", "#89d69d"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gift: ${post.title}`}>
+        {posts.map((post) => <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
+          {type === "GIFT" ? <button type="button" className="gigz-opportunity giftz-offer" style={{ "--gigz-accent": "var(--room-giftz)" } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gift: ${post.title}`}>
             <ResourceCardMotif name={post.title} category="community" />
             {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <span className="giftz-offer__fallback" aria-hidden="true"><Gift size={76} strokeWidth={1.2} /></span>}
             <span className="gigz-opportunity__shade" /><span className="gigz-opportunity__top"><span><em>{post.category || "GIFT OFFERED"}</em><small>{post.isDemo ? "DEMO LISTING" : `Gift offered · ${timeAgo(post.createdAt)}`}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
             <span className="gigz-opportunity__bottom"><strong>{post.title}</strong><span>{post.neighborhood || "Portland"} · {post.pickupPreference || "Message to coordinate"}</span><em>FREE</em></span>
-          </button> : <button type="button" className="gigz-talent giftz-iso" style={{ "--gigz-accent": ["#ccff00", "#b9eb75", "#e0ff87"][index % 3] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ISO: ${post.title}`}>
+          </button> : <button type="button" className="gigz-talent giftz-iso" style={{ "--gigz-accent": "var(--room-giftz)" } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ISO: ${post.title}`}>
             <ResourceCardMotif name={post.title} category="community" />
             <span className="gigz-talent__status"><span><i /> In search of</span><small>{post.isDemo ? "DEMO LISTING" : `Posted ${timeAgo(post.createdAt)}`}</small></span>
             <span className="gigz-talent__portrait">{post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <Search size={66} strokeWidth={1.2} aria-hidden="true" />}</span>
