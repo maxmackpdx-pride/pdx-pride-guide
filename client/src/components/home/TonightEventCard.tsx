@@ -51,9 +51,11 @@ export type TonightEventCardProps = {
   onToggleRsvp: (eventId: number) => void;
   onOpen: (listing: EventListing) => void;
   liveState?: TonightCardLive | null;
+  /** Extra class for the card's actions (the Events page registers them as events-action). */
+  actionClass?: string;
 };
 
-export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp, onOpen, liveState }: TonightEventCardProps) {
+export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp, onOpen, liveState, actionClass = "" }: TonightEventCardProps) {
   const admission = listing.admission === "FREE" ? "Free" : listing.admission === "SUGGESTED_DONATION" ? "Suggested donation" : listing.admission === "DOOR_FEE" ? "Door fee" : "Ticketed";
   // Saved cards show what moved since you saved them (last two weeks).
   const changedAt = listing.lastChangeAt ? Date.parse(listing.lastChangeAt) : NaN;
@@ -64,7 +66,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
     {poster
       ? <DayMotif day={listingDay(listing)} placement="card" />
       : <DayMotif day={listingDay(listing)} placement="art" className="tonight-card__motif-fill" />}
-    <RailShareButton href={eventPath(listing.id, listing.title, listing.dayOfWeek)} title={listing.title} />
+    <RailShareButton href={eventPath(listing.id, listing.title, listing.dayOfWeek)} title={listing.title} className={actionClass} />
     {liveState ? <LiveBadge live={liveState} /> : null}
     <div className="tonight-card__sheen pdx-glass-sheen--specular" aria-hidden="true" />
     <button className="tonight-card__open" type="button" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>
@@ -79,8 +81,8 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
       </div>
     </button>
     <footer className="tonight-card__footer">
-      <button type="button" className="tonight-card__save" aria-pressed={rsvped} aria-label={`${rsvped ? "Remove" : "Add"} ${listing.title} ${rsvped ? "from" : "to"} my schedule`} onClick={() => onToggleRsvp(listing.id)}><ZLineIcon name="favorite" size={18} filled={rsvped} />{rsvped ? "Saved" : "Save"}</button>
-      <button type="button" className="tonight-card__view" onClick={() => onOpen(listing)} aria-label={`View ${listing.title}`}>View event <ArrowUpRight size={17} aria-hidden="true" /></button>
+      <button type="button" className={`tonight-card__save ${actionClass}`.trim()} aria-pressed={rsvped} aria-label={`${rsvped ? "Remove" : "Add"} ${listing.title} ${rsvped ? "from" : "to"} my schedule`} onClick={() => onToggleRsvp(listing.id)}><ZLineIcon name="favorite" size={18} filled={rsvped} />{rsvped ? "Saved" : "Save"}</button>
+      <button type="button" className={`tonight-card__view ${actionClass}`.trim()} onClick={() => onOpen(listing)} aria-label={`View ${listing.title}`}>View event <ArrowUpRight size={17} aria-hidden="true" /></button>
     </footer>
   </article>;
 }

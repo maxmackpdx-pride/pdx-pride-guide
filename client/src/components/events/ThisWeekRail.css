@@ -42,6 +42,15 @@
 .events-week .week-day__label { position: relative; z-index: 3; display: block; margin-top: 6px; min-height: 2.08em; color: var(--text-hi); font: 800 16px/1.04 var(--font-display); text-transform: uppercase;
  }
 
+/* Closed day cards invert: the day color is the ground, motif lines and text go black.
+   The motif is grayscaled and inverted (neon lines to black, black ground to white),
+   then multiplied over the day color. */
+.events-week .week-day.is-closed .week-day__card { background: var(--c); color: var(--z-black); border-color: var(--z-black); }
+.events-week .week-day.is-closed .week-day__card .day-motif--art { opacity: 1; filter: grayscale(1) invert(1) contrast(1.35); mix-blend-mode: multiply; }
+.events-week .week-day.is-closed :is(.week-day__count, .week-day__hero, .week-day__date) { color: var(--z-black); text-shadow: none; }
+.events-week .week-day.is-closed .week-day__foot { border-top-color: color-mix(in srgb, var(--z-black) 35%, transparent); }
+.events-week .week-day.is-closed .week-day__tap { border-color: var(--z-black); background: var(--z-black); color: var(--c); box-shadow: none; }
+
 /* Fan: the day's real rail cards, full size, tucked behind and breathing out right. */
 .events-week .week-day__fan { position: absolute; top: 0; left: 0; z-index: 1; width: 136px; pointer-events: none; border-radius: 16px; transform-origin: 0% 100%; }
 .events-week .week-day__fan--1 { animation: week-fan-1 3.2s ease-in-out infinite; }

@@ -41,7 +41,7 @@ export default function EventRailCard({
       </button>
       <button
         type="button"
-        className="event-rail-card__save"
+        className="event-rail-card__save events-action events-action--icon"
         aria-pressed={saved}
         aria-label={`${saved ? "Remove" : "Add"} ${listing.title} ${saved ? "from" : "to"} my schedule`}
         onClick={() => onToggleSave(listing.id)}
