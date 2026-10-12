@@ -12,7 +12,7 @@ function quietMotion() {
 
 /**
  * Horizontal rail with clear swipe cues: edge fade + arrow on whichever side has
- * more cards, a progress bar under the row, and a one-time nudge the first time
+ * more cards, and a one-time nudge the first time
  * a rail scrolls into view (skipped in calm mode and reduced motion).
  */
 export default function EventsRail({ open, label, nudge = false, children }: { open: boolean; label: string; nudge?: boolean; children: ReactNode }) {
@@ -81,9 +81,6 @@ export default function EventsRail({ open, label, nudge = false, children }: { o
           <button type="button" className="events-rail-arrow events-rail-arrow--right" aria-label={`More in ${label}`} tabIndex={state.right ? 0 : -1} aria-hidden={!state.right} onClick={() => page(1)}>
             <ChevronRight size={20} aria-hidden="true" />
           </button>
-          <div className="events-rail-progress" aria-hidden="true">
-            <span style={{ width: `${state.thumb * 100}%`, transform: `translateX(${(state.progress * (1 - state.thumb) / Math.max(state.thumb, 0.01)) * 100}%)` }} />
-          </div>
         </>
       )}
     </div>

@@ -419,9 +419,6 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 .events-page .events-rail-wrap.has-left .events-rail-arrow--left,
 .events-page .events-rail-wrap.has-right .events-rail-arrow--right { opacity: 1; pointer-events: auto; }
 .events-page .events-rail-arrow:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }
-.events-page .events-rail-progress { position: absolute; left: 50%; width: 72px; transform: translateX(-50%); bottom: 2px; height: 2px; border-radius: 999px; background: color-mix(in srgb, var(--c) 18%, transparent); overflow: hidden; }
-.events-page .events-rail-progress > span { display: block; height: 100%; border-radius: inherit; background: color-mix(in srgb, var(--c) 45%, var(--text-meta)); box-shadow: none; transition: transform .12s linear; }
-@media (prefers-reduced-motion: reduce) { .events-page .events-rail-progress > span { transition: none; } }
 
 /* Rail card stamps: weekday code on posterless art, hidden under a live badge. */
 .event-rail-card--s .day-motif-code { font-size: 12px; left: 9px; top: 10px; }
