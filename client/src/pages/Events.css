@@ -443,3 +443,12 @@ html body .events-page.board-page--makeover .events-day-row .events-view-toggle_
   display: inline-flex; align-items: center; justify-content: center; background: var(--room-eventz); color: var(--z-black); font: 800 11px/1 var(--font-display); box-shadow: 0 0 0 2px var(--z-black); }
 html body .events-page.board-page--makeover .events-board-feed__sticky { padding-top: 0; padding-bottom: 0; border-bottom: 0; }
 html body .events-page.board-page--makeover .events-board-feed .board-active-feed__body { padding-top: 32px; }
+
+/* Desktop uses the mobile rails at identical card sizes (200px Happening now,
+   136px compact cards and day folders). Opened rails fill the wider row with
+   more columns at those same widths. */
+@media (min-width: 768px) {
+  .events-page .events-rail-sec--full .events-rail--open { grid-template-columns: repeat(auto-fill, 200px); }
+  .events-page .events-rail-sec--m .events-rail--open { grid-template-columns: repeat(auto-fill, 136px); }
+  .events-page .events-rail-sec--s .events-rail--open { grid-template-columns: repeat(auto-fill, 108px); }
+}

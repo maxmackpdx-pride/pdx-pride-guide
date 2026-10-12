@@ -589,7 +589,7 @@ export default function Events() {
     return bands.filter(b => b.items.length > 0);
   }, [activeDay, pastView, sortMode, filtered, now]);
 
-  // Mobile rails: the first band (now + soon merged on tonight) keeps the full
+  // Rails: the first band (now + soon merged on tonight) keeps the full
   // Eventz card at rail width; later bands use compact rail cards.
   const railBands = useMemo(() => {
     if (!tonightBands || !tonightBands.length) return null;
@@ -627,7 +627,8 @@ export default function Events() {
   const weekOpen = useCallback((listing: EventListing) => openEvent(listing), [openEvent]);
   const [openRails, setOpenRails] = useState<Set<string>>(() => new Set());
   useEffect(() => { setOpenRails(new Set()); }, [activeDay, activeFilters, searchQuery]);
-  const useRails = isMobile && viewMode === "grid" && railBands != null;
+  // Rails on every screen size: desktop uses the same rails and card sizes as mobile.
+  const useRails = viewMode === "grid" && railBands != null;
 
   const mySavedUpcoming = useMemo(
     () => liveEvents.filter(e => savedIds.has(e.id)).length,
