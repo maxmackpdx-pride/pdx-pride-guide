@@ -1,13 +1,66 @@
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { ChevronRight } from "lucide-react";
 import type { EventListing } from "@shared/multiDayEvents";
 import type { TonightCardLive } from "@/components/home/TonightEventCard";
 import { listingPosterUrl } from "@/lib/dsEvent";
 import EventsRail from "./EventsRail";
 import EventRailCard from "./EventRailCard";
-import DayMotif, { DAY_MOTIF_NAMES, motifDay } from "./DayMotif";
+import { DAY_MOTIF_NAMES, motifDay } from "./DayMotif";
 import SponsorRailCard, { SPONSOR_KINDS } from "./SponsorRailCard";
 import "./ThisWeekRail.css";
+
+const WEEK_INDEX: Record<string, number> = { MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6, SUN: 7 };
+
+function quiet() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    || document.documentElement.classList.contains("calm-mode")
+    || document.documentElement.dataset.calm === "true";
+}
+
+/**
+ * Covers: wide day names (MON, WED) step down so every name fills the same frame,
+ * and the cover art drifts with scroll like the big event card motifs: an 8px
+ * diagonal from page scroll, plus a little sideways drift as the rail slides.
+ */
+function useWeekCovers(ref: RefObject<HTMLElement>, key: number) {
+  useEffect(() => {
+    const sec = ref.current;
+    if (!sec) return;
+    const fit = () => sec.querySelectorAll<HTMLElement>(".week-day__hero").forEach(h => {
+      h.style.removeProperty("--hs");
+      const room = (h.parentElement?.clientWidth ?? 136) - 10;
+      if (h.scrollWidth > room) h.style.setProperty("--hs", `${(60 * room / h.scrollWidth).toFixed(1)}px`);
+    });
+    fit();
+    document.fonts?.ready.then(fit).catch(() => {});
+    if (quiet()) return;
+    const scroller = sec.querySelector<HTMLElement>(".events-rail") ?? sec;
+    let raf = 0;
+    const run = () => {
+      raf = 0;
+      const vh = window.innerHeight, vw = window.innerWidth;
+      sec.querySelectorAll<HTMLElement>(".week-day__cover").forEach(a => {
+        const r = a.parentElement!.getBoundingClientRect();
+        if (r.bottom < -80 || r.top > vh + 80) return;
+        const py = Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / (vh / 2 + r.height / 2)));
+        const px = Math.max(-1, Math.min(1, (r.left + r.width / 2 - vw / 2) / (vw / 2 + r.width / 2)));
+        const uy = py * 8, ux = px * 8 * 0.6;
+        a.style.transform = `translate3d(${(uy * 0.707 + ux).toFixed(2)}px, ${(uy * 0.707).toFixed(2)}px, 0)`;
+      });
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(run); };
+    kick();
+    window.addEventListener("scroll", kick, { passive: true });
+    window.addEventListener("resize", kick);
+    scroller.addEventListener("scroll", kick, { passive: true });
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", kick);
+      window.removeEventListener("resize", kick);
+      scroller.removeEventListener("scroll", kick);
+    };
+  }, [ref, key]);
+}
 
 export type WeekDay = { key: string; code: string; mon: string; dom: number; color: string; items: EventListing[] };
 
@@ -57,11 +110,14 @@ export default function ThisWeekRail({
             </div>
           ))}
           <button type="button" className="week-day__card" aria-expanded={isOpen} aria-label={`${isOpen ? "Close" : "Open"} ${d.code}, ${d.items.length} events`} onClick={toggle}>
-            <DayMotif day={code} placement="art" />
+            <span className="week-day__cover" aria-hidden="true" style={{ backgroundImage: `url(/motifs/days/covers/${code.toLowerCase()}.webp)` }} />
             <span className="week-day__body">
-              <span className="week-day__count">{d.items.length} {d.items.length === 1 ? "event" : "events"}</span>
-              <span className="week-day__hero">{d.code}</span>
-              <span className="week-day__date">{d.mon} {d.dom}</span>
+              <span className="week-day__top">
+                <span className="week-day__count">{d.items.length} {d.items.length === 1 ? "event" : "events"}</span>
+                <span className="week-day__index" aria-hidden="true">D/0{WEEK_INDEX[code]}</span>
+              </span>
+              <span className="week-day__hero" data-t={d.code}>{d.code}</span>
+              <span className="week-day__date">{d.mon}<b>{d.dom}</b></span>
             </span>
             <span className="week-day__foot"><span className="week-day__tap">{isOpen ? "Close" : "Open"} <ChevronRight size={12} strokeWidth={3} aria-hidden="true" /></span></span>
           </button>
@@ -90,11 +146,14 @@ export default function ThisWeekRail({
     return out;
   }, [visible, open, offset, savedIds, liveStateFor, onToggleSave, onOpen]);
 
+  const secRef = useRef<HTMLElement>(null);
+  useWeekCovers(secRef, children.length);
+
   if (!visible.length) return null;
   const first = visible[0];
   const last = visible[visible.length - 1];
   return (
-    <section className="events-rail-sec events-rail-sec--m events-week pdx-glass-rebind" style={{ "--c": "var(--neon-cyan)" } as CSSProperties} aria-labelledby="events-rail-week">
+    <section ref={secRef} className="events-rail-sec events-rail-sec--m events-week pdx-glass-rebind" style={{ "--c": "var(--neon-cyan)" } as CSSProperties} aria-labelledby="events-rail-week">
       <div className="events-rail-sec__head">
         <h3 id="events-rail-week"><span aria-hidden="true" />This week<small>{first.code} {first.dom} to {last.code} {last.dom}</small></h3>
       </div>
