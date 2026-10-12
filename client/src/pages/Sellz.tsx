@@ -38,7 +38,7 @@ const money = (cents: number) => new Intl.NumberFormat("en-US", { style: "curren
 
 function SellzGrid({ posts, saved, selectedId, onSelect }: { posts: SellzPost[]; saved: Set<number>; selectedId: number | null; onSelect: (id: number) => void }) {
   return <div className="sellz-listing-grid">
-    {posts.map((post, index) => <button type="button" key={post.id} className="gigz-opportunity sellz-listing" style={{ "--gigz-accent": ["#39ff14", "#83e35d", "#a5fb6e", "#49cb92"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selectedId === post.id} aria-label={`View listing: ${post.title}`}>
+    {posts.map((post, index) => <button type="button" key={post.id} className="gigz-opportunity sellz-listing" style={{ "--gigz-accent": "var(--room-sellz)" } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selectedId === post.id} aria-label={`View listing: ${post.title}`}>
       <ResourceCardMotif name={post.title} category="money" />
       {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <span className="sellz-listing__fallback" aria-hidden="true"><Tag size={65} strokeWidth={1.2} /></span>}
       <span className="gigz-opportunity__shade" />

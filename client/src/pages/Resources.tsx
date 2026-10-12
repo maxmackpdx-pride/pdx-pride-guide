@@ -452,8 +452,8 @@ const ResourceCard = memo(function ResourceCard({
       className={`rg-directory-card rg-category-${category.id} pdxPlace--clickable${org.logoSurface === "light" ? " rg-directory-card--light-logo" : ""}`}
       onClick={() => onOpen(row)}
       footer={
-        <div className="rg-directory-footer" onClick={(event) => event.stopPropagation()}>
-          <button className={`pdx-glass-rebind pdxBtn${["safety", "legal", "arts", "youth", "harm-reduction"].includes(category.id) ? " rg-contact-white" : ""}`} aria-label={`View details for ${org.name}`} onClick={() => onOpen(row)}>
+        <div className="rg-directory-footer">
+          <button className={`pdx-glass-rebind pdxBtn${["safety", "legal", "arts", "youth", "harm-reduction"].includes(category.id) ? " rg-contact-white" : ""}`} aria-label={`View details for ${org.name}`} onClick={event => { event.stopPropagation(); onOpen(row); }}>
             View details <ArrowUpRight size={16} />
           </button>
         </div>

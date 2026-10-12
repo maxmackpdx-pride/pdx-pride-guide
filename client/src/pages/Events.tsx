@@ -1116,7 +1116,7 @@ export default function Events() {
             <FilterChip
               selected={pastView}
               fill={pastView}
-              accent="var(--text-meta, #8c8c8c)"
+              accent="var(--text-meta)"
               onToggle={() => setPastView(v => !v)}
               data-testid="filter-past-events"
               className="events-filter-chip--past"

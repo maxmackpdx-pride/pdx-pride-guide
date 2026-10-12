@@ -14,9 +14,10 @@ async function request(route,{method='GET',body,cookie}={}){
 async function check(name,run){try{await run();passed++;console.log('PASS '+name)}catch(e){failures.push(name);console.error('FAIL '+name+': '+e.message)}}
 try{
  let ready=false;for(let i=0;i<100;i++){if(server.exitCode!==null)throw Error(logs.slice(-3000));try{if((await request('/api/health')).response.ok){ready=true;break}}catch{}await new Promise(r=>setTimeout(r,100))}if(!ready)throw Error('Server did not start: '+logs.slice(-3000));
- for(const route of ['/api/health','/api/events','/api/directory','/api/gigs','/api/gifting','/api/sellz','/api/missed-connections','/api/communities'])await check('public '+route,async()=>assert.equal((await request(route)).response.status,200));
- for(const route of ['/api/auth/me','/api/gigs/mine','/api/gifting/mine','/api/sellz/mine','/api/events/mine/talent'])await check('guest blocked '+route,async()=>assert.equal((await request(route)).response.status,401));
+ for(const route of ['/api/health','/api/events','/api/directory','/api/housing','/api/gigs','/api/gifting','/api/sellz','/api/missed-connections','/api/communities'])await check('public '+route,async()=>assert.equal((await request(route)).response.status,200));
+ for(const route of ['/api/auth/me','/api/boards/saved','/api/gigs/mine','/api/gifting/mine','/api/sellz/mine','/api/events/mine/talent'])await check('guest blocked '+route,async()=>assert.equal((await request(route)).response.status,401));
  for(const route of ['/api/gigs','/api/gifting','/api/sellz','/api/missed-connections'])await check('guest write blocked '+route,async()=>assert.equal((await request(route,{method:'POST',body:{}})).response.status,401));
+ for(const method of ['PUT','DELETE'])await check('guest bookmarks blocked '+method,async()=>assert.equal((await request('/api/boards/gigz/posts/1/save',{method})).response.status,401));
  for(const [route,expected] of [['/gigs','/gigz'],['/housing','/the-hauz'],['/missed-connections','/mizzed'],['/z/out','/outzide']])await check('redirect '+route,async()=>{const {response}=await request(route);assert.equal(response.status,301);assert.equal(response.headers.get('location'),expected)});
  const accounts=[];for(const username of ['prelaunch_owner','prelaunch_other']){const r=await request('/api/auth/register',{method:'POST',body:{username,email:username+'@example.invalid',password:'Local-test-only-123!',displayName:username,agreedToCommunityStandards:true}});assert.equal(r.response.status,200,JSON.stringify(r.data));assert.ok(r.cookie);accounts.push(r.cookie)}
  const [cookie,otherCookie]=accounts;
@@ -25,7 +26,7 @@ try{
  await check('valid login creates session',async()=>{const r=await request('/api/auth/login',{method:'POST',body:{email:'prelaunch_other',password:'Local-test-only-123!'}});assert.equal(r.response.status,200);assert.ok(r.cookie)});
  for(const board of ['gigz','giftz','sellz'])await check(board+' follow persists and is private',async()=>{assert.equal((await request(`/api/boards/${board}/follow`,{method:'PUT',body:{follow:true},cookie})).response.status,200);assert.equal((await request(`/api/boards/${board}/follow`,{cookie})).data.isFollowing,true);assert.equal((await request(`/api/boards/${board}/follow`,{cookie:otherCookie})).data.isFollowing,false);assert.equal((await request(`/api/boards/${board}/follow`,{method:'PUT',body:{follow:false},cookie})).data.isFollowing,false)});
  await check('Giftz posting remains open year-round',async()=>assert.equal((await request('/api/gifting/status')).data.postingOpen,true));
- const common={acceptRules:true,title:'Prelaunch test listing',description:'A local test listing for checking the complete posting workflow.',category:'Household',neighborhood:'SE Portland',pickupPreference:'Message to coordinate',photoUrls:[]};
+ const common={acceptRules:true,title:'Prelaunch test listing',description:'A local test listing for checking the complete posting workflow.',category:'Household',neighborhood:'SE Portland',pickupPreference:'Message to coordinate',photoUrls:['/stock/portland/cafe.jpg']};
  const cases=[['/api/gigs',{acceptRules:true,postType:'POSTING_GIG',title:common.title,name:'Prelaunch',contactEmail:'prelaunch_owner@example.invalid',description:common.description,compensation:'$25 per hour',location:'Portland',isRemote:false}],['/api/gifting',{...common,postType:'GIFT'}],['/api/sellz',{...common,price:'25.00',condition:'Good'}]];
  for(const [route,body] of cases){
   await check(route+' rejects blank listing content',async()=>assert.equal((await request(route,{method:'POST',body:{...body,title:'   ',description:'   '},cookie})).response.status,400));
@@ -33,6 +34,17 @@ try{
  }
  const communities=(await request('/api/communities')).data;const community=(Array.isArray(communities)?communities:communities.communities||[]).find(c=>c.membershipPolicy==='open');
  if(community){await check('community join automatically follows',async()=>{const r=await request(`/api/communities/${community.slug}/join`,{method:'POST',body:{},cookie});assert.equal(r.response.status,200);assert.equal(r.data.viewerFollowing,true)});await check('community events are public',async()=>{const r=await request(`/api/communities/${community.slug}`);assert.equal(r.response.status,200);assert.ok(r.data.events)})}else failures.push('No open community fixture');
+ await check('board bookmarks persist, are idempotent, and remain private',async()=>{
+  const gig=(await request('/api/gigs')).data.find(p=>p.status==='LIVE');assert.ok(gig);
+  const route=`/api/boards/gigz/posts/${gig.id}/save`;
+  for(let i=0;i<2;i++)assert.equal((await request(route,{method:'PUT',cookie})).response.status,200);
+  assert.equal((await request('/api/boards/saved',{cookie})).data.filter(k=>k===`gigz:${gig.id}`).length,1);
+  assert.ok(!(await request('/api/boards/saved',{cookie:otherCookie})).data.includes(`gigz:${gig.id}`));
+  for(let i=0;i<2;i++)assert.equal((await request(route,{method:'DELETE',cookie})).response.status,200);
+  assert.ok(!(await request('/api/boards/saved',{cookie})).data.includes(`gigz:${gig.id}`));
+  assert.equal((await request('/api/boards/nope/posts/1/save',{method:'PUT',cookie})).response.status,400);
+  assert.equal((await request('/api/boards/gigz/posts/999999999/save',{method:'PUT',cookie})).response.status,404);
+ });
  await check('logout clears session',async()=>{assert.equal((await request('/api/auth/logout',{method:'POST',cookie})).response.status,200);assert.equal((await request('/api/auth/me',{cookie})).response.status,401)});
  console.log(`${passed} passed; ${failures.length} failed`);if(failures.length)process.exitCode=1;
 }catch(e){console.error(e);process.exitCode=1}finally{server.kill('SIGTERM');await new Promise(r=>{if(server.exitCode!==null)r();else server.once('exit',r)});rmSync(dir,{recursive:true,force:true})}

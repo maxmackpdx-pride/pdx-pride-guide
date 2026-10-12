@@ -143,7 +143,7 @@
 }
 .event-modal.eb-detail :is(.rg-detail-disclosure, .place-modal-panel__description-wrap) {
   border: 0;
-  border-top: 1px solid #ffffff32;
+  border-top: 1px solid color-mix(in srgb,var(--text-hi) 20%,transparent);
   border-radius: 0;
   margin: 0;
   background: transparent;

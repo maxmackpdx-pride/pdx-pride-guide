@@ -5,8 +5,8 @@
 .place-upcoming__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; padding: 6px 0 24px; }
 .place-event-tile { position: relative; display: block; aspect-ratio: 1; overflow: hidden; border-radius: 12px; background: var(--ink-900); border: 1px solid color-mix(in srgb, var(--c) 55%, var(--z-black)); color: var(--text-heading); isolation: isolate; }
 .place-event-tile > img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
-.place-event-tile__shade { position: absolute; inset: auto 0 0; z-index: 3; padding: 28px 9px 9px; background: linear-gradient(transparent, #000e 62%); }
+.place-event-tile__shade { position: absolute; inset: auto 0 0; z-index: 3; padding: 28px 9px 9px; background: linear-gradient(transparent, color-mix(in srgb,var(--z-oled) 93%,transparent) 62%); }
 .place-event-tile__shade strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font: 800 16px/1.04 var(--font-display); text-transform: uppercase; }
 .place-event-tile__shade small { display: block; margin-top: 5px; font: 500 10px/1.3 var(--font-body); color: var(--text-mid); }
-.place-event-tile__example { position: absolute; top: 8px; right: 8px; z-index: 4; background: #000c; padding: 4px 6px; border-radius: 6px; color: white; font: 600 9px var(--font-mono); text-transform: uppercase; }
+.place-event-tile__example { position: absolute; top: 8px; right: 8px; z-index: 4; background: color-mix(in srgb,var(--z-oled) 80%,transparent); padding: 4px 6px; border-radius: 6px; color: var(--text-hi); font: 600 9px var(--font-mono); text-transform: uppercase; }
 .place-modal-panel__community-room { scroll-margin-top: 76px; }

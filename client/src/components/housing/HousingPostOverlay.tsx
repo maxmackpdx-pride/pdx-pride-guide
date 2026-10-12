@@ -32,6 +32,7 @@ import "@/components/board/OpenBoardCard.css";
 
 type Props = {
   post: HousingPostView;
+  presentation?: "eventz";
   userId?: number | null;
   initialDetail?: boolean;
   initialIntent?: HousingRequestKind | "BUILD" | null;
@@ -57,7 +58,7 @@ function markerTransform(source: Pick<DOMRect, "left" | "top" | "width" | "heigh
   return `translate3d(${x}px, ${y}px, 0) scale(${source.width / target.width}, ${source.height / target.height})`;
 }
 
-export default function HousingPostOverlay({ post: initialPost, userId, initialDetail = false, initialIntent = null, sharePath, originRect, onClose, onRequireAuth, onSelectPost }: Props) {
+export default function HousingPostOverlay({ post: initialPost, userId, initialDetail = false, initialIntent = null, sharePath, originRect, onClose, onRequireAuth, onSelectPost, presentation }: Props) {
   const closingRef = useRef(false);
   const panelAnimationRef = useRef<Animation | null>(null);
   const transitionFromRef = useRef<DOMRect | null>(null);
@@ -114,7 +115,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
   };
 
   const { data: fetchedPost } = useQuery<HousingPostView>({
-    queryKey: ["/api/housing", initialPost.id],
+    queryKey: ["/api/housing", initialPost.id, userId],
     initialData: initialPost,
     queryFn: async () => {
       const response = await fetch(`/api/housing/${initialPost.id}`, { credentials: "include" });
@@ -136,6 +137,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
 
   const requireAuth = () => { if (signedIn) return true; onRequireAuth(); return false; };
   const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: ["/api/boards/saved"] });
     void queryClient.invalidateQueries({ queryKey: ["/api/housing", postId] });
     void queryClient.invalidateQueries({ queryKey: ["/api/housing"] });
   };
@@ -212,7 +214,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
 
   return createPortal(
     <div className="board-detail-backdrop" onClick={requestClose}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} HAÜZ ${detail ? "details" : "card"}`} tabIndex={-1} className="hz pdx-glass-rebind board-open-card--shared" style={panelStyle} onClick={(event) => event.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} HAÜZ ${detail ? "details" : "card"}`} tabIndex={-1} className={`hz pdx-glass-rebind board-open-card--shared${presentation ? " ab-open-card ab-open-card--housing" : ""}`} style={panelStyle} onClick={(event) => event.stopPropagation()}>
         <span className="board-open-card__rule" aria-hidden="true" />
         <div style={{ position: "relative", zIndex: 30, padding: 12 }}><DetailActions label="Haüz listing" onClose={requestClose} /></div>
         <div key={detail ? "detail" : "card"} className="houz-overlay-content">

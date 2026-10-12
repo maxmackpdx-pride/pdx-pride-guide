@@ -36,8 +36,8 @@
 .events-page.board-shader-page > .board-shader-veil {
   background: linear-gradient(to bottom,
     var(--z-oled) 0%, var(--z-oled) 12%,
-    rgb(0 0 0 / 78%) 32%, rgb(0 0 0 / 62%) 55%,
-    rgb(0 0 0 / 28%) 78%, rgb(0 0 0 / 8%) 100%);
+    color-mix(in srgb,var(--z-oled) 78%,transparent) 32%, color-mix(in srgb,var(--z-oled) 62%,transparent) 55%,
+    color-mix(in srgb,var(--z-oled) 28%,transparent) 78%, color-mix(in srgb,var(--z-oled) 8%,transparent) 100%);
   mask-image: none;
   -webkit-mask-image: none;
   backdrop-filter: none;

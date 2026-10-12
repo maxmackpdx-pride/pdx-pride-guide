@@ -45,7 +45,7 @@ html[data-zaylist-cards] :is(
   --glass-sheen-specular: linear-gradient(135deg, color-mix(in srgb, var(--text-hi) 3%, transparent), transparent 24%, transparent 84%, color-mix(in srgb, var(--c, var(--neon-cyan)) 6%, transparent));
 }
 
-@supports (color: hsl(from #00ffff calc(h + 180) 88% 72%)) {
+@supports (color: hsl(from cyan calc(h + 180) 88% 72%)) {
   html[data-zaylist-cards] :is(
   .pdx-glass-rebind:where(:not(header):not(nav):not(.demo-nav)), .pdxPlace, .event-rail-card,
   .card:where(:not(header):not(nav)), .ds-listing-card, .rb-card, .rb-checkin__hero-card,
@@ -105,24 +105,24 @@ html[data-zaylist-cards] :is(.event-rail-card__art, .event-modal__glass-panel, .
   --card-secondary-override: inherit;
 }
 /* Bind older card families that name their primary accent differently. */
-html[data-zaylist-cards] .boards-index__card { --c: var(--card-accent); }
-html[data-zaylist-cards] .sch-event-card { --c: var(--sch-day, var(--neon-cyan)); }
-html[data-zaylist-cards] .schedule-event-card { --c: var(--schedule-day, var(--neon-cyan)); }
-html[data-zaylist-cards] .dash-metric-card { --c: var(--metric-color, var(--dash-lime)); }
-html[data-zaylist-cards] .admin-attn-card { --c: var(--neon-pink); }
-html[data-zaylist-cards] .gifting-card { --c: var(--neon-yellow); }
-html[data-zaylist-cards] .gifting-card.iso { --c: var(--neon-cyan); }
-html[data-zaylist-cards] .gigs-card { --c: var(--neon-yellow); }
-html[data-zaylist-cards] .gigs-card.looking { --c: var(--neon-cyan); }
-html[data-zaylist-cards] .about-mission-card--magenta { --c: var(--neon-pink); }
-html[data-zaylist-cards] .about-mission-card--orange { --c: var(--neon-orange); }
-html[data-zaylist-cards] .about-mission-card--cyan { --c: var(--neon-cyan); }
+html[data-zaylist-cards] .boards-index__card.pdx-glass-rebind { --c: var(--card-accent); }
+html[data-zaylist-cards] .sch-event-card.pdx-glass-rebind { --c: var(--sch-day, var(--neon-cyan)); }
+html[data-zaylist-cards] .schedule-event-card.pdx-glass-rebind { --c: var(--schedule-day, var(--neon-cyan)); }
+html[data-zaylist-cards] .dash-metric-card.pdx-glass-rebind { --c: var(--metric-color, var(--dash-lime)); }
+html[data-zaylist-cards] .admin-attn-card.pdx-glass-rebind { --c: var(--neon-pink); }
+html[data-zaylist-cards] .gifting-card.pdx-glass-rebind { --c: var(--neon-yellow); }
+html[data-zaylist-cards] .gifting-card.iso.pdx-glass-rebind { --c: var(--neon-cyan); }
+html[data-zaylist-cards] .gigs-card.pdx-glass-rebind { --c: var(--neon-yellow); }
+html[data-zaylist-cards] .gigs-card.looking.pdx-glass-rebind { --c: var(--neon-cyan); }
+html[data-zaylist-cards] .about-mission-card--magenta.pdx-glass-rebind { --c: var(--neon-pink); }
+html[data-zaylist-cards] .about-mission-card--orange.pdx-glass-rebind { --c: var(--neon-orange); }
+html[data-zaylist-cards] .about-mission-card--cyan.pdx-glass-rebind { --c: var(--neon-cyan); }
 /* Some older cards used only box-shadow for focus. Keep that cue explicit. */
 html[data-zaylist-cards] :is(.sch-event-card, .schedule-event-card, .boards-index__card, .card, .pdxBoard, .pdxRow, .pdxPlace, .board-listing-card, .room-doorways__door, .ab-card, .ab-door):focus-visible {
   outline: 3px solid var(--c, var(--neon-cyan));
   outline-offset: 3px;
 }
-html[data-zaylist-cards] .sponsor-rail-card__box { --c: var(--b, var(--neon-cyan)); }
+html[data-zaylist-cards] .sponsor-rail-card__box.pdx-glass-rebind { --c: var(--b, var(--neon-cyan)); }
 
 /* Logo wells use restrained category-tinted reflections, without bright spots. */
 html[data-zaylist-cards] .pdxPlace__mediaGlow {

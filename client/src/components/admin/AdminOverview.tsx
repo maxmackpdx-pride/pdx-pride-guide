@@ -384,7 +384,7 @@ export default function AdminOverview({
         ) : (
           <div className="admin-attn-list">
             {attentionItems.map(item => (
-              <article key={item.key} className="admin-attn-card" style={{ borderLeftColor: item.color }}>
+              <article key={item.key} className="pdx-glass-rebind admin-attn-card" style={{ borderLeftColor: item.color }}>
                 <div className="admin-attn-card__top">
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <span className="admin-attn-card__kind" style={{ color: item.color, borderColor: item.color }}>

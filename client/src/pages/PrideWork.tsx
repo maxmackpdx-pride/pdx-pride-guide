@@ -126,7 +126,7 @@ function GigRail({ posts, kind, selected, onSelect }: {
           const isTalent = kind === "talent";
           const poster = post.displayName || post.name;
           return <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
-            {isTalent ? <button type="button" className="gigz-talent" style={{ "--gigz-accent": ["#b984ff", "#bbff54", "#ff8bb8", "#8edfff"][index % 4] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ${poster}: ${post.title}`}>
+            {isTalent ? <button type="button" className="gigz-talent" style={{ "--gigz-accent": "var(--room-gigz)" } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ${poster}: ${post.title}`}>
               <ResourceCardMotif name={post.title} category="money" />
               <span className="gigz-talent__status"><span><i /> Available for gigs</span><small>{post.isDemo ? "DEMO LISTING" : `Posted ${timeAgo(post.createdAt)}`}</small></span>
               {post.username?.toLowerCase() !== "tucker_pdmax" && <span className="gigz-talent__portrait">{post.posterPhotoUrl || post.imageUrl ? <img src={post.posterPhotoUrl || post.imageUrl || ""} alt="" loading="lazy" /> : <UserAvatar photoUrl={post.posterPhotoUrl} avatarChoice={post.avatarChoice} avatarRing={post.posterAvatarRing} displayName={poster} username={post.username} size={150} />}</span>}
@@ -134,7 +134,7 @@ function GigRail({ posts, kind, selected, onSelect }: {
               <span className="gigz-talent__location"><MapPin size={14} /> {post.isRemote ? "Remote" : post.location || "Portland"}</span>
               <span className="gigz-talent__hire">View and message <ArrowUpRight size={18} /></span>
               <span className="gigz-talent__caption"><Zap size={15} /> {post.compensation || post.skills || "Available for work"}</span>
-            </button> : <button type="button" className="gigz-opportunity" style={{ "--gigz-accent": ["#bb8aff", "#75c9ef", "#ffb477", "#f39ace", "#c7fa89"][index % 5] } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gig: ${post.title}`}>
+            </button> : <button type="button" className="gigz-opportunity" style={{ "--gigz-accent": "var(--room-gigz)" } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gig: ${post.title}`}>
               <ResourceCardMotif name={post.title} category="arts" />
               {post.imageUrl ? <img src={post.imageUrl} alt="" loading="lazy" /> : <span className="gigz-opportunity__fallback" aria-hidden="true">GIGZ</span>}
               <span className="gigz-opportunity__shade" />
@@ -213,7 +213,7 @@ export default function PrideWork() {
 }
 
 function ghostLetter(title: string) { return (title || "?").trim().charAt(0).toUpperCase(); }
-function thumbGradient(isLooking: boolean) { return isLooking ? "linear-gradient(135deg,#19e3ff,#8a4bff)" : "linear-gradient(135deg,#b06bff,#19e3ff)"; }
+function thumbGradient() { return "linear-gradient(135deg,var(--room-gigz),var(--z-black))"; }
 
 export function GigListingCard({
   gig,
@@ -321,12 +321,12 @@ export function GigListingCard({
         .filter(Boolean)
         .join(" ")}
       style={glassVars}
-      onClick={onToggle}
-      role="button"
-      tabIndex={0}
+      onClick={expanded ? undefined : onToggle}
+      role={expanded ? undefined : "button"}
+      tabIndex={expanded ? undefined : 0}
       onKeyDown={e => {
         // Don't steal Space/Enter from the reply textarea (or any field).
-        if (e.target !== e.currentTarget) return;
+        if (expanded || e.target !== e.currentTarget) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onToggle();
@@ -357,9 +357,9 @@ export function GigListingCard({
               <p className="gig-talent-card__location">{locationLabel}{gig.isRemote ? " · remote" : ""}</p>
             </div>
           </div>
-          <div className="gig-talent-card__actions" onClick={e => e.stopPropagation()}>
-            <button type="button" onClick={() => openTalentReply(`Hi ${talentFirstName}, I’d like to hire you for `)}>Hire {talentFirstName} <ArrowUpRight size={14} aria-hidden="true" /></button>
-            <button type="button" onClick={() => openTalentReply()}>Message</button>
+          <div className="gig-talent-card__actions">
+            <button type="button" onClick={event => {event.stopPropagation();openTalentReply(`Hi ${talentFirstName}, I’d like to hire you for `);}}>Hire {talentFirstName} <ArrowUpRight size={14} aria-hidden="true" /></button>
+            <button type="button" onClick={event => {event.stopPropagation();openTalentReply();}}>Message</button>
           </div>
           <div className="gig-talent-card__footer"><span aria-hidden="true"><Sparkle size={13} fill="currentColor" /></span>{availabilityDetail}</div>
         </>
@@ -369,7 +369,7 @@ export function GigListingCard({
           <div className="board-listing-card__row">
             <div
               className="board-listing-card__thumb"
-              style={gig.imageUrl ? undefined : { background: thumbGradient(false) }}
+              style={gig.imageUrl ? undefined : { background: thumbGradient() }}
             >
               {gig.imageUrl ? (
                 <img src={gig.imageUrl} alt="" />
@@ -379,7 +379,7 @@ export function GigListingCard({
                   <div className="board-listing-card__thumb-fallback" aria-hidden="true" />
                 </>
               )}
-              {gig.isRemote && <span className="board-listing-card__grab-badge" style={{ background: "#ff1fa0" }}>Remote</span>}
+              {gig.isRemote && <span className="board-listing-card__grab-badge" style={{ background: "var(--room-gigz-ink)" }}>Remote</span>}
             </div>
             <div className="board-listing-card__main">
               <div className="board-listing-card__tags">
@@ -412,7 +412,7 @@ export function GigListingCard({
       )}
 
       {expanded && (
-        <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
+        <div className="board-listing-card__expand">
           <p style={{ whiteSpace: "pre-line" }}>{gig.description}</p>
           {(skills.length > 0 || gig.compensation || gig.location) && (
             <div className="gifting-details">
@@ -461,6 +461,7 @@ export function GigListingCard({
           {!gig.isMine && gig.userId !== user?.id && (
             <div className="gifting-response">
               <textarea
+                aria-label="Private reply"
                 value={messageBody}
                 onChange={e => setMessageBody(e.target.value)}
                 placeholder={
@@ -600,7 +601,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
   };
 
   const postType = form.watch("postType");
-  const formAccent = postType === "LOOKING_FOR_WORK" ? "#19e3ff" : "#b06bff";
+  const formAccent = "var(--room-gigz-ink)";
 
   return (
           <RoomComposer id="gigs-form" room="gigz" accent={formAccent} testId="form-pride-work" onClose={onClose}
@@ -625,13 +626,13 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
               <label>
                 Your name *
                 <input className="board-text-field" data-testid="input-name" placeholder="Name or handle" {...form.register("name")} />
-                {form.formState.errors.name && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.name.message}</span>}
+                {form.formState.errors.name && <span className="board-copy-sm" style={{ color: "var(--neon-orange)" }}>{form.formState.errors.name.message}</span>}
               </label>
 
               <label>
                 Contact email *
                 <input className="board-text-field" data-testid="input-email" type="email" placeholder="your@email.com" {...form.register("contactEmail")} />
-                {form.formState.errors.contactEmail && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.contactEmail.message}</span>}
+                {form.formState.errors.contactEmail && <span className="board-copy-sm" style={{ color: "var(--neon-orange)" }}>{form.formState.errors.contactEmail.message}</span>}
               </label>
 
               <label className="span">
@@ -642,7 +643,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
                   placeholder={postType === "POSTING_GIG" ? "e.g. Stage Manager for Pride Stage" : "e.g. Event Photographer"}
                   {...form.register("title")}
                 />
-                {form.formState.errors.title && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.title.message}</span>}
+                {form.formState.errors.title && <span className="board-copy-sm" style={{ color: "var(--neon-orange)" }}>{form.formState.errors.title.message}</span>}
               </label>
 
               <label className="span">
@@ -654,7 +655,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
                   placeholder={postType === "POSTING_GIG" ? "What is the gig, what do you need, when, and what's the pay..." : "Your experience, availability, and what kind of work you want..."}
                   {...form.register("description")}
                 />
-                {form.formState.errors.description && <span className="board-copy-sm" style={{ color: "#ff6600" }}>{form.formState.errors.description.message}</span>}
+                {form.formState.errors.description && <span className="board-copy-sm" style={{ color: "var(--neon-orange)" }}>{form.formState.errors.description.message}</span>}
               </label>
 
               <label>
@@ -704,8 +705,8 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
 
               <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} />
               {postType === "POSTING_GIG" && isEligiblePoster && (
-                <div className="span" style={{ border: "1px solid #262626", borderRadius: 8, padding: 14 }}>
-                  <p className="board-copy-sm" style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)" }}>
+                <div className="span" style={{ border: "1px solid var(--border-default)", borderRadius: 8, padding: 14 }}>
+                  <p className="board-copy-sm" style={{ marginBottom: 8, color: "var(--text-body)" }}>
                     Link this gig to a directory venue (optional). It'll show up on that venue's GIGZ tab.
                   </p>
                   {linkedBusiness ? (
@@ -810,7 +811,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
                 {postType === "POSTING_GIG" ? "Remote / hybrid friendly" : "Open to remote or hybrid work"}
               </label>
 
-              <p className="span board-copy-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+              <p className="span board-copy-sm" style={{ color: "var(--text-mid)" }}>
                 {GIG_BOARD_RULES_SUMMARY}
               </p>
               <ComposerRules className="span" checked={acceptRules} onChange={setAcceptRules}>

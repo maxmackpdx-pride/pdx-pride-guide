@@ -1,6 +1,6 @@
 /* Eventz is the visual reference: compact identity, category dock, search, 248px
    desktop sidebar and fixed-size lanes. Shared DS tokens fill its open details. */
-.eb-page { --c: var(--neon-cyan); position: relative; isolation: isolate; background: var(--z-black); color: var(--text-hi); padding-bottom: 40px; }
+.eb-page { position: relative; isolation: isolate; background: var(--z-black); color: var(--text-hi); padding-bottom: 40px; }
 .eb-page > .rg-stream-background { position: fixed; inset: 0; z-index: -2; pointer-events: none; }
 .eb-page::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(to bottom, var(--z-black), color-mix(in srgb, var(--z-black) 82%, transparent) 40%, color-mix(in srgb, var(--z-black) 48%, transparent)); }
 .eb-frame { width: min(100%, var(--zl-frame, 1320px)); margin-inline: auto; padding-inline: var(--zl-gutter, 16px); box-sizing: border-box; }

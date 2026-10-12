@@ -45,7 +45,7 @@ export function BrowseControls({ title, categories, selected, onSelect, query, o
 export function BrowseLane({ title, color, count, children }: { title: string; color: string; count: number; children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const id = useId();
-  return <section className={`eb-lane${open ? " eb-lane--open" : ""}`} style={{ "--c": color } as CSSProperties} aria-labelledby={id}>
+  return <section className={`eb-lane pdx-glass-rebind${open ? " eb-lane--open" : ""}`} style={{ "--c": color } as CSSProperties} aria-labelledby={id}>
     <header className="eb-lane__head"><h2 id={id}><i aria-hidden="true" />{title} <small>{count}</small></h2>
       {count > 4 && <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Show less" : "View all"}</button>}
     </header>

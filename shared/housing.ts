@@ -25,15 +25,16 @@ export const HAUS_NAME_MAX_WORDS = 3;
 export const HAUS_NAME_MAX_CHARS = 22;
 
 /**
- * Board accents. Each post type rebinds `--c` for its own subtree.
+ * Housing keeps its room brand across intents; labels and anatomy distinguish them.
+ * Each post rebinds `--c` for its own subtree.
  * Any element setting these MUST also carry `.pdx-glass-rebind` or it silently
  * falls back to root cyan.
  */
 export const HOUSING_ACCENT_VAR: Record<HousingType, string> = {
-  LOOKING: "var(--panel-cyan)",
-  OFFERING: "var(--panel-orange)",
-  FORMING: "var(--green-acid)",
-  MANAGED: "var(--panel-purple)",
+  LOOKING: "var(--room-hauz)",
+  OFFERING: "var(--room-hauz)",
+  FORMING: "var(--room-hauz)",
+  MANAGED: "var(--room-hauz)",
 };
 
 /** Board chrome runs on the same softened cyan as "Looking for housing". */
@@ -42,7 +43,7 @@ export const HOUSING_BOARD_ACCENT = "var(--panel-cyan)";
 export const HOUSING_TYPE_LABEL: Record<HousingType, string> = {
   LOOKING: "Looking for housing",
   OFFERING: "Offering a room",
-  FORMING: "Forming a HAÜZ",
+  FORMING: "Building a Hoüz",
   MANAGED: "Managed property",
 };
 
@@ -50,7 +51,7 @@ export const HOUSING_TYPE_LABEL: Record<HousingType, string> = {
 export const HOUSING_TYPE_KICKER: Record<HousingType, string> = {
   LOOKING: "LOOKING FOR HOUSING",
   OFFERING: "OFFERING A ROOM",
-  FORMING: "FORMING A HAÜZ",
+  FORMING: "BUILDING A HOÜZ",
   MANAGED: "MANAGED PROPERTY",
 };
 
@@ -231,7 +232,7 @@ export const HOUSING_FILTER_LABEL: Record<HousingFilter, string> = {
   ALL: "All",
   LOOKING: "Looking for housing",
   OFFERING: "Offering a room",
-  FORMING: "Forming a HAÜZ",
+  FORMING: "Building a Hoüz",
   MANAGED: "Managed property",
   SAVED: "Saved",
 };

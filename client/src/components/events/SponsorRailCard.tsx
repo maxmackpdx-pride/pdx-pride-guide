@@ -47,14 +47,14 @@ export default function SponsorRailCard({ kind }: { kind: SponsorKind }) {
       aria-label={`Sponsor: ${b.name}. ${design === "ticket" ? `Code ${b.code}, ${b.off}` : b.spot.head}. Opens in a new tab.`}
     >
       {design === "ticket" ? (
-        <span className="sponsor-rail-card__box sponsor-rail-card__ticket">
+        <span className="pdx-glass-rebind sponsor-rail-card__box sponsor-rail-card__ticket">
           <span className="sponsor-rail-card__pill"><i aria-hidden="true" />Sponsor</span>
           <span className="sponsor-rail-card__logo"><img src={b.logo} alt="" loading="lazy" /></span>
           <span className="sponsor-rail-card__cut" aria-hidden="true" />
           <span className="sponsor-rail-card__deal"><b>{b.off}</b><code>{b.code}</code></span>
         </span>
       ) : (
-        <span className="sponsor-rail-card__box sponsor-rail-card__spot">
+        <span className="pdx-glass-rebind sponsor-rail-card__box sponsor-rail-card__spot">
           {b.photo
             ? <img className="sponsor-rail-card__photo" src={b.photo} alt="" loading="lazy" />
             : <img className="sponsor-rail-card__photo sponsor-rail-card__photo--logo" src={b.logo} alt="" loading="lazy" />}
