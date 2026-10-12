@@ -452,3 +452,12 @@ html body .events-page.board-page--makeover .events-board-feed .board-active-fee
   .events-page .events-rail-sec--m .events-rail--open { grid-template-columns: repeat(auto-fill, 136px); }
   .events-page .events-rail-sec--s .events-rail--open { grid-template-columns: repeat(auto-fill, 108px); }
 }
+
+/* Day tabs fade out at their right edge instead of cutting off at the view switch. */
+.events-page .events-day-row .events-day-rail {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  padding-right: 24px;
+}
+/* All three switch buttons share one size; the active one only changes color. */
+html body .events-page.board-page--makeover .events-day-row .events-view-toggle__btn { justify-content: center; padding: 0; border-radius: 11px; }

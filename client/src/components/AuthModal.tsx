@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import "./AuthModal.css";
 import { ArrowLeft, ArrowRight, AtSign, Lock, Mail, User, X } from "lucide-react";
 import { EyeToggleIcon } from "@/components/ui/animated-state-icons";
 import { MultiStepProgress } from "@/components/ui/multistep-form";
@@ -88,23 +89,6 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
 
   /* Calm Mode and reduced motion hold the card flat and stop the beams. */
   const still = useMemo(() => prefersStillMotion(), []);
-
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const rotateX = useTransform(mouseY, [-300, 300], [8, -8]);
-  const rotateY = useTransform(mouseX, [-300, 300], [-8, 8]);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (still) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    mouseX.set(e.clientX - rect.left - rect.width / 2);
-    mouseY.set(e.clientY - rect.top - rect.height / 2);
-  };
-
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -224,44 +208,9 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="pdx-auth-shell relative z-10 w-full max-w-[440px]"
-        style={{ perspective: 1500 }}
         onClick={e => e.stopPropagation()}
       >
-        <motion.div
-          className="relative"
-          style={still ? undefined : { rotateX, rotateY }}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-        >
-          {/* Beams travelling the four edges, one seam colour each. */}
-          {!still && (
-            <div className="pointer-events-none absolute -inset-[1px] overflow-hidden rounded-2xl" aria-hidden>
-              <motion.div
-                className="absolute left-0 top-0 h-[2px] w-1/2"
-                style={{ background: `linear-gradient(90deg, transparent, ${BEAM[0]}, transparent)`, filter: "blur(1px)" }}
-                animate={{ left: ["-50%", "100%"] }}
-                transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity, repeatDelay: 1 }}
-              />
-              <motion.div
-                className="absolute right-0 top-0 h-1/2 w-[2px]"
-                style={{ background: `linear-gradient(180deg, transparent, ${BEAM[1]}, transparent)`, filter: "blur(1px)" }}
-                animate={{ top: ["-50%", "100%"] }}
-                transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity, repeatDelay: 1, delay: 0.65 }}
-              />
-              <motion.div
-                className="absolute bottom-0 right-0 h-[2px] w-1/2"
-                style={{ background: `linear-gradient(90deg, transparent, ${BEAM[2]}, transparent)`, filter: "blur(1px)" }}
-                animate={{ right: ["-50%", "100%"] }}
-                transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity, repeatDelay: 1, delay: 1.3 }}
-              />
-              <motion.div
-                className="absolute bottom-0 left-0 h-1/2 w-[2px]"
-                style={{ background: `linear-gradient(180deg, transparent, ${BEAM[3]}, transparent)`, filter: "blur(1px)" }}
-                animate={{ bottom: ["-50%", "100%"] }}
-                transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity, repeatDelay: 1, delay: 1.95 }}
-              />
-            </div>
-          )}
+        <div className="relative">
 
           <div
             ref={dialogRef}
@@ -269,11 +218,9 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
             aria-modal="true"
             aria-label={forgotPassword ? "Reset password" : tab === "login" ? "Log in" : "Join"}
             tabIndex={-1}
-            className="pdx-auth-panel pdx-liquid-overlay relative max-h-[92vh] overflow-y-auto rounded-2xl border border-white/[0.07] p-7 backdrop-blur-xl"
+            className="pdx-auth-panel pdx-liquid-overlay relative max-h-[92vh] overflow-y-auto rounded-2xl p-7 backdrop-blur-xl"
             style={{
               background: "radial-gradient(120% 140% at 50% 0%, rgba(18,18,26,.94) 0%, rgba(5,5,6,.97) 72%)",
-              boxShadow:
-                "0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.07), 0 40px 90px -30px rgba(0,0,0,.9), 0 0 44px -18px rgba(25,227,255,.35)",
             }}
           >
             {/* Rainbow seam across the head, same rule as the nav. */}
@@ -571,7 +518,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
               </>
             )}
           </div>
-        </motion.div>
+        </div>
       </motion.div>
     </div>,
     document.body,
