@@ -372,17 +372,18 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 .event-rail-card__art .tonight-card__live { top: 6px; left: 6px; min-height: 26px; padding: 0 7px; gap: 5px; font-size: 11px; }
 .event-rail-card__art .tonight-card__live-label { font-size: 11px; }
 .event-rail-card__art .tonight-card__live--count b { font-size: 14px; }
-.event-rail-card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-hi); font: 800 16px/1.04 var(--font-display); text-transform: uppercase; }
+/* Title sits on the flyer's bottom edge over a short clear-to-dark fade. */
+.event-rail-card__shade { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; padding: 26px 10px 10px; background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--z-black) 88%, transparent) 62%); pointer-events: none; }
+.event-rail-card--s .event-rail-card__shade { padding: 20px 8px 8px; }
+.event-rail-card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-hi); font: 800 16px/1.04 var(--font-display); text-transform: uppercase; text-shadow: 0 1px 3px var(--z-black); }
 .event-rail-card--s .event-rail-card__title { font-size: 14px; }
-.event-rail-card__meta { overflow: hidden; color: var(--text-body); font: 500 12px/1.3 var(--font-body); white-space: nowrap; text-overflow: ellipsis; }
-.event-rail-card--s .event-rail-card__meta { font-size: 11px; }
-.event-rail-card__save { position: absolute; right: 8px; top: calc(136px * 1.25 - 46px); z-index: 4; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent); background: color-mix(in srgb, var(--z-black) 84%, transparent); color: var(--text-hi); box-shadow: 0 0 0 2px var(--z-black); cursor: pointer; }
-.event-rail-card--s .event-rail-card__save { top: calc(108px - 40px); right: 6px; width: 34px; height: 34px; }
-.events-rail--open .event-rail-card__save { top: 8px; }
+/* Time and venue ride above the card. Fixed height so save can sit on the flyer corner. */
+.event-rail-card__meta { display: block; height: 16px; overflow: hidden; color: var(--text-body); font: 500 12px/16px var(--font-body); white-space: nowrap; text-overflow: ellipsis; }
+.event-rail-card--s .event-rail-card__meta { height: 15px; font-size: 11px; line-height: 15px; }
+.event-rail-card__save { position: absolute; right: 8px; top: calc(16px + 6px + 8px); z-index: 4; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent); background: color-mix(in srgb, var(--z-black) 84%, transparent); color: var(--text-hi); box-shadow: 0 0 0 2px var(--z-black); cursor: pointer; }
+.event-rail-card--s .event-rail-card__save { top: calc(15px + 6px + 6px); right: 6px; width: 34px; height: 34px; }
 .event-rail-card__save[aria-pressed="true"] { background: var(--neon-magenta); border-color: var(--neon-magenta); color: var(--z-black); }
 .event-rail-card__save:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }
-/* Every compact rail card is the same height: two title lines reserved. */
-.event-rail-card__title { min-height: 2.08em; }
 
 /* Rail swipe cues: edge fade + arrow where more cards wait, and a progress bar. */
 .events-page .events-rail-wrap { position: relative; }
@@ -412,9 +413,6 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 .events-page .events-rail-progress > span { display: block; height: 100%; border-radius: inherit; background: color-mix(in srgb, var(--c) 45%, var(--text-meta)); box-shadow: none; transition: transform .12s linear; }
 @media (prefers-reduced-motion: reduce) { .events-page .events-rail-progress > span { transition: none; } }
 
-/* Day motif on rail cards: art layer stays above it; copy rides on top. */
-.event-rail-card__open { position: relative; }
-.event-rail-card__art { z-index: 1; }
-.event-rail-card__title, .event-rail-card__meta { position: relative; z-index: 2; text-shadow: 0 1px 3px var(--z-black); }
+/* Rail card stamps: weekday code on posterless art, hidden under a live badge. */
 .event-rail-card--s .day-motif-code { font-size: 12px; left: 9px; top: 10px; }
 .event-rail-card__art:has(.tonight-card__live) .day-motif-code { display: none; }

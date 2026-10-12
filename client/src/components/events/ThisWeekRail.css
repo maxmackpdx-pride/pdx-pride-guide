@@ -52,7 +52,7 @@
 @keyframes week-fan-3 { 0%, 100% { transform: translateX(44px) rotate(5deg); } 50% { transform: translateX(48px) rotate(6deg); } }
 
 /* Only the flyer half of each fanned card shows; its copy would sit under the label. */
-.events-week .week-day__fan :is(.event-rail-card__title, .event-rail-card__meta, .day-motif--low) { visibility: hidden; }
+.events-week .week-day__fan :is(.event-rail-card__shade, .event-rail-card__meta) { visibility: hidden; }
 
 /* Events slide out of the day card onto the rail. */
 .events-week .week-slide { animation: week-slide .5s cubic-bezier(.2, .8, .2, 1) both; }

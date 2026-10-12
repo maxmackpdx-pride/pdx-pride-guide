@@ -40,10 +40,9 @@ const layerSrc = (day: Day, layer: "back" | "mid" | "top") => `/motifs/days/${da
  * placement:
  *  - "card": spans the whole closed card, strongest low, behind the reading layer
  *    (flyer cards: the flyer covers the top, the motif rises behind the copy)
- *  - "low": a compact rail card's copy area, behind title and time
  *  - "art": fills a flyer slot when an event has no flyer
  */
-export default function DayMotif({ day, placement, className = "" }: { day: string | null | undefined; placement: "card" | "low" | "art"; className?: string }) {
+export default function DayMotif({ day, placement, className = "" }: { day: string | null | undefined; placement: "card" | "art"; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {

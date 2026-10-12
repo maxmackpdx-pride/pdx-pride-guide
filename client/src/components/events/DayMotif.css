@@ -38,11 +38,6 @@
   -webkit-mask-image: linear-gradient(transparent 8%, black 40%, black 88%, transparent 100%);
   mask-image: linear-gradient(transparent 8%, black 40%, black 88%, transparent 100%); }
 
-/* Compact rail card: faint, behind title and time, no box. */
-.day-motif--low { inset: auto 0 -4px 0; height: 150px; z-index: 0; opacity: .55;
-  -webkit-mask-image: radial-gradient(75% 60% at 50% 78%, black 45%, transparent 100%);
-  mask-image: radial-gradient(75% 60% at 50% 78%, black 45%, transparent 100%); }
-
 /* Posterless art: the motif fills the flyer slot. */
 .day-motif--art { --dm-s: 10px; background: var(--z-black); }
 
