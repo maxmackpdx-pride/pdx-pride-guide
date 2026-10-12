@@ -39,16 +39,25 @@ must show the **same animated rainbow divider across the top**, the way
 Plain hub-feed activity rows (RSVP, check-in, member text/photo posts) do
 **not** get it.
 
-### Visual reference - PlaceCard
+### Visual reference - the dock rim
 
-Directory `PlaceCard` is the canonical look:
+The mobile dock's rim is the canonical look (standardized from Eventz, Oct 2026):
 
-- 3px bar flush to the top edge of the card
-- Gradient: cyan → yellow → magenta → orange → cyan
-- **Motion:** colors flow left→right (`pdxSeamFlow`), soft rainbow glow pulse
-  (`pdxSeamGlow`), white glint sweep (`pdxSeamGlint`) - ~3.4s loop
-- **Calm mode / `prefers-reduced-motion`:** bar stays visible but **static**
-  (no flow, glint, or glow) - see `effects.css`
+- A **0.75px ring** around the card's top edge, painted with `var(--z-spectrum)`
+  (cyan, acid green, yellow, orange, magenta, violet, back to cyan)
+- **Masked** so it is full strength at the top edge and fades out over **26px**
+  down the sides: `mask: linear-gradient(black, transparent 26px), content-box xor`
+- It follows the card's own border radius, so the seam reads as part of the rim,
+  never as a flat inset bar
+- One rule drives every card: the seam block at the end of
+  `client/src/components/ds/tokens/glass.css` (event cards, rail cards, boards,
+  rows, listing, spotted, schedule, featured ad, open event card, and
+  `.pdx-refract-seam`). Poster ad cards (`.pdxBoard--event-grid`) keep their black
+  outer ring and are excluded
+- **Calm mode / `prefers-reduced-motion`:** static; the rim stays
+
+Retired: the 3px flat bar flush to the top edge with flow, glow and glint
+animation. Do not restore it on new cards.
 
 PlaceCard implements it as an explicit element:
 

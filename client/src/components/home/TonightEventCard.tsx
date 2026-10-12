@@ -1,7 +1,8 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { ArrowUpRight, Clock3, MapPin } from "lucide-react";
 import { dayAccentToken } from "@/lib/dsColors";
-import type { RailCardProps } from "@/components/RailCard";
+import type { ScheduleEvent } from "@/lib/scheduleEvents";
+import type { EventListing } from "@shared/multiDayEvents";
 import { formatGridCardWhen, listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import "./TonightEventCard.css";
 import DayMotif from "@/components/events/DayMotif";
@@ -43,7 +44,16 @@ export function LiveBadge({ live }: { live: TonightCardLive }) {
   );
 }
 
-export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp, onOpen, liveState }: Omit<RailCardProps, "event"> & { event?: RailCardProps["event"]; liveState?: TonightCardLive | null }) {
+export type TonightEventCardProps = {
+  event?: ScheduleEvent;
+  listing: EventListing;
+  rsvped: boolean;
+  onToggleRsvp: (eventId: number) => void;
+  onOpen: (listing: EventListing) => void;
+  liveState?: TonightCardLive | null;
+};
+
+export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp, onOpen, liveState }: TonightEventCardProps) {
   const admission = listing.admission === "FREE" ? "Free" : listing.admission === "SUGGESTED_DONATION" ? "Suggested donation" : listing.admission === "DOOR_FEE" ? "Door fee" : "Ticketed";
   // Saved cards show what moved since you saved them (last two weeks).
   const changedAt = listing.lastChangeAt ? Date.parse(listing.lastChangeAt) : NaN;

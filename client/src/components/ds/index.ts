@@ -3,7 +3,6 @@ export { IconButton } from "./IconButton";
 export { Button } from "./Button";
 export { Countdown } from "./Countdown";
 export { Divider } from "./Divider";
-export { EventCard } from "./EventCard";
 export { FilterChip } from "./FilterChip";
 export { HeroBanner } from "./HeroBanner";
 export { HouseholdStack } from "./HouseholdStack";

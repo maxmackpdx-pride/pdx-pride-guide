@@ -107,7 +107,6 @@ export default function DesignSystemSandbox() {
           Button: mod.Button,
           Countdown: mod.Countdown,
           Divider: mod.Divider,
-          EventCard: mod.EventCard,
           FilterChip: mod.FilterChip,
           HeroBanner: mod.HeroBanner,
           Logo: mod.Logo,
@@ -430,20 +429,6 @@ export default function DesignSystemSandbox() {
                 />
               ) : (
                 <DsPlaceholder name="PosterCard" />
-              )}
-              {C.EventCard ? (
-                <C.EventCard
-                  title={rowEvent.title}
-                  venue={rowEvent.venue}
-                  when={formatEventWhen(rowEvent)}
-                  day={rowEvent.day}
-                  image={rowEvent.image}
-                  types={rowEvent.tags.slice(0, 2)}
-                  admission={rowEvent.admission}
-                  going={rowEvent.going}
-                />
-              ) : (
-                <DsPlaceholder name="EventCard" />
               )}
             </div>
 

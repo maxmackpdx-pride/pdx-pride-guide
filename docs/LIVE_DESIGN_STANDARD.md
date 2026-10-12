@@ -76,6 +76,11 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Hub as an outlined pill with a standing cyan glow (plus a decorative pulsing cyan dot) | **Solid fill primary** - cyan plate, dark ink, composed from `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor` + `--neon-bloom` |
 | Global Hub tab opening a Member/Admin or administration drawer | **Hub is navigation** - signed-in Hub goes directly to `/dashboard`; admin controls live inside the Hub experience |
 | Hand-rolled glass shells that restate `--glass-card-shadow` behind `!important` (promoter ActionRow) | **Compose `.pdx-glass-card`**; set only `--c` and `--dir-gm` locally |
+| Generated day posters (`/placeholders/event-day-*.svg`, `event-placeholder-*.svg`) when an event has no flyer | **Day motif** - `EventFlyerArt` / `EventThumb` / `DayMotif placement="art"` draws the weekday's motif with the weekday on it. A real flyer is the only image an event shows; `resolveEventPosterUrl` returns `null` without one |
+| Org-name `ResourceCardMotif` (stage drawing) on event cards | **Day motif** (`DayMotif`) - one drawing per weekday, same on every card of that day |
+| Flat inset gradient bar as a card's top seam | **Dock rim seam** - 0.75px ring painted with `var(--z-spectrum)`, masked to fade out over 26px (`glass.css` seam rule; matches the mobile dock rim) |
+| Hero + stat pills + "The board / Live listings" heading + discovery quiz at the top of Eventz | **Compact top bar** (kicker, EVENTZ logo, share/follow), day tabs, chip row, then rails |
+| Legacy event components `ds/EventCard`, `RailCard`, `EventsNowPanel` | **`TonightEventCard`** (full card), **`EventRailCard`** (compact rail card), **`ThisWeekRail`** (day cards) |
 | Generic `PageHero` billboard on new pages (wallpaper, giant centered title, boxed lede, decorative slug, automatic CTA row) | **Use the closest existing product composition.** For ordinary utility, detail, legal, empty, and error pages use the compact nav-aligned `PageHeader`; a large authored hero is an explicit page-specific decision, never the default scaffold. |
 
 **Outer neon bloom is 8%, and it is NOT retired.** The card guide retired the
@@ -128,6 +133,22 @@ artwork keep the artwork instead of replacing it with typeset text.
 **Composition contract:** the card recipe applies only after an independent object boundary exists. Related prose and document structure remain continuous until meaning, action, comparison, selection, or state creates a real object boundary.
 
 ---
+
+## Eventz standard (reference surface)
+
+Tucker named the live Events page (Oct 11 2026, commit `20191b8c`) as the design standard for event surfaces. New event UI composes these pieces, with these numbers, before inventing anything.
+
+| Piece | Component | Spec |
+|-------|-----------|------|
+| Full event card | `components/home/TonightEventCard.tsx` | Deep glass shell + `.pdx-glass-rebind`, `--c` = day token. 4:5 flyer zone, bottom quarter fades into the body (body rises `-31.25%`). Footer: Save + View event. Live badge top left (ON NOW or STARTS IN h:mm:ss). Rail width 236px |
+| Compact rail card | `components/events/EventRailCard.tsx` | 136px (`m`) / 108px (`s`). 4:5 flyer (1:1 for `s`), radius 16px (12px `s`), 1px day border, 2px black ring, `--neon-bloom`. Save heart 38px on the flyer, 8px from the right, 46px up from the flyer bottom. Title Barlow Condensed 800 16px/1.04 uppercase, 2 lines reserved (`min-height: 2.08em`). Meta Barlow 500 12px/1.3, one line, "time · venue". Gap 6px |
+| Day card (This week) | `components/events/ThisWeekRail.tsx` | 136px, 4:5, Eventz glass shell, rim seam, day motif behind. Count line JetBrains Mono 600 10.5px, weekday Barlow Condensed 900 60px/.84 in the day color with glow, date 800 15px, Open/Close glow button 30px tall. Closed: up to three of the day's rail cards fan out behind (76px reserved, never touching the next card). Open: events slide onto the rail |
+| Sponsor rail card | `components/events/SponsorRailCard.tsx` | Same footprint as the compact rail card. Code ticket or product spotlight. Brand accent via `--b` (CockBlock `--neon-red`, Mr. S `--neon-cyan`). Sprinkled 1 per day with 4+ events, 2 past 8, never first |
+| Day motif | `components/events/DayMotif.tsx` | Places art style, one drawing per weekday (Moon, Tide, Hump, Crystal, Disco, Speaker, Sun), drawn bigger than the card, mesh and object layers drifting in opposite directions. `card` = low behind the copy, `low` = faint behind rail-card copy, `art` = the flyer slot when there is no flyer |
+| Rails | `components/events/EventsRail.tsx` | 12px gap, 16px side padding, scroll snap, edge fade + arrows + progress bar, one nudge per session. Section head: Barlow Condensed 900 24px, 8px dot in the section color, mono count |
+| Filters / Mapz | `components/events/EventsDrawer.tsx` | Bottom sheet, half and full snap, drag grip, Escape and backdrop close |
+
+Type: Barlow Condensed (`--font-display`) for titles and labels, Barlow (`--font-body`) for meta, JetBrains Mono (`--font-mono`) for counts and kickers. Colors: day tokens (`--day-*`) only, never raw hex. Spacing rhythm: 6px inside a card stack, 12px between rail items, 16px page gutters, 28px between rails.
 
 ## Events board (behavior + chrome)
 

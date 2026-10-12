@@ -42,7 +42,6 @@ export const DESIGN_COMPONENT_REGISTRY = Object.freeze([
   entry("component:data-display/Badge", "Badge", "data-display", "Badge", "client/src/components/ds/Badge.tsx"),
   entry("component:data-display/ChangeBadge", "ChangeBadge", "data-display", "ChangeBadge", "client/src/components/ds/ChangeBadge.tsx"),
   entry("component:data-display/Countdown", "Countdown", "data-display", "Countdown", "client/src/components/ds/Countdown.tsx"),
-  entry("component:data-display/EventCard", "EventCard", "data-display", "EventCard", "client/src/components/ds/EventCard.tsx", "adapter"),
   entry("component:data-display/HouseholdStack", "HouseholdStack", "data-display", "HouseholdStack", "client/src/components/ds/HouseholdStack.tsx"),
   entry("component:data-display/PlaceCard", "PlaceCard", "data-display", "PlaceCard", "client/src/components/ds/PlaceCard.tsx", "adapter"),
   entry("component:data-display/PosterCard", "PosterCard", "data-display", "PosterCard", "client/src/components/ds/PosterCard.tsx", "adapter"),

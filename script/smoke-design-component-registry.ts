@@ -8,7 +8,7 @@ import {
 } from "../shared/designComponentRegistry";
 
 assert.equal(DESIGN_COMPONENT_SOURCE_REPOSITORY, "maxmackpdx-pride/pdx-pride-guide");
-assert.equal(DESIGN_COMPONENT_REGISTRY.length, 23, "the connected registry must cover all 23 cataloged React objects");
+assert.equal(DESIGN_COMPONENT_REGISTRY.length, 22, "the connected registry must cover all 22 cataloged React objects");
 
 const ids = new Set<string>();
 const sourcePairs = new Set<string>();

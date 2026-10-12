@@ -9,7 +9,6 @@ import {
   ChangeBadge,
   Countdown,
   Divider,
-  EventCard,
   FilterChip,
   HeroBanner,
   HouseholdStack,
@@ -58,8 +57,6 @@ function Specimen({ id }: { id: string }) {
       return <ChangeBadge label="Updated today" />;
     case "component:data-display/Countdown":
       return <Countdown target={countdownTarget} accent="rainbow" />;
-    case "component:data-display/EventCard":
-      return <EventCard {...event} claimable saved={false} onSave={() => undefined} />;
     case "component:data-display/HouseholdStack":
       return <HouseholdStack people={[{ id: 1, name: "Tucker", username: "maxmackpdx", avatarChoice: 4, avatarRing: "rainbow", kind: "MEMBER", role: "LEAD" }, { id: 2, name: "Alex", avatarChoice: 2, kind: "OFFPLATFORM", role: "MEMBER" }]} pets={[{ id: 3, name: "Ziggy", species: "dog", kind: "PET", role: "MEMBER" }]} slots={1} />;
     case "component:data-display/PlaceCard":
