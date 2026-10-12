@@ -633,7 +633,7 @@ export default function Events() {
     () => liveEvents.filter(e => savedIds.has(e.id)).length,
     [liveEvents, savedIds],
   );
-  const drawerFilterCount = (railKeys.has(activeDay) ? 0 : 1) + Number(pastView) + Number(sortMode !== "start_time");
+  const drawerFilterCount = (railKeys.has(activeDay) ? 0 : 1) + Number(pastView) + Number(sortMode !== "start_time") + activeFilters.length;
 
   const posterServeQuery = useQuery<{ ads: AdServePayload[] }>({
     queryKey: ["/api/ads/serve", "grid"],
@@ -759,6 +759,7 @@ export default function Events() {
                 </div>
               )}
               <div className="events-browse">
+                <div className="events-day-row">
                 <nav className="events-day-rail" aria-label="Pick a day">
                   {dayRail.map(d => (
                     <button
@@ -786,38 +787,6 @@ export default function Events() {
                     <span className="events-day-tab__sub">{moreLabel}</span>
                   </button>
                 </nav>
-                <div className="events-chip-row" role="group" aria-label="Filter by type">
-                  {EVENT_TYPE_FILTERS.map(f => (
-                    <EventTypeTag
-                      key={f}
-                      label={f}
-                      interactive
-                      active={activeFilters.includes(f)}
-                      onClick={() => toggleFilter(f)}
-                      testId={`filter-type-${f.replace(/[+ ]/g, "-")}`}
-                    />
-                  ))}
-                </div>
-              <BrowseToolbar label="Search and filter Eventz" className="board-active-feed__controls">
-                <div className="board-filter-row events-filter-row">
-                  <div className="events-filter-search">
-                    <SearchInput
-                      id="event-search"
-                      aria-label={pastView ? "Search past events" : "Search events"}
-                      placeholder={pastView ? "Search past events, venues, DJs, days…" : "Search events, venues, DJs, days…"}
-                      value={searchQuery}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                      onClear={() => setSearchQuery("")}
-                      data-testid="event-search"
-                      size="sm"
-                    />
-                  </div>
-                  <button type="button" className="events-tool-btn" aria-haspopup="dialog" onClick={() => setDrawerOpen(true)} data-testid="events-filters-open">
-                    <SlidersHorizontal size={18} aria-hidden="true" />Filters{drawerFilterCount ? ` · ${drawerFilterCount}` : ""}
-                  </button>
-                  <button type="button" className="events-tool-btn" aria-haspopup="dialog" onClick={() => setMapOpen(true)} data-testid="events-map-open">
-                    <MapIcon size={18} aria-hidden="true" />Map
-                  </button>
                   <div className="events-view-toggle">
                     <button
                       type="button"
@@ -852,6 +821,27 @@ export default function Events() {
                       <CalendarDays size={22} />
                     </button>
                   </div>
+                </div>
+              <BrowseToolbar label="Search and filter Eventz" className="board-active-feed__controls">
+                <div className="board-filter-row events-filter-row">
+                  <div className="events-filter-search">
+                    <SearchInput
+                      id="event-search"
+                      aria-label={pastView ? "Search past events" : "Search events"}
+                      placeholder={pastView ? "Search past events, venues, DJs, days…" : "Search events, venues, DJs, days…"}
+                      value={searchQuery}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                      onClear={() => setSearchQuery("")}
+                      data-testid="event-search"
+                      size="sm"
+                    />
+                  </div>
+                  <button type="button" className="events-tool-btn events-tool-btn--icon" aria-haspopup="dialog" aria-label={`Filters${drawerFilterCount ? `, ${drawerFilterCount} on` : ""}`} onClick={() => setDrawerOpen(true)} data-testid="events-filters-open">
+                    <SlidersHorizontal size={19} aria-hidden="true" />{drawerFilterCount ? <span className="events-tool-btn__count" aria-hidden="true">{drawerFilterCount}</span> : null}
+                  </button>
+                  <button type="button" className="events-tool-btn events-tool-btn--icon" aria-haspopup="dialog" aria-label="Map" onClick={() => setMapOpen(true)} data-testid="events-map-open">
+                    <MapIcon size={19} aria-hidden="true" />
+                  </button>
                 </div>
                 {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== DEFAULT_WINDOW) && (
                   <button
@@ -1100,6 +1090,21 @@ export default function Events() {
             >
               PAST{pastEvents.length > 0 ? ` · ${pastEvents.length}` : ""}
             </FilterChip>
+          </div>
+        </div>
+        <div className="events-drawer__section">
+          <span className="events-drawer__label">Type</span>
+          <div className="events-drawer__chips" role="group" aria-label="Filter by type">
+            {EVENT_TYPE_FILTERS.map(f => (
+              <EventTypeTag
+                key={f}
+                label={f}
+                interactive
+                active={activeFilters.includes(f)}
+                onClick={() => toggleFilter(f)}
+                testId={`filter-type-${f.replace(/[+ ]/g, "-")}`}
+              />
+            ))}
           </div>
         </div>
         <div className="events-drawer__section">

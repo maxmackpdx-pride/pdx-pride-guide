@@ -426,3 +426,23 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 /* Rail card stamps: weekday code on posterless art, hidden under a live badge. */
 .event-rail-card--s .day-motif-code { font-size: 12px; left: 9px; top: 10px; }
 .event-rail-card__art:has(.tonight-card__live) .day-motif-code { display: none; }
+
+/* Browse wireframe (mobile first): three control rows, grouped and spaced.
+   Row 1: day tabs with the grid/list/calendar switch at the right end.
+   Row 2: search with Filters and Map as icon buttons at its right end.
+   Type chips live in the Filters drawer. 8px inside the group, 20px under
+   the header, 32px before the first rail. */
+.events-page .events-browse { gap: 8px; }
+.events-page .events-day-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.events-page .events-day-row .events-day-rail { flex: 1; min-width: 0; }
+html body .events-page.board-page--makeover .events-day-row .events-view-toggle { flex: none; display: flex; gap: 0; padding: 2px; margin: 0; border-radius: 13px; }
+html body .events-page.board-page--makeover .events-day-row .events-view-toggle__btn { min-width: 36px; width: 36px; min-height: 44px; padding: 0; }
+.events-page .events-day-row .events-view-toggle__btn svg { width: 20px; height: 20px; }
+.events-page .events-browse .board-active-feed__controls { margin: 0; padding: 0; }
+.events-page .events-filter-row { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin: 0; }
+.events-page .events-filter-row .events-filter-search { flex: 1 1 auto; min-width: 0; width: auto; order: 0; }
+.events-page .events-tool-btn--icon { position: relative; flex: none; width: 44px; min-width: 44px; padding: 0; gap: 0; border-radius: 12px; }
+.events-page .events-tool-btn__count { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; box-sizing: border-box;
+  display: inline-flex; align-items: center; justify-content: center; background: var(--room-eventz); color: var(--z-black); font: 800 11px/1 var(--font-display); box-shadow: 0 0 0 2px var(--z-black); }
+html body .events-page.board-page--makeover .events-board-feed__sticky { padding-top: 0; padding-bottom: 0; border-bottom: 0; }
+html body .events-page.board-page--makeover .events-board-feed .board-active-feed__body { padding-top: 32px; }
