@@ -1,5 +1,4 @@
-import { BrowseHeader, BrowseControls, BrowseLane, BrowseCard, type BrowseView } from "@/components/discovery/EventzBrowse";
-import VenueFollowButton from "@/components/VenueFollowButton";
+import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
 import BoardShareButton from "@/components/BoardShareButton";
 import { WebGLShader } from '@/components/ui/web-gl-shader';
 import { ResourceFilterButton } from '@/components/resources/ResourceFilterButton';
@@ -464,13 +463,9 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     ? "Loading…"
     : `${filtered.length} ${isSpaces ? (filtered.length === 1 ? "squad" : "squadz") : (filtered.length === 1 ? "PLACE" : "PLACEZ")}`;
 
-  const renderBrowsePlace = (biz: Business) => <BrowseCard key={biz.id} name={biz.name}
-    image={resolveDirectoryLogo(biz.name, biz.imageUrl)} fallback={directoryFallbackLogo(biz.type)}
-    category={`place-${biz.type}`} color={TYPE_COLORS[biz.type] || "var(--neon-cyan)"}
-    meta={`${biz.neighborhood || "Portland metro"}${biz.queerOwned ? " · Queer owned" : ""}`} description={biz.description}
-    onOpen={element => openPlace(biz, element)}>
-    <VenueFollowButton businessId={biz.id} initialFollowing={Boolean(biz.isFollowing)} accent={TYPE_COLORS[biz.type]} onRequireAuth={() => setShowAuth(true)} />
-  </BrowseCard>;
+  const renderBrowsePlace = (biz: Business) => <div key={biz.id} className="eb-original-card">
+    <DirectoryCard biz={biz} onClick={element => openPlace(biz, element)} onRequireAuth={() => setShowAuth(true)} />
+  </div>;
 
   const { calmMode } = useTheme();
   const reducedMotion = useReducedMotion();

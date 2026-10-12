@@ -1,8 +1,9 @@
-import { BrowseHeader, BrowseControls, BrowseLane, BrowseCard, type BrowseView } from "@/components/discovery/EventzBrowse";
+import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
 import BrowseStatus from "@/components/BrowseStatus";
 import "@/components/discovery/DiscoveryFlow.css";
 import {
   lazy,
+  memo,
   Suspense,
   useCallback,
   useEffect,
@@ -30,6 +31,8 @@ import { placeGoogleMapsUrl } from "@/lib/placeLinks";
 import { Badge } from "@/components/ds/Badge";
 import BoardShareButton from "@/components/BoardShareButton";
 import BoardFollowButton from "@/components/BoardFollowButton";
+import { resourceLogoLayout } from "@/components/resources/resourceLogoLayout";
+import { PlaceCard } from "@/components/ds/PlaceCard";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import "@/components/ui/web-gl-shader.css";
 import "@fontsource/barlow/latin-400.css";
@@ -391,7 +394,70 @@ function ResourceLocationMap({ org, color, initiallyOpen = false }: { org: Resou
   </section>;
 }
 
-// Keep service identifiers when the wordmark names only the parent organization.
+// Preserve the original resource card artwork and optical logo treatment.
+const RESOURCE_CARD_CAPTIONS: Record<string, string> = {
+ "Family Peace Center of Washington County": "Family Peace Center",
+ "Virginia Garcia · Beaverton Wellness Center": "Beaverton Wellness Center",
+ "PFLAG Vancouver": "Vancouver, WA",
+ "YWCA Clark County · SafeChoice": "SafeChoice",
+
+ "Oregon Health Plan (OHP)": "Oregon Health Plan (OHP)",
+ "Multnomah County · Free Outreach Testing": "Free Outreach Testing",
+ "Oregon Free HIV & Syphilis Lab Testing": "Free HIV & Syphilis Testing",
+ "CAP Northwest & Our House": "Our House",
+ "OHSU Transgender Health Program": "Transgender Health Program",
+ "Marsha's Folx | Bradley Angle": "Marsha’s Folx",
+ "WERQ Together": "WERQ Together",
+ "New Avenues for Youth / SMYRC": "SMYRC",
+ "The Living Room": "The Living Room",
+ "TransActive Gender Project": "TransActive Gender Project",
+ "Pairs With Pride": "Pairs With Pride",
+ "Oregon Department of Veterans' Affairs": "Oregon Veterans’ Affairs",
+ "Northwest Gender Alliance": "Northwest Gender Alliance",
+ "Portland Small Business Development Center": "Portland Small Business Development Center",
+ "Independent Publishing Resource Center": "Independent Publishing Resource Center",
+ "Multnomah County Harm Reduction": "Harm Reduction",
+ "HIV Alliance · Syringe Services": "Syringe Services",
+ "Just in Case Oregon · Free Naloxone": "Free Naloxone",
+ "Food banks & pantries": "Food Banks & Pantries",
+};
+
+const ResourceCard = memo(function ResourceCard({
+  row,
+  onOpen,
+}: {
+  row: Row;
+  onOpen: (row: Row) => void;
+}) {
+  const { org } = row;
+  const category = row.sectionCategory ?? row.category;
+  return (
+    <PlaceCard
+      name={org.name}
+      displayName={org.logo ? (RESOURCE_CARD_CAPTIONS[org.name] ?? null) : org.name}
+      decoration={<><div className="rg-card-vignette" aria-hidden="true" /><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true" /><ResourceCardMotif name={org.name} category={category.id} /></>}
+      data-optical-logo={org.name}
+      style={resourceLogoLayout(org.name) as CSSProperties}
+      categoryLabel={category.name}
+      categoryTags={tagsFor(row).slice(0, 2)}
+      accentColor={category.color}
+      logoUrl={org.logo}
+      logoFallback={<Mark org={{ ...org, logo: undefined }} />}
+      description={org.desc}
+      shareUrl={`https://www.zaylist.com/rezources?resource=${encodeURIComponent(org.name)}`}
+      className={`rg-directory-card rg-category-${category.id} pdxPlace--clickable${org.logoSurface === "light" ? " rg-directory-card--light-logo" : ""}`}
+      onClick={() => onOpen(row)}
+      footer={
+        <div className="rg-directory-footer" onClick={(event) => event.stopPropagation()}>
+          <button className={`pdx-glass-rebind pdxBtn${["safety", "legal", "arts", "youth", "harm-reduction"].includes(category.id) ? " rg-contact-white" : ""}`} aria-label={`View details for ${org.name}`} onClick={() => onOpen(row)}>
+            View details <ArrowUpRight size={16} />
+          </button>
+        </div>
+      }
+    />
+  );
+});
+
 export default function Resources() {
   const { calmMode } = useTheme();
   const reducedMotion = useReducedMotion();
@@ -472,9 +538,9 @@ export default function Resources() {
     return !query || [row.org.name, row.org.desc, row.org.sub, row.org.scope, row.org.addr, ...(row.org.aliases || []), ...(row.org.serviceTags || []), ...categoriesFor(row).map(c => c.name)].filter(Boolean).join(" ").toLowerCase().includes(query);
   }), [categoryIds, searchQuery]);
   const selectedCategories = RESOURCE_CATEGORIES.filter(c => !categoryIds.length || categoryIds.includes(c.id));
-  const renderCard = (row: Row) => <BrowseCard key={row.org.name} name={row.org.name} image={row.org.logo} imageSurface={row.org.logoSurface}
-    category={(row.sectionCategory ?? row.category).id} color={(row.sectionCategory ?? row.category).color}
-    meta={row.org.sub || row.org.scope || row.category.name} description={row.org.desc} onOpen={() => openDetail(row)} />;
+  const renderCard = (row: Row) => <div key={row.org.name} className="placez-card-surface eb-original-card">
+    <ResourceCard row={row} onOpen={openDetail} />
+  </div>;
   return (
     <div className="eb-page eb-page--resources">
       {lightweightBackground

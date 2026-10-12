@@ -2,7 +2,6 @@ import { Children, useId, useState, type CSSProperties, type ChangeEvent, type R
 import { Grid2X2, List, SlidersHorizontal } from "lucide-react";
 import { SearchInput } from "@/components/ds";
 import EventsRail from "@/components/events/EventsRail";
-import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import "./EventzBrowse.css";
 
 export type BrowseCategory = { id: string; label: string; color: string; count: number };
@@ -53,20 +52,4 @@ export function BrowseLane({ title, color, count, children }: { title: string; c
     </header>
     <EventsRail open={open} label={title}>{Children.map(children, child => <div className="events-rail__item" role="listitem">{child}</div>)}</EventsRail>
   </section>;
-}
-
-export function BrowseCard({ name, image, imageSurface, fallback, category, color, meta, description, onOpen, children }: {
-  name: string; image?: string | null; imageSurface?: "light"; fallback?: string; category: string; color: string; meta: string; description?: string;
-  onOpen: (element: HTMLElement) => void; children?: ReactNode;
-}) {
-  return <article className="eb-card pdx-glass-card pdx-glass-rebind" style={{ "--c": color } as CSSProperties}>
-    <div className="pdx-refract-seam" aria-hidden="true" />
-    <button type="button" className="eb-card__open" aria-label={`Open ${name}`} onClick={event => onOpen(event.currentTarget)}>
-      <span className="eb-card__art"><ResourceCardMotif name={name} category={category} />
-        {image && <img src={image} data-surface={imageSurface} alt="" loading="lazy" onError={event => { if (fallback && event.currentTarget.getAttribute("src") !== fallback) event.currentTarget.src = fallback; else event.currentTarget.hidden = true; }} />}
-      </span>
-      <span className="eb-card__copy"><strong>{name}</strong><span className="eb-card__meta">{meta}</span>{description && <span className="eb-card__description">{description}</span>}</span>
-    </button>
-    {children && <div className="eb-card__actions">{children}</div>}
-  </article>;
 }
