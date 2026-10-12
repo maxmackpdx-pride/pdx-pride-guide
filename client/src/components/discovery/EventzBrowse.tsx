@@ -1,11 +1,11 @@
 import { Children, useId, useState, type CSSProperties, type ChangeEvent, type ReactNode } from "react";
-import { Grid2X2, List, SlidersHorizontal } from "lucide-react";
+import { Grid2X2, SlidersHorizontal } from "lucide-react";
 import { SearchInput } from "@/components/ds";
 import EventsRail from "@/components/events/EventsRail";
 import "./EventzBrowse.css";
 
 export type BrowseCategory = { id: string; label: string; color: string; count: number };
-export type BrowseView = "browse" | "grid" | "list";
+export type BrowseView = "browse" | "grid";
 
 /** Placez and ReZources use the approved Eventz composition, with their own data and actions. */
 export function BrowseHeader({ title, logo, kicker, description, children }: {
@@ -35,7 +35,6 @@ export function BrowseControls({ title, categories, selected, onSelect, query, o
       <div className="eb-view" role="group" aria-label={`${title} view`}>
         <button type="button" aria-label="Browse by category" aria-pressed={view === "browse"} onClick={() => onView("browse")}><SlidersHorizontal size={19} /></button>
         <button type="button" aria-label="Show all as a grid" aria-pressed={view === "grid"} onClick={() => onView("grid")}><Grid2X2 size={19} /></button>
-        <button type="button" aria-label="Show all as a list" aria-pressed={view === "list"} onClick={() => onView("list")}><List size={19} /></button>
       </div>
     </div>
     <div className="eb-search-row"><SearchInput aria-label={`Search ${title}`} placeholder={`Search ${title.toLowerCase()}…`} value={query}

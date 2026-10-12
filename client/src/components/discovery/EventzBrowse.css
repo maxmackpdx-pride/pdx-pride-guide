@@ -57,7 +57,6 @@
 .eb-page .events-rail-arrow--right { right: 0; }
 .eb-page .events-rail-arrow[aria-hidden="true"] { visibility: hidden; }
 .eb-grid { display: grid; grid-template-columns: repeat(auto-fill, var(--eb-card-width)); align-items: start; gap: 20px 16px; }
-.eb-list { display: flex; flex-direction: column; gap: 12px; }
 .eb-empty { padding: 32px 0; }
 .eb-footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-top: 40px; padding-block: 24px; border-top: 1px solid var(--panel-border); }
 .eb-footer h2 { margin: 0; font: 800 26px/1.2 var(--font-display); text-transform: uppercase; }
@@ -188,7 +187,6 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
   position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; padding: 0; opacity: 0;
 }
 .eb-page .eb-original-card .rg-directory-card:focus-within { outline: 2px solid var(--c); outline-offset: 3px; }
-.eb-list .eb-original-card { width: var(--eb-card-width); }
 @media (max-width: 600px) {
   .eb-grid { grid-template-columns: repeat(auto-fill, var(--eb-card-width)); justify-content: center; gap: 14px; }
 }

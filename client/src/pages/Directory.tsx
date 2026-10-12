@@ -1,4 +1,5 @@
 import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
+import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import BoardShareButton from "@/components/BoardShareButton";
 import { directoryResourceName, directoryResourcePath } from "@/lib/directoryResources";
 import { WebGLShader } from '@/components/ui/web-gl-shader';
@@ -50,6 +51,8 @@ import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import "./Directory.css";
 
 export type DirectoryEventSummary = {
+  /** Used only by the isolated design preview; never marks a live event as upcoming. */
+  previewExample?: boolean;
   id: number;
   title: string;
   dateStart: string;
@@ -194,7 +197,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
   const { user } = useAuth();
   const { toast } = useToast();
-  const [browseView, setBrowseView] = useState<BrowseView>(() => { const view = new URLSearchParams(window.location.search).get("layout"); return view === "list" || view === "grid" ? view : "browse"; });
+  const [browseView, setBrowseView] = useState<BrowseView>(() => { const view = new URLSearchParams(window.location.search).get("layout"); return view === "grid" ? "grid" : "browse"; });
   const [placeIntent, setPlaceIntent] = useState(false);
   const [discoveryChosen, setDiscoveryChosen] = useState(() => /[?&](type|category|neighborhood|q|place)=/.test(window.location.search));
   const [showAuth, setShowAuth] = useState(false);
@@ -265,7 +268,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       const type = params.get("type");
       setActiveType(isSpaces ? "group" : type?.split(",").filter(isPlacezType).join(",") || "ALL");
       const view = params.get("layout");
-      setBrowseView(view === "list" || view === "grid" ? view : "browse");
+      setBrowseView(view === "grid" ? "grid" : "browse");
       setSearchQuery(params.get("q") || "");
       setActiveNeighborhood(params.get("neighborhood") || "ALL");
     };
@@ -496,7 +499,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         <div className="eb-frame">
           <BrowseControls title="Placez" categories={[{id:"ALL",label:"All Placez",color:"var(--neon-cyan)",count:visibleBusinesses.length}, ...categoryBands.map(c => ({id:c.key,label:c.label,color:c.color,count:c.count}))]}
             selected={activeType.split(",")} onSelect={handleSelectCategory} query={searchQuery} onSearch={setSearchQuery} view={browseView} onView={setBrowseView}>
-            <a className="eb-tool pdx-glass-rebind" href="/map?layer=places" aria-label="Explore places on Mapz"><Map size={19} /><span>Map</span></a>
+            <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("places")} aria-label="Explore places on Mapz"><Map size={19} /><span>Map</span></a>
           </BrowseControls>
           {formOpen && <DirectoryAddPlaceForm isSpaces={false} onClose={() => setFormOpen(false)} />}
           <div className="eb-body">
@@ -509,7 +512,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                 <label>Neighborhood<select value={activeNeighborhood} onChange={e => setActiveNeighborhood(e.target.value)} aria-label="Filter by neighborhood">
                   {neighborhoodsInUse.map(n => <option key={n} value={n}>{n === "ALL" ? "Anywhere in Portland" : n}</option>)}
                 </select></label>
-                <a className="eb-tool pdx-glass-rebind" href="/map?layer=places"><Map size={18} />Explore on Mapz</a>
+                <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("places")}><Map size={18} />Explore on Mapz</a>
               </div>
               <details className="eb-panel eb-mobile-filters"><summary><SlidersHorizontal size={18} />Neighborhood{activeNeighborhood !== "ALL" ? ` · ${activeNeighborhood}` : ""}</summary>
                 <label>Neighborhood<select value={activeNeighborhood} onChange={e => setActiveNeighborhood(e.target.value)} aria-label="Filter by neighborhood">
@@ -529,7 +532,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                   return places.length ? <BrowseLane key={category.key} title={category.label} color={category.color} count={places.length}>
                     {places.map(biz => renderBrowsePlace(biz))}
                   </BrowseLane> : null;
-                })}</div> : <div className={browseView === "list" ? "eb-list" : "eb-grid"}>{filtered.map(biz => renderBrowsePlace(biz))}</div>}
+                })}</div> : <div className="eb-grid">{filtered.map(biz => renderBrowsePlace(biz))}</div>}
             </section>
           </div>
           <footer className="eb-footer"><h2>Not seeing your place?</h2><button type="button" className="eb-tool pdx-glass-rebind" onClick={openAddForm}><Plus size={18} />Add a place</button></footer>
@@ -541,7 +544,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
           <h1 className="rg-board-logo-frame placez-reference-logo"><img src={isSpaces ? "/brand/family/my-squadz.svg" : "/brand/family/our-placez.svg"} alt={isSpaces ? "My Squadz" : "Our Placez"} /></h1>
           <div className="rg-intro-actions">
             <BoardShareButton title={isSpaces ? "My Squadz" : "Placez"} path={isSpaces ? "/spaces" : "/directory"} />
-            <a className="placez-reference-map" href="/map?layer=places">Explore on Mapz ↗</a>
+            <a className="placez-reference-map" href={mapBrowseHref("places")}>Explore on Mapz ↗</a>
           </div>
         </div>
         <section className="rg-layout rg-wrap placez-reference-start">

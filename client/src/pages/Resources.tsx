@@ -1,4 +1,5 @@
 import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
+import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import BrowseStatus from "@/components/BrowseStatus";
 import "@/components/discovery/DiscoveryFlow.css";
 import {
@@ -22,6 +23,7 @@ import {
   ArrowUpRight,
   ChevronDown,
   ShieldAlert,
+  Map,
   Phone,
   X,
 } from "lucide-react";
@@ -483,7 +485,7 @@ export default function Resources() {
   const readBrowseState = () => {
     const params = new URLSearchParams(window.location.search);
     const ids = (params.get("cat") || "").split(",").filter(id => RESOURCE_CATEGORIES.some(c => c.id === id));
-    return { ids: params.get("view") === "all" ? [] : ids, query: params.get("q") || "", layout: params.get("layout") === "grid" ? "grid" as const : params.get("layout") === "list" ? "list" as const : "browse" as const, mode: params.get("door") === "talk" ? "talk" as const : "directory" as const };
+    return { ids: params.get("view") === "all" ? [] : ids, query: params.get("q") || "", layout: params.get("layout") === "grid" ? "grid" as const : "browse" as const, mode: params.get("door") === "talk" ? "talk" as const : "directory" as const };
   };
   const [initial] = useState(readBrowseState);
   const [categoryIds, setCategoryIds] = useState<string[]>(initial.ids);
@@ -556,6 +558,7 @@ export default function Resources() {
       <div className="eb-frame">
         <BrowseControls title="ReZources" categories={[{id:"ALL",label:"All resources",color:"var(--neon-cyan)",count:ROWS.length}, ...RESOURCE_CATEGORIES.map((c, i) => ({id:c.id,label:LABELS[i],color:c.color,count:ROWS.filter(row => categoriesFor(row).some(category => category.id === c.id)).length}))]}
           selected={categoryIds.length ? categoryIds : ["ALL"]} onSelect={choose} query={searchQuery} onSearch={value => {setSearchQuery(value); setMode("directory");}} view={browseView} onView={value => {setBrowseView(value); setMode("directory");}}>
+          <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("rezources")} aria-label="Explore resources on Mapz"><Map size={19} /><span>Map</span></a>
           <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Talk to someone" aria-pressed={mode === "talk"} onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} /><span>Talk to someone</span></button>
           <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Immediate safety and support" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}><ShieldAlert size={19} /></button>
         </BrowseControls>
@@ -578,7 +581,7 @@ export default function Resources() {
                 <div className="eb-lanes">{selectedCategories.map(category => {
                   const group = rows.filter(row => categoriesFor(row).some(c => c.id === category.id)).sort((a, b) => Number(b.category.id === category.id) - Number(a.category.id === category.id));
                   return group.length ? <BrowseLane key={category.id} title={category.name} color={category.color} count={group.length}>{group.map(row => renderCard({...row, sectionCategory:category}))}</BrowseLane> : null;
-                })}</div> : <div className={browseView === "list" ? "eb-list" : "eb-grid"}>{rows.map(renderCard)}</div>}
+                })}</div> : <div className="eb-grid">{rows.map(renderCard)}</div>}
             </>}
           </section>
         </div>
