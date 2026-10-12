@@ -542,7 +542,7 @@ export default function Events() {
       const dom = Number(date.slice(8));
       return {
         key,
-        top: i === 0 ? "Tonight" : code,
+        top: i === 0 ? "Today" : code,
         sub: i === 0 ? `${code} ${dom}` : `${mon} ${dom}`,
         color: `var(--day-${lower})`,
         text: code === "MON" || code === "TUE" ? `var(--day-${lower}-text)` : `var(--day-${lower})`,
@@ -554,7 +554,7 @@ export default function Events() {
   const railKeys = useMemo(() => new Set(dayRail.map(d => d.key)), [dayRail]);
   const moreLabel = pastView ? "Past" : railKeys.has(activeDay) ? "All +" : (activeChipLabel ?? "All +");
 
-  // A single day reads as a timeline. Tonight: on now, starting soon, tonight,
+  // A single day reads as a timeline. Today: on now, starting soon, today,
   // late. Any other day on the rail: daytime, evening, late.
   const tonightBands = useMemo(() => {
     const isTonight = activeDay === DEFAULT_WINDOW;
@@ -566,7 +566,7 @@ export default function Events() {
       ? [
           { id: "now", label: "On now", color: "var(--neon-green)", items: [] as EventListing[] },
           { id: "soon", label: "Starting soon", color: "var(--neon-cyan)", items: [] as EventListing[] },
-          { id: "tonight", label: "Tonight", color: "var(--neon-magenta)", items: [] as EventListing[] },
+          { id: "tonight", label: "Today", color: "var(--neon-magenta)", items: [] as EventListing[] },
           { id: "late", label: "Late", color: "var(--neon-violet)", items: [] as EventListing[] },
         ]
       : [
@@ -594,10 +594,23 @@ export default function Events() {
   const railBands = useMemo(() => {
     if (!tonightBands || !tonightBands.length) return null;
     const merged = tonightBands.filter(b => b.id === "now" || b.id === "soon");
-    const rest = tonightBands.filter(b => b.id !== "now" && b.id !== "soon");
-    const first = merged.length
+    let rest = tonightBands.filter(b => b.id !== "now" && b.id !== "soon");
+    let first: Array<{ id: string; label: string; color: string; items: EventListing[] }> = merged.length
       ? [{ id: "happening", label: "Happening now", color: "var(--neon-green)", items: merged.flatMap(b => b.items) }]
       : [];
+    // Nothing on now: the lead rail becomes Next up. It holds the next event to start
+    // plus any others starting within the same hour, pulled out of their later rails.
+    if (!first.length && activeDay === DEFAULT_WINDOW) {
+      const startOf = (e: EventListing) => parsePacificDateTime(e.dateStart) ?? Number.MAX_SAFE_INTEGER;
+      const upcoming = rest.flatMap(b => b.items).filter(e => startOf(e) >= now).sort((a, b) => startOf(a) - startOf(b));
+      if (upcoming.length) {
+        const cutoff = startOf(upcoming[0]) + 3600000;
+        const next = upcoming.filter(e => startOf(e) < cutoff);
+        const taken = new Set(next);
+        rest = rest.map(b => ({ ...b, items: b.items.filter(e => !taken.has(e)) })).filter(b => b.items.length > 0);
+        first = [{ id: "next", label: "Next up", color: "var(--neon-green)", items: next }];
+      }
+    }
     const bands = [...first, ...rest];
     // Tonight also previews tomorrow as its own rail.
     if (activeDay === DEFAULT_WINDOW) {
@@ -911,8 +924,8 @@ export default function Events() {
           <div className="events-rails">
             {railBands.map((band, index) => {
               const expanded = openRails.has(band.id);
-              // Happening now keeps the full Eventz card; every other rail uses one size.
-              const size = band.id === "happening" ? "full" : "m";
+              // Happening now / Next up keep the full Eventz card; every other rail uses one size.
+              const size = band.id === "happening" || band.id === "next" ? "full" : "m";
               return (
                 <section key={band.id} className={`events-rail-sec events-rail-sec--${size} pdx-glass-rebind`} style={{ "--c": band.color } as React.CSSProperties} aria-labelledby={`events-rail-${band.id}`}>
                   <div className="events-rail-sec__head">
