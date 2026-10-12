@@ -43,3 +43,12 @@ The private Sites preview uses seeded public data and a private three-page navig
 - TypeScript and whitespace checks passed. Browser checks confirmed both default-open disclosures, details-before-Follow order, Mizzed tab selection and 148px square event tiles at the 390px viewport. Map query assertions and the rendered Placez/ReZources links agree with Mapz's existing eight visibility controls.
 - The isolated Site contains three clearly marked archived event examples for Badlands, so the tile treatment can be reviewed without implying a current schedule. No product event data changed.
 - A Site-only All boards experiment combines five community categories with twelve fictional posts. Its implementation, sample data, and three-page navigation do not alter product routes or production navigation.
+
+
+## 2026-10-12 · Shared complementary card accents
+
+Passed for the scoped color change. Added a shared secondary-color recipe across the existing card families, including nested cards and older card roots. Eventz large, compact and open cards retain the existing dayComplementToken pairs. Category cards derive a softened complementary hue from their own primary color. Nested Mizzed doorways rebind to their own identity. Thin opposite edges, motif linework, footer seams and small icons carry the secondary accent; dimensions, text hierarchy, logos, imagery and statuses remain intact.
+
+Tucker’s follow-up removed the fixed pink/cyan smoked-glass flare from open cards and the experimental wide family. Shared card lighting now uses restrained category-specific linear reflections, a darker fill, 6px backdrop blur and a shorter edge shadow. No new image asset was created.
+
+Verification: product TypeScript check and diff checks passed; matching private Site build passed. Browser inspection covered Placez (200 × 403), ReZources (163.2 × 204), open Placez, nested Mizzed and upcoming event tiles, wide board cards/open state, and calm mode. A local isolated fixture checked the actual full-size and compact Eventz components across all seven days, open Eventz, and representative shared card primitives. Fixed an explicit day-pair inheritance mismatch on compact card art. Final built board view compared against the prior screenshot in one visual input. At 390px the board page has no horizontal overflow and its cards remain 334px wide. Representative families were inspected, not every route; physical Safari was not tested. Product production is unchanged.

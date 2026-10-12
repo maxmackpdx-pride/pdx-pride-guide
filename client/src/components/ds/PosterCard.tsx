@@ -102,7 +102,7 @@ export function PosterCard({
   };
   const claim = (event: React.MouseEvent) => { stop(event); onClaimClick?.(); };
   return (
-    <article className={`pdxBoard pdxBoard--event-grid${className ? ` ${className}` : ""}`} style={{ "--day-c": base, "--c": base, "--on-c": contrast, "--opposite-neon": secondary, ...style }} {...rest}>
+    <article className={`pdxBoard pdxBoard--event-grid${className ? ` ${className}` : ""}`} style={{ "--day-c": base, "--c": base, "--on-c": contrast, "--opposite-neon": secondary, "--card-secondary-override": secondary, ...style }} {...rest}>
       <EdgeLight />
       <div className="pdxBoard__poster">
         {image ? <img className="pdxBoard__img" src={image} alt="" loading="lazy" decoding="async" /> : <div className="pdxBoard__ph" aria-hidden="true" />}

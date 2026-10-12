@@ -1,0 +1,246 @@
+/* Shared secondary accents. Eventz owns card anatomy; this layer changes only
+   color, reflection, and edge light. Rebind on every card so a nested card pairs
+   with its own --c. Inline --card-secondary-override opts into an approved pair.
+   Existing day pairings come from dayComplementToken; arbitrary category colors
+   get a softened opposite hue. Photos, brand artwork, text and status fills stay intact. */
+html[data-zaylist-cards] :is(
+  .pdx-glass-rebind:where(:not(header):not(nav):not(.demo-nav)), .pdxPlace, .event-rail-card,
+  .card:where(:not(header):not(nav)), .ds-listing-card, .rb-card, .rb-checkin__hero-card,
+  .boards-index__card, .sch-event-card, .schedule-event-card,
+  .about-mission-card, .admin-attn-card, .dash-metric-card, .dash-profile-card,
+  .dvs-work-card, .event-host-card, .gifting-card, .gig-card, .gigs-card,
+  .gigs-path-card, .hp-card, .hub-card, .hub-rail-card, .living-map-card,
+  .mp-event-card, .mp-pack-card, .nude-live-card, .outz-beach-card, .outz-card,
+  .pg-home-card, .pgc-card, .rbi-card, .sellz-card,
+  .pdx-glass-card:where(:not(header):not(nav):not(.demo-nav)), .pdxBoard, .pdxRow,
+  .pdxPlace__body, .shadcn-card, .pdxStatCard, .board-listing-card,
+  .board-spotted-card, .spotted-card, .mp-board-card, .board-path-card,
+  .board-detail-modal, .board-post-overlay, .board-open-card, .event-modal,
+  .place-modal-panel, .rg-detail-card, .rg-card, .affiliate-poster-card,
+  .feed-aff, .featured-event-ad, .fitem--glow, .tonight-card,
+  .event-rail-card__art, .sponsor-rail-card__box, .place-event-tile,
+  .home-stage__housing-card, .home-stage__chat-card, .home-stage-card,
+  .hz-card, .home-world, .today-location, .hub-feed-card, .sc-card,
+  .install-app-card, .eb-panel, .room-doorways__door,
+  .event-modal__glass-panel, .event-modal__tab-panel,
+  .place-modal-panel__community-room, .ab-card, .ab-door
+) {
+  --card-secondary-override: initial;
+  --card-secondary: var(--card-secondary-override, #ff9f80);
+  --card-pair-glow: 14%;
+  --glass-card-blur: 6px;
+  --card-secondary-ink: color-mix(in srgb, var(--card-secondary) 70%, white);
+  --card-pair-edge: color-mix(in srgb, var(--card-secondary) 64%, #11131a);
+  --card-pair-shadow:
+    0 2px 5px #0008,
+    0 18px 32px -24px #000e,
+    -3px 0 9px -6px color-mix(in srgb, var(--c, var(--neon-cyan)) var(--card-pair-glow), transparent),
+    3px 4px 10px -7px color-mix(in srgb, var(--card-secondary) var(--card-pair-glow), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c, var(--neon-cyan)) 50%, #ffffff20),
+    inset -1px -1px 0 color-mix(in srgb, var(--card-secondary) 46%, transparent);
+  --glass-card-shadow: var(--card-pair-shadow);
+  --glass-card-bg:
+    linear-gradient(135deg, color-mix(in srgb, var(--c, var(--neon-cyan)) 8%, transparent), transparent 38%),
+    linear-gradient(315deg, color-mix(in srgb, var(--card-secondary) 6%, transparent), transparent 30%),
+    linear-gradient(133deg, #ffffff08, #ffffff02 18%, transparent 34%),
+    #050608f5;
+  --glass-sheen-specular: linear-gradient(135deg, #ffffff08, transparent 24%, transparent 84%, color-mix(in srgb, var(--card-secondary) 6%, transparent));
+}
+
+@supports (color: hsl(from #00ffff calc(h + 180) 88% 72%)) {
+  html[data-zaylist-cards] :is(
+  .pdx-glass-rebind:where(:not(header):not(nav):not(.demo-nav)), .pdxPlace, .event-rail-card,
+  .card:where(:not(header):not(nav)), .ds-listing-card, .rb-card, .rb-checkin__hero-card,
+  .boards-index__card, .sch-event-card, .schedule-event-card,
+  .about-mission-card, .admin-attn-card, .dash-metric-card, .dash-profile-card,
+  .dvs-work-card, .event-host-card, .gifting-card, .gig-card, .gigs-card,
+  .gigs-path-card, .hp-card, .hub-card, .hub-rail-card, .living-map-card,
+  .mp-event-card, .mp-pack-card, .nude-live-card, .outz-beach-card, .outz-card,
+  .pg-home-card, .pgc-card, .rbi-card, .sellz-card,
+  .pdx-glass-card:where(:not(header):not(nav):not(.demo-nav)), .pdxBoard, .pdxRow,
+  .pdxPlace__body, .shadcn-card, .pdxStatCard, .board-listing-card,
+  .board-spotted-card, .spotted-card, .mp-board-card, .board-path-card,
+  .board-detail-modal, .board-post-overlay, .board-open-card, .event-modal,
+  .place-modal-panel, .rg-detail-card, .rg-card, .affiliate-poster-card,
+  .feed-aff, .featured-event-ad, .fitem--glow, .tonight-card,
+  .event-rail-card__art, .sponsor-rail-card__box, .place-event-tile,
+  .home-stage__housing-card, .home-stage__chat-card, .home-stage-card,
+  .hz-card, .home-world, .today-location, .hub-feed-card, .sc-card,
+  .install-app-card, .eb-panel, .room-doorways__door,
+  .event-modal__glass-panel, .event-modal__tab-panel,
+  .place-modal-panel__community-room, .ab-card, .ab-door
+) {
+    --card-secondary: var(--card-secondary-override, hsl(from var(--c, #00ffff) calc(h + 180) 88% 72%));
+  }
+}
+
+/* This targeted surface override wins older single-color route styles, including
+   their !important glass shadows, while retaining each card's border width,
+   radius, poster background, hover movement, and keyboard focus outline. */
+html[data-zaylist-cards] :is(
+  .card:where(:not(header):not(nav)), .ds-listing-card, .rb-card, .rb-checkin__hero-card,
+  .boards-index__card, .sch-event-card, .schedule-event-card,
+  .about-mission-card, .admin-attn-card, .dash-metric-card, .dash-profile-card,
+  .dvs-work-card, .event-host-card, .gifting-card, .gig-card, .gigs-card,
+  .gigs-path-card, .hp-card, .hub-card, .hub-rail-card, .living-map-card,
+  .mp-event-card, .mp-pack-card, .nude-live-card, .outz-beach-card, .outz-card,
+  .pg-home-card, .pgc-card, .rbi-card, .sellz-card,
+  .pdx-glass-card:where(:not(header):not(nav):not(.demo-nav)), .pdxBoard, .pdxRow,
+  .pdxPlace__body, .shadcn-card, .pdxStatCard, .board-listing-card,
+  .board-spotted-card, .spotted-card, .mp-board-card, .board-path-card,
+  .board-detail-modal, .board-post-overlay, .board-open-card, .event-modal,
+  .place-modal-panel, .rg-detail-card, .rg-card, .affiliate-poster-card,
+  .feed-aff, .featured-event-ad, .fitem--glow, .tonight-card,
+  .event-rail-card__art, .sponsor-rail-card__box, .place-event-tile,
+  .home-stage__housing-card, .home-stage__chat-card, .home-stage-card,
+  .hz-card, .home-world, .today-location, .hub-feed-card, .sc-card,
+  .install-app-card, .eb-panel, .room-doorways__door,
+  .event-modal__glass-panel, .event-modal__tab-panel,
+  .place-modal-panel__community-room, .ab-card, .ab-door
+) {
+  border-right-color: var(--card-pair-edge) !important;
+  border-bottom-color: var(--card-pair-edge) !important;
+  box-shadow: var(--card-pair-shadow) !important;
+}
+/* These surfaces are parts of their parent card, so retain its explicit pair. */
+html[data-zaylist-cards] :is(.event-rail-card__art, .event-modal__glass-panel, .event-modal__tab-panel) {
+  --card-secondary-override: inherit;
+}
+/* Bind older card families that name their primary accent differently. */
+html[data-zaylist-cards] .boards-index__card { --c: var(--card-accent); }
+html[data-zaylist-cards] .sch-event-card { --c: var(--sch-day, var(--neon-cyan)); }
+html[data-zaylist-cards] .schedule-event-card { --c: var(--schedule-day, var(--neon-cyan)); }
+html[data-zaylist-cards] .dash-metric-card { --c: var(--metric-color, var(--dash-lime)); }
+html[data-zaylist-cards] .admin-attn-card { --c: var(--neon-pink); }
+html[data-zaylist-cards] .gifting-card { --c: var(--neon-yellow); }
+html[data-zaylist-cards] .gifting-card.iso { --c: var(--neon-cyan); }
+html[data-zaylist-cards] .gigs-card { --c: var(--neon-yellow); }
+html[data-zaylist-cards] .gigs-card.looking { --c: var(--neon-cyan); }
+html[data-zaylist-cards] .about-mission-card--magenta { --c: var(--neon-pink); }
+html[data-zaylist-cards] .about-mission-card--orange { --c: var(--neon-orange); }
+html[data-zaylist-cards] .about-mission-card--cyan { --c: var(--neon-cyan); }
+/* Some older cards used only box-shadow for focus. Keep that cue explicit. */
+html[data-zaylist-cards] :is(.sch-event-card, .schedule-event-card, .boards-index__card, .card, .pdxBoard, .pdxRow, .pdxPlace, .board-listing-card, .room-doorways__door, .ab-card, .ab-door):focus-visible {
+  outline: 3px solid var(--c, var(--neon-cyan));
+  outline-offset: 3px;
+}
+html[data-zaylist-cards] .sponsor-rail-card__box { --c: var(--b, var(--neon-cyan)); }
+
+/* Logo wells use restrained category-tinted reflections, without bright spots. */
+html[data-zaylist-cards] .pdxPlace__mediaGlow {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c, var(--neon-cyan)) 12%, transparent), transparent 48%),
+    linear-gradient(315deg, color-mix(in srgb, var(--card-secondary) 8%, transparent), transparent 40%);
+}
+html[data-zaylist-cards] .rg-card-motif :is(.rg-motif-mesh, .rg-motif-circuits, .rg-motif-calibration) {
+  color: var(--card-secondary);
+  stroke: currentColor;
+}
+html[data-zaylist-cards] .rg-card-motif .rg-motif-nodes { color: var(--card-secondary); fill: currentColor; }
+
+/* The main edge leads; the secondary color catches the opposite corner. */
+html[data-zaylist-cards] .event-modal.event-modal--approved::before {
+  background: conic-gradient(from var(--event-open-edge-angle),
+    color-mix(in srgb, var(--c, var(--neon-cyan)) 85%, white), var(--c, var(--neon-cyan)) 110deg,
+    color-mix(in srgb, var(--c, var(--neon-cyan)) 65%, #000) 165deg,
+    var(--card-secondary) 218deg, color-mix(in srgb, var(--card-secondary) 70%, white) 276deg,
+    var(--c, var(--neon-cyan)) 330deg, color-mix(in srgb, var(--c, var(--neon-cyan)) 85%, white));
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--c, var(--neon-cyan)) 22%, transparent));
+}
+html[data-zaylist-cards] .event-modal.event-modal--reference::after {
+  border-right-color: color-mix(in srgb, var(--card-secondary) 55%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--card-secondary) 55%, transparent);
+  box-shadow: inset 0 2px 4px #ffffff38, inset -2px -3px 9px color-mix(in srgb, var(--card-secondary) 26%, transparent);
+}
+html[data-zaylist-cards] .pdxBoard.pdxBoard--event-grid { --shine-3: var(--card-secondary); }
+html[data-zaylist-cards] .pdxBoard--event-grid .pdxBoard__shine--prepeak {
+  background: conic-gradient(from var(--event-edge-angle), var(--c, var(--neon-cyan)), transparent 34%, var(--card-secondary) 50%, transparent 84%, var(--c, var(--neon-cyan)));
+}
+html[data-zaylist-cards] :is(.tonight-card__footer, .rg-directory-footer, .ab-card__footer, .home-stage-card__foot) {
+  border-top-color: color-mix(in srgb, var(--card-secondary) 38%, transparent);
+}
+html[data-zaylist-cards] :is(.tonight-card__view, .placez-discovery-footer .pdxBtn, .ab-open, .home-stage-card__cta) svg {
+  color: var(--card-secondary-ink);
+}
+html[data-zaylist-cards] :is(.tonight-card__time, .tonight-card__venue, .placez-discovery-meta) svg {
+  color: var(--card-secondary-ink);
+}
+html[data-zaylist-cards] :is(.event-modal__disclosure, .rg-detail-disclosure) > summary > svg:last-child {
+  color: var(--card-secondary-ink);
+}
+
+/* Nested doorways keep their own pairing rather than inheriting the parent event. */
+html[data-zaylist-cards] .room-doorways__door::before {
+  background: radial-gradient(ellipse at 15% 24%, color-mix(in srgb, var(--c, var(--neon-cyan)) 14%, transparent), transparent 58%),
+    radial-gradient(ellipse at 90% 80%, color-mix(in srgb, var(--card-secondary) 18%, transparent), transparent 60%),
+    linear-gradient(to top, var(--z-black), transparent 60%);
+}
+html[data-zaylist-cards] .room-doorways__door .room-doorways__go {
+  color: var(--card-secondary-ink);
+  border-color: color-mix(in srgb, var(--card-secondary) 55%, transparent);
+}
+
+/* Wide cards use their category pair, never the fixed pink/cyan flare texture. */
+html[data-zaylist-cards] :is(.ab-card, .ab-door) {
+  background: var(--glass-card-bg);
+}
+html[data-zaylist-cards] .ab-card__eyebrow > span {
+  color: var(--card-secondary-ink);
+  border-color: color-mix(in srgb, var(--card-secondary) 62%, transparent);
+}
+html[data-zaylist-cards] :is(.ab-card--available, .ab-card--giving) .ab-card__eyebrow > span {
+  color: var(--z-black);
+  background: var(--card-secondary-ink);
+}
+html[data-zaylist-cards] .ab-art__symbol { color: var(--card-secondary-ink); }
+html[data-zaylist-cards] .ab-door > small { color: var(--card-secondary-ink); }
+
+/* Calm mode preserves the pair through thin keylines, without added bloom. */
+:is(html.calm-mode, :root[data-calm="true"]) :is(
+  .pdx-glass-rebind:where(:not(header):not(nav):not(.demo-nav)), .pdxPlace, .event-rail-card,
+  .card:where(:not(header):not(nav)), .ds-listing-card, .rb-card, .rb-checkin__hero-card,
+  .boards-index__card, .sch-event-card, .schedule-event-card,
+  .about-mission-card, .admin-attn-card, .dash-metric-card, .dash-profile-card,
+  .dvs-work-card, .event-host-card, .gifting-card, .gig-card, .gigs-card,
+  .gigs-path-card, .hp-card, .hub-card, .hub-rail-card, .living-map-card,
+  .mp-event-card, .mp-pack-card, .nude-live-card, .outz-beach-card, .outz-card,
+  .pg-home-card, .pgc-card, .rbi-card, .sellz-card,
+  .pdx-glass-card:where(:not(header):not(nav):not(.demo-nav)), .pdxBoard, .pdxRow,
+  .pdxPlace__body, .shadcn-card, .pdxStatCard, .board-listing-card,
+  .board-spotted-card, .spotted-card, .mp-board-card, .board-path-card,
+  .board-detail-modal, .board-post-overlay, .board-open-card, .event-modal,
+  .place-modal-panel, .rg-detail-card, .rg-card, .affiliate-poster-card,
+  .feed-aff, .featured-event-ad, .fitem--glow, .tonight-card,
+  .event-rail-card__art, .sponsor-rail-card__box, .place-event-tile,
+  .home-stage__housing-card, .home-stage__chat-card, .home-stage-card,
+  .hz-card, .home-world, .today-location, .hub-feed-card, .sc-card,
+  .install-app-card, .eb-panel, .room-doorways__door,
+  .event-modal__glass-panel, .event-modal__tab-panel,
+  .place-modal-panel__community-room, .ab-card, .ab-door
+) {
+  --card-pair-glow: 0%;
+  --card-pair-shadow: inset 0 1px 0 #ffffff24, inset -1px -1px 0 color-mix(in srgb, var(--card-secondary) 30%, transparent);
+}
+@media (prefers-reduced-transparency: reduce) {
+  html[data-zaylist-cards] :is(
+  .pdx-glass-rebind:where(:not(header):not(nav):not(.demo-nav)), .pdxPlace, .event-rail-card,
+  .card:where(:not(header):not(nav)), .ds-listing-card, .rb-card, .rb-checkin__hero-card,
+  .boards-index__card, .sch-event-card, .schedule-event-card,
+  .about-mission-card, .admin-attn-card, .dash-metric-card, .dash-profile-card,
+  .dvs-work-card, .event-host-card, .gifting-card, .gig-card, .gigs-card,
+  .gigs-path-card, .hp-card, .hub-card, .hub-rail-card, .living-map-card,
+  .mp-event-card, .mp-pack-card, .nude-live-card, .outz-beach-card, .outz-card,
+  .pg-home-card, .pgc-card, .rbi-card, .sellz-card,
+  .pdx-glass-card:where(:not(header):not(nav):not(.demo-nav)), .pdxBoard, .pdxRow,
+  .pdxPlace__body, .shadcn-card, .pdxStatCard, .board-listing-card,
+  .board-spotted-card, .spotted-card, .mp-board-card, .board-path-card,
+  .board-detail-modal, .board-post-overlay, .board-open-card, .event-modal,
+  .place-modal-panel, .rg-detail-card, .rg-card, .affiliate-poster-card,
+  .feed-aff, .featured-event-ad, .fitem--glow, .tonight-card,
+  .event-rail-card__art, .sponsor-rail-card__box, .place-event-tile,
+  .home-stage__housing-card, .home-stage__chat-card, .home-stage-card,
+  .hz-card, .home-world, .today-location, .hub-feed-card, .sc-card,
+  .install-app-card, .eb-panel, .room-doorways__door,
+  .event-modal__glass-panel, .event-modal__tab-panel,
+  .place-modal-panel__community-room, .ab-card, .ab-door
+) { --glass-card-bg: #08090c; }
+}

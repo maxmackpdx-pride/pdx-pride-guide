@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { ArrowUpRight, Clock3, MapPin } from "lucide-react";
-import { dayAccentToken } from "@/lib/dsColors";
+import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
 import type { ScheduleEvent } from "@/lib/scheduleEvents";
 import type { EventListing } from "@shared/multiDayEvents";
 import { formatCardTime, formatGridCardWhen, listingDay, listingPosterUrl } from "@/lib/dsEvent";
@@ -62,7 +62,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
   const changeLabel = rsvped && listing.lastChangeLabel && Number.isFinite(changedAt) && Date.now() - changedAt < CHANGE_WINDOW_MS ? listing.lastChangeLabel : null;
   const poster = listingPosterUrl(listing);
   const age = listing.ageRequirement === "21_PLUS" ? "21+" : listing.ageRequirement === "18_PLUS" ? "18+" : "All ages";
-  return <article className={`tonight-card tonight-card--${layout} pdx-glass-card pdx-glass-rebind`} style={{ "--c": dayAccentToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
+  return <article className={`tonight-card tonight-card--${layout} pdx-glass-card pdx-glass-rebind`} style={{ "--c": dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
     {poster
       ? <DayMotif day={listingDay(listing)} placement="card" />
       : <DayMotif day={listingDay(listing)} placement="art" className="tonight-card__motif-fill" />}

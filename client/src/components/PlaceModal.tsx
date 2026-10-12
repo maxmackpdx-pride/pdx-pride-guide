@@ -1,3 +1,4 @@
+import { dayComplementToken } from "@/lib/dsColors";
 import { PLACE_ACCENTS } from './discovery/placeTokens';
 import { ResourceCardMotif } from './resources/ResourceCardMotif';
 import { ArrowRight } from "lucide-react";
@@ -1052,7 +1053,7 @@ export default function PlaceModal({
                 href={eventPath(event.id, event.title, event.dayOfWeek)}
                 onClick={onClose}
                 className="place-event-tile pdx-glass-rebind"
-                style={{ "--c": DAY_COLOR[dayCodeFromEvent(event)] || accent } as React.CSSProperties}
+                style={{ "--c": DAY_COLOR[dayCodeFromEvent(event)] || accent, "--card-secondary-override": dayComplementToken(dayCodeFromEvent(event)) } as React.CSSProperties}
                 aria-label={`View event: ${event.title}`}
                 role="listitem"
               >
