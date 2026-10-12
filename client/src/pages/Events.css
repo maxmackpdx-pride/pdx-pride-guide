@@ -335,13 +335,14 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 .events-page .events-rail-sec__actions { display: flex; gap: 6px; }
 .events-page .events-rail-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 13px; border-radius: 999px; border: 1.5px solid var(--border-strong); background: var(--z-black); color: var(--text-hi); font: 700 13px/1 var(--font-display); letter-spacing: .05em; text-transform: uppercase; cursor: pointer; }
 .events-page .events-rail-pill:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
-.events-page .events-rail { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; padding: 4px 16px 8px; scrollbar-width: none; }
+/* Rails scroll sideways only: no vertical travel. Block padding leaves room for the card bloom. */
+.events-page .events-rail { display: flex; gap: 13px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; touch-action: pan-x pan-y; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; padding: 10px 16px 12px; scrollbar-width: none; }
 .events-page .events-rail::-webkit-scrollbar { display: none; }
 .events-page .events-rail__item { flex: none; scroll-snap-align: start; }
 .events-page .events-rail-sec--full .events-rail__item { width: 236px; }
 .events-page .events-rail-sec--m .events-rail__item { width: 136px; }
 .events-page .events-rail-sec--s .events-rail__item { width: 108px; }
-.events-page .events-rail--open { display: grid; overflow: visible; scroll-snap-type: none; gap: 16px 12px; }
+.events-page .events-rail--open { display: grid; overflow: visible; scroll-snap-type: none; gap: 18px 13px; }
 .events-page .events-rail-sec--full .events-rail--open { grid-template-columns: minmax(0, 1fr); }
 .events-page .events-rail-sec--m .events-rail--open { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .events-page .events-rail-sec--s .events-rail--open { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -366,7 +367,13 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 .event-rail-card { position: relative; width: 100%; }
 .event-rail-card__open { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 0; border: 0; background: none; color: inherit; text-align: left; font: inherit; cursor: pointer; }
 .event-rail-card__open:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 16px; }
-.event-rail-card__art { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 16px; background: var(--ink-900); border: 1px solid color-mix(in srgb, var(--c) 55%, var(--z-black)); box-shadow: 0 0 0 2px var(--z-black), inset 0 1px 0 color-mix(in srgb, var(--c) 55%, transparent), var(--neon-bloom); }
+.event-rail-card__art { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 16px; background: var(--ink-900); border: 1px solid color-mix(in srgb, var(--c) 55%, var(--z-black)); box-shadow: 0 0 0 2px var(--z-black), inset 0 1px 0 color-mix(in srgb, var(--c) 55%, transparent), var(--rail-bloom); transition: box-shadow .2s ease; }
+/* Rail card bloom: the glass card glow (as on "Not seeing your event?") scaled down so it
+   stops short of the next card (rail gap 13px). Brighter on hover, tap and keyboard focus. */
+.event-rail-card { --rail-bloom: 0 0 10px -2px color-mix(in srgb, var(--c) 55%, transparent), 0 0 4px -1px color-mix(in srgb, var(--c) 45%, transparent); }
+.event-rail-card:is(:hover, :active, :focus-within) { --rail-bloom: 0 0 12px -1px color-mix(in srgb, var(--c) 90%, transparent), 0 0 5px 0 color-mix(in srgb, var(--c) 75%, transparent); }
+:is(html.calm-mode, :root[data-calm="true"]) .event-rail-card { --rail-bloom: 0 0 8px -3px color-mix(in srgb, var(--c) 30%, transparent); }
+@media (prefers-reduced-motion: reduce) { .event-rail-card__art { transition: none; } }
 .event-rail-card--s .event-rail-card__art { aspect-ratio: 1 / 1; border-radius: 12px; }
 .event-rail-card__art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
 .event-rail-card__art .tonight-card__live { top: 6px; left: 6px; min-height: 26px; padding: 0 7px; gap: 5px; font-size: 11px; }

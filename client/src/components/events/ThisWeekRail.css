@@ -1,7 +1,7 @@
 /* This week rail (see ThisWeekRail.tsx). Tokens only. */
 .events-week .week-day { position: relative; transition: padding-right .35s ease; }
 .events-page .events-week .week-day.is-closed { width: 240px; padding-right: 104px; }
-.events-page .events-week .events-rail { gap: 20px; }
+.events-page .events-week .events-rail { gap: 22px; }
 
 /* Day card: the Eventz glass shell with the day as the hero, its motif behind. */
 .events-week .week-day__card {
@@ -52,7 +52,9 @@
 @keyframes week-fan-3 { 0%, 100% { transform: translateX(44px) rotate(5deg); } 50% { transform: translateX(48px) rotate(6deg); } }
 
 /* Only the flyer half of each fanned card shows; its copy would sit under the label. */
-.events-week .week-day__fan :is(.event-rail-card__shade, .event-rail-card__meta) { visibility: hidden; }
+.events-week .week-day__fan .event-rail-card__shade { visibility: hidden; }
+/* No time line on fanned cards, so their flyers line up with the day card's top. */
+.events-week .week-day__fan .event-rail-card__meta { display: none; }
 
 /* Events slide out of the day card onto the rail. */
 .events-week .week-slide { animation: week-slide .5s cubic-bezier(.2, .8, .2, 1) both; }
