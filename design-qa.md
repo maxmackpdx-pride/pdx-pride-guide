@@ -63,3 +63,61 @@ Extracted the approved 200px Eventz card geometry and typography into component 
 Verification: product and Site TypeScript checks passed, Site build passed, diff checks passed. Desktop and 390px phone inspected, including all 12 board cards (334 × 242px on phone, no content/page overflow), Giftz open state with primary-color frame, default-open details, Escape/focus return and Calm Mode. Placez remains 200 × 403px with matching Eventz title/tag fonts. Before/after screenshots compared in the same visual input. Physical Safari not tested.
 
 Evidence: `.local/qa/token-boards-desktop.png`, `token-boards-phone.png`, `token-board-open.png`, `token-placez-phone.png`.
+
+
+## HUB dropdown — October 12, 2026
+
+This section records the current Hub implementation. Earlier reports above remain intact.
+
+Source visual truth: `/Users/tuckercasey/.codex/generated_images/01a13131-ae08-71f2-b571-fde825e2aed6/exec-c57d5f64-ca1e-4a6d-8389-cf0842cf2556.png` (Tucker's selected second concept). Tucker explicitly overrode the mock's name to **HUB**. The later everyday, events, and board studies supply representative content patterns, not a different visual direction.
+
+Implementation: `http://localhost:5056/`, built production assets, signed-in disposable local preview member. All preview fixture changes stay in ignored `.local/data.db`; no production posts were created.
+
+Evidence:
+- Desktop screenshot: `/Users/tuckercasey/.codex/visualizations/2026/10/12/01a13131-ae08-71f2-b571-fde825e2aed6/hub-build/hub-desktop-final.png`
+- Full comparison: `/Users/tuckercasey/.codex/visualizations/2026/10/12/01a13131-ae08-71f2-b571-fde825e2aed6/hub-build/comparison-final.png`
+- Focused panel comparison: `/Users/tuckercasey/.codex/visualizations/2026/10/12/01a13131-ae08-71f2-b571-fde825e2aed6/hub-build/comparison-panel-final.png`
+- Initial comparison: `/Users/tuckercasey/.codex/visualizations/2026/10/12/01a13131-ae08-71f2-b571-fde825e2aed6/hub-build/comparison-initial.png`
+- Phone screenshot: `/Users/tuckercasey/.codex/visualizations/2026/10/12/01a13131-ae08-71f2-b571-fde825e2aed6/hub-build/hub-mobile.png`
+- Board examples: `/Users/tuckercasey/.codex/visualizations/2026/10/12/01a13131-ae08-71f2-b571-fde825e2aed6/hub-build/hub-boards-mobile.png`
+- Calm mode: `/Users/tuckercasey/.codex/visualizations/2026/10/12/01a13131-ae08-71f2-b571-fde825e2aed6/hub-build/hub-calm-mobile.png`
+
+Comparison normalization: source 1487×1058 raster, final desktop 1440×1024 pixels at 1440×1024 CSS pixels / DPR 1. The full comparison scales the source to 1440×1024; the ratios are effectively identical. Focused source panel crop (945,70)-(1460,1038) is normalized to 480 px wide; actual panel is 480×920 CSS px at (944,88). Both captures show Home at page scroll 0, an open panel, All activity, and photo/event rows. Phone viewport is 390×844, panel 374×680 at (8,76); tablet 768×1024 was checked for fit and overflow. The mock's illustrative counts, stock picture, author pictures, and flyer are replaced by actual renderer data and existing local sample assets. Home globe animation, headline, and stats remain the current product.
+
+### Findings and comparison history
+
+- [P2, fixed] Initial panel was capped at 820 px and the photo at 300 px, reducing visible feed density. The panel now uses available viewport height up to 960 px and photo previews are capped at 220 px. The final full/panel comparisons show the complete photo and event, with the next row starting above the persistent footer.
+- [P2, fixed] Local venue image URLs could fail and leave broken-image glyphs. UserAvatar now falls back to a neutral venue initial (or the member's existing avatar choice). Final capture and DOM inspection found zero broken feed avatar images.
+- [P2, fixed] Opening a native RSVP changed attendance without immediately refreshing Hub. Attendance entry points now invalidate feed and activity-head queries. A local confirmation renders GOING in the event row.
+- [P2, fixed] Phone scroll locking initially used overflow rather than the application's shared iOS-safe lock and did not respond to a breakpoint change. Hub now uses the existing ref-counted body lock, follows media-query changes, and restores focus to a visible Hub trigger. Mobile body position is fixed while open and restored on close.
+- [P2, fixed] Calm controls were quiet but category tokens could retain bright board colors. Panel and semantic category tokens are now muted within Hub. Final Calm capture shows neutral controls, categories, and listing actions while photos retain color, matching the existing Calm policy.
+
+No actionable P0/P1/P2 findings remain. Expected adaptations: HUB naming, current Barlow/Barlow Condensed typography and capsule controls, 44 px interaction targets, actual data and image crops, native RSVP state, the existing up/down vote model, and engagement only for content that actually supports it. These retain the selected panel structure without fabricating actions or counts for event listings.
+
+### Fidelity surfaces
+
+- Typography: browser reports loaded fonts; HUB and names use Barlow Condensed, body copy uses current Barlow tokens, metadata uses the existing mono token. Hierarchy, readable body sizes, wrapping, and long-text expansion are consistent. No fallback-only display font remains.
+- Layout: header, filter, composer, continuous hairline rows, full-width photos, compact embedded events/listings, independent scrolling, and persistent footer follow the selected concept. Desktop, phone, and tablet have no horizontal overflow; bottom navigation remains reachable on phone.
+- Colors: canonical token colors identify post families. Neutral dark shell and top spectrum seam preserve the reference; Calm removes the seam and control/category color. Focus outlines and disabled states remain visible.
+- Images: real uploads/posters and existing local fixture assets render in the appropriate photo/thumbnail frames; venue logos remain contained. Missing assets use the existing avatar fallback treatment. No generated replacement brand marks or rasterized interface were introduced.
+- Copy: navigation and reader are HUB; filter is Following, with clear posting, refresh, error, empty, and older-page states. Source/time/category data come from the feed API. Fictional fixture copy identifies itself as a local sample.
+
+### Interaction and requirement evidence
+
+- Desktop/mobile triggers and `/dashboard?section=feed` open the shared Hub panel; the old route returns to Home with Hub open. Account utility sections remain available.
+- Text post submission, own-post removal, inline reply submission, and upvote were exercised through the local UI and verified in returned state. Existing photo input and audience controls are reused.
+- RSVP opens the native attendance tab, exposes public/friends/anonymous choices, and confirmation returns to the Hub. GIFTZ opens the existing listing dialog. Nested Escape closes the child and keeps Hub open.
+- Older updates increased rendered rows from 25 to 45. Keyboard scrolling changes only the feed. Escape closes Hub and focuses Hub; reopening restored scrollTop 371.
+- All/Events/Posts/RSVPs/Boards/Following use the real feed. Compact renderer covers every HubFeedKind, including text/photo, submitted/grouped events, host updates, RSVP, GIFTZ/ISO, SELLZ, GIGZ, all housing types, anonymous connections, OUTZ public notes/buddy/ride posts, check-ins, community posts, resource releases, and pinned beach/feedback content.
+- Tests verify person, venue, board, community, and destination follows; unfollow/mute; blocking before anonymous rendering and engagement; private check-in/request exclusion; expiry; RSVP-only audience and anonymous RSVP behavior; resource release persistence; publication-time sorting and paging beyond the prior candidate cap.
+- Existing featured-event rotation, daily dismissal/expiry, server feed ad pin/depth ordering, and affiliate fallback remain in the reader.
+- Loading/error/empty/retry/older-page failure states have dedicated rendering. A housing-source failure preserves the rest of the feed and identifies the unavailable source.
+- Browser console inspection found only the earlier development HomeStage fetchPriority warning; no Hub runtime exception was observed in the built preview.
+
+Validation: 16 focused tests passed; final typecheck, production build (including token/nav guards), bundle verification, and diff whitespace check passed. Canonical master closeout passed. Actual Safari and file-upload transport were not separately exercised; Hub reuses the established scroll lock and upload path.
+
+### Follow-up polish
+
+A future iteration could tune individual image crops and compact spacing against larger live-content samples. This is optional P3 work, not a remaining implementation requirement.
+
+final result: passed

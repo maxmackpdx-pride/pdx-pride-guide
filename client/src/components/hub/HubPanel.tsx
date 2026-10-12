@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type RefObject, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject, type CSSProperties } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/scrollLock";
 import HubReader from "./HubReader";
 import "./hub-panel.css";
 
@@ -10,14 +11,28 @@ export default function HubPanel({ open, onOpenChange, trigger }: {
 }) {
   const [top, setTop] = useState(86);
   const wasOpen = useRef(false);
+  const returnFocus = useCallback(() => {
+    const original = trigger.current;
+    const visible = original?.isConnected && original.getClientRects().length ? original
+      : Array.from(document.querySelectorAll<HTMLElement>("[data-hub-trigger]")).find(element => element.getClientRects().length);
+    visible?.focus();
+  }, [trigger]);
   useEffect(() => {
-    if (wasOpen.current && !open && trigger.current?.isConnected) trigger.current.focus();
+    if (wasOpen.current && !open) returnFocus();
     wasOpen.current = open;
-    if (!open || !window.matchMedia("(max-width: 959px)").matches) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = previous; };
-  }, [open, trigger]);
+  }, [open, returnFocus]);
+  useEffect(() => {
+    if (!open) return;
+    const media = window.matchMedia("(max-width: 959px)");
+    let locked = false;
+    const update = () => {
+      if (media.matches && !locked) { lockBodyScroll(); locked = true; }
+      else if (!media.matches && locked) { unlockBodyScroll(); locked = false; }
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => { media.removeEventListener("change", update); if (locked) unlockBodyScroll(); };
+  }, [open]);
   useEffect(() => {
     const position = () => {
       const header = document.querySelector(".site-header");
@@ -31,7 +46,7 @@ export default function HubPanel({ open, onOpenChange, trigger }: {
     <Dialog.Portal forceMount>
       <Dialog.Content forceMount className="hub-panel pdx-glass-rebind" style={{ top, "--hub-top": `${top}px` } as CSSProperties} aria-describedby="hub-panel-description"
         onEscapeKeyDown={event => { if (document.querySelector('[role="dialog"]:not(.hub-panel)')) event.preventDefault(); }}
-        onCloseAutoFocus={event => { event.preventDefault(); trigger.current?.focus(); }}
+        onCloseAutoFocus={event => { event.preventDefault(); returnFocus(); }}
         onInteractOutside={event => {
           // Existing event/board/auth detail overlays are descendants in the
           // React tree but may portal their DOM beside the Hub.

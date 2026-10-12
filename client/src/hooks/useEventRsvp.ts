@@ -60,6 +60,8 @@ export function useEventRsvp() {
       endInFlight(pendingRef.current, vars.eventId);
       setPendingTick((n) => n + 1);
       queryClient.invalidateQueries({ queryKey: [...RSVP_CHECKINS_KEY] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
       queryClient.invalidateQueries({ queryKey: [...RSVP_SUMMARIES_KEY] });
       queryClient.invalidateQueries({ queryKey: ["/api/events", vars.eventId, "attendance"] });
     },

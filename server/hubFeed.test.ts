@@ -134,3 +134,16 @@ test("public beach rides follow their destination, omit private requests, and di
   assert.equal(feed().items.some(row=>row.id===`beach-ride-${ride}`),false);
   unfollowOutzDestination(viewer,"rooster-rock");
 });
+
+test("an anonymous RSVP stays out of Hub and RSVP-only posts require attendance", () => {
+  const event=storage.createEvent({title:"Hub Privacy Event",venueName:"Privacy Venue",description:"test",dateStart:"2027-03-01T20:00:00",dateEnd:"2027-03-01T23:00:00",dayOfWeek:"MON",status:"LIVE",source:"user_submitted"} as any);
+  storage.setPrimaryEventHost(event.id,stranger,null);
+  const post=storage.createHubFeedPost({userId:stranger,postType:"text",audience:"RSVPS",eventId:event.id,body:"Attendance-only preview",status:"LIVE"} as any);
+  assert.equal(feed("posts").items.some(row=>row.id===`feed_post-${post.id}`),false);
+  const person=storage.getUserById(viewer)!;
+  const attendance=storage.upsertAttendance(event.id,person,"Private vibe","anonymous");
+  assert.equal(feed("posts").items.some(row=>row.id===`feed_post-${post.id}`),true);
+  assert.equal(feed("rsvps").items.some(row=>row.id===`rsvp-${attendance.id}`),false);
+  storage.removeAttendance(event.id,viewer);
+  assert.equal(feed("posts").items.some(row=>row.id===`feed_post-${post.id}`),false);
+});

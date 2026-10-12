@@ -1,4 +1,4 @@
-import type { CSSProperties, MouseEvent } from "react";
+import { useState, type CSSProperties, type MouseEvent } from "react";
 import { Link } from "wouter";
 import { LockKeyhole } from "lucide-react";
 import { AVATAR_EMOJI_OPTIONS, normalizeAvatarRing } from "@shared/avatarRings";
@@ -59,17 +59,17 @@ export default function UserAvatar({
   const style: CSSProperties | undefined =
     size !== undefined ? ({ "--avatar-size": `${size}px` } as CSSProperties) : undefined;
 
+  const [failedSources, setFailedSources] = useState<string[]>([]);
+  const imageSource = [photoUrl, logoFit ? null : emoji.img].find(source => source && !failedSources.includes(source));
   const face = (
     <>
       <div className="user-avatar__inner">
-        {photoUrl ? (
-          <img src={photoUrl} alt="" className="user-avatar__photo" />
-        ) : emoji.img ? (
-          <img src={emoji.img} alt="" className="user-avatar__photo" />
+        {imageSource ? (
+          <img src={imageSource} alt="" className="user-avatar__photo" onError={() => setFailedSources(previous => [...previous, imageSource])} />
         ) : (
           <span
             className="user-avatar__fallback display"
-            style={{ background: emoji.bg || "#00FFFF", color: "#000" }}
+            style={{ background: logoFit ? "var(--ink-800)" : emoji.bg || "#00FFFF", color: logoFit ? "var(--text-hi)" : "#000" }}
           >
             {initial}
           </span>

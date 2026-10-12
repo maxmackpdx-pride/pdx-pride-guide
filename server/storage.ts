@@ -1,3 +1,4 @@
+import outzMapCatalog from "@shared/outzMapCatalog";
 import { seedLittleShopOfPonies20261031 } from "./seedLittleShopOfPonies20261031";
 import { seedDiscoveredQueerEvents20260928 } from "./seedDiscoveredQueerEvents20260928";
 import { seedPosterAudit20260928 } from "./seedPosterAudit20260928";
@@ -15941,7 +15942,9 @@ export const storage: IStorage = {
         WHERE datetime(p.created_at) >= datetime('now', '-30 days') AND (f.user_id IS NOT NULL OR ?)
         ORDER BY p.created_at DESC
       `).all(viewerUserId, followsOutz ? 1 : 0) as any[];
+      const destinationNames = new Map(outzMapCatalog.map(place => [place.id, place.name]));
       for (const row of destinationPosts) {
+        row.placeName = destinationNames.get(row.placeId) || row.placeName;
         if (row.userId !== viewerUserId && storage.isMemberInteractionBlocked(viewerUserId, row.userId)) continue;
         if (row.postKind !== "TRIP_NOTE" && row.tripDate && row.tripDate < hubFeedPostedDay(new Date().toISOString())) continue;
         items.push({
@@ -15999,7 +16002,9 @@ export const storage: IStorage = {
           AND NOT EXISTS (SELECT 1 FROM member_blocks b WHERE (b.blocker_user_id=? AND b.blocked_user_id=c.user_id) OR (b.blocker_user_id=c.user_id AND b.blocked_user_id=?))
         GROUP BY c.place_id, c.calendar_date
       `).all(viewerUserId, followsOutz ? 1 : 0, viewerUserId, viewerUserId) as Array<{placeId:string;tripDate:string;createdAt:string;count:number;placeName:string}>;
-      for (const row of groups) items.push({
+      for (const row of groups) {
+        row.placeName = outzMapCatalog.find(place => place.id === row.placeId)?.name || row.placeName;
+        items.push({
         id:`outz-checkin-${row.placeId}-${row.tripDate}`,kind:"checkin",badge:"Visit plans",
         action:"Planned a visit", title:`${row.count} ${row.count === 1 ? "person planning" : "people planning"} a visit`,
         text:"Open the destination to see the plan or add your check-in.",createdAt:row.createdAt,
@@ -16007,6 +16012,7 @@ export const storage: IStorage = {
         source:{kind:"destination",id:row.placeId,label:row.placeName,href:`/outzide?place=${encodeURIComponent(row.placeId)}`},
         link:`/outzide?place=${encodeURIComponent(row.placeId)}`,listing:{timing:row.tripDate},
       });
+      }
     }
 
     ensureHubFeedPostsSchema();

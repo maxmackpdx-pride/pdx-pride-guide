@@ -30,7 +30,8 @@ export default function HubReader({ panelOpen = true, onClose, canPostToFeed }: 
     queryKey: ["/api/hub/feed", filter, user?.id ?? "guest"],
     enabled: panelOpen && (!!user || demo),
     initialPageParam: null as string | null,
-    staleTime: 60_000,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
     queryFn: async ({ pageParam }) => {
       if (demo) return getLocalDemoHubFeed(filter);
       const params = new URLSearchParams({ tab: filter, limit: "20" });

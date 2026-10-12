@@ -5,7 +5,7 @@
   right: max(16px, calc((100vw - 1440px) / 2 + 16px));
   z-index: 180;
   width: min(480px, calc(100vw - 32px));
-  height: min(820px, calc(100dvh - var(--hub-top, 86px) - 16px));
+  height: min(960px, calc(100dvh - var(--hub-top, 86px) - 16px));
   border: 1px solid var(--chrome-border, var(--ink-border));
   border-radius: 16px;
   color: var(--text-hi, var(--text-hi));
@@ -72,7 +72,7 @@
 .hub-item__posted-by a { color: inherit; }
 .hub-item p { margin: 8px 0; font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
 .hub-item h3 { margin: 8px 0; color: var(--text-hi); font: 800 19px/1.15 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; overflow-wrap: anywhere; }
-.hub-item__photo { display: block; width: 100%; max-height: 300px; object-fit: cover; border: 1px solid var(--ink-border-strong); border-radius: 10px; margin: 12px 0; }
+.hub-item__photo { display: block; width: 100%; max-height: 220px; object-fit: cover; border: 1px solid var(--ink-border-strong); border-radius: 10px; margin: 12px 0; }
 .hub-item__listing { display: grid; gap: 12px; }
 .hub-item__listing--photo { grid-template-columns: 100px minmax(0, 1fr); }
 .hub-item__thumbnail { display: block; width: 100px; height: 100px; object-fit: cover; border: 1px solid var(--ink-border-strong); border-radius: 10px; }
@@ -128,7 +128,18 @@
 @media (prefers-reduced-motion: reduce) { .hub-panel, .hub-reader * { animation: none !important; transition: none !important; } }
 html.calm-mode .hub-panel { box-shadow: 0 24px 60px rgb(0 0 0 / .72); }
 
-.hub-reader__promotion { padding: 16px; border-bottom: 1px solid var(--stroke-1); }
+.hub-reader__promotion { padding: 16px; border-bottom: 1px solid var(--ink-border); }
 .hub-reader__promotion .featured-event-ad { margin: 0; }
 .hub-reader__promotion .featured-event-ad__media { max-height: 240px; }
 .hub-reader__promotion .featured-event-ad__slide { object-fit: contain; }
+html.calm-mode .hub-panel {
+  --neon-cyan: var(--text-mid); --neon-orange: var(--text-mid); --neon-violet: var(--text-mid);
+  --neon-yellow: var(--text-mid); --neon-magenta: var(--text-mid); --neon-lime: var(--text-mid);
+  --btn-glow-bg: var(--ink-800); --btn-glow-shadow: none;
+}
+html.calm-mode .hub-panel::before { background: var(--ink-border-strong); }
+html.calm-mode .hub-panel :is(button, a, select) { box-shadow: none; text-shadow: none; }
+html.calm-mode .hub-panel {
+  --panel-cyan: var(--text-mid); --panel-orange: var(--text-mid); --panel-purple: var(--text-mid);
+  --panel-magenta: var(--text-mid); --panel-lime: var(--text-mid); --status-good: var(--text-mid);
+}

@@ -1,5 +1,5 @@
 import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./AuthContext";
 import { MOBILE_NAV_DISMISS, dismissMobileNavOverlays, type MobileNavDismissDetail } from "@/lib/mobileNavDismiss";
 import type { HubFeedResponse } from "@shared/hubFeed";
@@ -25,6 +25,7 @@ export function useHubPanel() {
 export function HubPanelProvider({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const { user } = useAuth();
+  const cache = useQueryClient();
   const [isOpen, setOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const trigger = useRef<HTMLElement | null>(null);
@@ -32,7 +33,6 @@ export function HubPanelProvider({ children }: { children: ReactNode }) {
   const [seen, setSeen] = useState("");
   const seenKey = `zaylist-hub-seen:${user?.id ?? "guest"}`;
   useEffect(() => {
-    setOpen(false);
     setSeen("");
     try { setSeen(localStorage.getItem(seenKey) || ""); } catch { /* Storage is optional. */ }
   }, [seenKey]);
@@ -63,9 +63,10 @@ export function HubPanelProvider({ children }: { children: ReactNode }) {
     if (element) trigger.current = element;
     openedRoute.current = window.location.pathname;
     dismissMobileNavOverlays("hub-panel");
+    void cache.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
     setHasOpened(true);
     setOpen(true);
-  }, []);
+  }, [cache]);
   useEffect(() => {
     if (isOpen && openedRoute.current !== window.location.pathname) setOpen(false);
   }, [location, isOpen]);
