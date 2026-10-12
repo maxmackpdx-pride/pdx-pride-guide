@@ -52,3 +52,14 @@ Passed for the scoped color change. Added a shared secondary-color recipe across
 Tucker’s follow-up removed the fixed pink/cyan smoked-glass flare from open cards and the experimental wide family. Shared card lighting now uses restrained category-specific linear reflections, a darker fill, 6px backdrop blur and a shorter edge shadow. No new image asset was created.
 
 Verification: product TypeScript check and diff checks passed; matching private Site build passed. Browser inspection covered Placez (200 × 403), ReZources (163.2 × 204), open Placez, nested Mizzed and upcoming event tiles, wide board cards/open state, and calm mode. A local isolated fixture checked the actual full-size and compact Eventz components across all seven days, open Eventz, and representative shared card primitives. Fixed an explicit day-pair inheritance mismatch on compact card art. Final built board view compared against the prior screenshot in one visual input. At 390px the board page has no horizontal overflow and its cards remain 334px wide. Representative families were inspected, not every route; physical Safari was not tested. Product production is unchanged.
+
+
+## 2026-10-12 · Category branding and Eventz typography tokens
+
+Passed. Category brand color now owns every card edge, surface reflection, motif line and tag outline. Complementary color is confined to small arrows/icons and motif nodes, targeting about 10% of the treatment and never a second broad surface. Fixed flare textures remain removed. Shared bloom now composes the existing 8% token.
+
+Extracted the approved 200px Eventz card geometry and typography into component tokens, consumed by TonightEventCard, Placez and the experimental board cards. Placez badges now use the Eventz 9.2px mono label recipe; titles remain 18px Barlow Condensed. All Boards retains the exact room-brand registry, with system neutral colors, type, spacing, radii, focus and motion. Its stylesheet contains no raw color literals. This adapts the requested reference; it does not change the Foundation Library.
+
+Verification: product and Site TypeScript checks passed, Site build passed, diff checks passed. Desktop and 390px phone inspected, including all 12 board cards (334 × 242px on phone, no content/page overflow), Giftz open state with primary-color frame, default-open details, Escape/focus return and Calm Mode. Placez remains 200 × 403px with matching Eventz title/tag fonts. Before/after screenshots compared in the same visual input. Physical Safari not tested.
+
+Evidence: `.local/qa/token-boards-desktop.png`, `token-boards-phone.png`, `token-board-open.png`, `token-placez-phone.png`.

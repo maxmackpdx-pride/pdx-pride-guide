@@ -108,7 +108,7 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 .eb-category b { color: var(--category-readable); }
 /* Eventz card dimensions: full 200 × ~403; compact 136 × 170, enlarged 20%.
    Original motif SVGs, category colors, optical logos and motion stay intact. */
-.eb-page--places { --eb-card-width: 200px; --eb-card-height: 403px; --eb-card-radius: 17px; }
+.eb-page--places { --eb-card-width: var(--event-card-width); --eb-card-height: var(--event-card-height); --eb-card-radius: var(--event-card-radius); }
 .eb-page--resources { --eb-card-width: 163.2px; --eb-card-height: 204px; --eb-card-radius: 19.2px; }
 .eb-original-card { width: var(--eb-card-width); min-width: 0; }
 .eb-page .eb-original-card .rg-directory-card { margin: 0; width: 100%; min-height: 0; height: var(--eb-card-height); border-radius: var(--eb-card-radius); }
@@ -117,7 +117,7 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 }
 .eb-page .eb-original-card .rg-directory-card .pdxPlace__main { gap: 7px; }
 .eb-page .eb-original-card .rg-directory-card .pdxPlace__name {
-  order: -1; font: 800 18px/1.02 var(--font-display); flex: none; height: 2.04em; min-height: 0;
+  order: -1; font: var(--event-card-title-font); letter-spacing: var(--tracking-normal); flex: none; height: 2.04em; min-height: 0;
   max-height: 2.04em; margin: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
 }
 .eb-page .eb-original-card .rg-directory-card .pdxPlace__badges { gap: 5px; flex: none; }
@@ -145,7 +145,7 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__actions { position: static; display: contents; opacity: 1; pointer-events: auto; }
 .eb-page--places .eb-original-card .pdxPlace__actions > button:first-child {
   position: absolute; z-index: 5; bottom: 10px; left: 12px; height: 34px !important; min-height: 34px;
-  border-radius: 8px !important; padding: 0 7px !important; font-size: 12.1px !important; letter-spacing: 0 !important;
+  border-radius: 8px !important; padding: 0 7px !important; font-size: var(--event-card-action-size) !important; letter-spacing: 0 !important;
 }
 .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__share {
   position: absolute; z-index: 5; top: 9px; right: 9px; min-height: 28px; height: 28px; padding: 0 8px;
@@ -190,3 +190,16 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 @media (max-width: 600px) {
   .eb-grid { grid-template-columns: repeat(auto-fill, var(--eb-card-width)); justify-content: center; gap: 14px; }
 }
+
+/* Eventz typography for full-size Placez cards: compact mono tags, white ink,
+   category outlines, and the same 18px title / 11.6px metadata rhythm. */
+.eb-page.eb-page--places .eb-original-card .rg-directory-card .pdxPlace__cat .pdxBadge {
+  min-height: 0 !important; height: auto !important;
+  padding: var(--event-card-tag-pad-y) var(--event-card-tag-pad-x) !important; border-radius: var(--event-card-tag-radius) !important;
+  border: 1px solid color-mix(in srgb, var(--c) 55%, transparent) !important;
+  background: var(--event-card-tag-bg) !important;
+  color: var(--text-hi) !important; box-shadow: none !important;
+  font: var(--event-card-tag-font) !important;
+  letter-spacing: 0; text-transform: none;
+}
+.eb-page--places .eb-original-card .placez-discovery-meta { font-weight: var(--fw-semibold); }

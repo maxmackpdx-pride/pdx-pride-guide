@@ -1,8 +1,7 @@
-/* Shared secondary accents. Eventz owns card anatomy; this layer changes only
-   color, reflection, and edge light. Rebind on every card so a nested card pairs
-   with its own --c. Inline --card-secondary-override opts into an approved pair.
-   Existing day pairings come from dayComplementToken; arbitrary category colors
-   get a softened opposite hue. Photos, brand artwork, text and status fills stay intact. */
+/* Category color owns the frame, surface and motif. Complementary color is
+   reserved for small icons and motif nodes (roughly 10%, never a second broad
+   surface or half-colored border). Eventz owns anatomy and day pairings.
+   Rebind on each card; nested cards keep their own identity. */
 html[data-zaylist-cards] :is(
   .pdx-glass-rebind:where(:not(header):not(nav):not(.demo-nav)), .pdxPlace, .event-rail-card,
   .card:where(:not(header):not(nav)), .ds-listing-card, .rb-card, .rb-checkin__hero-card,
@@ -26,25 +25,24 @@ html[data-zaylist-cards] :is(
   .place-modal-panel__community-room, .ab-card, .ab-door
 ) {
   --card-secondary-override: initial;
-  --card-secondary: var(--card-secondary-override, #ff9f80);
-  --card-pair-glow: 14%;
+  --card-secondary: var(--card-secondary-override, var(--neon-orange));
+  --card-pair-glow: var(--bloom-alpha);
   --glass-card-blur: 6px;
-  --card-secondary-ink: color-mix(in srgb, var(--card-secondary) 70%, white);
-  --card-pair-edge: color-mix(in srgb, var(--card-secondary) 64%, #11131a);
+  --card-secondary-ink: color-mix(in srgb, var(--card-secondary) 70%, var(--text-hi));
+  --card-pair-edge: color-mix(in srgb, var(--c, var(--neon-cyan)) 64%, var(--panel-card));
   --card-pair-shadow:
-    0 2px 5px #0008,
-    0 18px 32px -24px #000e,
-    -3px 0 9px -6px color-mix(in srgb, var(--c, var(--neon-cyan)) var(--card-pair-glow), transparent),
-    3px 4px 10px -7px color-mix(in srgb, var(--card-secondary) var(--card-pair-glow), transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--c, var(--neon-cyan)) 50%, #ffffff20),
-    inset -1px -1px 0 color-mix(in srgb, var(--card-secondary) 46%, transparent);
+    0 2px 5px color-mix(in srgb, var(--z-oled) 53%, transparent),
+    0 18px 32px -24px color-mix(in srgb, var(--z-oled) 93%, transparent),
+    var(--neon-bloom),
+    inset 0 1px 0 color-mix(in srgb, var(--c, var(--neon-cyan)) 50%, color-mix(in srgb, var(--text-hi) 12.5%, transparent)),
+    inset -1px -1px 0 color-mix(in srgb, var(--c, var(--neon-cyan)) 46%, transparent);
   --glass-card-shadow: var(--card-pair-shadow);
   --glass-card-bg:
     linear-gradient(135deg, color-mix(in srgb, var(--c, var(--neon-cyan)) 8%, transparent), transparent 38%),
-    linear-gradient(315deg, color-mix(in srgb, var(--card-secondary) 6%, transparent), transparent 30%),
-    linear-gradient(133deg, #ffffff08, #ffffff02 18%, transparent 34%),
-    #050608f5;
-  --glass-sheen-specular: linear-gradient(135deg, #ffffff08, transparent 24%, transparent 84%, color-mix(in srgb, var(--card-secondary) 6%, transparent));
+    linear-gradient(315deg, color-mix(in srgb, var(--c, var(--neon-cyan)) 6%, transparent), transparent 30%),
+    linear-gradient(133deg, color-mix(in srgb, var(--text-hi) 3%, transparent), color-mix(in srgb, var(--text-hi) .8%, transparent) 18%, transparent 34%),
+    color-mix(in srgb, var(--z-black) 96%, transparent);
+  --glass-sheen-specular: linear-gradient(135deg, color-mix(in srgb, var(--text-hi) 3%, transparent), transparent 24%, transparent 84%, color-mix(in srgb, var(--c, var(--neon-cyan)) 6%, transparent));
 }
 
 @supports (color: hsl(from #00ffff calc(h + 180) 88% 72%)) {
@@ -70,7 +68,7 @@ html[data-zaylist-cards] :is(
   .event-modal__glass-panel, .event-modal__tab-panel,
   .place-modal-panel__community-room, .ab-card, .ab-door
 ) {
-    --card-secondary: var(--card-secondary-override, hsl(from var(--c, #00ffff) calc(h + 180) 88% 72%));
+    --card-secondary: var(--card-secondary-override, hsl(from var(--c, var(--neon-cyan)) calc(h + 180) 88% 72%));
   }
 }
 
@@ -129,34 +127,34 @@ html[data-zaylist-cards] .sponsor-rail-card__box { --c: var(--b, var(--neon-cyan
 /* Logo wells use restrained category-tinted reflections, without bright spots. */
 html[data-zaylist-cards] .pdxPlace__mediaGlow {
   background: linear-gradient(135deg, color-mix(in srgb, var(--c, var(--neon-cyan)) 12%, transparent), transparent 48%),
-    linear-gradient(315deg, color-mix(in srgb, var(--card-secondary) 8%, transparent), transparent 40%);
+    linear-gradient(315deg, color-mix(in srgb, var(--c, var(--neon-cyan)) 8%, transparent), transparent 40%);
 }
 html[data-zaylist-cards] .rg-card-motif :is(.rg-motif-mesh, .rg-motif-circuits, .rg-motif-calibration) {
-  color: var(--card-secondary);
+  color: var(--c, var(--neon-cyan));
   stroke: currentColor;
 }
 html[data-zaylist-cards] .rg-card-motif .rg-motif-nodes { color: var(--card-secondary); fill: currentColor; }
 
-/* The main edge leads; the secondary color catches the opposite corner. */
+/* The category hue owns the entire frame, including the opposite corner. */
 html[data-zaylist-cards] .event-modal.event-modal--approved::before {
   background: conic-gradient(from var(--event-open-edge-angle),
-    color-mix(in srgb, var(--c, var(--neon-cyan)) 85%, white), var(--c, var(--neon-cyan)) 110deg,
-    color-mix(in srgb, var(--c, var(--neon-cyan)) 65%, #000) 165deg,
-    var(--card-secondary) 218deg, color-mix(in srgb, var(--card-secondary) 70%, white) 276deg,
-    var(--c, var(--neon-cyan)) 330deg, color-mix(in srgb, var(--c, var(--neon-cyan)) 85%, white));
+    color-mix(in srgb, var(--c, var(--neon-cyan)) 85%, var(--text-hi)), var(--c, var(--neon-cyan)) 110deg,
+    color-mix(in srgb, var(--c, var(--neon-cyan)) 65%, var(--z-oled)) 165deg,
+    var(--c, var(--neon-cyan)) 218deg, color-mix(in srgb, var(--c, var(--neon-cyan)) 70%, var(--text-hi)) 276deg,
+    var(--c, var(--neon-cyan)) 330deg, color-mix(in srgb, var(--c, var(--neon-cyan)) 85%, var(--text-hi)));
   filter: drop-shadow(0 0 5px color-mix(in srgb, var(--c, var(--neon-cyan)) 22%, transparent));
 }
 html[data-zaylist-cards] .event-modal.event-modal--reference::after {
-  border-right-color: color-mix(in srgb, var(--card-secondary) 55%, transparent);
-  border-bottom-color: color-mix(in srgb, var(--card-secondary) 55%, transparent);
-  box-shadow: inset 0 2px 4px #ffffff38, inset -2px -3px 9px color-mix(in srgb, var(--card-secondary) 26%, transparent);
+  border-right-color: color-mix(in srgb, var(--c, var(--neon-cyan)) 55%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--c, var(--neon-cyan)) 55%, transparent);
+  box-shadow: inset 0 2px 4px color-mix(in srgb, var(--text-hi) 22%, transparent), inset -2px -3px 9px color-mix(in srgb, var(--c, var(--neon-cyan)) 26%, transparent);
 }
-html[data-zaylist-cards] .pdxBoard.pdxBoard--event-grid { --shine-3: var(--card-secondary); }
+html[data-zaylist-cards] .pdxBoard.pdxBoard--event-grid { --shine-3: var(--c, var(--neon-cyan)); }
 html[data-zaylist-cards] .pdxBoard--event-grid .pdxBoard__shine--prepeak {
-  background: conic-gradient(from var(--event-edge-angle), var(--c, var(--neon-cyan)), transparent 34%, var(--card-secondary) 50%, transparent 84%, var(--c, var(--neon-cyan)));
+  background: conic-gradient(from var(--event-edge-angle), var(--c, var(--neon-cyan)), transparent 34%, var(--c, var(--neon-cyan)) 50%, transparent 84%, var(--c, var(--neon-cyan)));
 }
 html[data-zaylist-cards] :is(.tonight-card__footer, .rg-directory-footer, .ab-card__footer, .home-stage-card__foot) {
-  border-top-color: color-mix(in srgb, var(--card-secondary) 38%, transparent);
+  border-top-color: color-mix(in srgb, var(--c, var(--neon-cyan)) 38%, transparent);
 }
 html[data-zaylist-cards] :is(.tonight-card__view, .placez-discovery-footer .pdxBtn, .ab-open, .home-stage-card__cta) svg {
   color: var(--card-secondary-ink);
@@ -171,30 +169,27 @@ html[data-zaylist-cards] :is(.event-modal__disclosure, .rg-detail-disclosure) > 
 /* Nested doorways keep their own pairing rather than inheriting the parent event. */
 html[data-zaylist-cards] .room-doorways__door::before {
   background: radial-gradient(ellipse at 15% 24%, color-mix(in srgb, var(--c, var(--neon-cyan)) 14%, transparent), transparent 58%),
-    radial-gradient(ellipse at 90% 80%, color-mix(in srgb, var(--card-secondary) 18%, transparent), transparent 60%),
+    radial-gradient(ellipse at 90% 80%, color-mix(in srgb, var(--c, var(--neon-cyan)) 18%, transparent), transparent 60%),
     linear-gradient(to top, var(--z-black), transparent 60%);
 }
 html[data-zaylist-cards] .room-doorways__door .room-doorways__go {
   color: var(--card-secondary-ink);
-  border-color: color-mix(in srgb, var(--card-secondary) 55%, transparent);
+  border-color: color-mix(in srgb, var(--c, var(--neon-cyan)) 55%, transparent);
 }
 
-/* Wide cards use their category pair, never the fixed pink/cyan flare texture. */
+/* Wide cards use their category hue, never the fixed pink/cyan flare texture. */
 html[data-zaylist-cards] :is(.ab-card, .ab-door) {
   background: var(--glass-card-bg);
 }
-html[data-zaylist-cards] .ab-card__eyebrow > span {
-  color: var(--card-secondary-ink);
-  border-color: color-mix(in srgb, var(--card-secondary) 62%, transparent);
+html[data-zaylist-cards] .ab-art__symbol { color: var(--c); }
+html[data-zaylist-cards] .ab-door > small { color: var(--text-body); }
+/* Remove rainbow seams from category cards; logos retain their original art. */
+html[data-zaylist-cards] :is(.pdxPlace, .ab-card, .ab-door, .board-listing-card, .board-spotted-card, .spotted-card, .mp-board-card, .boards-index__card) .pdx-refract-seam {
+  background: linear-gradient(90deg, transparent, var(--c) 25%, var(--c) 75%, transparent) !important;
+  animation: none !important;
 }
-html[data-zaylist-cards] :is(.ab-card--available, .ab-card--giving) .ab-card__eyebrow > span {
-  color: var(--z-black);
-  background: var(--card-secondary-ink);
-}
-html[data-zaylist-cards] .ab-art__symbol { color: var(--card-secondary-ink); }
-html[data-zaylist-cards] .ab-door > small { color: var(--card-secondary-ink); }
 
-/* Calm mode preserves the pair through thin keylines, without added bloom. */
+/* Calm mode preserves category keylines, without added bloom. */
 :is(html.calm-mode, :root[data-calm="true"]) :is(
   .pdx-glass-rebind:where(:not(header):not(nav):not(.demo-nav)), .pdxPlace, .event-rail-card,
   .card:where(:not(header):not(nav)), .ds-listing-card, .rb-card, .rb-checkin__hero-card,
@@ -217,8 +212,8 @@ html[data-zaylist-cards] .ab-door > small { color: var(--card-secondary-ink); }
   .event-modal__glass-panel, .event-modal__tab-panel,
   .place-modal-panel__community-room, .ab-card, .ab-door
 ) {
-  --card-pair-glow: 0%;
-  --card-pair-shadow: inset 0 1px 0 #ffffff24, inset -1px -1px 0 color-mix(in srgb, var(--card-secondary) 30%, transparent);
+  --bloom-alpha: 0%;
+  --card-pair-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 14%, transparent), inset -1px -1px 0 color-mix(in srgb, var(--c, var(--neon-cyan)) 30%, transparent);
 }
 @media (prefers-reduced-transparency: reduce) {
   html[data-zaylist-cards] :is(
@@ -242,5 +237,5 @@ html[data-zaylist-cards] .ab-door > small { color: var(--card-secondary-ink); }
   .install-app-card, .eb-panel, .room-doorways__door,
   .event-modal__glass-panel, .event-modal__tab-panel,
   .place-modal-panel__community-room, .ab-card, .ab-door
-) { --glass-card-bg: #08090c; }
+) { --glass-card-bg: var(--panel-card); }
 }
