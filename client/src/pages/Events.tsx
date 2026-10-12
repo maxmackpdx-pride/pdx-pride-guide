@@ -973,7 +973,7 @@ export default function Events() {
                 <div className={viewMode === "list" ? "events-band__list" : "events-poster-grid"}>
                   {band.items.map(e => (
                     <TonightEventCard
-                      key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)}
+                      key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)} layout={viewMode === "list" ? "row" : "card"}
                       liveState={liveStateFor(e, now)}
                       onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
                       onOpen={listing => openEvent(listing)}
@@ -1026,7 +1026,7 @@ export default function Events() {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {visibleListEvents.map((e, i) => (
               <TonightEventCard
-                  key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)}
+                  key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)} layout="row"
                   liveState={pastView ? null : liveStateFor(e, now)}
                   onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
                   onOpen={listing => openEvent(listing)}

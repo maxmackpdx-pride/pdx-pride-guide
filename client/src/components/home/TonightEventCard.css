@@ -55,50 +55,9 @@
 .rail-card-share { position:absolute; top:16px; right:16px; z-index:4; display:flex; align-items:center; gap:7px; min-height:44px; padding:10px 14px; border:1px solid var(--c); border-radius:10px; background:var(--z-oled); color:var(--text-heading); }
 .tonight-card .rail-card-share { font:700 14px/1 var(--font-display); text-transform:uppercase; }
 .rail-card-share:hover { box-shadow:var(--btn-glow-shadow); }
-.home-tonight__item > .tonight-card { height:100%; }
 
 /* Homepage rail: one hierarchy and interaction language for every room. */
 .rail-card-room { display: none; }
-.home-tonight .rail-card-room {
-  display: block; color: var(--c); font: 800 14px/1.2 var(--font-display);
-  letter-spacing: .08em; text-transform: uppercase;
-}
-.home-tonight .tonight-card__body { gap: 16px; padding: 24px; }
-.home-tonight .tonight-card__tags span { text-transform: uppercase; letter-spacing: .035em; }
-.home-tonight .tonight-card__time { align-items: flex-start; min-height: 36px; }
-.home-tonight .tonight-card__time svg { margin-top: 2px; }
-.home-tonight .tonight-card__venue { height: 60px; min-height: 60px; overflow: hidden; }
-.home-tonight .tonight-card__venue > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
-.home-tonight .tonight-card__footer { margin-inline: 24px; gap: 10px; }
-.home-tonight .tonight-card__footer button {
-  height: 44px !important; min-width: 88px; padding: 8px 12px !important;
-  border-radius: 10px !important; font: 700 14px/1.2 var(--font-display) !important;
-  letter-spacing: .035em !important; color: var(--text-heading) !important;
-  border: 1px solid color-mix(in srgb,var(--c) 55%,transparent) !important;
-  background: var(--btn-glow-bg) !important;
-}
-.home-tonight .tonight-card__footer .tonight-card__view { margin-left: auto; }
-.home-tonight .tonight-card__footer button[aria-pressed="true"] {
-  border-color: var(--c) !important;
-  background: color-mix(in srgb,var(--c) 20%,var(--z-oled)) !important;
-}
-.home-tonight .tonight-card { transition: transform 180ms ease; }
-@media (hover:hover) {
-  .home-tonight .tonight-card:hover { transform: translateY(-3px); }
-}
-.home-tonight .tonight-card button:focus-visible { outline: 2px solid var(--text-heading); outline-offset: -4px; }
-.home-tonight .tonight-card__footer button:hover, .home-tonight .rail-card-share:hover { color: var(--c) !important; text-decoration: none; }
-@media (prefers-reduced-motion:reduce) {
-  .home-tonight .tonight-card { transition: none; transform: none !important; }
-}
-:is(html.calm-mode,:root[data-calm="true"]) .home-tonight .tonight-card { transition: none; transform: none !important; }
-
-@media(max-width:600px) {
-  .home-tonight .tonight-card__body { padding:18px; gap:12px; }
-  .home-tonight .tonight-card__body h3 { font-size:28px; }
-  .home-tonight .tonight-card__footer { margin-inline:18px; gap:8px; }
-  .home-tonight .tonight-card__footer button { min-width:0; flex:1; }
-}
 
 /* Day motif. Flyer cards: it sits low, rising behind the copy under the flyer.
    No-flyer cards: it fills the whole card at full strength, weekday stamp on top. */
@@ -109,7 +68,6 @@
 .tonight-card__art--motif { position:relative; overflow:hidden; }
 .tonight-card__art--motif .day-motif-code { top:18px; left:18px; font-size:18px; }
 
-.home-tonight .rail-card-room { height:34px; flex:none; display:flex; align-items:center; }
 .rail-card-room__logo { display:block; width:120px; height:34px; object-fit:contain; object-position:left center; }
 .rail-card-room__logo--white { object-fit:cover; object-position:center; filter:brightness(0) invert(1); }
 
@@ -126,9 +84,6 @@
 .tonight-card__art + .tonight-card__body { margin-top:-31.25%; }
 .tonight-card__art + .tonight-card__body .rail-card-room__logo { filter:drop-shadow(0 2px 6px var(--z-oled)) drop-shadow(0 0 2px var(--z-oled)); }
 .tonight-card__art + .tonight-card__body .rail-card-room__logo--white { filter:brightness(0) invert(1) drop-shadow(0 2px 6px var(--z-oled)) drop-shadow(0 0 2px var(--z-oled)); }
-.home-tonight .tonight-card__body { padding:18px; gap:10px; }
-.home-tonight .tonight-card__body h3 { font-size:28px; }
-.home-tonight .tonight-card__footer { margin-inline:18px; padding:12px 0 16px; }
 
 /* Live badge: ON NOW, or STARTS IN with a ticking ds/Countdown-style readout.
    Same height, inset and radius as the Share button so the two line up. */
@@ -157,3 +112,24 @@
 
 .tonight-card__body .tonight-card__change { align-self: flex-start; max-width: 100%; margin-bottom: -4px; }
 .tonight-card:has(> .tonight-card__live) .tonight-card__art--motif .day-motif-code { top:56px; }
+
+/* Design API: <TonightEventCard layout="card"> (the default) is the big event card,
+   one fixed size everywhere it appears (Events rails, Events grid, homepage rail):
+   200px wide, 4:5 flyer, about 403px tall. Pages place it; they never resize it or
+   restyle its parts. layout="row" is the list-view row (Events list). */
+.tonight-card.tonight-card--card { width: 200px; max-width: 100%; flex: none; }
+.tonight-card.tonight-card--card { border-radius: 17px; }
+.tonight-card--card .tonight-card__body { padding: 12px 12px 9px; gap: 7px; }
+.tonight-card--card .tonight-card__time { min-height: 0; font-size: 10.2px; }
+.tonight-card--card .tonight-card__body h3 { font-size: 18px; height: 2.04em; -webkit-line-clamp: 2; }
+.tonight-card--card .tonight-card__venue { min-height: 0; font-size: 11.6px; gap: 6px; }
+.tonight-card--card .tonight-card__venue small { font-size: 10.7px; margin-top: 2px; }
+.tonight-card--card .tonight-card__tags { gap: 5px; }
+.tonight-card--card .tonight-card__tags span { padding: 3px 5px; font-size: 9.2px; }
+.tonight-card--card .tonight-card__footer { margin: 0 12px; padding: 8px 0 10px; gap: 5px; }
+.tonight-card--card .tonight-card__footer button { min-height: 34px; padding: 0 7px; gap: 5px; border-radius: 8px; font-size: 12.1px; }
+.tonight-card--card .tonight-card__footer button svg { width: 15px; height: 15px; }
+.tonight-card--card .rail-card-share { top: 9px; right: 9px; min-height: 28px; padding: 0 8px; gap: 5px; border-radius: 8px; font-size: 11.6px; }
+.tonight-card--card .tonight-card__live { top: 9px; left: 9px; min-height: 28px; padding: 0 8px; gap: 5px; font-size: 12.6px; }
+.tonight-card--card .tonight-card__live-label { font-size: 12.6px; }
+.tonight-card--card .tonight-card__live--count b { font-size: 14.5px; }

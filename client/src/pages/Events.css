@@ -343,28 +343,11 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 .events-page .events-rail-sec--m .events-rail__item { width: 136px; }
 .events-page .events-rail-sec--s .events-rail__item { width: 108px; }
 .events-page .events-rail--open { display: grid; overflow: visible; scroll-snap-type: none; gap: 18px 13px; }
-.events-page .events-rail-sec--full .events-rail--open { grid-template-columns: minmax(0, 1fr); }
+.events-page .events-rail-sec--full .events-rail--open { grid-template-columns: repeat(auto-fill, 200px); }
 .events-page .events-rail-sec--m .events-rail--open { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .events-page .events-rail-sec--s .events-rail--open { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .events-page .events-rail--open .events-rail__item { width: auto; }
 
-/* Our card at rail width: same anatomy and proportions. Card, spacing, title and chrome
-   run 15% under the old 236px card; small text only 3% under, so it stays readable. */
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card { border-radius: 17px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__body { padding: 12px 12px 9px; gap: 7px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__time { min-height: 0; font-size: 10.2px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__body h3 { font-size: 18px; height: 2.04em; -webkit-line-clamp: 2; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__venue { min-height: 0; font-size: 11.6px; gap: 6px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__venue small { font-size: 10.7px; margin-top: 2px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__tags { gap: 5px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__tags span { padding: 3px 5px; font-size: 9.2px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__footer { margin: 0 12px; padding: 8px 0 10px; gap: 5px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__footer button { min-height: 34px; padding: 0 7px; gap: 5px; border-radius: 8px; font-size: 12.1px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__footer button svg { width: 15px; height: 15px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .rail-card-share { top: 9px; right: 9px; min-height: 28px; padding: 0 8px; gap: 5px; border-radius: 8px; font-size: 11.6px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__live { top: 9px; left: 9px; min-height: 28px; padding: 0 8px; gap: 5px; font-size: 12.6px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__live-label { font-size: 12.6px; }
-.events-page .events-rail-sec--full .events-rail:not(.events-rail--open) .tonight-card__live--count b { font-size: 14.5px; }
 
 /* Compact rail card. */
 .event-rail-card { position: relative; width: 100%; }
@@ -448,7 +431,6 @@ html body .events-page.board-page--makeover .events-board-feed .board-active-fee
    136px compact cards and day folders). Opened rails fill the wider row with
    more columns at those same widths. */
 @media (min-width: 768px) {
-  .events-page .events-rail-sec--full .events-rail--open { grid-template-columns: repeat(auto-fill, 200px); }
   .events-page .events-rail-sec--m .events-rail--open { grid-template-columns: repeat(auto-fill, 136px); }
   .events-page .events-rail-sec--s .events-rail--open { grid-template-columns: repeat(auto-fill, 108px); }
 }
@@ -461,3 +443,21 @@ html body .events-page.board-page--makeover .events-board-feed .board-active-fee
 }
 /* All three switch buttons share one size; the active one only changes color. */
 html body .events-page.board-page--makeover .events-day-row .events-view-toggle__btn { justify-content: center; padding: 0; border-radius: 11px; }
+
+/* Filtered grid: the same big event card as the rails, at its fixed 200px size.
+   Columns are the card width; the row centers. Phones keep two per row where
+   the screen fits two cards (430px wide and up). */
+html body .events-page .events-poster-grid { grid-template-columns: repeat(auto-fill, 200px); grid-auto-rows: auto; justify-content: center; align-items: start; gap: 18px 10px; padding-inline: 0; max-width: none; }
+@media (max-width: 767px) {
+  html body .events-page .events-poster-grid { margin-inline: -6px; width: auto; }
+}
+/* Desktop filtered grid: four cards per row. */
+@media (min-width: 768px) {
+  html body .events-page .events-poster-grid { grid-template-columns: repeat(4, 200px); gap: 24px 20px; }
+}
+/* Desktop filtered grid: four cards per row. */
+@media (min-width: 768px) {
+  html body .events-page .events-poster-grid { grid-template-columns: repeat(4, 200px); gap: 24px 20px; }
+}
+/* More room between the search bar and the Filters / Map buttons. */
+.events-page .events-filter-row { gap: 12px; }

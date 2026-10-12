@@ -28,7 +28,7 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(location.key.replace(/^outz:/, ""));
   const businessLogo = isPlace ? resolveDirectoryLogo(location.name, location.place?.imageUrl) || directoryFallbackLogo(kind) : null;
   const label = isPlace ? DIRECTORY_TYPE_LABELS[kind] || "Placez" : OUTZ_LABELS[location.kind || ""] || "Destination";
-  return <><article className="tonight-card today-location pdx-glass-card pdx-glass-rebind" style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
+  return <><article className="tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind" style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
     {isPlace && <ResourceCardMotif name={location.name} category={`place-${kind}`} />}
     <CardWaypoint kind={isPlace ? kind : location.kind || "trail"} outside={!isPlace} />
     <RailShareButton href={location.href} title={location.name} />
