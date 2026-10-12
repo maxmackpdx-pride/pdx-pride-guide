@@ -218,7 +218,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
             aria-modal="true"
             aria-label={forgotPassword ? "Reset password" : tab === "login" ? "Log in" : "Join"}
             tabIndex={-1}
-            className="pdx-auth-panel pdx-liquid-overlay relative max-h-[92vh] overflow-y-auto rounded-2xl p-7 backdrop-blur-xl"
+            className="pdx-auth-panel pdx-glass-rebind pdx-liquid-overlay relative max-h-[92vh] overflow-y-auto rounded-2xl p-7 backdrop-blur-xl"
             style={{
               background: "radial-gradient(120% 140% at 50% 0%, rgba(18,18,26,.94) 0%, rgba(5,5,6,.97) 72%)",
             }}

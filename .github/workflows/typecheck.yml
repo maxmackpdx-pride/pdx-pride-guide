@@ -53,5 +53,8 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Test glass audit parser
+        run: node --test script/audit-glass-rebind.test.mjs
+
       - name: Audit glass --c rebind
         run: node script/audit-glass-rebind.mjs

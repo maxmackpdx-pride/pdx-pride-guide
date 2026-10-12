@@ -263,7 +263,7 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
   font: 700 12px/1 var(--font-display); letter-spacing: .05em; font-variant-numeric: tabular-nums;
 }
 .events-page .events-day-tab[aria-pressed="true"] .events-day-tab__count { background: var(--c); color: var(--day-ink, var(--z-black)); box-shadow: 0 0 0 2px var(--z-oled); }
-.events-page .events-day-tab--more { --c: var(--border-strong); border-style: dashed; color: var(--text-mid); }
+.events-page .events-day-tab--more.pdx-glass-rebind { --c: var(--border-strong); border-style: dashed; color: var(--text-mid); }
 .events-page .events-day-tab--more[aria-pressed="true"] { background: var(--z-oled); border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: none; }
 .events-page .events-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
 @media (max-width: 640px) {

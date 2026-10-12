@@ -359,8 +359,26 @@ function findJsxOpenTag(src, fromIndex) {
 }
 
 function classNameFromJsx(tagText) {
-  const m = tagText.match(/\bclassName\s*=\s*(\{[\s\S]*?\}|"[^"]*"|'[^']*'|`[^`]*`)/);
-  return m ? m[1] : "";
+  const match = /\bclassName\s*=\s*/.exec(tagText);
+  if (!match) return "";
+  const start = match.index + match[0].length;
+  let depth = 0;
+  let quote = null;
+  for (let i = start; i < tagText.length; i += 1) {
+    const ch = tagText[i];
+    if (quote) {
+      if (ch === "\\") { i += 1; continue; }
+      if (ch === quote) {
+        quote = null;
+        if (depth === 0) return tagText.slice(start, i + 1);
+      }
+      continue;
+    }
+    if (ch === "\"" || ch === "'" || ch === "`") { quote = ch; continue; }
+    if (ch === "{") depth += 1;
+    else if (ch === "}" && --depth === 0) return tagText.slice(start, i + 1);
+  }
+  return "";
 }
 
 function classBlobRebinds(blob, group) {

@@ -812,7 +812,7 @@ export default function Events() {
     </button>
     <button
       type="button"
-      className="events-day-tab events-day-tab--more"
+      className="events-day-tab events-day-tab--more pdx-glass-rebind"
       data-all={!pastView && activeDay === "ALL" ? "true" : undefined}
       aria-pressed={pastView || !railKeys.has(activeDay)}
       aria-haspopup="dialog"
