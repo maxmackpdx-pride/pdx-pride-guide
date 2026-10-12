@@ -101,13 +101,12 @@
 }
 
 /* Day motif. Flyer cards: it sits low, rising behind the copy under the flyer.
-   No-flyer cards: it is the art, featured at the top with the weekday on it. */
+   No-flyer cards: it fills the whole card at full strength, weekday stamp on top. */
+.tonight-card > .tonight-card__motif-fill { z-index:0; }
 .tonight-card > .day-motif--card { z-index:0; }
 .tonight-card__open { position:relative; z-index:2; }
 .tonight-card__body { background:linear-gradient(transparent,color-mix(in srgb,var(--z-oled) 48%,transparent)); }
 .tonight-card__art--motif { position:relative; overflow:hidden; }
-.tonight-card__art--motif .day-motif--art { opacity:.8;
-  -webkit-mask-image:linear-gradient(to bottom,black 70%,transparent 100%); mask-image:linear-gradient(to bottom,black 70%,transparent 100%); }
 .tonight-card__art--motif .day-motif-code { top:18px; left:18px; font-size:18px; }
 
 .home-tonight .rail-card-room { height:34px; flex:none; display:flex; align-items:center; }

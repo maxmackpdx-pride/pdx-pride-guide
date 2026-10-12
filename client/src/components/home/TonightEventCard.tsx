@@ -5,7 +5,7 @@ import type { ScheduleEvent } from "@/lib/scheduleEvents";
 import type { EventListing } from "@shared/multiDayEvents";
 import { formatGridCardWhen, listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import "./TonightEventCard.css";
-import DayMotif from "@/components/events/DayMotif";
+import DayMotif, { motifDay } from "@/components/events/DayMotif";
 import EventFlyerArt from "@/components/events/EventFlyerArt";
 import RailShareButton from "./RailShareButton";
 import { eventPath } from "@shared/eventSlug";
@@ -61,12 +61,14 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
   const poster = listingPosterUrl(listing);
   const age = listing.ageRequirement === "21_PLUS" ? "21+" : listing.ageRequirement === "18_PLUS" ? "18+" : "All ages";
   return <article className="tonight-card pdx-glass-card pdx-glass-rebind" style={{ "--c": dayAccentToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
-    {poster ? <DayMotif day={listingDay(listing)} placement="card" /> : null}
+    {poster
+      ? <DayMotif day={listingDay(listing)} placement="card" />
+      : <DayMotif day={listingDay(listing)} placement="art" className="tonight-card__motif-fill" />}
     <RailShareButton href={eventPath(listing.id, listing.title, listing.dayOfWeek)} title={listing.title} />
     {liveState ? <LiveBadge live={liveState} /> : null}
     <div className="tonight-card__sheen pdx-glass-sheen--specular" aria-hidden="true" />
     <button className="tonight-card__open" type="button" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>
-      <div className={`tonight-card__art tonight-card__art--flyer${poster ? "" : " tonight-card__art--motif"}`}><EventFlyerArt src={poster} day={listingDay(listing)} /></div>
+      <div className={`tonight-card__art tonight-card__art--flyer${poster ? "" : " tonight-card__art--motif"}`}>{poster ? <EventFlyerArt src={poster} day={listingDay(listing)} /> : <i className="day-motif-code">{motifDay(listingDay(listing))}</i>}</div>
       <div className="tonight-card__body">
         <p className="rail-card-room"><img className="rail-card-room__logo rail-card-room__logo--white" src="/brand/family/eventz.png" alt="Eventz" /></p>
         {changeLabel ? <ChangeBadge label={changeLabel} className="tonight-card__change" /> : null}
