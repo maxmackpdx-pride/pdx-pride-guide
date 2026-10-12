@@ -1,4 +1,3 @@
-import CardWaypoint from "./home/CardWaypoint";
 import { PLACE_ACCENTS } from './discovery/placeTokens';
 import { ResourceCardMotif } from './resources/ResourceCardMotif';
 import { ArrowRight } from "lucide-react";
@@ -14,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
 import { Badge } from "@/components/ds";
-import { MapPinned, Share2 } from "lucide-react";
+import { MapPinned, Share2, ChevronRight, Info } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import {
@@ -34,6 +33,7 @@ import { resolveBusinessLocations } from "@shared/businessLocations";
 import { directoryFallbackLogo, resolveDirectoryLogo } from "@shared/directoryLogos";
 import DirectoryMap from "@/components/DirectoryMap";
 import "./PlaceModal.css";
+import "./discovery/EventzDetail.css";
 
 /** Source-card rect retained for compatibility with directory callers. */
 export type PlaceModalOriginRect = {
@@ -419,7 +419,7 @@ export default function PlaceModal({
   const useSpecialEdge =
     isNonprofit || isHealthcare || isRealEstate || isCampground || isGroup;
   const panelClass = [
-    "place-modal-panel",
+    "place-modal-panel event-modal event-modal--approved event-modal--reference eb-detail eb-detail--place",
     "pdx-glass-rebind",
     useSpecialEdge ? "place-modal-panel--edge" : "",
     "place-modal-panel--enter",
@@ -434,7 +434,7 @@ export default function PlaceModal({
     <div
       onClick={handleClose}
       role="presentation"
-      className={`place-modal-overlay${open ? " place-modal-overlay--open" : ""}`}
+      className={`event-modal-overlay place-modal-overlay${open ? " place-modal-overlay--open" : ""}`}
     >
       <div
         ref={panelRef}
@@ -447,30 +447,20 @@ export default function PlaceModal({
         style={{
           ["--c" as string]: accent,
           ["--_c" as string]: accent,
+          ["--event-accent" as string]: accent,
           ...(useSpecialEdge ? { ["--_edge" as string]: edge } : {}),
         }}
       >
-        <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={`place-${place.type}`} /></div>
-        <div className="place-modal-panel__glow" aria-hidden="true" />
-        <div className="place-modal-panel__sheen" aria-hidden="true" />
-        <div className="place-modal-panel__seam dir-refract" aria-hidden="true" />
-
-        <div className="place-modal-panel__inner">
-        <CardWaypoint kind={place.type} inline />
-        <DetailActions label="place" onClose={handleClose} onShare={handleShare} sharing={sharing}>
-          <VenueFollowButton
-            businessId={place.id}
-            initialFollowing={Boolean(place.isFollowing)}
-            variant="modal"
-            accent={accent}
-            onRequireAuth={onRequireAuth}
-          />
-        </DetailActions>
-
+        <div className="event-modal__chrome">
+          <DetailActions label="place" onClose={handleClose} onShare={handleShare} sharing={sharing} />
+        </div>
+        <div className="place-modal-panel__inner event-modal__scroll">
         <div>
           <div className="place-modal-panel__body">
 
           <div className="place-modal-panel__identity">
+          <div className="eb-detail__art">
+            <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={`place-${place.type}`} /></div>
           <img
             key={`${place.id}:${place.name}:${place.imageUrl}`}
             className="place-modal-panel__logo"
@@ -486,18 +476,9 @@ export default function PlaceModal({
             }}
           />
 
+          </div>
           <div className="place-modal-panel__identity-text">
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 900,
-              textTransform: "uppercase",
-              fontSize: "clamp(2.45rem, 9vw, 4.1rem)",
-              lineHeight: 1.02,
-              color: "var(--text-hi)",
-              margin: isGrandOpeningActive(place.grandOpeningDate) ? "0 0 4px" : "0 0 10px",
-            }}
-          >
+          <h2 className="event-modal__title">
             {place.name}
           </h2>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 10 }}>
@@ -538,6 +519,24 @@ export default function PlaceModal({
           </div>
           </div>
 
+          <div className="eb-detail__primary-action">
+            <VenueFollowButton
+              businessId={place.id}
+              initialFollowing={Boolean(place.isFollowing)}
+              variant="modal"
+              accent={accent}
+              onRequireAuth={onRequireAuth}
+            />
+          </div>
+                  {!editing && !multiLoc && (address || displayed.phone) && (
+                    <div className="place-modal-panel__quick-actions">
+                      <Link href={place.lat != null && place.lng != null ? `/map?layer=places&lat=${place.lat}&lng=${place.lng}&zoom=15` : `/map?layer=places&q=${encodeURIComponent(place.name)}`}>View on Mapz</Link>
+                      {address && <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer">Directions</a>}
+                      {displayed.phone && <a href={telHref(displayed.phone)}>Call</a>}
+                    </div>
+                  )}
+          <details className="event-modal__disclosure" open={editing || undefined}>
+            <summary><Info aria-hidden="true" />Place details<ChevronRight aria-hidden="true" /></summary>
           <div className="place-modal-panel__details-room">
 
           {multiLoc && address && (
@@ -784,13 +783,7 @@ export default function PlaceModal({
                     {displayed.phone && <div className="place-modal-panel__fact"><Icon d={PHONE} /><a href={telHref(displayed.phone)}>{displayed.phone}</a></div>}
                     {displayed.instagram && <div className="place-modal-panel__fact"><Icon d={IG} /><a href={displayed.instagram.startsWith("http") ? displayed.instagram : `https://instagram.com/${displayed.instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer">{displayed.instagram}</a></div>}
                   </div>
-                  {(address || displayed.phone) && (
-                    <div className="place-modal-panel__quick-actions">
-                      <Link href={place.lat != null && place.lng != null ? `/map?layer=places&lat=${place.lat}&lng=${place.lng}&zoom=15` : `/map?layer=places&q=${encodeURIComponent(place.name)}`}>View on Mapz</Link>
-                      {address && <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer">Directions</a>}
-                      {displayed.phone && <a href={telHref(displayed.phone)}>Call</a>}
-                    </div>
-                  )}
+
                 </>
               )}
 
@@ -870,6 +863,8 @@ export default function PlaceModal({
           )}
 
           </div>
+
+          </details>
 
           <div className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
             <DirectoryMap

@@ -1,5 +1,6 @@
 import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
 import BoardShareButton from "@/components/BoardShareButton";
+import { directoryResourceName, directoryResourcePath } from "@/lib/directoryResources";
 import { WebGLShader } from '@/components/ui/web-gl-shader';
 import { ResourceFilterButton } from '@/components/resources/ResourceFilterButton';
 import { PLACE_ACCENTS as TYPE_COLORS } from '@/components/discovery/placeTokens';
@@ -34,6 +35,7 @@ import type { BusinessLocation } from "@shared/businessLocations";
 import { resolveBusinessLocations } from "@shared/businessLocations";
 import {
   DIRECTORY_TYPE_LABELS as TYPE_LABELS,
+  isPlacezType,
 } from "@shared/directoryTheme";
 
 import {
@@ -200,7 +202,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   const [activeType, setActiveType] = useState(() => {
     if (isSpaces) return "group";
     const t = new URLSearchParams(window.location.search).get("type");
-    return t?.split(",").filter(type => type !== "group" && type in TYPE_LABELS).join(",") || "ALL";
+    return t?.split(",").filter(isPlacezType).join(",") || "ALL";
   });
   const [activeNeighborhood, setActiveNeighborhood] = useState(() => new URLSearchParams(window.location.search).get("neighborhood") || "ALL");
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
@@ -231,7 +233,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   });
 
   const visibleBusinesses = useMemo(
-    () => businesses.filter(b => isSpaces ? b.type === "group" : b.type !== "group"),
+    () => businesses.filter(b => isSpaces ? b.type === "group" : isPlacezType(b.type) && !directoryResourceName(b)),
     [businesses, isSpaces],
   );
 
@@ -261,7 +263,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     const restore = () => {
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type");
-      setActiveType(isSpaces ? "group" : type?.split(",").filter(value => value !== "group" && value in TYPE_LABELS).join(",") || "ALL");
+      setActiveType(isSpaces ? "group" : type?.split(",").filter(isPlacezType).join(",") || "ALL");
       const view = params.get("layout");
       setBrowseView(view === "list" || view === "grid" ? view : "browse");
       setSearchQuery(params.get("q") || "");
@@ -327,6 +329,13 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       return;
     }
     const sourceBusiness = businesses.find(b => b.id === placeId);
+    const resourcePath = !isSpaces && sourceBusiness && directoryResourcePath(sourceBusiness);
+    if (resourcePath) {
+      setSelectedPlace(null);
+      setPlaceOriginRect(null);
+      setLocation(resourcePath, { replace: true });
+      return;
+    }
     if (!isSpaces && sourceBusiness?.type === "group") {
       setSelectedPlace(null);
       setPlaceOriginRect(null);

@@ -17,6 +17,7 @@ import { Link, useLocation } from "wouter";
 import { useReducedMotion } from "framer-motion";
 import { useTheme } from "@/context/ThemeContext";
 import { Drawer } from "vaul";
+import * as Dialog from "@radix-ui/react-dialog";
 import {
   ArrowUpRight,
   ChevronDown,
@@ -42,6 +43,7 @@ import "@fontsource/barlow/latin-700.css";
 import "@fontsource/jetbrains-mono/latin-400.css";
 import "@fontsource/jetbrains-mono/latin-600.css";
 import "./Resources.css";
+import "@/components/discovery/EventzDetail.css";
 
 const ResourceDirectoryMap = lazy(() => import("@/components/DirectoryMap"));
 const ResourceBackgroundShader = lazy(() => import("@/components/ui/web-gl-shader").then(({ WebGLShader }) => ({ default: WebGLShader })));
@@ -434,7 +436,7 @@ const ResourceCard = memo(function ResourceCard({
   return (
     <PlaceCard
       name={org.name}
-      displayName={org.logo ? (RESOURCE_CARD_CAPTIONS[org.name] ?? null) : org.name}
+      displayName={RESOURCE_CARD_CAPTIONS[org.name] ?? org.name}
       decoration={<><div className="rg-card-vignette" aria-hidden="true" /><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true" /><ResourceCardMotif name={org.name} category={category.id} /></>}
       data-optical-logo={org.name}
       style={resourceLogoLayout(org.name) as CSSProperties}
@@ -603,21 +605,17 @@ export default function Resources() {
         </Drawer.Portal>
       </Drawer.Root>
 
-      <Drawer.Root
-        autoFocus
+      <Dialog.Root
         open={detailOpen}
         onOpenChange={setDetailOpen}
-        direction={mobile ? "bottom" : "right"}
-        shouldScaleBackground={false}
-        dismissible
-        closeThreshold={0.2}
       >
-        <Drawer.Portal>
-          <Drawer.Overlay className="rg-overlay-backdrop" />
-          <Drawer.Content
-            className={`pdx-glass-rebind rg-overlay rg-drawer rg-resource-detail rg-category-${(detail?.sectionCategory ?? detail?.category)?.id || "health"} ${mobile ? "rg-drawer-mobile" : "rg-drawer-desktop"}`}
+        <Dialog.Portal>
+          <Dialog.Overlay className="rg-overlay-backdrop eb-detail-backdrop" />
+          <Dialog.Content
+            className={`pdx-glass-rebind rg-overlay rg-drawer rg-resource-detail event-modal event-modal--approved event-modal--reference eb-detail eb-detail--resource rg-category-${(detail?.sectionCategory ?? detail?.category)?.id || "health"}`}
             data-quiet-motion={quietMotion ? "true" : undefined}
             style={{
+              "--event-accent": (detail?.sectionCategory ?? detail?.category)?.color || "var(--neon-cyan)",
               "--resource-accent": (detail?.sectionCategory ?? detail?.category)?.color || "var(--neon-cyan)",
               "--c": (detail?.sectionCategory ?? detail?.category)?.color || "var(--neon-cyan)",
               "--rg-category-gradient": (detail?.sectionCategory ?? detail?.category)?.color || "var(--neon-cyan)",
@@ -632,27 +630,23 @@ export default function Resources() {
                   ?.focus();
             }}
           >
-            {detail && <div className="rg-detail-art" aria-hidden="true">
-              <ResourceCardMotif name={detail.org.name} category={(detail.sectionCategory ?? detail.category).id} />
-              <div className="rg-category-wash" />
-            </div>}
-            <div className="rg-category-edge" aria-hidden="true" />
-            {(
-              <Drawer.Handle
-                className="rg-drawer-handle"
-                aria-label="Drag to close resource"
-              />
-            )}
-            <Drawer.Close className="rg-close" aria-label="Close resource">
-              <X size={20} />
-            </Drawer.Close>
+            <div className="event-modal__chrome">
+              <div className="detail-actions">
+                {detail && <BoardShareButton title={detail.org.name} path={`/rezources?resource=${encodeURIComponent(detail.org.name)}`} />}
+                <Dialog.Close className="detail-actions__close" aria-label="Close resource"><X size={20} aria-hidden="true" /></Dialog.Close>
+              </div>
+            </div>
             {detail && (
-              <div className="rg-drawer-body">
+              <div className="rg-drawer-body event-modal__scroll">
                 <div className="rg-detail-primary">
-                <div className="rg-detail-logo">
+                <div className="rg-detail-logo eb-detail__art">
+                  <div className="rg-detail-art" aria-hidden="true">
+                    <ResourceCardMotif name={detail.org.name} category={(detail.sectionCategory ?? detail.category).id} />
+                    <div className="rg-category-wash" />
+                  </div>
                   <Mark org={detail.org} />
                 </div>
-                <Drawer.Title>{detail.org.name}</Drawer.Title>
+                <Dialog.Title className="event-modal__title">{detail.org.name}</Dialog.Title>
                 <div className="rg-detail-tags">
                   {tagsFor(detail).map((category, index) => (
                     <span className="rg-category-tag" data-category-id={category.id} key={category.id}>
@@ -661,86 +655,7 @@ export default function Resources() {
                   ))}
                 </div>
 
-                {detail.org.sub && <p>{detail.org.sub}</p>}
-                <Drawer.Description>{detail.org.desc}</Drawer.Description>
-                {detail.org.sourceChecked && (
-                  <a
-                    className="rg-source-check"
-                    href={detail.org.sourceUrl || detail.org.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Service page checked {detail.org.sourceChecked}{" "}
-                    <ArrowUpRight size={13} />
-                  </a>
-                )}
-                {detail.org === FOOD_RESOURCE && (
-                  <>
-                    <a className="pdx-glass-rebind pdxBtn pdxBtn--solid rg-food-finder" href="https://foodfinder.oregonfoodbank.org/" target="_blank" rel="noopener noreferrer">
-                      Find food near you <ArrowUpRight size={22} aria-hidden="true" />
-                    </a>
-                    <p className="rg-food-finder-caption">Oregon Food Bank’s Food Finder · Search by location, day, and food type.</p>
-                    <details className="rg-detail-disclosure"><summary>Food pantries<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content"><FoodPantryList /></div></details>
-                  </>
-                )}
-                {detail.org.locations && detail.org !== FOOD_RESOURCE && (
-                  <details className="rg-org-locations rg-detail-disclosure" aria-label="Locations">
-                    <summary>Locations<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content">
-                    {detail.org.locations.map((location) => (
-                      <div className="rg-org-section" key={location.address}>
-                        <h4>{location.name}</h4>
-                        <p>{location.address}</p>
-                        {location.hours && <p>{location.hours}</p>}
-                        {location.phone && <ResourcePhone org={detail.org} href={location.phone} label={location.name} />}
-                        <a className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: location.address, name: location.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>
-                        {location.sourceUrl && <a className="rg-safety-source" href={location.sourceUrl} target="_blank" rel="noopener noreferrer">Official location details <ArrowUpRight size={13} /></a>}
-                      </div>
-                    ))}
-                  </div></details>
-                )}
-                {detail.org.programs && (
-                  <details className="rg-org-programs rg-detail-disclosure" aria-label="Programs and services">
-                    <summary>Programs & services<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content">
-                    {detail.org.programs.map((program) => (
-                      <div className="rg-org-section" key={program.name}>
-                        <h4>{program.name}</h4>
-                        <p>{program.desc}</p>
-                        <p>{program.scope}</p>
-                        {program.addr && <p>{program.addr}</p>}
-                        {program.hours && <p>{program.hours}</p>}
-                        {program.phone && <ResourcePhone org={program} />}
-                        {program.addr && <a className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: program.addr, name: detail.org.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>}
-                        {program.url && <a className="pdx-glass-rebind pdxBtn" href={program.url} target="_blank" rel="noopener noreferrer">{program.cta || "Program details"} <ArrowUpRight size={16} /></a>}
-                        {program.sourceChecked && <a className="rg-safety-source" href={program.sourceUrl || program.url} target="_blank" rel="noopener noreferrer">Service page checked {program.sourceChecked} <ArrowUpRight size={13} /></a>}
-                      </div>
-                    ))}
-                  </div></details>
-                )}
-                </div>
-                <div className="rg-detail-secondary">
-                <details className="rg-detail-disclosure"><summary>Getting started & service details<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-detail-meta rg-disclosure-content">
-                  <span className="rg-eyebrow">How to start</span>
-                  <p>{detail.org.howToStart || detail.category.use}</p>
-                  {detail.org.hours && <>
-                    <span className="rg-eyebrow">Hours</span>
-                    <p>{detail.org.hours}</p>
-                  </>}
-                  {detail.org.contactSourceUrl && <a className="rg-source-check" href={detail.org.contactSourceUrl} target="_blank" rel="noopener noreferrer">Contact details checked {detail.org.contactChecked} <ArrowUpRight size={13} /></a>}
-                  {detail.org.mailingAddress && <>
-                    <span className="rg-eyebrow">Mailing address</span>
-                    <p>{detail.org.mailingAddress}</p>
-                  </>}
-                  <span className="rg-eyebrow">Where they serve</span>
-                  <p>{detail.org.scope}</p>
-                  {detail.org.addr && !detail.org.locations && (
-                    <>
-                      <span className="rg-eyebrow">Location</span>
-                      <p>{detail.org.addr}</p>
-                    </>
-                  )}
-                </div></details>
                 {detail.org.phone && <ResourcePhone org={detail.org} />}
-                <ResourceLocationMap key={detail.org.name} org={detail.org} color={(detail.sectionCategory ?? detail.category).color} />
                 <div className="rg-detail-actions">
                   {detail.org.email && <a className="pdx-glass-rebind pdxBtn" href={`mailto:${detail.org.email}`}>Email {detail.org.email} <ArrowUpRight size={16} /></a>}
                   {detail.org.url && (
@@ -771,6 +686,85 @@ export default function Resources() {
                     </a>
                   )}
                 </div>
+                {detail.org.sub && <p>{detail.org.sub}</p>}
+                <Dialog.Description>{detail.org.desc}</Dialog.Description>
+                {detail.org.sourceChecked && (
+                  <a
+                    className="rg-source-check"
+                    href={detail.org.sourceUrl || detail.org.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Service page checked {detail.org.sourceChecked}{" "}
+                    <ArrowUpRight size={13} />
+                  </a>
+                )}
+                {detail.org === FOOD_RESOURCE && (
+                  <>
+                    <a className="pdx-glass-rebind pdxBtn pdxBtn--solid rg-food-finder" href="https://foodfinder.oregonfoodbank.org/" target="_blank" rel="noopener noreferrer">
+                      Find food near you <ArrowUpRight size={22} aria-hidden="true" />
+                    </a>
+                    <p className="rg-food-finder-caption">Oregon Food Bank’s Food Finder · Search by location, day, and food type.</p>
+                    <details className="rg-detail-disclosure event-modal__disclosure"><summary>Food pantries<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content"><FoodPantryList /></div></details>
+                  </>
+                )}
+                {detail.org.locations && detail.org !== FOOD_RESOURCE && (
+                  <details className="rg-org-locations rg-detail-disclosure event-modal__disclosure" aria-label="Locations">
+                    <summary>Locations<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content">
+                    {detail.org.locations.map((location) => (
+                      <div className="rg-org-section" key={location.address}>
+                        <h4>{location.name}</h4>
+                        <p>{location.address}</p>
+                        {location.hours && <p>{location.hours}</p>}
+                        {location.phone && <ResourcePhone org={detail.org} href={location.phone} label={location.name} />}
+                        <a className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: location.address, name: location.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>
+                        {location.sourceUrl && <a className="rg-safety-source" href={location.sourceUrl} target="_blank" rel="noopener noreferrer">Official location details <ArrowUpRight size={13} /></a>}
+                      </div>
+                    ))}
+                  </div></details>
+                )}
+                {detail.org.programs && (
+                  <details className="rg-org-programs rg-detail-disclosure event-modal__disclosure" aria-label="Programs and services">
+                    <summary>Programs & services<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-disclosure-content">
+                    {detail.org.programs.map((program) => (
+                      <div className="rg-org-section" key={program.name}>
+                        <h4>{program.name}</h4>
+                        <p>{program.desc}</p>
+                        <p>{program.scope}</p>
+                        {program.addr && <p>{program.addr}</p>}
+                        {program.hours && <p>{program.hours}</p>}
+                        {program.phone && <ResourcePhone org={program} />}
+                        {program.addr && <a className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: program.addr, name: detail.org.name })} target="_blank" rel="noopener noreferrer">Directions <ArrowUpRight size={16} /></a>}
+                        {program.url && <a className="pdx-glass-rebind pdxBtn" href={program.url} target="_blank" rel="noopener noreferrer">{program.cta || "Program details"} <ArrowUpRight size={16} /></a>}
+                        {program.sourceChecked && <a className="rg-safety-source" href={program.sourceUrl || program.url} target="_blank" rel="noopener noreferrer">Service page checked {program.sourceChecked} <ArrowUpRight size={13} /></a>}
+                      </div>
+                    ))}
+                  </div></details>
+                )}
+                </div>
+                <div className="rg-detail-secondary">
+                <details className="rg-detail-disclosure event-modal__disclosure"><summary>Getting started & service details<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-detail-meta rg-disclosure-content">
+                  <span className="rg-eyebrow">How to start</span>
+                  <p>{detail.org.howToStart || detail.category.use}</p>
+                  {detail.org.hours && <>
+                    <span className="rg-eyebrow">Hours</span>
+                    <p>{detail.org.hours}</p>
+                  </>}
+                  {detail.org.contactSourceUrl && <a className="rg-source-check" href={detail.org.contactSourceUrl} target="_blank" rel="noopener noreferrer">Contact details checked {detail.org.contactChecked} <ArrowUpRight size={13} /></a>}
+                  {detail.org.mailingAddress && <>
+                    <span className="rg-eyebrow">Mailing address</span>
+                    <p>{detail.org.mailingAddress}</p>
+                  </>}
+                  <span className="rg-eyebrow">Where they serve</span>
+                  <p>{detail.org.scope}</p>
+                  {detail.org.addr && !detail.org.locations && (
+                    <>
+                      <span className="rg-eyebrow">Location</span>
+                      <p>{detail.org.addr}</p>
+                    </>
+                  )}
+                </div></details>
+                <ResourceLocationMap key={detail.org.name} org={detail.org} color={(detail.sectionCategory ?? detail.category).color} />
                 <small>
                   Check the organization's website for current hours, services,
                   and eligibility.
@@ -778,9 +772,9 @@ export default function Resources() {
                 </div>
               </div>
             )}
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }
