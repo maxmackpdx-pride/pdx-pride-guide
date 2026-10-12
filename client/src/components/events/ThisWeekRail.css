@@ -48,11 +48,13 @@
 .events-week .week-day__hero::before { content: attr(data-t); position: absolute; left: 4px; top: 4px; z-index: -1; color: transparent; -webkit-text-stroke: 1.4px var(--text-hi); }
 .events-week .week-day__date { margin: auto 0 6px; color: var(--z-black); font: 900 20px/.9 var(--font-display); text-transform: uppercase; text-shadow: none; }
 .events-week .week-day__date b { display: inline-block; margin-left: 16px; padding: 2px 5px 1px; background: var(--z-black); color: var(--c); font-weight: 900; }
-.events-week .week-day__foot { margin: 0 8px; padding: 0 0 8px; border-top: 0; }
-.events-week .week-day__tap { height: 28px; border-radius: 8px; border: 0; background: var(--z-black); color: var(--c);
-  font: 800 12px/1 var(--font-display); letter-spacing: .14em; box-shadow: inset 0 1px 0 color-mix(in srgb, var(--c) 35%, transparent); }
-.events-week .week-day.is-open .week-day__tap { border: 0; background: color-mix(in srgb, var(--z-black) 78%, var(--c)); }
+/* Open sits as a small black tag in the bottom right corner, under the date. */
+.events-week .week-day__date { margin-bottom: 36px; }
+.events-week .week-day__card > .week-day__foot { position: absolute; right: 8px; bottom: 8px; z-index: 3; margin: 0; padding: 0; border-top: 0; }
+.events-week .week-day__tap { display: inline-flex; align-items: center; gap: 2px; height: 22px; padding: 0 5px 0 7px; border-radius: 4px; border: 0; background: var(--z-black); color: var(--c);
+  font: 800 11.5px/1 var(--font-display); letter-spacing: .12em; text-transform: uppercase; box-shadow: none; }
 .events-week .week-day__tap svg { transition: transform .3s ease; }
+.events-week .week-day.is-open .week-day__tap { background: var(--z-black); }
 .events-week .week-day.is-open .week-day__tap svg { transform: rotate(180deg); }
 .events-week .week-day__label { position: relative; z-index: 3; display: block; margin-top: 8px; min-height: 2.08em; color: var(--text-hi); font: 800 16px/1.04 var(--font-display); text-transform: uppercase; }
 

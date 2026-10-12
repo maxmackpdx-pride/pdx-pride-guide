@@ -28,8 +28,7 @@ html:root :is(.pdxBtn,
   .hub-ghost-btn,
   .hub-v2-profile__btn,
   .hub-settings-prefs__enable-btn,
-  .pp-btn:where(:not(.pp-btn--accent-swatch)),
-  .events-action) {
+  .pp-btn:where(:not(.pp-btn--accent-swatch))) {
   --button-c: var(--_c, var(--c, var(--action-accent)));
   /* Rebind the canonical chrome recipe to this control, not its parent card. */
   --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--button-c) var(--bloom-alpha, 8%), transparent);
@@ -65,8 +64,7 @@ html:root :is(.pdxBtn,
   .hub-ghost-btn,
   .hub-v2-profile__btn,
   .hub-settings-prefs__enable-btn,
-  .pp-btn:where(:not(.pp-btn--accent-swatch)),
-  .events-action):hover:not(:disabled):not([aria-disabled="true"]) {
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):hover:not(:disabled):not([aria-disabled="true"]) {
   color: var(--button-ink, var(--button-c)); background: var(--btn-glow-bg);
   box-shadow: var(--btn-glow-shadow); filter: brightness(1.08);
   transform: translateY(-1px); text-decoration: none;
@@ -90,8 +88,7 @@ html:root :is(.pdxBtn,
   .hub-ghost-btn,
   .hub-v2-profile__btn,
   .hub-settings-prefs__enable-btn,
-  .pp-btn:where(:not(.pp-btn--accent-swatch)),
-  .events-action):where(:is(.pdxBtn--solid,.pdxBtn--pill,.pdx-glass-btn--solid,.btn-neon.solid,.zay-action--solid,.dash-btn-lime-solid,.pgc-btn--primary,.rbi-btn,.support-sponsors__pitch,.nude-map-btn--primary)),
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):where(:is(.pdxBtn--solid,.pdxBtn--pill,.pdx-glass-btn--solid,.btn-neon.solid,.zay-action--solid,.dash-btn-lime-solid,.pgc-btn--primary,.rbi-btn,.support-sponsors__pitch,.nude-map-btn--primary)),
 html:root :is(.pdxBtn,
   .pdx-glass-btn,
   .btn-neon,
@@ -111,8 +108,7 @@ html:root :is(.pdxBtn,
   .hub-ghost-btn,
   .hub-v2-profile__btn,
   .hub-settings-prefs__enable-btn,
-  .pp-btn:where(:not(.pp-btn--accent-swatch)),
-  .events-action):where(:is(.pdxBtn--solid,.pdxBtn--pill,.pdx-glass-btn--solid,.btn-neon.solid,.zay-action--solid,.dash-btn-lime-solid,.pgc-btn--primary,.rbi-btn,.support-sponsors__pitch,.nude-map-btn--primary)):hover:not(:disabled):not([aria-disabled="true"]) {
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):where(:is(.pdxBtn--solid,.pdxBtn--pill,.pdx-glass-btn--solid,.btn-neon.solid,.zay-action--solid,.dash-btn-lime-solid,.pgc-btn--primary,.rbi-btn,.support-sponsors__pitch,.nude-map-btn--primary)):hover:not(:disabled):not([aria-disabled="true"]) {
   --button-c: var(--action-accent); --button-ink: var(--action-ink);
   color: var(--button-ink); background: var(--button-c); border-color: #000;
   box-shadow: var(--chrome-keyline), var(--chrome-bevel), var(--chrome-floor), var(--neon-bloom);
@@ -136,8 +132,7 @@ html:root :is(.pdxBtn,
   .hub-ghost-btn,
   .hub-v2-profile__btn,
   .hub-settings-prefs__enable-btn,
-  .pp-btn:where(:not(.pp-btn--accent-swatch)),
-  .events-action):active:not(:disabled):not([aria-disabled="true"]) {
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):active:not(:disabled):not([aria-disabled="true"]) {
   transform: translateY(1px); filter: none;
   box-shadow: var(--chrome-keyline), inset 0 2px 5px rgba(0,0,0,.35), var(--neon-bloom);
 }
@@ -160,8 +155,7 @@ html:root :is(.pdxBtn,
   .hub-ghost-btn,
   .hub-v2-profile__btn,
   .hub-settings-prefs__enable-btn,
-  .pp-btn:where(:not(.pp-btn--accent-swatch)),
-  .events-action):focus-visible {
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):focus-visible {
   outline: 3px solid var(--focus-ring); outline-offset: 3px; border-radius: 22px;
 }
 html:root :is(.pdxBtn,
@@ -183,8 +177,7 @@ html:root :is(.pdxBtn,
   .hub-ghost-btn,
   .hub-v2-profile__btn,
   .hub-settings-prefs__enable-btn,
-  .pp-btn:where(:not(.pp-btn--accent-swatch)),
-  .events-action):is(:disabled,[aria-disabled="true"]) {
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):is(:disabled,[aria-disabled="true"]) {
   opacity: .55; cursor: not-allowed; transform: none; filter: none;
   color: var(--text-lo); background: var(--ink-850); border-color: var(--border-strong); box-shadow: none;
 }
@@ -192,9 +185,6 @@ html:root .pdxBtn.pdxBtn--sm { padding: 8px 15px; font-size: .75rem; }
 html:root .pdxBtn.pdxBtn--lg { min-height: 56px; padding: 14px 28px; font-size: 1.0625rem; border-radius: 28px; }
 html:root .pdxBtn--block { width: 100%; }
 html:root .zay-action.zay-action--icon { width: 44px; height: 44px; padding: 0; flex: none; }
-/* Events page actions: secondary glow plate in the card's day color; saved = lit. */
-html:root .events-action.events-action--icon { width: 44px; height: 44px; padding: 0; flex: none; }
-html:root .events-action[aria-pressed="true"] { --bloom-alpha: 45%; color: var(--button-c); border-width: 2px; }
 html:root .pdxIconBtn--lg { width: 52px; height: 52px; border-radius: 26px; }
 html:root .zay-action.zay-action--destructive { --button-c: var(--neon-red); }
 /* Lift dark violet/blue label ink without changing their identity rims. */
@@ -265,8 +255,7 @@ html.calm-mode :is(.pdxBtn,
   .hub-ghost-btn,
   .hub-v2-profile__btn,
   .hub-settings-prefs__enable-btn,
-  .pp-btn:where(:not(.pp-btn--accent-swatch)),
-  .events-action),
+  .pp-btn:where(:not(.pp-btn--accent-swatch))),
 html[data-calm="true"] :is(.pdxBtn,
   .pdx-glass-btn,
   .btn-neon,
@@ -286,8 +275,7 @@ html[data-calm="true"] :is(.pdxBtn,
   .hub-ghost-btn,
   .hub-v2-profile__btn,
   .hub-settings-prefs__enable-btn,
-  .pp-btn:where(:not(.pp-btn--accent-swatch)),
-  .events-action) {
+  .pp-btn:where(:not(.pp-btn--accent-swatch))) {
   --bloom-alpha: 0%; box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark);
 }
 @media (prefers-reduced-motion: reduce) {
@@ -310,8 +298,7 @@ html[data-calm="true"] :is(.pdxBtn,
   .hub-ghost-btn,
   .hub-v2-profile__btn,
   .hub-settings-prefs__enable-btn,
-  .pp-btn:where(:not(.pp-btn--accent-swatch)),
-  .events-action) { transition: none; }
+  .pp-btn:where(:not(.pp-btn--accent-swatch))) { transition: none; }
   html:root :is(.pdxBtn,
   .pdx-glass-btn,
   .btn-neon,
@@ -331,8 +318,7 @@ html[data-calm="true"] :is(.pdxBtn,
   .hub-ghost-btn,
   .hub-v2-profile__btn,
   .hub-settings-prefs__enable-btn,
-  .pp-btn:where(:not(.pp-btn--accent-swatch)),
-  .events-action):is(:hover,:active) { transform: none; }
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):is(:hover,:active) { transform: none; }
 }
 
 html:root .calm-mode-toggle__label { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .06em; }

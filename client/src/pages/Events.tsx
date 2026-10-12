@@ -739,7 +739,7 @@ export default function Events() {
         <ScrollReveal delay={50}>
           <div className="events-page__body events-page__body--schedule">
             <div className="events-schedule-switch">
-              <button type="button" className="events-tool-btn events-action" onClick={() => setActiveTab("board")}>
+              <button type="button" className="events-tool-btn" onClick={() => setActiveTab("board")}>
                 <Grid size={18} aria-hidden="true" />Back to flyers
               </button>
             </div>
@@ -812,10 +812,10 @@ export default function Events() {
                       size="sm"
                     />
                   </div>
-                  <button type="button" className="events-tool-btn events-action" aria-haspopup="dialog" onClick={() => setDrawerOpen(true)} data-testid="events-filters-open">
+                  <button type="button" className="events-tool-btn" aria-haspopup="dialog" onClick={() => setDrawerOpen(true)} data-testid="events-filters-open">
                     <SlidersHorizontal size={18} aria-hidden="true" />Filters{drawerFilterCount ? ` · ${drawerFilterCount}` : ""}
                   </button>
-                  <button type="button" className="events-tool-btn events-action" aria-haspopup="dialog" onClick={() => setMapOpen(true)} data-testid="events-map-open">
+                  <button type="button" className="events-tool-btn" aria-haspopup="dialog" onClick={() => setMapOpen(true)} data-testid="events-map-open">
                     <MapIcon size={18} aria-hidden="true" />Map
                   </button>
                   <div className="events-view-toggle">
@@ -928,16 +928,16 @@ export default function Events() {
                     <h3 id={`events-rail-${band.id}`}><span aria-hidden="true" />{band.label}<small>{band.items.length}</small></h3>
                     <div className="events-rail-sec__actions">
                       {index === 0 && (
-                        <button type="button" className="events-rail-pill events-action" onClick={() => setMapOpen(true)}><MapIcon size={14} aria-hidden="true" />Map</button>
+                        <button type="button" className="events-rail-pill" onClick={() => setMapOpen(true)}><MapIcon size={14} aria-hidden="true" />Map</button>
                       )}
                       {band.dayKey ? (
-                        <button type="button" className="events-rail-pill events-action" onClick={() => { setPastView(false); setActiveDay(band.dayKey!); }}>
+                        <button type="button" className="events-rail-pill" onClick={() => { setPastView(false); setActiveDay(band.dayKey!); }}>
                           See the day
                         </button>
                       ) : band.items.length > 2 && (
                         <button
                           type="button"
-                          className="events-rail-pill events-action"
+                          className="events-rail-pill"
                           aria-expanded={expanded}
                           onClick={() => setOpenRails(prev => { const next = new Set(prev); if (next.has(band.id)) next.delete(band.id); else next.add(band.id); return next; })}
                         >
@@ -951,7 +951,6 @@ export default function Events() {
                       <div role="listitem" key={listingKey(e)} className="events-rail__item">
                         {size === "full" ? (
                           <TonightEventCard
-                            actionClass="events-action"
                             listing={e} rsvped={savedIds.has(e.id)}
                             liveState={liveStateFor(e, now)}
                             onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
@@ -983,7 +982,6 @@ export default function Events() {
                 <div className={viewMode === "list" ? "events-band__list" : "events-poster-grid"}>
                   {band.items.map(e => (
                     <TonightEventCard
-                      actionClass="events-action"
                       key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)}
                       liveState={liveStateFor(e, now)}
                       onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
@@ -1023,7 +1021,6 @@ export default function Events() {
               const e = item.event;
               return (
                 <TonightEventCard
-                  actionClass="events-action"
                   key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)}
                   liveState={pastView ? null : liveStateFor(e, now)}
                   onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
@@ -1038,7 +1035,6 @@ export default function Events() {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {visibleListEvents.map((e, i) => (
               <TonightEventCard
-                  actionClass="events-action"
                   key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)}
                   liveState={pastView ? null : liveStateFor(e, now)}
                   onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}

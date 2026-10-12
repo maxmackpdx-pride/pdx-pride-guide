@@ -49,3 +49,9 @@
 .events-map-row__open > svg { flex: none; color: var(--text-body); }
 .events-map-row__pin { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--c) 50%, transparent); color: var(--c); background: var(--z-oled); }
 .events-tool-btn--block { width: 100%; }
+.events-drawer .events-tool-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 14px; box-sizing: border-box;
+  border-radius: 10px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
+  background: var(--btn-glow-bg); box-shadow: var(--btn-glow-shadow); color: var(--text-hi);
+  font: 700 15px/1 var(--font-display); letter-spacing: .04em; text-transform: uppercase; text-decoration: none;
+}
