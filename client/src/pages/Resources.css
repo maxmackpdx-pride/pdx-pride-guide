@@ -3659,7 +3659,7 @@ html.calm-mode .rg-options button,
 }
 .resources-page .rg-stack-controls {
   position: sticky;
-  top: calc(var(--site-header-height, 72px) + 4px);
+  top: var(--site-header-sticky-edge, var(--site-header-height, 72px));
   z-index: 50;
   display: flex;
   align-items: center;
@@ -4718,7 +4718,7 @@ html.calm-mode .rg-options button,
   .rg-door-path[data-door="talk"] .rg-results { margin-top: 0; }
   .rg-door-path .rg-selected-categories {
     position: sticky;
-    top: calc(var(--site-header-height, 72px) + 4px);
+    top: var(--site-header-sticky-edge, var(--site-header-height, 72px));
     z-index: 30;
     display: flex;
     gap: 7px;

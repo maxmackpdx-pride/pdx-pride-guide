@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronDown, House, Inbox, Search, Settings, Trash2, UserRound, UsersRound } from "lucide-react";
@@ -554,6 +554,28 @@ export default function Nav() {
   const navScrollRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
   const fetching = useIsFetching();
+
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    const root = document.documentElement;
+    const measure = () => {
+      // Sticky bars meet the floating header's rim, including its safe-area
+      // offset. The layout-height token also includes margins, so it cannot
+      // supply this edge.
+      const top = parseFloat(getComputedStyle(header).top) || 0;
+      root.style.setProperty("--site-header-sticky-edge", `${top + header.getBoundingClientRect().height}px`);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(header);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+      root.style.removeProperty("--site-header-sticky-edge");
+    };
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;

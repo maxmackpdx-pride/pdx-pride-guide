@@ -2,7 +2,7 @@
 
 .schedule-toolbar {
   position: sticky;
-  top: var(--site-header-height);
+  top: var(--site-header-sticky-edge, var(--site-header-height));
   z-index: 55;
   background: rgba(6, 6, 10, 0.94);
   backdrop-filter: blur(12px);

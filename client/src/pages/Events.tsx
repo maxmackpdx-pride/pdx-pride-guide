@@ -537,7 +537,7 @@ export default function Events() {
       if (!rail) { setDockTop(null); return; }
       const header = document.querySelector(".site-header");
       const hr = header?.getBoundingClientRect();
-      const top = hr && hr.height > 0 && hr.bottom > 0 ? Math.round(hr.bottom) + 8 : 0;
+      const top = hr && hr.height > 0 && hr.bottom > 0 ? hr.bottom : 0;
       setDockTop(rail.getBoundingClientRect().bottom < top + 8 ? top : null);
     };
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(measure); };

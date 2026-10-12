@@ -113,10 +113,11 @@ function AppLayout() {
   const livingMap = ["/map", "/map-demo"].includes(routePath);
   const mapSurface = livingMap || routePath === "/outzide" || routePath.startsWith("/outzide/");
   const hideFooter = livingMap || routePath === "/outzide" || routePath.startsWith("/outzide/");
+  const mobileFooter = routePath === "/" || routePath === "/about";
   return (
     <div
       data-glass-scene
-      className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${livingMap ? " app-shell--mapz-demo" : ""}${mapSurface ? " app-shell--map-surface" : ""}`}
+      className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${livingMap ? " app-shell--mapz-demo" : ""}${mapSurface ? " app-shell--map-surface" : ""}${mobileFooter ? "" : " app-shell--no-mobile-footer"}`}
       style={{ background: "var(--z-black, #050506)" }}
     >
       <PullToRefresh />
