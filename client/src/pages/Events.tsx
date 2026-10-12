@@ -555,6 +555,14 @@ export default function Events() {
     });
   }, [events, activeFilters, searchQuery, now]);
   const railKeys = useMemo(() => new Set(dayRail.map(d => d.key)), [dayRail]);
+  // Desktop "View all" tab: every upcoming event in one scrolling grid, the original Eventz board.
+  const allEvents = useMemo(
+    () => sortEvents(filterBoardEvents(events, "ALL", activeFilters, searchQuery, false, now), "start_time"),
+    [events, activeFilters, searchQuery, now],
+  );
+  const allCount = allEvents.length;
+  const [allShown, setAllShown] = useState(24);
+  useEffect(() => { setAllShown(24); }, [activeFilters, searchQuery]);
   const moreLabel = pastView ? "Past" : railKeys.has(activeDay) ? "All +" : (activeChipLabel ?? "All +");
 
   // Day dock: once the page's day tabs scroll up under the site header, a slim
@@ -783,7 +791,29 @@ export default function Events() {
     ))}
     <button
       type="button"
+      className="events-day-tab events-day-tab--all pdx-glass-rebind"
+      aria-pressed={!pastView && activeDay === "ALL"}
+      onClick={() => {
+        setPastView(false);
+        const grid = document.getElementById("events-all");
+        if (grid && grid.getClientRects().length) {
+          const offset = (dockTop ?? 0) + 150;
+          window.scrollTo({ top: grid.getBoundingClientRect().top + window.scrollY - offset, behavior: quietScroll() ? "auto" : "smooth" });
+          return;
+        }
+        setActiveDay("ALL");
+      }}
+      style={{ "--c": "var(--neon-cyan)", "--day-text": "var(--neon-cyan)", "--day-ink": "var(--z-black)" } as React.CSSProperties}
+      data-testid={inDock ? undefined : "day-tab-ALL"}
+    >
+      <span className="events-day-tab__top">View all</span>
+      <span className="events-day-tab__sub">Grid</span>
+      <span className="events-day-tab__count" aria-label={`${allCount} events`}>{allCount}</span>
+    </button>
+    <button
+      type="button"
       className="events-day-tab events-day-tab--more"
+      data-all={!pastView && activeDay === "ALL" ? "true" : undefined}
       aria-pressed={pastView || !railKeys.has(activeDay)}
       aria-haspopup="dialog"
       onClick={() => setDrawerOpen(true)}
@@ -920,6 +950,57 @@ export default function Events() {
           </ScrollReveal>
 
           <div className="board-active-feed__body">
+            {/* Desktop only (CSS): filters, map and the promoter path stay in view beside the feed. */}
+            <aside className="events-side" aria-label="Filters">
+              <section className="events-side__panel pdx-glass-rebind" style={{ "--c": "var(--room-eventz)" } as React.CSSProperties}>
+                <div className="events-side__head">
+                  <h2 className="events-side__title">Filters</h2>
+                  {activeFilters.length > 0 && (
+                    <button type="button" className="events-side__clear" onClick={() => setActiveFilters([])}>Clear</button>
+                  )}
+                </div>
+                <div className="events-drawer__section">
+                  <span className="events-drawer__label">Type</span>
+                  <div className="events-drawer__chips" role="group" aria-label="Filter by type">
+                    {EVENT_TYPE_FILTERS.map(f => (
+                      <EventTypeTag
+                        key={f}
+                        label={f}
+                        interactive
+                        active={activeFilters.includes(f)}
+                        onClick={() => toggleFilter(f)}
+                        testId={`side-filter-type-${f.replace(/[+ ]/g, "-")}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="events-drawer__section">
+                  <label className="events-drawer__label" htmlFor="events-side-sort">Sort</label>
+                  <div className="board-select-wrap">
+                    <select id="events-side-sort" className="board-select events-sort__select" value={sortMode} onChange={e => setSortMode(e.target.value as SortMode)} data-testid="events-side-sort">
+                      {SORT_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                    <span className="board-select-caret" aria-hidden="true"><ChevronDown size={14} /></span>
+                  </div>
+                </div>
+              </section>
+              <section className="events-side__panel pdx-glass-rebind" style={{ "--c": "var(--room-eventz)" } as React.CSSProperties}>
+                <p className="events-side__copy">{filtered.length} {filtered.length === 1 ? "event" : "events"} on this view.</p>
+                <button type="button" className="events-tool-btn events-tool-btn--block" onClick={() => setMapOpen(true)} data-testid="events-side-map">
+                  <MapIcon size={18} aria-hidden="true" />Open the map
+                </button>
+              </section>
+              <section className="events-side__panel events-side__promoters pdx-glass-rebind" style={{ "--c": "var(--neon-lime)" } as React.CSSProperties}>
+                <div className="board-path-card__label">Promoters</div>
+                <h3>Not seeing your event?</h3>
+                <p>Submit a new listing or claim one that is already on Zaylist.</p>
+                <Link href="/submit">
+                  <Button as="span" variant="solid" accent="lime" arrow>Get started</Button>
+                </Link>
+              </section>
+            </aside>
         {isLoading ? (
           <EventsRailSkeleton />
         ) : isError ? (
@@ -970,7 +1051,7 @@ export default function Events() {
               // Happening now / Next up keep the full Eventz card; every other rail uses one size.
               const size = band.id === "happening" || band.id === "next" ? "full" : "m";
               return (
-                <section key={band.id} className={`events-rail-sec events-rail-sec--${size} pdx-glass-rebind`} style={{ "--c": band.color } as React.CSSProperties} aria-labelledby={`events-rail-${band.id}`}>
+                <section key={band.id} className={`events-rail-sec events-rail-sec--${size} events-rail-sec--${band.id} pdx-glass-rebind`} style={{ "--c": band.color } as React.CSSProperties} aria-labelledby={`events-rail-${band.id}`}>
                   <div className="events-rail-sec__head">
                     <h3 id={`events-rail-${band.id}`}><span aria-hidden="true" />{band.label}<small>{band.items.length}</small></h3>
                     <div className="events-rail-sec__actions">
@@ -1015,6 +1096,29 @@ export default function Events() {
               );
             })}
             {weekDays ? <ThisWeekRail days={weekDays} savedIds={savedIds} liveStateFor={weekLiveState} onToggleSave={weekToggleSave} onOpen={weekOpen} /> : null}
+            {/* Desktop only (CSS): every upcoming event in one scrolling grid, under the lanes. */}
+            {allEvents.length > 0 && (
+              <section id="events-all" className="events-all-grid" aria-labelledby="events-all-title">
+                <div className="events-rail-sec__head">
+                  <h3 id="events-all-title"><span aria-hidden="true" />All events<small>{allEvents.length}</small></h3>
+                </div>
+                <div className="events-poster-grid">
+                  {allEvents.slice(0, allShown).map(e => (
+                    <TonightEventCard
+                      key={`all-${listingKey(e)}`} listing={e} rsvped={savedIds.has(e.id)}
+                      liveState={liveStateFor(e, now)}
+                      onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
+                      onOpen={listing => openEvent(listing)}
+                    />
+                  ))}
+                </div>
+                {allShown < allEvents.length && (
+                  <button type="button" className="events-tool-btn events-all-grid__more" onClick={() => setAllShown(n => n + 24)}>
+                    Show more
+                  </button>
+                )}
+              </section>
+            )}
           </div>
         ) : tonightBands ? (
           <div className={`events-card-feed events-bands${viewMode === "list" ? " events-card-feed--list" : ""}`}>

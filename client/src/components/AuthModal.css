@@ -1,10 +1,10 @@
 /* Join / Log in card: the Eventz rail card shell. Holds still under the mouse;
    only its edge bloom wakes on hover or focus, like the event cards. */
 .pdx-auth-panel {
-  --c: var(--panel-lime, #c8fa3c);
+  --c: var(--panel-lime);
   --auth-bloom: 0 0 10px -2px color-mix(in srgb, var(--c) 55%, transparent), 0 0 4px -1px color-mix(in srgb, var(--c) 45%, transparent);
-  border: 1px solid color-mix(in srgb, var(--c) 55%, var(--z-black, #000));
-  box-shadow: 0 0 0 2px var(--z-black, #000), inset 0 1px 0 color-mix(in srgb, var(--c) 55%, transparent), 0 40px 90px -30px rgba(0, 0, 0, .9), var(--auth-bloom);
+  border: 1px solid color-mix(in srgb, var(--c) 55%, var(--z-black));
+  box-shadow: 0 0 0 2px var(--z-black), inset 0 1px 0 color-mix(in srgb, var(--c) 55%, transparent), 0 40px 90px -30px rgba(0, 0, 0, .9), var(--auth-bloom);
   transition: box-shadow .2s ease;
 }
 .pdx-auth-panel:is(:hover, :focus-within) {

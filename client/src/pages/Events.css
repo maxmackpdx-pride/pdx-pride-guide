@@ -437,8 +437,8 @@ html body .events-page.board-page--makeover .events-board-feed .board-active-fee
 
 /* Day tabs fade out at their right edge instead of cutting off at the view switch. */
 .events-page .events-day-row .events-day-rail {
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
-  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  -webkit-mask-image: linear-gradient(90deg, var(--z-black) calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, var(--z-black) calc(100% - 28px), transparent);
   padding-right: 24px;
 }
 /* All three switch buttons share one size; the active one only changes color. */
@@ -467,11 +467,11 @@ html body .events-page > .events-day-dock {
   padding: 0 var(--zl-gutter, 16px);
   background: color-mix(in srgb, var(--z-black) 92%, transparent);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid #1c1c22;
+  border-bottom: 1px solid var(--panel-border);
   animation: events-dock-in .2s ease-out both;
 }
 .events-page .events-day-dock__inner { max-width: calc(1320px - 2 * var(--zl-gutter, 16px)); margin: 0 auto; padding: calc(8px + env(safe-area-inset-top, 0px)) 2px 8px; gap: 8px;
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+  -webkit-mask-image: linear-gradient(90deg, var(--z-black) calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, var(--z-black) calc(100% - 28px), transparent); }
 .events-page .events-day-dock .events-day-tab { min-height: 44px; min-width: 64px; padding: 0 12px; gap: 3px; }
 .events-page .events-day-dock .events-day-tab--tonight { min-width: 88px; }
 .events-page .events-day-dock .events-day-tab__count { display: none; }
@@ -485,3 +485,56 @@ html.calm-mode .events-page > .events-day-dock { animation: none; }
 .events-page .events-rail-skel__card { display: block; border-radius: 17px; }
 .events-page .events-rail-skel__card--full { width: 200px; height: 403px; }
 .events-page .events-rail-skel__card--m { width: 136px; height: 170px; border-radius: 16px; }
+
+/* Desktop only: a "View all" day tab that opens the full scrolling grid (the original Eventz board). */
+.events-page .events-day-tab--all { display: none; }
+.events-page .events-all-grid { display: none; }
+
+/* ── Desktop layout (1100px and up): sidebar + real time bands. Phones and tablets are untouched. ──
+   The feed's own cards keep their fixed sizes; only their placement changes. */
+.events-page .events-side { display: none; }
+@media (min-width: 1100px) {
+  /* Sit on the site frame: the same column and gutters as the header block above. */
+  html body .events-page.board-page--makeover .board-active-feed__inner { width: min(100%, var(--zl-frame)); max-width: var(--zl-frame); margin-inline: auto; padding-inline: var(--zl-gutter); box-sizing: border-box; }
+  .events-page .board-active-feed__body { display: grid; grid-template-columns: 248px minmax(0, 1fr); column-gap: 32px; align-items: start; }
+  .events-page .board-active-feed__body > :not(.events-side) { grid-column: 2; }
+  .events-page .events-side { grid-column: 1; grid-row: 1 / span 12; position: sticky; top: calc(var(--site-header-height, 96px) + 84px); display: flex; flex-direction: column; gap: 16px; }
+  .events-page .events-side__panel { padding: 20px; box-sizing: border-box; border-radius: 16px; border: 1px solid var(--panel-border); background: var(--ink-800); display: flex; flex-direction: column; gap: 16px; }
+  .events-page .events-side__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .events-page .events-side__title { margin: 0; color: var(--text-hi); font: 800 20px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
+  .events-page .events-side__clear { min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--room-eventz); font: 600 14px/1 var(--font-body); cursor: pointer; }
+  .events-page .events-side__clear:focus-visible { outline: 2px solid var(--room-eventz); outline-offset: 2px; }
+  .events-page .events-side__copy { margin: 0; color: var(--text-body); font: 400 14px/1.45 var(--font-body); }
+  .events-page .events-side__promoters { border-color: color-mix(in srgb, var(--c) 35%, transparent); gap: 10px; }
+  .events-page .events-side__promoters h3 { margin: 0; color: var(--text-hi); font: 800 22px/1.1 var(--font-display); text-transform: uppercase; }
+  .events-page .events-side__promoters p { margin: 0; color: var(--text-body); font: 400 14px/1.5 var(--font-body); }
+  /* The sidebar carries the promoter path; the feed's own copy would repeat it. */
+  .events-page .board-active-feed__body > .scroll-reveal:has(.events-submit-panel) { display: none; }
+
+  /* Bands: Next up (or Happening now), then Today, Late and Tomorrow as side-by-side lanes of the same
+     fixed-size cards. Lanes show their first six and wrap onto the next row when the window is narrow.
+     This week runs the full width beneath. */
+  .events-page .events-rails { display: flex; flex-direction: row; flex-wrap: wrap; gap: 44px 32px; margin-inline: 0; align-items: flex-start; }
+  .events-page .events-rails > .events-rail-sec { flex: none; min-width: 0; }
+  .events-page .events-rails > .events-rail-sec--full { width: 200px; }
+  .events-page .events-rails > .events-rail-sec--m:not(.events-week) { width: calc(2 * 136px + 16px); }
+  .events-page .events-rails > .events-rail-sec--late { width: 136px; }
+  .events-page .events-rails > .events-rail-sec--m:not(.events-week) .events-rail { display: grid; grid-template-columns: repeat(2, 136px); gap: 16px; }
+  .events-page .events-rails > .events-rail-sec--late .events-rail { grid-template-columns: 136px; }
+  .events-page .events-rails > .events-rail-sec--m:not(.events-week) .events-rail:not(.events-rail--open) .events-rail__item:nth-child(n+7) { display: none; }
+  .events-page .events-rails > .events-rail-sec--late .events-rail:not(.events-rail--open) .events-rail__item:nth-child(n+4) { display: none; }
+  .events-page .events-rails > .events-rail-sec--m:not(.events-week) .events-rail__item { width: 136px; }
+  .events-page .events-rail-sec__head { flex-wrap: wrap; }
+  .events-page .events-rail-sec__head { padding-inline: 0; }
+  /* Rails wrap into rows instead of scrolling sideways. */
+  .events-page .events-rail { flex-wrap: wrap; overflow: visible; scroll-snap-type: none; gap: 16px; padding-inline: 0; }
+  .events-page .events-rail-arrow { display: none; }
+  /* This week is the same seven days as the day tabs above, so desktop drops it. Phones keep it. */
+  .events-page .events-rails > .events-week { display: none; }
+  .events-page .events-day-tab--all { display: flex; min-width: 96px; }
+  /* With View all on, More (filters) steps back to its resting look. */
+  .events-page .events-day-tab--more[data-all="true"][aria-pressed="true"] { border-color: var(--border-strong); color: var(--text-mid); }
+  .events-page .events-all-grid { display: block; flex: 1 1 100%; min-width: 0; }
+  .events-page .events-all-grid .events-poster-grid { padding: 10px 0 0; margin-inline: 0; max-width: none; grid-template-columns: repeat(auto-fill, 200px); gap: 24px 20px; justify-content: start; }
+  .events-page .events-all-grid__more { margin: 28px auto 0; display: flex; }
+}
