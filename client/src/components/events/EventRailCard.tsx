@@ -9,7 +9,7 @@ import type { EventListing } from "@shared/multiDayEvents";
 
 /**
  * Compact rail card for the mobile Eventz rails: the flyer with the title on a short dark fade at its bottom and save in
- * its top-right corner, then "time · venue" under the card. Opens the same event card. With no flyer, the day motif
+ * its top-right corner. "time · venue" sits on the flyer under the title; nothing sits under the card. Opens the same event card. With no flyer, the day motif
  * (with the weekday) is the art.
  */
 export default function EventRailCard({
@@ -34,9 +34,8 @@ export default function EventRailCard({
         <span className="event-rail-card__art">
           <EventFlyerArt src={poster} day={listingDay(listing)} showDay={size === "m"} />
           {liveState && size === "m" ? <LiveBadge live={liveState} /> : null}
-          <span className="event-rail-card__shade"><span className="event-rail-card__title">{listing.title}</span></span>
+          <span className="event-rail-card__shade"><span className="event-rail-card__title">{listing.title}</span><span className="event-rail-card__meta">{eventTimeLabel(listing.dateStart)} · {listing.venueName}</span></span>
         </span>
-        <span className="event-rail-card__meta">{eventTimeLabel(listing.dateStart)} · {listing.venueName}</span>
       </button>
       <button
         type="button"

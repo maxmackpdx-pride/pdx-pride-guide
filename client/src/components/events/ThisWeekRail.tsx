@@ -9,7 +9,6 @@ import { motifDay } from "./DayMotif";
 import SponsorRailCard, { SPONSOR_KINDS } from "./SponsorRailCard";
 import "./ThisWeekRail.css";
 
-const DAY_NAMES: Record<string, string> = { MON: "Monday", TUE: "Tuesday", WED: "Wednesday", THU: "Thursday", FRI: "Friday", SAT: "Saturday", SUN: "Sunday" };
 const WEEK_INDEX: Record<string, number> = { MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6, SUN: 7 };
 
 function quiet() {
@@ -122,7 +121,6 @@ export default function ThisWeekRail({
             </span>
             <span className="week-day__foot"><span className="week-day__tap">{isOpen ? "Close" : "Open"} <ChevronRight size={12} strokeWidth={3} aria-hidden="true" /></span></span>
           </button>
-          <span className="week-day__label">{DAY_NAMES[code]}</span>
         </div>,
       );
       if (!isOpen) continue;
