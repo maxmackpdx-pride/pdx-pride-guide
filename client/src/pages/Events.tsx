@@ -46,7 +46,7 @@ import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
 import { eventPath, eventUrl } from "@shared/eventSlug";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
-import { List, Grid, ChevronDown, ChevronRight, CalendarDays, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
+import { Grid, ChevronDown, ChevronRight, CalendarDays, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
 
 import { DAY_SORT_ORDER } from "@shared/eventWeek";
@@ -58,13 +58,10 @@ import EventThumb from "@/components/events/EventThumb";
 
 const PACIFIC = "America/Los_Angeles";
 const GRID_RENDER_BATCH = 40;
-const LIST_RENDER_BATCH = 60;
 const MOBILE_GRID_RENDER_BATCH = 12;
-const MOBILE_LIST_RENDER_BATCH = 20;
 
-function renderBatch(viewMode: "grid" | "list", isMobile: boolean): number {
-  if (viewMode === "grid") return isMobile ? MOBILE_GRID_RENDER_BATCH : GRID_RENDER_BATCH;
-  return isMobile ? MOBILE_LIST_RENDER_BATCH : LIST_RENDER_BATCH;
+function renderBatch(isMobile: boolean): number {
+  return isMobile ? MOBILE_GRID_RENDER_BATCH : GRID_RENDER_BATCH;
 }
 
 /** Pacific YYYY-MM-DD for an epoch-ms. */
@@ -379,9 +376,7 @@ export default function Events() {
   });
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [eventOriginRect, setEventOriginRect] = useState<EventModalOriginRect | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "list">(() => readSearchParam("view") === "list" ? "list" : "grid");
   const [visibleItemCount, setVisibleItemCount] = useState(() => renderBatch(
-    readSearchParam("view") === "list" ? "list" : "grid",
     typeof window !== "undefined" && window.innerWidth < 768,
   ));
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -403,11 +398,10 @@ export default function Events() {
     if (activeDay !== DEFAULT_WINDOW) params.set("window", activeDay);
     if (activeFilters.length) params.set("type", activeFilters.join("|"));
     if (pastView) params.set("past", "1");
-    if (viewMode !== "grid") params.set("view", viewMode);
     if (sortMode !== "start_time") params.set("sort", sortMode);
     if (activeTab === "schedule") params.set("tab", activeTab);
     return params;
-  }, [searchQuery, activeDay, activeFilters, pastView, viewMode, sortMode, activeTab]);
+  }, [searchQuery, activeDay, activeFilters, pastView, sortMode, activeTab]);
   const openEvent = useCallback((event: EventListing, originRect: EventModalOriginRect | null = null) => {
     setEventOriginRect(originRect);
     setSelectedEvent(event);
@@ -435,7 +429,6 @@ export default function Events() {
       setActiveFilters(readSearchParam("type").split("|").filter(isEventTypeFilterLabel));
       setPastView(readSearchParam("past") === "1");
       setSearchQuery(readSearchParam("q"));
-      setViewMode(readSearchParam("view") === "list" ? "list" : "grid");
       setSortMode(SORT_OPTIONS.find(option => option.value === readSearchParam("sort"))?.value || "start_time");
       setActiveTabState(readSearchParam("tab") === "schedule" ? "schedule" : "board");
     };
@@ -555,14 +548,6 @@ export default function Events() {
     });
   }, [events, activeFilters, searchQuery, now]);
   const railKeys = useMemo(() => new Set(dayRail.map(d => d.key)), [dayRail]);
-  // Desktop "View all" tab: every upcoming event in one scrolling grid, the original Eventz board.
-  const allEvents = useMemo(
-    () => sortEvents(filterBoardEvents(events, "ALL", activeFilters, searchQuery, false, now), "start_time"),
-    [events, activeFilters, searchQuery, now],
-  );
-  const allCount = allEvents.length;
-  const [allShown, setAllShown] = useState(24);
-  useEffect(() => { setAllShown(24); }, [activeFilters, searchQuery]);
   const moreLabel = pastView ? "Past" : railKeys.has(activeDay) ? "All +" : (activeChipLabel ?? "All +");
 
   // Day dock: once the page's day tabs scroll up under the site header, a slim
@@ -674,14 +659,12 @@ export default function Events() {
   const weekOpen = useCallback((listing: EventListing) => openEvent(listing), [openEvent]);
   const [openRails, setOpenRails] = useState<Set<string>>(() => new Set());
   useEffect(() => { setOpenRails(new Set()); }, [activeDay, activeFilters, searchQuery]);
-  // Rails on every screen size: desktop uses the same rails and card sizes as mobile.
-  const useRails = viewMode === "grid" && railBands != null;
 
   const mySavedUpcoming = useMemo(
     () => liveEvents.filter(e => savedIds.has(e.id)).length,
     [liveEvents, savedIds],
   );
-  const drawerFilterCount = (railKeys.has(activeDay) ? 0 : 1) + Number(pastView) + Number(sortMode !== "start_time") + activeFilters.length;
+  const drawerFilterCount = (activeDay === "ALL" || railKeys.has(activeDay) ? 0 : 1) + Number(pastView) + Number(sortMode !== "start_time") + activeFilters.length;
 
   const posterServeQuery = useQuery<{ ads: AdServePayload[] }>({
     queryKey: ["/api/ads/serve", "grid"],
@@ -694,7 +677,7 @@ export default function Events() {
   });
   const posterServeReady = posterServeQuery.isFetched || posterServeQuery.isError;
 
-  /** Grid-only: scatter affiliate poster cards among real events (not list view). */
+  /** Scatter affiliate poster cards among real events in the full grid. */
   const gridItems = useMemo(() => {
     // While serve loads, show events only so we do not flash legacy brands then swap.
     if (!posterServeReady) {
@@ -707,22 +690,16 @@ export default function Events() {
     () => gridItems.slice(0, visibleItemCount),
     [gridItems, visibleItemCount],
   );
-  const visibleListEvents = useMemo(
-    () => filtered.slice(0, visibleItemCount),
-    [filtered, visibleItemCount],
-  );
-  const hasMoreVisibleItems = viewMode === "grid"
-    ? visibleGridItems.length < gridItems.length
-    : visibleListEvents.length < filtered.length;
+  const hasMoreVisibleItems = visibleGridItems.length < gridItems.length;
 
   useEffect(() => {
-    setVisibleItemCount(renderBatch(viewMode, isMobile));
-  }, [viewMode, isMobile, activeDay, activeFilters, searchQuery, sortMode, pastView]);
+    setVisibleItemCount(renderBatch(isMobile));
+  }, [isMobile, activeDay, activeFilters, searchQuery, sortMode, pastView]);
 
   useEffect(() => {
     const node = loadMoreRef.current;
     if (!node || !hasMoreVisibleItems) return;
-    const batch = renderBatch(viewMode, isMobile);
+    const batch = renderBatch(isMobile);
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -733,7 +710,7 @@ export default function Events() {
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [hasMoreVisibleItems, viewMode, isMobile, visibleItemCount]);
+  }, [hasMoreVisibleItems, isMobile, visibleItemCount, activeTab, activeDay, sortMode]);
 
   // All upcoming (not-yet-ended) live events - the site is year-round now.
   const upcomingCount = liveEvents.length;
@@ -791,30 +768,8 @@ export default function Events() {
     ))}
     <button
       type="button"
-      className="events-day-tab events-day-tab--all pdx-glass-rebind"
-      aria-pressed={!pastView && activeDay === "ALL"}
-      onClick={() => {
-        setPastView(false);
-        const grid = document.getElementById("events-all");
-        if (grid && grid.getClientRects().length) {
-          const offset = (dockTop ?? 0) + 150;
-          window.scrollTo({ top: grid.getBoundingClientRect().top + window.scrollY - offset, behavior: quietScroll() ? "auto" : "smooth" });
-          return;
-        }
-        setActiveDay("ALL");
-      }}
-      style={{ "--c": "var(--neon-cyan)", "--day-text": "var(--neon-cyan)", "--day-ink": "var(--z-black)" } as React.CSSProperties}
-      data-testid={inDock ? undefined : "day-tab-ALL"}
-    >
-      <span className="events-day-tab__top">View all</span>
-      <span className="events-day-tab__sub">Grid</span>
-      <span className="events-day-tab__count" aria-label={`${allCount} events`}>{allCount}</span>
-    </button>
-    <button
-      type="button"
-      className="events-day-tab events-day-tab--more"
-      data-all={!pastView && activeDay === "ALL" ? "true" : undefined}
-      aria-pressed={pastView || !railKeys.has(activeDay)}
+      className="events-day-tab events-day-tab--more pdx-glass-rebind"
+      aria-pressed={pastView || (activeDay !== "ALL" && !railKeys.has(activeDay))}
       aria-haspopup="dialog"
       onClick={() => setDrawerOpen(true)}
     >
@@ -871,43 +826,9 @@ export default function Events() {
               )}
               <div className="events-browse">
                 <div className="events-day-row">
-                <nav className="events-day-rail" aria-label="Pick a day" ref={dayRailRef}>
-                  {renderDayTabs(false)}
-                </nav>
-                  <div className="events-view-toggle">
-                    <button
-                      type="button"
-                      data-testid="toggle-grid-view"
-                      onClick={() => setViewMode("grid")}
-                      className={`events-view-toggle__btn${viewMode === "grid" ? " active" : ""}`}
-                      title="Grid view"
-                      aria-label="Show events as a grid"
-                      aria-pressed={viewMode === "grid"}
-                    >
-                      <Grid size={22} />
-                    </button>
-                    <button
-                      type="button"
-                      data-testid="toggle-list-view"
-                      onClick={() => setViewMode("list")}
-                      className={`events-view-toggle__btn${viewMode === "list" ? " active" : ""}`}
-                      title="List view"
-                      aria-label="Show events as a list"
-                      aria-pressed={viewMode === "list"}
-                    >
-                      <List size={22} />
-                    </button>
-                    <button
-                      type="button"
-                      data-testid="toggle-calendar-view"
-                      onClick={() => setActiveTab("schedule")}
-                      className="events-view-toggle__btn"
-                      title="Calendar view"
-                      aria-label="Show the calendar"
-                    >
-                      <CalendarDays size={22} />
-                    </button>
-                  </div>
+                  <nav className="events-day-rail" aria-label="Pick a day" ref={dayRailRef}>
+                    {renderDayTabs(false)}
+                  </nav>
                 </div>
               <BrowseToolbar label="Search and filter Eventz" className="board-active-feed__controls">
                 <div className="board-filter-row events-filter-row">
@@ -926,10 +847,20 @@ export default function Events() {
                   <button type="button" className="events-tool-btn events-tool-btn--icon" aria-haspopup="dialog" aria-label={`Filters${drawerFilterCount ? `, ${drawerFilterCount} on` : ""}`} onClick={() => setDrawerOpen(true)} data-testid="events-filters-open">
                     <SlidersHorizontal size={19} aria-hidden="true" />{drawerFilterCount ? <span className="events-tool-btn__count" aria-hidden="true">{drawerFilterCount}</span> : null}
                   </button>
-                  <button type="button" className="events-tool-btn events-tool-btn--icon" aria-haspopup="dialog" aria-label="Map" onClick={() => setMapOpen(true)} data-testid="events-map-open">
-                    <MapIcon size={19} aria-hidden="true" />
+                  <button type="button" className="events-tool-btn events-tool-btn--icon" aria-label="My Schedule" title="My Schedule" onClick={() => setActiveTab("schedule")} data-testid="toggle-calendar-view">
+                    <CalendarDays size={19} aria-hidden="true" />
                   </button>
                 </div>
+                <div className="events-browse-actions">
+                  <button
+                    type="button"
+                    className="events-tool-btn events-view-all"
+                    data-testid="events-view-all"
+                    aria-pressed={!pastView && activeDay === "ALL"}
+                    onClick={() => { setPastView(false); setActiveDay("ALL"); }}
+                  >
+                    <Grid size={18} aria-hidden="true" />View all
+                  </button>
                 {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== DEFAULT_WINDOW) && !(filtered.length === 0 && !isLoading && !isError) && (
                   <button
                     type="button"
@@ -944,6 +875,7 @@ export default function Events() {
                     Clear filters
                   </button>
                 )}
+                </div>
               </BrowseToolbar>
               </div>
             </div>
@@ -1044,11 +976,11 @@ export default function Events() {
                 : "Clear filters"}
             </Button>
           </div>
-        ) : useRails && railBands ? (
+        ) : railBands ? (
           <div className="events-rails">
             {railBands.map((band, index) => {
-              const expanded = openRails.has(band.id);
-              // Happening now / Next up keep the full Eventz card; every other rail uses one size.
+              const expanded = isMobile || openRails.has(band.id);
+              // Mobile uses full cards in two columns; desktop keeps its existing lane sizes.
               const size = band.id === "happening" || band.id === "next" ? "full" : "m";
               return (
                 <section key={band.id} className={`events-rail-sec events-rail-sec--${size} events-rail-sec--${band.id} pdx-glass-rebind`} style={{ "--c": band.color } as React.CSSProperties} aria-labelledby={`events-rail-${band.id}`}>
@@ -1059,7 +991,7 @@ export default function Events() {
                         <button type="button" className="events-rail-pill" onClick={() => { setPastView(false); setActiveDay(band.dayKey!); }}>
                           See the day
                         </button>
-                      ) : band.items.length > 2 && (
+                      ) : !isMobile && band.items.length > 2 && (
                         <button
                           type="button"
                           className="events-rail-pill"
@@ -1074,7 +1006,7 @@ export default function Events() {
                   <EventsRail open={expanded} label={band.label} nudge={index === 0}>
                     {band.items.map(e => (
                       <div role="listitem" key={listingKey(e)} className="events-rail__item">
-                        {size === "full" ? (
+                        {isMobile || size === "full" ? (
                           <TonightEventCard
                             listing={e} rsvped={savedIds.has(e.id)}
                             liveState={liveStateFor(e, now)}
@@ -1096,55 +1028,11 @@ export default function Events() {
               );
             })}
             {weekDays ? <ThisWeekRail days={weekDays} savedIds={savedIds} liveStateFor={weekLiveState} onToggleSave={weekToggleSave} onOpen={weekOpen} /> : null}
-            {/* Desktop only (CSS): every upcoming event in one scrolling grid, under the lanes. */}
-            {allEvents.length > 0 && (
-              <section id="events-all" className="events-all-grid" aria-labelledby="events-all-title">
-                <div className="events-rail-sec__head">
-                  <h3 id="events-all-title"><span aria-hidden="true" />All events<small>{allEvents.length}</small></h3>
-                </div>
-                <div className="events-poster-grid">
-                  {allEvents.slice(0, allShown).map(e => (
-                    <TonightEventCard
-                      key={`all-${listingKey(e)}`} listing={e} rsvped={savedIds.has(e.id)}
-                      liveState={liveStateFor(e, now)}
-                      onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
-                      onOpen={listing => openEvent(listing)}
-                    />
-                  ))}
-                </div>
-                {allShown < allEvents.length && (
-                  <button type="button" className="events-tool-btn events-all-grid__more" onClick={() => setAllShown(n => n + 24)}>
-                    Show more
-                  </button>
-                )}
-              </section>
-            )}
           </div>
-        ) : tonightBands ? (
-          <div className={`events-card-feed events-bands${viewMode === "list" ? " events-card-feed--list" : ""}`}>
-            {tonightBands.map(band => (
-              <section key={band.id} className="events-band pdx-glass-rebind" style={{ "--c": band.color } as React.CSSProperties} aria-labelledby={`events-band-${band.id}`}>
-                <h3 className="events-band__head" id={`events-band-${band.id}`}>
-                  <span aria-hidden="true" />{band.label}<small>{band.items.length}</small>
-                </h3>
-                <div className={viewMode === "list" ? "events-band__list" : "events-poster-grid"}>
-                  {band.items.map(e => (
-                    <TonightEventCard
-                      key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)} layout={viewMode === "list" ? "row" : "card"}
-                      liveState={liveStateFor(e, now)}
-                      onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
-                      onOpen={listing => openEvent(listing)}
-                    />
-                  ))}
-                </div>
-              </section>
-            ))}
-            {weekDays && viewMode === "grid" ? <div className="events-rails events-rails--week"><ThisWeekRail days={weekDays} savedIds={savedIds} liveStateFor={weekLiveState} onToggleSave={weekToggleSave} onOpen={weekOpen} /></div> : null}
-          </div>
-        ) : viewMode === "grid" ? (
+        ) : (
           <div className="events-card-feed">
           <div className="events-poster-grid">
-            {visibleGridItems.map((item, i) => {
+            {visibleGridItems.map((item) => {
               if (item.kind === "affiliate") {
                 return (
                   <div
@@ -1176,19 +1064,6 @@ export default function Events() {
                 />
               );
             })}
-          </div>
-          </div>
-        ) : (
-          <div className="events-card-feed events-card-feed--list">
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {visibleListEvents.map((e, i) => (
-              <TonightEventCard
-                  key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)} layout="row"
-                  liveState={pastView ? null : liveStateFor(e, now)}
-                  onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
-                  onOpen={listing => openEvent(listing)}
-                />
-            ))}
           </div>
           </div>
         )}

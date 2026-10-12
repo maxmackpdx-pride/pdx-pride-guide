@@ -49,7 +49,7 @@ export default function AppleCardCarousel({ cards, onOpen }: {
         <CarouselContent className="feed-event-carousel__content">
           {cards.map(card => (
             <CarouselItem key={card.id} className="feed-event-carousel__item">
-              <button type="button" className="feed-event-carousel__card" style={{ borderColor: card.color, "--c": card.color } as CSSProperties} onClick={() => onOpen(card.id)} aria-label={`Open ${card.title}${card.venue ? ` at ${card.venue}` : ""}`}>
+              <button type="button" className="feed-event-carousel__card pdx-glass-rebind" style={{ borderColor: card.color, "--c": card.color } as CSSProperties} onClick={() => onOpen(card.id)} aria-label={`Open ${card.title}${card.venue ? ` at ${card.venue}` : ""}`}>
                 {card.src ? <img src={card.src} alt={card.alt} loading="lazy" decoding="async" /> : <DayMotif day={card.day} placement="art" />}
                 <span className="feed-event-carousel__shade" aria-hidden="true" />
                 <span className="feed-event-carousel__copy">

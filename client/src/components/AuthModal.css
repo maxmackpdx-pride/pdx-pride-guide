@@ -1,6 +1,6 @@
 /* Join / Log in card: the Eventz rail card shell. Holds still under the mouse;
    only its edge bloom wakes on hover or focus, like the event cards. */
-.pdx-auth-panel {
+.pdx-auth-panel.pdx-glass-rebind {
   --c: var(--panel-lime);
   --auth-bloom: 0 0 10px -2px color-mix(in srgb, var(--c) 55%, transparent), 0 0 4px -1px color-mix(in srgb, var(--c) 45%, transparent);
   border: 1px solid color-mix(in srgb, var(--c) 55%, var(--z-black));

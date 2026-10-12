@@ -107,8 +107,7 @@
   /* Mobile WebKit must not retain a composited surface for every loaded card.
      Keep offscreen cards in layout, but skip their paint and animation work. */
   .events-page .events-poster-grid > .scroll-reveal,
-  .events-page .events-poster-grid > .ds-listing-card,
-  .events-page .events-card-feed--list > div > .scroll-reveal {
+  .events-page .events-poster-grid > .ds-listing-card {
     content-visibility: auto;
     contain-intrinsic-size: auto 650px;
     overflow-clip-margin: 32px;
@@ -116,9 +115,6 @@
     transform: none;
     transition: none;
     will-change: auto;
-  }
-  .events-page .events-card-feed--list > div > .scroll-reveal {
-    contain-intrinsic-size: auto 200px;
   }
 
   /* Static day-color edges and shadows retain the card treatment without
@@ -201,8 +197,6 @@ html body .events-page.board-page--makeover .board-active-feed__head-row { flex-
 html body .events-page.board-page--makeover .board-active-feed__title { font:800 var(--section-heading)/1.15 var(--font-display); }
 html body .events-page.board-page--makeover .filter-survey { max-width:880px; margin:0 auto 40px; }
 html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdxRow) { --dir-gm:8; }
-html body .events-page.board-page--makeover .events-view-toggle__btn { min-width:44px; min-height:44px; border-radius:12px; }
-html body .events-page.board-page--makeover .events-view-toggle__btn[aria-pressed=true] { background:color-mix(in srgb,var(--room-eventz) 15%,var(--z-black)); box-shadow:inset 0 0 0 1px var(--room-eventz); color:var(--text-heading); }
 @media(max-width:600px) {
   html body .events-page.board-page--makeover .board-hero--room { padding-top:32px; }
   html body .events-page.board-page--makeover .board-hero__title { margin-top:40px; }
@@ -219,25 +213,6 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 
 /* The same poster/glass card serves the homepage and Eventz feed. */
 .events-page .events-poster-grid { grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr)); gap:24px; }
-.events-page .events-card-feed--list .tonight-card { display:grid; grid-template-columns:minmax(0,1fr) auto; }
-.events-page .events-card-feed--list .tonight-card__open { display:grid; grid-template-columns:160px minmax(0,1fr); }
-.events-page .events-card-feed--list .tonight-card__art img { height:100%; object-fit:cover; }
-/* In a list row the flyer sits beside the copy, so it fades to the right instead. */
-.events-page .events-card-feed--list .tonight-card__art { aspect-ratio:auto; }
-.events-page .events-card-feed--list .tonight-card__art + .tonight-card__body { margin-top:0; }
-.events-page .events-card-feed--list .tonight-card__art > img:not(.today-location__brand) {
-  mask-image:linear-gradient(to right,var(--z-oled) 75%,transparent 100%);
-  -webkit-mask-image:linear-gradient(to right,var(--z-oled) 75%,transparent 100%);
-}
-.events-page .events-card-feed--list .tonight-card__footer { flex-direction:column; justify-content:center; border-top:0; }
-@media(max-width:600px) {
-  .events-page .events-card-feed--list .tonight-card { display:flex; }
-  .events-page .events-card-feed--list .tonight-card__open { grid-template-columns:100px minmax(0,1fr); }
-  .events-page .events-card-feed--list .tonight-card__body { padding:16px; gap:12px; }
-  .events-page .events-card-feed--list .tonight-card__body h3 { font-size:25px; }
-  .events-page .events-card-feed--list .tonight-card__footer { flex-direction:row; border-top:1px solid color-mix(in srgb,var(--c) 25%,transparent); }
-}
-
 /* ── Eventz browse: one date rail, one chip row, tools, drawer (Oct 2026) ── */
 .events-page .events-browse { display: flex; flex-direction: column; gap: 16px; }
 .events-page .events-day-rail { display: flex; gap: 12px; overflow-x: auto; padding: 10px 2px 4px; scrollbar-width: none; }
@@ -263,7 +238,7 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
   font: 700 12px/1 var(--font-display); letter-spacing: .05em; font-variant-numeric: tabular-nums;
 }
 .events-page .events-day-tab[aria-pressed="true"] .events-day-tab__count { background: var(--c); color: var(--day-ink, var(--z-black)); box-shadow: 0 0 0 2px var(--z-oled); }
-.events-page .events-day-tab--more { --c: var(--border-strong); border-style: dashed; color: var(--text-mid); }
+.events-page .events-day-tab--more.pdx-glass-rebind { --c: var(--border-strong); border-style: dashed; color: var(--text-mid); }
 .events-page .events-day-tab--more[aria-pressed="true"] { background: var(--z-oled); border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: none; }
 .events-page .events-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
 @media (max-width: 640px) {
@@ -407,17 +382,13 @@ html body .events-page.board-page--makeover .events-view-toggle__btn[aria-presse
 .event-rail-card--s .day-motif-code { font-size: 12px; left: 9px; top: 10px; }
 .event-rail-card__art:has(.tonight-card__live) .day-motif-code { display: none; }
 
-/* Browse wireframe (mobile first): three control rows, grouped and spaced.
-   Row 1: day tabs with the grid/list/calendar switch at the right end.
-   Row 2: search with Filters and Map as icon buttons at its right end.
+/* Browse wireframe: full-width day tabs, search with Filters and Schedule,
+   then a labeled View all action.
    Type chips live in the Filters drawer. 8px inside the group, 20px under
    the header, 32px before the first rail. */
 .events-page .events-browse { gap: 8px; }
 .events-page .events-day-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .events-page .events-day-row .events-day-rail { flex: 1; min-width: 0; }
-html body .events-page.board-page--makeover .events-day-row .events-view-toggle { flex: none; display: flex; gap: 0; padding: 2px; margin: 0; border-radius: 13px; }
-html body .events-page.board-page--makeover .events-day-row .events-view-toggle__btn { min-width: 36px; width: 36px; min-height: 44px; padding: 0; }
-.events-page .events-day-row .events-view-toggle__btn svg { width: 20px; height: 20px; }
 .events-page .events-browse .board-active-feed__controls { margin: 0; padding: 0; }
 .events-page .events-filter-row { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin: 0; }
 .events-page .events-filter-row .events-filter-search { flex: 1 1 auto; min-width: 0; width: auto; order: 0; }
@@ -435,29 +406,25 @@ html body .events-page.board-page--makeover .events-board-feed .board-active-fee
   .events-page .events-rail-sec--s .events-rail--open { grid-template-columns: repeat(auto-fill, 108px); }
 }
 
-/* Day tabs fade out at their right edge instead of cutting off at the view switch. */
+/* Day tabs keep their full row and fade at the scrolling edge. */
 .events-page .events-day-row .events-day-rail {
   -webkit-mask-image: linear-gradient(90deg, var(--z-black) calc(100% - 28px), transparent);
   mask-image: linear-gradient(90deg, var(--z-black) calc(100% - 28px), transparent);
   padding-right: 24px;
 }
-/* All three switch buttons share one size; the active one only changes color. */
-html body .events-page.board-page--makeover .events-day-row .events-view-toggle__btn { justify-content: center; padding: 0; border-radius: 11px; }
 
-/* Filtered grid: the same big event card as the rails, at its fixed 200px size.
-   Columns are the card width; the row centers. Phones keep two per row where
-   the screen fits two cards (430px wide and up). */
+/* Desktop cards keep their 200px width; phones scale to two equal columns. */
 html body .events-page .events-poster-grid { grid-template-columns: repeat(auto-fill, 200px); grid-auto-rows: auto; justify-content: center; align-items: start; gap: 18px 10px; padding-inline: 0; max-width: none; }
 @media (max-width: 767px) {
-  html body .events-page .events-poster-grid { margin-inline: -6px; width: auto; }
+  html body .events-page .events-poster-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-inline: 0; width: 100%; }
 }
 /* Search row: the field starts on the page edge like the day tabs, headings and
    cards (no 8px inset), with more room above it. */
 html body .events-page .events-filter-row .events-filter-search { margin: 0; }
 html body .events-page .events-browse .board-active-feed__controls { margin-top: 8px; }
-/* Desktop filtered grid: four cards per row. */
+/* Fit as many full-size cards as the available desktop or tablet column allows. */
 @media (min-width: 768px) {
-  html body .events-page .events-poster-grid { grid-template-columns: repeat(4, 200px); gap: 24px 20px; }
+  html body .events-page .events-poster-grid { grid-template-columns: repeat(auto-fill, 200px); gap: 24px 20px; }
 }
 
 /* Day dock: slim pinned copy of the day tabs once the page row scrolls under the
@@ -485,10 +452,6 @@ html.calm-mode .events-page > .events-day-dock { animation: none; }
 .events-page .events-rail-skel__card { display: block; border-radius: 17px; }
 .events-page .events-rail-skel__card--full { width: 200px; height: 403px; }
 .events-page .events-rail-skel__card--m { width: 136px; height: 170px; border-radius: 16px; }
-
-/* Desktop only: a "View all" day tab that opens the full scrolling grid (the original Eventz board). */
-.events-page .events-day-tab--all { display: none; }
-.events-page .events-all-grid { display: none; }
 
 /* ── Desktop layout (1100px and up): sidebar + real time bands. Phones and tablets are untouched. ──
    The feed's own cards keep their fixed sizes; only their placement changes. */
@@ -531,10 +494,28 @@ html.calm-mode .events-page > .events-day-dock { animation: none; }
   .events-page .events-rail-arrow { display: none; }
   /* This week is the same seven days as the day tabs above, so desktop drops it. Phones keep it. */
   .events-page .events-rails > .events-week { display: none; }
-  .events-page .events-day-tab--all { display: flex; min-width: 96px; }
-  /* With View all on, More (filters) steps back to its resting look. */
-  .events-page .events-day-tab--more[data-all="true"][aria-pressed="true"] { border-color: var(--border-strong); color: var(--text-mid); }
-  .events-page .events-all-grid { display: block; flex: 1 1 100%; min-width: 0; }
-  .events-page .events-all-grid .events-poster-grid { padding: 10px 0 0; margin-inline: 0; max-width: none; grid-template-columns: repeat(auto-fill, 200px); gap: 24px 20px; justify-content: start; }
-  .events-page .events-all-grid__more { margin: 28px auto 0; display: flex; }
+}
+
+/* View all lives with search, leaving the date rail entirely for day filters. */
+.events-page .events-browse-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.events-page .events-view-all[aria-pressed="true"] { border-color: var(--room-eventz); background: color-mix(in srgb, var(--room-eventz) 15%, var(--z-black)); color: var(--room-eventz); }
+.events-page .events-tool-btn:focus-visible { outline: 2px solid var(--room-eventz); outline-offset: 3px; }
+
+@media (max-width: 767px) {
+  /* Every event band wraps into the same two-column layout as View all. */
+  .events-page .events-rails > .events-rail-sec:not(.events-week) .events-rail {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 10px; overflow: visible; scroll-snap-type: none; align-items: stretch;
+  }
+  .events-page .events-rails > .events-rail-sec:not(.events-week) .events-rail__item { width: auto; min-width: 0; }
+  .events-page .events-rail-skel__card { width: 100%; height: auto; aspect-ratio: 200 / 403; }
+  .events-page .tonight-card.tonight-card--card { width: 100%; min-width: 0; height: 100%; box-sizing: border-box; }
+  .events-page .tonight-card--card .tonight-card__body { padding-inline: 8px; }
+  .events-page .tonight-card--card .tonight-card__venue > span { min-width: 0; overflow-wrap: anywhere; }
+  .events-page .tonight-card--card .tonight-card__footer { display: grid; grid-template-columns: minmax(0, 1fr) 44px; margin-inline: 8px; }
+  .events-page .tonight-card--card .tonight-card__footer button { min-height: 44px; min-width: 0; padding-inline: 4px; }
+  .events-page .tonight-card--card .tonight-card__view { font-size: 0; gap: 0; }
+  .events-page .tonight-card--card .rail-card-share { top: 8px; right: 8px; width: 44px; min-height: 44px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
+  .events-page .tonight-card--card .tonight-card__live { top: 8px; left: 8px; min-height: 28px; padding-inline: 6px; gap: 4px; font-size: 11px; }
+  .events-page .tonight-card--card .tonight-card__live--count { top: 56px; max-width: calc(100% - 16px); flex-wrap: wrap; }
 }
