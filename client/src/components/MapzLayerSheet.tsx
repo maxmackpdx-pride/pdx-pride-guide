@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
 import { Link } from "wouter";
-import { ChevronRight, SlidersHorizontal } from "lucide-react";
+import { ChevronRight, SlidersHorizontal, X } from "lucide-react";
+import { useDragControls } from "framer-motion";
 import SmoothDrawer from "./ui/smooth-drawer";
 import { NavGlassLayers, navGlassPointer } from "./ui/nav-glass";
 
@@ -27,9 +28,14 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
   const positions = useRef(new Map<MapzLayerId, number>());
   const visited = useRef(new Set<MapzLayerId>());
   const panelId = useId();
+  const dragControls = useDragControls();
   const open = active !== null;
   if (active) visited.current.add(active);
   const activeLayer = layers.find(layer => layer.id === active);
+  const close = useCallback(() => {
+    setActive(null);
+    document.querySelector<HTMLButtonElement>('.mapz-demo-navigation button[title="Layers"]')?.focus({ preventScroll: true });
+  }, [setActive]);
 
   useLayoutEffect(() => {
     if (!active) return;
@@ -47,19 +53,25 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
     window.dispatchEvent(new CustomEvent("zaylist:drawer", { detail: { open: false, restorePrevious: true } }));
   }, []);
   useEffect(() => {
-    const close = () => setActive(null);
     window.addEventListener("zaylist:map-sheet-close", close);
     return () => window.removeEventListener("zaylist:map-sheet-close", close);
-  }, [setActive]);
+  }, [close]);
 
   return <>
     <SmoothDrawer id={panelId} hidden={!open} className="mapz-layer-sheet z-glass pdx-glass-rebind is-open"
+      drag="y" dragControls={dragControls} dragListener={false} dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={{ top: 0, bottom: 0.35 }} dragMomentum={false} dragSnapToOrigin
+      onDragEnd={(_event, info) => { if (info.offset.y > 72 || (info.offset.y > 24 && info.velocity.y > 600)) close(); }}
+      onKeyDown={event => { if (event.key === "Escape") { event.stopPropagation(); close(); } }}
       data-seam="top" data-no-pull-to-refresh onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}
       aria-label="Map controls and sections"
       style={{ "--active-layer-color": activeLayer?.color || "var(--neon-cyan)" } as CSSProperties}>
       <NavGlassLayers />
-      <div className="mapz-layer-sheet__title">
+      <div className="mapz-layer-sheet__title" onPointerDown={event => {
+        if (event.isPrimary && event.button === 0 && !(event.target as Element).closest("button")) dragControls.start(event);
+      }}>
         <span><SlidersHorizontal size={18} aria-hidden="true" />Map controls</span>
+        <button type="button" aria-label="Close map drawer" onClick={close}><X size={22} aria-hidden="true" /></button>
       </div>
       <div className="mapz-layer-sheet__workspace">
         <div className="mapz-layer-sheet__sections" role="group" aria-label="Map sections">
@@ -77,7 +89,7 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
             id={`${panelId}-${layer.id}`} className="mapz-layer-sheet__body" hidden={active !== layer.id}
             aria-label={`${layer.label} options`} onScroll={event => { positions.current.set(layer.id, event.currentTarget.scrollTop); }}>
             <div className="mapz-layer-sheet__panel">
-              <div className="mapz-layer-sheet__brand" aria-hidden="true"><small>In this view</small><img src={LAYER_LOGOS[layer.id]} alt="" /></div>
+              {layer.id !== "places" && <div className="mapz-layer-sheet__brand" aria-hidden="true"><small>In this view</small><img src={LAYER_LOGOS[layer.id]} alt="" /></div>}
               {layer.onToggle && <label className="mapz-layer-visibility">
                 <input type="checkbox" checked={layer.enabled} onChange={layer.onToggle} />Show {layer.label} pins on map
               </label>}
