@@ -12,7 +12,6 @@ import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'framer-m
 import BrowseStatus from "@/components/BrowseStatus";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
-import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import type React from "react";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -20,34 +19,28 @@ import { useRoute, useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 import DirectoryAddPlaceForm from "@/components/DirectoryAddPlaceForm";
 import AuthModal from "@/components/AuthModal";
-import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import { MapPin, Plus, Map, SlidersHorizontal } from "lucide-react";
 import "./PlacezDoorOpener.css";
-import { eventPath } from "@shared/eventSlug";
 import { placePath, placeUrl, slugifyPlaceName } from "@shared/placeSlug";
-import { Button, PlaceCard, SearchInput } from "@/components/ds";
+import { Button, SearchInput } from "@/components/ds";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { isGrandOpeningActive } from "@shared/grandOpening";
 import type { BusinessLocation } from "@shared/businessLocations";
-import { resolveBusinessLocations } from "@shared/businessLocations";
 import {
   DIRECTORY_TYPE_LABELS as TYPE_LABELS,
   isPlacezType,
 } from "@shared/directoryTheme";
 
 import {
-  directoryFallbackLogo,
   resolveDirectoryLogo,
 } from "@/lib/directoryLogos";
 import {
   pushDirectoryRecent,
 } from "@/lib/directoryRecent";
 import PlaceModal from "@/components/PlaceModal";
-import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import "./Directory.css";
 
 export type DirectoryEventSummary = {
@@ -196,7 +189,6 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   );
 
   const { user } = useAuth();
-  const { toast } = useToast();
   const [browseView, setBrowseView] = useState<BrowseView>(() => { const view = new URLSearchParams(window.location.search).get("layout"); return view === "grid" ? "grid" : "browse"; });
   const [placeIntent, setPlaceIntent] = useState(false);
   const [discoveryChosen, setDiscoveryChosen] = useState(() => /[?&](type|category|neighborhood|q|place)=/.test(window.location.search));

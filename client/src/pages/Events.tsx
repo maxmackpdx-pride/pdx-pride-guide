@@ -39,11 +39,8 @@ import EventModal from "../components/EventModal";
 import type { EventModalOriginRect } from "../components/EventModal";
 import Schedule from "@/pages/Schedule";
 import ScheduleCard from "@/components/ScheduleCard";
-import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import type { AttendanceSummary } from "@/lib/attendanceBubble";
-import type { UserEventTalentCard } from "@shared/eventTalent";
 import { eventPath, eventUrl } from "@shared/eventSlug";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
 import { Grid, ChevronDown, ChevronRight, CalendarDays, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
@@ -327,15 +324,6 @@ function readSearchParam(key: string) {
 }
 
 export default function Events() {
-  const [leaving, setLeaving] = useState(false);
-  const navigationTimer = useRef<ReturnType<typeof setTimeout>>();
-  useEffect(() => () => clearTimeout(navigationTimer.current), []);
-  const goToEventAction = (path: string) => {
-    const quiet = window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('calm-mode') || document.documentElement.dataset.calm === 'true';
-    setLeaving(true);
-    clearTimeout(navigationTimer.current);
-    navigationTimer.current = setTimeout(() => setLocation(path), quiet ? 0 : 220);
-  };
   const [now, setNow] = useState(Date.now);
   useEffect(() => {
     const refresh = () => setNow(Date.now());
@@ -436,25 +424,11 @@ export default function Events() {
     return () => window.removeEventListener("popstate", restore);
   }, []);
 
-  const { data: events = [], isLoading, isError, error, refetch } = useQuery<EventListing[]>({
+  const { data: events = [], isLoading, isError, refetch } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
     staleTime: 60_000,
     refetchOnMount: "always",
-  });
-
-  useAttendanceSummariesLive();
-
-  const { data: attendanceSummaries = {} } = useQuery<Record<string, AttendanceSummary>>({
-    queryKey: ["/api/events/attendance-summaries"],
-    queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
-    refetchInterval: 120_000,
-  });
-
-  const { data: myTalentByEvent = {} } = useQuery<Record<string, UserEventTalentCard>>({
-    queryKey: ["/api/events/mine/talent"],
-    queryFn: () => apiRequest("GET", "/api/events/mine/talent").then(r => r.json()),
-    enabled: !!user,
   });
 
   const { data: routeEvent, error: routeError, refetch: refetchRouteEvent } = useQuery<Event>({
@@ -721,9 +695,6 @@ export default function Events() {
     return `${label} · Portland`;
   }, [now]);
 
-  const hasActiveFilters =
-    activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0 || pastView;
-
   const toggleFilter = (f: string) =>
     setActiveFilters(prev => {
       const next = prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f];
@@ -779,7 +750,7 @@ export default function Events() {
     </>
   );
   return (
-    <div className="zine-page events-page board-page board-page--makeover board-shader-page" data-shader-room="eventz" data-leaving={leaving || undefined}>
+    <div className="zine-page events-page board-page board-page--makeover board-shader-page" data-shader-room="eventz">
       <BoardShader room="eventz" />
       {dockTop != null && !drawerOpen && !mapOpen ? (
         <nav className="events-day-dock" aria-label="Pick a day" style={{ top: dockTop } as React.CSSProperties}>

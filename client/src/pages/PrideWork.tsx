@@ -2,7 +2,7 @@ import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { roomToast } from "@/lib/roomToast";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -54,19 +54,6 @@ const gigSchema = z.object({
   gigTime: z.string().optional(),
   businessId: z.number().nullable().optional(),
   imageUrl: z.string().optional(),
-});
-
-const newBusinessSubmissionSchema = z.object({
-  name: z.string().trim().min(2, "Name required"),
-  type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group", "campground"]),
-  description: z.string().trim().min(10, "Description must be at least 10 characters"),
-  address: z.string().trim().max(200).optional(),
-  neighborhood: z.string().trim().max(80).optional(),
-  hours: z.string().trim().max(200).optional(),
-  phone: z.string().trim().max(40).optional(),
-  website: z.string().trim().max(300).optional(),
-  instagram: z.string().trim().max(80).optional(),
-  logoImageUrl: z.string().trim().max(300).optional(),
 });
 
 const DIACRITIC_MARKS = new RegExp(`[${String.fromCharCode(0x0300)}-${String.fromCharCode(0x036f)}]`, "g");
@@ -122,7 +109,7 @@ function GigRail({ posts, kind, selected, onSelect }: {
   return <>
     <Carousel setApi={setApi} opts={{ align: "start", dragFree: true, direction: "rtl" }} className="gigz-rail" dir="rtl">
       <CarouselContent className="gigz-rail__track">
-        {posts.map((post, index) => {
+        {posts.map((post) => {
           const isTalent = kind === "talent";
           const poster = post.displayName || post.name;
           return <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">

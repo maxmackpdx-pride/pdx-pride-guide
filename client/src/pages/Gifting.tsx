@@ -4,7 +4,7 @@ import RoomPlate from "@/components/board/RoomPlate";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, ArrowUpRight, ChevronDown, Gift, MapPin, Plus, Search, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, ChevronDown, Gift, MapPin, Plus, Search } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -70,7 +70,7 @@ function GiftRail({ posts, type, selected, onSelect }: {
   return <>
     <Carousel setApi={setApi} opts={{ align: "start", dragFree: true, direction: "rtl" }} className="gigz-rail" dir="rtl">
       <CarouselContent className="gigz-rail__track">
-        {posts.map((post, index) => <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
+        {posts.map((post) => <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
           {type === "GIFT" ? <button type="button" className="gigz-opportunity giftz-offer" style={{ "--gigz-accent": "var(--room-giftz)" } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gift: ${post.title}`}>
             <ResourceCardMotif name={post.title} category="community" />
             {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" loading="lazy" /> : <span className="giftz-offer__fallback" aria-hidden="true"><Gift size={76} strokeWidth={1.2} /></span>}

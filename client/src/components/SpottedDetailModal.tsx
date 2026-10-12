@@ -5,7 +5,6 @@ import DetailActions from "@/components/DetailActions";
 import { useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
@@ -18,7 +17,7 @@ import "@/components/board/OpenBoardCard.css";
  * post on the board. Shared so the hub feed can open the identical card instead
  * of bouncing to the board page. Self-contained: owns the private-reply flow.
  *
- * Deep-glass SoT §2.4: --glass-card with magenta accent (#FF00CC) + quote motif.
+ * Deep-glass SoT §2.4: --glass-card with room accent (var(--room-mizzed)) + quote motif.
  */
 export type SpottedDetailModalProps = {
   presentation?: "eventz";

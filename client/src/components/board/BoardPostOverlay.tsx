@@ -4,7 +4,6 @@ import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
-import { X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import GiftListingCard, { cardAccent, type GiftingPost } from "./GiftListingCard";
@@ -20,7 +19,7 @@ import "./OpenBoardCard.css";
  * fixed overlay escapes the feed's transformed wrappers.
  *
  * Deep-glass SoT §2.4: same --glass-card recipe as board cards; accent keyed
- * to the post (Gifting #CCFF00 / Gigs var(--board-gigs)).
+ * to the post (Giftz var(--room-giftz) / Gigz var(--board-gigs)).
  */
 const GIG_ACCENT = { POSTING_GIG: "var(--board-gigs)", LOOKING_FOR_WORK: "var(--board-gigs)" } as const;
 

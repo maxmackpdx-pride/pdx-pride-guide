@@ -129,7 +129,7 @@ export const ResourceCardMotif = memo(function ResourceCardMotif(props: { name: 
   if (!motifObserver) motifObserver = new IntersectionObserver(entries => {
    for (const entry of entries) motifVisibility.get(entry.target)?.(entry.isIntersecting);
   }, { rootMargin: "200px" });
-  const card = element.closest<HTMLElement>(".rg-directory-card, .rg-safety-summary, .room-doorways__door, .boards-index__card");
+  const card = element.closest<HTMLElement>(".rg-directory-card, .rg-safety-summary, .room-doorways__door");
   if (card) card.dataset.artVisible = "false";
   motifVisibility.set(element, visible => {
    if (card) card.dataset.artVisible = String(visible);

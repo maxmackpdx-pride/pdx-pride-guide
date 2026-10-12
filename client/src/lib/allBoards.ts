@@ -1,4 +1,4 @@
-import type { HousingPostView, HousingBoardResponse } from "@shared/housing";
+import type { HousingBoardResponse } from "@shared/housing";
 import { FORMING_FLAVOR_LABEL } from "@shared/housing";
 import type { GigPost } from "@/pages/PrideWork";
 import type { GiftingPost } from "@/components/board/GiftListingCard";

@@ -2,7 +2,6 @@ import DetailActions from "@/components/DetailActions";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import {
   HOUSING_REPORT_REASONS,
   HOUSING_REPORT_REASON_LABEL,
