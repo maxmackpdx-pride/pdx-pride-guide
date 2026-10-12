@@ -7,6 +7,7 @@ import { CompactHubLink, CompactNavigation } from "@/components/ui/compact-navig
 import GlitchLogo from "@/components/GlitchLogo";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
+import { useHubPanel } from "@/context/HubPanelContext";
 import AuthModal from "./AuthModal";
 import StankTicketGate from "./StankTicketGate";
 import UserAvatar from "@/components/UserAvatar";
@@ -233,10 +234,11 @@ function HubMemberFolder({
   location: string;
   onClose: () => void;
 }) {
+  const { openHub } = useHubPanel();
   const [open, setOpen] = useState(true);
   const profileEditorOpen = location.startsWith("/dashboard") && new URLSearchParams(window.location.search).get("edit") === "profile";
   const items = [
-    { label: "Feed", href: "/dashboard", icon: House, active: hubActive && hubSection === "feed" },
+    { label: "Hub", href: "/dashboard", icon: House, active: false },
     { label: "Profile", href: "/dashboard?edit=profile", icon: UserRound, active: profileEditorOpen },
     { label: "Events", href: "/dashboard?section=events", icon: CalendarDays, active: hubActive && hubSection === "events" },
     { label: "People", href: "/dashboard?section=people", icon: UsersRound, active: hubActive && hubSection === "people" },
@@ -258,7 +260,7 @@ function HubMemberFolder({
       {open && (
         <div id="profile-member-sections" className="hub-member-folder__children" role="group" aria-label="Member sections">
           {items.map(({ label, href, icon: Icon, active }) => (
-            <Link key={href} href={href} role="menuitem" className={`site-profile-menu__item hub-member-folder__child${active ? " active" : ""}`} onClick={onClose}>
+            label === "Hub" ? <button key={href} type="button" role="menuitem" className="site-profile-menu__item hub-member-folder__child" onClick={event => { onClose(); openHub(event.currentTarget); }}><Icon size={16} aria-hidden /><span>Hub</span></button> : <Link key={href} href={href} role="menuitem" className={`site-profile-menu__item hub-member-folder__child${active ? " active" : ""}`} onClick={onClose}>
               <Icon size={16} strokeWidth={2} aria-hidden />
               <span>{label}</span>
             </Link>

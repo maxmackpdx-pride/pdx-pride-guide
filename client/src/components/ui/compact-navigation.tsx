@@ -7,6 +7,7 @@ import { Home, Info, CalendarDays, MapPin, Map, TreePine, Layers, House, LayoutG
 import { PRIMARY_NAV, navLinkActive, type NavEntry } from "@/lib/siteNav";
 import { MOBILE_NAV_DISMISS, dismissMobileNavOverlays } from "@/lib/mobileNavDismiss";
 import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
+import { useHubPanel } from "@/context/HubPanelContext";
 
 const ICONS: Record<string, LucideIcon> = {
   Home, About: Info, Eventz: CalendarDays, Placez: MapPin, Mapz: Map,
@@ -69,12 +70,13 @@ export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV,
 
 /** Hub shares the destination controls' icon, caption, and accent-rim treatment. */
 export function CompactHubLink({ active, unreadCount = 0, onNavigate, textOnly = false }: { active: boolean; unreadCount?: number; onNavigate: () => void; textOnly?: boolean }) {
-  return <Link href="/dashboard" className={`znav-control znav-hub pdx-glass-rebind${textOnly ? " znav-control--text" : ""}${active ? " is-active" : ""}`} data-accent="cyan" aria-current={active ? "page" : undefined} aria-label={unreadCount > 0 ? `Hub, ${unreadCount} unread messages` : "Hub"} onClick={onNavigate}>
+  const { isOpen, hasNewActivity, toggleHub } = useHubPanel();
+  return <button type="button" className={`znav-control znav-hub pdx-glass-rebind${textOnly ? " znav-control--text" : ""}${isOpen ? " is-active" : ""}`} data-accent="cyan" data-hub-trigger aria-expanded={isOpen} aria-haspopup="dialog" aria-label={hasNewActivity ? "Hub, new activity" : "Hub"} onClick={event => { onNavigate(); toggleHub(event.currentTarget); }}>
     <ButtonGlassOptics />
-    {!textOnly && <span className="znav-icon-row"><PanelsTopLeft size={20} strokeWidth={1.8} aria-hidden="true" />{unreadCount > 0 && <span className="znav-hub-badge" aria-hidden="true">{unreadCount > 99 ? "99+" : unreadCount}</span>}</span>}
+    {!textOnly && <span className="znav-icon-row"><PanelsTopLeft size={20} strokeWidth={1.8} aria-hidden="true" /></span>}
     <span className="znav-caption" aria-hidden="true">Hub</span>
-    {textOnly && unreadCount > 0 && <span className="znav-hub-badge" aria-hidden="true">{unreadCount > 99 ? "99+" : unreadCount}</span>}
-  </Link>;
+    {hasNewActivity && <span className="hub-trigger-dot" aria-hidden="true" />}
+  </button>;
 }
 
 /** The same caption rail scrolls within the phone header, below account controls. */

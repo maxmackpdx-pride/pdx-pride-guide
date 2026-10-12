@@ -8,6 +8,7 @@ import BrowseScrollRestoration from "./components/BrowseScrollRestoration";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
 import { InboxSheetProvider } from "./context/InboxSheetContext";
+import { HubPanelProvider } from "./context/HubPanelContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import CalmAccountSync from "./components/CalmAccountSync";
 import Nav from "./components/Nav";
@@ -271,12 +272,14 @@ export default function App() {
           <CommunityStandardsGate />
           <Router>
             <InboxSheetProvider>
+              <HubPanelProvider>
               <BrowseScrollRestoration />
               <AnalyticsTracker />
               <PrideGlowNudge />
               <RiverBratsIntroOnBeaches />
               <AppLayout />
               <Toaster />
+              </HubPanelProvider>
             </InboxSheetProvider>
           </Router>
         </AuthProvider>

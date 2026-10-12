@@ -162,7 +162,7 @@ export default function OutzPlace() {
     mutationFn: (next: boolean) => apiRequest(next ? "POST" : "DELETE", "/api/outz/follow", { placeId }).then(r => r.json() as Promise<{ isFollowing: boolean }>),
     onSuccess: data => {
       queryClient.setQueryData(followKey, data);
-      queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
       toast({ title: data.isFollowing ? "Following destination" : "Destination unfollowed", description: data.isFollowing ? "New wall posts will appear in your Hub." : undefined });
     },
     onError: err => toast({ title: "Couldn’t update follow", description: parseApiError(err, "Try again in a moment."), variant: "destructive" }),

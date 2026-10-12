@@ -53,21 +53,21 @@ export default function Community({ params }: { params: { communitySlug: string 
   const refresh = async () => { await queryClient.invalidateQueries({ queryKey: [key] }); await queryClient.invalidateQueries({ queryKey: ["/api/communities"] }); };
   const membership = useMutation({
     mutationFn: async () => community.data?.viewerRole ? apiRequest("DELETE", `${key}/membership`) : apiRequest("POST", `${key}/join`, {}),
-    onSuccess: async () => { await refresh(); await queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); }, onError: err => setError(parseApiError(err, "Membership could not be updated.")),
+    onSuccess: async () => { await refresh(); await queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] }); }, onError: err => setError(parseApiError(err, "Membership could not be updated.")),
   });
   const follow = useMutation({
     mutationFn: async (following: boolean) => apiRequest("PUT", `${key}/follow`, { following }),
-    onSuccess: async () => { setError(""); await refresh(); await queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); },
+    onSuccess: async () => { setError(""); await refresh(); await queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] }); },
     onError: err => setError(parseApiError(err, "Feed following could not be updated.")),
   });
   const post = useMutation({
     mutationFn: () => apiRequest("POST", `${key}/posts`, { title: postTitle, body: postBody, mediaUrl: postMediaUrl }),
-    onSuccess: async () => { setPostTitle(""); setPostBody(""); setPostMediaUrl(""); setComposerOpen(false); setError(""); setSort("new"); await refresh(); await queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); },
+    onSuccess: async () => { setPostTitle(""); setPostBody(""); setPostMediaUrl(""); setComposerOpen(false); setError(""); setSort("new"); await refresh(); await queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] }); },
     onError: err => setError(parseApiError(err, "Post could not be published.")),
   });
   const act = useMutation({
     mutationFn: async ({ method, path, body }: { method: "POST" | "PATCH" | "DELETE"; path: string; body?: any }) => apiRequest(method, `${key}${path}`, body),
-    onSuccess: async (_response, action) => { if (action.path.endsWith("/report")) toast({ title: "Report sent", description: "Community moderators will review it." }); setError(""); setNotice(action.path.endsWith("/report") ? "Report sent. Community moderators will review it." : action.path.endsWith("/replies") ? "Reply posted." : "Changes saved."); setReplyTo(null); setReplyBody(""); setEditPostId(null); setReportPostId(null); setReportReason(""); await refresh(); await queryClient.invalidateQueries({ queryKey: [`${key}/manage`] }); await queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); },
+    onSuccess: async (_response, action) => { if (action.path.endsWith("/report")) toast({ title: "Report sent", description: "Community moderators will review it." }); setError(""); setNotice(action.path.endsWith("/report") ? "Report sent. Community moderators will review it." : action.path.endsWith("/replies") ? "Reply posted." : "Changes saved."); setReplyTo(null); setReplyBody(""); setEditPostId(null); setReportPostId(null); setReportReason(""); await refresh(); await queryClient.invalidateQueries({ queryKey: [`${key}/manage`] }); await queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] }); },
     onError: err => setError(parseApiError(err, "Community action could not be completed.")),
   });
   const vote = useMutation({

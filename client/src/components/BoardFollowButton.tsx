@@ -37,7 +37,8 @@ export default function BoardFollowButton({ board }: { board: FollowableRoom }) 
     onSuccess: data => {
       queryClient.setQueryData(queryKey, data);
       queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
-      toast({ title: data.isFollowing ? `Following ${boardName}` : `Unfollowed ${boardName}`, description: data.isFollowing ? board === "rezources" ? "ReZources is in your followed sections." : "New posts appear in your Hub’s Following boards feed." : undefined });
+      queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
+      toast({ title: data.isFollowing ? `Following ${boardName}` : `Unfollowed ${boardName}`, description: data.isFollowing ? "New updates appear in your Hub’s Following feed." : undefined });
     },
     onError: () => toast({ title: "Could not update follow", description: "Try again in a moment.", variant: "destructive" }),
   });

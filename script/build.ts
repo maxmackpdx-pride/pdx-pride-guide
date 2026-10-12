@@ -4,6 +4,7 @@ import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
 import { rm, readFile, readdir, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { writeDesignComponentSourceEvidence } from "./design-component-source-evidence";
 import { writeOutzideTokens } from "./build-outzide-tokens.mjs";
 import { assertNav } from "./nav-tripwire";
@@ -78,6 +79,7 @@ async function buildAll() {
     outfile: "dist/index.cjs",
     define: {
       "process.env.NODE_ENV": '"production"',
+      __RESOURCE_DIRECTORY_REVISION__: JSON.stringify(createHash("sha256").update(await readFile("client/src/lib/resourcesData.ts")).digest("hex")),
     },
     minify: true,
     external: externals,

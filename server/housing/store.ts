@@ -430,6 +430,8 @@ export type ListOpts = {
   savedOnly?: boolean;
   includeHidden?: boolean;
   limit?: number;
+  /** Internal Hub history: each published post keeps its own chronological entry. */
+  feedMode?: boolean;
   /** Tag ids. A post must carry every one of them (AND, not OR). */
   tags?: string[];
   /** Seeded @hausing_demo posts only. Used for empty-board liquidity. */
@@ -495,7 +497,7 @@ export function listHousingPosts(db: Database, opts: ListOpts = {}): HousingPost
       `SELECT p.* FROM housing_posts p
         WHERE ${where.join(" AND ")}
         ORDER BY COALESCE(p.updated_at, p.created_at) DESC, p.id DESC
-        LIMIT ${fetchLimit}`,
+        ${opts.feedMode ? "" : `LIMIT ${fetchLimit}`}`,
     )
     .all(...args) as PostRow[];
   let shaped = shapePosts(db, rows, { viewerId: opts.viewerId });
@@ -505,7 +507,7 @@ export function listHousingPosts(db: Database, opts: ListOpts = {}): HousingPost
 
   // Saved filter and single-type filter: show everything the query matched.
   // Main board: condense same-author same-type duplicates.
-  if (!opts.savedOnly && !opts.type) {
+  if (!opts.savedOnly && !opts.type && !opts.feedMode) {
     const seen = new Set<string>();
     shaped = shaped.filter((p) => {
       const key = `${p.author?.userId ?? 0}:${p.type}`;
@@ -515,7 +517,7 @@ export function listHousingPosts(db: Database, opts: ListOpts = {}): HousingPost
     });
   }
 
-  return shaped.slice(0, limit);
+  return opts.feedMode ? shaped : shaped.slice(0, limit);
 }
 
 export function getHousingPost(db: Database, id: number, viewerId?: number | null): HousingPostView | null {

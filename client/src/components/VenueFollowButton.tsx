@@ -43,6 +43,8 @@ export default function VenueFollowButton({
       // Hub People → Following includes places (business_follows)
       queryClient.invalidateQueries({ queryKey: ["/api/users/me/people"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users/me/follow-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
       toast({ title: data.isFollowing ? "Following listing" : "Unfollowed listing", duration: 1800 });
     },
     onError: (err: Error) => {

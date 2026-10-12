@@ -189,14 +189,16 @@ export default function EventModal({
   onClose,
   onEventUpdated,
   originRect = null,
+  initialSection = "details",
 }: {
   event: Event;
   onClose: () => void;
   onEventUpdated?: (event: Event) => void;
   originRect?: EventModalOriginRect | null;
+  initialSection?: "details" | "attendance";
 }) {
   if (!event || typeof event.id !== "number") return null;
-  return <EventModalInner event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} />;
+  return <EventModalInner event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} initialSection={initialSection} />;
 }
 
 function EventModalInner({
@@ -204,11 +206,13 @@ function EventModalInner({
   onClose,
   onEventUpdated,
   originRect,
+  initialSection,
 }: {
   event: Event;
   onClose: () => void;
   onEventUpdated?: (event: Event) => void;
   originRect: EventModalOriginRect | null;
+  initialSection: "details" | "attendance";
 }) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -230,7 +234,7 @@ function EventModalInner({
   const [showStickyCta, setShowStickyCta] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [socialOpen, setSocialOpen] = useState(false);
+  const [socialOpen, setSocialOpen] = useState(initialSection === "attendance");
   const [socialTab, setSocialTab] = useState<"attendance" | "missed">("attendance");
   const [editing, setEditing] = useState(false);
   const [eventForm, setEventForm] = useState<EventEditFormState | null>(null);
@@ -239,6 +243,11 @@ function EventModalInner({
   const [inviteFollowers, setInviteFollowers] = useState(true);
   const [inviteNote, setInviteNote] = useState("");
   const socialTabsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (initialSection !== "attendance") return;
+    const frame = requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ block: "start", behavior: "auto" }));
+    return () => cancelAnimationFrame(frame);
+  }, [event.id, initialSection]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const posterImageRef = useRef<HTMLImageElement>(null);
   const heroRef = useRef<HTMLElement>(null);

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
+import { useHubPanel } from "@/context/HubPanelContext";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
@@ -11,38 +12,11 @@ import {
 } from "@/lib/mobileNavDismiss";
 import { EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
-import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
 import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
 import { CalendarDays, MapPin, MessageCircle, PanelsTopLeft } from "lucide-react";
 
 const MOBILE_ICON = 19;
-
-const HUB_SHEET_LINKS = [
-  { section: "feed", label: "Feed", icon: <path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z" /> },
-  { section: "profile", label: "Profile", icon: <><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></> },
-  { section: "events", label: "Events", icon: <><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M3 9h18M8 2v4M16 2v4" /></> },
-  { section: "people", label: "People", icon: <><circle cx="9" cy="8" r="3.2" /><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5S15.5 16.5 15.5 20" /><path d="M16.5 8.5a3 3 0 1 1 0-5.9" /><path d="M18 14.3c2 .4 3.5 1.9 3.5 4.2" /></> },
-  { section: "settings", label: "Settings", icon: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9 2 2 0 1 1-2.8 2.8 1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6 2 2 0 1 1-4 0 1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3 2 2 0 1 1-2.8-2.8 1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1 2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9 2 2 0 1 1 2.8-2.8 1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6 2 2 0 1 1 4 0 1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3 2 2 0 1 1 2.8 2.8 1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1 2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z" /></> },
-] as const;
-
-function TabIcon({ children }: { children: ReactNode }) {
-  return (
-    <svg
-      width={MOBILE_ICON}
-      height={MOBILE_ICON}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2.2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      {children}
-    </svg>
-  );
-}
 
 function tabClass(
   active: boolean,
@@ -56,14 +30,14 @@ export default function MobileBottomNav() {
   const { user } = useAuth();
   const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
-  const [hubOpen, setHubOpen] = useState(false);
+  const { isOpen: hubOpen, toggleHub, closeHub } = useHubPanel();
   const [showAuth, setShowAuth] = useState(false);
   const overlayOpen = hubOpen || open || showAuth;
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
-    if (except !== "hub-sheet") setHubOpen(false);
+    if (except !== "hub-panel") closeHub();
     if (except !== "inbox") closeSheet();
-  }, [closeSheet]);
+  }, [closeSheet, closeHub]);
 
   useEffect(() => {
     const onDismiss = (event: Event) => {
@@ -74,31 +48,11 @@ export default function MobileBottomNav() {
     return () => window.removeEventListener(MOBILE_NAV_DISMISS, onDismiss);
   }, [closeLocalSheets]);
 
-  useEffect(() => {
-    setHubOpen(false);
-  }, [location]);
-
-  useEffect(() => {
-    const close = () => setHubOpen(false);
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        close();
-      }
-    };
-    const desktop = window.matchMedia("(min-width: 960px)");
-    const onResize = () => { if (desktop.matches) close(); };
-    window.addEventListener("keydown", onKey);
-    desktop.addEventListener("change", onResize);
-    return () => { window.removeEventListener("keydown", onKey); desktop.removeEventListener("change", onResize); };
-  }, []);
-
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
-  const hubActive = navLinkActive(location, "/dashboard");
+  const hubActive = hubOpen;
   const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
   const placesActive = navLinkActive(location, "/directory");
   const activeIndex = open || showAuth ? 4 : hubActive ? 2 : placesActive ? 1 : mapActive ? 3 : eventsActive ? 0 : -1;
-  const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
-  const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
 
   const dismissExcept = (except?: MobileNavDismissDetail["except"]) => {
     closeLocalSheets(except);
@@ -126,78 +80,6 @@ export default function MobileBottomNav() {
 
   return createPortal(
     <>
-      {hubOpen && (
-        <>
-          <div className="hub-more-backdrop" onClick={() => setHubOpen(false)} aria-hidden="true" />
-          <div className="hub-sheet pdx-liquid-overlay" role="dialog" aria-label="Your Hub">
-            <span className="hub-sheet__grip" aria-hidden="true" />
-            <div className="hub-sheet__body">
-              <div className="hub-sheet__switch" role="group" aria-label="Hub account">
-                <Link
-                  href="/dashboard"
-                  className="hub-sheet__switch-btn is-on"
-                  onClick={() => setHubOpen(false)}
-                >
-                  Member
-                </Link>
-                {isAdmin ? (
-                  <Link
-                    href="/dashboard?section=admin"
-                    className="hub-sheet__switch-btn"
-                    onClick={() => setHubOpen(false)}
-                  >
-                    Admin
-                  </Link>
-                ) : (
-                  <span className="hub-sheet__switch-btn is-off" aria-disabled="true">
-                    Admin
-                  </span>
-                )}
-              </div>
-
-              <div className="hub-sheet__kicker">Your Hub</div>
-              <div className="hub-sheet__list">
-                {HUB_SHEET_LINKS.map(row => {
-                  const current = hubActive && hubSection === row.section;
-                  return (
-                    <Link
-                      key={row.section}
-                      href={`/dashboard?section=${row.section}`}
-                      className={`hub-sheet__row${current ? " is-current" : ""}`}
-                      aria-current={current ? "page" : undefined}
-                      onClick={() => setHubOpen(false)}
-                    >
-                      <TabIcon>{row.icon}</TabIcon>
-                      <span className="hub-sheet__row-label">{row.label}</span>
-                    </Link>
-                  );
-                })}
-                <button
-                  type="button"
-                  className="hub-sheet__row"
-                  onClick={() => {
-                    setHubOpen(false);
-                    dismissExcept("inbox");
-                    openSheet();
-                  }}
-                >
-                  <TabIcon>
-                    <path d="M3 8l7.5 5a3 3 0 0 0 3 0L21 8" />
-                    <rect x="3" y="5" width="18" height="14" rx="2" />
-                  </TabIcon>
-                  <span className="hub-sheet__row-label">Messages</span>
-                  {attentionCount > 0 && (
-                    <span className="hub-sheet__row-badge">
-                      {attentionCount > 9 ? "9+" : attentionCount}
-                    </span>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
       <MobileDockShell activeIndex={activeIndex} overlayOpen={overlayOpen} location={location} attentionCount={user ? attentionCount : 0}>
           <Link
             href="/events"
@@ -224,18 +106,12 @@ export default function MobileBottomNav() {
             <span className="znav-caption">Placez</span>
           </Link>
 
-          <Link
-            href="/dashboard"
-            className={`${tabClass(hubActive, "cyan")} znav-mapz`}
-            data-accent="cyan"
-            aria-label="Hub"
-            title="Hub"
-            aria-current={hubActive ? "page" : undefined}
-            onClick={handleNavLink}
-          >
+          <button type="button" className={`${tabClass(hubActive, "cyan")} znav-mapz`} data-accent="cyan" data-hub-trigger
+            aria-label="Hub" title="Hub" aria-expanded={hubOpen} aria-haspopup="dialog"
+            onClick={event => { toggleHub(event.currentTarget); }}>
             <span className="znav-icon-row"><PanelsTopLeft size={22} strokeWidth={1.8} aria-hidden="true" /></span>
             <span className="znav-caption">Hub</span>
-          </Link>
+          </button>
 
           <Link
             href="/map"

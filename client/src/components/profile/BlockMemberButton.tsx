@@ -18,6 +18,8 @@ export default function BlockMemberButton({ username, blocked }: { username: str
     onSuccess: (result) => {
       if (!result) return;
       void queryClient.invalidateQueries({ queryKey: ["profile", username] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
       void queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
       void queryClient.invalidateQueries({ queryKey: ["/api/messages/sent"] });
       toast({

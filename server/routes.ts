@@ -4362,7 +4362,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       return res.status(status).json({ error: meta.error });
     }
     const replies =
-      meta.mode === "thread" ? storage.listContentReplies(type, id, 20) : [];
+      meta.mode === "thread" ? storage.listContentReplies(type, id, 20, req.session?.userId) : [];
     res.json({
       replies,
       count: meta.count,

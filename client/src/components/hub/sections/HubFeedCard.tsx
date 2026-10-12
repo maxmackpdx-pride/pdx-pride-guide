@@ -23,6 +23,7 @@ import FeedEventDeck from "./FeedEventDeck";
 import RedgifsMedia from "@/components/RedgifsMedia";
 import HubFeedBoardFace from "./HubFeedBoardFace";
 import "./hub-feed-layout.css";
+import HubCompactPost from "../HubCompactPost";
 
 function stopCardNav(e: MouseEvent) {
   e.stopPropagation();
@@ -30,6 +31,7 @@ function stopCardNav(e: MouseEvent) {
 
 type Props = {
   item: HubFeedItem;
+  compact?: boolean;
 };
 
 type VoteResponse = {
@@ -71,7 +73,7 @@ function openLabelFor(item: HubFeedItem): string {
   }
 }
 
-export default function HubFeedCard({ item }: Props) {
+export default function HubFeedCard({ item, compact = false }: Props) {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -80,6 +82,7 @@ export default function HubFeedCard({ item }: Props) {
   const [spottedOpen, setSpottedOpen] = useState(false);
   const [boardOpen, setBoardOpen] = useState(false);
   const [modalEvent, setModalEvent] = useState<Event | null>(null);
+  const [attendanceFirst, setAttendanceFirst] = useState(false);
   const [openingEventId, setOpeningEventId] = useState<number | null>(null);
   const [followOverride, setFollowOverride] = useState<boolean | null>(null);
   const [voteOverride, setVoteOverride] = useState<VoteResponse | null>(null);
@@ -166,13 +169,14 @@ export default function HubFeedCard({ item }: Props) {
     },
   });
 
-  const openEventInPlace = async (eventId: number) => {
+  const openEventInPlace = async (eventId: number, attendance = false) => {
     if (openingEventId != null) return;
     setOpeningEventId(eventId);
     try {
       const res = await apiRequest("GET", `/api/events/${eventId}`);
       if (!res.ok) throw new Error("Event not found");
       const full = (await res.json()) as Event;
+      setAttendanceFirst(attendance);
       setModalEvent(full);
     } catch {
       const embed = eventRowsForItem(item).find((e) => e.id === eventId);
@@ -438,7 +442,7 @@ export default function HubFeedCard({ item }: Props) {
     </div>
   );
 
-  const body = (
+  const legacyBody = (
     <article
       className={cardClass}
       style={accentStyle}
@@ -483,6 +487,15 @@ export default function HubFeedCard({ item }: Props) {
       )}
     </article>
   );
+
+  const body = compact ? <>
+    <HubCompactPost item={item} when={when} events={bundledEvents}
+      openControl={ctaBlock || openControl} onOpenEvent={openEventInPlace}
+      engagement={engagement} onVote={value => voteMutation.mutate(value)} votePending={voteMutation.isPending}
+      isFollowing={isFollowing} onToggleFollow={() => followMutation.mutate(!isFollowing)} />
+    {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
+    {modalEvent && <EventModal event={modalEvent} initialSection={attendanceFirst ? "attendance" : "details"} onClose={() => setModalEvent(null)} onEventUpdated={event => { setModalEvent(event); void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); }} />}
+  </> : legacyBody;
 
   if (isSpotted) {
     return (

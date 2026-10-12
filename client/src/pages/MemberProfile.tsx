@@ -116,6 +116,8 @@ export default function MemberProfile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", username] });
+      queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
       toast({
         title: data?.isFollowing ? "Unfollowed" : "Following",
         duration: 2000,

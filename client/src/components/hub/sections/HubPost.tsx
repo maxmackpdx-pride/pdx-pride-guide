@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ds";
 import ImageUploader from "@/components/ImageUploader";
@@ -30,11 +31,15 @@ type Props = {
   initialType?: PostType;
   /** When rendered inline inside the feed, hide the page-style header. */
   embedded?: boolean;
+  compact?: boolean;
+  onPosted?: () => void;
+  onCancel?: () => void;
 };
 
-export default function HubPost({ initialType = "text", embedded = false }: Props) {
+export default function HubPost({ initialType = "text", embedded = false, compact = false, onPosted, onCancel }: Props) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [postType, setPostType] = useState<PostType>(initialType === "photo" ? "photo" : "text");
   const [body, setBody] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
@@ -43,9 +48,10 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
   const [postAs, setPostAs] = useState<PostAs>("self");
   const [identityEventId, setIdentityEventId] = useState<number | "">("");
   const [venueId, setVenueId] = useState<number | "">("");
+  useEffect(() => { setPostType(initialType); }, [initialType]);
 
   const optionsQuery = useQuery<PostOptions>({
-    queryKey: ["/api/hub/feed/post-options"],
+    queryKey: ["/api/hub/feed/post-options", user?.id ?? "guest"],
     queryFn: async () => {
       const r = await fetch("/api/hub/feed/post-options", { credentials: "include" });
       if (!r.ok) throw new Error("Could not load post options");
@@ -54,13 +60,13 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
   });
 
   const mineQuery = useQuery<HubFeedPost[]>({
-    queryKey: ["/api/hub/feed/posts/mine"],
+    queryKey: ["/api/hub/feed/posts/mine", user?.id ?? "guest"],
     queryFn: async () => {
       const r = await fetch("/api/hub/feed/posts/mine", { credentials: "include" });
       if (!r.ok) throw new Error("Could not load your posts");
       return r.json();
     },
-    enabled: optionsQuery.data?.canPost === true,
+    enabled: !compact && optionsQuery.data?.canPost === true,
   });
 
   const hostedEvents = optionsQuery.data?.hostedEvents ?? [];
@@ -107,7 +113,9 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
       setVenueId("");
       queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/posts/mine"] });
       queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
       toast({ title: "Posted to the scene feed" });
+      onPosted?.();
     },
     onError: (err: Error) => {
       toast({ title: "Could not post", description: err.message, variant: "destructive" });
@@ -127,6 +135,7 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/posts/mine"] });
       queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
       toast({ title: "Post removed" });
     },
     onError: (err: Error) => {
@@ -181,6 +190,7 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
           <div className="kick hub-post__kick">Post to the feed</div>
         )}
         <div className="hub-post__tabs">
+          {onCancel && <button type="button" className="hub-reader__cancel" onClick={onCancel}>Cancel</button>}
           {POST_TYPES.map((pt) => (
             <button
               key={pt.key}
@@ -211,6 +221,7 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
         <textarea
           className="fin hub-post__textarea"
           rows={3}
+          aria-label={postType === "photo" ? "Photo caption" : "Your Hub post"}
           placeholder={PROMPTS[postType]}
           value={body}
           onChange={(e) => setBody(e.target.value)}
