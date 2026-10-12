@@ -69,7 +69,7 @@
 
 /* Only the flyer half of each fanned card shows; its copy would sit under the label. */
 .events-week .week-day__fan .event-rail-card__shade { visibility: hidden; }
-/* No time line on fanned cards, so their flyers line up with the day card's top. */
+/* Fanned cards show only their flyer; the time line under them would sit on the label. */
 .events-week .week-day__fan .event-rail-card__meta { display: none; }
 
 /* Events slide out of the day card onto the rail. */
