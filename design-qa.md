@@ -1,97 +1,70 @@
-# Mapz rising layer drawer and Houz
+# Placez and ReZources — Eventz design review
 
-final result: passed for staged functional preview; mobile screenshot comparison remains a follow-up
+final result: passed
 
-## Scope and source
+## Reference and scope
 
-- Approved visual: `/workspace/scratch/0de7547360b8/generated_images/exec-9bf35c4a-c320-474e-b72c-d741e10d3994.png`.
-- Source image opened and inspected: 853 × 1844 pixels, portrait. Intended density-normalized comparison: approximately 393 × 850 CSS pixels.
-- Implementation: existing `/map` and `/map-demo` routes, branch `feature/mapz-houz-rising-drawer`.
-- Staged implementation: `https://hauz-mapz-7aec2011bf59823b.up.railway.app/map-demo` in an isolated Railway Sandbox.
-- Browser viewport verified at 1363 × 936. The browser harness cannot resize its managed viewport, so the 393 × 850 screenshot comparison remains outstanding.
-- Intended state: Eventz open, Houz fourth, navigation dock collapsed, map controls visible. Also verify every layer, compact dock states, and desktop/tablet widths.
-- No production deployment or push has been performed.
+Eventz is the primary visual reference, as requested. Existing design-system tokens, brand assets, accessible controls, and detail interfaces fill the remaining decisions. This is a local product change; Eventz, navigation, Foundation, and production are unchanged.
 
-## Implemented
+Source visual truth: `/Users/tuckercasey/Projects/Zaylist/Website branches/placez-rezources-eventz/.local/design-review/eventz-desktop.png` (local `/events`, the unchanged Eventz implementation at `76b046af`).
 
-- Rising bottom sheet, four continuous layer controls, persistent View more and collapse actions, compact rail between the Z dock and right-hand map controls.
-- Houz replaces ZayDark. Housing has its own visibility and All Houz / Rooms / Looking / Forming / Rentals filters. Housing is no longer part of Boards.
-- All four panels use existing APIs and existing product images, logos, fonts, and icon components. Mock event names, times, and artwork were not substituted for real records.
-- First five matching event results include poster, venue, date/time and a working event-detail action. RSVPs remain available in a secondary disclosure.
-- Event filters now drive both results and event pins. Tonight means Portland's current day, Soon means live or starting within 90 minutes. Place categories no longer silently hide event pins.
-- Each panel retains a separate Show pins checkbox, loading/error/empty states, and its existing destination for View more.
-- Escape restores focus to the active layer control. Handle supports tap and downward swipe. Switching layers resets the result scroll. Closing retains the collapsed navigation dock; restoring navigation now keeps the sheet open and lifts it above the dock. Scrolling sheet content does not expand navigation over it.
-- Housing/board marker keys are namespaced, avoiding collisions between equal numeric ids from different APIs. Null/empty listing coordinates are not converted to zero.
+Implementation captures:
+- `/Users/tuckercasey/Projects/Zaylist/Website branches/placez-rezources-eventz/.local/design-review/placez-desktop.png`
+- `/Users/tuckercasey/Projects/Zaylist/Website branches/placez-rezources-eventz/.local/design-review/rezources-desktop.png`
+- `/Users/tuckercasey/Projects/Zaylist/Website branches/placez-rezources-eventz/.local/design-review/placez-mobile.png`
+- `/Users/tuckercasey/Projects/Zaylist/Website branches/placez-rezources-eventz/.local/design-review/rezources-mobile.png`
+- `/Users/tuckercasey/Projects/Zaylist/Website branches/placez-rezources-eventz/.local/design-review/placez-mobile-grid.png`
 
-## Findings
+Full comparison: `/Users/tuckercasey/Projects/Zaylist/Website branches/placez-rezources-eventz/.local/design-review/comparison.png`.
+Focused controls, sidebar, typography, and card comparison: `/Users/tuckercasey/Projects/Zaylist/Website branches/placez-rezources-eventz/.local/design-review/comparison-detail.png`.
 
-- No P0, P1, or P2 drawer defects found in the staged functional pass.
-- The managed test browser has WebGL disabled. The application handled that expected environment limitation by presenting its lightweight Leaflet map, with working OpenStreetMap/CARTO tiles and controls.
-- Browser-extension metadata errors were unrelated to the application. No drawer-specific runtime error was observed.
+Desktop captures use the same 1280px CSS width, 900px viewport, and explicit 1280 × 1000px capture region. Each image is 1280 × 1000px; the combined comparison is 3840 × 1000px. No density rescaling was applied to the saved evidence. Mobile captures are 390 × 844px at a 390 × 844px CSS viewport. Default browse state, dark theme, signed-out local preview with seeded content. Category data deliberately differs from Eventz time-based content; this is a shared composition, not an identical content clone.
+
+## Findings and iteration history
+
+No actionable P0/P1/P2 findings remain.
+
+1. Header wordmarks initially appeared too small. Changed intrinsic logo sizing while retaining the source family assets and compact header. Initial evidence: `/Users/tuckercasey/Projects/Zaylist/Website branches/placez-rezources-eventz/.local/design-review/placez-initial.png`; post-fix evidence: both final desktop captures and the combined comparison.
+2. Some organization logos needed their declared light surface. Preserved each resource's existing `logoSurface` setting; verified the final ReZources capture, including Oregon State Bar.
+3. At 390px, the original grid minimum produced one column. Reduced the flexible minimum from 160px to 150px. Post-fix evidence: `placez-mobile-grid.png` shows two cards without horizontal page overflow.
+4. Resource drawers now focus their close button when opened and retain the existing focus-restoration handlers. Confirmed the active element is inside the Prism Health dialog. The 21st checker flags the two explicit drawer autofocus props; these are intentional modal focus management, not page-load autofocus.
+
+The initial development preview's missing font requests were caused by a shared dependency symlink and Vite file restrictions. Final evidence uses the completed production build with loaded fonts. That preview repair is not counted as a design iteration.
 
 ## Required fidelity surfaces
 
-- Typography: existing Barlow Condensed display face and Inter body face reused. Large active-layer title, compact uppercase rows. Browser wrapping and rendering remain unverified.
-- Spacing/layout: full-width rising mobile sheet, safe-area-aware footer, independently scrolling results, compact rail avoids fixed dock/control columns. Desktop breakpoint matches the 960px mobile navigation boundary. Real viewport overlap and five-row density require browser verification.
-- Colors/tokens: approved magenta Eventz, cyan Placez/Houz, purple Boards; existing glass optical layers retained. Actual contrast and composited appearance require capture.
-- Image quality: existing event posters, housing photos, directory logos and supplied fallback assets reused. Existing map renderer and waypoint imagery preserved. Actual image loading/crops remain unverified.
-- Copy/content: approved four labels implemented; fictional reference event records replaced with API records. Location note distinguishes neighborhood housing pins from exact addresses. Empty states and retry controls supplied.
+- **Typography:** Existing Barlow Condensed display, Barlow body, and monospaced metadata render successfully. Bold uppercase controls and lane headings follow Eventz. Long organization names remain readable instead of truncating identifying service names.
+- **Layout:** Shared frame, compact identity, category/count dock, search row, 248px desktop sidebar, 136px compact cards, and two-card lanes follow the Eventz composition. Mobile uses horizontal lanes and a two-column flexible grid. More descriptive resource categories may wrap onto two lines; result counts add a small vertical offset. These are accepted content adaptations.
+- **Colors:** Existing semantic category colors and glass tokens are retained. Saturated category text is mixed with the existing high-emphasis text color for legibility. Selected states use a filled category tab; view controls use the source cyan accent.
+- **Imagery:** Existing family marks, venue logos, organization logos, fallback logos, and resource motifs are reused. Logo backgrounds are preserved where required. No replacement brand artwork or fabricated organization assets were introduced.
+- **Copy/content:** Search, category counts, place follow actions, maps, contact details, resource services, talk options, and safety information remain available. The old introductory gates are replaced by immediate browsing, as in Eventz.
 
-## Comparison history
+## Interaction checks
 
-The staged desktop state was inspected in-browser. Eventz, Placez, Boards, and Houz each opened their dedicated panel; Houz displayed four real records and All Houz / Rooms / Looking / Forming / Rentals controls. The compact state restored after closing. No pixel-match claim is made for the still-outstanding 393 × 850 capture.
+- Place search, category filters, empty state/reset, grid/list/browse controls, detail modal, and add-place authentication entry passed.
+- Place category plus list layout survived reload (`type=cafe&layout=list`, six seeded results).
+- Resource category plus grid layout survived reload (`cat=arts&layout=grid`, sixteen results).
+- Resource search, empty state/reset, expanded lane, Prism Health detail, talk options, and immediate safety drawer passed.
+- Mobile browse and grid were inspected at 390px; page width equals viewport width.
+- Existing Spaces branch was preserved in Directory; no source edits to its layout.
+- No application console errors or warnings were returned in the final browser check. Signed-out auth requests and existing browser install/preload notices were visible during earlier preview checks.
 
-## Verification and remaining checklist
+## Validation
 
-- PASS: `npm run typecheck`.
-- PASS: `node --import tsx script/build.ts` (complete client, service worker and server production build).
-- PASS: `node --import tsx --test client/src/lib/mapLayerFilters.test.ts`, 8/8 tests. Covers Tonight, Soon, tags, date ranges, malformed dates, Portland/UTC day boundaries, DST, the upcoming horizon, and marker-key collisions.
-- PASS: `git diff --check`.
-- PASS: isolated Railway Sandbox health endpoint returned 200 on Node 20.
-- PASS: live browser interaction opened Eventz, Placez, Boards, and Houz, while map controls remained present.
-- PASS: Houz replaced ZayDark in the layer rail and exposed independent pin visibility and housing-type filters.
-- PASS: lightweight basemap displayed OpenStreetMap and CARTO attribution; Google tiles are not used.
-- PASS: closing the open panel returned the layer control to its compact state.
-- [ ] Capture Eventz at 393 × 850, normalize the approved image, and compare together.
-- [ ] Capture compact/expanded Z navigation with closed drawer at 320, 393, 768 and 960+ widths.
-- [ ] Open all four layers, change filters and pin visibility, verify list/pin consistency in both 3D and 2D.
-- [ ] Open actual event/place/housing details and all View more destinations.
-- [ ] Verify swipe, close, Escape focus return, reduced motion, keyboard navigation, long titles and empty/error states.
-- [ ] Check console errors, actual poster loads, no overlapping touch targets, and no horizontal page overflow.
-- [ ] Fix any P0/P1/P2 findings and repeat visual comparison before marking passed.
+- TypeScript: passed.
+- Production build: passed, including bundled map startup/tile checks, navigation tripwire, and token guard. Existing large-bundle warning remains.
+- Whitespace/diff validation: passed.
+- 21st review: four implementation files checked; only the two intentional modal-focus warnings described above.
+- Focused manual review: route state, multi-select restoration, existing detail actions, data coverage, and CSS scoping checked.
 
-## Unrelated pre-existing checkout changes
+## Remaining limits
 
-These were present before this task, remain untouched and are excluded from the drawer commit. Their original owner is not established in this session:
+Authenticated follow/submission mutations were not executed. No server behavior changed. Visual verification used Chromium desktop and phone-sized emulation, not physical Safari.
 
-- `.claude/skills/zaylist-design`: already deleted.
-- `client/public/posters/lets-get-wild-pride-drag-show.jpg`: already modified.
-- `tmp/`: existing untracked sandbox patches.
+## Implementation checklist
 
-## Follow-up: layer buttons also filter map pins
-
-- Each label is now an independent pressed-state toggle connected to the existing layer visibility state. Its separate arrow opens or closes that layer's drawer without changing visibility. The drawer checkbox and label toggle stay synchronized.
-- Enabled layers retain their layer color and underline. Disabled layers dim even when their drawer is open. Mobile compact controls stack the arrow below the label so both targets remain usable between the dock and map controls.
-- PASS: local and sandbox typechecks, sandbox production build, and whitespace check.
-- PASS: browser checks for all four label toggles, independent drawer opening, checkbox synchronization, and Escape close. The current event dataset has zero matching pins, so Eventz was verified through its pressed state and checkbox, not a marker-count reduction.
-- PASS: actual rendered marker counts were 90 initially, 6 with Placez disabled, 88 with Boards disabled, and 86 with Houz disabled. Each returned to 90 after re-enabling.
-- PASS: actual app rendered inside 393 × 850 and 320 × 850 browser frames. Visually inspected expanded dock, collapsed dock, compact rail, and open Houz drawer with Houz disabled. Button labels did not overflow; compact arrow targets were at least 35 × 24 pixels. This is responsive-layout verification, not an iPhone Safari or 3D rendering test.
-- Separate existing map-provider issue: the visual capture shows an “API key required” watermark in CARTO basemap imagery. The earlier attribution-only check did not detect this, so the prior statement that tiles fully work was too broad. This filter-only change does not resolve that provider issue. WebGL is also disabled in the test browser, which uses the existing lightweight map fallback.
-- Published this filter change only to the already-authorized temporary Railway demo. No production push.
-
-## Follow-up: top-right map controls and dock clearance
-
-- Map controls now stay at the top right in both compact and open drawer states, independent of the dock state.
-- Tapping Z to restore navigation preserves the selected drawer. Both the compact rail and open drawer clear the expanded dock by moving to 98px plus the bottom safe area. Open drawer height is capped to preserve top clearance on short screens.
-- Removed the unused bottom-right control reservation from the compact rail, giving the layer toggles more room. With the expanded dock, the footer no longer reserves space for the collapsed Z button.
-- PASS: typecheck, CSS parsing for both affected stylesheets, and whitespace check.
-- Not visually verified or deployed: the Railway preview returns 404 and the Railway sign-in endpoint returned 502 in the preceding task. These edits are committed locally only.
-- The unrelated pre-existing changes listed above remain untouched; their ownership remains unknown.
-
-## Follow-up: browser-loaded basemap
-
-- The 3D Mapz engine continues to load from the bundled `/mapz-map/` files when the visitor opens the map.
-- The lightweight CARTO fallback now requests raster tiles directly from CARTO in the visitor's browser, including the configured public basemap key. It no longer sends each tile through the Zaylist Express server.
-- Removed the obsolete `/api/mapz/carto-tiles` server route and proxy module.
-- PASS: typecheck, complete client/service-worker/server production build, reference search for the removed route, and whitespace check.
-- This change is committed locally only. The unavailable Railway Sandbox was not used for verification or deployment.
+- [x] Rebuild Placez and ReZources around Eventz.
+- [x] Preserve page-specific actions and existing detail interfaces.
+- [x] Verify responsive composition and primary interactions.
+- [x] Build and typecheck.
+- [x] Keep the change local for review.
