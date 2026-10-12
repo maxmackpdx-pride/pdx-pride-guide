@@ -461,3 +461,9 @@ html body .events-page .events-poster-grid { grid-template-columns: repeat(auto-
 }
 /* More room between the search bar and the Filters / Map buttons. */
 .events-page .events-filter-row { gap: 12px; }
+/* Desktop filtered grid: four cards per row. */
+@media (min-width: 768px) {
+  html body .events-page .events-poster-grid { grid-template-columns: repeat(4, 200px); gap: 24px 20px; }
+}
+/* More room between the day tabs and the search row. */
+.events-page .events-browse { gap: 16px; }
