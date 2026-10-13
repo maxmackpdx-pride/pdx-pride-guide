@@ -51,7 +51,8 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
     {get("ids") && <p className="mapz-layer-location-note">Showing this waypoint’s posts. <button onClick={()=>set("ids","")}>Show all in view</button></p>}
     {applied.length>0&&<div className="map-applied-filters" aria-label="Applied filters"><button type="button" onClick={onClearFilters}>Clear filters</button>{applied.map(([key,value])=><button key={key} type="button" onClick={()=>setParam(key,"")} aria-label={"Remove "+key.split(".")[1]+" filter"}>{key.endsWith(".ids")?"Selected waypoint":key.endsWith(".owned")?"Queer owned":key.endsWith(".remote")?"Remote friendly":value.replaceAll("_"," ")} ×</button>)}</div>}
     {world !== "places" && children}
-    {loading ? <p role="status">Loading {name}…</p> : error ? <BrowseStatus error title={`${name} couldn’t load`} description="Your map and filters are still here. Try loading the listings again." onAction={retry} /> : <>
+    {error && <BrowseStatus error title={allRows.length ? `${name} could not refresh` : `${name} couldn’t load`} description={allRows.length ? "Showing the last loaded listings. Your map and filters are still here." : "Your map and filters are still here. Try loading the listings again."} onAction={retry} />}
+    {loading && !allRows.length ? <p role="status">Loading {name}…</p> : error && !allRows.length ? null : <>
       <p role="status" className="mapz-layer-location-note">{inView.length} in view{!bounds ? " · waiting for map bounds" : ""}</p>
       {renderList(inView.slice(0,rowLimit))}
       {inView.length>rowLimit && <button onClick={()=>setLimit(n=>n+40)}>Show more ({inView.length-rowLimit})</button>}

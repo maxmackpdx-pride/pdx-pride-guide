@@ -1,4 +1,5 @@
 import { serviceIdentity, serviceWaypointLogo } from "@shared/serviceIdentity";
+import { useMapzActive, useMapzCameraRecorder } from "@/components/RetainedMapzRoute";
 import ResourceMapPanel from '@/components/ResourceMapPanel';
 import { RESOURCE_MAP_ENTRIES, resourceMapHref, resourceMapKey, type ResourceMapEntry } from '@/lib/resourceMap';
 import {eventNight} from '../../public/mapz-map/event-night.js';
@@ -326,7 +327,10 @@ function useDesktop() {
 }
 
 export default function MapzMapDemo() {
-  usePageSeo(roomTitle("mapz"), "Portland on one map: tonight's events, places, and posts from every room.");
+  const active = useMapzActive();
+  const recordCamera = useMapzCameraRecorder();
+  const activity = useRef(active); activity.current=active;
+  usePageSeo(roomTitle("mapz"), "Portland on one map: tonight's events, places, and posts from every room.", {skip:!active});
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const search = useSearch();
@@ -336,7 +340,7 @@ export default function MapzMapDemo() {
   }, [setLocation]);
   const query = params.get("q") || "";
   const [dataReady,setDataReady]=useState(false);
-  const initialCamera=useMemo(()=>readMapCamera(new URLSearchParams(window.location.search)),[]);
+  const initialCamera=useMemo(()=>readMapCamera(params),[]);
   const cameraState=useRef(initialCamera);
   const cameraWriteTimer=useRef<number>();
   useEffect(()=>()=>window.clearTimeout(cameraWriteTimer.current),[]);
@@ -391,22 +395,25 @@ export default function MapzMapDemo() {
   const [cardOriginRect, setCardOriginRect] = useState<EventModalOriginRect | PlaceModalOriginRect | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const requestedPrivateAction=["compose","houzCompose","gigz.view","giftz.view","sellz.view","mizzed.view"].map(key=>params.get(key)||"").join("|");
-  useEffect(()=>{if(!authLoading && !user && requestedPrivateAction.replaceAll("|","").length)setShowAuth(true);},[authLoading,user,requestedPrivateAction]);
+  useEffect(()=>{if(active && !authLoading && !user && requestedPrivateAction.replaceAll("|","").length)setShowAuth(true);},[active,authLoading,user,requestedPrivateAction]);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState("");
   const mapRef = useRef<MapzHandle | null>(null);
+  const requestedCamera = [params.get("lat"),params.get("lng"),params.get("zoom"),params.get("pitch"),params.get("bearing")].join("|");
   useEffect(()=>{
+    if(!active)return;
     const restore=()=>{
       window.clearTimeout(cameraWriteTimer.current);
       const view=readMapCamera(new URLSearchParams(window.location.search));
       const current=cameraState.current;
-      if(view && (!current || Math.abs(view.center[0]-current.center[0])>.00001 || Math.abs(view.center[1]-current.center[1])>.00001 || Math.abs(view.zoom-current.zoom)>.01)) {
+      if(view && (!current || Math.abs(view.center[0]-current.center[0])>.00001 || Math.abs(view.center[1]-current.center[1])>.00001 || Math.abs(view.zoom-current.zoom)>.01 || Math.abs(view.pitch-current.pitch)>.01 || Math.abs(view.bearing-current.bearing)>.01)) {
         mapRef.current?.send("view",{center:view.center,zoom:view.zoom,pitch:view.pitch,bearing:view.bearing});
       }
     };
+    restore();
     window.addEventListener("popstate",restore);
     return()=>window.removeEventListener("popstate",restore);
-  },[]);
+  },[active,requestedCamera]);
   const pageRef = useRef<HTMLElement | null>(null);
   const timeInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -434,12 +441,14 @@ export default function MapzMapDemo() {
 
 
   useEffect(() => {
+    if(!active)return;
     const update = () => setClockNow(Date.now());
     update();
     const timer = window.setInterval(update, 30_000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [active]);
   useLayoutEffect(() => {
+    if(!active)return;
     const page = pageRef.current;
     if (!page) return;
     const dock = document.querySelector(".site-hub-mobile-bar");
@@ -455,7 +464,7 @@ export default function MapzMapDemo() {
     window.addEventListener("resize", measure);
     window.visualViewport?.addEventListener("resize", measure);
     return () => { observer.disconnect(); window.removeEventListener("resize", measure); window.visualViewport?.removeEventListener("resize", measure); };
-  }, [desktop]);
+  }, [desktop,active]);
   const locateMe = useCallback(() => {
     if (!navigator.geolocation) { setLocateError("Location is not available on this device."); return; }
     setLocating(true);
@@ -472,17 +481,17 @@ export default function MapzMapDemo() {
       setLocating(false);
     }, { enableHighAccuracy: true, timeout: 12000 });
   }, [locationAvatar]);
-  const { data: events = EMPTY_EVENTS, isPending: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
-  const { data: communities = EMPTY_COMMUNITIES } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
-  const { data: places = EMPTY_PLACES, isPending: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
-  const { data: housingRaw, isPending: housingLoading, isError: housingError, refetch: retryHousing } = useQuery<unknown>({ queryKey: ["/api/housing", "map"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/housing").then(r => r.json()) });
-  const { data: boardMapPoints = [] } = useQuery<Array<{board:string;postId:number;lat:number;lng:number}>>({queryKey:["/api/board-map-locations"],enabled:dataReady,queryFn:()=>apiRequest("GET","/api/board-map-locations").then(r=>r.json())});
-  const { data: mizzed = [], isPending: mizzedLoading, isError: mizzedError, refetch: retryMizzed } = useQuery<MissedConnectionPost[]>({ queryKey: ["/api/missed-connections"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()) });
-  const { data: gigs = EMPTY_ROWS, isPending: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
-  const { data: gifts = EMPTY_ROWS, isPending: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
-  const { data: sells = EMPTY_ROWS, isPending: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], enabled:dataReady, queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
+  const { data: events = EMPTY_EVENTS, isPending: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], enabled:active, queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
+  const { data: communities = EMPTY_COMMUNITIES } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], enabled:active, queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
+  const { data: places = EMPTY_PLACES, isPending: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], enabled:active, queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
+  const { data: housingRaw, isPending: housingLoading, isError: housingError, refetch: retryHousing } = useQuery<unknown>({ queryKey: ["/api/housing", "map"], enabled:active, queryFn: () => apiRequest("GET", "/api/housing").then(r => r.json()) });
+  const { data: boardMapPoints = [] } = useQuery<Array<{board:string;postId:number;lat:number;lng:number}>>({queryKey:["/api/board-map-locations"],enabled:active,queryFn:()=>apiRequest("GET","/api/board-map-locations").then(r=>r.json())});
+  const { data: mizzed = [], isPending: mizzedLoading, isError: mizzedError, refetch: retryMizzed } = useQuery<MissedConnectionPost[]>({ queryKey: ["/api/missed-connections"], enabled:active, queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()) });
+  const { data: gigs = EMPTY_ROWS, isPending: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], enabled:active, queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
+  const { data: gifts = EMPTY_ROWS, isPending: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], enabled:active, queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
+  const { data: sells = EMPTY_ROWS, isPending: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], enabled:active, queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
   const mineSpecs=useMemo(()=>[["gigz","/api/gigs?mine=1"],["giftz","/api/gifting/mine"],["sellz","/api/sellz/mine"],["mizzed","/api/missed-connections/mine"]] as const,[]);
-  const mineQueries=useQueries({queries:mineSpecs.map(([world,url])=>({queryKey:["map-worlds-mine",world,user?.id],enabled:!!user&&dataReady,queryFn:()=>apiRequest("GET",url).then(r=>r.json()) as Promise<MapRow[]>}))});
+  const mineQueries=useQueries({queries:mineSpecs.map(([world,url])=>({queryKey:["map-worlds-mine",world,user?.id],enabled:active&&!!user&&dataReady,queryFn:()=>apiRequest("GET",url).then(r=>r.json()) as Promise<MapRow[]>}))});
   const mineWorlds=Object.fromEntries(mineSpecs.map(([world],i)=>[world,mineQueries[i]]));
   const savedSellz=useQuery<number[]>({queryKey:["/api/sellz/saved/ids"],enabled:!!user,queryFn:()=>apiRequest("GET","/api/sellz/saved/ids").then(r=>r.json())});
   const savedSellzSet=useMemo(()=>new Set(savedSellz.data||[]),[savedSellz.data]);
@@ -528,7 +537,7 @@ export default function MapzMapDemo() {
   const placeId = mapRecordId(params.get("place"));
   const feedEvent = events.find(event => event.id === eventId);
   const eventDetail = useQuery<Event>({
-    queryKey: ["/api/events", eventId], enabled: eventId !== null && !feedEvent && !eventsLoading,
+    queryKey: ["/api/events", eventId], enabled: active && eventId !== null && !feedEvent && !eventsLoading,
     queryFn: () => apiRequest("GET", `/api/events/${eventId}`).then(r => r.json()),
   });
   const selectedEvent = eventId ? feedEvent || eventDetail.data : null;
@@ -536,12 +545,12 @@ export default function MapzMapDemo() {
   const houzId = mapRecordId(params.get("houz"));
   const feedHouz = houzId ? housing.find(post => Number(post.id) === houzId) as HousingPostView | undefined : undefined;
   const houzDetail = useQuery<HousingPostView>({
-    queryKey: ["/api/housing", houzId], enabled: houzId !== null && !feedHouz,
+    queryKey: ["/api/housing", houzId], enabled: active && houzId !== null && !feedHouz,
     queryFn: async () => { const response = await fetch(`/api/housing/${houzId}`, { credentials: "include" }); if (!response.ok) throw new Error("Not found"); return response.json(); },
   });
   const selectedHouz = feedHouz || houzDetail.data;
   const mizzedId = mapRecordId(params.get("mizzed") || params.get("spotted"));
-  const mizzedDetail=useQuery<MissedConnectionPost>({queryKey:["/api/missed-connections",mizzedId,user?.id],enabled:mizzedId!==null,queryFn:()=>apiRequest("GET",`/api/missed-connections/${mizzedId}`).then(r=>r.json())});
+  const mizzedDetail=useQuery<MissedConnectionPost>({queryKey:["/api/missed-connections",mizzedId,user?.id],enabled:active&&mizzedId!==null,queryFn:()=>apiRequest("GET",`/api/missed-connections/${mizzedId}`).then(r=>r.json())});
   const selectedMizzed = mizzedId ? mizzedDetail.data || mizzed.find(post => post.id === mizzedId) : null;
   const boardKey = (["gig", "gift", "sell", "sellz"] as const).find(key => mapRecordId(params.get(key)) !== null);
   const boardOverlay = boardKey ? { kind: boardFromParam(boardKey)!, postId: mapRecordId(params.get(boardKey))! } : null;
@@ -666,7 +675,8 @@ export default function MapzMapDemo() {
     </div>
     {(timeFilter!=="default"||eventTag) && <div className="map-applied-filters" aria-label="Applied event filters">{timeFilter!=="default"&&<button onClick={()=>setTimeFilter("default")} aria-label="Remove date filter">{timeFilter} ×</button>}{eventTag&&<button onClick={()=>setEventTag(null)} aria-label="Remove event type filter">{eventTag.replaceAll("_"," ")} ×</button>}<button onClick={()=>{setTimeFilter("default");setEventTag(null);}}>Clear all</button></div>}
     {demoEventIds.size>0 && <p className="mapz-layer-location-note">Demo examples use saved event listings and their original dates.</p>}
-    {eventsLoading ? <p role="status">Loading Eventz…</p> : eventsError ? <p role="alert">Eventz could not load. <button type="button" onClick={() => void retryEvents()}>Try again</button></p> : <div className="mapz-layer-list">
+    {eventsError && <p role="status">Eventz could not refresh.{events.length > 0 ? " Showing the last loaded events." : ""} <button type="button" onClick={() => void retryEvents()}>Try again</button></p>}
+    {eventsLoading && !events.length ? <p role="status">Loading Eventz…</p> : eventsError && !events.length ? null : <div className="mapz-layer-list">
       {visibleEvents.slice(0, 5).map(event => {
         const starts = parsePacificDateTime(event.dateStart) || Date.now();
         const isToday = portlandCalendarDay(starts) === portlandCalendarDay(Date.now());
@@ -709,7 +719,8 @@ export default function MapzMapDemo() {
       <button type="button" aria-pressed={housingSaved} onClick={() => user ? setHousingSaved(!housingSaved) : setShowAuth(true)}>Saved</button>
     </div>
     <HousingTagFilter applied={housingTags} onApply={setHousingTags} />
-    {housingLoading ? <p role="status">Loading My Hoüz…</p> : housingError ? <p role="alert">My Hoüz could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
+    {housingError && <p role="status">My Hoüz could not refresh.{housing.length > 0 ? " Showing the last loaded listings." : ""} <button type="button" onClick={() => void retryHousing()}>Try again</button></p>}
+    {housingLoading && !housing.length ? <p role="status">Loading My Hoüz…</p> : housingError && !housing.length ? null : panelRows(visibleHousing, "houz")}
     <p className="mapz-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
     <details className="mapz-houz-about"><summary>How My Hoüz works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
   </section>;
@@ -729,8 +740,8 @@ export default function MapzMapDemo() {
     { id: "houz", label: ROOMS.hauz.nav, color: ROOMS.hauz.accent, enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "Browse My Hoüz", href: "/boards?board=housing" }] },
   ];
 
-  useAttendanceSummariesLive(dataReady);
-  const {data:attendance={}}=useQuery<Record<number,{count:number;preview:Array<{initials:string;photoUrl?:string|null}>}>>({queryKey:["/api/events/attendance-summaries"],enabled:dataReady,queryFn:()=>apiRequest("GET","/api/events/attendance-summaries").then(r=>r.json()),refetchInterval:60000});
+  useAttendanceSummariesLive(active&&dataReady);
+  const {data:attendance={}}=useQuery<Record<number,{count:number;preview:Array<{initials:string;photoUrl?:string|null}>}>>({queryKey:["/api/events/attendance-summaries"],enabled:active&&dataReady,queryFn:()=>apiRequest("GET","/api/events/attendance-summaries").then(r=>r.json()),refetchInterval:active?60000:false});
   // Day colors are tokens; re-read them after calm mode flips the class on <html>.
   const [tokenEpoch, setTokenEpoch] = useState(0);
   useEffect(() => {
@@ -805,17 +816,19 @@ export default function MapzMapDemo() {
     requestAnimationFrame(() => document.querySelector<HTMLInputElement>(".mapz-layer-sheet input[type=search]")?.focus());
   };
   return <section ref={pageRef} className="living-map-page mapz-map-demo" data-map="mapz" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
-    <MapzCanvas onBoot={()=>setDataReady(true)} initialCamera={initialCamera} ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
+    <MapzCanvas active={active} onBrowse={()=>changeLayer(activeLayer || "places")} onBoot={()=>setDataReady(true)} initialCamera={initialCamera} ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
       if(!["places","rezources","mizzed","gigz","giftz","sellz"].includes(world))return;
       if(zoom<16.8){mapRef.current?.send("fit",{bounds});return;}
       const ids=world==='rezources' ? keys.join(',') : marks.filter(mark=>keys.includes(mark.key)).map(mark=>(mark.item as MapRow).id).join(',');
       updateParams(p=>{p.set("layer",world);p.set(`${world}.ids`,ids);});
     }} onView={view=>{
+      if(!activity.current)return;
+      recordCamera(view);
       cameraState.current=view;
-      try { sessionStorage.setItem("mapz.lastCamera", JSON.stringify({lat:view.center[0],lng:view.center[1],zoom:view.zoom})); } catch { /* Browsing still works without storage. */ }
+      try { sessionStorage.setItem("mapz.lastCamera", JSON.stringify({lat:view.center[0],lng:view.center[1],zoom:view.zoom,pitch:view.pitch,bearing:view.bearing})); } catch { /* Browsing still works without storage. */ }
       setMapBounds(view.bounds);setMapCenter(current => current[0] === view.center[0] && current[1] === view.center[1] ? current : view.center);
       window.clearTimeout(cameraWriteTimer.current);
-      cameraWriteTimer.current=window.setTimeout(()=>updateParams(p=>{p.set("lat",view.center[0].toFixed(5));p.set("lng",view.center[1].toFixed(5));p.set("zoom",view.zoom.toFixed(2));}),500);
+      cameraWriteTimer.current=window.setTimeout(()=>{if(activity.current)updateParams(p=>{p.set("lat",view.center[0].toFixed(5));p.set("lng",view.center[1].toFixed(5));p.set("zoom",view.zoom.toFixed(2));p.set("pitch",view.pitch.toFixed(2));p.set("bearing",view.bearing.toFixed(2));});},500);
     }} />
     <div className="mapz-map-lockup pdx-glass-rebind" aria-label={`${regionLabel}, ${mapTimeLabel}${tonightCount ? `, ${tonightCount} tonight` : ""}`}>
       <strong>{regionLabel}</strong>
@@ -841,7 +854,7 @@ export default function MapzMapDemo() {
     <MapzLayerSheet layers={layers} active={activeLayer} onActiveChange={changeLayer} />
     {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="mapz-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
     {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="mapz-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
-    <Suspense fallback={null}>
+    {active && <Suspense fallback={null}>
     <DetailRoomLinkContext.Provider value={detailRoomLink}>
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
@@ -853,6 +866,6 @@ export default function MapzMapDemo() {
     {user && houzCompose && <HousingComposerOverlay initialType={houzCompose} viewerDisplayName={user.displayName} onClose={() => updateParams(p => p.delete("houzCompose"))} onPosted={postId => { updateParams(p => { p.delete("houzCompose"); clearMapOverlay(p); p.set("houz", String(postId)); }); }} />}
     {user && composeWorld && <MapComposerOverlay key={composeWorld} world={composeWorld} onClose={closeOverlays} onPosted={id=>{void queryClient.invalidateQueries({queryKey:["map-worlds-mine"]});setLocation(mapHref(p=>{p.delete("compose");clearMapOverlay(p);p.set(WORLD_DETAIL_KEYS[composeWorld],String(id));p.set("layer",composeWorld);}),{replace:true,state:window.history.state});}}/>}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}
-    </Suspense>
+    </Suspense>}
   </section>;
 }

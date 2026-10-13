@@ -1,3 +1,4 @@
+import RetainedMapzRoute from "@/components/RetainedMapzRoute";
 import { boardBrowseHref } from "@/lib/boardBrowseHref";
 import type { BoardCategory } from "@/lib/allBoards";
 import MapWorldRedirect from "@/components/MapWorldRedirect";
@@ -58,7 +59,6 @@ import ResetPassword from "./pages/ResetPassword";
 
 const Events = lazyWithReload(() => import("./pages/Events"));
 const Home = lazyWithReload(() => import("./pages/Home"));
-const MapzMapDemo = lazyWithReload(() => import("./pages/MapzMapDemo"));
 const Schedule = lazyWithReload(() => import("./pages/Schedule"));
 const Submit = lazyWithReload(() => import("./pages/Submit"));
 const Boards = lazyWithReload(() => import("./pages/Boards"));
@@ -130,6 +130,7 @@ function AppLayout() {
       <Nav />
       {location.split("?")[0] !== "/admin" && <MobileBottomNav />}
       <main className="flex-1">
+        <RetainedMapzRoute />
         <RouteBoundary>
           <Suspense fallback={routePath === "/" ? <div dangerouslySetInnerHTML={{ __html: homeBootLogoHtml }} /> : livingMap ? <MapBootLoader map="mapz" /> : routePath === "/outzide" ? <MapBootLoader map="outz" /> : <SpectrumLoader variant="full" label="Loading page" />}>
             <Switch>
@@ -144,8 +145,8 @@ function AppLayout() {
             <Route path="/events" component={Events} />
             <Route path="/boards" component={Boards} />
             <Route path="/all-boards" component={Boards} />
-            <Route path="/map-demo" component={MapzMapDemo} />
-            <Route path="/map" component={MapzMapDemo} />
+            <Route path="/map-demo">{() => null}</Route>
+            <Route path="/map">{() => null}</Route>
             <Route path="/schedule">{() => <Schedule />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />
