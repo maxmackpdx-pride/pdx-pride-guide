@@ -525,3 +525,10 @@ html.calm-mode .events-page > .events-day-dock { animation: none; }
 .events-page .events-result-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:8px 0 0; }
 .events-page .events-result-head p { margin:0; color:var(--text-mid); font:500 12px/1.4 var(--font-mono, monospace); }
 @media(min-width:1100px) { .events-page .events-rail-sec__head { min-height:64px; padding-top:20px; box-sizing:border-box; align-items:flex-start; align-content:flex-start; margin-bottom:16px; } }
+
+@media(min-width:1100px) {
+  .events-page .events-card-feed { width:100%; min-width:0; }
+  html body .events-page .events-poster-grid { width:100%; max-width:100%; margin-inline:0; justify-content:space-between; }
+  .events-page .events-rails>.events-rail-sec:has(.events-rail--open) { width:100%; }
+  .events-page .events-rails .events-rail--open { justify-content:space-between; }
+}

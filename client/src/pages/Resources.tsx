@@ -1,3 +1,4 @@
+import OregonUrgentHelp from "@/components/resources/OregonUrgentHelp";
 import { ServiceNameMark } from "@/components/ServiceNameMark";
 import { serviceArtwork } from "@shared/serviceIdentity";
 import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
@@ -158,7 +159,7 @@ function SafetyNotice({ openCard = false }: { openCard?: boolean }) {
         {openCard && <ShieldAlert size={28} aria-hidden="true" />}
         <div>
           {openCard ? <span className="pdxPlace__cat pdx-glass-rebind"><Badge color="var(--neon-orange)" size="sm">Immediate safety</Badge></span> : <span className="rg-safety-kicker"><ShieldAlert size={24} aria-hidden="true" />Immediate safety</span>}
-          <h3>In immediate danger?</h3>
+          <h3>{openCard ? "ARE YOU SAFE?" : "In immediate danger?"}</h3>
         </div>
         {!openCard && <div className="rg-safety-motif" aria-hidden="true">
           <svg viewBox="0 0 180 180" className="rg-safety-draft" fill="none">
@@ -179,14 +180,7 @@ function SafetyNotice({ openCard = false }: { openCard?: boolean }) {
         <span className="rg-safety-expand-indicator" aria-hidden="true">{expanded ? "−" : "+"}</span>
       </button>}
       <div id={detailsId} hidden={!openCard && !expanded}>
-      {openCard && <div className="rg-support-numbers rg-emergency-numbers">
-        {HOTLINES.map((h) => (
-          <SupportNumber key={h.tel}
-            name={h.tel === "988" ? "Suicide & Crisis Lifeline" : h.name}
-            number={h.tel === "988" ? "988" : h.description}
-            tel={h.tel} />
-        ))}
-      </div>}
+      {openCard && <OregonUrgentHelp />}
       <details className="rg-safety-law">
         <summary>Domestic violence in Oregon — what counts?</summary>
         <div>
@@ -438,7 +432,7 @@ const ResourceCard = memo(function ResourceCard({
       categoryLabel={category.name}
       categoryTags={tagsFor(row).slice(0, 2)}
       accentColor={category.color}
-      logoUrl={serviceArtwork(org, org.logo) || undefined}
+      logoUrl={serviceArtwork(org, org.logo, true) || undefined}
       logoFallback={<Mark org={org} allowArtwork={false} iconOnly />}
       description={org.desc}
       shareUrl={`https://www.zaylist.com/needz?resource=${encodeURIComponent(org.name)}`}
@@ -540,10 +534,11 @@ export default function Resources() {
       </BrowseHeader>
       <div className="eb-frame">
         <BrowseControls title="NEEDZ" categories={[{id:"ALL",label:"All resources",color:"var(--neon-cyan)",count:ROWS.length}, ...RESOURCE_CATEGORIES.map((c, i) => ({id:c.id,label:LABELS[i],color:c.color,count:ROWS.filter(row => categoriesFor(row).some(category => category.id === c.id)).length}))]}
-          selected={categoryIds.length ? categoryIds : ["ALL"]} onSelect={choose} query={searchQuery} onSearch={value => {setSearchQuery(value); setMode("directory");}} view={browseView} onView={value => {setBrowseView(value); setMode("directory");}}>
+          selected={categoryIds.length ? categoryIds : ["ALL"]} onSelect={choose} query={searchQuery} onSearch={value => {setSearchQuery(value); setMode("directory");}} view={browseView} onView={value => {setBrowseView(value); setMode("directory");}} actions={<div className="needz-support-actions">
+            <button type="button" className="eb-tool needz-support-action needz-support-action--talk" aria-pressed={mode === "talk"} onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} aria-hidden="true" /><span>Talk to someone</span></button>
+            <button type="button" className="eb-tool needz-support-action needz-support-action--safety" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}><ShieldAlert size={19} aria-hidden="true" /><span>ARE YOU SAFE?</span></button>
+          </div>}>
           <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("rezources")} aria-label="Explore resources on Mapz"><Map size={19} /><span>Map</span></a>
-          <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Talk to someone" aria-pressed={mode === "talk"} onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} /><span>Talk to someone</span></button>
-          <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Immediate safety and support" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}><ShieldAlert size={19} /></button>
         </BrowseControls>
         {mode === "directory" && <div className="eb-result-head"><p role="status">{rows.length} resource{rows.length === 1 ? "" : "s"}</p>{(categoryIds.length > 0 || searchQuery) && <button type="button" className="eb-clear" onClick={clear}>Clear filters</button>}</div>}
         <div className="eb-body">
@@ -553,8 +548,8 @@ export default function Resources() {
               {RESOURCE_CATEGORIES.map((c, i) => <button type="button" key={c.id} aria-pressed={categoryIds.includes(c.id)} onClick={() => choose(c.id)}>{LABELS[i]}</button>)}
             </div></div>
             <div className="eb-panel eb-desktop-panel"><h3>A person on the other end.</h3><p>Choose the line that fits what you need.</p>
-              <button type="button" className="eb-tool pdx-glass-rebind" onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} />{mode === "talk" ? "Back to resources" : "Talk to someone"}</button>
-              <button type="button" className="eb-clear" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}>Immediate safety & support</button>
+              <button type="button" className="eb-tool needz-support-action needz-support-action--talk" onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} />{mode === "talk" ? "Back to resources" : "Talk to someone"}</button>
+              <button type="button" className="eb-tool needz-support-action needz-support-action--safety" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}>ARE YOU SAFE?</button>
             </div>
             <div className="eb-panel eb-desktop-panel"><h3>Know someone we should know?</h3><Link className="eb-tool pdx-glass-rebind" href="/contact">Suggest a resource<ArrowUpRight size={16} /></Link></div>
           </aside>
@@ -583,7 +578,7 @@ export default function Resources() {
             <Drawer.Handle className="rg-drawer-handle" aria-label="Drag to close safety support" />
             <Drawer.Close className="rg-close" aria-label="Close safety support"><X size={20} /></Drawer.Close>
             <div className="rg-drawer-body">
-              <Drawer.Title className="sr-only">Immediate safety and support</Drawer.Title>
+              <Drawer.Title className="sr-only">ARE YOU SAFE? Oregon urgent help</Drawer.Title>
               <Drawer.Description className="sr-only">Call 911 for immediate danger, or choose a crisis support line. Includes Oregon safety information.</Drawer.Description>
               <Support openCard />
             </div>

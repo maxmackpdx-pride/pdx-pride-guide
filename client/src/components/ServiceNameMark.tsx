@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { serviceIdentity, type ServiceIdentitySource } from '@shared/serviceIdentity';
+import { companyFallbackIcon, serviceIdentity, type ServiceIdentitySource } from '@shared/serviceIdentity';
 import { clearDynamicTextCache, rowGapAbove, solveDynamicText } from '@/lib/dynamicText';
 import { CompanyNameMark } from './CompanyNameMark';
 import './ServiceNameMark.css';
 
 /** One service-family icon, beside an undistorted, fitted provider name. */
 export function ServiceNameMark({ source, iconOnly = false }: { source: ServiceIdentitySource; iconOnly?: boolean }) {
-  const identity = serviceIdentity(source);
+  const identity = serviceIdentity(source) || (iconOnly ? {kind:"general", label:"Category icon", icon:companyFallbackIcon(source)} : null);
   const frame = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [fontReady, setFontReady] = useState(false);

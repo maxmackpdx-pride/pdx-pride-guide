@@ -65,7 +65,7 @@ export default function ZIndex() {
     </div>
     {!communities.isLoading && !communities.isError && searchQuery && visibleCommunities.length === 0 && (communities.data?.length || 0) > 0 ? <p className="z-communities__no-match">No communities match “{searchQuery}”. Try another name or neighborhood.</p> : null}
     <section className="z-communities__grid" aria-label="Communities">
-      {visibleCommunities.map(community => { const logo = communityLogo(community); return <article key={community.id} className="z-community-card pdx-glass-rebind pdx-glass-card">
+      {visibleCommunities.map(community => { const logo = communityLogo(community, true); return <article key={community.id} className="z-community-card pdx-glass-rebind pdx-glass-card">
         <span className="pdx-refract-seam" aria-hidden="true" />
         <Link href={`/z/${community.slug}`} className="z-community-card__link">
         <div className="z-community-card__image" style={logo ? { backgroundImage: `url(${logo})`, backgroundSize: community.slug === "yes-coach-productions" && (!community.imageUrl || community.imageUrl === "/directory-logos/Yes_Coach_Productions.png") ? "75% auto" : !community.imageUrl || logo === "/community-logos/pink-ponies.jpeg" ? "contain" : undefined, backgroundColor: !community.imageUrl && community.slug === "lesbian-culture-club" ? "#f5f1e9" : undefined } : undefined}>{!logo ? <span aria-hidden="true">Z/</span> : null}</div>

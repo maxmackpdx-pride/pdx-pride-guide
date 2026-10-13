@@ -1,3 +1,5 @@
+import { companyFallbackIcon } from "./serviceIdentity";
+import { companyLogoEntry, whiteCompanyLogo } from "./whiteCompanyLogos";
 import type { CommunitySummary } from "./community";
 
 // Artwork is sourced from the named organizations' own sites. Keep this list
@@ -24,7 +26,9 @@ const COMMUNITY_LOGOS: Record<string, string> = {
   "yes-coach-productions": "/directory-logos/Yes_Coach_Productions.png",
 };
 
-export function communityLogo(community: Pick<CommunitySummary, "slug" | "imageUrl">): string | null {
+export function communityLogo(community: Pick<CommunitySummary, "slug" | "imageUrl">, iconOnly = false): string | null {
+  const reviewed = companyLogoEntry(community.slug);
+  if (reviewed) return reviewed.kind === "text-fallback" && iconOnly ? companyFallbackIcon({name:community.slug, type:"nonprofit"}) : whiteCompanyLogo(community.slug);
   // A community moderator's chosen image takes precedence over curated art.
   // The seeded Placez image is still the yellow version of the Pink Ponies mark.
   if (community.slug === "pink-ponies" && community.imageUrl === "/directory-logos/Pink_Ponies.png") {

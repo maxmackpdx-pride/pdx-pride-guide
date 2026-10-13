@@ -1,7 +1,7 @@
 import { companyLogoEntry, whiteCompanyLogo } from "./whiteCompanyLogos";
 
 export type ServiceKind = "tattoo" | "hair" | "massage" | "graphic-design" | "web-development" | "healthcare" | "real-estate" | "beauty" | "general";
-export type ServiceIdentitySource = { name: string; type?: string | null; description?: string | null; desc?: string; serviceTags?: string[] };
+export type ServiceIdentitySource = { name: string; type?: string | null; description?: string | null; desc?: string; serviceTags?: string[]; categoryIds?: string[] };
 const key = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, "");
 const KNOWN_KINDS: Record<string, ServiceKind> = {
   reconstructedwellness: "healthcare", bywaterhealth: "healthcare", fruit: "beauty",
@@ -37,18 +37,27 @@ export function serviceIdentity(source: ServiceIdentitySource) {
   return kind ? { kind, ...SERVICE_IDENTITIES[kind] } : null;
 }
 /** Authored text assets are name placeholders, not company artwork. */
-export function serviceArtwork(source: ServiceIdentitySource, logo: string | null | undefined) {
+export function serviceArtwork(source: ServiceIdentitySource, logo: string | null | undefined, iconOnly = false) {
   const reviewed = companyLogoEntry(source.name);
   const isPlaceholder = reviewed?.kind === "text-fallback";
   const supplied = logo || null;
   const sameReviewedAsset = supplied?.split(/[?#]/)[0] === reviewed?.asset;
+  if (reviewed && !isPlaceholder) return whiteCompanyLogo(source.name);
   if (reviewed && (!supplied || sameReviewedAsset)) {
-    if (serviceIdentity(source) && isPlaceholder) return null;
+    if (isPlaceholder && (iconOnly || serviceIdentity(source))) return null;
     return whiteCompanyLogo(source.name);
   }
   return supplied;
 }
+export function companyFallbackIcon(source: ServiceIdentitySource) {
+  const identity = serviceIdentity(source);
+  if (identity) return identity.icon;
+  const types = ["bar", "restaurant", "cafe", "shop", "venue", "hotel", "campground", "healthcare", "nonprofit"];
+  const type = source.type && types.includes(source.type) ? source.type : source.categoryIds?.includes("health") ? "healthcare" : "nonprofit";
+  return `/mapz-map/icons/types/${type}.svg`;
+}
+
 /** Cards and waypoints share the same service icon whenever company artwork is absent. */
 export function serviceWaypointLogo(source: ServiceIdentitySource, logo?: string | null) {
-  return serviceArtwork(source, logo) || serviceIdentity(source)?.icon || null;
+  return serviceArtwork(source, logo, true) || companyFallbackIcon(source);
 }
