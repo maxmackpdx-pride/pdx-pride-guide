@@ -271,8 +271,8 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
   transform-box: view-box; transform-origin: center;
   animation: rg-motif-object-drift 49s ease-in-out infinite reverse;
 }
-.eb-page--places .rg-card-motif .rg-motif-solid-depth { opacity: .35; stroke-width: 1.05; }
-.eb-page--places .rg-card-motif .rg-motif-side-edges { opacity: .55; stroke-width: .8; }
+.eb-page--places .rg-card-motif .rg-motif-surface-grid { opacity: .7; stroke-width: .65; }
+.eb-page--places .rg-card-motif .rg-motif-layer--support .rg-motif-surface-grid { stroke-width: 1.1; }
 .eb-page--places .rg-card-motif .rg-motif-support-contour { opacity: .9; stroke-width: 1.6; }
 @media (prefers-reduced-motion: reduce) {
   .eb-page--places .rg-card-motif .rg-motif-support-drift { animation: none !important; }
