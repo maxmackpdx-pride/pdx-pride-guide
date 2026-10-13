@@ -1,3 +1,4 @@
+import ZLineIcon from "@/components/ZLineIcon";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
@@ -98,6 +99,7 @@ export default function VenueFollowButton({
         boxShadow: isCard ? undefined : "0 4px 14px -6px rgba(0,0,0,.75)",
       }}
     >
+      <span className="venue-follow-heart" aria-hidden="true" style={{display:"none"}}><ZLineIcon name="favorite" size={17} filled={following} /></span>
       {following ? "Following" : "Follow"}
     </button>
   );

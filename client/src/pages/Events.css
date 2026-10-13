@@ -313,7 +313,7 @@ html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdx
 .events-page .events-rail::-webkit-scrollbar { display: none; }
 .events-page .events-rail__item { flex: none; scroll-snap-align: start; }
 .events-page .events-rail-sec--full .events-rail__item { width: 200px; }
-.events-page .events-rail-sec--m .events-rail__item { width: 136px; }
+.events-page .events-rail-sec--m .events-rail__item { width: var(--event-card-compact-width); }
 .events-page .events-rail-sec--s .events-rail__item { width: 108px; }
 .events-page .events-rail--open { display: grid; overflow: visible; scroll-snap-type: none; gap: 18px 13px; }
 .events-page .events-rail-sec--full .events-rail--open { grid-template-columns: repeat(auto-fill, 200px); }
@@ -341,10 +341,10 @@ html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdx
 /* Title sits on the flyer's bottom edge over a short clear-to-dark fade. */
 .event-rail-card__shade { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; padding: 34px 10px 10px; background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--z-black) 88%, transparent) 62%); pointer-events: none; }
 .event-rail-card--s .event-rail-card__shade { padding: 20px 8px 8px; }
-.event-rail-card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-hi); font: 800 16px/1.04 var(--font-display); text-transform: uppercase; text-shadow: 0 1px 3px var(--z-black); }
+.event-rail-card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-hi); font: var(--event-card-compact-title-font); text-transform: uppercase; text-shadow: 0 1px 3px var(--z-black); }
 .event-rail-card--s .event-rail-card__title { font-size: 14px; }
 /* Time and venue ride above the card. Fixed height so save can sit on the flyer corner. */
-.event-rail-card__meta { display: block; margin-top: 5px; overflow: hidden; color: var(--text-hi); opacity: .82; font: 500 11px/14px var(--font-body); white-space: nowrap; text-overflow: ellipsis; text-shadow: 0 1px 3px var(--z-black); }
+.event-rail-card__meta { display: block; margin-top: 5px; overflow: hidden; color: var(--text-hi); opacity: .82; font: var(--event-card-compact-meta-font); white-space: nowrap; text-overflow: ellipsis; text-shadow: 0 1px 3px var(--z-black); }
 .event-rail-card--s .event-rail-card__meta { margin-top: 4px; font-size: 10px; line-height: 13px; }
 .event-rail-card__save { position: absolute; right: 8px; top: 8px; z-index: 4; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent); background: color-mix(in srgb, var(--z-black) 84%, transparent); color: var(--text-hi); box-shadow: 0 0 0 2px var(--z-black); cursor: pointer; }
 .event-rail-card--s .event-rail-card__save { top: 6px; right: 6px; width: 34px; height: 34px; }
@@ -400,7 +400,7 @@ html body .events-page.board-page--makeover .events-board-feed .board-active-fee
    136px compact cards and day folders). Opened rails fill the wider row with
    more columns at those same widths. */
 @media (min-width: 768px) {
-  .events-page .events-rail-sec--m .events-rail--open { grid-template-columns: repeat(auto-fill, 136px); }
+  .events-page .events-rail-sec--m .events-rail--open { grid-template-columns: repeat(auto-fill, var(--event-card-compact-width)); }
   .events-page .events-rail-sec--s .events-rail--open { grid-template-columns: repeat(auto-fill, 108px); }
 }
 
@@ -449,7 +449,7 @@ html.calm-mode .events-page > .events-day-dock { animation: none; }
 .events-page .events-rail-skel .events-rail { overflow: hidden; }
 .events-page .events-rail-skel__card { display: block; border-radius: 17px; }
 .events-page .events-rail-skel__card--full { width: 200px; height: 403px; }
-.events-page .events-rail-skel__card--m { width: 136px; height: 170px; border-radius: 16px; }
+.events-page .events-rail-skel__card--m { width: var(--event-card-compact-width); height: var(--event-card-compact-height); border-radius: var(--event-card-compact-radius); }
 
 /* ── Desktop layout (1100px and up): sidebar + real time bands. Phones and tablets are untouched. ──
    The feed's own cards keep their fixed sizes; only their placement changes. */
@@ -478,13 +478,13 @@ html.calm-mode .events-page > .events-day-dock { animation: none; }
   .events-page .events-rails { display: flex; flex-direction: row; flex-wrap: wrap; gap: 44px 32px; margin-inline: 0; align-items: flex-start; }
   .events-page .events-rails > .events-rail-sec { flex: none; min-width: 0; }
   .events-page .events-rails > .events-rail-sec--full { width: 200px; }
-  .events-page .events-rails > .events-rail-sec--m:not(.events-week) { width: calc(2 * 136px + 16px); }
-  .events-page .events-rails > .events-rail-sec--late { width: 136px; }
-  .events-page .events-rails > .events-rail-sec--m:not(.events-week) .events-rail { display: grid; grid-template-columns: repeat(2, 136px); gap: 16px; }
-  .events-page .events-rails > .events-rail-sec--late .events-rail { grid-template-columns: 136px; }
+  .events-page .events-rails > .events-rail-sec--m:not(.events-week) { width: calc(2 * var(--event-card-compact-width) + 16px); }
+  .events-page .events-rails > .events-rail-sec--late { width: var(--event-card-compact-width); }
+  .events-page .events-rails > .events-rail-sec--m:not(.events-week) .events-rail { display: grid; grid-template-columns: repeat(2, var(--event-card-compact-width)); gap: 16px; }
+  .events-page .events-rails > .events-rail-sec--late .events-rail { grid-template-columns: var(--event-card-compact-width); }
   .events-page .events-rails > .events-rail-sec--m:not(.events-week) .events-rail:not(.events-rail--open) .events-rail__item:nth-child(n+7) { display: none; }
   .events-page .events-rails > .events-rail-sec--late .events-rail:not(.events-rail--open) .events-rail__item:nth-child(n+4) { display: none; }
-  .events-page .events-rails > .events-rail-sec--m:not(.events-week) .events-rail__item { width: 136px; }
+  .events-page .events-rails > .events-rail-sec--m:not(.events-week) .events-rail__item { width: var(--event-card-compact-width); }
   .events-page .events-rail-sec__head { flex-wrap: wrap; }
   .events-page .events-rail-sec__head { padding-inline: 0; }
   /* Rails wrap into rows instead of scrolling sideways. */

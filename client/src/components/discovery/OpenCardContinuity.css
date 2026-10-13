@@ -1,0 +1,27 @@
+/* Shared open-card roles preserve each family's artwork and working actions. */
+.event-modal.event-modal--reference .event-modal__title { font: var(--open-card-title-font) !important; margin: 16px 0 12px !important; text-wrap: balance; }
+.event-modal.event-modal--reference :is(.event-modal__description,.event-modal__disclosure-body,.event-modal__disclosure-content > p,.rg-detail-primary > p,.rg-detail-meta > p,.rg-org-section p) { font: var(--open-card-body-font) !important; }
+.event-modal.event-modal--reference :is(.event-modal__disclosure > summary,.rg-org-section h4,.event-modal__section-label) { font: var(--open-card-heading-font) !important; letter-spacing: normal !important; }
+.event-modal.event-modal--reference :is(.event-modal__trust,.rg-source-check,.rg-safety-source,.rg-detail-secondary > small) { font: var(--open-card-meta-font) !important; }
+.event-modal.event-modal--reference .event-modal__scroll { -webkit-overflow-scrolling: touch; padding-bottom: calc(32px + env(safe-area-inset-bottom,0px)); }
+.event-modal.event-modal--reference :is(.event-modal__hero-actions > a,.event-modal__hero-actions > button,.event-modal__actions .event-modal__action-btn,.rg-detail-actions > a,.rg-org-section > a.pdxBtn,.rg-food-finder) {
+ min-height: 44px !important; height: auto !important; max-height: none !important; padding: 12px 14px !important;
+ border: 1px solid color-mix(in srgb,var(--c) 45%,transparent) !important; border-radius: 12px !important;
+ background: var(--btn-glow-bg) !important; box-shadow: var(--btn-glow-shadow) !important;
+ color: var(--text-hi) !important; font: var(--open-card-action-font) !important; letter-spacing: .025em !important;
+ text-transform: uppercase; white-space: normal; overflow-wrap: anywhere;
+}
+.event-modal.event-modal--reference :is(.event-modal__hero-rsvp,.event-modal__save[aria-pressed="true"]) { background: var(--c) !important; color: var(--z-black) !important; }
+.event-modal.event-modal--reference :is(.event-modal__hero-actions,.rg-detail-actions) { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin: 24px 0; }
+.event-modal.event-modal--reference .event-modal__hero-actions > a:first-child,
+.event-modal.event-modal--reference .rg-detail-actions > .pdxBtn--solid,
+.event-modal.event-modal--reference :is(.event-modal__hero-actions,.rg-detail-actions) > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+.event-modal.event-modal--reference :is(.event-modal__glass-panel,.rg-org-section) { border: 0; border-top: 1px solid color-mix(in srgb,var(--text-hi) 15%,transparent); border-radius: 0; background: transparent; box-shadow: none; padding: 16px 0; }
+.event-modal.eb-detail--resource .rg-detail-disclosure { background: transparent; box-shadow: none; }
+.event-modal.eb-detail--resource .rg-phone-block { margin: 20px 0; }
+.event-modal.eb-detail--resource .rg-phone-block .rg-safety-crisis { border-radius: 12px; background: var(--btn-glow-bg); box-shadow: var(--btn-glow-shadow); }
+.event-modal.eb-detail--resource .rg-phone-block .rg-safety-crisis span { font: var(--open-card-meta-font); }
+.event-modal.eb-detail--resource .rg-phone-block .rg-safety-crisis strong { font: var(--open-card-action-font); }
+.event-modal.event-modal--reference .event-modal__mizzed-door { margin-top: 24px; }
+.event-modal.event-modal--reference .event-modal__hero-actions .event-modal__tickets-mid.pdx-glass-btn { font: var(--open-card-action-font) !important; border-radius: 12px !important; background: var(--btn-glow-bg) !important; box-shadow: var(--btn-glow-shadow) !important; border-color: color-mix(in srgb,var(--c) 45%,transparent) !important; }
+.event-modal.event-modal--reference .event-modal__hero-actions > a:last-child { grid-column: 1 / -1; }
