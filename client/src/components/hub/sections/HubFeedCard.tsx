@@ -278,7 +278,7 @@ export default function HubFeedCard({ item, compact = false }: Props) {
   const openControl = (isSpotted || isBoard) ? (
     <button
       type="button"
-      className="hub-feed-card__open hub-feed-board__open"
+      className="hub-feed-card__open hub-feed-board__open pdx-glass-rebind"
       onClick={(e) => {
         e.stopPropagation();
         openCard();
@@ -287,7 +287,7 @@ export default function HubFeedCard({ item, compact = false }: Props) {
       {openLabelFor(item)} <span aria-hidden="true"><ArrowRight size={14} aria-hidden="true" /></span>
     </button>
   ) : canNavigateCard && href ? (
-    <Link href={href} className="hub-feed-card__open hub-feed-board__open" onClick={stopCardNav}>
+    <Link href={href} className="hub-feed-card__open hub-feed-board__open pdx-glass-rebind" onClick={stopCardNav}>
       {openLabelFor(item)} <span aria-hidden="true"><ArrowRight size={14} aria-hidden="true" /></span>
     </Link>
   ) : null;
