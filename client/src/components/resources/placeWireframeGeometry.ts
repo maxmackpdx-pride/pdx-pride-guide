@@ -77,12 +77,17 @@ function plant(d: Drawing) {
   d.line([0,-55,0],[0,60,0]);
   leaf(d,[0,-35,0],-1); leaf(d,[0,0,0],1); leaf(d,[0,25,0],-1,.7);
 }
-function flame(d: Drawing) {
+function flame(d: Drawing, campfire = false) {
   d.surface((v,u) => {
     const r = Math.sin(v*Math.PI)*47*(1-.5*v), a=u*tau;
     return [r*Math.cos(a)+25*v*v, -65+175*v, r*Math.sin(a)];
   }, 9, 12, true);
-  d.lathe(v => [10,-85+170*v], [0,0,0], 4, 8);
+  // Crossed cylindrical logs give the flame a recognizable campfire base.
+  if (!campfire) d.lathe(v => [10,-85+170*v], [0,0,0], 4, 8);
+  if (campfire) for (const direction of [-1, 1]) d.surface((u,v) => {
+    const along = -65 + 130*u, angle = v*tau;
+    return [along, -76 + 10*Math.cos(angle), direction*along*.6 + 10*Math.sin(angle)];
+  }, 4, 8, true);
 }
 function speaker(d: Drawing) {
   d.box([0,0,0],[130,190,50]);
@@ -132,6 +137,7 @@ export function placeWireframe(form: string, density = 1): PlaceWireframe {
     case 'gardenBrunch': bowl(d); leaf(d,[0,15,0],1,.7); break;
     case 'botanicalBottles': d.lathe(v=>[v>.65?18:43,-95+190*v],[0,0,0],9,12); leaf(d,[-30,-20,15],-1,.7); break;
     case 'fireWood': flame(d); break;
+    case 'campfire': flame(d, true); break;
     case 'coffeeMix': cup(d); break;
     case 'espressoCart': d.box([0,0,0],[140,135,70]); cup(d,[0,-65,45],.4); break;
     case 'coffeeBeer': cup(d,[-43,0,0],.7); d.lathe(v=>[27,-55+130*v],[65,0,0],6,10); break;
