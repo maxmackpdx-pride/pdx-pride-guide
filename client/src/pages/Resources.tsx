@@ -545,6 +545,7 @@ export default function Resources() {
           <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Talk to someone" aria-pressed={mode === "talk"} onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} /><span>Talk to someone</span></button>
           <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Immediate safety and support" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}><ShieldAlert size={19} /></button>
         </BrowseControls>
+        {mode === "directory" && <div className="eb-result-head"><p role="status">{rows.length} resource{rows.length === 1 ? "" : "s"}</p>{(categoryIds.length > 0 || searchQuery) && <button type="button" className="eb-clear" onClick={clear}>Clear filters</button>}</div>}
         <div className="eb-body">
           <aside className="eb-side" aria-label="NEEDZ filters and support">
             <div className="eb-panel eb-desktop-panel"><h2>Categories</h2><div className="eb-side-categories" role="group" aria-label="Filter resources">
@@ -559,7 +560,6 @@ export default function Resources() {
           </aside>
           <section className="eb-results" aria-label="Resource results">
             {mode === "talk" ? <><div className="eb-result-head"><h2>A person on the other end.</h2><button type="button" className="eb-clear" onClick={() => setMode("directory")}>Back to resources</button></div><div id="resource-talk-results"><TalkOptions /></div></> : <>
-              <div className="eb-result-head"><p role="status">{rows.length} resource{rows.length === 1 ? "" : "s"}</p>{(categoryIds.length > 0 || searchQuery) && <button type="button" className="eb-clear" onClick={clear}>Clear filters</button>}</div>
               {!rows.length ? <BrowseStatus title="No resources match your search" description="Try a broader search or another category." actionLabel="Clear filters" onAction={clear} /> : browseView === "browse" ?
                 <div className="eb-lanes">{selectedCategories.map(category => {
                   const group = rows.filter(row => categoriesFor(row).some(c => c.id === category.id)).sort((a, b) => Number(b.category.id === category.id) - Number(a.category.id === category.id));

@@ -832,7 +832,15 @@ export default function Events() {
                   >
                     <Grid size={18} aria-hidden="true" />View all
                   </button>
-                {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== DEFAULT_WINDOW) && !(filtered.length === 0 && !isLoading && !isError) && (
+                </div>
+              </BrowseToolbar>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <div className="eb-result-head events-result-head">
+            <p role="status" data-testid="events-result-count">{isLoading ? "Loading events…" : `${filtered.length} ${filtered.length === 1 ? "event" : "events"}`}</p>
+                {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== DEFAULT_WINDOW) && (
                   <button
                     type="button"
                     className="events-clear-filters"
@@ -846,12 +854,7 @@ export default function Events() {
                     Clear filters
                   </button>
                 )}
-                </div>
-              </BrowseToolbar>
-              </div>
-            </div>
-          </ScrollReveal>
-
+          </div>
           <div className="board-active-feed__body">
             {/* Desktop only (CSS): filters, map and the promoter path stay in view beside the feed. */}
             <aside className="events-side" aria-label="Filters">
@@ -890,7 +893,6 @@ export default function Events() {
                 </div>
               </section>
               <section className="events-side__panel pdx-glass-rebind" style={{ "--c": "var(--room-eventz)" } as React.CSSProperties}>
-                <p className="events-side__copy">{filtered.length} {filtered.length === 1 ? "event" : "events"} on this view.</p>
                 <button type="button" className="events-tool-btn events-tool-btn--block" onClick={() => setMapOpen(true)} data-testid="events-side-map">
                   <MapIcon size={18} aria-hidden="true" />Open the map
                 </button>

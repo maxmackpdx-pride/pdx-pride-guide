@@ -449,14 +449,6 @@ export default function Boards() {
                 </button>
               </div>
               <div className="eb-browse-actions">
-                <button type="button" className="eb-tool" aria-pressed={mineOnly} onClick={()=>user?update({mine:mineOnly?null:"1",saved:null},true):setShowAuth(true)} title="Edit your posts and manage active, pending, and completed listings">My posts</button>
-                <button type="button" className="eb-tool eb-view-all" aria-pressed={selection === "all"} onClick={() => select("all")}>
-                  <LayoutGrid size={18} aria-hidden="true" />View all
-                </button>
-              </div>
-            </div>
-            <div className="ab-browse">
-              <aside className="ab-sidebar">
                 <button
                   type="button"
                   className="ab-back"
@@ -465,6 +457,27 @@ export default function Boards() {
                   <ArrowLeft size={16} />
                   Choose a category
                 </button>
+
+                <button type="button" className="eb-tool" aria-pressed={mineOnly} onClick={()=>user?update({mine:mineOnly?null:"1",saved:null},true):setShowAuth(true)} title="Edit your posts and manage active, pending, and completed listings">My posts</button>
+                <button type="button" className="eb-tool eb-view-all" aria-pressed={selection === "all"} onClick={() => select("all")}>
+                  <LayoutGrid size={18} aria-hidden="true" />View all
+                </button>
+              </div>
+            </div>
+                <div className="eb-result-head">
+                  <p aria-live="polite">
+                    {loading
+                      ? "Loading boards…"
+                      : `${results.length} ${results.length === 1 ? "post" : "posts"}${savedOnly ? " · Saved" : ""}`}
+                  </p>
+                  {(query || intent !== "all" || savedOnly || mineOnly || hasFeatureFilters) && (
+                    <button type="button" className="eb-clear" onClick={clear}>
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+            <div className="ab-browse">
+              <aside className="ab-sidebar">
                 <section className="eb-panel ab-filter-panel">
                   <h2>{selectedCategory?.label || "Our BoardZ"}</h2>
                   <p>
@@ -527,18 +540,6 @@ export default function Boards() {
                 aria-label="Board posts"
                 aria-busy={loading}
               >
-                <div className="eb-result-head">
-                  <p aria-live="polite">
-                    {loading
-                      ? "Loading boards…"
-                      : `${results.length} ${results.length === 1 ? "post" : "posts"}${savedOnly ? " · Saved" : ""}`}
-                  </p>
-                  {(query || intent !== "all" || savedOnly || mineOnly || hasFeatureFilters) && (
-                    <button type="button" className="eb-clear" onClick={clear}>
-                      Clear filters
-                    </button>
-                  )}
-                </div>
                 {failed && (
                   <BrowseStatus
                     error
