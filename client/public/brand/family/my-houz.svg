@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="500" viewBox="0 0 1000 500" role="img" aria-labelledby="title desc">
+  <title id="title">MY HOÜZ</title>
+  <desc id="desc">My Hoüz: white angular MY, cyan HOÜ, and an oversized white terminal Z. Editable path artwork revised for Zaylist.</desc>
+  <g fill="#fff">
+    <path d="M64 100h35l29 35 28-35h36v82h-32v-43l-32 38-32-38v43H64z"/>
+    <path d="M205 100h36l24 31 24-31h37l-44 55v27h-33v-27z"/>
+  </g>
+  <g fill="#00ffff">
+    <path d="M64 252l42-42v65h64v-54l42-40v195h-42v-59h-64v51l-42 40z"/>
+    <path fill-rule="evenodd" d="M263 221h111l42 42v99l-42 42H263l-42-42v-99zm18 43-18 18v61l18 18h75l18-18v-61l-18-18z"/>
+    <path d="M434 221l43 43v80l19 19h40l19-19v-80l43-43v141l-42 42h-80l-42-42z"/>
+    <path d="M466 187a20 20 0 1 0 40 0 20 20 0 1 0-40 0M526 187a20 20 0 1 0 40 0 20 20 0 1 0-40 0"/>
+  </g>
+  <path fill="#fff" d="M583 147h341l-39 45-169 169h201l-42 43H585l177-202H624z"/>
+</svg>

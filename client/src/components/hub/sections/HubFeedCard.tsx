@@ -62,7 +62,7 @@ function openLabelFor(item: HubFeedItem): string {
     case "sellz":
       return "Open SELLZ listing";
     case "housing":
-      return "Open HAÜZ listing";
+      return "Open My Hoüz listing";
     case "outz":
       return "Open destination post";
     case "checkin":

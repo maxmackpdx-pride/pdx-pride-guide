@@ -248,7 +248,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     const lng = asNum(req.body?.lng);
     if (lat != null && lng != null && !withinHousingBounds(lat, lng)) {
       return res.status(400).json({
-        error: "That pin is outside THE HAÜZ region (Portland metro through the Willamette Valley to Salem).",
+        error: "That pin is outside My Hoüz region (Portland metro through the Willamette Valley to Salem).",
       });
     }
 
@@ -256,7 +256,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     if (mapPoint != null && (typeof mapPoint.lat !== "number" || typeof mapPoint.lng !== "number" ||
         !Number.isFinite(mapPoint.lat) || !Number.isFinite(mapPoint.lng) ||
         !withinHousingBounds(mapPoint.lat, mapPoint.lng))) {
-      return res.status(400).json({ error: "Shared map point must be in THE HAÜZ region." });
+      return res.status(400).json({ error: "Shared map point must be in My Hoüz region." });
     }
     const postId = createHousingPost(db, {
       userId,
@@ -333,7 +333,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       const lng = asNum(patch.lng) ?? post.lng ?? null;
       if (lat != null && lng != null && !withinHousingBounds(lat, lng)) {
         return res.status(400).json({
-          error: "That pin is outside THE HAÜZ region (Portland metro through the Willamette Valley to Salem).",
+          error: "That pin is outside My Hoüz region (Portland metro through the Willamette Valley to Salem).",
         });
       }
     }
@@ -522,7 +522,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
           ? `Waiting list: ${label}`
           : kind === "JOIN"
             ? `Asked to join ${label}`
-            : `THE HAÜZ: ${label}`;
+            : `My Hoüz: ${label}`;
       const msg = deps.sendMessage(userId, recipientId, subject, note || "Asked to chat about this post.", {
         contextType: "HOUSING",
         contextId: id,
@@ -573,7 +573,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       deps.sendMessage(
         userId,
         request.requester_user_id,
-        `Accepted: ${post?.displayName || "THE HAÜZ"}`,
+        `Accepted: ${post?.displayName || "My Hoüz"}`,
         post?.type === "FORMING" ? "You are in. Welcome to the household." : "Happy to chat.",
         {
           threadId: request.thread_id || undefined,
@@ -653,7 +653,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       deps.sendMessage(
         userId,
         request.recipient_user_id,
-        `Still hoping to connect: ${post?.displayName || "THE HAÜZ"}`,
+        `Still hoping to connect: ${post?.displayName || "My Hoüz"}`,
         "Just a nudge. Still interested when you have a moment.",
         {
           threadId: request.thread_id || undefined,

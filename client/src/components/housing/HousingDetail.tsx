@@ -135,7 +135,7 @@ function leadPerson(group: HousingInterestGroup): HousingPerson {
   };
 }
 
-function Back({ onBack, label = "Back to THE HAÜZ" }: { onBack: () => void; label?: string }) {
+function Back({ onBack, label = "Back to My Hoüz" }: { onBack: () => void; label?: string }) {
   return (
     <button type="button" className="hz-back" onClick={onBack}>
       <Mono>&#8592; {label}</Mono>
@@ -448,7 +448,7 @@ function LookingDetail({
             <div className="hz-chiprow" style={{ margin: "16px 0 12px" }}>
               <TypeTitle label={HOUSING_TYPE_KICKER.LOOKING} />
               {verified ? <Chip>{verified}</Chip> : null}
-              {post.openToHaus ? <Chip tone="haus">Open to forming or joining a HAÜZ</Chip> : null}
+              {post.openToHaus ? <Chip tone="haus">Open to forming or joining a Hoüz</Chip> : null}
             </div>
 
             <h2 className="hz-title hz-dttl">{post.author.displayName}</h2>
@@ -510,17 +510,17 @@ function LookingDetail({
           {isOwner && post.openToHaus ? (
             <div className="hz-sect">
               <SectionTitle kicker="Poster view" right={<Mono micro>Only you see this</Mono>}>
-                Turn this into a HAÜZ
+                Turn this into a Hoüz
               </SectionTitle>
               <p className="hz-prose">
-                You can turn this into a HAÜZ without losing the post or the replies. Same post, same
+                You can turn this into a Hoüz without losing the post or the replies. Same post, same
                 conversation, plus a shared workspace where the people who answer can pick places and dates
                 together.
               </p>
               <div style={{ marginTop: 12 }}>
                 <Btn kind="outline" onClick={() => h.onConvert?.()}>
                   <HousingIcon name="home" />
-                  Turn this into a HAÜZ
+                  Turn this into a Hoüz
                 </Btn>
               </div>
             </div>
@@ -653,7 +653,7 @@ function OfferingDetail({ post, h, isOwner }: { post: HousingPostView; h: Housin
         h={h}
         isOwner={isOwner}
         primary={
-          <RequestButton post={post} h={h} kind="CHAT" icon="message" label="Contact Haüz" />
+          <RequestButton post={post} h={h} kind="CHAT" icon="message" label="Contact Hoüz" />
         }
       />
     </div>
@@ -760,10 +760,10 @@ function ManagedDetail({ post, h }: { post: HousingPostView; h: HousingDetailHan
               kicker="Renters organizing"
               right={<Mono micro>{groups.length ? `${groups.length} forming` : "None yet"}</Mono>}
             >
-              Build a HAÜZ around this place
+              Build a Hoüz around this place
             </SectionTitle>
             <p className="hz-prose">
-              Nobody has to rent it alone. Start a HAÜZ and the unit lands on your shortlist as the target,
+              Nobody has to rent it alone. Start a Hoüz and the unit lands on your shortlist as the target,
               with the availability date already in your dates. This does not claim or reserve anything. The
               listing stays live and more than one group can form on it.
             </p>
@@ -798,7 +798,7 @@ function ManagedDetail({ post, h }: { post: HousingPostView; h: HousingDetailHan
             <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
               <Btn kind="solid" onClick={() => h.onBuildHaus?.()}>
                 <HousingIcon name="home" />
-                Build a HAÜZ around this place
+                Build a Hoüz around this place
               </Btn>
             </div>
           </div>
@@ -846,7 +846,7 @@ function ManagedDetail({ post, h }: { post: HousingPostView; h: HousingDetailHan
           {post.sourceDomain ? <Mono micro>{post.sourceDomain}</Mono> : null}
           <Btn kind="outline" onClick={() => h.onBuildHaus?.()}>
             <HousingIcon name="home" />
-            Build a HAÜZ
+            Build a Hoüz
           </Btn>
           {post.sourceUrl ? <BtnLink href={post.sourceUrl}>View listing</BtnLink> : null}
         </div>
@@ -874,7 +874,7 @@ function FormingDetail({
   const isFull = !!post.isFull;
   const seeking = post.seeking ?? 0;
   const lead = people.find((p) => p.role === "LEAD");
-  const title = post.photos.length ? post.displayName : "Build a HAÜZ";
+  const title = post.photos.length ? post.displayName : "Build a Hoüz";
 
   return (
     <div className="pdx-glass-rebind" style={accentStyle(post.type)}>
@@ -957,7 +957,7 @@ function FormingDetail({
               <div className="hz-note">
                 <HousingIcon name="community" size={15} />
                 <div>
-                  This HAÜZ is full. You can still join the waiting list, and the Lead reaches out if a spot
+                  This Hoüz is full. You can still join the waiting list, and the Lead reaches out if a spot
                   opens.
                 </div>
               </div>
@@ -966,7 +966,7 @@ function FormingDetail({
 
           {post.flavor ? (
             <div className="hz-sect">
-              <SectionTitle kicker="How this HAÜZ works">{FORMING_FLAVOR_LABEL[post.flavor]}</SectionTitle>
+              <SectionTitle kicker="How this Hoüz works">{FORMING_FLAVOR_LABEL[post.flavor]}</SectionTitle>
               <p className="hz-prose">{FLAVOR_NOTE[post.flavor]}</p>
             </div>
           ) : null}
@@ -1021,7 +1021,7 @@ function FormingDetail({
             <div className="hz-sect">
               <SectionTitle
                 kicker="Members only"
-                right={<Mono micro>{isOwner ? "You are the Lead" : "You are in this HAÜZ"}</Mono>}
+                right={<Mono micro>{isOwner ? "You are the Lead" : "You are in this Hoüz"}</Mono>}
               >
                 The house hunt
               </SectionTitle>

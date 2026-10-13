@@ -693,24 +693,24 @@ export default function MapzMapDemo() {
     </MapWorldPanel>];
   })) as Record<MapWorld,React.ReactNode>;
   const houzPanel = <section className="mapz-layer-panel" aria-labelledby="map-houz-title">
-    <div className="mapz-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">Haüz</h2></div>
+    <div className="mapz-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">My Hoüz</h2></div>
     <BoardFollowButton board="houz" />
-    {housingStats && <div className="mapz-houz-stats" aria-label="HAÜZ board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
-    <button type="button" className="mapz-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to HAÜZ</button>
-    <div className="mapz-layer-rail mapz-houz-actions" role="group" aria-label="Start a HAÜZ post">
+    {housingStats && <div className="mapz-houz-stats" aria-label="My Hoüz board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
+    <button type="button" className="mapz-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to My Hoüz</button>
+    <div className="mapz-layer-rail mapz-houz-actions" role="group" aria-label="Start a My Hoüz post">
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "OFFERING")) : setShowAuth(true)}>Offer a room</button>
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Find housing</button>
-      <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "FORMING")) : setShowAuth(true)}>Build a HAÜZ</button>
+      <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "FORMING")) : setShowAuth(true)}>Build a Hoüz</button>
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "PM")) : setShowAuth(true)}>List a rental</button>
     </div>
     <div className="mapz-layer-rail" role="group" aria-label="Housing types">
-      {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All HAÜZ" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
+      {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All My Hoüz" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
       <button type="button" aria-pressed={housingSaved} onClick={() => user ? setHousingSaved(!housingSaved) : setShowAuth(true)}>Saved</button>
     </div>
     <HousingTagFilter applied={housingTags} onApply={setHousingTags} />
-    {housingLoading ? <p role="status">Loading HAÜZ…</p> : housingError ? <p role="alert">HAÜZ could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
+    {housingLoading ? <p role="status">Loading My Hoüz…</p> : housingError ? <p role="alert">My Hoüz could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
     <p className="mapz-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
-    <details className="mapz-houz-about"><summary>How HAÜZ works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
+    <details className="mapz-houz-about"><summary>How My Hoüz works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
   </section>;
   const layers: MapzLayer[] = [
     { id: "events", label: ROOMS.eventz.nav, color: ROOMS.eventz.accent, enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
@@ -725,7 +725,7 @@ export default function MapzMapDemo() {
     { id:"gigz",label:ROOMS.gigz.nav,color:"var(--room-gigz-ink)",enabled:showGigz,onToggle:()=>toggleLayer("hideGigz"),panel:worldPanels.gigz,viewMore:[{label:"Browse all Gigz",href:"/gigz"}] },
     { id:"giftz",label:ROOMS.giftz.nav,color:ROOMS.giftz.accent,enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[{label:"Browse all Giftz",href:"/giftz"}] },
     { id:"sellz",label:ROOMS.sellz.nav,color:ROOMS.sellz.accent,enabled:showSellz,onToggle:()=>toggleLayer("hideSellz"),panel:worldPanels.sellz,viewMore:[{label:"Browse all Sellz",href:"/sellz"}] },
-    { id: "houz", label: ROOMS.hauz.nav, color: ROOMS.hauz.accent, enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "Browse all Haüz", href: "/the-hauz" }] },
+    { id: "houz", label: ROOMS.hauz.nav, color: ROOMS.hauz.accent, enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "Browse My Hoüz", href: "/boards?board=housing" }] },
   ];
 
   useAttendanceSummariesLive(dataReady);

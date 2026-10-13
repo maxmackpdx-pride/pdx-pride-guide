@@ -1,5 +1,5 @@
 /**
- * Post to THE HAÜZ.
+ * Post to My Hoüz.
  *
  * One question, four answers. The headline and any required cover photo get a
  * post started; optional details can be filled in later.
@@ -22,9 +22,9 @@ type PmMe = {
 };
 
 export default function HousingNew() {
-  usePageSeo("Post to THE HAÜZ", "Offer a room, look for housing, or start a household.", {
+  usePageSeo("Post to My Hoüz", "Offer a room, look for housing, or start a household.", {
     image: shareCardUrl("housing"),
-    imageAlt: "THE HAÜZ - housing board on Zaylist",
+    imageAlt: "My Hoüz - housing board on Zaylist",
   });
   const [, navigate] = useLocation();
   const { user, loading: authLoading } = useAuth();
@@ -82,10 +82,10 @@ export default function HousingNew() {
         isPropertyManager={!!pm?.approved}
         managerName={pm?.manager?.company || pm?.manager?.name || null}
         viewerDisplayName={user?.displayName ?? null}
-        onClose={() => navigate("/the-hauz")}
+        onClose={() => navigate("/boards?board=housing")}
         onPosted={(postId) => {
           queryClient.invalidateQueries({ queryKey: ["/api/housing"] });
-          navigate(`/the-hauz/${postId}`);
+          navigate(`/boards?board=housing&post=housing:${postId}`);
         }}
       />
     </div>

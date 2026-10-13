@@ -22,8 +22,8 @@ export type BoardIntent =
 export const boardCategories = [
   {
     id: "housing",
-    label: "Housing",
-    logo: "the-hauz.svg",
+    label: "My Hoüz",
+    logo: "my-houz.svg",
     color: ROOMS.hauz.accent,
     motif: "hauz",
     endpoint: "/api/housing",

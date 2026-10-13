@@ -118,7 +118,7 @@ export function spottedPostPath(id: number): string {
 }
 
 export function housingPostPath(id: number): string {
-  return `/the-hauz/${id}`;
+  return `/boards?board=housing&post=housing:${id}`;
 }
 
 /** Prefer a currently-happening listing; else first live/upcoming. */
@@ -188,12 +188,12 @@ export function mapEventSample(
 }
 
 export function mapHousingSample(post: HousingPostView): HomeStageCardData {
-  const kicker = HOUSING_TYPE_KICKER[post.type] || "THE HAÜZ";
+  const kicker = HOUSING_TYPE_KICKER[post.type] || "My Hoüz";
   const title =
     post.displayName ||
     housingDisplayName(post.type, post.name) ||
     post.headline ||
-    "THE HAÜZ post";
+    "My Hoüz post";
   const area = (post.areas || []).filter(Boolean).slice(0, 2).join(", ");
   const line = clip(post.headline || post.body || area || "Portland");
   const metaParts: string[] = [];
@@ -220,7 +220,7 @@ export function mapHousingSample(post: HousingPostView): HomeStageCardData {
     kicker: kicker.replace(/_/g, " "),
     title,
     line,
-    meta: metaParts.filter(Boolean).join(" · ") || "THE HAÜZ",
+    meta: metaParts.filter(Boolean).join(" · ") || "My Hoüz",
     cta,
     accent: ACCENT.housing,
     thumbUrl: post.photos?.[0] ?? null,
@@ -327,9 +327,9 @@ export function buildHomeStageSamples(input: {
 export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
   housing: {
     key: "housing",
-    href: "/the-hauz",
-    kicker: "FORMING A HAÜS",
-    title: "Wildrose haüs, 2 in, 2 to go",
+    href: "/boards?board=housing",
+    kicker: "BUILDING A HOÜZ",
+    title: "Wildrose Hoüz, 2 in, 2 to go",
     line: "Southeast. Big kitchen, one very polite beagle.",
     meta: "$850 · Feb 1 · 4 asks",
     cta: "Ask to join",

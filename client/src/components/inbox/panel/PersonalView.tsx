@@ -17,7 +17,7 @@ const CAT_TAG: Record<string, { label: string; color: string }> = {
   gigs: { label: "GIG", color: C.purple },
   gifting: { label: "GIFTING", color: C.lime },
   sellz: { label: "SELLZ", color: C.green },
-  housing: { label: "THE HAÜZ", color: C.cyan },
+  housing: { label: "My Hoüz", color: C.cyan },
   hosts: { label: "HOST", color: C.cyan },
   checkins: { label: "CHECK-IN", color: C.green },
   group: { label: "GROUP", color: C.limeSoft },

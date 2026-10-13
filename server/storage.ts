@@ -106,10 +106,10 @@ import { ensureSystemDiagnosticsTable } from "./systemDiagnostics";
 
 /** How a housing post announces itself in the hub feed. */
 const HOUSING_FEED_ACTION: Record<HousingType, string> = {
-  LOOKING: "Looking for housing on THE HAÜZ",
-  OFFERING: "Has a room open on THE HAÜZ",
-  FORMING: "Is forming a HAÜS",
-  MANAGED: "New managed unit on THE HAÜZ",
+  LOOKING: "Looking for housing on My Hoüz",
+  OFFERING: "Has a room open on My Hoüz",
+  FORMING: "Is building a Hoüz",
+  MANAGED: "New managed unit on My Hoüz",
 };
 
 /** getGigPosts LEFT JOINs users, so each row carries the poster's author
@@ -454,7 +454,7 @@ try {
   console.error("[businesses] column migration failed:", e);
 }
 
-// HAUSING - THE HAÜZ. See shared/schema.ts for the annotated schema.
+// HAUSING - My Hoüz. See shared/schema.ts for the annotated schema.
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS housing_posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -8272,8 +8272,8 @@ function bumpSavedHubFeedItems(items: HubFeedItem[], viewerUserId: number): void
       upsertHubFeedBump(items, {
         id: `housing-${row.id}`,
         kind: "housing",
-        badge: HOUSING_TYPE_LABEL[type] || "THE HAÜZ",
-        action: HOUSING_FEED_ACTION[type] || "Updated a HAÜZ post",
+        badge: HOUSING_TYPE_LABEL[type] || "My Hoüz",
+        action: HOUSING_FEED_ACTION[type] || "Updated a My Hoüz post",
         title: row.name || null,
         text: row.headline || null,
         createdAt: bumpedAt,

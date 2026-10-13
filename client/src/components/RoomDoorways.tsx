@@ -18,7 +18,7 @@ const NEXT_DOOR: Record<DoorRoom, DoorRoom[]> = {
 };
 const ROOM_LOGO: Record<DoorRoom, string> = {
   eventz: "/brand/family/eventz.png",
-  hauz: "/brand/family/the-hauz.svg",
+  hauz: "/brand/family/my-houz.svg",
   giftz: "/brand/family/giftz.svg",
   gigz: "/brand/family/gigz.svg",
   sellz: "/brand/family/sellz.svg",

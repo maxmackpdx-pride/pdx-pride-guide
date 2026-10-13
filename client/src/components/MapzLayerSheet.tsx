@@ -19,7 +19,7 @@ const LAYER_LOGOS: Record<MapzLayerId, string> = {
   gigz: "/brand/family/gigz.svg",
   giftz: "/brand/family/giftz.svg",
   sellz: "/brand/family/sellz.svg",
-  houz: "/brand/family/the-hauz.svg",
+  houz: "/brand/family/my-houz.svg",
 };
 
 export default function MapzLayerSheet({ layers, active, onActiveChange: setActive }: { layers: MapzLayer[]; active: MapzLayerId | null; onActiveChange: (id: MapzLayerId | null) => void }) {

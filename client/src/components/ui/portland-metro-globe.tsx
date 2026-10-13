@@ -100,7 +100,7 @@ const PRODUCT_WAYPOINTS: Venue[] = [
   { id: "gigz", name: "GIGZ", logo: "/brand/family/gigz.svg", color: "#8800ff" },
   { id: "outz", name: "OUTZide", logo: "/brand/outzide.png", color: "#ff6600" },
   { id: "sellz", name: "SELLZ", logo: "/brand/family/sellz.svg", color: "#39ff14" },
-  { id: "hauz", name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", color: "#00ffff" },
+  { id: "hauz", name: "My Hoüz", logo: "/brand/family/my-houz.svg", color: "#00ffff" },
 ].map((waypoint, index) => ({
   ...waypoint, coordinates: [0, 0], logoMode: "alpha",
   point: sphere(warp(-1+(index+.2+Math.random()*.6)/3,-.15,5,true),

@@ -170,6 +170,13 @@ function AppLayout() {
             <Route path="/sellz/new">{() => <MapWorldRedirect world="sellz" />}</Route>
             <Route path="/sellz">{() => <BoardEntrance board="sellz" tools={<Sellz />} />}</Route>
             <Route path="/sellz/">{() => <BoardEntrance board="sellz" tools={<Sellz />} />}</Route>
+            <Route path="/my-houz/new" component={HousingNew} />
+            <Route path="/my-houz/:id">{params => {
+              const search = new URLSearchParams(window.location.search);
+              search.set("post", params.id);
+              return <Redirect to={boardBrowseHref("housing", search.toString())} replace />;
+            }}</Route>
+            <Route path="/my-houz">{() => <BoardEntrance board="housing" tools={<Housing />} />}</Route>
             <Route path="/houz">{() => <BoardEntrance board="housing" tools={<Housing />} />}</Route>
             <Route path="/the-hauz/new" component={HousingNew} />
             <Route path="/the-hauz/:id">{params => {
