@@ -105,7 +105,7 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 .eb-category b { color: var(--category-readable); }
 /* Eventz card dimensions: full 200 × ~403; compact 136 × 170, enlarged 20%.
    Original motif SVGs, category colors, optical logos and motion stay intact. */
-.eb-page--places { --eb-card-width: var(--event-card-width); --eb-card-height: var(--event-card-height); --eb-card-radius: var(--event-card-radius); }
+.eb-page--places { --eb-card-width: var(--event-card-width); --eb-card-height: calc(var(--event-card-height) - 24px); --eb-card-radius: var(--event-card-radius); }
 .eb-page--resources { --eb-card-width: 163.2px; --eb-card-height: 204px; --eb-card-radius: 19.2px; }
 .eb-original-card { width: var(--eb-card-width); min-width: 0; }
 .eb-page .eb-original-card .rg-directory-card { margin: 0; width: 100%; min-height: 0; height: var(--eb-card-height); border-radius: var(--eb-card-radius); }

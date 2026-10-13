@@ -1,4 +1,5 @@
 import { ServiceNameMark } from "./ServiceNameMark";
+import { directoryCardCategoryLabel } from '@shared/directorySubcategories';
 import { serviceArtwork } from "@shared/serviceIdentity";
 import GigPreviewCard from "@/components/board/GigPreviewCard";
 import type { GigPost } from "@/pages/PrideWork";
@@ -320,7 +321,7 @@ export default function PlaceModal({
   if (!place) return null;
 
   const category = TYPE_TO_DS_CATEGORY[place.type] || "venues";
-  const categoryLabel = TYPE_LABELS[place.type] || place.type;
+  const categoryLabel = directoryCardCategoryLabel(place);
   const locations =
     Array.isArray(place.locations) && place.locations.length > 0
       ? place.locations
