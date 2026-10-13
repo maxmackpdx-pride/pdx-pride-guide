@@ -122,6 +122,7 @@ export type BoardPost = {
   isRemote?: boolean;
   source?: string;
   saved?: boolean;
+  tags?: string[];
 };
 export type BoardPayload =
   | HousingBoardResponse
@@ -150,7 +151,7 @@ const liveGiftStatuses = new Set([
   "OFFER_PENDING",
 ]);
 
-/** Adapt only public, real inventory; every detail and action remains owned by its board. */
+/** Adapt visible inventory and preserved demos; owner views can include inactive posts. */
 export function toBoardPosts(
   category: BoardCategory,
   payload: BoardPayload,
@@ -159,7 +160,6 @@ export function toBoardPosts(
   switch (category) {
     case "housing":
       return (payload as HousingBoardResponse).posts
-        .filter(() => true)
         .map((p) => ({
           ...base(category, p),
           intent: (

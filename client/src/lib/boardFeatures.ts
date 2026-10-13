@@ -5,17 +5,18 @@ export function boardFeaturePosts(category: BoardCategory, payload: BoardPayload
  const byId = new Map(raw.map(p => [p.id, p]));
  return toBoardPosts(category, payload, mine).map(post => {
   const p = byId.get(post.id) as unknown as Record<string, any>;
-  return {...post, isDemo: Boolean(p.isDemo), status: p.status, saved: Boolean(p.saved),
-   isMine: Boolean(p.isMine || (userId && (p.userId === userId || p.author?.id === userId))),
+  return {...post, isDemo: Boolean(p.isDemo), status: p.status, saved: Boolean(p.saved), tags: Array.isArray(p.tags) ? p.tags : [],
+   isMine: Boolean(p.isMine || (userId && (p.userId === userId || p.author?.userId === userId))),
    itemCategory: typeof p.category === "string" ? p.category : undefined, condition: p.condition,
    priceCents: p.priceCents, isRemote: Boolean(p.isRemote),
    source: p.eventId ? "events" : p.placeId ? "placez" : p.beachId ? "outzide" : "spot"};
  }).filter(post => !mine || post.isMine);
 }
 
-export function filterBoardFeatures(posts: BoardPost[], filters: {itemCategory?: string; condition?: string; price?: string; remote?: boolean; source?: string; neighborhood?: string; sort?: string}): BoardPost[] {
+export function filterBoardFeatures(posts: BoardPost[], filters: {itemCategory?: string; condition?: string; price?: string; remote?: boolean; source?: string; neighborhood?: string; sort?: string; tags?: string[]}): BoardPost[] {
  return posts.filter(p => (!filters.itemCategory || p.itemCategory === filters.itemCategory)
   && (!filters.condition || p.condition === filters.condition)
+  && (!filters.tags?.length || filters.tags.every(tag=>p.tags?.includes(tag)))
   && (!filters.remote || p.isRemote)
   && (!filters.source || p.source === filters.source)
   && (!filters.neighborhood || p.area.toLowerCase().includes(filters.neighborhood.toLowerCase()))
