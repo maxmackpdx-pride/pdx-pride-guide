@@ -8,7 +8,7 @@
 .eb-header__row { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .eb-header__identity { min-width: 0; }
 .eb-page .eb-kicker { margin: 0 0 8px; color: var(--c); font: 500 12px/1.2 var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase; }
-.eb-header h1 { margin: 0; width: clamp(220px, 30vw, 420px); height: 112px; display: flex; align-items: center; }
+.eb-header h1 { margin: 0; width: clamp(220px, 30vw, 420px); min-height: 112px; height:auto; display: flex; align-items: center; }
 .eb-header h1 img { width: 100%; height: auto; max-height: none; object-fit: contain; object-position: left center; }
 .eb-header__actions { display: flex; gap: 10px; flex: none; }
 .eb-page .eb-lede { max-width: 640px; margin: 16px 0 0; color: var(--text-body); font: 400 16px/1.55 var(--font-body); }
@@ -84,7 +84,7 @@
 @media (max-width: 600px) {
   .eb-page .eb-header { padding-top: 24px; padding-bottom: 16px; }
   .eb-header__row { gap: 12px; }
-  .eb-header h1 { width: min(54vw, 240px); height: 68px; }
+  .eb-header h1 { width: min(54vw, 240px); min-height: 68px; height:auto; }
   .eb-page .eb-kicker { font-size: 10px; }
   .eb-page .eb-lede { display: none; }
   .eb-header__actions :is(.board-share-button, .board-follow-button) { width: 44px; min-width: 44px; height: 44px; padding: 0; gap: 0; font-size: 0; }
@@ -329,3 +329,5 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: transparent; }
     padding: 28px 10px 54px;
   }
 }
+
+.eb-header h1 img { display:block; }

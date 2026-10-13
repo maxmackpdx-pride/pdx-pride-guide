@@ -10,7 +10,7 @@ const CSS = `
 .pdxSearch{
   display:flex; align-items:center; gap:10px;
   height:48px; padding:0 16px;
-  background:var(--surface-inset); color:var(--text-hi);
+  background:var(--z-oled); color:var(--text-hi);
   border:var(--bw-bold) solid var(--border-default); border-radius:var(--radius-pill);
   transition:border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
 }
