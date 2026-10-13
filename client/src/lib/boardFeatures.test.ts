@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { boardFeaturePosts, filterBoardFeatures } from "./boardFeatures";
+import { boardFeaturePosts, filterBoardFeatures, canSaveBoardPost } from "./boardFeatures";
 import { boardBrowseHref } from "./boardBrowseHref";
 import type { BoardPayload, BoardPost } from "./allBoards";
 
@@ -48,3 +48,5 @@ test("open-grab gifting is a distinct retained subsection",()=>{
  const rows=boardFeaturePosts("giftz",payload);
  assert.equal(rows[0].intent,"grab");assert.equal(rows[0].isDemo,true);
 });
+
+test("completed and demo posts cannot become new saved availability",()=>{const posts=boardFeaturePosts("gigz",gigPayload,7,true);assert.equal(canSaveBoardPost(posts.find(p=>p.id===1)!),true);assert.equal(canSaveBoardPost(posts.find(p=>p.id===3)!),false);assert.equal(canSaveBoardPost(boardFeaturePosts("gigz",gigPayload)[1]),false);});
