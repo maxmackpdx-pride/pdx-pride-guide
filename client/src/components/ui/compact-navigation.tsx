@@ -14,7 +14,7 @@ import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
 
 const ICONS: Record<string, LucideIcon> = {
   Home, About: Info, Eventz: CalendarDays, Placez: MapPin, Mapz: Map,
-  OutZide: TreePine, "Z/Lists": Layers, "My Hoüz": House, Boards: LayoutGrid, Resources: LifeBuoy, ReZources: LifeBuoy,
+  OutZide: TreePine, "Z/Lists": Layers, "My Hoüz": House, Boards: LayoutGrid, Resources: LifeBuoy, NEEDZ: LifeBuoy,
 };
 const entryKey = (entry: NavEntry) => entry.type === "link" ? entry.href : entry.id;
 const entryActive = (entry: NavEntry, location: string) => entry.type === "link"

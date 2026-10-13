@@ -194,6 +194,7 @@ export function GigListingCard({
   skills,
   isLooking,
   onToggle,
+  presentation,
 }: {
   gig: GigPost;
   accent: string;
@@ -201,6 +202,7 @@ export function GigListingCard({
   skills: string[];
   isLooking: boolean;
   onToggle: () => void;
+  presentation?: "eventz";
 }) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -246,7 +248,7 @@ export function GigListingCard({
 
   const posterLabel = gig.username ? `@${gig.username}` : gig.name;
   const locationLabel = gig.location || "Portland";
-  const status = [gig.compensation, gig.location].filter(Boolean).join(" · ")
+  const status = [gig.compensation, ...(presentation ? [] : [gig.location])].filter(Boolean).join(" · ")
     || (isLooking ? "Available · message in inbox" : "Open · reply privately");
   const cta = isLooking ? "Say hi" : "Reply";
   const profileHref = gig.username ? memberProfileHref(gig.username) : null;
@@ -386,7 +388,12 @@ export function GigListingCard({
       {expanded && (
         <div className="board-listing-card__expand">
           <p style={{ whiteSpace: "pre-line" }}>{gig.description}</p>
-          {(skills.length > 0 || gig.compensation || gig.location) && (
+          {presentation ? skills.length > 0 && (
+            <section className="ab-gig-skills" aria-label="Skills">
+              <h5>Skills</h5>
+              <div>{skills.map((skill, index) => <span key={`${skill}-${index}`}>{skill}</span>)}</div>
+            </section>
+          ) : (skills.length > 0 || gig.compensation || gig.location) && (
             <div className="gifting-details">
               {[skills.join(", "), gig.compensation, gig.location].filter(Boolean).join(" · ")}
             </div>

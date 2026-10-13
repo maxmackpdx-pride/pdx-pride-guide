@@ -12,7 +12,7 @@
 .eb-header h1 img { width: 100%; height: auto; max-height: none; object-fit: contain; object-position: left center; }
 .eb-header__actions { display: flex; gap: 10px; flex: none; }
 .eb-page .eb-lede { max-width: 640px; margin: 16px 0 0; color: var(--text-body); font: 400 16px/1.55 var(--font-body); }
-.eb-controls { position: sticky; top: var(--site-header-sticky-edge, var(--site-header-height, 80px)); z-index: 20; padding-block: 8px 16px; background: color-mix(in srgb, var(--z-black) 94%, transparent); backdrop-filter: blur(12px); }
+.eb-controls { position: sticky; top: var(--site-header-sticky-edge, var(--site-header-height, 80px)); z-index: 20; padding-block: 8px 16px; background: transparent; backdrop-filter: none; }
 .eb-category-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .eb-categories { display: flex; flex: 1; min-width: 0; gap: 12px; overflow-x: auto; padding: 10px 10px 6px 2px; scrollbar-width: none; }
 .eb-category { position: relative; flex: none; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 5px; min-width: 100px; min-height: 60px; padding: 8px 14px; border: 1.5px solid color-mix(in srgb, var(--c) 42%, transparent); border-radius: 14px; background: var(--z-oled); color: var(--c); cursor: pointer; }
@@ -97,7 +97,7 @@
   .eb-footer { flex-direction: column; align-items: flex-start; }
 }
 @media (prefers-reduced-motion: reduce) { .eb-page *, .eb-page *::before, .eb-page *::after { scroll-behavior: auto; } }
-html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black); }
+html.calm-mode .eb-controls { backdrop-filter: none; background: transparent; }
 .eb-page--resources { --rg-ink: var(--z-black); --rg-text: var(--res-text); --rg-body: var(--res-secondary-text); --rg-muted: var(--res-caption); --rg-line: var(--res-control-border); }
 .eb-page .eb-header__actions > .eb-tool { white-space: nowrap; }
 @media (max-width: 600px) { .eb-header__actions > .eb-tool { width: 44px; padding: 0; } .eb-header__actions > .eb-tool span { display: none; } }

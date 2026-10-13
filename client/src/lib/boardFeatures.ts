@@ -21,7 +21,7 @@ export function filterBoardFeatures(posts: BoardPost[], filters: {itemCategory?:
   && (!filters.source || p.source === filters.source)
   && (!filters.neighborhood || p.area.toLowerCase().includes(filters.neighborhood.toLowerCase()))
   && (!filters.price || (p.priceCents !== undefined && (filters.price === "under25" ? p.priceCents < 2500 : filters.price === "25to100" ? p.priceCents >= 2500 && p.priceCents <= 10000 : p.priceCents > 10000))))
-  .sort((a,b) => Number(a.isDemo) - Number(b.isDemo) || (filters.sort === "price-low" ? (a.priceCents ?? 0)-(b.priceCents ?? 0) : filters.sort === "price-high" ? (b.priceCents ?? 0)-(a.priceCents ?? 0) : filters.sort === "oldest" ? Date.parse(a.createdAt)-Date.parse(b.createdAt) : Date.parse(b.createdAt)-Date.parse(a.createdAt)));
+  .sort((a,b) => (filters.sort === "price-low" || filters.sort === "price-high" ? Number(a.isDemo) - Number(b.isDemo) : 0) || (filters.sort === "price-low" ? (a.priceCents ?? 0)-(b.priceCents ?? 0) : filters.sort === "price-high" ? (b.priceCents ?? 0)-(a.priceCents ?? 0) : filters.sort === "oldest" ? Date.parse(a.createdAt)-Date.parse(b.createdAt) : Date.parse(b.createdAt)-Date.parse(a.createdAt)));
 }
 
 export function canSaveBoardPost(post: BoardPost): boolean {
