@@ -221,7 +221,7 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 }
 .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__mediaGlow { display: none; }
 .eb-page--places .eb-original-card .rg-directory-card .rg-card-motif {
-  transform: scale(1.32); transform-origin: center;
+  transform: scale(1.254); transform-origin: 50% 50%;
 }
 
 /* Placez content rhythm below the logo, within the Eventz frame. */
@@ -250,3 +250,13 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 .eb-page--places .rg-card-motif .rg-motif-mesh { opacity: .55; stroke-width: .85; }
 .eb-page--places .rg-card-motif .rg-motif-circuits { opacity: .65; stroke-width: 1; }
 .eb-page--places .rg-card-motif .rg-motif-nodes { opacity: 1; stroke: currentColor; stroke-width: .6; }
+
+/* Keep the mesh visible at the crown; the front motif stays fine and centered. */
+.eb-page--places .eb-original-card .rg-directory-card .rg-card-motif {
+  mask-image: linear-gradient(var(--z-black) 0%, var(--z-black) 64%, transparent 90%);
+}
+.eb-page--places .rg-card-motif .rg-motif-object { filter: none; }
+.eb-page--places .rg-card-motif .rg-motif-object > path:nth-child(4) { stroke-width: 1.05; }
+.eb-page--places .rg-card-motif .rg-motif-object > path:nth-child(2),
+.eb-page--places .rg-card-motif .rg-motif-object > path:nth-child(3) { stroke-width: .5; }
+.eb-page--places .rg-card-motif .rg-motif-signal-trace { stroke-width: .8; }

@@ -62,7 +62,8 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
  const paint = colors && colors.length > 1 ? `url(#${gradientId})` : "currentColor";
  let seed = Array.from(name).reduce((n,c)=>Math.imul(n,31)+c.charCodeAt(0)|0,7) >>> 0;
  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
- const nodes=Array.from({length:30},(_,i)=>({x:20+random()*360,y:125+random()*290,r:i%7===0?2.4:1.1}));
+ const isPlace = category.startsWith("place-");
+ const nodes=Array.from({length:30},(_,i)=>({x:20+random()*360,y:(isPlace ? 25 : 125)+random()*(isPlace ? 420 : 290),r:i%7===0?2.4:1.1}));
  const theme=themeFor(name,category);
  const silhouette = category.startsWith("place-") ? distinctPlaceMotif(name) ?? silhouettes[theme] : distinctResourceMotifs[name] ?? silhouettes[theme];
  const tilt=(random()-.5)*12;
@@ -71,7 +72,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
  const circuits = Array.from({ length: 5 }, (_, i) => {
   const left = i % 2 === 0;
   const x = left ? 18 + random() * 32 : 350 + random() * 30;
-  const y = 140 + i * 43 + random() * 18;
+  const y = (isPlace ? 35 : 140) + i * (isPlace ? 78 : 43) + random() * 18;
   const reach = (left ? 1 : -1) * (28 + random() * 45);
   const rise = (random() - .5) * 45;
   return { x, y, endX: x + reach, endY: y + rise,
