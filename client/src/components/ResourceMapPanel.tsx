@@ -7,6 +7,7 @@ import { inMapBounds, type MapBounds } from '@/lib/mapWorlds';
 import './ResourceMapPanel.css';
 
 type Props = {
+  entries?: ResourceMapEntry[];
   bounds: MapBounds | null;
   query: string;
   category: string;
@@ -16,13 +17,13 @@ type Props = {
   onClearSelection: () => void;
 };
 
-export default function ResourceMapPanel({ bounds, query, category, onQuery, onCategory, selectedKeys, onClearSelection }: Props) {
+export default function ResourceMapPanel({ entries = RESOURCE_MAP_ENTRIES, bounds, query, category, onQuery, onCategory, selectedKeys, onClearSelection }: Props) {
   const [limit, setLimit] = useState(40);
-  const matching = useMemo(() => RESOURCE_MAP_ENTRIES.filter(({ org, categories }) => {
+  const matching = useMemo(() => entries.filter(({ org, categories }) => {
     if (category && !categories.some(item => item.id === category || org.categoryIds?.includes(category))) return false;
     const text = [org.name, org.desc, org.scope, org.addr, ...categories.map(item => item.name), ...(org.serviceTags || [])].join(' ').toLowerCase();
     return text.includes(query.trim().toLowerCase());
-  }), [query, category]);
+  }), [entries, query, category]);
   const inView = matching.filter(entry => entry.locations.some((location, index) => inMapBounds(location, bounds) && (!selectedKeys.length || selectedKeys.includes(resourceMapKey(entry.org.name, index)))));
   const withoutPin = matching.filter(entry => !entry.locations.length);
   const renderEntry = (entry: ResourceMapEntry) => <a className="resource-map-result" key={entry.org.name} href={resourceMapHref(entry.org.name)}>
@@ -44,8 +45,8 @@ export default function ResourceMapPanel({ bounds, query, category, onQuery, onC
       <div className="resource-map-results">{inView.slice(0, limit).map(renderEntry)}</div>
       {inView.length > limit && <button className="resource-map-more" type="button" onClick={() => setLimit(value => value + 40)}>Show more ({inView.length - limit})</button>}
       {!inView.length && <p className="resource-map-empty">No mapped NEEDZ in this view. Move the map or broaden the filters.</p>}
-      {withoutPin.length > 0 && <details className="resource-map-unlocated"><summary>{withoutPin.length} more NEEDZ without a map pin</summary>
-        <p>These providers have no verified map coordinates. Their details and contact options are still available.</p>
+      {withoutPin.length > 0 && <details className="resource-map-unlocated" open={Boolean(category)}><summary>{withoutPin.length} more NEEDZ without a map pin</summary>
+        <p>These entries have no verified map coordinates. Their details and contact options are still available.</p>
         <div className="resource-map-results">{withoutPin.map(renderEntry)}</div>
       </details>}
   </section>;

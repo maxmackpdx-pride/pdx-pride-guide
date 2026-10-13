@@ -1,10 +1,11 @@
+import { communityResourceMapEntries } from '@/lib/communityResourceMap';
 import { Button } from "@/components/ds";
 import "./AllBoards.css";
 import { oneShotMapLocation } from "@/lib/oneShotMapLocation";
 import { serviceIdentity, serviceWaypointLogo } from "@shared/serviceIdentity";
 import { useMapzActive, useMapzCameraRecorder } from "@/components/RetainedMapzRoute";
 import ResourceMapPanel from '@/components/ResourceMapPanel';
-import { RESOURCE_MAP_ENTRIES, resourceMapHref, resourceMapKey, type ResourceMapEntry } from '@/lib/resourceMap';
+import { resourceMapHref, resourceMapKey, type ResourceMapEntry } from '@/lib/resourceMap';
 import {eventNight} from '../../public/mapz-map/event-night.js';
 import { DetailRoomLinkContext, type DetailRoomLinkValue } from "@/components/DetailRoomLink";
 import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
@@ -369,11 +370,6 @@ export default function MapzMapDemo() {
   const resourceQuery = params.get('resources.q') || '';
   const resourceCategory = params.get('resources.category') || '';
   const selectedResourceKeys = (params.get('resources.ids') || '').split(',').filter(Boolean);
-  const visibleResources = useMemo(() => RESOURCE_MAP_ENTRIES.filter(({ org, categories }) => {
-    if (resourceCategory && !categories.some(item => item.id === resourceCategory || org.categoryIds?.includes(resourceCategory))) return false;
-    return [org.name, org.desc, org.scope, org.addr, ...categories.map(item => item.name), ...(org.serviceTags || [])]
-      .join(' ').toLowerCase().includes(resourceQuery.trim().toLowerCase());
-  }), [resourceQuery, resourceCategory]);
   const housingValue = params.get("housingType");
   const housingType = ["OFFERING", "LOOKING", "FORMING", "MANAGED"].includes(housingValue || "") ? housingValue as HousingType : null;
   const setHousingType = (value: HousingType | null) => updateParams(p => { if (value) p.set("housingType", value); else p.delete("housingType"); });
@@ -494,6 +490,13 @@ export default function MapzMapDemo() {
   const { data: events = EMPTY_EVENTS, isPending: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], enabled:active, queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
   const { data: communities = EMPTY_COMMUNITIES } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], enabled:active, queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
   const { data: places = EMPTY_PLACES, isPending: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], enabled:active, queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
+  const publicCommunityPlaceIds = useMemo(() => new Set(communities.filter(item => item.visibility !== "private").map(item => item.sourcePlaceId).filter(id => id != null)), [communities]);
+  const resourceEntries = useMemo(() => communityResourceMapEntries(communities, places), [communities, places]);
+  const visibleResources = useMemo(() => resourceEntries.filter(({ org, categories }) => {
+    if (resourceCategory && !categories.some(item => item.id === resourceCategory || org.categoryIds?.includes(resourceCategory))) return false;
+    return [org.name, org.desc, org.scope, org.addr, ...categories.map(item => item.name), ...(org.serviceTags || [])]
+      .join(' ').toLowerCase().includes(resourceQuery.trim().toLowerCase());
+  }), [resourceEntries, resourceQuery, resourceCategory]);
   const { data: housingRaw, isPending: housingLoading, isError: housingError, refetch: retryHousing } = useQuery<unknown>({ queryKey: ["/api/housing", "map"], enabled:active, queryFn: () => apiRequest("GET", "/api/housing").then(r => r.json()) });
   const { data: boardMapPoints = [] } = useQuery<Array<{board:string;postId:number;lat:number;lng:number}>>({queryKey:["/api/board-map-locations"],enabled:active,queryFn:()=>apiRequest("GET","/api/board-map-locations").then(r=>r.json())});
   const { data: mizzed = [], isPending: mizzedLoading, isError: mizzedError, refetch: retryMizzed } = useQuery<MissedConnectionPost[]>({ queryKey: ["/api/missed-connections"], enabled:active, queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()) });
@@ -618,7 +621,7 @@ export default function MapzMapDemo() {
     })) as unknown as Record<MapWorld,WorldRow[]>;
   },[places,mizzed,gigs,gifts,sells,mineQueries[0].data,mineQueries[1].data,mineQueries[2].data,mineQueries[3].data,params,boardMapPoints,viewerPoint,mapCenter]);
   const filteredWorlds=useMemo(()=>Object.fromEntries((Object.keys(locatedWorlds) as MapWorld[]).map(world=>[world,filterWorldRows(locatedWorlds[world],world,params,savedSellzSet)])) as Record<MapWorld,WorldRow[]>,[locatedWorlds,params,savedSellzSet]);
-  const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>(place as Place).type!=='nonprofit'&&placeTypes.includes(mapzPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes]);
+  const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>(place as Place).type!=='nonprofit'&&((place as Place).type!=='group'||!publicCommunityPlaceIds.has((place as Place).id))&&placeTypes.includes(mapzPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes,publicCommunityPlaceIds]);
   const visibleHousing = useMemo(() => housing
     .filter(row => (!housingType || row.type === housingType || (housingType === "FORMING" && row.type === "LOOKING" && row.openToHaus === true)) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
     .map(row => ({ ...row, _board: "My Hoüz", locationLabel: row.lat != null && row.lng != null
@@ -738,7 +741,7 @@ export default function MapzMapDemo() {
     { id: "events", label: ROOMS.eventz.nav, color: ROOMS.eventz.accent, enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
     { id:"places",label:ROOMS.placez.nav,color:ROOMS.placez.accent,enabled:showPlaces,onToggle:()=>toggleLayer("hidePlaces"),panel:worldPanels.places,viewMore:[{label:"Browse all Placez",href:"/directory"}] },
     { id:'rezources',label:'NEEDZ',color:'var(--neon-yellow)',enabled:showResources,onToggle:()=>toggleLayer('hideResources'),
-      panel:<ResourceMapPanel bounds={mapBounds} query={resourceQuery} category={resourceCategory}
+      panel:<ResourceMapPanel entries={resourceEntries} bounds={mapBounds} query={resourceQuery} category={resourceCategory}
         selectedKeys={selectedResourceKeys} onClearSelection={()=>updateParams(p=>p.delete('resources.ids'))}
         onQuery={value=>updateParams(p=>{if(value)p.set('resources.q',value);else p.delete('resources.q');p.delete('resources.ids');})}
         onCategory={value=>updateParams(p=>{if(value)p.set('resources.category',value);else p.delete('resources.category');p.delete('resources.ids');})} />,
