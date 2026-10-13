@@ -32,7 +32,7 @@ export function distinctPlaceMotif(name: string): PlaceWireframe | undefined {
 
 // A second, related object occupies its own offset plane behind the logo.
 const supportingForms: Record<string, string> = {
- danceScreen: 'ringCocktail', gathering: 'campfire', dragStage: 'starStage', antlers: 'wineRoom',
+ danceScreen: 'ringCocktail', gathering: 'pineTree', dragStage: 'starStage', antlers: 'wineRoom',
  wingsLinks: 'ringCocktail', lounge: 'wineRoom', starStage: 'karaoke', fireWood: 'bowlChopsticks',
  trophyBall: 'coffeeBeer', taco: 'fireWood', bowlChopsticks: 'plantHouse', coffeeMix: 'bagel',
  gardenBrunch: 'coffeeMix', espressoCart: 'coffeeMix', coffeeBeer: 'coffeeMix', wineRoom: 'plantHouse',

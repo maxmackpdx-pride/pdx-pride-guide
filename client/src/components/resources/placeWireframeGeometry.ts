@@ -138,6 +138,11 @@ export function placeWireframe(form: string, density = 1): PlaceWireframe {
     case 'botanicalBottles': d.lathe(v=>[v>.65?18:43,-95+190*v],[0,0,0],9,12); leaf(d,[-30,-20,15],-1,.7); break;
     case 'fireWood': flame(d); break;
     case 'campfire': flame(d, true); break;
+    case 'pineTree':
+      d.lathe(v => [7,-105+55*v],[0,0,0],3,8);
+      for (const [radius,base,height] of [[65,-65,85],[48,-20,85],[32,25,80]])
+        d.lathe(v => [radius*(1-v),base+height*v],[0,0,0],4,12);
+      break;
     case 'coffeeMix': cup(d); break;
     case 'espressoCart': d.box([0,0,0],[140,135,70]); cup(d,[0,-65,45],.4); break;
     case 'coffeeBeer': cup(d,[-43,0,0],.7); d.lathe(v=>[27,-55+130*v],[65,0,0],6,10); break;
