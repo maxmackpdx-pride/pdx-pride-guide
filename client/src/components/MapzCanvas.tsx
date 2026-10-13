@@ -13,7 +13,7 @@ const MAX_3D_ATTEMPTS=3;
 
 const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onCluster,onMode,onView},ref){
  const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onCluster,onMode,onView});latest.current={onFailure,onVisible,onSelect,onCluster,onMode,onView};
- const failed=useRef(false),restoreView=useRef(initialView);
+ const failed=useRef(false),restoreView=useRef(initialView),sentSelection=useRef<{key:string|null}|null>(null);
  const [phase,setPhase]=useState('loading'),[firstFrame,setFirstFrame]=useState(false),[ready,setReady]=useState(false);
  const post=(type:string,data:Record<string,unknown>={})=>frame.current?.contentWindow?.postMessage({source:'mapz-host',type,...data},window.location.origin);
  useImperativeHandle(ref,()=>({send:post}),[]);
@@ -58,7 +58,7 @@ const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,row
  useEffect(()=>{if(ready&&active)post('data',{rows});},[ready,serialized,active]);
  useEffect(()=>{if(ready)post('visibility',{active});},[ready,active]);
  useEffect(()=>{if(ready&&restoreView.current)post('view',{center:restoreView.current.center,zoom:restoreView.current.zoom,pitch:restoreView.current.pitch,bearing:restoreView.current.bearing});},[ready]);
- useEffect(()=>{if(ready&&active)post('select',{key:selected});},[ready,selected,active]);
+ useEffect(()=>{if(!ready||!active||sentSelection.current?.key===selected)return;sentSelection.current={key:selected};post('select',{key:selected});},[ready,selected,active]);
  useEffect(()=>{if(ready)post('labels',{enabled:labelsEnabled});},[ready,labelsEnabled]);
  useEffect(()=>{if(ready)post('time',{timestamp:viewTime});},[ready,viewTime]);
  useEffect(()=>{

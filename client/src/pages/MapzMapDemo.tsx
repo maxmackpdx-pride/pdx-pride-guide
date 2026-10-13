@@ -1,3 +1,4 @@
+import { oneShotMapLocation } from "@/lib/oneShotMapLocation";
 import { serviceIdentity, serviceWaypointLogo } from "@shared/serviceIdentity";
 import { useMapzActive, useMapzCameraRecorder } from "@/components/RetainedMapzRoute";
 import ResourceMapPanel from '@/components/ResourceMapPanel';
@@ -397,6 +398,12 @@ export default function MapzMapDemo() {
   const requestedPrivateAction=["compose","houzCompose","gigz.view","giftz.view","sellz.view","mizzed.view"].map(key=>params.get(key)||"").join("|");
   useEffect(()=>{if(active && !authLoading && !user && requestedPrivateAction.replaceAll("|","").length)setShowAuth(true);},[active,authLoading,user,requestedPrivateAction]);
   const [locating, setLocating] = useState(false);
+  const cancelLocation=useRef<(()=>void)|null>(null);
+  useLayoutEffect(()=>{
+    const stop=()=>{cancelLocation.current?.();cancelLocation.current=null;};
+    if(!active){stop();setLocating(false);}
+    return stop;
+  },[active]);
   const [locateError, setLocateError] = useState("");
   const mapRef = useRef<MapzHandle | null>(null);
   const requestedCamera = [params.get("lat"),params.get("lng"),params.get("zoom"),params.get("pitch"),params.get("bearing")].join("|");
@@ -469,7 +476,8 @@ export default function MapzMapDemo() {
     if (!navigator.geolocation) { setLocateError("Location is not available on this device."); return; }
     setLocating(true);
     setLocateError("");
-    navigator.geolocation.getCurrentPosition(position => {
+    cancelLocation.current?.();
+    cancelLocation.current=oneShotMapLocation(navigator.geolocation,position => {
       const point: [number, number] = [position.coords.latitude, position.coords.longitude];
       if(point[0]<45.2||point[0]>45.85||point[1]<-123.15||point[1]>-122.15){setLocateError("You’re outside this Portland metro demo.");setLocating(false);return;}
       setMapCenter(point);
@@ -479,7 +487,7 @@ export default function MapzMapDemo() {
     }, () => {
       setLocateError("We could not find your location.");
       setLocating(false);
-    }, { enableHighAccuracy: true, timeout: 12000 });
+    }, () => activity.current);
   }, [locationAvatar]);
   const { data: events = EMPTY_EVENTS, isPending: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], enabled:active, queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
   const { data: communities = EMPTY_COMMUNITIES } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], enabled:active, queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
