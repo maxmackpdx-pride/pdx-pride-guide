@@ -20,7 +20,7 @@ import RedgifsMedia from "@/components/RedgifsMedia";
 import "./ZIndex.css";
 import { roomTitle } from "@/lib/rooms";
 
-export default function Community({ params }: { params: { communitySlug: string } }) {
+export default function Community({ params, embedded = false }: { params: { communitySlug: string }; embedded?: boolean }) {
   const slug = params.communitySlug.toLowerCase();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -49,7 +49,7 @@ export default function Community({ params }: { params: { communitySlug: string 
   const key = `/api/communities/${encodeURIComponent(slug)}`;
   const community = useQuery<CommunityDetail>({ queryKey: [key], retry: false });
   const manage = useQuery<any>({ queryKey: [`${key}/manage`], enabled: managing });
-  usePageSeo(roomTitle("zlists", community.data?.name), community.data?.description || "A Zaylist community.");
+  usePageSeo(roomTitle("zlists", community.data?.name), community.data?.description || "A Zaylist community.", {skip: embedded});
   const refresh = async () => { await queryClient.invalidateQueries({ queryKey: [key] }); await queryClient.invalidateQueries({ queryKey: ["/api/communities"] }); };
   const membership = useMutation({
     mutationFn: async () => community.data?.viewerRole ? apiRequest("DELETE", `${key}/membership`) : apiRequest("POST", `${key}/join`, {}),
@@ -95,7 +95,7 @@ export default function Community({ params }: { params: { communitySlug: string 
       else { await navigator.clipboard.writeText(url); setNotice("Link copied."); }
     } catch (err) { if ((err as Error).name !== "AbortError") setError("The link could not be shared."); }
   };
-  const pageUrl = `${window.location.origin}/z/${item.slug}`;
+  const pageUrl = `${window.location.origin}${embedded ? `/needz?cat=community&community=${encodeURIComponent(item.slug)}` : `/z/${item.slug}`}`;
   function voteButtons(entry: CommunityPost) {
     return <div className="z-community-votes" aria-label={`Score ${entry.score}`}>
       <button type="button" aria-label={`Upvote ${entry.author.username}'s post`} aria-pressed={entry.viewerVote === 1} disabled={!item.viewerRole || vote.isPending} onClick={() => vote.mutate({ id: entry.id, value: entry.viewerVote === 1 ? 0 : 1 })}><ArrowBigUp size={20}/></button>
@@ -117,12 +117,12 @@ export default function Community({ params }: { params: { communitySlug: string 
       {reportPostId === entry.id ? <form onSubmit={event => { event.preventDefault(); act.mutate({ method: "POST", path: `/posts/${entry.id}/report`, body: { reason: reportReason } }); }}><label>Why are you reporting this message?<textarea value={reportReason} onChange={event => setReportReason(event.target.value)} minLength={5} maxLength={500} required/></label><Button type="submit" disabled={act.isPending}>SEND REPORT</Button><Button type="button" onClick={() => setReportPostId(null)}>CANCEL</Button></form> : null}
     </>;
   }
-  return <div className="z-communities z-community-detail board-shader-page" data-shader-room="zlists">
-    <BoardShader room="zlists" />
-    <div className="z-community-detail__toolbar"><Link href="/z" className="z-community-detail__back"><ArrowLeft size={19}/> Z/ LIST</Link><div className="z-community-detail__tools"><button type="button" aria-label="Search posts" aria-expanded={searchOpen} onClick={() => { setFeedTab("posts"); setSearchOpen(value => !value); }}><Search size={19}/></button><button type="button" aria-label="Create post" onClick={() => { setFeedTab("posts"); setComposerOpen(true); document.querySelector(".z-community-feed__compose")?.scrollIntoView({ behavior: "smooth" }); }}><Plus size={20}/></button><button type="button" aria-label="Share community" onClick={() => void share(pageUrl)}><Share2 size={19}/></button></div></div>
+  return <div className={`z-communities z-community-detail ${embedded ? "z-community-detail--embedded" : "board-shader-page"}`} data-shader-room="zlists">
+    {!embedded && <BoardShader room="zlists" />}
+    <div className="z-community-detail__toolbar">{!embedded && <Link href="/z" className="z-community-detail__back"><ArrowLeft size={19}/> Z/ LIST</Link>}<div className="z-community-detail__tools"><button type="button" aria-label="Search posts" aria-expanded={searchOpen} onClick={() => { setFeedTab("posts"); setSearchOpen(value => !value); }}><Search size={19}/></button><button type="button" aria-label="Create post" onClick={() => { setFeedTab("posts"); setComposerOpen(true); document.querySelector(".z-community-feed__compose")?.scrollIntoView({ behavior: "smooth" }); }}><Plus size={20}/></button>{!embedded && <button type="button" aria-label="Share community" onClick={() => void share(pageUrl)}><Share2 size={19}/></button>}</div></div>
     <header className="z-community-detail__hero pdx-glass-rebind">
-      <div className="z-community-detail__image" style={logo ? { backgroundImage: `url(${logo})`, backgroundSize: item.slug === "yes-coach-productions" && (!item.imageUrl || item.imageUrl === "/directory-logos/Yes_Coach_Productions.png") ? "75% auto" : !item.imageUrl || logo === "/community-logos/pink-ponies.jpeg" ? "contain" : undefined, backgroundColor: !item.imageUrl && item.slug === "lesbian-culture-club" ? "#f5f1e9" : undefined } : undefined}>{!logo ? <span aria-hidden="true">Z/</span> : null}</div>
-      <div className="z-community-detail__identity"><p className="z-community-card__address">z/{item.slug}</p><h1>{item.name}</h1><p className="z-community-detail__count">{item.memberCount} {item.memberCount === 1 ? "member" : "members"} · {item.posts.length} recent {item.posts.length === 1 ? "post" : "posts"}</p><p className="z-community-detail__description">{item.description}</p><div className="z-community-detail__membership">
+      {!embedded && <div className="z-community-detail__image" style={logo ? { backgroundImage: `url(${logo})`, backgroundSize: item.slug === "yes-coach-productions" && (!item.imageUrl || item.imageUrl === "/directory-logos/Yes_Coach_Productions.png") ? "75% auto" : !item.imageUrl || logo === "/community-logos/pink-ponies.jpeg" ? "contain" : undefined, backgroundColor: !item.imageUrl && item.slug === "lesbian-culture-club" ? "#f5f1e9" : undefined } : undefined}>{!logo ? <span aria-hidden="true">Z/</span> : null}</div>}
+      <div className="z-community-detail__identity">{!embedded && <><p className="z-community-card__address">z/{item.slug}</p><h1>{item.name}</h1></>}<p className="z-community-detail__count">{item.memberCount} {item.memberCount === 1 ? "member" : "members"} · {item.posts.length} recent {item.posts.length === 1 ? "post" : "posts"}</p>{!embedded && <p className="z-community-detail__description">{item.description}</p>}<div className="z-community-detail__membership">
         {user ? item.viewerMembershipStatus === "pending" ? <Button disabled accent="cyan">REQUEST PENDING</Button> : item.viewerRole === "owner" ? <p>You own this community. <button type="button" onClick={() => { setManaging(true); setTimeout(() => document.getElementById("community-members")?.scrollIntoView({ behavior: "smooth" }), 0); }}>Transfer ownership in Members</button> before leaving.</p> : <Button onClick={() => membership.mutate()} disabled={membership.isPending} accent="cyan">{item.viewerRole ? "LEAVE COMMUNITY" : item.membershipPolicy === "request" ? "REQUEST TO JOIN" : "JOIN COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO JOIN</Button></Link>}
         {item.viewerRole ? <button type="button" className="z-community-follow pdx-glass-rebind" aria-pressed={item.viewerFollowing} disabled={follow.isPending} onClick={() => follow.mutate(!item.viewerFollowing)}>{item.viewerFollowing ? <Check size={17}/> : <Plus size={17}/>} {item.viewerFollowing ? "Following feed" : "Follow feed"}</button> : null}
         {item.canManage ? <Button onClick={() => setManaging(value => !value)}>{managing ? "CLOSE MODERATOR DESK" : "MANAGE COMMUNITY"}</Button> : null}</div>

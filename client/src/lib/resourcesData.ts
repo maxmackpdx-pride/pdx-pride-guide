@@ -1788,7 +1788,7 @@ const RESOURCE_CATEGORY_SOURCE: ResourceCategory[] = [
   },
   {
     "id": "community",
-    "name": "Community & Belonging",
+    "name": "Find Your People",
     "color": "var(--yellow)",
     "what": "Community centers, the people behind Portland Pride, choruses, social clubs, and the archive that keeps our history.",
     "help": "Support groups, a library, a resource hub, emergency assistance, and year-round programs where you can find your people.",

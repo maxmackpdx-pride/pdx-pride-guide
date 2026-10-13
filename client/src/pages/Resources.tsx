@@ -1,3 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
+import type { CommunitySummary } from "@shared/community";
+import { mergeCommunityResources } from "@/lib/communityResources";
 import { ServiceNameMark } from "@/components/ServiceNameMark";
 import { serviceArtwork } from "@shared/serviceIdentity";
 import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
@@ -16,7 +19,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { useReducedMotion } from "framer-motion";
 import { useTheme } from "@/context/ThemeContext";
 import { Drawer } from "vaul";
@@ -50,30 +53,32 @@ import "./Resources.css";
 import "@/components/discovery/EventzDetail.css";
 import "@/components/discovery/OpenCardContinuity.css";
 
+const CommunityWorkspace = lazy(() => import("./Community"));
 const ResourceDirectoryMap = lazy(() => import("@/components/DirectoryMap"));
 const ResourceBackgroundShader = lazy(() => import("@/components/ui/web-gl-shader").then(({ WebGLShader }) => ({ default: WebGLShader })));
 
+const CATEGORIES = RESOURCE_CATEGORIES;
 const LABELS = [
   "Health & care",
   "Safety & basic needs",
   "Rights & advocacy",
   "Youth support",
-  "Community",
+  "Find Your People",
   "Family & elders",
   "Work & money",
   "Arts & spaces",
   "Mental health & peer support",
   "Harm reduction",
 ];
-const ROWS = RESOURCE_CATEGORIES.flatMap((category) =>
+const ROWS = CATEGORIES.flatMap((category) =>
   (category.id === "safety"
     ? [...category.orgs, FOOD_RESOURCE]
     : category.orgs
   ).map((org) => ({ org, category })),
 );
-type Row = (typeof ROWS)[number] & { sectionCategory?: (typeof RESOURCE_CATEGORIES)[number] };
+type Row = (typeof ROWS)[number] & { community?: CommunitySummary; sectionCategory?: (typeof RESOURCE_CATEGORIES)[number] };
 function categoriesFor(row: Row) {
-  return RESOURCE_CATEGORIES.filter((category) =>
+  return CATEGORIES.filter((category) =>
     category.id === row.category.id || row.org.categoryIds?.includes(category.id),
   );
 }
@@ -460,6 +465,7 @@ export default function Resources() {
   const reducedMotion = useReducedMotion();
   const quietMotion = calmMode || reducedMotion;
   const [location, navigate] = useLocation();
+  const locationSearch = useSearch();
   useEffect(() => {
     if (location === "/resources" || location === "/rezources") navigate(`/needz${window.location.search}${window.location.hash}`, { replace: true });
   }, [location, navigate]);
@@ -470,8 +476,10 @@ export default function Resources() {
   const readBrowseState = () => {
     const params = new URLSearchParams(window.location.search);
     const ids = (params.get("cat") || "").split(",").filter(id => RESOURCE_CATEGORIES.some(c => c.id === id));
-    return { ids: params.get("view") === "all" ? [] : ids, query: params.get("q") || "", layout: params.get("layout") === "grid" ? "grid" as const : "browse" as const, mode: params.get("door") === "talk" ? "talk" as const : "directory" as const };
+    return { ids: params.get("view") === "all" ? [] : ids, query: params.get("q") || "", layout: params.get("layout") === "grid" || ids.length > 0 ? "grid" as const : "browse" as const, mode: params.get("door") === "talk" ? "talk" as const : "directory" as const };
   };
+  const communities = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"] });
+  const allRows = useMemo(() => mergeCommunityResources(ROWS, communities.data || [], CATEGORIES.find(c => c.id === "community")!), [communities.data]);
   const [initial] = useState(readBrowseState);
   const [categoryIds, setCategoryIds] = useState<string[]>(initial.ids);
   const [searchQuery, setSearchQuery] = useState(initial.query);
@@ -482,6 +490,7 @@ export default function Resources() {
   const [detail, setDetail] = useState<Row | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const detailTrigger = useRef<HTMLElement | null>(null);
+  const openedRequest = useRef<string | null>(null);
   const [mobile, setMobile] = useState(() => window.matchMedia("(max-width: 600px)").matches);
   useEffect(() => {
     const media = window.matchMedia("(max-width: 600px)");
@@ -509,25 +518,29 @@ export default function Resources() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const requested = params.get("resource") || params.get("find");
-    const row = requested && ROWS.find(({ org }) => org.name === requested || org.aliases?.includes(requested));
-    if (row) { setDetail(row); setDetailOpen(true); }
-  }, [location]);
+    const requestedCommunity = params.get("community");
+    const row = allRows.find(({ org, community }) => requestedCommunity ? community?.slug === requestedCommunity : requested && (org.name === requested || org.aliases?.includes(requested)));
+    const requestKey = `${location}:${requestedCommunity || requested || ""}`;
+    if (row && openedRequest.current !== requestKey) { openedRequest.current = requestKey; setDetail(row); setDetailOpen(true); }
+    if (!requested && !requestedCommunity) openedRequest.current = null;
+  }, [location, locationSearch, allRows]);
   const openDetail = useCallback((row: Row) => {
     detailTrigger.current = document.activeElement as HTMLElement;
     setDetail(row); setDetailOpen(true);
   }, []);
   const choose = (id: string) => {
     setMode("directory");
+    setBrowseView("grid");
     setCategoryIds(ids => id === "ALL" ? [] : ids.includes(id) ? ids.filter(value => value !== id) : [...ids, id]);
   };
   const clear = () => { setSearchQuery(""); setCategoryIds([]); };
-  const rows = useMemo(() => ROWS.filter(row => {
+  const rows = useMemo(() => allRows.filter(row => {
     if (categoryIds.length && !categoriesFor(row).some(c => categoryIds.includes(c.id))) return false;
     const query = searchQuery.trim().toLowerCase();
     return !query || [row.org.name, row.org.desc, row.org.sub, row.org.scope, row.org.addr, ...(row.org.aliases || []), ...(row.org.serviceTags || []), ...categoriesFor(row).map(c => c.name)].filter(Boolean).join(" ").toLowerCase().includes(query);
-  }), [categoryIds, searchQuery]);
-  const selectedCategories = RESOURCE_CATEGORIES.filter(c => !categoryIds.length || categoryIds.includes(c.id));
-  const renderCard = (row: Row) => <div key={row.org.name} className="placez-card-surface eb-original-card">
+  }), [categoryIds, searchQuery, allRows]);
+  const selectedCategories = CATEGORIES.filter(c => !categoryIds.length || categoryIds.includes(c.id));
+  const renderCard = (row: Row) => <div key={row.community?.id || row.org.name} className="placez-card-surface eb-original-card">
     <ResourceCard row={row} onOpen={openDetail} />
   </div>;
   return (
@@ -539,7 +552,7 @@ export default function Resources() {
         <BoardFollowButton board="rezources" />
       </BrowseHeader>
       <div className="eb-frame">
-        <BrowseControls title="NEEDZ" categories={[{id:"ALL",label:"All resources",color:"var(--neon-cyan)",count:ROWS.length}, ...RESOURCE_CATEGORIES.map((c, i) => ({id:c.id,label:LABELS[i],color:c.color,count:ROWS.filter(row => categoriesFor(row).some(category => category.id === c.id)).length}))]}
+        <BrowseControls title="NEEDZ" categories={[{id:"ALL",label:"All resources",color:"var(--neon-cyan)",count:allRows.length}, ...CATEGORIES.map((c, i) => ({id:c.id,label:LABELS[i],color:c.color,count:allRows.filter(row => categoriesFor(row).some(category => category.id === c.id)).length}))]}
           selected={categoryIds.length ? categoryIds : ["ALL"]} onSelect={choose} query={searchQuery} onSearch={value => {setSearchQuery(value); setMode("directory");}} view={browseView} onView={value => {setBrowseView(value); setMode("directory");}}>
           <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("rezources")} aria-label="Explore resources on Mapz"><Map size={19} /><span>Map</span></a>
           <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Talk to someone" aria-pressed={mode === "talk"} onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} /><span>Talk to someone</span></button>
@@ -550,7 +563,7 @@ export default function Resources() {
           <aside className="eb-side" aria-label="NEEDZ filters and support">
             <div className="eb-panel eb-desktop-panel"><h2>Categories</h2><div className="eb-side-categories" role="group" aria-label="Filter resources">
               <button type="button" aria-pressed={!categoryIds.length} onClick={() => choose("ALL")}>All resources</button>
-              {RESOURCE_CATEGORIES.map((c, i) => <button type="button" key={c.id} aria-pressed={categoryIds.includes(c.id)} onClick={() => choose(c.id)}>{LABELS[i]}</button>)}
+              {CATEGORIES.map((c, i) => <button type="button" key={c.id} aria-pressed={categoryIds.includes(c.id)} onClick={() => choose(c.id)}>{LABELS[i]}</button>)}
             </div></div>
             <div className="eb-panel eb-desktop-panel"><h3>A person on the other end.</h3><p>Choose the line that fits what you need.</p>
               <button type="button" className="eb-tool pdx-glass-rebind" onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} />{mode === "talk" ? "Back to resources" : "Talk to someone"}</button>
@@ -559,6 +572,8 @@ export default function Resources() {
             <div className="eb-panel eb-desktop-panel"><h3>Know someone we should know?</h3><Link className="eb-tool pdx-glass-rebind" href="/contact">Suggest a resource<ArrowUpRight size={16} /></Link></div>
           </aside>
           <section className="eb-results" aria-label="Resource results">
+            {communities.isLoading && <p role="status">Loading clubs and groups…</p>}
+            {communities.isError && <BrowseStatus title="Clubs and groups could not load" description="Existing resources are still available." actionLabel="Try again" onAction={() => {void communities.refetch();}} />}
             {mode === "talk" ? <><div className="eb-result-head"><h2>A person on the other end.</h2><button type="button" className="eb-clear" onClick={() => setMode("directory")}>Back to resources</button></div><div id="resource-talk-results"><TalkOptions /></div></> : <>
               {!rows.length ? <BrowseStatus title="No resources match your search" description="Try a broader search or another category." actionLabel="Clear filters" onAction={clear} /> : browseView === "browse" ?
                 <div className="eb-lanes">{selectedCategories.map(category => {
@@ -643,6 +658,7 @@ export default function Resources() {
 
                 {detail.org.phone && <ResourcePhone org={detail.org} />}
                 {detail.org.alt?.startsWith("tel:") && <ResourcePhone org={detail.org} href={detail.org.alt} label={detail.org.altLabel} />}
+                {detail.community ? <><Dialog.Description>{detail.org.desc}</Dialog.Description><Suspense fallback={<p role="status">Opening community…</p>}><CommunityWorkspace key={detail.community.slug} params={{communitySlug: detail.community.slug}} embedded /></Suspense></> : <>
                 <details open className="rg-detail-disclosure event-modal__disclosure"><summary>Getting started & service details<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-detail-meta rg-disclosure-content">
                   <span className="rg-eyebrow">How to start</span>
                   <p>{detail.org.howToStart || detail.category.use}</p>
@@ -749,6 +765,7 @@ export default function Resources() {
                     ))}
                   </div></details>
                 )}
+                </>}
                 </div>
                 <div className="rg-detail-secondary">
                 <ResourceLocationMap key={detail.org.name} org={detail.org} color={(detail.sectionCategory ?? detail.category).color} />
