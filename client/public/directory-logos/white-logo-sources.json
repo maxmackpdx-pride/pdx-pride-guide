@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-13-white-vector-r3",
+  "version": "2026-10-13-white-vector-r4",
   "treatment": "White ink on transparency; no bloom. Native vectors retain publisher geometry. Raster traces are monochrome outlines of official artwork, not original publisher vectors. Text fallbacks use bundled Barlow Condensed 900 with up to three authored lines. Text fallbacks fit rows independently with proportional sizing and optical hierarchy; short labels need not fill the full width.",
   "entries": [
     {
@@ -164,47 +164,29 @@
       "name": "Bridge City Mentors",
       "normalized": "bridgecitymentors",
       "asset": "/directory-logos/bridgecitymentors-white.svg",
-      "kind": "text-fallback",
+      "kind": "official-raster-trace",
       "sourcePage": "https://bridgecitymentors.com/",
-      "sourceAsset": null,
+      "sourceAsset": "https://bridgecitymentors.com/wp-content/uploads/2020/05/cropped-whitebacklogo-scaled-1.jpg",
       "checked": "2026-10-13",
-      "ratio": 2.2649259716149097,
-      "lines": [
-        "BRIDGE CITY",
-        "MENTORS"
-      ],
-      "reason": "Published artwork cannot form a clear faithful white mark without retaining source bloom or a solid illustration plate.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          38.40814871679289,
-          49.95487107675003
-        ]
-      }
+      "ratio": 0.8733139578210001,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/bridgecitymentors.jpg",
+      "treatment": "White ink extracted from the verified official source image; original geometry retained, color translated to monochrome. Original artwork saved alongside for comparison."
     },
     {
       "name": "Brown Girl Rise",
       "normalized": "browngirlrise",
       "asset": "/directory-logos/browngirlrise-white.svg",
-      "kind": "text-fallback",
-      "sourcePage": "https://browngirlriseportland.org",
-      "sourceAsset": null,
+      "kind": "reference-restored-vector",
+      "sourcePage": "https://www.browngirlrise.org/",
+      "sourceAsset": "https://static1.squarespace.com/static/5ac57c1fb27e395f3f980cea/t/612fd363c4a0531a188eceea/1630524259078/BGR_Transparent.png?format=1500w",
       "checked": "2026-10-13",
-      "ratio": 1.8239194412406416,
-      "lines": [
-        "BROWN",
-        "GIRL RISE"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          63.699161761916024,
-          50.1359142978597
-        ]
-      }
+      "ratio": 1.003179397504173,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/browngirlrise.png",
+      "treatment": "Imagegen image-for-image monochrome restoration from the saved original, then outlined in pure white. This is an AI reconstruction for review, not exact publisher vector geometry."
     },
     {
       "name": "Business Oregon",
@@ -501,24 +483,20 @@
       "name": "Fantasy Land",
       "normalized": "fantasyland",
       "asset": "/directory-logos/fantasyland-white.svg",
-      "kind": "text-fallback",
+      "kind": "reference-restored-vector",
       "sourcePage": null,
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 2.2066444035006914,
-      "lines": [
-        "FANTASY",
-        "LAND"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          52.267011558919066,
-          44.426959825081205
-        ]
-      }
+      "ratio": 3.996419719085652,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/fantasyland.png",
+      "treatment": "Imagegen image-for-image monochrome restoration from the saved original, then outlined in pure white. This is an AI reconstruction for review, not exact publisher vector geometry.",
+      "sourceEvidence": "Tucker-supplied storefront screenshot, 2026-10-13",
+      "restoredText": [
+        "FANTASYLAND",
+        "AN ADULT ESTABLISHMENT"
+      ]
     },
     {
       "name": "Fertile Ground Festival",
@@ -755,24 +733,15 @@
       "name": "Hunny Beez",
       "normalized": "hunnybeez",
       "asset": "/directory-logos/hunnybeez-white.svg",
-      "kind": "text-fallback",
+      "kind": "official-raster-trace",
       "sourcePage": "https://hunnybeezpdx.com/",
-      "sourceAsset": null,
+      "sourceAsset": "https://hunnybeezpdx.com/restaurant/4345/images/imported-logo.png",
       "checked": "2026-10-13",
-      "ratio": 1.5747649428854253,
-      "lines": [
-        "HUNNY",
-        "BEEZ"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          60.80225491819686,
-          60.80225491819686
-        ]
-      }
+      "ratio": 1.1119356055842033,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/hunnybeez.png",
+      "treatment": "White ink extracted from the verified official source image; original geometry retained, color translated to monochrome. Original artwork saved alongside for comparison."
     },
     {
       "name": "IL Youth 2 Youth",
@@ -959,24 +928,15 @@
       "name": "Mr. Peeps",
       "normalized": "mrpeeps",
       "asset": "/directory-logos/mrpeeps-white.svg",
-      "kind": "text-fallback",
+      "kind": "reference-restored-vector",
       "sourcePage": "https://www.mrpeeps.com",
-      "sourceAsset": null,
+      "sourceAsset": "https://www.mrpeeps.com/__static/ca62220eb6007548ac2dcd16c5d7f68c/logo.png",
       "checked": "2026-10-13",
-      "ratio": 1.6395162724524275,
-      "lines": [
-        "MR.",
-        "PEEPS"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          38.031413734577846,
-          52.82140796469146
-        ]
-      }
+      "ratio": 0.8091934084995662,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/mrpeeps.png",
+      "treatment": "Imagegen image-for-image monochrome restoration from the saved original, then outlined in pure white. This is an AI reconstruction for review, not exact publisher vector geometry."
     },
     {
       "name": "Multnomah County \u00b7 Free Outreach Testing",
@@ -1091,24 +1051,15 @@
       "name": "Open Space Dance",
       "normalized": "openspacedance",
       "asset": "/directory-logos/openspacedance-white.svg",
-      "kind": "text-fallback",
-      "sourcePage": "https://openspace.dance",
-      "sourceAsset": null,
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.openspace.dance/",
+      "sourceAsset": "https://static.wixstatic.com/media/9e7ff1_189c22ca019b4321bb898ba605d5d9f3~mv2.png",
       "checked": "2026-10-13",
-      "ratio": 1.908036712326708,
-      "lines": [
-        "OPEN SPACE",
-        "DANCE"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          38.89410226965588,
-          70.8493513743528
-        ]
-      }
+      "ratio": 0.45962402009285336,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/openspacedance.png",
+      "treatment": "White ink extracted from the verified official source image; original geometry retained, color translated to monochrome. Original artwork saved alongside for comparison."
     },
     {
       "name": "Oregon Arts Commission",
@@ -1260,24 +1211,15 @@
       "name": "PDX Gaymers",
       "normalized": "pdxgaymers",
       "asset": "/directory-logos/pdxgaymers-white.svg",
-      "kind": "text-fallback",
-      "sourcePage": "https://pdxgaymers.org",
-      "sourceAsset": null,
+      "kind": "official-raster-trace",
+      "sourcePage": "https://pdxgaymers.org/",
+      "sourceAsset": "https://pdxgaymers.org/logo.png",
       "checked": "2026-10-13",
-      "ratio": 2.339535830946212,
-      "lines": [
-        "PDX",
-        "GAYMERS"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          31.29948379299172,
-          43.471505268044055
-        ]
-      }
+      "ratio": 0.9503968253968254,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/pdxgaymers.png",
+      "treatment": "White ink extracted from the verified official source image; original geometry retained, color translated to monochrome. Original artwork saved alongside for comparison."
     },
     {
       "name": "PDX PAH - Portland Pets & Handlers",
@@ -1452,24 +1394,15 @@
       "name": "Portland Leather Alliance",
       "normalized": "portlandleatheralliance",
       "asset": "/directory-logos/portlandleatheralliance-white.svg",
-      "kind": "text-fallback",
-      "sourcePage": "http://www.portlandleather.org",
-      "sourceAsset": null,
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.portlandleather.org/",
+      "sourceAsset": "https://www.portlandleather.org/plalogo.png",
       "checked": "2026-10-13",
-      "ratio": 2.7975034998048534,
-      "lines": [
-        "PORTLAND",
-        "LEATHER ALLIANCE"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          43.89212623789061,
-          24.365186826008486
-        ]
-      }
+      "ratio": 1.7195496417604914,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/portlandleatheralliance.png",
+      "treatment": "White ink extracted from the verified official source image; original geometry retained, color translated to monochrome. Original artwork saved alongside for comparison."
     },
     {
       "name": "Portland Playhouse",
@@ -1837,24 +1770,15 @@
       "name": "Sincere Studio",
       "normalized": "sincerestudio",
       "asset": "/directory-logos/sincerestudio-white.svg",
-      "kind": "text-fallback",
-      "sourcePage": "https://sincerestudiopdx.org",
-      "sourceAsset": null,
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.sincerestudiopdx.org/",
+      "sourceAsset": "https://static.wixstatic.com/media/e729e3_ba69bbd956a14b9b9ad57ce55fd1dc1c~mv2.png",
       "checked": "2026-10-13",
-      "ratio": 1.718488828342126,
-      "lines": [
-        "SINCERE",
-        "STUDIO"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          56.36673494177411,
-          65.61266405011543
-        ]
-      }
+      "ratio": 1.1378101724618632,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/sincerestudio.png",
+      "treatment": "White ink extracted from the verified official source image; original geometry retained, color translated to monochrome. Original artwork saved alongside for comparison."
     },
     {
       "name": "Sold By Scott",
@@ -1872,24 +1796,15 @@
       "name": "Speed-o Cappuccino",
       "normalized": "speedocappuccino",
       "asset": "/directory-logos/speedocappuccino-white.svg",
-      "kind": "text-fallback",
-      "sourcePage": null,
-      "sourceAsset": null,
+      "kind": "official-raster-trace",
+      "sourcePage": "https://speed-ocappuccino.square.site/",
+      "sourceAsset": "https://speed-ocappuccino.square.site/uploads/b/e3ef9910c4ff9aeec662af5db53e56df99974e16d0f8852a45085094ee51a01b/logo-whitebg_1746569567.jpg",
       "checked": "2026-10-13",
-      "ratio": 2.177023581372583,
-      "lines": [
-        "SPEED-O",
-        "CAPPUCCINO"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          55.29647801473464,
-          37.38739252690393
-        ]
-      }
+      "ratio": 1.5485335025132985,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/speedocappuccino.jpg",
+      "treatment": "White ink extracted from the verified official source image; original geometry retained, color translated to monochrome. Original artwork saved alongside for comparison."
     },
     {
       "name": "Sprout Therapy PDX",
@@ -1980,24 +1895,15 @@
       "name": "Taqueria Los Pu\u00f1ales",
       "normalized": "taquerialospunales",
       "asset": "/directory-logos/taquerialospunales-white.svg",
-      "kind": "text-fallback",
-      "sourcePage": "https://lospunales.com",
-      "sourceAsset": null,
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.lospunales.com",
+      "sourceAsset": "https://www.lospunales.com/uploads/b/8c66632d8d1fcbde0c64633b1541c4a9a39611fcc852974668fd8c722de9517d/Los pun\u0303ales web-03 _1667262973.png",
       "checked": "2026-10-13",
-      "ratio": 2.121980798667809,
-      "lines": [
-        "TAQUERIA",
-        "LOS PU\u00d1ALES"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          48.311994119592676,
-          35.00633455485192
-        ]
-      }
+      "ratio": 1.0727254613832782,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/taquerialospunales.png",
+      "treatment": "White ink extracted from the verified official source image; original geometry retained, color translated to monochrome. Original artwork saved alongside for comparison."
     },
     {
       "name": "The Automatic Bar",
@@ -2041,26 +1947,15 @@
       "name": "The Imperial Sovereign Rose Court of Oregon",
       "normalized": "theimperialsovereignrosecourtoforegon",
       "asset": "/directory-logos/theimperialsovereignrosecourtoforegon-white.svg",
-      "kind": "text-fallback",
-      "sourcePage": "https://rosecourt.org",
-      "sourceAsset": null,
+      "kind": "official-raster-trace",
+      "sourcePage": "https://rosecourt.org/",
+      "sourceAsset": "https://rosecourt.org/wp-content/uploads/2023/06/18ISRCCrestOl.png",
       "checked": "2026-10-13",
-      "ratio": 2.2293587206503567,
-      "lines": [
-        "THE IMPERIAL",
-        "SOVEREIGN ROSE COURT",
-        "OF OREGON"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          34.389890200952976,
-          19.754849458526717,
-          29.231406670810028
-        ]
-      }
+      "ratio": 0.7176802447886785,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/theimperialsovereignrosecourtoforegon.png",
+      "treatment": "White ink extracted from the verified official source image; original geometry retained, color translated to monochrome. Original artwork saved alongside for comparison."
     },
     {
       "name": "The Living Room",
@@ -2176,24 +2071,15 @@
       "name": "Tin Shed Garden Cafe",
       "normalized": "tinshedgardencafe",
       "asset": "/directory-logos/tinshedgardencafe-white.svg",
-      "kind": "text-fallback",
-      "sourcePage": "https://tinshedgardencafe.com",
-      "sourceAsset": null,
+      "kind": "reference-restored-vector",
+      "sourcePage": "https://www.tinshedgardencafe.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5e15f0db289a0e270b508949/fc4796ce-1b15-4717-bc45-038533899d22/Color.logo.web.png?format=1000w",
       "checked": "2026-10-13",
-      "ratio": 2.3042787202360193,
-      "lines": [
-        "TIN SHED",
-        "GARDEN CAFE"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          52.152069807513904,
-          34.66277591362854
-        ]
-      }
+      "ratio": 1.2506063055780112,
+      "lines": null,
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/tinshedgardencafe.webp",
+      "treatment": "Imagegen image-for-image monochrome restoration from the saved original, then outlined in pure white. This is an AI reconstruction for review, not exact publisher vector geometry."
     },
     {
       "name": "Trans Advocacy & Care Team (TACT)",

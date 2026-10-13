@@ -1,6 +1,6 @@
 /** Reviewed white marks; provenance lives in /directory-logos/white-logo-sources.json. */
-export const WHITE_COMPANY_LOGO_VERSION = "2026-10-13-white-vector-r3";
-export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number; kind: "official-vector" | "official-raster-trace" | "retained-logo-trace" | "text-fallback" }> = {
+export const WHITE_COMPANY_LOGO_VERSION = "2026-10-13-white-vector-r4";
+export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number; kind: "official-vector" | "official-raster-trace" | "retained-logo-trace" | "reference-restored-vector" | "text-fallback" }> = {
   "albertarosetheatre": {
     "asset": "/directory-logos/albertarosetheatre-white.svg",
     "ratio": 1.00121,
@@ -68,13 +68,13 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "bridgecitymentors": {
     "asset": "/directory-logos/bridgecitymentors-white.svg",
-    "ratio": 2.26493,
-    "kind": "text-fallback"
+    "ratio": 0.87331,
+    "kind": "official-raster-trace"
   },
   "browngirlrise": {
     "asset": "/directory-logos/browngirlrise-white.svg",
-    "ratio": 1.82392,
-    "kind": "text-fallback"
+    "ratio": 1.00318,
+    "kind": "reference-restored-vector"
   },
   "businessoregon": {
     "asset": "/directory-logos/businessoregon-white.svg",
@@ -183,8 +183,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "fantasyland": {
     "asset": "/directory-logos/fantasyland-white.svg",
-    "ratio": 2.20664,
-    "kind": "text-fallback"
+    "ratio": 3.99642,
+    "kind": "reference-restored-vector"
   },
   "fertilegroundfestival": {
     "asset": "/directory-logos/fertilegroundfestival-white.svg",
@@ -268,8 +268,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "hunnybeez": {
     "asset": "/directory-logos/hunnybeez-white.svg",
-    "ratio": 1.57476,
-    "kind": "text-fallback"
+    "ratio": 1.11194,
+    "kind": "official-raster-trace"
   },
   "ilyouth2youth": {
     "asset": "/directory-logos/ilyouth2youth-white.svg",
@@ -348,8 +348,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "mrpeeps": {
     "asset": "/directory-logos/mrpeeps-white.svg",
-    "ratio": 1.63952,
-    "kind": "text-fallback"
+    "ratio": 0.80919,
+    "kind": "reference-restored-vector"
   },
   "multnomahcountyfreeoutreachtesting": {
     "asset": "/resources-logos/multnomahcountyfreeoutreachtesting-white.svg",
@@ -398,8 +398,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "openspacedance": {
     "asset": "/directory-logos/openspacedance-white.svg",
-    "ratio": 1.90804,
-    "kind": "text-fallback"
+    "ratio": 0.45962,
+    "kind": "official-raster-trace"
   },
   "oregonartscommission": {
     "asset": "/directory-logos/oregonartscommission-white.svg",
@@ -463,8 +463,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "pdxgaymers": {
     "asset": "/directory-logos/pdxgaymers-white.svg",
-    "ratio": 2.33954,
-    "kind": "text-fallback"
+    "ratio": 0.9504,
+    "kind": "official-raster-trace"
   },
   "pdxpahportlandpetsandhandlers": {
     "asset": "/directory-logos/pdxpahportlandpetsandhandlers-white.svg",
@@ -533,8 +533,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "portlandleatheralliance": {
     "asset": "/directory-logos/portlandleatheralliance-white.svg",
-    "ratio": 2.7975,
-    "kind": "text-fallback"
+    "ratio": 1.71955,
+    "kind": "official-raster-trace"
   },
   "portlandplayhouse": {
     "asset": "/directory-logos/portlandplayhouse-white.svg",
@@ -683,8 +683,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "sincerestudio": {
     "asset": "/directory-logos/sincerestudio-white.svg",
-    "ratio": 1.71849,
-    "kind": "text-fallback"
+    "ratio": 1.13781,
+    "kind": "official-raster-trace"
   },
   "soldbyscott": {
     "asset": "/directory-logos/soldbyscott-white.svg",
@@ -693,8 +693,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "speedocappuccino": {
     "asset": "/directory-logos/speedocappuccino-white.svg",
-    "ratio": 2.17702,
-    "kind": "text-fallback"
+    "ratio": 1.54853,
+    "kind": "official-raster-trace"
   },
   "sprouttherapypdx": {
     "asset": "/directory-logos/sprouttherapypdx-white.svg",
@@ -733,8 +733,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "taquerialospunales": {
     "asset": "/directory-logos/taquerialospunales-white.svg",
-    "ratio": 2.12198,
-    "kind": "text-fallback"
+    "ratio": 1.07273,
+    "kind": "official-raster-trace"
   },
   "theautomaticbar": {
     "asset": "/directory-logos/theautomaticbar-white.svg",
@@ -753,8 +753,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "theimperialsovereignrosecourtoforegon": {
     "asset": "/directory-logos/theimperialsovereignrosecourtoforegon-white.svg",
-    "ratio": 2.22936,
-    "kind": "text-fallback"
+    "ratio": 0.71768,
+    "kind": "official-raster-trace"
   },
   "thelivingroom": {
     "asset": "/resources-logos/thelivingroom-white.svg",
@@ -798,8 +798,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "tinshedgardencafe": {
     "asset": "/directory-logos/tinshedgardencafe-white.svg",
-    "ratio": 2.30428,
-    "kind": "text-fallback"
+    "ratio": 1.25061,
+    "kind": "reference-restored-vector"
   },
   "transadvocacyandcareteamtact": {
     "asset": "/resources-logos/transadvocacyandcareteamtact-white.svg",
