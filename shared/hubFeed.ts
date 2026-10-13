@@ -13,9 +13,10 @@ export type HubFeedKind =
   | "feedback"
   | "feed_text"
   | "feed_photo"
-  | "community";
+  | "community"
+  | "resource_update";
 
-export type HubFeedTab = "all" | "events" | "posts" | "rsvps" | "boards" | "followed_boards";
+export type HubFeedTab = "all" | "events" | "posts" | "rsvps" | "boards" | "followed_boards" | "people" | "outside";
 
 export type HubFeedAuthor = {
   displayName: string;
@@ -42,6 +43,7 @@ export type HubFeedEventEmbed = {
   posterImageUrl?: string | null;
   /** Person or venue who posted this event (shown per row in bundled cards). */
   poster?: HubFeedAuthor | null;
+  viewerIsGoing?: boolean;
 };
 
 export type HubFeedVoteValue = -1 | 0 | 1;
@@ -87,6 +89,10 @@ export type HubFeedItem = {
   boardPostId?: number | null;
   /** The viewer follows this post's board. */
   viewerFollowsBoard?: boolean;
+  /** Any authorized followed relationship: person, venue, board, destination, or community. */
+  viewerFollowsSource?: boolean;
+  source?: { kind: "board" | "place" | "destination" | "community"; id: string; label: string; href: string };
+  listing?: { price?: string; location?: string; timing?: string; compensation?: string; status?: string };
   /** Seeded demo content (server-marked; board 18). */
   isDemo?: boolean;
   photoUrl?: string | null;
@@ -116,6 +122,7 @@ export type HubFeedResponse = {
   items: HubFeedItem[];
   pinned: HubFeedItem[];
   nextCursor: string | null;
+  unavailableSources?: string[];
 };
 
 export const HUB_FEED_TABS: Array<{ key: HubFeedTab; label: string }> = [
@@ -124,29 +131,47 @@ export const HUB_FEED_TABS: Array<{ key: HubFeedTab; label: string }> = [
   { key: "posts", label: "Posts" },
   { key: "rsvps", label: "RSVPs" },
   { key: "boards", label: "Boards" },
-  { key: "followed_boards", label: "Following boards" },
+  { key: "followed_boards", label: "Following" },
+  { key: "people", label: "People" },
+  { key: "outside", label: "Outside" },
 ];
+
+export const HUB_PANEL_TABS = [
+  { key: "all", label: "View all" },
+  { key: "events", label: "Events" },
+  { key: "people", label: "People" },
+  { key: "outside", label: "Outside" },
+] as const;
+
+function isOutsideActivity(item: HubFeedItem): boolean {
+  return ["outz", "beach", "checkin"].includes(item.kind) || item.source?.kind === "destination" || !!item.beachId;
+}
 
 const TAB_PREDICATES: Record<HubFeedTab, (item: HubFeedItem) => boolean> = {
   all: () => true,
-  events: (item) => item.kind === "event" || item.kind === "event_update",
+  events: (item) => item.kind === "event" || item.kind === "event_update" || item.kind === "rsvp"
+    || (item.kind === "feed_text" || item.kind === "feed_photo") && !!(item.event || item.events?.length),
+  people: (item) => !isOutsideActivity(item) && ["feed_text", "feed_photo", "community", "rsvp", "gifting", "sellz", "spotted", "gig", "housing"].includes(item.kind),
+  outside: isOutsideActivity,
   posts: (item) =>
     item.kind === "checkin"
     || item.kind === "beach"
     || item.kind === "outz"
     || item.kind === "feed_text"
     || item.kind === "feed_photo"
-    || item.kind === "community",
+    || item.kind === "community"
+    || item.kind === "resource_update",
+  // Section releases use a persisted publication time, never a per-request timestamp.
   rsvps: (item) => item.kind === "rsvp",
   boards: (item) => ["gifting", "sellz", "spotted", "gig", "housing"].includes(item.kind),
-  followed_boards: (item) => !!item.viewerFollowsBoard,
+  followed_boards: (item) => !!(item.viewerFollowsSource ?? item.viewerFollowsBoard),
 };
 
 export function filterHubFeedPinned(items: HubFeedItem[], tab: HubFeedTab): HubFeedItem[] {
   return items.filter((item) => {
     if (item.kind === "feedback") return tab === "all";
     if (tab === "all") return true;
-    if (tab === "events") return item.kind === "event";
+    if (tab === "events" || tab === "people" || tab === "outside") return TAB_PREDICATES[tab](item);
     if (tab === "posts") return item.kind === "beach";
     if (tab === "boards") return item.kind === "gig";
     return false;
@@ -175,11 +200,13 @@ export function hubFeedBadgeColor(kind: HubFeedKind): string {
     feed_text: "var(--panel-cyan)",
     feed_photo: "var(--panel-magenta)",
     community: "var(--panel-cyan)",
+    resource_update: "var(--panel-cyan)",
   };
   return map[kind] ?? "var(--panel-cyan)";
 }
 
 export function parseHubFeedTab(raw: string | null | undefined): HubFeedTab {
+  if (raw === "following") return "followed_boards";
   if (raw && (HUB_FEED_TABS as Array<{ key: string }>).some((t) => t.key === raw)) {
     return raw as HubFeedTab;
   }

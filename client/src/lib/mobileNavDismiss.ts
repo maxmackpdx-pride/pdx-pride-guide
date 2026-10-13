@@ -8,6 +8,7 @@ export type MobileNavDismissExcept =
   | "outz"
   | "hub-sheet"
   | "hub-drawer"
+  | "hub-panel"
   | "profile"
   | "notify";
 

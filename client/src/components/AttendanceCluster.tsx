@@ -143,6 +143,8 @@ export default function AttendanceCluster({
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
       queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
   });
@@ -172,6 +174,8 @@ export default function AttendanceCluster({
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
       queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
   });

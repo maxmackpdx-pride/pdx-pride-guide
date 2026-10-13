@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocation } from "wouter";
+import { useHubPanel } from "@/context/HubPanelContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/context/ThemeContext";
 import type { AuthUser } from "@/context/AuthContext";
@@ -216,6 +217,7 @@ export default function HubV2({
 }: HubV2Props) {
   const { calmMode, toggleCalmMode } = useTheme();
   const [, navigate] = useLocation();
+  const { openHub } = useHubPanel();
   const [searchQ, setSearchQ] = useState("");
 
   const publicProfilePath = user.username
@@ -236,6 +238,7 @@ export default function HubV2({
   }, [section, navigate]);
 
   const handleSectionChange = (next: HubSection) => {
+    if (next === "feed" || next === "post") { navigate("/"); openHub(); return; }
     if (next === "profile" && !editMode && publicProfilePath) {
       navigate(publicProfilePath);
       return;

@@ -49,6 +49,7 @@ import EventLocationMap from "./EventLocationMap";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import "./EventModal.approved.css";
 import "./EventModal.reference.css";
+import "./discovery/OpenCardContinuity.css";
 import DayMotif from "@/components/events/DayMotif";
 import EventFallbackLogo from "@/components/events/EventFallbackLogo";
 
@@ -190,14 +191,16 @@ export default function EventModal({
   onClose,
   onEventUpdated,
   originRect = null,
+  initialSection = "details",
 }: {
   event: Event;
   onClose: () => void;
   onEventUpdated?: (event: Event) => void;
   originRect?: EventModalOriginRect | null;
+  initialSection?: "details" | "attendance";
 }) {
   if (!event || typeof event.id !== "number") return null;
-  return <EventModalInner event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} />;
+  return <EventModalInner event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} initialSection={initialSection} />;
 }
 
 function EventModalInner({
@@ -205,11 +208,13 @@ function EventModalInner({
   onClose,
   onEventUpdated,
   originRect,
+  initialSection,
 }: {
   event: Event;
   onClose: () => void;
   onEventUpdated?: (event: Event) => void;
   originRect: EventModalOriginRect | null;
+  initialSection: "details" | "attendance";
 }) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -230,8 +235,8 @@ function EventModalInner({
   const [posterOrientation, setPosterOrientation] = useState<"portrait" | "landscape">("portrait");
   const [showStickyCta, setShowStickyCta] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [socialOpen, setSocialOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(true);
+  const [socialOpen, setSocialOpen] = useState(initialSection === "attendance");
   const [socialTab, setSocialTab] = useState<"attendance" | "missed">("attendance");
   const [editing, setEditing] = useState(false);
   const [eventForm, setEventForm] = useState<EventEditFormState | null>(null);
@@ -240,6 +245,11 @@ function EventModalInner({
   const [inviteFollowers, setInviteFollowers] = useState(true);
   const [inviteNote, setInviteNote] = useState("");
   const socialTabsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (initialSection !== "attendance") return;
+    const frame = requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ block: "start", behavior: "auto" }));
+    return () => cancelAnimationFrame(frame);
+  }, [event.id, initialSection]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const posterImageRef = useRef<HTMLImageElement>(null);
   const heroRef = useRef<HTMLElement>(null);
@@ -843,23 +853,6 @@ function EventModalInner({
         </section>
 
         <div className="event-modal__body">
-          <section className="event-modal__mizzed-door" aria-label="Mizzed Connection">
-            <button type="button" className="room-doorways__door pdx-glass-card pdx-glass-rebind"
-              style={{ "--c": "var(--room-mizzed)", "--ink": "var(--room-mizzed)" } as React.CSSProperties}
-              aria-expanded={socialOpen && socialTab === "missed"} onClick={() => {
-                setSocialOpen(true);
-                setSocialTab("missed");
-                requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
-              }}>
-              <ResourceCardMotif name="MIZZED CONNECTION" category="mizzed" />
-              <span className="room-doorways__vignette" aria-hidden="true" />
-              <span className="room-doorways__glass" aria-hidden="true" />
-              <img className="room-doorways__logo" src="/brand/family/mizzed-connection.svg" alt="Mizzed Connection" loading="lazy" decoding="async" />
-              <span className="room-doorways__line"><strong>That person you noticed</strong><br />Maybe they noticed you, too.</span>
-              <span className="room-doorways__go">Who caught your eye? <span aria-hidden="true">↗</span></span>
-            </button>
-          </section>
-          {socialOpen && <div className="event-modal__social-room">{eventSocialTabs}{eventSocialPanel}</div>}
           <details className="event-modal__disclosure" open={detailsOpen} onToggle={e => setDetailsOpen(e.currentTarget.open)}>
             <summary><FileText aria-hidden="true" />Event details<ChevronRight aria-hidden="true" /></summary>
             <div className="event-modal__disclosure-content">
@@ -1339,6 +1332,23 @@ function EventModalInner({
                 onSchedule={() => rsvp.toggleRsvp(event.id)} />}
             </div>
           </details>
+          <section className="event-modal__mizzed-door" aria-label="Mizzed Connection">
+            <button type="button" className="room-doorways__door pdx-glass-card pdx-glass-rebind"
+              style={{ "--c": "var(--room-mizzed)", "--ink": "var(--room-mizzed)" } as React.CSSProperties}
+              aria-expanded={socialOpen && socialTab === "missed"} onClick={() => {
+                setSocialOpen(true);
+                setSocialTab("missed");
+                requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
+              }}>
+              <ResourceCardMotif name="MIZZED CONNECTION" category="mizzed" />
+              <span className="room-doorways__vignette" aria-hidden="true" />
+              <span className="room-doorways__glass" aria-hidden="true" />
+              <img className="room-doorways__logo" src="/brand/family/mizzed-connection.svg" alt="Mizzed Connection" loading="lazy" decoding="async" />
+              <span className="room-doorways__line"><strong>That person you noticed</strong><br />Maybe they noticed you, too.</span>
+              <span className="room-doorways__go">Who caught your eye? <span aria-hidden="true">↗</span></span>
+            </button>
+          </section>
+          {socialOpen && <div className="event-modal__social-room">{eventSocialTabs}{eventSocialPanel}</div>}
           <div className="event-modal__more">
             <button type="button" aria-label="More event information" aria-expanded={detailsOpen} onClick={() => setDetailsOpen(!detailsOpen)}><Ellipsis size={34} aria-hidden="true" /></button>
           </div>

@@ -1,3 +1,5 @@
+import { boardBrowseHref } from "@/lib/boardBrowseHref";
+import type { BoardCategory } from "@/lib/allBoards";
 import MapWorldRedirect from "@/components/MapWorldRedirect";
 import { homeBootLogoHtml } from "@shared/homeBoot";
 import { Switch, Route, Router, Redirect, useLocation } from "wouter";
@@ -8,6 +10,7 @@ import BrowseScrollRestoration from "./components/BrowseScrollRestoration";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
 import { InboxSheetProvider } from "./context/InboxSheetContext";
+import { HubPanelProvider } from "./context/HubPanelContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import CalmAccountSync from "./components/CalmAccountSync";
 import Nav from "./components/Nav";
@@ -87,6 +90,12 @@ const Community = lazyWithReload(() => import("./pages/Community"));
 const MemberProfile = lazyWithReload(() => import("./pages/MemberProfile"));
 const NotFound = lazyWithReload(() => import("./pages/not-found"));
 
+function BoardEntrance({ board, tools }: { board: BoardCategory; tools: ReactNode }) {
+  return new URLSearchParams(window.location.search).get("view") === "tools"
+    ? tools
+    : <Redirect to={boardBrowseHref(board, window.location.search)} replace />;
+}
+
 function isHubPath(path: string) {
   const bare = path.split("?")[0];
   return bare === "/dashboard" || bare === "/admin";
@@ -144,7 +153,7 @@ function AppLayout() {
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />
             <Route path="/gigz/new">{() => <MapWorldRedirect world="gigz" />}</Route>
-            <Route path="/gigz" component={PrideWork} />
+            <Route path="/gigz">{() => <BoardEntrance board="gigz" tools={<PrideWork />} />}</Route>
             <Route path="/gigs">
               {() => <Redirect to="/gigz" />}
             </Route>
@@ -157,17 +166,18 @@ function AppLayout() {
               }}
             </Route>
             <Route path="/giftz/new">{() => <MapWorldRedirect world="giftz" />}</Route>
-            <Route path="/giftz" component={Gifting} />
+            <Route path="/giftz">{() => <BoardEntrance board="giftz" tools={<Gifting />} />}</Route>
             <Route path="/sellz/new">{() => <MapWorldRedirect world="sellz" />}</Route>
-            <Route path="/sellz" component={Sellz} />
-            <Route path="/sellz/" component={Sellz} />
+            <Route path="/sellz">{() => <BoardEntrance board="sellz" tools={<Sellz />} />}</Route>
+            <Route path="/sellz/">{() => <BoardEntrance board="sellz" tools={<Sellz />} />}</Route>
+            <Route path="/houz">{() => <BoardEntrance board="housing" tools={<Housing />} />}</Route>
             <Route path="/the-hauz/new" component={HousingNew} />
             <Route path="/the-hauz/:id">{params => {
               const search = new URLSearchParams(window.location.search);
               search.set("post", params.id);
               return <Redirect to={`/the-hauz?${search.toString()}`} replace />;
             }}</Route>
-            <Route path="/the-hauz" component={Housing} />
+            <Route path="/the-hauz">{() => <BoardEntrance board="housing" tools={<Housing />} />}</Route>
             <Route path="/hausing/new">
               {() => <Redirect to="/the-hauz/new" />}
             </Route>
@@ -204,7 +214,7 @@ function AppLayout() {
             <Route path="/reset-password" component={ResetPassword} />
             <Route path="/inbox" component={Home} />
             <Route path="/mizzed/new" component={MizzedBoard} />
-            <Route path="/mizzed" component={MizzedBoard} />
+            <Route path="/mizzed">{() => <BoardEntrance board="mizzed" tools={<MizzedBoard />} />}</Route>
             <Route path="/directory/new">{() => <MapWorldRedirect world="places" />}</Route>
             <Route path="/directory/:id/:slug?" component={Directory} />
 
@@ -273,12 +283,14 @@ export default function App() {
           <CommunityStandardsGate />
           <Router>
             <InboxSheetProvider>
+              <HubPanelProvider>
               <BrowseScrollRestoration />
               <AnalyticsTracker />
               <PrideGlowNudge />
               <RiverBratsIntroOnBeaches />
               <AppLayout />
               <Toaster />
+              </HubPanelProvider>
             </InboxSheetProvider>
           </Router>
         </AuthProvider>

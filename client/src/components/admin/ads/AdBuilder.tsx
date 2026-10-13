@@ -731,7 +731,7 @@ export default function AdBuilder({ onSaved }: Props) {
         </div>
         <p className="ad-mgr__preview-note">
           {isPoster
-            ? "Poster uses the same PosterAdCard as /events - 2:3 media well, brand chip, solid Shop Now."
+            ? "Poster uses the same PosterAdCard as /events - 4:5 media well, brand chip, solid Shop Now."
             : "Feed uses the same FeedAdCard as the hub - media, title, and footer CTA row."}
         </p>
       </aside>

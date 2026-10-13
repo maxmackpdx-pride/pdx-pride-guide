@@ -77,6 +77,7 @@ export default function HubPeople() {
       toast({ title: vars.isFollowing ? "Unfollowed" : "Following", duration: 2000 });
       queryClient.invalidateQueries({ queryKey: ["/api/users/me/people"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users/me/follow-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
     },
     onError: () => {
       toast({ title: "Could not update follow", variant: "destructive" });

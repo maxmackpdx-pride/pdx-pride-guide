@@ -1,7 +1,7 @@
 import { ServiceNameMark } from "@/components/ServiceNameMark";
 import { serviceArtwork } from "@shared/serviceIdentity";
 import { PLACE_ACCENTS } from './placeTokens';
-import type { MouseEvent } from 'react';
+import { useId, type CSSProperties, type MouseEvent } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { PlaceCard } from '@/components/ds';
 import { ResourceCardMotif } from '@/components/resources/ResourceCardMotif';
@@ -16,10 +16,17 @@ type PlacePreview = Pick<Business, 'id' | 'name' | 'type'> & Partial<Business>;
 export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
   place: PlacePreview; onOpen: (element: HTMLElement) => void; onRequireAuth?: () => void;
 }) {
+  const logoInkId = `placez-logo-ink-${useId().replace(/:/g, '')}`;
   const accent = PLACE_ACCENTS[place.type] || 'var(--neon-cyan)';
   const label = DIRECTORY_TYPE_LABELS[place.type] || place.type;
   const open = (event: MouseEvent<HTMLElement>) => onOpen(event.currentTarget.closest<HTMLElement>('.pdxPlace') || event.currentTarget);
-  return <div className="placez-card-surface">
+  return <div className="placez-card-surface" style={{ '--placez-logo-ink-filter': `url(#${logoInkId})` } as CSSProperties}>
+    <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: 'absolute' }}>
+      <defs><filter id={logoInkId} colorInterpolationFilters="sRGB">
+        {/* Remove low-alpha glow baked into the logo while retaining its authored contour. */}
+        <feComponentTransfer><feFuncA type="linear" slope="4" intercept="-1.2" /></feComponentTransfer>
+      </filter></defs>
+    </svg>
     <PlaceCard name={place.name} category={place.type} categoryLabel={label} accentColor={accent}
       variant="full"
       logoUrl={serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl)) || undefined} logoFallback={<ServiceNameMark source={place} />}

@@ -540,7 +540,7 @@ export default function Boards() {
                             ? "Mizzed"
                             : selectedCategory.label}
                       </button>
-                      <Link className="ab-back" href={selectedCategory.route}>
+                      <Link className="ab-back" href={`${selectedCategory.route}?view=tools`}>
                         My posts & board tools <ArrowRight size={14} />
                       </Link>
                     </>

@@ -1,4 +1,5 @@
 import { seedOwnerRequestedPlaces20261013 } from "./seedOwnerRequestedPlaces20261013";
+import outzMapCatalog from "@shared/outzMapCatalog";
 import { seedLittleShopOfPonies20261031 } from "./seedLittleShopOfPonies20261031";
 import { seedDiscoveredQueerEvents20260928 } from "./seedDiscoveredQueerEvents20260928";
 import { seedPosterAudit20260928 } from "./seedPosterAudit20260928";
@@ -63,6 +64,8 @@ import { buildSubmissionMergePatch } from "@shared/submissionMatch";
 import { mergeMapCoordinates, eventMatchesBusiness } from "./venueCoordinates";
 import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
+import { pageHubActivity } from "@shared/hubFeedPagination";
+import { recordResourceRelease, resourceDirectoryRevision, resourceReleaseItems } from "./hubSectionActivity";
 import { resolveDirectoryLogo, directoryFallbackLogo } from "@shared/directoryLogos";
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
@@ -984,7 +987,7 @@ if (boardFollowsSchema && (!boardFollowsSchema.sql.includes("'mizzed'") || !boar
     sqlite.exec("ALTER TABLE board_follows_new RENAME TO board_follows");
   })();
 }
-/** Rooms a member can follow. Following widens what that room puts in the Hub feed. */
+/** Rooms a member can follow. Following puts that room’s published activity in the Hub Following view. */
 export type FollowableRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | "eventz" | "outz" | "rezources";
 export function isFollowingBoard(userId: number, board: FollowableRoom): boolean {
   return !!sqlite.prepare("SELECT 1 FROM board_follows WHERE user_id = ? AND board = ?").get(userId, board);
@@ -1290,7 +1293,7 @@ function bulkContentReplyCounts(contentType: ContentReplyThreadType, ids: number
 }
 
 /** True when the target board/hub post is public enough to engage (like / reply). */
-function contentIsPubliclyEngagable(contentType: string, contentId: number): boolean {
+function contentIsPubliclyEngagable(contentType: string, contentId: number, viewerUserId?: number): boolean {
   const type = String(contentType || "").toUpperCase();
   const id = Number(contentId);
   if (!Number.isFinite(id) || id <= 0) return false;
@@ -1308,7 +1311,8 @@ function contentIsPubliclyEngagable(contentType: string, contentId: number): boo
     return !!row && String(row.status || "").toUpperCase() === "ACTIVE";
   }
   if (type === "HUB") {
-    const row = sqlite.prepare(`SELECT id, status, audience FROM hub_feed_posts WHERE id = ?`).get(id) as any;
+    const row = sqlite.prepare(`SELECT id, user_id AS userId, status, audience FROM hub_feed_posts WHERE id = ?`).get(id) as any;
+    if (row && viewerUserId != null && storage.isMemberInteractionBlocked(viewerUserId, row.userId)) return false;
     return !!row && row.status === "LIVE" && String(row.audience || "ALL").toUpperCase() === "ALL";
   }
   return false;
@@ -8523,15 +8527,10 @@ function hubFeedEventActivityAt(evt: {
   // upcoming party to the top and buries real-time posts, host updates, and
   // RSVPs beneath the whole week's catalog. Prefer the created/listed time for
   // all events; only fall back to the party date when no created time exists.
-  const created = hubFeedCreatedAt(evt);
+  const created = typeof evt.createdAt === "string" ? evt.createdAt : "";
   if (created) return created;
 
-  const start = typeof evt.dateStart === "string" ? evt.dateStart : "";
-  if (start) {
-    const startMs = parsePacificDateTime(start);
-    if (startMs != null) return new Date(startMs).toISOString();
-    return start;
-  }
+  // An event's future start is not evidence of when it was published.
   return created;
 }
 
@@ -9677,7 +9676,7 @@ export interface IStorage {
   getHubPostKarmaForUser(userId: number): number;
   /** Public thread replies for GIG / HUB. SPOTTED / GIFTING use native private flows for counts only. */
   countContentReplies(contentType: string, contentId: number): number;
-  listContentReplies(contentType: string, contentId: number, limit?: number): Array<{
+  listContentReplies(contentType: string, contentId: number, limit?: number, viewerUserId?: number): Array<{
     id: number;
     body: string;
     createdAt: string;
@@ -11727,7 +11726,7 @@ export const storage: IStorage = {
     if (!Number.isInteger(id) || id <= 0 || ![-1, 0, 1].includes(value)) {
       return { score: 0, viewerVote: 0, authorKarma: 0, error: "Invalid vote" };
     }
-    if (!contentIsPubliclyEngagable("HUB", id)) {
+    if (!contentIsPubliclyEngagable("HUB", id, userId)) {
       return { score: 0, viewerVote: 0, authorKarma: 0, error: "Not found" };
     }
     const stamp = new Date().toISOString();
@@ -11764,15 +11763,16 @@ export const storage: IStorage = {
     `).get(type, id) as { cnt: number } | undefined;
     return Number(row?.cnt) || 0;
   },
-  listContentReplies(contentType, contentId, limit = 20) {
+  listContentReplies(contentType, contentId, limit = 20, viewerUserId) {
     ensureContentRepliesSchema();
     const type = String(contentType || "").toUpperCase();
     if (!(CONTENT_REPLY_THREAD_TYPES as readonly string[]).includes(type)) return [];
     const id = Number(contentId);
     if (!Number.isFinite(id) || id <= 0) return [];
+    if (type === "HUB" && viewerUserId != null && !contentIsPubliclyEngagable(type, id, viewerUserId)) return [];
     const take = Math.min(Math.max(Number(limit) || 20, 1), 50);
     const rows = sqlite.prepare(`
-      SELECT r.id, r.body, r.created_at AS createdAt,
+      SELECT r.id, r.user_id AS userId, r.body, r.created_at AS createdAt,
              u.username AS username,
              u.display_name AS displayName,
              u.photo_url AS photoUrl,
@@ -11785,7 +11785,7 @@ export const storage: IStorage = {
       ORDER BY r.created_at DESC, r.id DESC
       LIMIT ?
     `).all(type, id, take) as Array<{
-      id: number;
+      id: number; userId: number;
       body: string;
       createdAt: string;
       username: string;
@@ -11795,7 +11795,7 @@ export const storage: IStorage = {
       avatarRing: string | null;
     }>;
     // Newest first in SQL; reverse so thread reads oldest → newest in the UI.
-    return rows.reverse().map(r => ({
+    return rows.filter(row => viewerUserId == null || !storage.isMemberInteractionBlocked(viewerUserId, row.userId)).reverse().map(r => ({
       id: r.id,
       body: r.body,
       createdAt: r.createdAt,
@@ -11816,7 +11816,7 @@ export const storage: IStorage = {
     }
     const id = Number(contentId);
     if (!Number.isFinite(id) || id <= 0) return { error: "Invalid content id" };
-    if (!contentIsPubliclyEngagable(type, id)) return { error: "Not found" };
+    if (!contentIsPubliclyEngagable(type, id, userId)) return { error: "Not found" };
 
     const text = String(body || "").trim().slice(0, 500);
     if (!text) return { error: "body required" };
@@ -15602,6 +15602,7 @@ export const storage: IStorage = {
     const followsHouz = viewerUserId != null && isFollowingBoard(viewerUserId, "houz");
     const followsEventz = viewerUserId != null && isFollowingBoard(viewerUserId, "eventz");
     const followsOutz = viewerUserId != null && isFollowingBoard(viewerUserId, "outz");
+    const followsResources = viewerUserId != null && isFollowingBoard(viewerUserId, "rezources");
     const viewerIsAdmin = !!opts.viewerIsAdmin;
     const cursor = opts.cursor?.trim() || null;
 
@@ -15613,7 +15614,7 @@ export const storage: IStorage = {
     const goingCounts = storage.getAttendanceSummaries();
     const viewerRsvpEventIds = new Set<number>();
     const viewerBeachDays = new Set<string>();
-    if (viewerUserId != null && sqlite.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='outz_wall_posts'").get()) {
+    if (viewerUserId != null) {
       for (const row of sqlite.prepare(`
         SELECT event_id AS eventId FROM attendances WHERE user_id = ? AND is_active = 1
       `).all(viewerUserId) as { eventId: number }[]) {
@@ -15634,6 +15635,7 @@ export const storage: IStorage = {
     const pinned = filterHubFeedPinned(pinnedAll, tab);
 
     const items: HubFeedItem[] = [];
+    const unavailableSources: string[] = [];
 
     // Venue parties we listed on the guide + every user-submitted event.
     // Order by LISTING time (created_at), the same axis the feed sorts on, so
@@ -15657,7 +15659,6 @@ export const storage: IStorage = {
           OR date(date_start) >= date('now', '-14 days')
         )
       ORDER BY datetime(COALESCE(created_at, date_start)) DESC
-      LIMIT 200
     `).all() as any[];
     const rawEventItems: HubFeedItem[] = [];
     for (const evt of recentEvents) {
@@ -15705,7 +15706,6 @@ export const storage: IStorage = {
       JOIN events e ON e.id = hm.event_id AND e.status = 'LIVE'
       JOIN users u ON u.id = hm.user_id
       ORDER BY hm.created_at DESC
-      LIMIT 12
     `).all() as any[];
     for (const row of hostRows) {
       items.push({
@@ -15734,9 +15734,9 @@ export const storage: IStorage = {
       LEFT JOIN users u ON u.id = a.user_id
       WHERE a.is_active = 1
       ORDER BY a.created_at DESC
-      LIMIT 25
     `).all() as any[];
     for (const row of rsvpRows) {
+      if (viewerUserId != null && storage.isMemberInteractionBlocked(viewerUserId, row.userId)) continue;
       if (!canViewerSeeHubFeedRsvp(row, viewerUserId, viewerIsAdmin)) continue;
       const viewerRsvped = viewerUserId != null && viewerRsvpEventIds.has(row.eventId);
       const masked = maskAttendanceRow(viewerUserId, viewerRsvped, row);
@@ -15758,12 +15758,12 @@ export const storage: IStorage = {
       });
     }
 
-    for (const post of storage.getGiftingPosts({ viewerUserId }).slice(0, followsGiftz ? 100 : 15)) {
+    for (const post of storage.getGiftingPosts({ viewerUserId })) {
       items.push({
         id: `gifting-${post.id}`,
         kind: "gifting",
-        badge: post.postType === "ISO" ? "ISO" : "GIFTZ",
-        action: post.postType === "ISO" ? "Posted an ISO on the free board" : "New gift on the free board",
+        badge: (post.postType || post.post_type) === "ISO" ? "ISO" : "GIFTZ",
+        action: (post.postType || post.post_type) === "ISO" ? "Posted an ISO on the free board" : "New gift on the free board",
         title: post.title,
         text: post.description || null,
         createdAt: post.createdAt || post.created_at,
@@ -15778,10 +15778,12 @@ export const storage: IStorage = {
         link: `/giftz?post=${post.id}`,
         boardPostId: post.id,
         viewerFollowsBoard: followsGiftz,
+        photoUrl: firstPhoto(post.photoUrls) || post.photoUrl || null,
+        listing: { location: post.pickupArea || post.neighborhood || undefined, status: post.postType || post.post_type },
       });
     }
 
-    for (const post of storage.getSellzPosts().slice(0, followsSellz ? 100 : 15)) {
+    for (const post of storage.getSellzPosts()) {
       items.push({
         id: `sellz-${post.id}`,
         kind: "sellz",
@@ -15795,13 +15797,14 @@ export const storage: IStorage = {
         boardPostId: post.id,
         photoUrl: post.photoUrls?.[0] || null,
         viewerFollowsBoard: followsSellz,
+        listing: { price: `$${(Number(post.price_cents || 0) / 100).toFixed(Number(post.price_cents || 0) % 100 ? 2 : 0)}`, location: post.pickupArea || post.neighborhood || undefined },
       });
     }
 
     // HAUSING. Ordered by listing recency inside listHousingPosts, the same axis
     // the feed sorts on, so a new post is always a candidate.
     try {
-      for (const post of listHousingPosts(sqlite, { viewerId: viewerUserId ?? null, limit: followsHouz ? 100 : 12 })) {
+      for (const post of listHousingPosts(sqlite, { viewerId: viewerUserId ?? null, feedMode: true })) {
         items.push({
           id: `housing-${post.id}`,
           kind: "housing",
@@ -15821,13 +15824,15 @@ export const storage: IStorage = {
           boardPostId: post.id,
           photoUrl: post.photos[0] || null,
           viewerFollowsBoard: followsHouz,
+          listing: { price: post.rent || post.budget || undefined, location: post.areas.join(" · ") || undefined, timing: post.moveIn || post.moveTimeline || undefined, status: post.type },
         });
       }
-    } catch {
-      // A board that fails to read must never take the whole feed down.
+    } catch (error) {
+      console.error("[hub] HAÜSING source unavailable", error);
+      unavailableSources.push("HAÜSING");
     }
 
-    for (const gig of storage.getGigPosts("LIVE").slice(0, followsGigz ? 100 : 12)) {
+    for (const gig of storage.getGigPosts("LIVE")) {
       if (pinnedGigId != null && gig.id === pinnedGigId) continue;
       items.push({
         id: `gig-${gig.id}`,
@@ -15848,10 +15853,14 @@ export const storage: IStorage = {
         link: `/gigz?post=${gig.id}`,
         boardPostId: gig.id,
         viewerFollowsBoard: followsGigz,
+        listing: { location: gig.location || undefined, compensation: gig.compensation || undefined },
       });
     }
 
-    for (const row of storage.getMissedConnections("ACTIVE", viewerUserId).slice(0, followsMizzed ? 100 : 12)) {
+    const missedAuthors = sqlite.prepare("SELECT m.user_id AS userId, u.status FROM missed_connections m JOIN users u ON u.id=m.user_id WHERE m.id=?");
+    for (const row of storage.getMissedConnections("ACTIVE", viewerUserId)) {
+      const actor = missedAuthors.get(row.id) as { userId: number; status: string } | undefined;
+      if (!actor || actor.status !== "active" || viewerUserId != null && actor.userId !== viewerUserId && storage.isMemberInteractionBlocked(viewerUserId, actor.userId)) continue;
       // Mirror the board's spottedKind()/spottedPlace() so the feed card and the
       // detail card that opens on tap read identically.
       const kind = row.eventId != null
@@ -15900,9 +15909,9 @@ export const storage: IStorage = {
       JOIN users u ON u.id = c.user_id
       WHERE c.is_active = 1
       ORDER BY c.created_at DESC
-      LIMIT 12
     `).all() as any[];
     for (const row of checkinRows) {
+      if (viewerUserId != null && row.userId !== viewerUserId && storage.isMemberInteractionBlocked(viewerUserId, row.userId)) continue;
       const beachKey = `${row.beachId}:${row.calendarDate}`;
       const viewerCheckedIn = viewerUserId != null && viewerBeachDays.has(beachKey);
       const isSelf = viewerUserId != null && row.userId === viewerUserId;
@@ -15920,6 +15929,7 @@ export const storage: IStorage = {
         beachId: row.beachId,
         beachLabel,
         link: `/nude-beaches?tab=${encodeURIComponent(row.beachId)}`,
+        source: { kind: "destination", id: row.beachId, label: beachLabel, href: `/outzide/${encodeURIComponent(row.beachId)}` },
       });
     }
 
@@ -15927,7 +15937,7 @@ export const storage: IStorage = {
     // Chats and check-in notes stay in their existing destination rooms.
     if (viewerUserId != null) {
       const destinationPosts = sqlite.prepare(`
-        SELECT p.id, p.place_id AS placeId, p.user_id AS userId, p.post_kind AS postKind,
+        SELECT p.id, p.place_id AS placeId, p.user_id AS userId, p.post_kind AS postKind, p.trip_date AS tripDate,
                p.body, p.created_at AS createdAt,
                COALESCE(f.place_name, (SELECT place_name FROM outz_destination_follows WHERE place_id = p.place_id LIMIT 1), p.place_id) AS placeName,
                u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
@@ -15936,21 +15946,78 @@ export const storage: IStorage = {
         LEFT JOIN outz_destination_follows f ON f.place_id = p.place_id AND f.user_id = ?
         JOIN users u ON u.id = p.user_id
         WHERE datetime(p.created_at) >= datetime('now', '-30 days') AND (f.user_id IS NOT NULL OR ?)
-        ORDER BY p.created_at DESC LIMIT 40
+        ORDER BY p.created_at DESC
       `).all(viewerUserId, followsOutz ? 1 : 0) as any[];
+      const destinationNames = new Map(outzMapCatalog.map(place => [place.id, place.name]));
       for (const row of destinationPosts) {
+        row.placeName = destinationNames.get(row.placeId) || row.placeName;
         if (row.userId !== viewerUserId && storage.isMemberInteractionBlocked(viewerUserId, row.userId)) continue;
+        if (row.postKind !== "TRIP_NOTE" && row.tripDate && row.tripDate < hubFeedPostedDay(new Date().toISOString())) continue;
         items.push({
           id: `outz-post-${row.id}`,
           kind: "outz",
-          badge: "OUTZIDE",
+          badge: ({ CARPOOL: "Carpool", CARPOOL_OFFER: "Offering a ride", CARPOOL_REQUEST: "Looking for a ride", HIKE_BUDDY: "Hike buddy", CAMP_BUDDY: "Camp buddy", LOOKING_FOR_COMPANY: "Company" } as Record<string,string>)[row.postKind] || "OUTZIDE",
           action: `Posted at ${row.placeName}`,
           text: row.body,
           createdAt: row.createdAt,
           author: hubFeedAuthorFromUser(row),
           link: `/outzide?place=${encodeURIComponent(row.placeId)}&wall=1`,
           viewerFollowsBoard: followsOutz,
+          viewerFollowsSource: true,
+          source: { kind: "destination", id: row.placeId, label: row.placeName, href: `/outzide?place=${encodeURIComponent(row.placeId)}&wall=1` },
+          listing: row.tripDate ? { timing: row.tripDate } : undefined,
         });
+      }
+    }
+
+    // These are public ride listings. Requests and direct-message notes remain private.
+    storage.expireBeachCarpoolPosts();
+    const rides = sqlite.prepare(`
+      SELECT p.id, p.user_id AS userId, p.beach_id AS beachId, p.post_type AS postType,
+             p.departure_area AS departureArea, p.trip_date AS tripDate, p.seats, p.note,
+             p.created_at AS createdAt, u.display_name AS displayName, u.username,
+             u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+      FROM beach_carpool_posts p JOIN users u ON u.id=p.user_id
+      WHERE p.status='OPEN' AND datetime(p.expires_at)>datetime('now') AND u.status='active'
+    `).all() as any[];
+    for (const row of rides) {
+      if (viewerUserId != null && row.userId !== viewerUserId && storage.isMemberInteractionBlocked(viewerUserId, row.userId)) continue;
+      const beachLabel = beachVenueLabel(row.beachId);
+      const href = `/outzide/${encodeURIComponent(row.beachId)}`;
+      items.push({ id: `beach-ride-${row.id}`, kind: "outz", badge: "Carpool", action: `Posted a ride at ${beachLabel}`,
+        title: row.postType === "OFFERING_RIDE" ? "Offering a ride" : "Looking for a ride", text: row.note,
+        createdAt: row.createdAt, author: hubFeedAuthorFromUser(row), link: href, viewerFollowsBoard: followsOutz,
+        source: { kind: "destination", id: row.beachId, label: beachLabel, href },
+        listing: { location: row.departureArea, timing: row.tripDate, compensation: row.seats ? `${row.seats} seats` : undefined },
+      });
+    }
+
+    // Destination check-ins remain anonymous aggregates, matching OutZide's
+    // public community feed. Names, arrival/departure hours, and private notes
+    // never become Hub content merely because someone follows the destination.
+    if (viewerUserId != null && sqlite.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='outz_checkins'").get()) {
+      const groups = sqlite.prepare(`
+        SELECT c.place_id AS placeId, c.calendar_date AS tripDate, MAX(c.created_at) AS createdAt,
+               COUNT(DISTINCT c.user_id) AS count,
+               COALESCE(f.place_name, (SELECT place_name FROM outz_destination_follows WHERE place_id=c.place_id LIMIT 1), c.place_id) AS placeName
+        FROM outz_checkins c
+        LEFT JOIN outz_destination_follows f ON f.place_id=c.place_id AND f.user_id=?
+        JOIN users u ON u.id=c.user_id AND u.status='active'
+        WHERE c.is_active=1 AND datetime(c.expires_at)>datetime('now')
+          AND (f.user_id IS NOT NULL OR ?)
+          AND NOT EXISTS (SELECT 1 FROM member_blocks b WHERE (b.blocker_user_id=? AND b.blocked_user_id=c.user_id) OR (b.blocker_user_id=c.user_id AND b.blocked_user_id=?))
+        GROUP BY c.place_id, c.calendar_date
+      `).all(viewerUserId, followsOutz ? 1 : 0, viewerUserId, viewerUserId) as Array<{placeId:string;tripDate:string;createdAt:string;count:number;placeName:string}>;
+      for (const row of groups) {
+        row.placeName = outzMapCatalog.find(place => place.id === row.placeId)?.name || row.placeName;
+        items.push({
+        id:`outz-checkin-${row.placeId}-${row.tripDate}`,kind:"checkin",badge:"Visit plans",
+        action:"Planned a visit", title:`${row.count} ${row.count === 1 ? "person planning" : "people planning"} a visit`,
+        text:"Open the destination to see the plan or add your check-in.",createdAt:row.createdAt,
+        author:{displayName:"OutZide",anonymous:true},viewerFollowsSource:true,
+        source:{kind:"destination",id:row.placeId,label:row.placeName,href:`/outzide?place=${encodeURIComponent(row.placeId)}`},
+        link:`/outzide?place=${encodeURIComponent(row.placeId)}`,listing:{timing:row.tripDate},
+      });
       }
     }
 
@@ -15965,10 +16032,10 @@ export const storage: IStorage = {
       JOIN users u ON u.id = p.user_id
       WHERE p.status = 'LIVE'
       ORDER BY p.created_at DESC
-      LIMIT 40
     `).all() as any[];
     const hostedCache = new Map<number, number[]>();
     for (const row of feedPostRows) {
+      if (viewerUserId != null && row.userId !== viewerUserId && storage.isMemberInteractionBlocked(viewerUserId, row.userId)) continue;
       let hosted = hostedCache.get(row.userId);
       if (!hosted) {
         hosted = storage.getHostedLiveEventIds(row.userId);
@@ -15989,13 +16056,14 @@ export const storage: IStorage = {
         JOIN communities c ON c.id=p.community_id
         JOIN users u ON u.id=p.user_id
         WHERE p.status='published' AND p.parent_post_id IS NULL AND datetime(p.created_at)>=datetime('now','-60 days')
-        ORDER BY p.created_at DESC LIMIT 40
+        ORDER BY p.created_at DESC
       `).all(viewerUserId) as any[];
       for(const row of communityRows){
         if(row.userId!==viewerUserId&&storage.isMemberInteractionBlocked(viewerUserId,row.userId))continue;
         items.push({id:`community-${row.id}`,kind:"community",badge:"Z/LIST",action:`Posted in z/${row.slug}`,
           title:row.title||null,text:row.body||null,mediaUrl:row.mediaUrl||null,createdAt:row.createdAt,
-          author:hubFeedAuthorFromUser(row),link:`/z/${row.slug}#post-${row.id}`});
+          author:hubFeedAuthorFromUser(row),link:`/z/${row.slug}#post-${row.id}`,
+          viewerFollowsSource:true,source:{kind:"community",id:row.slug,label:row.communityName,href:`/z/${row.slug}#post-${row.id}`}});
       }
     }
 
@@ -16003,18 +16071,35 @@ export const storage: IStorage = {
       bumpSavedHubFeedItems(items, viewerUserId);
     }
 
-    const sorted = items
-      .filter((item) => item.createdAt)
-      .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
-
-    const tabbed = filterHubFeedItems(sorted, tab);
-    const paged = cursor
-      ? tabbed.filter((item) => String(item.createdAt) < cursor)
-      : tabbed;
-    const slice = paged.slice(0, limit);
-    const nextCursor = paged.length > limit ? slice[slice.length - 1]?.createdAt ?? null : null;
-
-    return { items: slice, pinned, nextCursor };
+    recordResourceRelease(sqlite, resourceDirectoryRevision());
+    if (followsResources) items.push(...resourceReleaseItems(sqlite));
+    const followedPlaces = new Set<number>(viewerUserId == null ? [] : (sqlite.prepare("SELECT business_id AS id FROM business_follows WHERE follower_user_id = ?").all(viewerUserId) as { id: number }[]).map(row => row.id));
+    const followedDestinations = new Set<string>(viewerUserId == null ? [] : (sqlite.prepare("SELECT place_id AS id FROM outz_destination_follows WHERE user_id = ?").all(viewerUserId) as { id: string }[]).map(row => row.id));
+    const personCache = new Map<string, ReturnType<typeof storage.getUserByUsername>>();
+    const authorized = items.filter(item => {
+      const actor = item.postedBy ?? item.author;
+      let person = actor.username ? personCache.get(actor.username) : undefined;
+      if (actor.username && !personCache.has(actor.username)) {
+        person = storage.getUserByUsername(actor.username);
+        personCache.set(actor.username, person);
+      }
+      if (person && person.status !== "active") return false;
+      if (viewerUserId != null && person && person.id !== viewerUserId && storage.isMemberInteractionBlocked(viewerUserId, person.id)) return false;
+      const personFollowed = viewerUserId != null && person != null && storage.isFollowing(viewerUserId, person.id);
+      const embedded = item.events?.length ? item.events : item.event ? [item.event] : [];
+      const eventPlaces = embedded.map(event => hubFeedResolveBusinessForEvent(event, businesses)).filter((place): place is Business => !!place);
+      const placeId = item.author.businessId ?? eventPlaces[0]?.id;
+      if (placeId && !item.source) {
+        const place = businesses.find(row => row.id === placeId);
+        if (place) item.source = { kind: "place", id: String(place.id), label: place.name, href: placePath(place.id, place.name) };
+      }
+      const placeFollowed = placeId != null && followedPlaces.has(placeId) || eventPlaces.some(place => followedPlaces.has(place.id));
+      const destinationFollowed = !!item.source && item.source.kind === "destination" && (followsOutz || followedDestinations.has(item.source.id));
+      item.viewerFollowsSource = !!(item.viewerFollowsSource || item.viewerFollowsBoard || personFollowed || placeFollowed || destinationFollowed);
+      for (const event of embedded) event.viewerIsGoing = viewerRsvpEventIds.has(event.id);
+      return true;
+    });
+    return { ...pageHubActivity(authorized, tab, limit, cursor ?? undefined), pinned, ...(unavailableSources.length ? { unavailableSources } : {}) };
   },
 };
 

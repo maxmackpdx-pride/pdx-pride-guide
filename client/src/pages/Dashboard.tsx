@@ -12,6 +12,7 @@ import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import PageHeader from "@/components/PageHeader";
 import HubV2 from "@/components/hub/HubV2";
+import { useHubPanel } from "@/context/HubPanelContext";
 import type { HubEventsFocus } from "@/components/hub/sections/HubEvents";
 import type { HubEventRow } from "@/components/hub/sections/HubEvents";
 import { parseHubSection, type HubSection } from "@/components/hub/types";
@@ -69,7 +70,7 @@ function hubSectionFromSearch(params: URLSearchParams): HubSection {
   return parseHubSection(params.get("section"));
 }
 
-export default function Dashboard() {
+function AccountDashboard() {
   usePageSeo("Your Hub | Zaylist", "Your Zaylist hub: events, feed, people, and more.");
   const { user, logout, refreshUser, loading } = useAuth();
   const { toast } = useToast();
@@ -643,4 +644,20 @@ export default function Dashboard() {
       />
     </div>
   );
+}
+
+/** Old feed bookmarks open the Hub over Home; account-management routes remain intact. */
+function LegacyHubEntry() {
+  const [, navigate] = useLocation();
+  const { openHub } = useHubPanel();
+  useEffect(() => { navigate("/", { replace: true }); openHub(); }, [navigate, openHub]);
+  return null;
+}
+
+export default function Dashboard() {
+  const [location] = useLocation();
+  const params = new URLSearchParams(window.location.search);
+  const account = params.has("edit") || params.has("editEvent") || params.has("editGig")
+    || params.get("view") === "posts" || !["", "feed", "post"].includes(params.get("section") || "");
+  return account ? <AccountDashboard key={location} /> : <LegacyHubEntry />;
 }

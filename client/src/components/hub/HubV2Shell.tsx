@@ -44,7 +44,7 @@ const NAV_ACCENTS: Record<string, string> = {
 };
 
 const MEMBER_NAV: NavItem[] = [
-  { key: "feed", label: "Feed", icon: <HubIconFeed /> },
+  { key: "feed", label: "Hub", icon: <HubIconFeed /> },
   { key: "profile", label: "Profile", icon: <HubIconProfile /> },
   { key: "events", label: "Events", icon: <HubIconEvents /> },
   { key: "people", label: "People", icon: <HubIconPeople /> },
