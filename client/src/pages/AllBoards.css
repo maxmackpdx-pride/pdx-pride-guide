@@ -202,6 +202,6 @@ html.calm-mode .ab-door:hover { translate:none; }
 }
 .ab-art--photo { background:transparent; }
 .ab-art__photo {
- -webkit-mask-image:linear-gradient(to right,#000 55%,transparent 100%);
- mask-image:linear-gradient(to right,#000 55%,transparent 100%);
+ -webkit-mask-image:linear-gradient(to right,var(--z-black) 55%,transparent 100%);
+ mask-image:linear-gradient(to right,var(--z-black) 55%,transparent 100%);
 }
