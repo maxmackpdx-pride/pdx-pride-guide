@@ -1,6 +1,7 @@
 import "./ResourceCardMotif.css";
 import { resourceGradientStops } from "./resourceGradient";
 import { distinctResourceMotifs } from "./distinctResourceMotifs";
+import { distinctPlaceMotif } from "./distinctPlaceMotifs";
 import { memo, useId, useRef, useState, useEffect } from "react";
 import { useCardMotifParallax } from "./useCardMotifParallax";
 
@@ -63,7 +64,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
  const nodes=Array.from({length:30},(_,i)=>({x:20+random()*360,y:125+random()*290,r:i%7===0?2.4:1.1}));
  const theme=themeFor(name,category);
- const silhouette = category.startsWith("place-") ? silhouettes[theme] : distinctResourceMotifs[name] ?? silhouettes[theme];
+ const silhouette = category.startsWith("place-") ? distinctPlaceMotif(name) ?? silhouettes[theme] : distinctResourceMotifs[name] ?? silhouettes[theme];
  const tilt=(random()-.5)*12;
  const cycle = 28 + Math.round(random() * 8);
  const phase = -Math.round(random() * cycle);
