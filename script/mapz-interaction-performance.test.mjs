@@ -21,10 +21,10 @@ test('new tile remainder geometry does not reparse unchanged building filters',(
 
 test('tile arrivals retain the complete scene and cannot bypass its refresh interval',async()=>{
  const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
- let onData,frames=0,invalidations=0,timers=0;
+ let onData,frames=0,invalidations=0,timers=0,projectionInvalidations=0;
  const map={},cached={time:100,buildings:[{height:20}]},surfaceCache=new WeakMap([[map,cached]]);
  map.on=(name,fn)=>{assert.equal(name,'sourcedata');onData=fn;};
- const context=vm.createContext({window:{setTimeout:()=>++timers},map,surfaceCache,scheduleFrame:()=>frames++,performance:{now:()=>200},terrainSamples:{invalidate:()=>invalidations++},groundLightPools:{invalidate:()=>invalidations++},bridgeLayer:{},waterBloom:{invalidate:()=>invalidations++}});
+ const context=vm.createContext({window:{setTimeout:()=>++timers},map,surfaceCache,scheduleFrame:()=>frames++,performance:{now:()=>200},featureProjection:{invalidate:()=>projectionInvalidations++},terrainSamples:{invalidate:()=>invalidations++},groundLightPools:{invalidate:()=>invalidations++},bridgeLayer:{},waterBloom:{invalidate:()=>invalidations++}});
  vm.runInContext(renderer.slice(renderer.indexOf('let elevationDirty='),renderer.indexOf('// Neon colors')),context);
  const start=renderer.indexOf('function updateSurfaces('),end=renderer.indexOf('function drawSurfaceReflections',start);
  vm.runInContext(renderer.slice(start,end),context);
@@ -34,6 +34,14 @@ test('tile arrivals retain the complete scene and cannot bypass its refresh inte
  vm.runInContext('lastExplorationMove=1990',context);
  assert.equal(vm.runInContext('updateSurfaces(map)',context),cached);
  assert.equal(invalidations,0);
+ // All 100 DEM arrivals collapse into one settled terrain/cache refresh.
+ Object.assign(map,{getCenter:()=>({lng:0,lat:0}),getZoom:()=>15,getPitch:()=>48,getBearing:()=>0,getLayer:()=>({}),querySourceFeatures:()=>[]});
+ Object.assign(context,{portlandBridges:{update(){}},landmarkBuildings:{update(){},surfaceFeatures:()=>[]},createSpatialIndex:()=>()=>[],lightFeatures:[],intersectionLightPools:()=>[],matchMedia:()=>({matches:false})});
+ context.bridgeLayer.update=()=>{};context.groundLightPools.update=()=>{};
+ context.performance.now=()=>2300;
+ vm.runInContext('updateSurfaces(map)',context);assert.equal(projectionInvalidations,1);
+ for(let i=0;i<60;i++)vm.runInContext('updateSurfaces(map)',context);
+ assert.equal(projectionInvalidations,1);
 });
 
 test('trackpad events coalesce into one camera update per frame and cancel on disposal',()=>{

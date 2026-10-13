@@ -116,7 +116,7 @@ function updateSurfaces(target){
  const cameraKey=[center.lng,center.lat,target.getZoom(),target.getPitch(),target.getBearing()].join(':');
  if(cached&&cached.revision===surfaceRevision&&cached.cameraKey===cameraKey)return cached;
  if(!target.getLayer('bridge-decks'))return {buildings:[]};
- if(elevationDirty){terrainSamples.invalidate();groundLightPools.invalidate();bridgeLayer.signature='';elevationDirty=false;}
+ if(elevationDirty){terrainSamples.invalidate();featureProjection.invalidate();groundLightPools.invalidate();bridgeLayer.signature='';elevationDirty=false;}
  waterBloom.invalidate();
  const buildings=[],seen=new Set();
  const buildingFeatures=target.querySourceFeatures('terrain',{sourceLayer:'building'});
