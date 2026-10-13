@@ -26,7 +26,11 @@ test('discovery effects pause, resume, and survive responsive changes', { skip: 
     const expectStopped = async () => {
       await page.waitForFunction(() => [...document.querySelectorAll('.rg-stream-background--mobile-fallback')].every(element => element.getAnimations().every(animation => animation.playState !== 'running')));
     };
-    await page.goto(url('/boards'));
+    await page.goto(url('/directory'));
+    const surfaces = await page.evaluate(() => { const root=getComputedStyle(document.documentElement); return {app:getComputedStyle(document.querySelector('.app-shell')).backgroundColor, ink:root.getPropertyValue('--ink-900').trim(), cardBase:root.getPropertyValue('--z-black').trim()}; });
+    assert.equal(surfaces.app,'rgb(0, 0, 0)');
+    assert.equal(surfaces.ink,'#050506');
+    assert.equal(surfaces.cardBase,'#050506');
     await expectDrawing();
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await expectStopped();
@@ -50,12 +54,12 @@ test('discovery effects pause, resume, and survive responsive changes', { skip: 
     await expectDrawing();
     await page.setViewportSize({ width: 900, height: 650 });
     await expectDrawing();
-    await plane().evaluate(canvas => canvas.style.transform = 'translateY(200vh)');
+    await plane().evaluate(canvas => canvas.style.top = '200vh');
     await expectStopped();
-    await plane().evaluate(canvas => canvas.style.transform = '');
+    await plane().evaluate(canvas => canvas.style.top = '');
     await expectDrawing();
-    await page.goto(url('/'));
-    await page.locator('.home-tonight__atmosphere .rg-stream-background').waitFor({ state: 'attached' });
+    await page.goto(url('/needz'));
+    await expectDrawing();
     assert.deepEqual(errors, []);
   } finally {
     await browser.close();
