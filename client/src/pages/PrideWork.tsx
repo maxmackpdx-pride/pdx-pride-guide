@@ -249,7 +249,7 @@ export function GigListingCard({
   const posterLabel = gig.username ? `@${gig.username}` : gig.name;
   const locationLabel = gig.location || "Portland";
   const status = [gig.compensation, ...(presentation ? [] : [gig.location])].filter(Boolean).join(" · ")
-    || (isLooking ? "Available · message in inbox" : "Open · reply privately");
+    || (gig.status === "CLOSED" ? "Completed" : isLooking ? "Available · message in inbox" : "Open · reply privately");
   const cta = isLooking ? "Say hi" : "Reply";
   const profileHref = gig.username ? memberProfileHref(gig.username) : null;
   const talentName = gig.displayName || gig.name;
@@ -335,7 +335,8 @@ export function GigListingCard({
             <button type="button" onClick={event => {event.stopPropagation();openTalentReply(`Hi ${talentFirstName}, I’d like to hire you for `);}}>Hire {talentFirstName} <ArrowUpRight size={14} aria-hidden="true" /></button>
             <button type="button" onClick={event => {event.stopPropagation();openTalentReply();}}>Message</button>
           </div>
-          <div className="gig-talent-card__footer"><span aria-hidden="true"><Sparkle size={13} fill="currentColor" /></span>{availabilityDetail}</div>
+          {!presentation && <div className="gig-talent-card__footer"><span aria-hidden="true"><Sparkle size={13} fill="currentColor" /></span>{availabilityDetail}</div>}
+          {presentation && gig.compensation && <p className="gig-talent-card__rate">{gig.compensation}</p>}
         </>
       ) : (
         <>

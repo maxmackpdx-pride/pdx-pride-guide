@@ -156,3 +156,15 @@
 .ab-open-card--gigz .ab-gig-skills span { padding:var(--space-1) var(--space-2); border:var(--bw-hair) solid color-mix(in srgb,var(--c) 40%,transparent); border-radius:var(--event-card-tag-radius); background:var(--event-card-tag-bg); color:var(--text-hi); font:var(--open-card-meta-font); }
 /* Keep the close control within reach during long phone scrolls, without a bar. */
 .board-post-overlay.ab-open-card .ab-open-card__chrome { position:sticky; top:0; height:0; z-index:6; }
+
+/* Looking-for-work keeps its identity and Hire/Message tools inside the same
+   shared body inset; skills are the individual tags below the description. */
+.ab-open-card--gigz :is(.gig-talent-card__topline,.gig-talent-card__identity,.gig-talent-card__actions,.gig-talent-card__rate) { margin-inline:6%; }
+.ab-open-card--gigz .gig-talent-card__topline { padding-top:var(--space-5); flex-wrap:wrap; font:var(--open-card-meta-font); letter-spacing:normal; text-transform:none; }
+.ab-open-card--gigz .gig-talent-card__identity { margin-block:var(--space-5); }
+.ab-open-card--gigz .gig-talent-card__name { max-width:none; text-transform:none; letter-spacing:normal; line-height:1.1; }
+.ab-open-card--gigz :is(.gig-talent-card__role,.gig-talent-card__location) { letter-spacing:normal; text-transform:none; margin-top:var(--space-2); }
+.ab-open-card--gigz .gig-talent-card__time { color:var(--text-body); }
+.ab-open-card--gigz .gig-talent-card__actions { margin-bottom:var(--space-5); }
+.ab-open-card--gigz .gig-talent-card__actions button { letter-spacing:normal; text-transform:none; }
+.ab-open-card--gigz .gig-talent-card__rate { margin-block:0 var(--space-4); font:var(--open-card-body-font); color:var(--text-hi); }
