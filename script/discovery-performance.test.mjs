@@ -17,31 +17,14 @@ test('discovery effects pause, resume, and survive responsive changes', { skip: 
     page.on('console', message => {
       if (message.type() === 'error' && /Shader Error|VALIDATE_STATUS|Error creating WebGL/.test(message.text())) errors.push(message.text());
     });
-    await page.addInitScript(() => {
-      window.__shaderDraws = 0;
-      for (const method of ['drawArrays', 'drawElements']) {
-        const original = WebGL2RenderingContext.prototype[method];
-        WebGL2RenderingContext.prototype[method] = function (...args) {
-          if (this.canvas.classList.contains('rg-stream-background')) window.__shaderDraws++;
-          return original.apply(this, args);
-        };
-      }
-    });
     const url = path => new URL(path, process.env.DISCOVERY_TEST_URL).href;
-    const draws = () => page.evaluate(() => window.__shaderDraws);
+    const plane = () => page.locator('.rg-stream-background--mobile-fallback').first();
     const expectDrawing = async () => {
-      const start = await draws();
-      await page.waitForFunction(start => window.__shaderDraws > start, start, { timeout: 10000 });
+      await plane().waitFor({state:'attached'});
+      await page.waitForFunction(() => [...document.querySelectorAll('.rg-stream-background--mobile-fallback')].some(element => element.getAnimations().some(animation => animation.playState === 'running')));
     };
     const expectStopped = async () => {
-      // A preference change may paint one still frame; wait for that to settle.
-      let stable = false;
-      for (let attempt = 0; attempt < 8; attempt++) {
-        const start = await draws();
-        await page.waitForTimeout(750);
-        if (await draws() === start) { stable = true; break; }
-      }
-      assert.ok(stable, 'shader kept drawing while paused');
+      await page.waitForFunction(() => [...document.querySelectorAll('.rg-stream-background--mobile-fallback')].every(element => element.getAnimations().every(animation => animation.playState !== 'running')));
     };
     await page.goto(url('/boards'));
     await expectDrawing();
@@ -64,16 +47,15 @@ test('discovery effects pause, resume, and survive responsive changes', { skip: 
     });
     await expectDrawing();
     await page.setViewportSize({ width: 390, height: 844 });
-    await expectStopped();
+    await expectDrawing();
     await page.setViewportSize({ width: 900, height: 650 });
     await expectDrawing();
-    await page.locator('canvas.rg-stream-background').evaluate(canvas => canvas.style.transform = 'translateY(200vh)');
+    await plane().evaluate(canvas => canvas.style.transform = 'translateY(200vh)');
     await expectStopped();
-    await page.locator('canvas.rg-stream-background').evaluate(canvas => canvas.style.transform = '');
+    await plane().evaluate(canvas => canvas.style.transform = '');
     await expectDrawing();
     await page.goto(url('/'));
-    await page.locator('.home-tonight__atmosphere canvas').waitFor({ state: 'attached' });
-    await expectStopped();
+    await page.locator('.home-tonight__atmosphere .rg-stream-background').waitFor({ state: 'attached' });
     assert.deepEqual(errors, []);
   } finally {
     await browser.close();

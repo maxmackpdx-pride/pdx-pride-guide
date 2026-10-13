@@ -459,14 +459,6 @@ export default function Resources() {
   const { calmMode } = useTheme();
   const reducedMotion = useReducedMotion();
   const quietMotion = calmMode || reducedMotion;
-  const [lightweightBackground, setLightweightBackground] = useState(() =>
-    window.matchMedia("(max-width: 719px), (pointer: coarse)").matches);
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 719px), (pointer: coarse)");
-    const sync = () => setLightweightBackground(media.matches);
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
   const [location, navigate] = useLocation();
   useEffect(() => {
     if (location === "/resources" || location === "/rezources") navigate(`/needz${window.location.search}${window.location.hash}`, { replace: true });
@@ -540,9 +532,7 @@ export default function Resources() {
   </div>;
   return (
     <div className="eb-page eb-page--resources">
-      {lightweightBackground
-        ? <div className="rg-stream-background rg-stream-background--mobile-fallback" aria-hidden="true" />
-        : <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>}
+      <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>
       <BrowseHeader title="NEEDZ" logo="/brand/family/needz-mobile.webp" kicker="Oregon · All the ways we show up"
         description="Art, community, opportunity, care, and support for queer and trans Oregon. Find your next connection.">
         <BoardShareButton title="NEEDZ" path="/needz" card={{ room: "NEEDZ", mark: "/brand/family/needz-mobile.webp", line: "All the ways we show up." }} />
