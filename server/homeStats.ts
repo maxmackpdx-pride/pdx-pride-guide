@@ -1,11 +1,9 @@
 import { dedupeEvents } from "../shared/eventDedupe";
 import { expandMultiDayEvents } from "../shared/multiDayEvents";
-import { isPlacezType } from "../shared/directoryTheme";
 import { isEventSchedulePast, pacificCalendarDate, pacificTodayDate } from "../shared/missedConnections";
-import { directoryResourceName } from "../client/src/lib/directoryResources";
 import type { Event } from "../shared/schema";
 
-/** Match Eventz's next seven Pacific calendar days and Placez's public catalog. */
+/** Eventz uses seven Pacific dates; the home Placez total includes all active directory listings, including Needz. */
 export function homeCatalogCounts(events: Event[], places: { name: string; type: string; active: boolean }[], now = Date.now()) {
   const today = pacificTodayDate(now);
   const lastDay = new Date(`${today}T12:00:00Z`);
@@ -17,6 +15,6 @@ export function homeCatalogCounts(events: Event[], places: { name: string; type:
       return date != null && date >= today && date <= lastDate
         && !isEventSchedulePast(event.dateStart, event.dateEnd, now);
     }).length;
-  const placesCount = places.filter(place => place.active && isPlacezType(place.type) && !directoryResourceName(place)).length;
+  const placesCount = places.filter(place => place.active).length;
   return { eventCount, placesCount };
 }

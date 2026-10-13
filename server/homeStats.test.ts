@@ -30,7 +30,7 @@ test("seven-day window stays on Pacific calendar dates across fall DST", () => {
   ], [], now).eventCount, 1);
 });
 
-test("Placez excludes inactive listings, Squadz, care, nonprofits, and named Needz services", () => {
+test("Home Placez includes Needz and community listings, and excludes inactive records", () => {
   const places = [
     { name: "Bar", type: "bar", active: true },
     { name: "Local pro", type: "service", active: true },
@@ -40,5 +40,5 @@ test("Placez excludes inactive listings, Squadz, care, nonprofits, and named Nee
     { name: "Charity", type: "nonprofit", active: true },
     { name: "Outside In", type: "service", active: true },
   ];
-  assert.equal(homeCatalogCounts([], places).placesCount, 2);
+  assert.equal(homeCatalogCounts([], places).placesCount, 6);
 });
