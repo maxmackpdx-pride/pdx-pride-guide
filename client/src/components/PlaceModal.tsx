@@ -476,7 +476,7 @@ export default function PlaceModal({
           {failedLogo !== place.name && serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl)) ? <img
             key={`${place.id}:${place.name}:${place.imageUrl}`}
             className="place-modal-panel__logo"
-            src={resolveDirectoryLogo(place.name, place.imageUrl)!}
+            src={serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl))!}
             alt={`${place.name} logo`}
             onError={() => setFailedLogo(place.name)}
           /> : <div className="place-modal-panel__logo"><ServiceNameMark source={place} /></div>}

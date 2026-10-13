@@ -100,13 +100,14 @@ const HOTLINES = [
   { name: "Trans Lifeline", description: "877-565-8860", tel: "18775658860" },
 ];
 
-function Mark({ org }: { org: ResourceOrg }) {
+function Mark({ org, allowArtwork = true }: { org: ResourceOrg; allowArtwork?: boolean }) {
   const [failedLogo, setFailedLogo] = useState<string | null>(null);
-  return serviceArtwork(org, org.logo) && failedLogo !== org.logo ? (
+  const artwork = allowArtwork ? serviceArtwork(org, org.logo) : null;
+  return artwork && failedLogo !== artwork ? (
     <img
       className={`rg-logo${org.logoSurface === "light" ? " rg-logo--light" : ""}`}
-      src={org.logo}
-      onError={() => setFailedLogo(org.logo ?? null)}
+      src={artwork}
+      onError={() => setFailedLogo(artwork)}
       alt={`${org.name} logo`}
       loading="lazy"
     />
@@ -437,7 +438,7 @@ const ResourceCard = memo(function ResourceCard({
       categoryTags={tagsFor(row).slice(0, 2)}
       accentColor={category.color}
       logoUrl={serviceArtwork(org, org.logo) || undefined}
-      logoFallback={<Mark org={{ ...org, logo: undefined }} />}
+      logoFallback={<Mark org={org} allowArtwork={false} />}
       description={org.desc}
       shareUrl={`https://www.zaylist.com/rezources?resource=${encodeURIComponent(org.name)}`}
       className={`rg-directory-card rg-category-${category.id} pdxPlace--clickable${org.logoSurface === "light" ? " rg-directory-card--light-logo" : ""}`}

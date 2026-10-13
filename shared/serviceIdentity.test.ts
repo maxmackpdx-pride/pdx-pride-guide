@@ -21,3 +21,17 @@ test('referral copy and the sewing studio do not become hair or massage provider
   assert.equal(serviceIdentity({name:'Community Support',desc:'Referrals for massage and tattoo services'}),null);
   assert.equal(serviceIdentity({name:'Example',type:'service',description:'Therapeutic bodywork'} )?.kind,'massage');
 });
+
+test('saved real marks are recovered even when a caller omits its logo field',()=>{
+  for (const name of ['Reconstructed Wellness','Bywater Health','Eagle Portland','Yes Coach','Pink Ponies','211info']) {
+    const resolved=resolveDirectoryLogo(name);
+    assert.ok(resolved, name);
+    assert.equal(serviceArtwork({name}, undefined),resolved,name);
+    assert.equal(serviceWaypointLogo({name},undefined),resolved,name);
+  }
+});
+test('a newly supplied real image overrides a reviewed text placeholder',()=>{
+  const source={name:'Greenhouse Hair Collective',type:'service'};
+  assert.equal(serviceArtwork(source,'/uploaded-real-logo.svg'),'/uploaded-real-logo.svg');
+  assert.equal(serviceArtwork(source,resolveDirectoryLogo(source.name)+'?v=1'),null);
+});

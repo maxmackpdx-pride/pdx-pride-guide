@@ -1,4 +1,4 @@
-import { companyLogoEntry } from "./whiteCompanyLogos";
+import { companyLogoEntry, whiteCompanyLogo } from "./whiteCompanyLogos";
 
 export type ServiceKind = "tattoo" | "hair" | "massage" | "graphic-design" | "web-development" | "healthcare" | "general";
 export type ServiceIdentitySource = { name: string; type?: string | null; description?: string | null; desc?: string; serviceTags?: string[] };
@@ -34,7 +34,13 @@ export function serviceIdentity(source: ServiceIdentitySource) {
 }
 /** Authored text assets are name placeholders, not company artwork. */
 export function serviceArtwork(source: ServiceIdentitySource, logo: string | null | undefined) {
-  return serviceIdentity(source) && companyLogoEntry(source.name)?.kind === "text-fallback" ? null : logo || null;
+  const reviewed = companyLogoEntry(source.name);
+  const isPlaceholder = reviewed?.kind === "text-fallback";
+  const supplied = logo || null;
+  const sameReviewedAsset = supplied?.split(/[?#]/)[0] === reviewed?.asset;
+  if (supplied && !(serviceIdentity(source) && isPlaceholder && sameReviewedAsset)) return supplied;
+  if (reviewed && !isPlaceholder) return whiteCompanyLogo(source.name);
+  return serviceIdentity(source) ? null : supplied || whiteCompanyLogo(source.name);
 }
 /** Cards and waypoints share the same service icon whenever company artwork is absent. */
 export function serviceWaypointLogo(source: ServiceIdentitySource, logo?: string | null) {
