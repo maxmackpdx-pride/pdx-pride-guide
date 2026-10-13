@@ -215,7 +215,7 @@ function rowMarks(rows: MapRow[], kind: Extract<Mark["kind"], "board">): Mark[] 
 }
 
 function boardColor(row: MapRow): string {
-  if (String(row._board) === "The HAÜZ") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
+  if (String(row._board) === "My Hoüz") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
   if(row._board === "Mizzed") return "#FF00CC";
   const kind = boardKind(row);
   if (kind === "gig") return "#6E3DFF";
@@ -224,7 +224,7 @@ function boardColor(row: MapRow): string {
 }
 
 function boardIcon(row: MapRow): string {
-  if (String(row._board) === "The HAÜZ") return `/mapz-map/icons/housing-${({LOOKING:"looking",FORMING:"forming",OFFERING:"offering",MANAGED:"managed"} as Record<string,string>)[String(row.type)]||"looking"}.svg`;
+  if (String(row._board) === "My Hoüz") return `/mapz-map/icons/housing-${({LOOKING:"looking",FORMING:"forming",OFFERING:"offering",MANAGED:"managed"} as Record<string,string>)[String(row.type)]||"looking"}.svg`;
   if(row._board === "Mizzed")return "/mapz-map/icons/mizzed.svg";
   const kind = boardKind(row);
   if (kind === "gig") return "/mapz-map/icons/gigz.svg";
@@ -602,7 +602,7 @@ export default function MapzMapDemo() {
   const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>(place as Place).type!=='nonprofit'&&placeTypes.includes(mapzPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes]);
   const visibleHousing = useMemo(() => housing
     .filter(row => (!housingType || row.type === housingType || (housingType === "FORMING" && row.type === "LOOKING" && row.openToHaus === true)) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
-    .map(row => ({ ...row, _board: "The HAÜZ", locationLabel: row.lat != null && row.lng != null
+    .map(row => ({ ...row, _board: "My Hoüz", locationLabel: row.lat != null && row.lng != null
       ? `${row.mapPoint ? "Shared map point" : "Approximate area"} · ${roughDistanceMiles(viewerPoint || {lat:mapCenter[0],lng:mapCenter[1]},{lat:Number(row.lat),lng:Number(row.lng)})}${viewerPoint ? "" : " from map center"}` : row.mapPoint ? "Shared map point" : "Approximate area" })), [housing, housingType, housingSaved, housingTags, q, viewerPoint, mapCenter]);
   const marks = useMemo<Mark[]>(() => [
     ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
@@ -626,7 +626,7 @@ export default function MapzMapDemo() {
     else if (mark.kind === "place") { goOverlay("place", (mark.item as Place).id); }
     else {
       const row = mark.item as MapRow;
-      if (String(row._board) === "The HAÜZ") {
+      if (String(row._board) === "My Hoüz") {
         const postId = Number(row.id);
         if (Number.isFinite(postId)) goOverlay("houz", postId);
       }
@@ -694,24 +694,24 @@ export default function MapzMapDemo() {
     </MapWorldPanel>];
   })) as Record<MapWorld,React.ReactNode>;
   const houzPanel = <section className="mapz-layer-panel" aria-labelledby="map-houz-title">
-    <div className="mapz-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">Haüz</h2></div>
+    <div className="mapz-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">My Hoüz</h2></div>
     <BoardFollowButton board="houz" />
-    {housingStats && <div className="mapz-houz-stats" aria-label="HAÜZ board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
-    <button type="button" className="mapz-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to HAÜZ</button>
-    <div className="mapz-layer-rail mapz-houz-actions" role="group" aria-label="Start a HAÜZ post">
+    {housingStats && <div className="mapz-houz-stats" aria-label="My Hoüz board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
+    <button type="button" className="mapz-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to My Hoüz</button>
+    <div className="mapz-layer-rail mapz-houz-actions" role="group" aria-label="Start a My Hoüz post">
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "OFFERING")) : setShowAuth(true)}>Offer a room</button>
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Find housing</button>
-      <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "FORMING")) : setShowAuth(true)}>Build a HAÜZ</button>
+      <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "FORMING")) : setShowAuth(true)}>Build a Hoüz</button>
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "PM")) : setShowAuth(true)}>List a rental</button>
     </div>
     <div className="mapz-layer-rail" role="group" aria-label="Housing types">
-      {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All HAÜZ" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
+      {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All My Hoüz" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
       <button type="button" aria-pressed={housingSaved} onClick={() => user ? setHousingSaved(!housingSaved) : setShowAuth(true)}>Saved</button>
     </div>
     <HousingTagFilter applied={housingTags} onApply={setHousingTags} />
-    {housingLoading ? <p role="status">Loading HAÜZ…</p> : housingError ? <p role="alert">HAÜZ could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
+    {housingLoading ? <p role="status">Loading My Hoüz…</p> : housingError ? <p role="alert">My Hoüz could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
     <p className="mapz-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
-    <details className="mapz-houz-about"><summary>How HAÜZ works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
+    <details className="mapz-houz-about"><summary>How My Hoüz works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
   </section>;
   const layers: MapzLayer[] = [
     { id: "events", label: ROOMS.eventz.nav, color: ROOMS.eventz.accent, enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
@@ -726,7 +726,7 @@ export default function MapzMapDemo() {
     { id:"gigz",label:ROOMS.gigz.nav,color:"var(--room-gigz-ink)",enabled:showGigz,onToggle:()=>toggleLayer("hideGigz"),panel:worldPanels.gigz,viewMore:[{label:"Browse all Gigz",href:"/gigz"}] },
     { id:"giftz",label:ROOMS.giftz.nav,color:ROOMS.giftz.accent,enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[{label:"Browse all Giftz",href:"/giftz"}] },
     { id:"sellz",label:ROOMS.sellz.nav,color:ROOMS.sellz.accent,enabled:showSellz,onToggle:()=>toggleLayer("hideSellz"),panel:worldPanels.sellz,viewMore:[{label:"Browse all Sellz",href:"/sellz"}] },
-    { id: "houz", label: ROOMS.hauz.nav, color: ROOMS.hauz.accent, enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "Browse all Haüz", href: "/the-hauz" }] },
+    { id: "houz", label: ROOMS.hauz.nav, color: ROOMS.hauz.accent, enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "Browse My Hoüz", href: "/boards?board=housing" }] },
   ];
 
   useAttendanceSummariesLive(dataReady);
@@ -752,7 +752,7 @@ export default function MapzMapDemo() {
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
     const row=mark.item as MapRow;
-    const isHouz=String(row._board)==='The HAÜZ';
+    const isHouz=String(row._board)==='My Hoüz';
     const brands=event?eventBrandLogos(event,places):null;
     const color=event?mapzEventColor(event,places):place?mapzPlaceColor(place):boardColor(row);
     const connectionEvent=row._board==='Mizzed'?events.find(e=>e.id===Number(row.eventId)):undefined;
@@ -787,14 +787,14 @@ export default function MapzMapDemo() {
   }), [marks, places, events, demoEventIds, attendance, tokenEpoch]);
   // Board 49: the status line says how many holograms are up tonight. No badge on the pin.
   const tonightCount = useMemo(() => { const night = eventNight(viewTimestamp); return sceneRows.filter(row => row.kind === "event" && row.eventNight === night).length; }, [sceneRows, viewTimestamp]);
-  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name));return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
+  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name));return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='My Hoüz')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{
       if(mark.kind==="resource")return false;
       if(mark.kind==="place")return Number((mark.item as Place).id)===placeId;
       if(mark.kind==="event")return Number((mark.item as Event).id)===eventId;
       const row=mark.item as MapRow;
-      const key=row._board==="Mizzed"?"mizzed":row._board==="The HAÜZ"?"houz":boardKind(row)?boardParam(boardKind(row)!):"";
+      const key=row._board==="Mizzed"?"mizzed":row._board==="My Hoüz"?"houz":boardKind(row)?boardParam(boardKind(row)!):"";
       return key && Number(row.id)===mapRecordId(params.get(key));
     })?.key||null;
     setSelected(key);

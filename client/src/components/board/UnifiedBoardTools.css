@@ -1,0 +1,12 @@
+/* Native housing flows sit within the same accessible composer as other boards. */
+.ab-housing-composer .hz-sheetwrap { position:static; display:block; background:none; backdrop-filter:none; }
+.ab-housing-composer .hz-sheet { max-width:none; max-height:none; padding:0; border:0; background:transparent; box-shadow:none; animation:none; overflow:visible; }
+.ab-housing-composer .hz-sheet__head .hz-x { display:none; }
+.ab-housing-composer .hz-sheet__head { padding:var(--space-4) 0; }
+
+/* Category-specific tools are available at desktop and mobile widths. */
+.ab-page .ab-controls .eb-mobile-filter-toggle { display:inline-flex; }
+.eb-filter-popover input:not([type=checkbox]) { min-height:var(--ab-target,44px); padding:var(--space-2); border:var(--bw-hair) solid var(--panel-border); border-radius:var(--radius-xl); background:var(--z-black); color:var(--text-hi); }
+.eb-filter-popover fieldset { border:0; padding:0; margin:0; min-width:0; }
+.eb-filter-popover fieldset details { margin-top:var(--space-2); }
+.eb-filter-popover fieldset label:has(input[type=checkbox]) { flex-direction:row; align-items:center; min-height:var(--ab-target,44px); }

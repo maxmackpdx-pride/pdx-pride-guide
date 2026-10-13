@@ -63,6 +63,10 @@ app.use((req, res, next) => {
 // Retired public paths → canonical boards. 301 so crawlers and old links
 // collapse. Do not rewrite static files under /hausing/demo.
 const PATH_ALIASES: Record<string, string> = {
+  "/brand/family/the-hauz.svg": "/brand/family/my-houz.svg",
+  "/og/zaylist-hauz-logo-v2.png": "/og/zaylist-my-houz-v1.png",
+  "/og/zaylist-housing-1200x630.png": "/og/zaylist-my-houz-v1.png",
+  "/brand/waypoints/zayhaus-clean-margin.png": "/brand/family/my-houz.svg",
   // Rooms moved to their own names; old addresses keep working forever.
   "/pride-work": "/gigz",
   "/gifting": "/giftz",

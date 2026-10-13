@@ -71,7 +71,7 @@ export default function HubCompactPost({ item, when, openControl, events, onOpen
   const shortened = text.length > 360 && !showFullText ? text.slice(0, 360).trimEnd() + "…" : text;
   const visibleEvents = showAllEvents ? events : events.slice(0, 3);
   const category = isConnection ? "MIZZED CONNECTION" : isListing
-    ? ({ gig: "GIGZ", gifting: "GIFTZ", sellz: "SELLZ", housing: "HAÜSING" } as Record<string, string>)[item.kind]
+    ? ({ gig: "GIGZ", gifting: "GIFTZ", sellz: "SELLZ", housing: "My Hoüz" } as Record<string, string>)[item.kind]
     : item.kind === "event_update" ? "HOST UPDATE" : item.badge;
   const accent = item.kind === "housing"
     ? ({ OFFERING: "var(--neon-orange)", MANAGED: "var(--neon-violet)", FORMING: "var(--neon-yellow)", LOOKING: "var(--neon-cyan)" } as Record<string,string>)[item.listing?.status || item.badge.toUpperCase()] || hubFeedBadgeColor(item.kind)

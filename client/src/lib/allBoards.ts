@@ -17,12 +17,13 @@ export type BoardIntent =
   | "giving"
   | "iso"
   | "selling"
-  | "connection";
+  | "connection"
+  | "grab";
 export const boardCategories = [
   {
     id: "housing",
-    label: "Housing",
-    logo: "the-hauz.svg",
+    label: "My Hoüz",
+    logo: "my-houz.svg",
     color: ROOMS.hauz.accent,
     motif: "hauz",
     endpoint: "/api/housing",
@@ -96,6 +97,7 @@ export const intentLabels: Record<BoardIntent, string> = {
   iso: "In search of",
   selling: "For sale",
   connection: "Looking for you",
+  grab: "Open grab",
 };
 export type BoardPost = {
   key: string;
@@ -111,6 +113,16 @@ export type BoardPost = {
   createdAt: string;
   householdCount?: number;
   openSlots?: number;
+  isDemo?: boolean;
+  status?: string;
+  isMine?: boolean;
+  itemCategory?: string;
+  condition?: string;
+  priceCents?: number;
+  isRemote?: boolean;
+  source?: string;
+  saved?: boolean;
+  tags?: string[];
 };
 export type BoardPayload =
   | HousingBoardResponse
@@ -139,15 +151,15 @@ const liveGiftStatuses = new Set([
   "OFFER_PENDING",
 ]);
 
-/** Adapt only public, real inventory; every detail and action remains owned by its board. */
+/** Adapt visible inventory and preserved demos; owner views can include inactive posts. */
 export function toBoardPosts(
   category: BoardCategory,
   payload: BoardPayload,
+  includeInactive = false,
 ): BoardPost[] {
   switch (category) {
     case "housing":
       return (payload as HousingBoardResponse).posts
-        .filter((p) => !p.isDemo)
         .map((p) => ({
           ...base(category, p),
           intent: (
@@ -176,7 +188,7 @@ export function toBoardPosts(
         }));
     case "gigz":
       return (payload as GigPost[])
-        .filter((p) => !p.isDemo && p.status === "LIVE")
+        .filter((p) => includeInactive || p.status === "LIVE")
         .map((p) => ({
           ...base(category, p),
           intent: p.postType === "LOOKING_FOR_WORK" ? "available" : "hiring",
@@ -189,10 +201,10 @@ export function toBoardPosts(
         }));
     case "giftz":
       return (payload as GiftingPost[])
-        .filter((p) => !p.isDemo && liveGiftStatuses.has(p.status))
+        .filter((p) => includeInactive || liveGiftStatuses.has(p.status))
         .map((p) => ({
           ...base(category, p),
-          intent: p.postType === "ISO" ? "iso" : "giving",
+          intent: p.postType === "ISO" ? "iso" : (p.pickupPreference || "").toLowerCase().includes("open grab") ? "grab" : "giving",
           title: p.title,
           description: p.description,
           area: p.neighborhood,
@@ -202,7 +214,7 @@ export function toBoardPosts(
         }));
     case "sellz":
       return (payload as SellzPost[])
-        .filter((p) => !p.isDemo && ["ACTIVE", "RESERVED"].includes(p.status))
+        .filter((p) => includeInactive || ["ACTIVE", "RESERVED"].includes(p.status))
         .map((p) => ({
           ...base(category, p),
           intent: "selling",
@@ -226,7 +238,7 @@ export function toBoardPosts(
         }));
     case "mizzed":
       return (payload as MissedConnectionPost[])
-        .filter((p) => !p.isDemo && p.status === "ACTIVE")
+        .filter((p) => includeInactive || p.status === "ACTIVE")
         .map((p) => ({
           ...base(category, p),
           intent: "connection",

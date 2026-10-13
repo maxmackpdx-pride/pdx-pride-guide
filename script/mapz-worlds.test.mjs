@@ -52,8 +52,8 @@ test('legacy bookmarks retain details, filters, compose and use map URLs',()=>{
   }
   assert.equal(new URL(legacyWorldMapHref('places','?type=bar','12'),'https://example.test').searchParams.get('place'),'12');
 });
-test('Haüz names normalize legacy suffixes without doubling them',()=>{
-  for(const suffix of ['HAUS','HAUZ','HOUS','HOÜS','HAÜS','HAÜZ'])assert.equal(housingDisplayName('FORMING',`Test ${suffix}`),'Test HAÜZ');
+test('Hoüz names normalize legacy suffixes without doubling them',()=>{
+  for(const suffix of ['HAUS','HAUZ','HOUS','HOÜS','HAÜS','HAÜZ','HOÜZ'])assert.equal(housingDisplayName('FORMING',`Test ${suffix}`),'Test HOÜZ');
 });
 test('all four waypoint meshes fit the GPU budget, retain normals and use no textures',async()=>{
   for(const id of ['mizzed','gigz','giftz','sellz']){

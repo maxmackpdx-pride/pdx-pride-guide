@@ -13,7 +13,7 @@ Zaylist wink, and gets out.
 | File | Use it on |
 | --- | --- |
 | zaylist-home-fallback-1200x630.png | Homepage, and the site-wide default for any page without its own image |
-| zaylist-housing-1200x630.png | HAUSING, the housing board (/hausing) |
+| zaylist-my-houz-v1.png | My Hoüz, the housing category (/boards?board=housing) |
 | zaylist-events-1200x630.png | Events (/events) and Schedule (/schedule) |
 | zaylist-missed-connections-1200x630.png | Missed Connections! (/spotted) |
 | zaylist-gig-board-1200x630.png | Gig Board (/pride-work) |
@@ -27,7 +27,7 @@ one rather than letting the platform pick something out of the page.
 
 Per page, in the head:
 
-    <meta property="og:image" content="https://www.zaylist.com/og/zaylist-housing-1200x630.png">
+    <meta property="og:image" content="https://www.zaylist.com/og/zaylist-my-houz-v1.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">

@@ -19,7 +19,7 @@ export const SHARE_CARD_FILES = {
   home: "zaylist-social-portland-nightlife-v2.png",
   events: "zaylist-events-1200x630.png",
   schedule: "zaylist-events-1200x630.png",
-  housing: "zaylist-hauz-logo-v2.png",
+  housing: "zaylist-my-houz-v1.png",
   spotted: "zaylist-mizzed-logo-v2.png",
   prideWork: "zaylist-gigz-logo-v2.png",
   sellz: "zaylist-sellz-logo-v2.png",
@@ -50,7 +50,7 @@ export function shareCardKeyForPath(pathname: string): ShareCardKey | null {
     return null;
   }
   if (path === "/schedule") return "schedule";
-  if (path === "/the-hauz" || path.startsWith("/the-hauz/") || path === "/hausing" || path.startsWith("/hausing/")) return "housing";
+  if (path === "/my-houz" || path.startsWith("/my-houz/") || path === "/houz" || path === "/housing" || path.startsWith("/housing/") || path === "/the-hauz" || path.startsWith("/the-hauz/") || path === "/hausing" || path.startsWith("/hausing/")) return "housing";
   if (path === "/mizzed") return "spotted";
   if (path === "/gigz" || path === "/gigs") return "prideWork";
   if (path === "/sellz") return "sellz";

@@ -15,7 +15,7 @@ export const HOUSING_TYPES = ["LOOKING", "OFFERING", "FORMING", "MANAGED"] as co
 export type HousingType = (typeof HOUSING_TYPES)[number];
 
 /** The locked suffix every household name ends in. Never editable by the poster. */
-export const HAUS_SUFFIX = "HAÜZ";
+export const HAUS_SUFFIX = "HOÜZ";
 
 /** Types whose name carries the locked HAÜS suffix. A managed building is not a household. */
 export const SUFFIXED_TYPES: HousingType[] = ["OFFERING", "FORMING"];

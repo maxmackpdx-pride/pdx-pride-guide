@@ -354,18 +354,22 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   },
   "/next": {
     title: "Next | What Zaylist Is Building",
-    description: "See what is next on Zaylist: THE HAÜZ, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
+    description: "See what is next on Zaylist: My Hoüz, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
   },
   "/darkroom": {
     title: "Next | What Zaylist Is Building",
-    description: "See what is next on Zaylist: THE HAÜZ, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
+    description: "See what is next on Zaylist: My Hoüz, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
   },
   "/gigs": {
     title: "GIGZ | Zaylist",
     description: "Portland queer gig board and work listings. Post a gig or find work in PDX.",
   },
+  "/my-houz": {
+    title: "My Hoüz | Zaylist",
+    description: "Rooms, roommates, and people building a household together in queer Portland.",
+  },
   "/the-hauz": {
-    title: "THE HAÜZ | Zaylist",
+    title: "My Hoüz | Zaylist",
     description:
       "Rooms, roommates, and people building a household together in queer Portland. A community board, not a listings site.",
   },

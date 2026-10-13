@@ -6,7 +6,7 @@ const ROOMS = [
   { paths: ["events", "schedule", "submit"], section: "Eventz", href: "/events", label: "Browse Eventz", description: "This event address is no longer available. Find upcoming parties, shows, and gatherings on Eventz." },
   { paths: ["outz", "outzide"], section: "Outzide", href: "/outzide", label: "Explore Outzide", description: "This outdoor destination isn't at this address. Explore the Northwest map to find your next spot." },
   { paths: ["z"], section: "Z/ List", href: "/z", label: "Find a community", description: "This community address isn't available. Find your people in Z/ List." },
-  { paths: ["the-hauz", "hausing", "housing"], section: "The Haüz", href: "/the-hauz", label: "Browse housing", description: "This housing address isn't available. Browse current rooms, roommates, and households on The Haüz." },
+  { paths: ["my-houz", "houz", "the-hauz", "hausing", "housing"], section: "My Hoüz", href: "/boards?board=housing", label: "Browse housing", description: "This housing address isn't available. Browse current rooms, roommates, and households on My Hoüz." },
   { paths: ["u", "dashboard", "inbox", "settings"], section: "Your Zaylist", href: "/dashboard", label: "Open your Hub", description: "This account or profile address isn't available. Your Hub is the place to return to your Zaylist." },
   { paths: ["map", "directory", "gifting", "sellz", "pride-work", "spotted"], section: "Mapz", href: "/map", label: "Explore Mapz", description: "This address isn't on the map. Explore places, posts, and people around Portland on Mapz." },
 ];

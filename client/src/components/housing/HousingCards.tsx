@@ -48,9 +48,9 @@ const stop = (fn: () => void) => (e: React.MouseEvent) => {
 
 const SINGLE_WORD_CARD_LINE: Record<HousingPostView["type"], string> = {
   LOOKING: "LOOKING TO RENT",
-  OFFERING: "JOIN OUR HAÜZ",
+  OFFERING: "JOIN OUR Hoüz",
   FORMING: "BUILDING A HOÜZ",
-  MANAGED: "COMMERCIAL RENTAL HAÜZ",
+  MANAGED: "COMMERCIAL RENTAL Hoüz",
 };
 
 function cardDynamicTitle(post: HousingPostView, title: string): string {
@@ -89,7 +89,7 @@ function CardShell({
         }
       }}
     >
-      <ResourceCardMotif name={post.displayName || post.headline || "The Haüz"} category="family" />
+      <ResourceCardMotif name={post.displayName || post.headline || "My Hoüz"} category="family" />
       <span className="pdx-refract-seam" aria-hidden="true" />
       {post.isDemo ? (
         <span className="hz-demo-sticker" aria-hidden="true">DEMO</span>
@@ -132,7 +132,7 @@ function CardActions({ post, h }: { post: HousingPostView; h: HousingCardHandler
       ) : (
         <Btn size="sm" kind="solid" disabled={requestBusy} onClick={stop(() => h.onChat(post))}>
           <HousingIcon name="message" />
-          {requested ? "Request sent" : post.type === "OFFERING" ? "Contact Haüz" : `Contact ${post.author.displayName.split(" ")[0]}`}
+          {requested ? "Request sent" : post.type === "OFFERING" ? "Contact Hoüz" : `Contact ${post.author.displayName.split(" ")[0]}`}
         </Btn>
       )}
     </div>
@@ -159,7 +159,7 @@ export function LookingCard({ post, h }: { post: HousingPostView; h: HousingCard
         <Fact label="Areas" value={post.areas.slice(0, 2).join(", ") || "Anywhere"} />
       </div>
       <div className="hz-chiprow">
-        {post.openToHaus ? <Chip tone="haus">Open to a HAÜZ</Chip> : null}
+        {post.openToHaus ? <Chip tone="haus">Open to a Hoüz</Chip> : null}
         {(post.livingStyle || []).slice(0, 3).map((l) => (
           <Chip key={l}>{l}</Chip>
         ))}
@@ -208,7 +208,7 @@ export function FormingCard({ post, h }: { post: HousingPostView; h: HousingCard
       <TypeTitle label={HOUSING_TYPE_KICKER.FORMING} />
       <HousingWell
         photos={post.photos}
-        title={cardDynamicTitle(post, post.photos.length ? post.displayName : "Build a HAÜZ")}
+        title={cardDynamicTitle(post, post.photos.length ? post.displayName : "Build a Hoüz")}
         fallbackPhoto={FORMING_DEFAULT_COVER}
         className="hz-well--contain-stack"
       >
@@ -301,7 +301,7 @@ export function ManagedCard({
         <span className="hz-spacer" />
         <Btn size="sm" kind="outline" onClick={stop(() => h.onBuildHaus(post))}>
           <HousingIcon name="home" />
-          {viewerLeadsGroup ? "Open your HAÜZ" : "Build a HAÜZ"}
+          {viewerLeadsGroup ? "Open your Hoüz" : "Build a Hoüz"}
         </Btn>
         <Btn size="sm" kind="solid" onClick={stop(() => h.onOpen(post))}>
           <HousingIcon name="search" />

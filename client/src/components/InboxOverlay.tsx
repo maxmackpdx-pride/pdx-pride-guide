@@ -50,7 +50,7 @@ const FILTERS: Array<[string, string, string]> = [
   ["gigs", "GIGZ", C.purple],
   ["gifting", "GIFTZ", C.lime],
   ["sellz", "SELLZ", C.green],
-  ["housing", "THE HAÜZ", C.cyan],
+  ["housing", "My Hoüz", C.cyan],
   ["hosts", "Hosts", C.cyan],
   ["checkins", "Check-ins", C.green],
 ];
@@ -879,7 +879,7 @@ function ThreadDetail({
       {housingGate?.pending && housingGate.role === "recipient" && (
         <div className="inbox-exp-thread__panel inbox-exp-thread__panel--lineup">
           <div className="inbox-exp-thread__panel-copy inbox-exp-thread__panel-copy--actions">
-            Asked to chat about this HAÜZ post. Nothing opens until you accept.
+            Asked to chat about this My Hoüz post. Nothing opens until you accept.
           </div>
           <div className="inbox-exp-thread__panel-actions">
             <button type="button" className="inbox-exp-thread__btn-approve" onClick={onHousingAccept}>

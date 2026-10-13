@@ -522,7 +522,7 @@ export function HousingComposer({
   };
 
   const sharePost = (id: number) => {
-    const url = `${window.location.origin}/the-hauz/${id}`;
+    const url = `${window.location.origin}/boards?board=housing&post=housing:${id}`;
     if (navigator.share) {
       navigator.share({ url }).catch(() => undefined);
       return;
@@ -1181,8 +1181,8 @@ export function HousingComposer({
                 onChange={(e) => patch({ openToHaus: e.target.checked })}
               />
               <span>
-                <b style={{ color: "var(--text-hi)" }}>Open to forming a HAÜZ</b>
-                <p>Your room search will also appear with people forming a Haüz. You can change this whenever.</p>
+                <b style={{ color: "var(--text-hi)" }}>Open to forming a Hoüz</b>
+                <p>Your room search will also appear with people forming a Hoüz. You can change this whenever.</p>
               </span>
             </label>
           </>
@@ -1192,7 +1192,7 @@ export function HousingComposer({
           <>
             <div className="hz-field">
               <label>
-                <Mono micro>How this HAÜZ works</Mono>
+                <Mono micro>How this Hoüz works</Mono>
               </label>
               <div className="hz-ask" style={{ gridTemplateColumns: "1fr 1fr", marginTop: 0 }}>
                 {FORMING_FLAVORS.map((f) => (

@@ -1,3 +1,4 @@
+import { isEventPlaceholderUrl, resolveEventPosterUrl } from "../shared/eventPoster";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import test from "node:test";
@@ -21,7 +22,7 @@ test("applies the complete reviewed poster manifest once without changing event 
   const before = db.prepare("SELECT id, title, venue_name, date_start, description FROM events ORDER BY id").all();
   assert.equal(new Set(corrections.map(c => c.id)).size, corrections.length);
   assert.ok(corrections.every(c => !/sanctuary|eagle|badlands|peacock|peakcock/i.test(c.venueName)));
-  for (const c of corrections) assert.ok(existsSync(new URL(`../client/public${c.posterImageUrl}`, import.meta.url)), c.posterImageUrl);
+  for (const c of corrections) { if(isEventPlaceholderUrl(c.posterImageUrl)) assert.equal(resolveEventPosterUrl(c.id,c.posterImageUrl),null); else assert.ok(existsSync(new URL(`../client/public${c.posterImageUrl}`, import.meta.url)), c.posterImageUrl); }
   assert.equal(seedPosterAudit20260928(db), corrections.length);
   assert.equal(seedPosterAudit20260928(db), 0);
   assert.deepEqual(db.prepare("SELECT id, title, venue_name, date_start, description FROM events ORDER BY id").all(), before);

@@ -18,7 +18,7 @@ export type Room = {
 export const ROOMS: Record<RoomKey, Room> = {
   eventz: { name: "EVENTZ", nav: "Eventz", accent: "var(--room-eventz)", route: "/events" },
   placez: { name: "OUR PLACEZ", nav: "Placez", accent: "var(--room-placez)", route: "/directory" },
-  hauz: { name: "THE HAÜZ", nav: "The Haüz", accent: "var(--room-hauz)", route: "/the-hauz" },
+  hauz: { name: "My Hoüz", nav: "My Hoüz", accent: "var(--room-hauz)", route: "/my-houz" },
   giftz: { name: "GIFTZ", nav: "Giftz", accent: "var(--room-giftz)", route: "/giftz" },
   gigz: { name: "GIGZ", nav: "Gigz", accent: "var(--room-gigz)", route: "/gigz" },
   sellz: { name: "SELLZ", nav: "Sellz", accent: "var(--room-sellz)", route: "/sellz" },
@@ -31,7 +31,7 @@ export const ROOMS: Record<RoomKey, Room> = {
 /** Inbox thread categories that belong to a room. */
 const INBOX_ROOM: Record<string, RoomKey> = { spotted: "mizzed", gigs: "gigz", gifting: "giftz", sellz: "sellz", housing: "hauz" };
 /** Short room tag for thread rows, notifications and badges. */
-const ROOM_TAG: Partial<Record<RoomKey, string>> = { mizzed: "MIZZED", gigz: "GIGZ", giftz: "GIFTZ", sellz: "SELLZ", hauz: "THE HAÜZ" };
+const ROOM_TAG: Partial<Record<RoomKey, string>> = { mizzed: "MIZZED", gigz: "GIGZ", giftz: "GIFTZ", sellz: "SELLZ", hauz: "My Hoüz" };
 
 /**
  * One lookup for the tag a thread wears: the room's short name in the room's
