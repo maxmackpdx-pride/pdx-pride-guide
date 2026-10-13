@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-13-white-vector-r2",
-  "treatment": "White ink on transparency; no bloom. Native vectors retain publisher geometry. Raster traces are monochrome outlines of official artwork, not original publisher vectors. Text fallbacks use bundled Barlow Condensed 900 with two authored lines.",
+  "version": "2026-10-13-white-vector-r3",
+  "treatment": "White ink on transparency; no bloom. Native vectors retain publisher geometry. Raster traces are monochrome outlines of official artwork, not original publisher vectors. Text fallbacks use bundled Barlow Condensed 900 with up to three authored lines. Text fallbacks fit rows independently with proportional sizing and optical hierarchy; short labels need not fill the full width.",
   "entries": [
     {
       "name": "Alberta Rose Theatre",
@@ -168,12 +168,20 @@
       "sourcePage": "https://bridgecitymentors.com/",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 2.780401416765053,
+      "ratio": 2.2649259716149097,
       "lines": [
         "BRIDGE CITY",
         "MENTORS"
       ],
-      "reason": "Published artwork cannot form a clear faithful white mark without retaining source bloom or a solid illustration plate."
+      "reason": "Published artwork cannot form a clear faithful white mark without retaining source bloom or a solid illustration plate.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          38.40814871679289,
+          49.95487107675003
+        ]
+      }
     },
     {
       "name": "Brown Girl Rise",
@@ -183,12 +191,20 @@
       "sourcePage": "https://browngirlriseportland.org",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 2.1599763872491144,
+      "ratio": 1.8239194412406416,
       "lines": [
         "BROWN",
         "GIRL RISE"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          63.699161761916024,
+          50.1359142978597
+        ]
+      }
     },
     {
       "name": "Business Oregon",
@@ -380,12 +396,20 @@
       "sourcePage": "https://multco.us/info/energy-bill-assistance",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 4.141676505312869,
+      "ratio": 2.9826307771459297,
       "lines": [
         "ENERGY & UTILITY",
         "ASSISTANCE"
       ],
-      "reason": "Service title rather than organization identity."
+      "reason": "Service title rather than organization identity.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          25.499236732257753,
+          38.240044385123056
+        ]
+      }
     },
     {
       "name": "Escape Bar & Grill",
@@ -420,12 +444,22 @@
       "sourcePage": "https://www.portland.gov/phb/rental-services/eviction-help-renters",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 4.606257378984652,
+      "ratio": 1.6291033576358438,
       "lines": [
-        "EVICTION & HOUSING",
-        "CRISIS SUPPORT"
+        "EVICTION &",
+        "HOUSING CRISIS",
+        "SUPPORT"
       ],
-      "reason": "Service title rather than organization identity."
+      "reason": "Service title rather than organization identity.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          40.736196319018404,
+          30.447542186353633,
+          51.25038592158074
+        ]
+      }
     },
     {
       "name": "Family Peace Center of Washington County",
@@ -448,12 +482,20 @@
       "sourcePage": "https://www.fantasyforadultsonly.com",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 4.039551357733176,
+      "ratio": 2.5826982384349684,
       "lines": [
         "FANTASY",
         "FOR ADULTS ONLY"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          52.267011558919066,
+          26.598305195969235
+        ]
+      }
     },
     {
       "name": "Fantasy Land",
@@ -463,12 +505,20 @@
       "sourcePage": null,
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 2.1605667060212514,
+      "ratio": 2.2066444035006914,
       "lines": [
         "FANTASY",
         "LAND"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          52.267011558919066,
+          44.426959825081205
+        ]
+      }
     },
     {
       "name": "Fertile Ground Festival",
@@ -490,12 +540,22 @@
       "sourcePage": "https://foundationforcontemporaryarts.org",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 4.9185360094451,
+      "ratio": 2.259068775551892,
       "lines": [
         "FOUNDATION FOR",
-        "CONTEMPORARY ARTS"
+        "CONTEMPORARY",
+        "ARTS"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          27.59308510638298,
+          28.914823201532833,
+          24.577599721302906
+        ]
+      }
     },
     {
       "name": "Friendly House",
@@ -542,12 +602,20 @@
       "sourcePage": "https://futureprairie.com",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 1.820543093270366,
+      "ratio": 1.7505565961645144,
       "lines": [
         "FUTURE",
         "PRAIRIE"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          61.32250829059143,
+          59.79827615244543
+        ]
+      }
     },
     {
       "name": "Gaylabration",
@@ -581,12 +649,20 @@
       "sourcePage": "https://www.greenhousepdx.com/",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 3.8907910271546635,
+      "ratio": 2.9357783117171725,
       "lines": [
         "GREENHOUSE",
         "HAIR COLLECTIVE"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          36.547782694648866,
+          27.110896595886615
+        ]
+      }
     },
     {
       "name": "Hand Up Project",
@@ -683,12 +759,20 @@
       "sourcePage": "https://hunnybeezpdx.com/",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 1.5932703659976388,
+      "ratio": 1.5747649428854253,
       "lines": [
         "HUNNY",
         "BEEZ"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          60.80225491819686,
+          60.80225491819686
+        ]
+      }
     },
     {
       "name": "IL Youth 2 Youth",
@@ -879,12 +963,20 @@
       "sourcePage": "https://www.mrpeeps.com",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 1.4645808736717827,
+      "ratio": 1.6395162724524275,
       "lines": [
         "MR.",
         "PEEPS"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          38.031413734577846,
+          52.82140796469146
+        ]
+      }
     },
     {
       "name": "Multnomah County \u00b7 Free Outreach Testing",
@@ -1003,12 +1095,20 @@
       "sourcePage": "https://openspace.dance",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 2.7744982290436835,
+      "ratio": 1.908036712326708,
       "lines": [
         "OPEN SPACE",
         "DANCE"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          38.89410226965588,
+          70.8493513743528
+        ]
+      }
     },
     {
       "name": "Oregon Arts Commission",
@@ -1164,12 +1264,20 @@
       "sourcePage": "https://pdxgaymers.org",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 2.153482880755608,
+      "ratio": 2.339535830946212,
       "lines": [
         "PDX",
         "GAYMERS"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          31.29948379299172,
+          43.471505268044055
+        ]
+      }
     },
     {
       "name": "PDX PAH - Portland Pets & Handlers",
@@ -1203,12 +1311,20 @@
       "sourcePage": "https://groups.io",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 2.7101534828807554,
+      "ratio": 2.8289072887012296,
       "lines": [
         "PDX",
         "BACKSTAGE"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          26.580129944507544,
+          36.91684714514937
+        ]
+      }
     },
     {
       "name": "Peacock PDX",
@@ -1340,12 +1456,20 @@
       "sourcePage": "http://www.portlandleather.org",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 4.338842975206612,
+      "ratio": 2.7975034998048534,
       "lines": [
         "PORTLAND",
         "LEATHER ALLIANCE"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          43.89212623789061,
+          24.365186826008486
+        ]
+      }
     },
     {
       "name": "Portland Playhouse",
@@ -1634,12 +1758,20 @@
       "sourcePage": null,
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 2.741440377804014,
+      "ratio": 2.277646509847326,
       "lines": [
         "SANKOFA",
         "COLLECTIVE"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          50.79560027607766,
+          38.821336102088026
+        ]
+      }
     },
     {
       "name": "Scandals East",
@@ -1709,12 +1841,20 @@
       "sourcePage": "https://sincerestudiopdx.org",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 1.9203069657615113,
+      "ratio": 1.718488828342126,
       "lines": [
         "SINCERE",
         "STUDIO"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          56.36673494177411,
+          65.61266405011543
+        ]
+      }
     },
     {
       "name": "Sold By Scott",
@@ -1736,12 +1876,20 @@
       "sourcePage": null,
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 2.846517119244392,
+      "ratio": 2.177023581372583,
       "lines": [
         "SPEED-O",
         "CAPPUCCINO"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          55.29647801473464,
+          37.38739252690393
+        ]
+      }
     },
     {
       "name": "Sprout Therapy PDX",
@@ -1836,12 +1984,20 @@
       "sourcePage": "https://lospunales.com",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 3.0312868949232588,
+      "ratio": 2.121980798667809,
       "lines": [
         "TAQUERIA",
         "LOS PU\u00d1ALES"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          48.311994119592676,
+          35.00633455485192
+        ]
+      }
     },
     {
       "name": "The Automatic Bar",
@@ -1889,12 +2045,22 @@
       "sourcePage": "https://rosecourt.org",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 5.62396694214876,
+      "ratio": 2.2293587206503567,
       "lines": [
-        "THE IMPERIAL SOVEREIGN",
-        "ROSE COURT OF OREGON"
+        "THE IMPERIAL",
+        "SOVEREIGN ROSE COURT",
+        "OF OREGON"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          34.389890200952976,
+          19.754849458526717,
+          29.231406670810028
+        ]
+      }
     },
     {
       "name": "The Living Room",
@@ -1967,12 +2133,20 @@
       "sourcePage": "https://www.yelp.com/biz/the-secret-warehouse-portland",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 2.78099173553719,
+      "ratio": 2.547045640989489,
       "lines": [
         "THE SECRET",
         "WAREHOUSE"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          39.10483483337975,
+          38.857682343978865
+        ]
+      }
     },
     {
       "name": "The Sports Bra",
@@ -2006,12 +2180,20 @@
       "sourcePage": "https://tinshedgardencafe.com",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 3.072609208972845,
+      "ratio": 2.3042787202360193,
       "lines": [
         "TIN SHED",
         "GARDEN CAFE"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          52.152069807513904,
+          34.66277591362854
+        ]
+      }
     },
     {
       "name": "Trans Advocacy & Care Team (TACT)",
@@ -2045,12 +2227,20 @@
       "sourcePage": "https://graduate.lclark.edu/programs/continuing_education/transactive/support-groups",
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 3.88370720188902,
+      "ratio": 3.0683966160058525,
       "lines": [
         "TRANSACTIVE",
         "GENDER PROJECT"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          33.346730498970445,
+          27.0755216336359
+        ]
+      }
     },
     {
       "name": "TransPonder",
@@ -2072,12 +2262,20 @@
       "sourcePage": null,
       "sourceAsset": null,
       "checked": "2026-10-13",
-      "ratio": 2.6977567886658798,
+      "ratio": 2.8242036263272894,
       "lines": [
         "TRANZGUYS",
         "PDX"
       ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
+      "fitting": {
+        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
+        "font": "Barlow Condensed 900",
+        "rowSizes": [
+          36.20537641227227,
+          26.067871016836037
+        ]
+      }
     },
     {
       "name": "Triangle Recreation Camp",
