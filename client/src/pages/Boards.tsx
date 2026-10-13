@@ -578,7 +578,7 @@ export default function Boards() {
                         <UnifiedBoardArt post={post} />
                         <div className="ab-card__body">
                           <div className="ab-card__eyebrow">
-                            <span>{intentLabels[post.intent]}</span>{post.isDemo && <span className="ab-demo-badge">DEMO · EXAMPLE ONLY</span>}{mineOnly && <span>{post.status}</span>}
+                            <span>{intentLabels[post.intent]}</span>{post.isDemo && <span className="ab-demo-badge">DEMO</span>}{mineOnly && <span>{post.status}</span>}
                           </div>
                           <h3>
                             <button
