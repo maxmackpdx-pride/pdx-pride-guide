@@ -176,10 +176,10 @@ export default function Boards() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const rawSelection = params.get("board");
-  const selection: Selection | null =
+  const selection: Selection | null = rawSelection === "choose" ? null :
     rawSelection === "all" || boardCategories.some((c) => c.id === rawSelection)
       ? (rawSelection as Selection)
-      : null;
+      : "all";
   const query = params.get("q") || "";
   const rawIntent = params.get("intent");
   const intent: BoardIntent | "all" =
@@ -280,7 +280,7 @@ export default function Boards() {
   ), featureFilters);
   const clear = () => update({ q: null, intent: null, saved: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null }, true);
   const select = (board: Selection | null) => {
-    update({ board, q: null, intent: null, saved: null, post: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null });
+    update({ board:board ?? "choose", q: null, intent: null, saved: null, post: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null });
     window.scrollTo({ top: 0, behavior: "instant" });
   };
   const close = () => {

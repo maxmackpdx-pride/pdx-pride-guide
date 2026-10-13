@@ -50,3 +50,11 @@ test("open-grab gifting is a distinct retained subsection",()=>{
 });
 
 test("completed and demo posts cannot become new saved availability",()=>{const posts=boardFeaturePosts("gigz",gigPayload,7,true);assert.equal(canSaveBoardPost(posts.find(p=>p.id===1)!),true);assert.equal(canSaveBoardPost(posts.find(p=>p.id===3)!),false);assert.equal(canSaveBoardPost(boardFeaturePosts("gigz",gigPayload)[1]),false);});
+
+
+test("View all chronology orders every category newest first, including clearly marked demos",()=>{
+ const base=boardFeaturePosts("gigz",gigPayload,7)[0];
+ const rows=[{...base,key:"gigz:1",createdAt:"2026-10-01T12:00:00Z"},{...base,category:"housing",key:"housing:2",createdAt:"2026-10-03T12:00:00Z"},{...base,category:"sellz",key:"sellz:3",createdAt:"2026-10-05T12:00:00Z"},{...base,key:"gigz:4",isDemo:true,createdAt:"2026-10-06T12:00:00Z"}] as BoardPost[];
+ assert.deepEqual(filterBoardFeatures(rows,{}).map(p=>p.key),["gigz:4","sellz:3","housing:2","gigz:1"]);
+ assert.deepEqual(filterBoardFeatures(rows,{sort:"oldest"}).map(p=>p.key),["gigz:1","housing:2","sellz:3","gigz:4"]);
+});
