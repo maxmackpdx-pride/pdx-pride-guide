@@ -43,7 +43,7 @@ const supportingForms: Record<string, string> = {
  spa: 'plantHouse', bagel: 'coffeeMix', waffle: 'coffeeMix', yarnBook: 'books', keysHome: 'plantHouse',
  riverCamp: 'fireWood', film: 'starStage', wealth: 'keysHome',
 };
-const supportingByName = new Map(Object.entries(assignments).map(([name, form]) => [key(name), placeWireframe(supportingForms[form])]));
+const supportingByName = new Map(Object.entries(assignments).map(([name, form]) => [key(name), placeWireframe(supportingForms[form], .6)]));
 export function distinctPlaceSupportingMotif(name: string): PlaceWireframe | undefined {
  return supportingByName.get(key(name));
 }

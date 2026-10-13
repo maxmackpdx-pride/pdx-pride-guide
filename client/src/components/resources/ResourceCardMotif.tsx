@@ -121,7 +121,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
   </g>
   {supporting && <g className="rg-motif-layer rg-motif-layer--support">
    <g className="rg-motif-support-drift" style={{ animationDuration: `${cycle + 17}s`, animationDelay: `${phase - 13}s` }}>
-    <g className="rg-motif-support-position" transform={`translate(${rightAtTop ? 240 : 160} 140) scale(.6) translate(-200 -250)`}>
+    <g className="rg-motif-support-position" transform={`translate(${rightAtTop ? 230 : 170} 150) scale(.78) translate(-200 -250)`}>
      <g fill="none" stroke={paint} strokeLinejoin="round">
       <path className="rg-motif-surface-grid" d={supporting.grid} />
       <path className="rg-motif-support-contour" d={supporting.outline} stroke={`url(#${gradientId}-edge)`} />

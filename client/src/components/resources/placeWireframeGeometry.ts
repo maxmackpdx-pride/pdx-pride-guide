@@ -18,10 +18,13 @@ const curve = (fn: (t: number) => Point, steps = 32) => Array.from({ length: ste
   return `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`;
 }).join('');
 class Drawing {
+  constructor(private density = 1) {}
   outline = ''; grid = '';
   line(a: Point, b: Point) { this.outline += curve(t => a.map((v, i) => v + (b[i] - v) * t) as Point, 1); }
   edge(fn: (t: number) => Point) { this.outline += curve(fn); }
   surface(fn: Surface, rows = 6, columns = 10, closed = false) {
+    rows = Math.max(2, Math.round(rows * this.density));
+    columns = Math.max(3, Math.round(columns * this.density));
     for (let i = 1; i < rows; i++) this.grid += curve(t => fn(i / rows, t));
     for (let i = 1; i < columns; i++) this.grid += curve(t => fn(t, i / columns));
     this.edge(t => fn(0, t)); this.edge(t => fn(1, t));
@@ -114,9 +117,10 @@ function wing(d: Drawing, side: number) {
   d.surface((u,v) => [side*(u*115),-65+140*Math.sin(u*Math.PI*.7)*(1-.7*v),30*Math.sin(u*Math.PI)*Math.sin(v*Math.PI)], 8, 6);
 }
 const cache = new Map<string, PlaceWireframe>();
-export function placeWireframe(form: string): PlaceWireframe {
-  const cached = cache.get(form); if(cached) return cached;
-  const d = new Drawing();
+export function placeWireframe(form: string, density = 1): PlaceWireframe {
+  const cacheKey = `${form}-${density}`;
+  const cached = cache.get(cacheKey); if(cached) return cached;
+  const d = new Drawing(density);
   switch(form) {
     case 'danceScreen': d.sphere([0,0,0],90); d.line([0,90,0],[0,120,0]); break;
     case 'gathering': d.surface((u,v)=>[-90+180*u,-70+175*(1-Math.abs(u*2-1)),-55+110*v],8,6); d.line([-90,-70,55],[90,-70,55]); d.line([0,105,55],[0,-70,55]); break;
@@ -165,5 +169,5 @@ export function placeWireframe(form: string): PlaceWireframe {
       d.torus([0,65,0],22,3); break;
     default: d.sphere([0,0,0],85);
   }
-  const result = { outline:d.outline, grid:d.grid }; cache.set(form,result); return result;
+  const result = { outline:d.outline, grid:d.grid }; cache.set(cacheKey,result); return result;
 }
