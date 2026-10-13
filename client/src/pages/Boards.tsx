@@ -1,3 +1,5 @@
+import BoardCategoryFollows from "@/components/board/BoardCategoryFollows";
+import { followRoomForCategory } from "@/lib/boardFollowChoices";
 import RoomComposer from "@/components/board/RoomComposer";
 import "./Housing.css";
 import "@/components/board/UnifiedBoardTools.css";
@@ -514,12 +516,12 @@ export default function Boards() {
                             : selectedCategory.label}
                       </button>
                       {selectedCategory.id === "housing" && mineOnly && <button type="button" className="ab-back" onClick={()=>{if(!user){setShowAuth(true);return;}update({type:"PM",compose:"1"});}}>Property managers · Contact Tucker</button>}
-                      <BoardFollowButton board={selectedCategory.id === "housing" ? "houz" : selectedCategory.id} />
+                      <BoardFollowButton board={followRoomForCategory(selectedCategory.id)} />
                       <Link className="ab-back" href={`/map?layer=${selectedCategory.id === "housing" ? "houz" : selectedCategory.id}`}><MapPin size={14} />Explore on Mapz</Link>
 
                     </>
                   ) : (
-                    <p className="ab-note">To post, choose the board where it belongs.</p>
+                    <><p className="ab-note">To post, choose the board where it belongs.</p><BoardCategoryFollows /></>
                   )}
                 </section>
               </aside>
