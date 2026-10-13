@@ -150,3 +150,7 @@
 .board-post-overlay.ab-open-card .board-listing-card::before,
 .board-post-overlay.ab-open-card .board-listing-card::after { display:none !important; }
 .ab-open-card--gigz .board-listing-card__expand { margin:0; }
+.ab-open-card--gigz .ab-gig-skills { margin-block:var(--space-5); }
+.ab-open-card--gigz .ab-gig-skills h5 { margin:0 0 var(--space-3); font:var(--open-card-heading-font); color:var(--text-hi); }
+.ab-open-card--gigz .ab-gig-skills>div { display:flex; flex-wrap:wrap; gap:var(--space-2); }
+.ab-open-card--gigz .ab-gig-skills span { padding:var(--space-1) var(--space-2); border:var(--bw-hair) solid color-mix(in srgb,var(--c) 40%,transparent); border-radius:var(--event-card-tag-radius); background:var(--event-card-tag-bg); color:var(--text-hi); font:var(--open-card-meta-font); }

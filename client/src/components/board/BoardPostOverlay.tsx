@@ -68,6 +68,7 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
     card = (
       <GigListingCard
         gig={gig}
+        presentation={presentation}
         accent={accent}
         expanded
         skills={skills}
