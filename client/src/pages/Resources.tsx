@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { CommunitySummary } from "@shared/community";
+import {resourceDetailSelection, type EmbeddedResourceDetail} from "@/lib/resourceDetailSelection";
 import { mergeCommunityResources } from "@/lib/communityResources";
 import { ServiceNameMark } from "@/components/ServiceNameMark";
 import { serviceArtwork } from "@shared/serviceIdentity";
@@ -460,18 +461,22 @@ const ResourceCard = memo(function ResourceCard({
   );
 });
 
-export default function Resources() {
+export type ResourcesProps = { params?: unknown; embeddedDetail?: EmbeddedResourceDetail; onEmbeddedClose?: () => void };
+
+export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesProps = {}) {
   const { calmMode } = useTheme();
   const reducedMotion = useReducedMotion();
   const quietMotion = calmMode || reducedMotion;
   const [location, navigate] = useLocation();
   const locationSearch = useSearch();
   useEffect(() => {
+    if (embeddedDetail) return;
     if (location === "/resources" || location === "/rezources") navigate(`/needz${window.location.search}${window.location.hash}`, { replace: true });
-  }, [location, navigate]);
+  }, [location, navigate, embeddedDetail]);
   usePageSeo(
     "NEEDZ | Zaylist",
     "Art, community, opportunity, care, and support for queer and trans Oregon. Explore local organizations and food pantries to find your next connection.",
+    {skip: Boolean(embeddedDetail)},
   );
   const readBrowseState = () => {
     const params = new URLSearchParams(window.location.search);
@@ -488,7 +493,7 @@ export default function Resources() {
   const [supportOpen, setSupportOpen] = useState(false);
   const supportTrigger = useRef<HTMLElement | null>(null);
   const [detail, setDetail] = useState<Row | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(Boolean(embeddedDetail));
   const detailTrigger = useRef<HTMLElement | null>(null);
   const openedRequest = useRef<string | null>(null);
   const [mobile, setMobile] = useState(() => window.matchMedia("(max-width: 600px)").matches);
@@ -499,14 +504,16 @@ export default function Resources() {
     return () => media.removeEventListener("change", sync);
   }, []);
   useEffect(() => {
+    if (embeddedDetail) return;
     const restore = () => {
       const state = readBrowseState();
       setCategoryIds(state.ids); setSearchQuery(state.query); setMode(state.mode); setBrowseView(state.layout);
     };
     window.addEventListener("popstate", restore);
     return () => window.removeEventListener("popstate", restore);
-  }, []);
+  }, [embeddedDetail]);
   useEffect(() => {
+    if (embeddedDetail) return;
     const url = new URL(window.location.href);
     url.searchParams.delete("cat"); url.searchParams.delete("view"); url.searchParams.delete("q"); url.searchParams.delete("layout");
     url.searchParams.set("door", mode === "talk" ? "talk" : "find");
@@ -514,16 +521,14 @@ export default function Resources() {
     if (searchQuery.trim()) url.searchParams.set("q", searchQuery.trim());
     if (browseView !== "browse") url.searchParams.set("layout", browseView);
     window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
-  }, [categoryIds, searchQuery, mode, browseView]);
+  }, [categoryIds, searchQuery, mode, browseView, embeddedDetail]);
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const requested = params.get("resource") || params.get("find");
-    const requestedCommunity = params.get("community");
-    const row = allRows.find(({ org, community }) => requestedCommunity ? community?.slug === requestedCommunity : requested && (org.name === requested || org.aliases?.includes(requested)));
-    const requestKey = `${location}:${requestedCommunity || requested || ""}`;
-    if (row && openedRequest.current !== requestKey) { openedRequest.current = requestKey; setDetail(row); setDetailOpen(true); }
-    if (!requested && !requestedCommunity) openedRequest.current = null;
-  }, [location, locationSearch, allRows]);
+    const selection = resourceDetailSelection(allRows, window.location.search, embeddedDetail);
+    const requestKey = `${embeddedDetail ? "embedded" : location}:${selection.key}`;
+    if ((selection.row || embeddedDetail) && openedRequest.current !== requestKey) { openedRequest.current = requestKey; setDetail(selection.row || null); setDetailOpen(true); }
+    if (selection.row && detailOpen && openedRequest.current === requestKey) setDetail(selection.row);
+    if (!selection.requested) openedRequest.current = null;
+  }, [location, locationSearch, allRows, embeddedDetail?.name, embeddedDetail?.communitySlug, detailOpen]);
   const openDetail = useCallback((row: Row) => {
     detailTrigger.current = document.activeElement as HTMLElement;
     setDetail(row); setDetailOpen(true);
@@ -544,7 +549,8 @@ export default function Resources() {
     <ResourceCard row={row} onOpen={openDetail} />
   </div>;
   return (
-    <div className="eb-page eb-page--resources">
+    <>
+    {!embeddedDetail && <div className="eb-page eb-page--resources">
       <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>
       <BrowseHeader title="NEEDZ" logo="/brand/family/needz-mobile.webp" kicker="Oregon · All the ways we show up"
         description="Art, community, opportunity, care, and support for queer and trans Oregon. Find your next connection.">
@@ -606,9 +612,10 @@ export default function Resources() {
         </Drawer.Portal>
       </Drawer.Root>
 
+    </div>}
       <Dialog.Root
         open={detailOpen}
-        onOpenChange={setDetailOpen}
+        onOpenChange={open => {setDetailOpen(open); if (!open && embeddedDetail) onEmbeddedClose?.();}}
       >
         <Dialog.Portal>
           <Dialog.Overlay className="rg-overlay-backdrop eb-detail-backdrop" />
@@ -625,7 +632,7 @@ export default function Resources() {
               event.preventDefault();
               const target = detailTrigger.current;
               if (target?.isConnected) target.focus();
-              else
+              else if (!embeddedDetail)
                 document
                   .querySelector<HTMLButtonElement>(".eb-category")
                   ?.focus();
@@ -637,6 +644,7 @@ export default function Resources() {
                 <Dialog.Close className="detail-actions__close" aria-label="Close resource"><X size={20} aria-hidden="true" /></Dialog.Close>
               </div>
             </div>
+            {!detail && embeddedDetail && <div className="rg-drawer-body event-modal__scroll"><Dialog.Title className="event-modal__title">{embeddedDetail.name}</Dialog.Title><Dialog.Description>{communities.isLoading ? "Opening card…" : "This resource is unavailable."}</Dialog.Description>{communities.isError && <button className="pdxBtn" onClick={() => {void communities.refetch();}}>Try again</button>}</div>}
             {detail && (
               <div className="rg-drawer-body event-modal__scroll">
                 <div className="rg-detail-primary">
@@ -779,6 +787,6 @@ export default function Resources() {
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
-    </div>
+    </>
   );
 }
