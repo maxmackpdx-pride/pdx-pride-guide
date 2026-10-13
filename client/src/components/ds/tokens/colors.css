@@ -7,8 +7,8 @@
 
 :root {
   /* ---- SURFACES (exact) ---------------------------------- */
-  --z-black:  #050506;   /* default Zaylist page/background black */
-  --z-oled:   #000000;   /* reserved for buttons and deep glass */
+  --z-black:  #050506;   /* preserved near-black card/art base */
+  --z-oled:   #000000;   /* pure black page/chrome/control surroundings */
   --ink-1000: var(--z-black); /* full-bleed stage */
   --ink-900:  var(--z-black); /* app background */
   --ink-850:  #111111;   /* inset chips / inputs */

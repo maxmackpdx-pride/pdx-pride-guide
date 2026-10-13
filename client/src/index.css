@@ -17932,5 +17932,6 @@ html, body, .app-shell { background-color:var(--z-oled) !important; }
 :where(.zine-page,.eb-page,.events-page,.resources-page,.directory-page,.board-shader-page) { background-color:var(--z-oled) !important; }
 .site-header, .site-footer, .site-mobile-nav, .mobile-top-nav { background-color:var(--z-oled) !important; }
 
-:root { --ink-1000:var(--z-oled); --ink-900:var(--z-oled); }
+:root { --bg-app:var(--z-oled); --bg-stage:var(--z-oled); }
+.home-front, .home-page { background-color:var(--z-oled) !important; }
 :where(.about-page,.missed-page,.gigs-page,.profile-page,.hub-page,.contact-page,.login-page,.legal-page) { background-color:var(--z-oled) !important; }
