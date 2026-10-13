@@ -217,7 +217,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
         <span className="board-open-card__rule" aria-hidden="true" />
         <div style={{ position: "relative", zIndex: 30, padding: 12 }}><DetailActions label="My Hoüz listing" onClose={requestClose} /></div>
         {post.isDemo && <p className="board-demo-notice" role="note">Demo listing — example only. Participation is disabled.</p>}
-        <fieldset disabled={post.isDemo} style={{border:0,padding:0,margin:0,minWidth:0}}><div key={detail ? "detail" : "card"} className="houz-overlay-content">
+        <fieldset disabled={post.isDemo} onClickCapture={event => { if (post.isDemo) { event.preventDefault(); event.stopPropagation(); } }} onKeyDownCapture={event => { if (post.isDemo && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); event.stopPropagation(); } }} style={{border:0,padding:0,margin:0,minWidth:0}}><div key={detail ? "detail" : "card"} className="houz-overlay-content">
           {detail ? <HousingDetail post={post} h={detailHandlers} isOwner={isOwner} workspace={post.type === "FORMING" ? <HousingWorkspace post={post} onOpenThread={() => openSheet({ view: "inbox" })} /> : undefined} /> : <HousingCard post={post} h={cardHandlers} />}
         </div>
         </fieldset>
