@@ -2,6 +2,11 @@
    TonightEventCard geometry and typography wherever its card language is reused.
    The broader type scale remains in typography.css; room identity in rooms.css. */
 :root {
+  --event-card-compact-width: 136px;
+  --event-card-compact-height: 170px;
+  --event-card-compact-radius: 16px;
+  --event-card-compact-title-font: 800 16px/1.04 var(--font-display);
+  --event-card-compact-meta-font: 500 11px/14px var(--font-body);
   --event-card-width: 200px;
   --event-card-height: 403px;
   --event-card-radius: 17px;

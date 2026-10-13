@@ -6,7 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import DetailActions from "./DetailActions";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
@@ -180,7 +180,7 @@ const BLANK_OWNER_FIELDS: OwnerEditableFields = {
   ...BLANK_FIELDS, name: "", address: "", type: "bar", neighborhood: "", queerOwned: false, queerFriendly: true,
 };
 
-type ModalTab = "past" | "missed" | "gigs";
+type ModalTab = "past" | "gigs";
 
 const DAY_CODES = new Set(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]);
 
@@ -215,6 +215,7 @@ export default function PlaceModal({
   /** Retained for callers; opening now uses the shared centered scale/fade. */
   originRect?: PlaceModalOriginRect | null;
 }) {
+  const logoInkId = `placez-open-logo-${useId().replace(/:/g, "")}`;
   const { toast } = useToast();
   const { user } = useAuth();
   const [editing, setEditing] = useState(false);
@@ -226,7 +227,10 @@ export default function PlaceModal({
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [descriptionClipped, setDescriptionClipped] = useState(false);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
-  const communityRef = useRef<HTMLDivElement>(null);
+  const mizzedRef = useRef<HTMLElement>(null);
+  const [missedOpen, setMissedOpen] = useState(false);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const [heroMapVisible, setHeroMapVisible] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(true);
   const [eventsOpen, setEventsOpen] = useState(true);
   const [open, setOpen] = useState(false);
@@ -235,6 +239,8 @@ export default function PlaceModal({
   // Fresh tab when opening a different place
   useEffect(() => {
     setTab("past");
+    setMissedOpen(false);
+    setHeroMapVisible(false);
     setEditing(false);
     setSavedOverrides(null);
     setDescriptionExpanded(false);
@@ -419,9 +425,6 @@ export default function PlaceModal({
   const hideMissed = categoryHidesMissedConnections(place.type, category);
   const tabs: Array<{ key: ModalTab; label: string; count: number }> = [
     { key: "past", label: "Past", count: pastEvents.length },
-    ...(hideMissed
-      ? []
-      : [{ key: "missed" as ModalTab, label: "MIZZED CONNECTION", count: spotted.length }]),
     { key: "gigs", label: "GIGZ", count: gigs.length },
   ];
 
@@ -457,9 +460,11 @@ export default function PlaceModal({
           ["--c" as string]: accent,
           ["--_c" as string]: accent,
           ["--event-accent" as string]: accent,
+          ["--placez-logo-ink-filter" as string]: `url(#${logoInkId})`,
           ...(useSpecialEdge ? { ["--_edge" as string]: edge } : {}),
         }}
       >
+        <svg width="0" height="0" aria-hidden="true" focusable="false" style={{position:'absolute'}}><defs><filter id={logoInkId} colorInterpolationFilters="sRGB"><feComponentTransfer><feFuncA type="linear" slope="4" intercept="-1.2" /></feComponentTransfer></filter></defs></svg>
         <div className="event-modal__chrome">
           <DetailActions label="place" onClose={handleClose} onShare={handleShare} sharing={sharing} />
         </div>
@@ -468,7 +473,13 @@ export default function PlaceModal({
           <div className="place-modal-panel__body">
 
           <div className="place-modal-panel__identity">
-          <div className="eb-detail__art">
+          <div className="place-modal-panel__hero">
+            <div className="place-modal-panel__hero-rail" key={place.id} ref={heroRef}
+              aria-label="Place artwork and map" tabIndex={0}
+              onScroll={event => setHeroMapVisible(event.currentTarget.scrollLeft > event.currentTarget.clientWidth / 2)}
+              onKeyDown={event => { if(event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); heroRef.current?.scrollTo({left:event.key === "ArrowRight" ? heroRef.current.clientWidth : 0}); } }}>
+              <div className="place-modal-panel__hero-slide" aria-label="Place artwork">
+<div className="eb-detail__art">
             <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={`place-${place.type}`} /></div>
           <img
             key={`${place.id}:${place.name}:${place.imageUrl}`}
@@ -485,6 +496,36 @@ export default function PlaceModal({
             }}
           />
 
+          </div>
+              </div>
+              <div className="place-modal-panel__hero-slide" aria-label="Place map">
+<div className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
+            <DirectoryMap
+              businesses={hasMapCoordinates ? [displayed] : []}
+              height="100%"
+              showKey={false}
+              interactive
+              focusBusiness={hasMapCoordinates}
+              rasterBasemap
+              accent={accent}
+            />
+            <div className="place-modal-panel__map-label">
+              <MapPinned size={14} aria-hidden="true" />
+              <span>
+                {hasMapCoordinates
+                  ? multiLoc
+                    ? `${locations.length} locations`
+                    : place.neighborhood || "Portland"
+                  : "Portland overview"}
+              </span>
+            </div>
+          </div>
+              </div>
+            </div>
+            <div className="place-modal-panel__hero-switch" aria-label="Choose artwork or map">
+              <button type="button" aria-label="Show place artwork" aria-pressed={!heroMapVisible} onClick={() => { setHeroMapVisible(false); heroRef.current?.scrollTo({left:0}); }}><span aria-hidden="true" /></button>
+              <button type="button" aria-label="Show place map" aria-pressed={heroMapVisible} onClick={() => { setHeroMapVisible(true); if(heroRef.current) heroRef.current.scrollTo({left:heroRef.current.clientWidth}); }}><span aria-hidden="true" /></button>
+            </div>
           </div>
           <div className="place-modal-panel__identity-text">
           <h2 className="event-modal__title">
@@ -875,45 +916,29 @@ export default function PlaceModal({
                       {displayed.phone && <a href={telHref(displayed.phone)}>Call</a>}
                     </div>
                   )}
-          {!hideMissed && <section className="event-modal__mizzed-door" aria-label="Mizzed Connection">
-            <button type="button" className="room-doorways__door pdx-glass-card pdx-glass-rebind"
-              style={{ "--c": "var(--room-mizzed)", "--ink": "var(--room-mizzed)" } as React.CSSProperties}
-              aria-expanded={tab === "missed"} onClick={() => {
-                setTab("missed");
-                requestAnimationFrame(() => communityRef.current?.scrollIntoView({ behavior: "auto", block: "start" }));
-              }}>
-              <ResourceCardMotif name="MIZZED CONNECTION" category="mizzed" />
-              <span className="room-doorways__vignette" aria-hidden="true" />
-              <span className="room-doorways__glass" aria-hidden="true" />
-              <img className="room-doorways__logo" src="/brand/family/mizzed-connection.svg" alt="Mizzed Connection" loading="lazy" decoding="async" />
-              <span className="room-doorways__line"><strong>That person you noticed</strong><br />Maybe they noticed you, too.</span>
-              <span className="room-doorways__go">Who caught your eye? <span aria-hidden="true">↗</span></span>
-            </button>
-          </section>}
 
-          <div className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
-            <DirectoryMap
-              businesses={hasMapCoordinates ? [displayed] : []}
-              height="100%"
-              showKey={false}
-              interactive
-              focusBusiness={hasMapCoordinates}
-              rasterBasemap
-              accent={accent}
-            />
-            <div className="place-modal-panel__map-label">
-              <MapPinned size={14} aria-hidden="true" />
-              <span>
-                {hasMapCoordinates
-                  ? multiLoc
-                    ? `${locations.length} locations`
-                    : place.neighborhood || "Portland"
-                  : "Portland overview"}
-              </span>
-            </div>
-          </div>
 
-          <div className="place-modal-panel__community-room" ref={communityRef}>
+          <details className="event-modal__disclosure place-upcoming" open={eventsOpen} onToggle={event => setEventsOpen(event.currentTarget.open)}>
+            <summary><Icon d={CAL} />Upcoming events <span className="place-upcoming__count">{upcomingEvents.length}</span><ChevronRight aria-hidden="true" /></summary>
+            {upcomingEvents.some(event => event.previewExample) && <p className="place-upcoming__note">Sample event cards for this preview.</p>}
+            {upcomingEvents.length ? <div className="place-upcoming__grid" role="list" aria-label={`Upcoming events at ${place.name}`}>
+              {upcomingEvents.map(event => <Link
+                key={event.listingInstanceKey ?? event.id}
+                href={eventPath(event.id, event.title, event.dayOfWeek)}
+                onClick={onClose}
+                className="place-event-tile pdx-glass-rebind"
+                style={{ "--c": DAY_COLOR[dayCodeFromEvent(event)] || accent, "--card-secondary-override": dayComplementToken(dayCodeFromEvent(event)) } as React.CSSProperties}
+                aria-label={`View event: ${event.title}`}
+                role="listitem"
+              >
+                <EventFlyerArt src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} day={event.dayOfWeek} />
+                {event.previewExample && <span className="place-event-tile__example">Example</span>}
+                <span className="place-event-tile__shade"><strong>{event.title}</strong><small>{event.previewExample ? "Preview example" : formatDirectoryEventWhen(event)}</small></span>
+              </Link>)}
+            </div> : <p className="place-upcoming__note">No upcoming events matched to this venue yet.</p>}
+          </details>
+
+          <div className="place-modal-panel__community-room">
             {promoters.length > 0 && (
               <div className="place-modal-panel__promoters">
                 <span>Event promoters</span>
@@ -1001,25 +1026,6 @@ export default function PlaceModal({
               )
             )}
 
-            {tab === "missed" && (
-              spotted.length === 0 ? (
-                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No MIZZED CONNECTION posts posted at this venue yet.</p>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {spotted.map(mc => (
-                    <div key={mc.id} style={{ padding: "8px 0 8px 12px", borderLeft: `3px solid ${accent}` }}>
-                      <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-hi)", marginBottom: 2 }}>
-                        {mc.body}
-                      </div>
-                    </div>
-                  ))}
-                  <Link href="/mizzed" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
-                    View MIZZED CONNECTION board <ArrowRight size={14} aria-hidden="true" />
-                  </Link>
-                </div>
-              )
-            )}
-            {tab === "missed" && <Link href={`/mizzed/new?place=${place.id}`} onClick={onClose} style={{ ...linkStyle, marginTop: 12 }}>Post a connection from this Placez card <ArrowRight size={14} aria-hidden="true" /></Link>}
 
             {tab === "gigs" && (
               gigs.length === 0 ? (
@@ -1044,25 +1050,43 @@ export default function PlaceModal({
             )}
             </div>
           </div>
-          <details className="event-modal__disclosure place-upcoming" open={eventsOpen} onToggle={event => setEventsOpen(event.currentTarget.open)}>
-            <summary><Icon d={CAL} />Upcoming events <span className="place-upcoming__count">{upcomingEvents.length}</span><ChevronRight aria-hidden="true" /></summary>
-            {upcomingEvents.some(event => event.previewExample) && <p className="place-upcoming__note">Sample event cards for this preview.</p>}
-            {upcomingEvents.length ? <div className="place-upcoming__grid" role="list" aria-label={`Upcoming events at ${place.name}`}>
-              {upcomingEvents.map(event => <Link
-                key={event.listingInstanceKey ?? event.id}
-                href={eventPath(event.id, event.title, event.dayOfWeek)}
-                onClick={onClose}
-                className="place-event-tile pdx-glass-rebind"
-                style={{ "--c": DAY_COLOR[dayCodeFromEvent(event)] || accent, "--card-secondary-override": dayComplementToken(dayCodeFromEvent(event)) } as React.CSSProperties}
-                aria-label={`View event: ${event.title}`}
-                role="listitem"
-              >
-                <EventFlyerArt src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} day={event.dayOfWeek} />
-                {event.previewExample && <span className="place-event-tile__example">Example</span>}
-                <span className="place-event-tile__shade"><strong>{event.title}</strong><small>{event.previewExample ? "Preview example" : formatDirectoryEventWhen(event)}</small></span>
-              </Link>)}
-            </div> : <p className="place-upcoming__note">No upcoming events matched to this venue yet.</p>}
-          </details>
+
+          {!hideMissed && <section className="event-modal__mizzed-door" aria-label="Mizzed Connection" ref={mizzedRef}>
+            <button type="button" className="room-doorways__door pdx-glass-card pdx-glass-rebind"
+              style={{ "--c": "var(--room-mizzed)", "--ink": "var(--room-mizzed)" } as React.CSSProperties}
+              aria-expanded={missedOpen} onClick={() => {
+                setMissedOpen(value => !value);
+                requestAnimationFrame(() => mizzedRef.current?.scrollIntoView({ behavior: "auto", block: "start" }));
+              }}>
+              <ResourceCardMotif name="MIZZED CONNECTION" category="mizzed" />
+              <span className="room-doorways__vignette" aria-hidden="true" />
+              <span className="room-doorways__glass" aria-hidden="true" />
+              <img className="room-doorways__logo" src="/brand/family/mizzed-connection.svg" alt="Mizzed Connection" loading="lazy" decoding="async" />
+              <span className="room-doorways__line"><strong>That person you noticed</strong><br />Maybe they noticed you, too.</span>
+              <span className="room-doorways__go">Who caught your eye? <span aria-hidden="true">↗</span></span>
+            </button>
+            {missedOpen && (
+              spotted.length === 0 ? (
+                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No MIZZED CONNECTION posts posted at this venue yet.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {spotted.map(mc => (
+                    <div key={mc.id} style={{ padding: "8px 0 8px 12px", borderLeft: `3px solid ${accent}` }}>
+                      <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-hi)", marginBottom: 2 }}>
+                        {mc.body}
+                      </div>
+                    </div>
+                  ))}
+                  <Link href="/mizzed" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
+                    View MIZZED CONNECTION board <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+              )
+            )}
+            {missedOpen && <Link href={`/mizzed/new?place=${place.id}`} onClick={onClose} style={{ ...linkStyle, marginTop: 12 }}>Post a connection from this Placez card <ArrowRight size={14} aria-hidden="true" /></Link>}
+
+          </section>}
+
           </div>
         </div>
         </div>{/* /.place-modal-panel__inner */}
