@@ -147,3 +147,29 @@ test("an anonymous RSVP stays out of Hub and RSVP-only posts require attendance"
   storage.removeAttendance(event.id,viewer);
   assert.equal(feed("posts").items.some(row=>row.id===`feed_post-${post.id}`),false);
 });
+
+
+test("each unified Boards category independently adds its new posts to Following",()=>{
+  const subscriber=user("category_subscriber"), poster=user("category_poster");
+  const created=new Date().toISOString(), expires=new Date(Date.now()+86400000*7).toISOString();
+  const gift=Number(sqlite.prepare("INSERT INTO gifting_posts(user_id,post_type,title,description,category,neighborhood,pickup_preference,photo_urls,status,expires_at,created_at) VALUES(?,'GIFT','Category gift','A gift','Other','North','Pickup','[]','OPEN',?,?)").run(poster,expires,created).lastInsertRowid);
+  const sell=Number(sqlite.prepare("INSERT INTO sellz_posts(user_id,title,description,category,condition,price_cents,neighborhood,pickup_preference,photo_urls,status,expires_at,created_at) VALUES(?,'Category sell','A sale','Other','Good',12000,'North','Pickup','[]','ACTIVE',?,?)").run(poster,expires,created).lastInsertRowid);
+  const missed=Number(sqlite.prepare("INSERT INTO missed_connections(user_id,title,body,status,closes_at,created_at) VALUES(?,'Category anonymous','A connection','ACTIVE',?,?)").run(poster,expires,created).lastInsertRowid);
+  const gig=Number(sqlite.prepare("INSERT INTO gig_posts(user_id,type,role,post_type,title,name,contact_email,description,status,created_at) VALUES(?,'GIG','Host','POSTING_GIG','Category gig','Category poster','private_contact@hub.test','A gig','LIVE',?)").run(poster,created).lastInsertRowid);
+  const housing=Number(sqlite.prepare("INSERT INTO housing_posts(user_id,type,name,headline,body,status,hidden,created_at,updated_at) VALUES(?,'LOOKING','Category home','Looking for a room','Room details','ACTIVE',0,?,?)").run(poster,created,created).lastInsertRowid);
+  const hiddenHousing=Number(sqlite.prepare("INSERT INTO housing_posts(user_id,type,name,headline,status,hidden,created_at,updated_at) VALUES(?,'LOOKING','Private home','Hidden housing','ACTIVE',1,?,?)").run(poster,created,created).lastInsertRowid);
+  const rows=()=>storage.getHubFeed({viewerUserId:subscriber,tab:"following",limit:50}).items;
+  const ids={giftz:`gifting-${gift}`,sellz:`sellz-${sell}`,mizzed:`spotted-${missed}`,gigz:`gig-${gig}`,houz:`housing-${housing}`} as const;
+  for(const board of Object.keys(ids) as Array<keyof typeof ids>){
+    setBoardFollowing(subscriber,board,true);
+    const feedRows=rows();assert.ok(feedRows.some(row=>row.id===ids[board]),`${board} post reaches Following`);
+    for(const other of Object.keys(ids) as Array<keyof typeof ids>)if(other!==board)assert.equal(feedRows.some(row=>row.id===ids[other]),false,`${other} is not implicitly followed`);
+    assert.equal(feedRows.some(row=>row.id===`housing-${hiddenHousing}`),false);
+    if(board==="mizzed"){
+      const anonymous=feedRows.find(row=>row.id===ids.mizzed)!;
+      assert.equal(anonymous.author.anonymous,true);assert.equal(JSON.stringify(anonymous).includes("category_poster"),false);
+      storage.blockMember(subscriber,poster);assert.equal(rows().some(row=>row.id===ids.mizzed),false);storage.unblockMember(subscriber,poster);
+    }
+    setBoardFollowing(subscriber,board,false);assert.equal(rows().some(row=>row.id===ids[board]),false,`${board} unfollow stops category updates`);
+  }
+});

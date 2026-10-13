@@ -1,3 +1,5 @@
+import BoardCategoryFollows from "@/components/board/BoardCategoryFollows";
+import { followRoomForCategory } from "@/lib/boardFollowChoices";
 import RoomComposer from "@/components/board/RoomComposer";
 import "./Housing.css";
 import "@/components/board/UnifiedBoardTools.css";
@@ -174,10 +176,10 @@ export default function Boards() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const rawSelection = params.get("board");
-  const selection: Selection | null =
+  const selection: Selection | null = rawSelection === "choose" ? null :
     rawSelection === "all" || boardCategories.some((c) => c.id === rawSelection)
       ? (rawSelection as Selection)
-      : null;
+      : "all";
   const query = params.get("q") || "";
   const rawIntent = params.get("intent");
   const intent: BoardIntent | "all" =
@@ -278,7 +280,7 @@ export default function Boards() {
   ), featureFilters);
   const clear = () => update({ q: null, intent: null, saved: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null }, true);
   const select = (board: Selection | null) => {
-    update({ board, q: null, intent: null, saved: null, post: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null });
+    update({ board:board ?? "choose", q: null, intent: null, saved: null, post: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null });
     window.scrollTo({ top: 0, behavior: "instant" });
   };
   const close = () => {
@@ -514,12 +516,12 @@ export default function Boards() {
                             : selectedCategory.label}
                       </button>
                       {selectedCategory.id === "housing" && mineOnly && <button type="button" className="ab-back" onClick={()=>{if(!user){setShowAuth(true);return;}update({type:"PM",compose:"1"});}}>Property managers · Contact Tucker</button>}
-                      <BoardFollowButton board={selectedCategory.id === "housing" ? "houz" : selectedCategory.id} />
+                      <BoardFollowButton board={followRoomForCategory(selectedCategory.id)} />
                       <Link className="ab-back" href={`/map?layer=${selectedCategory.id === "housing" ? "houz" : selectedCategory.id}`}><MapPin size={14} />Explore on Mapz</Link>
 
                     </>
                   ) : (
-                    <p className="ab-note">To post, choose the board where it belongs.</p>
+                    <><p className="ab-note">To post, choose the board where it belongs.</p><BoardCategoryFollows /></>
                   )}
                 </section>
               </aside>
@@ -578,7 +580,7 @@ export default function Boards() {
                         <UnifiedBoardArt post={post} />
                         <div className="ab-card__body">
                           <div className="ab-card__eyebrow">
-                            <span>{intentLabels[post.intent]}</span>{post.isDemo && <span className="ab-demo-badge">DEMO · EXAMPLE ONLY</span>}{mineOnly && <span>{post.status}</span>}
+                            <span>{intentLabels[post.intent]}</span>{post.isDemo && <span className="ab-demo-badge">DEMO</span>}{mineOnly && <span>{post.status}</span>}
                           </div>
                           <h3>
                             <button

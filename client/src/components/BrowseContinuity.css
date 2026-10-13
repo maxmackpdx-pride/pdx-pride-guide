@@ -52,3 +52,28 @@
 .browse-status h3 { margin-bottom:var(--space-2); font:var(--fw-heavy) var(--title-lg)/1.15 var(--font-display); }
 .browse-status p { font:var(--body-md)/1.6 var(--font-body); color:var(--text-body); }
 .browse-status__actions { margin:0; gap:var(--space-3); }
+
+/* One browse vocabulary, using Eventz's control roles in every room. */
+:is(.events-page,.eb-page) {
+  --browse-category-font:var(--fw-black) var(--title-md)/1.1 var(--font-display);
+  --browse-caption-font:var(--fw-medium) var(--meta-sm)/1 var(--font-mono);
+  --browse-action-font:var(--fw-bold) var(--body-sm)/1 var(--font-display);
+  --browse-category-radius:calc(var(--radius-panel) + var(--space-1) / 2);
+}
+.eb-page :is(.eb-category,.ab-category),.events-page .events-day-tab { border-radius:var(--browse-category-radius); }
+.eb-page .eb-category > span,.eb-page .ab-category,.events-page .events-day-tab__top {
+  font:var(--browse-category-font); letter-spacing:var(--tracking-display);
+}
+.eb-page .eb-category small,.events-page .events-day-tab__sub { font:var(--browse-caption-font); }
+.eb-page .eb-category b,.events-page .events-day-tab__count { font:var(--fw-bold) var(--mono-kicker)/1 var(--font-display); }
+.eb-page .eb-tool,.events-page .events-tool-btn {
+  font:var(--browse-action-font); letter-spacing:var(--tracking-wide); border-radius:var(--radius-tile);
+}
+.eb-page .eb-mobile-filter-toggle,.events-page .events-tool-btn--icon { border-radius:var(--radius-panel); }
+.eb-page .eb-lede,.eb-page .ab-header p:not(.eb-kicker) { font:var(--fw-regular) var(--body-md)/var(--lh-body) var(--font-body); }
+html body .events-page.board-page--makeover .events-board-feed__sticky {
+  background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none;
+}
+@media(max-width:600px) {
+  .eb-page .eb-search-row .eb-tool,.ab-page .ab-saved { border-radius:var(--radius-panel); }
+}

@@ -66,3 +66,93 @@
 .board-open-card--shared :is(.gifting-owner-actions,.sellz-edit-form,.gifting-interest) button { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:var(--space-2) var(--space-3); border:var(--bw-hair) solid color-mix(in srgb,var(--c) 45%,transparent); border-radius:var(--radius-panel); background:var(--z-black); color:var(--text-hi); font:var(--fw-semibold) var(--body-sm)/1.3 var(--font-body); }
 
 .board-demo-notice { margin:var(--space-3); padding:var(--space-3); border:var(--bw-hair) solid var(--panel-border); border-radius:var(--radius-xl); color:var(--text-hi); background:var(--glass-card-bg); font:var(--event-card-detail-font); }
+
+/* Unified Boards uses Eventz's open-card text roles. The room's artwork,
+   photo well, fixed card geometry and working controls keep their own anatomy. */
+.ab-open-card :is(.board-listing-card__title,.gig-talent-card__name,.board-detail-modal__quote-title,.hz-dttl) {
+  font:var(--open-card-title-font) !important;
+  letter-spacing:normal;
+  line-clamp:none; -webkit-line-clamp:unset;
+  overflow-wrap:anywhere;
+  margin-block:var(--space-4) var(--space-3);
+}
+.ab-open-card :is(.board-listing-card__expand>p,.board-detail-modal__body,.hz-prose,.gifting-response>p,.gifting-pending-note) {
+  font:var(--open-card-body-font) !important;
+  overflow-wrap:anywhere;
+}
+.ab-open-card :is(.gig-talent-card__role,.hz-secttl,.gifting-owner>summary,.gifting-owner-panel>summary,.gifting-report>summary,.board-detail-modal__actions details>summary) {
+  font:var(--open-card-heading-font);
+  min-height:var(--ab-target,44px);
+  align-content:center;
+}
+.ab-open-card :is(.board-listing-card__poster,.board-listing-card__time,.board-listing-card__status,.gifting-details,.gig-talent-card__location,.gig-talent-card__footer,.board-detail-modal__meta-line,.mizzed-source-link small,.hz-dhead>.hz-mono,.board-demo-notice) {
+  font:var(--open-card-meta-font) !important;
+  letter-spacing:normal;
+}
+.ab-open-card :is(.gifting-listing-actions,.gig-talent-card__actions,.gifting-owner-actions,.sellz-edit-form,.gifting-form-grid,.gifting-response,.gifting-interest,.board-detail-modal__actions) :is(button,a),
+.ab-open-card .board-listing-card__expand :is(button.pdxBtn,a.pdxBtn),
+.ab-open-card .hz-actionbar :is(button,a) {
+  font:var(--open-card-action-font) !important;
+  letter-spacing:.025em;
+  text-transform:uppercase;
+  min-height:var(--ab-target,44px);
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.ab-open-card .board-listing-card__expand>p { margin-block:var(--space-4); }
+.ab-open-card :is(.gifting-details,.board-detail-modal__meta) { margin-block:var(--space-3); }
+.ab-open-card :is(.gifting-listing-actions,.gig-talent-card__actions,.gifting-owner-actions) { gap:var(--space-3); }
+.ab-open-card :is(input,textarea,select) { font-family:var(--font-body); font-size:var(--body-md); }
+
+/* Gigz's working detail stays inside the same art-first glass frame. */
+.board-post-overlay.ab-open-card.ab-open-card--gigz { container-type:inline-size; }
+.ab-open-card--gigz .ab-open-card__art {
+  position:relative; height:clamp(170px,42cqw,260px); overflow:hidden;
+  border-radius:var(--event-card-radius) var(--event-card-radius) 0 0;
+}
+.ab-open-card--gigz .ab-open-card__art>.ab-art { width:100%; height:100%; }
+.ab-open-card--gigz .ab-open-card__art .ab-art__brand {
+  inset:50% auto auto 50%; translate:-50% -50%; width:min(65%,300px); height:80px;
+}
+.ab-open-card--gigz .ab-open-card__art .ab-art__intent-mark { left:85%; top:35%; width:90px; opacity:.35; }
+.board-post-overlay.ab-open-card.ab-open-card--gigz .detail-actions {
+  position:absolute; top:var(--space-3); right:var(--space-3); z-index:6;
+  width:auto; min-height:44px; margin:0; padding:0; background:transparent;
+}
+.ab-open-card--gigz .board-listing-card__thumb,
+.ab-open-card--gigz .board-listing-card>.board-glass-motif { display:none; }
+.ab-open-card--gigz .board-listing-card__row { display:block; }
+.ab-open-card--gigz .board-listing-card__main { padding:var(--space-5) 6% var(--space-3); border:0 !important; min-height:0; }
+.ab-open-card--gigz .board-listing-card__expand { padding:0 6% var(--space-6); }
+.ab-open-card--gigz .board-listing-card__title { margin-top:var(--space-3); }
+.ab-open-card--gigz .gifting-details { text-transform:none; color:var(--text-body); }
+.ab-open-card--gigz :is(.gifting-listing-actions,.gifting-response,.gig-talent-card__actions) :is(button,a) {
+  --c:var(--room-gigz); --_c:var(--room-gigz);
+  border:var(--bw-hair) solid color-mix(in srgb,var(--room-gigz) 45%,transparent);
+  border-radius:12px; padding:var(--space-3) var(--space-4);
+  color:var(--text-hi); background:var(--btn-glow-bg); box-shadow:var(--btn-glow-shadow);
+  text-decoration:none;
+}
+.ab-open-card--gigz .gifting-response>button { background:var(--room-gigz); border-color:var(--room-gigz); color:var(--text-hi); }
+.ab-open-card--gigz .gifting-listing-actions { flex-wrap:wrap; margin-block:var(--space-5); }
+.ab-open-card--gigz .gifting-response textarea { border-radius:12px; margin-bottom:var(--space-3); }
+.ab-open-card--gigz .ab-open-card__art .ab-art__photo { -webkit-mask-image:linear-gradient(180deg,var(--z-black) 65%,transparent); mask-image:linear-gradient(180deg,var(--z-black) 65%,transparent); }
+.ab-open-card--gigz .ab-open-card__intent { position:absolute; z-index:3; left:6%; bottom:var(--space-4); padding:var(--space-1) var(--space-2); border:var(--bw-hair) solid color-mix(in srgb,var(--c) 50%,transparent); border-radius:var(--event-card-tag-radius); color:var(--text-hi); background:var(--event-card-tag-bg); font:var(--open-card-meta-font); }
+/* The native tools now live inside a demo guard fieldset, so the old direct-child
+   shell reset no longer reaches them. The overlay remains the only glass shell. */
+.board-post-overlay.ab-open-card .board-listing-card,
+.board-post-overlay.ab-open-card .board-listing-card:hover,
+.board-post-overlay.ab-open-card .board-listing-card.is-expanded {
+  border:0 !important; border-radius:0 !important; box-shadow:none !important;
+  background:transparent !important; filter:none !important; transform:none !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+.board-post-overlay.ab-open-card .board-listing-card::before,
+.board-post-overlay.ab-open-card .board-listing-card::after { display:none !important; }
+.ab-open-card--gigz .board-listing-card__expand { margin:0; }
+.ab-open-card--gigz .ab-gig-skills { margin-block:var(--space-5); }
+.ab-open-card--gigz .ab-gig-skills h5 { margin:0 0 var(--space-3); font:var(--open-card-heading-font); color:var(--text-hi); }
+.ab-open-card--gigz .ab-gig-skills>div { display:flex; flex-wrap:wrap; gap:var(--space-2); }
+.ab-open-card--gigz .ab-gig-skills span { padding:var(--space-1) var(--space-2); border:var(--bw-hair) solid color-mix(in srgb,var(--c) 40%,transparent); border-radius:var(--event-card-tag-radius); background:var(--event-card-tag-bg); color:var(--text-hi); font:var(--open-card-meta-font); }
+/* Keep the close control within reach during long phone scrolls, without a bar. */
+.board-post-overlay.ab-open-card .ab-open-card__chrome { position:sticky; top:0; height:0; z-index:6; }
