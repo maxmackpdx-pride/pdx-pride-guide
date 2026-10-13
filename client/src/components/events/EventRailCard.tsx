@@ -4,6 +4,7 @@ import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import { eventTimeLabel } from "@/lib/eventDisplay";
 import ZLineIcon from "@/components/ZLineIcon";
 import EventFlyerArt from "./EventFlyerArt";
+import { CardArtworkGlass } from '../CardArtworkGlass';
 import { LiveBadge, type TonightCardLive } from "@/components/home/TonightEventCard";
 import type { EventListing } from "@shared/multiDayEvents";
 
@@ -33,6 +34,7 @@ export default function EventRailCard({
       <button type="button" className="event-rail-card__open" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>
         <span className="event-rail-card__art">
           <EventFlyerArt src={poster} day={listingDay(listing)} showDay={size === "m"} title={listing.title} venueName={listing.venueName} />
+          <CardArtworkGlass />
           {liveState && size === "m" ? <LiveBadge live={liveState} /> : null}
           <span className="event-rail-card__shade"><span className="event-rail-card__title">{listing.title}</span><span className="event-rail-card__meta">{eventTimeLabel(listing.dateStart)} · {listing.venueName}</span></span>
         </span>

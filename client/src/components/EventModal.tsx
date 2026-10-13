@@ -1,3 +1,4 @@
+import { CardArtworkGlass } from "./CardArtworkGlass";
 import { useSavedEvents } from "@/hooks/useSavedEvents";
 import { ResourceCardMotif } from "./resources/ResourceCardMotif";
 import "./RoomDoorways.css";
@@ -810,7 +811,7 @@ function EventModalInner({
         <section ref={heroRef} className={`event-modal__poster event-modal__hero event-modal--poster-${posterOrientation}`} aria-labelledby="event-modal-title">
           {posterUrl
             ? <img ref={posterImageRef} src={posterUrl} alt="" className="event-modal__poster-img" onLoad={e => setPosterOrientation(e.currentTarget.naturalHeight > e.currentTarget.naturalWidth * 1.08 ? "portrait" : "landscape")} />
-            : <span className="event-modal__poster-img event-modal__poster-motif"><DayMotif day={event.dayOfWeek} placement="art" /><EventFallbackLogo title={event.title} venueName={event.venueName} /></span>}
+            : <span className="event-modal__poster-img event-modal__poster-motif"><DayMotif day={event.dayOfWeek} placement="art" /><CardArtworkGlass /><EventFallbackLogo title={event.title} venueName={event.venueName} /></span>}
           <span className="event-modal__poster-fade" aria-hidden="true" />
           <span className="event-modal__poster-scan" aria-hidden="true" />
           <div className="event-modal__hero-content" ref={heroContentRef}>

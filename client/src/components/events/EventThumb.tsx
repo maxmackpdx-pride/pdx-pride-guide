@@ -7,7 +7,7 @@ export default function EventThumb({ src, day, className = "" }: { src: string |
   if (src) return <img className={className || undefined} src={src} alt="" loading="lazy" decoding="async" />;
   return (
     <span className={`event-thumb pdx-glass-rebind ${className}`.trim()} style={{ "--c": dayAccentToken(motifDay(day)) } as CSSProperties} aria-hidden="true">
-      <DayMotif day={day} placement="art" />
+      <DayMotif glass day={day} placement="art" />
     </span>
   );
 }

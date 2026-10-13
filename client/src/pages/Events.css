@@ -323,7 +323,7 @@ html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdx
 
 
 /* Compact rail card. */
-.event-rail-card { position: relative; width: 100%; }
+.event-rail-card { position: relative; width: 100%; --event-control-ink: var(--text-hi); }
 .event-rail-card__open { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 0; border: 0; background: none; color: inherit; text-align: left; font: inherit; cursor: pointer; }
 .event-rail-card__open:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 16px; }
 .event-rail-card__art { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 16px; background: var(--ink-900); border: 1px solid color-mix(in srgb, var(--c) 55%, var(--z-black)); box-shadow: 0 0 0 2px var(--z-black), inset 0 1px 0 color-mix(in srgb, var(--c) 55%, transparent), var(--rail-bloom); transition: box-shadow .2s ease; }
@@ -346,9 +346,9 @@ html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdx
 /* Time and venue ride above the card. Fixed height so save can sit on the flyer corner. */
 .event-rail-card__meta { display: block; margin-top: 5px; overflow: hidden; color: var(--text-hi); opacity: .82; font: var(--event-card-compact-meta-font); white-space: nowrap; text-overflow: ellipsis; text-shadow: 0 1px 3px var(--z-black); }
 .event-rail-card--s .event-rail-card__meta { margin-top: 4px; font-size: 10px; line-height: 13px; }
-.event-rail-card__save { position: absolute; right: 8px; top: 8px; z-index: 4; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent); background: color-mix(in srgb, var(--z-black) 84%, transparent); color: var(--text-hi); box-shadow: 0 0 0 2px var(--z-black); cursor: pointer; }
+.event-rail-card__save { position: absolute; right: 8px; top: 8px; z-index: 4; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent); background: color-mix(in srgb, var(--z-black) 84%, transparent); color: var(--event-control-ink); box-shadow: 0 0 0 2px var(--z-black); cursor: pointer; }
 .event-rail-card--s .event-rail-card__save { top: 6px; right: 6px; width: 34px; height: 34px; }
-.event-rail-card__save[aria-pressed="true"] { background: var(--neon-magenta); border-color: var(--neon-magenta); color: var(--z-black); }
+.event-rail-card__save[aria-pressed="true"] { background: var(--neon-magenta); border-color: var(--neon-magenta); color: var(--event-control-ink); }
 .event-rail-card__save:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }
 
 /* Rail swipe cues: edge fade + arrow where more cards wait, and a progress bar. */
@@ -377,6 +377,9 @@ html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdx
 .events-page .events-rail-arrow:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }
 
 /* Rail card stamps: weekday code on posterless art, hidden under a live badge. */
+.event-rail-card .day-motif-code { color: var(--event-control-ink); }
+.event-rail-card .event-fallback-logo { top:48px; bottom:72px; left:10px; right:10px; width:auto; height:auto; transform:none; background-position:center; background-size:contain; }
+.event-rail-card--s .event-fallback-logo { top:42px; bottom:58px; }
 .event-rail-card--s .day-motif-code { font-size: 12px; left: 9px; top: 10px; }
 .event-rail-card__art:has(.tonight-card__live) .day-motif-code { display: none; }
 

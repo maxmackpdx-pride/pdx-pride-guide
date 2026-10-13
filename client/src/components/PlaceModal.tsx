@@ -488,7 +488,7 @@ export default function PlaceModal({
               onKeyDown={event => { if(event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); heroRef.current?.scrollTo({left:event.key === "ArrowRight" ? heroRef.current.clientWidth : 0}); } }}>
               <div className="place-modal-panel__hero-slide" aria-label="Place artwork">
 <div className="eb-detail__art">
-            <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={`place-${place.type}`} /></div>
+            <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif glass name={place.name} category={`place-${place.type}`} /></div>
           {failedLogo !== place.name && serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl)) ? <img
             key={`${place.id}:${place.name}:${place.imageUrl}`}
             className="place-modal-panel__logo"
@@ -932,7 +932,7 @@ export default function PlaceModal({
                 aria-label={`View event: ${event.title}`}
                 role="listitem"
               >
-                <EventFlyerArt src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} day={event.dayOfWeek} title={event.title} venueName={place.name} />
+                <EventFlyerArt glass src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} day={event.dayOfWeek} title={event.title} venueName={place.name} />
                 {event.previewExample && <span className="place-event-tile__example">Example</span>}
                 <span className="place-event-tile__shade"><strong>{event.title}</strong><small>{event.previewExample ? "Preview example" : formatDirectoryEventWhen(event)}</small></span>
               </Link>)}
@@ -983,7 +983,7 @@ export default function PlaceModal({
                       role="listitem" aria-label={`View past event: ${ev.title}`}
                       className="place-event-tile place-event-tile--past pdx-glass-rebind"
                       style={{"--c":DAY_COLOR[dayCodeFromEvent(ev)] || accent} as React.CSSProperties}>
-                      <EventFlyerArt src={resolveEventPosterUrl(ev.id,ev.posterImageUrl,ev.dayOfWeek)} day={ev.dayOfWeek} showDay={false} />
+                      <EventFlyerArt glass src={resolveEventPosterUrl(ev.id,ev.posterImageUrl,ev.dayOfWeek)} day={ev.dayOfWeek} showDay={false} />
                       <span className="place-event-tile__shade"><strong>{ev.title}</strong><small>{formatPastWhen(ev)} · Ended</small></span>
                     </Link>)}
                   </div>

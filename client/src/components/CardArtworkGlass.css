@@ -1,0 +1,8 @@
+.card-artwork-glass{position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;background:linear-gradient(to top,rgba(255,255,255,.04) 0,rgba(255,255,255,.01) min(var(--artwork-glass-action-depth,64px),100%),rgba(255,255,255,.01) 100%);backdrop-filter:blur(.2px);-webkit-backdrop-filter:blur(.2px)}
+.event-rail-card__art{--artwork-glass-action-depth:64px}
+.tonight-card{--artwork-glass-action-depth:54px}
+.event-rail-card__art>img{position:relative;z-index:2}
+.tonight-card__footer{position:relative;z-index:3}
+.pdxBoard--event-grid .pdxBoard__meta :is(.pdxBoard__facts,.pdxBoard__tags,.pdxBoard__actions){position:relative;z-index:2}
+.pdxBoard--event-grid .pdxBoard__meta>.card-artwork-glass{position:absolute;inset:0;z-index:0}
+@supports not (backdrop-filter:blur(.2px)){.card-artwork-glass{backdrop-filter:none}}

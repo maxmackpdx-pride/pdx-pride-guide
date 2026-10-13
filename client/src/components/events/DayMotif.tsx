@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { EVENT_WEEK_DAYS } from "@shared/eventWeek";
 import "./DayMotif.css";
+import { CardArtworkGlass } from '../CardArtworkGlass';
 
 /**
  * Day motifs: one neon wireframe artwork per weekday, matched to the day's color.
@@ -42,7 +43,7 @@ const layerSrc = (day: Day, layer: "back" | "mid" | "top") => `/motifs/days/${da
  *    (flyer cards: the flyer covers the top, the motif rises behind the copy)
  *  - "art": fills a flyer slot when an event has no flyer
  */
-export default function DayMotif({ day, placement, className = "" }: { day: string | null | undefined; placement: "card" | "art"; className?: string }) {
+export default function DayMotif({ day, placement, className = "", glass = false }: { day: string | null | undefined; placement: "card" | "art"; className?: string; glass?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -69,6 +70,7 @@ export default function DayMotif({ day, placement, className = "" }: { day: stri
             <img key={layer} className={`day-motif__layer day-motif__layer--${layer}`} src={layerSrc(code, layer)} alt="" loading="lazy" decoding="async" draggable={false} />
           ))
         : null}
+      {glass && <CardArtworkGlass />}
     </span>
   );
 }
