@@ -1,3 +1,4 @@
+import { Button } from "@/components/ds";
 import "./AllBoards.css";
 import { oneShotMapLocation } from "@/lib/oneShotMapLocation";
 import { serviceIdentity, serviceWaypointLogo } from "@shared/serviceIdentity";
@@ -863,7 +864,7 @@ export default function MapzMapDemo() {
     <MapzLayerSheet layers={layers} active={activeLayer} onActiveChange={changeLayer} />
     {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="mapz-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
     {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="mapz-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
-    {active && <Suspense fallback={<p className="ab-detail-status" role="status">Opening card… <button type="button" onClick={closeOverlays}>Back to map</button></p>}>
+    {active && <Suspense fallback={<p className="ab-detail-status" role="status">Opening card… <Button variant="outline" accent="cyan" type="button" onClick={closeOverlays}>Back to map</Button></p>}>
     <DetailRoomLinkContext.Provider value={detailRoomLink}>
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
