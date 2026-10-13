@@ -114,11 +114,11 @@ export default function MobileBottomNav() {
             className={tabClass(boardsActive, "pink")}
             data-accent="magenta"
             aria-current={boardsActive ? "page" : undefined}
-            aria-label="Our BoardZ"
+            aria-label="Boardz"
             onClick={handleNavLink}
           >
             <span className="znav-icon-row"><LayoutGrid size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Our BoardZ</span>
+            <span className="znav-caption">Boardz</span>
           </Link>
 
           <Link

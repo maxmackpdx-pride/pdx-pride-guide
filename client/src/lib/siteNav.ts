@@ -49,7 +49,7 @@ export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/events", label: "Eventz", accent: "cyan" },
   { type: "link", href: "/directory", label: "Placez", accent: "cyan" },
   { type: "link", href: "/map", label: "Mapz", accent: "blue" },
-  { type: "link", href: "/boardz", label: "Our BoardZ", accent: "magenta" },
+  { type: "link", href: "/boardz", label: "Boardz", accent: "magenta" },
   /* Nonprofits, hotlines, and LGBTQ+ groups (moved off Placez 2026-09-30). */
   { type: "link", href: "/needz", label: "NEEDZ", accent: "green" },
 ];
