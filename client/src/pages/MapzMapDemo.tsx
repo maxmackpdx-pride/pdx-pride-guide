@@ -1,3 +1,4 @@
+import { serviceIdentity, serviceWaypointLogo } from "@shared/serviceIdentity";
 import ResourceMapPanel from '@/components/ResourceMapPanel';
 import { RESOURCE_MAP_ENTRIES, resourceMapHref, resourceMapKey, type ResourceMapEntry } from '@/lib/resourceMap';
 import {eventNight} from '../../public/mapz-map/event-night.js';
@@ -743,9 +744,9 @@ export default function MapzMapDemo() {
       const category = entry.categories[0];
       const token = category.color.match(/var\((--[^)]+)\)/)?.[1];
       const color = token ? getComputedStyle(document.documentElement).getPropertyValue(token).trim() || '#CCFF00' : '#CCFF00';
-      return { key:mark.key, kind:'resource', waypointFamily:'rezources', type:'service', typeIcon:mapzTypeIcon('service'),
+      return { key:mark.key, kind:'resource', waypointFamily:'rezources', type:'service', typeIcon:serviceIdentity(entry.org)?.icon || mapzTypeIcon('service'),
         coordinates:[mark.lng,mark.lat], name:entry.org.name, color,
-        logo:entry.org.logo || '/mapz-map/icons/types/service.svg', locationLabel:entry.org.scope };
+        logo:serviceWaypointLogo(entry.org, entry.org.logo) || '/mapz-map/icons/types/service.svg', locationLabel:entry.org.scope };
     }
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
@@ -763,12 +764,12 @@ export default function MapzMapDemo() {
     const venuePoint=venue?placeMarks([venue]).sort((a,b)=>Math.hypot(a.lat-mark.lat,a.lng-mark.lng)-Math.hypot(b.lat-mark.lat,b.lng-mark.lng))[0]:undefined;
     const venueAnchor=venue&&venuePoint?{key:`directory-${venue.id}`,coordinates:[venuePoint.lng,venuePoint.lat],name:venue.name,
       color:mapzPlaceColor(venue),type:mapzPlaceType(venue),typeIcon:mapzTypeIcon(mapzPlaceType(venue)),
-      waypointLogo:resolveDirectoryLogo(venue.name,venue.imageUrl)?.replace(/\.png(?=\?|$)/,'-white.png'),logo:''}:undefined;
+      waypointLogo:serviceWaypointLogo(venue, resolveDirectoryLogo(venue.name,venue.imageUrl))?.replace(/\.png(?=\?|$)/,'-white.png'),logo:''}:undefined;
     const type=place?mapzPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');
     const name=event?.title||place?.name||boardTitle(row);
     const boardLogo=isHouz?firstImage(row.photos)||FORMING_COVER:firstImage(row.photoUrls)||firstImage(row.imageUrl);
-    return {venueAnchor,createdAt:row.createdAt,closesAt:row.closesAt,status:row.status,waypointLogo:place?resolveDirectoryLogo(place.name,place.imageUrl)?.replace(/\.png(?=\?|$)/,"-white.png"):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place||event?mapzTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
-      logo:isHouz?'':brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/mapz-map/icons/event.svg':boardLogo||boardIcon(row)),
+    return {venueAnchor,createdAt:row.createdAt,closesAt:row.closesAt,status:row.status,waypointLogo:place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl))?.replace(/\.png(?=\?|$)/,"-white.png"):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place||event?mapzTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
+      logo:isHouz?'':brands?.primary||(place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl))||directoryFallbackLogo(place.type):mark.kind==='event'?'/mapz-map/icons/event.svg':boardLogo||boardIcon(row)),
       alternateLogo:brands?.alternate,
       housingModel:isHouz?String(row.type||'LOOKING'):undefined,
       neighborhoodLabel:isHouz?housingAreaLabel(row):undefined,

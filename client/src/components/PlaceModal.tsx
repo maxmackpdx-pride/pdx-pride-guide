@@ -1,4 +1,5 @@
-import { CompanyNameMark } from "./CompanyNameMark";
+import { ServiceNameMark } from "./ServiceNameMark";
+import { serviceArtwork } from "@shared/serviceIdentity";
 import { dayComplementToken } from "@/lib/dsColors";
 import { PLACE_ACCENTS } from './discovery/placeTokens';
 import { ResourceCardMotif } from './resources/ResourceCardMotif';
@@ -472,13 +473,13 @@ export default function PlaceModal({
           <div className="place-modal-panel__identity">
           <div className="eb-detail__art">
             <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={`place-${place.type}`} /></div>
-          {failedLogo !== place.name && resolveDirectoryLogo(place.name, place.imageUrl) ? <img
+          {failedLogo !== place.name && serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl)) ? <img
             key={`${place.id}:${place.name}:${place.imageUrl}`}
             className="place-modal-panel__logo"
             src={resolveDirectoryLogo(place.name, place.imageUrl)!}
             alt={`${place.name} logo`}
             onError={() => setFailedLogo(place.name)}
-          /> : <div className="place-modal-panel__logo"><CompanyNameMark name={place.name} /></div>}
+          /> : <div className="place-modal-panel__logo"><ServiceNameMark source={place} /></div>}
 
           </div>
           <div className="place-modal-panel__identity-text">

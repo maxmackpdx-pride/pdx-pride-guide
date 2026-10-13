@@ -1,4 +1,5 @@
-import { CompanyNameMark } from "@/components/CompanyNameMark";
+import { ServiceNameMark } from "@/components/ServiceNameMark";
+import { serviceArtwork } from "@shared/serviceIdentity";
 import { PLACE_ACCENTS } from './placeTokens';
 import type { MouseEvent } from 'react';
 import { ArrowUpRight } from 'lucide-react';
@@ -21,7 +22,7 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
   return <div className="placez-card-surface">
     <PlaceCard name={place.name} category={place.type} categoryLabel={label} accentColor={accent}
       variant="full"
-      logoUrl={resolveDirectoryLogo(place.name, place.imageUrl) || undefined} logoFallback={<CompanyNameMark name={place.name} />}
+      logoUrl={serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl)) || undefined} logoFallback={<ServiceNameMark source={place} />}
       businessId={place.id} isFollowing={Boolean(place.isFollowing)} onRequireAuth={onRequireAuth}
       shareUrl={placeUrl(place.id, place.name)}
       categoryTags={[{id:place.type,name:label,color:accent},...(place.queerOwned ? [{id:'owned',name:'Queer owned',color:accent}] : [])]}

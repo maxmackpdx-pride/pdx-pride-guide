@@ -1,0 +1,45 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { serviceIdentity, type ServiceIdentitySource } from '@shared/serviceIdentity';
+import { clearDynamicTextCache, rowGapAbove, solveDynamicText } from '@/lib/dynamicText';
+import { CompanyNameMark } from './CompanyNameMark';
+import './ServiceNameMark.css';
+
+/** One service-family icon, beside an undistorted, fitted provider name. */
+export function ServiceNameMark({ source }: { source: ServiceIdentitySource }) {
+  const identity = serviceIdentity(source);
+  const frame = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const [fontReady, setFontReady] = useState(false);
+  useEffect(() => {
+    let active = true;
+    document.fonts.load('900 32px "Barlow Condensed"').then(() => document.fonts.ready).then(() => {
+      if (active) { clearDynamicTextCache(); setFontReady(true); }
+    });
+    return () => { active = false; };
+  }, []);
+  useEffect(() => {
+    const element = frame.current;
+    if (!element) return;
+    const observer = new ResizeObserver(([entry]) => setSize({ width: entry.contentRect.width, height: entry.contentRect.height }));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [identity?.kind]);
+  const layout = useMemo(() => {
+    if (!fontReady || !size.width || !size.height) return null;
+    // Keep the solver's row-selection floor from collapsing narrow service
+    // wells into a tiny single line. Solve a proportionate frame, then apply
+    // the same proportion to every font size; glyphs are never stretched.
+    const proportion = Math.max(1, 180 / size.width);
+    const result = solveDynamicText(source.name, size.width * proportion, size.height * proportion, true, true);
+    return { ...result, sizes: result.sizes.map(value => value / proportion) };
+  }, [source.name, size.width, size.height, fontReady]);
+  if (!identity) return <CompanyNameMark name={source.name} />;
+  return <div className="service-name-mark" role="img" aria-label={`${source.name} — ${identity.label}`}>
+    <img className="service-name-mark__icon" src={identity.icon} alt="" aria-hidden="true" />
+    <div className="service-name-mark__frame" ref={frame} aria-hidden="true">
+      <div className="service-name-mark__lines">
+        {layout ? layout.lines.map((line, index) => <span key={index} style={{ fontSize: layout.sizes[index], marginTop: index ? rowGapAbove(line, layout.sizes[index]) : undefined }}>{line}</span>) : <span className="service-name-mark__loading">{source.name}</span>}
+      </div>
+    </div>
+  </div>;
+}

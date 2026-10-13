@@ -1,4 +1,5 @@
-import { CompanyNameMark } from "@/components/CompanyNameMark";
+import { ServiceNameMark } from "@/components/ServiceNameMark";
+import { serviceArtwork } from "@shared/serviceIdentity";
 import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
 import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import BrowseStatus from "@/components/BrowseStatus";
@@ -101,7 +102,7 @@ const HOTLINES = [
 
 function Mark({ org }: { org: ResourceOrg }) {
   const [failedLogo, setFailedLogo] = useState<string | null>(null);
-  return org.logo && failedLogo !== org.logo ? (
+  return serviceArtwork(org, org.logo) && failedLogo !== org.logo ? (
     <img
       className={`rg-logo${org.logoSurface === "light" ? " rg-logo--light" : ""}`}
       src={org.logo}
@@ -110,7 +111,7 @@ function Mark({ org }: { org: ResourceOrg }) {
       loading="lazy"
     />
   ) : (
-    <CompanyNameMark name={org.name} />
+    <ServiceNameMark source={org} />
   );
 }
 
@@ -435,7 +436,7 @@ const ResourceCard = memo(function ResourceCard({
       categoryLabel={category.name}
       categoryTags={tagsFor(row).slice(0, 2)}
       accentColor={category.color}
-      logoUrl={org.logo}
+      logoUrl={serviceArtwork(org, org.logo) || undefined}
       logoFallback={<Mark org={{ ...org, logo: undefined }} />}
       description={org.desc}
       shareUrl={`https://www.zaylist.com/rezources?resource=${encodeURIComponent(org.name)}`}
