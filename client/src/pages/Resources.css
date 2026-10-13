@@ -3322,10 +3322,10 @@ html.calm-mode .rg-options button,
  :is(.resources-page, .placez-card-surface) .rg-directory-card[data-optical-logo] { --rg-logo-flow-gap: 16px; }
 }
 
-/* Gentle mouse-following card depth with the motif drifting in opposition. */
+/* The glass frame stays fixed; only its artwork follows pointer and scroll. */
 :is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable,
 :is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover {
- transform: perspective(900px) translate3d(var(--rg-card-shift-x, 0px), var(--rg-card-shift-y, 0px), 0) rotateX(var(--rg-card-tilt-x, 0deg)) rotateY(var(--rg-card-tilt-y, 0deg)) !important;
+ transform: none !important;
  transition: transform 280ms ease-out;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -3388,7 +3388,7 @@ html.calm-mode .rg-options button,
 :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main,
 :is(.resources-page, .placez-card-surface) .rg-directory-card .rg-directory-footer { position: relative; z-index: 3; }
 :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__actions { z-index: 4; }
-/* Spring values own the surface motion, avoiding a second easing layer. */
+/* No independent motion on the reading surface or glass. */
 :is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable,
 :is(.resources-page, .placez-card-surface) .rg-directory-card.pdxPlace--clickable:hover { transition: none; }
 
@@ -3529,7 +3529,7 @@ html.calm-mode .rg-options button,
   70% { transform: translate(1px, 4px); }
 }
 .resources-page .rg-safety-summary {
-  transform: perspective(900px) translate3d(var(--rg-card-shift-x, 0px), var(--rg-card-shift-y, 0px), 0) rotateX(var(--rg-card-tilt-x, 0deg)) rotateY(var(--rg-card-tilt-y, 0deg));
+  transform: none;
   transition: transform 280ms ease-out;
 }
 /* Give outlined orange category tags a little more definition. */
@@ -3568,10 +3568,10 @@ html.calm-mode .rg-options button,
   font-weight: 800 !important;
 }
 
-/* A soft cast shadow follows the same spring values as the glass surface. */
+/* The cast shadow stays anchored to the fixed glass frame. */
 .resources-page :is(.rg-directory-card, .rg-safety-summary) {
   box-shadow:
-    calc(var(--rg-card-shift-x, 0px) * -2) calc(9px - var(--rg-card-shift-y, 0px) * 2) 22px -8px color-mix(in srgb, var(--z-black) 38%, transparent);
+    0 9px 22px -8px color-mix(in srgb, var(--z-black) 38%, transparent);
 }
 
 /* Keep the floor shadow and accent bloom close to the resource-card rim. */
@@ -3586,7 +3586,7 @@ html.calm-mode .rg-options button,
     inset 0 0 34px -26px color-mix(in srgb, var(--c) 28%, transparent);
 }
 .resources-page :is(.rg-directory-card, .rg-safety-summary) {
-  box-shadow: calc(var(--rg-card-shift-x, 0px) * -2) calc(4px - var(--rg-card-shift-y, 0px) * 2) 16px -8px color-mix(in srgb, var(--z-black) 38%, transparent);
+  box-shadow: 0 4px 16px -8px color-mix(in srgb, var(--z-black) 38%, transparent);
 }
 
 /* The 911 surface shares the resource cards' layered glass and motif framing. */

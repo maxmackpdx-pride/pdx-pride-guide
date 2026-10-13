@@ -25,7 +25,7 @@ function schedule() {
 export function useCardMotifParallax() {
  const ref = useRef<SVGSVGElement>(null);
  const reduced = useReducedMotion();
- // Spring-following tilt inspired by 21st's Motion Primitives Tilt.
+ // Spring-following artwork moves behind the stationary glass frame.
  const springX = useSpring(0, { stiffness: 150, damping: 24, mass: .5 });
  const springY = useSpring(0, { stiffness: 150, damping: 24, mass: .5 });
  const { calmMode } = useTheme();
@@ -52,10 +52,6 @@ export function useCardMotifParallax() {
    const y = springY.get();
    entry.x = -x * 12;
    entry.y = -y * 10;
-   card.style.setProperty("--rg-card-shift-x", `${x * 4}px`);
-   card.style.setProperty("--rg-card-shift-y", `${y * 3}px`);
-   card.style.setProperty("--rg-card-tilt-x", `${-y * 1.6}deg`);
-   card.style.setProperty("--rg-card-tilt-y", `${x * 2}deg`);
    schedule();
   };
   const stopX = springX.on("change", updateSurface);
@@ -66,9 +62,6 @@ export function useCardMotifParallax() {
    springX.set(Math.max(-.5, Math.min(.5, (event.clientX - rect.left) / rect.width - .5)));
    springY.set(Math.max(-.5, Math.min(.5, (event.clientY - rect.top) / rect.height - .5)));
   };
-  const resetCard = () => {
-   for (const property of ["--rg-card-shift-x", "--rg-card-shift-y", "--rg-card-tilt-x", "--rg-card-tilt-y"]) card.style.removeProperty(property);
-  };
   const leave = () => { springX.set(0); springY.set(0); };
   card.addEventListener("pointermove", move);
   card.addEventListener("pointerleave", leave);
@@ -76,7 +69,6 @@ export function useCardMotifParallax() {
    card.removeEventListener("pointermove", move);
    card.removeEventListener("pointerleave", leave);
    stopX(); stopY(); springX.jump(0); springY.jump(0);
-   resetCard();
    observer?.unobserve(card);
    entries.delete(card); visible.delete(card);
    svg.style.removeProperty("--rg-parallax-x"); svg.style.removeProperty("--rg-parallax-y");

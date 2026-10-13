@@ -14,6 +14,8 @@
    ============================================================ */
 
 :root {
+  /* Fixed artwork glass gently softens moving mesh without blurring content. */
+  --glass-artwork-blur: .45px;
   /* ── Accent contract: set --c (or --_c / --dc) per instance ─
      Recipes below use var(--c). Because custom props compute on the
      element where they are defined, any node that sets a local --c MUST

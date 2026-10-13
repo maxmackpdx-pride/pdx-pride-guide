@@ -1,3 +1,4 @@
+import { CardArtworkGlass } from "../CardArtworkGlass";
 import { useState } from "react";
 import { boardCategories, type BoardPost } from "@/lib/allBoards";
 
@@ -32,6 +33,7 @@ export default function UnifiedBoardArt({ post }: { post: BoardPost }) {
       <strong>{post.householdCount ?? 0}<span> in</span></strong>
       <small>{post.openSlots ? `${post.openSlots} ${post.openSlots === 1 ? "spot" : "spots"} to go` : "Building a Hoüz"}</small>
     </div>}
+    <CardArtworkGlass />
     <img className="ab-art__brand" src={`/brand/family/${cat.logo}`} alt="" />
   </div>;
 }
