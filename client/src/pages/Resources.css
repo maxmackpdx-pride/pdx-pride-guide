@@ -4868,3 +4868,6 @@ html.calm-mode .rg-options button,
 
 /* New tight-cropped assets no longer need the old source-margin enlargement. */
 .rg-directory-card[data-optical-logo="Intersect NW"] .pdxPlace__media .pdxPlace__logo[src*="-white.svg"] { scale: 1; }
+
+/* The illustrated NEEDZ identity needs its full frame, without touching the kicker or lede. */
+.eb-page--resources .eb-header h1 { height:auto; line-height:0; }

@@ -466,7 +466,7 @@ export default function Boards() {
                   Choose a category
                 </button>
                 <section className="eb-panel ab-filter-panel">
-                  <h2>{selectedCategory?.label || "All boards"}</h2>
+                  <h2>{selectedCategory?.label || "Our BoardZ"}</h2>
                   <p>
                     {selectedCategory?.prompt ||
                       "Homes, work, good finds, and second chances. All in one place."}
