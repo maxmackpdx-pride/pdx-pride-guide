@@ -755,7 +755,7 @@ html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__details-room {
   .place-modal-panel__fact { min-height: 56px; font-size: .98rem; }
 }
 
-/* ReZources continuity; retain Placez's FLIP, map, tabs and owner features. */
+/* NEEDZ continuity; retain Placez's FLIP, map, tabs and owner features. */
 .place-modal-overlay { align-items:center; justify-content:flex-end; padding:clamp(24px,6vh,64px) 24px; overflow:hidden; }
 .place-modal-panel.pdx-glass-rebind { margin:0; max-width:780px; max-height:calc(100dvh - clamp(24px,6vh,64px) * 2); border:1.5px solid var(--c); border-radius:8px; background:var(--glass-card-bg); box-shadow:var(--glass-card-shadow),var(--neon-bloom); }
 .place-modal-panel__inner { max-height:calc(100dvh - clamp(24px,6vh,64px) * 2 - 3px); overflow:auto; overscroll-behavior:contain; position:relative; z-index:1; }
@@ -791,7 +791,7 @@ html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__details-room {
  .place-modal-panel.pdx-glass-rebind { border-radius:24px 24px 0 0; }
 }
 
-/* The closed Placez card, opened in the center with ReZources motion. */
+/* The closed Placez card, opened in the center with NEEDZ motion. */
 .place-modal-overlay { justify-content:center; align-items:center; padding:24px; }
 .place-modal-panel.pdx-glass-rebind { width:min(100%,680px); max-width:680px; max-height:calc(100dvh - 48px); border:var(--glass-card-border); border-radius:24px; background:var(--glass-card-bg); background-color:var(--z-oled); box-shadow:var(--glass-card-shadow); transform-origin:center; }
 .place-modal-panel__inner { max-height:calc(100dvh - 50px); }

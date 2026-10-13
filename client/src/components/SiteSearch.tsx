@@ -15,7 +15,7 @@ const GROUP_LABELS: Record<string, string> = {
   event: "EVENTZ", place: "PLACEZ", community: "Z/LISTS", listing: "SELLZ", gig: "GIGZ",
   guide: "GUIDES", profile: "PEOPLE", organization: "ORGANIZATIONS",
 };
-const GROUP_ORDER = ["ReZources", "EVENTZ", "PLACEZ", "Z/LISTS", "SELLZ", "GIGZ", "GUIDES", "PEOPLE", "ORGANIZATIONS", "PAGES"];
+const GROUP_ORDER = ["NEEDZ", "EVENTZ", "PLACEZ", "Z/LISTS", "SELLZ", "GIGZ", "GUIDES", "PEOPLE", "ORGANIZATIONS", "PAGES"];
 const RESOURCE_ROWS = RESOURCE_CATEGORIES.flatMap((category) =>
   (category.id === "safety" ? [...category.orgs, FOOD_RESOURCE] : category.orgs).map((org) => ({ org, category })),
 );
@@ -51,7 +51,7 @@ function resourceHits(query: string): SearchHit[] {
   }).sort((a, b) => b.score - a.score || a.org.name.localeCompare(b.org.name)).slice(0, 8).map(({ org, category }) => ({
     key: `resource-${org.name}`, label: org.name,
     subtitle: (org.serviceTags?.length ? org.serviceTags : [category.name]).join(" · "),
-    detail: org.scope, href: `/rezources?find=${encodeURIComponent(org.name)}`,
+    detail: org.scope, href: `/needz?find=${encodeURIComponent(org.name)}`,
   }));
 }
 function platformGroups(objects: PlatformHit[]): SearchGroup[] {
@@ -120,14 +120,14 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
     const pages = PAGE_LINKS.filter((page) => normalized(page.label).includes(normalized(query.trim()))).map((page) => ({
       key: `page-${page.href}`, label: page.label, subtitle: "Page", href: page.href,
     }));
-    const all = [...platformGroups(objects), ...(resource.length ? [{ label: "ReZources", hits: resource }] : []), ...(pages.length ? [{ label: "PAGES", hits: pages }] : [])];
+    const all = [...platformGroups(objects), ...(resource.length ? [{ label: "NEEDZ", hits: resource }] : []), ...(pages.length ? [{ label: "PAGES", hits: pages }] : [])];
     return all.sort((a, b) => GROUP_ORDER.indexOf(a.label) - GROUP_ORDER.indexOf(b.label));
   }, [objects, query]);
   const flat = useMemo(() => groups.flatMap((group) => group.hits), [groups]);
   useEffect(() => setActiveIndex(0), [query]);
   const go = useCallback((href: string) => {
     onClose();
-    if (href.startsWith("/rezources?find=") && window.location.pathname === "/rezources") {
+    if (href.startsWith("/needz?find=") && window.location.pathname === "/needz") {
       window.location.assign(href);
       return;
     }
@@ -151,7 +151,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
         <button type="button" className="site-search__close" onClick={onClose} aria-label="Close search"><X size={20} /></button>
       </div>
       <div id={listId} className="site-search__body" role="listbox" aria-label="Search results">
-        {query.trim().length < 2 && <p className="site-search__hint">Search ReZources, EVENTZ, PLACEZ, Boards, people, and pages.</p>}
+        {query.trim().length < 2 && <p className="site-search__hint">Search NEEDZ, EVENTZ, PLACEZ, Boards, people, and pages.</p>}
         {loading && <p className="site-search__hint" role="status">Searching…</p>}
         {query.trim().length >= 2 && !loading && flat.length === 0 && <p className="site-search__hint">No matches for “{query.trim()}”.</p>}
         {groups.map((group) => <section className="site-search__group" key={group.label}>

@@ -218,7 +218,7 @@ export function buildSitemapXml(events: SeoEvent[]) {
     "/mizzed",
     "/the-hauz",
     "/about",
-    "/rezources",
+    "/needz",
     "/contact",
     "/sponsors",
     "/access",
@@ -254,7 +254,7 @@ ${eventUrls}
 
 export function buildCanonicalUrl(requestPath: string) {
   const path = (requestPath.split("?")[0]?.split("#")[0] || "/").trim() || "/";
-  const normalized = path === "/resources" ? "/rezources" : path.startsWith("/") ? path : `/${path}`;
+  const normalized = ["/resources", "/rezources"].includes(path) ? "/needz" : path.startsWith("/") ? path : `/${path}`;
   return normalized === "/" ? `${SITE_URL}/` : `${SITE_URL}${normalized}`;
 }
 
@@ -279,8 +279,8 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "Tucker Max Resume | Zaylist",
     description: "Sales and operations leader with 12+ years in big tech and EV brands, now producing live events and building community platforms in Portland.",
   },
-  "/rezources": {
-    title: "ReZources | Zaylist",
+  "/needz": {
+    title: "NEEDZ | Zaylist",
     description: "Nonprofits, hotlines, and LGBTQ+ groups for queer and trans Oregon: health care, safety, legal help, youth, community, funding, and more.",
   },
   "/contact": {
@@ -611,7 +611,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
         ? `${SITE_URL}/api/og/profile/${encodeURIComponent(liveProfile.username)}?v=2`
         : boardShareKey
           ? shareCardUrl(boardShareKey)
-          : defaultShareCardUrl();
+          : pathKey === "/needz" ? absoluteAssetUrl("/og/zaylist-needz-v1.png") : defaultShareCardUrl();
   const pageImageIsCard = !!(liveEvent || livePlace || liveProfile || boardShareKey);
 
   // Home used to inline the whole LIVE catalog (~500 events) as JSON-LD + a

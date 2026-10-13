@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="500" viewBox="0 0 1000 500" role="img" aria-labelledby="title desc">
+<title id="title">NEEDZ</title>
+<desc id="desc">NEEDZ, Zaylist’s care and community identity. Angular green NEED with an oversized white terminal Z. Editable vector paths.</desc>
+<g fill="#39ff14">
+<path d="M65 150h44l66 101V150h45v205h-44l-66-101v101H65z"/>
+<path d="M237 150h145l-25 43h-75v39h76l-23 40h-53v40h100l-25 43H237z"/>
+<path d="M398 150h145l-25 43h-75v39h76l-23 40h-53v40h100l-25 43H398z"/>
+<path fill-rule="evenodd" d="M559 150h85l61 51v103l-61 51h-85z M604 193v119h24l32-28v-63l-32-28z"/>
+</g>
+<path fill="#fff" d="M730 113h219l-24 45-140 196h133l-29 43H699l23-45 141-196H707z"/>
+</svg>

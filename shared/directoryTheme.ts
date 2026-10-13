@@ -19,7 +19,7 @@ export const DIRECTORY_TYPES = [
 
 export type DirectoryType = (typeof DIRECTORY_TYPES)[number];
 
-/** Care and nonprofit support belong in ReZources; groups belong in Squadz. */
+/** Care and nonprofit support belong in NEEDZ; groups belong in Squadz. */
 export function isPlacezType(type: string): boolean {
   return DIRECTORY_TYPES.includes(type as DirectoryType) && !["group", "nonprofit", "healthcare"].includes(type);
 }

@@ -267,7 +267,7 @@ export default function PlaceModal({
     return () => observer.disconnect();
   }, [place?.id, place?.description, savedOverrides?.description, editing, descriptionExpanded]);
 
-  // Match ReZources: a centered scale/fade, independent of the source card.
+  // Match NEEDZ: a centered scale/fade, independent of the source card.
   useEffect(() => {
     if (!place) return;
     setOpen(false);

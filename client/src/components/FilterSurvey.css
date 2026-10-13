@@ -27,7 +27,7 @@
 @media (max-width: 600px) { .filter-survey[data-surface="globe"] { padding: 23px 10px 18px; } }
 @media (prefers-reduced-motion: reduce) { .filter-survey__details-toggle svg { transition: none; } }
 
-/* ReZources artwork behind non-flyer rail cards; the existing card geometry and copy stay in place. */
+/* NEEDZ artwork behind non-flyer rail cards; the existing card geometry and copy stay in place. */
 .gigz-page :is(.gigz-opportunity, .gigz-talent), .hz-card { isolation: isolate; }
 .gigz-page :is(.gigz-opportunity, .gigz-talent) .rg-motif-slot,
 .hz-card .rg-motif-slot { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; z-index: 0; }

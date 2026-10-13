@@ -11,7 +11,7 @@ type Props = {
   children: ReactNode | ((requestClose: () => void) => ReactNode);
 };
 
-/** ReZources' open-card motion and edge, around each board's own expanded card. */
+/** NEEDZ' open-card motion and edge, around each board's own expanded card. */
 export default function OpenBoardCard({ label, accent, onClose, children }: Props) {
   const { dialogRef, requestClose } = useOpenCardClose(onClose);
 

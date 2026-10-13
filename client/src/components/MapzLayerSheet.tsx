@@ -15,7 +15,7 @@ export type MapzLayer = {
 const LAYER_LOGOS: Record<MapzLayerId, string> = {
   events: "/brand/family/eventz.png",
   places: "/brand/family/our-placez.svg",
-  rezources: "/brand/family/rezources.png",
+  rezources: "/brand/family/needz.svg",
   mizzed: "/brand/family/mizzed-connection.svg",
   gigz: "/brand/family/gigz.svg",
   giftz: "/brand/family/giftz.svg",

@@ -23,7 +23,7 @@
 .home-tonight__subhead p { margin: 0; color: var(--text-lo, #b7b7c0); font: 600 11px/1.4 var(--font-mono, monospace); letter-spacing: .07em; text-transform: uppercase; }
 .home-tonight__all { padding:10px 16px; border:1px solid color-mix(in srgb,var(--room-eventz) 45%,transparent); border-radius:12px; background:var(--glass-card-bg); flex: none; display: inline-flex; align-items: center; gap: 3px; color: var(--neon-cyan, #00ffff); font: 800 13px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .08em; text-decoration: none; text-transform: uppercase; }
 .home-tonight__all:hover { color: #fff; }
-/* Use the same draggable, centered rail and edge rules as ReZources. */
+/* Use the same draggable, centered rail and edge rules as NEEDZ. */
 .home-tonight .rg-resource-rail-section { min-width: 0; }
 .home-tonight .rg-rail-heading { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .home-tonight .rg-resource-rail {

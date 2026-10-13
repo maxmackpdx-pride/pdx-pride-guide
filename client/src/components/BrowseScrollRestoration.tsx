@@ -19,8 +19,8 @@ export default function BrowseScrollRestoration() {
   useEffect(() => {
     let stopped = false;
     let frame = 0;
-    // ReZources is a guided entry: every visit starts at its centered hero.
-    const startAtTop = path === "/rezources" || path === "/resources";
+    // NEEDZ is a guided entry: every visit starts at its centered hero.
+    const startAtTop = path === "/needz" || path === "/resources" || path === "/rezources";
     if (startAtTop) positions.delete(path);
     const target = startAtTop ? 0 : positions.get(path) || 0;
     const remember = () => {

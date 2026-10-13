@@ -17873,7 +17873,7 @@ html.calm-mode .z-board-address__index {
   text-transform: uppercase;
 }
 
-/* Shared search uses the rounded ReZources command surface throughout the site. */
+/* Shared search uses the rounded NEEDZ command surface throughout the site. */
 .site-search { z-index: 2600; align-items: center; padding: 16px; }
 .site-search__backdrop { background: color-mix(in srgb, var(--z-black) 65%, transparent); backdrop-filter: blur(6px); }
 .site-search__panel {

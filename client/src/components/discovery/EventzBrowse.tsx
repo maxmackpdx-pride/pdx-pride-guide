@@ -9,7 +9,7 @@ import "./EventzBrowse.css";
 export type BrowseCategory = { id: string; label: string; color: string; count: number };
 export type BrowseView = "browse" | "grid";
 
-/** Placez and ReZources use the approved Eventz composition, with their own data and actions. */
+/** Placez and NEEDZ use the approved Eventz composition, with their own data and actions. */
 export function BrowseHeader({ title, logo, kicker, description, children }: {
   title: string; logo: string; kicker: string; description: string; children: ReactNode;
 }) {

@@ -30,21 +30,21 @@ export default function ResourceMapPanel({ bounds, query, category, onQuery, onC
     <span className="resource-map-result__copy"><strong>{entry.org.name}</strong><small>{entry.org.scope}</small><span>{entry.categories.map(item => item.name).join(' · ')}</span></span>
     <ArrowUpRight size={19} aria-hidden="true" />
   </a>;
-  return <section className="mapz-layer-panel resource-map-panel" aria-label="ReZources on this map">
-    <div className="mapz-layer-panel__heading"><small>In this view</small><h2>ReZources</h2></div>
+  return <section className="mapz-layer-panel resource-map-panel" aria-label="NEEDZ on this map">
+    <div className="mapz-layer-panel__heading"><small>In this view</small><h2>NEEDZ</h2></div>
       <div className="resource-map-controls">
-        <label>Search ReZources<input type="search" value={query} onChange={event => { onQuery(event.target.value); setLimit(40); }} placeholder="Organization, service, or need" /></label>
+        <label>Search NEEDZ<input type="search" value={query} onChange={event => { onQuery(event.target.value); setLimit(40); }} placeholder="Organization, service, or need" /></label>
         <label>Category<select value={category} onChange={event => { onCategory(event.target.value); setLimit(40); }}>
           <option value="">All categories</option>
           {RESOURCE_CATEGORIES.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}
         </select></label>
       </div>
-      {selectedKeys.length > 0 && <button className="resource-map-more" type="button" onClick={onClearSelection}>Show all ReZources in view</button>}
-      <p className="resource-map-count" role="status">{inView.length} organizations in view · {matching.length} matching ReZources</p>
+      {selectedKeys.length > 0 && <button className="resource-map-more" type="button" onClick={onClearSelection}>Show all NEEDZ in view</button>}
+      <p className="resource-map-count" role="status">{inView.length} organizations in view · {matching.length} matching NEEDZ</p>
       <div className="resource-map-results">{inView.slice(0, limit).map(renderEntry)}</div>
       {inView.length > limit && <button className="resource-map-more" type="button" onClick={() => setLimit(value => value + 40)}>Show more ({inView.length - limit})</button>}
-      {!inView.length && <p className="resource-map-empty">No mapped ReZources in this view. Move the map or broaden the filters.</p>}
-      {withoutPin.length > 0 && <details className="resource-map-unlocated"><summary>{withoutPin.length} more ReZources without a map pin</summary>
+      {!inView.length && <p className="resource-map-empty">No mapped NEEDZ in this view. Move the map or broaden the filters.</p>}
+      {withoutPin.length > 0 && <details className="resource-map-unlocated"><summary>{withoutPin.length} more NEEDZ without a map pin</summary>
         <p>These providers have no verified map coordinates. Their details and contact options are still available.</p>
         <div className="resource-map-results">{withoutPin.map(renderEntry)}</div>
       </details>}

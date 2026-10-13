@@ -1536,7 +1536,7 @@ html.calm-mode .rg-options button,
 :is(.rg-directory-card, .rg-detail-tags) [data-category-id="youth"] .pdxBadge,
 :is(.rg-directory-card, .rg-detail-tags) [data-category-id^="service-youth-"] .pdxBadge { background: var(--text-hi); border-color: var(--text-hi); color: var(--z-black) !important; }
 
-/* ReZources: eight refinements from the guide's spacing, type and motion scales. */
+/* NEEDZ: eight refinements from the guide's spacing, type and motion scales. */
 /* 1. Filter tiles use the 4px spacing scale and shared panel radius. */
 .rg-options { gap: var(--space-3); grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .rg-options button { min-width: 0; gap: var(--space-2); padding: var(--space-3); border-radius: var(--radius-panel); }
@@ -1628,7 +1628,7 @@ html.calm-mode .rg-options button,
   max-height: 120px;
 }
 
-/* ReZources closed previews follow the Places family: identity, short preview, action. */
+/* NEEDZ closed previews follow the Places family: identity, short preview, action. */
 :is(.resources-page, .placez-card-surface) .rg-directory-card { --font-body: "Inter", system-ui, sans-serif; }
 :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__main { flex: 0 0 auto; }
 :is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__name {
@@ -2462,7 +2462,7 @@ html.calm-mode .rg-options button,
  height: 100dvh;
 }
 
-/* Main page headings share the All ReZources scale; cards retain their own type. */
+/* Main page headings share the All NEEDZ scale; cards retain their own type. */
 .resources-page { --rg-title-size: clamp(36px, 3.2vw, 44px); }
 .resources-page .rg-controls .rg-step h2,
 .resources-page .rg-results-head h2,
@@ -2558,7 +2558,7 @@ html.calm-mode .rg-options button,
 .rg-talk-intro, .rg-talk-option p,
 .rg-support-open .rg-talk p { line-height: 1.7; }
 
-/* Approved ReZources type scale. Closed-card typography and phone controls are separate. */
+/* Approved NEEDZ type scale. Closed-card typography and phone controls are separate. */
 .resources-page, .rg-overlay {
  --rg-title-size: 40px;
  --rg-subheading-size: 26px;
@@ -4063,7 +4063,7 @@ html.calm-mode .rg-options button,
   .resources-page .rg-search-section--hero { margin-block: 40px 56px; padding-block: 20px; }
 }
 
-/* Match the board header's Share / Follow pair while preserving the ReZources logo. */
+/* Match the board header's Share / Follow pair while preserving the NEEDZ logo. */
 .resources-page .rg-intro-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:8px; }
 .resources-page .rg-intro-actions :is(.board-share-button,.board-follow-button) { min-height:44px; --follow-accent:var(--neon-yellow); }
 @media(max-width:600px){ .resources-page .rg-intro-actions { justify-content:center; width:100%; } }
@@ -4380,7 +4380,7 @@ html.calm-mode .rg-options button,
   .resources-page .rg-selection-control label { min-height: 80px; padding: 6px 4px; font-size: 11px; }
   .resources-page .rg-selection-control input { width: 15px; height: 15px; }
 }
-/* The selected ReZources canvas: a phone door, with in-page desktop reveals. */
+/* The selected NEEDZ canvas: a phone door, with in-page desktop reveals. */
 .resources-page.rg-door-path {
   --rg-door-yellow: var(--neon-yellow);
   background: var(--z-black);

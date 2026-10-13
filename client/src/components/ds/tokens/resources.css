@@ -1,4 +1,4 @@
-/* ReZources aliases consume the shared Zaylist palette. */
+/* NEEDZ aliases consume the shared Zaylist palette. */
 .resources-page,
 .rg-overlay {
   /* Identity colors: the trans flag intentionally retains its exact palette. */

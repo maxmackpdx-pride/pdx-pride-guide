@@ -94,7 +94,7 @@
 @media(min-width:960px){.mapz-map-demo .mapz-layer-sheet.is-open{width:min(540px,calc(100% - 92px))}}
 .mapz-map-demo .mapz-layer-section{color:var(--layer-color)}
 
-/* ReZources discovery treatment: bounded glass, clear hierarchy and roomy controls. */
+/* NEEDZ discovery treatment: bounded glass, clear hierarchy and roomy controls. */
 .mapz-map-demo .mapz-layer-sheet,
 .mapz-map-demo .mapz-layer-sheet.is-open {
   width:min(680px,calc(100% - 92px)); border-radius:8px;

@@ -3,7 +3,7 @@ import "./BoardShader.css";
 
 type BoardShaderRoom = "eventz" | "gigz" | "giftz" | "sellz" | "mizzed" | "hauz" | "zlists";
 
-/** ReZources' viewport shader and veil, with one room-color beam palette. */
+/** NEEDZ' viewport shader and veil, with one room-color beam palette. */
 export default function BoardShader({ room }: { room: BoardShaderRoom }) {
   const direction: -1 | 1 = room === "gigz" || room === "sellz" || room === "hauz" ? -1 : 1;
   return <>

@@ -34,7 +34,7 @@
   overflow-x: clip;
 }
 
-/* ReZources' layered artwork and logo floor, on the existing PlaceCard shape. */
+/* NEEDZ' layered artwork and logo floor, on the existing PlaceCard shape. */
 .directory-page .placez-rezource-card .pdxPlace__body { isolation: isolate; }
 .directory-page .placez-rezource-card .rg-motif-slot { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .directory-page .placez-rezource-card .rg-card-motif { width: 100%; height: 100%; color: var(--c); opacity: .13; transform: scale(1.2); }
@@ -1391,7 +1391,7 @@ html.calm-mode .directory-page .board-empty,
   }
 }
 
-/* ReZources is the approved Placez discovery composition. */
+/* NEEDZ is the approved Placez discovery composition. */
 .directory-page.resources-page { padding-inline:clamp(16px,4vw,56px); }
 .directory-page.resources-page .directory-browser-header { max-width:1152px; margin-inline:auto; display:block; }
 .directory-page.resources-page .directory-browser-header__identity { display:block; text-align:center; padding-block:64px 32px; }
@@ -1419,7 +1419,7 @@ html.calm-mode .directory-page .board-empty,
 .directory-page .directory-browser-category--active { background:color-mix(in srgb,var(--_c) 13%,var(--z-black)); }
 .directory-page .directory-browser-search__field>span,.directory-page .directory-browser-search__select>span { font:14px/1.4 var(--font-mono,monospace); }
 @media(max-width:700px){.directory-page .directory-browser-categories{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:32px auto 48px}.directory-page .directory-browser-category{font-size:18px;padding:14px 12px}}
-/* Placez reflects the ReZources field in the opposite horizontal direction. */
+/* Placez reflects the NEEDZ field in the opposite horizontal direction. */
 .directory-page.resources-page .rg-stream-background { z-index:0; filter:brightness(.72); }
 .directory-page.resources-page .placez-shader-contours { position:fixed; inset:0; z-index:0; width:100%; height:100%; pointer-events:none; stroke-width:1.5; opacity:.24; filter:drop-shadow(0 0 8px currentColor); }
 .placez-shader-contours__cyan { stroke:var(--neon-cyan); }
@@ -1428,7 +1428,7 @@ html.calm-mode .directory-page .board-empty,
 .directory-page.resources-page .directory-add-band { position:relative; z-index:1; }
 .directory-page.resources-page::before { pointer-events:none; }
 
-/* Placez front door: the same choice, refine, reveal rhythm as ReZources. */
+/* Placez front door: the same choice, refine, reveal rhythm as NEEDZ. */
 .directory-page .directory-browser-header { width:min(100% - 40px,1120px); margin:0 auto; padding-top:40px; }
 .directory-page .directory-browser-header__identity { text-align:center; max-width:760px; margin:0 auto 28px; }
 .directory-page .directory-browser-header__wordmark { width:min(100%,420px); max-height:190px; object-fit:contain; }
@@ -1477,7 +1477,7 @@ html.calm-mode .directory-page .board-empty,
 .directory-page .filter-survey__option-description { color:var(--text-body); }
 .directory-page .directory-browser-search input,.directory-page .directory-browser-search select { background:var(--z-oled); border-color:var(--border-default); }
 
-/* Reuse the ReZources front-door structure and its dimensions directly. */
+/* Reuse the NEEDZ front-door structure and its dimensions directly. */
 .directory-page.resources-page { padding-inline:16px; }
 .directory-page.resources-page .directory-browser-header { width:100%; max-width:1248px; padding:0; position:relative; z-index:2; }
 .directory-page .placez-reference-intro.rg-intro { width:100%; box-sizing:border-box; padding:32px 48px 0; gap:var(--rg-logo-space); }

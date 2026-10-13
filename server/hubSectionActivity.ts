@@ -22,16 +22,16 @@ export function recordResourceRelease(database: Database.Database, revision: str
   const prior = database.prepare("SELECT 1 FROM hub_section_activity WHERE section = 'rezources' LIMIT 1").get();
   database.prepare("INSERT OR IGNORE INTO hub_section_activity(id, section, revision, title, body, created_at) VALUES(?, ?, ?, ?, ?, ?)")
     .run(`rezources-${revision}`, "rezources", revision,
-      prior ? "ReZources directory updated" : "ReZources is in your Hub",
-      prior ? "Explore the latest resource listings, services, and ways to give back." : "Follow ReZources to keep directory updates here. Open it to find organizations, services, and ways to give back.",
+      prior ? "NEEDZ directory updated" : "NEEDZ is in your Hub",
+      prior ? "Explore the latest resource listings, services, and ways to give back." : "Follow NEEDZ to keep directory updates here. Open it to find organizations, services, and ways to give back.",
       now);
 }
 
 export function resourceReleaseItems(database: Database.Database): HubFeedItem[] {
   return (database.prepare("SELECT id, title, body, created_at FROM hub_section_activity WHERE section = 'rezources' ORDER BY created_at DESC").all() as Array<{ id: string; title: string; body: string; created_at: string }>).map(row => ({
-    id: row.id, kind: "resource_update", badge: "ReZources", action: "Published a directory update", title: row.title, text: row.body,
+    id: row.id, kind: "resource_update", badge: "NEEDZ", action: "Published a directory update", title: row.title.replace(/ReZources|Rezources|REZOURCES/g, "NEEDZ"), text: row.body.replace(/ReZources|Rezources|REZOURCES/g, "NEEDZ"),
     createdAt: row.created_at, author: { displayName: "Zaylist", photoUrl: "/brand/zaylist-avatar.jpg" },
-    source: { kind: "board", id: "rezources", label: "ReZources", href: "/rezources" },
-    link: "/rezources", viewerFollowsBoard: true, viewerFollowsSource: true,
+    source: { kind: "board", id: "rezources", label: "NEEDZ", href: "/needz" },
+    link: "/needz", viewerFollowsBoard: true, viewerFollowsSource: true,
   }));
 }

@@ -1,4 +1,4 @@
-/* ReZources action pair, shared by every room and detail surface. */
+/* NEEDZ action pair, shared by every room and detail surface. */
 html body :is(.board-share-button, .board-follow-button, .z-community-follow) {
   display: inline-flex;
   align-items: center;

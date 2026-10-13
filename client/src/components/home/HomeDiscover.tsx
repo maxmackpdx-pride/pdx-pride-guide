@@ -14,7 +14,7 @@ const destinations = [
   { icon: House, room: "My Hoüz", title: "A roommate", description: "Find your people. Share a place.", href: "/boards?board=housing", accent: "var(--room-hauz)" },
   { icon: Gift, room: "Giftz", title: "Something to give", description: "Give it a new home. Find something free.", href: "/giftz", accent: "var(--room-giftz)" },
   { icon: Tags, room: "Sellz", title: "Something to buy or sell", description: "Find what you need. Pass something on.", href: "/sellz", accent: "var(--room-sellz)" },
-  { icon: LifeBuoy, room: "ReZources", title: "Care and support", description: "Find help, services, and someone to talk to.", href: "/rezources", accent: "var(--neon-green)" },
+  { icon: LifeBuoy, room: "NEEDZ", title: "Care and support", description: "Find help, services, and someone to talk to.", href: "/needz", accent: "var(--neon-green)" },
   { icon: BriefcaseBusiness, room: "Gigz", title: "Work or collaborators", description: "Find a gig, hire someone, or share your skills.", href: "/gigz", accent: "var(--room-gigz)" },
   { icon: Users, room: "Z/Lists", title: "My community", description: "Find groups and people who share your interests.", href: "/z", accent: "var(--room-zlists)" },
   { icon: MapPinned, room: "Mapz", title: "Somewhere nearby", description: "Explore queer Portland on the map.", href: "/map", accent: "var(--neon-cyan)" },

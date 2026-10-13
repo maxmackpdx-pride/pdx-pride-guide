@@ -5,7 +5,7 @@ import { motion, useSpring } from "framer-motion";
 
 // Adapted from 21st's Appica Carousel and Designali Scroll Progress patterns.
 // The rail owns navigation and clipping; resource cards keep their own design.
-export function ResourceRail({ id, title, color, count, quiet, children, room = "ReZources", itemName = "resource", focusIndex, deferOnMobile = false, deferUntilVisible = false }: {
+export function ResourceRail({ id, title, color, count, quiet, children, room = "NEEDZ", itemName = "resource", focusIndex, deferOnMobile = false, deferUntilVisible = false }: {
   id: string; title: string; color: string; count: number; quiet: boolean; children: ReactNode | (() => ReactNode); room?: string; itemName?: string; focusIndex?: number; deferOnMobile?: boolean; deferUntilVisible?: boolean;
 }) {
   const sectionRef = useRef<HTMLElement>(null);

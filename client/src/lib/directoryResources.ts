@@ -19,5 +19,5 @@ export function directoryResourceName(listing: { name: string; type: string }): 
 
 export function directoryResourcePath(listing: { name: string; type: string }): string | undefined {
   const name = directoryResourceName(listing);
-  return name ? `/rezources?resource=${encodeURIComponent(name)}` : undefined;
+  return name ? `/needz?resource=${encodeURIComponent(name)}` : undefined;
 }

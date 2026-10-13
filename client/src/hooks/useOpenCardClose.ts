@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
 import { useModalA11y } from "@/hooks/useModalA11y";
 
-/** Match the ReZources 220ms close while keeping the dialog mounted until it ends. */
+/** Match the NEEDZ 220ms close while keeping the dialog mounted until it ends. */
 export function useOpenCardClose(onClose: () => void, enabled = true) {
   const latestClose = useRef(onClose);
   latestClose.current = onClose;

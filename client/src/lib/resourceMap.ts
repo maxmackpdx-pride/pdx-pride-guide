@@ -30,7 +30,7 @@ export const RESOURCE_MAP_ENTRIES: ResourceMapEntry[] = (() => {
 })();
 
 export function resourceMapHref(name: string): string {
-  return `/rezources?resource=${encodeURIComponent(name)}`;
+  return `/needz?resource=${encodeURIComponent(name)}`;
 }
 
 export function resourceMapKey(name: string, locationIndex: number): string {

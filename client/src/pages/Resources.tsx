@@ -441,7 +441,7 @@ const ResourceCard = memo(function ResourceCard({
       logoUrl={serviceArtwork(org, org.logo) || undefined}
       logoFallback={<Mark org={org} allowArtwork={false} iconOnly />}
       description={org.desc}
-      shareUrl={`https://www.zaylist.com/rezources?resource=${encodeURIComponent(org.name)}`}
+      shareUrl={`https://www.zaylist.com/needz?resource=${encodeURIComponent(org.name)}`}
       className={`rg-directory-card rg-category-${category.id} pdxPlace--clickable${org.logoSurface === "light" ? " rg-directory-card--light-logo" : ""}`}
       onClick={() => onOpen(row)}
       footer={
@@ -469,10 +469,10 @@ export default function Resources() {
   }, []);
   const [location, navigate] = useLocation();
   useEffect(() => {
-    if (location === "/resources") navigate(`/rezources${window.location.search}${window.location.hash}`, { replace: true });
+    if (location === "/resources" || location === "/rezources") navigate(`/needz${window.location.search}${window.location.hash}`, { replace: true });
   }, [location, navigate]);
   usePageSeo(
-    "ReZources | Zaylist",
+    "NEEDZ | Zaylist",
     "Art, community, opportunity, care, and support for queer and trans Oregon. Explore local organizations and food pantries to find your next connection.",
   );
   const readBrowseState = () => {
@@ -543,20 +543,20 @@ export default function Resources() {
       {lightweightBackground
         ? <div className="rg-stream-background rg-stream-background--mobile-fallback" aria-hidden="true" />
         : <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>}
-      <BrowseHeader title="ReZources" logo="/brand/family/rezources-mobile.webp" kicker="Oregon · All the ways we show up"
+      <BrowseHeader title="NEEDZ" logo="/brand/family/needz.svg" kicker="Oregon · All the ways we show up"
         description="Art, community, opportunity, care, and support for queer and trans Oregon. Find your next connection.">
-        <BoardShareButton title="ReZources" path="/rezources" card={{ room: "ReZources", mark: "/brand/family/rezources-mobile.webp", line: "All the ways we show up." }} />
+        <BoardShareButton title="NEEDZ" path="/needz" card={{ room: "NEEDZ", mark: "/brand/family/needz.svg", line: "All the ways we show up." }} />
         <BoardFollowButton board="rezources" />
       </BrowseHeader>
       <div className="eb-frame">
-        <BrowseControls title="ReZources" categories={[{id:"ALL",label:"All resources",color:"var(--neon-cyan)",count:ROWS.length}, ...RESOURCE_CATEGORIES.map((c, i) => ({id:c.id,label:LABELS[i],color:c.color,count:ROWS.filter(row => categoriesFor(row).some(category => category.id === c.id)).length}))]}
+        <BrowseControls title="NEEDZ" categories={[{id:"ALL",label:"All resources",color:"var(--neon-cyan)",count:ROWS.length}, ...RESOURCE_CATEGORIES.map((c, i) => ({id:c.id,label:LABELS[i],color:c.color,count:ROWS.filter(row => categoriesFor(row).some(category => category.id === c.id)).length}))]}
           selected={categoryIds.length ? categoryIds : ["ALL"]} onSelect={choose} query={searchQuery} onSearch={value => {setSearchQuery(value); setMode("directory");}} view={browseView} onView={value => {setBrowseView(value); setMode("directory");}}>
           <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("rezources")} aria-label="Explore resources on Mapz"><Map size={19} /><span>Map</span></a>
           <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Talk to someone" aria-pressed={mode === "talk"} onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} /><span>Talk to someone</span></button>
           <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Immediate safety and support" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}><ShieldAlert size={19} /></button>
         </BrowseControls>
         <div className="eb-body">
-          <aside className="eb-side" aria-label="ReZources filters and support">
+          <aside className="eb-side" aria-label="NEEDZ filters and support">
             <div className="eb-panel eb-desktop-panel"><h2>Categories</h2><div className="eb-side-categories" role="group" aria-label="Filter resources">
               <button type="button" aria-pressed={!categoryIds.length} onClick={() => choose("ALL")}>All resources</button>
               {RESOURCE_CATEGORIES.map((c, i) => <button type="button" key={c.id} aria-pressed={categoryIds.includes(c.id)} onClick={() => choose(c.id)}>{LABELS[i]}</button>)}
@@ -628,7 +628,7 @@ export default function Resources() {
           >
             <div className="event-modal__chrome">
               <div className="detail-actions">
-                {detail && <BoardShareButton title={detail.org.name} path={`/rezources?resource=${encodeURIComponent(detail.org.name)}`} />}
+                {detail && <BoardShareButton title={detail.org.name} path={`/needz?resource=${encodeURIComponent(detail.org.name)}`} />}
                 <Dialog.Close className="detail-actions__close" aria-label="Close resource"><X size={20} aria-hidden="true" /></Dialog.Close>
               </div>
             </div>

@@ -22,7 +22,7 @@ const assignments: Record<string, string> = {
   'Inbundance Wealth Management':'wealth', 'Open Space Dance':'aerialStage', 'Echo Theater':'aerialStage',
   'SymbiOp':'plantHouse', 'Steam Portland':'spa', 'Club Privata':'dancePortal',
   'The Velvet Rope':'dancePortal', 'Best Coast Barber Co.':'scissors',
-  // Owner-requested professional cards; same objects in Placez and ReZources.
+  // Owner-requested professional cards; same objects in Placez and NEEDZ.
   "Tattoos by Les": "tattooPen",
   "Fuzzy Pits Tattoo": "tattooPen",
   "Birdhouse Tattoo · Noble": "tattooPen",

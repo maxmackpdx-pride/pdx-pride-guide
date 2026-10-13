@@ -737,12 +737,12 @@ export default function MapzMapDemo() {
   const layers: MapzLayer[] = [
     { id: "events", label: ROOMS.eventz.nav, color: ROOMS.eventz.accent, enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
     { id:"places",label:ROOMS.placez.nav,color:ROOMS.placez.accent,enabled:showPlaces,onToggle:()=>toggleLayer("hidePlaces"),panel:worldPanels.places,viewMore:[{label:"Browse all Placez",href:"/directory"}] },
-    { id:'rezources',label:'ReZources',color:'var(--neon-yellow)',enabled:showResources,onToggle:()=>toggleLayer('hideResources'),
+    { id:'rezources',label:'NEEDZ',color:'var(--neon-yellow)',enabled:showResources,onToggle:()=>toggleLayer('hideResources'),
       panel:<ResourceMapPanel bounds={mapBounds} query={resourceQuery} category={resourceCategory}
         selectedKeys={selectedResourceKeys} onClearSelection={()=>updateParams(p=>p.delete('resources.ids'))}
         onQuery={value=>updateParams(p=>{if(value)p.set('resources.q',value);else p.delete('resources.q');p.delete('resources.ids');})}
         onCategory={value=>updateParams(p=>{if(value)p.set('resources.category',value);else p.delete('resources.category');p.delete('resources.ids');})} />,
-      viewMore:[{label:'Browse all ReZources',href:'/rezources'}] },
+      viewMore:[{label:'Browse all NEEDZ',href:'/needz'}] },
     { id:"mizzed",label:ROOMS.mizzed.nav,color:ROOMS.mizzed.accent,enabled:showMizzed,onToggle:()=>toggleLayer("hideMizzed"),panel:worldPanels.mizzed,viewMore:[{label:"Browse all Mizzed",href:"/mizzed"}] },
     { id:"gigz",label:ROOMS.gigz.nav,color:"var(--room-gigz-ink)",enabled:showGigz,onToggle:()=>toggleLayer("hideGigz"),panel:worldPanels.gigz,viewMore:[{label:"Browse all Gigz",href:"/gigz"}] },
     { id:"giftz",label:ROOMS.giftz.nav,color:ROOMS.giftz.accent,enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[{label:"Browse all Giftz",href:"/giftz"}] },

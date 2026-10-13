@@ -5,7 +5,7 @@ import { ResourceFilterButton } from '@/components/resources/ResourceFilterButto
 import './DiscoveryFlow.css';
 
 export type DiscoveryChoice = { id: string; label: string; description?: string; disabled?: boolean; scrollToResults?: boolean; scrollTargetId?: string; onChoose?: () => void };
-/** ReZources' progressive opening, with each room retaining its own data and actions. */
+/** NEEDZ' progressive opening, with each room retaining its own data and actions. */
 export default function DiscoveryFlow({ room, accent, choices, children, initiallyOpen = false, initialChoiceId, title = 'What do you need?', kicker, intro = 'Choose a starting point. You can change it any time.', enabled = true, keepMounted = false, onViewAll }: {
   room: string; accent: string; choices: DiscoveryChoice[]; children: ReactNode;
   initiallyOpen?: boolean; initialChoiceId?: string; title?: string; kicker?: ReactNode; intro?: string; enabled?: boolean; keepMounted?: boolean; onViewAll?: () => void;

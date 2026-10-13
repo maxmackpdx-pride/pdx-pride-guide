@@ -8,7 +8,7 @@ import "./discovery/DiscoveryFlow.css";
 
 export type FilterSurveyOption = { value: string; label: string; color?: string; count?: number; icon?: string; description?: string };
 
-/** The ReZources choice-first pattern, adapted to a board's existing filters. */
+/** The NEEDZ choice-first pattern, adapted to a board's existing filters. */
 export default function FilterSurvey({
   label, question, options, value, onChange, children, accent = "var(--neon-yellow)", surface, startStep = 1, eyebrow = "Start here", description, selectedValues, detailsLabel = "Refine your search",
 }: {

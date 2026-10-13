@@ -166,7 +166,7 @@ export function WebGLShader({ accent, palette = "prime", direction = 1, blueprin
     const canvas = canvasRef.current;
     if (!canvas) return;
     // The full-screen fragment pass can stall mobile GPUs, especially beside
-    // ReZources' card rails. CSS paints the same soft wave surface on phones.
+    // NEEDZ' card rails. CSS paints the same soft wave surface on phones.
     if (waveSpeed < 1 && mobileFallback) return;
     let renderer: THREE.WebGLRenderer;
     try {

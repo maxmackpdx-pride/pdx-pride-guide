@@ -201,8 +201,9 @@ function AppLayout() {
             <Route path="/housing">
               {() => <Redirect to={`/the-hauz${window.location.search}`} />}
             </Route>
-            <Route path="/resources" component={Resources} />
-            <Route path="/rezources" component={Resources} />
+            <Route path="/resources">{() => <Redirect to={`/needz${window.location.search}${window.location.hash}`} replace />}</Route>
+            <Route path="/rezources">{() => <Redirect to={`/needz${window.location.search}${window.location.hash}`} replace />}</Route>
+            <Route path="/needz" component={Resources} />
             <Route path="/about" component={About} />
             <Route path="/aboutz" component={About} />
             <Route path="/resume" component={Resume} />

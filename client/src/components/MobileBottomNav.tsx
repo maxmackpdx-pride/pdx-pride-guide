@@ -43,7 +43,7 @@ export default function MobileBottomNav() {
   const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
   const placesActive = navLinkActive(location, "/directory");
   const boardsActive = navLinkActive(location, "/boards") || BOARDS_MENU.some(item => navLinkActive(location, item.href)) || navLinkActive(location, "/hausing");
-  const resourcesActive = navLinkActive(location, "/rezources");
+  const resourcesActive = navLinkActive(location, "/needz");
   const activeIndex = resourcesActive ? 4 : placesActive ? 1 : mapActive ? 2 : boardsActive ? 3 : eventsActive ? 0 : -1;
 
   const dismissExcept = (except?: MobileNavDismissDetail["except"]) => {
@@ -122,7 +122,7 @@ export default function MobileBottomNav() {
           </Link>
 
           <Link
-            href="/rezources"
+            href="/needz"
             className={tabClass(resourcesActive, "green")}
             data-accent="green"
             aria-current={resourcesActive ? "page" : undefined}

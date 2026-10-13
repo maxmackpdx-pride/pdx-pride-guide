@@ -10,7 +10,7 @@ import AuthModal from "@/components/AuthModal";
 
 export type FollowableRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | "eventz" | "outz" | "rezources";
 
-const BOARD_NAMES:Record<FollowableRoom,string> = { gigz: "Gigz", giftz: "Giftz", sellz: "Sellz", mizzed: "Mizzed", houz: "My Hoüz", eventz: "Eventz", outz: "OutZide", rezources: "ReZources" };
+const BOARD_NAMES:Record<FollowableRoom,string> = { gigz: "Gigz", giftz: "Giftz", sellz: "Sellz", mizzed: "Mizzed", houz: "My Hoüz", eventz: "Eventz", outz: "OutZide", rezources: "NEEDZ" };
 type FollowAction = {follow:boolean;board:FollowableRoom;viewerId:number};
 
 export default function BoardFollowButton({ board }: { board: FollowableRoom }) {

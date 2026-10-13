@@ -58,7 +58,7 @@
   will-change: auto;
 }
 
-/* Eventz uses the same drafting shader and layered wave field as ReZources. */
+/* Eventz uses the same drafting shader and layered wave field as NEEDZ. */
 .events-page { isolation: isolate; background: var(--z-black); }
 .events-page > .rg-stream-background {
   position: fixed;
@@ -172,7 +172,7 @@
 
 }
 
-/* ReZources composition: identity, a choice, a compact counter, then results. */
+/* NEEDZ composition: identity, a choice, a compact counter, then results. */
 html body .events-page.board-page--makeover .board-hero--room { padding:48px var(--zl-gutter,24px) 0; }
 html body .events-page.board-page--makeover .board-hero__kicker { display:block; margin:0; text-align:center; color:var(--text-body); font:14px/1.5 var(--font-mono); letter-spacing:.08em; text-transform:uppercase; }
 html body .events-page.board-page--makeover .board-hero__title { margin:64px 0 0; }
