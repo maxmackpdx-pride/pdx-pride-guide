@@ -1,21 +1,51 @@
-.site-header--glass .hub-disclosure.znav-hub {
+.site-auth__hub { display: flex; align-items: center; gap: 6px; }
+.site-header--glass .hub-disclosure.znav-control {
   display: inline-flex; flex-direction: row; align-items: center; gap: 8px;
-  height: 44px; min-height: 44px; min-width: 120px; width: auto; padding: 0 7px 0 13px;
+  height: 44px; min-height: 44px; min-width: 80px; width: 80px; padding: 0 7px 0 11px;
   border-radius: 22px; position: relative;
 }
-.site-header--glass .hub-disclosure.znav-hub .znav-caption { margin: 0; font: 800 15px/1 var(--font-display); letter-spacing: .04em; }
-.hub-disclosure__glyph { flex: 0 0 19px; }
+.hub-disclosure__glyph { flex: 0 0 22px; }
 .hub-disclosure__caret {
   display: inline-flex; flex: 0 0 28px; align-items: center; justify-content: center; width: 28px; height: 28px;
-  margin-left: 3px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--c) 28%, transparent);
+  margin-left: 0; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--c) 28%, transparent);
   background: color-mix(in srgb, var(--c) 8%, var(--ink-900));
 }
 .hub-disclosure__chevron { flex-shrink: 0; transition: transform .16s ease; }
 .hub-disclosure[aria-expanded="true"] .hub-disclosure__chevron { transform: rotate(180deg); }
 .hub-disclosure__dot { width: 6px; height: 6px; position: absolute; left: 27px; top: 8px; border-radius: 50%; background: var(--neon-magenta); }
-.hub-disclosure__dock-icon { gap: 2px; }
-.hub-disclosure--dock .hub-disclosure__dot { left: calc(50% + 2px); top: 11px; }
 html.calm-mode .hub-disclosure__caret { border-color: var(--ink-border-strong); background: var(--ink-800); }
 html.calm-mode .hub-disclosure__dot { background: var(--text-mid); }
 html.calm-mode .hub-disclosure__chevron { transition: none; }
 @media (prefers-reduced-motion: reduce) { .hub-disclosure__chevron { transition: none; } }
+
+.hub-disclosure__count { position: absolute; left: 23px; top: 2px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 8px; background: var(--neon-magenta); color: var(--ink-1000); font: 800 10px/15px var(--font-display); text-align: center; }
+html.calm-mode .hub-disclosure__count { background: var(--text-mid); }
+
+@media (max-width: 959px) {
+  html:root { --site-header-height: 84px; }
+  .site-header.site-header--glass .site-header-inner { height: 68px; min-height: 68px; }
+  .site-header.site-header--glass .site-hub-mtop { height: 68px; padding: 12px; gap: 6px; }
+  .site-header.site-header--glass .site-hub-mtop .znav-control--text { height: 44px; min-height: 44px; padding: 0 8px; }
+  .site-header.site-header--glass .site-hub-mtop .site-profile-menu__avatar-link { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
+  .site-header.site-header--glass .site-hub-mtop .user-avatar { --avatar-size: 34px; }
+  .site-header.site-header--glass .site-hub-mtop > nav { flex: none; width: 118px; }
+  .site-header.site-header--glass .site-hub-mtop .znav-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .site-header.site-header--glass .site-hub-mtop .hub-mtop__spacer { display: block; flex: 1; min-width: 0; }
+  .site-header.site-header--glass .site-hub-mtop .site-auth__hub--mobile { display: flex; flex: none; gap: 6px; }
+  .site-header.site-header--glass .site-hub-mtop .hub-disclosure.znav-control { flex: none; min-width: 52px; width: 52px; min-height: 44px; height: 44px; gap: 4px; padding: 0 8px; }
+  .site-hub-mtop .hub-disclosure__glyph { flex: 0 0 20px; width: 20px; height: 20px; }
+  .site-hub-mtop .hub-disclosure__caret { flex: 0 0 10px; width: 10px; height: 20px; border: 0; border-radius: 0; background: transparent; }
+  .site-hub-mtop .hub-disclosure__chevron { width: 10px; height: 10px; }
+  .site-hub-mtop .hub-disclosure__dot { left: 21px; top: 8px; }
+  .site-hub-mtop .hub-disclosure__count { left: 17px; top: 2px; }
+}
+
+.site-header--glass .hub-disclosure.znav-control > .hub-disclosure__dot,
+.site-header--glass .hub-disclosure.znav-control > .hub-disclosure__count { position: absolute; z-index: 3; }
+
+@media (max-width: 359px) {
+  .site-header.site-header--glass .site-hub-mtop { padding-inline: 10px; gap: 4px; }
+  .site-header.site-header--glass .site-hub-mtop > nav { width: 108px; }
+  .site-header.site-header--glass .site-hub-mtop .znav-rail,
+  .site-header.site-header--glass .site-hub-mtop .site-auth__hub--mobile { gap: 4px; }
+}

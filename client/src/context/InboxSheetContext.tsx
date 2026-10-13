@@ -1,7 +1,7 @@
 import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import FloatingInbox from "@/components/FloatingInbox";
+import { MOBILE_NAV_DISMISS, dismissMobileNavOverlays, type MobileNavDismissDetail } from "@/lib/mobileNavDismiss";
 import { isLocalDemo } from "@/lib/localDemo";
 
 const InboxOverlay = lazy(() => import("@/components/InboxOverlay"));
@@ -16,9 +16,9 @@ export type InboxSheetOpenOpts = {
 type InboxSheetContextValue = {
   open: boolean;
   openOpts: InboxSheetOpenOpts | null;
-  openSheet: (opts?: InboxSheetOpenOpts) => void;
+  openSheet: (opts?: InboxSheetOpenOpts, trigger?: HTMLElement) => void;
   closeSheet: () => void;
-  toggleSheet: () => void;
+  toggleSheet: (trigger?: HTMLElement) => void;
 };
 
 const InboxSheetContext = createContext<InboxSheetContextValue | null>(null);
@@ -58,11 +58,15 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
   const [openOpts, setOpenOpts] = useState<InboxSheetOpenOpts | null>(null);
   // Sheet opts carried through the /inbox door; guests hold them until they sign in.
   const arrivalRef = useRef<InboxSheetOpenOpts | null>(null);
+  const trigger = useRef<HTMLElement | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const guestRedirectRef = useRef(false);
   const lastPathRef = useRef<string | null>(null);
 
-  const openSheet = useCallback((opts?: InboxSheetOpenOpts) => {
+  const openSheet = useCallback((opts?: InboxSheetOpenOpts, element?: HTMLElement) => {
+    const focus = element ?? document.activeElement;
+    trigger.current = focus instanceof HTMLElement && focus !== document.body ? focus : null;
+    dismissMobileNavOverlays("inbox");
     setOverlayActivated(true);
     setOpenOpts(opts ?? null);
     setOpen(true);
@@ -111,13 +115,17 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
     setOpen(false);
     setOpenOpts(null);
   }, []);
-  const toggleSheet = useCallback(() => {
-    setOpen((v) => {
-      if (!v) setOverlayActivated(true);
-      if (v) setOpenOpts(null);
-      return !v;
-    });
-  }, []);
+  const toggleSheet = useCallback((element?: HTMLElement) => {
+    if (open) closeSheet();
+    else openSheet(undefined, element);
+  }, [open, closeSheet, openSheet]);
+  useEffect(() => {
+    const dismiss = (event: Event) => {
+      if ((event as CustomEvent<MobileNavDismissDetail>).detail?.except !== "inbox") closeSheet();
+    };
+    window.addEventListener(MOBILE_NAV_DISMISS, dismiss);
+    return () => window.removeEventListener(MOBILE_NAV_DISMISS, dismiss);
+  }, [closeSheet]);
 
   const value = useMemo(
     () => ({ open, openOpts, openSheet, closeSheet, toggleSheet }),
@@ -130,12 +138,12 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
   return (
     <InboxSheetContext.Provider value={value}>
       {children}
-      <FloatingInbox />
       {showOverlay && overlayActivated && (
         <div className="inbox-sheet-host" aria-hidden={!open}>
           <Suspense fallback={null}>
             <InboxOverlay
               open={open}
+              trigger={trigger}
               onClose={closeSheet}
               initialView={openOpts?.view}
               initialAccount={openOpts?.account}

@@ -3,12 +3,14 @@ import { Link } from "wouter";
 import { motion, useReducedMotion } from "framer-motion";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Home, Info, CalendarDays, MapPin, Map, TreePine, Layers, House, LayoutGrid, PanelsTopLeft, ChevronDown, Menu, X, MessageCircle, LifeBuoy, type LucideIcon } from "lucide-react";
+import { Mail, Home, Info, CalendarDays, MapPin, Map, TreePine, Layers, House, LayoutGrid, PanelsTopLeft, ChevronDown, Menu, X, MessageCircle, LifeBuoy, type LucideIcon } from "lucide-react";
 import { PRIMARY_NAV, navLinkActive, type NavEntry } from "@/lib/siteNav";
 import { MOBILE_NAV_DISMISS, dismissMobileNavOverlays } from "@/lib/mobileNavDismiss";
 import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
 import HubTriggerContent from "@/components/hub/HubTriggerContent";
 import { useHubPanel } from "@/context/HubPanelContext";
+import { useInboxSheet } from "@/context/InboxSheetContext";
+import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
 
 const ICONS: Record<string, LucideIcon> = {
   Home, About: Info, Eventz: CalendarDays, Placez: MapPin, Mapz: Map,
@@ -72,9 +74,20 @@ export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV,
 /** Hub shares the destination controls' icon, caption, and accent-rim treatment. */
 export function CompactHubLink({ active, unreadCount = 0, onNavigate, textOnly = false }: { active: boolean; unreadCount?: number; onNavigate: () => void; textOnly?: boolean }) {
   const { isOpen, hasNewActivity, toggleHub } = useHubPanel();
-  return <button type="button" className={`znav-control znav-hub hub-disclosure pdx-glass-rebind${textOnly ? " znav-control--text" : ""}${isOpen ? " is-active" : ""}`} data-accent="cyan" data-hub-trigger aria-controls="hub-panel" aria-expanded={isOpen} aria-haspopup="dialog" aria-label={hasNewActivity ? "Hub, new activity" : "Hub"} onClick={event => { onNavigate(); toggleHub(event.currentTarget); }}>
+  return <button type="button" className={`znav-control znav-hub hub-disclosure pdx-glass-rebind${textOnly ? " znav-control--text" : ""}${isOpen ? " is-active" : ""}`} data-accent="cyan" data-hub-trigger title="Hub" aria-controls="hub-panel" aria-expanded={isOpen} aria-haspopup="dialog" aria-label={hasNewActivity ? "Hub, new activity" : "Hub"} onClick={event => { onNavigate(); toggleHub(event.currentTarget); }}>
     <HubTriggerContent hasNewActivity={hasNewActivity} />
   </button>;
+}
+
+/** Inbox lives beside Hub and retains the same attention count as the mobile dock. */
+export function CompactInboxLink({ onNavigate }: { onNavigate: () => void }) {
+  const { open, openSheet, closeSheet } = useInboxSheet();
+  const { total } = useInboxAttentionCount();
+  return <button type="button" className={`znav-control znav-hub hub-disclosure pdx-glass-rebind${open ? " is-active" : ""}`} data-accent="cyan" data-inbox-open-trigger="header" aria-controls="inbox-panel" aria-expanded={open} aria-haspopup="dialog" aria-label={total > 0 ? `Inbox, ${total} need attention` : "Inbox"} title="Inbox" onClick={event => {
+    onNavigate();
+    if (open) closeSheet();
+    else openSheet({ view: "inbox", account: "personal" }, event.currentTarget);
+  }}><HubTriggerContent icon={Mail} count={total} /></button>;
 }
 
 /** The same caption rail scrolls within the phone header, below account controls. */
