@@ -1,3 +1,4 @@
+import { CardArtworkGlass } from "../CardArtworkGlass";
 import "./ResourceCardMotif.css";
 import { resourceGradientStops } from "./resourceGradient";
 import { distinctResourceMotifs } from "./distinctResourceMotifs";
@@ -135,7 +136,6 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
    <g className="rg-motif-object-drift" style={{ animationDuration: `${cycle + 9}s`, animationDelay: `${phase - 7}s` }}>
   <g className="rg-motif-breathe" style={{ animationDuration: `${cycle + 4}s`, animationDelay: `${phase}s` }}>
   <g className="rg-motif-object" fill="none" stroke={paint} strokeLinejoin="round" transform={`${isPlace ? `translate(${rightAtTop ? -22 : 22} 46) ` : ""}rotate(${tilt} 200 250)`}>
-   {isPlace && <path className="rg-motif-glass-film" d={silhouette} fill="white" fillOpacity=".02" stroke="none" />}
    {placeArtwork && <><path className="rg-motif-rear-grid" d={placeArtwork.rearGrid} /><path className="rg-motif-surface-grid" d={placeArtwork.grid} /></>}
    {!isPlace && !projected && <path className="rg-motif-depth" d={silhouette} transform="translate(5 7)" strokeWidth=".8" strokeDasharray="2 5" />}
    {((isPlace || projected) ? [1] : [1.13,1.06,1]).map((scale,i)=><path key={scale} d={silhouette} transform={`translate(200 250) scale(${scale}) translate(-200 -250)`} className={scale===1 ? "rg-motif-contour" : "rg-motif-echo"} stroke={(isPlace || projected) && scale===1 ? `url(#${gradientId}-edge)` : undefined} strokeWidth={scale===1?1.5:.65} opacity={scale===1?.85:.24} />)}
@@ -151,7 +151,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
 
 const motifVisibility = new Map<Element, (visible: boolean) => void>();
 let motifObserver: IntersectionObserver | undefined;
-export const ResourceCardMotif = memo(function ResourceCardMotif(props: { name: string; category: string; colors?: string[] }) {
+export const ResourceCardMotif = memo(function ResourceCardMotif({ glass = false, ...props }: { name: string; category: string; colors?: string[]; glass?: boolean }) {
  const slot = useRef<HTMLDivElement>(null);
  const [visible, setVisible] = useState(false);
  useEffect(() => {
@@ -173,5 +173,5 @@ export const ResourceCardMotif = memo(function ResourceCardMotif(props: { name: 
    if (!motifVisibility.size) { motifObserver?.disconnect(); motifObserver = undefined; }
   };
  }, []);
- return <div ref={slot} className="rg-motif-slot" aria-hidden="true">{visible && <MotifArtwork {...props} />}</div>;
+ return <div ref={slot} className="rg-motif-slot" aria-hidden="true">{visible && <MotifArtwork {...props} />}{glass && <CardArtworkGlass />}</div>;
 });

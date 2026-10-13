@@ -35,7 +35,7 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
       shareUrl={placeUrl(place.id, place.name)}
       categoryTags={[...(serviceTags.length ? serviceTags.slice(0,2).map(tag => ({id:tag.id,name:tag.label,color:accent})) : [{id:place.type,name:label,color:accent}]),...(place.queerOwned ? [{id:'owned',name:'Queer owned',color:accent}] : [])]}
       className="rg-directory-card placez-discovery-card pdxPlace--clickable"
-      decoration={<><div className="rg-card-vignette" aria-hidden="true"/><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true"/><ResourceCardMotif name={place.name} category={`place-${place.type}`}/></>}
+      decoration={<><div className="rg-card-vignette" aria-hidden="true"/><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true"/><ResourceCardMotif glass name={place.name} category={`place-${place.type}`}/></>}
       onClick={open}
       footer={<div className="rg-directory-footer placez-discovery-footer">
         <p className="placez-discovery-meta">{place.neighborhood || 'Portland metro'}</p>

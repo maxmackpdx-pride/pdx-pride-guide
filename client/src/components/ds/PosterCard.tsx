@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { CardArtworkGlass } from "../CardArtworkGlass";
 import { dayAccentToken, dayInkToken, dayComplementToken } from "@/lib/dsColors";
 import React, { useLayoutEffect, useRef } from "react";
 import "./event-grid-card.css";
@@ -110,6 +111,7 @@ export function PosterCard({
         <DynamicEventTitle title={title} />
       </div>
       <div className="pdxBoard__meta">
+        <CardArtworkGlass />
         <span className="pdxBoard__divider" aria-hidden="true" />
         <div className="pdxBoard__facts">
           {venue && <div className="pdxBoard__venue">{venue}</div>}

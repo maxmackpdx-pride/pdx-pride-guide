@@ -151,7 +151,7 @@ function SafetyNotice({ openCard = false }: { openCard?: boolean }) {
       <div className={openCard ? "rg-safety-open-body" : "pdxPlace__body pdx-glass-card pdx-glass-rebind"}>
         {!openCard && <div className="pdxPlace__sheen pdx-glass-sheen--specular" aria-hidden="true" />}
         {!openCard && <div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true" />}
-        {!openCard && <ResourceCardMotif name="Immediate danger safety support" category="safety" />}
+        {!openCard && <ResourceCardMotif glass name="Immediate danger safety support" category="safety" />}
         {!openCard && <div className="rg-card-vignette" aria-hidden="true" />}
         <div className="rg-safety-content">
       <div className="rg-safety-heading">
@@ -432,7 +432,7 @@ const ResourceCard = memo(function ResourceCard({
     <PlaceCard
       name={org.name}
       displayName={RESOURCE_CARD_CAPTIONS[org.name] ?? org.name}
-      decoration={<><div className="rg-card-vignette" aria-hidden="true" /><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true" /><ResourceCardMotif name={org.name} category={category.id} /></>}
+      decoration={<><div className="rg-card-vignette" aria-hidden="true" /><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true" /><ResourceCardMotif glass name={org.name} category={category.id} /></>}
       data-optical-logo={org.name}
       style={resourceLogoLayout(org.name) as CSSProperties}
       categoryLabel={category.name}
@@ -637,7 +637,7 @@ export default function Resources() {
                 <div className="rg-detail-primary">
                 <div className="rg-detail-logo eb-detail__art">
                   <div className="rg-detail-art" aria-hidden="true">
-                    <ResourceCardMotif name={detail.org.name} category={(detail.sectionCategory ?? detail.category).id} />
+                    <ResourceCardMotif glass name={detail.org.name} category={(detail.sectionCategory ?? detail.category).id} />
                     <div className="rg-category-wash" />
                   </div>
                   <Mark org={detail.org} />

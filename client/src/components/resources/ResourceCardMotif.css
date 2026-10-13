@@ -19,5 +19,3 @@ html.calm-mode .rg-motif-slot .rg-card-motif :is(.rg-motif-drift,.rg-motif-objec
 .rg-card-motif:is([data-motif^="place-"],[data-motif-material="projected"]) .rg-motif-support-drift { transform-box: view-box; transform-origin: center; animation: card-object-orbit 49s ease-in-out infinite reverse; }
 @media(prefers-reduced-motion:reduce) { .rg-card-motif:is([data-motif^="place-"],[data-motif-material="projected"]) .rg-motif-support-drift { animation: none !important; } }
 :is(html.calm-mode,:root[data-calm="true"]) .rg-card-motif:is([data-motif^="place-"],[data-motif-material="projected"]) .rg-motif-support-drift { animation: none !important; }
-/* A restrained glass film on the front Placez object; logos stay separate. */
-.rg-card-motif[data-motif^="place-"] .rg-motif-layer--object{filter:blur(.2px)}

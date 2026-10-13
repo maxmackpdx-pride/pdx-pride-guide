@@ -180,7 +180,7 @@ export default function TheBigOne({
         >
           {poster
             ? <img className="tbo__poster-img" src={poster} alt="" loading="lazy" />
-            : <DayMotif day={day} placement="art" />}
+            : <DayMotif glass day={day} placement="art" />}
           <div className="tbo__poster-scrim" aria-hidden="true" />
           <div className="tbo__poster-title">
             <div className="tbo__tags" aria-label="Event tags">
