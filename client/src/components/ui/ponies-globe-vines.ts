@@ -12,7 +12,7 @@ export const VINE_ANCHORS = Array.from({length:12},(_,i) => ({
 }));
 
 // Attach the continuous stem network to actual ink inside each artwork crop.
-const ROOT_UV = [[.38,.43],[.65,.56],[.45,.62],[.48,.6]];
+const ROOT_UV = [[.38,.43],[.65,.56],[.45,.62],[.4924,.6807]];
 const ROOTS = VINE_ANCHORS.map(anchor => {
   const [, ,w,h] = TU[anchor.crop], [u,v] = ROOT_UV[anchor.crop];
   const localX=(u-.5)*1.04, localY=(.5-v)*1.04*h/w;
