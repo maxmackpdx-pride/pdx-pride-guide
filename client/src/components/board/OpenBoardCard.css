@@ -154,3 +154,5 @@
 .ab-open-card--gigz .ab-gig-skills h5 { margin:0 0 var(--space-3); font:var(--open-card-heading-font); color:var(--text-hi); }
 .ab-open-card--gigz .ab-gig-skills>div { display:flex; flex-wrap:wrap; gap:var(--space-2); }
 .ab-open-card--gigz .ab-gig-skills span { padding:var(--space-1) var(--space-2); border:var(--bw-hair) solid color-mix(in srgb,var(--c) 40%,transparent); border-radius:var(--event-card-tag-radius); background:var(--event-card-tag-bg); color:var(--text-hi); font:var(--open-card-meta-font); }
+/* Keep the close control within reach during long phone scrolls, without a bar. */
+.board-post-overlay.ab-open-card .ab-open-card__chrome { position:sticky; top:0; height:0; z-index:6; }

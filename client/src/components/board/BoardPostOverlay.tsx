@@ -104,6 +104,11 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
           style={panelStyle}
         >
           <span className="board-open-card__rule" aria-hidden="true" />
+          {presentation && kind === "gig" ? (
+            <div className="ab-open-card__chrome">
+              <DetailActions label="listing" onClose={requestClose} />
+            </div>
+          ) : <DetailActions label="listing" onClose={requestClose} />}
           {gigArtwork && (
             <div className="ab-open-card__art">
               <UnifiedBoardArt post={gigArtwork} />
@@ -112,7 +117,6 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
               )}
             </div>
           )}
-          <DetailActions label="listing" onClose={requestClose} />
           {post?.isDemo && <p className="board-demo-notice" role="note">Demo listing — example only. Participation is disabled.</p>}
           <fieldset disabled={post?.isDemo} onClickCapture={event => { if (post?.isDemo) { event.preventDefault(); event.stopPropagation(); } }} onKeyDownCapture={event => { if (post?.isDemo && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); event.stopPropagation(); } }} style={{border:0,padding:0,margin:0,minWidth:0}}>{card ?? (
             <div className="board-listing-card board-listing-card--makeover pdx-glass-rebind" style={{ padding: 28, textAlign: "center", "--listing-accent": accent, "--c": accent } as CSSProperties}>
