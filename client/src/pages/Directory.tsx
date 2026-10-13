@@ -191,7 +191,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   );
 
   const { user } = useAuth();
-  const [browseView, setBrowseView] = useState<BrowseView>(() => { const view = new URLSearchParams(window.location.search).get("layout"); return view === "grid" ? "grid" : "browse"; });
+  const [browseView, setBrowseView] = useState<BrowseView>(() => { const params = new URLSearchParams(window.location.search); const type = params.get("type") || params.get("category"); return params.get("layout") === "grid" || Boolean(type && type !== "ALL") ? "grid" : "browse"; });
   const [placeIntent, setPlaceIntent] = useState(false);
   const [discoveryChosen, setDiscoveryChosen] = useState(() => /[?&](type|category|neighborhood|q|place)=/.test(window.location.search));
   const [showAuth, setShowAuth] = useState(false);
@@ -264,7 +264,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       const type = params.get("type");
       setActiveType(isSpaces ? "group" : type?.split(",").filter(isPlacezType).join(",") || "ALL");
       const view = params.get("layout");
-      setBrowseView(view === "grid" ? "grid" : "browse");
+      setBrowseView(view === "grid" || Boolean(type && type !== "ALL") ? "grid" : "browse");
       setSearchQuery(params.get("q") || "");
       setActiveNeighborhood(params.get("neighborhood") || "ALL");
       setActiveSubcategory(params.get('sub') || 'ALL');

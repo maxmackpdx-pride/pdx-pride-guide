@@ -39,6 +39,9 @@ test('discovery effects pause, resume, and survive responsive changes', { skip: 
     await bars.click();
     await page.locator('.eb-grid').waitFor();
     assert.equal(await page.locator('.eb-grid .eb-original-card').count(),count,'selected category must expose every matching card');
+    await page.goto(url('/directory?type=bar'));
+    await page.locator('.eb-grid').waitFor();
+    assert.equal(await page.locator('.eb-grid .eb-original-card').count(),count,'category deep link must expose the same complete set');
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await expectStopped();
     await page.emulateMedia({ reducedMotion: 'no-preference' });

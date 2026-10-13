@@ -344,7 +344,7 @@ export default function Events() {
   const [location, setLocation] = useLocation();
   const routeEventId = routeMatch && routeParams?.id ? Number(routeParams.id) : null;
   const routeDay = useMemo(() => readSearchParam("day").toUpperCase(), [location]);
-  const [activeDay, setActiveDay] = useState(() => readSearchParam("window") || DEFAULT_WINDOW);
+  const [activeDay, setActiveDay] = useState(() => readSearchParam("window") || (readSearchParam("type") ? "ALL" : DEFAULT_WINDOW));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
   const [mapOpen, setMapOpen] = useState(false);
@@ -414,7 +414,7 @@ export default function Events() {
   }, [browseQuery, routeMatch]);
   useEffect(() => {
     const restore = () => {
-      setActiveDay(readSearchParam("window") || DEFAULT_WINDOW);
+      setActiveDay(readSearchParam("window") || (readSearchParam("type") ? "ALL" : DEFAULT_WINDOW));
       setActiveFilters(readSearchParam("type").split("|").filter(isEventTypeFilterLabel));
       setPastView(readSearchParam("past") === "1");
       setSearchQuery(readSearchParam("q"));
