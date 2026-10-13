@@ -278,6 +278,8 @@ export default function Boards() {
         .toLowerCase()
         .includes(query.trim().toLowerCase()),
   ), featureFilters);
+  // A category doorway shows every matching post; the mixed feed loads progressively.
+  const visibleResults = selectedCategory ? results : results.slice(0, limit);
   const clear = () => update({ q: null, intent: null, saved: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null }, true);
   const select = (board: Selection | null) => {
     update({ board:board ?? "choose", q: null, intent: null, saved: null, post: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null });
@@ -564,7 +566,7 @@ export default function Boards() {
                 )}
                 {categoryPosts.some(post=>post.isDemo) && <p className="ab-note" role="note">Demo posts show how Our BoardZ works. They are examples, not available listings.</p>}
                 <div className="ab-card-grid">
-                  {results.slice(0, limit).map((post) => {
+                  {visibleResults.map((post) => {
                     const cat = boardCategories.find(
                       (c) => c.id === post.category,
                     )!;
@@ -679,7 +681,7 @@ export default function Boards() {
                       }
                     />
                   )}
-                {results.length > limit && (
+                {!selectedCategory && results.length > limit && (
                   <button
                     type="button"
                     className="eb-tool ab-more"
