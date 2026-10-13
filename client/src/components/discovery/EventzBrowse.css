@@ -272,7 +272,7 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
   animation: rg-motif-object-drift 49s ease-in-out infinite reverse;
 }
 .eb-page--places .rg-card-motif .rg-motif-surface-grid { opacity: .7; stroke-width: .65; }
-.eb-page--places .rg-card-motif .rg-motif-layer--support .rg-motif-surface-grid { stroke-width: 1.1; }
+.eb-page--places .rg-card-motif .rg-motif-layer--support .rg-motif-surface-grid { opacity: .9; stroke-width: 1.1; }
 .eb-page--places .rg-card-motif .rg-motif-support-contour { opacity: .9; stroke-width: 1.6; }
 @media (prefers-reduced-motion: reduce) {
   .eb-page--places .rg-card-motif .rg-motif-support-drift { animation: none !important; }

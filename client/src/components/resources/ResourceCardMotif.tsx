@@ -74,6 +74,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
  const theme=themeFor(name,category);
  const placeArtwork = isPlace ? distinctPlaceMotif(name) : undefined;
  const silhouette = placeArtwork?.outline ?? (isPlace ? silhouettes[theme] : distinctResourceMotifs[name] ?? silhouettes[theme]);
+ const rightAtTop = Array.from(name).reduce((total, letter) => total + letter.charCodeAt(0), 0) % 2 === 0;
  const supporting = isPlace ? distinctPlaceSupportingMotif(name) : undefined;
  const tilt=(random()-.5)*(isPlace ? 4 : 12);
  const cycle = 28 + Math.round(random() * 8);
@@ -120,7 +121,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
   </g>
   {supporting && <g className="rg-motif-layer rg-motif-layer--support">
    <g className="rg-motif-support-drift" style={{ animationDuration: `${cycle + 17}s`, animationDelay: `${phase - 13}s` }}>
-    <g className="rg-motif-support-position" transform="translate(275 155) scale(.52) translate(-200 -250)">
+    <g className="rg-motif-support-position" transform={`translate(${rightAtTop ? 240 : 160} 140) scale(.6) translate(-200 -250)`}>
      <g fill="none" stroke={paint} strokeLinejoin="round">
       <path className="rg-motif-surface-grid" d={supporting.grid} />
       <path className="rg-motif-support-contour" d={supporting.outline} stroke={`url(#${gradientId}-edge)`} />
@@ -131,7 +132,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
   <g className="rg-motif-layer rg-motif-layer--object">
    <g className="rg-motif-object-drift" style={{ animationDuration: `${cycle + 9}s`, animationDelay: `${phase - 7}s` }}>
   <g className="rg-motif-breathe" style={{ animationDuration: `${cycle + 4}s`, animationDelay: `${phase}s` }}>
-  <g className="rg-motif-object" fill="none" stroke={paint} strokeLinejoin="round" transform={`${isPlace ? "translate(-22 46) " : ""}rotate(${tilt} 200 250)`}>
+  <g className="rg-motif-object" fill="none" stroke={paint} strokeLinejoin="round" transform={`${isPlace ? `translate(${rightAtTop ? -22 : 22} 46) ` : ""}rotate(${tilt} 200 250)`}>
    {placeArtwork && <path className="rg-motif-surface-grid" d={placeArtwork.grid} />}
    {!isPlace && <path className="rg-motif-depth" d={silhouette} transform="translate(5 7)" strokeWidth=".8" strokeDasharray="2 5" />}
    {(isPlace ? [1] : [1.13,1.06,1]).map((scale,i)=><path key={scale} d={silhouette} transform={`translate(200 250) scale(${scale}) translate(-200 -250)`} className={scale===1 ? "rg-motif-contour" : "rg-motif-echo"} stroke={isPlace && scale===1 ? `url(#${gradientId}-edge)` : undefined} strokeWidth={scale===1?1.5:.65} opacity={scale===1?.85:.24} />)}
