@@ -245,3 +245,8 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
   .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__main { gap: 10px; }
   .eb-page--places .eb-original-card .rg-directory-card .rg-directory-footer { min-height: 88px; }
 }
+
+/* Bring the Placez wire mesh and connection points forward. */
+.eb-page--places .rg-card-motif .rg-motif-mesh { opacity: .55; stroke-width: .85; }
+.eb-page--places .rg-card-motif .rg-motif-circuits { opacity: .65; stroke-width: 1; }
+.eb-page--places .rg-card-motif .rg-motif-nodes { opacity: 1; stroke: currentColor; stroke-width: .6; }
