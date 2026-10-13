@@ -216,9 +216,11 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} My Hoüz ${detail ? "details" : "card"}`} tabIndex={-1} className={`hz pdx-glass-rebind board-open-card--shared${presentation ? " ab-open-card ab-open-card--housing" : ""}`} style={panelStyle} onClick={(event) => event.stopPropagation()}>
         <span className="board-open-card__rule" aria-hidden="true" />
         <div style={{ position: "relative", zIndex: 30, padding: 12 }}><DetailActions label="My Hoüz listing" onClose={requestClose} /></div>
-        <div key={detail ? "detail" : "card"} className="houz-overlay-content">
+        {post.isDemo && <p className="board-demo-notice" role="note">Demo listing — example only. Participation is disabled.</p>}
+        <fieldset disabled={post.isDemo} style={{border:0,padding:0,margin:0,minWidth:0}}><div key={detail ? "detail" : "card"} className="houz-overlay-content">
           {detail ? <HousingDetail post={post} h={detailHandlers} isOwner={isOwner} workspace={post.type === "FORMING" ? <HousingWorkspace post={post} onOpenThread={() => openSheet({ view: "inbox" })} /> : undefined} /> : <HousingCard post={post} h={cardHandlers} />}
         </div>
+        </fieldset>
         {reporting ? <div className="hz-sheetwrap" onClick={() => setReporting(false)}><div className="hz-sheet pdx-glass-rebind" onClick={(event) => event.stopPropagation()}>
           <div className="hz-sheet__head"><Mono accent>Report this post</Mono><button className="hz-x" onClick={() => setReporting(false)} aria-label="Close">×</button></div>
           <p className="hz-prose">What is wrong with it? An admin sees this, and the poster does not.</p>

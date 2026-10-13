@@ -162,6 +162,7 @@ function BoardDetail({
       kindColor={cat.color}
       isMine={p.isMine}
       status={p.status}
+      isDemo={p.isDemo}
       source={mizzedSource(p)}
       onClose={onClose}
     />
@@ -171,7 +172,7 @@ function BoardDetail({
 export default function Boards() {
   usePageSeo(
     "All Boards | Zaylist",
-    "Housing, Gigz, Giftz, Sellz, and Mizzed Connections. Find your people and your next thing.",
+    "My Hoüz, Gigz, Giftz, Sellz, and Mizzed Connections. Find your people and your next thing.",
   );
   const { user } = useAuth();
   const { toast } = useToast();
@@ -248,6 +249,7 @@ export default function Boards() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["/api/boards/saved"] });
       void queryClient.invalidateQueries({ queryKey: ["/api/housing"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/housing/mine"] });
       void queryClient.invalidateQueries({
         queryKey: ["/api/sellz/saved/ids"],
       });
@@ -291,13 +293,13 @@ export default function Boards() {
     if (locallyOpened.current) {
       locallyOpened.current = false;
       window.history.back();
-    } else update({ post: null }, true);
+    } else update({ post: null,build:null,join:null,waitlist:null,chat:null }, true);
     requestAnimationFrame(() => lastOpener.current?.focus());
   };
   const open = (key: string, opener?: HTMLButtonElement) => {
     lastOpener.current = opener || lastOpener.current;
     locallyOpened.current = true;
-    update({ post: key }, !!validPost);
+    update({ post: key,compose:null,build:null,join:null,waitlist:null,chat:null }, !!validPost);
   };
   const postNew = () => {
     if (!user) {
@@ -310,12 +312,12 @@ export default function Boards() {
   };
   const posted = (id: number) => {
     const category = compose!;
+    const endpoint = boardCategories.find(c=>c.id === category)!.endpoint;
     setCompose(null);
-    update({compose:null},true);
-    void queryClient.invalidateQueries({
-      queryKey: [boardCategories.find((c) => c.id === category)!.endpoint],
-    });
-    open(`${category}:${id}`);
+    void queryClient.invalidateQueries({queryKey:[endpoint]});
+    void queryClient.invalidateQueries({queryKey:[endpoint+"/mine"]});
+    locallyOpened.current = true;
+    update({compose:null,post:`${category}:${id}`,build:null,join:null,waitlist:null,chat:null});
   };
   useEffect(() => {if(params.get("compose") === "1" && selection && selection !== "all") {if(user) setCompose(selection); else setShowAuth(true);}},[search,user?.id]);
   useEffect(() => setLimit(24), [selection, query, intent, savedOnly,mineOnly]);
@@ -711,7 +713,7 @@ export default function Boards() {
             onSelect={(key) => open(key)}
           />
         )}
-        {compose === "housing" && <RoomComposer id="boards-housing-composer" room="hauz" kicker="New post" title="Post to My Hoüz" onClose={()=>{setCompose(null);update({compose:null},true);}}><div className="ab-housing-composer"><HousingComposer initialType={params.get("type") === "PM" ? "PM" : ({offering:"OFFERING",looking:"LOOKING",forming:"FORMING",managed:"MANAGED"} as const)[intent as "offering"|"looking"|"forming"|"managed"] || null} isPropertyManager={!!pm.data?.approved} managerName={pm.data?.manager?.company || pm.data?.manager?.name || null} viewerDisplayName={user?.displayName ?? null} onClose={()=>{setCompose(null);update({compose:null},true);}} onPosted={posted} /></div></RoomComposer>}
+        {compose === "housing" && <RoomComposer id="boards-housing-composer" room="hauz" kicker="New post" title="Post to My Hoüz" onClose={()=>{setCompose(null);update({compose:null},true);}}><div className="ab-housing-composer"><HousingComposer initialType={params.get("type")?.toUpperCase() === "PM" ? "PM" : ({offering:"OFFERING",looking:"LOOKING",forming:"FORMING",managed:"MANAGED"} as const)[intent as "offering"|"looking"|"forming"|"managed"] || null} isPropertyManager={!!pm.data?.approved} managerName={pm.data?.manager?.company || pm.data?.manager?.name || null} viewerDisplayName={user?.displayName ?? null} onClose={()=>{setCompose(null);update({compose:null},true);}} onPosted={posted} /></div></RoomComposer>}
         {compose === "mizzed" && <RoomComposer id="boards-mizzed-composer" room="mizzed" kicker="New connection" title="Post a connection" intro="Anonymous posts. Private replies. Reveal when you’re both ready." onClose={()=>{setCompose(null);update({compose:null},true);}}>{postableEvents.isError ? <BrowseStatus error title="Event choices could not load" description="Try again to link your connection to an event." actionLabel="Try again" onAction={()=>void postableEvents.refetch()} /> : <MizzedComposer linkableEvents={postableEvents.data || []} initialSource={{eventId:params.get("event") || undefined,placeId:params.get("place") || undefined,beachId:params.get("beach") || undefined}} onPosted={()=>{setCompose(null);update({compose:null},true);void queryClient.invalidateQueries({queryKey:["/api/missed-connections"]});}} />}</RoomComposer>}
         {compose === "gigz" && (
           <GigComposer initialType={intent === "available" ? "LOOKING_FOR_WORK" : "POSTING_GIG"} onClose={() => {setCompose(null);update({compose:null},true);}} onPosted={posted} />

@@ -61,12 +61,7 @@ const Home = lazyWithReload(() => import("./pages/Home"));
 const MapzMapDemo = lazyWithReload(() => import("./pages/MapzMapDemo"));
 const Schedule = lazyWithReload(() => import("./pages/Schedule"));
 const Submit = lazyWithReload(() => import("./pages/Submit"));
-const PrideWork = lazyWithReload(() => import("./pages/PrideWork"));
 const Boards = lazyWithReload(() => import("./pages/Boards"));
-const Gifting = lazyWithReload(() => import("./pages/Gifting"));
-const Sellz = lazyWithReload(() => import("./pages/Sellz"));
-const Housing = lazyWithReload(() => import("./pages/Housing"));
-const HousingNew = lazyWithReload(() => import("./pages/HousingNew"));
 const About = lazyWithReload(() => import("./pages/About"));
 const Resources = lazyWithReload(() => import("./pages/Resources"));
 const Resume = lazyWithReload(() => import("./pages/Resume"));
@@ -77,7 +72,6 @@ const AccessSafety = lazyWithReload(() => import("./pages/AccessSafety"));
 const Admin = lazyWithReload(() => import("./pages/Admin"));
 const Dashboard = lazyWithReload(() => import("./pages/Dashboard"));
 const NotificationSettings = lazyWithReload(() => import("./pages/NotificationSettings"));
-const MizzedBoard = lazyWithReload(() => import("./pages/MizzedBoard"));
 const Directory = lazyWithReload(() => import("./pages/Directory"));
 const RoosterRock = lazyWithReload(() => import("./pages/RoosterRock"));
 const SauvieIsland = lazyWithReload(() => import("./pages/SauvieIsland"));
@@ -189,22 +183,22 @@ function AppLayout() {
             }}</Route>
             <Route path="/the-hauz">{() => <BoardEntrance board="housing" />}</Route>
             <Route path="/hausing/new">
-              {() => <Redirect to="/the-hauz/new" />}
+              {() => <Redirect to={`/the-hauz/new${window.location.search}`} />}
             </Route>
             <Route path="/hausing/:id">
-              {(params) => <Redirect to={`/the-hauz/${params.id}`} />}
+              {(params) => <Redirect to={`/the-hauz/${params.id}${window.location.search}`} />}
             </Route>
             <Route path="/hausing">
-              {() => <Redirect to="/the-hauz" />}
+              {() => <Redirect to={`/the-hauz${window.location.search}`} />}
             </Route>
             <Route path="/housing/new">
-              {() => <Redirect to="/the-hauz/new" />}
+              {() => <Redirect to={`/the-hauz/new${window.location.search}`} />}
             </Route>
             <Route path="/housing/:id">
-              {(params) => <Redirect to={`/the-hauz/${params.id}`} />}
+              {(params) => <Redirect to={`/the-hauz/${params.id}${window.location.search}`} />}
             </Route>
             <Route path="/housing">
-              {() => <Redirect to="/the-hauz" />}
+              {() => <Redirect to={`/the-hauz${window.location.search}`} />}
             </Route>
             <Route path="/resources" component={Resources} />
             <Route path="/rezources" component={Resources} />
