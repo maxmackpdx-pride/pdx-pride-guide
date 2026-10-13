@@ -46,6 +46,7 @@ import "@fontsource/jetbrains-mono/latin-400.css";
 import "@fontsource/jetbrains-mono/latin-600.css";
 import "./Resources.css";
 import "@/components/discovery/EventzDetail.css";
+import "@/components/discovery/OpenCardContinuity.css";
 
 const ResourceDirectoryMap = lazy(() => import("@/components/DirectoryMap"));
 const ResourceBackgroundShader = lazy(() => import("@/components/ui/web-gl-shader").then(({ WebGLShader }) => ({ default: WebGLShader })));
@@ -658,6 +659,27 @@ export default function Resources() {
                   ))}
                 </div>
 
+                <details open className="rg-detail-disclosure event-modal__disclosure"><summary>Getting started & service details<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-detail-meta rg-disclosure-content">
+                  <span className="rg-eyebrow">How to start</span>
+                  <p>{detail.org.howToStart || detail.category.use}</p>
+                  {detail.org.hours && <>
+                    <span className="rg-eyebrow">Hours</span>
+                    <p>{detail.org.hours}</p>
+                  </>}
+                  {detail.org.contactSourceUrl && <a className="rg-source-check" href={detail.org.contactSourceUrl} target="_blank" rel="noopener noreferrer">Contact details checked {detail.org.contactChecked} <ArrowUpRight size={13} /></a>}
+                  {detail.org.mailingAddress && <>
+                    <span className="rg-eyebrow">Mailing address</span>
+                    <p>{detail.org.mailingAddress}</p>
+                  </>}
+                  <span className="rg-eyebrow">Where they serve</span>
+                  <p>{detail.org.scope}</p>
+                  {detail.org.addr && !detail.org.locations && (
+                    <>
+                      <span className="rg-eyebrow">Location</span>
+                      <p>{detail.org.addr}</p>
+                    </>
+                  )}
+                </div></details>
                 {detail.org.phone && <ResourcePhone org={detail.org} />}
                 <div className="rg-detail-actions">
                   {detail.org.email && <a className="pdx-glass-rebind pdxBtn" href={`mailto:${detail.org.email}`}>Email {detail.org.email} <ArrowUpRight size={16} /></a>}
@@ -746,27 +768,6 @@ export default function Resources() {
                 )}
                 </div>
                 <div className="rg-detail-secondary">
-                <details className="rg-detail-disclosure event-modal__disclosure"><summary>Getting started & service details<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-detail-meta rg-disclosure-content">
-                  <span className="rg-eyebrow">How to start</span>
-                  <p>{detail.org.howToStart || detail.category.use}</p>
-                  {detail.org.hours && <>
-                    <span className="rg-eyebrow">Hours</span>
-                    <p>{detail.org.hours}</p>
-                  </>}
-                  {detail.org.contactSourceUrl && <a className="rg-source-check" href={detail.org.contactSourceUrl} target="_blank" rel="noopener noreferrer">Contact details checked {detail.org.contactChecked} <ArrowUpRight size={13} /></a>}
-                  {detail.org.mailingAddress && <>
-                    <span className="rg-eyebrow">Mailing address</span>
-                    <p>{detail.org.mailingAddress}</p>
-                  </>}
-                  <span className="rg-eyebrow">Where they serve</span>
-                  <p>{detail.org.scope}</p>
-                  {detail.org.addr && !detail.org.locations && (
-                    <>
-                      <span className="rg-eyebrow">Location</span>
-                      <p>{detail.org.addr}</p>
-                    </>
-                  )}
-                </div></details>
                 <ResourceLocationMap key={detail.org.name} org={detail.org} color={(detail.sectionCategory ?? detail.category).color} />
                 <small>
                   Check the organization's website for current hours, services,
