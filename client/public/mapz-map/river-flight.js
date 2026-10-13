@@ -710,8 +710,11 @@ function drawLights(fade,target=map,surface=lights){
     const roof=surfaces.roofs?.get(parent.feature.properties.phase)??9;
     const roofPixels=roof*extrusionAmount(target)/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
     const beamAnchor={x:parent.p.x,y:parent.p.y-roofPixels};
-    const projection=eventProjectionGeometry(beamAnchor,{x:logoX,y:hologramTop},beaconScale,eventProjectionHeightLimit(target.getZoom(),target.getPitch()));
-    hologramTop=projection.top+32*beaconScale;
+    // Cap the beam itself, with the artwork/title footprint above its mouth.
+    // Adding the old center offset after the cap pushed overview headers onto roofs.
+    const headerClearance=hologramBounds(feature,beaconScale).halfHeight;
+    const projection=eventProjectionGeometry(beamAnchor,{x:logoX,y:hologramTop+headerClearance+32*beaconScale},beaconScale,eventProjectionHeightLimit(target.getZoom(),target.getPitch()));
+    hologramTop=projection.top-headerClearance;
    if(pass===0){
     lightsContext.save();
     lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*bloomScale;
