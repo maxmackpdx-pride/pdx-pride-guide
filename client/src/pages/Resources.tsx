@@ -1,3 +1,4 @@
+import { CompanyNameMark } from "@/components/CompanyNameMark";
 import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
 import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import BrowseStatus from "@/components/BrowseStatus";
@@ -99,28 +100,17 @@ const HOTLINES = [
 ];
 
 function Mark({ org }: { org: ResourceOrg }) {
-  const letters =
-    org.mark ||
-    org.name
-      .replace(/\(.*?\)/g, "")
-      .split(/\s+/)
-      .filter(
-        (w) => !["the", "and", "of", "for", "&"].includes(w.toLowerCase()),
-      )
-      .slice(0, 3)
-      .map((w) => w[0])
-      .join("");
-  return org.logo ? (
+  const [failedLogo, setFailedLogo] = useState<string | null>(null);
+  return org.logo && failedLogo !== org.logo ? (
     <img
       className={`rg-logo${org.logoSurface === "light" ? " rg-logo--light" : ""}`}
       src={org.logo}
+      onError={() => setFailedLogo(org.logo ?? null)}
       alt={`${org.name} logo`}
       loading="lazy"
     />
   ) : (
-    <span className="rg-mark" aria-hidden="true">
-      {letters}
-    </span>
+    <CompanyNameMark name={org.name} />
   );
 }
 

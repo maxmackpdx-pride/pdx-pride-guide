@@ -4858,3 +4858,13 @@ html.calm-mode .rg-options button,
   .resources-page.rg-door-path .rg-resource-stacks[data-view-all="false"] .rg-stack-card .pdxPlace__body { gap: 10px; }
   .resources-page.rg-door-path .rg-resource-stacks[data-view-all="false"] .rg-stack-card :is(.pdxPlace__main,.rg-directory-footer) { margin-inline: 16px; }
 }
+
+/* The reviewed assets carry their white ink; card effects must not add bloom. */
+:is(.resources-page, .placez-card-surface) .rg-directory-card .pdxPlace__media .pdxPlace__logo,
+.rg-resource-detail .rg-detail-logo .rg-logo {
+  filter: none !important;
+  mix-blend-mode: normal;
+}
+
+/* New tight-cropped assets no longer need the old source-margin enlargement. */
+.rg-directory-card[data-optical-logo="Intersect NW"] .pdxPlace__media .pdxPlace__logo[src*="-white.svg"] { scale: 1; }

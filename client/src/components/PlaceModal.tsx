@@ -1,3 +1,4 @@
+import { CompanyNameMark } from "./CompanyNameMark";
 import { dayComplementToken } from "@/lib/dsColors";
 import { PLACE_ACCENTS } from './discovery/placeTokens';
 import { ResourceCardMotif } from './resources/ResourceCardMotif';
@@ -32,7 +33,7 @@ import VenueFollowButton from "@/components/VenueFollowButton";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
 import { categoryHidesMissedConnections } from "@shared/missedConnections";
 import { resolveBusinessLocations } from "@shared/businessLocations";
-import { directoryFallbackLogo, resolveDirectoryLogo } from "@shared/directoryLogos";
+import { resolveDirectoryLogo } from "@shared/directoryLogos";
 import DirectoryMap from "@/components/DirectoryMap";
 import "./PlaceModal.css";
 import "./RoomDoorways.css";
@@ -217,6 +218,7 @@ export default function PlaceModal({
 }) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [failedLogo, setFailedLogo] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditableFields>(BLANK_FIELDS);
   const [ownerForm, setOwnerForm] = useState<OwnerEditableFields>(BLANK_OWNER_FIELDS);
@@ -470,20 +472,13 @@ export default function PlaceModal({
           <div className="place-modal-panel__identity">
           <div className="eb-detail__art">
             <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={`place-${place.type}`} /></div>
-          <img
+          {failedLogo !== place.name && resolveDirectoryLogo(place.name, place.imageUrl) ? <img
             key={`${place.id}:${place.name}:${place.imageUrl}`}
             className="place-modal-panel__logo"
-            src={resolveDirectoryLogo(place.name, place.imageUrl) || directoryFallbackLogo(place.type)}
+            src={resolveDirectoryLogo(place.name, place.imageUrl)!}
             alt={`${place.name} logo`}
-            onError={(event) => {
-              const image = event.currentTarget;
-              const fallback = directoryFallbackLogo(place.type);
-              if (image.getAttribute("src") !== fallback) {
-                image.src = fallback;
-                image.alt = categoryLabel;
-              }
-            }}
-          />
+            onError={() => setFailedLogo(place.name)}
+          /> : <div className="place-modal-panel__logo"><CompanyNameMark name={place.name} /></div>}
 
           </div>
           <div className="place-modal-panel__identity-text">

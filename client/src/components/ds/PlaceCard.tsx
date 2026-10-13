@@ -84,11 +84,11 @@ const CSS = `
   max-width:100%; max-height:108px; width:auto; height:auto;
   object-fit:contain; object-position:center;
   mix-blend-mode:screen;
-  filter:contrast(1.35) brightness(1.08) drop-shadow(0 0 16px color-mix(in srgb, var(--c) 55%, transparent));
+  filter:none;
 }
 .pdxPlace__logo--fallback{
   max-width:58%; max-height:96px; mix-blend-mode:normal;
-  filter:drop-shadow(0 0 14px color-mix(in srgb, var(--c) 55%, transparent));
+  filter:none;
 }
 /* Solid category chip - filled accent, black type */
 .pdxPlace__cat .pdxBadge,

@@ -1,0 +1,2247 @@
+{
+  "version": "2026-10-13-white-vector",
+  "treatment": "White ink on transparency; no bloom. Native vectors retain publisher geometry. Raster traces are monochrome outlines of official artwork, not original publisher vectors. Text fallbacks use bundled Barlow Condensed 900 with two authored lines.",
+  "entries": [
+    {
+      "name": "Alberta Rose Theatre",
+      "normalized": "albertarosetheatre",
+      "asset": "/directory-logos/albertarosetheatre-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://albertarosetheatre.com",
+      "sourceAsset": "https://albertarosetheatre.com/wp-content/uploads/elementor/thumbs/albertarose_logo_round_alt-ph7zes5a1svhlr7lzl51n9l51o40bhkngtuz9cnky8.png",
+      "checked": "2026-10-13",
+      "ratio": 1.0012070006035003,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Arium Botanicals",
+      "normalized": "ariumbotanicals",
+      "asset": "/directory-logos/ariumbotanicals-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://ariumbotanicals.com/",
+      "sourceAsset": "https://ariumbotanicals.com/cdn/shop/files/Arium_Logo_83118e06-c8bc-42f1-af89-5930c6929e39.png",
+      "checked": "2026-10-13",
+      "ratio": 2.985781990521327,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Backstage",
+      "normalized": "backstage",
+      "asset": "/directory-logos/backstage-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://www.backstage.com",
+      "sourceAsset": "https://www.backstage.com",
+      "checked": "2026-10-13",
+      "ratio": 4.29629038607989,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Backstory Books & Yarn",
+      "normalized": "backstorybooksandyarn",
+      "asset": "/directory-logos/backstorybooksandyarn-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.backstorybooksandyarn.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5e8681ba6c6692546fbc0c8a/1585891384191-HUE94JAFQ8WWR5H43QB6/Backstory.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 1.4416073670992045,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Bad Girls PDX",
+      "normalized": "badgirlspdx",
+      "asset": "/directory-logos/badgirlspdx-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "http://www.pdxbadgirls.net",
+      "sourceAsset": "http://pdxbadgirls.net/wp-content/uploads/2021/09/bad-girls_logo_120x150_09-02.png",
+      "checked": "2026-10-13",
+      "ratio": 0.7613291892099305,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Badlands",
+      "normalized": "badlands",
+      "asset": "/directory-logos/badlands-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.badlandsportland.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/67006feccf01f078fe3a8922/257a5a88-1735-4731-ab5c-f970592d765f/Badlands_logo1.png",
+      "checked": "2026-10-13",
+      "ratio": 7.182572614107885,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Basic Rights Oregon",
+      "normalized": "basicrightsoregon",
+      "asset": "/directory-logos/basicrightsoregon-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.basicrights.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/62a0dd7e540c734aa239ffa7/4f949057-f192-4867-86de-614d6bde952d/bro+logo+square.png",
+      "checked": "2026-10-13",
+      "ratio": 1.3292300968752275,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Bearracuda",
+      "normalized": "bearracuda",
+      "asset": "/directory-logos/bearracuda-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://bearracuda.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 1.8654073199527745,
+      "lines": [
+        "BEAR",
+        "RACUDA"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Beaverton Resource Center",
+      "normalized": "beavertonresourcecenter",
+      "asset": "/resources-logos/beavertonresourcecenter-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://beavertonresourcecenter.org/what-we-do-1",
+      "sourceAsset": "https://img1.wsimg.com/isteam/ip/5ed746d6-e6c4-498d-b93d-1abd0b2e0fad/BRC-Mark_FNL_FULL-COLOR_HORIZ-1-cf8125e.png",
+      "checked": "2026-10-13",
+      "ratio": 5.498817723861416,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Best Coast Barber Co.",
+      "normalized": "bestcoastbarberco",
+      "asset": "/directory-logos/bestcoastbarberco-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://bestcoastbarberco.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5b7644804611a0f710e4e146/a6b8dc5b-72e5-4c0b-b636-b0ac0e5caf59/Image-1.PNG?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 0.9854497354497355,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Beyond These Walls",
+      "normalized": "beyondthesewalls",
+      "asset": "/resources-logos/beyondthesewalls-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://beyondthesewallslgbt.org",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/6354ab4bf2c1a30a8a9b2e9c/98f7da6a-9aa3-4f74-90b6-2492cdb1cde4/Beyond+These+Walls+Logo+PNG+Large.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 2.1826314641064806,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Black & Beyond the Binary Collective",
+      "normalized": "blackandbeyondthebinarycollective",
+      "asset": "/directory-logos/blackandbeyondthebinarycollective-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.blackbeyondthebinarycollective.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5fb42e75300426086615900b/1606164127712-KAVCH3UC9HWPQT23Y71C/49new-49.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 2.7537537537537538,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Bowery Bagels",
+      "normalized": "bowerybagels",
+      "asset": "/directory-logos/bowerybagels-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.bowerybagels.com/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 1.946871310507674,
+      "lines": [
+        "BOWERY",
+        "BAGELS"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Bridge City Mentors",
+      "normalized": "bridgecitymentors",
+      "asset": "/directory-logos/bridgecitymentors-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://bridgecitymentors.com/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.780401416765053,
+      "lines": [
+        "BRIDGE CITY",
+        "MENTORS"
+      ],
+      "reason": "Published artwork cannot form a clear faithful white mark without retaining source bloom or a solid illustration plate."
+    },
+    {
+      "name": "Brown Girl Rise",
+      "normalized": "browngirlrise",
+      "asset": "/directory-logos/browngirlrise-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://browngirlriseportland.org",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.1599763872491144,
+      "lines": [
+        "BROWN",
+        "GIRL RISE"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Business Oregon",
+      "normalized": "businessoregon",
+      "asset": "/directory-logos/businessoregon-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.oregon.gov/biz",
+      "sourceAsset": "https://www.oregon.gov/biz/PublishingImages/Icons/bizOR_logo_black_TM.png",
+      "checked": "2026-10-13",
+      "ratio": 3.041836600447309,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Camp Bar PDX",
+      "normalized": "campbarpdx",
+      "asset": "/directory-logos/campbarpdx-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://campbarpdx.com/",
+      "sourceAsset": "https://campbarpdx.com/images/camplogorainbow.png",
+      "checked": "2026-10-13",
+      "ratio": 3.6346153846153846,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "CAP Northwest & Our House",
+      "normalized": "capnorthwestandourhouse",
+      "asset": "/resources-logos/capnorthwestandourhouse-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.capnw.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5d79a1b111bad12f87bb3532/214ea043-d800-478f-9120-47aef8b42c90/Artboard+10.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 3.3041355170476647,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Cascade AIDS Project (CAP) & Our House",
+      "normalized": "cascadeaidsprojectcapandourhouse",
+      "asset": "/directory-logos/cascadeaidsprojectcapandourhouse-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.capnw.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5d79a1b111bad12f87bb3532/214ea043-d800-478f-9120-47aef8b42c90/Artboard+10.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 3.3041355170476647,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "CASH Oregon",
+      "normalized": "cashoregon",
+      "asset": "/directory-logos/cashoregon-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://cashoregon.org",
+      "sourceAsset": "https://cashoregon.org",
+      "checked": "2026-10-13",
+      "ratio": 1.6300774939713905,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "CC Slaughters",
+      "normalized": "ccslaughters",
+      "asset": "/directory-logos/ccslaughters-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://ccslaughterspdx.com/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.9214876033057853,
+      "lines": [
+        "CC",
+        "SLAUGHTERS"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Club Privata",
+      "normalized": "clubprivata",
+      "asset": "/directory-logos/clubprivata-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.clubprivata.com",
+      "sourceAsset": "https://cdn.prod.website-files.com/5712b98b1b6331b5777255e5/5712ba341b6331b5777256b2_Privata-logo-white-reverse.png",
+      "checked": "2026-10-13",
+      "ratio": 1.6891839125341663,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Coffee Beer",
+      "normalized": "coffeebeer",
+      "asset": "/directory-logos/coffeebeer-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://coffeebeer.me",
+      "sourceAsset": "https://www.coffeebeer.me/cdn/shop/t/2/assets/logo.png?v=182475460565239469221446545156",
+      "checked": "2026-10-13",
+      "ratio": 1.7642596234897443,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Covert Café",
+      "normalized": "covertcafe",
+      "asset": "/directory-logos/covertcafe-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.thecovertcafe.com/",
+      "sourceAsset": "https://www.thecovertcafe.com/_next/image?url=%2Flogo.png&w=256&q=75",
+      "checked": "2026-10-13",
+      "ratio": 1.1695378725731473,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Darcelle XV Showplace",
+      "normalized": "darcellexvshowplace",
+      "asset": "/directory-logos/darcellexvshowplace-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://darcellexv.com",
+      "sourceAsset": "https://darcellexv.com/wp-content/uploads/2025/03/darcelle-oval-logo-goldshadow_transp.png",
+      "checked": "2026-10-13",
+      "ratio": 0.7391195284083782,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Eagle Portland",
+      "normalized": "eagleportland",
+      "asset": "/directory-logos/eagleportland-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.eagleportland.com/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.426210153482881,
+      "lines": [
+        "EAGLE",
+        "PORTLAND"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Eastern Oregon Center for Independent Living",
+      "normalized": "easternoregoncenterforindependentliving",
+      "asset": "/resources-logos/easternoregoncenterforindependentliving-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://eocil.org",
+      "sourceAsset": "https://eocil.org/assets/eocil-logo.png",
+      "checked": "2026-10-13",
+      "ratio": 1.0086151195347834,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Echo Theater",
+      "normalized": "echotheater",
+      "asset": "/directory-logos/echotheater-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://echotheaterpdx.org",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/646fd8af9572cc7b4a12e649/b82cda6d-1c41-406e-89a0-98b3cb1b7fda/wordmark-white.png",
+      "checked": "2026-10-13",
+      "ratio": 1.247969217614365,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Either/Or",
+      "normalized": "eitheror",
+      "asset": "/directory-logos/eitheror-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://eitherorpdx.com",
+      "sourceAsset": "https://eitherorpdx.com/wp-content/uploads/2025/10/image-103.png",
+      "checked": "2026-10-13",
+      "ratio": 1.0677966101694916,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Emergence",
+      "normalized": "emergence",
+      "asset": "/resources-logos/emergence-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://4emergence.com",
+      "sourceAsset": "https://www.4emergence.com/wp-content/uploads/2022/05/logo-emergence.svg",
+      "checked": "2026-10-13",
+      "ratio": 2.1960090932053546,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Energy & utility assistance",
+      "normalized": "energyandutilityassistance",
+      "asset": "/resources-logos/energyandutilityassistance-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://multco.us/info/energy-bill-assistance",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 4.141676505312869,
+      "lines": [
+        "ENERGY & UTILITY",
+        "ASSISTANCE"
+      ],
+      "reason": "Service title rather than organization identity."
+    },
+    {
+      "name": "Escape Bar & Grill",
+      "normalized": "escapebarandgrill",
+      "asset": "/directory-logos/escapebarandgrill-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://escapebarandgrill.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.781582054309327,
+      "lines": [
+        "ESCAPE BAR",
+        "& GRILL"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Evergreen Urgent Care",
+      "normalized": "evergreenurgentcare",
+      "asset": "/resources-logos/evergreenurgentcare-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://evergreenurgent.com/",
+      "sourceAsset": "https://evergreenurgent.com/wp-content/uploads/2024/01/2-scaled-214x52.png",
+      "checked": "2026-10-13",
+      "ratio": 3.5837320574162677,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Eviction & housing crisis support",
+      "normalized": "evictionandhousingcrisissupport",
+      "asset": "/resources-logos/evictionandhousingcrisissupport-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.portland.gov/phb/rental-services/eviction-help-renters",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 4.606257378984652,
+      "lines": [
+        "EVICTION & HOUSING",
+        "CRISIS SUPPORT"
+      ],
+      "reason": "Service title rather than organization identity."
+    },
+    {
+      "name": "Family Peace Center of Washington County",
+      "normalized": "familypeacecenterofwashingtoncounty",
+      "asset": "/resources-logos/familypeacecenterofwashingtoncounty-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.fpcwc.org/services",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.227272727272727,
+      "lines": [
+        "FAMILY PEACE",
+        "CENTER"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "FANTASY",
+      "normalized": "fantasy",
+      "asset": "/directory-logos/fantasy-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.fantasyforadultsonly.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 4.039551357733176,
+      "lines": [
+        "FANTASY",
+        "FOR ADULTS ONLY"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Fantasy Land",
+      "normalized": "fantasyland",
+      "asset": "/directory-logos/fantasyland-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": null,
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.1605667060212514,
+      "lines": [
+        "FANTASY",
+        "LAND"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Fertile Ground Festival",
+      "normalized": "fertilegroundfestival",
+      "asset": "/directory-logos/fertilegroundfestival-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://fertilegroundpdx.org",
+      "sourceAsset": "https://fertilegroundpdx.org/wp-content/uploads/2026/08/FG-Logo-Refresh-WITH-PATA-FOOTER.png",
+      "checked": "2026-10-13",
+      "ratio": 1.1371841155234657,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Foundation for Contemporary Arts",
+      "normalized": "foundationforcontemporaryarts",
+      "asset": "/directory-logos/foundationforcontemporaryarts-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://foundationforcontemporaryarts.org",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 4.9185360094451,
+      "lines": [
+        "FOUNDATION FOR",
+        "CONTEMPORARY ARTS"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Friendly House",
+      "normalized": "friendlyhouse",
+      "asset": "/resources-logos/friendlyhouse-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://fhpdx.org/for-adults-seniors/elder-pride-services/",
+      "sourceAsset": "https://fhpdx.org/wp-content/uploads/2020/01/Friendly-House-Logo-horizontal.svg",
+      "checked": "2026-10-13",
+      "ratio": 2.599580890792439,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Friendship Kitchen",
+      "normalized": "friendshipkitchen",
+      "asset": "/directory-logos/friendshipkitchen-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://friendshipkitchenpdx.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.6298701298701297,
+      "lines": [
+        "FRIENDSHIP",
+        "KITCHEN"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Full Spectrum Therapy",
+      "normalized": "fullspectrumtherapy",
+      "asset": "/directory-logos/fullspectrumtherapy-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.fullspectrumpdx.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/58a760f0db29d650285103cd/1599353441158-ZNRIZ7JCOOOWSVTFZ3SQ/full+spectrum+logo-linkedin_profile.png",
+      "checked": "2026-10-13",
+      "ratio": 2.0094637223974763,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Future Prairie",
+      "normalized": "futureprairie",
+      "asset": "/directory-logos/futureprairie-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://futureprairie.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 1.820543093270366,
+      "lines": [
+        "FUTURE",
+        "PRAIRIE"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Gaylabration",
+      "normalized": "gaylabration",
+      "asset": "/directory-logos/gaylabration-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://gaylabration.org",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/54f5fe6fe4b0b85c67f4c4b2/1561409275536-AACQ5WNX19691P2EZIG3/GAYLABRATION+Dark+Pink+TM.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 2.954971857410882,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "GiGi's Cafe",
+      "normalized": "gigiscafe",
+      "asset": "/directory-logos/gigiscafe-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://gigiscafepdx.com/",
+      "sourceAsset": "https://gigiscafepdx.com/wp-content/uploads/2024/12/gg_logo_front_lg_white_shadow.png",
+      "checked": "2026-10-13",
+      "ratio": 5.531468531468532,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Greenhouse Hair Collective",
+      "normalized": "greenhousehaircollective",
+      "asset": "/directory-logos/greenhousehaircollective-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.greenhousepdx.com/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.8907910271546635,
+      "lines": [
+        "GREENHOUSE",
+        "HAIR COLLECTIVE"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Hand Up Project",
+      "normalized": "handupproject",
+      "asset": "/resources-logos/handupproject-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://handupproject.org",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.073199527744982,
+      "lines": [
+        "HAND UP",
+        "PROJECT"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Happylucky No. 1",
+      "normalized": "happyluckyno1",
+      "asset": "/directory-logos/happyluckyno1-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": null,
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.000590318772137,
+      "lines": [
+        "HAPPYLUCKY",
+        "NO. 1"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Hawks PDX",
+      "normalized": "hawkspdx",
+      "asset": "/directory-logos/hawkspdx-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://hawkspdx.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/598f8fd1f43b5572af3d9c14/ca8f685c-187c-4bf4-8e3f-9039a4b6434f/HawksPDX+logo+%28transparent+background%29.png",
+      "checked": "2026-10-13",
+      "ratio": 1.1889287738522576,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "HIV Alliance · Syringe Services",
+      "normalized": "hivalliancesyringeservices",
+      "asset": "/resources-logos/hivalliancesyringeservices-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://hivalliance.org/services/syringe-services/",
+      "sourceAsset": "https://hivalliance.org/wp-content/uploads/2024/09/HIVA-logo-reversed.png",
+      "checked": "2026-10-13",
+      "ratio": 5.286439817166073,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Holocene",
+      "normalized": "holocene",
+      "asset": "/directory-logos/holocene-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.holocene.org",
+      "sourceAsset": "https://www.holocene.org/wp-content/uploads/2021/03/Holocene-Logo-Black-Transparent.png",
+      "checked": "2026-10-13",
+      "ratio": 4.651898734177215,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "HomePlate Youth Services",
+      "normalized": "homeplateyouthservices",
+      "asset": "/resources-logos/homeplateyouthservices-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.homeplateyouth.org/drop-in",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/613fa13d8568b45dd0d152ce/a254c378-fd40-4059-847c-4c9375051e91/HomePlate_logo_green-w-purple_horizontal.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 3.580178442247408,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Honeyed Words",
+      "normalized": "honeyedwords",
+      "asset": "/directory-logos/honeyedwords-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": null,
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.092680047225502,
+      "lines": [
+        "HONEYED",
+        "WORDS"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Hunny Beez",
+      "normalized": "hunnybeez",
+      "asset": "/directory-logos/hunnybeez-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://hunnybeezpdx.com/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 1.5932703659976388,
+      "lines": [
+        "HUNNY",
+        "BEEZ"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "IL Youth 2 Youth",
+      "normalized": "ilyouth2youth",
+      "asset": "/directory-logos/ilyouth2youth-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.ilyouth2.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/665fbcbf3db5c22170d57a4f/c43e0348-6b5e-46e9-9fa5-109ad09e0ecb/041924-ILYouth2-LogoALL-41.png",
+      "checked": "2026-10-13",
+      "ratio": 2.740085800983572,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Inbundance Wealth Management",
+      "normalized": "inbundancewealthmanagement",
+      "asset": "/directory-logos/inbundancewealthmanagement-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://inbundance.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/629d4db06964453874b09d42/4e39a40c-4cbf-437b-abbf-a645795edab9/Full+Logo+Horizontal.png",
+      "checked": "2026-10-13",
+      "ratio": 3.3569482288828336,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Independent Publishing Resource Center",
+      "normalized": "independentpublishingresourcecenter",
+      "asset": "/directory-logos/independentpublishingresourcecenter-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.iprc.org",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/65a04ea0c7342f223c8e2ea1/827f1e55-6120-4d89-8e4d-af16a67752bb/IPRC-Logo-Black-Header.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 3.5041656748393235,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Intersect NW",
+      "normalized": "intersectnw",
+      "asset": "/resources-logos/intersectnw-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://intersectnorthwest.org",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/6462bdfd71c5e61841caa4d6/eb68112d-021c-41ef-9cf9-62fc28ac5296/INTERSECT-logo-medINTERSECT+logo+sq+wh.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 0.9941049322067204,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Jackie's",
+      "normalized": "jackies",
+      "asset": "/directory-logos/jackies-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.jackiespdx.com",
+      "sourceAsset": "https://jackiespdx.com/cdn/shop/files/coverpage-01_150x.png?v=1624039631",
+      "checked": "2026-10-13",
+      "ratio": 3.089775561097257,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Just in Case Oregon · Free Naloxone",
+      "normalized": "justincaseoregonfreenaloxone",
+      "asset": "/resources-logos/justincaseoregonfreenaloxone-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://justincaseoregon.org/",
+      "sourceAsset": "https://justincaseoregon.org/brand/jico-logo-horizontal-color.png",
+      "checked": "2026-10-13",
+      "ratio": 2.664209244182319,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Kann",
+      "normalized": "kann",
+      "asset": "/directory-logos/kann-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://kannrestaurant.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/61293e699619755e4417d700/d05a66e7-b4a8-4372-8068-ebf20a8eb37f/Kann+web+cream.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 2.626101552664708,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Lavender League",
+      "normalized": "lavenderleague",
+      "asset": "/directory-logos/lavenderleague-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://lavenderleaguepdx.org",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/646d78fbbfe5e90d1d1ae9fb/5b08e883-ef03-4be8-9828-3a86d80f42c7/IMG_2552+%281%29.PNG?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 0.8895379713223579,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Lesbian Culture Club",
+      "normalized": "lesbiancultureclub",
+      "asset": "/directory-logos/lesbiancultureclub-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://lesbiancultureclub.com",
+      "sourceAsset": "https://lesbiancultureclub.com/cdn/shop/files/LCC-Wordmark-DarkGreen.svg?crop=center&height=1000&v=1723506347&width=1000",
+      "checked": "2026-10-13",
+      "ratio": 7.112682184033064,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Living Room Wines",
+      "normalized": "livingroomwines",
+      "asset": "/directory-logos/livingroomwines-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://livingroomwinespdx.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/65e9db99b535dc28f3e1fc31/5531ed3e-98e2-469e-ac0a-bee3992fe172/LRW_store+signage+%281%29.jpg?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 5.471830985915492,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "MakeWithPDX",
+      "normalized": "makewithpdx",
+      "asset": "/directory-logos/makewithpdx-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://makewithpdx.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/655e742f3e845e7ad0cd4702/f8bf7a3f-7fa9-4e3e-9979-8b2fe051c95c/MW_Wordmark_Cream_Small.png",
+      "checked": "2026-10-13",
+      "ratio": 3.9473684210526314,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Marsha's Folx | Bradley Angle",
+      "normalized": "marshasfolxbradleyangle",
+      "asset": "/resources-logos/marshasfolxbradleyangle-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.bradleyangle.org/marshas-folx",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/672405ec9381ed71f8eeffc0/4521ccf5-f54a-4998-aa79-5a92cd84ae6a/Bradley-Angle_Logo_Stacked_Horiz_Color+%281%29.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 3.004008016032064,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Mid-Willamette Trans Support Network",
+      "normalized": "midwillamettetranssupportnetwork",
+      "asset": "/resources-logos/midwillamettetranssupportnetwork-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://midwillamettetsn.wixsite.com/oursite",
+      "sourceAsset": "https://static.wixstatic.com/media/d3d37d_b47f1171e29d4266bd9e6d66adf355b9~mv2.png",
+      "checked": "2026-10-13",
+      "ratio": 0.9210220673635308,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Mis Tacones",
+      "normalized": "mistacones",
+      "asset": "/directory-logos/mistacones-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://mistaconespdx.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.1210153482880756,
+      "lines": [
+        "MIS",
+        "TACONES"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Montavilla Station",
+      "normalized": "montavillastation",
+      "asset": "/directory-logos/montavillastation-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://montavillastation.com/",
+      "sourceAsset": "https://montavillastation.com/wp-content/uploads/2018/12/Montavilla_station_logo_header-12-298x300.png",
+      "checked": "2026-10-13",
+      "ratio": 0.9832606493106031,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Mr. Peeps",
+      "normalized": "mrpeeps",
+      "asset": "/directory-logos/mrpeeps-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.mrpeeps.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 1.4645808736717827,
+      "lines": [
+        "MR.",
+        "PEEPS"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Multnomah County · Free Outreach Testing",
+      "normalized": "multnomahcountyfreeoutreachtesting",
+      "asset": "/resources-logos/multnomahcountyfreeoutreachtesting-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://multco.us/services/hiv-testing",
+      "sourceAsset": "https://multco.us/themes/custom/multnomah_gov_theme/assets/images/logo.svg",
+      "checked": "2026-10-13",
+      "ratio": 2.949994979415604,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Multnomah County Cultural Coalition",
+      "normalized": "multnomahcountyculturalcoalition",
+      "asset": "/directory-logos/multnomahcountyculturalcoalition-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.multcoculturalcoalition.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/6894f10d2c3ea10337a5df37/7c5e6fd1-9da0-49b8-91cb-e35a8b0a0bbc/MCCC+logo+300.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 3.585979628520072,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Multnomah County Harm Reduction",
+      "normalized": "multnomahcountyharmreduction",
+      "asset": "/resources-logos/multnomahcountyharmreduction-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://multco.us/services/syringe-exchange",
+      "sourceAsset": "https://multco.us/themes/custom/multnomah_gov_theme/assets/images/logo.svg",
+      "checked": "2026-10-13",
+      "ratio": 2.949994979415604,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "NAYA",
+      "normalized": "naya",
+      "asset": "/resources-logos/naya-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://nayapdx.org/services/two-spirit-safe-space-alliance",
+      "sourceAsset": "https://cdn.prod.website-files.com/6786f6413e94faa2908eb35e/680ff42d5b359199f1b37946_NAYA%20Web%20Logo%20(1).png",
+      "checked": "2026-10-13",
+      "ratio": 1.7898753850850657,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "New Avenues for Youth / SMYRC",
+      "normalized": "newavenuesforyouthsmyrc",
+      "asset": "/directory-logos/newavenuesforyouthsmyrc-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://newavenues.org/smyrc/",
+      "sourceAsset": "http://newavenues.org/wp-content/uploads/2021/10/Logo-white.svg",
+      "checked": "2026-10-13",
+      "ratio": 0.9945578231292518,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Northwest Gender Alliance",
+      "normalized": "northwestgenderalliance",
+      "asset": "/resources-logos/northwestgenderalliance-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.nwgenderalliance.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/61731abb28236a4dc1eeb87b/7b876c1e-18c4-4999-bebc-340f49374234/NWG+%282500+%C3%97+500+px%29+%284200+%C3%97+1800+px%29+%284600+%C3%97+1800+px%29.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 2.940549635445878,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Nova PDX",
+      "normalized": "novapdx",
+      "asset": "/directory-logos/novapdx-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": null,
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 1.3175914994096811,
+      "lines": [
+        "NOVA",
+        "PDX"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "OGALLA",
+      "normalized": "ogalla",
+      "asset": "/resources-logos/ogalla-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.ogalla.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/641bc574c72ca25e9491779d/b37efbbb-6ed0-469c-b97c-1478430d78ac/OGALLA_Full_Color_Horizontal%404x.jpg?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 3.2849551643972106,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "OHSU Transgender Health Program",
+      "normalized": "ohsutransgenderhealthprogram",
+      "asset": "/resources-logos/ohsutransgenderhealthprogram-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://www.ohsu.edu/transgender-health",
+      "sourceAsset": "https://www.ohsu.edu/transgender-health#inline-logo",
+      "checked": "2026-10-13",
+      "ratio": 0.6042700654169945,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Open Space Dance",
+      "normalized": "openspacedance",
+      "asset": "/directory-logos/openspacedance-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://openspace.dance",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.7744982290436835,
+      "lines": [
+        "OPEN SPACE",
+        "DANCE"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Oregon Arts Commission",
+      "normalized": "oregonartscommission",
+      "asset": "/directory-logos/oregonartscommission-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.oregonartscommission.org",
+      "sourceAsset": "https://www.oregon.gov/biz/aboutus/artscommission/resources/commission_logos/Arts%20Logos/OAC-logo.png",
+      "checked": "2026-10-13",
+      "ratio": 0.9192451174017995,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Oregon Department of Veterans' Affairs",
+      "normalized": "oregondepartmentofveteransaffairs",
+      "asset": "/resources-logos/oregondepartmentofveteransaffairs-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://www.oregon.gov/odva/resources",
+      "sourceAsset": "https://www.oregon.gov/ODVA/Style%20Library/Images/ODVA-Logo.svg",
+      "checked": "2026-10-13",
+      "ratio": 1,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Oregon Free HIV & Syphilis Lab Testing",
+      "normalized": "oregonfreehivandsyphilislabtesting",
+      "asset": "/resources-logos/oregonfreehivandsyphilislabtesting-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://www.oregon.gov/oha/PH/DiseasesConditions/HIVSTDViralHepatitis/HIVPrevention/Pages/index.aspx",
+      "sourceAsset": "https://www.oregon.gov/oha/Style%20Library/Images/OHA-Full-Color.svg",
+      "checked": "2026-10-13",
+      "ratio": 2.80288242342413,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Oregon Health Plan (OHP)",
+      "normalized": "oregonhealthplanohp",
+      "asset": "/resources-logos/oregonhealthplanohp-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://one.oregon.gov/",
+      "sourceAsset": "https://www.oregon.gov/oha/Style%20Library/Images/OHA-Full-Color.svg",
+      "checked": "2026-10-13",
+      "ratio": 2.80288242342413,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Oregon Pride in Business",
+      "normalized": "oregonprideinbusiness",
+      "asset": "/directory-logos/oregonprideinbusiness-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.orpib.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/6789c3b70c8e5900dcba6a4d/6623214f-0dcd-4ffd-a9a2-01381f26746e/cropped-NEW-ORPIB-LOGO-MAIN.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 2.513443191673894,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Oregon Queer History Project",
+      "normalized": "oregonqueerhistoryproject",
+      "asset": "/resources-logos/oregonqueerhistoryproject-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://glapn.org",
+      "sourceAsset": "https://glapn.org/0000-OQHC_transition/OQHC%20x200px.jpg",
+      "checked": "2026-10-13",
+      "ratio": 2.1905424200278163,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Oregon State Bar",
+      "normalized": "oregonstatebar",
+      "asset": "/resources-logos/oregonstatebar-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.osbar.org/public/ris",
+      "sourceAsset": "https://www.osbar.org/_images/_/index/new/publiclogo.png",
+      "checked": "2026-10-13",
+      "ratio": 2.007387508394896,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Oregon State Leather Contest",
+      "normalized": "oregonstateleathercontest",
+      "asset": "/directory-logos/oregonstateleathercontest-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://oslcontest.org",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/61fc7ed13dd33145ef504fa9/f1f9736a-70d3-477e-b887-7c11d68fd655/OSLC%2B-%2BHorizontal%2B-%2BRGB.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 1.9825551564905077,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Ori Gallery",
+      "normalized": "origallery",
+      "asset": "/directory-logos/origallery-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://oriartgallery.org",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/58db2b5129687fd202ac76be/84c72ac7-e2c5-4592-ac52-e583a82046f3/Ori-Gallery--logo-white.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 0.7497450380481682,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Outside In",
+      "normalized": "outsidein",
+      "asset": "/directory-logos/outsidein-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://outsidein.org/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 1.9256198347107438,
+      "lines": [
+        "OUTSIDE",
+        "IN"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "P:EAR",
+      "normalized": "pear",
+      "asset": "/directory-logos/pear-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.pearmentor.org",
+      "sourceAsset": "https://www.pearmentor.org/wp-content/themes/pear2021/img/pear-logo.png",
+      "checked": "2026-10-13",
+      "ratio": 2.2464256910330667,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Pairs With Pride",
+      "normalized": "pairswithpride",
+      "asset": "/resources-logos/pairswithpride-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://perfectpair.org/pairs-with-pride",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.627508854781582,
+      "lines": [
+        "PAIRS",
+        "WITH PRIDE"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "PDX Gaymers",
+      "normalized": "pdxgaymers",
+      "asset": "/directory-logos/pdxgaymers-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://pdxgaymers.org",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.153482880755608,
+      "lines": [
+        "PDX",
+        "GAYMERS"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "PDX PAH - Portland Pets & Handlers",
+      "normalized": "pdxpahportlandpetsandhandlers",
+      "asset": "/directory-logos/pdxpahportlandpetsandhandlers-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.pdxpah.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/59372f5bebbd1aec221c42ff/1496800600700-OGK3KNPJF7AT0E3SWVHK/banner_logo.jpg?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 0.9975673538891929,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "PDX Transparent",
+      "normalized": "pdxtransparent",
+      "asset": "/resources-logos/pdxtransparent-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://transparentusa.org/chapters-oregon",
+      "sourceAsset": "https://transparentusa.org/wp-content/uploads/2020/04/TransParent-Logo-Newsletter.svg",
+      "checked": "2026-10-13",
+      "ratio": 3.9138649725952948,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "PDXBackstage",
+      "normalized": "pdxbackstage",
+      "asset": "/directory-logos/pdxbackstage-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://groups.io",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.7101534828807554,
+      "lines": [
+        "PDX",
+        "BACKSTAGE"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Peacock PDX",
+      "normalized": "peacockpdx",
+      "asset": "/directory-logos/peacockpdx-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://peacockpdx.com",
+      "sourceAsset": "https://img1.wsimg.com/isteam/ip/b3eac825-ddd3-4e51-bcc7-0b2cb512e9ec/Peacock%20Logo%20BW%20words.png/:/rs=h:200,cg:true,m/qt=q:95",
+      "checked": "2026-10-13",
+      "ratio": 1.19551466359977,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "People Like Us",
+      "normalized": "peoplelikeus",
+      "asset": "/resources-logos/peoplelikeus-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://wallowalgbtq.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/67a4fb016ab977696a2b9918/546ae17e-39bb-4256-8245-1d844414948d/WC+LGBTQIA+logo.png",
+      "checked": "2026-10-13",
+      "ratio": 1.4068961235176025,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "PFLAG Portland",
+      "normalized": "pflagportland",
+      "asset": "/resources-logos/pflagportland-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://pflagpdx.org/",
+      "sourceAsset": "https://pflagpdx.org/wp-content/uploads/2024/12/portland-1000x750-no-bg-e1734046057423.png",
+      "checked": "2026-10-13",
+      "ratio": 1.1535836177474403,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "PFLAG Vancouver",
+      "normalized": "pflagvancouver",
+      "asset": "/resources-logos/pflagvancouver-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://vancouver.pflag.org/meeting-info/",
+      "sourceAsset": "https://vancouver.pflag.org/meeting-info/",
+      "checked": "2026-10-13",
+      "ratio": 1.5355542450661503,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Pink Ponies",
+      "normalized": "pinkponies",
+      "asset": "/directory-logos/pinkponies-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://events.humanitix.com/host/pink-ponies",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 1.6576151121605667,
+      "lines": [
+        "PINK",
+        "PONIES"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Pizza Thief",
+      "normalized": "pizzathief",
+      "asset": "/directory-logos/pizzathief-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://pizzathief.com/",
+      "sourceAsset": "https://pizzathief.com/wp-content/uploads/2024/11/PIZZA-THIEF-Nav-new.png",
+      "checked": "2026-10-13",
+      "ratio": 5.944375772558714,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Plus Psychiatry",
+      "normalized": "pluspsychiatry",
+      "asset": "/directory-logos/pluspsychiatry-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.pluspsychiatry.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/658f36223b38c97cdaa09d2c/48d119d7-d399-4646-928e-37f369025a0c/Logo+%2BPsych+jpg.jpg?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 1.4293559660509236,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Portland Area Theatre Alliance",
+      "normalized": "portlandareatheatrealliance",
+      "asset": "/directory-logos/portlandareatheatrealliance-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://portlandtheatre.com",
+      "sourceAsset": "https://portlandtheatre.com/wp-content/uploads/2022/08/PATA-Logo-Red.png",
+      "checked": "2026-10-13",
+      "ratio": 2.813168991242297,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Portland Frontrunners",
+      "normalized": "portlandfrontrunners",
+      "asset": "/directory-logos/portlandfrontrunners-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://pdxfrontrunners.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5bf385d0d274cb3fb374ea2b/098137a5-0c1b-4e72-a0fd-70e9e2b4eb0b/PFR+Header.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 1.5850727387729284,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Portland Gay Men's Chorus",
+      "normalized": "portlandgaymenschorus",
+      "asset": "/directory-logos/portlandgaymenschorus-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.pdxgmc.org/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.4397874852420305,
+      "lines": [
+        "PORTLAND GAY",
+        "MEN'S CHORUS"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Portland Leather Alliance",
+      "normalized": "portlandleatheralliance",
+      "asset": "/directory-logos/portlandleatheralliance-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "http://www.portlandleather.org",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 4.338842975206612,
+      "lines": [
+        "PORTLAND",
+        "LEATHER ALLIANCE"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Portland Playhouse",
+      "normalized": "portlandplayhouse",
+      "asset": "/directory-logos/portlandplayhouse-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.portlandplayhouse.org",
+      "sourceAsset": "https://portlandplayhouse.org/wp-content/uploads/2018/11/pp_logo_white.png",
+      "checked": "2026-10-13",
+      "ratio": 0.8566308243727598,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Portland Queer Arts Foundation",
+      "normalized": "portlandqueerartsfoundation",
+      "asset": "/directory-logos/portlandqueerartsfoundation-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://portlandqueerarts.foundation",
+      "sourceAsset": "https://portlandqueerarts.foundation/wp-content/themes/pqa/assets/images/brand-assets/logos/Foundation-Logo-Horizontal-Dark-TransparentBG-1024.png",
+      "checked": "2026-10-13",
+      "ratio": 3.936507936507936,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Portland Small Business Development Center",
+      "normalized": "portlandsmallbusinessdevelopmentcenter",
+      "asset": "/directory-logos/portlandsmallbusinessdevelopmentcenter-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://oregonsbdc.org",
+      "sourceAsset": "https://oregonsbdc.org/wp-content/uploads/2023/01/Oregon_SBDC-Logo-Header.jpg",
+      "checked": "2026-10-13",
+      "ratio": 1.6342412451361867,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Pride Foundation",
+      "normalized": "pridefoundation",
+      "asset": "/resources-logos/pridefoundation-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://pridefoundation.org",
+      "sourceAsset": "https://pridefoundation.org/wp-content/uploads/2018/09/logo-pride-foundation-white.svg",
+      "checked": "2026-10-13",
+      "ratio": 3.8437486830012713,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Pride Northwest",
+      "normalized": "pridenorthwest",
+      "asset": "/directory-logos/pridenorthwest-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.pridenw.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5b99853a365f02c7e5f464fd/1575402510903-Q132W0ISKHERIN2CNE8O/Artboard+1.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 0.767465372560914,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Prism Health",
+      "normalized": "prismhealth",
+      "asset": "/directory-logos/prismhealth-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.prismhealth.org",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/62d85b8b2cd5533f553ee78c/f763c925-1492-4be0-9408-26bbc4b03b53/Prism-Logo-2023.png",
+      "checked": "2026-10-13",
+      "ratio": 5.466086956521739,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Process",
+      "normalized": "process",
+      "asset": "/directory-logos/process-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.processpdx.club",
+      "sourceAsset": "https://cdn.prod.website-files.com/65f4d8dfe382f6096dff03e3/661332ed5902f9c02f9c3bbe_logo.png",
+      "checked": "2026-10-13",
+      "ratio": 1.070733863837312,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Prosper Portland",
+      "normalized": "prosperportland",
+      "asset": "/directory-logos/prosperportland-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://prosperportland.us",
+      "sourceAsset": "https://prosperportland.us/wp-content/uploads/2024/11/ProsperPortland_FullColor_Banner.svg",
+      "checked": "2026-10-13",
+      "ratio": 2.7952060594164303,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Q Center",
+      "normalized": "qcenter",
+      "asset": "/directory-logos/qcenter-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.pdxqcenter.org",
+      "sourceAsset": "https://static.wixstatic.com/media/312949_58ad0c6b069848179ae7323543083ee1~mv2.png/v1/fill/w_283,h_283,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/2026%20Q%20Logo1.png",
+      "checked": "2026-10-13",
+      "ratio": 0.9312980377002018,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Q Restaurant & Bar",
+      "normalized": "qrestaurantandbar",
+      "asset": "/directory-logos/qrestaurantandbar-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://q-portland.com/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.4220779220779223,
+      "lines": [
+        "Q RESTAURANT",
+        "& BAR"
+      ],
+      "reason": "Source reduces to a backplate"
+    },
+    {
+      "name": "Queer Social Club",
+      "normalized": "queersocialclub",
+      "asset": "/directory-logos/queersocialclub-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://queersocialclub.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/62155dfcfc6583248de4ebac/829441f5-8535-4984-921f-3ab48f9e9c1f/QSC+Email+Banner+%282%29.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 3.550842533410808,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Queer Youth Resource Center",
+      "normalized": "queeryouthresourcecenter",
+      "asset": "/resources-logos/queeryouthresourcecenter-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.qyrcvancouverwa.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/58ec48a76b8f5b270c1381ca/5f68fcc2-5d4a-4f25-b4a2-5c7d8838e3be/QUEER+YOUTH+LOGO+WHITE.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 4.708563535911603,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Quest Center for Integrative Health",
+      "normalized": "questcenterforintegrativehealth",
+      "asset": "/resources-logos/questcenterforintegrativehealth-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://quest-center.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/601b7e255d76be323d84ded6/6a246fd7-4b1b-4cbe-90f4-cd4a8988529f/Lockup-Purple+%281%29+%281%29.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 3.409090909090909,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Radical Faerie Arts Fest",
+      "normalized": "radicalfaerieartsfest",
+      "asset": "/directory-logos/radicalfaerieartsfest-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.radfaf.org",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.628099173553719,
+      "lines": [
+        "RADICAL FAERIE",
+        "ARTS FEST"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Rahab's Sisters",
+      "normalized": "rahabssisters",
+      "asset": "/resources-logos/rahabssisters-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://rahabs-sisters.org",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5b3a6a3a1137a6a0b2c213ca/8f994441-7238-46f7-baf3-6165eebec83a/Untitled+design+%281%29.png",
+      "checked": "2026-10-13",
+      "ratio": 2.7842341022313395,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Rainbow Youth",
+      "normalized": "rainbowyouth",
+      "asset": "/resources-logos/rainbowyouth-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://rainbowyouth.org",
+      "sourceAsset": "https://rainbowyouth.org/wp-content/uploads/2025/08/newest-Rainbow-Youth-logo-Update-8.14-355x200.png",
+      "checked": "2026-10-13",
+      "ratio": 2.855146124523507,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "REALM PDX",
+      "normalized": "realmpdx",
+      "asset": "/directory-logos/realmpdx-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.realmpdx.com",
+      "sourceAsset": "https://realmpdx.com/wp-content/uploads/2025/06/REALM-LOGO-NEW-WHITE-300x78.webp",
+      "checked": "2026-10-13",
+      "ratio": 2.811548223350254,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Rebel Heart Therapy",
+      "normalized": "rebelhearttherapy",
+      "asset": "/directory-logos/rebelhearttherapy-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.rebelheartpdx.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/603c0a4cf4a6a57df7ecd7c9/a2ede39d-8685-4dba-975d-6e30bef429f0/Logo+for+Website+Header.png",
+      "checked": "2026-10-13",
+      "ratio": 1.9885931558935361,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Regional Arts & Culture Council",
+      "normalized": "regionalartsandculturecouncil",
+      "asset": "/directory-logos/regionalartsandculturecouncil-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://racc.org",
+      "sourceAsset": "https://racc.org/wp-content/uploads/2023/10/RACC-Logo.png",
+      "checked": "2026-10-13",
+      "ratio": 4.249427917620138,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Ring Ding Ding",
+      "normalized": "ringdingding",
+      "asset": "/directory-logos/ringdingding-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": null,
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.258559622195986,
+      "lines": [
+        "RING",
+        "DING DING"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Rogue Action Center",
+      "normalized": "rogueactioncenter",
+      "asset": "/resources-logos/rogueactioncenter-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://rogueactioncenter.org",
+      "sourceAsset": "https://static.wixstatic.com/media/85835d_a40ad4eb7571461eb88663dc03873830~mv2.png",
+      "checked": "2026-10-13",
+      "ratio": 5.884723523898781,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Roots & Crowns",
+      "normalized": "rootsandcrowns",
+      "asset": "/directory-logos/rootsandcrowns-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://rootsandcrowns.com",
+      "sourceAsset": "https://www.rootsandcrowns.com/cdn/shop/files/Newest_Logo_x100.jpg?v=1613720515",
+      "checked": "2026-10-13",
+      "ratio": 4.336520076481836,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Sanctuary Club",
+      "normalized": "sanctuaryclub",
+      "asset": "/directory-logos/sanctuaryclub-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.pdxsanctuary.com/",
+      "sourceAsset": "https://pdxsanctuary.com/wp-content/uploads/2025/06/LOGO-t_color_full@2x.png",
+      "checked": "2026-10-13",
+      "ratio": 0.8929087817976706,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Sankofa Collective",
+      "normalized": "sankofacollective",
+      "asset": "/directory-logos/sankofacollective-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": null,
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.741440377804014,
+      "lines": [
+        "SANKOFA",
+        "COLLECTIVE"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Scandals East",
+      "normalized": "scandalseast",
+      "asset": "/directory-logos/scandalseast-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://scandalspdx.com/",
+      "sourceAsset": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,fit=crop/ywERv6du0XixHeb1/scandalseast-2color-black-a7lziX2IDxVU5Wwy.png",
+      "checked": "2026-10-13",
+      "ratio": 1.9170749193452028,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "SCORE Portland",
+      "normalized": "scoreportland",
+      "asset": "/directory-logos/scoreportland-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://www.score.org",
+      "sourceAsset": "https://www.score.org",
+      "checked": "2026-10-13",
+      "ratio": 2.858157408308201,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Seagrape Apothecary",
+      "normalized": "seagrapeapothecary",
+      "asset": "/directory-logos/seagrapeapothecary-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://seagrapeapothecary.com",
+      "sourceAsset": "https://seagrapeapothecary.com/cdn/shop/files/Seagrape_Shop_Sign_Update_White_220x.png?v=1613773402",
+      "checked": "2026-10-13",
+      "ratio": 1.0547945205479452,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Share Vancouver",
+      "normalized": "sharevancouver",
+      "asset": "/resources-logos/sharevancouver-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://sharevancouver.org/about-us/",
+      "sourceAsset": "https://sharevancouver.org/wp-content/uploads/2020/09/Share-Logo-White.png",
+      "checked": "2026-10-13",
+      "ratio": 2.217821782178218,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Silverado",
+      "normalized": "silverado",
+      "asset": "/directory-logos/silverado-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.silveradopdx.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/571a7369859fd0c9cedb6446/ac77059a-4593-45e9-8d65-51d327d0e9e7/Silverdao+New+Logo+Design3-01.png",
+      "checked": "2026-10-13",
+      "ratio": 1.3312651739951442,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Sincere Studio",
+      "normalized": "sincerestudio",
+      "asset": "/directory-logos/sincerestudio-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://sincerestudiopdx.org",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 1.9203069657615113,
+      "lines": [
+        "SINCERE",
+        "STUDIO"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Sold By Scott",
+      "normalized": "soldbyscott",
+      "asset": "/directory-logos/soldbyscott-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://soldxscott.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/66577739ba5d2679406660b8/92afcf40-2bef-49c4-9197-df91e0699ec3/5.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 2.880306481673224,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Speed-o Cappuccino",
+      "normalized": "speedocappuccino",
+      "asset": "/directory-logos/speedocappuccino-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": null,
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.846517119244392,
+      "lines": [
+        "SPEED-O",
+        "CAPPUCCINO"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Sprout Therapy PDX",
+      "normalized": "sprouttherapypdx",
+      "asset": "/directory-logos/sprouttherapypdx-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://sprouttherapypdx.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5aaaac0f5ffd209c7392568a/c8690fe1-7349-4282-b9c0-7b3cbf699288/3.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 1.265831357941077,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Stag PDX",
+      "normalized": "stagpdx",
+      "asset": "/directory-logos/stagpdx-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.stagportland.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/69cef468f09e8d047ab0b63c/01f766e3-299a-4b5c-b996-3fe255664852/STAG+LOGO+GLOW.png",
+      "checked": "2026-10-13",
+      "ratio": 1.2812971557099337,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Star Theater",
+      "normalized": "startheater",
+      "asset": "/directory-logos/startheater-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.startheaterportland.com",
+      "sourceAsset": "https://www.startheaterportland.com/wp-content/uploads/2020/03/startheater-mobile-logo.png",
+      "checked": "2026-10-13",
+      "ratio": 2.2399826054544323,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Steam Portland",
+      "normalized": "steamportland",
+      "asset": "/directory-logos/steamportland-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.steampdx.com",
+      "sourceAsset": "https://static.wixstatic.com/media/b88095_9310349ea9424d0288ae73316e3219ad.png",
+      "checked": "2026-10-13",
+      "ratio": 1.0964668997950078,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Stem Wine Bar",
+      "normalized": "stemwinebar",
+      "asset": "/directory-logos/stemwinebar-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://stemwinebarpdx.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.2461629279811097,
+      "lines": [
+        "STEM",
+        "WINE BAR"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "SymbiOp",
+      "normalized": "symbiop",
+      "asset": "/directory-logos/symbiop-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://symbiop.com",
+      "sourceAsset": "https://symbiop.com/wp-content/uploads/2026/01/cropped-SymbiOp_Secondary-Logo-scaled-1.png",
+      "checked": "2026-10-13",
+      "ratio": 3.2191477587161046,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Taboo Video",
+      "normalized": "taboovideo",
+      "asset": "/directory-logos/taboovideo-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.taboovideo.com",
+      "sourceAsset": "https://www.taboovideo.com/logo-transparent-shadow.png",
+      "checked": "2026-10-13",
+      "ratio": 2.1073155883248216,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Taqueria Los Puñales",
+      "normalized": "taquerialospunales",
+      "asset": "/directory-logos/taquerialospunales-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://lospunales.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.0312868949232588,
+      "lines": [
+        "TAQUERIA",
+        "LOS PUÑALES"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "The Automatic Bar",
+      "normalized": "theautomaticbar",
+      "asset": "/directory-logos/theautomaticbar-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.theautomaticbarpdx.com/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.603305785123967,
+      "lines": [
+        "THE AUTOMATIC",
+        "BAR"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "The Center for Couples & Sex Therapy",
+      "normalized": "thecenterforcouplesandsextherapy",
+      "asset": "/directory-logos/thecenterforcouplesandsextherapy-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://www.thecenterportland.com/",
+      "sourceAsset": "https://www.thecenterportland.com/wp-content/themes/nopio_master_theme/assets/images/CT-Logo-Light.svg",
+      "checked": "2026-10-13",
+      "ratio": 4.428571428571429,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "The Get Down",
+      "normalized": "thegetdown",
+      "asset": "/directory-logos/thegetdown-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.thegetdownpdx.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 1.8996458087367178,
+      "lines": [
+        "THE GET",
+        "DOWN"
+      ],
+      "reason": "Published artwork cannot form a clear faithful white mark without retaining source bloom or a solid illustration plate."
+    },
+    {
+      "name": "The Imperial Sovereign Rose Court of Oregon",
+      "normalized": "theimperialsovereignrosecourtoforegon",
+      "asset": "/directory-logos/theimperialsovereignrosecourtoforegon-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://rosecourt.org",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 5.62396694214876,
+      "lines": [
+        "THE IMPERIAL SOVEREIGN",
+        "ROSE COURT OF OREGON"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "The Living Room",
+      "normalized": "thelivingroom",
+      "asset": "/resources-logos/thelivingroom-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://newavenues.org/thelivingroomyouth",
+      "sourceAsset": "http://newavenues.org/wp-content/uploads/2021/10/Logo-white.svg",
+      "checked": "2026-10-13",
+      "ratio": 0.9945578231292518,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "The Lodge Bar and Grill",
+      "normalized": "thelodgebarandgrill",
+      "asset": "/directory-logos/thelodgebarandgrill-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://thelodgebarandgrill.shop/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.373671782762692,
+      "lines": [
+        "THE LODGE",
+        "BAR AND GRILL"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "The Marie Equi Center",
+      "normalized": "themarieequicenter",
+      "asset": "/directory-logos/themarieequicenter-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.marieequi.center/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/653e9e06845ac839b8536e89/25ac5cf8-51e8-4028-9555-cdcdfd8c35ce/Artwork+29.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 1.42792384406165,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "The Meet Rack at Darkroom",
+      "normalized": "themeetrackatdarkroom",
+      "asset": "/directory-logos/themeetrackatdarkroom-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://meetrack.org",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.520661157024793,
+      "lines": [
+        "THE MEET RACK",
+        "AT DARKROOM"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "The Nest Lounge",
+      "normalized": "thenestlounge",
+      "asset": "/directory-logos/thenestlounge-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": null,
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.2024793388429753,
+      "lines": [
+        "THE NEST",
+        "LOUNGE"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "The Secret Warehouse",
+      "normalized": "thesecretwarehouse",
+      "asset": "/directory-logos/thesecretwarehouse-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://www.yelp.com/biz/the-secret-warehouse-portland",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.78099173553719,
+      "lines": [
+        "THE SECRET",
+        "WAREHOUSE"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "The Sports Bra",
+      "normalized": "thesportsbra",
+      "asset": "/directory-logos/thesportsbra-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://thesportsbraofficial.com",
+      "sourceAsset": "https://thesportsbraofficial.com/cdn/shop/files/Raised_Type_-_White2_sm.png?v=1748900352&width=600",
+      "checked": "2026-10-13",
+      "ratio": 3.325269717885144,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "The Velvet Rope",
+      "normalized": "thevelvetrope",
+      "asset": "/directory-logos/thevelvetrope-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://velvetropepdx.com",
+      "sourceAsset": "https://velvetropepdx.com/wp-content/uploads/2026/07/tvrlogo-lite.png",
+      "checked": "2026-10-13",
+      "ratio": 0.9478623566214807,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Tin Shed Garden Cafe",
+      "normalized": "tinshedgardencafe",
+      "asset": "/directory-logos/tinshedgardencafe-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://tinshedgardencafe.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.072609208972845,
+      "lines": [
+        "TIN SHED",
+        "GARDEN CAFE"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Trans Advocacy & Care Team (TACT)",
+      "normalized": "transadvocacyandcareteamtact",
+      "asset": "/resources-logos/transadvocacyandcareteamtact-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://yourtact.org",
+      "sourceAsset": "https://i0.wp.com/yourtact.org/wp-content/uploads/2025/12/new-logo-1.png?fit=457%2C100&ssl=1",
+      "checked": "2026-10-13",
+      "ratio": 5.143646408839778,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Trans Youth Care Collective",
+      "normalized": "transyouthcarecollective",
+      "asset": "/resources-logos/transyouthcarecollective-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://transyouthcarecollective.com",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/66bbb2aca8870450119116da/7bbd85ad-5421-434e-9a05-913d567df368/TYCC+-+White+Hor+Long.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 2.5264456015346672,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "TransActive Gender Project",
+      "normalized": "transactivegenderproject",
+      "asset": "/resources-logos/transactivegenderproject-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://graduate.lclark.edu/programs/continuing_education/transactive/support-groups",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.88370720188902,
+      "lines": [
+        "TRANSACTIVE",
+        "GENDER PROJECT"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "TransPonder",
+      "normalized": "transponder",
+      "asset": "/resources-logos/transponder-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://www.transponderoregon.org/",
+      "sourceAsset": "https://www.transponderoregon.org/#inline-logo",
+      "checked": "2026-10-13",
+      "ratio": 3.31899200983405,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "TranzGuys PDX",
+      "normalized": "tranzguyspdx",
+      "asset": "/directory-logos/tranzguyspdx-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": null,
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 2.6977567886658798,
+      "lines": [
+        "TRANZGUYS",
+        "PDX"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "Triangle Recreation Camp",
+      "normalized": "trianglerecreationcamp",
+      "asset": "/directory-logos/trianglerecreationcamp-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://camptrc.org/",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 4.1605667060212514,
+      "lines": [
+        "TRIANGLE",
+        "RECREATION CAMP"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "underU4men",
+      "normalized": "underu4men",
+      "asset": "/directory-logos/underu4men-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://shop.underu4men.com",
+      "sourceAsset": "https://cdn11.bigcommerce.com/s-tsgvw/images/stencil/250x100/rainbow_logo_black_1735237526__71313.original.png",
+      "checked": "2026-10-13",
+      "ratio": 4.069767441860465,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "UTOPIA PDX",
+      "normalized": "utopiapdx",
+      "asset": "/resources-logos/utopiapdx-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.utopiaportland.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5dc5d38a3c84600828df46df/1587857634890-DGNVBHGAGRXH1DU7KZHS/UTOPIA-Horiz-Logo-Rev-LG.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 2.4901712111604315,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Virginia Garcia · Beaverton Wellness Center",
+      "normalized": "virginiagarciabeavertonwellnesscenter",
+      "asset": "/resources-logos/virginiagarciabeavertonwellnesscenter-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://virginiagarcia.org/location/beaverton-wellness-center/",
+      "sourceAsset": "https://virginiagarcia.org/wp-content/uploads/Nav-Logo-Full-Color@2x.png",
+      "checked": "2026-10-13",
+      "ratio": 3.5830258302583022,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "WERQ Together",
+      "normalized": "werqtogether",
+      "asset": "/directory-logos/werqtogether-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://werqt.org/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/683d4bedc2fe8538b6fa26e2/77a868b1-0137-4cc2-8631-829e4e4e49a5/WERQTOGETHER+%283%29.png?format=1500w",
+      "checked": "2026-10-13",
+      "ratio": 5.397076735688184,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Westside Q Center",
+      "normalized": "westsideqcenter",
+      "asset": "/resources-logos/westsideqcenter-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://westsideqrc.org",
+      "sourceAsset": "https://westsideqrc.org/assets/img/logo-header.png",
+      "checked": "2026-10-13",
+      "ratio": 4.734650875535857,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Yes Coach Productions",
+      "normalized": "yescoachproductions",
+      "asset": "/directory-logos/yescoachproductions-white.svg",
+      "kind": "text-fallback",
+      "sourcePage": "https://yescoachparty.com",
+      "sourceAsset": null,
+      "checked": "2026-10-13",
+      "ratio": 3.115112160566706,
+      "lines": [
+        "YES COACH",
+        "PRODUCTIONS"
+      ],
+      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+    },
+    {
+      "name": "YWCA Clark County · SafeChoice",
+      "normalized": "ywcaclarkcountysafechoice",
+      "asset": "/resources-logos/ywcaclarkcountysafechoice-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.ywcaclarkcounty.org/safechoice-domestic-violence-program",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/6524a50efc22a87d5ae084ef/ced32d0f-0cff-4d99-b2a6-a3bd0b1a3a41/AssociationLogo_Clark-County-1.png",
+      "checked": "2026-10-13",
+      "ratio": 1.5833791964777106,
+      "lines": null,
+      "reason": null
+    },
+    {
+      "name": "Food banks & pantries",
+      "normalized": "foodbanksandpantries",
+      "asset": "/resources-logos/foodbanksandpantries-white.svg",
+      "kind": "official-vector",
+      "sourcePage": "https://www.oregonfoodbank.org/",
+      "sourceAsset": "https://www.oregonfoodbank.org/ (inline header SVG)",
+      "checked": "2026-10-13",
+      "ratio": 3.7772963604852685,
+      "lines": null,
+      "reason": null
+    }
+  ]
+}

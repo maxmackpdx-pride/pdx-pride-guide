@@ -1,10 +1,12 @@
+import { whiteCompanyLogo } from "@shared/whiteCompanyLogos";
+
 /**
  * Resources directory: nonprofits, hotlines, and LGBTQ+ groups.
  * Moved off Placez (2026-09-30). Placez is for spending time and money;
  * Resources is for getting help and giving back.
  *
  * Logos are clean white marks on transparent in /public/resources-logos.
- * Orgs without a logo file show a white monogram (mark, or computed initials).
+ * Unverified identities use explicit two-line white text assets.
  */
 export type ResourceOrg = {
   name: string;
@@ -53,7 +55,7 @@ export type ResourceCategory = {
   orgs: ResourceOrg[];
 };
 
-export const RESOURCE_CATEGORIES: ResourceCategory[] = [
+const RESOURCE_CATEGORY_SOURCE: ResourceCategory[] = [
   {
     "id": "health",
     "name": "Health & Care",
@@ -2472,3 +2474,9 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     ]
   }
 ];
+
+/** Reviewed white artwork replaces legacy neon and improvised identities. */
+export const RESOURCE_CATEGORIES: ResourceCategory[] = RESOURCE_CATEGORY_SOURCE.map(category => ({
+  ...category,
+  orgs: category.orgs.map(org => ({ ...org, logo: whiteCompanyLogo(org.name) ?? org.logo, logoSurface: undefined })),
+}));

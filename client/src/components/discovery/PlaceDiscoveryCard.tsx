@@ -1,9 +1,10 @@
+import { CompanyNameMark } from "@/components/CompanyNameMark";
 import { PLACE_ACCENTS } from './placeTokens';
 import type { MouseEvent } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { PlaceCard } from '@/components/ds';
 import { ResourceCardMotif } from '@/components/resources/ResourceCardMotif';
-import { directoryFallbackLogo, resolveDirectoryLogo } from '@/lib/directoryLogos';
+import { resolveDirectoryLogo } from '@/lib/directoryLogos';
 import { DIRECTORY_TYPE_LABELS } from '@shared/directoryTheme';
 import { placeUrl } from '@shared/placeSlug';
 import type { Business } from '@/pages/Directory';
@@ -20,7 +21,7 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
   return <div className="placez-card-surface">
     <PlaceCard name={place.name} category={place.type} categoryLabel={label} accentColor={accent}
       variant="full"
-      logoUrl={resolveDirectoryLogo(place.name, place.imageUrl) || undefined} fallbackLogoUrl={directoryFallbackLogo(place.type)}
+      logoUrl={resolveDirectoryLogo(place.name, place.imageUrl) || undefined} logoFallback={<CompanyNameMark name={place.name} />}
       businessId={place.id} isFollowing={Boolean(place.isFollowing)} onRequireAuth={onRequireAuth}
       shareUrl={placeUrl(place.id, place.name)}
       categoryTags={[{id:place.type,name:label,color:accent},...(place.queerOwned ? [{id:'owned',name:'Queer owned',color:accent}] : [])]}

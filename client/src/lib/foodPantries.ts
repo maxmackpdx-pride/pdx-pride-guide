@@ -1,3 +1,4 @@
+import { whiteCompanyLogo } from "@shared/whiteCompanyLogos";
 import type { ResourceOrg } from "./resourcesData";
 
 // Provider-published client hours checked September 30, 2026.
@@ -123,7 +124,7 @@ export const FOOD_RESOURCE: ResourceOrg = {
     "lng": -122.7002762
   }
 ],
-  logo: "/resources-logos/oregon-food-bank.svg",
+  logo: whiteCompanyLogo("Food banks & pantries") ?? "/resources-logos/oregon-food-bank.svg",
   serviceTags: ["Nutrition", "Free groceries"],
   url: "https://foodfinder.oregonfoodbank.org/",
   cta: "Find food near you",

@@ -834,3 +834,6 @@ html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__details-room {
     radial-gradient(70% 55% at 108% 112%,color-mix(in srgb,var(--text-heading) 3%,transparent),color-mix(in srgb,var(--c) 3.6%,transparent) 30%,transparent 62%);
 }
 .place-modal-panel__identity .place-modal-panel__logo { filter:brightness(0) invert(1)!important; }
+
+/* Reviewed company assets already contain crisp white ink. */
+.place-modal-panel__identity .place-modal-panel__logo { filter: none !important; }
