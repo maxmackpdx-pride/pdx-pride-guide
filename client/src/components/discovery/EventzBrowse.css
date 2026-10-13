@@ -223,3 +223,25 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 .eb-page--places .eb-original-card .rg-directory-card .rg-card-motif {
   transform: scale(1.32); transform-origin: center;
 }
+
+/* Placez content rhythm below the logo, within the Eventz frame. */
+.eb-page--places .eb-original-card .rg-directory-card .pdxPlace__main {
+  flex: none; gap: 10px;
+}
+.eb-page--places .eb-original-card .rg-directory-card .pdxPlace__badges {
+  align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.eb-page--places .eb-original-card .rg-directory-card .rg-directory-footer {
+  display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0;
+  padding-top: 12px; gap: 10px;
+}
+.eb-page--places .eb-original-card .placez-discovery-meta {
+  height: auto; min-height: 1.4em; margin: 0; line-height: 1.4;
+}
+.eb-page--places .eb-original-card .rg-directory-footer .pdxBtn {
+  margin-top: auto; flex: none; justify-content: flex-end;
+}
+@media (max-width: 767px) {
+  .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__main { gap: 10px; }
+  .eb-page--places .eb-original-card .rg-directory-card .rg-directory-footer { min-height: 88px; }
+}
