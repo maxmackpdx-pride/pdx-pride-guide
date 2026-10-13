@@ -459,6 +459,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   }, [activeType, visibleBusinesses]);
 
   const handleSelectCategory = (key: string) => {
+    setBrowseView("grid");
     setActiveSubcategory('ALL');
     setDiscoveryChosen(true);
     setActiveType(current => {

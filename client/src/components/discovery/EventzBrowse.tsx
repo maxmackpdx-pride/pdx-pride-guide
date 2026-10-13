@@ -30,7 +30,7 @@ export function BrowseControls({ title, categories, selected, onSelect, query, o
     <div className="eb-category-row">
       <div className="eb-categories" role="group" aria-label={`${title} categories`}>
         {categories.map(category => <button type="button" className="eb-category pdx-glass-rebind" key={category.id}
-          style={{ "--c": category.color } as CSSProperties} aria-pressed={selected.includes(category.id)} onClick={() => { onSelect(category.id); onView("browse"); }}>
+          style={{ "--c": category.color } as CSSProperties} aria-pressed={selected.includes(category.id)} onClick={() => { onSelect(category.id); onView("grid"); }}>
           <span>{category.label}</span><small>{category.id === "ALL" ? "Explore" : title}</small><b>{category.count}</b>
         </button>)}
       </div>

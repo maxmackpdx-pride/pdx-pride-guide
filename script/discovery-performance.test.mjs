@@ -32,6 +32,13 @@ test('discovery effects pause, resume, and survive responsive changes', { skip: 
     assert.equal(surfaces.ink,'#050506');
     assert.equal(surfaces.cardBase,'#050506');
     await expectDrawing();
+    const bars=page.getByRole('button',{name:/Bars & Clubs Placez/i});
+    await bars.waitFor();
+    const count=Number((await bars.innerText()).match(/\d+\s*$/)?.[0]);
+    assert.ok(count>4,'fixture must contain more than a preview rail');
+    await bars.click();
+    await page.locator('.eb-grid').waitFor();
+    assert.equal(await page.locator('.eb-grid .eb-original-card').count(),count,'selected category must expose every matching card');
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await expectStopped();
     await page.emulateMedia({ reducedMotion: 'no-preference' });

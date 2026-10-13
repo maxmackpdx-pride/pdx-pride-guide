@@ -348,6 +348,7 @@ export default function Events() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
   const [mapOpen, setMapOpen] = useState(false);
+  const [mapRowLimit, setMapRowLimit] = useState(40);
   const closeMap = useCallback(() => setMapOpen(false), []);
   const [activeFilters, setActiveFilters] = useState<string[]>(() => {
     const raw = readSearchParam("type");
@@ -668,6 +669,7 @@ export default function Events() {
 
   useEffect(() => {
     setVisibleItemCount(renderBatch(isMobile));
+    setMapRowLimit(40);
   }, [isMobile, activeDay, activeFilters, searchQuery, sortMode, pastView]);
 
   useEffect(() => {
@@ -695,16 +697,19 @@ export default function Events() {
     return `${label} · Portland`;
   }, [now]);
 
-  const toggleFilter = (f: string) =>
+  const toggleFilter = (f: string) => {
+    setActiveDay("ALL");
     setActiveFilters(prev => {
       const next = prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f];
       const params = new URLSearchParams(window.location.search);
       if (next.length) params.set("type", next.join("|"));
       else params.delete("type");
+      params.set("window", "ALL");
       const qs = params.toString();
       window.history.replaceState(null, "", qs ? `/events?${qs}` : "/events");
       return next;
     });
+  };
 
   if (routeMatch && (routeError || !Number.isFinite(routeEventId))) {
     const missing = !Number.isFinite(routeEventId) || /^404:/.test(routeError?.message || "");
@@ -725,6 +730,7 @@ export default function Events() {
         aria-pressed={!pastView && activeDay === d.key}
         onClick={() => {
           setPastView(false); setActiveDay(d.key);
+          setOpenRails(new Set(["happening", "next", "tonight", "late", "day", "evening", "tomorrow"]));
           // From the dock, bring the page back to the top of that day's list.
           const rail = dayRailRef.current;
           if (inDock && rail) window.scrollTo({ top: rail.getBoundingClientRect().top + window.scrollY - (dockTop ?? 0) - 8, behavior: quietScroll() ? "auto" : "smooth" });
@@ -952,7 +958,7 @@ export default function Events() {
         ) : railBands ? (
           <div className="events-rails">
             {railBands.map((band, index) => {
-              const expanded = isMobile || openRails.has(band.id);
+              const expanded = isMobile || activeDay.startsWith("D:") || openRails.has(band.id);
               // Keep full and compact card types while mobile wraps both into two columns.
               const size = band.id === "happening" || band.id === "next" ? "full" : "m";
               return (
@@ -1144,7 +1150,7 @@ export default function Events() {
         )}
       >
         <div className="events-map-list" role="list">
-          {filtered.slice(0, 40).map(e => {
+          {filtered.slice(0, mapRowLimit).map(e => {
             const pinHref = e.lat != null && e.lng != null
               ? `/map?layer=events&lat=${e.lat}&lng=${e.lng}&zoom=15`
               : `/map?layer=events&q=${encodeURIComponent(e.title)}`;
@@ -1164,7 +1170,7 @@ export default function Events() {
             );
           })}
           {filtered.length === 0 && <p className="board-copy-sm">Nothing on this view. Try another day.</p>}
-          {filtered.length > 40 && <p className="board-copy-sm">Showing the first 40. Open the full map for everything.</p>}
+          {filtered.length > mapRowLimit && <Button className="events-tool-btn events-tool-btn--block" onClick={() => setMapRowLimit(count => count + 40)}>Show more events ({Math.min(mapRowLimit, filtered.length)} of {filtered.length})</Button>}
         </div>
       </EventsDrawer>
 
