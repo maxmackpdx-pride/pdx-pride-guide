@@ -39,9 +39,10 @@ try{
   await cdp.send('Network.emulateNetworkConditions',{offline:false,latency:network.latencyMs,downloadThroughput:network.mbps*1024*1024/8,uploadThroughput:5*1024*1024/8});
   await cdp.send('Emulation.setCPUThrottlingRate',{rate:profile==='phone'?phoneCpuThrottle:1});
    await page.addInitScript(()=>{
-    window.__mapzBench={firstFrame:null,layouts:0,draws:0,longTasks:[],pending:0,lastActivity:0,failures:[]};
+    window.__mapzBench={firstFrame:null,firstPins:null,controlsReady:null,layouts:0,draws:0,longTasks:[],pending:0,lastActivity:0,failures:[]};
     const stats=window.__mapzBench;
-    window.addEventListener('message',event=>{if(event.origin===location.origin&&event.data?.source==='mapz-demo'&&event.data.type==='first-frame'&&stats.firstFrame===null)stats.firstFrame=performance.now();});
+    window.addEventListener('message',event=>{if(event.origin!==location.origin||event.data?.source!=='mapz-demo')return;if(event.data.type==='first-frame'&&stats.firstFrame===null)stats.firstFrame=performance.now();if(event.data.type==='pins-painted'&&stats.firstPins===null)stats.firstPins=performance.now();});
+    new MutationObserver(()=>{if(stats.controlsReady===null&&document.querySelector('.mapz-demo-navigation button[aria-label="Zoom in"]'))stats.controlsReady=performance.now();}).observe(document,{subtree:true,childList:true});
     const rect=Element.prototype.getBoundingClientRect;Element.prototype.getBoundingClientRect=function(...args){stats.layouts++;return rect.apply(this,args);};
     const clear=CanvasRenderingContext2D.prototype.clearRect;CanvasRenderingContext2D.prototype.clearRect=function(...args){if(this.canvas.id==='waypoint-lights')stats.draws++;return clear.apply(this,args);};
     new PerformanceObserver(()=>{stats.lastActivity=performance.now();}).observe({type:'resource',buffered:true});
@@ -101,12 +102,24 @@ try{
     },{soakMs:Number(args['soak-minutes']||0)*60000});
     const frameOffset=await frame.evaluate(()=>performance.timeOrigin)-await page.evaluate(()=>performance.timeOrigin);
     if(frame!==page.mainFrame()){const hostFirstFrame=await page.evaluate(()=>window.__mapzBench.firstFrame);result.firstFrameMs=hostFirstFrame??(result.firstFrameMs===null?null:result.firstFrameMs+frameOffset);}else if(result.firstFrameMs!==null)result.firstFrameMs+=frameOffset;result.fullSceneMs+=frameOffset;
+    const hostReadiness=await page.evaluate(()=>({pinsMs:window.__mapzBench.firstPins,controlsMs:window.__mapzBench.controlsReady}));
+    result.initialUsableMs=hostReadiness.pinsMs!==null&&hostReadiness.controlsMs!==null?Math.max(result.firstFrameMs,hostReadiness.pinsMs,hostReadiness.controlsMs):null;result.publicPinsMs=hostReadiness.pinsMs;result.controlsMs=hostReadiness.controlsMs;
     // Ensure an actual input still reaches the map after readiness.
     await frame.evaluate(()=>{window.__mapzBench.center=window.__mapzMap.getCenter().toArray();window.__mapzBench.zoom=window.__mapzMap.getZoom();});
     if(args.out&&run===0&&cache==='cold'){fs.mkdirSync(path.dirname(args.out),{recursive:true});await page.screenshot({path:args.out.replace(/\.json$/,'')+'-'+profile+'.png'});}
     const bounds=frame===page.mainFrame()?{x:0,y:0,width:page.viewportSize().width,height:page.viewportSize().height}:await (await frame.frameElement()).boundingBox();
     await page.mouse.move(bounds.x+bounds.width/2,bounds.y+bounds.height/2);await page.mouse.wheel(0,-120);
     try{await frame.waitForFunction(()=>window.__mapzMap.getCenter().toArray().some((v,i)=>Math.abs(v-window.__mapzBench.center[i])>1e-7)||Math.abs(window.__mapzMap.getZoom()-window.__mapzBench.zoom)>1e-7,null,{timeout:5000});result.panResponded=true;}catch{result.panResponded=false;}
+    if(args.retention==='1'&&frame!==page.mainFrame()){
+     const before=await frame.evaluate(()=>({origin:performance.timeOrigin,camera:{center:window.__mapzMap.getCenter().toArray(),zoom:window.__mapzMap.getZoom(),pitch:window.__mapzMap.getPitch(),bearing:window.__mapzMap.getBearing()},layouts:window.__mapzBench.layouts,draws:window.__mapzBench.draws}));
+     await page.evaluate(()=>{history.pushState(null,'','/boards');dispatchEvent(new PopStateEvent('popstate'));});
+     await page.waitForSelector('[data-mapz-retained="paused"]',{state:'attached'});
+     await page.waitForTimeout(1100);const hidden=await frame.evaluate(()=>({layouts:window.__mapzBench.layouts,draws:window.__mapzBench.draws}));
+     const started=Date.now();await page.evaluate(()=>{history.pushState(null,'','/map');dispatchEvent(new PopStateEvent('popstate'));});
+     await page.waitForSelector('[data-mapz-retained="active"] iframe',{state:'visible'});
+     const after=await frame.evaluate(()=>({origin:performance.timeOrigin,camera:{center:window.__mapzMap.getCenter().toArray(),zoom:window.__mapzMap.getZoom(),pitch:window.__mapzMap.getPitch(),bearing:window.__mapzMap.getBearing()}}));
+     result.retention={method:'programmatic SPA route away and return; includes driver overhead',restoreMs:Date.now()-started,sameIframeTimeOrigin:before.origin===after.origin,before:before.camera,after:after.camera,hiddenWork:{layouts:hidden.layouts-before.layouts,draws:hidden.draws-before.draws}};
+    }
    }catch(error){
     const partial=await frame.evaluate(()=>({firstFrameMs:window.__mapzBench?.firstFrame,frameOrigin:performance.timeOrigin,phase:document.documentElement.dataset.mapPhase})).catch(()=>({firstFrameMs:null,phase:'frame-replaced'}));
     if(frame!==page.mainFrame())partial.firstFrameMs=await page.evaluate(()=>window.__mapzBench.firstFrame);else if(partial.firstFrameMs!==null&&partial.firstFrameMs!==undefined)partial.firstFrameMs+=partial.frameOrigin-await page.evaluate(()=>performance.timeOrigin);
