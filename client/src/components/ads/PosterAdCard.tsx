@@ -6,8 +6,8 @@ import {
   resolveAdChrome,
   type AffiliateBrand,
 } from "@/lib/affiliateCards";
-import { EdgeLight } from "@/components/ds/PosterCard";
-import "@/components/AffiliatePosterCard.css";
+import { ArrowRight } from "lucide-react";
+import "./PosterAdCard.css";
 
 type AdLike = AdDraft | AdServePayload;
 
@@ -24,28 +24,28 @@ function isCodeMeta(text: string) {
   return /code|tucker|%|\boff\b/i.test(text);
 }
 
-function Slides({ slides, ms }: { slides: string[]; ms: number }) {
+function Slides({ slides, ms, auto }: { slides: string[]; ms: number; auto: boolean }) {
   const [i, setI] = useState(0);
   useEffect(() => {
-    if (slides.length < 2) return;
+    if (slides.length < 2 || !auto || window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.matches(".calm-mode, [data-calm=\"true\"]")) return;
     const t = window.setInterval(() => setI((prev) => (prev + 1) % slides.length), ms);
     return () => window.clearInterval(t);
-  }, [slides.length, ms]);
+  }, [slides.length, ms, auto]);
 
   return (
     <>
-      <div className="pdxBoard__slides" aria-hidden="true">
+      <div className="poster-ad__slides" aria-hidden="true">
         {slides.map((src, idx) => (
-          <div key={`${src}-${idx}`} className={`pdxBoard__slide${idx === i ? " is-active" : ""}`}>
-            <img className="pdxBoard__img" src={src} alt="" />
+          <div key={`${src}-${idx}`} className={`poster-ad__slide${idx === i ? " is-active" : ""}`}>
+            <img className="poster-ad__image" src={src} alt="" />
           </div>
         ))}
       </div>
-      <div className="pdxBoard__slideDots" aria-hidden="true">
+      <div className="poster-ad__dots" aria-hidden="true">
         {slides.map((src, idx) => (
           <span
             key={`${src}-dot-${idx}`}
-            className={`pdxBoard__slideDot${idx === i ? " is-active" : ""}`}
+            className={`poster-ad__dot${idx === i ? " is-active" : ""}`}
           />
         ))}
       </div>
@@ -96,7 +96,7 @@ export default function PosterAdCard({
   };
 
   const dest = !preview && ad.destUrl ? ad.destUrl : undefined;
-  const cardClass = `pdxBoard pdxBoard--event-grid pdxBoard--affiliate pdx-glass-rebind ${brandClass} ${className}`.trim();
+  const cardClass = `poster-ad pdx-glass-card pdx-glass-rebind ${brandClass} ${className}`.trim();
   const cardStyle = {
     ["--ac" as string]: accent,
     ["--c" as string]: accent,
@@ -117,17 +117,18 @@ export default function PosterAdCard({
 
   const inner = (
     <>
-      <EdgeLight />
+      <span className="pdx-glass-sheen" aria-hidden="true" />
+      <span className="pdx-glass-sheen--specular" aria-hidden="true" />
 
-      <div className="pdxBoard__poster pdx-poster-well">
-        <span className="pdx-poster-well__scan" aria-hidden="true" />
+      <div className="poster-ad__media">
+        <span className="poster-ad__scan" aria-hidden="true" />
         {slides.length > 1 ? (
-          <Slides slides={slides} ms={ad.slideMs || 3200} />
+          <Slides slides={slides} ms={ad.slideMs || 3200} auto={ad.slideAuto !== false} />
         ) : slides[0] ? (
-          <img className="pdxBoard__img" src={slides[0]} alt="" />
+          <img className="poster-ad__image" src={slides[0]} alt="" />
         ) : (
           <div
-            className="pdxBoard__img"
+            className="poster-ad__image"
             style={{
               display: "grid",
               placeItems: "center",
@@ -142,38 +143,37 @@ export default function PosterAdCard({
             {ad.logoText || "LOGO"}
           </div>
         )}
-        <span className="pdxBoard__affChip">{ad.pillLabel || "Affiliate"}</span>
-        <h3 className="pdxBoard__title pdxBoard__affTitle">
+        <span className="poster-ad__label">{ad.pillLabel || "Affiliate"}</span>
+        <h3 className="poster-ad__title">
           {ad.title || ad.business || "Ad"}
         </h3>
       </div>
 
-      <div className="pdxBoard__meta">
-        <span className="pdxBoard__divider" aria-hidden="true" />
-        <div className="pdxBoard__facts pdxBoard__affFacts">
-          {ad.body ? <div className="pdxBoard__venue">{ad.body}</div> : null}
+      <div className="poster-ad__body">
+        <div className="poster-ad__facts">
+          {ad.body ? <div className="poster-ad__description">{ad.body}</div> : null}
           {ad.ctaTitle ? (
             <div
-              className={`pdxBoard__affMeta${isCodeMeta(ad.ctaTitle) ? " pdxBoard__affMeta--code" : ""}`}
+              className={`poster-ad__offer${isCodeMeta(ad.ctaTitle) ? " poster-ad__offer--code" : ""}`}
             >
               {ad.ctaTitle}
             </div>
           ) : null}
         </div>
-        <div className="pdxBoard__tags">
+        <div className="poster-ad__tags">
           {ad.tag1 ? (
-            <span className="pdxTag pdxTag--day pdxBoard__affTag--fill">{ad.tag1}</span>
+            <span className="poster-ad__tag">{ad.tag1}</span>
           ) : null}
-          {ad.tag2 ? <span className="pdxTag pdxTag--type">{ad.tag2}</span> : null}
+          {ad.tag2 ? <span className="poster-ad__tag">{ad.tag2}</span> : null}
         </div>
 
-        <div className="pdxBoard__foot">
-          <span className="pdxBoard__affAd">
+        <div className="poster-ad__footer">
+          <span className="poster-ad__disclosure">
             <span className="dot" aria-hidden="true" />
             Ad
           </span>
-          <span className="pdxBoard__affShop pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind">
-            {ad.ctaCopy || "Shop Now"}
+          <span className="poster-ad__shop pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind">
+            {ad.ctaCopy || "Shop Now"}<ArrowRight size={14} aria-hidden="true" />
           </span>
         </div>
       </div>
