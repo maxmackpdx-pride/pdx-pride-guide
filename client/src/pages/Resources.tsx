@@ -543,9 +543,9 @@ export default function Resources() {
       {lightweightBackground
         ? <div className="rg-stream-background rg-stream-background--mobile-fallback" aria-hidden="true" />
         : <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>}
-      <BrowseHeader title="NEEDZ" logo="/brand/family/needz.svg" kicker="Oregon · All the ways we show up"
+      <BrowseHeader title="NEEDZ" logo="/brand/family/needz-mobile.webp" kicker="Oregon · All the ways we show up"
         description="Art, community, opportunity, care, and support for queer and trans Oregon. Find your next connection.">
-        <BoardShareButton title="NEEDZ" path="/needz" card={{ room: "NEEDZ", mark: "/brand/family/needz.svg", line: "All the ways we show up." }} />
+        <BoardShareButton title="NEEDZ" path="/needz" card={{ room: "NEEDZ", mark: "/brand/family/needz-mobile.webp", line: "All the ways we show up." }} />
         <BoardFollowButton board="rezources" />
       </BrowseHeader>
       <div className="eb-frame">

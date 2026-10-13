@@ -16,7 +16,7 @@ test('NEEDZ retains resource-only Mapz doorway filters and existing internal key
  assert.equal(params.get('layer'),'rezources');assert.equal(params.get('hideResources'),'0');
  for(const key of ['hideEvents','hidePlaces','hideGigz','hideGiftz','hideSellz','hideMizzed','hideHouz'])assert.equal(params.get(key),'1');
 });
-test('legacy URLs redirect without discarding deep-link queries and active art is editable SVG',()=>{
+test('legacy URLs redirect without discarding deep-link queries and active art preserves the illustrated source',()=>{
  const server=readFileSync('server/index.ts','utf8');
  for(const path of ['/resources','/rezources','/z/resources','/z/rezources'])assert.ok(server.includes(`"${path}": "/needz"`));
  assert.match(server,/if \(exact\) return res.redirect\(301, exact \+ qs\)/);
@@ -24,7 +24,8 @@ test('legacy URLs redirect without discarding deep-link queries and active art i
  assert.match(app,/<Route path="\/needz" component=\{Resources\}/);
  assert.match(app,/\/needz\$\{window.location.search\}\$\{window.location.hash\}/);
  const svg=readFileSync('client/public/brand/family/needz.svg','utf8');
- assert.match(svg,/<title id="title">NEEDZ<\/title>/);assert.match(svg,/<path/);assert.doesNotMatch(svg,/<image/);
+ assert.match(svg,/<title id="title">NEEDZ<\/title>/);assert.match(svg,/<image/);assert.match(svg,/data:image\/png;base64,/);
+ assert.equal(existsSync('client/public/brand/family/needz-mobile.webp'),true);
  assert.equal(existsSync('client/src/components/resources/RezourcesLogo.tsx'),false);
 });
 
