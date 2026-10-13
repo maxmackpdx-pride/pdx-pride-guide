@@ -38,7 +38,7 @@ test("Upcoming applies the 21-day horizon and excludes invalid DST wall times", 
   assert.equal(matchesMapEvent(event("2026-03-08T02:30:00", "2026-03-08T04:00:00"), "default", null, "", "", Date.parse("2026-03-08T00:00:00-08:00")), false);
 });
 test("Housing and board listings with equal numeric ids have different selection keys", () => {
-  const keys = ["The Haüz", "Gigz", "Giftz", "Sellz"].map(board => mapListingKey(board, 9));
+  const keys = ["My Hoüz", "Gigz", "Giftz", "Sellz"].map(board => mapListingKey(board, 9));
   assert.equal(new Set(keys).size, 4);
 });
 

@@ -1,6 +1,6 @@
 /**
  * Dynamic Text — general-purpose solver for any fixed-frame title motif on the
- * site, not just HAÜZ cards.
+ * site, not just HOÜZ cards.
  *
  * Ported from the canonical generator:
  *   zaylist-foundation-library/public/design-system/guidelines/dynamic-text.html
@@ -17,7 +17,7 @@
  *    shrinks by the same ratio, no further than it has to, down to the
  *    readable floor (MIN_ROW_SIZE) if truly necessary — but this is a
  *    per-caller exception, not part of the site-wide contract, and defaults
- *    OFF. Owner-approved for HAÜZ specifically, 2026-08-23: "biggest font
+ *    OFF. Owner-approved for HOÜZ specifically, 2026-08-23: "biggest font
  *    sizes possible that still fit within the borders." (An earlier version
  *    of this capped the shrink at a fixed percentage instead — 5%, then
  *    6.75%, then 6.2% — but real cases needed 25–42% to actually fit, so a
@@ -41,7 +41,7 @@
  *    comfortably — never force a split, then invent a way to make it fit.
  *    Reject or shorten copy that cannot fit at the approved readable size.
  *    A caller may opt into `preferTwoRows` to try every 2-row split before
- *    the general search — HAÜZ's own opt-in (HOUSING_PREFER_TWO_ROWS),
+ *    the general search — HOÜZ's own opt-in (HOUSING_PREFER_TWO_ROWS),
  *    "almost always two lines except with one word." Defaults off; this is
  *    a per-caller visual preference, not part of the canonical contract.
  *  - Accessible label: the original, unbroken source string. Visual splitting
@@ -49,14 +49,14 @@
  *    accessible name.
  *
  * WHY THIS EXISTS AS ITS OWN MODULE (not inlined in HousingWell.tsx).
- * It was inlined once, and the HAÜS-specific caller added a suffix special
- * case that short-circuited the search instead of feeding "HAÜS" through it
+ * It was inlined once, and the Hoüz-specific caller added a suffix special
+ * case that short-circuited the search instead of feeding "Hoüz" through it
  * as an ordinary word. That produced 2-row blocks sized to fill frame width
  * with no check that the combined row heights still fit the frame, which
- * silently overflowed on desktop for most "___ HAÜS" names — verified against
- * the real shipped font: "Sunnyside HAÜS" on a half card scored 73px/152px
+ * silently overflowed on desktop for most "___ Hoüz" names — verified against
+ * the real shipped font: "Sunnyside Hoüz" on a half card scored 73px/152px
  * against a 139px-tall frame. The general search below already finds
- * ["SUNNYSIDE HAÜS"] at 48px, or a better split, on its own — it does not
+ * ["SUNNYSIDE Hoüz"] at 48px, or a better split, on its own — it does not
  * need a caller to force one. Any surface that special-cases a suffix or a
  * fixed split is very likely reintroducing that bug. Feed the solver the full
  * string and let it search.
@@ -110,7 +110,7 @@ const LETTER_SPACING_EM = -0.02;
  *
  * This is NOT a site-wide default — solveDynamicText's `fitWithinFrame`
  * parameter defaults to false (strict, canonical, matches the Foundation
- * Library guide exactly). HOUSING_FIT_WITHIN_FRAME is HAÜZ's own opt-in,
+ * Library guide exactly). HOUSING_FIT_WITHIN_FRAME is HOÜZ's own opt-in,
  * owner-approved 2026-08-23 specifically for housing titles (very short
  * names — a bare first name, a short household name — forced onto multiple
  * rows have little other room to give). Another surface adopting Dynamic
@@ -132,9 +132,9 @@ export const HOUSING_FIT_WITHIN_FRAME = true;
  * this has no effect there.
  *
  * NOT a site-wide default — solveDynamicText's `preferTwoRows` parameter
- * defaults to false. HOUSING_PREFER_TWO_ROWS is HAÜZ's own opt-in,
+ * defaults to false. HOUSING_PREFER_TWO_ROWS is HOÜZ's own opt-in,
  * owner-approved 2026-08-23: "almost always two lines except with one
- * word." This is a visual/design preference for HAÜZ cards specifically,
+ * word." This is a visual/design preference for HOÜZ cards specifically,
  * not a canonical Dynamic Text rule — the guide's own contract says
  * maximize width and height among groupings that already fit, which is
  * row-count-agnostic. Another surface adopting Dynamic Text should stay at
@@ -149,14 +149,14 @@ export const HOUSING_PREFER_TWO_ROWS = true;
  * clampNeighborRatios), which flags an unconstrained short-line-dominates
  * failure mode as a known risk of pure per-row width-fill sizing.
  *
- * Tested before shipping, not assumed: across the full HAÜZ regression set
+ * Tested before shipping, not assumed: across the full HOÜZ regression set
  * (12 real names x 3 real widths = 36 cases), the worst adjacent-row ratio
- * the unconstrained algorithm ever produces is 2.89x ("Cully Kitchen HAÜS").
+ * the unconstrained algorithm ever produces is 2.89x ("Cully Kitchen Hoüz").
  * A cap set at or below that (tried at 2.5x) starts changing real,
- * already-good HAÜZ output for the worse — it broke "Cully Kitchen" apart
+ * already-good HOÜZ output for the worse — it broke "Cully Kitchen" apart
  * from its own name to chase a better ratio, which read worse, not better.
  * 3.0 sits safely above that observed max: verified to change ZERO of the
- * 36 real HAÜZ cases, while fixing a genuine failure on a differently-shaped
+ * 36 real HOÜZ cases, while fixing a genuine failure on a differently-shaped
  * synthetic surface (a portrait event-card mockup) where a lone short final
  * word solved to 128px against 31px on the row above it (4.16x) — owner-
  * approved 2026-08-24 after seeing that comparison directly, not asserted.
@@ -168,11 +168,11 @@ export const HOUSING_PREFER_TWO_ROWS = true;
  * result outOfRange — an extreme ratio is a "could look better," not a
  * "does not fit."
  *
- * NOT a site-wide default. Like the two opt-ins above, this is HAÜZ's own
+ * NOT a site-wide default. Like the two opt-ins above, this is HOÜZ's own
  * decision, passed explicitly at its one call site. Another surface has to
  * verify its own regression set the same way before adopting this — there
  * is no guarantee 3.0 is the right number for content shaped differently
- * than HAÜZ titles.
+ * than HOÜZ titles.
  */
 export const HOUSING_MAX_NEIGHBOR_RATIO = 3;
 
@@ -217,7 +217,7 @@ function measureLine(text: string): number {
 /**
  * Gap above every row after the first, sized to the ACTUAL diacritic overshoot
  * of that row's own text — not a guessed constant. A tight 0.82 line-height has
- * no headroom for ascenders or diacritics: "HAÜS" measures an
+ * no headroom for ascenders or diacritics: "Hoüz" measures an
  * actualBoundingBoxAscent of 93 units at the 100px reference size versus 71 for
  * every plain-cap string (WHISKEY, JACK, ROWAN, …) — a real 22-unit overshoot
  * from the umlaut alone. A row with no diacritic measures the same ascent as
@@ -302,7 +302,7 @@ function scoreRows(lines: string[], frameW: number, frameH: number, maxNeighborR
     // the winner — see recoverToFit. Letting it influence this score lets a
     // worse-looking split sneak past the height penalty just because it's
     // technically rescuable — verified: it flipped a clean single-row
-    // "WHISKEY TOWN HAÜS" (37px) into an unforced two-row split. The search
+    // "WHISKEY TOWN Hoüz" (37px) into an unforced two-row split. The search
     // must never know a fit mode exists, regardless of what the caller passed.
     score: Math.abs(frameH - usedHeight) + singletonPenalty + neighborRatioPenalty + (outOfRange ? 100000 : 0),
   };

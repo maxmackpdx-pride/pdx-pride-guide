@@ -5,7 +5,7 @@
  * the cover photo, every row scaled to fill the same fixed frame width so the
  * block reads as one flush column. Sizing comes from the shared Dynamic Text
  * solver (client/src/lib/dynamicText.ts) — see that file for the algorithm and
- * why the HAÜS suffix is fed through it as an ordinary word rather than forced
+ * why the Hoüz suffix is fed through it as an ordinary word rather than forced
  * onto its own row. Do not reintroduce a suffix special case here.
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
@@ -140,7 +140,7 @@ export function HousingWell({
     // via ResizeObserver below), not a hardcoded estimate — gives up exactly
     // what the caption row needs, nothing more.
     frameH = Math.max(48, contentH - CAPTION_GAP - box.captionH);
-    // HAÜZ-specific opt-ins — see HOUSING_FIT_WITHIN_FRAME, HOUSING_PREFER_TWO_ROWS,
+    // HOÜZ-specific opt-ins — see HOUSING_FIT_WITHIN_FRAME, HOUSING_PREFER_TWO_ROWS,
     // and HOUSING_MAX_NEIGHBOR_RATIO in dynamicText.ts. Every other caller of
     // solveDynamicText defaults to strict/agnostic/uncapped, not these.
     layout = solveDynamicText(

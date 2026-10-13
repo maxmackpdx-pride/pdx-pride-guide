@@ -214,7 +214,7 @@ function rowMarks(rows: MapRow[], kind: Extract<Mark["kind"], "board">): Mark[] 
 }
 
 function boardColor(row: MapRow): string {
-  if (String(row._board) === "The HAÜZ") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
+  if (String(row._board) === "My Hoüz") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
   if(row._board === "Mizzed") return "#FF00CC";
   const kind = boardKind(row);
   if (kind === "gig") return "#6E3DFF";
@@ -223,7 +223,7 @@ function boardColor(row: MapRow): string {
 }
 
 function boardIcon(row: MapRow): string {
-  if (String(row._board) === "The HAÜZ") return `/mapz-map/icons/housing-${({LOOKING:"looking",FORMING:"forming",OFFERING:"offering",MANAGED:"managed"} as Record<string,string>)[String(row.type)]||"looking"}.svg`;
+  if (String(row._board) === "My Hoüz") return `/mapz-map/icons/housing-${({LOOKING:"looking",FORMING:"forming",OFFERING:"offering",MANAGED:"managed"} as Record<string,string>)[String(row.type)]||"looking"}.svg`;
   if(row._board === "Mizzed")return "/mapz-map/icons/mizzed.svg";
   const kind = boardKind(row);
   if (kind === "gig") return "/mapz-map/icons/gigz.svg";
@@ -601,7 +601,7 @@ export default function MapzMapDemo() {
   const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>(place as Place).type!=='nonprofit'&&placeTypes.includes(mapzPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes]);
   const visibleHousing = useMemo(() => housing
     .filter(row => (!housingType || row.type === housingType || (housingType === "FORMING" && row.type === "LOOKING" && row.openToHaus === true)) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
-    .map(row => ({ ...row, _board: "The HAÜZ", locationLabel: row.lat != null && row.lng != null
+    .map(row => ({ ...row, _board: "My Hoüz", locationLabel: row.lat != null && row.lng != null
       ? `${row.mapPoint ? "Shared map point" : "Approximate area"} · ${roughDistanceMiles(viewerPoint || {lat:mapCenter[0],lng:mapCenter[1]},{lat:Number(row.lat),lng:Number(row.lng)})}${viewerPoint ? "" : " from map center"}` : row.mapPoint ? "Shared map point" : "Approximate area" })), [housing, housingType, housingSaved, housingTags, q, viewerPoint, mapCenter]);
   const marks = useMemo<Mark[]>(() => [
     ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
@@ -625,7 +625,7 @@ export default function MapzMapDemo() {
     else if (mark.kind === "place") { goOverlay("place", (mark.item as Place).id); }
     else {
       const row = mark.item as MapRow;
-      if (String(row._board) === "The HAÜZ") {
+      if (String(row._board) === "My Hoüz") {
         const postId = Number(row.id);
         if (Number.isFinite(postId)) goOverlay("houz", postId);
       }
@@ -750,7 +750,7 @@ export default function MapzMapDemo() {
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
     const row=mark.item as MapRow;
-    const isHouz=String(row._board)==='The HAÜZ';
+    const isHouz=String(row._board)==='My Hoüz';
     const brands=event?eventBrandLogos(event,places):null;
     const color=event?mapzEventColor(event,places):place?mapzPlaceColor(place):boardColor(row);
     const connectionEvent=row._board==='Mizzed'?events.find(e=>e.id===Number(row.eventId)):undefined;
@@ -785,14 +785,14 @@ export default function MapzMapDemo() {
   }), [marks, places, events, demoEventIds, attendance, tokenEpoch]);
   // Board 49: the status line says how many holograms are up tonight. No badge on the pin.
   const tonightCount = useMemo(() => { const night = eventNight(viewTimestamp); return sceneRows.filter(row => row.kind === "event" && row.eventNight === night).length; }, [sceneRows, viewTimestamp]);
-  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name));return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
+  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name));return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='My Hoüz')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{
       if(mark.kind==="resource")return false;
       if(mark.kind==="place")return Number((mark.item as Place).id)===placeId;
       if(mark.kind==="event")return Number((mark.item as Event).id)===eventId;
       const row=mark.item as MapRow;
-      const key=row._board==="Mizzed"?"mizzed":row._board==="The HAÜZ"?"houz":boardKind(row)?boardParam(boardKind(row)!):"";
+      const key=row._board==="Mizzed"?"mizzed":row._board==="My Hoüz"?"houz":boardKind(row)?boardParam(boardKind(row)!):"";
       return key && Number(row.id)===mapRecordId(params.get(key));
     })?.key||null;
     setSelected(key);

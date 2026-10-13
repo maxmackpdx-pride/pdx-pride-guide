@@ -522,7 +522,7 @@ export function HousingComposer({
   };
 
   const sharePost = (id: number) => {
-    const url = `${window.location.origin}/the-hauz/${id}`;
+    const url = `${window.location.origin}/boards?board=housing&post=housing:${id}`;
     if (navigator.share) {
       navigator.share({ url }).catch(() => undefined);
       return;
