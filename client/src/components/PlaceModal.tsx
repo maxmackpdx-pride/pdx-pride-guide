@@ -570,6 +570,14 @@ export default function PlaceModal({
           </div>
           </div>
 
+          {!editing && (multiLoc ? locations.some(loc => loc.phone) : displayed.phone) && (
+            <div className="place-modal-panel__facts place-modal-panel__contacts" aria-label="Phone contacts">
+              {multiLoc ? locations.filter(loc => loc.phone).map((loc, index) => (
+                <div key={index} className="place-modal-panel__fact"><Icon d={PHONE} /><a href={telHref(loc.phone!)}>{loc.label}: {loc.phone}</a></div>
+              )) : <div className="place-modal-panel__fact"><Icon d={PHONE} /><a href={telHref(displayed.phone!)}>{displayed.phone}</a></div>}
+            </div>
+          )}
+
           <details className="event-modal__disclosure" open={editing || detailsOpen} onToggle={event => setDetailsOpen(event.currentTarget.open)}>
             <summary><Info aria-hidden="true" />Place details<ChevronRight aria-hidden="true" /></summary>
           <div className="place-modal-panel__details-room">
@@ -629,7 +637,7 @@ export default function PlaceModal({
                     <div style={{ fontSize: "0.85rem", color: "var(--text-mid)", lineHeight: 1.45, marginBottom: 4 }}>
                       {loc.address}
                     </div>
-                    {(loc.phone || loc.hours) && (
+                    {loc.hours && (
                       <div
                         style={{
                           display: "flex",
@@ -640,11 +648,6 @@ export default function PlaceModal({
                           marginBottom: 6,
                         }}
                       >
-                        {loc.phone && (
-                          <a href={telHref(loc.phone)} style={{ color: "inherit", textDecoration: "none" }}>
-                            {loc.phone}
-                          </a>
-                        )}
                         {loc.hours && <span>{loc.hours}</span>}
                       </div>
                     )}
@@ -815,7 +818,6 @@ export default function PlaceModal({
                   <div className="place-modal-panel__facts">
                     {displayed.hours && <div className="place-modal-panel__fact"><Icon d={CLOCK} />{displayed.hours}</div>}
                     {address && <div className="place-modal-panel__fact"><Icon d={PIN} />{address}</div>}
-                    {displayed.phone && <div className="place-modal-panel__fact"><Icon d={PHONE} /><a href={telHref(displayed.phone)}>{displayed.phone}</a></div>}
                     {displayed.instagram && <div className="place-modal-panel__fact"><Icon d={IG} /><a href={displayed.instagram.startsWith("http") ? displayed.instagram : `https://instagram.com/${displayed.instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer">{displayed.instagram}</a></div>}
                   </div>
 

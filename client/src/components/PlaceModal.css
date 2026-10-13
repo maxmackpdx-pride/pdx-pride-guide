@@ -837,3 +837,5 @@ html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__details-room {
 
 /* Reviewed company assets already contain crisp white ink. */
 .place-modal-panel__identity .place-modal-panel__logo { filter: none !important; }
+
+.place-modal-panel__contacts .place-modal-panel__fact a { display:flex; align-items:center; min-height:44px; flex:1; }

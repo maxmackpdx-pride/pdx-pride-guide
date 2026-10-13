@@ -651,6 +651,8 @@ export default function Resources() {
                   ))}
                 </div>
 
+                {detail.org.phone && <ResourcePhone org={detail.org} />}
+                {detail.org.alt?.startsWith("tel:") && <ResourcePhone org={detail.org} href={detail.org.alt} label={detail.org.altLabel} />}
                 <details open className="rg-detail-disclosure event-modal__disclosure"><summary>Getting started & service details<ChevronDown size={20} aria-hidden="true" /></summary><div className="rg-detail-meta rg-disclosure-content">
                   <span className="rg-eyebrow">How to start</span>
                   <p>{detail.org.howToStart || detail.category.use}</p>
@@ -672,7 +674,6 @@ export default function Resources() {
                     </>
                   )}
                 </div></details>
-                {detail.org.phone && <ResourcePhone org={detail.org} />}
                 <div className="rg-detail-actions">
                   {detail.org.email && <a className="pdx-glass-rebind pdxBtn" href={`mailto:${detail.org.email}`}>Email {detail.org.email} <ArrowUpRight size={16} /></a>}
                   {detail.org.url && (
@@ -691,7 +692,7 @@ export default function Resources() {
                       <ArrowUpRight size={16} />
                     </a>
                   )}
-                  {detail.org.alt?.startsWith("tel:") ? <ResourcePhone org={detail.org} href={detail.org.alt} label={detail.org.altLabel} /> : detail.org.alt && (
+                  {detail.org.alt && !detail.org.alt.startsWith("tel:") && (
                     <a
                       className="pdx-glass-rebind pdxBtn"
                       href={detail.org.alt}
