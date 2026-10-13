@@ -75,5 +75,6 @@ test('Mapz opens the shared board card shell and preserves demo reply guards',()
  assert.match(page,/import "\.\/AllBoards\.css"/);
  assert.match(page,/<SpottedDetailModal presentation="eventz" isDemo=\{selectedMizzed\.isDemo\}/);
  assert.match(page,/<HousingPostOverlay presentation="eventz"/);
- assert.match(page,/fallback=\{<p className="ab-detail-status" role="status">Opening card…<\/p>\}/);
+ assert.match(page,/fallback=\{<p className="ab-detail-status" role="status">Opening card… <button type="button" onClick=\{closeOverlays\}>Back to map<\/button><\/p>\}/);
+ assert.match(page,/<BoardPostOverlay presentation="eventz"/);
 });
