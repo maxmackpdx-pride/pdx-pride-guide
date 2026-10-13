@@ -54,19 +54,10 @@ export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/rezources", label: "ReZources", accent: "green" },
 ];
 
-/** Phone header keeps Home and ReZources; Boards lives in the bottom dock. */
+/** Phone header keeps Home and About separate; discovery destinations live in the dock. */
 export const MOBILE_TOP_NAV: NavEntry[] = [
-  {
-    type: "dropdown",
-    id: "home",
-    label: "Home",
-    accent: "lime",
-    items: [
-      { href: "/", label: "Home", accent: "lime" },
-      { href: "/about", label: "About", accent: "magenta" },
-    ],
-  },
-  { type: "link", href: "/rezources", label: "ReZources", accent: "green" },
+  { type: "link", href: "/", label: "Home", accent: "lime" },
+  { type: "link", href: "/about", label: "About", accent: "magenta" },
 ];
 
 export type PageHeaderMeta = {

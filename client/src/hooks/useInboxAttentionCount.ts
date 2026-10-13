@@ -11,7 +11,7 @@ type PendingAdmin = {
 
 /**
  * Combined inbox attention: personal unread + shared admin queue + owner desk.
- * Used by the floating FAB and mobile Messages tab so backlog is not invisible.
+ * Used by the header Inbox dropdown and mobile Messages tab so backlog is not invisible.
  */
 export function useInboxAttentionCount() {
   const { user } = useAuth();

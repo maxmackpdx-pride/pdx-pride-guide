@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronDown, House, Inbox, Search, Settings, Trash2, UserRound, UsersRound } from "lucide-react";
 import { MenuCloseIcon } from "@/components/ui/animated-state-icons";
-import { CompactHubLink, CompactNavigation } from "@/components/ui/compact-navigation";
+import { CompactHubLink, CompactInboxLink, CompactNavigation } from "@/components/ui/compact-navigation";
 import GlitchLogo from "@/components/GlitchLogo";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
@@ -733,20 +733,21 @@ export default function Nav() {
     <>
       <NavShell ref={headerRef} mapSurface={location.startsWith("/map") || location.startsWith("/outzide")} loading={seamLoading}>
         <div className="site-header-inner">
-          {!isHome && <button type="button" className="site-brand site-brand--desktop" aria-label="Search Zaylist" title="Search (⌘K)" onClick={openSearch}>
+          {!isHome && <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home" title="Home" onClick={closeMenu}>
             <GlitchLogo
               src="/brand/family/zaylist-primary.svg"
               alt="Zaylist"
               className="site-brand-lockup"
             />
-          </button>}
+          </Link>}
 
           <div className="hub-mtop site-hub-mtop" aria-label="Mobile navigation">
             <nav aria-label="Mobile top navigation"><CompactNavigation location={location} entries={MOBILE_TOP_NAV} textOnly onNavigate={() => { closeMenu(); setMobileProfileOpen(false); dismissMobileNavOverlays(); }} /></nav>
             <div className="hub-mtop__spacer" />
-            <button type="button" className="site-search-trigger site-search-trigger--mobile" onClick={() => setSearchOpen(true)} aria-label="Search Zaylist" title="Search Zaylist" data-testid="site-search-trigger-mobile">
-              <Search size={20} aria-hidden="true" />
-            </button>
+            {(user || localDemo) && <span className="site-auth__hub site-auth__hub--mobile">
+              <CompactHubLink active={hubActive} onNavigate={() => { closeMenu(); setMobileProfileOpen(false); }} />
+              <CompactInboxLink onNavigate={() => { closeMenu(); setMobileProfileOpen(false); }} />
+            </span>}
             {authLoading && !user ? (
               <span className="hub-mtop__mode-btn" role="status" aria-label="Checking your session">…</span>
             ) : user ? (
@@ -792,7 +793,7 @@ export default function Nav() {
               <CompactNavigation textOnly location={location} onNavigate={closeMenu} />
             </div>
 
-            {isHome && <button
+            <button
               type="button"
               className="site-search-trigger site-search-trigger--desktop-nav"
               onClick={() => setSearchOpen(true)}
@@ -802,12 +803,13 @@ export default function Nav() {
             >
               <Search size={18} aria-hidden="true" />
               <span className="site-search-trigger__label">Search</span>
-            </button>}
+            </button>
 
             {(user || localDemo) && (
               <div className="site-auth site-auth--desktop">
                 <span className="site-auth__hub">
                   <CompactHubLink textOnly active={hubActive} unreadCount={unreadCount} onNavigate={closeMenu} />
+                  <CompactInboxLink onNavigate={closeMenu} />
                 </span>
                 <span className="site-auth__seam" aria-hidden="true" />
                 {user && (

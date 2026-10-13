@@ -1,0 +1,43 @@
+/* Hub supplies the shared frame; these rules remove the former floating-sheet surface. */
+.hub-panel.inbox-dropdown.pdx-glass-rebind {
+  --c: var(--neon-cyan);
+  display: block; min-width: 0; min-height: 0; max-width: none; max-height: none;
+  /* The retired sheet sets these three declarations as important. */
+  padding: 0; border: 1px solid var(--chrome-border, var(--ink-border)) !important; border-radius: 16px;
+  color: var(--text-hi); background: var(--ink-900) !important;
+  box-shadow: 0 24px 60px rgb(0 0 0 / .72), var(--glass-card-shadow) !important;
+  backdrop-filter: none; -webkit-backdrop-filter: none; animation: none;
+}
+.hub-panel.inbox-dropdown.pdx-glass-rebind::before {
+  inset: -1px 12px auto; height: 2px; padding: 0; z-index: 2; opacity: 1;
+  background: var(--chrome-spectrum, linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-orange), var(--neon-magenta), var(--neon-violet), var(--neon-cyan))); border-radius: 2px; pointer-events: none;
+  -webkit-mask: none; mask: none;
+}
+.hub-panel.inbox-dropdown::after { content: none; }
+.inbox-dropdown__reader { display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; border-radius: inherit; }
+.inbox-dropdown .hub-reader__header { flex: none; }
+.inbox-dropdown__tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.inbox-dropdown :is(button, a, input, textarea, summary):focus-visible { outline: 3px solid var(--chrome-focus, var(--neon-cyan)); outline-offset: 3px; }
+.inbox-dropdown .inbox-exp-icon-btn { width: 44px; height: 44px; border-radius: 22px; border: 0; color: var(--text-mid); background: transparent; }
+.inbox-dropdown .inbox-exp-chrome-pad { padding: 12px 18px 0; }
+.inbox-dropdown .inbox-exp-chrome-pad--toolbar { padding-bottom: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--ink-border); }
+.inbox-dropdown .inbox-exp-folder-pill { min-height: 44px; }
+.inbox-dropdown .inbox-exp-filter__btn { min-height: 44px; }
+.inbox-dropdown .inbox-overlay__scroll { flex: 1; min-height: 0; padding: 14px 18px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--text-lo) transparent; }
+.inbox-dropdown .inbox-overlay__scroll[data-view="inbox"], .inbox-dropdown .inbox-overlay__scroll--detail { padding: 0; }
+.inbox-dropdown .inbox-overlay__scroll::-webkit-scrollbar { width: 6px; height: auto; }
+.inbox-dropdown .inbox-exp-list { margin: 0; border: 0; border-radius: 0; background: transparent; }
+.inbox-dropdown .inbox-exp-row { margin: 0; padding: 17px 18px; border: 0; border-bottom: 1px solid var(--ink-border); border-radius: 0; }
+.inbox-dropdown .inbox-exp-row__name { font: 800 16px/1.2 var(--font-display); letter-spacing: .04em; }
+.inbox-dropdown .inbox-exp-row__at { font: 11px/1.4 var(--font-board-mono, monospace); color: var(--text-lo); }
+.inbox-dropdown .inbox-exp-row__preview { font-size: 14px; color: var(--text-lo); }
+.inbox-dropdown .inbox-exp-search { padding: 12px 18px; border-color: var(--ink-border); background: var(--ink-900); }
+.inbox-dropdown .inbox-exp-search__field { height: 44px; border-radius: 22px; background: var(--ink-800); border-color: var(--ink-border-strong); }
+.inbox-dropdown .inbox-exp-empty { color: var(--text-mid); }
+html.calm-mode .hub-panel.inbox-dropdown.pdx-glass-rebind { box-shadow: 0 24px 60px rgb(0 0 0 / .72) !important; }
+html.calm-mode .hub-panel.inbox-dropdown.pdx-glass-rebind::before { background: var(--ink-border-strong); opacity: 1; }
+@media (max-width: 959px) {
+  .inbox-dropdown .inbox-exp-chrome-pad { padding-inline: 14px; }
+  .inbox-dropdown .inbox-exp-row { padding: 15px 14px; }
+  .inbox-dropdown .inbox-exp-search { padding: 10px 14px; }
+}

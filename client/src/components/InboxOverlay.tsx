@@ -1,10 +1,12 @@
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { X, SlidersHorizontal, ChevronDown, Search, ChevronLeft, Archive } from "lucide-react";
+import { X, RefreshCw, SlidersHorizontal, ChevronDown, Search, ChevronLeft, Archive } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import * as Tabs from "@radix-ui/react-tabs";
+import HeaderDropdown from "@/components/ui/header-dropdown";
 import { useInboxThreads } from "@/components/inbox/useInboxThreads";
 import { useAdminGuideThreads } from "@/components/inbox/useAdminGuideThreads";
 import type { Folder, QueueFolder, Thread, LineupDecision } from "@/components/inbox/types";
@@ -26,17 +28,34 @@ import type { MessageReactionCode } from "@shared/messageReactions";
 import { isLocalDemo } from "@/lib/localDemo";
 import "@/components/inbox/inbox.css";
 import "@/components/inbox/message-reactions.css";
+import "@/components/inbox/inbox-dropdown.css";
 
 type View = "inbox" | "posts" | "stats";
 type Account = "personal" | "admin" | "owner";
 
 type InboxOverlayProps = {
   open: boolean;
+  trigger: RefObject<HTMLElement | null>;
   onClose: () => void;
   initialView?: View;
   initialAccount?: Account;
   initialThreadId?: string | null;
 };
+
+function InboxPanelHeader({ onClose, onRefresh, refreshing = false, guest = false }: { onClose: () => void; onRefresh?: () => void; refreshing?: boolean; guest?: boolean }) {
+  return <header className="hub-reader__header">
+    <div className="hub-reader__heading">
+      <div><h2>INBOX</h2><p>Your conversations.</p></div>
+      <div className="hub-reader__utilities">
+        {onRefresh && <button type="button" className="hub-reader__icon" aria-label="Refresh inbox" disabled={refreshing} onClick={onRefresh}><RefreshCw size={19} aria-hidden /></button>}
+        <button type="button" className="hub-reader__icon" aria-label="Close inbox" onClick={onClose}><X size={22} aria-hidden /></button>
+      </div>
+    </div>
+    <Tabs.List className="hub-reader__tabs inbox-dropdown__tabs" aria-label="Inbox views">
+      {(["inbox", "posts", "stats"] as const).map(value => <Tabs.Trigger className="hub-reader__tab" value={value} key={value} disabled={guest && value !== "inbox"}>{value}</Tabs.Trigger>)}
+    </Tabs.List>
+  </header>;
+}
 
 const ACCOUNTS: Array<[Account, string, string]> = [
   ["personal", "Personal", C.limeSoft],
@@ -65,10 +84,11 @@ type HousingThreadGate = {
   canNudge: boolean;
 };
 
-export default function InboxOverlay({ open, onClose, initialView, initialAccount, initialThreadId }: InboxOverlayProps) {
+export default function InboxOverlay({ open, trigger, onClose, initialView, initialAccount, initialThreadId }: InboxOverlayProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const inboxRefreshing = useIsFetching({ queryKey: ["/api/messages/inbox"] });
   const [view, setView] = useState<View>("inbox");
   const [account, setAccount] = useState<Account>("personal");
   const [folder, setFolder] = useState<Folder>("inbox");
@@ -81,7 +101,6 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const [activeGroup, setActiveGroup] = useState<InboxGroupChatTarget | null>(null);
   const [reply, setReply] = useState("");
   const [showAuth, setShowAuth] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
@@ -153,40 +172,6 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   });
 
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
-  // Close on outside press - but never on the same gesture that opened the
-  // sheet (FAB / Messages tab). Also ignore the floating FAB itself so open
-  // can toggle cleanly without an instant close.
-  useEffect(() => {
-    if (!open) return;
-    let armed = false;
-    const armTimer = window.setTimeout(() => {
-      armed = true;
-    }, 280);
-    const onDown = (e: PointerEvent | MouseEvent) => {
-      if (!armed) return;
-      const t = e.target;
-      if (!(t instanceof Node)) return;
-      if (panelRef.current?.contains(t)) return;
-      if (t instanceof Element) {
-        if (t.closest(".floating-inbox")) return;
-        if (t.closest("[data-inbox-open-trigger]")) return;
-      }
-      onClose();
-    };
-    document.addEventListener("pointerdown", onDown, true);
-    return () => {
-      window.clearTimeout(armTimer);
-      document.removeEventListener("pointerdown", onDown, true);
-    };
-  }, [open, onClose]);
-
-  useEffect(() => {
     if (!filterOpen) return;
     const onDown = (e: MouseEvent) => {
       if (!filterRef.current?.contains(e.target as Node)) setFilterOpen(false);
@@ -246,74 +231,22 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
 
   if (!open) return null;
 
-  // Local guest demo: glass shell + login so the FAB/chrome can be shown without a session.
+  // Local preview shares the same frame and keeps real messages behind sign-in.
   if (!user) {
     if (!isLocalDemo()) return null;
-    return (
-      <>
-        <div
-          className="inbox-overlay pdx-liquid-overlay pdx-glass-rebind"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Inbox demo"
-          ref={panelRef}
-          data-testid="inbox-overlay-guest-demo"
-        >
-          <header className="inbox-exp-head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 18px 10px", gap: 12 }}>
-            <div style={{ display: "flex", gap: 14, alignItems: "baseline" }}>
-              <span className="display" style={{ fontWeight: 900, letterSpacing: "0.06em", color: "#fff" }}>INBOX</span>
-              <span className="display" style={{ fontWeight: 800, letterSpacing: "0.06em", color: "#666" }}>POSTS</span>
-              <span className="display" style={{ fontWeight: 800, letterSpacing: "0.06em", color: "#666" }}>STATS</span>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close inbox"
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                border: "1px solid #2a2a32",
-                background: "#0c0c0f",
-                color: "#ccc",
-                cursor: "pointer",
-              }}
-            >
-              <X size={16} />
-            </button>
-          </header>
-          <div style={{ padding: "28px 22px 32px", display: "flex", flexDirection: "column", gap: 16, alignItems: "flex-start" }}>
-            <p style={{ margin: 0, color: "#e6e3da", fontSize: "0.95rem", lineHeight: 1.5, maxWidth: 36 + "ch" }}>
-              Local demo - floating inbox glass shell. Sign in to load real threads, posts, and queues.
-            </p>
-            <p style={{ margin: 0, color: "#8a8a8a", fontSize: "0.8rem", lineHeight: 1.45 }}>
-              Smoke account if seeded: <code style={{ color: "#3d7cff" }}>tucker@test.com</code> /{" "}
-              <code style={{ color: "#3d7cff" }}>smoketest</code>
-            </p>
-            <button
-              type="button"
-              className="pdx-glass-btn pdx-glass-rebind"
-              data-testid="inbox-demo-login"
-              onClick={() => setShowAuth(true)}
-              style={{
-                ["--c" as string]: "#1a4dff",
-                marginTop: 4,
-                padding: "10px 18px",
-                borderRadius: 6,
-                fontFamily: "var(--font-display)",
-                fontWeight: 800,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                cursor: "pointer",
-              }}
-            >
-              Log in to demo
-            </button>
-          </div>
-        </div>
-        {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}
-      </>
-    );
+    return <>
+      <HeaderDropdown open={open} onOpenChange={next => { if (!next) onClose(); }} trigger={trigger} triggerSelector="[data-inbox-open-trigger]" id="inbox-panel" title="Inbox" description="Your messages, posts, and stats." className="inbox-overlay inbox-dropdown">
+        <Tabs.Root value={view} onValueChange={value => setView(value as View)} className="inbox-dropdown__reader">
+          <InboxPanelHeader onClose={onClose} guest />
+          <Tabs.Content value={view} className="hub-reader__state">
+            <h3>Your conversations are here.</h3>
+            <p>Sign in to read messages, manage your posts, and see your stats.</p>
+            <button type="button" className="hub-reader__action pdx-glass-rebind" data-testid="inbox-demo-login" onClick={() => setShowAuth(true)}>Log in / Join</button>
+          </Tabs.Content>
+        </Tabs.Root>
+      </HeaderDropdown>
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}
+    </>;
   }
 
   const inboxActive = view === "inbox";
@@ -379,32 +312,14 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
 
   return (
     <>
-      <div className="inbox-overlay__backdrop" onClick={onClose} aria-hidden="true" />
-      <div
-        className="inbox-overlay pdx-liquid-overlay pdx-glass-rebind"
-        data-action-context={account === "owner" ? "owner" : account === "admin" ? "admin" : "hub"}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Inbox"
-        ref={panelRef}
-      >
-        <div className="inbox-exp-handle">
-          <div className="inbox-exp-handle__bar" />
-        </div>
-
-        <div className="inbox-exp-head">
-          <div className="inbox-exp-head__tabs">
-            <button type="button" className={`inbox-exp-head__tab${view === "inbox" ? " is-active" : ""}`} onClick={() => setView("inbox")}>INBOX</button>
-            <button type="button" className={`inbox-exp-head__tab${view === "posts" ? " is-active" : ""}`} onClick={() => setView("posts")}>POSTS</button>
-            <button type="button" className={`inbox-exp-head__tab${view === "stats" ? " is-active" : ""}`} onClick={() => setView("stats")}>STATS</button>
-          </div>
-          <button type="button" className="inbox-exp-icon-btn" onClick={onClose} aria-label="Close" title="Close">
-            <X size={16} />
-          </button>
-        </div>
+      <HeaderDropdown open={open} onOpenChange={next => { if (!next) onClose(); }} trigger={trigger} triggerSelector="[data-inbox-open-trigger]" id="inbox-panel" title="Inbox" description="Your messages, posts, stats, and account tools." className="inbox-overlay inbox-dropdown" actionContext={account === "owner" ? "owner" : account === "admin" ? "admin" : "hub"}>
+        <Tabs.Root value={view} onValueChange={value => setView(value as View)} className="inbox-dropdown__reader">
+        <InboxPanelHeader onClose={onClose} refreshing={inboxRefreshing > 0} onRefresh={() => {
+          for (const key of ["/api/messages/inbox", "/api/messages/sent", "/api/messages/unread-count", "/api/admin/pending-count"]) void queryClient.invalidateQueries({ queryKey: [key] });
+        }} />
 
         {/* account tabs (inbox only) */}
-        {inboxActive && !detailOpen && (
+        {inboxActive && !detailOpen && visibleAccounts.length > 1 && (
           <div className="inbox-exp-chrome-pad">
             <div className="inbox-exp-seg-tray">
               {visibleAccounts.map(([id, label]) => {
@@ -563,9 +478,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         )}
 
         {/* body */}
-        <div
-          className={`inbox-overlay__scroll${detailOpen ? " inbox-overlay__scroll--detail" : ""}`}
-        >
+        <Tabs.Content value={view} data-view={view} className={`inbox-overlay__scroll${detailOpen ? " inbox-overlay__scroll--detail" : ""}`}>
+
           {activeGroup ? (
             <InboxGroupChat target={activeGroup} onBack={closeGroup} />
           ) : activeThread ? (
@@ -711,7 +625,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
               {view === "stats" && <StatsView />}
             </>
           )}
-        </div>
+        </Tabs.Content>
 
         {/* bottom search */}
         {searchVisible && !detailOpen && (
@@ -722,12 +636,14 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
                 className="inbox-exp-search__input"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                aria-label="Search messages"
                 placeholder="Search messages"
               />
             </div>
           </div>
         )}
-      </div>
+        </Tabs.Root>
+      </HeaderDropdown>
 
       {openEvent && (
         <EventModal

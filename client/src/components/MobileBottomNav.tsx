@@ -1,22 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
 import { useHubPanel } from "@/context/HubPanelContext";
-import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
-import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
 import {
   MOBILE_NAV_DISMISS,
   dismissMobileNavOverlays,
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
 import { BOARDS_MENU, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
-import { isLocalDemo } from "@/lib/localDemo";
-import AuthModal from "./AuthModal";
 import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
-import { CalendarDays, LayoutGrid, MapPin, MessageCircle } from "lucide-react";
-
-const MOBILE_ICON = 19;
+import { CalendarDays, LayoutGrid, MapPin, LifeBuoy } from "lucide-react";
 
 function tabClass(
   active: boolean,
@@ -27,12 +21,9 @@ function tabClass(
 
 export default function MobileBottomNav() {
   const [location] = useLocation();
-  const { user } = useAuth();
-  const { open, openSheet, closeSheet } = useInboxSheet();
-  const { total: attentionCount } = useInboxAttentionCount();
+  const { open, closeSheet } = useInboxSheet();
   const { isOpen: hubOpen, closeHub } = useHubPanel();
-  const [showAuth, setShowAuth] = useState(false);
-  const overlayOpen = hubOpen || open || showAuth;
+  const overlayOpen = hubOpen || open;
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
     if (except !== "hub-panel") closeHub();
@@ -52,26 +43,12 @@ export default function MobileBottomNav() {
   const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
   const placesActive = navLinkActive(location, "/directory");
   const boardsActive = navLinkActive(location, "/boards") || BOARDS_MENU.some(item => navLinkActive(location, item.href)) || navLinkActive(location, "/hausing");
-  const activeIndex = open || showAuth ? 4 : placesActive ? 1 : mapActive ? 2 : boardsActive ? 3 : eventsActive ? 0 : -1;
+  const resourcesActive = navLinkActive(location, "/rezources");
+  const activeIndex = resourcesActive ? 4 : placesActive ? 1 : mapActive ? 2 : boardsActive ? 3 : eventsActive ? 0 : -1;
 
   const dismissExcept = (except?: MobileNavDismissDetail["except"]) => {
     closeLocalSheets(except);
     dismissMobileNavOverlays(except);
-  };
-
-  const localDemo = isLocalDemo();
-
-  const handleMessages = () => {
-    if (!user && !localDemo) {
-      setShowAuth(true);
-      return;
-    }
-    if (open) {
-      closeSheet();
-      return;
-    }
-    dismissExcept("inbox");
-    openSheet();
   };
 
   const handleNavLink = () => {
@@ -80,7 +57,7 @@ export default function MobileBottomNav() {
 
   return createPortal(
     <>
-      <MobileDockShell activeIndex={activeIndex} overlayOpen={overlayOpen} location={location} attentionCount={user ? attentionCount : 0}>
+      <MobileDockShell activeIndex={activeIndex} overlayOpen={overlayOpen} location={location}>
           <Link
             href="/events"
             className={tabClass(eventsActive, "cyan")}
@@ -144,28 +121,20 @@ export default function MobileBottomNav() {
             <span className="znav-caption">Boards</span>
           </Link>
 
-          <button
-            type="button"
-            className={tabClass(Boolean((user || localDemo) && open), "pink")}
-            data-accent="magenta"
-            data-inbox-open-trigger="messages"
-            onClick={handleMessages}
-            aria-expanded={user || localDemo ? open : undefined}
-            aria-label={
-              attentionCount > 0
-                ? `Messages, ${attentionCount} need attention`
-                : "Messages"
-            }
+          <Link
+            href="/rezources"
+            className={tabClass(resourcesActive, "green")}
+            data-accent="green"
+            aria-current={resourcesActive ? "page" : undefined}
+            aria-label="ReZources"
+            title="ReZources"
+            onClick={handleNavLink}
           >
-            <span className="znav-icon-row hub-mobile-tab__icon-wrap">
-              <MessageCircle size={20} strokeWidth={1.8} aria-hidden="true" />
-              {user && attentionCount > 0 && <i>{attentionCount > 9 ? "9+" : attentionCount}</i>}
-            </span>
-            <span className="znav-caption">Messages</span>
-          </button>
+            <span className="znav-icon-row"><LifeBuoy size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">ReZources</span>
+          </Link>
       </MobileDockShell>
 
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </>,
     document.body,
   );

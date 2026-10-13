@@ -516,5 +516,5 @@ html.calm-mode .z-glass__pointer,html[data-calm="true"] .z-glass__pointer { disp
 @media (prefers-reduced-transparency:reduce) { .site-header.site-header--glass,.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass { background:#080c12; } .z-glass__blur,.z-glass__blur[data-refract] { backdrop-filter:none; -webkit-backdrop-filter:none; } }
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .site-header.site-header--glass,.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass { background:#080c12; } }
 
-.site-header--glass button.site-brand--desktop { border:0; padding:0; background:transparent; cursor:pointer; }
-.site-header--glass button.site-brand--desktop:focus-visible { outline:2px solid var(--neon-cyan); outline-offset:4px; border-radius:8px; }
+.site-header--glass .site-brand--desktop { border:0; padding:0; background:transparent; cursor:pointer; }
+.site-header--glass .site-brand--desktop:focus-visible { outline:2px solid var(--neon-cyan); outline-offset:4px; border-radius:8px; }
