@@ -1,3 +1,5 @@
+import GigPreviewCard from "@/components/board/GigPreviewCard";
+import type { GigPost } from "@/pages/PrideWork";
 import { dayComplementToken } from "@/lib/dsColors";
 import { PLACE_ACCENTS } from './discovery/placeTokens';
 import { ResourceCardMotif } from './resources/ResourceCardMotif';
@@ -8,8 +10,8 @@ import DetailActions from "./DetailActions";
 import type React from "react";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "wouter";
-import { useMutation } from "@tanstack/react-query";
+import { Link, useLocation } from "wouter";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -216,6 +218,8 @@ export default function PlaceModal({
   originRect?: PlaceModalOriginRect | null;
 }) {
   const logoInkId = `placez-open-logo-${useId().replace(/:/g, "")}`;
+  const [,navigate] = useLocation();
+  const gigCards = useQuery<GigPost[]>({ queryKey:["/api/gigs"], enabled:Boolean(place?.gigs?.length), queryFn:async()=>{const response=await fetch("/api/gigs",{credentials:"include"}); if(!response.ok) throw new Error("Could not load Gigz cards");return response.json();} });
   const { toast } = useToast();
   const { user } = useAuth();
   const [editing, setEditing] = useState(false);
@@ -976,51 +980,15 @@ export default function PlaceModal({
                     role="list"
                     aria-label={`Past events at ${place.name}`}
                   >
-                    {pastEvents.map((ev) => {
-                      const code = dayCodeFromEvent(ev);
-                      const dayVar = `var(--day-${code.toLowerCase()})`;
-                      const poster = resolveEventPosterUrl(
-                        ev.id,
-                        ev.posterImageUrl,
-                        ev.dayOfWeek,
-                      );
-                      return (
-                        <Link
-                          key={ev.listingInstanceKey ?? ev.id}
-                          href={eventPath(ev.id, ev.title, ev.dayOfWeek)}
-                          onClick={onClose}
-                          role="listitem"
-                          className="place-modal-past__card"
-                          style={{ ["--pm-day" as string]: dayVar }}
-                        >
-                          <div className="place-modal-past__banner">
-                            {poster ? (
-                              <img
-                                className="place-modal-past__poster"
-                                src={poster}
-                                alt=""
-                                loading="lazy"
-                                decoding="async"
-                              />
-                            ) : null}
-                            <div className="place-modal-past__scrim" aria-hidden="true" />
-                            <span className="place-modal-past__when">{formatPastWhen(ev)}</span>
-                          </div>
-                          <div className="place-modal-past__body">
-                            <div className="place-modal-past__title">{ev.title}</div>
-                            {ev.hostDisplayName ? (
-                              <div className="place-modal-past__host">
-                                Host · {ev.hostDisplayName}
-                              </div>
-                            ) : (
-                              <div className="place-modal-past__host place-modal-past__host--muted">
-                                Ended
-                              </div>
-                            )}
-                          </div>
-                        </Link>
-                      );
-                    })}
+                    {pastEvents.map(ev => <Link
+                      key={ev.listingInstanceKey ?? ev.id}
+                      href={eventPath(ev.id,ev.title,ev.dayOfWeek)} onClick={onClose}
+                      role="listitem" aria-label={`View past event: ${ev.title}`}
+                      className="place-event-tile place-event-tile--past pdx-glass-rebind"
+                      style={{"--c":DAY_COLOR[dayCodeFromEvent(ev)] || accent} as React.CSSProperties}>
+                      <EventFlyerArt src={resolveEventPosterUrl(ev.id,ev.posterImageUrl,ev.dayOfWeek)} day={ev.dayOfWeek} showDay={false} />
+                      <span className="place-event-tile__shade"><strong>{ev.title}</strong><small>{formatPastWhen(ev)} · Ended</small></span>
+                    </Link>)}
                   </div>
                 </div>
               )
@@ -1032,16 +1000,11 @@ export default function PlaceModal({
                 <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No gig postings at this venue yet.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {gigs.map(g => (
-                    <div key={g.id} style={{ padding: "8px 0 8px 12px", borderLeft: `3px solid ${accent}` }}>
-                      <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", color: accent }}>
-                        {g.postType === "LOOKING_FOR_WORK" ? "Available" : "Gig"}
-                      </div>
-                      <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-hi)" }}>
-                        {g.title}
-                      </div>
-                    </div>
-                  ))}
+                  <div className="place-gigs-rail" aria-label={`Gigz at ${place.name}`}>
+                    {gigs.map(g => <GigPreviewCard key={g.id}
+                      post={gigCards.data?.find(post=>post.id===g.id) ?? {...g,postType:g.postType === "LOOKING_FOR_WORK" ? "LOOKING_FOR_WORK" : "POSTING_GIG"}}
+                      onOpen={()=>{onClose();navigate(`/gigz?post=${g.id}`);}} />)}
+                  </div>
                   <Link href="/gigz" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
                     View GIGZ <ArrowRight size={14} aria-hidden="true" />
                   </Link>

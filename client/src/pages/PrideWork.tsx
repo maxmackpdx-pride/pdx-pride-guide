@@ -1,3 +1,4 @@
+import GigPreviewCard from "@/components/board/GigPreviewCard";
 import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
@@ -110,24 +111,8 @@ function GigRail({ posts, kind, selected, onSelect }: {
     <Carousel setApi={setApi} opts={{ align: "start", dragFree: true, direction: "rtl" }} className="gigz-rail" dir="rtl">
       <CarouselContent className="gigz-rail__track">
         {posts.map((post) => {
-          const isTalent = kind === "talent";
-          const poster = post.displayName || post.name;
           return <CarouselItem key={post.id} className="gigz-rail__item" dir="ltr">
-            {isTalent ? <button type="button" className="gigz-talent" style={{ "--gigz-accent": "var(--room-gigz)" } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View ${poster}: ${post.title}`}>
-              <ResourceCardMotif name={post.title} category="money" />
-              <span className="gigz-talent__status"><span><i /> Available for gigs</span><small>{post.isDemo ? "DEMO LISTING" : `Posted ${timeAgo(post.createdAt)}`}</small></span>
-              {post.username?.toLowerCase() !== "tucker_pdmax" && <span className="gigz-talent__portrait">{post.posterPhotoUrl || post.imageUrl ? <img src={post.posterPhotoUrl || post.imageUrl || ""} alt="" loading="lazy" /> : <UserAvatar photoUrl={post.posterPhotoUrl} avatarChoice={post.avatarChoice} avatarRing={post.posterAvatarRing} displayName={poster} username={post.username} size={150} />}</span>}
-              <strong>{poster}</strong><span className="gigz-talent__role">{post.title}</span>
-              <span className="gigz-talent__location"><MapPin size={14} /> {post.isRemote ? "Remote" : post.location || "Portland"}</span>
-              <span className="gigz-talent__hire">View and message <ArrowUpRight size={18} /></span>
-              <span className="gigz-talent__caption"><Zap size={15} /> {post.compensation || post.skills || "Available for work"}</span>
-            </button> : <button type="button" className="gigz-opportunity" style={{ "--gigz-accent": "var(--room-gigz)" } as CSSProperties} onClick={() => onSelect(post.id)} aria-expanded={selected === post.id} aria-label={`View gig: ${post.title}`}>
-              <ResourceCardMotif name={post.title} category="arts" />
-              {post.imageUrl ? <img src={post.imageUrl} alt="" loading="lazy" /> : <span className="gigz-opportunity__fallback" aria-hidden="true">GIGZ</span>}
-              <span className="gigz-opportunity__shade" />
-              <span className="gigz-opportunity__top"><span><em>{post.skills?.split(",")[0]?.trim() || "OPPORTUNITY"}</em><small>{post.isDemo ? "DEMO LISTING" : `Gig posted · ${timeAgo(post.createdAt)}`}</small></span><span className="gigz-opportunity__arrow"><ArrowUpRight size={20} /></span></span>
-              <span className="gigz-opportunity__bottom"><strong>{post.title}</strong><span>{post.isRemote ? "Remote" : post.location || "Portland"}{post.gigDate ? ` · ${post.gigDate}${post.gigTime ? ` · ${post.gigTime}` : ""}` : ""}</span><em>{post.compensation || "Pay not listed"}</em></span>
-            </button>}
+            <GigPreviewCard post={post} selected={selected === post.id} onOpen={() => onSelect(post.id)} />
           </CarouselItem>;
         })}
       </CarouselContent>

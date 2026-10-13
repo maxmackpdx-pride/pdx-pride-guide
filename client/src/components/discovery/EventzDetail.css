@@ -211,3 +211,15 @@
 .event-modal.eb-detail--place .place-modal-panel__hero img { -webkit-user-drag: none; user-select: none; }
 .event-modal.eb-detail--place :is(.place-modal-panel__read-more,.place-modal-panel__tab) { min-height: 44px; }
 .event-modal.eb-detail--place .place-modal-panel__hero .leaflet-control-zoom a { width: 44px; height: 44px; line-height: 44px; }
+
+/* Reuse the current Eventz/Placez glow-plate button recipe in the open card. */
+.event-modal.eb-detail.eb-detail--place :is(.eb-detail__primary-action > button,.place-modal-panel__quick-actions > a,.place-modal-panel__tab) {
+ min-height: 44px !important; border: 1px solid color-mix(in srgb,var(--c) 45%,transparent) !important;
+ border-radius: 12px !important; background: var(--btn-glow-bg) !important; box-shadow: var(--btn-glow-shadow) !important;
+ color: var(--text-hi) !important; padding: 12px 14px !important; font: var(--place-open-action-font) !important; text-transform: uppercase;
+}
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__tab[aria-selected="true"],
+.event-modal.eb-detail.eb-detail--place .eb-detail__primary-action > button[aria-pressed="true"] { background: var(--c) !important; color: var(--z-black) !important; }
+
+.event-modal.eb-detail--place .place-gigs-rail { display: flex; gap: 16px; overflow-x: auto; padding: 8px 0 20px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+.event-modal.eb-detail--place .place-gigs-rail > :is(.gigz-opportunity,.gigz-talent) { flex: none; width: min(80cqw,280px); scroll-snap-align: start; }
