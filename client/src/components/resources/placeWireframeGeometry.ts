@@ -2,10 +2,10 @@
 // these are original parametric drawings, not offset copies of a flat icon.
 type Point = [number, number, number];
 type Surface = (u: number, v: number) => Point;
-export type PlaceWireframe = { outline: string; grid: string };
+export type PlaceWireframe = { outline: string; grid: string; rearGrid: string };
 const tau = Math.PI * 2;
-const project = ([x, y, z]: Point): [number, number] => {
-  const yaw = -.42, pitch = .3;
+const project = ([x, y, z]: Point, yaw = -.42): [number, number] => {
+  const pitch = .3;
   const rx = x * Math.cos(yaw) + z * Math.sin(yaw);
   const rz = z * Math.cos(yaw) - x * Math.sin(yaw);
   const ry = y * Math.cos(pitch) - rz * Math.sin(pitch);
@@ -13,20 +13,32 @@ const project = ([x, y, z]: Point): [number, number] => {
   const scale = 1.15 * 550 / (550 - depth);
   return [200 + rx * scale, 250 - ry * scale];
 };
-const curve = (fn: (t: number) => Point, steps = 32) => Array.from({ length: steps + 1 }, (_, i) => {
-  const [x, y] = project(fn(i / steps));
+const curve = (fn: (t: number) => Point, steps = 32, yaw = -.42) => Array.from({ length: steps + 1 }, (_, i) => {
+  const [x, y] = project(fn(i / steps), yaw);
   return `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`;
 }).join('');
 class Drawing {
-  constructor(private density = 1) {}
-  outline = ''; grid = '';
-  line(a: Point, b: Point) { this.outline += curve(t => a.map((v, i) => v + (b[i] - v) * t) as Point, 1); }
-  edge(fn: (t: number) => Point) { this.outline += curve(fn); }
+  constructor(private density = 1, private yaw = -.42) {}
+  outline = ''; grid = ''; rearGrid = '';
+  meshCurve(fn: (t: number) => Point) {
+    let previousFar: boolean | undefined;
+    for (let i=1; i<=32; i++) {
+      const a=fn((i-1)/32), b=fn(i/32);
+      const middle=a.map((value,j)=>(value+b[j])/2) as Point;
+      const depth=middle[1]*Math.sin(.3)+(middle[2]*Math.cos(this.yaw)-middle[0]*Math.sin(this.yaw))*Math.cos(.3);
+      const far=depth<0, [ax,ay]=project(a,this.yaw), [bx,by]=project(b,this.yaw);
+      const segment=`${previousFar===far ? '' : `M${ax.toFixed(2)} ${ay.toFixed(2)}`}L${bx.toFixed(2)} ${by.toFixed(2)}`;
+      if(far) this.rearGrid+=segment; else this.grid+=segment;
+      previousFar=far;
+    }
+  }
+  line(a: Point, b: Point) { this.outline += curve(t => a.map((v, i) => v + (b[i] - v) * t) as Point, 1, this.yaw); }
+  edge(fn: (t: number) => Point) { this.outline += curve(fn,32,this.yaw); }
   surface(fn: Surface, rows = 6, columns = 10, closed = false) {
     rows = Math.max(2, Math.round(rows * this.density));
     columns = Math.max(3, Math.round(columns * this.density));
-    for (let i = 1; i < rows; i++) this.grid += curve(t => fn(i / rows, t));
-    for (let i = 1; i < columns; i++) this.grid += curve(t => fn(t, i / columns));
+    for (let i = 1; i < rows; i++) this.meshCurve(t => fn(i / rows, t));
+    for (let i = 1; i < columns; i++) this.meshCurve(t => fn(t, i / columns));
     this.edge(t => fn(0, t)); this.edge(t => fn(1, t));
     if (!closed) { this.edge(t => fn(t, 0)); this.edge(t => fn(t, 1)); }
   }
@@ -122,10 +134,10 @@ function wing(d: Drawing, side: number) {
   d.surface((u,v) => [side*(u*115),-65+140*Math.sin(u*Math.PI*.7)*(1-.7*v),30*Math.sin(u*Math.PI)*Math.sin(v*Math.PI)], 8, 6);
 }
 const cache = new Map<string, PlaceWireframe>();
-export function placeWireframe(form: string, density = 1): PlaceWireframe {
-  const cacheKey = `${form}-${density}`;
+export function placeWireframe(form: string, density = 1, yaw = -.42): PlaceWireframe {
+  const cacheKey = `${form}-${density}-${yaw}`;
   const cached = cache.get(cacheKey); if(cached) return cached;
-  const d = new Drawing(density);
+  const d = new Drawing(density,yaw);
   switch(form) {
     case 'danceScreen': d.sphere([0,0,0],90); d.line([0,90,0],[0,120,0]); break;
     case 'gathering': d.surface((u,v)=>[-90+180*u,-70+175*(1-Math.abs(u*2-1)),-55+110*v],8,6); d.line([-90,-70,55],[90,-70,55]); d.line([0,105,55],[0,-70,55]); break;
@@ -145,7 +157,7 @@ export function placeWireframe(form: string, density = 1): PlaceWireframe {
       break;
     case 'coffeeMix': cup(d); break;
     case 'espressoCart': d.box([0,0,0],[140,135,70]); cup(d,[0,-65,45],.4); break;
-    case 'coffeeBeer': cup(d,[-43,0,0],.7); d.lathe(v=>[27,-55+130*v],[65,0,0],6,10); break;
+    case 'coffeeBeer': d.lathe(v=>[35+13*v,-80+165*v],[0,0,0],6,12); d.torus([0,85,0],48,3); break;
     case 'wineRoom': glass(d); break;
     case 'wineTarot': glass(d,[-25,0,0],.8); d.box([65,0,-10],[55,125,8]); break;
     case 'ringCocktail': d.lathe(v=>[5+80*v,-5+85*v],[0,0,0],6,14); d.lathe(v=>[5,-85+80*v],[0,0,0],3,8); d.lathe(v=>[48*v,-90],[0,0,0],3,12); break;
@@ -156,7 +168,12 @@ export function placeWireframe(form: string, density = 1): PlaceWireframe {
     case 'taco': d.surface((u,v)=>[-85+170*v,-45+80*Math.sin(u*Math.PI),55*Math.cos(u*Math.PI)],10,8); break;
     case 'pizza': d.surface((u,v)=>[(v-.5)*150*u,95-180*u,18*Math.sin(u*Math.PI)],7,7); d.line([-75,-85,0],[0,95,0]); d.line([75,-85,0],[0,95,0]); break;
     case 'wingsLinks': case 'peacockMic': wing(d,-1); wing(d,1); break;
-    case 'starStage': d.surface((u,v)=>{const a=u*tau,r=55+25*Math.cos(a*5);return [r*Math.cos(a)*v,r*Math.sin(a)*v,20*Math.sin(v*Math.PI)];},20,4,true); break;
+    case 'starStage': {
+      const star=(u:number): Point=>{const index=Math.min(9,Math.floor(u*10)),fraction=u*10-index;const point=(i:number)=>{const a=Math.PI/2+i*tau/10,r=i%2===0?85:36;return [r*Math.cos(a),r*Math.sin(a)]};const a=point(index),b=point(index+1);return [a[0]+(b[0]-a[0])*fraction,a[1]+(b[1]-a[1])*fraction,0]};
+      d.surface((u,v)=>{const [x,y]=star(u);return [x*v,y*v,12];},10,3,true);
+      d.surface((u,v)=>{const [x,y]=star(u);return [x,y,-12+24*v];},10,2,true);
+      break;
+    }
     case 'dancePortal': arch(d); d.torus([0,0,0],30,5,tau,true); break;
     case 'lantern': d.lathe(v=>[40+25*Math.sin(v*Math.PI),-90+180*v],[0,0,0],9,12); break;
     case 'spa': bowl(d); d.surface((u,v)=>[(v-.5)*115,20+100*u,20*Math.sin(u*Math.PI*2+v*Math.PI)],6,4); break;
@@ -168,7 +185,7 @@ export function placeWireframe(form: string, density = 1): PlaceWireframe {
     case 'keysHome': d.box([0,-25,0],[145,125,85]); d.surface((u,v)=>[-80+160*u,40+65*(1-Math.abs(u*2-1)),-50+100*v],8,5); break;
     case 'riverCamp': d.surface((u,v)=>[-90+180*u,-65+165*(1-Math.abs(u*2-1)),-55+110*v],8,5); break;
     case 'lounge': d.box([0,-35,0],[150,45,80]); d.box([0,15,-35],[150,80,20]); d.box([-85,-5,0],[20,85,80]); d.box([85,-5,0],[20,85,80]); break;
-    case 'trophyBall': glass(d); d.torus([-70,40,0],25,4,Math.PI,true); d.torus([70,40,0],25,4,Math.PI,true); break;
+    case 'trophyBall': d.lathe(v=>[25+32*v,-5+90*v],[0,0,0],5,12); d.lathe(v=>[9,-70+65*v],[0,0,0],3,8); d.lathe(v=>[50*v,-75],[0,0,0],2,10); d.torus([-57,35,0],26,5,Math.PI*1.4,true); d.torus([57,35,0],26,5,Math.PI*1.4,true); break;
     case 'scissors': d.torus([-40,-55,0],30,5,tau,true); d.torus([40,-55,0],30,5,tau,true); d.surface((u,v)=>[-50+140*u,-35+140*u,(v-.5)*12],6,2); d.surface((u,v)=>[50-140*u,-35+140*u,(v-.5)*12+10],6,2); break;
     case 'antlers': for(const side of [-1,1]) {
       d.surface((u,v)=>[side*(15+70*u)+5*Math.cos(v*tau),-80+175*u,15*Math.sin(u*Math.PI)+5*Math.sin(v*tau)],8,6,true);
@@ -180,5 +197,5 @@ export function placeWireframe(form: string, density = 1): PlaceWireframe {
       d.torus([0,65,0],22,3); break;
     default: d.sphere([0,0,0],85);
   }
-  const result = { outline:d.outline, grid:d.grid }; cache.set(cacheKey,result); return result;
+  const result = { outline:d.outline, grid:d.grid, rearGrid:d.rearGrid }; cache.set(cacheKey,result); return result;
 }

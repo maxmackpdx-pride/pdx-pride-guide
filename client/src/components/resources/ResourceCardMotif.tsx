@@ -121,8 +121,9 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
   </g>
   {supporting && <g className="rg-motif-layer rg-motif-layer--support">
    <g className="rg-motif-support-drift" style={{ animationDuration: `${cycle + 17}s`, animationDelay: `${phase - 13}s` }}>
-    <g className="rg-motif-support-position" transform={`translate(${rightAtTop ? 230 : 170} 150) scale(.78) translate(-200 -250)`}>
+    <g className="rg-motif-support-position" transform={`translate(${rightAtTop ? 230 : 170} 165) scale(.78) translate(-200 -250)`}>
      <g fill="none" stroke={paint} strokeLinejoin="round">
+      <path className="rg-motif-rear-grid" d={supporting.rearGrid} />
       <path className="rg-motif-surface-grid" d={supporting.grid} />
       <path className="rg-motif-support-contour" d={supporting.outline} stroke={`url(#${gradientId}-edge)`} />
      </g>
@@ -133,7 +134,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
    <g className="rg-motif-object-drift" style={{ animationDuration: `${cycle + 9}s`, animationDelay: `${phase - 7}s` }}>
   <g className="rg-motif-breathe" style={{ animationDuration: `${cycle + 4}s`, animationDelay: `${phase}s` }}>
   <g className="rg-motif-object" fill="none" stroke={paint} strokeLinejoin="round" transform={`${isPlace ? `translate(${rightAtTop ? -22 : 22} 46) ` : ""}rotate(${tilt} 200 250)`}>
-   {placeArtwork && <path className="rg-motif-surface-grid" d={placeArtwork.grid} />}
+   {placeArtwork && <><path className="rg-motif-rear-grid" d={placeArtwork.rearGrid} /><path className="rg-motif-surface-grid" d={placeArtwork.grid} /></>}
    {!isPlace && <path className="rg-motif-depth" d={silhouette} transform="translate(5 7)" strokeWidth=".8" strokeDasharray="2 5" />}
    {(isPlace ? [1] : [1.13,1.06,1]).map((scale,i)=><path key={scale} d={silhouette} transform={`translate(200 250) scale(${scale}) translate(-200 -250)`} className={scale===1 ? "rg-motif-contour" : "rg-motif-echo"} stroke={isPlace && scale===1 ? `url(#${gradientId}-edge)` : undefined} strokeWidth={scale===1?1.5:.65} opacity={scale===1?.85:.24} />)}
    {!isPlace && <path className="rg-motif-inner-edge" d={silhouette} transform="translate(200 250) scale(.976) translate(-200 -250)" strokeWidth=".55" />}

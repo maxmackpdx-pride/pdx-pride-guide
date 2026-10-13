@@ -25,7 +25,7 @@ const assignments: Record<string, string> = {
 };
 
 const key = (name: string) => name.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[’‘]/g, "'").trim().toLowerCase();
-const namedForms = new Map(Object.entries(assignments).map(([name, form]) => [key(name), placeWireframe(form)]));
+const namedForms = new Map(Object.entries(assignments).map(([name, form]) => [key(name), placeWireframe(form, .8)]));
 export function distinctPlaceMotif(name: string): PlaceWireframe | undefined {
   return namedForms.get(key(name));
 }
@@ -43,7 +43,7 @@ const supportingForms: Record<string, string> = {
  spa: 'plantHouse', bagel: 'coffeeMix', waffle: 'coffeeMix', yarnBook: 'books', keysHome: 'plantHouse',
  riverCamp: 'fireWood', film: 'starStage', wealth: 'keysHome',
 };
-const supportingByName = new Map(Object.entries(assignments).map(([name, form]) => [key(name), placeWireframe(supportingForms[form], .6)]));
+const supportingByName = new Map(Object.entries(assignments).map(([name, form]) => [key(name), placeWireframe(supportingForms[form], .6, .38)]));
 export function distinctPlaceSupportingMotif(name: string): PlaceWireframe | undefined {
  return supportingByName.get(key(name));
 }

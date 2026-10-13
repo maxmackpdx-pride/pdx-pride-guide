@@ -278,3 +278,8 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
   .eb-page--places .rg-card-motif .rg-motif-support-drift { animation: none !important; }
 }
 :is(html.calm-mode, :root[data-calm="true"]) .eb-page--places .rg-card-motif .rg-motif-support-drift { animation: none !important; }
+
+/* Read the object through glass: light-facing mesh above subdued far-side lines. */
+.eb-page--places .rg-card-motif .rg-motif-rear-grid { opacity: .23; stroke-width: .55; }
+.eb-page--places .rg-card-motif .rg-motif-layer--support .rg-motif-rear-grid { opacity: .3; stroke-width: .8; }
+.eb-page--places .rg-card-motif .rg-motif-surface-grid { opacity: .85; }
