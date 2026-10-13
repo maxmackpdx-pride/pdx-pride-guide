@@ -54,7 +54,7 @@ export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/rezources", label: "ReZources", accent: "green" },
 ];
 
-/** Phone header keeps the same direct Boards destination. */
+/** Phone header keeps Home and ReZources; Boards lives in the bottom dock. */
 export const MOBILE_TOP_NAV: NavEntry[] = [
   {
     type: "dropdown",
@@ -66,7 +66,6 @@ export const MOBILE_TOP_NAV: NavEntry[] = [
       { href: "/about", label: "About", accent: "magenta" },
     ],
   },
-  { type: "link", href: "/boards", label: "Boards", accent: "magenta" },
   { type: "link", href: "/rezources", label: "ReZources", accent: "green" },
 ];
 

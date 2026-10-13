@@ -10,12 +10,11 @@ import {
   dismissMobileNavOverlays,
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
-import { EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
+import { BOARDS_MENU, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
 import AuthModal from "./AuthModal";
 import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
-import HubTriggerContent from "./hub/HubTriggerContent";
-import { CalendarDays, MapPin, MessageCircle } from "lucide-react";
+import { CalendarDays, LayoutGrid, MapPin, MessageCircle } from "lucide-react";
 
 const MOBILE_ICON = 19;
 
@@ -31,7 +30,7 @@ export default function MobileBottomNav() {
   const { user } = useAuth();
   const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
-  const { isOpen: hubOpen, hasNewActivity, toggleHub, closeHub } = useHubPanel();
+  const { isOpen: hubOpen, closeHub } = useHubPanel();
   const [showAuth, setShowAuth] = useState(false);
   const overlayOpen = hubOpen || open || showAuth;
 
@@ -50,10 +49,10 @@ export default function MobileBottomNav() {
   }, [closeLocalSheets]);
 
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
-  const hubActive = hubOpen;
   const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
   const placesActive = navLinkActive(location, "/directory");
-  const activeIndex = open || showAuth ? 4 : hubActive ? 2 : placesActive ? 1 : mapActive ? 3 : eventsActive ? 0 : -1;
+  const boardsActive = navLinkActive(location, "/boards") || BOARDS_MENU.some(item => navLinkActive(location, item.href)) || navLinkActive(location, "/hausing");
+  const activeIndex = open || showAuth ? 4 : placesActive ? 1 : mapActive ? 2 : boardsActive ? 3 : eventsActive ? 0 : -1;
 
   const dismissExcept = (except?: MobileNavDismissDetail["except"]) => {
     closeLocalSheets(except);
@@ -107,12 +106,6 @@ export default function MobileBottomNav() {
             <span className="znav-caption">Placez</span>
           </Link>
 
-          <button type="button" className={`${tabClass(hubActive, "cyan")} znav-mapz hub-disclosure hub-disclosure--dock`} data-accent="cyan" data-hub-trigger
-            aria-label={hasNewActivity ? "Hub, new activity" : "Hub"} title="Hub" aria-controls="hub-panel" aria-expanded={hubOpen} aria-haspopup="dialog"
-            onClick={event => { toggleHub(event.currentTarget); }}>
-            <HubTriggerContent dock hasNewActivity={hasNewActivity} />
-          </button>
-
           <Link
             href="/map"
             className={tabClass(mapActive, "orange")}
@@ -137,6 +130,18 @@ export default function MobileBottomNav() {
               </svg>
             </span>
             <span className="znav-caption">MAPZ</span>
+          </Link>
+
+          <Link
+            href="/boards"
+            className={tabClass(boardsActive, "pink")}
+            data-accent="magenta"
+            aria-current={boardsActive ? "page" : undefined}
+            aria-label="Boards"
+            onClick={handleNavLink}
+          >
+            <span className="znav-icon-row"><LayoutGrid size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Boards</span>
           </Link>
 
           <button
