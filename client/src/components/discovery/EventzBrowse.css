@@ -247,8 +247,8 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 }
 
 /* Bring the Placez wire mesh and connection points forward. */
-.eb-page--places .rg-card-motif .rg-motif-mesh { opacity: .55; stroke-width: .85; }
-.eb-page--places .rg-card-motif .rg-motif-circuits { opacity: .65; stroke-width: 1; }
+.eb-page--places .rg-card-motif .rg-motif-mesh { opacity: .55; stroke-width: .6; }
+.eb-page--places .rg-card-motif .rg-motif-circuits { opacity: .65; stroke-width: .65; }
 .eb-page--places .rg-card-motif .rg-motif-nodes { opacity: 1; stroke: currentColor; stroke-width: .6; }
 
 /* Keep the mesh visible at the crown; the front motif stays fine and centered. */
@@ -256,7 +256,25 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
   mask-image: linear-gradient(var(--z-black) 0%, var(--z-black) 64%, transparent 90%);
 }
 .eb-page--places .rg-card-motif .rg-motif-object { filter: none; }
-.eb-page--places .rg-card-motif .rg-motif-object > path:nth-child(4) { stroke-width: 1.05; }
-.eb-page--places .rg-card-motif .rg-motif-object > path:nth-child(2),
-.eb-page--places .rg-card-motif .rg-motif-object > path:nth-child(3) { stroke-width: .5; }
+.eb-page--places .rg-card-motif .rg-motif-object > .rg-motif-contour { opacity: 1; stroke-width: 1.25; }
+.eb-page--places .rg-card-motif .rg-motif-object > .rg-motif-echo { opacity: .12; stroke-width: .5; }
 .eb-page--places .rg-card-motif .rg-motif-signal-trace { stroke-width: .8; }
+
+/* Subdued offset depth leaves one clear outline in front of the mesh. */
+.eb-page--places .rg-card-motif .rg-motif-depth { opacity: .12; }
+
+/* Offset third artwork plane: dimensional contours, separate from the fixed logo. */
+.eb-page--places .rg-card-motif .rg-motif-layer--support {
+  translate: calc(var(--rg-parallax-x, 0px) * -.12) calc(var(--rg-parallax-y, 0px) * .08);
+}
+.eb-page--places .rg-card-motif .rg-motif-support-drift {
+  transform-box: view-box; transform-origin: center;
+  animation: rg-motif-object-drift 49s ease-in-out infinite reverse;
+}
+.eb-page--places .rg-card-motif .rg-motif-solid-depth { opacity: .35; stroke-width: 1.05; }
+.eb-page--places .rg-card-motif .rg-motif-side-edges { opacity: .55; stroke-width: .8; }
+.eb-page--places .rg-card-motif .rg-motif-support-contour { opacity: .9; stroke-width: 1.6; }
+@media (prefers-reduced-motion: reduce) {
+  .eb-page--places .rg-card-motif .rg-motif-support-drift { animation: none !important; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .eb-page--places .rg-card-motif .rg-motif-support-drift { animation: none !important; }
