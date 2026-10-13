@@ -35,6 +35,7 @@ export default function Home() {
     queryFn: () => apiRequest("GET", "/api/home/stats").then(r => r.json()),
     staleTime: 60_000,
     refetchOnMount: "always",
+    refetchInterval: 60_000,
   });
 
   const eventCount = stats?.eventCount ?? 0;

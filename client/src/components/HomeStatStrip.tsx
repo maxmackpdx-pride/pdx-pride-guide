@@ -60,7 +60,7 @@ export default function HomeStatStrip({ eventCount, placesCount, newUsers90Days,
           <CountUpValue value={eventCount} duration={1400} />
         </StatValue>
         <div className="home-stat-strip__label home-stat-strip__grad home-stat-strip__grad--events">
-          events next 7 days
+          EVENTZ · next 7 days
         </div>
       </div>
       <div className="home-stat-strip__cell home-stat-strip__cell--places">
@@ -73,7 +73,7 @@ export default function HomeStatStrip({ eventCount, placesCount, newUsers90Days,
           {placesCount}
         </StatValue>
         <div className="home-stat-strip__label home-stat-strip__grad home-stat-strip__grad--places">
-          Places to back
+          PLACEZ to back
         </div>
       </div>
       <div className="home-stat-strip__cell home-stat-strip__cell--last home-stat-strip__cell--going">
