@@ -223,3 +223,14 @@
 
 .event-modal.eb-detail--place .place-gigs-rail { display: flex; gap: 16px; overflow-x: auto; padding: 8px 0 20px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
 .event-modal.eb-detail--place .place-gigs-rail > :is(.gigz-opportunity,.gigz-talent) { flex: none; width: min(80cqw,280px); scroll-snap-align: start; }
+
+/* Final hierarchy pass: one glass shell, lighter interior structure. */
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__community-room { margin-top: 24px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__tabs { padding: 0; margin: 0 0 16px; gap: 8px; border: 0; background: transparent; box-shadow: none; }
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__tab-panel { padding: 0; }
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__fact { background: transparent; border: 0; border-top: 1px solid color-mix(in srgb,var(--text-hi) 15%,transparent); border-radius: 0; min-height: 52px; padding: 12px 0; gap: 12px; }
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__quick-actions { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__quick-actions > a:first-child,
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__quick-actions > a:nth-child(2):last-child { grid-column: 1 / -1; }
+.event-modal.eb-detail.eb-detail--place .place-modal-past__rail { gap: 12px; padding: 4px 3px 12px; scrollbar-width: none; }
+.event-modal.eb-detail.eb-detail--place .place-modal-past__hint { letter-spacing: .025em; text-transform: none; margin-bottom: 12px; }

@@ -973,7 +973,7 @@ export default function PlaceModal({
               ) : (
                 <div className="place-modal-past">
                   <p className="place-modal-past__hint">
-                    Swipe for past nights · does not grow the card
+                    Swipe to explore past events
                   </p>
                   <div
                     className="place-modal-past__rail"
