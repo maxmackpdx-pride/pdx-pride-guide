@@ -23,3 +23,9 @@ export function filterBoardFeatures(posts: BoardPost[], filters: {itemCategory?:
   && (!filters.price || (p.priceCents !== undefined && (filters.price === "under25" ? p.priceCents < 2500 : filters.price === "25to100" ? p.priceCents >= 2500 && p.priceCents <= 10000 : p.priceCents > 10000))))
   .sort((a,b) => Number(a.isDemo) - Number(b.isDemo) || (filters.sort === "price-low" ? (a.priceCents ?? 0)-(b.priceCents ?? 0) : filters.sort === "price-high" ? (b.priceCents ?? 0)-(a.priceCents ?? 0) : filters.sort === "oldest" ? Date.parse(a.createdAt)-Date.parse(b.createdAt) : Date.parse(b.createdAt)-Date.parse(a.createdAt)));
 }
+
+export function canSaveBoardPost(post: BoardPost): boolean {
+ if(post.isDemo)return false;
+ const visible: Record<BoardCategory,string[]> = {housing:["ACTIVE","FILLED"],gigz:["LIVE"],giftz:["OPEN","THREE_INTERESTED","POSTER_CHOOSING","PICKUP_PENDING","REOPENED","LOOKING","OFFER_PENDING"],sellz:["ACTIVE","RESERVED"],mizzed:["ACTIVE"]};
+ return visible[post.category].includes(post.status || "");
+}

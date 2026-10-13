@@ -4,7 +4,7 @@ import "@/components/board/UnifiedBoardTools.css";
 import UnifiedBoardArt from "@/components/board/UnifiedBoardArt";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import { housingFilterGroups, housingTagLabel } from "@shared/housingTags";
-import { boardFeaturePosts, filterBoardFeatures } from "@/lib/boardFeatures";
+import { boardFeaturePosts, filterBoardFeatures, canSaveBoardPost } from "@/lib/boardFeatures";
 import { HousingComposer } from "@/components/housing/HousingComposer";
 import { MizzedComposer } from "@/components/SpottedCardGrid";
 import type { LinkableMissedConnectionEvent } from "@/components/MissedConnectionsPanel";
@@ -23,12 +23,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Bookmark,
-  Heart,
   MapPin,
-  Search,
-  Users,
-  BriefcaseBusiness,
-  Gift,
   LayoutGrid,
   Plus,
 } from "lucide-react";
@@ -45,7 +40,6 @@ import {
   boardCategories,
   intentLabels,
   parseBoardPostKey,
-  toBoardPosts,
   type BoardCategory,
   type BoardIntent,
   type BoardPayload,
@@ -316,8 +310,8 @@ export default function Boards() {
     setCompose(null);
     void queryClient.invalidateQueries({queryKey:[endpoint]});
     void queryClient.invalidateQueries({queryKey:[endpoint+"/mine"]});
-    locallyOpened.current = true;
-    update({compose:null,post:`${category}:${id}`,build:null,join:null,waitlist:null,chat:null});
+    locallyOpened.current = false;
+    update({compose:null,post:`${category}:${id}`,build:null,join:null,waitlist:null,chat:null},true);
   };
   useEffect(() => {if(params.get("compose") === "1" && selection && selection !== "all") {if(user) setCompose(selection); else setShowAuth(true);}},[search,user?.id]);
   useEffect(() => setLimit(24), [selection, query, intent, savedOnly,mineOnly]);
@@ -433,7 +427,7 @@ export default function Boards() {
                   <label>Sort<select value={featureFilters.sort} onChange={e=>update({sort:e.target.value},true)}><option value="newest">Newest</option><option value="oldest">Oldest</option>{selection === "sellz" && <><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></>}</select></label>
                   {(selection === "giftz" || selection === "sellz") && <label>Category<select value={featureFilters.itemCategory} onChange={e=>update({category:e.target.value || null},true)}><option value="">All categories</option>{Array.from(new Set(categoryPosts.map(p=>p.itemCategory).filter(Boolean))).map(c=><option key={c} value={c}>{c}</option>)}</select></label>}
                   {selection === "sellz" && <><label>Condition<select value={featureFilters.condition} onChange={e=>update({condition:e.target.value || null},true)}><option value="">All conditions</option>{Array.from(new Set(categoryPosts.map(p=>p.condition).filter(Boolean))).map(c=><option key={c} value={c}>{c}</option>)}</select></label><label>Price<select value={featureFilters.price} onChange={e=>update({price:e.target.value || null},true)}><option value="">Any price</option><option value="under25">Under $25</option><option value="25to100">$25–$100</option><option value="over100">Over $100</option></select></label></>}
-                  {selection === "housing" && <fieldset><legend>My Hoüz tags</legend>{housingFilterGroups().map(group=><details key={group.category.id}><summary>{group.category.label}</summary>{group.tags.map(tag=><label key={tag.id}><input type="checkbox" checked={featureFilters.tags.includes(tag.id)} onChange={e=>update({tags:(e.target.checked?[...featureFilters.tags,tag.id]:featureFilters.tags.filter(id=>id!==tag.id)).join(",") || null},true)} />{housingTagLabel(tag.id)}</label>)}</details>)}</fieldset>}
+                  {selection === "housing" && <details className="ab-more-preferences"><summary>More housing preferences</summary><fieldset><legend className="sr-only">My Hoüz tags</legend>{housingFilterGroups().map(group=><details key={group.category.id}><summary>{group.category.label}</summary>{group.tags.map(tag=><label key={tag.id}><input type="checkbox" checked={featureFilters.tags.includes(tag.id)} onChange={e=>update({tags:(e.target.checked?[...featureFilters.tags,tag.id]:featureFilters.tags.filter(id=>id!==tag.id)).join(",") || null},true)} />{housingTagLabel(tag.id)}</label>)}</details>)}</fieldset></details>}
                   {selection === "gigz" && <label><input type="checkbox" checked={featureFilters.remote} onChange={e=>update({remote:e.target.checked?"1":null},true)} />Remote opportunities</label>}
                   {selection === "mizzed" && <label>Where you connected<select value={featureFilters.source} onChange={e=>update({source:e.target.value || null},true)}><option value="">All connections</option><option value="events">Events</option><option value="placez">Placez</option><option value="outzide">OutZide</option><option value="spot">That one spot by the…</option></select></label>}
                 </BrowseFilters>
@@ -456,7 +450,7 @@ export default function Boards() {
                 </button>
               </div>
               <div className="eb-browse-actions">
-                <button type="button" className="eb-tool" aria-pressed={mineOnly} onClick={()=>user?update({mine:mineOnly?null:"1",saved:null},true):setShowAuth(true)}>My posts & management</button>
+                <button type="button" className="eb-tool" aria-pressed={mineOnly} onClick={()=>user?update({mine:mineOnly?null:"1",saved:null},true):setShowAuth(true)} title="Edit your posts and manage active, pending, and completed listings">My posts</button>
                 <button type="button" className="eb-tool eb-view-all" aria-pressed={selection === "all"} onClick={() => select("all")}>
                   <LayoutGrid size={18} aria-hidden="true" />View all
                 </button>
@@ -470,7 +464,7 @@ export default function Boards() {
                   onClick={() => select(null)}
                 >
                   <ArrowLeft size={16} />
-                  Choose a doorway
+                  Choose a category
                 </button>
                 <section className="eb-panel ab-filter-panel">
                   <h2>{selectedCategory?.label || "All boards"}</h2>
@@ -519,10 +513,10 @@ export default function Boards() {
                             ? "Mizzed"
                             : selectedCategory.label}
                       </button>
-                      {selectedCategory.id === "housing" && <button type="button" className="ab-back" onClick={()=>{if(!user){setShowAuth(true);return;}update({type:"PM",compose:"1"});}}>Property managers · Contact Tucker</button>}
+                      {selectedCategory.id === "housing" && mineOnly && <button type="button" className="ab-back" onClick={()=>{if(!user){setShowAuth(true);return;}update({type:"PM",compose:"1"});}}>Property managers · Contact Tucker</button>}
                       <BoardFollowButton board={selectedCategory.id === "housing" ? "houz" : selectedCategory.id} />
                       <Link className="ab-back" href={`/map?layer=${selectedCategory.id === "housing" ? "houz" : selectedCategory.id}`}><MapPin size={14} />Explore on Mapz</Link>
-                      <button type="button" className="ab-back" onClick={()=>user?update({mine:"1",saved:null},true):setShowAuth(true)}>My posts & board tools <ArrowRight size={14} /></button>
+
                     </>
                   ) : (
                     <p className="ab-note">To post, choose the board where it belongs.</p>
@@ -568,6 +562,7 @@ export default function Boards() {
                     onAction={() => void savedQuery.refetch()}
                   />
                 )}
+                {categoryPosts.some(post=>post.isDemo) && <p className="ab-note" role="note">Demo posts show how Boards works. They are examples, not available listings.</p>}
                 <div className="ab-card-grid">
                   {results.slice(0, limit).map((post) => {
                     const cat = boardCategories.find(
@@ -583,7 +578,7 @@ export default function Boards() {
                         <UnifiedBoardArt post={post} />
                         <div className="ab-card__body">
                           <div className="ab-card__eyebrow">
-                            <span>{intentLabels[post.intent]}</span>{post.isDemo && <span>Demo</span>}{mineOnly && <span>{post.status}</span>}
+                            <span>{intentLabels[post.intent]}</span>{post.isDemo && <span className="ab-demo-badge">DEMO · EXAMPLE ONLY</span>}{mineOnly && <span>{post.status}</span>}
                           </div>
                           <h3>
                             <button
@@ -614,7 +609,7 @@ export default function Boards() {
                               aria-label={`${isSaved ? "Unsave" : "Save"} ${post.title}`}
                               aria-pressed={isSaved}
                               disabled={
-                                saveMutation.isPending ||
+                                saveMutation.isPending || (!isSaved && !canSaveBoardPost(post)) ||
                                 (!!user && savedQuery.isPending)
                               }
                               onClick={() =>

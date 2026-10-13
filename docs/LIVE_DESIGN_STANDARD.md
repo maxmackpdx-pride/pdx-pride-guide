@@ -176,9 +176,9 @@ Type: Barlow Condensed (`--font-display`) for titles and labels, Barlow (`--font
 - Canonical spec: `zaylist-foundation-library/public/design-system/guidelines/dynamic-text.html`. This section is the product mirror, not the source — if the two disagree, treat it as drift to resolve, not a choice to make silently.
 - Implementation: `client/src/lib/dynamicText.ts` (general-purpose, any surface can adopt it) + `client/src/components/housing/HousingWell.tsx` (the one current caller). Full contract, algorithm, and gotchas: the `zaylist-dynamic-text` skill.
 - **Readable band is 24-220px, not 28-180.** Height math includes a diacritic-gap term (`rowGapAbove`) — an accented row needs more headroom than a plain one, or it clips.
-- **Three HAÜZ-only opt-ins, all default off:** `HOUSING_FIT_WITHIN_FRAME` (shrink to fit, exact, down to the floor only if required), `HOUSING_PREFER_TWO_ROWS` ("almost always two lines except with one word"), `HOUSING_MAX_NEIGHBOR_RATIO` (3x - softly discourages an extreme size gap between adjacent rows, verified against the real regression set before shipping). Do not assume these transfer to a new surface without the same verification.
+- **Three HOÜZ-only opt-ins, all default off:** `HOUSING_FIT_WITHIN_FRAME` (shrink to fit, exact, down to the floor only if required), `HOUSING_PREFER_TWO_ROWS` ("almost always two lines except with one word"), `HOUSING_MAX_NEIGHBOR_RATIO` (3x - softly discourages an extreme size gap between adjacent rows, verified against the real regression set before shipping). Do not assume these transfer to a new surface without the same verification.
 - **Never use letter-spacing, `scaleX()`, or per-character positioning as a fitting mechanism.** Tracking is fixed and uniform (`-.02em`), folded into the width measurement so measured and rendered widths match - it never varies to force a row to fit.
-- Scope: short authored display names and title motifs that own a fixed visual field. Not event names, interface copy, paragraphs, controls, or changing system titles - those get the normal type scale. An exception needs an explicit decision, the same way HAÜZ earned its opt-ins.
+- Scope: short authored display names and title motifs that own a fixed visual field. Not event names, interface copy, paragraphs, controls, or changing system titles - those get the normal type scale. An exception needs an explicit decision, the same way HOÜZ earned its opt-ins.
 
 ## Maps
 
@@ -202,7 +202,7 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 - Accents resolve through the shared tokens (`--panel-*`, `--neon-*`, `--green-acid`) via a `data-accent` attribute, so Calm Mode desaturates the nav with no nav-specific overrides. `#0044ff` and `#8800ff` are too dark to read as label ink: the glow keeps the token and the text lifts to a tint (`--nav-c` vs `--nav-c-ink`).
 - Pills are `.88rem`. They must **not** inherit `--site-nav-size` (16.8 to 21.6px) - six bordered pills at that size run off the bar. Padding, pill gap, brand lockup width, and the search trigger's label all step down between 1024 and 1439 so the full set fits without the nav scrolling.
 - Dropdowns are dark rounded panels of the same pills, **one plain column each**. A list may carry a mono **eyebrow**, used either as a section label (Outz: "Most Visited") or as plain descriptive copy (Z/Space: "Every board, one place"). There is no featured card. Z/Space opens leftward because its trigger is the last pill.
-- Outz lists `All OUTZ` (`/z/out`, a real index page) above the two OUTZ addresses. Z/Space leads with `z/ all boards`, which carries the `/z` link the retired featured card used to own, then `THE HAÜZ`, `Gigz`, `Sellz`, `Mizzed`, `Giftz`.
+- Outz lists `All OUTZ` (`/z/out`, a real index page) above the two OUTZ addresses. Z/Space leads with `z/ all boards`, which carries the `/z` link the retired featured card used to own, then `My Hoüz`, `Gigz`, `Sellz`, `Mizzed`, `Giftz`.
 - The desktop right cluster reads **search → notifications bolt → Hub → seam → avatar + caret**, in that order. The bolt is the same component as the mobile top bar's, so its panel styles are global, not trapped in a phone media query.
 - **Hub is the one primary action** in the bar, so it takes the solid fill the standard reserves for primary: cyan plate, dark ink, and `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor` + `--neon-bloom` composed as the whole shadow. No border, no standing dot. Log in / Join is the signed-out control in the same slot and is built the same way.
 - The wordmark keeps the glitch treatment: the real logo asset plus two RGB-split ghost layers (cyan and magenta, `screen` blend) flashing briefly on a 3.2s loop. Never typeset it.
@@ -229,7 +229,7 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 
 ## Homepage front door
 
-- Product-family names are exact: always render `EVENTZ`, `PLACEZ` (page title `OUR PLACEZ`), `OUTZ`, `THE HAÜZ`, `GIGZ`, `GIFTZ`, `SELLZ`, and `MIZZED CONNECTION` with this capitalization in public UI, metadata, accessibility labels, and current documentation. Existing lowercase routes, APIs, code identifiers, analytics keys, and asset paths remain compatibility internals unless a separate migration is approved.
+- Product-family names are exact: always render `EVENTZ`, `PLACEZ` (page title `OUR PLACEZ`), `OUTZ`, `My Hoüz`, `GIGZ`, `GIFTZ`, `SELLZ`, and `MIZZED CONNECTION` with this capitalization in public UI, metadata, accessibility labels, and current documentation. Existing lowercase routes, APIs, code identifiers, analytics keys, and asset paths remain compatibility internals unless a separate migration is approved.
 
 ## Z/ address continuity
 
@@ -250,7 +250,7 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 - The destination rail owns its section padding, modest consistent gaps, top/bottom dividers, and horizontal overflow. On motion-capable desktop it flows seamlessly from right to left at exactly **68.4 seconds per cycle** (10% faster than the prior timing).
 - Keep one semantic seven-card sequence. If seamless looping requires presentational clones, mark them `aria-hidden`, unfocusable, inert, and exclude them from analytics; never add a second visible rail or expose repeated destinations to assistive technology.
 - Mobile, Calm Mode, and `prefers-reduced-motion` disable rail autoplay and keep the same order in a manual touch-scroll rail with card snap points, readable peek, 44px actions, contained overscroll, and no document/page horizontal overflow.
-- Current founder order starts with OUTZ, then EVENTZ, PLACEZ, THE HAÜZ, GIFTZ, GIGZ, and MIZZED CONNECTION.
+- Current founder order starts with OUTZ, then EVENTZ, PLACEZ, My Hoüz, GIFTZ, GIGZ, and MIZZED CONNECTION.
 - The Nude Beaches world shows live Rooster Rock air, water, wind, and river conditions over its neutral gray topographic motif.
 - The existing site navigation remains outside the homepage pattern and must not be duplicated inside it.
 - Each world uses the deep-glass shell with one `--c` accent. Calm Mode removes ambient video and bloom while preserving every route and label.
@@ -265,7 +265,7 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 - The Events flyer stage always shows its active position counter and rail. When local upcoming data is empty, it uses the canonical `HOME_STAGE_DEMO_SAMPLES.events` fallback from the repository.
 - The Places world uses a low-contrast Portland street-and-river map motif behind the directory story.
 - Places uses a reduced app-tile launcher sourced from `/api/directory`, with two fewer rows than the former layout: 8 columns by 3 rows on larger screens and 5 columns by 6 rows on phones. Render only the visible capacity in stable source order so the footer/action aligns with sibling cards.
-- Haüsing, GIFTZ, GIGZ, and MIZZED CONNECTION use full-card object motifs at a stronger register than the river and Places maps: house floor plan, gift-box blueprint, pinned bulletin board, and lost/found/looking notices respectively.
+- My Hoüz, GIFTZ, GIGZ, and MIZZED CONNECTION use full-card object motifs at a stronger register than the river and Places maps: house floor plan, gift-box blueprint, pinned bulletin board, and lost/found/looking notices respectively.
 - A single light transparent static/scan overlay may sit on the homepage wallpaper behind every content object. It is decorative, `pointer-events: none`, hidden from assistive technology, and must not reduce the legibility of type, logos, controls, imagery, statuses, or focus rings.
 - The wallpaper overlay may occasionally make one short, subtle displacement. Move only the texture, never the content; do not run a continuous glitch or add a duplicate noise/marquee layer. Calm Mode and `prefers-reduced-motion` preserve the texture as a still layer and remove displacement.
 - Homepage background depth uses a restrained set of black and dark-gray shadow planes. Stack them behind the static/scan texture and behind every content object; they remain decorative and pointer-free.

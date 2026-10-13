@@ -1,3 +1,5 @@
+> Current housing product name: **My Hoüz**, the housing category within unified Boards. Older HAÜS/HAÜSING mentions below describe historical letter-library examples and must not be used as active product identities.
+
 # ZAY Master Letter Library — Source of Truth
 
 **ZAY LOGO SYSTEM · MASTER GLYPH LIBRARY · SOURCE OF TRUTH**

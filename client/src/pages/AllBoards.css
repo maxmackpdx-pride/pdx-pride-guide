@@ -200,3 +200,14 @@ html.calm-mode .ab-door:hover { translate:none; }
  .ab-art--unified .ab-art__brand { bottom:var(--space-4); }
  .ab-art__quote-pair { font-size:var(--ab-quote-size); }
 }
+
+/* Demo status is readable at a glance; photographs blend toward card content. */
+.ab-page .ab-card .ab-card__eyebrow > .ab-demo-badge {
+ background:var(--c); color:var(--z-oled); border-color:var(--c);
+ padding:var(--space-2) var(--space-3); font:var(--fw-bold) var(--event-card-meta-size,var(--body-sm))/1.2 var(--font-mono);
+}
+.ab-art--photo { background:transparent; }
+.ab-art__photo {
+ -webkit-mask-image:linear-gradient(to right,#000 55%,transparent 100%);
+ mask-image:linear-gradient(to right,#000 55%,transparent 100%);
+}
