@@ -27,8 +27,7 @@
 .eb-search-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
 .eb-search-row > .pdxField, .eb-search-row > .pdxSearch { flex: 1; min-width: 0; }
 .eb-tool { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); border-radius: 12px; background: var(--btn-glow-bg); box-shadow: var(--btn-glow-shadow); color: var(--text-hi); font: 700 14px/1 var(--font-display); text-transform: uppercase; text-decoration: none; cursor: pointer; }
-.eb-body { padding-top: 24px; }
-.eb-page--places .eb-body { padding-top:16px; }
+.eb-body { padding-top:16px; }
 .eb-side { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
 .eb-panel { padding: 20px; border-radius: 16px; border: 1px solid var(--panel-border); background: var(--ink-800); display: flex; flex-direction: column; gap: 14px; }
 .eb-panel h2, .eb-panel h3 { margin: 0; font: 800 22px/1.1 var(--font-display); text-transform: uppercase; }
@@ -40,7 +39,7 @@
 .eb-side-categories button[aria-pressed="true"] { color: var(--neon-cyan); border-color: var(--neon-cyan); }
 .eb-results { min-width: 0; }
 .eb-result-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
-.eb-page--places .eb-result-head { margin:8px 0 0; }
+.eb-frame > .eb-result-head { margin:8px 0 0; }
 .eb-result-head p { margin: 0; color: var(--text-mid); font: 500 12px/1.4 var(--font-mono, monospace); }
 .eb-clear { min-height: 44px; border: 0; padding: 0 4px; background: none; color: var(--neon-cyan); font: 600 14px/1 var(--font-body); cursor: pointer; }
 .eb-lanes { display: flex; flex-direction: column; gap: 36px; }
@@ -64,7 +63,7 @@
 .eb-footer h2 { margin: 0; font: 800 26px/1.2 var(--font-display); text-transform: uppercase; }
 .eb-page :is(button, a, select, input):focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 3px; }
 @media (min-width: 1100px) {
-  .eb-page--places .eb-lane__head { min-height:64px; }
+  .eb-page .eb-lane__head { min-height:64px; }
   .eb-body { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 32px; align-items: start; }
   .eb-side { position: sticky; top: calc(var(--site-header-height, 96px) + 180px); }
   .eb-lanes { flex-direction: row; flex-wrap: wrap; gap: 36px 16px; align-items: start; }

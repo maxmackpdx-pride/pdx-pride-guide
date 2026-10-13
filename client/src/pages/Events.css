@@ -397,7 +397,7 @@ html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdx
 .events-page .events-tool-btn__count { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; box-sizing: border-box;
   display: inline-flex; align-items: center; justify-content: center; background: var(--room-eventz); color: var(--z-black); font: 800 11px/1 var(--font-display); box-shadow: 0 0 0 2px var(--z-black); }
 html body .events-page.board-page--makeover .events-board-feed__sticky { padding-top: 0; padding-bottom: 0; border-bottom: 0; }
-html body .events-page.board-page--makeover .events-board-feed .board-active-feed__body { padding-top: 32px; }
+html body .events-page.board-page--makeover .events-board-feed .board-active-feed__body { padding-top: 16px; }
 
 /* Desktop uses the mobile rails at identical card sizes (200px Happening now,
    136px compact cards and day folders). Opened rails fill the wider row with
@@ -520,3 +520,8 @@ html.calm-mode .events-page > .events-day-dock { animation: none; }
   .events-page .tonight-card--card .tonight-card__live { top: 8px; left: 8px; min-height: 28px; padding-inline: 6px; gap: 4px; font-size: 11px; }
   .events-page .tonight-card--card .tonight-card__live--count { top: 56px; max-width: calc(100% - 16px); flex-wrap: wrap; }
 }
+
+/* Match the shared discovery counter and sidebar/section alignment. */
+.events-page .events-result-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:8px 0 0; }
+.events-page .events-result-head p { margin:0; color:var(--text-mid); font:500 12px/1.4 var(--font-mono, monospace); }
+@media(min-width:1100px) { .events-page .events-rail-sec__head { min-height:64px; padding-top:20px; box-sizing:border-box; align-items:flex-start; align-content:flex-start; margin-bottom:16px; } }
