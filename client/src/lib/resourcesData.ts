@@ -868,6 +868,267 @@ const RESOURCE_CATEGORY_SOURCE: ResourceCategory[] = [
         "contactSourceUrl": "https://www.portland.gov/phb/rental-services/eviction-help-renters"
       },
       {
+        "name": "211info",
+        "sub": "Find local help",
+        "categoryIds": [
+          "money"
+        ],
+        "aliases": [
+          "211",
+          "211 Info",
+          "211 information",
+          "Utility Assistance",
+          "Electric Assistance",
+          "Natural Gas",
+          "Water Discounts",
+          "Internet and Phone Service",
+          "Furniture Resource",
+          "Heating and Cooling Resources",
+          "housing",
+          "shelter",
+          "food",
+          "child care",
+          "parenting",
+          "health care",
+          "mental health",
+          "transportation",
+          "legal",
+          "employment",
+          "education",
+          "disaster",
+          "volunteering",
+          "financial wellness"
+        ],
+        "serviceTags": [
+          "Resource referrals",
+          "Utility help"
+        ],
+        "scope": "Oregon & Southwest Washington",
+        "desc": "A free, confidential starting point for finding local help with housing, food, utilities, child care, health care and other everyday needs. 211info connects you with community providers; eligibility, appointments and funding vary.",
+        "howToStart": "Call 211 or 866-698-6155 and share your ZIP code and what you need. You can also text your ZIP code to 898211, email help@211info.org, or search online. Ask for an interpreter if needed. If a utility shutoff is pending, also contact your utility directly.",
+        "phone": "tel:211",
+        "phoneLabel": "Call 211",
+        "alt": "tel:+18666986155",
+        "altLabel": "Call 866-698-6155",
+        "email": "help@211info.org",
+        "hours": "Calls: Monday–Friday, 8 am–6 pm. Text: Monday–Friday, 9 am–5 pm. Email responses: within 72 hours during core operating hours. Some programs and incident responses have extended hours.",
+        "url": "https://www.211info.org/",
+        "cta": "Find local resources",
+        "logo": "/resources-logos/211info-white.svg",
+        "contactSourceUrl": "https://www.211info.org/contact-us/",
+        "contactChecked": "October 13, 2026",
+        "sourceUrl": "https://www.211info.org/",
+        "sourceChecked": "October 13, 2026",
+        "programs": [
+          {
+            "name": "Electric assistance",
+            "desc": "Find electric-bill payment assistance, discounts and reconnection resources.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/utility-assistance/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-2",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Natural gas assistance",
+            "desc": "Find gas-bill assistance and programs for past-due balances.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/utility-assistance/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-3",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Water discounts & assistance",
+            "desc": "Find water-bill discounts, payment assistance and service-connection help.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/utility-assistance/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-4",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Internet & phone service",
+            "desc": "Find discounted internet, telephone service and mobile-device resources.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/utility-assistance/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-5",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Furniture & household goods",
+            "desc": "Find furniture and essential home goods. Some providers require a case-manager or agency referral.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/basic-needs/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-6",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Heating & cooling resources",
+            "desc": "Find heating-fuel assistance, weatherization, cooling centers and air-conditioner resources.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/extreme-heat/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-7",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Other utility support",
+            "desc": "Explore trash and recycling assistance, weatherization, and energy or water conservation resources.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/utility-assistance/",
+            "cta": "Find resources",
+            "sourceUrl": "https://www.211info.org/get-help/utility-assistance/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Housing & shelter",
+            "desc": "Connect with housing and shelter resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/housing-shelter/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Food",
+            "desc": "Find food assistance nearby.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/food/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Basic needs",
+            "desc": "Find clothing, hygiene supplies and everyday essentials.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/basic-needs/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Child care & parenting",
+            "desc": "Explore child-care and parenting resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/child-care-parenting/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Health care",
+            "desc": "Find health-care resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/health-care/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Mental & behavioral health",
+            "desc": "Find mental- and behavioral-health resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/mental-behavioral-health/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Crisis hotlines",
+            "desc": "Find specialized crisis and support lines.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/crisis-hotlines/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Transportation",
+            "desc": "Explore transportation support.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/transportation/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Legal & public safety",
+            "desc": "Find legal and public-safety resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/legal-public-safety/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Employment",
+            "desc": "Find employment-related support.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/employment/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Education",
+            "desc": "Explore education resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/education/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Disaster services",
+            "desc": "Find disaster-related support.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/disaster-services/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Volunteering & donating",
+            "desc": "Find ways to give time or goods.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/volunteering-donating/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Financial wellness",
+            "desc": "Explore financial-wellness resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/financial-wellness",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Community-specific resources",
+            "desc": "Find services for diverse populations.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/diverse-populations/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "211info Android app",
+            "desc": "Search nearby resources, view program details and connect with 211info from your phone.",
+            "scope": "Free app",
+            "url": "https://play.google.com/store/apps/details?id=com.info.portland211info&hl=en_US",
+            "cta": "Get the Android app",
+            "sourceChecked": "October 13, 2026"
+          }
+        ]
+      },
+      {
         "name": "Energy & utility assistance",
         "serviceTags": [
           "Energy assistance",
