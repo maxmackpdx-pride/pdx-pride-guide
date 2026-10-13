@@ -126,12 +126,12 @@ export default function MobileBottomNav() {
             className={tabClass(resourcesActive, "green")}
             data-accent="green"
             aria-current={resourcesActive ? "page" : undefined}
-            aria-label="ReZources"
-            title="ReZources"
+            aria-label="NEEDZ"
+            title="NEEDZ"
             onClick={handleNavLink}
           >
             <span className="znav-icon-row"><LifeBuoy size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">ReZources</span>
+            <span className="znav-caption">NEEDZ</span>
           </Link>
       </MobileDockShell>
 
