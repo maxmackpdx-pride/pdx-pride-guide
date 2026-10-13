@@ -44,7 +44,7 @@ export default function HubPanel({ open, onOpenChange, trigger }: {
   }, [open]);
   return <Dialog.Root open={open} onOpenChange={onOpenChange} modal={false}>
     <Dialog.Portal forceMount>
-      <Dialog.Content forceMount className="hub-panel pdx-glass-rebind" style={{ top, "--hub-top": `${top}px` } as CSSProperties} aria-describedby="hub-panel-description"
+      <Dialog.Content id="hub-panel" forceMount className="hub-panel pdx-glass-rebind" style={{ top, "--hub-top": `${top}px` } as CSSProperties} aria-describedby="hub-panel-description"
         onEscapeKeyDown={event => { if (document.querySelector('[role="dialog"]:not(.hub-panel)')) event.preventDefault(); }}
         onCloseAutoFocus={event => { event.preventDefault(); returnFocus(); }}
         onInteractOutside={event => {

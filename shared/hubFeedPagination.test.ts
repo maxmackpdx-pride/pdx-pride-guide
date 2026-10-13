@@ -18,3 +18,31 @@ test("Following includes an individual destination or community without a whole-
   const followed = { ...item("followed", "2026-10-12T10:00:00Z"), viewerFollowsSource: true, viewerFollowsBoard: false };
   assert.deepEqual(pageHubActivity([followed, item("other", "2026-10-12T10:00:00Z")], "followed_boards", 20).items.map(row => row.id), ["followed"]);
 });
+
+test("People shows member activity and connections while Outside owns destination activity", () => {
+  const base = item("social", "2026-10-12T10:00:00Z");
+  const rows: HubFeedItem[] = [
+    base,
+    { ...base, id: "photo", kind: "feed_photo" },
+    { ...base, id: "connection", kind: "spotted", author: {displayName:"Anonymous",anonymous:true} },
+    { ...base, id: "gift", kind: "gifting" },
+    { ...base, id: "community", kind: "community" },
+    { ...base, id: "visit", kind: "checkin" },
+    { ...base, id: "ride", kind: "outz" },
+    { ...base, id: "destination-post", source: {kind:"destination",id:"trail",label:"Trail",href:"/outzide/trail"} },
+    { ...base, id: "listing", kind: "event" },
+    { ...base, id: "resources", kind: "resource_update" },
+  ];
+  assert.deepEqual(new Set(pageHubActivity(rows,"people",50).items.map(row=>row.id)),new Set(["social","photo","connection","gift","community"]));
+  assert.deepEqual(new Set(pageHubActivity(rows,"outside",50).items.map(row=>row.id)),new Set(["visit","ride","destination-post"]));
+});
+
+test("Events includes listings, host updates, RSVPs, and posts attached to an event", () => {
+  const base = item("social", "2026-10-12T10:00:00Z");
+  const rows: HubFeedItem[] = [base,
+    { ...base, id:"listing", kind:"event" }, { ...base, id:"update", kind:"event_update" },
+    { ...base, id:"going", kind:"rsvp" },
+    { ...base, id:"attached", event:{id:1,title:"Event",venueName:"Place",dateStart:"2026-10-16T20:00:00",admission:"FREE"} },
+  ];
+  assert.deepEqual(new Set(pageHubActivity(rows,"events",50).items.map(row=>row.id)),new Set(["listing","update","going","attached"]));
+});

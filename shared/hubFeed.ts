@@ -16,7 +16,7 @@ export type HubFeedKind =
   | "community"
   | "resource_update";
 
-export type HubFeedTab = "all" | "events" | "posts" | "rsvps" | "boards" | "followed_boards";
+export type HubFeedTab = "all" | "events" | "posts" | "rsvps" | "boards" | "followed_boards" | "people" | "outside";
 
 export type HubFeedAuthor = {
   displayName: string;
@@ -132,11 +132,27 @@ export const HUB_FEED_TABS: Array<{ key: HubFeedTab; label: string }> = [
   { key: "rsvps", label: "RSVPs" },
   { key: "boards", label: "Boards" },
   { key: "followed_boards", label: "Following" },
+  { key: "people", label: "People" },
+  { key: "outside", label: "Outside" },
 ];
+
+export const HUB_PANEL_TABS = [
+  { key: "all", label: "View all" },
+  { key: "events", label: "Events" },
+  { key: "people", label: "People" },
+  { key: "outside", label: "Outside" },
+] as const;
+
+function isOutsideActivity(item: HubFeedItem): boolean {
+  return ["outz", "beach", "checkin"].includes(item.kind) || item.source?.kind === "destination" || !!item.beachId;
+}
 
 const TAB_PREDICATES: Record<HubFeedTab, (item: HubFeedItem) => boolean> = {
   all: () => true,
-  events: (item) => item.kind === "event" || item.kind === "event_update",
+  events: (item) => item.kind === "event" || item.kind === "event_update" || item.kind === "rsvp"
+    || (item.kind === "feed_text" || item.kind === "feed_photo") && !!(item.event || item.events?.length),
+  people: (item) => !isOutsideActivity(item) && ["feed_text", "feed_photo", "community", "rsvp", "gifting", "sellz", "spotted", "gig", "housing"].includes(item.kind),
+  outside: isOutsideActivity,
   posts: (item) =>
     item.kind === "checkin"
     || item.kind === "beach"
@@ -155,7 +171,7 @@ export function filterHubFeedPinned(items: HubFeedItem[], tab: HubFeedTab): HubF
   return items.filter((item) => {
     if (item.kind === "feedback") return tab === "all";
     if (tab === "all") return true;
-    if (tab === "events") return item.kind === "event";
+    if (tab === "events" || tab === "people" || tab === "outside") return TAB_PREDICATES[tab](item);
     if (tab === "posts") return item.kind === "beach";
     if (tab === "boards") return item.kind === "gig";
     return false;

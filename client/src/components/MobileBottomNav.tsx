@@ -14,7 +14,8 @@ import { EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
 import AuthModal from "./AuthModal";
 import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
-import { CalendarDays, MapPin, MessageCircle, PanelsTopLeft } from "lucide-react";
+import HubTriggerContent from "./hub/HubTriggerContent";
+import { CalendarDays, MapPin, MessageCircle } from "lucide-react";
 
 const MOBILE_ICON = 19;
 
@@ -30,7 +31,7 @@ export default function MobileBottomNav() {
   const { user } = useAuth();
   const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
-  const { isOpen: hubOpen, toggleHub, closeHub } = useHubPanel();
+  const { isOpen: hubOpen, hasNewActivity, toggleHub, closeHub } = useHubPanel();
   const [showAuth, setShowAuth] = useState(false);
   const overlayOpen = hubOpen || open || showAuth;
 
@@ -106,11 +107,10 @@ export default function MobileBottomNav() {
             <span className="znav-caption">Placez</span>
           </Link>
 
-          <button type="button" className={`${tabClass(hubActive, "cyan")} znav-mapz`} data-accent="cyan" data-hub-trigger
-            aria-label="Hub" title="Hub" aria-expanded={hubOpen} aria-haspopup="dialog"
+          <button type="button" className={`${tabClass(hubActive, "cyan")} znav-mapz hub-disclosure hub-disclosure--dock`} data-accent="cyan" data-hub-trigger
+            aria-label={hasNewActivity ? "Hub, new activity" : "Hub"} title="Hub" aria-controls="hub-panel" aria-expanded={hubOpen} aria-haspopup="dialog"
             onClick={event => { toggleHub(event.currentTarget); }}>
-            <span className="znav-icon-row"><PanelsTopLeft size={22} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Hub</span>
+            <HubTriggerContent dock hasNewActivity={hasNewActivity} />
           </button>
 
           <Link

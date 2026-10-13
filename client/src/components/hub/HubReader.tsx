@@ -1,7 +1,8 @@
 import { Image, Pencil, RefreshCw, X } from "lucide-react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { HUB_FEED_TABS, parseHubFeedTab, type HubFeedResponse, type HubFeedTab } from "@shared/hubFeed";
+import { HUB_PANEL_TABS, parseHubFeedTab, type HubFeedResponse, type HubFeedTab } from "@shared/hubFeed";
 import { useAuth } from "@/context/AuthContext";
 import { useHubPanel } from "@/context/HubPanelContext";
 import { isLocalDemo } from "@/lib/localDemo";
@@ -96,24 +97,21 @@ export default function HubReader({ panelOpen = true, onClose, canPostToFeed }: 
     }
     return result;
   }, [items, advertisements.data, advertisements.isSuccess, advertisements.isError, user]);
-  return <div className="hub-reader">
+  return <Tabs.Root className="hub-reader" value={filter} onValueChange={value => setFilter(parseHubFeedTab(value))}>
     <header className="hub-reader__header">
       <div className="hub-reader__heading">
         <div><h2>HUB</h2><p>Portland, right now.</p></div>
         <div className="hub-reader__utilities">
+          <button className="hub-reader__action hub-reader__post" type="button" aria-label="Create a Hub post" disabled={!!user && !canPost} onClick={() => compose("text")}><Pencil size={16} aria-hidden /><span>Post</span></button>
           <button type="button" aria-label="Refresh Hub" className="hub-reader__icon" disabled={feed.isFetching || !user && !demo} onClick={() => void feed.refetch()}>
             <RefreshCw size={19} className={feed.isFetching ? "hub-reader__refreshing" : ""} aria-hidden />
           </button>
           <button type="button" aria-label="Close Hub" className="hub-reader__icon" onClick={onClose}><X size={22} aria-hidden /></button>
         </div>
       </div>
-      <div className="hub-reader__controls">
-        <label className="sr-only" htmlFor="hub-filter">Filter Hub</label>
-        <select id="hub-filter" value={filter} onChange={event => setFilter(parseHubFeedTab(event.target.value))}>
-          {HUB_FEED_TABS.map(tab => <option key={tab.key} value={tab.key}>{tab.key === "all" ? "All activity" : tab.label}</option>)}
-        </select>
-        <button className="hub-reader__action" type="button" disabled={!!user && !canPost} onClick={() => compose("text")}><Pencil size={16} aria-hidden />Post</button>
-      </div>
+      <Tabs.List className="hub-reader__tabs" aria-label="Hub views">
+        {HUB_PANEL_TABS.map(tab => <Tabs.Trigger className="hub-reader__tab" value={tab.key} key={tab.key}>{tab.label}</Tabs.Trigger>)}
+      </Tabs.List>
       {hasNewActivity && feed.data && !feed.isFetching && <button className="hub-reader__new" onClick={() => void feed.refetch()}>New updates · Refresh Hub</button>}
       {(canPost || demo) && <div className="hub-reader__compose-trigger">
         <UserAvatar photoUrl={user?.photoUrl} avatarChoice={user?.avatarChoice} avatarRing={user?.avatarRing} displayName={user?.displayName || (demo ? "Tucker" : undefined)} username={user?.username} size={36} />
@@ -121,7 +119,7 @@ export default function HubReader({ panelOpen = true, onClose, canPostToFeed }: 
         <button type="button" className="hub-reader__icon" aria-label="Share a photo" onClick={() => compose("photo")}><Image size={19} aria-hidden /></button>
       </div>}
     </header>
-    <div className="hub-reader__scroll" ref={scrollRef} tabIndex={0} aria-label="Hub activity">
+    <Tabs.Content className="hub-reader__scroll" value={filter} ref={scrollRef} tabIndex={0}>
       {demo && <p className="hub-reader__demo">Demo posts · Sign in to see your Hub.</p>}
       {!user && !demo && <div className="hub-reader__state"><h3>Your scene is here.</h3><p>Sign in to see the Hub, follow your people and places, and share an update.</p><button className="hub-reader__action" onClick={() => setShowAuth(true)}>Log in / Join</button></div>}
       {!!feed.data?.pages[0]?.unavailableSources?.length && <p className="hub-reader__demo" role="status">{feed.data.pages[0].unavailableSources.join(", ")} updates are temporarily unavailable. The rest of your Hub is here.</p>}
@@ -129,13 +127,13 @@ export default function HubReader({ panelOpen = true, onClose, canPostToFeed }: 
       {(authLoading || feed.isPending && (!!user || demo)) && <div className="hub-reader__state" role="status"><p>Loading your Hub…</p><div className="hub-reader__skeleton" /><div className="hub-reader__skeleton" /></div>}
       {feed.isError && !feed.data && <div className="hub-reader__state" role="alert"><h3>Hub didn’t load.</h3><p>Your place is saved. Try again in a moment.</p><button className="hub-reader__action" onClick={() => void feed.refetch()}>Try again</button></div>}
       {rows.map((row, index) => "item" in row ? <div key={row.item.id}><HubFeedCard item={row.item} compact />{index === Math.min(2, rows.length - 1) && <HubFeaturedPromotion enabled={panelOpen && !!user} />}</div> : "ad" in row ? <div className="hub-reader__ad" key={`ad-${row.ad.id}`}><FeedAdCard ad={row.ad} /></div> : <div className="hub-reader__ad" key={`affiliate-${row.brand}`}><FeedAffiliateAd brand={row.brand} /></div>)}
-      {feed.isSuccess && !items.length && <div className="hub-reader__state" role="status"><h3>{filter === "followed_boards" ? "Make this your scene." : "You’re caught up."}</h3><p>{filter === "followed_boards" ? "Follow a person, venue, board, community, or outdoor destination. Their updates will appear here." : "Fresh activity will appear here as people post."}</p>{filter !== "all" && <button className="hub-reader__action" onClick={() => setFilter("all")}>All activity</button>}</div>}
+      {feed.isSuccess && !items.length && <div className="hub-reader__state" role="status"><h3>{filter === "followed_boards" ? "Make this your scene." : filter === "outside" ? "No outside updates yet." : filter === "people" ? "No people updates yet." : "You’re caught up."}</h3><p>{filter === "followed_boards" ? "Follow a person, venue, board, community, or outdoor destination. Their updates will appear here." : filter === "outside" ? "Follow an OUTZ destination to see trail notes, visit plans, and rides here." : "Fresh activity will appear here as people post."}</p>{filter !== "all" && <button className="hub-reader__action" onClick={() => setFilter("all")}>View all</button>}</div>}
       {pinned.length > 0 && <section aria-label="Scene staples"><div className="hub-reader__section">Scene staples</div>{pinned.map(item => <HubFeedCard key={item.id} item={item} compact />)}</section>}
       {feed.isFetchNextPageError && <div className="hub-reader__state" role="alert"><p>Older updates didn’t load. The posts above are still here.</p><button className="hub-reader__action" onClick={() => void feed.fetchNextPage()}>Try again</button></div>}
-    </div>
+    </Tabs.Content>
     <footer className="hub-reader__footer">
       {feed.hasNextPage ? <button className="hub-reader__action hub-reader__more" disabled={feed.isFetchingNextPage} onClick={() => void feed.fetchNextPage()}>{feed.isFetchingNextPage ? "Loading older updates…" : "Load older updates"}</button> : <span>{feed.isSuccess && items.length ? "You’re caught up" : "Your people. Your places. Your Hub."}</span>}
     </footer>
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
-  </div>;
+  </Tabs.Root>;
 }
