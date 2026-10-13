@@ -1,3 +1,4 @@
+import { homeCatalogCounts } from "./homeStats";
 import { createEventSaves } from "./eventSaves";
 import { createBoardSaves, isSavedBoard } from "./boardSaves";
 import { publicBoardMapLocations } from './boardMapLocations';
@@ -1921,15 +1922,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // a count made the strip wait several seconds on otherwise unnecessary work.
   app.get("/api/home/stats", (_req, res) => {
     const now = Date.now();
-    const windowEnd = now + 7 * 24 * 60 * 60 * 1000;
-    const liveEvents = dedupeEvents(expandMultiDayEvents(storage.getEvents({ status: "LIVE" })));
-    const eventCount = liveEvents.filter(event => {
-      const start = parsePacificDateTime(event.dateStart);
-      if (start == null) return false;
-      const end = parsePacificDateTime(event.dateEnd) ?? start;
-      return end >= now && start <= windowEnd;
-    }).length;
-    const placesCount = storage.getBusinesses().length;
+    const { eventCount, placesCount } = homeCatalogCounts(
+      storage.getEvents({ status: "LIVE" }), storage.getBusinesses(), now,
+    );
     const signupWindowStart = new Date(now - 90 * 24 * 60 * 60 * 1000).toISOString();
     const newUsers90Days = (sqlite.prepare(
       "SELECT COUNT(*) AS count FROM users WHERE created_at >= ? AND created_at <= ?",
