@@ -1,3 +1,4 @@
+import { seedResearchedProviderCards20261013 } from "./seedResearchedProviderCards20261013";
 import { seedOwnerRequestedPlaces20261013 } from "./seedOwnerRequestedPlaces20261013";
 import outzMapCatalog from "@shared/outzMapCatalog";
 import { seedLittleShopOfPonies20261031 } from "./seedLittleShopOfPonies20261031";
@@ -7224,6 +7225,11 @@ function runBootMigrationsOnce() {
       }
     }
     recordBootMigration("seed_fantasy_adults_only_multi_v1");
+  }
+
+  if (!hasBootMigration("seed_researched_provider_cards_20261013_v1")) {
+    seedResearchedProviderCards20261013(sqlite);
+    recordBootMigration("seed_researched_provider_cards_20261013_v1");
   }
 
   if (!hasBootMigration("seed_owner_requested_places_20261013_v1")) {

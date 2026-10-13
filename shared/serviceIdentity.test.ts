@@ -35,3 +35,10 @@ test('a newly supplied real image overrides a reviewed text placeholder',()=>{
   assert.equal(serviceArtwork(source,'/uploaded-real-logo.svg'),'/uploaded-real-logo.svg');
   assert.equal(serviceArtwork(source,resolveDirectoryLogo(source.name)+'?v=1'),null);
 });
+
+test('reviewed resource artwork receives the current cache version',()=>{
+ const source={name:'Northwest Gender Alliance'};
+ const expected=resolveDirectoryLogo(source.name);
+ assert.ok(expected);
+ assert.equal(serviceArtwork(source,expected!.split('?')[0]+'?v=old'),expected);
+});

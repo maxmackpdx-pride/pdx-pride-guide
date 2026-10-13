@@ -1,9 +1,10 @@
 import { companyLogoEntry, whiteCompanyLogo } from "./whiteCompanyLogos";
 
-export type ServiceKind = "tattoo" | "hair" | "massage" | "graphic-design" | "web-development" | "healthcare" | "general";
+export type ServiceKind = "tattoo" | "hair" | "massage" | "graphic-design" | "web-development" | "healthcare" | "real-estate" | "beauty" | "general";
 export type ServiceIdentitySource = { name: string; type?: string | null; description?: string | null; desc?: string; serviceTags?: string[] };
 const key = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, "");
 const KNOWN_KINDS: Record<string, ServiceKind> = {
+  reconstructedwellness: "healthcare", bywaterhealth: "healthcare", fruit: "beauty",
   greenhousehaircollective: "hair", limelightsalon: "hair", lovesalonpdx: "hair", lovesalon: "hair", bestcoastbarberco: "hair",
   blackholebodypiercingtattoo: "tattoo", ritualarts: "tattoo", robotpiercingandtattoo: "tattoo", sonnyshouseoftattoosandtreasures: "tattoo", plushtattoointuitivearts: "tattoo",
   thrivetherapeuticmassage: "massage", waywardmassagetherapist: "massage", restandritual: "massage",
@@ -16,6 +17,8 @@ export const SERVICE_IDENTITIES: Record<ServiceKind, { label: string; icon: stri
   "graphic-design": { label: "Graphic design", icon: "/mapz-map/icons/services/graphic-design.svg" },
   "web-development": { label: "Web design & development", icon: "/mapz-map/icons/services/web-development.svg" },
   healthcare: { label: "Health care", icon: "/mapz-map/icons/types/healthcare.svg" },
+  "real-estate": { label: "Real estate", icon: "/mapz-map/icons/types/realestate.svg" },
+  beauty: { label: "Beauty & esthetics", icon: "/mapz-map/icons/types/service.svg" },
   general: { label: "Services", icon: "/mapz-map/icons/types/service.svg" },
 };
 export function serviceIdentity(source: ServiceIdentitySource) {
@@ -27,6 +30,7 @@ export function serviceIdentity(source: ServiceIdentitySource) {
     else if (/\b(massage|bodywork)\b/i.test(label)) kind = "massage";
     else if (/\b(web(?:site)? (?:design|development|developer)|wordpress|web dev)\b/i.test(label)) kind = "web-development";
     else if (/\b(graphic design|branding (?:studio|agency)|illustrator)\b/i.test(label)) kind = "graphic-design";
+    else if (source.type === "realestate") kind = "real-estate";
     else if (source.type === "healthcare") kind = "healthcare";
     else if (source.type === "service") kind = "general";
   }
@@ -38,9 +42,11 @@ export function serviceArtwork(source: ServiceIdentitySource, logo: string | nul
   const isPlaceholder = reviewed?.kind === "text-fallback";
   const supplied = logo || null;
   const sameReviewedAsset = supplied?.split(/[?#]/)[0] === reviewed?.asset;
-  if (supplied && !(serviceIdentity(source) && isPlaceholder && sameReviewedAsset)) return supplied;
-  if (reviewed && !isPlaceholder) return whiteCompanyLogo(source.name);
-  return serviceIdentity(source) ? null : supplied || whiteCompanyLogo(source.name);
+  if (reviewed && (!supplied || sameReviewedAsset)) {
+    if (serviceIdentity(source) && isPlaceholder) return null;
+    return whiteCompanyLogo(source.name);
+  }
+  return supplied;
 }
 /** Cards and waypoints share the same service icon whenever company artwork is absent. */
 export function serviceWaypointLogo(source: ServiceIdentitySource, logo?: string | null) {

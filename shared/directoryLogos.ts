@@ -208,14 +208,14 @@ const WAYPOINT_ART_BY_STEM: Record<string, string> = {
   Best_Coast_Barber_Co: "/directory-logos/Best_Coast_Barber_Co.png",
 };
 
-/** White waypoint mark. Uses existing flyover art when the pack has no -white file. */
+/** Exact reviewed waypoint artwork, with explicit legacy aliases only. */
 export function resolveDirectoryWaypointLogo(name: string, imageUrl?: string | null): string | null {
   const primary = resolveDirectoryLogo(name, imageUrl);
   if (!primary) return null;
   const stem = primary.replace(/^\/directory-logos\//, "").replace(/\.png(?:\?.*)?$/, "");
   const art = WAYPOINT_ART_BY_STEM[stem];
   if (art) return art.startsWith("/directory-logos/") ? withLogoCacheBust(art) : art;
-  return primary.replace(/\.png(?=\?|$)/, "-white.png");
+  return primary;
 }
 
 /**

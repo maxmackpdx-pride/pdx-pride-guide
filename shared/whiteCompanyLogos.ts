@@ -1,27 +1,31 @@
 /** Reviewed white marks; provenance lives in /directory-logos/white-logo-sources.json. */
-export const WHITE_COMPANY_LOGO_VERSION = "2026-10-13-white-vector-r7";
+export const WHITE_COMPANY_LOGO_VERSION = "2026-10-13-white-vector-r8";
 export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number; kind: "official-vector" | "official-raster-trace" | "retained-logo-trace" | "reference-restored-vector" | "text-fallback" }> = {
   "cockeyekink": {
-  "asset": "/directory-logos/cockeyekink-white.svg",
-  "ratio": 1.00257135510414,
-  "kind": "retained-logo-trace"
-},
+    "asset": "/directory-logos/cockeyekink-white.svg",
+    "ratio": 1.00257135510414,
+    "kind": "retained-logo-trace"
+  },
   "blackholebodypiercingandtattoo": {
-  "asset": "/directory-logos/blackholebodypiercingandtattoo-white.svg",
-  "ratio": 0.9840025595904656,
-  "kind": "retained-logo-trace"
-},
+    "asset": "/directory-logos/blackholebodypiercingandtattoo-white.svg",
+    "ratio": 0.9840025595904656,
+    "kind": "retained-logo-trace"
+  },
   "bywaterhealth": {
-  "asset": "/resources-logos/bywaterhealth-white.svg",
-  "ratio": 0.9704573570413043,
-  "kind": "official-raster-trace"
-},
+    "asset": "/resources-logos/bywaterhealth-white.svg",
+    "ratio": 0.9704573570413043,
+    "kind": "official-raster-trace"
+  },
   "reconstructedwellness": {
-  "asset": "/resources-logos/reconstructedwellness-white.svg",
-  "ratio": 1.000719295090811,
-  "kind": "official-raster-trace"
-},
-  "211info": {"asset": "/resources-logos/211info-white.svg", "ratio": 2.7262, "kind": "official-vector"},
+    "asset": "/resources-logos/reconstructedwellness-white.svg",
+    "ratio": 1.000719295090811,
+    "kind": "official-raster-trace"
+  },
+  "211info": {
+    "asset": "/resources-logos/211info-white.svg",
+    "ratio": 2.7262,
+    "kind": "official-vector"
+  },
   "albertarosetheatre": {
     "asset": "/directory-logos/albertarosetheatre-white.svg",
     "ratio": 1.00121,
@@ -198,10 +202,10 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
     "kind": "retained-logo-trace"
   },
   "fantasy": {
-  "asset": "/directory-logos/fantasy-white.svg",
-  "ratio": 2.6548754229467857,
-  "kind": "retained-logo-trace"
-},
+    "asset": "/directory-logos/fantasy-white.svg",
+    "ratio": 2.6548754229467857,
+    "kind": "retained-logo-trace"
+  },
   "fantasyland": {
     "asset": "/directory-logos/fantasyland-white.svg",
     "ratio": 3.99642,
@@ -399,7 +403,7 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "northwestgenderalliance": {
     "asset": "/resources-logos/northwestgenderalliance-white.svg",
-    "ratio": 2.94055,
+    "ratio": 2.929595827900913,
     "kind": "official-raster-trace"
   },
   "novapdx": {
@@ -459,7 +463,7 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "oregonstateleathercontest": {
     "asset": "/directory-logos/oregonstateleathercontest-white.svg",
-    "ratio": 1.98256,
+    "ratio": 1.9825551564905077,
     "kind": "official-raster-trace"
   },
   "origallery": {
@@ -554,7 +558,7 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "portlandleatheralliance": {
     "asset": "/directory-logos/portlandleatheralliance-white.svg",
-    "ratio": 1.71955,
+    "ratio": 1.7142857142857142,
     "kind": "official-raster-trace"
   },
   "portlandplayhouse": {
@@ -819,7 +823,7 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "tinshedgardencafe": {
     "asset": "/directory-logos/tinshedgardencafe-white.svg",
-    "ratio": 1.25061,
+    "ratio": 1.2506063055780112,
     "kind": "reference-restored-vector"
   },
   "transadvocacyandcareteamtact": {
@@ -890,6 +894,146 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   "foodbanksandpantries": {
     "asset": "/resources-logos/foodbanksandpantries-white.svg",
     "ratio": 3.7773,
+    "kind": "official-vector"
+  },
+  "fuzzypitstattoo": {
+    "asset": "/directory-logos/fuzzy-pits-tattoo-white.svg",
+    "ratio": 0.950994950994951,
+    "kind": "official-raster-trace"
+  },
+  "birdhousetattoonoble": {
+    "asset": "/directory-logos/birdhouse-tattoo-noble-white.svg",
+    "ratio": 0.8968867737457862,
+    "kind": "official-raster-trace"
+  },
+  "enjoycohairstudio": {
+    "asset": "/directory-logos/enjoy-co-hair-studio-white.svg",
+    "ratio": 0.9996018474279343,
+    "kind": "official-raster-trace"
+  },
+  "littlewilmashairsalon": {
+    "asset": "/directory-logos/little-wilma-s-hair-salon-white.svg",
+    "ratio": 1.8229166666666667,
+    "kind": "official-raster-trace"
+  },
+  "everybodysbodywork": {
+    "asset": "/directory-logos/everybody-s-bodywork-white.svg",
+    "ratio": 1.168515892216568,
+    "kind": "official-raster-trace"
+  },
+  "somasoulhealing": {
+    "asset": "/directory-logos/somasoul-healing-white.svg",
+    "ratio": 0.9157616262879421,
+    "kind": "official-raster-trace"
+  },
+  "springtidesmassage": {
+    "asset": "/directory-logos/spring-tides-massage-white.svg",
+    "ratio": 1.0,
+    "kind": "official-raster-trace"
+  },
+  "stephaniemadeit": {
+    "asset": "/directory-logos/stephaniemadeit-white.svg",
+    "ratio": 2.2160804020100504,
+    "kind": "official-raster-trace"
+  },
+  "courtneyahndesign": {
+    "asset": "/directory-logos/courtney-ahn-design-white.svg",
+    "ratio": 7.253409372675428,
+    "kind": "official-raster-trace"
+  },
+  "nerdykeppie": {
+    "asset": "/directory-logos/nerdykeppie-white.svg",
+    "ratio": 2.3070360804570713,
+    "kind": "official-raster-trace"
+  },
+  "sonnyshouseoftattoosandtreasures": {
+    "asset": "/directory-logos/sonny-s-house-of-tattoos-and-treasures-white.svg",
+    "ratio": 3.8179922549895737,
+    "kind": "official-raster-trace"
+  },
+  "ritualarts": {
+    "asset": "/directory-logos/ritual-arts-white.svg",
+    "ratio": 3.8557743480574773,
+    "kind": "official-raster-trace"
+  },
+  "lovesalonpdx": {
+    "asset": "/directory-logos/love-salon-pdx-white.svg",
+    "ratio": 1.345026318822761,
+    "kind": "official-raster-trace"
+  },
+  "restandritual": {
+    "asset": "/directory-logos/rest-and-ritual-white.svg",
+    "ratio": 0.8248677248677249,
+    "kind": "official-raster-trace"
+  },
+  "unlockcollective": {
+    "asset": "/directory-logos/unlock-collective-white.svg",
+    "ratio": 1.3348888278891025,
+    "kind": "official-raster-trace"
+  },
+  "dogoodbizstudio": {
+    "asset": "/directory-logos/dogoodbiz-studio-white.svg",
+    "ratio": 5.370092181631957,
+    "kind": "official-raster-trace"
+  },
+  "rainbowforge": {
+    "asset": "/directory-logos/rainbow-forge-white.svg",
+    "ratio": 1.734987247855321,
+    "kind": "official-raster-trace"
+  },
+  "gaythrive": {
+    "asset": "/directory-logos/gay-thrive-white.svg",
+    "ratio": 0.9128860177164391,
+    "kind": "official-raster-trace"
+  },
+  "studioanansi": {
+    "asset": "/directory-logos/studio-anansi-white.svg",
+    "ratio": 2.042566317088217,
+    "kind": "official-raster-trace"
+  },
+  "maxburnsux": {
+    "asset": "/directory-logos/max-burns-ux-white.svg",
+    "ratio": 1.8119147866524228,
+    "kind": "official-raster-trace"
+  },
+  "claustudio": {
+    "asset": "/directory-logos/clau-studio-white.svg",
+    "ratio": 1.8857492188561336,
+    "kind": "official-raster-trace"
+  },
+  "plushtattooandintuitivearts": {
+    "asset": "/directory-logos/plush-tattoo-intuitive-arts-white.svg",
+    "ratio": 2.2522576760987354,
+    "kind": "official-raster-trace"
+  },
+  "fruit": {
+    "asset": "/directory-logos/fruit-white.svg",
+    "ratio": 3.255013242527431,
+    "kind": "official-raster-trace"
+  },
+  "jensonsarrlivingroomrealty": {
+    "asset": "/directory-logos/jenson-sarr-living-room-realty-white.svg",
+    "ratio": 6.451612903225806,
+    "kind": "official-vector"
+  },
+  "jamisminnislivingroomrealty": {
+    "asset": "/directory-logos/jamis-minnis-living-room-realty-white.svg",
+    "ratio": 6.451612903225806,
+    "kind": "official-vector"
+  },
+  "tylermarsing": {
+    "asset": "/directory-logos/tyler-marsing-white.svg",
+    "ratio": 4.070278759324696,
+    "kind": "official-raster-trace"
+  },
+  "blakeandalderpropertymanagement": {
+    "asset": "/directory-logos/blake-alder-property-management-white.svg",
+    "ratio": 1.0,
+    "kind": "official-raster-trace"
+  },
+  "bonnierosemanrosemanteam": {
+    "asset": "/directory-logos/bonnie-roseman-roseman-team-white.svg",
+    "ratio": 6.451612903225806,
     "kind": "official-vector"
   }
 };
@@ -965,7 +1109,18 @@ const ALIASES: Record<string, string> = {
   "fpcwc": "familypeacecenterofwashingtoncounty",
   "qyrc": "queeryouthresourcecenter",
   "pflagvancouverwa": "pflagvancouver",
-  "pflagsouthwestwashington": "pflagvancouver"
+  "pflagsouthwestwashington": "pflagvancouver",
+  "enjoycompanyhairstudio": "enjoycohairstudio",
+  "birdhousetattoo": "birdhousetattoonoble",
+  "lovesalon": "lovesalonpdx",
+  "sonnyshouse": "sonnyshouseoftattoosandtreasures",
+  "sonnyshouseoftattoos": "sonnyshouseoftattoosandtreasures",
+  "bonnierosemanandteam": "bonnierosemanrosemanteam",
+  "bonnieroseman": "bonnierosemanrosemanteam",
+  "rosemanteam": "bonnierosemanrosemanteam",
+  "jensonsarr": "jensonsarrlivingroomrealty",
+  "jamisminnis": "jamisminnislivingroomrealty",
+  "plushtattoo": "plushtattooandintuitivearts"
 };
 for (const [alias, name] of Object.entries(ALIASES)) WHITE_COMPANY_LOGOS[alias] = WHITE_COMPANY_LOGOS[name];
 

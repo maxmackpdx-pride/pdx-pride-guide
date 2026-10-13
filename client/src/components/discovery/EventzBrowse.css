@@ -305,3 +305,12 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
  .eb-page--places .eb-original-card .pdxPlace__actions > button:first-child { top: 4px; right: 4px; bottom: auto; left: auto; width: 44px; height: 44px !important; border-radius: 50% !important; padding: 0 !important; font-size: 0 !important; color: var(--text-hi) !important; }
  .eb-page--places .eb-original-card .venue-follow-heart { display: inline-flex !important; }
 }
+
+/* Reviewed company artwork owns its white ink and internal dark detail. */
+.eb-page--places .eb-original-card .rg-directory-card .pdxPlace__media .pdxPlace__logo[src*="-white.svg"] { filter: none !important; mix-blend-mode: normal; }
+@media (max-width: 767px) {
+  /* Leave room for a legible reviewed logo within the existing compact card. */
+  .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__media:has(> .pdxPlace__logo[src*="-white.svg"]) {
+    padding: 28px 10px 54px;
+  }
+}

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { ArrowUpRight, MapPin } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
+import { serviceIdentity, serviceWaypointLogo } from '@shared/serviceIdentity';
 import { RESOURCE_CATEGORIES } from '@/lib/resourcesData';
 import { RESOURCE_MAP_ENTRIES, resourceMapHref, resourceMapKey, type ResourceMapEntry } from '@/lib/resourceMap';
 import { inMapBounds, type MapBounds } from '@/lib/mapWorlds';
@@ -25,7 +26,7 @@ export default function ResourceMapPanel({ bounds, query, category, onQuery, onC
   const inView = matching.filter(entry => entry.locations.some((location, index) => inMapBounds(location, bounds) && (!selectedKeys.length || selectedKeys.includes(resourceMapKey(entry.org.name, index)))));
   const withoutPin = matching.filter(entry => !entry.locations.length);
   const renderEntry = (entry: ResourceMapEntry) => <a className="resource-map-result" key={entry.org.name} href={resourceMapHref(entry.org.name)}>
-    <span className="resource-map-result__icon"><MapPin size={20} aria-hidden="true" /></span>
+    <span className="resource-map-result__icon"><img src={serviceWaypointLogo(entry.org, entry.org.logo) || '/mapz-map/icons/types/service.svg'} alt="" loading="lazy" onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = serviceIdentity(entry.org)?.icon || '/mapz-map/icons/types/service.svg'; }} /></span>
     <span className="resource-map-result__copy"><strong>{entry.org.name}</strong><small>{entry.org.scope}</small><span>{entry.categories.map(item => item.name).join(' · ')}</span></span>
     <ArrowUpRight size={19} aria-hidden="true" />
   </a>;

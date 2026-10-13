@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Badge } from "./Badge";
 import { Share2 } from "lucide-react";
 import { placeGoogleMapsUrl, telHref } from "@/lib/placeLinks";
@@ -83,7 +83,7 @@ const CSS = `
   position:relative; z-index:3;
   max-width:100%; max-height:108px; width:auto; height:auto;
   object-fit:contain; object-position:center;
-  mix-blend-mode:screen;
+  mix-blend-mode:normal;
   filter:none;
 }
 .pdxPlace__logo--fallback{
@@ -502,6 +502,7 @@ export function PlaceCard({
             ? GROUP_EDGE
             : `linear-gradient(${accent},${accent})`;
   const [logoFailed, setLogoFailed] = useState(false);
+  useEffect(() => { setLogoFailed(false); }, [logoUrl]);
   const [sharing, setSharing] = useState(false);
   const [mapExpanded, setMapExpanded] = useState(false);
   const showLogo = logoUrl && !logoFailed;

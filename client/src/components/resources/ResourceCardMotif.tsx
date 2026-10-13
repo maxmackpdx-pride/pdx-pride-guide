@@ -72,11 +72,12 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
    .map(({ q, j }) => <path key={`${i}-${j}`} d={`M${p.x} ${p.y}L${q.x} ${q.y}`} />);
  });
  const theme=themeFor(name,category);
- const placeArtwork = isPlace ? distinctPlaceMotif(name) : undefined;
+ const placeArtwork = distinctPlaceMotif(name);
+ const projected = Boolean(placeArtwork);
  const silhouette = placeArtwork?.outline ?? (isPlace ? silhouettes[theme] : distinctResourceMotifs[name] ?? silhouettes[theme]);
  const rightAtTop = Array.from(name).reduce((total, letter) => total + letter.charCodeAt(0), 0) % 2 === 0;
- const supporting = isPlace ? distinctPlaceSupportingMotif(name) : undefined;
- const tilt=(random()-.5)*(isPlace ? 4 : 12);
+ const supporting = projected ? distinctPlaceSupportingMotif(name) : undefined;
+ const tilt=(random()-.5)*((isPlace || projected) ? 4 : 12);
  const cycle = 28 + Math.round(random() * 8);
  const phase = -Math.round(random() * cycle);
  const circuits = Array.from({ length: 5 }, (_, i) => {
@@ -88,8 +89,8 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
   return { x, y, endX: x + reach, endY: y + rise,
    path: `M${x} ${y}h${reach * .45}l${reach * .25} ${rise}h${reach * .3}` };
  });
- return <svg ref={ref} className="rg-card-motif" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-motif={`${category}-${name}`}>
-  {isPlace && <defs><linearGradient id={`${gradientId}-edge`} gradientUnits="userSpaceOnUse" x1="90" y1="140" x2="280" y2="355">
+ return <svg ref={ref} className="rg-card-motif" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-motif={`${category}-${name}`} data-motif-material={projected ? "projected" : undefined}>
+  {(isPlace || projected) && <defs><linearGradient id={`${gradientId}-edge`} gradientUnits="userSpaceOnUse" x1="90" y1="140" x2="280" y2="355">
    <stop offset="0" style={{ stopColor: "color-mix(in srgb, var(--c) 70%, var(--text-hi))" }} />
    <stop offset=".45" stopColor="currentColor" />
    <stop offset="1" style={{ stopColor: "color-mix(in srgb, var(--c) 70%, var(--z-black))" }} />
@@ -135,9 +136,9 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
   <g className="rg-motif-breathe" style={{ animationDuration: `${cycle + 4}s`, animationDelay: `${phase}s` }}>
   <g className="rg-motif-object" fill="none" stroke={paint} strokeLinejoin="round" transform={`${isPlace ? `translate(${rightAtTop ? -22 : 22} 46) ` : ""}rotate(${tilt} 200 250)`}>
    {placeArtwork && <><path className="rg-motif-rear-grid" d={placeArtwork.rearGrid} /><path className="rg-motif-surface-grid" d={placeArtwork.grid} /></>}
-   {!isPlace && <path className="rg-motif-depth" d={silhouette} transform="translate(5 7)" strokeWidth=".8" strokeDasharray="2 5" />}
-   {(isPlace ? [1] : [1.13,1.06,1]).map((scale,i)=><path key={scale} d={silhouette} transform={`translate(200 250) scale(${scale}) translate(-200 -250)`} className={scale===1 ? "rg-motif-contour" : "rg-motif-echo"} stroke={isPlace && scale===1 ? `url(#${gradientId}-edge)` : undefined} strokeWidth={scale===1?1.5:.65} opacity={scale===1?.85:.24} />)}
-   {!isPlace && <path className="rg-motif-inner-edge" d={silhouette} transform="translate(200 250) scale(.976) translate(-200 -250)" strokeWidth=".55" />}
+   {!isPlace && !projected && <path className="rg-motif-depth" d={silhouette} transform="translate(5 7)" strokeWidth=".8" strokeDasharray="2 5" />}
+   {((isPlace || projected) ? [1] : [1.13,1.06,1]).map((scale,i)=><path key={scale} d={silhouette} transform={`translate(200 250) scale(${scale}) translate(-200 -250)`} className={scale===1 ? "rg-motif-contour" : "rg-motif-echo"} stroke={(isPlace || projected) && scale===1 ? `url(#${gradientId}-edge)` : undefined} strokeWidth={scale===1?1.5:.65} opacity={scale===1?.85:.24} />)}
+   {!isPlace && !projected && <path className="rg-motif-inner-edge" d={silhouette} transform="translate(200 250) scale(.976) translate(-200 -250)" strokeWidth=".55" />}
    <path className="rg-motif-signal-trace" d={silhouette} pathLength="100" strokeWidth="1.15" strokeDasharray="3 97" style={{ animationDuration: `${cycle + 8}s`, animationDelay: `${phase}s` }} />
   </g>
   </g>

@@ -16,7 +16,7 @@ import {createBridgeLayer} from '../home-flight/bridge-roads.js?v=20260921-layer
 import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-white-sparkles';
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
-import {logoCoverage} from './logo-mask.js';
+import {logoCoverage,logoTone,authoredLogoMode} from './logo-mask.js';
 import {createEventProjection,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
@@ -248,6 +248,7 @@ function loadVenueLogo(url,mode){
  const promise=decodeVenueLogo(url,mode);logoLoads.set(url,promise);return promise;
 }
 async function decodeVenueLogo(url,mode){
+ mode=authoredLogoMode(url,mode);
  const image=new Image();image.src=url;
  try{
   await image.decode();
@@ -262,7 +263,7 @@ async function decodeVenueLogo(url,mode){
   // Suppress low-opacity baked glow; keep anti-aliased solid white artwork.
   for(let i=0;i<pixels.length;i+=4){
    const coverage=logoCoverage(pixels[i],pixels[i+1],pixels[i+2],pixels[i+3],mode);
-   const tone=mode==='grayscale'?Math.round(.2126*pixels[i]+.7152*pixels[i+1]+.0722*pixels[i+2]):255;
+   const tone=logoTone(pixels[i],pixels[i+1],pixels[i+2],mode);
    pixels[i]=pixels[i+1]=pixels[i+2]=tone;pixels[i+3]=Math.round(coverage*255);
   }
   ctx.putImageData(artwork,0,0);
@@ -676,7 +677,7 @@ function drawLights(fade,target=map,surface=lights){
    if(pass===0)drawWaypointFoot(lightsContext,geometry,color,hologramMaterials,drawProjectionBeam,coreAlpha,selected);
    else{
     // Heads remain readable above buildings; their beam is masked at street level.
-    const logo=feature.properties.kind==='place'&&feature.properties.waypointLogo?venueLogos.get(feature.properties.waypointLogo)?.image:null;
+    const logo=feature.properties.waypointLogo?venueLogos.get(feature.properties.waypointLogo)?.image:null;
     const shell=waypointFamilyShell(feature.properties.waypointFamily);
     drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,logo&&showWaypointLogo(pulseTime,phase,reduced.matches)?logo:null,selected,coreAlpha,shell,
      {glitch:logo?waypointSwapGlitch(pulseTime,phase,reduced.matches):0});
