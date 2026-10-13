@@ -1,3 +1,7 @@
+import { boardFeaturePosts, filterBoardFeatures } from "@/lib/boardFeatures";
+import { HousingComposer } from "@/components/housing/HousingComposer";
+import { MizzedComposer } from "@/components/SpottedCardGrid";
+import type { LinkableMissedConnectionEvent } from "@/components/MissedConnectionsPanel";
 import {
   lazy,
   Suspense,
@@ -183,6 +187,7 @@ function BoardDetail({
         post={detail.data as HousingPostView}
         userId={user?.id}
         initialDetail
+        initialIntent={new URLSearchParams(window.location.search).get("build") === "1" ? "BUILD" : new URLSearchParams(window.location.search).get("join") === "1" ? "JOIN" : new URLSearchParams(window.location.search).get("waitlist") === "1" ? "WAITLIST" : new URLSearchParams(window.location.search).get("chat") === "1" ? "CHAT" : null}
         onClose={onClose}
         onRequireAuth={onRequireAuth}
         onSelectPost={(id) => onSelect(`housing:${id}`)}
@@ -230,6 +235,8 @@ export default function Boards() {
       ? (rawIntent as BoardIntent)
       : "all";
   const savedOnly = params.get("saved") === "1";
+  const mineOnly = params.get("mine") === "1";
+  const featureFilters = {itemCategory: params.get("category") || "", condition: params.get("condition") || "", price: params.get("price") || "", remote: params.get("remote") === "1", source: params.get("source") || "", neighborhood: params.get("neighborhood") || "", sort: params.get("sort") || "newest"};
   const postKey = params.get("post");
   const validPost = postKey && parseBoardPostKey(postKey) ? postKey : null;
   const [showAuth, setShowAuth] = useState(false),
@@ -253,9 +260,18 @@ export default function Boards() {
         ),
     })),
   });
-  const allPosts = feeds
+  const ownerFeeds = useQueries({queries: boardCategories.map(cat => ({
+    queryKey: [cat.endpoint + "/mine", "all-boards", user?.id],
+    enabled: !!user && mineOnly && cat.id !== "housing",
+    queryFn: () => apiRequest("GET", cat.endpoint + "/mine").then(r => r.json() as Promise<BoardPayload>),
+  }))});
+  const postingStatus = useQuery<{postingOpen:boolean;message:string}>({queryKey:["/api/gifting/status"]});
+  const pm = useQuery<{approved:boolean;manager?:{name?:string;company?:string}}>({queryKey:["/api/housing/pm/me"],enabled:!!user});
+  const postableEvents = useQuery<LinkableMissedConnectionEvent[]>({queryKey:["/api/missed-connections/postable-events","board"], enabled:!!user && compose === "mizzed", queryFn:()=>apiRequest("GET","/api/missed-connections/postable-events?scope=board").then(r=>r.json())});
+  const activeFeeds = mineOnly ? feeds.map((feed,i)=>boardCategories[i].id === "housing" ? feed : ownerFeeds[i]) : feeds;
+  const allPosts = activeFeeds
     .flatMap((feed, index) =>
-      feed.data ? toBoardPosts(boardCategories[index].id, feed.data) : [],
+      feed.data ? boardFeaturePosts(boardCategories[index].id, feed.data, user?.id, mineOnly) : [],
     )
     .sort(
       (a, b) =>
@@ -266,7 +282,7 @@ export default function Boards() {
     queryFn: () => apiRequest("GET", "/api/boards/saved").then((r) => r.json()),
     enabled: !!user,
   });
-  const saved = new Set(user ? savedQuery.data || [] : []);
+  const saved = new Set(user ? [...(savedQuery.data || []), ...allPosts.filter(p=>p.saved).map(p=>p.key)] : []);
   const saveMutation = useMutation({
     mutationFn: ({ post, wasSaved }: { post: BoardPost; wasSaved: boolean }) =>
       apiRequest(
@@ -287,7 +303,7 @@ export default function Boards() {
         variant: "destructive",
       }),
   });
-  const relevant = feeds.filter(
+  const relevant = activeFeeds.filter(
     (_, index) =>
       !selection ||
       selection === "all" ||
@@ -299,7 +315,7 @@ export default function Boards() {
     (p) => !selection || selection === "all" || p.category === selection,
   );
   const intents = Array.from(new Set(categoryPosts.map((p) => p.intent)));
-  const results = categoryPosts.filter(
+  const results = filterBoardFeatures(categoryPosts.filter(
     (p) =>
       (intent === "all" || p.intent === intent) &&
       (!savedOnly || saved.has(p.key)) &&
@@ -307,10 +323,10 @@ export default function Boards() {
         .join(" ")
         .toLowerCase()
         .includes(query.trim().toLowerCase()),
-  );
-  const clear = () => update({ q: null, intent: null, saved: null }, true);
+  ), featureFilters);
+  const clear = () => update({ q: null, intent: null, saved: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null }, true);
   const select = (board: Selection | null) => {
-    update({ board, q: null, intent: null, saved: null, post: null });
+    update({ board, q: null, intent: null, saved: null, post: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null });
     window.scrollTo({ top: 0, behavior: "instant" });
   };
   const close = () => {
@@ -331,25 +347,20 @@ export default function Boards() {
       setShowAuth(true);
       return;
     }
-    if (selection === "housing") {
-      navigate("/the-hauz/new");
-      return;
-    }
-    if (selection === "mizzed") {
-      navigate("/mizzed/new");
-      return;
-    }
+    if (selection === "giftz" && postingStatus.data?.postingOpen !== true) {toast({title:postingStatus.data?.message || "Checking Giftz posting availability"});return;}
     if (selection && selection !== "all") setCompose(selection);
   };
   const posted = (id: number) => {
     const category = compose!;
     setCompose(null);
+    update({compose:null},true);
     void queryClient.invalidateQueries({
       queryKey: [boardCategories.find((c) => c.id === category)!.endpoint],
     });
     open(`${category}:${id}`);
   };
-  useEffect(() => setLimit(24), [selection, query, intent, savedOnly]);
+  useEffect(() => {if(params.get("compose") === "1" && selection && selection !== "all") {if(user) setCompose(selection); else setShowAuth(true);}},[search,user?.id]);
+  useEffect(() => setLimit(24), [selection, query, intent, savedOnly,mineOnly]);
   return (
     <div
       className="eb-page ab-page pdx-glass-rebind"
@@ -451,13 +462,19 @@ export default function Boards() {
                   }
                   onClear={() => update({ q: null }, true)}
                 />
-                <BrowseFilters title="Filter board posts" active={intent !== "all"}>
+                <BrowseFilters title="Filter board posts" active={intent !== "all" || Object.entries(featureFilters).some(([k,v])=>k!=="sort" && Boolean(v))}>
                   <label>Post type
                     <select value={intent} onChange={e => update({ intent: e.target.value === "all" ? null : e.target.value }, true)}>
                       <option value="all">All types</option>
                       {intents.map(i => <option key={i} value={i}>{intentLabels[i]}</option>)}
                     </select>
                   </label>
+                  <label>Neighborhood<input value={featureFilters.neighborhood} onChange={e=>update({neighborhood:e.target.value || null},true)} /></label>
+                  <label>Sort<select value={featureFilters.sort} onChange={e=>update({sort:e.target.value},true)}><option value="newest">Newest</option><option value="oldest">Oldest</option>{selection === "sellz" && <><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></>}</select></label>
+                  {(selection === "giftz" || selection === "sellz") && <label>Category<select value={featureFilters.itemCategory} onChange={e=>update({category:e.target.value || null},true)}><option value="">All categories</option>{Array.from(new Set(categoryPosts.map(p=>p.itemCategory).filter(Boolean))).map(c=><option key={c} value={c}>{c}</option>)}</select></label>}
+                  {selection === "sellz" && <><label>Condition<select value={featureFilters.condition} onChange={e=>update({condition:e.target.value || null},true)}><option value="">All conditions</option>{Array.from(new Set(categoryPosts.map(p=>p.condition).filter(Boolean))).map(c=><option key={c} value={c}>{c}</option>)}</select></label><label>Price<select value={featureFilters.price} onChange={e=>update({price:e.target.value || null},true)}><option value="">Any price</option><option value="under25">Under $25</option><option value="25to100">$25–$100</option><option value="over100">Over $100</option></select></label></>}
+                  {selection === "gigz" && <label><input type="checkbox" checked={featureFilters.remote} onChange={e=>update({remote:e.target.checked?"1":null},true)} />Remote opportunities</label>}
+                  {selection === "mizzed" && <label>Where you connected<select value={featureFilters.source} onChange={e=>update({source:e.target.value || null},true)}><option value="">All connections</option><option value="events">Events</option><option value="placez">Placez</option><option value="outzide">OutZide</option><option value="spot">That one spot by the…</option></select></label>}
                 </BrowseFilters>
                 <button
                   type="button"
@@ -478,6 +495,7 @@ export default function Boards() {
                 </button>
               </div>
               <div className="eb-browse-actions">
+                <button type="button" className="eb-tool" aria-pressed={mineOnly} onClick={()=>user?update({mine:mineOnly?null:"1",saved:null},true):setShowAuth(true)}>My posts & management</button>
                 <button type="button" className="eb-tool eb-view-all" aria-pressed={selection === "all"} onClick={() => select("all")}>
                   <LayoutGrid size={18} aria-hidden="true" />View all
                 </button>
@@ -535,14 +553,13 @@ export default function Boards() {
                         <Plus size={16} />
                         Post in{" "}
                         {selectedCategory.id === "housing"
-                          ? "Housing"
+                          ? "My Hoüz"
                           : selectedCategory.id === "mizzed"
                             ? "Mizzed"
                             : selectedCategory.label}
                       </button>
-                      <Link className="ab-back" href={`${selectedCategory.route}?view=tools`}>
-                        My posts & board tools <ArrowRight size={14} />
-                      </Link>
+                      {selectedCategory.id === "housing" && <button type="button" className="ab-back" onClick={()=>{if(!user){setShowAuth(true);return;}update({type:"PM",compose:"1"});}}>Property managers · Contact Tucker</button>}
+                      <button type="button" className="ab-back" onClick={()=>user?update({mine:"1",saved:null},true):setShowAuth(true)}>My posts & board tools <ArrowRight size={14} /></button>
                     </>
                   ) : (
                     <p className="ab-note">
@@ -605,7 +622,7 @@ export default function Boards() {
                         <PostArt post={post} />
                         <div className="ab-card__body">
                           <div className="ab-card__eyebrow">
-                            <span>{intentLabels[post.intent]}</span>
+                            <span>{intentLabels[post.intent]}</span>{post.isDemo && <span>Demo</span>}{mineOnly && <span>{post.status}</span>}
                           </div>
                           <h3>
                             <button
@@ -735,14 +752,16 @@ export default function Boards() {
             onSelect={(key) => open(key)}
           />
         )}
+        {compose === "housing" && <HousingComposer initialType={params.get("type") === "PM" ? "PM" : ({offering:"OFFERING",looking:"LOOKING",forming:"FORMING",managed:"MANAGED"} as const)[intent as "offering"|"looking"|"forming"|"managed"] || null} isPropertyManager={!!pm.data?.approved} managerName={pm.data?.manager?.company || pm.data?.manager?.name || null} viewerDisplayName={user?.displayName ?? null} onClose={()=>{setCompose(null);update({compose:null},true);}} onPosted={posted} />}
+        {compose === "mizzed" && <section className="ab-filter-panel pdx-glass-rebind" aria-label="Post a Mizzed connection"><button className="eb-tool" onClick={()=>setCompose(null)}>Close composer</button>{postableEvents.isError ? <BrowseStatus error title="Event choices could not load" description="Try again to link your connection to an event." actionLabel="Try again" onAction={()=>void postableEvents.refetch()} /> : <MizzedComposer linkableEvents={postableEvents.data || []} initialSource={{eventId:params.get("event") || undefined,placeId:params.get("place") || undefined,beachId:params.get("beach") || undefined}} onPosted={()=>{setCompose(null);void queryClient.invalidateQueries({queryKey:["/api/missed-connections"]});}} />}</section>}
         {compose === "gigz" && (
-          <GigComposer onClose={() => setCompose(null)} onPosted={posted} />
+          <GigComposer initialType={intent === "available" ? "LOOKING_FOR_WORK" : "POSTING_GIG"} onClose={() => {setCompose(null);update({compose:null},true);}} onPosted={posted} />
         )}
         {compose === "giftz" && (
-          <GiftComposer onClose={() => setCompose(null)} onPosted={posted} />
+          <GiftComposer initialType={intent === "iso" ? "ISO" : "GIFT"} initialPickupPreference={intent === "grab" ? "Open grab" : undefined} onClose={() => {setCompose(null);update({compose:null},true);}} onPosted={posted} />
         )}
         {compose === "sellz" && (
-          <SellzComposer onClose={() => setCompose(null)} onPosted={posted} />
+          <SellzComposer onClose={() => {setCompose(null);update({compose:null},true);}} onPosted={posted} />
         )}
       </Suspense>
       {showAuth && (
