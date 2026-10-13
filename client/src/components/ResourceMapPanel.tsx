@@ -8,6 +8,7 @@ import './ResourceMapPanel.css';
 
 type Props = {
   entries?: ResourceMapEntry[];
+  onOpenEntry?: (entry: ResourceMapEntry) => void;
   bounds: MapBounds | null;
   query: string;
   category: string;
@@ -17,7 +18,7 @@ type Props = {
   onClearSelection: () => void;
 };
 
-export default function ResourceMapPanel({ entries = RESOURCE_MAP_ENTRIES, bounds, query, category, onQuery, onCategory, selectedKeys, onClearSelection }: Props) {
+export default function ResourceMapPanel({ entries = RESOURCE_MAP_ENTRIES, onOpenEntry, bounds, query, category, onQuery, onCategory, selectedKeys, onClearSelection }: Props) {
   const [limit, setLimit] = useState(40);
   const matching = useMemo(() => entries.filter(({ org, categories }) => {
     if (category && !categories.some(item => item.id === category || org.categoryIds?.includes(category))) return false;
@@ -26,7 +27,7 @@ export default function ResourceMapPanel({ entries = RESOURCE_MAP_ENTRIES, bound
   }), [entries, query, category]);
   const inView = matching.filter(entry => entry.locations.some((location, index) => inMapBounds(location, bounds) && (!selectedKeys.length || selectedKeys.includes(resourceMapKey(entry.org.name, index, entry.communitySlug)) || selectedKeys.includes(resourceMapKey(entry.org.name, index)))));
   const withoutPin = matching.filter(entry => !entry.locations.length);
-  const renderEntry = (entry: ResourceMapEntry) => <a className="resource-map-result" key={entry.communitySlug || entry.org.name} href={resourceMapHref(entry.org.name, entry.communitySlug)}>
+  const renderEntry = (entry: ResourceMapEntry) => <a className="resource-map-result" key={entry.communitySlug || entry.org.name} href={resourceMapHref(entry.org.name, entry.communitySlug)} onClick={event => { if (onOpenEntry && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onOpenEntry(entry); } }}>
     <span className="resource-map-result__icon"><img src={serviceWaypointLogo(entry.org, entry.org.logo) || '/mapz-map/icons/types/service.svg'} alt="" loading="lazy" onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = serviceIdentity(entry.org)?.icon || '/mapz-map/icons/types/service.svg'; }} /></span>
     <span className="resource-map-result__copy"><strong>{entry.org.name}</strong><small>{entry.org.scope}</small><span>{entry.categories.map(item => item.name).join(' · ')}</span></span>
     <ArrowUpRight size={19} aria-hidden="true" />

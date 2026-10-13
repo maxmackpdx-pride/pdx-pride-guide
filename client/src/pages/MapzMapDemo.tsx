@@ -5,7 +5,7 @@ import { oneShotMapLocation } from "@/lib/oneShotMapLocation";
 import { serviceIdentity, serviceWaypointLogo } from "@shared/serviceIdentity";
 import { useMapzActive, useMapzCameraRecorder } from "@/components/RetainedMapzRoute";
 import ResourceMapPanel from '@/components/ResourceMapPanel';
-import { resourceMapHref, resourceMapKey, type ResourceMapEntry } from '@/lib/resourceMap';
+import { resourceMapKey, type ResourceMapEntry } from '@/lib/resourceMap';
 import {eventNight} from '../../public/mapz-map/event-night.js';
 import { DetailRoomLinkContext, type DetailRoomLinkValue } from "@/components/DetailRoomLink";
 import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
@@ -63,6 +63,7 @@ const BoardPostOverlay = lazyWithReload(() => import("@/components/board/BoardPo
 const SpottedDetailModal = lazyWithReload(() => import("@/components/SpottedDetailModal"));
 const HousingPostOverlay = lazyWithReload(() => import("@/components/housing/HousingPostOverlay"));
 const HousingComposerOverlay = lazyWithReload(() => import("@/components/housing/HousingComposerOverlay"));
+const ResourceDetails = lazyWithReload(() => import("./Resources"));
 const EventModal = lazyWithReload(() => import("@/components/EventModal"));
 const PlaceModal = lazyWithReload(() => import("@/components/PlaceModal"));
 const MapComposerOverlay = lazyWithReload(() => import("@/components/MapComposerOverlay"));
@@ -272,7 +273,7 @@ function originRect(element: Element | null): EventModalOriginRect | PlaceModalO
   return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
 }
 
-const OVERLAY_KEYS = ["event", "place", "mizzed", "spotted", "gig", "gift", "sell", "sellz", "houz"] as const;
+const OVERLAY_KEYS = ["event", "place", "mizzed", "spotted", "gig", "gift", "sell", "sellz", "houz", "resource", "community"] as const;
 type OverlayKey = typeof OVERLAY_KEYS[number];
 type TimeFilter = MapTimeFilter;
 
@@ -531,6 +532,18 @@ export default function MapzMapDemo() {
       mapOverlayReturn: hasOverlay ? window.history.state?.mapOverlayReturn : window.location.pathname + window.location.search,
     } });
   }, [setLocation]);
+  const openResourceDetail = useCallback((entry: ResourceMapEntry) => {
+    const hasOverlay = [...OVERLAY_KEYS, "compose", "houzCompose"].some(key => mapSearchParams().has(key));
+    setLocation(mapHref(p => {
+      clearMapOverlay(p); p.set("resource", entry.org.name);
+      if (entry.communitySlug) p.set("community", entry.communitySlug);
+      p.set("layer", "rezources");
+    }), {replace: hasOverlay, state: {...window.history.state,
+      mapOverlayReturn: hasOverlay ? window.history.state?.mapOverlayReturn : window.location.pathname + window.location.search,
+    }});
+  }, [setLocation]);
+  const resourceName = params.get("resource");
+  const communitySlug = params.get("community");
   const closingOverlay = useRef(false);
   useEffect(() => { closingOverlay.current = false; }, [search]);
   const closeOverlays = useCallback(() => {
@@ -643,7 +656,7 @@ export default function MapzMapDemo() {
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
     setSelected(mark.key);
     setCardOriginRect(originRect(target || null));
-    if (mark.kind === "resource") { setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name, (mark.item as ResourceMapEntry).communitySlug)); }
+    if (mark.kind === "resource") { openResourceDetail(mark.item as ResourceMapEntry); }
     else if (mark.kind === "event") { goOverlay("event", (mark.item as Event).id); }
     else if (mark.kind === "place") { goOverlay("place", (mark.item as Place).id); }
     else {
@@ -659,7 +672,7 @@ export default function MapzMapDemo() {
         if (kind && Number.isFinite(postId)) { goOverlay(boardParam(kind), postId); }
       }
     }
-  }, [goOverlay, setLocation]);
+  }, [goOverlay, openResourceDetail]);
   const openBoardRow = (row: MapRow, target?: Element | null) => openMark({ key: mapListingKey(row._board,row.id), kind: "board", lat: Number(row.lat), lng: Number(row.lng), item: row }, target);
   const panelRows = (rows: MapRow[], kind: "places" | "boards" | "houz") => (
     <div className="mapz-layer-list">
@@ -741,7 +754,7 @@ export default function MapzMapDemo() {
     { id: "events", label: ROOMS.eventz.nav, color: ROOMS.eventz.accent, enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
     { id:"places",label:ROOMS.placez.nav,color:ROOMS.placez.accent,enabled:showPlaces,onToggle:()=>toggleLayer("hidePlaces"),panel:worldPanels.places,viewMore:[{label:"Browse all Placez",href:"/directory"}] },
     { id:'rezources',label:'NEEDZ',color:'var(--neon-yellow)',enabled:showResources,onToggle:()=>toggleLayer('hideResources'),
-      panel:<ResourceMapPanel entries={resourceEntries} bounds={mapBounds} query={resourceQuery} category={resourceCategory}
+      panel:<ResourceMapPanel entries={resourceEntries} onOpenEntry={openResourceDetail} bounds={mapBounds} query={resourceQuery} category={resourceCategory}
         selectedKeys={selectedResourceKeys} onClearSelection={()=>updateParams(p=>p.delete('resources.ids'))}
         onQuery={value=>updateParams(p=>{if(value)p.set('resources.q',value);else p.delete('resources.q');p.delete('resources.ids');})}
         onCategory={value=>updateParams(p=>{if(value)p.set('resources.category',value);else p.delete('resources.category');p.delete('resources.ids');})} />,
@@ -811,10 +824,10 @@ export default function MapzMapDemo() {
   }), [marks, places, events, demoEventIds, attendance, tokenEpoch]);
   // Board 49: the status line says how many holograms are up tonight. No badge on the pin.
   const tonightCount = useMemo(() => { const night = eventNight(viewTimestamp); return sceneRows.filter(row => row.kind === "event" && row.eventNight === night).length; }, [sceneRows, viewTimestamp]);
-  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name, (mark.item as ResourceMapEntry).communitySlug));return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='My Hoüz')setCardOriginRect(rect);}};
+  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')openResourceDetail(mark.item as ResourceMapEntry);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='My Hoüz')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{
-      if(mark.kind==="resource")return false;
+      if(mark.kind==="resource"){const entry=mark.item as ResourceMapEntry;return communitySlug ? entry.communitySlug===communitySlug : entry.org.name===resourceName;}
       if(mark.kind==="place")return Number((mark.item as Place).id)===placeId;
       if(mark.kind==="event")return Number((mark.item as Event).id)===eventId;
       const row=mark.item as MapRow;
@@ -822,7 +835,7 @@ export default function MapzMapDemo() {
       return key && Number(row.id)===mapRecordId(params.get(key));
     })?.key||null;
     setSelected(key);
-  },[marks,params,placeId,eventId]);
+  },[marks,params,placeId,eventId,resourceName,communitySlug]);
   const openMapSearch = () => {
     // Events have no search box; Placez does. A layer that has one keeps it.
     if (!activeLayer || activeLayer === "events" || activeLayer === "houz") changeLayer("places");
@@ -869,6 +882,7 @@ export default function MapzMapDemo() {
     {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="mapz-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
     {active && <Suspense fallback={<p className="ab-detail-status" role="status">Opening card… <Button variant="outline" accent="cyan" type="button" onClick={closeOverlays}>Back to map</Button></p>}>
     <DetailRoomLinkContext.Provider value={detailRoomLink}>
+    {(resourceName || communitySlug) && <ResourceDetails embeddedDetail={{name:resourceName || "", communitySlug:communitySlug || undefined}} onEmbeddedClose={closeOverlays} />}
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {boardOverlay && <BoardPostOverlay presentation="eventz" kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}

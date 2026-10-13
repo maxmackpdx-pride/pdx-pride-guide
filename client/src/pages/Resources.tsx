@@ -1,3 +1,4 @@
+import { resourceMapHref } from '@/lib/resourceMap';
 import { useQuery } from "@tanstack/react-query";
 import type { CommunitySummary } from "@shared/community";
 import {resourceDetailSelection, type EmbeddedResourceDetail} from "@/lib/resourceDetailSelection";
@@ -447,7 +448,7 @@ const ResourceCard = memo(function ResourceCard({
       logoUrl={serviceArtwork(org, org.logo) || undefined}
       logoFallback={<Mark org={org} allowArtwork={false} iconOnly />}
       description={org.desc}
-      shareUrl={`https://www.zaylist.com/needz?resource=${encodeURIComponent(org.name)}`}
+      shareUrl={`https://www.zaylist.com${resourceMapHref(org.name, row.community?.slug)}`}
       className={`rg-directory-card rg-category-${category.id} pdxPlace--clickable${org.logoSurface === "light" ? " rg-directory-card--light-logo" : ""}`}
       onClick={() => onOpen(row)}
       footer={
@@ -640,7 +641,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
           >
             <div className="event-modal__chrome">
               <div className="detail-actions">
-                {detail && <BoardShareButton title={detail.org.name} path={`/needz?resource=${encodeURIComponent(detail.org.name)}`} />}
+                {detail && <BoardShareButton title={detail.org.name} path={resourceMapHref(detail.org.name, detail.community?.slug)} />}
                 <Dialog.Close className="detail-actions__close" aria-label="Close resource"><X size={20} aria-hidden="true" /></Dialog.Close>
               </div>
             </div>
