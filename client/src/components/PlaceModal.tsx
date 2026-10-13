@@ -1057,7 +1057,7 @@ export default function PlaceModal({
                 aria-label={`View event: ${event.title}`}
                 role="listitem"
               >
-                <EventFlyerArt src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} day={event.dayOfWeek} />
+                <EventFlyerArt src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} day={event.dayOfWeek} title={event.title} venueName={place.name} />
                 {event.previewExample && <span className="place-event-tile__example">Example</span>}
                 <span className="place-event-tile__shade"><strong>{event.title}</strong><small>{event.previewExample ? "Preview example" : formatDirectoryEventWhen(event)}</small></span>
               </Link>)}
