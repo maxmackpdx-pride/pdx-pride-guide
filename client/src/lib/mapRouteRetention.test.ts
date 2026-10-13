@@ -4,6 +4,7 @@ import { isMapzRoute, retainedMapSearch, accountSafeMapSearch } from './mapRoute
 
 test('retains only the Mapz routes, never an unrelated page', () => {
   assert.equal(isMapzRoute('/map'),true);
+  assert.equal(isMapzRoute('/map-demo'),true);
   assert.equal(isMapzRoute('/map-demo/?layer=places'),true);
   assert.equal(isMapzRoute('/mapz-map/index.html'),false);
   assert.equal(isMapzRoute('/boards'),false);

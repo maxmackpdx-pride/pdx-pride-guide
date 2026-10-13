@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 
-const [host,page,html,renderer,home,routes,app,bootLoader]=await Promise.all([
+const [host,page,html,renderer,home,routes,app,bootLoader,retainedHost]=await Promise.all([
  readFile(new URL('../client/src/components/MapzCanvas.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/src/pages/MapzMapDemo.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/public/mapz-map/index.html',import.meta.url),'utf8'),
@@ -11,6 +11,7 @@ const [host,page,html,renderer,home,routes,app,bootLoader]=await Promise.all([
  readFile(new URL('../server/routes.ts',import.meta.url),'utf8'),
  readFile(new URL('../client/src/App.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/src/components/MapBootLoader.tsx',import.meta.url),'utf8'),
+ readFile(new URL('../client/src/components/RetainedMapzRoute.tsx',import.meta.url),'utf8'),
 ]);
 
 test('Mapz and the home flyover share the same natural surface renderer',()=>{
@@ -42,7 +43,7 @@ test('3D base frame does not wait for optional waypoint assets',()=>{
  assert.match(renderer,/const ready=loaded;/);
  assert.match(renderer,/const overlaysReady=loaded&&assetsReady;/);
  assert.match(renderer,/classList\.toggle\('scene-ready',loaded\)/);
- assert.match(renderer,/if\(overlaysReady\)drawLights\(visibility\)/);
+ assert.match(renderer,/if\(overlaysReady\)\s*(?:\{\s*)?drawLights\(visibility\)/);
 });
 
 test('Mapz retries the 3D renderer without a retired 2D architecture',()=>{
@@ -54,8 +55,13 @@ test('Mapz retries the 3D renderer without a retired 2D architecture',()=>{
 });
 
 test('Mapz browsing is public while posting and private views require authentication',()=>{
- assert.match(app,/<Route path="\/map-demo" component=\{MapzMapDemo\} \/>/);
- assert.match(app,/<Route path="\/map" component=\{MapzMapDemo\} \/>/);
+ // One public host outside the Switch keeps the same scene across both route aliases.
+ assert.match(app,/<RetainedMapzRoute \/>[\s\S]*<RouteBoundary>[\s\S]*<Switch>/);
+ for(const path of ['/map','/map-demo'])assert.ok(app.includes(`<Route path="${path}">{() => null}</Route>`));
+ assert.match(retainedHost,/const active = isMapzRoute\(path\)/);
+ assert.ok(retainedHost.includes("lazyWithReload(() => import('@/pages/MapzMapDemo'))"));
+ assert.match(retainedHost,/<MapzPage key=\{generation\} \/>/);
+ assert.doesNotMatch(retainedHost,/SignedIn|if\s*\(\s*!user\s*\)\s*return/);
  assert.doesNotMatch(app,/SignedInLivingMap/);
  assert.doesNotMatch(page,/gateSignedOutControls|canOpenMapObjects/);
  assert.match(page,/if\(!user\)\{setShowAuth\(true\);return;\}/);
@@ -63,4 +69,11 @@ test('Mapz browsing is public while posting and private views require authentica
  assert.match(page,/user && houzCompose && <HousingComposerOverlay/);
  assert.match(page,/!authLoading && !user && requestedPrivateAction/);
  assert.match(page,/<AuthModal onClose=\{\(\) => setShowAuth\(false\)\} defaultTab="login" \/>/);
+});
+
+test('Mapz opens the shared board card shell and preserves demo reply guards',()=>{
+ assert.match(page,/import "\.\/AllBoards\.css"/);
+ assert.match(page,/<SpottedDetailModal presentation="eventz" isDemo=\{selectedMizzed\.isDemo\}/);
+ assert.match(page,/<HousingPostOverlay presentation="eventz"/);
+ assert.match(page,/fallback=\{<p className="ab-detail-status" role="status">Opening card…<\/p>\}/);
 });
