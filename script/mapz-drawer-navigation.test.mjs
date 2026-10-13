@@ -22,3 +22,8 @@ test('closing details preserves layer, query and filters while removing overlay 
   clearMapOverlay(params);
   assert.equal(params.toString(), 'layer=places&q=cafe&when=soon&placeTypes=cafe');
 });
+test('closing NEEDZ and community details keeps the camera and selected resource filters', () => {
+  const params = new URLSearchParams('layer=rezources&lat=45.5&lng=-122.6&zoom=15&pitch=20&bearing=12&resources.category=community&resource=Same+Name&community=second');
+  clearMapOverlay(params);
+  assert.equal(params.toString(), 'layer=rezources&lat=45.5&lng=-122.6&zoom=15&pitch=20&bearing=12&resources.category=community');
+});
