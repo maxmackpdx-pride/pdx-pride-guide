@@ -1,3 +1,5 @@
+import UnifiedBoardArt from "./UnifiedBoardArt";
+import { toBoardPosts } from "@/lib/allBoards";
 import DetailActions from "@/components/DetailActions";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -38,6 +40,7 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
   const endpoint=kind==="gig"?"/api/gigs":kind==="gifting"?"/api/gifting":"/api/sellz";
   const query=useQuery<GiftingPost|GigPost|SellzPost>({queryKey:[endpoint,postId,user?.id],queryFn:()=>apiRequest("GET",`${endpoint}/${postId}`).then(r=>r.json()),retry:1});
   const post=query.data;
+  const gigArtwork = presentation && kind === "gig" && post ? toBoardPosts("gigz", [post as GigPost], true)[0] : null;
   const saved=useQuery<number[]>({queryKey:["/api/sellz/saved/ids"],enabled:kind==="sellz"&&!!user,queryFn:()=>apiRequest("GET","/api/sellz/saved/ids").then(r=>r.json())});
 
   let card: ReactNode = null;
@@ -95,7 +98,7 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
           aria-modal="true"
           aria-label={kind === "gig" ? "Gigz listing" : kind === "gifting" ? "Giftz listing" : "Sellz listing"}
           tabIndex={-1}
-          className={`board-post-overlay board-post-overlay--glass board-open-card--shared pdx-glass-rebind${presentation ? " ab-open-card" : ""}`}
+          className={`board-post-overlay board-post-overlay--glass board-open-card--shared pdx-glass-rebind${presentation ? ` ab-open-card${kind === "gig" ? " ab-open-card--gigz" : ""}` : ""}`}
           onClick={e => e.stopPropagation()}
           style={panelStyle}
         >

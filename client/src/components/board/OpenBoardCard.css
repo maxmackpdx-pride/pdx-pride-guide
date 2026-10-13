@@ -103,3 +103,38 @@
 .ab-open-card :is(.gifting-details,.board-detail-modal__meta) { margin-block:var(--space-3); }
 .ab-open-card :is(.gifting-listing-actions,.gig-talent-card__actions,.gifting-owner-actions) { gap:var(--space-3); }
 .ab-open-card :is(input,textarea,select) { font-family:var(--font-body); font-size:var(--body-md); }
+
+/* Gigz's working detail stays inside the same art-first glass frame. */
+.board-post-overlay.ab-open-card.ab-open-card--gigz { container-type:inline-size; }
+.ab-open-card--gigz .ab-open-card__art {
+  position:relative; height:clamp(170px,42cqw,260px); overflow:hidden;
+  border-radius:var(--event-card-radius) var(--event-card-radius) 0 0;
+}
+.ab-open-card--gigz .ab-open-card__art>.ab-art { width:100%; height:100%; }
+.ab-open-card--gigz .ab-open-card__art .ab-art__brand {
+  inset:50% auto auto 50%; translate:-50% -50%; width:min(65%,300px); height:80px;
+}
+.ab-open-card--gigz .ab-open-card__art .ab-art__intent-mark { left:85%; top:35%; width:90px; opacity:.35; }
+.board-post-overlay.ab-open-card.ab-open-card--gigz .detail-actions {
+  position:absolute; top:var(--space-3); right:var(--space-3); z-index:6;
+  width:auto; min-height:44px; margin:0; padding:0; background:transparent;
+}
+.ab-open-card--gigz .board-listing-card__thumb,
+.ab-open-card--gigz .board-listing-card>.board-glass-motif { display:none; }
+.ab-open-card--gigz .board-listing-card__row { display:block; }
+.ab-open-card--gigz .board-listing-card__main { padding:var(--space-5) 6% var(--space-3); border:0 !important; min-height:0; }
+.ab-open-card--gigz .board-listing-card__expand { padding:0 6% var(--space-6); }
+.ab-open-card--gigz .board-listing-card__title { margin-top:var(--space-3); }
+.ab-open-card--gigz .gifting-details { text-transform:none; color:var(--text-body); }
+.ab-open-card--gigz :is(.gifting-listing-actions,.gifting-response,.gig-talent-card__actions) :is(button,a) {
+  --c:var(--room-gigz); --_c:var(--room-gigz);
+  border:var(--bw-hair) solid color-mix(in srgb,var(--room-gigz) 45%,transparent);
+  border-radius:12px; padding:var(--space-3) var(--space-4);
+  color:var(--text-hi); background:var(--btn-glow-bg); box-shadow:var(--btn-glow-shadow);
+  text-decoration:none;
+}
+.ab-open-card--gigz .gifting-response>button { background:var(--room-gigz); border-color:var(--room-gigz); color:var(--text-hi); }
+.ab-open-card--gigz .gifting-listing-actions { flex-wrap:wrap; margin-block:var(--space-5); }
+.ab-open-card--gigz .gifting-response textarea { border-radius:12px; margin-bottom:var(--space-3); }
+.ab-open-card--gigz .ab-open-card__art .ab-art__photo { mask-image:linear-gradient(180deg,var(--z-black) 65%,transparent); }
+.ab-open-card--gigz .ab-open-card__intent { position:absolute; z-index:3; left:6%; bottom:var(--space-4); padding:var(--space-1) var(--space-2); border:var(--bw-hair) solid color-mix(in srgb,var(--c) 50%,transparent); border-radius:var(--event-card-tag-radius); color:var(--text-hi); background:var(--event-card-tag-bg); font:var(--open-card-meta-font); }
