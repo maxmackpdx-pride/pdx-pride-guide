@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-13-white-vector-r4",
+  "version": "2026-10-13-white-vector-r5",
   "treatment": "White ink on transparency; no bloom. Native vectors retain publisher geometry. Raster traces are monochrome outlines of official artwork, not original publisher vectors. Text fallbacks use bundled Barlow Condensed 900 with up to three authored lines. Text fallbacks fit rows independently with proportional sizing and optical hierarchy; short labels need not fill the full width.",
   "entries": [
     {
@@ -2271,7 +2271,9 @@
       "checked": "2026-10-13",
       "ratio": 3.7772963604852685,
       "lines": null,
-      "reason": null
+      "reason": null,
+      "originalAsset": "/directory-logos/verified-originals/oregonfoodbank.svg",
+      "treatment": "Official header vector in white. The source\u2019s white overlay paths are omitted so the leaf and roots remain transparent cutouts inside the white circle."
     }
   ]
 }

@@ -1,5 +1,5 @@
 /** Reviewed white marks; provenance lives in /directory-logos/white-logo-sources.json. */
-export const WHITE_COMPANY_LOGO_VERSION = "2026-10-13-white-vector-r4";
+export const WHITE_COMPANY_LOGO_VERSION = "2026-10-13-white-vector-r5";
 export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number; kind: "official-vector" | "official-raster-trace" | "retained-logo-trace" | "reference-restored-vector" | "text-fallback" }> = {
   "albertarosetheatre": {
     "asset": "/directory-logos/albertarosetheatre-white.svg",
