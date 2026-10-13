@@ -21,6 +21,7 @@ import {logoCoverage,logoTone,authoredLogoMode} from './logo-mask.js';
 import {createEventProjection,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
+import {screenNeighborCounts} from './screen-neighbors.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
@@ -556,8 +557,9 @@ function drawLights(fade,target=map,surface=lights){
  const protectedVenues=new Set(ordered.map(item=>item.feature.properties.venueWaypointKey).filter(Boolean));
  const placeClusters=(cameraMoving&&frozenClusters)||clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel&&!protectedVenues.has(item.feature.properties.key)&&!(['mizzed','gigz'].includes(item.feature.properties.waypointFamily)&&item.feature.properties.venueWaypointKey)),selectedKey,target.getZoom(),width,height);
  if(!cameraMoving)frozenClusters=placeClusters;
- for(const item of beacons){
-  const phase=item.feature.properties.phase;
+ const {counts:beaconNeighborCounts}=screenNeighborCounts(beacons);
+ for(let beaconIndex=0;beaconIndex<beacons.length;beaconIndex++){
+  const item=beacons[beaconIndex],phase=item.feature.properties.phase;
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
   item.attention=reduced.matches?.5:.5+.5*Math.sin(pulseTime*(.13+.025*Math.sin(phase))+phase*1.83);
   const driftX=eventProjectionSway(pulseTime,phase,presentationScale,reduced.matches||cameraMoving);
@@ -567,7 +569,7 @@ function drawLights(fade,target=map,surface=lights){
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
   // No pin ceiling. Lift comes from hologramLiftScale, heightScale, and tonight's multiplier.
   const dayLift=activeTonight(item.feature)?1.65:1;item.x=item.p.x+driftX;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale)*effectiveHologramLift*dayLift;
-  item.neighbors=beacons.filter(v=>v!==item&&Math.hypot(v.p.x-item.p.x,v.p.y-item.p.y)<220).length;
+  item.neighbors=beaconNeighborCounts[beaconIndex];
   item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25*effectiveHologramLift:0;
  }
  // Relax overlapping logo bounds, with restrained displacement from each fixed anchor.
