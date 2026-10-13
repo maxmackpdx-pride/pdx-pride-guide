@@ -896,7 +896,7 @@ function downtownZoom(latitude){
  return normalZoom+Math.log2(1.5)*enter*leave+Math.log2(1.35)*barApproach*barDeparture;
 }
 const status=document.querySelector('#map-status');
-let selectedKey=null,hitTargets=[],viewTime=Date.now();
+let selectedKey=null,hitTargets=[],viewTime=Date.now(),firstPinsPainted=false;
 // Motion kit (board 48): a newly shown pin rises out of the ground once; a hologram
 // whose night ends folds back down into its venue. Calm and reduced motion skip both.
 const rises=new Map(),folds=new Map(),RISE_MS=500;let lastBeaconKeys=new Set(),listingsShown=false;
@@ -1026,7 +1026,10 @@ function draw(now){
   // Let the loaded vector frame paint before drawing the unchanged scene artwork.
   scheduleFrame();return;
  }
- if(overlaysReady)drawLights(visibility);
+ if(overlaysReady){
+  drawLights(visibility);
+  if(!firstPinsPainted&&visibility>.1&&hitTargets.length){firstPinsPainted=true;performance.mark("mapz-public-pins-painted");tell("pins-painted",{count:hitTargets.length});}
+ }
  if(!reduced.matches||!ready)scheduleFrame();
 }
 scheduleFrame();
