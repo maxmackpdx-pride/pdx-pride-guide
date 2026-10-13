@@ -1,6 +1,26 @@
 /** Reviewed white marks; provenance lives in /directory-logos/white-logo-sources.json. */
-export const WHITE_COMPANY_LOGO_VERSION = "2026-10-13-white-vector-r6";
+export const WHITE_COMPANY_LOGO_VERSION = "2026-10-13-white-vector-r7";
 export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number; kind: "official-vector" | "official-raster-trace" | "retained-logo-trace" | "reference-restored-vector" | "text-fallback" }> = {
+  "cockeyekink": {
+  "asset": "/directory-logos/cockeyekink-white.svg",
+  "ratio": 1.00257135510414,
+  "kind": "retained-logo-trace"
+},
+  "blackholebodypiercingandtattoo": {
+  "asset": "/directory-logos/blackholebodypiercingandtattoo-white.svg",
+  "ratio": 0.9840025595904656,
+  "kind": "retained-logo-trace"
+},
+  "bywaterhealth": {
+  "asset": "/resources-logos/bywaterhealth-white.svg",
+  "ratio": 0.9704573570413043,
+  "kind": "official-raster-trace"
+},
+  "reconstructedwellness": {
+  "asset": "/resources-logos/reconstructedwellness-white.svg",
+  "ratio": 1.000719295090811,
+  "kind": "official-raster-trace"
+},
   "211info": {"asset": "/resources-logos/211info-white.svg", "ratio": 2.7262, "kind": "official-vector"},
   "albertarosetheatre": {
     "asset": "/directory-logos/albertarosetheatre-white.svg",
@@ -178,10 +198,10 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
     "kind": "retained-logo-trace"
   },
   "fantasy": {
-    "asset": "/directory-logos/fantasy-white.svg",
-    "ratio": 2.5827,
-    "kind": "text-fallback"
-  },
+  "asset": "/directory-logos/fantasy-white.svg",
+  "ratio": 2.6548754229467857,
+  "kind": "retained-logo-trace"
+},
   "fantasyland": {
     "asset": "/directory-logos/fantasyland-white.svg",
     "ratio": 3.99642,

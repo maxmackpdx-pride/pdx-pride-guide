@@ -66,6 +66,194 @@ const RESOURCE_CATEGORY_SOURCE: ResourceCategory[] = [
     "use": "Check the org's site for current hours and services, then call or walk in. Ask what to bring to your first visit.",
     "orgs": [
       {
+        "name": "Bywater Health",
+        "aliases": [
+          "Bywater",
+          "Bywater Health LLC"
+        ],
+        "sub": "Queer-led medical & psychiatric care",
+        "categoryIds": [
+          "mental-health"
+        ],
+        "serviceTags": [
+          "Gender-affirming care",
+          "HIV care"
+        ],
+        "transSpecialist": true,
+        "scope": "Portland · LGBTQ+ health care",
+        "desc": "Queer-led clinic offering LGBTQ+ primary care, HIV prevention and treatment, sexual health, gender-affirming care and psychiatric services. Also offers aesthetic and weight-management appointments.",
+        "addr": "2119 NE Halsey St, Portland, OR 97232",
+        "phone": "tel:+15039759398",
+        "phoneLabel": "Call Bywater Health",
+        "email": "frontdesk@bywaterhealth.com",
+        "hours": "Monday–Friday, 8:30 am–5 pm.",
+        "url": "https://www.bywaterhealth.com/appointment-booking",
+        "cta": "Request an appointment",
+        "logo": "/resources-logos/bywaterhealth-white.svg",
+        "howToStart": "Request an appointment online or call the front desk. Ask which clinician and appointment type fits your needs, and confirm current availability, insurance participation and out-of-pocket costs before booking.",
+        "sourceUrl": "https://www.bywaterhealth.com/services",
+        "sourceChecked": "October 13, 2026",
+        "contactSourceUrl": "https://www.bywaterhealth.com/appointment-booking",
+        "contactChecked": "October 13, 2026",
+        "programs": [
+          {
+            "name": "LGBTQ+ primary & preventive care",
+            "desc": "Primary care and preventive wellness visits tailored to LGBTQ+ patients.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/primarycare",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/primarycare",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "HIV prevention, treatment & sexual health",
+            "desc": "PrEP, HIV treatment, and STI testing, treatment and prevention.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/hiv-prevention-treatment",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/hiv-prevention-treatment",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Gender-affirming care",
+            "desc": "Hormone care, surgical referrals and support letters.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/gender-affirming-care",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/gender-affirming-care",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Psychiatric care",
+            "desc": "Psychiatric assessment and treatment, including medication management.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/psychiatric-care",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/psychiatric-care",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Aesthetic care",
+            "desc": "Provider-administered aesthetic appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/aesthetic-care",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/aesthetic-care",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Weight management",
+            "desc": "Clinician-supervised weight-management appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/weight-loss",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/weight-loss",
+            "sourceChecked": "October 13, 2026"
+          }
+        ]
+      },
+      {
+        "name": "Reconstructed Wellness",
+        "aliases": [
+          "Reconstructed Wellness Clinic",
+          "RW"
+        ],
+        "sub": "Multidisciplinary health clinic",
+        "serviceTags": [
+          "LGBTQ health",
+          "Integrative care"
+        ],
+        "scope": "Inner Southeast Portland · By appointment",
+        "desc": "Multidisciplinary clinic offering naturopathic and functional medicine, acupuncture, chiropractic care, massage and other services. Founder Dr. Jason Wells lists men’s and LGBTQ health among his clinical interests.",
+        "addr": "936 SE Ankeny St, Portland, OR 97214",
+        "phone": "tel:+15032323215",
+        "phoneLabel": "Call Reconstructed Wellness",
+        "email": "info@reconstructedwellness.com",
+        "hours": "Monday–Thursday, 8:30 am–5 pm; Friday, 8:30 am–3 pm; Saturday, 9 am–2 pm.",
+        "url": "https://www.reconstructedwellness.com/schedule",
+        "cta": "Request an appointment",
+        "logo": "/resources-logos/reconstructedwellness-white.svg",
+        "howToStart": "Complete the new-patient scheduling form or call the office. Staff follow up to finish scheduling. Ask about the practitioner’s availability, service fees and your insurance coverage; return visits can be requested through the patient portal.",
+        "sourceUrl": "https://www.reconstructedwellness.com/",
+        "sourceChecked": "October 13, 2026",
+        "contactSourceUrl": "https://www.reconstructedwellness.com/contact-1",
+        "contactChecked": "October 13, 2026",
+        "programs": [
+          {
+            "name": "LGBTQ & men’s health",
+            "desc": "Dr. Jason Wells lists LGBTQ and men’s health among his clinical interests.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/dr-jason-wells-1",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/dr-jason-wells-1",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Functional & naturopathic medicine",
+            "desc": "Naturopathic and functional-medicine appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/functional-medicine",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/functional-medicine",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Acupuncture & Chinese medicine",
+            "desc": "Acupuncture and Chinese-medicine appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/acupuncture",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/acupuncture",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Chiropractic care",
+            "desc": "Chiropractic appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/chiropractic",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/chiropractic",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Massage",
+            "desc": "Massage-therapy appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/massage",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/massage",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Structural integration",
+            "desc": "Structural-integration appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/structural-integration",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/structural-integration",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "IV nutrient therapy",
+            "desc": "IV nutrient-therapy appointments listed by the clinic.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/iv-nutrient-therapy",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/iv-nutrient-therapy",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Holistic pelvic care",
+            "desc": "Holistic pelvic-care appointments listed by the clinic.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/holistic-pelvic-care",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/holistic-pelvic-care",
+            "sourceChecked": "October 13, 2026"
+          }
+        ]
+      },
+      {
         "name": "Virginia Garcia · Beaverton Wellness Center",
         "logo": "/resources-logos/virginia-garcia.png",
         "categoryIds": ["mental-health"],

@@ -1,3 +1,4 @@
+import { seedOwnerRequestedPlaces20261013 } from "./seedOwnerRequestedPlaces20261013";
 import { seedLittleShopOfPonies20261031 } from "./seedLittleShopOfPonies20261031";
 import { seedDiscoveredQueerEvents20260928 } from "./seedDiscoveredQueerEvents20260928";
 import { seedPosterAudit20260928 } from "./seedPosterAudit20260928";
@@ -7219,6 +7220,11 @@ function runBootMigrationsOnce() {
       }
     }
     recordBootMigration("seed_fantasy_adults_only_multi_v1");
+  }
+
+  if (!hasBootMigration("seed_owner_requested_places_20261013_v1")) {
+    seedOwnerRequestedPlaces20261013(sqlite);
+    recordBootMigration("seed_owner_requested_places_20261013_v1");
   }
 
   /**

@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-13-white-vector-r6",
+  "version": "2026-10-13-white-vector-r7",
   "treatment": "White ink on transparency; no bloom. Native vectors retain publisher geometry. Raster traces are monochrome outlines of official artwork, not original publisher vectors. Text fallbacks use bundled Barlow Condensed 900 with up to three authored lines. Text fallbacks fit rows independently with proportional sizing and optical hierarchy; short labels need not fill the full width.",
   "entries": [
     {
@@ -455,29 +455,6 @@
       "lines": null,
       "reason": null,
       "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
-    },
-    {
-      "name": "FANTASY",
-      "normalized": "fantasy",
-      "asset": "/directory-logos/fantasy-white.svg",
-      "kind": "text-fallback",
-      "sourcePage": "https://www.fantasyforadultsonly.com",
-      "sourceAsset": null,
-      "checked": "2026-10-13",
-      "ratio": 2.5826982384349684,
-      "lines": [
-        "FANTASY",
-        "FOR ADULTS ONLY"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records.",
-      "fitting": {
-        "method": "Independent proportional row sizes; optical centering; authored hierarchy for short labels",
-        "font": "Barlow Condensed 900",
-        "rowSizes": [
-          52.267011558919066,
-          26.598305195969235
-        ]
-      }
     },
     {
       "name": "Fantasy Land",
@@ -2287,6 +2264,97 @@
       "ratio": 2.7262037506335526,
       "lines": null,
       "reason": null
+    },
+    {
+      "name": "Reconstructed Wellness",
+      "normalized": "reconstructedwellness",
+      "asset": "/resources-logos/reconstructedwellness-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.reconstructedwellness.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/5a6100946f4ca38ab75feb9a/1532194923969-LQWV9J1N8S46T0Z5RPS3/RWsmall.png",
+      "originalAsset": "/directory-logos/verified-originals/reconstructedwellness.webp",
+      "checked": "2026-10-13",
+      "ratio": 1.000719295090811,
+      "lines": null,
+      "reason": null,
+      "treatment": "White vector ink extracted from saved artwork, without bloom; color translated to monochrome."
+    },
+    {
+      "name": "Bywater Health",
+      "normalized": "bywaterhealth",
+      "asset": "/resources-logos/bywaterhealth-white.svg",
+      "kind": "official-raster-trace",
+      "sourcePage": "https://www.bywaterhealth.com/",
+      "sourceAsset": "https://images.squarespace-cdn.com/content/v1/69aa3edd033bd11090f95634/4f20f44e-3d77-4602-af88-cab2194c2463/Bywater+Health_Secondary+Logo_Light.png",
+      "originalAsset": "/directory-logos/verified-originals/bywaterhealth.webp",
+      "checked": "2026-10-13",
+      "ratio": 0.9704573570413043,
+      "lines": null,
+      "reason": null,
+      "treatment": "White vector ink extracted from saved artwork, without bloom; color translated to monochrome."
+    },
+    {
+      "name": "Black Hole Body Piercing & Tattoo",
+      "normalized": "blackholebodypiercingandtattoo",
+      "asset": "/directory-logos/blackholebodypiercingandtattoo-white.svg",
+      "kind": "retained-logo-trace",
+      "sourcePage": "https://www.blackholebodypiercing.com/",
+      "sourceAsset": null,
+      "originalAsset": "/directory-logos/verified-originals/blackholebodypiercingandtattoo.png",
+      "checked": "2026-10-13",
+      "ratio": 0.9840025595904656,
+      "lines": null,
+      "reason": null,
+      "treatment": "White vector ink extracted from saved artwork, without bloom; color translated to monochrome.",
+      "sourceEvidence": "Tucker-supplied screenshot, October 13, 2026",
+      "sourceCrop": [
+        75,
+        85,
+        372,
+        389
+      ]
+    },
+    {
+      "name": "Cockeye Kink",
+      "normalized": "cockeyekink",
+      "asset": "/directory-logos/cockeyekink-white.svg",
+      "kind": "retained-logo-trace",
+      "sourcePage": "https://cockeyekink.com/",
+      "sourceAsset": null,
+      "originalAsset": "/directory-logos/verified-originals/cockeyekink.png",
+      "checked": "2026-10-13",
+      "ratio": 1.00257135510414,
+      "lines": null,
+      "reason": null,
+      "treatment": "White vector ink extracted from saved artwork, without bloom; color translated to monochrome.",
+      "sourceEvidence": "Tucker-supplied screenshot, October 13, 2026",
+      "sourceCrop": [
+        105,
+        60,
+        410,
+        352
+      ]
+    },
+    {
+      "name": "FANTASY",
+      "normalized": "fantasy",
+      "asset": "/directory-logos/fantasy-white.svg",
+      "kind": "retained-logo-trace",
+      "sourcePage": "https://www.fantasyforadultsonly.com/",
+      "sourceAsset": null,
+      "originalAsset": "/directory-logos/verified-originals/fantasy.png",
+      "checked": "2026-10-13",
+      "ratio": 2.6548754229467857,
+      "lines": null,
+      "reason": null,
+      "treatment": "White vector ink extracted from saved artwork, without bloom; color translated to monochrome.",
+      "sourceEvidence": "Tucker-supplied screenshot, October 13, 2026",
+      "sourceCrop": [
+        698,
+        195,
+        926,
+        281
+      ]
     }
   ]
 }
