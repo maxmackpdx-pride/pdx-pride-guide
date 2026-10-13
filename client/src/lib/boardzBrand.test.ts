@@ -22,5 +22,5 @@ test('all old board entrances retain query and fragment; hidden drawer art loads
  for(const alias of ['/boards','/all-boards','/our-boardz'])assert.ok(server.includes(`"${alias}": "/boardz"`));
  const app=readFileSync('client/src/App.tsx','utf8');assert.match(app,/<Route path="\/boardz" component=\{Boards\}/);assert.match(app,/\/boardz\$\{window.location.search\}\$\{window.location.hash\}/);
  const drawer=readFileSync('client/src/components/MapzLayerSheet.tsx','utf8');assert.match(drawer,/src=\{LAYER_LOGOS\[layer.id\]\} alt="" loading="lazy" decoding="async"/);
- const art=readFileSync('client/public/brand/family/our-boardz.svg','utf8');assert.match(art,/<title id="title">Our BoardZ<\/title>/);assert.doesNotMatch(art,/<image/);
+ const art=readFileSync('client/public/brand/family/our-boardz.svg','utf8');assert.match(art,/<title id="title">Our BoardZ<\/title>/);assert.match(art,/<image/);assert.match(art,/data:image\/png;base64,/);
 });

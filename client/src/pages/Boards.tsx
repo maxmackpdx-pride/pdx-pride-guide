@@ -329,7 +329,7 @@ export default function Boards() {
       <header className="eb-frame ab-header">
         <div>
           <p className="eb-kicker">Portland · Community boards</p>
-          <h1 className="ab-brand"><img src="/brand/family/our-boardz.svg" alt="Our BoardZ" /></h1>
+          <h1 className="ab-brand"><img src="/brand/family/our-boardz-mobile.webp" alt="Our BoardZ" /></h1>
           <p>Find your people. Find your next thing.</p>
         </div>
         <Link className="eb-tool" href="/z">
