@@ -118,7 +118,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
     initialData: initialPost,
     queryFn: async () => {
       const response = await fetch(`/api/housing/${initialPost.id}`, { credentials: "include" });
-      if (!response.ok) throw new Error("This HAÜZ post could not load");
+      if (!response.ok) throw new Error("This My Hoüz post could not load");
       return response.json();
     },
   });
@@ -163,7 +163,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
   });
   const buildMutation = useMutation({
     mutationFn: async () => { const response = await fetch(`/api/housing/${postId}/build-haus`, { method: "POST", credentials: "include" }); if (!response.ok) throw new Error((await response.json())?.error || "Could not start it"); return response.json(); },
-    onSuccess: (data) => { toast({ title: data?.alreadyLeading ? "You already lead one here" : "HAÜZ started", description: data?.alreadyLeading ? undefined : "Nothing is reserved. The listing stays live." }); if (Number.isFinite(Number(data?.postId))) onSelectPost(Number(data.postId)); },
+    onSuccess: (data) => { toast({ title: data?.alreadyLeading ? "You already lead one here" : "Hoüz started", description: data?.alreadyLeading ? undefined : "Nothing is reserved. The listing stays live." }); if (Number.isFinite(Number(data?.postId))) onSelectPost(Number(data.postId)); },
   });
   const reportMutation = useMutation({
     mutationFn: async (reason: string) => { const response = await fetch(`/api/housing/${postId}/report`, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ reason }) }); if (!response.ok) throw new Error("Could not report"); return response.json(); },
@@ -213,12 +213,14 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
 
   return createPortal(
     <div className="board-detail-backdrop" onClick={requestClose}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} HAÜZ ${detail ? "details" : "card"}`} tabIndex={-1} className={`hz pdx-glass-rebind board-open-card--shared${presentation ? " ab-open-card ab-open-card--housing" : ""}`} style={panelStyle} onClick={(event) => event.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} My Hoüz ${detail ? "details" : "card"}`} tabIndex={-1} className={`hz pdx-glass-rebind board-open-card--shared${presentation ? " ab-open-card ab-open-card--housing" : ""}`} style={panelStyle} onClick={(event) => event.stopPropagation()}>
         <span className="board-open-card__rule" aria-hidden="true" />
-        <div style={{ position: "relative", zIndex: 30, padding: 12 }}><DetailActions label="Haüz listing" onClose={requestClose} /></div>
-        <div key={detail ? "detail" : "card"} className="houz-overlay-content">
+        <div style={{ position: "relative", zIndex: 30, padding: 12 }}><DetailActions label="My Hoüz listing" onClose={requestClose} /></div>
+        {post.isDemo && <p className="board-demo-notice" role="note">Demo listing — example only. Participation is disabled.</p>}
+        <fieldset disabled={post.isDemo} style={{border:0,padding:0,margin:0,minWidth:0}}><div key={detail ? "detail" : "card"} className="houz-overlay-content">
           {detail ? <HousingDetail post={post} h={detailHandlers} isOwner={isOwner} workspace={post.type === "FORMING" ? <HousingWorkspace post={post} onOpenThread={() => openSheet({ view: "inbox" })} /> : undefined} /> : <HousingCard post={post} h={cardHandlers} />}
         </div>
+        </fieldset>
         {reporting ? <div className="hz-sheetwrap" onClick={() => setReporting(false)}><div className="hz-sheet pdx-glass-rebind" onClick={(event) => event.stopPropagation()}>
           <div className="hz-sheet__head"><Mono accent>Report this post</Mono><button className="hz-x" onClick={() => setReporting(false)} aria-label="Close">×</button></div>
           <p className="hz-prose">What is wrong with it? An admin sees this, and the poster does not.</p>

@@ -101,12 +101,13 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
         >
           <span className="board-open-card__rule" aria-hidden="true" />
           <DetailActions label="listing" onClose={requestClose} />
-          {card ?? (
+          {post?.isDemo && <p className="board-demo-notice" role="note">Demo listing — example only. Participation is disabled.</p>}
+          <fieldset disabled={post?.isDemo} style={{border:0,padding:0,margin:0,minWidth:0}}>{card ?? (
             <div className="board-listing-card board-listing-card--makeover pdx-glass-rebind" style={{ padding: 28, textAlign: "center", "--listing-accent": accent, "--c": accent } as CSSProperties}>
               <p className="board-copy-sm" role={query.isError ? "alert" : "status"}>{query.isLoading ? "Loading…" : query.isError ? "This listing could not load." : "This listing is no longer available."}</p>
               {query.isError && <button type="button" onClick={() => void query.refetch()}>Try again</button>}
             </div>
-          )}
+          )}</fieldset>
         </div>
       </div>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}

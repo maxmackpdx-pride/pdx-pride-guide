@@ -9,7 +9,7 @@ const CAT_TAG: Record<string, { label: string; color: string }> = {
   spotted: { label: "MISSED CONN", color: C.magenta },
   gigs: { label: "GIG", color: C.purple },
   gifting: { label: "GIFTING", color: C.lime },
-  housing: { label: "THE HAÜZ", color: C.cyan },
+  housing: { label: "My Hoüz", color: C.cyan },
   hosts: { label: "HOST", color: C.cyan },
   checkins: { label: "CHECK-IN", color: C.green },
 };

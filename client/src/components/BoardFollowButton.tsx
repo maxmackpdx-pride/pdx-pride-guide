@@ -24,7 +24,7 @@ export default function BoardFollowButton({ board }: { board: FollowableRoom }) 
     enabled: !!user,
   });
   const following = !!status.data?.isFollowing;
-  const boardName = { gigz: "Gigz", giftz: "Giftz", sellz: "Sellz", mizzed: "Mizzed", houz: "Haüz", eventz: "Eventz", outz: "OutZide", rezources: "ReZources" }[board];
+  const boardName = { gigz: "Gigz", giftz: "Giftz", sellz: "Sellz", mizzed: "Mizzed", houz: "My Hoüz", eventz: "Eventz", outz: "OutZide", rezources: "ReZources" }[board];
   const mutation = useMutation({
     mutationFn: async (follow: boolean) => {
       const response = await fetch(`/api/boards/${board}/follow`, {

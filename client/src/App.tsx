@@ -61,12 +61,7 @@ const Home = lazyWithReload(() => import("./pages/Home"));
 const MapzMapDemo = lazyWithReload(() => import("./pages/MapzMapDemo"));
 const Schedule = lazyWithReload(() => import("./pages/Schedule"));
 const Submit = lazyWithReload(() => import("./pages/Submit"));
-const PrideWork = lazyWithReload(() => import("./pages/PrideWork"));
 const Boards = lazyWithReload(() => import("./pages/Boards"));
-const Gifting = lazyWithReload(() => import("./pages/Gifting"));
-const Sellz = lazyWithReload(() => import("./pages/Sellz"));
-const Housing = lazyWithReload(() => import("./pages/Housing"));
-const HousingNew = lazyWithReload(() => import("./pages/HousingNew"));
 const About = lazyWithReload(() => import("./pages/About"));
 const Resources = lazyWithReload(() => import("./pages/Resources"));
 const Resume = lazyWithReload(() => import("./pages/Resume"));
@@ -77,7 +72,6 @@ const AccessSafety = lazyWithReload(() => import("./pages/AccessSafety"));
 const Admin = lazyWithReload(() => import("./pages/Admin"));
 const Dashboard = lazyWithReload(() => import("./pages/Dashboard"));
 const NotificationSettings = lazyWithReload(() => import("./pages/NotificationSettings"));
-const MizzedBoard = lazyWithReload(() => import("./pages/MizzedBoard"));
 const Directory = lazyWithReload(() => import("./pages/Directory"));
 const RoosterRock = lazyWithReload(() => import("./pages/RoosterRock"));
 const SauvieIsland = lazyWithReload(() => import("./pages/SauvieIsland"));
@@ -90,10 +84,13 @@ const Community = lazyWithReload(() => import("./pages/Community"));
 const MemberProfile = lazyWithReload(() => import("./pages/MemberProfile"));
 const NotFound = lazyWithReload(() => import("./pages/not-found"));
 
-function BoardEntrance({ board, tools }: { board: BoardCategory; tools: ReactNode }) {
-  return new URLSearchParams(window.location.search).get("view") === "tools"
-    ? tools
-    : <Redirect to={boardBrowseHref(board, window.location.search)} replace />;
+function BoardEntrance({ board }: { board: BoardCategory }) {
+ return <Redirect to={boardBrowseHref(board, window.location.search)} replace />;
+}
+function BoardComposeEntrance({ board }: { board: BoardCategory }) {
+ const params = new URLSearchParams(window.location.search);
+ params.set("compose", "1");
+ return <Redirect to={boardBrowseHref(board, params.toString())} replace />;
 }
 
 function isHubPath(path: string) {
@@ -152,8 +149,8 @@ function AppLayout() {
             <Route path="/schedule">{() => <Schedule />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />
-            <Route path="/gigz/new">{() => <MapWorldRedirect world="gigz" />}</Route>
-            <Route path="/gigz">{() => <BoardEntrance board="gigz" tools={<PrideWork />} />}</Route>
+            <Route path="/gigz/new">{() => <BoardComposeEntrance board="gigz" />}</Route>
+            <Route path="/gigz">{() => <BoardEntrance board="gigz" />}</Route>
             <Route path="/gigs">
               {() => <Redirect to="/gigz" />}
             </Route>
@@ -165,36 +162,43 @@ function AppLayout() {
                 return <Redirect to={`${to}${rest}${window.location.search}`} replace />;
               }}
             </Route>
-            <Route path="/giftz/new">{() => <MapWorldRedirect world="giftz" />}</Route>
-            <Route path="/giftz">{() => <BoardEntrance board="giftz" tools={<Gifting />} />}</Route>
-            <Route path="/sellz/new">{() => <MapWorldRedirect world="sellz" />}</Route>
-            <Route path="/sellz">{() => <BoardEntrance board="sellz" tools={<Sellz />} />}</Route>
-            <Route path="/sellz/">{() => <BoardEntrance board="sellz" tools={<Sellz />} />}</Route>
-            <Route path="/houz">{() => <BoardEntrance board="housing" tools={<Housing />} />}</Route>
-            <Route path="/the-hauz/new" component={HousingNew} />
+            <Route path="/giftz/new">{() => <BoardComposeEntrance board="giftz" />}</Route>
+            <Route path="/giftz">{() => <BoardEntrance board="giftz" />}</Route>
+            <Route path="/sellz/new">{() => <BoardComposeEntrance board="sellz" />}</Route>
+            <Route path="/sellz">{() => <BoardEntrance board="sellz" />}</Route>
+            <Route path="/sellz/">{() => <BoardEntrance board="sellz" />}</Route>
+            <Route path="/my-houz/new">{() => <BoardComposeEntrance board="housing" />}</Route>
+            <Route path="/my-houz/:id">{params => {
+              const search = new URLSearchParams(window.location.search);
+              search.set("post", params.id);
+              return <Redirect to={boardBrowseHref("housing", search.toString())} replace />;
+            }}</Route>
+            <Route path="/my-houz">{() => <BoardEntrance board="housing" />}</Route>
+            <Route path="/houz">{() => <BoardEntrance board="housing" />}</Route>
+            <Route path="/the-hauz/new">{() => <BoardComposeEntrance board="housing" />}</Route>
             <Route path="/the-hauz/:id">{params => {
               const search = new URLSearchParams(window.location.search);
               search.set("post", params.id);
               return <Redirect to={`/the-hauz?${search.toString()}`} replace />;
             }}</Route>
-            <Route path="/the-hauz">{() => <BoardEntrance board="housing" tools={<Housing />} />}</Route>
+            <Route path="/the-hauz">{() => <BoardEntrance board="housing" />}</Route>
             <Route path="/hausing/new">
-              {() => <Redirect to="/the-hauz/new" />}
+              {() => <Redirect to={`/the-hauz/new${window.location.search}`} />}
             </Route>
             <Route path="/hausing/:id">
-              {(params) => <Redirect to={`/the-hauz/${params.id}`} />}
+              {(params) => <Redirect to={`/the-hauz/${params.id}${window.location.search}`} />}
             </Route>
             <Route path="/hausing">
-              {() => <Redirect to="/the-hauz" />}
+              {() => <Redirect to={`/the-hauz${window.location.search}`} />}
             </Route>
             <Route path="/housing/new">
-              {() => <Redirect to="/the-hauz/new" />}
+              {() => <Redirect to={`/the-hauz/new${window.location.search}`} />}
             </Route>
             <Route path="/housing/:id">
-              {(params) => <Redirect to={`/the-hauz/${params.id}`} />}
+              {(params) => <Redirect to={`/the-hauz/${params.id}${window.location.search}`} />}
             </Route>
             <Route path="/housing">
-              {() => <Redirect to="/the-hauz" />}
+              {() => <Redirect to={`/the-hauz${window.location.search}`} />}
             </Route>
             <Route path="/resources" component={Resources} />
             <Route path="/rezources" component={Resources} />
@@ -213,8 +217,8 @@ function AppLayout() {
             <Route path="/settings/notifications" component={NotificationSettings} />
             <Route path="/reset-password" component={ResetPassword} />
             <Route path="/inbox" component={Home} />
-            <Route path="/mizzed/new" component={MizzedBoard} />
-            <Route path="/mizzed">{() => <BoardEntrance board="mizzed" tools={<MizzedBoard />} />}</Route>
+            <Route path="/mizzed/new">{() => <BoardComposeEntrance board="mizzed" />}</Route>
+            <Route path="/mizzed">{() => <BoardEntrance board="mizzed" />}</Route>
             <Route path="/directory/new">{() => <MapWorldRedirect world="places" />}</Route>
             <Route path="/directory/:id/:slug?" component={Directory} />
 

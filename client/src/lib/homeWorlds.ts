@@ -192,13 +192,13 @@ export const WORLDS: WorldSpec[] = [
   {
     key: "hauz",
     number: "04",
-    title: "THE HAÜZ",
+    title: "My Hoüz",
     eyebrow: "Rooms and people",
     body: "Find the room, roommate, home, or people that fit your actual life.",
-    action: "See HouZ on the map",
+    action: "See My Hoüz on the map",
     href: "/map?layer=houz",
     accent: "var(--room-hauz)",
-    mark: "/brand/family/the-hauz.svg",
+    mark: "/brand/family/my-houz.svg",
     slot: "promo",
     promoLines: ["Rooms and homes available", "Roommates looking for people", "New households forming together"],
     mapLayer: "HouZ",
@@ -335,8 +335,8 @@ export const DEMO_POSTINGS: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPo
   hauz: [
     {
       id: "demo-hauz-1",
-      href: "/the-hauz",
-      kicker: "Forming a haüs",
+      href: "/boards?board=housing",
+      kicker: "Building a Hoüz",
       title: "Wildrose Haüs",
       line: "Southeast. Big kitchen, one very polite beagle.",
       meta: "$850 · FEB 1 · 2 IN 2 TO GO",
@@ -346,8 +346,8 @@ export const DEMO_POSTINGS: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPo
     },
     {
       id: "demo-hauz-2",
-      href: "/the-hauz",
-      kicker: "Forming a haüs",
+      href: "/boards?board=housing",
+      kicker: "Building a Hoüz",
       title: "Cully Room Open",
       line: "Quiet room in a shared craftsman near the Cully Kitchen.",
       meta: "2H AGO · 1 IN 3 TO GO",
@@ -440,7 +440,7 @@ export const DEMO_ITEMS: WorldItem[] = [
 ];
 
 /**
- * NEXT is the teaser for the three unbuilt products. THE HAÜZ, OUTZ and
+ * NEXT is the teaser for the three unbuilt products. My Hoüz, OUTZ and
  * Z/SPACE graduated into the rail above, so they are not restated here.
  * `#next-preview` further down the page stays the detail view.
  */

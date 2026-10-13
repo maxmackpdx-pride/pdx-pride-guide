@@ -10,7 +10,7 @@ function stopCardNav(e: MouseEvent) {
 }
 
 const KIND_KICKER: Record<string, string> = {
-  housing: "HAÜSING",
+  housing: "My Hoüz",
   gig: "GIGZ",
   gifting: "GIFTZ",
   sellz: "SELLZ",

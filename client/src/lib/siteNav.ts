@@ -35,8 +35,8 @@ export const BOARD_NAV: NavLinkItem[] = [
   { href: "/gigz", label: "Gigz", accent: "gigz" },
 ];
 
-/** Every board room, including THE HAÜZ. */
-export const BOARDS_MENU: NavLinkItem[] = [...BOARD_NAV, { href: "/the-hauz", label: "The Haüz", accent: "hauz" }];
+/** Every board room, including My Hoüz. */
+export const BOARDS_MENU: NavLinkItem[] = [...BOARD_NAV, { href: "/boards?board=housing", label: "My Hoüz", accent: "hauz" }];
 
 /**
  * Primary nav - labels match on-page titles where possible.
@@ -82,7 +82,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/gigz": { section: "Boards", title: "GIGZ" },
   "/giftz": { section: "Boards", title: "GIFTZ" },
   "/sellz": { section: "Boards", title: "SELLZ" },
-  "/the-hauz": { section: "Boards", title: "THE HAÜZ" },
+  "/the-hauz": { section: "Boards", title: "My Hoüz" },
   "/mizzed": { section: "Boards", title: "MIZZED CONNECTION" },
   "/directory": { section: "PLACEZ", title: "OUR PLACEZ" },
   "/outzide": { section: "OutZide", title: "OutZide" },
