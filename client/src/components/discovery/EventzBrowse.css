@@ -214,22 +214,12 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 }
 .eb-page--places .eb-original-card .placez-discovery-meta { font-weight: var(--fw-semibold); }
 
-/* Placez wordmarks belong to the fixed content plane above the title. */
-.eb-page--places .eb-original-card .rg-directory-card .pdxPlace__media {
-  height: 190px; min-height: 190px; max-height: 190px; aspect-ratio: auto;
-  padding: 64px 16px 24px; align-items: flex-start; justify-content: center;
-  background: transparent;
-}
+/* Keep Eventz geometry and original logo sizing; shadow is depth, not bloom. */
 .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__media .pdxPlace__logo {
-  position: relative !important; inset: auto !important; transform: none !important;
-  width: auto !important; height: auto !important; max-width: 100% !important;
-  max-height: 84px !important; object-fit: contain; object-position: top center;
-  filter: var(--placez-logo-ink-filter) brightness(0) invert(1) !important; mix-blend-mode: normal;
-  box-shadow: none !important; text-shadow: none !important;
+  filter: var(--placez-logo-ink-filter) brightness(0) invert(1) drop-shadow(0 2px 4px var(--z-black)) !important;
+  mix-blend-mode: normal;
 }
-.eb-page--places .eb-original-card .rg-directory-card .pdxPlace__mediaGlow,
-.eb-page--places .eb-original-card .rg-directory-card .pdxPlace__mediaScan { display: none; }
-.eb-page--places .eb-original-card .rg-directory-card .pdxPlace__main { margin: 0 12px; }
+.eb-page--places .eb-original-card .rg-directory-card .pdxPlace__mediaGlow { display: none; }
 .eb-page--places .eb-original-card .rg-directory-card .rg-card-motif {
-  transform: translateY(6%) scale(1.2); mask-image: linear-gradient(transparent 15%,black 32%,black 65%,transparent 88%);
+  transform: scale(1.32); transform-origin: center;
 }
