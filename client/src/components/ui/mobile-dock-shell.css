@@ -101,3 +101,13 @@
 @media(max-width:959px) {
  .z-mobile-dock[data-collapsed="false"] .z-mobile-dock__restore { display:none; }
 }
+
+@media (max-width:959px) {
+  /* Mapz keeps the shared baseline, with only a 3px rise at its top edge. */
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock .hub-mobile-tab.znav-control[href="/map"] {
+    top:-3px; height:73px; min-height:73px;
+  }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock:has([href="/map"][data-dock-selected="true"]) .z-mobile-dock__indicator {
+    top:3px;
+  }
+}
