@@ -30,7 +30,14 @@ export function ServiceNameMark({ source }: { source: ServiceIdentitySource }) {
     // wells into a tiny single line. Solve a proportionate frame, then apply
     // the same proportion to every font size; glyphs are never stretched.
     const proportion = Math.max(1, 180 / size.width);
-    const result = solveDynamicText(source.name, size.width * proportion, size.height * proportion, true, true);
+    let result = solveDynamicText(source.name, size.width * proportion, size.height * proportion, true, true);
+    const words = source.name.trim().split(/\s+/);
+    // On small two-column cards, three short whole-word rows can be more
+    // readable than a tiny first row. Keep this choice local to service marks.
+    if (words.length === 3 && Math.min(...result.sizes) / proportion < 16) {
+      const threeRows = solveDynamicText(words.join("\n"), size.width * proportion, size.height * proportion, true);
+      if (Math.min(...threeRows.sizes) > Math.min(...result.sizes)) result = threeRows;
+    }
     return { ...result, sizes: result.sizes.map(value => value / proportion) };
   }, [source.name, size.width, size.height, fontReady]);
   if (!identity) return <CompanyNameMark name={source.name} />;
