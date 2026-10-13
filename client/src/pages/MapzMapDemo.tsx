@@ -532,7 +532,9 @@ export default function MapzMapDemo() {
       mapOverlayReturn: hasOverlay ? window.history.state?.mapOverlayReturn : window.location.pathname + window.location.search,
     } });
   }, [setLocation]);
+  const resourceOpener = useRef<HTMLElement | null>(null);
   const openResourceDetail = useCallback((entry: ResourceMapEntry) => {
+    resourceOpener.current = document.activeElement instanceof HTMLElement && document.activeElement.tagName !== "IFRAME" ? document.activeElement : null;
     const hasOverlay = [...OVERLAY_KEYS, "compose", "houzCompose"].some(key => mapSearchParams().has(key));
     setLocation(mapHref(p => {
       clearMapOverlay(p); p.set("resource", entry.org.name);
@@ -559,6 +561,15 @@ export default function MapzMapDemo() {
       else setLocation(overlayHref(null), { replace: true, state: window.history.state });
     });
   }, [setLocation]);
+  const closeResourceDetail = useCallback(() => {
+    closeOverlays();
+    requestAnimationFrame(() => {
+      const target = resourceOpener.current;
+      if (target?.isConnected) target.focus();
+      else document.querySelector<HTMLButtonElement>('[aria-label="Search the map"]')?.focus();
+      resourceOpener.current = null;
+    });
+  }, [closeOverlays]);
   const eventId = mapRecordId(params.get("event"), true);
   const placeId = mapRecordId(params.get("place"));
   const feedEvent = events.find(event => event.id === eventId);
@@ -824,7 +835,7 @@ export default function MapzMapDemo() {
   }), [marks, places, events, demoEventIds, attendance, tokenEpoch]);
   // Board 49: the status line says how many holograms are up tonight. No badge on the pin.
   const tonightCount = useMemo(() => { const night = eventNight(viewTimestamp); return sceneRows.filter(row => row.kind === "event" && row.eventNight === night).length; }, [sceneRows, viewTimestamp]);
-  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')openResourceDetail(mark.item as ResourceMapEntry);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='My Hoüz')setCardOriginRect(rect);}};
+  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')openResourceDetail(mark.item as ResourceMapEntry);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){const entry=resourceEntries.find(item=>item.communitySlug===community.slug);if(entry){openResourceDetail(entry);return;}}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='My Hoüz')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{
       if(mark.kind==="resource"){const entry=mark.item as ResourceMapEntry;return communitySlug ? entry.communitySlug===communitySlug : entry.org.name===resourceName;}
@@ -882,7 +893,7 @@ export default function MapzMapDemo() {
     {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="mapz-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
     {active && <Suspense fallback={<p className="ab-detail-status" role="status">Opening card… <Button variant="outline" accent="cyan" type="button" onClick={closeOverlays}>Back to map</Button></p>}>
     <DetailRoomLinkContext.Provider value={detailRoomLink}>
-    {(resourceName || communitySlug) && <ResourceDetails embeddedDetail={{name:resourceName || "", communitySlug:communitySlug || undefined}} onEmbeddedClose={closeOverlays} />}
+    {(resourceName || communitySlug) && <ResourceDetails embeddedDetail={{name:resourceName || "", communitySlug:communitySlug || undefined}} onEmbeddedClose={closeResourceDetail} />}
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {boardOverlay && <BoardPostOverlay presentation="eventz" kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
