@@ -6,7 +6,7 @@ export function PlaceSubcategoryFilters({ options, selected, onSelect, color }: 
   selected: string; onSelect: (id: string) => void; color: string;
 }) {
   if (!options.length) return null;
-  return <div className="placez-subfilters" style={{ '--c': color } as CSSProperties}>
+  return <div className="placez-subfilters pdx-glass-rebind" style={{ '--c': color } as CSSProperties}>
     <span className="placez-subfilters__label">Narrow it down</span>
     <div className="placez-subfilters__options" role="group" aria-label="Place subcategories">
       <button type="button" className="eb-tool pdx-glass-rebind" aria-pressed={selected === 'ALL'} onClick={() => onSelect('ALL')}>All in this category</button>

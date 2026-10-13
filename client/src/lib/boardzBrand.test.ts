@@ -6,7 +6,7 @@ import {PRIMARY_NAV} from './siteNav';
 import type {BoardCategory} from './allBoards';
 
 test('Our BoardZ is the single canonical entrance for all five category/post deep links',()=>{
- const nav=PRIMARY_NAV.find(item=>item.type==='link'&&item.label==='Our BoardZ');
+ const nav=PRIMARY_NAV.find(item=>item.type==='link'&&item.label==='Boardz');
  assert.equal(nav?.type==='link'&&nav.href,'/boardz');
  for(const category of ['housing','gigz','giftz','sellz','mizzed'] as BoardCategory[]){
   const url=new URL(boardBrowseHref(category,'post=7&saved=1'), 'https://www.zaylist.com');

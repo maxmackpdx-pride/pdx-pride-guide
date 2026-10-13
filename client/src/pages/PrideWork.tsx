@@ -332,8 +332,8 @@ export function GigListingCard({
             </div>
           </div>
           <div className="gig-talent-card__actions">
-            <button type="button" onClick={event => {event.stopPropagation();openTalentReply(`Hi ${talentFirstName}, I’d like to hire you for `);}}>Hire {talentFirstName} <ArrowUpRight size={14} aria-hidden="true" /></button>
-            <button type="button" onClick={event => {event.stopPropagation();openTalentReply();}}>Message</button>
+            <button className="pdx-glass-rebind" type="button" onClick={event => {event.stopPropagation();openTalentReply(`Hi ${talentFirstName}, I’d like to hire you for `);}}>Hire {talentFirstName} <ArrowUpRight size={14} aria-hidden="true" /></button>
+            <button className="pdx-glass-rebind" type="button" onClick={event => {event.stopPropagation();openTalentReply();}}>Message</button>
           </div>
           {!presentation && <div className="gig-talent-card__footer"><span aria-hidden="true"><Sparkle size={13} fill="currentColor" /></span>{availabilityDetail}</div>}
           {presentation && gig.compensation && <p className="gig-talent-card__rate">{gig.compensation}</p>}
@@ -405,13 +405,13 @@ export function GigListingCard({
             </div>
           ) : null}
           <div className="gifting-listing-actions">
-            <button type="button" onClick={handleShare}><Share2 size={14} /> Share</button>
+            <button className="pdx-glass-rebind" type="button" onClick={handleShare}><Share2 size={14} /> Share</button>
             {gig.username && profileHref ? (
-              <Link href={profileHref}>View @{gig.username}&apos;s profile</Link>
+              <Link href={profileHref} className="pdx-glass-rebind">View @{gig.username}&apos;s profile</Link>
             ) : null}
             {gig.isMine && <>
-              <button type="button" onClick={() => setEditing(!editing)}>Edit post</button>
-              <button type="button" disabled={updateMutation.isPending} onClick={() => updateMutation.mutate({ status: gig.status === "CLOSED" ? "LIVE" : "CLOSED" })}>
+              <button className="pdx-glass-rebind" type="button" onClick={() => setEditing(!editing)}>Edit post</button>
+              <button className="pdx-glass-rebind" type="button" disabled={updateMutation.isPending} onClick={() => updateMutation.mutate({ status: gig.status === "CLOSED" ? "LIVE" : "CLOSED" })}>
                 {gig.status === "CLOSED" ? "Reopen post" : isLooking ? "Mark work found" : "Mark filled"}
               </button>
               {gig.status === "CLOSED" && <span role="status">Completed · visible only in your posts</span>}
@@ -451,7 +451,7 @@ export function GigListingCard({
                 }
                 maxLength={500}
               />
-              <button
+              <button className="pdx-glass-rebind"
                 type="button"
                 onClick={() => {
                   if (!user) return setShowAuth(true);

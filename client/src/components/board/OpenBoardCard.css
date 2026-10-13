@@ -126,7 +126,7 @@
 .ab-open-card--gigz .board-listing-card__expand { padding:0 6% var(--space-6); }
 .ab-open-card--gigz .board-listing-card__title { margin-top:var(--space-3); }
 .ab-open-card--gigz .gifting-details { text-transform:none; color:var(--text-body); }
-.ab-open-card--gigz :is(.gifting-listing-actions,.gifting-response,.gig-talent-card__actions) :is(button,a) {
+.ab-open-card--gigz :is(.gifting-listing-actions,.gifting-response,.gig-talent-card__actions) :is(button,a).pdx-glass-rebind {
   --c:var(--room-gigz); --_c:var(--room-gigz);
   border:var(--bw-hair) solid color-mix(in srgb,var(--room-gigz) 45%,transparent);
   border-radius:12px; padding:var(--space-3) var(--space-4);
