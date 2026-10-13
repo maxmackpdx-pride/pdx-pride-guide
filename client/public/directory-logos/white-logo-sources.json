@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-13-white-vector",
+  "version": "2026-10-13-white-vector-r2",
   "treatment": "White ink on transparency; no bloom. Native vectors retain publisher geometry. Raster traces are monochrome outlines of official artwork, not original publisher vectors. Text fallbacks use bundled Barlow Condensed 900 with two authored lines.",
   "entries": [
     {
@@ -90,16 +90,14 @@
       "name": "Bearracuda",
       "normalized": "bearracuda",
       "asset": "/directory-logos/bearracuda-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://bearracuda.com",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Bearracuda.png",
       "checked": "2026-10-13",
-      "ratio": 1.8654073199527745,
-      "lines": [
-        "BEAR",
-        "RACUDA"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 5.3706449221645665,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Beaverton Resource Center",
@@ -153,16 +151,14 @@
       "name": "Bowery Bagels",
       "normalized": "bowerybagels",
       "asset": "/directory-logos/bowerybagels-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://www.bowerybagels.com/",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Bowery_Bagels.png",
       "checked": "2026-10-13",
-      "ratio": 1.946871310507674,
-      "lines": [
-        "BOWERY",
-        "BAGELS"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 2.5957319266275025,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Bridge City Mentors",
@@ -258,16 +254,14 @@
       "name": "CC Slaughters",
       "normalized": "ccslaughters",
       "asset": "/directory-logos/ccslaughters-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://ccslaughterspdx.com/",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/CC_Slaughters.png",
       "checked": "2026-10-13",
-      "ratio": 2.9214876033057853,
-      "lines": [
-        "CC",
-        "SLAUGHTERS"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.0153846153846153,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Club Privata",
@@ -294,7 +288,7 @@
       "reason": null
     },
     {
-      "name": "Covert Café",
+      "name": "Covert Caf\u00e9",
       "normalized": "covertcafe",
       "asset": "/directory-logos/covertcafe-white.svg",
       "kind": "official-raster-trace",
@@ -321,16 +315,14 @@
       "name": "Eagle Portland",
       "normalized": "eagleportland",
       "asset": "/directory-logos/eagleportland-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://www.eagleportland.com/",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Eagle_Portland.png",
       "checked": "2026-10-13",
-      "ratio": 2.426210153482881,
-      "lines": [
-        "EAGLE",
-        "PORTLAND"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.4026285595076666,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Tucker explicitly identified this as a supplied/correct logo."
     },
     {
       "name": "Eastern Oregon Center for Independent Living",
@@ -399,16 +391,14 @@
       "name": "Escape Bar & Grill",
       "normalized": "escapebarandgrill",
       "asset": "/directory-logos/escapebarandgrill-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://escapebarandgrill.com",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Escape_Bar_and_Grill.png",
       "checked": "2026-10-13",
-      "ratio": 2.781582054309327,
-      "lines": [
-        "ESCAPE BAR",
-        "& GRILL"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 3.5330812854442346,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Evergreen Urgent Care",
@@ -441,16 +431,14 @@
       "name": "Family Peace Center of Washington County",
       "normalized": "familypeacecenterofwashingtoncounty",
       "asset": "/resources-logos/familypeacecenterofwashingtoncounty-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://www.fpcwc.org/services",
-      "sourceAsset": null,
+      "sourceAsset": "/resources-logos/family-peace.png",
       "checked": "2026-10-13",
-      "ratio": 3.227272727272727,
-      "lines": [
-        "FAMILY PEACE",
-        "CENTER"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.001107358396545,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "FANTASY",
@@ -525,16 +513,14 @@
       "name": "Friendship Kitchen",
       "normalized": "friendshipkitchen",
       "asset": "/directory-logos/friendshipkitchen-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://friendshipkitchenpdx.com",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Friendship_Kitchen.png",
       "checked": "2026-10-13",
-      "ratio": 2.6298701298701297,
-      "lines": [
-        "FRIENDSHIP",
-        "KITCHEN"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 0.9690721649484536,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Tucker explicitly identified this as a supplied/correct logo."
     },
     {
       "name": "Full Spectrum Therapy",
@@ -606,31 +592,27 @@
       "name": "Hand Up Project",
       "normalized": "handupproject",
       "asset": "/resources-logos/handupproject-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://handupproject.org",
-      "sourceAsset": null,
+      "sourceAsset": "/resources-logos/hand-up-project-transparent.png",
       "checked": "2026-10-13",
-      "ratio": 2.073199527744982,
-      "lines": [
-        "HAND UP",
-        "PROJECT"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 0.9992380952380953,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Happylucky No. 1",
       "normalized": "happyluckyno1",
       "asset": "/directory-logos/happyluckyno1-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": null,
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Happylucky_No_1.png",
       "checked": "2026-10-13",
-      "ratio": 3.000590318772137,
-      "lines": [
-        "HAPPYLUCKY",
-        "NO. 1"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 4.72093023255814,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Hawks PDX",
@@ -645,7 +627,7 @@
       "reason": null
     },
     {
-      "name": "HIV Alliance · Syringe Services",
+      "name": "HIV Alliance \u00b7 Syringe Services",
       "normalized": "hivalliancesyringeservices",
       "asset": "/resources-logos/hivalliancesyringeservices-white.svg",
       "kind": "official-raster-trace",
@@ -684,16 +666,14 @@
       "name": "Honeyed Words",
       "normalized": "honeyedwords",
       "asset": "/directory-logos/honeyedwords-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": null,
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Honeyed_Words.png",
       "checked": "2026-10-13",
-      "ratio": 2.092680047225502,
-      "lines": [
-        "HONEYED",
-        "WORDS"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 2.6461126005361932,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Hunny Beez",
@@ -771,7 +751,7 @@
       "reason": null
     },
     {
-      "name": "Just in Case Oregon · Free Naloxone",
+      "name": "Just in Case Oregon \u00b7 Free Naloxone",
       "normalized": "justincaseoregonfreenaloxone",
       "asset": "/resources-logos/justincaseoregonfreenaloxone-white.svg",
       "kind": "official-raster-trace",
@@ -870,16 +850,14 @@
       "name": "Mis Tacones",
       "normalized": "mistacones",
       "asset": "/directory-logos/mistacones-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://mistaconespdx.com",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Mis_Tacones.png",
       "checked": "2026-10-13",
-      "ratio": 2.1210153482880756,
-      "lines": [
-        "MIS",
-        "TACONES"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.1092413096328102,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Montavilla Station",
@@ -909,7 +887,7 @@
       "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
     },
     {
-      "name": "Multnomah County · Free Outreach Testing",
+      "name": "Multnomah County \u00b7 Free Outreach Testing",
       "normalized": "multnomahcountyfreeoutreachtesting",
       "asset": "/resources-logos/multnomahcountyfreeoutreachtesting-white.svg",
       "kind": "official-vector",
@@ -984,16 +962,14 @@
       "name": "Nova PDX",
       "normalized": "novapdx",
       "asset": "/directory-logos/novapdx-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": null,
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Nova_PDX.png",
       "checked": "2026-10-13",
-      "ratio": 1.3175914994096811,
-      "lines": [
-        "NOVA",
-        "PDX"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.9711684370257965,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "OGALLA",
@@ -1146,16 +1122,14 @@
       "name": "Outside In",
       "normalized": "outsidein",
       "asset": "/directory-logos/outsidein-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://outsidein.org/",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Outside_In.png",
       "checked": "2026-10-13",
-      "ratio": 1.9256198347107438,
-      "lines": [
-        "OUTSIDE",
-        "IN"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 3.586750788643533,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "P:EAR",
@@ -1173,16 +1147,14 @@
       "name": "Pairs With Pride",
       "normalized": "pairswithpride",
       "asset": "/resources-logos/pairswithpride-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://perfectpair.org/pairs-with-pride",
-      "sourceAsset": null,
+      "sourceAsset": "/resources-logos/pairs-with-pride-transparent.png",
       "checked": "2026-10-13",
-      "ratio": 2.627508854781582,
-      "lines": [
-        "PAIRS",
-        "WITH PRIDE"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.0,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "PDX Gaymers",
@@ -1290,16 +1262,14 @@
       "name": "Pink Ponies",
       "normalized": "pinkponies",
       "asset": "/directory-logos/pinkponies-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://events.humanitix.com/host/pink-ponies",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Pink_Ponies.png",
       "checked": "2026-10-13",
-      "ratio": 1.6576151121605667,
-      "lines": [
-        "PINK",
-        "PONIES"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.1372519767268388,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Tucker explicitly identified this as a supplied/correct logo."
     },
     {
       "name": "Pizza Thief",
@@ -1353,16 +1323,14 @@
       "name": "Portland Gay Men's Chorus",
       "normalized": "portlandgaymenschorus",
       "asset": "/directory-logos/portlandgaymenschorus-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://www.pdxgmc.org/",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Portland_Gay_Mens_Chorus.png",
       "checked": "2026-10-13",
-      "ratio": 3.4397874852420305,
-      "lines": [
-        "PORTLAND GAY",
-        "MEN'S CHORUS"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.0673380957957606,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Portland Leather Alliance",
@@ -1491,16 +1459,14 @@
       "name": "Q Restaurant & Bar",
       "normalized": "qrestaurantandbar",
       "asset": "/directory-logos/qrestaurantandbar-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://q-portland.com/",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Q_Restaurant_and_Bar.png",
       "checked": "2026-10-13",
-      "ratio": 3.4220779220779223,
-      "lines": [
-        "Q RESTAURANT",
-        "& BAR"
-      ],
-      "reason": "Source reduces to a backplate"
+      "ratio": 0.5512638454984379,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Queer Social Club",
@@ -1542,16 +1508,14 @@
       "name": "Radical Faerie Arts Fest",
       "normalized": "radicalfaerieartsfest",
       "asset": "/directory-logos/radicalfaerieartsfest-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://www.radfaf.org",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/place-radicalfaerieartsfest.png",
       "checked": "2026-10-13",
-      "ratio": 3.628099173553719,
-      "lines": [
-        "RADICAL FAERIE",
-        "ARTS FEST"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 3.1154720412183665,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Rahab's Sisters",
@@ -1617,16 +1581,14 @@
       "name": "Ring Ding Ding",
       "normalized": "ringdingding",
       "asset": "/directory-logos/ringdingding-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": null,
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/place-ringdingding.png",
       "checked": "2026-10-13",
-      "ratio": 2.258559622195986,
-      "lines": [
-        "RING",
-        "DING DING"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.1945443011207444,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "Rogue Action Center",
@@ -1833,16 +1795,14 @@
       "name": "Stem Wine Bar",
       "normalized": "stemwinebar",
       "asset": "/directory-logos/stemwinebar-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://stemwinebarpdx.com",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Stem_Wine_Bar.png",
       "checked": "2026-10-13",
-      "ratio": 2.2461629279811097,
-      "lines": [
-        "STEM",
-        "WINE BAR"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 2.681717840658238,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "SymbiOp",
@@ -1869,7 +1829,7 @@
       "reason": null
     },
     {
-      "name": "Taqueria Los Puñales",
+      "name": "Taqueria Los Pu\u00f1ales",
       "normalized": "taquerialospunales",
       "asset": "/directory-logos/taquerialospunales-white.svg",
       "kind": "text-fallback",
@@ -1879,7 +1839,7 @@
       "ratio": 3.0312868949232588,
       "lines": [
         "TAQUERIA",
-        "LOS PUÑALES"
+        "LOS PU\u00d1ALES"
       ],
       "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
     },
@@ -1887,16 +1847,14 @@
       "name": "The Automatic Bar",
       "normalized": "theautomaticbar",
       "asset": "/directory-logos/theautomaticbar-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://www.theautomaticbarpdx.com/",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/The_Automatic_Bar.png",
       "checked": "2026-10-13",
-      "ratio": 3.603305785123967,
-      "lines": [
-        "THE AUTOMATIC",
-        "BAR"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 2.2480838017373532,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "The Center for Couples & Sex Therapy",
@@ -1914,16 +1872,14 @@
       "name": "The Get Down",
       "normalized": "thegetdown",
       "asset": "/directory-logos/thegetdown-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://www.thegetdownpdx.com",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/The_Get_Down.png",
       "checked": "2026-10-13",
-      "ratio": 1.8996458087367178,
-      "lines": [
-        "THE GET",
-        "DOWN"
-      ],
-      "reason": "Published artwork cannot form a clear faithful white mark without retaining source bloom or a solid illustration plate."
+      "ratio": 0.9986110146537954,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "The Imperial Sovereign Rose Court of Oregon",
@@ -1956,16 +1912,14 @@
       "name": "The Lodge Bar and Grill",
       "normalized": "thelodgebarandgrill",
       "asset": "/directory-logos/thelodgebarandgrill-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://thelodgebarandgrill.shop/",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/The_Lodge_Bar_and_Grill.png",
       "checked": "2026-10-13",
-      "ratio": 3.373671782762692,
-      "lines": [
-        "THE LODGE",
-        "BAR AND GRILL"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.31367225179522,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Tucker explicitly identified this as a supplied/correct logo."
     },
     {
       "name": "The Marie Equi Center",
@@ -1983,31 +1937,27 @@
       "name": "The Meet Rack at Darkroom",
       "normalized": "themeetrackatdarkroom",
       "asset": "/directory-logos/themeetrackatdarkroom-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://meetrack.org",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/The_Meet_Rack.png",
       "checked": "2026-10-13",
-      "ratio": 3.520661157024793,
-      "lines": [
-        "THE MEET RACK",
-        "AT DARKROOM"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.0248490277095552,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "The Nest Lounge",
       "normalized": "thenestlounge",
       "asset": "/directory-logos/thenestlounge-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": null,
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/place-thenestlounge.png",
       "checked": "2026-10-13",
-      "ratio": 2.2024793388429753,
-      "lines": [
-        "THE NEST",
-        "LOUNGE"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 2.4932171502128924,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "The Secret Warehouse",
@@ -2133,16 +2083,14 @@
       "name": "Triangle Recreation Camp",
       "normalized": "trianglerecreationcamp",
       "asset": "/directory-logos/trianglerecreationcamp-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://camptrc.org/",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Triangle_Recreation_Camp.png",
       "checked": "2026-10-13",
-      "ratio": 4.1605667060212514,
-      "lines": [
-        "TRIANGLE",
-        "RECREATION CAMP"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 1.20863309352518,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Restored after reviewing prior artwork instead of substituting plain text."
     },
     {
       "name": "underU4men",
@@ -2169,7 +2117,7 @@
       "reason": null
     },
     {
-      "name": "Virginia Garcia · Beaverton Wellness Center",
+      "name": "Virginia Garcia \u00b7 Beaverton Wellness Center",
       "normalized": "virginiagarciabeavertonwellnesscenter",
       "asset": "/resources-logos/virginiagarciabeavertonwellnesscenter-white.svg",
       "kind": "official-raster-trace",
@@ -2208,19 +2156,17 @@
       "name": "Yes Coach Productions",
       "normalized": "yescoachproductions",
       "asset": "/directory-logos/yescoachproductions-white.svg",
-      "kind": "text-fallback",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://yescoachparty.com",
-      "sourceAsset": null,
+      "sourceAsset": "/directory-logos/Yes_Coach_Productions.png",
       "checked": "2026-10-13",
-      "ratio": 3.115112160566706,
-      "lines": [
-        "YES COACH",
-        "PRODUCTIONS"
-      ],
-      "reason": "No suitable exact, current monochrome organization logo verified after checking official site and existing source records."
+      "ratio": 2.0152990264255912,
+      "lines": null,
+      "reason": null,
+      "treatment": "Existing logo geometry retained; white vector ink extracted without bloom. Tucker explicitly identified this as a supplied/correct logo."
     },
     {
-      "name": "YWCA Clark County · SafeChoice",
+      "name": "YWCA Clark County \u00b7 SafeChoice",
       "normalized": "ywcaclarkcountysafechoice",
       "asset": "/resources-logos/ywcaclarkcountysafechoice-white.svg",
       "kind": "official-raster-trace",
