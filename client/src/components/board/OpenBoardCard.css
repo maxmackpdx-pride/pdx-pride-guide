@@ -66,3 +66,40 @@
 .board-open-card--shared :is(.gifting-owner-actions,.sellz-edit-form,.gifting-interest) button { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:var(--space-2) var(--space-3); border:var(--bw-hair) solid color-mix(in srgb,var(--c) 45%,transparent); border-radius:var(--radius-panel); background:var(--z-black); color:var(--text-hi); font:var(--fw-semibold) var(--body-sm)/1.3 var(--font-body); }
 
 .board-demo-notice { margin:var(--space-3); padding:var(--space-3); border:var(--bw-hair) solid var(--panel-border); border-radius:var(--radius-xl); color:var(--text-hi); background:var(--glass-card-bg); font:var(--event-card-detail-font); }
+
+/* Unified Boards uses Eventz's open-card text roles. The room's artwork,
+   photo well, fixed card geometry and working controls keep their own anatomy. */
+.ab-open-card :is(.board-listing-card__title,.gig-talent-card__name,.board-detail-modal__quote-title,.hz-dttl) {
+  font:var(--open-card-title-font) !important;
+  letter-spacing:normal;
+  line-clamp:none; -webkit-line-clamp:unset;
+  overflow-wrap:anywhere;
+  margin-block:var(--space-4) var(--space-3);
+}
+.ab-open-card :is(.board-listing-card__expand>p,.board-detail-modal__body,.hz-prose,.gifting-response>p,.gifting-pending-note) {
+  font:var(--open-card-body-font) !important;
+  overflow-wrap:anywhere;
+}
+.ab-open-card :is(.gig-talent-card__role,.hz-secttl,.gifting-owner>summary,.gifting-owner-panel>summary,.gifting-report>summary,.board-detail-modal__actions details>summary) {
+  font:var(--open-card-heading-font);
+  min-height:var(--ab-target,44px);
+  align-content:center;
+}
+.ab-open-card :is(.board-listing-card__poster,.board-listing-card__time,.board-listing-card__status,.gifting-details,.gig-talent-card__location,.gig-talent-card__footer,.board-detail-modal__meta-line,.mizzed-source-link small,.hz-dhead>.hz-mono,.board-demo-notice) {
+  font:var(--open-card-meta-font) !important;
+  letter-spacing:normal;
+}
+.ab-open-card :is(.gifting-listing-actions,.gig-talent-card__actions,.gifting-owner-actions,.sellz-edit-form,.gifting-form-grid,.gifting-response,.gifting-interest,.board-detail-modal__actions) :is(button,a),
+.ab-open-card .board-listing-card__expand :is(button.pdxBtn,a.pdxBtn),
+.ab-open-card .hz-actionbar :is(button,a) {
+  font:var(--open-card-action-font) !important;
+  letter-spacing:.025em;
+  text-transform:uppercase;
+  min-height:var(--ab-target,44px);
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.ab-open-card .board-listing-card__expand>p { margin-block:var(--space-4); }
+.ab-open-card :is(.gifting-details,.board-detail-modal__meta) { margin-block:var(--space-3); }
+.ab-open-card :is(.gifting-listing-actions,.gig-talent-card__actions,.gifting-owner-actions) { gap:var(--space-3); }
+.ab-open-card :is(input,textarea,select) { font-family:var(--font-body); font-size:var(--body-md); }
