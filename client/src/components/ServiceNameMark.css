@@ -5,3 +5,5 @@
 .service-name-mark__lines>span{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:.98;white-space:nowrap}
 .service-name-mark__lines>.service-name-mark__loading{font-size:18px;white-space:normal}
 .pdxPlace--compact .service-name-mark,.pdxPlace--wide .service-name-mark{height:52px;gap:6px}
+.service-name-mark--icon-only{display:flex;justify-content:center;height:100%;min-height:0;gap:0}
+.service-name-mark--icon-only .service-name-mark__icon{width:60%;max-width:76px;height:76px;max-height:100%}

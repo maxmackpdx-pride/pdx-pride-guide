@@ -101,7 +101,7 @@ const HOTLINES = [
   { name: "Trans Lifeline", description: "877-565-8860", tel: "18775658860" },
 ];
 
-function Mark({ org, allowArtwork = true }: { org: ResourceOrg; allowArtwork?: boolean }) {
+function Mark({ org, allowArtwork = true, iconOnly = false }: { org: ResourceOrg; allowArtwork?: boolean; iconOnly?: boolean }) {
   const [failedLogo, setFailedLogo] = useState<string | null>(null);
   const artwork = allowArtwork ? serviceArtwork(org, org.logo) : null;
   return artwork && failedLogo !== artwork ? (
@@ -113,7 +113,7 @@ function Mark({ org, allowArtwork = true }: { org: ResourceOrg; allowArtwork?: b
       loading="lazy"
     />
   ) : (
-    <ServiceNameMark source={org} />
+    <ServiceNameMark source={org} iconOnly={iconOnly} />
   );
 }
 
@@ -439,7 +439,7 @@ const ResourceCard = memo(function ResourceCard({
       categoryTags={tagsFor(row).slice(0, 2)}
       accentColor={category.color}
       logoUrl={serviceArtwork(org, org.logo) || undefined}
-      logoFallback={<Mark org={org} allowArtwork={false} />}
+      logoFallback={<Mark org={org} allowArtwork={false} iconOnly />}
       description={org.desc}
       shareUrl={`https://www.zaylist.com/rezources?resource=${encodeURIComponent(org.name)}`}
       className={`rg-directory-card rg-category-${category.id} pdxPlace--clickable${org.logoSurface === "light" ? " rg-directory-card--light-logo" : ""}`}
