@@ -1,4 +1,4 @@
-.placez-subfilters{margin:0 0 22px;min-width:0}
+.placez-subfilters{margin:0 0 8px;min-width:0}
 .placez-subfilters__label{display:block;margin:0 0 8px;color:var(--text-body);font:600 13px/1.4 var(--font-body)}
 .placez-subfilters__options{display:flex;flex-wrap:wrap;gap:8px}
 .placez-subfilters__options .eb-tool{font-size:13px;min-height:44px;max-width:100%;line-height:1.2;text-align:left}

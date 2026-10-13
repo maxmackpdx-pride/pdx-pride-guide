@@ -58,13 +58,13 @@ export function BrowseFilters({ title, active = false, children }: { title: stri
   </Popover>;
 }
 
-export function BrowseLane({ title, color, count, children }: { title: string; color: string; count: number; children: ReactNode }) {
+export function BrowseLane({ title, color, count, children, onViewAll }: { title: string; color: string; count: number; children: ReactNode; onViewAll?: () => void }) {
   const [open, setOpen] = useState(false);
   const isMobile = useIsMobile();
   const id = useId();
   return <section className={`eb-lane pdx-glass-rebind${open ? " eb-lane--open" : ""}`} style={{ "--c": color } as CSSProperties} aria-labelledby={id}>
     <header className="eb-lane__head"><h2 id={id}><i aria-hidden="true" />{title} <small>{count}</small></h2>
-      {!isMobile && count > 4 && <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Show less" : "View all"}</button>}
+      {!isMobile && count > 4 && <button type="button" aria-expanded={onViewAll ? undefined : open} onClick={() => onViewAll ? onViewAll() : setOpen(!open)}>{!onViewAll && open ? "Show less" : "View all"}</button>}
     </header>
     <EventsRail open={isMobile || open} label={title}>{Children.map(children, child => <div className="events-rail__item" role="listitem">{child}</div>)}</EventsRail>
   </section>;

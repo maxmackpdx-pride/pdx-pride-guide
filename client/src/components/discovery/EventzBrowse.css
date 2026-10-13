@@ -28,6 +28,7 @@
 .eb-search-row > .pdxField, .eb-search-row > .pdxSearch { flex: 1; min-width: 0; }
 .eb-tool { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); border-radius: 12px; background: var(--btn-glow-bg); box-shadow: var(--btn-glow-shadow); color: var(--text-hi); font: 700 14px/1 var(--font-display); text-transform: uppercase; text-decoration: none; cursor: pointer; }
 .eb-body { padding-top: 24px; }
+.eb-page--places .eb-body { padding-top:16px; }
 .eb-side { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
 .eb-panel { padding: 20px; border-radius: 16px; border: 1px solid var(--panel-border); background: var(--ink-800); display: flex; flex-direction: column; gap: 14px; }
 .eb-panel h2, .eb-panel h3 { margin: 0; font: 800 22px/1.1 var(--font-display); text-transform: uppercase; }
@@ -39,6 +40,7 @@
 .eb-side-categories button[aria-pressed="true"] { color: var(--neon-cyan); border-color: var(--neon-cyan); }
 .eb-results { min-width: 0; }
 .eb-result-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+.eb-page--places .eb-result-head { margin:8px 0 0; }
 .eb-result-head p { margin: 0; color: var(--text-mid); font: 500 12px/1.4 var(--font-mono, monospace); }
 .eb-clear { min-height: 44px; border: 0; padding: 0 4px; background: none; color: var(--neon-cyan); font: 600 14px/1 var(--font-body); cursor: pointer; }
 .eb-lanes { display: flex; flex-direction: column; gap: 36px; }
@@ -62,11 +64,14 @@
 .eb-footer h2 { margin: 0; font: 800 26px/1.2 var(--font-display); text-transform: uppercase; }
 .eb-page :is(button, a, select, input):focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 3px; }
 @media (min-width: 1100px) {
+  .eb-page--places .eb-lane__head { min-height:64px; }
   .eb-body { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 32px; align-items: start; }
   .eb-side { position: sticky; top: calc(var(--site-header-height, 96px) + 180px); }
   .eb-lanes { flex-direction: row; flex-wrap: wrap; gap: 36px 16px; align-items: start; }
   .eb-lane { width: calc(2 * var(--eb-card-width) + 16px); }
   .eb-page .eb-lane .events-rail { display: grid; grid-template-columns: repeat(2, var(--eb-card-width)); overflow: visible; }
+  .eb-page--places .eb-lane:only-child { width:100%; }
+  .eb-page--places .eb-lane:only-child .events-rail { grid-template-columns:repeat(auto-fill,var(--eb-card-width)); }
   .eb-page .eb-lane:not(.eb-lane--open) .events-rail__item:nth-child(n+5) { display: none; }
   .eb-page .events-rail-arrow { display: none; }
   .eb-mobile-filter-toggle { display: none; }
@@ -308,6 +313,17 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 
 /* Reviewed company artwork owns its white ink and internal dark detail. */
 .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__media .pdxPlace__logo[src*="-white.svg"] { filter: none !important; mix-blend-mode: normal; }
+/* Keep the authored logo well fixed; tighten only the reading and action rows. */
+@media (min-width:768px) {
+  .eb-page--places .eb-original-card .rg-directory-card { --event-card-tag-pad-y:2px; }
+  .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__name { height:auto; }
+  .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__main { gap:4px; }
+  .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__badges { row-gap:2px; }
+  .eb-page--places .eb-original-card .rg-directory-card .rg-directory-footer { position:static; flex:none; padding-top:0; gap:0; }
+  .eb-page--places .eb-original-card .placez-discovery-meta { position:relative; z-index:3; display:block; min-height:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .eb-page--places .eb-original-card .pdxPlace__actions > button:first-child { width:68px; height:44px!important; min-height:44px; border-radius:22px!important; }
+  .eb-page--places .eb-original-card .rg-directory-footer .pdxBtn { position:absolute; z-index:5; bottom:10px; right:12px; width:calc(100% - 100px); height:44px!important; min-height:44px!important; margin:0; border-radius:22px; }
+}
 @media (max-width: 767px) {
   /* Leave room for a legible reviewed logo within the existing compact card. */
   .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__media:has(> .pdxPlace__logo[src*="-white.svg"]) {

@@ -512,6 +512,9 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
           </BrowseControls>
           <PlaceSubcategoryFilters options={subcategoryOptions} selected={selectedSubcategory} onSelect={setActiveSubcategory} color={TYPE_COLORS[activeType] || 'var(--neon-cyan)'} />
           {formOpen && <DirectoryAddPlaceForm isSpaces={false} onClose={() => setFormOpen(false)} />}
+          <div className="eb-result-head"><p role="status" data-testid="directory-result-count">{resultLine}</p>
+            {(searchQuery || activeType !== "ALL" || activeNeighborhood !== "ALL") && <button type="button" className="eb-clear" onClick={() => { setSearchQuery(""); setActiveType("ALL"); setActiveSubcategory('ALL'); setActiveNeighborhood("ALL"); }}>Clear filters</button>}
+          </div>
           <div className="eb-body">
             <aside className="eb-side" aria-label="Placez filters">
               <div className="eb-panel eb-desktop-panel"><h2>Filters</h2>
@@ -527,14 +530,14 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               <div className="eb-panel eb-desktop-panel"><h3>Not seeing your place?</h3><p>Share a place with your community.</p><button type="button" className="eb-tool pdx-glass-rebind" onClick={openAddForm}><Plus size={18} />Add a place</button></div>
             </aside>
             <section className="eb-results" aria-label="Placez results">
-              <div className="eb-result-head"><p role="status" data-testid="directory-result-count">{resultLine}</p>
-                {(searchQuery || activeType !== "ALL" || activeNeighborhood !== "ALL") && <button type="button" className="eb-clear" onClick={() => { setSearchQuery(""); setActiveType("ALL"); setActiveNeighborhood("ALL"); }}>Clear filters</button>}
-              </div>
               {isLoading ? <BoardLoadingState label="Loading directory" /> : isError ? <BrowseStatus error title="Places couldn’t load" description="Your filters are still here. Try loading the directory again." onAction={() => void refetch()} /> : !filtered.length ?
                 <BrowseStatus title="No places match your filters" description="Try a broader search or another neighborhood." actionLabel="Clear filters" onAction={() => { setSearchQuery(""); setActiveType("ALL"); setActiveNeighborhood("ALL"); }} /> :
                 browseView === "browse" ? <div className="eb-lanes">{categoryBands.map(category => {
                   const places = filtered.filter(place => place.type === category.key);
-                  return places.length ? <BrowseLane key={category.key} title={category.label} color={category.color} count={places.length}>
+                  return places.length ? <BrowseLane key={category.key} title={category.label} color={category.color} count={places.length} onViewAll={() => {
+                    if (activeType !== category.key) { setActiveType(category.key); setActiveSubcategory('ALL'); }
+                    setBrowseView('grid');
+                  }}>
                     {places.map(biz => renderBrowsePlace(biz))}
                   </BrowseLane> : null;
                 })}</div> : <div className="eb-grid">{filtered.map(biz => renderBrowsePlace(biz))}</div>}
