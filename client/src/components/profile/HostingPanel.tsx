@@ -130,7 +130,7 @@ function HostingCard({
       <div className="hp-card__banner">
         {poster
           ? <img className="hp-card__poster" src={poster} alt="" decoding="async" loading="lazy" />
-          : <DayMotif day={code} placement="art" />}
+          : <DayMotif glass day={code} placement="art" />}
         <div className="hp-card__banner-scrim" aria-hidden="true" />
       </div>
       <div className="hp-card__body">

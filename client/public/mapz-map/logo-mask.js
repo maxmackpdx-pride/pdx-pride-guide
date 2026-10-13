@@ -14,3 +14,11 @@ export function logoCoverage(r, g, b, alpha, mode = 'light') {
   const edge = Math.max(0, Math.min(1, (ink - floor) / range));
   return (mode === 'light' ? 1 : opacity) * edge * edge * (3 - 2 * edge);
 }
+
+/** Reviewed white SVGs contain authored dark cutlines and light gray detail. */
+export function authoredLogoMode(url, mode) {
+  return /^\/(?:directory|resources)-logos\/[^?#]+-white\.svg(?:[?#]|$)/.test(url || '') ? 'grayscale' : mode;
+}
+export function logoTone(r, g, b, mode) {
+  return mode === 'grayscale' ? Math.round(.2126*r + .7152*g + .0722*b) : 255;
+}

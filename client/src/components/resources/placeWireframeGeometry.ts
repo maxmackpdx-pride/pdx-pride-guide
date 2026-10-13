@@ -133,12 +133,68 @@ function arch(d: Drawing) {
 function wing(d: Drawing, side: number) {
   d.surface((u,v) => [side*(u*115),-65+140*Math.sin(u*Math.PI*.7)*(1-.7*v),30*Math.sin(u*Math.PI)*Math.sin(v*Math.PI)], 8, 6);
 }
+// Professional motifs are built from volumes, with curved surface grids and
+// front/rear separation. These objects describe the service, never its logo.
+function inkVessel(d: Drawing) {
+  d.lathe(v => [v < .15 ? 33 + v*55 : v > .75 ? 28 : 44, -75 + 135*v], [0,0,0], 8,12);
+  d.lathe(v => [29,60+25*v], [0,0,0], 3,10);
+  d.torus([0,85,0],29,3);
+}
+function tattooPen(d: Drawing) {
+  d.lathe(v => [v<.25 ? 19+v*24 : 25-12*v, -65+150*v], [0,0,0], 10,12);
+  d.lathe(v => [4*(1-v),-100+35*v], [0,0,0], 3,8);
+  d.edge(t => [13+44*Math.sin(t*Math.PI),85+30*t,30*Math.sin(t*tau)]);
+}
+function comb(d: Drawing) {
+  d.box([0,55,0],[170,24,14]);
+  for(let i=0;i<11;i++) d.box([-75+i*15,-9,0],[5,115-i%2*8,10]);
+}
+function bodywork(d: Drawing) {
+  // Two rounded cushioning volumes, with a folded flowing textile above them.
+  d.sphere([0,-57,0],78,27); d.sphere([0,-16,0],61,24);
+  d.surface((u,v) => [-90+180*u,35+32*Math.sin(u*Math.PI)+25*v, -42+84*v+18*Math.sin(u*tau)],8,6);
+}
+function designPlanes(d: Drawing) {
+  for(const [z,shift] of [[-24,-15],[12,15]]) d.surface((u,v) => [-78+156*u+shift,-85+170*v,z+14*Math.sin(u*Math.PI)*Math.sin(v*Math.PI)],6,7);
+  d.sphere([28,36,38],24); d.torus([-25,-24,30],29,4,tau,true);
+}
+function webConsole(d: Drawing) {
+  d.box([0,0,0],[165,125,26]);
+  d.line([-82,38,16],[82,38,16]);
+  for(const x of [-62,-47,-32]) d.sphere([x,48,18],3);
+  d.line([-36,16,20],[-57,-4,20]);d.line([-57,-4,20],[-36,-24,20]);
+  d.line([36,16,20],[57,-4,20]);d.line([57,-4,20],[36,-24,20]);
+  d.line([11,23,20],[-11,-30,20]);
+  d.box([0,-85,-5],[80,10,45]);d.box([0,-65,-5],[13,30,17]);
+}
+function keyRing(d: Drawing) {
+  d.torus([0,52,0],39,5,tau,true);
+  d.box([0,-20,0],[13,88,15]);
+  d.box([16,-49,0],[26,11,15]);d.box([12,-28,0],[18,10,15]);
+}
+function careRibbon(d: Drawing) {
+  // Anatomical care as an open supportive volume, rather than a medical cross.
+  d.surface((u,v) => {const a=(.15+u*1.7)*Math.PI,r=55+18*Math.sin(v*Math.PI);return [r*Math.cos(a),-70+140*v,r*Math.sin(a)*.7];},12,8);
+  d.sphere([0,78,0],22);leaf(d,[20,-20,0],1,.7);
+}
 const cache = new Map<string, PlaceWireframe>();
 export function placeWireframe(form: string, density = 1, yaw = -.42): PlaceWireframe {
   const cacheKey = `${form}-${density}-${yaw}`;
   const cached = cache.get(cacheKey); if(cached) return cached;
   const d = new Drawing(density,yaw);
   switch(form) {
+    case 'threadSpool':
+      d.lathe(v => [29+5*Math.sin(v*Math.PI),-65+130*v],[0,0,0],12,12);
+      d.lathe(v => [50*v,-65],[0,0,0],3,12); d.lathe(v => [50*v,65],[0,0,0],3,12);
+      d.edge(t => [35*Math.cos(t*tau*5),-65+130*t,35*Math.sin(t*tau*5)]); break;
+    case 'tattooPen': tattooPen(d); break;
+    case 'inkVessel': inkVessel(d); break;
+    case 'comb': comb(d); break;
+    case 'bodywork': bodywork(d); break;
+    case 'designPlanes': designPlanes(d); break;
+    case 'webConsole': webConsole(d); break;
+    case 'keyRing': keyRing(d); break;
+    case 'careRibbon': careRibbon(d); break;
     case 'danceScreen': d.sphere([0,0,0],90); d.line([0,90,0],[0,120,0]); break;
     case 'gathering': d.surface((u,v)=>[-90+180*u,-70+175*(1-Math.abs(u*2-1)),-55+110*v],8,6); d.line([-90,-70,55],[90,-70,55]); d.line([0,105,55],[0,-70,55]); break;
     case 'dragStage': curtain(d); break;

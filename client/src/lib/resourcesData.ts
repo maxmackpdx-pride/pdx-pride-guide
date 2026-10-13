@@ -1,10 +1,12 @@
+import { whiteCompanyLogo } from "@shared/whiteCompanyLogos";
+
 /**
  * Resources directory: nonprofits, hotlines, and LGBTQ+ groups.
  * Moved off Placez (2026-09-30). Placez is for spending time and money;
  * Resources is for getting help and giving back.
  *
  * Logos are clean white marks on transparent in /public/resources-logos.
- * Orgs without a logo file show a white monogram (mark, or computed initials).
+ * Unverified identities use explicit two-line white text assets.
  */
 export type ResourceOrg = {
   name: string;
@@ -53,7 +55,7 @@ export type ResourceCategory = {
   orgs: ResourceOrg[];
 };
 
-export const RESOURCE_CATEGORIES: ResourceCategory[] = [
+const RESOURCE_CATEGORY_SOURCE: ResourceCategory[] = [
   {
     "id": "health",
     "name": "Health & Care",
@@ -63,6 +65,194 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     "forr": "Primary and walk-in urgent care, testing and HIV services, gender-affirming care and surgery, and health-plan enrollment.",
     "use": "Check the org's site for current hours and services, then call or walk in. Ask what to bring to your first visit.",
     "orgs": [
+      {
+        "name": "Bywater Health",
+        "aliases": [
+          "Bywater",
+          "Bywater Health LLC"
+        ],
+        "sub": "Queer-led medical & psychiatric care",
+        "categoryIds": [
+          "mental-health"
+        ],
+        "serviceTags": [
+          "Gender-affirming care",
+          "HIV care"
+        ],
+        "transSpecialist": true,
+        "scope": "Portland · LGBTQ+ health care",
+        "desc": "Queer-led clinic offering LGBTQ+ primary care, HIV prevention and treatment, sexual health, gender-affirming care and psychiatric services. Also offers aesthetic and weight-management appointments.",
+        "addr": "2119 NE Halsey St, Portland, OR 97232",
+        "phone": "tel:+15039759398",
+        "phoneLabel": "Call Bywater Health",
+        "email": "frontdesk@bywaterhealth.com",
+        "hours": "Monday–Friday, 8:30 am–5 pm.",
+        "url": "https://www.bywaterhealth.com/appointment-booking",
+        "cta": "Request an appointment",
+        "logo": "/resources-logos/bywaterhealth-white.svg",
+        "howToStart": "Request an appointment online or call the front desk. Ask which clinician and appointment type fits your needs, and confirm current availability, insurance participation and out-of-pocket costs before booking.",
+        "sourceUrl": "https://www.bywaterhealth.com/services",
+        "sourceChecked": "October 13, 2026",
+        "contactSourceUrl": "https://www.bywaterhealth.com/appointment-booking",
+        "contactChecked": "October 13, 2026",
+        "programs": [
+          {
+            "name": "LGBTQ+ primary & preventive care",
+            "desc": "Primary care and preventive wellness visits tailored to LGBTQ+ patients.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/primarycare",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/primarycare",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "HIV prevention, treatment & sexual health",
+            "desc": "PrEP, HIV treatment, and STI testing, treatment and prevention.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/hiv-prevention-treatment",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/hiv-prevention-treatment",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Gender-affirming care",
+            "desc": "Hormone care, surgical referrals and support letters.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/gender-affirming-care",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/gender-affirming-care",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Psychiatric care",
+            "desc": "Psychiatric assessment and treatment, including medication management.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/psychiatric-care",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/psychiatric-care",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Aesthetic care",
+            "desc": "Provider-administered aesthetic appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/aesthetic-care",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/aesthetic-care",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Weight management",
+            "desc": "Clinician-supervised weight-management appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.bywaterhealth.com/weight-loss",
+            "cta": "Service details",
+            "sourceUrl": "https://www.bywaterhealth.com/weight-loss",
+            "sourceChecked": "October 13, 2026"
+          }
+        ]
+      },
+      {
+        "name": "Reconstructed Wellness",
+        "aliases": [
+          "Reconstructed Wellness Clinic",
+          "RW"
+        ],
+        "sub": "Multidisciplinary health clinic",
+        "serviceTags": [
+          "LGBTQ health",
+          "Integrative care"
+        ],
+        "scope": "Inner Southeast Portland · By appointment",
+        "desc": "Multidisciplinary clinic offering naturopathic and functional medicine, acupuncture, chiropractic care, massage and other services. Founder Dr. Jason Wells lists men’s and LGBTQ health among his clinical interests.",
+        "addr": "936 SE Ankeny St, Portland, OR 97214",
+        "phone": "tel:+15032323215",
+        "phoneLabel": "Call Reconstructed Wellness",
+        "email": "info@reconstructedwellness.com",
+        "hours": "Monday–Thursday, 8:30 am–5 pm; Friday, 8:30 am–3 pm; Saturday, 9 am–2 pm.",
+        "url": "https://www.reconstructedwellness.com/schedule",
+        "cta": "Request an appointment",
+        "logo": "/resources-logos/reconstructedwellness-white.svg",
+        "howToStart": "Complete the new-patient scheduling form or call the office. Staff follow up to finish scheduling. Ask about the practitioner’s availability, service fees and your insurance coverage; return visits can be requested through the patient portal.",
+        "sourceUrl": "https://www.reconstructedwellness.com/",
+        "sourceChecked": "October 13, 2026",
+        "contactSourceUrl": "https://www.reconstructedwellness.com/contact-1",
+        "contactChecked": "October 13, 2026",
+        "programs": [
+          {
+            "name": "LGBTQ & men’s health",
+            "desc": "Dr. Jason Wells lists LGBTQ and men’s health among his clinical interests.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/dr-jason-wells-1",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/dr-jason-wells-1",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Functional & naturopathic medicine",
+            "desc": "Naturopathic and functional-medicine appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/functional-medicine",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/functional-medicine",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Acupuncture & Chinese medicine",
+            "desc": "Acupuncture and Chinese-medicine appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/acupuncture",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/acupuncture",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Chiropractic care",
+            "desc": "Chiropractic appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/chiropractic",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/chiropractic",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Massage",
+            "desc": "Massage-therapy appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/massage",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/massage",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Structural integration",
+            "desc": "Structural-integration appointments.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/structural-integration",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/structural-integration",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "IV nutrient therapy",
+            "desc": "IV nutrient-therapy appointments listed by the clinic.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/iv-nutrient-therapy",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/iv-nutrient-therapy",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Holistic pelvic care",
+            "desc": "Holistic pelvic-care appointments listed by the clinic.",
+            "scope": "Portland · By appointment",
+            "url": "https://www.reconstructedwellness.com/holistic-pelvic-care",
+            "cta": "Service details",
+            "sourceUrl": "https://www.reconstructedwellness.com/holistic-pelvic-care",
+            "sourceChecked": "October 13, 2026"
+          }
+        ]
+      },
       {
         "name": "Virginia Garcia · Beaverton Wellness Center",
         "logo": "/resources-logos/virginia-garcia.png",
@@ -864,6 +1054,267 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         "hours": "Hours and intake vary by program. Use the contact details below; contact legal help promptly if you have court papers.",
         "contactChecked": "September 30, 2026",
         "contactSourceUrl": "https://www.portland.gov/phb/rental-services/eviction-help-renters"
+      },
+      {
+        "name": "211info",
+        "sub": "Find local help",
+        "categoryIds": [
+          "money"
+        ],
+        "aliases": [
+          "211",
+          "211 Info",
+          "211 information",
+          "Utility Assistance",
+          "Electric Assistance",
+          "Natural Gas",
+          "Water Discounts",
+          "Internet and Phone Service",
+          "Furniture Resource",
+          "Heating and Cooling Resources",
+          "housing",
+          "shelter",
+          "food",
+          "child care",
+          "parenting",
+          "health care",
+          "mental health",
+          "transportation",
+          "legal",
+          "employment",
+          "education",
+          "disaster",
+          "volunteering",
+          "financial wellness"
+        ],
+        "serviceTags": [
+          "Resource referrals",
+          "Utility help"
+        ],
+        "scope": "Oregon & Southwest Washington",
+        "desc": "A free, confidential starting point for finding local help with housing, food, utilities, child care, health care and other everyday needs. 211info connects you with community providers; eligibility, appointments and funding vary.",
+        "howToStart": "Call 211 or 866-698-6155 and share your ZIP code and what you need. You can also text your ZIP code to 898211, email help@211info.org, or search online. Ask for an interpreter if needed. If a utility shutoff is pending, also contact your utility directly.",
+        "phone": "tel:211",
+        "phoneLabel": "Call 211",
+        "alt": "tel:+18666986155",
+        "altLabel": "Call 866-698-6155",
+        "email": "help@211info.org",
+        "hours": "Calls: Monday–Friday, 8 am–6 pm. Text: Monday–Friday, 9 am–5 pm. Email responses: within 72 hours during core operating hours. Some programs and incident responses have extended hours.",
+        "url": "https://www.211info.org/",
+        "cta": "Find local resources",
+        "logo": "/resources-logos/211info-white.svg",
+        "contactSourceUrl": "https://www.211info.org/contact-us/",
+        "contactChecked": "October 13, 2026",
+        "sourceUrl": "https://www.211info.org/",
+        "sourceChecked": "October 13, 2026",
+        "programs": [
+          {
+            "name": "Electric assistance",
+            "desc": "Find electric-bill payment assistance, discounts and reconnection resources.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/utility-assistance/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-2",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Natural gas assistance",
+            "desc": "Find gas-bill assistance and programs for past-due balances.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/utility-assistance/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-3",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Water discounts & assistance",
+            "desc": "Find water-bill discounts, payment assistance and service-connection help.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/utility-assistance/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-4",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Internet & phone service",
+            "desc": "Find discounted internet, telephone service and mobile-device resources.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/utility-assistance/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-5",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Furniture & household goods",
+            "desc": "Find furniture and essential home goods. Some providers require a case-manager or agency referral.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/basic-needs/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-6",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Heating & cooling resources",
+            "desc": "Find heating-fuel assistance, weatherization, cooling centers and air-conditioner resources.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/extreme-heat/",
+            "cta": "Find resources",
+            "sourceUrl": "https://multco.us/info/utility-phone-internet-furniture-assistance#section-7",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Other utility support",
+            "desc": "Explore trash and recycling assistance, weatherization, and energy or water conservation resources.",
+            "scope": "Availability depends on location and provider.",
+            "url": "https://www.211info.org/get-help/utility-assistance/",
+            "cta": "Find resources",
+            "sourceUrl": "https://www.211info.org/get-help/utility-assistance/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Housing & shelter",
+            "desc": "Connect with housing and shelter resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/housing-shelter/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Food",
+            "desc": "Find food assistance nearby.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/food/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Basic needs",
+            "desc": "Find clothing, hygiene supplies and everyday essentials.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/basic-needs/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Child care & parenting",
+            "desc": "Explore child-care and parenting resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/child-care-parenting/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Health care",
+            "desc": "Find health-care resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/health-care/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Mental & behavioral health",
+            "desc": "Find mental- and behavioral-health resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/mental-behavioral-health/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Crisis hotlines",
+            "desc": "Find specialized crisis and support lines.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/crisis-hotlines/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Transportation",
+            "desc": "Explore transportation support.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/transportation/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Legal & public safety",
+            "desc": "Find legal and public-safety resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/legal-public-safety/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Employment",
+            "desc": "Find employment-related support.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/employment/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Education",
+            "desc": "Explore education resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/education/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Disaster services",
+            "desc": "Find disaster-related support.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/disaster-services/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Volunteering & donating",
+            "desc": "Find ways to give time or goods.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/volunteering-donating/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Financial wellness",
+            "desc": "Explore financial-wellness resources.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/financial-wellness",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "Community-specific resources",
+            "desc": "Find services for diverse populations.",
+            "scope": "Local resource referrals",
+            "url": "https://www.211info.org/get-help/diverse-populations/",
+            "cta": "Browse resources",
+            "sourceUrl": "https://www.211info.org/",
+            "sourceChecked": "October 13, 2026"
+          },
+          {
+            "name": "211info Android app",
+            "desc": "Search nearby resources, view program details and connect with 211info from your phone.",
+            "scope": "Free app",
+            "url": "https://play.google.com/store/apps/details?id=com.info.portland211info&hl=en_US",
+            "cta": "Get the Android app",
+            "sourceChecked": "October 13, 2026"
+          }
+        ]
       },
       {
         "name": "Energy & utility assistance",
@@ -2472,3 +2923,9 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     ]
   }
 ];
+
+/** Reviewed white artwork replaces legacy neon and improvised identities. */
+export const RESOURCE_CATEGORIES: ResourceCategory[] = RESOURCE_CATEGORY_SOURCE.map(category => ({
+  ...category,
+  orgs: category.orgs.map(org => ({ ...org, logo: whiteCompanyLogo(org.name) ?? org.logo, logoSurface: undefined })),
+}));

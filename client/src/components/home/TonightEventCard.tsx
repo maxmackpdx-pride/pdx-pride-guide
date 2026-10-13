@@ -12,6 +12,7 @@ import RailShareButton from "./RailShareButton";
 import { eventPath } from "@shared/eventSlug";
 import ZLineIcon from "@/components/ZLineIcon";
 import { ChangeBadge } from "@/components/ds/ChangeBadge";
+import { CardArtworkGlass } from '../CardArtworkGlass';
 
 const CHANGE_WINDOW_MS = 14 * 86400000;
 
@@ -67,6 +68,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
     {poster
       ? <DayMotif day={listingDay(listing)} placement="card" />
       : <DayMotif day={listingDay(listing)} placement="art" className="tonight-card__motif-fill" />}
+    <CardArtworkGlass />
     <RailShareButton href={eventPath(listing.id, listing.title, listing.dayOfWeek)} title={listing.title} />
     {liveState ? <LiveBadge live={liveState} /> : null}
     <div className="tonight-card__sheen pdx-glass-sheen--specular" aria-hidden="true" />

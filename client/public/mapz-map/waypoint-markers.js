@@ -73,7 +73,7 @@ function tintedIcon(image,color){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=96;
  const ctx=canvas.getContext('2d'),fit=88/Math.max(image.width,image.height);
  ctx.drawImage(image,(96-image.width*fit)/2,(96-image.height*fit)/2,image.width*fit,image.height*fit);
- ctx.globalCompositeOperation='source-in';ctx.fillStyle=color;ctx.fillRect(0,0,96,96);
+ if(color){ctx.globalCompositeOperation='source-in';ctx.fillStyle=color;ctx.fillRect(0,0,96,96);}
  colors.set(color,canvas);return canvas;
 }
 /** Glow ring: breathes .18 to .42 over 3.8s at rest; selected holds .45; calm and reduced motion hold .28. */
@@ -82,8 +82,8 @@ function ringAlpha(selected){
  if(stillMotion())return .28;
  return .3+.12*Math.sin(performance.now()/1000*Math.PI*2/3.8);
 }
-function drawGlyph(ctx,image,x,y,size,glitch){
- const tinted=tintedIcon(image,'#FFFFFF'),left=x-size/2,top=y-size/2;
+function drawGlyph(ctx,image,x,y,size,glitch,preserveArtwork=false){
+ const tinted=tintedIcon(image,preserveArtwork?null:'#FFFFFF'),left=x-size/2,top=y-size/2;
  if(!glitch){ctx.drawImage(tinted,left,top,size,size);return;}
  // Swap glitch: the glyph splits into two bands that slip sideways for a beat.
  const shift=Math.max(1,size*.08)*glitch,half=tinted.height/2;
@@ -113,7 +113,7 @@ export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1,f
  ctx.globalAlpha=alpha;ctx.drawImage(body.canvas,left,top,body.box*k,body.tall*k);
  // White glyph at 58% of the head, as in the waypoint pack.
  const glyph=size*.58;
- if(logo)drawGlyph(ctx,logo,x,y,glyph,extra.glitch||0);
+ if(logo)drawGlyph(ctx,logo,x,y,glyph,extra.glitch||0,true);
  else if(icon)drawGlyph(ctx,icon,x,y,glyph,extra.glitch||0);
  if(extra.scoop)drawScoop(ctx,x,y,size,color,extra.scoop);
  ctx.restore();

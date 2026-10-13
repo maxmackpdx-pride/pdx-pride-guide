@@ -1,7 +1,9 @@
-/** Map directory business names → static neon logo paths under /directory-logos. */
+import { whiteCompanyLogo } from "./whiteCompanyLogos";
+
+/** Resolve reviewed white company artwork before legacy directory assets. */
 
 /** Bump when logo assets under /directory-logos change so browsers fetch fresh files. */
-export const DIRECTORY_LOGO_VERSION = "2026-09-25-placez-white-marks";
+export const DIRECTORY_LOGO_VERSION = "2026-10-13-white-vector";
 
 /** Append soft cache-bust query to pack paths. Skip if already has a query string. */
 function withLogoCacheBust(path: string): string {
@@ -206,25 +208,27 @@ const WAYPOINT_ART_BY_STEM: Record<string, string> = {
   Best_Coast_Barber_Co: "/directory-logos/Best_Coast_Barber_Co.png",
 };
 
-/** White waypoint mark. Uses existing flyover art when the pack has no -white file. */
+/** Exact reviewed waypoint artwork, with explicit legacy aliases only. */
 export function resolveDirectoryWaypointLogo(name: string, imageUrl?: string | null): string | null {
   const primary = resolveDirectoryLogo(name, imageUrl);
   if (!primary) return null;
   const stem = primary.replace(/^\/directory-logos\//, "").replace(/\.png(?:\?.*)?$/, "");
   const art = WAYPOINT_ART_BY_STEM[stem];
   if (art) return art.startsWith("/directory-logos/") ? withLogoCacheBust(art) : art;
-  return primary.replace(/\.png(?=\?|$)/, "-white.png");
+  return primary;
 }
 
 /**
  * Resolve logo for a directory place.
- * Prefer static neon pack under /directory-logos (redesign source of truth),
- * then fall back to DB imageUrl when no pack match exists.
+ * Prefer reviewed white SVGs, including published name aliases.
+ * Retain explicit legacy pack matches only for records outside the reviewed inventory.
  */
 export function resolveDirectoryLogo(
   name: string,
   imageUrl?: string | null,
 ): string | null {
+  const reviewed = whiteCompanyLogo(name);
+  if (reviewed) return reviewed;
   const norm = normalizeDirectoryName(name);
   let stem = STEM_BY_NORMALIZED[norm];
   // Safe prefix only (venue name starts with a known stem). Never substring /
@@ -240,14 +244,17 @@ export function resolveDirectoryLogo(
       }
     }
   }
+  if (stem) {
+    const alias = Object.entries(STEM_BY_NORMALIZED).find(([, value]) => value === stem);
+    const reviewedAlias = alias ? whiteCompanyLogo(alias[0]) : null;
+    if (reviewedAlias) return reviewedAlias;
+  }
   if (norm === "lesbiancultureclub") return withLogoCacheBust("/directory-logos/place-lesbiancultureclub-primary.svg");
   if (norm === "scoreportland") {
     return withLogoCacheBust(`/directory-logos/place-${norm}.svg`);
   }
   if (stem) return withLogoCacheBust(`/directory-logos/${stem}.png`);
-  // Every live Place is packaged locally. The deterministic stem covers records
-  // added after the hand-authored map once the pack builder has run.
-  if (norm) return withLogoCacheBust(`/directory-logos/place-${norm}.png`);
+  // Unknown names use the card’s readable name fallback; do not invent a file URL.
   if (imageUrl && imageUrl.trim()) {
     const url = imageUrl.trim();
     return url.startsWith("/directory-logos/") ? withLogoCacheBust(url) : null;
@@ -261,6 +268,6 @@ export function directoryFallbackLogo(type: string): string {
 
 export function hasDirectoryLogo(name: string, imageUrl?: string | null): boolean {
   const norm = normalizeDirectoryName(name);
-  if (STEM_BY_NORMALIZED[norm] || norm) return true;
+  if (whiteCompanyLogo(name) || STEM_BY_NORMALIZED[norm]) return true;
   return Boolean(imageUrl?.trim().startsWith("/directory-logos/"));
 }

@@ -1,10 +1,12 @@
+import { ServiceNameMark } from "@/components/ServiceNameMark";
+import { serviceArtwork } from "@shared/serviceIdentity";
+import { directoryCardCategoryLabel, directorySubcategories } from '@shared/directorySubcategories';
 import { PLACE_ACCENTS } from './placeTokens';
 import { useId, type CSSProperties, type MouseEvent } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { PlaceCard } from '@/components/ds';
 import { ResourceCardMotif } from '@/components/resources/ResourceCardMotif';
-import { directoryFallbackLogo, resolveDirectoryLogo } from '@/lib/directoryLogos';
-import { DIRECTORY_TYPE_LABELS } from '@shared/directoryTheme';
+import { resolveDirectoryLogo } from '@/lib/directoryLogos';
 import { placeUrl } from '@shared/placeSlug';
 import type { Business } from '@/pages/Directory';
 import '@/pages/Resources.css';
@@ -16,7 +18,8 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
 }) {
   const logoInkId = `placez-logo-ink-${useId().replace(/:/g, '')}`;
   const accent = PLACE_ACCENTS[place.type] || 'var(--neon-cyan)';
-  const label = DIRECTORY_TYPE_LABELS[place.type] || place.type;
+  const label = directoryCardCategoryLabel(place);
+  const serviceTags = place.type === 'service' ? directorySubcategories(place) : [];
   const open = (event: MouseEvent<HTMLElement>) => onOpen(event.currentTarget.closest<HTMLElement>('.pdxPlace') || event.currentTarget);
   return <div className="placez-card-surface" style={{ '--placez-logo-ink-filter': `url(#${logoInkId})` } as CSSProperties}>
     <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: 'absolute' }}>
@@ -27,12 +30,12 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
     </svg>
     <PlaceCard name={place.name} category={place.type} categoryLabel={label} accentColor={accent}
       variant="full"
-      logoUrl={resolveDirectoryLogo(place.name, place.imageUrl) || undefined} fallbackLogoUrl={directoryFallbackLogo(place.type)}
+      logoUrl={serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl)) || undefined} logoFallback={<ServiceNameMark source={place} iconOnly />}
       businessId={place.id} isFollowing={Boolean(place.isFollowing)} onRequireAuth={onRequireAuth}
       shareUrl={placeUrl(place.id, place.name)}
-      categoryTags={[{id:place.type,name:label,color:accent},...(place.queerOwned ? [{id:'owned',name:'Queer owned',color:accent}] : [])]}
+      categoryTags={[...(serviceTags.length ? serviceTags.slice(0,2).map(tag => ({id:tag.id,name:tag.label,color:accent})) : [{id:place.type,name:label,color:accent}]),...(place.queerOwned ? [{id:'owned',name:'Queer owned',color:accent}] : [])]}
       className="rg-directory-card placez-discovery-card pdxPlace--clickable"
-      decoration={<><div className="rg-card-vignette" aria-hidden="true"/><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true"/><ResourceCardMotif name={place.name} category={`place-${place.type}`}/></>}
+      decoration={<><div className="rg-card-vignette" aria-hidden="true"/><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true"/><ResourceCardMotif glass name={place.name} category={`place-${place.type}`}/></>}
       onClick={open}
       footer={<div className="rg-directory-footer placez-discovery-footer">
         <p className="placez-discovery-meta">{place.neighborhood || 'Portland metro'}</p>

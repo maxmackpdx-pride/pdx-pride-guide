@@ -1,4 +1,6 @@
 import { BrowseHeader, BrowseControls, BrowseFilters, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
+import { PlaceSubcategoryFilters } from '@/components/discovery/PlaceSubcategoryFilters';
+import { directorySubcategories, directorySubcategoryOptions } from '@shared/directorySubcategories';
 import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import BoardShareButton from "@/components/BoardShareButton";
 import { directoryResourceName, directoryResourcePath } from "@/lib/directoryResources";
@@ -200,6 +202,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     return t?.split(",").filter(isPlacezType).join(",") || "ALL";
   });
   const [activeNeighborhood, setActiveNeighborhood] = useState(() => new URLSearchParams(window.location.search).get("neighborhood") || "ALL");
+  const [activeSubcategory, setActiveSubcategory] = useState(() => new URLSearchParams(window.location.search).get('sub') || 'ALL');
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
   const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
   const [placeOriginRect, setPlaceOriginRect] = useState<{
@@ -236,6 +239,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   const directoryQuerySuffix = useCallback(() => {
     const params = new URLSearchParams();
     if (!isSpaces && activeType !== "ALL") params.set("type", activeType);
+    if (!isSpaces && activeType !== 'ALL' && activeSubcategory !== 'ALL') params.set('sub', activeSubcategory);
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
     if (activeNeighborhood !== "ALL") params.set("neighborhood", activeNeighborhood);
     if (formOpen) params.set("add", "1");
@@ -246,7 +250,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     }
     const next = params.toString();
     return next ? `?${next}` : "";
-  }, [activeType, isSpaces, searchQuery, activeNeighborhood, formOpen, browseView]);
+  }, [activeType, activeSubcategory, isSpaces, searchQuery, activeNeighborhood, formOpen, browseView]);
 
   useEffect(() => {
     if (routePlaceId || new URLSearchParams(window.location.search).has("place")) return;
@@ -263,6 +267,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       setBrowseView(view === "grid" ? "grid" : "browse");
       setSearchQuery(params.get("q") || "");
       setActiveNeighborhood(params.get("neighborhood") || "ALL");
+      setActiveSubcategory(params.get('sub') || 'ALL');
     };
     window.addEventListener("popstate", restore);
     return () => window.removeEventListener("popstate", restore);
@@ -397,11 +402,18 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       .filter(c => c.count > 0);
   }, [categoryCounts, isSpaces]);
 
+  const subcategoryOptions = useMemo(() => isSpaces ? [] : directorySubcategoryOptions(visibleBusinesses, activeType.split(',')), [visibleBusinesses, activeType, isSpaces]);
+  const selectedSubcategory = subcategoryOptions.some(option => option.id === activeSubcategory) ? activeSubcategory : 'ALL';
+  useEffect(() => {
+    if (!isLoading && activeSubcategory !== selectedSubcategory) setActiveSubcategory(selectedSubcategory);
+  }, [isLoading, activeSubcategory, selectedSubcategory]);
+
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return visibleBusinesses
       .filter(b => {
         if (activeType !== "ALL" && !activeType.split(",").includes(b.type)) return false;
+        if (selectedSubcategory !== 'ALL' && !directorySubcategories(b).some(tag => tag.id === selectedSubcategory)) return false;
         if (activeNeighborhood !== "ALL" && browseNeighborhood(b.neighborhood) !== browseNeighborhood(activeNeighborhood)) return false;
         if (q) {
           const haystack = [
@@ -411,6 +423,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
             b.description,
             b.address,
             b.neighborhood,
+            ...directorySubcategories(b).map(tag => tag.label),
           ]
             .filter(Boolean)
             .join(" ")
@@ -429,7 +442,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         if (bGo !== aGo) return bGo - aGo;
         return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
       });
-  }, [visibleBusinesses, activeType, activeNeighborhood, searchQuery]);
+  }, [visibleBusinesses, activeType, selectedSubcategory, activeNeighborhood, searchQuery]);
 
   const neighborhoodsInUse = useMemo(() => {
     const seen = new Set(
@@ -446,12 +459,11 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   }, [activeType, visibleBusinesses]);
 
   const handleSelectCategory = (key: string) => {
+    setActiveSubcategory('ALL');
     setDiscoveryChosen(true);
     setActiveType(current => {
       if (key === "ALL" || isSpaces) return key;
-      const selected = current === "ALL" ? [] : current.split(",");
-      const next = selected.includes(key) ? selected.filter(type => type !== key) : [...selected, key];
-      return next.join(",") || "ALL";
+      return current === key ? 'ALL' : key;
     });
     setActiveNeighborhood("ALL");
     setSelectedPlace(null);
@@ -498,6 +510,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
             </BrowseFilters>
             <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("places")} aria-label="Explore places on Mapz"><Map size={19} /><span>Map</span></a>
           </BrowseControls>
+          <PlaceSubcategoryFilters options={subcategoryOptions} selected={selectedSubcategory} onSelect={setActiveSubcategory} color={TYPE_COLORS[activeType] || 'var(--neon-cyan)'} />
           {formOpen && <DirectoryAddPlaceForm isSpaces={false} onClose={() => setFormOpen(false)} />}
           <div className="eb-body">
             <aside className="eb-side" aria-label="Placez filters">

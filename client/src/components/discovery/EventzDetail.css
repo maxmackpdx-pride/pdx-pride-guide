@@ -236,3 +236,6 @@
 .event-modal.eb-detail.eb-detail--place .place-modal-past__hint { letter-spacing: .025em; text-transform: none; margin-bottom: 12px; }
 
 .event-modal.eb-detail--place .eb-detail__art .place-modal-panel__logo { max-width: 374px; max-height: 264px; width: 110%; flex-shrink: 0; }
+
+/* Reviewed company artwork owns its white ink and internal dark detail. */
+.event-modal.eb-detail--place .eb-detail__art .place-modal-panel__logo[src*="-white.svg"] { filter: none !important; mix-blend-mode: normal; }

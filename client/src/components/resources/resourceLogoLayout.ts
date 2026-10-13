@@ -1,3 +1,4 @@
+import { companyLogoEntry } from "@shared/whiteCompanyLogos";
 import type { CSSProperties } from "react";
 
 // Individually reviewed visible-art bounds and optical targets for closed cards.
@@ -90,7 +91,8 @@ const profiles: Record<string, number[]> = {
 };
 
 export function resourceLogoLayout(name: string): CSSProperties {
- const p = profiles[name];
+ const mark = companyLogoEntry(name);
+ const p = mark ? [1, 120 * mark.ratio, 50, 50, 0, mark.ratio] : profiles[name];
  if (!p) return {};
  return {
   "--rg-optical-width": p[0],

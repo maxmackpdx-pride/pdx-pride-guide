@@ -13,13 +13,14 @@ export default function EventFlyerArt({
   showDay = true,
   title = "",
   venueName = "",
+  glass = false,
   alt = "",
   ...img
-}: { src: string | null | undefined; day: string | null | undefined; showDay?: boolean; title?: string; venueName?: string } & Omit<ImgHTMLAttributes<HTMLImageElement>, "src">) {
+}: { src: string | null | undefined; day: string | null | undefined; showDay?: boolean; title?: string; venueName?: string; glass?: boolean } & Omit<ImgHTMLAttributes<HTMLImageElement>, "src">) {
   if (src) return <img src={src} alt={alt} loading="lazy" decoding="async" {...img} />;
   return (
     <>
-      <DayMotif day={day} placement="art" />
+      <DayMotif day={day} placement="art" glass={glass} />
       {showDay ? <i className="day-motif-code">{motifDay(day)}</i> : null}
       <EventFallbackLogo title={title} venueName={venueName} />
     </>

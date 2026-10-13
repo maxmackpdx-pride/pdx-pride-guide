@@ -1,3 +1,6 @@
+import { ServiceNameMark } from "./ServiceNameMark";
+import { directoryCardCategoryLabel } from '@shared/directorySubcategories';
+import { serviceArtwork } from "@shared/serviceIdentity";
 import GigPreviewCard from "@/components/board/GigPreviewCard";
 import type { GigPost } from "@/pages/PrideWork";
 import { dayComplementToken } from "@/lib/dsColors";
@@ -34,7 +37,7 @@ import VenueFollowButton from "@/components/VenueFollowButton";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
 import { categoryHidesMissedConnections } from "@shared/missedConnections";
 import { resolveBusinessLocations } from "@shared/businessLocations";
-import { directoryFallbackLogo, resolveDirectoryLogo } from "@shared/directoryLogos";
+import { resolveDirectoryLogo } from "@shared/directoryLogos";
 import DirectoryMap from "@/components/DirectoryMap";
 import "./PlaceModal.css";
 import "./RoomDoorways.css";
@@ -222,6 +225,7 @@ export default function PlaceModal({
   const gigCards = useQuery<GigPost[]>({ queryKey:["/api/gigs"], enabled:Boolean(place?.gigs?.length), queryFn:async()=>{const response=await fetch("/api/gigs",{credentials:"include"}); if(!response.ok) throw new Error("Could not load Gigz cards");return response.json();} });
   const { toast } = useToast();
   const { user } = useAuth();
+  const [failedLogo, setFailedLogo] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditableFields>(BLANK_FIELDS);
   const [ownerForm, setOwnerForm] = useState<OwnerEditableFields>(BLANK_OWNER_FIELDS);
@@ -317,7 +321,7 @@ export default function PlaceModal({
   if (!place) return null;
 
   const category = TYPE_TO_DS_CATEGORY[place.type] || "venues";
-  const categoryLabel = TYPE_LABELS[place.type] || place.type;
+  const categoryLabel = directoryCardCategoryLabel(place);
   const locations =
     Array.isArray(place.locations) && place.locations.length > 0
       ? place.locations
@@ -484,21 +488,14 @@ export default function PlaceModal({
               onKeyDown={event => { if(event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); heroRef.current?.scrollTo({left:event.key === "ArrowRight" ? heroRef.current.clientWidth : 0}); } }}>
               <div className="place-modal-panel__hero-slide" aria-label="Place artwork">
 <div className="eb-detail__art">
-            <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif name={place.name} category={`place-${place.type}`} /></div>
-          <img
+            <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif glass name={place.name} category={`place-${place.type}`} /></div>
+          {failedLogo !== place.name && serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl)) ? <img
             key={`${place.id}:${place.name}:${place.imageUrl}`}
             className="place-modal-panel__logo"
-            src={resolveDirectoryLogo(place.name, place.imageUrl) || directoryFallbackLogo(place.type)}
+            src={serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl))!}
             alt={`${place.name} logo`}
-            onError={(event) => {
-              const image = event.currentTarget;
-              const fallback = directoryFallbackLogo(place.type);
-              if (image.getAttribute("src") !== fallback) {
-                image.src = fallback;
-                image.alt = categoryLabel;
-              }
-            }}
-          />
+            onError={() => setFailedLogo(place.name)}
+          /> : <div className="place-modal-panel__logo"><ServiceNameMark source={place} /></div>}
 
           </div>
               </div>
@@ -935,7 +932,7 @@ export default function PlaceModal({
                 aria-label={`View event: ${event.title}`}
                 role="listitem"
               >
-                <EventFlyerArt src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} day={event.dayOfWeek} title={event.title} venueName={place.name} />
+                <EventFlyerArt glass src={resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek)} day={event.dayOfWeek} title={event.title} venueName={place.name} />
                 {event.previewExample && <span className="place-event-tile__example">Example</span>}
                 <span className="place-event-tile__shade"><strong>{event.title}</strong><small>{event.previewExample ? "Preview example" : formatDirectoryEventWhen(event)}</small></span>
               </Link>)}
@@ -986,7 +983,7 @@ export default function PlaceModal({
                       role="listitem" aria-label={`View past event: ${ev.title}`}
                       className="place-event-tile place-event-tile--past pdx-glass-rebind"
                       style={{"--c":DAY_COLOR[dayCodeFromEvent(ev)] || accent} as React.CSSProperties}>
-                      <EventFlyerArt src={resolveEventPosterUrl(ev.id,ev.posterImageUrl,ev.dayOfWeek)} day={ev.dayOfWeek} showDay={false} />
+                      <EventFlyerArt glass src={resolveEventPosterUrl(ev.id,ev.posterImageUrl,ev.dayOfWeek)} day={ev.dayOfWeek} showDay={false} />
                       <span className="place-event-tile__shade"><strong>{ev.title}</strong><small>{formatPastWhen(ev)} · Ended</small></span>
                     </Link>)}
                   </div>
