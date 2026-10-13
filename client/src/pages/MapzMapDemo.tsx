@@ -501,7 +501,7 @@ export default function MapzMapDemo() {
   const mineSpecs=useMemo(()=>[["gigz","/api/gigs?mine=1"],["giftz","/api/gifting/mine"],["sellz","/api/sellz/mine"],["mizzed","/api/missed-connections/mine"]] as const,[]);
   const mineQueries=useQueries({queries:mineSpecs.map(([world,url])=>({queryKey:["map-worlds-mine",world,user?.id],enabled:active&&!!user&&dataReady,queryFn:()=>apiRequest("GET",url).then(r=>r.json()) as Promise<MapRow[]>}))});
   const mineWorlds=Object.fromEntries(mineSpecs.map(([world],i)=>[world,mineQueries[i]]));
-  const savedSellz=useQuery<number[]>({queryKey:["/api/sellz/saved/ids"],enabled:!!user,queryFn:()=>apiRequest("GET","/api/sellz/saved/ids").then(r=>r.json())});
+  const savedSellz=useQuery<number[]>({queryKey:["/api/sellz/saved/ids"],enabled:active&&!!user,queryFn:()=>apiRequest("GET","/api/sellz/saved/ids").then(r=>r.json())});
   const savedSellzSet=useMemo(()=>new Set(savedSellz.data||[]),[savedSellz.data]);
   useEffect(()=>{
     return queryClient.getQueryCache().subscribe(event=>{

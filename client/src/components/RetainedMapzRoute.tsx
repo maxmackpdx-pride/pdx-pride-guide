@@ -22,6 +22,12 @@ export default function RetainedMapzRoute() {
   const [path] = useLocation();
   const search = useSearch();
   const active = isMapzRoute(path);
+  const [documentVisible,setDocumentVisible]=useState(()=>!document.hidden);
+  useLayoutEffect(()=>{
+    const sync=()=>setDocumentVisible(!document.hidden);
+    document.addEventListener("visibilitychange",sync);
+    return()=>document.removeEventListener("visibilitychange",sync);
+  },[]);
   const [visited, setVisited] = useState(active);
   const [generation,setGeneration]=useState(0);
   const identity=useRef<{known:boolean;id:number|null}>({known:!authLoading,id:user?.id??null});
@@ -47,7 +53,7 @@ export default function RetainedMapzRoute() {
     if (!search && held.search) navigate(`${path}?${held.search}`, { replace: true, state: window.history.state });
   }, [active, path, search, held.search]);
   if (!visited && !active) return null;
-  return <Activity.Provider value={active}>
+  return <Activity.Provider value={active&&documentVisible}>
     <CameraRecorder.Provider value={recordCamera}><RouteSnapshot.Provider value={held}>
       <div hidden={!active} style={{display:active?undefined:"none"}} aria-hidden={!active || undefined} data-mapz-retained={active ? 'active' : 'paused'}>
         <Router hook={useMapLocation} searchHook={useMapSearch}>
