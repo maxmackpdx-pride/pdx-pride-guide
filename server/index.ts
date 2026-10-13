@@ -63,6 +63,9 @@ app.use((req, res, next) => {
 // Retired public paths → canonical boards. 301 so crawlers and old links
 // collapse. Do not rewrite static files under /hausing/demo.
 const PATH_ALIASES: Record<string, string> = {
+  "/boards": "/boardz",
+  "/all-boards": "/boardz",
+  "/our-boardz": "/boardz",
   "/resources": "/needz",
   "/rezources": "/needz",
   "/z/resources": "/needz",

@@ -210,7 +210,7 @@ export function buildSitemapXml(events: SeoEvent[]) {
   const staticPaths = [
     "/",
     "/events",
-    "/boards",
+    "/boardz",
     "/schedule",
     "/directory",
     "/giftz",
@@ -254,7 +254,7 @@ ${eventUrls}
 
 export function buildCanonicalUrl(requestPath: string) {
   const path = (requestPath.split("?")[0]?.split("#")[0] || "/").trim() || "/";
-  const normalized = ["/resources", "/rezources"].includes(path) ? "/needz" : path.startsWith("/") ? path : `/${path}`;
+  const normalized = ["/resources", "/rezources"].includes(path) ? "/needz" : ["/boards", "/all-boards", "/our-boardz"].includes(path) ? "/boardz" : path.startsWith("/") ? path : `/${path}`;
   return normalized === "/" ? `${SITE_URL}/` : `${SITE_URL}${normalized}`;
 }
 
@@ -267,8 +267,8 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "EVENTZ | Zaylist",
     description: "Every Portland queer event in one place. Find the party, back the spaces that host it, all year round.",
   },
-  "/boards": {
-    title: "Boards | Zaylist",
+  "/boardz": {
+    title: "Our BoardZ | Zaylist",
     description: "Explore Zaylist's community boards for housing, gifts, selling, work, missed connections, and groups.",
   },
   "/about": {
@@ -611,7 +611,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
         ? `${SITE_URL}/api/og/profile/${encodeURIComponent(liveProfile.username)}?v=2`
         : boardShareKey
           ? shareCardUrl(boardShareKey)
-          : pathKey === "/needz" ? absoluteAssetUrl("/og/zaylist-needz-v1.png") : defaultShareCardUrl();
+          : pathKey === "/needz" ? absoluteAssetUrl("/og/zaylist-needz-v1.png") : pathKey === "/boardz" ? absoluteAssetUrl("/og/zaylist-our-boardz-v1.png") : defaultShareCardUrl();
   const pageImageIsCard = !!(liveEvent || livePlace || liveProfile || boardShareKey);
 
   // Home used to inline the whole LIVE catalog (~500 events) as JSON-LD + a

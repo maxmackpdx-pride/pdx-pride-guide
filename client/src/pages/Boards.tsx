@@ -126,7 +126,7 @@ function BoardDetail({
           onAction={detail.isError ? () => void detail.refetch() : undefined}
         />
         <button type="button" className="eb-tool" onClick={onClose}>
-          Back to boards
+          Back to Our BoardZ
         </button>
       </div>
     );
@@ -142,7 +142,7 @@ function BoardDetail({
         onClose={onClose}
         onRequireAuth={onRequireAuth}
         onSelectPost={(id) => onSelect(`housing:${id}`)}
-        sharePath={(id) => `/boards?board=housing&post=housing:${id}`}
+        sharePath={(id) => `/boardz?board=housing&post=housing:${id}`}
       />
     );
   const p = detail.data as MissedConnectionPost;
@@ -167,7 +167,7 @@ function BoardDetail({
 
 export default function Boards() {
   usePageSeo(
-    "All Boards | Zaylist",
+    "Our BoardZ | Zaylist",
     "My Hoüz, Gigz, Giftz, Sellz, and Mizzed Connections. Find your people and your next thing.",
   );
   const { user } = useAuth();
@@ -329,10 +329,7 @@ export default function Boards() {
       <header className="eb-frame ab-header">
         <div>
           <p className="eb-kicker">Portland · Community boards</p>
-          <h1>
-            ALL <span>BOARDS</span>
-            <i aria-hidden="true">↗</i>
-          </h1>
+          <h1 className="ab-brand"><img src="/brand/family/our-boardz.svg" alt="Our BoardZ" /></h1>
           <p>Find your people. Find your next thing.</p>
         </div>
         <Link className="eb-tool" href="/z">
@@ -564,7 +561,7 @@ export default function Boards() {
                     onAction={() => void savedQuery.refetch()}
                   />
                 )}
-                {categoryPosts.some(post=>post.isDemo) && <p className="ab-note" role="note">Demo posts show how Boards works. They are examples, not available listings.</p>}
+                {categoryPosts.some(post=>post.isDemo) && <p className="ab-note" role="note">Demo posts show how Our BoardZ works. They are examples, not available listings.</p>}
                 <div className="ab-card-grid">
                   {results.slice(0, limit).map((post) => {
                     const cat = boardCategories.find(

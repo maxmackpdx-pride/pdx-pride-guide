@@ -218,8 +218,8 @@ function ProfileMenuPanel({
 function ProfileBoardsFolder({ location, onClose }: { location: string; onClose: () => void }) {
   const [open, setOpen] = useState(false);
   return <div className="hub-member-folder">
-    <button type="button" className="site-profile-menu__item hub-member-folder__toggle" aria-expanded={open} aria-controls="profile-board-links" onClick={() => setOpen(value => !value)}><span>Boards</span><ChevronDown size={14} strokeWidth={2.4} aria-hidden style={{ transform: open ? "rotate(180deg)" : "none" }} /></button>
-    {open && <div id="profile-board-links" className="hub-member-folder__children" role="group" aria-label="Boards">{BOARD_NAV.map(item => <Link key={item.href} href={item.href} role="menuitem" className={`site-profile-menu__item hub-member-folder__child${location === item.href ? " active" : ""}`} onClick={onClose}>{item.label}</Link>)}</div>}
+    <button type="button" className="site-profile-menu__item hub-member-folder__toggle" aria-expanded={open} aria-controls="profile-board-links" onClick={() => setOpen(value => !value)}><span>Our BoardZ</span><ChevronDown size={14} strokeWidth={2.4} aria-hidden style={{ transform: open ? "rotate(180deg)" : "none" }} /></button>
+    {open && <div id="profile-board-links" className="hub-member-folder__children" role="group" aria-label="Our BoardZ">{BOARD_NAV.map(item => <Link key={item.href} href={item.href} role="menuitem" className={`site-profile-menu__item hub-member-folder__child${location === item.href ? " active" : ""}`} onClick={onClose}>{item.label}</Link>)}</div>}
   </div>;
 }
 

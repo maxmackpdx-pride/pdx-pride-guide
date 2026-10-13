@@ -31,7 +31,7 @@ test("housing tags and remote filters only include requested posts",()=>{
 test("old category, saved and tools links retain post IDs in unified Boards",()=>{
  for(const board of ["housing","gigz","giftz","sellz","mizzed"] as const){
   const u=new URL(boardBrowseHref(board,"?post=9&view=tools"),"https://www.zaylist.com");
-  assert.equal(u.pathname,"/boards");assert.equal(u.searchParams.get("post"),`${board}:9`);assert.equal(u.searchParams.get("mine"),"1");
+  assert.equal(u.pathname,"/boardz");assert.equal(u.searchParams.get("post"),`${board}:9`);assert.equal(u.searchParams.get("mine"),"1");
  }
  const u=new URL(boardBrowseHref("housing","?type=FORMING&filter=SAVED&join=1"),"https://www.zaylist.com");
  assert.equal(u.searchParams.get("intent"),"forming");assert.equal(u.searchParams.get("saved"),"1");assert.equal(u.searchParams.get("join"),"1");

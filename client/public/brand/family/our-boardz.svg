@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="500" viewBox="0 0 1240 500" role="img" aria-labelledby="title desc">
+<title id="title">Our BoardZ</title><desc id="desc">Our BoardZ. Small white OUR above angular magenta BOARD and an oversized white Z.</desc>
+<g fill="#fff" transform="translate(74 66)">
+<path fill-rule="evenodd" d="M0 18L18 0h46l18 18v47L64 83H18L0 65z M26 25v33h30V25z"/>
+<path d="M96 0h27v54l8 8h17l8-8V0h27v65l-18 18h-51L96 65z"/>
+<path fill-rule="evenodd" d="M198 0h54l21 21v25l-16 16 24 21h-37l-20-23v23h-26z M224 22v16h19l5-5v-6l-5-5z"/>
+</g>
+<g fill="#ff00cc">
+<path fill-rule="evenodd" transform="translate(74 188)" d="M0 0h104l37 34v49l-18 17 21 20v47l-37 33H0z M44 42v35h40l13-12V54L84 42z M44 119v39h42l14-13v-13l-14-13z"/>
+<path fill-rule="evenodd" transform="translate(241 188)" d="M35 0h79l36 34v132l-36 34H35L0 166V34z M44 44v112h62V44z"/>
+<path fill-rule="evenodd" transform="translate(414 188)" d="M42 0h78l42 200h-46l-10-45H55l-9 45H0z M66 111h30L81 42z"/>
+<path fill-rule="evenodd" transform="translate(599 188)" d="M0 0h105l36 34v59l-33 32 50 75h-52l-46-72H44v72H0z M44 42v44h42l11-11V53L86 42z"/>
+<path fill-rule="evenodd" transform="translate(780 188)" d="M0 0h83l61 51v98l-61 51H0z M44 43v114h24l32-27V70L68 43z"/>
+</g>
+<path fill="#fff" d="M948 144h225l-24 44-146 216h134l-28 43H914l25-45 145-215H925z"/>
+</svg>

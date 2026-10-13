@@ -60,7 +60,7 @@ Everything in ZAYLIST is an **Object** (Event, Gift, Gig, Housing Post, Organiza
 
 ## 3. What My Hoüz Is
 
-**My Hoüz** is the housing category inside the single unified Boards page (`/boards?board=housing`). Every housing post lives inside My Hoüz, alongside Gigz, Giftz, Sellz, and Mizzed categories in that one Boards experience.
+**My Hoüz** is the housing category inside the single unified Our BoardZ page (`/boardz?board=housing`). Every housing post lives inside My Hoüz, alongside Gigz, Giftz, Sellz, and Mizzed categories in that one Our BoardZ experience.
 
 Two names, two scopes:
 

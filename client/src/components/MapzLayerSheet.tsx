@@ -93,7 +93,7 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
             id={`${panelId}-${layer.id}`} className="mapz-layer-sheet__body" hidden={active !== layer.id}
             aria-label={`${layer.label} options`} onScroll={event => { positions.current.set(layer.id, event.currentTarget.scrollTop); }}>
             <div className="mapz-layer-sheet__panel">
-              {layer.id !== "places" && <div className="mapz-layer-sheet__brand" aria-hidden="true"><small>In this view</small><img src={LAYER_LOGOS[layer.id]} alt="" /></div>}
+              {layer.id !== "places" && <div className="mapz-layer-sheet__brand" aria-hidden="true"><small>In this view</small><img src={LAYER_LOGOS[layer.id]} alt="" loading="lazy" decoding="async" /></div>}
               {layer.onToggle && <label className="mapz-layer-visibility">
                 <input type="checkbox" checked={layer.enabled} onChange={layer.onToggle} />Show {layer.label} pins on map
               </label>}

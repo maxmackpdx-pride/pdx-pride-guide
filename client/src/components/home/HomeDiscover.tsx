@@ -11,7 +11,7 @@ const destinations = [
   { icon: CalendarDays, room: "Eventz", title: "A night out", description: "Find events worth showing up for.", href: "/events", accent: "var(--room-eventz)" },
   { icon: Trees, room: "OutZide", title: "An outdoor escape", description: "Get out. Find your next adventure.", href: "/outzide", accent: "var(--room-outz)" },
   { icon: Heart, room: "Mizzed", title: "That person you noticed", description: "Maybe they noticed you, too.", href: "/mizzed", accent: "var(--room-mizzed)" },
-  { icon: House, room: "My Hoüz", title: "A roommate", description: "Find your people. Share a place.", href: "/boards?board=housing", accent: "var(--room-hauz)" },
+  { icon: House, room: "My Hoüz", title: "A roommate", description: "Find your people. Share a place.", href: "/boardz?board=housing", accent: "var(--room-hauz)" },
   { icon: Gift, room: "Giftz", title: "Something to give", description: "Give it a new home. Find something free.", href: "/giftz", accent: "var(--room-giftz)" },
   { icon: Tags, room: "Sellz", title: "Something to buy or sell", description: "Find what you need. Pass something on.", href: "/sellz", accent: "var(--room-sellz)" },
   { icon: LifeBuoy, room: "NEEDZ", title: "Care and support", description: "Find help, services, and someone to talk to.", href: "/needz", accent: "var(--neon-green)" },

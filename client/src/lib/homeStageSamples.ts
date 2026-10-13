@@ -118,7 +118,7 @@ export function spottedPostPath(id: number): string {
 }
 
 export function housingPostPath(id: number): string {
-  return `/boards?board=housing&post=housing:${id}`;
+  return `/boardz?board=housing&post=housing:${id}`;
 }
 
 /** Prefer a currently-happening listing; else first live/upcoming. */
@@ -327,7 +327,7 @@ export function buildHomeStageSamples(input: {
 export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
   housing: {
     key: "housing",
-    href: "/boards?board=housing",
+    href: "/boardz?board=housing",
     kicker: "BUILDING A HOÜZ",
     title: "Wildrose Hoüz, 2 in, 2 to go",
     line: "Southeast. Big kitchen, one very polite beagle.",

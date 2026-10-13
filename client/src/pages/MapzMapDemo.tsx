@@ -747,7 +747,7 @@ export default function MapzMapDemo() {
     { id:"gigz",label:ROOMS.gigz.nav,color:"var(--room-gigz-ink)",enabled:showGigz,onToggle:()=>toggleLayer("hideGigz"),panel:worldPanels.gigz,viewMore:[{label:"Browse all Gigz",href:"/gigz"}] },
     { id:"giftz",label:ROOMS.giftz.nav,color:ROOMS.giftz.accent,enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[{label:"Browse all Giftz",href:"/giftz"}] },
     { id:"sellz",label:ROOMS.sellz.nav,color:ROOMS.sellz.accent,enabled:showSellz,onToggle:()=>toggleLayer("hideSellz"),panel:worldPanels.sellz,viewMore:[{label:"Browse all Sellz",href:"/sellz"}] },
-    { id: "houz", label: ROOMS.hauz.nav, color: ROOMS.hauz.accent, enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "Browse My Hoüz", href: "/boards?board=housing" }] },
+    { id: "houz", label: ROOMS.hauz.nav, color: ROOMS.hauz.accent, enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "Browse My Hoüz", href: "/boardz?board=housing" }] },
   ];
 
   useAttendanceSummariesLive(active&&dataReady);

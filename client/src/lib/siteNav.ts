@@ -36,7 +36,7 @@ export const BOARD_NAV: NavLinkItem[] = [
 ];
 
 /** Every board room, including My Hoüz. */
-export const BOARDS_MENU: NavLinkItem[] = [...BOARD_NAV, { href: "/boards?board=housing", label: "My Hoüz", accent: "hauz" }];
+export const BOARDS_MENU: NavLinkItem[] = [...BOARD_NAV, { href: "/boardz?board=housing", label: "My Hoüz", accent: "hauz" }];
 
 /**
  * Primary nav - labels match on-page titles where possible.
@@ -49,7 +49,7 @@ export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/events", label: "Eventz", accent: "cyan" },
   { type: "link", href: "/directory", label: "Placez", accent: "cyan" },
   { type: "link", href: "/map", label: "Mapz", accent: "blue" },
-  { type: "link", href: "/boards", label: "Boards", accent: "magenta" },
+  { type: "link", href: "/boardz", label: "Our BoardZ", accent: "magenta" },
   /* Nonprofits, hotlines, and LGBTQ+ groups (moved off Placez 2026-09-30). */
   { type: "link", href: "/needz", label: "NEEDZ", accent: "green" },
 ];
@@ -67,14 +67,14 @@ export type PageHeaderMeta = {
 
 /** Breadcrumb section + H1 title for interior pages. */
 export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
-  "/boards": { section: "Boards", title: "BOARDS" },
+  "/boardz": { section: "Our BoardZ", title: "OUR BOARDZ" },
   "/events": { section: "EVENTZ", title: "EVENTZ" },
   "/schedule": { section: "EVENTZ", title: "My Schedule" },
-  "/gigz": { section: "Boards", title: "GIGZ" },
-  "/giftz": { section: "Boards", title: "GIFTZ" },
-  "/sellz": { section: "Boards", title: "SELLZ" },
-  "/the-hauz": { section: "Boards", title: "My Hoüz" },
-  "/mizzed": { section: "Boards", title: "MIZZED CONNECTION" },
+  "/gigz": { section: "Our BoardZ", title: "GIGZ" },
+  "/giftz": { section: "Our BoardZ", title: "GIFTZ" },
+  "/sellz": { section: "Our BoardZ", title: "SELLZ" },
+  "/the-hauz": { section: "Our BoardZ", title: "My Hoüz" },
+  "/mizzed": { section: "Our BoardZ", title: "MIZZED CONNECTION" },
   "/directory": { section: "PLACEZ", title: "OUR PLACEZ" },
   "/outzide": { section: "OutZide", title: "OutZide" },
   "/outzide/rooster-rock": { section: "OutZide", title: "Rooster Rock" },

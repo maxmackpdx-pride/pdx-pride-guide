@@ -1,4 +1,4 @@
-> **Historical handoff — superseded, 2026-10-13.** The current housing category is **My Hoüz** within the single unified Boards page (`/boards?board=housing`). This archived layout and its old labels are source history, not current UI instructions. Use `docs/LIVE_DESIGN_STANDARD.md` and the live Boards implementation for new work.
+> **Historical handoff — superseded, 2026-10-13.** The current housing category is **My Hoüz** within the single unified Our BoardZ page (`/boardz?board=housing`). This archived layout and its old labels are source history, not current UI instructions. Use `docs/LIVE_DESIGN_STANDARD.md` and the live Our BoardZ implementation for new work.
 
 # Handoff: ZAYLIST HAÜSING (Housing board)
 

@@ -42,7 +42,7 @@ export default function MobileBottomNav() {
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
   const placesActive = navLinkActive(location, "/directory");
-  const boardsActive = navLinkActive(location, "/boards") || BOARDS_MENU.some(item => navLinkActive(location, item.href)) || navLinkActive(location, "/hausing");
+  const boardsActive = navLinkActive(location, "/boardz") || BOARDS_MENU.some(item => navLinkActive(location, item.href)) || navLinkActive(location, "/hausing");
   const resourcesActive = navLinkActive(location, "/needz");
   const activeIndex = resourcesActive ? 4 : placesActive ? 1 : mapActive ? 2 : boardsActive ? 3 : eventsActive ? 0 : -1;
 
@@ -110,15 +110,15 @@ export default function MobileBottomNav() {
           </Link>
 
           <Link
-            href="/boards"
+            href="/boardz"
             className={tabClass(boardsActive, "pink")}
             data-accent="magenta"
             aria-current={boardsActive ? "page" : undefined}
-            aria-label="Boards"
+            aria-label="Our BoardZ"
             onClick={handleNavLink}
           >
             <span className="znav-icon-row"><LayoutGrid size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Boards</span>
+            <span className="znav-caption">Our BoardZ</span>
           </Link>
 
           <Link

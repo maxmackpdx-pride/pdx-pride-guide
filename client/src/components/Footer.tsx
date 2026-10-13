@@ -25,7 +25,7 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
       ["/gigz", "GIGZ"],
       ["/giftz", "GIFTZ"],
       ["/sellz", "SELLZ"],
-      ["/boards?board=housing", "My Hoüz"],
+      ["/boardz?board=housing", "My Hoüz"],
     ],
   },
   {

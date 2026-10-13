@@ -143,8 +143,10 @@ function AppLayout() {
             <Route path="/" component={Home} />
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
-            <Route path="/boards" component={Boards} />
-            <Route path="/all-boards" component={Boards} />
+            <Route path="/boardz" component={Boards} />
+            <Route path="/boards">{() => <Redirect to={`/boardz${window.location.search}${window.location.hash}`} replace />}</Route>
+            <Route path="/all-boards">{() => <Redirect to={`/boardz${window.location.search}${window.location.hash}`} replace />}</Route>
+            <Route path="/our-boardz">{() => <Redirect to={`/boardz${window.location.search}${window.location.hash}`} replace />}</Route>
             <Route path="/map-demo">{() => null}</Route>
             <Route path="/map">{() => null}</Route>
             <Route path="/schedule">{() => <Schedule />}</Route>

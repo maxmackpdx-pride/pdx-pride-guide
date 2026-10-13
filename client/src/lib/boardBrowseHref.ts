@@ -12,5 +12,5 @@ export function boardBrowseHref(board: BoardCategory, search = ""): string {
   if(params.get("filter")?.toUpperCase() === "SAVED") params.set("saved","1");
   const post = params.get("post");
   if (post && /^\d+$/.test(post)) params.set("post", `${board}:${post}`);
-  return `/boards?${params.toString()}`;
+  return `/boardz?${params.toString()}`;
 }

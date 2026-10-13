@@ -151,7 +151,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
         <button type="button" className="site-search__close" onClick={onClose} aria-label="Close search"><X size={20} /></button>
       </div>
       <div id={listId} className="site-search__body" role="listbox" aria-label="Search results">
-        {query.trim().length < 2 && <p className="site-search__hint">Search NEEDZ, EVENTZ, PLACEZ, Boards, people, and pages.</p>}
+        {query.trim().length < 2 && <p className="site-search__hint">Search NEEDZ, EVENTZ, PLACEZ, Our BoardZ, people, and pages.</p>}
         {loading && <p className="site-search__hint" role="status">Searching…</p>}
         {query.trim().length >= 2 && !loading && flat.length === 0 && <p className="site-search__hint">No matches for “{query.trim()}”.</p>}
         {groups.map((group) => <section className="site-search__group" key={group.label}>

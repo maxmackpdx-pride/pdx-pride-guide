@@ -335,7 +335,7 @@ export const DEMO_POSTINGS: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPo
   hauz: [
     {
       id: "demo-hauz-1",
-      href: "/boards?board=housing",
+      href: "/boardz?board=housing",
       kicker: "Building a Hoüz",
       title: "Wildrose Haüs",
       line: "Southeast. Big kitchen, one very polite beagle.",
@@ -346,7 +346,7 @@ export const DEMO_POSTINGS: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPo
     },
     {
       id: "demo-hauz-2",
-      href: "/boards?board=housing",
+      href: "/boardz?board=housing",
       kicker: "Building a Hoüz",
       title: "Cully Room Open",
       line: "Quiet room in a shared craftsman near the Cully Kitchen.",
