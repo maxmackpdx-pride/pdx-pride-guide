@@ -1,3 +1,4 @@
+import { useMapzActive } from './MapzActivity';
 import { captureCamera, cameraHref, type CameraMap } from "../../public/map-foundation/camera.js";
 import { Link, useLocation } from "wouter";
 import { useEffect, useState, type MouseEvent } from "react";
@@ -7,6 +8,7 @@ import "./MapSwitch.css";
 
 /** Portland city map and OutZide are one map family: a switch in the same spot on both maps crosses between them. */
 export default function MapSwitch({ current }: { current: "mapz" | "outz" }) {
+  const active=useMapzActive();
   const [,setLocation] = useLocation();
   const switchMode = (event: MouseEvent, href: string) => {
     if(event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)return;
@@ -26,6 +28,7 @@ export default function MapSwitch({ current }: { current: "mapz" | "outz" }) {
     catch { return "/outzide"; }
   });
   useEffect(() => {
+    if(!active)return;
     if (current === "outz") {
       try { sessionStorage.setItem("outzide.visited", "1"); } catch { /* Private browsing can disable storage. */ }
     }
@@ -46,7 +49,7 @@ export default function MapSwitch({ current }: { current: "mapz" | "outz" }) {
       window.removeEventListener("zaylist:map-ready", warm);
       cancelIdle();
     };
-  }, [current]);
+  }, [current,active]);
   const leavingMapz = () => {
     try {
       const url = new URL(window.location.href);

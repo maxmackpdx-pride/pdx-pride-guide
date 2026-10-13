@@ -1,3 +1,4 @@
+import { useMapzActive } from '../MapzActivity';
 /**
  * The tag filter above the HAUSING feed.
  *
@@ -31,6 +32,7 @@ export function HousingTagFilter({
   applied: string[];
   onApply: (tags: string[]) => void;
 }) {
+  const active=useMapzActive();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<string[]>(applied);
   const [query, setQuery] = useState("");
@@ -46,7 +48,7 @@ export function HousingTagFilter({
   }, [applied, open]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !active) return;
     const onDown = (e: MouseEvent) => {
       if (!shellRef.current?.contains(e.target as Node)) setOpen(false);
     };
@@ -59,7 +61,7 @@ export function HousingTagFilter({
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("keydown", onKey);
     };
-  }, [open]);
+  }, [open,active]);
 
   const blocked = useMemo(() => blockedByHousingTags(draft), [draft]);
   const results = useMemo(() => searchHousingTags(query), [query]);
