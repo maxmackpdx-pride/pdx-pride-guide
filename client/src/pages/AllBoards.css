@@ -161,3 +161,42 @@ html.calm-mode .ab-door:hover { translate:none; }
 .ab-open-card .detail-actions>button::before,.ab-open-card .detail-actions>button::after { display:none; }
 .ab-open-card :is(.board-listing-card__cta,.sellz-card__open,.sellz-card__summary,.hz-back) { display:none; }
 .ab-open-card .board-listing-card__main { border-top-color:var(--c)!important; }
+
+/* Original board intent motifs, composed within the new shared card well.
+   Keep the middle clear for household information and the bottom for branding. */
+.ab-art--unified .ab-art__space {
+  position:absolute; inset:0; width:100%; height:100%; z-index:0;
+  stroke:var(--c); stroke-width:.65; opacity:.26; pointer-events:none;
+}
+.ab-art--unified .ab-art__intent-mark {
+  position:absolute; z-index:0; left:50%; top:38%; translate:-50% -50%;
+  width:clamp(54px,65%,108px); height:auto; aspect-ratio:1;
+  color:color-mix(in srgb,var(--c) 78%,var(--text-hi));
+}
+.ab-art--unified .ab-art__brand {
+  bottom:var(--space-5); height:var(--space-10); object-position:center;
+  filter:none; z-index:2;
+}
+.ab-art--unified .ab-household--clear {
+  top:var(--space-6); left:var(--space-3); right:var(--space-3);
+  gap:var(--space-2); padding:var(--space-3) var(--space-2);
+  background:color-mix(in srgb,var(--surface-card) 92%,transparent);
+  border:var(--bw-hair) solid color-mix(in srgb,var(--c) 22%,transparent);
+  border-radius:var(--radius-xl);
+}
+.ab-household--clear strong { width:100%; text-align:center; color:var(--c); font:var(--fw-heavy) var(--display-2)/1 var(--font-display); }
+.ab-household--clear strong span { color:var(--text-hi); font:var(--event-card-detail-font); }
+.ab-art--unified .ab-household--clear small { margin:0; font:var(--event-card-detail-font); text-shadow:none; }
+.ab-art__quote-pair { position:absolute; z-index:0; inset:var(--space-5) var(--space-3) auto; display:flex; justify-content:space-between; color:var(--c); font:var(--fw-heavy) var(--ab-quote-size)/1 var(--font-display); opacity:.65; }
+.ab-art__quote-pair span:last-child { padding-top:var(--space-8); }
+.ab-card--giving .ab-art__intent-mark { transform:rotate(-8deg); }
+.ab-card--iso .ab-art__intent-mark,.ab-card--looking .ab-art__intent-mark { transform:rotate(8deg); }
+.ab-card--available .ab-card__eyebrow>span,.ab-card--giving .ab-card__eyebrow>span { background:var(--c); color:var(--z-black); }
+.ab-card--hiring .ab-card__value { border-left:var(--bw-chunk) solid var(--c); padding-left:var(--space-2); }
+@media(max-width:767px) {
+ .ab-art--unified .ab-household--clear { top:var(--space-4); }
+ .ab-household--clear strong { font-size:var(--display-3); }
+ .ab-art--unified .ab-household--clear small { font:var(--event-card-meta-font); }
+ .ab-art--unified .ab-art__brand { bottom:var(--space-4); }
+ .ab-art__quote-pair { font-size:var(--ab-quote-size); }
+}
