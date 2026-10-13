@@ -1469,7 +1469,6 @@ export default function Schedule({
       <>
 
       {/* ---- Sticky toolbar ---- */}
-      <ScrollReveal delay={30}>
       <div className="schedule-toolbar">
         <div className="schedule-toolbar__inner">
           <div className="schedule-toolbar__row">
@@ -1527,7 +1526,6 @@ export default function Schedule({
           </div>
         </div>
       </div>
-      </ScrollReveal>
       </>
       )}
 

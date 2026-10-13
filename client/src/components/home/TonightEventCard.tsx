@@ -7,6 +7,7 @@ import { formatCardTime, formatGridCardWhen, listingDay, listingPosterUrl } from
 import "./TonightEventCard.css";
 import DayMotif, { motifDay } from "@/components/events/DayMotif";
 import EventFlyerArt from "@/components/events/EventFlyerArt";
+import EventFallbackLogo from "@/components/events/EventFallbackLogo";
 import RailShareButton from "./RailShareButton";
 import { eventPath } from "@shared/eventSlug";
 import ZLineIcon from "@/components/ZLineIcon";
@@ -70,7 +71,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
     {liveState ? <LiveBadge live={liveState} /> : null}
     <div className="tonight-card__sheen pdx-glass-sheen--specular" aria-hidden="true" />
     <button className="tonight-card__open" type="button" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>
-      <div className={`tonight-card__art tonight-card__art--flyer${poster ? "" : " tonight-card__art--motif"}`}>{poster ? <EventFlyerArt src={poster} day={listingDay(listing)} /> : <i className="day-motif-code">{motifDay(listingDay(listing))}</i>}</div>
+      <div className={`tonight-card__art tonight-card__art--flyer${poster ? "" : " tonight-card__art--motif"}`}>{poster ? <EventFlyerArt src={poster} day={listingDay(listing)} /> : <><i className="day-motif-code">{motifDay(listingDay(listing))}</i><EventFallbackLogo title={listing.title} venueName={listing.venueName} /></>}</div>
       <div className="tonight-card__body">
         <p className="rail-card-room"><img className="rail-card-room__logo rail-card-room__logo--white" src="/brand/family/eventz.png" alt="Eventz" /></p>
         {changeLabel ? <ChangeBadge label={changeLabel} className="tonight-card__change" /> : null}

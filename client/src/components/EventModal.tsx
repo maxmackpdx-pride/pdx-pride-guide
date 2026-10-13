@@ -49,7 +49,9 @@ import EventLocationMap from "./EventLocationMap";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import "./EventModal.approved.css";
 import "./EventModal.reference.css";
+import "./discovery/OpenCardContinuity.css";
 import DayMotif from "@/components/events/DayMotif";
+import EventFallbackLogo from "@/components/events/EventFallbackLogo";
 
 type EventWithLinks = Event & {
   venueWebsite?: string | null;
@@ -233,7 +235,7 @@ function EventModalInner({
   const [posterOrientation, setPosterOrientation] = useState<"portrait" | "landscape">("portrait");
   const [showStickyCta, setShowStickyCta] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(true);
   const [socialOpen, setSocialOpen] = useState(initialSection === "attendance");
   const [socialTab, setSocialTab] = useState<"attendance" | "missed">("attendance");
   const [editing, setEditing] = useState(false);
@@ -808,7 +810,7 @@ function EventModalInner({
         <section ref={heroRef} className={`event-modal__poster event-modal__hero event-modal--poster-${posterOrientation}`} aria-labelledby="event-modal-title">
           {posterUrl
             ? <img ref={posterImageRef} src={posterUrl} alt="" className="event-modal__poster-img" onLoad={e => setPosterOrientation(e.currentTarget.naturalHeight > e.currentTarget.naturalWidth * 1.08 ? "portrait" : "landscape")} />
-            : <span className="event-modal__poster-img event-modal__poster-motif"><DayMotif day={event.dayOfWeek} placement="art" /></span>}
+            : <span className="event-modal__poster-img event-modal__poster-motif"><DayMotif day={event.dayOfWeek} placement="art" /><EventFallbackLogo title={event.title} venueName={event.venueName} /></span>}
           <span className="event-modal__poster-fade" aria-hidden="true" />
           <span className="event-modal__poster-scan" aria-hidden="true" />
           <div className="event-modal__hero-content" ref={heroContentRef}>
@@ -851,23 +853,6 @@ function EventModalInner({
         </section>
 
         <div className="event-modal__body">
-          <section className="event-modal__mizzed-door" aria-label="Mizzed Connection">
-            <button type="button" className="room-doorways__door pdx-glass-card pdx-glass-rebind"
-              style={{ "--c": "var(--room-mizzed)", "--ink": "var(--room-mizzed)" } as React.CSSProperties}
-              aria-expanded={socialOpen && socialTab === "missed"} onClick={() => {
-                setSocialOpen(true);
-                setSocialTab("missed");
-                requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
-              }}>
-              <ResourceCardMotif name="MIZZED CONNECTION" category="mizzed" />
-              <span className="room-doorways__vignette" aria-hidden="true" />
-              <span className="room-doorways__glass" aria-hidden="true" />
-              <img className="room-doorways__logo" src="/brand/family/mizzed-connection.svg" alt="Mizzed Connection" loading="lazy" decoding="async" />
-              <span className="room-doorways__line"><strong>That person you noticed</strong><br />Maybe they noticed you, too.</span>
-              <span className="room-doorways__go">Who caught your eye? <span aria-hidden="true">↗</span></span>
-            </button>
-          </section>
-          {socialOpen && <div className="event-modal__social-room">{eventSocialTabs}{eventSocialPanel}</div>}
           <details className="event-modal__disclosure" open={detailsOpen} onToggle={e => setDetailsOpen(e.currentTarget.open)}>
             <summary><FileText aria-hidden="true" />Event details<ChevronRight aria-hidden="true" /></summary>
             <div className="event-modal__disclosure-content">
@@ -1347,6 +1332,23 @@ function EventModalInner({
                 onSchedule={() => rsvp.toggleRsvp(event.id)} />}
             </div>
           </details>
+          <section className="event-modal__mizzed-door" aria-label="Mizzed Connection">
+            <button type="button" className="room-doorways__door pdx-glass-card pdx-glass-rebind"
+              style={{ "--c": "var(--room-mizzed)", "--ink": "var(--room-mizzed)" } as React.CSSProperties}
+              aria-expanded={socialOpen && socialTab === "missed"} onClick={() => {
+                setSocialOpen(true);
+                setSocialTab("missed");
+                requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
+              }}>
+              <ResourceCardMotif name="MIZZED CONNECTION" category="mizzed" />
+              <span className="room-doorways__vignette" aria-hidden="true" />
+              <span className="room-doorways__glass" aria-hidden="true" />
+              <img className="room-doorways__logo" src="/brand/family/mizzed-connection.svg" alt="Mizzed Connection" loading="lazy" decoding="async" />
+              <span className="room-doorways__line"><strong>That person you noticed</strong><br />Maybe they noticed you, too.</span>
+              <span className="room-doorways__go">Who caught your eye? <span aria-hidden="true">↗</span></span>
+            </button>
+          </section>
+          {socialOpen && <div className="event-modal__social-room">{eventSocialTabs}{eventSocialPanel}</div>}
           <div className="event-modal__more">
             <button type="button" aria-label="More event information" aria-expanded={detailsOpen} onClick={() => setDetailsOpen(!detailsOpen)}><Ellipsis size={34} aria-hidden="true" /></button>
           </div>

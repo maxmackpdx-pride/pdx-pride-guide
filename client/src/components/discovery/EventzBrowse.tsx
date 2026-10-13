@@ -1,6 +1,8 @@
 import { Children, useId, useState, type CSSProperties, type ChangeEvent, type ReactNode } from "react";
 import { Grid2X2, SlidersHorizontal } from "lucide-react";
 import { SearchInput } from "@/components/ds";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useIsMobile } from "@/hooks/use-mobile";
 import EventsRail from "@/components/events/EventsRail";
 import "./EventzBrowse.css";
 
@@ -28,27 +30,42 @@ export function BrowseControls({ title, categories, selected, onSelect, query, o
     <div className="eb-category-row">
       <div className="eb-categories" role="group" aria-label={`${title} categories`}>
         {categories.map(category => <button type="button" className="eb-category pdx-glass-rebind" key={category.id}
-          style={{ "--c": category.color } as CSSProperties} aria-pressed={selected.includes(category.id)} onClick={() => onSelect(category.id)}>
+          style={{ "--c": category.color } as CSSProperties} aria-pressed={selected.includes(category.id)} onClick={() => { onSelect(category.id); onView("browse"); }}>
           <span>{category.label}</span><small>{category.id === "ALL" ? "Explore" : title}</small><b>{category.count}</b>
         </button>)}
-      </div>
-      <div className="eb-view" role="group" aria-label={`${title} view`}>
-        <button type="button" aria-label="Browse by category" aria-pressed={view === "browse"} onClick={() => onView("browse")}><SlidersHorizontal size={19} /></button>
-        <button type="button" aria-label="Show all as a grid" aria-pressed={view === "grid"} onClick={() => onView("grid")}><Grid2X2 size={19} /></button>
       </div>
     </div>
     <div className="eb-search-row"><SearchInput aria-label={`Search ${title}`} placeholder={`Search ${title.toLowerCase()}…`} value={query}
       onChange={(event: ChangeEvent<HTMLInputElement>) => onSearch(event.target.value)} onClear={() => onSearch("")} />{children}</div>
+    <div className="eb-browse-actions">
+      <button type="button" className="eb-tool eb-view-all" aria-pressed={view === "grid"} onClick={() => onView("grid")}>
+        <Grid2X2 size={18} aria-hidden="true" />View all
+      </button>
+    </div>
   </div>;
+}
+
+export function BrowseFilters({ title, active = false, children }: { title: string; active?: boolean; children: ReactNode }) {
+  return <Popover>
+    <PopoverTrigger asChild>
+      <button type="button" className="eb-tool eb-mobile-filter-toggle" aria-label={title} data-active={active}>
+        <SlidersHorizontal size={19} aria-hidden="true" />
+      </button>
+    </PopoverTrigger>
+    <PopoverContent align="end" sideOffset={8} className="eb-panel eb-filter-popover" aria-label={title}>
+      {children}
+    </PopoverContent>
+  </Popover>;
 }
 
 export function BrowseLane({ title, color, count, children }: { title: string; color: string; count: number; children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
   const id = useId();
   return <section className={`eb-lane pdx-glass-rebind${open ? " eb-lane--open" : ""}`} style={{ "--c": color } as CSSProperties} aria-labelledby={id}>
     <header className="eb-lane__head"><h2 id={id}><i aria-hidden="true" />{title} <small>{count}</small></h2>
-      {count > 4 && <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Show less" : "View all"}</button>}
+      {!isMobile && count > 4 && <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Show less" : "View all"}</button>}
     </header>
-    <EventsRail open={open} label={title}>{Children.map(children, child => <div className="events-rail__item" role="listitem">{child}</div>)}</EventsRail>
+    <EventsRail open={isMobile || open} label={title}>{Children.map(children, child => <div className="events-rail__item" role="listitem">{child}</div>)}</EventsRail>
   </section>;
 }

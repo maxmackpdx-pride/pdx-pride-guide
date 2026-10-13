@@ -1,6 +1,6 @@
 /* Room colors are brand identity. Do not replace them with intent colors.
    Shared tokens govern color, type, spacing, chrome, focus and motion; only the
-   approved experimental wide-card geometry belongs to this page. */
+   desktop wide cards and mobile poster cards belong to this page. */
 :root {
   --ab-target: 44px;
   --ab-hero-size: clamp(52px,6vw,78px);
@@ -9,7 +9,6 @@
   --ab-card-height: 250px;
   --ab-card-height-wide: 260px;
   --ab-card-height-compact: 240px;
-  --ab-card-height-phone: 242px;
 }
 .ab-page { min-height:calc(100dvh - 88px); background:radial-gradient(ellipse at 20% 0%, color-mix(in srgb,var(--room-hauz) 3%,transparent),transparent 60%),var(--z-black); }
 .ab-header { display:flex; justify-content:space-between; align-items:center; gap:var(--space-6); padding-block:var(--space-8) calc(var(--space-8) - var(--space-1)); }
@@ -30,7 +29,7 @@
 .ab-door--all { background:linear-gradient(115deg,color-mix(in srgb,var(--room-hauz) 8%,transparent),transparent),var(--z-black); }
 .ab-door--all>svg { color:var(--c); margin-bottom:var(--space-3); }
 .ab-door--all>strong { font:var(--fw-black) var(--display-2)/1 var(--font-display); text-transform:uppercase; margin-bottom:var(--space-3); }
-.ab-controls { position:sticky; top:var(--site-header-height); z-index:20; padding-block:var(--space-3) var(--space-4); background:color-mix(in srgb,var(--z-black) 95%,transparent); backdrop-filter:blur(var(--space-3)); }
+.ab-controls { position:sticky; top:var(--site-header-sticky-edge, var(--site-header-height)); z-index:20; padding-block:var(--space-3) var(--space-4); background:color-mix(in srgb,var(--z-black) 95%,transparent); backdrop-filter:blur(var(--space-3)); }
 .ab-category-dock { display:flex; gap:var(--space-3); padding:calc(var(--space-1) / 2); overflow:auto; scrollbar-width:none; }
 .ab-category { display:flex; align-items:center; justify-content:center; gap:var(--space-3); flex:1 0 auto; min-height:58px; padding:var(--space-3) var(--space-5); border:var(--bw-hair) solid color-mix(in srgb,var(--c) 48%,transparent); border-radius:var(--radius-panel); background:var(--z-black); color:color-mix(in srgb,var(--c) 72%,var(--text-hi)); font:var(--fw-heavy) var(--chrome-lg)/1.1 var(--font-display); text-transform:uppercase; cursor:pointer; }
 .ab-category small { font:var(--mono-kicker)/1 var(--font-mono); }
@@ -43,12 +42,10 @@
 .ab-back { display:flex; align-items:center; gap:var(--space-2); min-height:var(--ab-target); margin-bottom:var(--space-2); padding:0; background:transparent; border:0; color:var(--text-body); font:var(--meta)/1.4 var(--font-body); cursor:pointer; }
 .ab-filter-panel { padding:var(--space-5) var(--space-4); }
 .ab-filter-panel h2 { color:var(--text-hi); }
-.ab-filter-label { margin-top:var(--space-3); font-size:12px!important; color:var(--text-mid)!important; }
 .ab-intents { display:flex; flex-direction:column; gap:var(--space-1); }
 .ab-intents button { display:flex; justify-content:space-between; align-items:center; gap:var(--space-3); min-height:var(--ab-target); padding:var(--space-2) var(--space-3); border:var(--bw-hair) solid transparent; border-radius:var(--radius-xl); background:transparent; color:var(--text-body); font:var(--fw-semibold) var(--body-sm)/1.3 var(--font-body); text-align:left; cursor:pointer; }
 .ab-intents button span { font:var(--mono-label)/1.3 var(--font-mono); color:var(--text-mid); }
 .ab-intents button[aria-pressed=true] { border-color:color-mix(in srgb,var(--c) 35%,transparent); background:color-mix(in srgb,var(--c) 8%,transparent); color:color-mix(in srgb,var(--c) 75%,var(--text-hi)); }
-.ab-mobile-select { display:none; }
 .ab-results { min-width:0; }
 .ab-results .eb-result-head { min-height:var(--ab-target); margin-bottom:var(--space-2); }
 .ab-card-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-5); align-items:start; }
@@ -87,17 +84,29 @@
 .ab-card--connection .ab-card__value { font-size:var(--event-card-title-size); }
 @media(min-width:1450px) { .ab-card { height:var(--ab-card-height-wide); } .ab-card h3 { font-size:var(--display-3); } }
 @media(max-width:1100px) { .ab-browse { grid-template-columns:180px minmax(0,1fr); gap:var(--space-5); } .ab-card-grid { grid-template-columns:1fr; } .ab-card { grid-template-columns:35% 1fr; height:var(--ab-card-height-compact); } .ab-card h3 { font-size:var(--display-3); } .ab-card__body { padding:var(--space-5) var(--space-5) var(--space-3); } }
-@media(max-width:700px) {
+@media(max-width:767px) {
  .ab-header { padding-block:var(--space-6) var(--space-5); display:block; } .ab-header h1 { font-size:var(--ab-hero-size-phone); } .ab-header p:not(.eb-kicker) { font-size:var(--body-sm); }
  .ab-section-heading { margin-top:var(--space-3); } .ab-section-heading h2 { font-size:var(--display-3); }
  .ab-door-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-3); } .ab-door { min-height:200px; padding:var(--space-4); } .ab-door>img { width:100%; height:66px; } .ab-door>span { font-size:var(--mono-kicker); } .ab-door>small { font-size:var(--mono-micro); gap:var(--space-2); } .ab-door--all>strong { font-size:var(--display-3); }
  .ab-category { flex:none; min-height:48px; padding:var(--space-2) 13px; font-size:var(--event-card-title-size); gap:var(--space-2); } .ab-category-dock { gap:var(--space-2); }
  .ab-browse { display:block; padding-top:var(--space-2); } .ab-sidebar { position:static; }
- .ab-back { margin-bottom:var(--space-1); } .ab-filter-panel { padding:var(--space-4); display:grid; grid-template-columns:1fr 1fr; gap:var(--space-2) var(--space-3); } .ab-filter-panel h2 { font-size:var(--title-md); } .ab-filter-panel p { grid-column:1/-1; font-size:var(--mono-kicker); } .ab-filter-label { grid-column:1; align-self:center; margin:0; } .ab-mobile-select { display:block; grid-column:2; grid-row:1; } .ab-filter-label { display:none!important; } .ab-intents { display:none; }
- .ab-card-grid { gap:var(--space-4); } .ab-card { height:var(--ab-card-height-phone); grid-template-columns:34% minmax(0,1fr); } .ab-card__body { padding:var(--space-4) var(--space-4) var(--space-2); } .ab-card h3 { font-size:var(--title-lg); } .ab-card--connection h3 { font-size:var(--title-lg); } .ab-card__value { font-size:var(--chrome-lg); } .ab-card__footer button { min-height:var(--ab-target); } .ab-card__eyebrow { margin-bottom:var(--space-2); } .ab-art__brand { bottom:22px; }
+ .ab-back { margin-bottom:var(--space-1); } .ab-filter-panel { padding:var(--space-4); gap:var(--space-2); } .ab-filter-panel h2 { font-size:var(--title-md); } .ab-filter-panel p { font-size:var(--mono-kicker); } .ab-intents { display:none; }
+ .ab-card-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 10px; align-items:stretch; }
+ .ab-card { display:flex; flex-direction:column; height:100%; min-width:0; }
+ .ab-art { height:auto; aspect-ratio:4/5; flex:none; }
+ .ab-card__body { flex:1; padding:12px 8px 8px; }
+ .ab-card h3 { font-size:var(--title-lg); min-height:3em; }
+ .ab-card--connection h3 { font-size:var(--title-lg); }
+ .ab-card__value { font-size:var(--chrome-lg); }
+ .ab-card__footer { gap:4px; }
+ .ab-card__footer button { flex:1; min-width:0; min-height:var(--ab-target); flex-wrap:wrap; }
+ .ab-card__eyebrow { margin-bottom:var(--space-2); }
+ .ab-page .ab-card__location { white-space:normal; overflow-wrap:anywhere; }
+ .ab-art__brand { bottom:16px; }
  .ab-household { left:5%; right:5%; } .ab-household>span { width:27px; height:27px; } .ab-household small { font-size:var(--event-card-tag-size); }
- .ab-controls { padding-block:var(--space-2) var(--space-3); } .ab-controls .ab-saved { width:auto; min-width:66px; padding:0 var(--space-3); } .ab-controls .ab-saved b { display:block; }
+ .ab-controls { padding-block:var(--space-2) var(--space-3); } .ab-controls .ab-saved { width:44px; min-width:44px; padding:0; } .ab-controls .ab-saved span { display:none; }
 }
+@media(min-width:768px) { .ab-controls .eb-mobile-filter-toggle { display:none; } }
 @media(prefers-reduced-motion:reduce) { .ab-door { transition:none; } .ab-door:hover { translate:none; } }
 html.calm-mode .ab-controls { backdrop-filter:none; background:var(--z-black); }
 

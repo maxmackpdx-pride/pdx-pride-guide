@@ -1,5 +1,6 @@
 import type { ImgHTMLAttributes } from "react";
 import DayMotif, { motifDay } from "./DayMotif";
+import EventFallbackLogo from "./EventFallbackLogo";
 
 /**
  * The flyer slot of any event card: the real flyer when there is one, otherwise the
@@ -10,14 +11,17 @@ export default function EventFlyerArt({
   src,
   day,
   showDay = true,
+  title = "",
+  venueName = "",
   alt = "",
   ...img
-}: { src: string | null | undefined; day: string | null | undefined; showDay?: boolean } & Omit<ImgHTMLAttributes<HTMLImageElement>, "src">) {
+}: { src: string | null | undefined; day: string | null | undefined; showDay?: boolean; title?: string; venueName?: string } & Omit<ImgHTMLAttributes<HTMLImageElement>, "src">) {
   if (src) return <img src={src} alt={alt} loading="lazy" decoding="async" {...img} />;
   return (
     <>
       <DayMotif day={day} placement="art" />
       {showDay ? <i className="day-motif-code">{motifDay(day)}</i> : null}
+      <EventFallbackLogo title={title} venueName={venueName} />
     </>
   );
 }

@@ -155,3 +155,84 @@
 .event-modal.eb-detail[data-state="closed"] { animation: rg-detail-exit 220ms cubic-bezier(.4,0,1,1) !important; }
 .event-modal.eb-detail[data-quiet-motion="true"] { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { .event-modal.eb-detail { animation: none !important; } }
+
+/* Placez keeps its closed-card identity inside the shared Eventz open frame. */
+.event-modal.eb-detail--place .eb-detail__art .rg-card-motif { opacity: .55; }
+.event-modal.eb-detail--place .eb-detail__art .place-modal-panel__logo { filter: var(--placez-logo-ink-filter) brightness(0) invert(1) drop-shadow(0 2px 4px var(--z-black)) !important; }
+.event-modal.eb-detail--place .event-modal__title { line-height: 1.16 !important; text-wrap: balance; margin: 16px 0 12px !important; }
+.event-modal.eb-detail--place .place-modal-panel__details-room { padding: 5px 0 20px; }
+
+.event-modal.eb-detail--place .place-modal-past__poster { filter: grayscale(1) !important; }
+
+/* The map and artwork share the top art well; horizontal swiping moves the logo aside. */
+.event-modal.eb-detail--place .place-modal-panel__hero { position: relative; width: calc(100% / .88); margin: 0 calc(-100% * .06 / .88); }
+.event-modal.eb-detail--place .place-modal-panel__hero-rail { display: flex; width: 100%; height: min(84cqw,510px); overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; overscroll-behavior-x: contain; }
+.event-modal.eb-detail--place .place-modal-panel__hero-rail::-webkit-scrollbar { display: none; }
+.event-modal.eb-detail--place .place-modal-panel__hero-slide { flex: 0 0 100%; min-width: 0; height: 100%; scroll-snap-align: start; scroll-snap-stop: always; }
+.event-modal.eb-detail--place .place-modal-panel__hero .eb-detail__art { width: 100%; height: 100%; margin: 0; padding-bottom: 60px; }
+.event-modal.eb-detail--place .place-modal-panel__hero .place-modal-panel__map { width: 100%; height: 100%; margin: 0; border: 0; border-radius: 0; }
+.event-modal.eb-detail--place .place-modal-panel__hero-switch { position: absolute; z-index: 5; bottom: 12px; left: 50%; translate: -50% 0; display: flex; gap: 6px; }
+.event-modal.eb-detail--place .place-modal-panel__hero-switch button { min-height: 44px; padding: 0 16px; border-radius: 22px; border: 1px solid color-mix(in srgb,var(--c) 55%,transparent); background: var(--event-card-tag-bg); color: var(--text-hi); font: var(--event-card-action-font); text-transform: uppercase; cursor: pointer; }
+.event-modal.eb-detail--place .place-modal-panel__hero-switch button[aria-pressed="true"] { background: var(--c); color: var(--z-black); }
+.event-modal.eb-detail--place .place-modal-panel__hero-rail:focus-visible { outline: 2px solid var(--c); outline-offset: -3px; }
+.event-modal.eb-detail--place .place-modal-panel__hero-switch button:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }
+@media(prefers-reduced-motion:reduce) { .event-modal.eb-detail--place .place-modal-panel__hero-rail { scroll-behavior: auto; } }
+:is(html.calm-mode,:root[data-calm="true"]) .event-modal.eb-detail--place .place-modal-panel__hero-rail { scroll-behavior: auto; }
+.event-modal.eb-detail--place .place-modal-panel__hero .leaflet-top { top: 64px; }
+.event-modal.eb-detail--place .place-modal-past__banner { filter: grayscale(1); }
+
+/* A small pagination indicator replaces labeled artwork/map controls. */
+.event-modal.eb-detail--place .place-modal-panel__hero-switch { gap: 0; bottom: 8px; }
+.event-modal.eb-detail--place .place-modal-panel__hero-switch button,
+.event-modal.eb-detail--place .place-modal-panel__hero-switch button[aria-pressed="true"] { width: 44px; min-width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: grid; place-items: center; }
+.event-modal.eb-detail--place .place-modal-panel__hero-switch button span { display: block; width: 8px; height: 8px; border-radius: 8px; background: color-mix(in srgb,var(--text-hi) 50%,var(--z-black)); box-shadow: 0 1px 3px var(--z-black); }
+.event-modal.eb-detail--place .place-modal-panel__hero-switch button[aria-pressed="true"] span { width: 22px; background: var(--text-hi); }
+/* Stable text roles, rather than a different scale for each section. */
+.event-modal.eb-detail--place {
+ --place-open-title-font: var(--open-card-title-font);
+ --place-open-body-font: var(--open-card-body-font);
+ --place-open-heading-font: var(--open-card-heading-font);
+ --place-open-action-font: var(--open-card-action-font);
+ --place-open-meta-font: var(--open-card-meta-font);
+}
+.event-modal.eb-detail--place .event-modal__title { font: var(--place-open-title-font) !important; }
+.event-modal.eb-detail--place :is(.place-modal-panel__body,.place-modal-panel__fact,.place-modal-panel__description,.place-upcoming__note) { font: var(--place-open-body-font) !important; }
+.event-modal.eb-detail--place .place-modal-panel__details-room a { font: var(--place-open-body-font) !important; }
+.event-modal.eb-detail--place .event-modal__disclosure > summary { font: var(--place-open-heading-font); }
+.event-modal.eb-detail--place :is(.eb-detail__primary-action > button,.place-modal-panel__quick-actions > a,.place-modal-panel__read-more,.place-modal-panel__tab) { font: var(--place-open-action-font) !important; letter-spacing: .025em; }
+.event-modal.eb-detail--place :is(.place-modal-past__hint,.place-modal-past__when,.place-modal-past__host,.place-modal-panel__promoters) { font: var(--place-open-meta-font); }
+.event-modal.eb-detail--place .place-modal-past__title { font: var(--event-card-compact-title-font); }
+.event-modal.eb-detail--place .event-modal__mizzed-door > :is(p,a) { font: var(--place-open-body-font) !important; }
+
+.event-modal.eb-detail.eb-detail--place .eb-detail__primary-action > button { font: var(--place-open-action-font) !important; font-size: 18px !important; font-weight: 700 !important; }
+/* iPhone-first interaction: safe-area room and consistent touch targets. */
+.event-modal.eb-detail--place .event-modal__scroll { -webkit-overflow-scrolling: touch; padding-bottom: calc(32px + env(safe-area-inset-bottom,0px)); }
+.event-modal.eb-detail--place .place-modal-panel__hero-rail { -webkit-overflow-scrolling: touch; }
+.event-modal.eb-detail--place .place-modal-panel__hero img { -webkit-user-drag: none; user-select: none; }
+.event-modal.eb-detail--place :is(.place-modal-panel__read-more,.place-modal-panel__tab) { min-height: 44px; }
+.event-modal.eb-detail--place .place-modal-panel__hero .leaflet-control-zoom a { width: 44px; height: 44px; line-height: 44px; }
+
+/* Reuse the current Eventz/Placez glow-plate button recipe in the open card. */
+.event-modal.eb-detail.eb-detail--place :is(.eb-detail__primary-action > button,.place-modal-panel__quick-actions > a,.place-modal-panel__tab) {
+ min-height: 44px !important; border: 1px solid color-mix(in srgb,var(--c) 45%,transparent) !important;
+ border-radius: 12px !important; background: var(--btn-glow-bg) !important; box-shadow: var(--btn-glow-shadow) !important;
+ color: var(--text-hi) !important; padding: 12px 14px !important; font: var(--place-open-action-font) !important; text-transform: uppercase;
+}
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__tab[aria-selected="true"],
+.event-modal.eb-detail.eb-detail--place .eb-detail__primary-action > button[aria-pressed="true"] { background: var(--c) !important; color: var(--z-black) !important; }
+
+.event-modal.eb-detail--place .place-gigs-rail { display: flex; gap: 16px; overflow-x: auto; padding: 8px 0 20px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+.event-modal.eb-detail--place .place-gigs-rail > :is(.gigz-opportunity,.gigz-talent) { flex: none; width: min(80cqw,280px); scroll-snap-align: start; }
+
+/* Final hierarchy pass: one glass shell, lighter interior structure. */
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__community-room { margin-top: 24px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__tabs { padding: 0; margin: 0 0 16px; gap: 8px; border: 0; background: transparent; box-shadow: none; }
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__tab-panel { padding: 0; }
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__fact { background: transparent; border: 0; border-top: 1px solid color-mix(in srgb,var(--text-hi) 15%,transparent); border-radius: 0; min-height: 52px; padding: 12px 0; gap: 12px; }
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__quick-actions { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__quick-actions > a:first-child,
+.event-modal.eb-detail.eb-detail--place .place-modal-panel__quick-actions > a:nth-child(2):last-child { grid-column: 1 / -1; }
+.event-modal.eb-detail.eb-detail--place .place-modal-past__rail { gap: 12px; padding: 4px 3px 12px; scrollbar-width: none; }
+.event-modal.eb-detail.eb-detail--place .place-modal-past__hint { letter-spacing: .025em; text-transform: none; margin-bottom: 12px; }
+
+.event-modal.eb-detail--place .eb-detail__art .place-modal-panel__logo { max-width: 374px; max-height: 264px; width: 110%; flex-shrink: 0; }

@@ -6,3 +6,16 @@
 @keyframes card-object-orbit { 0%,100% { transform:translate(4px,-3px) rotate(.4deg); } 40% { transform:translate(-7px,3px) rotate(-.7deg); } 75% { transform:translate(1px,7px) rotate(.3deg); } }
 @media(prefers-reduced-motion:reduce) { .rg-motif-slot .rg-card-motif :is(.rg-motif-drift,.rg-motif-object-drift) { animation:none!important; } }
 html.calm-mode .rg-motif-slot .rg-card-motif :is(.rg-motif-drift,.rg-motif-object-drift) { animation:none!important; }
+
+/* The same Placez artwork material in closed, open, and embedded cards. */
+.rg-card-motif[data-motif^="place-"] .rg-motif-object { filter: none; }
+.rg-card-motif[data-motif^="place-"] .rg-motif-contour { opacity: 1; stroke-width: 1.25; }
+.rg-card-motif[data-motif^="place-"] .rg-motif-surface-grid { opacity: .85; stroke-width: .65; }
+.rg-card-motif[data-motif^="place-"] .rg-motif-rear-grid { opacity: .23; stroke-width: .55; }
+.rg-card-motif[data-motif^="place-"] .rg-motif-layer--support .rg-motif-surface-grid { opacity: .9; stroke-width: 1.1; }
+.rg-card-motif[data-motif^="place-"] .rg-motif-layer--support .rg-motif-rear-grid { opacity: .3; stroke-width: .8; }
+.rg-card-motif[data-motif^="place-"] .rg-motif-support-contour { opacity: .9; stroke-width: 1.6; }
+.rg-card-motif[data-motif^="place-"] .rg-motif-layer--support { translate: calc(var(--rg-parallax-x,0px) * -.12) calc(var(--rg-parallax-y,0px) * .08); }
+.rg-card-motif[data-motif^="place-"] .rg-motif-support-drift { transform-box: view-box; transform-origin: center; animation: card-object-orbit 49s ease-in-out infinite reverse; }
+@media(prefers-reduced-motion:reduce) { .rg-card-motif[data-motif^="place-"] .rg-motif-support-drift { animation: none !important; } }
+:is(html.calm-mode,:root[data-calm="true"]) .rg-card-motif[data-motif^="place-"] .rg-motif-support-drift { animation: none !important; }

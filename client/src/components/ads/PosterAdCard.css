@@ -1,0 +1,50 @@
+/* Poster ads match the large Eventz card's shell and 4:5 art zone. Their
+   typography is independent of the retired 2:3 poster-grid internals. */
+.poster-ad {
+  position: relative; isolation: isolate; display: flex; flex-direction: column;
+  width: var(--event-card-width); max-width: 100%; min-width: 0;
+  min-height: var(--event-card-height); height: auto; box-sizing: border-box;
+  border: var(--glass-card-border); border-radius: var(--event-card-radius);
+  background: var(--glass-card-bg); box-shadow: var(--glass-card-shadow);
+  overflow: hidden; color: var(--text-hi); text-decoration: none;
+  --dir-gm: 8;
+}
+.poster-ad:hover { text-decoration: none; color: var(--text-hi); }
+.poster-ad:focus-visible { outline: 3px solid var(--chrome-focus, var(--neon-cyan)); outline-offset: 3px; }
+.poster-ad > .pdx-glass-sheen, .poster-ad > .pdx-glass-sheen--specular { position: absolute; inset: 0; pointer-events: none; z-index: 1; border-radius: inherit; }
+.poster-ad__media { position: relative; z-index: 2; flex: none; aspect-ratio: 4 / 5; width: 100%; overflow: hidden; background: var(--poster-well-bg); }
+.poster-ad__image, .poster-ad__slides, .poster-ad__slide { position: absolute; inset: 0; width: 100%; height: 100%; }
+.poster-ad__image { display: block; object-fit: cover; object-position: center; }
+.poster-ad__slide { opacity: 0; transition: opacity .7s ease; }
+.poster-ad__slide.is-active { opacity: 1; }
+.poster-ad__scan { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to bottom, transparent 45%, rgba(0,0,0,.85)); }
+.poster-ad__label { position: absolute; z-index: 2; top: 9px; left: 9px; max-width: calc(100% - 18px); padding: 5px 8px; border-radius: 8px; background: var(--c); color: var(--z-oled); font: 700 10px/1 var(--font-display); letter-spacing: .08em; text-transform: uppercase; overflow-wrap: anywhere; }
+.pdxBoard--affiliate-cb .poster-ad__label { color: var(--text-heading); }
+.poster-ad__title { position: absolute; z-index: 2; bottom: 22px; left: 12px; right: 12px; margin: 0; color: var(--text-heading); font: 900 28px/.95 var(--font-display); text-transform: uppercase; overflow-wrap: anywhere; text-shadow: 0 2px 5px var(--z-black); }
+.poster-ad__dots { position: absolute; bottom: 9px; left: 0; right: 0; z-index: 2; display: flex; justify-content: center; gap: 5px; }
+.poster-ad__dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-heading); opacity: .35; }
+.poster-ad__dot.is-active { opacity: 1; }
+.poster-ad__body { position: relative; z-index: 2; display: flex; flex-direction: column; flex: 1; min-width: 0; padding: 12px 12px 10px; gap: 9px; background: linear-gradient(transparent, color-mix(in srgb,var(--z-oled) 48%,transparent)); }
+.poster-ad__facts { display: grid; gap: 7px; }
+.poster-ad__description { font: var(--event-card-detail-font); overflow-wrap: anywhere; }
+.poster-ad__offer { font: var(--event-card-meta-font); color: var(--text-mid); overflow-wrap: anywhere; }
+.poster-ad__offer--code { color: var(--c); font-weight: 700; }
+.poster-ad__tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.poster-ad__tag { max-width: 100%; box-sizing: border-box; padding: var(--event-card-tag-pad-y) var(--event-card-tag-pad-x); border: 1px solid color-mix(in srgb,var(--c) 30%,transparent); border-radius: 6px; font: var(--event-card-tag-font); color: var(--text-hi); overflow-wrap: anywhere; }
+.poster-ad__footer { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 8px; border-top: 1px solid color-mix(in srgb,var(--c) 25%,transparent); }
+.poster-ad__disclosure { display: inline-flex; gap: 5px; align-items: center; font: 500 9px/1 var(--font-mono); color: var(--text-lo); text-transform: uppercase; letter-spacing: .1em; }
+.poster-ad__disclosure .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--c); }
+.poster-ad .poster-ad__shop { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 44px; max-width: 100%; padding: 8px 12px; border-radius: 22px; font: 800 12px/1.2 var(--font-display); text-transform: uppercase; white-space: normal; overflow-wrap: anywhere; text-align: center; }
+.poster-ad__shop svg { flex: none; }
+.events-poster-grid > .ds-listing-card:has(.poster-ad) { width: var(--event-card-width); max-width: 100%; min-width: 0; }
+@media (max-width: 767px) {
+  .events-poster-grid > .ds-listing-card:has(.poster-ad), .events-poster-grid .poster-ad { width: 100%; }
+  .poster-ad__body { padding-inline: 8px; }
+  .poster-ad__title { left: 8px; right: 8px; font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .poster-ad__slide { transition: none; } }
+
+/* Bind the shared primary-button recipe to the advertiser, including hover. */
+html:root .poster-ad .poster-ad__shop { --button-c: var(--c); --button-ink: var(--z-oled); }
+html:root .poster-ad.pdxBoard--affiliate-cb .poster-ad__shop { --button-ink: var(--text-heading); }
+.events-poster-grid .poster-ad { height: 100%; }

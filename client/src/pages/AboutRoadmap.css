@@ -61,7 +61,7 @@
       .quick-nav {
         position: sticky;
         z-index: 50;
-        top: 0;
+        top: var(--site-header-sticky-edge, 0px);
         width: 100%;
         overflow-x: auto;
         background: color-mix(in srgb, var(--slate-1) 92%, transparent);
@@ -3178,7 +3178,7 @@
         --type-subhead: clamp(32px, 4vw, 50px);
         --type-body: clamp(17px, 1.35vw, 19px);
         --type-meta: 16px;
-        --phase-sticky-top: 52px;
+        --phase-sticky-top: calc(var(--site-header-sticky-edge, 0px) + 52px);
       }
 
       /* Five reusable type roles. Font, size, weight, line-height, and
@@ -3428,7 +3428,7 @@
           --type-section: 44px;
           --type-subhead: 32px;
           --type-body: 17px;
-          --phase-sticky-top: 46px;
+          --phase-sticky-top: calc(var(--site-header-sticky-edge, 0px) + 46px);
         }
         .roadmap-phase__rails { display: none; }
         .quick-nav a { min-height: 46px; }
@@ -3466,9 +3466,9 @@
         }
       }
 
-      /* Phone hub top bar is sticky again (76px + rainbow seam). Sit under it. */
+      /* Phase summaries stack below the site header and compact jump rail. */
       @media (max-width: 640px) {
-        :host { --phase-sticky-top: 80px; }
+        :host { --phase-sticky-top: calc(var(--site-header-sticky-edge, 0px) + 46px); }
         .roadmap-phase__summary { top: var(--phase-sticky-top); }
       }
 

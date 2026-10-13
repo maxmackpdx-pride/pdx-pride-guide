@@ -23,6 +23,7 @@ import {
   Plus,
 } from "lucide-react";
 import { SearchInput } from "@/components/ds";
+import { BrowseFilters } from "@/components/discovery/EventzBrowse";
 import BrowseStatus from "@/components/BrowseStatus";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import AuthModal from "@/components/AuthModal";
@@ -423,15 +424,6 @@ export default function Boards() {
                 role="group"
                 aria-label="Board categories"
               >
-                <button
-                  type="button"
-                  className="ab-category pdx-glass-rebind"
-                  aria-pressed={selection === "all"}
-                  onClick={() => select("all")}
-                >
-                  <LayoutGrid size={16} />
-                  View all
-                </button>
                 {boardCategories.map((cat) => (
                   <button
                     type="button"
@@ -459,6 +451,14 @@ export default function Boards() {
                   }
                   onClear={() => update({ q: null }, true)}
                 />
+                <BrowseFilters title="Filter board posts" active={intent !== "all"}>
+                  <label>Post type
+                    <select value={intent} onChange={e => update({ intent: e.target.value === "all" ? null : e.target.value }, true)}>
+                      <option value="all">All types</option>
+                      {intents.map(i => <option key={i} value={i}>{intentLabels[i]}</option>)}
+                    </select>
+                  </label>
+                </BrowseFilters>
                 <button
                   type="button"
                   className="eb-tool ab-saved"
@@ -475,6 +475,11 @@ export default function Boards() {
                     fill={savedOnly ? "currentColor" : "none"}
                   />
                   <span>Saved</span>
+                </button>
+              </div>
+              <div className="eb-browse-actions">
+                <button type="button" className="eb-tool eb-view-all" aria-pressed={selection === "all"} onClick={() => select("all")}>
+                  <LayoutGrid size={18} aria-hidden="true" />View all
                 </button>
               </div>
             </div>
@@ -494,30 +499,6 @@ export default function Boards() {
                     {selectedCategory?.prompt ||
                       "Homes, work, good finds, and second chances. All in one place."}
                   </p>
-                  <label className="ab-filter-label" htmlFor="ab-intent-select">
-                    What brings you here?
-                  </label>
-                  <select
-                    id="ab-intent-select"
-                    className="ab-mobile-select"
-                    value={intent}
-                    onChange={(e) =>
-                      update(
-                        {
-                          intent:
-                            e.target.value === "all" ? null : e.target.value,
-                        },
-                        true,
-                      )
-                    }
-                  >
-                    <option value="all">All types</option>
-                    {intents.map((i) => (
-                      <option key={i} value={i}>
-                        {intentLabels[i]}
-                      </option>
-                    ))}
-                  </select>
                   <div
                     className="ab-intents"
                     role="group"
@@ -559,7 +540,7 @@ export default function Boards() {
                             ? "Mizzed"
                             : selectedCategory.label}
                       </button>
-                      <Link className="ab-back" href={selectedCategory.route}>
+                      <Link className="ab-back" href={`${selectedCategory.route}?view=tools`}>
                         My posts & board tools <ArrowRight size={14} />
                       </Link>
                     </>

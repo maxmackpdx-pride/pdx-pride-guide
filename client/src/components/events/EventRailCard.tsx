@@ -32,7 +32,7 @@ export default function EventRailCard({
     <article className={`event-rail-card event-rail-card--${size} pdx-glass-rebind`} style={{ "--c": dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)) } as CSSProperties}>
       <button type="button" className="event-rail-card__open" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>
         <span className="event-rail-card__art">
-          <EventFlyerArt src={poster} day={listingDay(listing)} showDay={size === "m"} />
+          <EventFlyerArt src={poster} day={listingDay(listing)} showDay={size === "m"} title={listing.title} venueName={listing.venueName} />
           {liveState && size === "m" ? <LiveBadge live={liveState} /> : null}
           <span className="event-rail-card__shade"><span className="event-rail-card__title">{listing.title}</span><span className="event-rail-card__meta">{eventTimeLabel(listing.dateStart)} · {listing.venueName}</span></span>
         </span>

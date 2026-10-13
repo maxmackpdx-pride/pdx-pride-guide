@@ -84,14 +84,14 @@ test('chrome reuses wall paths at rest and rebuilds only when the camera changes
 test('actual hologram draw paints sky artwork after building occlusion',async()=>{
   const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
   const source=renderer.slice(renderer.indexOf('function drawLights('),renderer.indexOf('// Gentle corridor:'));
-  const operations=[],noop=()=>{},window={innerWidth:900,innerHeight:1200};
+  const operations=[],projections=[],noop=()=>{},window={innerWidth:900,innerHeight:1200};
   const ctx=new Proxy({drawImage(image){operations.push(image);},createLinearGradient:()=>({addColorStop:noop}),
     createRadialGradient:()=>({addColorStop:noop})},{get:(target,key)=>key in target?target[key]:noop});
   const surface={width:900,height:1200,getContext:()=>ctx},map={getZoom:()=>15.5,getPitch:()=>55,project:()=>({x:450,y:700})};
   const color='#FF00CC',feature={geometry:{coordinates:[-122.675,45.52]},properties:{key:'demo',kind:'event',demoOpen:true,name:'Musical Mondays',time:'9:00 PM',logo:'logo',phase:1,color,heightScale:1}};
   const logo={width:120,height:60,padding:1,outlined:'sky-logo',image:'artwork',silhouette:'mask'};
   const context=vm.createContext({window,parent:window,performance,rises:new Map(),folds:new Map(),lastBeaconKeys:new Set(),riseAmount:()=>1,foldAmount:()=>1,document:{getElementById:()=>null},map,lights:surface,devicePixelRatio:1,Intl,Date,Map,Set,Math,
-    eventNight,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor,extrusionAmount:()=>1,eventProjection:{draw:()=>operations.push('beam')},mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
+    eventNight,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor,extrusionAmount:()=>1,eventProjection:{draw:(_ctx,geometry)=>{operations.push('beam');projections.push(geometry);}},mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
     updateSurfaces:()=>({buildings:[{}],reflections:[]}),waterBloom:{draw:noop},drawUserLocationGlow:noop,
     citySparkles:{update:noop},buildingGlitter:()=>[],opacityControl:{value:1},motionDelta:1/30,pulseTime:1,
     hologramLiftScale:.7,hologramArtworkScale:3.15,hologramLayouts:new WeakMap(),hologramLabelWidth:68.4,HOUSING_EVENT_HEIGHT_RATIO:1/3,
@@ -99,7 +99,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     HOUSING_HOLOGRAM_LABELS:{LOOKING:'LOOKING TO RENT',FORMING:'BUILDING A HOÜS',OFFERING:'JOIN OUR HOÜS',MANAGED:'COMMERCIAL RENTAL HOÜS'},
     smoothRange:(a,b,v)=>Math.max(0,Math.min(1,(v-a)/(b-a))),
     clusterPlaceMarkers:()=>({byKey:new Map()}),roofLift:()=>15,
-    hologramBounds:()=>({halfWidth:60,halfHeight:80}),settleValue:(object,key,_velocity,goal)=>{object[key]=goal;},
+    hologramBounds:(_feature,scale)=>({halfWidth:60*scale,halfHeight:90*scale}),settleValue:(object,key,_velocity,goal)=>{object[key]=goal;},
     logoPointerOffset:()=>({x:0,y:0}),separateHolograms:noop,
     venueLogos:new Map([['logo',logo]]),logoFocus:{update:noop,active:new Map()},logoFit:()=>.2,logoMotionSeed:0,
     adultVenueColor:'#FF0000',hologramMaterials:{beams:new Map([[color,{}]])},drawProjectionBeam:()=>operations.push('beam'),
@@ -118,6 +118,21 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   assert.ok(Math.abs(labels[0].y-anchored.y+19)<1e-8);
   assert.ok(Math.abs(labels[0].logoY-anchored.logoY+19)<1e-8);
   assert.ok(Math.abs((labels[0].y-labels[0].logoY)-(anchored.y-anchored.logoY))<1e-8);
+
+  // Overview caps must leave the full artwork/title above the beam mouth,
+  // rather than moving the billboard down into the rooftop emitter.
+  for(const zoom of [12,13.4,15.5]){
+    context.map.getZoom=()=>zoom;
+    for(const pitch of [0,48,75]){
+      context.map.getPitch=()=>pitch;
+      vm.runInContext('drawLights(1)',context);
+      const label=labels[0],projection=projections.at(-1);
+      const titleBottom=label.y+(label.width*.52+16)*label.scale;
+      assert.ok(titleBottom<projection.top,`header clears beam mouth at zoom ${zoom}, pitch ${pitch}`);
+      assert.ok(label.logoY+label.logoHeight/2<projection.top);
+      assert.ok(projection.height>=10&&projection.height<=eventProjectionHeightLimit(zoom,pitch));
+    }
+  }
 
   context.lightFeatures=[{geometry:{coordinates:[-122.67,45.53]},properties:{key:'houz',kind:'housing',housingModel:'MANAGED',demoOpen:true,logo:'',phase:2,color:'#8800FF',heightScale:1,name:'Property for rent'}}];
   operations.length=0;assert.doesNotThrow(()=>vm.runInContext('drawLights(1)',context));

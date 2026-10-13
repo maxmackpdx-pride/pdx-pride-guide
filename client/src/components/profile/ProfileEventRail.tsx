@@ -124,7 +124,7 @@ export function GoingEventCard({ event, onClick, goingAvatars = [], past = false
   const inner = (
     <>
       <span className="pp-event-rail__art" aria-hidden="true">
-        <EventFlyerArt src={poster} day={code} />
+        <EventFlyerArt src={poster} day={code} title={event.title} venueName={event.venueName || ""} />
       </span>
       <span className="pp-event-rail__scrim" aria-hidden="true" />
       <span className="pp-event-rail__content">

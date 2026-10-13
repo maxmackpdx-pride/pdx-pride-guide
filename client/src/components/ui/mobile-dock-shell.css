@@ -99,7 +99,5 @@
 }
 
 @media(max-width:959px) {
- /* Let document content scroll without a second fixed bar over the top. */
- .site-header.site-header--glass:not([data-map-surface]) { position:relative; top:auto; }
  .z-mobile-dock[data-collapsed="false"] .z-mobile-dock__restore { display:none; }
 }

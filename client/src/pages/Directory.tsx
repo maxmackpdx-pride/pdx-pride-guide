@@ -1,4 +1,4 @@
-import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
+import { BrowseHeader, BrowseControls, BrowseFilters, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
 import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import BoardShareButton from "@/components/BoardShareButton";
 import { directoryResourceName, directoryResourcePath } from "@/lib/directoryResources";
@@ -22,7 +22,7 @@ import { useAuth } from "@/context/AuthContext";
 import DirectoryAddPlaceForm from "@/components/DirectoryAddPlaceForm";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { MapPin, Plus, Map, SlidersHorizontal } from "lucide-react";
+import { MapPin, Plus, Map } from "lucide-react";
 import "./PlacezDoorOpener.css";
 import { placePath, placeUrl, slugifyPlaceName } from "@shared/placeSlug";
 import { Button, SearchInput } from "@/components/ds";
@@ -491,6 +491,11 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         <div className="eb-frame">
           <BrowseControls title="Placez" categories={[{id:"ALL",label:"All Placez",color:"var(--neon-cyan)",count:visibleBusinesses.length}, ...categoryBands.map(c => ({id:c.key,label:c.label,color:c.color,count:c.count}))]}
             selected={activeType.split(",")} onSelect={handleSelectCategory} query={searchQuery} onSearch={setSearchQuery} view={browseView} onView={setBrowseView}>
+            <BrowseFilters title="Filter places" active={activeNeighborhood !== "ALL"}>
+              <label>Neighborhood<select value={activeNeighborhood} onChange={e => setActiveNeighborhood(e.target.value)}>
+                {neighborhoodsInUse.map(n => <option key={n} value={n}>{n === "ALL" ? "Anywhere in Portland" : n}</option>)}
+              </select></label>
+            </BrowseFilters>
             <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("places")} aria-label="Explore places on Mapz"><Map size={19} /><span>Map</span></a>
           </BrowseControls>
           {formOpen && <DirectoryAddPlaceForm isSpaces={false} onClose={() => setFormOpen(false)} />}
@@ -506,11 +511,6 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                 </select></label>
                 <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("places")}><Map size={18} />Explore on Mapz</a>
               </div>
-              <details className="eb-panel eb-mobile-filters"><summary><SlidersHorizontal size={18} />Neighborhood{activeNeighborhood !== "ALL" ? ` · ${activeNeighborhood}` : ""}</summary>
-                <label>Neighborhood<select value={activeNeighborhood} onChange={e => setActiveNeighborhood(e.target.value)} aria-label="Filter by neighborhood">
-                  {neighborhoodsInUse.map(n => <option key={n} value={n}>{n === "ALL" ? "Anywhere in Portland" : n}</option>)}
-                </select></label>
-              </details>
               <div className="eb-panel eb-desktop-panel"><h3>Not seeing your place?</h3><p>Share a place with your community.</p><button type="button" className="eb-tool pdx-glass-rebind" onClick={openAddForm}><Plus size={18} />Add a place</button></div>
             </aside>
             <section className="eb-results" aria-label="Placez results">

@@ -1,6 +1,7 @@
 import "./ResourceCardMotif.css";
 import { resourceGradientStops } from "./resourceGradient";
 import { distinctResourceMotifs } from "./distinctResourceMotifs";
+import { distinctPlaceMotif, distinctPlaceSupportingMotif } from "./distinctPlaceMotifs";
 import { memo, useId, useRef, useState, useEffect } from "react";
 import { useCardMotifParallax } from "./useCardMotifParallax";
 
@@ -61,30 +62,46 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
  const paint = colors && colors.length > 1 ? `url(#${gradientId})` : "currentColor";
  let seed = Array.from(name).reduce((n,c)=>Math.imul(n,31)+c.charCodeAt(0)|0,7) >>> 0;
  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
- const nodes=Array.from({length:30},(_,i)=>({x:20+random()*360,y:125+random()*290,r:i%7===0?2.4:1.1}));
+ const isPlace = category.startsWith("place-");
+ const nodes=Array.from({length:30},(_,i)=>({x:20+random()*360,y:(isPlace ? 25 : 125)+random()*(isPlace ? 420 : 290),r:i%7===0?2.4:1.1}));
+ const meshLinks = nodes.flatMap((p, i) => {
+  const nearby = nodes.map((q, j) => ({ q, j, distance: Math.hypot(p.x-q.x, p.y-q.y) }))
+   .filter(({ j, distance }) => j !== i && distance < (isPlace ? 150 : 115))
+   .sort((a, b) => a.distance - b.distance);
+  return (isPlace ? nearby.slice(0, 3) : nearby).filter(({ j }) => j > i)
+   .map(({ q, j }) => <path key={`${i}-${j}`} d={`M${p.x} ${p.y}L${q.x} ${q.y}`} />);
+ });
  const theme=themeFor(name,category);
- const silhouette = category.startsWith("place-") ? silhouettes[theme] : distinctResourceMotifs[name] ?? silhouettes[theme];
- const tilt=(random()-.5)*12;
+ const placeArtwork = isPlace ? distinctPlaceMotif(name) : undefined;
+ const silhouette = placeArtwork?.outline ?? (isPlace ? silhouettes[theme] : distinctResourceMotifs[name] ?? silhouettes[theme]);
+ const rightAtTop = Array.from(name).reduce((total, letter) => total + letter.charCodeAt(0), 0) % 2 === 0;
+ const supporting = isPlace ? distinctPlaceSupportingMotif(name) : undefined;
+ const tilt=(random()-.5)*(isPlace ? 4 : 12);
  const cycle = 28 + Math.round(random() * 8);
  const phase = -Math.round(random() * cycle);
  const circuits = Array.from({ length: 5 }, (_, i) => {
   const left = i % 2 === 0;
   const x = left ? 18 + random() * 32 : 350 + random() * 30;
-  const y = 140 + i * 43 + random() * 18;
+  const y = (isPlace ? 35 : 140) + i * (isPlace ? 78 : 43) + random() * 18;
   const reach = (left ? 1 : -1) * (28 + random() * 45);
   const rise = (random() - .5) * 45;
   return { x, y, endX: x + reach, endY: y + rise,
    path: `M${x} ${y}h${reach * .45}l${reach * .25} ${rise}h${reach * .3}` };
  });
  return <svg ref={ref} className="rg-card-motif" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-motif={`${category}-${name}`}>
+  {isPlace && <defs><linearGradient id={`${gradientId}-edge`} gradientUnits="userSpaceOnUse" x1="90" y1="140" x2="280" y2="355">
+   <stop offset="0" style={{ stopColor: "color-mix(in srgb, var(--c) 70%, var(--text-hi))" }} />
+   <stop offset=".45" stopColor="currentColor" />
+   <stop offset="1" style={{ stopColor: "color-mix(in srgb, var(--c) 70%, var(--z-black))" }} />
+  </linearGradient></defs>}
   {colors && colors.length > 1 && <defs><linearGradient id={gradientId} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="400" y2="500">
    {resourceGradientStops(colors).map((stop, index) => <stop key={index} offset={`${stop.offset}%`} style={{ stopColor: stop.color }} />)}
   </linearGradient></defs>}
   <g className="rg-motif-layer rg-motif-layer--mesh">
   <g className="rg-motif-drift" style={{ animationDuration: `${cycle}s`, animationDelay: `${phase}s` }}>
   <g className="rg-motif-mesh" fill="none" stroke={paint} strokeWidth=".65">
-   {nodes.flatMap((p,i)=>nodes.slice(i+1).map((q,j)=>Math.hypot(p.x-q.x,p.y-q.y)<115?<path key={`${i}-${j}`} d={`M${p.x} ${p.y}L${q.x} ${q.y}`} />:null))}
-   {Array.from({length:6},(_,i)=><path key={i} d={`M-30 ${220+i*24} Q${140+tilt*3} ${100+i*30} 430 ${300+i*20}`} />)}
+   {meshLinks}
+   {Array.from({length:isPlace ? 3 : 6},(_,i)=><path key={i} d={`M-30 ${220+i*24} Q${140+tilt*3} ${100+i*30} 430 ${300+i*20}`} />)}
   </g>
   <g className="rg-motif-circuits" fill="none" stroke={paint} strokeWidth=".75">
    {circuits.map((c,i)=><g key={i}>
@@ -102,13 +119,25 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
   <g stroke={paint} strokeWidth=".7" opacity=".4" fill="none"><path d="M32 155V135H52 M348 135H368V155 M32 365V385H52 M348 385H368V365" />{nodes.filter((_,i)=>i%7===0).map((p,i)=><path key={i} d={`M${p.x-5} ${p.y}h10 M${p.x} ${p.y-5}v10`}/>)}</g>
   </g>
   </g>
+  {supporting && <g className="rg-motif-layer rg-motif-layer--support">
+   <g className="rg-motif-support-drift" style={{ animationDuration: `${cycle + 17}s`, animationDelay: `${phase - 13}s` }}>
+    <g className="rg-motif-support-position" transform={`translate(${rightAtTop ? 230 : 170} 165) scale(.78) translate(-200 -250)`}>
+     <g fill="none" stroke={paint} strokeLinejoin="round">
+      <path className="rg-motif-rear-grid" d={supporting.rearGrid} />
+      <path className="rg-motif-surface-grid" d={supporting.grid} />
+      <path className="rg-motif-support-contour" d={supporting.outline} stroke={`url(#${gradientId}-edge)`} />
+     </g>
+    </g>
+   </g>
+  </g>}
   <g className="rg-motif-layer rg-motif-layer--object">
    <g className="rg-motif-object-drift" style={{ animationDuration: `${cycle + 9}s`, animationDelay: `${phase - 7}s` }}>
   <g className="rg-motif-breathe" style={{ animationDuration: `${cycle + 4}s`, animationDelay: `${phase}s` }}>
-  <g className="rg-motif-object" fill="none" stroke={paint} strokeLinejoin="round" transform={`rotate(${tilt} 200 250)`}>
-   <path className="rg-motif-depth" d={silhouette} transform="translate(5 7)" strokeWidth=".8" strokeDasharray="2 5" />
-   {[1.13,1.06,1].map((scale,i)=><path key={scale} d={silhouette} transform={`translate(200 250) scale(${scale}) translate(-200 -250)`} strokeWidth={i===2?1.5:.65} opacity={i===2?.85:.24} />)}
-   <path className="rg-motif-inner-edge" d={silhouette} transform="translate(200 250) scale(.976) translate(-200 -250)" strokeWidth=".55" />
+  <g className="rg-motif-object" fill="none" stroke={paint} strokeLinejoin="round" transform={`${isPlace ? `translate(${rightAtTop ? -22 : 22} 46) ` : ""}rotate(${tilt} 200 250)`}>
+   {placeArtwork && <><path className="rg-motif-rear-grid" d={placeArtwork.rearGrid} /><path className="rg-motif-surface-grid" d={placeArtwork.grid} /></>}
+   {!isPlace && <path className="rg-motif-depth" d={silhouette} transform="translate(5 7)" strokeWidth=".8" strokeDasharray="2 5" />}
+   {(isPlace ? [1] : [1.13,1.06,1]).map((scale,i)=><path key={scale} d={silhouette} transform={`translate(200 250) scale(${scale}) translate(-200 -250)`} className={scale===1 ? "rg-motif-contour" : "rg-motif-echo"} stroke={isPlace && scale===1 ? `url(#${gradientId}-edge)` : undefined} strokeWidth={scale===1?1.5:.65} opacity={scale===1?.85:.24} />)}
+   {!isPlace && <path className="rg-motif-inner-edge" d={silhouette} transform="translate(200 250) scale(.976) translate(-200 -250)" strokeWidth=".55" />}
    <path className="rg-motif-signal-trace" d={silhouette} pathLength="100" strokeWidth="1.15" strokeDasharray="3 97" style={{ animationDuration: `${cycle + 8}s`, animationDelay: `${phase}s` }} />
   </g>
   </g>

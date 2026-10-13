@@ -31,6 +31,19 @@
   padding-bottom: 24px;
 }
 
+@media (max-width: 959px) {
+  .app-shell--no-mobile-footer > .site-footer,
+  .app-shell--no-mobile-footer > .site-pre-footer-edge {
+    display: none;
+  }
+
+  /* The last content row now owns clearance because these pages have no
+     visible footer spacer. Map canvases keep the dock as an overlay. */
+  body:has(.site-hub-mobile-bar) .app-shell.app-shell--no-mobile-footer:not(.app-shell--hub):not(.app-shell--map-surface) > main {
+    padding-bottom: calc(var(--site-mobile-nav-height, 82px) + var(--site-mobile-nav-offset, 8px) + env(safe-area-inset-bottom, 0px) + 16px);
+  }
+}
+
 @media (max-width: 640px) {
   body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) main {
     padding-bottom: 0;
