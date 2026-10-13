@@ -1,3 +1,4 @@
+import { useMapzActive } from './MapzActivity';
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Bell, BellOff } from "lucide-react";
@@ -10,6 +11,7 @@ import AuthModal from "@/components/AuthModal";
 export type FollowableRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "houz" | "eventz" | "outz" | "rezources";
 
 export default function BoardFollowButton({ board }: { board: FollowableRoom }) {
+  const active = useMapzActive();
   const { user } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
@@ -21,7 +23,7 @@ export default function BoardFollowButton({ board }: { board: FollowableRoom }) 
       if (!response.ok) throw new Error("Could not load follow status");
       return response.json();
     },
-    enabled: !!user,
+    enabled: active && !!user,
   });
   const following = !!status.data?.isFollowing;
   const boardName = { gigz: "Gigz", giftz: "Giftz", sellz: "Sellz", mizzed: "Mizzed", houz: "My Hoüz", eventz: "Eventz", outz: "OutZide", rezources: "ReZources" }[board];

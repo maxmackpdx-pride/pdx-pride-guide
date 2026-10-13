@@ -1,3 +1,4 @@
+import { useMapzActive } from './MapzActivity';
 import {useEffect,useRef,useState} from 'react';
 import {useMutation,useQuery} from '@tanstack/react-query';
 import {MoreHorizontal,CalendarDays,Check,Share2,MessageCircle,Megaphone,Heart,X} from 'lucide-react';
@@ -18,19 +19,20 @@ type Action='options'|'rsvp'|'host'|'attendees'|'venue'|'mizzed'|null;
 const dateLabel=(value:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(parsePacificDateTime(value)??value));
 
 export default function MapzUpcomingRsvps({events,loading,onOpen,onSignIn}:{events:Event[];loading:boolean;onOpen:(event:Event,target:HTMLElement)=>void;onSignIn:()=>void}){
+ const active=useMapzActive();
  const {user}=useAuth();
  const preview=Boolean((window as unknown as {__PDX_LOCAL_PREVIEW__?:number}).__PDX_LOCAL_PREVIEW__);
  const [now,setNow]=useState(Date.now);
  const [removed,setRemoved]=useState<number[]>([]);
- useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(timer);},[]);
- const checkIns=useQuery<CheckIn[]>({queryKey:[...RSVP_CHECKINS_KEY],queryFn:()=>apiRequest('GET','/api/events/mine/check-ins').then(r=>r.json()),enabled:!!user&&!preview});
+ useEffect(()=>{if(!active)return;setNow(Date.now());const timer=window.setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(timer);},[active]);
+ const checkIns=useQuery<CheckIn[]>({queryKey:[...RSVP_CHECKINS_KEY],queryFn:()=>apiRequest('GET','/api/events/mine/check-ins').then(r=>r.json()),enabled:active&&!!user&&!preview});
  // The server's host list includes co-hosts and is the same authority used by host updates.
- const hosted=useQuery<Event[]>({queryKey:['/api/events/mine/claimed'],queryFn:()=>apiRequest('GET','/api/events/mine/claimed').then(r=>r.json()),enabled:!!user&&!preview});
+ const hosted=useQuery<Event[]>({queryKey:['/api/events/mine/claimed'],queryFn:()=>apiRequest('GET','/api/events/mine/claimed').then(r=>r.json()),enabled:active&&!!user&&!preview});
  const missingIds=(checkIns.data||[]).map(row=>row.eventId).filter(id=>!events.some(event=>event.id===id));
  const missing=useQuery<Event[]>({queryKey:['mapz-rsvp-events',user?.id,...missingIds],queryFn:async()=>{
   const rows=await Promise.all(missingIds.map(async id=>{const response=await fetch(`/api/events/${id}`,{credentials:'include'});if(response.status===404)return null;if(!response.ok)throw new Error('Could not load your event');return response.json() as Promise<Event>;}));
   return rows.filter((event):event is Event=>event!==null);
- },enabled:!preview&&!!user&&missingIds.length>0});
+ },enabled:active&&!preview&&!!user&&missingIds.length>0});
  const future=[...events,...(missing.data||[])].filter(event=>new Date(event.dateStart).getTime()>=now).sort((a,b)=>Date.parse(a.dateStart)-Date.parse(b.dateStart)).filter((event,index,array)=>array.findIndex(other=>other.id===event.id)===index);
  // Only the explicitly marked, read-only phone demo gets sample RSVPs. Never seed personal caches.
  const samples=future.filter((event,index,array)=>array.findIndex(other=>other.title===event.title)===index).slice(0,3);
@@ -49,18 +51,19 @@ export default function MapzUpcomingRsvps({events,loading,onOpen,onSignIn}:{even
 }
 
 export function RsvpRow({event,checkIn,preview,host,claimed,onOpen,onRemove,recent=false,previewContact}:{recent?:boolean;previewContact?:'host'|'venue'|'none';event:Event;checkIn?:CheckIn;preview:boolean;host:boolean;claimed:boolean;onOpen:(event:Event,target:HTMLElement)=>void;onRemove:()=>void}){
+ const active=useMapzActive();
  const [action,setAction]=useState<Action>(null);
  const [phrase,setPhrase]=useState(checkIn?.message||"I'll be there");
  const [visibility,setVisibility]=useState(checkIn?.visibility||(checkIn?.isAnonymous?'anonymous':'public'));
  const [body,setBody]=useState('');
  const [postTitle,setPostTitle]=useState('');
- const contacts=useQuery<{canMessageHost:boolean;canMessageVenue:boolean;venueName:string}>({queryKey:['/api/events',event.id,'message-options'],queryFn:()=>apiRequest('GET',`/api/events/${event.id}/message-options`).then(r=>r.json()),enabled:recent&&!preview&&action!==null,retry:false});
+ const contacts=useQuery<{canMessageHost:boolean;canMessageVenue:boolean;venueName:string}>({queryKey:['/api/events',event.id,'message-options'],queryFn:()=>apiRequest('GET',`/api/events/${event.id}/message-options`).then(r=>r.json()),enabled:active&&recent&&!preview&&action!==null,retry:false});
  const canMessageHost=preview?previewContact==='host':contacts.data?.canMessageHost;
  const canMessageVenue=preview?previewContact==='venue':contacts.data?.canMessageVenue;
  const [error,setError]=useState('');
  const optionsButton=useRef<HTMLButtonElement>(null),panelTitle=useRef<HTMLHeadingElement>(null);
  const {toast}=useToast();
- useEffect(()=>{if(action)panelTitle.current?.focus();},[action]);
+ useEffect(()=>{if(active&&action)panelTitle.current?.focus();},[active,action]);
  const close=()=>{setAction(null);setError('');optionsButton.current?.focus();};
  const open=(next:Action)=>{setError('');setBody('');setPostTitle('');if(next==='rsvp'&&!preview){setPhrase(checkIn?.message||"I'll be there");setVisibility(checkIn?.visibility||(checkIn?.isAnonymous?'anonymous':'public'));}setAction(next);};
  const mutation=useMutation({mutationFn:async(kind:'save'|'remove'|'host'|'attendees'|'venue'|'mizzed')=>{

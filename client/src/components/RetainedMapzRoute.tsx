@@ -8,11 +8,11 @@ import ErrorBoundary from './ErrorBoundary';
 import { useAuth } from '@/context/AuthContext';
 
 const MapzPage = lazyWithReload(() => import('@/pages/MapzMapDemo'));
-const Activity = createContext(true);
+import { MapzActivity as Activity } from './MapzActivity';
+export { useMapzActive } from './MapzActivity';
 const CameraRecorder = createContext<(camera:RetainedCamera)=>void>(()=>{});
 export const useMapzCameraRecorder = () => useContext(CameraRecorder);
 const RouteSnapshot = createContext({ path: '/map', search: '' });
-export const useMapzActive = () => useContext(Activity);
 function useMapLocation(): [string, typeof navigate] { return [useContext(RouteSnapshot).path, navigate]; }
 function useMapSearch() { return useContext(RouteSnapshot).search; }
 

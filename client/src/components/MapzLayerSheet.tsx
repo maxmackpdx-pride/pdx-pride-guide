@@ -1,3 +1,4 @@
+import { useMapzActive } from './MapzActivity';
 import { useCallback, useEffect, useLayoutEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
 import { Link } from "wouter";
 import { ChevronRight, SlidersHorizontal, X } from "lucide-react";
@@ -31,6 +32,7 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
   const dragControls = useDragControls();
   const open = active !== null;
   if (active) visited.current.add(active);
+  const mapActive=useMapzActive();
   const activeLayer = layers.find(layer => layer.id === active);
   const close = useCallback(() => {
     setActive(null);
@@ -38,24 +40,26 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
   }, [setActive]);
 
   useLayoutEffect(() => {
-    if (!active) return;
+    if (!active || !mapActive) return;
     lastActive.current = active;
     const panel = panels.current.get(active);
     if (panel) panel.scrollTop = positions.current.get(active) || 0;
-  }, [active]);
+  }, [active,mapActive]);
   useEffect(() => {
+    if(!mapActive)return;
     const root = document.documentElement;
     root.dataset.zaylistDrawer = open ? "open" : "compact";
     window.dispatchEvent(new CustomEvent("zaylist:drawer", { detail: { open, restorePrevious: true } }));
-    return () => { delete root.dataset.zaylistDrawer; };
-  }, [open]);
+    return () => { delete root.dataset.zaylistDrawer; window.dispatchEvent(new CustomEvent("zaylist:drawer", { detail: { open: false, restorePrevious: true } })); };
+  }, [open,mapActive]);
   useEffect(() => () => {
     window.dispatchEvent(new CustomEvent("zaylist:drawer", { detail: { open: false, restorePrevious: true } }));
   }, []);
   useEffect(() => {
+    if(!mapActive)return;
     window.addEventListener("zaylist:map-sheet-close", close);
     return () => window.removeEventListener("zaylist:map-sheet-close", close);
-  }, [close]);
+  }, [close,mapActive]);
 
   return <>
     <SmoothDrawer id={panelId} hidden={!open} className="mapz-layer-sheet z-glass pdx-glass-rebind is-open"
