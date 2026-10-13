@@ -630,8 +630,8 @@ export default function MapzMapDemo() {
     ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
     ...(showPlaces ? placeMarks(mapPlaces) : []),
     ...(showResources ? visibleResources.flatMap(entry => entry.locations.flatMap((location, index) => {
-      const key = resourceMapKey(entry.org.name, index);
-      return selectedResourceKeys.length && !selectedResourceKeys.includes(key) ? [] : [{ key, kind: 'resource' as const, lat: location.lat, lng: location.lng, item: entry }];
+      const key = resourceMapKey(entry.org.name, index, entry.communitySlug);
+      return selectedResourceKeys.length && !selectedResourceKeys.includes(key) && !selectedResourceKeys.includes(resourceMapKey(entry.org.name, index)) ? [] : [{ key, kind: 'resource' as const, lat: location.lat, lng: location.lng, item: entry }];
     })) : []),
     ...(showGigz ? rowMarks(filteredWorlds.gigz, "board") : []),
     ...(showMizzed ? rowMarks(filteredWorlds.mizzed, "board") : []),
@@ -643,7 +643,7 @@ export default function MapzMapDemo() {
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
     setSelected(mark.key);
     setCardOriginRect(originRect(target || null));
-    if (mark.kind === "resource") { setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name)); }
+    if (mark.kind === "resource") { setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name, (mark.item as ResourceMapEntry).communitySlug)); }
     else if (mark.kind === "event") { goOverlay("event", (mark.item as Event).id); }
     else if (mark.kind === "place") { goOverlay("place", (mark.item as Place).id); }
     else {
@@ -811,7 +811,7 @@ export default function MapzMapDemo() {
   }), [marks, places, events, demoEventIds, attendance, tokenEpoch]);
   // Board 49: the status line says how many holograms are up tonight. No badge on the pin.
   const tonightCount = useMemo(() => { const night = eventNight(viewTimestamp); return sceneRows.filter(row => row.kind === "event" && row.eventNight === night).length; }, [sceneRows, viewTimestamp]);
-  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name));return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='My Hoüz')setCardOriginRect(rect);}};
+  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')setLocation(resourceMapHref((mark.item as ResourceMapEntry).org.name, (mark.item as ResourceMapEntry).communitySlug));return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='My Hoüz')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{
       if(mark.kind==="resource")return false;

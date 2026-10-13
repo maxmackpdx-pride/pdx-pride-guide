@@ -4,6 +4,7 @@ import { mapCoordinates } from './mapCoordinates';
 
 export type ResourceMapEntry = {
   org: ResourceOrg;
+  communitySlug?: string;
   categories: ResourceCategory[];
   locations: { name: string; address: string; lat: number; lng: number }[];
 };
@@ -29,10 +30,12 @@ export const RESOURCE_MAP_ENTRIES: ResourceMapEntry[] = (() => {
   });
 })();
 
-export function resourceMapHref(name: string): string {
+export function resourceMapHref(name: string, communitySlug?: string): string {
+  if (communitySlug) return `/needz?cat=community&community=${encodeURIComponent(communitySlug)}`;
   return `/needz?resource=${encodeURIComponent(name)}`;
 }
 
-export function resourceMapKey(name: string, locationIndex: number): string {
+export function resourceMapKey(name: string, locationIndex: number, communitySlug?: string): string {
+  if (communitySlug) return `r-community-${encodeURIComponent(communitySlug)}-${locationIndex}`;
   return `r-${encodeURIComponent(name)}-${locationIndex}`;
 }

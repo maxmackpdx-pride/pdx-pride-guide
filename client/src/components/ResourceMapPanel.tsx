@@ -24,9 +24,9 @@ export default function ResourceMapPanel({ entries = RESOURCE_MAP_ENTRIES, bound
     const text = [org.name, org.desc, org.scope, org.addr, ...categories.map(item => item.name), ...(org.serviceTags || [])].join(' ').toLowerCase();
     return text.includes(query.trim().toLowerCase());
   }), [entries, query, category]);
-  const inView = matching.filter(entry => entry.locations.some((location, index) => inMapBounds(location, bounds) && (!selectedKeys.length || selectedKeys.includes(resourceMapKey(entry.org.name, index)))));
+  const inView = matching.filter(entry => entry.locations.some((location, index) => inMapBounds(location, bounds) && (!selectedKeys.length || selectedKeys.includes(resourceMapKey(entry.org.name, index, entry.communitySlug)) || selectedKeys.includes(resourceMapKey(entry.org.name, index)))));
   const withoutPin = matching.filter(entry => !entry.locations.length);
-  const renderEntry = (entry: ResourceMapEntry) => <a className="resource-map-result" key={entry.org.name} href={resourceMapHref(entry.org.name)}>
+  const renderEntry = (entry: ResourceMapEntry) => <a className="resource-map-result" key={entry.communitySlug || entry.org.name} href={resourceMapHref(entry.org.name, entry.communitySlug)}>
     <span className="resource-map-result__icon"><img src={serviceWaypointLogo(entry.org, entry.org.logo) || '/mapz-map/icons/types/service.svg'} alt="" loading="lazy" onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = serviceIdentity(entry.org)?.icon || '/mapz-map/icons/types/service.svg'; }} /></span>
     <span className="resource-map-result__copy"><strong>{entry.org.name}</strong><small>{entry.org.scope}</small><span>{entry.categories.map(item => item.name).join(' · ')}</span></span>
     <ArrowUpRight size={19} aria-hidden="true" />

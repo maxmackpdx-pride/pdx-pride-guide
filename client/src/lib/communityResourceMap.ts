@@ -9,8 +9,10 @@ type SourcePlace = { id: number; name: string; address?: string | null; lat?: nu
 export function communityResourceMapEntries(communities: CommunitySummary[], places: SourcePlace[], base = RESOURCE_MAP_ENTRIES): ResourceMapEntry[] {
   const category = RESOURCE_CATEGORIES.find(item => item.id === 'community')!;
   const rows = mergeCommunityResources(base.map(entry => ({org: entry.org, category: entry.categories[0]})), communities, category);
+  const usedOriginal = new Set<ResourceMapEntry>();
   return rows.map(row => {
-    const original = base.find(entry => entry.org.name === row.org.name);
+    const original = base.find(entry => entry.org.name === row.org.name && !usedOriginal.has(entry));
+    if (original) usedOriginal.add(original);
     const categories = [...(original?.categories || [row.category])];
     if (row.community && !categories.some(item => item.id === category.id)) categories.push(category);
     let locations = original?.locations || [];
@@ -19,6 +21,6 @@ export function communityResourceMapEntries(communities: CommunitySummary[], pla
       const point = source && mapCoordinates(source.lat, source.lng);
       if (source && point) locations = [{name: source.name, address: source.address || '', ...point}];
     }
-    return {org: row.org, categories, locations};
+    return {org: row.org, categories, locations, communitySlug: row.community?.slug};
   });
 }
