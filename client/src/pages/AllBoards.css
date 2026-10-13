@@ -54,14 +54,8 @@
 .ab-art { position:relative; isolation:isolate; min-width:0; height:100%; overflow:hidden; background:color-mix(in srgb,var(--c) 7%,var(--surface-card)); }
 .ab-art::after { content:''; pointer-events:none; position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,color-mix(in srgb,var(--z-oled) 13%,transparent) 35%,color-mix(in srgb,var(--z-black) 93%,transparent) 100%); }
 .ab-art__photo { height:100%; width:100%; object-fit:cover; }
-.ab-art>.rg-card-motif { position:absolute; inset:0; width:100%; height:100%; color:var(--c); opacity:.38; }
-.ab-art__symbol { position:absolute; top:30%; left:50%; translate:-50% -50%; width:58px; height:58px; color:color-mix(in srgb,var(--c) 74%,var(--text-hi)); }
 .ab-art__brand { position:absolute; z-index:2; bottom:22px; left:10%; width:80%; height:46px; object-fit:contain; }
-.ab-art__quote { position:absolute; left:10px; top:0; font:var(--ab-quote-size)/1 var(--font-display); color:color-mix(in srgb,var(--c) 30%,transparent); }
-.ab-art--connection .ab-art__symbol { top:44%; }
 .ab-household { position:absolute; z-index:2; top:24px; left:10%; right:10%; display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:var(--space-1); }
-.ab-household>span { display:grid; place-items:center; width:30px; height:30px; border:var(--bw-hair) solid color-mix(in srgb,var(--text-hi) 40%,transparent); border-radius:var(--radius-pill); background:color-mix(in srgb,var(--z-black) 85%,transparent); color:var(--neon-cyan); font:var(--fw-bold) var(--title-sm)/1 var(--font-display); }
-.ab-household>span:nth-child(2) { width:16px; background:transparent; border:0; color:var(--text-hi); }
 .ab-household small { width:100%; margin-top:var(--space-2); text-align:center; color:var(--text-hi); text-shadow:0 1px 5px var(--z-oled); font:var(--mono-label)/1.4 var(--font-body); }
 .ab-card__body { min-width:0; display:flex; flex-direction:column; padding:var(--space-4) var(--space-4) var(--space-3); }
 .ab-card__eyebrow { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-1) var(--space-2); margin-bottom:var(--space-3); }
@@ -103,14 +97,14 @@
  .ab-card__eyebrow { margin-bottom:var(--space-2); }
  .ab-page .ab-card__location { white-space:normal; overflow-wrap:anywhere; }
  .ab-art__brand { bottom:16px; }
- .ab-household { left:5%; right:5%; } .ab-household>span { width:27px; height:27px; } .ab-household small { font-size:var(--event-card-tag-size); }
+ .ab-household { left:5%; right:5%; } .ab-household small { font-size:var(--event-card-tag-size); }
  .ab-controls { padding-block:var(--space-2) var(--space-3); } .ab-controls .ab-saved { width:44px; min-width:44px; padding:0; } .ab-controls .ab-saved span { display:none; }
 }
 @media(min-width:768px) { .ab-controls .eb-mobile-filter-toggle { display:none; } }
 @media(prefers-reduced-motion:reduce) { .ab-door { transition:none; } .ab-door:hover { translate:none; } }
 html.calm-mode .ab-controls { backdrop-filter:none; background:var(--z-black); }
 
-.ab-door>.rg-motif-slot{position:absolute;z-index:-1;inset:-45% -3% auto auto;width:72%;height:200%;color:var(--c);opacity:.35;pointer-events:none}.ab-door>.rg-motif-slot .rg-card-motif{width:100%;height:100%}.ab-art>.rg-motif-slot{position:absolute;inset:0;color:var(--c);opacity:.4;pointer-events:none}.ab-art>.rg-motif-slot .rg-card-motif{width:100%;height:100%}
+.ab-door>.rg-motif-slot{position:absolute;z-index:-1;inset:-45% -3% auto auto;width:72%;height:200%;color:var(--c);opacity:.35;pointer-events:none}.ab-door>.rg-motif-slot .rg-card-motif{width:100%;height:100%}
 @media(max-width:360px){.ab-header h1{font-size:44px}.ab-header h1 i{margin-left:var(--space-2)}}
 
 /* All five board categories share the full-size Eventz type scale.
@@ -208,6 +202,6 @@ html.calm-mode .ab-door:hover { translate:none; }
 }
 .ab-art--photo { background:transparent; }
 .ab-art__photo {
- -webkit-mask-image:linear-gradient(to right,#000 55%,transparent 100%);
- mask-image:linear-gradient(to right,#000 55%,transparent 100%);
+ -webkit-mask-image:linear-gradient(to right,var(--z-black) 55%,transparent 100%);
+ mask-image:linear-gradient(to right,var(--z-black) 55%,transparent 100%);
 }
