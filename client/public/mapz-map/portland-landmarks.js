@@ -59,7 +59,8 @@ function loadArrayBuffer(url){return new Promise((resolve,reject)=>{const reques
 export function createPortlandLandmarkLayer(maplibre,elevation=()=>0,reduced={matches:false},definitions=PORTLAND_LANDMARKS){
   const models=definitions.map(definition=>({...definition,loading:false,count:0}));let activeLoads=0;
   return {
-    id:'portland-hologram-landmarks',type:'custom',renderingMode:'3d',models,disposed:false,
+    id:'portland-hologram-landmarks',type:'custom',renderingMode:'3d',models,disposed:false,active:true,
+    setActive(active){this.active=active!==false;if(this.active)this.map?.triggerRepaint();},
     visible(model){if(this.map.getZoom()<PORTLAND_LANDMARK_MIN_ZOOM)return false;const point=this.map.project(model.center),canvas=this.map.getCanvas();return point.x>-300&&point.y>-420&&point.x<canvas.clientWidth+300&&point.y<canvas.clientHeight+300;},
     async load(model){
       if(model.loading||model.count||this.disposed||activeLoads>=2)return;model.loading=true;activeLoads++;
@@ -89,6 +90,7 @@ export function createPortlandLandmarkLayer(maplibre,elevation=()=>0,reduced={ma
       for(const [name,size,offset] of [['a_position',3,0],['a_normal',3,12],['a_color',3,24]]){const location=gl.getAttribLocation(this.program,name);gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,size,gl.FLOAT,false,36,offset);}gl.bindVertexArray(null);model.vertices=null;model.dirty=false;
     },
     render(gl,input){
+      if(!this.active||this.disposed)return;
       const visible=models.filter(model=>this.visible(model));for(const model of prioritizeModels(this.map,visible))if(!model.count)this.load(model);const ready=visible.filter(model=>model.count);if(!ready.length)return;
       const depth=gl.isEnabled(gl.DEPTH_TEST),cull=gl.isEnabled(gl.CULL_FACE),blend=gl.isEnabled(gl.BLEND),depthMask=gl.getParameter(gl.DEPTH_WRITEMASK),srcRgb=gl.getParameter(gl.BLEND_SRC_RGB),dstRgb=gl.getParameter(gl.BLEND_DST_RGB),srcAlpha=gl.getParameter(gl.BLEND_SRC_ALPHA),dstAlpha=gl.getParameter(gl.BLEND_DST_ALPHA);
       gl.disable(gl.CULL_FACE);gl.disable(gl.DEPTH_TEST);gl.depthMask(false);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(this.program);const seconds=reduced.matches?0:performance.now()/1000;gl.uniform1f(this.time,seconds);

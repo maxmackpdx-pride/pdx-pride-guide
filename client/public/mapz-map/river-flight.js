@@ -7,6 +7,7 @@ import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOIN
 import { visibleHologramLabels } from './label-visibility.js?v=20260925-venue-nights';
 import {faceStackHtml} from '../outzide-map/assets/community-ui.js?v=map-continuity-1';
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
+import {createProjectionCache} from './projection-cache.js';
 import {createTerrainSampler} from './terrain-elevation.js';
 import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260925-smooth-map';
 import {createBuildingModelLayer} from './building-models.js?v=20260929-mesh';
@@ -539,7 +540,7 @@ function drawLights(fade,target=map,surface=lights){
  // Ground effects first, then upright pins from farthest to nearest.
  const visibleFeatures=lightFeatures.filter(feature=>mizzedNotificationActive(feature.properties));
  const liveVenueKeys=new Set(visibleFeatures.filter(feature=>!feature.properties.attachmentOnly).map(feature=>feature.properties.venueWaypointKey));
- const ordered=visibleFeatures.filter(feature=>!feature.properties.attachmentOnly||liveVenueKeys.has(feature.properties.key)).map(feature=>({feature,p:target.project(feature.geometry.coordinates)})).filter(({feature,p})=>p.x>=-420&&p.y>=-420&&p.x<=width+420&&p.y<=height+420*(feature.properties.isBar?feature.properties.heightScale:1)).sort((a,b)=>a.p.y-b.p.y);
+ const ordered=visibleFeatures.filter(feature=>!feature.properties.attachmentOnly||liveVenueKeys.has(feature.properties.key)).map(feature=>({feature,p:target===map?featureProjection.project(feature):target.project(feature.geometry.coordinates)})).filter(({feature,p})=>p.x>=-420&&p.y>=-420&&p.x<=width+420&&p.y<=height+420*(feature.properties.isBar?feature.properties.heightScale:1)).sort((a,b)=>a.p.y-b.p.y);
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
  const reveal=smoothRange(14.5,16.5,target.getZoom());
  // Every event in the active Portland night launches, including shared venues.
@@ -968,6 +969,7 @@ function updateSceneStatus(){
  document.body.classList.toggle('scene-ready',loaded);
 }
 const mapActivity=createMapActivity(map,{onChange:onVisibilityChange});
+const featureProjection=createProjectionCache(map);
 function scheduleFrame(){if(!frame&&!disposed&&mapActivity.visible)frame=requestAnimationFrame(draw);}
 map.on('idle',()=>{
  if(loopWaiting){
@@ -1042,10 +1044,16 @@ const stopSceneResize=observeMapSize(map,onSceneResize);
 reduced.addEventListener('change',onReducedChange);
 function onVisibilityChange(){
  cancelAnimationFrame(frame);frame=0;last=0;clearLogoPointer();
- scheduleFrame();
+ portlandLandmarks.setActive(mapActivity.visible);
+ if(!mapActivity.visible){
+  cancelAnimationFrame(overviewPitchFrame);overviewPitchFrame=0;
+  clearTimeout(interactionSettledTimer);interactionSettledTimer=0;
+  clearTimeout(surfaceRefreshTimer);surfaceRefreshTimer=0;
+  map.stop();
+ }else scheduleFrame();
 }
 window.addEventListener('pagehide',()=>{
- disposed=true;clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);mapActivity.dispose();
+ disposed=true;clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);mapActivity.dispose();featureProjection.dispose();
  cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);
  exploration.dispose();
  assetController.abort();reduced.removeEventListener('change',onReducedChange);reduced.dispose();stopSceneResize();
@@ -1120,6 +1128,7 @@ async function setListings(rows){
 window.addEventListener('message',event=>{
  if(event.origin!==location.origin||event.source!==parent||event.data?.source!=='mapz-host')return;
  const {type,...data}=event.data;
+ if(type==='visibility'){mapActivity.setActive(data.active);return;}
  if(type==='data'&&Array.isArray(data.rows))void setListings(data.rows);
  if(type==='select'){selectedKey=data.key;const feature=lightFeatures.find(f=>f.properties.key===selectedKey);if(feature){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:feature.geometry.coordinates,zoom:Math.max(16.5,map.getZoom()),duration:700});}scheduleFrame();}
  if(type==='locate'){setUserLocation(data.coordinates,data.avatar);pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:data.coordinates,zoom:16,duration:700});}

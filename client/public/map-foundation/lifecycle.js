@@ -40,8 +40,8 @@ export function observeMapSize(map, onResize=()=>{}, scope=globalThis) {
 
 // A retained iframe can be offscreen while its document is still visible.
 export function createMapActivity(map,{onChange=()=>{},scope=globalThis}={}){
- let onscreen=true;
- const activity={get visible(){return onscreen&&!scope.document.hidden;},dispose};
+ let onscreen=true,active=true;
+ const activity={get visible(){return active&&onscreen&&!scope.document.hidden;},setActive(value){active=value!==false;update();},dispose};
  let visible=activity.visible;
  const update=()=>{const next=activity.visible;if(next!==visible){visible=next;onChange(next);}};
  const observer=scope.IntersectionObserver?new scope.IntersectionObserver(entries=>{onscreen=entries[0]?.isIntersecting!==false;update();}):null;
