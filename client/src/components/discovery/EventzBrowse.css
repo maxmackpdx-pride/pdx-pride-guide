@@ -218,7 +218,7 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: var(--z-black);
 .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__media {
   height: 190px; min-height: 190px; max-height: 190px; aspect-ratio: auto;
   padding: 64px 16px 24px; align-items: flex-start; justify-content: center;
-  background: linear-gradient(var(--z-black) 0 80%, transparent 100%);
+  background: transparent;
 }
 .eb-page--places .eb-original-card .rg-directory-card .pdxPlace__media .pdxPlace__logo {
   position: relative !important; inset: auto !important; transform: none !important;
