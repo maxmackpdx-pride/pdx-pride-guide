@@ -46,11 +46,20 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 }
 .standalone-hologram-label:focus-visible{outline:2px solid var(--label-color);outline-offset:5px;border-radius:6px}
 
-/* Event projection typography stays crisp above the translucent optical material. */
-.standalone-hologram-label--event{text-shadow:0 1px 2px #090511;}
-.standalone-hologram-label--event .standalone-hologram-title{justify-content:flex-start;height:auto;min-height:0;overflow:visible;}
-.standalone-hologram-label--event .standalone-hologram-clock{margin-top:5px;font:900 12px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.01em;color:color-mix(in srgb,var(--label-clock) 55%,white);text-shadow:0 1px 2px #090511;}
-
 .standalone-hologram-label--event:hover .standalone-hologram-title{filter:none}
 
 .standalone-hologram-countdown{display:block;margin-top:4px;color:#f4f7ff;font:800 9px/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.035em;white-space:nowrap;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px #020509}
+
+/* Approved Blender frame: the projection attaches around this entire rear edge. */
+.standalone-hologram-label--event{height:112px;display:grid;grid-template-rows:30px 1fr 21px;padding:7px 9px 6px;gap:4px;isolation:isolate;text-shadow:0 1px 2px #020509;}
+.event-hologram-frame{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:-1;filter:drop-shadow(0 0 2px color-mix(in srgb,var(--projection-color) 40%,transparent));}
+.event-hologram-frame__rear{fill:#061019f5;stroke:var(--projection-color);stroke-width:1.15;stroke-linejoin:round;}
+.event-hologram-frame__inset{fill:none;stroke:var(--projection-color);stroke-width:.35;opacity:.6;transform:translate(2px,2px) scale(.9643);transform-origin:0 0;}
+.event-hologram-brand{height:30px;display:flex;align-items:center;justify-content:center;padding:0 8px 4px;border-bottom:.5px solid color-mix(in srgb,var(--projection-color) 25%,transparent);color:#fff;font:800 9px/1.05 'Barlow Condensed',sans-serif;}
+.event-hologram-brand canvas{display:block;max-width:100%;max-height:25px;object-fit:contain;width:auto;height:auto;}
+.standalone-hologram-label--event .standalone-hologram-title{height:40px;justify-content:center;overflow:hidden;min-width:0;}
+.event-hologram-footer{height:21px;display:flex;align-items:center;justify-content:center;gap:6px;border-top:.5px solid color-mix(in srgb,var(--projection-color) 45%,transparent);min-width:0;}
+.standalone-hologram-label--event .standalone-hologram-clock{margin:0;color:#fff;font:900 10px/1 'Barlow Condensed',sans-serif;text-shadow:0 1px 2px #020509;white-space:nowrap;}
+.standalone-hologram-label--event .standalone-hologram-countdown{margin:0;color:#cbd5e1;font:900 8px/1 'Barlow Condensed',sans-serif;letter-spacing:0;}
+.standalone-hologram-label--event:focus-visible{outline-color:#fff;outline-offset:4px;}
+.standalone-hologram-label--event:hover .event-hologram-frame__rear{stroke-width:1.6;}

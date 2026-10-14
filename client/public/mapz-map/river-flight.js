@@ -1,3 +1,5 @@
+import {eventCardGeometry,appendEventCardFrame,createAttachedEventBeam} from './event-hologram-card.js';
+import {EVENT_CARD_WIDTH,EVENT_CARD_HEIGHT} from './event-hologram-model.js';
 import { groupBoardPins, drawBoardPin } from './board-pins.js';
 import {addLayers} from '../map-foundation/layers.js';
 import {captureCamera,readCameraParams} from '../map-foundation/camera.js';
@@ -20,7 +22,7 @@ import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-whi
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
 import {logoCoverage,logoTone,authoredLogoMode} from './logo-mask.js';
-import {createEventProjection,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from './event-projection.js';
+import {eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
 import {hologramPresence,hologramCameraDrift,boundedHologramPosition} from './hologram-presence.js';
@@ -408,7 +410,8 @@ function buildingGlitter(target,surfaces){
  points=whiteSparkles(points,30);
  glitterCache.set(target,{time:now,surfaces,flat,coarse,overview,points});return points;
 }
-const eventProjection=createEventProjection();
+
+const attachedEventBeam=createAttachedEventBeam();
 const hologramLayouts=new WeakMap();
 const logoSpacing=1.15;
 const hologramLiftScale=.7*TONIGHT_HEIGHT_MULTIPLIER*.8*1.15*1.35;
@@ -417,6 +420,7 @@ const hologramLabelWidth=62;
 const logoFit=logo=>Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height);
 const eventArtworkScale=feature=>/\/icons\/event\.svg(?:[?#]|$)/.test(feature.properties.logo||'')?.38:1;
 function hologramBounds(feature,scale){
+ if(feature.properties.kind==='event')return {halfWidth:(EVENT_CARD_WIDTH/2+5)*scale,halfHeight:(EVENT_CARD_HEIGHT/2+5)*scale};
  const logo=venueLogos.get(feature.properties.logo);
  if(!logo)return {halfWidth:40*logoSpacing*scale,halfHeight:75*logoSpacing*scale};
  const fit=logoFit(logo)*hologramArtworkScale*eventArtworkScale(feature);
@@ -537,7 +541,7 @@ function drawLights(fade,target=map,surface=lights){
  const hologramMultiplier=2.4-.75*streetProgress;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
  // Clear the artwork and its title above the waypoint, without filling the viewport.
- const skyCeiling=Math.min(height*.36,Math.max(84,170*presentationScale,1.3*eventProjectionHeightLimit(target.getZoom(),target.getPitch())));
+ const skyCeiling=Math.min(height*.46,Math.max(110,220*presentationScale,1.3*eventProjectionHeightLimit(target.getZoom(),target.getPitch())));
  const overviewAnchor=.32+.68*smoothRange(11.25,14.25,target.getZoom());
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
@@ -653,6 +657,12 @@ function drawLights(fade,target=map,surface=lights){
   const parent=venue?venueGeometry(v):null;
   return {...v,p:parent?{x:parent.x+46,y:parent.y+18}:v.p};
  }));
+ const eventCards=new Map(beacons.map(item=>{
+  const {feature,p}=item,grow=Math.min(riseAmount(feature.properties.key,frameNow),foldAmount(feature.properties.key,frameNow));
+  const card=eventCardGeometry(p.x+(item.x-p.x)*grow,p.y+(item.y-p.y)*grow,item.offset.scale*grow);
+  return [feature.properties.key,{...card,key:feature.properties.key,opacity:coreAlpha*grow}];
+ }));
+ const visibleEventCards=new Set(visibleHologramLabels([...eventCards.values()],selectedKey,width,height).map(card=>card.key));
  const extensionSlots=new Map(),branchCounts=new Map();
  for(const {feature} of ordered){const row=feature.properties;if((row.waypointFamily==='mizzed'||row.waypointFamily==='gigz')&&row.venueWaypointKey)branchCounts.set(row.venueWaypointKey,(branchCounts.get(row.venueWaypointKey)||0)+1);}
  for(const pass of [0,1]){
@@ -752,60 +762,28 @@ function drawLights(fade,target=map,surface=lights){
     const roof=surfaces.roofs?.get(parent.feature.properties.phase)??9;
     const roofPixels=roof*extrusionAmount(target)/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
     const beamAnchor={x:parent.p.x,y:parent.p.y-roofPixels};
-    // Cap the beam itself, with the artwork/title footprint above its mouth.
-    // Adding the old center offset after the cap pushed overview headers onto roofs.
-    const headerClearance=hologramBounds(feature,beaconScale).halfHeight;
-    const projection=eventProjectionGeometry(beamAnchor,{x:logoX,y:hologramTop+headerClearance+32*beaconScale},beaconScale,Math.max(skyCeiling,beamAnchor.y-hologramTop-headerClearance));
-    hologramTop=projection.top-headerClearance;
-   if(pass===0){
-    lightsContext.save();
-    lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*(presence?.opacity??1)*bloomScale;
-    eventProjection.draw(lightsContext,projection,pulseTime,phase,reduced.matches,eventProjectionColor(feature.properties));
-    lightsContext.restore();
-   continue;
-   }
-
-   // Floating hologram: only the artwork and fine corner guides, no pin body.
-   const hologramCenterY=hologramTop;
-   const renderedArtworkScale=hologramArtworkScale*beaconScale*eventArtworkScale(feature);
-   lightsContext.save();lightsContext.globalAlpha=hologramAlpha;
-   // Keep every part of the hologram attached to the same map-tracked center.
-   // Screen-space billboard: the beam can lean, but its header stays level
-   // with the waypoint and faces the camera through map pitch/bearing changes.
-   lightsContext.translate(logoX,hologramCenterY+34*renderedArtworkScale);lightsContext.scale(renderedArtworkScale,renderedArtworkScale);
-   // Stable identity; the projection carries the motion instead of logo swaps.
-   const artUrl=feature.properties.logo;
-   const logoKey=feature.properties.logoKey;
-   if(logoKey)hitTargets.push({key:logoKey,x:logoX,y:hologramCenterY,r:Math.max(24,38*beaconScale)});
-   const logo=venueLogos.get(artUrl)||venueLogos.get(feature.properties.logo);
-   if(feature.properties.time&&logo&&coreAlpha>.1){
-    const fit=logoFit(logo)*renderedArtworkScale;
-    const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
-    const labelOffset=logoHeight/2+5*beaconScale;
-    const labelX=logoX,labelY=hologramCenterY+labelOffset;
-    eventLabels.push({projectionColor:eventProjectionColor(feature.properties),avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,countdown:eventCountdown(feature.properties.startsAtMs,viewTime),color,x:labelX,y:labelY,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:hologramAlpha});
-   }
-   lightsContext.globalAlpha=hologramAlpha;
-   if(logo){
-    lightsContext.save();lightsContext.translate(0,-34);
-    // Artwork and title stay level on the same camera-facing billboard.
-    lightsContext.translate(0,34);
-    const scale=logoFit(logo),w=logo.width*scale,h=logo.height*scale;
-    lightsContext.imageSmoothingEnabled=true;lightsContext.imageSmoothingQuality='high';
-    const padding=logo.padding*scale;
-    lightsContext.globalAlpha=hologramAlpha;
-    lightsContext.drawImage(logo.outlined,-w/2-padding,-34-h/2-padding,w+padding*2,h+padding*2);
-    // Tiny low-contrast digital scan, confined to the artwork's alpha mask.
-    if(!reduced.matches){
-     const band=(Math.sin(pulseTime*.31+phase*5.1)*.5+.5)*logo.height;
-     const bandHeight=Math.max(1,logo.height*.008);
-     lightsContext.globalAlpha=hologramAlpha*(activeTonight(feature)?.2:.07);
-     lightsContext.drawImage(logo.silhouette,logo.left,logo.top+band,logo.width,Math.min(bandHeight,logo.height-band),-w/2,-34-h/2+band*scale,w,Math.min(bandHeight,logo.height-band)*scale);
+    // The DOM frame and beam use identical screen geometry during rise/fold.
+    lightsContext.setTransform(dpr,0,0,dpr,0,0);
+    const card=eventCards.get(feature.properties.key);
+    // Near the screen edge, keep an event pin until there is room for its light.
+    if(!card||!visibleEventCards.has(feature.properties.key)||card.bottom>beamAnchor.y-Math.max(24,32*card.scale)){
+     if(pass===1){
+      const head=venueGeometry({feature,p});
+      drawWaypointHead(lightsContext,head,eventProjectionColor(feature.properties),typeIcons.get(feature.properties.typeIcon)?.light,null,false,coreAlpha);
+      hitTargets.push({key:feature.properties.key,x:head.x,y:head.y,r:Math.max(22,head.size/2+8),name:feature.properties.name,color});
+     }
+     continue;
     }
-    lightsContext.restore();
-
-   }
-   lightsContext.restore();
+    const projectionColor=eventProjectionColor(feature.properties);
+    if(pass===0){
+     lightsContext.save();lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*(presence?.opacity??1)*bloomScale;
+     attachedEventBeam.draw(lightsContext,card,beamAnchor,pulseTime,phase,reduced.matches,projectionColor);
+     lightsContext.restore();continue;
+    }
+    eventLabels.push({...card,projectionColor,avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,
+     name:feature.properties.name,venueName:feature.properties.venueName||'',time:feature.properties.time,
+     countdown:eventCountdown(feature.properties.startsAtMs,viewTime),color,logo:feature.properties.logo,
+     logoKey:feature.properties.logoKey,logoY:card.top,logoWidth:0,logoHeight:0,opacity:card.opacity});
   }else if(pass===0){
    const size=126*(.92+.1*pulse);
    lightsContext.drawImage(lightSprites.get(color),p.x-size/2,raisedY-size/2,size,size);
@@ -817,10 +795,10 @@ function drawLights(fade,target=map,surface=lights){
  lightsContext.setTransform(dpr,0,0,dpr,0,0);
  }
  drawUserLocationAvatar(lightsContext,target,fade);
- // Titles live in this same document and frame cadence as their canvas logos.
+ // Cards live in this same document and frame cadence as their light beams.
  // Crossing the iframe boundary here caused visible lag while panning and zooming.
- renderHologramLabels(visibleHologramLabels(eventLabels, selectedKey, width, height));
- hitTargets.push(...eventLabels.filter(label=>label.opacity>.1).map(label=>({key:label.logoKey||label.key,x:label.x,y:label.logoY,width:label.logoWidth,height:label.logoHeight,color:label.color})));
+ renderHologramLabels([...eventLabels.filter(label=>label.cardHeight),...visibleHologramLabels(eventLabels.filter(label=>!label.cardHeight),selectedKey,width,height)]);
+ hitTargets.push(...eventLabels.filter(label=>!label.cardHeight&&label.opacity>.1).map(label=>({key:label.logoKey||label.key,x:label.x,y:label.logoY,width:label.logoWidth,height:label.logoHeight,color:label.color})));
  hoverTargets=[...hitTargets];
  if(userLocation&&fade>.1){const p=target.project(userLocation.coordinates);hoverTargets.push({x:p.x,y:p.y-27,r:23,color:userLocation.feature.properties.color,hoverOnly:true});}
  mapHover.update(hoverTargets,logoPointer);
@@ -833,7 +811,7 @@ document.fonts?.load("900 100px 'Barlow Condensed'").then(()=>{
  for(const item of document.querySelectorAll('.standalone-hologram-label'))delete item.dataset.signature;
  scheduleFrame();
 }).catch(()=>{});
-function labelRows(text,width,requiredRows){
+function labelRows(text,width,requiredRows,heightRatio=.52){
  const words=String(text).trim().split(/\s+/).filter(Boolean),candidates=[];
  const partition=(start,rows,left)=>{
   if(left===1){candidates.push([...rows,words.slice(start).join(' ')]);return;}
@@ -842,7 +820,7 @@ function labelRows(text,width,requiredRows){
  const rowCounts=requiredRows?[Math.min(requiredRows,words.length)]:Array.from({length:Math.min(3,words.length)},(_,index)=>index+1);
  for(const count of rowCounts)partition(0,[],count);
  labelMeasureContext.font="900 100px 'Barlow Condensed','Arial Narrow',sans-serif";
- const targetWidth=width*.96,targetHeight=width*.52,maxSize=width*.34;
+ const targetWidth=width*.96,targetHeight=width*heightRatio,maxSize=width*.34;
  return candidates.map(lines=>{
   let sizes=lines.map(line=>Math.min(maxSize,targetWidth/Math.max(1,labelMeasureContext.measureText(line).width)*100));
   const rowGap=Math.max(0,lines.length-1)*.75;
@@ -868,17 +846,34 @@ function renderHologramLabels(labels){
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
   item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',label.kind==='housing'?labelComplement(label.color):label.projectionColor);item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}${label.countdown?`, ${label.countdown}`:""}`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);
-  const signature=JSON.stringify([label.kind,label.name,label.time,label.countdown,label.color,label.projectionColor,label.width,label.avatars]);
+  const signature=JSON.stringify([label.kind,label.name,label.time,label.countdown,label.color,label.projectionColor,label.width,label.avatars,label.logo,!!venueLogos.get(label.logo),label.venueName]);
   if(item.dataset.signature!==signature){
-   item.dataset.signature=signature;item.replaceChildren();const title=document.createElement('span');title.className='standalone-hologram-title';
-   const fitted=labelRows(label.name,label.width,label.kind==='housing'?2:undefined);fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
-   if(label.kind!=='housing'&&label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=label.time;item.appendChild(clock);}
-   if(label.kind!=='housing'&&label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';countdown.textContent=label.countdown;item.appendChild(countdown);}
+   item.dataset.signature=signature;item.replaceChildren();
+   if(label.cardHeight){
+    appendEventCardFrame(item);
+    const brand=document.createElement('span');brand.className='event-hologram-brand';
+    const logo=venueLogos.get(label.logo);
+    if(logo&&!/\/icons\/event\.svg(?:[?#]|$)/.test(label.logo||'')){
+     const canvas=document.createElement('canvas');canvas.width=logo.width;canvas.height=logo.height;
+     canvas.style.aspectRatio=`${logo.width} / ${logo.height}`;canvas.getContext('2d').drawImage(logo.image,0,0);brand.appendChild(canvas);
+    }else{brand.textContent=label.venueName||'EVENT';}
+    item.appendChild(brand);
+   }
+   const title=document.createElement('span');title.className='standalone-hologram-title';
+   const fitted=labelRows(label.name,label.cardHeight?label.width-18:label.width,label.kind==='housing'?2:undefined,label.cardHeight?.43:.52);
+   fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
+   if(label.kind!=='housing'){
+    const footer=document.createElement('span');footer.className='event-hologram-footer';
+    if(label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=label.time;footer.appendChild(clock);}
+    if(label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';countdown.textContent=label.countdown;footer.appendChild(countdown);}
+    item.appendChild(footer);
+   }
+
   }
   let stack=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='faces');
   if(label.avatars?.length){
    if(!stack){stack=document.createElement('span');stack.className='standalone-hologram-faces standalone-hologram-faces--anchored';stack.dataset.labelKey=label.key;stack.dataset.labelRole='faces';root.appendChild(stack);}
-   stack.style.left=`${label.x}px`;stack.style.top=`${label.logoY-label.logoHeight/2-14*label.scale}px`;stack.style.opacity=label.opacity;stack.style.setProperty('--face-scale',label.scale);stack.style.setProperty('--face-size',`${Math.min(18,60/Math.max(1,label.avatars.length*.72+.28))}px`);
+   stack.style.left=`${label.x}px`;stack.style.top=`${label.cardHeight?label.top-10*label.scale:label.logoY-label.logoHeight/2-14*label.scale}px`;stack.style.opacity=label.opacity;stack.style.setProperty('--face-scale',label.scale);stack.style.setProperty('--face-size',`${Math.min(18,60/Math.max(1,label.avatars.length*.72+.28))}px`);
    const faceSignature=JSON.stringify([label.color,label.avatars,label.avatarTotal]);
    if(stack.dataset.signature!==faceSignature){stack.dataset.signature=faceSignature;stack.innerHTML=faceStackHtml(label.avatars.map(avatar=>({displayName:avatar.initial,photoUrl:avatar.url})),label.avatarTotal??label.avatars.length);}
   }else stack?.remove();
@@ -1090,7 +1085,7 @@ window.addEventListener('pagehide',()=>{
  mapHover.dispose();
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
- waterBloom.dispose();hologramMaterials.dispose();eventProjection.dispose();
+ waterBloom.dispose();hologramMaterials.dispose();attachedEventBeam.dispose();
  for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);

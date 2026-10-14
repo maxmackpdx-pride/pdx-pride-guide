@@ -36,7 +36,7 @@ test('spectral fringes follow the primary token while keeping that token dominan
 test('event headers stay level and camera-facing while the beam moves',async()=>{
   const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
   const style=await readFile(new URL('../client/public/mapz-map/studio.css',import.meta.url),'utf8');
-  assert.match(renderer,/labelX=logoX,labelY=hologramCenterY\+labelOffset/);
+  assert.match(renderer,/eventCardGeometry\(p.x\+\(item.x-p.x\)\*grow,p.y\+\(item.y-p.y\)\*grow,item.offset.scale\*grow\)/);
   assert.doesNotMatch(renderer,/facing\.roll|facing\.shear|--label-roll|--label-shear/);
   assert.doesNotMatch(style,/--label-roll|--label-shear/);
 });

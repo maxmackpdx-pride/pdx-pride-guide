@@ -846,7 +846,7 @@ export default function MapzMapDemo() {
       eventDay:event?portlandCalendarDay(event.dateStart):undefined,
       eventNight:event?eventNight(parsePacificDateTime(event.dateStart)??NaN):undefined,
       dayColor:event?nightDayColor(eventNight(parsePacificDateTime(event.dateStart)??NaN)):undefined,
-      startsAt:event?.dateStart,startsAtMs:event?parsePacificDateTime(event.dateStart):undefined,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
+      venueName:event?.venueName,startsAt:event?.dateStart,startsAtMs:event?parsePacificDateTime(event.dateStart):undefined,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?eventTimeLabel(event.dateStart):undefined};
   }); }, [marks, places, events, demoEventIds, attendance, tokenEpoch]);
   // Board 49: the status line says how many holograms are up tonight. No badge on the pin.
