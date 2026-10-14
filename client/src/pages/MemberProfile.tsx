@@ -32,7 +32,8 @@ import HostingPanel from "@/components/profile/HostingPanel";
 import TheBigOne from "@/components/profile/TheBigOne";
 import GoingRail from "@/components/profile/GoingRail";
 const OutzAdventures = lazyWithReload(() => import("@/components/profile/OutzAdventures"));
-const FlyerStash = lazyWithReload(() => import("@/components/profile/FlyerStash"));
+import ProfileCollection from "@/components/profile/ProfileCollection";
+const ProfileEditDrawer = lazyWithReload(() => import("@/components/profile/ProfileEditDrawer"));
 import UpdatesPanel from "@/components/profile/UpdatesPanel";
 import ProfileFooter from "@/components/profile/ProfileFooter";
 import SafetyGuide from "@/components/SafetyGuide";
@@ -43,12 +44,13 @@ import {
   type AttendanceSummaryMap,
 } from "@/components/profile/mapAttendancePreviewToChips";
 const MessageModal = lazyWithReload(() => import("./profile/MessageModal"));
-import ProfileAbout, { hasProfileAboutContent } from "@/components/profile/ProfileAbout";
+import ProfileAbout from "@/components/profile/ProfileAbout";
 import { profileCssVars } from "@/components/profile/profileHelpers";
 import { copyTextToClipboard } from "@/lib/copyText";
 import "./MemberProfile.css";
 import "./ProfileFoundation.css";
-import ProfileWidgetGrid, { type ProfileSection } from "@/components/profile/ProfileWidgetGrid";
+import ProfileContent, { type ProfileChapter } from "@/components/profile/ProfileContent";
+import {parseSocialLinks, socialCardsFor} from "./profile/helpers";
 
 export default function MemberProfile() {
   const [routeMatch, routeParams] = useRoute("/u/:username");
@@ -71,6 +73,7 @@ export default function MemberProfile() {
   );
 
   const [msgOpen, setMsgOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [accentOpen, setAccentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [top8Open, setTop8Open] = useState(false);
@@ -82,6 +85,7 @@ export default function MemberProfile() {
   const closeMessage = useCallback(() => setMsgOpen(false), []);
   useEffect(() => {
     setMsgOpen(false);
+    setEditOpen(false);
     setAccentOpen(false);
     setShareOpen(false);
     setTop8Open(false);
@@ -276,7 +280,7 @@ export default function MemberProfile() {
       href="/needz?cat=community" label="Find your people" missing={notFound} retry={notFound ? undefined : () => { void refetch(); }} />;
   }
 
-  const isOwner = !!data.isOwner;
+  const isOwner = !!data.isOwner && viewer?.username.toLowerCase() === data.username.toLowerCase();
   const accent = data.accentColor || DEFAULT_PROFILE_ACCENT;
   const banner = data.profileBanner ?? null;
   const hosting = data.events?.hosting ?? { upcoming: [], past: [] };
@@ -314,6 +318,7 @@ export default function MemberProfile() {
           shareOpen={shareOpen}
           copied={copied}
           profileUrl={profileUrl}
+          onEdit={() => setEditOpen(true)}
           onFollow={() => viewer ? followMutation.mutate() : setShowAuth(true)}
           onShareToggle={() => setShareOpen(v => !v)}
           onCopy={onCopy}
@@ -340,17 +345,19 @@ export default function MemberProfile() {
           <ProfileMarquee items={marqueeItems} speed={data.marquee?.speed || 30} color={data.marquee?.color} />
         </div>}
 
-        <ProfileWidgetGrid key={username} username={username} sections={[
-          ...(hasProfileAboutContent(data, apiData.profilePhotos, apiData.profileEmbeds) ? [{ id: "about", label: "About", size: "sm", content: <ProfileAbout data={data} profilePhotos={apiData.profilePhotos} profileEmbeds={apiData.profileEmbeds} /> } as ProfileSection] : []),
-          ...(hosting.upcoming.length || hosting.past.length ? [{ id: "hosting", label: "Hosting", size: "wide", content: (
+        <ProfileContent key={username} username={username} sections={[
+          ...(data.roles?.length || data.talents?.length || data.standFor?.length || socialCardsFor(parseSocialLinks(data.socialLinks)).length ? [{ id: "about", room:"about", label: "About", size: "sm", content: <ProfileAbout data={data} mode="about" /> } as ProfileChapter] : []),
+          ...(data.businessPlace || data.affiliatedVenues?.length || data.linkedVenues?.length || data.pup || data.packmates?.length || data.handlers?.length ? [{ id: "connections", room:"people", label: "Places and pack", size: "sm", content: <ProfileAbout data={data} mode="connections" /> } as ProfileChapter] : []),
+          ...(data.media || apiData.profilePhotos?.length || apiData.profileEmbeds?.length ? [{ id: "media", room:"media", label: "Media", size: "sm", content: <ProfileAbout data={data} mode="media" profilePhotos={apiData.profilePhotos} profileEmbeds={apiData.profileEmbeds} /> } as ProfileChapter] : []),
+          ...(hosting.upcoming.length || hosting.past.length ? [{ id: "hosting", room:"events", label: "Hosting", size: "wide", content: (
             <HostingPanel
               upcoming={hosting.upcoming}
               past={hosting.past}
               displayName={data.displayName}
               onEventClick={(e) => openEvent(e.id)}
             />
-          ) } as ProfileSection] : []),
-          ...(isOwner || data.top8?.length ? [{ id: "top8", label: "Top 8", size: "sm", content: (
+          ) } as ProfileChapter] : []),
+          ...(isOwner || data.top8?.length ? [{ id: "top8", room:"people", label: "Top 8", size: "sm", content: (
             <ProfileTop8
               entries={data.top8 ?? []}
               isOwner={isOwner}
@@ -359,8 +366,8 @@ export default function MemberProfile() {
               onRequireAuth={() => setShowAuth(true)}
               onPlaceClick={openPlaceFromTop8}
             />
-          ) } as ProfileSection] : []),
-          ...(posts.length ? [{ id: "updates", label: "Updates", size: "sm", content: (
+          ) } as ProfileChapter] : []),
+          ...(posts.length ? [{ id: "updates", room:"boardz", label: "Updates", size: "sm", content: (
             <UpdatesPanel
               posts={posts}
               author={{
@@ -371,8 +378,8 @@ export default function MemberProfile() {
                 username: data.username,
               }}
             />
-          ) } as ProfileSection] : []),
-          ...(bigOne ? [{ id: "big-one", label: "The Big One", size: "sm", content: (
+          ) } as ProfileChapter] : []),
+          ...(bigOne ? [{ id: "big-one", room:"events", label: "The Big One", size: "sm", content: (
             <TheBigOne
               event={bigOne!}
               goingCount={
@@ -383,23 +390,20 @@ export default function MemberProfile() {
               onRsvp={() => toggleRsvp(bigOne!.id)}
               onOpen={() => openEvent(bigOne!.id)}
             />
-          ) } as ProfileSection] : []),
-          ...(going.upcoming.length ? [{ id: "going", label: "Going", size: "sm", content: (
+          ) } as ProfileChapter] : []),
+          ...(going.upcoming.length ? [{ id: "going", room:"events", label: "Going", size: "sm", content: (
             <GoingRail
               events={going.upcoming}
               attendanceSummaries={attendanceSummaries}
               onEventClick={(e) => openEvent(e.id)}
             />
-          ) } as ProfileSection] : []),
-          ...(stashEvents.length ? [{ id: "stash", label: "The Stash", size: "wide", content: (
-            <ProfileDeferred label="The Stash"><Suspense fallback={<p role="status">Loading flyers…</p>}><FlyerStash
-              events={stashEvents}
-              onEventClick={(e) => openEvent(e.id)}
-            /></Suspense></ProfileDeferred>
-          ) } as ProfileSection] : []),
-          ...(isOwner ? [{ id: "outz", label: "Outz adventures", size: "wide", content: (
+          ) } as ProfileChapter] : []),
+          ...(stashEvents.length || posts.length || isOwner ? [{ id: "stash", room:"stash", label: "The Stash", size: "wide", content: (
+            <ProfileDeferred label="The Stash"><ProfileCollection events={stashEvents} data={data} adventures={apiData.outzAdventures} isOwner={isOwner} onEventClick={id=>{void openEvent(id);}} onPlaceOpen={(place,element)=>{void openPlaceFromTop8({kind:"place",id:place.id,name:place.name,logoUrl:place.imageUrl || null},element);}} onRequireAuth={()=>setShowAuth(true)} /></ProfileDeferred>
+          ) } as ProfileChapter] : []),
+          ...(isOwner ? [{ id: "outz", room:"events", label: "Outz adventures", size: "wide", content: (
             <ProfileDeferred label="Outz adventures"><Suspense fallback={<p role="status">Loading adventures…</p>}><OutzAdventures adventures={apiData.outzAdventures} /></Suspense></ProfileDeferred>
-          ) } as ProfileSection] : []),
+          ) } as ProfileChapter] : []),
         ]} />
 
         {!isOwner && <SafetyGuide context="profile" compact />}
@@ -407,6 +411,7 @@ export default function MemberProfile() {
       </div>
 
       <Suspense fallback={<div className="pp-dialog-loading" role="status">Opening…</div>}>
+      {editOpen && isOwner && viewer && <ProfileEditDrawer open={editOpen} onOpenChange={setEditOpen} ownerUserId={viewer.id} />}
       {msgOpen && (
         <MessageModal
           data={apiData}

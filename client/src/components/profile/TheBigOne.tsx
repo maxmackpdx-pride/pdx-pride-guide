@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { RoomKicker } from "@/components/ds";
+import { RoomKicker } from "@/components/ds/RoomKicker";
 import type { CSSProperties } from "react";
 import { dayAccentToken } from "@/lib/dsColors";
 import { formatPacificDateTime, parsePacificEventTime, useCountdown } from "@/lib/countdown";

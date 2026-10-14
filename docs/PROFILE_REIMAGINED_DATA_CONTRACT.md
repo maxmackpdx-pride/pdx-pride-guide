@@ -8,6 +8,9 @@ Design authority remains the [canonical Zaylist Library](https://zaylist-foundat
 - `components/profile/ProfileHero.tsx`: identity, cover crop, avatar/ring, bio, theme, follow, messaging, sharing, and guarded account options.
 - `components/profile/ProfileStatStrip.tsx`: the existing public counters.
 - `components/profile/ProfileAbout.tsx`: existing public roles, talents, values, social links, places, media, photos, and pack connections. Approved SoundCloud players mount only when opened.
+- `components/profile/ProfileContent.tsx`: mobile area navigation and focused-area deep links.
+- `components/profile/ProfileEditDrawer.tsx`: owner-only existing full editor, photo/cover controls and server validation.
+- `components/profile/ProfileCollection.tsx`: authorized collection inputs; private favorites are fetched only for their signed-in owner. `stashCollection.ts` deduplicates identity and computes XP.
 - `components/profile/ProfileWidgetGrid.tsx`: device-local section order; static reading layout, lazy arrangement tools, keyboard/touch movement and reset.
 - Existing HostingPanel, ProfileTop8, TheBigOne, GoingRail, UpdatesPanel, FlyerStash and owner-only OutzAdventures retain their native features. Closed dialogs and secondary galleries load on demand.
 - `pages/profile/types.ts` describes the API response; `components/profile/normalizePublicProfile.ts` maps its existing public fields without exposing anonymous Mizzed posts.

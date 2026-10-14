@@ -1,22 +1,20 @@
 import { ArrowRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "wouter";
-import { ImageStreamHero } from "@/components/ui/image-stream-hero";
+import { GoingEventCard } from "./ProfileEventRail";
+import ProfilePlacePreview from "./ProfilePlacePreview";
+import UpdatesPanel, { type UpdatesAuthor } from "./UpdatesPanel";
+import type { Business } from "@/pages/Directory";
+import type { ProfileAdventure } from "@/pages/profile/types";
+import type { ProfileBoardPost } from "./types";
+import TodayLocationCard from "@/components/home/TodayLocationCard";
+import outzMapCatalog from "@shared/outzMapCatalog";
+import { formatRiverBratsWindow } from "@shared/riverBrats";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent } from "./types";
 import "./FlyerStash.css";
 
-type StashRole =
-  | "DJ"
-  | "DRAG"
-  | "MC"
-  | "GOGO"
-  | "PHOTO"
-  | "BAR"
-  | "SECURITY"
-  | "VOLUNTEER"
-  | "VENDOR"
-  | "WENT";
+import { buildStashCollection, normalizeStashRole as normalizeRole, STASH_WORK_XP, type StashRole } from "./stashCollection";
 
 type WorkMeta = {
   label: string;
@@ -26,16 +24,16 @@ type WorkMeta = {
 };
 
 const WORK: Record<StashRole, WorkMeta> = {
-  DJ: { label: "DJ SET", color: "#19e3ff", xp: 70, ladder: ["BEDROOM DJ", "OPENER", "RESIDENT DJ", "HEADLINE DJ", "PDX SOUND LEGEND"] },
-  DRAG: { label: "DRAG", color: "#FF00CC", xp: 70, ladder: ["BABY QUEEN", "LOCAL LEGEND", "STAGE MOTHER", "HEADLINER", "PDX DRAG ROYALTY"] },
-  MC: { label: "HOST / MC", color: "#CCFF00", xp: 60, ladder: ["OPEN MIC", "MC", "MAIN STAGE MC", "RINGLEADER", "PARTY PUP"] },
-  GOGO: { label: "GO-GO", color: "#FF6600", xp: 55, ladder: ["FRESH FEET", "GO-GO", "BOX STAR", "HEADLINE DANCER", "PDX GO-GO LEGEND"] },
-  PHOTO: { label: "PHOTOG", color: "#b06bff", xp: 45, ladder: ["SHUTTERBUG", "EVENT PHOTOG", "SCENE SHOOTER", "STAFF LENS", "PDX LENS LEGEND"] },
-  BAR: { label: "BAR", color: "#FFB23D", xp: 40, ladder: ["BACK BAR", "BARTENDER", "HEAD POUR", "BAR BOSS", "PDX BAR LEGEND"] },
-  SECURITY: { label: "SECURITY", color: "#39FF14", xp: 40, ladder: ["DOOR", "SECURITY", "HEAD OF DOOR", "SAFETY LEAD", "PDX SAFETY LEGEND"] },
-  VOLUNTEER: { label: "VOLUNTEER", color: "#00FFFF", xp: 35, ladder: ["HELPER", "VOLUNTEER", "CREW", "TEAM LEAD", "PDX CREW LEGEND"] },
-  VENDOR: { label: "VENDOR", color: "#FFEE00", xp: 35, ladder: ["POP-UP", "VENDOR", "MARKET REG", "VENDOR BOSS", "PDX MARKET LEGEND"] },
-  WENT: { label: "WENT", color: "#00FFFF", xp: 15, ladder: null },
+  DJ: { label: "DJ SET", color: "#19e3ff", xp: STASH_WORK_XP.DJ, ladder: ["BEDROOM DJ", "OPENER", "RESIDENT DJ", "HEADLINE DJ", "PDX SOUND LEGEND"] },
+  DRAG: { label: "DRAG", color: "#FF00CC", xp: STASH_WORK_XP.DRAG, ladder: ["BABY QUEEN", "LOCAL LEGEND", "STAGE MOTHER", "HEADLINER", "PDX DRAG ROYALTY"] },
+  MC: { label: "HOST / MC", color: "#CCFF00", xp: STASH_WORK_XP.MC, ladder: ["OPEN MIC", "MC", "MAIN STAGE MC", "RINGLEADER", "PARTY PUP"] },
+  GOGO: { label: "GO-GO", color: "#FF6600", xp: STASH_WORK_XP.GOGO, ladder: ["FRESH FEET", "GO-GO", "BOX STAR", "HEADLINE DANCER", "PDX GO-GO LEGEND"] },
+  PHOTO: { label: "PHOTOG", color: "#b06bff", xp: STASH_WORK_XP.PHOTO, ladder: ["SHUTTERBUG", "EVENT PHOTOG", "SCENE SHOOTER", "STAFF LENS", "PDX LENS LEGEND"] },
+  BAR: { label: "BAR", color: "#FFB23D", xp: STASH_WORK_XP.BAR, ladder: ["BACK BAR", "BARTENDER", "HEAD POUR", "BAR BOSS", "PDX BAR LEGEND"] },
+  SECURITY: { label: "SECURITY", color: "#39FF14", xp: STASH_WORK_XP.SECURITY, ladder: ["DOOR", "SECURITY", "HEAD OF DOOR", "SAFETY LEAD", "PDX SAFETY LEGEND"] },
+  VOLUNTEER: { label: "VOLUNTEER", color: "#00FFFF", xp: STASH_WORK_XP.VOLUNTEER, ladder: ["HELPER", "VOLUNTEER", "CREW", "TEAM LEAD", "PDX CREW LEGEND"] },
+  VENDOR: { label: "VENDOR", color: "#FFEE00", xp: STASH_WORK_XP.VENDOR, ladder: ["POP-UP", "VENDOR", "MARKET REG", "VENDOR BOSS", "PDX MARKET LEGEND"] },
+  WENT: { label: "WENT", color: "#00FFFF", xp: STASH_WORK_XP.WENT, ladder: null },
 };
 
 const SCENE_LADDER = ["FRESH FACE", "REGULAR", "SCENE STAPLE", "PARTY GREMLIN", "PDX SCENE ROYALTY"];
@@ -46,10 +44,18 @@ export type FlyerStashEvent = ProfileEvent & {
   stashRole?: StashRole | string | null;
 };
 
-type Props = {
+export type StashPlace = Pick<Business,"id"|"name"> & Partial<Business>;
+export type Props = {
   events: FlyerStashEvent[];
   onEventClick?: (event: ProfileEvent) => void;
   collectHref?: string;
+  completedAdventures?: ProfileAdventure[];
+  favoritePlaces?: StashPlace[];
+  boardPosts?: ProfileBoardPost[];
+  author?: UpdatesAuthor;
+  onPlaceOpen?: (place: StashPlace, element: HTMLElement) => void;
+  onBoardOpen?: (post: ProfileBoardPost) => void;
+  onRequireAuth?: () => void;
 };
 
 type BuiltFlyer = {
@@ -88,21 +94,6 @@ function formatPastWhen(iso?: string | null): string {
   if (hour == null || minute == null) return date;
   const h = Number(hour);
   return `${date} · ${h % 12 || 12}:${minute}${h < 12 ? "am" : "pm"}`;
-}
-
-function normalizeRole(raw?: string | null): StashRole {
-  const r = String(raw || "WENT").toUpperCase().replace(/[\s/-]+/g, "");
-  if (r === "DJ" || r === "DJSET") return "DJ";
-  if (r === "DRAG") return "DRAG";
-  if (r === "MC" || r === "HOST" || r === "HOSTMC" || r === "PRIMARY" || r === "COHOST") return "MC";
-  if (r === "GOGO" || r === "GOGODANCER") return "GOGO";
-  if (r === "PHOTO" || r === "PHOTOG" || r === "PHOTOGRAPHER") return "PHOTO";
-  if (r === "BAR" || r === "BARTENDER" || r === "BARTEND") return "BAR";
-  if (r === "SECURITY" || r === "DOOR") return "SECURITY";
-  if (r === "VOLUNTEER" || r === "CREW") return "VOLUNTEER";
-  if (r === "VENDOR") return "VENDOR";
-  if (r === "PERFORMER") return "DRAG";
-  return "WENT";
 }
 
 function tierIndex(xp: number): number {
@@ -154,16 +145,20 @@ export default function FlyerStash({
   events,
   onEventClick,
   collectHref = "/events",
+  completedAdventures = [], favoritePlaces = [], boardPosts = [],
+  onPlaceOpen, onBoardOpen, onRequireAuth, author,
 }: Props) {
-  const base = useMemo(() => buildFlyers(events), [events]);
+  const collection = useMemo(() => buildStashCollection({events,adventures:completedAdventures,places:favoritePlaces,posts:boardPosts,canRenderPosts:!!author}),[events,completedAdventures,favoritePlaces,boardPosts,author]);
+  const base = useMemo(() => buildFlyers(collection.events),[collection.events]);
+  const {adventures,places,posts,counts,collectionXp} = collection;
+  const [category,setCategory] = useState<'all'|'flyers'|'outz'|'places'|'boards'>('all');
   const n = base.length;
-  const [paused, setPaused] = useState(false);
-  const streamFlyers = base.filter(f => f.posterUrl);
+
   const stats = useMemo(() => {
     const count = n;
     const worked = base.filter((f) => f.worked);
     const attended = count - worked.length;
-    const xp = base.reduce((s, f) => s + f.pts, 0);
+    const xp = base.reduce((s, f) => s + f.pts, 0) + collectionXp;
     const rareCount = base.filter((f) => f.rare).length;
     const tally: Record<string, number> = {};
     const roleXp: Record<string, number> = {};
@@ -208,9 +203,9 @@ export default function FlyerStash({
       progressPct: `${Math.max(0, Math.min(100, progressPct))}%`,
       toNextLabel,
     };
-  }, [base, n]);
+  }, [base, n, collectionXp]);
 
-  if (!n) return null;
+  if (!counts.all) return null;
 
   return (
     <section className="flyer-stash" aria-label="The Stash">
@@ -219,7 +214,7 @@ export default function FlyerStash({
           <span className="flyer-stash__dot" aria-hidden />
           The Stash
         </div>
-        <span className="flyer-stash__sub">Every flyer from a night out, kept.</span>
+        <span className="flyer-stash__sub">Your nights, places and community, collected.</span>
       </div>
 
       <div className="flyer-stash__grid">
@@ -231,7 +226,7 @@ export default function FlyerStash({
               <div className="flyer-stash__xp-unit">XP</div>
             </div>
             <div className="flyer-stash__meta">
-              {stats.count} flyers · {stats.rareCount} rare
+              {counts.all} collected · {stats.count} flyers · {stats.rareCount} rare
             </div>
           </div>
           <div>
@@ -271,32 +266,21 @@ export default function FlyerStash({
           </p>
         </aside>
 
-        <div className="flyer-stash__gallery" aria-label="Saved flyers">
-          <div className="flyer-stash__gallery-head">
-            <span>{stats.count} saved flyers</span>
-            {streamFlyers.length > 0 && (
-              <button type="button" className="flyer-stash__pause" aria-pressed={paused}
-                onClick={() => setPaused(value => !value)}>
-                {paused ? "Play flyers" : "Pause flyers"}
-              </button>
-            )}
+        <div className="flyer-stash__gallery" aria-label="Your collected cards">
+          <div className="flyer-stash__album-tabs" role="group" aria-label="Collection category">
+            {([['all','All'],['flyers','Flyers'],['outz','Outz'],['places','Placez'],['boards','BoardZ']] as const).map(([key,label]) => <button key={key} type="button" aria-pressed={category===key} onClick={()=>setCategory(key)}>{label}<span>{counts[key]}</span></button>)}
           </div>
-          {streamFlyers.length > 0 && (
-            <ImageStreamHero
-              className="flyer-stash__stream"
-              images={streamFlyers.map(f => ({ src: f.posterUrl!, alt: `${f.title} at ${f.venue}` }))}
-              cards={Math.max(9, streamFlyers.length)}
-              path={{ cardRadius: 0 }}
-              paused={paused}
-              onImageClick={onEventClick ? index => onEventClick(streamFlyers[index].event) : undefined}
-            />
-          )}
-          {base.filter(f => !f.posterUrl).map(f => (
-            <button key={f.id} type="button" className="flyer-stash__missing"
-              disabled={!onEventClick} onClick={() => onEventClick?.(f.event)}>
-              {f.title} · {f.venue}
-            </button>
-          ))}
+          <div className="flyer-stash__album" role="list" aria-label={`${category} collection`}>
+            {(category==='all' || category==='flyers') && base.map(flyer=><div className="flyer-stash__album-item" role="listitem" key={`event:${flyer.id}`}><GoingEventCard event={flyer.event} past onClick={onEventClick}/><p className="flyer-stash__album-caption">{flyer.roleLabel} · {flyer.pts} XP{flyer.rare?' · Rare':''}</p></div>)}
+            {(category==='all' || category==='outz') && adventures.map(trip=>{
+              const destination=outzMapCatalog.find(place=>place.id===trip.placeId);
+              return <div className="flyer-stash__album-item" role="listitem" key={`outz:${trip.placeId}:${trip.calendarDate}`}><TodayLocationCard location={{key:trip.placeId,name:destination?.name || trip.placeId,room:'OutZide',kind:destination?.kind,detail:`${formatShortDate(trip.calendarDate)} · ${formatRiverBratsWindow(trip.arrivalHour,trip.departHour)}`,href:`/outzide?place=${encodeURIComponent(trip.placeId)}`}}/><p className="flyer-stash__album-caption">Past Outz check-in · 25 XP · Only you see this</p></div>;
+            })}
+            {(category==='all' || category==='places') && places.map(place=><div className="flyer-stash__album-item" role="listitem" key={`place:${place.id}`}><ProfilePlacePreview place={place} onOpen={element=>onPlaceOpen?.(place,element)} onRequireAuth={onRequireAuth}/><p className="flyer-stash__album-caption">Favorite place · 10 XP</p></div>)}
+            {(category==='all' || category==='boards') && posts.map(post=><div className="flyer-stash__album-item flyer-stash__album-item--board" role="listitem" key={`board:${post.contentType}:${post.id}`}><UpdatesPanel posts={[post]} author={author!} hideHeader onPostClick={onBoardOpen}/><p className="flyer-stash__album-caption">Community post · 10 XP</p></div>)}
+          </div>
+          {!counts[category] && <p className="flyer-stash__album-empty">Nothing collected here yet.</p>}
+          <details className="flyer-stash__album-scoring"><summary>How collection XP works</summary><p>Flyers keep their existing attendance/work XP and rare bonus. Each unique past Outz check-in destination and date adds 25 XP; a favorite place adds 10 XP; a community post adds 10 XP. Repeated records count once.</p></details>
         </div>
       </div>
     </section>

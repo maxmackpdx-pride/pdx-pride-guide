@@ -1,4 +1,4 @@
-/* Borderless flyer stream with collector progress alongside it. */
+/* Static collection album with the approved collector progress alongside it. */
 .flyer-stash {
   --stash-accent: var(--profile-acc, var(--neon-cyan));
   width: 100%;
@@ -37,12 +37,7 @@
 .flyer-stash__cta { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding-inline: 12px; border: 1px solid var(--ink-border-faint); border-radius: 22px; color: var(--text-hi); background: var(--btn-glow-bg); box-shadow: var(--btn-glow-shadow); font: 700 14px/1 var(--font-display); text-transform: uppercase; text-decoration: none; }
 .flyer-stash__blurb { margin: 0; color: var(--text-lo); font-size: 12px; line-height: 1.6; }
 .flyer-stash__gallery { min-width: 0; }
-.flyer-stash__gallery-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 12px; color: var(--text-lo); font: 700 13px/1 var(--font-display); text-transform: uppercase; letter-spacing: .06em; }
-.flyer-stash__stream { width: 100%; height: clamp(280px, 42vw, 560px); }
-.flyer-stash__pause, .flyer-stash__missing { border: 0; padding: 10px 0; min-height: 44px; background: transparent; color: var(--text-hi); cursor: pointer; }
-.flyer-stash__missing { display: block; text-align: left; }
-.flyer-stash__missing:disabled { cursor: default; }
-.flyer-stash__pause:focus-visible, .flyer-stash__missing:focus-visible, .flyer-stash__cta:focus-visible { outline: 2px solid var(--stash-accent); outline-offset: 2px; }
+.flyer-stash__cta:focus-visible { outline: 2px solid var(--stash-accent); outline-offset: 2px; }
 @media (max-width: 767px) {
   .flyer-stash__grid { display: flex; flex-direction: column; gap: 20px; }
   .flyer-stash__gallery { order: -1; width: 100%; }
@@ -50,3 +45,16 @@
   .flyer-stash__collector-label, .flyer-stash__blurb { grid-column: 1 / -1; }
   .flyer-stash__collector > * { min-width: 0; }
 }
+/* Manual collection album. Left collector/theme/font rules above stay intact. */
+.flyer-stash__album-tabs{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-5)}
+.flyer-stash__album-tabs button{display:inline-flex;align-items:center;gap:var(--space-2);min-height:44px;padding:var(--space-2) var(--space-3);border:var(--bw-hair) solid var(--panel-border-2);border-radius:var(--radius-panel);background:var(--z-oled);color:var(--text-hi);font:var(--fw-bold) var(--body-sm)/1.2 var(--font-display)}
+.flyer-stash__album-tabs button[aria-pressed=true]{border-color:var(--profile-acc-t);color:var(--profile-acc-t)}
+.flyer-stash__album-tabs button:focus-visible{outline:2px solid var(--profile-acc-t);outline-offset:3px}
+.flyer-stash__album-tabs span{font:var(--fw-medium) var(--meta)/1.2 var(--font-mono)}
+.flyer-stash__album{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--space-6) var(--space-3)}
+.flyer-stash__album-item{min-width:0;max-width:100%}
+.flyer-stash__album-item--board{width:100%}
+.flyer-stash__album-caption,.flyer-stash__album-empty,.flyer-stash__album-scoring{font:var(--open-card-meta-font);color:var(--text-lo)}
+.flyer-stash__album-caption{margin:var(--space-2) 0 0}
+.flyer-stash__album-scoring{margin-top:var(--space-5)}
+.flyer-stash__album-scoring summary{min-height:44px;display:flex;align-items:center;cursor:pointer}

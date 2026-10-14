@@ -1,3 +1,4 @@
+import ProfileBoardPreview from "./ProfileBoardPreview";
 import { ArrowRight } from "lucide-react";
 import ZLineIcon from "@/components/ZLineIcon";
 import { Suspense, useCallback, useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent, type CSSProperties } from "react";
@@ -62,6 +63,7 @@ type RepliesResponse = {
 };
 
 type Props = {
+  hideHeader?: boolean;
   posts: UpdatesPost[];
   author: UpdatesAuthor;
   onPostClick?: (post: UpdatesPost) => void;
@@ -129,6 +131,7 @@ function boardOverlayKind(type: "GIG" | "GIFTING"): "gig" | "gifting" {
 }
 
 export default function UpdatesPanel({
+  hideHeader = false,
   posts,
   author,
   onPostClick,
@@ -303,13 +306,13 @@ export default function UpdatesPanel({
 
   return (
     <section className="pp-updates" aria-label="Updates">
-      <div className="pp-updates__head">
+      {!hideHeader && <div className="pp-updates__head">
         <span className="pp-updates__kicker">
           <span className="pp-updates__dot" aria-hidden="true" />
           UPDATES
         </span>
         <span className="pp-updates__meta">{rightMeta}</span>
-      </div>
+      </div>}
 
       <div className="pp-updates__rail" role="list">
         {posts.map(post => {
@@ -499,6 +502,8 @@ export default function UpdatesPanel({
             </div>
           ) : null;
 
+          if (isBoardCard) return <ProfileBoardPreview key={key} post={post} type={type} onOpen={() => openBoardCard(post)} footer={footer} />;
+
           const body = (
             <>
               <div className="pp-updates__card-top">
@@ -600,6 +605,7 @@ export default function UpdatesPanel({
 
       {boardOverlay ? (<Suspense fallback={<p role="status">Opening post…</p>}>
         <BoardPostOverlay
+          presentation="eventz"
           kind={boardOverlay.kind}
           postId={boardOverlay.postId}
           onClose={() => setBoardOverlay(null)}

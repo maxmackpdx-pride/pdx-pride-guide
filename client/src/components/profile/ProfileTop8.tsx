@@ -1,3 +1,5 @@
+import ProfilePlacePreview from "./ProfilePlacePreview";
+import "./ProfileTop8Current.css";
 import { Suspense, useCallback, useState } from "react";
 import { MessageCircle, UserRound } from "lucide-react";
 import { Link } from "wouter";
@@ -79,43 +81,7 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onR
                 </article>
               );
             }
-            const placeInner = (
-              <>
-                <span className="pp-top8__rank display">{rank}</span>
-                <span className="pp-top8__avatar pp-top8__avatar--logo">
-                  {e.logoUrl ? (
-                    <img src={e.logoUrl} alt="" loading="lazy" />
-                  ) : (
-                    <span className="pp-top8__logo-fallback display">{e.name.slice(0, 1)}</span>
-                  )}
-                </span>
-                <span className="pp-top8__name display">{e.name}</span>
-                <span className="pp-top8__meta">Venue</span>
-              </>
-            );
-            // Prefer in-page PlaceModal so closing stays on the profile.
-            if (onPlaceClick) {
-              return (
-                <button
-                  key={`b-${e.id}`}
-                  type="button"
-                  className="pp-top8__tile pp-top8__tile--place pdx-glass-rebind"
-                  aria-label={`Open ${e.name} directory card`}
-                  onClick={(ev) => onPlaceClick(e, ev.currentTarget)}
-                >
-                  {placeInner}
-                </button>
-              );
-            }
-            return (
-              <Link
-                key={`b-${e.id}`}
-                href={placePath(e.id, e.name)}
-                className="pp-top8__tile pp-top8__tile--place pdx-glass-rebind"
-              >
-                {placeInner}
-              </Link>
-            );
+            return <div key={`b-${e.id}`} className="pp-top8__place-current eb-page--places"><span className="pp-top8__rank display">{rank}</span><ProfilePlacePreview place={{id:e.id,name:e.name,imageUrl:e.logoUrl}} onOpen={element=>onPlaceClick ? onPlaceClick(e,element) : window.location.assign(placePath(e.id,e.name))} onRequireAuth={onRequireAuth}/></div>;
           })}
         </div>
       )}

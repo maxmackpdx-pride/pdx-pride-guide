@@ -145,7 +145,7 @@ export function GoingEventCard({ event, onClick, goingAvatars = [], past = false
     return (
       <button
         type="button"
-        className="pp-event-rail__card pp-event-rail__card--btn pdx-glass-rebind"
+        className={`pp-event-rail__card pp-event-rail__card--btn pdx-glass-rebind${past ? " is-past" : ""}`}
         style={style}
         aria-label={`Open ${event.title}`}
         onClick={() => onClick(event)}
@@ -156,7 +156,7 @@ export function GoingEventCard({ event, onClick, goingAvatars = [], past = false
   }
 
   return (
-    <article className="pp-event-rail__card pdx-glass-rebind" style={style}>
+    <article className={`pp-event-rail__card pdx-glass-rebind${past ? " is-past" : ""}`} style={style}>
       {inner}
     </article>
   );

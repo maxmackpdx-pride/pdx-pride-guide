@@ -233,3 +233,10 @@ html.calm-mode .pp-event-rail__card--btn:focus-visible {
   transform: none;
   box-shadow: 0 0 0 2px #000, inset 0 -18px 34px rgba(0, 0, 0, 0.72);
 }
+
+/* Past is an artwork state, not a monochrome card: preserve day ink, tags
+   and foreground information, including during hover/focus. */
+.pp-event-rail__card.is-past .pp-event-rail__art img,
+.pp-event-rail__card.is-past:is(:hover,:focus-visible) .pp-event-rail__art img {
+  filter: grayscale(1);
+}

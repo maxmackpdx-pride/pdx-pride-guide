@@ -24,6 +24,7 @@ type Props = {
   shareOpen: boolean;
   copied: boolean;
   profileUrl: string;
+  onEdit?: () => void;
   onFollow: () => void;
   onShareToggle: () => void;
   onCopy: () => void;
@@ -69,6 +70,7 @@ export default function ProfileHero({
   shareOpen,
   copied,
   profileUrl,
+  onEdit,
   onFollow,
   onShareToggle,
   onCopy,
@@ -130,9 +132,7 @@ export default function ProfileHero({
         <div className="pp-hero__identity">
           <div className="pp-hero__avatar">
             {isOwner ? (
-              <Link href="/dashboard?edit=profile" className="pp-hero__avatar-link" aria-label="Edit profile">
-                {avatar}
-              </Link>
+              onEdit ? <button type="button" onClick={onEdit} className="pp-hero__avatar-link" aria-label="Edit profile">{avatar}</button> : <Link href="/dashboard?edit=profile" className="pp-hero__avatar-link" aria-label="Edit profile">{avatar}</Link>
             ) : (
               avatar
             )}
@@ -191,9 +191,7 @@ export default function ProfileHero({
             )}
 
             {isOwner && (
-              <Link href="/dashboard?edit=profile" className="pp-btn pp-btn--outline display">
-                Edit profile
-              </Link>
+              onEdit ? <button type="button" className="pp-btn pp-btn--outline display" onClick={onEdit}>Edit profile</button> : <Link href="/dashboard?edit=profile" className="pp-btn pp-btn--outline display">Edit profile</Link>
             )}
 
             {isOwner && (

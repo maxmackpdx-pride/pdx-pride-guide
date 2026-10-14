@@ -6,7 +6,7 @@ import "./ProfileWidgetGrid.css";
 
 export type ProfileSection = WidgetItem & { content: ReactNode };
 
-export default function ProfileWidgetGrid({ username, sections }: { username: string; sections: ProfileSection[] }) {
+export default function ProfileWidgetGrid({ username, sections, arrangeable = true }: { username: string; sections: ProfileSection[]; arrangeable?:boolean }) {
   const storageKey = `zaylist:profile-layout:v1:${username}`;
   const [editing, setEditing] = useState(false);
   const [revision, setRevision] = useState(0);
@@ -31,13 +31,14 @@ export default function ProfileWidgetGrid({ username, sections }: { username: st
   if (!sections.length) return null;
   return (
     <section className="pp-widget-board" data-profile-composition aria-label="Profile sections">
-      <div className="pp-widget-board__toolbar" aria-label="Arrange profile sections">
+      {arrangeable && <div className="pp-widget-board__toolbar" aria-label="Arrange profile sections">
         <p>{editing ? "Drag a section heading to move it. On touch, press and hold. Keyboard: Alt + arrow keys." : "Your view · saved on this device"}</p>
         <div>
           {editing && <button type="button" onClick={() => { save(sections); setRevision(v => v + 1); }}>Reset layout</button>}
           <button type="button" aria-pressed={editing} onClick={() => setEditing(v => !v)}>{editing ? "Done arranging" : "Arrange view"}</button>
         </div>
       </div>
+      }
       <span className="sr-only" role="status">{notice}</span>
       {editing ? <Suspense fallback={<p className="pp-widget-board__loading" role="status">Loading arrangement tools…</p>}>
       <DraggableWidgetGrid

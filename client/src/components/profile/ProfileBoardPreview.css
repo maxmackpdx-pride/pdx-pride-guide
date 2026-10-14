@@ -1,0 +1,5 @@
+.pp-board-preview {width:100%;min-width:0;--ab-card-height:280px;}
+.pp-board-preview .ab-card {width:100%;}
+.pp-board-preview .pp-updates__footer {margin-top:var(--space-2);padding:0;}
+.pp-board-preview .ab-open {min-height:44px;}
+@media(max-width:600px){.pp-board-preview {--ab-card-height:360px;}.pp-board-preview .ab-card {grid-template-columns:35% minmax(0,1fr);}.pp-board-preview .ab-card h3 {font:var(--event-card-compact-title-font);}.pp-board-preview .ab-card__body {padding:var(--space-3);}}
