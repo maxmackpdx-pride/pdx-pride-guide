@@ -542,6 +542,8 @@ function drawLights(fade,target=map,surface=lights){
  const streetProgress=smoothRange(13.5,15,target.getZoom());
  const hologramMultiplier=2.4-.75*streetProgress;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
+ // Scale the complete card, its collision bounds and beam endpoint together.
+ const cardPresentationScale=presentationScale*.9;
  // Clear the artwork and its title above the waypoint, without filling the viewport.
  const skyCeiling=Math.min(height*.46,Math.max(110,220*presentationScale,1.3*eventProjectionHeightLimit(target.getZoom(),target.getPitch())));
  const overviewAnchor=.32+.68*smoothRange(11.25,14.25,target.getZoom());
@@ -583,7 +585,7 @@ function drawLights(fade,target=map,surface=lights){
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
   item.attention=reduced.matches?.5:.5+.5*Math.sin(pulseTime*(.13+.025*Math.sin(phase))+phase*1.83);
   const driftX=eventProjectionSway(pulseTime,phase,presentationScale*item.presence.motion,reduced.matches);
-  item.scaleGoal=emergenceFor(item.feature)*presentationScale*item.presence.scale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
+  item.scaleGoal=emergenceFor(item.feature)*cardPresentationScale*item.presence.scale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
   const skyRise=skyCeiling*(.55+.35*item.presence.motion+heightBoost*.25);
@@ -620,7 +622,7 @@ function drawLights(fade,target=map,surface=lights){
   settleValue(prev,'x','vx',item.x-item.p.x,2.3,motionDelta);
   settleValue(prev,'y','vy',item.y-item.p.y,2.3,motionDelta);
   settleValue(prev,'scale','vs',item.scaleGoal,2.8,motionDelta);
-  prev.scale=Math.min(prev.scale,presentationScale);layout.set(key,prev);
+  prev.scale=Math.min(prev.scale,cardPresentationScale);layout.set(key,prev);
   const drift=hologramCameraDrift(prev,item.p,item.feature.properties.phase,motionDelta,reduced.matches);
   prev.cameraX=drift.x;prev.cameraY=drift.y;prev.anchorX=item.p.x;prev.anchorY=item.p.y;
   item.offset=prev;
