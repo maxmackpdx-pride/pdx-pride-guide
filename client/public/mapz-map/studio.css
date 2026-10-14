@@ -73,3 +73,8 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 .standalone-hologram-label--event>.event-hologram-footer{position:relative;z-index:1;transform:translateY(-1px);text-shadow:0 2px 1px #020509,0 3px 5px #020509;}
 .standalone-hologram-label--event .standalone-hologram-clock,
 .standalone-hologram-label--event .standalone-hologram-countdown{text-shadow:0 2px 1px #020509,0 3px 4px #020509;}
+
+/* Small complementary-color echoes accompany cutouts, never the foreground type. */
+.event-hologram-glitch-trace{display:none;fill:none;stroke:var(--glitch-accent);stroke-width:.7;stroke-linecap:butt;opacity:.85;}
+.event-hologram-surface[data-glitch-stage="0"] .event-hologram-glitch-trace--0,
+.event-hologram-surface[data-glitch-stage="1"] .event-hologram-glitch-trace--1{display:block;}

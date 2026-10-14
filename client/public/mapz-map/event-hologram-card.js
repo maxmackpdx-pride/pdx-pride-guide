@@ -25,6 +25,12 @@ export function appendEventCardFrame(item){
  for(const y of [24,78]){
   const line=document.createElementNS(ns,'path');line.setAttribute('d',`M7 ${y}H105`);line.setAttribute('class','event-hologram-rule');svg.appendChild(line);
  }
+ // Tiny opposite-color echoes sit beside the missing pixels, behind all type.
+ const ink=item.style.getPropertyValue('--projection-color').trim();
+ if(/^#[0-9a-f]{6}$/i.test(ink))item.style.setProperty('--glitch-accent',`#${(0xffffff^parseInt(ink.slice(1),16)).toString(16).padStart(6,'0')}`);
+ const traces=['M1 27.2H19 M25 26.2H32 M83 75.8H110 M94 77H103 M28 92H33',
+  'M43 13.2H62 M71 12.2H78 M1 62H23 M30 63H39 M95 84.2H110'];
+ traces.forEach((d,index)=>{const trace=document.createElementNS(ns,'path');trace.setAttribute('d',d);trace.setAttribute('class',`event-hologram-glitch-trace event-hologram-glitch-trace--${index}`);svg.appendChild(trace);});
  const surface=document.createElement('span');surface.className='event-hologram-surface';surface.setAttribute('aria-hidden','true');surface.appendChild(svg);item.appendChild(surface);
 }
 
