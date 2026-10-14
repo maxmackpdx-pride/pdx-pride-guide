@@ -1,0 +1,39 @@
+/* Timing adapted from 21st Expandable Card (kuratlielia / component 35717).
+   Geometry stays fixed; feedback lives in the content and action icons. */
+html [data-card-motion="shared"] {
+  animation: none !important;
+  transition: none !important;
+  scale: none !important;
+}
+html [data-card-motion="shared"]:is(.event-modal, .place-modal-panel) { transform: none !important; }
+html [data-card-motion="shared"] :is(.event-modal__hero-block, .event-modal__tabs,
+  .event-modal__section, .event-modal__actions, .event-modal__footer) {
+  animation: none !important;
+}
+
+:is(.board-listing-card__cta, .board-spotted-card__cta, .placez-discovery-footer .pdxBtn,
+  .home-stage-card__cta, .tonight-card__view) > svg,
+.gigz-opportunity__arrow {
+  transition: translate 240ms cubic-bezier(.16,1,.3,1);
+}
+@media (hover: hover) and (pointer: fine) {
+  :is(.board-listing-card, .board-spotted-card, .placez-discovery-card, .home-stage-card, .gigz-opportunity, .tonight-card):hover
+  :is(.board-listing-card__cta, .board-spotted-card__cta, .placez-discovery-footer .pdxBtn, .home-stage-card__cta, .tonight-card__view) > svg,
+  .gigz-opportunity:hover .gigz-opportunity__arrow { translate: 3px 0; }
+}
+:is(.board-listing-card, .board-spotted-card, .placez-discovery-card, .home-stage-card, .gigz-opportunity, .tonight-card):focus-within
+:is(.board-listing-card__cta, .board-spotted-card__cta, .placez-discovery-footer .pdxBtn, .home-stage-card__cta, .tonight-card__view) > svg,
+.gigz-opportunity:focus-within .gigz-opportunity__arrow { translate: 3px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.board-listing-card__cta, .board-spotted-card__cta, .placez-discovery-footer .pdxBtn,
+    .home-stage-card__cta, .tonight-card__view) > svg, .gigz-opportunity__arrow {
+    transition: none !important; translate: none !important;
+  }
+}
+:is(html.calm-mode, html[data-calm="true"])
+:is(.board-listing-card__cta, .board-spotted-card__cta, .placez-discovery-footer .pdxBtn,
+  .home-stage-card__cta, .tonight-card__view) > svg,
+:is(html.calm-mode, html[data-calm="true"]) .gigz-opportunity__arrow {
+  transition: none !important; translate: none !important;
+}

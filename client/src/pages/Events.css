@@ -342,10 +342,10 @@ html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdx
 .event-rail-card__shade { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; padding: 34px 10px 10px; background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--z-black) 88%, transparent) 62%); pointer-events: none; }
 .event-rail-card--s .event-rail-card__shade { padding: 20px 8px 8px; }
 .event-rail-card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-hi); font: var(--event-card-compact-title-font); text-transform: uppercase; text-shadow: 0 1px 3px var(--z-black); }
-.event-rail-card--s .event-rail-card__title { font-size: 14px; }
+.event-rail-card--s .event-rail-card__title { font-size: 16px; }
 /* Time and venue ride above the card. Fixed height so save can sit on the flyer corner. */
 .event-rail-card__meta { display: block; margin-top: 5px; overflow: hidden; color: var(--text-hi); opacity: .82; font: var(--event-card-compact-meta-font); white-space: nowrap; text-overflow: ellipsis; text-shadow: 0 1px 3px var(--z-black); }
-.event-rail-card--s .event-rail-card__meta { margin-top: 4px; font-size: 10px; line-height: 13px; }
+.event-rail-card--s .event-rail-card__meta { margin-top: 4px; font-size: 12px; line-height: 14px; }
 .event-rail-card__save { position: absolute; right: 8px; top: 8px; z-index: 4; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent); background: color-mix(in srgb, var(--z-black) 84%, transparent); color: var(--event-control-ink); box-shadow: 0 0 0 2px var(--z-black); cursor: pointer; }
 .event-rail-card--s .event-rail-card__save { top: 6px; right: 6px; width: 34px; height: 34px; }
 .event-rail-card__save[aria-pressed="true"] { background: var(--neon-magenta); border-color: var(--neon-magenta); color: var(--event-control-ink); }

@@ -119,13 +119,15 @@
    restyle its parts. layout="row" is the list-view row (Events list). */
 .tonight-card.tonight-card--card { width: var(--event-card-width); max-width: 100%; flex: none; }
 .tonight-card.tonight-card--card { border-radius: var(--event-card-radius); }
-.tonight-card--card .tonight-card__body { padding: 12px 12px 9px; gap: 7px; }
-.tonight-card--card .tonight-card__time { min-height: 0; font-size: var(--event-card-time-size); }
-.tonight-card--card .tonight-card__body h3 { font: var(--event-card-title-font); height: 2.04em; -webkit-line-clamp: 2; }
-.tonight-card--card .tonight-card__venue { min-height: 0; font-size: var(--event-card-detail-size); gap: 6px; }
-.tonight-card--card .tonight-card__venue small { font-size: var(--event-card-meta-size); margin-top: 2px; }
+/* Spend the existing three gaps on the larger two-line title. Keep metadata
+   line boxes at their original measurements so the card shell does not grow. */
+.tonight-card--card .tonight-card__body { padding: 12px 12px 9px; gap: calc(7px - (44px - 36.72px) / 3); }
+.tonight-card--card .tonight-card__time { min-height: 0; font-size: var(--event-card-time-size); line-height: 15.3px; }
+.tonight-card--card .tonight-card__body h3 { font: var(--event-card-title-font); height: 44px; -webkit-line-clamp: 2; }
+.tonight-card--card .tonight-card__venue { min-height: 0; font-size: var(--event-card-detail-size); line-height: 16.24px; gap: 6px; }
+.tonight-card--card .tonight-card__venue small { font-size: var(--event-card-meta-size); line-height: 14.98px; margin-top: 2px; }
 .tonight-card--card .tonight-card__tags { gap: 5px; }
-.tonight-card--card .tonight-card__tags span { padding: var(--event-card-tag-pad-y) var(--event-card-tag-pad-x); font: var(--event-card-tag-font); }
+.tonight-card--card .tonight-card__tags span { padding: var(--event-card-tag-pad-y) var(--event-card-tag-pad-x); font: var(--event-card-tag-font); line-height: 11.96px; }
 .tonight-card--card .tonight-card__footer { margin: 0 12px; padding: 8px 0 10px; gap: 5px; }
 .tonight-card--card .tonight-card__footer button { min-height: 34px; padding: 0 7px; gap: 5px; border-radius: 8px; font-size: var(--event-card-action-size); }
 .tonight-card--card .tonight-card__footer button svg { width: var(--event-card-action-icon); height: var(--event-card-action-icon); }
