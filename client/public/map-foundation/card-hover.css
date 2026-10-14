@@ -1,0 +1,20 @@
+/* Whole-object feedback: the glass and its sharp content move together.
+   Map surfaces and waypoint artwork keep their separate debossed contract. */
+:root { --card-hover-lift: -2px; --card-hover-bloom-alpha: 12%; }
+@media (hover: hover) and (pointer: fine) {
+  html body :is(.pdxBoard,.pdxRow,.pdxPlace,.rg-directory-card,.ab-card,.tonight-card,.event-rail-card,.poster-card,.board-listing-card,.board-spotted-card,.spotted-card,.affiliate-poster-card,.feed-aff,.featured-event-ad,.pdxStatCard,.home-world-card,.home-world,.pdx-glass-card,.pp-pack__card,.pp-board__card,.pp-place-preview,.sch-event-card,.flyer-stash__poster,.place-card,.event-modal,.eb-detail,.ab-open-card,.rg-resource-detail,.outz-card-modal,#detail) {
+    transition: translate var(--dur-fast,150ms) var(--ease-out,ease-out), box-shadow var(--dur-fast,150ms) var(--ease-out,ease-out);
+  }
+  html body :is(.pdxBoard,.pdxRow,.pdxPlace,.rg-directory-card,.ab-card,.tonight-card,.event-rail-card,.poster-card,.board-listing-card,.board-spotted-card,.spotted-card,.affiliate-poster-card,.feed-aff,.featured-event-ad,.pdxStatCard,.home-world-card,.home-world,.pdx-glass-card,.pp-pack__card,.pp-board__card,.pp-place-preview,.sch-event-card,.flyer-stash__poster,.place-card,.event-modal,.eb-detail,.ab-open-card,.rg-resource-detail,.outz-card-modal,#detail):hover {
+    translate: 0 var(--card-hover-lift) !important;
+    box-shadow: var(--glass-card-shadow, 0 0 0 1px var(--z-oled,#000)), 0 0 20px -3px color-mix(in srgb,var(--c,var(--res-accent,var(--outz-orange,var(--neon-cyan)))) var(--card-hover-bloom-alpha),transparent) !important;
+  }
+  /* Replace the legacy four-pixel Eventz lift rather than stacking lifts. */
+  html body :is(.pdxBoard,.pdxRow):hover { transform: none !important; }
+  /* Nested card anatomy follows its outer object rather than lifting twice. */
+  html body :is(.pdxBoard,.pdxRow,.pdxPlace,.rg-directory-card,.ab-card,.tonight-card,.event-rail-card,.poster-card,.board-listing-card,.board-spotted-card,.spotted-card,.affiliate-poster-card,.feed-aff,.featured-event-ad,.pdxStatCard,.home-world-card,.home-world,.pdx-glass-card,.pp-pack__card,.pp-board__card,.pp-place-preview,.sch-event-card,.flyer-stash__poster,.place-card,.event-modal,.eb-detail,.ab-open-card,.rg-resource-detail,.outz-card-modal,#detail) :is(.pdxBoard,.pdxRow,.pdxPlace,.rg-directory-card,.ab-card,.tonight-card,.event-rail-card,.poster-card,.board-listing-card,.board-spotted-card,.spotted-card,.affiliate-poster-card,.feed-aff,.featured-event-ad,.pdxStatCard,.home-world-card,.home-world,.pdx-glass-card,.pp-pack__card,.pp-board__card,.pp-place-preview,.sch-event-card,.flyer-stash__poster,.place-card,.event-modal,.eb-detail,.ab-open-card,.rg-resource-detail,.outz-card-modal,#detail):hover { translate: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body :is(.pdxBoard,.pdxRow,.pdxPlace,.rg-directory-card,.ab-card,.tonight-card,.event-rail-card,.poster-card,.board-listing-card,.board-spotted-card,.spotted-card,.affiliate-poster-card,.feed-aff,.featured-event-ad,.pdxStatCard,.home-world-card,.home-world,.pdx-glass-card,.pp-pack__card,.pp-board__card,.pp-place-preview,.sch-event-card,.flyer-stash__poster,.place-card,.event-modal,.eb-detail,.ab-open-card,.rg-resource-detail,.outz-card-modal,#detail):hover { translate:none !important; transform:none !important; transition:none !important; }
+}
+:is(html.calm-mode,:root[data-calm="true"]) { --card-hover-lift:0px; --card-hover-bloom-alpha:0%; }
