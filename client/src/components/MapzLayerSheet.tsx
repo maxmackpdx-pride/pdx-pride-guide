@@ -23,7 +23,7 @@ const LAYER_LOGOS: Record<MapzLayerId, string> = {
   houz: "/brand/family/my-houz.svg",
 };
 
-export default function MapzLayerSheet({ layers, active, onActiveChange: setActive }: { layers: MapzLayer[]; active: MapzLayerId | null; onActiveChange: (id: MapzLayerId | null) => void }) {
+export default function MapzLayerSheet({ layers, active, onActiveChange: setActive, minePins=false, onMinePins, minePanel }: { minePins?:boolean;onMinePins?:()=>void;minePanel?:ReactNode; layers: MapzLayer[]; active: MapzLayerId | null; onActiveChange: (id: MapzLayerId | null) => void }) {
   const lastActive = useRef<MapzLayerId>("events");
   const panels = useRef(new Map<MapzLayerId, HTMLDivElement>());
   const positions = useRef(new Map<MapzLayerId, number>());
@@ -77,7 +77,8 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
         <span><SlidersHorizontal size={18} aria-hidden="true" />Map controls</span>
         <button type="button" aria-label="Close map drawer" onClick={close}><X size={22} aria-hidden="true" /></button>
       </div>
-      <div className="mapz-layer-sheet__workspace">
+      {onMinePins && <div className="mapz-my-postings"><button type="button" aria-pressed={minePins} onClick={onMinePins}>My postings</button>{minePins && <Link href="/boardz?mine=1">View all my posts</Link>}</div>}
+      {minePins ? <div className="mapz-my-postings-panel">{minePanel}</div> : <div className="mapz-layer-sheet__workspace">
         <div className="mapz-layer-sheet__sections" role="group" aria-label="Map sections">
           {layers.map(layer => <button key={layer.id} type="button" className="mapz-layer-section"
             style={{ "--layer-color": layer.color } as CSSProperties}
@@ -104,7 +105,7 @@ export default function MapzLayerSheet({ layers, active, onActiveChange: setActi
             {activeLayer?.viewMore.map(link => <Link key={link.href} className="mapz-layer-sheet__more" href={link.href}>{link.label}<ChevronRight size={18} aria-hidden="true" /></Link>)}
           </div>
         </div>
-      </div>
+      </div>}
     </SmoothDrawer>
   </>;
 }

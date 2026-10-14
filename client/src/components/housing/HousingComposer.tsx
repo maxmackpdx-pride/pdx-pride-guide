@@ -1,3 +1,4 @@
+import BoardMotifSetting from "@/components/board/BoardMotifSetting";
 /**
  * HAUSING composer. One question, four answers, then a short field set.
  *
@@ -303,6 +304,7 @@ export function HousingComposer({
   const [type, setType] = useState<HousingType | "PM" | null>(initialType ?? null);
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [mapLocation, setMapLocation] = useState<BoardMapPoint | null>(null);
+  const [motifChoice, setMotifChoice] = useState("default");
   const [photos, setPhotos] = useState<string[]>([]);
   const [members, setMembers] = useState<PendingMember[]>([]);
   const [pm, setPm] = useState<PmForm>(EMPTY_PM);
@@ -400,6 +402,7 @@ export function HousingComposer({
       photos,
       areas: draft.areas,
       mapLocation,
+      motifChoice,
       // The server re-validates these against the post type, so what lands here
       // is a request, not the final list.
       tags: draft.tags,
@@ -946,7 +949,8 @@ export function HousingComposer({
           hint="Where the place is, or where you are looking. Add as many as you want."
         />
 
-        <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} />
+        {photos.length === 0 && <BoardMotifSetting category="housing" value={motifChoice} onChange={setMotifChoice} />}
+        <BoardMapLocationSetting housing value={mapLocation} onChange={setMapLocation} />
 
         {isManaged ? (
           <>

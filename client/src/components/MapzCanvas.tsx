@@ -6,13 +6,13 @@ export type MapzHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 export type MapView={center:[number,number];zoom:number;pitch:number;bearing:number;bounds:{south:number;north:number;west:number;east:number}};
 type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string;avatars?:Array<{url:string;initial:string;background:string;ring:string}>};
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
-type CanvasProps={active?:boolean;onBrowse?:()=>void;onBoot?:()=>void;initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
+type CanvasProps={active?:boolean;onBrowse?:()=>void;onEscape?:()=>void;onBoot?:()=>void;initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onBoardPins?:(keys:string[])=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};
 const MAP_SRC='/mapz-map/index.html?v=20261006-shared-map';
 const MAX_3D_ATTEMPTS=3;
 
-const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onCluster,onMode,onView},ref){
- const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onCluster,onMode,onView});latest.current={onFailure,onVisible,onSelect,onCluster,onMode,onView};
+const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onCluster,onBoardPins,onMode,onView,onEscape},ref){
+ const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onCluster,onBoardPins,onMode,onView,onEscape});latest.current={onFailure,onVisible,onSelect,onCluster,onBoardPins,onMode,onView,onEscape};
  const failed=useRef(false),restoreView=useRef(initialView),sentSelection=useRef<{key:string|null}|null>(null);
  const [phase,setPhase]=useState('loading'),[firstFrame,setFirstFrame]=useState(false),[ready,setReady]=useState(false);
  const post=(type:string,data:Record<string,unknown>={})=>frame.current?.contentWindow?.postMessage({source:'mapz-host',type,...data},window.location.origin);
@@ -40,6 +40,7 @@ const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,row
   if(event.data.type==='phase'&&typeof event.data.phase==='string')setPhase(event.data.phase);
   if(event.data.type==='first-frame'){failed.current=false;setFirstFrame(true);latest.current.onVisible();}
   if(event.data.type==='ready')setReady(true);
+  if(event.data.type==='escape')latest.current.onEscape?.();
   if(event.data.type==='view')latest.current.onView(event.data);
   if(event.data.type==='fatal'){
    const detail=typeof event.data.message==='string'?event.data.message.slice(0,300):'Unknown graphics error.';
@@ -47,6 +48,7 @@ const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,row
   }
   if(event.data.type==='mode')latest.current.onMode?.(event.data.mode);
   if(event.data.type==='cluster'&&typeof event.data.world==='string'&&Array.isArray(event.data.keys))latest.current.onCluster?.(event.data.world,event.data.keys,event.data.bounds,event.data.zoom);
+  if(event.data.type==='board-pins'&&Array.isArray(event.data.keys))latest.current.onBoardPins?.(event.data.keys);
   if(event.data.type==='select'){
    const source=event.data.rect,frameRect=frame.current?.getBoundingClientRect();
    const rect=source&&frameRect&&[source.left,source.top,source.width,source.height].every(Number.isFinite)
@@ -70,7 +72,7 @@ const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,row
   return()=>node.removeEventListener('load',hello);
  },[attempt]);
  const cameraParams=useMemo(()=>initialView?new URLSearchParams({lat:String(initialView.center[0]),lng:String(initialView.center[1]),zoom:String(initialView.zoom),pitch:String(initialView.pitch??48),bearing:String(initialView.bearing??0)}).toString():"",[]);
- return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}&${cameraParams}`} title="Zaylist interactive Portland metro map" className="mapz-demo-canvas" onLoad={()=>post('hello')}/>;
+ return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}&${cameraParams}${onEscape?"&escape=host":""}`} title="Zaylist interactive Portland metro map" className="mapz-demo-canvas" onLoad={()=>post('hello')}/>;
 });
 
 export default forwardRef<MapzHandle,CanvasProps>(function MapzCanvas(props,ref){

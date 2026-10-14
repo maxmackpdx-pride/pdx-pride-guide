@@ -12,6 +12,7 @@
  *     Ordering is recency. Filtering is by post type and by the viewer's own saves.
  *  2. No money moves. Rent and deposit columns are display text, nothing more.
  */
+import { readBoardMotif } from "../boardMotifs";
 import type { Database } from "better-sqlite3";
 import { isDemoAuthor } from "@shared/demo";
 import {
@@ -350,6 +351,7 @@ export function shapePosts(db: Database, rows: PostRow[], opts: ShapeOpts = {}):
       headline: r.headline || "",
       body: r.body || "",
       photos: parseJsonArray(r.photo_urls),
+      motifChoice: readBoardMotif(db,"housing",r.id),
       areas: parseJsonArray(r.areas),
       // Stored tags plus the two the platform issues from trust. Verification
       // is never self-claimed, so it is merged in here rather than persisted.

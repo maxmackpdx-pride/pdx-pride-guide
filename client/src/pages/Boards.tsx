@@ -1,3 +1,4 @@
+import BoardBrowseCard from "@/components/board/BoardBrowseCard";
 import { useBrowseControlsOffset } from "@/components/discovery/useBrowseControlsOffset";
 import BoardCategoryFollows from "@/components/board/BoardCategoryFollows";
 import { followRoomForCategory } from "@/lib/boardFollowChoices";
@@ -512,85 +513,9 @@ export default function Boards() {
                   />
                 )}
                 <div className="ab-card-grid">
-                  {visibleResults.map((post) => {
-                    const cat = boardCategories.find(
-                      (c) => c.id === post.category,
-                    )!;
-                    const isSaved = saved.has(post.key);
-                    return (
-                      <div
-                        key={post.key}
-                        className="ab-pinned-card pdx-glass-rebind"
-                        style={{ "--c": cat.color } as CSSProperties}
-                      >
-                        <BoardPushPin postKey={post.key} />
-                        <article className={`ab-card ab-card--${post.intent} pdx-glass-rebind`}>
-                        <BoardCardMotif post={post} placement="card" />
-                        <UnifiedBoardArt post={post} />
-                        <div className="ab-card__body">
-                          <div className="ab-card__eyebrow">
-                            <span>{intentLabels[post.intent]}</span>{post.isDemo && <span className="ab-demo-badge">DEMO</span>}{mineOnly && <span>{post.status}</span>}
-                          </div>
-                          <h3>
-                            <button
-                              type="button"
-                              onClick={(e) => open(post.key, e.currentTarget)}
-                            >
-                              {post.title}
-                            </button>
-                          </h3>
-                          <p className="ab-card__detail">
-                            {post.detail || post.description}
-                          </p>
-                          <div className="ab-card__bottom">
-                          {post.value && (
-                            <strong className="ab-card__value">
-                              {post.value.trim().toLowerCase() === "free" ? "FREE" : post.value}
-                            </strong>
-                          )}
-                          <p className="ab-card__location" aria-hidden={!post.area || undefined} title={post.area || undefined}>
-                            {post.area && <><MapPin size={13} /><span>{post.area}</span></>}
-                          </p>
-                          <div className="ab-card__footer">
-                            <button
-                              type="button"
-                              className="ab-save"
-                              aria-label={`${isSaved ? "Unsave" : "Save"} ${post.title}`}
-                              aria-pressed={isSaved}
-                              disabled={
-                                saveMutation.isPending || (!isSaved && !canSaveBoardPost(post)) ||
-                                (!!user && savedQuery.isPending)
-                              }
-                              onClick={() =>
-                                user
-                                  ? saveMutation.mutate({
-                                      post,
-                                      wasSaved: isSaved,
-                                    })
-                                  : setShowAuth(true)
-                              }
-                            >
-                              <Bookmark
-                                size={16}
-                                fill={isSaved ? "currentColor" : "none"}
-                              />
-                              {isSaved ? "Saved" : "Save"}
-                            </button>
-                            <button
-                              type="button"
-                              className="ab-open"
-                              aria-label={`Open ${post.title}`}
-                              onClick={(e) => open(post.key, e.currentTarget)}
-                            >
-                              Open <ArrowRight size={16} />
-                            </button>
-                          </div>
-                          </div>
-                        </div>
-                        </article>
-                      </div>
-                    );
-                  })}
+                  {visibleResults.map(post => <BoardBrowseCard key={post.key} post={post} isSaved={saved.has(post.key)} showStatus={mineOnly}
+                    saveDisabled={saveMutation.isPending || (!saved.has(post.key) && !canSaveBoardPost(post)) || (!!user && savedQuery.isPending)}
+                    onOpen={target=>open(post.key,target)} onSave={()=>user?saveMutation.mutate({post,wasSaved:saved.has(post.key)}):setShowAuth(true)}/>)}
                 </div>
                 {!loading &&
                   !(savedOnly && savedQuery.isPending) &&

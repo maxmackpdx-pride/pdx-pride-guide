@@ -1,4 +1,5 @@
 import { memo, type CSSProperties } from "react";
+import { boardMotifOptions, resolveBoardMotif } from "@shared/boardMotifs";
 import type { BoardPost } from "@/lib/allBoards";
 import { placeWireframe, type PlaceWireframe } from "../resources/placeWireframeGeometry";
 
@@ -13,11 +14,10 @@ function Volume({ form }: { form: PlaceWireframe }) {
 /** The same projected 3D meshes as Placez/Needz, with board-specific objects. */
 export const BoardCardMotif = memo(function BoardCardMotif({ post, placement = "hero" }: { post: BoardPost; placement?: "hero" | "card" }) {
   const subject = `${post.title} ${post.detail} ${post.itemCategory || ""}`.toLowerCase();
-  const pair = post.category === "housing" ? ["keysHome", "keyRing"]
-    : post.category === "gigz" ? (/dj|music|sound|perform/.test(subject) ? ["karaoke", "soundRoom"] : ["webConsole", "designPlanes"])
-    : post.category === "giftz" ? ["boardParcel", "plantHouse"]
-    : post.category === "sellz" ? [/cloth|shirt|jacket|wear/.test(subject) ? "garment" : "lounge", "boardTag"]
-    : ["boardMessages", "coffeeMix"];
+  const choice = post.category === "housing" && (!post.motifChoice || post.motifChoice === "default")
+    ? boardMotifOptions.housing[1 + (Math.abs(post.id) % 5)].id : post.motifChoice;
+  const motif = resolveBoardMotif(post.category, choice, subject);
+  const pair = [motif.main, motif.support];
   const yaw = post.id % 2 ? -.42 : .32;
   if (placement === "card") {
     const seed = Array.from(post.key).reduce((n, char) => (Math.imul(n, 31) + char.charCodeAt(0)) >>> 0, 7);
@@ -47,7 +47,7 @@ export const BoardCardMotif = memo(function BoardCardMotif({ post, placement = "
     </div>;
   }
   return <svg className={`ab-motif ab-motif--${post.category}`} viewBox="0 0 400 500" fill="none" stroke="currentColor" aria-hidden="true">
-    <g className="ab-motif__main" transform="translate(200 230) scale(1.05) translate(-200 -250)">
+    <g className="ab-motif__main" transform="translate(200 230) scale(1.365) translate(-200 -250)">
       <Volume form={placeWireframe(pair[0], .8, yaw)} />
     </g>
   </svg>;

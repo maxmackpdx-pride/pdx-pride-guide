@@ -1,3 +1,4 @@
+import {groupBoardPins,drawBoardPin} from '../client/public/mapz-map/board-pins.js';
 import {eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from '../client/public/mapz-map/event-projection.js';
 import {eventNight} from '../client/public/mapz-map/event-night.js';
 import {screenNeighborCounts} from '../client/public/mapz-map/screen-neighbors.js';
@@ -99,7 +100,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     housingIconSize:scale=>({width:70*scale,height:58*scale}),
     HOUSING_HOLOGRAM_LABELS:{LOOKING:'LOOKING TO RENT',FORMING:'BUILDING A HOÜS',OFFERING:'JOIN OUR HOÜS',MANAGED:'COMMERCIAL RENTAL HOÜS'},
     smoothRange:(a,b,v)=>Math.max(0,Math.min(1,(v-a)/(b-a))),
-    clusterPlaceMarkers:()=>({byKey:new Map()}),roofLift:()=>15,
+    groupBoardPins,drawBoardPin,clusterPlaceMarkers:()=>({byKey:new Map()}),roofLift:()=>15,
     hologramBounds:(_feature,scale)=>({halfWidth:60*scale,halfHeight:90*scale}),settleValue:(object,key,_velocity,goal)=>{object[key]=goal;},
     logoPointerOffset:()=>({x:0,y:0}),separateHolograms:noop,
     venueLogos:new Map([['logo',logo]]),logoFocus:{update:noop,active:new Map()},logoFit:()=>.2,logoMotionSeed:0,

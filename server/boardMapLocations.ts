@@ -3,9 +3,9 @@ import type Database from "better-sqlite3";
 /** Coordinates inherit the public lifetime of their post, including expiry. */
 export function publicBoardMapLocations(db: Database.Database, now = new Date()) {
   return db.prepare(`
-    SELECT m.board, m.post_id AS postId, m.lat, m.lng
+    SELECT m.board, m.post_id AS postId, m.lat, m.lng, m.first_placed_at AS firstPlacedAt, m.expires_at AS expiresAt, m.venue_id AS venueId
     FROM board_map_locations m
-    WHERE (m.board = 'gigz' AND EXISTS (
+    WHERE datetime(m.expires_at) > datetime(@now) AND ((m.board = 'gigz' AND EXISTS (
       SELECT 1 FROM gig_posts p WHERE p.id = m.post_id AND p.status = 'LIVE' AND p.is_remote = 0
     )) OR (m.board = 'giftz' AND EXISTS (
       SELECT 1 FROM gifting_posts p WHERE p.id = m.post_id
@@ -20,6 +20,6 @@ export function publicBoardMapLocations(db: Database.Database, now = new Date())
     )) OR (m.board = 'houz' AND EXISTS (
       SELECT 1 FROM housing_posts p WHERE p.id = m.post_id
       AND p.status IN ('ACTIVE','FILLED') AND p.hidden = 0 AND p.gone = 0
-    ))
+    )))
   `).all({ now: now.toISOString() });
 }

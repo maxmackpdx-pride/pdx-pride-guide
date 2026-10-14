@@ -6,9 +6,9 @@
   --ab-hero-size: clamp(52px,6vw,78px);
   --ab-hero-size-phone: 54px;
   --ab-quote-size: 160px;
-  --ab-card-height: 250px;
-  --ab-card-height-wide: 260px;
-  --ab-card-height-compact: 240px;
+  --ab-card-height: 330px;
+  --ab-card-height-wide: 340px;
+  --ab-card-height-compact: 330px;
 }
 .ab-page { min-height:calc(100dvh - 88px); background:radial-gradient(ellipse at 20% 0%, color-mix(in srgb,var(--room-hauz) 3%,transparent),transparent 60%),var(--z-black); }
 .ab-header { display:flex; justify-content:space-between; align-items:center; gap:var(--space-6); padding-block:var(--space-8) calc(var(--space-8) - var(--space-1)); }
@@ -337,3 +337,36 @@ html.calm-mode .ab-page .ab-card .ab-card__eyebrow > .ab-demo-badge { box-shadow
 }
 @media(prefers-reduced-motion:reduce) { .ab-card-motif__network,.ab-card-motif__object { animation:none; } }
 :is(html.calm-mode,:root[data-calm="true"]) :is(.ab-card-motif__network,.ab-card-motif__object) { animation:none; }
+/* The post type is an identity heading. Actual descriptive tags sit below it. */
+.ab-card__eyebrow{align-items:flex-start;gap:6px;margin-bottom:10px}
+.ab-card .ab-card__type{flex:1 1 100%;margin:0;padding:0 0 5px;border:0;border-radius:0;background:none;color:var(--c);font:800 clamp(22px,1.65vw,30px)/.98 var(--font-display);letter-spacing:.035em;text-transform:uppercase;text-shadow:1px 1px 0 color-mix(in srgb,var(--c) 25%,transparent)}
+.ab-card__type::after{content:"";display:block;width:38px;height:2px;margin-top:7px;background:linear-gradient(90deg,var(--c),transparent)}
+.ab-card__tags{display:flex;gap:4px;margin:0 0 8px;min-width:0;max-height:22px;overflow:hidden}
+.ab-card__tags span{white-space:nowrap;max-width:45%;overflow:hidden;text-overflow:ellipsis;padding:3px 5px;border:1px solid color-mix(in srgb,var(--c) 28%,transparent);border-radius:4px;color:var(--text-body);font:10px/1.2 var(--font-mono)}
+.ab-card .ab-card__eyebrow .ab-demo-badge{position:absolute;right:12px;top:10px;font-size:10px;font-weight:900;letter-spacing:.04em;padding:3px 5px;opacity:1}
+.ab-card__glass{position:absolute;inset:-2px;z-index:0;pointer-events:none;background:linear-gradient(118deg,color-mix(in srgb,var(--text-hi) 4%,transparent) 0%,color-mix(in srgb,var(--text-hi) 1%,transparent) 37%,transparent 58%,color-mix(in srgb,var(--c) 7%,transparent));backdrop-filter:blur(.4px);-webkit-backdrop-filter:blur(.4px);filter:blur(0)}
+@media(hover:hover) and (pointer:fine){
+ .ab-pinned-card:hover .ab-card__glass{animation:ab-glass-motion-blur 1.8s ease-in-out both}
+ .ab-pinned-card:has(.ab-card__footer:hover) .ab-card__glass,.ab-pinned-card:focus-within .ab-card__glass{animation:none}
+}
+@keyframes ab-glass-motion-blur{0%,100%{filter:blur(0);backdrop-filter:blur(.4px)}12%,33%{filter:blur(1.2px);backdrop-filter:blur(1.5px)}20%,45%,68%,85%{filter:blur(.2px);backdrop-filter:blur(.4px)}56%,76%{filter:blur(.6px);backdrop-filter:blur(.8px)}}
+@media(prefers-reduced-motion:reduce){.ab-pinned-card:hover .ab-card__glass{animation:none}}
+:is(html.calm-mode,:root[data-calm="true"]) .ab-pinned-card:hover .ab-card__glass{animation:none}
+@media(max-width:767px){.ab-card .ab-card__type{font-size:22px}.ab-card__eyebrow{margin-bottom:7px}.ab-card__tags{margin-bottom:6px}}
+
+.ab-card__tags{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;max-height:22px;flex:none}
+.ab-card__tags span{flex:none;max-width:none;overflow:visible;text-overflow:clip}
+.ab-card__eyebrow{min-height:48px;flex:none}
+.map-board-cards .ab-card__footer button{min-height:44px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--c) 50%,transparent);border-radius:10px;background:var(--btn-glow-bg)}
+.map-board-cards .ab-card__location{height:1.4em;min-height:1.4em;flex:none}
+@media(max-width:767px){.ab-pinned-card{display:flex;flex-direction:column}.ab-pinned-card>.ab-card{flex:1}.map-board-cards .ab-card{height:auto}.map-board-cards .ab-art{max-height:180px;aspect-ratio:auto}.map-board-cards .ab-card__location{height:2.8em;min-height:2.8em}}
+/* Boardz uses the day palette. Housing keeps a cyan shell with type-specific artwork. */
+:is(.ab-page,.map-board-cards,.board-pin-picker){--room-hauz:var(--day-thu);--room-gigz:var(--day-mon);--room-gigz-ink:var(--day-mon-text);--room-giftz:var(--day-wed);--room-sellz:var(--day-sat);--room-mizzed:var(--day-fri);--neon-cyan:var(--day-thu);--neon-violet:var(--day-mon);--neon-magenta:var(--day-fri);--neon-yellow:var(--day-wed);--neon-green:var(--day-sat);--neon-orange:var(--day-sun)}
+.ab-pinned-card :is(.ab-card-motif,.ab-motif){color:var(--ab-accent,var(--c))}
+.ab-pinned-card .ab-motif__edge{stroke:color-mix(in srgb,var(--ab-accent,var(--c)) 72%,var(--text-hi))}
+.ab-pinned-card .ab-motif__main{filter:drop-shadow(0 2px 4px color-mix(in srgb,var(--ab-accent,var(--c)) 16%,transparent))}
+.ab-pinned-card :is(.ab-pin__wire,.ab-pin__surface-wire,.ab-pin__glitch){stroke:var(--ab-accent,var(--c))}
+.ab-pinned-card--housing .ab-card{border-left:1px solid color-mix(in srgb,var(--day-thu) 42%,transparent)}
+.ab-card__intent-edge{position:absolute;z-index:4;pointer-events:none;inset:0 auto 0 0;width:3px;background:linear-gradient(to bottom,var(--day-thu),var(--ab-accent) 18%,var(--ab-accent) 82%,var(--day-thu));mask:repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px);-webkit-mask:repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px)}
+@media(max-width:767px){.ab-controls{background:color-mix(in srgb,var(--z-black) 94%,transparent)}}
+.ab-pinned-card--gigz :is(.ab-card__type,.ab-card__value){color:color-mix(in srgb,var(--day-mon-text) 82%,var(--text-hi))}

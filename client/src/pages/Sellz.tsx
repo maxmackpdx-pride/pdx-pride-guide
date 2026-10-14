@@ -1,3 +1,4 @@
+import BoardMotifSetting from "@/components/board/BoardMotifSetting";
 import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
 import FilterSurvey from "@/components/FilterSurvey";
@@ -237,8 +238,10 @@ export function SellzComposer({onClose, onPosted}: {onClose: () => void; onPoste
   const [form, setForm] = useState<any>(blank);
   const [photos, setPhotos] = useState<FileList | null>(null);
   const [mapLocation, setMapLocation] = useState<BoardMapPoint | null>(null);
+  const [motifChoice, setMotifChoice] = useState("default");
   const create = useMutation({
     mutationFn: async () => {
+      if (!photos?.length) throw new Error("Add at least one photo before posting.");
       let photoUrls: string[] = [];
       if (photos?.length) {
         const formData = new FormData();
@@ -247,11 +250,12 @@ export function SellzComposer({onClose, onPosted}: {onClose: () => void; onPoste
         if (!upload.ok) throw new Error(await upload.text());
         photoUrls = (await upload.json()).urls || [];
       }
+      if (!photoUrls.length) throw new Error("The photo did not upload. Please try again.");
       const response = await fetch("/api/sellz", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, photoUrls, mapLocation }),
+        body: JSON.stringify({ ...form, photoUrls, mapLocation, motifChoice }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || response.statusText);
@@ -264,10 +268,12 @@ export function SellzComposer({onClose, onPosted}: {onClose: () => void; onPoste
       setForm(blank);
       setPhotos(null);
       setMapLocation(null);
+      setMotifChoice("default");
       toast({ title: "Your listing is live" });
     },
     onError: (error: any) => toast({ title: "Could not post", description: error.message, variant: "destructive" }),
   });
 
-  return <RoomComposer id="sellz-form" room="sellz" kicker="New listing" title="Sell something" onClose={onClose}><div className="gifting-form-grid"><label className="span">Title<input className="board-text-field" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="What are you selling?" /></label><label className="span">Description<textarea className="board-text-field" rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Useful details, dimensions, flaws, what is included." /></label><label>Price<input className="board-text-field" inputMode="decimal" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="$" /></label><label>Category<select className="board-text-field" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{CATEGORIES.map(value => <option key={value}>{value}</option>)}</select></label><label>Condition<select className="board-text-field" value={form.condition} onChange={e => setForm({ ...form, condition: e.target.value })}>{CONDITIONS.map(value => <option key={value}>{value}</option>)}</select></label><label>Neighborhood<input className="board-text-field" value={form.neighborhood} onChange={e => setForm({ ...form, neighborhood: e.target.value })} /></label><label>Handoff<select className="board-text-field" value={form.pickupPreference} onChange={e => setForm({ ...form, pickupPreference: e.target.value })}>{PICKUP.map(value => <option key={value}>{value}</option>)}</select></label><BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} /><label className="span">Photos (at least 1, up to 6)<input type="file" accept="image/*" multiple required onChange={e => setPhotos(e.target.files)} /><small className="board-copy-sm">Listings need a real photo of the item.</small></label></div><ComposerRules checked={form.negotiable} onChange={negotiable => setForm({ ...form, negotiable })}>Open to offers</ComposerRules><ComposerRules checked={form.acceptRules} onChange={acceptRules => setForm({ ...form, acceptRules })}>I own this item, described it honestly, and agree to the marketplace rules.</ComposerRules><ComposerSubmit busy={create.isPending} disabled={!form.acceptRules || !form.title || !form.price || !photos?.length} onClick={() => create.mutate()}>Post listing</ComposerSubmit></RoomComposer>;
+  return <RoomComposer id="sellz-form" room="sellz" kicker="New listing" title="Sell something" onClose={onClose}><div className="gifting-form-grid"><label className="span">Title<input className="board-text-field" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="What are you selling?" /></label><label className="span">Description<textarea className="board-text-field" rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Useful details, dimensions, flaws, what is included." /></label><label>Price<input className="board-text-field" inputMode="decimal" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="$" /></label><label>Category<select className="board-text-field" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{CATEGORIES.map(value => <option key={value}>{value}</option>)}</select></label><label>Condition<select className="board-text-field" value={form.condition} onChange={e => setForm({ ...form, condition: e.target.value })}>{CONDITIONS.map(value => <option key={value}>{value}</option>)}</select></label><label>Neighborhood<input className="board-text-field" value={form.neighborhood} onChange={e => setForm({ ...form, neighborhood: e.target.value })} /></label><label>Handoff<select className="board-text-field" value={form.pickupPreference} onChange={e => setForm({ ...form, pickupPreference: e.target.value })}>{PICKUP.map(value => <option key={value}>{value}</option>)}</select></label><BoardMotifSetting category="sellz" value={motifChoice} onChange={setMotifChoice} />
+              <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} /><label className="span">Photos (at least 1, up to 6)<input type="file" accept="image/*" multiple required onChange={e => setPhotos(e.target.files)} /><small className="board-copy-sm">Listings need a real photo of the item.</small></label></div><ComposerRules checked={form.negotiable} onChange={negotiable => setForm({ ...form, negotiable })}>Open to offers</ComposerRules><ComposerRules checked={form.acceptRules} onChange={acceptRules => setForm({ ...form, acceptRules })}>I own this item, described it honestly, and agree to the marketplace rules.</ComposerRules><ComposerSubmit busy={create.isPending} disabled={!form.acceptRules || !form.title || !form.price || !photos?.length} onClick={() => create.mutate()}>Post listing</ComposerSubmit></RoomComposer>;
 }

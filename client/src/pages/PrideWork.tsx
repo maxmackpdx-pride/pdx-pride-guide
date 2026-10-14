@@ -1,3 +1,4 @@
+import BoardMotifSetting from "@/components/board/BoardMotifSetting";
 import GigPreviewCard from "@/components/board/GigPreviewCard";
 import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
@@ -478,6 +479,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
   const {toast} = useToast();
   const [acceptRules, setAcceptRules] = useState(false);
   const [mapLocation, setMapLocation] = useState<BoardMapPoint | null>(null);
+  const [motifChoice, setMotifChoice] = useState("default");
   const [venueQuery, setVenueQuery] = useState("");
   const [linkedBusiness, setLinkedBusiness] = useState<{ id: number; name: string } | null>(null);
   const [venueBranch, setVenueBranch] = useState<"idle" | "private" | "newBusiness">("idle");
@@ -542,7 +544,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
   const mutation = useMutation({
     mutationFn: (data: GigFormData) => {
       trackProductEvent("post_attempt", "gigz");
-      return apiRequest("POST", "/api/gigs", { ...data, mapLocation, acceptRules: true }).then(r => r.json());
+      return apiRequest("POST", "/api/gigs", { ...data, mapLocation, motifChoice, acceptRules: true }).then(r => r.json());
     },
     onSuccess: (_data, variables) => {
       trackProductEvent("post_completed", "gigz");
@@ -556,6 +558,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
       form.reset();
       setAcceptRules(false);
       setMapLocation(null);
+      setMotifChoice("default");
       onPosted(_data.id);
       setLinkedBusiness(null);
       setVenueBranch("idle");
@@ -683,6 +686,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
                 </>
               ) : null}
 
+              <BoardMotifSetting category="gigz" value={motifChoice} onChange={setMotifChoice} />
               <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} />
               {postType === "POSTING_GIG" && isEligiblePoster && (
                 <div className="span" style={{ border: "1px solid var(--border-default)", borderRadius: 8, padding: 14 }}>

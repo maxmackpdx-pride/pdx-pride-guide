@@ -72,12 +72,12 @@ test('the actual startup reaches MapLibre construction, with only one graphics c
  assert.deepEqual(validateStyleMin(optionsCaptured.style).map(error=>error.message),[]);
 });
 
-function bridge(){
+function bridge(search=""){
  const handlers=new Map(),messages=[],status={textContent:''},dataset={};
  class ErrorEvent{constructor(message){this.message=message;}}
  const window={addEventListener:(type,fn)=>handlers.set(type,fn)};
  vm.runInNewContext(html.match(/<script>([\s\S]*?)<\/script>/)[1],{
-  window,ErrorEvent,location:{origin:'https://www.zaylist.com'},
+  window,ErrorEvent,URLSearchParams,location:{origin:'https://www.zaylist.com',search},
   document:{documentElement:{dataset},getElementById:()=>status,
    createElement:()=>({}),body:{appendChild(){} }},
   parent:{postMessage:value=>messages.push(value)}
@@ -128,4 +128,20 @@ test('base-city readiness uses idle or its bounded fallback without terrain or f
  canvas.width=390;canvas.height=720;
  fallback();assert.equal(context.baseFrameRendered,true);assert.equal(frames,2);
  onIdle();assert.equal(frames,2,'readiness must only be announced once');
+});
+
+
+test('placement iframe forwards Escape before map startup without changing normal Mapz keys',()=>{
+ const regular=bridge();
+ assert.equal(regular.handlers.has('keydown'),false);
+ const placement=bridge('?escape=host');
+ let prevented=0,stopped=0;
+ const key=key=>({key,preventDefault(){prevented++;},stopImmediatePropagation(){stopped++;}});
+ placement.handlers.get('keydown')(key('Tab'));
+ assert.equal(prevented,0);
+ assert.equal(placement.messages.filter(message=>message.type==='escape').length,0);
+ placement.handlers.get('keydown')(key('Escape'));
+ assert.equal(prevented,1);
+ assert.equal(stopped,1);
+ assert.equal(placement.messages.filter(message=>message.type==='escape').length,1);
 });
