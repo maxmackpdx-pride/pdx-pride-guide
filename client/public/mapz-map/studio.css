@@ -63,3 +63,11 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 .standalone-hologram-label--event .standalone-hologram-countdown{margin:0;color:#cbd5e1;font:900 8px/1 'Barlow Condensed',sans-serif;letter-spacing:0;}
 .standalone-hologram-label--event:focus-visible{outline-color:#fff;outline-offset:4px;}
 .standalone-hologram-label--event:hover .event-hologram-frame__rear{stroke-width:1.6;}
+
+/* TV texture belongs to the rear surface; foreground artwork never inherits it. */
+.standalone-hologram-label--event::before{content:"";position:absolute;inset:2px;z-index:0;pointer-events:none;clip-path:var(--event-surface-clip);background:repeating-linear-gradient(to bottom,transparent 0 2px,color-mix(in srgb,var(--projection-color) 16%,transparent) 2px 2.5px,rgba(255,255,255,.035) 2.5px 3px);}
+.standalone-hologram-label--event>.event-hologram-brand,
+.standalone-hologram-label--event>.standalone-hologram-title,
+.standalone-hologram-label--event>.event-hologram-footer{position:relative;z-index:1;transform:translateY(-1px);text-shadow:0 2px 1px #020509,0 3px 5px #020509;}
+.standalone-hologram-label--event .standalone-hologram-clock,
+.standalone-hologram-label--event .standalone-hologram-countdown{text-shadow:0 2px 1px #020509,0 3px 4px #020509;}

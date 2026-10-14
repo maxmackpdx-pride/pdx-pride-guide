@@ -17,6 +17,7 @@ export function eventBeamPoint(anchor,end,t,phase=0,seconds=0,reduced=false){
 const ns='http://www.w3.org/2000/svg';
 export function appendEventCardFrame(item){
  const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 112 112');svg.setAttribute('aria-hidden','true');svg.classList.add('event-hologram-frame');
+ item.style.setProperty('--event-surface-clip',`polygon(${EVENT_FRAME.map(([u,v])=>`${u*100}% ${v*100}%`).join(',')})`);
  const outline=EVENT_FRAME.map(([u,v])=>`${u*112},${v*112}`).join(' ');
  for(const name of ['event-hologram-frame__rear','event-hologram-frame__inset']){
   const edge=document.createElementNS(ns,'polygon');edge.setAttribute('points',outline);edge.setAttribute('class',name);svg.appendChild(edge);
