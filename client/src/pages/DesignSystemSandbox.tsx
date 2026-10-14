@@ -83,8 +83,8 @@ function Section({
 
 export default function DesignSystemSandbox() {
   usePageSeo(
-    "Design System Sandbox",
-    "Isolated preview of Zaylist design tokens and components. Not production.",
+    "Historical Design System Preview",
+    "Historical diagnostic preview; current standards are in the canonical Zaylist Foundation Library.",
     { url: typeof window !== "undefined" ? `${window.location.origin}/design-preview` : undefined },
   );
 
@@ -151,16 +151,16 @@ export default function DesignSystemSandbox() {
       data-calm={calm ? "true" : "false"}
     >
       <div className="ds-sandbox__dev-banner" role="note">
-        Dev preview: design system sandbox only
+        Historical diagnostic preview — not the current design guide
       </div>
 
       <header className="ds-sandbox__header">
         <div className="ds-sandbox__header-top">
           <div>
-            <h1 className="ds-sandbox__title">Design System Sandbox</h1>
+            <h1 className="ds-sandbox__title">Historical Design System Preview</h1>
             <p className="ds-sandbox__subtitle">
-              Ported Claude Design export components and tokens. Toggle calm mode to
-              flatten glows and motion inside this preview.
+              Preserved export components and tokens for diagnostics. Current Eventz-based room standards live in the{" "}
+              <a href="https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/" target="_blank" rel="noopener noreferrer">canonical Foundation Library</a>. Toggle calm mode to inspect this historical preview.
             </p>
           </div>
           <div className="ds-sandbox__row">
