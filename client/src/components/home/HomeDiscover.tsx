@@ -8,7 +8,7 @@ const destinations = [
   { icon: CalendarDays, name: "EVENTZ", description: "Find something to do.", href: "/events", accent: "var(--room-eventz)" },
   { icon: MapPinned, name: "PLACEZ", description: "Find somewhere to go.", href: "/directory", accent: "var(--room-placez)" },
   { icon: LayoutGrid, name: "OUR BOARDZ", description: "Find people, work, and things.", href: "/boardz", accent: "var(--neon-magenta)" },
-  { icon: LifeBuoy, name: "NEEDZ", description: "Find care and support.", href: "/needz", accent: "var(--green-acid)" },
+  { icon: LifeBuoy, name: "NEEDZ", description: "Find care, support, clubs, and groups.", href: "/needz", accent: "var(--green-acid)" },
 
 ];
 
