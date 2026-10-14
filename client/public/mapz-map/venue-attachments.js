@@ -5,7 +5,7 @@ export const TONIGHT_HEIGHT_MULTIPLIER=1.2;
 // A Mizzed connection, or a gig posted at a place, branches off that place's
 // waypoint for 8 days and then leaves the map. The post itself stays in its room.
 export function mizzedNotificationActive(row,now=Date.now()){
- if(row.boardPin)return Number.isFinite(Date.parse(row.expiresAt))&&now<Date.parse(row.expiresAt);
+ if(row.boardPin)return row.demoPin===true||Number.isFinite(Date.parse(row.expiresAt))&&now<Date.parse(row.expiresAt);
  const branchGig=row.waypointFamily==='gigz'&&Boolean(row.venueWaypointKey||row.venueAnchor);
  if(row.waypointFamily!=='mizzed'&&!branchGig)return true;
  const created=Date.parse(row.createdAt),closes=Date.parse(row.closesAt);

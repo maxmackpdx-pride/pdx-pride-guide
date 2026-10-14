@@ -49,6 +49,7 @@ import { directoryTypeColor, isPlacezType } from "@shared/directoryTheme";
 import { directoryFallbackLogo, normalizeDirectoryName, resolveDirectoryLogo } from "@/lib/directoryLogos";
 import { mapRecordId, clearMapOverlay } from "@/lib/mapDrawerNavigation";
 import { mapCoordinates } from "@/lib/mapCoordinates";
+import { boardDemoPoint } from "@/lib/boardDemoPins";
 import { stampHauzMapPoints } from "@/lib/hauzDemoPins";
 import { mapListingKey, matchesMapEvent, type MapTimeFilter } from "@/lib/mapLayerFilters";
 import { HOUSING_TYPE_LABEL, type HousingBoardResponse, type HousingPostView, type HousingType } from "@shared/housing";
@@ -647,8 +648,10 @@ export default function MapzMapDemo() {
           const points=placeMarks([row as Place]);
           return {...row,lat:points[0]?.lat,lng:points[0]?.lng,_mapPoints:points,locationLabel:row.neighborhood||"Confirmed address"};
         }
-        const mapPoint=boardMapPoints.find(point=>point.board===world && point.postId===Number(row.id));
-        const located:MapRow=mapPoint?{...row,mapPoint,lat:mapPoint.lat,lng:mapPoint.lng,locationLabel:"Placed by poster"}:{...row,lat:null,lng:null,locationLabel:"Not on the map"};
+        const savedPoint=boardMapPoints.find(point=>point.board===world && point.postId===Number(row.id));
+        const demoPoint=savedPoint?null:boardDemoPoint(row,world);
+        const mapPoint=savedPoint||demoPoint;
+        const located:MapRow=mapPoint?{...row,mapPoint,lat:mapPoint.lat,lng:mapPoint.lng,locationLabel:demoPoint?"Demo location":"Placed by poster"}:{...row,lat:null,lng:null,locationLabel:"Not on the map"};
         const distance=located.lat!=null&&located.lng!=null
           ? `${roughDistanceMiles(viewerPoint || {lat:mapCenter[0],lng:mapCenter[1]},{lat:Number(located.lat),lng:Number(located.lng)})}${viewerPoint ? "" : " from map center"}` : "";
         return {...located,locationLabel:distance ? `${located.locationLabel} · ${distance}` : located.locationLabel,_board:board[world]};
@@ -833,7 +836,7 @@ export default function MapzMapDemo() {
     const type=place?mapzPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');
     const name=event?.title||place?.name||boardTitle(row);
     const boardLogo=isHouz?firstImage(row.photos)||FORMING_COVER:firstImage(row.photoUrls)||firstImage(row.imageUrl);
-    return {pinCyan,wireColor:boardWireColor(row),boardPin:mark.kind==='board',expiresAt:(row.mapPoint as any)?.expiresAt,venueAnchor,createdAt:row.createdAt,closesAt:row.closesAt,status:row.status,waypointLogo:place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl)):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place?serviceIdentity(place)?.icon || mapzTypeIcon(type):event?serviceIdentity(venue || {name:venueName})?.icon || mapzTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
+    return {pinCyan,wireColor:boardWireColor(row),boardPin:mark.kind==='board',demoPin:row.isDemo===true&&(row.mapPoint as any)?.demo===true,expiresAt:(row.mapPoint as any)?.expiresAt,venueAnchor,createdAt:row.createdAt,closesAt:row.closesAt,status:row.status,waypointLogo:place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl)):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place?serviceIdentity(place)?.icon || mapzTypeIcon(type):event?serviceIdentity(venue || {name:venueName})?.icon || mapzTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
       logo:isHouz?'':brands?.primary||(place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl))||directoryFallbackLogo(place.type):mark.kind==='event'?'/mapz-map/icons/event.svg':boardLogo||boardIcon(row)),
       alternateLogo:brands?.alternate,
       housingModel:undefined,
