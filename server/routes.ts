@@ -6313,7 +6313,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/admin/pending-count", requireAdmin, (req, res) => {
     const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() + getAdminQueueAggregate().workSummary.escalated : 0;
+    const ownerEscalationCount = user && storage.isPrimarySiteOwner(user) ? getAdminQueueAggregate().workSummary.escalated : 0;
+    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() + ownerEscalationCount : 0;
     const breakdown = storage.getAdminQueueBreakdown();
     const queueCount = breakdown.total;
     const guideUnread = breakdown.guideUnread;
@@ -6324,6 +6325,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       /** Badge total for Admin tab / mobile Queue: queue items + guide-inbox unreplies. */
       adminBadge: queueCount + guideUnread,
       ownerCount,
+      ownerEscalationCount,
       /** Category counts - one mobile-friendly payload for badges and overview. */
       breakdown,
     });
@@ -6336,13 +6338,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/admin/pulse", requireAdmin, (req, res) => {
     const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
     const breakdown = storage.getAdminQueueBreakdown();
-    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() + getAdminQueueAggregate().workSummary.escalated : 0;
+    const ownerEscalationCount = user && storage.isPrimarySiteOwner(user) ? getAdminQueueAggregate().workSummary.escalated : 0;
+    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() + ownerEscalationCount : 0;
     const metrics = storage.getAdminMetrics();
     res.json({
       generatedAt: new Date().toISOString(),
       queue: breakdown,
       adminBadge: breakdown.total + breakdown.guideUnread,
       ownerCount,
+      ownerEscalationCount,
       liveEvents: metrics.liveEvents,
       pendingSubmissions: metrics.pendingSubmissions,
       newUsersToday: metrics.newUsersToday,

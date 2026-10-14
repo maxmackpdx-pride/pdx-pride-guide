@@ -22,7 +22,7 @@ interface AdminMetrics {
 const METRICS: { key: keyof AdminMetrics; label: string; color: string; tab?: string; alwaysClickable?: boolean }[] = [
   { key: "users",              label: "Registered users",               color: "#C8FA3C", tab: "users",    alwaysClickable: true },
   { key: "newUsersToday",      label: "New users today",                color: "#C8FA3C", tab: "users",    alwaysClickable: true },
-  { key: "activeSessions",     label: "Active sessions",                color: "#19E3FF" },
+  { key: "activeSessions",     label: "Stored login sessions",                color: "#19E3FF" },
   { key: "liveEvents",         label: "Live events (excl. placeholders)", color: "#FF8C00", tab: "events", alwaysClickable: true },
   { key: "userSubmittedEvents",label: "Community-submitted events",     color: "#00FFFF", tab: "events" },
   { key: "attendances",        label: "Member check-ins",               color: "#C8FA3C", tab: "events",  alwaysClickable: true },
@@ -89,7 +89,7 @@ export default function AdminMetricsPanel({
         </button>
       </div>
       <div className="dash-admin-metrics">
-        {METRICS.map(metric => {
+        {METRICS.filter(metric => typeof data[metric.key] === "number").map(metric => {
           const raw = data[metric.key];
           const count = typeof raw === "number" ? raw : Number(raw) || 0;
           const clickable = !!metric.tab && !!onMetricClick

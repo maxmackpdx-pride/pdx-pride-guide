@@ -5,6 +5,7 @@ import { useUnreadCount } from "@/hooks/useUnreadCount";
 type PendingAdmin = {
   count: number;
   ownerCount?: number;
+  ownerEscalationCount?: number;
   guideUnread?: number;
   adminBadge?: number;
 };
@@ -38,7 +39,8 @@ export function useInboxAttentionCount() {
       ?? ((pendingAdmin.count || 0) + (pendingAdmin.guideUnread || 0))
     : 0;
   const ownerDesk = isPrimaryOwner ? pendingAdmin.ownerCount || 0 : 0;
-  const actionQueue = adminQueue + ownerDesk;
+  const sharedOwnerCases = isPrimaryOwner ? pendingAdmin.ownerEscalationCount || 0 : 0;
+  const actionQueue = adminQueue + ownerDesk - Math.min(sharedOwnerCases, adminQueue, ownerDesk);
   const total = unread + actionQueue;
 
   return {
