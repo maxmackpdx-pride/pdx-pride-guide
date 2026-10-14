@@ -6,6 +6,7 @@ import {
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
+import { profileShareImagePath } from "@shared/profileShare";
 
 type Props = {
   open: boolean;
@@ -13,6 +14,7 @@ type Props = {
   onClose: () => void;
   onCopy: () => void;
   onMessage?: () => void;
+  username: string;
   profileUrl: string;
   displayName: string;
   /** Anchor (Share button wrap) for fixed positioning above page content. */
@@ -27,6 +29,7 @@ export default function SharePopover({
   onClose,
   onCopy,
   onMessage,
+  username,
   profileUrl,
   displayName,
   anchorRef,
@@ -44,8 +47,9 @@ export default function SharePopover({
     left = Math.max(pad, Math.min(left, window.innerWidth - width - pad));
     // Prefer below the Share button; flip above if clipped
     const spaceBelow = window.innerHeight - r.bottom - pad;
-    const preferBelow = spaceBelow >= 140;
-    const top = preferBelow ? r.bottom + 8 : Math.max(pad, r.top - 8 - 140);
+    const height = panelRef.current?.getBoundingClientRect().height || 300;
+    const preferBelow = spaceBelow >= height;
+    const top = preferBelow ? r.bottom + 8 : Math.max(pad, r.top - 8 - height);
     setPos({ top, left });
   };
 
@@ -97,9 +101,12 @@ export default function SharePopover({
       ref={panelRef}
       style={{ top: pos.top, left: pos.left }}
       role="dialog"
-      aria-modal={window.matchMedia("(max-width: 640px)").matches || undefined}
       aria-label={`Share ${displayName}`}
     >
+      <a className="pp-share-pop__image" href={profileShareImagePath(username)} download={`${username}-zaylist.png`}>
+        <img src={profileShareImagePath(username)} alt={`Follow ${displayName} on Zaylist`} width="1200" height="630" loading="lazy" decoding="async" />
+        <span>Save your social image</span>
+      </a>
       <button
         type="button"
         className="pp-share-pop__item"

@@ -1,5 +1,7 @@
 import PageRecovery from "@/components/PageRecovery";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { DEFAULT_PROFILE_ACCENT } from "@shared/profileConstants";
+import { profileShareImagePath } from "@shared/profileShare";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRoute } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, parseApiError, queryClient } from "@/lib/queryClient";
@@ -7,9 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import EventModal from "@/components/EventModal";
-import PlaceModal, { type PlaceModalOriginRect } from "@/components/PlaceModal";
-import AuthModal from "@/components/AuthModal";
+import { lazyWithReload } from "@/lib/lazyWithReload";
+const EventModal = lazyWithReload(() => import("@/components/EventModal"));
+import type { PlaceModalOriginRect } from "@/components/PlaceModal";
+const PlaceModal = lazyWithReload(() => import("@/components/PlaceModal"));
+const AuthModal = lazyWithReload(() => import("@/components/AuthModal"));
 import type { Event } from "@shared/schema";
 import type { Business } from "@/pages/Directory";
 import type { MemberProfileData, ProfileTop8Entry } from "./profile/types";
@@ -19,14 +23,16 @@ import {
 } from "@/components/profile/normalizePublicProfile";
 import ProfileHero from "@/components/profile/ProfileHero";
 import ProfileStatStrip from "@/components/profile/ProfileStatStrip";
-import { Marquee } from "@/components/ds";
+import ProfileMarquee from "@/components/profile/ProfileMarquee";
+import ProfileDeferred from "@/components/profile/ProfileDeferred";
+import { useAuth } from "@/context/AuthContext";
 import ProfileTop8 from "@/components/profile/ProfileTop8";
-import Top8Editor from "@/components/profile/Top8Editor";
+const Top8Editor = lazyWithReload(() => import("@/components/profile/Top8Editor"));
 import HostingPanel from "@/components/profile/HostingPanel";
 import TheBigOne from "@/components/profile/TheBigOne";
 import GoingRail from "@/components/profile/GoingRail";
-import OutzAdventures from "@/components/profile/OutzAdventures";
-import FlyerStash from "@/components/profile/FlyerStash";
+const OutzAdventures = lazyWithReload(() => import("@/components/profile/OutzAdventures"));
+const FlyerStash = lazyWithReload(() => import("@/components/profile/FlyerStash"));
 import UpdatesPanel from "@/components/profile/UpdatesPanel";
 import ProfileFooter from "@/components/profile/ProfileFooter";
 import SafetyGuide from "@/components/SafetyGuide";
@@ -36,7 +42,8 @@ import {
   summaryForEvent,
   type AttendanceSummaryMap,
 } from "@/components/profile/mapAttendancePreviewToChips";
-import MessageModal from "./profile/MessageModal";
+const MessageModal = lazyWithReload(() => import("./profile/MessageModal"));
+import ProfileAbout, { hasProfileAboutContent } from "@/components/profile/ProfileAbout";
 import { profileCssVars } from "@/components/profile/profileHelpers";
 import { copyTextToClipboard } from "@/lib/copyText";
 import "./MemberProfile.css";
@@ -47,6 +54,7 @@ export default function MemberProfile() {
   const [routeMatch, routeParams] = useRoute("/u/:username");
   const username = routeParams?.username || "";
   const { toast } = useToast();
+  const { user: viewer } = useAuth();
   usePageSeo(
     username ? `@${username} · Profile | Zaylist` : "Profile | Zaylist",
     username
@@ -55,7 +63,7 @@ export default function MemberProfile() {
     username
       ? {
           url: `https://www.zaylist.com/u/${encodeURIComponent(username)}`,
-          image: `https://www.zaylist.com/api/og/profile/${encodeURIComponent(username)}?v=2`,
+          image: `https://www.zaylist.com${profileShareImagePath(username)}`,
           imageAlt: `@${username} on Zaylist`,
           type: "article",
         }
@@ -71,6 +79,18 @@ export default function MemberProfile() {
   const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
   const [placeOriginRect, setPlaceOriginRect] = useState<PlaceModalOriginRect | null>(null);
 
+  const closeMessage = useCallback(() => setMsgOpen(false), []);
+  useEffect(() => {
+    setMsgOpen(false);
+    setAccentOpen(false);
+    setShareOpen(false);
+    setTop8Open(false);
+    setCopied(false);
+    setSelectedEvent(null);
+    setSelectedPlace(null);
+    setPlaceOriginRect(null);
+  }, [username]);
+
   const { myEventIds, toggleRsvp, showAuth, setShowAuth } = useEventRsvp();
 
   const { data: apiData, isLoading, error, refetch } = useQuery({
@@ -85,6 +105,7 @@ export default function MemberProfile() {
       return res.json() as Promise<MemberProfileData>;
     },
     enabled: !!username && routeMatch,
+    staleTime: 60_000,
   });
   useEffect(() => {
     if (!apiData?.stats || !apiData.activity) return;
@@ -101,6 +122,7 @@ export default function MemberProfile() {
       return res.json() as Promise<AttendanceSummaryMap>;
     },
     staleTime: 30_000,
+    enabled: !!apiData && !!(apiData.activity?.goingTo?.length || apiData.activity?.hostedEvents?.length),
   });
 
   const data = useMemo(() => {
@@ -251,11 +273,11 @@ export default function MemberProfile() {
     const notFound = !!(error && ((error as Error & { status?: number }).status === 404 || /^404:/.test(error.message)));
     return <PageRecovery section="People" title={notFound ? "This profile isn’t available." : "We couldn’t load this profile."}
       description={notFound ? "This member may have changed their address or their profile may no longer be available. Find people through Zaylist’s communities." : "The profile couldn’t load just now. Try again in a moment."}
-      href="/z" label="Explore communities" missing={notFound} retry={notFound ? undefined : () => { void refetch(); }} />;
+      href="/needz?cat=community" label="Find your people" missing={notFound} retry={notFound ? undefined : () => { void refetch(); }} />;
   }
 
   const isOwner = !!data.isOwner;
-  const accent = data.accentColor || "#FF00CC";
+  const accent = data.accentColor || DEFAULT_PROFILE_ACCENT;
   const banner = data.profileBanner ?? null;
   const hosting = data.events?.hosting ?? { upcoming: [], past: [] };
   const going = data.events?.going ?? { upcoming: [], past: [] };
@@ -273,9 +295,7 @@ export default function MemberProfile() {
   const partyNames = Array.from(
     new Set(stashEvents.map(e => e.title).filter((t): t is string => !!t)),
   ).slice(0, 14);
-  const marqueeItems = partyNames.length
-    ? partyNames
-    : ["I need to go to a party still", "Where should I go?"];
+  const marqueeItems = data.marquee?.items?.length ? data.marquee.items : partyNames;
 
   return (
     <div
@@ -294,10 +314,10 @@ export default function MemberProfile() {
           shareOpen={shareOpen}
           copied={copied}
           profileUrl={profileUrl}
-          onFollow={() => followMutation.mutate()}
+          onFollow={() => viewer ? followMutation.mutate() : setShowAuth(true)}
           onShareToggle={() => setShareOpen(v => !v)}
           onCopy={onCopy}
-          onMessage={!isOwner ? () => setMsgOpen(true) : undefined}
+          onMessage={!isOwner ? () => viewer ? setMsgOpen(true) : setShowAuth(true) : undefined}
           onAccentToggle={() => setAccentOpen(v => !v)}
           onAccent={(hex) => patchMutation.mutate({ accentColor: hex })}
           onSolidBanner={(hex) =>
@@ -313,14 +333,15 @@ export default function MemberProfile() {
 
         <ProfileStatStrip data={data} />
 
-        <div
+        {marqueeItems.length > 0 && <div
           className="pp-marquee-wrap"
           style={{ ["--pp-mq-accent" as string]: accent }}
         >
-          <Marquee items={marqueeItems} speed={30} className="pp-marquee pp-marquee--accent" />
-        </div>
+          <ProfileMarquee items={marqueeItems} speed={data.marquee?.speed || 30} color={data.marquee?.color} />
+        </div>}
 
         <ProfileWidgetGrid key={username} username={username} sections={[
+          ...(hasProfileAboutContent(data, apiData.profilePhotos, apiData.profileEmbeds) ? [{ id: "about", label: "About", size: "sm", content: <ProfileAbout data={data} profilePhotos={apiData.profilePhotos} profileEmbeds={apiData.profileEmbeds} /> } as ProfileSection] : []),
           ...(hosting.upcoming.length || hosting.past.length ? [{ id: "hosting", label: "Hosting", size: "wide", content: (
             <HostingPanel
               upcoming={hosting.upcoming}
@@ -371,13 +392,13 @@ export default function MemberProfile() {
             />
           ) } as ProfileSection] : []),
           ...(stashEvents.length ? [{ id: "stash", label: "The Stash", size: "wide", content: (
-            <FlyerStash
+            <ProfileDeferred label="The Stash"><Suspense fallback={<p role="status">Loading flyers…</p>}><FlyerStash
               events={stashEvents}
               onEventClick={(e) => openEvent(e.id)}
-            />
+            /></Suspense></ProfileDeferred>
           ) } as ProfileSection] : []),
           ...(isOwner ? [{ id: "outz", label: "Outz adventures", size: "wide", content: (
-            <OutzAdventures adventures={apiData.outzAdventures} />
+            <ProfileDeferred label="Outz adventures"><Suspense fallback={<p role="status">Loading adventures…</p>}><OutzAdventures adventures={apiData.outzAdventures} /></Suspense></ProfileDeferred>
           ) } as ProfileSection] : []),
         ]} />
 
@@ -385,11 +406,12 @@ export default function MemberProfile() {
         <ProfileFooter username={data.username} />
       </div>
 
+      <Suspense fallback={<div className="pp-dialog-loading" role="status">Opening…</div>}>
       {msgOpen && (
         <MessageModal
           data={apiData}
           username={username}
-          onClose={() => setMsgOpen(false)}
+          onClose={closeMessage}
         />
       )}
 
@@ -423,6 +445,7 @@ export default function MemberProfile() {
           }}
         />
       )}
+      </Suspense>
     </div>
   );
 }

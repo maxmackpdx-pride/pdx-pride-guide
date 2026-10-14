@@ -1,0 +1,20 @@
+.pp-about {display:flex;flex-direction:column;gap:var(--space-5);min-width:0;color:var(--text-body);font:var(--open-card-body-font,400 17px/1.6 var(--font-body));}
+.pp-about h3 {margin:0 0 var(--space-2);font:var(--fw-bold) var(--body-md)/1.25 var(--font-display);color:var(--text-hi);}
+.pp-about p {margin:var(--space-2) 0;overflow-wrap:anywhere;}
+.pp-about ul {list-style:none;margin:0;padding:0;}
+.pp-about__tags,.pp-about__links {display:flex;flex-wrap:wrap;gap:var(--space-2);}
+.pp-about__tags li {border:1px solid var(--border-subtle);border-radius:var(--radius-tag);padding:var(--space-1) var(--space-2);font:var(--open-card-meta-font,500 14px/1.4 var(--font-body));}
+.pp-about a {color:var(--text-hi);min-height:44px;display:inline-flex;align-items:center;gap:var(--space-2);padding-block:var(--space-2);text-underline-offset:4px;overflow-wrap:anywhere;}
+.pp-about a:focus-visible,.pp-about summary:focus-visible {outline:2px solid var(--c,var(--neon-cyan));outline-offset:3px;}
+.pp-about__disclosure {border-top:1px solid var(--border-subtle);padding-top:var(--space-2);}
+.pp-about summary {cursor:pointer;min-height:44px;align-content:center;font:var(--fw-bold) var(--body-md)/1.3 var(--font-display);color:var(--text-hi);}
+.pp-about__people {display:flex;flex-direction:column;gap:var(--space-2);}
+.pp-about__meta {font:var(--fw-medium) var(--meta-sm)/1.4 var(--font-body);color:var(--text-meta);}
+.pp-about__media {margin-top:var(--space-4);}
+.pp-about audio {width:100%;max-width:100%;}
+.pp-about dl {margin:0;}.pp-about dl>div {margin-block:var(--space-2);}.pp-about dt {color:var(--text-meta);}.pp-about dd {margin:0;overflow-wrap:anywhere;}
+
+.pp-about__embed {border:0;width:100%;height:166px;max-width:100%;}
+.pp-about__photos {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:var(--space-3);}.pp-about__photos figure {margin:0;min-width:0;}.pp-about__photos img {width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;border-radius:var(--radius-tile);}.pp-about__photos figcaption {font:var(--meta-sm)/1.4 var(--font-body);overflow-wrap:anywhere;}
+
+.pp-about__heading {margin:0;padding-bottom:var(--space-3);border-bottom:1px solid var(--border-subtle);font:var(--fw-heavy) var(--display-3)/1.1 var(--font-display);text-transform:uppercase;color:var(--text-hi);}

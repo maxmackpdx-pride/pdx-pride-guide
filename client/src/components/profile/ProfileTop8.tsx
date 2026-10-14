@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { MessageCircle, UserRound } from "lucide-react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import { useAuth } from "@/context/AuthContext";
-import MessageModal from "@/pages/profile/MessageModal";
+import { lazyWithReload } from "@/lib/lazyWithReload";
+const MessageModal = lazyWithReload(() => import("@/pages/profile/MessageModal"));
 import { placePath } from "@shared/placeSlug";
 import type { ProfileTop8Entry } from "@/pages/profile/types";
 
@@ -22,6 +23,7 @@ type Props = {
 export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onRequireAuth, onPlaceClick }: Props) {
   const { user } = useAuth();
   const [messageTarget, setMessageTarget] = useState<Extract<ProfileTop8Entry, { kind: "user" }> | null>(null);
+  const closeMessage = useCallback(() => setMessageTarget(null), []);
   // Nothing to show and not the owner → hide the section entirely.
   if (entries.length === 0 && !isOwner) return null;
 
@@ -120,7 +122,7 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onR
       {isOwner && entries.length > 0 && (
         <p className="pp-top8__owner-hint">{firstName}&apos;s crew. Tap Edit to reorder.</p>
       )}
-      {messageTarget ? <MessageModal data={messageTarget} username={messageTarget.username} onClose={() => setMessageTarget(null)} /> : null}
+      {messageTarget ? <Suspense fallback={<p role="status">Opening message…</p>}><MessageModal data={messageTarget} username={messageTarget.username} onClose={closeMessage} /></Suspense> : null}
     </section>
   );
 }

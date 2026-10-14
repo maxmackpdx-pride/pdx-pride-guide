@@ -1,0 +1,107 @@
+/* Profile sections are continuous editorial layout. Only their independently
+   actionable objects own glass; the arrangement wrapper adds no second slab. */
+.pp-widget-board[data-profile-composition] {
+  min-width: 0;
+  margin-block: var(--space-6) var(--space-8);
+}
+.pp-widget-board[data-profile-composition] .pp-widget-board__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  padding-block: var(--space-3);
+  margin-bottom: var(--space-6);
+  border-bottom: var(--bw-hair) solid var(--panel-border);
+}
+.pp-widget-board[data-profile-composition] .pp-widget-board__toolbar p {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--text-lo);
+  font: var(--open-card-meta-font);
+}
+.pp-widget-board[data-profile-composition] .pp-widget-board__toolbar > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.pp-widget-board[data-profile-composition] .pp-widget-board__toolbar button {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  color: var(--text-hi);
+  background: var(--z-oled);
+  border: var(--bw-hair) solid var(--panel-border-2);
+  border-radius: var(--radius-panel);
+  font: var(--fw-bold) var(--body-sm)/1.2 var(--font-display);
+  text-transform: uppercase;
+}
+.pp-widget-board[data-profile-composition] .pp-widget-board__toolbar button:is(:hover,[aria-pressed="true"]) {
+  color: var(--profile-acc-t);
+  border-color: var(--profile-acc-t);
+}
+.pp-widget-board[data-profile-composition] .pp-widget-board__toolbar button:focus-visible {
+  outline: 2px solid var(--profile-acc-t);
+  outline-offset: 3px;
+}
+/* Preserve outer motion/focus/drag feedback; remove only the generic inner
+   widget frame competing with native section/card surfaces. */
+.pp-widget-board[data-profile-composition] .pp-widget-grid [data-slot="widget"] > div {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  color: inherit;
+}
+.pp-widget-board[data-profile-composition] .pp-widget-grid [data-slot="widget"] > div > :is(section,article) {
+  min-width: 0;
+  margin-bottom: 0;
+}
+.pp-widget-board[data-profile-composition] .pp-widget-grid.is-editing [data-slot="widget"] {
+  outline: var(--bw-hair) dashed var(--profile-acc-t);
+  outline-offset: var(--space-2);
+}
+@media (max-width: 600px) {
+  .pp-widget-board[data-profile-composition] .pp-widget-board__toolbar {
+    margin-bottom: var(--space-5);
+  }
+  .pp-widget-board[data-profile-composition] .pp-widget-board__toolbar > div {
+    margin-left: auto;
+  }
+}
+/* Reading mode uses intrinsic content height: no square drag tracks, layout
+   springs or delayed widget entrances in the normal profile render. */
+.pp-widget-board[data-profile-composition] .pp-widget-static {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-8) var(--space-6);
+}
+.pp-widget-board[data-profile-composition] .pp-widget-static__section {
+  min-width: 0;
+}
+.pp-widget-board[data-profile-composition] .pp-widget-static__section.is-wide {
+  grid-column: 1 / -1;
+}
+.pp-widget-board[data-profile-composition] .pp-widget-static__section > :is(section,article) {
+  margin-bottom: 0;
+}
+.pp-widget-board[data-profile-composition] .pp-widget-board__handle {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+  border-bottom: var(--bw-hair) dashed var(--profile-acc-t);
+  color: var(--profile-acc-t);
+  font: var(--fw-bold) var(--body-sm)/1.2 var(--font-display);
+  text-transform: uppercase;
+  cursor: grab;
+}
+.pp-widget-board[data-profile-composition] .pp-widget-board__loading {
+  font: var(--open-card-meta-font);
+  color: var(--text-lo);
+}
+@media (min-width: 960px) {
+  .pp-widget-board[data-profile-composition] .pp-widget-static {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -71,6 +71,7 @@ export function profileCssVars(accent: string): React.CSSProperties {
   return {
     "--profile-acc": accent,
     "--profile-acc-t": profileAccentText(accent),
+    "--profile-solid-ink": ["#8800FF", "#0044FF"].includes(accent.toUpperCase()) ? "var(--text-hi)" : "var(--z-oled)",
   } as React.CSSProperties;
 }
 
