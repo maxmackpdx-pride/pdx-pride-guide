@@ -2,7 +2,7 @@
   --board-shader-color: var(--room-eventz);
   position: relative;
   isolation: isolate;
-  background: radial-gradient(ellipse 700px 600px at 88% 280px, color-mix(in srgb, var(--board-shader-color) 20%, transparent), transparent 85%), var(--z-black);
+  background: radial-gradient(ellipse 700px 600px at 88% 280px, color-mix(in srgb, var(--board-shader-color) 20%, transparent), transparent 85%), var(--page-background);
 }
 .board-shader-page[data-shader-room="gigz"] { --board-shader-color: var(--room-gigz); }
 .board-shader-page[data-shader-room="giftz"] { --board-shader-color: var(--room-giftz); }
@@ -26,7 +26,7 @@
   height: 100dvh;
   z-index: -1;
   pointer-events: none;
-  background: var(--z-black);
+  background: var(--page-background);
   mask-image: linear-gradient(to bottom, var(--z-black) 0%, var(--z-black) 10%, color-mix(in srgb, var(--z-black) 98%, transparent) 20%, color-mix(in srgb, var(--z-black) 93%, transparent) 30%, color-mix(in srgb, var(--z-black) 82%, transparent) 40%, color-mix(in srgb, var(--z-black) 66%, transparent) 50%, color-mix(in srgb, var(--z-black) 48%, transparent) 60%, color-mix(in srgb, var(--z-black) 30%, transparent) 70%, color-mix(in srgb, var(--z-black) 19%, transparent) 80%, color-mix(in srgb, var(--z-black) 13%, transparent) 90%, color-mix(in srgb, var(--z-black) 13%, transparent) 100%);
   -webkit-mask-image: linear-gradient(to bottom, var(--z-black) 0%, var(--z-black) 10%, color-mix(in srgb, var(--z-black) 98%, transparent) 20%, color-mix(in srgb, var(--z-black) 93%, transparent) 30%, color-mix(in srgb, var(--z-black) 82%, transparent) 40%, color-mix(in srgb, var(--z-black) 66%, transparent) 50%, color-mix(in srgb, var(--z-black) 48%, transparent) 60%, color-mix(in srgb, var(--z-black) 30%, transparent) 70%, color-mix(in srgb, var(--z-black) 19%, transparent) 80%, color-mix(in srgb, var(--z-black) 13%, transparent) 90%, color-mix(in srgb, var(--z-black) 13%, transparent) 100%);
   backdrop-filter: blur(13.8px);
@@ -35,9 +35,9 @@
 .events-page.board-shader-page::before { content: none; }
 .events-page.board-shader-page > .board-shader-veil {
   background: linear-gradient(to bottom,
-    var(--z-oled) 0%, var(--z-oled) 12%,
-    color-mix(in srgb,var(--z-oled) 78%,transparent) 32%, color-mix(in srgb,var(--z-oled) 62%,transparent) 55%,
-    color-mix(in srgb,var(--z-oled) 28%,transparent) 78%, color-mix(in srgb,var(--z-oled) 8%,transparent) 100%);
+    var(--page-background) 0%, var(--page-background) 12%,
+    color-mix(in srgb,var(--page-background) 78%,transparent) 32%, color-mix(in srgb,var(--page-background) 62%,transparent) 55%,
+    color-mix(in srgb,var(--page-background) 28%,transparent) 78%, color-mix(in srgb,var(--page-background) 8%,transparent) 100%);
   mask-image: none;
   -webkit-mask-image: none;
   backdrop-filter: none;
@@ -51,7 +51,7 @@
 html body .board-shader-page[data-shader-room] {
   --page-accent:var(--board-shader-color);
   --font-body:Inter, system-ui, sans-serif;
-  background:radial-gradient(ellipse 700px 600px at 88% 280px, color-mix(in srgb,var(--board-shader-color) 20%,transparent),transparent 85%),var(--z-black);
+  background:radial-gradient(ellipse 700px 600px at 88% 280px, color-mix(in srgb,var(--board-shader-color) 20%,transparent),transparent 85%),var(--page-background);
 }
 html body .board-shader-page[data-shader-room] > .rg-stream-background { position:fixed; z-index:-3; }
 html body .board-shader-page[data-shader-room] > .board-shader-veil { position:fixed; z-index:-1; }

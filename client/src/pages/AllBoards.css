@@ -514,3 +514,10 @@ html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--te
  :is(.ab-page,.map-board-cards) .ab-card__detail { height:32.48px; min-height:32.48px; }
  :is(.ab-page,.map-board-cards) .ab-card__location { height:29.96px; min-height:29.96px; }
 }
+
+/* A static cork surface behind pinned posts, with no effect on card geometry. */
+.ab-page::after {
+ content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+ background:url("/textures/board-cork.svg") repeat; background-size:256px 256px;
+ opacity:.48;
+}

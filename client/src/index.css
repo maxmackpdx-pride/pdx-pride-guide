@@ -17928,15 +17928,15 @@ html.calm-mode .z-board-address__index {
   box-shadow:inset 0 1px 0 #242427,inset 0 -1px 0 #080809;
 }
 
-/* OLED surroundings: card glass/room tokens remain independent and unchanged. */
-html, body, .app-shell { background-color:var(--z-oled) !important; }
-.app-shell { background:var(--z-oled) !important; }
-:where(.zine-page,.eb-page,.events-page,.resources-page,.directory-page,.board-shader-page) { background-color:var(--z-oled) !important; }
+/* Page canvas is two subtle shades above black; card glass and chrome stay independent. */
+:root { --page-background:var(--ink-850); --bg-app:var(--page-background); --bg-stage:var(--page-background); }
+html, body, .app-shell { background-color:var(--page-background) !important; }
+.app-shell { background:var(--page-background) !important; }
+:where(.zine-page,.eb-page,.events-page,.resources-page,.directory-page,.board-shader-page,
+ .home-front,.home-page,.about-page,.missed-page,.gigs-page,.profile-page,.hub-page,.contact-page,.login-page,.legal-page) {
+ background-color:var(--page-background) !important;
+}
 .site-header, .site-footer, .site-mobile-nav, .mobile-top-nav { background-color:var(--z-oled) !important; }
-
-:root { --bg-app:var(--z-oled); --bg-stage:var(--z-oled); }
-.home-front, .home-page { background-color:var(--z-oled) !important; }
-:where(.about-page,.missed-page,.gigs-page,.profile-page,.hub-page,.contact-page,.login-page,.legal-page) { background-color:var(--z-oled) !important; }
 
 /* Calm removes decorative glow, while title ink remains readable. */
 html.calm-mode .gigs-path-card h3 { -webkit-text-stroke:var(--title-outline-width) var(--title-outline-color) !important; paint-order:stroke fill; }
