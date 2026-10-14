@@ -7,6 +7,11 @@ import "./inbox-daily-reminder.css";
 
 type Reminder = { show: boolean; adminCount: number; ownerCount: number; adminFolder?: "active" | "inbox" };
 
+// Header dropdowns stay mounted while closed, so only visible dialogs block a reminder.
+function hasVisibleDialog() {
+  return Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"], [role="alertdialog"]')).some(element => element.getClientRects().length > 0 && getComputedStyle(element).visibility !== "hidden");
+}
+
 export function InboxDailyReminder() {
   const { user } = useAuth();
   const { open: inboxOpen, openSheet } = useInboxSheet();
@@ -24,7 +29,7 @@ export function InboxDailyReminder() {
     if (!admin || !user) return;
     let disposed = false;
     const check = async () => {
-      if (disposed || busy.current || inboxVisible.current || document.visibilityState !== "visible" || document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
+      if (disposed || busy.current || inboxVisible.current || document.visibilityState !== "visible" || hasVisibleDialog()) return;
       if (pending.current) {
         busy.current = true;
         try {
@@ -33,7 +38,7 @@ export function InboxDailyReminder() {
           const counts = await response.json();
           const latest: Reminder = { show: true, adminCount: counts.adminBadge ?? 0, ownerCount: counts.ownerCount ?? 0, adminFolder: counts.queueCount > 0 ? "active" : "inbox" };
           pending.current = latest.adminCount + latest.ownerCount > 0 ? latest : null;
-          if (pending.current && !inboxVisible.current && document.visibilityState === "visible" && !document.querySelector('[role="dialog"], [role="alertdialog"]')) {
+          if (pending.current && !inboxVisible.current && document.visibilityState === "visible" && !hasVisibleDialog()) {
             setReminder(pending.current); pending.current = null;
           }
         } catch { /* Keep it pending until fresh counts are available. */ }
@@ -47,7 +52,7 @@ export function InboxDailyReminder() {
         const data: Reminder = await response.json();
         if (!disposed && data.show && data.adminCount + data.ownerCount > 0) {
           // Keep the claimed reminder until other dialogs/inbox activity finish.
-          if (inboxVisible.current || document.visibilityState !== "visible" || document.querySelector('[role="dialog"], [role="alertdialog"]')) pending.current = data;
+          if (inboxVisible.current || document.visibilityState !== "visible" || hasVisibleDialog()) pending.current = data;
           else setReminder(data);
         }
       } catch { /* A background reminder must never block the product. Retry next minute. */ }
