@@ -52,9 +52,21 @@ for(const profile of ['desktop','phone'])test(`Outzide ${profile}: shell and mar
   assert.equal(await page.locator('.maplibregl-marker.waypoint-icon').count(),0);
   releaseCatalog();await page.waitForSelector('.maplibregl-marker.waypoint-icon');
   assert.match(await page.locator('#result-count').textContent(),/385 destinations/);
-  await page.locator('#rack-layers').click();await page.waitForSelector('#outz-map-controls:not([hidden])');
-  await page.locator('#outz-map-controls-close').click();assert.equal(await page.locator('#outz-map-controls').isVisible(),false);
-  releaseDetails();await page.waitForTimeout(4000);
+  releaseDetails();
+  await page.waitForTimeout(4000);
+  await page.locator('#drawer-launcher').click({noWaitAfter:true});await page.waitForSelector('#outz-map-controls:not([hidden])');
+  const sheetBox=await page.locator('#outz-map-controls').boundingBox(),searchBox=await page.locator('#search').boundingBox();
+  assert.ok(searchBox.x>=sheetBox.x&&searchBox.y>=sheetBox.y&&searchBox.x+searchBox.width<=sheetBox.x+sheetBox.width&&searchBox.y+searchBox.height<=sheetBox.y+sheetBox.height);
+  await page.screenshot({path:`.local/maplibre-consolidation/outzide-sheet-${profile}.png`});
+  await page.locator('[data-controls-tab][data-kind="spring"]').click({noWaitAfter:true});
+  assert.equal(await page.locator('#results .place-card').count(),5);
+  await page.locator('#search').fill('no-such-destination-123');
+  await page.locator('#results .empty').waitFor();
+  await page.locator('#results [data-action="clear-filters"]').click();
+  assert.equal(await page.locator('#results .place-card').count(),385);
+  await page.locator('#outz-map-controls-close').click({noWaitAfter:true});assert.equal(await page.locator('#outz-map-controls').isVisible(),false);
+  assert.equal(await page.locator('#drawer-launcher').evaluate(el=>el===document.activeElement),true);
+  await page.waitForTimeout(4000);
   await page.screenshot({path:`.local/maplibre-consolidation/outzide-startup-${profile}.png`});
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}

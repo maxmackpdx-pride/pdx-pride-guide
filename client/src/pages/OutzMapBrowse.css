@@ -1,0 +1,6 @@
+/* Reserve one top row for the regional identity and the map-family switch. */
+.outz-map-page > .map-switch { top:12px;right:12px;left:auto;transform:none; }
+.outz-map-page > .map-switch .map-switch__option { min-height:44px;padding:0 14px;font-size:14px; }
+@media(max-width:360px) {
+  .outz-map-page > .map-switch .map-switch__option { padding-inline:10px;font-size:13px; }
+}

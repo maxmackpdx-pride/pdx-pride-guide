@@ -1,0 +1,166 @@
+/* One owner for search, activity selection and results. Destination cards and
+   map artwork retain their existing rendering and semantic accent tokens. */
+.outzide-shell { --browse-bottom: 16px; }
+.outzide-shell #outz-map-controls {
+  position:fixed;inset:76px auto var(--browse-bottom) 16px;width:420px;max-width:calc(100vw - 32px);
+  z-index:900;display:flex;flex-direction:column;overflow:hidden;
+  border:1px solid var(--line);border-radius:24px;background:var(--outz-forest);
+  box-shadow:var(--map-shadow);color:var(--text-hi);
+}
+.outzide-shell #outz-map-controls[hidden] { display:none; }
+.outzide-shell .outz-map-controls__title {
+  padding:20px 20px 12px;border:0;gap:12px;align-items:center;flex:none;background:transparent;
+}
+.outzide-shell .outz-map-controls__title .browse-heading { display:block;min-width:0; }
+.outzide-shell .browse-eyebrow { display:block;font:600 10px/1.4 var(--mono);letter-spacing:.12em;color:var(--outz-orange); }
+.outzide-shell .browse-heading h1 { font:800 28px/1.1 var(--display);letter-spacing:0;text-transform:none;margin:6px 0 0; }
+.outzide-shell #outz-map-controls-close { flex:none;border:1px solid var(--line);border-radius:50%;background:var(--z-oled);color:var(--text-hi); }
+.outzide-shell .outz-map-controls__workspace,
+.outzide-shell .outz-map-controls__content { display:flex;flex-direction:column;flex:1;min-height:0;padding:0;overflow:hidden; }
+/* Neutralize the old independently fixed child drawer. The sheet alone owns geometry. */
+.outzide-shell[data-drawer] .workspace #outz-map-controls #outz-browse-content {
+  display:flex!important;position:static!important;inset:auto!important;width:100%!important;
+  height:auto!important;max-height:none!important;flex:1;min-height:0;border:0;border-radius:0!important;
+  background:transparent;box-shadow:none;overflow:hidden!important;visibility:visible;transform:none;pointer-events:auto;
+}
+.outzide-shell #outz-map-controls .search {
+  display:flex!important;flex:none;margin:0 20px 12px;padding:0 14px;min-height:48px;
+  border:1px solid var(--line);border-radius:14px;background:var(--z-oled);gap:10px;
+}
+.outzide-shell #outz-map-controls .search:focus-within { border-color:var(--outz-orange); }
+.outzide-shell #outz-map-controls .search input { min-width:0;width:100%;height:46px;padding:0;border:0;background:transparent;color:var(--text-hi);font:400 16px/1.4 var(--body);outline:none; }
+.outzide-shell #outz-map-controls .search kbd { display:none; }
+.outzide-shell .outz-map-controls__sections {
+  display:flex;flex:none;flex-direction:row;gap:8px;overflow-x:auto;overflow-y:hidden;
+  padding:2px 20px 12px;border:0;background:transparent;scroll-padding-inline:20px;scrollbar-width:thin;
+  scrollbar-color:var(--line) transparent;
+}
+.outzide-shell .outz-map-controls__sections .outz-section-icon {
+  display:flex;align-items:center;justify-content:center;gap:8px;flex:0 0 auto;
+  height:44px;min-width:44px;padding:0 12px;border:1px solid var(--line);border-radius:12px;
+  background:var(--z-oled);box-shadow:none;color:var(--text-mid);
+  font:700 15px/1 var(--display);white-space:nowrap;letter-spacing:.02em;
+}
+.outzide-shell .outz-map-controls__sections .outz-section-icon[aria-pressed=true] {
+  color:var(--text-hi);border-color:var(--outz-orange);background:color-mix(in srgb,var(--outz-orange) 12%,var(--z-oled));box-shadow:inset 0 -2px var(--outz-orange);
+}
+.outzide-shell #outz-map-controls .outz-section-icon .waypoint-head {
+  width:20px;height:20px;min-width:20px;box-shadow:none;position:static;flex:none;
+}
+.outzide-shell #outz-map-controls .outz-section-icon .waypoint-head svg { width:13px;height:13px; }
+.outzide-shell .activity-all { font-size:22px;color:var(--outz-orange); }
+.outzide-shell #outz-map-controls .region-switch { display:flex!important;flex:none;padding:0 20px;gap:4px; }
+.outzide-shell #outz-map-controls .region-switch button { flex:1;min-height:44px;padding:0 8px;border:0;border-radius:10px;font:600 15px/1 var(--display);color:var(--text-lo);background:transparent;box-shadow:none; }
+.outzide-shell #outz-map-controls .region-switch button[aria-pressed=true] { color:var(--text-hi);background:var(--z-oled);box-shadow:inset 0 -2px var(--outz-orange); }
+.outzide-shell .browse-refine { display:flex;align-items:center;justify-content:space-between;flex:none;padding:0 20px;border-bottom:1px solid var(--line); }
+.outzide-shell .browse-refine button { padding:0;min-height:44px;font:500 12px/1.4 var(--body);border:0;background:transparent;color:var(--text-mid); }
+.outzide-shell .browse-refine button span { margin-left:8px;color:var(--outz-orange); }
+.outzide-shell .browse-refine .matching-count { display:none; }
+.outzide-shell #outz-map-controls .list-scroll { display:block!important;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 16px 20px;scrollbar-width:thin; }
+.outzide-shell #outz-map-controls .result-bar { display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;margin:0;padding:6px 4px;font:500 11px/1.4 var(--mono);color:var(--text-lo); }
+.outzide-shell #reset-filters { min-height:44px;padding:0 6px;background:transparent;border:0;color:var(--outz-orange);font:600 12px/1 var(--body); }
+.outzide-shell #reset-filters[hidden] { display:none; }
+.outzide-shell #results { display:grid;gap:10px; }
+.outzide-shell #results .place-card { width:100%;min-height:120px;margin:0;grid-template-columns:56px minmax(0,1fr) 20px;gap:12px;padding:16px 12px;border-radius:16px; }
+.outzide-shell #results .place-art { width:56px;height:64px;object-fit:contain; }
+.outzide-shell #results .place-copy { min-width:0; }
+.outzide-shell #results .place-copy strong { font:800 24px/1.08 var(--display);white-space:normal;overflow:visible;display:block;text-overflow:clip;margin:5px 0; }
+.outzide-shell #results .place-copy small { display:block;white-space:normal;font:400 12px/1.45 var(--body);color:var(--text-mid); }
+.outzide-shell #results .kind-label { font:600 10px/1.4 var(--mono);letter-spacing:.1em; }
+.outzide-shell #results .trail-facts { margin-top:5px;font-size:11px;color:var(--text-lo); }
+.outzide-shell .browse-sheet-footer { display:flex;flex:none;padding:12px 20px;border-top:1px solid var(--line);background:var(--outz-forest); }
+.outzide-shell .browse-sheet-footer>button:not([hidden]) { display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:44px;background:var(--outz-orange);color:var(--z-oled);border:0;border-radius:12px;font:800 16px/1 var(--display);text-transform:uppercase; }
+.outzide-shell .browse-sheet-footer [hidden] { display:none; }
+.outzide-shell #outz-map-controls .drawer-map-only,.outzide-shell #outz-map-controls .browse-drawer-handle { display:none!important; }
+.outzide-shell .list-footer { margin:20px 4px 0;padding:16px 0 0;border-top:1px solid var(--line);font:400 12px/1.5 var(--body); }
+.outzide-shell .list-footer button { min-height:44px; }
+.outzide-shell .map-stage #drawer-launcher {
+  display:flex!important;left:16px;bottom:var(--browse-bottom);min-height:60px;width:300px;max-width:calc(100vw - 92px);border-radius:18px;flex-wrap:wrap;gap:4px 10px;justify-content:flex-start;padding:12px 16px;
+}
+.outzide-shell #drawer-launcher small { width:100%;padding-left:28px;font:400 12px/1.4 var(--body);text-transform:none;letter-spacing:0;color:var(--text-lo); }
+.outzide-shell[data-controls=open] .map-stage #drawer-launcher { display:none!important; }
+.outzide-shell .place-pill { max-width:150px;font-size:12px;min-height:52px;padding:0 12px; }
+.outzide-shell .map-bottom { pointer-events:none; }
+.outzide-shell .map-bottom .map-hint { display:none; }
+.outzide-shell #browse-summary:empty { display:none; }
+.outzide-shell #browse-summary:not([hidden]) { margin:0 20px 12px;padding:10px;border:1px solid var(--line);border-radius:12px; }
+.outzide-shell #browse-steps { flex:1;min-height:0;overflow:auto;padding:0 20px 20px;background:transparent; }
+.outzide-shell #browse-steps[hidden] { display:none; }
+.outzide-shell #outz-browse-content.choosing-spots > :not(#browse-steps):not(.browse-drawer-handle) { display:none!important; }
+.outzide-shell #browse-steps button { min-height:44px; }
+@media(min-width:761px) {
+ .outzide-shell .map-stage .map-top { bottom:16px!important; }
+ .outzide-shell .maplibregl-ctrl-bottom-right { bottom:8px!important; }
+}
+@media(max-width:760px) {
+ .outzide-shell { --browse-bottom:calc(var(--oz-dock) + 12px); }
+ .outzide-shell #outz-map-controls { inset:78px 8px var(--browse-bottom);width:auto;max-width:none;border-radius:24px; }
+ .outzide-shell .outz-map-controls__title { padding:16px 16px 12px; }
+ .outzide-shell .browse-heading h1 { font-size:26px; }
+ .outzide-shell #outz-map-controls .search { margin:0 16px 10px; }
+ .outzide-shell .outz-map-controls__sections { padding-inline:16px; }
+ .outzide-shell #outz-map-controls .region-switch { padding-inline:16px; }
+ .outzide-shell .browse-refine { padding-inline:16px; }
+ .outzide-shell #outz-map-controls .list-scroll { padding-inline:12px; }
+ .outzide-shell .browse-sheet-footer { padding:10px 16px; }
+ .outzide-shell[data-controls=open] .map-stage .map-top { display:none; }
+ .outzide-shell .place-pill { max-width:128px;min-height:52px;font-size:11px;letter-spacing:.03em; }
+ .outzide-shell .map-stage #drawer-launcher { left:12px; }
+}
+@media(max-height:620px) {
+ .outzide-shell .browse-eyebrow,.outzide-shell .browse-refine { display:none; }
+ .outzide-shell .outz-map-controls__title { padding-block:8px; }
+ .outzide-shell #outz-map-controls { top:72px; }
+ .outzide-shell .browse-sheet-footer { padding-block:8px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .outzide-shell #outz-map-controls,.outzide-shell #outz-map-controls * { scroll-behavior:auto;transition:none;animation:none; }
+}
+/* Keep optional area choices out of the results' permanent vertical budget. */
+.outzide-shell .browse-area { flex:none;margin:0 16px 4px;border:0; }
+.outzide-shell .browse-area summary { display:flex;align-items:center;gap:8px;min-height:44px;padding:0 4px;font:400 12px/1.3 var(--body);color:var(--text-lo);cursor:pointer;list-style:none; }
+.outzide-shell .browse-area summary::-webkit-details-marker { display:none; }
+.outzide-shell .browse-area summary strong { color:var(--text-mid);font-weight:500;flex:1; }
+.outzide-shell .browse-area[open] { border-bottom:1px solid var(--line); }
+.outzide-shell #outz-map-controls .browse-area .region-switch { padding:0; }
+.outzide-shell #outz-map-controls .browse-area .browse-refine { display:flex;padding:0 4px;border:0; }
+.outzide-shell #outz-map-controls .result-bar { display:flex!important; }
+.outzide-shell #outz-map-controls #browse-steps:not([hidden]) { display:block!important; }
+.outzide-shell #outz-map-controls #browse-summary:not([hidden]) { display:block!important; }
+.outzide-shell #results .place-art { width:56px!important;height:56px!important; }
+@media(max-width:760px) {
+ .outzide-shell #outz-map-controls .browse-heading h1 { font-size:24px; }
+ .outzide-shell #outz-map-controls .outz-map-controls__title { padding-block:10px; }
+ .outzide-shell #outz-map-controls .browse-eyebrow { display:none; }
+ .outzide-shell #results .place-card { min-height:108px;padding:12px; }
+ .outzide-shell .browse-sheet-footer { padding-block:8px; }
+}
+/* The search field is the sheet header. Optional filters scroll with results. */
+.outzide-shell #outz-map-controls .outz-map-controls__title { padding:16px 16px 12px;gap:10px; }
+.outzide-shell #outz-map-controls .outz-map-controls__title .search { flex:1;min-width:0;margin:0;padding-inline:12px; }
+.outzide-shell #outz-map-controls .browse-area { margin:0 4px;border-bottom:1px solid var(--line); }
+.outzide-shell #outz-map-controls .result-bar { padding-block:0;min-height:36px; }
+@media(max-width:760px) {
+ .outzide-shell #outz-map-controls .outz-map-controls__title { padding:12px; }
+ .outzide-shell #outz-map-controls .search input { font-size:16px; }
+ .outzide-shell .outz-map-controls__sections { padding:0 12px 10px; }
+ .outzide-shell #outz-map-controls .list-scroll { border-top:1px solid var(--line); }
+}
+/* Search has one visible entry; the map rail is reserved for map operations. */
+.outzide-shell .map-controls :is(#rack-search,#rack-layers) { display:none; }
+/* The opaque search sheet needs no nested backdrop compositing over WebGL. */
+.outzide-shell #outz-map-controls,
+.outzide-shell #outz-map-controls :is(.discovery,.outz-map-controls__content,.search) { backdrop-filter:none;-webkit-backdrop-filter:none; }
+.outzide-shell #outz-map-controls { isolation:isolate; }
+.outzide-shell #outz-map-controls .outz-map-controls__title .search { position:relative;inset:auto;transform:none;width:auto;z-index:auto; }
+.outzide-shell #outz-map-controls .outz-map-controls__workspace,
+.outzide-shell[data-drawer] .workspace #outz-map-controls #outz-browse-content {
+  background:var(--outz-forest);contain:paint;
+}
+.outzide-shell #outz-map-controls .list-scroll { background:var(--outz-forest); }
+/* Map-only water animation must not escape the small activity-filter glyphs. */
+.outzide-shell #outz-map-controls .waypoint-head::before,
+.outzide-shell #outz-map-controls .waypoint-head::after { display:none; }
+@media(max-width:360px) {
+ .outzide-shell .place-pill { max-width:100px;min-height:52px;font-size:10px;padding-inline:8px; }
+}

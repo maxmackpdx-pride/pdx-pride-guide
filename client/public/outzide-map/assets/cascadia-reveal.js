@@ -71,7 +71,7 @@ export function installCascadiaReveal(map,places=[],{preserveCamera=false}={}){
  };
  const configure=()=>{if(framing)return;const el=map.getContainer();if(!el||el.clientWidth<48||el.clientHeight<48)return;framing=true;camera=frame();const maxZoom=typeof map.getMaxZoom==="function"?map.getMaxZoom():22;const zoom=Number.isFinite(camera.zoom)?Math.min(maxZoom,Math.max(-2,camera.zoom)):null;if(zoom!=null)map.setMinZoom(preserveCamera?Math.min(zoom,map.getZoom()):zoom);framing=false;if(preserveCamera)return;if(active)place();else update();};
  const zoomOut=document.getElementById('zoom-out');if(zoomOut)zoomOut.onclick=()=>{if(map.getZoom()-1<=camera.zoom+.08)enter();else map.zoomOut();};
- document.addEventListener('click',e=>{if(active&&e.target.closest('.browse-toggle,#updates-button,[data-kind]'))map.jumpTo({center:entryCenter,zoom:Math.max(5.5,camera.zoom+1)});});
+ document.addEventListener('click',e=>{if(active&&e.target.closest('.browse-toggle,#drawer-launcher,#rack-search,#rack-layers,[data-kind]'))map.jumpTo({center:entryCenter,zoom:Math.max(5.5,camera.zoom+1)});});
  // Wheel, trackpad and pinch trigger during movement, not only after momentum ends.
  map.on('movestart',event=>{if(event.originalEvent)preserveCamera=false;});
  map.on('zoom',update);map.on('zoomend',update);

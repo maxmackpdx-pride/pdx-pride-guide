@@ -9,6 +9,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import { roomTitle } from "@/lib/rooms";
 import MapSwitch from "@/components/MapSwitch";
+import "./OutzMapBrowse.css";
 
 /** Keep the field map's canvas, dialogs and styles isolated from the site shell. */
 export type OutzDiscoveryPlace = { id: string; name: string; region: string; kind: string; short: string; accent: string; cardAccent?: string; note: string; href: string; lat?: number; lng?: number; logo?: string };
