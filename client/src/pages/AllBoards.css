@@ -473,3 +473,12 @@ html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--te
   border-color: color-mix(in srgb,var(--c) 55%,var(--text-hi));
   font-weight: var(--fw-bold);
 }
+
+/* Heart-only controls share one centered slot on BoardZ and Mapz cards. */
+:is(.ab-page,.map-board-cards) .ab-card__footer .ab-save {
+ display:grid; place-items:center; gap:0; line-height:0;
+}
+:is(.ab-page,.map-board-cards) .ab-card__footer .ab-save svg {
+ display:block; flex:none; margin:0; padding:0;
+ transform:translateY(-.375px);
+}
