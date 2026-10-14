@@ -421,3 +421,6 @@ html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--te
 
 .ab-card__value-amount { min-width:0; overflow:hidden; text-overflow:ellipsis; }
 .ab-card__value-label { flex:none; }
+
+/* Keep the category lettering crisp against its neon accent. */
+.ab-category { -webkit-text-stroke:.35px var(--z-black); paint-order:stroke fill; }
