@@ -43,7 +43,7 @@ test('3D base frame does not wait for optional waypoint assets',()=>{
  assert.match(renderer,/const ready=loaded;/);
  assert.match(renderer,/const overlaysReady=loaded&&assetsReady;/);
  assert.match(renderer,/classList\.toggle\('scene-ready',loaded\)/);
- assert.match(renderer,/if\(overlaysReady\)\s*(?:\{\s*)?drawLights\(visibility\)/);
+ assert.match(renderer,/if\(overlaysReady\)\{\s*overlayPending=true;\s*map\.triggerRepaint\(\)/);
 });
 
 test('Mapz retries the 3D renderer without a retired 2D architecture',()=>{
