@@ -8,46 +8,28 @@ https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/. That p
 
 **This file** is the **production trap list** for agents shipping React/CSS: what not to re-introduce, and where chrome lives in code. It must **not contradict** the design guide. If it does, fix this file (or product), not invent a third guide.
 
-| Priority | What | Path |
-|----------|------|------|
-| **1 - Design guide** | Written standard + specimens | `zaylist-foundation-library` `public/design-system/` · https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/ |
-| **2 - Implementation** | Production React + CSS | `client/src/components/ds/**`, page CSS, adapters |
-| **3 - Token modules (code)** | Live token files used by the app | `client/src/components/ds/tokens/` especially **`glass.css`** and **`chrome.css`** |
-| **Archive** | Migration package + screenshots | `docs/handoffs/deep-glass-2026-07-16/` |
+## Authority and guide pointers
 
-If an old handoff, sandbox, or removed portable preview **disagrees with the design guide**, **the design guide wins**. If product code disagrees with the guide, either ship product to match or mark the guide panel **queued**.
+1. Tucker’s latest explicit direction.
+2. A named, approved reference for the exact object. Eventz open/closed, large/compact cards are the named reference for current Eventz, Our Placez, NEEDZ and Our BoardZ continuity.
+3. The accepted canonical Library guide fills gaps in that reference, including tokens, accessibility and card-family contracts.
+4. Verified production code supplies implementation evidence. Draft proposals, historical handoffs and old specimens remain reference history.
 
-### The guide lives in two repos and must match
+Neither a source file, a pinned old screenshot nor live implementation automatically overrides owner direction. Resolve drift against the exact approved reference and update the relevant owning guide when authorized. The product ships on `master`; the Library ships on `main`.
 
-The design guide has two checked-in homes plus a published surface, and they are one
-document. Change one, change the other in the same ship.
+The canonical written guide is maintained only in `maxmackpdx-pride/zaylist-foundation-library/public/design-system/` and published to Cloudflare. This trap list is an implementation pointer, not a mirrored second guide. Product changes do not automatically require a Library deployment; guide changes and publication need the owner’s scope authorization.
 
-| Copy | Where |
-|------|-------|
-| Trap list (this file) | `pdx-pride-guide` `docs/LIVE_DESIGN_STANDARD.md` |
-| Written guide + specimens | `zaylist-foundation-library` `public/design-system/` |
-| Published guide | https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/ (Cloudflare Worker, deployed from that repo) |
-| Design surface | the Zaylist Claude Design project |
+Current guide pointers: `guidelines/card-system.html`, `guidelines/master-letter-library.html`, current room-card chapters and token modules. Historical glow/nav proposals are proposals, not sources that automatically win.
 
-**Branches differ.** `pdx-pride-guide` ships on `master`. `zaylist-foundation-library`
-ships on `main`. Check the branch before every push. Pushing to the wrong one is a live risk.
+## Current room continuity · 2026-10-13
 
-### The five sources of truth
-
-For design work these five win, in addition to Tucker's current instructions. Paths are
-relative to `zaylist-foundation-library` `public/design-system/`.
-
-| # | Source of truth | Path |
-|---|-----------------|------|
-| 1 | Card system and deep glass | `guidelines/card-system.html` + `guidelines/card-system-authority.md` |
-| 2 | Glow treatment proposal | `templates/glow-proposal/GlowProposal.dc.html` |
-| 3 | Desktop nav, corrected | `templates/nav-compliance/DesktopNav.dc.html` |
-| 4 | Mobile nav, corrected | `templates/mobile-nav-compliance/MobileNav.dc.html` |
-| 5 | Logo letter library | `guidelines/master-letter-library.html` |
-
-Where a specimen page disagrees with one of these, the source of truth wins and the page
-is stale. Where a source of truth disagrees with what ships and has been verified live,
-the live implementation wins and the source of truth needs correcting.
+- Our Placez uses large Eventz card proportions on desktop and compact cards on mobile; NEEDZ uses the compact Eventz footprint enlarged 20% on its page. Our BoardZ uses the approved wide card treatment.
+- Preserve the Eventz-derived open and closed anatomy, typography, tags, heart actions and token-based buttons. Card motifs retain three independently layered planes and approved geometry.
+- No list view. Category selection shows every matching result; Mapz entrances retain the originating room filter.
+- NEEDZ’s Find Your People category includes public/discoverable clubs and groups from the existing community API. Open cards embed the full community workspace; private groups stay excluded from discovery. Phones remain above the workspace.
+- My Hoüz, Gigz, Giftz, Sellz and Mizzed are categories within the single Our BoardZ page. Keep My Hoüz subsection language distinct from the category name.
+- Use each current logo’s declared master and export format. Preserve authored proportions and transparent margins. There is no universal 1000×500 master canvas or automatic identical pixel width for different logos.
+- Mapz and Hub reuse the same open-card object; close preserves the originating scene. Past event posters alone are monochrome, upcoming events precede past events, and Mizzed is last.
 
 ---
 
@@ -72,7 +54,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Touch nav chrome without explicit ask | **Nav locked** unless user requests. When it is requested, ship the glow-pill standard below, not a new treatment |
 | Nav links as bare text with a gradient underline; board-folder dropdown (9px pill trigger, 236px panel, rainbow seam, per-index hover rails) | **Glow pills** - see *Site navigation* |
 | Persistent glow on the current nav pill (`siteNavPillPulse`) | **Glow is hover only.** The current page holds its accent on rim and label, with no bloom and no pulse |
-| Z/Space "mega" dropdown with a Featured card beside the item column | **One plain column** of pills under a line of descriptive copy; `z/ all boards` carries the `/z` link |
+| Z/Space "mega" dropdown with a Featured card beside the item column | Current navigation comes from `PRIMARY_NAV`; Our BoardZ points to `/boardz`. Historical Z/Space proposals are not current entrances. |
 | Hub as an outlined pill with a standing cyan glow (plus a decorative pulsing cyan dot) | **Solid fill primary** - cyan plate, dark ink, composed from `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor` + `--neon-bloom` |
 | Global Hub tab opening a Member/Admin or administration drawer | **Hub is navigation** - signed-in Hub goes directly to `/dashboard`; admin controls live inside the Hub experience |
 | Hand-rolled glass shells that restate `--glass-card-shadow` behind `!important` (promoter ActionRow) | **Compose `.pdx-glass-card`**; set only `--c` and `--dir-gm` locally |
@@ -136,7 +118,7 @@ artwork keep the artwork instead of replacing it with typeset text.
 
 ## Eventz standard (reference surface)
 
-Tucker named the live Events page (Oct 11 2026, commit `20191b8c`) as the design standard for event surfaces. New event UI composes these pieces, with these numbers, before inventing anything.
+Tucker named Eventz as the current reference for room-card continuity. The component table below records implementation evidence from the Oct 11 reference; values are not immutable geometry and must be checked against the current approved component and owner direction.
 
 | Piece | Component | Spec |
 |-------|-----------|------|
@@ -193,28 +175,7 @@ Type: Barlow Condensed (`--font-display`) for titles and labels, Barlow (`--font
 
 ## Site navigation
 
-Source: Claude Design handoff *Top Nav Bar Mockups*, project `8c680e88`, 2026-08-21.
-Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.tsx`,
-`.site-nav-link` / `.site-nav-dropdown__*` in `client/src/index.css`.
-
-- Every entry is a **hairline pill** (`999px`, `2px solid #333`) on a plain dark bar. It lights in **its own accent** on hover, and **on hover only**. The current page keeps its accent on the rim and the label but carries **no standing glow and no pulse**: glow is an affordance, not a state.
-- Accents are per destination and live in the nav model, not in CSS forks: Home lime, About magenta, Eventz cyan, Placez blue, Outz orange, Z/Space violet. Board items inside Z/Space carry their own board accent.
-- Accents resolve through the shared tokens (`--panel-*`, `--neon-*`, `--green-acid`) via a `data-accent` attribute, so Calm Mode desaturates the nav with no nav-specific overrides. `#0044ff` and `#8800ff` are too dark to read as label ink: the glow keeps the token and the text lifts to a tint (`--nav-c` vs `--nav-c-ink`).
-- Pills are `.88rem`. They must **not** inherit `--site-nav-size` (16.8 to 21.6px) - six bordered pills at that size run off the bar. Padding, pill gap, brand lockup width, and the search trigger's label all step down between 1024 and 1439 so the full set fits without the nav scrolling.
-- Dropdowns are dark rounded panels of the same pills, **one plain column each**. A list may carry a mono **eyebrow**, used either as a section label (Outz: "Most Visited") or as plain descriptive copy (Z/Space: "Every board, one place"). There is no featured card. Z/Space opens leftward because its trigger is the last pill.
-- Outz lists `All OUTZ` (`/z/out`, a real index page) above the two OUTZ addresses. Z/Space leads with `z/ all boards`, which carries the `/z` link the retired featured card used to own, then `My Hoüz`, `Gigz`, `Sellz`, `Mizzed`, `Giftz`.
-- The desktop right cluster reads **search → notifications bolt → Hub → seam → avatar + caret**, in that order. The bolt is the same component as the mobile top bar's, so its panel styles are global, not trapped in a phone media query.
-- **Hub is the one primary action** in the bar, so it takes the solid fill the standard reserves for primary: cyan plate, dark ink, and `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor` + `--neon-bloom` composed as the whole shadow. No border, no standing dot. Log in / Join is the signed-out control in the same slot and is built the same way.
-- The wordmark keeps the glitch treatment: the real logo asset plus two RGB-split ghost layers (cyan and magenta, `screen` blend) flashing briefly on a 3.2s loop. Never typeset it.
-
-### Mobile bar and sheets
-
-- Five tabs: **Eventz, Placez, Hub, Z/Space, Messages**, on deep glass with the flowing rainbow seam on the top edge. There is **no pull handle** on the site-wide bar; that remains retired. Any grip belongs to an in-Hub drawer, never the global site bar.
-- Tab glow is accent-coloured and **hover/active only**. **Hub is the exception: its glow is white**, never a colour, because it is the centre mark and reads as neutral chrome.
-- **Outz opens a drawer, not a navigation.** The phone bar has no Outz tab, so the trigger is the Outz row inside the Z/Space sheet. The drawer pins above the bar with a mono `Outz · Most Visited` kicker, numbered rows, and a `View All Outz →` footer to `/z/out`. It lists the OUTZ addresses that exist; do not pad it with places that have no page.
-- **Hub is navigation, not a drawer trigger.** Tapping Hub takes a signed-in visitor directly to `/dashboard`. Admin remains an explicit destination inside the Hub experience. The global Hub tab must never open Member/Admin or administration sheets.
-- **Signed out, Hub opens the log-in sheet**, which is the same `AuthModal` component presented bottom-anchored and full-bleed below 640px (`24px` top corners, ~82vh). One auth component, one Google path, one reset path: do not fork a second login form for phones.
-- Reduced motion and Calm Mode drop sheet entrances and the seam flow; colors, glow, and every destination stay.
+Primary destinations are owned by `client/src/lib/siteNav.ts` (`PRIMARY_NAV`). Preserve the current Eventz, Placez, Mapz, Our BoardZ and NEEDZ entrances and compatibility redirects. Do not restore the retired Z/Space board launcher or a second Boards page from historical nav proposals. Reuse current desktop/mobile controls and token styles; change them only within the owner’s requested scope.
 
 ## About + roadmap direct reference
 
@@ -231,17 +192,9 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 
 - Product-family names are exact: always render `EVENTZ`, `PLACEZ` (page title `OUR PLACEZ`), `OUTZ`, `My Hoüz`, `GIGZ`, `GIFTZ`, `SELLZ`, and `MIZZED CONNECTION` with this capitalization in public UI, metadata, accessibility labels, and current documentation. Existing lowercase routes, APIs, code identifiers, analytics keys, and asset paths remain compatibility internals unless a separate migration is approved.
 
-## Z/ address continuity
+## Current board and community entrances
 
-- Existing indexed board URLs remain canonical. The Z/ index provides address discovery; established board pages do not add a second Z/ address strip or a separate board-switching navigation beside their hero.
-- Primary site navigation remains the only page-level navigation on GIGZ, GIFTZ, MIZZED CONNECTION, and SELLZ. Each board keeps its identity and actions in the hero, then follows the shared stats, explainer-cell, active-board, and closing-seam rhythm.
-- Approved product-family artwork uses a shared 1000×500 transparent canvas. Hero/header placements render that canvas at the same 620px maximum width, while repeated product cards use one shared optical frame per card system. Preserve the artwork's authored transparent margins; do not add per-logo shrinking, stretching, or compensating offsets. The Z/ index hero begins with Z/SPACE, and its board cards share one 460px optical frame. Fallback board names occupy the same structural slot; image alt stays empty where the adjacent heading already names the board.
-- Places is the full-width center hub on the Z/ index and renders the public Directory categories with real counts. MY SQUADZ is not a Places category on this surface: the complete board owns `z/spaces`, with its own top-level card and logo, and resolves to the existing group-filtered Directory implementation.
-- OUTZ is one top-level board card. Rooster Rock and Sauvie Island are nested destinations inside it, never peer cards or duplicate top-rail addresses.
-- Board totals and the top address rail count top-level boards only. Nested address labels show only their terminal segment while links retain the full canonical route.
-- `z/spaces` must preserve Directory listing identity end to end: real group records, existing detail pages, and the same persistent follow relationship used elsewhere in Places.
-- User-facing address slugs are lowercase ASCII. When normalization repairs a shipped malformed slug, keep the old path as a compatibility alias rather than breaking saved links.
-- Never fabricate listings, member totals, marketplace stock, or counts for pending Z/ boards. Loading, failure, unknown, empty, and not-built are distinct states.
+Our BoardZ is `/boardz`; `/boards`, `/all-boards` and legacy individual board entrances remain compatibility links. NEEDZ is `/needz`; `/resources` and `/rezources` preserve old deep links. Find Your People uses `cat=community` and exact `community=slug` selections. Internal API/data keys remain stable. Historical Z/ visual notes are in `docs/archive/design-standards/2026-10-13/` and do not govern current cards.
 
 - The homepage uses one full-bleed Welcome scene followed by a single horizontal, no-wrap rail of seven destination cards. It is not a wrapping grid, multi-row gallery, or full-page carousel.
 - The counter strip occupies the seam immediately after the main Zaylist hero and before the destination rail. Its bottom edge aligns exactly with the hero end; do not float it deeper into the hero or leave a separate spacer before the rail.
@@ -277,29 +230,9 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 
 ## Source chain for agents
 
-```
-zaylist-foundation-library  public/design-system/   (branch: main)
-        = written standard + specimens (SoT for design)
-        published at .../design-system/ by the Cloudflare Worker
-        ↓  implement in product
-pdx-pride-guide  docs/LIVE_DESIGN_STANDARD.md       (branch: master)
-        = this trap list, kept in step with the guide
-        ↓
-client/src/components/ds/tokens/*   ← live token modules (glass, chrome, colors, …)
-client/src/components/ds/*          ← React components
-client/src/pages/*.css              ← page chrome
-        ↑  if product drifts, fix product or mark guide "queued"
-```
+Use Tucker’s explicit direction, the named approved reference, and the accepted owning Library guide in that order. Then inspect the current product components and tokens for implementation details. Draft proposals and archived source files cannot override these authorities. There is no mirrored portable design kit in this product repository.
 
-There is no mirror script and no `design-system/` directory in this repo. Read the guide
-from the `zaylist-foundation-library` checkout or the published site.
-
-Before inventing a new global rule:
-
-1. Check **`public/design-system/guidelines/`** and **`public/design-system/tokens/`** in `zaylist-foundation-library`, starting with the five sources of truth above.
-2. Look at **production component CSS** for that surface.
-3. Prefer a token in `glass.css` / `chrome.css` / `effects.css` over a one-off.
-4. If you change a global default, update the **design guide** in `zaylist-foundation-library` and this trap list in the same ship.
+Before changing a global rule, read its relevant accepted Library chapter, inspect the current component, reuse existing tokens, and update guide documentation only within the owner’s authorized scope.
 
 ---
 

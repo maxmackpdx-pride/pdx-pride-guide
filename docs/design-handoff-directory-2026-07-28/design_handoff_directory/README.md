@@ -1,3 +1,5 @@
+> **Historical handoff — superseded 2026-10-13.** Current Our Placez cards follow the named Eventz reference and canonical Foundation Library. This prototype is provenance, not current dimensions/layout/typography instructions. See `docs/LIVE_DESIGN_STANDARD.md`.
+
 # Handoff: Zaylist Directory page (`/directory`)
 
 ## Overview

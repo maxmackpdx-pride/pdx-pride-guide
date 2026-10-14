@@ -1,6 +1,6 @@
 # Design System integration
 
-**Rule:** Only replace product surfaces that have a clear DS component spec. Everything else stays as-is until the guide covers it.
+**Rule:** Follow Tucker’s named approved reference for the exact object; use the canonical Library to fill gaps.
 
 ## Design guide is truth
 
@@ -12,9 +12,7 @@ The guide is **not in this repo.** There is no `design-system/` directory here.
 | **Production trap list** | [`docs/LIVE_DESIGN_STANDARD.md`](./LIVE_DESIGN_STANDARD.md) (must not contradict the guide) |
 | **Implementation** | `client/src/components/ds/**`, page CSS |
 
-The trap list and the written guide are one document in two repos, plus a Claude Design
-project. See *The guide lives in two repos and must match* and *The five sources of truth*
-in [`LIVE_DESIGN_STANDARD.md`](./LIVE_DESIGN_STANDARD.md). Branches differ:
+The canonical Library owns the written guide; the product trap list supplies implementation pointers rather than a second kit. Follow the owner/reference/accepted-guide authority order in [`LIVE_DESIGN_STANDARD.md`](./LIVE_DESIGN_STANDARD.md). Branches differ:
 `pdx-pride-guide` uses `master`, `zaylist-foundation-library` uses `main`.
 
 The old portable kit (`EVENTS_GUIDE.md`, single-file `tokens/tokens.css`, `previews/*.html`) is **removed**. Do not recreate it.
@@ -33,29 +31,11 @@ Deep-glass is the **canonical** card/map/button surface standard (see guide glas
 | Components | `client/src/components/ds/*` (Button, PosterCard, PlaceCard, …) |
 | Migration archive | `docs/handoffs/deep-glass-2026-07-16/` (**historical**) |
 
-**Agents:** Read the design guide first. Implement with live components + `glass.css`. Never invent chrome that fights the guide.
+**Agents:** Read the named approved reference and the relevant accepted guide. Reuse current shared components and tokens; source code or live pixels do not automatically override owner direction.
 
 ## Source of truth chain
 
-```
-zaylist-foundation-library  public/design-system/   (branch: main)
-        = written standard + specimens
-        published by the Cloudflare Worker at .../design-system/
-        ↓
-pdx-pride-guide  docs/LIVE_DESIGN_STANDARD.md       (branch: master)
-        = production trap list, kept in step with the guide
-        ↓
-client/src/components/ds/tokens/*   modular production tokens (glass + chrome)
-client/src/components/ds/*          React components
-shared/eventWeek.ts                 day codes / day colors (data)
-        ↑  product implements guide; mark guide "queued" when ahead
-```
-
-There is no mirror script and nothing to sync into this repo. Read the guide from the
-`zaylist-foundation-library` checkout or from the published site.
-
-If chrome/behavior rules change, update the **design guide** in `zaylist-foundation-library`
-and the `LIVE_DESIGN_STANDARD.md` trap list here, in the same ship.
+Tucker’s explicit direction → named approved reference → accepted owning Library guide → current component/token implementation evidence. Archived handoffs and proposals are historical, not automatic winners. Eventz open/closed and large/compact cards govern current room-card continuity; see the current room section of `LIVE_DESIGN_STANDARD.md`.
 
 ## Shipped (complete)
 
