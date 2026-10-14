@@ -39,6 +39,7 @@ type InboxOverlayProps = {
   onClose: () => void;
   initialView?: View;
   initialAccount?: Account;
+  initialQueueFolder?: "active" | "inbox";
   initialThreadId?: string | null;
 };
 
@@ -59,7 +60,7 @@ function InboxPanelHeader({ onClose, onRefresh, refreshing = false, guest = fals
 
 const ACCOUNTS: Array<[Account, string, string]> = [
   ["personal", "Personal", C.limeSoft],
-  ["admin", "Staff", C.cyan],
+  ["admin", "Admin", C.cyan],
   ["owner", "Owner", C.purple],
 ];
 
@@ -84,7 +85,7 @@ type HousingThreadGate = {
   canNudge: boolean;
 };
 
-export default function InboxOverlay({ open, trigger, onClose, initialView, initialAccount, initialThreadId }: InboxOverlayProps) {
+export default function InboxOverlay({ open, trigger, onClose, initialView, initialAccount, initialThreadId, initialQueueFolder }: InboxOverlayProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -206,11 +207,12 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
       setAccount("personal");
     }
     setFolder("inbox");
-    setQueueFolder("active");
+    setQueueFolder(initialQueueFolder ?? "active");
     setFilter("all");
     setFilterOpen(false);
     setQuery("");
-  }, [open, initialView, initialAccount, isAdmin, isOwner, pendingAdmin.count, pendingAdmin.ownerCount]);
+  // Counts select a starting account only when opening; polling must never reset a draft.
+  }, [open, initialView, initialAccount, initialQueueFolder, isAdmin, isOwner]);
 
   // After the reset above, so a thread passed in (the /inbox?thread= door, a
   // notification row) is the one that opens.
@@ -252,7 +254,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
 
   const inboxActive = view === "inbox";
   const personalActive = inboxActive && account === "personal";
-  const searchVisible = view !== "stats";
+  const searchVisible = inboxActive && (account === "personal" || adminMailActive);
   const visibleAccounts = ACCOUNTS.filter(([id]) => id === "personal" || (id === "admin" && isAdmin) || (id === "owner" && isOwner));
 
   const active = threads.filter((t) => !t.archived);

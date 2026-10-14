@@ -1,3 +1,4 @@
+import { InboxDailyReminder } from "./components/inbox/InboxDailyReminder";
 import RetainedMapzRoute from "@/components/RetainedMapzRoute";
 import { boardBrowseHref } from "@/lib/boardBrowseHref";
 import type { BoardCategory } from "@/lib/allBoards";
@@ -126,6 +127,7 @@ function AppLayout() {
       className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${livingMap ? " app-shell--mapz-demo" : ""}${mapSurface ? " app-shell--map-surface" : ""}${mobileFooter ? "" : " app-shell--no-mobile-footer"}`}
       style={{ background: "var(--z-black, #050506)" }}
     >
+      <InboxDailyReminder />
       <PullToRefresh />
       <Nav />
       {location.split("?")[0] !== "/admin" && <MobileBottomNav />}

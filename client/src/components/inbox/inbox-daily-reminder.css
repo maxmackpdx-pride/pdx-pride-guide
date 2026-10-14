@@ -1,0 +1,8 @@
+.inbox-daily-reminder.inbox-daily-reminder{width:calc(100% - 32px);max-width:440px;max-height:calc(100dvh - 32px);overflow-y:auto;border-radius:14px;color:var(--text-hi);background:var(--ink-900);border-color:var(--ink-border-strong)}
+.inbox-daily-reminder h2{font-family:var(--font-display);font-size:30px;line-height:1.15;text-transform:uppercase;padding-right:32px}
+.inbox-daily-reminder button{min-height:44px;min-width:44px}
+.inbox-daily-reminder__row{display:grid;gap:12px}
+.inbox-daily-reminder__row p{font-size:16px;line-height:1.5}
+.inbox-daily-reminder>button.absolute{display:flex;align-items:center;justify-content:center;top:8px;right:8px}
+@media(prefers-reduced-motion:reduce){.inbox-daily-reminder.inbox-daily-reminder{animation:none!important;transition:none!important}}
+[data-calm="true"] .inbox-daily-reminder,.calm-mode .inbox-daily-reminder.inbox-daily-reminder{animation:none!important;transition:none!important}

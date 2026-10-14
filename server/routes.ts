@@ -1,3 +1,4 @@
+import { createInboxDailyReminder } from "./inboxDailyReminder";
 import { inboxCaseForMutation } from "./inboxWorkflow";
 import { metricsForInbox } from "./inboxPolicy";
 import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "./boardMotifs";
@@ -6310,6 +6311,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
       return res.status(403).json({ error: "Owner admin only" });
     }
     res.json(getPersistenceAudit(getTableCounts()));
+  });
+
+  const claimDailyInboxReminder = createInboxDailyReminder(sqlite);
+  app.post("/api/admin/inbox-daily-reminder", requireAdmin, (req, res) => {
+    const user = storage.getUserById(req.session.userId!);
+    if (!user) return res.status(401).json({ error: "Sign in required" });
+    const primaryOwner = storage.isPrimarySiteOwner(user);
+    const breakdown = storage.getAdminQueueBreakdown();
+    const ownerCount = primaryOwner ? storage.getOwnerDeskCount() + getAdminQueueAggregate().workSummary.escalated : 0;
+    res.setHeader("Cache-Control", "private, no-store");
+    res.json({ ...claimDailyInboxReminder(user.id, breakdown.total + breakdown.guideUnread, ownerCount, primaryOwner), adminFolder: breakdown.total > 0 ? "active" : "inbox" });
   });
 
   app.get("/api/admin/pending-count", requireAdmin, (req, res) => {

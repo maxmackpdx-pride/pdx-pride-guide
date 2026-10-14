@@ -5,7 +5,7 @@
 .inbox-workspace__intro h2{font:900 clamp(28px,4vw,42px)/1 var(--font-display);text-transform:uppercase;margin:10px 0}
 .inbox-workspace__intro p,.inbox-workspace__access p{font-size:13px;line-height:1.6;color:var(--text-mid);margin:8px 0}
 .inbox-workspace__access{max-width:250px;min-width:140px;border:1px solid var(--ink-border-strong);border-radius:12px;padding:12px;font-size:12px}
-.inbox-workspace__access summary{cursor:pointer;min-height:24px;font-weight:700;color:var(--work-accent)}
+.inbox-workspace__access summary{cursor:pointer;min-height:44px;font-weight:700;color:var(--work-accent)}
 .inbox-workspace__metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
 .inbox-workspace button,.inbox-workspace select,.inbox-workspace input{min-height:44px}
 .inbox-workspace__metrics button{display:flex;align-items:center;text-align:left;gap:12px;border:1px solid var(--ink-border-strong);border-radius:14px;padding:14px;background:var(--ink-900);color:var(--text-hi)}
@@ -47,3 +47,5 @@
 .inbox-workspace__footnote{margin-top:20px;border-top:1px solid var(--ink-border);padding-top:15px}
 @container(max-width:600px){.inbox-workspace__intro{display:block}.inbox-workspace__access{max-width:none;margin-top:15px}.inbox-workspace__split{grid-template-columns:1fr}.inbox-workspace__queue{max-height:260px;overflow:auto}.inbox-workspace__metrics button{padding:12px 8px;gap:8px;flex-direction:column;align-items:flex-start}.inbox-workspace__metrics strong{font-size:30px}.inbox-workspace__metrics span{font-size:12px}.inbox-workspace__toolbar label{flex:1;min-width:120px}}
 @media(max-width:600px){.inbox-workspace{padding:14px}}
+
+.inbox-workspace__history summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--text-mid)}

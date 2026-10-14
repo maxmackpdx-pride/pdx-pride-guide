@@ -928,7 +928,7 @@ export default function QueueView({
         borderRadius: 999,
         border: outline ? `1.5px solid ${color}` : "none",
         background: outline ? "none" : color,
-        color: outline ? color : "#06060a",
+        color: outline ? color : "var(--z-black)",
         fontFamily: MONO,
         fontSize: 9.5,
         letterSpacing: ".07em",
@@ -1192,12 +1192,12 @@ export default function QueueView({
                   const c = claimFor(q.kind, q.entityId);
                   const mine = c && user?.id === c.assigneeUserId;
                   if (!c) {
-                    return btn("CLAIM", C.cyan, () =>
+                    return btn("ASSIGN TO ME", C.cyan, () =>
                       claimMutation.mutate({ kind: ck, entityId: q.entityId }),
                     );
                   }
                   if (mine) {
-                    return btn("RELEASE", C.limeSoft, () =>
+                    return btn("UNASSIGN ME", C.limeSoft, () =>
                       releaseClaimMutation.mutate({ kind: ck, entityId: q.entityId }),
                       true,
                     );
@@ -1386,7 +1386,7 @@ export default function QueueView({
     );
   };
 
-  const kickerAccent = mode === "admin" ? "var(--board-spotted, #ff00cc)" : "var(--room-gigz-ink, #b06bff)";
+  const kickerAccent = mode === "admin" ? "var(--board-spotted)" : "var(--room-gigz-ink)";
 
   const queueScopeClass =
     mode === "admin" ? "inbox-exp-admin" : mode === "owner" ? "inbox-exp-owner" : undefined;
@@ -1397,7 +1397,7 @@ export default function QueueView({
   return (
     <div className={`${queueScopeClass} inbox-workspace`}>
       <header className="inbox-workspace__intro">
-        <div><RoomKicker accent={mode === "admin" ? C.cyan : C.purple} as="div">{mode === "admin" ? "STAFF WORKSPACE" : "PRIVATE OWNER BRIEFING"}</RoomKicker>
+        <div><RoomKicker accent={mode === "admin" ? C.cyan : C.purple} as="div">{mode === "admin" ? "ADMIN INBOX" : "PRIVATE OWNER BRIEFING"}</RoomKicker>
           <h2>{completed ? "Decision history" : mode === "owner" ? "What needs you." : "Make the next call."}</h2>
           <p>{mode === "owner" ? "Escalations, logo decisions and messages for the primary owner." : "One queue. Clear responsibility. Context before every decision."}</p>
         </div>
@@ -1408,7 +1408,7 @@ export default function QueueView({
       </div>}
       <div className="inbox-workspace__toolbar">
         <label className="inbox-workspace__search">Find a case<input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Title, person or place" /></label>
-        <label>Category<select value={bucketFilter} onChange={e=>setBucketFilter(e.target.value)}><option value="all">All categories</option>{mode === "admin" && <><option value="mine">Assigned to me</option>{ADMIN_QUEUE_BUCKETS.map(b=><option key={b.id} value={b.id}>{b.label} ({bucketCounts[b.id] || 0})</option>)}</>}</select></label>
+        {mode === "admin" && <label>Category<select value={bucketFilter} onChange={e=>setBucketFilter(e.target.value)}><option value="all">All categories</option>{mode === "admin" && <><option value="mine">Assigned to me</option>{ADMIN_QUEUE_BUCKETS.map(b=><option key={b.id} value={b.id}>{b.label} ({bucketCounts[b.id] || 0})</option>)}</>}</select></label>}
         {!completed && <label>Status<select value={workFilter} onChange={e=>setWorkFilter(e.target.value)}><option value="all">All open work</option><option value="review">Needs review</option><option value="waiting">Waiting</option><option value="escalated">Owner decision</option><option value="unassigned">Unassigned</option></select></label>}
       </div>
       {mode === "admin" && !completed && <div className="inbox-workspace__jumps">{onOpenGuideInbox && <button type="button" onClick={onOpenGuideInbox}>Guide messages · {guideUnread} unread</button>}{onOpenOwnerDesk && <button type="button" onClick={onOpenOwnerDesk}>Owner briefing · {ownerCount}</button>}</div>}
@@ -1422,10 +1422,10 @@ export default function QueueView({
             {workflowFor(focused)?.reason && <p><b>{workflowFor(focused)?.status === "escalated" ? "Owner decision requested" : "Waiting on"}:</b> {workflowFor(focused)?.reason}</p>}
             {workflowFor(focused)?.status === "escalated" && !user?.isPrimaryOwner ? <p>Only the primary owner can decide or return this case to review.</p> : <>
             <div className="inbox-workspace__jumps"><button type="button" disabled={pending} onClick={()=>{setWorkAction("waiting");setWorkReason("");}}>Mark waiting</button><button type="button" disabled={pending} onClick={()=>{setWorkAction("escalated");setWorkReason("");}}>Escalate to owner</button>{workflowFor(focused)?.status && workflowFor(focused)?.status !== "review" && <button type="button" disabled={pending} onClick={()=>workflowMutation.mutate({row:focused,status:"review",reason:"Returned to review"})}>Return to review</button>}</div>
-            {workAction && <form onSubmit={e=>{e.preventDefault();workflowMutation.mutate({row:focused,status:workAction,reason:workReason});}}><label>Reason and next step<textarea autoFocus required maxLength={2000} value={workReason} onChange={e=>setWorkReason(e.target.value)} /></label><p>This records an internal handoff. It does not message the submitter.</p><div className="inbox-workspace__jumps"><button type="button" onClick={()=>setWorkAction(null)}>Cancel</button><button type="submit" disabled={pending || !workReason.trim()}>Save {workAction === "waiting" ? "waiting status" : "escalation"}</button></div></form>}</>}
+            {workAction && <form onSubmit={e=>{e.preventDefault();workflowMutation.mutate({row:focused,status:workAction,reason:workReason});}}><label>Reason and next step<textarea required maxLength={2000} value={workReason} onChange={e=>setWorkReason(e.target.value)} /></label><p>This records an internal handoff. It does not message the submitter.</p><div className="inbox-workspace__jumps"><button type="button" onClick={()=>setWorkAction(null)}>Cancel</button><button type="submit" disabled={pending || !workReason.trim()}>Save {workAction === "waiting" ? "waiting status" : "escalation"}</button></div></form>}</>}
           </div>}
           {historyQuery.isError && <p role="alert" className="inbox-workspace__note">Case history could not load.</p>}
-          {!!historyQuery.data?.length && <div className="inbox-workspace__history"><h3>Case timeline</h3>{historyQuery.data.map((entry,i)=><div key={i}><b>{entry.status} · @{entry.actor}</b><time>{ts(entry.updatedAt)}</time><p>{entry.reason}</p></div>)}</div>}
+          {!!historyQuery.data?.length && <details key={focused.id} className="inbox-workspace__history"><summary>Case history ({historyQuery.data.length})</summary>{historyQuery.data.map((entry,i)=><div key={i}><b>{entry.status} · @{entry.actor}</b><time>{ts(entry.updatedAt)}</time><p>{entry.reason}</p></div>)}</details>}
         </section>}
       </div>}
       <p className="inbox-workspace__footnote">Seen is not resolved. {completed ? "Recent source records; not a complete audit ledger." : "Counts reflect the current queue, not visitors or messages."}</p>

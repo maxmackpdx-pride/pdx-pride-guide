@@ -292,7 +292,7 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
       {onOpenQueue && work?.workSummary && <section className="inbox-workspace" aria-label="Operational insights"><RoomKicker accent={C.cyan} as="div">Work that needs action</RoomKicker><div className="inbox-workspace__metrics">{([['review','Need review'],['waiting','Waiting'],['escalated','Owner decision']] as const).map(([status,label])=><button key={status} type="button" onClick={()=>onOpenQueue(status)}><strong>{work.workSummary[status]}</strong><span>{label}</span></button>)}</div><p className="inbox-workspace__note">Open cases, not messages or people. Select a count to see the work behind it.</p></section>}
       {fullStats && (
         <>
-          <RoomKicker accent="var(--green-acid, #39ff14)" as="div">Site pulse</RoomKicker>
+          <RoomKicker accent="var(--green-acid)" as="div">Site pulse</RoomKicker>
           <div className="inbox-exp-stats-pulse">
             <div className="inbox-exp-stats-pulse__label">LIVE RIGHT NOW</div>
             <div className="inbox-exp-stats-pulse__row">
