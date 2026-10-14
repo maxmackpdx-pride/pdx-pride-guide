@@ -114,3 +114,16 @@ body {
   text-transform: uppercase;
 }
 .pdx-kicker-mono--accent { color: var(--c, var(--neon-cyan)); }
+
+/* Title ink is a quiet minimum, not a replacement for authored poster outlines.
+   Explicit title selectors avoid inheriting a stroke across card containers. */
+:root { --title-outline-width:.35px; --title-outline-color:var(--z-black); }
+:where(h1,h2,h3,h4,h5,h6,[role="heading"],
+ .panel-heading,.pdx-display,.event-rail-card__title,.ab-card__type,.pdxPlace__name,.pdxPlace__eventTitle,
+ .board-listing-card__title,.board-hero__title,.hz-well__name-line,
+ .gigz-talent__role,.gigz-talent > strong,.gigz-opportunity__bottom > strong,
+ .place-event-tile__shade > strong,.resource-map-result__copy > strong,
+ .needz-mobile-safety-card__copy > strong) {
+ -webkit-text-stroke:var(--title-outline-width) var(--title-outline-color);
+ paint-order:stroke fill;
+}

@@ -27,7 +27,7 @@ html[data-zaylist-cards] .event-modal.event-modal--reference,
 .event-modal.event-modal--reference .event-modal--poster-portrait .event-modal__hero-content { padding: 0 6% 0; margin-top: -1px; }
 .event-modal.event-modal--reference .event-modal--poster-landscape .event-modal__hero-content { padding: 84cqw 6% 0; min-height: 0; }
 .event-modal.event-modal--reference .event-modal--poster-landscape.event-modal__hero { min-height: 0; }
-.event-modal.event-modal--reference .event-modal__title { margin: 0 0 8px; width: 100%; font: 900 clamp(28px, 13.4cqw, var(--event-title-size, 84px))/.98 var(--font-display); letter-spacing: -.015em; white-space: normal; text-wrap: balance; overflow-wrap: anywhere; -webkit-text-stroke: 0; text-shadow: 0 2px 8px #000; }
+.event-modal.event-modal--reference .event-modal__title { margin: 0 0 8px; width: 100%; font: 900 clamp(28px, 13.4cqw, var(--event-title-size, 84px))/.98 var(--font-display); letter-spacing: -.015em; white-space: normal; text-wrap: balance; overflow-wrap: anywhere; -webkit-text-stroke: var(--title-outline-width) var(--title-outline-color); text-shadow: 0 2px 8px #000; }
 .event-modal.event-modal--reference .event-modal__hero-date { margin: 0 0 9px; gap: 0; }
 .event-modal.event-modal--reference .event-modal__hero-date > span:first-child { color: var(--c); font: 800 clamp(20px, 6.2cqw, 35px)/1.1 var(--font-display); letter-spacing: .01em; white-space: normal; text-transform: uppercase; }
 .event-modal.event-modal--reference .event-modal__venue-line { display: flex; align-items: center; gap: 16px; }

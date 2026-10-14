@@ -203,7 +203,8 @@ export function toBoardPosts(
           area: join(p.location, p.isRemote ? "Remote okay" : ""),
           value: p.compensation || "",
           detail: p.skills || "",
-          photo: p.imageUrl || undefined,
+          // Talent cards historically show the poster's portrait when no upload exists.
+          photo: p.imageUrl || (!p.isDemo && p.postType === "LOOKING_FOR_WORK" ? p.posterPhotoUrl : undefined) || undefined,
         }));
     case "giftz":
       return (payload as GiftingPost[])

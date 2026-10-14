@@ -3153,7 +3153,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ── Gigs ─────────────────────────────────────────────────────────────────
   app.get("/api/gigs", (req, res) => {
     const viewerId = req.session?.userId;
-    const rows = req.query.mine === "1" && viewerId ? storage.getGigPostsByUser(viewerId) : storage.getGigPosts("LIVE");
+    const rows = req.query.mine === "1" && viewerId ? storage.getGigPosts().filter(gig => gig.userId === viewerId) : storage.getGigPosts("LIVE");
     const gigs = rows.map(gig => publicGigPost(gig, viewerId));
     res.json(gigs);
   });
@@ -3230,8 +3230,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // User's own gig posts
   app.get("/api/gigs/mine", requireAuth, (req, res) => {
-    const gigs = storage.getGigPostsByUser(req.session.userId!);
-    res.json(gigs);
+    const viewerId = req.session.userId!;
+    const gigs = storage.getGigPosts().filter(gig => gig.userId === viewerId);
+    res.json(gigs.map(gig => publicGigPost(gig, viewerId)));
   });
 
   app.get("/api/gigs/:id", (req,res)=>{

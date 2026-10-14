@@ -2898,7 +2898,7 @@ html.calm-mode .home-main-stage .home-hero__grain {
   letter-spacing: -0.02em;
   text-transform: uppercase;
   text-wrap: balance;
-  -webkit-text-stroke: 0;
+  -webkit-text-stroke: var(--title-outline-width) var(--title-outline-color);
   text-shadow: none;
 }
 .home-main-stage #next-preview .home-next-preview__head h2 .hl { color:#ff1f1f; font-style:normal; text-shadow:none; }

@@ -1,6 +1,7 @@
 import { housingTagLabel } from "@shared/housingTags";
-import type { CSSProperties } from "react";
-import { Bookmark, MapPin, ArrowRight } from "lucide-react";
+import { useRef, type CSSProperties } from "react";
+import { MapPin } from "lucide-react";
+import ZLineIcon from "@/components/ZLineIcon";
 import { boardCategories,intentLabels,type BoardPost } from "@/lib/allBoards";
 import BoardPushPin from "./BoardPushPin";
 import { BoardCardMotif } from "./BoardCardMotif";
@@ -8,6 +9,7 @@ import UnifiedBoardArt from "./UnifiedBoardArt";
 import BoardMapPlacement from "./BoardMapPlacement";
 import "@/pages/AllBoards.css";
 export default function BoardBrowseCard({post,isSaved=false,saveDisabled=false,showStatus=false,onSave,onOpen}:{post:BoardPost;isSaved?:boolean;saveDisabled?:boolean;showStatus?:boolean;onSave:()=>void;onOpen:(target:HTMLButtonElement)=>void}) {
+ const openTarget = useRef<HTMLButtonElement>(null);
  const cat=boardCategories.find(c=>c.id===post.category)!;
  return (
                       <div
@@ -16,7 +18,10 @@ export default function BoardBrowseCard({post,isSaved=false,saveDisabled=false,s
                         style={{ "--c": cat.color, "--ab-accent": post.category==="housing"?({managed:"var(--neon-coral)",looking:"var(--day-thu)",offering:"var(--day-fri)",forming:"var(--day-sat)"} as Record<string,string>)[post.intent]:cat.color } as CSSProperties}
                       >
                         <BoardPushPin postKey={post.key} />
-                        <article className={`ab-card ab-card--${post.intent} pdx-glass-rebind`}>
+                        <article className={`ab-card ab-card--${post.intent} pdx-glass-rebind`} onClick={event => {
+                          if ((event.target as Element).closest("button,a,input,select,textarea,summary,[role=button]")) return;
+                          if (openTarget.current) onOpen(openTarget.current);
+                        }}>
                         {post.category==="housing" && post.intent!=="managed" && <div className="ab-card__intent-edge" aria-hidden="true"/>}
                         <BoardCardMotif post={post} placement="card" />
                         <div className="ab-card__glass" aria-hidden="true" />
@@ -29,6 +34,7 @@ export default function BoardBrowseCard({post,isSaved=false,saveDisabled=false,s
                           <div className="ab-card__tags" role={post.tags?.length ? "group" : undefined} tabIndex={post.tags?.length ? 0 : undefined} aria-hidden={!post.tags?.length || undefined} aria-label={post.tags?.length ? "Post tags, scroll for more" : undefined}>{post.tags?.map(tag=><span key={tag}>{post.category==="housing"?housingTagLabel(tag):tag}</span>)}</div>
                           <h3>
                             <button
+                              ref={openTarget}
                               type="button"
                               onClick={(e) => onOpen(e.currentTarget)}
                             >
@@ -55,19 +61,7 @@ export default function BoardBrowseCard({post,isSaved=false,saveDisabled=false,s
                               disabled={saveDisabled}
                               onClick={onSave}
                             >
-                              <Bookmark
-                                size={16}
-                                fill={isSaved ? "currentColor" : "none"}
-                              />
-                              {isSaved ? "Saved" : "Save"}
-                            </button>
-                            <button
-                              type="button"
-                              className="ab-open"
-                              aria-label={`Open ${post.title}`}
-                              onClick={(e) => onOpen(e.currentTarget)}
-                            >
-                              Open <ArrowRight size={16} />
+                              <ZLineIcon name="favorite" size={18} filled={isSaved} />
                             </button>
                           </div>
                           </div>

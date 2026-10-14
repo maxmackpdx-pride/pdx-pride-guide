@@ -424,3 +424,27 @@ html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--te
 
 /* Keep the category lettering crisp against its neon accent. */
 .ab-category { -webkit-text-stroke:.35px var(--z-black); paint-order:stroke fill; }
+
+/* Board cards open across their surface; the only footer action is the heart. */
+.ab-card { cursor:pointer; }
+:is(.ab-page,.map-board-cards) .ab-card__footer { display:flex; justify-content:flex-end; }
+:is(.ab-page,.map-board-cards) .ab-card__footer .ab-save {
+ flex:0 0 44px; width:44px; height:44px; min-width:44px; min-height:44px; padding:0;
+ border-radius:50%; border:1.5px solid color-mix(in srgb,var(--c) 70%,transparent);
+ background:color-mix(in srgb,var(--z-black) 84%,transparent); color:var(--text-hi);
+ box-shadow:0 0 0 2px var(--z-black);
+}
+:is(.ab-page,.map-board-cards) .ab-card__footer .ab-save svg { width:18px; height:18px; }
+:is(.ab-page,.map-board-cards) .ab-card__footer .ab-save[aria-pressed=true] {
+ background:var(--neon-magenta); border-color:var(--neon-magenta); color:var(--text-hi);
+}
+
+/* Violet's existing complementary token accents details, never the Gigz shell. */
+.ab-pinned-card--gigz { --ab-detail-accent:var(--neon-yellow); }
+.ab-pinned-card--gigz .ab-card__tags span {
+ color:var(--ab-detail-accent);
+ border-color:color-mix(in srgb,var(--ab-detail-accent) 42%,transparent);
+ background:color-mix(in srgb,var(--ab-detail-accent) 7%,var(--z-black));
+}
+.ab-pinned-card--gigz .ab-card__type::after { background:linear-gradient(90deg,var(--ab-detail-accent),transparent); }
+.ab-pinned-card--gigz .ab-card__location svg { color:var(--ab-detail-accent); }

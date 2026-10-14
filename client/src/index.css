@@ -4242,7 +4242,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 .sellz-page .board-how--makeover .board-step--makeover h3,
 .sellz-page .board-how--makeover .board-step--makeover .panel-heading {
   color: #fff !important;
-  -webkit-text-stroke: 0 !important;
+  -webkit-text-stroke: var(--title-outline-width) var(--title-outline-color) !important;
   text-shadow: none !important;
 }
 
@@ -4344,7 +4344,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   font-size: 14px;
   font-weight: 800;
   color: #060606;
-  -webkit-text-stroke: 0;
+  -webkit-text-stroke: var(--title-outline-width) var(--title-outline-color);
   text-shadow: none;
 }
 
@@ -4533,7 +4533,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   font-size: 14px;
   font-weight: 800;
   color: #060606;
-  -webkit-text-stroke: 0;
+  -webkit-text-stroke: var(--title-outline-width) var(--title-outline-color);
   text-shadow: none;
 }
 
@@ -12566,7 +12566,7 @@ html.calm-mode .board-step .panel-heading,
 html.calm-mode .board-how--inline .board-step h3,
 html.calm-mode .board-how--inline .board-step .panel-heading {
   color: #fff !important;
-  -webkit-text-stroke: 0 !important;
+  -webkit-text-stroke: var(--title-outline-width) var(--title-outline-color) !important;
   text-shadow: none !important;
 }
 
@@ -15325,7 +15325,7 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   letter-spacing: -0.015em;
   color: #fff;
   font-size: clamp(3.6rem, 10vw, 9.5rem);
-  -webkit-text-stroke: 0;
+  -webkit-text-stroke: var(--title-outline-width) var(--title-outline-color);
   text-wrap: balance;
   text-shadow:
     0 2px 0 rgba(0, 0, 0, 0.96),
@@ -15351,7 +15351,7 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   isolation: isolate;
   display: inline-block;
   color: #070708;
-  -webkit-text-stroke: 0;
+  -webkit-text-stroke: var(--title-outline-width) var(--title-outline-color);
   text-shadow:
     0 2px 0 rgba(0, 0, 0, 0.98),
     0 8px 24px rgba(0, 0, 0, 0.9),
@@ -17937,3 +17937,6 @@ html, body, .app-shell { background-color:var(--z-oled) !important; }
 :root { --bg-app:var(--z-oled); --bg-stage:var(--z-oled); }
 .home-front, .home-page { background-color:var(--z-oled) !important; }
 :where(.about-page,.missed-page,.gigs-page,.profile-page,.hub-page,.contact-page,.login-page,.legal-page) { background-color:var(--z-oled) !important; }
+
+/* Calm removes decorative glow, while title ink remains readable. */
+html.calm-mode .gigs-path-card h3 { -webkit-text-stroke:var(--title-outline-width) var(--title-outline-color) !important; paint-order:stroke fill; }
