@@ -16,5 +16,6 @@ test('workflow persists atomic versioned history and rejects stale or unauthoriz
 });
 test('guard resolves case identity across all decision routes and ignores unrelated routes',()=>{
  for(const [path,kind] of [['submissions/1/approve','submission'],['gifting/reports/2/resolve','gifting_report'],['gifting/3/reject','gifting_flagged'],['river-brats/reports/4/resolve','river_brats'],['gigs/5/status','gig_pending']])assert.equal(inboxCaseForMutation('/api/admin/'+path)?.kind,kind);
+ assert.equal(inboxCaseForMutation('/API/ADMIN/SUBMISSIONS/1/APPROVE')?.kind,'submission');
  assert.equal(inboxCaseForMutation('/api/admin/team'),null);
 });

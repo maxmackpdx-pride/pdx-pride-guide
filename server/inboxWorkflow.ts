@@ -31,16 +31,16 @@ export function createInboxWorkflow(db: Database.Database) {
 /** All mutation routes used by the shared case reviewer. */
 export function inboxCaseForMutation(path:string): {kind:string;entityId:number}|null {
  const routes: [RegExp,string][]=[
- [/^\/api\/admin\/submissions\/(\d+)(?:\/|$)/,'submission'],
- [/^\/api\/admin\/promoter-requests\/(\d+)(?:\/|$)/,'promoter'],
- [/^\/api\/admin\/business-claims\/(\d+)(?:\/|$)/,'business_claim'],
- [/^\/api\/admin\/business-submissions\/(\d+)(?:\/|$)/,'business_submission'],
- [/^\/api\/admin\/moderation\/(\d+)(?:\/|$)/,'moderation'],
- [/^\/api\/admin\/missed-connections\/(\d+)(?:\/|$)/,'missed_connection'],
- [/^\/api\/admin\/gifting\/reports\/(\d+)(?:\/|$)/,'gifting_report'],
- [/^\/api\/admin\/gifting\/(\d+)(?:\/|$)/,'gifting_flagged'],
- [/^\/api\/admin\/river-brats\/reports\/(\d+)(?:\/|$)/,'river_brats'],
- [/^\/api\/admin\/gigs\/(\d+)(?:\/|$)/,'gig_pending'],
+ [/^\/api\/admin\/submissions\/(\d+)(?:\/|$)/i,'submission'],
+ [/^\/api\/admin\/promoter-requests\/(\d+)(?:\/|$)/i,'promoter'],
+ [/^\/api\/admin\/business-claims\/(\d+)(?:\/|$)/i,'business_claim'],
+ [/^\/api\/admin\/business-submissions\/(\d+)(?:\/|$)/i,'business_submission'],
+ [/^\/api\/admin\/moderation\/(\d+)(?:\/|$)/i,'moderation'],
+ [/^\/api\/admin\/missed-connections\/(\d+)(?:\/|$)/i,'missed_connection'],
+ [/^\/api\/admin\/gifting\/reports\/(\d+)(?:\/|$)/i,'gifting_report'],
+ [/^\/api\/admin\/gifting\/(\d+)(?:\/|$)/i,'gifting_flagged'],
+ [/^\/api\/admin\/river-brats\/reports\/(\d+)(?:\/|$)/i,'river_brats'],
+ [/^\/api\/admin\/gigs\/(\d+)(?:\/|$)/i,'gig_pending'],
  ];
  for(const [pattern,kind] of routes){const match=path.match(pattern);if(match)return {kind,entityId:Number(match[1])}}
  return null;
