@@ -1,3 +1,4 @@
+import BoardMotifSetting from "@/components/board/BoardMotifSetting";
 import BoardShader from '@/components/board/BoardShader';
 import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
@@ -312,9 +313,11 @@ export function GiftComposer({initialType = "GIFT", initialPickupPreference, onC
   const [form, setForm] = useState<typeof blankForm>({ ...blankForm, postType: initialType, pickupPreference: initialPickupPreference || blankForm.pickupPreference });
   const [photos, setPhotos] = useState<FileList | null>(null);
   const [mapLocation, setMapLocation] = useState<BoardMapPoint | null>(null);
+  const [motifChoice, setMotifChoice] = useState("default");
   const createMutation = useMutation({
     mutationFn: async () => {
       trackProductEvent("post_attempt", "gifz");
+      if (!photos?.length) throw new Error("Add at least one photo before posting.");
       let photoUrls: string[] = [];
       if (photos?.length) {
         const fd = new FormData();
@@ -323,11 +326,12 @@ export function GiftComposer({initialType = "GIFT", initialPickupPreference, onC
         if (!uploadRes.ok) throw new Error(await uploadRes.text());
         photoUrls = (await uploadRes.json()).urls || [];
       }
+      if (!photoUrls.length) throw new Error("The photo did not upload. Please try again.");
       const res = await fetch("/api/gifting", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ ...form, photoUrls, mapLocation }),
+        body: JSON.stringify({ ...form, photoUrls, mapLocation, motifChoice }),
       });
       if (!res.ok) throw new Error((await res.text()) || res.statusText);
       return res;
@@ -341,6 +345,7 @@ export function GiftComposer({initialType = "GIFT", initialPickupPreference, onC
       setForm(blankForm);
       setPhotos(null);
       setMapLocation(null);
+      setMotifChoice("default");
       onPosted(body.id);
     },
     onError: (err: any) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
@@ -368,6 +373,7 @@ export function GiftComposer({initialType = "GIFT", initialPickupPreference, onC
             title={form.postType === "ISO" ? "Post an in search of" : "Post a gift"}
             intro="No selling, trading, exact addresses, unsafe items, or hookup behavior. Keep it free, keep it kind, keep it moving. Posts go live right away and are removed if they break the rules.">
             <div className="gifting-form-grid">
+              <BoardMotifSetting category="giftz" value={motifChoice} onChange={setMotifChoice} />
               <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} />
               <label>
                 Post type
@@ -422,15 +428,15 @@ export function GiftComposer({initialType = "GIFT", initialPickupPreference, onC
                 </select>
               </label>
               <label className="span">
-                {form.postType === "GIFT" ? "Photos (at least 1, up to 2)" : "Photos, up to 2"}
-                <input type="file" accept="image/*" multiple required={form.postType === "GIFT"} onChange={e => setPhotos(e.target.files)} />
-                {form.postType === "GIFT" && <small className="board-copy-sm">Gifts need a real photo so people know what they're picking up.</small>}
+                Photos (at least 1, up to 2)
+                <input type="file" accept="image/*" multiple required onChange={e => setPhotos(e.target.files)} />
+                <small className="board-copy-sm">{form.postType === "GIFT" ? "Show the item you are giving away." : "Add a photo of what you are looking for."}</small>
               </label>
             </div>
             <ComposerRules checked={form.acceptRules} onChange={acceptRules => setForm({ ...form, acceptRules })}>
               I agree: keep it free, keep it kind, keep it moving.
             </ComposerRules>
-            <ComposerSubmit busy={createMutation.isPending} disabled={!postingOpen || !form.acceptRules || (form.postType === "GIFT" && !photos?.length)} onClick={submitPost}>Post it</ComposerSubmit>
+            <ComposerSubmit busy={createMutation.isPending} disabled={!postingOpen || !form.acceptRules || !photos?.length} onClick={submitPost}>Post it</ComposerSubmit>
           </RoomComposer>
   </>;
 }

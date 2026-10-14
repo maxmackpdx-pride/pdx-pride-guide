@@ -1,6 +1,6 @@
 import ZLineIcon from "@/components/ZLineIcon";
 import RoomComposer from "@/components/board/RoomComposer";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import BoardMapLocationSetting, { type BoardMapPoint } from "@/components/BoardMapLocationSetting";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
@@ -274,6 +274,11 @@ export function MizzedComposer({linkableEvents, onPosted, initialSource}: {linka
   const [acceptRules, setAcceptRules] = useState(false);
   const [mapLocation, setMapLocation] = useState<BoardMapPoint | null>(null);
 
+  const {data: mapVenues=[]}=useQuery<Array<{lat:number;lng:number;name:string;venueId?:number}>>({queryKey:["/api/board-map-waypoints"],queryFn:()=>fetch("/api/board-map-waypoints").then(r=>{if(!r.ok)throw new Error("Could not load map points");return r.json();})});
+  const eventVenue=linkableEvents.find(e=>String(e.id)===draftEventId)?.venueName;
+  const linkedMapVenue=mapVenues.find(v=>v.venueId && (spotMode==="placez"?String(v.venueId)===draftPlaceId:spotMode==="event"&&v.name.toLowerCase()===eventVenue?.toLowerCase()));
+  useEffect(()=>{setMapLocation(linkedMapVenue?{lat:linkedMapVenue.lat,lng:linkedMapVenue.lng,venueId:linkedMapVenue.venueId,days:7}:null);},[spotMode,draftPlaceId,draftEventId,linkedMapVenue?.venueId]);
+
   const groupedEvents = useMemo(() => ({
     live: linkableEvents.filter(e => e.timing === "live"),
     upcoming: linkableEvents.filter(e => e.timing === "upcoming"),
@@ -397,7 +402,7 @@ export function MizzedComposer({linkableEvents, onPosted, initialSource}: {linka
             />
           </label>
         )}
-        <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} />
+        <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} venue={linkedMapVenue?.venueId?{...linkedMapVenue,venueId:linkedMapVenue.venueId}:null} />
         {sourceArt && <div className="mizzed-compose-art span"><img src={sourceArt} alt=""/><span>{spotMode === "placez" ? "Portland stock photo. Venue logo stays off your post." : spotMode === "event" ? "This Eventz flyer appears on your post." : "OutZide destination artwork appears on your post."}</span></div>}
         <label className="span">
           Title

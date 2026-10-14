@@ -1,3 +1,5 @@
+import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "./boardMotifs";
+import { registerBoardPlacement } from "./boardMapPlacement";
 import { homeCatalogCounts } from "./homeStats";
 import { createEventSaves } from "./eventSaves";
 import { createBoardSaves, isSavedBoard } from "./boardSaves";
@@ -788,6 +790,7 @@ function publicGiftingPost(post: any, viewerUserId?: number) {
   return {
     id: post.id,
     userId,
+    motifChoice: readBoardMotif(sqlite,"giftz",post.id),
     postType: post.postType ?? post.post_type,
     title: post.title,
     description: post.description,
@@ -837,6 +840,7 @@ function publicSellzPost(post: any, viewerUserId?: number) {
   const safeInterests = isMine ? interests : interests.filter((interest: any) => interest.userId === viewerUserId);
   return {
     id: post.id, userId, title: post.title, description: post.description,
+    motifChoice: readBoardMotif(sqlite,"sellz",post.id),
     category: post.category, condition: post.condition,
     priceCents: Number(post.priceCents ?? post.price_cents),
     negotiable: Boolean(post.negotiable), neighborhood: post.neighborhood,
@@ -866,6 +870,7 @@ function publicGigPost(gig: any, viewerUserId?: number) {
   } = gig;
   return {
     ...safe,
+    motifChoice: readBoardMotif(sqlite,"gigz",gig.id),
     isMine: viewerUserId ? gig.userId === viewerUserId : false,
     isDemo: isDemoAuthor({ username: gig.username, displayName: gig.name }),
   };
@@ -3146,26 +3151,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const FOLLOWABLE_ROOMS: readonly FollowableRoom[] = ["gigz", "giftz", "sellz", "mizzed", "houz", "eventz", "outz", "rezources"];
   const boardFollowKey = (value: unknown): FollowableRoom | null =>
     FOLLOWABLE_ROOMS.includes(value as FollowableRoom) ? value as FollowableRoom : null;
-  // Exact board map points exist only after an explicit choice by the author.
-  sqlite.exec(`CREATE TABLE IF NOT EXISTS board_map_locations (
-    board TEXT NOT NULL, post_id INTEGER NOT NULL, lat REAL NOT NULL, lng REAL NOT NULL,
-    PRIMARY KEY (board, post_id)
-  )`);
-  const validateBoardMapLocation = (value: unknown) => {
-    if (value == null) return null;
-    if (typeof value !== "object") throw new Error("Invalid map point.");
-    const point = value as { lat?: unknown; lng?: unknown };
-    if (typeof point.lat !== "number" || typeof point.lng !== "number" ||
-        !Number.isFinite(point.lat) || !Number.isFinite(point.lng) ||
-        point.lat < 45.2 || point.lat > 45.85 || point.lng < -123.15 || point.lng > -122.15) {
-      throw new Error("Map point must be within the Portland metro area.");
-    }
-    return { lat: point.lat, lng: point.lng };
-  };
-  const saveBoardMapLocation = (board: string, postId: number, point: {lat:number;lng:number} | null) => {
-    if (point) sqlite.prepare("INSERT OR REPLACE INTO board_map_locations (board,post_id,lat,lng) VALUES (?,?,?,?)")
-      .run(board, postId, point.lat, point.lng);
-  };
+  const boardPlacement = registerBoardPlacement(app, sqlite, requireAuth, storage);
+  const validateBoardMapLocation = boardPlacement.validate;
+  const saveBoardMapLocation = boardPlacement.save;
   app.get("/api/board-map-locations", (_req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.json(publicBoardMapLocations(sqlite));
@@ -3195,6 +3183,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         location: req.body.location,
       })) return;
       const validatedMapPoint = validateBoardMapLocation(req.body.mapLocation);
+      const motifChoice = validateBoardMotif("gigz", req.body.motifChoice);
       const data = insertGigPostSchema.parse(req.body);
       assertGigBoardAllowed(req.body, data);
       const userId = req.session.userId!;
@@ -3207,6 +3196,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
       const gig = storage.createGigPost({ ...data, userId } as any);
       saveBoardMapLocation("gigz", gig.id, validatedMapPoint);
+      saveBoardMotif(sqlite,"gigz",gig.id,motifChoice);
       res.json(gig);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -3313,11 +3303,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
         description: req.body.description,
         pickupPreference: req.body.pickupPreference,
       })) return;
-      const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.slice(0, 2) : [];
+      const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.filter((url: unknown) => typeof url === "string" && url.trim()).slice(0, 2) : [];
       const postType = req.body.postType === "ISO" ? "ISO" : "GIFT";
-      // A gift offer needs a photo; an in-search-of post has nothing to show yet.
-      if (postType === "GIFT" && !photoUrls.length) throw new Error("Add at least one photo.");
+      if (!photoUrls.length) throw new Error("Add at least one photo.");
       const validatedMapPoint = validateBoardMapLocation(req.body.mapLocation);
+      const motifChoice = validateBoardMotif("giftz", req.body.motifChoice);
       const data = insertGiftingPostSchema.parse({
         userId: req.session.userId!,
         postType,
@@ -3330,6 +3320,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       });
       const post = storage.createGiftingPost(data);
       saveBoardMapLocation("giftz", post.id, validatedMapPoint);
+      saveBoardMotif(sqlite,"giftz",post.id,motifChoice);
       res.json({ ...post, message: "Your GIFTZ post is live." });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -3341,6 +3332,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const existing=storage.getGiftingPost(Number(req.params.id));
       if(!existing || Number(existing.user_id ?? existing.userId)!==req.session.userId || existing.status==="REMOVED")return res.status(404).json({error:"Not found"});
       const data={title:String(req.body.title||"").trim(),description:String(req.body.description||"").trim(),category:String(req.body.category||"").trim(),neighborhood:String(req.body.neighborhood||"").trim(),pickupPreference:String(req.body.pickupPreference||"").trim(),photoUrls:JSON.stringify(Array.isArray(req.body.photoUrls)?req.body.photoUrls.filter((url:unknown)=>typeof url==="string").slice(0,2):existing.photoUrls||[])};
+      if(Array.isArray(req.body.photoUrls) && !JSON.parse(data.photoUrls).some((url:unknown)=>typeof url==="string" && url.trim()))throw new Error("Add at least one photo.");
       if(!data.title || data.title.length>90 || !data.description)throw new Error("Add a title (up to 90 characters) and description.");
       const haystack=`${data.title} ${data.description} ${data.category}`.toLowerCase();
       if(RESTRICTED_GIFTING_TERMS.some(term=>haystack.includes(term)))throw new Error("This post appears to include a restricted item.");
@@ -3507,9 +3499,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
         throw new Error("This listing appears to include a restricted item.");
       }
       if (moderationGate(res, "SELLZ marketplace", { title: req.body.title, description: req.body.description })) return;
-      const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.slice(0, 6) : [];
+      const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.filter((url: unknown) => typeof url === "string" && url.trim()).slice(0, 6) : [];
       if (!photoUrls.length) throw new Error("Add at least one photo.");
       const validatedMapPoint = validateBoardMapLocation(req.body.mapLocation);
+      const motifChoice = validateBoardMotif("sellz", req.body.motifChoice);
       const post = storage.createSellzPost(insertSellzPostSchema.parse({
         userId: req.session.userId!,
         title: String(req.body.title || "").trim(),
@@ -3523,6 +3516,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         photoUrls: JSON.stringify(photoUrls),
       }));
       saveBoardMapLocation("sellz", post.id, validatedMapPoint);
+      saveBoardMotif(sqlite,"sellz",post.id,motifChoice);
       res.json(publicSellzPost(post, req.session.userId!));
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -4596,11 +4590,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
         };
       }
 
-      const validatedMapPoint = validateBoardMapLocation(req.body.mapLocation);
+      const venuePoint = boardPlacement.venuePoint(Number(payload.placeId) || null, Number(payload.eventId) || null);
+      const validatedMapPoint = validateBoardMapLocation(req.body.mapLocation === undefined ? venuePoint : req.body.mapLocation, venuePoint?.venueId);
       const data = insertMissedConnectionSchema.parse(payload);
       if (data.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
       const created = storage.createMissedConnection(data);
-      if (boardScope) saveBoardMapLocation("mizzed", created.id, validatedMapPoint);
+      saveBoardMapLocation("mizzed", created.id, validatedMapPoint);
       res.json({
         ...created,
         eventTitle: eventMeta?.title ?? null,
@@ -7914,6 +7909,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // HAUSING - the Housing board. See docs/HAUS_ENGINEERING_HANDOFF.md
   registerHousingRoutes(app, {
     db: sqlite,
+    boardPlacement: {...boardPlacement, validate: (value:unknown)=>boardPlacement.validate(value,null,true)},
     requireAuth,
     requireAdmin,
     isPrimaryOwner: (user) => storage.isPrimarySiteOwner(user),

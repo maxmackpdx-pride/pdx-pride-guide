@@ -5,7 +5,7 @@ export function boardFeaturePosts(category: BoardCategory, payload: BoardPayload
  const byId = new Map(raw.map(p => [p.id, p]));
  return toBoardPosts(category, payload, mine).map(post => {
   const p = byId.get(post.id) as unknown as Record<string, any>;
-  return {...post, isDemo: Boolean(p.isDemo), status: p.status, saved: Boolean(p.saved), tags: Array.isArray(p.tags) ? p.tags : [],
+  return {...post, motifChoice: typeof p.motifChoice === "string" ? p.motifChoice : undefined, isDemo: Boolean(p.isDemo), status: p.status, saved: Boolean(p.saved), tags: Array.isArray(p.tags) ? p.tags : [],
    isMine: Boolean(p.isMine || (userId && (p.userId === userId || p.author?.userId === userId))),
    itemCategory: typeof p.category === "string" ? p.category : undefined, condition: p.condition,
    priceCents: p.priceCents, isRemote: Boolean(p.isRemote),

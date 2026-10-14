@@ -289,6 +289,7 @@ export type HousingInterestGroup = {
 };
 
 export type HousingPostView = {
+  motifChoice?: string;
   id: number;
   type: HousingType;
   author: HousingAuthor;

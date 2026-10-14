@@ -32,6 +32,7 @@
   --accent-pop: var(--neon-cyan);
   --accent-pop-shadow: rgba(0, 255, 255, 0.55);
   --neon-orange: #FF6600;
+  --neon-coral: #FF5F6D; /* managed-rental artwork accent */
   --neon-violet: #8800FF;
   --neon-red: #FF2400;
   --green-acid: #39FF14;
@@ -11914,6 +11915,7 @@ html:not(.calm-mode) .calm-mode-toggle__label {
   --hub-pink: #a3a3a3;
   --hub-lime: #c8c8c8;
   --hub-green: #a3a3a3;
+  --neon-coral: #a3a3a3;
   --day-mon: #888;
   --day-tue: #888;
   --day-wed: #888;

@@ -1,3 +1,4 @@
+import { groupBoardPins, drawBoardPin } from './board-pins.js';
 import {addLayers} from '../map-foundation/layers.js';
 import {captureCamera,readCameraParams} from '../map-foundation/camera.js';
 import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../map-foundation/lifecycle.js';
@@ -555,7 +556,7 @@ function drawLights(fade,target=map,surface=lights){
  const venueItems=new Map(ordered.filter(item=>item.feature.properties.kind==='place').map(item=>[item.feature.properties.key,item]));
  const venueGeometry=item=>{const parent=venueItems.get(item.feature.properties.venueWaypointKey)||item;return waypointGeometry(parent.p,parent.feature.properties.key===selectedKey,placezHoverLift(target,parent.feature,surfaces),parent.feature.properties.key);};
  const protectedVenues=new Set(ordered.map(item=>item.feature.properties.venueWaypointKey).filter(Boolean));
- const placeClusters=(cameraMoving&&frozenClusters)||clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel&&!protectedVenues.has(item.feature.properties.key)&&!(['mizzed','gigz'].includes(item.feature.properties.waypointFamily)&&item.feature.properties.venueWaypointKey)),selectedKey,target.getZoom(),width,height);
+ const placeClusters=(cameraMoving&&frozenClusters)||clusterPlaceMarkers(ordered.filter(item=>!item.feature.properties.boardPin&&item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel&&!protectedVenues.has(item.feature.properties.key)&&!(['mizzed','gigz'].includes(item.feature.properties.waypointFamily)&&item.feature.properties.venueWaypointKey)),selectedKey,target.getZoom(),width,height);
  if(!cameraMoving)frozenClusters=placeClusters;
  const {counts:beaconNeighborCounts}=screenNeighborCounts(beacons);
  for(let beaconIndex=0;beaconIndex<beacons.length;beaconIndex++){
@@ -626,6 +627,11 @@ function drawLights(fade,target=map,surface=lights){
   if(Math.abs(y-item.offset.y)>.01)item.offset.vy=0;
   item.offset.x=x;item.offset.y=y;
  }
+ const boardPins=groupBoardPins(ordered.filter(v=>v.feature.properties.boardPin).map(v=>{
+  const venue=v.feature.properties.venueWaypointKey;
+  const parent=venue?venueGeometry(v):null;
+  return {...v,p:parent?{x:parent.x+46,y:parent.y+18}:v.p};
+ }));
  const extensionSlots=new Map(),branchCounts=new Map();
  for(const {feature} of ordered){const row=feature.properties;if((row.waypointFamily==='mizzed'||row.waypointFamily==='gigz')&&row.venueWaypointKey)branchCounts.set(row.venueWaypointKey,(branchCounts.get(row.venueWaypointKey)||0)+1);}
  for(const pass of [0,1]){
@@ -634,7 +640,13 @@ function drawLights(fade,target=map,surface=lights){
    // logo artwork is drawn afterward, in the sky, and is never punched out.
    if(!cameraMoving){applyBuildingOcclusion(lightsContext,target,surfaces.buildings??[]);buildingChrome.draw(lightsContext,target,surfaces.buildings??[],fade);drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);}
   }
+  if(pass===1)for(const group of boardPins){
+   const row=group.items[0].feature.properties;
+   drawBoardPin(lightsContext,group.x,group.y,row.color,row.key,pulseTime,reduced.matches,group.items.length,row.wireColor);
+   hitTargets.push({x:group.x,y:group.y-22,r:26,width:44,height:48,key:row.key,name:row.name,boardPinKeys:group.items.map(v=>v.feature.properties.key)});
+  }
   for(const {feature,p,offset,neighbors=0} of ordered){
+  if(feature.properties.boardPin)continue;
   const {color,phase}=feature.properties;
   // Rise and fold scale the pin up out of its ground point; everything else is untouched.
   const riseLift=Math.min(riseAmount(feature.properties.key,frameNow),foldAmount(feature.properties.key,frameNow));
@@ -1149,6 +1161,7 @@ map.getCanvas().addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY
 map.getCanvas().addEventListener('pointerup',e=>{
  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>7){down=null;return;}down=null;
  const hit=hoveredMapTarget(hitTargets,{x:e.clientX,y:e.clientY,active:true});
+ if(hit?.boardPinKeys){tell('board-pins',{keys:hit.boardPinKeys});return;}
  if(hit?.clusterBounds){if(parent===window)map.fitBounds(hit.clusterBounds,{padding:72,maxZoom:17.25,duration:620});else tell('cluster',{world:hit.clusterWorld||'places',keys:hit.clusterKeys,bounds:hit.clusterBounds,zoom:map.getZoom()});return;}
  if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);const width=hit.width||Math.max(32,(hit.r||22)*1.5),height=hit.height||width;tell('select',{key:hit.key,rect:{left:hit.x-width/2,top:hit.y-height/2,width,height}});scheduleFrame();}
 });

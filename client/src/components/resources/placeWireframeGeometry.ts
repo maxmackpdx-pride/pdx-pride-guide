@@ -184,6 +184,84 @@ export function placeWireframe(form: string, density = 1, yaw = -.42): PlaceWire
   const d = new Drawing(density,yaw);
   switch(form) {
     // Community boards share the Placez/Needz projected-volume treatment.
+    case 'boardTurntable':
+      d.box([0,-30,0],[190,32,140]);
+      d.torus([-30,-10,0],49,4); d.torus([-30,-8,0],31,2);
+      d.lathe(v=>[10,-12+10*v],[-30,0,0],2,8);
+      d.line([72,-8,-45],[72,10,25]); d.line([72,10,25],[15,10,48]);
+      d.box([9,10,48],[18,12,12]); d.box([70,-7,48],[18,12,18]);
+      break;
+    case 'boardCamera':
+      d.box([0,0,0],[160,100,55]); d.box([10,61,-5],[62,22,42]);
+      d.surface((u,v)=>[48*Math.cos(v*tau),48*Math.sin(v*tau),28+48*u],5,14,true);
+      d.torus([0,0,78],39,5,tau,true); d.torus([0,0,82],23,2,tau,true);
+      d.box([-58,59,0],[22,13,20]);
+      break;
+    case 'boardCoatCheck':
+      d.edge(t=>[18*Math.cos(t*Math.PI*1.6),78+18*Math.sin(t*Math.PI*1.6),0]);
+      d.line([5,62,0],[5,40,0]);
+      d.line([5,40,0],[-95,-35,0]); d.line([-95,-35,0],[95,-35,0]); d.line([95,-35,0],[5,40,0]);
+      d.line([-90,-39,7],[90,-39,7]); d.line([-90,-39,7],[5,35,7]); d.line([90,-39,7],[5,35,7]);
+      d.box([35,-61,10],[37,46,6]); d.torus([35,-37,10],7,2,tau,true);
+      break;
+    case 'boardStJohns': {
+      d.box([0,-48,0],[230,12,38]);
+      for (const x of [-70,70]) {
+        for (const z of [-19,19]) {
+          d.box([x-13,4,z],[9,126,9]); d.box([x+13,4,z],[9,126,9]);
+          // Gothic pointed tower openings and finials.
+          d.line([x-13,42,z],[x,61,z]); d.line([x,61,z],[x+13,42,z]);
+          d.line([x-13,67,z],[x-13,82,z]); d.line([x+13,67,z],[x+13,82,z]);
+        }
+        d.box([x,-77,0],[38,48,50]);
+      }
+      for (const z of [-22,22]) {
+        d.edge(t=>[-70+140*t,13+48*(2*t-1)**2,z]);
+        for(let i=1;i<10;i++) { const t=i/10;d.line([-70+140*t,-42,z],[-70+140*t,13+48*(2*t-1)**2,z]); }
+        d.line([-116,-42,z],[-70,61,z]); d.line([70,61,z],[116,-42,z]);
+      }
+      break;
+    }
+    case 'boardMountHood':
+      // Angular volcanic silhouette, a snow ridge, and receding foothills.
+      d.surface((u,v)=>{const a=v*tau,r=120*(1-u);return [r*Math.cos(a),-70+180*u+10*Math.sin(a*5)*(1-u),r*.55*Math.sin(a)];},9,14,true);
+      d.edge(t=>[-50+100*t,40+70*(1-Math.abs(t*2-1)),20]);
+      d.edge(t=>[-48+96*t,34+12*Math.sin(t*Math.PI*5),29]);
+      d.edge(t=>[-130+260*t,-68+18*Math.sin(t*Math.PI*3),60]);
+      break;
+    case 'boardPortlandSign':
+      d.box([0,-25,0],[190,93,12]);
+      for(const x of [-65,65]) d.box([x,-92,-7],[8,45,10]);
+      // Leaping stag silhouette atop the sign, with lifted antlers.
+      d.sphere([0,48,0],36,16); d.sphere([40,68,0],13,16);
+      d.line([24,50,0],[36,71,0]);
+      d.line([-28,46,0],[-59,14,0]);d.line([-59,14,0],[-82,15,0]);
+      d.line([21,45,0],[57,31,0]);d.line([57,31,0],[75,45,0]);
+      for(const side of [-1,1]) {d.line([40,79,0],[40+side*18,106,0]);d.line([40+side*10,95,0],[40+side*26,96,0]);}
+      // Three inset sign lines suggest the original stacked lettering.
+      for(const y of [-5,-25,-45]) d.box([0,y,8],[142,y===-25?9:5,2]);
+      break;
+    case 'boardSteelBridge':
+      for(const x of [-76,76]) {
+        d.box([x,0,0],[35,160,42]);
+        for(const z of [-23,23]) for(let i=0;i<4;i++) {
+          d.line([x-17,-80+i*40,z],[x+17,-40+i*40,z]);
+          d.line([x+17,-80+i*40,z],[x-17,-40+i*40,z]);
+        }
+      }
+      for(const y of [-60,-21,35]) d.box([0,y,0],[210,9,42]);
+      for(const z of [-23,23]) for(let i=0;i<5;i++) {
+        d.line([-65+i*26,-17,z],[-39+i*26,32,z]);
+        d.line([-65+i*26,32,z],[-39+i*26,-17,z]);
+      }
+      break;
+    case 'boardCourthouse':
+      d.box([0,-30,-8],[180,87,90]); d.box([0,-81,10],[210,16,125]);
+      d.box([0,21,-8],[196,15,105]);
+      d.surface((u,v)=>[-100+200*u,30+43*(1-Math.abs(u*2-1)),-63+110*v],6,4);
+      for(const x of [-65,-32,0,32,65]) { d.lathe(v=>[6,-72+91*v],[x,0,50],5,8); d.box([x,-6,40],[13,32,4]); }
+      d.box([0,80,-8],[40,45,35]);d.lathe(v=>[27*(1-v),104+27*v],[0,0,-8],3,10);
+      break;
     case 'boardParcel':
       d.box([0,-15,0],[135,115,110]);
       d.box([0,47,0],[145,14,120]);

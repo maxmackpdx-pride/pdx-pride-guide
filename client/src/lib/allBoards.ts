@@ -100,6 +100,7 @@ export const intentLabels: Record<BoardIntent, string> = {
   grab: "Open grab",
 };
 export type BoardPost = {
+  motifChoice?: string;
   key: string;
   id: number;
   category: BoardCategory;
