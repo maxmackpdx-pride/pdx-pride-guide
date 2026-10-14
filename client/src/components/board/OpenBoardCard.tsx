@@ -6,13 +6,14 @@ import "./OpenBoardCard.css";
 
 type Props = {
   label: string;
+  floating?: boolean;
   accent: string;
   onClose: () => void;
   children: ReactNode | ((requestClose: () => void) => ReactNode);
 };
 
 /** NEEDZ' open-card motion and edge, around each board's own expanded card. */
-export default function OpenBoardCard({ label, accent, onClose, children }: Props) {
+export default function OpenBoardCard({ label, accent, onClose, children, floating = false }: Props) {
   const { dialogRef, requestClose } = useOpenCardClose(onClose);
 
   return createPortal(
@@ -23,7 +24,7 @@ export default function OpenBoardCard({ label, accent, onClose, children }: Prop
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className="board-open-card pdx-glass-rebind"
+        className={`board-open-card ${floating ? "board-open-card--floating" : "pdx-glass-rebind"}`}
         style={{ "--c": accent, "--listing-accent": accent } as CSSProperties}
         onClick={event => event.stopPropagation()}
       >
