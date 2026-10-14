@@ -1,3 +1,4 @@
+import {eventCountdown} from '../client/public/mapz-map/event-countdown.js';
 import {hologramPresence,hologramCameraDrift,boundedHologramPosition} from '../client/public/mapz-map/hologram-presence.js';
 import {groupBoardPins,drawBoardPin} from '../client/public/mapz-map/board-pins.js';
 import {eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from '../client/public/mapz-map/event-projection.js';
@@ -91,10 +92,10 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   const ctx=new Proxy({drawImage(image){operations.push(image);},createLinearGradient:()=>({addColorStop:noop}),
     createRadialGradient:()=>({addColorStop:noop})},{get:(target,key)=>key in target?target[key]:noop});
   const surface={width:900,height:1200,getContext:()=>ctx},map={getCenter:()=>({lat:45.52,lng:-122.675,distanceTo:()=>0}),getZoom:()=>15.5,getPitch:()=>55,project:()=>({x:450,y:700})};
-  const color='#FF00CC',feature={geometry:{coordinates:[-122.675,45.52]},properties:{key:'demo',kind:'event',demoOpen:true,name:'Musical Mondays',time:'9:00 PM',logo:'logo',phase:1,color,heightScale:1}};
+  const color='#FF00CC',feature={geometry:{coordinates:[-122.675,45.52]},properties:{key:'demo',kind:'event',demoOpen:true,name:'Musical Mondays',time:'9:00 PM',startsAtMs:Date.now()+720000,logo:'logo',phase:1,color,heightScale:1}};
   const logo={width:120,height:60,padding:1,outlined:'sky-logo',image:'artwork',silhouette:'mask'};
   const context=vm.createContext({window,parent:window,performance,rises:new Map(),folds:new Map(),lastBeaconKeys:new Set(),riseAmount:()=>1,foldAmount:()=>1,document:{getElementById:()=>null},map,lights:surface,devicePixelRatio:1,Intl,Date,Map,Set,Math,
-    hologramPresence,hologramCameraDrift,boundedHologramPosition,eventArtworkScale:()=>1,screenNeighborCounts,eventNight,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor,extrusionAmount:()=>1,eventProjection:{draw:(_ctx,geometry)=>{operations.push('beam');projections.push(geometry);}},mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
+    eventCountdown,hologramPresence,hologramCameraDrift,boundedHologramPosition,eventArtworkScale:()=>1,screenNeighborCounts,eventNight,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor,extrusionAmount:()=>1,eventProjection:{draw:(_ctx,geometry)=>{operations.push('beam');projections.push(geometry);}},mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
     featureProjection:{project:feature=>map.project(feature.geometry.coordinates)},updateSurfaces:()=>({buildings:[{}],reflections:[]}),waterBloom:{draw:noop},drawUserLocationGlow:noop,
     citySparkles:{update:noop},buildingGlitter:()=>[],opacityControl:{value:1},motionDelta:1/30,pulseTime:1,
     hologramLiftScale:.7,hologramArtworkScale:3.15,hologramLayouts:new WeakMap(),hologramLabelWidth:68.4,HOUSING_EVENT_HEIGHT_RATIO:1/3,
@@ -102,7 +103,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     HOUSING_HOLOGRAM_LABELS:{LOOKING:'LOOKING TO RENT',FORMING:'BUILDING A HOÜS',OFFERING:'JOIN OUR HOÜS',MANAGED:'COMMERCIAL RENTAL HOÜS'},
     smoothRange:(a,b,v)=>Math.max(0,Math.min(1,(v-a)/(b-a))),
     groupBoardPins,drawBoardPin,clusterPlaceMarkers:()=>({byKey:new Map()}),roofLift:()=>15,
-    hologramBounds:(_feature,scale)=>({halfWidth:60*scale,halfHeight:90*scale}),settleValue:(object,key,_velocity,goal)=>{object[key]=goal;},
+    hologramBounds:(_feature,scale)=>({halfWidth:60*scale,halfHeight:110*scale}),settleValue:(object,key,_velocity,goal)=>{object[key]=goal;},
     logoPointerOffset:()=>({x:0,y:0}),separateHolograms:noop,
     venueLogos:new Map([['logo',logo]]),logoFocus:{update:noop,active:new Map()},logoFit:()=>.2,logoMotionSeed:0,
     adultVenueColor:'#FF0000',hologramMaterials:{beams:new Map([[color,{}]])},drawProjectionBeam:()=>operations.push('beam'),
@@ -113,7 +114,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     drawSurfaceReflections:()=>operations.push('building-reflections'),drawUserLocationAvatar:noop,tell:noop,
   });
   vm.runInContext(source,context);let labels=[];context.renderHologramLabels=rows=>{labels=rows;};vm.runInContext('drawLights(1)',context);
-  assert.equal(labels.length,1);assert.equal(labels[0].name,'Musical Mondays');assert.equal(labels[0].time,'9:00 PM');assert.ok(labels[0].logoY<700);
+  assert.equal(labels.length,1);assert.equal(labels[0].name,'Musical Mondays');assert.equal(labels[0].time,'9:00 PM');assert.equal(labels[0].countdown,'IN 12 MIN');assert.ok(labels[0].logoY<700);
   assert.deepEqual(operations,['beam','building-mask','chrome','building-reflections','sky-logo']);
   const anchored={...labels[0]};context.map.project=()=>({x:487,y:681});
   vm.runInContext('drawLights(1)',context);
@@ -133,7 +134,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
       context.map.getPitch=()=>pitch;
       vm.runInContext('drawLights(1)',context);
       const label=labels[0],projection=projections.at(-1);
-      const titleBottom=label.y+(label.width*.52+16)*label.scale;
+      const titleBottom=label.y+(label.width*.52+32)*label.scale;
       assert.ok(titleBottom<projection.top,`header clears beam mouth at zoom ${zoom}, pitch ${pitch}`);
       assert.ok(label.logoY+label.logoHeight/2<projection.top);
       assert.ok(projection.height>=60,`visible beam at zoom ${zoom}, pitch ${pitch}`);

@@ -2,7 +2,7 @@
 export function visibleHologramLabels(labels, selectedKey, width, height) {
   const overlap = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
   const titleBox = label => ({left: label.x - label.width * label.scale / 2 - 6, right: label.x + label.width * label.scale / 2 + 6,
-    top: label.y - 4, bottom: label.y + (label.width * .52 + 16) * label.scale + 4});
+    top: label.y - 4, bottom: label.y + (label.width * .52 + 16 + (label.countdown ? 16 : 0)) * label.scale + 4});
   const logos = labels.map(label => ({key: label.key, left: label.x - label.logoWidth / 2 - 4, right: label.x + label.logoWidth / 2 + 4,
     top: label.logoY - label.logoHeight / 2 - 4, bottom: label.logoY + label.logoHeight / 2 + 4}));
   const placed = [], visible = [];

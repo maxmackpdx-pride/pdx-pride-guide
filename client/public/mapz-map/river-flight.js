@@ -3,6 +3,7 @@ import {addLayers} from '../map-foundation/layers.js';
 import {captureCamera,readCameraParams} from '../map-foundation/camera.js';
 import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../map-foundation/lifecycle.js';
 import {motionPreference as reduced} from '../map-foundation/motion.js';
+import {eventCountdown} from './event-countdown.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
 import { visibleHologramLabels } from './label-visibility.js?v=20260925-venue-nights';
@@ -422,7 +423,7 @@ function hologramBounds(feature,scale){
  const logoHalfWidth=logo.width*fit/2,logoHalfHeight=logo.height*fit/2;
  // The artwork, title, and clock share one compact footprint regardless of source-logo dimensions.
  return {halfWidth:Math.max(feature.properties.time?hologramLabelWidth/2:0,logoHalfWidth+6)*logoSpacing*scale,
-  halfHeight:(feature.properties.time?Math.max(75,logoHalfHeight+12+hologramLabelWidth*.52+16+12):logoHalfHeight+6)*logoSpacing*scale};
+  halfHeight:(feature.properties.time?Math.max(75,logoHalfHeight+12+hologramLabelWidth*.52+32+12):logoHalfHeight+6)*logoSpacing*scale};
 }
 function separateHolograms(items,width,height){
  const overlaps=(a,b)=>Math.abs(a.x-b.x)<a.halfWidth+b.halfWidth&&Math.abs(a.y-b.y)<a.halfHeight+b.halfHeight;
@@ -675,7 +676,7 @@ function drawLights(fade,target=map,surface=lights){
   const isBar=expandedKeys.has(feature.properties.key);
   const hover=reduced.matches||cameraMoving?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
-  const hologramAlpha=coreAlpha*(presence?.opacity??1);
+  const hologramAlpha=coreAlpha; // Event identity stays bright; distance softens its beam.
   const lift=roofLift(target,feature,surfaces),eventTop=offset?p.y+offset.y+offset.avoidY+(offset.cameraY||0)-hover:p.y-lift-hover;
   let hologramTop=eventTop;const raisedY=hologramTop+178.5*beaconScale;
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0)+(offset?.cameraX||0),beamAlpha=Math.max(.55,1/(1+neighbors*.24));
@@ -782,7 +783,7 @@ function drawLights(fade,target=map,surface=lights){
     const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
     const labelOffset=logoHeight/2+5*beaconScale;
     const labelX=logoX,labelY=hologramCenterY+labelOffset;
-    eventLabels.push({projectionColor:eventProjectionColor(feature.properties),avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:labelX,y:labelY,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:hologramAlpha});
+    eventLabels.push({projectionColor:eventProjectionColor(feature.properties),avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,countdown:eventCountdown(feature.properties.startsAtMs,viewTime),color,x:labelX,y:labelY,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:hologramAlpha});
    }
    lightsContext.globalAlpha=hologramAlpha;
    if(logo){
@@ -865,13 +866,14 @@ function renderHologramLabels(labels){
   let item=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='title');
   if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.dataset.labelRole='title';item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey,item));root.appendChild(item);}
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
-  item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',label.kind==='housing'?labelComplement(label.color):label.projectionColor);item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}`);
+  item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',label.kind==='housing'?labelComplement(label.color):label.projectionColor);item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}${label.countdown?`, ${label.countdown}`:""}`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);
-  const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.projectionColor,label.width,label.avatars]);
+  const signature=JSON.stringify([label.kind,label.name,label.time,label.countdown,label.color,label.projectionColor,label.width,label.avatars]);
   if(item.dataset.signature!==signature){
    item.dataset.signature=signature;item.replaceChildren();const title=document.createElement('span');title.className='standalone-hologram-title';
    const fitted=labelRows(label.name,label.width,label.kind==='housing'?2:undefined);fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
    if(label.kind!=='housing'&&label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=label.time;item.appendChild(clock);}
+   if(label.kind!=='housing'&&label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';countdown.textContent=label.countdown;item.appendChild(countdown);}
   }
   let stack=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='faces');
   if(label.avatars?.length){

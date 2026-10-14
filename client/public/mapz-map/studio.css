@@ -52,3 +52,5 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 .standalone-hologram-label--event .standalone-hologram-clock{margin-top:5px;font:900 12px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.01em;color:color-mix(in srgb,var(--label-clock) 55%,white);text-shadow:0 1px 2px #090511;}
 
 .standalone-hologram-label--event:hover .standalone-hologram-title{filter:none}
+
+.standalone-hologram-countdown{display:block;margin-top:4px;color:#f4f7ff;font:800 9px/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.035em;white-space:nowrap;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px #020509}
