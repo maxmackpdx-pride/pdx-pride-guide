@@ -1,3 +1,4 @@
+import { useBrowseControlsOffset } from "@/components/discovery/useBrowseControlsOffset";
 import BoardCategoryFollows from "@/components/board/BoardCategoryFollows";
 import { followRoomForCategory } from "@/lib/boardFollowChoices";
 import RoomComposer from "@/components/board/RoomComposer";
@@ -180,6 +181,7 @@ export default function Boards() {
     rawSelection === "all" || boardCategories.some((c) => c.id === rawSelection)
       ? (rawSelection as Selection)
       : "all";
+  const controlsRef=useBrowseControlsOffset(selection);
   const query = params.get("q") || "";
   const rawIntent = params.get("intent");
   const intent: BoardIntent | "all" =
@@ -384,7 +386,7 @@ export default function Boards() {
           </section>
         ) : (
           <>
-            <div className="ab-controls">
+            <div className="ab-controls" ref={controlsRef}>
               <div
                 className="ab-category-dock"
                 role="group"

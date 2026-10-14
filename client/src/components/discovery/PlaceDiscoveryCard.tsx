@@ -30,7 +30,7 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
     </svg>
     <PlaceCard name={place.name} category={place.type} categoryLabel={label} accentColor={accent}
       variant="full"
-      logoUrl={serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl)) || undefined} logoFallback={<ServiceNameMark source={place} iconOnly />}
+      logoUrl={serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl), true) || undefined} logoFallback={<ServiceNameMark source={place} iconOnly />}
       businessId={place.id} isFollowing={Boolean(place.isFollowing)} onRequireAuth={onRequireAuth}
       shareUrl={placeUrl(place.id, place.name)}
       categoryTags={[...(serviceTags.length ? serviceTags.slice(0,2).map(tag => ({id:tag.id,name:tag.label,color:accent})) : [{id:place.type,name:label,color:accent}]),...(place.queerOwned ? [{id:'owned',name:'Queer owned',color:accent}] : [])]}

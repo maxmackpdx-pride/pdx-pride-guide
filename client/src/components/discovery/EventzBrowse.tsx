@@ -1,3 +1,4 @@
+import { useBrowseControlsOffset } from "./useBrowseControlsOffset";
 import { Children, useId, useState, type CSSProperties, type ChangeEvent, type ReactNode } from "react";
 import { Grid2X2, SlidersHorizontal } from "lucide-react";
 import { SearchInput } from "@/components/ds";
@@ -22,11 +23,12 @@ export function BrowseHeader({ title, logo, kicker, description, children }: {
   </header>;
 }
 
-export function BrowseControls({ title, categories, selected, onSelect, query, onSearch, view, onView, children }: {
+export function BrowseControls({ title, categories, selected, onSelect, query, onSearch, view, onView, children, actions }: {
   title: string; categories: BrowseCategory[]; selected: string[]; onSelect: (id: string) => void;
-  query: string; onSearch: (query: string) => void; view: BrowseView; onView: (view: BrowseView) => void; children?: ReactNode;
+  query: string; onSearch: (query: string) => void; view: BrowseView; onView: (view: BrowseView) => void; children?: ReactNode; actions?: ReactNode;
 }) {
-  return <div className="eb-controls">
+  const controlsRef=useBrowseControlsOffset();
+  return <div className="eb-controls" ref={controlsRef}>
     <div className="eb-category-row">
       <div className="eb-categories" role="group" aria-label={`${title} categories`}>
         {categories.map(category => <button type="button" className="eb-category pdx-glass-rebind" key={category.id}
@@ -41,6 +43,7 @@ export function BrowseControls({ title, categories, selected, onSelect, query, o
       <button type="button" className="eb-tool eb-view-all" aria-pressed={view === "grid"} onClick={() => onView("grid")}>
         <Grid2X2 size={18} aria-hidden="true" />View all
       </button>
+      {actions}
     </div>
   </div>;
 }

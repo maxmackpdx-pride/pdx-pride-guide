@@ -42,3 +42,16 @@ test('reviewed resource artwork receives the current cache version',()=>{
  assert.ok(expected);
  assert.equal(serviceArtwork(source,expected!.split('?')[0]+'?v=old'),expected);
 });
+
+ test('old color artwork cannot replace reviewed white company marks on cards or waypoints',()=>{
+ for(const name of ['Brown Girl Rise','Pink Ponies','Oregon State Leather Contest','Yes Coach Productions','Portland Leather Alliance']){
+ assert.equal(serviceArtwork({name},'/old-color.png',true),resolveDirectoryLogo(name));
+ assert.equal(serviceWaypointLogo({name},'/old-color.png'),resolveDirectoryLogo(name));
+ }
+ });
+ test('small cards use icons for authored text while open cards retain the fitted name',()=>{
+ const source={name:'Sankofa Collective'};
+ assert.equal(serviceArtwork(source,undefined,true),null);
+ assert.ok(serviceArtwork(source,undefined));
+ assert.equal(serviceArtwork({name:'An unreviewed provider'},'/real.svg',true),'/real.svg');
+ });

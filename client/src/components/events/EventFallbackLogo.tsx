@@ -1,30 +1,16 @@
 import { whiteCompanyLogo } from "@shared/whiteCompanyLogos";
 import { normalizeDirectoryName } from "@/lib/directoryLogos";
 
-// Only exact, known identities with an existing white mark. Never infer a
-// venue from words in an event title or reuse a traveling group's last venue.
-const VENUE_NAMES = new Set([
-  "sanctuaryclub",
-  "eagleportland",
-  "portlandeagle",
-  "badlands",
-  "thesportsbra",
-  "qcenter",
-  "steamportland",
-  "campbarpdx",
-  "darcellexvshowplace",
-  "ccslaughters",
-  "hawkspdx",
-  "scandalseast",
-  "peacockpdx",
-  "trianglerecreationcamp",
-  "novapdx"
-]);
+import { companyLogoEntry } from "@shared/whiteCompanyLogos";
+import { companyFallbackIcon } from "@shared/serviceIdentity";
 
+// Match only saved company names and aliases; never guess a venue from an event title.
 export function fallbackEventLogo(title: string, venueName: string): string | null {
   if (/\bbearracuda\b/i.test(title)) return whiteCompanyLogo("Bearracuda");
   const normalized = normalizeDirectoryName(venueName);
-  return VENUE_NAMES.has(normalized) ? whiteCompanyLogo(normalized === "portlandeagle" ? "Eagle Portland" : venueName) : null;
+  const name = normalized === "portlandeagle" ? "Eagle Portland" : venueName;
+  const reviewed = companyLogoEntry(name);
+  return reviewed ? reviewed.kind === "text-fallback" ? companyFallbackIcon({name, type:"venue"}) : whiteCompanyLogo(name) : null;
 }
 
 export default function EventFallbackLogo({ title, venueName }: { title: string; venueName: string }) {
