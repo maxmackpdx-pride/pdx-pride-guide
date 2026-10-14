@@ -336,9 +336,6 @@ export default function Boards() {
           <h1 className="ab-brand"><img src="/brand/family/our-boardz-mobile.webp?v=20261013-texture" alt="Our BoardZ" /></h1>
           <p>Find your people. Find your next thing.</p>
         </div>
-        <Link className="eb-tool" href="/z">
-          Z/Lists <ArrowRight size={16} />
-        </Link>
       </header>
       <div className="eb-frame">
         {selection === null ? (
@@ -468,7 +465,8 @@ export default function Boards() {
                 </button>
               </div>
             </div>
-                <div className="eb-result-head">
+                <div className="eb-result-head ab-result-head">
+                  <div className="ab-result-meta">
                   <p aria-live="polite">
                     {loading
                       ? "Loading boards…"
@@ -479,6 +477,8 @@ export default function Boards() {
                       Clear filters
                     </button>
                   )}
+                  </div>
+                  {categoryPosts.some(post=>post.isDemo) && <p className="ab-note ab-demo-note" role="note">* Demo posts show how Our BoardZ works. They are examples, not available listings.</p>}
                 </div>
             <div className="ab-browse">
               <aside className="ab-sidebar">
@@ -566,7 +566,6 @@ export default function Boards() {
                     onAction={() => void savedQuery.refetch()}
                   />
                 )}
-                {categoryPosts.some(post=>post.isDemo) && <p className="ab-note" role="note">Demo posts show how Our BoardZ works. They are examples, not available listings.</p>}
                 <div className="ab-card-grid">
                   {visibleResults.map((post) => {
                     const cat = boardCategories.find(
