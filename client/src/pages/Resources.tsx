@@ -481,6 +481,8 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   const communities = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"] });
   const allRows = useMemo(() => mergeCommunityResources(ROWS, communities.data || [], CATEGORIES.find(c => c.id === "community")!), [communities.data]);
   const [initial] = useState(readBrowseState);
+  const [safetyPlacement] = useState(() => Math.random());
+  const safetyRank = useRef<number | null>(null);
   const [categoryIds, setCategoryIds] = useState<string[]>(initial.ids);
   const [searchQuery, setSearchQuery] = useState(initial.query);
   const [mode, setMode] = useState<"directory" | "talk">(initial.mode);
@@ -543,6 +545,23 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   const renderCard = (row: Row) => <div key={row.community?.id || row.org.name} className="placez-card-surface eb-original-card">
     <ResourceCard row={row} onOpen={openDetail} />
   </div>;
+  const browseGroups = selectedCategories.map(category => ({
+    category,
+    group: rows.filter(row => categoriesFor(row).some(c => c.id === category.id)).sort((a, b) => Number(b.category.id === category.id) - Number(a.category.id === category.id)),
+  })).filter(({group}) => group.length);
+  const cardCount = browseView === "grid" ? rows.length : browseGroups.reduce((sum, {group}) => sum + group.length, 0);
+  if (safetyRank.current === null && cardCount) safetyRank.current = Math.max(4, Math.floor(safetyPlacement * cardCount));
+  const safetyIndex = cardCount ? Math.min(cardCount - 1, safetyRank.current ?? 4) : -1;
+  const safetyCard = <div key="mobile-safety" className="placez-card-surface eb-original-card needz-mobile-safety-slot">
+    <button type="button" className="rg-directory-card needz-mobile-safety-card" aria-label="ARE YOU SAFE? Open Oregon urgent help" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}>
+      <ResourceCardMotif glass name="Immediate danger safety support" category="safety" />
+      <ShieldAlert className="needz-mobile-safety-card__icon" aria-hidden="true" />
+      <span className="needz-mobile-safety-card__copy"><strong>ARE YOU SAFE?</strong><span>Oregon urgent help<ArrowUpRight size={16} aria-hidden="true" /></span></span>
+    </button>
+  </div>;
+  const renderCards = (items: Row[], offset = 0) => items.flatMap((row, index) => [
+    ...(mobile && offset + index === safetyIndex ? [safetyCard] : []), renderCard(row),
+  ]);
   return (
     <>
     {!embeddedDetail && <div className="eb-page eb-page--resources">
@@ -578,10 +597,10 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
             {communities.isError && <BrowseStatus title="Clubs and groups could not load" description="Existing resources are still available." actionLabel="Try again" onAction={() => {void communities.refetch();}} />}
             {mode === "talk" ? <><div className="eb-result-head"><h2>A person on the other end.</h2><button type="button" className="eb-clear" onClick={() => setMode("directory")}>Back to resources</button></div><div id="resource-talk-results"><TalkOptions /></div></> : <>
               {!rows.length ? <BrowseStatus title="No resources match your search" description="Try a broader search or another category." actionLabel="Clear filters" onAction={clear} /> : browseView === "browse" ?
-                <div className="eb-lanes">{selectedCategories.map(category => {
-                  const group = rows.filter(row => categoriesFor(row).some(c => c.id === category.id)).sort((a, b) => Number(b.category.id === category.id) - Number(a.category.id === category.id));
-                  return group.length ? <BrowseLane key={category.id} title={category.name} color={category.color} count={group.length}>{group.map(row => renderCard({...row, sectionCategory:category}))}</BrowseLane> : null;
-                })}</div> : <div className="eb-grid">{rows.map(renderCard)}</div>}
+                <div className="eb-lanes">{browseGroups.map(({category, group}, index) => {
+                  const offset = browseGroups.slice(0, index).reduce((sum, previous) => sum + previous.group.length, 0);
+                  return <BrowseLane key={category.id} title={category.name} color={category.color} count={group.length}>{renderCards(group.map(row => ({...row, sectionCategory:category})), offset)}</BrowseLane>;
+                })}</div> : <div className="eb-grid">{renderCards(rows)}</div>}
             </>}
           </section>
         </div>
