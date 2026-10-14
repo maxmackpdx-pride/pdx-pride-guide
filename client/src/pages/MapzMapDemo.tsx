@@ -533,8 +533,8 @@ export default function MapzMapDemo() {
     } });
   }, [setLocation]);
   const resourceOpener = useRef<HTMLElement | null>(null);
-  const openResourceDetail = useCallback((entry: ResourceMapEntry) => {
-    resourceOpener.current = document.activeElement instanceof HTMLElement && document.activeElement.tagName !== "IFRAME" ? document.activeElement : null;
+  const openResourceDetail = useCallback((entry: ResourceMapEntry, opener?: HTMLElement) => {
+    resourceOpener.current = opener || (document.activeElement instanceof HTMLElement && document.activeElement.tagName !== "IFRAME" ? document.activeElement : null);
     const hasOverlay = [...OVERLAY_KEYS, "compose", "houzCompose"].some(key => mapSearchParams().has(key));
     setLocation(mapHref(p => {
       clearMapOverlay(p); p.set("resource", entry.org.name);
