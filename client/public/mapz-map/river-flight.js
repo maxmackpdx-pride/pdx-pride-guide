@@ -5,7 +5,7 @@ import {addLayers} from '../map-foundation/layers.js';
 import {captureCamera,readCameraParams} from '../map-foundation/camera.js';
 import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../map-foundation/lifecycle.js';
 import {motionPreference as reduced} from '../map-foundation/motion.js';
-import {eventCountdown} from './event-countdown.js';
+import {eventCountdown,appendEventCountdown} from './event-countdown.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
 import { visibleHologramLabels } from './label-visibility.js?v=20260925-venue-nights';
@@ -866,7 +866,7 @@ function renderHologramLabels(labels){
    if(label.kind!=='housing'){
     const footer=document.createElement('span');footer.className='event-hologram-footer';
     if(label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=timeText;footer.appendChild(clock);}
-    if(label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';countdown.textContent=statusText;footer.appendChild(countdown);}
+    if(label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';appendEventCountdown(countdown,label.countdown);footer.appendChild(countdown);}
     item.appendChild(footer);
    }
 
