@@ -97,7 +97,7 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 .event-hologram-logo-face,.event-hologram-poster{position:absolute;inset:0;width:100%;height:100%;}
 .event-hologram-logo-face{display:flex;align-items:center;justify-content:center;padding:6px;box-sizing:border-box;}
 .event-hologram-brand .event-hologram-logo-face canvas{max-height:86px;max-width:100%;}
-.event-hologram-poster{object-fit:contain;opacity:0;}
+.event-hologram-poster{object-fit:cover;object-position:center;opacity:0;}
 .standalone-hologram-label--event[data-artwork-face="poster"]>.event-hologram-brand,
 .standalone-hologram-label--event[data-artwork-face="logo"]>.event-hologram-brand{opacity:1;}
 [data-artwork-face="poster"] .event-hologram-poster{opacity:1;}
@@ -115,3 +115,7 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 .event-countdown-unit{font-size:6px;}
 .event-countdown-separator{color:var(--label-clock);}
 .standalone-hologram-label--event .standalone-hologram-title>span{line-height:.94;flex-shrink:0;}
+
+/* Hologram posters fill the card (crop, do not stretch) with the same TV scanlines over them. */
+.event-hologram-poster{object-fit:cover;object-position:center;}
+.standalone-hologram-label--event[data-artwork-face="poster"] .event-hologram-surface::before{z-index:2;}
