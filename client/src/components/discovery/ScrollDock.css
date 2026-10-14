@@ -1,0 +1,58 @@
+/* Scroll dock (shared by Eventz, Placez, NEEDZ, BoardZ).
+   The full controls scroll away with the page; once they pass under the site
+   header this slim bar pins in their place. The frosted ink panel starts at the
+   very top of the screen, so nothing reads through around the floating header
+   pill, and the rainbow seam keeps the fun at the edge without loud chrome. */
+/* html body: outranks page rules that reset nav positioning (Eventz). Rendered
+   inside the page so it stays under the site header (app shell z-index 1). */
+html body .zl-dock.zl-dock {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+  padding: var(--zl-dock-top, 76px) var(--zl-gutter, 16px) 0;
+  background: color-mix(in srgb, var(--z-black) 92%, transparent);
+  backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 14px 28px -18px var(--z-black);
+  animation: zl-dock-in .22s ease-out both;
+}
+.zl-dock::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1.5px;
+  background: var(--rainbow-bar); opacity: .7; pointer-events: none;
+}
+.zl-dock__inner {
+  display: flex; align-items: center; gap: 8px;
+  max-width: calc(var(--zl-frame, 1320px) - 2 * var(--zl-gutter, 16px)); margin: 0 auto;
+  padding: 8px 0 10px;
+}
+.zl-dock__rail {
+  display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;
+  overflow-x: auto; scrollbar-width: none; padding: 2px 24px 2px 2px;
+  -webkit-mask-image: linear-gradient(90deg, var(--z-black) calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, var(--z-black) calc(100% - 28px), transparent);
+}
+.zl-dock__rail::-webkit-scrollbar { display: none; }
+.zl-dock__search {
+  flex: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0;
+  border: 1px solid var(--panel-border); border-radius: 50%;
+  background: var(--z-oled); color: var(--text-hi); cursor: pointer;
+}
+.zl-dock__search:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+
+/* Compact chip: the category tile's color and voice at pill size. */
+.zl-dock-chip {
+  --chip: color-mix(in srgb, var(--c) 72%, var(--text-hi));
+  flex: none; display: inline-flex; align-items: center; gap: 7px;
+  min-height: 44px; padding: 0 15px; border-radius: 999px;
+  border: 1.5px solid color-mix(in srgb, var(--c) 48%, transparent);
+  background: color-mix(in srgb, var(--c) 9%, var(--z-oled));
+  color: var(--chip); font: 900 15px/1 var(--font-display); letter-spacing: .02em;
+  text-transform: uppercase; white-space: nowrap; cursor: pointer;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.zl-dock-chip b { font: 600 11px/1 var(--font-mono, monospace); letter-spacing: 0; opacity: .75; }
+.zl-dock-chip[aria-pressed="true"] { background: var(--chip); border-color: var(--chip); color: var(--z-black); box-shadow: var(--neon-bloom); }
+.zl-dock-chip[aria-pressed="true"] b { opacity: .7; }
+.zl-dock :is(button):focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 2px; }
+
+@keyframes zl-dock-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .zl-dock { animation: none; } .zl-dock-chip { transition: none; } }
+html.calm-mode .zl-dock { animation: none; }
+html.calm-mode .zl-dock::after { opacity: .35; }

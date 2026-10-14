@@ -12,7 +12,8 @@
 .eb-header h1 img { width: 100%; height: auto; max-height: none; object-fit: contain; object-position: left center; }
 .eb-header__actions { display: flex; gap: 10px; flex: none; }
 .eb-page .eb-lede { max-width: 640px; margin: 16px 0 0; color: var(--text-body); font: 400 16px/1.55 var(--font-body); }
-.eb-controls { position: sticky; top: var(--site-header-sticky-edge, var(--site-header-height, 80px)); z-index: 20; padding-block: 8px 16px; background: transparent; backdrop-filter: none; }
+/* Controls scroll with the page; ScrollDock pins the compact category chips. */
+.eb-controls { position: relative; z-index: 2; padding-block: 8px 16px; background: transparent; backdrop-filter: none; }
 .eb-category-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .eb-categories { display: flex; flex: 1; min-width: 0; gap: 12px; overflow-x: auto; padding: 10px 10px 6px 2px; scrollbar-width: none; }
 .eb-category { position: relative; flex: none; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 5px; min-width: 100px; min-height: 60px; padding: 8px 14px; border: 1.5px solid color-mix(in srgb, var(--c) 42%, transparent); border-radius: 14px; background: var(--z-oled); color: var(--c); cursor: pointer; }
@@ -89,7 +90,6 @@
   .eb-page .eb-lede { display: none; }
   .eb-header__actions :is(.board-share-button, .board-follow-button) { width: 44px; min-width: 44px; height: 44px; padding: 0; gap: 0; font-size: 0; }
   .eb-header__actions svg { width: 18px; height: 18px; }
-  .eb-controls { top: var(--site-header-sticky-edge, var(--site-header-height, 72px)); }
   .eb-category { min-width: 96px; }
   .eb-search-row .eb-tool { width: 44px; padding: 0; flex: none; }
   .eb-search-row .eb-tool span { display: none; }

@@ -1,5 +1,6 @@
 import { useBrowseControlsOffset } from "./useBrowseControlsOffset";
-import { Children, useId, useState, type CSSProperties, type ChangeEvent, type ReactNode } from "react";
+import { Children, useId, useRef, useState, type CSSProperties, type ChangeEvent, type ReactNode } from "react";
+import { DockChip, ScrollDock, focusPageSearch, scrollToResults, useScrollDock } from "./ScrollDock";
 import { Grid2X2, SlidersHorizontal } from "lucide-react";
 import { SearchInput } from "@/components/ds";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -28,11 +29,19 @@ export function BrowseControls({ title, categories, selected, onSelect, query, o
   query: string; onSearch: (query: string) => void; view: BrowseView; onView: (view: BrowseView) => void; children?: ReactNode; actions?: ReactNode;
 }) {
   const controlsRef=useBrowseControlsOffset();
+  const categoryRowRef=useRef<HTMLDivElement>(null);
+  const dockTop=useScrollDock(categoryRowRef);
+  const pick=(id: string) => { onSelect(id); onView("grid"); };
   return <div className="eb-controls" ref={controlsRef}>
-    <div className="eb-category-row">
+    {dockTop != null && (<ScrollDock top={dockTop} label={`${title} categories`} searchLabel={`Search ${title}`}
+      onSearch={() => focusPageSearch(".eb-controls .eb-search-row input", dockTop)}>
+      {categories.map(category => <DockChip key={category.id} label={category.id === "ALL" ? "All" : category.label} count={category.count}
+        color={category.color} pressed={selected.includes(category.id)} onClick={() => { pick(category.id); requestAnimationFrame(() => scrollToResults(".eb-result-head, .eb-body", dockTop)); }} />)}
+    </ScrollDock>)}
+    <div className="eb-category-row" ref={categoryRowRef}>
       <div className="eb-categories" role="group" aria-label={`${title} categories`}>
         {categories.map(category => <button type="button" className="eb-category pdx-glass-rebind" key={category.id}
-          style={{ "--c": category.color } as CSSProperties} aria-pressed={selected.includes(category.id)} onClick={() => { onSelect(category.id); onView("grid"); }}>
+          style={{ "--c": category.color } as CSSProperties} aria-pressed={selected.includes(category.id)} onClick={() => pick(category.id)}>
           <span>{category.label}</span><small>{category.id === "ALL" ? "Explore" : title}</small><b>{category.count}</b>
         </button>)}
       </div>

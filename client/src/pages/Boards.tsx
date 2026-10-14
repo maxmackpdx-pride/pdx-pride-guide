@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { SearchInput } from "@/components/ds";
 import { BrowseFilters } from "@/components/discovery/EventzBrowse";
+import { DockChip, ScrollDock, focusPageSearch, scrollToResults, useScrollDock } from "@/components/discovery/ScrollDock";
 import BrowseStatus from "@/components/BrowseStatus";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/context/AuthContext";
@@ -183,6 +184,8 @@ export default function Boards() {
       ? (rawSelection as Selection)
       : "all";
   const controlsRef=useBrowseControlsOffset(selection);
+  const categoryDockRef=useRef<HTMLDivElement>(null);
+  const dockTop=useScrollDock(categoryDockRef);
   const query = params.get("q") || "";
   const rawIntent = params.get("intent");
   const intent = boardIntentForSelection(rawIntent, selection);
@@ -338,7 +341,14 @@ export default function Boards() {
       </header>
       <div className="eb-frame">
             <div className="ab-controls" ref={controlsRef}>
+              {dockTop != null && (<ScrollDock top={dockTop} label="Board categories" searchLabel="Search community boards"
+                onSearch={archiveOnly ? undefined : () => focusPageSearch(".ab-controls .eb-search-row input", dockTop)}>
+                <DockChip label="All" color="var(--neon-cyan)" pressed={selection === "all"} onClick={() => { select("all"); requestAnimationFrame(() => scrollToResults(".ab-result-head, .ab-browse", dockTop)); }} />
+                {boardCategories.map(cat => <DockChip key={cat.id} label={cat.id === "mizzed" ? "Mizzed" : cat.label} color={cat.color}
+                  pressed={selection === cat.id} onClick={() => { select(cat.id); requestAnimationFrame(() => scrollToResults(".ab-result-head, .ab-browse", dockTop)); }} />)}
+              </ScrollDock>)}
               <div
+                ref={categoryDockRef}
                 className="ab-category-dock"
                 role="group"
                 aria-label="Board categories"

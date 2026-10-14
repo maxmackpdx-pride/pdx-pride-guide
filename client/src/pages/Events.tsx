@@ -1,4 +1,5 @@
 import { eventsTonightWindow } from "@shared/eventsTonight";
+import { ScrollDock, focusPageSearch } from "@/components/discovery/ScrollDock";
 import BoardShader from "@/components/board/BoardShader";
 import { createEventSearch } from "@shared/eventSearch";
 import BrowseToolbar from "@/components/BrowseToolbar";
@@ -742,9 +743,10 @@ export default function Events() {
     <div className="zine-page events-page board-page board-page--makeover board-shader-page" data-shader-room="eventz">
       <BoardShader room="eventz" />
       {dockTop != null && !drawerOpen && !mapOpen ? (
-        <nav className="events-day-dock" aria-label="Pick a day" style={{ top: dockTop } as React.CSSProperties}>
-          <div className="events-day-dock__inner events-day-rail">{renderDayTabs(true)}</div>
-        </nav>
+        <ScrollDock top={dockTop} className="events-day-dock" railClassName="events-day-rail" label="Pick a day"
+          searchLabel="Search events" onSearch={() => focusPageSearch("#event-search", dockTop)}>
+          {renderDayTabs(true)}
+        </ScrollDock>
       ) : null}
       <header className="events-top pdx-glass-rebind" style={{ "--c": "var(--room-eventz)" } as React.CSSProperties}>
         <div className="events-top__row">

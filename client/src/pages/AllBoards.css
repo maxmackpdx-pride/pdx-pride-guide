@@ -16,7 +16,7 @@
 .ab-header h1 span { color:var(--neon-cyan); }
 .ab-header h1 i { display:inline-block; font-style:normal; margin-left:var(--space-4); color:var(--neon-cyan); }
 .ab-header p:not(.eb-kicker) { margin:var(--space-4) 0 0; color:var(--text-body); font:var(--body-md)/1.5 var(--font-body); }
-.ab-controls { position:sticky; top:var(--site-header-sticky-edge, var(--site-header-height)); z-index:20; padding-block:var(--space-3) var(--space-4); background:transparent; backdrop-filter:none; }
+.ab-controls { position:relative; z-index:2; padding-block:var(--space-3) var(--space-4); background:transparent; backdrop-filter:none; }
 .ab-category-dock { display:flex; gap:var(--space-3); padding:calc(var(--space-1) / 2); overflow:auto; scrollbar-width:none; }
 .ab-category { display:flex; align-items:center; justify-content:center; gap:var(--space-3); flex:1 0 auto; min-height:58px; padding:var(--space-3) var(--space-5); border:var(--bw-hair) solid color-mix(in srgb,var(--c) 48%,transparent); border-radius:var(--radius-panel); background:var(--z-black); color:color-mix(in srgb,var(--c) 72%,var(--text-hi)); font:var(--fw-heavy) var(--chrome-lg)/1.1 var(--font-display); text-transform:uppercase; cursor:pointer; }
 .ab-category small { font:var(--mono-kicker)/1 var(--font-mono); }
@@ -361,7 +361,7 @@ html.calm-mode .ab-controls { backdrop-filter:none; background:transparent; }
 .ab-pinned-card .ab-pin__glitch path + path{stroke:var(--day-thu)}
 .ab-pinned-card--housing .ab-card{border-left:1px solid color-mix(in srgb,var(--day-thu) 42%,transparent)}
 .ab-card__intent-edge{position:absolute;z-index:4;pointer-events:none;inset:0 auto 0 0;width:3px;background:linear-gradient(to bottom,var(--day-thu),var(--ab-accent) 18%,var(--ab-accent) 82%,var(--day-thu));mask:repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px);-webkit-mask:repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px)}
-@media(max-width:767px){.ab-controls{background:color-mix(in srgb,var(--z-black) 94%,transparent)}}
+/* .ab-controls scrolls with the page now; ScrollDock carries the pinned chips. */
 .ab-pinned-card--gigz .ab-card__value{color:color-mix(in srgb,var(--day-mon-text) 45%,var(--text-hi))}
 
 /* Fixed reading slots keep short and long posts aligned at a compact height. */
