@@ -4,6 +4,7 @@ import { followRoomForCategory } from "@/lib/boardFollowChoices";
 import RoomComposer from "@/components/board/RoomComposer";
 import "./Housing.css";
 import "@/components/board/UnifiedBoardTools.css";
+import { BoardCardMotif } from "@/components/board/BoardCardMotif";
 import BoardPushPin from "@/components/board/BoardPushPin";
 import UnifiedBoardArt from "@/components/board/UnifiedBoardArt";
 import BoardFollowButton from "@/components/BoardFollowButton";
@@ -524,6 +525,7 @@ export default function Boards() {
                       >
                         <BoardPushPin postKey={post.key} />
                         <article className={`ab-card ab-card--${post.intent} pdx-glass-rebind`}>
+                        <BoardCardMotif post={post} placement="card" />
                         <UnifiedBoardArt post={post} />
                         <div className="ab-card__body">
                           <div className="ab-card__eyebrow">
@@ -540,17 +542,15 @@ export default function Boards() {
                           <p className="ab-card__detail">
                             {post.detail || post.description}
                           </p>
+                          <div className="ab-card__bottom">
                           {post.value && (
                             <strong className="ab-card__value">
-                              {post.value}
+                              {post.value.trim().toLowerCase() === "free" ? "FREE" : post.value}
                             </strong>
                           )}
-                          {post.area && (
-                            <p className="ab-card__location">
-                              <MapPin size={13} />
-                              {post.area}
-                            </p>
-                          )}
+                          <p className="ab-card__location" aria-hidden={!post.area || undefined} title={post.area || undefined}>
+                            {post.area && <><MapPin size={13} /><span>{post.area}</span></>}
+                          </p>
                           <div className="ab-card__footer">
                             <button
                               type="button"
@@ -584,6 +584,7 @@ export default function Boards() {
                             >
                               Open <ArrowRight size={16} />
                             </button>
+                          </div>
                           </div>
                         </div>
                         </article>
