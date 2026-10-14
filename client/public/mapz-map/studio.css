@@ -108,7 +108,8 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 .standalone-hologram-label--event[data-artwork-face="poster"]>.event-hologram-footer,
 .standalone-hologram-label--event[data-artwork-face="logo"]>.standalone-hologram-title,
 .standalone-hologram-label--event[data-artwork-face="logo"]>.event-hologram-footer{opacity:0;}
-.standalone-hologram-label--event.is-artwork-switching>.event-hologram-brand{clip-path:polygon(0 0,100% 0,100% 21%,12% 21%,12% 29%,100% 29%,100% 61%,0 61%,0 68%,87% 68%,87% 76%,0 76%);filter:drop-shadow(1px 0 var(--glitch-accent));}
+/* Poster broadcasts stay intact during the switch; cutouts expose the rear frame. */
+.standalone-hologram-label--event.is-artwork-switching:not([data-artwork-face="poster"])>.event-hologram-brand{clip-path:polygon(0 0,100% 0,100% 21%,12% 21%,12% 29%,100% 29%,100% 61%,0 61%,0 68%,87% 68%,87% 76%,0 76%);filter:drop-shadow(1px 0 var(--glitch-accent));}
 .standalone-hologram-label--event:not([data-artwork-face="info"]) .event-hologram-rule{opacity:0;}
 /* Digital clock sits above the scanline layer with a small split-color echo. */
 .standalone-hologram-label--event .standalone-hologram-clock{color:var(--label-clock);font:800 12px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:-.04em;text-shadow:.6px 0 color-mix(in srgb,var(--projection-color) 70%,transparent),0 0 4px color-mix(in srgb,var(--label-clock) 30%,transparent);}
