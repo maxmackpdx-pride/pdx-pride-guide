@@ -1,0 +1,28 @@
+/* Only artwork planes move. Glass and reading surfaces are never selected here. */
+[data-card-motif] { --motif-playing:paused; }
+[data-card-motif].rg-card-motif { translate:none !important; }
+[data-card-motif] :is(.rg-motif-drift,.rg-motif-object-drift,.rg-motif-support-drift,.rg-motif-breathe,.rg-motif-signal-trace) { animation:none !important; }
+[data-card-motif] [data-motif-depth],
+[data-card-motif][data-motif-depth] {
+ transform-box:view-box; transform-origin:center;
+ animation:card-motif-idle-back 24s ease-in-out var(--motif-phase,0s) infinite alternate !important;
+ animation-play-state:var(--motif-playing,paused) !important;
+ translate:calc(var(--rg-parallax-x,0px) * -.45) calc(var(--rg-parallax-y,0px) * -.45) !important;
+ transition:none !important;
+}
+[data-card-motif] [data-motif-depth="support"] {
+ animation-name:card-motif-idle-support !important; animation-duration:29s !important;
+ translate:calc(var(--rg-parallax-x,0px) * .35) calc(var(--rg-parallax-y,0px) * -.3) !important;
+}
+[data-card-motif] [data-motif-depth="front"],
+[data-card-motif][data-motif-depth="front"] {
+ animation-name:card-motif-idle-front !important; animation-duration:32s !important;
+ translate:calc(var(--rg-parallax-x,0px) * .65) calc(var(--rg-parallax-y,0px) * .65) !important;
+}
+@keyframes card-motif-idle-back { from{transform:translate(-3px,2px)} to{transform:translate(3px,-2px)} }
+@keyframes card-motif-idle-support { from{transform:translate(2px,3px)} to{transform:translate(-2px,-3px)} }
+@keyframes card-motif-idle-front { from{transform:translate(4px,-2px)} to{transform:translate(-4px,2px)} }
+@media(prefers-reduced-motion:reduce) {
+ [data-card-motif] [data-motif-depth],[data-card-motif][data-motif-depth] { animation:none !important; translate:none !important; }
+}
+:is(html.calm-mode,:root[data-calm="true"]) :is([data-card-motif] [data-motif-depth],[data-card-motif][data-motif-depth]) { animation:none !important; translate:none !important; }

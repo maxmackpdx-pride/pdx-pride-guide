@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from "react";
+import { isBoardMapPickerOpen, subscribeBoardMapPicker } from "@/lib/boardMapPickerActivity";
 import MapBoardCards, {type MapBoardCardRow} from "@/components/board/MapBoardCards";
 import { communityResourceMapEntries } from '@/lib/communityResourceMap';
 import { Button } from "@/components/ds";
@@ -222,7 +224,7 @@ function rowMarks(rows: MapRow[], kind: Extract<Mark["kind"], "board">): Mark[] 
 }
 
 function boardColor(row: MapRow): string {
-  const token=String(row._board)==="My Hoüz"?"--day-thu":row._board==="Mizzed"?"--day-fri":boardKind(row)==="gig"?"--day-mon":boardKind(row)==="gifting"?"--day-wed":"--day-sat";
+  const token=String(row._board)==="My Hoüz"?"--day-thu":row._board==="Mizzed"?"--day-fri":boardKind(row)==="gig"?"--day-mon":boardKind(row)==="gifting"?"--neon-yellow":"--day-sat";
   return getComputedStyle(document.documentElement).getPropertyValue(token).trim();
 }
 function boardWireColor(row: MapRow): string {
@@ -334,10 +336,12 @@ function useDesktop() {
 }
 
 export default function MapzMapDemo() {
-  const active = useMapzActive();
+  const routeActive = useMapzActive();
+  const placementOpen = useSyncExternalStore(subscribeBoardMapPicker,isBoardMapPickerOpen,()=>false);
+  const active = routeActive && !placementOpen;
   const recordCamera = useMapzCameraRecorder();
   const activity = useRef(active); activity.current=active;
-  usePageSeo(roomTitle("mapz"), "Portland on one map: tonight's events, places, and posts from every room.", {skip:!active});
+  usePageSeo(roomTitle("mapz"), "Portland on one map: tonight's events, places, and posts from every room.", {skip:!routeActive});
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const search = useSearch();
@@ -411,7 +415,7 @@ export default function MapzMapDemo() {
   const mapRef = useRef<MapzHandle | null>(null);
   const requestedCamera = [params.get("lat"),params.get("lng"),params.get("zoom"),params.get("pitch"),params.get("bearing")].join("|");
   useEffect(()=>{
-    if(!active)return;
+    if(!routeActive)return;
     const restore=()=>{
       window.clearTimeout(cameraWriteTimer.current);
       const view=readMapCamera(new URLSearchParams(window.location.search));
@@ -423,7 +427,7 @@ export default function MapzMapDemo() {
     restore();
     window.addEventListener("popstate",restore);
     return()=>window.removeEventListener("popstate",restore);
-  },[active,requestedCamera]);
+  },[routeActive,requestedCamera]);
   const pageRef = useRef<HTMLElement | null>(null);
   const timeInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -503,7 +507,7 @@ export default function MapzMapDemo() {
       .join(' ').toLowerCase().includes(resourceQuery.trim().toLowerCase());
   }), [resourceEntries, resourceQuery, resourceCategory]);
   const { data: housingRaw, isPending: housingLoading, isError: housingError, refetch: retryHousing } = useQuery<unknown>({ queryKey: ["/api/housing", "map"], enabled:active, queryFn: () => apiRequest("GET", "/api/housing").then(r => r.json()) });
-  const { data: boardMapPoints = [] } = useQuery<Array<{board:string;postId:number;lat:number;lng:number;expiresAt:string;venueId:number|null}>>({queryKey:["/api/board-map-locations"],enabled:active,refetchInterval:30000,queryFn:()=>apiRequest("GET","/api/board-map-locations").then(r=>r.json())});
+  const { data: boardMapPoints = [] } = useQuery<Array<{board:string;postId:number;lat:number;lng:number;expiresAt:string;venueId:number|null}>>({queryKey:["/api/board-map-locations"],enabled:active,refetchInterval:active?30000:false,queryFn:()=>apiRequest("GET","/api/board-map-locations").then(r=>r.json())});
   const { data: mizzed = [], isPending: mizzedLoading, isError: mizzedError, refetch: retryMizzed } = useQuery<MissedConnectionPost[]>({ queryKey: ["/api/missed-connections"], enabled:active, queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()) });
   const { data: gigs = EMPTY_ROWS, isPending: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], enabled:active, queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
   const { data: gifts = EMPTY_ROWS, isPending: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], enabled:active, queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
@@ -790,7 +794,9 @@ export default function MapzMapDemo() {
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();
   }, []);
-  const sceneRows = useMemo(() => marks.map(mark => {
+  const sceneRows = useMemo(() => {
+    const pinCyan=getComputedStyle(document.documentElement).getPropertyValue("--day-thu").trim();
+    return marks.map(mark => {
     if (mark.kind === 'resource') {
       const entry = mark.item as ResourceMapEntry;
       const category = entry.categories[0];
@@ -821,7 +827,7 @@ export default function MapzMapDemo() {
     const type=place?mapzPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');
     const name=event?.title||place?.name||boardTitle(row);
     const boardLogo=isHouz?firstImage(row.photos)||FORMING_COVER:firstImage(row.photoUrls)||firstImage(row.imageUrl);
-    return {wireColor:boardWireColor(row),boardPin:mark.kind==='board',expiresAt:(row.mapPoint as any)?.expiresAt,venueAnchor,createdAt:row.createdAt,closesAt:row.closesAt,status:row.status,waypointLogo:place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl)):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place?serviceIdentity(place)?.icon || mapzTypeIcon(type):event?serviceIdentity(venue || {name:venueName})?.icon || mapzTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
+    return {pinCyan,wireColor:boardWireColor(row),boardPin:mark.kind==='board',expiresAt:(row.mapPoint as any)?.expiresAt,venueAnchor,createdAt:row.createdAt,closesAt:row.closesAt,status:row.status,waypointLogo:place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl)):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place?serviceIdentity(place)?.icon || mapzTypeIcon(type):event?serviceIdentity(venue || {name:venueName})?.icon || mapzTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
       logo:isHouz?'':brands?.primary||(place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl))||directoryFallbackLogo(place.type):mark.kind==='event'?'/mapz-map/icons/event.svg':boardLogo||boardIcon(row)),
       alternateLogo:brands?.alternate,
       housingModel:undefined,
@@ -836,7 +842,7 @@ export default function MapzMapDemo() {
       dayColor:event?nightDayColor(eventNight(parsePacificDateTime(event.dateStart)??NaN)):undefined,
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?eventTimeLabel(event.dateStart):undefined};
-  }), [marks, places, events, demoEventIds, attendance, tokenEpoch]);
+  }); }, [marks, places, events, demoEventIds, attendance, tokenEpoch]);
   // Board 49: the status line says how many holograms are up tonight. No badge on the pin.
   const tonightCount = useMemo(() => { const night = eventNight(viewTimestamp); return sceneRows.filter(row => row.kind === "event" && row.eventNight === night).length; }, [sceneRows, viewTimestamp]);
   const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('r-')){const mark=marks.find(item=>item.key===key);if(mark?.kind==='resource')openResourceDetail(mark.item as ResourceMapEntry);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){const entry=resourceEntries.find(item=>item.communitySlug===community.slug);if(entry){openResourceDetail(entry);return;}}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='My Hoüz')setCardOriginRect(rect);}};
@@ -896,7 +902,7 @@ export default function MapzMapDemo() {
     {pinCards.length>0 && <MapBoardCards rows={marks.filter(mark=>pinCards.includes(mark.key)).map(mark=>({key:mark.key,row:mark.item as MapRow,category:({"My Hoüz":"housing",Mizzed:"mizzed",Gigz:"gigz",Giftz:"giftz",Sellz:"sellz"} as const)[(mark.item as MapRow)._board as "Gigz"]} as MapBoardCardRow))} onClose={()=>setPinCards([])} onRequireAuth={()=>{setPinCards([]);setShowAuth(true);}} onOpen={(key,target)=>{setPinCards([]);const mark=marks.find(m=>m.key===key);if(mark)openMark(mark,target);}}/>}
     {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="mapz-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
     {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="mapz-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
-    {active && <Suspense fallback={<p className="ab-detail-status" role="status">Opening card… <Button variant="outline" accent="cyan" type="button" onClick={closeOverlays}>Back to map</Button></p>}>
+    {routeActive && <Suspense fallback={<p className="ab-detail-status" role="status">Opening card… <Button variant="outline" accent="cyan" type="button" onClick={closeOverlays}>Back to map</Button></p>}>
     <DetailRoomLinkContext.Provider value={detailRoomLink}>
     {(resourceName || communitySlug) && <ResourceDetails embeddedDetail={{name:resourceName || "", communitySlug:communitySlug || undefined}} onEmbeddedClose={closeResourceDetail} />}
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}

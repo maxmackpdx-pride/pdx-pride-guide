@@ -1,5 +1,6 @@
+import { acquireBoardMapPicker } from "@/lib/boardMapPickerActivity";
 import { withinHousingBounds } from "@shared/housing";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import MapzCanvas, { type MapzHandle, type MapView } from "../MapzCanvas";
@@ -23,10 +24,11 @@ export default function BoardMapPicker({value,housing=false,maxDays=14,renewal=f
  const cancel=useRef(onCancel);cancel.current=onCancel;
  useEffect(()=>{
   const previous=document.activeElement as HTMLElement;dialog.current?.showModal();
+  const releaseMap=acquireBoardMapPicker();
   // Native top-layer dialog owns focus above a composer or card's custom trap.
   const keyboard=(e:KeyboardEvent)=>{if((e.key==="Escape"||e.key==="Tab")&&dialog.current?.open){e.stopPropagation();if(e.key==="Escape"){e.preventDefault();cancel.current();}}};
   window.addEventListener("keydown",keyboard,true);
-  return()=>{window.removeEventListener("keydown",keyboard,true);previous?.focus();};
+  return()=>{releaseMap();window.removeEventListener("keydown",keyboard,true);previous?.focus();};
  },[]);
  const target=atVenue && venue?venue:point;
  const blocked=!atVenue && waypoints.data?.some(w=>metres(w,target)<18);
@@ -35,7 +37,9 @@ export default function BoardMapPicker({value,housing=false,maxDays=14,renewal=f
    const next={...camera.current,center:[point.lat+lat,point.lng+lng] as [number,number]};
    map.current?.send("view",next);setAtVenue(false);
  };
- const rows=(waypoints.data || []).map((w,i)=>({key:`placement-${i}`,coordinates:[w.lng,w.lat],name:w.name,color:getComputedStyle(document.documentElement).getPropertyValue("--day-thu").trim(),logo:"",kind:"place",waypointFamily:"places"}));
+ // Resolve the live token once, not once per waypoint. Pan updates reuse rows.
+ const waypointColor=getComputedStyle(document.documentElement).getPropertyValue("--day-thu").trim();
+ const rows=useMemo(()=>(waypoints.data || []).map((w,i)=>({key:`placement-${i}`,coordinates:[w.lng,w.lat],name:w.name,color:waypointColor,logo:"",kind:"place",waypointFamily:"places"})),[waypoints.data,waypointColor]);
  return createPortal(<dialog ref={dialog} className="board-pin-picker" aria-labelledby="pin-picker-title" onCancel={e=>{e.preventDefault();onCancel();}} onKeyDown={e=>{if(e.key==="Escape")e.stopPropagation();}}>
    <MapzCanvas ref={map} onEscape={onCancel} rows={rows} selected={null} labelsEnabled viewTime={Date.now()} initialCamera={camera.current} onSelect={()=>{}} onBoot={()=>setReady(true)} onView={v=>{camera.current={center:v.center,zoom:v.zoom,pitch:v.pitch,bearing:v.bearing,bounds:v.bounds};setPoint(p=>({...p,lat:v.center[0],lng:v.center[1]}));if(venue && metres(venue,{lat:v.center[0],lng:v.center[1]})>2)setAtVenue(false);}} />
    <div className="board-pin-picker__heading"><h2 id="pin-picker-title">Place your pin</h2><button type="button" onClick={onCancel}>Cancel</button></div>

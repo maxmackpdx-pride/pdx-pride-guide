@@ -204,6 +204,27 @@ export function placeWireframe(form: string, density = 1, yaw = -.42): PlaceWire
       d.line([-90,-39,7],[90,-39,7]); d.line([-90,-39,7],[5,35,7]); d.line([90,-39,7],[5,35,7]);
       d.box([35,-61,10],[37,46,6]); d.torus([35,-37,10],7,2,tau,true);
       break;
+    case 'boardHouseBlueprint':
+      d.box([0,-20,0],[145,110,90]);
+      d.surface((u,v)=>[-80+160*u,35+62*(1-Math.abs(u*2-1)),-50+100*v],8,6);
+      d.box([-32,-36,48],[28,74,3]); d.box([34,-5,48],[37,37,3]);
+      // Plan lines and measured construction guides below the house.
+      d.box([0,-102,0],[195,2,145]);
+      d.line([0,-100,-70],[0,-100,70]); d.line([-95,-100,0],[95,-100,0]);
+      d.line([-101,-112,81],[101,-112,81]);
+      for(const x of [-101,101]) d.line([x,-119,76],[x,-105,86]);
+      d.line([-110,-102,-77],[-110,-102,77]);
+      break;
+    case 'boardPet':
+      d.sphere([0,-30,0],45,62); d.sphere([0,43,8],34,31);
+      for(const side of [-1,1]) {
+        d.surface((u,v)=>[side*(14+23*u),60+38*(1-u),5+23*v*u],4,4);
+        d.sphere([side*23,-85,22],20,12);
+        d.line([side*12,38,38],[side*45,42,38]);
+        d.line([side*12,33,38],[side*45,30,38]);
+      }
+      d.torus([34,-57,0],38,9,Math.PI*1.45,true);
+      break;
     case 'boardStJohns': {
       d.box([0,-48,0],[230,12,38]);
       for (const x of [-70,70]) {

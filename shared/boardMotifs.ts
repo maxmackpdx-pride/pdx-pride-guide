@@ -9,6 +9,7 @@ export const boardMotifOptions: Record<BoardMotifCategory, readonly BoardMotifOp
     { id: "portland-sign", label: "Portland sign", main: "boardPortlandSign", support: "boardSteelBridge" },
     { id: "steel-bridge", label: "Steel Bridge", main: "boardSteelBridge", support: "boardMountHood" },
     { id: "pioneer-courthouse", label: "Pioneer Courthouse", main: "boardCourthouse", support: "boardStJohns" },
+    { id: "pet", label: "Pet", main: "boardPet", support: "keysHome" },
   ],
   gigz: [
     { id: "default", label: "Automatic", main: "webConsole", support: "designPlanes" },
@@ -45,4 +46,24 @@ export function resolveBoardMotif(category: BoardMotifCategory, choice?: string 
   if (category === "gigz" && /dj|music|sound|perform/i.test(subject)) return { ...fallback, main: "karaoke", support: "soundRoom" };
   if (category === "sellz" && /cloth|shirt|jacket|wear/i.test(subject)) return { ...fallback, main: "garment" };
   return fallback;
+}
+
+export type HousingMotifType = "LOOKING" | "OFFERING" | "FORMING" | "MANAGED";
+export function hasHousingPets(tags: readonly string[] = [], household: readonly { kind: string }[] = []): boolean {
+  return tags.some(tag => tag === "existing-dog" || tag === "existing-cat") || household.some(member => member.kind === "PET");
+}
+export function housingMotifOptions(type: HousingMotifType, hasPets: boolean): readonly BoardMotifOption[] {
+  const automatic = { id: "default", label: "Automatic", main: type === "FORMING" ? "boardHouseBlueprint" : "keysHome", support: "keysHome" };
+  if (type === "MANAGED" || type === "FORMING") return [automatic];
+  const options = type === "LOOKING" ? boardMotifOptions.housing.filter(option => option.id !== "pet") : [automatic];
+  return hasPets ? [...options, boardMotifOptions.housing.find(option => option.id === "pet")!] : options;
+}
+export function normalizeHousingMotif(type: HousingMotifType, choice: string | null | undefined, hasPets: boolean): string {
+  return housingMotifOptions(type, hasPets).some(option => option.id === choice) ? choice! : "default";
+}
+export function resolveHousingMotif(type: HousingMotifType, choice: string | null | undefined, hasPets: boolean, postId = 0): BoardMotifOption {
+  const options = housingMotifOptions(type, hasPets);
+  const id = normalizeHousingMotif(type, choice, hasPets);
+  if (type === "LOOKING" && id === "default") return options[1 + (Math.abs(postId) % 5)];
+  return options.find(option => option.id === id)!;
 }

@@ -1,17 +1,26 @@
-import type { CSSProperties } from "react";
+import { useId, type CSSProperties } from "react";
 
 /** Decorative hardware stays fixed while the card swings around its needle. */
 export default function BoardPushPin({ postKey }: { postKey: string }) {
+  const wireId = `pin-wire-${useId().replace(/:/g, "")}`;
   const seed = Array.from(postKey).reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 0);
   const variant = seed % 4;
   // Mix nearby post IDs so neighboring pins do not share a material-change beat.
   const timing = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0;
   const materialStyle = {
+    "--pin-wire-paint": `url(#${wireId})`,
     "--pin-material-cycle": `${(8.2 + (timing % 4901) / 1000).toFixed(3)}s`,
     "--pin-material-phase": `${-((timing >>> 7) % 13001) / 1000}s`,
   } as CSSProperties;
   return (
     <svg className={`ab-pin ab-pin--${variant}`} style={materialStyle} viewBox="0 0 40 48" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id={wireId} gradientUnits="userSpaceOnUse" x1="10" y1="5" x2="30" y2="34">
+          <stop offset="0" stopColor="var(--day-thu)" />
+          <stop offset=".45" stopColor="var(--day-thu)" />
+          <stop offset="1" stopColor="var(--ab-accent,var(--c))" />
+        </linearGradient>
+      </defs>
       <ellipse className="ab-pin__contact" cx="21" cy="41" rx="6" ry="2" />
       <g className="ab-pin__hardware">
         <path className="ab-pin__needle" d="M18 27 24 29 20 40Z" />

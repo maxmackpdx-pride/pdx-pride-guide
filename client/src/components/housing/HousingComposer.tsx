@@ -1,4 +1,4 @@
-import BoardMotifSetting from "@/components/board/BoardMotifSetting";
+import { hasHousingPets, housingMotifOptions, normalizeHousingMotif } from "@shared/boardMotifs";
 /**
  * HAUSING composer. One question, four answers, then a short field set.
  *
@@ -402,7 +402,7 @@ export function HousingComposer({
       photos,
       areas: draft.areas,
       mapLocation,
-      motifChoice,
+      motifChoice: normalizeHousingMotif(postType, motifChoice, hasHousingPets(draft.tags, members.filter(member => member.name.trim()))),
       // The server re-validates these against the post type, so what lands here
       // is a request, not the final list.
       tags: draft.tags,
@@ -458,6 +458,7 @@ export function HousingComposer({
             credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              motifChoice: m.kind === "PET" && motifChoice === "pet" ? "pet" : undefined,
               kind: m.kind,
               name: m.name.trim(),
               photoUrl: m.photoUrl,
@@ -949,7 +950,6 @@ export function HousingComposer({
           hint="Where the place is, or where you are looking. Add as many as you want."
         />
 
-        {photos.length === 0 && <BoardMotifSetting category="housing" value={motifChoice} onChange={setMotifChoice} />}
         <BoardMapLocationSetting housing value={mapLocation} onChange={setMapLocation} />
 
         {isManaged ? (
@@ -1325,6 +1325,13 @@ export function HousingComposer({
           value={draft.tags}
           onChange={(tags) => patch({ tags })}
         />
+
+        {(isLooking || (isOffering && hasHousingPets(draft.tags, members.filter(member => member.name.trim())))) && <label className="hz-field">
+          <Mono micro>Card artwork</Mono>
+          <select className="hz-input" value={normalizeHousingMotif(type, motifChoice, hasHousingPets(draft.tags, members.filter(member => member.name.trim())))} onChange={event => setMotifChoice(event.target.value)}>
+            {housingMotifOptions(type, hasHousingPets(draft.tags, members.filter(member => member.name.trim()))).map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
+          </select>
+        </label>}
 
         {/*
           The one hard rule on photos. Zaylist is sex positive everywhere else,

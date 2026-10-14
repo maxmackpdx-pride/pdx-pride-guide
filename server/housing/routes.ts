@@ -1,4 +1,5 @@
-import { saveBoardMotif, validateBoardMotif } from "../boardMotifs";
+import { hasHousingPets, normalizeHousingMotif } from "../../shared/boardMotifs";
+import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "../boardMotifs";
 import type { Placement } from "../boardMapPlacement";
 /**
  * HAUSING HTTP routes. Registered from routes.ts with shared auth/upload deps,
@@ -299,7 +300,8 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     });
 
     deps.boardPlacement.save("houz", postId, mapPoint);
-    saveBoardMotif(db,"housing",postId,motifChoice);
+    const created = getHousingPost(db, postId, userId)!;
+    saveBoardMotif(db,"housing",postId,normalizeHousingMotif(type,motifChoice,hasHousingPets(created.tags,created.household)));
     res.json(getHousingPost(db, postId, userId));
   });
 
@@ -320,7 +322,11 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     }
     if (!allowed) return res.status(403).json({ error: "Not your post" });
 
+    let nextMotif: string;
+    try { nextMotif = req.body?.motifChoice === undefined ? readBoardMotif(db,"housing",id) : validateBoardMotif("housing",req.body.motifChoice); }
+    catch(error: any) { return res.status(400).json({error:error.message}); }
     const patch: Record<string, any> = { ...req.body };
+    delete patch.motifChoice;
     delete patch.type; // conversion has its own route
     delete patch.propertyManagerId;
     delete patch.changeLabel;
@@ -339,6 +345,8 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     const changeLabel =
       asStr(req.body?.changeLabel, 60) || deriveHousingChangeLabel(patch);
     updateHousingPost(db, id, patch, changeLabel);
+    const updated = getHousingPost(db,id,userId)!;
+    saveBoardMotif(db,"housing",id,normalizeHousingMotif(updated.type,nextMotif,hasHousingPets(updated.tags,updated.household)));
     res.json(getHousingPost(db, id, userId));
   });
 
@@ -427,6 +435,10 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       species: kind === "PET" ? asStr(req.body?.species, 40) : null,
       role: "MEMBER",
     });
+    if (kind === "PET" && req.body?.motifChoice === "pet") {
+      const updated = getHousingPost(db,id,userId)!;
+      saveBoardMotif(db,"housing",id,normalizeHousingMotif(updated.type,"pet",hasHousingPets(updated.tags,updated.household)));
+    }
     res.json({ id: memberId, post: getHousingPost(db, id, userId) });
   });
 

@@ -6,9 +6,9 @@
   --ab-hero-size: clamp(52px,6vw,78px);
   --ab-hero-size-phone: 54px;
   --ab-quote-size: 160px;
-  --ab-card-height: 330px;
-  --ab-card-height-wide: 340px;
-  --ab-card-height-compact: 330px;
+  --ab-card-height: 280px;
+  --ab-card-height-wide: 280px;
+  --ab-card-height-compact: 280px;
 }
 .ab-page { min-height:calc(100dvh - 88px); background:radial-gradient(ellipse at 20% 0%, color-mix(in srgb,var(--room-hauz) 3%,transparent),transparent 60%),var(--z-black); }
 .ab-header { display:flex; justify-content:space-between; align-items:center; gap:var(--space-6); padding-block:var(--space-8) calc(var(--space-8) - var(--space-1)); }
@@ -182,19 +182,12 @@ html.calm-mode
  .ab-art__quote-pair { font-size:var(--ab-quote-size); }
 }
 
-/* Demo status is readable at a glance; photographs blend toward card content. */
-.ab-page .ab-card .ab-card__eyebrow > .ab-demo-badge {
- background:var(--c); color:var(--z-oled); border-color:var(--c);
- padding:var(--space-2) var(--space-3); font:var(--fw-bold) var(--event-card-meta-size,var(--body-sm))/1.2 var(--font-mono);
-}
 .ab-art--photo { background:transparent; }
 .ab-art__photo {
  -webkit-mask-image:linear-gradient(to right,var(--z-black) 55%,transparent 100%);
  mask-image:linear-gradient(to right,var(--z-black) 55%,transparent 100%);
 }
 
-.ab-page .ab-card .ab-card__eyebrow > .ab-demo-badge { box-shadow:0 0 var(--space-4) color-mix(in srgb,var(--c) 40%,transparent); }
-html.calm-mode .ab-page .ab-card .ab-card__eyebrow > .ab-demo-badge { box-shadow:none; }
 
 /* Give the three control rows room vertically; retain horizontal grouping. */
 .ab-controls > .eb-search-row { margin-top:var(--space-5); }
@@ -220,7 +213,7 @@ html.calm-mode .ab-page .ab-card .ab-card__eyebrow > .ab-demo-badge { box-shadow
 .ab-pin__cap-side { fill:color-mix(in srgb,var(--c) 55%,var(--z-black)); }
 .ab-pin__cap { fill:color-mix(in srgb,var(--c) 75%,var(--text-hi)); }
 .ab-pin__shine { fill:none; stroke:var(--text-hi); stroke-width:1; opacity:.7; }
-.ab-pin__wire { fill:none; stroke:color-mix(in srgb,var(--c) 65%,var(--text-hi)); stroke-width:.8; stroke-linejoin:round; animation:ab-pin-wire-glitch 6.7s steps(1,end) infinite; }
+.ab-pin__wire { fill:none; stroke:var(--pin-wire-paint); stroke-width:.8; stroke-linejoin:round; animation:ab-pin-wire-glitch 6.7s steps(1,end) infinite; }
 .ab-pin__mesh { fill:none; opacity:.65; }
 .ab-pin__glitch { fill:none; stroke:var(--c); stroke-width:1; opacity:0; animation:ab-pin-scan-glitch 6.7s steps(1,end) infinite; }
 .ab-pin__glitch path + path { stroke:var(--text-hi); }
@@ -236,7 +229,7 @@ html.calm-mode .ab-page .ab-card .ab-card__eyebrow > .ab-demo-badge { box-shadow
 /* Full solid/wireframe material swap has its own per-post clock, separate
    from the existing wire jitter and scan-line offsets. */
 .ab-pin__solid { animation:ab-pin-material-solid var(--pin-material-cycle) steps(1,end) var(--pin-material-phase) infinite; }
-.ab-pin__surface-wire { fill:none; stroke:color-mix(in srgb,var(--c) 65%,var(--text-hi)); stroke-width:.8; stroke-linejoin:round; opacity:0; animation:ab-pin-material-wire var(--pin-material-cycle) steps(1,end) var(--pin-material-phase) infinite; }
+.ab-pin__surface-wire { fill:none; stroke:var(--pin-wire-paint); stroke-width:.8; stroke-linejoin:round; opacity:0; animation:ab-pin-material-wire var(--pin-material-cycle) steps(1,end) var(--pin-material-phase) infinite; }
 @keyframes ab-pin-material-solid {
   0%, 63%, 81%, 100% { opacity:1; }
   60%, 66% { opacity:0; }
@@ -343,7 +336,6 @@ html.calm-mode .ab-page .ab-card .ab-card__eyebrow > .ab-demo-badge { box-shadow
 .ab-card__type::after{content:"";display:block;width:38px;height:2px;margin-top:7px;background:linear-gradient(90deg,var(--c),transparent)}
 .ab-card__tags{display:flex;gap:4px;margin:0 0 8px;min-width:0;max-height:22px;overflow:hidden}
 .ab-card__tags span{white-space:nowrap;max-width:45%;overflow:hidden;text-overflow:ellipsis;padding:3px 5px;border:1px solid color-mix(in srgb,var(--c) 28%,transparent);border-radius:4px;color:var(--text-body);font:10px/1.2 var(--font-mono)}
-.ab-card .ab-card__eyebrow .ab-demo-badge{position:absolute;right:12px;top:10px;font-size:10px;font-weight:900;letter-spacing:.04em;padding:3px 5px;opacity:1}
 .ab-card__glass{position:absolute;inset:-2px;z-index:0;pointer-events:none;background:linear-gradient(118deg,color-mix(in srgb,var(--text-hi) 4%,transparent) 0%,color-mix(in srgb,var(--text-hi) 1%,transparent) 37%,transparent 58%,color-mix(in srgb,var(--c) 7%,transparent));backdrop-filter:blur(.4px);-webkit-backdrop-filter:blur(.4px);filter:blur(0)}
 @media(hover:hover) and (pointer:fine){
  .ab-pinned-card:hover .ab-card__glass{animation:ab-glass-motion-blur 1.8s ease-in-out both}
@@ -360,13 +352,72 @@ html.calm-mode .ab-page .ab-card .ab-card__eyebrow > .ab-demo-badge { box-shadow
 .map-board-cards .ab-card__footer button{min-height:44px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--c) 50%,transparent);border-radius:10px;background:var(--btn-glow-bg)}
 .map-board-cards .ab-card__location{height:1.4em;min-height:1.4em;flex:none}
 @media(max-width:767px){.ab-pinned-card{display:flex;flex-direction:column}.ab-pinned-card>.ab-card{flex:1}.map-board-cards .ab-card{height:auto}.map-board-cards .ab-art{max-height:180px;aspect-ratio:auto}.map-board-cards .ab-card__location{height:2.8em;min-height:2.8em}}
-/* Boardz uses the day palette. Housing keeps a cyan shell with type-specific artwork. */
-:is(.ab-page,.map-board-cards,.board-pin-picker){--room-hauz:var(--day-thu);--room-gigz:var(--day-mon);--room-gigz-ink:var(--day-mon-text);--room-giftz:var(--day-wed);--room-sellz:var(--day-sat);--room-mizzed:var(--day-fri);--neon-cyan:var(--day-thu);--neon-violet:var(--day-mon);--neon-magenta:var(--day-fri);--neon-yellow:var(--day-wed);--neon-green:var(--day-sat);--neon-orange:var(--day-sun)}
+/* Boardz uses day colors, with Giftz retaining its canonical acid-yellow token. */
+:is(.ab-page,.map-board-cards,.board-pin-picker){--room-hauz:var(--day-thu);--room-gigz:var(--day-mon);--room-gigz-ink:var(--day-mon-text);--room-giftz:var(--neon-yellow);--room-sellz:var(--day-sat);--room-mizzed:var(--day-fri);--neon-cyan:var(--day-thu);--neon-violet:var(--day-mon);--neon-magenta:var(--day-fri);--neon-green:var(--day-sat);--neon-orange:var(--day-sun)}
 .ab-pinned-card :is(.ab-card-motif,.ab-motif){color:var(--ab-accent,var(--c))}
 .ab-pinned-card .ab-motif__edge{stroke:color-mix(in srgb,var(--ab-accent,var(--c)) 72%,var(--text-hi))}
 .ab-pinned-card .ab-motif__main{filter:drop-shadow(0 2px 4px color-mix(in srgb,var(--ab-accent,var(--c)) 16%,transparent))}
-.ab-pinned-card :is(.ab-pin__wire,.ab-pin__surface-wire,.ab-pin__glitch){stroke:var(--ab-accent,var(--c))}
+.ab-pinned-card :is(.ab-pin__wire,.ab-pin__surface-wire){stroke:var(--pin-wire-paint)}
+.ab-pinned-card .ab-pin__glitch{stroke:var(--ab-accent,var(--c))}
+.ab-pinned-card .ab-pin__glitch path + path{stroke:var(--day-thu)}
 .ab-pinned-card--housing .ab-card{border-left:1px solid color-mix(in srgb,var(--day-thu) 42%,transparent)}
 .ab-card__intent-edge{position:absolute;z-index:4;pointer-events:none;inset:0 auto 0 0;width:3px;background:linear-gradient(to bottom,var(--day-thu),var(--ab-accent) 18%,var(--ab-accent) 82%,var(--day-thu));mask:repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px);-webkit-mask:repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px)}
 @media(max-width:767px){.ab-controls{background:color-mix(in srgb,var(--z-black) 94%,transparent)}}
-.ab-pinned-card--gigz :is(.ab-card__type,.ab-card__value){color:color-mix(in srgb,var(--day-mon-text) 82%,var(--text-hi))}
+.ab-pinned-card--gigz .ab-card__value{color:color-mix(in srgb,var(--day-mon-text) 45%,var(--text-hi))}
+
+/* Fixed reading slots keep short and long posts aligned at a compact height. */
+.ab-card > .ab-card__body { padding:var(--space-5) var(--space-3) var(--space-3); gap:var(--space-1); }
+.ab-card .ab-card__eyebrow { height:42px; min-height:42px; margin:0; overflow:hidden; }
+.ab-card .ab-card__type { padding:0; font:var(--fw-heavy) var(--title-sm)/1.05 var(--font-display); letter-spacing:var(--tracking-display); text-shadow:none; }
+.ab-card__type::after { width:var(--space-8); height:1px; margin-top:var(--space-1); }
+.ab-card .ab-card__tags { height:20px; min-height:20px; max-height:20px; margin:0; align-items:center; }
+.ab-card .ab-card__tags span { font:var(--event-card-tag-font); padding:2px var(--space-1); }
+:is(.ab-page,.map-board-cards) .ab-card h3 { height:2.2em; min-height:2.2em; margin:0; flex:none; font:var(--fw-heavy) var(--event-card-title-size)/1.1 var(--font-display); -webkit-line-clamp:2; }
+:is(.ab-page,.map-board-cards) .ab-card__detail { height:2.8em; min-height:2.8em; margin:0; flex:none; font:var(--event-card-detail-font); -webkit-line-clamp:2; }
+.ab-card__bottom { display:flex; flex-direction:column; gap:var(--space-1); }
+:is(.ab-page,.map-board-cards) .ab-card__bottom .ab-card__value { height:1.1em; min-height:1.1em; margin:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font:var(--fw-heavy) var(--event-card-title-size)/1.1 var(--font-display); }
+:is(.ab-page,.map-board-cards) .ab-card__location { margin:0; height:1.4em; min-height:1.4em; font:var(--event-card-meta-font); }
+.ab-card__status { position:absolute; z-index:4; left:var(--space-3); top:var(--space-3); max-width:calc(35% - var(--space-6)); display:flex; flex-wrap:wrap; gap:var(--space-1); pointer-events:none; }
+.ab-card__status > span { padding:var(--space-1) var(--space-2); border:var(--bw-hair) solid var(--panel-border); border-radius:var(--radius-md); background:var(--z-black); color:var(--text-body); font:var(--fw-bold) var(--meta-sm)/1.2 var(--font-body); letter-spacing:var(--tracking-normal); text-transform:uppercase; box-shadow:none; }
+@media(max-width:767px) {
+ .ab-card,.map-board-cards .ab-card { height:100%; }
+ .ab-card .ab-art,.map-board-cards .ab-art { height:auto; min-height:calc(var(--space-10) * 3); max-height:none; aspect-ratio:4/3; }
+ .ab-card > .ab-card__body { padding:var(--space-2); }
+ .ab-card .ab-card__eyebrow { height:42px; min-height:42px; }
+ :is(.ab-page,.map-board-cards) .ab-card h3 { height:3.3em; min-height:3.3em; -webkit-line-clamp:3; }
+ :is(.ab-page,.map-board-cards) .ab-card__location { height:2.8em; min-height:2.8em; }
+ .ab-card__status { max-width:calc(100% - var(--space-6)); }
+ .ab-art--unified .ab-household--clear { top:var(--space-8); padding:var(--space-1); gap:0; }
+ .ab-household--clear strong { font-size:var(--title-md); }
+ .ab-art--unified .ab-household--clear small { font:var(--event-card-meta-font); }
+ .ab-art--unified .ab-art__brand { bottom:var(--space-2); height:var(--space-6); }
+}
+
+html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--text-hi); stroke:currentColor; }
+
+.ab-card .ab-card__type,
+.ab-card h3 button { color:var(--text-hi); -webkit-text-stroke:.35px var(--z-black); paint-order:stroke fill; text-shadow:0 1px 2px color-mix(in srgb,var(--z-black) 70%,transparent); }
+
+.ab-category[data-board="gigz"][aria-pressed="false"] { color:color-mix(in srgb,var(--day-mon-text) 45%,var(--text-hi)); }
+
+@media(max-width:767px) {
+ .ab-page .ab-card__footer,.map-board-cards .ab-card__footer { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-1); }
+ .ab-page .ab-card__footer button,.map-board-cards .ab-card__footer button { padding:var(--space-2) var(--space-1); flex-wrap:nowrap; gap:2px; }
+}
+@media(max-width:360px) {
+ .ab-page .ab-card__footer button svg,.map-board-cards .ab-card__footer button svg { width:12px; height:12px; }
+}
+
+/* Housing money has a clear hierarchy; every card keeps the same value slot. */
+:is(.ab-page,.map-board-cards) .ab-card__bottom .ab-card__value { height:28px; min-height:28px; display:flex; align-items:baseline; gap:var(--space-1); }
+:is(.ab-page,.map-board-cards) .ab-pinned-card--housing .ab-card__bottom .ab-card__value { font-size:var(--title-lg); }
+.ab-card__value-label { color:var(--text-body); font:var(--fw-semibold) var(--meta-sm)/1.2 var(--font-body); text-transform:none; }
+@media(min-width:768px) {
+ :is(.ab-page,.map-board-cards) .ab-card__detail { height:1.4em; min-height:1.4em; -webkit-line-clamp:1; }
+}
+@media(max-width:767px) {
+ :is(.ab-page,.map-board-cards) .ab-pinned-card--housing .ab-card__bottom .ab-card__value { font-size:var(--title-md); }
+}
+
+.ab-card__value-amount { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.ab-card__value-label { flex:none; }

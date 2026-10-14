@@ -349,6 +349,7 @@ export default function Boards() {
                     type="button"
                     key={cat.id}
                     className="ab-category pdx-glass-rebind"
+                    data-board={cat.id}
                     style={{ "--c": cat.color } as CSSProperties}
                     aria-pressed={selection === cat.id}
                     onClick={() => select(cat.id)}

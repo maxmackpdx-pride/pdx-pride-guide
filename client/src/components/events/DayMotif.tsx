@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCardMotifParallax } from "../resources/useCardMotifParallax";
+import { useEffect, useState, type CSSProperties } from "react";
 import { EVENT_WEEK_DAYS } from "@shared/eventWeek";
 import "./DayMotif.css";
 import { CardArtworkGlass } from '../CardArtworkGlass';
@@ -7,9 +8,8 @@ import { CardArtworkGlass } from '../CardArtworkGlass';
  * Day motifs: one neon wireframe artwork per weekday, matched to the day's color.
  * Each motif is a stack of image layers from /motifs/days/: an opaque back layer and a
  * transparent top layer (Wednesday adds a transparent middle layer). The layers drift on
- * opposite diagonals: the back runs top-left to bottom-right, the top runs center-right
- * to bottom-left at 60% of the back's speed (the middle at 80%). Scroll drives the drift
- * where the browser supports scroll-driven animation; elsewhere it idles slowly.
+ * different directions with gentle idle drift. Shared pointer and scroll motion adds
+ * depth to the artwork while glass and content stay fixed.
  * Every card of a weekday gets the same motif, so a Friday card always reads as Friday.
  */
 
@@ -44,7 +44,7 @@ const layerSrc = (day: Day, layer: "back" | "mid" | "top") => `/motifs/days/${da
  *  - "art": fills a flyer slot when an event has no flyer
  */
 export default function DayMotif({ day, placement, className = "", glass = false }: { day: string | null | undefined; placement: "card" | "art"; className?: string; glass?: boolean }) {
-  const ref = useRef<HTMLSpanElement>(null);
+  const ref = useCardMotifParallax<HTMLSpanElement>();
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const el = ref.current;
@@ -67,7 +67,7 @@ export default function DayMotif({ day, placement, className = "", glass = false
     >
       {visible
         ? layers.map(layer => (
-            <img key={layer} className={`day-motif__layer day-motif__layer--${layer}`} src={layerSrc(code, layer)} alt="" loading="lazy" decoding="async" draggable={false} />
+            <img key={layer} data-motif-depth={layer==="back"?"back":layer==="mid"?"support":"front"} className={`day-motif__layer day-motif__layer--${layer}`} src={layerSrc(code, layer)} alt="" loading="lazy" decoding="async" draggable={false} />
           ))
         : null}
       {glass && <CardArtworkGlass />}

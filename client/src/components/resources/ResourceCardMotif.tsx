@@ -99,7 +99,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
   {colors && colors.length > 1 && <defs><linearGradient id={gradientId} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="400" y2="500">
    {resourceGradientStops(colors).map((stop, index) => <stop key={index} offset={`${stop.offset}%`} style={{ stopColor: stop.color }} />)}
   </linearGradient></defs>}
-  <g className="rg-motif-layer rg-motif-layer--mesh">
+  <g data-motif-depth="back" className="rg-motif-layer rg-motif-layer--mesh">
   <g className="rg-motif-drift" style={{ animationDuration: `${cycle}s`, animationDelay: `${phase}s` }}>
   <g className="rg-motif-mesh" fill="none" stroke={paint} strokeWidth=".65">
    {meshLinks}
@@ -121,7 +121,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
   <g stroke={paint} strokeWidth=".7" opacity=".4" fill="none"><path d="M32 155V135H52 M348 135H368V155 M32 365V385H52 M348 385H368V365" />{nodes.filter((_,i)=>i%7===0).map((p,i)=><path key={i} d={`M${p.x-5} ${p.y}h10 M${p.x} ${p.y-5}v10`}/>)}</g>
   </g>
   </g>
-  {supporting && <g className="rg-motif-layer rg-motif-layer--support">
+  {supporting && <g data-motif-depth="support" className="rg-motif-layer rg-motif-layer--support">
    <g className="rg-motif-support-drift" style={{ animationDuration: `${cycle + 17}s`, animationDelay: `${phase - 13}s` }}>
     <g className="rg-motif-support-position" transform={`translate(${rightAtTop ? 230 : 170} 165) scale(.78) translate(-200 -250)`}>
      <g fill="none" stroke={paint} strokeLinejoin="round">
@@ -132,7 +132,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
     </g>
    </g>
   </g>}
-  <g className="rg-motif-layer rg-motif-layer--object">
+  <g data-motif-depth="front" className="rg-motif-layer rg-motif-layer--object">
    <g className="rg-motif-object-drift" style={{ animationDuration: `${cycle + 9}s`, animationDelay: `${phase - 7}s` }}>
   <g className="rg-motif-breathe" style={{ animationDuration: `${cycle + 4}s`, animationDelay: `${phase}s` }}>
   <g className="rg-motif-object" fill="none" stroke={paint} strokeLinejoin="round" transform={`${isPlace ? `translate(${rightAtTop ? -22 : 22} 46) ` : ""}rotate(${tilt} 200 250)`}>

@@ -1,3 +1,4 @@
+import { hasHousingPets } from "@shared/boardMotifs";
 import type { HousingBoardResponse } from "@shared/housing";
 import { FORMING_FLAVOR_LABEL } from "@shared/housing";
 import type { GigPost } from "@/pages/PrideWork";
@@ -109,10 +110,12 @@ export type BoardPost = {
   description: string;
   area: string;
   value: string;
+  valueLabel?: string;
   detail: string;
   photo?: string;
   createdAt: string;
   householdCount?: number;
+  hasPets?: boolean;
   openSlots?: number;
   isDemo?: boolean;
   status?: string;
@@ -175,7 +178,8 @@ export function toBoardPosts(
           description: p.body,
           area: p.areas.join(" / "),
           photo: p.photos[0],
-          value: p.rent || p.budget || "",
+          value: p.type === "FORMING" ? (p.budget || "") : (p.rent || p.budget || ""),
+          valueLabel: p.type === "FORMING" ? "Budget" : undefined,
           detail:
             p.type === "FORMING"
               ? join(
@@ -183,6 +187,7 @@ export function toBoardPosts(
                   p.around && `Around ${p.around.propertyName}`,
                 )
               : join(p.roomNote, p.moveIn || p.moveTimeline),
+          hasPets: hasHousingPets(p.tags, p.household),
           householdCount: p.household.filter((person) => person.kind !== "PET")
             .length,
           openSlots: p.openSlots,

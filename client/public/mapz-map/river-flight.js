@@ -642,7 +642,7 @@ function drawLights(fade,target=map,surface=lights){
   }
   if(pass===1)for(const group of boardPins){
    const row=group.items[0].feature.properties;
-   drawBoardPin(lightsContext,group.x,group.y,row.color,row.key,pulseTime,reduced.matches,group.items.length,row.wireColor);
+   drawBoardPin(lightsContext,group.x,group.y,row.color,row.key,pulseTime,reduced.matches,group.items.length,row.wireColor,row.pinCyan);
    hitTargets.push({x:group.x,y:group.y-22,r:26,width:44,height:48,key:row.key,name:row.name,boardPinKeys:group.items.map(v=>v.feature.properties.key)});
   }
   for(const {feature,p,offset,neighbors=0} of ordered){

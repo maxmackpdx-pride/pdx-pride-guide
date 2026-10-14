@@ -21,11 +21,12 @@ export default function BoardBrowseCard({post,isSaved=false,saveDisabled=false,s
                         <BoardCardMotif post={post} placement="card" />
                         <div className="ab-card__glass" aria-hidden="true" />
                         <UnifiedBoardArt post={post} />
+                        {(post.isDemo || showStatus) && <div className="ab-card__status">{post.isDemo && <span className="ab-demo-badge">DEMO</span>}{showStatus && <span>{post.status}</span>}</div>}
                         <div className="ab-card__body">
                           <div className="ab-card__eyebrow">
-                            <p className="ab-card__type">{intentLabels[post.intent]}</p>{post.isDemo && <span className="ab-demo-badge">DEMO</span>}{showStatus && <span>{post.status}</span>}
+                            <p className="ab-card__type">{intentLabels[post.intent]}</p>
                           </div>
-                          {!!post.tags?.length && <div className="ab-card__tags" role="group" tabIndex={0} aria-label="Post tags, scroll for more">{post.tags.map(tag=><span key={tag}>{post.category==="housing"?housingTagLabel(tag):tag}</span>)}</div>}
+                          <div className="ab-card__tags" role={post.tags?.length ? "group" : undefined} tabIndex={post.tags?.length ? 0 : undefined} aria-hidden={!post.tags?.length || undefined} aria-label={post.tags?.length ? "Post tags, scroll for more" : undefined}>{post.tags?.map(tag=><span key={tag}>{post.category==="housing"?housingTagLabel(tag):tag}</span>)}</div>
                           <h3>
                             <button
                               type="button"
@@ -38,11 +39,10 @@ export default function BoardBrowseCard({post,isSaved=false,saveDisabled=false,s
                             {post.detail || post.description}
                           </p>
                           <div className="ab-card__bottom">
-                          {post.value && (
-                            <strong className="ab-card__value">
-                              {post.value.trim().toLowerCase() === "free" ? "FREE" : post.value}
+                          <strong className="ab-card__value" aria-hidden={(!post.value && !post.valueLabel) || undefined}>
+                              <span className="ab-card__value-amount">{post.value?.trim().toLowerCase() === "free" ? "FREE" : post.value}</span>
+                              {post.valueLabel && <small className="ab-card__value-label">{post.value ? post.valueLabel : `${post.valueLabel} not set`}</small>}
                             </strong>
-                          )}
                           <p className="ab-card__location" aria-hidden={!post.area || undefined} title={post.area || undefined}>
                             {post.area && <><MapPin size={13} /><span>{post.area}</span></>}
                           </p>
