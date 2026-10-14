@@ -98,6 +98,8 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 .event-hologram-logo-face{display:flex;align-items:center;justify-content:center;padding:6px;box-sizing:border-box;}
 .event-hologram-brand .event-hologram-logo-face canvas{max-height:86px;max-width:100%;}
 .event-hologram-poster{object-fit:cover;object-position:center;opacity:0;}
+/* Posters bleed across the entire frame, beyond its decorative cutouts. */
+.standalone-hologram-label--event[data-artwork-face="poster"]>.event-hologram-brand{inset:0;transform:none;}
 .standalone-hologram-label--event[data-artwork-face="poster"]>.event-hologram-brand,
 .standalone-hologram-label--event[data-artwork-face="logo"]>.event-hologram-brand{opacity:1;}
 [data-artwork-face="poster"] .event-hologram-poster{opacity:1;}
