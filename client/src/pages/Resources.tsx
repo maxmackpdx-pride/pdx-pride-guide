@@ -596,8 +596,6 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
             <div className="eb-panel eb-desktop-panel"><h3>Know someone we should know?</h3><Link className="eb-tool pdx-glass-rebind" href="/contact">Suggest a resource<ArrowUpRight size={16} /></Link></div>
           </aside>
           <section className="eb-results" aria-label="Resource results">
-            {communities.isLoading && <p role="status">Loading clubs and groups…</p>}
-            {communities.isError && <BrowseStatus title="Clubs and groups could not load" description="Existing resources are still available." actionLabel="Try again" onAction={() => {void communities.refetch();}} />}
             {mode === "talk" ? <><div className="eb-result-head"><h2>A person on the other end.</h2><button type="button" className="eb-clear" onClick={() => setMode("directory")}>Back to resources</button></div><div id="resource-talk-results"><TalkOptions /></div></> : <>
               {!rows.length ? <BrowseStatus title="No resources match your search" description="Try a broader search or another category." actionLabel="Clear filters" onAction={clear} /> : browseView === "browse" ?
                 <div className="eb-lanes">{browseGroups.map(({category, group}, index) => {

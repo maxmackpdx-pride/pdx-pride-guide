@@ -1662,7 +1662,7 @@ export default function Schedule({
                         >
                           <div style={b.overlayStyle} aria-hidden />
                           {b.showQuick && (
-                            <button onClick={b.onQuick} style={b.quickStyle}>
+                            <button type="button" aria-label={`${b.rsvp ? "Remove from" : "Add to"} my schedule: ${b.title}`} aria-pressed={b.rsvp} onClick={b.onQuick} style={b.quickStyle}>
                               {b.quickIcon}
                             </button>
                           )}

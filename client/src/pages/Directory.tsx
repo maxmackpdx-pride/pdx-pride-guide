@@ -532,7 +532,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
             </aside>
             <section className="eb-results" aria-label="Placez results">
               {isLoading ? <BoardLoadingState label="Loading directory" /> : isError ? <BrowseStatus error title="Places couldn’t load" description="Your filters are still here. Try loading the directory again." onAction={() => void refetch()} /> : !filtered.length ?
-                <BrowseStatus title="No places match your filters" description="Try a broader search or another neighborhood." actionLabel="Clear filters" onAction={() => { setSearchQuery(""); setActiveType("ALL"); setActiveNeighborhood("ALL"); }} /> :
+                <BrowseStatus title="No places match your filters" description="Try a broader search or another neighborhood." actionLabel="Clear filters" onAction={() => { setSearchQuery(""); setActiveType("ALL"); setActiveSubcategory("ALL"); setActiveNeighborhood("ALL"); }} /> :
                 browseView === "browse" ? <div className="eb-lanes">{categoryBands.map(category => {
                   const places = filtered.filter(place => place.type === category.key);
                   return places.length ? <BrowseLane key={category.key} title={category.label} color={category.color} count={places.length} onViewAll={() => {
@@ -673,7 +673,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         ) : isError ? (
           <BrowseStatus error title="Places couldn’t load" description="Your filters are still here. Try loading the directory again." onAction={() => void refetch()} />
         ) : filtered.length === 0 ? (
-          <BrowseStatus title={visibleBusinesses.length ? "No places match your filters" : "No places listed yet"} description="Try a broader search or add a place for the next person." actionLabel="Clear filters" onAction={() => { setSearchQuery(""); setActiveType(isSpaces ? "group" : "ALL"); setActiveNeighborhood("ALL"); }}>
+          <BrowseStatus title={visibleBusinesses.length ? "No places match your filters" : "No places listed yet"} description="Try a broader search or add a place for the next person." actionLabel="Clear filters" onAction={() => { setSearchQuery(""); setActiveType(isSpaces ? "group" : "ALL"); setActiveSubcategory("ALL"); setActiveNeighborhood("ALL"); }}>
             <Button variant="solid" accent="cyan" onClick={openAddForm}><Plus size={16} /> {isSpaces ? "Add a squad" : "Add a place"}</Button>
           </BrowseStatus>
         ) : (
