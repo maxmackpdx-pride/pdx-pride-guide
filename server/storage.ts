@@ -1,4 +1,5 @@
 import { pacificDayStart } from "./inboxReportingTime";
+import { withoutArchivedPosts } from "./boardArchive";
 import { seedResearchedProviderCards20261013 } from "./seedResearchedProviderCards20261013";
 import { seedOwnerRequestedPlaces20261013 } from "./seedOwnerRequestedPlaces20261013";
 import outzMapCatalog from "@shared/outzMapCatalog";
@@ -11196,14 +11197,13 @@ export const storage: IStorage = {
       avatarChoice: row.avatarChoice,
       posterAvatarRing: row.posterAvatarRing,
     }));
-    if (status) return rows.filter(g => g.status === status);
-    return rows;
+    return withoutArchivedPosts(sqlite,"gigz",status?rows.filter(g=>g.status===status):rows);
   },
   createGigPost(data) {
     return insertGigPostCompat({ ...data, status: "LIVE", createdAt: new Date().toISOString() });
   },
   getGigPostsByUser(userId) {
-    return db.select().from(gigPosts).where(eq(gigPosts.userId, userId)).all();
+    return withoutArchivedPosts(sqlite,"gigz",db.select().from(gigPosts).where(eq(gigPosts.userId, userId)).all());
   },
   updateGigPost(id, userId, data) {
     const params = {
@@ -13635,7 +13635,7 @@ export const storage: IStorage = {
       WHERE m.status = ?
       ORDER BY m.created_at DESC
     `).all(status) as any[];
-    return rows.map(row => mapMissedConnectionRow(row, viewerUserId));
+    return withoutArchivedPosts(sqlite,"mizzed",rows).map(row => mapMissedConnectionRow(row, viewerUserId));
   },
   getMissedConnectionsByBeach(beachId: string, viewerUserId?: number) {
     archiveExpiredMissedConnections();
@@ -13668,7 +13668,7 @@ export const storage: IStorage = {
       WHERE m.status = 'ACTIVE' AND m.beach_id = ?
       ORDER BY m.created_at DESC
     `).all(beachId) as any[];
-    return rows.map(row => mapMissedConnectionRow(row, viewerUserId));
+    return withoutArchivedPosts(sqlite,"mizzed",rows).map(row => mapMissedConnectionRow(row, viewerUserId));
   },
   getMissedConnectionsByEvent(eventId, viewerUserId?: number) {
     archiveExpiredMissedConnections();
@@ -13701,7 +13701,7 @@ export const storage: IStorage = {
       WHERE m.status = 'ACTIVE' AND m.event_id = ?
       ORDER BY m.created_at DESC
     `).all(eventId) as any[];
-    return rows.map(row => mapMissedConnectionRow(row, viewerUserId));
+    return withoutArchivedPosts(sqlite,"mizzed",rows).map(row => mapMissedConnectionRow(row, viewerUserId));
   },
   getMissedConnectionsByUser(userId) {
     archiveExpiredMissedConnections();
@@ -13731,7 +13731,7 @@ export const storage: IStorage = {
       WHERE m.user_id = ? AND m.status != 'DELETED'
       ORDER BY m.created_at DESC
     `).all(userId) as any[];
-    return rows.map(row => mapMissedConnectionRow(row, userId));
+    return withoutArchivedPosts(sqlite,"mizzed",rows).map(row => mapMissedConnectionRow(row, userId));
   },
   createMissedConnection(data) {
     const createdAt = new Date().toISOString();
@@ -13913,7 +13913,7 @@ export const storage: IStorage = {
       where.push(`p.user_id = ?`);
       params.push(opts.userId);
     }
-    return sqlite.prepare(`
+    return withoutArchivedPosts(sqlite,"giftz",sqlite.prepare(`
       SELECT p.*,
              u.username,
              u.display_name AS displayName,
@@ -13925,7 +13925,7 @@ export const storage: IStorage = {
       JOIN users u ON u.id = p.user_id
       ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
       ORDER BY p.created_at DESC
-    `).all(...params).map((post: any) => ({
+    `).all(...params) as any[]).map((post: any) => ({
       ...post,
       photoUrls: safeJson(post.photo_urls || post.photoUrls || "[]"),
       interests: this.getGiftingPost(post.id)?.interests || [],
@@ -14086,7 +14086,7 @@ export const storage: IStorage = {
     const params: any[] = [];
     if (!opts.includeInactive) where.push(`p.status IN ('ACTIVE','RESERVED')`);
     if (opts.userId) { where.push(`p.user_id = ?`); params.push(opts.userId); }
-    return sqlite.prepare(`
+    return withoutArchivedPosts(sqlite,"sellz",sqlite.prepare(`
       SELECT p.*, u.username, u.display_name AS displayName,
              u.photo_url AS posterPhotoUrl, u.avatar_choice AS avatarChoice,
              u.avatar_ring AS posterAvatarRing,
@@ -14094,7 +14094,7 @@ export const storage: IStorage = {
       FROM sellz_posts p JOIN users u ON u.id = p.user_id
       ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
       ORDER BY p.created_at DESC
-    `).all(...params).map((post: any) => ({
+    `).all(...params) as any[]).map((post: any) => ({
       ...post,
       photoUrls: safeJson(post.photo_urls || "[]"),
       interests: this.getSellzPost(post.id)?.interests || [],

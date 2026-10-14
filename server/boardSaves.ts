@@ -1,3 +1,4 @@
+import { isBoardArchived } from "./boardArchive";
 import type Database from "better-sqlite3";
 
 const boards = ["housing", "gigz", "giftz", "sellz", "mizzed"] as const;
@@ -35,7 +36,7 @@ export function createBoardSaves(db: Database.Database) {
       return rows.map((row) => `${row.board}:${row.post_id}`);
     },
     isPublic(board: SavedBoard, id: number): boolean {
-      return !!db.prepare(visibleSql[board]).get(id);
+      return !isBoardArchived(db,board,id) && !!db.prepare(visibleSql[board]).get(id);
     },
     save(userId: number, board: SavedBoard, id: number) {
       if (board === "housing" || board === "sellz") {

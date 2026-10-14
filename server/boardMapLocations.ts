@@ -1,3 +1,4 @@
+import { isBoardArchived } from "./boardArchive";
 import type Database from "better-sqlite3";
 
 /** Coordinates inherit the public lifetime of their post, including expiry. */
@@ -21,5 +22,5 @@ export function publicBoardMapLocations(db: Database.Database, now = new Date())
       SELECT 1 FROM housing_posts p WHERE p.id = m.post_id
       AND p.status IN ('ACTIVE','FILLED') AND p.hidden = 0 AND p.gone = 0
     )))
-  `).all({ now: now.toISOString() });
+  `).all({ now: now.toISOString() }).filter((row:any)=>!isBoardArchived(db,row.board==="houz"?"housing":row.board,row.postId));
 }

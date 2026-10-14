@@ -1,3 +1,4 @@
+import { isBoardArchived } from "./boardArchive";
 import { withinHousingBounds } from "../shared/housing";
 import { RESOURCE_MAP_ENTRIES } from "../client/src/lib/resourceMap";
 import type Database from "better-sqlite3";
@@ -103,6 +104,7 @@ export function registerBoardPlacement(app: Express, db: Database.Database, requ
     }
   })();
   const canPlace = (board:string,post:any) => {
+    if(isBoardArchived(db,board==="houz"?"housing":board as any,post.id))return false;
     if(board==="gigz")return ['LIVE','PENDING'].includes(post.status) && !post.is_remote;
     if(board==="houz")return ['ACTIVE','FILLED'].includes(post.status) && !post.hidden && !post.gone;
     if(board==="mizzed")return post.status==='ACTIVE' || (post.status==='ARCHIVED' && Date.parse(post.closes_at)<=Date.now());

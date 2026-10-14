@@ -23,3 +23,9 @@ test('real category identities count once while separate days and board types re
 test('posts with no author renderer and anonymous or unsupported posts cannot inflate visible score',()=>{
  const result=buildStashCollection({...empty,posts:[{id:1,contentType:'HUB'},{id:2,contentType:'SPOTTED'}],canRenderPosts:false});assert.equal(result.counts.boards,0);assert.equal(result.totalXp,0);assert.deepEqual(result.posts,[]);
 });
+
+test('archived and purged memories retain ten XP once per board identity without stale active cards',()=>{
+ const memory={board:'gigz',postId:2,title:'Past gig',createdAt:'2025-01-01',archivedAt:'2025-02-01',purgedAt:'2026-02-01'};
+ const result=buildStashCollection({...empty,posts:[{id:2,board:'GIGZ',contentType:'GIG'},{id:2,board:'GIFTZ',contentType:'GIFTING'}],memories:[memory,memory,{...memory,board:'housing'}]});
+ assert.equal(result.counts.boards,3);assert.equal(result.collectionXp,30);assert.equal(result.memories.length,2);assert.equal(result.posts.length,1);assert.equal(result.posts[0].contentType,'GIFTING');
+});

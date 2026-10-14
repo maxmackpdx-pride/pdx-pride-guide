@@ -1,3 +1,4 @@
+import { withoutArchivedPosts } from "../boardArchive";
 /**
  * HAUSING data access.
  *
@@ -166,7 +167,7 @@ function loadTrust(db: Database, viewerId: number | null, subjectIds: number[]):
   return out;
 }
 
-type PostRow = Record<string, any>;
+type PostRow = Record<string, any> & { id:number };
 
 function loadHousehold(db: Database, postIds: number[]): Map<number, HousingPerson[]> {
   const out = new Map<number, HousingPerson[]>();
@@ -263,6 +264,7 @@ export type ShapeOpts = { viewerId?: number | null };
 
 /** Turn raw rows into the view the board and cards render. */
 export function shapePosts(db: Database, rows: PostRow[], opts: ShapeOpts = {}): HousingPostView[] {
+  rows=withoutArchivedPosts(db,"housing",rows);
   if (!rows.length) return [];
   const viewerId = opts.viewerId ?? null;
   const ids = rows.map((r) => r.id);

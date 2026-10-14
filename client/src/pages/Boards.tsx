@@ -1,3 +1,4 @@
+import BoardArchiveList, { BoardArchiveFeedback } from "@/components/board/BoardArchiveList";
 import BoardBrowseCard from "@/components/board/BoardBrowseCard";
 import { useBrowseControlsOffset } from "@/components/discovery/useBrowseControlsOffset";
 import BoardCategoryFollows from "@/components/board/BoardCategoryFollows";
@@ -191,6 +192,7 @@ export default function Boards() {
       : "all";
   const savedOnly = params.get("saved") === "1";
   const mineOnly = params.get("mine") === "1";
+  const archiveOnly = params.get("archive") === "1";
   const featureFilters = {itemCategory: params.get("category") || "", condition: params.get("condition") || "", price: params.get("price") || "", remote: params.get("remote") === "1", source: params.get("source") || "", neighborhood: params.get("neighborhood") || "", sort: params.get("sort") || "newest", tags:(params.get("tags") || "").split(",").filter(Boolean)};
   const hasFeatureFilters = Object.entries(featureFilters).some(([key,value])=>key === "sort" ? value !== "newest" : Array.isArray(value) ? value.length > 0 : Boolean(value));
   const postKey = params.get("post");
@@ -210,6 +212,7 @@ export default function Boards() {
   const feeds = useQueries({
     queries: boardCategories.map((cat) => ({
       queryKey: [cat.endpoint, "all-boards", user?.id],
+      enabled: !archiveOnly,
       queryFn: () =>
         apiRequest("GET", cat.endpoint).then(
           (r) => r.json() as Promise<BoardPayload>,
@@ -218,7 +221,7 @@ export default function Boards() {
   });
   const ownerFeeds = useQueries({queries: boardCategories.map(cat => ({
     queryKey: [cat.endpoint + "/mine", "all-boards", user?.id],
-    enabled: !!user && mineOnly,
+    enabled: !!user && mineOnly && !archiveOnly,
     queryFn: () => apiRequest("GET", cat.endpoint + "/mine").then(r => r.json() as Promise<BoardPayload>),
   }))});
   const postingStatus = useQuery<{postingOpen:boolean;message:string}>({queryKey:["/api/gifting/status"]});
@@ -282,9 +285,9 @@ export default function Boards() {
   ), featureFilters);
   // A category doorway shows every matching post; the mixed feed loads progressively.
   const visibleResults = selectedCategory ? results : results.slice(0, limit);
-  const clear = () => update({ q: null, intent: null, saved: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null }, true);
+  const clear = () => update({ archive:null, q: null, intent: null, saved: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null }, true);
   const select = (board: Selection) => {
-    update({ board, q: null, intent: null, saved: null, post: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null });
+    update({ board, archive:null, q: null, intent: null, saved: null, post: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null });
     window.scrollTo({ top: 0, behavior: "instant" });
   };
   const close = () => {
@@ -358,7 +361,7 @@ export default function Boards() {
                   </button>
                 ))}
               </div>
-              <div className="eb-search-row">
+              {!archiveOnly && <div className="eb-search-row">
                 <SearchInput
                   aria-label="Search community boards"
                   placeholder={
@@ -404,14 +407,17 @@ export default function Boards() {
                   />
                   <span>Saved</span>
                 </button>
-              </div>
+              </div>}
               <div className="eb-browse-actions">
-                <button type="button" className="eb-tool" aria-pressed={mineOnly} onClick={()=>user?update({mine:mineOnly?null:"1",saved:null},true):setShowAuth(true)} title="Edit your posts and manage active, pending, and completed listings">My posts</button>
-                <button type="button" className="eb-tool eb-view-all" aria-pressed={selection === "all"} onClick={() => select("all")}>
+                <button type="button" className="eb-tool" aria-pressed={mineOnly && !archiveOnly} onClick={()=>user?update({mine:mineOnly && !archiveOnly?null:"1",archive:null,saved:null},true):setShowAuth(true)} title="Edit your posts and manage active, pending, and completed listings">My posts</button>
+                <button type="button" className="eb-tool" aria-pressed={archiveOnly} onClick={()=>user?update({archive:archiveOnly?null:"1",mine:null,saved:null,post:null},true):setShowAuth(true)}>Archive</button>
+                <button type="button" className="eb-tool eb-view-all" aria-pressed={selection === "all" && !archiveOnly} onClick={() => select("all")}>
                   <LayoutGrid size={18} aria-hidden="true" />View all
                 </button>
               </div>
             </div>
+            <BoardArchiveFeedback />
+            {archiveOnly ? <BoardArchiveList userId={user?.id} onSignIn={()=>setShowAuth(true)}/> : <>
                 <div className="eb-result-head ab-result-head">
                   <div className="ab-result-meta">
                   <p aria-live="polite">
@@ -567,6 +573,7 @@ export default function Boards() {
                 )}
               </section>
             </div>
+            </>}
       </div>
       <Suspense
         fallback={

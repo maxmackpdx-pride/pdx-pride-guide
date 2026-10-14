@@ -14,7 +14,7 @@ import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent } from "./types";
 import "./FlyerStash.css";
 
-import { buildStashCollection, normalizeStashRole as normalizeRole, STASH_WORK_XP, type StashRole } from "./stashCollection";
+import { buildStashCollection, normalizeStashRole as normalizeRole, STASH_WORK_XP, type StashRole, type BoardMemory } from "./stashCollection";
 
 type WorkMeta = {
   label: string;
@@ -52,6 +52,7 @@ export type Props = {
   completedAdventures?: ProfileAdventure[];
   favoritePlaces?: StashPlace[];
   boardPosts?: ProfileBoardPost[];
+  boardMemories?: BoardMemory[];
   author?: UpdatesAuthor;
   onPlaceOpen?: (place: StashPlace, element: HTMLElement) => void;
   onBoardOpen?: (post: ProfileBoardPost) => void;
@@ -74,7 +75,7 @@ type BuiltFlyer = {
   event: ProfileEvent;
 };
 
-function formatShortDate(iso?: string | null): string {
+function formatShortDate(iso?: string | null, includeYear = false): string {
   if (!iso) return "";
   const ms = Date.parse(iso.includes("T") || /[zZ]|[+-]\d\d:?\d\d$/.test(iso) ? iso : `${iso}T12:00:00-07:00`);
   if (!Number.isFinite(ms)) return String(iso).slice(0, 10);
@@ -82,6 +83,7 @@ function formatShortDate(iso?: string | null): string {
     timeZone: "America/Los_Angeles",
     month: "short",
     day: "numeric",
+    ...(includeYear ? {year: "numeric" as const} : {}),
   }).format(new Date(ms));
 }
 
@@ -145,12 +147,12 @@ export default function FlyerStash({
   events,
   onEventClick,
   collectHref = "/events",
-  completedAdventures = [], favoritePlaces = [], boardPosts = [],
+  completedAdventures = [], favoritePlaces = [], boardPosts = [], boardMemories = [],
   onPlaceOpen, onBoardOpen, onRequireAuth, author,
 }: Props) {
-  const collection = useMemo(() => buildStashCollection({events,adventures:completedAdventures,places:favoritePlaces,posts:boardPosts,canRenderPosts:!!author}),[events,completedAdventures,favoritePlaces,boardPosts,author]);
+  const collection = useMemo(() => buildStashCollection({events,adventures:completedAdventures,places:favoritePlaces,posts:boardPosts,memories:boardMemories,canRenderPosts:!!author}),[events,completedAdventures,favoritePlaces,boardPosts,boardMemories,author]);
   const base = useMemo(() => buildFlyers(collection.events),[collection.events]);
-  const {adventures,places,posts,counts,collectionXp} = collection;
+  const {adventures,places,posts,memories,counts,collectionXp} = collection;
   const [category,setCategory] = useState<'all'|'flyers'|'outz'|'places'|'boards'>('all');
   const n = base.length;
 
@@ -278,6 +280,7 @@ export default function FlyerStash({
             })}
             {(category==='all' || category==='places') && places.map(place=><div className="flyer-stash__album-item" role="listitem" key={`place:${place.id}`}><ProfilePlacePreview place={place} onOpen={element=>onPlaceOpen?.(place,element)} onRequireAuth={onRequireAuth}/><p className="flyer-stash__album-caption">Favorite place · 10 XP</p></div>)}
             {(category==='all' || category==='boards') && posts.map(post=><div className="flyer-stash__album-item flyer-stash__album-item--board" role="listitem" key={`board:${post.contentType}:${post.id}`}><UpdatesPanel posts={[post]} author={author!} hideHeader onPostClick={onBoardOpen}/><p className="flyer-stash__album-caption">Community post · 10 XP</p></div>)}
+            {(category==='all' || category==='boards') && memories.map(memory=><div className="flyer-stash__album-item flyer-stash__board-memory" role="listitem" key={`board:${memory.board}:${memory.postId}`}><h3>{memory.title}</h3><p>{{housing:'My Hoüz',gigz:'Gigz',giftz:'Giftz',sellz:'Sellz',mizzed:'Mizzed'}[memory.board]} · Archived {formatShortDate(memory.archivedAt, true)}</p><p className="flyer-stash__album-caption">Community post · 10 XP · Only you see this</p></div>)}
           </div>
           {!counts[category] && <p className="flyer-stash__album-empty">Nothing collected here yet.</p>}
           <details className="flyer-stash__album-scoring"><summary>How collection XP works</summary><p>Flyers keep their existing attendance/work XP and rare bonus. Each unique past Outz check-in destination and date adds 25 XP; a favorite place adds 10 XP; a community post adds 10 XP. Repeated records count once.</p></details>

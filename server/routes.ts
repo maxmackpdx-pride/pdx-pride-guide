@@ -1,6 +1,7 @@
 import { createInboxDailyReminder } from "./inboxDailyReminder";
 import { inboxCaseForMutation } from "./inboxWorkflow";
 import { metricsForInbox } from "./inboxPolicy";
+import { registerBoardArchiveRoutes } from "./boardArchiveRoutes";
 import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "./boardMotifs";
 import { registerBoardPlacement } from "./boardMapPlacement";
 import { homeCatalogCounts } from "./homeStats";
@@ -1187,6 +1188,7 @@ function notifyAttendanceUpdate(eventId: number) {
 }
 
 export function registerRoutes(httpServer: Server, app: Express) {
+  registerBoardArchiveRoutes(app, sqlite, requireAuth, httpServer);
   const eventSaves = createEventSaves(sqlite);
   const boardSaves = createBoardSaves(sqlite);
   assertProductionPersistence();

@@ -1,3 +1,4 @@
+import { BoardArchiveAction } from "./BoardArchiveList";
 import { housingTagLabel } from "@shared/housingTags";
 import { useRef, type CSSProperties } from "react";
 import { MapPin } from "lucide-react";
@@ -67,6 +68,6 @@ export default function BoardBrowseCard({post,isSaved=false,saveDisabled=false,s
                           </div>
                         </div>
                         </article>
-                        {post.isMine && <BoardMapPlacement board={post.category} postId={post.id}/>}
+                        {post.isMine && <div className="board-card-owner-controls"><BoardMapPlacement board={post.category} postId={post.id}/><BoardArchiveAction board={post.category} postId={post.id} title={post.title}/></div>}
                       </div>);
 }

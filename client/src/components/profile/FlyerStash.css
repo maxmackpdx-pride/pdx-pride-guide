@@ -58,3 +58,8 @@
 .flyer-stash__album-caption{margin:var(--space-2) 0 0}
 .flyer-stash__album-scoring{margin-top:var(--space-5)}
 .flyer-stash__album-scoring summary{min-height:44px;display:flex;align-items:center;cursor:pointer}
+
+/* Private, minimal memories deliberately have no full-post link or media. */
+.flyer-stash__board-memory { width: 100%; padding: var(--space-3); border-bottom: var(--bw-hair) solid var(--panel-border-2); }
+.flyer-stash__board-memory h3 { margin: 0 0 var(--space-2); font: var(--fw-bold) var(--title-sm)/1.2 var(--font-display); overflow-wrap: anywhere; }
+.flyer-stash__board-memory p { margin: var(--space-2) 0 0; color: var(--text-lo); }
