@@ -520,7 +520,7 @@ export default function Boards() {
                     return (
                       <div
                         key={post.key}
-                        className="ab-pinned-card"
+                        className="ab-pinned-card pdx-glass-rebind"
                         style={{ "--c": cat.color } as CSSProperties}
                       >
                         <BoardPushPin postKey={post.key} />
