@@ -82,7 +82,7 @@ try{
      if(soakMs>0){
       const started=performance.now(),origin=performance.timeOrigin,samples=[],gestureIntervals=[];
       let previous=performance.now(),soakFrame,lastSample=started,index=0;
-      const measure=now=>{if(map.isMoving())gestureIntervals.push(now-previous);previous=now;soakFrame=requestAnimationFrame(measure);};
+      const measure=now=>{if(map.isMoving()&&now>previous)gestureIntervals.push(now-previous);previous=now;soakFrame=requestAnimationFrame(measure);};
       soakFrame=requestAnimationFrame(measure);
       const views=[{center:[-122.675,45.524],zoom:15.5},{center:[-122.65,45.52],zoom:14.5},{center:[-122.68,45.51],zoom:16}];
       try{
