@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createProfileShareCache} from './profileShareCache';
+import {profileShareImagePath} from '../shared/profileShare';
+test('public share path normalizes handles and safely encodes usernames with version',()=>{assert.equal(profileShareImagePath(' @name '),'/api/og/profile/name?v=3');assert.equal(profileShareImagePath('@name'),'/api/og/profile/name?v=3');});
+test('same visual key deduplicates concurrent rendering and reuses output until expiry',async()=>{let now=0,calls=0;const cache=createProfileShareCache({ttlMs:10,now:()=>now});let resolve!: (image:Buffer)=>void;const render=()=>{calls++;return new Promise<Buffer>(r=>resolve=r);};const first=cache('public-fields',render),second=cache('public-fields',render);resolve(Buffer.from('image'));assert.equal(await first,await second);assert.equal(calls,1);assert.equal((await cache('public-fields',render)).toString(),'image');now=11;const next=cache('public-fields',render);resolve(Buffer.from('updated'));assert.equal((await next).toString(),'updated');assert.equal(calls,2);});
+test('changed public visual fields render independently and least-recent entries are bounded',async()=>{let calls=0;const cache=createProfileShareCache({maxEntries:1,maxBytes:10});const render=async()=>Buffer.from(String(++calls));await cache('old-photo',render);await cache('new-photo',render);await cache('old-photo',render);assert.equal(calls,3);});
+test('failed render is never cached and pending requests recover',async()=>{const cache=createProfileShareCache();await assert.rejects(cache('photo',async()=>{throw new Error('bad image');}));assert.equal((await cache('photo',async()=>Buffer.from('retry'))).toString(),'retry');});

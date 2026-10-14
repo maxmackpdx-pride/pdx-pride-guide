@@ -98,7 +98,7 @@ export default function ProfileHero({
       avatarRing={data.avatarRing}
       displayName={data.displayName}
       username={data.username}
-      size={88}
+      size={152}
       className="pp-hero__avatar-el"
     />
   );
@@ -111,11 +111,13 @@ export default function ProfileHero({
             className="pp-hero__banner-img"
             src={data.coverImageUrl}
             alt=""
+            decoding="async"
+            fetchPriority="high"
             style={coverCropToImgStyle(data.coverCrop)}
           />
         </div>
       ) : banner ? (
-        <img className="pp-hero__banner" src={banner} alt="" />
+        <img className="pp-hero__banner" src={banner} alt="" decoding="async" />
       ) : (
         <div className="pp-hero__banner-fallback" aria-hidden="true">
           <div className="pp-hero__banner-dots" />
@@ -134,23 +136,10 @@ export default function ProfileHero({
             ) : (
               avatar
             )}
-            {data.viewerIsAdmin && !isOwner && data.photoUrl ? (
-              <AdminProfilePhotoReject username={data.username} />
-            ) : null}
-            {data.viewerIsAdmin && !isOwner ? (
-              <AdminProfileModeration
-                username={data.username}
-                accountStatus={(data as any).accountStatus}
-                shadowBanned={!!(data as any).shadowBanned}
-                canDeleteAccount={canDeleteAccount}
-              />
-            ) : null}
-            {!isOwner && viewer && !data.viewerIsAdmin ? (
-              <ReportAccount username={data.username} />
-            ) : null}
           </div>
 
           <div className="pp-hero__meta">
+            <span className="pp-hero__eyebrow">Zaylist / People</span>
             <div className="pp-hero__name-row">
               <h1 className="display pp-hero__name">{displayName}</h1>
               <RoleStickers
@@ -167,10 +156,11 @@ export default function ProfileHero({
               ) : null}
               {metaLine ? <span className="pp-hero__meta-line display">{metaLine}</span> : null}
             </div>
+            {data.bio ? <p className="pp-hero__bio">{data.bio}</p> : null}
           </div>
 
           {/* Single action row - no second copy under the avatar/bio */}
-          <div className="pp-hero__actions">
+          <div className={`pp-hero__actions${isOwner ? " pp-hero__actions--owner" : ""}`}>
             {!isOwner && (
               <>
                 <button
@@ -179,6 +169,8 @@ export default function ProfileHero({
                   onClick={onFollow}
                   disabled={followPending || blockStatus.interactionBlocked}
                   data-testid="profile-follow"
+                  aria-pressed={isFollowing}
+                  aria-busy={followPending}
                 >
                   {isFollowing && (
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -191,9 +183,6 @@ export default function ProfileHero({
                   <button type="button" className="pp-btn pp-btn--message" onClick={onMessage} data-testid="profile-message">
                     Message
                   </button>
-                )}
-                {viewer && !data.viewerIsAdmin && (
-                  <BlockMemberButton username={data.username} blocked={blockStatus.blockedByViewer} />
                 )}
                 {blockStatus.blockedViewer && !blockStatus.blockedByViewer && (
                   <span className="pp-hero__blocked-note">Contact unavailable</span>
@@ -242,15 +231,35 @@ export default function ProfileHero({
                 onClose={onShareToggle}
                 onCopy={onCopy}
                 onMessage={!isOwner && !blockStatus.interactionBlocked ? onMessage : undefined}
+                username={data.username}
                 profileUrl={profileUrl}
                 displayName={displayName}
                 anchorRef={shareRef}
               />
             </div>
           </div>
+          {!isOwner && viewer && <details className="pp-hero__manage">
+            <summary>Account options</summary>
+            <div className="pp-hero__manage-tools">
+            {data.viewerIsAdmin && !isOwner && data.photoUrl ? (
+              <AdminProfilePhotoReject username={data.username} />
+            ) : null}
+            {data.viewerIsAdmin && !isOwner ? (
+              <AdminProfileModeration
+                username={data.username}
+                accountStatus={(data as any).accountStatus}
+                shadowBanned={!!(data as any).shadowBanned}
+                canDeleteAccount={canDeleteAccount}
+              />
+            ) : null}
+            {!isOwner && viewer && !data.viewerIsAdmin ? (
+              <ReportAccount username={data.username} />
+            ) : null}
+              {!data.viewerIsAdmin && <BlockMemberButton username={data.username} blocked={blockStatus.blockedByViewer} />}
+            </div>
+          </details>}
         </div>
 
-        {data.bio ? <p className="pp-hero__bio">{data.bio}</p> : null}
       </div>
     </section>
   );

@@ -1,5 +1,8 @@
-import { useState, type ReactNode } from "react";
-import { DraggableWidgetGrid, type WidgetItem } from "@/components/ui/draggable-widget-grid";
+import { Suspense, useState, type ReactNode } from "react";
+import type { WidgetItem } from "@/components/ui/draggable-widget-grid";
+import { lazyWithReload } from "@/lib/lazyWithReload";
+const DraggableWidgetGrid = lazyWithReload(() => import("@/components/ui/draggable-widget-grid").then(module => ({ default: module.DraggableWidgetGrid })));
+import "./ProfileWidgetGrid.css";
 
 export type ProfileSection = WidgetItem & { content: ReactNode };
 
@@ -27,15 +30,16 @@ export default function ProfileWidgetGrid({ username, sections }: { username: st
   }
   if (!sections.length) return null;
   return (
-    <section className="pp-widget-board" aria-label="Profile sections">
-      <div className="pp-widget-board__toolbar">
-        <p>{editing ? "Drag a section heading to move it. On touch, press and hold. Keyboard: Alt + arrow keys." : "Arrange this profile view. Saved on this device."}</p>
+    <section className="pp-widget-board" data-profile-composition aria-label="Profile sections">
+      <div className="pp-widget-board__toolbar" aria-label="Arrange profile sections">
+        <p>{editing ? "Drag a section heading to move it. On touch, press and hold. Keyboard: Alt + arrow keys." : "Your view · saved on this device"}</p>
         <div>
           {editing && <button type="button" onClick={() => { save(sections); setRevision(v => v + 1); }}>Reset layout</button>}
           <button type="button" aria-pressed={editing} onClick={() => setEditing(v => !v)}>{editing ? "Done arranging" : "Arrange view"}</button>
         </div>
       </div>
       <span className="sr-only" role="status">{notice}</span>
+      {editing ? <Suspense fallback={<p className="pp-widget-board__loading" role="status">Loading arrangement tools…</p>}>
       <DraggableWidgetGrid
         key={`${revision}:${sections.map(s => s.id).join(",")}`}
         items={items}
@@ -47,8 +51,16 @@ export default function ProfileWidgetGrid({ username, sections }: { username: st
         radius={18}
         contentSized
         className={`pp-widget-grid${editing ? " is-editing" : ""}`}
-        renderItem={item => byId.get(item.id)?.content}
+        renderItem={item => <><div className="pp-widget-board__handle" aria-hidden="true">Move {item.label}</div>{byId.get(item.id)?.content}</>}
       />
+      </Suspense> : <div className="pp-widget-static" role="list" aria-label="Profile sections">
+        {ids.map(id => {
+          const section = byId.get(id)!;
+          return <div key={id} role="listitem" aria-label={section.label} className={`pp-widget-static__section${section.size === "wide" || section.size === "lg" ? " is-wide" : ""}`}>
+            {section.content}
+          </div>;
+        })}
+      </div>}
     </section>
   );
 }

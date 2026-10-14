@@ -1,3 +1,4 @@
+import {profileShareImagePath} from "@shared/profileShare";
 import { outzShareId } from "@shared/outzShare";
 import { getOutzSharePlace } from "./outzShareCards";
 import { buildGoogleAnalyticsHead } from "./gaSnippet";
@@ -608,7 +609,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
       ? `${SITE_URL}/api/og/place/${livePlace.id}?v=2`
       : liveProfile
         // v= query busts crawler caches after OG renderer fixes (remote Google avatars, etc.)
-        ? `${SITE_URL}/api/og/profile/${encodeURIComponent(liveProfile.username)}?v=2`
+        ? `${SITE_URL}${profileShareImagePath(liveProfile.username)}`
         : boardShareKey
           ? shareCardUrl(boardShareKey)
           : pathKey === "/needz" ? absoluteAssetUrl("/og/zaylist-needz-v1.png") : pathKey === "/boardz" ? absoluteAssetUrl("/og/zaylist-our-boardz-v1.png") : defaultShareCardUrl();

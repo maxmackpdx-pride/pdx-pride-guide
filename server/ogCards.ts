@@ -6,6 +6,9 @@
  * outer edge of the image (inward), not a circular crop.
  */
 import fs from "node:fs";
+import {profileShareDisplayPath} from "./profileShareType";
+import {createProfileShareCache} from "./profileShareCache";
+import {PROFILE_SHARE_IMAGE_VERSION, profileShareImagePath} from "@shared/profileShare";
 import path from "node:path";
 import sharp from "sharp";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
@@ -28,7 +31,7 @@ function publicRoots(): string[] {
   return [
     path.resolve(process.cwd(), "dist", "public"),
     path.resolve(process.cwd(), "client", "public"),
-    path.resolve(__dirname, "public"),
+    path.resolve(typeof __dirname === "string" ? __dirname : path.join(process.cwd(), "server"), "public"),
   ];
 }
 
@@ -201,10 +204,11 @@ export function ogPlaceCardUrl(placeId: number): string {
 }
 
 /** Bump when profile card layout/fetch logic changes so scrapers re-pull (not sticky cache). */
-const PROFILE_OG_VERSION = "2";
+const PROFILE_OG_VERSION = PROFILE_SHARE_IMAGE_VERSION;
+const profileShareCache = createProfileShareCache();
 
 export function ogProfileCardUrl(username: string): string {
-  return `${SITE_URL}/api/og/profile/${encodeURIComponent(username.replace(/^@/, "").trim())}?v=${PROFILE_OG_VERSION}`;
+  return `${SITE_URL}${profileShareImagePath(username)}`;
 }
 
 /** Conic stops matching client avatar ring CSS (for rectangular edge glow). */
@@ -372,6 +376,14 @@ export async function renderProfileOgCard(usernameRaw: string): Promise<Buffer |
   const user = storage.getUserByUsername(username) as any;
   if (!user || String(user.status || "").toLowerCase() !== "active") return null;
 
+  const localPhoto = resolveLocalAsset(user.photoUrl);
+  const photoRevision = localPhoto ? fs.statSync(localPhoto).mtimeMs : null;
+  const key = JSON.stringify([PROFILE_OG_VERSION, user.username, user.displayName, user.photoUrl, photoRevision, user.avatarRing, user.accentColor]);
+  // The active-public gate above runs on every request, before any cached artwork is returned.
+  return profileShareCache(key, () => renderPublicProfileArtwork(user, username));
+}
+
+export async function renderPublicProfileArtwork(user: {photoUrl?: string | null; avatarRing?: string | null; displayName?: string | null; username?: string; accentColor?: string | null}, username: string): Promise<Buffer> {
   const ring = normalizeAvatarRing(user.avatarRing);
   // Local /uploads photos OR remote (Google Sign-In avatars - previously skipped → monogram fallback)
   const raw = await loadAvatarBuffer(user.photoUrl || null);
@@ -387,6 +399,10 @@ export async function renderProfileOgCard(usernameRaw: string): Promise<Buffer |
 
   const display = String(user.displayName || user.username || username).trim();
   const handle = `@${user.username || username}`;
+  const nameGlyphs = Array.from(display.toUpperCase());
+  const cardName = nameGlyphs.length > 42 ? `${nameGlyphs.slice(0, 41).join("")}…` : nameGlyphs.join("");
+  const nameSize = Math.min(42, Math.floor((W - 96) / Math.max(1, Array.from(cardName).length * .65)));
+  const namePath = profileShareDisplayPath(cardName, {x:48,y:H-61,width:W-96,height:45,maxSize:44}, "#FFFFFF");
   const rawAccent = String(user.accentColor || "#FF00CC").trim() || "#FF00CC";
   const accent = rawAccent.toUpperCase() === "#00EE44" ? "#39FF14" : rawAccent;
 
@@ -410,8 +426,8 @@ export async function renderProfileOgCard(usernameRaw: string): Promise<Buffer |
     </filter>
   </defs>
   <!-- Outer soft bloom (inward from edges) -->
-  <rect x="8" y="8" width="${W - 16}" height="${H - 16}" fill="none" stroke="url(#ring)" stroke-width="64" filter="url(#softer)" opacity="0.85"/>
-  <rect x="10" y="10" width="${W - 20}" height="${H - 20}" fill="none" stroke="url(#ring)" stroke-width="28" filter="url(#soft)" opacity="0.95"/>
+  <rect x="8" y="8" width="${W - 16}" height="${H - 16}" fill="none" stroke="url(#ring)" stroke-width="40" filter="url(#softer)" opacity="0.45"/>
+  <rect x="10" y="10" width="${W - 20}" height="${H - 20}" fill="none" stroke="url(#ring)" stroke-width="18" filter="url(#soft)" opacity="0.6"/>
   <!-- Crisp inner edge band -->
   <rect x="14" y="14" width="${W - 28}" height="${H - 28}" fill="none" stroke="url(#ring)" stroke-width="10" opacity="0.95"/>
   <rect x="18" y="18" width="${W - 36}" height="${H - 36}" fill="none" stroke="url(#ring)" stroke-width="3" opacity="0.7"/>
@@ -419,9 +435,9 @@ export async function renderProfileOgCard(usernameRaw: string): Promise<Buffer |
   <rect width="${W}" height="${H}" fill="url(#inward)"/>
   <!-- Bottom name plate -->
   <rect x="0" y="${H - 120}" width="${W}" height="120" fill="#060608" fill-opacity="0.72"/>
-  <text x="48" y="${H - 68}" fill="#CCFF00" font-family="ui-monospace, Menlo, monospace" font-size="16" letter-spacing="0.2em">ZAYLIST · MEMBER</text>
-  <text x="48" y="${H - 28}" fill="#FFFFFF" font-family="Arial Narrow, Arial, sans-serif" font-weight="900" font-size="42" letter-spacing="0.02em">${escapeXml(display.toUpperCase())}</text>
-  <text x="${W - 48}" y="${H - 32}" fill="${escapeXml(accent)}" font-family="ui-monospace, Menlo, monospace" font-size="22" letter-spacing="0.08em" text-anchor="end">${escapeXml(handle)}</text>
+  <text x="48" y="${H - 68}" fill="#CCFF00" font-family="ui-monospace, Menlo, monospace" font-size="16" letter-spacing="0.2em">Follow me on Zaylist</text>
+  ${namePath || `<text x="48" y="${H - 28}" fill="#FFFFFF" font-family="Arial Narrow, Arial, sans-serif" font-weight="900" font-size="${nameSize}" letter-spacing="0.02em">${escapeXml(cardName)}</text>`}
+  <text x="${W - 48}" y="${H - 68}" fill="${escapeXml(accent)}" font-family="ui-monospace, Menlo, monospace" font-size="22" letter-spacing="0.08em" text-anchor="end">${escapeXml(handle)}</text>
 </svg>`);
 
   if (photoBuf) {
@@ -433,10 +449,11 @@ export async function renderProfileOgCard(usernameRaw: string): Promise<Buffer |
 
   // No photo: solid dark field with monogram + same edge glow
   const initial = (display.replace(/[^a-zA-Z0-9]/g, "").slice(0, 1) || "?").toUpperCase();
+  const initialPath = profileShareDisplayPath(initial,{x:0,y:85,width:W,height:380,maxSize:220,align:"center"},escapeXml(accent));
   const fallback = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
   <rect width="${W}" height="${H}" fill="#121218"/>
-  <text x="50%" y="48%" fill="${escapeXml(accent)}" font-family="Arial Narrow, Arial, sans-serif" font-weight="900" font-size="220" text-anchor="middle" dominant-baseline="middle">${escapeXml(initial)}</text>
+  ${initialPath ? initialPath : `<text x="50%" y="48%" fill="${escapeXml(accent)}" font-family="Arial Narrow, Arial, sans-serif" font-weight="900" font-size="220" text-anchor="middle" dominant-baseline="middle">${escapeXml(initial)}</text>`}
 </svg>`);
 
   return sharp(await sharp(fallback).png().toBuffer())

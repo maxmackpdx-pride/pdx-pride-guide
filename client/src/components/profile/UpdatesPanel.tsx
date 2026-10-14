@@ -1,9 +1,10 @@
 import { ArrowRight } from "lucide-react";
 import ZLineIcon from "@/components/ZLineIcon";
-import { useCallback, useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent, type CSSProperties } from "react";
+import { Suspense, useCallback, useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent, type CSSProperties } from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
-import BoardPostOverlay from "@/components/board/BoardPostOverlay";
+import { lazyWithReload } from "@/lib/lazyWithReload";
+const BoardPostOverlay = lazyWithReload(() => import("@/components/board/BoardPostOverlay"));
 import { memberProfileHref } from "@/lib/avatarLinks";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
@@ -597,12 +598,12 @@ export default function UpdatesPanel({
         })}
       </div>
 
-      {boardOverlay ? (
+      {boardOverlay ? (<Suspense fallback={<p role="status">Opening post…</p>}>
         <BoardPostOverlay
           kind={boardOverlay.kind}
           postId={boardOverlay.postId}
           onClose={() => setBoardOverlay(null)}
-        />
+        /></Suspense>
       ) : null}
     </section>
   );
