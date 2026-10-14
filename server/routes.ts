@@ -1,3 +1,5 @@
+import { inboxCaseForMutation } from "./inboxWorkflow";
+import { metricsForInbox } from "./inboxPolicy";
 import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "./boardMotifs";
 import { registerBoardPlacement } from "./boardMapPlacement";
 import { homeCatalogCounts } from "./homeStats";
@@ -32,6 +34,8 @@ import {
 import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts, normalizeAttendanceVisibility, isFollowingBoard, setBoardFollowing, type FollowableRoom } from "./storage";
 import { isTransactionalEmailConfigured, sendOwnerDeskNotification, sendPasswordResetEmail } from "./email";
 import {
+  inboxWorkflow,
+  ADMIN_QUEUE_KINDS,
   adminSearchForViewer,
   attachDirectoryListing,
   checkAdminMessageRateLimit,
@@ -1082,6 +1086,12 @@ function requireAdmin(req: any, res: any, next: any) {
     return next();
   }
   return res.status(401).json({ error: "Not authenticated" });
+}
+
+function requirePrimaryInboxOwner(req: any, res: any, next: any) {
+  const user = req.session?.userId ? storage.getUserById(req.session.userId) : null;
+  if (!user || !storage.isPrimarySiteOwner(user)) return res.status(403).json({ error: "Primary owner only" });
+  next();
 }
 
 const requireEventResearchAccess = allowAdminOrEventResearchAgent(requireAdmin);
@@ -5597,6 +5607,36 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
+  // Escalations cannot be resolved through an older admin screen or direct request.
+  app.use((req, res, next) => {
+    if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
+    const item = inboxCaseForMutation(req.path);
+    if (!item || inboxWorkflow.get(item.kind, item.entityId)?.status !== "escalated") return next();
+    return requireAdmin(req, res, () => requirePrimaryInboxOwner(req, res, next));
+  });
+
+  app.get("/api/admin/inbox-workflow/:kind/:id", requireAdmin, (req, res) => {
+    if (!Number.isSafeInteger(Number(req.params.id)) || Number(req.params.id) <= 0 || !ADMIN_QUEUE_KINDS.includes(req.params.kind as any) || req.params.kind === "logo_request") return res.status(400).json({ error: "Invalid shared case" });
+    res.setHeader("Cache-Control", "private, no-store");
+    res.json(inboxWorkflow.history(req.params.kind, Number(req.params.id)));
+  });
+  app.post("/api/admin/inbox-workflow/:kind/:id", requireAdmin, (req, res) => {
+    const kind = String(req.params.kind), entityId = Number(req.params.id);
+    const sources: Record<string, string> = { submission: "submissions", promoter: "promoters", business_claim: "businessClaims", business_submission: "businessSubmissions", moderation: "moderation", missed_connection: "missedConnections", gifting_report: "giftingReports", gifting_flagged: "giftingPosts", river_brats: "riverBrats", gig_pending: "gigPending" };
+    const raw = getAdminQueueAggregate().raw as Record<string, any[]>;
+    const item = sources[kind] && raw[sources[kind]]?.find(row => row.id === entityId);
+    if (kind === "missed_connection" && (item?.adminReviewed || item?.status !== "ACTIVE")) return res.status(404).json({ error: "This case is no longer active" });
+    if (kind === "gifting_flagged" && Number(item?.reportCount || 0) <= 0) return res.status(404).json({ error: "This case is no longer flagged" });
+    if (!item || ["RESOLVED", "REJECTED", "REMOVED", "GIFTED", "FOUND", "EXPIRED"].includes(String(item.status).toUpperCase())) return res.status(404).json({ error: "This case is no longer in the active queue" });
+    const actor = storage.getUserById(req.session.userId!);
+    try {
+      const result = inboxWorkflow.change({kind, entityId, status: req.body?.status, reason: req.body?.reason, version: req.body?.version, actor: actor?.username || "Admin", primaryOwner: Boolean(actor && storage.isPrimarySiteOwner(actor))});
+      res.json(result);
+    } catch (error) {
+      res.status(409).json({ error: error instanceof Error ? error.message : "Could not update case" });
+    }
+  });
+
   app.get("/api/admin/me", requireAdmin, (req, res) => {
     const mainUser = getSessionAdminUser(req);
     const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
@@ -5848,13 +5888,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
-  app.get("/api/admin/business-logo-requests", requireAdmin, (req, res) => {
+  app.get("/api/admin/business-logo-requests", requireAdmin, requirePrimaryInboxOwner, (req, res) => {
     res.json(req.query.recent === "true"
       ? storage.getRecentResolvedBusinessLogoRequests()
       : storage.getPendingBusinessLogoRequests());
   });
 
-  app.post("/api/admin/business-logo-requests/:id/approve", requireAdmin, (req, res) => {
+  app.post("/api/admin/business-logo-requests/:id/approve", requireAdmin, requirePrimaryInboxOwner, (req, res) => {
     const overrideImageUrl = req.body?.imageUrl ? String(req.body.imageUrl) : undefined;
     const id = Number(req.params.id);
     const result = storage.approveBusinessLogoRequest(id, overrideImageUrl);
@@ -5863,7 +5903,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(result);
   });
 
-  app.post("/api/admin/business-logo-requests/:id/deny", requireAdmin, (req, res) => {
+  app.post("/api/admin/business-logo-requests/:id/deny", requireAdmin, requirePrimaryInboxOwner, (req, res) => {
     const id = Number(req.params.id);
     storage.rejectBusinessLogoRequest(id, req.body?.reason);
     auditAdmin(req, "deny_logo", { type: "logo_request", id });
@@ -6273,7 +6313,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/admin/pending-count", requireAdmin, (req, res) => {
     const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() : 0;
+    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() + getAdminQueueAggregate().workSummary.escalated : 0;
     const breakdown = storage.getAdminQueueBreakdown();
     const queueCount = breakdown.total;
     const guideUnread = breakdown.guideUnread;
@@ -6296,7 +6336,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/admin/pulse", requireAdmin, (req, res) => {
     const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
     const breakdown = storage.getAdminQueueBreakdown();
-    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() : 0;
+    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() + getAdminQueueAggregate().workSummary.escalated : 0;
     const metrics = storage.getAdminMetrics();
     res.json({
       generatedAt: new Date().toISOString(),
@@ -6335,9 +6375,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
    * Single payload for floating inbox Admin · Queue (all buckets + soft claims).
    * Prefer this over 10 parallel list endpoints on mobile admin.
    */
-  app.get("/api/admin/queue", requireAdmin, (_req, res) => {
+  app.get("/api/admin/queue", requireAdmin, (req, res) => {
     try {
-      res.json(getAdminQueueAggregate());
+      res.json(getAdminQueueAggregate(Boolean(req.session?.userId && storage.isPrimarySiteOwner(storage.getUserById(req.session.userId)))));
     } catch (err) {
       console.error("[admin/queue]", err);
       res.status(500).json({ error: "Could not load admin queue" });
@@ -6371,7 +6411,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       String(req.params.kind || ""),
       Number(req.params.entityId),
       actor.id,
-      { force: Boolean(req.query.force === "1" || req.body?.force) },
+      // Client flags never grant claim-release authority.
     );
     if (result.error) return res.status(400).json({ error: result.error });
     auditAdmin(req, "queue_release", {
@@ -7365,7 +7405,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     return res.json({ ...totals, members });
   });
 
-  app.get("/api/admin/metrics", requireAdmin, async (_req, res) => {
+  app.get("/api/admin/metrics", requireAdmin, async (req, res) => {
     try {
       const metrics = storage.getAdminMetrics();
       const gaTrackingEnabled = !!readGaMeasurementId();
@@ -7390,7 +7430,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
         };
       }
 
-      res.json(metrics);
+      res.setHeader("Cache-Control", "private, no-store");
+      const viewer = req.session?.userId ? storage.getUserById(req.session.userId) : null;
+      res.json(metricsForInbox(metrics, Boolean(viewer && storage.hasOwnerAdminAccess(viewer))));
     } catch (err) {
       console.error("[admin/metrics]", err);
       res.status(500).json({ error: err instanceof Error ? err.message : "Failed to load admin metrics" });

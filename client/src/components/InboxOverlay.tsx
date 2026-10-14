@@ -59,7 +59,7 @@ function InboxPanelHeader({ onClose, onRefresh, refreshing = false, guest = fals
 
 const ACCOUNTS: Array<[Account, string, string]> = [
   ["personal", "Personal", C.limeSoft],
-  ["admin", "Admin", C.magenta],
+  ["admin", "Staff", C.cyan],
   ["owner", "Owner", C.purple],
 ];
 
@@ -92,6 +92,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
   const [view, setView] = useState<View>("inbox");
   const [account, setAccount] = useState<Account>("personal");
   const [folder, setFolder] = useState<Folder>("inbox");
+  const [queueWorkFilter, setQueueWorkFilter] = useState("all");
   const [queueFolder, setQueueFolder] = useState<QueueFolder>("active");
   const [filter, setFilter] = useState("all");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -439,7 +440,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                   ] as Array<[QueueFolder, string]>)
                 : ([
                     ["active", "Active desk"],
-                    ["completed", "Recently deleted"],
+                    ["completed", "Done"],
                   ] as Array<[QueueFolder, string]>)
               ).map(([f, label]) => {
                 const act = queueFolder === f;
@@ -447,7 +448,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                   f === "inbox"
                     ? (pendingAdmin.guideUnread || adminGuideUnread || 0)
                     : f === "active"
-                      ? (pendingAdmin.queueCount ?? pendingAdmin.count ?? 0)
+                      ? (account === "owner" ? pendingAdmin.ownerCount || 0 : pendingAdmin.queueCount ?? pendingAdmin.count ?? 0)
                       : 0;
                 const pillClass =
                   account === "admin"
@@ -604,6 +605,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
               {inboxActive && account === "admin" && (queueFolder === "active" || queueFolder === "completed") && (
                 <QueueView
                   mode="admin"
+                  initialWorkFilter={queueWorkFilter}
                   queueFolder={queueFolder}
                   guideUnread={pendingAdmin.guideUnread || adminGuideUnread || 0}
                   ownerCount={isOwner ? (pendingAdmin.ownerCount || 0) : 0}
@@ -622,7 +624,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                 <QueueView mode="owner" queueFolder={queueFolder === "completed" ? "completed" : "active"} />
               )}
               {view === "posts" && <PostsView onNavigate={navigateFromSheet} />}
-              {view === "stats" && <StatsView />}
+              {view === "stats" && <StatsView onOpenQueue={isAdmin ? (status) => {setQueueWorkFilter(status);setView("inbox");setAccount("admin");setQueueFolder("active");} : undefined} />}
             </>
           )}
         </Tabs.Content>

@@ -3,6 +3,8 @@
  * Not used by public member surfaces.
  */
 import { storage, sqlite } from "./storage";
+import { createInboxWorkflow } from "./inboxWorkflow";
+import { mayReleaseQueueClaim } from "./inboxPolicy";
 
 export const ADMIN_QUEUE_KINDS = [
   "submission",
@@ -100,6 +102,7 @@ export function ensureAdminOpsSchema() {
 }
 
 ensureAdminOpsSchema();
+export const inboxWorkflow = createInboxWorkflow(sqlite);
 
 export function reclaimStaleAdminQueueClaims(nowIso = new Date().toISOString()): number {
   ensureAdminOpsSchema();
@@ -171,6 +174,9 @@ export function claimAdminQueueItem(
     };
   }
 
+  if (existing && existing.assigneeUserId !== assigneeUserId && !storage.hasOwnerAdminAccess(assignee)) {
+    return { error: "Only an owner admin can take over another admin's claim" };
+  }
   const now = new Date().toISOString();
   sqlite.prepare(`
     INSERT INTO admin_queue_claims (queue_kind, entity_id, assignee_user_id, claimed_at)
@@ -207,9 +213,10 @@ export function releaseAdminQueueClaim(
     WHERE queue_kind = ? AND entity_id = ?
   `).get(kind, entityId) as { assigneeUserId: number } | undefined;
   if (!existing) return { ok: true };
+  // force is reserved for trusted post-decision cleanup, never HTTP input.
   if (!opts?.force && existing.assigneeUserId !== actorUserId) {
     const actor = storage.getUserById(actorUserId);
-    if (!actor || !storage.hasOwnerAdminAccess(actor)) {
+    if (!actor || !mayReleaseQueueClaim(actorUserId, existing.assigneeUserId, storage.hasOwnerAdminAccess(actor))) {
       return { error: "Only the assignee or an owner admin can release this claim" };
     }
   }
@@ -311,7 +318,7 @@ export function executeBulkEvents(
 }
 
 /** One payload for floating inbox Admin · Queue (mobile-friendly). Includes raw lists for mappers. */
-export function getAdminQueueAggregate() {
+export function getAdminQueueAggregate(primaryOwner = false) {
   reclaimStaleAdminQueueClaims();
   const breakdown = storage.getAdminQueueBreakdown();
   const claims = listAdminQueueClaims();
@@ -334,10 +341,27 @@ export function getAdminQueueAggregate() {
   const gigsAll = storage.getGigPosts();
   const gigPending = gigsAll.filter((g) => String(g.status || "").toUpperCase() === "PENDING");
 
+  const activeCases = [
+    ...submissionsPending.map(x => ({kind:"submission",id:x.id})),
+    ...promoters.map(x => ({kind:"promoter",id:x.id})),
+    ...businessClaims.map(x => ({kind:"business_claim",id:x.id})),
+    ...businessSubmissions.map(x => ({kind:"business_submission",id:x.id})),
+    ...moderation.map(x => ({kind:"moderation",id:x.id})),
+    ...missedConnections.filter(x => String(x.status).toUpperCase() === "ACTIVE" && !x.adminReviewed).map(x => ({kind:"missed_connection",id:x.id})),
+    ...giftingReports.map(x => ({kind:"gifting_report",id:x.id})),
+    ...giftingFlagged.map(x => ({kind:"gifting_flagged",id:x.id})),
+    ...riverBrats.map(x => ({kind:"river_brats",id:x.id})),
+    ...gigPending.map(x => ({kind:"gig_pending",id:x.id})),
+  ];
+  const workflow = inboxWorkflow.list().filter(w => activeCases.some(x => x.kind === w.kind && x.id === w.entityId));
+  const waiting = workflow.filter(w => w.status === "waiting").length;
+  const escalated = workflow.filter(w => w.status === "escalated").length;
   return {
     generatedAt: new Date().toISOString(),
+    workSummary: { total: activeCases.length, review: activeCases.length - waiting - escalated, waiting, escalated },
     breakdown,
     claims,
+    workflow,
     /** Full entities for QueueView mappers - one round-trip instead of ~10. */
     raw: {
       submissions: submissionsPending,
@@ -365,7 +389,7 @@ export function getAdminQueueAggregate() {
       gigPending: gigPending.length,
     },
     ownerOnly: {
-      logoRequests: storage.getPendingBusinessLogoRequests(),
+      logoRequests: primaryOwner ? storage.getPendingBusinessLogoRequests() : [],
     },
   };
 }

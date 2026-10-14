@@ -1,3 +1,4 @@
+import { pacificDayStart } from "./inboxReportingTime";
 import { seedResearchedProviderCards20261013 } from "./seedResearchedProviderCards20261013";
 import { seedOwnerRequestedPlaces20261013 } from "./seedOwnerRequestedPlaces20261013";
 import outzMapCatalog from "@shared/outzMapCatalog";
@@ -14355,14 +14356,9 @@ export const storage: IStorage = {
   getAdminMetrics() {
     const counts = getTableCounts();
     const now = new Date();
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
-    const weekStart = new Date(now);
-    weekStart.setDate(weekStart.getDate() - 7);
-    weekStart.setHours(0, 0, 0, 0);
-    const prevWeekStart = new Date(now);
-    prevWeekStart.setDate(prevWeekStart.getDate() - 14);
-    prevWeekStart.setHours(0, 0, 0, 0);
+    const todayStart = pacificDayStart(now);
+    const weekStart = pacificDayStart(now, 7);
+    const prevWeekStart = pacificDayStart(now, 14);
 
     const countSince = (table: string, sinceIso: string, extraWhere = "") => {
       const row = sqlite.prepare(
@@ -14378,31 +14374,15 @@ export const storage: IStorage = {
     };
 
     const dailyTrend14d = (table: string, extraWhere = "") => {
-      const start = new Date(now);
-      start.setDate(start.getDate() - 13);
-      start.setHours(0, 0, 0, 0);
-      const rows = sqlite.prepare(`
-        SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS count
-        FROM ${table}
-        WHERE created_at >= ?${extraWhere ? ` AND ${extraWhere}` : ""}
-        GROUP BY substr(created_at, 1, 10)
-      `).all(start.toISOString()) as Array<{ day: string; count: number }>;
-      const byDay = Object.fromEntries(rows.map(r => [r.day, r.count]));
-      const series: number[] = [];
-      for (let i = 13; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        const key = d.toISOString().slice(0, 10);
-        series.push(byDay[key] ?? 0);
-      }
-      return series;
+      return Array.from({length:14}, (_, index) => {
+        const daysAgo = 13 - index;
+        return countBetween(table, pacificDayStart(now, daysAgo).toISOString(), pacificDayStart(now, daysAgo - 1).toISOString(), extraWhere);
+      });
     };
 
     const memberGrowth12h = (() => {
       const bucketMs = 12 * 60 * 60 * 1000;
-      const windowStart = new Date(now);
-      windowStart.setDate(windowStart.getDate() - 14);
-      windowStart.setHours(0, 0, 0, 0);
+      const windowStart = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
       const buckets: Array<{
         at: string;
         signups: number;

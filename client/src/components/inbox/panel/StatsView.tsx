@@ -41,6 +41,8 @@ type Metrics = {
   activeSessions: number;
   liveEvents: number;
   userSubmittedEvents: number;
+  claimedEvents: number;
+  unclaimedEvents: number;
   messages: number;
   attendances: number;
   pendingSubmissions: number;
@@ -216,14 +218,15 @@ function ActionFlow({ metrics }: { metrics: NonNullable<Metrics["productExperien
   );
 }
 
-export default function StatsView() {
+export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) => void}) {
   const { user } = useAuth();
   const fullStats = !!(user?.canViewUsers || user?.isPrimaryOwner);
   const isOwner = !!user?.isPrimaryOwner;
 
-  const { data: m } = useQuery<Metrics>({
+  const { data: work } = useQuery<{workSummary: {review:number;waiting:number;escalated:number}}>({queryKey:["/api/admin/queue"], queryFn:async()=>{const r=await fetch("/api/admin/queue",{credentials:"include"});if(!r.ok)throw Error("Could not load queue");return r.json();}, refetchInterval:45_000});
+  const { data: m, isError, refetch } = useQuery<Metrics>({
     queryKey: ["/api/admin/metrics"],
-    queryFn: () => fetch("/api/admin/metrics", { credentials: "include" }).then((r) => (r.ok ? r.json() : null)),
+    queryFn: async () => {const r=await fetch("/api/admin/metrics", {credentials:"include"});if(!r.ok)throw Error("Metrics are unavailable");return r.json();},
   });
 
   const { data: places = [] } = useQuery<unknown[]>({
@@ -238,13 +241,14 @@ export default function StatsView() {
     enabled: isOwner,
   });
 
+  if (isError) return <div className="inbox-exp-empty" role="alert">Metrics could not load. <button type="button" onClick={()=>void refetch()}>Retry</button></div>;
   if (!m) {
     return <div className="inbox-exp-empty">LOADING STATS…</div>;
   }
 
   const tr = m.traffic;
-  const claimed = Math.max(0, m.liveEvents - m.userSubmittedEvents);
-  const unclaimed = m.userSubmittedEvents;
+  const claimed = m.claimedEvents;
+  const unclaimed = m.unclaimedEvents;
   const total = claimed + unclaimed;
   const claimedPct = total ? (claimed / total) * 100 : 0;
 
@@ -257,7 +261,7 @@ export default function StatsView() {
         [m.attendances, "MEMBER RSVPS"],
         [m.giftingPosts, "GIFTZ POSTS"],
         [m.missedConnections, "MIZZED CONNECTION"],
-        [m.userSubmittedEvents, "UNCLAIMED EVENTS"],
+        [m.unclaimedEvents, "UNCLAIMED EVENTS"],
       ]
     : [
         [m.liveEvents, "LIVE EVENTS"],
@@ -265,12 +269,12 @@ export default function StatsView() {
         [m.attendances, "MEMBER RSVPS"],
         [m.giftingPosts, "GIFTZ POSTS"],
         [m.missedConnections, "MIZZED CONNECTION"],
-        [m.userSubmittedEvents, "UNCLAIMED EVENTS"],
+        [m.unclaimedEvents, "UNCLAIMED EVENTS"],
       ];
 
   const board = hbars(
     [
-      ["Messages", m.messages],
+      ...(fullStats ? [["Messages", m.messages] as [string, number]] : []),
       ["RSVPs", m.attendances],
       ["GIGZ", m.gigPosts],
       ["GIFTZ", m.giftingPosts],
@@ -285,13 +289,14 @@ export default function StatsView() {
 
   return (
     <div className="inbox-exp-stats">
+      {onOpenQueue && work?.workSummary && <section className="inbox-workspace" aria-label="Operational insights"><RoomKicker accent={C.cyan} as="div">Work that needs action</RoomKicker><div className="inbox-workspace__metrics">{([['review','Need review'],['waiting','Waiting'],['escalated','Owner decision']] as const).map(([status,label])=><button key={status} type="button" onClick={()=>onOpenQueue(status)}><strong>{work.workSummary[status]}</strong><span>{label}</span></button>)}</div><p className="inbox-workspace__note">Open cases, not messages or people. Select a count to see the work behind it.</p></section>}
       {fullStats && (
         <>
           <RoomKicker accent="var(--green-acid, #39ff14)" as="div">Site pulse</RoomKicker>
           <div className="inbox-exp-stats-pulse">
             <div className="inbox-exp-stats-pulse__label">LIVE RIGHT NOW</div>
             <div className="inbox-exp-stats-pulse__row">
-              <span className="inbox-exp-stats-pulse__value">{tr?.activeNow ?? m.activeSessions}</span>
+              <span className="inbox-exp-stats-pulse__value">{tr?.activeNow ?? "—"}</span>
               <span className="inbox-exp-stats-pulse__sub">visitors in the last 5 min</span>
             </div>
             <div className="inbox-exp-stats-pulse__foot">
@@ -304,10 +309,10 @@ export default function StatsView() {
       <div className={`inbox-exp-stats-title${fullStats ? "" : " inbox-exp-stats-title--first"} inbox-exp-stats-title--tight`}>
         SNAPSHOT
       </div>
-      <p className="inbox-exp-stats-copy">Live totals across the platform right now.</p>
+      <p className="inbox-exp-stats-copy">Live totals across the platform. Today uses Pacific time; the current day is incomplete.</p>
       <div className="inbox-exp-stats-stack">
         {[
-          [m.newUsersToday, "NEW USERS TODAY", C.limeSoft],
+          ...(fullStats ? [[m.newUsersToday, "NEW USERS TODAY", C.limeSoft]] : []),
           [m.userSubmittedEvents, "USER EVENT SUBMISSIONS", C.cyan],
           [m.attendances, "RSVPS GOING", C.magenta],
         ].map(([value, label, color], i) => (

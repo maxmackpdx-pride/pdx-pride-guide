@@ -1,6 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import { RoomKicker } from "@/components/ds";
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -11,6 +11,7 @@ import { publicHttpUrl } from "@shared/safeHttpUrl";
 import type { QueueFolder } from "../types";
 import { C, MONO } from "./sheet";
 import "../inbox.css";
+import "../inbox-workspace.css";
 
 type QueueRowKind =
   | "submission"
@@ -132,7 +133,7 @@ function mapSubmission(s: any, completed = false): QueueRow | null {
     body: s.claimReason || undefined,
     proofUrl: s.type === "PROMOTER_APPLICATION" ? publicHttpUrl(s.ticketUrl) || undefined : undefined,
     outcome: completed ? status : undefined,
-    completedAt: completed ? String(s.createdAt || "") : undefined,
+    completedAt: completed ? String(s.resolvedAt || s.reviewedAt || "") : undefined,
     readOnly: completed,
   };
 }
@@ -159,7 +160,7 @@ function mapPendingGig(g: any, completed = false): QueueRow | null {
     ],
     note: g.description || g.adminNotes || "",
     outcome: completed ? status : undefined,
-    completedAt: completed ? String(g.createdAt || "") : undefined,
+    completedAt: completed ? String(g.resolvedAt || "") : undefined,
     readOnly: completed,
   };
 }
@@ -181,7 +182,7 @@ function mapRiverBratsReport(r: any, completed = false): QueueRow | null {
     ],
     note: r.details || r.message || "",
     outcome: completed ? status : undefined,
-    completedAt: completed ? String(r.createdAt || r.resolved_at || "") : undefined,
+    completedAt: completed ? String(r.resolvedAt || r.resolved_at || "") : undefined,
     readOnly: completed,
   };
 }
@@ -200,7 +201,7 @@ function mapGiftingReport(r: any, completed = false): QueueRow | null {
     fields: [["Post", String(r.postTitle || r.postId || "-")]],
     note: r.message || "",
     outcome: completed ? status : undefined,
-    completedAt: completed ? String(r.createdAt || r.resolved_at || "") : undefined,
+    completedAt: completed ? String(r.resolvedAt || r.resolved_at || "") : undefined,
     readOnly: completed,
   };
 }
@@ -475,6 +476,7 @@ function invalidateAdminQueue(qc: ReturnType<typeof useQueryClient>) {
 export default function QueueView({
   mode,
   queueFolder,
+  initialWorkFilter = "all",
   guideUnread = 0,
   ownerCount = 0,
   onOpenGuideInbox,
@@ -482,6 +484,7 @@ export default function QueueView({
 }: {
   mode: "admin" | "owner";
   queueFolder: QueueFolder;
+  initialWorkFilter?: string;
   /** Shared guide-admin message unread - shown as a jump chip into Admin · Inbox. */
   guideUnread?: number;
   ownerCount?: number;
@@ -490,18 +493,21 @@ export default function QueueView({
 }) {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [open, setOpen] = useState<Record<string, boolean>>({});
   const [rejectReasons, setRejectReasons] = useState<Record<string, string>>({});
   const [rejectNotes, setRejectNotes] = useState<Record<string, string>>({});
   /** NEW PLACE rows: typed @handle when the owner isn't the submitter. */
   const [ownerInputs, setOwnerInputs] = useState<Record<string, string>>({});
   /** "all" | "mine" | bucket id from ADMIN_QUEUE_BUCKETS */
   const [bucketFilter, setBucketFilter] = useState<string>("all");
-  const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
-  const [bulkPending, setBulkPending] = useState(false);
-  const accent = mode === "admin" ? C.magenta : C.purple;
+  const [search, setSearch] = useState("");
+  const [workFilter, setWorkFilter] = useState(initialWorkFilter);
+  const [focusedId, setFocusedId] = useState<string | null>(null);
+  useEffect(() => {setWorkFilter(initialWorkFilter);setBucketFilter("all");setSearch("");}, [initialWorkFilter, mode, queueFolder]);
+  const [workReason, setWorkReason] = useState("");
+  const [workAction, setWorkAction] = useState<"waiting" | "escalated" | null>(null);
+  const accent = mode === "admin" ? C.cyan : C.purple;
   const completed = queueFolder === "completed";
-  const useAggregate = mode === "admin" && !completed;
+  const useAggregate = !completed;
 
   const adminFetch = async (url: string) => {
     const r = await fetch(url, { credentials: "include" });
@@ -511,6 +517,7 @@ export default function QueueView({
 
   /** Active shared queue: one payload (mobile reliability). */
   const aggregateQuery = useQuery<{
+    workflow?: Array<{kind: string; entityId: number; status: string; reason: string; version: number; updatedAt: string; actor: string}>;
     raw: {
       submissions: any[];
       promoters: any[];
@@ -637,14 +644,19 @@ export default function QueueView({
           bizSubsQuery.isError && "venue submissions",
         ].filter(Boolean) as string[])
     : ([
+        aggregateQuery.isError && !completed && "shared escalations",
         ownerQuery.isError && "owner desk",
         logoQuery.isError && "logo requests",
       ].filter(Boolean) as string[]);
 
-  const onQueueSuccess = () => invalidateAdminQueue(qc);
+  const onQueueSuccess = () => {
+    invalidateAdminQueue(qc);
+    qc.invalidateQueries({queryKey: ["/api/admin/inbox-workflow"]});
+    qc.invalidateQueries({queryKey: ["/api/admin/metrics"]});
+  };
   const resolveOwnerDesk = useMutation({
     mutationFn: (id: number) =>
-      fetch(`/api/admin/feedback/${id}/resolve`, { method: "POST", credentials: "include" }),
+      apiRequest("POST", `/api/admin/feedback/${id}/resolve`, {}),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
       qc.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
@@ -653,22 +665,12 @@ export default function QueueView({
 
   const approveSub = useMutation({
     mutationFn: (id: number) =>
-      fetch(`/api/admin/submissions/${id}/approve`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminName: user?.displayName || user?.username || "admin" }),
-      }),
+      apiRequest("POST", `/api/admin/submissions/${id}/approve`, {adminName: user?.displayName || user?.username || "admin"}),
     onSuccess: onQueueSuccess,
   });
   const declineSub = useMutation({
     mutationFn: (id: number) =>
-      fetch(`/api/admin/submissions/${id}/reject`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: "" }),
-      }),
+      apiRequest("POST", `/api/admin/submissions/${id}/reject`, {reason: ""}),
     onSuccess: onQueueSuccess,
   });
   const resolveRiverBrats = useMutation({
@@ -760,19 +762,6 @@ export default function QueueView({
   });
 
   const rows: QueueRow[] = useMemo(() => {
-    if (mode === "owner") {
-      const items: QueueRow[] = [];
-      for (const r of ownerReports) {
-        const row = mapOwnerDeskItem(r, completed);
-        if (row) items.push(row);
-      }
-      // Logo requests are Owner inbox only.
-      for (const l of logoReqs) {
-        const row = mapLogoRequest(l, completed);
-        if (row) items.push(row);
-      }
-      return completed ? sortCompletedRows(items) : items;
-    }
     const items: QueueRow[] = [];
     for (const s of subs) {
       // Standalone promoter applications render in the promoter queue (enriched there).
@@ -816,8 +805,13 @@ export default function QueueView({
       const row = mapPendingGig(g, completed);
       if (row) items.push(row);
     }
+    if (mode === "owner") {
+      const escalated = completed ? [] : items.filter(row => aggregateQuery.data?.workflow?.some(w => w.kind === (row.kind === "promoter_request" ? "promoter" : row.kind === "spotted" ? "missed_connection" : row.kind) && w.entityId === row.entityId && w.status === "escalated"));
+      const ownerItems = [...escalated, ...ownerReports.map(r => mapOwnerDeskItem(r, completed)).filter((r): r is QueueRow => !!r), ...logoReqs.map(r => mapLogoRequest(r, completed)).filter((r): r is QueueRow => !!r)];
+      return completed ? sortCompletedRows(ownerItems) : ownerItems;
+    }
     return completed ? sortCompletedRows(items) : items;
-  }, [mode, completed, subs, riverBratsReports, giftingAdmin, spotted, moderationReqs, promoterReqs, businessClaims, businessSubs, logoReqs, gigs, ownerReports]);
+  }, [mode, completed, subs, riverBratsReports, giftingAdmin, spotted, moderationReqs, promoterReqs, businessClaims, businessSubs, logoReqs, gigs, ownerReports, aggregateQuery.data?.workflow]);
 
   const queueClaims =
     aggregateQuery.data?.claims
@@ -838,36 +832,27 @@ export default function QueueView({
     return kind;
   };
 
-  const rowsFiltered = useMemo(() => {
-    if (bucketFilter !== "mine" || !user?.id) return rows;
-    return rows.filter((r) => {
-      const c = claimFor(r.kind, r.entityId);
-      return c && c.assigneeUserId === user.id;
-    });
-  }, [rows, bucketFilter, user?.id, queueClaims]);
-
-  const selectedQueueRows = rowsFiltered.filter((row) => selectedRows[row.id]);
-  const selectableQueueRows = rowsFiltered.filter((row) => !row.readOnly && !claimFor(row.kind, row.entityId));
-  const toggleSelected = (id: string) => setSelectedRows((current) => ({ ...current, [id]: !current[id] }));
-  const clearSelected = () => setSelectedRows({});
-  const claimSelected = async () => {
-    if (!selectedQueueRows.length || bulkPending) return;
-    setBulkPending(true);
-    try {
-      await Promise.all(selectedQueueRows.map(async (row) => {
-        const response = await apiRequest("POST", "/api/admin/queue-claims", {
-          kind: claimKindFor(row.kind),
-          entityId: row.entityId,
-          takeover: false,
-        });
-        if (!response.ok) throw new Error(`Could not claim ${row.title}`);
-      }));
-      clearSelected();
-      invalidateAdminQueue(qc);
-    } finally {
-      setBulkPending(false);
-    }
-  };
+  const workflowFor = (row: QueueRow) => aggregateQuery.data?.workflow?.find(w => w.kind === claimKindFor(row.kind) && w.entityId === row.entityId);
+  const rowsFiltered = rows.filter(row => {
+    const claim = claimFor(row.kind, row.entityId);
+    if (bucketFilter === "mine" && claim?.assigneeUserId !== user?.id) return false;
+    if (bucketFilter !== "all" && bucketFilter !== "mine" && !ADMIN_QUEUE_BUCKETS.find(b => b.id === bucketFilter)?.kinds.includes(row.kind)) return false;
+    if (workFilter === "unassigned" && claim) return false;
+    if (["waiting", "escalated", "review"].includes(workFilter) && (workflowFor(row)?.status || "review") !== workFilter) return false;
+    return `${row.title} ${row.meta} ${row.tag}`.toLowerCase().includes(search.toLowerCase());
+  });
+  const focused = rowsFiltered.find(row => row.id === focusedId) || rowsFiltered[0];
+  useEffect(() => {setWorkAction(null);setWorkReason("");}, [focused?.id]);
+  const workflowMutation = useMutation({
+    mutationFn: async ({row, status, reason}: {row: QueueRow; status: string; reason: string}) => apiRequest("POST", `/api/admin/inbox-workflow/${claimKindFor(row.kind)}/${row.entityId}`, {status, reason, version: workflowFor(row)?.version || 0}),
+    onSuccess: () => { setWorkAction(null); setWorkReason(""); onQueueSuccess(); },
+    onError: () => invalidateAdminQueue(qc),
+  });
+  const historyQuery = useQuery<Array<{status:string; reason:string; actor:string; updatedAt:string}>>({
+    queryKey: ["/api/admin/inbox-workflow", focused?.kind, focused?.entityId],
+    queryFn: () => adminFetch(`/api/admin/inbox-workflow/${claimKindFor(focused!.kind)}/${focused!.entityId}`),
+    enabled: !!focused && !["owner_desk", "logo_request"].includes(focused.kind),
+  });
 
   const bucketCounts = useMemo(() => {
     const base = rows;
@@ -885,12 +870,6 @@ export default function QueueView({
     }
     return counts;
   }, [rows, user?.id, queueClaims]);
-
-  const visibleBuckets = useMemo(() => {
-    if (mode !== "admin") return [];
-    if (bucketFilter === "all" || bucketFilter === "mine") return ADMIN_QUEUE_BUCKETS;
-    return ADMIN_QUEUE_BUCKETS.filter((b) => b.id === bucketFilter);
-  }, [mode, bucketFilter]);
 
   const claimMutation = useMutation({
     mutationFn: async ({ kind, entityId, takeover }: { kind: string; entityId: number; takeover?: boolean }) => {
@@ -923,7 +902,8 @@ export default function QueueView({
     || denyBizSub.isPending || approveLogo.isPending || denyLogo.isPending
     || approveGig.isPending || rejectGig.isPending
     || setPlaceType.isPending || assignPlaceOwner.isPending || clearPlaceOwner.isPending
-    || claimMutation.isPending || releaseClaimMutation.isPending;
+    || claimMutation.isPending || releaseClaimMutation.isPending || workflowMutation.isPending;
+  const mutationError = [approveSub, declineSub, resolveRiverBrats, resolveGiftingReport, rejectGifting, approveSpotted, removeSpotted, rejectSpotted, resolveOwnerDesk, resolveModeration, approvePromoter, denyPromoter, approveClaim, denyClaim, approveBizSub, denyBizSub, approveLogo, denyLogo, approveGig, rejectGig, setPlaceType, assignPlaceOwner, clearPlaceOwner, claimMutation, releaseClaimMutation, workflowMutation].find(m => m.error)?.error;
 
   const displayCount = bucketFilter === "mine" || bucketFilter === "all" || mode === "owner"
     ? rowsFiltered.length
@@ -944,6 +924,7 @@ export default function QueueView({
       style={{
         flex: 1,
         padding: "8px 14px",
+        minHeight: 44,
         borderRadius: 999,
         border: outline ? `1.5px solid ${color}` : "none",
         background: outline ? "none" : color,
@@ -1171,23 +1152,16 @@ export default function QueueView({
   };
 
   const renderQueueRow = (q: QueueRow) => {
-    const isOpen = !!open[q.id];
+    const isOpen = true;
     const rejectKey = q.id;
     const claimNote = (() => {
       const c = claimFor(q.kind, q.entityId);
       return c?.assigneeUsername ? ` · claimed by @${c.assigneeUsername}` : "";
     })();
-    const selectable = mode === "admin" && !completed && !q.readOnly && !claimFor(q.kind, q.entityId);
     return (
       <div key={q.id} className={`inbox-exp-queue-row${isOpen ? " is-open" : ""}`}>
         <div className="inbox-exp-queue-row__head">
-          {selectable && (
-            <label className="inbox-exp-queue-select">
-              <input type="checkbox" checked={!!selectedRows[q.id]} onChange={() => toggleSelected(q.id)} aria-label={`Select ${q.title}`} />
-              <span aria-hidden="true" />
-            </label>
-          )}
-          <button type="button" className="inbox-exp-queue-row__head-main" onClick={() => setOpen((p) => ({ ...p, [q.id]: !p[q.id] }))} aria-expanded={isOpen}>
+          <div className="inbox-exp-queue-row__head-main">
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="inbox-exp-row__foot" style={{ marginTop: 0, marginBottom: 6 }}>
               <span className="inbox-exp-tag" style={{ background: q.tagColor }}>
@@ -1207,7 +1181,7 @@ export default function QueueView({
           >
             <ChevronDown size={20} strokeWidth={2.4} />
           </span>
-          </button>
+          </div>
         </div>
         {isOpen && (
           <div className="inbox-exp-queue-row__detail">
@@ -1218,7 +1192,7 @@ export default function QueueView({
                   const c = claimFor(q.kind, q.entityId);
                   const mine = c && user?.id === c.assigneeUserId;
                   if (!c) {
-                    return btn("CLAIM", C.magenta, () =>
+                    return btn("CLAIM", C.cyan, () =>
                       claimMutation.mutate({ kind: ck, entityId: q.entityId }),
                     );
                   }
@@ -1228,10 +1202,10 @@ export default function QueueView({
                       true,
                     );
                   }
-                  return btn("TAKE OVER", C.orange, () =>
+                  return user?.canManageTeam ? btn("TAKE OVER", C.orange, () =>
                     claimMutation.mutate({ kind: ck, entityId: q.entityId, takeover: true }),
                     true,
-                  );
+                  ) : <p className="inbox-workspace__note">An owner admin can reassign this case.</p>;
                 })()}
               </div>
             )}
@@ -1281,7 +1255,7 @@ export default function QueueView({
                 ))}
               </div>
             )}
-            {!q.readOnly && (
+            {!q.readOnly && (workflowFor(q)?.status !== "escalated" || user?.isPrimaryOwner) && (
               <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
                 {q.kind === "submission" && (
                   <>
@@ -1417,176 +1391,44 @@ export default function QueueView({
   const queueScopeClass =
     mode === "admin" ? "inbox-exp-admin" : mode === "owner" ? "inbox-exp-owner" : undefined;
 
+  const loading = useAggregate ? aggregateQuery.isPending || (mode === "owner" && (ownerQuery.isPending || logoQuery.isPending)) : mode === "owner" ? ownerQuery.isPending || logoQuery.isPending : [subsQuery, giftingQuery, spottedQuery, riverBratsQuery, moderationQuery, claimsQuery, bizSubsQuery, gigsQuery].some(q => q.isPending && q.fetchStatus === "fetching");
+  const workCount = (status: string) => rows.filter(r => (workflowFor(r)?.status || "review") === status).length;
+  const resetFilters = () => {setSearch(""); setBucketFilter("all"); setWorkFilter("all");};
   return (
-    <div className={queueScopeClass}>
-      <RoomKicker accent={kickerAccent} as="div">{kicker}</RoomKicker>
-
-      {/* Always-visible map of every queue surface (counts stay visible at 0). */}
-      {mode === "admin" && !completed && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "0 2px 14px" }}>
-          <button
-            type="button"
-            onClick={() => setBucketFilter("all")}
-            style={{
-              fontFamily: MONO,
-              fontSize: 9.5,
-              letterSpacing: ".06em",
-              fontWeight: 700,
-              padding: "6px 10px",
-              borderRadius: 999,
-              border: `1px solid ${bucketFilter === "all" ? accent : C.border2}`,
-              background: bucketFilter === "all" ? accent : "transparent",
-              color: bucketFilter === "all" ? "#06060a" : C.meta,
-              cursor: "pointer",
-            }}
-          >
-            All · {bucketCounts.all || 0}
-          </button>
-          <button
-            type="button"
-            onClick={() => setBucketFilter("mine")}
-            style={{
-              fontFamily: MONO,
-              fontSize: 9.5,
-              letterSpacing: ".06em",
-              fontWeight: 700,
-              padding: "6px 10px",
-              borderRadius: 999,
-              border: `1px solid ${bucketFilter === "mine" ? C.lime : C.border2}`,
-              background: bucketFilter === "mine" ? C.lime : "transparent",
-              color: bucketFilter === "mine" ? "#06060a" : C.meta,
-              cursor: "pointer",
-            }}
-          >
-            Mine · {bucketCounts.mine || 0}
-          </button>
-          {ADMIN_QUEUE_BUCKETS.map((b) => {
-            const n = bucketCounts[b.id] || 0;
-            const act = bucketFilter === b.id;
-            return (
-              <button
-                key={b.id}
-                type="button"
-                onClick={() => setBucketFilter(b.id)}
-                style={{
-                  fontFamily: MONO,
-                  fontSize: 9.5,
-                  letterSpacing: ".06em",
-                  fontWeight: 700,
-                  padding: "6px 10px",
-                  borderRadius: 999,
-                  border: `1px solid ${act ? b.color : C.border2}`,
-                  background: act ? b.color : n > 0 ? "rgba(255,255,255,0.03)" : "transparent",
-                  color: act ? "#06060a" : n > 0 ? C.heading : C.faint,
-                  cursor: "pointer",
-                }}
-              >
-                {b.label} · {n}
-              </button>
-            );
-          })}
-          {onOpenGuideInbox && (
-            <button
-              type="button"
-              onClick={onOpenGuideInbox}
-              style={{
-                fontFamily: MONO,
-                fontSize: 9.5,
-                letterSpacing: ".06em",
-                fontWeight: 700,
-                padding: "6px 10px",
-                borderRadius: 999,
-                border: `1px solid ${C.cyan}`,
-                background: guideUnread > 0 ? "rgba(0,255,255,0.08)" : "transparent",
-                color: C.cyan,
-                cursor: "pointer",
-              }}
-            >
-              Guide messages · {guideUnread}
-            </button>
-          )}
-          {onOpenOwnerDesk && (
-            <button
-              type="button"
-              onClick={onOpenOwnerDesk}
-              style={{
-                fontFamily: MONO,
-                fontSize: 9.5,
-                letterSpacing: ".06em",
-                fontWeight: 700,
-                padding: "6px 10px",
-                borderRadius: 999,
-                border: `1px solid ${C.purple}`,
-                background: ownerCount > 0 ? "rgba(138,77,255,0.1)" : "transparent",
-                color: C.purple,
-                cursor: "pointer",
-              }}
-            >
-              Owner desk · {ownerCount}
-            </button>
-          )}
+    <div className={`${queueScopeClass} inbox-workspace`}>
+      <header className="inbox-workspace__intro">
+        <div><RoomKicker accent={mode === "admin" ? C.cyan : C.purple} as="div">{mode === "admin" ? "STAFF WORKSPACE" : "PRIVATE OWNER BRIEFING"}</RoomKicker>
+          <h2>{completed ? "Decision history" : mode === "owner" ? "What needs you." : "Make the next call."}</h2>
+          <p>{mode === "owner" ? "Escalations, logo decisions and messages for the primary owner." : "One queue. Clear responsibility. Context before every decision."}</p>
         </div>
-      )}
-
-      {failedSources.length > 0 && (
-        <div className="inbox-exp-alert inbox-exp-alert--error">
-          Could not load: {failedSources.join(", ")}. You may need to sign in again as admin, or the server returned an error - not an empty queue.
-        </div>
-      )}
-
-      {mode === "admin" && !completed && selectableQueueRows.length > 0 && (
-        <div className="inbox-exp-bulkbar pdx-liquid-overlay pdx-glass-rebind" aria-label="Bulk queue actions">
-          <span aria-live="polite">{selectedQueueRows.length} selected</span>
-          <button type="button" onClick={() => setSelectedRows(Object.fromEntries(selectableQueueRows.map((row) => [row.id, true])))} disabled={bulkPending || selectedQueueRows.length === selectableQueueRows.length}>Select all visible</button>
-          <button type="button" onClick={clearSelected} disabled={bulkPending || selectedQueueRows.length === 0}>Clear</button>
-          <button type="button" className="is-primary" onClick={() => void claimSelected()} disabled={bulkPending || selectedQueueRows.length === 0}>{bulkPending ? "Claiming…" : "Claim selected"}</button>
-        </div>
-      )}
-
-      {mode === "admin" ? (
-        visibleBuckets.map((bucket) => {
-          const bucketRows = rowsFiltered.filter((r) => bucket.kinds.includes(r.kind));
-          return (
-            <div key={bucket.id} className="inbox-exp-bucket-block">
-              <div
-                className="inbox-exp-bucket-head"
-                style={{ "--inbox-exp-bucket-color": bucket.color } as CSSProperties}
-              >
-                <span className="inbox-exp-bucket-head__dot" aria-hidden />
-                {bucket.label.toUpperCase()}
-                <span className="inbox-exp-bucket-head__count">· {bucketRows.length}</span>
-              </div>
-              {bucketRows.length === 0 ? (
-                <div className="inbox-exp-empty inbox-exp-empty--compact">
-                  {completed ? "None in recently completed" : "None waiting - queue clear"}
-                </div>
-              ) : (
-                <div className="inbox-exp-list">
-                  {bucketRows.map((q) => renderQueueRow(q))}
-                </div>
-              )}
-            </div>
-          );
-        })
-      ) : rowsFiltered.length === 0 ? (
-        <div className="inbox-exp-empty">
-          {failedSources.length > 0
-            ? "QUEUE COULD NOT LOAD"
-            : completed
-              ? "NO RECENTLY DELETED ITEMS"
-              : "OWNER DESK IS CLEAR"}
-        </div>
-      ) : (
-        <div className="inbox-exp-list">
-          {rowsFiltered.map((q) => renderQueueRow(q))}
-        </div>
-      )}
-
-      {mode === "owner" && !completed && (
-        <p className="inbox-exp-queue-footnote">
-          Contact and sponsorship messages from the site's forms land here. Reply goes to the sender's email; Mark done clears it from the desk.
-        </p>
-      )}
+        <details className="inbox-workspace__access"><summary>Your access</summary><p>{user?.isPrimaryOwner ? "Primary owner: staff review, escalations and private owner messages." : user?.canManageTeam ? "Owner admin: shared queue and team management. The private owner briefing stays with the primary owner." : "Admin: shared queue review and your assignments. Ask an owner admin to reassign another person's case."} Personal messages stay private.</p></details>
+      </header>
+      {!completed && <div className="inbox-workspace__metrics" aria-label="Open work by status">
+        {[["review", "Need review"], ["waiting", "Waiting"], ["escalated", "Owner decision"]].map(([value,label]) => <button key={value} type="button" aria-pressed={workFilter === value} onClick={() => {setWorkFilter(value); setBucketFilter("all"); setSearch("");}}><strong>{loading || failedSources.length ? "—" : workCount(value)}</strong><span>{label}</span></button>)}
+      </div>}
+      <div className="inbox-workspace__toolbar">
+        <label className="inbox-workspace__search">Find a case<input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Title, person or place" /></label>
+        <label>Category<select value={bucketFilter} onChange={e=>setBucketFilter(e.target.value)}><option value="all">All categories</option>{mode === "admin" && <><option value="mine">Assigned to me</option>{ADMIN_QUEUE_BUCKETS.map(b=><option key={b.id} value={b.id}>{b.label} ({bucketCounts[b.id] || 0})</option>)}</>}</select></label>
+        {!completed && <label>Status<select value={workFilter} onChange={e=>setWorkFilter(e.target.value)}><option value="all">All open work</option><option value="review">Needs review</option><option value="waiting">Waiting</option><option value="escalated">Owner decision</option><option value="unassigned">Unassigned</option></select></label>}
+      </div>
+      {mode === "admin" && !completed && <div className="inbox-workspace__jumps">{onOpenGuideInbox && <button type="button" onClick={onOpenGuideInbox}>Guide messages · {guideUnread} unread</button>}{onOpenOwnerDesk && <button type="button" onClick={onOpenOwnerDesk}>Owner briefing · {ownerCount}</button>}</div>}
+      {failedSources.length > 0 && <div role="alert" className="inbox-exp-alert inbox-exp-alert--error">Could not load {failedSources.join(", ")}. This is not an empty queue. <button type="button" onClick={()=>{void qc.refetchQueries({type:"active"});}}>Retry</button></div>}
+      {mutationError && <div role="alert" className="inbox-exp-alert inbox-exp-alert--error">{mutationError instanceof Error ? mutationError.message : "The action could not be saved. Please retry."}</div>}
+      {loading ? <div className="inbox-exp-empty" role="status">Loading your workspace…</div> : rowsFiltered.length === 0 ? <div className="inbox-workspace__empty"><h3>{failedSources.length ? "Some work is unavailable." : rows.length ? "No matching cases." : completed ? "No recent decisions." : "You're caught up."}</h3><p>{rows.length ? "Try another category or status." : "New work will appear here. No empty categories to work through."}</p>{rows.length > 0 && <button type="button" onClick={resetFilters}>Clear filters</button>}</div> : <div className="inbox-workspace__split">
+        <section className="inbox-workspace__queue" aria-label="Case list"><div className="inbox-workspace__queue-heading">{rowsFiltered.length} {completed ? "recent decisions" : "open cases"}</div>{rowsFiltered.map(row=><button key={row.id} type="button" aria-pressed={focused?.id===row.id} className={focused?.id===row.id ? "is-selected" : ""} onClick={()=>{setFocusedId(row.id); setWorkAction(null); setWorkReason("");}}><span className="inbox-workspace__case-kind">{row.tag}<small>{row.outcome || workflowFor(row)?.status || "Review"}</small></span><strong>{row.title}</strong><span>{row.meta}</span><small>{claimFor(row.kind,row.entityId)?.assigneeUsername ? `Assigned to @${claimFor(row.kind,row.entityId)?.assigneeUsername}` : row.kind === "owner_desk" || row.kind === "logo_request" ? "Primary owner" : "Unassigned"}</small></button>)}</section>
+        {focused && <section className="inbox-workspace__detail" aria-label="Selected case">
+          {renderQueueRow(focused)}
+          {!completed && !["owner_desk","logo_request"].includes(focused.kind) && <div className="inbox-workspace__workflow">
+            {workflowFor(focused)?.reason && <p><b>{workflowFor(focused)?.status === "escalated" ? "Owner decision requested" : "Waiting on"}:</b> {workflowFor(focused)?.reason}</p>}
+            {workflowFor(focused)?.status === "escalated" && !user?.isPrimaryOwner ? <p>Only the primary owner can decide or return this case to review.</p> : <>
+            <div className="inbox-workspace__jumps"><button type="button" disabled={pending} onClick={()=>{setWorkAction("waiting");setWorkReason("");}}>Mark waiting</button><button type="button" disabled={pending} onClick={()=>{setWorkAction("escalated");setWorkReason("");}}>Escalate to owner</button>{workflowFor(focused)?.status && workflowFor(focused)?.status !== "review" && <button type="button" disabled={pending} onClick={()=>workflowMutation.mutate({row:focused,status:"review",reason:"Returned to review"})}>Return to review</button>}</div>
+            {workAction && <form onSubmit={e=>{e.preventDefault();workflowMutation.mutate({row:focused,status:workAction,reason:workReason});}}><label>Reason and next step<textarea autoFocus required maxLength={2000} value={workReason} onChange={e=>setWorkReason(e.target.value)} /></label><p>This records an internal handoff. It does not message the submitter.</p><div className="inbox-workspace__jumps"><button type="button" onClick={()=>setWorkAction(null)}>Cancel</button><button type="submit" disabled={pending || !workReason.trim()}>Save {workAction === "waiting" ? "waiting status" : "escalation"}</button></div></form>}</>}
+          </div>}
+          {historyQuery.isError && <p role="alert" className="inbox-workspace__note">Case history could not load.</p>}
+          {!!historyQuery.data?.length && <div className="inbox-workspace__history"><h3>Case timeline</h3>{historyQuery.data.map((entry,i)=><div key={i}><b>{entry.status} · @{entry.actor}</b><time>{ts(entry.updatedAt)}</time><p>{entry.reason}</p></div>)}</div>}
+        </section>}
+      </div>}
+      <p className="inbox-workspace__footnote">Seen is not resolved. {completed ? "Recent source records; not a complete audit ledger." : "Counts reflect the current queue, not visitors or messages."}</p>
     </div>
   );
 }
