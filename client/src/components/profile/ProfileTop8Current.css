@@ -22,3 +22,6 @@
 .pp-place-preview .placez-discovery-card .pdxPlace__name {width:100%;max-width:100%;font-size:var(--event-card-compact-title-size,16px)!important;}
 .pp-place-preview .placez-discovery-card .pdxPlace__body {position:relative;height:var(--event-card-compact-height,170px)!important;min-height:0!important;max-height:var(--event-card-compact-height,170px)!important;overflow:hidden;}
 .pp-place-preview .placez-discovery-card .pdxPlace__main {position:absolute!important;inset:auto 12px 12px!important;transform:none!important;}
+
+/* The native full-card button is visually transparent; focus belongs on its shell. */
+.pp-place-preview .placez-discovery-card:focus-within {outline:2px solid var(--c,var(--neon-cyan));outline-offset:3px;}

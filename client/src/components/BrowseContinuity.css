@@ -1,3 +1,4 @@
+@import "./RoomInteractions.css";
 /* Shared anatomy adapted from 21st search/header, modal, and empty-state patterns.
    Product typography, colors, and primitives remain Zaylist's. */
 .section-breadcrumb{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 16px;font:600 12px/1.5 var(--font-body,sans-serif);color:var(--text-meta,#a6a6ad)}

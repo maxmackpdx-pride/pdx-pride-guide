@@ -1,0 +1,47 @@
+/* 21st animated-tab inspiration, adapted to the existing room controls.
+   Feedback lives on controls; card glass, artwork and content never move. */
+/* Keep an overflow cue visible: more categories should not look absent. */
+:is(.eb-page,.events-page,.pp-chapters) :is(.eb-categories,.ab-category-dock,.events-day-rail,.pp-chapters__nav) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-meta) transparent;
+}
+:is(.eb-page,.events-page,.pp-chapters) :is(.eb-categories,.ab-category-dock,.events-day-rail,.pp-chapters__nav)::-webkit-scrollbar {
+  display: block;
+  height: 3px;
+}
+:is(.eb-page,.events-page,.pp-chapters) :is(.eb-categories,.ab-category-dock,.events-day-rail,.pp-chapters__nav)::-webkit-scrollbar-thumb {
+  background: var(--text-meta);
+  border-radius: var(--radius-control);
+}
+:root :is(.eb-page,.events-page,.pp-chapters) :is(.eb-category,.ab-category,.events-day-tab,.pp-chapters__nav button) {
+  transition: background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+:is(.eb-category,.ab-category,.events-day-tab)[aria-pressed="true"],
+.pp-chapters__nav button[aria-current="page"] {
+  animation: room-selection-confirm var(--dur-base) var(--ease-out);
+}
+@keyframes room-selection-confirm {
+  from { filter: brightness(1.18); }
+  to { filter: brightness(1); }
+}
+:is(.eb-category,.ab-category,.events-day-tab,.pp-chapters__nav button):active:not(:disabled) {
+  filter: brightness(.88);
+}
+:is(.eb-category,.ab-category,.events-day-tab):focus-visible {
+  outline: 2px solid var(--text-hi);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.eb-category,.ab-category,.events-day-tab,.pp-chapters__nav button) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+:is(html.calm-mode,:root[data-calm="true"]) :is(.eb-category,.ab-category,.events-day-tab,.pp-chapters__nav button) {
+  animation: none !important;
+  transition: none !important;
+}

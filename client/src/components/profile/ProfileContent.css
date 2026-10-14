@@ -1,3 +1,4 @@
+@import "../RoomInteractions.css";
 .pp-chapters { min-width:0; }
 .pp-chapters__nav { display:flex; gap:var(--space-2); overflow-x:auto; overscroll-behavior-x:contain; padding:var(--space-3) 2px var(--space-5); border-bottom:1px solid var(--panel-border-2); scrollbar-width:thin; }
 .pp-chapters__nav button { flex:0 0 auto; min-height:44px; padding:var(--space-2) var(--space-4); border:1px solid var(--panel-border-2); border-radius:var(--radius-control); background:var(--z-oled); color:var(--text-lo); font:var(--fw-bold) var(--chrome-md)/1.2 var(--font-display); text-transform:uppercase; cursor:pointer; }

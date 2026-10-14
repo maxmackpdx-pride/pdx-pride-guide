@@ -8,7 +8,7 @@ import './BoardCategoryFollows.css';
 export default function BoardCategoryFollows() {
   const [open,setOpen]=useState(false);
   return <details className="board-category-follows" onToggle={event=>setOpen(event.currentTarget.open)}>
-    <summary className="ab-back"><Bell size={16} aria-hidden="true" />Follow categories</summary>
+    <summary className="eb-tool"><Bell size={16} aria-hidden="true" />Follow categories</summary>
     {open && <>
       <p>New posts from categories you follow appear in your Hub’s Following feed.</p>
       <ul aria-label="Categories to follow">
