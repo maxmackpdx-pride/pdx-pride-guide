@@ -332,7 +332,7 @@ export default function Boards() {
       <header className="eb-frame ab-header">
         <div>
           <p className="eb-kicker">Portland · Community boards</p>
-          <h1 className="ab-brand"><img src="/brand/family/our-boardz-mobile.webp?v=20261013-texture" alt="Our BoardZ" /></h1>
+          <h1 className="ab-brand"><img src="/brand/family/our-boardz-mobile.webp?v=20261014-rainbow" alt="Our BoardZ" /></h1>
           <p>Find your people. Find your next thing.</p>
         </div>
       </header>
