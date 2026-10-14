@@ -352,8 +352,8 @@ html.calm-mode
 .map-board-cards .ab-card__footer button{min-height:44px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--c) 50%,transparent);border-radius:10px;background:var(--btn-glow-bg)}
 .map-board-cards .ab-card__location{height:1.4em;min-height:1.4em;flex:none}
 @media(max-width:767px){.ab-pinned-card{display:flex;flex-direction:column}.ab-pinned-card>.ab-card{flex:1}.map-board-cards .ab-card{height:auto}.map-board-cards .ab-art{max-height:180px;aspect-ratio:auto}.map-board-cards .ab-card__location{height:2.8em;min-height:2.8em}}
-/* Boardz uses day colors, with Giftz retaining its canonical acid-yellow token. */
-:is(.ab-page,.map-board-cards,.board-pin-picker){--room-hauz:var(--day-thu);--room-gigz:var(--day-mon);--room-gigz-ink:var(--day-mon-text);--room-giftz:var(--neon-yellow);--room-sellz:var(--day-sat);--room-mizzed:var(--day-fri);--neon-cyan:var(--day-thu);--neon-violet:var(--day-mon);--neon-magenta:var(--day-fri);--neon-green:var(--day-sat);--neon-orange:var(--day-sun)}
+/* Boardz uses the day palette. Housing keeps a cyan shell with type-specific artwork. */
+:is(.ab-page,.map-board-cards,.board-pin-picker){--room-hauz:var(--day-thu);--room-gigz:var(--day-mon);--room-gigz-ink:var(--day-mon-text);--room-giftz:var(--day-wed);--room-sellz:var(--day-sat);--room-mizzed:var(--day-fri);--neon-cyan:var(--day-thu);--neon-violet:var(--day-mon);--neon-magenta:var(--day-fri);--neon-green:var(--day-sat);--neon-orange:var(--day-sun)}
 .ab-pinned-card :is(.ab-card-motif,.ab-motif){color:var(--ab-accent,var(--c))}
 .ab-pinned-card .ab-motif__edge{stroke:color-mix(in srgb,var(--ab-accent,var(--c)) 72%,var(--text-hi))}
 .ab-pinned-card .ab-motif__main{filter:drop-shadow(0 2px 4px color-mix(in srgb,var(--ab-accent,var(--c)) 16%,transparent))}

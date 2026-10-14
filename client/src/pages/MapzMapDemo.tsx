@@ -224,7 +224,7 @@ function rowMarks(rows: MapRow[], kind: Extract<Mark["kind"], "board">): Mark[] 
 }
 
 function boardColor(row: MapRow): string {
-  const token=String(row._board)==="My Hoüz"?"--day-thu":row._board==="Mizzed"?"--day-fri":boardKind(row)==="gig"?"--day-mon":boardKind(row)==="gifting"?"--neon-yellow":"--day-sat";
+  const token=String(row._board)==="My Hoüz"?"--day-thu":row._board==="Mizzed"?"--day-fri":boardKind(row)==="gig"?"--day-mon":boardKind(row)==="gifting"?"--day-wed":"--day-sat";
   return getComputedStyle(document.documentElement).getPropertyValue(token).trim();
 }
 function boardWireColor(row: MapRow): string {
