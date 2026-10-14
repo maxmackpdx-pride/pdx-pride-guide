@@ -41,7 +41,8 @@ for(const width of [320,390,1320])test(`Outzide ${width}: solid pins, two-step c
   assert.equal(await page.locator('#map canvas.maplibregl-canvas').isVisible(),true);
   await page.keyboard.press('/');
   await page.waitForSelector('#outz-map-controls:not([hidden])');
-  assert.equal(await page.locator('#search').evaluate(el=>document.activeElement===el),true);
+  // Search intentionally receives focus on the next animation frame.
+  await page.waitForFunction(()=>document.activeElement===document.querySelector('#search'));
   await page.locator('#results .place-card').click({noWaitAfter:true});
   await page.waitForFunction(()=>document.querySelector('#detail').open);
   await page.locator('#detail [data-action="close-detail"]').click({noWaitAfter:true});

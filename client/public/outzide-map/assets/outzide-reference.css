@@ -1,0 +1,78 @@
+@font-face {
+  font-family: 'Barlow Condensed'; font-style: normal; font-weight: 900;
+  font-display: swap; src: url('/mapz-map/fonts/barlow-condensed-900.woff2') format('woff2');
+}
+/* Outzide's reference palette on the Mapz card anatomy: header controls,
+   full-width title, tab rail, independently scrolling content, fixed actions. */
+.outzide-shell {
+  --outz-forest: #04170c;
+  --outz-forest-light: #5c8a43;
+  --outz-orange: #ff921e;
+  --map-ink: #04170c;
+  --map-panel: #04170cda;
+  --map-light: #8ca77a;
+  --map-accent: var(--outz-orange);
+  --map-ui-ink: #04170c;
+  --map-ui-light: #8ca77a;
+  --map-ui-glass: linear-gradient(145deg,#7aab4220,transparent 58%),#031209df;
+}
+.outzide-shell #detail:not(.winter-card) {
+  background: linear-gradient(145deg,#1b471b40,transparent 58%),#02160bce;
+  border: 1px solid var(--outz-orange);
+  border-radius: 24px;
+  box-shadow: inset 0 0 0 1px #ffc56b70, inset 0 0 16px #ff921e12, 0 0 8px #ff921e66, 0 18px 44px #0009;
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  color: var(--text-body,#e6e3da);
+}
+.outzide-shell #detail .detail-hero { padding: 76px 20px 20px; }
+.outzide-shell #detail .detail-hero h2 {
+  padding: 0; margin: 8px 0 12px; max-width: none;
+  font: var(--open-card-title-font); text-wrap: pretty; text-shadow:none; -webkit-text-stroke:0;
+}
+.outzide-shell #detail .detail-hero .eyebrow { padding: 0; color: var(--outz-orange); }
+.outzide-shell #detail .detail-tools { top: 16px; right: 16px; gap: 8px; }
+.outzide-shell #detail .detail-tools button {
+  width: 44px; height: 44px; min-width: 44px; min-height: 44px;
+  border: 1px solid #ff921e99; border-radius: 14px;
+  background: linear-gradient(145deg,#ff921e18,transparent),#04170cb8;
+  box-shadow: inset 0 1px #ffd99d44; color: var(--text-heading,#fff);
+}
+.outzide-shell #detail .detail-waypoint { top:16px;left:20px; }
+.outzide-shell #detail .detail-hero>.detail-art { top:64px;right:20px;width:150px;height:150px;opacity:.25; }
+.outzide-shell #detail .detail-tabs { padding:0 12px;gap:0;background:#021209a8;border-color:#ff921e40; }
+.outzide-shell #detail .detail-tabs button { flex:1;min-width:0;min-height:48px;padding:10px 4px;font:600 12px/1.4 var(--mono); }
+.outzide-shell #detail .detail-tabs button[aria-selected=true] { color:var(--text-heading,#fff);border-bottom-color:var(--outz-orange); }
+.outzide-shell #detail .detail-body { padding:20px; }
+.outzide-shell #detail .detail-footer {
+  display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;
+  background:#021209ed;border-top:1px solid #ff921e55;
+}
+.outzide-shell #detail .detail-footer>[data-action=share-place] { display:none; }
+.outzide-shell #detail .detail-footer>.directions-choice { order:0;flex:1 1 40%;margin:0; }
+.outzide-shell #detail .detail-footer>[data-action=follow-destination] { order:1;flex:1 1 40%; }
+.outzide-shell #detail .detail-footer>[data-action=view-mapz],
+.outzide-shell #detail .detail-footer>a { order:2;flex:1 1 40%; }
+.outzide-shell #detail .detail-footer :is(button,a,summary) {
+  display:flex;align-items:center;justify-content:center;min-height:44px;
+  padding:8px 12px;border-radius:14px;font:var(--open-card-action-font);text-align:center;
+}
+.outzide-shell #detail .drawer-handle { border-bottom:1px solid #ff921e80;background:transparent; }
+.outzide-shell #detail .detail-body :is(.fact-grid>div,.post,.notice) { background:#153a1c60;border-color:#7b9b6440; }
+@media(max-width:760px) {
+  .outzide-shell:not(.home-card-embed) #detail {
+    inset:auto 12px calc(var(--oz-dock) + 12px);width:auto;
+    height:min(72dvh,850px);max-height:calc(100dvh - var(--oz-dock) - 76px);
+  }
+  .outzide-shell #detail .detail-hero { padding:68px 16px 16px; }
+  .outzide-shell #detail .detail-body { padding:16px; }
+}
+/* The embedded card gets its frame and safe-area placement from the host. */
+.outzide-shell.home-card-embed #detail .detail-hero { padding:0 24px 20px; }
+.outzide-shell.home-card-embed #detail .detail-hero>.detail-art { position:relative;top:auto;right:auto;opacity:.95; }
+@media(prefers-reduced-transparency:reduce) {
+  .outzide-shell #detail:not(.winter-card) { background:#04170c;backdrop-filter:none;-webkit-backdrop-filter:none; }
+}
+
+.outzide-shell #detail .detail-footer>[data-action=view-mapz],
+.outzide-shell #detail .detail-footer>a { background:transparent;border-color:transparent;color:var(--text-mid);font:var(--open-card-meta-font);box-shadow:none; }

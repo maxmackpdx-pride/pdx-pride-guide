@@ -24,7 +24,7 @@ import {FIRE_SOURCES,FIRE_COLORS,fetchFireState,containsPoint} from './assets/fi
 import {clusterWaypoints} from './assets/waypoint-clusters.js?v=activity-clusters-20260925';
 import {addI5Spectrum} from './assets/i5-spectrum.js';
 import {mapzSurfaceStyle,createWaterBloom} from './assets/outzide-surface.js';
-import {brightenOutzideTerrain} from './assets/outzide-night-palette.js';
+import {brightenOutzideTerrain} from './assets/outzide-night-palette.js?v=20261014-reference';
 import {createHologramMaterials,drawProjectionBeam,drawGroundRipples,groundDiskScale} from './assets/hologram-materials.js';
 const cardEmbed=new URLSearchParams(location.search).get('card')==='1';
 document.body.classList.toggle('home-card-embed',cardEmbed);
