@@ -22,7 +22,7 @@ export function appendEventCardFrame(item){
  for(const name of ['event-hologram-frame__rear','event-hologram-frame__inset']){
   const edge=document.createElementNS(ns,'polygon');edge.setAttribute('points',outline);edge.setAttribute('class',name);svg.appendChild(edge);
  }
- for(const y of [24,78]){
+ for(const y of [74]){
   const line=document.createElementNS(ns,'path');line.setAttribute('d',`M7 ${y}H105`);line.setAttribute('class','event-hologram-rule');svg.appendChild(line);
  }
  // Tiny opposite-color echoes sit beside the missing pixels, behind all type.

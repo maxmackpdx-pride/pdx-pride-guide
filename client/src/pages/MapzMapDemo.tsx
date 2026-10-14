@@ -839,6 +839,7 @@ export default function MapzMapDemo() {
     return {pinCyan,wireColor:boardWireColor(row),boardPin:mark.kind==='board',demoPin:row.isDemo===true&&(row.mapPoint as any)?.demo===true,expiresAt:(row.mapPoint as any)?.expiresAt,venueAnchor,createdAt:row.createdAt,closesAt:row.closesAt,status:row.status,waypointLogo:place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl)):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place?serviceIdentity(place)?.icon || mapzTypeIcon(type):event?serviceIdentity(venue || {name:venueName})?.icon || mapzTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
       logo:isHouz?'':brands?.primary||(place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl))||directoryFallbackLogo(place.type):mark.kind==='event'?'/mapz-map/icons/event.svg':boardLogo||boardIcon(row)),
       alternateLogo:brands?.alternate,
+      poster:event?resolveEventPosterUrl(event.id,event.posterImageUrl,event.dayOfWeek):undefined,
       housingModel:undefined,
       neighborhoodLabel:isHouz?housingAreaLabel(row):undefined,
       avatars:isHouz?housingFaceStack(row):event?attendance[event.id]?.preview.map(person=>({url:person.photoUrl||"",initial:person.initials,background:color,ring:""})):undefined,

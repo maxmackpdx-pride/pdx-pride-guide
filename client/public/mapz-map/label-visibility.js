@@ -1,5 +1,5 @@
 // Keep selected titles first; unselected events remain available as map pins.
-export function visibleHologramLabels(labels, selectedKey, width, height) {
+export function visibleHologramLabels(labels, selectedKey, width, height, retained = new Set(), margin = 0) {
   const overlap = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
   const titleBox = label => label.cardHeight ? {left:label.left-4,right:label.right+4,top:label.top-4,bottom:label.bottom+4} : ({left: label.x - label.width * label.scale / 2 - 6, right: label.x + label.width * label.scale / 2 + 6,
     top: label.y - 4, bottom: label.y + (label.width * .52 + 16 + (label.countdown ? 16 : 0)) * label.scale + 4});
@@ -7,11 +7,12 @@ export function visibleHologramLabels(labels, selectedKey, width, height) {
     top: label.logoY - label.logoHeight / 2 - 4, bottom: label.logoY + label.logoHeight / 2 + 4}));
   const placed = [], visible = [];
   const ordered = [...labels].sort((a,b) => Number(b.key === selectedKey) - Number(a.key === selectedKey)
+    || Number(retained.has(b.key))-Number(retained.has(a.key))
     || Math.hypot(a.x-width/2,a.y-height/2) - Math.hypot(b.x-width/2,b.y-height/2) || String(a.key).localeCompare(String(b.key)));
   for (const label of ordered) {
     if (label.opacity <= .1) continue;
     const box = titleBox(label), selected = label.key === selectedKey;
-    if (!selected && (box.left < 0 || box.right > width || box.top < 0 || box.bottom > height
+    if (!selected && (box.right < -margin || box.left > width+margin || box.bottom < -margin || box.top > height+margin || (!margin && (box.left < 0 || box.right > width || box.top < 0 || box.bottom > height))
       || placed.some(other => overlap(box, other)) || logos.some(logo => logo.key !== label.key && overlap(box, logo)))) continue;
     visible.push(label); placed.push(box);
   }
