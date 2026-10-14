@@ -6,10 +6,10 @@ test('distant events yield smoothly while selected events stay readable',()=>{
  for(let distance=0;distance<=5000;distance+=10){const next=hologramPresence(distance,1000);assert.ok(next.scale<=previous.scale&&next.opacity<=previous.opacity);assert.ok(next.scale>=.62&&next.opacity>=.38);previous=next;}
  assert.deepEqual(hologramPresence(10000,1000,true),hologramPresence(0,1000));
 });
-test('some heads follow camera gently, settle, and respect calm mode',()=>{
+test('camera movement never introduces lag between a head and its anchor',()=>{
  const anchor={x:100,y:100};assert.deepEqual(hologramCameraDrift({},anchor,0,.016),{x:0,y:0});
  const prior={anchorX:500,anchorY:500,cameraX:0,cameraY:0};
- assert.deepEqual(hologramCameraDrift(prior,anchor,0,.016),{x:12,y:7});
+ assert.deepEqual(hologramCameraDrift(prior,anchor,0,.016),{x:0,y:0});
  assert.deepEqual(hologramCameraDrift(prior,anchor,1/7,.016),{x:0,y:0});
  assert.deepEqual(hologramCameraDrift(prior,anchor,0,.016,true),{x:0,y:0});
  let previous={anchorX:100,anchorY:100,cameraX:12,cameraY:7};

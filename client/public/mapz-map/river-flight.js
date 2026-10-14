@@ -675,6 +675,9 @@ function drawLights(fade,target=map,surface=lights){
    if(!cameraMoving){applyBuildingOcclusion(lightsContext,target,surfaces.buildings??[]);buildingChrome.draw(lightsContext,target,surfaces.buildings??[],fade);drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);}
   }
   if(pass===1)for(const group of boardPins){
+   // Hardware must not inherit the previous beam's rise transform or opacity.
+   lightsContext.setTransform(dpr,0,0,dpr,0,0);
+   lightsContext.globalAlpha=coreAlpha;
    const row=group.items[0].feature.properties;
    const pinHit=drawBoardPin(lightsContext,group.x,group.y,row.color,row.key,pulseTime,reduced.matches,group.items.length,row.wireColor,row.pinCyan,waypointHeadSize(false,target.getZoom()));
    hitTargets.push({...pinHit,key:row.key,name:row.name,boardPinKeys:group.items.map(v=>v.feature.properties.key)});
@@ -731,9 +734,8 @@ function drawLights(fade,target=map,surface=lights){
     const shell=waypointFamilyShell(feature.properties.waypointFamily);
     const icon=typeIcons.get(feature.properties.typeIcon)?.light;
     const artwork=waypointArtwork(logo,icon,selected,target.getZoom());
-    // A pin under a full event header yields visually, retaining its hit target.
-    const underHeader=beacons.some(item=>Math.abs(item.x-geometry.x)<item.halfWidth+geometry.size/2+8&&Math.abs(item.y-geometry.y)<item.halfHeight+geometry.size/2+8);
-    const headAlpha=coreAlpha*(selected?1:underHeader?.38:.88);
+    // Foreground heads retain their brightness even beneath overlapping holograms.
+    const headAlpha=coreAlpha;
     drawWaypointHead(lightsContext,geometry,color,icon,artwork,selected,headAlpha,shell);
     if(cluster?.members.length>1)drawClusterCount(lightsContext,geometry.x,geometry.y,cluster.members.length,color,geometry.size);
     hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color,clusterBounds:cluster?.members.length>1?cluster.bounds:null,clusterKeys:cluster?.members.map(member=>member.feature.properties.key),clusterWorld:feature.properties.waypointFamily});
@@ -1022,14 +1024,28 @@ map.on('error',event=>{
 });
 setTimeout(()=>{if(!loaded)status.textContent='Portland is still loading…';},8000);
 let firstFrameSent=false,baseFrameRendered=false;
+let overlayVisibility=0,lastOverlayFrame=0,overlayPending=false;
+// Project pins and DOM holograms after MapLibre paints its current camera.
+// A separate animation frame can run before the camera update and trail the map.
+function renderSceneOverlays(){
+ if(disposed||!mapActivity.visible||!loaded||!assetsReady)return;
+ if(!overlayPending&&!map.isMoving())return;
+ overlayPending=false;
+ const now=performance.now();
+ motionDelta=lastOverlayFrame?Math.min((now-lastOverlayFrame)/1000,.1):0;
+ lastOverlayFrame=now;
+ if(!reduced.matches)pulseTime+=motionDelta;
+ drawLights(overlayVisibility);
+ if(!firstPinsPainted&&overlayVisibility>.1&&hitTargets.length){firstPinsPainted=true;performance.mark("mapz-public-pins-painted");tell("pins-painted",{count:hitTargets.length});}
+}
+map.on('render',renderSceneOverlays);
 function draw(now){
  frame=0;
  if(disposed||!mapActivity.visible)return;
- const activeFrameInterval=map.isMoving()?(matchMedia('(pointer:coarse)').matches?1000/30:1000/45):frameInterval;
+ const activeFrameInterval=map.isMoving()||exploration.mode==='flight'&&!pauseControl.checked?0:frameInterval;
  if(last&&now-last<activeFrameInterval-1){scheduleFrame();return;}
  const dt=last?Math.min((now-last)/1000,.1):0;last=now;
- motionDelta=dt;
- if(!reduced.matches)pulseTime+=dt;
+
  const ready=loaded;
  const overlaysReady=loaded&&assetsReady;
  if(ready&&!loopWaiting)revealTime+=dt;
@@ -1055,6 +1071,7 @@ function draw(now){
  }
  const fade=!ready||loopWaiting?0:exitAt===null?(reduced.matches?1:smoothRange(0,3,revealTime)):1-smoothRange(.5,3.5,elapsed-exitAt);
  const visibility=Number(opacityControl.value)*fade;
+ overlayVisibility=visibility;
  mapElement.style.opacity=visibility;
  if(ready&&baseFrameRendered&&!firstFrameSent){
   firstFrameSent=true;startup.phase('first-frame');tell('first-frame');
@@ -1064,8 +1081,8 @@ function draw(now){
   scheduleFrame();return;
  }
  if(overlaysReady){
-  drawLights(visibility);
-  if(!firstPinsPainted&&visibility>.1&&hitTargets.length){firstPinsPainted=true;performance.mark("mapz-public-pins-painted");tell("pins-painted",{count:hitTargets.length});}
+  overlayPending=true;
+  map.triggerRepaint();
  }
  if(!reduced.matches||!ready)scheduleFrame();
  else {clearTimeout(countdownFrameTimer);countdownFrameTimer=setTimeout(scheduleFrame,1000);}
@@ -1084,6 +1101,7 @@ for(const control of [opacityControl,pauseControl,speedControl])control.addEvent
 const stopSceneResize=observeMapSize(map,onSceneResize);
 reduced.addEventListener('change',onReducedChange);
 function onVisibilityChange(){
+ lastOverlayFrame=0;
  clearTimeout(countdownFrameTimer);cancelAnimationFrame(frame);frame=0;last=0;clearLogoPointer();
  portlandLandmarks.setActive(mapActivity.visible);
  if(!mapActivity.visible){
@@ -1094,7 +1112,7 @@ function onVisibilityChange(){
  }else scheduleFrame();
 }
 window.addEventListener('pagehide',()=>{
- disposed=true;clearTimeout(countdownFrameTimer);clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);mapActivity.dispose();featureProjection.dispose();
+ disposed=true;map.off('render',renderSceneOverlays);clearTimeout(countdownFrameTimer);clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);mapActivity.dispose();featureProjection.dispose();
  cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);
  exploration.dispose();
  assetController.abort();reduced.removeEventListener('change',onReducedChange);reduced.dispose();stopSceneResize();

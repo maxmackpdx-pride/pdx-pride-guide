@@ -6,10 +6,9 @@ export function hologramPresence(distance,viewRadius,selected=false){
  return {scale:.62+.38*near,opacity:.38+.62*near,motion:.35+.65*near};
 }
 export function hologramCameraDrift(previous,anchor,phase,delta,reduced=false){
- if(!previous||!Number.isFinite(previous.anchorX)||!Number.isFinite(previous.anchorY)||reduced||Math.floor(Math.abs(phase)*7)%3!==0)return {x:0,y:0};
- const decay=Math.exp(-Math.min(.1,Math.max(0,delta))*8);
- return {x:clamp(((previous.cameraX||0)+previous.anchorX-anchor.x)*decay,-12,12),
- y:clamp(((previous.cameraY||0)+previous.anchorY-anchor.y)*decay,-7,7)};
+ // Camera translation must move the complete hologram with its venue anchor.
+ // Ambient sway is applied separately; camera inertia makes attached artwork slip.
+ return {x:0,y:0};
 }
 export function boundedHologramPosition(anchor,position,scale,roof,ceiling){
  const side=Math.min(72,48*scale);
