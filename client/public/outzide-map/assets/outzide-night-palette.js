@@ -1,11 +1,12 @@
 // Reference theme: black evergreen land, luminous green relief and amber contours.
+// Acid Green #39FF14 and Neon Orange #FF6600 match Zaylist color tokens.
 // Keep this treatment local so Mapz and the home flyover retain their own shader.
 export function brightenOutzideTerrain(style) {
   const layer = id => style.layers.find(entry => entry.id === id);
   layer('ground').paint['background-color'] = '#031009';
   Object.assign(layer('land-relief').paint, {
     'hillshade-shadow-color': '#010704',
-    'hillshade-highlight-color': '#65ba36',
+    'hillshade-highlight-color': '#39FF14',
     'hillshade-accent-color': '#163f15',
   });
   for (const id of ['forest-landcover', 'forest-landuse']) layer(id).paint['fill-color'] = '#123d16';
@@ -26,7 +27,7 @@ export function brightenOutzideTerrain(style) {
   ];
   const contours = layer('elevation-contours');
   if (contours) Object.assign(contours.paint, {
-    'line-color': '#c18a32',
+    'line-color': '#FF6600',
     'line-opacity': ['interpolate', ['linear'], ['zoom'], 10, .25, 12.5, .65, 15, .52, 18, .2],
     'line-width': ['match', ['get', 'level'], 1, 1.15, .55],
   });
