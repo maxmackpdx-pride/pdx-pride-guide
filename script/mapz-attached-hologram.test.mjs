@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {eventCardGeometry,eventCardPerimeter,eventBeamPoint,createAttachedEventBeam} from '../client/public/mapz-map/event-hologram-card.js';
+import {eventCardGeometry,eventCardPerimeter,eventBeamPoint,createAttachedEventBeam,eventGlitchStage} from '../client/public/mapz-map/event-hologram-card.js';
 import {visibleHologramLabels} from '../client/public/mapz-map/label-visibility.js';
 
 test('light remains attached to the full card perimeter through scale and animation',()=>{
@@ -36,4 +36,13 @@ test('hidden and disposed light never allocates a canvas',()=>{
   beam.draw({globalAlpha:0},card,{x:160,y:600},0,0,false,'#00FFFF');
   beam.dispose();beam.draw({globalAlpha:1},card,{x:160,y:600},0,0,false,'#00FFFF');
  }finally{globalThis.document=previous;}
+});
+
+test('card glitches are brief, staggered, and disabled in Calm Mode',()=>{
+ assert.equal(eventGlitchStage(5.8),0);
+ assert.equal(eventGlitchStage(6.2),1);
+ assert.equal(eventGlitchStage(6),-1);
+ assert.equal(eventGlitchStage(5.8,1),-1);
+ for(let t=0;t<14;t+=.01)assert.equal(eventGlitchStage(t,0,true),-1);
+ assert.equal(eventGlitchStage(12.8),eventGlitchStage(5.8));
 });

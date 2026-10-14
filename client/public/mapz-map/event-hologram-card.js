@@ -22,7 +22,10 @@ export function appendEventCardFrame(item){
  for(const name of ['event-hologram-frame__rear','event-hologram-frame__inset']){
   const edge=document.createElementNS(ns,'polygon');edge.setAttribute('points',outline);edge.setAttribute('class',name);svg.appendChild(edge);
  }
- item.appendChild(svg);
+ for(const y of [24,78]){
+  const line=document.createElementNS(ns,'path');line.setAttribute('d',`M7 ${y}H105`);line.setAttribute('class','event-hologram-rule');svg.appendChild(line);
+ }
+ const surface=document.createElement('span');surface.className='event-hologram-surface';surface.setAttribute('aria-hidden','true');surface.appendChild(svg);item.appendChild(surface);
 }
 
 export function createAttachedEventBeam(){
@@ -63,4 +66,23 @@ export function createAttachedEventBeam(){
    ctx.globalAlpha=alpha;ctx.fillStyle=source;ctx.fillRect(anchor.x-radius,anchor.y-radius,radius*2,radius*2);ctx.restore();
   },dispose(){disposed=true;film.dispose();}
  };
+}
+
+// Alpha holes remove the entire rear surface, including rails and scanlines.
+const glitchMasks=[[[0,28,34,10],[69,61,43,14],[27,93,24,6]],[[42,14,38,7],[0,48,49,13],[84,85,28,11]]].map(chunks=>{
+ const holes=chunks.map(([x,y,width,height])=>`<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="black"/>`).join('');
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 112"><defs><mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="112" height="112"><rect width="112" height="112" fill="white"/>${holes}</mask></defs><rect width="112" height="112" fill="white" mask="url(#cut)"/></svg>`;
+ return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+});
+export function eventGlitchStage(seconds,phase=0,calm=false){
+ if(calm)return -1;
+ const t=((seconds+phase)%7+7)%7;
+ return t>=5.7&&t<5.94?0:t>=6.08&&t<6.34?1:-1;
+}
+export function updateEventCardGlitch(item,seconds,calm){
+ const surface=item.querySelector('.event-hologram-surface');if(!surface)return;
+ if(!item.dataset.glitchPhase){let hash=0;for(const c of item.dataset.labelKey||'')hash=(Math.imul(hash,31)+c.charCodeAt(0))>>>0;hash=Math.imul(hash^(hash>>>16),2654435761)>>>0;item.dataset.glitchPhase=String((hash%7000)/1000);}
+ const stage=eventGlitchStage(seconds,Number(item.dataset.glitchPhase),calm);
+ if(surface.dataset.glitchStage===String(stage))return;
+ surface.dataset.glitchStage=String(stage);surface.style.maskImage=stage<0?'none':glitchMasks[stage];
 }

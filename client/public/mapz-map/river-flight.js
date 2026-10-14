@@ -1,4 +1,4 @@
-import {eventCardGeometry,appendEventCardFrame,createAttachedEventBeam} from './event-hologram-card.js';
+import {eventCardGeometry,appendEventCardFrame,updateEventCardGlitch,createAttachedEventBeam} from './event-hologram-card.js';
 import {EVENT_CARD_WIDTH,EVENT_CARD_HEIGHT} from './event-hologram-model.js';
 import { groupBoardPins, drawBoardPin } from './board-pins.js';
 import {addLayers} from '../map-foundation/layers.js';
@@ -871,6 +871,7 @@ function renderHologramLabels(labels){
    }
 
   }
+  if(label.cardHeight)updateEventCardGlitch(item,pulseTime,reduced.matches);
   let stack=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='faces');
   if(label.avatars?.length){
    if(!stack){stack=document.createElement('span');stack.className='standalone-hologram-faces standalone-hologram-faces--anchored';stack.dataset.labelKey=label.key;stack.dataset.labelRole='faces';root.appendChild(stack);}
