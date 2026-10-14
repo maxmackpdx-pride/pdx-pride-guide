@@ -119,3 +119,18 @@ export function readMapCamera(params:URLSearchParams):{center:[number,number];zo
   const [lng,lat]=camera.center;
   return {center:[lat,lng],zoom:camera.zoom,pitch:camera.pitch,bearing:camera.bearing,bounds:{south:lat,north:lat,west:lng,east:lng}};
 }
+
+/** Clear only the selected world's filters; retain camera, layer and other worlds. */
+export function clearMapWorldFilters(params: URLSearchParams, world: MapWorld): void {
+  for (const key of [...params.keys()]) if (key.startsWith(world + '.')) params.delete(key);
+  if (world === 'places') params.delete('placeTypes');
+}
+
+/** One category-scoped dataset for Places pins and cards; unlocated records remain browseable. */
+export function scopeMapPlaceRows<T extends WorldRow>(rows: T[], types: readonly string[], communityPlaceIds: ReadonlySet<number>, kindFor: (row: T) => string): T[] {
+  return rows.filter(row => row.type !== 'nonprofit' && (row.type !== 'group' || !communityPlaceIds.has(Number(row.id))) && types.includes(kindFor(row)));
+}
+
+export function appliedMapWorldFilters(params: URLSearchParams, world: MapWorld): [string, string][] {
+  return [...params.entries()].filter(([key,value]) => Boolean(value) && (key.startsWith(world + ".") || (world === "places" && key === "placeTypes")));
+}

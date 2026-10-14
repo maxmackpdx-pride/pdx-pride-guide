@@ -14,8 +14,8 @@ import { useAuth } from "@/context/AuthContext";
 
 import type { Event } from "@shared/schema";
 import { listingKey, type EventListing } from "@shared/multiDayEvents";
-import { admissionFromFilterTag } from "@shared/admission";
-import { EVENT_TYPE_FILTERS, isEventTypeFilterLabel } from "@shared/eventTypeTags";
+import { matchesEventTypeFilters, readEventTypeFilters } from "@/lib/eventBrowseFilters";
+import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import EventsRailSkeleton from "@/components/events/EventsRailSkeleton";
 import TonightEventCard, { type TonightCardLive } from "@/components/home/TonightEventCard";
 import ZLineIcon from "@/components/ZLineIcon";
@@ -220,8 +220,8 @@ function liveStateFor(e: EventListing, nowMs: number): TonightCardLive | null {
 }
 
 /** Board PAST = scheduled end has passed (not the 7-day MC post window). */
-function isPastListing(e: EventListing): boolean {
-  return isEventSchedulePast(e.dateStart, e.dateEnd);
+function isPastListing(e: EventListing, nowMs = Date.now()): boolean {
+  return isEventSchedulePast(e.dateStart, e.dateEnd, nowMs);
 }
 
 type SortMode =
@@ -288,21 +288,10 @@ function filterBoardEvents(
   return events
     .filter(e => {
       // Live board = upcoming + happening now. Past board = ended only.
-      const past = isPastListing(e);
+      const past = isPastListing(e,nowMs);
       if (pastView ? !past : past) return false;
       if (!eventInWindow(e, activeDay, windows)) return false;
-      if (activeFilters.length > 0) {
-        const admissionFilters = activeFilters
-          .map(admissionFromFilterTag)
-          .filter((v): v is NonNullable<typeof v> => v != null);
-        if (admissionFilters.length > 0 && !admissionFilters.some(a => e.admission === a)) return false;
-        if (activeFilters.includes("21+") && e.ageRequirement !== "21_PLUS") return false;
-        if (activeFilters.includes("ALL AGES") && e.ageRequirement !== "ALL_AGES") return false;
-        if (activeFilters.includes("PUBLIC") && !e.isPublic) return false;
-        if (activeFilters.includes("HOUSE PARTY") && !e.isHouseParty) return false;
-        if (activeFilters.includes("SEX POSITIVE") && !e.isSexPositive) return false;
-        if (activeFilters.includes("NUDITY OK") && !e.nudityOk) return false;
-      }
+      if (!matchesEventTypeFilters(e,activeFilters)) return false;
       if (!matchesSearch(e)) return false;
       return true;
     });
@@ -350,13 +339,7 @@ export default function Events() {
   const [mapOpen, setMapOpen] = useState(false);
   const [mapRowLimit, setMapRowLimit] = useState(40);
   const closeMap = useCallback(() => setMapOpen(false), []);
-  const [activeFilters, setActiveFilters] = useState<string[]>(() => {
-    const raw = readSearchParam("type");
-    return raw
-      .split("|")
-      .map(value => value.trim().toUpperCase())
-      .filter(isEventTypeFilterLabel);
-  });
+  const [activeFilters, setActiveFilters] = useState<string[]>(() => readEventTypeFilters(readSearchParam("type")));
   /** Past events live in their own board view (chip next to day categories). */
   const [pastView, setPastView] = useState(() => readSearchParam("past") === "1");
   const [searchQuery, setSearchQuery] = useState(() => {
@@ -415,7 +398,7 @@ export default function Events() {
   useEffect(() => {
     const restore = () => {
       setActiveDay(readSearchParam("window") || (readSearchParam("type") ? "ALL" : DEFAULT_WINDOW));
-      setActiveFilters(readSearchParam("type").split("|").filter(isEventTypeFilterLabel));
+      setActiveFilters(readEventTypeFilters(readSearchParam("type")));
       setPastView(readSearchParam("past") === "1");
       setSearchQuery(readSearchParam("q"));
       setSortMode(SORT_OPTIONS.find(option => option.value === readSearchParam("sort"))?.value || "start_time");
@@ -482,8 +465,8 @@ export default function Events() {
     });
   }, [routeEventId, routeDay, routeMatch, events, routeEvent]);
 
-  const liveEvents = useMemo(() => events.filter(e => !isPastListing(e)), [events, now]);
-  const pastEvents = useMemo(() => events.filter(isPastListing), [events, now]);
+  const liveEvents = useMemo(() => events.filter(e => !isPastListing(e,now)), [events, now]);
+  const pastEvents = useMemo(() => events.filter(e => isPastListing(e,now)), [events, now]);
   const poolEvents = pastView ? pastEvents : liveEvents;
 
   // Date-window chips: All / Today / Tonight / week windows / months
@@ -846,7 +829,7 @@ export default function Events() {
 
           <div className="eb-result-head events-result-head">
             <p role="status" data-testid="events-result-count">{isLoading ? "Loading events…" : `${filtered.length} ${filtered.length === 1 ? "event" : "events"}`}</p>
-                {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== DEFAULT_WINDOW) && (
+                {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== DEFAULT_WINDOW || sortMode !== "start_time") && (
                   <button
                     type="button"
                     className="events-clear-filters"
@@ -855,6 +838,7 @@ export default function Events() {
                       setSearchQuery("");
                       setPastView(false);
                       setActiveDay(DEFAULT_WINDOW);
+                      setSortMode("start_time");
                     }}
                   >
                     Clear filters

@@ -58,3 +58,21 @@ test("View all chronology orders every category newest first, including clearly 
  assert.deepEqual(filterBoardFeatures(rows,{}).map(p=>p.key),["gigz:4","sellz:3","housing:2","gigz:1"]);
  assert.deepEqual(filterBoardFeatures(rows,{sort:"oldest"}).map(p=>p.key),["gigz:1","housing:2","sellz:3","gigz:4"]);
 });
+
+test("category deep links ignore another room's hidden controls and invalid options", async()=>{
+ const {readBoardFeatureFilters,boardIntentForSelection}=await import('./boardFeatures');
+ const p=new URLSearchParams('category=Furniture&condition=Good&price=under25&remote=1&source=events&tags=pets&sort=price-low&neighborhood= SE ');
+ assert.deepEqual(readBoardFeatureFilters(p,'gigz'),{itemCategory:'',condition:'',price:'',remote:true,source:'',neighborhood:'SE',sort:'newest',tags:[]});
+ assert.equal(boardIntentForSelection('available','giftz'),'all');
+ assert.equal(boardIntentForSelection('iso','giftz'),'iso');
+ assert.equal(boardIntentForSelection('not-a-type','all'),'all');
+ assert.equal(readBoardFeatureFilters(new URLSearchParams('price=bad&sort=bad'),'sellz').price,'');
+ assert.equal(readBoardFeatureFilters(new URLSearchParams('source=bad'),'mizzed').source,'');
+});
+test("the selected room retains its own real filters and My Hoüz tags deduplicate", async()=>{
+ const {readBoardFeatureFilters}=await import('./boardFeatures');
+ const sell=readBoardFeatureFilters(new URLSearchParams('category=Furniture&condition=Good&price=25to100&sort=price-high'),'sellz');
+ assert.equal(sell.itemCategory,'Furniture');assert.equal(sell.condition,'Good');assert.equal(sell.price,'25to100');assert.equal(sell.sort,'price-high');
+ assert.deepEqual(readBoardFeatureFilters(new URLSearchParams('tags=pets,pets, verified'),'housing').tags,['pets','verified']);
+ assert.equal(readBoardFeatureFilters(new URLSearchParams('source=outzide'),'mizzed').source,'outzide');
+});

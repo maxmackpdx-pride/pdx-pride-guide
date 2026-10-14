@@ -11,7 +11,7 @@ import BoardPushPin from "@/components/board/BoardPushPin";
 import UnifiedBoardArt from "@/components/board/UnifiedBoardArt";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import { housingFilterGroups, housingTagLabel } from "@shared/housingTags";
-import { boardFeaturePosts, filterBoardFeatures, canSaveBoardPost } from "@/lib/boardFeatures";
+import { boardFeaturePosts, filterBoardFeatures, canSaveBoardPost, readBoardFeatureFilters, boardIntentForSelection } from "@/lib/boardFeatures";
 import { HousingComposer } from "@/components/housing/HousingComposer";
 import { MizzedComposer } from "@/components/SpottedCardGrid";
 import type { LinkableMissedConnectionEvent } from "@/components/MissedConnectionsPanel";
@@ -46,7 +46,6 @@ import {
   intentLabels,
   parseBoardPostKey,
   type BoardCategory,
-  type BoardIntent,
   type BoardPayload,
   type BoardPost,
 } from "@/lib/allBoards";
@@ -186,14 +185,11 @@ export default function Boards() {
   const controlsRef=useBrowseControlsOffset(selection);
   const query = params.get("q") || "";
   const rawIntent = params.get("intent");
-  const intent: BoardIntent | "all" =
-    rawIntent && Object.hasOwn(intentLabels, rawIntent)
-      ? (rawIntent as BoardIntent)
-      : "all";
+  const intent = boardIntentForSelection(rawIntent, selection);
   const savedOnly = params.get("saved") === "1";
   const mineOnly = params.get("mine") === "1";
   const archiveOnly = params.get("archive") === "1";
-  const featureFilters = {itemCategory: params.get("category") || "", condition: params.get("condition") || "", price: params.get("price") || "", remote: params.get("remote") === "1", source: params.get("source") || "", neighborhood: params.get("neighborhood") || "", sort: params.get("sort") || "newest", tags:(params.get("tags") || "").split(",").filter(Boolean)};
+  const featureFilters = readBoardFeatureFilters(params, selection);
   const hasFeatureFilters = Object.entries(featureFilters).some(([key,value])=>key === "sort" ? value !== "newest" : Array.isArray(value) ? value.length > 0 : Boolean(value));
   const postKey = params.get("post");
   const validPost = postKey && parseBoardPostKey(postKey) ? postKey : null;
@@ -271,18 +267,18 @@ export default function Boards() {
   const loading = relevant.some((f) => f.isPending),
     failed = relevant.some((f) => f.isError);
   const categoryPosts = allPosts.filter(
-    (p) => selection === "all" || p.category === selection,
+    (p) => (!mineOnly || !!user) && (selection === "all" || p.category === selection),
   );
   const intents = Array.from(new Set(categoryPosts.map((p) => p.intent)));
-  const results = filterBoardFeatures(categoryPosts.filter(
+  const matchingCategoryPosts = filterBoardFeatures(categoryPosts.filter(
     (p) =>
-      (intent === "all" || p.intent === intent) &&
       (!savedOnly || saved.has(p.key)) &&
       [p.title, p.description, p.area, p.detail, intentLabels[p.intent]]
         .join(" ")
         .toLowerCase()
         .includes(query.trim().toLowerCase()),
   ), featureFilters);
+  const results = matchingCategoryPosts.filter(p => intent === "all" || p.intent === intent);
   // A category doorway shows every matching post; the mixed feed loads progressively.
   const visibleResults = selectedCategory ? results : results.slice(0, limit);
   const clear = () => update({ archive:null, q: null, intent: null, saved: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null }, true);
@@ -323,7 +319,7 @@ export default function Boards() {
     update({compose:null,post:`${category}:${id}`,build:null,join:null,waitlist:null,chat:null},true);
   };
   useEffect(() => {if(params.get("compose") === "1" && selection && selection !== "all") {if(user) setCompose(selection); else setShowAuth(true);}},[search,user?.id]);
-  useEffect(() => setLimit(24), [selection, query, intent, savedOnly,mineOnly]);
+  useEffect(() => setLimit(24), [selection, query, intent, savedOnly,mineOnly, JSON.stringify(featureFilters)]);
   return (
     <div
       className="eb-page ab-page pdx-glass-rebind"
@@ -462,7 +458,7 @@ export default function Boards() {
                       >
                         {intentLabels[i]}
                         <span>
-                          {categoryPosts.filter((p) => p.intent === i).length}
+                          {matchingCategoryPosts.filter((p) => p.intent === i).length}
                         </span>
                       </button>
                     ))}

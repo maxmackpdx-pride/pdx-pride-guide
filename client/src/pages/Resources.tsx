@@ -1,3 +1,4 @@
+import { readBrowseCategories } from "@/lib/browseCategoryState";
 import { resourceMapHref } from '@/lib/resourceMap';
 import { useQuery } from "@tanstack/react-query";
 import type { CommunitySummary } from "@shared/community";
@@ -475,7 +476,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   );
   const readBrowseState = () => {
     const params = new URLSearchParams(window.location.search);
-    const ids = (params.get("cat") || "").split(",").filter(id => RESOURCE_CATEGORIES.some(c => c.id === id));
+    const ids = readBrowseCategories(params, "cat", id => RESOURCE_CATEGORIES.some(c => c.id === id));
     return { ids: params.get("view") === "all" ? [] : ids, query: params.get("q") || "", layout: params.get("layout") === "grid" || ids.length > 0 ? "grid" as const : "browse" as const, mode: params.get("door") === "talk" ? "talk" as const : "directory" as const };
   };
   const communities = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"] });
@@ -579,6 +580,8 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
           </div>}>
           <a className="eb-tool pdx-glass-rebind" href={mapBrowseHref("rezources")} aria-label="Explore resources on Mapz"><Map size={19} /><span>Map</span></a>
         </BrowseControls>
+        {mode === "directory" && (!categoryIds.length || categoryIds.includes("community")) && communities.isPending && <p role="status">Loading community groups…</p>}
+        {mode === "directory" && (!categoryIds.length || categoryIds.includes("community")) && communities.isError && <p role="alert">Community groups could not refresh. Other resources remain available. <button type="button" className="eb-clear" onClick={()=>void communities.refetch()}>Try again</button></p>}
         {mode === "directory" && <div className="eb-result-head"><p role="status">{rows.length} resource{rows.length === 1 ? "" : "s"}</p>{(categoryIds.length > 0 || searchQuery) && <button type="button" className="eb-clear" onClick={clear}>Clear filters</button>}</div>}
         <div className="eb-body">
           <aside className="eb-side" aria-label="NEEDZ filters and support">

@@ -1,3 +1,4 @@
+import {clearMapWorldFilters,scopeMapPlaceRows} from '@/lib/mapWorlds';
 import { useSyncExternalStore } from "react";
 import { isBoardMapPickerOpen, subscribeBoardMapPicker } from "@/lib/boardMapPickerActivity";
 import MapBoardCards, {type MapBoardCardRow} from "@/components/board/MapBoardCards";
@@ -653,7 +654,7 @@ export default function MapzMapDemo() {
     })) as unknown as Record<MapWorld,WorldRow[]>;
   },[places,mizzed,gigs,gifts,sells,mineQueries[0].data,mineQueries[1].data,mineQueries[2].data,mineQueries[3].data,params,boardMapPoints,viewerPoint,mapCenter]);
   const filteredWorlds=useMemo(()=>Object.fromEntries((Object.keys(locatedWorlds) as MapWorld[]).map(world=>[world,filterWorldRows(locatedWorlds[world],world,params,savedSellzSet)])) as Record<MapWorld,WorldRow[]>,[locatedWorlds,params,savedSellzSet]);
-  const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>(place as Place).type!=='nonprofit'&&((place as Place).type!=='group'||!publicCommunityPlaceIds.has((place as Place).id))&&placeTypes.includes(mapzPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes,publicCommunityPlaceIds]);
+  const mapPlaces=useMemo(()=>scopeMapPlaceRows(filteredWorlds.places,placeTypes,publicCommunityPlaceIds,place=>mapzPlaceType(place as Place)) as unknown as Place[],[filteredWorlds,placeTypes,publicCommunityPlaceIds]);
   const visibleHousing = useMemo(() => housing
     .filter(row => (!housingType || row.type === housingType || (housingType === "FORMING" && row.type === "LOOKING" && row.openToHaus === true)) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
     .map(row => ({ ...row, _board: "My Hoüz", locationLabel: row.lat != null && row.lng != null
@@ -744,7 +745,7 @@ export default function MapzMapDemo() {
     const isMine=params.get(`${world}.view`)==="mine";
     const state={places:[placesLoading,placesError,retryPlaces],mizzed:[mizzedLoading,mizzedError,retryMizzed],gigz:[gigsLoading,gigsError,retryGigs],giftz:[giftsLoading,giftsError,retryGifts],sellz:[sellsLoading,sellsError,retrySells]}[world];
     const rows=world==="places"?mapPlaces as unknown as WorldRow[]:filteredWorlds[world];
-    return [world,<MapWorldPanel key={world} world={world} rows={rows} allRows={locatedWorlds[world]} bounds={mapBounds} params={params} setParam={(key,value)=>updateParams(p=>{if(value)p.set(key,value);else p.delete(key);})} onClearFilters={()=>updateParams(p=>{[...p.keys()].filter(key=>key.startsWith(world+".")).forEach(key=>p.delete(key));})} onCreate={()=>openComposer(world)} selectedId={mapRecordId(params.get(WORLD_DETAIL_KEYS[world]))} loading={isMine?mineWorlds[world]?.isLoading:Boolean(state[0])} error={isMine?mineWorlds[world]?.isError:Boolean(state[1])} retry={()=>{if(isMine)void mineWorlds[world]?.refetch();else void (state[2] as ()=>unknown)();}} onOpen={(row,target)=>world==="places"?openMark(placeMarks([row as Place])[0]||{key:`p-${row.id}`,kind:"place",lat:NaN,lng:NaN,item:row as Place},target):openBoardRow(row,target)}>
+    return [world,<MapWorldPanel key={world} world={world} rows={rows} allRows={locatedWorlds[world]} bounds={mapBounds} params={params} setParam={(key,value)=>updateParams(p=>{if(value)p.set(key,value);else p.delete(key);})} onClearFilters={()=>updateParams(p=>{clearMapWorldFilters(p,world);})} onCreate={()=>openComposer(world)} selectedId={mapRecordId(params.get(WORLD_DETAIL_KEYS[world]))} loading={isMine?mineWorlds[world]?.isLoading:Boolean(state[0])} error={isMine?mineWorlds[world]?.isError:Boolean(state[1])} retry={()=>{if(isMine)void mineWorlds[world]?.refetch();else void (state[2] as ()=>unknown)();}} onOpen={(row,target)=>world==="places"?openMark(placeMarks([row as Place])[0]||{key:`p-${row.id}`,kind:"place",lat:NaN,lng:NaN,item:row as Place},target):openBoardRow(row,target)}>
       {world==="places" && <div className="mapz-layer-rail" role="group" aria-label="Place categories">{MAPZ_PLACE_TYPE_OPTIONS.map(type=><button key={type} aria-pressed={placeTypes.includes(type)} onClick={()=>updateParams(p=>p.set("placeTypes",(placeTypes.includes(type)?placeTypes.filter(item=>item!==type):[...placeTypes,type]).join(",")))}>{mapzTypeLabel(type)}</button>)}</div>}
     </MapWorldPanel>];
   })) as Record<MapWorld,React.ReactNode>;

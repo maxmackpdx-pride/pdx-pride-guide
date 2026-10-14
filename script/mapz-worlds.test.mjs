@@ -8,7 +8,7 @@ async function moduleFrom(path){
   const result=await build({entryPoints:[new URL(path,import.meta.url).pathname],bundle:true,write:false,platform:'node',format:'esm'});
   return import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`);
 }
-const {locateWorldRow,filterWorldRows,legacyWorldMapHref,readMapCamera,inMapBounds}=await moduleFrom('../client/src/lib/mapWorlds.ts');
+const {locateWorldRow,filterWorldRows,scopeMapPlaceRows,clearMapWorldFilters,appliedMapWorldFilters,legacyWorldMapHref,readMapCamera,inMapBounds}=await moduleFrom('../client/src/lib/mapWorlds.ts');
 const {housingDisplayName}=await moduleFrom('../shared/housing.ts');
 const places=[{id:1,name:'Test Venue',lat:45.52,lng:-122.67,neighborhood:'Pearl District'},{id:2,name:'Other Venue',lat:45.54,lng:-122.69,neighborhood:'Pearl District'}];
 
@@ -69,4 +69,32 @@ test('all four waypoint meshes fit the GPU budget, retain normals and use no tex
   assert.deepEqual(layer.instances.map(row=>row.key),['sell']);
   for(let i=0;i<48;i++)assert.equal(layer.setLayout(String(i),{scale:1}),true);
   assert.equal(layer.setLayout('overflow',{scale:1}),false);layer.beginLayouts();assert.equal(layer.layouts.size,0);
+});
+
+test('clearing Places removes its selected categories without altering camera or other rooms',()=>{
+ const params=new URLSearchParams('placeTypes=bar&places.q=test&places.owned=1&gigz.type=POSTING_GIG&layer=places&lat=45&lng=-122&zoom=15&place=42');
+ clearMapWorldFilters(params,'places');
+ assert.equal(params.has('placeTypes'),false);assert.equal(params.has('places.q'),false);assert.equal(params.has('places.owned'),false);
+ for(const [key,value] of [['gigz.type','POSTING_GIG'],['lat','45'],['zoom','15'],['layer','places'],['place','42']])assert.equal(params.get(key),value);
+ const other=new URLSearchParams('placeTypes=bar&gigz.q=DJ');clearMapWorldFilters(other,'gigz');assert.equal(other.get('placeTypes'),'bar');assert.equal(other.has('gigz.q'),false);
+});
+
+test('shared Places categories retain unlocated matches and exclude moved public communities',async()=>{
+ const rows=[{id:1,type:'bar',name:'Bar',lat:45,lng:-122},{id:2,type:'bar',name:'Unlocated bar',lat:null,lng:null},{id:3,type:'cafe',name:'Cafe'},{id:4,type:'group',name:'Public club'},{id:5,type:'nonprofit',name:'Care'}];
+ assert.deepEqual(scopeMapPlaceRows(rows,['bar'],new Set([4]),row=>row.type).map(row=>row.id),[1,2]);
+ assert.deepEqual(scopeMapPlaceRows(rows,['bar','cafe','group','nonprofit'],new Set([4]),row=>row.type).map(row=>row.id),[1,2,3]);
+ assert.deepEqual(scopeMapPlaceRows(rows,[],new Set(),row=>row.type),[]);
+ const app=await readFile(new URL('../client/src/pages/MapzMapDemo.tsx',import.meta.url),'utf8');
+ assert.match(app,/const rows=world==="places"\?mapPlaces/,'drawer consumes the same scoped Places dataset as pins');
+});
+
+test('Places category alone exposes applied chip and Clear without leaking into other rooms',async()=>{
+ const params=new URLSearchParams('placeTypes=bar');
+ assert.deepEqual(appliedMapWorldFilters(params,'places'),[['placeTypes','bar']]);
+ assert.deepEqual(appliedMapWorldFilters(params,'gigz'),[]);
+ clearMapWorldFilters(params,'places');assert.deepEqual(appliedMapWorldFilters(params,'places'),[]);
+ const panel=await readFile(new URL('../client/src/components/MapWorldPanel.tsx',import.meta.url),'utf8');
+ assert.match(panel,/const applied=appliedMapWorldFilters\(params,world\)/);
+ assert.match(panel,/applied.length>0.*Clear filters/);
+ assert.match(panel,/Remove place category filter/);
 });

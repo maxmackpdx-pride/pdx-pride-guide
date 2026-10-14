@@ -1,3 +1,4 @@
+import { readBrowseCategories } from "@/lib/browseCategoryState";
 import { BrowseHeader, BrowseControls, BrowseFilters, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
 import { PlaceSubcategoryFilters } from '@/components/discovery/PlaceSubcategoryFilters';
 import { directorySubcategories, directorySubcategoryOptions } from '@shared/directorySubcategories';
@@ -198,8 +199,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   const [formOpen, setFormOpen] = useState(() => new URLSearchParams(window.location.search).get("add") === "1");
   const [activeType, setActiveType] = useState(() => {
     if (isSpaces) return "group";
-    const t = new URLSearchParams(window.location.search).get("type");
-    return t?.split(",").filter(isPlacezType).join(",") || "ALL";
+    return readBrowseCategories(new URLSearchParams(window.location.search), "type", isPlacezType, "category").join(",") || "ALL";
   });
   const [activeNeighborhood, setActiveNeighborhood] = useState(() => new URLSearchParams(window.location.search).get("neighborhood") || "ALL");
   const [activeSubcategory, setActiveSubcategory] = useState(() => new URLSearchParams(window.location.search).get('sub') || 'ALL');
@@ -261,8 +261,8 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   useEffect(() => {
     const restore = () => {
       const params = new URLSearchParams(window.location.search);
-      const type = params.get("type");
-      setActiveType(isSpaces ? "group" : type?.split(",").filter(isPlacezType).join(",") || "ALL");
+      const type = readBrowseCategories(params, "type", isPlacezType, "category").join(",");
+      setActiveType(isSpaces ? "group" : type || "ALL");
       const view = params.get("layout");
       setBrowseView(view === "grid" || Boolean(type && type !== "ALL") ? "grid" : "browse");
       setSearchQuery(params.get("q") || "");
@@ -514,7 +514,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
           <PlaceSubcategoryFilters options={subcategoryOptions} selected={selectedSubcategory} onSelect={setActiveSubcategory} color={TYPE_COLORS[activeType] || 'var(--neon-cyan)'} />
           {formOpen && <DirectoryAddPlaceForm isSpaces={false} onClose={() => setFormOpen(false)} />}
           <div className="eb-result-head"><p role="status" data-testid="directory-result-count">{resultLine}</p>
-            {(searchQuery || activeType !== "ALL" || activeNeighborhood !== "ALL") && <button type="button" className="eb-clear" onClick={() => { setSearchQuery(""); setActiveType("ALL"); setActiveSubcategory('ALL'); setActiveNeighborhood("ALL"); }}>Clear filters</button>}
+            {(searchQuery || activeType !== "ALL" || selectedSubcategory !== "ALL" || activeNeighborhood !== "ALL") && <button type="button" className="eb-clear" onClick={() => { setSearchQuery(""); setActiveType("ALL"); setActiveSubcategory('ALL'); setActiveNeighborhood("ALL"); }}>Clear filters</button>}
           </div>
           <div className="eb-body">
             <aside className="eb-side" aria-label="Placez filters">
@@ -653,7 +653,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
           </div>
           <div className="directory-browser-results__status">
             <span role="status" data-testid="directory-result-count">{resultLine}</span>
-            {(searchQuery || activeType !== "ALL" || activeNeighborhood !== "ALL") && (
+            {(searchQuery || activeType !== "ALL" || selectedSubcategory !== "ALL" || activeNeighborhood !== "ALL") && (
               <button
                 type="button"
                 onClick={() => {

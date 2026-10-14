@@ -4,7 +4,7 @@ import BoardFollowButton from "./BoardFollowButton";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Plus, ChevronRight } from "lucide-react";
 import { mapCoordinates } from "@/lib/mapCoordinates";
-import { WORLD_NAMES, inMapBounds, type MapWorld, type WorldRow, type MapBounds } from "@/lib/mapWorlds";
+import { WORLD_NAMES, appliedMapWorldFilters, inMapBounds, type MapWorld, type WorldRow, type MapBounds } from "@/lib/mapWorlds";
 
 type Props = {world:MapWorld; rows:WorldRow[]; allRows:WorldRow[]; bounds:MapBounds|null; params:URLSearchParams; setParam:(key:string,value:string)=>void; onClearFilters:()=>void; onCreate:()=>void; onOpen:(row:WorldRow,target:Element)=>void; selectedId:number|null; loading:boolean; error:boolean; retry:()=>void; children?:ReactNode};
 export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam,onClearFilters,onCreate,onOpen,selectedId,loading,error,retry,children}:Props) {
@@ -14,7 +14,7 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
   const get=(key:string)=>params.get(`${world}.${key}`)||"";
   const set=(key:string,value:string)=>setParam(`${world}.${key}`,value);
   const name=WORLD_NAMES[world];
-  const applied=[...params.entries()].filter(([key,value])=>key.startsWith(world+".")&&value);
+  const applied=appliedMapWorldFilters(params,world);
   const select=(key:string,label:string,options:Array<[string,string]>)=><label>{label}<select value={get(key)} onChange={e=>set(key,e.target.value)}>{options.map(([value,text])=><option value={value} key={value}>{text}</option>)}</select></label>;
   const categories=Array.from(new Set([...allRows.map(row=>row.category),get("category")].filter(Boolean))).sort();
   const orderedRows=world === "places" ? [...rows].sort((a,b)=>String(a.name || "Place").localeCompare(String(b.name || "Place"),"en",{sensitivity:"base",numeric:true})) : rows;
@@ -49,7 +49,7 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
     </BrowseToolbar>
     </>}
     {get("ids") && <p className="mapz-layer-location-note">Showing this waypoint’s posts. <button onClick={()=>set("ids","")}>Show all in view</button></p>}
-    {applied.length>0&&<div className="map-applied-filters" aria-label="Applied filters"><button type="button" onClick={onClearFilters}>Clear filters</button>{applied.map(([key,value])=><button key={key} type="button" onClick={()=>setParam(key,"")} aria-label={"Remove "+key.split(".")[1]+" filter"}>{key.endsWith(".ids")?"Selected waypoint":key.endsWith(".owned")?"Queer owned":key.endsWith(".remote")?"Remote friendly":value.replaceAll("_"," ")} ×</button>)}</div>}
+    {applied.length>0&&<div className="map-applied-filters" aria-label="Applied filters"><button type="button" onClick={onClearFilters}>Clear filters</button>{applied.map(([key,value])=><button key={key} type="button" onClick={()=>setParam(key,"")} aria-label={key==="placeTypes"?"Remove place category filter":"Remove "+key.split(".")[1]+" filter"}>{key.endsWith(".ids")?"Selected waypoint":key.endsWith(".owned")?"Queer owned":key.endsWith(".remote")?"Remote friendly":value.replaceAll("_"," ")} ×</button>)}</div>}
     {world !== "places" && children}
     {error && <BrowseStatus error title={allRows.length ? `${name} could not refresh` : `${name} couldn’t load`} description={allRows.length ? "Showing the last loaded listings. Your map and filters are still here." : "Your map and filters are still here. Try loading the listings again."} onAction={retry} />}
     {loading && !allRows.length ? <p role="status">Loading {name}…</p> : error && !allRows.length ? null : <>
