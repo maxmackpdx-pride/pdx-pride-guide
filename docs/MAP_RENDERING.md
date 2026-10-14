@@ -25,6 +25,12 @@ copying a demo into production or editing the homepage composition.
 - `camera.js`: camera capture, validated restoration and persistence with disposable
   listeners. Mapz keeps its host-driven flight/exploration behavior; Outzide keeps its
   existing saved-camera key and restoration rules.
+- `mode-camera.js`: independent room camera snapshots and the authored Portland metro
+  coverage bounds. Returning from outside that coverage centers Mapz in Portland;
+  returning to Outzide restores its last view. Room filters survive; old cards and
+  composers stay closed.
+- `location.js`: the shared, user-requested one-fix lookup. Both rooms cancel the watch
+  when hidden or finished and ignore late callbacks.
 - `motion.js`: cached OS reduced-motion and host Calm Mode preference, including updates.
 - `layers.js`: source registration, unchanged-data suppression, layer registration,
   deduplicated image loading with retry and feature selection/hover transitions.
@@ -35,6 +41,9 @@ Mapz's `natural-surfaces.js` owns custom water/reflection and cached building-oc
 rendering and exports the shared style. Outzide's `assets/outzide-surface.js` adds its
 contour signal layers. `brightenOutzideTerrain` remains its palette adapter. Terrain
 and hillshade use independent source state while sharing elevation data.
+Outzide's palette adapter uses deeper evergreen land and richer dark water; Mapz's
+palette is unchanged. Its iframe reads the canonical type, layout, card and accent
+recipes through the generated token bridge, with locally served platform fonts.
 
 ## Native and custom rendering boundary
 
@@ -91,6 +100,9 @@ visibility and motion changes cancel/restart the existing timer. During camera m
 are coalesced and disposed. Selected route geometry is cached and sources/layers are
 updated rather than removed and recreated. Native images are registered once per
 map/color; unchanged community rows do not rebuild their source.
+Native pin disposal tolerates an already-removed mini-map. Outzide's periodic feeds
+and marker projections pause with map activity. Activity heads stay opaque when their
+terrain anchor is covered; the original head shapes and hologram effects remain.
 
 Both scenes use the same authored MapLibre 5.6.2 runtime at
 `home-flight/vendor/maplibre-gl-5.6.2.{js,css}` and contour runtime at

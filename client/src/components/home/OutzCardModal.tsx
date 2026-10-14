@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
+import {X} from 'lucide-react';
 import {useLocation} from 'wouter';
 import {useAuth} from '@/context/AuthContext';
 import {useOpenCardClose} from '@/hooks/useOpenCardClose';
@@ -19,9 +20,9 @@ export default function OutzCardModal({location,onClose,onRequireAuth}:{location
    if(event.data.type==='browse-error')setFailed(true);
    if(event.data.type==='require-auth'&&!user&&!loading)onRequireAuth?.();
    if(event.data.type==='close-card')requestClose();
-   if(event.data.type==='view-mapz'){onClose();navigate(`${location.href}?mapOnly=1`);}
+   if(event.data.type==='view-mapz'){const target=new URL(location.href,window.location.origin);target.searchParams.set('mapOnly','1');onClose();navigate(target.pathname+target.search+target.hash);}
   };
   window.addEventListener('message',receive);publish();return()=>window.removeEventListener('message',receive);
  },[user,loading,id,location.href,navigate,onClose,onRequireAuth,requestClose]);
- return createPortal(<div className="home-outz-overlay" onClick={requestClose}><div ref={dialogRef} className="home-outz-modal" role="dialog" aria-modal="true" aria-label={location.name} onClick={e=>e.stopPropagation()}><div className="home-outz-loading" role="status" hidden={ready}>{failed ? <a href={location.href}>Open destination details</a> : "Loading destination…"}</div><iframe ref={frame} title={`${location.name} details`} src={`/outzide-map/index.html?v=20261006-keep-markers&card=1&place=${encodeURIComponent(id)}&guestPlace=${encodeURIComponent(id)}`} /><button className="home-outz-close" aria-label="Close destination" onClick={requestClose}>×</button></div></div>,document.body);
+ return createPortal(<div className="home-outz-overlay" onClick={requestClose}><div ref={dialogRef} className="home-outz-modal" role="dialog" aria-modal="true" aria-label={location.name} onClick={e=>e.stopPropagation()}><div className="home-outz-loading" role="status" hidden={ready}>{failed ? <a href={location.href}>Open destination details</a> : "Loading destination…"}</div><iframe ref={frame} title={`${location.name} details`} src={`/outzide-map/index.html?v=20261013-forest-room&card=1&place=${encodeURIComponent(id)}&guestPlace=${encodeURIComponent(id)}`} /><button type="button" className="home-outz-close" aria-label="Close destination" onClick={requestClose}><X size={20} aria-hidden="true" /></button></div></div>,document.body);
 }

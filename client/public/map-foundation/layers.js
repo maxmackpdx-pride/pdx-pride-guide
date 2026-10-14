@@ -12,11 +12,13 @@ export function addLayers(map,layers,before){
  for(const layer of layers)if(!map.getLayer(layer.id))map.addLayer(layer,before);
 }
 
-export function registerImage(map,id,load,options){
+export function registerImage(map,id,load,options,active=()=>true){
+ if(!active())return Promise.resolve(id);
  let pending=images.get(map);if(!pending){pending=new Map();images.set(map,pending);}
  if(map.hasImage(id))return Promise.resolve(id);
  if(!pending.has(id))pending.set(id,Promise.resolve().then(load).catch(error=>{pending.delete(id);throw error;}));
  return pending.get(id).then(image=>{
+  if(!active())return id;
   if(!map.hasImage(id))map.addImage(id,image,options);
   return id;
  });

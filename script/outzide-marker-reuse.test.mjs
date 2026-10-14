@@ -28,7 +28,7 @@ function harness(places){
   };
  }
  const context={
-  markers,clusterWaypoints,places,
+  markers,clusterWaypoints,places,mapActivity:{visible:true},
   filtered:()=>places,
   map:{project:([lng,lat])=>({x:lng*100,y:lat*100}),getZoom:()=>12},
   state:{selected:null},
@@ -50,6 +50,7 @@ function harness(places){
   waypointAccess:{run(fn){fn();}},
   stillMotion:()=>true,
   selectPlace(){},
+  previewPlace(){},
   maplibregl:{Marker,LngLatBounds:class{extend(){}},},
   drawHolograms(){draws++;},
  };
@@ -80,7 +81,21 @@ test('unchanged Outzide waypoints keep their marker nodes',()=>{
  for(const marker of context.markers){
   assert.match(marker.options.element.className,/waypoint-icon/);
   assert.match(marker.options.element.innerHTML,/waypoint-head/);
+  assert.equal(marker.options.opacityWhenCovered,'1');
  }
+});
+
+test('hidden maps do no marker projection or drawing and resume without replacing artwork',()=>{
+ const {context,counts}=harness([{id:'a',name:'Alpha Trail',kind:'trail',lat:45,lng:-122,special:false}]);
+ const before=counts(),element=context.markers[0].getElement();
+ context.mapActivity.visible=false;
+ context.filtered=()=>{throw Error('Hidden map should not filter or project');};
+ vm.runInContext('renderMarkers();',context);
+ assert.deepEqual(counts(),before);
+ context.mapActivity.visible=true;
+ context.filtered=()=>context.places;
+ vm.runInContext('renderMarkers();',context);
+ assert.equal(context.markers[0].getElement(),element);
 });
 
 test('selection changes only the marker whose artwork changed',()=>{

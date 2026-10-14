@@ -1,3 +1,4 @@
+import {PORTLAND_MAP_BOUNDS} from "../../public/map-foundation/mode-camera.js";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
@@ -120,10 +121,7 @@ const PIN_HALF = MAP_PIN_SIZE / 2;
 /** Keep the directory map framed on the Portland metro (incl. Vancouver WA,
     Aloha, Clackamas multi-loc storefronts). Users can't pan/zoom past this box.
     [SW, NE] corners. */
-const PORTLAND_BOUNDS: [[number, number], [number, number]] = [
-  [45.35, -122.92], // SW - Aloha / Tigard / Clackamas
-  [45.70, -122.42], // NE - Vancouver WA / Gresham
-];
+const PORTLAND_BOUNDS: [[number, number], [number, number]] = PORTLAND_MAP_BOUNDS.map(([lng,lat])=>[lat,lng]) as [[number, number], [number, number]];
 const PORTLAND_MIN_ZOOM = 11;
 
 /** Expand multi-loc businesses into one pin per storefront with coords. */

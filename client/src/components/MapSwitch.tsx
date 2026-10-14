@@ -1,5 +1,6 @@
+import {switchMapCameraHref} from "../../public/map-foundation/mode-camera.js";
 import { useMapzActive } from './MapzActivity';
-import { captureCamera, cameraHref, type CameraMap } from "../../public/map-foundation/camera.js";
+import { captureCamera, type CameraMap } from "../../public/map-foundation/camera.js";
 import { Link, useLocation } from "wouter";
 import { useEffect, useState, type MouseEvent } from "react";
 import { prefetchMapz } from "@/lib/prefetchMapz";
@@ -17,7 +18,8 @@ export default function MapSwitch({ current }: { current: "mapz" | "outz" }) {
     if(!map)return;
     event.preventDefault();
     if(current === "mapz")leavingMapz();else leavingOutz();
-    setLocation(cameraHref(href,captureCamera(map)));
+    let storage:Storage|undefined;try{storage=sessionStorage;}catch{}
+    setLocation(switchMapCameraHref(current,href,captureCamera(map),storage));
   };
   const [mapzHref] = useState(() => {
     try { const path = sessionStorage.getItem("mapz.lastHref") || ""; return /^\/map(?:\?|$)/.test(path) ? path : "/map"; }

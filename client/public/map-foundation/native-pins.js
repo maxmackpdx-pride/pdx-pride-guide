@@ -17,6 +17,8 @@ async function pinImage(color,library){
 export function createNativePins(map,id,{library=globalThis.maplibregl}={}){
  let revision=0,disposed=false,lastSignature=null;
  const layer=id+'-pins',interaction=createFeatureInteraction(map,id);
+ const removed=()=>{disposed=true;revision++;};
+ map.on('remove',removed);
  const click=event=>{
   const feature=event.features?.[0];if(!feature)return;
   interaction('selected',feature.id);
@@ -27,17 +29,19 @@ export function createNativePins(map,id,{library=globalThis.maplibregl}={}){
  map.on('click',layer,click);map.on('mousemove',layer,enter);map.on('mouseleave',layer,leave);
  return {
   async set(rows){
+   if(disposed)return;
    const signature=JSON.stringify(rows);
    if(signature===lastSignature&&map.getLayer(layer))return;
    const version=++revision;
    await whenStyleReady(map);
+   if(disposed||version!==revision)return;
    const colors=[...new Set(rows.map(row=>row.color))];
-   await Promise.all(colors.map(color=>registerImage(map,'standard-pin-'+color,()=>pinImage(color,library),{pixelRatio:2})));
+   await Promise.all(colors.map(color=>registerImage(map,'standard-pin-'+color,()=>pinImage(color,library),{pixelRatio:2},()=>!disposed&&version===revision)));
    if(disposed||version!==revision)return;
    const data={type:'FeatureCollection',features:rows.map(row=>({type:'Feature',id:row.id,geometry:{type:'Point',coordinates:[row.lng,row.lat]},properties:{image:'standard-pin-'+row.color,scale:row.scale??1,label:row.label??''}}))};
    setGeoJSON(map,id,data);lastSignature=signature;
    addLayers(map,[{id:layer,type:'symbol',source:id,layout:{'icon-image':['get','image'],'icon-size':['get','scale'],'icon-anchor':'bottom','icon-allow-overlap':true,'icon-ignore-placement':true,'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'}}]);
   },
-  dispose(){disposed=true;revision++;map.off('click',layer,click);map.off('mousemove',layer,enter);map.off('mouseleave',layer,leave);if(map.getLayer(layer))map.removeLayer(layer);if(map.getSource(id))map.removeSource(id);},
+  dispose(){const alreadyDisposed=disposed;disposed=true;revision++;map.off('remove',removed);map.off('click',layer,click);map.off('mousemove',layer,enter);map.off('mouseleave',layer,leave);if(alreadyDisposed)return;if(map.getLayer(layer))map.removeLayer(layer);if(map.getSource(id))map.removeSource(id);},
  };
 }

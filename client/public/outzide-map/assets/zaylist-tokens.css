@@ -222,7 +222,14 @@
   --map-selected-line: inset 0 -2px 0 var(--map-light);
 }
 [data-map="mapz"] { --map-ink: #090b13; --map-light: #94b5cf; --map-accent: var(--panel-cyan, #19e3ff); }
-[data-map="outzide"] { --map-ink: #101a16; --map-light: #a9bc98; --map-accent: #ff8c00; }
+[data-map="outzide"] {
+  --outz-forest: #101a16;
+  --outz-forest-light: #a9bc98;
+  --outz-orange: var(--neon-orange);
+  --map-ink: var(--outz-forest);
+  --map-light: var(--outz-forest-light);
+  --map-accent: var(--outz-orange);
+}
 
 /* chrome.css */
 /**
@@ -333,4 +340,280 @@ html.calm-mode {
   --bloom-alpha: 0%;
   --neon-bloom: 0 0 0 transparent;
   --btn-glow-shadow: var(--chrome-keyline), var(--chrome-bevel-dark);
+}
+
+/* typography.css: root tokens only */
+:root {
+  /* ---- FAMILIES ------------------------------------------ */
+  --font-display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --font-body:    'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
+
+  /* ---- WEIGHTS ------------------------------------------- */
+  --fw-regular: 400;  /* @kind font */
+  --fw-medium:  500;  /* @kind font */
+  --fw-semibold:600;  /* @kind font */
+  --fw-bold:    700;  /* @kind font */
+  --fw-heavy:   800;  /* @kind font */
+  --fw-black:   900;  /* @kind font */
+
+  /* ---- DISPLAY SCALE (Barlow Condensed, black) ----------- */
+  --display-hero:  clamp(3.5rem, 11vw, 9rem);    /* @kind font */
+  --display-1:     clamp(2.75rem, 7vw, 5.5rem);  /* @kind font */
+  --display-2:     clamp(2rem, 4.5vw, 3.5rem);   /* @kind font */
+  --display-3:     1.75rem;                       /* @kind font */
+
+  --lh-display:    0.95;        /* @kind other */
+  --tracking-display: 0.005em;  /* @kind other */
+
+  /* ---- CHROME (Barlow 700, UI labels) -------------------- */
+  --chrome-lg:  1.25rem;   /* nav @kind font */
+  --chrome-md:  1rem;      /* buttons @kind font */
+  --chrome-sm:  0.85rem;   /* chips @kind font */
+  --chrome-xs:  0.7rem;    /* badges @kind font */
+  --tracking-chrome: 0.06em;  /* @kind other */
+
+  /* ---- TITLE / HEADING (card titles, Barlow 900) --------- */
+  --title-lg:  1.5rem;    /* @kind font */
+  --title-md:  1.3125rem; /* @kind font */
+  --title-sm:  1.0625rem; /* @kind font */
+  --lh-title:  1.05;      /* @kind other */
+
+  /* ---- BODY (Inter) -------------------------------------- */
+  --body-lg:   1.125rem;  /* @kind font */
+  --body-md:   1rem;      /* @kind font */
+  --body-sm:   0.875rem;  /* @kind font */
+  --lh-body:   1.55;      /* @kind other */
+
+  /* ---- META ---------------------------------------------- */
+  --meta:      0.8125rem; /* @kind font */
+  --meta-sm:   0.6875rem; /* @kind font */
+  --lh-meta:   1.35;      /* @kind other */
+
+  /* ---- TRACKING ------------------------------------------ */
+  --tracking-tight:  -0.01em;  /* @kind other */
+  --tracking-normal: 0;         /* @kind other */
+  --tracking-wide:   0.04em;    /* @kind other */
+  --tracking-kicker: 0.14em;    /* @kind other */
+}
+:root {
+  --tracking-mono: 0.2em;
+  --mono-kicker: 0.75rem;
+  --mono-label: 0.6875rem;
+  --mono-micro: 0.625rem;
+  --font-board-display: var(--font-display);
+  --font-board-mono: var(--font-mono);
+}
+:root { --title-outline-width:.35px; --title-outline-color:var(--z-black); }
+
+/* layout.css: root tokens only */
+:root {
+  /* ---- SPACE SCALE (4px base) ---------------------------- */
+  --space-0:   0;
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-20:  80px;
+  --space-24:  96px;
+  --space-32:  128px;
+
+  /* Semantic spacing */
+  --gap-card:      var(--space-4);   /* inside cards */
+  --gap-list:      var(--space-3);   /* between event rows */
+  --gap-section:   var(--space-16);  /* between page sections */
+  --pad-card:      var(--space-5);   /* card padding */
+  --pad-page:      clamp(16px, 5vw, 48px); /* page gutter */
+
+  /* ---- CONTENT WIDTHS ------------------------------------ */
+  --w-content:  1180px;  /* main app column */
+  --w-prose:    680px;   /* readable blurb width */
+  --w-narrow:   440px;   /* forms / single column */
+
+  /* ---- RADIUS (brutalist, minimal 0 to 8px) -------------- */
+  --radius-xs:   2px;
+  --radius-sm:   3px;
+  --radius-md:   4px;    /* default card / button */
+  --radius-lg:   6px;
+  --radius-xl:   8px;
+  --radius-tile: 10px;
+  --radius-panel: 12px;
+  --radius-pill: 999px;
+
+  /* ---- BORDERS ------------------------------------------- */
+  --bw-hair:   1px;   /* @kind other */
+  --bw-bold:   2px;   /* @kind other */
+  --bw-chunk:  3px;   /* @kind other */
+
+  --z-base: 0;        /* @kind other */
+  --z-sticky: 100;    /* @kind other */
+  --z-nav: 200;       /* @kind other */
+  --z-overlay: 800;   /* @kind other */
+  --z-modal: 900;     /* @kind other */
+  --z-toast: 1000;    /* @kind other */
+}
+:root { --site-header-height: 120px; --hub-side-w: 266px; }
+:root {
+  --zl-col: 1180px;
+  --zl-gutter: clamp(28px, 3.4vw, 48px);
+  --zl-frame: calc(var(--zl-col) + 2 * var(--zl-gutter));
+}
+
+/* event-card.css: root tokens only */
+:root {
+  --open-card-title-font: 900 36px/1.16 var(--font-display);
+  --open-card-body-font: 400 17px/1.6 var(--font-body);
+  --open-card-heading-font: 600 18px/1.2 var(--font-body);
+  --open-card-action-font: 700 18px/1.2 var(--font-display);
+  --open-card-meta-font: 500 14px/1.4 var(--font-body);
+  --event-card-compact-width: 136px;
+  --event-card-compact-height: 170px;
+  --event-card-compact-radius: 16px;
+  --event-card-compact-title-font: 800 16px/1.04 var(--font-display);
+  --event-card-compact-meta-font: 500 11px/14px var(--font-body);
+  --event-card-width: 200px;
+  --event-card-height: 403px;
+  --event-card-radius: 17px;
+  --event-card-title-size: 18px;
+  --event-card-title-leading: 1.02;
+  --event-card-title-font: var(--fw-heavy) var(--event-card-title-size)/var(--event-card-title-leading) var(--font-display);
+  --event-card-time-size: 10.2px;
+  --event-card-detail-size: 11.6px;
+  --event-card-meta-size: 10.7px;
+  --event-card-detail-font: var(--fw-semibold) var(--event-card-detail-size)/1.4 var(--font-body);
+  --event-card-meta-font: var(--fw-regular) var(--event-card-meta-size)/1.4 var(--font-body);
+  --event-card-tag-size: 9.2px;
+  --event-card-tag-leading: 1.3;
+  --event-card-tag-font: var(--fw-semibold) var(--event-card-tag-size)/var(--event-card-tag-leading) var(--font-mono);
+  --event-card-tag-pad-y: 3px;
+  --event-card-tag-pad-x: 5px;
+  --event-card-tag-radius: var(--radius-lg);
+  --event-card-tag-bg: color-mix(in srgb, var(--z-black) 82%, transparent);
+  --event-card-action-size: 12.1px;
+  --event-card-action-font: var(--fw-bold) var(--event-card-action-size)/1.2 var(--font-display);
+  --event-card-action-icon: 15px;
+}
+
+/* effects.css: root tokens only */
+:root {
+  /* ---- BRUTALIST OFFSET (sticker / legacy ONLY - not default CTA) ---- */
+  /* Do not re-wire buttons / tickets / Shop Now / RSVP to these. */
+  --brutal-shadow:    4px 4px 0 rgba(255,0,204,0.36);
+  --brutal-shadow-lg: 6px 6px 0 rgba(255,0,204,0.50);
+  --brutal-shadow-cyan: 4px 4px 0 rgba(0,255,255,0.32);
+  --brutal-shadow-lime: 4px 4px 0 rgba(204,255,0,0.30);
+  /* Live claim sticker shadow (soft cyan; prefer this over --brutal-shadow) */
+  --claim-sticker-shadow: 3px 3px 0 rgba(0, 255, 255, 0.35);
+  --claim-sticker-bg: #00ffff;
+  --claim-sticker-fg: #050506;
+
+  /* Generic hard offsets (zine sticker) */
+  --shadow-hard-sm: 3px 3px 0 var(--ink-1000);
+  --shadow-hard:    4px 4px 0 var(--ink-1000);
+  --shadow-hard-lg: 6px 6px 0 var(--ink-1000);
+
+  /* ---- SOFT DEPTH ---------------------------------------- */
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.5);
+  --shadow-md:  0 8px 24px -8px rgba(0,0,0,.7);
+  --shadow-lg:  0 14px 30px rgba(0,0,0,.42);
+
+  /* ---- NEON GLOWS (soft, pulse-able) --------------------- */
+  --glow:        0 0 14px color-mix(in srgb, var(--neon-cyan) 18%, transparent);
+  --glow-pink:   0 0 16px color-mix(in srgb, var(--neon-magenta) 26%, transparent);
+  --glow-cyan:   0 0 16px color-mix(in srgb, var(--neon-cyan) 26%, transparent);
+  --glow-lime:   0 0 16px color-mix(in srgb, var(--neon-yellow) 24%, transparent);
+  --glow-violet: 0 0 16px color-mix(in srgb, var(--neon-violet) 30%, transparent);
+
+  /* ---- MOTION -------------------------------------------- */
+  --ease-out:    cubic-bezier(.2,.8,.2,1);      /* @kind other */
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);  /* @kind other */
+  --ease-inout:  cubic-bezier(.65,0,.35,1);     /* @kind other */
+
+  --dur-fast:   150ms;   /* @kind other */ /* snappy hover */
+  --dur-base:   220ms;   /* @kind other */
+  --dur-slow:   360ms;   /* @kind other */
+  --dur-pulse:  4s;      /* @kind other */ /* ambient neon pulse */
+
+  --press-scale: 0.97;   /* @kind other */
+  --hover-lift:  -2px;   /* @kind other */
+
+  /* Card glow policy (listings / Spotted / board):
+     Normal = glow on hover only (or slow idle pulse where product specifies).
+     Calm   = no glow, no pulse; hover may still lift without shadow. */
+  --card-glow-idle: 0 0 14px color-mix(in srgb, var(--dc, var(--neon-cyan)) 18%, transparent);
+  --card-glow-hot:  0 0 28px color-mix(in srgb, var(--dc, var(--neon-cyan)) 40%, transparent);
+}
+
+/* glass.css: accent recipes only */
+.pdx-glass-rebind {
+  /*
+   * The bloom family has to be re-declared here, not just at :root. CSS
+   * substitutes var(--c) into a custom property at DECLARATION time, so a
+   * :root --neon-bloom bakes in the root cyan fallback and inherits down
+   * already-resolved. Every accent on the site was blooming cyan because of
+   * it: Hub with --c #19e3ff, the yellow Log in button, the magenta MIZZED
+   * card, all of them. Re-declaring inside the rebind is what lets the bloom
+   * pick up the element's own accent, which is exactly why the recipes below
+   * are re-declared here too.
+   */
+  --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--c) var(--bloom-alpha, 8%), transparent);
+  --btn-glow-bg:
+    radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--button-c, var(--c)) 16%, transparent), transparent 60%),
+    #000;
+  --btn-glow-shadow:
+    0 2px 0 color-mix(in srgb, var(--button-c, var(--c)) 40%, #000),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -8px 14px -8px rgba(255, 255, 255, 0.06),
+    inset 0 10px 16px -12px rgba(0, 0, 0, 0.9),
+    var(--neon-bloom);
+  --sticker-bloom: 0 12px 26px -14px color-mix(in srgb, var(--c) 90%, transparent);
+  --sticker-lit: var(--chrome-keyline), var(--chrome-bevel), var(--sticker-bloom), var(--neon-bloom);
+  --chrome-bloom: 0 10px 26px -13px color-mix(in srgb, var(--c) 75%, transparent);
+  --glass-card-bg:
+    linear-gradient(133deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.0175) 14%, transparent 38%),
+    radial-gradient(80% 62% at 108% 112%, rgba(255, 255, 255, 0.055), color-mix(in srgb, var(--c) 4.5%, transparent) 42%, transparent 72%),
+    radial-gradient(115% 90% at 50% -18%, color-mix(in srgb, var(--c) 8%, transparent), transparent 58%),
+    rgba(5, 5, 8, 0.72);
+  --glass-card-border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
+  --glass-card-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    0 0 26px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    0 0 13px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent);
+  --poster-well-bg: radial-gradient(
+    130% 130% at 50% 14%,
+    color-mix(in srgb, var(--c) 32%, #050506),
+    #050506 72%
+  );
+  --poster-well-floor: 4px solid var(--c);
+  /* rebind solid/outline only - default glass btn stays dark translucent */
+  --glass-btn-solid-bg: var(--c);
+  --glass-btn-outline-color: var(--c);
+  --glass-btn-outline-border: 1px solid #000;
+  --glass-btn-outline-bg: linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--c) 16%, transparent),
+      color-mix(in srgb, var(--c) 2%, transparent) 46%
+    ),
+    rgba(255, 255, 255, 0.015);
+  --glass-btn-outline-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -6px 12px -8px rgba(0, 0, 0, 0.5);
+  --glass-sheen-specular: radial-gradient(
+    70% 55% at 108% 112%,
+    rgba(255, 255, 255, 0.05),
+    color-mix(in srgb, var(--c) 6%, transparent) 40%,
+    transparent 70%
+  );
+  --pdx-glass-edge: color-mix(in srgb, var(--c) 55%, #101014);
+  --pdx-glass-shadow: var(--glass-card-shadow);
 }

@@ -1,0 +1,92 @@
+/* Same platform, the forest room. Geography and signature activity artwork stay. */
+.outzide-shell {
+  --bg: var(--z-oled);
+  --panel: var(--outz-forest);
+  --ink: var(--text-mid);
+  --muted: var(--text-lo);
+  --orange: var(--outz-orange);
+  --line: color-mix(in srgb, var(--outz-forest-light) 26%, var(--outz-forest));
+  --display: var(--font-display);
+  --body: var(--font-body);
+  --mono: var(--font-mono);
+}
+.outzide-shell :is(.outz-map-controls,.discovery,#trail-feed) {
+  background: var(--map-panel);
+  border-color: var(--line);
+  border-radius: var(--map-chrome-radius);
+  box-shadow: var(--map-shadow);
+}
+.outzide-shell :is(.outz-map-controls__title,.search-panel-header) {
+  border-bottom: 1px solid var(--line);
+  background: var(--outz-forest);
+  color: var(--ink);
+  font: 700 20px/1.2 var(--display);
+}
+.outzide-shell :is(.map-controls button,.outz-map-controls__title button,.search-panel-header button) {
+  min-width: var(--map-target);
+  min-height: var(--map-target);
+  width: var(--map-target);
+  height: var(--map-target);
+}
+.outzide-shell :is(.explore-view-switch,.region-switch) button {
+  font: 700 16px/1.2 var(--display);
+  border-radius: var(--map-control-radius);
+  min-height: var(--map-target);
+  transition: background-color 150ms ease-out, border-color 150ms ease-out;
+}
+.outzide-shell :is(.explore-view-switch,.region-switch) button[aria-pressed=true] {
+  background: color-mix(in srgb, var(--outz-orange) 12%, var(--outz-forest));
+  color: var(--text-hi);
+  border-color: var(--outz-orange);
+  box-shadow: inset 0 -2px var(--outz-orange);
+}
+.outzide-shell .search { background: var(--z-oled); border-color: var(--line); }
+.outzide-shell .search input { font: 400 16px/1.5 var(--body); }
+.outzide-shell :is(button,a,summary):focus-visible {
+  outline: 2px solid var(--outz-orange);
+  outline-offset: 3px;
+}
+.outzide-shell .map-controls button { color: var(--text-hi); }
+.outzide-shell .map-controls #fire-toggle {
+  min-height: var(--map-target);
+  width: var(--map-target);
+  height: var(--map-target);
+}
+.outzide-shell .map-controls button[aria-pressed=true] { color: var(--outz-orange); }
+.outzide-shell .maplibregl-ctrl-attrib {
+  background: var(--outz-forest) !important;
+  color: var(--text-mid) !important;
+  border-radius: var(--map-control-radius);
+}
+.outzide-shell .maplibregl-ctrl-attrib a { color: var(--text-mid) !important; }
+.outzide-shell :is(.waypoint-head,.outz-map-controls .waypoint-head) {
+  /* Opaque material behind the glyph; line artwork stays crisp and recognizable. */
+  background-color: var(--outz-forest);
+  opacity: 1;
+  isolation: isolate;
+}
+.outzide-shell .waypoint-head svg { opacity: 1; }
+.outzide-shell #map-key .key-toggle[aria-pressed=false] {
+  opacity: 1;
+  color: var(--muted);
+}
+.outzide-shell #map-key .key-toggle[aria-pressed=false] svg {
+  color: var(--muted);
+}
+.outzide-shell .outz-map-controls__sections .outz-section-icon[aria-pressed=true] {
+  background: var(--map-selected-tint);
+  box-shadow: inset 0 -2px var(--outz-orange);
+}
+@media(prefers-reduced-motion:reduce) {
+  .outzide-shell :is(.explore-view-switch,.region-switch) button { transition: none; }
+}
+html.calm-mode .outzide-shell :is(.explore-view-switch,.region-switch) button { transition: none; }
+html.calm-mode .outzide-shell :is(.waypoint-head,.waypoint-head *) {
+  animation: none !important;
+  transition: none !important;
+}
+html.calm-mode .outzide-shell .waypoint-head::before,
+html.calm-mode .outzide-shell .waypoint-head::after {
+  animation: none !important;
+  will-change: auto;
+}

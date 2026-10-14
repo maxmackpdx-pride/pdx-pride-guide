@@ -22,4 +22,11 @@
   --map-selected-line: inset 0 -2px 0 var(--map-light);
 }
 [data-map="mapz"] { --map-ink: #090b13; --map-light: #94b5cf; --map-accent: var(--panel-cyan, #19e3ff); }
-[data-map="outzide"] { --map-ink: #101a16; --map-light: #a9bc98; --map-accent: #ff8c00; }
+[data-map="outzide"] {
+  --outz-forest: #101a16;
+  --outz-forest-light: #a9bc98;
+  --outz-orange: var(--neon-orange);
+  --map-ink: var(--outz-forest);
+  --map-light: var(--outz-forest-light);
+  --map-accent: var(--outz-orange);
+}

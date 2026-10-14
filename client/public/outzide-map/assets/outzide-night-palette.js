@@ -1,22 +1,22 @@
-// Outzide needs visible geography at regional zoom while retaining the night palette.
+// Forest-service night palette: deeper evergreen land, with legible regional relief.
 // Keep this treatment local so Mapz and the home flyover retain their own shader.
 export function brightenOutzideTerrain(style) {
   const layer = id => style.layers.find(entry => entry.id === id);
-  layer('ground').paint['background-color'] = '#1d3034';
+  layer('ground').paint['background-color'] = '#111f1a';
   Object.assign(layer('land-relief').paint, {
-    'hillshade-shadow-color': '#132127',
-    'hillshade-highlight-color': '#a0b9aa',
-    'hillshade-accent-color': '#466457',
+    'hillshade-shadow-color': '#0b1713',
+    'hillshade-highlight-color': '#91ad96',
+    'hillshade-accent-color': '#35563f',
   });
-  for (const id of ['forest-landcover', 'forest-landuse']) layer(id).paint['fill-color'] = '#365a46';
-  for (const id of ['leaf-landcover', 'leaf-landuse']) layer(id).paint['fill-color'] = '#3a5947';
-  layer('park-areas').paint['fill-color'] = '#426650';
+  for (const id of ['forest-landcover', 'forest-landuse']) layer(id).paint['fill-color'] = '#254b35';
+  for (const id of ['leaf-landcover', 'leaf-landuse']) layer(id).paint['fill-color'] = '#2a4c35';
+  layer('park-areas').paint['fill-color'] = '#315a40';
   layer('developed-earth').paint['fill-color'] = [
-    'match', ['get', 'class'], 'commercial', '#33494a', 'retail', '#33494a',
-    'industrial', '#354b4c', '#1d3034',
+    'match', ['get', 'class'], 'commercial', '#293c34', 'retail', '#293c34',
+    'industrial', '#2c4039', '#111f1a',
   ];
   layer('water').paint['fill-color'] = [
-    'interpolate', ['linear'], ['zoom'], 10, '#123847', 14, '#184351', 18, '#1c4a58',
+    'interpolate', ['linear'], ['zoom'], 10, '#0d2d38', 14, '#123844', 18, '#16424d',
   ];
   layer('streets').paint['line-color'] = [
     'match', ['get', 'class'], 'motorway', '#9ebaca', 'trunk', '#8eabba',

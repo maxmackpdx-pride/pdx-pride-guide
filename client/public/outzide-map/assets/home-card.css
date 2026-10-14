@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 .detail-waypoint{position:absolute;top:16px;left:16px;z-index:5;width:44px;height:44px;padding:8px;background:color-mix(in srgb,var(--z-oled) 80%,transparent);border:1px solid currentColor;border-radius:12px}.detail-waypoint svg{width:100%;height:100%}
 body.home-card-embed{background:var(--z-oled)!important}body.home-card-embed> :not(#detail):not(#utility):not(#toast):not(script){display:none!important}body.home-card-embed #detail{position:fixed!important;inset:0!important;margin:0!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border:0!important;border-radius:0!important;transform:none!important;box-shadow:none!important;background:var(--z-oled)!important}body.home-card-embed #detail::backdrop{background:var(--z-oled)}body.home-card-embed #detail .detail-tools{padding-right:52px}body.home-card-embed #detail .close{display:none}body.home-card-embed #detail-content{max-height:none!important;overflow:auto!important}body.home-card-embed .detail-footer button,body.home-card-embed .detail-footer a{text-transform:uppercase}
 
@@ -42,3 +41,34 @@ body.home-card-embed #detail .detail-hero>#card-trail-map.detail-hero-map{width:
 #detail .detail-hero-map .maplibregl-ctrl-attrib{font-size:10px;background:color-mix(in srgb,var(--z-oled,#000) 70%,transparent)}
 #detail .detail-hero-map .maplibregl-ctrl-bottom-right{left:52px}
 #detail .detail-hero-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib{max-width:none;margin:0}
+
+/* Current room card roles. Glass is fixed; destination artwork stays authored. */
+#detail{--glass-artwork-blur:.45px}
+#detail .detail-hero{isolation:isolate}
+#detail .detail-hero:has(>.detail-art)::after{content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;pointer-events:none;background:linear-gradient(to top,#ffffff0a,#ffffff03);backdrop-filter:blur(var(--glass-artwork-blur));-webkit-backdrop-filter:blur(var(--glass-artwork-blur));transform:none}
+#detail .detail-hero>.detail-art{z-index:-1}
+#detail .detail-hero>:not(.detail-art){position:relative;z-index:1}
+#detail .detail-hero>.detail-tools,#detail .detail-hero>.detail-waypoint{position:absolute}
+#detail .detail-hero>.detail-hero-map{position:relative}
+#detail .detail-hero h2,body.home-card-embed .detail-hero h2{font:var(--open-card-title-font);overflow-wrap:anywhere}
+#detail .region,body.home-card-embed .detail-hero .region{font:var(--open-card-meta-font);color:var(--text-body,#e6e3da)}
+#detail .detail-body{font:var(--open-card-body-font);overflow-wrap:anywhere}
+#detail .detail-body h3{font:var(--open-card-heading-font)}
+#detail :is(button,.directions-choice>summary,.detail-footer>a){min-height:44px}
+#detail .detail-tabs button{font:var(--open-card-meta-font);min-width:44px}
+#detail :is(button,a,summary):focus-visible{outline:2px solid var(--outz-orange,var(--neon-orange));outline-offset:3px}
+body.home-card-embed #detail .detail-footer{flex-wrap:wrap;gap:12px}
+body.home-card-embed #detail .detail-footer :is(button,.directions-choice>summary){font:var(--open-card-action-font);white-space:normal}
+body.home-card-embed #detail .detail-footer>a{font:var(--open-card-meta-font);white-space:normal}
+@media(max-width:390px){body.home-card-embed .detail-hero{padding-inline:16px}body.home-card-embed .detail-hero>.detail-art{max-width:100%}#detail .detail-tabs{min-width:0}#detail .detail-tabs button{flex:1;min-width:0;padding-inline:8px}}
+@media(prefers-reduced-motion:reduce){#detail{animation:none}#detail .detail-art{animation:none;transition:none}}
+:is(html.calm-mode,:root[data-calm=true]) #detail .detail-art{animation:none;transition:none}
+/* Destination category still owns its art/waypoint; room actions use the
+   requested forest primary with a restrained orange instrument edge. */
+#detail .detail-footer>.directions-choice>summary,body.home-card-embed #detail .detail-footer>.directions-choice>summary{background:var(--outz-forest,var(--map-ink));color:var(--text-hi,#fff);border:1px solid var(--outz-orange,var(--neon-orange));box-shadow:inset 0 1px 0 color-mix(in srgb,var(--outz-orange,var(--neon-orange)) 30%,transparent),var(--btn-glow-shadow)}
+#detail .detail-footer>[data-action=follow-destination],body.home-card-embed #detail .detail-footer>[data-action=follow-destination]{background:var(--outz-forest,var(--map-ink));border-color:color-mix(in srgb,var(--outz-orange,var(--neon-orange)) 55%,transparent);box-shadow:var(--btn-glow-shadow)}
+#detail .detail-footer>[data-action=follow-destination][aria-pressed=true],body.home-card-embed #detail .detail-footer>[data-action=follow-destination][aria-pressed=true]{background:color-mix(in srgb,var(--outz-orange) 12%,var(--outz-forest));border-color:var(--outz-orange)}
+body.home-card-embed #detail:not(.winter-card){background:var(--map-panel)!important}
+#detail .detail-body :is(p,li,dd){font:var(--open-card-body-font)}
+#detail .detail-body :is(small,.note){font:var(--open-card-meta-font)}
+#detail .detail-body a{display:inline-flex;align-items:center;min-height:44px;font:var(--open-card-meta-font);color:var(--outz-orange)}
