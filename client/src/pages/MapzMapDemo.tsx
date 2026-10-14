@@ -1,4 +1,5 @@
 import {clearMapWorldFilters,scopeMapPlaceRows} from '@/lib/mapWorlds';
+import { ownPlacedMapRows, ownMapPostingsStatus, ownMapPostingTitle, type BoardMapPlacementPoint } from "@/lib/ownMapPostings";
 import { useSyncExternalStore } from "react";
 import { isBoardMapPickerOpen, subscribeBoardMapPicker } from "@/lib/boardMapPickerActivity";
 import MapBoardCards, {type MapBoardCardRow} from "@/components/board/MapBoardCards";
@@ -508,13 +509,14 @@ export default function MapzMapDemo() {
       .join(' ').toLowerCase().includes(resourceQuery.trim().toLowerCase());
   }), [resourceEntries, resourceQuery, resourceCategory]);
   const { data: housingRaw, isPending: housingLoading, isError: housingError, refetch: retryHousing } = useQuery<unknown>({ queryKey: ["/api/housing", "map"], enabled:active, queryFn: () => apiRequest("GET", "/api/housing").then(r => r.json()) });
-  const { data: boardMapPoints = [] } = useQuery<Array<{board:string;postId:number;lat:number;lng:number;expiresAt:string;venueId:number|null}>>({queryKey:["/api/board-map-locations"],enabled:active,refetchInterval:active?30000:false,queryFn:()=>apiRequest("GET","/api/board-map-locations").then(r=>r.json())});
+  const boardMapQuery = useQuery<BoardMapPlacementPoint[]>({queryKey:["/api/board-map-locations"],enabled:active,refetchInterval:active?30000:false,queryFn:()=>apiRequest("GET","/api/board-map-locations").then(r=>r.json())});
+  const boardMapPoints = boardMapQuery.data || [];
   const { data: mizzed = [], isPending: mizzedLoading, isError: mizzedError, refetch: retryMizzed } = useQuery<MissedConnectionPost[]>({ queryKey: ["/api/missed-connections"], enabled:active, queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()) });
   const { data: gigs = EMPTY_ROWS, isPending: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], enabled:active, queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
   const { data: gifts = EMPTY_ROWS, isPending: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], enabled:active, queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
   const { data: sells = EMPTY_ROWS, isPending: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], enabled:active, queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
-  const mineSpecs=useMemo(()=>[["gigz","/api/gigs?mine=1"],["giftz","/api/gifting/mine"],["sellz","/api/sellz/mine"],["mizzed","/api/missed-connections/mine"]] as const,[]);
-  const mineQueries=useQueries({queries:mineSpecs.map(([world,url])=>({queryKey:["map-worlds-mine",world,user?.id],enabled:active&&!!user&&dataReady,queryFn:()=>apiRequest("GET",url).then(r=>r.json()) as Promise<MapRow[]>}))});
+  const mineSpecs=useMemo(()=>[["gigz","/api/gigs/mine"],["giftz","/api/gifting/mine"],["sellz","/api/sellz/mine"],["mizzed","/api/missed-connections/mine"],["houz","/api/housing/mine"]] as const,[]);
+  const mineQueries=useQueries({queries:mineSpecs.map(([world,url])=>({queryKey:["map-worlds-mine",world,user?.id],enabled:active&&!!user&&(dataReady||minePins)&&(world!=="houz"||minePins),queryFn:async()=>{const data=await apiRequest("GET",url).then(r=>r.json());return (Array.isArray(data)?data:data.posts || []) as MapRow[];}}))});
   const mineWorlds=Object.fromEntries(mineSpecs.map(([world],i)=>[world,mineQueries[i]]));
   const savedSellz=useQuery<number[]>({queryKey:["/api/sellz/saved/ids"],enabled:active&&!!user,queryFn:()=>apiRequest("GET","/api/sellz/saved/ids").then(r=>r.json())});
   const savedSellzSet=useMemo(()=>new Set(savedSellz.data||[]),[savedSellz.data]);
@@ -659,19 +661,22 @@ export default function MapzMapDemo() {
     .filter(row => (!housingType || row.type === housingType || (housingType === "FORMING" && row.type === "LOOKING" && row.openToHaus === true)) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
     .map(row => ({ ...row, _board: "My Hoüz", locationLabel: row.lat != null && row.lng != null
       ? `${row.mapPoint ? "Shared map point" : "Approximate area"} · ${roughDistanceMiles(viewerPoint || {lat:mapCenter[0],lng:mapCenter[1]},{lat:Number(row.lat),lng:Number(row.lng)})}${viewerPoint ? "" : " from map center"}` : row.mapPoint ? "Shared map point" : "Approximate area" })), [housing, housingType, housingSaved, housingTags, q, viewerPoint, mapCenter]);
-  const marks = useMemo<Mark[]>(() => [
-    ...(!minePins && showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
-    ...(!minePins && showPlaces ? placeMarks(mapPlaces) : []),
-    ...(!minePins && showResources ? visibleResources.flatMap(entry => entry.locations.flatMap((location, index) => {
+  const ownPlacedRows = useMemo(()=>ownPlacedMapRows(mineSpecs.map(([board],index)=>({board,rows:mineQueries[index].data || []})),boardMapPoints),[mineQueries[0].data,mineQueries[1].data,mineQueries[2].data,mineQueries[3].data,mineQueries[4].data,boardMapPoints]);
+  const ownPinsStatus = ownMapPostingsStatus([boardMapQuery,...mineQueries]);
+  const retryOwnPins = () => {void boardMapQuery.refetch();mineQueries.forEach(query=>{void query.refetch();});};
+  const marks = useMemo<Mark[]>(() => minePins ? rowMarks(ownPlacedRows,"board") : [
+    ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
+    ...(showPlaces ? placeMarks(mapPlaces) : []),
+    ...(showResources ? visibleResources.flatMap(entry => entry.locations.flatMap((location, index) => {
       const key = resourceMapKey(entry.org.name, index, entry.communitySlug);
       return selectedResourceKeys.length && !selectedResourceKeys.includes(key) && !selectedResourceKeys.includes(resourceMapKey(entry.org.name, index)) ? [] : [{ key, kind: 'resource' as const, lat: location.lat, lng: location.lng, item: entry }];
     })) : []),
-    ...((minePins || showGigz) ? rowMarks(filteredWorlds.gigz, "board") : []),
-    ...((minePins || showMizzed) ? rowMarks(filteredWorlds.mizzed, "board") : []),
-    ...((minePins || showGiftz) ? rowMarks(filteredWorlds.giftz, "board") : []),
-    ...((minePins || showSellz) ? rowMarks(filteredWorlds.sellz, "board") : []),
-    ...((minePins || showHouz) ? rowMarks(visibleHousing, "board") : []),
-  ].filter(mark=>!minePins || (mark.kind==="board" && Boolean((mark.item as MapRow).isMine || (mark.item as MapRow).userId===user?.id || (mark.item as any).author?.userId===user?.id))), [minePins,user?.id,showEvents, showPlaces, showResources, showGigz, showGiftz, showSellz, showMizzed, showHouz, visibleEvents, mapPlaces, visibleResources, selectedResourceKeys.join(","), filteredWorlds, visibleHousing]);
+    ...(showGigz ? rowMarks(filteredWorlds.gigz, "board") : []),
+    ...(showMizzed ? rowMarks(filteredWorlds.mizzed, "board") : []),
+    ...(showGiftz ? rowMarks(filteredWorlds.giftz, "board") : []),
+    ...(showSellz ? rowMarks(filteredWorlds.sellz, "board") : []),
+    ...(showHouz ? rowMarks(visibleHousing, "board") : []),
+  ], [minePins,ownPlacedRows,showEvents, showPlaces, showResources, showGigz, showGiftz, showSellz, showMizzed, showHouz, visibleEvents, mapPlaces, visibleResources, selectedResourceKeys.join(","), filteredWorlds, visibleHousing]);
 
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
     setSelected(mark.key);
@@ -899,7 +904,7 @@ export default function MapzMapDemo() {
       <button className="mapz-control-labels" title="Show map labels" aria-label="Show map labels" aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
     </div>
     {locateError&&<p className="mapz-demo-notice" role="status">{locateError}</p>}
-    <MapzLayerSheet minePanel={<><p>{marks.length?`${marks.length} active ${marks.length===1?"pin":"pins"}`:"No active pins. Open your posts to place one."}</p>{marks.map(mark=><button className="mapz-my-postings-row" type="button" key={mark.key} onClick={()=>setPinCards([mark.key])}>{boardTitle(mark.item as MapRow)}<ChevronRight size={16}/></button>)}</>} minePins={minePins} onMinePins={()=>user?updateParams(p=>{if(minePins)p.delete("myPosts");else p.set("myPosts","1");}):setShowAuth(true)} layers={layers} active={activeLayer} onActiveChange={changeLayer} />
+    <MapzLayerSheet minePanel={<>{ownPinsStatus==="loading"?<p role="status">Loading your pins…</p>:ownPinsStatus==="error"?<p role="alert">Your pins couldn’t fully load. <button type="button" onClick={retryOwnPins}>Retry</button></p>:<p>{marks.length?`${marks.length} active ${marks.length===1?"pin":"pins"}`:"No active pins. Open your posts to place one."}</p>}{marks.map(mark=><button className="mapz-my-postings-row" type="button" key={mark.key} onClick={()=>setPinCards([mark.key])}>{ownMapPostingTitle(mark.item as MapRow)}<ChevronRight size={16}/></button>)}</>} minePins={minePins} onMinePins={()=>user?updateParams(p=>{if(minePins)p.delete("myPosts");else p.set("myPosts","1");}):setShowAuth(true)} layers={layers} active={activeLayer} onActiveChange={changeLayer} />
     {pinCards.length>0 && <MapBoardCards rows={marks.filter(mark=>pinCards.includes(mark.key)).map(mark=>({key:mark.key,row:mark.item as MapRow,category:({"My Hoüz":"housing",Mizzed:"mizzed",Gigz:"gigz",Giftz:"giftz",Sellz:"sellz"} as const)[(mark.item as MapRow)._board as "Gigz"]} as MapBoardCardRow))} onClose={()=>setPinCards([])} onRequireAuth={()=>{setPinCards([]);setShowAuth(true);}} onOpen={(key,target)=>{setPinCards([]);const mark=marks.find(m=>m.key===key);if(mark)openMark(mark,target);}}/>}
     {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="mapz-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
     {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="mapz-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}

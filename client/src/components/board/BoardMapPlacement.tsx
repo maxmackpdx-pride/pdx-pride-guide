@@ -8,7 +8,7 @@ export default function BoardMapPlacement({board,postId}: {board:string;postId:n
  const [expanded,setExpanded]=useState(false),[editing,setEditing]=useState(false);
  const url=`/api/boards/${board==="housing"?"houz":board}/posts/${postId}/map-location`;
  const state=useQuery<{canPlace:boolean;reopensPost:boolean;pending:boolean;placement:Stored|null;maxDays:number;renewal:boolean;venue:BoardMapVenue|null}>({queryKey:[url],enabled:expanded,queryFn:()=>apiRequest("GET",url).then(r=>r.json()),staleTime:0});
- const save=useMutation({mutationFn:(point:BoardMapPoint|null)=>apiRequest("PUT",url,{mapLocation:point}),onSuccess:()=>{setEditing(false);void state.refetch();void queryClient.invalidateQueries({queryKey:["/api/board-map-locations"]});}});
+ const save=useMutation({mutationFn:(point:BoardMapPoint|null)=>apiRequest("PUT",url,{mapLocation:point}),onSuccess:()=>{setEditing(false);void state.refetch();void queryClient.invalidateQueries({queryKey:["/api/board-map-locations"]});void queryClient.invalidateQueries({queryKey:["map-worlds-mine"]});}});
  const p=state.data?.placement,active=p && Date.parse(p.expiresAt)>Date.now();
  return <details className="board-map-placement" onToggle={e=>setExpanded(e.currentTarget.open)}><summary>Map placement</summary>
    {state.isPending?<p>Loading placement…</p>:state.isError?<p role="alert">Placement couldn’t load. <button type="button" onClick={()=>void state.refetch()}>Retry</button></p>:<>
