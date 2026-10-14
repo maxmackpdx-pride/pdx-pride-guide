@@ -37,16 +37,38 @@ function pinPaths() {
   glitch:new Path2D('M27 8h8m-13 9h8M9 26h9m7 4h9')
  };
 }
-export function drawBoardPin(ctx,x,y,color,key,seconds,reduced=false,count=1,wireColor=color,cyanColor=color) {
+export function drawBoardPin(ctx,x,y,color,key,seconds,reduced=false,count=1,wireColor=color,cyanColor=color,waypointSize=31) {
  const material=pinMaterial(key,seconds,reduced),paths=pinPaths();
- ctx.save();ctx.translate(x-20,y-40);ctx.shadowColor='#000b';ctx.shadowBlur=6;ctx.shadowOffsetY=4;
+ // The full hardware envelope (including rotation and count badge) fits within
+ // 115% of the ordinary waypoint head at the current zoom. Keep the needle fixed.
+ const scale=waypointSize*1.15/40;
+ ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.translate(-20,-40);
+ if(material.wire){
+  // Three displaced shadow bands flicker on the very same material clock.
+  const slip=Math.sin(seconds*29+material.variant)>0?2:-2;
+  for(let band=0;band<3;band++){
+   ctx.save();ctx.beginPath();ctx.rect(0,4+band*12,44,10);ctx.clip();
+   ctx.translate((band===1?-slip:slip)+2,4);ctx.fillStyle='#0009';
+   ctx.shadowColor='#0009';ctx.shadowBlur=3;
+   for(const [,path]of paths.solid)ctx.fill(path);
+   ctx.restore();
+  }
+ }
+ ctx.save();ctx.shadowColor='#000b';ctx.shadowBlur=6;ctx.shadowOffsetY=4;
  ctx.fillStyle='#9fc0c3';ctx.fill(paths.needle);ctx.translate(20,24);ctx.rotate((material.variant-1.5)*.05);ctx.translate(-20,-24);
  if(!material.wire)for(const [fill,path]of paths.solid){ctx.fillStyle=fill==='color'?color:fill;ctx.fill(path);}
  const wirePaint=ctx.createLinearGradient(10,5,30,34);wirePaint.addColorStop(0,cyanColor);wirePaint.addColorStop(.45,cyanColor);wirePaint.addColorStop(1,wireColor);
  ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.strokeStyle=wirePaint;ctx.lineWidth=.85;
- if(material.wire)ctx.stroke(paths.wire);
+ if(material.wire){
+  // Low-opacity bloom appears only during the existing wireframe flashes.
+  ctx.save();ctx.globalAlpha*=.14;ctx.shadowColor=cyanColor;ctx.shadowBlur=8;
+  ctx.lineWidth=2.2;ctx.stroke(paths.wire);ctx.restore();
+  ctx.stroke(paths.wire);
+ }
  ctx.translate(material.jitter,0);ctx.strokeStyle=wirePaint;ctx.stroke(paths.side);
  if(material.jitter){ctx.strokeStyle=wireColor;ctx.stroke(paths.glitch);}
  ctx.restore();
- if(count>1){ctx.save();ctx.fillStyle='#061217';ctx.strokeStyle=color;ctx.beginPath();ctx.arc(x+15,y-34,10,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),x+15,y-34);ctx.restore();}
+ if(count>1){ctx.save();ctx.fillStyle='#061217';ctx.strokeStyle=color;ctx.beginPath();ctx.arc(35,12,9,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),35,12);ctx.restore();}
+ ctx.restore();
+ return {x,y:y-20*scale,r:Math.max(26,24*scale),width:Math.max(44,48*scale),height:Math.max(48,44*scale)};
 }

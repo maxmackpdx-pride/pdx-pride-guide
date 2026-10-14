@@ -30,7 +30,7 @@ import {screenNeighborCounts} from './screen-neighbors.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,waypointArtwork,waypointFamilyShell} from './waypoint-markers.js?v=20261005-gap';
+import {waypointHeadSize,waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,waypointArtwork,waypointFamilyShell} from './waypoint-markers.js?v=20261005-gap';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -673,8 +673,8 @@ function drawLights(fade,target=map,surface=lights){
   }
   if(pass===1)for(const group of boardPins){
    const row=group.items[0].feature.properties;
-   drawBoardPin(lightsContext,group.x,group.y,row.color,row.key,pulseTime,reduced.matches,group.items.length,row.wireColor,row.pinCyan);
-   hitTargets.push({x:group.x,y:group.y-22,r:26,width:44,height:48,key:row.key,name:row.name,boardPinKeys:group.items.map(v=>v.feature.properties.key)});
+   const pinHit=drawBoardPin(lightsContext,group.x,group.y,row.color,row.key,pulseTime,reduced.matches,group.items.length,row.wireColor,row.pinCyan,waypointHeadSize(false,target.getZoom()));
+   hitTargets.push({...pinHit,key:row.key,name:row.name,boardPinKeys:group.items.map(v=>v.feature.properties.key)});
   }
   for(const {feature,p,offset,presence,neighbors=0} of ordered){
   if(feature.properties.boardPin)continue;
