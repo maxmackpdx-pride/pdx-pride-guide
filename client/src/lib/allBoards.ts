@@ -34,7 +34,7 @@ export const boardCategories = [
   {
     id: "gigz",
     label: "Gigz",
-    logo: "gigz.svg",
+    logo: "gigz.svg?v=20261013-texture",
     color: ROOMS.gigz.accent,
     motif: "gigz",
     endpoint: "/api/gigs",
@@ -45,7 +45,7 @@ export const boardCategories = [
   {
     id: "giftz",
     label: "Giftz",
-    logo: "giftz.svg",
+    logo: "giftz.svg?v=20261013-texture",
     color: ROOMS.giftz.accent,
     motif: "giftz",
     endpoint: "/api/gifting",
@@ -56,7 +56,7 @@ export const boardCategories = [
   {
     id: "sellz",
     label: "Sellz",
-    logo: "sellz.svg",
+    logo: "sellz.svg?v=20261013-texture",
     color: ROOMS.sellz.accent,
     motif: "sellz",
     endpoint: "/api/sellz",
@@ -67,7 +67,7 @@ export const boardCategories = [
   {
     id: "mizzed",
     label: "Mizzed Connections",
-    logo: "mizzed-connection.svg",
+    logo: "mizzed-connection.svg?v=20261013-texture",
     color: ROOMS.mizzed.accent,
     motif: "mizzed",
     endpoint: "/api/missed-connections",

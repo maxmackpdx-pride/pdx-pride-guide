@@ -19,10 +19,10 @@ const NEXT_DOOR: Record<DoorRoom, DoorRoom[]> = {
 const ROOM_LOGO: Record<DoorRoom, string> = {
   eventz: "/brand/family/eventz.png",
   hauz: "/brand/family/my-houz.svg",
-  giftz: "/brand/family/giftz.svg",
-  gigz: "/brand/family/gigz.svg",
-  sellz: "/brand/family/sellz.svg",
-  mizzed: "/brand/family/mizzed-connection.svg",
+  giftz: "/brand/family/giftz.svg?v=20261013-texture",
+  gigz: "/brand/family/gigz.svg?v=20261013-texture",
+  sellz: "/brand/family/sellz.svg?v=20261013-texture",
+  mizzed: "/brand/family/mizzed-connection.svg?v=20261013-texture",
 };
 
 /** "Next door" rail above a room's footer, so no room is a dead end. Reads the room registry and home worlds. */

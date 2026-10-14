@@ -8,10 +8,10 @@ type PlateRoom = "gigz" | "giftz" | "sellz" | "mizzed" | "hauz" | "eventz" | "ou
 
 /** Marks come from the family library, never retyped. Lines are the room's own voice. */
 const PLATE: Record<PlateRoom, { mark: string; line?: string; follow: FollowableRoom; share: string; heroOwnsMark?: boolean }> = {
-  gigz: { mark: "/brand/family/gigz.svg", line: "Work with your people.", follow: "gigz", share: "Gigz" },
-  giftz: { mark: "/brand/family/giftz.svg", line: "Pass it on. Find what you need.", follow: "giftz", share: "Giftz" },
-  sellz: { mark: "/brand/family/sellz.svg", line: "Good stuff. New hands.", follow: "sellz", share: "Sellz" },
-  mizzed: { mark: "/brand/family/mizzed-connection.svg", line: "That person you noticed.", follow: "mizzed", share: "Mizzed Connections" },
+  gigz: { mark: "/brand/family/gigz.svg?v=20261013-texture", line: "Work with your people.", follow: "gigz", share: "Gigz" },
+  giftz: { mark: "/brand/family/giftz.svg?v=20261013-texture", line: "Pass it on. Find what you need.", follow: "giftz", share: "Giftz" },
+  sellz: { mark: "/brand/family/sellz.svg?v=20261013-texture", line: "Good stuff. New hands.", follow: "sellz", share: "Sellz" },
+  mizzed: { mark: "/brand/family/mizzed-connection.svg?v=20261013-texture", line: "That person you noticed.", follow: "mizzed", share: "Mizzed Connections" },
   hauz: { mark: "/brand/family/my-houz.svg", line: "Find people that know the know.", follow: "houz", share: "My Hoüz" },
   // The EVENTZ hero is its neon logo, so the plate carries only the actions there.
   eventz: { mark: "/brand/family/eventz.png", follow: "eventz", share: "Eventz", heroOwnsMark: true },

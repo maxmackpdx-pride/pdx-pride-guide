@@ -95,11 +95,11 @@ const MARKERS = PLACES.map(place => ({ ...place, point: placePoint(place) }));
 // Decorative product waypoints, not real listings or claimed venue locations.
 // One per longitude sector keeps the random anchors spread around the globe.
 const PRODUCT_WAYPOINTS: Venue[] = [
-  { id: "giftz", name: "GIFTZ", logo: "/brand/family/giftz.svg", color: "#ccff00" },
-  { id: "mizzed", name: "MIZZED CONNECTION", logo: "/brand/family/mizzed-connection.svg", color: "#ff00cc" },
-  { id: "gigz", name: "GIGZ", logo: "/brand/family/gigz.svg", color: "#8800ff" },
+  { id: "giftz", name: "GIFTZ", logo: "/brand/family/giftz.svg?v=20261013-texture", color: "#ccff00" },
+  { id: "mizzed", name: "MIZZED CONNECTION", logo: "/brand/family/mizzed-connection.svg?v=20261013-texture", color: "#ff00cc" },
+  { id: "gigz", name: "GIGZ", logo: "/brand/family/gigz.svg?v=20261013-texture", color: "#8800ff" },
   { id: "outz", name: "OUTZide", logo: "/brand/outzide.png", color: "#ff6600" },
-  { id: "sellz", name: "SELLZ", logo: "/brand/family/sellz.svg", color: "#39ff14" },
+  { id: "sellz", name: "SELLZ", logo: "/brand/family/sellz.svg?v=20261013-texture", color: "#39ff14" },
   { id: "hauz", name: "My Hoüz", logo: "/brand/family/my-houz.svg", color: "#00ffff" },
 ].map((waypoint, index) => ({
   ...waypoint, coordinates: [0, 0], logoMode: "alpha",

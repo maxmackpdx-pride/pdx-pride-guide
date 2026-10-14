@@ -1023,7 +1023,7 @@ export default function PlaceModal({
               <ResourceCardMotif name="MIZZED CONNECTION" category="mizzed" />
               <span className="room-doorways__vignette" aria-hidden="true" />
               <span className="room-doorways__glass" aria-hidden="true" />
-              <img className="room-doorways__logo" src="/brand/family/mizzed-connection.svg" alt="Mizzed Connection" loading="lazy" decoding="async" />
+              <img className="room-doorways__logo" src="/brand/family/mizzed-connection.svg?v=20261013-texture" alt="Mizzed Connection" loading="lazy" decoding="async" />
               <span className="room-doorways__line"><strong>That person you noticed</strong><br />Maybe they noticed you, too.</span>
               <span className="room-doorways__go">Who caught your eye? <span aria-hidden="true">↗</span></span>
             </button>

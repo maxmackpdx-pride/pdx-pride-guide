@@ -547,9 +547,9 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
     <>
     {!embeddedDetail && <div className="eb-page eb-page--resources">
       <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>
-      <BrowseHeader title="NEEDZ" logo="/brand/family/needz-mobile.webp" kicker="Oregon · All the ways we show up"
+      <BrowseHeader title="NEEDZ" logo="/brand/family/needz-mobile.webp?v=20261013-texture" kicker="Oregon · All the ways we show up"
         description="Art, community, opportunity, care, and support for queer and trans Oregon. Find your next connection.">
-        <BoardShareButton title="NEEDZ" path="/needz" card={{ room: "NEEDZ", mark: "/brand/family/needz-mobile.webp", line: "All the ways we show up." }} />
+        <BoardShareButton title="NEEDZ" path="/needz" card={{ room: "NEEDZ", mark: "/brand/family/needz-mobile.webp?v=20261013-texture", line: "All the ways we show up." }} />
         <BoardFollowButton board="rezources" />
       </BrowseHeader>
       <div className="eb-frame">

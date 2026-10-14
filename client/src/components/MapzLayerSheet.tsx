@@ -15,11 +15,11 @@ export type MapzLayer = {
 const LAYER_LOGOS: Record<MapzLayerId, string> = {
   events: "/brand/family/eventz.png",
   places: "/brand/family/our-placez.svg",
-  rezources: "/brand/family/needz.png",
-  mizzed: "/brand/family/mizzed-connection.svg",
-  gigz: "/brand/family/gigz.svg",
-  giftz: "/brand/family/giftz.svg",
-  sellz: "/brand/family/sellz.svg",
+  rezources: "/brand/family/needz.png?v=20261013-texture",
+  mizzed: "/brand/family/mizzed-connection.svg?v=20261013-texture",
+  gigz: "/brand/family/gigz.svg?v=20261013-texture",
+  giftz: "/brand/family/giftz.svg?v=20261013-texture",
+  sellz: "/brand/family/sellz.svg?v=20261013-texture",
   houz: "/brand/family/my-houz.svg",
 };
 
