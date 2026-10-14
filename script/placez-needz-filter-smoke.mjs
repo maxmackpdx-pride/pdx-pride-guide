@@ -1,9 +1,9 @@
 /** Synthetic fixtures; all page APIs mocked, no writes. */
 import {createRequire} from 'node:module';
-const require=createRequire('/Users/tuckercasey/Projects/Zaylist/zaylist-foundation-library/package.json');
+const require=createRequire(process.env.PLAYWRIGHT_PACKAGE_ROOT || '/Users/tuckercasey/Projects/Zaylist/zaylist-foundation-library/package.json');
 const {chromium,expect}=require('@playwright/test');
 const browser=await chromium.launch({channel:'chrome',headless:true});
-const base='http://localhost:5087';
+const base=process.env.BROWSE_FILTER_TEST_URL || 'http://localhost:5087';
 const makePlace=(id,type,name)=>({id,type,name,description:'Synthetic directory fixture',neighborhood:id%2?'North':'Southeast',address:'Example address',imageUrl:null,lat:null,lng:null,queerOwned:false,queerFriendly:true,events:[],pastEvents:[],gigs:[]});
 const places=[...Array.from({length:30},(_,i)=>makePlace(i+1,'bar',`Synthetic Bar ${i+1}`)),...Array.from({length:20},(_,i)=>makePlace(i+31,'cafe',`Synthetic Cafe ${i+1}`)),makePlace(51,'venue','Alberta Rose Theatre'),makePlace(52,'venue','Example Venue')];
 const groups=Array.from({length:30},(_,i)=>({id:`group-${i}`,slug:`synthetic-group-${i}`,name:`Synthetic Group ${i}`,description:'Synthetic community',visibility:'public',membershipPolicy:'open',memberCount:1,sourcePlaceId:null,imageUrl:null,neighborhood:null,viewerRole:null}));groups.push({...groups[0],id:'private',slug:'private-fixture',name:'Private Fixture',visibility:'private'});

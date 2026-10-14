@@ -1,6 +1,6 @@
 /** Synthetic API fixtures only: no live reads or writes. */
 import {createRequire} from 'node:module';
-const require=createRequire('/Users/tuckercasey/Projects/Zaylist/zaylist-foundation-library/package.json');
+const require=createRequire(process.env.PLAYWRIGHT_PACKAGE_ROOT || '/Users/tuckercasey/Projects/Zaylist/zaylist-foundation-library/package.json');
 const {chromium,expect}=require('@playwright/test');
 const browser=await chromium.launch({channel:'chrome',headless:true});
 try {
