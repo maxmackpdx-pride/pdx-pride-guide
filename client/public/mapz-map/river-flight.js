@@ -811,7 +811,7 @@ document.fonts?.load("900 100px 'Barlow Condensed'").then(()=>{
  for(const item of document.querySelectorAll('.standalone-hologram-label'))delete item.dataset.signature;
  scheduleFrame();
 }).catch(()=>{});
-function labelRows(text,width,requiredRows,heightRatio=.52){
+function labelRows(text,width,requiredRows,heightRatio=.52,balance=false){
  const words=String(text).trim().split(/\s+/).filter(Boolean),candidates=[];
  const partition=(start,rows,left)=>{
   if(left===1){candidates.push([...rows,words.slice(start).join(' ')]);return;}
@@ -822,12 +822,12 @@ function labelRows(text,width,requiredRows,heightRatio=.52){
  labelMeasureContext.font="900 100px 'Barlow Condensed','Arial Narrow',sans-serif";
  const targetWidth=width*.96,targetHeight=width*heightRatio,maxSize=width*.34;
  return candidates.map(lines=>{
-  let sizes=lines.map(line=>Math.min(maxSize,targetWidth/Math.max(1,labelMeasureContext.measureText(line).width)*100));
+  let sizes=lines.map(line=>Math.min(maxSize,targetWidth/Math.max(1,labelMeasureContext.measureText(line.toUpperCase()).width)*100));
   const rowGap=Math.max(0,lines.length-1)*.75;
   const total=sizes.reduce((sum,size)=>sum+size*.86,0);
   if(total+rowGap>targetHeight){const ratio=(targetHeight-rowGap)/total;sizes=sizes.map(size=>size*ratio);}
   const height=sizes.reduce((sum,size)=>sum+size*.86,0)+rowGap;
-  return {lines,sizes,score:height-lines.length*.05};
+  return {lines,sizes,score:balance?Math.min(...sizes)*10+height*.1:height-lines.length*.05};
  }).sort((a,b)=>b.score-a.score)[0]||{lines:[text],sizes:[14]};
 }
 function labelComplement(hex){const n=parseInt(String(hex).replace('#',''),16);return `rgb(${Math.max(85,255-(n>>16&255))}, ${Math.max(85,255-(n>>8&255))}, ${Math.max(85,255-(n&255))})`;}
@@ -843,8 +843,9 @@ function renderHologramLabels(labels){
   live.add(label.key);
   let item=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='title');
   if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.dataset.labelRole='title';item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey,item));root.appendChild(item);}
+  const timeText=(label.time||'').replace(/:00(?=\s*[AP]M)/i,''),statusText=label.countdown==='STARTED'?'Live':(label.countdown||'').toLowerCase().replace(/^in /,'In ');
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
-  item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',label.kind==='housing'?labelComplement(label.color):label.projectionColor);item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}${label.countdown?`, ${label.countdown}`:""}`);
+  item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',label.kind==='housing'?labelComplement(label.color):label.projectionColor);item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${timeText}${statusText?`, ${statusText}`:""}`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);
   const signature=JSON.stringify([label.kind,label.name,label.time,label.countdown,label.color,label.projectionColor,label.width,label.avatars,label.logo,!!venueLogos.get(label.logo),label.venueName]);
   if(item.dataset.signature!==signature){
@@ -860,12 +861,12 @@ function renderHologramLabels(labels){
     item.appendChild(brand);
    }
    const title=document.createElement('span');title.className='standalone-hologram-title';
-   const fitted=labelRows(label.name,label.cardHeight?label.width-18:label.width,label.kind==='housing'?2:undefined,label.cardHeight?.43:.52);
+   const fitted=labelRows(label.name,label.cardHeight?label.width-14:label.width,label.kind==='housing'?2:undefined,label.cardHeight?48/(label.width-14):.52,Boolean(label.cardHeight));
    fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
    if(label.kind!=='housing'){
     const footer=document.createElement('span');footer.className='event-hologram-footer';
-    if(label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=label.time;footer.appendChild(clock);}
-    if(label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';countdown.textContent=label.countdown;footer.appendChild(countdown);}
+    if(label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=timeText;footer.appendChild(clock);}
+    if(label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';countdown.textContent=statusText;footer.appendChild(countdown);}
     item.appendChild(footer);
    }
 

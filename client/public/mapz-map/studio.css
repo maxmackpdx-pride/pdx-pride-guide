@@ -51,18 +51,18 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 .standalone-hologram-countdown{display:block;margin-top:4px;color:#f4f7ff;font:800 9px/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.035em;white-space:nowrap;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px #020509}
 
 /* Approved Blender frame: the projection attaches around this entire rear edge. */
-.standalone-hologram-label--event{height:112px;display:grid;grid-template-rows:30px 1fr 21px;padding:7px 9px 6px;gap:4px;isolation:isolate;text-shadow:0 1px 2px #020509;}
+.standalone-hologram-label--event{height:112px;display:grid;grid-template-rows:18px 48px 28px;padding:6px 7px;gap:3px;isolation:isolate;text-shadow:0 1px 2px #020509;}
 .event-hologram-frame{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:-1;filter:drop-shadow(0 0 2px color-mix(in srgb,var(--projection-color) 40%,transparent));}
-.event-hologram-frame__rear{fill:#061019f5;stroke:var(--projection-color);stroke-width:1.15;stroke-linejoin:round;}
-.event-hologram-frame__inset{fill:none;stroke:var(--projection-color);stroke-width:.35;opacity:.6;transform:translate(2px,2px) scale(.9643);transform-origin:0 0;}
-.event-hologram-brand{height:30px;display:flex;align-items:center;justify-content:center;padding:0 8px 4px;border-bottom:.5px solid color-mix(in srgb,var(--projection-color) 25%,transparent);color:#fff;font:800 9px/1.05 'Barlow Condensed',sans-serif;}
-.event-hologram-brand canvas{display:block;max-width:100%;max-height:25px;object-fit:contain;width:auto;height:auto;}
-.standalone-hologram-label--event .standalone-hologram-title{height:40px;justify-content:center;overflow:hidden;min-width:0;}
-.event-hologram-footer{height:21px;display:flex;align-items:center;justify-content:center;gap:6px;border-top:.5px solid color-mix(in srgb,var(--projection-color) 45%,transparent);min-width:0;}
-.standalone-hologram-label--event .standalone-hologram-clock{margin:0;color:#fff;font:900 10px/1 'Barlow Condensed',sans-serif;text-shadow:0 1px 2px #020509;white-space:nowrap;}
-.standalone-hologram-label--event .standalone-hologram-countdown{margin:0;color:#cbd5e1;font:900 8px/1 'Barlow Condensed',sans-serif;letter-spacing:0;}
+.event-hologram-frame__rear{fill:#061019f5;stroke:var(--projection-color);stroke-width:.65;stroke-linejoin:round;}
+.event-hologram-frame__inset{fill:none;stroke:var(--projection-color);stroke-width:.2;opacity:.45;transform:translate(2px,2px) scale(.9643);transform-origin:0 0;}
+.event-hologram-brand{height:18px;display:flex;align-items:center;justify-content:center;padding:0 7px 2px;border-bottom:.35px solid color-mix(in srgb,var(--projection-color) 25%,transparent);color:#fff;font:800 9px/1.05 'Barlow Condensed',sans-serif;}
+.event-hologram-brand canvas{display:block;max-width:100%;max-height:16px;object-fit:contain;width:auto;height:auto;}
+.standalone-hologram-label--event .standalone-hologram-title{height:48px;justify-content:center;overflow:hidden;min-width:0;}
+.event-hologram-footer{height:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;text-transform:none;border-top:.35px solid color-mix(in srgb,var(--projection-color) 45%,transparent);min-width:0;}
+.standalone-hologram-label--event .standalone-hologram-clock{margin:0;color:#fff;font:900 13px/1 'Barlow Condensed',sans-serif;text-shadow:0 1px 2px #020509;white-space:nowrap;}
+.standalone-hologram-label--event .standalone-hologram-countdown{margin:0;color:#e2e8f0;font:800 11px/1 'Barlow Condensed',sans-serif;letter-spacing:0;}
 .standalone-hologram-label--event:focus-visible{outline-color:#fff;outline-offset:4px;}
-.standalone-hologram-label--event:hover .event-hologram-frame__rear{stroke-width:1.6;}
+.standalone-hologram-label--event:hover .event-hologram-frame__rear{stroke-width:.9;}
 
 /* TV texture belongs to the rear surface; foreground artwork never inherits it. */
 .standalone-hologram-label--event::before{content:"";position:absolute;inset:2px;z-index:0;pointer-events:none;clip-path:var(--event-surface-clip);background:repeating-linear-gradient(to bottom,transparent 0 2px,color-mix(in srgb,var(--projection-color) 16%,transparent) 2px 2.5px,rgba(255,255,255,.035) 2.5px 3px);}
