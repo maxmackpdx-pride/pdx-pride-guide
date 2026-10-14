@@ -58,20 +58,16 @@ test('waypoint heads follow roofs with the existing minimum ground gap',async()=
   }
 });
 
-test('Placez swaps logo and type every 7 seconds with a short glitch',async()=>{
- const {WAYPOINT_SWAP_SECONDS,showWaypointLogo,waypointSwapGlitch}=await import('../client/public/mapz-map/waypoint-markers.js');
- assert.equal(WAYPOINT_SWAP_SECONDS,7);
- for(const phase of [0,2.399963,10,50,900]){
-  const origin=-phase*1.7+14*1000;
-  assert.equal(showWaypointLogo(origin+1,phase),true);
-  assert.equal(showWaypointLogo(origin+6.9,phase),true);
-  assert.equal(showWaypointLogo(origin+7.1,phase),false);
-  assert.equal(showWaypointLogo(origin+13.9,phase),false);
-  assert.ok(waypointSwapGlitch(origin+7.02,phase)>0);
-  assert.equal(waypointSwapGlitch(origin+7.5,phase),0);
-  assert.equal(showWaypointLogo(origin+10,phase,true),true);
-  assert.equal(waypointSwapGlitch(origin+7.02,phase,true),0);
- }
+test('Placez artwork stays static and wordmarks yield to readable category symbols',async()=>{
+ const {waypointArtwork}=await import('../client/public/mapz-map/waypoint-markers.js');
+ const compact={width:100,height:100},wordmark={width:400,height:60},icon={};
+ assert.equal(waypointArtwork(compact,icon,false,13.5),null);
+ assert.equal(waypointArtwork(compact,icon,false,16),compact);
+ assert.equal(waypointArtwork(wordmark,icon,false,16),null);
+ assert.equal(waypointArtwork(wordmark,icon,true,13),wordmark);
+ assert.equal(waypointArtwork(wordmark,null,false,13),wordmark);
+ const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
+ assert.doesNotMatch(renderer,/showWaypointLogo|waypointSwapGlitch|const canCycle=|const swapProgress=/);
 });
 
 test('adult Placez use normal Placez markers; boards keep their families',async()=>{

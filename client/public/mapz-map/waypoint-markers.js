@@ -139,16 +139,10 @@ export function drawWaypointFoot(ctx,geometry,color,materials,drawBeam,alpha=1,s
  }
  ctx.restore();
 }
-/** Placez swap: logo for 7s, then the type glyph for 7s, offset per pin so they don't flip together. */
-export const WAYPOINT_SWAP_SECONDS=7;
-function swapClock(seconds,phase){const cycle=WAYPOINT_SWAP_SECONDS*2;return (((seconds+phase*1.7)%cycle)+cycle)%cycle;}
-export function showWaypointLogo(seconds,phase,reducedMotion=false){
- if(reducedMotion)return true;
- return swapClock(seconds,phase)<WAYPOINT_SWAP_SECONDS;
-}
-/** 0..1 glitch for the first 120ms after each swap; 0 under calm and reduced motion. */
-export function waypointSwapGlitch(seconds,phase,reducedMotion=false){
- if(reducedMotion)return 0;
- const since=swapClock(seconds,phase)%WAYPOINT_SWAP_SECONDS;
- return since<.12?1-since/.12:0;
+/** Stable artwork: compact symbols at overview; readable logos on approach/selection. */
+export function waypointArtwork(logo,icon,selected=false,zoom=mapZoom()){
+ if(!logo)return null;
+ if(!icon||selected)return logo;
+ const aspect=logo.width/Math.max(1,logo.height);
+ return zoom>=15.5&&aspect<=2.4?logo:null;
 }

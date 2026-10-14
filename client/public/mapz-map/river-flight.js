@@ -22,11 +22,12 @@ import {logoCoverage,logoTone,authoredLogoMode} from './logo-mask.js';
 import {createEventProjection,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
+import {hologramPresence,hologramCameraDrift,boundedHologramPosition} from './hologram-presence.js';
 import {screenNeighborCounts} from './screen-neighbors.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,showWaypointLogo,waypointSwapGlitch,waypointFamilyShell} from './waypoint-markers.js?v=20261005-gap';
+import {waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,waypointArtwork,waypointFamilyShell} from './waypoint-markers.js?v=20261005-gap';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -37,6 +38,11 @@ const initialCamera=readCameraParams(new URLSearchParams(location.search));
 // First paint is the vector city. DEM workers were blocking the phone boot
 // and the preload already dropped terrain from this first style.
 const surfaceStyle=vectorFirstStyle(mapzSurfaceStyle({terrainStrength:0}));
+// Keep Mapz's ordinary city quieter without changing Outzide's shared palette.
+const quietSkyline=surfaceStyle.layers.find(layer=>layer.id==='skyline');
+if(quietSkyline)quietSkyline.paint['fill-extrusion-color']='#1b3039';
+const quietOutlines=surfaceStyle.layers.find(layer=>layer.id==='buildings');
+if(quietOutlines)quietOutlines.paint['line-color']='#506c78';
 // The home city materials, extended with DEM hillshade and Mapz surface treatments.
 // MapLibre creates and checks its own WebGL context. A separate retained probe
 // needlessly consumes another context on phones and can prevent the real one.
@@ -408,10 +414,11 @@ const hologramLiftScale=.7*TONIGHT_HEIGHT_MULTIPLIER*.8*1.15*1.35;
 const hologramArtworkScale=2.7;
 const hologramLabelWidth=62;
 const logoFit=logo=>Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height);
+const eventArtworkScale=feature=>/\/icons\/event\.svg(?:[?#]|$)/.test(feature.properties.logo||'')?.38:1;
 function hologramBounds(feature,scale){
  const logo=venueLogos.get(feature.properties.logo);
  if(!logo)return {halfWidth:40*logoSpacing*scale,halfHeight:75*logoSpacing*scale};
- const fit=logoFit(logo)*hologramArtworkScale;
+ const fit=logoFit(logo)*hologramArtworkScale*eventArtworkScale(feature);
  const logoHalfWidth=logo.width*fit/2,logoHalfHeight=logo.height*fit/2;
  // The artwork, title, and clock share one compact footprint regardless of source-logo dimensions.
  return {halfWidth:Math.max(feature.properties.time?hologramLabelWidth/2:0,logoHalfWidth+6)*logoSpacing*scale,
@@ -528,6 +535,8 @@ function drawLights(fade,target=map,surface=lights){
  const streetProgress=smoothRange(13.5,15,target.getZoom());
  const hologramMultiplier=2.4-.75*streetProgress;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
+ // Clear the artwork and its title above the waypoint, without filling the viewport.
+ const skyCeiling=Math.min(height*.36,Math.max(84,170*presentationScale,1.3*eventProjectionHeightLimit(target.getZoom(),target.getPitch())));
  const overviewAnchor=.32+.68*smoothRange(11.25,14.25,target.getZoom());
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
@@ -561,15 +570,18 @@ function drawLights(fade,target=map,surface=lights){
  const {counts:beaconNeighborCounts}=screenNeighborCounts(beacons);
  for(let beaconIndex=0;beaconIndex<beacons.length;beaconIndex++){
   const item=beacons[beaconIndex],phase=item.feature.properties.phase;
+  const center=target.getCenter();
+  const metersPerPixel=40075016.686*Math.cos(center.lat*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
+  item.presence=hologramPresence(center.distanceTo({lng:item.feature.geometry.coordinates[0],lat:item.feature.geometry.coordinates[1]}),metersPerPixel*height*.55,item.feature.properties.key===selectedKey);
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
   item.attention=reduced.matches?.5:.5+.5*Math.sin(pulseTime*(.13+.025*Math.sin(phase))+phase*1.83);
-  const driftX=eventProjectionSway(pulseTime,phase,presentationScale,reduced.matches||cameraMoving);
-  const driftY=0;
-  item.scaleGoal=emergenceFor(item.feature)*presentationScale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
+  const driftX=eventProjectionSway(pulseTime,phase,presentationScale*item.presence.motion,reduced.matches);
+  item.scaleGoal=emergenceFor(item.feature)*presentationScale*item.presence.scale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
-  // No pin ceiling. Lift comes from hologramLiftScale, heightScale, and tonight's multiplier.
-  const dayLift=activeTonight(item.feature)?1.65:1;item.x=item.p.x+driftX;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale)*effectiveHologramLift*dayLift;
+  const skyRise=skyCeiling*(.55+.35*item.presence.motion+heightBoost*.25);
+  item.x=item.p.x+driftX;
+  item.y=item.p.y-roofLift(target,item.feature,surfaces)-skyRise-item.boundsGoal.halfHeight;
   item.neighbors=beaconNeighborCounts[beaconIndex];
   item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25*effectiveHologramLift:0;
  }
@@ -602,6 +614,8 @@ function drawLights(fade,target=map,surface=lights){
   settleValue(prev,'y','vy',item.y-item.p.y,2.3,motionDelta);
   settleValue(prev,'scale','vs',item.scaleGoal,2.8,motionDelta);
   prev.scale=Math.min(prev.scale,presentationScale);layout.set(key,prev);
+  const drift=hologramCameraDrift(prev,item.p,item.feature.properties.phase,motionDelta,reduced.matches);
+  prev.cameraX=drift.x;prev.cameraY=drift.y;prev.anchorX=item.p.x;prev.anchorY=item.p.y;
   item.offset=prev;
  }
  for(const item of beacons){
@@ -612,16 +626,22 @@ function drawLights(fade,target=map,surface=lights){
   const avoidance=cameraMoving?{x:0,y:0}:logoPointerOffset(item.x,item.y,phase,item.halfWidth,item.halfHeight);
   item.offset.avoidX+=(avoidance.x-item.offset.avoidX)*pointerBlend;
   item.offset.avoidY+=(avoidance.y-item.offset.avoidY)*pointerBlend;
-  item.x+=item.offset.avoidX;item.y+=item.offset.avoidY;
+  item.x+=item.offset.avoidX+item.offset.cameraX;item.y+=item.offset.avoidY+item.offset.cameraY;
  const emergence=emergenceFor(item.feature);
  item.x=item.p.x+(item.x-item.p.x)*emergence;
  item.y=item.p.y+(item.y-item.p.y)*emergence;
  }
- // Apply anchor limits before collision resolution; never clamp separated heads back together.
+ // Keep headers near their venue first, then resolve the complete artwork/title
+ // footprint. A post-layout clamp would collapse separated headers together.
+ for(const item of beacons){
+  const clearance=item.halfHeight;
+  const position=boundedHologramPosition(item.p,{x:item.x,y:item.y+clearance+32*item.offset.scale},item.offset.scale,roofLift(target,item.feature,surfaces),skyCeiling);
+  item.x=position.x;item.y=position.y-clearance-32*item.offset.scale;
+ }
  if(!cameraMoving)separateHolograms(beacons,width,height);
  // Keep the pointer's temporary offset separate so it cannot accumulate into drift.
  for(const item of beacons){
-  const x=item.x-item.p.x-item.offset.avoidX,y=item.y-item.p.y+item.hover-item.offset.avoidY;
+  const x=item.x-item.p.x-item.offset.avoidX-item.offset.cameraX,y=item.y-item.p.y+item.hover-item.offset.avoidY-item.offset.cameraY;
   // A collision correction must not carry momentum back into a neighboring logo.
   if(Math.abs(x-item.offset.x)>.01)item.offset.vx=0;
   if(Math.abs(y-item.offset.y)>.01)item.offset.vy=0;
@@ -645,7 +665,7 @@ function drawLights(fade,target=map,surface=lights){
    drawBoardPin(lightsContext,group.x,group.y,row.color,row.key,pulseTime,reduced.matches,group.items.length,row.wireColor,row.pinCyan);
    hitTargets.push({x:group.x,y:group.y-22,r:26,width:44,height:48,key:row.key,name:row.name,boardPinKeys:group.items.map(v=>v.feature.properties.key)});
   }
-  for(const {feature,p,offset,neighbors=0} of ordered){
+  for(const {feature,p,offset,presence,neighbors=0} of ordered){
   if(feature.properties.boardPin)continue;
   const {color,phase}=feature.properties;
   // Rise and fold scale the pin up out of its ground point; everything else is untouched.
@@ -655,9 +675,10 @@ function drawLights(fade,target=map,surface=lights){
   const isBar=expandedKeys.has(feature.properties.key);
   const hover=reduced.matches||cameraMoving?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
-  const lift=roofLift(target,feature,surfaces),eventTop=offset?p.y+offset.y+offset.avoidY-hover:p.y-lift-hover;
+  const hologramAlpha=coreAlpha*(presence?.opacity??1);
+  const lift=roofLift(target,feature,surfaces),eventTop=offset?p.y+offset.y+offset.avoidY+(offset.cameraY||0)-hover:p.y-lift-hover;
   let hologramTop=eventTop;const raisedY=hologramTop+178.5*beaconScale;
-  const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.56);
+  const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0)+(offset?.cameraX||0),beamAlpha=Math.max(.55,1/(1+neighbors*.24));
   const emergence=isBar?emergenceFor(feature):0;
   const branchFamily=feature.properties.waypointFamily;
   if((branchFamily==='mizzed'||branchFamily==='gigz')&&feature.properties.venueWaypointKey){
@@ -694,8 +715,12 @@ function drawLights(fade,target=map,surface=lights){
     // Heads remain readable above buildings; their beam is masked at street level.
     const logo=feature.properties.waypointLogo?venueLogos.get(feature.properties.waypointLogo)?.image:null;
     const shell=waypointFamilyShell(feature.properties.waypointFamily);
-    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,logo&&showWaypointLogo(pulseTime,phase,reduced.matches)?logo:null,selected,coreAlpha,shell,
-     {glitch:logo?waypointSwapGlitch(pulseTime,phase,reduced.matches):0});
+    const icon=typeIcons.get(feature.properties.typeIcon)?.light;
+    const artwork=waypointArtwork(logo,icon,selected,target.getZoom());
+    // A pin under a full event header yields visually, retaining its hit target.
+    const underHeader=beacons.some(item=>Math.abs(item.x-geometry.x)<item.halfWidth+geometry.size/2+8&&Math.abs(item.y-geometry.y)<item.halfHeight+geometry.size/2+8);
+    const headAlpha=coreAlpha*(selected?1:underHeader?.38:.88);
+    drawWaypointHead(lightsContext,geometry,color,icon,artwork,selected,headAlpha,shell);
     if(cluster?.members.length>1)drawClusterCount(lightsContext,geometry.x,geometry.y,cluster.members.length,color,geometry.size);
     hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color,clusterBounds:cluster?.members.length>1?cluster.bounds:null,clusterKeys:cluster?.members.map(member=>member.feature.properties.key),clusterWorld:feature.properties.waypointFamily});
    }
@@ -729,11 +754,11 @@ function drawLights(fade,target=map,surface=lights){
     // Cap the beam itself, with the artwork/title footprint above its mouth.
     // Adding the old center offset after the cap pushed overview headers onto roofs.
     const headerClearance=hologramBounds(feature,beaconScale).halfHeight;
-    const projection=eventProjectionGeometry(beamAnchor,{x:logoX,y:hologramTop+headerClearance+32*beaconScale},beaconScale,eventProjectionHeightLimit(target.getZoom(),target.getPitch()));
+    const projection=eventProjectionGeometry(beamAnchor,{x:logoX,y:hologramTop+headerClearance+32*beaconScale},beaconScale,Math.max(skyCeiling,beamAnchor.y-hologramTop-headerClearance));
     hologramTop=projection.top-headerClearance;
    if(pass===0){
     lightsContext.save();
-    lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*bloomScale;
+    lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*(presence?.opacity??1)*bloomScale;
     eventProjection.draw(lightsContext,projection,pulseTime,phase,reduced.matches,eventProjectionColor(feature.properties));
     lightsContext.restore();
    continue;
@@ -741,18 +766,15 @@ function drawLights(fade,target=map,surface=lights){
 
    // Floating hologram: only the artwork and fine corner guides, no pin body.
    const hologramCenterY=hologramTop;
-   const renderedArtworkScale=hologramArtworkScale*beaconScale;
-   lightsContext.save();lightsContext.globalAlpha=coreAlpha;
+   const renderedArtworkScale=hologramArtworkScale*beaconScale*eventArtworkScale(feature);
+   lightsContext.save();lightsContext.globalAlpha=hologramAlpha;
    // Keep every part of the hologram attached to the same map-tracked center.
    // Screen-space billboard: the beam can lean, but its header stays level
    // with the waypoint and faces the camera through map pitch/bearing changes.
    lightsContext.translate(logoX,hologramCenterY+34*renderedArtworkScale);lightsContext.scale(renderedArtworkScale,renderedArtworkScale);
-   const canCycle=feature.properties.alternateLogo&&venueLogos.has(feature.properties.alternateLogo);
-   const cycle=pulseTime/5,swapProgress=(pulseTime%5)/.48;
-   const cycleIndex=Math.floor(cycle);
-   const alternate=canCycle&&(cycleIndex>0&&swapProgress<.5?cycleIndex-1:cycleIndex)%2===1;
-   const artUrl=alternate?feature.properties.alternateLogo:feature.properties.logo;
-   const logoKey=alternate?feature.properties.alternateLogoKey:feature.properties.logoKey;
+   // Stable identity; the projection carries the motion instead of logo swaps.
+   const artUrl=feature.properties.logo;
+   const logoKey=feature.properties.logoKey;
    if(logoKey)hitTargets.push({key:logoKey,x:logoX,y:hologramCenterY,r:Math.max(24,38*beaconScale)});
    const logo=venueLogos.get(artUrl)||venueLogos.get(feature.properties.logo);
    if(feature.properties.time&&logo&&coreAlpha>.1){
@@ -760,9 +782,9 @@ function drawLights(fade,target=map,surface=lights){
     const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
     const labelOffset=logoHeight/2+5*beaconScale;
     const labelX=logoX,labelY=hologramCenterY+labelOffset;
-    eventLabels.push({projectionColor:eventProjectionColor(feature.properties),avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:labelX,y:labelY,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
+    eventLabels.push({projectionColor:eventProjectionColor(feature.properties),avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:labelX,y:labelY,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:hologramAlpha});
    }
-   lightsContext.globalAlpha=coreAlpha;
+   lightsContext.globalAlpha=hologramAlpha;
    if(logo){
     lightsContext.save();lightsContext.translate(0,-34);
     // Artwork and title stay level on the same camera-facing billboard.
@@ -770,25 +792,13 @@ function drawLights(fade,target=map,surface=lights){
     const scale=logoFit(logo),w=logo.width*scale,h=logo.height*scale;
     lightsContext.imageSmoothingEnabled=true;lightsContext.imageSmoothingQuality='high';
     const padding=logo.padding*scale;
-    const glitch=canCycle&&cycleIndex>0&&!reduced.matches&&swapProgress<1?Math.sin(Math.PI*swapProgress):0;
-    if(glitch>0){
-     lightsContext.save();lightsContext.globalCompositeOperation='screen';lightsContext.globalAlpha=coreAlpha*glitch*.8;
-     const offset=glitch*(1.1+.4*Math.sin(pulseTime*63));
-     logo.chromatic.forEach((channel,i)=>lightsContext.drawImage(channel,-w/2+(i?offset:-offset),-34-h/2+(i?-.25:.25)*glitch,w,h));
-     lightsContext.restore();
-    }
-    lightsContext.globalAlpha=coreAlpha*(1-glitch*.4);
+    lightsContext.globalAlpha=hologramAlpha;
     lightsContext.drawImage(logo.outlined,-w/2-padding,-34-h/2-padding,w+padding*2,h+padding*2);
-    if(glitch>0){
-     lightsContext.save();lightsContext.globalAlpha=coreAlpha*glitch*.75;
-     for(let band=0;band<3;band++){const sy=((band*.31+pulseTime*.8)%1)*logo.height,sh=Math.min(logo.height*.045,logo.height-sy);const shift=Math.sin(pulseTime*47+band*2)*glitch*1.6;lightsContext.drawImage(logo.image,0,sy,logo.width,sh,-w/2+shift,-34-h/2+sy*scale,w,sh*scale);}
-     lightsContext.restore();
-    }
     // Tiny low-contrast digital scan, confined to the artwork's alpha mask.
     if(!reduced.matches){
      const band=(Math.sin(pulseTime*.31+phase*5.1)*.5+.5)*logo.height;
      const bandHeight=Math.max(1,logo.height*.008);
-     lightsContext.globalAlpha=coreAlpha*(activeTonight(feature)?.2:.07);
+     lightsContext.globalAlpha=hologramAlpha*(activeTonight(feature)?.2:.07);
      lightsContext.drawImage(logo.silhouette,logo.left,logo.top+band,logo.width,Math.min(bandHeight,logo.height-band),-w/2,-34-h/2+band*scale,w,Math.min(bandHeight,logo.height-band)*scale);
     }
     lightsContext.restore();
@@ -799,7 +809,7 @@ function drawLights(fade,target=map,surface=lights){
    const size=126*(.92+.1*pulse);
    lightsContext.drawImage(lightSprites.get(color),p.x-size/2,raisedY-size/2,size,size);
    drawLightMist(lightsContext,p.x,raisedY,phase,fade);
-   lightsContext.globalAlpha=coreAlpha;
+   lightsContext.globalAlpha=hologramAlpha;
    lightsContext.drawImage(hologramMaterials.orbs.get(color),p.x-12.5,raisedY-12.5,25,25);
   }
  }
@@ -1096,7 +1106,7 @@ let frozenClusters=null;
 function clusterPlaceMarkers(items,selected,zoom,width,height){
  // Keep condensed waypoints at the broad overview, then separate them about
  // two zoom levels earlier as the camera approaches individual streets.
- const radius=zoom<11.5?64:zoom<12.5?52:zoom<13.5?38:zoom<14.25?28:12;
+ const radius=zoom<11.5?64:zoom<12.5?52:zoom<13.5?38:zoom<14.25?36:32;
  const byKey=new Map();
  if(!radius)return {byKey};
  // Pick a deterministic geographic leader so a cluster cannot jump between
