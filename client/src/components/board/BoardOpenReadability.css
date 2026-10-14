@@ -1,0 +1,20 @@
+/* Housing and Mizzed retain their real tools inside the shared open-card frame. */
+.board-open-readable .board-open-readable__close{position:sticky;top:var(--space-3);height:0;z-index:60;pointer-events:none;overflow:visible}
+.board-open-readable .board-open-readable__close .detail-actions{position:relative;justify-content:flex-end;margin:0;padding:0 var(--space-3) !important;min-height:44px;height:44px;background:transparent !important;border:0 !important;box-shadow:none !important;pointer-events:none}
+.board-open-readable .board-open-readable__close .detail-actions>*{pointer-events:auto}
+.board-open-readable .board-open-readable__close .detail-actions__close{min-width:44px;min-height:44px;width:44px;height:44px;flex:0 0 44px}
+.board-open-readable--housing .houz-overlay-content{padding-top:calc(44px + var(--space-6))}
+.board-open-readable--housing>.board-demo-notice{margin-top:calc(44px + var(--space-6));margin-inline:var(--space-5)}
+.board-open-readable--housing>.board-demo-notice+fieldset .houz-overlay-content{padding-top:var(--space-4)}
+.board-open-readable--housing .hz-prose{font:var(--open-card-body-font);color:var(--text-body);max-width:68ch;overflow-wrap:anywhere}
+.board-open-readable--housing .hz-mono{font:var(--open-card-meta-font)}
+.board-open-readable--housing .hz-secttl{font:var(--open-card-heading-font);margin-bottom:var(--space-3)}
+.board-open-readable--housing .hz-sect{margin-block:var(--space-5)}
+.board-open-readable--mizzed>.board-detail-modal__meta{margin-top:calc(44px + var(--space-6));margin-bottom:var(--space-4)}
+.board-open-readable--mizzed .board-detail-modal__meta-line{font:var(--open-card-meta-font);line-height:1.5;overflow-wrap:anywhere}
+.board-open-readable--mizzed .board-detail-modal__quote-title{font:var(--open-card-title-font);line-height:1.16;margin:var(--space-4) 0;overflow-wrap:anywhere}
+.board-open-readable--mizzed .board-detail-modal__body{font:var(--open-card-body-font);color:var(--text-body);line-height:1.6;white-space:pre-wrap;max-width:68ch;overflow-wrap:anywhere;margin-bottom:var(--space-5)}
+.board-open-readable--mizzed .board-text-field{font:var(--open-card-body-font);min-height:44px}
+.board-open-readable--mizzed .board-detail-modal__actions{gap:var(--space-3);margin-top:var(--space-5)}
+.board-open-readable--mizzed .mizzed-source-link{margin-block:var(--space-5)}
+@media(max-width:600px){.board-open-readable--mizzed .board-detail-modal__cta-row{flex-wrap:wrap;gap:var(--space-3)}.board-open-readable--mizzed .board-detail-modal__cta-row>button{min-height:44px}}

@@ -31,9 +31,10 @@ export type SellzPost = {
 const ACCENT = "var(--room-sellz)";
 const money = (cents: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);
 
-type Props = { post: SellzPost; expanded: boolean; saved: boolean; onToggle: () => void; onRequireAuth: () => void; onDeleted?: () => void };
+type Props = {
+  skipLeadPhoto?: boolean; post: SellzPost; expanded: boolean; saved: boolean; onToggle: () => void; onRequireAuth: () => void; onDeleted?: () => void };
 
-export default function SellzListingCard({ post, expanded, saved, onToggle, onRequireAuth, onDeleted }: Props) {
+export default function SellzListingCard({ post, skipLeadPhoto = false, expanded, saved, onToggle, onRequireAuth, onDeleted }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [note, setNote] = useState("Is this available?");
@@ -102,7 +103,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
           {post.photoUrls?.length > 1 ? <span className="board-listing-card__thumb-badge"><Images size={12} aria-hidden="true" /> {post.photoUrls.length}</span> : null}
         </div>
         <div className="board-listing-card__main">
-          <div className="board-listing-card__tags"><span className="board-listing-card__kind board-listing-card__kind--text">{post.category}</span><span className="board-listing-card__time">{timeAgo(post.createdAt)}</span></div>
+          <div className="board-listing-card__tags"><span className="board-listing-card__kind board-listing-card__kind--text">{post.category}</span><span className="board-listing-card__time">{timeAgo(post.createdAt)}</span>{expanded && <span className="board-listing-card__status">{statusLabel}</span>}</div>
           <h3 className="board-listing-card__title">{post.title}</h3>
           <div className="sellz-card__price">{money(post.priceCents)}{post.negotiable ? <small> OBO</small> : null}</div>
           <p className="sellz-card__summary">{post.description}</p>
@@ -111,7 +112,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
         </div>
       </div>
       {expanded ? <div id={`sellz-details-${post.id}`} className="board-listing-card__expand">
-        {post.photoUrls?.length ? <div className="gifting-photo-gallery">{post.photoUrls.map((url, i) => <img key={url} src={url} alt={`${post.title}, photo ${i + 1}`} />)}</div> : null}
+        {post.photoUrls?.slice(skipLeadPhoto ? 1 : 0).length ? <div className="gifting-photo-gallery">{post.photoUrls.slice(skipLeadPhoto ? 1 : 0).map((url, i) => <img key={url} src={url} alt={`${post.title}, photo ${i + 1 + (skipLeadPhoto ? 1 : 0)}`} />)}</div> : null}
         <p>{post.description}</p>
         <div className="gifting-details">{post.condition} · {post.pickupPreference} · {post.neighborhood}</div>
         <div className="gifting-listing-actions">

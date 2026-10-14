@@ -1,5 +1,5 @@
 import UnifiedBoardArt from "./UnifiedBoardArt";
-import { toBoardPosts } from "@/lib/allBoards";
+import { toBoardPosts, type BoardPayload } from "@/lib/allBoards";
 import DetailActions from "@/components/DetailActions";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -40,7 +40,8 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
   const endpoint=kind==="gig"?"/api/gigs":kind==="gifting"?"/api/gifting":"/api/sellz";
   const query=useQuery<GiftingPost|GigPost|SellzPost>({queryKey:[endpoint,postId,user?.id],queryFn:()=>apiRequest("GET",`${endpoint}/${postId}`).then(r=>r.json()),retry:1});
   const post=query.data;
-  const gigArtwork = presentation && kind === "gig" && post ? toBoardPosts("gigz", [post as GigPost], true)[0] : null;
+  const artwork = presentation && post ? toBoardPosts(kind === "gig" ? "gigz" : kind === "gifting" ? "giftz" : "sellz", [post] as BoardPayload, true)[0] : null;
+  const heroPhoto = presentation && kind !== "gig" ? (post as GiftingPost | SellzPost | undefined)?.photoUrls?.[0] : undefined;
   const saved=useQuery<number[]>({queryKey:["/api/sellz/saved/ids"],enabled:kind==="sellz"&&!!user,queryFn:()=>apiRequest("GET","/api/sellz/saved/ids").then(r=>r.json())});
 
   let card: ReactNode = null;
@@ -51,6 +52,7 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
     card = (
       <GiftListingCard
         post={post as GiftingPost}
+        skipLeadPhoto={!!heroPhoto}
         expanded
         onToggle={() => {}}
         onRequireAuth={() => setShowAuth(true)}
@@ -59,7 +61,7 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
     );
   } else if (post && kind === "sellz") {
     accent = "var(--room-sellz)";
-    card = <SellzListingCard post={post as SellzPost} expanded saved={saved.data?.includes(postId)||false} onToggle={() => {}} onRequireAuth={() => setShowAuth(true)} onDeleted={onClose} />;
+    card = <SellzListingCard post={post as SellzPost} skipLeadPhoto={!!heroPhoto} expanded saved={saved.data?.includes(postId)||false} onToggle={() => {}} onRequireAuth={() => setShowAuth(true)} onDeleted={onClose} />;
   } else if (post && kind === "gig") {
     const gig = post as GigPost;
     const isLooking = gig.postType === "LOOKING_FOR_WORK";
@@ -99,25 +101,25 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
           aria-modal="true"
           aria-label={kind === "gig" ? "Gigz listing" : kind === "gifting" ? "Giftz listing" : "Sellz listing"}
           tabIndex={-1}
-          className={`board-post-overlay board-post-overlay--glass board-open-card--shared pdx-glass-rebind${presentation ? ` ab-open-card${kind === "gig" ? " ab-open-card--gigz" : ""}` : ""}`}
+          className={`board-post-overlay board-post-overlay--glass board-open-card--shared pdx-glass-rebind${presentation ? ` ab-open-card${kind === "gig" ? " ab-open-card--gigz" : " ab-open-card--listing"}${artwork?.intent === "available" || artwork?.intent === "iso" ? ` ab-open-card--${artwork.intent}` : ""}` : ""}`}
           onClick={e => e.stopPropagation()}
           style={panelStyle}
         >
           <span className="board-open-card__rule" aria-hidden="true" />
-          {presentation && kind === "gig" ? (
+          {presentation ? (
             <div className="ab-open-card__chrome">
               <DetailActions label="listing" onClose={requestClose} />
             </div>
           ) : <DetailActions label="listing" onClose={requestClose} />}
-          {gigArtwork && (
+          {artwork && (
             <div className="ab-open-card__art">
-              <UnifiedBoardArt post={gigArtwork} />
-              {(post as GigPost).isRemote && (
+              {heroPhoto ? <img className="ab-open-card__photo" src={heroPhoto} alt={`${(post as GiftingPost | SellzPost).title}, listing photo`} /> : <UnifiedBoardArt post={artwork} />}
+              {kind === "gig" && (post as GigPost).isRemote && (
                 <span className="ab-open-card__intent">Remote</span>
               )}
             </div>
           )}
-          {post?.isDemo && <p className="board-demo-notice" role="note">Demo listing — example only. Participation is disabled.</p>}
+          {post?.isDemo && <p className="board-demo-notice" role="note">DEMO · Participation is disabled.</p>}
           <fieldset disabled={post?.isDemo} onClickCapture={event => { if (post?.isDemo) { event.preventDefault(); event.stopPropagation(); } }} onKeyDownCapture={event => { if (post?.isDemo && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); event.stopPropagation(); } }} style={{border:0,padding:0,margin:0,minWidth:0}}>{card ?? (
             <div className="board-listing-card board-listing-card--makeover pdx-glass-rebind" style={{ padding: 28, textAlign: "center", "--listing-accent": accent, "--c": accent } as CSSProperties}>
               <p className="board-copy-sm" role={query.isError ? "alert" : "status"}>{query.isLoading ? "Loading…" : query.isError ? "This listing could not load." : "This listing is no longer available."}</p>

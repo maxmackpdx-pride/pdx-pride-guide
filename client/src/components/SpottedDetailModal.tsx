@@ -1,3 +1,4 @@
+import "@/components/board/BoardOpenReadability.css";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import { ArrowUpRight } from "lucide-react";
@@ -105,13 +106,13 @@ export default function SpottedDetailModal({
         aria-modal="true"
         aria-label={title || "Missed connection"}
         tabIndex={-1}
-        className={`board-detail-modal board-detail-modal--spotted board-detail-modal--glass board-open-card--shared pdx-glass-rebind${presentation ? " ab-open-card" : ""}`}
+        className={`board-detail-modal board-detail-modal--spotted board-detail-modal--glass board-open-card--shared pdx-glass-rebind board-open-readable board-open-readable--mizzed${presentation ? " ab-open-card" : ""}`}
         onClick={e => e.stopPropagation()}
         style={glassVars}
       >
         <span className="board-open-card__rule" aria-hidden="true" />
         <BoardGlassMotif variant="quote-pair" />
-        <DetailActions label="listing" onClose={requestClose} />
+        <div className="board-open-readable__close"><DetailActions label="listing" onClose={requestClose} /></div>
         <div className="board-detail-modal__meta" style={{ position: "relative", zIndex: 1 }}>
           <span className="board-detail-modal__live-dot" aria-hidden="true" />
           <span className="board-detail-modal__meta-line" style={{ color: kindColor || MC_GLASS }}>
@@ -161,7 +162,7 @@ export default function SpottedDetailModal({
               Reply anonymously
             </Button>
           </div>
-          <p className="board-copy-sm" style={{ marginTop: 12, color: "var(--text-body)", fontSize: "0.72rem" }}>
+          <p className="board-copy-sm" style={{ marginTop: 12, color: "var(--text-body)", font: "var(--open-card-meta-font)" }}>
             Replies open a private, anonymous inbox thread. Reveal your profile only when you are both ready.
           </p>
           <details><summary>Report this connection</summary><label>Reason<input className="board-text-field" value={reportReason} onChange={e=>setReportReason(e.target.value)}/></label><Button disabled={!reportReason.trim()||reportMutation.isPending} onClick={()=>user ? reportMutation.mutate() : setShowAuth(true)}>Send report</Button></details>

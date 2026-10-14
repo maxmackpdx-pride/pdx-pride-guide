@@ -163,6 +163,7 @@ function cardCta(post: GiftingPost) {
 }
 
 type Props = {
+  skipLeadPhoto?: boolean;
   post: GiftingPost;
   expanded: boolean;
   onToggle: () => void;
@@ -171,7 +172,7 @@ type Props = {
   onDeleted?: () => void;
 };
 
-export default function GiftListingCard({ post, expanded, onToggle, onRequireAuth, onDeleted }: Props) {
+export default function GiftListingCard({ post, skipLeadPhoto = false, expanded, onToggle, onRequireAuth, onDeleted }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [editing,setEditing]=useState(false);
@@ -365,10 +366,10 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
 
       {expanded && (
         <div className="board-listing-card__expand">
-          {post.photoUrls?.length ? (
+          {post.photoUrls?.slice(skipLeadPhoto ? 1 : 0).length ? (
             <div className="gifting-photo-gallery" aria-label={`${post.photoUrls.length} listing photos`}>
-              {post.photoUrls.map((url, index) => (
-                <img key={`${url}-${index}`} src={url} alt={`${post.title}, photo ${index + 1} of ${post.photoUrls.length}`} />
+              {post.photoUrls.slice(skipLeadPhoto ? 1 : 0).map((url, index) => (
+                <img key={`${url}-${index}`} src={url} alt={`${post.title}, photo ${index + 1 + (skipLeadPhoto ? 1 : 0)} of ${post.photoUrls.length}`} />
               ))}
             </div>
           ) : null}

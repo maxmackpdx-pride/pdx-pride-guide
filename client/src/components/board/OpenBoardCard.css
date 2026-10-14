@@ -168,3 +168,29 @@
 .ab-open-card--gigz .gig-talent-card__actions { margin-bottom:var(--space-5); }
 .ab-open-card--gigz .gig-talent-card__actions button { letter-spacing:normal; text-transform:none; }
 .ab-open-card--gigz .gig-talent-card__rate { margin-block:0 var(--space-4); font:var(--open-card-body-font); color:var(--text-hi); }
+
+/* Giftz and Sellz share Gigz's clear art/body hierarchy without duplicating photos. */
+.ab-open-card--listing .ab-open-card__art {position:relative;height:clamp(200px,44vw,290px);overflow:hidden;border-radius:var(--event-card-radius) var(--event-card-radius) 0 0;}
+.ab-open-card--listing .ab-open-card__art>.ab-art {width:100%;height:100%;}
+.ab-open-card--listing .ab-art__brand {inset:50% auto auto 50%;translate:-50% -50%;width:min(65%,300px);height:80px;}
+.ab-open-card__photo {display:block;width:100%;height:100%;object-fit:contain;background:var(--z-black);mask-image:linear-gradient(var(--z-black) 75%,transparent);-webkit-mask-image:linear-gradient(var(--z-black) 75%,transparent);}
+.board-post-overlay.ab-open-card .ab-open-card__chrome>.detail-actions {position:absolute;top:var(--space-3);right:var(--space-3);width:auto;min-height:44px;margin:0;padding:0;background:transparent;}
+.ab-open-card--listing :is(.board-listing-card__thumb,.board-listing-card>.board-glass-motif,.board-listing-card__cta,.sellz-card__summary,.sellz-card__open) {display:none;}
+.ab-open-card--listing .board-listing-card__row {display:block;}
+.ab-open-card--listing .board-listing-card__main {min-height:0;padding:var(--space-5) 6% var(--space-3);border:0!important;}
+.ab-open-card--listing .board-listing-card__expand {padding:0 6% var(--space-6);margin:0;}
+.ab-open-card--listing .sellz-card__price {font:var(--open-card-heading-font);color:var(--text-hi);margin-block:var(--space-3);}
+.ab-open-card--listing :is(.gifting-listing-actions,.gifting-response,.gifting-owner-actions,.sellz-edit-form,.board-listing-card__expand) :is(button.pdxBtn,a.pdxBtn,button) {border:var(--bw-hair) solid color-mix(in srgb,var(--c) 45%,transparent);border-radius:var(--radius-panel);padding:var(--space-3) var(--space-4);color:var(--text-hi);background:var(--btn-glow-bg);box-shadow:var(--btn-glow-shadow);text-decoration:none;}
+.ab-open-card--listing .gifting-response>button {background:var(--c);color:var(--z-black);}
+.ab-open-card--listing :is(textarea,input,select) {border:var(--bw-hair) solid var(--panel-border-2);border-radius:var(--radius-panel);background:var(--panel-card);color:var(--text-hi);padding:var(--space-3);}
+.ab-open-card--listing .gifting-listing-actions {margin-block:var(--space-5);flex-wrap:wrap;}
+.ab-open-card--listing .gifting-photo-gallery {gap:var(--space-3);margin-block:var(--space-4);}
+.ab-open-card--listing .gifting-photo-gallery:has(>img:only-child) {grid-template-columns:minmax(0,1fr);}
+.ab-open-card .board-demo-notice {background:transparent;border:0;margin:var(--space-3) 6%;padding:0;}
+
+.ab-open-card--listing .sellz-card .board-listing-card__footer {display:none;}
+
+.ab-open-card:is(.ab-open-card--available,.ab-open-card--iso)::before {content:"";position:absolute;inset:0 auto 0 0;width:3px;z-index:5;pointer-events:none;background:var(--c);mask:repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px);-webkit-mask:repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px);}
+/* Keep the floating close target clear of text in every open-room variant. */
+.ab-open-card.board-open-readable--housing>.board-demo-notice {margin-top:calc(44px + var(--space-6))!important;}
+.ab-open-card.board-open-readable--mizzed>.board-detail-modal__meta {margin-top:calc(44px + var(--space-6))!important;}

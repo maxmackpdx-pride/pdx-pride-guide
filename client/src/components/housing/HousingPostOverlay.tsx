@@ -1,3 +1,4 @@
+import "@/components/board/BoardOpenReadability.css";
 import DetailActions from "@/components/DetailActions";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
@@ -213,9 +214,9 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
 
   return createPortal(
     <div className="board-detail-backdrop" onClick={requestClose}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} My Hoüz ${detail ? "details" : "card"}`} tabIndex={-1} className={`hz pdx-glass-rebind board-open-card--shared${presentation ? " ab-open-card ab-open-card--housing" : ""}`} style={panelStyle} onClick={(event) => event.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} My Hoüz ${detail ? "details" : "card"}`} tabIndex={-1} className={`hz pdx-glass-rebind board-open-card--shared board-open-readable board-open-readable--housing${presentation ? " ab-open-card ab-open-card--housing" : ""}`} style={panelStyle} onClick={(event) => event.stopPropagation()}>
         <span className="board-open-card__rule" aria-hidden="true" />
-        <div style={{ position: "relative", zIndex: 30, padding: 12 }}><DetailActions label="My Hoüz listing" onClose={requestClose} /></div>
+        <div className="board-open-readable__close"><DetailActions label="My Hoüz listing" onClose={requestClose} /></div>
         {post.isDemo && <p className="board-demo-notice" role="note">Demo listing — example only. Participation is disabled.</p>}
         <fieldset disabled={post.isDemo} onClickCapture={event => { if (post.isDemo) { event.preventDefault(); event.stopPropagation(); } }} onKeyDownCapture={event => { if (post.isDemo && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); event.stopPropagation(); } }} style={{border:0,padding:0,margin:0,minWidth:0}}><div key={detail ? "detail" : "card"} className="houz-overlay-content">
           {detail ? <HousingDetail post={post} h={detailHandlers} isOwner={isOwner} workspace={post.type === "FORMING" ? <HousingWorkspace post={post} onOpenThread={() => openSheet({ view: "inbox" })} /> : undefined} /> : <HousingCard post={post} h={cardHandlers} />}

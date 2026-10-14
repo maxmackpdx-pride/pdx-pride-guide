@@ -448,3 +448,28 @@ html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--te
 }
 .ab-pinned-card--gigz .ab-card__type::after { background:linear-gradient(90deg,var(--ab-detail-accent),transparent); }
 .ab-pinned-card--gigz .ab-card__location svg { color:var(--ab-detail-accent); }
+/* Intent readability: dark Gigz purple remains the brand edge/art, while
+   Available for work and In search of read sharply on the glass. */
+.ab-card:is(.ab-card--available,.ab-card--iso) .ab-card__type {
+  color: var(--text-hi);
+  text-shadow: none;
+}
+/* Same left intent stitch as housing, without changing the card boundary. */
+.ab-card:is(.ab-card--available,.ab-card--iso)::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(to bottom,var(--day-thu),var(--ab-accent,var(--c)) 18%,var(--ab-accent,var(--c)) 82%,var(--day-thu));
+  mask: repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px);
+  -webkit-mask: repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px);
+}
+.ab-card:is(.ab-card--available,.ab-card--iso) .ab-card__status > .ab-demo-badge,
+.ab-card:is(.ab-card--available,.ab-card--iso) .ab-card__eyebrow > .ab-demo-badge {
+  color: var(--text-hi);
+  background: var(--z-black);
+  border-color: color-mix(in srgb,var(--c) 55%,var(--text-hi));
+  font-weight: var(--fw-bold);
+}
