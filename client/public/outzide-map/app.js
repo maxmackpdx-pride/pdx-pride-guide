@@ -45,17 +45,13 @@ const icons={winter:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9
 const icon=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[k]}</svg>`;
 const filterStorageKey='outzide.filters.v1';
 const savedFilters=(()=>{try{const value=JSON.parse(localStorage.getItem(filterStorageKey)||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}catch{return {}}})();
-function saveFilters(){try{localStorage.setItem(filterStorageKey,JSON.stringify({region:state.region,kind:state.kind,browseRegion:state.browseRegion,activities:state.activities,query:state.query,fireVisible}))}catch{/* Storage may be unavailable; filters still work for this visit. */}}
+function saveFilters(){try{localStorage.setItem(filterStorageKey,JSON.stringify({fireVisible}))}catch{/* Storage may be unavailable; filters still work for this visit. */}}
 let mapActivity,markerLayout;
 let cancelLocation=()=>{};
 function stopLocation(){cancelLocation();cancelLocation=()=>{};}
 const mapWorkVisible=()=>!document.hidden&&(cardEmbed||mapActivity?.visible!==false);
 let state={region:'all',kind:'all',browseRegion:null,activities:[],query:'',selected:null,tab:'overview',view:'map',origin:null,hiddenKinds:new Set()},map,tiles,markers=[],routeLayers=[],places=[],details={},routes={type:'FeatureCollection',features:[]},metadata,materials,canvas,ctx,userMarker,originatingElement=null;
-if(['all','OR','WA'].includes(savedFilters.region))state.region=savedFilters.region;
-if(['all',...Object.keys(kinds)].includes(savedFilters.kind))state.kind=savedFilters.kind;
-if(typeof savedFilters.query==='string')state.query=savedFilters.query.slice(0,500);
-if(browseRegions.some(r=>r.id===savedFilters.browseRegion))state.browseRegion=savedFilters.browseRegion;
-if(Array.isArray(savedFilters.activities))state.activities=[...new Set(savedFilters.activities.filter(k=>Object.hasOwn(kinds,k)))];
+// Every visit starts with all destinations; only the fire overlay preference persists.
 $('#search').value=state.query;
 setView(state.view);
 const fireHologram=createFireHologram(),springSteam=createHotSpringSteam();
