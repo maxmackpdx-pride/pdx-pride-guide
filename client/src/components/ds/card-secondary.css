@@ -22,7 +22,7 @@ html[data-zaylist-cards] :is(
   .hz-card, .home-world, .today-location, .hub-feed-card, .sc-card,
   .install-app-card, .eb-panel, .room-doorways__door,
   .event-modal__glass-panel, .event-modal__tab-panel,
-  .place-modal-panel__community-room, .ab-card, .ab-door
+  .place-modal-panel__community-room, .ab-card
 ) {
   --card-secondary-override: initial;
   --card-secondary: var(--card-secondary-override, var(--neon-orange));
@@ -66,7 +66,7 @@ html[data-zaylist-cards] :is(
   .hz-card, .home-world, .today-location, .hub-feed-card, .sc-card,
   .install-app-card, .eb-panel, .room-doorways__door,
   .event-modal__glass-panel, .event-modal__tab-panel,
-  .place-modal-panel__community-room, .ab-card, .ab-door
+  .place-modal-panel__community-room, .ab-card
 ) {
     --card-secondary: var(--card-secondary-override, hsl(from var(--c, var(--neon-cyan)) calc(h + 180) 88% 72%));
   }
@@ -94,7 +94,7 @@ html[data-zaylist-cards] :is(
   .hz-card, .home-world, .today-location, .hub-feed-card, .sc-card,
   .install-app-card, .eb-panel, .room-doorways__door,
   .event-modal__glass-panel, .event-modal__tab-panel,
-  .place-modal-panel__community-room, .ab-card, .ab-door
+  .place-modal-panel__community-room, .ab-card
 ) {
   border-right-color: var(--card-pair-edge) !important;
   border-bottom-color: var(--card-pair-edge) !important;
@@ -117,7 +117,7 @@ html[data-zaylist-cards] .about-mission-card--magenta.pdx-glass-rebind { --c: va
 html[data-zaylist-cards] .about-mission-card--orange.pdx-glass-rebind { --c: var(--neon-orange); }
 html[data-zaylist-cards] .about-mission-card--cyan.pdx-glass-rebind { --c: var(--neon-cyan); }
 /* Some older cards used only box-shadow for focus. Keep that cue explicit. */
-html[data-zaylist-cards] :is(.sch-event-card, .schedule-event-card, .card, .pdxBoard, .pdxRow, .pdxPlace, .board-listing-card, .room-doorways__door, .ab-card, .ab-door):focus-visible {
+html[data-zaylist-cards] :is(.sch-event-card, .schedule-event-card, .card, .pdxBoard, .pdxRow, .pdxPlace, .board-listing-card, .room-doorways__door, .ab-card):focus-visible {
   outline: 3px solid var(--c, var(--neon-cyan));
   outline-offset: 3px;
 }
@@ -177,13 +177,12 @@ html[data-zaylist-cards] .room-doorways__door .room-doorways__go {
 }
 
 /* Wide cards use their category hue, never the fixed pink/cyan flare texture. */
-html[data-zaylist-cards] :is(.ab-card, .ab-door) {
+html[data-zaylist-cards] :is(.ab-card) {
   background: var(--glass-card-bg);
 }
 html[data-zaylist-cards] .ab-art__symbol { color: var(--c); }
-html[data-zaylist-cards] .ab-door > small { color: var(--text-body); }
 /* Remove rainbow seams from category cards; logos retain their original art. */
-html[data-zaylist-cards] :is(.pdxPlace, .ab-card, .ab-door, .board-listing-card, .board-spotted-card, .spotted-card, .mp-board-card) .pdx-refract-seam {
+html[data-zaylist-cards] :is(.pdxPlace, .ab-card, .board-listing-card, .board-spotted-card, .spotted-card, .mp-board-card) .pdx-refract-seam {
   background: linear-gradient(90deg, transparent, var(--c) 25%, var(--c) 75%, transparent) !important;
   animation: none !important;
 }
@@ -209,7 +208,7 @@ html[data-zaylist-cards] :is(.pdxPlace, .ab-card, .ab-door, .board-listing-card,
   .hz-card, .home-world, .today-location, .hub-feed-card, .sc-card,
   .install-app-card, .eb-panel, .room-doorways__door,
   .event-modal__glass-panel, .event-modal__tab-panel,
-  .place-modal-panel__community-room, .ab-card, .ab-door
+  .place-modal-panel__community-room, .ab-card
 ) {
   --bloom-alpha: 0%;
   --card-pair-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 14%, transparent), inset -1px -1px 0 color-mix(in srgb, var(--c, var(--neon-cyan)) 30%, transparent);
@@ -235,6 +234,6 @@ html[data-zaylist-cards] :is(.pdxPlace, .ab-card, .ab-door, .board-listing-card,
   .hz-card, .home-world, .today-location, .hub-feed-card, .sc-card,
   .install-app-card, .eb-panel, .room-doorways__door,
   .event-modal__glass-panel, .event-modal__tab-panel,
-  .place-modal-panel__community-room, .ab-card, .ab-door
+  .place-modal-panel__community-room, .ab-card
 ) { --glass-card-bg: var(--panel-card); }
 }

@@ -4,6 +4,7 @@ import { followRoomForCategory } from "@/lib/boardFollowChoices";
 import RoomComposer from "@/components/board/RoomComposer";
 import "./Housing.css";
 import "@/components/board/UnifiedBoardTools.css";
+import BoardPushPin from "@/components/board/BoardPushPin";
 import UnifiedBoardArt from "@/components/board/UnifiedBoardArt";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import { housingFilterGroups, housingTagLabel } from "@shared/housingTags";
@@ -23,7 +24,6 @@ import {
 import { Link, useLocation, useSearch } from "wouter";
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import {
-  ArrowLeft,
   ArrowRight,
   Bookmark,
   MapPin,
@@ -33,7 +33,6 @@ import {
 import { SearchInput } from "@/components/ds";
 import { BrowseFilters } from "@/components/discovery/EventzBrowse";
 import BrowseStatus from "@/components/BrowseStatus";
-import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -177,7 +176,7 @@ export default function Boards() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const rawSelection = params.get("board");
-  const selection: Selection | null = rawSelection === "choose" ? null :
+  const selection: Selection =
     rawSelection === "all" || boardCategories.some((c) => c.id === rawSelection)
       ? (rawSelection as Selection)
       : "all";
@@ -261,14 +260,13 @@ export default function Boards() {
   });
   const relevant = activeFeeds.filter(
     (_, index) =>
-      !selection ||
       selection === "all" ||
       boardCategories[index].id === selection,
   );
   const loading = relevant.some((f) => f.isPending),
     failed = relevant.some((f) => f.isError);
   const categoryPosts = allPosts.filter(
-    (p) => !selection || selection === "all" || p.category === selection,
+    (p) => selection === "all" || p.category === selection,
   );
   const intents = Array.from(new Set(categoryPosts.map((p) => p.intent)));
   const results = filterBoardFeatures(categoryPosts.filter(
@@ -283,8 +281,8 @@ export default function Boards() {
   // A category doorway shows every matching post; the mixed feed loads progressively.
   const visibleResults = selectedCategory ? results : results.slice(0, limit);
   const clear = () => update({ q: null, intent: null, saved: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null }, true);
-  const select = (board: Selection | null) => {
-    update({ board:board ?? "choose", q: null, intent: null, saved: null, post: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null });
+  const select = (board: Selection) => {
+    update({ board, q: null, intent: null, saved: null, post: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null });
     window.scrollTo({ top: 0, behavior: "instant" });
   };
   const close = () => {
@@ -338,51 +336,6 @@ export default function Boards() {
         </div>
       </header>
       <div className="eb-frame">
-        {selection === null ? (
-          <section className="ab-entry" aria-labelledby="ab-entry-title">
-            <div className="ab-section-heading">
-              <h2 id="ab-entry-title">What brings you here?</h2>
-              <p>Pick a door. There’s a lot on the other side.</p>
-            </div>
-            <div className="ab-door-grid">
-              {boardCategories.map((cat, index) => (
-                <button
-                  type="button"
-                  key={cat.id}
-                  className="ab-door pdx-glass-rebind"
-                  onClick={() => select(cat.id)}
-                  style={{ "--c": cat.color } as CSSProperties}
-                  aria-label={`Explore ${cat.label}`}
-                >
-                  <ResourceCardMotif name={cat.label} category={cat.motif} />
-                  <img src={`/brand/family/${cat.logo}`} alt={cat.label} />
-                  <span>{cat.description}</span>
-                  <small>
-                    {feeds[index].isPending
-                      ? "Loading…"
-                      : feeds[index].isError
-                        ? "Open board"
-                        : `${allPosts.filter((p) => p.category === cat.id).length} posts`}
-                    <ArrowRight size={18} />
-                  </small>
-                </button>
-              ))}
-              <button
-                type="button"
-                className="ab-door ab-door--all pdx-glass-rebind"
-                onClick={() => select("all")}
-              >
-                <LayoutGrid size={36} />
-                <strong>View all</strong>
-                <span>A little bit of everything.</span>
-                <small>
-                  Explore all five boards <ArrowRight size={18} />
-                </small>
-              </button>
-            </div>
-          </section>
-        ) : (
-          <>
             <div className="ab-controls" ref={controlsRef}>
               <div
                 className="ab-category-dock"
@@ -450,15 +403,6 @@ export default function Boards() {
                 </button>
               </div>
               <div className="eb-browse-actions">
-                <button
-                  type="button"
-                  className="ab-back"
-                  onClick={() => select(null)}
-                >
-                  <ArrowLeft size={16} />
-                  Choose a category
-                </button>
-
                 <button type="button" className="eb-tool" aria-pressed={mineOnly} onClick={()=>user?update({mine:mineOnly?null:"1",saved:null},true):setShowAuth(true)} title="Edit your posts and manage active, pending, and completed listings">My posts</button>
                 <button type="button" className="eb-tool eb-view-all" aria-pressed={selection === "all"} onClick={() => select("all")}>
                   <LayoutGrid size={18} aria-hidden="true" />View all
@@ -573,11 +517,13 @@ export default function Boards() {
                     )!;
                     const isSaved = saved.has(post.key);
                     return (
-                      <article
+                      <div
                         key={post.key}
-                        className={`ab-card ab-card--${post.intent} pdx-glass-rebind`}
+                        className="ab-pinned-card"
                         style={{ "--c": cat.color } as CSSProperties}
                       >
+                        <BoardPushPin postKey={post.key} />
+                        <article className={`ab-card ab-card--${post.intent} pdx-glass-rebind`}>
                         <UnifiedBoardArt post={post} />
                         <div className="ab-card__body">
                           <div className="ab-card__eyebrow">
@@ -640,7 +586,8 @@ export default function Boards() {
                             </button>
                           </div>
                         </div>
-                      </article>
+                        </article>
+                      </div>
                     );
                   })}
                 </div>
@@ -678,7 +625,7 @@ export default function Boards() {
                           ? clear
                           : selectedCategory
                             ? postNew
-                            : () => select(null)
+                            : () => document.querySelector<HTMLButtonElement>(".ab-category")?.focus()
                       }
                     />
                   )}
@@ -693,8 +640,6 @@ export default function Boards() {
                 )}
               </section>
             </div>
-          </>
-        )}
       </div>
       <Suspense
         fallback={

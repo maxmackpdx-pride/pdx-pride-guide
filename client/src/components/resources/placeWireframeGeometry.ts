@@ -183,6 +183,24 @@ export function placeWireframe(form: string, density = 1, yaw = -.42): PlaceWire
   const cached = cache.get(cacheKey); if(cached) return cached;
   const d = new Drawing(density,yaw);
   switch(form) {
+    // Community boards share the Placez/Needz projected-volume treatment.
+    case 'boardParcel':
+      d.box([0,-15,0],[135,115,110]);
+      d.box([0,47,0],[145,14,120]);
+      d.box([0,-12,57],[18,130,3]);
+      d.torus([-24,73,0],25,5,tau,true); d.torus([24,73,0],25,5,tau,true);
+      break;
+    case 'boardTag':
+      d.box([0,-10,0],[110,145,12]);
+      d.torus([0,48,9],10,2,tau,true);
+      d.edge(t=>[30*Math.sin(t*Math.PI),65+60*t,8-24*t]);
+      break;
+    case 'boardMessages':
+      d.box([-25,25,-15],[120,80,18]);
+      d.box([35,-35,25],[120,80,18]);
+      d.line([-60,-15,-6],[-60,-38,-6]); d.line([-60,-38,-6],[-30,-15,-6]);
+      d.line([70,-75,34],[70,-98,34]); d.line([70,-98,34],[40,-75,34]);
+      break;
     case 'threadSpool':
       d.lathe(v => [29+5*Math.sin(v*Math.PI),-65+130*v],[0,0,0],12,12);
       d.lathe(v => [50*v,-65],[0,0,0],3,12); d.lathe(v => [50*v,65],[0,0,0],3,12);
