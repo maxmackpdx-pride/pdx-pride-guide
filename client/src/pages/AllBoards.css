@@ -10,16 +10,25 @@
   --ab-card-height-wide: 280px;
   --ab-card-height-compact: 280px;
 }
-.ab-page { 
-  min-height:calc(100dvh - 88px); 
-  background-color: var(--z-black);
-  background-image:
-    radial-gradient(ellipse 70% 50% at 25% 20%, rgba(40,40,40,0.28) 0%, transparent 52%),
-    radial-gradient(ellipse 55% 65% at 75% 80%, rgba(0,0,0,0.75) 0%, transparent 62%),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='cork'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23cork)' opacity='0.38'/%3E%3C/svg%3E");
-  background-size: 100% 100%, 100% 100%, 180px 180px;
-  background-blend-mode: multiply, multiply, multiply;
+/* Static cork is also the no-WebGL/context-loss fallback. */
+.eb-page.ab-page {
+  position:relative;
+  isolation:isolate;
+  min-height:calc(100dvh - 88px);
+  background:linear-gradient(rgba(0,0,0,.82),rgba(0,0,0,.82)), var(--z-black) url("/textures/board-cork.svg") repeat;
+  background-size:256px 256px;
 }
+.eb-page.ab-page::before { content:none; }
+.ab-page > .ab-cork-background {
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100dvh;
+  z-index:-1;
+  pointer-events:none;
+  opacity:0;
+}
+.ab-page > .ab-cork-background[data-ready="true"] { opacity:1; }
 .ab-header { display:flex; justify-content:space-between; align-items:center; gap:var(--space-6); padding-block:var(--space-8) calc(var(--space-8) - var(--space-1)); }
 .ab-header h1 { margin:0; font:var(--fw-black) var(--ab-hero-size)/var(--lh-display) var(--font-display); letter-spacing:var(--tracking-tight); }
 .ab-header h1 span { color:var(--neon-cyan); }
@@ -522,11 +531,4 @@ html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--te
  :is(.ab-page,.map-board-cards) .ab-card h3 { height:59.4px; min-height:59.4px; }
  :is(.ab-page,.map-board-cards) .ab-card__detail { height:32.48px; min-height:32.48px; }
  :is(.ab-page,.map-board-cards) .ab-card__location { height:29.96px; min-height:29.96px; }
-}
-
-/* A static cork surface behind pinned posts, with no effect on card geometry. */
-.ab-page::after {
- content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
- background:url("/textures/board-cork.svg") repeat; background-size:256px 256px;
- opacity:.48;
 }

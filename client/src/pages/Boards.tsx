@@ -55,6 +55,7 @@ import type { HousingPostView } from "@shared/housing";
 import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import "@/components/discovery/EventzBrowse.css";
 import "@/components/discovery/EventzDetail.css";
+import CorkBackground from "@/components/board/CorkBackground";
 import "./AllBoards.css";
 
 const BoardPostOverlay = lazy(
@@ -332,6 +333,7 @@ export default function Boards() {
         } as CSSProperties
       }
     >
+      <CorkBackground />
       <header className="eb-frame ab-header">
         <div>
           <p className="eb-kicker">Portland · Community boards</p>
