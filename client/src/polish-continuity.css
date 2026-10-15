@@ -5,7 +5,7 @@
 /* 1. Selection uses the platform cyan instead of the browser default. */
 ::selection {
   background: color-mix(in srgb, var(--neon-cyan) 32%, transparent);
-  color: var(--text-heading, #fff);
+  color: var(--text-heading);
 }
 
 /* 2. Text caret matches the focus ring color. */
