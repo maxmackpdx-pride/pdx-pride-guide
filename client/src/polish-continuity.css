@@ -1,0 +1,94 @@
+/* Fifteen small polish rules for site-wide continuity.
+   Every selector sits in :where() so specificity stays zero and any
+   component's own rule still wins. Tokens only, no new colors. */
+
+/* 1. Selection uses the platform cyan instead of the browser default. */
+::selection {
+  background: color-mix(in srgb, var(--neon-cyan, #00ffff) 32%, transparent);
+  color: #fff;
+}
+
+/* 2. Text caret matches the focus ring color. */
+:where(input, textarea, [contenteditable="true"]) {
+  caret-color: var(--focus-ring-color, var(--neon-cyan, #00ffff));
+}
+
+/* 3. No gray flash on tap for phone users. */
+:where(a, button, summary, label, [role="button"], [role="tab"]) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 4. In-page anchors land below the sticky header. */
+html {
+  scroll-padding-top: 88px;
+}
+
+/* 5. Short headings break evenly. */
+:where(h1, h2, h3) {
+  text-wrap: balance;
+}
+
+/* 6. Paragraphs avoid one-word last lines. */
+:where(p, li, figcaption, blockquote) {
+  text-wrap: pretty;
+}
+
+/* 7. Dates, times, and table figures line up. */
+:where(time, table, output) {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 8. Plain prose links get a calmer underline. */
+:where(p, li, dd) > a:not([class]) {
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+/* 9. Disabled controls read as disabled. */
+:where(button, input, select, textarea)[disabled],
+:where([role="button"])[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* 10. One shared hover and press timing for interactive color changes. */
+:where(a, button, [role="button"], [role="tab"]) {
+  transition-property: color, background-color, border-color, box-shadow, opacity;
+  transition-duration: var(--dur-fast, 150ms);
+  transition-timing-function: var(--ease-out, cubic-bezier(.2, .8, .2, 1));
+}
+
+/* 11. Remove the double-tap zoom delay on controls. */
+:where(a, button, input, select, textarea, summary, label, [role="button"], [role="tab"]) {
+  touch-action: manipulation;
+}
+
+/* 12. Placeholders are readable but clearly secondary. */
+:where(input, textarea)::placeholder {
+  color: color-mix(in srgb, currentColor 55%, transparent);
+  opacity: 1;
+}
+
+/* 13. 16px fields on phones so iOS does not zoom on focus. */
+@media (max-width: 640px) {
+  :where(input, select, textarea) {
+    font-size: max(16px, 1em);
+  }
+}
+
+/* 14. Disclosure summaries look clickable. */
+:where(summary) {
+  cursor: pointer;
+}
+
+/* 15. Text areas only grow vertically, never break the layout sideways. */
+:where(textarea) {
+  resize: vertical;
+  max-width: 100%;
+}
+
+/* Respect reduced motion for the shared transition. */
+@media (prefers-reduced-motion: reduce) {
+  :where(a, button, [role="button"], [role="tab"]) {
+    transition-duration: 0.01ms;
+  }
+}

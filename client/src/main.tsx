@@ -19,6 +19,7 @@ import "@/components/ds/adapters/listing-card.css";
 import "./fluent2-m3-cards.css";
 import "./components/nav.css";
 import "./section-consistency.css";
+import "./polish-continuity.css";
 import "@/components/ds/tokens/buttons.css";
 import "@/components/ds/card-secondary.css";
 import "@/components/CardInteractionMotion.css";
