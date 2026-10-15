@@ -217,3 +217,316 @@ html.calm-mode .ab-controls { backdrop-filter:none; background:transparent; }
 .ab-pin__needle { fill:var(--text-mid); stroke:var(--text-hi); stroke-width:.5; }
 .ab-pin__side { fill:color-mix(in srgb,var(--c) 25%,var(--z-black)); }
 .ab-pin__face { fill:color-mix(in srgb,var(--c) 65%,var(--z-black)); }
+.ab-pin__neck { fill:color-mix(in srgb,var(--c) 40%,var(--z-black)); }
+.ab-pin__cap-side { fill:color-mix(in srgb,var(--c) 55%,var(--z-black)); }
+.ab-pin__cap { fill:color-mix(in srgb,var(--c) 75%,var(--text-hi)); }
+.ab-pin__shine { fill:none; stroke:var(--text-hi); stroke-width:1; opacity:.7; }
+.ab-pin__wire { fill:none; stroke:var(--pin-wire-paint); stroke-width:.8; stroke-linejoin:round; animation:ab-pin-wire-glitch 6.7s steps(1,end) infinite; }
+.ab-pin__mesh { fill:none; opacity:.65; }
+.ab-pin__glitch { fill:none; stroke:var(--c); stroke-width:1; opacity:0; animation:ab-pin-scan-glitch 6.7s steps(1,end) infinite; }
+.ab-pin__glitch path + path { stroke:var(--text-hi); }
+.ab-pin--1 .ab-pin__hardware { rotate:12deg; }
+.ab-pin--2 .ab-pin__hardware { rotate:-18deg; scale:.94 1; }
+.ab-pin--3 .ab-pin__hardware { rotate:5deg; scale:1.08 .95; }
+.ab-pin--1 :is(.ab-pin__wire,.ab-pin__glitch) { animation-duration:8.1s; animation-delay:-2.3s; }
+.ab-pin--2 :is(.ab-pin__wire,.ab-pin__glitch) { animation-duration:7.3s; animation-delay:-4.7s; }
+.ab-pin--3 :is(.ab-pin__wire,.ab-pin__glitch) { animation-duration:9.2s; animation-delay:-1.1s; }
+.ab-pin--1 .ab-pin__mesh { stroke-dasharray:2 1; }
+.ab-pin--2 .ab-pin__cap-side { fill:transparent; stroke:currentColor; stroke-width:.7; }
+.ab-pin--3 .ab-pin__face { fill:color-mix(in srgb,var(--c) 25%,transparent); stroke:currentColor; stroke-width:.7; }
+/* Full solid/wireframe material swap has its own per-post clock, separate
+   from the existing wire jitter and scan-line offsets. */
+.ab-pin__solid { animation:ab-pin-material-solid var(--pin-material-cycle) steps(1,end) var(--pin-material-phase) infinite; }
+.ab-pin__surface-wire { fill:none; stroke:var(--pin-wire-paint); stroke-width:.8; stroke-linejoin:round; opacity:0; animation:ab-pin-material-wire var(--pin-material-cycle) steps(1,end) var(--pin-material-phase) infinite; }
+@keyframes ab-pin-material-solid {
+  0%, 63%, 81%, 100% { opacity:1; }
+  60%, 66% { opacity:0; }
+}
+@keyframes ab-pin-material-wire {
+  0%, 63%, 81%, 100% { opacity:0; }
+  60%, 66% { opacity:1; }
+}
+@keyframes ab-pin-wire-glitch {
+  0%, 89%, 94%, 100% { transform:translate(0); opacity:1; }
+  90% { transform:translate(1.5px,-.5px); opacity:.45; }
+  92% { transform:translate(-1px,.5px); opacity:.85; }
+}
+@keyframes ab-pin-scan-glitch {
+  0%, 89%, 94%, 100% { opacity:0; transform:translateX(0); }
+  90% { opacity:.7; transform:translateX(-2px); }
+  92% { opacity:.4; transform:translateX(2px); }
+}
+@media (hover:hover) and (pointer:fine) {
+  .ab-pinned-card:hover > .ab-card { animation:ab-pinned-sway 1.8s ease-in-out both; }
+  /* Controls stay still while being used. */
+  .ab-pinned-card:has(.ab-card__footer:hover) > .ab-card,
+  .ab-pinned-card:focus-within > .ab-card { animation:none; }
+}
+@keyframes ab-pinned-sway {
+  0%, 100% { rotate:0deg; }
+  20% { rotate:1.1deg; }
+  45% { rotate:-.85deg; }
+  68% { rotate:.5deg; }
+  85% { rotate:-.2deg; }
+}
+.ab-page .ab-card__footer { gap:var(--space-2); padding-top:var(--space-2); }
+.ab-page .ab-card__footer button {
+  min-height:var(--ab-target); padding:var(--space-2) var(--space-3);
+  border:var(--bw-hair) solid color-mix(in srgb,var(--c) 50%,transparent);
+  border-radius:var(--radius-panel); background:var(--btn-glow-bg); box-shadow:var(--btn-glow-shadow);
+}
+.ab-page .ab-card__footer button:hover:not(:disabled) { border-color:var(--c); background:color-mix(in srgb,var(--c) 14%,var(--z-black)); }
+.ab-page .ab-card__footer button:focus-visible { outline:2px solid var(--c); outline-offset:3px; }
+.ab-page .ab-card__footer button:disabled { cursor:not-allowed; }
+.ab-page .ab-card__footer .ab-save[aria-pressed=true] { border-color:var(--c); background:color-mix(in srgb,var(--c) 18%,var(--z-black)); }
+@media (prefers-reduced-motion:reduce) {
+  .ab-pinned-card > .ab-card, .ab-pinned-card:hover > .ab-card,
+  .ab-pin__wire, .ab-pin__glitch, .ab-pin__solid, .ab-pin__surface-wire { animation:none; }
+}
+:is(html.calm-mode,:root[data-calm="true"]) .ab-pinned-card > .ab-card,
+:is(html.calm-mode,:root[data-calm="true"]) .ab-pin__wire,
+:is(html.calm-mode,:root[data-calm="true"]) .ab-pin__glitch,
+:is(html.calm-mode,:root[data-calm="true"]) .ab-pin__solid,
+:is(html.calm-mode,:root[data-calm="true"]) .ab-pin__surface-wire { animation:none; }
+@media (max-width:600px) {
+  .ab-pinned-card { margin-top:16px; }
+  .ab-pin { width:30px; height:36px; left:calc(50% - 15px); top:-24px; }
+  .ab-page .ab-card__footer { gap:6px; flex-wrap:wrap; }
+  .ab-page .ab-card__footer button { flex:1 1 54px; padding:8px 6px; min-height:44px; }
+  .ab-page .ab-card__footer button svg { flex:none; }
+}
+/* Mesh, supporting volume, and main volume occupy distinct artwork planes. */
+.ab-motif { position:absolute; inset:0; width:100%; height:100%; color:var(--c); pointer-events:none; }
+.ab-motif__mesh { opacity:.27; stroke-width:.7; }
+.ab-motif__rear { opacity:.24; stroke-width:.6; }
+.ab-motif__grid { opacity:.72; stroke-width:.85; }
+.ab-motif__edge { stroke:color-mix(in srgb,var(--c) 72%,var(--text-hi)); opacity:.9; stroke-width:1.4; }
+.ab-motif__support { opacity:.64; }
+.ab-motif__main { filter:drop-shadow(0 2px 4px color-mix(in srgb,var(--c) 16%,transparent)); }
+.ab-art--forming .ab-motif__main { opacity:.35; }
+.ab-art--forming .ab-household { z-index:2; }
+@media (max-width:600px) {
+  .ab-art > .ab-motif { width:100%; height:145%; top:-30%; }
+  .ab-motif__mesh { opacity:.22; }
+  .ab-motif__support { opacity:.5; }
+}
+
+/* Full-card depth, with cropped objects beyond the frame like Eventz artwork. */
+.ab-card-motif { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; color:var(--c); opacity:.65; }
+.ab-card-motif__network { position:absolute; inset:-5%; width:110%; height:110%; animation:ab-network-drift 29s ease-in-out var(--ab-motif-phase) infinite alternate; }
+.ab-card-motif__mesh { opacity:.17; stroke-width:.6; }
+.ab-card-motif__links { opacity:.26; stroke-width:.8; }
+.ab-card-motif__nodes { opacity:.7; }
+.ab-card-motif__object { position:absolute; max-width:none; opacity:.45; animation:ab-object-drift 37s ease-in-out var(--ab-motif-phase) infinite alternate; }
+.ab-card-motif__object--main { right:-28%; bottom:-80%; width:105%; height:210%; }
+.ab-card-motif__object--support { left:10%; top:-100%; width:100%; height:230%; opacity:.3; animation-direction:alternate-reverse; }
+.ab-card > .ab-art { z-index:1; background:transparent; }
+.ab-card > .ab-card__body { position:relative; z-index:1; background:linear-gradient(90deg,color-mix(in srgb,var(--z-black) 54%,transparent),color-mix(in srgb,var(--z-black) 28%,transparent)); }
+.ab-card__bottom { margin-top:auto; flex:none; }
+.ab-card__bottom .ab-card__value { display:block; margin-top:0; }
+.ab-page .ab-card__location { height:1.4em; min-height:1.4em; line-height:1.4; flex:none; align-items:flex-start; }
+.ab-card__location > span { min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.ab-card__location > svg { margin-top:.2em; }
+.ab-card__bottom .ab-card__footer { margin-top:0; }
+@keyframes ab-network-drift { from { transform:translate(-1%,-1%); } to { transform:translate(1%,1%); } }
+@keyframes ab-object-drift { from { transform:translate(0,-2%) rotate(-2deg); } to { transform:translate(-2%,2%) rotate(2deg); } }
+@media(max-width:767px) {
+  .ab-page .ab-card__location { height:2.8em; min-height:2.8em; }
+  .ab-card__location > span { white-space:normal; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+  .ab-card-motif__object--main { right:-70%; bottom:-35%; width:200%; height:110%; }
+  .ab-card-motif__object--support { left:-55%; top:-40%; width:180%; height:130%; }
+}
+@media(prefers-reduced-motion:reduce) { .ab-card-motif__network,.ab-card-motif__object { animation:none; } }
+:is(html.calm-mode,:root[data-calm="true"]) :is(.ab-card-motif__network,.ab-card-motif__object) { animation:none; }
+/* The post type is an identity heading. Actual descriptive tags sit below it. */
+.ab-card__eyebrow{align-items:flex-start;gap:6px;margin-bottom:10px}
+.ab-card .ab-card__type{flex:1 1 100%;margin:0;padding:0 0 5px;border:0;border-radius:0;background:none;color:var(--c);font:800 clamp(22px,1.65vw,30px)/.98 var(--font-display);letter-spacing:.035em;text-transform:uppercase;text-shadow:1px 1px 0 color-mix(in srgb,var(--c) 25%,transparent)}
+.ab-card__type::after{content:"";display:block;width:38px;height:2px;margin-top:7px;background:linear-gradient(90deg,var(--c),transparent)}
+.ab-card__tags{display:flex;gap:4px;margin:0 0 8px;min-width:0;max-height:22px;overflow:hidden}
+.ab-card__tags span{white-space:nowrap;max-width:45%;overflow:hidden;text-overflow:ellipsis;padding:3px 5px;border:1px solid color-mix(in srgb,var(--c) 28%,transparent);border-radius:4px;color:var(--text-body);font:10px/1.2 var(--font-mono)}
+.ab-card__glass{position:absolute;inset:-2px;z-index:0;pointer-events:none;background:linear-gradient(118deg,color-mix(in srgb,var(--text-hi) 4%,transparent) 0%,color-mix(in srgb,var(--text-hi) 1%,transparent) 37%,transparent 58%,color-mix(in srgb,var(--c) 7%,transparent));backdrop-filter:blur(.4px);-webkit-backdrop-filter:blur(.4px);filter:blur(0)}
+@media(hover:hover) and (pointer:fine){
+ .ab-pinned-card:hover .ab-card__glass{animation:ab-glass-motion-blur 1.8s ease-in-out both}
+ .ab-pinned-card:has(.ab-card__footer:hover) .ab-card__glass,.ab-pinned-card:focus-within .ab-card__glass{animation:none}
+}
+@keyframes ab-glass-motion-blur{0%,100%{filter:blur(0);backdrop-filter:blur(.4px)}12%,33%{filter:blur(1.2px);backdrop-filter:blur(1.5px)}20%,45%,68%,85%{filter:blur(.2px);backdrop-filter:blur(.4px)}56%,76%{filter:blur(.6px);backdrop-filter:blur(.8px)}}
+@media(prefers-reduced-motion:reduce){.ab-pinned-card:hover .ab-card__glass{animation:none}}
+:is(html.calm-mode,:root[data-calm="true"]) .ab-pinned-card:hover .ab-card__glass{animation:none}
+@media(max-width:767px){.ab-card .ab-card__type{font-size:22px}.ab-card__eyebrow{margin-bottom:7px}.ab-card__tags{margin-bottom:6px}}
+
+.ab-card__tags{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;max-height:22px;flex:none}
+.ab-card__tags span{flex:none;max-width:none;overflow:visible;text-overflow:clip}
+.ab-card__eyebrow{min-height:48px;flex:none}
+.map-board-cards .ab-card__footer button{min-height:44px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--c) 50%,transparent);border-radius:10px;background:var(--btn-glow-bg)}
+.map-board-cards .ab-card__location{height:1.4em;min-height:1.4em;flex:none}
+@media(max-width:767px){.ab-pinned-card{display:flex;flex-direction:column}.ab-pinned-card>.ab-card{flex:1}.map-board-cards .ab-card{height:auto}.map-board-cards .ab-art{max-height:180px;aspect-ratio:auto}.map-board-cards .ab-card__location{height:2.8em;min-height:2.8em}}
+/* Boardz uses the day palette. Housing keeps a cyan shell with type-specific artwork. */
+:is(.ab-page,.map-board-cards,.board-pin-picker){--room-hauz:var(--day-thu);--room-gigz:var(--day-mon);--room-gigz-ink:var(--day-mon-text);--room-giftz:var(--day-wed);--room-sellz:var(--day-sat);--room-mizzed:var(--day-fri);--neon-cyan:var(--day-thu);--neon-violet:var(--day-mon);--neon-magenta:var(--day-fri);--neon-green:var(--day-sat);--neon-orange:var(--day-sun)}
+.ab-pinned-card :is(.ab-card-motif,.ab-motif){color:var(--ab-accent,var(--c))}
+.ab-pinned-card .ab-motif__edge{stroke:color-mix(in srgb,var(--ab-accent,var(--c)) 72%,var(--text-hi))}
+.ab-pinned-card .ab-motif__main{filter:drop-shadow(0 2px 4px color-mix(in srgb,var(--ab-accent,var(--c)) 16%,transparent))}
+.ab-pinned-card :is(.ab-pin__wire,.ab-pin__surface-wire){stroke:var(--pin-wire-paint)}
+.ab-pinned-card .ab-pin__glitch{stroke:var(--ab-accent,var(--c))}
+.ab-pinned-card .ab-pin__glitch path + path{stroke:var(--day-thu)}
+.ab-pinned-card--housing .ab-card{border-left:1px solid color-mix(in srgb,var(--day-thu) 42%,transparent)}
+.ab-card__intent-edge{position:absolute;z-index:4;pointer-events:none;inset:0 auto 0 0;width:3px;background:linear-gradient(to bottom,var(--day-thu),var(--ab-accent) 18%,var(--ab-accent) 82%,var(--day-thu));mask:repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px);-webkit-mask:repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px)}
+/* .ab-controls scrolls with the page now; ScrollDock carries the pinned chips. */
+.ab-pinned-card--gigz .ab-card__value{color:color-mix(in srgb,var(--day-mon-text) 45%,var(--text-hi))}
+
+/* Fixed reading slots keep short and long posts aligned at a compact height. */
+.ab-card > .ab-card__body { padding:var(--space-5) var(--space-3) var(--space-3); gap:var(--space-1); }
+.ab-card .ab-card__eyebrow { height:42px; min-height:42px; margin:0; overflow:hidden; }
+.ab-card .ab-card__type { padding:0; font:var(--fw-heavy) var(--title-sm)/1.05 var(--font-display); letter-spacing:var(--tracking-display); text-shadow:none; }
+.ab-card__type::after { width:var(--space-8); height:1px; margin-top:var(--space-1); }
+.ab-card .ab-card__tags { height:20px; min-height:20px; max-height:20px; margin:0; align-items:center; }
+.ab-card .ab-card__tags span { font:var(--event-card-tag-font); padding:2px var(--space-1); }
+:is(.ab-page,.map-board-cards) .ab-card h3 { height:2.2em; min-height:2.2em; margin:0; flex:none; font:var(--fw-heavy) var(--event-card-title-size)/1.1 var(--font-display); -webkit-line-clamp:2; }
+:is(.ab-page,.map-board-cards) .ab-card__detail { height:2.8em; min-height:2.8em; margin:0; flex:none; font:var(--event-card-detail-font); -webkit-line-clamp:2; }
+.ab-card__bottom { display:flex; flex-direction:column; gap:var(--space-1); }
+:is(.ab-page,.map-board-cards) .ab-card__bottom .ab-card__value { height:1.1em; min-height:1.1em; margin:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font:var(--fw-heavy) var(--event-card-title-size)/1.1 var(--font-display); }
+:is(.ab-page,.map-board-cards) .ab-card__location { margin:0; height:1.4em; min-height:1.4em; font:var(--event-card-meta-font); }
+.ab-card__status { position:absolute; z-index:4; left:var(--space-3); top:var(--space-3); max-width:calc(35% - var(--space-6)); display:flex; flex-wrap:wrap; gap:var(--space-1); pointer-events:none; }
+.ab-card__status > span { padding:var(--space-1) var(--space-2); border:var(--bw-hair) solid var(--panel-border); border-radius:var(--radius-md); background:var(--z-black); color:var(--text-body); font:var(--fw-bold) var(--meta-sm)/1.2 var(--font-body); letter-spacing:var(--tracking-normal); text-transform:uppercase; box-shadow:none; }
+@media(max-width:767px) {
+ .ab-card,.map-board-cards .ab-card { height:100%; }
+ .ab-card .ab-art,.map-board-cards .ab-art { height:auto; min-height:calc(var(--space-10) * 3); max-height:none; aspect-ratio:4/3; }
+ .ab-card > .ab-card__body { padding:var(--space-2); }
+ .ab-card .ab-card__eyebrow { height:42px; min-height:42px; }
+ :is(.ab-page,.map-board-cards) .ab-card h3 { height:3.3em; min-height:3.3em; -webkit-line-clamp:3; }
+ :is(.ab-page,.map-board-cards) .ab-card__location { height:2.8em; min-height:2.8em; }
+ .ab-card__status { max-width:calc(100% - var(--space-6)); }
+ .ab-art--unified .ab-household--clear { top:var(--space-8); padding:var(--space-1); gap:0; }
+ .ab-household--clear strong { font-size:var(--title-md); }
+ .ab-art--unified .ab-household--clear small { font:var(--event-card-meta-font); }
+ .ab-art--unified .ab-art__brand { bottom:var(--space-2); height:var(--space-6); }
+}
+
+html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--text-hi); stroke:currentColor; }
+
+.ab-card .ab-card__type,
+.ab-card h3 button { color:var(--text-hi); -webkit-text-stroke:.35px var(--z-black); paint-order:stroke fill; text-shadow:0 1px 2px color-mix(in srgb,var(--z-black) 70%,transparent); }
+
+.ab-category[data-board="gigz"][aria-pressed="false"] { color:color-mix(in srgb,var(--day-mon-text) 45%,var(--text-hi)); }
+
+@media(max-width:767px) {
+ .ab-page .ab-card__footer,.map-board-cards .ab-card__footer { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-1); }
+ .ab-page .ab-card__footer button,.map-board-cards .ab-card__footer button { padding:var(--space-2) var(--space-1); flex-wrap:nowrap; gap:2px; }
+}
+@media(max-width:360px) {
+ .ab-page .ab-card__footer button svg,.map-board-cards .ab-card__footer button svg { width:12px; height:12px; }
+}
+
+/* Housing money has a clear hierarchy; every card keeps the same value slot. */
+:is(.ab-page,.map-board-cards) .ab-card__bottom .ab-card__value { height:28px; min-height:28px; display:flex; align-items:baseline; gap:var(--space-1); }
+:is(.ab-page,.map-board-cards) .ab-pinned-card--housing .ab-card__bottom .ab-card__value { font-size:var(--title-lg); }
+.ab-card__value-label { color:var(--text-body); font:var(--fw-semibold) var(--meta-sm)/1.2 var(--font-body); text-transform:none; }
+@media(min-width:768px) {
+ :is(.ab-page,.map-board-cards) .ab-card__detail { height:1.4em; min-height:1.4em; -webkit-line-clamp:1; }
+}
+@media(max-width:767px) {
+ :is(.ab-page,.map-board-cards) .ab-pinned-card--housing .ab-card__bottom .ab-card__value { font-size:var(--title-md); }
+}
+
+.ab-card__value-amount { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.ab-card__value-label { flex:none; }
+
+/* Keep the category lettering crisp against its neon accent. */
+.ab-category { -webkit-text-stroke:.35px var(--z-black); paint-order:stroke fill; }
+
+/* Board cards open across their surface; the only footer action is the heart. */
+.ab-card { cursor:pointer; }
+:is(.ab-page,.map-board-cards) .ab-card__footer { display:flex; justify-content:flex-end; }
+:is(.ab-page,.map-board-cards) .ab-card__footer .ab-save {
+ flex:0 0 44px; width:44px; height:44px; min-width:44px; min-height:44px; padding:0;
+ border-radius:50%; border:1.5px solid color-mix(in srgb,var(--c) 70%,transparent);
+ background:color-mix(in srgb,var(--z-black) 84%,transparent); color:var(--text-hi);
+ box-shadow:0 0 0 2px var(--z-black);
+}
+:is(.ab-page,.map-board-cards) .ab-card__footer .ab-save svg { width:18px; height:18px; }
+:is(.ab-page,.map-board-cards) .ab-card__footer .ab-save[aria-pressed=true] {
+ background:var(--neon-magenta); border-color:var(--neon-magenta); color:var(--text-hi);
+}
+
+/* Violet's existing complementary token accents details, never the Gigz shell. */
+.ab-pinned-card--gigz { --ab-detail-accent:var(--neon-yellow); }
+.ab-pinned-card--gigz .ab-card__tags span {
+ color:var(--ab-detail-accent);
+ border-color:color-mix(in srgb,var(--ab-detail-accent) 42%,transparent);
+ background:color-mix(in srgb,var(--ab-detail-accent) 7%,var(--z-black));
+}
+.ab-pinned-card--gigz .ab-card__type::after { background:linear-gradient(90deg,var(--ab-detail-accent),transparent); }
+.ab-pinned-card--gigz .ab-card__location svg { color:var(--ab-detail-accent); }
+/* Intent readability: dark Gigz purple remains the brand edge/art, while
+   Available for work and In search of read sharply on the glass. */
+.ab-card:is(.ab-card--available,.ab-card--iso) .ab-card__type {
+  color: var(--text-hi);
+  text-shadow: none;
+}
+/* Same left intent stitch as housing, without changing the card boundary. */
+.ab-card:is(.ab-card--available,.ab-card--iso)::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(to bottom,var(--day-thu),var(--ab-accent,var(--c)) 18%,var(--ab-accent,var(--c)) 82%,var(--day-thu));
+  mask: repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px);
+  -webkit-mask: repeating-linear-gradient(to bottom,var(--z-black) 0 9px,transparent 9px 15px);
+}
+.ab-card:is(.ab-card--available,.ab-card--iso) .ab-card__status > .ab-demo-badge,
+.ab-card:is(.ab-card--available,.ab-card--iso) .ab-card__eyebrow > .ab-demo-badge {
+  color: var(--text-hi);
+  background: var(--z-black);
+  border-color: color-mix(in srgb,var(--c) 55%,var(--text-hi));
+  font-weight: var(--fw-bold);
+}
+
+/* Heart-only controls share one centered slot on BoardZ and Mapz cards. */
+:is(.ab-page,.map-board-cards) .ab-card__footer .ab-save {
+ display:grid; place-items:center; gap:0; line-height:0;
+}
+:is(.ab-page,.map-board-cards) .ab-card__footer .ab-save svg {
+ display:block; flex:none; margin:0; padding:0;
+ transform:translateY(-.375px);
+}
+
+/* Keep the existing reading-slot geometry while making each text role legible.
+   Explicit slot sizes prevent shared type changes from growing mobile cards. */
+.ab-card .ab-card__tags span {
+ font:var(--fw-semibold) 12px/1.3 var(--font-mono);
+ letter-spacing:0;
+}
+:is(.ab-page,.map-board-cards) .ab-card h3 {
+ height:39.6px; min-height:39.6px;
+ font:var(--fw-heavy) 20px/19.8px var(--font-display);
+ overflow-wrap:anywhere;
+}
+:is(.ab-page,.map-board-cards) .ab-card__detail {
+ height:16.24px; min-height:16.24px;
+ font:var(--fw-semibold) 13px/16.24px var(--font-body);
+}
+:is(.ab-page,.map-board-cards) .ab-card__location {
+ height:14.98px; min-height:14.98px;
+ font:var(--fw-regular) 13px/14.98px var(--font-body);
+}
+:is(.ab-page,.map-board-cards) .ab-card__bottom .ab-card__value {
+ font:var(--fw-heavy) 20px/1.1 var(--font-display);
+}
+.ab-card__value-label {
+ font:var(--fw-semibold) 12px/1.2 var(--font-body);
+ min-width:0; flex:0 1 auto; overflow:hidden; text-overflow:ellipsis;
+}
+.ab-card__value-amount { flex-shrink:0; max-width:65%; }
+@media(max-width:767px) {
+ :is(.ab-page,.map-board-cards) .ab-card h3 { height:59.4px; min-height:59.4px; }
+ :is(.ab-page,.map-board-cards) .ab-card__detail { height:32.48px; min-height:32.48px; }
+ :is(.ab-page,.map-board-cards) .ab-card__location { height:29.96px; min-height:29.96px; }
+}
+
+/* A static cork surface behind pinned posts, with no effect on card geometry. */
+.ab-page::after {
+ content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+ background:url("/textures/board-cork.svg") repeat; background-size:256px 256px;
+ opacity:.48;
+}
