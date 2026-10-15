@@ -1,6 +1,6 @@
 /* Room colors are brand identity. Do not replace them with intent colors.
    Shared tokens govern color, type, spacing, chrome, focus and motion; only the
-   desktop wide cards and mobile poster cards belong to this page. */
+   horizontal board cards belong to this page. */
 :root {
   --ab-target: 44px;
   --ab-hero-size: clamp(52px,6vw,78px);
@@ -531,4 +531,16 @@ html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--te
  :is(.ab-page,.map-board-cards) .ab-card h3 { height:59.4px; min-height:59.4px; }
  :is(.ab-page,.map-board-cards) .ab-card__detail { height:32.48px; min-height:32.48px; }
  :is(.ab-page,.map-board-cards) .ab-card__location { height:29.96px; min-height:29.96px; }
+}
+
+/* BoardZ keeps its horizontal card composition on phones. */
+@media(max-width:767px) {
+ .ab-page .ab-card-grid { grid-template-columns:minmax(0,1fr); gap:var(--space-4); align-items:start; }
+ .ab-page .ab-pinned-card > .ab-card { display:grid; grid-template-columns:34% minmax(0,1fr); height:var(--ab-card-height-compact); flex:none; }
+ .ab-page .ab-card > .ab-art { height:100%; min-height:0; max-height:none; aspect-ratio:auto; }
+ .ab-page .ab-card h3 { height:39.6px; min-height:39.6px; -webkit-line-clamp:2; }
+ .ab-page .ab-card__detail { height:16.24px; min-height:16.24px; -webkit-line-clamp:1; }
+ .ab-page .ab-card__status { max-width:calc(34% - var(--space-6)); }
+ .ab-page .ab-card-motif__object--main { right:-28%; bottom:-80%; width:105%; height:210%; }
+ .ab-page .ab-card-motif__object--support { left:10%; top:-100%; width:100%; height:230%; }
 }
