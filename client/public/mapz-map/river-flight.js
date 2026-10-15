@@ -887,7 +887,7 @@ function renderHologramLabels(labels){
     item.appendChild(brand);
    }
    const title=document.createElement('span');title.className='standalone-hologram-title';
-   const fitted=labelRows(label.name,label.cardHeight?label.width-14:label.width,label.kind==='housing'?2:undefined,label.cardHeight?64/(label.width-14):.52,Boolean(label.cardHeight));
+   const fitted=labelRows(label.name,label.cardHeight?label.width-14:label.width,label.kind==='housing'?2:undefined,label.cardHeight?54/(label.width-14):.52,Boolean(label.cardHeight));
    fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
    if(label.kind!=='housing'){
     const footer=document.createElement('span');footer.className='event-hologram-footer';
