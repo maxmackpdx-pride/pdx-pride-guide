@@ -4,13 +4,13 @@
 
 /* 1. Selection uses the platform cyan instead of the browser default. */
 ::selection {
-  background: color-mix(in srgb, var(--neon-cyan, #00ffff) 32%, transparent);
-  color: #fff;
+  background: color-mix(in srgb, var(--neon-cyan) 32%, transparent);
+  color: var(--text-heading, #fff);
 }
 
 /* 2. Text caret matches the focus ring color. */
 :where(input, textarea, [contenteditable="true"]) {
-  caret-color: var(--focus-ring-color, var(--neon-cyan, #00ffff));
+  caret-color: var(--focus-ring-color, var(--neon-cyan));
 }
 
 /* 3. No gray flash on tap for phone users. */
