@@ -1,7 +1,8 @@
+import {EVENT_CLOCK_HEIGHT} from './event-hologram-model.js';
 // Keep selected titles first; unselected events remain available as map pins.
 export function visibleHologramLabels(labels, selectedKey, width, height, retained = new Set(), margin = 0) {
   const overlap = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
-  const titleBox = label => label.cardHeight ? {left:label.left-4,right:label.right+4,top:label.top-4,bottom:label.bottom+4} : ({left: label.x - label.width * label.scale / 2 - 6, right: label.x + label.width * label.scale / 2 + 6,
+  const titleBox = label => label.cardHeight ? {left:label.left-4,right:label.right+4,top:label.top-EVENT_CLOCK_HEIGHT*(label.scale??1)-4,bottom:label.bottom+4} : ({left: label.x - label.width * label.scale / 2 - 6, right: label.x + label.width * label.scale / 2 + 6,
     top: label.y - 4, bottom: label.y + (label.width * .52 + 16 + (label.countdown ? 16 : 0)) * label.scale + 4});
   const logos = labels.filter(label=>!label.cardHeight).map(label => ({key: label.key, left: label.x - label.logoWidth / 2 - 4, right: label.x + label.logoWidth / 2 + 4,
     top: label.logoY - label.logoHeight / 2 - 4, bottom: label.logoY + label.logoHeight / 2 + 4}));

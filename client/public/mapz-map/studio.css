@@ -122,3 +122,25 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 /* Hologram posters fill the card (crop, do not stretch) with the same TV scanlines over them. */
 .event-hologram-poster{object-fit:cover;object-position:center;}
 .standalone-hologram-label--event[data-artwork-face="poster"] .event-hologram-surface::before{z-index:2;}
+
+/* Raised countdown hardware: side notches remain free to dock other cards. */
+.standalone-hologram-label--event>.standalone-hologram-countdown{
+ position:absolute;bottom:100%;left:5px;right:5px;z-index:3;height:26px;
+ box-sizing:border-box;max-width:none;padding:2px 3px;gap:2px;
+ border:1px solid var(--projection-color);border-bottom-width:2px;border-radius:5px 5px 0 0;
+ background:#05090ef5;box-shadow:inset 0 0 0 2px #19232c;
+ text-shadow:0 0 5px color-mix(in srgb,var(--projection-color) 55%,transparent);
+}
+.standalone-hologram-label--event>.standalone-hologram-countdown::after{
+ content:"";position:absolute;left:8px;right:8px;bottom:-5px;height:4px;
+ border-inline:3px solid var(--projection-color);pointer-events:none;
+}
+.standalone-hologram-label--event>.standalone-hologram-countdown .event-countdown-number{font-size:17px;letter-spacing:-.08em;}
+.standalone-hologram-label--event>.standalone-hologram-countdown .event-countdown-unit{font-size:6px;}
+.standalone-hologram-label--event>.standalone-hologram-countdown .event-countdown-prefix{display:none;}
+.standalone-hologram-label--event>.standalone-hologram-countdown .event-countdown-separator{font-size:14px;}
+.standalone-hologram-label--event>.standalone-hologram-countdown .event-countdown-live{font-size:18px;letter-spacing:.12em;text-transform:uppercase;}
+/* Four-unit countdowns still fit the same docking module. */
+.standalone-hologram-countdown:has(.event-countdown-group ~ .event-countdown-group ~ .event-countdown-group ~ .event-countdown-group) .event-countdown-number{font-size:13px;}
+.standalone-hologram-countdown:has(.event-countdown-group ~ .event-countdown-group ~ .event-countdown-group ~ .event-countdown-group){gap:1px;padding-inline:1px;}
+.standalone-hologram-countdown:has(.event-countdown-group ~ .event-countdown-group ~ .event-countdown-group ~ .event-countdown-group) .event-countdown-separator{font-size:10px;}

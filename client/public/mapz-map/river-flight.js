@@ -1,5 +1,5 @@
 import {eventCardGeometry,appendEventCardFrame,updateEventCardGlitch,createAttachedEventBeam} from './event-hologram-card.js';
-import {EVENT_CARD_WIDTH,EVENT_CARD_HEIGHT} from './event-hologram-model.js';
+import {EVENT_CARD_WIDTH,EVENT_CARD_HEIGHT,EVENT_CLOCK_HEIGHT} from './event-hologram-model.js';
 import { groupBoardPins, drawBoardPin } from './board-pins.js';
 import {addLayers} from '../map-foundation/layers.js';
 import {captureCamera,readCameraParams} from '../map-foundation/camera.js';
@@ -9,7 +9,7 @@ import {eventCountdown,appendEventCountdown} from './event-countdown.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
 import { updateEventArtwork } from './event-card-artwork.js';
-import { smoothCardVisibility } from './event-card-motion.js';
+import { smoothCardVisibility,createEventCardLock } from './event-card-motion.js';
 import { visibleHologramLabels } from './label-visibility.js?v=20260925-venue-nights';
 import {faceStackHtml} from '../outzide-map/assets/community-ui.js?v=map-continuity-1';
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
@@ -415,6 +415,7 @@ function buildingGlitter(target,surfaces){
 
 const attachedEventBeam=createAttachedEventBeam();
 const hologramLayouts=new WeakMap();
+const eventCardLocks=new WeakMap();
 const logoSpacing=1.15;
 const hologramLiftScale=.7*TONIGHT_HEIGHT_MULTIPLIER*.8*1.15*1.35;
 const hologramArtworkScale=2.7;
@@ -422,7 +423,7 @@ const hologramLabelWidth=62;
 const logoFit=logo=>Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height);
 const eventArtworkScale=feature=>/\/icons\/event\.svg(?:[?#]|$)/.test(feature.properties.logo||'')?.38:1;
 function hologramBounds(feature,scale){
- if(feature.properties.kind==='event')return {halfWidth:(EVENT_CARD_WIDTH/2+5)*scale,halfHeight:(EVENT_CARD_HEIGHT/2+5)*scale};
+ if(feature.properties.kind==='event')return {halfWidth:(EVENT_CARD_WIDTH/2+5)*scale,halfHeight:((EVENT_CARD_HEIGHT+EVENT_CLOCK_HEIGHT)/2+5)*scale};
  const logo=venueLogos.get(feature.properties.logo);
  if(!logo)return {halfWidth:40*logoSpacing*scale,halfHeight:75*logoSpacing*scale};
  const fit=logoFit(logo)*hologramArtworkScale*eventArtworkScale(feature);
@@ -529,6 +530,9 @@ function drawLights(fade,target=map,surface=lights){
  noteSelectedWaypoint(selectedKey);
  const eventLabels=[];
  const cameraMoving=Boolean(target.isMoving?.());
+ const frameNow=performance.now();
+ let cardLock=eventCardLocks.get(target);if(!cardLock){cardLock=createEventCardLock();eventCardLocks.set(target,cardLock);}
+ const lockedKeys=cardLock.retained(frameNow,cameraMoving);
  const tonight=eventNight(viewTime);
  const activeTonight=feature=>(feature.properties.eventNight||feature.properties.eventDay)===tonight||feature.properties.demoOpen===true;
  const emergenceFor=feature=>feature.properties.key===selectedKey||activeTonight(feature)?1:reveal;
@@ -560,15 +564,14 @@ function drawLights(fade,target=map,surface=lights){
  // Ground effects first, then upright pins from farthest to nearest.
  const visibleFeatures=lightFeatures.filter(feature=>mizzedNotificationActive(feature.properties));
  const liveVenueKeys=new Set(visibleFeatures.filter(feature=>!feature.properties.attachmentOnly).map(feature=>feature.properties.venueWaypointKey));
- const ordered=visibleFeatures.filter(feature=>!feature.properties.attachmentOnly||liveVenueKeys.has(feature.properties.key)).map(feature=>({feature,p:target===map?featureProjection.project(feature):target.project(feature.geometry.coordinates)})).filter(({feature,p})=>p.x>=-420&&p.y>=-420&&p.x<=width+420&&p.y<=height+420*(feature.properties.isBar?feature.properties.heightScale:1)).sort((a,b)=>a.p.y-b.p.y);
+ const ordered=visibleFeatures.filter(feature=>!feature.properties.attachmentOnly||liveVenueKeys.has(feature.properties.key)).map(feature=>({feature,p:target===map?featureProjection.project(feature):target.project(feature.geometry.coordinates)})).filter(({feature,p})=>lockedKeys.has(feature.properties.key)||p.x>=-420&&p.y>=-420&&p.x<=width+420&&p.y<=height+420*(feature.properties.isBar?feature.properties.heightScale:1)).sort((a,b)=>a.p.y-b.p.y);
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
  const reveal=smoothRange(14.5,16.5,target.getZoom());
  // Every event in the active Portland night launches, including shared venues.
- const frameNow=performance.now();
  const liveBeaconKeys=new Set(ordered.filter(v=>v.feature.properties.kind==='event'&&(activeTonight(v.feature)||v.feature.properties.key===selectedKey)).map(v=>v.feature.properties.key));
  if(!reduced.matches)for(const key of lastBeaconKeys)if(!liveBeaconKeys.has(key)&&!folds.has(key))folds.set(key,frameNow+RISE_MS);
  lastBeaconKeys=liveBeaconKeys;
- const beacons=ordered.filter(v=>{const key=v.feature.properties.key;return (liveBeaconKeys.has(key)||folds.has(key)&&foldAmount(key,frameNow)>0)&&v.p.x>=-300&&v.p.x<=width+300&&v.p.y>=-300&&v.p.y<=height+300;});
+ const beacons=ordered.filter(v=>{const key=v.feature.properties.key;return (liveBeaconKeys.has(key)||folds.has(key)&&foldAmount(key,frameNow)>0)&&(lockedKeys.has(key)||v.p.x>=-300&&v.p.x<=width+300&&v.p.y>=-300&&v.p.y<=height+300);});
  beacons.sort((a,b)=>String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
  const expandedKeys=new Set(beacons.map(item=>item.feature.properties.key));
  const venueItems=new Map(ordered.filter(item=>item.feature.properties.kind==='place').map(item=>[item.feature.properties.key,item]));
@@ -647,7 +650,14 @@ function drawLights(fade,target=map,surface=lights){
   const position=boundedHologramPosition(item.p,{x:item.x,y:item.y+clearance+32*item.offset.scale},item.offset.scale,roofLift(target,item.feature,surfaces),skyCeiling);
   item.x=position.x;item.y=position.y-clearance-32*item.offset.scale;
  }
- if(!cameraMoving)separateHolograms(beacons,width,height);
+ if(!cameraMoving){
+  // Separate the combined clock/card footprint about its actual center, so the
+  // raised module reserves only its own height and neighboring pieces stay close.
+  for(const item of beacons)item.y-=EVENT_CLOCK_HEIGHT*item.offset.scale/2;
+  separateHolograms(beacons,width,height);
+  for(const item of beacons)item.y+=EVENT_CLOCK_HEIGHT*item.offset.scale/2;
+ }
+ cardLock.apply(beacons,frameNow,cameraMoving,reduced.matches);
  // Keep the pointer's temporary offset separate so it cannot accumulate into drift.
  for(const item of beacons){
   const x=item.x-item.p.x-item.offset.avoidX-item.offset.cameraX,y=item.y-item.p.y+item.hover-item.offset.avoidY-item.offset.cameraY;
@@ -664,7 +674,7 @@ function drawLights(fade,target=map,surface=lights){
  const eventCards=new Map(beacons.map(item=>{
   const {feature,p}=item,grow=Math.min(riseAmount(feature.properties.key,frameNow),foldAmount(feature.properties.key,frameNow));
   const card=eventCardGeometry(p.x+(item.x-p.x)*grow,p.y+(item.y-p.y)*grow,item.offset.scale*grow);
-  return [feature.properties.key,{...card,key:feature.properties.key,opacity:coreAlpha*grow}];
+  return [feature.properties.key,{...card,key:feature.properties.key,opacity:coreAlpha*grow,locked:Boolean(item.cardLocked)}];
  }));
  const retainedCards=new Set(beacons.filter(item=>item.offset.cardVisible).map(item=>item.feature.properties.key));
  const visibleEventCards=new Set(visibleHologramLabels([...eventCards.values()],selectedKey,width,height,retainedCards,120).map(card=>card.key));
@@ -773,7 +783,7 @@ function drawLights(fade,target=map,surface=lights){
     lightsContext.setTransform(dpr,0,0,dpr,0,0);
     const card=eventCards.get(feature.properties.key);
     // Near the screen edge, keep an event pin until there is room for its light.
-    const wanted=card&&visibleEventCards.has(feature.properties.key)&&card.bottom<beamAnchor.y-Math.max(12,24*card.scale);
+    const wanted=card&&(card.locked||visibleEventCards.has(feature.properties.key)&&card.bottom<beamAnchor.y-Math.max(12,24*card.scale));
     if(pass===0&&offset){
      offset.cardVisible=Boolean(wanted);
      offset.cardAlpha=smoothCardVisibility(offset.cardAlpha??0,wanted,motionDelta,reduced.matches);
@@ -788,9 +798,10 @@ function drawLights(fade,target=map,surface=lights){
      continue;
     }
     const projectionColor=eventProjectionColor(feature.properties);
+    const beamColor=venueItems.get(feature.properties.venueWaypointKey)?.feature.properties.color||feature.properties.venueAnchor?.color||color;
     if(pass===0){
      lightsContext.save();lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*(presence?.opacity??1)*bloomScale*cardAlpha;
-     attachedEventBeam.draw(lightsContext,card,beamAnchor,pulseTime,phase,reduced.matches,projectionColor);
+     attachedEventBeam.draw(lightsContext,card,beamAnchor,pulseTime,phase,reduced.matches,beamColor);
      lightsContext.restore();continue;
     }
     eventLabels.push({...card,projectionColor,avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,
@@ -881,7 +892,7 @@ function renderHologramLabels(labels){
    if(label.kind!=='housing'){
     const footer=document.createElement('span');footer.className='event-hologram-footer';
     if(label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=timeText;footer.appendChild(clock);}
-    if(label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';appendEventCountdown(countdown,label.countdown);footer.appendChild(countdown);}
+    if(label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';appendEventCountdown(countdown,label.countdown);(label.cardHeight?item:footer).appendChild(countdown);}
     item.appendChild(footer);
    }
 
@@ -892,7 +903,7 @@ function renderHologramLabels(labels){
   let stack=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='faces');
   if(label.avatars?.length){
    if(!stack){stack=document.createElement('span');stack.className='standalone-hologram-faces standalone-hologram-faces--anchored';stack.dataset.labelKey=label.key;stack.dataset.labelRole='faces';root.appendChild(stack);}
-   stack.style.left=`${label.x}px`;stack.style.top=`${label.cardHeight?label.top-10*label.scale:label.logoY-label.logoHeight/2-14*label.scale}px`;stack.style.opacity=label.opacity;stack.style.setProperty('--face-scale',label.scale);stack.style.setProperty('--face-size',`${Math.min(18,60/Math.max(1,label.avatars.length*.72+.28))}px`);
+   stack.style.left=`${label.x}px`;stack.style.top=`${label.cardHeight?label.top-(EVENT_CLOCK_HEIGHT+12)*label.scale:label.logoY-label.logoHeight/2-14*label.scale}px`;stack.style.opacity=label.opacity;stack.style.setProperty('--face-scale',label.scale);stack.style.setProperty('--face-size',`${Math.min(18,60/Math.max(1,label.avatars.length*.72+.28))}px`);
    const faceSignature=JSON.stringify([label.color,label.avatars,label.avatarTotal]);
    if(stack.dataset.signature!==faceSignature){stack.dataset.signature=faceSignature;stack.innerHTML=faceStackHtml(label.avatars.map(avatar=>({displayName:avatar.initial,photoUrl:avatar.url})),label.avatarTotal??label.avatars.length);}
   }else stack?.remove();
