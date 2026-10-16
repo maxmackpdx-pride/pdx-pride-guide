@@ -77,14 +77,7 @@ Staging environment `d10b5732-c324-46bc-b557-ac2cc626d4f0` was torn down on 2026
 Do not wake or recreate it, apply leftover Railway canvas creates, or attach the
 production `/data` volume to any preview environment.
 
-The canonical phone/Safari preview is a Railway Sandbox in the existing
-`pdx-pride-guide` project. Requests such as **stage this**, **show me on my phone**,
-**test in Safari**, or **give me a demo URL** authorize that temporary sandbox preview.
-Follow `.claude/skills/railway-sandbox-preview/SKILL.md` for that workflow.
-It replaces the old staging environment. It is not a hidden production path such as
-`/hauz-map-sandbox`, a zip, or a second always-on service.
-
-Every sandbox must have a public HTTPS URL, use no more than 2 GB, idle out after about
+When explicitly requested, a Railway sandbox must have a public HTTPS URL, use no more than 2 GB, idle out after about
 15 minutes, have no `/data` volume, and have no `zaylist.com` or `prideguidepdx.com`
 DNS. Destroy it when Tucker says done. Sandbox VMs cost about $50/GB-month while they
 exist, and workspace compute is already $45.12 of the $60 cap this cycle. Check current

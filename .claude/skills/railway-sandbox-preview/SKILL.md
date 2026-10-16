@@ -1,15 +1,15 @@
 ---
 name: railway-sandbox-preview
-description: Create and retire temporary Railway Sandbox previews for Zaylist when Tucker asks to stage work, test on a phone or Safari, or provide a demo URL. Do not use for production deployment or Railway outages.
+description: Create and retire temporary Railway Sandbox previews for Zaylist only when Tucker explicitly requests a Railway Sandbox. Do not use for production deployment or Railway outages.
 ---
 
 # Railway Sandbox Preview
 
 ## Purpose
 
-Use this skill when Tucker asks to **stage this**, test work on a phone or Safari, or
-provide a demo URL. The canonical remote preview is a temporary Railway Sandbox in the
-existing `pdx-pride-guide` project.
+Use this skill only when Tucker explicitly requests a Railway Sandbox. A request to
+stage work, test on a phone or Safari, or provide a demo URL does not select Railway
+as the preview host.
 
 This skill is not for production deployment or Railway outages. Use the separate
 `railway-break-glass` skill only when Railway is down, restricted, or otherwise meets

@@ -63,7 +63,7 @@ Therefore a failed custom GitHub Action does **not** by itself prove that produc
 7. **Do not describe Cloudflare as the mechanism for this fallback unless evidence shows Cloudflare performed the build/deploy.** The 2026-08-30 fallback was still a Railway deployment.
 8. **Do not remove the custom GitHub Action during the incident.** Decide which path to keep only after Railway billing/service health has been restored and both paths can be tested deliberately.
 9. **Never use `railway up` or a Railway Sandbox as production.** Production ships only by an approved push to `master`.
-10. **Do not use this skill for previews.** Phone testing, Safari testing, staging requests, and demo URLs use the separate `railway-sandbox-preview` skill. A Railway Sandbox is never a production or break-glass deployment target.
+10. **Do not use this skill for previews.** Use the separate `railway-sandbox-preview` skill only when Tucker explicitly requests a Railway Sandbox. A Railway Sandbox is never a production or break-glass deployment target.
 
 ## Break-glass procedure
 
