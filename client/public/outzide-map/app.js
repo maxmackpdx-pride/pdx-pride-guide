@@ -64,7 +64,8 @@ const bounds={OR:[[41.98,-124.65],[46.27,-116.45]],WA:[[45.5,-124.85],[49.03,-11
 // First-visit framing: Astoria to Madras, with a little room around both cities.
 const startingBounds=[[44.53,-123.94],[46.29,-121.03]];
 function fitRegion(viewBounds=bounds[state.region]){if(!map)return;map.fitBounds(viewBounds.map(p=>[p[1],p[0]]),{padding:window.innerWidth<761?{top:120,bottom:100,left:25,right:25}:{top:155,bottom:70,left:100,right:100},duration:0,pitch:35,bearing:0});$('#map-region').textContent=state.region==='OR'?'OREGON':state.region==='WA'?'WASHINGTON':'PACIFIC NORTHWEST'}
-function setView(view){state.view=view;$('.workspace').classList.toggle('view-map',view==='map');$('.workspace').classList.toggle('view-list',view==='list');$$('[data-view]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===view));if(view==='list')document.body.dataset.drawer='open';try{syncBrowseHandle()}catch{/* Drawer handle is created after the first view sync. */}requestAnimationFrame(()=>{if(map){map.resize();drawHolograms()}})}
+function publishView(){if(parent!==window)parent.postMessage({source:'outzide-map',type:'view-change',view:state.view},location.origin);}
+function setView(view){state.view=view;$('.workspace').classList.toggle('view-map',view==='map');$('.workspace').classList.toggle('view-list',view==='list');$$('[data-view]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===view));if(view==='list')document.body.dataset.drawer='open';try{syncBrowseHandle()}catch{/* Drawer handle is created after the first view sync. */}publishView();requestAnimationFrame(()=>{if(map){map.resize();drawHolograms()}})}
 function routeLine(p){if(p.routeMatch&&Number.isFinite(p.routeMiles))return esc(p.routeMiles)+' mi mapped';if(p.kind==='spring')return 'Soak';if(['stay','camp','watercamp','coastcamp'].includes(p.kind))return 'Overnight';if(p.kind==='trail')return 'Route distance not verified';return '';}
 function renderList(){saveFilters();$('#browse-area-label').textContent=state.browseRegion?(browseRegions.find(r=>r.id===state.browseRegion)?.name||'Selected area'):state.region==='OR'?'Oregon':state.region==='WA'?'Washington':'All Northwest';$$('[data-controls-tab][data-kind]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.kind===state.kind))); const shown=filtered();$('#result-count').textContent=`${shown.length} ${state.region==='all'?'':state.region==='OR'?'Oregon ':'Washington '}${shown.length===1?'destination':'destinations'}`;$('#reset-filters').hidden=!hasActiveOutzFilters(state);$('#beach-feature').hidden=true;
  $('#featured').innerHTML='';
@@ -416,4 +417,14 @@ browseHandle.onpointerdown=e=>{if(e.button!==0)return;browseStart=e.clientY;brow
 browseHandle.onpointerup=e=>{if(browseStart===null)return;const delta=e.clientY-browseStart;browseStart=null;browseDragged=Math.abs(delta)>12;if(delta>32)setView('map');else if(delta< -32)openResults();};
 browseHandle.onpointercancel=()=>{browseStart=null;browseDragged=true;};
 
-window.addEventListener('message',event=>{if(event.origin!==location.origin||event.data?.source!=='outzide-host'||event.data.type!=='hello')return;if(document.documentElement.dataset.mapPhase==='first-frame')parent.postMessage({source:'outzide-map',type:'map-ready'},location.origin);});
+window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==parent||event.data?.source!=='outzide-host')return;
+ if(event.data.type==='set-view'){
+  if(event.data.view==='list')openResults();
+  else if(event.data.view==='map')setMapControls(false);
+ }
+ if(event.data.type==='hello'){
+  publishView();
+  if(document.documentElement.dataset.mapPhase==='first-frame')parent.postMessage({source:'outzide-map',type:'map-ready'},location.origin);
+ }
+});

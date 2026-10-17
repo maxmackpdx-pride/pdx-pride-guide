@@ -28,6 +28,7 @@ export default function Outz() {
     imageAlt: "OutZide by Zaylist — Northwest mountain, river, rainbow trails and outdoor waypoints",
   });
   const frame = useRef<HTMLIFrameElement>(null);
+  const sheetOpen = useRef(false);
   const [mapReady, setMapReady] = useState(false);
   const [listReady, setListReady] = useState(false);
   const [restoreView] = useState<'map'|'list'>(() => {
@@ -37,7 +38,7 @@ export default function Outz() {
   useEffect(() => {
     if (!listReady || restoreView !== 'list') return;
     const timer = window.setTimeout(() => {
-      frame.current?.contentDocument?.querySelector<HTMLButtonElement>('button[data-view="list"]')?.click();
+      frame.current?.contentWindow?.postMessage({source:'outzide-host',type:'set-view',view:'list'},window.location.origin);
       window.dispatchEvent(new Event('resize'));
       frame.current?.contentWindow?.dispatchEvent(new Event('resize'));
     }, 80);
@@ -58,9 +59,16 @@ export default function Outz() {
   useEffect(()=>{
     const receive=(event:MessageEvent)=>{
       if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='outzide-map')return;
+      if(event.data.type==='view-change'&&(event.data.view==='list'||event.data.view==='map')){
+        const open=event.data.view==='list';
+        if(open!==sheetOpen.current){
+          sheetOpen.current=open;
+          window.dispatchEvent(new CustomEvent('zaylist:drawer',{detail:{open,keepCollapsedOnClose:true}}));
+        }
+      }
       if(event.data.type==='ready')publish();
       if(event.data.type==='list-ready')setListReady(true);
-      if(event.data.type==='map-ready'||event.data.type==='list-ready'&&restoreView==='list'){setMapReady(true);window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'outz'}}));}
+      if(event.data.type==='map-ready'||(event.data.type==='list-ready'&&restoreView==='list')){setMapReady(true);window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'outz'}}));}
       if(event.data.type==='browse-error')setMapSlow(true);
       if(event.data.type==='require-auth'){setRequested(true);publish();if(!loading&&!user)setShowAuth(true);}
     };
@@ -98,20 +106,8 @@ export default function Outz() {
         window.dispatchEvent(new CustomEvent("zaylist:outzide-scroll", { detail: { y } }));
       };
       doc.addEventListener("scroll", onScroll, { capture: true, passive: true });
-      const workspace = doc.querySelector(".workspace");
-      let sheetOpen = false;
-      const syncSheet = () => {
-        const open = Boolean(workspace?.classList.contains("view-list"));
-        if (open === sheetOpen) return;
-        sheetOpen = open;
-        window.dispatchEvent(new CustomEvent("zaylist:drawer", { detail: { open, keepCollapsedOnClose: true } }));
-      };
-      const observer = new MutationObserver(syncSheet);
-      if (workspace) observer.observe(workspace, { attributes: true, attributeFilter: ["class"] });
-      syncSheet();
       detachScroll = () => {
         doc.removeEventListener("scroll", onScroll, true);
-        observer.disconnect();
       };
       syncDock();
     };
@@ -124,6 +120,6 @@ export default function Outz() {
   return <><div className="outz-map-page" style={{ position: "relative" }}>
     <MapSwitch current="outz" />
     <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=20261013-forest-room&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (new URLSearchParams(window.location.search).get("mapOnly") === "1" ? "&mapOnly=1" : "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "") + (new URLSearchParams(window.location.search).get("wall") === "1" ? "&wall=1" : "") + (new URLSearchParams(window.location.search).get("restore") === "1" && !sharedId ? "&restore=1" : "") + "&" + new URLSearchParams(Array.from(new URLSearchParams(window.location.search)).filter(([key]) => ["lat","lng","zoom","pitch","bearing"].includes(key))).toString()} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} />
-    {!mapReady && !(listReady && restoreView === 'list') && <MapBootLoader map="outz" overlay error={mapSlow ? "Outzide is taking longer than expected." : undefined} onRetry={mapSlow ? retryMap : undefined} onBrowse={mapSlow && listReady ? () => {frame.current?.contentDocument?.querySelector<HTMLButtonElement>('button[data-view="list"]')?.click();setMapReady(true);} : undefined}/>}
+    {!mapReady && !(listReady && restoreView === 'list') && <MapBootLoader map="outz" overlay error={mapSlow ? "Outzide is taking longer than expected." : undefined} onRetry={mapSlow ? retryMap : undefined} onBrowse={mapSlow && listReady ? () => {frame.current?.contentWindow?.postMessage({source:'outzide-host',type:'set-view',view:'list'},window.location.origin);setMapReady(true);} : undefined}/>}
   </div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
 }
