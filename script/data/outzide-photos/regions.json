@@ -1,0 +1,532 @@
+{
+  "cape-lookout": {
+    "terrainExclude": [
+      [
+        [
+          0.54,
+          0.27
+        ],
+        [
+          1,
+          0.27
+        ],
+        [
+          1,
+          0.49
+        ],
+        [
+          0.79,
+          0.52
+        ],
+        [
+          0.57,
+          0.44
+        ]
+      ]
+    ],
+    "reason": "Visual review: distant headland is wooded; suppress all rainbow contours across it."
+  },
+  "bc-golden-ears": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    ],
+    "reason": "Fullsize review: all visible mountain land is densely forested; no rainbow terrain art appropriate."
+  },
+  "bc-buntzen": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    ],
+    "reason": "Fullsize review: wooded hills repeatedly mislabeled terrain; suppress rainbow art conservatively."
+  },
+  "boating-wa-lake-wenatchee-state-park-boating": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0.45
+        ],
+        [
+          0,
+          0.45
+        ]
+      ]
+    ],
+    "reason": "All upper hills forested; retain exposed foreground beach/driftwood contours."
+  },
+  "route-8594524": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0.5
+        ],
+        [
+          0,
+          0.5
+        ]
+      ]
+    ],
+    "reason": "Dense fog/clouds classified as terrain; suppress upper half, retaining lower exposed rocks/snow."
+  },
+  "bc-island-view": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0.2
+        ],
+        [
+          0.62,
+          0.2
+        ],
+        [
+          0.62,
+          0.28
+        ],
+        [
+          1,
+          0.28
+        ],
+        [
+          1,
+          0.38
+        ],
+        [
+          0,
+          0.38
+        ]
+      ]
+    ],
+    "reason": "Distant dark wooded ridges are not exposed land; preserve upper snowcap and foreground shoreline."
+  },
+  "bc-garibaldi": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0.24
+        ],
+        [
+          1,
+          0.24
+        ],
+        [
+          1,
+          0.48
+        ],
+        [
+          0,
+          0.48
+        ]
+      ]
+    ],
+    "reason": "Distant mountain bases/peninsulas are forested; retain alpine peaks and foreground rock."
+  },
+  "hurricane-hill": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0.24
+        ],
+        [
+          1,
+          0.24
+        ],
+        [
+          1,
+          0.55
+        ],
+        [
+          0,
+          0.55
+        ]
+      ]
+    ],
+    "reason": "Lower distant mountain faces densely forested; retain snowcaps and exposed foreground slope."
+  },
+  "fishing-or-henry-hagg-lake": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0.5
+        ],
+        [
+          0,
+          0.5
+        ]
+      ]
+    ],
+    "reason": "Upper aerial hills mostly continuous forest; conservative exclusion leaves nearby exposed fields."
+  },
+  "dayuse-or-ecola-state-park": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0.34
+        ],
+        [
+          1,
+          0.34
+        ],
+        [
+          1,
+          0.6
+        ],
+        [
+          0,
+          0.6
+        ]
+      ]
+    ],
+    "reason": "Distant headlands behind sea stacks are forested; suppress band while retaining main sea-stack rock below."
+  },
+  "route-8579664": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0.44
+        ],
+        [
+          0.32,
+          0.44
+        ],
+        [
+          0.32,
+          0.76
+        ],
+        [
+          0,
+          0.76
+        ]
+      ],
+      [
+        [
+          0.66,
+          0.4
+        ],
+        [
+          1,
+          0.4
+        ],
+        [
+          1,
+          0.72
+        ],
+        [
+          0.66,
+          0.72
+        ]
+      ]
+    ],
+    "reason": "Fullsize review: left/right distant lower mountain faces forested, while central exposed rock and foreground retain contour art."
+  },
+  "route-8580755": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0.14
+        ],
+        [
+          0.31,
+          0.14
+        ],
+        [
+          0.44,
+          0.57
+        ],
+        [
+          0.42,
+          0.9
+        ],
+        [
+          0,
+          0.9
+        ]
+      ],
+      [
+        [
+          0.4,
+          0.76
+        ],
+        [
+          1,
+          0.76
+        ],
+        [
+          1,
+          0.88
+        ],
+        [
+          0.4,
+          0.88
+        ]
+      ]
+    ],
+    "reason": "Fullsize review: suppress ambiguous densely wooded left mountain; preserve major bare right cliffs and scree. Bottom forest fringe excluded."
+  },
+  "winter-crystal": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0.53
+        ],
+        [
+          1,
+          0.53
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    ],
+    "reason": "Fullsize review: below Rainier/alpine snowcap all distant valley faces are forested; omit ambiguous lower land."
+  },
+  "winter-stevens": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0.45
+        ],
+        [
+          1,
+          0.45
+        ],
+        [
+          1,
+          0.88
+        ],
+        [
+          0,
+          0.88
+        ]
+      ]
+    ],
+    "reason": "Fullsize review: middle distant mountain faces have dense snow-covered trees misclassified as land; keep high ridges and foreground snow."
+  },
+  "winter-bc-grouse": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    ],
+    "reason": "Fullsize review: snowy tree canopy mistaken for exposed terrain. Conservative omission avoids rainbow on branches."
+  },
+  "winter-summit": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0.3
+        ],
+        [
+          1,
+          0.3
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    ],
+    "reason": "Fullsize review: lower resort mountain is forested; retain bare upper alpine ridge."
+  },
+  "usfs-7632.004731": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0.4
+        ],
+        [
+          1,
+          0.4
+        ],
+        [
+          1,
+          0.58
+        ],
+        [
+          0,
+          0.58
+        ]
+      ]
+    ],
+    "reason": "Fullsize review: distant blue mountain band densely forested; retain distant snowpeak and foreground volcanic rock."
+  },
+  "usfs-296847010602": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0.6
+        ],
+        [
+          0,
+          0.6
+        ]
+      ]
+    ],
+    "reason": "Fullsize review: Angel\u2019sRest entire distant north Gorge wall is densely forested, plus cloud-edge leaks. Foreground exposed rocks retained."
+  },
+  "usfs-5004.005631": {
+    "terrainExclude": [
+      [
+        [
+          0,
+          0.46
+        ],
+        [
+          1,
+          0.46
+        ],
+        [
+          1,
+          0.64
+        ],
+        [
+          0,
+          0.64
+        ]
+      ]
+    ],
+    "reason": "Fullsize review: snowy distant wooded ridge below MountHood has rainbow leaks; retain actual upper mountain peak."
+  },
+  "dayuse-wa-palouse-falls-state-park-heritage-site": {
+    "terrainInclude": [
+      [
+        [
+          0.73,
+          0.42
+        ],
+        [
+          0.98,
+          0.42
+        ],
+        [
+          0.98,
+          0.64
+        ],
+        [
+          0.72,
+          0.64
+        ]
+      ],
+      [
+        [
+          0.03,
+          0.4
+        ],
+        [
+          0.32,
+          0.4
+        ],
+        [
+          0.32,
+          0.53
+        ],
+        [
+          0.03,
+          0.53
+        ]
+      ]
+    ],
+    "reason": "Fullsize visual review: only clearly exposed vertical basalt cliff interiors, avoiding green rims/base and water. Apply tree/sky/water exclusions after include override."
+  }
+}

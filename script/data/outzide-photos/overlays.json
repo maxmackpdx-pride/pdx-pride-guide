@@ -1,0 +1,2282 @@
+[
+  {
+    "file": "assets/photos/rooster-rock.webp",
+    "sha256": "7636c1d5e6a690bf4ce3e3979544f33d835bcaecc818cc25433788852e796ded",
+    "width": 2048,
+    "height": 1153,
+    "overlaySrc": "assets/photos/overlays/rooster-rock.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.4168,
+      "trees": 0.1396,
+      "exposedLand": 0.2932,
+      "water": 0.055
+    },
+    "contourPaths": 56,
+    "skyNodes": 15,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/silver-falls.webp",
+    "sha256": "e68afd75da8b603e32c46f03556dd1ac98de16c751e5c4ada822d3e45ecca397",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/silver-falls.svg",
+    "overlayGlowSrc": "assets/photos/overlays/silver-falls-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.4208,
+      "exposedLand": 0.2065,
+      "water": 0.2044
+    },
+    "contourPaths": 95,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/cape-lookout.webp",
+    "sha256": "9ec95c1840f53a55d02f38dd009223e671c48d2f900175cefa8af03a5f15a3d0",
+    "width": 2048,
+    "height": 1158,
+    "overlaySrc": "assets/photos/overlays/cape-lookout.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3719,
+      "trees": 0.1444,
+      "exposedLand": 0.1467,
+      "water": 0.273
+    },
+    "contourPaths": 21,
+    "skyNodes": 15,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/atv-or-oregon-dunes-national-recreation-area.webp",
+    "sha256": "f2e6d09633385cbc0408a3136c888b27abfa96617bbec06cc2afae982c81daf1",
+    "width": 2048,
+    "height": 1368,
+    "overlaySrc": "assets/photos/overlays/atv-or-oregon-dunes-national-recreation-area.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1943,
+      "trees": 0.0675,
+      "exposedLand": 0.5235,
+      "water": 0.1909
+    },
+    "contourPaths": 75,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/atv-or-virtue-flat-ohv-area.webp",
+    "sha256": "c07ffd77bb6e7205342587cbc2961e95f7f3ee22c0eb74a59bc2514bf640714c",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/atv-or-virtue-flat-ohv-area.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.5038,
+      "trees": 0.3214,
+      "exposedLand": 0.1536,
+      "water": 0.0
+    },
+    "contourPaths": 33,
+    "skyNodes": 18,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/badger-lake.webp",
+    "sha256": "2ffa78a0755e6fc57418a2e4209efea0d043a55f57be201e2b11d5e2dd33291d",
+    "width": 2048,
+    "height": 790,
+    "overlaySrc": "assets/photos/overlays/badger-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1602,
+      "trees": 0.3658,
+      "exposedLand": 0.0027,
+      "water": 0.4385
+    },
+    "contourPaths": 5,
+    "skyNodes": 7,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bagby-hot-springs.webp",
+    "sha256": "ef2cc51ba516617b29dc623b63cc8e8b95b9ca391533cc07ec71f4fe88e1ebfd",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/bagby-hot-springs.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.2435,
+      "exposedLand": 0.0,
+      "water": 0.0377
+    },
+    "contourPaths": 0,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-brandywine.webp",
+    "sha256": "dffa9f4bcda6d1bb73f484769562710c9641d0202870bc1e708714a5e9651eaf",
+    "width": 2048,
+    "height": 2731,
+    "overlaySrc": "assets/photos/overlays/bc-brandywine.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.5236,
+      "exposedLand": 0.2103,
+      "water": 0.1054
+    },
+    "contourPaths": 182,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-buntzen.webp",
+    "sha256": "ed15e3aec2d5000a4796655a99171ff9548454b79022151646fdd136b612d4cb",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/bc-buntzen.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3644,
+      "trees": 0.1818,
+      "exposedLand": 0.0,
+      "water": 0.365
+    },
+    "contourPaths": 0,
+    "skyNodes": 17,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-garibaldi.webp",
+    "sha256": "da41ba0321e3357a5c5a69336e8e9078098c441f19aee896cdc2956cbb50931a",
+    "width": 2048,
+    "height": 1248,
+    "overlaySrc": "assets/photos/overlays/bc-garibaldi.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1689,
+      "trees": 0.0623,
+      "exposedLand": 0.2462,
+      "water": 0.3405
+    },
+    "contourPaths": 89,
+    "skyNodes": 7,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-golden-ears.webp",
+    "sha256": "09165158bf49b897890c886af5168dc010371e47bffa11a18c14c4c21040e872",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/bc-golden-ears.svg",
+    "overlayGlowSrc": "assets/photos/overlays/bc-golden-ears-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.3849,
+      "trees": 0.0646,
+      "exposedLand": 0.0,
+      "water": 0.3256
+    },
+    "contourPaths": 0,
+    "skyNodes": 18,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-goldstream.webp",
+    "sha256": "e1b43199a316470ffcbc88805a3ecc3e9acc6262f329a9e3935bd3a64739c0ee",
+    "width": 2048,
+    "height": 1158,
+    "overlaySrc": "assets/photos/overlays/bc-goldstream.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.6286,
+      "exposedLand": 0.0348,
+      "water": 0.1741
+    },
+    "contourPaths": 30,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-island-view.webp",
+    "sha256": "01d3cd382ba6435db6cbfb08b16e0b1d70bb53e9b48a57dd85d2c8b16bd3699d",
+    "width": 2048,
+    "height": 1378,
+    "overlaySrc": "assets/photos/overlays/bc-island-view.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2111,
+      "trees": 0.0019,
+      "exposedLand": 0.0713,
+      "water": 0.586
+    },
+    "contourPaths": 7,
+    "skyNodes": 13,
+    "treeNodes": 2,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-lost-lake.webp",
+    "sha256": "1511be64bc1646c79a43c9f85ba63de875ffacb73100943f942f464b71f5b403",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/bc-lost-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2429,
+      "trees": 0.2158,
+      "exposedLand": 0.5255,
+      "water": 0.0
+    },
+    "contourPaths": 89,
+    "skyNodes": 14,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-lynn.webp",
+    "sha256": "fd21574d38a81affe20ee0bb8b0e2599353f1c4610a5bd6af3e46518d0863d03",
+    "width": 2048,
+    "height": 2741,
+    "overlaySrc": "assets/photos/overlays/bc-lynn.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0563,
+      "trees": 0.4485,
+      "exposedLand": 0.3531,
+      "water": 0.0994
+    },
+    "contourPaths": 341,
+    "skyNodes": 7,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-porteau.webp",
+    "sha256": "b042f5e7c0cc3b7a1f804e8cd57b65d453b5e8462babdfcad49639267b279fd8",
+    "width": 2048,
+    "height": 1366,
+    "overlaySrc": "assets/photos/overlays/bc-porteau.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2764,
+      "trees": 0.2008,
+      "exposedLand": 0.1055,
+      "water": 0.3239
+    },
+    "contourPaths": 35,
+    "skyNodes": 12,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-stanley.webp",
+    "sha256": "eb846794ab828a8eebf9ec3382f1e6b6190321923edbd1b1cf3d2b56031a0195",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/bc-stanley.svg",
+    "overlayGlowSrc": "assets/photos/overlays/bc-stanley-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.0002,
+      "exposedLand": 0.637,
+      "water": 0.3156
+    },
+    "contourPaths": 223,
+    "skyNodes": 0,
+    "treeNodes": 0,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-thetis.webp",
+    "sha256": "52f4641afd99ca1bd5859a17502caa21a406e272d3f32fc4efb80ce09581b42a",
+    "width": 2048,
+    "height": 1153,
+    "overlaySrc": "assets/photos/overlays/bc-thetis.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3671,
+      "trees": 0.1604,
+      "exposedLand": 0.0,
+      "water": 0.4581
+    },
+    "contourPaths": 0,
+    "skyNodes": 13,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-tod-inlet.webp",
+    "sha256": "c10cf1668aa3369ca0fb96e60342ba2de019da1016df5243009865af387a2a73",
+    "width": 2048,
+    "height": 1153,
+    "overlaySrc": "assets/photos/overlays/bc-tod-inlet.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0269,
+      "trees": 0.5209,
+      "exposedLand": 0.0,
+      "water": 0.4298
+    },
+    "contourPaths": 0,
+    "skyNodes": 6,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/bc-wreck.webp",
+    "sha256": "1bb16e9e2db9bbee5495efd40298cfcd28493a2ddea52daaffd298c40484eddf",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/bc-wreck.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2135,
+      "trees": 0.2088,
+      "exposedLand": 0.205,
+      "water": 0.2565
+    },
+    "contourPaths": 102,
+    "skyNodes": 15,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/beacon-rock.webp",
+    "sha256": "51bcf1076092feedb7573323ca5084cb0ea5d612eeaf8925b0d874c36936912d",
+    "width": 2048,
+    "height": 1424,
+    "overlaySrc": "assets/photos/overlays/beacon-rock.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.4335,
+      "trees": 0.282,
+      "exposedLand": 0.0735,
+      "water": 0.1559
+    },
+    "contourPaths": 39,
+    "skyNodes": 19,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/boating-or-willamette-park-portland-launch.webp",
+    "sha256": "1c1910bba69f8fca315b1a951571d3ec5c35f629a5ee2ee36d438d8c939c481e",
+    "width": 2048,
+    "height": 1368,
+    "overlaySrc": "assets/photos/overlays/boating-or-willamette-park-portland-launch.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1705,
+      "trees": 0.1861,
+      "exposedLand": 0.0083,
+      "water": 0.6117
+    },
+    "contourPaths": 10,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/boating-wa-daroga-state-park-boating.webp",
+    "sha256": "c8cfeeb3653658f95ab82c635cc9e996c6a907123352dad909d8adb02d6eba3a",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/boating-wa-daroga-state-park-boating.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1814,
+      "trees": 0.3288,
+      "exposedLand": 0.2566,
+      "water": 0.1872
+    },
+    "contourPaths": 74,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/boating-wa-deception-pass-state-park-boating.webp",
+    "sha256": "95a6287a2bc547ff3a51808d8b77e204d0963050b8fb851903f31f56d9c4f002",
+    "width": 2048,
+    "height": 1368,
+    "overlaySrc": "assets/photos/overlays/boating-wa-deception-pass-state-park-boating.svg",
+    "overlayGlowSrc": "assets/photos/overlays/boating-wa-deception-pass-state-park-boating-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.2482,
+      "trees": 0.2178,
+      "exposedLand": 0.3267,
+      "water": 0.0733
+    },
+    "contourPaths": 88,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/boating-wa-lake-wenatchee-state-park-boating.webp",
+    "sha256": "6dfe0379c277d1c936577162846ca1dea4c0553e0a97178be5bc1eacebe9f520",
+    "width": 2048,
+    "height": 1363,
+    "overlaySrc": "assets/photos/overlays/boating-wa-lake-wenatchee-state-park-boating.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0719,
+      "trees": 0.4437,
+      "exposedLand": 0.3584,
+      "water": 0.0565
+    },
+    "contourPaths": 106,
+    "skyNodes": 6,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/boating-wa-pearrygin-lake-state-park-boating.webp",
+    "sha256": "de37fca68bee40f75fa859dd187f1403c089e3eb25e147f6f6878f904426ed74",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/boating-wa-pearrygin-lake-state-park-boating.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.4492,
+      "trees": 0.0143,
+      "exposedLand": 0.0714,
+      "water": 0.4406
+    },
+    "contourPaths": 34,
+    "skyNodes": 20,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/boating-wa-steamboat-rock-state-park-boating.webp",
+    "sha256": "8590b7c34c687d92e3664784981d07d0607ba4a7581f70f43806c179214b5cd4",
+    "width": 2048,
+    "height": 1136,
+    "overlaySrc": "assets/photos/overlays/boating-wa-steamboat-rock-state-park-boating.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2861,
+      "trees": 0.0753,
+      "exposedLand": 0.3056,
+      "water": 0.2815
+    },
+    "contourPaths": 109,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/boating-wa-sun-lakes-dry-falls-state-park-boating.webp",
+    "sha256": "ee252f05d25a1aecbde9c8c39c55255fa123f462eb2eae4763f555ea3ccefef2",
+    "width": 2048,
+    "height": 683,
+    "overlaySrc": "assets/photos/overlays/boating-wa-sun-lakes-dry-falls-state-park-boating.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3603,
+      "trees": 0.3238,
+      "exposedLand": 0.2306,
+      "water": 0.0241
+    },
+    "contourPaths": 35,
+    "skyNodes": 9,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/boating-wa-twanoh-state-park-boating.webp",
+    "sha256": "ccead8d08412710d9e12362e46707fdfa0b9a401677320ff2508fa603346e368",
+    "width": 2048,
+    "height": 1368,
+    "overlaySrc": "assets/photos/overlays/boating-wa-twanoh-state-park-boating.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.4072,
+      "trees": 0.5175,
+      "exposedLand": 0.0279,
+      "water": 0.0116
+    },
+    "contourPaths": 7,
+    "skyNodes": 20,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/cape-disappointment.webp",
+    "sha256": "b138e4fecca8c17d40bf22453f7e1ffed3d9db5215c2ad9913c806721cfb5580",
+    "width": 2048,
+    "height": 1371,
+    "overlaySrc": "assets/photos/overlays/cape-disappointment.svg",
+    "overlayGlowSrc": "assets/photos/overlays/cape-disappointment-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.3802,
+      "trees": 0.1504,
+      "exposedLand": 0.1823,
+      "water": 0.2473
+    },
+    "contourPaths": 75,
+    "skyNodes": 16,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/dayuse-or-dabney-state-recreation-area.webp",
+    "sha256": "0be5b9241f4fda3f04e5471d3c76c94ede7f41b4a332b513c7358d36f937d83a",
+    "width": 2048,
+    "height": 1372,
+    "overlaySrc": "assets/photos/overlays/dayuse-or-dabney-state-recreation-area.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2094,
+      "trees": 0.2632,
+      "exposedLand": 0.2425,
+      "water": 0.2598
+    },
+    "contourPaths": 88,
+    "skyNodes": 10,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/dayuse-or-ecola-state-park.webp",
+    "sha256": "8bbaa3e326ac8417b37e70706460e7cd959d12c30489b6dddf4fcf24538adef2",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/dayuse-or-ecola-state-park.svg",
+    "overlayGlowSrc": "assets/photos/overlays/dayuse-or-ecola-state-park-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.361,
+      "trees": 0.3699,
+      "exposedLand": 0.0287,
+      "water": 0.0925
+    },
+    "contourPaths": 30,
+    "skyNodes": 19,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/dayuse-or-latourell-falls-trailhead-guy-w-talbot.webp",
+    "sha256": "ab26a0cc9b3016bbd52d342dcdf159c2a29f8b675b18524100a0dd9d267290c6",
+    "width": 2048,
+    "height": 3072,
+    "overlaySrc": "assets/photos/overlays/dayuse-or-latourell-falls-trailhead-guy-w-talbot.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.7763,
+      "exposedLand": 0.0662,
+      "water": 0.0465
+    },
+    "contourPaths": 59,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/dayuse-or-oswald-west-state-park.webp",
+    "sha256": "33502ac91edc77067dc7f6622d6b3b9e3912873e7a8d3286d18316d6c4ea1aab",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/dayuse-or-oswald-west-state-park.svg",
+    "overlayGlowSrc": "assets/photos/overlays/dayuse-or-oswald-west-state-park-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.2844,
+      "trees": 0.3708,
+      "exposedLand": 0.0491,
+      "water": 0.2597
+    },
+    "contourPaths": 26,
+    "skyNodes": 13,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/dayuse-or-shore-acres-state-park.webp",
+    "sha256": "674c84eb1454a2a3d1e048f452869e29437864192c84bdc2226af92dcc7aa001",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/dayuse-or-shore-acres-state-park.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.0,
+      "exposedLand": 0.1727,
+      "water": 0.8019
+    },
+    "contourPaths": 81,
+    "skyNodes": 0,
+    "treeNodes": 0,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/dayuse-or-smith-rock-state-park.webp",
+    "sha256": "c30642cb6f5d62f9583e37b0d8eed9e9ee7527370387e7d60f4c5adc898d5668",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/dayuse-or-smith-rock-state-park.svg",
+    "overlayGlowSrc": "assets/photos/overlays/dayuse-or-smith-rock-state-park-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.2617,
+      "trees": 0.0756,
+      "exposedLand": 0.5404,
+      "water": 0.0137
+    },
+    "contourPaths": 199,
+    "skyNodes": 12,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/dayuse-wa-fort-casey-historical-state-park.webp",
+    "sha256": "e9192784ed686d65f1aef837cbe57b49da9438de6fbf3bf3cd72e47aa6b7e7fd",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/dayuse-wa-fort-casey-historical-state-park.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.4698,
+      "trees": 0.4273,
+      "exposedLand": 0.0,
+      "water": 0.0125
+    },
+    "contourPaths": 0,
+    "skyNodes": 20,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/dayuse-wa-palouse-falls-state-park-heritage-site.webp",
+    "sha256": "a1c2553596e2058e632d45ec83ce17744e3d5b292e559277a779dd62f7deabda",
+    "width": 2048,
+    "height": 1276,
+    "overlaySrc": "assets/photos/overlays/dayuse-wa-palouse-falls-state-park-heritage-site.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2533,
+      "trees": 0.0631,
+      "exposedLand": 0.2294,
+      "water": 0.2137
+    },
+    "contourPaths": 95,
+    "skyNodes": 10,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/denny-blaine.webp",
+    "sha256": "40d201febf924ec33b1f3cac7e088fa8e8b8f80ab2f8b3c7e1c3ea29bfae58ce",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/denny-blaine.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.4012,
+      "trees": 0.2975,
+      "exposedLand": 0.0013,
+      "water": 0.0454
+    },
+    "contourPaths": 3,
+    "skyNodes": 17,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fern-canyon.webp",
+    "sha256": "44939747bd3c1c1f2321d251340566c00cafb7c38b7b73d2201321e62952bd7a",
+    "width": 2048,
+    "height": 1368,
+    "overlaySrc": "assets/photos/overlays/fern-canyon.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.6883,
+      "exposedLand": 0.274,
+      "water": 0.0
+    },
+    "contourPaths": 60,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-or-commonwealth-lake.webp",
+    "sha256": "caa69cc6102c8e2341a8ea8e587a46b16d615056897ea4c4d7cfd645b5bdcd53",
+    "width": 2048,
+    "height": 1356,
+    "overlaySrc": "assets/photos/overlays/fishing-or-commonwealth-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1357,
+      "trees": 0.5111,
+      "exposedLand": 0.141,
+      "water": 0.0833
+    },
+    "contourPaths": 28,
+    "skyNodes": 10,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-or-crane-prairie-reservoir.webp",
+    "sha256": "c9383e7475e19b063916e7704a02ebea9b80bdea08dd3e5c777b5c3c9c1f49ea",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/fishing-or-crane-prairie-reservoir.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.4802,
+      "trees": 0.0,
+      "exposedLand": 0.0,
+      "water": 0.49
+    },
+    "contourPaths": 0,
+    "skyNodes": 19,
+    "treeNodes": 0,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-or-davis-lake.webp",
+    "sha256": "b642d2c77240d140cda3ebe78f0343b9aa2ba1177722b88137fca673f48a650f",
+    "width": 2048,
+    "height": 1368,
+    "overlaySrc": "assets/photos/overlays/fishing-or-davis-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.385,
+      "trees": 0.1219,
+      "exposedLand": 0.1091,
+      "water": 0.2819
+    },
+    "contourPaths": 51,
+    "skyNodes": 16,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-or-henry-hagg-lake.webp",
+    "sha256": "2184822e49e145e6ef607566b33a5704932fc9876dbec665e6338e5532372955",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/fishing-or-henry-hagg-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0065,
+      "trees": 0.2763,
+      "exposedLand": 0.0294,
+      "water": 0.1842
+    },
+    "contourPaths": 53,
+    "skyNodes": 4,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-or-hosmer-lake.webp",
+    "sha256": "7fc3bccc99449121702fc381b22f6019555d5199548030c5290f041125ace182",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/fishing-or-hosmer-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.397,
+      "trees": 0.1118,
+      "exposedLand": 0.0619,
+      "water": 0.404
+    },
+    "contourPaths": 26,
+    "skyNodes": 16,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-or-north-fork-reservoir.webp",
+    "sha256": "ade6be2ff1d7109432553810b9b5061c4bf424d8d4aacc18475d4b244411f510",
+    "width": 2048,
+    "height": 1463,
+    "overlaySrc": "assets/photos/overlays/fishing-or-north-fork-reservoir.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1836,
+      "trees": 0.2252,
+      "exposedLand": 0.0,
+      "water": 0.4227
+    },
+    "contourPaths": 0,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-or-south-twin-lake.webp",
+    "sha256": "dc184ec4c69ec51f773a5f2a0407c32c64358b0b343de849eeab765d2028a615",
+    "width": 2048,
+    "height": 683,
+    "overlaySrc": "assets/photos/overlays/fishing-or-south-twin-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3152,
+      "trees": 0.3528,
+      "exposedLand": 0.0366,
+      "water": 0.25
+    },
+    "contourPaths": 17,
+    "skyNodes": 7,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-or-suttle-lake.webp",
+    "sha256": "4400442d261baa30402b4f9350c6c8737c8c048c0144d405f7d28101d3fd13be",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/fishing-or-suttle-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.395,
+      "trees": 0.2169,
+      "exposedLand": 0.0775,
+      "water": 0.0001
+    },
+    "contourPaths": 65,
+    "skyNodes": 19,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-or-three-creeks-lake.webp",
+    "sha256": "c88ec45e19966f2b1594e36eca8c1a83f64a8e616acd3b9bf99410acb28407e6",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/fishing-or-three-creeks-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3317,
+      "trees": 0.1788,
+      "exposedLand": 0.0675,
+      "water": 0.3994
+    },
+    "contourPaths": 55,
+    "skyNodes": 14,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-or-wallowa-lake.webp",
+    "sha256": "7390365d44df197d5a8e4a28010fb137d5cc9bc4cc12afb89088f80420662c56",
+    "width": 2048,
+    "height": 1360,
+    "overlaySrc": "assets/photos/overlays/fishing-or-wallowa-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3183,
+      "trees": 0.1595,
+      "exposedLand": 0.0891,
+      "water": 0.3724
+    },
+    "contourPaths": 36,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-wa-angle-lake.webp",
+    "sha256": "e4f42683cfc92bee77068855f3f6a77b91519c0873a87e151e2e9127b117bd07",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/fishing-wa-angle-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3124,
+      "trees": 0.6255,
+      "exposedLand": 0.0,
+      "water": 0.0447
+    },
+    "contourPaths": 0,
+    "skyNodes": 15,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-wa-banks-lake.webp",
+    "sha256": "d6de008f8ef1d80e0c9bb60627a80cf8f3d15c4da57116a92939b967f348b3c8",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/fishing-wa-banks-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.4459,
+      "trees": 0.1395,
+      "exposedLand": 0.1575,
+      "water": 0.1626
+    },
+    "contourPaths": 60,
+    "skyNodes": 17,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-wa-battle-ground-lake.webp",
+    "sha256": "3209d95499898f0e8db9d260a639e34ac2ce63c8cd8d95a50e9a89b0df9a50f0",
+    "width": 2048,
+    "height": 912,
+    "overlaySrc": "assets/photos/overlays/fishing-wa-battle-ground-lake.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0319,
+      "trees": 0.7612,
+      "exposedLand": 0.0,
+      "water": 0.1938
+    },
+    "contourPaths": 0,
+    "skyNodes": 3,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-wa-green-lake.webp",
+    "sha256": "a4ad41d460803452f168095e9d111dfa6a1c3d8282266c02ad2b7d44669b0096",
+    "width": 2048,
+    "height": 1497,
+    "overlaySrc": "assets/photos/overlays/fishing-wa-green-lake.svg",
+    "overlayGlowSrc": "assets/photos/overlays/fishing-wa-green-lake-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.2996,
+      "trees": 0.0716,
+      "exposedLand": 0.0008,
+      "water": 0.4218
+    },
+    "contourPaths": 6,
+    "skyNodes": 15,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-wa-lake-chelan.webp",
+    "sha256": "e42f9730577ee391417cfe4caf89f3b198e617940adda524dd9e8009e15ade47",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/fishing-wa-lake-chelan.svg",
+    "overlayGlowSrc": "assets/photos/overlays/fishing-wa-lake-chelan-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.3339,
+      "trees": 0.0413,
+      "exposedLand": 0.4936,
+      "water": 0.0106
+    },
+    "contourPaths": 162,
+    "skyNodes": 16,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-wa-lake-kapowsin.webp",
+    "sha256": "689890c2d65a08bd7664f86f37d0fbb1634d3bec22ad5c27502ddf99200d848b",
+    "width": 2048,
+    "height": 717,
+    "overlaySrc": "assets/photos/overlays/fishing-wa-lake-kapowsin.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1288,
+      "trees": 0.3853,
+      "exposedLand": 0.0105,
+      "water": 0.4542
+    },
+    "contourPaths": 4,
+    "skyNodes": 4,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-wa-lake-padden.webp",
+    "sha256": "74af0fb0d2145aaa33e0d6a268b35f3e7fcd3bb654821a915988197a8aa3fe4d",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/fishing-wa-lake-padden.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2719,
+      "trees": 0.0977,
+      "exposedLand": 0.0502,
+      "water": 0.4124
+    },
+    "contourPaths": 16,
+    "skyNodes": 18,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-wa-lake-sammamish.webp",
+    "sha256": "7e5b2049a072def40683295a98199a7c17f72d3a41e3e1cc8a75f0eb17203368",
+    "width": 2048,
+    "height": 1371,
+    "overlaySrc": "assets/photos/overlays/fishing-wa-lake-sammamish.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2157,
+      "trees": 0.7297,
+      "exposedLand": 0.0015,
+      "water": 0.0025
+    },
+    "contourPaths": 7,
+    "skyNodes": 13,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-wa-lake-stevens.webp",
+    "sha256": "372ce3027ac7347ddea668b6a1e2a60f1e4612027435e4b083619275aa0d4245",
+    "width": 2048,
+    "height": 1024,
+    "overlaySrc": "assets/photos/overlays/fishing-wa-lake-stevens.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1644,
+      "trees": 0.1365,
+      "exposedLand": 0.1148,
+      "water": 0.5281
+    },
+    "contourPaths": 32,
+    "skyNodes": 8,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fishing-wa-lake-washington.webp",
+    "sha256": "50831f07b14096d5973b84706273aa2d596a92223ae0eff14a6bce5a80d718f5",
+    "width": 2048,
+    "height": 1024,
+    "overlaySrc": "assets/photos/overlays/fishing-wa-lake-washington.svg",
+    "overlayGlowSrc": "assets/photos/overlays/fishing-wa-lake-washington-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.2488,
+      "trees": 0.3267,
+      "exposedLand": 0.1086,
+      "water": 0.2268
+    },
+    "contourPaths": 27,
+    "skyNodes": 10,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/forest-park.webp",
+    "sha256": "3a90f108ecdf518bb2940ee67ca2e6918d271e46514536b3a8be4a99d2a2ac71",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/forest-park.svg",
+    "overlayGlowSrc": "assets/photos/overlays/forest-park-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.0279,
+      "trees": 0.9427,
+      "exposedLand": 0.0057,
+      "water": 0.0
+    },
+    "contourPaths": 13,
+    "skyNodes": 6,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/fort-stevens.webp",
+    "sha256": "2238ca52d88d14fa332475c3897a4b43ad016e7ba6de2f4e89d9e9f09ea3a71f",
+    "width": 2048,
+    "height": 1552,
+    "overlaySrc": "assets/photos/overlays/fort-stevens.svg",
+    "overlayGlowSrc": "assets/photos/overlays/fort-stevens-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.5456,
+      "trees": 0.0,
+      "exposedLand": 0.2936,
+      "water": 0.1093
+    },
+    "contourPaths": 34,
+    "skyNodes": 23,
+    "treeNodes": 0,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/grayland-beach.webp",
+    "sha256": "9b6338833a6a40d7009db5fcb2cc357942c058595995693d5383b455a6713fea",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/grayland-beach.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.5366,
+      "trees": 0.0,
+      "exposedLand": 0.4531,
+      "water": 0.0008
+    },
+    "contourPaths": 58,
+    "skyNodes": 20,
+    "treeNodes": 0,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/hall-mosses.webp",
+    "sha256": "af0247172edb9649d73addb91b21d0d29908b93c058ace715234c1a1d0218eac",
+    "width": 2048,
+    "height": 1271,
+    "overlaySrc": "assets/photos/overlays/hall-mosses.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.6385,
+      "exposedLand": 0.035,
+      "water": 0.2141
+    },
+    "contourPaths": 28,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/hoyt-arboretum.webp",
+    "sha256": "6f8008b86a2ed083ae704533d9ae28426d37257d3f68d50a94e88623fceef7f3",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/hoyt-arboretum.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.9996,
+      "exposedLand": 0.0,
+      "water": 0.0
+    },
+    "contourPaths": 0,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/hurricane-hill.webp",
+    "sha256": "c1188166ad7e669607772ee487b672bcfcacafc855ab57f7b7f1273b60bbd752",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/hurricane-hill.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1927,
+      "trees": 0.4925,
+      "exposedLand": 0.1084,
+      "water": 0.0
+    },
+    "contourPaths": 59,
+    "skyNodes": 12,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/kalaloch.webp",
+    "sha256": "1f29561a1048923f44eba9152d36042eb7dba81d3d625ce7321fbf969979d683",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/kalaloch.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2009,
+      "trees": 0.3302,
+      "exposedLand": 0.418,
+      "water": 0.0049
+    },
+    "contourPaths": 200,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/marymere.webp",
+    "sha256": "1663f5adabcc619a0f68dcb7115096072c6919fd25cafc35f30db965cc2a41e8",
+    "width": 2048,
+    "height": 2317,
+    "overlaySrc": "assets/photos/overlays/marymere.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.2761,
+      "exposedLand": 0.25,
+      "water": 0.1806
+    },
+    "contourPaths": 196,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/mount-tabor.webp",
+    "sha256": "8b43f949038f8c41231c1e3352a098f69961d81e8006bd8656fdf32a9658a05a",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/mount-tabor.svg",
+    "overlayGlowSrc": "assets/photos/overlays/mount-tabor-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.3963,
+      "trees": 0.4663,
+      "exposedLand": 0.0938,
+      "water": 0.0091
+    },
+    "contourPaths": 51,
+    "skyNodes": 20,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/powell-butte.webp",
+    "sha256": "fc9555e12e828c1d32752fb9458fdf07b6ccb7b213ca94d7686b25daeacd996a",
+    "width": 2048,
+    "height": 1368,
+    "overlaySrc": "assets/photos/overlays/powell-butte.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2224,
+      "trees": 0.6179,
+      "exposedLand": 0.1099,
+      "water": 0.0
+    },
+    "contourPaths": 35,
+    "skyNodes": 10,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/rialto.webp",
+    "sha256": "eaf7fb7e85ae6fd85483b0e0a9a0c83bf6f87b908a9d0593e0a5501cd89a935c",
+    "width": 2048,
+    "height": 1331,
+    "overlaySrc": "assets/photos/overlays/rialto.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1665,
+      "trees": 0.0861,
+      "exposedLand": 0.5038,
+      "water": 0.2193
+    },
+    "contourPaths": 131,
+    "skyNodes": 10,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/route-8569148.webp",
+    "sha256": "9a7ce0e2b7d8440af0139a3202a55ba1748917cabbb9a87c3f63e40c3e213aea",
+    "width": 2048,
+    "height": 1090,
+    "overlaySrc": "assets/photos/overlays/route-8569148.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.153,
+      "trees": 0.2918,
+      "exposedLand": 0.1349,
+      "water": 0.3604
+    },
+    "contourPaths": 85,
+    "skyNodes": 8,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/route-8579664.webp",
+    "sha256": "1653a74370154a9d720c72f2c59029dbc98ac5a20de7480adcdce2dd1f4c3f58",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/route-8579664.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2763,
+      "trees": 0.163,
+      "exposedLand": 0.3534,
+      "water": 0.0
+    },
+    "contourPaths": 228,
+    "skyNodes": 14,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/route-8580755.webp",
+    "sha256": "06ae5015ae39dfa1acc71a32c30f2bb3eb37981b64c607a007ead57315e18215",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/route-8580755.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2721,
+      "trees": 0.1654,
+      "exposedLand": 0.2292,
+      "water": 0.1291
+    },
+    "contourPaths": 97,
+    "skyNodes": 12,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/route-8594524.webp",
+    "sha256": "690a62d4f4ac5d715e8408a4803348a03472a338d7585268e0e56fbd7c52ac1b",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/route-8594524.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.207,
+      "trees": 0.1722,
+      "exposedLand": 0.3463,
+      "water": 0.0
+    },
+    "contourPaths": 182,
+    "skyNodes": 10,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/sauvie-island.webp",
+    "sha256": "ad8d03461ed87e528deef0b57aeeb4e5f6694ef2f719c3df8867e89e63a4bfa6",
+    "width": 2048,
+    "height": 1371,
+    "overlaySrc": "assets/photos/overlays/sauvie-island.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.5504,
+      "trees": 0.1889,
+      "exposedLand": 0.1202,
+      "water": 0.1057
+    },
+    "contourPaths": 22,
+    "skyNodes": 20,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/sol-duc-falls.webp",
+    "sha256": "1bccde12c79f9f98d5df1aeee968c7655b5dfc43c5f8f3a6427bac7949662fba",
+    "width": 2048,
+    "height": 1260,
+    "overlaySrc": "assets/photos/overlays/sol-duc-falls.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.9863,
+      "exposedLand": 0.0003,
+      "water": 0.006
+    },
+    "contourPaths": 1,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/sol-duc-hot-springs.webp",
+    "sha256": "32dd9604669a78caa17e0138ef6532aa73a17ac8fe66d68d6e2808b814a68ede",
+    "width": 2048,
+    "height": 1153,
+    "overlaySrc": "assets/photos/overlays/sol-duc-hot-springs.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.3328,
+      "exposedLand": 0.0,
+      "water": 0.0
+    },
+    "contourPaths": 0,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/stub-stewart.webp",
+    "sha256": "fa77f0b631f3fb36d85b0b0d0ca96f8f57384d34a95552f25a756373ba67ce6f",
+    "width": 2048,
+    "height": 683,
+    "overlaySrc": "assets/photos/overlays/stub-stewart.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3942,
+      "trees": 0.5631,
+      "exposedLand": 0.021,
+      "water": 0.0
+    },
+    "contourPaths": 7,
+    "skyNodes": 10,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/terwilliger-hot-springs.webp",
+    "sha256": "ba72a175d142b0fe92da64ca62f1417f8a094f9a967c444c09c138e7ecf060b4",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/terwilliger-hot-springs.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.3612,
+      "exposedLand": 0.4234,
+      "water": 0.1341
+    },
+    "contourPaths": 204,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/umpqua-hot-springs.webp",
+    "sha256": "ccc034dbf50e8a61e54fd0e23616996530b7e4c193da6f7b5e685c810e3a8dd1",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/umpqua-hot-springs.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0002,
+      "trees": 0.6308,
+      "exposedLand": 0.1405,
+      "water": 0.0
+    },
+    "contourPaths": 47,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-138847010602.webp",
+    "sha256": "68bd8e5a20fa72a9c88747d7737724187c840cff4038f7015f8280f1671b64bc",
+    "width": 2048,
+    "height": 2731,
+    "overlaySrc": "assets/photos/overlays/usfs-138847010602.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.22,
+      "exposedLand": 0.4642,
+      "water": 0.1619
+    },
+    "contourPaths": 324,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-296847010602.webp",
+    "sha256": "874537065a8aeccc3b863bff5b3416df7cfc614ccfc0d939d43784ed748091da",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/usfs-296847010602.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3127,
+      "trees": 0.2384,
+      "exposedLand": 0.1717,
+      "water": 0.1087
+    },
+    "contourPaths": 44,
+    "skyNodes": 16,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5004.005631.webp",
+    "sha256": "0a8938f8ebc39eadec04eebaf7354786e18e70f8653d063fe76130c3670b64f7",
+    "width": 2048,
+    "height": 1363,
+    "overlaySrc": "assets/photos/overlays/usfs-5004.005631.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3963,
+      "trees": 0.3002,
+      "exposedLand": 0.0026,
+      "water": 0.2526
+    },
+    "contourPaths": 4,
+    "skyNodes": 18,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5007010324.webp",
+    "sha256": "212c43ed9532b568b0b1d90ce9c866b7776b519b795b604b8914621d7e2a76dd",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/usfs-5007010324.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.343,
+      "trees": 0.5123,
+      "exposedLand": 0.0798,
+      "water": 0.0084
+    },
+    "contourPaths": 27,
+    "skyNodes": 15,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5045.009041.webp",
+    "sha256": "c6670b67167649d70f07bdbdca490195f9368cd420f70667cec962bd0e0c2121",
+    "width": 2048,
+    "height": 1371,
+    "overlaySrc": "assets/photos/overlays/usfs-5045.009041.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.8191,
+      "exposedLand": 0.131,
+      "water": 0.0
+    },
+    "contourPaths": 95,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5059.005641.webp",
+    "sha256": "40a9e723260d2c660e966b06cee07ae90b25170d7efc839ee4b43bfda712dc24",
+    "width": 2048,
+    "height": 3067,
+    "overlaySrc": "assets/photos/overlays/usfs-5059.005641.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3267,
+      "trees": 0.0605,
+      "exposedLand": 0.3049,
+      "water": 0.2826
+    },
+    "contourPaths": 212,
+    "skyNodes": 25,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5066010324.webp",
+    "sha256": "c224fa28e29c9de85b92685fd9947dfc1078d01212125972dbfd8346772ef6b5",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/usfs-5066010324.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3524,
+      "trees": 0.2739,
+      "exposedLand": 0.0613,
+      "water": 0.2826
+    },
+    "contourPaths": 50,
+    "skyNodes": 15,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5067010324.webp",
+    "sha256": "34b88e60463b0ff2450b7fe368bb3b69c88797d844610cc92359077742012d58",
+    "width": 2048,
+    "height": 1357,
+    "overlaySrc": "assets/photos/overlays/usfs-5067010324.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2314,
+      "trees": 0.1477,
+      "exposedLand": 0.0236,
+      "water": 0.4927
+    },
+    "contourPaths": 11,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5171010357.webp",
+    "sha256": "f70f0dd63590ea2fde29ff77fbb18362ad7633336db32f45cea902140f93d834",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/usfs-5171010357.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2454,
+      "trees": 0.1358,
+      "exposedLand": 0.2457,
+      "water": 0.2614
+    },
+    "contourPaths": 86,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5182010416.webp",
+    "sha256": "33cace7ab3715ebefa6094a18f5138d26cde876e15b71d8d544f4e4d190fcaa3",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/usfs-5182010416.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.6991,
+      "exposedLand": 0.0,
+      "water": 0.2852
+    },
+    "contourPaths": 0,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5250.005571.webp",
+    "sha256": "0fe7974496bb5b94810054febc7dec53baeec7d440818b9637f327abe4f0c821",
+    "width": 2048,
+    "height": 3060,
+    "overlaySrc": "assets/photos/overlays/usfs-5250.005571.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.6267,
+      "exposedLand": 0.0144,
+      "water": 0.025
+    },
+    "contourPaths": 21,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5326.004621.webp",
+    "sha256": "e6bda47b2f13ee93f8c42c745fbcfde5583e8b0e24b0b3c31f9b8cb18d0536f2",
+    "width": 2048,
+    "height": 1153,
+    "overlaySrc": "assets/photos/overlays/usfs-5326.004621.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0706,
+      "trees": 0.4831,
+      "exposedLand": 0.0,
+      "water": 0.424
+    },
+    "contourPaths": 1,
+    "skyNodes": 4,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5344010371.webp",
+    "sha256": "7f2512be45f184e763c8564a4a9b4877eb4104bcfc688d9d0aa3879ed61fb749",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/usfs-5344010371.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0512,
+      "trees": 0.8148,
+      "exposedLand": 0.0351,
+      "water": 0.0531
+    },
+    "contourPaths": 40,
+    "skyNodes": 5,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5435010324.webp",
+    "sha256": "5aaee3b493ff6d5ccb73d3a011062ca6d15b2e3b7652a41d4b09e707fb74fc9d",
+    "width": 2048,
+    "height": 853,
+    "overlaySrc": "assets/photos/overlays/usfs-5435010324.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2422,
+      "trees": 0.3675,
+      "exposedLand": 0.0221,
+      "water": 0.3218
+    },
+    "contourPaths": 20,
+    "skyNodes": 8,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5441010324.webp",
+    "sha256": "7e26333d50330fe614679cc10fea1ac2cfabf8d7afe632ff0d3cf20ea8e461d4",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/usfs-5441010324.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0009,
+      "trees": 0.4052,
+      "exposedLand": 0.0914,
+      "water": 0.0307
+    },
+    "contourPaths": 74,
+    "skyNodes": 1,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5444.005571.webp",
+    "sha256": "88da5c4389148d78526f8f9f202050317835fd062534d982c5099a5442eec567",
+    "width": 2048,
+    "height": 1368,
+    "overlaySrc": "assets/photos/overlays/usfs-5444.005571.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2482,
+      "trees": 0.3059,
+      "exposedLand": 0.0001,
+      "water": 0.4207
+    },
+    "contourPaths": 3,
+    "skyNodes": 13,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5480010324.webp",
+    "sha256": "801eb9852ee2637b2c261b8c4a1bc09a7fbda52b8aa28b692fe1da6cf6694dbc",
+    "width": 2048,
+    "height": 1627,
+    "overlaySrc": "assets/photos/overlays/usfs-5480010324.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1723,
+      "trees": 0.336,
+      "exposedLand": 0.0586,
+      "water": 0.3987
+    },
+    "contourPaths": 44,
+    "skyNodes": 12,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5510010263.webp",
+    "sha256": "8c1a697132f02218fb9848a233e5b01d20f4ea98b0b1dc3b0c65d7530876e1ce",
+    "width": 2048,
+    "height": 1368,
+    "overlaySrc": "assets/photos/overlays/usfs-5510010263.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.189,
+      "trees": 0.2789,
+      "exposedLand": 0.0724,
+      "water": 0.4193
+    },
+    "contourPaths": 57,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5545010616.webp",
+    "sha256": "3f431eafae45386c131f56f3a83366ffca7b5456ba5e0aa78edb0bdb3c07bf88",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/usfs-5545010616.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2409,
+      "trees": 0.2906,
+      "exposedLand": 0.0687,
+      "water": 0.2975
+    },
+    "contourPaths": 29,
+    "skyNodes": 12,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-5663296010602.webp",
+    "sha256": "0ec24be5391a89627c672eca915d0b82adfee78456b2c43db6367fc36540e7c9",
+    "width": 2048,
+    "height": 1684,
+    "overlaySrc": "assets/photos/overlays/usfs-5663296010602.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.118,
+      "trees": 0.4657,
+      "exposedLand": 0.0441,
+      "water": 0.338
+    },
+    "contourPaths": 43,
+    "skyNodes": 7,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-6130010414.webp",
+    "sha256": "e892652091a356b97a3144cb8f71ca72ef115bf182280423a396141730a43f6e",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/overlays/usfs-6130010414.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.3809,
+      "exposedLand": 0.4433,
+      "water": 0.0628
+    },
+    "contourPaths": 222,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-6131010414.webp",
+    "sha256": "5c6fd6b97e802453a06c6edf4ff8f284c031db217b89c74d868c29282f974dae",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/usfs-6131010414.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.6916,
+      "exposedLand": 0.2024,
+      "water": 0.0
+    },
+    "contourPaths": 116,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-6485821010602.webp",
+    "sha256": "451e3047131a87358788929573c5f59046e4e257a6ec504c32b4337aba3535f0",
+    "width": 2048,
+    "height": 1334,
+    "overlaySrc": "assets/photos/overlays/usfs-6485821010602.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.2232,
+      "exposedLand": 0.1573,
+      "water": 0.5517
+    },
+    "contourPaths": 81,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-6492.004291.webp",
+    "sha256": "cc64b18a5269862d271e496728dc3e85ad774ab88a70e42bf7c26819af018eb1",
+    "width": 2048,
+    "height": 1463,
+    "overlaySrc": "assets/photos/overlays/usfs-6492.004291.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2946,
+      "trees": 0.4986,
+      "exposedLand": 0.1798,
+      "water": 0.0025
+    },
+    "contourPaths": 101,
+    "skyNodes": 13,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-7632.004731.webp",
+    "sha256": "3412cd4dad507c7f835e34201fd2e07c9c6e5ecaac3f20a16de0e69b903c61b5",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/usfs-7632.004731.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.4044,
+      "trees": 0.1698,
+      "exposedLand": 0.2722,
+      "water": 0.0
+    },
+    "contourPaths": 109,
+    "skyNodes": 19,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/usfs-7682.004621.webp",
+    "sha256": "5371f1fdc7e5f00cc448f0122a6960e9ae7e637b705e9de50800435335814d10",
+    "width": 2048,
+    "height": 1360,
+    "overlaySrc": "assets/photos/overlays/usfs-7682.004621.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0,
+      "trees": 0.3466,
+      "exposedLand": 0.3428,
+      "water": 0.0152
+    },
+    "contourPaths": 205,
+    "skyNodes": 0,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/wildwood-recreation.webp",
+    "sha256": "76b67be9a656c031195675a31b8e605daa974933f9cc6d7621cec80550195e61",
+    "width": 2048,
+    "height": 1981,
+    "overlaySrc": "assets/photos/overlays/wildwood-recreation.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.0152,
+      "trees": 0.5594,
+      "exposedLand": 0.0654,
+      "water": 0.3355
+    },
+    "contourPaths": 55,
+    "skyNodes": 3,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-bachelor.webp",
+    "sha256": "79311ee0d664f72d8a929e54ccd7a2a8189bcdb7ba21c6b8b07702f6df9c383b",
+    "width": 2048,
+    "height": 1170,
+    "overlaySrc": "assets/photos/overlays/winter-bachelor.svg",
+    "overlayGlowSrc": "assets/photos/overlays/winter-bachelor-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.576,
+      "trees": 0.1043,
+      "exposedLand": 0.2881,
+      "water": 0.0
+    },
+    "contourPaths": 42,
+    "skyNodes": 18,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-baker.webp",
+    "sha256": "810a411656ac32cd84a4422d38b915b3a28c54012559039f668c29e88e40d334",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/winter-baker.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2093,
+      "trees": 0.0775,
+      "exposedLand": 0.6956,
+      "water": 0.0
+    },
+    "contourPaths": 97,
+    "skyNodes": 13,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-bc-cypress.webp",
+    "sha256": "6d2ca29b44fbf0f5df79733bb079c561c1ea2b6d91f210f71cffc80403eb7c17",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/winter-bc-cypress.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.04,
+      "trees": 0.9274,
+      "exposedLand": 0.017,
+      "water": 0.0
+    },
+    "contourPaths": 26,
+    "skyNodes": 4,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-bc-grouse.webp",
+    "sha256": "ab741e5d2c200396b0170f25a350513f90b032db23341438fdca0a7cf7f31757",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/winter-bc-grouse.svg",
+    "overlayGlowSrc": "assets/photos/overlays/winter-bc-grouse-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.5021,
+      "trees": 0.4406,
+      "exposedLand": 0.0,
+      "water": 0.0
+    },
+    "contourPaths": 0,
+    "skyNodes": 22,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-bc-seymour.webp",
+    "sha256": "9fb378123a27174c4648a6794c3f6e0e16d9ddd5fc7d9385d4d33e5f86aa0db2",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/winter-bc-seymour.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.2434,
+      "trees": 0.6331,
+      "exposedLand": 0.0925,
+      "water": 0.0
+    },
+    "contourPaths": 81,
+    "skyNodes": 14,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-bc-whistler-blackcomb.webp",
+    "sha256": "13c91a3f63f75679b824d9035ea7660a80323cc33bfe6b8a09fa7708935ab2cd",
+    "width": 2048,
+    "height": 844,
+    "overlaySrc": "assets/photos/overlays/winter-bc-whistler-blackcomb.svg",
+    "overlayGlowSrc": "assets/photos/overlays/winter-bc-whistler-blackcomb-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.4614,
+      "trees": 0.2204,
+      "exposedLand": 0.296,
+      "water": 0.0
+    },
+    "contourPaths": 57,
+    "skyNodes": 13,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-crystal.webp",
+    "sha256": "d66bb4605986472518e4efb57320f744275681711122c7fb1808890e4c4c14cd",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/winter-crystal.svg",
+    "overlayGlowSrc": "assets/photos/overlays/winter-crystal-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.4635,
+      "trees": 0.3905,
+      "exposedLand": 0.047,
+      "water": 0.0
+    },
+    "contourPaths": 30,
+    "skyNodes": 23,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-meadows.webp",
+    "sha256": "1afa6d54223fb92ecc804b20c5b8f3ea90cd94455f94bf869ba9c7648fc606b3",
+    "width": 2048,
+    "height": 1356,
+    "overlaySrc": "assets/photos/overlays/winter-meadows.svg",
+    "overlayGlowSrc": "assets/photos/overlays/winter-meadows-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.6899,
+      "trees": 0.2684,
+      "exposedLand": 0.0288,
+      "water": 0.0
+    },
+    "contourPaths": 12,
+    "skyNodes": 26,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-skibowl.webp",
+    "sha256": "4727101b9f0b7664c476f37cc43b575d683ba86e7f3fb7e8a580bf500eafd640",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/winter-skibowl.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3837,
+      "trees": 0.3626,
+      "exposedLand": 0.2183,
+      "water": 0.0
+    },
+    "contourPaths": 39,
+    "skyNodes": 17,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-stevens.webp",
+    "sha256": "5a9ee5511d1316c0779f3cb3f1fbcfcbed85634094d8ef665559083e8661b119",
+    "width": 2048,
+    "height": 1538,
+    "overlaySrc": "assets/photos/overlays/winter-stevens.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.3952,
+      "trees": 0.4403,
+      "exposedLand": 0.0782,
+      "water": 0.0
+    },
+    "contourPaths": 39,
+    "skyNodes": 17,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-summit.webp",
+    "sha256": "ef5722930e8973e36dd2615c0830dc04ee4624006efe385ed40c2a45a6c8083c",
+    "width": 2048,
+    "height": 1153,
+    "overlaySrc": "assets/photos/overlays/winter-summit.svg",
+    "overlayGlowSrc": null,
+    "segmentationCoverage": {
+      "sky": 0.1099,
+      "trees": 0.76,
+      "exposedLand": 0.0479,
+      "water": 0.0
+    },
+    "contourPaths": 32,
+    "skyNodes": 7,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  },
+  {
+    "file": "assets/photos/winter-timberline.webp",
+    "sha256": "c402567bb8cda0e5e3845d69e571445b3979f9300e32687d5f58027a139c7258",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/overlays/winter-timberline.svg",
+    "overlayGlowSrc": "assets/photos/overlays/winter-timberline-nodes.svg",
+    "segmentationCoverage": {
+      "sky": 0.2299,
+      "trees": 0.0165,
+      "exposedLand": 0.7323,
+      "water": 0.0
+    },
+    "contourPaths": 223,
+    "skyNodes": 11,
+    "treeNodes": 11,
+    "maskModel": "segformer-b0-finetuned-ade-512-512",
+    "review": "Automatic semantic masks; visual review is recorded separately."
+  }
+]

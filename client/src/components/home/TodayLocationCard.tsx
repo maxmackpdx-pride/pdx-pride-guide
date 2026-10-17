@@ -1,3 +1,4 @@
+import {OutzPhoto,type OutzPhotoData} from '@/components/outz/OutzPhoto';
 import PlaceModal from "@/components/PlaceModal";
 import OutzCardModal from "./OutzCardModal";
 import OutzFollowButton from "./OutzFollowButton";
@@ -15,7 +16,7 @@ import type { Business } from "@/pages/Directory";
 import { outzBandArt } from "@/lib/outzKinds";
 import "./TodayLocationCard.css";
 
-export type TodayLocation = { key: string; name: string; room: "OutZide" | "Placez"; detail: string; href: string; kind?: string; art?: string; place?: Business };
+export type TodayLocation = { key: string; name: string; room: "OutZide" | "Placez"; detail: string; href: string; kind?: string; art?: string; photo?: OutzPhotoData; place?: Business };
 // Matches the OutZide drawer's waypoint palette and destination categories.
 const OUTZ_TOKENS: Record<string, string> = { trail: "--neon-orange", stay: "--neon-magenta", beach: "--neon-magenta", camp: "--green-acid", coastcamp: "--neon-cyan", watercamp: "--neon-cyan", spring: "--neon-cyan", fishing: "--green-acid", boating: "--neon-cyan", atv: "--neon-red", winter: "--neon-blue", dayuse: "--neon-yellow" };
 const OUTZ_LABELS: Record<string, string> = { trail: "Trail", stay: "Stay", beach: "Beach", camp: "Camp", coastcamp: "Coastal camp", watercamp: "Waterfront camp", spring: "Hot spring", fishing: "Fishing", boating: "Boating", atv: "Off-road", winter: "Winter", dayuse: "Day use" };
@@ -34,7 +35,7 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
     <RailShareButton href={location.href} title={location.name} />
     <button type="button" className="tonight-card__open" aria-label={`Open ${location.name}`} onClick={() => setOpen(true)}>
       <div className="tonight-card__art today-location__art">
-        {!isPlace && <img src={art} alt="" loading="lazy" />}
+        {!isPlace && (location.photo ? <OutzPhoto photo={location.photo} /> : <img src={art} alt="" loading="lazy" />)}
         {isPlace && <img className={`today-location__brand${isPlace ? " today-location__brand--business" : ""}`} src={businessLogo || "/brand/outzide.png"} alt={isPlace ? `${location.name} logo` : "OutZide"} onError={event => { if (isPlace) { event.currentTarget.onerror = null; event.currentTarget.src = directoryFallbackLogo(kind); } }} />}
       </div>
       <div className="tonight-card__body">

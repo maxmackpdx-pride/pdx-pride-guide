@@ -1,3 +1,4 @@
+import {OutzPhoto,type OutzPhotoData} from '@/components/outz/OutzPhoto';
 import { ArrowUpRight } from "lucide-react";
 import { TriangleAlert } from "lucide-react";
 import PageRecovery from "@/components/PageRecovery";
@@ -105,9 +106,11 @@ export default function OutzPlace() {
     queryKey: ["/api/outz"],
     queryFn: () => apiRequest("GET", "/api/outz").then(r => r.json()),
   });
+  const {data: photoCatalog} = useQuery<{places:{id:string;photo?:OutzPhotoData}[]}>({queryKey:['/outzide-map/places.json'],queryFn:()=>apiRequest('GET','/outzide-map/places.json').then(r=>r.json()),staleTime:3600_000});
   const snapshot = snapshotQuery.data?.data;
   const place = snapshot ? outzPlaceFromSlug(snapshot, slug) : null;
   const placeId = place?.id ?? null;
+  const photo = photoCatalog?.places.find(row=>row.id===placeId)?.photo;
 
   /* The place contract carries no conditions or coordinates, so pull the full
      record when this listing is a featured destination or a catalog site. */
@@ -283,7 +286,7 @@ export default function OutzPlace() {
         </header>
       ) : (
         <div className="outz-hero">
-          <img className="outz-hero__art" src={`${OUTZ_MOTIF}/adventure-map-alpine-waypoints.svg`} alt="" aria-hidden="true" />
+          {photo ? <><OutzPhoto photo={photo} className="outz-hero__photo" /><p className="outz-hero__photo-credit">Photo: <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">{photo.author}</a> · <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer">{photo.license}</a> · Color & graphic treatment</p></> : <img className="outz-hero__art" src={`${OUTZ_MOTIF}/adventure-map-alpine-waypoints.svg`} alt="" aria-hidden="true" />}
           <BoardHero
             accent="orange"
             kicker={

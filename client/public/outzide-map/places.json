@@ -20,7 +20,35 @@
       "art": "assets/motifs/places/rooster-rock.svg",
       "coordinateSource": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=126",
       "coordinateCheckedAt": "2026-09-22T23:02:50.430Z",
-      "locationPrecision": "agency-area"
+      "locationPrecision": "agency-area",
+      "photo": {
+        "alt": "Columbia River shoreline at Rooster Rock State Park at sunset",
+        "author": "Another Believer",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rooster_Rock_State_Park,_Oregon,_2019_-_47.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/rooster-rock.webp",
+        "width": 2048,
+        "height": 1153,
+        "variants": [
+          {
+            "src": "assets/photos/rooster-rock-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/rooster-rock-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/rooster-rock.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/rooster-rock.svg",
+        "rank": 30,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "sauvie-island",
@@ -36,7 +64,35 @@
       "accent": "#FF00CC",
       "special": true,
       "state": "OR",
-      "art": "assets/motifs/places/sauvie-island.svg"
+      "art": "assets/motifs/places/sauvie-island.svg",
+      "photo": {
+        "alt": "Sauvie Island scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "M.O. Stevens",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sauvie_Island_and_the_Columbia_River_from_Skyline_-_Oregon.JPG",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/sauvie-island.webp",
+        "width": 2048,
+        "height": 1371,
+        "variants": [
+          {
+            "src": "assets/photos/sauvie-island-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/sauvie-island-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/sauvie-island.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/sauvie-island.svg",
+        "rank": 24,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "silver-falls",
@@ -59,7 +115,36 @@
       "note": "Camping",
       "state": "OR",
       "accent": "#39FF14",
-      "art": "assets/motifs/places/silver-falls.svg"
+      "art": "assets/motifs/places/silver-falls.svg",
+      "photo": {
+        "alt": "South Falls in winter at Silver Falls State Park",
+        "author": "Bonnie Moreland from Oregon, United States",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Silver_Falls_State_Park,_Oregon_(32389069216).jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "src": "assets/photos/silver-falls.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/silver-falls-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/silver-falls-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/silver-falls.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/silver-falls.svg",
+        "overlayGlowSrc": "assets/photos/overlays/silver-falls-nodes.svg",
+        "rank": 8,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "cape-lookout",
@@ -85,7 +170,35 @@
       "art": "assets/motifs/places/cape-lookout.svg",
       "coordinateSource": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=134",
       "coordinateCheckedAt": "2026-09-22T23:02:50.431Z",
-      "locationPrecision": "agency-area"
+      "locationPrecision": "agency-area",
+      "photo": {
+        "alt": "Coastline at Cape Lookout State Park",
+        "author": "Tobias Haase from Hanover, Germany",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cape_Lookout_State_Park,_Oregon_(23024704200).jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/cape-lookout.webp",
+        "width": 2048,
+        "height": 1158,
+        "variants": [
+          {
+            "src": "assets/photos/cape-lookout-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/cape-lookout-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/cape-lookout.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/cape-lookout.svg",
+        "rank": 37,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "beacon-rock",
@@ -111,7 +224,35 @@
       "art": "assets/motifs/places/beacon-rock.svg",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/beacon-rock-state-park",
       "coordinateCheckedAt": "2026-09-22T23:02:50.431Z",
-      "locationPrecision": "agency-area"
+      "locationPrecision": "agency-area",
+      "photo": {
+        "alt": "Beacon Rock from the Columbia River shore — HDR photograph with a slight warm shadow tint",
+        "author": "U.S. Geological Survey",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beacon_rock.jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Beacon_rock.jpg",
+        "src": "assets/photos/beacon-rock.webp",
+        "width": 2048,
+        "height": 1424,
+        "variants": [
+          {
+            "src": "assets/photos/beacon-rock-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/beacon-rock-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/beacon-rock.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/beacon-rock.svg",
+        "rank": 75,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "stub-stewart",
@@ -137,7 +278,35 @@
       "art": "assets/motifs/places/stub-stewart.svg",
       "coordinateSource": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=75",
       "coordinateCheckedAt": "2026-09-22T23:02:50.431Z",
-      "locationPrecision": "agency-area"
+      "locationPrecision": "agency-area",
+      "photo": {
+        "alt": "Coast Range forest viewed from Stub Stewart State Park",
+        "author": "Tedder",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stub_Stewart_State_Park_Oregon_Hilltop_pano.jpg",
+        "license": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "src": "assets/photos/stub-stewart.webp",
+        "width": 2048,
+        "height": 683,
+        "variants": [
+          {
+            "src": "assets/photos/stub-stewart-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/stub-stewart-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/stub-stewart.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/stub-stewart.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "memaloose",
@@ -474,7 +643,35 @@
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
       "accent": "#398BFF",
-      "art": "assets/motifs/places/usfs-5326.004621.svg"
+      "art": "assets/motifs/places/usfs-5326.004621.svg",
+      "photo": {
+        "alt": "Metolius River beside Allen Springs Campground",
+        "author": "U.S. Forest Service- Pacific Northwest Region",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Metolius_River,_Deschutes_National_Forest_(28730657965).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Metolius_River,_Deschutes_National_Forest_(28730657965).jpg",
+        "src": "assets/photos/usfs-5326.004621.webp",
+        "width": 2048,
+        "height": 1153,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5326.004621-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5326.004621-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5326.004621.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5326.004621.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5313.004621",
@@ -717,7 +914,35 @@
       "routeMatch": true,
       "routeDistance": 22,
       "routeSurface": "NATIVE MATERIAL",
-      "routeGrade": "TG02 - +5-8%"
+      "routeGrade": "TG02 - +5-8%",
+      "photo": {
+        "alt": "Angel's Rest Trailhead scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Forest Service Pacific Northwest Region",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:View_from_the_top_of_Angel%27s_Rest_November_29,_2018,_Columbia_River_Gorge_National_Scenic_Area.jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:View_from_the_top_of_Angel%27s_Rest_November_29,_2018,_Columbia_River_Gorge_National_Scenic_Area.jpg",
+        "src": "assets/photos/usfs-296847010602.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-296847010602-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-296847010602-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-296847010602.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-296847010602.svg",
+        "rank": 40,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5031010372",
@@ -803,7 +1028,35 @@
       "routeMatch": true,
       "routeDistance": 32,
       "routeSurface": "NAT - NATIVE MATERIAL",
-      "routeGrade": "12-20%"
+      "routeGrade": "12-20%",
+      "photo": {
+        "alt": "Mount Adams seen from the Ape Canyon trail",
+        "author": "jhvanwa",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ape_Canyon_in_WA_-_52223632853.jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "src": "assets/photos/usfs-7632.004731.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-7632.004731-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-7632.004731-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-7632.004731.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-7632.004731.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5463010371",
@@ -837,7 +1090,35 @@
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
       "accent": "#39FF14",
-      "art": "assets/motifs/places/usfs-6131010414.svg"
+      "art": "assets/motifs/places/usfs-6131010414.svg",
+      "photo": {
+        "alt": "A forest campsite at Archie Knowles Campground",
+        "author": "Rick Obst",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Campsite_in_Archie_Knowles_Campground.jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/usfs-6131010414.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-6131010414-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-6131010414-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-6131010414.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-6131010414.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5156010324",
@@ -1090,7 +1371,35 @@
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
       "accent": "#398BFF",
-      "art": "assets/motifs/places/usfs-5051010324.svg"
+      "art": "assets/motifs/places/usfs-5051010324.svg",
+      "photo": {
+        "alt": "Badger Lake in the Mt Hood National Forest",
+        "author": "U.S. Forest Service- Pacific Northwest Region",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
+        "src": "assets/photos/badger-lake.webp",
+        "width": 2048,
+        "height": 790,
+        "variants": [
+          {
+            "src": "assets/photos/badger-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/badger-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/badger-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/badger-lake.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-6015.004901",
@@ -1116,7 +1425,35 @@
       "routeMatch": false,
       "routeDistance": 1231,
       "routeSurface": "NATIVE MATERIAL",
-      "routeGrade": "12-20%"
+      "routeGrade": "12-20%",
+      "photo": {
+        "alt": "Badger Lake in the Mt Hood National Forest",
+        "author": "U.S. Forest Service- Pacific Northwest Region",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
+        "src": "assets/photos/badger-lake.webp",
+        "width": 2048,
+        "height": 790,
+        "variants": [
+          {
+            "src": "assets/photos/badger-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/badger-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/badger-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/badger-lake.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-4290630010602",
@@ -1739,7 +2076,35 @@
       "routeMatch": true,
       "routeDistance": 86,
       "routeSurface": "NATIVE MATERIAL",
-      "routeGrade": "12-20%"
+      "routeGrade": "12-20%",
+      "photo": {
+        "alt": "Wetland along Beaver Swamp Trail in Rogue-Umpqua Divide Wilderness",
+        "author": "U.S. Forest Service- Pacific Northwest Region",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beaver_Swamp_Trail,_Rogue-Umpqua_Divide_Wilderness,_Umpqua_National_Forest_(39602075691).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Beaver_Swamp_Trail,_Rogue-Umpqua_Divide_Wilderness,_Umpqua_National_Forest_(39602075691).jpg",
+        "src": "assets/photos/usfs-5344010371.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5344010371-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5344010371-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5344010371.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5344010371.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5013.005621",
@@ -1809,7 +2174,35 @@
       "routeMatch": true,
       "routeDistance": 1600,
       "routeSurface": "NATIVE MATERIAL",
-      "routeGrade": "12-20%"
+      "routeGrade": "12-20%",
+      "photo": {
+        "alt": "Benson Lake viewed from the Benson Lake Trail",
+        "author": "Gary Halvorson, Oregon State Archives",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Benson_Lake,_Benson_Lake_Trail,_Cascade_Mountains_-_DPLA_-_cc58211f8542ecbe6a0c93ace32c52f9.jpg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "src": "assets/photos/usfs-5444.005571.webp",
+        "width": 2048,
+        "height": 1368,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5444.005571-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5444.005571-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5444.005571.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5444.005571.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-7113.004731",
@@ -1861,7 +2254,35 @@
       "routeMatch": true,
       "routeDistance": 98,
       "routeSurface": "NATIVE MATERIAL",
-      "routeGrade": "12-20%"
+      "routeGrade": "12-20%",
+      "photo": {
+        "alt": "Betty Lake near Waldo Lake",
+        "author": "Gary Halvorson, Oregon State Archives",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Betty_Lake,_Cascade_Mountains,_Waldo_Lake_-_DPLA_-_ed2c8b9d236f106d15386f978f05f77e.jpg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "src": "assets/photos/usfs-5059.005641.webp",
+        "width": 2048,
+        "height": 3067,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5059.005641-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5059.005641-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5059.005641.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5059.005641.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5082.005641",
@@ -2016,7 +2437,35 @@
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
       "accent": "#398BFF",
-      "art": "assets/motifs/places/usfs-5004.005631.svg"
+      "art": "assets/motifs/places/usfs-5004.005631.svg",
+      "photo": {
+        "alt": "Mount Washington viewed across Big Lake",
+        "author": "Bonnie Moreland from Oregon, United States",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mt_Washington_in_snow_and_Big_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Mt_Washington_in_snow_and_Big_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "src": "assets/photos/usfs-5004.005631.webp",
+        "width": 2048,
+        "height": 1363,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5004.005631-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5004.005631-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5004.005631.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5004.005631.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5000.005631",
@@ -2033,7 +2482,35 @@
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
       "accent": "#398BFF",
-      "art": "assets/motifs/places/usfs-5000.005631.svg"
+      "art": "assets/motifs/places/usfs-5000.005631.svg",
+      "photo": {
+        "alt": "Mount Washington viewed across Big Lake",
+        "author": "Bonnie Moreland from Oregon, United States",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mt_Washington_in_snow_and_Big_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Mt_Washington_in_snow_and_Big_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "src": "assets/photos/usfs-5004.005631.webp",
+        "width": 2048,
+        "height": 1363,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5004.005631-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5004.005631-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5004.005631.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5004.005631.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "we-moon-land",
@@ -2145,7 +2622,35 @@
       "routeGrade": "N/A",
       "coordinateSource": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecInfraRecreationSites_02/MapServer/0/query?f=pjson&where=site_cn%3D%275236010553%27&outFields=site_name,latitude,longitude",
       "coordinateCheckedAt": "2026-09-22T23:04:46.842Z",
-      "locationPrecision": "agency-trailhead"
+      "locationPrecision": "agency-trailhead",
+      "photo": {
+        "alt": "Mountain ridges viewed from Maple Pass, with cartographic graphic treatment.",
+        "author": "jhvanwa",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Maple_Pass_at_North_Cascades_in_WA_-_53100659931.jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "src": "assets/photos/route-8579664.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/route-8579664-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/route-8579664-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/route-8579664.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/route-8579664.svg",
+        "rank": 34,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "route-8594524",
@@ -2172,7 +2677,35 @@
       "routeGrade": "TG05 - +12-20%",
       "coordinateSource": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecInfraRecreationSites_02/MapServer/0/query?f=pjson&where=site_cn%3D%275363010357%27&outFields=site_name,latitude,longitude",
       "coordinateCheckedAt": "2026-09-22T23:04:46.842Z",
-      "locationPrecision": "agency-trailhead"
+      "locationPrecision": "agency-trailhead",
+      "photo": {
+        "alt": "Lake 22 scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "brewbooks from near Seattle, USA",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Above_Lake_22_-_Flickr_-_brewbooks.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/route-8594524.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/route-8594524-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/route-8594524-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/route-8594524.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/route-8594524.svg",
+        "rank": 32,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "route-8569148",
@@ -2200,7 +2733,35 @@
       "routeGrade": "12-20%",
       "coordinateSource": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecInfraRecreationSites_02/MapServer/0/query?f=pjson&where=site_cn%3D%275137010357%27&outFields=site_name,latitude,longitude",
       "coordinateCheckedAt": "2026-09-22T23:02:50.434Z",
-      "locationPrecision": "agency-trailhead"
+      "locationPrecision": "agency-trailhead",
+      "photo": {
+        "alt": "Snow Lake near Snoqualmie Pass beneath misty mountains, with cartographic graphic treatment.",
+        "author": "Natecation",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Snow_Lake_(King_County,_Washington)_in_July_2020.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/route-8569148.webp",
+        "width": 2048,
+        "height": 1090,
+        "variants": [
+          {
+            "src": "assets/photos/route-8569148-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/route-8569148-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/route-8569148.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/route-8569148.svg",
+        "rank": 33,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "route-8600563",
@@ -2249,7 +2810,35 @@
       "routeGrade": "N/A",
       "coordinateSource": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecInfraRecreationSites_02/MapServer/0/query?f=pjson&where=site_cn%3D%276221.005511%27&outFields=site_name,latitude,longitude",
       "coordinateCheckedAt": "2026-09-22T23:04:46.842Z",
-      "locationPrecision": "agency-trailhead"
+      "locationPrecision": "agency-trailhead",
+      "photo": {
+        "alt": "Colchuck Lake below Aasgard Pass and Dragontail Peak, with cartographic graphic treatment.",
+        "author": "Laurel Fan",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Colchuck_Lake_2012.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/route-8580755.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/route-8580755-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/route-8580755-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/route-8580755.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/route-8580755.svg",
+        "rank": 31,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "route-8579996",
@@ -2300,7 +2889,36 @@
       "routeMatch": true,
       "routeSurface": "NATIVE MATERIAL",
       "routeGrade": "10-12%",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Mount Hood reflected in Mirror Lake, with cartographic graphic treatment.",
+        "author": "Oregon's Mt. Hood Territory.",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mount_Hood_reflected_in_Mirror_Lake,_Oregon.jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Mount_Hood_reflected_in_Mirror_Lake,_Oregon.jpg",
+        "src": "assets/photos/usfs-5480010324.webp",
+        "width": 2048,
+        "height": 1627,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5480010324-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5480010324-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5480010324.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5480010324.svg",
+        "position": "center 15%",
+        "rank": 49,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5441010324",
@@ -2317,7 +2935,35 @@
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
       "accent": "#FF6600",
       "art": "assets/motifs/places/usfs-5441010324.svg",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Ramona Falls cascading over basalt behind a wooden footbridge, with cartographic graphic treatment.",
+        "author": "Jeffhollett",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ramona_Falls_at_Mount_Hood_Wilderness_in_Oregon_2.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/usfs-5441010324.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5441010324-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5441010324-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5441010324.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5441010324.svg",
+        "rank": 50,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5447010324",
@@ -2419,7 +3065,35 @@
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
       "accent": "#FF6600",
       "art": "assets/motifs/places/usfs-5045.009041.svg",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Forested rocky cliffs at Eagle Creek, Columbia River Gorge National Scenic Area — HDR photograph with a slight warm shadow tint",
+        "author": "Forest Service Pacific Northwest Region",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Eagle_Creek,_Columbia_River_Gorge_NSA.jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Eagle_Creek,_Columbia_River_Gorge_NSA.jpg",
+        "src": "assets/photos/usfs-5045.009041.webp",
+        "width": 2048,
+        "height": 1371,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5045.009041-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5045.009041-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5045.009041.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5045.009041.svg",
+        "rank": 72,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-7682.004621",
@@ -2436,7 +3110,35 @@
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
       "accent": "#FF6600",
       "art": "assets/motifs/places/usfs-7682.004621.svg",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Tumalo Falls — HDR photograph with a slight warm shadow tint",
+        "author": "Gary Halvorson, Oregon State Archives",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tumalo_Falls_(Deschutes_County,_Oregon_scenic_images)_(desDB3253).jpg",
+        "license": "Attribution required; derivatives and commercial reuse allowed",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Tumalo_Falls_(Deschutes_County,_Oregon_scenic_images)_(desDB3253).jpg",
+        "src": "assets/photos/usfs-7682.004621.webp",
+        "width": 2048,
+        "height": 1360,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-7682.004621-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-7682.004621-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-7682.004621.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-7682.004621.svg",
+        "rank": 47,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5250.005571",
@@ -2462,7 +3164,35 @@
       "routeMatch": true,
       "routeSurface": "IMPORTED LOOSE MATERIAL",
       "routeGrade": "12-20%",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Proxy Falls cascading beside mossy rock and evergreen trees, with cartographic graphic treatment.",
+        "author": "U.S. Forest Service- Pacific Northwest Region",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Willamette_National_Forest,_Proxy_Falls-3_(36737290751).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Willamette_National_Forest,_Proxy_Falls-3_(36737290751).jpg",
+        "src": "assets/photos/usfs-5250.005571.webp",
+        "width": 2048,
+        "height": 3060,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5250.005571-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5250.005571-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5250.005571.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5250.005571.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-6485821010602",
@@ -2479,7 +3209,35 @@
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
       "accent": "#FF6600",
       "art": "assets/motifs/places/usfs-6485821010602.svg",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Mckenzie River Trailhead (Tamolitch Falls) — HDR photograph with a slight warm shadow tint",
+        "author": "Bonnie Moreland from Oregon, United States",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Blue_Pool,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Blue_Pool,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "src": "assets/photos/usfs-6485821010602.webp",
+        "width": 2048,
+        "height": 1334,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-6485821010602-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-6485821010602-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-6485821010602.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-6485821010602.svg",
+        "rank": 48,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-7667.004621",
@@ -2576,7 +3334,35 @@
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
       "accent": "#398BFF",
       "art": "assets/motifs/places/usfs-5435010324.svg",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Mount Hood reflected in Trillium Lake at sunrise, with cartographic graphic treatment.",
+        "author": "Kevin Crosby",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:OREGON_-_Trilluim_Lake_-_Mount_Hood_-_Sunrise_2024.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/usfs-5435010324.webp",
+        "width": 2048,
+        "height": 853,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5435010324-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5435010324-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5435010324.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5435010324.svg",
+        "rank": 26,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5008.005631",
@@ -2610,7 +3396,36 @@
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
       "accent": "#398BFF",
       "art": "assets/motifs/places/usfs-5067010324.svg",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Mount Hood across Timothy Lake from Hoodview Campground, with cartographic graphic treatment.",
+        "author": "Gary Halvorson, Oregon State Archives",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hoodview_Campground,_Timothy_Lake,_Mt._Hood_-_DPLA_-_6f6c70814b1299527407d40260333e6e.jpg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "src": "assets/photos/usfs-5067010324.webp",
+        "width": 2048,
+        "height": 1357,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5067010324-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5067010324-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5067010324.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5067010324.svg",
+        "position": "center 15%",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5066010324",
@@ -2627,7 +3442,35 @@
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
       "accent": "#398BFF",
       "art": "assets/motifs/places/usfs-5066010324.svg",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Mount Hood and evergreen forest reflected in Frog Lake, with cartographic graphic treatment.",
+        "author": "Bonnie Moreland from Oregon, United States",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Frog_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Frog_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "src": "assets/photos/usfs-5066010324.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5066010324-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5066010324-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5066010324.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5066010324.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5071010324",
@@ -2729,7 +3572,35 @@
       "sourceFetchedAt": "2026-09-22T09:26:38.059Z",
       "collection": "Northwest picks",
       "accent": "#398BFF",
-      "art": "assets/motifs/places/usfs-5545010616.svg"
+      "art": "assets/motifs/places/usfs-5545010616.svg",
+      "photo": {
+        "alt": "Dock and boat at forest-ringed Jubilee Lake, with cartographic graphic treatment.",
+        "author": "U.S. Forest Service",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jubilee_Lake,_USFS.jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Jubilee_Lake,_USFS.jpg",
+        "src": "assets/photos/usfs-5545010616.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5545010616-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5545010616-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5545010616.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5545010616.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5022.005631",
@@ -2814,7 +3685,35 @@
       "sourceFetchedAt": "2026-09-22T09:26:38.058Z",
       "collection": "Northwest picks",
       "accent": "#398BFF",
-      "art": "assets/motifs/places/usfs-5510010263.svg"
+      "art": "assets/motifs/places/usfs-5510010263.svg",
+      "photo": {
+        "alt": "Fishing at Anthony Lake in the Elkhorn Mountains, with cartographic graphic treatment.",
+        "author": "Gary Halvorson, Oregon State Archives",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Anthony_Lake,_Elkhorn_Mountains_-_DPLA_-_027a7a53c2b1b8b04c16d4e8b74fe249.jpg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "src": "assets/photos/usfs-5510010263.webp",
+        "width": 2048,
+        "height": 1368,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5510010263-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5510010263-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5510010263.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5510010263.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5104.004621",
@@ -2908,7 +3807,35 @@
       "routeMatch": true,
       "routeSurface": "NATIVE MATERIAL",
       "routeGrade": "TG05 - +12-20%",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Yellow wildflowers and Columbia River Gorge from Dog Mountain, with cartographic graphic treatment.",
+        "author": "jhvanwa",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dog_Mountain_in_WA_-_52174070438.jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "src": "assets/photos/usfs-5007010324.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5007010324-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5007010324-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5007010324.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5007010324.svg",
+        "rank": 41,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-6910.004731",
@@ -2993,7 +3920,35 @@
       "routeMatch": true,
       "routeSurface": "IMPORTED COMPACTED MATERIAL",
       "routeGrade": "TG05 - +12-20%",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Franklin Falls cascading over a rocky cliff into its pool, with cartographic graphic treatment.",
+        "author": "Steven Pavlov",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:2022-08-01,_Franklin_Falls_(King_County,_Washington),_004.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/usfs-138847010602.webp",
+        "width": 2048,
+        "height": 2731,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-138847010602-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-138847010602-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-138847010602.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-138847010602.svg",
+        "rank": 46,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5528010616",
@@ -3036,7 +3991,35 @@
       "routeMatch": true,
       "routeSurface": "NATIVE MATERIAL",
       "routeGrade": "TG05 - +12-20%",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Lake Serene — HDR photograph with a slight warm shadow tint",
+        "author": "Spengy",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lake_Serene_July_2025.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/usfs-5171010357.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5171010357-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5171010357-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5171010357.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5171010357.svg",
+        "rank": 45,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5421.005071",
@@ -3137,7 +4120,35 @@
       "routeMatch": true,
       "routeSurface": "N/A",
       "routeGrade": "N/A",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Rachel Lake surrounded by subalpine forest, with cartographic graphic treatment.",
+        "author": "Walter Siegmund",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rachel_Lake_26432.JPG",
+        "license": "CC BY 2.5",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+        "src": "assets/photos/usfs-5182010416.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5182010416-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5182010416-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5182010416.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5182010416.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5228010553",
@@ -3451,7 +4462,36 @@
       "sourceFetchedAt": "2026-09-22T09:23:10.673Z",
       "collection": "Northwest picks",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/forest-park.svg"
+      "art": "assets/motifs/places/forest-park.svg",
+      "photo": {
+        "alt": "Forest Park · Wildwood Trails scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "EncMstr",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Forest_park_wildwood_trail_lazy_bend_P3861.jpeg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/forest-park.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/forest-park-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/forest-park-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/forest-park.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/forest-park.svg",
+        "overlayGlowSrc": "assets/photos/overlays/forest-park-nodes.svg",
+        "rank": 14,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "hoyt-arboretum",
@@ -3468,7 +4508,35 @@
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/hoyt-arboretum.svg"
+      "art": "assets/motifs/places/hoyt-arboretum.svg",
+      "photo": {
+        "alt": "Tree branches and green foliage at Hoyt Arboretum, with cartographic graphic treatment.",
+        "author": "sunoochi from Sapporo, Hokkaido, Japan",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hoyt_Arboretum_in_Portland,_Oregon_(48852706563).jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/hoyt-arboretum.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/hoyt-arboretum-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/hoyt-arboretum-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/hoyt-arboretum.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/hoyt-arboretum.svg",
+        "rank": 28,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "powell-butte",
@@ -3485,7 +4553,35 @@
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/powell-butte.svg"
+      "art": "assets/motifs/places/powell-butte.svg",
+      "photo": {
+        "alt": "Trail through a flowering meadow at Powell Butte Nature Park, with cartographic graphic treatment.",
+        "author": "Gary Halvorson, Oregon State Archives",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Powell_Butte_Nature_Park,_Portland_-_DPLA_-_394f688a0772d8c6a2317c4dffd32b1f.jpg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "src": "assets/photos/powell-butte.webp",
+        "width": 2048,
+        "height": 1368,
+        "variants": [
+          {
+            "src": "assets/photos/powell-butte-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/powell-butte-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/powell-butte.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/powell-butte.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "mount-tabor",
@@ -3502,7 +4598,36 @@
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/mount-tabor.svg"
+      "art": "assets/motifs/places/mount-tabor.svg",
+      "photo": {
+        "alt": "Mt. Tabor Park Trails scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Akos Kokai",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Reservoir_(8232972593).jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/mount-tabor.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/mount-tabor-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/mount-tabor-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/mount-tabor.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/mount-tabor.svg",
+        "overlayGlowSrc": "assets/photos/overlays/mount-tabor-nodes.svg",
+        "rank": 15,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fort-stevens",
@@ -3522,7 +4647,36 @@
       "art": "assets/motifs/places/fort-stevens.svg",
       "coordinateSource": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=129",
       "coordinateCheckedAt": "2026-09-22T23:02:50.431Z",
-      "locationPrecision": "agency-area"
+      "locationPrecision": "agency-area",
+      "photo": {
+        "alt": "Peter Iredale shipwreck at sunset in Fort Stevens State Park, with cartographic graphic treatment.",
+        "author": "Robert Bradshaw (user Robertwb)",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Peter_iredale_sunset_edited1.jpg",
+        "license": "CC BY 2.5",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+        "src": "assets/photos/fort-stevens.webp",
+        "width": 2048,
+        "height": 1552,
+        "variants": [
+          {
+            "src": "assets/photos/fort-stevens-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fort-stevens-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fort-stevens.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fort-stevens.svg",
+        "overlayGlowSrc": "assets/photos/overlays/fort-stevens-nodes.svg",
+        "rank": 5,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "saddle-mountain",
@@ -3576,7 +4730,35 @@
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
       "accent": "#F2CA78",
-      "art": "assets/motifs/places/kalaloch.svg"
+      "art": "assets/motifs/places/kalaloch.svg",
+      "photo": {
+        "alt": "Driftwood beach at Kalaloch, Olympic National Park — HDR photograph with a slight warm shadow tint",
+        "author": "DeVos Max",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Drift_Logs_on_beach_in_northwest_Washington,_USA.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/kalaloch.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/kalaloch-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/kalaloch-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/kalaloch.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/kalaloch.svg",
+        "rank": 73,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "mora",
@@ -3661,7 +4843,35 @@
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/hall-mosses.svg"
+      "art": "assets/motifs/places/hall-mosses.svg",
+      "photo": {
+        "alt": "Mossy forest pond at the Hall of Mosses trail entrance, with cartographic graphic treatment.",
+        "author": "Reddit user PKThundr7",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hall_of_Mosses,_Hoh_Rainforest,_Olympic_National_Park,_Washington_(2015).jpg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "src": "assets/photos/hall-mosses.webp",
+        "width": 2048,
+        "height": 1271,
+        "variants": [
+          {
+            "src": "assets/photos/hall-mosses-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/hall-mosses-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/hall-mosses.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/hall-mosses.svg",
+        "rank": 25,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "hurricane-hill",
@@ -3678,7 +4888,36 @@
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/hurricane-hill.svg"
+      "art": "assets/motifs/places/hurricane-hill.svg",
+      "photo": {
+        "alt": "Olympic mountain ridges viewed from Hurricane Hill, with cartographic graphic treatment.",
+        "author": "Olympic National Park",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:MHC6518_High_Mountains_from_Hurricane_Hill_Olympic_NP_Washington_(22508802627).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:MHC6518_High_Mountains_from_Hurricane_Hill_Olympic_NP_Washington_(22508802627).jpg",
+        "src": "assets/photos/hurricane-hill.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/hurricane-hill-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/hurricane-hill-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/hurricane-hill.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/hurricane-hill.svg",
+        "position": "center 15%",
+        "rank": 53,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "marymere",
@@ -3695,7 +4934,35 @@
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/marymere.svg"
+      "art": "assets/motifs/places/marymere.svg",
+      "photo": {
+        "alt": "Marymere Falls — HDR photograph with a slight warm shadow tint",
+        "author": "Joe Mabel",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Marymere_Falls_pano_01.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/marymere.webp",
+        "width": 2048,
+        "height": 2317,
+        "variants": [
+          {
+            "src": "assets/photos/marymere-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/marymere-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/marymere.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/marymere.svg",
+        "rank": 54,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "sol-duc-falls",
@@ -3712,7 +4979,35 @@
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/sol-duc-falls.svg"
+      "art": "assets/motifs/places/sol-duc-falls.svg",
+      "photo": {
+        "alt": "Sol Duc Falls — HDR photograph with a slight warm shadow tint",
+        "author": "Sea Cow",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sol_Duc_Falls_2022_2.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/sol-duc-falls.webp",
+        "width": 2048,
+        "height": 1260,
+        "variants": [
+          {
+            "src": "assets/photos/sol-duc-falls-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/sol-duc-falls-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/sol-duc-falls.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/sol-duc-falls.svg",
+        "rank": 55,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "rialto",
@@ -3729,7 +5024,35 @@
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/rialto.svg"
+      "art": "assets/motifs/places/rialto.svg",
+      "photo": {
+        "alt": "Sea stacks and driftwood along Rialto Beach, with cartographic graphic treatment.",
+        "author": "Ron Clausen",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rialto_Beach,_Washington_coast._Olympic_National_Park.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/rialto.webp",
+        "width": 2048,
+        "height": 1331,
+        "variants": [
+          {
+            "src": "assets/photos/rialto-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/rialto-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/rialto.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/rialto.svg",
+        "rank": 52,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "cape-disappointment",
@@ -3749,7 +5072,36 @@
       "art": "assets/motifs/places/cape-disappointment.svg",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/cape-disappointment-state-park",
       "coordinateCheckedAt": "2026-09-22T23:02:50.431Z",
-      "locationPrecision": "agency-area"
+      "locationPrecision": "agency-area",
+      "photo": {
+        "alt": "Cape Disappointment State Park scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Adbar",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cape_Disappointment_and_Cape_Disappointment_Light.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/cape-disappointment.webp",
+        "width": 2048,
+        "height": 1371,
+        "variants": [
+          {
+            "src": "assets/photos/cape-disappointment-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/cape-disappointment-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/cape-disappointment.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/cape-disappointment.svg",
+        "overlayGlowSrc": "assets/photos/overlays/cape-disappointment-nodes.svg",
+        "rank": 17,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "grayland-beach",
@@ -3769,7 +5121,35 @@
       "art": "assets/motifs/places/grayland-beach.svg",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/grayland-beach-state-park",
       "coordinateCheckedAt": "2026-09-22T23:02:50.431Z",
-      "locationPrecision": "agency-area"
+      "locationPrecision": "agency-area",
+      "photo": {
+        "alt": "Driftwood and sunlit clouds over Grayland Beach, with cartographic graphic treatment.",
+        "author": "Steve Ginn from Western Washington, United States",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grayland_Beach_State_Park_(33475037010).jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "src": "assets/photos/grayland-beach.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/grayland-beach-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/grayland-beach-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/grayland-beach.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/grayland-beach.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bagby-hot-springs",
@@ -3786,7 +5166,35 @@
       "sourceName": "www.fs.usda.gov",
       "sourceFetchedAt": "2026-09-22T09:24:19.651Z",
       "collection": "Hot springs",
-      "art": "assets/motifs/places/bagby-hot-springs.svg"
+      "art": "assets/motifs/places/bagby-hot-springs.svg",
+      "photo": {
+        "alt": "Wooden tub at Bagby Hot Springs — HDR photograph with a slight warm shadow tint",
+        "author": "ReinholdAndrus",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bagby_hot_springs_oregon.jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Bagby_hot_springs_oregon.jpg",
+        "src": "assets/photos/bagby-hot-springs.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/bagby-hot-springs-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bagby-hot-springs-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bagby-hot-springs.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bagby-hot-springs.svg",
+        "rank": 64,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "umpqua-hot-springs",
@@ -3803,7 +5211,35 @@
       "sourceName": "www.fs.usda.gov",
       "sourceFetchedAt": "2026-09-22T09:24:19.652Z",
       "collection": "Hot springs",
-      "art": "assets/motifs/places/umpqua-hot-springs.svg"
+      "art": "assets/motifs/places/umpqua-hot-springs.svg",
+      "photo": {
+        "alt": "Umpqua Hot Springs — HDR photograph with a slight warm shadow tint",
+        "author": "Stephen Wood",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Umpqua_Hot_Springs_1_-_panoramio.jpg",
+        "license": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "src": "assets/photos/umpqua-hot-springs.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/umpqua-hot-springs-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/umpqua-hot-springs-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/umpqua-hot-springs.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/umpqua-hot-springs.svg",
+        "rank": 63,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "terwilliger-hot-springs",
@@ -3820,7 +5256,35 @@
       "sourceName": "www.fs.usda.gov",
       "sourceFetchedAt": "2026-09-22T09:24:19.652Z",
       "collection": "Hot springs",
-      "art": "assets/motifs/places/terwilliger-hot-springs.svg"
+      "art": "assets/motifs/places/terwilliger-hot-springs.svg",
+      "photo": {
+        "alt": "Rock-lined pools at Terwilliger Hot Springs in misty forest, with cartographic graphic treatment.",
+        "author": "Kane5187",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Terwilliger_Hot_Springs_2016-04-04.JPG",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/terwilliger-hot-springs.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/terwilliger-hot-springs-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/terwilliger-hot-springs-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/terwilliger-hot-springs.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/terwilliger-hot-springs.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "sol-duc-hot-springs",
@@ -3837,7 +5301,35 @@
       "sourceName": "www.nps.gov",
       "sourceFetchedAt": "2026-09-22T09:24:19.652Z",
       "collection": "Hot springs",
-      "art": "assets/motifs/places/sol-duc-hot-springs.svg"
+      "art": "assets/motifs/places/sol-duc-hot-springs.svg",
+      "photo": {
+        "alt": "Sol Duc Hot Springs Resort main lodge — HDR photograph with a slight warm shadow tint",
+        "author": "NPS Photo/D. Sullivan",
+        "sourceUrl": "https://www.nps.gov/places/000/sol-duc-hot-springs-resort.htm",
+        "license": "Public domain (US government NPS employee photograph)",
+        "licenseUrl": "https://www.nps.gov/aboutus/disclaimer.htm",
+        "src": "assets/photos/sol-duc-hot-springs.webp",
+        "width": 2048,
+        "height": 1153,
+        "variants": [
+          {
+            "src": "assets/photos/sol-duc-hot-springs-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/sol-duc-hot-springs-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/sol-duc-hot-springs.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/sol-duc-hot-springs.svg",
+        "rank": 65,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "goldmyer-hot-springs",
@@ -3871,7 +5363,36 @@
       "sourceFetchedAt": "2026-09-22T09:26:38.060Z",
       "collection": "Northern California",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/usfs-6492.004291.svg"
+      "art": "assets/motifs/places/usfs-6492.004291.svg",
+      "photo": {
+        "alt": "Mount Shasta and conifers seen from Bunny Flat",
+        "author": "Frank Schulenburg",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mount_Shasta_as_seen_from_Bunny_Flat.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/usfs-6492.004291.webp",
+        "width": 2048,
+        "height": 1463,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-6492.004291-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-6492.004291-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-6492.004291.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-6492.004291.svg",
+        "position": "center 15%",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-5386.004291",
@@ -3956,7 +5477,35 @@
       "sourceName": "www.nps.gov",
       "sourceFetchedAt": "2026-09-22T09:26:38.060Z",
       "collection": "Northern California",
-      "art": "assets/motifs/places/fern-canyon.svg"
+      "art": "assets/motifs/places/fern-canyon.svg",
+      "photo": {
+        "alt": "Fern-covered walls and a stream through Fern Canyon",
+        "author": "Carol M. Highsmith",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fern_Canyon_is_a_canyon_in_the_Prairie_Creek_Redwoods_State_Park_in_Humboldt_County,_California_LCCN2013632260.tif",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Fern_Canyon_is_a_canyon_in_the_Prairie_Creek_Redwoods_State_Park_in_Humboldt_County,_California_LCCN2013632260.tif",
+        "src": "assets/photos/fern-canyon.webp",
+        "width": 2048,
+        "height": 1368,
+        "variants": [
+          {
+            "src": "assets/photos/fern-canyon-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fern-canyon-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fern-canyon.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fern-canyon.svg",
+        "rank": 51,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-6108010414",
@@ -4068,7 +5617,35 @@
       "sourceName": "US Forest Service",
       "collection": "Coast & Portland foothills",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/usfs-6130010414.svg"
+      "art": "assets/motifs/places/usfs-6130010414.svg",
+      "photo": {
+        "alt": "Drift Creek Falls cascading down a forested rock cliff",
+        "author": "Bonnie from United States",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Drift_Creek_Falls,_Waterfalls,_Oregon_(32560576922).jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "src": "assets/photos/usfs-6130010414.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-6130010414-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-6130010414-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-6130010414.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-6130010414.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-6143010414",
@@ -4100,7 +5677,35 @@
       "sourceName": "US Forest Service",
       "collection": "Coast & Portland foothills",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/usfs-5663296010602.svg"
+      "art": "assets/motifs/places/usfs-5663296010602.svg",
+      "photo": {
+        "alt": "Cape Perpetua Trails — HDR photograph with a slight warm shadow tint",
+        "author": "Cacophony",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:USHighway101(Oregon).jpg",
+        "license": "CC BY-SA 2.5",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+        "src": "assets/photos/usfs-5663296010602.webp",
+        "width": 2048,
+        "height": 1684,
+        "variants": [
+          {
+            "src": "assets/photos/usfs-5663296010602-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/usfs-5663296010602-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/usfs-5663296010602.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/usfs-5663296010602.svg",
+        "rank": 56,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "usfs-27.005251",
@@ -4265,7 +5870,35 @@
       "sourceName": "Official park / land manager",
       "collection": "Coast & Portland foothills",
       "accent": "#FF6600",
-      "art": "assets/motifs/places/wildwood-recreation.svg"
+      "art": "assets/motifs/places/wildwood-recreation.svg",
+      "photo": {
+        "alt": "Salmon River through the forest at Wildwood Recreation Site",
+        "author": "EncMstr",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Oregon_Salmon_River_Clackamas_County_from_bridge_looking_west_P1651.jpeg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "src": "assets/photos/wildwood-recreation.webp",
+        "width": 2048,
+        "height": 1981,
+        "variants": [
+          {
+            "src": "assets/photos/wildwood-recreation-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/wildwood-recreation-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/wildwood-recreation.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/wildwood-recreation.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "eagle-fern",
@@ -4336,7 +5969,35 @@
       "accent": "#FF00CC",
       "special": false,
       "art": "assets/motifs/places/denny-blaine.svg",
-      "sourceCheckedAt": "2026-09-22"
+      "sourceCheckedAt": "2026-09-22",
+      "photo": {
+        "alt": "Denny Blaine Park — HDR photograph with a slight warm shadow tint",
+        "author": "Joe Mabel",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Denny_Blaine_Park_01.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "src": "assets/photos/denny-blaine.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/denny-blaine-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/denny-blaine-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/denny-blaine.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/denny-blaine.svg",
+        "rank": 61,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "howell-park",
@@ -4444,7 +6105,35 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.google.com/maps/d/viewer?mid=1cx0x3-agEyK28iKr5_WjjX2-dDc",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "Commonwealth Lake with shoreline paths and footbridge",
+        "author": "Steve Morgan",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Commonwealth_Lake_-_Cedar_Hills,_Oregon.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/fishing-or-commonwealth-lake.webp",
+        "width": 2048,
+        "height": 1356,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-or-commonwealth-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-or-commonwealth-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-or-commonwealth-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-or-commonwealth-lake.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-or-dorman-pond",
@@ -4549,7 +6238,35 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.google.com/maps/d/viewer?mid=1cx0x3-agEyK28iKr5_WjjX2-dDc",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "Henry Hagg Lake — HDR photograph with a slight warm shadow tint",
+        "author": "Meronim",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aerial_View_of_Henry_Hagg_Lake.JPG",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/fishing-or-henry-hagg-lake.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-or-henry-hagg-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-or-henry-hagg-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-or-henry-hagg-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-or-henry-hagg-lake.svg",
+        "rank": 60,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-or-north-fork-reservoir",
@@ -4570,7 +6287,35 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.google.com/maps/d/viewer?mid=1cx0x3-agEyK28iKr5_WjjX2-dDc",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "Boats at North Fork Reservoir beneath forested hills",
+        "author": "Rick Swart, ODFW",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:North_Fork_Reservoir_Clackamas_County_Oregon.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/fishing-or-north-fork-reservoir.webp",
+        "width": 2048,
+        "height": 1463,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-or-north-fork-reservoir-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-or-north-fork-reservoir-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-or-north-fork-reservoir.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-or-north-fork-reservoir.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-or-sandy-hatchery",
@@ -4654,7 +6399,35 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.google.com/maps/d/viewer?mid=10LVou9jmOzYPq-Qjzutac7vgj18",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "A boat silhouetted at sunset on Crane Prairie Reservoir",
+        "author": "Bureau of Land Management Oregon and Washington",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sunset_at_Crane_Prairie_Reservoir,_Oregon_(14176046352).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Sunset_at_Crane_Prairie_Reservoir,_Oregon_(14176046352).jpg",
+        "src": "assets/photos/fishing-or-crane-prairie-reservoir.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-or-crane-prairie-reservoir-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-or-crane-prairie-reservoir-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-or-crane-prairie-reservoir.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-or-crane-prairie-reservoir.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-or-wickiup-reservoir",
@@ -4696,7 +6469,35 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.google.com/maps/d/viewer?mid=10LVou9jmOzYPq-Qjzutac7vgj18",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "Odell Creek at south Davis Lake with distant Cascade peaks",
+        "author": "Gary Halvorson, Oregon State Archives",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Odell_Creek,_Davis_Lake,_Cascade_Lakes_National_Scenic_Byway,_Cascade_Mountains,_South_Sister,_Broken_Top,_Mt._Bachelor_-_DPLA_-_77493d3fbcc52535e05642b767552343.jpg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "src": "assets/photos/fishing-or-davis-lake.webp",
+        "width": 2048,
+        "height": 1368,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-or-davis-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-or-davis-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-or-davis-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-or-davis-lake.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-or-three-creeks-lake",
@@ -4717,7 +6518,35 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.google.com/maps/d/viewer?mid=10LVou9jmOzYPq-Qjzutac7vgj18",
-      "landscape": "river"
+      "landscape": "river",
+      "photo": {
+        "alt": "Three Creeks Lake beneath the snow-covered Tam McArthur Rim",
+        "author": "Bonnie Moreland from Oregon, United States",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tam_McArthur_Rim_at_Three_Creek_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Tam_McArthur_Rim_at_Three_Creek_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "src": "assets/photos/fishing-or-three-creeks-lake.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-or-three-creeks-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-or-three-creeks-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-or-three-creeks-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-or-three-creeks-lake.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-or-hosmer-lake",
@@ -4738,7 +6567,35 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.google.com/maps/d/viewer?mid=10LVou9jmOzYPq-Qjzutac7vgj18",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "Hosmer Lake reeds and water beneath Mount Bachelor",
+        "author": "Bonnie Moreland from Oregon, United States",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hosmer_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Hosmer_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+        "src": "assets/photos/fishing-or-hosmer-lake.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-or-hosmer-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-or-hosmer-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-or-hosmer-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-or-hosmer-lake.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-or-big-lava-lake",
@@ -4780,7 +6637,35 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.google.com/maps/d/viewer?mid=10LVou9jmOzYPq-Qjzutac7vgj18",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "South Twin Lake with a fallen log along the shore",
+        "author": "Nick Perla",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:South_Twin_Lake,_Oregon.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/fishing-or-south-twin-lake.webp",
+        "width": 2048,
+        "height": 683,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-or-south-twin-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-or-south-twin-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-or-south-twin-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-or-south-twin-lake.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-or-suttle-lake",
@@ -4801,7 +6686,35 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.google.com/maps/d/viewer?mid=10LVou9jmOzYPq-Qjzutac7vgj18",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "Snow and long tree shadows along frozen Suttle Lake",
+        "author": "Bonnie Moreland from Oregon, United States",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shadows_on_frozen_lake,_Oregon_(54410795083).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Shadows_on_frozen_lake,_Oregon_(54410795083).jpg",
+        "src": "assets/photos/fishing-or-suttle-lake.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-or-suttle-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-or-suttle-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-or-suttle-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-or-suttle-lake.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-or-metolius-river-wizard-falls",
@@ -4983,7 +6896,35 @@
       "selectionBasis": "Curated regional destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "approximate-area",
-      "landscape": "alpine"
+      "landscape": "alpine",
+      "photo": {
+        "alt": "Morning light on the mountains above Wallowa Lake",
+        "author": "Forest Service Northern Region from Missoula, MT, USA",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wallowa-lake-morning-07232011-rogermpeterson-001_(6096632257).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Wallowa-lake-morning-07232011-rogermpeterson-001_(6096632257).jpg",
+        "src": "assets/photos/fishing-or-wallowa-lake.webp",
+        "width": 2048,
+        "height": 1360,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-or-wallowa-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-or-wallowa-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-or-wallowa-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-or-wallowa-lake.svg",
+        "rank": 38,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-or-phillips-reservoir",
@@ -5034,7 +6975,36 @@
           "label": "Shore access",
           "value": "Good"
         }
-      ]
+      ],
+      "photo": {
+        "alt": "Lake Washington scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Joe Mabel",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seattle_-_E._Highland_Drive_shoreline_street_end_on_Lake_Washington_03.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/fishing-wa-lake-washington.webp",
+        "width": 2048,
+        "height": 1024,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-wa-lake-washington-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-washington-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-washington.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-wa-lake-washington.svg",
+        "overlayGlowSrc": "assets/photos/overlays/fishing-wa-lake-washington-nodes.svg",
+        "rank": 9,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-wa-lake-sammamish",
@@ -5065,7 +7035,36 @@
           "label": "Shore access",
           "value": "Good"
         }
-      ]
+      ],
+      "photo": {
+        "alt": "Trees and picnic lawns at Lake Sammamish State Park",
+        "author": "Mggkitsap",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:2006-08-0449lake-sammamish-washington.jpg",
+        "license": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "src": "assets/photos/fishing-wa-lake-sammamish.webp",
+        "width": 2048,
+        "height": 1371,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-wa-lake-sammamish-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-sammamish-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-sammamish.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-wa-lake-sammamish.svg",
+        "position": "center 90%",
+        "rank": 27,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-wa-green-lake",
@@ -5096,7 +7095,36 @@
           "label": "Shore access",
           "value": "Good"
         }
-      ]
+      ],
+      "photo": {
+        "alt": "Green Lake scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Seattle Municipal Archives from Seattle, WA",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Green_Lake,_Seattle,_2020_(52889781766).jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/fishing-wa-green-lake.webp",
+        "width": 2048,
+        "height": 1497,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-wa-green-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-wa-green-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-wa-green-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-wa-green-lake.svg",
+        "overlayGlowSrc": "assets/photos/overlays/fishing-wa-green-lake-nodes.svg",
+        "rank": 6,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-wa-angle-lake",
@@ -5127,7 +7155,35 @@
           "label": "Shore access",
           "value": "Good"
         }
-      ]
+      ],
+      "photo": {
+        "alt": "Angle Lake seen from the park lawn",
+        "author": "Joe Mabel",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:SeaTac,_WA_-_Angle_Lake_Park_01.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/fishing-wa-angle-lake.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-wa-angle-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-wa-angle-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-wa-angle-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-wa-angle-lake.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-wa-pine-lake",
@@ -5251,7 +7307,35 @@
           "label": "Shore access",
           "value": "Good"
         }
-      ]
+      ],
+      "photo": {
+        "alt": "Autumn trees and driftwood along Lake Kapowsin",
+        "author": "Chris Light",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:North_shore_panorama.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/fishing-wa-lake-kapowsin.webp",
+        "width": 2048,
+        "height": 717,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-wa-lake-kapowsin-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-kapowsin-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-kapowsin.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-wa-lake-kapowsin.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-wa-lake-goodwin",
@@ -5313,7 +7397,35 @@
           "label": "Shore access",
           "value": "Good"
         }
-      ]
+      ],
+      "photo": {
+        "alt": "Lake Stevens and snowy Cascade peaks seen from Wyatt Park",
+        "author": "Ron Clausen",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lake_Stevens_WA_panorama_from_Wyatt_Park.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/fishing-wa-lake-stevens.webp",
+        "width": 2048,
+        "height": 1024,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-wa-lake-stevens-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-stevens-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-stevens.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-wa-lake-stevens.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-wa-lake-roesiger",
@@ -5406,7 +7518,36 @@
           "label": "Shore access",
           "value": "Good"
         }
-      ]
+      ],
+      "photo": {
+        "alt": "Dock and autumn reflections at Lake Padden",
+        "author": "Robert Ashworth from Bellingham, WA., USA",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Late_autumn_at_Lake_Padden,_Bellingham_(8225221025).jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/fishing-wa-lake-padden.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-wa-lake-padden-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-padden-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-padden.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-wa-lake-padden.svg",
+        "position": "center 15%",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-wa-pass-lake",
@@ -5468,7 +7609,35 @@
           "label": "Shore access",
           "value": "Good"
         }
-      ]
+      ],
+      "photo": {
+        "alt": "Autumn foliage and mist reflected in Battle Ground Lake",
+        "author": "Cindy Shebley",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fall_Foliage_Peaks_Out_Through_the_Evergreen_Trees_(53321997992).jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/fishing-wa-battle-ground-lake.webp",
+        "width": 2048,
+        "height": 912,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-wa-battle-ground-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-wa-battle-ground-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-wa-battle-ground-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-wa-battle-ground-lake.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-wa-lacamas-lake",
@@ -5747,7 +7916,36 @@
           "label": "Shore access",
           "value": "Good"
         }
-      ]
+      ],
+      "photo": {
+        "alt": "Lake Chelan winding between mountains seen from Castle Rock",
+        "author": "NPS Staff",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lake_Chelan_from_Castle_Rock_(8dd37d134c384714b322012c2ca66ca1).JPG",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Lake_Chelan_from_Castle_Rock_(8dd37d134c384714b322012c2ca66ca1).JPG",
+        "src": "assets/photos/fishing-wa-lake-chelan.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-wa-lake-chelan-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-chelan-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-chelan.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-wa-lake-chelan.svg",
+        "overlayGlowSrc": "assets/photos/overlays/fishing-wa-lake-chelan-nodes.svg",
+        "rank": 13,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-wa-banks-lake",
@@ -5778,7 +7976,35 @@
           "label": "Shore access",
           "value": "Good"
         }
-      ]
+      ],
+      "photo": {
+        "alt": "Banks Lake and Grand Coulee cliffs from the shoreline",
+        "author": "Chris Light",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bank_Lake_2017-09-_679.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/fishing-wa-banks-lake.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-wa-banks-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-wa-banks-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-wa-banks-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-wa-banks-lake.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "fishing-wa-potholes-reservoir",
@@ -6038,7 +8264,36 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.google.com/maps/d/viewer?mid=1cx0x3-agEyK28iKr5_WjjX2-dDc",
-      "landscape": "river"
+      "landscape": "river",
+      "photo": {
+        "alt": "Willamette River and floating homes seen from Willamette Park",
+        "author": "Gary Halvorson, Oregon State Archives",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Willamette_Park,_Willamette_River_-_DPLA_-_2a3e19624734c1d7e932fa51848c8322.jpg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "src": "assets/photos/boating-or-willamette-park-portland-launch.webp",
+        "width": 2048,
+        "height": 1368,
+        "variants": [
+          {
+            "src": "assets/photos/boating-or-willamette-park-portland-launch-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/boating-or-willamette-park-portland-launch-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/boating-or-willamette-park-portland-launch.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/boating-or-willamette-park-portland-launch.svg",
+        "position": "center 15%",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "boating-or-lake-billy-chinook-crooked-river-launch",
@@ -6291,7 +8546,36 @@
       "locationPrecision": "agency-area",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/lake-sammamish-state-park",
       "activitySource": "https://parks.wa.gov/boat-launch-sites",
-      "landscape": "alpine"
+      "landscape": "alpine",
+      "photo": {
+        "alt": "Trees and picnic lawns at Lake Sammamish State Park",
+        "author": "Mggkitsap",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:2006-08-0449lake-sammamish-washington.jpg",
+        "license": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "src": "assets/photos/fishing-wa-lake-sammamish.webp",
+        "width": 2048,
+        "height": 1371,
+        "variants": [
+          {
+            "src": "assets/photos/fishing-wa-lake-sammamish-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-sammamish-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/fishing-wa-lake-sammamish.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/fishing-wa-lake-sammamish.svg",
+        "position": "center 90%",
+        "rank": 29,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "boating-wa-deception-pass-state-park-boating",
@@ -6313,7 +8597,36 @@
       "locationPrecision": "agency-area",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/deception-pass-state-park",
       "activitySource": "https://parks.wa.gov/boat-launch-sites",
-      "landscape": "coast"
+      "landscape": "coast",
+      "photo": {
+        "alt": "Deception Pass State Park · Boating scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "King of Hearts",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Deception_Pass_June_2018_002.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/boating-wa-deception-pass-state-park-boating.webp",
+        "width": 2048,
+        "height": 1368,
+        "variants": [
+          {
+            "src": "assets/photos/boating-wa-deception-pass-state-park-boating-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/boating-wa-deception-pass-state-park-boating-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/boating-wa-deception-pass-state-park-boating.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/boating-wa-deception-pass-state-park-boating.svg",
+        "overlayGlowSrc": "assets/photos/overlays/boating-wa-deception-pass-state-park-boating-nodes.svg",
+        "rank": 2,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "boating-wa-lake-wenatchee-state-park-boating",
@@ -6335,7 +8648,35 @@
       "locationPrecision": "agency-area",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/lake-wenatchee-state-park",
       "activitySource": "https://parks.wa.gov/boat-launch-sites",
-      "landscape": "alpine"
+      "landscape": "alpine",
+      "photo": {
+        "alt": "Driftwood along the forested shoreline at Lake Wenatchee State Park, with hills reflected in calm water.",
+        "author": "Steve Andersen from Seattle, WA, USA",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lake_Wenatchee_State_Park_(185828278).jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/boating-wa-lake-wenatchee-state-park-boating.webp",
+        "width": 2048,
+        "height": 1363,
+        "variants": [
+          {
+            "src": "assets/photos/boating-wa-lake-wenatchee-state-park-boating-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/boating-wa-lake-wenatchee-state-park-boating-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/boating-wa-lake-wenatchee-state-park-boating.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/boating-wa-lake-wenatchee-state-park-boating.svg",
+        "rank": 59,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "boating-wa-steamboat-rock-state-park-boating",
@@ -6357,7 +8698,35 @@
       "locationPrecision": "agency-area",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/steamboat-rock-state-park",
       "activitySource": "https://parks.wa.gov/boat-launch-sites",
-      "landscape": "desert"
+      "landscape": "desert",
+      "photo": {
+        "alt": "Steamboat Rock across blue water, framed by shoreline boulders.",
+        "author": "Ken Lund",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Steamboat_Rock_State_Park,_Washington_Route_155_Between_Coulee_City_and_Grand_Coulee_Dam,_Washington_-_50083297066.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/boating-wa-steamboat-rock-state-park-boating.webp",
+        "width": 2048,
+        "height": 1136,
+        "variants": [
+          {
+            "src": "assets/photos/boating-wa-steamboat-rock-state-park-boating-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/boating-wa-steamboat-rock-state-park-boating-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/boating-wa-steamboat-rock-state-park-boating.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/boating-wa-steamboat-rock-state-park-boating.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "boating-wa-potholes-state-park-boating",
@@ -6401,7 +8770,35 @@
       "locationPrecision": "agency-area",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/sun-lakes-dry-falls-state-park",
       "activitySource": "https://parks.wa.gov/boat-launch-sites",
-      "landscape": "desert"
+      "landscape": "desert",
+      "photo": {
+        "alt": "Basalt cliffs and autumn scrub around Deep Lake at Sun Lakes–Dry Falls State Park.",
+        "author": "Brylie Oxley",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:WA-DeepLake-SouthBank-p1_v1.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/boating-wa-sun-lakes-dry-falls-state-park-boating.webp",
+        "width": 2048,
+        "height": 683,
+        "variants": [
+          {
+            "src": "assets/photos/boating-wa-sun-lakes-dry-falls-state-park-boating-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/boating-wa-sun-lakes-dry-falls-state-park-boating-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/boating-wa-sun-lakes-dry-falls-state-park-boating.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/boating-wa-sun-lakes-dry-falls-state-park-boating.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "boating-wa-lincoln-rock-state-park-boating",
@@ -6445,7 +8842,35 @@
       "locationPrecision": "agency-area",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/daroga-state-park",
       "activitySource": "https://parks.wa.gov/boat-launch-sites",
-      "landscape": "desert"
+      "landscape": "desert",
+      "photo": {
+        "alt": "Trees frame the protected cove and dry hills at Daroga State Park.",
+        "author": "Todd Petit from East Wenatchee, WA, USA",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Daroga_State_Park,_001.jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/boating-wa-daroga-state-park-boating.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/boating-wa-daroga-state-park-boating-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/boating-wa-daroga-state-park-boating-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/boating-wa-daroga-state-park-boating.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/boating-wa-daroga-state-park-boating.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "boating-wa-twenty-five-mile-creek-state-park-boating",
@@ -6511,7 +8936,35 @@
       "locationPrecision": "agency-area",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/pearrygin-lake-state-park",
       "activitySource": "https://parks.wa.gov/boat-launch-sites",
-      "landscape": "alpine"
+      "landscape": "alpine",
+      "photo": {
+        "alt": "Pearrygin Lake beneath dry hills and a sweeping cloud-filled sky.",
+        "author": "Jennifer C.",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pearrygin_Lake,_Washington_(9864069254).jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/boating-wa-pearrygin-lake-state-park-boating.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/boating-wa-pearrygin-lake-state-park-boating-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/boating-wa-pearrygin-lake-state-park-boating-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/boating-wa-pearrygin-lake-state-park-boating.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/boating-wa-pearrygin-lake-state-park-boating.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "boating-wa-ike-kinswa-state-park-boating",
@@ -6555,7 +9008,35 @@
       "locationPrecision": "agency-area",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/twanoh-state-park",
       "activitySource": "https://parks.wa.gov/boat-launch-sites",
-      "landscape": "coast"
+      "landscape": "coast",
+      "photo": {
+        "alt": "Waterfront picnic grounds and evergreen trees at Twanoh State Park.",
+        "author": "Steven Pavlov",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Twanoh_State_Park,_002.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/boating-wa-twanoh-state-park-boating.webp",
+        "width": 2048,
+        "height": 1368,
+        "variants": [
+          {
+            "src": "assets/photos/boating-wa-twanoh-state-park-boating-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/boating-wa-twanoh-state-park-boating-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/boating-wa-twanoh-state-park-boating.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/boating-wa-twanoh-state-park-boating.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "boating-wa-joemma-beach-state-park-boating",
@@ -6640,7 +9121,35 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.rideatvoregon.org/wheretoride/cfcs/ridingGW.cfc?method=trailSearch&queryformat=column&returnformat=json",
-      "landscape": "dunes"
+      "landscape": "dunes",
+      "photo": {
+        "alt": "ATV riders among sand dunes, forest and shallow water at Oregon Dunes National Recreation Area.",
+        "author": "Themom51",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Oregon_Dunes_National_Recreation_Area.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/atv-or-oregon-dunes-national-recreation-area.webp",
+        "width": 2048,
+        "height": 1368,
+        "variants": [
+          {
+            "src": "assets/photos/atv-or-oregon-dunes-national-recreation-area-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/atv-or-oregon-dunes-national-recreation-area-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/atv-or-oregon-dunes-national-recreation-area.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/atv-or-oregon-dunes-national-recreation-area.svg",
+        "rank": 62,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "atv-or-winchester-bay",
@@ -6787,7 +9296,35 @@
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "agency-area",
       "coordinateSource": "https://www.rideatvoregon.org/wheretoride/cfcs/ridingGW.cfc?method=trailSearch&queryformat=column&returnformat=json",
-      "landscape": "desert"
+      "landscape": "desert",
+      "photo": {
+        "alt": "Dirt riding tracks cross sagebrush hills at Virtue Flat OHV Area.",
+        "author": "BLM Oregon & Washington",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Virtue_Flats_Off_Highway_Vehicle_(OHV)_Area_(26824035430).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Virtue_Flats_Off_Highway_Vehicle_(OHV)_Area_(26824035430).jpg",
+        "src": "assets/photos/atv-or-virtue-flat-ohv-area.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/atv-or-virtue-flat-ohv-area-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/atv-or-virtue-flat-ohv-area-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/atv-or-virtue-flat-ohv-area.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/atv-or-virtue-flat-ohv-area.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "atv-wa-walker-valley-orv-area",
@@ -7018,6 +9555,34 @@
         "reportUrl": "https://www.cypressmountain.com/",
         "passUrl": "https://www.cypressmountain.com/",
         "priceNote": "Canadian resort: prices are CAD unless the operator says otherwise. See official tickets, passes and operating reports for current terms."
+      },
+      "photo": {
+        "alt": "Cypress Mountain — HDR photograph with a slight warm shadow tint",
+        "author": "cogdogblog",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:2014-365-362_Snow_on_the_Mountain_(16132788051).jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/winter-bc-cypress.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/winter-bc-cypress-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-bc-cypress-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-bc-cypress.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-bc-cypress.svg",
+        "rank": 43,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {
@@ -7045,6 +9610,35 @@
         "reportUrl": "https://www.grousemountain.com/",
         "passUrl": "https://www.grousemountain.com/",
         "priceNote": "Canadian resort: prices are CAD unless the operator says otherwise. See official tickets, passes and operating reports for current terms."
+      },
+      "photo": {
+        "alt": "Snow-covered ski runs and forest on Grouse Mountain viewed from Burnaby.",
+        "author": "Orlandkurtenbach",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grouse_mountain_(ski_runs_close_up).JPG",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Grouse_mountain_(ski_runs_close_up).JPG",
+        "src": "assets/photos/winter-bc-grouse.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/winter-bc-grouse-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-bc-grouse-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-bc-grouse.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-bc-grouse.svg",
+        "overlayGlowSrc": "assets/photos/overlays/winter-bc-grouse-nodes.svg",
+        "rank": 7,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {
@@ -7072,6 +9666,34 @@
         "reportUrl": "https://mtseymour.ca/",
         "passUrl": "https://mtseymour.ca/",
         "priceNote": "Canadian resort: prices are CAD unless the operator says otherwise. See official tickets, passes and operating reports for current terms."
+      },
+      "photo": {
+        "alt": "Mt Seymour — HDR photograph with a slight warm shadow tint",
+        "author": "Keith Freeman (Keefer4~commonswiki)",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mtseymour-1.jpg",
+        "license": "CC BY-SA 2.5",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+        "src": "assets/photos/winter-bc-seymour.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/winter-bc-seymour-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-bc-seymour-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-bc-seymour.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-bc-seymour.svg",
+        "rank": 44,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {
@@ -7096,7 +9718,35 @@
       "landscape": "coast",
       "waterBody": "Strait of Georgia",
       "beachArea": "Wreck Beach",
-      "clothingStatus": "Clothing optional"
+      "clothingStatus": "Clothing optional",
+      "photo": {
+        "alt": "Wreck Beach scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "JRempel",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wreck_beach_vancouver_trees.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/bc-wreck.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/bc-wreck-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-wreck-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-wreck.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-wreck.svg",
+        "rank": 23,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-lynn",
@@ -7117,7 +9767,35 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "mountain"
+      "landscape": "mountain",
+      "photo": {
+        "alt": "Lynn Headwaters Regional Park — HDR photograph with a slight warm shadow tint",
+        "author": "Nerdreyes",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lynn_rapids.JPG",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/bc-lynn.webp",
+        "width": 2048,
+        "height": 2741,
+        "variants": [
+          {
+            "src": "assets/photos/bc-lynn-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-lynn-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-lynn.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-lynn.svg",
+        "rank": 68,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-stanley",
@@ -7138,7 +9816,36 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "mountain"
+      "landscape": "mountain",
+      "photo": {
+        "alt": "Stanley Park scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Dietmar Rabich",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Vancouver_(BC,_Canada),_Stanley_Park,_Ufer_zum_Hafen_--_2022_--_2118.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/bc-stanley.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/bc-stanley-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-stanley-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-stanley.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-stanley.svg",
+        "overlayGlowSrc": "assets/photos/overlays/bc-stanley-nodes.svg",
+        "rank": 1,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-golden-ears",
@@ -7159,7 +9866,36 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "Alouette Lake from Golden Ears Provincial Park — HDR photograph with a subtle orange shadow tint",
+        "author": "YukonExpatriate",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alouette_Lake_Seen_from_Golden_Ears_Provincial_Park.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/bc-golden-ears.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/bc-golden-ears-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-golden-ears-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-golden-ears.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-golden-ears.svg",
+        "overlayGlowSrc": "assets/photos/overlays/bc-golden-ears-nodes.svg",
+        "rank": 18,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-porteau",
@@ -7180,7 +9916,35 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "coast"
+      "landscape": "coast",
+      "photo": {
+        "alt": "Sunset over mountain silhouettes and driftwood along the shoreline at Porteau Cove.",
+        "author": "IvanAndreevich",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Porteau_Cove_at_sunset_by_IvanAndreevich_(WestCoastScapes).jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/bc-porteau.webp",
+        "width": 2048,
+        "height": 1366,
+        "variants": [
+          {
+            "src": "assets/photos/bc-porteau-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-porteau-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-porteau.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-porteau.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-buntzen",
@@ -7201,7 +9965,35 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "Forested mountains surrounding calm Buntzen Lake.",
+        "author": "Patrick Leahy (Patleahy)",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:BuntzenLakePL280507.jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/bc-buntzen.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/bc-buntzen-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-buntzen-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-buntzen.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-buntzen.svg",
+        "rank": 66,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-east-sooke",
@@ -7266,7 +10058,36 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "coast"
+      "landscape": "coast",
+      "photo": {
+        "alt": "A heron silhouetted against a red sunrise over the water at Island View Beach.",
+        "author": "Brandon Godfrey from Victoria B.C, Canada",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Island_View_Beach_BC.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/bc-island-view.webp",
+        "width": 2048,
+        "height": 1378,
+        "variants": [
+          {
+            "src": "assets/photos/bc-island-view-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-island-view-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-island-view.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-island-view.svg",
+        "position": "center 90%",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-goldstream",
@@ -7289,7 +10110,35 @@
       "locationPrecision": "mapped-site",
       "landscape": "mountain",
       "coordinateSource": "https://www.openstreetmap.org/way/164113984",
-      "coordinateCheckedAt": "2026-09-22T23:04:46.842Z"
+      "coordinateCheckedAt": "2026-09-22T23:04:46.842Z",
+      "photo": {
+        "alt": "Goldstream Falls beside Goldstream Campground, British Columbia — HDR photograph with a slight warm shadow tint",
+        "author": "Michal Klajban",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Goldstream_Falls,_Goldstream_Provincial_Park,_Vancouver_Island,_Canada_05.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/bc-goldstream.webp",
+        "width": 2048,
+        "height": 1158,
+        "variants": [
+          {
+            "src": "assets/photos/bc-goldstream-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-goldstream-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-goldstream.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-goldstream.svg",
+        "rank": 69,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-sooke-potholes",
@@ -7333,7 +10182,35 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "mountain"
+      "landscape": "mountain",
+      "photo": {
+        "alt": "Forest and rocky shores reflected in Thetis Lake beneath a cloudy sky.",
+        "author": "Michal Klajban\n\n",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Thetis_Lake,_Canada_01.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/bc-thetis.webp",
+        "width": 2048,
+        "height": 1153,
+        "variants": [
+          {
+            "src": "assets/photos/bc-thetis-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-thetis-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-thetis.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-thetis.svg",
+        "rank": 67,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-elk-lake",
@@ -7375,7 +10252,35 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "Boats and forest reflected in the calm water of Tod Inlet.",
+        "author": "Erinjlumley",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tod_Inlet,_Gowland_Tod_Provincial_Park,_BC,_Canada.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/bc-tod-inlet.webp",
+        "width": 2048,
+        "height": 1153,
+        "variants": [
+          {
+            "src": "assets/photos/bc-tod-inlet-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-tod-inlet-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-tod-inlet.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-tod-inlet.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "winter-bc-whistler-blackcomb",
@@ -7402,6 +10307,35 @@
         "reportUrl": "https://www.whistlerblackcomb.com/the-mountain/mountain-conditions/snow-and-weather-report/.aspx",
         "passUrl": "https://www.whistlerblackcomb.com/the-mountain/mountain-conditions/snow-and-weather-report/.aspx",
         "priceNote": "Canadian resort: prices are CAD unless the operator says otherwise. See official tickets, passes and operating reports for current terms."
+      },
+      "photo": {
+        "alt": "Snowy Whistler Mountain ski runs beneath a blue sky.",
+        "author": "Andysonic777 (talk · contribs)",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Whistler_Mountain_3.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "src": "assets/photos/winter-bc-whistler-blackcomb.webp",
+        "width": 2048,
+        "height": 844,
+        "variants": [
+          {
+            "src": "assets/photos/winter-bc-whistler-blackcomb-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-bc-whistler-blackcomb-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-bc-whistler-blackcomb.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-bc-whistler-blackcomb.svg",
+        "overlayGlowSrc": "assets/photos/overlays/winter-bc-whistler-blackcomb-nodes.svg",
+        "rank": 3,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {
@@ -7450,7 +10384,35 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "mountain"
+      "landscape": "mountain",
+      "photo": {
+        "alt": "Frozen Lost Lake, Whistler, British Columbia — HDR photograph with a slight warm shadow tint",
+        "author": "Ruth Hartnup from Vancouver, Canada",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lost_Lake_(4471634174).jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/bc-lost-lake.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/bc-lost-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-lost-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-lost-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-lost-lake.svg",
+        "rank": 70,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-rainbow",
@@ -7492,7 +10454,35 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "mountain"
+      "landscape": "mountain",
+      "photo": {
+        "alt": "Garibaldi Lake from Panorama Ridge — HDR photograph with a subtle orange shadow tint",
+        "author": "The Cosmonaut",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Garibaldi_Lake_seen_from_Panorama_Ridge.jpg",
+        "license": "CC BY-SA 2.5 ca",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5/ca/deed.en",
+        "src": "assets/photos/bc-garibaldi.webp",
+        "width": 2048,
+        "height": 1248,
+        "variants": [
+          {
+            "src": "assets/photos/bc-garibaldi-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-garibaldi-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-garibaldi.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-garibaldi.svg",
+        "rank": 35,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-brandywine",
@@ -7513,7 +10503,35 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "mountain"
+      "landscape": "mountain",
+      "photo": {
+        "alt": "Brandywine Falls Trail — HDR photograph with a slight warm shadow tint",
+        "author": "Paul Mannix",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Brandywine_Falls_Provincial_Park.jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/bc-brandywine.webp",
+        "width": 2048,
+        "height": 2731,
+        "variants": [
+          {
+            "src": "assets/photos/bc-brandywine-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/bc-brandywine-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/bc-brandywine.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/bc-brandywine.svg",
+        "rank": 71,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "bc-nairn",
@@ -7597,7 +10615,35 @@
       "selectionBasis": "Curated day-trip destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:44:22.777Z",
       "locationPrecision": "agency-area",
-      "landscape": "forest"
+      "landscape": "forest",
+      "photo": {
+        "alt": "Sandy River flowing around gravel bars at Dabney State Recreation Area.",
+        "author": "Ian Poellet",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sandy_at_Dabney_Oregon.jpg",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/dayuse-or-dabney-state-recreation-area.webp",
+        "width": 2048,
+        "height": 1372,
+        "variants": [
+          {
+            "src": "assets/photos/dayuse-or-dabney-state-recreation-area-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/dayuse-or-dabney-state-recreation-area-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/dayuse-or-dabney-state-recreation-area.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/dayuse-or-dabney-state-recreation-area.svg",
+        "rank": null,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "dayuse-or-latourell-falls-trailhead-guy-w-talbot",
@@ -7618,7 +10664,35 @@
       "selectionBasis": "Curated day-trip destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:44:22.777Z",
       "locationPrecision": "agency-area",
-      "landscape": "forest"
+      "landscape": "forest",
+      "photo": {
+        "alt": "Latourell Falls Trailhead (Guy W. Talbot) scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Steven Pavlov",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Latourell_Falls_(2017-05-28).jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/dayuse-or-latourell-falls-trailhead-guy-w-talbot.webp",
+        "width": 2048,
+        "height": 3072,
+        "variants": [
+          {
+            "src": "assets/photos/dayuse-or-latourell-falls-trailhead-guy-w-talbot-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/dayuse-or-latourell-falls-trailhead-guy-w-talbot-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/dayuse-or-latourell-falls-trailhead-guy-w-talbot.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/dayuse-or-latourell-falls-trailhead-guy-w-talbot.svg",
+        "rank": 36,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "dayuse-or-lewis-and-clark-state-recreation-site",
@@ -7681,7 +10755,36 @@
       "selectionBasis": "Curated day-trip destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:44:22.777Z",
       "locationPrecision": "agency-area",
-      "landscape": "coast"
+      "landscape": "coast",
+      "photo": {
+        "alt": "Ecola State Park scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Brmuchim (talk)",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ecola_State_Park_Haystack_Rock.JPG",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/dayuse-or-ecola-state-park.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/dayuse-or-ecola-state-park-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/dayuse-or-ecola-state-park-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/dayuse-or-ecola-state-park.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/dayuse-or-ecola-state-park.svg",
+        "overlayGlowSrc": "assets/photos/overlays/dayuse-or-ecola-state-park-nodes.svg",
+        "rank": 11,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "dayuse-or-oswald-west-state-park",
@@ -7702,7 +10805,36 @@
       "selectionBasis": "Curated day-trip destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:44:22.777Z",
       "locationPrecision": "agency-area",
-      "landscape": "coast"
+      "landscape": "coast",
+      "photo": {
+        "alt": "Oswald West State Park scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Steven Pavlov",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:2010-03-19_Neahkahnie_Viewpoint_(Oswald_West_State_Park,_Oregon)_165611.jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "src": "assets/photos/dayuse-or-oswald-west-state-park.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/dayuse-or-oswald-west-state-park-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/dayuse-or-oswald-west-state-park-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/dayuse-or-oswald-west-state-park.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/dayuse-or-oswald-west-state-park.svg",
+        "overlayGlowSrc": "assets/photos/overlays/dayuse-or-oswald-west-state-park-nodes.svg",
+        "rank": 16,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "dayuse-or-smith-rock-state-park",
@@ -7723,7 +10855,36 @@
       "selectionBasis": "Curated day-trip destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:44:22.777Z",
       "locationPrecision": "agency-area",
-      "landscape": "desert"
+      "landscape": "desert",
+      "photo": {
+        "alt": "Smith Rock State Park scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Jeffhollett",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Crooked_River_at_Smith_Rock_State_Park_in_Oregon_1.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/dayuse-or-smith-rock-state-park.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/dayuse-or-smith-rock-state-park-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/dayuse-or-smith-rock-state-park-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/dayuse-or-smith-rock-state-park.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/dayuse-or-smith-rock-state-park.svg",
+        "overlayGlowSrc": "assets/photos/overlays/dayuse-or-smith-rock-state-park-nodes.svg",
+        "rank": 10,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "dayuse-or-shore-acres-state-park",
@@ -7744,7 +10905,35 @@
       "selectionBasis": "Curated day-trip destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:44:22.777Z",
       "locationPrecision": "agency-area",
-      "landscape": "coast"
+      "landscape": "coast",
+      "photo": {
+        "alt": "Shore Acres State Park — HDR photograph with a slight warm shadow tint",
+        "author": "Dougtone",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shore_Acres_State_Park_-_Oregon_-_7413274768.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/dayuse-or-shore-acres-state-park.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/dayuse-or-shore-acres-state-park-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/dayuse-or-shore-acres-state-park-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/dayuse-or-shore-acres-state-park.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/dayuse-or-shore-acres-state-park.svg",
+        "rank": 57,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "dayuse-or-willamette-mission-state-park",
@@ -7933,7 +11122,35 @@
       "selectionBasis": "Curated day-trip destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:44:22.777Z",
       "locationPrecision": "agency-area",
-      "landscape": "desert"
+      "landscape": "desert",
+      "photo": {
+        "alt": "Palouse Falls State Park Heritage Site — HDR photograph with a slight warm shadow tint",
+        "author": "Williamborg",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Palouse-Falls-Washington-State.JPG",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "src": "assets/photos/dayuse-wa-palouse-falls-state-park-heritage-site.webp",
+        "width": 2048,
+        "height": 1276,
+        "variants": [
+          {
+            "src": "assets/photos/dayuse-wa-palouse-falls-state-park-heritage-site-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/dayuse-wa-palouse-falls-state-park-heritage-site-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/dayuse-wa-palouse-falls-state-park-heritage-site.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/dayuse-wa-palouse-falls-state-park-heritage-site.svg",
+        "rank": 74,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "dayuse-wa-ginkgo-petrified-forest-state-park",
@@ -7975,7 +11192,35 @@
       "selectionBasis": "Curated day-trip destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:44:22.777Z",
       "locationPrecision": "agency-area",
-      "landscape": "coast"
+      "landscape": "coast",
+      "photo": {
+        "alt": "Fort Casey Historical State Park — HDR photograph with a slight warm shadow tint",
+        "author": "Ricardo Martins from Gent, Belgium",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Admiralty_Head_Light_-_Whidbey_Island_WA.jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/dayuse-wa-fort-casey-historical-state-park.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/dayuse-wa-fort-casey-historical-state-park-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/dayuse-wa-fort-casey-historical-state-park-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/dayuse-wa-fort-casey-historical-state-park.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/dayuse-wa-fort-casey-historical-state-park.svg",
+        "rank": 58,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
+      }
     },
     {
       "id": "dayuse-wa-scenic-beach-state-park",
@@ -8021,6 +11266,35 @@
         "reportUrl": "https://www.skihood.com/mountain-report",
         "passUrl": "https://www.skihood.com/store/2026-27-season-passes",
         "priceNote": "Prices vary by age, date, access and purchase timing. See the resort for current totals and restrictions."
+      },
+      "photo": {
+        "alt": "Mt. Hood Meadows scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Gary Halvorson, Oregon State Archives",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mt._Hood,_Mt._Hood_Meadows_Ski_Resort_-_DPLA_-_a39dfe6619f883f93c95c0224fdd3994.jpg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "src": "assets/photos/winter-meadows.webp",
+        "width": 2048,
+        "height": 1356,
+        "variants": [
+          {
+            "src": "assets/photos/winter-meadows-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-meadows-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-meadows.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-meadows.svg",
+        "overlayGlowSrc": "assets/photos/overlays/winter-meadows-nodes.svg",
+        "rank": 19,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {
@@ -8046,6 +11320,35 @@
         "reportUrl": "https://www.mtbachelor.com/the-mountain/mountain-report/",
         "passUrl": "https://www.mtbachelor.com/tickets-passes/season-passes/",
         "priceNote": "Prices vary by age, date, access and purchase timing. See the resort for current totals and restrictions."
+      },
+      "photo": {
+        "alt": "Mt. Bachelor scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Bonnie Moreland",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mt._Bachelor,_Oregon,_early_morning.jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/File:Mt._Bachelor,_Oregon,_early_morning.jpg",
+        "src": "assets/photos/winter-bachelor.webp",
+        "width": 2048,
+        "height": 1170,
+        "variants": [
+          {
+            "src": "assets/photos/winter-bachelor-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-bachelor-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-bachelor.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-bachelor.svg",
+        "overlayGlowSrc": "assets/photos/overlays/winter-bachelor-nodes.svg",
+        "rank": 12,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {
@@ -8071,6 +11374,35 @@
         "reportUrl": "https://www.timberlinelodge.com/conditions",
         "passUrl": "https://www.timberlinelodge.com/mountain/season-passes/",
         "priceNote": "Prices vary by age, date, access and purchase timing. See the resort for current totals and restrictions."
+      },
+      "photo": {
+        "alt": "Timberline Lodge & Ski Area scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Another Believer",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Timberline_Lodge,_Oregon_(2013)_-_28.JPG",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/winter-timberline.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/winter-timberline-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-timberline-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-timberline.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-timberline.svg",
+        "overlayGlowSrc": "assets/photos/overlays/winter-timberline-nodes.svg",
+        "rank": 4,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {
@@ -8096,6 +11428,34 @@
         "reportUrl": "https://skibowl.com/winter-condition-and-lift-status/",
         "passUrl": "https://skibowl.com/tickets-passes/season-passes/",
         "priceNote": "Prices vary by age, date, access and purchase timing. See the resort for current totals and restrictions."
+      },
+      "photo": {
+        "alt": "Mt. Hood Skibowl scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Aaron Linville",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Skibowl_peak.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/winter-skibowl.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/winter-skibowl-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-skibowl-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-skibowl.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-skibowl.svg",
+        "rank": 39,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {
@@ -8221,6 +11581,35 @@
         "reportUrl": "https://www.crystalmountainresort.com/the-mountain/mountain-report-and-webcams",
         "passUrl": "https://www.crystalmountainresort.com/plan-your-trip/tickets-and-passes/season-passes",
         "priceNote": "Prices vary by age, date, access and purchase timing. See the resort for current totals and restrictions."
+      },
+      "photo": {
+        "alt": "Crystal Mountain Resort scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Buidhe",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mount_Rainier_from_just_north_of_Crystal_Mountain_summit_house_(7_March_2025).jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/winter-crystal.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/winter-crystal-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-crystal-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-crystal.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-crystal.svg",
+        "overlayGlowSrc": "assets/photos/overlays/winter-crystal-nodes.svg",
+        "rank": 20,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {
@@ -8246,6 +11635,34 @@
         "reportUrl": "https://www.stevenspass.com/the-mountain/mountain-conditions/lift-and-terrain-status.aspx",
         "passUrl": "https://www.stevenspass.com/explore/experience-stevens-pass.aspx",
         "priceNote": "Prices vary by age, date, access and purchase timing. See the resort for current totals and restrictions."
+      },
+      "photo": {
+        "alt": "Stevens Pass scenery with crisp HDR color and a subtle orange tint in the shadows.",
+        "author": "Buidhe",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:View_of_mountains_from_the_ski_lift_at_Stevens_Pass_(30_January_2025)_2.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/winter-stevens.webp",
+        "width": 2048,
+        "height": 1538,
+        "variants": [
+          {
+            "src": "assets/photos/winter-stevens-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-stevens-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-stevens.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-stevens.svg",
+        "rank": 21,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {
@@ -8271,6 +11688,34 @@
         "reportUrl": "https://www.summitatsnoqualmie.com/mountain-report",
         "passUrl": "https://www.summitatsnoqualmie.com/season-passes/downhill-season-passes",
         "priceNote": "Prices vary by age, date, access and purchase timing. See the resort for current totals and restrictions."
+      },
+      "photo": {
+        "alt": "Alpental ski slopes in summer — HDR photograph with a subtle orange shadow tint",
+        "author": "Wilderness trespasser",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alpental_ski_resort_(summer)_from_the_Snoqualmie_Mountain_trail.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/winter-summit.webp",
+        "width": 2048,
+        "height": 1153,
+        "variants": [
+          {
+            "src": "assets/photos/winter-summit-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-summit-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-summit.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-summit.svg",
+        "rank": 22,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {
@@ -8296,6 +11741,34 @@
         "reportUrl": "https://www.mtbaker.us/snow-report/",
         "passUrl": "https://www.mtbaker.us/tickets-and-passes/season-passes/",
         "priceNote": "Prices vary by age, date, access and purchase timing. See the resort for current totals and restrictions."
+      },
+      "photo": {
+        "alt": "Mt. Baker Ski Area — HDR photograph with a slight warm shadow tint",
+        "author": "Wavepacket",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:MtBaker-Chair8-Top.jpg",
+        "license": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "src": "assets/photos/winter-baker.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/winter-baker-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/winter-baker-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/winter-baker.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/overlays/winter-baker.svg",
+        "rank": 42,
+        "treatment": "layered-v2",
+        "modifications": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork."
       }
     },
     {

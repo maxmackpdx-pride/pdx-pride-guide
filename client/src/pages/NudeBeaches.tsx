@@ -1,3 +1,4 @@
+import {OutzPhoto,type OutzPhotoData} from '@/components/outz/OutzPhoto';
 import { ArrowRight } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CSSProperties } from "react";
@@ -180,6 +181,8 @@ function SauvieIslandPanel() {
 
 export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: NudeBeachTab }) {
   const isRooster = beachId === "rooster-rock";
+  const {data: photoCatalog}=useQuery<{places:{id:string;photo?:OutzPhotoData}[]}>({queryKey:['/outzide-map/places.json'],queryFn:()=>apiRequest('GET','/outzide-map/places.json').then(r=>r.json()),staleTime:3600_000});
+  const photo=photoCatalog?.places.find(row=>row.id===beachId)?.photo;
   usePageSeo(
     `${isRooster ? "Rooster Rock" : "Sauvie Island"} · OUTZ | Zaylist`,
     `${isRooster ? "Rooster Rock" : "Sauvie Island and Collins Beach"} live conditions, trip logistics, check-ins, carpools, and River Brats chat on OUTZ.`,
@@ -236,6 +239,7 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
           snapshot={snapshot}
           statsKey={`${beachId}-${snapshot?.fetchedAt ?? "pending"}`}
         />
+        {photo&&<><OutzPhoto key={beachId} photo={photo} className="outz-hero__photo" /><p className="outz-hero__photo-credit">Photo: <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">{photo.author}</a> · <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer">{photo.license}</a> · Color & graphic treatment</p></>}
       </header>
 
       <div className="nude-refresh-bar">

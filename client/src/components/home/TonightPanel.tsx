@@ -1,3 +1,4 @@
+import type {OutzPhotoData} from '@/components/outz/OutzPhoto';
 import { WebGLShader } from "@/components/ui/web-gl-shader";
 import { useSavedEvents } from "@/hooks/useSavedEvents";
 import { useAuth } from "@/context/AuthContext";
@@ -62,7 +63,7 @@ export default function TonightPanel() {
     queryFn: () => apiRequest("GET", "/api/directory").then((r) => r.json()),
     staleTime: 60_000,
   });
-  const { data: outzDetails } = useQuery<{ places: { id: string; art: string; region: string }[] }>({
+  const { data: outzDetails } = useQuery<{ places: { id: string; art: string; region: string; photo?: OutzPhotoData }[] }>({
     queryKey: ["/outzide-map/places.json"],
     queryFn: () => apiRequest("GET", "/outzide-map/places.json").then(r => r.json()),
     staleTime: 3600_000,
@@ -72,7 +73,7 @@ export default function TonightPanel() {
     .sort((a, b) => (parsePacificDateTime(a.dateStart) ?? 0) - (parsePacificDateTime(b.dateStart) ?? 0)), [listings, today]);
   const locations = useMemo(() => {
     const outside: TodayLocation[] = dailyPicks(outzCatalog, today, row => row.id).map(row => ({
-      key: `outz:${row.id}`, name: row.name, room: "OutZide", detail: outzDetails?.places.find(place => place.id === row.id)?.region || "Outdoor destination", kind: row.kind, art: outzDetails?.places.find(place => place.id === row.id)?.art, href: outzSharePath(row.id),
+      key: `outz:${row.id}`, name: row.name, room: "OutZide", detail: outzDetails?.places.find(place => place.id === row.id)?.region || "Outdoor destination", kind: row.kind, art: outzDetails?.places.find(place => place.id === row.id)?.art, photo: outzDetails?.places.find(place => place.id === row.id)?.photo, href: outzSharePath(row.id),
     }));
     const indoors: TodayLocation[] = dailyPicks(places.filter(row => row.status !== "CLOSED"), today, row => String(row.id)).map(row => ({
       key: `place:${row.id}`, name: row.name, room: "Placez", place: row, detail: row.neighborhood || row.address || "Portland metro", href: placePath(row.id, row.name),

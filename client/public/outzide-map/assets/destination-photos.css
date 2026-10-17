@@ -1,0 +1,22 @@
+/* Every plane shares identical sizing/crop; only transparent artwork moves. */
+.outz-photo{position:relative;display:block;overflow:hidden;isolation:isolate;--photo-x:0px;--photo-y:0px;background:#10130f}
+.outz-photo__base,.outz-photo__graphics,.outz-photo__overlay,.outz-photo__nodes{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;margin:0!important;object-fit:cover!important;object-position:var(--photo-position,center)!important;aspect-ratio:auto!important;mask-image:none!important;-webkit-mask-image:none!important;filter:none!important;pointer-events:none}
+.outz-photo__graphics{transform:translate(var(--photo-x),var(--photo-y));transition:transform .35s ease-out}
+.outz-photo__nodes{opacity:.65;animation:outz-photo-node-light 5s ease-in-out infinite;animation-play-state:paused}
+.outz-photo[data-photo-glowing=true] .outz-photo__nodes{animation-play-state:running}
+@keyframes outz-photo-node-light{0%,100%{opacity:.45}50%{opacity:.85}}
+.outzide-shell #detail .detail-hero.has-photo,.outzide-shell.home-card-embed #detail .detail-hero.has-photo{display:block;position:relative;padding:0 20px 16px}
+.outzide-shell #detail .detail-hero.has-photo>.destination-photo{position:relative;z-index:0;display:block;width:calc(100% + 40px);max-width:none;height:240px;margin:0 -20px 12px;border-radius:0}
+.outzide-shell #detail .detail-hero.has-photo .detail-tools button{background:#101510e8}
+.outzide-shell #detail .photo-credit{margin:12px 0 0;color:#c1c9c0;font:10px/1.5 var(--body)}
+.outzide-shell #detail .photo-credit a{color:inherit;text-decoration:underline}
+.outzide-shell #detail .photo-credit svg{display:none}
+.outzide-shell #results .place-card.has-photo{grid-template-columns:minmax(0,1fr) 28px}
+.outzide-shell #results .place-photo{grid-column:1/-1;display:block;width:calc(100% + 24px);max-width:none;height:165px;margin:-14px -12px 0}
+@media(max-width:760px){.outzide-shell #detail .detail-hero.has-photo>.destination-photo{height:210px}}
+:is(html.calm-mode,[data-calm=true]) .outz-photo__graphics{transform:none;transition:none}
+:is(html.calm-mode,[data-calm=true]) .outz-photo__nodes{animation:none}
+@media(prefers-reduced-motion:reduce){.outz-photo__graphics{transform:none!important;transition:none}.outz-photo__nodes{animation:none!important}}
+.outzide-shell #selection-dock>.place-card .place-photo{width:76px;height:76px;min-width:0;border-radius:9px;margin:0}
+/* Short owner-approved burnt-orange fade stays stationary with the photo frame. */
+.outz-photo::after{content:"";position:absolute;z-index:2;inset:auto 0 0;height:10%;background:linear-gradient(to bottom,rgba(184,71,16,0) 0%,rgba(184,71,16,.09) 25%,rgba(184,71,16,.48) 65%,rgba(184,71,16,.94) 100%);pointer-events:none}
