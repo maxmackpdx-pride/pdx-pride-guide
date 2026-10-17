@@ -9,6 +9,7 @@ import { writeDesignComponentSourceEvidence } from "./design-component-source-ev
 import { writeOutzideTokens } from "./build-outzide-tokens.mjs";
 import { assertNav } from "./nav-tripwire";
 import { assertTokens } from "./token-guard.mjs";
+import { syncMotifRecipes } from "./sync-motif-recipes";
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -48,6 +49,7 @@ async function buildAll() {
   console.log(`outzide tokens ${await writeOutzideTokens()}`);
   console.log(`nav tripwire ok (${assertNav()} destinations)`);
   console.log(`token guard ok (${assertTokens()} raw hexes, none new)`);
+  console.log(`Foundation motifs ${await syncMotifRecipes()}`);
 
   console.log("building client...");
   await viteBuild();

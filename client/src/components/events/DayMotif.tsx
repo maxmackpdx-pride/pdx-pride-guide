@@ -3,11 +3,13 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { EVENT_WEEK_DAYS } from "@shared/eventWeek";
 import "./DayMotif.css";
 import { CardArtworkGlass } from '../CardArtworkGlass';
+import { useMotifRecipes } from "../artwork/useMotifRecipes";
+import type { MotifDay } from "@/lib/designMotifRecipes";
 
 /**
  * Day motifs: one neon wireframe artwork per weekday, matched to the day's color.
- * Each motif is a stack of image layers from /motifs/days/: an opaque back layer and a
- * transparent top layer (Wednesday adds a transparent middle layer). The layers drift on
+ * Each motif uses the published weekday's two uploaded layers: its network and object.
+ * Black paper becomes transparent through luminance masks. The layers drift on
  * different directions with gentle idle drift. Shared pointer and scroll motion adds
  * depth to the artwork while glass and content stay fixed.
  * Every card of a weekday gets the same motif, so a Friday card always reads as Friday.
@@ -15,17 +17,17 @@ import { CardArtworkGlass } from '../CardArtworkGlass';
 
 type Day = (typeof EVENT_WEEK_DAYS)[number];
 
-type Motif = { name: string; mid: boolean; focusY: number };
+type Motif = { name: string; focusY: number };
 
 /** Keyed by day; colors follow the day tokens in shared/eventWeek.ts. */
 const MOTIFS: Record<Day, Motif> = {
-  MON: { name: "St. Johns", mid: false, focusY: 48 },    // purple
-  TUE: { name: "Willamette", mid: false, focusY: 44 },   // blue
-  WED: { name: "Steel Bridge", mid: true, focusY: 41 },  // yellow
-  THU: { name: "Rose", mid: false, focusY: 46 },         // cyan
-  FRI: { name: "Oregon", mid: false, focusY: 48 },       // magenta
-  SAT: { name: "Fremont", mid: false, focusY: 47 },      // green
-  SUN: { name: "Mt. Hood", mid: false, focusY: 47 },     // orange
+  MON: { name: "St. Johns", focusY: 48 },    // purple
+  TUE: { name: "Willamette", focusY: 44 },   // blue
+  WED: { name: "Steel Bridge", focusY: 41 }, // yellow
+  THU: { name: "Rose", focusY: 46 },         // cyan
+  FRI: { name: "Oregon", focusY: 48 },       // magenta
+  SAT: { name: "Fremont", focusY: 47 },      // green
+  SUN: { name: "Mt. Hood", focusY: 47 },     // orange
 };
 
 export const DAY_MOTIF_NAMES = Object.fromEntries(EVENT_WEEK_DAYS.map(d => [d, MOTIFS[d].name])) as Record<Day, string>;
@@ -35,16 +37,15 @@ export function motifDay(day: string | null | undefined): Day {
   return (EVENT_WEEK_DAYS as readonly string[]).includes(code) ? (code as Day) : "FRI";
 }
 
-const layerSrc = (day: Day, layer: "back" | "mid" | "top") => `/motifs/days/${day.toLowerCase()}-${layer}.webp`;
-
 /**
  * placement:
  *  - "card": spans the whole closed card, strongest low, behind the reading layer
  *    (flyer cards: the flyer covers the top, the motif rises behind the copy)
  *  - "art": fills a flyer slot when an event has no flyer
  */
-export default function DayMotif({ day, placement, className = "", glass = false }: { day: string | null | undefined; placement: "card" | "art"; className?: string; glass?: boolean }) {
+export default function DayMotif({ day, placement, className = "", glass = false, networkOnly = false }: { day: string | null | undefined; placement: "card" | "art"; className?: string; glass?: boolean; networkOnly?: boolean }) {
   const ref = useCardMotifParallax<HTMLSpanElement>();
+  const recipes = useMotifRecipes();
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const el = ref.current;
@@ -56,19 +57,18 @@ export default function DayMotif({ day, placement, className = "", glass = false
   }, []);
   const code = motifDay(day);
   const motif = MOTIFS[code];
-  const layers: ("back" | "mid" | "top")[] = motif.mid ? ["back", "mid", "top"] : ["back", "top"];
+  const pair = recipes?.dayPairs[code.toLowerCase() as MotifDay];
+  const layers = pair ? [{ depth: "back", id: pair.backId }, ...(networkOnly ? [] : [{ depth: "top", id: pair.frontId }])] : [];
   return (
     <span
       ref={ref}
-      className={`day-motif day-motif--${placement} ${className}`.trim()}
+      className={`day-motif day-motif--${placement}${networkOnly ? " day-motif--network" : ""} ${className}`.trim()}
       data-day={code}
       style={{ "--dm-focus": `${motif.focusY}%` } as CSSProperties}
       aria-hidden="true"
     >
       {visible
-        ? layers.map(layer => (
-            <img key={layer} data-motif-depth={layer==="back"?"back":layer==="mid"?"support":"front"} className={`day-motif__layer day-motif__layer--${layer}`} src={layerSrc(code, layer)} alt="" loading="lazy" decoding="async" draggable={false} />
-          ))
+        ? layers.map(layer => <span key={layer.depth} data-library-motif={layer.id} data-motif-depth={layer.depth === "back" ? "back" : "front"} className={`day-motif__layer day-motif__layer--${layer.depth}`} style={{ maskImage: `url("${recipes?.assets[layer.id].url}")`, WebkitMaskImage: `url("${recipes?.assets[layer.id].url}")` }} />)
         : null}
       {glass && <CardArtworkGlass />}
     </span>

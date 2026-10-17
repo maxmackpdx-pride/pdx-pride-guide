@@ -2,111 +2,52 @@ import { NetworkBackdrop } from "../artwork/NetworkBackdrop";
 import { CardArtworkGlass } from "../CardArtworkGlass";
 import "./ResourceCardMotif.css";
 import { resourceGradientStops } from "./resourceGradient";
-import { distinctResourceMotifs } from "./distinctResourceMotifs";
-import { distinctPlaceMotif, distinctPlaceSupportingMotif } from "./distinctPlaceMotifs";
+import { distinctPlaceMotif } from "./distinctPlaceMotifs";
 import { memo, useId, useRef, useState, useEffect } from "react";
 import { useCardMotifParallax } from "./useCardMotifParallax";
+import { categoryMotifRecipe, resourceMotifCategory } from "@/lib/designMotifRecipes";
+import { useMotifRecipes } from "../artwork/useMotifRecipes";
+import { LibraryMotifImage } from "../artwork/LibraryMotifImage";
 
-// Decorative, deterministic artwork: every organization gets a distinct mesh.
-// Paths are original drawings, not altered organization logos.
-const silhouettes: Record<string, string> = {
- cocktail: "M100 170 H300 L200 275 Z M200 275 V355 M155 355 H245 M230 170 L255 120 H300",
- dining: "M95 140 V225 Q125 255 155 225 V140 M125 140 V355 M285 140 Q235 185 260 245 H285 V355 M285 140 V245",
- coffee: "M100 220 H270 V300 Q185 370 100 300 Z M270 230 H305 Q345 270 270 290 M90 345 H290 M145 190 Q120 160 150 130 M215 190 Q190 160 220 130",
- shopping: "M100 210 H300 L320 355 H80 Z M150 220 V180 A50 50 0 0 1 250 180 V220",
- hotel: "M90 190 V350 M310 190 V350 M90 290 H310 M100 230 H300 V290 H100 Z M120 200 H185 V230 H120 Z M215 200 H280 V230 H215 Z",
- tools: "M130 135 Q80 190 145 220 L270 345 L305 310 L180 185 Q195 130 155 125 L160 175 L125 180 Z",
- camp: "M70 345 L200 145 L330 345 Z M145 345 L200 250 L255 345 M75 360 H325 M285 135 L300 115 M305 155 H335",
- wings: "M200 290 Q155 170 35 155 Q70 228 165 263 Q90 220 48 220 Q95 280 180 285 Q120 266 85 292 Q153 323 200 290 M200 290 Q245 170 365 155 Q330 228 235 263 Q310 220 352 220 Q305 280 220 285 Q280 266 315 292 Q247 323 200 290",
- home: "M85 250 L200 150 L315 250 M110 230 V345 H290 V230 M174 345 V270 H226 V345 M130 257 H154 V286 H130 Z M246 257 H270 V286 H246 Z",
- bridge: "M45 300 H355 M105 300 V175 H120 V300 M280 300 V175 H295 V300 M55 275 Q112 165 200 255 Q288 165 345 275 M150 235 V300 M200 255 V300 M250 235 V300",
- pulse: "M40 260 H112 L145 215 L178 310 L218 175 L250 260 H360 M75 200 V180 H95 M305 180 H325 V200 M75 320 V340 H95 M305 340 H325 V320",
- growth: "M200 350 V220 M200 280 Q110 285 100 190 Q193 180 200 280 M200 245 Q210 155 305 155 Q300 244 200 245 M160 350 H240",
- scales: "M200 155 V335 M145 335 H255 M100 190 H300 M115 190 L65 275 H165 Z M285 190 L235 275 H335 Z",
- prism: "M200 150 L320 310 H80 Z M200 150 V340 L80 310 M200 340 L320 310 M80 310 L240 235 M320 310 L160 235",
- orbit: "M65 250 C65 130 335 130 335 250 C335 370 65 370 65 250 Z M200 130 C90 130 90 370 200 370 C310 370 310 130 200 130 Z M70 200 L330 300 M70 300 L330 200",
- book: "M200 205 Q140 160 70 180 V325 Q140 305 200 350 Q260 305 330 325 V180 Q260 160 200 205 V350 M100 210 L170 230 M100 245 L170 265 M230 230 L300 210 M230 265 L300 245",
- stage: "M75 165 H325 V335 H75 Z M75 165 Q145 220 75 300 M325 165 Q255 220 325 300 M125 165 L190 300 M275 165 L210 300 M100 335 H300",
- heart: "M200 335 C150 295 70 250 85 190 C100 135 170 145 200 190 C230 145 300 135 315 190 C330 250 250 295 200 335 Z",
- signal: "M200 320 V235 M175 345 H225 M155 265 A65 65 0 1 1 245 265 M125 295 A108 108 0 1 1 275 295 M95 325 A150 150 0 1 1 305 325",
- shield: "M200 145 L310 185 V250 Q300 325 200 365 Q100 325 90 250 V185 Z M150 250 L185 285 L255 210",
- bolt: "M225 140 L110 280 H185 L165 370 L295 215 H215 Z",
- network: "M200 155 L300 220 L270 330 H130 L100 220 Z M200 155 L270 330 L100 220 H300 L130 330 Z",
- gift: "M92 215 H308 V365 H92 Z M78 185 H322 V220 H78 Z M190 185 V365 M210 185 V365 M200 185 C135 165 130 105 162 112 C184 117 198 158 200 185 C202 158 216 117 238 112 C270 105 265 165 200 185",
- microphone: "M145 135 H255 V232 Q255 285 200 285 Q145 285 145 232 Z M115 240 Q200 340 285 240 M200 310 V365 M145 365 H255",
- receipt: "M90 125 H260 L310 175 V365 H90 Z M260 125 V175 H310 M120 230 H270 M120 265 H250 M120 300 H225",
-};
-
-function themeFor(name: string, category: string) {
- const businessTheme = ({bar:"cocktail",restaurant:"dining",cafe:"coffee",venue:"stage",service:"tools",shop:"shopping",hotel:"hotel",nonprofit:"heart",healthcare:"pulse",realestate:"home",group:"network",campground:"camp"} as Record<string,string>)[category.replace(/^place-/, "")];
- if (category.startsWith("place-") && businessTheme) return businessTheme;
- const roomTheme = ({ eventz:"stage", hauz:"home", giftz:"gift", gigz:"microphone", sellz:"receipt", mizzed:"heart", zlists:"network" } as Record<string,string>)[category];
- if (roomTheme) return roomTheme;
- const n = name.toLowerCase();
- if (/bradley|beyond these|faerie/.test(n)) return "wings";
- if (/housing|house|living room|werq|pantr/.test(n)) return "home";
- if (/bridge|avenues|pairs|mentors/.test(n)) return "bridge";
- if (/evergreen|prairie|fertile|food|naya/.test(n)) return "growth";
- if (/prism|arts commission|ori|gallery/.test(n)) return "prism";
- if (/history|publishing|library/.test(n)) return "book";
- if (/stage|theatre|playhouse|festival/.test(n)) return "stage";
- if (/transponder|outreach|network/.test(n)) return "signal";
- if (/energy|cash|prosper|business|score/.test(n)) return "bolt";
- if (/veteran|rights|case oregon/.test(n)) return "shield";
- if (/tact|advocacy.*care|intersect|coalition/.test(n)) return "network";
- if (/emergence|quest|alliance/.test(n)) return "orbit";
- return ({health:"pulse", safety:"shield", legal:"scales", youth:"growth", community:"network", family:"heart", money:"bolt", arts:"prism", "harm-reduction":"shield", "mental-health":"orbit"} as Record<string,string>)[category] || "network";
-}
-
+// The API supplies all visible artwork; legacy placement metadata only preserves geometry.
 const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {name:string;category:string;colors?: string[]}) {
  const ref = useCardMotifParallax();
  const gradientId = `resource-motif-${useId().replace(/:/g, "")}`;
+ const recipes = useMotifRecipes();
+ const mappedCategory = resourceMotifCategory(category);
+ const recipe = mappedCategory && categoryMotifRecipe(recipes, mappedCategory.room, mappedCategory.category);
+ const hero = recipe && recipes?.assets[recipe.heroId];
+ const companion = recipe && recipes?.assets[recipe.companionId];
+ // Unregistered categories retain the registered network in the outer slot only.
+ if (!hero || !companion) return null;
  const paint = colors && colors.length > 1 ? `url(#${gradientId})` : "currentColor";
  let seed = Array.from(name).reduce((n,c)=>Math.imul(n,31)+c.charCodeAt(0)|0,7) >>> 0;
  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
  const isPlace = category.startsWith("place-");
- // Preserve the existing object placement seed while replacing only its backdrop.
  for (let i = 0; i < 60; i++) random();
- const theme=themeFor(name,category);
- const placeArtwork = distinctPlaceMotif(name);
- const projected = Boolean(placeArtwork);
- const silhouette = placeArtwork?.outline ?? (isPlace ? silhouettes[theme] : distinctResourceMotifs[name] ?? silhouettes[theme]);
+ const projected = Boolean(distinctPlaceMotif(name));
  const rightAtTop = Array.from(name).reduce((total, letter) => total + letter.charCodeAt(0), 0) % 2 === 0;
- const supporting = projected ? distinctPlaceSupportingMotif(name) : undefined;
  const tilt=(random()-.5)*((isPlace || projected) ? 4 : 12);
  const cycle = 28 + Math.round(random() * 8);
  const phase = -Math.round(random() * cycle);
  return <svg ref={ref} className="rg-card-motif" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-motif={`${category}-${name}`} data-motif-material={projected ? "projected" : undefined}>
-  {(isPlace || projected) && <defs><linearGradient id={`${gradientId}-edge`} gradientUnits="userSpaceOnUse" x1="90" y1="140" x2="280" y2="355">
-   <stop offset="0" style={{ stopColor: "color-mix(in srgb, var(--c) 70%, var(--text-hi))" }} />
-   <stop offset=".45" stopColor="currentColor" />
-   <stop offset="1" style={{ stopColor: "color-mix(in srgb, var(--c) 70%, var(--z-black))" }} />
-  </linearGradient></defs>}
   {colors && colors.length > 1 && <defs><linearGradient id={gradientId} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="400" y2="500">
    {resourceGradientStops(colors).map((stop, index) => <stop key={index} offset={`${stop.offset}%`} style={{ stopColor: stop.color }} />)}
   </linearGradient></defs>}
-  {supporting && <g data-motif-depth="support" className="rg-motif-layer rg-motif-layer--support">
+  <g data-motif-depth="support" className="rg-motif-layer rg-motif-layer--support">
    <g className="rg-motif-support-drift" style={{ animationDuration: `${cycle + 17}s`, animationDelay: `${phase - 13}s` }}>
     <g className="rg-motif-support-position" transform={`translate(${rightAtTop ? 230 : 170} 165) scale(.78) translate(-200 -250)`}>
-     <g fill="none" stroke={paint} strokeLinejoin="round">
-      <path className="rg-motif-rear-grid" d={supporting.rearGrid} />
-      <path className="rg-motif-surface-grid" d={supporting.grid} />
-      <path className="rg-motif-support-contour" d={supporting.outline} stroke={`url(#${gradientId}-edge)`} />
-     </g>
+     <g fill="none" stroke={paint} strokeLinejoin="round"><LibraryMotifImage asset={companion} paint={paint} /></g>
     </g>
    </g>
-  </g>}
+  </g>
   <g data-motif-depth="front" className="rg-motif-layer rg-motif-layer--object">
    <g className="rg-motif-object-drift" style={{ animationDuration: `${cycle + 9}s`, animationDelay: `${phase - 7}s` }}>
-  <g className="rg-motif-breathe" style={{ animationDuration: `${cycle + 4}s`, animationDelay: `${phase}s` }}>
-  <g className="rg-motif-object" fill="none" stroke={paint} strokeLinejoin="round" transform={`${isPlace ? `translate(${rightAtTop ? -22 : 22} 46) ` : ""}rotate(${tilt} 200 250)`}>
-   {placeArtwork && <><path className="rg-motif-rear-grid" d={placeArtwork.rearGrid} /><path className="rg-motif-surface-grid" d={placeArtwork.grid} /></>}
-   {!isPlace && !projected && <path className="rg-motif-depth" d={silhouette} transform="translate(5 7)" strokeWidth=".8" strokeDasharray="2 5" />}
-   {((isPlace || projected) ? [1] : [1.13,1.06,1]).map((scale,i)=><path key={scale} d={silhouette} transform={`translate(200 250) scale(${scale}) translate(-200 -250)`} className={scale===1 ? "rg-motif-contour" : "rg-motif-echo"} stroke={(isPlace || projected) && scale===1 ? `url(#${gradientId}-edge)` : undefined} strokeWidth={scale===1?1.5:.65} opacity={scale===1?.85:.24} />)}
-   {!isPlace && !projected && <path className="rg-motif-inner-edge" d={silhouette} transform="translate(200 250) scale(.976) translate(-200 -250)" strokeWidth=".55" />}
-   <path className="rg-motif-signal-trace" d={silhouette} pathLength="100" strokeWidth="1.15" strokeDasharray="3 97" style={{ animationDuration: `${cycle + 8}s`, animationDelay: `${phase}s` }} />
-  </g>
-  </g>
+    <g className="rg-motif-breathe" style={{ animationDuration: `${cycle + 4}s`, animationDelay: `${phase}s` }}>
+     <g className="rg-motif-object" fill="none" stroke={paint} strokeLinejoin="round" transform={`${isPlace ? `translate(${rightAtTop ? -22 : 22} 46) ` : ""}rotate(${tilt} 200 250)`}>
+      <LibraryMotifImage asset={hero} paint={paint} />
+     </g>
+    </g>
    </g>
   </g>
  </svg>;

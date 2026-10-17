@@ -3,7 +3,7 @@
 
 /* Each layer overfills the box so the drift never shows an edge. */
 .day-motif__layer { position: absolute; inset: calc(var(--dm-s) * -1.6); width: calc(100% + var(--dm-s) * 3.2); height: calc(100% + var(--dm-s) * 3.2);
-  max-width: none; object-fit: cover; object-position: 50% var(--dm-focus, 47%); user-select: none; will-change: transform; }
+  max-width: none; background:var(--c); mask-mode:luminance; mask-size:cover; mask-position:50% var(--dm-focus, 47%); mask-repeat:no-repeat; -webkit-mask-size:cover; -webkit-mask-position:50% var(--dm-focus, 47%); -webkit-mask-repeat:no-repeat; user-select: none; will-change: transform; }
 
 /* Opposite diagonals. Back: top-left to bottom-right. Top: center-right to bottom-left
    at 60% of the back's speed. Middle (Wednesday): the top's path at 80%. */
@@ -40,6 +40,9 @@
 
 /* Posterless art: the motif fills the flyer slot. */
 .day-motif--art { --dm-s: 10px; background: var(--z-black); }
+.day-motif--network { z-index:0; background:transparent; }
+/* A normal-flow flyer must paint above its absolutely positioned network. */
+.day-motif--network + img:not(.event-modal__poster-img) { position:relative; z-index:1; }
 
 /* A known white venue/organizer mark sits on the day art only when no real
    flyer exists. Unknown identities keep the day art alone. */
@@ -56,6 +59,9 @@
 
 /* No-flyer list thumbnails take the same box as the flyer image they replace. */
 .event-thumb { position: relative; display: block; flex: none; overflow: hidden; }
+.event-thumb > img { display:block; width:100%; height:100%; object-fit:cover; }
+.mapz-rsvp-event > .event-thumb { flex:none; }
+.events-map-row__open > .event-thumb > img { object-position:top; }
 .event-thumb .day-motif { --dm-s: 3px; }
 .events-map-row__open > .event-thumb { width: 60px; height: 60px; border-radius: 7px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 45%, transparent); }
 .mapz-layer-row > .event-thumb { width: 49px; height: 42px; border-radius: 7px; }

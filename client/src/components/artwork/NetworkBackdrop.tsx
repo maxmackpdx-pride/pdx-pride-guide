@@ -1,6 +1,7 @@
 import { memo, useId, useLayoutEffect, useState, type CSSProperties } from "react";
 import { useCardMotifParallax } from "../resources/useCardMotifParallax";
 import { networkSeed, networkStack } from "./networkStack";
+import { useMotifRecipes } from "./useMotifRecipes";
 import "./NetworkBackdrop.css";
 
 // DOM order follows filtering/reordering as well as separate card implementations.
@@ -23,6 +24,7 @@ function scheduleOrder() {
 export const NetworkBackdrop = memo(function NetworkBackdrop({ identity }: { identity: string }) {
   const ref = useCardMotifParallax<HTMLDivElement>();
   const maskId = useId().replace(/:/g, "");
+  const recipes = useMotifRecipes();
   const seed = networkSeed(identity);
   const [sequence, setSequence] = useState(seed % 8);
   const { set, orientation } = networkStack(sequence);
@@ -49,7 +51,7 @@ export const NetworkBackdrop = memo(function NetworkBackdrop({ identity }: { ide
         <div key={depth} className={`card-network__plane card-network__plane--${depth}`} data-network-depth={depth}>
           <svg viewBox="0 0 1280 1066" preserveAspectRatio="none" data-network-glitch={index === seed % 3 ? "true" : undefined}>
             <defs><mask id={`${maskId}-${depth}`} maskUnits="userSpaceOnUse" x="0" y="0" width="1280" height="1066" style={{ maskType: "luminance" }}>
-              <image href={`/card-art/network-stacks/${set}-${depth}.webp`} x="0" y="0" width="1280" height="1066" preserveAspectRatio="none"/>
+              <image href={recipes?.assets[recipes.networkSets[set === "a" ? "a" : "b"][index]]?.url} crossOrigin="anonymous" x="0" y="0" width="1280" height="1066" preserveAspectRatio="none"/>
             </mask></defs>
             <rect width="1280" height="1066" fill="white" mask={`url(#${maskId}-${depth})`}/>
           </svg>

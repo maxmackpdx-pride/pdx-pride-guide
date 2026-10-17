@@ -1,0 +1,18 @@
+/* One turn belongs to the whole registered triptych; each depth plane only drifts. */
+.outzide-network{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;z-index:0;opacity:.35}
+.outzide-network__orientation{position:absolute;inset:-7%;transform-origin:center}
+.outzide-network[data-network-orientation="mirror-x"]>.outzide-network__orientation{transform:scaleX(-1)}
+.outzide-network[data-network-orientation="half-turn"]>.outzide-network__orientation{transform:rotate(180deg)}
+.outzide-network[data-network-orientation="mirror-y"]>.outzide-network__orientation{transform:scaleY(-1)}
+.outzide-network__plane{position:absolute;inset:0;opacity:.55;animation:outzide-network-back 29s ease-in-out var(--outzide-motif-phase,0s) infinite;animation-play-state:var(--outzide-motif-playing,paused)}
+.outzide-network__plane--middle{opacity:.35;animation-name:outzide-network-middle;animation-duration:37s}
+.outzide-network__plane--front{opacity:.65;animation-name:outzide-network-front;animation-duration:23s}
+.outzide-network__plane>svg{display:block;position:absolute;inset:0;width:100%;height:100%;max-width:none}
+@keyframes outzide-network-back{0%,100%{transform:translate(-2px,1px)}50%{transform:translate(2px,-1px)}}
+@keyframes outzide-network-middle{0%,100%{transform:translate(3px,2px)}50%{transform:translate(-3px,-2px)}}
+@keyframes outzide-network-front{0%,100%{transform:translate(-4px,-2px)}50%{transform:translate(4px,2px)}}
+.outzide-shell #detail .detail-hero>.outzide-network{position:absolute;z-index:-2;opacity:.42}
+.outzide-shell .place-card>.outzide-network{z-index:0}
+.outzide-shell img[data-outzide-motif-ids]:not([src]){visibility:hidden}
+:is(html.calm-mode,[data-calm="true"],[data-motion-disabled="true"]) .outzide-network__plane{animation:none!important;transform:none!important}
+@media(prefers-reduced-motion:reduce){.outzide-network__plane{animation:none!important;transform:none!important}}

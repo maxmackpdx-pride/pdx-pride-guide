@@ -809,6 +809,7 @@ function EventModalInner({
 
         <div className="event-modal__scroll" ref={scrollRef}>
         <section ref={heroRef} className={`event-modal__poster event-modal__hero event-modal--poster-${posterOrientation}`} aria-labelledby="event-modal-title">
+          {posterUrl && <DayMotif day={event.dayOfWeek} placement="card" networkOnly />}
           {posterUrl
             ? <img ref={posterImageRef} src={posterUrl} alt="" className="event-modal__poster-img" onLoad={e => setPosterOrientation(e.currentTarget.naturalHeight > e.currentTarget.naturalWidth * 1.08 ? "portrait" : "landscape")} />
             : <span className="event-modal__poster-img event-modal__poster-motif"><DayMotif day={event.dayOfWeek} placement="art" /><CardArtworkGlass /><EventFallbackLogo title={event.title} venueName={event.venueName} /></span>}
