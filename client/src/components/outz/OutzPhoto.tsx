@@ -20,8 +20,8 @@ export function OutzPhoto({photo,className=''}:{photo:OutzPhotoData;className?:s
  const quiet=photoQuietStyle(photo.quiet);
  const dimensions={width:photo.width||1600,height:photo.height||1000};
  if(!localPhoto(photo.src))return null;
- const responsive=(variants?:{src:string;width:number}[])=>Array.isArray(variants)?variants.filter(v=>v&&typeof v==='object'&&localPhoto(v.src)&&/\.(?:webp|avif|png|jpe?g)$/i.test(v.src)&&Number.isInteger(v.width)&&v.width>0&&v.width<=8192).map(v=>`${localPhoto(v.src)} ${v.width}w`).join(', '):undefined;
- const srcSet=responsive(photo.variants),overlaySrcSet=responsive(photo.overlayVariants);
+ const responsive=(variants?:{src:string;width:number}[],allowSvg=false)=>Array.isArray(variants)?variants.filter(v=>v&&typeof v==='object'&&localPhoto(v.src)&&(allowSvg?/\.(?:webp|avif|png|jpe?g|svg)$/i:/\.(?:webp|avif|png|jpe?g)$/i).test(v.src)&&Number.isInteger(v.width)&&v.width>0&&v.width<=8192).map(v=>`${localPhoto(v.src)} ${v.width}w`).join(', '):undefined;
+ const srcSet=responsive(photo.variants),overlaySrcSet=responsive(photo.overlayVariants,true);
  return <span ref={ref} className={`outz-photo ${className}`} data-outz-photo data-photo-quiet={quiet?'true':undefined} data-photo-rank={photo.rank||999} style={{'--photo-position':photo.position||'center',...quiet} as CSSProperties}>
   <img className="outz-photo__base" src={localPhoto(photo.src)} srcSet={srcSet||undefined} sizes={srcSet?'(max-width: 800px) 100vw, 800px':undefined} alt={photo.alt||''} {...dimensions} loading="lazy" decoding="async" />
   {localPhoto(photo.overlaySrc)&&<span className="outz-photo__graphics" aria-hidden="true"><img className="outz-photo__overlay" src={localPhoto(photo.overlaySrc)} srcSet={overlaySrcSet||undefined} sizes={overlaySrcSet?'(max-width: 800px) 100vw, 800px':undefined} alt="" {...dimensions} loading="lazy" decoding="async" />{photo.rank&&photo.rank<=20&&localPhoto(photo.overlayGlowSrc)&&<img className="outz-photo__nodes" src={localPhoto(photo.overlayGlowSrc)} alt="" {...dimensions} loading="lazy" decoding="async" />}</span>}

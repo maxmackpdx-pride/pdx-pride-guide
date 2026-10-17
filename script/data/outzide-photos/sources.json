@@ -9,12 +9,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Rooster_Rock_State_Park,_Oregon,_2019_-_47.jpg",
     "originalSha256": null,
-    "output": "assets/photos/rooster-rock.webp",
+    "output": "assets/photos/v3/rooster-rock.webp",
     "width": 2048,
     "height": 1153,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and clean HDR base visually inspected; separate overlay artwork; slight warm shadows, greens/blues retained."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "sauvie-island",
@@ -26,15 +26,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Sauvie_Island_and_the_Columbia_River_from_Skyline_-_Oregon.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/sauvie-island.webp",
+    "output": "assets/photos/v3/sauvie-island.webp",
     "width": 2048,
     "height": 1371,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "silver-falls",
@@ -46,12 +43,12 @@
     "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Silver_Falls_State_Park,_Oregon_(32389069216).jpg",
     "originalSha256": null,
-    "output": "assets/photos/silver-falls.webp",
+    "output": "assets/photos/v3/silver-falls.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and clean HDR base visually inspected; separate overlay artwork; slight warm shadows, greens/blues retained."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "cape-lookout",
@@ -63,12 +60,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Cape_Lookout_State_Park,_Oregon_(23024704200).jpg",
     "originalSha256": null,
-    "output": "assets/photos/cape-lookout.webp",
+    "output": "assets/photos/v3/cape-lookout.webp",
     "width": 2048,
-    "height": 1158,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "height": 1160,
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and clean HDR base visually inspected; separate overlay artwork; slight warm shadows, greens/blues retained."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "beacon-rock",
@@ -80,12 +77,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Beacon_rock.jpg",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/5/54/Beacon_rock.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/beacon-rock.webp",
+    "output": "assets/photos/v3/beacon-rock.webp",
     "width": 2048,
-    "height": 1424,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "height": 1425,
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "stub-stewart",
@@ -97,12 +94,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Stub_Stewart_State_Park_Oregon_Hilltop_pano.jpg",
     "originalSha256": null,
-    "output": "assets/photos/stub-stewart.webp",
+    "output": "assets/photos/v3/stub-stewart.webp",
     "width": 2048,
     "height": 683,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and clean HDR base visually inspected; separate overlay artwork; slight warm shadows, greens/blues retained."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5326.004621",
@@ -114,12 +111,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Metolius_River,_Deschutes_National_Forest_(28730657965).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Metolius_River,_Deschutes_National_Forest_(28730657965).jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5326.004621.webp",
+    "output": "assets/photos/v3/usfs-5326.004621.webp",
     "width": 2048,
     "height": 1153,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-296847010602",
@@ -131,15 +128,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:View_from_the_top_of_Angel%27s_Rest_November_29,_2018,_Columbia_River_Gorge_National_Scenic_Area.jpg",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/6/63/View_from_the_top_of_Angel%27s_Rest_November_29%2C_2018%2C_Columbia_River_Gorge_National_Scenic_Area.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/usfs-296847010602.webp",
+    "output": "assets/photos/v3/usfs-296847010602.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-7632.004731",
@@ -151,12 +145,12 @@
     "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Ape_Canyon_in_WA_-_52223632853.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-7632.004731.webp",
+    "output": "assets/photos/v3/usfs-7632.004731.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-6131010414",
@@ -168,12 +162,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Campsite_in_Archie_Knowles_Campground.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-6131010414.webp",
+    "output": "assets/photos/v3/usfs-6131010414.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5051010324",
@@ -185,12 +179,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
     "originalSha256": null,
-    "output": "assets/photos/badger-lake.webp",
+    "output": "assets/photos/v3/badger-lake.webp",
     "width": 2048,
     "height": 790,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-6015.004901",
@@ -202,12 +196,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
     "originalSha256": null,
-    "output": "assets/photos/badger-lake.webp",
+    "output": "assets/photos/v3/badger-lake.webp",
     "width": 2048,
     "height": 790,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5344010371",
@@ -219,12 +213,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Beaver_Swamp_Trail,_Rogue-Umpqua_Divide_Wilderness,_Umpqua_National_Forest_(39602075691).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Beaver_Swamp_Trail,_Rogue-Umpqua_Divide_Wilderness,_Umpqua_National_Forest_(39602075691).jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5344010371.webp",
+    "output": "assets/photos/v3/usfs-5344010371.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5444.005571",
@@ -236,12 +230,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Benson_Lake,_Benson_Lake_Trail,_Cascade_Mountains_-_DPLA_-_cc58211f8542ecbe6a0c93ace32c52f9.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5444.005571.webp",
+    "output": "assets/photos/v3/usfs-5444.005571.webp",
     "width": 2048,
     "height": 1368,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5059.005641",
@@ -253,12 +247,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Betty_Lake,_Cascade_Mountains,_Waldo_Lake_-_DPLA_-_ed2c8b9d236f106d15386f978f05f77e.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5059.005641.webp",
+    "output": "assets/photos/v3/usfs-5059.005641.webp",
     "width": 2048,
     "height": 3067,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5004.005631",
@@ -270,12 +264,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Mt_Washington_in_snow_and_Big_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Mt_Washington_in_snow_and_Big_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5004.005631.webp",
+    "output": "assets/photos/v3/usfs-5004.005631.webp",
     "width": 2048,
     "height": 1363,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5000.005631",
@@ -287,12 +281,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Mt_Washington_in_snow_and_Big_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Mt_Washington_in_snow_and_Big_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5004.005631.webp",
+    "output": "assets/photos/v3/usfs-5004.005631.webp",
     "width": 2048,
     "height": 1363,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "route-8579664",
@@ -304,12 +298,12 @@
     "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Maple_Pass_at_North_Cascades_in_WA_-_53100659931.jpg",
     "originalSha256": null,
-    "output": "assets/photos/route-8579664.webp",
+    "output": "assets/photos/v3/route-8579664.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "route-8594524",
@@ -321,15 +315,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d6/Above_Lake_22_-_Flickr_-_brewbooks.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/route-8594524.webp",
+    "output": "assets/photos/v3/route-8594524.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "route-8569148",
@@ -341,12 +332,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Snow_Lake_(King_County,_Washington)_in_July_2020.jpg",
     "originalSha256": null,
-    "output": "assets/photos/route-8569148.webp",
+    "output": "assets/photos/v3/route-8569148.webp",
     "width": 2048,
     "height": 1090,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "route-8580755",
@@ -358,12 +349,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Colchuck_Lake_2012.jpg",
     "originalSha256": null,
-    "output": "assets/photos/route-8580755.webp",
+    "output": "assets/photos/v3/route-8580755.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5480010324",
@@ -375,12 +366,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Mount_Hood_reflected_in_Mirror_Lake,_Oregon.jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Mount_Hood_reflected_in_Mirror_Lake,_Oregon.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5480010324.webp",
+    "output": "assets/photos/v3/usfs-5480010324.webp",
     "width": 2048,
     "height": 1627,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5441010324",
@@ -392,12 +383,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Ramona_Falls_at_Mount_Hood_Wilderness_in_Oregon_2.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5441010324.webp",
+    "output": "assets/photos/v3/usfs-5441010324.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5045.009041",
@@ -409,12 +400,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Eagle_Creek,_Columbia_River_Gorge_NSA.jpg",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Eagle_Creek%2C_Columbia_River_Gorge_NSA.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5045.009041.webp",
+    "output": "assets/photos/v3/usfs-5045.009041.webp",
     "width": 2048,
     "height": 1371,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": "1992-09-15",
-    "review": "Corrected wrong-river ambiguity: verified official USFS photograph titled Eagle Creek, Columbia River Gorge NSA, from Eagle Creek Recreation Site category. Archival source1992, forest conditions not a current-condition representation. Source and AI-enhanced base visually compared; geology retained, no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-7682.004621",
@@ -426,12 +417,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Tumalo_Falls_(Deschutes_County,_Oregon_scenic_images)_(desDB3253).jpg",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/dd/Tumalo_Falls_%28Deschutes_County%2C_Oregon_scenic_images%29_%28desDB3253%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/usfs-7682.004621.webp",
+    "output": "assets/photos/v3/usfs-7682.004621.webp",
     "width": 2048,
     "height": 1360,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5250.005571",
@@ -443,12 +434,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Willamette_National_Forest,_Proxy_Falls-3_(36737290751).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Willamette_National_Forest,_Proxy_Falls-3_(36737290751).jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5250.005571.webp",
+    "output": "assets/photos/v3/usfs-5250.005571.webp",
     "width": 2048,
     "height": 3060,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-6485821010602",
@@ -460,12 +451,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Blue_Pool,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9d/Blue_Pool%2C_Oregon_-_Flickr_-_Bonnie_Moreland_%28free_images%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/usfs-6485821010602.webp",
+    "output": "assets/photos/v3/usfs-6485821010602.webp",
     "width": 2048,
     "height": 1334,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5435010324",
@@ -477,12 +468,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:OREGON_-_Trilluim_Lake_-_Mount_Hood_-_Sunrise_2024.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5435010324.webp",
+    "output": "assets/photos/v3/usfs-5435010324.webp",
     "width": 2048,
     "height": 853,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5067010324",
@@ -494,12 +485,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Hoodview_Campground,_Timothy_Lake,_Mt._Hood_-_DPLA_-_6f6c70814b1299527407d40260333e6e.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5067010324.webp",
+    "output": "assets/photos/v3/usfs-5067010324.webp",
     "width": 2048,
-    "height": 1357,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "height": 1358,
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5066010324",
@@ -511,12 +502,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Frog_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Frog_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5066010324.webp",
+    "output": "assets/photos/v3/usfs-5066010324.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5545010616",
@@ -528,12 +519,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Jubilee_Lake,_USFS.jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Jubilee_Lake,_USFS.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5545010616.webp",
+    "output": "assets/photos/v3/usfs-5545010616.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5510010263",
@@ -545,12 +536,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Anthony_Lake,_Elkhorn_Mountains_-_DPLA_-_027a7a53c2b1b8b04c16d4e8b74fe249.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5510010263.webp",
+    "output": "assets/photos/v3/usfs-5510010263.webp",
     "width": 2048,
     "height": 1368,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5007010324",
@@ -562,12 +553,12 @@
     "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Dog_Mountain_in_WA_-_52174070438.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5007010324.webp",
+    "output": "assets/photos/v3/usfs-5007010324.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source and final output visually reviewed; natural HDR with slight warm shadows; separate overlay retained outside base."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-138847010602",
@@ -579,12 +570,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:2022-08-01,_Franklin_Falls_(King_County,_Washington),_004.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-138847010602.webp",
+    "output": "assets/photos/v3/usfs-138847010602.webp",
     "width": 2048,
     "height": 2731,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated image visually inspected: same waterfall, forest and framing; vivid HDR, green foliage, cool water, slight warm shadows; clean base without graphics."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5171010357",
@@ -596,12 +587,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1f/Lake_Serene_July_2025.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5171010357.webp",
+    "output": "assets/photos/v3/usfs-5171010357.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5182010416",
@@ -613,12 +604,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Rachel_Lake_26432.JPG",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5182010416.webp",
+    "output": "assets/photos/v3/usfs-5182010416.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually inspected: lake shoreline, foreground framing and tree cover retained; natural vivid blue water and greens, restrained orange shadows; no graphics."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "forest-park",
@@ -630,15 +621,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Forest_park_wildwood_trail_lazy_bend_P3861.jpeg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/forest-park.webp",
+    "output": "assets/photos/v3/forest-park.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "hoyt-arboretum",
@@ -650,12 +638,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Hoyt_Arboretum_in_Portland,_Oregon_(48852706563).jpg",
     "originalSha256": null,
-    "output": "assets/photos/hoyt-arboretum.webp",
+    "output": "assets/photos/v3/hoyt-arboretum.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "powell-butte",
@@ -667,12 +655,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Powell_Butte_Nature_Park,_Portland_-_DPLA_-_394f688a0772d8c6a2317c4dffd32b1f.jpg",
     "originalSha256": null,
-    "output": "assets/photos/powell-butte.webp",
+    "output": "assets/photos/v3/powell-butte.webp",
     "width": 2048,
     "height": 1368,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "mount-tabor",
@@ -684,15 +672,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/af/Reservoir_%288232972593%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/mount-tabor.webp",
+    "output": "assets/photos/v3/mount-tabor.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fort-stevens",
@@ -704,12 +689,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Peter_iredale_sunset_edited1.jpg",
     "originalSha256": null,
-    "output": "assets/photos/fort-stevens.webp",
+    "output": "assets/photos/v3/fort-stevens.webp",
     "width": 2048,
     "height": 1552,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "kalaloch",
@@ -721,12 +706,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/aa/Drift_Logs_on_beach_in_northwest_Washington%2C_USA.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/kalaloch.webp",
+    "output": "assets/photos/v3/kalaloch.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "hall-mosses",
@@ -738,12 +723,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Hall_of_Mosses,_Hoh_Rainforest,_Olympic_National_Park,_Washington_(2015).jpg",
     "originalSha256": null,
-    "output": "assets/photos/hall-mosses.webp",
+    "output": "assets/photos/v3/hall-mosses.webp",
     "width": 2048,
     "height": 1271,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "hurricane-hill",
@@ -755,12 +740,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:MHC6518_High_Mountains_from_Hurricane_Hill_Olympic_NP_Washington_(22508802627).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:MHC6518_High_Mountains_from_Hurricane_Hill_Olympic_NP_Washington_(22508802627).jpg",
     "originalSha256": null,
-    "output": "assets/photos/hurricane-hill.webp",
+    "output": "assets/photos/v3/hurricane-hill.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "marymere",
@@ -772,12 +757,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/03/Marymere_Falls_pano_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/marymere.webp",
+    "output": "assets/photos/v3/marymere.webp",
     "width": 2048,
     "height": 2317,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "sol-duc-falls",
@@ -789,12 +774,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Sol_Duc_Falls_2022_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/sol-duc-falls.webp",
+    "output": "assets/photos/v3/sol-duc-falls.webp",
     "width": 2048,
     "height": 1260,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "rialto",
@@ -806,12 +791,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Rialto_Beach,_Washington_coast._Olympic_National_Park.jpg",
     "originalSha256": null,
-    "output": "assets/photos/rialto.webp",
+    "output": "assets/photos/v3/rialto.webp",
     "width": 2048,
-    "height": 1331,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "height": 1333,
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "cape-disappointment",
@@ -823,15 +808,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Cape_Disappointment_and_Cape_Disappointment_Light.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/cape-disappointment.webp",
+    "output": "assets/photos/v3/cape-disappointment.webp",
     "width": 2048,
     "height": 1371,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "grayland-beach",
@@ -843,12 +825,12 @@
     "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Grayland_Beach_State_Park_(33475037010).jpg",
     "originalSha256": null,
-    "output": "assets/photos/grayland-beach.webp",
+    "output": "assets/photos/v3/grayland-beach.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bagby-hot-springs",
@@ -860,12 +842,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Bagby_hot_springs_oregon.jpg",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/af/Bagby_hot_springs_oregon.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/bagby-hot-springs.webp",
+    "output": "assets/photos/v3/bagby-hot-springs.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "umpqua-hot-springs",
@@ -877,12 +859,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Umpqua_Hot_Springs_1_-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/umpqua-hot-springs.webp",
+    "output": "assets/photos/v3/umpqua-hot-springs.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "terwilliger-hot-springs",
@@ -894,12 +876,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Terwilliger_Hot_Springs_2016-04-04.JPG",
     "originalSha256": null,
-    "output": "assets/photos/terwilliger-hot-springs.webp",
+    "output": "assets/photos/v3/terwilliger-hot-springs.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "sol-duc-hot-springs",
@@ -911,12 +893,12 @@
     "licenseUrl": "https://www.nps.gov/aboutus/disclaimer.htm",
     "originalUrl": "https://www.nps.gov/common/uploads/cropped_image/primary/6F12C888-AE2A-F7A6-0B7BD04E77EAAA75.jpg?width=2400&quality=90&mode=crop",
     "originalSha256": null,
-    "output": "assets/photos/sol-duc-hot-springs.webp",
+    "output": "assets/photos/v3/sol-duc-hot-springs.webp",
     "width": 2048,
     "height": 1153,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-6492.004291",
@@ -928,12 +910,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Mount_Shasta_as_seen_from_Bunny_Flat.jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-6492.004291.webp",
+    "output": "assets/photos/v3/usfs-6492.004291.webp",
     "width": 2048,
     "height": 1463,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fern-canyon",
@@ -945,12 +927,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Fern_Canyon_is_a_canyon_in_the_Prairie_Creek_Redwoods_State_Park_in_Humboldt_County,_California_LCCN2013632260.tif",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Fern_Canyon_is_a_canyon_in_the_Prairie_Creek_Redwoods_State_Park_in_Humboldt_County,_California_LCCN2013632260.tif",
     "originalSha256": null,
-    "output": "assets/photos/fern-canyon.webp",
+    "output": "assets/photos/v3/fern-canyon.webp",
     "width": 2048,
     "height": 1368,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-6130010414",
@@ -962,12 +944,12 @@
     "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Drift_Creek_Falls,_Waterfalls,_Oregon_(32560576922).jpg",
     "originalSha256": null,
-    "output": "assets/photos/usfs-6130010414.webp",
+    "output": "assets/photos/v3/usfs-6130010414.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "usfs-5663296010602",
@@ -979,12 +961,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d6/USHighway101%28Oregon%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/usfs-5663296010602.webp",
+    "output": "assets/photos/v3/usfs-5663296010602.webp",
     "width": 2048,
     "height": 1684,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "wildwood-recreation",
@@ -996,12 +978,12 @@
     "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Oregon_Salmon_River_Clackamas_County_from_bridge_looking_west_P1651.jpeg",
     "originalSha256": null,
-    "output": "assets/photos/wildwood-recreation.webp",
+    "output": "assets/photos/v3/wildwood-recreation.webp",
     "width": 2048,
     "height": 1981,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "denny-blaine",
@@ -1013,12 +995,12 @@
     "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f3/Denny_Blaine_Park_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/denny-blaine.webp",
+    "output": "assets/photos/v3/denny-blaine.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-or-commonwealth-lake",
@@ -1030,12 +1012,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Commonwealth_Lake_-_Cedar_Hills,_Oregon.jpg",
     "originalSha256": null,
-    "output": "assets/photos/fishing-or-commonwealth-lake.webp",
+    "output": "assets/photos/v3/fishing-or-commonwealth-lake.webp",
     "width": 2048,
     "height": 1356,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-or-henry-hagg-lake",
@@ -1047,12 +1029,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/5/52/Aerial_View_of_Henry_Hagg_Lake.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/fishing-or-henry-hagg-lake.webp",
+    "output": "assets/photos/v3/fishing-or-henry-hagg-lake.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-or-north-fork-reservoir",
@@ -1064,12 +1046,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:North_Fork_Reservoir_Clackamas_County_Oregon.jpg",
     "originalSha256": null,
-    "output": "assets/photos/fishing-or-north-fork-reservoir.webp",
+    "output": "assets/photos/v3/fishing-or-north-fork-reservoir.webp",
     "width": 2048,
     "height": 1463,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-or-crane-prairie-reservoir",
@@ -1081,12 +1063,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Sunset_at_Crane_Prairie_Reservoir,_Oregon_(14176046352).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Sunset_at_Crane_Prairie_Reservoir,_Oregon_(14176046352).jpg",
     "originalSha256": null,
-    "output": "assets/photos/fishing-or-crane-prairie-reservoir.webp",
+    "output": "assets/photos/v3/fishing-or-crane-prairie-reservoir.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-or-davis-lake",
@@ -1098,12 +1080,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Odell_Creek,_Davis_Lake,_Cascade_Lakes_National_Scenic_Byway,_Cascade_Mountains,_South_Sister,_Broken_Top,_Mt._Bachelor_-_DPLA_-_77493d3fbcc52535e05642b767552343.jpg",
     "originalSha256": null,
-    "output": "assets/photos/fishing-or-davis-lake.webp",
+    "output": "assets/photos/v3/fishing-or-davis-lake.webp",
     "width": 2048,
     "height": 1368,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-or-three-creeks-lake",
@@ -1115,12 +1097,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Tam_McArthur_Rim_at_Three_Creek_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Tam_McArthur_Rim_at_Three_Creek_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "originalSha256": null,
-    "output": "assets/photos/fishing-or-three-creeks-lake.webp",
+    "output": "assets/photos/v3/fishing-or-three-creeks-lake.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-or-hosmer-lake",
@@ -1132,12 +1114,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Hosmer_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Hosmer_Lake,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "originalSha256": null,
-    "output": "assets/photos/fishing-or-hosmer-lake.webp",
+    "output": "assets/photos/v3/fishing-or-hosmer-lake.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-or-south-twin-lake",
@@ -1149,12 +1131,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:South_Twin_Lake,_Oregon.jpg",
     "originalSha256": null,
-    "output": "assets/photos/fishing-or-south-twin-lake.webp",
+    "output": "assets/photos/v3/fishing-or-south-twin-lake.webp",
     "width": 2048,
     "height": 683,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-or-suttle-lake",
@@ -1166,12 +1148,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Shadows_on_frozen_lake,_Oregon_(54410795083).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Shadows_on_frozen_lake,_Oregon_(54410795083).jpg",
     "originalSha256": null,
-    "output": "assets/photos/fishing-or-suttle-lake.webp",
+    "output": "assets/photos/v3/fishing-or-suttle-lake.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-or-wallowa-lake",
@@ -1183,12 +1165,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Wallowa-lake-morning-07232011-rogermpeterson-001_(6096632257).jpg",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:Wallowa-lake-morning-07232011-rogermpeterson-001_(6096632257).jpg",
     "originalSha256": null,
-    "output": "assets/photos/fishing-or-wallowa-lake.webp",
+    "output": "assets/photos/v3/fishing-or-wallowa-lake.webp",
     "width": 2048,
-    "height": 1360,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "height": 1362,
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-wa-lake-washington",
@@ -1200,15 +1182,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Seattle_-_E._Highland_Drive_shoreline_street_end_on_Lake_Washington_03.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/fishing-wa-lake-washington.webp",
+    "output": "assets/photos/v3/fishing-wa-lake-washington.webp",
     "width": 2048,
     "height": 1024,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-wa-lake-sammamish",
@@ -1220,12 +1199,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:2006-08-0449lake-sammamish-washington.jpg",
     "originalSha256": null,
-    "output": "assets/photos/fishing-wa-lake-sammamish.webp",
+    "output": "assets/photos/v3/fishing-wa-lake-sammamish.webp",
     "width": 2048,
     "height": 1371,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-wa-green-lake",
@@ -1237,15 +1216,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Green_Lake%2C_Seattle%2C_2020_%2852889781766%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/fishing-wa-green-lake.webp",
+    "output": "assets/photos/v3/fishing-wa-green-lake.webp",
     "width": 2048,
     "height": 1497,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-wa-angle-lake",
@@ -1257,12 +1233,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/SeaTac%2C_WA_-_Angle_Lake_Park_01.jpg/1920px-SeaTac%2C_WA_-_Angle_Lake_Park_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/fishing-wa-angle-lake.webp",
+    "output": "assets/photos/v3/fishing-wa-angle-lake.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-wa-lake-kapowsin",
@@ -1274,12 +1250,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/North_shore_panorama.jpg/1920px-North_shore_panorama.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/fishing-wa-lake-kapowsin.webp",
+    "output": "assets/photos/v3/fishing-wa-lake-kapowsin.webp",
     "width": 2048,
     "height": 717,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-wa-lake-stevens",
@@ -1291,12 +1267,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Lake_Stevens_WA_panorama_from_Wyatt_Park.jpg/1920px-Lake_Stevens_WA_panorama_from_Wyatt_Park.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/fishing-wa-lake-stevens.webp",
+    "output": "assets/photos/v3/fishing-wa-lake-stevens.webp",
     "width": 2048,
     "height": 1024,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-wa-lake-padden",
@@ -1308,12 +1284,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/04/Late_autumn_at_Lake_Padden%2C_Bellingham_%288225221025%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "originalSha256": null,
-    "output": "assets/photos/fishing-wa-lake-padden.webp",
+    "output": "assets/photos/v3/fishing-wa-lake-padden.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-wa-battle-ground-lake",
@@ -1325,12 +1301,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Fall_Foliage_Peaks_Out_Through_the_Evergreen_Trees_%2853321997992%29.jpg/1920px-Fall_Foliage_Peaks_Out_Through_the_Evergreen_Trees_%2853321997992%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/fishing-wa-battle-ground-lake.webp",
+    "output": "assets/photos/v3/fishing-wa-battle-ground-lake.webp",
     "width": 2048,
     "height": 912,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-wa-lake-chelan",
@@ -1342,12 +1318,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Lake_Chelan_from_Castle_Rock_(8dd37d134c384714b322012c2ca66ca1).JPG",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/Lake_Chelan_from_Castle_Rock_%288dd37d134c384714b322012c2ca66ca1%29.JPG/1920px-Lake_Chelan_from_Castle_Rock_%288dd37d134c384714b322012c2ca66ca1%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/fishing-wa-lake-chelan.webp",
+    "output": "assets/photos/v3/fishing-wa-lake-chelan.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "fishing-wa-banks-lake",
@@ -1359,12 +1335,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Bank_Lake_2017-09-_679.jpg/1920px-Bank_Lake_2017-09-_679.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/fishing-wa-banks-lake.webp",
+    "output": "assets/photos/v3/fishing-wa-banks-lake.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "boating-or-willamette-park-portland-launch",
@@ -1376,12 +1352,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/db/Willamette_Park%2C_Willamette_River_-_DPLA_-_2a3e19624734c1d7e932fa51848c8322.jpg/1920px-Willamette_Park%2C_Willamette_River_-_DPLA_-_2a3e19624734c1d7e932fa51848c8322.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/boating-or-willamette-park-portland-launch.webp",
+    "output": "assets/photos/v3/boating-or-willamette-park-portland-launch.webp",
     "width": 2048,
     "height": 1368,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "boating-wa-lake-sammamish-state-park-boating",
@@ -1393,12 +1369,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
     "originalUrl": "https://commons.wikimedia.org/wiki/File:2006-08-0449lake-sammamish-washington.jpg",
     "originalSha256": null,
-    "output": "assets/photos/fishing-wa-lake-sammamish.webp",
+    "output": "assets/photos/v3/fishing-wa-lake-sammamish.webp",
     "width": 2048,
     "height": 1371,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Original and generated visually reviewed; recognizable geography, framing and natural features retained; crisp vivid HDR with natural greens/blues and restrained warm shadows. No baked graphics or bottom fade."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "boating-wa-deception-pass-state-park-boating",
@@ -1410,15 +1386,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Deception_Pass_June_2018_002.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/boating-wa-deception-pass-state-park-boating.webp",
+    "output": "assets/photos/v3/boating-wa-deception-pass-state-park-boating.webp",
     "width": 2048,
     "height": 1368,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "boating-wa-lake-wenatchee-state-park-boating",
@@ -1430,12 +1403,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/Lake_Wenatchee_State_Park_%28185828278%29.jpg/1920px-Lake_Wenatchee_State_Park_%28185828278%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/boating-wa-lake-wenatchee-state-park-boating.webp",
+    "output": "assets/photos/v3/boating-wa-lake-wenatchee-state-park-boating.webp",
     "width": 2048,
-    "height": 1363,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "height": 1365,
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "boating-wa-steamboat-rock-state-park-boating",
@@ -1447,12 +1420,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Steamboat_Rock_State_Park%2C_Washington_Route_155_Between_Coulee_City_and_Grand_Coulee_Dam%2C_Washington_-_50083297066.jpg/1920px-Steamboat_Rock_State_Park%2C_Washington_Route_155_Between_Coulee_City_and_Grand_Coulee_Dam%2C_Washington_-_50083297066.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/boating-wa-steamboat-rock-state-park-boating.webp",
+    "output": "assets/photos/v3/boating-wa-steamboat-rock-state-park-boating.webp",
     "width": 2048,
     "height": 1136,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "boating-wa-sun-lakes-dry-falls-state-park-boating",
@@ -1464,12 +1437,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/WA-DeepLake-SouthBank-p1_v1.jpg/1920px-WA-DeepLake-SouthBank-p1_v1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/boating-wa-sun-lakes-dry-falls-state-park-boating.webp",
+    "output": "assets/photos/v3/boating-wa-sun-lakes-dry-falls-state-park-boating.webp",
     "width": 2048,
-    "height": 683,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "height": 682,
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "boating-wa-daroga-state-park-boating",
@@ -1481,12 +1454,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Daroga_State_Park%2C_001.jpg/1920px-Daroga_State_Park%2C_001.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/boating-wa-daroga-state-park-boating.webp",
+    "output": "assets/photos/v3/boating-wa-daroga-state-park-boating.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "boating-wa-pearrygin-lake-state-park-boating",
@@ -1498,12 +1471,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/Pearrygin_Lake%2C_Washington_%289864069254%29.jpg/1920px-Pearrygin_Lake%2C_Washington_%289864069254%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/boating-wa-pearrygin-lake-state-park-boating.webp",
+    "output": "assets/photos/v3/boating-wa-pearrygin-lake-state-park-boating.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "boating-wa-twanoh-state-park-boating",
@@ -1515,12 +1488,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/Twanoh_State_Park%2C_002.jpg/1920px-Twanoh_State_Park%2C_002.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/boating-wa-twanoh-state-park-boating.webp",
+    "output": "assets/photos/v3/boating-wa-twanoh-state-park-boating.webp",
     "width": 2048,
     "height": 1368,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "atv-or-oregon-dunes-national-recreation-area",
@@ -1532,12 +1505,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Oregon_Dunes_National_Recreation_Area.jpg/1920px-Oregon_Dunes_National_Recreation_Area.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/atv-or-oregon-dunes-national-recreation-area.webp",
+    "output": "assets/photos/v3/atv-or-oregon-dunes-national-recreation-area.webp",
     "width": 2048,
     "height": 1368,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "atv-or-virtue-flat-ohv-area",
@@ -1549,12 +1522,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Virtue_Flats_Off_Highway_Vehicle_(OHV)_Area_(26824035430).jpg",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Virtue_Flats_Off_Highway_Vehicle_%28OHV%29_Area_%2826824035430%29.jpg/1920px-Virtue_Flats_Off_Highway_Vehicle_%28OHV%29_Area_%2826824035430%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/atv-or-virtue-flat-ohv-area.webp",
+    "output": "assets/photos/v3/atv-or-virtue-flat-ohv-area.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-bc-cypress",
@@ -1566,12 +1539,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e0/2014-365-362_Snow_on_the_Mountain_%2816132788051%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/winter-bc-cypress.webp",
+    "output": "assets/photos/v3/winter-bc-cypress.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-bc-grouse",
@@ -1583,12 +1556,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Grouse_mountain_(ski_runs_close_up).JPG",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Grouse_mountain_%28ski_runs_close_up%29.JPG/1920px-Grouse_mountain_%28ski_runs_close_up%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/winter-bc-grouse.webp",
+    "output": "assets/photos/v3/winter-bc-grouse.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-bc-seymour",
@@ -1600,12 +1573,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b6/Mtseymour-1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/winter-bc-seymour.webp",
+    "output": "assets/photos/v3/winter-bc-seymour.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-wreck",
@@ -1617,15 +1590,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Wreck_beach_vancouver_trees.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/bc-wreck.webp",
+    "output": "assets/photos/v3/bc-wreck.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-lynn",
@@ -1637,12 +1607,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Lynn_rapids.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/bc-lynn.webp",
+    "output": "assets/photos/v3/bc-lynn.webp",
     "width": 2048,
     "height": 2741,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-stanley",
@@ -1654,15 +1624,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Vancouver_%28BC%2C_Canada%29%2C_Stanley_Park%2C_Ufer_zum_Hafen_--_2022_--_2118.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/bc-stanley.webp",
+    "output": "assets/photos/v3/bc-stanley.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-golden-ears",
@@ -1674,15 +1641,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Alouette_Lake_Seen_from_Golden_Ears_Provincial_Park.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/bc-golden-ears.webp",
+    "output": "assets/photos/v3/bc-golden-ears.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-porteau",
@@ -1694,12 +1658,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Porteau_Cove_at_sunset_by_IvanAndreevich_%28WestCoastScapes%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "originalSha256": null,
-    "output": "assets/photos/bc-porteau.webp",
+    "output": "assets/photos/v3/bc-porteau.webp",
     "width": 2048,
-    "height": 1366,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "height": 1368,
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-buntzen",
@@ -1711,12 +1675,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/BuntzenLakePL280507.jpg/1920px-BuntzenLakePL280507.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/bc-buntzen.webp",
+    "output": "assets/photos/v3/bc-buntzen.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-island-view",
@@ -1728,12 +1692,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Island_View_Beach_BC.jpg/1920px-Island_View_Beach_BC.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/bc-island-view.webp",
+    "output": "assets/photos/v3/bc-island-view.webp",
     "width": 2048,
     "height": 1378,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-goldstream",
@@ -1745,12 +1709,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c2/Goldstream_Falls%2C_Goldstream_Provincial_Park%2C_Vancouver_Island%2C_Canada_05.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/bc-goldstream.webp",
+    "output": "assets/photos/v3/bc-goldstream.webp",
     "width": 2048,
     "height": 1158,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-thetis",
@@ -1762,12 +1726,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Thetis_Lake%2C_Canada_01.jpg/1920px-Thetis_Lake%2C_Canada_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/bc-thetis.webp",
+    "output": "assets/photos/v3/bc-thetis.webp",
     "width": 2048,
     "height": 1153,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-tod-inlet",
@@ -1779,12 +1743,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Tod_Inlet%2C_Gowland_Tod_Provincial_Park%2C_BC%2C_Canada.jpg/1920px-Tod_Inlet%2C_Gowland_Tod_Provincial_Park%2C_BC%2C_Canada.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/bc-tod-inlet.webp",
+    "output": "assets/photos/v3/bc-tod-inlet.webp",
     "width": 2048,
     "height": 1153,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-bc-whistler-blackcomb",
@@ -1796,12 +1760,12 @@
     "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Whistler_Mountain_3.jpg/1920px-Whistler_Mountain_3.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/winter-bc-whistler-blackcomb.webp",
+    "output": "assets/photos/v3/winter-bc-whistler-blackcomb.webp",
     "width": 2048,
     "height": 844,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-lost-lake",
@@ -1813,12 +1777,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Lost_Lake_%284471634174%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/bc-lost-lake.webp",
+    "output": "assets/photos/v3/bc-lost-lake.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-garibaldi",
@@ -1830,15 +1794,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5/ca/deed.en",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/4/44/Garibaldi_Lake_seen_from_Panorama_Ridge.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/bc-garibaldi.webp",
+    "output": "assets/photos/v3/bc-garibaldi.webp",
     "width": 2048,
     "height": 1248,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "bc-brandywine",
@@ -1850,12 +1811,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/c/cc/Brandywine_Falls_Provincial_Park.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/bc-brandywine.webp",
+    "output": "assets/photos/v3/bc-brandywine.webp",
     "width": 2048,
     "height": 2731,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "dayuse-or-dabney-state-recreation-area",
@@ -1867,12 +1828,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Sandy_at_Dabney_Oregon.jpg/1920px-Sandy_at_Dabney_Oregon.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "originalSha256": null,
-    "output": "assets/photos/dayuse-or-dabney-state-recreation-area.webp",
+    "output": "assets/photos/v3/dayuse-or-dabney-state-recreation-area.webp",
     "width": 2048,
     "height": 1372,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Source identity, license and input retained from reviewed photo library. Input and clean enhanced output visually inspected; natural HDR greens/blues, slight orange shadows, real landscape preserved, no baked graphical overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "dayuse-or-latourell-falls-trailhead-guy-w-talbot",
@@ -1884,15 +1845,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/3/37/Latourell_Falls_%282017-05-28%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/dayuse-or-latourell-falls-trailhead-guy-w-talbot.webp",
+    "output": "assets/photos/v3/dayuse-or-latourell-falls-trailhead-guy-w-talbot.webp",
     "width": 2048,
     "height": 3072,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "dayuse-or-ecola-state-park",
@@ -1904,15 +1862,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Ecola_State_Park_Haystack_Rock.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/dayuse-or-ecola-state-park.webp",
+    "output": "assets/photos/v3/dayuse-or-ecola-state-park.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "dayuse-or-oswald-west-state-park",
@@ -1924,15 +1879,12 @@
     "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/7/77/2010-03-19_Neahkahnie_Viewpoint_%28Oswald_West_State_Park%2C_Oregon%29_165611.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/dayuse-or-oswald-west-state-park.webp",
+    "output": "assets/photos/v3/dayuse-or-oswald-west-state-park.webp",
     "width": 2048,
     "height": 1365,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "dayuse-or-smith-rock-state-park",
@@ -1944,15 +1896,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/98/Crooked_River_at_Smith_Rock_State_Park_in_Oregon_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/dayuse-or-smith-rock-state-park.webp",
+    "output": "assets/photos/v3/dayuse-or-smith-rock-state-park.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "dayuse-or-shore-acres-state-park",
@@ -1964,12 +1913,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/04/Shore_Acres_State_Park_-_Oregon_-_7413274768.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/dayuse-or-shore-acres-state-park.webp",
+    "output": "assets/photos/v3/dayuse-or-shore-acres-state-park.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "dayuse-wa-palouse-falls-state-park-heritage-site",
@@ -1981,12 +1930,12 @@
     "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Palouse-Falls-Washington-State.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/dayuse-wa-palouse-falls-state-park-heritage-site.webp",
+    "output": "assets/photos/v3/dayuse-wa-palouse-falls-state-park-heritage-site.webp",
     "width": 2048,
     "height": 1276,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "dayuse-wa-fort-casey-historical-state-park",
@@ -1998,12 +1947,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Admiralty_Head_Light_-_Whidbey_Island_WA.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/dayuse-wa-fort-casey-historical-state-park.webp",
+    "output": "assets/photos/v3/dayuse-wa-fort-casey-historical-state-park.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-meadows",
@@ -2015,15 +1964,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Mt._Hood%2C_Mt._Hood_Meadows_Ski_Resort_-_DPLA_-_a39dfe6619f883f93c95c0224fdd3994.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/winter-meadows.webp",
+    "output": "assets/photos/v3/winter-meadows.webp",
     "width": 2048,
-    "height": 1356,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "height": 1357,
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-bachelor",
@@ -2035,15 +1981,12 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Mt._Bachelor,_Oregon,_early_morning.jpg",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/6/60/Mt._Bachelor%2C_Oregon%2C_early_morning.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/winter-bachelor.webp",
+    "output": "assets/photos/v3/winter-bachelor.webp",
     "width": 2048,
     "height": 1170,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-timberline",
@@ -2055,15 +1998,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/1/13/Timberline_Lodge%2C_Oregon_%282013%29_-_28.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/winter-timberline.webp",
+    "output": "assets/photos/v3/winter-timberline.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-skibowl",
@@ -2075,15 +2015,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/c/cb/Skibowl_peak.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/winter-skibowl.webp",
+    "output": "assets/photos/v3/winter-skibowl.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-crystal",
@@ -2095,15 +2032,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e2/Mount_Rainier_from_just_north_of_Crystal_Mountain_summit_house_%287_March_2025%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/winter-crystal.webp",
+    "output": "assets/photos/v3/winter-crystal.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-stevens",
@@ -2115,15 +2049,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1c/View_of_mountains_from_the_ski_lift_at_Stevens_Pass_%2830_January_2025%29_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/winter-stevens.webp",
+    "output": "assets/photos/v3/winter-stevens.webp",
     "width": 2048,
     "height": 1538,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-summit",
@@ -2135,15 +2066,12 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/5/51/Alpental_ski_resort_%28summer%29_from_the_Snoqualmie_Mountain_trail.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/winter-summit.webp",
+    "output": "assets/photos/v3/winter-summit.webp",
     "width": 2048,
     "height": 1153,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": [
-      "Source identity and license metadata checked against Commons",
-      "Input and enhanced output visually inspected; real terrain preserved; clean base has no baked overlay"
-    ]
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   },
   {
     "id": "winter-baker",
@@ -2155,11 +2083,11 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
     "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a9/MtBaker-Chair8-Top.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "originalSha256": null,
-    "output": "assets/photos/winter-baker.webp",
+    "output": "assets/photos/v3/winter-baker.webp",
     "width": 2048,
     "height": 1536,
-    "changes": "AI-assisted HDR enhancement, subtle orange shadow tint, upscale and separate decorative artwork.",
+    "changes": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork.",
     "sourceCaptureDate": null,
-    "review": "Real location source visually inspected; built-in AI photo enhancement; slight orange shadows, greens/blues preserved; no baked overlay."
+    "review": "Original scenery and sculpted base visually reviewed; aligned separate luminous artwork and final composition reviewed."
   }
 ]

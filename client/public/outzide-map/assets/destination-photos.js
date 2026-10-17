@@ -1,7 +1,7 @@
 /** Two aligned image planes; no canvas, frame loop, or location/orientation sensors. */
 const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const photoUrl=value=>typeof value==='string'&&/^(?:\/outzide-map\/)?assets\/photos\/[A-Za-z0-9._/-]+$/.test(value)&&!value.split('/').some(part=>part==='.'||part==='..')?(value.startsWith('/')?value:'/outzide-map/'+value):'';
-const photoSrcSet=variants=>Array.isArray(variants)?variants.filter(v=>v&&typeof v==='object'&&photoUrl(v.src)&&/\.(?:webp|avif|png|jpe?g)$/i.test(v.src)&&Number.isInteger(v.width)&&v.width>0&&v.width<=8192).map(v=>photoUrl(v.src)+' '+v.width+'w').join(', '):'';
+const photoSrcSet=(variants,allowSvg=false)=>Array.isArray(variants)?variants.filter(v=>v&&typeof v==='object'&&photoUrl(v.src)&&(allowSvg?/\.(?:webp|avif|png|jpe?g|svg)$/i:/\.(?:webp|avif|png|jpe?g)$/i).test(v.src)&&Number.isInteger(v.width)&&v.width>0&&v.width<=8192).map(v=>photoUrl(v.src)+' '+v.width+'w').join(', '):'';
 // Quiet regions are spatial reservations, independent of sparse artwork alpha coverage.
 export function photoQuietStyle(quiet){
  if(!quiet||typeof quiet!=='object')return '';
@@ -13,7 +13,7 @@ export function photoQuietStyle(quiet){
 }
 export function photoMarkup(photo,className=''){
  if(!photoUrl(photo?.src))return '';
- const srcset=photoSrcSet(photo.variants),overlaySrcset=photoSrcSet(photo.overlayVariants),quiet=photoQuietStyle(photo.quiet);
+ const srcset=photoSrcSet(photo.variants),overlaySrcset=photoSrcSet(photo.overlayVariants,true),quiet=photoQuietStyle(photo.quiet);
  const image=(src,kind,alt='')=>{const responsive=kind==='base'?srcset:kind==='overlay'?overlaySrcset:'';return '<img class="outz-photo__'+kind+'" src="'+escape(photoUrl(src))+'"'+(responsive?' srcset="'+escape(responsive)+'" sizes="(max-width: 800px) 100vw, 800px"':'')+' alt="'+escape(alt)+'" width="'+(Number(photo.width)||1600)+'" height="'+(Number(photo.height)||1000)+'" loading="lazy" decoding="async"'+(kind==='base'?'':' aria-hidden="true"')+'>';};
  return '<span class="outz-photo '+escape(className)+'" data-outz-photo'+(quiet?' data-photo-quiet="true"':'')+' data-photo-rank="'+(Number(photo.rank)||999)+'" style="--photo-position:'+escape(photo.position||'center')+(quiet?';'+quiet:'')+'">'+image(photo.src,'base',photo.alt)+(photoUrl(photo.overlaySrc)?'<span class="outz-photo__graphics">'+image(photo.overlaySrc,'overlay')+(photoUrl(photo.overlayGlowSrc)&&photo.rank<=20?image(photo.overlayGlowSrc,'nodes'):'')+'</span>':'')+'</span>';
 }

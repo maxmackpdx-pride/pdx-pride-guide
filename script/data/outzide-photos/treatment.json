@@ -1,10 +1,11 @@
 {
-  "name": "Outzide layered HDR v2",
-  "base": "Source-backed HDR photo with natural greens/blues and a slight burnt-orange shadow tint; source geography retained.",
-  "delivery": "2048px-wide WebP with640/1280 responsive variants; original and generation dimensions remain recorded in local authoring manifests.",
-  "overlay": "Transparent SVG with offline semantic masks for orange sky nodes/wires, sparse small green tree nodes/wires and rainbow texture contours clipped to exposed terrain; selective water reflections. Decorative contours are not surveyed elevations.",
+  "name": "Outzide sculpted HDR v3",
+  "base": "Source-backed glossy sculpted HDR illustration; recognizable source geography and framing retained, with crisp embossed detail, vivid greens/blues and restrained orange shadow accents.",
+  "delivery": "2048px-wide WebP bases with640/1280 responsive variants. Separate self-contained SVG artwork embeds transparent generated lineart at matching responsive sizes.",
+  "overlay": "Generative fine orange sky/cloud networks, rainbow contours on selected exposed terrain, sparse tiny green tree networks and selective broken water reflections. Authored vector exclusions protect vegetation, wood and waterfall columns; decorative contours are not surveyed elevations.",
+  "quiet": "A coherent30–45percent region remains free of synthetic graphics in each image; a feathered display-frame reservation stays clear across crops, with separate intrinsic semantic exclusions.",
   "fade": "Stationary softly feathered burnt-orange gradient, bottom10percent.",
-  "motion": "Fine-pointer parallax3px total. Node-only opacity glow for first20provisional popularity entries, maximum3visible per document. Paused offscreen, hidden, Calm/reduced-motion.",
+  "motion": "Fine-pointer parallax3px total. Glow follows registered luminous cores for the first20 provisional popularity entries, maximum3visible per document. Paused offscreen, hidden and for Calm/reduced-motion.",
   "catalog": {
     "total": 385,
     "photos": 123,
@@ -12,10 +13,5 @@
     "priorityTop75Covered": 75,
     "newPhotos": 48
   },
-  "segmentation": {
-    "model": "Xenova/segformer-b0-finetuned-ade-512-512",
-    "source": "https://huggingface.co/Xenova/segformer-b0-finetuned-ade-512-512",
-    "execution": "offlineauthoringonly; model weights and inference are not deployed"
-  },
-  "tools": "Built-in imagegen enhancement; Sharp WebP/responsive delivery; offline semantic masks and SVG artwork."
+  "tools": "Built-in imagegen clean bases and transparent artwork; Sharp responsive WebP delivery; self-contained SVG alpha cleanup and authored semantic composition."
 }

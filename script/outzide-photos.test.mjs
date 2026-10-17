@@ -61,3 +61,8 @@ test('quiet region geometry accepts only finite in-bounds 30–45% clear reserva
  assert.match(html,/data-photo-quiet="true"/);assert.match(html,/--quiet-rx:43.0000%/);assert.match(html,/overlay.png/);assert.match(html,/outz-photo__nodes/);
  assert.doesNotMatch(photoMarkup({src:'assets/photos/base.webp'}),/data-photo-quiet|--quiet-/);
 });
+
+test('responsive SVG artwork stays on the graphics plane',()=>{
+ const html=photoMarkup({src:'assets/photos/v3/base.webp',variants:[{src:'assets/photos/v3/base.svg',width:640}],overlaySrc:'assets/photos/v3/overlays/art.svg',overlayVariants:[{src:'assets/photos/v3/overlays/art-640.svg',width:640}]});
+ const images=html.match(/<img[^>]+>/g);assert.doesNotMatch(images[0],/srcset=/);assert.match(images[1],/art-640.svg 640w/);
+});
