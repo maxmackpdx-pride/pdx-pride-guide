@@ -21,7 +21,7 @@ function scheduleOrder() {
 }
 
 /** Uploaded triptychs: one shared orientation, three independent depth movements. */
-export const NetworkBackdrop = memo(function NetworkBackdrop({ identity }: { identity: string }) {
+export const NetworkBackdrop = memo(function NetworkBackdrop({ identity, cardPair = false }: { identity: string; cardPair?: boolean }) {
   const ref = useCardMotifParallax<HTMLDivElement>();
   const maskId = useId().replace(/:/g, "");
   const recipes = useMotifRecipes();
@@ -43,11 +43,12 @@ export const NetworkBackdrop = memo(function NetworkBackdrop({ identity }: { ide
       else { ordering?.disconnect(); ordering = undefined; }
     };
   }, [ref]);
-  return <div ref={ref} className="card-network" data-network-set={set} data-network-orientation={orientation} aria-hidden="true" style={{
+  const depths = cardPair ? (["back", "middle"] as const) : (["back", "middle", "front"] as const);
+  return <div ref={ref} className={`card-network${cardPair ? " card-network--pair" : ""}`} data-network-set={set} data-network-orientation={orientation} aria-hidden="true" style={{
     "--network-stack-phase": `${-(seed % 37)}s`,
   } as CSSProperties}>
     <div className="card-network__orientation">
-      {(["back", "middle", "front"] as const).map((depth, index) => {
+      {depths.map((depth, index) => {
         const asset = recipes?.assets[recipes.networkSets[set === "a" ? "a" : "b"][index]];
         return <div key={depth} className={`card-network__plane card-network__plane--${depth}`} data-network-depth={depth}>
           <svg viewBox="0 0 1280 1066" preserveAspectRatio="none" data-network-glitch={index === seed % 3 ? "true" : undefined}>

@@ -23,7 +23,7 @@ export const BoardCardMotif = memo(function BoardCardMotif({ post, placement = "
     const clock=boardMotionTiming(post.key);
     const seed = Array.from(post.key).reduce((n, char) => (Math.imul(n, 31) + char.charCodeAt(0)) >>> 0, 7);
     return <div ref={cardMotion} className="ab-card-motif" aria-hidden="true" style={{ "--ab-motif-phase": `${-(seed % 29)}s`, "--network-glitch-cycle": `${clock.networkCycle}s`, "--network-glitch-phase": `${clock.networkPhase}s` } as CSSProperties}>
-      <NetworkBackdrop identity={post.key}/>
+      <NetworkBackdrop identity={post.key} cardPair />
       <svg data-motif-depth="front" className="ab-card-motif__object ab-card-motif__object--main" viewBox="0 0 400 500" fill="none" stroke="currentColor">
         {gradient("main")}
         {companion && <LibraryMotifImage asset={companion} paint={paint("main")} />}
