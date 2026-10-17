@@ -15,6 +15,7 @@
 import { useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { beginInFlight, endInFlight } from "@/lib/optimisticCache";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 import { queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
 import { HousingIcon, type HousingIconName } from "@/components/housing/HousingIcon";
@@ -626,14 +627,16 @@ export function HousingWorkspace({
   onOpenThread?: () => void;
 }): JSX.Element | null {
   const [tab, setTab] = useState<TabKey>("chat");
+  const { user } = useAuth();
 
   const workspaceKey = ["/api/housing", post.id, "workspace"];
 
   const { data, isLoading } = useQuery<WorkspaceData | null>({
     queryKey: workspaceKey,
+    enabled: !!user,
     queryFn: async () => {
       const res = await fetch(`/api/housing/${post.id}/workspace`, { credentials: "include" });
-      // Not a member, or signed out. Either way there is nothing to show.
+      // Not a member. There is nothing to show.
       if (res.status === 403 || res.status === 401) return null;
       if (!res.ok) throw new Error("Could not open the workspace");
       return (await res.json()) as WorkspaceData;

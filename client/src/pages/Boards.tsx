@@ -539,7 +539,7 @@ export default function Boards() {
                       title={
                         savedOnly
                           ? "No saved posts here yet"
-                          : query || intent !== "all"
+                          : query || intent !== "all" || hasFeatureFilters
                             ? "No posts match your filters"
                             : "Nothing posted here yet"
                       }
@@ -548,7 +548,7 @@ export default function Boards() {
                           ? "Save a card to find it here while it’s available."
                           : query
                             ? `No matches for “${query}”. Try a broader search.`
-                            : intent !== "all"
+                            : intent !== "all" || hasFeatureFilters
                               ? "Try another type or clear your filters."
                               : "Choose a board to start a post for your community."
                       }
@@ -609,7 +609,10 @@ export default function Boards() {
         )}
       </Suspense>
       {showAuth && (
-        <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />
+        <AuthModal onClose={(reason) => {
+          setShowAuth(false);
+          if (reason !== "success" && params.get("compose") === "1") update({ compose: null }, true);
+        }} defaultTab="register" />
       )}
     </div>
   );

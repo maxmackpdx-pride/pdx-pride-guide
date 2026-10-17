@@ -24,8 +24,11 @@
 .eb-category[aria-pressed="true"] b { background: var(--c); color: var(--z-black); box-shadow: 0 0 0 2px var(--z-black); }
 .eb-browse-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .eb-view-all[aria-pressed="true"], .eb-mobile-filter-toggle[data-active="true"] { color: var(--neon-cyan); border-color: var(--neon-cyan); background: var(--ink-800); }
-.eb-filter-popover { z-index: 3100; width: min(320px, calc(100vw - 32px)); max-height: var(--radix-popover-content-available-height); overflow-y: auto; }
-.eb-search-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.eb-filter-popover { order: 1; flex: 1 0 100%; width: 100%; max-height: min(70vh, 520px); overflow-y: auto; box-sizing: border-box; }
+@media (max-width: 700px) {
+  .eb-filter-popover { max-height: min(42vh, 280px); }
+}
+.eb-search-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .eb-search-row > .pdxField, .eb-search-row > .pdxSearch { flex: 1; min-width: 0; }
 .eb-tool { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); border-radius: 12px; background: var(--btn-glow-bg); box-shadow: var(--btn-glow-shadow); color: var(--text-hi); font: 700 14px/1 var(--font-display); text-transform: uppercase; text-decoration: none; cursor: pointer; }
 .eb-body { padding-top:16px; }

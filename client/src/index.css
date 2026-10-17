@@ -3368,6 +3368,15 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   background: rgba(204,255,0,0.08);
   box-shadow: 0 0 12px rgba(204,255,0,0.16), inset 0 0 0 1px rgba(204,255,0,0.16);
 }
+/* The mobile filter drawer is portaled outside .events-page, so the page rule never reaches it. */
+button.event-type-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  min-width: 44px;
+}
 
 /* Map container */
 .map-container {

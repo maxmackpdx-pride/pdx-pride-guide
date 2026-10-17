@@ -1,9 +1,8 @@
 import { useBrowseControlsOffset } from "./useBrowseControlsOffset";
-import { Children, useId, useRef, useState, type CSSProperties, type ChangeEvent, type ReactNode } from "react";
+import { Children, useEffect, useId, useRef, useState, type CSSProperties, type ChangeEvent, type ReactNode } from "react";
 import { DockChip, ScrollDock, focusPageSearch, scrollToResults, useScrollDock } from "./ScrollDock";
 import { Grid2X2, SlidersHorizontal } from "lucide-react";
 import { SearchInput } from "@/components/ds";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import EventsRail from "@/components/events/EventsRail";
 import "./EventzBrowse.css";
@@ -58,16 +57,24 @@ export function BrowseControls({ title, categories, selected, onSelect, query, o
 }
 
 export function BrowseFilters({ title, active = false, children }: { title: string; active?: boolean; children: ReactNode }) {
-  return <Popover>
-    <PopoverTrigger asChild>
-      <button type="button" className="eb-tool eb-mobile-filter-toggle" aria-label={title} data-active={active}>
-        <SlidersHorizontal size={19} aria-hidden="true" />
-      </button>
-    </PopoverTrigger>
-    <PopoverContent align="end" sideOffset={8} className="eb-panel eb-filter-popover" aria-label={title}>
-      {children}
-    </PopoverContent>
-  </Popover>;
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+  return <>
+    <button type="button" className="eb-tool eb-mobile-filter-toggle" aria-expanded={open} aria-controls={panelId} aria-label={title} data-active={active} onClick={() => setOpen(value => !value)}>
+      <SlidersHorizontal size={19} aria-hidden="true" />
+    </button>
+    {open && <div id={panelId} className="eb-panel eb-filter-popover" role="region" aria-label={title}>{children}</div>}
+  </>;
 }
 
 export function BrowseLane({ title, color, count, children, onViewAll }: { title: string; color: string; count: number; children: ReactNode; onViewAll?: () => void }) {

@@ -16,7 +16,7 @@ import {
 } from "@shared/communityStandards";
 
 interface AuthModalProps {
-  onClose: () => void;
+  onClose: (reason?: "success") => void;
   defaultTab?: "login" | "register";
 }
 
@@ -95,7 +95,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
     setError(""); setLoading(true);
     try {
       await login(email, password);
-      onClose();
+      onClose("success");
     } catch (err: any) {
       setError(err.message);
     } finally { setLoading(false); }
@@ -148,7 +148,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
           /* ignore */
         }
       }
-      onClose();
+      onClose("success");
     } catch (err: any) {
       setError(err.message);
     } finally { setLoading(false); }

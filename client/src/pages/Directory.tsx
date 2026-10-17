@@ -13,6 +13,7 @@ import { ResourceRail } from '@/components/resources/ResourceRail';
 import { useTheme } from '@/context/ThemeContext';
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'framer-motion';
 import BrowseStatus from "@/components/BrowseStatus";
+import PageRecovery from "@/components/PageRecovery";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import FilterSurvey from "@/components/FilterSurvey";
 import type React from "react";
@@ -486,6 +487,12 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
   const { calmMode } = useTheme();
   const reducedMotion = useReducedMotion();
+  const placeMissing = !isSpaces && !isLoading && businesses.length > 0 && Number.isFinite(routePlaceId) && (routePlaceId ?? 0) > 0 && !businesses.some(b => b.id === routePlaceId);
+  if (placeMissing) {
+    return <PageRecovery section="Placez" title="This place isn’t here anymore."
+      description="The listing may have moved or been removed. There’s still plenty to find: browse the places that are ours."
+      href="/directory" label="Browse Placez" missing />;
+  }
   return (
     <div className={isSpaces ? "zine-page directory-page board-page board-page--makeover directory-page--v2 resources-page directory-page--spaces" : "eb-page eb-page--places"}>
       <WebGLShader direction={-1} waveSpeed={0.7} />
