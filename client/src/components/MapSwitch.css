@@ -54,10 +54,12 @@
   box-shadow: inset 0 0 0 1px var(--neon-orange, #ff6600);
 }
 
-/* Phones: sit under the map's own top-left lockup instead of colliding with it. */
+/* Phones: keep one viewport anchor below the map lockup, including when
+   a drawer compacts the site header and shifts the map container. */
 @media (max-width: 767px) {
   .map-switch {
-    top: 62px;
+    position: fixed;
+    top: 130px;
     left: 12px;
     transform: none;
   }
