@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "stacks": [
+    {
+      "id": "a",
+      "layers": [
+        "a-back.webp",
+        "a-middle.webp",
+        "a-front.webp"
+      ],
+      "orientation": "shared-parent",
+      "motion": "independent translations only",
+      "blend": "luminance-mask"
+    },
+    {
+      "id": "b",
+      "layers": [
+        "b-back.webp",
+        "b-middle.webp",
+        "b-front.webp"
+      ],
+      "orientation": "shared-parent",
+      "motion": "independent translations only",
+      "blend": "luminance-mask"
+    }
+  ]
+}

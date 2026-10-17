@@ -1,3 +1,4 @@
+import { NetworkBackdrop } from "../artwork/NetworkBackdrop";
 import { CardArtworkGlass } from "../CardArtworkGlass";
 import "./ResourceCardMotif.css";
 import { resourceGradientStops } from "./resourceGradient";
@@ -64,14 +65,8 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
  let seed = Array.from(name).reduce((n,c)=>Math.imul(n,31)+c.charCodeAt(0)|0,7) >>> 0;
  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
  const isPlace = category.startsWith("place-");
- const nodes=Array.from({length:30},(_,i)=>({x:20+random()*360,y:(isPlace ? 25 : 125)+random()*(isPlace ? 420 : 290),r:i%7===0?2.4:1.1}));
- const meshLinks = nodes.flatMap((p, i) => {
-  const nearby = nodes.map((q, j) => ({ q, j, distance: Math.hypot(p.x-q.x, p.y-q.y) }))
-   .filter(({ j, distance }) => j !== i && distance < (isPlace ? 150 : 115))
-   .sort((a, b) => a.distance - b.distance);
-  return (isPlace ? nearby.slice(0, 3) : nearby).filter(({ j }) => j > i)
-   .map(({ q, j }) => <path key={`${i}-${j}`} d={`M${p.x} ${p.y}L${q.x} ${q.y}`} />);
- });
+ // Preserve the existing object placement seed while replacing only its backdrop.
+ for (let i = 0; i < 60; i++) random();
  const theme=themeFor(name,category);
  const placeArtwork = distinctPlaceMotif(name);
  const projected = Boolean(placeArtwork);
@@ -81,15 +76,6 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
  const tilt=(random()-.5)*((isPlace || projected) ? 4 : 12);
  const cycle = 28 + Math.round(random() * 8);
  const phase = -Math.round(random() * cycle);
- const circuits = Array.from({ length: 5 }, (_, i) => {
-  const left = i % 2 === 0;
-  const x = left ? 18 + random() * 32 : 350 + random() * 30;
-  const y = (isPlace ? 35 : 140) + i * (isPlace ? 78 : 43) + random() * 18;
-  const reach = (left ? 1 : -1) * (28 + random() * 45);
-  const rise = (random() - .5) * 45;
-  return { x, y, endX: x + reach, endY: y + rise,
-   path: `M${x} ${y}h${reach * .45}l${reach * .25} ${rise}h${reach * .3}` };
- });
  return <svg ref={ref} className="rg-card-motif" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-motif={`${category}-${name}`} data-motif-material={projected ? "projected" : undefined}>
   {(isPlace || projected) && <defs><linearGradient id={`${gradientId}-edge`} gradientUnits="userSpaceOnUse" x1="90" y1="140" x2="280" y2="355">
    <stop offset="0" style={{ stopColor: "color-mix(in srgb, var(--c) 70%, var(--text-hi))" }} />
@@ -99,28 +85,6 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
   {colors && colors.length > 1 && <defs><linearGradient id={gradientId} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="400" y2="500">
    {resourceGradientStops(colors).map((stop, index) => <stop key={index} offset={`${stop.offset}%`} style={{ stopColor: stop.color }} />)}
   </linearGradient></defs>}
-  <g data-motif-depth="back" className="rg-motif-layer rg-motif-layer--mesh">
-  <g className="rg-motif-drift" style={{ animationDuration: `${cycle}s`, animationDelay: `${phase}s` }}>
-  <g className="rg-motif-mesh" fill="none" stroke={paint} strokeWidth=".65">
-   {meshLinks}
-   {Array.from({length:isPlace ? 3 : 6},(_,i)=><path key={i} d={`M-30 ${220+i*24} Q${140+tilt*3} ${100+i*30} 430 ${300+i*20}`} />)}
-  </g>
-  <g className="rg-motif-circuits" fill="none" stroke={paint} strokeWidth=".75">
-   {circuits.map((c,i)=><g key={i}>
-    <path d={c.path} /><circle cx={c.endX} cy={c.endY} r="2.6" />
-    <path d={`M${c.x} ${c.y-6}v12M${c.x+4} ${c.y-3}v6`} />
-   </g>)}
-  </g>
-  <g className="rg-motif-nodes" fill={paint}>{nodes.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={p.r} />)}</g>
-  <g className="rg-motif-calibration" stroke={paint} strokeWidth=".65" fill="none">
-   {circuits.slice(0,3).map((c,i)=><g key={i} transform={`translate(${c.endX} ${c.endY})`}>
-    <circle r={8+i*2} strokeDasharray="2 8" />
-    <path d={`M-13 0h5M8 0h5M0 -13v5M0 8v5`} />
-   </g>)}
-  </g>
-  <g stroke={paint} strokeWidth=".7" opacity=".4" fill="none"><path d="M32 155V135H52 M348 135H368V155 M32 365V385H52 M348 385H368V365" />{nodes.filter((_,i)=>i%7===0).map((p,i)=><path key={i} d={`M${p.x-5} ${p.y}h10 M${p.x} ${p.y-5}v10`}/>)}</g>
-  </g>
-  </g>
   {supporting && <g data-motif-depth="support" className="rg-motif-layer rg-motif-layer--support">
    <g className="rg-motif-support-drift" style={{ animationDuration: `${cycle + 17}s`, animationDelay: `${phase - 13}s` }}>
     <g className="rg-motif-support-position" transform={`translate(${rightAtTop ? 230 : 170} 165) scale(.78) translate(-200 -250)`}>
@@ -173,5 +137,5 @@ export const ResourceCardMotif = memo(function ResourceCardMotif({ glass = false
    if (!motifVisibility.size) { motifObserver?.disconnect(); motifObserver = undefined; }
   };
  }, []);
- return <div ref={slot} className="rg-motif-slot" aria-hidden="true">{visible && <MotifArtwork {...props} />}{glass && <CardArtworkGlass />}</div>;
+ return <div ref={slot} className="rg-motif-slot" aria-hidden="true"><NetworkBackdrop identity={`${props.category}:${props.name}`}/>{visible && <MotifArtwork {...props} />}{glass && <CardArtworkGlass />}</div>;
 });

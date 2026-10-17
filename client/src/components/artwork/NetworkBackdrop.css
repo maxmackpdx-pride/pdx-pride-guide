@@ -1,0 +1,27 @@
+/* Luminance masks make black pixels transparent even inside isolated photo layers.
+   Orientation belongs ONLY to the common parent; depth planes only translate. */
+.card-network { position:absolute; inset:0; overflow:hidden; pointer-events:none; opacity:var(--network-stack-opacity,.42); z-index:0; }
+.card-network__orientation { position:absolute; inset:-7%; transform-origin:center; }
+.card-network[data-network-orientation="mirror-x"]>.card-network__orientation { transform:scaleX(-1); }
+.card-network[data-network-orientation="half-turn"]>.card-network__orientation { transform:rotate(180deg); }
+.card-network[data-network-orientation="mirror-y"]>.card-network__orientation { transform:scaleY(-1); }
+.card-network__plane { position:absolute; inset:0; transform-origin:center;
+  animation:network-stack-back 29s ease-in-out var(--network-stack-phase,0s) infinite;
+  animation-play-state:var(--motif-playing,paused);
+  translate:calc(var(--rg-parallax-x,0px)*-.18) calc(var(--rg-parallax-y,0px)*-.18); opacity:.55; }
+.card-network__plane--middle { animation-name:network-stack-middle; animation-duration:37s; opacity:.35;
+  translate:calc(var(--rg-parallax-x,0px)*.28) calc(var(--rg-parallax-y,0px)*-.28); }
+.card-network__plane--front { animation-name:network-stack-front; animation-duration:23s; opacity:.65;
+  translate:calc(var(--rg-parallax-x,0px)*.45) calc(var(--rg-parallax-y,0px)*.45); }
+.card-network__plane>svg { display:block; position:absolute; inset:0; width:100%; height:100%; max-width:none; object-fit:fill; }
+@keyframes network-stack-back { 0%,100%{transform:translate(-2px,1px)} 50%{transform:translate(2px,-1px)} }
+@keyframes network-stack-middle { 0%,100%{transform:translate(3px,2px)} 50%{transform:translate(-3px,-2px)} }
+@keyframes network-stack-front { 0%,100%{transform:translate(-4px,-2px)} 50%{transform:translate(4px,2px)} }
+.rg-motif-slot>.card-network { --network-stack-opacity:.23; }
+[data-size="small"] .card-network { --network-stack-opacity:.35; }
+:is([data-calm="true"], [data-motion-disabled="true"],html.calm-mode) .card-network__plane { animation:none!important; translate:none!important; }
+:is([data-calm="true"], [data-motion-disabled="true"],html.calm-mode) .card-network svg { animation:none!important; transform:none!important; }
+@media(prefers-reduced-motion:reduce) {
+  .card-network__plane { animation:none!important; translate:none!important; }
+  .card-network svg { animation:none!important; transform:none!important; }
+}

@@ -1,3 +1,4 @@
+import { NetworkBackdrop } from "../artwork/NetworkBackdrop";
 import { useCardMotifParallax } from "../resources/useCardMotifParallax";
 import { memo, useId, type CSSProperties } from "react";
 import { resolveHousingMotif, type HousingMotifType, resolveBoardMotif } from "@shared/boardMotifs";
@@ -28,24 +29,8 @@ export const BoardCardMotif = memo(function BoardCardMotif({ post, placement = "
   const yaw = post.id % 2 ? -.42 : .32;
   if (placement === "card") {
     const seed = Array.from(post.key).reduce((n, char) => (Math.imul(n, 31) + char.charCodeAt(0)) >>> 0, 7);
-    const nodes = Array.from({ length: 27 }, (_, i) => ({
-      x: ((seed % 67) + i * 137) % 840 - 20,
-      y: ((seed % 43) + i * 83) % 440 - 20,
-    }));
     return <div ref={cardMotion} className="ab-card-motif" aria-hidden="true" style={{ "--ab-motif-phase": `${-(seed % 29)}s` } as CSSProperties}>
-      <svg data-motif-depth="back" className="ab-card-motif__network" viewBox="0 0 800 400" preserveAspectRatio="none" fill="none" stroke={paint("network")}>
-        {gradient("network")}
-        <g className="ab-card-motif__mesh">
-          {Array.from({ length: 12 }, (_, i) => <path key={`h${i}`} d={`M-60 ${-20 + i * 40} Q400 ${-150 + i * 44} 860 ${40 + i * 40}`} />)}
-          {Array.from({ length: 17 }, (_, i) => <path key={`v${i}`} d={`M${-100 + i * 70} 450 Q${40 + i * 45} 230 ${-30 + i * 60} -50`} />)}
-        </g>
-        <g className="ab-card-motif__links">
-          {nodes.flatMap((node, i) => nodes.slice(i + 1).filter(other => Math.hypot(node.x - other.x, node.y - other.y) < 180).map(other => <path key={`${i}-${other.x}`} d={`M${node.x} ${node.y}L${other.x} ${other.y}`} />))}
-        </g>
-        <g className="ab-card-motif__nodes" fill={paint("network")} stroke="none">
-          {nodes.map((node, i) => <circle key={i} cx={node.x} cy={node.y} r={i % 5 === 0 ? 3 : 1.5} />)}
-        </g>
-      </svg>
+      <NetworkBackdrop identity={post.key}/>
       <svg data-motif-depth="support" className="ab-card-motif__object ab-card-motif__object--support" viewBox="0 0 400 500" fill="none" stroke="currentColor">
         {gradient("support")}
         <Volume form={placeWireframe(pair[1], .6, -yaw)} stroke={housing?paint("support"):undefined} />
