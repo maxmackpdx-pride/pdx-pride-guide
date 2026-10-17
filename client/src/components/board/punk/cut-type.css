@@ -1,6 +1,6 @@
 /* User-supplied Cut & Type: actual color-font cutouts, with editable live text. */
-@font-face{font-family:CutTypeTitle;src:url('/boardz/punk/cut-type/CutTypeCondensed-Mixed.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
-@font-face{font-family:CutTypePrice;src:url('/boardz/punk/cut-type/CutTypeCondensed-Paper.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-face{font-family:CutTypeTitle;src:url('/boardz/punk/cut-type/CutType-MixedLight.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-face{font-family:CutTypePrice;src:url('/boardz/punk/cut-type/CutType-Paper.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
 @font-palette-values --cut-title-white{font-family:CutTypeTitle;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
 @font-palette-values --cut-price-white{font-family:CutTypePrice;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
 .boardz-punk-scope .bz-card .bz-title,.boardz-punk-scope .bz-card .bz-title span{
@@ -11,7 +11,7 @@
 .boardz-punk-scope .bz-card .cut-line:before,.boardz-punk-scope .bz-card .cut-line:after{display:none}
 .boardz-punk-scope .bz-card .cut-line{padding:0 2px;margin-bottom:1px}
 .boardz-punk-scope .bz-card .cut-line>span{overflow:visible}
-.boardz-punk-scope .bz-card .cut-headline{filter:drop-shadow(1px 1px 0 var(--c))}
+.boardz-punk-scope .bz-card .cut-headline{filter:drop-shadow(0 1px 1px var(--punk-black))}
 .boardz-punk-scope .bz-card[data-size=large] .bz-title{line-height:1.14}
 .boardz-punk-scope .bz-card[data-size=small] .bz-title,.boardz-punk-scope .bz-card[data-size=small] .bz-title span{font-family:CutTypePrice,BoardzHouzText,Arial,sans-serif;font-palette:--cut-price-white;line-height:1.14}
 .boardz-punk-scope .bz-card .bz-value:not(:empty){line-height:1.16}
@@ -27,19 +27,37 @@
 .boardz-punk-scope .card[data-category=housing] .rate .price-copy{overflow:visible}
 
 /* Stable character-by-character mix of the supplied paper styles. */
-@font-face{font-family:CutMixPaper;src:url('/boardz/punk/cut-type/CutTypeCondensed-Paper.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
-@font-palette-values --cut-mix-paper{font-family:CutMixPaper;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
-@font-face{font-family:CutMixMixed;src:url('/boardz/punk/cut-type/CutTypeCondensed-Mixed.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
-@font-palette-values --cut-mix-mixed{font-family:CutMixMixed;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
-@font-face{font-family:CutMixRough;src:url('/boardz/punk/cut-type/CutTypeCondensed-Rough.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
-@font-palette-values --cut-mix-rough{font-family:CutMixRough;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
-@font-face{font-family:CutMixReverse;src:url('/boardz/punk/cut-type/CutTypeCondensed-Reverse.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
-@font-palette-values --cut-mix-reverse{font-family:CutMixReverse;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
-@font-face{font-family:CutMixLoose;src:url('/boardz/punk/cut-type/CutTypeCondensed-Loose.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
-@font-palette-values --cut-mix-loose{font-family:CutMixLoose;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
-@font-face{font-family:CutMixRansom;src:url('/boardz/punk/cut-type/CutTypeCondensed-Ransom.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
-@font-palette-values --cut-mix-ransom{font-family:CutMixRansom;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-face{font-family:CutMixRegular;src:url('/boardz/punk/cut-type/CutType-Regular.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-regular-normal{font-family:CutMixRegular;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-palette-values --cut-mix-regular-inverted{font-family:CutMixRegular;override-colors:0 rgb(0 0 0),1 rgb(255 255 255)}
+@font-face{font-family:CutMixMixed;src:url('/boardz/punk/cut-type/CutType-Mixed.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-mixed-normal{font-family:CutMixMixed;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-palette-values --cut-mix-mixed-inverted{font-family:CutMixMixed;override-colors:0 rgb(0 0 0),1 rgb(255 255 255)}
+@font-face{font-family:CutMixRough;src:url('/boardz/punk/cut-type/CutType-Rough.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-rough-normal{font-family:CutMixRough;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-palette-values --cut-mix-rough-inverted{font-family:CutMixRough;override-colors:0 rgb(0 0 0),1 rgb(255 255 255)}
+@font-face{font-family:CutMixReverse;src:url('/boardz/punk/cut-type/CutType-Reverse.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-reverse-normal{font-family:CutMixReverse;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-palette-values --cut-mix-reverse-inverted{font-family:CutMixReverse;override-colors:0 rgb(0 0 0),1 rgb(255 255 255)}
+@font-face{font-family:CutMixPaper;src:url('/boardz/punk/cut-type/CutType-Paper.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-paper-normal{font-family:CutMixPaper;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-palette-values --cut-mix-paper-inverted{font-family:CutMixPaper;override-colors:0 rgb(0 0 0),1 rgb(255 255 255)}
+@font-face{font-family:CutMixWorn;src:url('/boardz/punk/cut-type/CutType-Worn.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-worn-normal{font-family:CutMixWorn;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-palette-values --cut-mix-worn-inverted{font-family:CutMixWorn;override-colors:0 rgb(0 0 0),1 rgb(255 255 255)}
+@font-face{font-family:CutMixTall;src:url('/boardz/punk/cut-type/CutType-Tall.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-tall-normal{font-family:CutMixTall;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-palette-values --cut-mix-tall-inverted{font-family:CutMixTall;override-colors:0 rgb(0 0 0),1 rgb(255 255 255)}
+@font-face{font-family:CutMixRansom;src:url('/boardz/punk/cut-type/CutType-Ransom.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-ransom-normal{font-family:CutMixRansom;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-palette-values --cut-mix-ransom-inverted{font-family:CutMixRansom;override-colors:0 rgb(0 0 0),1 rgb(255 255 255)}
+@font-face{font-family:CutMixDistressed;src:url('/boardz/punk/cut-type/CutType-Distressed.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-distressed-normal{font-family:CutMixDistressed;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-palette-values --cut-mix-distressed-inverted{font-family:CutMixDistressed;override-colors:0 rgb(0 0 0),1 rgb(255 255 255)}
+@font-face{font-family:CutMixLoose;src:url('/boardz/punk/cut-type/CutType-Loose.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-loose-normal{font-family:CutMixLoose;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-palette-values --cut-mix-loose-inverted{font-family:CutMixLoose;override-colors:0 rgb(0 0 0),1 rgb(255 255 255)}
 .boardz-punk-scope .ransom-copy{display:inline!important;overflow:visible!important;max-width:none!important;font-size:inherit!important;line-height:inherit!important;font-weight:900!important;font-kerning:none;white-space:inherit;font-synthesis:none}
-.boardz-punk-scope .ransom-letter{display:inline-block;font-size:inherit;line-height:inherit;font-weight:900;font-style:normal;font-kerning:none;font-synthesis:none;vertical-align:baseline;transform-origin:50% 70%;transform:translateY(var(--cut-lift)) rotate(var(--cut-angle)) scaleY(var(--cut-stretch))}
-.boardz-punk-scope [data-size=small] .ransom-letter{transform:translateY(calc(var(--cut-lift)*.6)) rotate(calc(var(--cut-angle)*.65)) scaleY(var(--cut-stretch))}
+.boardz-punk-scope .ransom-letter{display:inline-block;font-size:inherit;line-height:inherit;font-weight:900;font-style:normal;font-kerning:none;font-synthesis:none;vertical-align:baseline;transform:none}
+
 .boardz-punk-scope .bz-card .bz-value:has(.ransom-copy){overflow:visible}
