@@ -2,11 +2,20 @@
 const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const photoUrl=value=>typeof value==='string'&&/^(?:\/outzide-map\/)?assets\/photos\/[A-Za-z0-9._/-]+$/.test(value)&&!value.split('/').some(part=>part==='.'||part==='..')?(value.startsWith('/')?value:'/outzide-map/'+value):'';
 const photoSrcSet=variants=>Array.isArray(variants)?variants.filter(v=>v&&typeof v==='object'&&photoUrl(v.src)&&/\.(?:webp|avif|png|jpe?g)$/i.test(v.src)&&Number.isInteger(v.width)&&v.width>0&&v.width<=8192).map(v=>photoUrl(v.src)+' '+v.width+'w').join(', '):'';
+// Quiet regions are spatial reservations, independent of sparse artwork alpha coverage.
+export function photoQuietStyle(quiet){
+ if(!quiet||typeof quiet!=='object')return '';
+ const {cx,cy,rx,ry}=quiet;
+ if(![cx,cy,rx,ry].every(v=>typeof v==='number'&&Number.isFinite(v))||rx<=0||ry<=0||cx-rx<0||cx+rx>1||cy-ry<0||cy+ry>1)return '';
+ const clearArea=Math.PI*rx*ry*.94**2;
+ if(clearArea<.30||clearArea>.45)return '';
+ return [['x',cx],['y',cy],['rx',rx],['ry',ry]].map(([key,value])=>'--quiet-'+key+':'+(value*100).toFixed(4)+'%').join(';');
+}
 export function photoMarkup(photo,className=''){
  if(!photoUrl(photo?.src))return '';
- const srcset=photoSrcSet(photo.variants);
- const image=(src,kind,alt='')=>'<img class="outz-photo__'+kind+'" src="'+escape(photoUrl(src))+'"'+(kind==='base'&&srcset?' srcset="'+escape(srcset)+'" sizes="(max-width: 800px) 100vw, 800px"':'')+' alt="'+escape(alt)+'" width="'+(Number(photo.width)||1600)+'" height="'+(Number(photo.height)||1000)+'" loading="lazy" decoding="async"'+(kind==='base'?'':' aria-hidden="true"')+'>';
- return '<span class="outz-photo '+escape(className)+'" data-outz-photo data-photo-rank="'+(Number(photo.rank)||999)+'" style="--photo-position:'+escape(photo.position||'center')+'">'+image(photo.src,'base',photo.alt)+(photoUrl(photo.overlaySrc)?'<span class="outz-photo__graphics">'+image(photo.overlaySrc,'overlay')+(photoUrl(photo.overlayGlowSrc)&&photo.rank<=20?image(photo.overlayGlowSrc,'nodes'):'')+'</span>':'')+'</span>';
+ const srcset=photoSrcSet(photo.variants),overlaySrcset=photoSrcSet(photo.overlayVariants),quiet=photoQuietStyle(photo.quiet);
+ const image=(src,kind,alt='')=>{const responsive=kind==='base'?srcset:kind==='overlay'?overlaySrcset:'';return '<img class="outz-photo__'+kind+'" src="'+escape(photoUrl(src))+'"'+(responsive?' srcset="'+escape(responsive)+'" sizes="(max-width: 800px) 100vw, 800px"':'')+' alt="'+escape(alt)+'" width="'+(Number(photo.width)||1600)+'" height="'+(Number(photo.height)||1000)+'" loading="lazy" decoding="async"'+(kind==='base'?'':' aria-hidden="true"')+'>';};
+ return '<span class="outz-photo '+escape(className)+'" data-outz-photo'+(quiet?' data-photo-quiet="true"':'')+' data-photo-rank="'+(Number(photo.rank)||999)+'" style="--photo-position:'+escape(photo.position||'center')+(quiet?';'+quiet:'')+'">'+image(photo.src,'base',photo.alt)+(photoUrl(photo.overlaySrc)?'<span class="outz-photo__graphics">'+image(photo.overlaySrc,'overlay')+(photoUrl(photo.overlayGlowSrc)&&photo.rank<=20?image(photo.overlayGlowSrc,'nodes'):'')+'</span>':'')+'</span>';
 }
 export function createPhotoMotion(scope=globalThis){
  const doc=scope.document, entries=new Map(),fine=scope.matchMedia?.('(hover: hover) and (pointer: fine)'),reduced=scope.matchMedia?.('(prefers-reduced-motion: reduce)');

@@ -20,3 +20,7 @@
 .outzide-shell #selection-dock>.place-card .place-photo{width:76px;height:76px;min-width:0;border-radius:9px;margin:0}
 /* Short owner-approved burnt-orange fade stays stationary with the photo frame. */
 .outz-photo::after{content:"";position:absolute;z-index:2;inset:auto 0 0;height:10%;background:linear-gradient(to bottom,rgba(184,71,16,0) 0%,rgba(184,71,16,.09) 25%,rgba(184,71,16,.48) 65%,rgba(184,71,16,.94) 100%);pointer-events:none}
+/* One bounded ellipse reserves a broad quiet region in both artwork layers.
+   Its inner 94% is exactly clear; the remaining 6% feathers into full artwork.
+   The base photo and stationary bottom fade remain outside this graphics mask. */
+.outz-photo[data-photo-quiet=true] .outz-photo__graphics{mask-image:radial-gradient(ellipse var(--quiet-rx) var(--quiet-ry) at var(--quiet-x) var(--quiet-y),transparent 0 94%,#000 100%)!important;-webkit-mask-image:radial-gradient(ellipse var(--quiet-rx) var(--quiet-ry) at var(--quiet-x) var(--quiet-y),transparent 0 94%,#000 100%)!important}

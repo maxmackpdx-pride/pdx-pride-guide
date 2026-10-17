@@ -28,6 +28,13 @@ test('responsive variants reject remote paths, traversal, unsupported formats an
  assert.equal(photoUrl('assets/photos/../x.webp'),'');
  assert.doesNotMatch(photoMarkup({src:'assets/photos/base.webp',variants:{src:'assets/photos/base.webp',width:640}}),/srcset=/);
 });
+test('transparent artwork selects its own responsive variants without reusing photo or glow images',()=>{
+ const html=photoMarkup({src:'assets/photos/v3/base.webp',variants:[{src:'assets/photos/v3/base-640.webp',width:640}],overlaySrc:'assets/photos/v3/overlays/art.webp',overlayVariants:[{src:'assets/photos/v3/overlays/art-640.webp',width:640},{src:'https://remote.test/art.webp',width:1280}],overlayGlowSrc:'assets/photos/v3/overlays/nodes.svg',rank:1});
+ const images=html.match(/<img[^>]+>/g);assert.equal(images.length,3);
+ assert.match(images[0],/base-640.webp 640w/);assert.doesNotMatch(images[0],/art-640/);
+ assert.match(images[1],/art-640.webp 640w/);assert.doesNotMatch(images[1],/base-640|remote/);
+ assert.doesNotMatch(images[2],/srcset=/);
+});
 test('caps visible node glows at three and resets motion when document is hidden',()=>{
  const f=fixture(),runtime=createPhotoMotion(f.scope);f.elements.forEach(runtime.attach);f.observe();
  assert.equal(f.elements.filter(e=>e.dataset.photoGlowing==='true').length,3);
@@ -45,4 +52,12 @@ test('Calm Mode stops motion and offscreen artwork remains static',()=>{
  const f=fixture();let calm=false;f.doc.documentElement.classList.contains=()=>calm;const runtime=createPhotoMotion(f.scope);runtime.attach(f.elements[0]);
  assert.equal(f.elements[0].dataset.photoMotion,'false');assert.equal(f.elements[0].dataset.photoGlowing,'false');f.observe();assert.equal(f.elements[0].dataset.photoMotion,'true');
  calm=true;f.scope.emit('storage');assert.equal(f.elements[0].dataset.photoMotion,'false');assert.equal(f.elements[0].dataset.photoGlowing,'false');runtime.dispose();
+});
+test('quiet region geometry accepts only finite in-bounds 30–45% clear reservations',async()=>{
+ const {photoQuietStyle}=await import('../client/public/outzide-map/assets/destination-photos.js');
+ const quiet={cx:.5,cy:.5,rx:.43,ry:.28};assert.equal(photoQuietStyle(quiet),'--quiet-x:50.0000%;--quiet-y:50.0000%;--quiet-rx:43.0000%;--quiet-ry:28.0000%');
+ for(const invalid of [null,{},'bad',{...quiet,cx:'50%;color:red'},{...quiet,rx:Infinity},{...quiet,ry:NaN},{...quiet,cx:.2},{...quiet,cy:1},{...quiet,rx:.1},{...quiet,rx:.5,ry:.5}])assert.equal(photoQuietStyle(invalid),'');
+ const html=photoMarkup({src:'assets/photos/base.webp',overlaySrc:'assets/photos/overlay.png',overlayGlowSrc:'assets/photos/nodes.svg',rank:1,quiet});
+ assert.match(html,/data-photo-quiet="true"/);assert.match(html,/--quiet-rx:43.0000%/);assert.match(html,/overlay.png/);assert.match(html,/outz-photo__nodes/);
+ assert.doesNotMatch(photoMarkup({src:'assets/photos/base.webp'}),/data-photo-quiet|--quiet-/);
 });

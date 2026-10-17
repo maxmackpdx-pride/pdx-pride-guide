@@ -181,7 +181,7 @@ function SauvieIslandPanel() {
 
 export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: NudeBeachTab }) {
   const isRooster = beachId === "rooster-rock";
-  const {data: photoCatalog}=useQuery<{places:{id:string;photo?:OutzPhotoData}[]}>({queryKey:['/outzide-map/places.json'],queryFn:()=>apiRequest('GET','/outzide-map/places.json').then(r=>r.json()),staleTime:3600_000});
+  const {data: photoCatalog}=useQuery<{places:{id:string;photo?:OutzPhotoData}[]}>({queryKey:['/outzide-map/places.json'],queryFn:()=>apiRequest('GET','/outzide-map/places.json?v=20261017-sculpted-v3').then(r=>r.json()),staleTime:3600_000});
   const photo=photoCatalog?.places.find(row=>row.id===beachId)?.photo;
   usePageSeo(
     `${isRooster ? "Rooster Rock" : "Sauvie Island"} · OUTZ | Zaylist`,

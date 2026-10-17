@@ -1,4 +1,4 @@
-@import url('/outzide-map/assets/destination-photos.css?v=20261017-layered');
+@import url('/outzide-map/assets/destination-photos.css?v=20261017-sculpted-v3');
 .today-location__art>.outz-photo{position:absolute;inset:0;width:100%;height:100%}
 .outz-hero__photo{position:relative;z-index:0;width:100%;height:clamp(220px,36vw,440px);margin-bottom:20px}
 .outz-hero__photo-credit{font-size:11px;color:var(--text-lo);margin:0 0 20px}

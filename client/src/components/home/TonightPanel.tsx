@@ -65,7 +65,7 @@ export default function TonightPanel() {
   });
   const { data: outzDetails } = useQuery<{ places: { id: string; art: string; region: string; photo?: OutzPhotoData }[] }>({
     queryKey: ["/outzide-map/places.json"],
-    queryFn: () => apiRequest("GET", "/outzide-map/places.json").then(r => r.json()),
+    queryFn: () => apiRequest("GET", "/outzide-map/places.json?v=20261017-sculpted-v3").then(r => r.json()),
     staleTime: 3600_000,
   });
   const dayEvents = useMemo(() => listings
