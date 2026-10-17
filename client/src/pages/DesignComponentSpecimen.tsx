@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { DESIGN_COMPONENT_REGISTRY, findDesignComponent } from "@shared/designComponentRegistry";
 import UserAvatar from "@/components/UserAvatar";
 import ActionRow from "@/components/promoter/ActionRow";
+import BoardzComponentSpecimen from "@/components/board/BoardzComponentSpecimen";
 import {
   Badge,
   Button,
@@ -47,6 +48,11 @@ function Specimen({ id }: { id: string }) {
   const countdownTarget = useMemo(() => new Date(Date.now() + 5 * 86_400_000).toISOString(), []);
 
   switch (id) {
+    case "component:data-display/BoardPostFace":
+    case "component:forms/BoardComposerPreview":
+    case "component:data-display/BoardPushPin":
+    case "component:data-display/BoardCardMotif":
+      return <BoardzComponentSpecimen componentId={id} />;
     case "component:brand/Logo":
       return <Logo variant="lockup" size={76} href={undefined} />;
     case "component:brand/UserAvatar":

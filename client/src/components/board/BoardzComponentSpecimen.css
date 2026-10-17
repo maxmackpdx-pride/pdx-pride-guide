@@ -1,0 +1,8 @@
+.boardz-specimen{width:100%;min-width:0;color:var(--text-body);font-family:var(--font-body)}
+.boardz-specimen>label{display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:14px}
+.boardz-specimen select{max-width:100%;min-height:44px;padding:8px;background:var(--ink-950);color:var(--text-body);border:1px solid var(--border-subtle);border-radius:8px}
+.boardz-specimen>p{max-width:64ch;font-size:13px;line-height:1.5;margin:16px 0 32px}
+.boardz-specimen__pair{display:flex;flex-wrap:wrap;align-items:flex-start;gap:32px;overflow:visible;padding-block:20px}
+.boardz-specimen .boardz-composer-preview{max-width:100%}
+.zay-specimen:has(.boardz-specimen){padding:12px}
+.zay-specimen:has(.boardz-specimen) .zay-specimen__stage{padding:2px;overflow:visible;border:0;box-shadow:none}
