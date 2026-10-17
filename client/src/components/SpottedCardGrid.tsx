@@ -1,3 +1,5 @@
+import {BOARD_TEXT_LIMITS,BOARD_NEIGHBORHOODS} from "@shared/boardCardPresentation";
+import BoardComposerPreview from "@/components/board/BoardComposerPreview";
 import ZLineIcon from "@/components/ZLineIcon";
 import RoomComposer from "@/components/board/RoomComposer";
 import { useEffect, useMemo, useState } from "react";
@@ -22,9 +24,9 @@ type BoardFilter = "ALL" | "EVENT" | "TOWN" | "ROOSTER" | "SAUVIE";
 
 function deriveTitle(title: string, body: string): string {
   const trimmed = title.trim();
-  if (trimmed) return trimmed.slice(0, 80);
+  if (trimmed) return trimmed.slice(0, BOARD_TEXT_LIMITS.title);
   const line = body.trim().split(/\n/)[0] || body.trim();
-  return line.slice(0, 80) || "Missed connection";
+  return line.slice(0, BOARD_TEXT_LIMITS.title) || "Missed connection";
 }
 
 type Props = {
@@ -195,7 +197,7 @@ export default function SpottedCardGrid({
   const replyModal = replyingTo && (
     <SpottedDetailModal
       postId={replyingTo.id}
-      title={replyingTo.title || replyingTo.body.slice(0, 80)}
+      title={replyingTo.title || replyingTo.body.slice(0, BOARD_TEXT_LIMITS.title)}
       body={replyingTo.body}
       place={spottedPlace(replyingTo)}
       kindLabel={spottedKind(replyingTo).label}
@@ -396,22 +398,22 @@ export function MizzedComposer({linkableEvents, onPosted, initialSource}: {linka
             <input
               className="board-text-field"
               value={draftVenueHint}
-              onChange={e => setDraftVenueHint(e.target.value.slice(0, 80))}
+              onChange={e => setDraftVenueHint(e.target.value.slice(0, BOARD_TEXT_LIMITS.title))}
               placeholder="e.g. Powell's late stacks, the MAX Blue Line"
               maxLength={80}
             />
           </label>
         )}
         <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} venue={linkedMapVenue?.venueId?{...linkedMapVenue,venueId:linkedMapVenue.venueId}:null} />
-        {sourceArt && <div className="mizzed-compose-art span"><img src={sourceArt} alt=""/><span>{spotMode === "placez" ? "Portland stock photo. Venue logo stays off your post." : spotMode === "event" ? "This Eventz flyer appears on your post." : "OutZide destination artwork appears on your post."}</span></div>}
+        {sourceArt && <p className="span board-copy-sm">Your source stays linked in the open card. Mizzed cards use the speech-bubble artwork.</p>}
         <label className="span">
           Title
           <input
             className="board-text-field"
             value={draftTitle}
-            onChange={e => setDraftTitle(e.target.value.slice(0, 80))}
+            onChange={e => setDraftTitle(e.target.value.slice(0, BOARD_TEXT_LIMITS.title))}
             placeholder="e.g. Mesh top, killer moves by the left speaker"
-            maxLength={80}
+            maxLength={BOARD_TEXT_LIMITS.title}
           />
         </label>
         <label className="span">
@@ -429,6 +431,7 @@ export function MizzedComposer({linkableEvents, onPosted, initialSource}: {linka
           </span>
         </label>
       </div>
+      <BoardComposerPreview category="mizzed" fields={{title:draftTitle,body:draftBody,venueHint:draftCustomLocation||draftVenueHint||chosenPlace?.name||chosenEvent?.venueName||'',eventTitle:chosenEvent?.title}}/>
       <label className="gifting-rules" style={{ marginTop: 16 }}>
         <input type="checkbox" checked={acceptRules} onChange={e => setAcceptRules(e.target.checked)} />
         I agree: kind, specific, PG-13, no full names or outing. I understand I stay anonymous until I choose to reveal.

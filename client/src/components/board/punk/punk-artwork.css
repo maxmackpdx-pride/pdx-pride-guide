@@ -1,0 +1,50 @@
+.boardz-punk-scope .punk-object{position:absolute;pointer-events:none;z-index:2;right:-7px;top:83px;width:178px;height:135px;transform:translate(var(--scrap-x),var(--scrap-y)) rotate(var(--scrap-tilt)) scale(var(--scrap-size));transform-origin:65% 65%;opacity:.68;mask-image:linear-gradient(90deg,transparent,color-mix(in srgb,var(--punk-black) 60.000%,transparent) 22%,var(--punk-black) 55%)}
+.boardz-punk-scope .punk-object img{width:100%;height:100%;object-fit:contain;filter:url('#punk-cutout-alpha') drop-shadow(3px 2px 0 var(--secondary));}
+.boardz-punk-scope .punk-object[data-color=true]{opacity:.8}.boardz-punk-scope .punk-flag-ink{width:100%;height:100%;display:block;overflow:visible}.boardz-punk-scope .punk-object[data-color=true] .punk-flag-ink{filter:drop-shadow(2px 2px 0 color-mix(in srgb,var(--secondary) 50%,transparent))}
+.boardz-punk-scope .bz-card:has(.punk-object) .bz-scraps i{opacity:.35;scale:.7}
+.boardz-punk-scope .card[data-category=housing] .punk-object{z-index:2;right:-5px;top:71px;width:190px;height:155px;opacity:.62}
+.boardz-punk-scope .card[data-category=housing]:has(.punk-object) .punk-paper i{opacity:.28}
+.boardz-punk-scope :is(.bz-card,.card)[data-size=small] .punk-object{right:-13px;top:49px;width:105px;height:96px;opacity:.47}
+.boardz-punk-scope .artwork-picker{max-width:520px;margin-top:12px;font:12px/1.4 BoardzHouzText,Arial,sans-serif;color:var(--punk-print-cccccc)}
+.boardz-punk-scope .artwork-picker summary{cursor:pointer;padding:6px 0}.boardz-punk-scope .artwork-picker-fields{display:grid;gap:10px;background:var(--punk-print-090909);padding:14px;border:1px solid var(--punk-print-333333);border-radius:9px}
+.boardz-punk-scope .artwork-picker label{display:grid;gap:5px}.boardz-punk-scope .artwork-picker select{width:100%;border:1px solid var(--punk-print-555555);background:var(--punk-print-161616);color:var(--punk-white);border-radius:5px;padding:8px;font:inherit}.boardz-punk-scope .artwork-picker .artwork-check{display:flex;align-items:center;gap:8px}.boardz-punk-scope .artwork-check input{accent-color:var(--day-thu)}.boardz-punk-scope .artwork-picker p{margin:0;color:var(--punk-print-a7a7a7)}
+.boardz-punk-scope .punk-library{font-family:BoardzHouzText,Arial,sans-serif}.boardz-punk-scope .library-heading{max-width:700px;margin-bottom:28px}.boardz-punk-scope .library-heading h1{font:700 44px/1 BoardzHouzText,Arial,sans-serif}.boardz-punk-scope .library-heading button{background:transparent;color:var(--punk-white);border:1px solid var(--punk-print-666666);border-radius:7px;padding:9px 14px;font:inherit;cursor:pointer;margin-bottom:20px}.boardz-punk-scope .library-heading p{line-height:1.4;color:var(--punk-print-c4c4c4)}
+.boardz-punk-scope .punk-library-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.boardz-punk-scope .artwork-tile{padding:14px 10px 12px;background:var(--punk-print-090909);color:var(--punk-white);border:1px solid var(--punk-print-444444);border-radius:10px;cursor:pointer;font:700 12px/1.2 BoardzHouzText,Arial,sans-serif;display:flex;flex-direction:column;gap:12px;text-align:left;min-width:0}
+.boardz-punk-scope .artwork-tile[aria-pressed=true]{border-color:var(--day-thu);background:var(--punk-print-061414)}.boardz-punk-scope .artwork-tile:focus-visible{outline:2px solid white;outline-offset:3px}.boardz-punk-scope .tile-art{display:block;height:140px;width:100%;position:relative}.boardz-punk-scope .tile-art :is(img,svg){width:100%;height:100%;object-fit:contain;transform:rotate(var(--tile-angle));filter:url('#punk-cutout-alpha');}.boardz-punk-scope .tile-art svg{filter:none}
+.boardz-punk-scope .library-card-preview{margin-top:36px;padding-top:24px;border-top:1px solid var(--punk-print-444444)}.boardz-punk-scope .library-card-preview>h2{font:700 20px/1.2 BoardzHouzText,Arial,sans-serif;margin:0 0 20px}.boardz-punk-scope .library-card-preview .pair{display:flex;flex-wrap:wrap;gap:24px}.boardz-punk-scope .library-card-preview>p{font:12px/1.5 BoardzHouzText,Arial,sans-serif;color:var(--punk-print-b6b6b6);max-width:550px}
+@media(max-width:650px){.boardz-punk-scope[data-artwork-view=true]{padding:22px 16px}.boardz-punk-scope .punk-library-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.boardz-punk-scope .tile-art{height:104px}.boardz-punk-scope .library-heading h1{font-size:32px}.boardz-punk-scope .artwork-tile{padding:11px 8px;font-size:11px}.boardz-punk-scope .library-card-preview .pair{gap:20px}.boardz-punk-scope[data-artwork-view=true] .library-card-preview{margin-left:-1px;margin-right:-1px}}
+
+.boardz-punk-scope .library-family{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px}.boardz-punk-scope .library-family select{max-width:100%;background:var(--punk-print-080808);color:var(--punk-white);border:1px solid var(--punk-print-666666);padding:9px;border-radius:6px;font:inherit}
+/* The original cyberspace layer stays below every paper scrap, never baked into an image. */
+.boardz-punk-scope :is(.bz-card,.card[data-category=housing]) .ab-card-motif{z-index:1}
+.boardz-punk-scope .card[data-category=housing] .ab-card-motif__network{color:var(--secondary);stroke:var(--secondary)}
+.boardz-punk-scope .card[data-category=housing] .ab-card-motif__nodes,
+.boardz-punk-scope .card[data-category=housing] .ab-card-motif__nodes circle{fill:var(--secondary);stroke:none}
+.boardz-punk-scope .card[data-category=housing] :is(.ab-card-motif__mesh,.ab-card-motif__links) path{stroke:var(--secondary);stroke-dasharray:31 1.8 7 .9 19 2.4}
+/* Accent ink scratches sit inside the cyan tears, beneath all live content. */
+.boardz-punk-scope .card[data-category=housing] .houz-edge-scratches{position:absolute;inset:0;z-index:3;pointer-events:none;background:var(--secondary);opacity:.72;mask:url('/boardz/punk/houz-edge-scratches.svg') center/100% 100% no-repeat}
+.boardz-punk-scope .card[data-category=housing][data-intent=looking] .houz-edge-scratches{transform:scaleX(-1)}
+.boardz-punk-scope .card[data-category=housing][data-intent=managed] .houz-edge-scratches{transform:rotate(180deg)}
+.boardz-punk-scope .card.small[data-category=housing] .houz-edge-scratches{opacity:.62}
+.boardz-punk-scope .punk-object .punk-flag-ink{width:100%;height:100%}
+.boardz-punk-scope :is(.bz-card,.card[data-category=housing]) .punk-object[data-color=true]{right:9px;top:85px;width:174px;height:116px;mask-image:none;opacity:.72}
+.boardz-punk-scope :is(.bz-card,.card[data-category=housing])[data-size=small] .punk-object[data-color=true]{right:3px;top:68px;width:109px;height:74px;opacity:.5}
+
+/* Mizzed keeps its exclusive speech-bubble identity on photo-free cards. */
+/* 68.36px is the tilted artwork's center below its top; keep its x anchor fixed. */
+.boardz-punk-scope .bz-card[data-category=mizzed] .punk-object[data-art=message-bubbles]{right:calc(7px + 10%);top:calc(50% - 68.36px);width:175px;height:128px;opacity:.95;mask-image:none;transform:rotate(-7deg);transform-origin:70% 60%}
+.boardz-punk-scope .bz-card[data-category=mizzed][data-size=small] .punk-object[data-art=message-bubbles]{left:calc(50% + 5px);right:auto;top:50%;width:108px;height:80px;opacity:.85;transform:translate(-50%,-50%) rotate(13deg);transform-origin:center}
+.boardz-punk-scope .bz-card[data-category=mizzed] .punk-object[data-art=message-bubbles] img{filter:url('#punk-cutout-alpha') var(--bz-tint);scale:1.21;transform-origin:center}
+.boardz-punk-scope .bz-card[data-category=mizzed][data-size=small] .punk-object[data-art=message-bubbles] img{scale:1.2}
+.boardz-punk-scope .bz-card[data-category=mizzed]:has(.punk-object) .bz-scraps i{opacity:.18;scale:.6}
+
+/* The Hoüz house is a permanent paper sticker, beneath live text and controls. */
+.boardz-punk-scope .card[data-category=housing] .punk-object[data-art=house]{z-index:2;opacity:.72}
+.boardz-punk-scope .card[data-category=housing][data-size=small] .punk-object[data-art=house]{opacity:.6}
+.boardz-punk-scope .card[data-category=housing] .punk-object:not([data-color=true]) img{filter:url('#punk-cutout-alpha') url('#hz-ink-cyan')}
+/* Let the photo breathe around the selected cyan paper, while keeping its house identity. */
+.boardz-punk-scope .card.large[data-category=housing][data-has-photos=true] .punk-object{right:-20px;top:87px;width:170px;height:140px;opacity:.72}
+.boardz-punk-scope .card.small[data-category=housing][data-has-photos=true] .punk-object{right:-15px;top:63px;width:94px;height:82px;opacity:.6}
+.boardz-punk-scope .card.large[data-category=housing]:has(.punk-object:not([data-art=house])) .punk-object[data-art=house]{right:-17px;top:155px;width:96px;height:80px;opacity:.55}
+.boardz-punk-scope .card.small[data-category=housing]:has(.punk-object:not([data-art=house])) .punk-object[data-art=house]{right:-10px;top:106px;width:53px;height:46px;opacity:.45}

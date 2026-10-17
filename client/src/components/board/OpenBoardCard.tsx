@@ -24,7 +24,7 @@ export default function OpenBoardCard({ label, accent, onClose, children, floati
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className={`board-open-card ${floating ? "board-open-card--floating" : "pdx-glass-rebind"}`}
+        className={`boardz-open-surface board-open-card ${floating ? "board-open-card--floating" : "pdx-glass-rebind"}`}
         style={{ "--c": accent, "--listing-accent": accent } as CSSProperties}
         onClick={event => event.stopPropagation()}
       >

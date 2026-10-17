@@ -1,3 +1,6 @@
+import {BOARD_TEXT_LIMITS,BOARD_NEIGHBORHOODS} from "@shared/boardCardPresentation";
+import BoardComposerPreview from "@/components/board/BoardComposerPreview";
+import BoardPostFace from "@/components/board/BoardPostFace";
 import BoardMotifSetting from "@/components/board/BoardMotifSetting";
 import GigPreviewCard from "@/components/board/GigPreviewCard";
 import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
@@ -46,7 +49,7 @@ const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
   name: z.string().min(2, "Name required"),
   contactEmail: z.string().email("Valid email required"),
-  title: z.string().min(3, "Title required"),
+  title: z.string().max(BOARD_TEXT_LIMITS.title).min(3, "Title required"),
   description: z.string().min(20, "Description must be at least 20 characters"),
   skills: z.string().optional(),
   compensation: z.string().optional(),
@@ -66,6 +69,7 @@ function normalizeVenueQuery(v: string): string {
 type GigFormData = z.infer<typeof gigSchema>;
 
 export type GigPost = {
+  motifChoice?: string;
   /** Seeded demo content, marked by the server (board 18). */
   isDemo?: boolean;
   id: number;
@@ -210,7 +214,7 @@ export function GigListingCard({
   const [showAuth, setShowAuth] = useState(false);
   const [messageBody, setMessageBody] = useState("");
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState({ title: gig.title, description: gig.description, skills: gig.skills || "", compensation: gig.compensation || "", location: gig.location || "", gigDate: gig.gigDate || "", gigTime: gig.gigTime || "", isRemote: !!gig.isRemote });
+  const [draft, setDraft] = useState({ title: gig.title, description: gig.description, skills: gig.skills || "", compensation: gig.compensation || "", location: gig.location || "", gigDate: gig.gigDate || "", gigTime: gig.gigTime || "", isRemote: !!gig.isRemote,motifChoice:gig.motifChoice||"default",imageUrl:gig.imageUrl||"" });
   const updateMutation = useMutation({
     mutationFn: (changes: Record<string, unknown>) => apiRequest("PUT", `/api/gigs/${gig.id}`, changes),
     onSuccess: () => {
@@ -284,12 +288,13 @@ export function GigListingCard({
   } as CSSProperties;
   const isDemo = gig.isDemo;
 
+  if (!expanded) return <BoardPostFace category="gigz" post={gig} onOpen={onToggle}/>;
   return (
     <article
       id={`board-post-${gig.id}`}
       data-testid={`card-gig-${gig.id}`}
       className={[
-        "board-listing-card board-listing-card--makeover board-listing-card--glass",
+        "boardz-open-surface board-listing-card board-listing-card--makeover board-listing-card--glass",
         isLooking ? "board-listing-card--talent" : "is-offering",
         expanded ? "is-expanded" : "",
       ]
@@ -308,6 +313,7 @@ export function GigListingCard({
         }
       }}
     >
+      <BoardPostFace category="gigz" post={gig} hero/>
       {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
       {isLooking ? (
         <>
@@ -433,8 +439,9 @@ export function GigListingCard({
           {editing && gig.isMine && <form className="gifting-form-grid" onClick={e => e.stopPropagation()} onSubmit={e => { e.preventDefault(); updateMutation.mutate(draft); }}>
             {(["title", "description", "skills", "compensation", "location", "gigDate", "gigTime"] as const).map(key => <label key={key}>
               {{ title: "Title", description: "Description", skills: "Skills", compensation: "Pay or rate", location: "Location", gigDate: "Date", gigTime: "Time" }[key]}
-              {key === "description" ? <textarea className="board-text-field" required minLength={20} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} /> : <input className="board-text-field" type={key === "gigDate" ? "date" : key === "gigTime" ? "time" : "text"} required={key === "title"} minLength={key === "title" ? 3 : undefined} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} />}
+              {key === "description" ? <textarea maxLength={BOARD_TEXT_LIMITS.description} className="board-text-field" required minLength={20} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} /> : <input maxLength={key==="title"?BOARD_TEXT_LIMITS.title:key==="compensation"?BOARD_TEXT_LIMITS.price:key==="skills"?BOARD_TEXT_LIMITS.subtext:BOARD_TEXT_LIMITS.area} className="board-text-field" type={key === "gigDate" ? "date" : key === "gigTime" ? "time" : "text"} required={key === "title"} minLength={key === "title" ? 3 : undefined} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} />}
             </label>)}
+            <BoardComposerPreview category="gigz" fields={{...gig,...draft}}/><BoardMotifSetting category="gigz" value={draft.motifChoice} onChange={motifChoice=>setDraft({...draft,motifChoice})}/><ImageUploader endpoint="/api/upload/poster" currentUrl={draft.imageUrl} onUploaded={imageUrl=>setDraft({...draft,imageUrl})} label="Update photo"/>
             <label><input type="checkbox" checked={draft.isRemote} onChange={e => setDraft({ ...draft, isRemote: e.target.checked })} /> Remote work</label>
             <Button type="submit" disabled={updateMutation.isPending}>Save changes</Button>
             <Button type="button" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
@@ -620,7 +627,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
 
               <label className="span">
                 {postType === "POSTING_GIG" ? "Gig title *" : "Role / what you do *"}
-                <input
+                <input maxLength={BOARD_TEXT_LIMITS.title}
                   className="board-text-field"
                   data-testid="input-title"
                   placeholder={postType === "POSTING_GIG" ? "e.g. Stage Manager for Pride Stage" : "e.g. Event Photographer"}
@@ -631,7 +638,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
 
               <label className="span">
                 Description *
-                <textarea
+                <textarea maxLength={BOARD_TEXT_LIMITS.description}
                   className="board-text-field"
                   data-testid="input-description"
                   rows={4}
@@ -643,7 +650,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
 
               <label>
                 Skills / tags
-                <input
+                <input maxLength={BOARD_TEXT_LIMITS.subtext}
                   className="board-text-field"
                   data-testid="input-skills"
                   placeholder={postType === "POSTING_GIG" ? "e.g. Sound, Lighting, Photography" : "e.g. Bar back, Stage hand, Social media"}
@@ -653,7 +660,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
 
               <label>
                 {postType === "POSTING_GIG" ? "Compensation" : "Pay sought / rate"}
-                <input
+                <input maxLength={BOARD_TEXT_LIMITS.price}
                   className="board-text-field"
                   data-testid="input-compensation"
                   placeholder={postType === "POSTING_GIG" ? "e.g. $25/hr, Volunteer, Negotiable" : "e.g. $25/hr minimum, Day rate, Volunteer OK"}
@@ -665,7 +672,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
 
               <label className="span">
                 Location
-                <input
+                <input maxLength={BOARD_TEXT_LIMITS.area}
                   className="board-text-field"
                   data-testid="input-location"
                   placeholder={postType === "POSTING_GIG" ? "e.g. Portland, Remote, Washington Park" : "e.g. Inner SE, Remote OK, Will travel"}
@@ -686,6 +693,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
                 </>
               ) : null}
 
+              <BoardComposerPreview category="gigz" fields={{...form.watch(),motifChoice}}/>
               <BoardMotifSetting category="gigz" value={motifChoice} onChange={setMotifChoice} />
               <BoardMapLocationSetting value={mapLocation} onChange={setMapLocation} />
               {postType === "POSTING_GIG" && isEligiblePoster && (

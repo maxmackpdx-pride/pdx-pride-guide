@@ -1,3 +1,5 @@
+import {BOARD_TEXT_LIMITS,BOARD_NEIGHBORHOODS} from "@shared/boardCardPresentation";
+import BoardComposerPreview from "@/components/board/BoardComposerPreview";
 import { hasHousingPets, housingMotifOptions, normalizeHousingMotif } from "@shared/boardMotifs";
 /**
  * HAUSING composer. One question, four answers, then a short field set.
@@ -816,10 +818,7 @@ export function HousingComposer({
           : "Only the headline is required. Everything else can wait until later."}
       </p>
 
-      <div className="hz-field" style={{ marginBottom: 16 }}>
-        <Mono micro>The name over your cover photo</Mono>
-        <HousingWell photos={photos.length ? [photos[0]] : []} title={previewTitle || null} />
-      </div>
+      <BoardComposerPreview category="housing" fields={{type,headline:draft.headline,body:draft.body,photos,areas:draft.areas,motifChoice,rent:isOffering||isManaged?draft.money:undefined,budget:isLooking||isForming?draft.money:undefined,openSlots:isForming?Number(draft.seeking)||0:isOffering?1:0,household:[{kind:'MEMBER',role:'LEAD',name:viewerDisplayName||'You'},...members.filter(m=>m.name.trim())]}}/>
 
       <div className="hz-fields">
         {suffixed ? (
@@ -870,7 +869,7 @@ export function HousingComposer({
           <label>
             <Mono micro>Headline</Mono>
           </label>
-          <input
+          <input maxLength={BOARD_TEXT_LIMITS.title}
             ref={!suffixed && !isManaged ? firstFieldRef : undefined}
             className="hz-input"
             style={{ width: "100%" }}
@@ -887,7 +886,7 @@ export function HousingComposer({
             onChange={(e) => patch({ headline: e.target.value })}
           />
           <small className="hz-hint">
-            The one line people read in the feed. {photoRequired ? "Add a cover photo below, too." : "This is the only required field."}
+            Up to 60 characters. The title people read on your card. {photoRequired ? "Add a cover photo below, too." : "This is the only required field."}
           </small>
         </div>
 
@@ -895,7 +894,7 @@ export function HousingComposer({
           <label>
             <Mono micro>In your own words</Mono>
           </label>
-          <textarea
+          <textarea maxLength={BOARD_TEXT_LIMITS.description}
             className="hz-input"
             style={{ width: "100%" }}
             value={draft.body}
@@ -913,7 +912,7 @@ export function HousingComposer({
             <label>
               <Mono micro>{moneyLabel}</Mono>
             </label>
-            <input
+            <input maxLength={BOARD_TEXT_LIMITS.price}
               className="hz-input"
               style={{ width: "100%" }}
               value={draft.money}
@@ -935,20 +934,7 @@ export function HousingComposer({
           </div>
         </div>
 
-        <ChipInput
-          label="Neighborhoods"
-          placeholder="Buckman"
-          values={draft.areas}
-          input={draft.areaInput}
-          onInput={(v) => patch({ areaInput: v })}
-          onAdd={() => {
-            const v = draft.areaInput.trim();
-            if (!v || draft.areas.includes(v)) return patch({ areaInput: "" });
-            patch({ areas: [...draft.areas, v], areaInput: "" });
-          }}
-          onRemove={(v) => patch({ areas: draft.areas.filter((a) => a !== v) })}
-          hint="Where the place is, or where you are looking. Add as many as you want."
-        />
+        <label className="hz-field"><Mono micro>Neighborhoods (up to 3)</Mono><select className="hz-input" value="" onChange={e=>{if(e.target.value&&!draft.areas.includes(e.target.value)&&draft.areas.length<3)patch({areas:[...draft.areas,e.target.value]})}} disabled={draft.areas.length>=3}><option value="">Choose a neighborhood…</option>{BOARD_NEIGHBORHOODS.map(area=><option key={area} value={area}>{area}</option>)}</select><div className="hz-chiprow">{draft.areas.map(area=><button type="button" key={area} onClick={()=>patch({areas:draft.areas.filter(a=>a!==area)})}>{area} ×</button>)}</div></label>
 
         <BoardMapLocationSetting housing value={mapLocation} onChange={setMapLocation} />
 
@@ -1080,18 +1066,19 @@ export function HousingComposer({
           </>
         ) : null}
 
-        {isOffering ? (
+        {!isManaged ? (
           <div className="hz-field">
             <label>
-              <Mono micro>Who lives here</Mono>
+              <Mono micro>{isLooking ? "Who is looking" : isForming ? "Who is already in" : "Who lives here"}</Mono>
             </label>
+            <p className="hz-hint">Your profile photo appears first in the face stack.</p>
             <div className="hz-mates">
               {members.map((m) => (
                 <span key={m.key} className={m.kind === "PET" ? "hz-mate hz-mate--pet" : "hz-mate"}>
                   <img src={m.photoUrl} alt="" />
                 </span>
               ))}
-              <label className="hz-mate hz-mate--add" title="Add a housemate who is not on Zaylist">
+              {(!isLooking || members.filter(m=>m.kind!=="PET").length<1)&&<label className="hz-mate hz-mate--add" title="Add a housemate who is not on Zaylist">
                 <HousingIcon name="add" size={15} />
                 <input
                   type="file"
@@ -1102,7 +1089,7 @@ export function HousingComposer({
                     e.target.value = "";
                   }}
                 />
-              </label>
+              </label>}
               <label className="hz-mate hz-mate--pet" title="Add a pet">
                 <HousingIcon name="paw" size={13} />
                 <input
@@ -1123,6 +1110,7 @@ export function HousingComposer({
                   <div key={m.key} style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <input
                       className="hz-input"
+                      maxLength={40}
                       value={m.name}
                       placeholder={m.kind === "PET" ? "Pet name" : "First name"}
                       onChange={(e) =>
@@ -1326,7 +1314,7 @@ export function HousingComposer({
           onChange={(tags) => patch({ tags })}
         />
 
-        {(isLooking || (isOffering && hasHousingPets(draft.tags, members.filter(member => member.name.trim())))) && <label className="hz-field">
+        {<label className="hz-field">
           <Mono micro>Card artwork</Mono>
           <select className="hz-input" value={normalizeHousingMotif(type, motifChoice, hasHousingPets(draft.tags, members.filter(member => member.name.trim())))} onChange={event => setMotifChoice(event.target.value)}>
             {housingMotifOptions(type, hasHousingPets(draft.tags, members.filter(member => member.name.trim()))).map(option => <option key={option.id} value={option.id}>{option.label}</option>)}

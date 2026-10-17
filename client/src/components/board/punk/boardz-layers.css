@@ -1,0 +1,51 @@
+/* Match Hoüz's compositing order without moving any content or artwork.
+   The pin remains a separate component above the card's torn clipping mask. */
+.boardz-punk-scope .bz-card{
+  --boardz-layer-content:50;--boardz-layer-collage:40;--boardz-layer-art:30;
+  --boardz-layer-shade:20;--boardz-layer-photo:35;--boardz-layer-stock:0;
+  z-index:0;
+}
+.boardz-punk-scope .demo-pinned:has(>.bz-card)>.ab-pin{z-index:60}
+
+/* Live text, its paper backings, logo and locked heart share the foreground. */
+.boardz-punk-scope[data-direction] .bz-card>:is(.bz-type,.bz-content,.bz-location,.bz-logo,.bz-value,.save){z-index:var(--boardz-layer-content)}
+
+/* Separate the rim from the approved scan; keep the original tears and ink. */
+.boardz-punk-scope[data-direction] .bz-card>.bz-paper-rim{
+  position:absolute;inset:0;pointer-events:none;
+  background:var(--bz-paper) 0% 7.3034%/166.6667% 225.3521% no-repeat;
+  filter:url('#hz-ink-frame') url('#hz-rim-only') var(--bz-frame);
+}
+.boardz-punk-scope[data-direction] .bz-card>:is(.bz-paper-rim,.bz-scraps,.punk-object){z-index:var(--boardz-layer-collage)}
+.boardz-punk-scope .bz-card:is([data-category=giftz],[data-category=gigz]) .punk-object:not([data-color=true]) img{filter:url('#punk-cutout-alpha') var(--bz-tint)}
+
+/* Nodes, scratchy network lines and object wireframes are separate SVG planes.
+   card-motion.css supplies the same independent loops and pause rules as Hoüz. */
+.boardz-punk-scope[data-direction] .bz-card>.ab-card-motif{z-index:var(--boardz-layer-art)}
+
+/* Static shading sits behind the moving artwork, above the paper foundation. */
+.boardz-punk-scope[data-direction] .bz-card>.bz-shade{
+  position:absolute;inset:0;pointer-events:none;z-index:var(--boardz-layer-shade);
+  background:radial-gradient(ellipse 65% 72% at left bottom,color-mix(in srgb,var(--punk-black) 40.000%,transparent) 0%,color-mix(in srgb,var(--punk-black) 20.000%,transparent) 40%,transparent 100%),linear-gradient(90deg,color-mix(in srgb,var(--punk-black) 94.902%,transparent) 0%,color-mix(in srgb,var(--punk-black) 81.176%,transparent) 24%,color-mix(in srgb,var(--punk-black) 46.667%,transparent) 48%,color-mix(in srgb,var(--punk-black) 6.667%,transparent) 72%,transparent 90%),linear-gradient(0deg,color-mix(in srgb,var(--punk-black) 60.000%,transparent),transparent 38%,transparent 75%,color-mix(in srgb,var(--punk-black) 46.667%,transparent));
+}
+/* Inset photographs float above networks and wireframes, below collage and content. */
+.boardz-punk-scope[data-direction] .bz-card>.bz-photo{z-index:var(--boardz-layer-photo)}
+/* Compact Giftz / Gigz photos fill the card while retaining their photo depth.
+   The card's outer torn mask still clips the image and its scroll overscan. */
+.boardz-punk-scope .bz-card:is([data-category=giftz],[data-category=gigz])[data-size=small][data-has-photos=true]>.bz-photo{
+  inset:0;transform:none;mask:none;background:transparent;overflow:hidden;
+}
+.boardz-punk-scope .bz-card:is([data-category=giftz],[data-category=gigz])[data-size=small][data-has-photos=true]>.bz-photo .houz-photo-slide{
+  inset:0;mask:none;
+}
+.boardz-punk-scope .bz-card[data-seeking=true]>.bz-stock:after{display:none}
+.boardz-punk-scope .bz-card[data-seeking=true]>.bz-paper-rim:after{
+  content:"";position:absolute;left:0;top:26px;bottom:26px;width:23px;
+  background:var(--day-thu);opacity:.93;pointer-events:none;
+  mask:url("/boardz/punk/punk-materials.png") 96.8354% 23.7333%/261.2245% 825.8065% no-repeat;
+}
+.boardz-punk-scope .bz-card[data-seeking=true][data-size=small]>.bz-paper-rim:after{top:16px;bottom:16px;width:12px}
+.boardz-punk-scope[data-direction] .bz-card>.bz-stock{
+  z-index:var(--boardz-layer-stock);
+  filter:url('#hz-ink-frame') url('#hz-stock-only');
+}

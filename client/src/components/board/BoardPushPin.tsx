@@ -1,13 +1,18 @@
+import { boardMotionTiming } from "@shared/boardMotion";
 import { useId, type CSSProperties } from "react";
 
 /** Decorative hardware stays fixed while the card swings around its needle. */
 export default function BoardPushPin({ postKey }: { postKey: string }) {
   const wireId = `pin-wire-${useId().replace(/:/g, "")}`;
+  const bodyId = `${wireId}-body`;
+  const clock = boardMotionTiming(postKey);
   const seed = Array.from(postKey).reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 0);
   const variant = seed % 4;
   // Mix nearby post IDs so neighboring pins do not share a material-change beat.
   const timing = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0;
   const materialStyle = {
+    "--pin-glitch-cycle": `${clock.pinCycle}s`,
+    "--pin-glitch-phase": `${clock.pinPhase}s`,
     "--pin-wire-paint": `url(#${wireId})`,
     "--pin-material-cycle": `${(8.2 + (timing % 4901) / 1000).toFixed(3)}s`,
     "--pin-material-phase": `${-((timing >>> 7) % 13001) / 1000}s`,
@@ -20,10 +25,13 @@ export default function BoardPushPin({ postKey }: { postKey: string }) {
           <stop offset=".45" stopColor="var(--day-thu)" />
           <stop offset="1" stopColor="var(--ab-accent,var(--c))" />
         </linearGradient>
+        <clipPath id={`${wireId}-slice-a`}><path d="M0 7H40V14H0Z"/></clipPath>
+        <clipPath id={`${wireId}-slice-b`}><path d="M0 23H40V28H0Z"/></clipPath>
       </defs>
       <ellipse className="ab-pin__contact" cx="21" cy="41" rx="6" ry="2" />
       <g className="ab-pin__hardware">
         <path className="ab-pin__needle" d="M18 27 24 29 20 40Z" />
+        <g id={bodyId} className="ab-pin__body">
         <g className="ab-pin__solid">
           <path className="ab-pin__side" d="m10 24 7-8 1-8 10 3-4 9 6 10-11 4-10-5Z" />
           <path className="ab-pin__face" d="m10 24 10-3 10 9-11 4-10-5Z" />
@@ -40,6 +48,9 @@ export default function BoardPushPin({ postKey }: { postKey: string }) {
           <path d="m22 3 9 5 1 6-9 4-1-5V3Zm0 10 9-5m-8 10 1 2 6 10-11 4 1-13 4-1m-4 1 10 9m-11 4 5-14" />
           <path className="ab-pin__mesh" d="m26 6-3 12m5-9-1 7m-7 9 7 1m-7 3 9 1" />
         </g>
+        </g>
+        <g clipPath={`url(#${wireId}-slice-a)`}><use href={`#${bodyId}`} className="ab-pin__tear ab-pin__tear--a"/></g>
+        <g clipPath={`url(#${wireId}-slice-b)`}><use href={`#${bodyId}`} className="ab-pin__tear ab-pin__tear--b"/></g>
         <g className="ab-pin__glitch">
           <path d="M27 8h8m-13 9h8M9 26h9m7 4h9" />
           <path d="M30 11h4M7 28h5" />

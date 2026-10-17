@@ -1,5 +1,5 @@
 import { hasHousingPets } from "@shared/boardMotifs";
-import type { HousingBoardResponse } from "@shared/housing";
+import type { HousingBoardResponse, HousingPostView } from "@shared/housing";
 import { FORMING_FLAVOR_LABEL } from "@shared/housing";
 import type { GigPost } from "@/pages/PrideWork";
 import type { GiftingPost } from "@/components/board/GiftListingCard";
@@ -101,6 +101,8 @@ export const intentLabels: Record<BoardIntent, string> = {
   grab: "Open grab",
 };
 export type BoardPost = {
+  photos?: string[];
+  housing?: HousingPostView;
   motifChoice?: string;
   key: string;
   id: number;
@@ -138,9 +140,14 @@ const join = (...parts: (string | null | undefined)[]) =>
   parts.filter(Boolean).join(" · ");
 const base = (
   category: BoardCategory,
-  post: { id: number; createdAt: string },
+  post: { id: number; createdAt: string; motifChoice?: string; isDemo?: boolean; isMine?: boolean; status?: string; saved?: boolean },
 ) => ({
   category,
+  motifChoice: post.motifChoice,
+  isDemo: post.isDemo,
+  isMine: post.isMine,
+  status: post.status,
+  saved: post.saved,
   id: post.id,
   key: `${category}:${post.id}`,
   createdAt: post.createdAt,
@@ -178,6 +185,8 @@ export function toBoardPosts(
           description: p.body,
           area: p.areas.join(" / "),
           photo: p.photos[0],
+          photos: p.photos,
+          housing: p,
           value: p.type === "FORMING" ? (p.budget || "") : (p.rent || p.budget || ""),
           valueLabel: p.type === "FORMING" ? "Budget" : undefined,
           detail:
@@ -218,6 +227,7 @@ export function toBoardPosts(
           value: "Free",
           detail: join(p.category, p.pickupPreference),
           photo: p.photoUrls[0],
+          photos: p.photoUrls,
         }));
     case "sellz":
       return (payload as SellzPost[])
@@ -242,6 +252,7 @@ export function toBoardPosts(
                 : "",
           ),
           photo: p.photoUrls[0],
+          photos: p.photoUrls,
         }));
     case "mizzed":
       return (payload as MissedConnectionPost[])

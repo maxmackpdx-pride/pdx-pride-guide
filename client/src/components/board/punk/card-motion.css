@@ -1,0 +1,96 @@
+/* Each SVG owns its plane: lines, nodes, then the two wireframe objects.
+   The common parent stays still; movement never propagates to card content. */
+.boardz-punk-scope :is(.card,.bz-card) .ab-card-motif [data-ambient-layer=lines]{z-index:0}
+.boardz-punk-scope :is(.card,.bz-card) .ab-card-motif [data-ambient-layer=nodes]{z-index:1}
+.boardz-punk-scope :is(.card,.bz-card) .ab-card-motif [data-motif-depth=support]{z-index:2}
+.boardz-punk-scope :is(.card,.bz-card) .ab-card-motif [data-motif-depth=front]{z-index:3}
+/* Background network planes drift independently, in different directions. */
+.boardz-punk-scope :is(.card,.bz-card) [data-ambient-layer],.boardz-punk-scope .card .rg-card-motif :is(.rg-motif-mesh,.rg-motif-nodes,.rg-motif-circuits,.rg-motif-calibration){
+  transform-box:view-box;transform-origin:center;
+  animation:punk-card-network-loop 26s ease-in-out var(--network-phase,0s) infinite;
+  animation-play-state:var(--card-ambient-playing,paused);
+}
+.boardz-punk-scope :is(.card,.bz-card) [data-ambient-layer=nodes],.boardz-punk-scope .card .rg-card-motif .rg-motif-nodes{
+  animation-name:punk-card-nodes-loop;animation-duration:31s;animation-delay:var(--nodes-phase,-9s);
+}
+/* The resource mesh wrapper used to carry the dots and lines together. */
+.boardz-punk-scope .card .rg-card-motif .rg-motif-layer--mesh,
+.boardz-punk-scope .card .rg-card-motif .rg-motif-drift{
+  animation:none!important;transform:none!important;translate:none!important;
+}
+/* Keep existing object drift quiet; it does not drive either network plane. */
+.boardz-punk-scope :is(.card,.bz-card) .ab-card-motif [data-motif-depth],.boardz-punk-scope .card .rg-card-motif :is(.rg-motif-layer--object,.rg-motif-layer--support){
+  animation-play-state:var(--card-ambient-playing,paused)!important;
+}
+@keyframes punk-card-network-loop{
+  0%,100%{transform:translate(-2px,1px)}
+  33%{transform:translate(.5px,-1.5px)}
+  66%{transform:translate(2px,.5px)}
+}
+@keyframes punk-card-nodes-loop{
+  0%,100%{transform:translate(2px,-1px)}
+  33%{transform:translate(-1px,1.5px)}
+  66%{transform:translate(-2px,-.5px)}
+}
+
+/* Boardz: increase travel and shorten the existing loops, keeping each plane
+   independent. No motion is applied to the parent, rim or foreground. */
+.boardz-punk-scope :is(.board,.bz-card) [data-ambient-layer=lines]{animation-name:punk-boardz-network-loop;animation-duration:18s}
+.boardz-punk-scope :is(.board,.bz-card) [data-ambient-layer=nodes]{animation-name:punk-boardz-nodes-loop;animation-duration:23s}
+.boardz-punk-scope :is(.board,.bz-card) .ab-card-motif [data-motif-depth=support]{
+  animation-name:punk-boardz-support-loop;animation-duration:27s;
+  translate:calc(var(--rg-parallax-x,0px)*-.30) calc(var(--rg-parallax-y,0px)*.20);
+}
+.boardz-punk-scope :is(.board,.bz-card) .ab-card-motif [data-motif-depth=front]{
+  animation-name:punk-boardz-object-loop;animation-duration:19s;
+  translate:calc(var(--rg-parallax-x,0px)*.38) calc(var(--rg-parallax-y,0px)*.38);
+}
+@keyframes punk-boardz-network-loop{
+  0%,100%{transform:translate(-6px,3px)}
+  33%{transform:translate(1.5px,-4.5px)}
+  66%{transform:translate(6px,1.5px)}
+}
+@keyframes punk-boardz-nodes-loop{
+  0%,100%{transform:translate(7px,-3.5px)}
+  33%{transform:translate(-3.5px,5px)}
+  66%{transform:translate(-7px,-2px)}
+}
+@keyframes punk-boardz-support-loop{
+  from{transform:translate(4px,3px)}
+  to{transform:translate(-5px,-4px)}
+}
+@keyframes punk-boardz-object-loop{
+  from{transform:translate(-5px,-3px)}
+  to{transform:translate(7px,5px)}
+}
+
+/* Portraits have their own per-person duration/phase, unrelated to artwork. */
+.boardz-punk-scope .card.large[data-category=housing] .occupancy-paper-face:not(.occupancy-paper-more){
+  animation-play-state:var(--card-ambient-playing,paused);rotate:none;
+}
+
+/* Move only the photo pixels. The image mask, gradient and slideshow UI stay put.
+   Individual transforms compose with the existing short glitch transition. */
+.boardz-punk-scope :is(.card,.bz-card) .houz-cover{
+  scale:1.04;translate:0 var(--card-photo-y,0px);
+}
+.boardz-punk-scope .card[data-size=small] .houz-cover,
+.boardz-punk-scope .bz-card[data-size=small] .houz-cover{scale:1.045}
+.boardz-punk-scope .card :is(.flyer,.river){translate:0 var(--card-photo-y,0px)}
+.boardz-punk-scope .card.large .flyer{scale:1.04}
+.boardz-punk-scope .card .river{scale:1.06}
+/* Overscan covers the increased scroll travel without exposing photo edges. */
+.boardz-punk-scope :is(.board,.bz-card) .houz-cover{scale:1.10}
+.boardz-punk-scope :is(.board,.bz-card)[data-size=small] .houz-cover{scale:1.10}
+.boardz-punk-scope :is(.board,.bz-card)[data-size=large] :is(.bz-photo,.houz-media) .houz-cover{scale:1.16}
+.boardz-punk-scope .board[data-size=large][data-photo-layout=full-bleed] .houz-cover{scale:1.10}
+
+/* The same controls pause each independent animation without changing layout. */
+.boardz-punk-scope :is(.card,.bz-card)[data-motion-disabled=true] :is([data-ambient-layer],[data-motif-depth],.rg-motif-mesh,.rg-motif-nodes,.rg-motif-circuits,.rg-motif-calibration,.occupancy-paper-face){
+  animation:none!important;translate:none!important;
+}
+.boardz-punk-scope :is(.card,.bz-card)[data-motion-disabled=true] :is(.houz-cover,.flyer,.river){translate:none}
+@media(prefers-reduced-motion:reduce){
+  .boardz-punk-scope :is(.card,.bz-card) :is([data-ambient-layer],.rg-motif-mesh,.rg-motif-nodes,.rg-motif-circuits,.rg-motif-calibration){animation:none!important;transform:none!important}
+  .boardz-punk-scope :is(.card,.bz-card) :is(.houz-cover,.flyer,.river){translate:none}
+}

@@ -1,3 +1,4 @@
+import BoardPostFace from "@/components/board/BoardPostFace";
 /**
  * The HAUSING post detail view. Four variants, one shell.
  *
@@ -441,9 +442,6 @@ function LookingDetail({
           <Back onBack={h.onBack} label={h.backLabel} />
 
           <div className="hz-dhead">
-            <HousingWell photos={post.photos} title={post.author.displayName} nameCap={0.35}>
-              <Mono micro>Meet {first}</Mono>
-            </HousingWell>
 
             <div className="hz-chiprow" style={{ margin: "16px 0 12px" }}>
               <TypeTitle label={HOUSING_TYPE_KICKER.LOOKING} />
@@ -451,14 +449,14 @@ function LookingDetail({
               {post.openToHaus ? <Chip tone="haus">Open to forming or joining a Hoüz</Chip> : null}
             </div>
 
-            <h2 className="hz-title hz-dttl">{post.author.displayName}</h2>
+            <h2 className="hz-title hz-dttl">{post.headline}</h2>
             <div style={{ marginTop: 8 }}>
               <Mono micro>
                 {post.author.pronouns ? `${post.author.pronouns} · ` : ""}posted {post.postedLabel}
               </Mono>
             </div>
             <p className="hz-prose" style={{ marginTop: 14 }}>
-              {post.headline}
+              {post.displayName || post.author.displayName}
             </p>
             <Trust data={post.trust} />
             <HousingDetailTags tags={post.tags} />
@@ -558,32 +556,20 @@ function OfferingDetail({ post, h, isOwner }: { post: HousingPostView; h: Housin
           <Back onBack={h.onBack} label={h.backLabel} />
 
           <div className="hz-dhead">
-            <HousingWell photos={post.photos} title={post.displayName} nameCap={0.35}>
-              <HouseholdStack
-                people={people}
-                pets={pets}
-                size="md"
-                scale={1.5}
-                wrap3
-                slots={post.openSlots}
-                onSelect={h.onPerson}
-              />
-              <Mono micro>Meet the household</Mono>
-            </HousingWell>
 
             <div className="hz-chiprow" style={{ margin: "16px 0 12px" }}>
               <TypeTitle label={HOUSING_TYPE_KICKER.OFFERING} />
               {verified ? <Chip>{verified}</Chip> : null}
             </div>
 
-            <h2 className="hz-title hz-dttl">{post.displayName}</h2>
+            <h2 className="hz-title hz-dttl">{post.headline}</h2>
             <div style={{ marginTop: 8 }}>
               <Mono micro>
                 {area} · posted {post.postedLabel}
               </Mono>
             </div>
             <p className="hz-prose" style={{ marginTop: 14 }}>
-              {post.headline}
+              {post.displayName || post.author.displayName}
             </p>
             <Trust data={post.trust} />
             <HousingDetailTags tags={post.tags} />
@@ -678,20 +664,13 @@ function ManagedDetail({ post, h }: { post: HousingPostView; h: HousingDetailHan
           <Back onBack={h.onBack} label={h.backLabel} />
 
           <div className="hz-dhead">
-            <HousingWell photos={post.photos} title={post.displayName} nameCap={0.35}>
-              <PropertyManagerBadge>
-                <HousingIcon name="verified" size={14} />
-                Property manager
-              </PropertyManagerBadge>
-              <Mono micro>{managerName}</Mono>
-            </HousingWell>
 
             <div className="hz-chiprow" style={{ margin: "16px 0 12px" }}>
               <TypeTitle label={HOUSING_TYPE_KICKER.MANAGED} />
               {verified ? <Chip>{verified}</Chip> : null}
             </div>
 
-            <h2 className="hz-title hz-dttl">{post.displayName}</h2>
+            <h2 className="hz-title hz-dttl">{post.headline}</h2>
             <div style={{ marginTop: 8 }}>
               <Mono micro>
                 {area} · {post.lastSeenAt ? `updated ${post.postedLabel}` : `posted ${post.postedLabel}`}
@@ -719,7 +698,7 @@ function ManagedDetail({ post, h }: { post: HousingPostView; h: HousingDetailHan
             ) : null}
 
             <p className="hz-prose" style={{ marginTop: 14 }}>
-              {post.headline}
+              {post.displayName || post.author.displayName}
             </p>
             <HousingDetailTags tags={post.tags} />
           </div>
@@ -883,23 +862,6 @@ function FormingDetail({
           <Back onBack={h.onBack} label={h.backLabel} />
 
           <div className="hz-dhead">
-            <HousingWell
-              photos={post.photos}
-              title={title}
-              nameCap={0.35}
-              fallbackPhoto={FORMING_DEFAULT_COVER}
-              className="hz-well--contain-stack"
-            >
-              <HouseholdStack
-                people={people}
-                pets={pets}
-                size="md"
-                wrap3
-                slots={isFull ? 0 : seeking}
-                onSelect={h.onPerson}
-              />
-              <Mono micro>{isFull ? "The household" : "What we are picturing"}</Mono>
-            </HousingWell>
 
             <div className="hz-chiprow" style={{ margin: "16px 0 12px" }}>
               <TypeTitle label={HOUSING_TYPE_KICKER.FORMING} />
@@ -911,7 +873,7 @@ function FormingDetail({
               )}
             </div>
 
-            <h2 className="hz-title hz-dttl">{post.displayName}</h2>
+            <h2 className="hz-title hz-dttl">{post.headline}</h2>
             <div style={{ marginTop: 8 }}>
               <Mono micro>
                 {lead ? `led by ${lead.name} · ` : ""}posted {post.postedLabel}
@@ -933,7 +895,7 @@ function FormingDetail({
             ) : null}
 
             <p className="hz-prose" style={{ marginTop: 14 }}>
-              {post.headline}
+              {post.displayName || post.author.displayName}
             </p>
             <Trust data={post.trust} />
             <HousingDetailTags tags={post.tags} />
@@ -1067,10 +1029,8 @@ export function HousingDetail({
   isOwner: boolean;
   workspace?: ReactNode;
 }) {
-  if (post.type === "LOOKING") return <LookingDetail post={post} h={h} isOwner={isOwner} />;
-  if (post.type === "OFFERING") return <OfferingDetail post={post} h={h} isOwner={isOwner} />;
-  if (post.type === "MANAGED") return <ManagedDetail post={post} h={h} />;
-  return <FormingDetail post={post} h={h} isOwner={isOwner} workspace={workspace} />;
+  const detail=post.type==='LOOKING'?<LookingDetail post={post} h={h} isOwner={isOwner}/>:post.type==='OFFERING'?<OfferingDetail post={post} h={h} isOwner={isOwner}/>:post.type==='MANAGED'?<ManagedDetail post={post} h={h}/>:<FormingDetail post={post} h={h} isOwner={isOwner} workspace={workspace}/>;
+  return <div className="boardz-open-surface" style={{'--c':'var(--day-thu)'} as CSSProperties}><BoardPostFace category="housing" post={post} hero/>{detail}{post.photos.length>1&&<section className="boardz-open-photos" aria-label="Listing photos">{post.photos.map((src,index)=><img key={src} src={src} alt={`${post.headline}, photo ${index+1}`} loading="lazy"/>)}</section>}</div>;
 }
 
 export default HousingDetail;

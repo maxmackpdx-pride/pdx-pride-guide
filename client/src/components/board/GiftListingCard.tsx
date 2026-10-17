@@ -1,3 +1,4 @@
+import BoardPostFace from "@/components/board/BoardPostFace";
 import { ArrowRight, Images } from "lucide-react";
 import GiftPostEditor from "./GiftPostEditor";
 import { useRef, useState } from "react";
@@ -21,6 +22,7 @@ import { isOpenGrabPost } from "@/lib/boardFeed";
 import { timeAgo } from "@/lib/timeAgo";
 
 export type GiftingPost = {
+  motifChoice?: string;
   /** Seeded demo content, marked by the server (board 18). */
   isDemo?: boolean;
   id: number;
@@ -279,11 +281,12 @@ export default function GiftListingCard({ post, skipLeadPhoto = false, expanded,
   } as CSSProperties;
   const isDemo = post.isDemo;
 
+  if (!expanded) return <BoardPostFace category="giftz" post={post} onOpen={onToggle}/>;
   return (
     <article
       id={`board-post-${post.id}`}
       className={[
-        "board-listing-card board-listing-card--makeover board-listing-card--glass",
+        "boardz-open-surface board-listing-card board-listing-card--makeover board-listing-card--glass",
         post.postType === "ISO" ? "is-iso is-dashed" : "is-giving",
         expanded ? "is-expanded" : "",
       ]
@@ -302,6 +305,7 @@ export default function GiftListingCard({ post, skipLeadPhoto = false, expanded,
         }
       }}
     >
+      <BoardPostFace category="giftz" post={post} hero/>
       {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
       <BoardGlassMotif variant={giftingMotifVariant(post)} />
       <div className="board-listing-card__row">

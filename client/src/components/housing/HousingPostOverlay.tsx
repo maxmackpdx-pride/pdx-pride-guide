@@ -214,7 +214,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
 
   return createPortal(
     <div className="board-detail-backdrop" onClick={requestClose}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} My Hoüz ${detail ? "details" : "card"}`} tabIndex={-1} className={`hz pdx-glass-rebind board-open-card--shared board-open-readable board-open-readable--housing${presentation ? " ab-open-card ab-open-card--housing" : ""}`} style={panelStyle} onClick={(event) => event.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} My Hoüz ${detail ? "details" : "card"}`} tabIndex={-1} className={`hz boardz-housing-dialog pdx-glass-rebind board-open-card--shared board-open-readable board-open-readable--housing${presentation ? " ab-open-card ab-open-card--housing" : ""}`} style={panelStyle} onClick={(event) => event.stopPropagation()}>
         <span className="board-open-card__rule" aria-hidden="true" />
         <div className="board-open-readable__close"><DetailActions label="My Hoüz listing" onClose={requestClose} /></div>
         {post.isDemo && <p className="board-demo-notice" role="note">Demo listing — example only. Participation is disabled.</p>}

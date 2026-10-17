@@ -1,0 +1,64 @@
+/* Hoüz compositing order, front to back. The pin is a separate sibling component.
+   1 Foreground: live content, controls, portraits/counter and their paper/shadows.
+   2 Collage: torn cyan rim, seeking dashes, scratches, scraps and one accent motif.
+   3 Artwork: independent nodes/line planes, wireframes, grain and an optional inset photo.
+   4 Readability: the existing gradient and subtle glass film.
+   5 Full-bleed photo: includes its slideshow/glitch and progress marks.
+   6 Foundation: black paper stock/texture, visible where there is no photo.
+   The existing card mask clips all six layers without clipping the separate pin. */
+.boardz-punk-scope .card[data-category=housing]{
+  --houz-layer-content:50;--houz-layer-collage:40;--houz-layer-art:30;
+  --houz-layer-shade:20;--houz-layer-photo:10;--houz-layer-stock:0;
+  z-index:0;
+}
+
+/* The pin owns its contact/cast shadows and remains outside the card mask. */
+.boardz-punk-scope .demo-pinned:has(>.card[data-category=housing])>.ab-pin{z-index:60}
+
+/* 1: each element's negative-z paper backing stays inside its own foreground group. */
+.boardz-punk-scope[data-direction] .card:is(.large,.small)[data-category=housing]>
+:is(.body,.board-logo,.houz-occupancy,footer,.save-paper-shell,.share){z-index:var(--houz-layer-content)}
+.boardz-punk-scope[data-direction] .card:is(.large,.small)[data-category=housing]>.body:before{display:none}
+
+/* 2: extract the actual cyan ink from the approved scan, preserving every tear. */
+.boardz-punk-scope .card[data-category=housing] .houz-paper-rim,
+.boardz-punk-scope .card[data-category=housing] .houz-surface-texture{
+  position:absolute;inset:0;pointer-events:none;
+  background:url('/boardz/punk/punk-materials.png') 0% 7.3034%/166.6667% 225.3521% no-repeat;
+}
+.boardz-punk-scope[data-direction] .card:is(.large,.small)[data-category=housing]>
+:is(.houz-paper-rim,.seeking-rail,.houz-edge-scratches,.punk-paper,.punk-object,.houz-unified-frame,.houz-torn-edge){z-index:var(--houz-layer-collage)}
+.boardz-punk-scope .card[data-category=housing] .houz-paper-rim{filter:url('#hz-ink-frame') url('#hz-rim-only')}
+.boardz-punk-scope .card[data-category=housing] .punk-object:not([data-color=true]) img{filter:url('#punk-cutout-alpha') var(--ink-filter)}
+.boardz-punk-scope .card[data-category=housing] .punk-object[data-art=house] img{filter:url('#punk-cutout-alpha') url('#hz-ink-cyan')}
+
+/* 3: nodes and network lines drift separately. Photo texture does not dull foreground ink. */
+.boardz-punk-scope[data-direction] .card:is(.large,.small)[data-category=housing]>
+:is(.ab-card-motif,.houz-surface-texture){z-index:var(--houz-layer-art)}
+.boardz-punk-scope .card[data-category=housing] .houz-surface-texture{display:none;filter:url('#hz-ink-frame') url('#hz-grain-only');opacity:.55}
+.boardz-punk-scope .card[data-category=housing][data-has-photos=true] .houz-surface-texture{display:block}
+
+/* 4: one standalone gradient, rather than shade nested inside the photo layer. */
+.boardz-punk-scope .card[data-category=housing] .houz-shade{position:absolute;inset:0;pointer-events:none;z-index:var(--houz-layer-shade);
+  background:radial-gradient(ellipse 65% 72% at left bottom,color-mix(in srgb,var(--punk-black) 40.000%,transparent) 0%,color-mix(in srgb,var(--punk-black) 20.000%,transparent) 40%,transparent 100%),linear-gradient(90deg,color-mix(in srgb,var(--punk-black) 94.902%,transparent) 0%,color-mix(in srgb,var(--punk-black) 81.176%,transparent) 24%,color-mix(in srgb,var(--punk-black) 46.667%,transparent) 48%,color-mix(in srgb,var(--punk-black) 6.667%,transparent) 72%,transparent 90%),linear-gradient(0deg,color-mix(in srgb,var(--punk-black) 60.000%,transparent),transparent 38%,transparent 75%,color-mix(in srgb,var(--punk-black) 46.667%,transparent));
+}
+.boardz-punk-scope[data-direction] .card:is(.large,.small)[data-category=housing]>.card-artwork-glass{z-index:var(--houz-layer-shade)}
+.boardz-punk-scope[data-direction] .card:is(.large,.small)[data-category=housing]>.houz-media:after{display:none}
+
+/* 5 / 6: full-bleed media above the black paper foundation. */
+.boardz-punk-scope[data-direction] .card:is(.large,.small)[data-category=housing]>.houz-media{z-index:var(--houz-layer-photo)}
+.boardz-punk-scope[data-direction] .card:is(.large,.small)[data-category=housing]>.houz-paper-base{z-index:var(--houz-layer-stock);filter:url('#hz-ink-frame') url('#hz-stock-only')}
+.boardz-punk-scope[data-direction] .card:is(.large,.small)[data-category=housing]:after{display:none}
+
+/* An inset photo sits just above the layer-3 artwork, below the collage.
+   Keep the previous pasted-photo placement, rip mask and soft left edge. */
+.boardz-punk-scope[data-direction] .card.large[data-category=housing][data-has-photos=true][data-photo-layout=inset]>.houz-media{
+  z-index:calc(var(--houz-layer-art) + 5);inset:10px 12px 11px 73px;width:auto;height:auto;transform:rotate(2deg);
+  mask-image:url('/boardz/punk/punk-materials.png'),linear-gradient(90deg,transparent,color-mix(in srgb,var(--punk-black) 60.000%,transparent) 27%,var(--punk-black) 48%);
+  mask-size:166.6667% 225.3521%,100% 100%;mask-position:0% 7.3034%,center;mask-repeat:no-repeat;mask-composite:intersect;
+}
+.boardz-punk-scope[data-direction] .card.small[data-category=housing][data-has-photos=true][data-photo-layout=inset]>.houz-media{
+  z-index:calc(var(--houz-layer-art) + 5);inset:3px 1px;width:auto;height:auto;transform:rotate(2deg);
+  mask-image:url('/boardz/punk/punk-materials.png'),linear-gradient(105deg,transparent,color-mix(in srgb,var(--punk-black) 40.000%,transparent) 30%,var(--punk-black) 65%);
+  mask-size:166.6667% 225.3521%,100% 100%;mask-position:0% 7.3034%,center;mask-repeat:no-repeat;mask-composite:intersect;
+}

@@ -1,0 +1,45 @@
+/* User-supplied Cut & Type: actual color-font cutouts, with editable live text. */
+@font-face{font-family:CutTypeTitle;src:url('/boardz/punk/cut-type/CutTypeCondensed-Mixed.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-face{font-family:CutTypePrice;src:url('/boardz/punk/cut-type/CutTypeCondensed-Paper.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-title-white{font-family:CutTypeTitle;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-palette-values --cut-price-white{font-family:CutTypePrice;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+.boardz-punk-scope .bz-card .bz-title,.boardz-punk-scope .bz-card .bz-title span{
+  font-family:CutTypeTitle,BoardzHouzText,Arial,sans-serif;font-weight:900;font-synthesis:none;
+  font-palette:--cut-title-white;letter-spacing:.005em;color:var(--punk-white);text-shadow:none;
+}
+/* Each glyph carries its own paper; remove the previous full-width white strips. */
+.boardz-punk-scope .bz-card .cut-line:before,.boardz-punk-scope .bz-card .cut-line:after{display:none}
+.boardz-punk-scope .bz-card .cut-line{padding:0 2px;margin-bottom:1px}
+.boardz-punk-scope .bz-card .cut-line>span{overflow:visible}
+.boardz-punk-scope .bz-card .cut-headline{filter:drop-shadow(1px 1px 0 var(--c))}
+.boardz-punk-scope .bz-card[data-size=large] .bz-title{line-height:1.14}
+.boardz-punk-scope .bz-card[data-size=small] .bz-title,.boardz-punk-scope .bz-card[data-size=small] .bz-title span{font-family:CutTypePrice,BoardzHouzText,Arial,sans-serif;font-palette:--cut-price-white;line-height:1.14}
+.boardz-punk-scope .bz-card .bz-value:not(:empty){line-height:1.16}
+.boardz-punk-scope .bz-card:not([data-intent=hiring]) .bz-value,.boardz-punk-scope .bz-card:not([data-intent=hiring]) .bz-value span,.boardz-punk-scope[data-direction] .card[data-category=housing] .rate,.boardz-punk-scope[data-direction] .card[data-category=housing] .rate .price-copy{
+  font-family:CutTypePrice,BoardzHouzText,Arial,sans-serif;font-weight:900;font-synthesis:none;
+  font-palette:--cut-price-white;letter-spacing:.01em;line-height:1.18;color:var(--punk-white);text-shadow:none;
+}
+.boardz-punk-scope .bz-card:not([data-intent=hiring]) .bz-value:before{inset:1px -2px -2px;opacity:.9}
+.boardz-punk-scope[data-direction] .card[data-category=housing] .rate:before,
+.boardz-punk-scope[data-direction] .card[data-category=housing] .rate:after{display:none}
+.boardz-punk-scope[data-direction] .board.large[data-category=housing] .rate{padding:0;margin-bottom:8px;transform:rotate(-2deg);filter:drop-shadow(1px 2px 0 var(--secondary))}
+.boardz-punk-scope[data-direction] .board.small[data-category=housing] .body .rate{padding:0;filter:drop-shadow(1px 1px 0 var(--secondary))}
+.boardz-punk-scope .card[data-category=housing] .rate .price-copy{overflow:visible}
+
+/* Stable character-by-character mix of the supplied paper styles. */
+@font-face{font-family:CutMixPaper;src:url('/boardz/punk/cut-type/CutTypeCondensed-Paper.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-paper{font-family:CutMixPaper;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-face{font-family:CutMixMixed;src:url('/boardz/punk/cut-type/CutTypeCondensed-Mixed.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-mixed{font-family:CutMixMixed;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-face{font-family:CutMixRough;src:url('/boardz/punk/cut-type/CutTypeCondensed-Rough.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-rough{font-family:CutMixRough;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-face{font-family:CutMixReverse;src:url('/boardz/punk/cut-type/CutTypeCondensed-Reverse.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-reverse{font-family:CutMixReverse;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-face{font-family:CutMixLoose;src:url('/boardz/punk/cut-type/CutTypeCondensed-Loose.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-loose{font-family:CutMixLoose;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+@font-face{font-family:CutMixRansom;src:url('/boardz/punk/cut-type/CutTypeCondensed-Ransom.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-palette-values --cut-mix-ransom{font-family:CutMixRansom;override-colors:0 rgb(255 255 255),1 rgb(0 0 0)}
+.boardz-punk-scope .ransom-copy{display:inline!important;overflow:visible!important;max-width:none!important;font-size:inherit!important;line-height:inherit!important;font-weight:900!important;font-kerning:none;white-space:inherit;font-synthesis:none}
+.boardz-punk-scope .ransom-letter{display:inline-block;font-size:inherit;line-height:inherit;font-weight:900;font-style:normal;font-kerning:none;font-synthesis:none;vertical-align:baseline;transform-origin:50% 70%;transform:translateY(var(--cut-lift)) rotate(var(--cut-angle)) scaleY(var(--cut-stretch))}
+.boardz-punk-scope [data-size=small] .ransom-letter{transform:translateY(calc(var(--cut-lift)*.6)) rotate(calc(var(--cut-angle)*.65)) scaleY(var(--cut-stretch))}
+.boardz-punk-scope .bz-card .bz-value:has(.ransom-copy){overflow:visible}

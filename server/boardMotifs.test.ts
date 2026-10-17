@@ -25,7 +25,7 @@ test("housing artwork honors post intent and actual pets, never pet-friendly pol
  for(const type of ["MANAGED","FORMING"] as const) for(const choice of ["steel-bridge","pet"]) {
   assert.equal(normalizeHousingMotif(type,choice,true),"default");
   assert.equal(resolveHousingMotif(type,choice,true).main,type === "FORMING" ? "boardHouseBlueprint" : "keysHome");
-  assert.equal(housingMotifOptions(type,true).length,1);
+  assert.equal(housingMotifOptions(type,true).filter(option=>!option.id.startsWith("paper:")).length,1);
  }
  assert.equal(resolveHousingMotif("OFFERING","steel-bridge",false).main,"keysHome");
  assert.equal(hasHousingPets(["pets-welcome","dogs-welcome"]),false);
@@ -38,11 +38,19 @@ test("housing artwork honors post intent and actual pets, never pet-friendly pol
  assert.equal(resolveHousingMotif("LOOKING","pet",true).main,"boardPet");
  assert.notEqual(resolveHousingMotif("LOOKING","pet",false).main,"boardPet");
  assert.equal(resolveHousingMotif("LOOKING","steel-bridge",false).main,"boardSteelBridge");
- assert.equal(housingMotifOptions("LOOKING",false).length,6);
- assert.equal(housingMotifOptions("LOOKING",true).length,7);
+ assert.equal(housingMotifOptions("LOOKING",false).filter(option=>!option.id.startsWith("paper:")).length,6);
+ assert.equal(housingMotifOptions("LOOKING",true).filter(option=>!option.id.startsWith("paper:")).length,7);
 });
 test("shared housing cards derive pet eligibility from actual tags and members",()=>{
  const base={id:1,type:"OFFERING",createdAt:"2026-10-14",headline:"Room",body:"",areas:[],photos:[],household:[],status:"ACTIVE",tags:["pets-welcome"]};
  const rows=boardFeaturePosts("housing",{posts:[base,{...base,id:2,tags:["existing-cat"]},{...base,id:3,household:[{kind:"PET"}]}]} as any);
  assert.deepEqual(rows.map(post=>post.hasPets),[false,true,true]);
+});
+
+test("approved paper artwork survives storage and housing normalization",async()=>{
+ const {normalizeHousingMotif}=await import("../shared/boardMotifs");
+ const db=new Database(":memory:");
+ for(const category of ["housing","gigz","sellz"] as const){saveBoardMotif(db,category,4,"paper:trans-flag");assert.equal(readBoardMotif(db,category,4),"paper:trans-flag");}
+ for(const type of ["LOOKING","FORMING","OFFERING","MANAGED"] as const)assert.equal(normalizeHousingMotif(type,"paper:trans-flag",false),"paper:trans-flag");
+ assert.throws(()=>validateBoardMotif("mizzed","paper:trans-flag"));db.close();
 });

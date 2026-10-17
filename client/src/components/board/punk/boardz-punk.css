@@ -1,0 +1,185 @@
+/* Boardz share the approved paper material; each intent owns its composition. */
+.boardz-punk-scope .bz-card{position:relative;isolation:isolate;flex:none;overflow:hidden;width:360px;height:240px;border:0;background:transparent;color:white;font-family:BoardzHouzText,Arial,sans-serif;--bz-paper:url('/boardz/punk/punk-materials.png');mask:var(--bz-paper) 0% 7.3034%/166.6667% 225.3521% no-repeat}
+.boardz-punk-scope .bz-stock{position:absolute;inset:0;pointer-events:none;background:var(--bz-paper) 0% 7.3034%/166.6667% 225.3521% no-repeat;filter:var(--bz-frame)}
+
+.boardz-punk-scope .bz-card .ab-card-motif{inset:0;z-index:2;opacity:1;overflow:hidden;color:var(--punk-white)}
+.boardz-punk-scope .bz-card .ab-card-motif__network{width:100%!important;height:100%!important;opacity:.46;stroke:var(--punk-white);stroke-width:1}
+.boardz-punk-scope .bz-card .ab-card-motif__mesh{opacity:.28}.boardz-punk-scope .bz-card .ab-card-motif__links{opacity:.55}
+.boardz-punk-scope .bz-card .ab-card-motif__nodes{opacity:1;fill:var(--secondary);stroke:none}
+.boardz-punk-scope .bz-card .ab-card-motif__nodes circle{r:2.6px}
+.boardz-punk-scope .bz-card .ab-card-motif__nodes circle:nth-child(5n+1){r:4px}
+/* Small irregular gaps read like scratched ink, using the original network paths. */
+.boardz-punk-scope .bz-card :is(.ab-card-motif__mesh,.ab-card-motif__links) path{stroke-dasharray:31 1.8 7 .9 19 2.4;stroke-linecap:butt}
+.boardz-punk-scope .bz-card :is(.ab-card-motif__mesh,.ab-card-motif__links) path:nth-child(3n){stroke-dasharray:13 1.2 37 2.2 9 1.6;stroke-dashoffset:11}
+.boardz-punk-scope .bz-card :is(.ab-card-motif__mesh,.ab-card-motif__links) path:nth-child(4n){stroke-width:.65;stroke-dashoffset:23}
+.bz-card .ab-card-motif__object--.boardz-punk-scope{left:auto;right:3px;top:62px;width:160px!important;height:170px!important;opacity:.52;stroke:var(--punk-white)}
+.boardz-punk-scope .bz-card .ab-card-motif__object--support{left:auto;right:42px;top:23px;width:110px!important;height:100px!important;opacity:.3;stroke:var(--punk-white)}
+.boardz-punk-scope .bz-card .ab-motif__edge{stroke-width:1.9;opacity:.9;stroke:var(--punk-white)}.boardz-punk-scope .bz-card .ab-motif__grid{stroke:var(--punk-white);stroke-width:1;opacity:.55}.boardz-punk-scope .bz-card .ab-motif__rear{stroke:var(--punk-white);stroke-width:.7;opacity:.25}
+.boardz-punk-scope .bz-card [data-motif-depth]{transform-origin:center;transform-box:view-box;animation:punk-hz-original-back 34s ease-in-out var(--motif-phase,0s) infinite alternate;animation-play-state:var(--motif-playing,paused);translate:calc(var(--rg-parallax-x,0px)*-.2) calc(var(--rg-parallax-y,0px)*-.2)}
+.boardz-punk-scope .bz-card [data-motif-depth=support]{animation-name:punk-hz-original-support;animation-duration:51s;translate:calc(var(--rg-parallax-x,0px)*-.12) calc(var(--rg-parallax-y,0px)*.08)}
+.boardz-punk-scope .bz-card [data-motif-depth=front]{animation-name:punk-hz-original-main;animation-duration:43s;translate:calc(var(--rg-parallax-x,0px)*.15) calc(var(--rg-parallax-y,0px)*.15)}
+.boardz-punk-scope .bz-card p,.boardz-punk-scope .bz-card h2{margin:0}
+.boardz-punk-scope .bz-card .bz-type,.boardz-punk-scope .bz-card .bz-location{position:absolute;z-index:4;left:24px}
+.boardz-punk-scope .bz-content{position:absolute;z-index:4;left:24px;right:24px;top:55px;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.boardz-punk-scope .bz-type{top:26px;max-width:166px;font:700 9px/1.2 BoardzHouzText,Arial,sans-serif;letter-spacing:.055em;color:var(--punk-print-d1d1d1)}
+.boardz-punk-scope .bz-card .bz-title{position:relative;width:286px;max-width:100%;overflow:visible;font:700 26px/1.06 BoardzHouzText,Arial,sans-serif;letter-spacing:0;transform:rotate(-1deg)}
+.boardz-punk-scope .bz-card .cut-headline{display:block;width:100%;max-width:100%;font:inherit}
+.boardz-punk-scope .bz-card .cut-line{display:table;width:fit-content;max-width:100%;padding:3px 7px;margin-bottom:3px;color:var(--punk-black);font:inherit;position:relative;isolation:isolate}
+.boardz-punk-scope .bz-card .cut-line:before,.boardz-punk-scope .bz-card .cut-line:after{inset:0}
+.boardz-punk-scope .bz-card .cut-line:before{background:var(--c);transform:translate(4px,3px)}
+.boardz-punk-scope .bz-card .cut-line:after{filter:url('#hz-ink-white')}
+.boardz-punk-scope .bz-description{position:relative;width:270px;max-width:100%;font:400 11px/1.25 BoardzHouzText,Arial,sans-serif;color:var(--punk-print-e4e4e4);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 4px var(--punk-black)}
+.boardz-punk-scope .bz-card[data-category=mizzed] .bz-description{isolation:isolate;display:block;overflow:visible;background:transparent;color:var(--punk-white);font-weight:400;font-size:11.5px;line-height:14px;text-shadow:0 1px 2px var(--punk-black),0 0 4px var(--punk-black)}
+.boardz-punk-scope .bz-card[data-category=mizzed] .bz-description:before{content:'';position:absolute;inset:-3px -7px;z-index:-1;background:linear-gradient(90deg,color-mix(in srgb,var(--punk-black) 86.667%,transparent) 0%,color-mix(in srgb,var(--punk-black) 73.333%,transparent) 68%,transparent 100%);filter:blur(4px);pointer-events:none}
+.boardz-punk-scope .bz-card[data-category=mizzed] .bz-description-copy{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.boardz-punk-scope .bz-card[data-category=mizzed][data-size=small] .bz-description{font-size:9.5px;line-height:12px}
+.boardz-punk-scope .bz-value{position:relative;isolation:isolate;width:max-content;max-width:100%;padding:1px 5px;color:var(--punk-black);transform:rotate(1deg);font:700 20px/1.05 BoardzHouzText,Arial,sans-serif}
+.boardz-punk-scope .bz-card[data-intent=hiring] .bz-content .bz-value{font-size:13px;color:white;max-width:286px}
+.boardz-punk-scope .bz-card .bz-status{position:absolute;z-index:4;left:127px;bottom:26px;font-size:15px;white-space:nowrap}
+.boardz-punk-scope .bz-value:before{content:'';position:absolute;inset:-2px -3px;z-index:-1;background:var(--bz-paper) 13.2813% 82.6531%/200% 426.6667% no-repeat;filter:var(--bz-tint);pointer-events:none}
+.boardz-punk-scope .bz-value span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.boardz-punk-scope .bz-location{top:26px;left:auto!important;right:24px;display:flex;gap:4px;align-items:center;max-width:126px;font:400 10px/1.2 BoardzHouzText,Arial,sans-serif;white-space:nowrap;color:white;text-shadow:0 1px 4px var(--punk-black)}
+.boardz-punk-scope .bz-location svg{width:13px;height:13px;flex:none;color:var(--bz-ink)}.boardz-punk-scope .bz-location span{overflow:hidden;text-overflow:ellipsis}
+.boardz-punk-scope .bz-logo{position:absolute;z-index:5;left:24px;bottom:24px;width:86px;height:27px;object-fit:contain;object-position:left bottom}
+.boardz-punk-scope .bz-card .save{position:absolute;z-index:8;right:24px;bottom:24px;width:36px;height:34px;border-radius:12px;display:grid;place-items:center;padding:0;background:color-mix(in srgb,var(--punk-print-070909) 90.980%,transparent);color:var(--punk-white);border:1.5px solid var(--c);box-shadow:0 0 5px color-mix(in srgb,var(--c) 40%,transparent),0 0 9px color-mix(in srgb,var(--c) 35%,transparent),0 2px 7px var(--punk-black);cursor:pointer}
+.boardz-punk-scope .bz-card .save svg{width:20px;height:20px}.boardz-punk-scope .bz-card .save[aria-pressed=true]{color:var(--bz-ink)}.boardz-punk-scope .bz-card .save:focus-visible{outline:2px solid var(--punk-white);outline-offset:3px}
+.boardz-punk-scope .bz-scraps{position:absolute;inset:0;z-index:2;pointer-events:none}
+.boardz-punk-scope .bz-scraps i{position:absolute;right:-12px;top:83px;width:92px;height:92px;background:url('/boardz/punk/punk-accents.png') 0 0/200% 200% no-repeat;filter:var(--bz-tint);transform:rotate(18deg)}
+.boardz-punk-scope .bz-scraps b{position:absolute;right:26px;top:51px;width:35px;height:2px;background:color-mix(in srgb,var(--punk-white) 53.333%,transparent);box-shadow:0 7px color-mix(in srgb,var(--punk-white) 53.333%,transparent),0 14px color-mix(in srgb,var(--punk-white) 53.333%,transparent);transform:rotate(-35deg)}
+.boardz-punk-scope .bz-scraps span{position:absolute;left:25px;bottom:64px;width:58px;height:8px;transform:rotate(-5deg);background:repeating-linear-gradient(90deg,var(--c) 0 2px,transparent 2px 6px);opacity:.55}
+/* Intent accents reuse existing scraps around the shared content. */
+.boardz-punk-scope .bz-card[data-intent=available] .bz-scraps i{background-position:94.4444% 93.9394%;background-size:228.5714% 206.4516%;height:125px;width:83px;top:63px;right:-4px;transform:rotate(12deg)}
+
+.boardz-punk-scope .bz-card[data-intent=hiring] .bz-scraps i{top:60px;right:-8px;transform:rotate(-11deg)}
+.boardz-punk-scope .bz-card[data-intent=hiring] .bz-location{top:29px;max-width:155px}
+
+.boardz-punk-scope .bz-card[data-intent=selling] .bz-scraps i{top:66px;right:-25px;background-position:100% 0;transform:rotate(-24deg)}
+.boardz-punk-scope .bz-card[data-intent=selling] .bz-scraps span{display:none}
+/* Giftz reuse one layout; existing offcuts and the seeking edge signal intent. */
+.boardz-punk-scope .bz-card[data-intent=giving] .bz-scraps i{width:115px;height:115px;top:55px;right:-20px;transform:rotate(42deg)}
+.boardz-punk-scope .bz-card[data-intent=giving] .bz-scraps span{display:none}
+.boardz-punk-scope .bz-card[data-intent=iso] .bz-scraps i{background-position:100% 0;top:95px;right:-27px;transform:rotate(6deg)}
+
+.boardz-punk-scope .bz-card[data-intent=connection] .bz-location{top:175px;left:26px!important;right:auto;max-width:245px;font-size:11px}
+.boardz-punk-scope .bz-card[data-intent=connection] .bz-logo{width:119px;height:26px}
+.boardz-punk-scope .bz-card[data-intent=connection] .bz-scraps i{background-position:100% 0;width:108px;height:108px;top:123px;right:-31px;transform:rotate(25deg);opacity:.75}
+.boardz-punk-scope .bz-card[data-intent=connection] .bz-scraps span{display:none}
+/* Compact companions are purpose-built, not scaled large cards. */
+.boardz-punk-scope .bz-card[data-size=small]{width:136px;height:149.6px}
+.boardz-punk-scope .bz-card[data-size=small] .bz-content{left:12px;right:12px;top:57px;gap:3px}
+.boardz-punk-scope .bz-card[data-size=small] .bz-type{left:12px;top:43px;max-width:112px;font-size:7px;letter-spacing:.025em;color:var(--punk-print-d1d1d1)}
+.boardz-punk-scope .bz-card[data-size=small] .bz-title{width:112px;font-size:15px;transform:rotate(-1deg)}
+.boardz-punk-scope .bz-card[data-size=small][data-intent=connection] .bz-title{font-size:12.5px}
+.boardz-punk-scope .bz-card[data-size=large][data-intent=connection] .bz-title{font-size:24px}
+.boardz-punk-scope .bz-card[data-size=small] .bz-content .bz-value{font-size:12px;padding:1px 3px;white-space:nowrap}
+.boardz-punk-scope .bz-card[data-size=small][data-intent=hiring] .bz-content .bz-value{font-size:10px;max-width:112px;overflow:hidden;text-overflow:ellipsis}
+.boardz-punk-scope .bz-card[data-size=small] .bz-description{font-size:8.5px;line-height:1.2;-webkit-line-clamp:1;width:112px}
+.boardz-punk-scope .bz-card[data-size=small] .bz-status{left:12px;bottom:13px;font-size:12px;padding:1px 3px}
+
+.boardz-punk-scope .bz-card[data-size=small] .bz-logo{left:12px;top:10px;bottom:auto;width:65px;height:22px;object-position:left center}
+.boardz-punk-scope .bz-card[data-size=small] .save{right:9px;top:9px;bottom:auto;width:30px;height:30px;border-radius:10px}
+.boardz-punk-scope .bz-card[data-size=small] .save svg{width:18px;height:18px}
+.boardz-punk-scope .bz-card[data-size=small] .cut-line{padding:2px 4px;margin-bottom:2px}
+.boardz-punk-scope .bz-card[data-size=small] .cut-line:before{transform:translate(2px,2px)}
+.boardz-punk-scope .bz-card[data-size=small] .bz-location{display:none}
+.boardz-punk-scope .bz-card[data-size=small] .bz-scraps b,.boardz-punk-scope .bz-card[data-size=small] .bz-scraps span{display:none}
+.boardz-punk-scope .bz-card[data-size=small] .bz-scraps i{scale:.6;transform-origin:right center;top:52px;right:-20px;opacity:.8}
+.bz-card[data-size=small] .ab-card-motif__object--.boardz-punk-scope{right:-13px;top:41px;width:103px!important;height:110px!important;opacity:.4}
+.boardz-punk-scope .bz-card[data-size=small] .ab-card-motif__object--support{right:10px;top:5px;width:70px!important;height:70px!important;opacity:.22}
+.boardz-punk-scope .bz-card[data-size=small] .ab-card-motif__network{opacity:.35}
+.boardz-punk-scope .bz-card[data-size=small][data-intent=connection] .bz-logo{width:70px;height:23px}
+/* Listing photos inherit the same torn-print approach when the record has them. */
+.boardz-punk-scope .bz-photo{position:absolute;inset:12px 12px 13px 95px;z-index:1;transform:rotate(2deg);background:white;mask-image:var(--bz-paper),linear-gradient(90deg,transparent,color-mix(in srgb,var(--punk-black) 60.000%,transparent) 27%,var(--punk-black) 48%);mask-size:166.6667% 225.3521%,100% 100%;mask-position:0% 7.3034%,center;mask-repeat:no-repeat;mask-composite:intersect}
+.boardz-punk-scope .bz-photo .houz-photo-slide{inset:3px;mask:var(--bz-paper) 0% 7.3034%/166.6667% 225.3521% no-repeat}
+.boardz-punk-scope .bz-photo .houz-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.95) contrast(1.06)}
+.boardz-punk-scope .bz-photo:after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(0deg,color-mix(in srgb,var(--punk-black) 93.333%,transparent),transparent 50%,transparent 75%,color-mix(in srgb,var(--punk-black) 66.667%,transparent))}
+.boardz-punk-scope .bz-card[data-has-photos=true] .ab-card-motif{mask-image:linear-gradient(90deg,var(--punk-black) 20%,color-mix(in srgb,var(--punk-black) 80.000%,transparent) 48%,color-mix(in srgb,var(--punk-black) 46.667%,transparent) 80%)}
+.boardz-punk-scope .bz-card[data-has-photos=true] .bz-scraps{opacity:.8}
+.boardz-punk-scope .bz-card[data-size=small] .bz-photo{inset:6px 5px 6px 6px;mask-image:var(--bz-paper),linear-gradient(105deg,transparent,color-mix(in srgb,var(--punk-black) 40.000%,transparent) 40%,var(--punk-black) 77%)}
+.boardz-punk-scope .bz-card[data-size=small] .bz-photo .houz-photo-slide{inset:2px}
+.boardz-punk-scope[data-calm=true] .bz-card [data-motif-depth]{animation:none!important;translate:none!important;transform:none!important}
+@media(prefers-reduced-motion:reduce){.boardz-punk-scope .bz-card [data-motif-depth]{animation:none!important;translate:none!important;transform:none!important}}
+.boardz-punk-scope[data-boardz-view=true] .pair{display:flex;flex-direction:row;flex-wrap:wrap;gap:24px;max-width:100%}
+.boardz-punk-scope[data-boardz-view=true] .section-title{font-family:BoardzHouzText,Arial,sans-serif;gap:12px;max-width:520px}
+.boardz-punk-scope[data-boardz-view=true] .section-title h3{font:700 14px/1.3 BoardzHouzText,Arial,sans-serif}
+.boardz-punk-scope[data-boardz-view=true] .section-title span{font:400 10px/1.3 BoardzHouzText,Arial,sans-serif}
+@media(min-width:1140px){.boardz-punk-scope[data-boardz-view=true] .board-collection{grid-template-columns:repeat(2,minmax(0,1fr));gap:35px 32px}}
+@media(max-width:374px){.boardz-punk-scope[data-boardz-view=true] .pair{overflow-x:auto;flex-wrap:nowrap;max-width:100%;padding-bottom:5px}}
+
+
+/* A second small offcut; the original object remains the visual motif. */
+.boardz-punk-scope .bz-scraps em{position:absolute;right:28px;bottom:68px;width:40px;height:12px;background:var(--bz-paper) 96.8354% 23.7333%/261.2245% 825.8065% no-repeat;filter:var(--bz-tint);transform:rotate(-13deg)}
+.boardz-punk-scope .bz-card[data-intent=hiring] .bz-scraps em{right:20px;top:42px;bottom:auto;transform:rotate(8deg)}
+.boardz-punk-scope .bz-card[data-intent=selling] .bz-scraps em{right:32px;bottom:72px;transform:rotate(-24deg)}
+.boardz-punk-scope .bz-card[data-intent=connection] .bz-scraps em{right:24px;top:44px;bottom:auto;transform:rotate(16deg)}
+.boardz-punk-scope .bz-card[data-size=small] .bz-scraps em{right:7px;top:46px;bottom:auto;width:23px;height:7px;opacity:.75}
+/* Shared torn print behind the live title-first content. */
+.boardz-punk-scope .bz-card[data-size=large] .bz-photo{inset:48px 15px 53px 190px}
+.boardz-punk-scope .bz-card[data-has-photos=true][data-size=large][data-intent=available] .bz-photo{inset:42px 16px 46px 190px;mask-image:var(--bz-paper);mask-size:166.6667% 225.3521%;mask-position:0% 7.3034%}
+.boardz-punk-scope .bz-card[data-has-photos=true][data-size=large][data-intent=available] .bz-photo .houz-cover{object-position:center 30%}
+.boardz-punk-scope .bz-card[data-has-photos=true][data-size=large][data-intent=selling] .bz-photo{inset:45px 15px 57px 175px}
+/* Giftz keeps the same photo crop for giving and seeking. */
+.boardz-punk-scope .bz-card[data-category=giftz][data-size=large] .bz-photo{inset:49px 15px 53px 195px}
+
+/* Personal seeking posts: ripped interruptions in the actual left edge. */
+.boardz-punk-scope .bz-card[data-seeking=true],.boardz-punk-scope .card[data-category=housing][data-seeking=true]{
+  --seeking-tears:url('/boardz/punk/seeking-tears-wide.svg');
+  mask-image:url('/boardz/punk/punk-materials.png'),var(--seeking-tears);
+  mask-size:166.6667% 225.3521%,100% 100%;
+  mask-position:0% 7.3034%,center;
+  mask-repeat:no-repeat;
+  mask-composite:intersect;
+}
+.boardz-punk-scope .bz-card[data-seeking=true][data-size=small],.boardz-punk-scope .card.small[data-category=housing][data-seeking=true]{--seeking-tears:url('/boardz/punk/seeking-tears-small.svg')}
+
+/* More visible seeking marks: thicker ink on the same torn edge, with denser gaps. */
+.boardz-punk-scope .bz-card[data-seeking=true] .bz-stock:after,
+.boardz-punk-scope .card[data-category=housing][data-seeking=true] .houz-paper-base:after{
+  content:'';position:absolute;left:0;top:26px;bottom:26px;width:23px;
+  background:var(--day-thu);opacity:.93;pointer-events:none;
+  mask:url('/boardz/punk/punk-materials.png') 96.8354% 23.7333%/261.2245% 825.8065% no-repeat;
+}
+.boardz-punk-scope .bz-card[data-seeking=true][data-size=small] .bz-stock:after,
+.boardz-punk-scope .card.small[data-category=housing][data-seeking=true] .houz-paper-base:after{
+  top:16px;bottom:16px;width:12px;
+}
+
+/* A little more breathing room inside the torn stock; outer sizes stay locked. */
+.boardz-punk-scope .bz-card[data-size=large] .bz-content{left:28px;right:28px}
+.boardz-punk-scope .bz-card[data-size=large] .bz-type,.boardz-punk-scope .bz-card[data-size=large] .bz-logo{left:28px}
+.boardz-punk-scope .bz-card[data-size=large] .bz-location{right:28px}
+.boardz-punk-scope .bz-card[data-size=large][data-intent=connection] .bz-location{left:30px!important;right:auto}
+.boardz-punk-scope .bz-card[data-size=large] .save{right:28px}
+.boardz-punk-scope .bz-card[data-size=small] .bz-content{left:14px;right:14px;top:59px}
+.boardz-punk-scope .bz-card[data-size=small] .bz-type{left:14px;top:45px;max-width:108px}
+.boardz-punk-scope .bz-card[data-size=small] :is(.bz-title,.bz-description){width:108px}
+.boardz-punk-scope .bz-card[data-size=small] .bz-logo{left:14px;top:12px}
+.boardz-punk-scope .bz-card[data-size=small] .save{right:11px;top:11px}
+.boardz-punk-scope .bz-card[data-size=small] .bz-status{left:14px;bottom:15px;max-width:108px}
+.boardz-punk-scope .bz-card[data-size=small][data-intent=hiring] .bz-content .bz-value{max-width:108px}
+
+.boardz-punk-scope[data-direction] .board.large[data-category=housing] .body{left:28px;right:28px}
+.boardz-punk-scope .card.large[data-category=housing] .board-logo{left:28px}
+.boardz-punk-scope .card.large[data-category=housing] footer{right:28px}
+.boardz-punk-scope[data-direction] .board.small[data-category=housing] .body{left:14px;right:14px;top:49px;bottom:47px}
+.boardz-punk-scope[data-direction] .board.small[data-category=housing] .body .rate{max-width:104px}
+.boardz-punk-scope .card.small[data-category=housing] .rate .price-copy{max-width:98px}
+.boardz-punk-scope[data-direction] .board.small[data-category=housing] .body .kicker{max-width:104px}
+.boardz-punk-scope .board.small[data-category=housing] .board-logo{left:13px;top:12px}
+.boardz-punk-scope .board.small[data-category=housing] .save{right:10px;top:10px}
+.boardz-punk-scope .card.small[data-category=housing] .houz-occupancy{left:13px;right:13px;bottom:12px}
+.boardz-punk-scope .board.small[data-category=housing]:not(:has(.houz-faces,.houz-media--forming)) .body .detail{max-width:101px}
+/* The font supplies its own paper; extra strip padding wastes compact safe space. */
+.boardz-punk-scope .bz-card[data-size=small] .cut-line{padding:0 2px;margin-bottom:1px}
+
+/* Larger pasted photos reach farther left, clear of the edge stickers. */
+.boardz-punk-scope .bz-card[data-has-photos=true][data-size=large] .bz-photo{inset:40px 15px 43px 155px}
+.boardz-punk-scope .bz-card[data-has-photos=true][data-size=large][data-intent=available] .bz-photo{inset:36px 16px 40px 160px}
+.boardz-punk-scope .bz-card[data-has-photos=true][data-size=large][data-intent=selling] .bz-photo{inset:37px 15px 46px 145px}
+.boardz-punk-scope .bz-card[data-category=giftz][data-has-photos=true][data-size=large] .bz-photo{inset:41px 15px 45px 160px}
+/* Compact photo prints also reach farther left, within the same locked card. */
+.boardz-punk-scope .bz-card[data-has-photos=true][data-size=small] .bz-photo{inset:3px 1px 3px 1px;mask-image:var(--bz-paper),linear-gradient(105deg,transparent,color-mix(in srgb,var(--punk-black) 40.000%,transparent) 30%,var(--punk-black) 65%)}
+
+/* Sellz pricing anchors the bottom between the logo and saved-heart control. */
+.boardz-punk-scope .bz-card[data-category=sellz] .bz-sale-price{position:absolute;z-index:5;left:50%;bottom:24px;max-width:140px;font-size:var(--sale-price-size,32px);white-space:nowrap;transform:translateX(-50%) rotate(1deg)}
+.boardz-punk-scope .bz-card[data-category=sellz][data-size=small] .bz-sale-price{bottom:15px;max-width:104px;padding:1px 3px;font-size:var(--sale-price-size,20px)}

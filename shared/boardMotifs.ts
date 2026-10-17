@@ -1,3 +1,4 @@
+import {BOARD_PAPER_ART,boardPaperChoice} from "./boardCardPresentation";
 /** Serializable, board-scoped motif choices shared by composers and cards. */
 export type BoardMotifCategory = "housing" | "gigz" | "giftz" | "sellz" | "mizzed";
 export type BoardMotifOption = { id: string; label: string; main: string; support: string };
@@ -38,6 +39,10 @@ export const boardMotifOptions: Record<BoardMotifCategory, readonly BoardMotifOp
   mizzed: [{ id: "default", label: "Speech bubbles", main: "boardMessages", support: "boardMessages" }],
 };
 
+for(const category of ['housing','gigz','sellz'] as const){
+ boardMotifOptions[category]=[...boardMotifOptions[category],...BOARD_PAPER_ART.map(([id,label])=>({id:`paper:${id}`,label:`Paper cutout · ${label}`,main:boardMotifOptions[category][0].main,support:boardMotifOptions[category][0].support}))];
+}
+
 export function resolveBoardMotif(category: BoardMotifCategory, choice?: string | null, subject = ""): BoardMotifOption {
   const options = boardMotifOptions[category];
   const selected = options.find(option => option.id === choice);
@@ -54,8 +59,9 @@ export function hasHousingPets(tags: readonly string[] = [], household: readonly
 }
 export function housingMotifOptions(type: HousingMotifType, hasPets: boolean): readonly BoardMotifOption[] {
   const automatic = { id: "default", label: "Automatic", main: type === "FORMING" ? "boardHouseBlueprint" : "keysHome", support: "keysHome" };
-  if (type === "MANAGED" || type === "FORMING") return [automatic];
-  const options = type === "LOOKING" ? boardMotifOptions.housing.filter(option => option.id !== "pet") : [automatic];
+  const paper=boardMotifOptions.housing.filter(option=>!!boardPaperChoice(option.id));
+  if (type === "MANAGED" || type === "FORMING") return [automatic,...paper];
+  const options = type === "LOOKING" ? boardMotifOptions.housing.filter(option => option.id !== "pet") : [automatic,...paper];
   return hasPets ? [...options, boardMotifOptions.housing.find(option => option.id === "pet")!] : options;
 }
 export function normalizeHousingMotif(type: HousingMotifType, choice: string | null | undefined, hasPets: boolean): string {

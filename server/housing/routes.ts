@@ -1,3 +1,4 @@
+import {boardTextError} from "../../shared/boardCardPresentation";
 import { hasHousingPets, normalizeHousingMotif } from "../../shared/boardMotifs";
 import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "../boardMotifs";
 import type { Placement } from "../boardMapPlacement";
@@ -201,6 +202,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
   // --- create / edit --------------------------------------------------------
 
   app.post("/api/housing", requireAuth, (req: any, res: any) => {
+    const cardError=boardTextError(req.body,true);if(cardError)return res.status(400).json({error:cardError});
     const userId = viewerId(req)!;
     const type = String(req.body?.type || "").toUpperCase() as HousingType;
     if (!HOUSING_TYPES.includes(type)) {
@@ -306,6 +308,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
   });
 
   app.patch("/api/housing/:id", requireAuth, (req: any, res: any) => {
+    const cardError=boardTextError(req.body,true);if(cardError)return res.status(400).json({error:cardError});
     const id = asNum(req.params.id);
     if (!id) return res.status(400).json({ error: "Invalid id" });
     const userId = viewerId(req)!;

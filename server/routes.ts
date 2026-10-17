@@ -1,3 +1,4 @@
+import {boardTextError,BOARD_TEXT_LIMITS} from "../shared/boardCardPresentation";
 import { createInboxDailyReminder } from "./inboxDailyReminder";
 import { inboxCaseForMutation } from "./inboxWorkflow";
 import { metricsForInbox } from "./inboxPolicy";
@@ -3186,6 +3187,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/gigs", requireAuth, (req, res) => {
+    const cardError=boardTextError(req.body);if(cardError)return res.status(400).json({error:cardError});
     try {
       if (moderationGate(res, "Gig board", {
         title: req.body.title,
@@ -3245,6 +3247,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.put("/api/gigs/:id", requireAuth, (req, res) => {
+    const cardError=boardTextError(req.body);if(cardError)return res.status(400).json({error:cardError});
     const id = Number(req.params.id);
     const userId = req.session.userId!;
     try {
@@ -3268,7 +3271,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
         compensation: req.body.compensation,
         location: req.body.location,
       })) return;
+      const motif=req.body.motifChoice===undefined?undefined:validateBoardMotif("gigz",req.body.motifChoice);
       storage.updateGigPost(id, userId, req.body);
+      if(motif!==undefined)saveBoardMotif(sqlite,"gigz",id,motif);
       res.json({ ok: true });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -3310,6 +3315,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/gifting", requireAuth, (req, res) => {
+    const cardError=boardTextError(req.body);if(cardError)return res.status(400).json({error:cardError});
     try {
       assertGiftingAllowed(req.body);
       if (moderationGate(res, "Gifting board", {
@@ -3342,16 +3348,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.put("/api/gifting/:id", requireAuth, (req,res)=>{
+    const cardError=boardTextError(req.body);if(cardError)return res.status(400).json({error:cardError});
     try {
       const existing=storage.getGiftingPost(Number(req.params.id));
       if(!existing || Number(existing.user_id ?? existing.userId)!==req.session.userId || existing.status==="REMOVED")return res.status(404).json({error:"Not found"});
       const data={title:String(req.body.title||"").trim(),description:String(req.body.description||"").trim(),category:String(req.body.category||"").trim(),neighborhood:String(req.body.neighborhood||"").trim(),pickupPreference:String(req.body.pickupPreference||"").trim(),photoUrls:JSON.stringify(Array.isArray(req.body.photoUrls)?req.body.photoUrls.filter((url:unknown)=>typeof url==="string").slice(0,2):existing.photoUrls||[])};
       if(Array.isArray(req.body.photoUrls) && !JSON.parse(data.photoUrls).some((url:unknown)=>typeof url==="string" && url.trim()))throw new Error("Add at least one photo.");
-      if(!data.title || data.title.length>90 || !data.description)throw new Error("Add a title (up to 90 characters) and description.");
+      if(!data.title || data.title.length>BOARD_TEXT_LIMITS.title || !data.description)throw new Error("Add a title (up to 60 characters) and description.");
       const haystack=`${data.title} ${data.description} ${data.category}`.toLowerCase();
       if(RESTRICTED_GIFTING_TERMS.some(term=>haystack.includes(term)))throw new Error("This post appears to include a restricted item.");
       if(moderationGate(res,"Gifting board edit",data))return;
+      const motif=req.body.motifChoice===undefined?undefined:validateBoardMotif("giftz",req.body.motifChoice);
       const post=storage.updateGiftingPost(Number(req.params.id),req.session.userId!,data);
+      if(motif!==undefined)saveBoardMotif(sqlite,"giftz",Number(req.params.id),motif);
       res.json(publicGiftingPost(post,req.session.userId));
     }catch(error:any){res.status(400).json({error:error.message});}
   });
@@ -3505,6 +3514,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/sellz", requireAuth, (req, res) => {
+    const cardError=boardTextError(req.body);if(cardError)return res.status(400).json({error:cardError});
     try {
       if (!req.body.acceptRules) throw new Error("You must agree to the SELLZ marketplace rules.");
       const priceCents = parseMarketplacePrice(req.body.price);
@@ -3538,18 +3548,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.put("/api/sellz/:id", requireAuth, (req, res) => {
+    const cardError=boardTextError(req.body);if(cardError)return res.status(400).json({error:cardError});
     try {
       const content = insertSellzPostSchema.pick({ title: true, description: true }).parse(req.body);
       const priceCents = parseMarketplacePrice(req.body.price);
       const haystack = `${req.body.title || ""} ${req.body.description || ""} ${req.body.category || ""}`.toLowerCase();
       if (RESTRICTED_GIFTING_TERMS.some(term => haystack.includes(term))) throw new Error("This listing appears to include a restricted item.");
       if (moderationGate(res, "SELLZ marketplace edit", { title: req.body.title, description: req.body.description })) return;
+      const motif=req.body.motifChoice===undefined?undefined:validateBoardMotif("sellz",req.body.motifChoice);
       const post = storage.updateSellzPost(Number(req.params.id), req.session.userId!, {
         title: content.title, description: content.description,
         category: String(req.body.category || "Other").trim(), condition: String(req.body.condition || "Good").trim(),
         priceCents, negotiable: Boolean(req.body.negotiable), neighborhood: String(req.body.neighborhood || "Portland").trim(),
         pickupPreference: String(req.body.pickupPreference || "Message to coordinate").trim(),
       });
+      if(motif!==undefined)saveBoardMotif(sqlite,"sellz",Number(req.params.id),motif);
       res.json(publicSellzPost(post, req.session.userId!));
     } catch (e: any) { res.status(400).json({ error: e.message }); }
   });
@@ -4506,6 +4519,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/missed-connections", requireAuth, (req, res) => {
+    const cardError=boardTextError(req.body);if(cardError)return res.status(400).json({error:cardError});
     try {
       const rawEventId = req.body.eventId;
       const rawBeachId = req.body.beachId;
@@ -4624,6 +4638,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.put("/api/missed-connections/:id", requireAuth, (req, res) => {
+    const cardError=boardTextError(req.body);if(cardError)return res.status(400).json({error:cardError});
     if(req.body.status!==undefined && req.body.status!=="ARCHIVED")return res.status(400).json({error:"Only closing a connection is supported here"});
     if(req.body.title!==undefined && String(req.body.title).length>80)return res.status(400).json({error:"Title max is 80 characters"});
     if(req.body.body!==undefined && !String(req.body.body).trim())return res.status(400).json({error:"Message required"});

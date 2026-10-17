@@ -1,3 +1,7 @@
+import BoardMotifSetting from "./BoardMotifSetting";
+import {BOARD_TEXT_LIMITS,BOARD_NEIGHBORHOODS} from "@shared/boardCardPresentation";
+import BoardComposerPreview from "@/components/board/BoardComposerPreview";
+import BoardPostFace from "@/components/board/BoardPostFace";
 import { ArrowRight, Images } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -19,6 +23,7 @@ import { timeAgo } from "@/lib/timeAgo";
 
 export type SellzInterest = { id: number; userId: number; note: string; offerCents?: number | null; status: string; username: string; displayName?: string | null };
 export type SellzPost = {
+  motifChoice?: string;
   /** Seeded demo content, marked by the server (board 18). */
   isDemo?: boolean;
   id: number; userId: number; title: string; description: string; category: string; condition: string;
@@ -42,7 +47,7 @@ export default function SellzListingCard({ post, skipLeadPhoto = false, expanded
   const [report, setReport] = useState("");
   const [editing, setEditing] = useState(false);
   const savePendingRef = useRef(new Set<number>());
-  const [edit, setEdit] = useState({ title: post.title, description: post.description, category: post.category, condition: post.condition, price: String(post.priceCents / 100), negotiable: post.negotiable, neighborhood: post.neighborhood, pickupPreference: post.pickupPreference });
+  const [edit, setEdit] = useState({ title: post.title, description: post.description, category: post.category, condition: post.condition, price: String(post.priceCents / 100), negotiable: post.negotiable, neighborhood: post.neighborhood, pickupPreference: post.pickupPreference,motifChoice:post.motifChoice||"default" });
   const mutate = useMutation({
     mutationFn: async ({ path, method = "POST", body }: { path: string; method?: string; body?: any }) => {
       const r = await fetch(path, { method, credentials: "include", headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined });
@@ -91,9 +96,11 @@ export default function SellzListingCard({ post, skipLeadPhoto = false, expanded
     if (!expanded || !saved || !user) return;
     fetch(`/api/sellz/${post.id}/seen`, { method: "POST", credentials: "include" }).catch(() => undefined);
   }, [expanded, saved, user, post.id]);
+  if (!expanded) return <BoardPostFace category="sellz" post={post} onOpen={onToggle}/>;
   return (
-    <article id={`sellz-post-${post.id}`} className={`board-listing-card board-listing-card--makeover board-listing-card--glass sellz-card${expanded ? " is-expanded" : ""} pdx-glass-rebind`} style={style}>
+    <article id={`sellz-post-${post.id}`} className={`boardz-open-surface board-listing-card board-listing-card--makeover board-listing-card--glass sellz-card${expanded ? " is-expanded" : ""} pdx-glass-rebind`} style={style}>
       {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
+      <BoardPostFace category="sellz" post={post} hero/>
       <button className="sellz-card__open" type="button" onClick={onToggle} aria-expanded={expanded} aria-controls={`sellz-details-${post.id}`} aria-label={`${expanded ? "Close" : "Open"} listing: ${post.title}`} />
       <div className="board-listing-card__row">
         <div className="board-listing-card__thumb" style={!post.photoUrls?.[0] ? { background: "linear-gradient(135deg,var(--room-sellz),var(--z-black))" } : undefined}>
@@ -134,11 +141,12 @@ export default function SellzListingCard({ post, skipLeadPhoto = false, expanded
             <button onClick={() => { if (confirm(`Delete ${post.title}?`)) act(`/api/sellz/${post.id}`, undefined, "DELETE"); }}>Delete</button>
           </div>
           {editing ? <div className="gifting-response sellz-edit-form">
-            <input className="board-text-field" value={edit.title} onChange={e => setEdit({ ...edit, title: e.target.value })} aria-label="Listing title" />
-            <textarea value={edit.description} onChange={e => setEdit({ ...edit, description: e.target.value })} aria-label="Listing description" />
-            <input className="board-text-field" inputMode="decimal" value={edit.price} onChange={e => setEdit({ ...edit, price: e.target.value })} aria-label="Price" />
+            <BoardComposerPreview category="sellz" fields={{...post,...edit,priceCents:Math.round(Number(edit.price.replace(/[$,]/g,""))*100)}}/><BoardMotifSetting category="sellz" value={edit.motifChoice} onChange={motifChoice=>setEdit({...edit,motifChoice})}/>
+            <input maxLength={BOARD_TEXT_LIMITS.title} className="board-text-field" value={edit.title} onChange={e => setEdit({ ...edit, title: e.target.value })} aria-label="Listing title" />
+            <textarea maxLength={BOARD_TEXT_LIMITS.description} value={edit.description} onChange={e => setEdit({ ...edit, description: e.target.value })} aria-label="Listing description" />
+            <input maxLength={BOARD_TEXT_LIMITS.price} className="board-text-field" inputMode="decimal" value={edit.price} onChange={e => setEdit({ ...edit, price: e.target.value })} aria-label="Price" />
             <select className="board-text-field" value={edit.condition} onChange={e => setEdit({ ...edit, condition: e.target.value })} aria-label="Condition"><option>New</option><option>Like new</option><option>Good</option><option>Fair</option><option>For parts</option></select>
-            <input className="board-text-field" value={edit.neighborhood} onChange={e => setEdit({ ...edit, neighborhood: e.target.value })} aria-label="Neighborhood" />
+            <input maxLength={BOARD_TEXT_LIMITS.area} className="board-text-field" value={edit.neighborhood} onChange={e => setEdit({ ...edit, neighborhood: e.target.value })} aria-label="Neighborhood" />
             <label><input type="checkbox" checked={edit.negotiable} onChange={e => setEdit({ ...edit, negotiable: e.target.checked })} /> Open to offers</label>
             <button onClick={() => { act(`/api/sellz/${post.id}`, edit, "PUT"); setEditing(false); }}>Save changes</button>
           </div> : null}

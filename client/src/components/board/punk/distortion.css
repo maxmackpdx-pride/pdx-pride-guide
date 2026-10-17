@@ -1,0 +1,41 @@
+
+/* Short geometric tears, not synchronized opacity flashes. The anchor and shadow stay fixed. */
+.boardz-punk-scope .demo-pinned :is(.ab-pin__solid,.ab-pin__surface-wire,.ab-pin__wire){animation:none}
+.boardz-punk-scope .demo-pinned .ab-pin__solid{opacity:1}
+.boardz-punk-scope .demo-pinned .ab-pin__wire{opacity:.65}
+.boardz-punk-scope .ab-pin__body{transform-origin:20px 21px;animation:punk-pin-distort var(--pin-glitch-cycle,13s) steps(1,end) var(--pin-glitch-phase,0s) infinite}
+.boardz-punk-scope .ab-pin__tear{opacity:0;animation:punk-pin-tear var(--pin-glitch-cycle,13s) steps(1,end) var(--pin-glitch-phase,0s) infinite}
+.boardz-punk-scope .ab-pin__tear--b{--tear-direction:-1}
+.boardz-punk-scope .demo-pinned .ab-pin__glitch{animation:punk-pin-scan var(--pin-glitch-cycle,13s) steps(1,end) var(--pin-glitch-phase,0s) infinite}
+@keyframes punk-pin-distort{
+  0%,93.8%,97%,100%{transform:none;clip-path:none}
+  94%{transform:translateX(-2px) skewX(12deg) scaleX(1.14);clip-path:polygon(0 0,100% 0,100% 48%,80% 48%,80% 66%,100% 66%,100% 100%,0 100%)}
+  94.8%{transform:translateX(3px) skewX(-16deg) scaleX(.9)}
+  95.5%{transform:translate(-1px,1px) skewX(7deg) scaleX(1.1);clip-path:none}
+  96.1%{transform:none}
+  96.5%{transform:translateX(2px) skewX(-5deg)}
+}
+@keyframes punk-pin-tear{
+  0%,93.8%,97%,100%{opacity:0;transform:none}
+  94%{opacity:.85;transform:translateX(calc(5px * var(--tear-direction,1)))}
+  94.8%{opacity:.9;transform:translateX(calc(-4px * var(--tear-direction,1)))}
+  95.5%{opacity:.7;transform:translateX(calc(3px * var(--tear-direction,1)))}
+  96.1%{opacity:0}
+  96.5%{opacity:.5;transform:translateX(calc(-2px * var(--tear-direction,1)))}
+}
+@keyframes punk-pin-scan{0%,93.8%,97%,100%{opacity:0;transform:none}94%{opacity:.65;transform:translateX(-3px) scaleX(1.15)}95.5%{opacity:.4;transform:translateX(4px) scaleX(.8)}}
+.boardz-punk-scope [data-network-glitch=true]{transform-box:view-box;transform-origin:center;animation:punk-network-distort var(--network-glitch-cycle,21s) steps(1,end) var(--network-glitch-phase,0s) infinite;animation-play-state:var(--card-ambient-playing,paused)}
+@keyframes punk-network-distort{
+  0%,95.8%,98%,100%{transform:none;clip-path:none}
+  96%{transform:translate(9px,-2px) skewX(6deg) scaleX(1.035);clip-path:polygon(0 0,100% 0,100% 28%,92% 28%,92% 31%,100% 31%,100% 62%,97% 62%,97% 66%,100% 66%,100% 100%,0 100%)}
+  96.4%{transform:translate(-7px,2px) skewX(-4deg) scaleX(.98)}
+  96.9%{transform:translate(3px,0) skewX(2deg);clip-path:none}
+  97.3%{transform:none}
+  97.6%{transform:translate(-2px,1px) skewX(-1deg)}
+}
+.boardz-punk-scope[data-calm=true] :is(.ab-pin__body,.ab-pin__tear,.ab-pin__glitch,[data-network-glitch=true]),
+.boardz-punk-scope [data-motion-disabled=true] [data-network-glitch=true]{animation:none!important;transform:none;clip-path:none}
+.boardz-punk-scope:has([data-motion-disabled=true]) :is(.ab-pin__body,.ab-pin__tear,.ab-pin__glitch){animation:none!important}
+@media(prefers-reduced-motion:reduce){.boardz-punk-scope :is(.ab-pin__body,.ab-pin__tear,.ab-pin__glitch,[data-network-glitch=true]){animation:none!important;transform:none;clip-path:none}}
+
+.boardz-punk-scope .demo-pinned :is(.ab-pin__body,.ab-pin__tear,.ab-pin__glitch){animation-play-state:var(--pin-playing,paused)}

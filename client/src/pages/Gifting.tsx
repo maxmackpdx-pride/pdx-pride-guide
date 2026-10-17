@@ -1,3 +1,5 @@
+import {BOARD_TEXT_LIMITS,BOARD_NEIGHBORHOODS} from "@shared/boardCardPresentation";
+import BoardComposerPreview from "@/components/board/BoardComposerPreview";
 import BoardMotifSetting from "@/components/board/BoardMotifSetting";
 import BoardShader from '@/components/board/BoardShader';
 import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
@@ -396,13 +398,13 @@ export function GiftComposer({initialType = "GIFT", initialPickupPreference, onC
                   className="board-text-field"
                   value={form.title}
                   onChange={e => setForm({ ...form, title: e.target.value })}
-                  maxLength={90}
+                  maxLength={BOARD_TEXT_LIMITS.title}
                   placeholder="e.g. Rack of drag looks, sizes S to L"
                 />
               </label>
               <label className="span">
                 Description
-                <textarea
+                <textarea maxLength={BOARD_TEXT_LIMITS.description}
                   className="board-text-field"
                   value={form.description}
                   onChange={e => setForm({ ...form, description: e.target.value })}
@@ -412,7 +414,7 @@ export function GiftComposer({initialType = "GIFT", initialPickupPreference, onC
               </label>
               <label>
                 Neighborhood / pickup area
-                <input
+                <input maxLength={BOARD_TEXT_LIMITS.area}
                   className="board-text-field"
                   value={form.neighborhood}
                   onChange={e => setForm({ ...form, neighborhood: e.target.value })}
@@ -433,6 +435,7 @@ export function GiftComposer({initialType = "GIFT", initialPickupPreference, onC
                 <small className="board-copy-sm">{form.postType === "GIFT" ? "Show the item you are giving away." : "Add a photo of what you are looking for."}</small>
               </label>
             </div>
+            <BoardComposerPreview category="giftz" fields={{...form,motifChoice}} files={photos}/>
             <ComposerRules checked={form.acceptRules} onChange={acceptRules => setForm({ ...form, acceptRules })}>
               I agree: keep it free, keep it kind, keep it moving.
             </ComposerRules>

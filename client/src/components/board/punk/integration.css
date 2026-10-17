@@ -1,0 +1,51 @@
+/* The approved card art is scoped; page navigation, Eventz and Placez are untouched. */
+.boardz-punk-scope{position:relative;isolation:isolate;width:360px;max-width:none;height:272px;margin:0;padding:0;background:transparent;color:var(--punk-white);font-family:BoardzHouzText,Arial,sans-serif;box-sizing:border-box;flex:none;overflow:visible}
+.boardz-punk-scope[data-compact=true]{width:136px;height:182px}
+.boardz-punk-scope .demo-pinned{margin:32px 0 0}
+.boardz-punk-scope .card.board.large{width:360px!important;height:240px!important}
+.boardz-punk-scope :is(button,p,h2,footer){box-sizing:border-box}
+.boardz-punk-scope .punk-open-target{position:absolute;inset:32px 0 0;z-index:1;background:transparent;border:0;border-radius:17px;cursor:pointer;width:100%;padding:0;color:transparent}
+.boardz-punk-scope .punk-open-target:focus-visible{outline:2px solid var(--punk-white);outline-offset:4px}
+.boardz-punk-scope .demo-pinned{pointer-events:none}
+.boardz-punk-scope .demo-pinned :is(.save,.occupancy-faces){pointer-events:auto}
+.boardz-punk-scope .punk-post-status{position:absolute;left:26px;top:8px;font:700 9px/1 Arial,sans-serif;letter-spacing:.08em;color:var(--punk-print-dddddd);z-index:70;pointer-events:none}
+.boardz-punk-scope .save:disabled{opacity:1;cursor:default}
+.boardz-punk-scope .body .share{display:none}
+.boardz-punk-scope [aria-hidden=true]{pointer-events:none}
+.boardz-production-card{width:360px;max-width:none;flex:none;background:transparent;border:0;box-shadow:none}
+.boardz-production-card .board-card-owner-controls{position:relative}
+.ab-page .ab-card-grid:has(.boardz-production-card){grid-template-columns:repeat(auto-fill,360px);justify-content:center}
+.boardz-open-surface{--punk-open-ink:var(--c,var(--listing-accent,var(--day-thu)));position:relative;isolation:isolate;background:var(--punk-black)!important;color:var(--punk-white);border:1px solid var(--punk-open-ink)!important;border-radius:14px!important;box-shadow:inset 0 0 24px color-mix(in srgb,var(--punk-open-ink) 12%,transparent)!important}
+.boardz-open-surface:before{content:'';position:absolute;inset:0;background:url('/boardz/punk/paper-grain.svg') repeat;opacity:.16;pointer-events:none;z-index:0}
+.boardz-open-surface>:not(.boardz-punk-scope){position:relative}
+.boardz-open-hero{position:relative;padding:20px 0 16px;display:flex;justify-content:center;overflow:visible;max-width:100%}
+.boardz-open-surface .boardz-open-hero{background:transparent!important}
+.boardz-open-surface :is(.board-listing-card__title,.hz-h1,.hz-sect-title,.board-detail-modal__quote-title){display:table;width:fit-content;max-width:100%;background:var(--punk-white)!important;color:var(--punk-black)!important;padding:5px 10px;box-shadow:3px 3px 0 var(--punk-open-ink);font-family:BoardzHouzText,Arial,sans-serif!important;font-weight:900!important;line-height:1.15;letter-spacing:0;transform:rotate(-.6deg)}
+.boardz-open-surface :is(.board-listing-card__body,.board-detail-modal__body,.hz-prose){color:var(--punk-white)!important;font-family:BoardzHouzText,Arial,sans-serif;line-height:1.55}
+.boardz-open-surface :is(.board-listing-card,.hz-detail,.hz-detail__main,.hz-detail__aside,.hz-actbar){background:transparent!important;box-shadow:none!important}
+.boardz-open-surface :is(.board-glass-motif,.board-open-card__rule,.ab-open-card__art){display:none!important}
+.boardz-open-surface .board-listing-card__thumb{display:none}
+.boardz-open-surface :is(.board-open-readable__close,.ab-open-card__chrome,.board-open-card__close){z-index:100}
+.boardz-composer-preview{grid-column:1/-1;margin:12px 0 20px;padding:12px 0;border-top:1px solid var(--punk-print-444444);border-bottom:1px solid var(--punk-print-444444);max-width:100%;overflow:auto}
+.boardz-composer-preview summary{cursor:pointer;color:var(--punk-white);font-weight:700}
+.boardz-preview-pair{display:flex;align-items:flex-start;gap:18px;padding:12px 0}
+.boardz-composer-preview p{font-size:12px;line-height:1.4;color:var(--punk-print-bbbbbb);margin:8px 0}
+@media(max-width:420px){.boardz-open-hero{justify-content:flex-start;overflow-x:auto}.boardz-open-surface{max-width:calc(100vw - 16px)!important}.boardz-production-card{margin-inline:auto}}
+
+/* Full posts keep their real actions, details and galleries in the same paper family. */
+.boardz-housing-dialog{background:var(--punk-black)!important;border:1px solid var(--room-hauz)!important;box-shadow:0 18px 70px rgb(0 0 0 / .7)!important}
+.boardz-housing-dialog fieldset:disabled{opacity:1}
+.boardz-housing-dialog .boardz-open-surface{border:0!important;box-shadow:none!important}
+.boardz-open-surface .pdx-glass-rebind{background:transparent!important;backdrop-filter:none!important}
+.boardz-open-surface :is(.hz-dttl,.hz-secttl){font-family:BoardzHouzText,Arial,sans-serif!important;letter-spacing:0!important;font-stretch:normal!important;line-height:1.18!important;font-weight:900!important}
+.boardz-open-surface .hz-dttl{display:table;background:var(--punk-white);color:var(--punk-black);padding:5px 10px;box-shadow:3px 3px 0 var(--room-hauz);transform:rotate(-.6deg);font-size:clamp(22px,4vw,32px)!important}
+.boardz-open-surface .hz-secttl{font-size:20px!important;color:var(--punk-white)!important}
+.boardz-open-surface :is(.hz-tile,.hz-member,.hz-request,.hz-workspace){background:rgb(0 0 0 / .7)!important;border-color:color-mix(in srgb,var(--c,var(--room-hauz)) 35%,transparent)}
+.boardz-open-surface .hz-title{font-family:BoardzHouzText,Arial,sans-serif!important;letter-spacing:0!important}
+.boardz-open-photos{display:flex;gap:12px;overflow:auto;padding:16px 24px 28px;scroll-snap-type:x mandatory}
+.boardz-open-photos img{height:240px;max-width:85%;object-fit:contain;scroll-snap-align:center;border:2px solid var(--punk-white);background:var(--punk-black)}
+
+.boardz-open-surface :is(.hz-dttl,.board-listing-card__title,.board-detail-modal__quote-title){position:relative;isolation:isolate;background:transparent!important;box-shadow:none!important;padding:8px 12px;color:var(--punk-black)!important;overflow:visible}
+.boardz-open-surface :is(.hz-dttl,.board-listing-card__title,.board-detail-modal__quote-title)::before{content:'';position:absolute;inset:0;z-index:-1;background:var(--punk-white);clip-path:polygon(0 3%,5% 0,13% 3%,22% 0,31% 2%,43% 0,53% 3%,66% 1%,78% 3%,89% 0,100% 2%,99% 24%,100% 49%,99% 76%,100% 98%,91% 100%,80% 97%,68% 100%,55% 98%,42% 100%,30% 97%,18% 100%,8% 98%,0 100%,1% 75%,0 50%,1% 25%);filter:drop-shadow(3px 3px 0 var(--punk-open-ink))}
+
+.boardz-open-surface.board-open-readable--mizzed>.board-detail-modal__meta{margin-top:var(--space-4)}

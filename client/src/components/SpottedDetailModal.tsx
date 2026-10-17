@@ -1,3 +1,6 @@
+import {BOARD_TEXT_LIMITS,BOARD_NEIGHBORHOODS} from "@shared/boardCardPresentation";
+import BoardComposerPreview from "@/components/board/BoardComposerPreview";
+import BoardPostFace from "@/components/board/BoardPostFace";
 import "@/components/board/BoardOpenReadability.css";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
@@ -106,13 +109,13 @@ export default function SpottedDetailModal({
         aria-modal="true"
         aria-label={title || "Missed connection"}
         tabIndex={-1}
-        className={`board-detail-modal board-detail-modal--spotted board-detail-modal--glass board-open-card--shared pdx-glass-rebind board-open-readable board-open-readable--mizzed${presentation ? " ab-open-card" : ""}`}
+        className={`boardz-open-surface board-detail-modal board-detail-modal--spotted board-detail-modal--glass board-open-card--shared pdx-glass-rebind board-open-readable board-open-readable--mizzed${presentation ? " ab-open-card" : ""}`}
         onClick={e => e.stopPropagation()}
         style={glassVars}
       >
         <span className="board-open-card__rule" aria-hidden="true" />
-        <BoardGlassMotif variant="quote-pair" />
         <div className="board-open-readable__close"><DetailActions label="listing" onClose={requestClose} /></div>
+        <BoardPostFace category="mizzed" post={{id:postId,title,body,venueHint:place,dayOfWeek:kindLabel,status,createdAt:'',isDemo}} hero/>
         <div className="board-detail-modal__meta" style={{ position: "relative", zIndex: 1 }}>
           <span className="board-detail-modal__live-dot" aria-hidden="true" />
           <span className="board-detail-modal__meta-line" style={{ color: kindColor || MC_GLASS }}>
@@ -129,7 +132,7 @@ export default function SpottedDetailModal({
         {source && <div className="mizzed-source-link"><span>FROM THE {source.label.toUpperCase()} CARD</span><div>{source.image && <img src={source.image} alt="" />}<div><strong>{source.title}</strong><small>{source.note}</small><a href={source.href}>Open source card <ArrowUpRight size={14} aria-hidden="true" /></a></div></div></div>}
         {isDemo && <p className="board-demo-notice" role="note">Demo connection — example only. Private replies are disabled.</p>}
         {isDemo ? null : isMine ? <div className="board-detail-modal__actions" style={{position:"relative",zIndex:1}}>
-          {editing ? <form onSubmit={e=>{e.preventDefault();ownerMutation.mutate({method:"PUT",data:{title:editTitle,body:editBody}});}}><label>Title<input className="board-text-field" maxLength={80} value={editTitle} onChange={e=>setEditTitle(e.target.value)}/></label><label>Message<textarea className="board-text-field" maxLength={500} rows={5} required value={editBody} onChange={e=>setEditBody(e.target.value)}/></label><Button type="submit" disabled={ownerMutation.isPending||!editBody.trim()}>Save changes</Button><Button type="button" onClick={()=>setEditing(false)}>Cancel</Button></form> : <Button onClick={()=>setEditing(true)}>Edit connection</Button>}
+          {editing ? <form onSubmit={e=>{e.preventDefault();ownerMutation.mutate({method:"PUT",data:{title:editTitle,body:editBody}});}}><label>Title<input className="board-text-field" maxLength={BOARD_TEXT_LIMITS.title} value={editTitle} onChange={e=>setEditTitle(e.target.value)}/></label><label>Message<textarea className="board-text-field" maxLength={500} rows={5} required value={editBody} onChange={e=>setEditBody(e.target.value)}/></label><Button type="submit" disabled={ownerMutation.isPending||!editBody.trim()}>Save changes</Button><Button type="button" onClick={()=>setEditing(false)}>Cancel</Button></form> : <Button onClick={()=>setEditing(true)}>Edit connection</Button>}
           {status==="ACTIVE" && <Button disabled={ownerMutation.isPending} onClick={()=>ownerMutation.mutate({method:"PUT",data:{status:"ARCHIVED"}})}>Close connection</Button>}
           <Button disabled={ownerMutation.isPending} onClick={()=>{if(confirm("Delete this connection?"))ownerMutation.mutate({method:"DELETE"},{onSuccess:onClose});}}>Delete</Button>
         </div> : status !== "ACTIVE" ? <p role="status">This connection is closed.</p> : <div className="board-detail-modal__actions" style={{ position: "relative", zIndex: 1 }}>

@@ -1,0 +1,69 @@
+/* Shared Boardz spacing, based on the approved Mizzed / Hoüz composition. */
+.boardz-punk-scope :is(.bz-card,.card[data-category=housing]){--boardz-inset:28px;--boardz-bottom:24px;--boardz-location-top:32px}
+.boardz-punk-scope :is(.bz-card,.card[data-category=housing])[data-size=small]{--boardz-inset:18px;--boardz-bottom:18px}
+.boardz-punk-scope .bz-card[data-size=large] .bz-type{
+  left:var(--boardz-inset);top:32px;max-width:160px;
+  color:var(--bz-ink);font-size:10.5px;line-height:15px;letter-spacing:.045em;
+}
+.boardz-punk-scope .bz-card .bz-type{isolation:isolate;width:max-content}
+.boardz-punk-scope .bz-card .bz-type:before{
+  content:'';position:absolute;inset:-3px -6px;z-index:-1;pointer-events:none;background:var(--punk-black);
+  mask:url('/boardz/punk/punk-materials.png') 96.8354% 23.7333%/261.2245% 825.8065% no-repeat;
+}
+.boardz-punk-scope .bz-card[data-size=large] .bz-location{
+  left:auto!important;right:var(--boardz-inset);top:32px;max-width:126px;min-height:15px;gap:4px;
+  font-size:10px;line-height:15px;text-transform:uppercase;isolation:isolate;text-shadow:none;
+}
+.boardz-punk-scope .bz-card[data-size=large] .bz-location:before,
+.boardz-punk-scope .bz-card[data-size=large] .bz-location:after{
+  content:'';position:absolute;inset:-2px -3px -2px -5px;pointer-events:none;
+  mask:url('/boardz/punk/punk-materials.png') 96.8354% 23.7333%/261.2245% 825.8065% no-repeat;
+}
+.boardz-punk-scope .bz-card[data-size=large] .bz-location:before{z-index:-2;background:var(--secondary);translate:0 1.5px}
+.boardz-punk-scope .bz-card[data-size=large] .bz-location:after{z-index:-1;background:var(--punk-black)}
+.boardz-punk-scope .bz-card[data-size=large] .bz-content{left:var(--boardz-inset);right:var(--boardz-inset);top:61px;gap:9px}
+.boardz-punk-scope .bz-card[data-size=large] .bz-title{width:252px;font-size:22px;line-height:1.1;transform-origin:left top}
+.boardz-punk-scope .bz-card[data-size=large] .bz-description{width:270px;font-size:11.5px;line-height:14px}
+.boardz-punk-scope .bz-card[data-size=large] .bz-logo{left:var(--boardz-inset);bottom:24px;width:110px;height:34px;object-position:left bottom}
+
+/* Compact cards keep the logo opposite the fixed top-right heart. */
+.boardz-punk-scope .bz-card[data-size=small] .bz-logo{left:var(--boardz-inset);top:13px;width:66px;height:27px;object-position:left center}
+.boardz-punk-scope .bz-card[data-size=small] .bz-type{left:var(--boardz-inset);top:46px;max-width:100px;font-size:8.5px;line-height:11px;color:var(--bz-ink);letter-spacing:.025em}
+.boardz-punk-scope .bz-card[data-size=small] .bz-type:before{inset:-2px -4px}
+.boardz-punk-scope .bz-card[data-size=small] .bz-content{left:var(--boardz-inset);right:var(--boardz-inset);top:64px;gap:7px}
+.boardz-punk-scope .bz-card[data-size=small] .bz-title{width:100px;font-size:11.5px;line-height:1.14;transform-origin:left top}
+.boardz-punk-scope .bz-card[data-size=small] .bz-description{width:100px;font-size:9.5px;line-height:12px}
+.boardz-punk-scope .bz-card[data-size=small] .bz-description-copy{-webkit-line-clamp:1}
+
+/* The same quiet, localized contrast treatment as Mizzed, with live subtext. */
+.boardz-punk-scope .bz-card .bz-description{isolation:isolate;display:block;overflow:visible;background:transparent;color:var(--punk-white);font-weight:400;text-shadow:0 1px 2px var(--punk-black),0 0 4px var(--punk-black)}
+.boardz-punk-scope .bz-card .bz-description:before{content:'';position:absolute;inset:-3px -7px;z-index:-1;background:linear-gradient(90deg,color-mix(in srgb,var(--punk-black) 86.667%,transparent) 0%,color-mix(in srgb,var(--punk-black) 73.333%,transparent) 68%,transparent 100%);filter:blur(4px);pointer-events:none}
+.boardz-punk-scope .bz-card .bz-description-copy{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.boardz-punk-scope .bz-card[data-size=small] .bz-description-copy{-webkit-line-clamp:1}
+
+/* Price-bearing cards reserve a clear row between the title and subtext. */
+.boardz-punk-scope .bz-card[data-category=gigz][data-size=large] .bz-content{gap:7px}
+.boardz-punk-scope .bz-card[data-category=gigz][data-size=large] .bz-value{font-size:21px;max-width:252px}
+.boardz-punk-scope .bz-card[data-category=gigz][data-intent=hiring][data-size=large] .bz-value{font-size:12px;line-height:15px;padding:2px 5px}
+.boardz-punk-scope .bz-card[data-category=gigz][data-size=small] .bz-content{gap:4px}
+.boardz-punk-scope .bz-card[data-category=gigz][data-size=small] .bz-value{max-width:100px}
+.boardz-punk-scope .bz-card[data-category=gigz][data-intent=hiring][data-size=small] .bz-value{font-size:9.5px;line-height:12px}
+.boardz-punk-scope .bz-card[data-category=gigz][data-intent=hiring][data-size=small] .bz-content .bz-value{max-width:100px}
+
+/* Giftz status occupies the bottom space between the logo and heart. */
+.boardz-punk-scope .bz-card[data-category=giftz][data-size=large] .bz-status{left:216px;bottom:26px;max-width:144px;font-size:14px;transform:translateX(-50%) rotate(1deg)}
+.boardz-punk-scope .bz-card[data-category=giftz][data-size=small] .bz-status{left:var(--boardz-inset);bottom:var(--boardz-bottom);max-width:100px;font-size:10px}
+.boardz-punk-scope .bz-card[data-category=giftz][data-size=small] .bz-content{gap:5px}
+
+/* Shared edge anchors. Hoüz's heart keeps its approved footprint and appearance. */
+.boardz-punk-scope .bz-card[data-size=large] .save{right:var(--boardz-inset);bottom:var(--boardz-bottom)}
+.boardz-punk-scope .bz-card[data-size=small] .save{right:14px;top:12px}
+.boardz-punk-scope[data-direction] .bz-card[data-size=large] .bz-location{left:auto!important;right:var(--boardz-inset);top:var(--boardz-location-top);min-height:17px}
+.boardz-punk-scope .bz-card[data-size=large] .bz-location .houz-location-window{width:auto;max-width:77px;flex:0 1 auto;text-align:right;text-overflow:clip}
+.boardz-punk-scope .bz-card[data-motion-disabled=true] .houz-location-moving{animation:none!important;transform:none!important}
+.boardz-punk-scope[data-direction] .board.large[data-category=housing] .body{left:var(--boardz-inset);right:var(--boardz-inset)}
+.boardz-punk-scope[data-direction] .board.large[data-category=housing] .body .detail{top:0;right:0}
+.boardz-punk-scope[data-direction] .board.small[data-category=housing] .body{left:var(--boardz-inset);right:var(--boardz-inset)}
+.boardz-punk-scope[data-direction] .board.small[data-category=housing] .body .detail{left:0;right:0}
+.boardz-punk-scope .card.small[data-category=housing] .rate .price-copy{--price-max:100;max-width:100px}
+.boardz-punk-scope .card.small[data-category=housing] .houz-occupancy{left:var(--boardz-inset);right:var(--boardz-inset);bottom:var(--boardz-bottom)}

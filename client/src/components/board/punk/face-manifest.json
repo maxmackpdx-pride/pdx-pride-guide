@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "displaySize": 29,
+  "portraitInset": 2,
+  "selection": "Stable post seed plus member index; no per-render randomness.",
+  "assets": [
+    {
+      "id": "deckle-round",
+      "src": "/boardz/punk/face-paper/deckle-round.svg",
+      "backing": "/boardz/punk/face-paper/ripped-fringe-a.svg"
+    },
+    {
+      "id": "torn-square",
+      "src": "/boardz/punk/face-paper/torn-square.svg",
+      "backing": "/boardz/punk/face-paper/ripped-fringe-b.svg"
+    },
+    {
+      "id": "rough-oval",
+      "src": "/boardz/punk/face-paper/rough-oval.svg",
+      "backing": "/boardz/punk/face-paper/ripped-fringe-c.svg"
+    },
+    {
+      "id": "clipped-paper",
+      "src": "/boardz/punk/face-paper/clipped-paper.svg",
+      "backing": "/boardz/punk/face-paper/ripped-fringe-d.svg"
+    }
+  ]
+}

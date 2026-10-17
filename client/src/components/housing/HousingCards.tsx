@@ -1,3 +1,5 @@
+import PunkBoardCard from "@/components/board/punk/PunkBoardCard";
+import {toBoardPosts} from "@/lib/allBoards";
 import type { ReactNode } from "react";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
 import { ChangeBadge } from "@/components/ds/ChangeBadge";
@@ -335,8 +337,7 @@ export function HousingCard({
   h: HousingCardHandlers;
   viewerLeadsGroup?: { postId: number } | null;
 }) {
-  if (post.type === "LOOKING") return <LookingCard post={post} h={h} />;
-  if (post.type === "OFFERING") return <OfferingCard post={post} h={h} />;
-  if (post.type === "MANAGED") return <ManagedCard post={post} h={h} viewerLeadsGroup={viewerLeadsGroup} />;
-  return <FormingCard post={post} h={h} />;
+  const data=toBoardPosts('housing',{posts:[post],stats:{activePosts:1,formingHouses:0,roomsOpen:0}},true)[0];
+  return <PunkBoardCard post={data} saved={post.saved} saveDisabled={post.isDemo||h.savePendingIds?.has(post.id)} onSave={()=>h.onSave(post)} onOpen={()=>h.onOpen(post)}/>;
+
 }

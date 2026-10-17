@@ -1,3 +1,5 @@
+import {BOARD_TEXT_LIMITS,BOARD_NEIGHBORHOODS} from "@shared/boardCardPresentation";
+import BoardComposerPreview from "@/components/board/BoardComposerPreview";
 import { Flag } from "lucide-react";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -244,7 +246,7 @@ export default function MissedConnectionsPanel({
       <p className="board-copy-sm" style={{ marginBottom: 14 }}>
         Tell them where you crossed paths—at an event, a favorite spot, or somewhere around town. You stay anonymous on the board.
       </p>
-      <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" maxLength={80} />
+      <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" maxLength={BOARD_TEXT_LIMITS.title} />
       <textarea
         style={{ ...inputStyle, minHeight: 120, resize: "vertical", marginTop: 10 }}
         value={form.body}
@@ -359,7 +361,7 @@ export default function MissedConnectionsPanel({
               ? "Missed connections from the beach · also on the main MIZZED CONNECTION board · anonymous until you both reveal in inbox."
               : "Missed connections for this event · anonymous on the board until you both reveal in inbox."}
           </p>
-          <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" maxLength={80} />
+          <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" maxLength={BOARD_TEXT_LIMITS.title} />
           <textarea
             style={{ ...inputStyle, minHeight: 90, resize: "vertical", marginTop: 8 }}
             value={form.body}

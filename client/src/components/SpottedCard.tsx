@@ -1,3 +1,4 @@
+import BoardPostFace from "@/components/board/BoardPostFace";
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import type { CSSProperties } from "react";
@@ -69,50 +70,7 @@ export default function SpottedCard({
   const displayTitle = post.title?.trim() || post.body.trim().split(/\n/)[0]?.slice(0, 80) || "Missed connection";
   const source = mizzedSource(post);
 
-  if (makeover) {
-    const glassVars = {
-      "--spotted-accent": MC_GLASS,
-      "--listing-accent": MC_GLASS,
-      "--c": MC_GLASS,
-      "--_c": MC_GLASS,
-      position: "relative",
-    } as CSSProperties;
-    return (
-      <article
-        className="board-spotted-card board-spotted-card--glass pdx-glass-rebind"
-        style={glassVars}
-        onClick={onReply}
-        onKeyDown={e => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onReply();
-          }
-        }}
-        role="button"
-        tabIndex={0}
-      >
-        {post.isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
-        <div className="board-spotted-card__art board-spotted-card__art--motif">
-          <MizzedMotif index={motifIndex} />
-          {post.eventPosterUrl && <img className="board-spotted-card__uploaded-art" src={post.eventPosterUrl} alt="" loading="lazy" />}
-        </div>
-        {/* Corner tick marks (design board cards) */}
-        <span className="board-spotted-card__ticks" aria-hidden="true">”</span>
-        <div className="board-spotted-card__meta">
-          <span className="board-spotted-card__kind" style={{ color: MC_GLASS }}>{source?.label || "That one spot by the…"}</span>
-          <span className="board-spotted-card__time">{post.isDemo ? "Demo post" : spottedTimeAgo(post.createdAt)}</span>
-        </div>
-        <h4 className="board-spotted-card__title">{displayTitle}</h4>
-        <p className="board-spotted-card__body">{post.body}</p>
-        <div className="board-spotted-card__foot">
-          <span className="board-spotted-card__place">{spottedPlace(post)}</span>
-          {!post.isMine && !isClosed && <span className="board-spotted-card__cta" style={{ color: MC_GLASS }}>Reply <ArrowRight size={14} aria-hidden="true" /></span>}
-        </div>
-        {source && <span className="board-spotted-card__source">From {source.label}</span>}
-        <span className="board-spotted-card__open">View and reply <span aria-hidden="true"><ArrowUpRight size={14} aria-hidden="true" /></span></span>
-      </article>
-    );
-  }
+  if (makeover) return <BoardPostFace category="mizzed" post={post} onOpen={onReply}/>;
 
   const handleShare = async () => {
     try {
