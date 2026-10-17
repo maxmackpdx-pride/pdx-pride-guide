@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "release": "zaylist-foundation-design-system-2026-10-16.3",
+  "release": "zaylist-foundation-design-system-2026-10-17.2",
   "categories": [
     {
       "room": "placez",
@@ -251,6 +251,904 @@
       "aliasOf": "needz/community"
     }
   ],
+  "places": [
+    {
+      "name": "Badlands",
+      "names": [
+        "Badlands"
+      ],
+      "heroId": "placez-specific-badlands",
+      "companionId": "companion-placez-specific-badlands"
+    },
+    {
+      "name": "Camp Bar PDX",
+      "names": [
+        "Camp Bar PDX"
+      ],
+      "heroId": "placez-specific-camp-bar-pdx",
+      "companionId": "companion-placez-specific-camp-bar-pdx"
+    },
+    {
+      "name": "CC Slaughters",
+      "names": [
+        "CC Slaughters"
+      ],
+      "heroId": "placez-specific-cc-slaughters",
+      "companionId": "companion-placez-specific-cc-slaughters"
+    },
+    {
+      "name": "Darcelle XV Showplace",
+      "names": [
+        "Darcelle XV Showplace"
+      ],
+      "heroId": "placez-specific-darcelle-xv-showplace",
+      "companionId": "companion-placez-specific-darcelle-xv-showplace"
+    },
+    {
+      "name": "Stag PDX",
+      "names": [
+        "Stag PDX"
+      ],
+      "heroId": "placez-specific-stag-pdx",
+      "companionId": "companion-placez-specific-stag-pdx"
+    },
+    {
+      "name": "Eagle Portland",
+      "names": [
+        "Eagle Portland"
+      ],
+      "heroId": "placez-specific-eagle-portland",
+      "companionId": "companion-placez-specific-eagle-portland"
+    },
+    {
+      "name": "The Nest Lounge",
+      "names": [
+        "The Nest Lounge"
+      ],
+      "heroId": "placez-specific-the-nest-lounge",
+      "companionId": "companion-placez-specific-the-nest-lounge"
+    },
+    {
+      "name": "Silverado",
+      "names": [
+        "Silverado"
+      ],
+      "heroId": "placez-specific-silverado",
+      "companionId": "companion-placez-specific-silverado"
+    },
+    {
+      "name": "Kann",
+      "names": [
+        "Kann"
+      ],
+      "heroId": "placez-specific-kann",
+      "companionId": "companion-placez-specific-kann"
+    },
+    {
+      "name": "The Sports Bra",
+      "names": [
+        "The Sports Bra"
+      ],
+      "heroId": "placez-specific-the-sports-bra",
+      "companionId": "companion-placez-specific-the-sports-bra"
+    },
+    {
+      "name": "Mis Tacones",
+      "names": [
+        "Mis Tacones"
+      ],
+      "heroId": "placez-specific-mis-tacones",
+      "companionId": "companion-placez-specific-mis-tacones"
+    },
+    {
+      "name": "Taqueria Los Puñales",
+      "names": [
+        "Taqueria Los Puñales"
+      ],
+      "heroId": "placez-specific-taqueria-los-punales",
+      "companionId": "companion-placez-specific-taqueria-los-punales"
+    },
+    {
+      "name": "Friendship Kitchen",
+      "names": [
+        "Friendship Kitchen"
+      ],
+      "heroId": "placez-specific-friendship-kitchen",
+      "companionId": "companion-placez-specific-friendship-kitchen"
+    },
+    {
+      "name": "Either/Or",
+      "names": [
+        "Either/Or"
+      ],
+      "heroId": "placez-specific-either-or",
+      "companionId": "companion-placez-specific-either-or"
+    },
+    {
+      "name": "Tin Shed Garden Cafe",
+      "names": [
+        "Tin Shed Garden Cafe"
+      ],
+      "heroId": "placez-specific-tin-shed-garden-cafe",
+      "companionId": "companion-placez-specific-tin-shed-garden-cafe"
+    },
+    {
+      "name": "Speed-o Cappuccino",
+      "names": [
+        "Speed-o Cappuccino"
+      ],
+      "heroId": "placez-specific-speed-o-cappuccino",
+      "companionId": "companion-placez-specific-speed-o-cappuccino"
+    },
+    {
+      "name": "Coffee Beer",
+      "names": [
+        "Coffee Beer"
+      ],
+      "heroId": "placez-specific-coffee-beer",
+      "companionId": "companion-placez-specific-coffee-beer"
+    },
+    {
+      "name": "Living Room Wines",
+      "names": [
+        "Living Room Wines"
+      ],
+      "heroId": "placez-specific-living-room-wines",
+      "companionId": "companion-placez-specific-living-room-wines"
+    },
+    {
+      "name": "Stem Wine Bar",
+      "names": [
+        "Stem Wine Bar"
+      ],
+      "heroId": "placez-specific-stem-wine-bar",
+      "companionId": "companion-placez-specific-stem-wine-bar"
+    },
+    {
+      "name": "Roots & Crowns",
+      "names": [
+        "Roots & Crowns"
+      ],
+      "heroId": "placez-specific-roots-crowns",
+      "companionId": "companion-placez-specific-roots-crowns"
+    },
+    {
+      "name": "Arium Botanicals",
+      "names": [
+        "Arium Botanicals"
+      ],
+      "heroId": "placez-specific-arium-botanicals",
+      "companionId": "companion-placez-specific-arium-botanicals"
+    },
+    {
+      "name": "Pizza Thief",
+      "names": [
+        "Pizza Thief"
+      ],
+      "heroId": "placez-specific-pizza-thief",
+      "companionId": "companion-placez-specific-pizza-thief"
+    },
+    {
+      "name": "Peacock PDX",
+      "names": [
+        "Peacock PDX"
+      ],
+      "heroId": "placez-specific-peacock-pdx",
+      "companionId": "companion-placez-specific-peacock-pdx"
+    },
+    {
+      "name": "Scandals East",
+      "names": [
+        "Scandals East"
+      ],
+      "heroId": "placez-specific-scandals-east",
+      "companionId": "companion-placez-specific-scandals-east"
+    },
+    {
+      "name": "Honeyed Words",
+      "names": [
+        "Honeyed Words"
+      ],
+      "heroId": "placez-specific-honeyed-words",
+      "companionId": "companion-placez-specific-honeyed-words"
+    },
+    {
+      "name": "Ring Ding Ding",
+      "names": [
+        "Ring Ding Ding"
+      ],
+      "heroId": "placez-specific-ring-ding-ding",
+      "companionId": "companion-placez-specific-ring-ding-ding"
+    },
+    {
+      "name": "Holocene",
+      "names": [
+        "Holocene"
+      ],
+      "heroId": "placez-specific-holocene",
+      "companionId": "companion-placez-specific-holocene"
+    },
+    {
+      "name": "Alberta Rose Theatre",
+      "names": [
+        "Alberta Rose Theatre"
+      ],
+      "heroId": "placez-specific-alberta-rose-theatre",
+      "companionId": "companion-placez-specific-alberta-rose-theatre"
+    },
+    {
+      "name": "Jackie's",
+      "names": [
+        "Jackie's"
+      ],
+      "heroId": "placez-specific-jackie-s",
+      "companionId": "companion-placez-specific-jackie-s"
+    },
+    {
+      "name": "Sanctuary Club",
+      "names": [
+        "Sanctuary Club"
+      ],
+      "heroId": "placez-specific-sanctuary-club",
+      "companionId": "companion-placez-specific-sanctuary-club"
+    },
+    {
+      "name": "Seagrape Apothecary",
+      "names": [
+        "Seagrape Apothecary"
+      ],
+      "heroId": "placez-specific-seagrape-apothecary",
+      "companionId": "companion-placez-specific-seagrape-apothecary"
+    },
+    {
+      "name": "REALM PDX",
+      "names": [
+        "REALM PDX"
+      ],
+      "heroId": "placez-specific-realm-pdx",
+      "companionId": "companion-placez-specific-realm-pdx"
+    },
+    {
+      "name": "Nova PDX",
+      "names": [
+        "Nova PDX"
+      ],
+      "heroId": "placez-specific-nova-pdx",
+      "companionId": "companion-placez-specific-nova-pdx"
+    },
+    {
+      "name": "Star Theater",
+      "names": [
+        "Star Theater"
+      ],
+      "heroId": "placez-specific-star-theater",
+      "companionId": "companion-placez-specific-star-theater"
+    },
+    {
+      "name": "The Get Down",
+      "names": [
+        "The Get Down"
+      ],
+      "heroId": "placez-specific-the-get-down",
+      "companionId": "companion-placez-specific-the-get-down"
+    },
+    {
+      "name": "Happylucky No. 1",
+      "names": [
+        "Happylucky No. 1"
+      ],
+      "heroId": "placez-specific-happylucky-no-1",
+      "companionId": "companion-placez-specific-happylucky-no-1"
+    },
+    {
+      "name": "Escape Bar & Grill",
+      "names": [
+        "Escape Bar & Grill"
+      ],
+      "heroId": "placez-specific-escape-bar-grill",
+      "companionId": "companion-placez-specific-escape-bar-grill"
+    },
+    {
+      "name": "The Lodge Bar and Grill",
+      "names": [
+        "The Lodge Bar and Grill"
+      ],
+      "heroId": "placez-specific-the-lodge-bar-and-grill",
+      "companionId": "companion-placez-specific-the-lodge-bar-and-grill"
+    },
+    {
+      "name": "underU4men",
+      "names": [
+        "underU4men"
+      ],
+      "heroId": "placez-specific-underu4men",
+      "companionId": "companion-placez-specific-underu4men"
+    },
+    {
+      "name": "The Meet Rack at Darkroom",
+      "names": [
+        "The Meet Rack at Darkroom"
+      ],
+      "heroId": "placez-specific-the-meet-rack-at-darkroom",
+      "companionId": "companion-placez-specific-the-meet-rack-at-darkroom"
+    },
+    {
+      "name": "Hawks PDX",
+      "names": [
+        "Hawks PDX"
+      ],
+      "heroId": "placez-specific-hawks-pdx",
+      "companionId": "companion-placez-specific-hawks-pdx"
+    },
+    {
+      "name": "Bowery Bagels",
+      "names": [
+        "Bowery Bagels"
+      ],
+      "heroId": "placez-specific-bowery-bagels",
+      "companionId": "companion-placez-specific-bowery-bagels"
+    },
+    {
+      "name": "Process",
+      "names": [
+        "Process"
+      ],
+      "heroId": "placez-specific-process",
+      "companionId": "companion-placez-specific-process"
+    },
+    {
+      "name": "The Automatic Bar",
+      "names": [
+        "The Automatic Bar"
+      ],
+      "heroId": "placez-specific-the-automatic-bar",
+      "companionId": "companion-placez-specific-the-automatic-bar"
+    },
+    {
+      "name": "Montavilla Station",
+      "names": [
+        "Montavilla Station"
+      ],
+      "heroId": "placez-specific-montavilla-station",
+      "companionId": "companion-placez-specific-montavilla-station"
+    },
+    {
+      "name": "Covert Café",
+      "names": [
+        "Covert Café"
+      ],
+      "heroId": "placez-specific-covert-cafe",
+      "companionId": "companion-placez-specific-covert-cafe"
+    },
+    {
+      "name": "Hunny Beez",
+      "names": [
+        "Hunny Beez"
+      ],
+      "heroId": "placez-specific-hunny-beez",
+      "companionId": "companion-placez-specific-hunny-beez"
+    },
+    {
+      "name": "Q Restaurant & Bar",
+      "names": [
+        "Q Restaurant & Bar"
+      ],
+      "heroId": "placez-specific-q-restaurant-bar",
+      "companionId": "companion-placez-specific-q-restaurant-bar"
+    },
+    {
+      "name": "GiGi's Cafe",
+      "names": [
+        "GiGi's Cafe"
+      ],
+      "heroId": "placez-specific-gigi-s-cafe",
+      "companionId": "companion-placez-specific-gigi-s-cafe"
+    },
+    {
+      "name": "Backstory Books & Yarn",
+      "names": [
+        "Backstory Books & Yarn"
+      ],
+      "heroId": "placez-specific-backstory-books-yarn",
+      "companionId": "companion-placez-specific-backstory-books-yarn"
+    },
+    {
+      "name": "Sold By Scott",
+      "names": [
+        "Sold By Scott"
+      ],
+      "heroId": "placez-specific-sold-by-scott",
+      "companionId": "companion-placez-specific-sold-by-scott"
+    },
+    {
+      "name": "Triangle Recreation Camp",
+      "names": [
+        "Triangle Recreation Camp"
+      ],
+      "heroId": "placez-specific-triangle-recreation-camp",
+      "companionId": "companion-placez-specific-triangle-recreation-camp"
+    },
+    {
+      "name": "The Secret Warehouse",
+      "names": [
+        "The Secret Warehouse"
+      ],
+      "heroId": "placez-specific-the-secret-warehouse",
+      "companionId": "companion-placez-specific-the-secret-warehouse"
+    },
+    {
+      "name": "Fantasy Land",
+      "names": [
+        "Fantasy Land"
+      ],
+      "heroId": "placez-specific-fantasy-land",
+      "companionId": "companion-placez-specific-fantasy-land"
+    },
+    {
+      "name": "Taboo Video",
+      "names": [
+        "Taboo Video"
+      ],
+      "heroId": "placez-specific-taboo-video",
+      "companionId": "companion-placez-specific-taboo-video"
+    },
+    {
+      "name": "Mr. Peeps",
+      "names": [
+        "Mr. Peeps"
+      ],
+      "heroId": "placez-specific-mr-peeps",
+      "companionId": "companion-placez-specific-mr-peeps"
+    },
+    {
+      "name": "FANTASY",
+      "names": [
+        "FANTASY"
+      ],
+      "heroId": "placez-specific-fantasy",
+      "companionId": "companion-placez-specific-fantasy"
+    },
+    {
+      "name": "Inbundance Wealth Management",
+      "names": [
+        "Inbundance Wealth Management"
+      ],
+      "heroId": "placez-specific-inbundance-wealth-management",
+      "companionId": "companion-placez-specific-inbundance-wealth-management"
+    },
+    {
+      "name": "Open Space Dance",
+      "names": [
+        "Open Space Dance"
+      ],
+      "heroId": "placez-specific-open-space-dance",
+      "companionId": "companion-placez-specific-open-space-dance"
+    },
+    {
+      "name": "Echo Theater",
+      "names": [
+        "Echo Theater"
+      ],
+      "heroId": "placez-specific-echo-theater",
+      "companionId": "companion-placez-specific-echo-theater"
+    },
+    {
+      "name": "SymbiOp",
+      "names": [
+        "SymbiOp"
+      ],
+      "heroId": "placez-specific-symbiop",
+      "companionId": "companion-placez-specific-symbiop"
+    },
+    {
+      "name": "Steam Portland",
+      "names": [
+        "Steam Portland"
+      ],
+      "heroId": "placez-specific-steam-portland",
+      "companionId": "companion-placez-specific-steam-portland"
+    },
+    {
+      "name": "Club Privata",
+      "names": [
+        "Club Privata"
+      ],
+      "heroId": "placez-specific-club-privata",
+      "companionId": "companion-placez-specific-club-privata"
+    },
+    {
+      "name": "The Velvet Rope",
+      "names": [
+        "The Velvet Rope"
+      ],
+      "heroId": "placez-specific-the-velvet-rope",
+      "companionId": "companion-placez-specific-the-velvet-rope"
+    },
+    {
+      "name": "Best Coast Barber Co.",
+      "names": [
+        "Best Coast Barber Co."
+      ],
+      "heroId": "placez-specific-best-coast-barber-co",
+      "companionId": "companion-placez-specific-best-coast-barber-co"
+    },
+    {
+      "name": "Tattoos by Les",
+      "names": [
+        "Tattoos by Les"
+      ],
+      "heroId": "placez-specific-tattoos-by-les",
+      "companionId": "companion-placez-specific-tattoos-by-les"
+    },
+    {
+      "name": "Fuzzy Pits Tattoo",
+      "names": [
+        "Fuzzy Pits Tattoo"
+      ],
+      "heroId": "placez-specific-fuzzy-pits-tattoo",
+      "companionId": "companion-placez-specific-fuzzy-pits-tattoo"
+    },
+    {
+      "name": "Birdhouse Tattoo · Noble",
+      "names": [
+        "Birdhouse Tattoo · Noble"
+      ],
+      "heroId": "placez-specific-birdhouse-tattoo-noble",
+      "companionId": "companion-placez-specific-birdhouse-tattoo-noble"
+    },
+    {
+      "name": "Enjoy Co. Hair Studio",
+      "names": [
+        "Enjoy Co. Hair Studio"
+      ],
+      "heroId": "placez-specific-enjoy-co-hair-studio",
+      "companionId": "companion-placez-specific-enjoy-co-hair-studio"
+    },
+    {
+      "name": "Little Wilma’s Hair Salon",
+      "names": [
+        "Little Wilma’s Hair Salon"
+      ],
+      "heroId": "placez-specific-little-wilma-s-hair-salon",
+      "companionId": "companion-placez-specific-little-wilma-s-hair-salon"
+    },
+    {
+      "name": "Everybody’s Bodywork",
+      "names": [
+        "Everybody’s Bodywork"
+      ],
+      "heroId": "placez-specific-everybody-s-bodywork",
+      "companionId": "companion-placez-specific-everybody-s-bodywork"
+    },
+    {
+      "name": "SomaSoul Healing",
+      "names": [
+        "SomaSoul Healing"
+      ],
+      "heroId": "placez-specific-somasoul-healing",
+      "companionId": "companion-placez-specific-somasoul-healing"
+    },
+    {
+      "name": "trans bodycare",
+      "names": [
+        "trans bodycare"
+      ],
+      "heroId": "placez-specific-trans-bodycare",
+      "companionId": "companion-placez-specific-trans-bodycare"
+    },
+    {
+      "name": "Spring Tides Massage",
+      "names": [
+        "Spring Tides Massage"
+      ],
+      "heroId": "placez-specific-spring-tides-massage",
+      "companionId": "companion-placez-specific-spring-tides-massage"
+    },
+    {
+      "name": "StephanieMadeIt",
+      "names": [
+        "StephanieMadeIt"
+      ],
+      "heroId": "placez-specific-stephaniemadeit",
+      "companionId": "companion-placez-specific-stephaniemadeit"
+    },
+    {
+      "name": "Courtney Ahn Design",
+      "names": [
+        "Courtney Ahn Design"
+      ],
+      "heroId": "placez-specific-courtney-ahn-design",
+      "companionId": "companion-placez-specific-courtney-ahn-design"
+    },
+    {
+      "name": "NerdyKeppie",
+      "names": [
+        "NerdyKeppie"
+      ],
+      "heroId": "placez-specific-nerdykeppie",
+      "companionId": "companion-placez-specific-nerdykeppie"
+    },
+    {
+      "name": "Sonny’s House of Tattoos and Treasures",
+      "names": [
+        "Sonny’s House of Tattoos and Treasures"
+      ],
+      "heroId": "placez-specific-sonny-s-house-of-tattoos-and-treasures",
+      "companionId": "companion-placez-specific-sonny-s-house-of-tattoos-and-treasures"
+    },
+    {
+      "name": "Ritual Arts",
+      "names": [
+        "Ritual Arts"
+      ],
+      "heroId": "placez-specific-ritual-arts",
+      "companionId": "companion-placez-specific-ritual-arts"
+    },
+    {
+      "name": "Robot Piercing and Tattoo",
+      "names": [
+        "Robot Piercing and Tattoo"
+      ],
+      "heroId": "placez-specific-robot-piercing-and-tattoo",
+      "companionId": "companion-placez-specific-robot-piercing-and-tattoo"
+    },
+    {
+      "name": "Greenhouse Hair Collective",
+      "names": [
+        "Greenhouse Hair Collective"
+      ],
+      "heroId": "placez-specific-greenhouse-hair-collective",
+      "companionId": "companion-placez-specific-greenhouse-hair-collective"
+    },
+    {
+      "name": "Limelight Salon",
+      "names": [
+        "Limelight Salon"
+      ],
+      "heroId": "placez-specific-limelight-salon",
+      "companionId": "companion-placez-specific-limelight-salon"
+    },
+    {
+      "name": "Love Salon PDX",
+      "names": [
+        "Love Salon PDX"
+      ],
+      "heroId": "placez-specific-love-salon-pdx",
+      "companionId": "companion-placez-specific-love-salon-pdx"
+    },
+    {
+      "name": "Thrive Therapeutic Massage",
+      "names": [
+        "Thrive Therapeutic Massage"
+      ],
+      "heroId": "placez-specific-thrive-therapeutic-massage",
+      "companionId": "companion-placez-specific-thrive-therapeutic-massage"
+    },
+    {
+      "name": "Wayward Massage Therapist",
+      "names": [
+        "Wayward Massage Therapist"
+      ],
+      "heroId": "placez-specific-wayward-massage-therapist",
+      "companionId": "companion-placez-specific-wayward-massage-therapist"
+    },
+    {
+      "name": "Rest and Ritual",
+      "names": [
+        "Rest and Ritual"
+      ],
+      "heroId": "placez-specific-rest-and-ritual",
+      "companionId": "companion-placez-specific-rest-and-ritual"
+    },
+    {
+      "name": "Unlock Collective",
+      "names": [
+        "Unlock Collective"
+      ],
+      "heroId": "placez-specific-unlock-collective",
+      "companionId": "companion-placez-specific-unlock-collective"
+    },
+    {
+      "name": "DoGoodBiz Studio",
+      "names": [
+        "DoGoodBiz Studio"
+      ],
+      "heroId": "placez-specific-dogoodbiz-studio",
+      "companionId": "companion-placez-specific-dogoodbiz-studio"
+    },
+    {
+      "name": "Rainbow Forge",
+      "names": [
+        "Rainbow Forge"
+      ],
+      "heroId": "placez-specific-rainbow-forge",
+      "companionId": "companion-placez-specific-rainbow-forge"
+    },
+    {
+      "name": "Gay Thrive",
+      "names": [
+        "Gay Thrive"
+      ],
+      "heroId": "placez-specific-gay-thrive",
+      "companionId": "companion-placez-specific-gay-thrive"
+    },
+    {
+      "name": "Smonday Studios",
+      "names": [
+        "Smonday Studios"
+      ],
+      "heroId": "placez-specific-smonday-studios",
+      "companionId": "companion-placez-specific-smonday-studios"
+    },
+    {
+      "name": "Studio Anansi",
+      "names": [
+        "Studio Anansi"
+      ],
+      "heroId": "placez-specific-studio-anansi",
+      "companionId": "companion-placez-specific-studio-anansi"
+    },
+    {
+      "name": "Max Burns UX",
+      "names": [
+        "Max Burns UX"
+      ],
+      "heroId": "placez-specific-max-burns-ux",
+      "companionId": "companion-placez-specific-max-burns-ux"
+    },
+    {
+      "name": "Clau Studio",
+      "names": [
+        "Clau Studio"
+      ],
+      "heroId": "placez-specific-clau-studio",
+      "companionId": "companion-placez-specific-clau-studio"
+    },
+    {
+      "name": "Plush Tattoo & Intuitive Arts",
+      "names": [
+        "Plush Tattoo & Intuitive Arts"
+      ],
+      "heroId": "placez-specific-plush-tattoo-intuitive-arts",
+      "companionId": "companion-placez-specific-plush-tattoo-intuitive-arts"
+    },
+    {
+      "name": "Plush Tattoo",
+      "names": [
+        "Plush Tattoo"
+      ],
+      "heroId": "placez-specific-plush-tattoo",
+      "companionId": "companion-placez-specific-plush-tattoo"
+    },
+    {
+      "name": "Fruit",
+      "names": [
+        "Fruit"
+      ],
+      "heroId": "placez-specific-fruit",
+      "companionId": "companion-placez-specific-fruit"
+    },
+    {
+      "name": "Fruit Beauty",
+      "names": [
+        "Fruit Beauty"
+      ],
+      "heroId": "placez-specific-fruit-beauty",
+      "companionId": "companion-placez-specific-fruit-beauty"
+    },
+    {
+      "name": "Jenson Sarr",
+      "names": [
+        "Jenson Sarr"
+      ],
+      "heroId": "placez-specific-jenson-sarr",
+      "companionId": "companion-placez-specific-jenson-sarr"
+    },
+    {
+      "name": "Jenson Sarr — Living Room Realty",
+      "names": [
+        "Jenson Sarr — Living Room Realty"
+      ],
+      "heroId": "placez-specific-jenson-sarr-living-room-realty",
+      "companionId": "companion-placez-specific-jenson-sarr-living-room-realty"
+    },
+    {
+      "name": "Jamis Minnis",
+      "names": [
+        "Jamis Minnis"
+      ],
+      "heroId": "placez-specific-jamis-minnis",
+      "companionId": "companion-placez-specific-jamis-minnis"
+    },
+    {
+      "name": "Jamis Minnis — Living Room Realty",
+      "names": [
+        "Jamis Minnis — Living Room Realty"
+      ],
+      "heroId": "placez-specific-jamis-minnis-living-room-realty",
+      "companionId": "companion-placez-specific-jamis-minnis-living-room-realty"
+    },
+    {
+      "name": "Tyler Marsing",
+      "names": [
+        "Tyler Marsing"
+      ],
+      "heroId": "placez-specific-tyler-marsing",
+      "companionId": "companion-placez-specific-tyler-marsing"
+    },
+    {
+      "name": "Bonnie Roseman / Roseman Team",
+      "names": [
+        "Bonnie Roseman / Roseman Team"
+      ],
+      "heroId": "placez-specific-bonnie-roseman-roseman-team",
+      "companionId": "companion-placez-specific-bonnie-roseman-roseman-team"
+    },
+    {
+      "name": "Bonnie Roseman",
+      "names": [
+        "Bonnie Roseman"
+      ],
+      "heroId": "placez-specific-bonnie-roseman",
+      "companionId": "companion-placez-specific-bonnie-roseman"
+    },
+    {
+      "name": "Blake & Alder",
+      "names": [
+        "Blake & Alder"
+      ],
+      "heroId": "placez-specific-blake-alder",
+      "companionId": "companion-placez-specific-blake-alder"
+    },
+    {
+      "name": "Blake & Alder Property Management",
+      "names": [
+        "Blake & Alder Property Management"
+      ],
+      "heroId": "placez-specific-blake-alder-property-management",
+      "companionId": "companion-placez-specific-blake-alder-property-management"
+    },
+    {
+      "name": "Reconstructed Wellness",
+      "names": [
+        "Reconstructed Wellness"
+      ],
+      "heroId": "placez-specific-reconstructed-wellness",
+      "companionId": "companion-placez-specific-reconstructed-wellness"
+    },
+    {
+      "name": "Bywater Health",
+      "names": [
+        "Bywater Health"
+      ],
+      "heroId": "placez-specific-bywater-health",
+      "companionId": "companion-placez-specific-bywater-health"
+    },
+    {
+      "name": "Black Hole Body Piercing & Tattoo",
+      "names": [
+        "Black Hole Body Piercing & Tattoo"
+      ],
+      "heroId": "placez-specific-black-hole-body-piercing-tattoo",
+      "companionId": "companion-placez-specific-black-hole-body-piercing-tattoo"
+    },
+    {
+      "name": "Black Hole Tattoo and Piercing",
+      "names": [
+        "Black Hole Tattoo and Piercing"
+      ],
+      "heroId": "placez-specific-black-hole-tattoo-and-piercing",
+      "companionId": "companion-placez-specific-black-hole-tattoo-and-piercing"
+    },
+    {
+      "name": "Cockeye Kink",
+      "names": [
+        "Cockeye Kink"
+      ],
+      "heroId": "placez-specific-cockeye-kink",
+      "companionId": "companion-placez-specific-cockeye-kink"
+    }
+  ],
   "networkSets": {
     "a": [
       "network-stack-a-back",
@@ -315,7 +1213,7 @@
     }
   },
   "rules": {
-    "source": "Library only. No generated, procedural, scraped or unregistered substitutions.",
+    "source": "Library first. If a place-specific motif is missing after searching names, aliases and location, create one in the established punk/Xerox and nodes-and-wire style, research recognizable details, and register it with a stable ID and Design API record before website use. This standing creation exception needs no additional permission request. No unrelated replacements, scraped substitutes or runtime-generated fallbacks.",
     "background": "Every card design includes a registered nodes/network background and its mapped category companion behind content.",
     "libraryMotion": "Static still examples with motion instructions only.",
     "orientation": "All three network layers share one orientation. Consecutive cards alternate; internal layers never flip independently.",
@@ -361,7 +1259,7 @@
       "note": "The existing paper house is selected. A separate approved punk FOR RENT sign was not found in the catalog or production assets; no substitute or new artwork was invented."
     }
   ],
-  "checksum": "a3536289da7e6337878f7c16e19ac6cb549ab78aafd70240867ca18f9e3df5f6",
+  "checksum": "01ef9b17f141310d68436f03bff86b96357dfe93545ac4a97369d555bd0a4c45",
   "assets": {
     "hero-placez-bar": {
       "id": "hero-placez-bar",
@@ -6465,61 +7363,61 @@
     },
     "network-stack-a-back": {
       "id": "network-stack-a-back",
-      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-back/file?v=d5fbc0ebfd44dc17",
-      "sha256": "d5fbc0ebfd44dc17003ee68fc0b6c1fb938510544ebd0cbff29358d4fdc5ea9c",
-      "width": 1280,
-      "height": 1066,
-      "alpha": false,
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-back/file?v=5082e3ebc2fa137f",
+      "sha256": "5082e3ebc2fa137f5523de7d872311bf9bbb31cc6859ed9731d5d818bea28f65",
+      "width": 1375,
+      "height": 1144,
+      "alpha": true,
       "kind": "network-layer",
       "room": "shared"
     },
     "network-stack-a-middle": {
       "id": "network-stack-a-middle",
-      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-middle/file?v=4dff7493bebf2630",
-      "sha256": "4dff7493bebf26302fff0d58f7d08cbe464e743276c9d5ab68488056dac3b4c7",
-      "width": 1280,
-      "height": 1066,
-      "alpha": false,
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-middle/file?v=2b1b733af4af5fc1",
+      "sha256": "2b1b733af4af5fc1391640f6b76452ac8ab3b85b1fead960dc399ddc656e5c45",
+      "width": 1375,
+      "height": 1144,
+      "alpha": true,
       "kind": "network-layer",
       "room": "shared"
     },
     "network-stack-a-front": {
       "id": "network-stack-a-front",
-      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-front/file?v=b8be1425f2751f31",
-      "sha256": "b8be1425f2751f31de537978d66e69fb47429dadbc2a6d54d99983dda48fff8c",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-front/file?v=ad6e074064505ed9",
+      "sha256": "ad6e074064505ed97958677c370df9c56dd877293d096d0def76366a58afed14",
       "width": 1375,
       "height": 1144,
-      "alpha": false,
+      "alpha": true,
       "kind": "network-layer",
       "room": "shared"
     },
     "network-stack-b-back": {
       "id": "network-stack-b-back",
-      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-back/file?v=50aaadb5edc5a992",
-      "sha256": "50aaadb5edc5a99282789bd2073cd4a464a9c2c5204c99c904660db5d4800caa",
-      "width": 1280,
-      "height": 1066,
-      "alpha": false,
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-back/file?v=4883968a6b712c26",
+      "sha256": "4883968a6b712c262a32c1f2ec9fc4d8a3689ca90db559782a8a522d439cf0a7",
+      "width": 1375,
+      "height": 1144,
+      "alpha": true,
       "kind": "network-layer",
       "room": "shared"
     },
     "network-stack-b-middle": {
       "id": "network-stack-b-middle",
-      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-middle/file?v=989d2f05aae4bf49",
-      "sha256": "989d2f05aae4bf495bd5394ea8ed0ff1f2c7a2ad5e1f795e151de9a4ba5ea427",
-      "width": 1280,
-      "height": 1066,
-      "alpha": false,
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-middle/file?v=607de33520a12f8a",
+      "sha256": "607de33520a12f8a6f9f517997014517f4b4fdb3d3bbbd25afeb7bb9a544ba04",
+      "width": 1375,
+      "height": 1144,
+      "alpha": true,
       "kind": "network-layer",
       "room": "shared"
     },
     "network-stack-b-front": {
       "id": "network-stack-b-front",
-      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-front/file?v=320c97c0abd668b6",
-      "sha256": "320c97c0abd668b6d26f94d8265dd6f5d2c84276fe1a6ecae0fa853da11e6707",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-front/file?v=fe86cc958499f8fa",
+      "sha256": "fe86cc958499f8fa9de96f9013be708301953033b1fc66e9bffd2512967df51f",
       "width": 1375,
       "height": 1144,
-      "alpha": false,
+      "alpha": true,
       "kind": "network-layer",
       "room": "shared"
     },
@@ -6772,6 +7670,2246 @@
       "alpha": true,
       "kind": "companion-motif",
       "room": "boardz"
+    },
+    "placez-specific-badlands": {
+      "id": "placez-specific-badlands",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-badlands/file?v=e79c73be19610952",
+      "sha256": "e79c73be1961095222c76b57f943b4ad7b8f29262e962f7cee55ea6bfd5bdb0f",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-badlands": {
+      "id": "companion-placez-specific-badlands",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-badlands/file?v=8247d58aadc27f43",
+      "sha256": "8247d58aadc27f4394c2f0ddac589280da7a55fb5500ec30312e78698b3fff50",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-camp-bar-pdx": {
+      "id": "placez-specific-camp-bar-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-camp-bar-pdx/file?v=be3576d83f730c6a",
+      "sha256": "be3576d83f730c6a5d83e6d492a71ebcde516b65ff4f7a9b6a6a8f57ac048a5e",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-camp-bar-pdx": {
+      "id": "companion-placez-specific-camp-bar-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-camp-bar-pdx/file?v=42e522cd80560634",
+      "sha256": "42e522cd805606348c96614b159de782afe07a50011fd79ae7e0f54d9d5926b9",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-cc-slaughters": {
+      "id": "placez-specific-cc-slaughters",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-cc-slaughters/file?v=d08d3dab6064167b",
+      "sha256": "d08d3dab6064167b0969fa701af34c2ac433f209b493f58da030764e47173ea9",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-cc-slaughters": {
+      "id": "companion-placez-specific-cc-slaughters",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-cc-slaughters/file?v=8530b2ed78c8b17a",
+      "sha256": "8530b2ed78c8b17a133fd80d6e480896289b5a1563a65a68c7d4019a1d6ca06f",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-darcelle-xv-showplace": {
+      "id": "placez-specific-darcelle-xv-showplace",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-darcelle-xv-showplace/file?v=c00b2dd4a1a44193",
+      "sha256": "c00b2dd4a1a441933ef82abfeca57256286001e224fc7487d80415ed88f3346e",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-darcelle-xv-showplace": {
+      "id": "companion-placez-specific-darcelle-xv-showplace",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-darcelle-xv-showplace/file?v=92320ef7d7b127de",
+      "sha256": "92320ef7d7b127de155f10026e6af502daf4f2a7248a744de2a3a0d3647d6f7b",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-stag-pdx": {
+      "id": "placez-specific-stag-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-stag-pdx/file?v=08461e113c3fbdb5",
+      "sha256": "08461e113c3fbdb523f8f576dc34fe5f3e191f0254d663fda0ea2a3bb974ab7e",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-stag-pdx": {
+      "id": "companion-placez-specific-stag-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-stag-pdx/file?v=44717ecf6b6dca9e",
+      "sha256": "44717ecf6b6dca9e02a33743047f9c24c3e342ded60878a5b1420c8e7478cf4b",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-eagle-portland": {
+      "id": "placez-specific-eagle-portland",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-eagle-portland/file?v=64cc03191f19efcc",
+      "sha256": "64cc03191f19efcca7c9898854ae81c2f2d57f96471f2af49f11709c7e877db8",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-eagle-portland": {
+      "id": "companion-placez-specific-eagle-portland",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-eagle-portland/file?v=493c4431bca38262",
+      "sha256": "493c4431bca38262b1615f0c2b4901284ea6d9f4c63829029dcb043bd8ec9f28",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-the-nest-lounge": {
+      "id": "placez-specific-the-nest-lounge",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-the-nest-lounge/file?v=eb0877c3665e46ab",
+      "sha256": "eb0877c3665e46ab2e19a8e31266ca1aa511d4f8deea75062b99670cefc22ef9",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-the-nest-lounge": {
+      "id": "companion-placez-specific-the-nest-lounge",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-the-nest-lounge/file?v=a9c39c29b277e485",
+      "sha256": "a9c39c29b277e4852473f5b7f44561c265e5593e0855e61efbf43acff184e19f",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-silverado": {
+      "id": "placez-specific-silverado",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-silverado/file?v=bc78a9d098c154cf",
+      "sha256": "bc78a9d098c154cfc4136a666bb815eabd311d192f6595b261c9a151c8aeefa6",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-silverado": {
+      "id": "companion-placez-specific-silverado",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-silverado/file?v=fda4fa97681df706",
+      "sha256": "fda4fa97681df706c25f43238d2988f872720d529dc0ab59e019e9632855f397",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-kann": {
+      "id": "placez-specific-kann",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-kann/file?v=61ceb53ac70bbb20",
+      "sha256": "61ceb53ac70bbb201d68ca223808a68dfb1f660150fee17b1765687756abbd1d",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-kann": {
+      "id": "companion-placez-specific-kann",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-kann/file?v=ead1fbb63d6b86d6",
+      "sha256": "ead1fbb63d6b86d61a8c72ed444a6bbc6573bdad672f7bfc4e4506df8e086dda",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-the-sports-bra": {
+      "id": "placez-specific-the-sports-bra",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-the-sports-bra/file?v=dc0339966f8e7c5d",
+      "sha256": "dc0339966f8e7c5d805538e254a5b550a6ca2269e86f7c8a9e87f6ecaf8ec511",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-the-sports-bra": {
+      "id": "companion-placez-specific-the-sports-bra",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-the-sports-bra/file?v=005beac0b5748617",
+      "sha256": "005beac0b574861732b0c252ce335ba05b533bb6c19788600118aa91f8403016",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-mis-tacones": {
+      "id": "placez-specific-mis-tacones",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-mis-tacones/file?v=9aa604fdcd93e0a3",
+      "sha256": "9aa604fdcd93e0a30d7d6a386ad6fa0c63f8dde1be938832dc4548bcb79fe45d",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-mis-tacones": {
+      "id": "companion-placez-specific-mis-tacones",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-mis-tacones/file?v=a31274e787a0b464",
+      "sha256": "a31274e787a0b464a42578d2011e47d145268bc76498814541691cde56c48c8f",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-taqueria-los-punales": {
+      "id": "placez-specific-taqueria-los-punales",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-taqueria-los-punales/file?v=673e6e1f590cd075",
+      "sha256": "673e6e1f590cd0754cccbbe326d9499d8b0db0431f8f42e1447c3ce2f9159d6c",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-taqueria-los-punales": {
+      "id": "companion-placez-specific-taqueria-los-punales",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-taqueria-los-punales/file?v=346c8dbf13880a9d",
+      "sha256": "346c8dbf13880a9d767f12e0c5d5c8e9b72ff31ba5fefd503593dee7f0ee3f91",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-friendship-kitchen": {
+      "id": "placez-specific-friendship-kitchen",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-friendship-kitchen/file?v=0ea9da7c26578113",
+      "sha256": "0ea9da7c26578113335e4cd43807faff10605a94719d59381a4d4b99c873a5db",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-friendship-kitchen": {
+      "id": "companion-placez-specific-friendship-kitchen",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-friendship-kitchen/file?v=c07e430691731a71",
+      "sha256": "c07e430691731a71ca7a4740483fe11056a406673058dddabfc5b17bc6f35c7c",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-either-or": {
+      "id": "placez-specific-either-or",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-either-or/file?v=2915347535c2db19",
+      "sha256": "2915347535c2db19b4a456ff5ee49a78fb6fb5e908510f7df2b3a58f06f7b6a5",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-either-or": {
+      "id": "companion-placez-specific-either-or",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-either-or/file?v=b0abd4b43a084982",
+      "sha256": "b0abd4b43a084982f0deb9b782e0c000e92bcd99ee5d5a9dcf598d511b045e1c",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-tin-shed-garden-cafe": {
+      "id": "placez-specific-tin-shed-garden-cafe",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-tin-shed-garden-cafe/file?v=a9abff52e857a24a",
+      "sha256": "a9abff52e857a24ae2f45e3e2e5e9cd4d71c6d76dff9a65781e7e9cbaff7fc45",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-tin-shed-garden-cafe": {
+      "id": "companion-placez-specific-tin-shed-garden-cafe",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-tin-shed-garden-cafe/file?v=5f713ea104eb47ac",
+      "sha256": "5f713ea104eb47aca99e07c36c9ecb14b3d196015a65803e47c6e4818993aedb",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-speed-o-cappuccino": {
+      "id": "placez-specific-speed-o-cappuccino",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-speed-o-cappuccino/file?v=494c4d9886e8827a",
+      "sha256": "494c4d9886e8827a7c94ba672ff38ff5298f9fc9550dd5e6c52073f04cf6a2b1",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-speed-o-cappuccino": {
+      "id": "companion-placez-specific-speed-o-cappuccino",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-speed-o-cappuccino/file?v=ba324098b2dc3bc8",
+      "sha256": "ba324098b2dc3bc80e65aa3a44da720ae138f8820ffdede2758157355566790a",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-coffee-beer": {
+      "id": "placez-specific-coffee-beer",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-coffee-beer/file?v=0780f075d398b9cf",
+      "sha256": "0780f075d398b9cf6f8ca604e14a4685d680051a698707bf8395ec8016fa21d4",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-coffee-beer": {
+      "id": "companion-placez-specific-coffee-beer",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-coffee-beer/file?v=2aa22c8e2e072f21",
+      "sha256": "2aa22c8e2e072f21eec12b8d6821387580431f14ced1cbcabc732dffc4888703",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-living-room-wines": {
+      "id": "placez-specific-living-room-wines",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-living-room-wines/file?v=830930c64ae9b108",
+      "sha256": "830930c64ae9b10894aa6e90008a919255b64e6c2e049186bdd6e22874abb815",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-living-room-wines": {
+      "id": "companion-placez-specific-living-room-wines",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-living-room-wines/file?v=ea147752ba52f935",
+      "sha256": "ea147752ba52f93572d42ba1a7b24803716ecc776396a491756624690bf1fefb",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-stem-wine-bar": {
+      "id": "placez-specific-stem-wine-bar",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-stem-wine-bar/file?v=820bf4c05fac80ad",
+      "sha256": "820bf4c05fac80ad493e85f6961851c8491b4ef675d4a9c4922a0c85cdd1fba2",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-stem-wine-bar": {
+      "id": "companion-placez-specific-stem-wine-bar",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-stem-wine-bar/file?v=cb16a3e2c428937d",
+      "sha256": "cb16a3e2c428937dd604cb54532b06fc5509e62eeba3797474c10791d2d51de5",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-roots-crowns": {
+      "id": "placez-specific-roots-crowns",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-roots-crowns/file?v=37b5d0ffb527636e",
+      "sha256": "37b5d0ffb527636e4b10d5ffbdfb092df7b9cc941b8d28ffb9fd61be1bb14333",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-roots-crowns": {
+      "id": "companion-placez-specific-roots-crowns",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-roots-crowns/file?v=e1c7a3660ad169d7",
+      "sha256": "e1c7a3660ad169d7e1384586d88e7bab0dea7557a0c1d5d0b6058900827d8fa0",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-arium-botanicals": {
+      "id": "placez-specific-arium-botanicals",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-arium-botanicals/file?v=47340597c2fbd601",
+      "sha256": "47340597c2fbd601dd0632c3da540da0363a67842cf453a14fda6b549c077384",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-arium-botanicals": {
+      "id": "companion-placez-specific-arium-botanicals",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-arium-botanicals/file?v=71e1072f0a696651",
+      "sha256": "71e1072f0a696651dbded443f8cb6efa017149ce1a43ea4944bcb908f5d9af7b",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-pizza-thief": {
+      "id": "placez-specific-pizza-thief",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-pizza-thief/file?v=66ef1f53d7cfef41",
+      "sha256": "66ef1f53d7cfef4139fecde7d8c102496baab6b0d8cfe805dd90bb30ae2a00fb",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-pizza-thief": {
+      "id": "companion-placez-specific-pizza-thief",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-pizza-thief/file?v=97271230b03c0a9b",
+      "sha256": "97271230b03c0a9b691b6c4e698843733a45efdd331ef89c522d0ba82ea15704",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-peacock-pdx": {
+      "id": "placez-specific-peacock-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-peacock-pdx/file?v=af44494b6f2e77b4",
+      "sha256": "af44494b6f2e77b41c19cfa3453a68dfdb9891f5f8872e09a5fd2d1f41aff910",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-peacock-pdx": {
+      "id": "companion-placez-specific-peacock-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-peacock-pdx/file?v=0ac195acf628290f",
+      "sha256": "0ac195acf628290fff8ffc1f93339bcbc53be101c0d082e7fcfac94d4fdde99f",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-scandals-east": {
+      "id": "placez-specific-scandals-east",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-scandals-east/file?v=de92d38d2862ad98",
+      "sha256": "de92d38d2862ad98db859ccef85987dfd211fd099aff165f8d6b29192a682a7e",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-scandals-east": {
+      "id": "companion-placez-specific-scandals-east",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-scandals-east/file?v=3cb2cef86e5ab777",
+      "sha256": "3cb2cef86e5ab77778a4fa09f429d9ca6c310129bee334cb84f13fc5bc720fd6",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-honeyed-words": {
+      "id": "placez-specific-honeyed-words",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-honeyed-words/file?v=c4ebb7e03dedbdaa",
+      "sha256": "c4ebb7e03dedbdaaeca540b284cfd1d34faa0d9621006b3050d82c2c2ffa48d2",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-honeyed-words": {
+      "id": "companion-placez-specific-honeyed-words",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-honeyed-words/file?v=fef0cf460498c2cc",
+      "sha256": "fef0cf460498c2cc5cc192ff43dc616752a37a60807f840aff29d161b865fd33",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-ring-ding-ding": {
+      "id": "placez-specific-ring-ding-ding",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-ring-ding-ding/file?v=cb47aabcb00280a3",
+      "sha256": "cb47aabcb00280a32fb741941303bc46af59b52b658d57b4d6f0ae2dee397584",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-ring-ding-ding": {
+      "id": "companion-placez-specific-ring-ding-ding",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-ring-ding-ding/file?v=d3c29338fc700da9",
+      "sha256": "d3c29338fc700da9a3ebe55eb2213f947533ffc1eb4492f0e74b1fed0a39edbf",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-holocene": {
+      "id": "placez-specific-holocene",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-holocene/file?v=7fbdd716dea6f3d4",
+      "sha256": "7fbdd716dea6f3d48ec74889f31268b9d2c49c542230c3948698b38fe7b849af",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-holocene": {
+      "id": "companion-placez-specific-holocene",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-holocene/file?v=7591692ec09fa46a",
+      "sha256": "7591692ec09fa46a2000b3bce1c7e8666ac4c31dc3728dd73669f3e727be1f22",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-alberta-rose-theatre": {
+      "id": "placez-specific-alberta-rose-theatre",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-alberta-rose-theatre/file?v=59bde9a10e2aabf1",
+      "sha256": "59bde9a10e2aabf128b10912c5336ca256f37f0d1636a699c44204a4902834ec",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-alberta-rose-theatre": {
+      "id": "companion-placez-specific-alberta-rose-theatre",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-alberta-rose-theatre/file?v=8af8bd835c5e451b",
+      "sha256": "8af8bd835c5e451b6f88abf4e7456335c3fbd5b993351fbd80aa174841254a9d",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-jackie-s": {
+      "id": "placez-specific-jackie-s",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-jackie-s/file?v=8e3c3fd626567885",
+      "sha256": "8e3c3fd62656788583d8ff075990061173b2ac712e9456e231a78d0a30d30b00",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-jackie-s": {
+      "id": "companion-placez-specific-jackie-s",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-jackie-s/file?v=39a5310a9b2d3c20",
+      "sha256": "39a5310a9b2d3c20349e11e9a23a636d4a3e3e7182226e9e08dbc8034038a854",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-sanctuary-club": {
+      "id": "placez-specific-sanctuary-club",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-sanctuary-club/file?v=fc027a9fafb192f8",
+      "sha256": "fc027a9fafb192f873dfd59663b07c7de223472eba935ae3994a8a926500dfa0",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-sanctuary-club": {
+      "id": "companion-placez-specific-sanctuary-club",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-sanctuary-club/file?v=75c4b31465a5e74c",
+      "sha256": "75c4b31465a5e74c0c8ac57b89ca468604df4ae9dc878736685a7db353ae01b3",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-seagrape-apothecary": {
+      "id": "placez-specific-seagrape-apothecary",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-seagrape-apothecary/file?v=fefc55a77c5b7e18",
+      "sha256": "fefc55a77c5b7e18f15da22e34c5290ed114b53eb5e6ee2481520f0008357ffa",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-seagrape-apothecary": {
+      "id": "companion-placez-specific-seagrape-apothecary",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-seagrape-apothecary/file?v=c35b63c92d5b6844",
+      "sha256": "c35b63c92d5b6844b7309b5407a9304c954f67d5e5b93fe3661a9cb76d68b755",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-realm-pdx": {
+      "id": "placez-specific-realm-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-realm-pdx/file?v=0ac9852968e47553",
+      "sha256": "0ac9852968e47553a31c66aa93fcd9372f79ca54c555d16e8f69deb63bd928c1",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-realm-pdx": {
+      "id": "companion-placez-specific-realm-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-realm-pdx/file?v=0467fdb8a754c31b",
+      "sha256": "0467fdb8a754c31bf2fe8d7c7aab45810af9a01db765ed77edb6d66f0dc8a4aa",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-nova-pdx": {
+      "id": "placez-specific-nova-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-nova-pdx/file?v=2a0db6d5b015d925",
+      "sha256": "2a0db6d5b015d9259d034070fd7ffe8f9dfa0c865f1badd1ee1c58a576056586",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-nova-pdx": {
+      "id": "companion-placez-specific-nova-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-nova-pdx/file?v=a0aa57935e86b93b",
+      "sha256": "a0aa57935e86b93be265da0e9011ae54c207d543e7a610e53cc2aa8ead73449d",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-star-theater": {
+      "id": "placez-specific-star-theater",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-star-theater/file?v=b0d25fa1af08cd54",
+      "sha256": "b0d25fa1af08cd541d29124fb9058de070c21a520ba9925b63617e4c8cc0a81d",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-star-theater": {
+      "id": "companion-placez-specific-star-theater",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-star-theater/file?v=caf273742b1bc2aa",
+      "sha256": "caf273742b1bc2aa92c617ab78279a60de5e519854ff89878e9eee1068c8fbd2",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-the-get-down": {
+      "id": "placez-specific-the-get-down",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-the-get-down/file?v=9601b16c47e34383",
+      "sha256": "9601b16c47e343832d49e1d2b7ea64e41262aaec6fa2831dc9683670e6ff0c64",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-the-get-down": {
+      "id": "companion-placez-specific-the-get-down",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-the-get-down/file?v=9d93a73ad71b3487",
+      "sha256": "9d93a73ad71b3487d6a1aaa120c231733ab3ed07a17756761ba426b23586c6b1",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-happylucky-no-1": {
+      "id": "placez-specific-happylucky-no-1",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-happylucky-no-1/file?v=314a4f63fc176230",
+      "sha256": "314a4f63fc17623072fa5b7f48e3a88260c991f352ec2ac0c97c2fed4b4471c7",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-happylucky-no-1": {
+      "id": "companion-placez-specific-happylucky-no-1",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-happylucky-no-1/file?v=2411f766f0d23aa1",
+      "sha256": "2411f766f0d23aa1efad539abce075bff94ea2aef22e030718b039519afa2d33",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-escape-bar-grill": {
+      "id": "placez-specific-escape-bar-grill",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-escape-bar-grill/file?v=c8b7333c296b6dc3",
+      "sha256": "c8b7333c296b6dc3bb2b39693414ac1f7a7a10cbc1bc4ae4a069620c807dc75c",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-escape-bar-grill": {
+      "id": "companion-placez-specific-escape-bar-grill",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-escape-bar-grill/file?v=1a169bd8851864c1",
+      "sha256": "1a169bd8851864c18f5ff5547adbbae168f6c8ba259d63084a954e1fc75dd341",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-the-lodge-bar-and-grill": {
+      "id": "placez-specific-the-lodge-bar-and-grill",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-the-lodge-bar-and-grill/file?v=8f8fa18b01d20ae0",
+      "sha256": "8f8fa18b01d20ae06d585391f8c48d7ef64b18b882387bf86bc8693a1fe3b309",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-the-lodge-bar-and-grill": {
+      "id": "companion-placez-specific-the-lodge-bar-and-grill",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-the-lodge-bar-and-grill/file?v=1eb39a58f58253dc",
+      "sha256": "1eb39a58f58253dc8540ac7f4ea913fc9086636a6bbd5fc9446502ea19bbf2bb",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-underu4men": {
+      "id": "placez-specific-underu4men",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-underu4men/file?v=ff34a6a07846d96f",
+      "sha256": "ff34a6a07846d96f0e65c589045ea54e1358aa5e17f436b8d5ad4f80c78652d2",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-underu4men": {
+      "id": "companion-placez-specific-underu4men",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-underu4men/file?v=f547ecacd7833fd0",
+      "sha256": "f547ecacd7833fd0bcd0e1155791bdec75903a7c5902e05f228aae1dbcd262b1",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-the-meet-rack-at-darkroom": {
+      "id": "placez-specific-the-meet-rack-at-darkroom",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-the-meet-rack-at-darkroom/file?v=db0086a42706db16",
+      "sha256": "db0086a42706db16eeab3ba0105fc0140e0678bbd6454598afd787491f4e64f3",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-the-meet-rack-at-darkroom": {
+      "id": "companion-placez-specific-the-meet-rack-at-darkroom",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-the-meet-rack-at-darkroom/file?v=5da01a85cf57a8ab",
+      "sha256": "5da01a85cf57a8ab7cc73d9e331d69402e4483814772c28611bd9016906a90d1",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-hawks-pdx": {
+      "id": "placez-specific-hawks-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-hawks-pdx/file?v=879a094962b7e7eb",
+      "sha256": "879a094962b7e7eb035f7414f4f7ae8967a62a47c4c4e76dc90433c13997ee5a",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-hawks-pdx": {
+      "id": "companion-placez-specific-hawks-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-hawks-pdx/file?v=495970182cd85f5f",
+      "sha256": "495970182cd85f5fed62f7048efd50e7238065152f59e7f5e142244b090095df",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-bowery-bagels": {
+      "id": "placez-specific-bowery-bagels",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-bowery-bagels/file?v=4d31afb47e913545",
+      "sha256": "4d31afb47e9135453ae7c72f452c9a5826eed741a4b8c0aacaece331da8c194f",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-bowery-bagels": {
+      "id": "companion-placez-specific-bowery-bagels",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-bowery-bagels/file?v=75de893771541994",
+      "sha256": "75de893771541994f4e76245c0e858c78bbc2de6f51232bde6721f94e4bc319d",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-process": {
+      "id": "placez-specific-process",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-process/file?v=c0942c830459eb51",
+      "sha256": "c0942c830459eb51ed18007fb6cdca19dda92567311fc3b95875bce2ec11f3c0",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-process": {
+      "id": "companion-placez-specific-process",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-process/file?v=3f3d0eda9faab45e",
+      "sha256": "3f3d0eda9faab45e271e00c0e77c22331c7e8d56a14c303493df90429aeb7015",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-the-automatic-bar": {
+      "id": "placez-specific-the-automatic-bar",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-the-automatic-bar/file?v=4955606afb4eb0e0",
+      "sha256": "4955606afb4eb0e041d30e8269d83ec319a7bbb00d18af98927a12ae8df0f65a",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-the-automatic-bar": {
+      "id": "companion-placez-specific-the-automatic-bar",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-the-automatic-bar/file?v=2835571fb619edb9",
+      "sha256": "2835571fb619edb9a0f31d9980d46e8ec71b876675d1a0c454eb0697a78f69bd",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-montavilla-station": {
+      "id": "placez-specific-montavilla-station",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-montavilla-station/file?v=fa5989c46c6e6c22",
+      "sha256": "fa5989c46c6e6c227220c671b37e377fa86c3c78c653f436c90a07da05e5bdcf",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-montavilla-station": {
+      "id": "companion-placez-specific-montavilla-station",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-montavilla-station/file?v=b8067acfcb468026",
+      "sha256": "b8067acfcb46802649730856753985c92bc4cd906fdb6abdd9295a3910fc5603",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-covert-cafe": {
+      "id": "placez-specific-covert-cafe",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-covert-cafe/file?v=56310c9139470279",
+      "sha256": "56310c91394702792d3748f38b235f65f6163e95dfb8a10ac56da5f960e87128",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-covert-cafe": {
+      "id": "companion-placez-specific-covert-cafe",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-covert-cafe/file?v=b2d7c7f39a6c3540",
+      "sha256": "b2d7c7f39a6c3540b2048557432bad964f42abafd883e8f4f3292953d55cb408",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-hunny-beez": {
+      "id": "placez-specific-hunny-beez",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-hunny-beez/file?v=603eee746c3ceab9",
+      "sha256": "603eee746c3ceab9f48dfcd01c6280348d474ec1ea264f1ac114c98d581563a7",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-hunny-beez": {
+      "id": "companion-placez-specific-hunny-beez",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-hunny-beez/file?v=523baea607367e47",
+      "sha256": "523baea607367e47dda35197cc2ae1f75ad0a8ba5c61f4f7a4a87c3c989160c6",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-q-restaurant-bar": {
+      "id": "placez-specific-q-restaurant-bar",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-q-restaurant-bar/file?v=ac9835e6547eb2ab",
+      "sha256": "ac9835e6547eb2aba33ea773e69f71bcf307ae48a08c82c1d3604f3805d717c7",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-q-restaurant-bar": {
+      "id": "companion-placez-specific-q-restaurant-bar",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-q-restaurant-bar/file?v=d45845514c7b43d2",
+      "sha256": "d45845514c7b43d28dd5a464ffbed094812e4639b2db981dcc2295ff995f73a7",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-gigi-s-cafe": {
+      "id": "placez-specific-gigi-s-cafe",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-gigi-s-cafe/file?v=b51a9de8fd7221e6",
+      "sha256": "b51a9de8fd7221e662e90f15888bf2e3c4acab8652fd08d6c3d29212604368e6",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-gigi-s-cafe": {
+      "id": "companion-placez-specific-gigi-s-cafe",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-gigi-s-cafe/file?v=fe6ee2cd7474779e",
+      "sha256": "fe6ee2cd7474779ecfee9ff5161e5741d64ecdda5728ec3f6c2e1a5aac992e3b",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-backstory-books-yarn": {
+      "id": "placez-specific-backstory-books-yarn",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-backstory-books-yarn/file?v=c45cc0afeb692258",
+      "sha256": "c45cc0afeb692258496c59a8f7d08e5d77d760321dd3f988a3a3b44d23d3c878",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-backstory-books-yarn": {
+      "id": "companion-placez-specific-backstory-books-yarn",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-backstory-books-yarn/file?v=025f55d57c2e7b4a",
+      "sha256": "025f55d57c2e7b4a498e7274e3f879b82288ecc68bbffe06dc2227791e20f10b",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-sold-by-scott": {
+      "id": "placez-specific-sold-by-scott",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-sold-by-scott/file?v=2dd796ddb21426de",
+      "sha256": "2dd796ddb21426de11d0c3c51b90a7d765697597bfdbed97e0c5bdc2767c956f",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-sold-by-scott": {
+      "id": "companion-placez-specific-sold-by-scott",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-sold-by-scott/file?v=7e21fac289f8bc5b",
+      "sha256": "7e21fac289f8bc5b714dcb06f464a5986375db5219e8674ff0bf3d5eda8c7cfb",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-triangle-recreation-camp": {
+      "id": "placez-specific-triangle-recreation-camp",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-triangle-recreation-camp/file?v=5412c0b7de25a771",
+      "sha256": "5412c0b7de25a7716a649a1c65ed0e321260b262013cf3864fc617341e65d5d8",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-triangle-recreation-camp": {
+      "id": "companion-placez-specific-triangle-recreation-camp",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-triangle-recreation-camp/file?v=f1ff3753ec5a6bcf",
+      "sha256": "f1ff3753ec5a6bcf829180a7067795c0b02f8544082f7d3d3e93c718733f2749",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-the-secret-warehouse": {
+      "id": "placez-specific-the-secret-warehouse",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-the-secret-warehouse/file?v=a1bbda8af69f1fb3",
+      "sha256": "a1bbda8af69f1fb34953647845d5c80329f32d058bb19ba3fe24881a8743a44d",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-the-secret-warehouse": {
+      "id": "companion-placez-specific-the-secret-warehouse",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-the-secret-warehouse/file?v=ac91710e82f23976",
+      "sha256": "ac91710e82f2397612adb6f7d3956d94d6ab563afdec7357004dd663693c8aab",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-fantasy-land": {
+      "id": "placez-specific-fantasy-land",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-fantasy-land/file?v=aeb67d7dda540cd7",
+      "sha256": "aeb67d7dda540cd7794d1f28541ed3dc6e70c4759af3e366b52b60cbfe622504",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-fantasy-land": {
+      "id": "companion-placez-specific-fantasy-land",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-fantasy-land/file?v=760ea51e2d7165aa",
+      "sha256": "760ea51e2d7165aa52fe7d8aed075875d3bc951ea541f7a09dabf8cf92609af9",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-taboo-video": {
+      "id": "placez-specific-taboo-video",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-taboo-video/file?v=bec970b1e41c2ffe",
+      "sha256": "bec970b1e41c2ffe842a3fe859a0d55ce5642664294620f966fb9fe75dde0e07",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-taboo-video": {
+      "id": "companion-placez-specific-taboo-video",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-taboo-video/file?v=cd821b30bdb0c21b",
+      "sha256": "cd821b30bdb0c21b0dc11971d70d13919246a920f98eec798dd696938bb025d8",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-mr-peeps": {
+      "id": "placez-specific-mr-peeps",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-mr-peeps/file?v=ab5ee6497951bf3c",
+      "sha256": "ab5ee6497951bf3ceeb9bf4563e07a34d094f68189f0b47c3059e81040eee524",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-mr-peeps": {
+      "id": "companion-placez-specific-mr-peeps",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-mr-peeps/file?v=359553339c4b59a6",
+      "sha256": "359553339c4b59a64272408d733467fe853e93d6d5988437b49b660a6e6bef87",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-fantasy": {
+      "id": "placez-specific-fantasy",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-fantasy/file?v=b21f349ba3b20a32",
+      "sha256": "b21f349ba3b20a326ab2d25cfb2632d87ccae733a650f87eb887e0ccedeb8bf5",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-fantasy": {
+      "id": "companion-placez-specific-fantasy",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-fantasy/file?v=bc44be5731efd86b",
+      "sha256": "bc44be5731efd86b5ebaf39351e7dde57a6e53815c0f3fd07e8d2a40dde90302",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-inbundance-wealth-management": {
+      "id": "placez-specific-inbundance-wealth-management",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-inbundance-wealth-management/file?v=32f1614b09039b7d",
+      "sha256": "32f1614b09039b7d95bc2c1305b358e1ad33de1ad94cf0b74485e7204b5004a0",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-inbundance-wealth-management": {
+      "id": "companion-placez-specific-inbundance-wealth-management",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-inbundance-wealth-management/file?v=b73957373b18d790",
+      "sha256": "b73957373b18d790c04e05e1eec2eacaf9453f1759298008f6309cf30e03cf1c",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-open-space-dance": {
+      "id": "placez-specific-open-space-dance",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-open-space-dance/file?v=a20b64dc00b7755c",
+      "sha256": "a20b64dc00b7755c968d440a4844f6d8145ee76c661181e2c0210d78103c2bc3",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-open-space-dance": {
+      "id": "companion-placez-specific-open-space-dance",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-open-space-dance/file?v=f878c939f62a72ea",
+      "sha256": "f878c939f62a72eacceb3a4cf69bc1f9f43f8c6f0775133f48222a355ab911cf",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-echo-theater": {
+      "id": "placez-specific-echo-theater",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-echo-theater/file?v=137ecb5312ab28d1",
+      "sha256": "137ecb5312ab28d199671ede2b528911d2085e4f0264e7b20a48cb0002c04a4e",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-echo-theater": {
+      "id": "companion-placez-specific-echo-theater",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-echo-theater/file?v=1c0357832c8bc565",
+      "sha256": "1c0357832c8bc56561430a2e94f43bdaa9376c81cbd76d9254e7b33865a18a66",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-symbiop": {
+      "id": "placez-specific-symbiop",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-symbiop/file?v=25839ebbd533a86f",
+      "sha256": "25839ebbd533a86f4741a9eb2650ae3bbd18875db622f07360474ae1fcc0a512",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-symbiop": {
+      "id": "companion-placez-specific-symbiop",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-symbiop/file?v=e7de17492f20dc6c",
+      "sha256": "e7de17492f20dc6c874ee8d73658b190527ad7642ccf6c3ef3f4b45527fb0d19",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-steam-portland": {
+      "id": "placez-specific-steam-portland",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-steam-portland/file?v=a35cc6af8dc800d1",
+      "sha256": "a35cc6af8dc800d1cc9adae0178f4be2ae7ec118bd865e727c10b8f3235e0b58",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-steam-portland": {
+      "id": "companion-placez-specific-steam-portland",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-steam-portland/file?v=087c51b00e04f490",
+      "sha256": "087c51b00e04f490cdd1545b8242548333273c75bba445595ac1e601e3e7da6a",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-club-privata": {
+      "id": "placez-specific-club-privata",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-club-privata/file?v=6f2edd25dd61b42a",
+      "sha256": "6f2edd25dd61b42a0bc71ee34ef3bdde18012377381053ff3deb35394dace72f",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-club-privata": {
+      "id": "companion-placez-specific-club-privata",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-club-privata/file?v=f2b28ff7147f48f8",
+      "sha256": "f2b28ff7147f48f8ff225aa426282f167644ea8bf0baeb8903e2da64f5716265",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-the-velvet-rope": {
+      "id": "placez-specific-the-velvet-rope",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-the-velvet-rope/file?v=fdd82858d4322de5",
+      "sha256": "fdd82858d4322de500258aac88cf9b2e6195d65044631d710eb8c0970673ae54",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-the-velvet-rope": {
+      "id": "companion-placez-specific-the-velvet-rope",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-the-velvet-rope/file?v=c95529d1b343b2c9",
+      "sha256": "c95529d1b343b2c93fbf23e9072509a1ad66676affb72ea2f3e581df1edc4c1a",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-best-coast-barber-co": {
+      "id": "placez-specific-best-coast-barber-co",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-best-coast-barber-co/file?v=7b4caba33a791e87",
+      "sha256": "7b4caba33a791e879713b318afe8b4f10caa0e47ded5a275d54f03aef3d93e98",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-best-coast-barber-co": {
+      "id": "companion-placez-specific-best-coast-barber-co",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-best-coast-barber-co/file?v=08e801a33fa1ddc8",
+      "sha256": "08e801a33fa1ddc8903facf878f2d40b4128bbd15c8f4bd4660bb5c7650f546a",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-tattoos-by-les": {
+      "id": "placez-specific-tattoos-by-les",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-tattoos-by-les/file?v=49de3d04555c47b9",
+      "sha256": "49de3d04555c47b96569eee6ae7f6c13e83a04efefdab9e25b811b257076f006",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-tattoos-by-les": {
+      "id": "companion-placez-specific-tattoos-by-les",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-tattoos-by-les/file?v=7be4f26368b0debd",
+      "sha256": "7be4f26368b0debd76616701f77da45b4e169bb3a161ad90d9c95c85c0f14dc2",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-fuzzy-pits-tattoo": {
+      "id": "placez-specific-fuzzy-pits-tattoo",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-fuzzy-pits-tattoo/file?v=20b6d46e7a281d75",
+      "sha256": "20b6d46e7a281d75b4604efc449a8198f8076fcaf1da356a8f328b7f3d8bf3bb",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-fuzzy-pits-tattoo": {
+      "id": "companion-placez-specific-fuzzy-pits-tattoo",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-fuzzy-pits-tattoo/file?v=7f677813722eb8db",
+      "sha256": "7f677813722eb8dba4c6d48e36b07329f5c80ed96e2275c7bbbe85868e7b7ecc",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-birdhouse-tattoo-noble": {
+      "id": "placez-specific-birdhouse-tattoo-noble",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-birdhouse-tattoo-noble/file?v=29de39e7baa6d1ef",
+      "sha256": "29de39e7baa6d1ef0b54d2e880ba3c6759bdc3120235aacbe90e6b2ab642daf3",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-birdhouse-tattoo-noble": {
+      "id": "companion-placez-specific-birdhouse-tattoo-noble",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-birdhouse-tattoo-noble/file?v=4300856c4545b813",
+      "sha256": "4300856c4545b8138c7969b59820abe9a263b3a2ea7e84b7e7fb85c3a75bf58d",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-enjoy-co-hair-studio": {
+      "id": "placez-specific-enjoy-co-hair-studio",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-enjoy-co-hair-studio/file?v=da108ed7e8290312",
+      "sha256": "da108ed7e8290312bfc4a45703e3b4503cb44b4616a6105c476a8b8dfa6539e9",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-enjoy-co-hair-studio": {
+      "id": "companion-placez-specific-enjoy-co-hair-studio",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-enjoy-co-hair-studio/file?v=087b48365e32325d",
+      "sha256": "087b48365e32325d5c46ba8a8113c1c32cd374b60d29eceb284a050c3bf45e35",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-little-wilma-s-hair-salon": {
+      "id": "placez-specific-little-wilma-s-hair-salon",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-little-wilma-s-hair-salon/file?v=48aa70b807a1e86b",
+      "sha256": "48aa70b807a1e86b64990a960b5e4c4b3d01568a9a1ecf7b149109d328972e53",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-little-wilma-s-hair-salon": {
+      "id": "companion-placez-specific-little-wilma-s-hair-salon",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-little-wilma-s-hair-salon/file?v=67baa40b7b267591",
+      "sha256": "67baa40b7b267591bf5c7f7b05420ae9c046943f888ed4a344a7df37b2929c78",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-everybody-s-bodywork": {
+      "id": "placez-specific-everybody-s-bodywork",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-everybody-s-bodywork/file?v=4718efaef1d01649",
+      "sha256": "4718efaef1d01649c043fe480355c56c2b275e189f8b77c9048f7f7890fffbd0",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-everybody-s-bodywork": {
+      "id": "companion-placez-specific-everybody-s-bodywork",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-everybody-s-bodywork/file?v=00e7c448c9079f48",
+      "sha256": "00e7c448c9079f48131d36ebac091614a3c33795636c53c31708b06dab871663",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-somasoul-healing": {
+      "id": "placez-specific-somasoul-healing",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-somasoul-healing/file?v=47e3afdd05cfb814",
+      "sha256": "47e3afdd05cfb814246306f23ca174649625c20a7b095128689eb7375814114a",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-somasoul-healing": {
+      "id": "companion-placez-specific-somasoul-healing",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-somasoul-healing/file?v=5718b9a1da4350df",
+      "sha256": "5718b9a1da4350df54c96283a206aaac0a89320326e2e561333594b2a9aed2e2",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-trans-bodycare": {
+      "id": "placez-specific-trans-bodycare",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-trans-bodycare/file?v=38467939d2dec611",
+      "sha256": "38467939d2dec6115d9fa2d222179d1d79d6c17463ba9a6e70c91823041506f0",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-trans-bodycare": {
+      "id": "companion-placez-specific-trans-bodycare",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-trans-bodycare/file?v=558d8f6dc81d0143",
+      "sha256": "558d8f6dc81d014342cc22c7f03541b82889daeb90e6c72a50f74f29402bc5a4",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-spring-tides-massage": {
+      "id": "placez-specific-spring-tides-massage",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-spring-tides-massage/file?v=11ab8ded0be59607",
+      "sha256": "11ab8ded0be59607f040b4feb2c426d8fd4bd46e1166810beb528fe470d75dca",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-spring-tides-massage": {
+      "id": "companion-placez-specific-spring-tides-massage",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-spring-tides-massage/file?v=4faaf0ab8b64ccfd",
+      "sha256": "4faaf0ab8b64ccfd2e31ee89602e41e0a9defaa549010c48a0450c5c119446d8",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-stephaniemadeit": {
+      "id": "placez-specific-stephaniemadeit",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-stephaniemadeit/file?v=bd96969b4a709629",
+      "sha256": "bd96969b4a709629e136f7e7a3fde0223b431a553b08b2313b0c0bf11ca1c5d0",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-stephaniemadeit": {
+      "id": "companion-placez-specific-stephaniemadeit",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-stephaniemadeit/file?v=a0c172f6f20a4a33",
+      "sha256": "a0c172f6f20a4a336dc4dfdc37ac5e21f4c3cee2a03d12e8f591d9cc38740047",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-courtney-ahn-design": {
+      "id": "placez-specific-courtney-ahn-design",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-courtney-ahn-design/file?v=a88cad8cfaa7283c",
+      "sha256": "a88cad8cfaa7283ce71ba933960dbc57530749b71e944fa97ee8258e2b7d84a0",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-courtney-ahn-design": {
+      "id": "companion-placez-specific-courtney-ahn-design",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-courtney-ahn-design/file?v=656f781e8687c337",
+      "sha256": "656f781e8687c3377f410aa98216694505d42d34b8de1e55e4c4d0228ccca61a",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-nerdykeppie": {
+      "id": "placez-specific-nerdykeppie",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-nerdykeppie/file?v=4f79d8ad64557e16",
+      "sha256": "4f79d8ad64557e169a37108aa6ca0a34424e6278ef7d8aa204e26e37700c58e7",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-nerdykeppie": {
+      "id": "companion-placez-specific-nerdykeppie",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-nerdykeppie/file?v=adf58f17f28f703b",
+      "sha256": "adf58f17f28f703b736303d87f9825c8643f8c5af81363561d67b9779efb9ff7",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-sonny-s-house-of-tattoos-and-treasures": {
+      "id": "placez-specific-sonny-s-house-of-tattoos-and-treasures",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-sonny-s-house-of-tattoos-and-treasures/file?v=9bf964d528a2b59a",
+      "sha256": "9bf964d528a2b59a1c731aa9f39cfc97c123b8b750e4199982d25c6f62810143",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-sonny-s-house-of-tattoos-and-treasures": {
+      "id": "companion-placez-specific-sonny-s-house-of-tattoos-and-treasures",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-sonny-s-house-of-tattoos-and-treasures/file?v=4c8011a0dc88b771",
+      "sha256": "4c8011a0dc88b77164bbe211457a4c63872ca44f55aa04a4202128f62cc61433",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-ritual-arts": {
+      "id": "placez-specific-ritual-arts",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-ritual-arts/file?v=c293735fbffe4e3f",
+      "sha256": "c293735fbffe4e3fd0cef470354cc9fcb6a41cece26e8050d8a97d8d6b9e21d6",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-ritual-arts": {
+      "id": "companion-placez-specific-ritual-arts",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-ritual-arts/file?v=6a82044482c9d15f",
+      "sha256": "6a82044482c9d15fde6ac83ffa9b639767e4e57cc828989656b98e0a19b6f741",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-robot-piercing-and-tattoo": {
+      "id": "placez-specific-robot-piercing-and-tattoo",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-robot-piercing-and-tattoo/file?v=b7cdb1265d54f1bc",
+      "sha256": "b7cdb1265d54f1bcc7db58663984ac2124bc320eaf9afd7e46c682de473a8117",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-robot-piercing-and-tattoo": {
+      "id": "companion-placez-specific-robot-piercing-and-tattoo",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-robot-piercing-and-tattoo/file?v=ff81ec703c66359e",
+      "sha256": "ff81ec703c66359e81e74c9c0a174ce6ff01bb8d86b24c1a9175a68e8e02e63d",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-greenhouse-hair-collective": {
+      "id": "placez-specific-greenhouse-hair-collective",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-greenhouse-hair-collective/file?v=5fc1412d4f9ae698",
+      "sha256": "5fc1412d4f9ae6989937c058aafa36cfe770eb352548924ed4fe514a1df50178",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-greenhouse-hair-collective": {
+      "id": "companion-placez-specific-greenhouse-hair-collective",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-greenhouse-hair-collective/file?v=10bfb141d50674b6",
+      "sha256": "10bfb141d50674b663e865cdbc9a9733bebfd613577fc2adf0f82092fc46cbf9",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-limelight-salon": {
+      "id": "placez-specific-limelight-salon",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-limelight-salon/file?v=12b628648cbc23a2",
+      "sha256": "12b628648cbc23a2543457584c5f16e152c25d3c1da37879e0410e78a909d5c7",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-limelight-salon": {
+      "id": "companion-placez-specific-limelight-salon",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-limelight-salon/file?v=e7b06f48747aa735",
+      "sha256": "e7b06f48747aa7352d3b4da155378df9a3e1d0481cbc57a6da7ee0ba90ca41b2",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-love-salon-pdx": {
+      "id": "placez-specific-love-salon-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-love-salon-pdx/file?v=ef0012d74550248e",
+      "sha256": "ef0012d74550248e85026b11ce47feb0f3fa4da625d4cce6498a46539e9a7e13",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-love-salon-pdx": {
+      "id": "companion-placez-specific-love-salon-pdx",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-love-salon-pdx/file?v=6c15260a6e7af991",
+      "sha256": "6c15260a6e7af99179f28d5f25bda323d1e69eac5b6e0c417c24aa4517b15b0b",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-thrive-therapeutic-massage": {
+      "id": "placez-specific-thrive-therapeutic-massage",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-thrive-therapeutic-massage/file?v=b60a567523db19ff",
+      "sha256": "b60a567523db19ff52f3b22a54a800958a5b27e1124507cdbd5f46c6e387786e",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-thrive-therapeutic-massage": {
+      "id": "companion-placez-specific-thrive-therapeutic-massage",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-thrive-therapeutic-massage/file?v=456a74452052abe5",
+      "sha256": "456a74452052abe5f1099b0816ef88c7cf5bdd2c64c8504b390dd30a19d45abf",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-wayward-massage-therapist": {
+      "id": "placez-specific-wayward-massage-therapist",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-wayward-massage-therapist/file?v=9b15677d96e33fdb",
+      "sha256": "9b15677d96e33fdb752936b0303c62ac82018ac6d5bc2a401a8b00f9d6449584",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-wayward-massage-therapist": {
+      "id": "companion-placez-specific-wayward-massage-therapist",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-wayward-massage-therapist/file?v=0690eb51a492db7d",
+      "sha256": "0690eb51a492db7d1124f1109bbfd399308ab9d7f98677e4227c86bb9fa23b92",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-rest-and-ritual": {
+      "id": "placez-specific-rest-and-ritual",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-rest-and-ritual/file?v=c877b932454bca51",
+      "sha256": "c877b932454bca51f39c0f79e616874a810bfdec81baa4a323a72cb52fc83471",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-rest-and-ritual": {
+      "id": "companion-placez-specific-rest-and-ritual",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-rest-and-ritual/file?v=3243701e03c9ca93",
+      "sha256": "3243701e03c9ca9346f7f529044fe5176993ded87991133bb5b9c1aa94dec84d",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-unlock-collective": {
+      "id": "placez-specific-unlock-collective",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-unlock-collective/file?v=e636b168987904c4",
+      "sha256": "e636b168987904c4daa193950f342e5fe8df51bafc7f9d5486d7dc92aaaa03d7",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-unlock-collective": {
+      "id": "companion-placez-specific-unlock-collective",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-unlock-collective/file?v=9bacb1b7feeafdb4",
+      "sha256": "9bacb1b7feeafdb4243fb1a9789495a7b10b693907ddbc2398972a2eed66bebd",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-dogoodbiz-studio": {
+      "id": "placez-specific-dogoodbiz-studio",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-dogoodbiz-studio/file?v=0b4e402833514c7c",
+      "sha256": "0b4e402833514c7c6c68aaf4aa6c0c3318181ad18f6322659fdbadd01ce3a2c6",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-dogoodbiz-studio": {
+      "id": "companion-placez-specific-dogoodbiz-studio",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-dogoodbiz-studio/file?v=f4c1e6a3ff5a8914",
+      "sha256": "f4c1e6a3ff5a8914a7e1b14d24735d17e1bf8827f44a86fa4418766237994501",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-rainbow-forge": {
+      "id": "placez-specific-rainbow-forge",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-rainbow-forge/file?v=d20c17f541e1abae",
+      "sha256": "d20c17f541e1abae5ec803be8a0d6c9066242652c7ee1bdf796396a01bbb8f36",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-rainbow-forge": {
+      "id": "companion-placez-specific-rainbow-forge",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-rainbow-forge/file?v=047041d585daec43",
+      "sha256": "047041d585daec43a87cf0bd27438c8336300693d5c5d2849d8a5600c4043723",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-gay-thrive": {
+      "id": "placez-specific-gay-thrive",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-gay-thrive/file?v=189144d694e988eb",
+      "sha256": "189144d694e988ebbf80e477ef5346c446b137054cb7975623b03aa60ccfdfc4",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-gay-thrive": {
+      "id": "companion-placez-specific-gay-thrive",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-gay-thrive/file?v=c7ee058b761570a0",
+      "sha256": "c7ee058b761570a0ddd5555c8ae1df774acb5e0229355a2ce44eff7aa337d3c5",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-smonday-studios": {
+      "id": "placez-specific-smonday-studios",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-smonday-studios/file?v=8bc052057f38f6a5",
+      "sha256": "8bc052057f38f6a572b31281bb34487403d8f3aa78f415db62e6b6810c2b554e",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-smonday-studios": {
+      "id": "companion-placez-specific-smonday-studios",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-smonday-studios/file?v=2d82d04d4afabc85",
+      "sha256": "2d82d04d4afabc85251254e090d54419d452b39261c3d0617b593205df832a76",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-studio-anansi": {
+      "id": "placez-specific-studio-anansi",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-studio-anansi/file?v=9377934a8cc63178",
+      "sha256": "9377934a8cc631780aad0f33f4a55952871d3b72f39cc5ef90dffe0e943b5c16",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-studio-anansi": {
+      "id": "companion-placez-specific-studio-anansi",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-studio-anansi/file?v=21177e3f5d02bdd5",
+      "sha256": "21177e3f5d02bdd59eddf1e9f3fe730d90a91902cf858bcfe3960151e4f7519c",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-max-burns-ux": {
+      "id": "placez-specific-max-burns-ux",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-max-burns-ux/file?v=a4465abc1f4d7aaf",
+      "sha256": "a4465abc1f4d7aaf6adb4a3822ed6cf36ad7a92a3051b9e1730ef7d9eea3f738",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-max-burns-ux": {
+      "id": "companion-placez-specific-max-burns-ux",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-max-burns-ux/file?v=202447f51b057d07",
+      "sha256": "202447f51b057d073a188d4c4467645789cc9c612c914793e4b372e3d86457b8",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-clau-studio": {
+      "id": "placez-specific-clau-studio",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-clau-studio/file?v=d7c3fdc1f9ce3f33",
+      "sha256": "d7c3fdc1f9ce3f33824a457e635dd33dbba1489df860f00b9ef5bddff736b928",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-clau-studio": {
+      "id": "companion-placez-specific-clau-studio",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-clau-studio/file?v=b0f2a5273dfe535f",
+      "sha256": "b0f2a5273dfe535fd17cf337f44f5f110dd160a393161ba4bfb09bc88e60a6ab",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-plush-tattoo-intuitive-arts": {
+      "id": "placez-specific-plush-tattoo-intuitive-arts",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-plush-tattoo-intuitive-arts/file?v=e013ec829ac3654e",
+      "sha256": "e013ec829ac3654efd17b10a88aa75537839ed89449397b43afd72c7069db70b",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-plush-tattoo-intuitive-arts": {
+      "id": "companion-placez-specific-plush-tattoo-intuitive-arts",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-plush-tattoo-intuitive-arts/file?v=feebe5c4f74a42b4",
+      "sha256": "feebe5c4f74a42b4f2d7d3fc8b828b2e90576e83ff7a4cb8f9e16eca0a691daf",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-plush-tattoo": {
+      "id": "placez-specific-plush-tattoo",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-plush-tattoo/file?v=1e6ee849b9a71371",
+      "sha256": "1e6ee849b9a7137181720ab7d9538faae4cf5fbd5a3add3cc3a80aedff744edc",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-plush-tattoo": {
+      "id": "companion-placez-specific-plush-tattoo",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-plush-tattoo/file?v=18b20512017b97e8",
+      "sha256": "18b20512017b97e8e25cb9ee683aa69004575d00a52ce206cad5ae77f9df84dc",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-fruit": {
+      "id": "placez-specific-fruit",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-fruit/file?v=bd5d37fdb4b268e6",
+      "sha256": "bd5d37fdb4b268e6cbf6a6438fbb7feeb7de10eadf11d8e6480184e8cc686e18",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-fruit": {
+      "id": "companion-placez-specific-fruit",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-fruit/file?v=f4e091521a80a2d7",
+      "sha256": "f4e091521a80a2d7363db3c643b26b1c73b1cf49e82275ebcb17def469aa26b8",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-fruit-beauty": {
+      "id": "placez-specific-fruit-beauty",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-fruit-beauty/file?v=3e288274897f9c91",
+      "sha256": "3e288274897f9c91afe45caa50fcb1c533b309f4eb035f63003d6690c6650a89",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-fruit-beauty": {
+      "id": "companion-placez-specific-fruit-beauty",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-fruit-beauty/file?v=4c7b5532b89d2728",
+      "sha256": "4c7b5532b89d2728a850a0519bc68d2fe7ac27286f337a4031c0133e56aa6fb8",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-jenson-sarr": {
+      "id": "placez-specific-jenson-sarr",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-jenson-sarr/file?v=0c500941f97a560b",
+      "sha256": "0c500941f97a560ba31b11c0707a47154e3d9a11d1db2be4ff67918d9f27d255",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-jenson-sarr": {
+      "id": "companion-placez-specific-jenson-sarr",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-jenson-sarr/file?v=31af2523f6901403",
+      "sha256": "31af2523f690140385d595d50356ac29c7ab9ad29d2464e6846097fd38da4b5f",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-jenson-sarr-living-room-realty": {
+      "id": "placez-specific-jenson-sarr-living-room-realty",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-jenson-sarr-living-room-realty/file?v=9b248dad5d794037",
+      "sha256": "9b248dad5d7940374c2a8568c5c69bc8b393d8d9f751a60e34dd518d7403aaa3",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-jenson-sarr-living-room-realty": {
+      "id": "companion-placez-specific-jenson-sarr-living-room-realty",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-jenson-sarr-living-room-realty/file?v=d38fc11b8f8a3e85",
+      "sha256": "d38fc11b8f8a3e8549ae07d1365332c8e42ca9944968b57667e6a4790f68fe73",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-jamis-minnis": {
+      "id": "placez-specific-jamis-minnis",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-jamis-minnis/file?v=15ff89fbedb1dd84",
+      "sha256": "15ff89fbedb1dd84a16cd1eff33d3f4bd341cb5448afafaaf1c07cfb1a2e0522",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-jamis-minnis": {
+      "id": "companion-placez-specific-jamis-minnis",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-jamis-minnis/file?v=28786534ca200299",
+      "sha256": "28786534ca2002995ef6ee13f1c5a91da07bd260831744236e838fa1628a62aa",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-jamis-minnis-living-room-realty": {
+      "id": "placez-specific-jamis-minnis-living-room-realty",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-jamis-minnis-living-room-realty/file?v=be3348d7291495fd",
+      "sha256": "be3348d7291495fdc7ef8c4362016c66865054076463ad6cb495973a1b9f8ebe",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-jamis-minnis-living-room-realty": {
+      "id": "companion-placez-specific-jamis-minnis-living-room-realty",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-jamis-minnis-living-room-realty/file?v=e6be0e67f154c8a3",
+      "sha256": "e6be0e67f154c8a39caa33985b1d8dcf67e8e3e69e3043a320d3ac67db53d665",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-tyler-marsing": {
+      "id": "placez-specific-tyler-marsing",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-tyler-marsing/file?v=ffeb994d734061e6",
+      "sha256": "ffeb994d734061e6e59de9888a7da1235e5574449334b3e0979f984e25ee028e",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-tyler-marsing": {
+      "id": "companion-placez-specific-tyler-marsing",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-tyler-marsing/file?v=f5e0b2c7162919c6",
+      "sha256": "f5e0b2c7162919c685ec45d468a0272f1c488dd0cd5df3520cb68856a2733b2d",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-bonnie-roseman-roseman-team": {
+      "id": "placez-specific-bonnie-roseman-roseman-team",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-bonnie-roseman-roseman-team/file?v=37fe302de2cbb838",
+      "sha256": "37fe302de2cbb838db6ebfe3640e2191ea04ab8e04bea8620d48c059b8cbb688",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-bonnie-roseman-roseman-team": {
+      "id": "companion-placez-specific-bonnie-roseman-roseman-team",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-bonnie-roseman-roseman-team/file?v=5984c259e9cc59f2",
+      "sha256": "5984c259e9cc59f2f58deb77e9a26194e985d00520463ebfb0e7abfd8e8e2224",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-bonnie-roseman": {
+      "id": "placez-specific-bonnie-roseman",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-bonnie-roseman/file?v=44dabcab866e2a94",
+      "sha256": "44dabcab866e2a944257e8294db05311e420522abad1e7776f71f16e9dc1d675",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-bonnie-roseman": {
+      "id": "companion-placez-specific-bonnie-roseman",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-bonnie-roseman/file?v=649a96164caf6148",
+      "sha256": "649a96164caf61485358fc2b4d6d3afd6b455989ae804745c338303abae8ab8e",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-blake-alder": {
+      "id": "placez-specific-blake-alder",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-blake-alder/file?v=49175f1b1d9efe00",
+      "sha256": "49175f1b1d9efe00dd195c5a7a61d9af2b2ea1108fe5b8fa452118d60aafb809",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-blake-alder": {
+      "id": "companion-placez-specific-blake-alder",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-blake-alder/file?v=79351eccad6bc2a4",
+      "sha256": "79351eccad6bc2a476106ad7ca2a17035cf0a2e059378d6b4c02b2a8425ffe3b",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-blake-alder-property-management": {
+      "id": "placez-specific-blake-alder-property-management",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-blake-alder-property-management/file?v=bb1cfd7d37b7a7b1",
+      "sha256": "bb1cfd7d37b7a7b190b51c229b3ef2c391b0a9dab7adf530d27672fd6249f51f",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-blake-alder-property-management": {
+      "id": "companion-placez-specific-blake-alder-property-management",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-blake-alder-property-management/file?v=660e72eb8ca68e7d",
+      "sha256": "660e72eb8ca68e7d5d6ae4bd1385c4a1a5aa4b115657b88b33266de675c9ee74",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-reconstructed-wellness": {
+      "id": "placez-specific-reconstructed-wellness",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-reconstructed-wellness/file?v=fe76bb132aba36d9",
+      "sha256": "fe76bb132aba36d9d63dad91f949855f4b79611b63c4ae99709e74feaa87a112",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-reconstructed-wellness": {
+      "id": "companion-placez-specific-reconstructed-wellness",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-reconstructed-wellness/file?v=7f4e1dc298c078a9",
+      "sha256": "7f4e1dc298c078a999299bcdc01e14d3de4701d310603b5e313bfe7dd7ca20dc",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-bywater-health": {
+      "id": "placez-specific-bywater-health",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-bywater-health/file?v=89788f292873f743",
+      "sha256": "89788f292873f743217f6c3dd6e9e2163e9e80fbf9b26376085bc382ba4c5c21",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-bywater-health": {
+      "id": "companion-placez-specific-bywater-health",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-bywater-health/file?v=b558e0bc23f01307",
+      "sha256": "b558e0bc23f013071e557e723c9812a7c449bab81b167b14cb5328b93e2580e8",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-black-hole-body-piercing-tattoo": {
+      "id": "placez-specific-black-hole-body-piercing-tattoo",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-black-hole-body-piercing-tattoo/file?v=daa63e9d02b8ed2e",
+      "sha256": "daa63e9d02b8ed2e2a50a0850c4bfee7b58c3e4781a7a40175e9fad057af8fed",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-black-hole-body-piercing-tattoo": {
+      "id": "companion-placez-specific-black-hole-body-piercing-tattoo",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-black-hole-body-piercing-tattoo/file?v=a905cfe0804471ff",
+      "sha256": "a905cfe0804471ffd14f14ce2d1ed3f9bafd0a5e0b6208aa627608185f9142f3",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-black-hole-tattoo-and-piercing": {
+      "id": "placez-specific-black-hole-tattoo-and-piercing",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-black-hole-tattoo-and-piercing/file?v=a7f49324bbadc412",
+      "sha256": "a7f49324bbadc412b187c27608c37520a61310c5ec137a10b1af4a953934f7f1",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-black-hole-tattoo-and-piercing": {
+      "id": "companion-placez-specific-black-hole-tattoo-and-piercing",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-black-hole-tattoo-and-piercing/file?v=a72123aa0e077838",
+      "sha256": "a72123aa0e077838f1d4463a5ce80844daa8f0b8daee3e9c570728f9e7eaa3b5",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
+    },
+    "placez-specific-cockeye-kink": {
+      "id": "placez-specific-cockeye-kink",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/placez-specific-cockeye-kink/file?v=8990352d660228d8",
+      "sha256": "8990352d660228d88619e62770dfe8893a67a53c2cd432280cbfab76a85b27aa",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-motif",
+      "room": "placez"
+    },
+    "companion-placez-specific-cockeye-kink": {
+      "id": "companion-placez-specific-cockeye-kink",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/companion-placez-specific-cockeye-kink/file?v=234a09d8fd635a8d",
+      "sha256": "234a09d8fd635a8d647aae945579aec2d09ba34b12583cc55637b7bc6fb5948e",
+      "width": 400,
+      "height": 500,
+      "alpha": true,
+      "kind": "place-companion",
+      "room": "placez"
     }
   }
 }

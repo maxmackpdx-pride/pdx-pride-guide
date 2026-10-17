@@ -5,7 +5,7 @@ import { resourceGradientStops } from "./resourceGradient";
 import { distinctPlaceMotif } from "./distinctPlaceMotifs";
 import { memo, useId, useRef, useState, useEffect } from "react";
 import { useCardMotifParallax } from "./useCardMotifParallax";
-import { categoryMotifRecipe, resourceMotifCategory } from "@/lib/designMotifRecipes";
+import { categoryMotifRecipe, placeMotifRecipe, resourceMotifCategory } from "@/lib/designMotifRecipes";
 import { useMotifRecipes } from "../artwork/useMotifRecipes";
 import { LibraryMotifImage } from "../artwork/LibraryMotifImage";
 
@@ -15,7 +15,9 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
  const gradientId = `resource-motif-${useId().replace(/:/g, "")}`;
  const recipes = useMotifRecipes();
  const mappedCategory = resourceMotifCategory(category);
- const recipe = mappedCategory && categoryMotifRecipe(recipes, mappedCategory.room, mappedCategory.category);
+ const namedRecipe = mappedCategory?.room === "placez" ? placeMotifRecipe(recipes, name) : undefined;
+ const recipe = namedRecipe ?? (mappedCategory && categoryMotifRecipe(recipes, mappedCategory.room, mappedCategory.category));
+ const artworkFrame = namedRecipe ? { x: 0, y: 0, width: 400, height: 500 } : {};
  const hero = recipe && recipes?.assets[recipe.heroId];
  const companion = recipe && recipes?.assets[recipe.companionId];
  // Unregistered categories retain the registered network in the outer slot only.
@@ -37,7 +39,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
   <g data-motif-depth="support" className="rg-motif-layer rg-motif-layer--support">
    <g className="rg-motif-support-drift" style={{ animationDuration: `${cycle + 17}s`, animationDelay: `${phase - 13}s` }}>
     <g className="rg-motif-support-position" transform={`translate(${rightAtTop ? 230 : 170} 165) scale(.78) translate(-200 -250)`}>
-     <g fill="none" stroke={paint} strokeLinejoin="round"><LibraryMotifImage asset={companion} paint={paint} /></g>
+     <g fill="none" stroke={paint} strokeLinejoin="round"><LibraryMotifImage asset={companion} paint={paint} {...artworkFrame} /></g>
     </g>
    </g>
   </g>
@@ -45,7 +47,7 @@ const MotifArtwork = memo(function MotifArtwork({ name, category, colors }: {nam
    <g className="rg-motif-object-drift" style={{ animationDuration: `${cycle + 9}s`, animationDelay: `${phase - 7}s` }}>
     <g className="rg-motif-breathe" style={{ animationDuration: `${cycle + 4}s`, animationDelay: `${phase}s` }}>
      <g className="rg-motif-object" fill="none" stroke={paint} strokeLinejoin="round" transform={`${isPlace ? `translate(${rightAtTop ? -22 : 22} 46) ` : ""}rotate(${tilt} 200 250)`}>
-      <LibraryMotifImage asset={hero} paint={paint} />
+      <LibraryMotifImage asset={hero} paint={paint} {...artworkFrame} />
      </g>
     </g>
    </g>

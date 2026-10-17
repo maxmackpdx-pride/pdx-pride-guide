@@ -47,15 +47,16 @@ export const NetworkBackdrop = memo(function NetworkBackdrop({ identity }: { ide
     "--network-stack-phase": `${-(seed % 37)}s`,
   } as CSSProperties}>
     <div className="card-network__orientation">
-      {(["back", "middle", "front"] as const).map((depth, index) =>
-        <div key={depth} className={`card-network__plane card-network__plane--${depth}`} data-network-depth={depth}>
+      {(["back", "middle", "front"] as const).map((depth, index) => {
+        const asset = recipes?.assets[recipes.networkSets[set === "a" ? "a" : "b"][index]];
+        return <div key={depth} className={`card-network__plane card-network__plane--${depth}`} data-network-depth={depth}>
           <svg viewBox="0 0 1280 1066" preserveAspectRatio="none" data-network-glitch={index === seed % 3 ? "true" : undefined}>
-            <defs><mask id={`${maskId}-${depth}`} maskUnits="userSpaceOnUse" x="0" y="0" width="1280" height="1066" style={{ maskType: "luminance" }}>
-              <image href={recipes?.assets[recipes.networkSets[set === "a" ? "a" : "b"][index]]?.url} crossOrigin="anonymous" x="0" y="0" width="1280" height="1066" preserveAspectRatio="none"/>
+            {asset?.alpha ? <image href={asset.url} crossOrigin="anonymous" x="0" y="0" width="1280" height="1066" preserveAspectRatio="none" data-native-alpha="true"/> : <><defs><mask id={`${maskId}-${depth}`} maskUnits="userSpaceOnUse" x="0" y="0" width="1280" height="1066" style={{ maskType: "luminance" }}>
+              <image href={asset?.url} crossOrigin="anonymous" x="0" y="0" width="1280" height="1066" preserveAspectRatio="none"/>
             </mask></defs>
-            <rect width="1280" height="1066" fill="white" mask={`url(#${maskId}-${depth})`}/>
+            <rect width="1280" height="1066" fill="white" mask={`url(#${maskId}-${depth})`}/></>}
           </svg>
-        </div>)}
+        </div>;})}
     </div>
   </div>;
 });

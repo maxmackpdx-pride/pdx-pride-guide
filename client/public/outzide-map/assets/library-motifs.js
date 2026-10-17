@@ -59,9 +59,11 @@ function buildNetwork(element,set){
   const asset=recipes.assets[recipes.networkSets[set][i]];
   const plane=document.createElement('span');plane.className='outzide-network__plane outzide-network__plane--'+DEPTHS[i];plane.dataset.networkDepth=DEPTHS[i];
   const svg=svgElement('svg',{viewBox:'0 0 1280 1066',preserveAspectRatio:'none'});
-  const defs=svgElement('defs'),maskId='outzide-network-'+(++serial),mask=svgElement('mask',{id:maskId,maskUnits:'userSpaceOnUse',x:0,y:0,width:1280,height:1066});mask.style.maskType='luminance';
+  if(asset.alpha){svg.append(svgElement('image',{href:asset.url,crossorigin:'anonymous',x:0,y:0,width:1280,height:1066,preserveAspectRatio:'none','data-native-alpha':'true'}));}
+  else{const defs=svgElement('defs'),maskId='outzide-network-'+(++serial),mask=svgElement('mask',{id:maskId,maskUnits:'userSpaceOnUse',x:0,y:0,width:1280,height:1066});mask.style.maskType='luminance';
   mask.append(svgElement('image',{href:asset.url,crossorigin:'anonymous',x:0,y:0,width:1280,height:1066,preserveAspectRatio:'none'}));defs.append(mask);
-  svg.append(defs,svgElement('rect',{width:1280,height:1066,fill:'white',mask:'url(#'+maskId+')'}));plane.append(svg);orientation.append(plane);
+  svg.append(defs,svgElement('rect',{width:1280,height:1066,fill:'white',mask:'url(#'+maskId+')'}));}
+  plane.append(svg);orientation.append(plane);
  }
  element.replaceChildren(orientation);element.style.setProperty('--outzide-motif-phase',-(seed%37)+'s');element.dataset.release=recipes.release;element.dataset.networkSet=set;built.add(element);
 }

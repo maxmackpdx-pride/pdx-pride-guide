@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { FOUNDATION_ORIGIN, MOTIF_DAYS, REQUIRED_MOTIF_CATEGORIES, categoryMotifRecipe, parseMotifRecipes, resourceMotifCategory, type MotifRecipes, type MotifRoom } from "./designMotifRecipes";
+import { FOUNDATION_ORIGIN, MOTIF_DAYS, REQUIRED_MOTIF_CATEGORIES, categoryMotifRecipe, placeMotifRecipe, parseMotifRecipes, resourceMotifCategory, type MotifRecipes, type MotifRoom } from "./designMotifRecipes";
 
 function fixture(): MotifRecipes {
   const categories = Object.entries(REQUIRED_MOTIF_CATEGORIES).flatMap(([room, keys]) => keys.map(category => ({ room: room as MotifRoom, category, heroId: `hero-${room}-${category}`, companionId: `companion-hero-${room}-${category}` })));
@@ -45,4 +45,18 @@ test("incomplete or malformed releases cannot replace checked artwork", () => {
   const missingDay = fixture();
   delete missingDay.assets[missingDay.dayPairs.wed.frontId];
   assert.throws(() => parseMotifRecipes(missingDay), /Incomplete day motif pair: wed/);
+});
+
+test("named PlaceZ artwork wins with a matching registered supporting object", () => {
+  const source = fixture();
+  source.assets["placez-specific-camp"] = { id: "placez-specific-camp", url: `${FOUNDATION_ORIGIN}/api/design/v1/motifs/placez-specific-camp/file` };
+  source.assets["companion-placez-specific-camp"] = { id: "companion-placez-specific-camp", url: `${FOUNDATION_ORIGIN}/api/design/v1/motifs/companion-placez-specific-camp/file` };
+  source.places = [{ name: "Camp Bar PDX", names: ["Camp Bar PDX", "Camp"], heroId: "placez-specific-camp", companionId: "companion-placez-specific-camp" }];
+  const recipes = parseMotifRecipes(source);
+  assert.equal(placeMotifRecipe(recipes, "  CAMP Bar PDX  ")?.heroId, "placez-specific-camp");
+  assert.equal(placeMotifRecipe(recipes, "Camp")?.companionId, "companion-placez-specific-camp");
+  assert.equal(placeMotifRecipe(recipes, "Another bar"), undefined);
+  assert.equal(categoryMotifRecipe(recipes, "placez", "bar")?.heroId, "hero-placez-bar");
+  delete source.assets["companion-placez-specific-camp"];
+  assert.throws(() => parseMotifRecipes(source), /Named-place recipe/);
 });

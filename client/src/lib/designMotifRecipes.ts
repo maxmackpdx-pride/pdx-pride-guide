@@ -24,10 +24,12 @@ export type CategoryMotifRecipe = {
   companionId: string;
   aliasOf?: string;
 };
+export type PlaceMotifRecipe = { name: string; names: string[]; heroId: string; companionId: string };
 export type MotifRecipes = {
   release: string;
   networkSets: { a: [string, string, string]; b: [string, string, string] };
   categories: CategoryMotifRecipe[];
+  places?: PlaceMotifRecipe[];
   dayPairs: Record<MotifDay, DayMotifPair>;
   assets: Record<string, MotifAsset>;
 };
@@ -75,13 +77,18 @@ export function parseMotifRecipes(value: unknown): MotifRecipes {
     for (const category of keys) if (!seen.has(`${room}:${category}:`)) throw new Error(`Missing motif recipe: ${room}:${category}`);
   }
   if (!seen.has("boardz:giftz:iso")) throw new Error("Missing Giftz ISO motif recipe");
+  if (value.places !== undefined && !Array.isArray(value.places)) throw new Error("Invalid named-place recipes");
+  const places = ((value.places ?? []) as unknown[]).map(raw => {
+    if (!record(raw) || typeof raw.name !== "string" || !Array.isArray(raw.names) || !raw.names.length || !raw.names.every(name => typeof name === "string" && name.trim()) || !identifier(raw.heroId) || !identifier(raw.companionId) || !assets[raw.heroId] || !assets[raw.companionId]) throw new Error("Named-place recipe references unavailable artwork");
+    return { ...raw } as PlaceMotifRecipe;
+  });
   const rawDayPairs = value.dayPairs;
   const dayPairs = Object.fromEntries(MOTIF_DAYS.map(day => {
     const pair = rawDayPairs[day];
     if (!record(pair) || !["frontId", "backId", "colorId", "invertedId"].every(key => typeof pair[key] === "string" && assets[pair[key] as string])) throw new Error(`Incomplete day motif pair: ${day}`);
     return [day, { ...pair } as DayMotifPair];
   })) as Record<MotifDay, DayMotifPair>;
-  return { ...value, release: value.release, networkSets: { a: triplet(value.networkSets.a), b: triplet(value.networkSets.b) }, categories, dayPairs, assets };
+  return { ...value, release: value.release, networkSets: { a: triplet(value.networkSets.a), b: triplet(value.networkSets.b) }, categories, places, dayPairs, assets };
 }
 
 export function categoryMotifRecipe(recipes: MotifRecipes | null, room: MotifRoom, category: string, intent?: string) {
@@ -95,4 +102,11 @@ export function resourceMotifCategory(category: string): { room: MotifRoom; cate
   if (["health", "safety", "legal", "youth", "community", "family", "money", "arts", "mental-health", "harm-reduction"].includes(category)) return { room: "needz", category };
   if (["housing", "hauz", "giftz", "gigz", "sellz", "mizzed"].includes(category)) return { room: "boardz", category: category === "hauz" ? "housing" : category };
   return null;
+}
+
+const normalizedPlaceName = (name: string) => name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[’‘]/g, "'").trim().toLowerCase().replace(/\s+/g, " ");
+/** Named PlaceZ artwork wins before any category fallback. */
+export function placeMotifRecipe(recipes: MotifRecipes | null, name: string) {
+  const key = normalizedPlaceName(name);
+  return recipes?.places?.find(recipe => recipe.names.some(alias => normalizedPlaceName(alias) === key));
 }
