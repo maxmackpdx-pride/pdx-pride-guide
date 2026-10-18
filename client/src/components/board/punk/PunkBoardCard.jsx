@@ -15,6 +15,7 @@ import {housingTypes,housingPrice,householdCount,housingFaceMembers} from './hou
 import {CardArtworkGlass} from '@/components/CardArtworkGlass';
 import {intentLabels} from '@/lib/allBoards';
 import {toPunkPost} from './postModel';
+import {ZineCard,ZineFilters} from './ZineCard';
 import './production.css';
 import {useTheme} from '@/context/ThemeContext';
 const A='/boardz/punk/';
@@ -58,7 +59,8 @@ return <article ref={el} data-kind={r.kind} data-category={r.category} data-inte
 </article>}
 function Card(props){
   const {r,small=false}=props;
-  const card=r.kind==='board'&&r.category!=='housing'?<BoardzCollage {...props} Photo={HouzPhoto} Save={Save} Location={HouzLocation}/>:<BaseCard {...props}/>;
+  const save=React.useContext(SaveContext);
+  const card=r.kind==='board'&&!small?<ZineCard r={r} calm={props.calm} save={save} Photo={HouzPhoto}/>:r.kind==='board'&&r.category!=='housing'?<BoardzCollage {...props} Photo={HouzPhoto} Save={Save} Location={HouzLocation}/>:<BaseCard {...props}/>;
   if(r.kind!=='board')return card;
   let seed=Array.from(`${r.key||r.id}:${small?'small':'large'}:${props.pinVariant||'default'}`).reduce((n,c)=>Math.imul(n^c.charCodeAt(0),16777619)>>>0,2166136261);
   seed=Math.imul(seed^(seed>>>16),0x45d9f3b)>>>0;
@@ -68,7 +70,7 @@ function Card(props){
 };
 
 let filterRoot=null,filterNode=null,filterUsers=0;
-function useFilters(){useLayoutEffect(()=>{filterUsers++;if(!filterRoot){filterNode=document.createElement('div');filterNode.setAttribute('aria-hidden','true');filterNode.style.cssText='position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';document.body.append(filterNode);filterRoot=createRoot(filterNode);filterRoot.render(<><InkFilters/><BoardzInkFilters/><PunkArtworkFilters/></>)}return()=>{filterUsers--;};},[]);}
+function useFilters(){useLayoutEffect(()=>{filterUsers++;if(!filterRoot){filterNode=document.createElement('div');filterNode.setAttribute('aria-hidden','true');filterNode.style.cssText='position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';document.body.append(filterNode);filterRoot=createRoot(filterNode);filterRoot.render(<><InkFilters/><BoardzInkFilters/><PunkArtworkFilters/><ZineFilters/></>)}return()=>{filterUsers--;};},[]);}
 export default function PunkBoardCard({post,small=false,saved=false,saveDisabled=false,onSave,onOpen,showStatus=false,calm=false}){
  const {calmMode}=useTheme(); calm=calm||calmMode; useFilters(); const openRef=useRef(null); const r=toPunkPost(post);
  return <SaveContext.Provider value={{saved,disabled:saveDisabled||!onSave,onSave:onSave||(()=>{})}}><div className="boardz-punk-scope" data-direction="split" data-calm={calm} data-compact={small||undefined} onClick={e=>{if(onOpen&&!e.target.closest('button,a,input,select,textarea'))onOpen(openRef.current)}}>

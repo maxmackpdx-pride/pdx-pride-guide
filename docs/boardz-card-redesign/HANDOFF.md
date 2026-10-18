@@ -38,6 +38,13 @@ Ship the new card designs in the real Boardz components, and add a mobile grid o
    `MizzedComposer` in `SpottedCardGrid.tsx`, `GiftComposer` in `Gifting.tsx`, `Sellz.tsx`, `GigComposer` in `PrideWork.tsx`).
    Restyle them; do not change fields or labels. Hoüz needs a new month field (currently free text "Available"). Ask first.
 
+## Build status
+- Step 1 (large closed card) is in React: `client/src/components/board/punk/ZineCard.jsx`, `zine-card.css`,
+  `zine-decay.css` (generated from `decay_keyframes()`). `PunkBoardCard` routes every large card to it; small cards
+  still use the old components until step 3. Pins reuse `BoardPushPin`, network reuses `NetworkBackdrop`, hero and wire
+  companion come from the Foundation motif recipe. Not done in step 1: Hoüz lit windows on the wire house (needs the
+  live companion's window coordinates).
+
 ## Known open items (not done)
 - Logos (Boardz, Gigz, Giftz, Mizzed, Sellz): restyle in the new texture, same shapes, token colors, color in the same
   places. Do the logo as an SVG edit; show the first one for approval before the other four.
