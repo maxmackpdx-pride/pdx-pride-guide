@@ -96,6 +96,28 @@ CSS = open(__file__.replace('gen_rooms.py', 'dirs2.css')).read()
 CSS = CSS.replace('url(#zt-lime-strip)', 'var(--zf-strip)').replace('url(#zt-lime)', 'var(--zf-hero)').replace('url(#zt-frame)', 'var(--zf-frame)')
 CSS += decay_keyframes() + ACC + open(__file__.replace('gen_rooms.py', 'inline-assets.css')).read()
 
+def houz_frame(dashed):
+    # The live Hoüz small-card frame (HouzFrame in PunkBoardCard.jsx): 32 hairline rounded rects stepping from
+    # cyan out to the type color, with the left side dashed on posts looking for something.
+    w, h, R, layers = 136, 150, 16, 32
+    step = 1.8 / 31
+    length = h - 2 * R
+    count = length // 8 + 1
+    dash = length / (2 * count - 1)
+    out = ''
+    for i in range(layers):
+        d = .15 + i * step
+        p1 = round(100 * (1 - .8 * max(0, (i / (layers - 1) - .5) / .5) ** 2))
+        st = 'color-mix(in srgb,#00ffff %d%%,var(--c2))' % p1
+        if dashed:
+            p2 = round(100 * (1 - .9 * max(0, (i / (layers - 1) - .35) / .65) ** 1.5))
+            out += ('<g stroke="%s" stroke-width=".1" fill="none"><path d="M%.2f %d Q%.2f %.2f %d %.2f H%.2f Q%.2f %.2f %.2f %d V%d Q%.2f %.2f %.2f %.2f H%d Q%.2f %.2f %.2f %d"/>'
+                    '<path d="M%.2f %d V%d" stroke-dasharray="%.3f %.3f" stroke="color-mix(in srgb,#00ffff %d%%,var(--c2))"/></g>') % (
+                st, d, R, d, d, R, d, w - R, w - d, d, w - d, R, h - R, w - d, h - d, w - R, h - d, R, d, h - d, d, h - R, d, R, h - R, dash, dash, p2)
+        else:
+            out += '<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f" rx="%.2f" stroke="%s" stroke-width=".1" fill="none"/>' % (d, d, w - 2 * d, h - 2 * d, R - d, st)
+    return '<svg class="hz-frame" viewBox="0 0 %d %d" preserveAspectRatio="none" aria-hidden="true">%s</svg>' % (w, h, out)
+
 def faces_html(p, mode):
     # Hoüz face stack and household counter, done like the Giftz parts: color photos on torn black paper with
     # the secondary offset, open spots as dashed slots, the count in Cut Type ransom letters.
@@ -139,6 +161,8 @@ for slug, name, logo, posts in ROOMS:
             SHORT = {'JOIN OUR HOÜZ': 'JOIN', 'LOOKING TO RENT': 'LOOKING', 'BUILDING A HOÜZ': 'BUILDING', 'MANAGED RENTAL': 'MANAGED', 'MIZZED CONNECTION': 'MIZZED'}
             if p['type'] in SHORT:  # the small tape has about 78px beside the heart
                 sm = sm.replace('zs-tape">%s<' % p['type'], 'zs-tape">%s<' % SHORT[p['type']], 1)
+            if p['zc'].startswith('houz'):  # Hoüz small cards keep their wire frame instead of the torn rim
+                sm = sm.replace('<span class="zt-rim" aria-hidden="true"></span>', houz_frame(p['seeking']), 1).replace('class="zc-', 'class="hz-small zc-', 1)
             sm = sm.replace('<button class="zopen-hit"', faces_html(p, 'small') + '<button class="zopen-hit"', 1)
             o = o.replace('<ul class="ztags"', faces_html(p, 'open') + '<ul class="ztags"', 1)
             c = '<div class="zpair">' + c + '<div class="zsmall"><span class="zsize">SMALL</span>' + sm + '</div></div>'
