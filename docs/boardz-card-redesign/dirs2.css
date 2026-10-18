@@ -388,3 +388,50 @@ button{font:inherit;cursor:pointer}
 .zs .zheart{right:14px!important;bottom:14px!important}
 :is(.wp-open,.cs-open) .zheart{bottom:46px!important;right:26px!important}:is(.wp-strips,.cs-sheet){padding-bottom:46px!important}:is(.wp-open,.cs-open) :is(.wp-actions,.cs-actions){padding-bottom:4px}
 .zt:is(.wp-open,.cs-open) .zheart{bottom:48px!important;right:26px!important}
+/* Open card v3: 375 x 667 phone screen at full size, calmer body so it reads. */
+.wp-open,.cs-open{width:375px!important;height:667px;zoom:1}
+.wp-ohead,.cs-case{height:250px}
+.wp-title--open{top:78px;font-size:27px}
+.cs-title--open{font-size:26px}
+.wp-ohead .wp-hero{width:200px;right:-50px;bottom:-60px}
+.cs-case .cs-hero--open{width:220px;right:-50px;bottom:-70px}
+.wp-ohead .wp-hero[src*="74608fe2"],.cs-case .cs-hero[src*="74608fe2"],.wp-ohead .wp-hero[src*="65fdccbc"],.cs-case .cs-hero[src*="65fdccbc"]{width:210px;right:-60px;top:46px}
+.wp-strips,.cs-sheet{padding:22px 24px 40px 24px!important;gap:14px}
+.z-seek :is(.wp-strips,.cs-sheet){padding-left:42px!important}
+.zt:is(.wp-open,.cs-open) .zheart{bottom:42px!important;right:24px!important}
+:is(.wp-strips,.cs-sheet){padding-bottom:40px!important}
+.wp-open>.zt-face::before,.cs-open>.zt-face::before{opacity:.45!important}
+:is(.wp-strips,.cs-sheet)::before{opacity:.22}
+:is(.wp-strips,.cs-sheet){background:linear-gradient(180deg,rgba(8,8,10,.72),rgba(8,8,10,.86))}
+/* Message panel: replaces the green paper. Ink panel, accent hairline and edge bar, mono kicker, faint scanlines. */
+.wp-open .wp-strip,.cs-sheet .cs-desc{position:relative;margin:0!important;rotate:0deg!important;padding:30px 18px 16px 20px!important;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px),#0b0b0e!important;
+  border:1px solid color-mix(in srgb,var(--c2,var(--c)) 45%,#1c1c22);border-left:3px solid var(--c2,var(--c));border-radius:4px;
+  box-shadow:0 0 14px color-mix(in srgb,var(--c2,var(--c)) 10%,transparent)!important;
+  font:400 15px/1.5 'Barlow',sans-serif!important;color:#e6e3da!important;max-width:none}
+.wp-open .wp-strip::before,.cs-sheet .cs-desc::before{content:"> MESSAGE"!important;position:absolute;inset:auto!important;top:10px!important;left:20px!important;
+  background:none!important;filter:none!important;box-shadow:none!important;z-index:1;
+  font:700 10px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:var(--c2,var(--c))}
+.wp-open .wp-strip::after,.cs-sheet .cs-desc::after{content:""!important;position:absolute;inset:auto!important;right:8px!important;top:8px!important;width:10px;height:10px;
+  border-top:1.5px solid var(--c2,var(--c));border-right:1.5px solid var(--c2,var(--c));background:none!important;filter:none!important;translate:0!important}
+:is(.wp-open,.cs-open) .ztag{font-family:'JetBrains Mono',monospace}
+:is(.wp-open,.cs-open) .zbtn{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;letter-spacing:.04em}
+@keyframes z-grow{
+0%{transform:scale(.96,.36);clip-path:inset(0)}
+16%{transform:scale(.97,.52) skewX(10deg) translateX(-12px);clip-path:polygon(0 0,100% 0,100% 22%,0 22%,0 30%,100% 30%,100% 58%,0 58%,0 66%,100% 66%,100% 100%,0 100%)}
+34%{transform:scale(1.03,.86) skewX(-8deg) translateX(10px);clip-path:inset(6% 0 20% 0)}
+52%{transform:scale(.98,1.03) skewX(4deg);clip-path:polygon(0 0,100% 0,100% 44%,0 44%,0 49%,100% 49%,100% 100%,0 100%)}
+70%{transform:scale(1.01) translateX(-4px);clip-path:inset(0)}
+100%{transform:none;clip-path:inset(0)}}
+/* Fit the phone screen: compact tags, tighter title, body scrolls under a pinned action row if a post runs long. */
+.wp-title--open{right:34px!important;max-width:300px}
+:is(.wp-open,.cs-open) .ztags{gap:5px}
+:is(.wp-open,.cs-open) .ztag{padding:6px 9px;font-size:10px}
+.cs-sheet .cs-title--open{font-size:24px}
+.wp-open .wp-strip,.cs-sheet .cs-desc{padding:26px 16px 12px 18px!important;font-size:14.5px!important;line-height:1.45!important}
+.wp-open .wp-strip::before,.cs-sheet .cs-desc::before{top:9px!important}
+.hf--open .hf-face{width:38px;height:38px;margin-left:-10px}
+.hf--open .hf-n{font-size:24px}
+:is(.wp-strips,.cs-sheet){min-height:0;overflow:hidden auto;scrollbar-width:none}
+:is(.wp-actions,.cs-actions){position:sticky;bottom:0;margin-top:auto;padding-top:10px;background:linear-gradient(180deg,transparent,rgba(8,8,10,.9) 30%)}
+.zt:is(.wp-open,.cs-open) .zheart{position:static!important;margin:0 0 0 auto!important;flex:none}:is(.wp-open,.cs-open) :is(.wp-actions,.cs-actions){padding-right:0!important;padding-bottom:0}

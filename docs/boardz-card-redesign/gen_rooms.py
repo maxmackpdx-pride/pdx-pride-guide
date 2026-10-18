@@ -164,7 +164,7 @@ for slug, name, logo, posts in ROOMS:
 }''' % json.dumps(keys)
     svg = re.search(r'<svg width="0" height="0".*?</svg>', SRC, re.S).group(0).replace('</svg>', FILT + '</svg>')
     doc = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>%s cards</title>\n<script src="./support.js"></script>\n'
-           '<link rel="stylesheet" href="%s">\n<link rel="stylesheet" href="%s">\n</head>\n<body>\n<x-dc>\n<helmet>\n'
+           '<link rel="stylesheet" href="%s">\n<link rel="stylesheet" href="%s">\n<link rel="stylesheet" href="./zay-fonts.css">\n</head>\n<body>\n<x-dc>\n<helmet>\n'
            '<link rel="preconnect" href="https://fonts.googleapis.com">\n'
            '<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&amp;family=Barlow:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">\n'
            '<style>\n%s\n.zroot{--zf-frame:url(#zt-frame);--zf-hero:url(#zt-lime);--zf-strip:url(#zt-lime-strip)}\n.zroom-logo{height:120px;width:auto;display:block;margin-bottom:12px}\n</style>\n</helmet>\n%s\n'

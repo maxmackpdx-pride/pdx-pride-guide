@@ -264,6 +264,7 @@ doc = '''<!doctype html>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="%s">
 <link rel="stylesheet" href="%s">
+<link rel="stylesheet" href="./zay-fonts.css">
 </head>
 <body>
 <x-dc>
