@@ -1,7 +1,7 @@
 body{margin:0;background:#0c0c0f}
-.zroot{box-sizing:border-box;padding:48px 40px 80px;background:#0c0c0f;color:#e6e3da;font-family:'Barlow',system-ui,sans-serif;--c:#ccff00;--ink:#050506;--paper:#f4f1e8}
+.zroot{box-sizing:border-box;padding:48px 40px 80px;background:#0c0c0f;color:#e6e3da;font-family:'Barlow',system-ui,sans-serif;--c:#ccff00;--ink:#050506;--paper:#e9e5da}
 .zhead{display:flex;flex-direction:column;gap:10px;padding-bottom:32px}
-.zkick,.ztag{font:500 12px/1.4 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#9a9aa3}
+.zkick,.ztag{font:500 12px/1.4 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#a3a3a3}
 .zhead h1{margin:0;font:900 64px/.95 'Barlow Condensed',sans-serif;text-transform:uppercase;color:#fff;letter-spacing:.02em}
 .zhead p{margin:0;max-width:920px;font-size:16px;line-height:1.5}
 .zdir{border-top:1px solid #1c1c22;padding:36px 0 24px;display:flex;flex-direction:column;gap:24px}
@@ -66,7 +66,7 @@ button{font:inherit;cursor:pointer}
 .wp-hero{position:absolute;z-index:3;right:-34px;bottom:-30px;width:150px;rotate:-12deg;filter:drop-shadow(3px 4px 0 var(--ink))}
 .wp-tape,.cs-tag--type{background:var(--c);color:var(--ink);font:700 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;border-radius:4px;box-shadow:inset 0 .8px 0 rgba(255,255,255,.35),0 2px 0 rgba(0,0,0,.55),0 6px 12px -4px rgba(0,0,0,.6);rotate:0deg}
 .wp-tape{position:absolute;z-index:7;top:12px;left:18px;padding:6px 10px 5px}
-.wp-area{position:absolute;z-index:7;top:14px;right:14px;padding:4px 8px;background:#111114;color:#c8c4bb;border:1.2px solid #2a2a33;border-radius:10px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em}
+.wp-area{position:absolute;z-index:7;top:14px;right:14px;padding:4px 8px;background:#111111;color:#bdbab2;border:1.2px solid #24242c;border-radius:10px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em}
 .wp-title{position:absolute;z-index:4;left:16px;right:10px;top:48px;margin:0;rotate:-5deg;display:flex;flex-wrap:wrap;gap:3px 6px;font:900 30px/1 'Barlow Condensed',sans-serif;letter-spacing:.01em;text-transform:uppercase}
 .wp-title span{background:var(--ink);padding:2px 6px 1px;box-shadow:3px 3px 0 var(--c)}
 .wp-value{position:absolute;z-index:4;left:18px;bottom:54px;font-size:15px;rotate:2deg}
@@ -128,7 +128,7 @@ button{font:inherit;cursor:pointer}
 .cs-tag::before{content:"";position:absolute;top:-5px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#fff;box-shadow:0 2px 0 var(--ink)}
 .cs-tag--type{top:20px;left:18px}
 .cs-tag::before{display:none}
-.cs-tag--area{top:20px;left:150px;background:#111114;color:#c8c4bb;border:1.2px solid #2a2a33;border-radius:10px}
+.cs-tag--area{top:20px;left:150px;background:#111111;color:#bdbab2;border:1.2px solid #24242c;border-radius:10px}
 .cs-title{position:absolute;z-index:5;left:20px;width:190px;top:62px;margin:0;display:flex;flex-wrap:wrap;gap:3px 5px;font:900 22px/1 'Barlow Condensed',sans-serif;text-transform:uppercase}
 .cs-title span{background:var(--ink);padding:2px 5px 1px;box-shadow:2px 2px 0 var(--c)}
 .cs-logo{position:absolute;z-index:7;left:20px;bottom:18px;width:90px}
@@ -170,9 +170,9 @@ button{font:inherit;cursor:pointer}
 /* Design-system elements carried into the new cards */
 .zt{filter:drop-shadow(0 0 18px color-mix(in srgb,var(--c) 8%,transparent))}
 .ztags{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
-.ztag{display:inline-flex;min-height:28px;align-items:center;padding:6px 10px 5px;border:1.2px solid #2a2a33;border-radius:12px;color:#c8c4bb;background:#111114;box-shadow:inset 0 .8px 0 rgba(255,255,255,.07);font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.ztag{display:inline-flex;min-height:28px;align-items:center;padding:6px 10px 5px;border:1.2px solid #24242c;border-radius:12px;color:#bdbab2;background:#111111;box-shadow:inset 0 .8px 0 rgba(255,255,255,.07);font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
 .ztag--solid{border-color:var(--c);color:var(--ink);background:var(--c);box-shadow:inset 0 .8px 0 rgba(255,255,255,.32)}
-.cs-no{padding:5px 8px;border-radius:8px;background:color-mix(in srgb,var(--c) 14%,#0b0b0e);color:var(--c);font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.2em}
+.cs-no{padding:5px 8px;border-radius:8px;background:color-mix(in srgb,var(--c) 14%,#0c0c0f);color:var(--c);font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.2em}
 .zseam{position:relative;z-index:4;display:block;height:3px;margin:0 20px;background:linear-gradient(90deg,#00ffff,#ccff00,#ff00cc,#ff6600,#00ffff) 0 0/200% 100%;animation:z-seam 6s linear infinite;box-shadow:0 0 8px -2px rgba(204,255,0,.5)}
 @keyframes z-seam{from{background-position:200% 0}to{background-position:0 0}}
 @media (prefers-reduced-motion:reduce){.zseam{animation:none}}
@@ -254,7 +254,7 @@ button{font:inherit;cursor:pointer}
 /* Small card: live size 136 x 150, shown beside the large card. Same open card. */
 .zpair{display:flex;gap:28px;align-items:flex-start}
 .zsmall{display:flex;flex-direction:column;gap:8px}
-.zsize{font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#9a9aa3}
+.zsize{font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#a3a3a3}
 .zs{width:136px;height:150px;overflow:hidden;--zt-band:3px}
 .zs .wp-photo{position:absolute;inset:0}
 .zs .zn{inset:0}
@@ -279,7 +279,7 @@ button{font:inherit;cursor:pointer}
 .wp-photo,.zt-face::before{animation:var(--zd-skin-n) var(--zd-skin-d) steps(1,end) var(--zd-skin-o) infinite}
 :is(.wp-hero:not(.wp-wire),.cs-hero:not(.cs-wire),.zs-hero:not(.zs-wire)){animation:var(--zd-hero-n) var(--zd-hero-d) steps(1,end) var(--zd-hero-o) infinite}
 .zt-face{animation:zd-jit var(--zd-jit-d) steps(1,end) var(--zd-jit-o) infinite}
-@keyframes zd-jit{0%,41%,43.5%,100%{translate:0;filter:none}41.2%{translate:3px 0;filter:drop-shadow(-2px 0 rgba(255,59,107,.7)) drop-shadow(2px 0 rgba(59,227,255,.7))}42.4%{translate:-2px 0;filter:drop-shadow(2px 0 rgba(255,59,107,.6)) drop-shadow(-2px 0 rgba(59,227,255,.6))}}
+@keyframes zd-jit{0%,41%,43.5%,100%{translate:0;filter:none}41.2%{translate:3px 0;filter:drop-shadow(-2px 0 rgba(255,0,204,.7)) drop-shadow(2px 0 rgba(25,227,255,.7))}42.4%{translate:-2px 0;filter:drop-shadow(2px 0 rgba(255,0,204,.6)) drop-shadow(-2px 0 rgba(25,227,255,.6))}}
 @media (prefers-reduced-motion:reduce){.zt-rim,.wp-photo,.zt-face,.zt-face::before,.wp-hero,.cs-hero,.zs-hero{animation:none!important}}
 :is(html.calm-mode,:root[data-calm="true"]) :is(.zt-rim,.wp-photo,.zt-face,.zt-face::before,.wp-hero,.cs-hero,.zs-hero){animation:none!important}
 /* Small card text: headline takes the space under the pin, post type moves to the footer beside the heart. */
@@ -405,7 +405,7 @@ button{font:inherit;cursor:pointer}
 :is(.wp-strips,.cs-sheet){background:linear-gradient(180deg,rgba(8,8,10,.72),rgba(8,8,10,.86))}
 /* Message panel: replaces the green paper. Ink panel, accent hairline and edge bar, mono kicker, faint scanlines. */
 .wp-open .wp-strip,.cs-sheet .cs-desc{position:relative;margin:0!important;rotate:0deg!important;padding:30px 18px 16px 20px!important;
-  background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px),#0b0b0e!important;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px),#0c0c0f!important;
   border:1px solid color-mix(in srgb,var(--c2,var(--c)) 45%,#1c1c22);border-left:3px solid var(--c2,var(--c));border-radius:4px;
   box-shadow:0 0 14px color-mix(in srgb,var(--c2,var(--c)) 10%,transparent)!important;
   font:400 15px/1.5 'Barlow',sans-serif!important;color:#e6e3da!important;max-width:none}
@@ -448,7 +448,7 @@ button{font:inherit;cursor:pointer}
 .wp-open .zclose,.cs-open .zclose{top:34px;right:22px}
 :is(.wp-open,.cs-open) .zbtn{font-family:'Barlow Condensed',sans-serif!important}
 /* Hoüz small card: the live layered wire frame, in the new style (ink face, decay glitch, bloom). */
-.hz-small .hz-frame{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;overflow:visible;filter:drop-shadow(0 0 2px color-mix(in srgb,#00ffff 55%,transparent))}
+.hz-small .hz-frame{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;overflow:visible;filter:drop-shadow(0 0 2px color-mix(in srgb,#19e3ff 55%,transparent))}
 .hz-small>.zt-face{inset:2px!important;-webkit-mask:none!important;mask:none!important;border-radius:14px;background:radial-gradient(ellipse at 100% 50%,color-mix(in srgb,var(--c2) 16%,transparent),transparent 70%),#031012!important}
 .hz-small.z-seek>.zt-face{-webkit-mask:none!important;mask:none!important}
 .hz-small .zs-title,.hz-small .zs-tape,.hz-small.z-seek .zs-title,.hz-small.z-seek .zs-tape{left:12px!important}
@@ -550,12 +550,12 @@ button{font:inherit;cursor:pointer}
 /* Hoüz blueprint: faint cyan floor-plan grid and one dashed room outline in the type color, instead of the node mesh. */
 [class*="zc-houz"] .zn img{display:none}
 [class*="zc-houz"] .zn{opacity:1!important;mix-blend-mode:normal!important;inset:0!important;transform:none!important;
-  background:linear-gradient(rgba(0,255,255,.06) 1px,transparent 1px) 0 0/24px 24px,linear-gradient(90deg,rgba(0,255,255,.06) 1px,transparent 1px) 0 0/24px 24px}
+  background:linear-gradient(rgba(25,227,255,.06) 1px,transparent 1px) 0 0/24px 24px,linear-gradient(90deg,rgba(25,227,255,.06) 1px,transparent 1px) 0 0/24px 24px}
 [class*="zc-houz"] .zn::before{content:"";position:absolute;left:52%;top:20%;width:34%;height:44%;border:1.5px dashed var(--c2);opacity:.3}
 [class*="zc-houz"] .zn::after{content:"";position:absolute;left:52%;top:42%;width:14%;height:22%;border-top:1.5px dashed var(--c2);border-right:1.5px dashed var(--c2);opacity:.3}
 /* Hoüz occupancy ticket: faces and count in one ink panel. */
 .hf{background:#0c0c0f;border:1px solid #1c1c22;border-radius:6px;padding:5px 10px 5px 6px;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.45)}
-.hf-face{border-radius:4px!important;box-shadow:none!important;border:1.5px solid #00ffff!important;rotate:0deg!important}
+.hf-face{border-radius:4px!important;box-shadow:none!important;border:1.5px solid #19e3ff!important;rotate:0deg!important}
 .hf-face img{border-radius:3px}
 .hf-open{border:1px dashed color-mix(in srgb,var(--c2) 45%,transparent)!important;background:transparent!important}
 .hf-open::after{content:none!important}
@@ -588,10 +588,10 @@ button{font:inherit;cursor:pointer}
 .zl .zr{font-weight:inherit;display:inline-block;white-space:nowrap;margin:0 .04em;vertical-align:-.04em}
 .zl .zr .rz-w{white-space:nowrap}
 .zl .zr .rz-l{font-size:1.08em;padding:.02em .07em;margin:0 .015em;line-height:.98;box-shadow:none}
-.zl .zr .rz-0{background:#f1ece0;color:#050506}
+.zl .zr .rz-0{background:#e9e5da;color:#050506}
 .zl .zr .rz-1{background:var(--c2,var(--c));color:#050506}
-.zl .zr .rz-2{background:#050506;color:#fff;outline:1px solid #f1ece0;outline-offset:-1px}
-.zl .zr .rz-3{background:#e2dccb;color:#050506}
+.zl .zr .rz-2{background:#050506;color:#fff;outline:1px solid #e9e5da;outline-offset:-1px}
+.zl .zr .rz-3{background:#bdbab2;color:#050506}
 .zc-gigz .zl .zr .rz-1{color:#fff}
 .zs .zl .zr .rz-l{font-size:.9em;padding:0 .04em;margin:0}
 /* Small torn-paper cards: same true-aspect edge as the open cards (scan pinned top and bottom, sides fill),
@@ -609,3 +609,20 @@ button{font:inherit;cursor:pointer}
 .wp.zs .zs-hero.zs-wire{width:80px!important;opacity:.45}
 .wp.zs .zs-hero:is([src*="4eaf45a0"],[src*="bc81ad61"]){width:74px!important}
 .wp.zs .zs-hero:not(.zs-wire):not(.lw){width:86px!important;opacity:.9;mix-blend-mode:normal;filter:var(--zf-hero) brightness(.82) saturate(.62) drop-shadow(1px 2px 0 rgba(5,5,6,.7))!important}.wp.zs .zs-hero.zs-wire{width:86px!important;opacity:.55}
+/* Calmer Hoüz cyan: the small-card wire frame drops its extra glow and sits a little back; face rings follow the softer cyan. */
+.hz-small .hz-frame{filter:drop-shadow(0 0 1px color-mix(in srgb,#19e3ff 30%,transparent))!important;opacity:.82}
+.hf-face{border-color:var(--c,#19e3ff)!important}
+[class*="zc-houz"] .zn{background:linear-gradient(rgba(25,227,255,.05) 1px,transparent 1px) 0 0/24px 24px,linear-gradient(90deg,rgba(25,227,255,.05) 1px,transparent 1px) 0 0/24px 24px!important}
+[class*="zc-houz"] :is(.wp-hero:not(.wp-wire),.cs-hero:not(.cs-wire),.zs-hero:not(.zs-wire)){opacity:.8}
+/* Small cards: no hero motifs, just texture. One fixed layout on every board (designer feedback):
+   16px top band (Hoüz ticket), headline from 46px, post-type tag on a shared baseline 14px from the bottom-left,
+   heart bottom-right. Photo cards show the photo; no-photo cards show a quiet network texture. */
+.zs :is(.zs-hero,.lw){display:none!important}
+.zs .zn{opacity:.32!important}
+.wp.zs .zn{opacity:.18!important}
+.zs .wp-dots{opacity:.18!important}
+.zs .zs-title{top:46px!important;left:12px!important;max-width:114px!important}
+.zs.z-seek .zs-title{left:16px!important}
+.zs .zs-tape{bottom:16px!important;left:12px!important}
+.zs.z-seek .zs-tape{left:16px!important}
+.zs:not([class*="zc-houz"]) .zs-title{top:40px!important}

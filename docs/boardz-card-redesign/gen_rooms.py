@@ -79,12 +79,12 @@ for zc, col in COLORS.items():
 ACC += '.zc-gigz :is(.wp-tape,.cs-tag--type,.ztag--solid,.zbtn--fill){color:#fff}\n'
 # Hoüz keeps its original palette: cyan frame, cyan-inked hero and heart, the type color as the secondary
 # (network, wire companion, tape, price, title offsets, tags), on the teal-black Hoüz ink with a secondary glow.
-CYAN = '#00FFFF'
+CYAN = '#19e3ff'  # calmer Hoüz cyan: pure #00FFFF reads white-hot on ink
 FILT += ('<filter id="zf-frame-houz" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncR type="linear" slope="1.6" intercept="-.12"/><feFuncG type="linear" slope="1.6" intercept="-.12"/><feFuncB type="linear" slope="1.6" intercept="-.12"/></feComponentTransfer><feColorMatrix values="%s"/></filter>'
          '<filter id="zf-hero-houz" color-interpolation-filters="sRGB"><feColorMatrix values="%s"/></filter>') % (frame(CYAN), mat(CYAN, (.2126, .7152, .0722)))
 for zc, col in COLORS.items():
     if not zc.startswith('houz'): continue
-    ACC += ('.zc-%s{--c:#00FFFF;--c2:%s;--zf-frame:url(#zf-frame-houz);--zf-hero:url(#zf-hero-houz);--zf-strip:url(#zf-strip-%s)}\n'
+    ACC += ('.zc-%s{--c:#19e3ff;--c2:%s;--zf-frame:url(#zf-frame-houz);--zf-hero:url(#zf-hero-houz);--zf-strip:url(#zf-strip-%s)}\n'
             '.zc-%s :is(.wp-wire,.cs-wire,.zs-wire){filter:url(#zf-hero-%s) drop-shadow(0 0 3px color-mix(in srgb,%s 45%%,transparent))!important}\n') % (zc, col, zc, zc, zc, col)
 ACC += ('[class*="zc-houz"] .zt-face{background:radial-gradient(ellipse at 100% 50%,color-mix(in srgb,var(--c2) 16%,transparent),transparent 70%),#031012!important}\n'
         '[class*="zc-houz"] :is(.wp-tape,.cs-tag--type)::before{background:var(--c2)}\n'
@@ -108,11 +108,11 @@ def houz_frame(dashed):
     for i in range(layers):
         d = .15 + i * step
         p1 = round(100 * (1 - .8 * max(0, (i / (layers - 1) - .5) / .5) ** 2))
-        st = 'color-mix(in srgb,#00ffff %d%%,var(--c2))' % p1
+        st = 'color-mix(in srgb,#19e3ff %d%%,var(--c2))' % p1
         if dashed:
             p2 = round(100 * (1 - .9 * max(0, (i / (layers - 1) - .35) / .65) ** 1.5))
             out += ('<g stroke="%s" stroke-width=".1" fill="none"><path d="M%.2f %d Q%.2f %.2f %d %.2f H%.2f Q%.2f %.2f %.2f %d V%d Q%.2f %.2f %.2f %.2f H%d Q%.2f %.2f %.2f %d"/>'
-                    '<path d="M%.2f %d V%d" stroke-dasharray="%.3f %.3f" stroke="color-mix(in srgb,#00ffff %d%%,var(--c2))"/></g>') % (
+                    '<path d="M%.2f %d V%d" stroke-dasharray="%.3f %.3f" stroke="color-mix(in srgb,#19e3ff %d%%,var(--c2))"/></g>') % (
                 st, d, R, d, d, R, d, w - R, w - d, d, w - d, R, h - R, w - d, h - d, w - R, h - d, R, d, h - d, d, h - R, d, R, h - R, dash, dash, p2)
         else:
             out += '<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f" rx="%.2f" stroke="%s" stroke-width=".1" fill="none"/>' % (d, d, w - 2 * d, h - 2 * d, R - d, st)
