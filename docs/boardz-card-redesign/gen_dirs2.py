@@ -119,7 +119,7 @@ def line_strips(html_):
         lines = inner.split('<i class="zs-br"></i>')
         lines = [re.findall(r'<span>(.*?)</span>', l) for l in lines]
         # Middle ground: one key word per title (the longest, 4+ letters) keeps the ransom-note cutout letters.
-        flat = [(len(re.sub(r'[^A-Z0-9]', '', w)), li, wi) for li, l in enumerate(lines) for wi, w in enumerate(l)]
+        flat = [(0 if w.startswith('(') else len(re.sub(r'[^A-Z0-9]', '', w)), li, wi) for li, l in enumerate(lines) for wi, w in enumerate(l)]
         best = max(flat, default=(0, 0, 0))
         if best[0] >= 4:
             w = lines[best[1]][best[2]]
@@ -188,7 +188,7 @@ def cs_open(k, p, flip, key):
             '<div class="cs-actions"><button class="zbtn zbtn--fill" type="button">%s</button><button class="zbtn" type="button">SHARE</button>%s</div></div></div></article>' % (e(p['action']), heart(key)))
 
 def small_title(text, cls):
-    # Small card: two lines max, wrapped here by estimated strip width (Barlow Condensed 900 at 12.5px)
+    # Small card: three lines max, wrapped here by estimated strip width (Barlow Condensed 900 at 12.5px)
     # with explicit breaks so the browser can't rewrap. Longer titles end on an ellipsis, like live.
     wpx = lambda w: len(w) * 9.4 + 8
     lines, cur, full = [[]], 0, True
@@ -198,14 +198,14 @@ def small_title(text, cls):
         else: toks.append(w)
     for w in toks:
         need = wpx(w) + (3 if cur else 0)
-        if cur + need > (116 if len(lines) < 2 else 92):  # two lines; line two stops short of the heart
-            if len(lines) == 2:
+        if cur + need > (124 if len(lines) < 3 else 74):  # three lines; line three stops short of the heart
+            if len(lines) == 3:
                 full = False; break
             lines.append([]); cur = 0; need = wpx(w)
         lines[-1].append(w); cur += need
     if not full:
         last = lines[-1]
-        while len(last) > 1 and (last[-1].startswith('(') or last[-1] in ('A', 'AN', 'THE', 'FOR', 'OF', 'TO', 'AND') or cur + 9 > 92):
+        while len(last) > 1 and (last[-1].startswith('(') or last[-1] in ('A', 'AN', 'THE', 'FOR', 'OF', 'TO', 'AND') or cur + 9 > 74):
             cur -= wpx(last.pop()) + 3
         last[-1] += '\u2026'
     return '<h3 class="%s">%s</h3>' % (cls, '<i class="zs-br"></i>'.join(''.join('<span>%s</span>' % e(w) for w in l) for l in lines))
