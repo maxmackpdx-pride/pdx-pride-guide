@@ -18,19 +18,19 @@ ROOMS = [
     post(id='offering', zc='houz-offering', type='JOIN OUR HOÜZ', value='$850/MO', title='Room open in a queer Hoüz off Alberta',
          desc='Big sunny room in a four person Hoüz. Plants, a dog, chore wheel that actually works. Looking for someone chill who cooks sometimes.',
          area='NE Portland', cat='2 of 4 rooms open', pickup='Move in Aug 1', count='Trans affirming', photo=B('607636d226d5fc0ba5c3138c452cd68d'),
-         hero=B('af1fc292d03733566ff7279572b9b577'), faces=AV[:2], total=4, hcount=2, hlabel='OPEN', wire=HOUZ_WIRE, net=NETA, seeking=True, action="I'M INTERESTED", num='1'),
+         hero=B('af1fc292d03733566ff7279572b9b577'), faces=AV[:2], total=4, hcount=2, hlabel='OPEN', mk='MOVE IN', mon='AUG', day='1', wire=HOUZ_WIRE, net=NETA, seeking=True, action="I'M INTERESTED", num='1'),
     post(id='looking', zc='houz-looking', type='LOOKING TO RENT', value='$900/MO', title='Looking for a room by August',
          desc='Trans femme, 30, works from home, quiet but social. Good with cats. Want to be close in, on a bus line.',
          area='Close in', cat='1 person', pickup='By Aug 1', count='Has references',
-         hero=B('4b32899a11e7d04257ad23b13ddef34b'), faces=AV[2:4], hlabel='LOOKING', wire=HOUZ_WIRE, net=NETB, seeking=True, action='I HAVE A ROOM', num='2'),
+         hero=B('4b32899a11e7d04257ad23b13ddef34b'), faces=AV[2:4], hlabel='LOOKING', mk='BY', mon='AUG', day='1', wire=HOUZ_WIRE, net=NETB, seeking=True, action='I HAVE A ROOM', num='2'),
     post(id='forming', zc='houz-forming', type='BUILDING A HOÜZ', value='$2,700 BUDGET', title='Building a three bedroom Hoüz in SE',
          desc='Two of us so far. Want one more to find a place together this fall. Into shared dinners and a garden.',
-         area='SE Portland', cat='2 of 3 in', pickup='Fall move', count='Queer household', photo=B('a6934db59f134035d782bbda3e59d3ed'),
-         hero=B('8faf273cadb132a7bd362505399c7a24'), faces=AV[3:4], total=4, hcount=1, hlabel='IN', wire=HOUZ_WIRE, net=NETA, seeking=True, action='COUNT ME IN', num='3'),
+         area='SE Portland', cat='2 of 3 in', pickup='Move by Sep 15', count='Queer household', photo=B('a6934db59f134035d782bbda3e59d3ed'),
+         hero=B('8faf273cadb132a7bd362505399c7a24'), faces=AV[3:4], total=4, hcount=1, hlabel='IN', mk='GOAL', mon='SEP', day='15', wire=HOUZ_WIRE, net=NETA, seeking=True, action='COUNT ME IN', num='3'),
     post(id='managed', zc='houz-managed', type='MANAGED RENTAL', value='$1,450/MO', title='One bedroom in a queer owned building',
          desc='Top floor one bedroom, in unit laundry, bike room. Queer owned and managed. Application through the office.',
-         area='N Portland', cat='1 bedroom', pickup='Available now', count='Pets ok', photo=B('02846d13fe195a8dc56877ace4904104'),
-         hero=B('27c6290cd0748ac01971eb8d7f38872a'), wire=HOUZ_WIRE, net=NETB, seeking=False, action='APPLY', num='4'),
+         area='N Portland', cat='1 bedroom', pickup='Available Jul 13', count='Pets ok', photo=B('02846d13fe195a8dc56877ace4904104'),
+         hero=B('27c6290cd0748ac01971eb8d7f38872a'), mk='AVAILABLE', mon='JUL', day='13', wire=HOUZ_WIRE, net=NETB, seeking=False, action='APPLY', num='4'),
   ]),
   ('Mizzed', 'Mizzed Connection', '77edd3da2a67a6a386665a5c45f985e8', [
     post(id='connection', zc='mizzed', type='MIZZED CONNECTION', title='You lent me your lighter at the Eagle Saturday',
@@ -143,6 +143,12 @@ def lit_windows(html_, p):
                              % (m.group(1), int(p['num']) * 0.7, panes))
     return re.sub(r'<img class="([^"]*(?:wp-wire|cs-wire|zs-wire)[^"]*)" src="%s" alt="" aria-hidden="true">' % re.escape(HOUZ_WIRE), add, html_)
 
+def month_html(p, mode):
+    # Hoüz month stamp: the date from the form (move in, by, goal, available) as a tear-off calendar chip.
+    if not p.get('mon'): return ''
+    return ('<span class="hm hm--%s" aria-label="%s %s %s"><b class="hm-k">%s</b><b class="hm-m">%s</b><b class="hm-d">%s</b></span>'
+            % (mode, p['mk'].lower(), p['mon'].title(), p['day'], p['mk'], p['mon'], p['day']))
+
 def faces_html(p, mode):
     # Hoüz face stack and household counter, done like the Giftz parts: color photos on torn black paper with
     # the secondary offset, open spots as dashed slots, the count in Cut Type ransom letters.
@@ -194,6 +200,10 @@ for slug, name, logo, posts in ROOMS:
             if p['type'] in SHORT:  # the small tape has about 78px beside the heart
                 sm = sm.replace('zs-tape">%s<' % p['type'], 'zs-tape">%s<' % SHORT[p['type']], 1)
             # Hoüz small cards use the same torn paper rim as every other card (no solid wire frame).
+            if p.get('mon'):
+                c = c.replace('<button class="zopen-hit"', month_html(p, 'large') + '<button class="zopen-hit"', 1)
+                sm = sm.replace('<button class="zopen-hit"', month_html(p, 'small') + '<button class="zopen-hit"', 1)
+                o = o.replace('<button class="zclose"', month_html(p, 'open') + '<button class="zclose"', 1)
             sm = sm.replace('<button class="zopen-hit"', faces_html(p, 'small').replace('<span class="hf-faces">', '<span class="hf-faces" hidden>', 1) + '<button class="zopen-hit"', 1)  # small: counter only, no faces
             o = o.replace('<ul class="ztags"', faces_html(p, 'open') + '<ul class="ztags"', 1)
             c = '<div class="zpair">' + c + '<div class="zsmall"><span class="zsize">SMALL</span>' + sm + '</div></div>'

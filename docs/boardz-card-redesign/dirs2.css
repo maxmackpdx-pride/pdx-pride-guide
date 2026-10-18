@@ -648,3 +648,24 @@ button{font:inherit;cursor:pointer}
 .hf--small .hf-faces[hidden]{display:none!important}
 .zs.z-seek .hf--small{left:16px!important}
 .zs[class*="zc-houz"] .zs-title{top:42px!important}
+/* Hoüz month stamp: tear-off calendar chip, same on every Hoüz card. Type-color header, big month, day. */
+.hm{position:absolute;z-index:7;display:flex;flex-direction:column;align-items:stretch;width:58px;background:#e9e5da;color:#050506;border-radius:3px;overflow:hidden;
+  box-shadow:3px 3px 0 #050506,0 6px 14px rgba(0,0,0,.45);rotate:3deg;text-align:center}
+.hm b{display:block;font-weight:inherit}
+.hm-k{background:var(--c2);color:#050506;font:700 8px/1 'JetBrains Mono',monospace;letter-spacing:.1em;padding:4px 2px 3px;white-space:nowrap}
+.hm-m{font:900 22px/1 'Barlow Condensed',sans-serif;letter-spacing:.02em;padding:4px 0 0}
+.hm-d{font:800 15px/1 'Barlow Condensed',sans-serif;padding:1px 0 5px;border-top:1px dashed rgba(5,5,6,.35);margin:3px 8px 0}
+.hm--large{right:22px;top:58px}
+.hm--small{right:12px;top:12px;width:34px;box-shadow:2px 2px 0 #050506}
+.hm--small .hm-k{display:none}
+.hm--small .hm-m{font-size:13px;padding:3px 0 0}
+.hm--small .hm-d{font-size:10px;margin:2px 5px 0;padding:1px 0 3px}
+.hm--open{right:24px;top:96px;width:64px}
+.hm--open .hm-m{font-size:26px}
+.zc-houz-forming .hm-k{color:#050506}
+.hm--large{top:102px!important;right:24px}
+/* Large card: compact stamp, month and day on one line, sits between the headline and the heart. */
+.hm--large{top:118px!important;right:24px;width:74px;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:baseline}
+.hm--large .hm-k{flex-basis:100%}
+.hm--large .hm-m{font-size:22px;padding:4px 3px 5px 0}
+.hm--large .hm-d{font-size:22px;border:0;margin:0;padding:4px 0 5px 3px;font-weight:900}
