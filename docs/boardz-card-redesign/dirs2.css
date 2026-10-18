@@ -817,3 +817,18 @@ button{font:inherit;cursor:pointer}
 .zf-actions{display:flex;gap:10px;margin-top:6px}
 .zf-actions .zbtn{font-family:'Barlow Condensed',sans-serif!important;font-weight:800;font-size:16px;letter-spacing:.04em;min-height:48px;padding:0 18px}
 .zf-actions .zbtn--fill{flex:1}
+/* Forms: the signature rainbow seam across the top, torn like a pasted paper strip, and the same edge bloom as the cards. */
+.zf-seam{position:absolute;left:-6px;right:-6px;top:14px;height:12px;z-index:2;pointer-events:none;
+  background:linear-gradient(90deg,#00ffff,#ccff00,#ff00cc,#ff6600,#00ffff) 0 0/200% 100%;animation:z-seam 6s linear infinite;
+  -webkit-mask:var(--zt-paper) 13.2813% 82.6531%/200% 426.6667% no-repeat;mask:var(--zt-paper) 13.2813% 82.6531%/200% 426.6667% no-repeat;
+  filter:drop-shadow(0 0 6px rgba(204,255,0,.35));rotate:-.6deg}
+.zf>.zt-face{padding-top:44px!important}
+.zf{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--c) 32%,transparent)) drop-shadow(0 0 16px color-mix(in srgb,var(--c) 12%,transparent))!important}
+.zf[class*="zc-houz"]{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--c) 32%,transparent)) drop-shadow(0 0 16px color-mix(in srgb,var(--c2) 14%,transparent))!important}
+@media (prefers-reduced-motion:reduce){.zf-seam{animation:none}}
+:is(html.calm-mode,:root[data-calm="true"]) .zf-seam{animation:none}
+/* Tall paper (open cards, small cards, forms): the rim colour layer uses the same three pieces as its mask, so the
+   torn top and bottom edges carry the accent too, all the way around. */
+:is(.wp-open,.cs-open,.zf,.zs)>.zt-rim{background:var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important}
+.zf-seam{top:30px!important}
+.zf>.zt-face{padding-top:54px!important}

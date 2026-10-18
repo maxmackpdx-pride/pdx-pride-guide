@@ -23,3 +23,6 @@ The boards reference canvas uploads by `/_blob/<id>` and a paper and tears style
   form's date field: move in (Join our Hoüz), by (Looking to rent), goal (Building a Hoüz), available (Managed
   rental). When Hoüz is viewed solo on Boardz, add a **sort by month** control that orders posts by that date,
   soonest first. Posts with no date go last.
+- **Mapz pin opens the card.** Tapping or clicking a pin on the map opens that post's open card centered,
+  full screen, over a blurred map. Use the same border-widen glitch as the board. Close by tapping the pin again
+  or the close button, with the same glitch in reverse. Calm mode and reduced motion: plain fade.
