@@ -77,6 +77,8 @@ for zc, col in COLORS.items():
              '<filter id="zf-strip-%s" color-interpolation-filters="sRGB"><feColorMatrix values="%s"/></filter>') % (zc, frame(col), zc, mat(col, (.2126, .7152, .0722)), zc, mat(col, (.32, 1.07, .11)))
     ACC += '.zc-%s{--c:%s;--zf-frame:url(#zf-frame-%s);--zf-hero:url(#zf-hero-%s);--zf-strip:url(#zf-strip-%s)}\n' % (zc, col, zc, zc, zc)
 ACC += '.zc-gigz :is(.wp-tape,.cs-tag--type,.ztag--solid,.zbtn--fill){color:#fff}\n'
+for zc, col in COLORS.items():  # pins sit beside the card, so they take the board accent from the card they hold
+    ACC += '.zpinned:has(>.zc-%s){--c:%s;--zpin-houz:%s}\n' % (zc, col, col)
 # Hoüz keeps its original palette: cyan frame, cyan-inked hero and heart, the type color as the secondary
 # (network, wire companion, tape, price, title offsets, tags), on the teal-black Hoüz ink with a secondary glow.
 CYAN = '#19e3ff'  # calmer Hoüz cyan: pure #00FFFF reads white-hot on ink
@@ -206,7 +208,8 @@ for slug, name, logo, posts in ROOMS:
                 o = o.replace('<button class="zclose"', month_html(p, 'open') + '<button class="zclose"', 1)
             sm = sm.replace('<button class="zopen-hit"', faces_html(p, 'small').replace('<span class="hf-faces">', '<span class="hf-faces" hidden>', 1) + '<button class="zopen-hit"', 1)  # small: counter only, no faces
             o = o.replace('<ul class="ztags"', faces_html(p, 'open') + '<ul class="ztags"', 1)
-            c = '<div class="zpair">' + c + '<div class="zsmall"><span class="zsize">SMALL</span>' + sm + '</div></div>'
+            pk = '%s:%s' % (p['zc'].split('-')[0], p['num'])
+            c = '<div class="zpair">' + pinned(c, pk + ':large') + '<div class="zsmall"><span class="zsize">SMALL</span>' + pinned(sm, pk + ':small', True) + '</div></div>'
             slots += ('<div class="zslot"><div class="ztag">%s</div>'
                       '<sc-if value="{{ s.%s_open }}" hint-placeholder-val="{{ false }}">%s</sc-if>'
                       '<sc-if value="{{ s.%s_closed }}" hint-placeholder-val="{{ true }}">%s</sc-if></div>' % (e(tag), key, o, key, c))

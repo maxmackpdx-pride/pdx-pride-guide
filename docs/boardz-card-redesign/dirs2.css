@@ -679,3 +679,70 @@ button{font:inherit;cursor:pointer}
 .hm--small .hm-m{font-size:14px!important;padding:3px 5px 3px!important}
 .hm--open{width:auto!important}
 .hm--open .hm-m{font-size:28px!important;padding:6px 12px 7px!important}
+
+/* Push pins: live BoardPushPin styles (client/src/components/board/punk/push-pins.css), scoped to the demo. */
+/* Live Boardz pin hardware styles; demo shell keeps it outside the torn mask. */
+.zpinned .ab-pin { position:absolute; z-index:5; top:-32px; left:calc(50% - 20px); width:40px; height:48px; overflow:visible; pointer-events:none; color:var(--c); filter:drop-shadow(1px 2px 1px rgb(0 0 0 / .95)) drop-shadow(4px 7px 3px rgb(0 0 0 / .8)); }
+/* A close contact shadow anchors the needle; the softer cast lifts the hardware. */
+.zpinned .ab-pin__contact { fill:rgb(0 0 0 / .8); rx:8px; ry:2.5px; transform:translate(2px,1px); filter:blur(.8px); }
+.zpinned .ab-pin__hardware { transform-origin:20px 40px; rotate:-9deg; }
+.zpinned .ab-pin__needle { fill:var(--text-mid); stroke:var(--text-hi); stroke-width:.5; }
+.zpinned .ab-pin__side { fill:color-mix(in srgb,var(--c) 25%,var(--z-black)); }
+.zpinned .ab-pin__face { fill:color-mix(in srgb,var(--c) 65%,var(--z-black)); }
+.zpinned .ab-pin__neck { fill:color-mix(in srgb,var(--c) 40%,var(--z-black)); }
+.zpinned .ab-pin__cap-side { fill:color-mix(in srgb,var(--c) 55%,var(--z-black)); }
+.zpinned .ab-pin__cap { fill:color-mix(in srgb,var(--c) 75%,var(--text-hi)); }
+.zpinned .ab-pin__shine { fill:none; stroke:var(--text-hi); stroke-width:1; opacity:.7; }
+.zpinned .ab-pin__wire { fill:none; stroke:var(--pin-wire-paint); stroke-width:.8; stroke-linejoin:round; animation:punk-ab-pin-wire-glitch 6.7s steps(1,end) infinite; }
+.zpinned .ab-pin__mesh { fill:none; opacity:.65; }
+.zpinned .ab-pin__glitch { fill:none; stroke:var(--c); stroke-width:1; opacity:0; animation:punk-ab-pin-scan-glitch 6.7s steps(1,end) infinite; }
+.zpinned .ab-pin__glitch path + path { stroke:var(--text-hi); }
+.zpinned .ab-pin--1 .ab-pin__hardware { rotate:12deg; }
+.zpinned .ab-pin--2 .ab-pin__hardware { rotate:-18deg; scale:.94 1; }
+.zpinned .ab-pin--3 .ab-pin__hardware { rotate:5deg; scale:1.08 .95; }
+.zpinned .ab-pin--1 :is(.ab-pin__wire,.ab-pin__glitch) { animation-duration:8.1s; animation-delay:-2.3s; }
+.zpinned .ab-pin--2 :is(.ab-pin__wire,.ab-pin__glitch) { animation-duration:7.3s; animation-delay:-4.7s; }
+.zpinned .ab-pin--3 :is(.ab-pin__wire,.ab-pin__glitch) { animation-duration:9.2s; animation-delay:-1.1s; }
+.zpinned .ab-pin--1 .ab-pin__mesh { stroke-dasharray:2 1; }
+.zpinned .ab-pin--2 .ab-pin__cap-side { fill:transparent; stroke:currentColor; stroke-width:.7; }
+.zpinned .ab-pin--3 .ab-pin__face { fill:color-mix(in srgb,var(--c) 25%,transparent); stroke:currentColor; stroke-width:.7; }
+/* Full solid/wireframe material swap has its own per-post clock, separate
+   from the existing wire jitter and scan-line offsets. */
+.zpinned .ab-pin__solid { animation:punk-ab-pin-material-solid var(--pin-material-cycle) steps(1,end) var(--pin-material-phase) infinite; }
+.zpinned .ab-pin__surface-wire { fill:none; stroke:var(--pin-wire-paint); stroke-width:.8; stroke-linejoin:round; opacity:0; animation:punk-ab-pin-material-wire var(--pin-material-cycle) steps(1,end) var(--pin-material-phase) infinite; }
+@keyframes punk-ab-pin-material-solid {
+  0%, 63%, 81%, 100% { opacity:1; }
+  60%, 66% { opacity:0; }
+}
+@keyframes punk-ab-pin-material-wire {
+  0%, 63%, 81%, 100% { opacity:0; }
+  60%, 66% { opacity:1; }
+}
+@keyframes punk-ab-pin-wire-glitch {
+  0%, 89%, 94%, 100% { transform:translate(0); opacity:1; }
+  90% { transform:translate(1.5px,-.5px); opacity:.45; }
+  92% { transform:translate(-1px,.5px); opacity:.85; }
+}
+@keyframes punk-ab-pin-scan-glitch {
+  0%, 89%, 94%, 100% { opacity:0; transform:translateX(0); }
+  90% { opacity:.7; transform:translateX(-2px); }
+  92% { opacity:.4; transform:translateX(2px); }
+}
+
+
+
+.zpinned{position:relative;display:inline-block;margin-top:22px;--z-black:#050506;--text-hi:#ffffff;--text-mid:#ababab;--day-thu:#00FFFF}
+.zpinned>.ab-pin{position:absolute;z-index:30;left:calc(50% - 20px + var(--pin-offset));top:-22px;width:40px;height:48px;color:var(--c)}
+.zpinned .ab-pin__hardware{rotate:var(--pin-tilt)}
+.zpinned[data-size=small]>.ab-pin{width:30px;height:36px;left:calc(50% - 15px + var(--pin-offset));top:-15px}
+.zpinned .ab-pin__glitch{stroke:var(--ab-accent,var(--c))}
+.zpinned .ab-pin__glitch path+path{stroke:var(--day-thu)}
+.zpinned:has(>[class*="zc-houz"])>.ab-pin{--c:var(--zpin-houz);--day-thu:var(--zpin-houz)}
+@media(prefers-reduced-motion:reduce){.zpinned :is(.ab-pin__wire,.ab-pin__glitch,.ab-pin__solid,.ab-pin__surface-wire){animation:none}}
+:is(html.calm-mode,:root[data-calm="true"]) .zpinned :is(.ab-pin__wire,.ab-pin__glitch,.ab-pin__solid,.ab-pin__surface-wire){animation:none}
+.zsmall .zpinned{margin-top:15px}
+/* Open cards: the hero motif gets the same depth as the closed card (bigger, clear of the headline, wire companion
+   offset up-right, hard ink shadow) and keeps the hero decay glitch. */
+.wp-ohead .wp-hero:not(.wp-wire),.cs-case .cs-hero--open:not(.cs-wire){width:230px!important;right:-34px!important;bottom:-38px!important;top:auto!important;rotate:-8deg!important;transform:none!important;z-index:4!important;
+  filter:var(--zf-hero) drop-shadow(5px 7px 0 #050506) drop-shadow(0 10px 18px rgba(0,0,0,.55))!important}
+.wp-ohead .wp-hero.wp-wire,.cs-case .cs-hero--open.cs-wire{width:230px!important;right:-34px!important;bottom:-38px!important;top:auto!important;rotate:-8deg!important;transform:none!important;z-index:3!important;translate:42px -30px!important;opacity:.9}

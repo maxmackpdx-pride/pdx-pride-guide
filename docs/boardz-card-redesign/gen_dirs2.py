@@ -134,6 +134,38 @@ def line_strips(html_):
         return '%s<span class="zl">%s</span></h3>' % (m.group(1), '<br>'.join(' '.join(l) for l in lines))
     return re.sub(r'(<h3 class="[^"]*(?:wp-title|cs-title)[^"]*">)(.*?)</h3>', merge, html_)
 
+def push_pin(post_key, small=False):
+    # Port of client/src/components/board/BoardPushPin.tsx (same SVG, same per-post seeds), so the demo shows the
+    # live React pin hardware: variant, tilt, offset and the solid / wireframe material swap clock.
+    seed = 0
+    for ch in post_key:
+        seed = (seed * 31 + ord(ch)) & 0xffffffff
+    variant = seed % 4
+    x = seed ^ (seed >> 16)
+    timing = (x * 0x45d9f3b) & 0xffffffff
+    wid = 'pin-wire-%08x%s' % (seed, 's' if small else 'l')
+    style = ('--pin-wire-paint:url(#%s);--pin-material-cycle:%.3fs;--pin-material-phase:%.3fs;--pin-tilt:%sdeg;--pin-offset:%dpx'
+             % (wid, 8.2 + (timing % 4901) / 1000, -((timing >> 7) % 13001) / 1000, ((seed % 81) - 44) / 2, ((seed >> 8) % 9) - 4))
+    return ('<svg class="ab-pin ab-pin--%d" style="%s" viewBox="0 0 40 48" aria-hidden="true" focusable="false"><defs>'
+            '<linearGradient id="%s" gradientUnits="userSpaceOnUse" x1="10" y1="5" x2="30" y2="34"><stop offset="0" stop-color="var(--day-thu)"/><stop offset=".45" stop-color="var(--day-thu)"/><stop offset="1" stop-color="var(--ab-accent,var(--c))"/></linearGradient>'
+            '<clipPath id="%s-a"><path d="M0 7H40V14H0Z"/></clipPath><clipPath id="%s-b"><path d="M0 23H40V28H0Z"/></clipPath></defs>'
+            '<ellipse class="ab-pin__contact" cx="21" cy="41" rx="6" ry="2"/><g class="ab-pin__hardware"><path class="ab-pin__needle" d="M18 27 24 29 20 40Z"/>'
+            '<g id="%s-body" class="ab-pin__body"><g class="ab-pin__solid">'
+            '<path class="ab-pin__side" d="m10 24 7-8 1-8 10 3-4 9 6 10-11 4-10-5Z"/><path class="ab-pin__face" d="m10 24 10-3 10 9-11 4-10-5Z"/>'
+            '<path class="ab-pin__neck" d="m17 16 1-8 10 3-4 9-4 1Z"/><path class="ab-pin__cap-side" d="m12 7 3-4 16 5 1 6-9 4-11-5Z"/>'
+            '<path class="ab-pin__cap" d="m12 7 10-4 9 5-9 5Z"/><path class="ab-pin__shine" d="m14 7 8-2 6 3M11 25l8-2 5 4"/></g>'
+            '<g class="ab-pin__surface-wire"><path d="m12 7 10-4 9 5 1 6-9 4-11-5V7Zm0 0 10 6 9-5m-9 5 1 5m-6-2 3 5 4-1 4-9M17 16l-7 8-1 5 10 5 11-4-6-10M10 24l10-3 10 9m-11 4 1-13"/>'
+            '<path d="m16 5 11 6m-8-7 11 5M14 10l9 5 8-4M16 18l8 5m-10-2 12 5m-14 0 7 4 8-3m-13-4 5 11m4-12 2 9"/></g>'
+            '<g class="ab-pin__wire"><path d="m22 3 9 5 1 6-9 4-1-5V3Zm0 10 9-5m-8 10 1 2 6 10-11 4 1-13 4-1m-4 1 10 9m-11 4 5-14"/>'
+            '<path class="ab-pin__mesh" d="m26 6-3 12m5-9-1 7m-7 9 7 1m-7 3 9 1"/></g></g>'
+            '<g clip-path="url(#%s-a)"><use href="#%s-body" class="ab-pin__tear ab-pin__tear--a"/></g>'
+            '<g clip-path="url(#%s-b)"><use href="#%s-body" class="ab-pin__tear ab-pin__tear--b"/></g>'
+            '<g class="ab-pin__glitch"><path d="M27 8h8m-13 9h8M9 26h9m7 4h9"/><path d="M30 11h4M7 28h5"/></g></g></svg>'
+            ) % (variant, style, wid, wid, wid, wid, wid, wid, wid, wid)
+
+def pinned(article_html, post_key, small=False):
+    return '<div class="zpinned" data-size="%s">%s%s</div>' % ('small' if small else 'large', push_pin(post_key, small), article_html)
+
 SEAM = '<span class="zseam" aria-hidden="true"></span>'
 
 # ---------- 1. Wheatpaste ----------
@@ -259,7 +291,7 @@ for d, title, blurb, closed, opened, small in DIRS:
             o = o.replace(' zglitch', ' zglitch zo-%s' % 'abcd'[sum(ord(ch) * (i + 7) for i, ch in enumerate(key)) % 4], 1)  # which way it opens
             c = c.replace('<article ', '<article style="%s" ' % decay_vars(key), 1)
             sm = sm.replace('<article ', '<article style="%s" ' % decay_vars(key + 's'), 1)
-            c = '<div class="zpair">' + c + '<div class="zsmall"><span class="zsize">SMALL</span>' + sm + '</div></div>'
+            c = '<div class="zpair">' + pinned(c, 'giftz:' + p['num'] + ':large') + '<div class="zsmall"><span class="zsize">SMALL</span>' + pinned(sm, 'giftz:' + p['num'] + ':small', True) + '</div></div>'
             slots += ('<div class="zslot"><div class="ztag">%s</div>'
                       '<sc-if value="{{ s.%s_open }}" hint-placeholder-val="{{ false }}">%s</sc-if>'
                       '<sc-if value="{{ s.%s_closed }}" hint-placeholder-val="{{ true }}">%s</sc-if></div>' % (e(tag), key, o, key, c))
