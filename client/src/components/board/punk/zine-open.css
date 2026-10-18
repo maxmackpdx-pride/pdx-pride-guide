@@ -137,3 +137,10 @@ html.calm-mode .board-detail-backdrop:has(>[data-zine-open]){backdrop-filter:blu
 [role=dialog][data-zine-open] :is(.hz-actionbar,.gifting-listing-actions+*,.sellz-actions){
   position:sticky!important;bottom:0;z-index:6;padding:12px 16px 14px!important;background:var(--z-black,#050506)!important;
   border-top:1px solid var(--panel-border,#1c1c22)}
+
+/* Clear of the torn edge: Hoüz body and action row keep the same 22px gutter as the message panel. */
+[role=dialog][data-zine-open] :is(.hz-wrap,.hz-actionbar){padding-inline:22px!important;box-sizing:border-box}
+/* The area chip stops short of the round close button. */
+.boardz-punk-scope .zine-open-head .zine-area{right:90px}
+/* Seeking Hoüz posts: the torn notches are already outside the 22px gutter, so the body doesn't indent again. */
+[role=dialog][data-zine-seek=true] .hz-pad{padding-left:0!important}
