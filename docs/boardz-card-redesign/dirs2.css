@@ -381,3 +381,10 @@ button{font:inherit;cursor:pointer}
 :is(.wp-open,.cs-open) :is(.wp-actions,.cs-actions){padding-right:64px!important;gap:10px}
 :is(.wp-open,.cs-open) .zbtn{flex:0 1 auto;min-width:0;padding-left:14px;padding-right:14px;font-size:14px}
 .wp-open .wp-strip{padding:20px 22px 18px 26px!important}
+/* Heart clears the torn rim: the scan bites up to ~10px in, so keep 22px from the face edge on large and open cards. */
+.zt:not(.zs) .zheart,:is(.wp-open,.cs-open) .zheart{right:22px!important;bottom:22px!important}
+:is(.wp-open,.cs-open) .zheart{bottom:30px!important}
+:is(.wp-open,.cs-open) :is(.wp-actions,.cs-actions){padding-right:72px!important;padding-bottom:8px}
+.zs .zheart{right:14px!important;bottom:14px!important}
+:is(.wp-open,.cs-open) .zheart{bottom:46px!important;right:26px!important}:is(.wp-strips,.cs-sheet){padding-bottom:46px!important}:is(.wp-open,.cs-open) :is(.wp-actions,.cs-actions){padding-bottom:4px}
+.zt:is(.wp-open,.cs-open) .zheart{bottom:48px!important;right:26px!important}
