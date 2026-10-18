@@ -594,3 +594,13 @@ button{font:inherit;cursor:pointer}
 .zl .zr .rz-3{background:#e2dccb;color:#050506}
 .zc-gigz .zl .zr .rz-1{color:#fff}
 .zs .zl .zr .rz-l{font-size:.9em;padding:0 .04em;margin:0}
+/* Small torn-paper cards: same true-aspect edge as the open cards (scan pinned top and bottom, sides fill),
+   so the tears keep their shape on the taller 136 x 150 card instead of stretching. */
+.zs:not(.hz-small)>:is(.zt-rim,.zt-face){
+  -webkit-mask:var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important;
+  mask:var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important}
+.zs:not(.hz-small)>.zt-rim{background:var(--zt-card) center/100% 100% no-repeat!important}
+.z-seek.zs:not(.hz-small)>:is(.zt-rim,.zt-face){
+  -webkit-mask:var(--zt-tears) center/100% 100% no-repeat,var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important;
+  mask:var(--zt-tears) center/100% 100% no-repeat,var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important;
+  -webkit-mask-composite:source-in,source-over,source-over!important;mask-composite:intersect,add,add!important}
