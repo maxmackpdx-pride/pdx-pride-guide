@@ -6,6 +6,7 @@ exec(SRC.split("\nbody = ''")[0])
 B = lambda i: '/_blob/' + i
 NETA = [B('1a93af24feb1018d07912913d3e65299'), B('d4dc408c6733fe053c49d4420b3afb0e'), B('4b7808ce1c35716da2f36bd7589319a6')]
 NETB = [B('908149a2a7881508173827249fb42461'), B('7579a17b3218836a3267bc68be1e457e'), B('2b6477e813e62610161df2541616a735')]
+AV = [B('51d44a40e9e0af822e68eb540ae9ef84'), B('23dd5aa430ee8d6151af0dd8865cd537'), B('4b97153611b72eed1c67665c14f6622d'), B('140a00f61855a845708de95f2da515ed')]
 HOUZ_WIRE = B('cd9f09513f3f5da022ac80708e48b671')
 COLORS = {'houz-offering': '#FF00CC', 'houz-looking': '#FF6600', 'houz-forming': '#39FF14', 'houz-managed': '#FF5F6D',
           'mizzed': '#FF00CC', 'sellz': '#39FF14', 'gigz': '#6E3DFF'}
@@ -17,15 +18,15 @@ ROOMS = [
     post(id='offering', zc='houz-offering', type='JOIN OUR HOÜZ', value='$850/MO', title='Room open in a queer Hoüz off Alberta',
          desc='Big sunny room in a four person Hoüz. Plants, a dog, chore wheel that actually works. Looking for someone chill who cooks sometimes.',
          area='NE Portland', cat='2 of 4 rooms open', pickup='Move in Aug 1', count='Trans affirming', photo=B('607636d226d5fc0ba5c3138c452cd68d'),
-         hero=B('af1fc292d03733566ff7279572b9b577'), wire=HOUZ_WIRE, net=NETA, seeking=True, action="I'M INTERESTED", num='1'),
+         hero=B('af1fc292d03733566ff7279572b9b577'), faces=AV[:2], total=4, hcount=2, hlabel='OPEN', wire=HOUZ_WIRE, net=NETA, seeking=True, action="I'M INTERESTED", num='1'),
     post(id='looking', zc='houz-looking', type='LOOKING TO RENT', value='$900/MO', title='Looking for a room by August',
          desc='Trans femme, 30, works from home, quiet but social. Good with cats. Want to be close in, on a bus line.',
          area='Close in', cat='1 person', pickup='By Aug 1', count='Has references',
-         hero=B('4b32899a11e7d04257ad23b13ddef34b'), wire=HOUZ_WIRE, net=NETB, seeking=True, action='I HAVE A ROOM', num='2'),
+         hero=B('4b32899a11e7d04257ad23b13ddef34b'), faces=AV[2:4], hlabel='LOOKING', wire=HOUZ_WIRE, net=NETB, seeking=True, action='I HAVE A ROOM', num='2'),
     post(id='forming', zc='houz-forming', type='BUILDING A HOÜZ', value='$2,700 BUDGET', title='Building a three bedroom Hoüz in SE',
          desc='Two of us so far. Want one more to find a place together this fall. Into shared dinners and a garden.',
          area='SE Portland', cat='2 of 3 in', pickup='Fall move', count='Queer household', photo=B('a6934db59f134035d782bbda3e59d3ed'),
-         hero=B('8faf273cadb132a7bd362505399c7a24'), wire=HOUZ_WIRE, net=NETA, seeking=True, action='COUNT ME IN', num='3'),
+         hero=B('8faf273cadb132a7bd362505399c7a24'), faces=AV[3:4], total=4, hcount=1, hlabel='IN', wire=HOUZ_WIRE, net=NETA, seeking=True, action='COUNT ME IN', num='3'),
     post(id='managed', zc='houz-managed', type='MANAGED RENTAL', value='$1,450/MO', title='One bedroom in a queer owned building',
          desc='Top floor one bedroom, in unit laundry, bike room. Queer owned and managed. Application through the office.',
          area='N Portland', cat='1 bedroom', pickup='Available now', count='Pets ok', photo=B('02846d13fe195a8dc56877ace4904104'),
@@ -89,10 +90,33 @@ ACC += ('[class*="zc-houz"] .zt-face{background:radial-gradient(ellipse at 100% 
         '[class*="zc-houz"] :is(.wp-tape,.cs-tag--type)::before{background:var(--c2)}\n'
         '[class*="zc-houz"] :is(.ztag--solid,.zbtn--fill){background:var(--c2);border-color:var(--c2)}\n'
         '[class*="zc-houz"] .wp-value{color:var(--c2)}\n'
+        '[class*="zc-houz"].wp-card .wp-value{left:auto;right:70px;bottom:20px}\n'
         '[class*="zc-houz"] .zt{filter:drop-shadow(0 0 18px color-mix(in srgb,var(--c2) 8%,transparent))}\n')
 CSS = open(__file__.replace('gen_rooms.py', 'dirs2.css')).read()
 CSS = CSS.replace('url(#zt-lime-strip)', 'var(--zf-strip)').replace('url(#zt-lime)', 'var(--zf-hero)').replace('url(#zt-frame)', 'var(--zf-frame)')
 CSS += decay_keyframes() + ACC
+
+def faces_html(p, mode):
+    # Hoüz face stack and household counter, done like the Giftz parts: color photos on torn black paper with
+    # the secondary offset, open spots as dashed slots, the count in Cut Type ransom letters.
+    if not p.get('faces'): return ''
+    total = p.get('total') or len(p['faces'])
+    faces = list(p['faces'])
+    slots = ''
+    for i in range(total if p.get('total') else len(faces)):
+        r = ((i * 37 + int(p['num']) * 11) % 9) - 4
+        if i < len(faces):
+            slots += '<span class="hf-face" style="--r:%ddeg"><img src="%s" alt=""></span>' % (r, faces[i])
+        else:
+            slots += '<span class="hf-face hf-open" style="--r:%ddeg" aria-hidden="true"></span>' % r
+    if p.get('total'):
+        label = '%d %s out of %d' % (p['hcount'], p['hlabel'].lower(), total)
+        count = ('<span class="hf-count"><b class="hf-n">%s</b><span class="hf-l">%s</span><span class="hf-of">/%d</span></span>'
+                 % (ransom(str(p['hcount']), int(p['num'])), p['hlabel'], total))
+    else:
+        label = '%d people looking' % len(faces)
+        count = '<span class="hf-count"><b class="hf-n">%s</b><span class="hf-l">%s</span></span>' % (ransom(str(len(faces)), int(p['num'])), p['hlabel'])
+    return '<div class="hf hf--%s" role="img" aria-label="%s"><span class="hf-faces">%s</span>%s</div>' % (mode, label, slots, count)
 
 out = {}
 for slug, name, logo, posts in ROOMS:
@@ -111,6 +135,12 @@ for slug, name, logo, posts in ROOMS:
                 html_ = html_.replace('alt="Giftz"', 'alt="%s"' % e(name))
                 return html_.replace('<article ', '<article style="%s" ' % decay_vars(key + suffix), 1)
             o, c, sm = prep(opened(p['id'], p, flip, key), 'o'), prep(closed(p['id'], p, flip, key), ''), prep(small(p['id'], p, flip, key), 's')
+            c = c.replace('<button class="zopen-hit"', faces_html(p, 'large') + '<button class="zopen-hit"', 1)
+            SHORT = {'JOIN OUR HOÜZ': 'JOIN', 'LOOKING TO RENT': 'LOOKING', 'BUILDING A HOÜZ': 'BUILDING', 'MANAGED RENTAL': 'MANAGED', 'MIZZED CONNECTION': 'MIZZED'}
+            if p['type'] in SHORT:  # the small tape has about 78px beside the heart
+                sm = sm.replace('zs-tape">%s<' % p['type'], 'zs-tape">%s<' % SHORT[p['type']], 1)
+            sm = sm.replace('<button class="zopen-hit"', faces_html(p, 'small') + '<button class="zopen-hit"', 1)
+            o = o.replace('<ul class="ztags"', faces_html(p, 'open') + '<ul class="ztags"', 1)
             c = '<div class="zpair">' + c + '<div class="zsmall"><span class="zsize">SMALL</span>' + sm + '</div></div>'
             slots += ('<div class="zslot"><div class="ztag">%s</div>'
                       '<sc-if value="{{ s.%s_open }}" hint-placeholder-val="{{ false }}">%s</sc-if>'

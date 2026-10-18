@@ -312,6 +312,37 @@ button{font:inherit;cursor:pointer}
 .wp-open>.zt-face,.cs-open>.zt-face{position:relative}
 .wp-actions,.cs-actions{padding-right:60px}
 .zs .zheart{right:13px!important;bottom:13px!important}
+/* Hoüz face stack + household counter. */
+.hf{position:absolute;z-index:6;left:20px;bottom:52px;display:flex;align-items:center;gap:12px;--c2:var(--c)}
+[class*="zc-houz"] .hf{--c2:inherit}
+.hf-faces{display:flex;padding-left:9px}
+.hf-face{position:relative;width:34px;height:34px;margin-left:-9px;rotate:var(--r);background:#050506;border:2px solid #050506;box-shadow:3px 3px 0 var(--c2,var(--c));overflow:hidden}
+.hf-face img{display:block;width:100%;height:100%;object-fit:cover;filter:saturate(1.15) contrast(1.05)}
+.hf-face:nth-child(2n){border-radius:2px 6px 3px 5px}
+.hf-open{background:color-mix(in srgb,#031012 70%,transparent);border:1.5px dashed var(--c2,var(--c));box-shadow:none;display:grid;place-items:center}
+.hf-open::after{content:"+";font:700 16px/1 'JetBrains Mono',monospace;color:var(--c2,var(--c))}
+.hf-count{position:relative;display:inline-flex;align-items:baseline;gap:5px;padding:4px 8px 3px;background:#050506;box-shadow:3px 3px 0 var(--c2,var(--c));rotate:-2deg}
+.hf-n{font-size:24px;line-height:1;color:#fff}
+.hf-l{font:700 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--c2,var(--c))}
+.hf-of{font:700 13px/1 'JetBrains Mono',monospace;color:#fff;opacity:.85}
+.hf--small{left:10px;top:12px;bottom:auto;gap:0;width:116px;justify-content:space-between}
+.hf--small .hf-faces{padding-left:5px}
+.hf--small .hf-face{width:17px;height:17px;margin-left:-5px;border-width:1.5px;box-shadow:2px 2px 0 var(--c2,var(--c))}
+.hf--small .hf-open::after{font-size:10px}
+.hf--small .hf-count{padding:2px 5px 1px;gap:3px;box-shadow:2px 2px 0 var(--c2,var(--c))}
+.hf--small .hf-n{font-size:13px}
+.hf--small .hf-l{font-size:7px;letter-spacing:.1em}
+.hf--small .hf-of{font-size:9px}
+.hf--open{position:relative;left:auto;bottom:auto;margin:2px 0 6px}
+.hf--open .hf-faces{padding-left:14px}
+.hf--open .hf-face{width:54px;height:54px;margin-left:-14px;box-shadow:4px 4px 0 var(--c2,var(--c))}
+.hf--open .hf-open::after{font-size:22px}
+.hf--open .hf-n{font-size:36px}
+.hf--open .hf-l{font-size:12px}
+.hf--open .hf-of{font-size:18px}
+/* Hoüz large card: headline holds to three lines above the face stack. */
+[class*="zc-houz"]:is(.wp-card,.cs-card) :is(.wp-title,.cs-title){font-size:21px;gap:3px 5px;max-height:84px;overflow:hidden;padding:2px 4px 4px 2px}
+.zs .zs-tape{letter-spacing:.06em;font-size:7.5px;max-width:78px;overflow:hidden}
 @keyframes zd-0{0.00%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}24.41%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,50% 70%,66% 70%,66% 112%,50% 112%,50% 70%)}25.46%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,53% 68%,69% 68%,69% 114%,53% 114%,53% 68%)}26.76%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}55.45%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,16% 33%,48% 33%,48% 69%,16% 69%,16% 33%)}58.72%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}78.33%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,81% 6%,112% 6%,112% 28%,81% 28%,81% 6%)}80.23%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}100.00%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}}
 @keyframes zd-1{0.00%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}14.68%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,50% 38%,89% 38%,89% 52%,50% 52%,50% 38%)}15.20%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,53% 36%,92% 36%,92% 54%,53% 54%,53% 36%)}15.83%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}40.64%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,72% 13%,112% 13%,112% 46%,72% 46%,72% 13%)}43.28%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}58.88%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,23% 83%,50% 83%,50% 112%,23% 112%,23% 83%)}60.59%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}84.52%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,67% 44%,85% 44%,85% 70%,67% 70%,67% 44%)}86.36%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}100.00%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}}
 @keyframes zd-2{0.00%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}24.96%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,50% 77%,86% 77%,86% 112%,50% 112%,50% 77%)}28.09%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}63.22%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,74% 67%,112% 67%,112% 85%,74% 85%,74% 67%)}64.95%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}83.45%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,26% 73%,64% 73%,64% 112%,26% 112%,26% 73%)}85.87%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}100.00%{clip-path:polygon(evenodd,-10% -10%,110% -10%,110% 110%,-10% 110%,-10% -10%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%)}}

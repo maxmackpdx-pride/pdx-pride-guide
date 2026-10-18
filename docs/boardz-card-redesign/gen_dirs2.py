@@ -178,14 +178,14 @@ def small_title(text, cls):
         else: toks.append(w)
     for w in toks:
         need = wpx(w) + (3 if cur else 0)
-        if cur + need > (116 if len(lines) < 3 else 84):  # line three stops short of the heart
+        if cur + need > (116 if len(lines) < 3 else 72):  # line three stops short of the heart
             if len(lines) == 3:
                 full = False; break
             lines.append([]); cur = 0; need = wpx(w)
         lines[-1].append(w); cur += need
     if not full:
         last = lines[-1]
-        while len(last) > 1 and (last[-1].startswith('(') or last[-1] in ('A', 'AN', 'THE', 'FOR', 'OF', 'TO', 'AND') or cur + 9 > 84):
+        while len(last) > 1 and (last[-1].startswith('(') or last[-1] in ('A', 'AN', 'THE', 'FOR', 'OF', 'TO', 'AND') or cur + 9 > 72):
             cur -= wpx(last.pop()) + 3
         last[-1] += '\u2026'
     return '<h3 class="%s">%s</h3>' % (cls, '<i class="zs-br"></i>'.join(''.join('<span>%s</span>' % e(w) for w in l) for l in lines))
