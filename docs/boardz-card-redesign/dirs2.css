@@ -466,3 +466,10 @@ button{font:inherit;cursor:pointer}
 @keyframes z-content{0%,55%{opacity:0}100%{opacity:1}}
 @media (prefers-reduced-motion:reduce){.zglitch,.zglitch :is(.wp-strips,.cs-sheet){animation:z-fade .2s ease both!important}}
 :is(html.calm-mode,:root[data-calm="true"]) :is(.zglitch,.zglitch .wp-strips,.zglitch .cs-sheet){animation:z-fade .2s ease both!important}
+/* Mizzed: the speech bubbles read clearly, about two thirds in frame, still touching the right edge. */
+.cs-card .cs-hero:is([src*="b4f6ad47"],[src*="be7ac672"]){width:238px;right:-34px;top:34px;bottom:auto;rotate:-6deg}
+.zv-b.cs-card .cs-hero:is([src*="b4f6ad47"],[src*="be7ac672"]){width:228px;right:-28px;top:58px;rotate:7deg}
+.zs .zs-hero:is([src*="b4f6ad47"],[src*="be7ac672"]){width:118px;right:-30px;top:22px;bottom:auto;rotate:-6deg}
+.zv-b.zs .zs-hero:is([src*="b4f6ad47"],[src*="be7ac672"]){top:36px;rotate:7deg}
+.cs-case .cs-hero:is([src*="b4f6ad47"],[src*="be7ac672"]){width:270px;right:-40px;top:40px;bottom:auto;rotate:-6deg}
+.zc-mizzed :is(.cs-wire,.zs-wire){translate:22px -16px}
