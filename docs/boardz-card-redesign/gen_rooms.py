@@ -141,6 +141,7 @@ def faces_html(p, mode):
     return '<div class="hf hf--%s" role="img" aria-label="%s"><span class="hf-faces">%s</span>%s</div>' % (mode, label, slots, count)
 
 out = {}
+COMBINED_BODY, COMBINED_KEYS = '', []
 for slug, name, logo, posts in ROOMS:
     LOGO = B(logo)
     body, keys = '', []
@@ -196,7 +197,27 @@ for slug, name, logo, posts in ROOMS:
            '<p>The new card design for %s. Posts with a photo use the Wheatpaste card, posts without use the Cutout specimen card. Each shows its large and small card in versions A and B. Tap a card to open it. Tap the X to close. The heart saves.</p></header>\n%s</div>\n</x-dc>\n'
            '<script type="text/x-dc" data-dc-script data-props=\'{"$preview":{"width":%d,"height":%d}}\'>\n%s\n</script>\n</body>\n</html>\n') % (
         e(name), FONTS, PAPERCSS, CSS, svg, W, LOGO, e(name), e(name), e(name), e(name), body, W, H, logic)
+    COMBINED_BODY += ('<section class="zdir zroom" aria-label="%s"><header class="zdir-head"><img class="zroom-logo" src="%s" alt="%s"><h2>%s</h2></header>%s</section>\n' % (e(name), LOGO, e(name), e(name), body))
+    COMBINED_KEYS += keys
     fn = 'Cards-%s.dc.html' % slug
     open('/tmp/claude-0/-home-user-pdx-pride-guide/4b1ae876-0793-5aa1-a5d3-e65182ac68ab/scratchpad/canvas2/project/' + fn, 'w').write(doc)
     out[fn] = (W, H)
+print(out)
+
+# One board with everything: the Giftz board's sections plus every room, so every card opens from the same board.
+D = '/tmp/claude-0/-home-user-pdx-pride-guide/4b1ae876-0793-5aa1-a5d3-e65182ac68ab/scratchpad/canvas2/project/Directions.dc.html'
+src = open(D).read()
+gk = json.loads(re.search(r'const keys = (\[.*?\]);', src).group(1))
+gbody = src[src.index('<section class="zdir"'):src.rindex('</div>\n</x-dc>')]
+allkeys = gk + COMBINED_KEYS
+hdr = src[src.index('<header class="zhead">'):src.index('</header>', src.index('<header class="zhead">')) + 9]
+H2 = 6700 + sum(len(p) for _, _, _, p in ROOMS) * 900 + len(ROOMS) * 260
+doc2 = src[:src.index('<style>') + 7] + '\n' + CSS + '\n.zroot{--zf-frame:url(#zt-frame);--zf-hero:url(#zt-lime);--zf-strip:url(#zt-lime-strip)}\n.zroom-logo{height:110px;width:auto;display:block;margin-bottom:10px}\n.zroom{margin-top:80px}\n' + src[src.index('</style>'):]
+doc2 = re.sub(r'<svg width="0" height="0".*?</svg>', lambda m: svg, doc2, count=1, flags=re.S)
+doc2 = doc2.replace(gbody, gbody + COMBINED_BODY, 1)
+doc2 = re.sub(r'const keys = \[.*?\];', lambda m: 'const keys = %s;' % json.dumps(allkeys), doc2, count=1)
+doc2 = re.sub(r'"\$preview":\{"width":1600,"height":\d+\}', '"$preview":{"width":1600,"height":%d}' % H2, doc2, count=1)
+doc2 = doc2.replace('<title>Boardz card directions</title>', '<title>Boardz new cards</title>', 1)
+open(D, 'w').write(doc2)  # the Directions board is the one that opens on the canvas
+out['Directions.dc.html'] = (1600, H2)
 print(out)
