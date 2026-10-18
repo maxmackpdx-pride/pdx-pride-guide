@@ -123,8 +123,11 @@ def line_strips(html_):
         best = max(flat, default=(0, 0, 0))
         if best[0] >= 4:
             w = lines[best[1]][best[2]]
+            tail = ''
+            while w and not w[-1].isalnum():  # keep trailing punctuation and the small-card ellipsis off the cutouts
+                tail = w[-1] + tail; w = w[:-1]
             seed = sum(ord(ch) for ch in w)
-            lines[best[1]][best[2]] = '<b class="zr">%s</b>' % ransom(html.unescape(w), seed)
+            lines[best[1]][best[2]] = '<i class="zrw"><b class="zr">%s</b>%s</i>' % (ransom(html.unescape(w), seed), tail)
         return '%s<span class="zl">%s</span></h3>' % (m.group(1), '<br>'.join(' '.join(l) for l in lines))
     return re.sub(r'(<h3 class="[^"]*(?:wp-title|cs-title)[^"]*">)(.*?)</h3>', merge, html_)
 

@@ -626,3 +626,11 @@ button{font:inherit;cursor:pointer}
 .zs .zs-tape{bottom:16px!important;left:12px!important}
 .zs.z-seek .zs-tape{left:16px!important}
 .zs:not([class*="zc-houz"]) .zs-title{top:40px!important}
+/* Ransom word renders the same on every card size: plain cutout letters only, none of the older per-word strip
+   layers (torn ::before / accent ::after) that were leaking onto each letter on small cards. */
+:is(.wp-title,.cs-title) .zr span::before,:is(.wp-title,.cs-title) .zr span::after{content:none!important;display:none!important}
+:is(.wp-title,.cs-title) .zr span{position:static!important;isolation:auto!important;filter:none!important;box-shadow:none!important}
+:is(.wp-title,.cs-title) .zr .rz-l{display:inline-block!important;padding:.02em .07em!important;margin:0 .015em!important}
+.zs .zl .zr .rz-l{font-size:1em!important}
+.zrw{font-style:normal;white-space:nowrap}
+.zs .zl .zr .rz-l{font-size:.84em!important;padding:0 .04em!important;margin:0!important}.zs .zs-title{max-width:126px!important}.zl .zr{margin-right:0!important}
