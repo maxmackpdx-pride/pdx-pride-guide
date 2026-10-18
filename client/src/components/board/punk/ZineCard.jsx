@@ -170,7 +170,7 @@ export function ZineCard({r,save,calm=false,Photo}){
   const paste=photos.length>0;
   const seeking=SEEKING.includes(r.intent);
   const version=hash31(r.id??r.key)%2?'b':'a';
-  const title=r.intent==='iso'?r.title.replace(/^ISO:\s*/i,''):r.title;
+  const title=r.title;
   const value=paste&&!seeking?cardValue(r):'';
   const d=paste?'wp':'cs';
   const style={...decayVars(key),'--c':p.c,'--c2':p.c2,'--zf-frame':`url(#zine-frame-${p.frame})`,'--zf-hero':`url(#zine-hero-${p.hero})`,'--zf-strip':`url(#zine-strip-${p.strip})`,'--zf-wire':`url(#zine-hero-${p.wire})`};
