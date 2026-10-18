@@ -19,12 +19,14 @@ POSTS = {
                net=[B('908149a2a7881508173827249fb42461'), B('7579a17b3218836a3267bc68be1e457e'), B('2b6477e813e62610161df2541616a735')],
                seeking=False, action="I'M INTERESTED", count='1 of 3 hands up', num='10'),
 }
+# Title cutouts skip the faces with built-in reversed (white on black) glyphs, so every letter reads the same way.
+TITLE_MIX = ['CutMixPaper', 'CutMixLoose']  # the only two Cut Type mixes with no reversed glyphs
 MIX = ['CutMixPaper', 'CutMixRough', 'CutMixReverse', 'CutMixMixed', 'CutMixLoose', 'CutMixRansom', 'CutMixWorn', 'CutMixTall']
 e = html.escape
 RIM = '<span class="zt-rim" aria-hidden="true"></span><div class="zt-face">'
 PAPERCSS = B('d794eaf651e71acb38744eb7f753a379')
 
-def ransom(text, seed):
+def ransom(text, seed, mix=None):
     # Stable per-letter mix of the Cut Type styles, like RansomText (seeded, never rerolled).
     # Letters stay grouped by word so lines only break between words.
     out, word = [], []
@@ -32,9 +34,10 @@ def ransom(text, seed):
         if ch == ' ':
             if word: out.append('<span class="rz-w">%s</span>' % ''.join(word)); word = []
             continue
-        k = (i * 7 + seed * 3) % len(MIX)
+        faces = mix or MIX
+        k = (i * 7 + seed * 3) % len(faces)
         rot = ((i * 37 + seed * 11) % 9) - 4
-        word.append('<span class="rz-l rz-%d" style="font-family:%s;rotate:%ddeg">%s</span>' % (k % 4, MIX[k], rot, e(ch)))
+        word.append('<span class="rz-l rz-%d" style="font-family:%s;rotate:%ddeg">%s</span>' % (k % 4, faces[k], rot, e(ch)))
     return '<span class="rz-gap"> </span>'.join(out)
 
 def net(p, flip):
@@ -127,7 +130,7 @@ def line_strips(html_):
             while w and not w[-1].isalnum():  # keep trailing punctuation and the small-card ellipsis off the cutouts
                 tail = w[-1] + tail; w = w[:-1]
             seed = sum(ord(ch) for ch in w)
-            lines[best[1]][best[2]] = '<i class="zrw"><b class="zr">%s</b>%s</i>' % (ransom(html.unescape(w), seed), tail)
+            lines[best[1]][best[2]] = '<i class="zrw"><b class="zr">%s</b>%s</i>' % (ransom(html.unescape(w), seed, TITLE_MIX), tail)
         return '%s<span class="zl">%s</span></h3>' % (m.group(1), '<br>'.join(' '.join(l) for l in lines))
     return re.sub(r'(<h3 class="[^"]*(?:wp-title|cs-title)[^"]*">)(.*?)</h3>', merge, html_)
 
