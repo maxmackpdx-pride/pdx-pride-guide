@@ -118,6 +118,31 @@ def houz_frame(dashed):
             out += '<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f" rx="%.2f" stroke="%s" stroke-width=".1" fill="none"/>' % (d, d, w - 2 * d, h - 2 * d, R - d, st)
     return '<svg class="hz-frame" viewBox="0 0 %d %d" preserveAspectRatio="none" aria-hidden="true">%s</svg>' % (w, h, out)
 
+def lit_windows(html_, p):
+    # Game-designer signature move: the wire companion house's left window has four panes, one per spot in the
+    # household. Members light a pane in the type color, open spots stay dark and dashed, one open pane breathes.
+    # Drawn as an SVG in the wire image's own coordinates (1374 x 1145) and given the wire's classes, so it lands
+    # exactly on the house wherever the hero rules put it.
+    total = p.get('total') or 4
+    lit = len(p['faces'])
+    q = [(366, 630), (540, 666), (496, 880), (300, 840)]  # left window: TL, TR, BR, BL in image px
+    def at(u, v):
+        top = (q[0][0] + (q[1][0] - q[0][0]) * u, q[0][1] + (q[1][1] - q[0][1]) * u)
+        bot = (q[3][0] + (q[2][0] - q[3][0]) * u, q[3][1] + (q[2][1] - q[3][1]) * u)
+        return (top[0] + (bot[0] - top[0]) * v, top[1] + (bot[1] - top[1]) * v)
+    g = .06
+    panes = ''
+    for i in range(4):
+        u0, v0 = (i % 2) * .5, (i // 2) * .5
+        pts = [at(u0 + g, v0 + g), at(u0 + .5 - g, v0 + g), at(u0 + .5 - g, v0 + .5 - g), at(u0 + g, v0 + .5 - g)]
+        if i >= total: continue
+        cls = 'lw-lit' if i < lit else ('lw-open lw-breathe' if i == lit else 'lw-open')
+        panes += '<polygon class="%s" points="%s"/>' % (cls, ' '.join('%.0f,%.0f' % pt for pt in pts))
+    def add(m):
+        return m.group(0) + ('<svg class="%s lw" viewBox="0 0 1374 1145" style="--lw-dly:-%.1fs" aria-hidden="true">%s</svg>'
+                             % (m.group(1), int(p['num']) * 0.7, panes))
+    return re.sub(r'<img class="([^"]*(?:wp-wire|cs-wire|zs-wire)[^"]*)" src="%s" alt="" aria-hidden="true">' % re.escape(HOUZ_WIRE), add, html_)
+
 def faces_html(p, mode):
     # Hoüz face stack and household counter, done like the Giftz parts: color photos on torn black paper with
     # the secondary offset, open spots as dashed slots, the count in Cut Type ransom letters.
@@ -133,11 +158,11 @@ def faces_html(p, mode):
             slots += '<span class="hf-face hf-open" style="--r:%ddeg" aria-hidden="true"></span>' % r
     if p.get('total'):
         label = '%d %s out of %d' % (p['hcount'], p['hlabel'].lower(), total)
-        count = ('<span class="hf-count"><b class="hf-n">%s</b><span class="hf-l">%s</span><span class="hf-of">/%d</span></span>'
-                 % (ransom(str(p['hcount']), int(p['num'])), p['hlabel'], total))
+        count = ('<span class="hf-count"><b class="hf-n">%s</b><span class="hf-of">/%d</span><span class="hf-l">%s</span></span>'
+                 % (p['hcount'], total, p['hlabel']))
     else:
         label = '%d people looking' % len(faces)
-        count = '<span class="hf-count"><b class="hf-n">%s</b><span class="hf-l">%s</span></span>' % (ransom(str(len(faces)), int(p['num'])), p['hlabel'])
+        count = '<span class="hf-count"><b class="hf-n">%d</b><span class="hf-l">%s</span></span>' % (len(faces), p['hlabel'])
     return '<div class="hf hf--%s" role="img" aria-label="%s"><span class="hf-faces">%s</span>%s</div>' % (mode, label, slots, count)
 
 out = {}
@@ -158,9 +183,14 @@ for slug, name, logo, posts in ROOMS:
                 html_ = html_.replace('alt="Giftz"', 'alt="%s"' % e(name))
                 return html_.replace('<article ', '<article style="%s" ' % decay_vars(key + suffix), 1)
             o, c, sm = prep(opened(p['id'], p, flip, key), 'o'), prep(closed(p['id'], p, flip, key), ''), prep(small(p['id'], p, flip, key), 's')
+            o, c, sm = line_strips(o), line_strips(c), line_strips(sm)
+            if p.get('faces') and p['zc'].startswith('houz'):  # lit windows on the wire house: one pane per spot
+                o, c, sm = lit_windows(o, p), lit_windows(c, p), lit_windows(sm, p)
             o = o.replace(' zglitch', ' zglitch zo-%s' % 'abcd'[sum(ord(ch) * (i + 7) for i, ch in enumerate(key)) % 4], 1)  # which way it opens
             c = c.replace('<button class="zopen-hit"', faces_html(p, 'large') + '<button class="zopen-hit"', 1)
             SHORT = {'JOIN OUR HOÜZ': 'JOIN', 'LOOKING TO RENT': 'LOOKING', 'BUILDING A HOÜZ': 'BUILDING', 'MANAGED RENTAL': 'MANAGED', 'MIZZED CONNECTION': 'MIZZED'}
+            if p['type'] == 'MIZZED CONNECTION':  # the open card's kicker must clear the location chip
+                o = o.replace('cs-tag--type">MIZZED CONNECTION<', 'cs-tag--type">MIZZED<', 1)
             if p['type'] in SHORT:  # the small tape has about 78px beside the heart
                 sm = sm.replace('zs-tape">%s<' % p['type'], 'zs-tape">%s<' % SHORT[p['type']], 1)
             if p['zc'].startswith('houz'):  # Hoüz small cards keep their wire frame instead of the torn rim

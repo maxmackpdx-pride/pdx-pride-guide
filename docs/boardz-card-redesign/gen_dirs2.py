@@ -1,4 +1,4 @@
-import json, html
+import json, html, re
 # Three new Boardz card directions: punk paper meets cyberspace. Real Giftz motifs, photos and Cut Type
 # fonts from the canvas uploads. Tap a card: it grows into its open card through a glitch.
 B = lambda i: '/_blob/' + i
@@ -111,6 +111,16 @@ def decay_vars(key):
         out.append('--zd-%s-n:zd-%d;--zd-%s-d:%.2fs;--zd-%s-o:%.2fs' % (layer, int(r() * 8), layer, 7 + r() * 9, layer, -r() * 16))
     return ';'.join(out)
 
+def line_strips(html_):
+    # Headlines read as one torn strip per line instead of a chip per word: merge the word spans into one
+    # wrapping span (its background is cloned per line box), keeping explicit small-card line breaks.
+    def merge(m):
+        inner = m.group(2)
+        lines = inner.split('<i class="zs-br"></i>')
+        words = [' '.join(re.findall(r'<span>(.*?)</span>', l)) for l in lines]
+        return '%s<span class="zl">%s</span></h3>' % (m.group(1), '<br>'.join(words))
+    return re.sub(r'(<h3 class="[^"]*(?:wp-title|cs-title)[^"]*">)(.*?)</h3>', merge, html_)
+
 SEAM = '<span class="zseam" aria-hidden="true"></span>'
 
 # ---------- 1. Wheatpaste ----------
@@ -162,13 +172,13 @@ def cs_closed(k, p, flip, key):
 def cs_open(k, p, flip, key):
     return ('<article class="cs cs-open zt zglitch%s">' % (' z-seek' if p['seeking'] else '') + RIM + closer(key) +
             '<div class="cs-case">' + net(p, flip) + '<img class="cs-hero cs-hero--open cs-wire" src="%s" alt="" aria-hidden="true"><img class="cs-hero cs-hero--open" src="%s" alt="" aria-hidden="true">' % (p['wire'], p['hero']) +
-            '<span class="cs-tag cs-tag--type">%s</span><span class="cs-tag cs-tag--area">%s</span><span class="cs-no">SPECIMEN NO. %s · %s</span></div>' % (p['type'], e(p['area'].upper()), p['num'], e(p['cat'].upper())) + SEAM +
-            '<div class="cs-sheet">%s<p class="cs-desc">%s</p>%s'
-            % (strips(p['title'], 'cs-title cs-title--open'), e(p['desc']), details(p)) +
+            '<span class="cs-tag cs-tag--type">%s</span><span class="cs-tag cs-tag--area">%s</span>%s<span class="cs-no">SPECIMEN NO. %s · %s</span></div>' % (p['type'], e(p['area'].upper()), strips(p['title'], 'cs-title cs-title--open'), p['num'], e(p['cat'].upper())) + SEAM +
+            '<div class="cs-sheet"><p class="cs-desc">%s</p>%s'
+            % (e(p['desc']), details(p)) +
             '<div class="cs-actions"><button class="zbtn zbtn--fill" type="button">%s</button><button class="zbtn" type="button">SHARE</button>%s</div></div></div></article>' % (e(p['action']), heart(key)))
 
 def small_title(text, cls):
-    # Small card: three lines max, wrapped here by estimated strip width (Barlow Condensed 900 at 12.5px)
+    # Small card: two lines max, wrapped here by estimated strip width (Barlow Condensed 900 at 12.5px)
     # with explicit breaks so the browser can't rewrap. Longer titles end on an ellipsis, like live.
     wpx = lambda w: len(w) * 9.4 + 8
     lines, cur, full = [[]], 0, True
@@ -178,14 +188,14 @@ def small_title(text, cls):
         else: toks.append(w)
     for w in toks:
         need = wpx(w) + (3 if cur else 0)
-        if cur + need > (116 if len(lines) < 3 else 72):  # line three stops short of the heart
-            if len(lines) == 3:
+        if cur + need > (116 if len(lines) < 2 else 92):  # two lines; line two stops short of the heart
+            if len(lines) == 2:
                 full = False; break
             lines.append([]); cur = 0; need = wpx(w)
         lines[-1].append(w); cur += need
     if not full:
         last = lines[-1]
-        while len(last) > 1 and (last[-1].startswith('(') or last[-1] in ('A', 'AN', 'THE', 'FOR', 'OF', 'TO', 'AND') or cur + 9 > 72):
+        while len(last) > 1 and (last[-1].startswith('(') or last[-1] in ('A', 'AN', 'THE', 'FOR', 'OF', 'TO', 'AND') or cur + 9 > 92):
             cur -= wpx(last.pop()) + 3
         last[-1] += '\u2026'
     return '<h3 class="%s">%s</h3>' % (cls, '<i class="zs-br"></i>'.join(''.join('<span>%s</span>' % e(w) for w in l) for l in lines))
@@ -230,6 +240,7 @@ for d, title, blurb, closed, opened, small in DIRS:
             o = opened(k, p, flip, key).replace('<article class="', '<article class="zv-%s ' % v, 1)
             c = closed(k, p, flip, key).replace('<article class="', '<article class="zv-%s ' % v, 1)
             sm = small(k, p, flip, key).replace('<article class="', '<article class="zv-%s ' % v, 1)
+            o, c, sm = line_strips(o), line_strips(c), line_strips(sm)
             RIMS = '<span class="zt-rim" aria-hidden="true"></span>'
             o = o.replace('<article ', '<article style="%s" ' % decay_vars(key + 'o'), 1)
             o = o.replace(' zglitch', ' zglitch zo-%s' % 'abcd'[sum(ord(ch) * (i + 7) for i, ch in enumerate(key)) % 4], 1)  # which way it opens
