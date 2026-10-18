@@ -328,3 +328,56 @@ button{font:inherit;cursor:pointer}
 /* Hoüz large card: headline holds to three lines above the face stack. */
 [class*="zc-houz"]:is(.wp-card,.cs-card) :is(.wp-title,.cs-title){font-size:21px;gap:3px 5px;max-height:84px;overflow:hidden;padding:2px 4px 4px 2px}
 .zs .zs-tape{letter-spacing:.06em;font-size:7.5px;max-width:78px;overflow:hidden}
+/* Open card margins: content clears the torn rim, and on seeking posts the notch dashes too. */
+.wp-strips,.cs-sheet{padding:30px 40px 40px 36px!important;gap:20px}
+.z-seek :is(.wp-strips,.cs-sheet){padding-left:56px!important}
+.wp-strip{margin:4px 6px 4px 2px}
+/* Open card backdrop: torn paper on the left, vector network on the right, blended through the middle. */
+.wp-open>.zt-face::before,.cs-open>.zt-face::before{-webkit-mask:linear-gradient(104deg,#000 34%,rgba(0,0,0,.55) 48%,transparent 64%);mask:linear-gradient(104deg,#000 34%,rgba(0,0,0,.55) 48%,transparent 64%)}
+:is(.wp-strips,.cs-sheet)::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:url(/_blob/4b7808ce1c35716da2f36bd7589319a6) 70% 40%/120% auto no-repeat,url(/_blob/d4dc408c6733fe053c49d4420b3afb0e) 100% 100%/90% auto no-repeat;
+  filter:url(#zt-lime-strip) brightness(.8);opacity:.6;mix-blend-mode:screen;
+  -webkit-mask:linear-gradient(104deg,transparent 30%,rgba(0,0,0,.5) 46%,#000 62%);mask:linear-gradient(104deg,transparent 30%,rgba(0,0,0,.5) 46%,#000 62%)}
+:is(.wp-strips,.cs-sheet){isolation:isolate}
+.wp-strip{padding:14px 22px 14px 24px!important}
+/* Open card = a full phone screen (390 x 844), shown at 90% on the board, with even padding top and bottom. */
+.wp-open,.cs-open{width:390px!important;height:844px;zoom:.9;display:flex}
+.wp-open>.zt-face,.cs-open>.zt-face{flex:1;display:flex;flex-direction:column;min-height:0}
+.wp-ohead,.cs-case{flex:none;height:330px}
+.wp-strips,.cs-sheet{flex:1;padding:28px 28px 36px 28px!important;gap:16px;justify-content:flex-start}
+.z-seek :is(.wp-strips,.cs-sheet){padding-left:46px!important}
+:is(.wp-actions,.cs-actions){margin-top:auto;padding-right:58px}
+.wp-open .zclose,.cs-open .zclose{top:40px;right:24px}
+.wp-ohead .wp-tape{top:40px;left:26px}
+.z-seek .wp-ohead .wp-tape{left:40px}
+.wp-ohead .wp-area{top:44px;right:76px}
+.wp-title--open{left:26px!important;right:26px;top:96px;font-size:31px}
+.wp-open.z-seek .wp-title--open{left:40px!important}
+.cs-case .cs-tag--type{top:40px;left:26px}
+.z-seek .cs-case .cs-tag--type{left:40px}
+.cs-case .cs-tag--area{top:40px;right:76px;left:auto}
+.cs-title--open{font-size:30px}
+.wp-ohead .wp-hero{width:230px;right:-60px;bottom:-70px}
+.cs-case .cs-hero--open{width:260px;right:-60px;bottom:-80px}
+.wp-ohead .wp-hero[src*="74608fe2"],.cs-case .cs-hero[src*="74608fe2"],.wp-ohead .wp-hero[src*="65fdccbc"],.cs-case .cs-hero[src*="65fdccbc"]{width:250px;right:-70px;top:60px}
+.wp-ohead .wp-hero.wp-wire,.cs-case .cs-hero.cs-wire{translate:30px -20px}
+.wp-strip{font-size:14px;line-height:1.45}
+.cs-sheet .cs-desc{font-size:14px}
+.hf--open .hf-face{width:44px;height:44px;margin-left:-12px}
+.hf--open .hf-n{font-size:28px}
+@keyframes z-grow{
+0%{transform:scale(.92,.28);clip-path:inset(0)}
+16%{transform:scale(.95,.46) skewX(10deg) translateX(-12px);clip-path:polygon(0 0,100% 0,100% 22%,0 22%,0 30%,100% 30%,100% 58%,0 58%,0 66%,100% 66%,100% 100%,0 100%)}
+34%{transform:scale(1.03,.84) skewX(-8deg) translateX(10px);clip-path:inset(6% 0 20% 0)}
+52%{transform:scale(.98,1.03) skewX(4deg);clip-path:polygon(0 0,100% 0,100% 44%,0 44%,0 49%,100% 49%,100% 100%,0 100%)}
+70%{transform:scale(1.01) translateX(-4px);clip-path:inset(0)}
+100%{transform:none;clip-path:inset(0)}}
+/* Slight bloom around every card edge, in its accent. */
+.zt{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--c) 32%,transparent)) drop-shadow(0 0 16px color-mix(in srgb,var(--c) 12%,transparent))!important}
+[class*="zc-houz"].zt{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--c) 32%,transparent)) drop-shadow(0 0 16px color-mix(in srgb,var(--c2) 14%,transparent))!important}
+:is(.wp-open,.cs-open) .zbtn{white-space:nowrap;padding-left:16px;padding-right:16px}
+:is(.wp-open,.cs-open) .zheart{right:22px!important;bottom:26px!important}
+:is(.wp-actions,.cs-actions){padding-right:62px;padding-bottom:4px}
+:is(.wp-open,.cs-open) :is(.wp-actions,.cs-actions){padding-right:64px!important;gap:10px}
+:is(.wp-open,.cs-open) .zbtn{flex:0 1 auto;min-width:0;padding-left:14px;padding-right:14px;font-size:14px}
+.wp-open .wp-strip{padding:20px 22px 18px 26px!important}
