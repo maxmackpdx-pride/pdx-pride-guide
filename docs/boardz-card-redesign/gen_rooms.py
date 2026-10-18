@@ -194,7 +194,7 @@ for slug, name, logo, posts in ROOMS:
             if p['type'] in SHORT:  # the small tape has about 78px beside the heart
                 sm = sm.replace('zs-tape">%s<' % p['type'], 'zs-tape">%s<' % SHORT[p['type']], 1)
             # Hoüz small cards use the same torn paper rim as every other card (no solid wire frame).
-            # small cards: no face stack
+            sm = sm.replace('<button class="zopen-hit"', faces_html(p, 'small').replace('<span class="hf-faces">', '<span class="hf-faces" hidden>', 1) + '<button class="zopen-hit"', 1)  # small: counter only, no faces
             o = o.replace('<ul class="ztags"', faces_html(p, 'open') + '<ul class="ztags"', 1)
             c = '<div class="zpair">' + c + '<div class="zsmall"><span class="zsize">SMALL</span>' + sm + '</div></div>'
             slots += ('<div class="zslot"><div class="ztag">%s</div>'

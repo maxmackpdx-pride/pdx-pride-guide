@@ -643,3 +643,8 @@ button{font:inherit;cursor:pointer}
 .zl .zr .rz-3{background:#e9e5da!important}
 .zc-gigz .zl .zr .rz-1{color:#050506!important}
 .zs[class*="zc-houz"] .zs-title{top:38px!important}
+/* Small Hoüz: counter only, top-left, clear of the pin zone. */
+.hf--small{left:12px!important;top:14px!important;padding:3px 7px!important}
+.hf--small .hf-faces[hidden]{display:none!important}
+.zs.z-seek .hf--small{left:16px!important}
+.zs[class*="zc-houz"] .zs-title{top:42px!important}
