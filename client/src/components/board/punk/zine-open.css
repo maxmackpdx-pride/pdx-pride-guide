@@ -80,7 +80,7 @@ html.calm-mode .board-detail-backdrop:has(>[data-zine-open]){backdrop-filter:blu
 .boardz-punk-scope .zine-open-head{width:100%;height:auto;filter:none}
 .boardz-punk-scope .zine-open-head>.zt-face{position:relative;inset:auto;height:250px;mask:none}
 .boardz-punk-scope .zine-open-head .wp-photo .houz-photo-progress{display:flex}
-.boardz-punk-scope .zine-open-head .zine-tape{top:40px;left:26px;max-width:calc(50% - 40px)}
+.boardz-punk-scope .zine-open-head .zine-tape{top:40px;left:26px;max-width:calc(100% - 210px)}
 .boardz-punk-scope .zine-open-head.z-seek .zine-tape{left:40px}
 .boardz-punk-scope .zine-open-head .zine-area{top:44px;right:76px;max-width:calc(50% - 72px)}
 .boardz-punk-scope .zine-open-head .zine-title{left:26px;top:86px;max-width:300px;font-size:28px}
@@ -144,3 +144,14 @@ html.calm-mode .board-detail-backdrop:has(>[data-zine-open]){backdrop-filter:blu
 .boardz-punk-scope .zine-open-head .zine-area{right:90px}
 /* Seeking Hoüz posts: the torn notches are already outside the 22px gutter, so the body doesn't indent again. */
 [role=dialog][data-zine-seek=true] .hz-pad{padding-left:0!important}
+
+/* Optical alignment, one left edge per card: plain posts sit 26px in from the face, the headline's inset. Seeking
+   posts sit 40px in, the same inset their headline uses to clear the torn notches. Each row is padded once. */
+[role=dialog][data-zine-open] :is(.hz-pad,.hz-actionbar){padding-left:0!important;padding-right:0!important;box-sizing:border-box}
+[role=dialog][data-zine-open] .hz-wrap{padding-left:26px!important;padding-right:26px!important;box-sizing:border-box}
+[role=dialog][data-zine-open] .board-listing-card__row,[role=dialog][data-zine-open] .board-listing-card__expand{padding-left:26px!important;padding-right:26px!important}
+[role=dialog][data-zine-seek=true] .hz-wrap{padding-left:40px!important}
+[role=dialog][data-zine-seek=true] .board-listing-card__row,[role=dialog][data-zine-seek=true] .board-listing-card__expand{padding-left:40px!important}
+
+/* The post-type tape stops before the area chip. Seeking heads start 14px further in, so they stop 14px sooner. */
+.boardz-punk-scope .zine-open-head.z-seek .zine-tape{max-width:calc(100% - 224px)}
