@@ -240,7 +240,7 @@ for d, title, blurb, closed, opened, small in DIRS:
                       '<sc-if value="{{ s.%s_closed }}" hint-placeholder-val="{{ true }}">%s</sc-if></div>' % (e(tag), key, o, key, c))
     body += ('<section class="zdir" aria-label="%s"><header class="zdir-head"><h2>%s</h2><p>%s</p></header><div class="zslots">%s</div></section>\n' % (e(title), e(title), e(blurb), slots))
 
-CSS = open(__file__.replace('gen_dirs2.py', 'dirs2.css')).read() + decay_keyframes()
+CSS = open(__file__.replace('gen_dirs2.py', 'dirs2.css')).read() + decay_keyframes() + open(__file__.replace('gen_dirs2.py', 'inline-assets.css')).read()
 W, H = 1600, 4300
 logic = '''class Component extends DCLogic {
   state = { open: {}, saved: {} };
@@ -264,7 +264,6 @@ doc = '''<!doctype html>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="%s">
 <link rel="stylesheet" href="%s">
-<link rel="stylesheet" href="./zay-fonts.css">
 </head>
 <body>
 <x-dc>
