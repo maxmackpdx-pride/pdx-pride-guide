@@ -604,3 +604,8 @@ button{font:inherit;cursor:pointer}
   -webkit-mask:var(--zt-tears) center/100% 100% no-repeat,var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important;
   mask:var(--zt-tears) center/100% 100% no-repeat,var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important;
   -webkit-mask-composite:source-in,source-over,source-over!important;mask-composite:intersect,add,add!important}
+/* Small photo cards: the hero steps back so the photo leads. Smaller, toned-down accent, screen-blended into the photo. */
+.wp.zs .zs-hero:not(.zs-wire):not(.lw){width:80px!important;opacity:.72;mix-blend-mode:screen;filter:var(--zf-hero) brightness(.72) saturate(.7) drop-shadow(1px 2px 0 rgba(5,5,6,.6))!important}
+.wp.zs .zs-hero.zs-wire{width:80px!important;opacity:.45}
+.wp.zs .zs-hero:is([src*="4eaf45a0"],[src*="bc81ad61"]){width:74px!important}
+.wp.zs .zs-hero:not(.zs-wire):not(.lw){width:86px!important;opacity:.9;mix-blend-mode:normal;filter:var(--zf-hero) brightness(.82) saturate(.62) drop-shadow(1px 2px 0 rgba(5,5,6,.7))!important}.wp.zs .zs-hero.zs-wire{width:86px!important;opacity:.55}
