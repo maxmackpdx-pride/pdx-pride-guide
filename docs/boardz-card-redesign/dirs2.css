@@ -473,3 +473,41 @@ button{font:inherit;cursor:pointer}
 .zv-b.zs .zs-hero:is([src*="b4f6ad47"],[src*="be7ac672"]){top:36px;rotate:7deg}
 .cs-case .cs-hero:is([src*="b4f6ad47"],[src*="be7ac672"]){width:270px;right:-40px;top:40px;bottom:auto;rotate:-6deg}
 .zc-mizzed :is(.cs-wire,.zs-wire){translate:22px -16px}
+/* Open direction varies per card: a grows down from the closed card, b rises from below, c splits open from the
+   middle, d unfolds from the top right. All end on the same short slice glitch. */
+.zglitch.zo-b{animation:z-rise .62s cubic-bezier(.2,.8,.2,1) both!important}
+.zglitch.zo-c{animation:z-split .62s cubic-bezier(.2,.8,.2,1) both!important}
+.zglitch.zo-d{animation:z-unfold .62s cubic-bezier(.2,.8,.2,1) both!important}
+@keyframes z-rise{
+0%{clip-path:inset(calc(100% - 240px) 0 0 0)}
+62%{clip-path:inset(0);transform:none}
+70%{transform:skewX(4deg) translateX(-4px);clip-path:polygon(0 0,100% 0,100% 52%,0 52%,0 57%,100% 57%,100% 100%,0 100%)}
+80%{transform:skewX(-3deg) translateX(3px);clip-path:polygon(0 0,100% 0,100% 20%,0 20%,0 23%,100% 23%,100% 100%,0 100%)}
+90%,100%{transform:none;clip-path:inset(0)}}
+@keyframes z-split{
+0%{clip-path:inset(32% 0 32% 0)}
+60%{clip-path:inset(0);transform:none}
+70%{transform:skewY(1.5deg);clip-path:polygon(0 0,100% 0,100% 47%,0 47%,0 53%,100% 53%,100% 100%,0 100%)}
+82%{transform:skewY(-1deg);clip-path:inset(0)}
+92%,100%{transform:none;clip-path:inset(0)}}
+@keyframes z-unfold{
+0%{clip-path:inset(0 0 64% 4%)}
+58%{clip-path:inset(0);transform:none}
+68%{transform:skewX(-5deg) translateX(5px);clip-path:polygon(0 0,100% 0,100% 64%,0 64%,0 68%,100% 68%,100% 100%,0 100%)}
+80%{transform:skewX(3deg) translateX(-3px);clip-path:polygon(0 0,100% 0,100% 33%,0 33%,0 36%,100% 36%,100% 100%,0 100%)}
+90%,100%{transform:none;clip-path:inset(0)}}
+/* Photo cards: less texture over the photo. */
+.wp .wp-dots{opacity:.3}
+.wp-card .zn,.wp-ohead .zn,.wp.zs .zn{opacity:.28!important}
+/* Small cards use their top: the hero sits up in the top right corner, the headline starts higher and runs bigger. */
+.zs .zs-hero{width:100px!important;right:-26px!important;top:14px!important;bottom:auto!important;rotate:-10deg}
+.zv-b.zs .zs-hero{right:-20px!important;top:26px!important;rotate:8deg}
+.zs .zs-hero.zs-wire{translate:12px -10px}
+.zs .zs-title{top:44px!important;font-size:15px!important;gap:4px 3px}
+/* Gigz: the microphone runs on its natural diagonal, handle low in the middle, head up in the top right. */
+.cs-card .cs-hero:is([src*="19ab2346"],[src*="54ba751f"]){width:292px;right:-26px;top:22px;bottom:auto;rotate:0deg;transform:none}
+.zv-b.cs-card .cs-hero:is([src*="19ab2346"],[src*="54ba751f"]){width:276px;right:-18px;top:40px;rotate:6deg}
+.cs-case .cs-hero:is([src*="19ab2346"],[src*="54ba751f"]){width:330px;right:-34px;top:20px;bottom:auto;rotate:0deg}
+.zs .zs-hero:is([src*="19ab2346"],[src*="54ba751f"]){width:124px!important;right:-22px!important;top:8px!important;rotate:0deg}
+/* Sellz price tag on the small card fills the top right. */
+.zs .zs-hero:is([src*="4eaf45a0"],[src*="bc81ad61"]){width:96px!important;right:-18px!important;top:-6px!important;rotate:14deg}

@@ -232,6 +232,7 @@ for d, title, blurb, closed, opened, small in DIRS:
             sm = small(k, p, flip, key).replace('<article class="', '<article class="zv-%s ' % v, 1)
             RIMS = '<span class="zt-rim" aria-hidden="true"></span>'
             o = o.replace('<article ', '<article style="%s" ' % decay_vars(key + 'o'), 1)
+            o = o.replace(' zglitch', ' zglitch zo-%s' % 'abcd'[sum(ord(ch) * (i + 7) for i, ch in enumerate(key)) % 4], 1)  # which way it opens
             c = c.replace('<article ', '<article style="%s" ' % decay_vars(key), 1)
             sm = sm.replace('<article ', '<article style="%s" ' % decay_vars(key + 's'), 1)
             c = '<div class="zpair">' + c + '<div class="zsmall"><span class="zsize">SMALL</span>' + sm + '</div></div>'

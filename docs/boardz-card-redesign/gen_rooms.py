@@ -158,6 +158,7 @@ for slug, name, logo, posts in ROOMS:
                 html_ = html_.replace('alt="Giftz"', 'alt="%s"' % e(name))
                 return html_.replace('<article ', '<article style="%s" ' % decay_vars(key + suffix), 1)
             o, c, sm = prep(opened(p['id'], p, flip, key), 'o'), prep(closed(p['id'], p, flip, key), ''), prep(small(p['id'], p, flip, key), 's')
+            o = o.replace(' zglitch', ' zglitch zo-%s' % 'abcd'[sum(ord(ch) * (i + 7) for i, ch in enumerate(key)) % 4], 1)  # which way it opens
             c = c.replace('<button class="zopen-hit"', faces_html(p, 'large') + '<button class="zopen-hit"', 1)
             SHORT = {'JOIN OUR HOÜZ': 'JOIN', 'LOOKING TO RENT': 'LOOKING', 'BUILDING A HOÜZ': 'BUILDING', 'MANAGED RENTAL': 'MANAGED', 'MIZZED CONNECTION': 'MIZZED'}
             if p['type'] in SHORT:  # the small tape has about 78px beside the heart
