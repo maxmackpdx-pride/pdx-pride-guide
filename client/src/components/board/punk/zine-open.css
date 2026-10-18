@@ -1,0 +1,139 @@
+/* Boardz open card: a full phone screen (375 x 667, smaller screens get the screen less a 12px margin) in torn paper.
+   The dialog is the paper: accent rim, rainbow seam in the torn top edge, ink face (the dialog's fieldset) that
+   scrolls. The head repeats the closed card's parts at phone size. Spec: docs/boardz-card-redesign/dirs2.css. */
+[role=dialog][data-zine-open]{
+  --zt-card:url('/boardz/punk/torn-card-scan.webp');
+  --zt-tall:var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat;
+  --zt-band:4px;
+  position:relative!important;isolation:isolate;box-sizing:border-box;display:flex!important;flex-direction:column;
+  width:min(375px,calc(100vw - 24px))!important;max-width:none!important;
+  height:min(667px,calc(100dvh - 24px))!important;max-height:none!important;
+  margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;overflow:visible!important;color:#e6e3da;
+  filter:drop-shadow(0 0 5px color-mix(in srgb,var(--c) 32%,transparent)) drop-shadow(0 0 16px color-mix(in srgb,var(--c2) var(--bloom-alpha,8%),transparent));
+  animation:zine-open-a .62s cubic-bezier(.2,.8,.2,1) both;
+}
+.board-detail-backdrop:has(>[data-zine-open]){background:rgba(3,3,6,.62);backdrop-filter:blur(10px)}
+html.calm-mode .board-detail-backdrop:has(>[data-zine-open]){backdrop-filter:blur(10px)}
+/* Accent rim, the live frame color map over the card scan. */
+[role=dialog][data-zine-open]::before{
+  content:""!important;display:block!important;position:absolute!important;inset:0!important;z-index:-2!important;height:auto!important;
+  margin:0!important;border:0!important;border-radius:0!important;opacity:1!important;pointer-events:none;
+  background:var(--zt-tall)!important;filter:var(--zf-frame)!important;mask:var(--zt-tall)!important;animation:none!important}
+/* Rainbow seam: lives in the torn top edge and fades into the accent rim down each side. */
+[role=dialog][data-zine-open]::after{
+  content:""!important;display:block!important;position:absolute!important;inset:0!important;z-index:-1!important;
+  margin:0!important;border:0!important;border-radius:0!important;opacity:1!important;pointer-events:none;
+  background:var(--site-rainbow-bar,linear-gradient(90deg,#00ffff,#ccff00,#ff00cc,#ff6600,#00ffff)) 0 0/200% 100%!important;
+  mask:linear-gradient(180deg,#000 0,#000 22px,transparent 88px),var(--zt-tall)!important;mask-composite:intersect,add,add!important;
+  filter:saturate(1.3) brightness(1.2);animation:zine-seam 6s linear infinite!important}
+@keyframes zine-seam{to{background-position:-200% 0}}
+[role=dialog][data-zine-seek=true]::before,[role=dialog][data-zine-seek=true]>fieldset{
+  mask:url('/boardz/punk/seeking-tears-wide.svg') center/100% 100% no-repeat,var(--zt-tall)!important;mask-composite:intersect,add,add!important}
+/* The face: ink paper that scrolls inside the torn edge. */
+[role=dialog][data-zine-open]>fieldset{
+  position:relative!important;flex:1 1 auto;min-height:0;margin:var(--zt-band)!important;padding:0 0 64px!important;
+  overflow:hidden auto!important;overscroll-behavior:contain;scrollbar-width:none;
+  background:var(--z-black,#050506);mask:var(--zt-tall)}
+[role=dialog][data-zine-open]>fieldset::-webkit-scrollbar{display:none}
+/* Old open-card parts the head now carries. */
+[role=dialog][data-zine-open] :is(.board-open-card__rule,.board-glass-motif,.pdx-demo-sticker,.board-listing-card__thumb,.board-listing-card__title,.board-listing-card__kind,.hz-dttl,.sellz-card__open){display:none!important}
+[role=dialog][data-zine-open] :is(.boardz-open-surface,.board-listing-card,.houz-overlay-content,.pdx-glass-rebind){
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;backdrop-filter:none!important;max-width:none!important;margin:0!important}
+[role=dialog][data-zine-open] .boardz-open-surface::before{display:none!important}
+[role=dialog][data-zine-open] .board-listing-card{padding:0!important}
+[role=dialog][data-zine-open] :is(.board-listing-card__row,.board-listing-card__expand){padding:0 24px!important}
+[role=dialog][data-zine-seek=true] :is(.board-listing-card__row,.board-listing-card__expand,.hz-pad,.hz-actionbar){padding-left:42px!important}
+[role=dialog][data-zine-open] .board-listing-card__row{display:block!important;margin:22px 0 0!important}
+[role=dialog][data-zine-open] .board-listing-card__expand{display:flex!important;flex-direction:column;gap:24px;margin-top:24px!important}
+[role=dialog][data-zine-open] .boardz-punk-scope--open~*{animation:zine-content .62s ease both}
+@keyframes zine-content{0%,55%{opacity:0}100%{opacity:1}}
+
+/* Message panel: ink, accent hairline and edge bar, mono kicker, faint scanlines. */
+[role=dialog][data-zine-open] :is(.board-listing-card__expand>p:first-of-type,.board-detail-modal__body){
+  position:relative;margin:0!important;padding:30px 18px 14px 20px!important;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px),var(--panel-card,#0c0c0f)!important;
+  border:1px solid color-mix(in srgb,var(--c2) 45%,var(--panel-border,#1c1c22));border-left:3px solid var(--c2);border-radius:4px;
+  box-shadow:0 0 14px color-mix(in srgb,var(--c2) 10%,transparent);font:400 16px/24px var(--font-body)!important;color:#e6e3da!important}
+[role=dialog][data-zine-open] :is(.board-listing-card__expand>p:first-of-type,.board-detail-modal__body)::before{
+  content:"> MESSAGE";position:absolute;top:10px;left:20px;font:600 10px/1 var(--font-mono);letter-spacing:.18em;color:var(--c2)}
+/* Controls: the zine buttons and fields. */
+[role=dialog][data-zine-open]>fieldset :is(button,a.pdx-glass-rebind):not(.zheart){
+  min-height:44px;padding:0 16px;border-radius:10px!important;border:2px solid var(--c)!important;background:var(--z-black,#050506)!important;color:#fff!important;
+  box-shadow:none!important;font:800 16px/1 var(--font-display)!important;letter-spacing:.04em;text-transform:uppercase}
+[role=dialog][data-zine-open]>fieldset :is(.gifting-response,.sellz-response) button,[role=dialog][data-zine-open] .hz-actionbar button:first-child{background:var(--c2)!important;border-color:var(--c2)!important;color:var(--z-black,#050506)!important}
+[role=dialog][data-zine-cat=gigz]>fieldset :is(.gifting-response,.sellz-response) button{color:#fff!important}
+[role=dialog][data-zine-open]>fieldset :is(textarea,input:not([type=checkbox]):not([type=radio]),select){
+  box-sizing:border-box;width:100%;min-height:44px;padding:11px 12px;border:1px solid var(--panel-border-2,#24242c)!important;border-radius:6px!important;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 1px,transparent 1px 3px),var(--panel-card,#0c0c0f)!important;color:#fff!important;
+  font:400 15px/1.35 var(--font-body)!important;color-scheme:dark}
+[role=dialog][data-zine-open]>fieldset :is(textarea,input,select):focus{outline:none;border-color:var(--c2)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--c2) 22%,transparent)!important}
+/* Close: round ink button on the paper, top right. */
+[role=dialog][data-zine-open] :is(.ab-open-card__chrome,.board-open-readable__close,.board-detail-modal__chrome){position:absolute!important;top:30px!important;right:22px!important;left:auto!important;z-index:10;width:auto!important;height:auto!important;margin:0!important;padding:0!important;background:none!important}
+[role=dialog][data-zine-open] :is(.ab-open-card__chrome,.board-open-readable__close,.board-detail-modal__chrome) button{
+  width:44px;height:44px;border-radius:50%!important;border:2px solid var(--c)!important;background:var(--z-black,#050506)!important;color:#fff!important;box-shadow:none!important}
+[role=dialog][data-zine-open]>.board-demo-notice{position:absolute;left:20px;right:20px;bottom:18px;z-index:10;margin:0;padding:7px 10px;
+  background:var(--panel-card,#0c0c0f);border:1px solid var(--panel-border,#1c1c22);border-radius:4px;color:#bdbab2;font:600 10px/1.35 var(--font-mono);letter-spacing:.1em;text-transform:uppercase}
+
+/* Head: the closed card's parts at phone size, 250px tall. */
+.boardz-punk-scope.boardz-punk-scope--open{width:100%;height:auto;max-width:none}
+.boardz-punk-scope .zine-open-head{width:100%;height:auto;filter:none}
+.boardz-punk-scope .zine-open-head>.zt-face{position:relative;inset:auto;height:250px;mask:none}
+.boardz-punk-scope .zine-open-head .wp-photo .houz-photo-progress{display:flex}
+.boardz-punk-scope .zine-open-head .zine-tape{top:40px;left:26px;max-width:calc(50% - 40px)}
+.boardz-punk-scope .zine-open-head.z-seek .zine-tape{left:40px}
+.boardz-punk-scope .zine-open-head .zine-area{top:44px;right:76px;max-width:calc(50% - 72px)}
+.boardz-punk-scope .zine-open-head .zine-title{left:26px;top:86px;max-width:300px;font-size:28px}
+.boardz-punk-scope .zine-open-head.z-seek .zine-title{left:40px}
+.boardz-punk-scope .zine-open-head.zc-houz .zine-title{font-size:26px}
+.boardz-punk-scope .zine-open-head .zine-hero,
+.boardz-punk-scope .zine-open-head[data-motif] .zine-hero{width:230px;right:-34px;bottom:-38px;top:auto;rotate:-8deg;transform:none;z-index:4;
+  filter:var(--zf-hero) drop-shadow(5px 7px 0 var(--z-black,#050506)) drop-shadow(0 10px 18px rgba(0,0,0,.55))}
+.boardz-punk-scope .zine-open-head .zine-hero.zine-wire,
+.boardz-punk-scope .zine-open-head[data-motif] .zine-hero.zine-wire{z-index:3;translate:42px -30px;opacity:.9;filter:var(--zf-wire) drop-shadow(0 0 3px color-mix(in srgb,var(--c2) 45%,transparent))}
+.boardz-punk-scope .zine-open-head .zseam{position:relative;z-index:4;display:block;height:3px;margin:0 16px;
+  background:var(--site-rainbow-bar,linear-gradient(90deg,#00ffff,#ccff00,#ff00cc,#ff6600,#00ffff)) 0 0/200% 100%;animation:zine-seam 6s linear infinite;box-shadow:0 0 8px -2px rgba(204,255,0,.5)}
+
+/* Open: the card's borders widen from the closed card to the phone screen, then a short slice glitch settles it.
+   b rises from below, c splits from the middle, d unfolds from the top. */
+[role=dialog][data-zine-open=b]{animation-name:zine-open-b}
+[role=dialog][data-zine-open=c]{animation-name:zine-open-c}
+[role=dialog][data-zine-open=d]{animation-name:zine-open-d}
+@keyframes zine-open-a{
+0%{clip-path:inset(0 calc(50% - 180px) calc(100% - 240px))}
+62%{clip-path:inset(0);transform:none}
+70%{transform:skewX(-4deg) translateX(4px);clip-path:polygon(0 0,100% 0,100% 38%,0 38%,0 44%,100% 44%,100% 100%,0 100%)}
+78%{transform:skewX(3deg) translateX(-3px);clip-path:polygon(0 0,100% 0,100% 70%,0 70%,0 73%,100% 73%,100% 100%,0 100%)}
+86%,100%{transform:none;clip-path:inset(0)}}
+@keyframes zine-open-b{
+0%{clip-path:inset(calc(100% - 240px) 0 0 0)}
+62%{clip-path:inset(0);transform:none}
+70%{transform:skewX(4deg) translateX(-4px);clip-path:polygon(0 0,100% 0,100% 52%,0 52%,0 57%,100% 57%,100% 100%,0 100%)}
+80%{transform:skewX(-3deg) translateX(3px);clip-path:polygon(0 0,100% 0,100% 20%,0 20%,0 23%,100% 23%,100% 100%,0 100%)}
+90%,100%{transform:none;clip-path:inset(0)}}
+@keyframes zine-open-c{
+0%{clip-path:inset(32% 0 32% 0)}
+60%{clip-path:inset(0);transform:none}
+70%{transform:skewY(1.5deg);clip-path:polygon(0 0,100% 0,100% 47%,0 47%,0 53%,100% 53%,100% 100%,0 100%)}
+82%{transform:skewY(-1deg);clip-path:inset(0)}
+92%,100%{transform:none;clip-path:inset(0)}}
+@keyframes zine-open-d{
+0%{clip-path:inset(0 0 64% 4%)}
+58%{clip-path:inset(0);transform:none}
+68%{transform:skewX(-5deg) translateX(5px);clip-path:polygon(0 0,100% 0,100% 64%,0 64%,0 68%,100% 68%,100% 100%,0 100%)}
+80%{transform:skewX(3deg) translateX(-3px);clip-path:polygon(0 0,100% 0,100% 33%,0 33%,0 36%,100% 36%,100% 100%,0 100%)}
+90%,100%{transform:none;clip-path:inset(0)}}
+@keyframes zine-fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  [role=dialog][data-zine-open],[role=dialog][data-zine-open] .boardz-punk-scope--open~*{animation:zine-fade .2s ease both!important}
+  [role=dialog][data-zine-open]::after,.boardz-punk-scope .zine-open-head .zseam{animation:none!important}
+}
+:is(html.calm-mode,:root[data-calm=true]) [role=dialog][data-zine-open],
+:is(html.calm-mode,:root[data-calm=true]) [role=dialog][data-zine-open] .boardz-punk-scope--open~*{animation:zine-fade .2s ease both!important}
+:is(html.calm-mode,:root[data-calm=true]) [role=dialog][data-zine-open]::after,
+:is(html.calm-mode,:root[data-calm=true]) .boardz-punk-scope .zine-open-head .zseam{animation:none!important}
+
+/* Action row stays pinned at the bottom of the ink face, solid, so the message scrolls under it and never through it. */
+[role=dialog][data-zine-open] :is(.hz-actionbar,.gifting-listing-actions+*,.sellz-actions){
+  position:sticky!important;bottom:0;z-index:6;padding:12px 16px 14px!important;background:var(--z-black,#050506)!important;
+  border-top:1px solid var(--panel-border,#1c1c22)}

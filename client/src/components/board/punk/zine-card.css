@@ -137,3 +137,39 @@
 @media (prefers-reduced-motion:reduce){
   .boardz-punk-scope .zine :is(.zt-rim,.wp-photo,.zt-face,.zine-sticker),.boardz-punk-scope .zine .zt-face::before{animation:none}
 }
+
+/* Tall paper (small cards, open cards): the card scan at its true aspect, pinned top and bottom, with a stretched
+   copy filling the sides, so the torn top and bottom keep their real size. */
+.boardz-punk-scope .zine{--zt-card:url('/boardz/punk/torn-card-scan.webp');
+  --zt-tall:var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat}
+
+/* Small card, 136 x 150: texture only, no hero. Headline from the top band, post type and heart on one baseline. */
+.boardz-punk-scope .zine--small{--zt-band:3px;width:136px;height:150px;--zt-tears:url('/boardz/punk/seeking-tears-small.svg')}
+.boardz-punk-scope .zine--small :is(.zt-rim,.zt-face){mask:var(--zt-tall)}
+.boardz-punk-scope .zine--small .zt-rim{background:var(--zt-tall)}
+.boardz-punk-scope .zine--small.z-seek :is(.zt-rim,.zt-face){
+  mask:var(--zt-tears) center/100% 100% no-repeat,var(--zt-tall);mask-composite:intersect,add,add}
+.boardz-punk-scope .zine--small .zn{opacity:.32}
+.boardz-punk-scope .zine--small.zine--wp .zn{opacity:.18}
+.boardz-punk-scope .zine--small .wp-dots{opacity:.18}
+.boardz-punk-scope .zine--small .zine-title{top:38px;left:12px;max-width:124px;font-size:15px;rotate:none}
+.boardz-punk-scope .zine--small.z-seek .zine-title{left:16px}
+.boardz-punk-scope .zine--small.zc-houz .zine-title{top:42px;font-size:15px}
+.boardz-punk-scope .zine--small .zl{padding:1px 5px 2px;box-shadow:2px 2px 0 var(--c2)}
+.boardz-punk-scope .zine--small .zr .rz-l{font-size:.84em;padding:0 .04em;margin:0}
+.boardz-punk-scope .zine--small .zine-tape{top:auto;bottom:16px;left:12px;max-width:78px;padding:4px 6px 3px;font-size:8px;letter-spacing:.06em}
+.boardz-punk-scope .zine--small.z-seek .zine-tape{left:16px}
+.boardz-punk-scope .zine--small .zheart{right:14px;bottom:14px;width:30px;height:30px;border-radius:9px}
+.boardz-punk-scope .zine--small .zheart svg{width:16px;height:16px}
+.boardz-punk-scope .zine--small.zc-houz .zheart{box-shadow:0 0 0 3px var(--z-black,#050506)}
+.boardz-punk-scope .zine--small .hf--small{left:12px;top:14px;bottom:auto;gap:0;padding:3px 7px;border-radius:5px}
+.boardz-punk-scope .zine--small.z-seek .hf--small{left:16px}
+.boardz-punk-scope .zine--small .hf--small .hf-n{font-size:13px}
+.boardz-punk-scope .zine--small .hf--small .hf-of{font-size:8px}
+.boardz-punk-scope .zine--small .hf--small .hf-l{font-size:7px;margin-left:2px}
+
+/* While a card is open, the board behind it holds still: nothing re-renders under the blurred backdrop. */
+body:has(.board-detail-backdrop) .boardz-punk-scope:not(.boardz-punk-scope--open) .zine *,
+body:has(.board-detail-backdrop) .boardz-punk-scope:not(.boardz-punk-scope--open) .zine .zt-face::before,
+body:has(.board-detail-backdrop) .boardz-punk-scope:not(.boardz-punk-scope--open) .zine,
+body:has(.board-detail-backdrop) .boardz-punk-scope:not(.boardz-punk-scope--open) .demo-pinned *{animation-play-state:paused!important}

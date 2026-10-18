@@ -137,13 +137,13 @@ function Hero({art,className}){
   </>;
 }
 
-function HouzTicket({r}){
+function HouzTicket({r,small=false}){
   const occupancy=householdCount(r),looking=r.intent==='looking';
   if(!occupancy&&!looking)return null;
   const slots=occupancy?visibleHousingFaceSlots(r).visible:housingFaceMembers(r);
   const label=occupancy?`${occupancy.count} ${occupancy.label.toLowerCase()} out of ${occupancy.total}`:`${slots.length} looking`;
-  return <div className="hf" role="img" aria-label={label}>
-    <span className="hf-faces">{slots.map((slot,i)=>slot.open?<span key={slot.slotKey||i} className="hf-face hf-open"/>:<span key={slot.slotKey||i} className="hf-face"><img src={slot.photo} alt=""/></span>)}</span>
+  return <div className={small?'hf hf--small':'hf'} role="img" aria-label={label}>
+    {!small&&<span className="hf-faces">{slots.map((slot,i)=>slot.open?<span key={slot.slotKey||i} className="hf-face hf-open"/>:<span key={slot.slotKey||i} className="hf-face"><img src={slot.photo} alt=""/></span>)}</span>}
     <span className="hf-count"><b className="hf-n">{occupancy?occupancy.count:slots.length}</b>{occupancy&&<span className="hf-of">/{occupancy.total}</span>}<span className="hf-l">{occupancy?occupancy.label:'LOOKING'}</span></span>
   </div>;
 }
@@ -160,27 +160,76 @@ function cardValue(r){
   return String(r.value||'').toUpperCase();
 }
 
-/** Large closed card, 360 x 240. */
-export function ZineCard({r,save,calm=false,Photo}){
-  const ref=useRef(null);
-  const key=`${r.category}:${r.key||r.id}`;
-  useCardMotion(ref,`${key}:large`,calm);
-  const art=useArt(r),p=palette(r);
+function cardParts(r,size){
+  const key=`${r.category}:${r.key||r.id}`,p=palette(r);
   const photos=r.category==='mizzed'||r.previewNoPhoto?[]:r.photos||[];
-  const paste=photos.length>0;
-  const seeking=SEEKING.includes(r.intent);
-  const version=hash31(r.id??r.key)%2?'b':'a';
-  const title=r.title;
-  const value=paste&&!seeking?cardValue(r):'';
-  const d=paste?'wp':'cs';
-  const style={...decayVars(key),'--c':p.c,'--c2':p.c2,'--zf-frame':`url(#zine-frame-${p.frame})`,'--zf-hero':`url(#zine-hero-${p.hero})`,'--zf-strip':`url(#zine-strip-${p.strip})`,'--zf-wire':`url(#zine-hero-${p.wire})`};
-  return <article ref={ref} className={`zine zine--${d} ${p.zc} zv-${version}${seeking?' z-seek':''}`} data-size="large" data-category={r.category} data-intent={r.intent} data-motif={art.motif} style={style} aria-label={`${r.kicker}: ${title}`}>
+  const paste=photos.length>0,seeking=SEEKING.includes(r.intent);
+  const style={...decayVars(key+(size==='large'?'':size[0])),'--c':p.c,'--c2':p.c2,'--zf-frame':`url(#zine-frame-${p.frame})`,'--zf-hero':`url(#zine-hero-${p.hero})`,'--zf-strip':`url(#zine-strip-${p.strip})`,'--zf-wire':`url(#zine-hero-${p.wire})`};
+  const className=`zine zine--${paste?'wp':'cs'} zine--${size} ${p.zc} zv-${hash31(r.id??r.key)%2?'b':'a'}${seeking?' z-seek':''}`;
+  return {key,p,photos,paste,seeking,style,className};
+}
+const Texture=({r,id,paste,photos,calm,Photo})=><>
+  {paste&&<span className="wp-photo"><Photo photos={photos} alt={r.title} calm={calm}/></span>}
+  {paste&&<span className="wp-dots" aria-hidden="true"/>}
+  <span className="zn" aria-hidden="true">{r.category==='housing'?null:<NetworkBackdrop identity={id}/>}</span>
+  {paste&&<span className="wp-paper" aria-hidden="true"/>}
+</>;
+// The small tape has about 78px beside the heart.
+const SHORT_TYPE={available:'AVAILABLE',connection:'MIZZED',offering:'JOIN',looking:'LOOKING',forming:'BUILDING',managed:'MANAGED'};
+
+/** Small card, 136 x 150: texture only, headline under the pin, post type and heart on one baseline. */
+export function ZineSmallCard({r,save,calm=false,Photo}){
+  const ref=useRef(null),{key,photos,paste,style,className}=cardParts(r,'small');
+  useCardMotion(ref,`${key}:small`,calm);
+  return <article ref={ref} className={className} data-size="small" data-category={r.category} data-intent={r.intent} style={style} aria-label={`${r.kicker}: ${r.title}`}>
     <span className="zt-rim" aria-hidden="true"/>
     <div className="zt-face">
-      {paste&&<span className="wp-photo"><Photo photos={photos} alt={title} calm={calm}/></span>}
-      {paste&&<span className="wp-dots" aria-hidden="true"/>}
-      <span className="zn" aria-hidden="true">{r.category==='housing'?null:<NetworkBackdrop identity={`${key}:large`}/>}</span>
-      {paste&&<span className="wp-paper" aria-hidden="true"/>}
+      <Texture r={r} id={`${key}:small`} paste={paste} photos={photos} calm={calm} Photo={Photo}/>
+      {r.category==='housing'&&<HouzTicket r={r} small/>}
+      <Headline text={r.title} className="zine-title"/>
+      <span className="zine-tape">{SHORT_TYPE[r.intent]||r.kicker}</span>
+      <Heart save={save}/>
+    </div>
+  </article>;
+}
+
+/** Open card head: the closed card's parts at phone size. Sets the dialog's accent and open glitch. */
+export function ZineOpenHead({r,calm=false,Photo}){
+  const ref=useRef(null),{key,p,photos,paste,style,className}=cardParts(r,'open');
+  const art=useArt(r);
+  useLayoutEffect(()=>{
+    const dialog=ref.current?.closest('[role=dialog]');
+    if(!dialog)return;
+    const vars=['--c','--c2','--zf-frame'];
+    dialog.dataset.zineOpen='abcd'[Array.from(key).reduce((n,ch,i)=>n+ch.charCodeAt(0)*(i+7),0)%4];
+    dialog.dataset.zineCat=r.category;
+    if(SEEKING.includes(r.intent))dialog.dataset.zineSeek='true';
+    for(const v of vars)dialog.style.setProperty(v,style[v]);
+    return()=>{delete dialog.dataset.zineOpen;delete dialog.dataset.zineSeek;delete dialog.dataset.zineCat;for(const v of vars)dialog.style.removeProperty(v)};
+  },[key,r.intent,r.category,style['--c'],style['--c2'],style['--zf-frame']]);
+  return <header ref={ref} className={`${className} zine-open-head`} data-size="open" data-category={r.category} data-intent={r.intent} data-motif={art.motif} style={style}>
+    <div className="zt-face">
+      <Texture r={r} id={`${key}:open`} paste={paste} photos={photos} calm={calm} Photo={Photo}/>
+      <Hero art={art} className="zine-hero"/>
+      <span className="zine-tape">{r.kicker}</span>
+      {r.detail&&<span className="zine-area" title={r.detail}>{r.detail.toUpperCase()}</span>}
+      <Headline text={r.title} className="zine-title" maxLines={4}/>
+    </div>
+    <span className="zseam" aria-hidden="true"/>
+  </header>;
+}
+
+/** Large closed card, 360 x 240. */
+export function ZineCard({r,save,calm=false,Photo}){
+  const ref=useRef(null),{key,photos,paste,seeking,style,className}=cardParts(r,'large');
+  useCardMotion(ref,`${key}:large`,calm);
+  const art=useArt(r);
+  const title=r.title;
+  const value=paste&&!seeking?cardValue(r):'';
+  return <article ref={ref} className={className} data-size="large" data-category={r.category} data-intent={r.intent} data-motif={art.motif} style={style} aria-label={`${r.kicker}: ${title}`}>
+    <span className="zt-rim" aria-hidden="true"/>
+    <div className="zt-face">
+      <Texture r={r} id={`${key}:large`} paste={paste} photos={photos} calm={calm} Photo={Photo}/>
       <Hero art={art} className="zine-hero"/>
       <span className="zine-tape" data-long={r.kicker.length>14||undefined}>{r.kicker}</span>
       {r.detail&&<span className="zine-area" title={r.detail}>{r.detail.toUpperCase()}</span>}

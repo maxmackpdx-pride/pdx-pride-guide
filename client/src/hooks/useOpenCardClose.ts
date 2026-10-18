@@ -29,7 +29,12 @@ export function useOpenCardClose(onClose: () => void, enabled = true) {
       latestClose.current();
       return;
     }
-    const animation = panel.animate([{ opacity }, { opacity: 0 }], {
+    // Boardz zine cards close through the same slice glitch they open with, in reverse.
+    const animation = panel.dataset.zineOpen ? panel.animate([
+      { clipPath: "inset(0)", transform: "none", opacity },
+      { clipPath: "polygon(0 0,100% 0,100% 40%,0 40%,0 46%,100% 46%,100% 100%,0 100%)", transform: "skewX(-4deg) translateX(4px)", offset: .3 },
+      { clipPath: "inset(0 0 calc(100% - 240px))", transform: "none", opacity: 0 },
+    ], { duration: 320, easing: "cubic-bezier(.6,0,.8,.2)", fill: "forwards" }) : panel.animate([{ opacity }, { opacity: 0 }], {
       duration: 180, easing: "cubic-bezier(.7,0,.84,0)", fill: "forwards",
     });
     animations.current = [animation];

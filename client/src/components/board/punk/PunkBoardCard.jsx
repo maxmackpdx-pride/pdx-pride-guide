@@ -15,7 +15,8 @@ import {housingTypes,housingPrice,householdCount,housingFaceMembers} from './hou
 import {CardArtworkGlass} from '@/components/CardArtworkGlass';
 import {intentLabels} from '@/lib/allBoards';
 import {toPunkPost} from './postModel';
-import {ZineCard,ZineFilters} from './ZineCard';
+import {ZineCard,ZineSmallCard,ZineOpenHead,ZineFilters} from './ZineCard';
+import './zine-open.css';
 import './production.css';
 import {useTheme} from '@/context/ThemeContext';
 const A='/boardz/punk/';
@@ -60,7 +61,7 @@ return <article ref={el} data-kind={r.kind} data-category={r.category} data-inte
 function Card(props){
   const {r,small=false}=props;
   const save=React.useContext(SaveContext);
-  const card=r.kind==='board'&&!small?<ZineCard r={r} calm={props.calm} save={save} Photo={HouzPhoto}/>:r.kind==='board'&&r.category!=='housing'?<BoardzCollage {...props} Photo={HouzPhoto} Save={Save} Location={HouzLocation}/>:<BaseCard {...props}/>;
+  const card=r.kind==='board'?(small?<ZineSmallCard r={r} calm={props.calm} save={save} Photo={HouzPhoto}/>:<ZineCard r={r} calm={props.calm} save={save} Photo={HouzPhoto}/>):r.kind==='board'&&r.category!=='housing'?<BoardzCollage {...props} Photo={HouzPhoto} Save={Save} Location={HouzLocation}/>:<BaseCard {...props}/>;
   if(r.kind!=='board')return card;
   let seed=Array.from(`${r.key||r.id}:${small?'small':'large'}:${props.pinVariant||'default'}`).reduce((n,c)=>Math.imul(n^c.charCodeAt(0),16777619)>>>0,2166136261);
   seed=Math.imul(seed^(seed>>>16),0x45d9f3b)>>>0;
@@ -78,4 +79,10 @@ export default function PunkBoardCard({post,small=false,saved=false,saveDisabled
  {onOpen&&<button type="button" className="punk-open-target" ref={openRef} onClick={e=>onOpen(e.currentTarget)} aria-label={'Open '+post.title}/>}
  {(post.isDemo||showStatus)&&<span className="punk-post-status">{post.isDemo?'DEMO · ':''}{showStatus?post.status:''}</span>}
  </div></SaveContext.Provider>;
+}
+
+/** Open card head for the full post: same parts as the closed card, at phone size. */
+export function PunkOpenHead({post,calm=false}){
+ const {calmMode}=useTheme(); calm=calm||calmMode; useFilters(); const r=toPunkPost(post);
+ return <div className="boardz-punk-scope boardz-punk-scope--open" data-direction="split" data-calm={calm}><ZineOpenHead r={r} calm={calm} Photo={HouzPhoto}/></div>;
 }
