@@ -854,3 +854,11 @@ button{font:inherit;cursor:pointer}
 .zf>.zt-face{z-index:1}
 .zf>.zt-rim{clip-path:inset(18px 0 0 0)}
 .zf-seam{filter:saturate(1.5) brightness(1.35) drop-shadow(0 0 3px rgba(255,255,255,.18))!important}
+/* Seam wraps the corners: the rainbow follows the torn edge round the top corners and fades into the accent rim
+   down each side, instead of stopping at a straight line. */
+.zf>.zt-rim{clip-path:none!important}
+.zf-seam{clip-path:inset(0 0 calc(100% - 90px) 0)!important;
+  background:linear-gradient(90deg,#00ffff,#ccff00,#ff00cc,#ff6600,#00ffff) 0 0/200% 100%!important;
+  -webkit-mask:linear-gradient(180deg,#000 0,#000 22px,transparent 88px),var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important;
+  mask:linear-gradient(180deg,#000 0,#000 22px,transparent 88px),var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important;
+  -webkit-mask-composite:source-in,source-over,source-over!important;mask-composite:intersect,add,add!important}
