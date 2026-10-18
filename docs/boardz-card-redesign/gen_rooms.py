@@ -192,6 +192,7 @@ for slug, name, logo, posts in ROOMS:
                 return html_.replace('<article ', '<article style="%s" ' % decay_vars(key + suffix), 1)
             o, c, sm = prep(opened(p['id'], p, flip, key), 'o'), prep(closed(p['id'], p, flip, key), ''), prep(small(p['id'], p, flip, key), 's')
             o, c, sm = line_strips(o), line_strips(c), line_strips(sm)
+            o = o.replace('<span class="zt-rim" aria-hidden="true"></span>', '<span class="zt-rim" aria-hidden="true"></span><span class="zf-seam" aria-hidden="true"></span>', 1)  # open card: rainbow torn top edge
             if p.get('faces') and p['zc'].startswith('houz'):  # lit windows on the wire house: one pane per spot
                 o, c, sm = lit_windows(o, p), lit_windows(c, p), lit_windows(sm, p)
             o = o.replace(' zglitch', ' zglitch zo-%s' % 'abcd'[sum(ord(ch) * (i + 7) for i, ch in enumerate(key)) % 4], 1)  # which way it opens

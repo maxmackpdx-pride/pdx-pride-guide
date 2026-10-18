@@ -862,3 +862,24 @@ button{font:inherit;cursor:pointer}
   -webkit-mask:linear-gradient(180deg,#000 0,#000 22px,transparent 88px),var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important;
   mask:linear-gradient(180deg,#000 0,#000 22px,transparent 88px),var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important;
   -webkit-mask-composite:source-in,source-over,source-over!important;mask-composite:intersect,add,add!important}
+:is(.wp-open,.cs-open)>.zt-face{z-index:1}:is(.wp-open,.cs-open)>.zt-rim{clip-path:none!important}
+/* Month stamp v3: a flat, photocopied tear-off calendar page. Black toner header with two punched ring holes,
+   xerox speckle and a slightly ragged cut, hard accent offset like the headline strips. No soft 3D shadow.
+   Sits on the headline's top line so it reads with the title, a touch louder than the motifs. */
+.hm{border:0!important;border-radius:0!important;rotate:-1.2deg!important;overflow:visible!important;
+  background:radial-gradient(rgba(5,5,6,.18) .6px,transparent .9px) 0 0/3px 3px,radial-gradient(rgba(5,5,6,.12) .5px,transparent .8px) 1px 2px/5px 4px,#e9e5da!important;
+  box-shadow:3px 3px 0 var(--c2,var(--c))!important;padding-top:11px!important;
+  clip-path:polygon(0 1%,18% 0,41% 1.5%,63% 0,86% 1%,100% 0,99% 34%,100% 67%,99% 100%,74% 99%,52% 100%,27% 98.5%,0 100%,1% 62%,0 31%)}
+.hm::before{content:"";position:absolute;left:0;right:0;top:0;height:10px;background:
+  radial-gradient(circle,#e9e5da 0 2.2px,transparent 2.6px) 28% 50%/12px 10px no-repeat,
+  radial-gradient(circle,#e9e5da 0 2.2px,transparent 2.6px) 72% 50%/12px 10px no-repeat,#050506}
+.hm .hm-m{font:900 25px/1 'Barlow Condensed',sans-serif!important;letter-spacing:.03em;color:#050506;padding:3px 9px 5px!important;
+  text-shadow:.5px 0 0 rgba(5,5,6,.6),-.4px .3px 0 rgba(5,5,6,.35)}
+.hm--large{top:54px!important;right:24px!important;width:auto!important}
+[class*="zc-houz"]:is(.wp-card,.cs-card) :is(.wp-title,.cs-title){max-width:224px!important}
+.hm--small{top:13px!important;right:12px!important;padding-top:7px!important;box-shadow:2px 2px 0 var(--c2,var(--c))!important}
+.hm--small::before{height:6px;background:radial-gradient(circle,#e9e5da 0 1.3px,transparent 1.6px) 28% 50%/8px 6px no-repeat,radial-gradient(circle,#e9e5da 0 1.3px,transparent 1.6px) 72% 50%/8px 6px no-repeat,#050506}
+.hm--small .hm-m{font-size:14px!important;padding:2px 5px 3px!important}
+.hm--open{top:92px!important;right:24px!important}
+.hm--open .hm-m{font-size:28px!important;padding:4px 11px 6px!important}
+[class*="zc-houz"]:is(.wp-card,.cs-card) :is(.wp-title,.cs-title){font-size:19px!important;max-width:236px!important}

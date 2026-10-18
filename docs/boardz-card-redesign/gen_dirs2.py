@@ -286,6 +286,7 @@ for d, title, blurb, closed, opened, small in DIRS:
             c = closed(k, p, flip, key).replace('<article class="', '<article class="zv-%s ' % v, 1)
             sm = small(k, p, flip, key).replace('<article class="', '<article class="zv-%s ' % v, 1)
             o, c, sm = line_strips(o), line_strips(c), line_strips(sm)
+            o = o.replace('<span class="zt-rim" aria-hidden="true"></span>', '<span class="zt-rim" aria-hidden="true"></span><span class="zf-seam" aria-hidden="true"></span>', 1)  # open card: rainbow torn top edge
             RIMS = '<span class="zt-rim" aria-hidden="true"></span>'
             o = o.replace('<article ', '<article style="%s" ' % decay_vars(key + 'o'), 1)
             o = o.replace(' zglitch', ' zglitch zo-%s' % 'abcd'[sum(ord(ch) * (i + 7) for i, ch in enumerate(key)) % 4], 1)  # which way it opens
