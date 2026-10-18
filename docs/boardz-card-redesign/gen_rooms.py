@@ -254,10 +254,13 @@ gk = json.loads(re.search(r'const keys = (\[.*?\]);', src).group(1))
 gbody = src[src.index('<section class="zdir"'):src.rindex('</div>\n</x-dc>')]
 allkeys = gk + COMBINED_KEYS
 hdr = src[src.index('<header class="zhead">'):src.index('</header>', src.index('<header class="zhead">')) + 9]
-H2 = 6700 + sum(len(p) for _, _, _, p in ROOMS) * 900 + len(ROOMS) * 260
+H2 = 6700 + sum(len(p) for _, _, _, p in ROOMS) * 900 + len(ROOMS) * 260 + 1900
 doc2 = src[:src.index('<style>') + 7] + '\n' + CSS + '\n.zroot{--zf-frame:url(#zt-frame);--zf-hero:url(#zt-lime);--zf-strip:url(#zt-lime-strip)}\n.zroom-logo{height:110px;width:auto;display:block;margin-bottom:10px}\n.zroom{margin-top:80px}\n' + src[src.index('</style>'):]
 doc2 = re.sub(r'<svg width="0" height="0".*?</svg>', lambda m: svg, doc2, count=1, flags=re.S)
-doc2 = doc2.replace(gbody, gbody + COMBINED_BODY, 1)
+import importlib.util as _u
+_spec=_u.spec_from_file_location('gen_forms', __file__.replace('gen_rooms.py','gen_forms.py')); _gf=_u.module_from_spec(_spec); _spec.loader.exec_module(_gf)
+FORMS = _gf.forms(B)
+doc2 = doc2.replace(gbody, gbody + COMBINED_BODY + FORMS, 1)
 doc2 = re.sub(r'const keys = \[.*?\];', lambda m: 'const keys = %s;' % json.dumps(allkeys), doc2, count=1)
 doc2 = re.sub(r'"\$preview":\{"width":1600,"height":\d+\}', '"$preview":{"width":1600,"height":%d}' % H2, doc2, count=1)
 doc2 = doc2.replace('<title>Boardz card directions</title>', '<title>Boardz new cards</title>', 1)
