@@ -16,3 +16,10 @@ Files
 
 The boards reference canvas uploads by `/_blob/<id>` and a paper and tears stylesheet embedded as data URIs
 (not committed, about 1.6 MB). They render inside the canvas, not standalone. Nothing here ships to the site yet.
+
+## Deploy notes (do when this ships)
+
+- **Hoüz month stamp + sort.** Every Hoüz card shows a three-letter month stamp (AUG, SEP, JUL) taken from the
+  form's date field: move in (Join our Hoüz), by (Looking to rent), goal (Building a Hoüz), available (Managed
+  rental). When Hoüz is viewed solo on Boardz, add a **sort by month** control that orders posts by that date,
+  soonest first. Posts with no date go last.
