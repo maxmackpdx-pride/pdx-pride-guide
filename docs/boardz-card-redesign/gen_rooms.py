@@ -193,8 +193,7 @@ for slug, name, logo, posts in ROOMS:
                 o = o.replace('cs-tag--type">MIZZED CONNECTION<', 'cs-tag--type">MIZZED<', 1)
             if p['type'] in SHORT:  # the small tape has about 78px beside the heart
                 sm = sm.replace('zs-tape">%s<' % p['type'], 'zs-tape">%s<' % SHORT[p['type']], 1)
-            if p['zc'].startswith('houz'):  # Hoüz small cards keep their wire frame instead of the torn rim
-                sm = sm.replace('<span class="zt-rim" aria-hidden="true"></span>', houz_frame(p['seeking']), 1).replace('class="zc-', 'class="hz-small zc-', 1)
+            # Hoüz small cards use the same torn paper rim as every other card (no solid wire frame).
             sm = sm.replace('<button class="zopen-hit"', faces_html(p, 'small') + '<button class="zopen-hit"', 1)
             o = o.replace('<ul class="ztags"', faces_html(p, 'open') + '<ul class="ztags"', 1)
             c = '<div class="zpair">' + c + '<div class="zsmall"><span class="zsize">SMALL</span>' + sm + '</div></div>'
