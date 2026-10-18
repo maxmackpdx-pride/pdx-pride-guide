@@ -25,7 +25,7 @@ def chips(items): return '<span class="zf-chips">%s</span>' % ''.join('<span cla
 def form(zc, kicker, title, intro, body, submit, logo, seeking=False):
     return ('<div class="zf-slot"><div class="ztag">%s form</div>'
             '<form class="zf zt %s%s" onsubmit="return false">'
-            '<span class="zt-rim" aria-hidden="true"></span><div class="zt-face"><span class="zf-seam" aria-hidden="true"></span>'
+            '<span class="zt-rim" aria-hidden="true"></span><span class="zf-seam" aria-hidden="true"></span><div class="zt-face">'
             '<header class="zf-head"><img class="zf-logo" src="%s" alt=""><span class="zf-kick">&gt; %s</span><h3 class="zf-title"><span class="zl">%s</span></h3>'
             '<p class="zf-intro">%s</p></header>%s'
             '<div class="zf-actions"><button type="button" class="zbtn">BACK</button><button type="submit" class="zbtn zbtn--fill">%s</button></div>'

@@ -832,3 +832,25 @@ button{font:inherit;cursor:pointer}
 :is(.wp-open,.cs-open,.zf,.zs)>.zt-rim{background:var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important}
 .zf-seam{top:30px!important}
 .zf>.zt-face{padding-top:54px!important}
+/* Forms: the signature rainbow seam IS the torn top edge. A thin rainbow band lives in the rim's own torn shape,
+   above the accent rim and under the paper face, so only the top fringe shows it. */
+.zf-seam{position:absolute!important;inset:0!important;top:0!important;left:0!important;right:0!important;height:auto!important;z-index:0!important;rotate:0deg!important;
+  background:linear-gradient(90deg,#00ffff,#ccff00,#ff00cc,#ff6600,#00ffff) 0 0/200% 14px repeat-x!important;
+  -webkit-mask:var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important;
+  mask:var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat!important;
+  filter:drop-shadow(0 0 4px rgba(204,255,0,.3))!important;animation:z-seam-x 6s linear infinite}
+@keyframes z-seam-x{to{background-position:-200% 0}}
+.zf>.zt-face{z-index:1;padding-top:40px!important}
+.zf.z-seek>.zt-face{padding-top:40px!important}
+/* The rim's colour comes from the scan's bright torn fibres, so the seam takes its shape from that luminance. */
+.zf-seam{-webkit-mask-mode:luminance!important;mask-mode:luminance!important;-webkit-mask-source-type:luminance;z-index:2!important;
+  background:linear-gradient(90deg,#00ffff,#ccff00,#ff00cc,#ff6600,#00ffff) 0 0/200% 16px repeat-x!important}
+/* Seam v3: a rainbow layer clipped to the top band, multiplied by a white copy of the rim's torn fibres, so the
+   rainbow lives exactly in the torn top edge the way the accent does on the sides. */
+.zf-seam{background:linear-gradient(90deg,#00ffff,#ccff00,#ff00cc,#ff6600,#00ffff) 0 0/200% 100%!important;
+  -webkit-mask-mode:alpha!important;mask-mode:alpha!important;clip-path:inset(0 0 calc(100% - 18px) 0);isolation:isolate;filter:none!important;z-index:0!important}
+.zf-seam::before{content:"";position:absolute;inset:0;mix-blend-mode:multiply;filter:url(#zt-white);
+  background:var(--zt-card) top/100% auto no-repeat,var(--zt-card) bottom/100% auto no-repeat,var(--zt-card) center/100% 100% no-repeat}
+.zf>.zt-face{z-index:1}
+.zf>.zt-rim{clip-path:inset(18px 0 0 0)}
+.zf-seam{filter:saturate(1.5) brightness(1.35) drop-shadow(0 0 3px rgba(255,255,255,.18))!important}
