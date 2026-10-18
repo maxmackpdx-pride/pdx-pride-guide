@@ -584,3 +584,13 @@ button{font:inherit;cursor:pointer}
 @keyframes lw-breathe{0%,100%{fill:rgba(3,16,18,.55)}50%{fill:color-mix(in srgb,var(--c2) 38%,transparent)}}
 @media (prefers-reduced-motion:reduce){.lw-breathe{animation:none}}
 :is(html.calm-mode,:root[data-calm="true"]) .lw-breathe{animation:none}
+/* Ransom key word inside the line strips: cutout letters on paper and accent chips, slightly bigger, each tilted. */
+.zl .zr{font-weight:inherit;display:inline-block;white-space:nowrap;margin:0 .04em;vertical-align:-.04em}
+.zl .zr .rz-w{white-space:nowrap}
+.zl .zr .rz-l{font-size:1.08em;padding:.02em .07em;margin:0 .015em;line-height:.98;box-shadow:none}
+.zl .zr .rz-0{background:#f1ece0;color:#050506}
+.zl .zr .rz-1{background:var(--c2,var(--c));color:#050506}
+.zl .zr .rz-2{background:#050506;color:#fff;outline:1px solid #f1ece0;outline-offset:-1px}
+.zl .zr .rz-3{background:#e2dccb;color:#050506}
+.zc-gigz .zl .zr .rz-1{color:#fff}
+.zs .zl .zr .rz-l{font-size:.9em;padding:0 .04em;margin:0}

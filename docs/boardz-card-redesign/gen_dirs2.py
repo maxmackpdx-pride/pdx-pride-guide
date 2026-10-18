@@ -117,8 +117,15 @@ def line_strips(html_):
     def merge(m):
         inner = m.group(2)
         lines = inner.split('<i class="zs-br"></i>')
-        words = [' '.join(re.findall(r'<span>(.*?)</span>', l)) for l in lines]
-        return '%s<span class="zl">%s</span></h3>' % (m.group(1), '<br>'.join(words))
+        lines = [re.findall(r'<span>(.*?)</span>', l) for l in lines]
+        # Middle ground: one key word per title (the longest, 4+ letters) keeps the ransom-note cutout letters.
+        flat = [(len(re.sub(r'[^A-Z0-9]', '', w)), li, wi) for li, l in enumerate(lines) for wi, w in enumerate(l)]
+        best = max(flat, default=(0, 0, 0))
+        if best[0] >= 4:
+            w = lines[best[1]][best[2]]
+            seed = sum(ord(ch) for ch in w)
+            lines[best[1]][best[2]] = '<b class="zr">%s</b>' % ransom(html.unescape(w), seed)
+        return '%s<span class="zl">%s</span></h3>' % (m.group(1), '<br>'.join(' '.join(l) for l in lines))
     return re.sub(r'(<h3 class="[^"]*(?:wp-title|cs-title)[^"]*">)(.*?)</h3>', merge, html_)
 
 SEAM = '<span class="zseam" aria-hidden="true"></span>'
