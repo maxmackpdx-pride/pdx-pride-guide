@@ -511,3 +511,11 @@ button{font:inherit;cursor:pointer}
 .zs .zs-hero:is([src*="19ab2346"],[src*="54ba751f"]){width:124px!important;right:-22px!important;top:8px!important;rotate:0deg}
 /* Sellz price tag on the small card fills the top right. */
 .zs .zs-hero:is([src*="4eaf45a0"],[src*="bc81ad61"]){width:96px!important;right:-18px!important;top:-6px!important;rotate:14deg}
+/* Hoüz large card spacing: tape, three-line headline, face stack and logo each get their own band with even gaps. */
+[class*="zc-houz"]:is(.wp-card,.cs-card) :is(.wp-title,.cs-title){top:50px!important;font-size:19px!important;gap:3px 5px!important;max-height:80px!important;right:110px}
+[class*="zc-houz"]:is(.wp-card,.cs-card) .hf{bottom:66px;left:22px}
+[class*="zc-houz"]:is(.wp-card,.cs-card) .hf-face{width:30px;height:30px;margin-left:-8px}
+[class*="zc-houz"]:is(.wp-card,.cs-card) .hf-faces{padding-left:8px}
+[class*="zc-houz"]:is(.wp-card,.cs-card) .hf-n{font-size:21px}
+[class*="zc-houz"]:is(.wp-card,.cs-card) :is(.wp-title,.cs-title){right:auto!important;width:auto!important;max-width:252px!important;font-size:18.5px!important;overflow:hidden!important}
+[class*="zc-houz"]:is(.wp-card,.cs-card) .hf{bottom:60px!important}
