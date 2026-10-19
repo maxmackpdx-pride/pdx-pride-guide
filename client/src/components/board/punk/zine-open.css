@@ -160,5 +160,6 @@ html.calm-mode .board-detail-backdrop:has(>[data-zine-open]){backdrop-filter:blu
 
 /* Never a frame: an open dialog that holds a zine card draws no border, radius, shadow or backing of its own.
    The torn paper is the only edge. Specificity beats the board overlay and floating-card frames. */
-.board-detail-backdrop [role=dialog]:is(.boardz-open-surface,.board-open-card):has(.zine){
+.board-detail-backdrop [role=dialog]:is(.boardz-open-surface,.board-open-card):has(.zine),
+.board-detail-backdrop [role=dialog][data-zine-open]{
   border:0!important;border-width:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;outline:0!important}
