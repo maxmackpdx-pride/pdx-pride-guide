@@ -182,3 +182,5 @@ body:has(.board-detail-backdrop) .boardz-punk-scope:not(.boardz-punk-scope--open
 .boardz-punk-scope .zine--small .zine-title .rz-w{white-space:normal}
 /* Small titles stop at three lines with an ellipsis, clear of the post-type tape and the heart. */
 .boardz-punk-scope .zine--small .zine-title{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+/* Small cards: no outer glow box. The torn edge keeps its color; the square halo around each card is gone. */
+.boardz-punk-scope .zine--small{filter:none}
