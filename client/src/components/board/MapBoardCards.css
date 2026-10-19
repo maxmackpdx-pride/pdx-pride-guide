@@ -47,6 +47,11 @@
 .board-open-card--floating .ab-card__location > span { white-space:normal; }
 .board-open-card--floating .ab-card__location > svg { width:1em; height:1em; }
 @media(max-width:600px) {
+  .board-open-card.board-open-card--floating { padding-inline:0; }
   .board-open-card--floating .ab-card { grid-template-columns:minmax(0,1fr); min-height:0; }
   .board-open-card--floating .ab-card > .ab-art { height:200px; min-height:0; max-height:200px; aspect-ratio:auto; }
 }
+/* The zine card is a fixed 360px. On phones it scales down to sit inside the 16px side gutters. */
+@media(max-width:391px) { .board-open-card--floating .boardz-production-card { zoom:.93; } }
+@media(max-width:366px) { .board-open-card--floating .boardz-production-card { zoom:.88; } }
+@media(max-width:348px) { .board-open-card--floating .boardz-production-card { zoom:.8; } }
