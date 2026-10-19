@@ -521,6 +521,17 @@ html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--te
  :is(.ab-page,.map-board-cards) .ab-card__location { height:29.96px; min-height:29.96px; }
 }
 
+/* Phone Boardz: chips wrap instead of scrolling sideways, and posts sit two per row as small cards.
+   The wide toggle (.ab-card-grid--wide) returns to one large card per row. */
+@media(max-width:767px) {
+ .ab-page .ab-category-dock { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); overflow:visible; }
+ .ab-page .ab-category { flex:none; min-width:0; padding-inline:6px; font-size:var(--chrome-md); }
+ .ab-page .ab-card-grid:not(.ab-card-grid--wide) { grid-template-columns:repeat(2,136px); justify-content:center; gap:18px 14px; }
+ .ab-page .ab-card-grid:not(.ab-card-grid--wide) .boardz-production-card { width:136px; }
+ .ab-phone-grid-toggle { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 14px; margin-left:auto; border:var(--bw-hair) solid var(--neon-cyan); border-radius:var(--radius-panel); background:var(--z-black); color:var(--text-hi); font:var(--fw-heavy) var(--chrome-md)/1 var(--font-display); letter-spacing:.06em; text-transform:uppercase; cursor:pointer; }
+}
+@media(min-width:768px) { .ab-phone-grid-toggle { display:none; } }
+
 /* BoardZ keeps its horizontal card composition on phones. */
 @media(max-width:767px) {
  .ab-page .ab-card-grid { grid-template-columns:minmax(0,1fr); gap:var(--space-4); align-items:start; }

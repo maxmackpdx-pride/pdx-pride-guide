@@ -173,3 +173,12 @@ body:has(.board-detail-backdrop) .boardz-punk-scope:not(.boardz-punk-scope--open
 body:has(.board-detail-backdrop) .boardz-punk-scope:not(.boardz-punk-scope--open) .zine .zt-face::before,
 body:has(.board-detail-backdrop) .boardz-punk-scope:not(.boardz-punk-scope--open) .zine,
 body:has(.board-detail-backdrop) .boardz-punk-scope:not(.boardz-punk-scope--open) .demo-pinned *{animation-play-state:paused!important}
+
+/* Small cards: the headline stays inside the 136px card (strips run to the right edge at the larger size). */
+.boardz-punk-scope .zine--small .zine-title{max-width:112px;font-size:14px}
+/* Small titles wrap inside the card instead of running past its edge. */
+.boardz-punk-scope .zine--small .zine-title,
+.boardz-punk-scope .zine--small .zine-title .zr,
+.boardz-punk-scope .zine--small .zine-title .rz-w{white-space:normal}
+/* Small titles stop at three lines with an ellipsis, clear of the post-type tape and the heart. */
+.boardz-punk-scope .zine--small .zine-title{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}

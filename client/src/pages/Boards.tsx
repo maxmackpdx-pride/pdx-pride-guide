@@ -168,7 +168,31 @@ function BoardDetail({
   );
 }
 
+/** Phone-only layout: small cards two per row. Saved in localStorage, read defensively (private windows throw). */
+function usePhoneLayout() {
+  const query = "(max-width: 767px)";
+  const [phone, setPhone] = useState(() => typeof window !== "undefined" && window.matchMedia(query).matches);
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    const onChange = () => setPhone(media.matches);
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
+  return phone;
+}
+function usePhoneWidePreference() {
+  const [wide, setWide] = useState(() => {
+    try { return window.localStorage.getItem("boardz-phone-wide") === "1"; } catch { return false; }
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem("boardz-phone-wide", wide ? "1" : "0"); } catch { /* storage unavailable */ }
+  }, [wide]);
+  return [wide, setWide] as const;
+}
+
 export default function Boards() {
+  const [phoneWide, setPhoneWide] = usePhoneWidePreference();
+  const phoneLayout = usePhoneLayout();
   usePageSeo(
     "Our BoardZ | Zaylist",
     "My Hoüz, Gigz, Giftz, Sellz, and Mizzed Connections. Find your people and your next thing.",
@@ -341,7 +365,8 @@ export default function Boards() {
       </header>
       <div className="eb-frame">
             <div className="ab-controls" ref={controlsRef}>
-              {dockTop != null && (<ScrollDock top={dockTop} label="Board categories" searchLabel="Search community boards"
+              {/* Phones keep the category chips in the page flow: one scroll, not a second pinned rail. */}
+              {dockTop != null && !phoneLayout && (<ScrollDock top={dockTop} label="Board categories" searchLabel="Search community boards"
                 onSearch={archiveOnly ? undefined : () => focusPageSearch(".ab-controls .eb-search-row input", dockTop)}>
                 <DockChip label="All" color="var(--neon-cyan)" pressed={selection === "all"} onClick={() => { select("all"); requestAnimationFrame(() => scrollToResults(".ab-result-head, .ab-browse", dockTop)); }} />
                 {boardCategories.map(cat => <DockChip key={cat.id} label={cat.id === "mizzed" ? "Mizzed" : cat.label} color={cat.color}
@@ -525,8 +550,9 @@ export default function Boards() {
                     onAction={() => void savedQuery.refetch()}
                   />
                 )}
-                <div className="ab-card-grid">
-                  {visibleResults.map(post => <BoardBrowseCard key={post.key} post={post} isSaved={saved.has(post.key)} showStatus={mineOnly}
+                <button type="button" className="ab-phone-grid-toggle" aria-pressed={phoneWide} onClick={() => setPhoneWide(w => !w)}>{phoneWide ? "Two per row" : "One wide per row"}</button>
+                <div className={`ab-card-grid${phoneWide ? " ab-card-grid--wide" : ""}`}>
+                  {visibleResults.map(post => <BoardBrowseCard key={post.key} post={post} small={!phoneWide && phoneLayout} isSaved={saved.has(post.key)} showStatus={mineOnly}
                     saveDisabled={saveMutation.isPending || (!saved.has(post.key) && !canSaveBoardPost(post)) || (!!user && savedQuery.isPending)}
                     onOpen={target=>open(post.key,target)} onSave={()=>user?saveMutation.mutate({post,wasSaved:saved.has(post.key)}):setShowAuth(true)}/>)}
                 </div>
