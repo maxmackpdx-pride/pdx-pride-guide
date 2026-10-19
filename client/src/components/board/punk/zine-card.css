@@ -6,7 +6,7 @@
   --zt-map:0% 7.3034%/166.6667% 225.3521% no-repeat;
   --zt-strip:var(--zt-paper) 13.2813% 82.6531%/200% 426.6667% no-repeat;
   --zt-band:4px;
-  position:relative;isolation:isolate;flex:none;box-sizing:border-box;width:360px;height:240px;margin:0;color:#fff;
+  position:relative;isolation:isolate;flex:none;box-sizing:border-box;width:360px;height:240px;margin:0;color:var(--text-hi);
   font-family:var(--font-body);
   /* Edge glow in the accent, then the system's 8% outer bloom (calm mode sets --bloom-alpha to 0%). */
   filter:drop-shadow(0 0 5px color-mix(in srgb,var(--c) 32%,transparent)) drop-shadow(0 0 16px color-mix(in srgb,var(--c2) var(--bloom-alpha,8%),transparent));
@@ -16,14 +16,14 @@
 /* Torn paper edge: the punk-materials scan, recolored by the live frame map. A black face, inset and masked by
    the same scan, covers all but a thin fringe of it. Seeking posts tear notches into the left edge. */
 .boardz-punk-scope .zine .zt-rim{position:absolute;inset:0;z-index:0;pointer-events:none;background:var(--zt-paper) var(--zt-map);filter:var(--zf-frame);mask:var(--zt-paper) var(--zt-map)}
-.boardz-punk-scope .zine .zt-face{position:absolute;inset:var(--zt-band);z-index:1;overflow:hidden;background:var(--z-black,#050506);mask:var(--zt-paper) var(--zt-map)}
+.boardz-punk-scope .zine .zt-face{position:absolute;inset:var(--zt-band);z-index:1;overflow:hidden;background:var(--z-black);mask:var(--zt-paper) var(--zt-map)}
 .boardz-punk-scope .zine .zt-face::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:var(--zt-paper) 0% 7.3034%/180% 244% no-repeat;filter:url(#zine-ink)}
 .boardz-punk-scope .zine.z-seek :is(.zt-rim,.zt-face){
   mask-image:var(--zt-paper),var(--zt-tears);mask-size:166.6667% 225.3521%,100% 100%;mask-position:0% 7.3034%,center;mask-repeat:no-repeat;mask-composite:intersect}
 
 /* Network planes take the accent, knocked back by the card's paper. */
 .boardz-punk-scope .zine .zn{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.7}
-.boardz-punk-scope .zine .zn .card-network{--network-stack-opacity:1;color:#fff;filter:var(--zf-strip) brightness(.85)}
+.boardz-punk-scope .zine .zn .card-network{--network-stack-opacity:1;color:var(--text-hi);filter:var(--zf-strip) brightness(.85)}
 .boardz-punk-scope .zine--wp .zn{opacity:.28;mix-blend-mode:screen}
 
 /* Wheatpaste: the user photo full bleed under a halftone and a pass of paper. */
@@ -35,10 +35,10 @@
 .boardz-punk-scope .zine .wp-paper{position:absolute;inset:0;z-index:2;pointer-events:none;background:var(--zt-paper) center/180% auto;mix-blend-mode:multiply;opacity:.3}
 
 /* Hero sticker in the accent, cropped by the torn edge, its wire companion offset up and right beneath it. */
-.boardz-punk-scope .zine .zine-hero{position:absolute;z-index:3;display:block;max-width:none;height:auto;width:210px;right:-52px;bottom:-46px;rotate:-14deg;filter:var(--zf-hero) drop-shadow(3px 4px 0 var(--z-black,#050506))}
+.boardz-punk-scope .zine .zine-hero{position:absolute;z-index:3;display:block;max-width:none;height:auto;width:210px;right:-52px;bottom:-46px;rotate:-14deg;filter:var(--zf-hero) drop-shadow(3px 4px 0 var(--z-black))}
 .boardz-punk-scope .zine--cs .zine-hero{width:215px;right:-46px;bottom:-50px;rotate:-12deg}
 .boardz-punk-scope .zine .zine-hero.zine-wire{z-index:2;translate:30px -20px;filter:var(--zf-wire) drop-shadow(0 0 3px color-mix(in srgb,var(--c2) 45%,transparent))}
-.boardz-punk-scope .zine .zine-flag{filter:drop-shadow(3px 4px 0 var(--z-black,#050506))}
+.boardz-punk-scope .zine .zine-flag{filter:drop-shadow(3px 4px 0 var(--z-black))}
 .boardz-punk-scope .zine .zine-flag svg{display:block;width:100%;height:auto}
 .boardz-punk-scope .zine.zv-b .zine-hero{width:196px;right:-40px;bottom:auto;top:70px;rotate:9deg}
 .boardz-punk-scope .zine.zv-b .zine-hero.zine-wire{translate:-24px -22px}
@@ -55,48 +55,48 @@
 
 /* Post type on neon tape (torn strip of the scan), area on a utility chip. Both stay clear of the pin zone. */
 .boardz-punk-scope .zine .zine-tape{position:absolute;z-index:7;top:12px;left:18px;isolation:isolate;max-width:140px;padding:6px 10px 5px;box-sizing:border-box;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--z-black,#050506);font:600 11px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase}
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--z-black);font:600 11px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase}
 .boardz-punk-scope .zine .zine-tape::before{content:"";position:absolute;inset:-2px -4px;z-index:-1;background:var(--zt-strip);filter:var(--zf-strip) drop-shadow(0 2px 0 rgba(0,0,0,.55))}
 .boardz-punk-scope .zine .zine-tape[data-long]{font-size:10px;letter-spacing:.06em}
 .boardz-punk-scope .zine--cs .zine-tape{top:20px;padding:4px 8px;letter-spacing:.12em}
-.boardz-punk-scope .zine.zc-gigz .zine-tape{color:#fff}
+.boardz-punk-scope .zine.zc-gigz .zine-tape{color:var(--text-hi)}
 .boardz-punk-scope .zine .zine-area{position:absolute;z-index:7;top:14px;right:14px;max-width:126px;box-sizing:border-box;padding:4px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  background:var(--ink-850,#111);color:#bdbab2;border:1.2px solid var(--panel-border-2,#24242c);border-radius:10px;font:600 10px/1 var(--font-mono);letter-spacing:.12em}
+  background:var(--ink-850);color:var(--board-muted);border:1.2px solid var(--panel-border-2);border-radius:10px;font:600 10px/1 var(--font-mono);letter-spacing:.12em}
 .boardz-punk-scope .zine--cs .zine-area{top:20px;right:18px;font-size:11px}
 
 /* Headline: one torn ink strip per line with an accent offset, one ransom key word in Cut Type. */
 .boardz-punk-scope .zine .zine-title{position:absolute;z-index:5;left:16px;top:54px;max-width:250px;margin:0;display:block;transform:rotate(-1.2deg);rotate:-5deg;
-  font:900 24px/1 var(--font-display);letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;color:#fff}
+  font:900 24px/1 var(--font-display);letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;color:var(--text-hi)}
 .boardz-punk-scope .zine--cs .zine-title{left:20px;rotate:none}
 .boardz-punk-scope .zine.z-seek .zine-title{left:30px}
-.boardz-punk-scope .zine .zl{display:inline;background:var(--z-black,#050506);color:#fff;padding:2px 7px 3px;line-height:1.36;-webkit-box-decoration-break:clone;box-decoration-break:clone;box-shadow:3px 3px 0 var(--c2)}
+.boardz-punk-scope .zine .zl{display:inline;background:var(--z-black);color:var(--text-hi);padding:2px 7px 3px;line-height:1.36;-webkit-box-decoration-break:clone;box-decoration-break:clone;box-shadow:3px 3px 0 var(--c2)}
 .boardz-punk-scope .zine .zrw{font-style:normal;white-space:nowrap}
 .boardz-punk-scope .zine .zr{font-weight:inherit;display:inline-block;white-space:nowrap;margin:0 0 0 .04em;vertical-align:-.04em}
-.boardz-punk-scope .zine .zr .rz-l{display:inline-block;font-size:1.08em;padding:.02em .07em;margin:0 .015em;line-height:.98;color:var(--z-black,#050506);background:var(--paper,#e9e5da)}
-.boardz-punk-scope .zine .zr .rz-2{background:#bdbab2}
+.boardz-punk-scope .zine .zr .rz-l{display:inline-block;font-size:1.08em;padding:.02em .07em;margin:0 .015em;line-height:.98;color:var(--z-black);background:var(--paper)}
+.boardz-punk-scope .zine .zr .rz-2{background:var(--board-muted)}
 .boardz-punk-scope .zine .rz-w{display:inline-block;white-space:nowrap}
 .boardz-punk-scope .zine .rz-gap{display:inline-block;width:.32em}
 
 /* Value as ransom letters (Giftz status, Sellz and Gigz prices, managed rent). */
 .boardz-punk-scope .zine .zine-value{position:absolute;z-index:4;left:18px;bottom:54px;font-size:15px;rotate:2deg;white-space:nowrap}
 .boardz-punk-scope .zine .zine-value .rz-l{display:inline-block;padding:0 .06em;margin:0 .02em;line-height:1}
-.boardz-punk-scope .zine .zine-value .rz-0{background:#fff;color:var(--z-black,#050506)}
-.boardz-punk-scope .zine .zine-value .rz-1{background:var(--z-black,#050506);color:#fff;box-shadow:2px 2px 0 var(--c2)}
-.boardz-punk-scope .zine .zine-value .rz-2{background:#fff;color:var(--z-black,#050506);box-shadow:-2px 2px 0 var(--c2)}
-.boardz-punk-scope .zine .zine-value .rz-3{background:var(--z-black,#050506);color:#fff}
+.boardz-punk-scope .zine .zine-value .rz-0{background:var(--text-hi);color:var(--z-black)}
+.boardz-punk-scope .zine .zine-value .rz-1{background:var(--z-black);color:var(--text-hi);box-shadow:2px 2px 0 var(--c2)}
+.boardz-punk-scope .zine .zine-value .rz-2{background:var(--text-hi);color:var(--z-black);box-shadow:-2px 2px 0 var(--c2)}
+.boardz-punk-scope .zine .zine-value .rz-3{background:var(--z-black);color:var(--text-hi)}
 
 .boardz-punk-scope .zine .zine-logo{position:absolute;z-index:7;left:16px;bottom:14px;width:auto;height:35px;max-width:96px;object-fit:contain;object-position:left bottom}
 .boardz-punk-scope .zine--cs .zine-logo{left:20px;bottom:18px;height:33px;max-width:90px}
 
 /* Heart: one spot on every card, clear of the torn rim. */
-.boardz-punk-scope .zine .zheart{position:absolute;z-index:8;right:22px;bottom:22px;width:44px;height:44px;display:grid;place-items:center;padding:0;border-radius:12px;border:2px solid var(--c);background:var(--z-black,#050506);color:var(--c);cursor:pointer}
+.boardz-punk-scope .zine .zheart{position:absolute;z-index:8;right:22px;bottom:22px;width:44px;height:44px;display:grid;place-items:center;padding:0;border-radius:12px;border:2px solid var(--c);background:var(--z-black);color:var(--c);cursor:pointer}
 .boardz-punk-scope .zine .zheart svg{width:22px;height:22px}
-.boardz-punk-scope .zine .zheart[aria-pressed=true]{background:var(--c);color:var(--z-black,#050506)}
+.boardz-punk-scope .zine .zheart[aria-pressed=true]{background:var(--c);color:var(--z-black)}
 .boardz-punk-scope .zine .zheart:disabled{cursor:default}
-.boardz-punk-scope .zine .zheart:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.boardz-punk-scope .zine .zheart:focus-visible{outline:2px solid var(--text-hi);outline-offset:3px}
 
 /* Hoüz keeps its palette: cyan frame, hero and heart; the type color is the secondary. Blueprint grid, not nodes. */
-.boardz-punk-scope .zine.zc-houz .zt-face{background:radial-gradient(ellipse at 100% 50%,color-mix(in srgb,var(--c2) 16%,transparent),transparent 70%),#031012}
+.boardz-punk-scope .zine.zc-houz .zt-face{background:radial-gradient(ellipse at 100% 50%,color-mix(in srgb,var(--c2) 16%,transparent),transparent 70%),var(--z-black)}
 .boardz-punk-scope .zine.zc-houz .wp-photo img{filter:saturate(.4) brightness(.62) contrast(1.08)}
 .boardz-punk-scope .zine.zc-houz .wp-photo::after{content:"";position:absolute;inset:0;background:var(--c2);mix-blend-mode:multiply;opacity:.14;pointer-events:none}
 .boardz-punk-scope .zine.zc-houz .wp-dots{opacity:.06}
@@ -108,18 +108,18 @@
 /* Hoüz headline holds three lines above the ticket: no extra paste tilt to push its last line down. */
 .boardz-punk-scope .zine.zc-houz .zine-title{rotate:none}
 .boardz-punk-scope .zine.zc-houz .zine-value{left:22px;bottom:48px;font-size:18px;color:var(--c2)}
-.boardz-punk-scope .zine.zc-houz .zheart{box-shadow:0 0 0 4px var(--z-black,#050506),0 0 28px 16px rgba(5,5,6,.6)}
+.boardz-punk-scope .zine.zc-houz .zheart{box-shadow:0 0 0 4px var(--z-black),0 0 28px 16px rgba(5,5,6,.6)}
 
 /* Hoüz occupancy ticket: faces and count on one ink panel. */
 .boardz-punk-scope .zine .hf{position:absolute;z-index:6;left:22px;bottom:60px;display:flex;align-items:center;gap:10px;padding:5px 10px 5px 6px;
-  background:var(--panel-card,#0c0c0f);border:1px solid var(--panel-border,#1c1c22);border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.45)}
+  background:var(--panel-card);border:1px solid var(--panel-border);border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.45)}
 .boardz-punk-scope .zine .hf-faces{display:flex;padding-left:8px}
-.boardz-punk-scope .zine .hf-face{position:relative;width:30px;height:30px;margin-left:-6px;box-sizing:border-box;overflow:hidden;background:var(--z-black,#050506);border:1.5px solid var(--c);border-radius:4px}
+.boardz-punk-scope .zine .hf-face{position:relative;width:30px;height:30px;margin-left:-6px;box-sizing:border-box;overflow:hidden;background:var(--z-black);border:1.5px solid var(--c);border-radius:4px}
 .boardz-punk-scope .zine .hf-face img{display:block;width:100%;height:100%;object-fit:cover;border-radius:3px;filter:saturate(1.15) contrast(1.05)}
 .boardz-punk-scope .zine .hf-open{background:transparent;border:1px dashed color-mix(in srgb,var(--c2) 45%,transparent)}
 .boardz-punk-scope .zine .hf-count{display:inline-flex;align-items:baseline;gap:3px}
-.boardz-punk-scope .zine .hf-n{font:800 24px/1 var(--font-display);color:#fff}
-.boardz-punk-scope .zine .hf-of{font:600 12px/1 var(--font-mono);color:#fff;opacity:.8}
+.boardz-punk-scope .zine .hf-n{font:800 24px/1 var(--font-display);color:var(--text-hi)}
+.boardz-punk-scope .zine .hf-of{font:600 12px/1 var(--font-mono);color:var(--text-hi);opacity:.8}
 .boardz-punk-scope .zine .hf-l{margin-left:4px;font:600 11px/1 var(--font-mono);letter-spacing:.12em;color:var(--c2)}
 
 /* Decay: the card's own layers drop chunks and jitter, each on its own clock. Nothing is added. */
@@ -161,7 +161,7 @@
 .boardz-punk-scope .zine--small.z-seek .zine-tape{left:16px}
 .boardz-punk-scope .zine--small .zheart{right:14px;bottom:14px;width:30px;height:30px;border-radius:9px}
 .boardz-punk-scope .zine--small .zheart svg{width:16px;height:16px}
-.boardz-punk-scope .zine--small.zc-houz .zheart{box-shadow:0 0 0 3px var(--z-black,#050506)}
+.boardz-punk-scope .zine--small.zc-houz .zheart{box-shadow:0 0 0 3px var(--z-black)}
 .boardz-punk-scope .zine--small .hf--small{left:12px;top:14px;bottom:auto;gap:0;padding:3px 7px;border-radius:5px}
 .boardz-punk-scope .zine--small.z-seek .hf--small{left:16px}
 .boardz-punk-scope .zine--small .hf--small .hf-n{font-size:13px}
