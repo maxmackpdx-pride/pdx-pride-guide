@@ -525,6 +525,9 @@ html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--te
    The wide toggle (.ab-card-grid--wide) returns to one large card per row. */
 @media(max-width:767px) {
  .ab-page .ab-category-dock { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); overflow:visible; }
+ .ab-page .ab-browse { display:flex; flex-direction:column; gap:var(--space-5); }
+ .ab-page .ab-results { order:1; }
+ .ab-page .ab-sidebar { order:2; }
  .ab-page .ab-category { flex:none; min-width:0; padding-inline:6px; font-size:var(--chrome-md); }
  .ab-page .ab-card-grid:not(.ab-card-grid--wide) { grid-template-columns:repeat(2,136px); justify-content:center; gap:18px 14px; }
  .ab-page .ab-card-grid:not(.ab-card-grid--wide) .boardz-production-card { width:136px; }
