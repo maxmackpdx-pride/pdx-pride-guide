@@ -55,3 +55,6 @@
 @media(max-width:391px) { .board-open-card--floating .boardz-production-card { zoom:.93; } }
 @media(max-width:366px) { .board-open-card--floating .boardz-production-card { zoom:.88; } }
 @media(max-width:348px) { .board-open-card--floating .boardz-production-card { zoom:.8; } }
+/* Zine cards are fixed width: the dialog hugs them so the close button sits over the card's right edge. */
+.board-open-card.board-open-card--floating:has(.boardz-production-card) { width:fit-content; max-width:calc(100vw - 32px); }
+.board-open-card--floating:has(.boardz-production-card) .map-board-cards { container-type:normal; width:max-content; max-width:100%; }
