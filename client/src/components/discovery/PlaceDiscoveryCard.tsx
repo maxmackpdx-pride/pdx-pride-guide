@@ -5,6 +5,7 @@ import { PLACE_ACCENTS } from './placeTokens';
 import { useId, type CSSProperties, type MouseEvent } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { PlaceCard } from '@/components/ds';
+import { PlacezXerox } from '@/components/xerox/Overlays';
 import { ResourceCardMotif } from '@/components/resources/ResourceCardMotif';
 import { resolveDirectoryLogo } from '@/lib/directoryLogos';
 import { placeUrl } from '@shared/placeSlug';
@@ -21,7 +22,7 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
   const label = directoryCardCategoryLabel(place);
   const serviceTags = place.type === 'service' ? directorySubcategories(place) : [];
   const open = (event: MouseEvent<HTMLElement>) => onOpen(event.currentTarget.closest<HTMLElement>('.pdxPlace') || event.currentTarget);
-  return <div className="placez-card-surface" style={{ '--placez-logo-ink-filter': `url(#${logoInkId})` } as CSSProperties}>
+  return <PlacezXerox accent={accent}><div className="placez-card-surface" style={{ '--placez-logo-ink-filter': `url(#${logoInkId})` } as CSSProperties}>
     <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: 'absolute' }}>
       <defs><filter id={logoInkId} colorInterpolationFilters="sRGB">
         {/* Remove low-alpha glow baked into the logo while retaining its authored contour. */}
@@ -42,5 +43,5 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
         <button type="button" className="pdx-glass-rebind pdxBtn" aria-label={`View details for ${place.name}`} onClick={event=>{event.stopPropagation();open(event);}}>View details <ArrowUpRight size={18}/></button>
       </div>}
     />
-  </div>;
+  </div></PlacezXerox>;
 }

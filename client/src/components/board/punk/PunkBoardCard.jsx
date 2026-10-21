@@ -19,6 +19,8 @@ import {ZineCard,ZineSmallCard,ZineOpenHead,ZineFilters} from './ZineCard';
 import './zine-open.css';
 import './production.css';
 import {useTheme} from '@/context/ThemeContext';
+import {BoardzXerox,hasXerox} from '@/components/xerox/RoomOverlays';
+import {XeroxFilters} from '@/components/xerox/XeroxFilters';
 const A='/boardz/punk/';
 const boardNames={housing:'My Hoüz',giftz:'Giftz',gigz:'Gigz',sellz:'Sellz',mizzed:'Mizzed Connection'};
 function HouzPhoto({photos,alt,calm=false}){const [index,setIndex]=useState(0);const [glitch,setGlitch]=useState(false);useEffect(()=>{setIndex(0);if(photos.length<2)return;const media=matchMedia('(prefers-reduced-motion: reduce)');let pulse;const timer=setInterval(()=>{if(document.hidden||media.matches||calm)return;setGlitch(true);pulse=setTimeout(()=>setGlitch(false),360);setIndex(i=>(i+1)%photos.length)},6500);return()=>{clearInterval(timer);clearTimeout(pulse)}},[photos.join('|'),calm]);return <div className={'houz-photo-slide'+(glitch?' is-glitching':'')}><img className="houz-cover" src={photos[index]||photos[0]} alt={alt}/>{photos.length>1&&<><span className="houz-glitch" aria-hidden="true"/><span className="houz-photo-progress" aria-hidden="true">{photos.map((_,i)=><i key={i} className={i===index?'active':''}/>)}</span></>}</div>}
@@ -63,15 +65,16 @@ function Card(props){
   const save=React.useContext(SaveContext);
   const card=r.kind==='board'?(small?<ZineSmallCard r={r} calm={props.calm} save={save} Photo={HouzPhoto}/>:<ZineCard r={r} calm={props.calm} save={save} Photo={HouzPhoto}/>):r.kind==='board'&&r.category!=='housing'?<BoardzCollage {...props} Photo={HouzPhoto} Save={Save} Location={HouzLocation}/>:<BaseCard {...props}/>;
   if(r.kind!=='board')return card;
+  const xerox=!props.calm&&hasXerox(r);
   let seed=Array.from(`${r.key||r.id}:${small?'small':'large'}:${props.pinVariant||'default'}`).reduce((n,c)=>Math.imul(n^c.charCodeAt(0),16777619)>>>0,2166136261);
   seed=Math.imul(seed^(seed>>>16),0x45d9f3b)>>>0;
   const color=r.category==='housing'?'#00FFFF':boardPalette[r.category]?.color||r.color;
   const secondary=r.category==='housing'?housingTypes[r.intent].color:color;
-  return <div className="demo-pinned" data-size={small?'small':'large'} style={{'--c':color,'--ab-accent':secondary,'--day-thu':'#00FFFF','--pin-tilt':`${((seed%81)-44)/2}deg`,'--pin-offset':`${((seed>>>8)%9)-4}px`}}><BoardPushPin postKey={`${r.key}:${small?'small':'large'}`}/>{card}</div>;
+  return <div className="demo-pinned" data-size={small?'small':'large'} style={{'--c':color,'--ab-accent':secondary,'--day-thu':'#00FFFF','--pin-tilt':`${((seed%81)-44)/2}deg`,'--pin-offset':`${((seed>>>8)%9)-4}px`}}><BoardPushPin postKey={`${r.key}:${small?'small':'large'}`}/>{xerox?<BoardzXerox r={r} size={small?'small':'large'}>{card}</BoardzXerox>:card}</div>;
 };
 
 let filterRoot=null,filterNode=null,filterUsers=0;
-function useFilters(){useLayoutEffect(()=>{filterUsers++;if(!filterRoot){filterNode=document.createElement('div');filterNode.setAttribute('aria-hidden','true');filterNode.style.cssText='position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';document.body.append(filterNode);filterRoot=createRoot(filterNode);filterRoot.render(<><InkFilters/><BoardzInkFilters/><PunkArtworkFilters/><ZineFilters/></>)}return()=>{filterUsers--;};},[]);}
+function useFilters(){useLayoutEffect(()=>{filterUsers++;if(!filterRoot){filterNode=document.createElement('div');filterNode.setAttribute('aria-hidden','true');filterNode.style.cssText='position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';document.body.append(filterNode);filterRoot=createRoot(filterNode);filterRoot.render(<><InkFilters/><BoardzInkFilters/><PunkArtworkFilters/><ZineFilters/><XeroxFilters/></>)}return()=>{filterUsers--;};},[]);}
 export default function PunkBoardCard({post,small=false,saved=false,saveDisabled=false,onSave,onOpen,showStatus=false,calm=false}){
  const {calmMode}=useTheme(); calm=calm||calmMode; useFilters(); const openRef=useRef(null); const r=toPunkPost(post);
  return <SaveContext.Provider value={{saved,disabled:saveDisabled||!onSave,onSave:onSave||(()=>{})}}><div className="boardz-punk-scope" data-direction="split" data-calm={calm} data-compact={small||undefined} onClick={e=>{if(onOpen&&!e.target.closest('button,a,input,select,textarea'))onOpen(openRef.current)}}>

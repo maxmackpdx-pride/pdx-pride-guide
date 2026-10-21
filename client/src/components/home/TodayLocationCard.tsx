@@ -15,6 +15,7 @@ import "./TonightEventCard.css";
 import type { Business } from "@/pages/Directory";
 import { outzBandArt } from "@/lib/outzKinds";
 import "./TodayLocationCard.css";
+import { OutzXerox, PlacezXerox, RansomTitle } from "@/components/xerox/Overlays";
 
 export type TodayLocation = { key: string; name: string; room: "OutZide" | "Placez"; detail: string; href: string; kind?: string; art?: string; photo?: OutzPhotoData; place?: Business };
 // Matches the OutZide drawer's waypoint palette and destination categories.
@@ -29,7 +30,7 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(location.key.replace(/^outz:/, ""));
   const businessLogo = isPlace ? resolveDirectoryLogo(location.name, location.place?.imageUrl) || directoryFallbackLogo(kind) : null;
   const label = isPlace ? DIRECTORY_TYPE_LABELS[kind] || "Placez" : OUTZ_LABELS[location.kind || ""] || "Destination";
-  return <><article className="tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind" style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
+  const card = <article className="tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind" style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
     {isPlace && <ResourceCardMotif name={location.name} category={`place-${kind}`} />}
     <CardWaypoint kind={isPlace ? kind : location.kind || "trail"} outside={!isPlace} />
     <RailShareButton href={location.href} title={location.name} />
@@ -41,7 +42,7 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
       <div className="tonight-card__body">
         <p className="rail-card-room"><img className={isPlace ? "rail-card-room__logo rail-card-room__logo--white" : "rail-card-room__logo"} src={isPlace ? "/brand/family/our-placez.svg" : "/brand/outzide.png"} alt={location.room} /></p>
         <p className="tonight-card__time">{label}</p>
-        <h3 title={location.name}>{location.name}</h3>
+        <h3 title={location.name} aria-label={location.name}>{isPlace ? location.name : <span aria-hidden="true"><RansomTitle text={location.name} /></span>}</h3>
         <p className="tonight-card__venue"><MapPin size={16} aria-hidden="true" /><span>{location.detail}</span></p>
         <div className="tonight-card__tags"><span>{label}</span></div>
       </div>
@@ -51,5 +52,6 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
       {isPlace && location.place && <VenueFollowButton accent={accent} businessId={location.place.id} initialFollowing={Boolean(location.place.isFollowing)} onRequireAuth={onRequireAuth} />}
       <button type="button" className="tonight-card__view" onClick={() => setOpen(true)}>View details <ArrowUpRight size={17} aria-hidden="true" /></button>
     </footer>
-  </article>{open && (isPlace && location.place ? <PlaceModal place={location.place} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth || (() => {})} /> : <OutzCardModal location={location} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth} />)}</>;
+  </article>;
+  return <>{isPlace ? <PlacezXerox slot=".today-location__art">{card}</PlacezXerox> : <OutzXerox photo={Boolean(location.photo)}>{card}</OutzXerox>}{open && (isPlace && location.place ? <PlaceModal place={location.place} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth || (() => {})} /> : <OutzCardModal location={location} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth} />)}</>;
 }

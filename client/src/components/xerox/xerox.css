@@ -1,0 +1,193 @@
+/* autofocus */
+.xr-af{position:absolute;pointer-events:none;z-index:12}
+.xr-af .af-box{position:absolute;left:var(--x);top:var(--y);width:58px;height:42px;transform:translate(-50%,-50%);
+  transition:left .38s cubic-bezier(.3,1.22,.5,1),top .38s cubic-bezier(.3,1.22,.5,1),width .22s,height .22s}
+.xr-af .af-box i{position:absolute;width:11px;height:11px;border:0 solid rgb(230 227 218)}
+.xr-af .af-box i:nth-child(1){left:0;top:0;border-top-width:2px;border-left-width:2px}
+.xr-af .af-box i:nth-child(2){right:0;top:0;border-top-width:2px;border-right-width:2px}
+.xr-af .af-box i:nth-child(3){left:0;bottom:0;border-bottom-width:2px;border-left-width:2px}
+.xr-af .af-box i:nth-child(4){right:0;bottom:0;border-bottom-width:2px;border-right-width:2px}
+.xr-af .af-box b{position:absolute;left:0;top:-12px;font:600 7px/1 var(--font-mono);letter-spacing:.14em;color:rgb(230 227 218);white-space:nowrap;text-shadow:0 0 3px rgb(0 0 0)}
+.xr-af.lock .af-box i{border-color:rgb(57 255 20)}.xr-af.lock .af-box b{color:rgb(57 255 20)}
+.xr-af.hunt .af-box{width:84px;height:62px;animation:xrAfFlick .1s steps(1) infinite}
+@keyframes xrAfFlick{50%{opacity:.35}}
+.xr-afm-track .af-box{transition:left .9s ease-in-out,top .9s ease-in-out,width .3s,height .3s}
+.xr-af .af-grid{position:absolute;inset:6% 6%;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(3,1fr);gap:10px}
+.xr-af .af-grid i{border:1px solid rgba(230,227,218,.35);border-radius:2px}
+.xr-af .af-grid i.on{border:2px solid rgb(57 255 20);box-shadow:0 0 8px rgba(57,255,20,.6)}
+.xr-af.hunt .af-grid i.on{border-color:rgb(230 227 218);box-shadow:none;animation:xrAfFlick .1s steps(1) infinite}
+.xr-af .af-soft{position:absolute;inset:0;transition:backdrop-filter .3s,-webkit-backdrop-filter .3s}
+.xr-afm-dof .af-soft{backdrop-filter:blur(1.8px);-webkit-backdrop-filter:blur(1.8px);
+  -webkit-mask:radial-gradient(ellipse 26% 30% at var(--x) var(--y),transparent 55%,rgb(0 0 0) 100%);mask:radial-gradient(ellipse 26% 30% at var(--x) var(--y),transparent 55%,rgb(0 0 0) 100%)}
+.xr-afm-dof.hunt .af-soft{-webkit-mask:none;mask:none}
+.xr-afm-rack .af-soft{backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0)}
+.xr-afm-rack.hunt .af-soft{backdrop-filter:blur(2.6px);-webkit-backdrop-filter:blur(2.6px)}
+@media (prefers-reduced-motion:reduce){.xr-af *{animation:none!important;transition:none!important}}
+.xr-af{overflow:hidden}
+
+/* Mizzed autofocus: a chat bubble hunts, then locks and types */
+.xr-af .af-bubble{position:absolute;left:var(--x);top:var(--y);width:74px;height:48px;transform:translate(-50%,-50%);color:rgb(230 227 218);
+  transition:left .38s cubic-bezier(.3,1.22,.5,1),top .38s cubic-bezier(.3,1.22,.5,1),width .22s,height .22s}
+.xr-af .af-bubble svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.xr-af.lock .af-bubble{color:var(--neon-magenta);filter:drop-shadow(0 0 6px rgba(255,0,204,.55))}
+.xr-af.hunt .af-bubble{width:96px;height:62px;animation:xrAfFlick .1s steps(1) infinite}
+.xr-af .af-bubble b{position:absolute;left:2px;top:-12px;font:600 7px/1 var(--font-mono);letter-spacing:.14em;white-space:nowrap;color:rgb(230 227 218);text-shadow:0 0 3px rgb(0 0 0)}
+.xr-af.lock .af-bubble b{color:var(--neon-magenta)}
+.xr-af .tb-dots{position:absolute;left:12%;top:20%;display:flex;gap:4px}
+.xr-af .tb-dots i{width:5px;height:5px;border-radius:50%;background:currentColor;animation:xrTbDot 1s ease-in-out infinite}
+.xr-af .tb-dots i:nth-child(2){animation-delay:.15s}.tb-dots i:nth-child(3){animation-delay:.3s}
+@keyframes xrTbDot{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-3px);opacity:1}}
+.xr-af .tb-red{position:absolute;left:12%;top:52%;width:58%;height:4px;background:rgb(230 227 218);opacity:.75}
+.xr-af.hunt .tb-dots,.xr-af.hunt .tb-red{opacity:0}
+.xr-rz .xr-room .ghost{opacity:0;animation:xrGhostBubble 6s ease-in-out infinite}
+@keyframes xrGhostBubble{0%,100%{opacity:0}25%,55%{opacity:.75}}
+
+/* ===== Round 7: cross hatch, colour kept, room-specific overlays, crisp glitch, grain, AF without blur ===== */
+
+
+.xr-rz .xr-room{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;mix-blend-mode:screen}
+.xr-rz .xr-room .ring{transform-box:fill-box;transform-origin:center;animation:xrRzPing 2.4s ease-out infinite}
+@keyframes xrRzPing{0%{transform:scale(.2);opacity:.95}100%{transform:scale(2.6);opacity:0}}
+.xr-rz .xr-room .pk2{stroke-dasharray:3 5;animation:xrRzMarch 1.6s linear infinite}
+@keyframes xrRzMarch{to{stroke-dashoffset:-24}}
+.xr-rz .xr-room .ecg{stroke-dasharray:180 1000;animation:xrRzEcg 2.6s linear infinite}
+@keyframes xrRzEcg{from{stroke-dashoffset:1000}to{stroke-dashoffset:-180}}
+.xr-rz .xr-room .scanline{animation:xrRzScan 3s ease-in-out infinite}
+@keyframes xrRzScan{0%,100%{transform:translateY(0)}50%{transform:translateY(var(--scan,160px))}}
+.xr-rz .xr-room .spin{transform-box:fill-box;transform-origin:center;animation:xrRzSpin 6s linear infinite}
+@keyframes xrRzSpin{to{transform:rotate(360deg)}}
+
+/* crisp HD glitch: hard bands, channel split, no blur */
+.xr-hdg{position:relative;width:100%;height:100%}
+
+.xr-hdg-r,.xr-hdg-c{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:5}
+.xr-hdg-r>*,.xr-hdg-c>*{position:absolute;inset:0}
+.xr-hdg-r{filter:url(#xr-ch-red);mix-blend-mode:screen;animation:xrHdgR 15.6s steps(1) infinite;animation-delay:var(--gd)}
+.xr-hdg-c{filter:url(#xr-ch-cyan);mix-blend-mode:screen;animation:xrHdgC 15.6s steps(1) infinite;animation-delay:var(--gd)}
+@keyframes xrHdgR{0.0%,86.0%,100.0%{opacity:0;transform:none;clip-path:inset(0)}
+  86.3%{opacity:1;transform:translateX(-7px);clip-path:inset(12.0% 0 70.0% 0)}
+  87.0%{opacity:1;transform:translateX(9px);clip-path:inset(46.0% 0 38.0% 0)}
+  87.7%{opacity:1;transform:translateX(-4px);clip-path:inset(72.0% 0 12.0% 0)}
+  88.3%{opacity:1;transform:translateX(5px);clip-path:inset(30.0% 0 58.0% 0)}
+  89.0%{opacity:0}}
+@keyframes xrHdgC{0.0%,86.0%,100.0%{opacity:0;transform:none;clip-path:inset(0)}
+  86.1%{opacity:1;transform:translateX(6px);clip-path:inset(16.0% 0 66.0% 0)}
+  86.3%{opacity:1;transform:translateX(-10px);clip-path:inset(50.0% 0 34.0% 0)}
+  86.6%{opacity:1;transform:translateX(5px);clip-path:inset(76.0% 0 8.0% 0)}
+  86.8%{opacity:1;transform:translateX(-6px);clip-path:inset(26.0% 0 62.0% 0)}
+  87.0%{opacity:0}}
+/* the base card jolts with the bands */
+.xr-hdg>:first-child{animation:xrHdgJolt 15.6s steps(1) infinite;animation-delay:var(--gd)}
+@keyframes xrHdgJolt{0.0%,86.0%,89.3%,100.0%{transform:none}86.3%{transform:translateX(2px)}87.0%{transform:translateX(-3px)}87.7%{transform:translateX(1px)}88.3%{transform:none}}
+
+/* film grain: fine, sharp, flickering */
+.xr-grain{position:absolute;inset:0;pointer-events:none;z-index:9;border-radius:inherit;mix-blend-mode:overlay;opacity:.55;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:xrXrGrainShift .5s steps(4) infinite}
+@keyframes xrXrGrainShift{0%{background-position:0 0}25%{background-position:-37px 21px}50%{background-position:19px -43px}75%{background-position:-11px 33px}100%{background-position:0 0}}
+@media (prefers-reduced-motion:reduce){.xr-rz *,.xr-hdg *,.xr-grain,.xr-hdg-r,.xr-hdg-c{animation:none!important}}
+
+
+/* motif layers (clones of the card's own sticker and wire art) */
+.boardz-punk-scope .xr-rz .zine .zine-hero.mo{pointer-events:none}
+.boardz-punk-scope .xr-rz .zine .zine-hero.mo-edge{filter:var(--mo-edge)!important;z-index:4;animation:xrMoPulse 3.6s ease-in-out infinite}
+@keyframes xrMoPulse{0%,100%{opacity:.55}50%{opacity:1}}
+.boardz-punk-scope .xr-rz .zine .zine-hero.mo-scan{filter:var(--mo-fill)!important;z-index:4;mix-blend-mode:screen;opacity:.75;
+  -webkit-mask:linear-gradient(180deg,transparent 0 40%,rgb(0 0 0) 47% 53%,transparent 60% 100%) 0 0/100% 300% no-repeat;mask:linear-gradient(180deg,transparent 0 40%,rgb(0 0 0) 47% 53%,transparent 60% 100%) 0 0/100% 300% no-repeat;
+  animation:xrMoScan 2.8s linear infinite}
+@keyframes xrMoScan{from{-webkit-mask-position:0 100%;mask-position:0 100%}to{-webkit-mask-position:0 0;mask-position:0 0}}
+.boardz-punk-scope .xr-rz .zine .zine-hero.mo-echo{filter:var(--mo-edge)!important;z-index:2;animation:xrMoEcho 2.7s ease-out infinite}
+@keyframes xrMoEcho{0%{scale:1;opacity:.9}100%{scale:1.32;opacity:0}}
+.boardz-punk-scope .xr-rz .zine .zine-hero.mo-wire{filter:var(--mo-edge)!important;z-index:3;opacity:.8;animation:xrMoFlick 2.2s steps(1) infinite}
+@keyframes xrMoFlick{0%,100%{opacity:.8}38%{opacity:.25}40%{opacity:.9}71%{opacity:.4}72%{opacity:.85}}
+@media (prefers-reduced-motion:reduce){.xr-rz .mo{animation:none!important}}
+.boardz-punk-scope .xr-rz .zine--wp .zine-hero:not(.mo){opacity:.28}
+/* nodes and wires, tuned down: the network mesh drops to one clean plane, the wire companion breathes instead of flickering */
+.boardz-punk-scope .xr-rz .zine .zn{opacity:.34}
+.boardz-punk-scope .xr-rz .zine .zn .card-network__plane:not(:first-child){opacity:.3}
+.boardz-punk-scope .xr-rz .zine .zn .card-network{filter:var(--zf-strip) brightness(.75) contrast(1.15)}
+.boardz-punk-scope .xr-rz .zine .zine-hero.mo-wire{opacity:.32;animation:xrMoBreathe 5s ease-in-out infinite}
+@keyframes xrMoBreathe{0%,100%{opacity:.22}50%{opacity:.42}}
+.boardz-punk-scope .xr-rz .zine .zine-hero.zine-wire:not(.mo){opacity:.18}
+
+/* gigz and giftz overlay motion */
+.xr-rz .xr-room .vinyl{transform-box:fill-box;transform-origin:center;animation:xrRzSpin 2.4s linear infinite}
+.xr-rz .xr-room .arm{animation:xrRzArm 4s ease-in-out infinite;transform-box:view-box}
+@keyframes xrRzArm{0%,100%{opacity:1}50%{opacity:.7}}
+.xr-rz .xr-room .wave{animation:xrRzWave .9s steps(3) infinite}
+@keyframes xrRzWave{33%{transform:translateX(-3px)}66%{transform:translateX(2px)}}
+.xr-rz .xr-room .eq rect{transform-box:fill-box;transform-origin:50% 100%;animation:xrRzEq 1s ease-in-out infinite}
+@keyframes xrRzEq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+.xr-rz .xr-room .pk{stroke-dasharray:6 8;animation:xrRzMarch 1.2s linear infinite}
+.xr-rz .xr-room .claim{animation:xrRzMarch 1.6s linear infinite}
+.xr-rz .xr-room .bow{animation:xrMoPulse 2.4s ease-in-out infinite}
+/* small cards: overlays sit inside the narrower tear; autofocus scales down */
+.xr-rz.xr-sz-small .room{inset:0}
+.xr-sz-small .xr-af .af-box{width:34px;height:26px}.xr-sz-small .xr-af.hunt .af-box{width:48px;height:36px}
+.xr-sz-small .xr-af .af-box i{width:7px;height:7px}.xr-sz-small .xr-af .af-box b{font-size:6px;top:-9px}
+.xr-sz-small .af-bubble{width:50px;height:32px}.xr-sz-small .xr-af.hunt .af-bubble{width:62px;height:40px}
+.xr-sz-small .tb-dots i{width:3.5px;height:3.5px}.xr-sz-small .af-bubble b{font-size:6px;top:-9px}
+.xr-sz-small .xr-grain{background-size:120px 120px}
+/* photo posts: the photo is the primary image, so the motif trace stays light and the fill scan is off */
+.boardz-punk-scope .xr-rz .zine--wp .zine-hero.mo-edge{animation:none;opacity:.35}
+.boardz-punk-scope .xr-rz .zine--wp .zine-hero.mo-echo{animation-name:xrMoEchoLite}
+@keyframes xrMoEchoLite{0%{scale:1;opacity:.35}100%{scale:1.25;opacity:0}}
+.boardz-punk-scope .xr-rz .zine--wp .zine-hero.mo-scan{display:none}
+.boardz-punk-scope .xr-rz .zine--wp .zine-hero:not(.mo){opacity:.16}
+
+
+
+/* cross hatch on the primary image only: a post photo, or the sticker on a post without one */
+.xr-rz .zine .wp-photo img{filter:url(#xr-ht-hatch)!important}
+.boardz-punk-scope .xr-rz .zine--cs .zine-hero.zine-sticker{filter:var(--zf-hero) url(#xr-ht-hatch)!important}
+
+/* ===== Outzide and Placez: live cards with the Xerox layer ===== */
+.xr-oz,.xr-pz{position:relative}
+.xr-xo{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;color:var(--c);mix-blend-mode:screen;opacity:.8}
+.xr-xo-cp{animation:xrXoPulse 3.6s ease-in-out infinite}
+@keyframes xrXoPulse{0%,100%{opacity:.3}50%{opacity:1}}
+.xr-xo-sweep{stroke-dasharray:90 1000;stroke-dashoffset:1000;animation:xrXoSweep 5.2s linear infinite}
+@keyframes xrXoSweep{to{stroke-dashoffset:-90}}
+.xr-xo-route{stroke-dasharray:6 8;animation:xrXoMarch 1.2s linear infinite}
+@keyframes xrXoMarch{to{stroke-dashoffset:-28}}
+.xr-xo-spin,.xr-radar-sweep{transform-box:fill-box;transform-origin:center;animation:xrXoSpin 9s linear infinite}
+.xr-radar-sweep{animation-duration:4.2s}
+@keyframes xrXoSpin{to{transform:rotate(360deg)}}
+.xr-xo-scan{animation:xrXoScan 4.6s linear infinite}
+@keyframes xrXoScan{to{transform:translateY(300px)}}
+/* photo: cross hatch on the primary image only, a touch brighter, with red and cyan split copies for the glitch */
+.xr-oz--photo .today-location__art img:not(.xr-copy){filter:url(#xr-ht-hatch-oz) brightness(1.12)}
+.xr-copy{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;mix-blend-mode:screen;z-index:5;pointer-events:none}
+.xr-copy-r{filter:url(#xr-ch-red);animation:xrCopyR 15.6s steps(1) infinite;animation-delay:var(--gd)}
+.xr-copy-c{filter:url(#xr-ch-cyan);animation:xrCopyC 15.6s steps(1) infinite;animation-delay:var(--gd)}
+@keyframes xrCopyR{0%,86%,100%{opacity:0}86.3%{opacity:1;transform:translateX(-5px);clip-path:inset(12% 0 70% 0)}87%{opacity:1;transform:translateX(7px);clip-path:inset(46% 0 38% 0)}87.7%{opacity:1;transform:translateX(-3px);clip-path:inset(72% 0 12% 0)}88.3%{opacity:1;transform:translateX(4px);clip-path:inset(30% 0 58% 0)}89%{opacity:0}}
+@keyframes xrCopyC{0%,86%,100%{opacity:0}86.1%{opacity:1;transform:translateX(5px);clip-path:inset(16% 0 66% 0)}86.3%{opacity:1;transform:translateX(-7px);clip-path:inset(50% 0 34% 0)}86.6%{opacity:1;transform:translateX(4px);clip-path:inset(76% 0 8% 0)}86.8%{opacity:1;transform:translateX(-5px);clip-path:inset(26% 0 62% 0)}87%{opacity:0}}
+.xr-oz .today-location__art{position:relative}
+/* ransom title: one polarity, paper tile and black ink */
+.xr-rl{display:inline-block;padding:1px 3px;margin:0 1px 2px 0;font-style:normal;font-weight:900;line-height:1.02;color:var(--z-black);background:var(--paper)}
+.xr-rw{display:inline-flex;white-space:nowrap;margin-right:.3em}
+.xr-oz .tonight-card__body h3{font-size:15px;line-height:1.2;-webkit-line-clamp:3;max-height:none}
+.xr-oz h3 .xr-rl{font-size:15px;padding:0 2px}
+/* Placez radar over the logo well */
+.xr-pz :is(.pdxPlace__media,.today-location__art){position:relative;color:var(--c)}
+.xr-radar{position:absolute;left:50%;top:50%;width:150px;height:150px;transform:translate(-50%,-50%);color:var(--c);opacity:.9;pointer-events:none;z-index:2}
+.xr-radar-pin{transform-box:fill-box;transform-origin:50% 100%;animation:xrPinDrop 2.8s cubic-bezier(.3,1.4,.6,1) infinite}
+@keyframes xrPinDrop{0%{transform:translateY(-38px);opacity:0}15%{opacity:1}40%,100%{transform:translateY(0);opacity:1}}
+.xr-radar-ping{transform-box:fill-box;transform-origin:center;animation:xrPing 2.8s ease-out infinite}
+@keyframes xrPing{0%,40%{transform:scale(.4);opacity:.9}100%{transform:scale(3.2);opacity:0}}
+.xr-pz .pdxPlace__body::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:screen;opacity:.22;background:url(/boardz/punk/torn-card-scan.webp) center/auto 125%}
+@media (prefers-reduced-motion:reduce){.xr-xo *,.xr-radar *,.xr-copy,.xr-radar-pin,.xr-radar-ping{animation:none!important}}
+.xr-oz .xr-grain,.xr-pz .xr-grain{opacity:.3}
+
+/* One action per card: no share, and the follow control is the heart, bottom right, 44px, as on every other card */
+.xr-oz .rail-card-share,.xr-pz :is(.rail-card-share,.pdxPlace__share){display:none!important}
+.xr-oz .tonight-card__footer .tonight-card__view[aria-pressed]{order:2;font-size:0;min-width:0;width:44px;height:44px;padding:0;border-radius:12px;border:2px solid var(--c);background:var(--z-black);color:var(--c);display:grid;place-items:center}
+.xr-oz .tonight-card__footer .tonight-card__view[aria-pressed]::before{content:"";width:22px;height:22px;background:currentColor;-webkit-mask:var(--xr-heart) center/contain no-repeat;mask:var(--xr-heart) center/contain no-repeat}
+.xr-oz .tonight-card__footer .tonight-card__view[aria-pressed=true]{background:var(--c);color:var(--z-black)}
+.xr-oz .tonight-card__footer{display:flex;align-items:center;justify-content:space-between}
+.xr-oz,.xr-pz{--xr-heart:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2'%3E%3Cpath d='M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z'/%3E%3C/svg%3E")}
+.xr-pz .pdxPlace__actions{position:absolute!important;left:auto!important;right:25px!important;bottom:25px!important;top:auto!important;z-index:12;opacity:1!important;visibility:visible!important;transform:none!important;pointer-events:auto!important}
+.xr-pz .pdxPlace__actions button:first-child{display:grid!important;place-items:center;font-size:0!important;line-height:0!important;width:44px!important;height:44px!important;min-width:0!important;padding:0!important;border-radius:12px!important;border:2px solid var(--c)!important;background:var(--z-black)!important;color:var(--c)!important}
+.xr-pz .pdxPlace__actions .venue-follow-heart{display:grid!important;place-items:center}
+.xr-pz .pdxPlace__actions .venue-follow-heart svg{width:22px!important;height:22px!important;font-size:initial}
+.xr-pz .placez-discovery-footer .pdxBtn{width:calc(100% - 58px)!important;margin-right:0!important}
