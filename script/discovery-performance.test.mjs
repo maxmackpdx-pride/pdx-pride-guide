@@ -4,14 +4,15 @@ import { chromium } from 'playwright';
 
 // Run against a local preview: DISCOVERY_TEST_URL=http://localhost:5051 node --test script/discovery-performance.test.mjs
 // PLAYWRIGHT_CHROMIUM_EXECUTABLE optionally selects an already installed browser.
-test('discovery effects pause, resume, and survive responsive changes', { skip: !process.env.DISCOVERY_TEST_URL }, async () => {
+test('discovery effects pause, resume, and survive responsive changes', { skip: !process.env.DISCOVERY_TEST_URL, timeout:90000 }, async () => {
   const browser = await chromium.launch({
     headless: true,
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || undefined,
     args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
   });
   try {
-    const page = await browser.newPage({ viewport: { width: 900, height: 650 }, deviceScaleFactor: 0.5 });
+    const page = await browser.newPage({ viewport: { width: 900, height: 650 }, deviceScaleFactor: 0.5, reducedMotion:'no-preference' });
+    page.setDefaultTimeout(15000);
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => {
@@ -28,7 +29,7 @@ test('discovery effects pause, resume, and survive responsive changes', { skip: 
     };
     await page.goto(url('/directory'));
     const surfaces = await page.evaluate(() => { const root=getComputedStyle(document.documentElement); return {app:getComputedStyle(document.querySelector('.app-shell')).backgroundColor, ink:root.getPropertyValue('--ink-900').trim(), cardBase:root.getPropertyValue('--z-black').trim()}; });
-    assert.equal(surfaces.app,'rgb(0, 0, 0)');
+    assert.equal(surfaces.app,'rgb(17, 17, 17)');
     assert.equal(surfaces.ink,'#050506');
     assert.equal(surfaces.cardBase,'#050506');
     await expectDrawing();

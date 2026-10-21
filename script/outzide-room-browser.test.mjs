@@ -11,7 +11,7 @@ app.use('/api',(_req,res)=>res.status(503).json({error:'Optional feed unavailabl
 app.use(express.static('client/public'));
 let server,base;
 test.before(async()=>{server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s));});base=`http://127.0.0.1:${server.address().port}`;});
-test.after(()=>server.close());
+test.after(()=>{server.closeAllConnections();return new Promise(resolve=>server.close(resolve));});
 for(const width of [320,390,1320])test(`Outzide ${width}: solid pins, two-step cards, responsive controls and static motion`,{timeout:90000},async()=>{
  const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  try{

@@ -10,7 +10,7 @@ app.get('/pin-fixture',(_req,res)=>res.send('<html><head><link rel="stylesheet" 
 app.use(express.static('client/public'));
 let server,url;
 test.before(async()=>{server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s));});url=`http://127.0.0.1:${server.address().port}`;fs.mkdirSync('.local/maplibre-consolidation',{recursive:true});});
-test.after(()=>server.close());
+test.after(()=>{server.closeAllConnections();return new Promise(resolve=>server.close(resolve));});
 
 for(const engine of ['chromium','webkit'])test(`${engine}: native standard pins preserve artwork, popup and source reuse`,{timeout:60000},async t=>{
  let browser;
