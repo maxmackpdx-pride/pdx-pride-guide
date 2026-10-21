@@ -4,9 +4,17 @@
  */
 const MINUTE = 60_000, HOUR = 60 * MINUTE, DAY = 24 * HOUR;
 
+// SQLite CURRENT_TIMESTAMP stores UTC without an offset. ISO event times keep
+// their explicit offset (or existing local-time semantics).
+function timestamp(iso: string): number {
+  const normalized = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?$/.test(iso)
+    ? iso.replace(" ", "T") + "Z" : iso;
+  return Date.parse(normalized);
+}
+
 function elapsed(iso?: string | null, now = Date.now()): number | null {
   if (!iso) return null;
-  const then = new Date(iso).getTime();
+  const then = timestamp(iso);
   return Number.isFinite(then) ? now - then : null;
 }
 
@@ -40,5 +48,5 @@ export function timeAgoCoarse(iso?: string | null, now = Date.now()): string {
   if (days <= 0) return "today";
   if (days < 7) return `${days}d ago`;
   if (days < 30) return `${Math.floor(days / 7)}w ago`;
-  return new Date(iso!).toLocaleDateString([], { month: "short", day: "numeric" });
+  return new Date(timestamp(iso!)).toLocaleDateString([], { month: "short", day: "numeric" });
 }

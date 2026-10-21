@@ -9,7 +9,7 @@ import {brotliCompressSync,gzipSync,brotliDecompressSync,gunzipSync} from 'node:
 import {staticTextPrecompressed} from '../server/mapzStatic';
 
 test('startup static text negotiates compression without changing content or caching mutable files forever',async()=>{
- const root=fs.mkdtempSync(path.join(os.tmpdir(),'map-startup-'));
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'.map-startup-'));
  const content='export const camera = [1,2];';
  for(const name of ['assets/app-abc.js','outzide-map/app.js','outzide-map/places.json','api/private.json']){
   const file=path.join(root,name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,content);fs.writeFileSync(file+'.br',brotliCompressSync(content));fs.writeFileSync(file+'.gz',gzipSync(content));
@@ -25,6 +25,7 @@ test('startup static text negotiates compression without changing content or cac
    const result=await request('/assets/app-abc.js',encoding);assert.equal(result.status,200);assert.equal(result.headers['content-encoding'],encoding);assert.equal(decode(result.body).toString(),content);assert.match(String(result.headers.vary),/Accept-Encoding/);assert.match(String(result.headers['cache-control']),/immutable/);
    const mutable=await request('/outzide-map/app.js?v=boot',encoding);assert.equal(decode(mutable.body).toString(),content);assert.doesNotMatch(String(mutable.headers['cache-control']),/immutable/);
   }
+  for(const method of ['GET','HEAD']){const rejected=await request('/assets/app-abc.js','br;q=0, gzip;q=0, identity;q=0',method);assert.equal(rejected.status,406);assert.equal(rejected.body.length,0);}
   const head=await request('/outzide-map/places.json','br','HEAD');assert.equal(head.headers['content-encoding'],'br');assert.equal(head.body.length,0);
   for(const [url,encoding] of [['/assets/app-abc.js','identity'],['/api/private.json','br']]){const result=await request(url,encoding);assert.equal(result.headers['content-encoding'],undefined);assert.equal(result.body.toString(),content);}
   assert.equal((await request('/assets/missing.js','br')).status,404);

@@ -18,7 +18,7 @@ export default function BoardPushPin({ postKey }: { postKey: string }) {
     "--pin-material-phase": `${-((timing >>> 7) % 13001) / 1000}s`,
   } as CSSProperties;
   return (
-    <svg className={`ab-pin ab-pin--${variant}`} style={materialStyle} viewBox="0 0 40 48" aria-hidden="true" focusable="false">
+    <svg className={`ab-pin pdx-glass-rebind ab-pin--${variant}`} style={materialStyle} viewBox="0 0 40 48" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id={wireId} gradientUnits="userSpaceOnUse" x1="10" y1="5" x2="30" y2="34">
           <stop offset="0" stopColor="var(--day-thu)" />

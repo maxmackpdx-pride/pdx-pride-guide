@@ -8,7 +8,7 @@ import express from 'express';
 import {mapzPrecompressed} from '../server/mapzStatic.ts';
 
 test('map delivery negotiates lossless Brotli/gzip and preserves identity fallback',async()=>{
- const root=fs.mkdtempSync(path.join(os.tmpdir(),'mapz-delivery-'));
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'.mapz-delivery-'));
  const url='/assets/mapz-0123456789abcdef/models/test_lat45.52280_lon-122.67620.glb',file=path.join(root,url),bytes=Buffer.from('glTF unchanged geometry '.repeat(50));
  fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,bytes);fs.writeFileSync(file+'.br',brotliCompressSync(bytes));fs.writeFileSync(file+'.gz',gzipSync(bytes));
  const app=express();app.use(mapzPrecompressed(root));app.use(express.static(root));

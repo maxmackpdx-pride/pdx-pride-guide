@@ -15,11 +15,11 @@ test.after(()=>server.close());
 for(const width of [320,390,1320])test(`Outzide ${width}: solid pins, two-step cards, responsive controls and static motion`,{timeout:90000},async()=>{
  const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  try{
-  const page=await browser.newPage({viewport:{width,height:900}}),errors=[];page.setDefaultTimeout(10000);page.setDefaultNavigationTimeout(15000);
+  const page=await browser.newPage({viewport:{width,height:900},reducedMotion:'reduce'}),errors=[];page.setDefaultTimeout(10000);page.setDefaultNavigationTimeout(15000);
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(`${base}/outzide-map/index.html?lng=-122.7389&lat=45.5727&zoom=13&pitch=48`,{waitUntil:'domcontentloaded'});
   await page.waitForSelector('.waypoint-icon');
-  await page.locator('#rack-search').click({noWaitAfter:true});
+  await page.locator('#drawer-launcher').click({noWaitAfter:true});
   await page.waitForSelector('#outz-map-controls:not([hidden])');
   assert.equal(await page.locator('#search').isVisible(),true);
   await page.locator('#search').fill('Forest Park');
@@ -35,7 +35,7 @@ for(const width of [320,390,1320])test(`Outzide ${width}: solid pins, two-step c
   await page.locator('#selection-dock .place-card').click({noWaitAfter:true});
   await page.waitForFunction(()=>document.querySelector('#detail').open);
   assert.match(await page.locator('#detail-title').textContent(),/Forest Park/);
-  await page.screenshot({path:`/private/tmp/outzide-room-open-${width}.png`});
+  if(process.env.OUTZIDE_TEST_SCREENSHOTS==='1')await page.screenshot({animations:"disabled",path:`/private/tmp/outzide-room-open-${width}.png`});
   await page.locator('#detail [data-action="close-detail"]').click({noWaitAfter:true});
   assert.equal(await page.locator('#detail').evaluate(el=>el.open),false);
   assert.equal(await page.locator('#map canvas.maplibregl-canvas').isVisible(),true);
@@ -46,12 +46,13 @@ for(const width of [320,390,1320])test(`Outzide ${width}: solid pins, two-step c
   await page.locator('#results .place-card').click({noWaitAfter:true});
   await page.waitForFunction(()=>document.querySelector('#detail').open);
   await page.locator('#detail [data-action="close-detail"]').click({noWaitAfter:true});
-  const sizes=await page.locator('.map-controls button').evaluateAll(nodes=>nodes.map(el=>{const r=el.getBoundingClientRect();return {width:r.width,height:r.height};}));
+  const sizes=await page.locator('.map-controls button:visible').evaluateAll(nodes=>nodes.map(el=>{const r=el.getBoundingClientRect();return {width:r.width,height:r.height};}));
+  assert.ok(sizes.length>0);
   assert.ok(sizes.every(size=>size.width>=44&&size.height>=44),JSON.stringify(sizes));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   await page.emulateMedia({reducedMotion:'reduce'});
   assert.equal(await page.locator('.region-switch button').first().evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
-  await page.screenshot({path:`/private/tmp/outzide-room-map-${width}.png`});
+  if(process.env.OUTZIDE_TEST_SCREENSHOTS==='1')await page.screenshot({animations:"disabled",path:`/private/tmp/outzide-room-map-${width}.png`});
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });

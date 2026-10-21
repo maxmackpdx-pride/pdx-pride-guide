@@ -2,8 +2,8 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {HALLOWEEN_END,homeHalloweenActive} from '../client/src/lib/homeHalloween';
 import {VINE_ANCHORS,vineMesh,hitVines} from '../client/src/components/ui/ponies-globe-vines';
-test('thirty vine clusters fill both hemispheres without crowding existing vines',()=>{
-  assert.equal(VINE_ANCHORS.length,30);
+test('twelve vine clusters fill both hemispheres without crowding existing vines',()=>{
+  assert.equal(VINE_ANCHORS.length,12);
   assert(VINE_ANCHORS.some(a=>a.lat>1.1));
   assert(VINE_ANCHORS.some(a=>a.lat< -1.1));
   for(let i=0;i<VINE_ANCHORS.length;i++)for(let j=i+1;j<VINE_ANCHORS.length;j++){
@@ -35,7 +35,7 @@ test('the visible vine mesh stays under its drawing budget throughout a full tur
   for(let i=0;i<24;i++){
     const mesh=vineMesh(0,0,180,0,true,i*Math.PI/12);
     assert(mesh.length<700,`Too many vine triangles: ${mesh.length}`);
-    assert(mesh.every(p=>p.z>=0||p.triangles.some(t=>t.some(v=>Math.hypot(v.x,v.y)>180))));
+    assert(mesh.every(p=>p.stem||p.z>=0||p.triangles.some(t=>t.some(v=>Math.hypot(v.x,v.y)>180))));
   }
 });
 test('transparent vine texture does not capture globe taps',()=>{

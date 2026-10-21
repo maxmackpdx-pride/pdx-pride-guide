@@ -1030,7 +1030,7 @@ export function HousingDetail({
   workspace?: ReactNode;
 }) {
   const detail=post.type==='LOOKING'?<LookingDetail post={post} h={h} isOwner={isOwner}/>:post.type==='OFFERING'?<OfferingDetail post={post} h={h} isOwner={isOwner}/>:post.type==='MANAGED'?<ManagedDetail post={post} h={h}/>:<FormingDetail post={post} h={h} isOwner={isOwner} workspace={workspace}/>;
-  return <div className="boardz-open-surface" style={{'--c':'var(--day-thu)'} as CSSProperties}><BoardPostFace category="housing" post={post} hero/>{detail}{post.photos.length>1&&<section className="boardz-open-photos" aria-label="Listing photos">{post.photos.map((src,index)=><img key={src} src={src} alt={`${post.headline}, photo ${index+1}`} loading="lazy"/>)}</section>}</div>;
+  return <div className="boardz-open-surface pdx-glass-rebind" style={{'--c':'var(--day-thu)'} as CSSProperties}><BoardPostFace category="housing" post={post} hero/>{detail}{post.photos.length>1&&<section className="boardz-open-photos" aria-label="Listing photos">{post.photos.map((src,index)=><img key={src} src={src} alt={`${post.headline}, photo ${index+1}`} loading="lazy"/>)}</section>}</div>;
 }
 
 export default HousingDetail;

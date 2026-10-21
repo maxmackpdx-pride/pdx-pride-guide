@@ -18,3 +18,19 @@ test("profile style keeps the old profile helper strings", () => {
   assert.equal(timeAgoCoarse(null, now), "");
   assert.equal(timeAgoCoarse(at(40 * D), now), new Date(now - 40 * D).toLocaleDateString([], { month: "short", day: "numeric" }));
 });
+
+test("SQLite publication timestamps remain UTC across viewer timezones", () => {
+  const previousTimezone = process.env.TZ;
+  try {
+    for (const timezone of ["America/Los_Angeles", "Asia/Tokyo", "UTC"]) {
+      process.env.TZ = timezone;
+      assert.equal(timeAgo("2026-07-16 19:00:00", now), "1h ago", timezone);
+      assert.equal(timeAgo("2026-07-16 19:00:00.000", now), "1h ago", timezone);
+      assert.equal(timeAgoCoarse("2026-07-13 20:00:00", now), "3d ago", timezone);
+      assert.equal(timeAgo("2026-07-16T12:00:00-07:00", now), "1h ago", timezone);
+    }
+  } finally {
+    if (previousTimezone === undefined) delete process.env.TZ;
+    else process.env.TZ = previousTimezone;
+  }
+});

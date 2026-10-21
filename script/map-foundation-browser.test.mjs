@@ -33,19 +33,19 @@ for(const engine of ['chromium','webkit'])test(`${engine}: native standard pins 
   assert.equal(result.count,1);assert.equal(result.writes,0);assert.deepEqual(result.image,{width:54,height:82,pixelRatio:2});
   await page.mouse.click(308,190);await page.waitForSelector('.maplibregl-popup-content');
   assert.match(await page.locator('.maplibregl-popup-content').textContent(),/Community waypoint/);
-  await page.screenshot({path:`.local/maplibre-consolidation/native-pins-${engine}.png`});
+  if(process.env.OUTZIDE_TEST_SCREENSHOTS==='1')await page.screenshot({animations:"disabled",path:`.local/maplibre-consolidation/native-pins-${engine}.png`});
   await page.evaluate(()=>{window.__testPins.dispose();window.__testMap.remove();});assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
 
 for(const profile of ['desktop','phone'])test(`Outzide ${profile}: shell and markers do not wait for detail feeds`,{timeout:90000},async()=>{
  const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+ let releaseCatalog=()=>{},releaseDetails=()=>{};
  try{
-  const context=await browser.newContext(profile==='phone'?devices['iPhone 13']:{viewport:{width:1280,height:800}}),page=await context.newPage(),errors=[];
+  const context=await browser.newContext({...profile==='phone'?devices['iPhone 13']:{viewport:{width:1280,height:800}},deviceScaleFactor:1,reducedMotion:'reduce'}),page=await context.newPage(),errors=[];page.setDefaultTimeout(15000);page.setDefaultNavigationTimeout(15000);
   page.on('pageerror',error=>errors.push(error.message));
-  let releaseCatalog,releaseDetails;
   const catalogGate=new Promise(resolve=>releaseCatalog=resolve),detailsGate=new Promise(resolve=>releaseDetails=resolve);
-  await page.route('**/places.json',async route=>{await catalogGate;await route.continue();});
+  await page.route(/\/places\.json(?:\?.*)?$/,async route=>{await catalogGate;await route.continue();});
   await page.route(/\/(details|routes|feed|beaches)\.json/,async route=>{await detailsGate;await route.continue();});
   await page.goto(url+'/outzide-map/index.html',{waitUntil:'domcontentloaded'});
   await page.waitForSelector('.maplibregl-canvas');
@@ -57,7 +57,7 @@ for(const profile of ['desktop','phone'])test(`Outzide ${profile}: shell and mar
   await page.locator('#drawer-launcher').click({noWaitAfter:true});await page.waitForSelector('#outz-map-controls:not([hidden])');
   const sheetBox=await page.locator('#outz-map-controls').boundingBox(),searchBox=await page.locator('#search').boundingBox();
   assert.ok(searchBox.x>=sheetBox.x&&searchBox.y>=sheetBox.y&&searchBox.x+searchBox.width<=sheetBox.x+sheetBox.width&&searchBox.y+searchBox.height<=sheetBox.y+sheetBox.height);
-  await page.screenshot({path:`.local/maplibre-consolidation/outzide-sheet-${profile}.png`});
+  if(process.env.OUTZIDE_TEST_SCREENSHOTS==='1')await page.screenshot({animations:"disabled",path:`.local/maplibre-consolidation/outzide-sheet-${profile}.png`});
   await page.locator('[data-controls-tab][data-kind="spring"]').click({noWaitAfter:true});
   assert.equal(await page.locator('#results .place-card').count(),5);
   await page.locator('#search').fill('no-such-destination-123');
@@ -67,7 +67,7 @@ for(const profile of ['desktop','phone'])test(`Outzide ${profile}: shell and mar
   await page.locator('#outz-map-controls-close').click({noWaitAfter:true});assert.equal(await page.locator('#outz-map-controls').isVisible(),false);
   assert.equal(await page.locator('#drawer-launcher').evaluate(el=>el===document.activeElement),true);
   await page.waitForTimeout(4000);
-  await page.screenshot({path:`.local/maplibre-consolidation/outzide-startup-${profile}.png`});
+  if(process.env.OUTZIDE_TEST_SCREENSHOTS==='1')await page.screenshot({animations:"disabled",path:`.local/maplibre-consolidation/outzide-startup-${profile}.png`});
   assert.deepEqual(errors,[]);
- }finally{await browser.close();}
+ }finally{releaseCatalog();releaseDetails();await browser.close();}
 });

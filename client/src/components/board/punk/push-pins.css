@@ -56,7 +56,7 @@
 .boardz-punk-scope .demo-pinned .ab-pin__glitch{stroke:var(--ab-accent,var(--c))}
 .boardz-punk-scope .demo-pinned .ab-pin__glitch path+path{stroke:var(--day-thu)}
 /* Hoüz hardware uses the post's accent in both solid and wireframe states. */
-.boardz-punk-scope .demo-pinned:has(>.card[data-category=housing])>.ab-pin{--c:var(--ab-accent);--day-thu:var(--ab-accent)}
+.boardz-punk-scope .demo-pinned:has(>.card[data-category=housing])>.ab-pin.pdx-glass-rebind{--c:var(--ab-accent);--day-thu:var(--ab-accent)}
 .boardz-punk-scope[data-calm=true] .demo-pinned :is(.ab-pin__wire,.ab-pin__glitch,.ab-pin__solid,.ab-pin__surface-wire){animation:none}
 @media(prefers-reduced-motion:reduce){.boardz-punk-scope .demo-pinned :is(.ab-pin__wire,.ab-pin__glitch,.ab-pin__solid,.ab-pin__surface-wire){animation:none}}
 
