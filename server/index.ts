@@ -213,7 +213,7 @@ const limiter = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
-  skip: req => rateLimitSkipDev() || isEventResearchAgentRequest(req),
+  skip: req => rateLimitSkipDev() || (req.path.startsWith("/admin/event-research") && isEventResearchAgentRequest(req)),
 });
 const eventResearchLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -277,6 +277,15 @@ app.use("/api/ads", adsTrackLimiter);
 // records for every inspected event. Give its valid machine credential a
 // separate bounded budget while keeping the public API's tighter limit.
 app.use("/api/admin/event-research", eventResearchLimiter);
+const eventResearchPairingLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: rateLimitSkipDev,
+});
+app.use("/api/admin/event-research/pairing/start", eventResearchPairingLimiter);
+app.use("/api/admin/event-research/pairing/redeem", eventResearchPairingLimiter);
 app.use("/api", limiter);
 
 declare module "http" {

@@ -1,7 +1,8 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import type { RequestHandler } from "express";
+import { isPairedEventResearchToken } from "./eventResearchPairing";
 
-export const EVENT_RESEARCH_AGENT_NAME = "qsearch-2";
+export const EVENT_RESEARCH_AGENT_NAME = "qsearch-3";
 export const EVENT_RESEARCH_TOKEN_ENV = "QSEARCH_AGENT_TOKEN";
 
 function bearerToken(raw: unknown): string {
@@ -17,7 +18,7 @@ function constantTimeTokenMatch(candidate: string, expected: string): boolean {
 }
 
 /**
- * Dedicated machine authentication for QSearch 2.0.
+ * Dedicated machine authentication for the paired QSearch agent.
  *
  * The credential is accepted only by event-research routes. It never turns a
  * request into a site-admin session and is never accepted from a URL/query.
@@ -26,12 +27,13 @@ export function isEventResearchAgentRequest(req: {
   get?: (name: string) => string | undefined;
   headers?: Record<string, unknown>;
 }): boolean {
-  const expected = String(process.env[EVENT_RESEARCH_TOKEN_ENV] || "").trim();
-  if (expected.length < 32) return false;
   const raw = req.get?.("authorization") ?? req.headers?.authorization;
   const candidate = bearerToken(raw);
   if (!candidate) return false;
-  return constantTimeTokenMatch(candidate, expected);
+  if (isPairedEventResearchToken(candidate)) return true;
+  // Migration path for an already provisioned QSearch 2.0 installation.
+  const expected = String(process.env[EVENT_RESEARCH_TOKEN_ENV] || "").trim();
+  return expected.length >= 32 && constantTimeTokenMatch(candidate, expected);
 }
 
 export function allowAdminOrEventResearchAgent(

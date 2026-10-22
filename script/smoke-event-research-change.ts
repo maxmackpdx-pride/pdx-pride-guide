@@ -167,7 +167,7 @@ const created = createEventFromResearch({
 assert.equal(created.ok, true);
 if (!created.ok) throw new Error(created.error);
 assert.equal(created.event.status, "LIVE");
-assert.equal(created.event.source, "qsearch-2");
+assert.equal(created.event.source, "qsearch-3");
 
 const { address: _omittedAddress, ...withoutAddress } = createEvent;
 const missingAddress = { ...withoutAddress, title: "QSearch Missing Address" };

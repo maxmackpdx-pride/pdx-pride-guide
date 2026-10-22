@@ -182,6 +182,14 @@ import {
   eventResearchActor,
 } from "./eventResearchAuth";
 import {
+  approveAgentPairing,
+  listAgentCredentials,
+  listAgentPairings,
+  redeemAgentPairing,
+  revokeAgentCredential,
+  startAgentPairing,
+} from "./eventResearchPairing";
+import {
   deleteOutzCheckin,
   updateOutzWallPost,
   deleteOutzWallPost,
@@ -1205,9 +1213,41 @@ export function registerRoutes(httpServer: Server, app: Express) {
       res.status(410).json({
         error: "QSEARCH is archived",
         archived: true,
-        replacement: "QSearch 2.0",
+        replacement: "QSearch 3",
       }),
   );
+
+  // Pairing is public only for the first/redeem steps. The random claim secret
+  // never appears in an admin response, and only the primary owner may approve.
+  app.post("/api/admin/event-research/pairing/start", (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.status(201).json(startAgentPairing());
+  });
+  app.post("/api/admin/event-research/pairing/redeem", (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    const result = redeemAgentPairing(String(req.body?.id || ""), String(req.body?.claimSecret || ""));
+    if (result.status === "invalid") return res.status(401).json({ error: "Invalid pairing request" });
+    if (result.status === "expired") return res.status(410).json({ error: "Pairing expired" });
+    if (result.status === "pending") return res.status(202).json({ status: "pending" });
+    storage.logAdminAction({ actorUserId: null, actorUsername: "qsearch-3", action: "event_research_agent_paired", targetType: "agent_credential", targetId: result.credentialId, targetLabel: null, detail: null });
+    res.json(result);
+  });
+  app.get("/api/admin/event-research/pairing", requireAdmin, requirePrimaryInboxOwner, (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.json({ requests: listAgentPairings(), credentials: listAgentCredentials() });
+  });
+  app.post("/api/admin/event-research/pairing/:id/approve", requireAdmin, requirePrimaryInboxOwner, (req, res) => {
+    const ok = approveAgentPairing(String(req.params.id || ""), Number(req.session.userId));
+    if (!ok) return res.status(409).json({ error: "Pairing expired or already approved" });
+    auditAdmin(req, "event_research_agent_pairing_approved", { type: "agent_pairing", id: String(req.params.id) });
+    res.json({ ok: true });
+  });
+  app.post("/api/admin/event-research/credentials/:id/revoke", requireAdmin, requirePrimaryInboxOwner, (req, res) => {
+    const ok = revokeAgentCredential(String(req.params.id || ""));
+    if (!ok) return res.status(404).json({ error: "Active credential not found" });
+    auditAdmin(req, "event_research_agent_revoked", { type: "agent_credential", id: String(req.params.id) });
+    res.json({ ok: true });
+  });
 
   // The agent can read every old source pathway without reviving QSEARCH.
   app.get("/api/admin/event-research/source-memory", requireEventResearchAccess, (_req, res) => {
@@ -1316,7 +1356,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   /**
-   * Narrow machine catalog for QSearch 2.0. Unlike /api/admin/events, this
+   * Narrow machine catalog for QSearch. Unlike /api/admin/events, this
    * omits member/admin profiles and accepts only the dedicated agent token or
    * a live admin session.
    */

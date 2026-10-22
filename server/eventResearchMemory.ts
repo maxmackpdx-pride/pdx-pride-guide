@@ -368,7 +368,7 @@ function recordEventResearchChange(input: {
     INSERT INTO agent_event_change_log (
       rollback_token, operation, event_id, before_json, after_json,
       patch_json, evidence_receipts_json, reason, actor, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'qsearch-2', ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'qsearch-3', ?)
   `).run(
     rollbackToken,
     input.operation,
@@ -644,7 +644,7 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
       operation: "create_preview" as const,
       candidateKey: input.candidateKey,
       dryRun: true,
-      event: eventForResearchAgent({ ...event, id: null, source: "qsearch-2", lockedFields: "[]" }),
+      event: eventForResearchAgent({ ...event, id: null, source: "qsearch-3", lockedFields: "[]" }),
       beforeValues: null,
       afterValues: event,
       evidenceReceipts: receipts.receipts,
@@ -660,7 +660,7 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
     if (!currentGate.publishable) return eventResearchError(409, "candidate decision gate did not approve creation", { gate: currentGate });
     const created = storage.createEvent({
       ...event,
-      source: "qsearch-2",
+      source: "qsearch-3",
       isClaimable: false,
       lockedFields: JSON.stringify(lockedFields),
     } as any) as Record<string, unknown>;

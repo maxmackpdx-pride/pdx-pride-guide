@@ -4,36 +4,54 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-const KEYCHAIN_ACCOUNT = "qsearch-2";
+const KEYCHAIN_ACCOUNT = "qsearch-3";
 const KEYCHAIN_SERVICE = "zaylist-qsearch-agent-api";
+const PAIRING_SERVICE = "zaylist-qsearch-agent-pairing";
 const baseUrl = String(process.env.QSEARCH_API_BASE_URL || "https://www.zaylist.com")
   .trim()
   .replace(/\/$/, "");
 
 function readToken() {
+  if (process.platform === "darwin") {
+    try { return readKeychain(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT); } catch { /* continue */ }
+  }
   const fromEnv = String(process.env.QSEARCH_AGENT_TOKEN || "").trim();
   if (fromEnv) return fromEnv;
   if (process.platform === "darwin") {
-    try {
-      return execFileSync(
-        "/usr/bin/security",
-        [
-          "find-generic-password",
-          "-a",
-          KEYCHAIN_ACCOUNT,
-          "-s",
-          KEYCHAIN_SERVICE,
-          "-w",
-        ],
-        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
-      ).trim();
-    } catch {
-      // Fall through to the actionable error below.
-    }
+    try { return readKeychain(KEYCHAIN_SERVICE, "qsearch-2"); } catch { /* legacy fallback */ }
   }
   throw new Error(
-    `QSearch credential unavailable. Set QSEARCH_AGENT_TOKEN or install it in the macOS Keychain service ${KEYCHAIN_SERVICE}.`,
+    "QSearch is not paired. Run 'node script/qsearch-agent-api.mjs pair-start', approve its code in Zaylist Admin, then run 'pair-complete'.",
   );
+}
+
+function readKeychain(service, account) {
+  return execFileSync("/usr/bin/security", ["find-generic-password", "-a", account, "-s", service, "-w"],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+}
+
+function writeKeychain(service, account, secret) {
+  if (process.platform !== "darwin") throw new Error("Owner pairing currently requires macOS Keychain.");
+  // With -w last, security prompts twice on stdin; the secret is never an argv value.
+  execFileSync("/usr/bin/security", ["add-generic-password", "-a", account, "-s", service, "-U", "-w"],
+    { input: `${secret}\n${secret}\n`, stdio: ["pipe", "ignore", "pipe"], timeout: 15_000 });
+}
+
+function deleteKeychain(service, account) {
+  execFileSync("/usr/bin/security", ["delete-generic-password", "-a", account, "-s", service],
+    { stdio: ["ignore", "ignore", "ignore"] });
+}
+
+async function unauthenticatedRequest(path, body) {
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: "POST",
+    signal: AbortSignal.timeout(30_000),
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const payload = await response.json();
+  if (!response.ok && response.status !== 202) throw new Error(`${response.status}: ${payload?.error || "Pairing failed"}`);
+  return payload;
 }
 
 function jsonInput(raw) {
@@ -73,9 +91,11 @@ async function request(method, path, body) {
 
 function usage() {
   return [
-    "QSearch 2.0 scoped API client",
+    "QSearch 3 scoped API client",
     "",
     "Commands:",
+    "  pair-start        Ask the owner to approve a short code in Zaylist Admin",
+    "  pair-complete     Finish pairing and save access in macOS Keychain",
     "  source-memory",
     "  control",
     "  events [from-date]",
@@ -107,6 +127,23 @@ async function main() {
   const [command, first, second] = process.argv.slice(2);
   let payload;
   switch (command) {
+    case "pair-start": {
+      if (process.platform !== "darwin") throw new Error("Pairing currently requires macOS Keychain.");
+      payload = await unauthenticatedRequest("/api/admin/event-research/pairing/start", {});
+      writeKeychain(PAIRING_SERVICE, KEYCHAIN_ACCOUNT, JSON.stringify({ id: payload.id, claimSecret: payload.claimSecret }));
+      payload = { displayCode: payload.displayCode, expiresAt: payload.expiresAt,
+        next: "Approve this code in Zaylist Admin > Team, then run pair-complete." };
+      break;
+    }
+    case "pair-complete": {
+      const pending = JSON.parse(readKeychain(PAIRING_SERVICE, KEYCHAIN_ACCOUNT));
+      const result = await unauthenticatedRequest("/api/admin/event-research/pairing/redeem", pending);
+      if (result.status === "pending") { payload = { status: "pending", next: "Owner approval is still needed." }; break; }
+      writeKeychain(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT, result.token);
+      deleteKeychain(PAIRING_SERVICE, KEYCHAIN_ACCOUNT);
+      payload = { status: "paired", credentialId: result.credentialId };
+      break;
+    }
     case "source-memory":
       payload = await request("GET", "/api/admin/event-research/source-memory");
       break;

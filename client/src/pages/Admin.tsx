@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
 import AdminLoadError from "@/components/admin/AdminLoadError";
+import AdminQSearchPairing from "@/components/admin/AdminQSearchPairing";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
 import { type BoardRejectTarget, type OwnerDeskItem } from "@/components/admin/admin-queue-types";
 import AdminUserIdentity, { type AdminUserProfile } from "@/components/admin/AdminUserIdentity";
@@ -3379,6 +3380,7 @@ export default function Admin() {
 
         {activeTab === "team" && canManageTeam && (
           <div className="space-y-8">
+            {isPrimaryOwner && <AdminQSearchPairing />}
             <div className="border border-white/10 p-4" style={{ background: "#0d0d0d" }}>
               <p className="display text-sm mb-2" style={{ color: "#C8FA3C" }}>QUEUE CLAIMS · WHO HOLDS WHAT</p>
               <p className="text-white/40 text-xs mb-3">
