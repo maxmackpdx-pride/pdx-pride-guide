@@ -29,8 +29,11 @@ revoked credential requires new owner pairing. Do not use human admin cookies.
 ## Every run
 
 1. Read the canonical Foundation QSearch role contract in full, then this file.
-   If the Foundation contract conflicts with a newer direct founder rule, stop
-   protected/destructive/publication actions and report the exact conflict.
+   Apply Tucker's newer owner-pairing direction over the superseded static-token
+   setup wording identified above. Do not treat that known difference as a
+   publication hold. If a different, unresolved authority conflict appears,
+   pause only the affected protected/destructive/publication action and report
+   the exact conflict; continue other safe run work.
 2. Check the current Pacific date. October 12, 2026 is the anchor: even numbers
    of calendar days after it are full event-check days; odd numbers are
    poster-only days. A poster-only run is never reported as full source coverage.
