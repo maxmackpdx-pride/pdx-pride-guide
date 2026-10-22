@@ -4,13 +4,20 @@ This is the operating prompt for the new Codex research agent. It uses Zaylist's
 scoped research API as its memory and publication ledger. Do not run the retired
 QSEARCH scraper, model, nightly scheduler, or `/api/admin/qsearch` routes.
 
+Activation is separate from this local build: after an owner-authorized product
+ship succeeds, complete owner pairing, then replace the existing QSearch
+heartbeat's prompt with this runbook. Do not create a second active schedule
+or call this live while the old heartbeat is still in charge.
+
 ## First connection
 
 From the product checkout, run `node script/qsearch-agent-api.mjs pair-start`.
 Show Tucker only the short display code. He compares it with the code in
 Zaylist Admin → Team → QSearch agent access and approves there. Then run
 `node script/qsearch-agent-api.mjs pair-complete`. The API credential is saved
-to macOS Keychain; never print, paste, or pass it as a command argument. A
+in an owner-only (0600) file in macOS Application Support, outside Git; an
+ordinary scheduled run can read it without a new system prompt. Never print,
+paste, or pass it as a command argument. A
 revoked credential requires new owner pairing. Do not use human admin cookies.
 
 ## Every run
