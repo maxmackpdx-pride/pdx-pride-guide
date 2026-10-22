@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { storage } from "../server/storage";
-import { beginResearchRun, finishResearchRun, getResearchControlState, recordFieldEvidence, recordMistakeTestResult } from "../server/eventResearchControl";
+import { beginResearchRun, finishResearchRun, getResearchControlState, recordFieldEvidence, recordMistakeTestResult, upsertMistakeTest } from "../server/eventResearchControl";
 import {
   applyEventResearchEventChange,
   createEventFromResearch,
@@ -183,6 +183,35 @@ const addressUnknownPublish = createEventFromResearch({
   mistakeTestsPassed: true,
 });
 assert.equal(addressUnknownPublish.ok, true);
+
+// The founder's fast path: one official source, three core facts, no poster or
+// optional details. A failed diagnostic is reported but is not a veto.
+const minimalCandidateKey = "candidate:smoke-minimal-official-event";
+const minimalEvent = {
+  title: "QSearch Minimal Official Event",
+  venueName: "QSearch Test Venue",
+  dateStart: "2027-01-16T19:00:00",
+};
+assert.equal(upsertMistakeTest({ testKey: "smoke-diagnostic-only", title: "Diagnostic only",
+  misleadingInput: {}, evidence: {}, expected: {}, forbidden: {} }).ok, true);
+assert.equal(recordMistakeTestResult({ testKey: "smoke-diagnostic-only", passed: false, detail: "Deliberate test failure" }).ok, true);
+for (const [field, observedValue] of Object.entries(minimalEvent)) {
+  assert.equal(recordFieldEvidence({ runId: createRun.runId, entityKey: minimalCandidateKey,
+    field, observedValue, sourceUrl, checkedAt }).ok, true);
+}
+const minimalPublished = createEventFromResearch({
+  runId: createRun.runId,
+  candidateKey: minimalCandidateKey,
+  event: minimalEvent,
+  evidenceReceipts: Object.keys(minimalEvent).map(field => ({ field, sourceUrl, checkedAt })),
+  reason: "Publish one exact official occurrence with its three verified core facts.",
+  mistakeTestsPassed: false,
+});
+assert.equal(minimalPublished.ok, true);
+if (!minimalPublished.ok) throw new Error(minimalPublished.error);
+assert.equal(minimalPublished.event.status, "LIVE");
+assert.equal(minimalPublished.event.ageRequirement, "UNVERIFIED");
+assert.equal(minimalPublished.event.admission, "UNKNOWN");
 
 const createRollback = rollbackEventResearchChange(created.rollback.token);
 assert.equal(createRollback.ok, true);

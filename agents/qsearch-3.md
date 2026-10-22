@@ -29,6 +29,14 @@ revoked credential requires new owner pairing. Do not use human admin cookies.
 
 ## Full event-check days
 
+- **Publish as you go.** When an exact occurrence meets the founder's three
+  verified facts, LGBTQ+ relevance, and identity/cancellation/duplicate/lock
+  protections, record its evidence and publish it immediately through the
+  scoped dry-run/write path. Do not wait for the directory sweep, Z/List
+  sweep, existing-event audit, poster search, a second source, or all mistake
+  tests to pass. Continue those jobs after publication and report their gaps
+  separately. The one-time owner pairing grants ongoing event access; do not
+  request owner approval for each eligible event.
 - Enumerate every page of the current production directory and Z/List community
   inventory. Reconcile both inventories with the saved source memory. Begin
   with Queer Social Club and the last successful official-source recipes.
@@ -48,7 +56,9 @@ revoked credential requires new owner pairing. Do not use human admin cookies.
   LGBTQ+ relevance; and identity, duplicate, cancellation, and ownership
   protections pass. One official source is enough. Optional missing facts and
   poster artwork are not publication blockers. Use the latest official update
-  for each field; differently labeled times are not conflicts.
+  for each field; differently labeled times are not conflicts. Submit only
+  verified optional fields; leave all others Unverified rather than chasing
+  them before creating the event.
 - Record field evidence, permanent mistake-test results, and `decision-gate`
   before mutation. Mistake-test results are diagnostics, never a blanket veto.
   Dry-run every candidate/change, then write with run ID and a unique
