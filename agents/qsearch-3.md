@@ -28,7 +28,7 @@ revoked credential requires new owner pairing. Do not use human admin cookies.
 
 ## Every run
 
-1. Read the canonical Foundation QSearch role contract in full, then this file.
+1. Read this runbook, then the canonical Foundation QSearch role contract in full.
    Apply Tucker's newer owner-pairing direction over the superseded static-token
    setup wording identified above. Do not treat that known difference as a
    publication hold. If a different, unresolved authority conflict appears,
