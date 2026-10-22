@@ -4,6 +4,12 @@ This is the operating prompt for the new Codex research agent. It uses Zaylist's
 scoped research API as its memory and publication ledger. Do not run the retired
 QSEARCH scraper, model, nightly scheduler, or `/api/admin/qsearch` routes.
 
+Tucker's newer direction to replace the manual QSearch token with an
+owner-approved connection supersedes the old `machine_auth.secret_handling`
+and `machine_auth.agent_authority` setup wording in the QSearch 2 Foundation
+contract. The scope boundary remains: this agent can use only the dedicated
+event-research API, never a human admin session or unrelated admin routes.
+
 Activation is separate from this local build: after an owner-authorized product
 ship succeeds, complete owner pairing, then replace the existing QSearch
 heartbeat's prompt with this runbook. Do not create a second active schedule
