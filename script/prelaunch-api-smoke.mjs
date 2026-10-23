@@ -15,6 +15,13 @@ async function check(name,run){try{await run();passed++;console.log('PASS '+name
 try{
  let ready=false;for(let i=0;i<100;i++){if(server.exitCode!==null)throw Error(logs.slice(-3000));try{if((await request('/api/health')).response.ok){ready=true;break}}catch{}await new Promise(r=>setTimeout(r,100))}if(!ready)throw Error('Server did not start: '+logs.slice(-3000));
  for(const route of ['/api/health','/api/events','/api/directory','/api/housing','/api/gigs','/api/gifting','/api/sellz','/api/missed-connections','/api/communities'])await check('public '+route,async()=>assert.equal((await request(route)).response.status,200));
+ for(const route of ['/api/events','/api/housing','/api/gigs','/api/gifting','/api/sellz','/api/missed-connections']){
+  await check('missing card '+route,async()=>assert.equal((await request(route+'/999999999')).response.status,404));
+ }
+ await check('guest housing workspace blocked',async()=>{
+  const {data}=await request('/api/housing');assert.ok(data.posts?.length);
+  assert.equal((await request(`/api/housing/${data.posts[0].id}/workspace`)).response.status,401);
+ });
  for(const route of ['/api/auth/me','/api/boards/saved','/api/gigs/mine','/api/gifting/mine','/api/sellz/mine','/api/events/mine/talent'])await check('guest blocked '+route,async()=>assert.equal((await request(route)).response.status,401));
  for(const route of ['/api/gigs','/api/gifting','/api/sellz','/api/missed-connections'])await check('guest write blocked '+route,async()=>assert.equal((await request(route,{method:'POST',body:{}})).response.status,401));
  for(const method of ['PUT','DELETE'])await check('guest bookmarks blocked '+method,async()=>assert.equal((await request('/api/boards/gigz/posts/1/save',{method})).response.status,401));
@@ -31,6 +38,18 @@ try{
  for(const [route,body] of cases){
   await check(route+' rejects blank listing content',async()=>assert.equal((await request(route,{method:'POST',body:{...body,title:'   ',description:'   '},cookie})).response.status,400));
   await check(route+' create read owner update and ownership protection',async()=>{const created=await request(route,{method:'POST',body,cookie});assert.equal(created.response.status,200,JSON.stringify(created.data));assert.ok(created.data.id);const detail=route+'/'+created.data.id;assert.equal((await request(detail,{cookie})).response.status,200);assert.equal((await request(detail,{method:'PUT',body:{...body,title:'   ',description:'   '},cookie})).response.status,400);const changed={...body,title:'Updated prelaunch listing'};assert.equal((await request(detail,{method:'PUT',body:changed,cookie})).response.status,200);assert.ok([400,403,404].includes((await request(detail,{method:'PUT',body:changed,cookie:otherCookie})).response.status));assert.equal((await request(detail,{cookie})).data.title,changed.title)});
+ }
+ await check('create local Mizzed fixture',async()=>{
+  const created=await request('/api/missed-connections',{method:'POST',cookie,body:{title:'We met at the local test night',body:'You helped me find my jacket. I would like to say thank you.',venueHint:'Portland',scope:'board'}});
+  assert.equal(created.response.status,200,JSON.stringify(created.data));
+ });
+ for(const route of ['/api/events','/api/housing','/api/gigs','/api/gifting','/api/sellz','/api/missed-connections']){
+  await check('listed card opens '+route,async()=>{
+   const {data}=await request(route);const posts=Array.isArray(data)?data:data.posts;
+   assert.ok(posts?.length,'Expected at least one seeded card');
+   const detail=await request(route+'/'+posts[0].id);assert.equal(detail.response.status,200);
+   assert.equal(detail.data.id,posts[0].id);
+  });
  }
  const communities=(await request('/api/communities')).data;const community=(Array.isArray(communities)?communities:communities.communities||[]).find(c=>c.membershipPolicy==='open');
  if(community){await check('community join automatically follows',async()=>{const r=await request(`/api/communities/${community.slug}/join`,{method:'POST',body:{},cookie});assert.equal(r.response.status,200);assert.equal(r.data.viewerFollowing,true)});await check('community events are public',async()=>{const r=await request(`/api/communities/${community.slug}`);assert.equal(r.response.status,200);assert.ok(r.data.events)})}else failures.push('No open community fixture');

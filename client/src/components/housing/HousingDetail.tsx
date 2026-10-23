@@ -979,17 +979,7 @@ function FormingDetail({
 
           <Context trust={post.trust} />
 
-          {workspace ? (
-            <div className="hz-sect">
-              <SectionTitle
-                kicker="Members only"
-                right={<Mono micro>{isOwner ? "You are the Lead" : "You are in this Hoüz"}</Mono>}
-              >
-                The house hunt
-              </SectionTitle>
-              {workspace}
-            </div>
-          ) : null}
+          {workspace}
 
           <Safety h={h} />
         </div>

@@ -19,7 +19,7 @@ import { useAuth } from "@/context/AuthContext";
 import { queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
 import { HousingIcon, type HousingIconName } from "@/components/housing/HousingIcon";
-import { Btn, Chip, Mono, accentStyle, type ChipTone } from "@/components/housing/HousingPrimitives";
+import { Btn, Chip, Mono, SectionTitle, accentStyle, type ChipTone } from "@/components/housing/HousingPrimitives";
 import {
   HOUSING_DATE_KINDS,
   HOUSING_DATE_KIND_LABEL,
@@ -649,35 +649,43 @@ export function HousingWorkspace({
     queryClient.invalidateQueries({ queryKey: ["/api/housing", post.id] });
   };
 
-  if (isLoading || !data) return null;
+  if (!user || isLoading || !data) return null;
 
   return (
-    <div className="hz-ws pdx-glass-rebind" style={accentStyle(post.type) as CSSProperties}>
-      <div className="hz-wstabs" role="tablist" aria-label="The house hunt">
-        {TABS.map(([key, label, icon]) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            className="hz-wstab"
-            aria-selected={tab === key}
-            onClick={() => setTab(key)}
-          >
-            <HousingIcon name={icon} />
-            {label}
-          </button>
-        ))}
-      </div>
-      <div className="hz-wsbody" role="tabpanel">
-        {tab === "chat" ? (
-          <HouseChatTab post={post} onOpenThread={onOpenThread} />
-        ) : tab === "places" ? (
-          <PlacesTab post={post} workspace={data} refresh={refresh} />
-        ) : tab === "dates" ? (
-          <DatesTab post={post} workspace={data} refresh={refresh} />
-        ) : (
-          <PeopleTab post={post} workspace={data} refresh={refresh} />
-        )}
+    <div className="hz-sect">
+      <SectionTitle
+        kicker="Members only"
+        right={<Mono micro>{data.isLead ? "You are the Lead" : "You are in this Hoüz"}</Mono>}
+      >
+        The house hunt
+      </SectionTitle>
+      <div className="hz-ws pdx-glass-rebind" style={accentStyle(post.type) as CSSProperties}>
+        <div className="hz-wstabs" role="tablist" aria-label="The house hunt">
+          {TABS.map(([key, label, icon]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              className="hz-wstab"
+              aria-selected={tab === key}
+              onClick={() => setTab(key)}
+            >
+              <HousingIcon name={icon} />
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="hz-wsbody" role="tabpanel">
+          {tab === "chat" ? (
+            <HouseChatTab post={post} onOpenThread={onOpenThread} />
+          ) : tab === "places" ? (
+            <PlacesTab post={post} workspace={data} refresh={refresh} />
+          ) : tab === "dates" ? (
+            <DatesTab post={post} workspace={data} refresh={refresh} />
+          ) : (
+            <PeopleTab post={post} workspace={data} refresh={refresh} />
+          )}
+        </div>
       </div>
     </div>
   );
