@@ -1,0 +1,2 @@
+/* The blended art fills the card's art well; the engine's own stylesheet draws everything inside it. */
+.outz-blend{position:absolute;inset:0;display:block;overflow:hidden;background:var(--z-black,#050506)}

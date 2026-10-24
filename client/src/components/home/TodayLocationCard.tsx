@@ -1,4 +1,6 @@
 import {OutzPhoto,type OutzPhotoData} from '@/components/outz/OutzPhoto';
+import {OutzBlendArt} from '@/components/outz/OutzBlendArt';
+import {hasBlendRecipe} from '@/lib/outzBlend';
 import PlaceModal from "@/components/PlaceModal";
 import OutzCardModal from "./OutzCardModal";
 import OutzFollowButton from "./OutzFollowButton";
@@ -24,7 +26,10 @@ const OUTZ_LABELS: Record<string, string> = { trail: "Trail", stay: "Stay", beac
 
 export default function TodayLocationCard({ location, onRequireAuth }: { location: TodayLocation; onRequireAuth?: () => void }) {
   const [open, setOpen] = useState(false);
+  const [blendFailed, setBlendFailed] = useState(false);
   const isPlace = location.room === "Placez";
+  const placeId = location.key.replace(/^outz:/, "");
+  const blend = !isPlace && hasBlendRecipe(placeId, "tall") && !blendFailed;
   const kind = location.place?.type || "community";
   const accent = isPlace ? PLACE_ACCENTS[kind] || "var(--neon-cyan)" : `var(${OUTZ_TOKENS[location.kind || ""] || "--neon-yellow"})`;
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(location.key.replace(/^outz:/, ""));
@@ -36,7 +41,7 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
     <RailShareButton href={location.href} title={location.name} />
     <button type="button" className="tonight-card__open" aria-label={`Open ${location.name}`} onClick={() => setOpen(true)}>
       <div className="tonight-card__art today-location__art">
-        {!isPlace && (location.photo ? <OutzPhoto photo={location.photo} /> : <img src={art} alt="" loading="lazy" />)}
+        {!isPlace && (blend ? <OutzBlendArt placeId={placeId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : location.photo ? <OutzPhoto photo={location.photo} /> : <img src={art} alt="" loading="lazy" />)}
         {isPlace && <img className={`today-location__brand${isPlace ? " today-location__brand--business" : ""}`} src={businessLogo || "/brand/outzide.png"} alt={isPlace ? `${location.name} logo` : "OutZide"} onError={event => { if (isPlace) { event.currentTarget.onerror = null; event.currentTarget.src = directoryFallbackLogo(kind); } }} />}
       </div>
       <div className="tonight-card__body">
@@ -53,5 +58,5 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
       <button type="button" className="tonight-card__view" onClick={() => setOpen(true)}>View details <ArrowUpRight size={17} aria-hidden="true" /></button>
     </footer>
   </article>;
-  return <>{isPlace ? <PlacezXerox slot=".today-location__art">{card}</PlacezXerox> : <OutzXerox photo={Boolean(location.photo)}>{card}</OutzXerox>}{open && (isPlace && location.place ? <PlaceModal place={location.place} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth || (() => {})} /> : <OutzCardModal location={location} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth} />)}</>;
+  return <>{isPlace ? <PlacezXerox slot=".today-location__art">{card}</PlacezXerox> : <OutzXerox photo={Boolean(location.photo) && !blend} blend={blend}>{card}</OutzXerox>}{open && (isPlace && location.place ? <PlaceModal place={location.place} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth || (() => {})} /> : <OutzCardModal location={location} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth} />)}</>;
 }

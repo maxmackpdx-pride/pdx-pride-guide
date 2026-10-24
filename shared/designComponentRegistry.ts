@@ -41,6 +41,8 @@ export const DESIGN_COMPONENT_REGISTRY = Object.freeze([
   entry("component:forms/BoardComposerPreview", "BoardComposerPreview", "forms", "default", "client/src/components/board/BoardComposerPreview.tsx"),
   entry("component:data-display/BoardPushPin", "BoardPushPin", "data-display", "default", "client/src/components/board/BoardPushPin.tsx"),
   entry("component:data-display/BoardCardMotif", "BoardCardMotif", "data-display", "BoardCardMotif", "client/src/components/board/punk/BoardCardMotif.tsx"),
+  entry("component:data-display/TodayLocationCard", "TodayLocationCard", "data-display", "default", "client/src/components/home/TodayLocationCard.tsx"),
+  entry("component:data-display/OutzBlendArt", "OutzBlendArt", "data-display", "OutzBlendArt", "client/src/components/outz/OutzBlendArt.tsx"),
   entry("component:brand/Logo", "Logo", "brand", "Logo", "client/src/components/ds/Logo.tsx"),
   entry("component:brand/UserAvatar", "UserAvatar", "brand", "default", "client/src/components/UserAvatar.tsx"),
   entry("component:data-display/Badge", "Badge", "data-display", "Badge", "client/src/components/ds/Badge.tsx"),

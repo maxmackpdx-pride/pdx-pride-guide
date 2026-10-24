@@ -40,7 +40,7 @@ export function RansomTitle({text}){
 }
 
 /** Cinema Xerox layer for a live Outzide card (TodayLocationCard): channel-split glitch of the photo, overlay, grain. */
-export function OutzXerox({children,photo=false,delay=0}){
+export function OutzXerox({children,photo=false,blend=false,delay=0}){
   const ref=useRef(null);
   const art=useSlot(ref,'.today-location__art');
   const [src,setSrc]=useState(null);
@@ -49,7 +49,7 @@ export function OutzXerox({children,photo=false,delay=0}){
     {children}
     {art&&createPortal(<>
       {photo&&src&&<><img className="xr-copy xr-copy-r" src={src} alt="" aria-hidden="true"/><img className="xr-copy xr-copy-c" src={src} alt="" aria-hidden="true"/></>}
-      <XeroxOverlay mode="bottom" W={200} H={230}/>
+      {!blend&&<XeroxOverlay mode="bottom" W={200} H={230}/>}
       <Grain/>
     </>,art)}
   </div>;

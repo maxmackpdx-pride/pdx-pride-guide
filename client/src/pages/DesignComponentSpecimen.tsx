@@ -4,6 +4,9 @@ import { DESIGN_COMPONENT_REGISTRY, findDesignComponent } from "@shared/designCo
 import UserAvatar from "@/components/UserAvatar";
 import ActionRow from "@/components/promoter/ActionRow";
 import BoardzComponentSpecimen from "@/components/board/BoardzComponentSpecimen";
+import TodayLocationCard from "@/components/home/TodayLocationCard";
+import { AuthProvider } from "@/context/AuthContext";
+import { OutzBlendArt } from "@/components/outz/OutzBlendArt";
 import {
   Badge,
   Button,
@@ -53,6 +56,24 @@ function Specimen({ id }: { id: string }) {
     case "component:data-display/BoardPushPin":
     case "component:data-display/BoardCardMotif":
       return <BoardzComponentSpecimen componentId={id} />;
+    case "component:data-display/TodayLocationCard":
+      return (
+        <AuthProvider><div className="zay-specimen__row">
+          {[["bc-garibaldi", "Garibaldi Lake Trail", "Whistler & Sea-to-Sky · BC, Canada", "trail"], ["silver-falls", "Silver Falls State Park", "Campground · Trail of Ten Falls · Silverton, OR", "camp"], ["rooster-rock", "Rooster Rock", "Columbia River · Corbett, OR", "beach"]].map(([id, name, detail, kind]) => (
+            <TodayLocationCard key={id} location={{ key: `outz:${id}`, name, room: "OutZide", detail, href: `/outzide?place=${id}`, kind }} />
+          ))}
+        </div></AuthProvider>
+      );
+    case "component:data-display/OutzBlendArt":
+      return (
+        <div className="zay-specimen__row">
+          {(["bc-garibaldi", "rooster-rock"] as const).map(id => (
+            <div key={id} style={{ position: "relative", width: 540, aspectRatio: "1360 / 800", borderRadius: 17, overflow: "hidden", border: "2px solid var(--neon-orange)" }}>
+              <OutzBlendArt placeId={id} variant="wide" />
+            </div>
+          ))}
+        </div>
+      );
     case "component:brand/Logo":
       return <Logo variant="lockup" size={76} href={undefined} />;
     case "component:brand/UserAvatar":

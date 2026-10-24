@@ -1,0 +1,52 @@
+/* Blended Outzide art (see blend-art.js): small one-size dot base, six real-photo cutouts, free-floating lines, route HUD. */
+.bl{position:absolute;inset:0;overflow:hidden;container-type:inline-size;background:var(--z-black,#050506);isolation:isolate}
+.bl>.bl-base{position:absolute;left:0;right:0;top:var(--xt,0px);height:var(--xh,100%);width:100%;object-fit:fill;display:block;max-width:none;filter:url(#xdots) brightness(1.1) contrast(1.3)}
+.bl .xc{position:absolute;left:0;right:0;top:var(--xt,0px);height:var(--xh,100%);z-index:3;opacity:0;pointer-events:none;filter:drop-shadow(0 .6cqw 1cqw rgba(0,0,0,.55));animation:blon var(--d) steps(1) infinite,bljit var(--d) steps(1) infinite;animation-delay:var(--o),var(--o)}
+.bl .xc>img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;max-width:none}
+.bl .xc.bw>img{filter:url(#xcopyBW) contrast(1.45) brightness(1.2)}
+.bl .xc.lc>img{filter:url(#xcopyLC) contrast(1.35) saturate(1.2) brightness(1.12)}
+.bl .xc.col>img{filter:url(#xcopyCOL) contrast(1.15) saturate(1.25)}
+.bl .xc.pop>img{filter:url(#xpop) saturate(1.7) contrast(1.4)}
+.bl .xc.terr>.xt{position:absolute;inset:0;filter:url(#xcopyBW) contrast(1.45) brightness(1.2)}
+.bl .xt>img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;max-width:none}
+.bl .xt>img.m1,.bl .xt>img.m2{filter:brightness(.88)}.bl .xt>img.m1{transform:translate(.5cqw,-.4cqw)}.bl .xt>img.m2{transform:translate(1cqw,-.8cqw)}
+@keyframes blon{0%,6%{opacity:0}7%,34%{opacity:1}35%{opacity:0}36%,62%{opacity:1}63%,100%{opacity:0}}
+@keyframes bljit{0%{transform:none}7%{transform:translate(-1cqw,0)}8%{transform:translate(.8cqw,.2cqw)}9%{transform:none}36%{transform:translate(1cqw,-.2cqw)}37%{transform:none}62%{transform:translate(-.8cqw,0)}63%{transform:none}}
+@keyframes blon2{0%,15%{opacity:0}16%,28%{opacity:1}29%,33%{opacity:0}34%,69%{opacity:1}70%,100%{opacity:0}}
+@keyframes blon3{0%,40%{opacity:0}41%,47%{opacity:1}48%,52%{opacity:0}53%,86%{opacity:1}87%,100%{opacity:0}}
+@keyframes blonbw{0%,5%{opacity:0}6%,44%{opacity:1}45%{opacity:0}46%,82%{opacity:1}83%,100%{opacity:0}}
+@keyframes blsync{0%,85%{opacity:0}86%,97%{opacity:1}98%,100%{opacity:0}}
+@keyframes bljitsync{0%,85%{transform:none}86%{transform:translate(-1cqw,0)}87%{transform:translate(.8cqw,.2cqw)}88%{transform:none}93%{transform:translate(1cqw,0)}94%{transform:none}100%{transform:none}}
+@keyframes bllong{0%,3%{opacity:0}4%,38%{opacity:1}39%{opacity:0}40%,71%{opacity:1}72%{opacity:0}73%,94%{opacity:1}95%,100%{opacity:0}}
+.bl .xc.kbw{animation-name:blonbw,bljit}.bl .xc.k2{animation-name:blon2,bljit}.bl .xc.k3{animation-name:blon3,bljit}.bl .xc.ksync{animation-name:blsync,bljitsync}
+.bl .xc.long{animation:bllong var(--d) steps(1) infinite,bljit var(--d) steps(1) infinite;animation-delay:var(--o),var(--o)}
+.bl>svg.xfl{position:absolute;left:0;right:0;top:var(--xt,0px);height:var(--xh,100%);width:100%;z-index:5;mix-blend-mode:screen;pointer-events:none}
+.bl .xfl .flow{stroke-dasharray:60 22;animation:blflow 2.6s linear infinite}
+@keyframes blflow{to{stroke-dashoffset:-164}}
+.bl .xfl .tw{animation:bltw 3.2s ease-in-out infinite}
+@keyframes bltw{50%{opacity:.25}}
+.bl .xfl .wfl{opacity:0;animation:blwfl 6s steps(1) infinite}
+@keyframes blwfl{0%,60%{opacity:0}61%,63%{opacity:.95}64%,100%{opacity:0}}
+.bl .mwr{transform-box:fill-box;transform-origin:50% 100%;animation:blmw 9s linear infinite}
+@keyframes blmw{0%{transform:scaleY(0)}16%,78%{transform:scaleY(1)}92%,100%{transform:scaleY(0)}}
+.bl .swr{animation:blsw 8s linear infinite}
+@keyframes blsw{from{transform:translateX(0)}to{transform:translateX(var(--sw))}}
+.bl .xfl .pulse{stroke-dasharray:30 2400;animation:blpl 6s linear infinite}
+@keyframes blpl{from{stroke-dashoffset:2430}to{stroke-dashoffset:0}}
+.bl>svg.xfl.tear{opacity:0;animation:blgs 7s steps(1) infinite;animation-delay:var(--sd,0s)}
+@keyframes blgs{0%,86%{opacity:0;transform:none}87%{opacity:1;transform:translateX(var(--dx))}88%{opacity:1;transform:translateX(calc(var(--dx) * -.6))}89%{opacity:1;transform:translateX(calc(var(--dx) * .4))}90%{opacity:0}93%{opacity:0}93.4%{opacity:1;transform:translateX(calc(var(--dx) * -1))}94.2%{opacity:0}100%{opacity:0}}
+.bl>svg.xfl.tear.v{animation-name:blgsv}
+@keyframes blgsv{0%,86%{opacity:0;transform:none}87%{opacity:1;transform:translateY(var(--dy))}88%{opacity:1;transform:translateY(calc(var(--dy) * -.6))}89%{opacity:1;transform:translateY(calc(var(--dy) * .4))}90%{opacity:0}93%{opacity:0}93.4%{opacity:1;transform:translateY(calc(var(--dy) * -1))}94.2%{opacity:0}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.bl *{animation:none!important}}
+
+
+.bl{--z-black:#050506;--neon-orange:#FF6600;--neon-cyan:#00FFFF;--text-hi:#fff}
+.bl>.bl-hud{position:absolute;left:0;right:0;top:var(--xt,0px);height:var(--xh,100%);width:100%;z-index:6;pointer-events:none}
+.bl .bl-route{animation:blmarch 1.4s linear infinite}
+@keyframes blmarch{to{stroke-dashoffset:-60}}
+.bl .bl-ring{transform-box:fill-box;transform-origin:center;animation:blspin 9s linear infinite}
+@keyframes blspin{to{transform:rotate(360deg)}}
+/* Calm mode and still mode stop all of the blended motion */
+:root[data-calm="true"] .bl *,[data-demo-still="true"] .bl *{animation:none!important}
+:root[data-calm="true"] .bl .xc,[data-demo-still="true"] .bl .xc{opacity:0}
+:root[data-calm="true"] .bl .xc.bw,[data-demo-still="true"] .bl .xc.bw{opacity:.85}

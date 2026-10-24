@@ -1,0 +1,261 @@
+// Blended Outzide art: a small one-size dot halftone base, six real-photo cutouts, and free-floating topo, water and mesh lines.
+// One recipe per photo (outline polygons) and one rule table (class to overlay). Used by the Outzide map and by the React cards.
+// Docs: the outzide-blend-card skill.
+const NS='http://www.w3.org/2000/svg';
+const tile=(c,kind)=>{const g=kind==='anti'
+ ?"<linearGradient id='g' x1='1' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#000'/><stop offset='.25' stop-color='#fff'/><stop offset='.5' stop-color='#000'/><stop offset='.75' stop-color='#fff'/><stop offset='1' stop-color='#000'/></linearGradient>"
+ :kind==='diag'
+ ?"<linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#000'/><stop offset='.25' stop-color='#fff'/><stop offset='.5' stop-color='#000'/><stop offset='.75' stop-color='#fff'/><stop offset='1' stop-color='#000'/></linearGradient>"
+ :"<radialGradient id='g'><stop offset='0' stop-color='#fff'/><stop offset='1' stop-color='#000'/></radialGradient>";
+ return 'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns='${NS}' width='${c}' height='${c}'><defs>${g}</defs><rect width='${c}' height='${c}' fill='url(#g)'/></svg>`)};
+const screenFilter=(id,cell,shape,sat,floor,lift)=>{const lum=`${.2126} ${.7152} ${.0722} 0 ${lift} `.repeat(3)+'0 0 0 0 1';
+ const scr=shape==='hatch'
+  ?`<feImage href="${tile(cell,'diag')}" x="0" y="0" width="${cell}" height="${cell}" preserveAspectRatio="none" result="ia"/><feTile in="ia" result="ta"/><feImage href="${tile(cell,'anti')}" x="0" y="0" width="${cell}" height="${cell}" preserveAspectRatio="none" result="ib"/><feTile in="ib" result="tb"/><feBlend in="ta" in2="tb" mode="lighten" result="screen"/>`
+  :`<feImage href="${tile(cell,'dot')}" x="0" y="0" width="${cell}" height="${cell}" preserveAspectRatio="none" result="ci"/><feTile in="ci" result="screen"/>`;
+ return `<filter id="${id}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+<feColorMatrix in="SourceGraphic" values="${lum}" result="lum"/>${scr}
+<feComposite in="lum" in2="screen" operator="arithmetic" k1="0" k2="1" k3="1" k4="-1" result="raw"/>
+<feComponentTransfer in="raw" result="bin"><feFuncR type="linear" slope="60"/><feFuncG type="linear" slope="60"/><feFuncB type="linear" slope="60"/><feFuncA type="linear" slope="0" intercept="1"/></feComponentTransfer>
+<feColorMatrix in="SourceGraphic" type="saturate" values="${sat}" result="sc"/><feComposite in="sc" in2="bin" operator="arithmetic" k1="${1-floor}" k2="${floor}" k3="0" k4="0" result="ink"/>
+<feComposite in="ink" in2="SourceGraphic" operator="in"/></filter>`};
+const copier=(id,sat,curve)=>`<filter id="${id}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+<feColorMatrix in="SourceGraphic" type="saturate" values="${sat}" result="g"/>
+<feComponentTransfer in="g" result="c"><feFuncR type="table" tableValues="${curve}"/><feFuncG type="table" tableValues="${curve}"/><feFuncB type="table" tableValues="${curve}"/></feComponentTransfer>
+<feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="3" result="n1"/>
+<feColorMatrix in="n1" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  9 0 0 0 -5.5" result="blk"/>
+<feTurbulence type="fractalNoise" baseFrequency=".004 .55" numOctaves="1" seed="5" result="n3"/>
+<feColorMatrix in="n3" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.1 0 0 0 -.5" result="stk"/>
+<feComposite in="blk" in2="c" operator="over" result="a"/><feComposite in="stk" in2="a" operator="over" result="d"/>
+<feComposite in="d" in2="SourceGraphic" operator="in"/></filter>`;
+let blDefs=null;const ensureDefs=()=>{if(blDefs&&blDefs.isConnected)return blDefs;let el=document.getElementById('bl-defs');if(!el){const sv=document.createElementNS('http://www.w3.org/2000/svg','svg');sv.setAttribute('width','0');sv.setAttribute('height','0');sv.style.position='absolute';sv.setAttribute('aria-hidden','true');el=document.createElementNS('http://www.w3.org/2000/svg','defs');el.id='bl-defs';sv.appendChild(el);document.body.appendChild(sv);el.innerHTML=DEFS_HTML}return blDefs=el};
+const DEFS_HTML=screenFilter('xdots',3,'dot',1.4,.45,.12)+screenFilter('xpop',4,'hatch',1.8,.12,.05)+copier('xcopyBW',0,'0 .02 .1 .42 .92 1 1')+copier('xcopyLC',.4,'0 .02 .16 .52 .9 1 1')+copier('xcopyCOL',.95,'0 .03 .2 .52 .88 1 1')+
+ '<filter id="xglow" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="2.2" result="h"/><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="b"/><feComponentTransfer in="b" result="b2"><feFuncA type="linear" slope=".4"/></feComponentTransfer><feMerge><feMergeNode in="b2"/><feMergeNode in="h"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+
+// ======== geometry helpers ========
+let seed=11;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const f1=v=>v.toFixed(1);
+const cssPoly=(P,W,H)=>'polygon('+P.map(q=>(q[0]/W*100).toFixed(2)+'% '+(q[1]/H*100).toFixed(2)+'%').join(',')+')';
+const inPoly=(x,y,P)=>{let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){if(((P[i][1]>y)!=(P[j][1]>y))&&(x<(P[j][0]-P[i][0])*(y-P[i][1])/(P[j][1]-P[i][1])+P[i][0]))c=!c}return c};
+const bbox=P=>{const xs=P.map(q=>q[0]),ys=P.map(q=>q[1]);return {x0:Math.min(...xs),x1:Math.max(...xs),y0:Math.min(...ys),y1:Math.max(...ys)}};
+const area=P=>Math.abs(P.reduce((a,q,i)=>{const r=P[(i+1)%P.length];return a+q[0]*r[1]-r[0]*q[1]},0))/2;
+const centroid=P=>[P.reduce((a,q)=>a+q[0],0)/P.length,P.reduce((a,q)=>a+q[1],0)/P.length];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+// ---- low-resolution fields (computed once per image; the page only draws static SVG afterwards) ----
+const GW=96;
+const mkGrid=rec=>{const gh=Math.round(GW*rec.H/rec.W);return {gw:GW,gh,sx:rec.W/GW,sy:rec.H/gh}};
+const raster=(P,g)=>{const m=new Uint8Array(g.gw*g.gh);for(let y=0;y<g.gh;y++)for(let x=0;x<g.gw;x++)m[y*g.gw+x]=inPoly((x+.5)*g.sx,(y+.5)*g.sy,P)?1:0;return m};
+const chamfer=(m,gw,gh)=>{const d=new Float32Array(gw*gh);for(let i=0;i<d.length;i++)d[i]=m[i]?1e6:0;const a=1,b=1.4142;
+ for(let y=0;y<gh;y++)for(let x=0;x<gw;x++){const i=y*gw+x;if(!d[i])continue;let v=d[i];if(x>0)v=Math.min(v,d[i-1]+a);if(y>0){v=Math.min(v,d[i-gw]+a);if(x>0)v=Math.min(v,d[i-gw-1]+b);if(x<gw-1)v=Math.min(v,d[i-gw+1]+b)}d[i]=v}
+ for(let y=gh-1;y>=0;y--)for(let x=gw-1;x>=0;x--){const i=y*gw+x;if(!d[i])continue;let v=d[i];if(x<gw-1)v=Math.min(v,d[i+1]+a);if(y<gh-1){v=Math.min(v,d[i+gw]+a);if(x<gw-1)v=Math.min(v,d[i+gw+1]+b);if(x>0)v=Math.min(v,d[i+gw-1]+b)}d[i]=v}
+ return d};
+const isoLines=(f,g,lv)=>{const {gw,gh,sx,sy}=g,segs=[];
+ for(let y=0;y<gh-1;y++)for(let x=0;x<gw-1;x++){
+  const a=f[y*gw+x],b=f[y*gw+x+1],c=f[(y+1)*gw+x+1],d=f[(y+1)*gw+x],pts=[];
+  if((a>lv)!==(b>lv))pts.push([x+(lv-a)/(b-a),y]);
+  if((b>lv)!==(c>lv))pts.push([x+1,y+(lv-b)/(c-b)]);
+  if((d>lv)!==(c>lv))pts.push([x+(lv-d)/(c-d),y+1]);
+  if((a>lv)!==(d>lv))pts.push([x,y+(lv-a)/(d-a)]);
+  if(pts.length===2)segs.push(pts);else if(pts.length===4){segs.push([pts[0],pts[3]]);segs.push([pts[1],pts[2]])}}
+ const key=p=>Math.round(p[0]*200)+'_'+Math.round(p[1]*200),ends=new Map(),used=new Uint8Array(segs.length);
+ segs.forEach((s,i)=>{for(const p of s){const k=key(p);if(!ends.has(k))ends.set(k,[]);ends.get(k).push(i)}});
+ const lines=[];
+ for(let i=0;i<segs.length;i++){if(used[i])continue;used[i]=1;const line=[segs[i][0],segs[i][1]];
+  for(const dir of [1,0]){for(;;){const tip=dir?line[line.length-1]:line[0],cand=(ends.get(key(tip))||[]).find(j=>!used[j]);if(cand===undefined)break;used[cand]=1;const s=segs[cand],nx=key(s[0])===key(tip)?s[1]:s[0];dir?line.push(nx):line.unshift(nx)}}
+  if(line.length>=5)lines.push(line)}
+ return lines.map(l=>{const px=l.map(p=>[(p[0]+.5)*sx,(p[1]+.5)*sy]);return px.map((p,i)=>{const a=px[Math.max(0,i-1)],b=px[Math.min(px.length-1,i+1)];return [(a[0]+p[0]*2+b[0])/4,(a[1]+p[1]*2+b[1])/4]})})};
+// photo samples for roughness, glare and light/shadow (one small canvas read per image)
+function samplePhoto(src,g){return new Promise(res=>{const im=new Image();im.onload=()=>{try{const c=document.createElement('canvas');c.width=g.gw;c.height=g.gh;const x=c.getContext('2d');x.drawImage(im,0,0,g.gw,g.gh);const d=x.getImageData(0,0,g.gw,g.gh).data,B=new Float32Array(g.gw*g.gh),T=new Float32Array(g.gw*g.gh);
+  for(let i=0;i<B.length;i++)B[i]=(d[i*4]*.3+d[i*4+1]*.59+d[i*4+2]*.11)/255;
+  for(let y=1;y<g.gh-1;y++)for(let xx=1;xx<g.gw-1;xx++){const i=y*g.gw+xx;T[i]=Math.abs(B[i]-B[i-1])+Math.abs(B[i]-B[i+1])+Math.abs(B[i]-B[i-g.gw])+Math.abs(B[i]-B[i+g.gw])}
+  res({B,T})}catch(e){res({B:new Float32Array(g.gw*g.gh).fill(.5),T:new Float32Array(g.gw*g.gh).fill(.1)})}};im.onerror=()=>res({B:new Float32Array(g.gw*g.gh).fill(.5),T:new Float32Array(g.gw*g.gh).fill(.1)});im.src=src})}
+let uid=0;
+// ---- line drawing: every line is kept to its object and out of the other lines' zones ----
+let CLIPS=[],EXCL=[],SKIP=[],ROUTE=null,RW=800,SWEEP='';
+const blocked=q=>EXCL.some(c=>Math.hypot(q[0]-c[0],q[1]-c[1])<c[2])||SKIP.some(P=>inPoly(q[0],q[1],P));
+const rawPath=(pts,cls,col,w,op,extra='')=>`<path ${cls?`class="${cls}" `:''}${extra}d="${pts.map((q,i)=>(i?'L':'M')+f1(q[0])+','+f1(q[1])).join('')}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" opacity="${op}"/>`;
+const path=(pts,cls,col,w,op,extra='')=>{let run=[],d='';const flush=()=>{if(run.length>1)d+=run.map((q,i)=>(i?'L':'M')+f1(q[0])+','+f1(q[1])).join('');run=[]};
+ for(const q of pts){if((!CLIPS.length||CLIPS.some(P=>inPoly(q[0],q[1],P)))&&!blocked(q))run.push(q);else flush()}flush();
+ return d?`<path ${cls?`class="${cls}" `:''}${extra}d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" opacity="${op}"/>`:''};
+const mix=(a,b,t)=>{const h=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16));const A=h(a),B=h(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')};
+const topoColor=(k,n)=>{const t=n>1?Math.round(k/(n-1)*100):0;return `color-mix(in srgb,var(--neon-orange,#FF6600) ${100-t}%,var(--outz-clay,#a8552b))`};
+// (5) route weighting: lines are dense and bright near the route and fade with distance from it
+const routeDist=q=>{let m=1e9;for(const r of ROUTE){const d=Math.hypot(q[0]-r[0],q[1]-r[1]);if(d<m)m=d}return m};
+const routeW=q=>ROUTE?.35+.65*Math.exp(-routeDist(q)/(RW*.2)):1;
+const weighted=(pts,draw)=>{let out='',cur=[],cb=-1;const flush=()=>{if(cur.length>1)out+=draw(cur,[.4,.7,1][cb]);cur=[]};
+ for(const q of pts){const b=Math.min(2,Math.floor(routeW(q)*3));if(b!==cb){const last=cur[cur.length-1];flush();cur=last?[last]:[];cb=b}cur.push(q)}flush();return out};
+// a terrain line, plus a white copy for the scan sweep, plus a white flash copy on some lines
+const topoLine=(pts,k,n)=>{const wide=k%5===4;let o=weighted(pts,(seg,m)=>path(seg,'',topoColor(k,n),wide?3:1.7,((1-k*.04)*m).toFixed(2)));
+ SWEEP+=weighted(pts,(seg,m)=>path(seg,'','var(--text-hi,#fff)',wide?3.4:2.2,(.95*m).toFixed(2)));
+ if(k%3===1)o+=path(pts,'wfl','var(--text-hi,#fff)',wide?2.4:1.3,.9,`style="animation-delay:${(-rnd()*6).toFixed(1)}s" `);return o};
+// ======== the rule table: object class -> overlay ========
+// (1)+(2) one terrain map across all the land: height by place in the frame plus distance in from the outline,
+//          so lines run on across neighbouring peaks, bunch on steep edges and hug every silhouette
+const terrain=(rec,g,N)=>{const land=rec.cutouts.filter(c=>['mountain','snow','rock'].includes(c.cls));if(!land.length)return '';
+ const M=new Uint8Array(g.gw*g.gh);land.forEach(c=>{const m=raster(c.poly,g);for(let i=0;i<M.length;i++)if(m[i])M[i]=1});
+ const D=chamfer(M,g.gw,g.gh);let maxD=1;for(let i=0;i<D.length;i++)if(M[i]&&D[i]<1e5&&D[i]>maxD)maxD=D[i];
+ const f=new Float32Array(M.length);let lo=1e9,hi=-1e9;
+ for(let y=0;y<g.gh;y++)for(let x=0;x<g.gw;x++){const i=y*g.gw+x;if(!M[i]){f[i]=-1;continue}const e=.55*(1-y/g.gh)+.45*Math.min(1,D[i]/(maxD*.6));f[i]=e;lo=Math.min(lo,e);hi=Math.max(hi,e)}
+ CLIPS=land.map(c=>c.poly);let o='';
+ for(let k=0;k<N;k++){const lv=lo+(hi-lo)*(k+1)/(N+1);for(const pl of isoLines(f,g,lv))o+=topoLine(pl,k,N)}
+ CLIPS=[];return o};
+// (water) shore-parallel lines near land, rounding into rings toward the focal point, drawn only where the water is rough or glaring
+const waterLines=(c,rec,g,S,ctx)=>{const PW=c.lines||c.poly,m=raster(PW,g),D=chamfer(m,g.gw,g.gh),W=rec.W,H=rec.H,bb=bbox(PW);
+ const F=ctx.focus||[(bb.x0+bb.x1)/2,bb.y0+(bb.y1-bb.y0)*.72],f=new Float32Array(m.length);
+ for(let y=0;y<g.gh;y++)for(let x=0;x<g.gw;x++){const i=y*g.gw+x;if(!m[i]){f[i]=-1;continue}const dS=D[i]*g.sx,px=(x+.5)*g.sx,py=(y+.5)*g.sy,dF=Math.hypot(px-F[0],(py-F[1])*2.4),t=clamp(dS/(.2*W),0,1);f[i]=(1-t)*dS+t*(.2*W+.55*dF)}
+ const lv=[.02,.05,.085].slice(0,ctx.shore||3).map(v=>v*W).concat([.28,.34,.4,.47].slice(0,ctx.rings||3).map(v=>v*W));
+ CLIPS=[c.lines||c.poly];SKIP=ctx.skip||[];let o='',idx=0,lines=[];
+ for(const L of lv){for(const pl of isoLines(f,g,L)){idx++;lines.push(pl);
+  // roughness and glare decide how strong each stretch is
+  let run=[],cb=-1,first=true;const flush=()=>{if(run.length>1)o+=path(run,'','var(--neon-cyan,#00FFFF)',1.2,[.16,.34,.52][cb]*(1-idx*.01));run=[]};
+  for(const q of pl){const gi=clamp(Math.floor(q[1]/g.sy),0,g.gh-1)*g.gw+clamp(Math.floor(q[0]/g.sx),0,g.gw-1),r=S.T[gi]*3.2+Math.max(0,S.B[gi]-.62)*1.4,b=r>.34?2:(r>.16?1:0);if(b!==cb){const last=run[run.length-1];flush();run=last?[last]:[];cb=b}run.push(q)}flush()}}
+ // (water) one bright pulse travels along two of the lines
+ lines.slice().sort((a,b)=>b.length-a.length).slice(0,2).forEach((pl,i)=>{o+=path(pl,'pulse','var(--text-hi,#fff)',2.4,.9,`style="animation-delay:${(-rnd()*6).toFixed(1)}s" `)});
+ // (water) reflection echo: the subject or the highest mountain mirrored into the water, broken by wave gaps
+ const subj=rec.cutouts.find(c2=>c2.subject),mt=rec.cutouts.filter(c2=>['mountain','snow'].includes(c2.cls)).sort((a,b)=>area(b.poly)-area(a.poly))[0],src=subj||mt;
+ if(src){const b=bbox(src.poly),ys=subj?b.y1:bb.y0+6,k=subj?.8:.5,mir=src.poly.map(q=>[q[0],ys+(ys-q[1])*k]);
+  const seg=[];for(let i=0;i<mir.length;i++){const a=mir[i],b2=mir[(i+1)%mir.length],n=Math.max(1,Math.round(Math.hypot(b2[0]-a[0],b2[1]-a[1])/14));for(let j=0;j<n;j++)seg.push([a[0]+(b2[0]-a[0])*j/n,a[1]+(b2[1]-a[1])*j/n+Math.sin(j*1.7+i)*2])}
+  let run=[];seg.forEach((q,i)=>{if(i%9===8){if(run.length>1)o+=path(run,'','var(--neon-cyan,#00FFFF)',1,.22);run=[]}else run.push(q)});if(run.length>1)o+=path(run,'','var(--neon-cyan,#00FFFF)',1,.22)}
+ CLIPS=[];SKIP=[];return o};
+const fallLines=(P,n)=>{const b=bbox(P),rows=[];for(let y=b.y0+10;y<=b.y1-10;y+=20){let l=1e9,r=-1e9;for(let x=b.x0;x<=b.x1;x+=4)if(inPoly(x,y,P)){l=Math.min(l,x);r=Math.max(r,x)}if(r>l)rows.push([y,(l+r)/2,(r-l)*.7])}
+ let o='';CLIPS=[P];for(let k=0;k<n;k++){const u=k/(n-1)-.5,pts=rows.map(([y,c,w])=>[c+u*w+Math.sin(y/37+k*1.9)*3,y]);o+=path(pts,k%2?'flow':'','var(--neon-cyan,#00FFFF)',1.6+(k%3)*.5,.7)}CLIPS=[];return o};
+// (mesh) wire mesh that hugs one object: an outline ring, a ring inset from it, then an even fill; spacing follows the object's size;
+//        edges fade on the shadow side
+const largest=ls=>ls.sort((a,b)=>b.length-a.length)[0];
+const meshObj=(P,g,S)=>{const A=area(P),minD=clamp(Math.sqrt(A)/4.2,26,48),pts=[];
+ const ring=pl=>{for(let i=0;i<pl.length-1;i++){const a=pl[i],b=pl[i+1],n=Math.max(1,Math.round(Math.hypot(b[0]-a[0],b[1]-a[1])/minD));for(let j=0;j<n;j++)pts.push([a[0]+(b[0]-a[0])*j/n,a[1]+(b[1]-a[1])*j/n])}};
+ ring(P.concat([P[0]]));
+ const m=raster(P,g),D=chamfer(m,g.gw,g.gh),inner=largest(isoLines(D,g,Math.max(1.4,minD*.9/g.sx)));if(inner)ring(inner);
+ const bb=bbox(P);
+ for(let t=0;t<1500;t++){const x=bb.x0+rnd()*(bb.x1-bb.x0),y=bb.y0+rnd()*(bb.y1-bb.y0);if(!inPoly(x,y,P))continue;if(pts.some(q=>Math.hypot(q[0]-x,q[1]-y)<minD*.95))continue;pts.push([x,y])}
+ const seen=new Set(),buckets=['','',''];let nodes='';
+ pts.forEach((a,i)=>{const near=pts.map((b,j)=>[Math.hypot(a[0]-b[0],a[1]-b[1]),j]).filter(t=>t[1]!==i).sort((x,y)=>x[0]-y[0]).slice(0,3);
+  near.forEach(([d,j])=>{const k=i<j?i+'-'+j:j+'-'+i,b=pts[j];if(d>minD*2.3||seen.has(k))return;const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;if(!inPoly(mx,my,P))return;seen.add(k);
+   const gi=clamp(Math.floor(my/g.sy),0,g.gh-1)*g.gw+clamp(Math.floor(mx/g.sx),0,g.gw-1),br=S.B[gi],bi=br>.55?2:(br>.35?1:0);buckets[bi]+=`M${f1(a[0])},${f1(a[1])}L${f1(b[0])},${f1(b[1])}`});
+  nodes+=`<circle cx="${f1(a[0])}" cy="${f1(a[1])}" r="1.6" fill="var(--amber,#FFB23D)"/>`});
+ return {bb,svg:`<path d="${buckets[0]}" fill="none" stroke="var(--neon-orange,#FF6600)" stroke-width="1.1" opacity=".3"/><path d="${buckets[1]}" fill="none" stroke="var(--neon-orange,#FF6600)" stroke-width="1.2" opacity=".6"/><path d="${buckets[2]}" fill="none" stroke="var(--neon-orange,#FF6600)" stroke-width="1.3" opacity="1"/>${nodes}`}};
+const objCircle=P=>{const c=centroid(P);return [c[0],c[1],Math.max(...P.map(q=>Math.hypot(q[0]-c[0],q[1]-c[1])))+16]};
+// ======== recipes: one per photo (the baker writes the same shape; these four are hand-corrected) ========
+const RECIPES={
+ garibaldi:{W:800,H:1000,ownMesh:true,avoid:[[110,860,170]],cutouts:[
+  {cls:'water',look:'col',poly:[[0,385],[100,370],[170,350],[207,320],[260,310],[330,308],[400,312],[430,335],[420,350],[470,375],[540,385],[640,392],[740,395],[800,400],[800,900],[700,890],[600,880],[500,840],[400,790],[300,740],[200,700],[100,660],[40,640],[0,620]],ring:[470,690],shore:3},
+  {cls:'snow',look:'pop',poly:[[60,215],[100,195],[150,200],[190,215],[250,205],[300,185],[345,160],[385,135],[430,133],[470,150],[530,195],[600,215],[700,200],[640,235],[560,255],[500,230],[430,215],[380,230],[320,250],[270,245],[230,235],[200,250],[150,255],[100,240]]},
+  {cls:'mountain',look:'bw',poly:[[0,195],[20,185],[60,225],[130,275],[190,305],[207,318],[170,350],[100,370],[40,385],[0,385]]},
+  {cls:'mountain',look:'bw',poly:[[420,350],[470,310],[560,255],[640,235],[700,210],[740,185],[800,178],[800,400],[740,395],[640,390],[540,385],[470,375]]},
+  {cls:'rock',look:'bw',poly:[[0,620],[40,640],[55,700],[120,780],[200,830],[290,870],[370,920],[420,1000],[0,1000]]},
+  {cls:'veg',look:'lc',poly:[[40,670],[120,720],[250,800],[400,870],[520,890],[600,880],[700,890],[800,900],[800,1000],[420,1000],[370,920],[290,870],[200,830],[120,780],[55,700]]}
+ ]},
+ falls:{W:800,H:1000,hideov:true,mesh:[[[200,585],[260,580],[320,598],[346,640],[340,692],[290,684],[222,682],[200,640]],[[0,650],[60,622],[122,680],[190,760],[200,822],[160,900],[104,978],[0,1000]]],cutouts:[
+  {cls:'fall',look:'bw',poly:[[375,170],[420,155],[470,150],[480,200],[462,300],[452,420],[442,540],[447,640],[470,720],[420,745],[340,735],[345,640],[350,520],[358,400],[362,300],[368,220]]},
+  {cls:'rock',look:'pop',poly:[[0,165],[100,170],[250,165],[370,175],[362,300],[358,420],[350,520],[330,540],[200,520],[80,520],[0,500]]},
+  {cls:'rock',look:'bw',poly:[[470,150],[540,120],[620,90],[700,50],[800,8],[800,500],[700,500],[600,490],[500,430],[450,420],[462,300],[480,200]]},
+  {cls:'veg',look:'bw',poly:[[0,530],[100,545],[220,560],[340,560],[345,640],[345,700],[300,690],[200,700],[100,690],[0,640]]},
+  {cls:'veg',look:'lc',poly:[[450,540],[560,545],[700,530],[800,510],[800,720],[700,700],[600,690],[480,690],[445,640]]},
+  {cls:'water',look:'col',poly:[[200,745],[340,735],[420,745],[500,740],[640,740],[760,770],[800,790],[800,1000],[160,1000],[180,880],[200,800]],shore:2,minY:810,focusFrom:'fall'}
+ ]},
+ rooster:{W:800,H:1000,hideov:true,mesh:[[[0,322],[60,300],[130,310],[182,358],[150,392],[0,396]],[[668,232],[690,200],[722,194],[756,214],[762,250],[742,272],[690,270]]],cutouts:[
+  {cls:'sky',look:'pop',poly:[[0,0],[260,0],[270,210],[150,225],[0,235]]},
+  {cls:'mountain',look:'bw',poly:[[270,210],[310,150],[400,100],[480,50],[550,10],[600,0],[800,0],[800,270],[700,265],[600,260],[500,255],[400,250],[320,235]]},
+  {cls:'veg',look:'lc',poly:[[0,235],[100,230],[250,225],[400,255],[600,260],[800,270],[800,380],[600,375],[400,370],[200,385],[0,400]]},
+  {cls:'water',look:'col',poly:[[0,415],[480,412],[483,540],[490,600],[500,670],[480,760],[300,780],[0,820]],lines:[[0,414],[800,412],[800,1000],[0,1000]],shore:2,rings:6,focusFrom:'person'},
+  {cls:'veg',look:'bw',poly:[[10,740],[50,610],[110,590],[130,690],[200,810],[110,850],[100,1000],[0,1000]]},
+  {cls:'person',look:'bw',subject:true,poly:[[582,478],[585,458],[610,451],[640,455],[660,475],[662,505],[640,530],[650,550],[670,580],[690,640],[697,700],[680,730],[640,735],[560,735],[530,730],[528,700],[498,665],[484,650],[484,620],[495,570],[515,545],[540,535],[570,520],[582,500]]}
+ ]},
+ hero:{W:1360,H:800,ownMesh:true,avoid:[[150,640,230]],cutouts:[
+  {cls:'water',look:'col',poly:[[255,375],[330,330],[470,310],[550,262],[640,258],[730,290],[800,320],[950,330],[1100,335],[1230,330],[1360,320],[1360,700],[1250,730],[1050,745],[900,720],[700,690],[540,620],[420,560],[330,470]],ring:[900,610],shore:3},
+  {cls:'snow',look:'pop',poly:[[430,175],[500,160],[560,150],[620,140],[690,115],[740,112],[800,135],[820,160],[760,180],[700,185],[620,190],[560,185],[500,200],[470,190]]},
+  {cls:'mountain',look:'bw',poly:[[170,230],[260,170],[330,160],[380,155],[420,180],[480,215],[550,255],[540,280],[470,305],[390,320],[300,335],[240,340],[200,290]]},
+  {cls:'mountain',look:'bw',poly:[[730,290],[800,240],[890,200],[970,160],[1040,150],[1100,165],[1200,170],[1360,175],[1360,320],[1300,315],[1230,330],[1150,335],[1050,335],[950,325],[850,322],[760,300]]},
+  {cls:'rock',look:'bw',poly:[[0,130],[40,150],[120,200],[200,290],[260,380],[330,490],[390,560],[440,620],[470,700],[520,800],[0,800]]},
+  {cls:'veg',look:'lc',poly:[[420,555],[540,600],[700,690],[850,740],[1000,755],[1150,740],[1360,700],[1360,800],[520,800],[470,700],[440,620]]}
+ ]},
+ roosterHero:{W:1360,H:800,mesh:[[[255,268],[330,262],[420,266],[520,280],[538,312],[258,312]],[[1052,180],[1088,158],[1140,158],[1166,190],[1160,238],[1100,248],[1058,226]]],cutouts:[
+  {cls:'sky',look:'pop',poly:[[0,0],[820,0],[690,70],[625,150],[620,185],[500,175],[300,185],[0,190]]},
+  {cls:'mountain',look:'bw',poly:[[620,185],[640,130],[700,80],[780,30],[850,0],[1360,0],[1360,215],[1200,200],[1050,215],[900,205],[780,195]]},
+  {cls:'veg',look:'lc',poly:[[0,190],[300,175],[500,185],[620,185],[780,195],[900,205],[1050,215],[1200,200],[1360,215],[1360,330],[900,325],[600,325],[300,320],[0,330]]},
+  {cls:'water',look:'col',poly:[[0,334],[790,334],[788,520],[800,610],[810,700],[780,800],[0,800]],lines:[[0,334],[1360,334],[1360,800],[0,800]],shore:2,rings:6,focusFrom:'person'},
+  {cls:'veg',look:'bw',poly:[[250,650],[300,500],[350,480],[410,590],[470,650],[540,650],[480,720],[420,800],[330,800],[290,720]]},
+  {cls:'person',look:'bw',subject:true,poly:[[582,478],[585,458],[610,451],[640,455],[660,475],[662,505],[640,530],[650,550],[670,580],[690,640],[697,700],[680,730],[640,735],[560,735],[530,730],[528,700],[498,665],[484,650],[484,620],[495,570],[515,545],[540,535],[570,520],[582,500]].map(q=>[q[0]*.8+400,q[1]*.8])}
+ ]}
+};
+const PLACE_MATCH=[['garibaldi',/Garibaldi Lake/i],['falls',/Silver Falls/i],['rooster',/Rooster Rock/i]];
+
+const ROUTES={
+ garibaldi:[[240,732],[222,690],[204,620],[200,550],[228,480],[288,412],[340,352],[372,300],[392,232],[398,176]],
+ falls:[[270,650],[300,590],[330,552],[420,546],[560,532],[700,516],[800,506]],
+ rooster:[[150,925],[190,820],[250,700],[300,590],[318,500],[350,420],[430,330],[500,250],[570,170],[625,118],[640,100]],
+ hero:[[400,550],[470,520],[550,490],[620,445],[668,390],[655,330],[668,268],[690,205],[700,152],[702,128]]
+};
+const largest2=ls=>ls.sort((a,b)=>b.length-a.length)[0];
+const insetPoly=(poly,g,dpx)=>{const m=raster(poly,g),D=chamfer(m,g.gw,g.gh),pl=largest2(isoLines(D,g,dpx/g.sx));return pl&&pl.length>=6?pl:null};
+const qa=()=>({});
+async function build(rec,name,art,real){
+ const W0=rec.W,H0=rec.H,g=mkGrid(rec),S=await samplePhoto(real.src,g);
+ RW=W0;ROUTE=null;const rt=ROUTES[name];if(rt){ROUTE=[];for(let i=0;i<rt.length-1;i++){const a=rt[i],b=rt[i+1],n=Math.max(1,Math.round(Math.hypot(b[0]-a[0],b[1]-a[1])/12));for(let j=0;j<n;j++)ROUTE.push([a[0]+(b[0]-a[0])*j/n,a[1]+(b[1]-a[1])*j/n])}}
+ const subj=rec.cutouts.find(c=>c.subject),fall=rec.cutouts.find(c=>c.cls==='fall');
+ const focusOf=c=>{if(c.ring)return c.ring;if(c.focusFrom==='person'&&subj){const b=bbox(subj.poly);return [(b.x0+b.x1)/2,b.y1+3]}if(c.focusFrom==='fall'&&fall){const b=bbox(fall.poly);return [(b.x0+b.x1)/2,b.y1+10]}return null};
+ EXCL=(rec.mesh||[]).map(objCircle).concat(rec.avoid||[]);SWEEP='';
+ const stats={topo:0,water:0};
+ let lines=terrain(rec,g,W0>1000?10:9);stats.topo=(lines.match(/<path/g)||[]).length;
+ for(const c of rec.cutouts){
+  if(c.cls==='fall')lines+=fallLines(c.poly,6);
+  if(c.cls==='water'){const w=waterLines(c,rec,g,S,{focus:focusOf(c),shore:c.shore,rings:c.rings,skip:subj?[subj.poly]:[]});stats.water+=(w.match(/<path/g)||[]).length;lines+=w}
+ }
+ EXCL=[];
+ // meshes: each reveals bottom-up on its own clock
+ let meshes='',meshPlain='',defs='';
+ (rec.mesh||[]).forEach((P,i)=>{const mo=meshObj(P,g,S),id='mw'+(uid++);
+  defs+=`<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="${W0}" height="${H0}"><rect class="mwr" x="${f1(mo.bb.x0-12)}" y="${f1(mo.bb.y0-12)}" width="${f1(mo.bb.x1-mo.bb.x0+24)}" height="${f1(mo.bb.y1-mo.bb.y0+24)}" fill="#fff" style="animation-delay:${(-rnd()*9).toFixed(1)}s"/></mask>`;
+  meshes+=`<g mask="url(#${id})">${mo.svg}</g>`;meshPlain+=mo.svg});
+ // (4) scan sweep: a bright band crosses the card; the white copy of the terrain lines shows only inside it
+ const smask='sm'+(uid++);
+ defs+=`<linearGradient id="sg${smask}" x1="0" x2="1"><stop offset="0" stop-color="#000"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="${smask}" maskUnits="userSpaceOnUse" x="0" y="0" width="${W0}" height="${H0}"><rect class="swr" x="${-W0*.4}" y="0" width="${W0*.4}" height="${H0}" fill="url(#sg${smask})" style="--sw:${W0*1.8}px;animation-delay:${(-rnd()*8).toFixed(1)}s"/></mask>`;
+ const main=`<svg class="xfl" viewBox="0 0 ${W0} ${H0}" preserveAspectRatio="none" aria-hidden="true"><defs>${defs}</defs><g filter="url(#xglow)">${lines}${meshes}</g><g mask="url(#${smask})">${SWEEP}</g></svg>`;
+ art.insertAdjacentHTML('beforeend',main);
+ // (6) tear: three clipped copies of the static lines slip with the glitch (columns for Silver Falls)
+ const plain=`<svg class="xfl tear${name==='falls'?' v':''}" viewBox="0 0 ${W0} ${H0}" preserveAspectRatio="none" aria-hidden="true"__STYLE__><g filter="url(#xglow)">${lines}${meshPlain}</g></svg>`;
+ const cuts=name==='falls'?[[10,0,70,0,-3],[40,0,40,0,4],[70,0,10,0,-3]]:[[8,86,0,0,-7],[38,52,0,0,6],[62,28,0,0,-5]];
+ cuts.forEach(([a,b,c2,d,dx],i)=>{const clip=name==='falls'?`inset(0 ${100-a-30}% 0 ${a}%)`:`inset(${a}% 0 ${b}% 0)`;
+  art.insertAdjacentHTML('beforeend',plain.replace('__STYLE__',` style="clip-path:${clip};--dx:${dx}cqw;--dy:${dx*.6}cqw;--sd:${(i*.05).toFixed(2)}s"`))});
+ return qa(rec,name,stats);
+}
+
+// ======== public API ========
+// Places with blended art. variant 'tall' is the 200x236 card art, 'wide' the drawer card and open-card hero.
+const BLEND_KEYS={'bc-garibaldi':{tall:'garibaldi',wide:'hero'},'silver-falls':{tall:'falls'},'rooster-rock':{tall:'rooster',wide:'roosterHero'}};
+const BLEND_PHOTO={garibaldi:'garibaldi',falls:'falls',rooster:'rooster',hero:'hero',roosterHero:'rooster-wide'};
+const HUD_LABEL={garibaldi:'MT GARIBALDI 2,678 M',hero:'MT GARIBALDI 2,678 M',falls:'SOUTH FALLS 177 FT'};
+export const hasBlend=(placeId,variant='tall')=>Boolean(BLEND_KEYS[placeId]&&BLEND_KEYS[placeId][variant]);
+const photoUrl=key=>`/outzide-map/assets/photos/blend/${BLEND_PHOTO[key]}.webp`;
+const setVars=(box,rec)=>{const W=box.clientWidth,H=box.clientHeight;if(!W||!H)return false;const ph=W*rec.H/rec.W;box.style.setProperty('--xt',((H-ph)/2).toFixed(1)+'px');box.style.setProperty('--xh',ph.toFixed(1)+'px');return true};
+// A route with a travelling dot, a target ring and a lock-on label, drawn in the recipe's own coordinates.
+function hudMarkup(rec,key){
+ const rt=ROUTES[key];if(!rt)return '';const W=rec.W,H=rec.H,e=rt[rt.length-1],tx=clamp(e[0],W*.12,W*.88),ty=clamp(e[1],H*.1,H*.9),d='M'+rt.map(q=>f1(q[0])+','+f1(q[1])).join('L');
+ const label=HUD_LABEL[key],fs=Math.round(W*.034),lw=label?label.length*fs*.62+fs*1.2:0,lx=clamp(tx-lw/2,W*.03,W-lw-W*.03),ly=clamp(ty+W*.1,H*.06,H-fs*2.4);
+ return `<svg class="bl-hud" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><defs><filter id="bl-hud-glow-${key}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="${(W/200).toFixed(1)}" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g filter="url(#bl-hud-glow-${key})"><path class="bl-route" d="${d}" fill="none" stroke="var(--neon-orange,#FF6600)" stroke-width="${(W/130).toFixed(1)}" stroke-linecap="round" stroke-dasharray="${(W/20).toFixed(0)} ${(W/32).toFixed(0)}"/><circle r="${(W/110).toFixed(1)}" fill="var(--text-hi,#fff)"><animateMotion dur="6s" repeatCount="indefinite" path="${d}"/></circle><g transform="translate(${f1(tx)} ${f1(ty)})"><circle class="bl-ring" r="${(W/16).toFixed(0)}" fill="none" stroke="var(--text-hi,#fff)" stroke-width="${(W/260).toFixed(1)}" stroke-dasharray="${(W/60).toFixed(0)} ${(W/80).toFixed(0)}"/><path d="M${-W/12} ${-W/30}V${-W/12}H${-W/30}M${W/12} ${-W/30}V${-W/12}H${W/30}M${-W/12} ${W/30}V${W/12}H${-W/30}M${W/12} ${W/30}V${W/12}H${W/30}" fill="none" stroke="var(--neon-orange,#FF6600)" stroke-width="${(W/200).toFixed(1)}"/></g>${label?`<g transform="translate(${f1(lx)} ${f1(ly)})"><rect width="${f1(lw)}" height="${f1(fs*1.7)}" fill="var(--z-black,#050506)" stroke="var(--neon-orange,#FF6600)" stroke-width="${(W/400).toFixed(1)}"/><text x="${f1(fs*.6)}" y="${f1(fs*1.2)}" font-family="'JetBrains Mono',ui-monospace,monospace" font-weight="600" font-size="${fs}" fill="var(--text-hi,#fff)" letter-spacing="1">${label}</text></g>`:''}</g></svg>`;
+}
+/** Mount the blended art into `container` (position:relative, sized by its owner). Returns a disposer. */
+export async function mountBlend(container,placeId,{variant='tall',hud=true}={}){
+ const key=BLEND_KEYS[placeId]&&BLEND_KEYS[placeId][variant];if(!key)return()=>{};
+ const rec=RECIPES[key],src=photoUrl(key);if(!rec)return()=>{};
+ ensureDefs();
+ const W0=rec.W,H0=rec.H,g=mkGrid(rec);
+ const box=document.createElement('div');box.className='bl';box.dataset.blend=placeId;container.prepend(box);
+ let disposed=false,ro=null;
+ for(let i=0;i<30&&!setVars(box,rec);i++){await new Promise(r=>requestAnimationFrame(r));if(disposed)return()=>{}}
+ ro=new ResizeObserver(()=>setVars(box,rec));ro.observe(box);
+ box.insertAdjacentHTML('beforeend',`<img class="bl-base" src="${src}" alt="" decoding="async">`);
+ box.insertAdjacentHTML('beforeend',rec.cutouts.map((c,ci)=>{
+  const long=!!c.subject,sync=!long&&(ci===1||ci===4),d=long?10:(sync?7:+(5.5+rnd()*8).toFixed(1)),o=long?.4:(sync?0:-+(rnd()*d).toFixed(1)),
+   k=long?'long':(sync?'ksync':(c.look==='bw'?'kbw':'k'+(1+Math.floor(rnd()*3))));
+  const terr=c.look==='bw'&&['mountain','rock','snow'].includes(c.cls);let inner='';
+  if(terr){const L=[.035,.075].map(v=>insetPoly(c.poly,g,v*W0));
+   inner=`<div class="xt"><img src="${src}" style="clip-path:${cssPoly(c.poly,W0,H0)}" alt="">`+L.map((pl,li)=>pl?`<img class="m${li+1}" src="${src}" style="clip-path:${cssPoly(pl,W0,H0)}" alt="">`:'').join('')+'</div>'}
+  else inner=`<img src="${src}" style="clip-path:${cssPoly(c.poly,W0,H0)}" alt="">`;
+  return `<div class="xc ${c.look} ${k}${terr?' terr':''}" style="--d:${d}s;--o:${o}s">${inner}</div>`}).join(''));
+ await build(rec,key,box,{src});
+ if(hud&&!disposed)box.insertAdjacentHTML('beforeend',hudMarkup(rec,key));
+ return ()=>{disposed=true;ro&&ro.disconnect();box.remove()};
+}
+
+// The React cards load this file as a module script and read the API from here.
+if(typeof window!=="undefined")window.__outzBlendArt={hasBlend,mountBlend};
