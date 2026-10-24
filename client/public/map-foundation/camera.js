@@ -45,3 +45,13 @@ export function cameraHref(href,camera) {
  for(const key of ['restore','place','event','houz','mizzed','gig','gift','sell','layer'])url.searchParams.delete(key);
  return url.pathname+url.search;
 }
+
+// A retry keeps the current destination and filters as well as the camera.
+export function mapRetryHref(href,map) {
+ const url=new URL(href,globalThis.location?.href||'https://map.invalid');
+ if(map){
+  const camera=captureCamera(map);
+  for(const [key,value] of Object.entries({lng:camera.center[0],lat:camera.center[1],zoom:camera.zoom,pitch:camera.pitch,bearing:camera.bearing}))url.searchParams.set(key,String(value));
+ }
+ return url.pathname+url.search+url.hash;
+}

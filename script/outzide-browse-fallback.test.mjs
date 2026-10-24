@@ -9,7 +9,14 @@ const init=source.slice(source.indexOf('async function init()'),source.indexOf('
 async function boot({catalogFails=false}={}) {
  const messages=[],nodes=new Map();let rendered=false,view=null;
  const context={URL,URLSearchParams,readCameraParams,structuredClone,AbortSignal,vectorFirstStyle,createMapActivity,createMap:options=>createMap(options,{library:{Map:class{constructor(){throw Error('Failed to initialize WebGL')}}}}),console:{error(){},warn(){}},location:{href:'https://www.zaylist.com/outzide-map/index.html',origin:'https://www.zaylist.com'},parent:{postMessage(message){messages.push(message.type)}},metadata:null,details:null,routes:null,feed:null,beaches:null,places:[],map:null,state:{view:'list'},mobileLightMode:false,CASCADIA_MIN_ZOOM:2,fetch:async()=>({ok:!catalogFails,json:async()=>({places:[{id:'trail',name:'Trail'}],fetchedAt:'2026-09-24'})}),$:selector=>{if(!nodes.has(selector))nodes.set(selector,{hidden:true});return nodes.get(selector)},stamp:x=>x,renderList(){rendered=true},setView(value){view=value},mlcontour:{DemSource:class {setupMaplibre(){} contourProtocolUrl(){return 'contours'}}},mapzSurfaceStyle:()=>({sources:{elevation:{}},layers:[{id:'land-relief'}]}),brightenOutzideTerrain:x=>x,addI5Spectrum(){},addCascadiaOutline(){},maplibregl:{Map:class {constructor(){throw new Error('Failed to initialize WebGL')}}}};
- await vm.runInNewContext(init+'\ninit()',context);return {messages,nodes,rendered,view};
+ await vm.runInNewContext(init+'\ninit()',context);return {messages,nodes,rendered,view,metadata:context.metadata};
 }
 test('WebGL failure leaves loaded field guide accessible',async()=>{const r=await boot();assert.equal(r.rendered,true);assert.equal(r.view,'list');assert.ok(r.messages.includes('list-ready'));assert.ok(r.messages.includes('browse-ready'));assert.equal(r.messages.includes('browse-error'),false);assert.equal(r.nodes.get('#map-failure').hidden,false)});
 test('catalogue failure reports error without claiming readiness',async()=>{const r=await boot({catalogFails:true});assert.equal(r.rendered,false);assert.deepEqual(r.messages,['browse-error']);assert.match(r.nodes.get('#results').innerHTML,/couldn’t load/)});
+test('catalog metadata remains available to Sources & map notes after boot',async()=>{
+ const r=await boot();let content;
+ const fn=source.slice(source.indexOf('function sources()'),source.indexOf('const feedLabels='));
+ vm.runInNewContext(fn+'\nsources();',{metadata:r.metadata,stamp:value=>value,link:(_url,text)=>text,openUtility:(_title,html)=>{content=html;}});
+ assert.match(content,/2026-09-24/);
+ assert.match(content,/OpenStreetMap/);
+});

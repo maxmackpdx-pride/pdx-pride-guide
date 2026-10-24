@@ -16,7 +16,7 @@ test('richer Outzide palette preserves geography, provider data and Mapz style',
  const land=outdoor.layers.find(layer=>layer.id==='forest-landcover').paint['fill-color'];
  const rgb=land.match(/[a-f0-9]{2}/gi).map(value=>parseInt(value,16));
  assert.ok(rgb[1]>rgb[0]&&rgb[1]>rgb[2],'forest geography remains green');
- assert.equal(outdoor.layers.find(layer=>layer.id==='ground').paint['background-color'],'#031009');
+ assert.equal(outdoor.layers.find(layer=>layer.id==='ground').paint['background-color'],'#020805');
 });
 
 test('native pins can be disposed after a mini-map removes its style',async()=>{

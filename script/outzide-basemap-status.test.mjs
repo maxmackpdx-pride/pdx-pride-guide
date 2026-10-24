@@ -33,3 +33,12 @@ test('basemap failure stays visible until a basemap tile recovers, without waiti
   emit('error', {sourceId: 'terrain'});
   assert.equal(banner.hidden, false);
 });
+
+test('graphics-context failure is visible even after boot and cannot be hidden by a tile',()=>{
+ const {banner,emit}=setup();
+ emit('webglcontextlost');assert.equal(banner.hidden,false);
+ emit('sourcedata',{sourceId:'terrain',tile:{state:'loaded'}});assert.equal(banner.hidden,false);
+ emit('webglcontextrestored');assert.equal(banner.hidden,true);
+ emit('error',{sourceId:'terrain'});emit('webglcontextlost');emit('webglcontextrestored');
+ assert.equal(banner.hidden,false,'context restoration must not mask a failed basemap');
+});

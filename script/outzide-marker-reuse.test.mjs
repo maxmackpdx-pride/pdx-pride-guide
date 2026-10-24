@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import {clusterWaypoints} from '../client/public/outzide-map/assets/waypoint-clusters.js';
 
 const app=readFileSync(new URL('../client/public/outzide-map/app.js',import.meta.url),'utf8');
-const fn=app.slice(app.indexOf('function renderMarkers()'),app.indexOf('\n// Mizzed branches'));
+const fn=app.slice(app.indexOf('function secondaryKind('),app.indexOf('function waypointAccent('))+app.slice(app.indexOf('function renderMarkers()'),app.indexOf('\n// Mizzed branches'));
 
 function harness(places){
  let constructed=0,added=0,removed=0,draws=0;

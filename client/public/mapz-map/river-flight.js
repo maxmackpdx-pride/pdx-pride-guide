@@ -1124,7 +1124,10 @@ function onVisibilityChange(){
   map.stop();
  }else scheduleFrame();
 }
-window.addEventListener('pagehide',()=>{
+window.addEventListener('pagehide',event=>{
+ // BFCache freezes the complete scene. Keep its objects alive for Back/Forward.
+ if(event.persisted){map.stop();return;}
+ if(disposed)return;
  disposed=true;map.off('render',renderSceneOverlays);clearTimeout(countdownFrameTimer);clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);mapActivity.dispose();featureProjection.dispose();
  cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);
  exploration.dispose();
@@ -1140,8 +1143,8 @@ window.addEventListener('pagehide',()=>{
  if(map.getLayer(groundLightPools.id))map.removeLayer(groundLightPools.id);
  if(map.getLayer(portlandLandmarks.id))map.removeLayer(portlandLandmarks.id);
  map.remove();venueLogos.clear();logoLoads.clear();lightSprites.clear();lightFeatures=[];userLocation=null;userAvatarImage=null;nearbyLights=()=>[];lights.width=lights.height=1;
-},{once:true});
-window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
+});
+window.addEventListener('pageshow',event=>{if(event.persisted){map.resize();onVisibilityChange();scheduleFrame();}});
 
 // Interactive adapter: isolated from the original studio and homepage.
 function tell(type,payload={}){if(parent!==window)parent.postMessage({source:'mapz-demo',type,...payload},location.origin);}
@@ -1225,5 +1228,5 @@ map.on('webglcontextlost',()=>startup.fatal('The 3D graphics context was lost.')
 map.on('load',()=>{
  pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));
  if(parent===window){map.jumpTo(STANDALONE_DEMO_VIEW);void setListings(standaloneDemoRows());}
- viewState();tell('ready');
+ viewState();startup.ready();
 });

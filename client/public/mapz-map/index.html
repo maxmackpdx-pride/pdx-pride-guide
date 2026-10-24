@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mapz · Interactive map</title>
 <script>
 (function(){
- var failed=false,currentPhase='document',visible=false;
+ var failed=false,currentPhase='document',visible=false,interactive=false;
  if(parent!==window)document.documentElement.dataset.embedded='1';
  function tell(type,payload){if(parent!==window)parent.postMessage(Object.assign({source:'mapz-demo',type:type},payload||{}),location.origin);}
  // Placement dialogs own Escape even while the map is still loading.
@@ -15,7 +15,7 @@
   document.documentElement.dataset.mapPhase=value;
   tell('phase',{phase:value});
  }
- function replay(){tell('phase',{phase:currentPhase});if(visible)tell('first-frame');}
+ function replay(){tell('phase',{phase:currentPhase});if(visible)tell('first-frame');if(interactive)tell('ready');}
  window.addEventListener('message',function(event){
   if(event.origin!==location.origin||event.source!==parent||event.data?.source!=='mapz-host')return;
   if(event.data.type==='hello')replay();
@@ -30,7 +30,7 @@
   if(status)status.hidden=true;
   tell('fatal',{message:detail});
  }
- window.__mapzStartup={phase:phase,fatal:fatal};phase('document');
+ window.__mapzStartup={phase:phase,fatal:fatal,ready:function(){interactive=true;tell('ready');}};phase('document');
  window.addEventListener('error',function(event){
   if(visible)return;
   if(event instanceof ErrorEvent)fatal(event.message||'3D script error');

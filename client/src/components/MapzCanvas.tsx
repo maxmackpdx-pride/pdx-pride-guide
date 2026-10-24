@@ -13,8 +13,8 @@ const MAX_3D_ATTEMPTS=3;
 
 const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onCluster,onBoardPins,onMode,onView,onEscape},ref){
  const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onCluster,onBoardPins,onMode,onView,onEscape});latest.current={onFailure,onVisible,onSelect,onCluster,onBoardPins,onMode,onView,onEscape};
- const failed=useRef(false),restoreView=useRef(initialView),sentSelection=useRef<{key:string|null}|null>(null);
- const [phase,setPhase]=useState('loading'),[firstFrame,setFirstFrame]=useState(false),[ready,setReady]=useState(false);
+ const failed=useRef(false),restoreView=useRef(initialView),interactive=useRef(false),sentSelection=useRef<{key:string|null}|null>(null);
+ const [phase,setPhase]=useState('loading'),[firstFrame,setFirstFrame]=useState(false),[ready,setReady]=useState(0);
  const post=(type:string,data:Record<string,unknown>={})=>frame.current?.contentWindow?.postMessage({source:'mapz-host',type,...data},window.location.origin);
  useImperativeHandle(ref,()=>({send:post}),[]);
  const fail=useCallback((reason:string)=>{
@@ -39,9 +39,9 @@ const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,row
   if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='mapz-demo')return;
   if(event.data.type==='phase'&&typeof event.data.phase==='string')setPhase(event.data.phase);
   if(event.data.type==='first-frame'){failed.current=false;setFirstFrame(true);latest.current.onVisible();}
-  if(event.data.type==='ready')setReady(true);
+  if(event.data.type==='ready'){interactive.current=true;setReady(value=>value+1);}
   if(event.data.type==='escape')latest.current.onEscape?.();
-  if(event.data.type==='view')latest.current.onView(event.data);
+  if(event.data.type==='view'){if(interactive.current)restoreView.current=event.data;latest.current.onView(event.data);}
   if(event.data.type==='fatal'){
    const detail=typeof event.data.message==='string'?event.data.message.slice(0,300):'Unknown graphics error.';
    fail(`3D error: ${detail}`);
@@ -66,13 +66,13 @@ const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,row
  useEffect(()=>{
   const node=frame.current;
   if(!node)return;
-  const hello=()=>post('hello');
+  const hello=()=>{failed.current=false;interactive.current=false;sentSelection.current=null;setReady(0);setFirstFrame(false);setPhase('loading');post('hello');};
   node.addEventListener('load',hello);
   if(node.contentDocument?.readyState==='complete')hello();
   return()=>node.removeEventListener('load',hello);
  },[attempt]);
  const cameraParams=useMemo(()=>initialView?new URLSearchParams({lat:String(initialView.center[0]),lng:String(initialView.center[1]),zoom:String(initialView.zoom),pitch:String(initialView.pitch??48),bearing:String(initialView.bearing??0)}).toString():"",[]);
- return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}&${cameraParams}${onEscape?"&escape=host":""}`} title="Zaylist interactive Portland metro map" className="mapz-demo-canvas" onLoad={()=>post('hello')}/>;
+ return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}&${cameraParams}${onEscape?"&escape=host":""}`} title="Zaylist interactive Portland metro map" className="mapz-demo-canvas"/>;
 });
 
 export default forwardRef<MapzHandle,CanvasProps>(function MapzCanvas(props,ref){
@@ -80,6 +80,12 @@ export default forwardRef<MapzHandle,CanvasProps>(function MapzCanvas(props,ref)
  const attempts=useRef(0),visible=useRef(false),pendingRecovery=useRef<string|null>(null);
  const active=props.active!==false;
  const [generation,setGeneration]=useState(0),[bootError,setBootError]=useState(''),[stopped,setStopped]=useState(false),[shown,setShown]=useState(false);
+ // Bound consecutive failures, without exhausting recovery after a healthy visit.
+ useEffect(()=>{
+  if(!shown||stopped)return;
+  const timer=window.setTimeout(()=>{attempts.current=0;},30000);
+  return()=>window.clearTimeout(timer);
+ },[shown,stopped,generation]);
  const reportView=(view:MapView)=>{lastView.current=view;props.onView(view);};
  const retry=()=>{attempts.current=0;visible.current=false;setStopped(false);setShown(false);setBootError('');setGeneration(value=>value+1);};
  const recover=(reason:string)=>{
