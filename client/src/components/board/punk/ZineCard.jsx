@@ -189,6 +189,7 @@ export function ZineSmallCard({r,save,calm=false,Photo}){
     <div className="zt-face">
       <Texture r={r} id={`${key}:small`} paste={paste} photos={photos} calm={calm} Photo={Photo}/>
       {r.category==='housing'&&<HouzTicket r={r} small/>}
+      {OUTZ_HERO[r.category]&&r.detail&&<span className="zine-area" title={r.detail}>{r.detail.toUpperCase()}</span>}
       <Headline text={r.title} className="zine-title"/>
       <span className="zine-tape">{SHORT_TYPE[r.intent]||r.kicker}</span>
       <Heart save={save}/>

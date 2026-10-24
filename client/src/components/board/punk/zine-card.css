@@ -191,3 +191,4 @@ body:has(.board-detail-backdrop) .boardz-punk-scope:not(.boardz-punk-scope--open
 .boardz-punk-scope .zine[data-motif=trail] .zine-hero{width:170px;right:-14px;top:84px;bottom:auto;rotate:6deg}
 .boardz-punk-scope .zine[data-motif=ride] .zine-hero{width:250px;right:-34px;top:64px;bottom:auto;rotate:-4deg}
 .boardz-punk-scope .zine.zv-b[data-motif=trail] .zine-hero,.boardz-punk-scope .zine.zv-b[data-motif=ride] .zine-hero{rotate:-5deg}
+.boardz-punk-scope .zine--small.zc-tripbuddy .zine-area,.boardz-punk-scope .zine--small.zc-carpool .zine-area{top:auto;bottom:40px;left:8px;right:auto;max-width:112px;padding:3px 6px;font-size:9px;border-radius:7px;box-shadow:2px 2px 0 var(--ink-950)}
