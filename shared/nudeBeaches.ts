@@ -209,11 +209,14 @@ export function calendarDayInTimeZone(isoOrDate: string | Date, timeZone = BEACH
 }
 
 export function formatWindStat(wind?: string | null): { value: string; label: string } {
-  if (!wind?.trim()) return { value: "-", label: "Wind" };
-  const mphMatch = wind.match(/(\d+(?:\s*to\s*\d+)?)\s*mph/i);
-  const dir = wind.trim().split(/\s+/)[0] ?? "-";
-  if (mphMatch) return { value: `${dir} ${mphMatch[1]}`, label: "Wind · mph" };
-  return { value: wind.trim(), label: "Wind" };
+  const trimmed = wind?.trim() ?? "";
+  if (!trimmed) return { value: "-", label: "Wind" };
+  const mphMatch = trimmed.match(/(\d+(?:\s*to\s*\d+)?)\s*mph/i);
+  if (!mphMatch || mphMatch.index == null) return { value: trimmed, label: "Wind" };
+  const speed = mphMatch[1];
+  const before = trimmed.slice(0, mphMatch.index).trim();
+  const dir = before && !/^\d/.test(before) ? before.split(/\s+/)[0] : "";
+  return { value: dir ? `${dir} ${speed}` : speed, label: "Wind · mph" };
 }
 
 export function depthEstimateFromGage(gageFt: number): string {

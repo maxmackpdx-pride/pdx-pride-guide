@@ -66,9 +66,28 @@ export function BrowseFilters({ title, active = false, children }: { title: stri
       event.preventDefault();
       setOpen(false);
     };
+    const fit = () => {
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+      if (!window.matchMedia("(max-width: 700px)").matches) {
+        panel.style.maxHeight = "";
+        return;
+      }
+      const dock = document.querySelector(".site-hub-mobile-bar");
+      const dockTop = dock?.getBoundingClientRect().top ?? window.innerHeight;
+      const available = Math.floor(dockTop - panel.getBoundingClientRect().top - 12);
+      panel.style.maxHeight = available > 96 ? `${available}px` : "";
+    };
+    fit();
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+    window.addEventListener("resize", fit);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", fit);
+      const panel = document.getElementById(panelId);
+      if (panel) panel.style.maxHeight = "";
+    };
+  }, [open, panelId]);
   return <>
     <button type="button" className="eb-tool eb-mobile-filter-toggle" aria-expanded={open} aria-controls={panelId} aria-label={title} data-active={active} onClick={() => setOpen(value => !value)}>
       <SlidersHorizontal size={19} aria-hidden="true" />

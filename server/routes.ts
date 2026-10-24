@@ -2815,7 +2815,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const liveEvents = storage.getEvents({ status: "LIVE" });
     // Upcoming Pride nights + past (LIVE past + Tucker archive for Sanctuary/Eagle)
     const withEvents = await attachEventsToBusinessesAsync(businesses, liveEvents);
-    const withPromoters = attachPromotersToBusinesses(withEvents, id => storage.getPromotersForBusiness(id));
+    const promoterMap = storage.getPromotersForBusinesses(businesses, liveEvents);
+    const withPromoters = attachPromotersToBusinesses(withEvents, id => promoterMap.get(id) ?? []);
     const missedConnections = storage.getMissedConnections("ACTIVE");
     const gigs = storage.getGigPosts("LIVE");
     const withTabs = attachSpottedAndGigsToBusinesses(withPromoters, missedConnections, gigs);
@@ -2826,6 +2827,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       ? new Set(storage.getUserLinkedBusinesses(req.session.userId).map(b => b.id))
       : null;
     const userId = req.session?.userId;
+    const followerCounts = storage.getBusinessFollowerCounts();
+    const followedIds = userId != null ? storage.getFollowedBusinessIds(userId) : null;
     res.json(withTabs.map(biz => {
       const isOwner = userId != null && biz.ownerId === userId;
       return {
@@ -2834,8 +2837,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
         locations: resolveBusinessLocations(biz),
         isOwner,
         canEditVenue: isOwner || (linkedIds?.has(biz.id) ?? false),
-        isFollowing: userId != null ? storage.isFollowingBusiness(userId, biz.id) : false,
-        followerCount: storage.getBusinessFollowerCount(biz.id),
+        isFollowing: followedIds?.has(biz.id) ?? false,
+        followerCount: followerCounts.get(biz.id) ?? 0,
       };
     }));
     } catch (error) { next(error); }

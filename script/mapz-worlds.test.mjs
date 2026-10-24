@@ -36,6 +36,7 @@ test('world filters are independent and preserve owner, saved, and cluster selec
   assert.deepEqual(filterWorldRows(rows,'sellz',new URLSearchParams('sellz.view=mine')).map(r=>r.id),[1]);
   assert.deepEqual(filterWorldRows(rows,'sellz',new URLSearchParams('sellz.ids=2,3')).map(r=>r.id),[2,3]);
   assert.equal(filterWorldRows([{id:8,postType:'GIFT',pickupPreference:'Open grab'}],'giftz',new URLSearchParams('giftz.type=GRAB')).length,1);
+  assert.deepEqual(filterWorldRows([{id:4,name:'Badlands'},{id:5,name:'Crush'}],'places',new URLSearchParams('places.q=badl')).map(r=>r.id),[4]);
 });
 test('viewport containment and shared camera state handle invalid values',()=>{
   assert.equal(inMapBounds({lat:45.52,lng:-122.67},{south:45.51,north:45.53,west:-122.68,east:-122.66}),true);

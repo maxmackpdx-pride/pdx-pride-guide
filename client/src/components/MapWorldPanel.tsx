@@ -31,6 +31,9 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
   return <section className="mapz-layer-panel" aria-label={`${name} in this map`}>
     <div className="mapz-layer-panel__heading"><small>In this view</small><h2>{name}</h2></div>
     {(world === "gigz" || world === "giftz" || world === "sellz" || world === "mizzed") && <BoardFollowButton board={world} />}
+    {world === "places" && <BrowseToolbar label="Search Placez" className="mapz-world-filters">
+      <label>Search Placez<input type="search" value={get("q")} onChange={e=>set("q",e.target.value)} placeholder="Search Placez" /></label>
+    </BrowseToolbar>}
     {world !== "places" && <>
     <button type="button" className="mapz-houz-post" onClick={onCreate}><Plus size={16} aria-hidden="true"/> {`Post to ${name}`}</button>
     <BrowseToolbar label={`Search and filter ${name}`} className="mapz-world-filters">
