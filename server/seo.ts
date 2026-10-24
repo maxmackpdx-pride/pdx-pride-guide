@@ -11,6 +11,7 @@ import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import type { Event } from "@shared/schema";
 import { resolveDirectoryLogo } from "@shared/directoryLogos";
 import { defaultShareCardUrl, shareCardDimensions, shareCardKeyForPath, shareCardUrl } from "@shared/shareCards";
+import { eventsIndexInlineCatalog } from "./eventsIndexCatalog";
 
 const SITE_URL = (process.env.SITE_URL || "https://www.zaylist.com").replace(/\/$/, "");
 
@@ -615,12 +616,15 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
           : pathKey === "/needz" ? absoluteAssetUrl("/og/zaylist-needz-v1.png") : pathKey === "/boardz" ? absoluteAssetUrl("/og/zaylist-our-boardz-v1.png") : defaultShareCardUrl();
   const pageImageIsCard = !!(liveEvent || livePlace || liveProfile || boardShareKey);
 
-  // Home used to inline the whole LIVE catalog (~500 events) as JSON-LD + a
-  // hidden HTML feed. That made `/` a 700KB+ document and the app looked
-  // like it never loaded. Keep the full catalog on /events, sitemap, llms.txt.
+  // Home used to inline the whole LIVE catalog as JSON-LD plus a hidden HTML
+  // feed. That made `/` a 700KB+ document and the app looked like it never
+  // loaded. /events later grew past 1.5MB the same way and phones killed the
+  // tab while scrolling. The index inlines a short sample. The full catalog
+  // stays on /api/events, /llms.txt, and the sitemap. A single event page
+  // still inlines that event.
   const catalogEvents =
     pathKey === "/events"
-      ? events
+      ? eventsIndexInlineCatalog(events)
       : liveEvent
         ? events.filter(event => event.id === liveEvent.id)
         : events.slice(0, 12);
