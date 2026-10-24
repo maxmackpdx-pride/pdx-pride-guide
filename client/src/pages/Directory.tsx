@@ -45,6 +45,7 @@ import {
   pushDirectoryRecent,
 } from "@/lib/directoryRecent";
 import PlaceModal from "@/components/PlaceModal";
+import PlacezOutzideSection from "@/components/directory/PlacezOutzideSection";
 import { LoadMore, useProgressiveList } from "@/hooks/useProgressiveList";
 import "./Directory.css";
 
@@ -551,6 +552,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                     {places.slice(0, 16).map(biz => renderBrowsePlace(biz))}
                   </BrowseLane> : null;
                 })}</div> : <><div className="eb-grid">{filtered.slice(0, placeList.limit).map(biz => renderBrowsePlace(biz))}</div><LoadMore hasMore={placeList.hasMore} remaining={placeList.remaining} onLoad={placeList.loadMore} label="Show more places" /></>}
+            {!isSpaces && activeType === "ALL" && !isLoading && <PlacezOutzideSection query={searchQuery} onRequireAuth={() => setShowAuth(true)} quiet={Boolean(calmMode || reducedMotion)} />}
             </section>
           </div>
           <footer className="eb-footer"><h2>Not seeing your place?</h2><button type="button" className="eb-tool pdx-glass-rebind" onClick={openAddForm}><Plus size={18} />Add a place</button></footer>
