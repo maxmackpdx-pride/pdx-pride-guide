@@ -1,0 +1,33 @@
+/* Outzide cards in the Cinema Xerox look: wide drawer cards and the open card. Loaded last. */
+
+/* ---- Drawer wide card ---- */
+.outzide-shell #results .place-card.has-photo{border:2px solid var(--outz-orange,var(--neon-orange));border-radius:17px;background:var(--z-black)}
+.outzide-shell #results .place-card.has-photo .card-waypoint{position:absolute;z-index:4;top:12px;left:12px;display:grid;place-items:center;width:44px;height:44px;border:1.5px solid currentColor;border-radius:12px;background:color-mix(in srgb,var(--z-black) 78%,transparent)}
+.outzide-shell #results .place-card.has-photo .card-waypoint svg{width:24px;height:24px}
+.outzide-shell #results .place-card.has-photo>.place-copy{left:16px;right:70px;bottom:14px;gap:6px}
+.outzide-shell #results .place-card.has-photo .kind-label{padding:0;background:none;color:var(--outz-orange,var(--neon-orange));font:700 14px/1.2 var(--display);letter-spacing:.12em}
+.outzide-shell #results .place-card.has-photo .place-copy strong{padding:0;background:none;color:var(--text-hi);box-shadow:none;rotate:0deg;font:800 clamp(22px,5.4vw,34px)/1.05 var(--display);letter-spacing:.14em;text-transform:uppercase;text-shadow:0 2px 0 var(--z-black),0 0 14px var(--z-black)}
+.outzide-shell #results .place-card.has-photo .place-copy small{display:flex;align-items:center;gap:6px;color:var(--text-hi);font:600 14px/1.3 var(--body)}
+.outzide-shell #results .place-card.has-photo>.place-arrow{display:grid;place-items:center;right:12px;bottom:12px;width:48px;height:48px;border:1.5px solid var(--outz-orange,var(--neon-orange));border-radius:12px;background:color-mix(in srgb,var(--z-black) 70%,transparent);color:var(--outz-orange,var(--neon-orange))}
+
+/* ---- Open card: one scroll for hero, tabs and body; actions stay pinned ---- */
+#detail{border:2px solid var(--outz-orange,var(--neon-orange))!important;background:var(--z-black)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-radius:18px;overflow:hidden}
+#detail #detail-content{display:block!important;height:100%;max-height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+#detail .detail-hero{flex:none;background:none!important}
+#detail .detail-body{overflow:visible!important;flex:none!important;min-height:0}
+#detail .detail-tabs{position:sticky;top:0;z-index:6;background:var(--z-black)!important;border-bottom:1px solid color-mix(in srgb,var(--outz-orange) 40%,transparent)}
+#detail .detail-footer{position:sticky;bottom:0;z-index:7;background:var(--z-black)!important;border-top:1px solid color-mix(in srgb,var(--outz-orange) 40%,transparent)}
+#detail .detail-hero>.destination-photo{height:clamp(190px,34dvh,300px)!important}
+#detail .detail-hero>.destination-photo::after{content:"";position:absolute;inset:auto 0 0;height:55%;z-index:3;pointer-events:none;background:linear-gradient(180deg,transparent,var(--z-black))}
+#detail .detail-hero .eyebrow{color:var(--outz-orange,var(--neon-orange))!important;font:700 15px/1.2 var(--display)!important;letter-spacing:.2em;text-transform:uppercase}
+#detail .detail-hero h2{color:var(--text-hi);font:800 clamp(26px,6vw,40px)/1.05 var(--display)!important;letter-spacing:.14em;text-transform:uppercase}
+#detail .detail-hero .region{color:var(--text-hi);font:600 16px/1.3 var(--body)}
+#detail .detail-footer>.directions-choice>summary{background:var(--outz-orange,var(--neon-orange))!important;color:var(--z-black)!important;border-color:var(--outz-orange,var(--neon-orange))!important;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+/* Follow is the heart: it follows the destination and saves it to the member's collection. */
+#detail .detail-footer>[data-action=follow-destination]{order:9;margin-left:auto;position:relative;width:48px;min-width:48px;height:48px;padding:0!important;font-size:0!important;color:var(--outz-orange,var(--neon-orange))!important;border:1.5px solid var(--outz-orange,var(--neon-orange))!important;border-radius:12px;background:var(--z-black)!important;flex:none!important}
+#detail .detail-footer>[data-action=follow-destination]::before{content:"";position:absolute;inset:0;margin:auto;width:24px;height:24px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z'/%3E%3C/svg%3E") center/contain no-repeat}
+#detail .detail-footer>[data-action=follow-destination][aria-pressed=true]{background:var(--outz-orange,var(--neon-orange))!important;color:var(--z-black)!important}
+@media(prefers-reduced-motion:reduce){#detail #detail-content{scroll-behavior:auto}}
+#detail .detail-footer{padding:10px 14px!important;gap:6px 10px!important}
+#detail .detail-footer>a{min-height:30px!important;flex:1 1 100%!important;justify-content:center;font-size:13px!important}
+#detail .detail-footer>[data-action=view-mapz]{flex:1 1 auto;justify-content:center}
