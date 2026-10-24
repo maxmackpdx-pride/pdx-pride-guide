@@ -79,12 +79,24 @@ function Specimen({ id }: { id: string }) {
       );
     case "component:data-display/OutzBlendArt":
       return (
-        <div className="zay-specimen__row">
-          {(["bc-garibaldi", "rooster-rock"] as const).map(id => (
-            <div key={id} style={{ position: "relative", width: 540, aspectRatio: "1360 / 800", borderRadius: 17, overflow: "hidden", border: "2px solid var(--neon-orange)" }}>
-              <OutzBlendArt placeId={id} variant="wide" />
-            </div>
-          ))}
+        <div style={{ display: "grid", gap: 20 }}>
+          <div className="zay-specimen__row">
+            {(["bc-garibaldi", "rooster-rock"] as const).map(id => (
+              <div key={id} style={{ position: "relative", width: "min(540px, 100%)", aspectRatio: "1360 / 800", borderRadius: 17, overflow: "hidden", border: "2px solid var(--neon-orange)" }}>
+                <OutzBlendArt placeId={id} variant="wide" />
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 240px), 1fr))", gap: 14 }}>
+            {BLEND_GALLERY.map(([id, name]) => (
+              <figure key={id} style={{ margin: 0, display: "grid", gap: 6 }}>
+                <div style={{ position: "relative", aspectRatio: "4 / 5", borderRadius: 17, overflow: "hidden", border: "2px solid var(--neon-orange)" }}>
+                  <OutzBlendArt placeId={id} variant="tall" />
+                </div>
+                <figcaption style={{ font: "700 13px/1.2 var(--font-mono)", letterSpacing: ".08em", textTransform: "uppercase", color: "var(--text-hi)" }}>{name}</figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       );
     case "component:brand/Logo":
@@ -139,6 +151,14 @@ function Specimen({ id }: { id: string }) {
 function SpecimenFrame({ children }: { children: ReactNode }) {
   return <div className="zay-specimen__stage">{children}</div>;
 }
+
+const BLEND_GALLERY: Array<[string, string]> = [
+  ["bc-garibaldi", "Garibaldi Lake Trail"], ["silver-falls", "Silver Falls"], ["rooster-rock", "Rooster Rock"],
+  ["usfs-5435010324", "Trillium Lake"], ["dayuse-wa-palouse-falls-state-park-heritage-site", "Palouse Falls"], ["usfs-7682.004621", "Tumalo Falls"],
+  ["bc-brandywine", "Brandywine Falls"], ["hurricane-hill", "Hurricane Hill"], ["dayuse-or-latourell-falls-trailhead-guy-w-talbot", "Latourell Falls"],
+  ["usfs-5250.005571", "Proxy Falls"], ["usfs-6485821010602", "Tamolitch Falls"], ["dayuse-or-smith-rock-state-park", "Smith Rock"],
+  ["sol-duc-falls", "Sol Duc Falls"], ["cape-disappointment", "Cape Disappointment"], ["cape-lookout", "Cape Lookout"],
+];
 
 export default function DesignComponentSpecimen() {
   const id = new URLSearchParams(window.location.search).get("id");
