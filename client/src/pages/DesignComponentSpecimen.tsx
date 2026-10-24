@@ -6,6 +6,7 @@ import ActionRow from "@/components/promoter/ActionRow";
 import BoardzComponentSpecimen from "@/components/board/BoardzComponentSpecimen";
 import TodayLocationCard from "@/components/home/TodayLocationCard";
 import { AuthProvider } from "@/context/AuthContext";
+import OutzSmallCard from "@/components/home/OutzSmallCard";
 import PunkBoardCard from "@/components/board/punk/PunkBoardCard";
 import { outzWallToBoardPost } from "@/lib/outzBoardPost";
 import { OutzBlendArt } from "@/components/outz/OutzBlendArt";
@@ -63,6 +64,14 @@ function Specimen({ id }: { id: string }) {
         <AuthProvider><div className="zay-specimen__row">
           {[["bc-garibaldi", "Garibaldi Lake Trail", "Whistler & Sea-to-Sky · BC, Canada", "trail"], ["silver-falls", "Silver Falls State Park", "Campground · Trail of Ten Falls · Silverton, OR", "camp"], ["rooster-rock", "Rooster Rock", "Columbia River · Corbett, OR", "beach"]].map(([id, name, detail, kind]) => (
             <TodayLocationCard key={id} location={{ key: `outz:${id}`, name, room: "OutZide", detail, href: `/outzide?place=${id}`, kind }} />
+          ))}
+        </div></AuthProvider>
+      );
+    case "component:data-display/OutzSmallCard":
+      return (
+        <AuthProvider><div className="zay-specimen__row">
+          {[["bc-garibaldi", "Garibaldi Lake Trail", "trail"], ["silver-falls", "Silver Falls State Park", "camp"], ["rooster-rock", "Rooster Rock", "beach"]].map(([id, name, kind]) => (
+            <OutzSmallCard key={id} location={{ key: `outz:${id}`, name, room: "OutZide", detail: "", href: `/outzide?place=${id}`, kind }} />
           ))}
         </div></AuthProvider>
       );

@@ -546,3 +546,10 @@ html[data-zaylist-cards] .ab-card .ab-card__footer .ab-open svg { color:var(--te
  .ab-page .ab-card-motif__object--main { right:-28%; bottom:-80%; width:105%; height:210%; }
  .ab-page .ab-card-motif__object--support { left:10%; top:-100%; width:100%; height:230%; }
 }
+
+/* Bulletin board: cards of mixed size, scattered and a little crooked, as if pinned up by hand. */
+.ab-page .ab-card-grid--pinboard { display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-start; gap:30px 22px; padding:18px 8px 40px; }
+.ab-page .ab-card-grid--pinboard > .boardz-production-card { flex:none; width:auto; transition:rotate .25s ease,translate .25s ease; }
+.ab-page .ab-card-grid--pinboard > .boardz-production-card:hover { rotate:0deg; translate:0 -4px; z-index:2; }
+@media(max-width:767px) { .ab-page .ab-card-grid--pinboard { gap:22px 12px; padding-inline:0; } .ab-page .ab-card-grid--pinboard > .boardz-production-card { width:136px; } }
+@media(prefers-reduced-motion:reduce) { .ab-page .ab-card-grid--pinboard > .boardz-production-card { transition:none; } }

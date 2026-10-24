@@ -1,5 +1,6 @@
 import BoardArchiveList, { BoardArchiveFeedback } from "@/components/board/BoardArchiveList";
 import BoardBrowseCard from "@/components/board/BoardBrowseCard";
+import { pinboardPlacement } from "@/lib/pinboardPlacement";
 import { useBrowseControlsOffset } from "@/components/discovery/useBrowseControlsOffset";
 import BoardCategoryFollows from "@/components/board/BoardCategoryFollows";
 import { followRoomForCategory } from "@/lib/boardFollowChoices";
@@ -551,10 +552,10 @@ export default function Boards() {
                   />
                 )}
                 <button type="button" className="ab-phone-grid-toggle" aria-pressed={phoneWide} onClick={() => setPhoneWide(w => !w)}>{phoneWide ? "Two per row" : "One wide per row"}</button>
-                <div className={`ab-card-grid${phoneWide ? " ab-card-grid--wide" : ""}`}>
-                  {visibleResults.map(post => <BoardBrowseCard key={post.key} post={post} small={!phoneWide && phoneLayout} isSaved={saved.has(post.key)} showStatus={mineOnly}
+                <div className={`ab-card-grid${phoneWide ? " ab-card-grid--wide" : " ab-card-grid--pinboard"}`}>
+                  {visibleResults.map(post => { const pin = phoneWide ? null : pinboardPlacement(post.key, phoneLayout); return <BoardBrowseCard key={post.key} post={post} small={pin ? pin.small : false} style={pin?.style} isSaved={saved.has(post.key)} showStatus={mineOnly}
                     saveDisabled={saveMutation.isPending || (!saved.has(post.key) && !canSaveBoardPost(post)) || (!!user && savedQuery.isPending)}
-                    onOpen={target=>open(post.key,target)} onSave={()=>user?saveMutation.mutate({post,wasSaved:saved.has(post.key)}):setShowAuth(true)}/>)}
+                    onOpen={target=>open(post.key,target)} onSave={()=>user?saveMutation.mutate({post,wasSaved:saved.has(post.key)}):setShowAuth(true)}/>; })}
                 </div>
                 {!loading &&
                   !(savedOnly && savedQuery.isPending) &&
