@@ -210,6 +210,7 @@ import {
   upsertOutzPlaceRating,
   upsertOutzCheckin,
   getOutzChatRoomsForUser,
+  getOutzBoardPosts,
 } from "./outzSocial";
 import { isProfileAccentColor, isProfileBanner, normalizeProfileAccentColor } from "@shared/profileTheme";
 import {
@@ -2272,6 +2273,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
       res.status(502).json({ error: "Could not load destination wall" });
     }
   });
+
+  // Outzide board: Trip Buddy and Carpool posts only, with the place name resolved from the catalog.
+  const outzBoardPayload = (userId: number | undefined, mineOnly: boolean) => getOutzBoardPosts(userId, mineOnly)
+    .map(row => ({ ...row, placeName: outzMapCatalog.find(place => place.id === row.placeId)?.name ?? (row.placeId === "__openplans" ? "Open plans" : "Outzide") }));
+  app.get("/api/outz/board", (req: any, res) => res.json(outzBoardPayload(req.session?.userId, false)));
+  app.get("/api/outz/board/mine", requireAuth, (req, res) => res.json(outzBoardPayload(req.session.userId!, true)));
 
   app.post("/api/outz/wall", requireAuth, async (req, res) => {
     try {

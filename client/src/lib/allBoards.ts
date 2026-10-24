@@ -6,8 +6,9 @@ import type { GiftingPost } from "@/components/board/GiftListingCard";
 import type { SellzPost } from "@/components/board/SellzListingCard";
 import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import { ROOMS } from "./rooms";
+import { outzBoardRowToPost, type OutzBoardPost } from "./outzBoardPost";
 
-export type BoardCategory = "housing" | "gigz" | "giftz" | "sellz" | "mizzed";
+export type BoardCategory = "housing" | "gigz" | "giftz" | "sellz" | "mizzed" | "outz";
 export type BoardIntent =
   | "offering"
   | "looking"
@@ -19,7 +20,9 @@ export type BoardIntent =
   | "iso"
   | "selling"
   | "connection"
-  | "grab";
+  | "grab"
+  | "buddy"
+  | "ride";
 export const boardCategories = [
   {
     id: "mizzed",
@@ -76,6 +79,17 @@ export const boardCategories = [
     description: "Good work. Good people.",
     prompt: "Find your next gig or the person who can make it happen.",
   },
+  {
+    id: "outz",
+    label: "OutZide",
+    logo: "outzide.png",
+    color: ROOMS.outz.accent,
+    motif: "outz",
+    endpoint: "/api/outz/board",
+    route: ROOMS.outz.route,
+    description: "Find your people outside.",
+    prompt: "Look for a trip buddy or share a ride to the trailhead.",
+  },
 ] satisfies {
   id: BoardCategory;
   label: string;
@@ -99,6 +113,8 @@ export const intentLabels: Record<BoardIntent, string> = {
   selling: "For sale",
   connection: "Looking for you",
   grab: "Open grab",
+  buddy: "Trip buddy",
+  ride: "Carpool",
 };
 export type BoardPost = {
   photos?: string[];
@@ -135,7 +151,8 @@ export type BoardPayload =
   | GigPost[]
   | GiftingPost[]
   | SellzPost[]
-  | MissedConnectionPost[];
+  | MissedConnectionPost[]
+  | OutzBoardPost[];
 const join = (...parts: (string | null | undefined)[]) =>
   parts.filter(Boolean).join(" · ");
 const base = (
@@ -254,6 +271,8 @@ export function toBoardPosts(
           photo: p.photoUrls[0],
           photos: p.photoUrls,
         }));
+    case "outz":
+      return (payload as OutzBoardPost[]).map((p) => outzBoardRowToPost(base(category, p), p));
     case "mizzed":
       return (payload as MissedConnectionPost[])
         .filter((p) => includeInactive || p.status === "ACTIVE")
@@ -272,7 +291,7 @@ export function toBoardPosts(
 export function parseBoardPostKey(
   value: string | null,
 ): { category: BoardCategory; id: number } | null {
-  const match = value?.match(/^(housing|gigz|giftz|sellz|mizzed):([1-9]\d*)$/);
+  const match = value?.match(/^(housing|gigz|giftz|sellz|mizzed|outz):([1-9]\d*)$/);
   return match && Number.isSafeInteger(Number(match[2]))
     ? { category: match[1] as BoardCategory, id: Number(match[2]) }
     : null;

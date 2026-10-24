@@ -2,7 +2,9 @@ import {intentLabels,type BoardPost} from '@/lib/allBoards';
 import {boardPaperChoice} from '@shared/boardCardPresentation';
 
 /** One adapter for form previews, browse faces and open-card heroes. Never supplies demo people or photos. */
-export function toPunkPost(post:BoardPost&{kicker?:string;logo?:string}){
+export function toPunkPost(input:BoardPost&{kicker?:string;logo?:string}){
+ // Outzide board posts are drawn as the orange Trip Buddy or Carpool card.
+ const post=input.category==='outz'?{...input,category:(input.intent==='ride'?'carpool':'tripbuddy') as never,logo:'outzide.png'}:input;
  const housing=post.housing;
  const household=housing?.household.filter(p=>p.kind!=='PET')||[];
  const author=housing?.author;

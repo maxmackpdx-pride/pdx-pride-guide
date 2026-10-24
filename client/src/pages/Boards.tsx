@@ -324,6 +324,9 @@ export default function Boards() {
     requestAnimationFrame(() => lastOpener.current?.focus());
   };
   const open = (key: string, opener?: HTMLButtonElement) => {
+    // Outzide posts belong to a place: open that place's card on the Outzide map.
+    const outzPost = key.startsWith("outz:") ? allPosts.find(p => p.key === key) : undefined;
+    if (outzPost) { navigate(`/outzide?place=${encodeURIComponent(outzPost.source || "")}&tab=community`); return; }
     lastOpener.current = opener || lastOpener.current;
     locallyOpened.current = true;
     update({ post: key,compose:null,build:null,join:null,waitlist:null,chat:null }, !!validPost);
@@ -335,6 +338,7 @@ export default function Boards() {
       return;
     }
     if (selection === "giftz" && postingStatus.data?.postingOpen !== true) {toast({title:postingStatus.data?.message || "Checking Giftz posting availability"});return;}
+    if (selection === "outz") { navigate("/outzide"); return; }
     if (selection && selection !== "all") setCompose(selection);
   };
   const posted = (id: number) => {

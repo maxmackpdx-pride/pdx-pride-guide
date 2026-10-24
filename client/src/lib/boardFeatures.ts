@@ -9,7 +9,7 @@ export function boardFeaturePosts(category: BoardCategory, payload: BoardPayload
    isMine: Boolean(p.isMine || (userId && (p.userId === userId || p.author?.userId === userId))),
    itemCategory: typeof p.category === "string" ? p.category : undefined, condition: p.condition,
    priceCents: p.priceCents, isRemote: Boolean(p.isRemote),
-   source: p.eventId ? "events" : p.placeId ? "placez" : p.beachId ? "outzide" : "spot"};
+   source: category === "outz" ? post.source : p.eventId ? "events" : p.placeId ? "placez" : p.beachId ? "outzide" : "spot"};
  }).filter(post => !mine || post.isMine);
 }
 
@@ -26,7 +26,7 @@ export function filterBoardFeatures(posts: BoardPost[], filters: {itemCategory?:
 
 export function canSaveBoardPost(post: BoardPost): boolean {
  if(post.isDemo)return false;
- const visible: Record<BoardCategory,string[]> = {housing:["ACTIVE","FILLED"],gigz:["LIVE"],giftz:["OPEN","THREE_INTERESTED","POSTER_CHOOSING","PICKUP_PENDING","REOPENED","LOOKING","OFFER_PENDING"],sellz:["ACTIVE","RESERVED"],mizzed:["ACTIVE"]};
+ const visible: Record<BoardCategory,string[]> = {housing:["ACTIVE","FILLED"],gigz:["LIVE"],giftz:["OPEN","THREE_INTERESTED","POSTER_CHOOSING","PICKUP_PENDING","REOPENED","LOOKING","OFFER_PENDING"],sellz:["ACTIVE","RESERVED"],mizzed:["ACTIVE"],outz:[]};
  return visible[post.category].includes(post.status || "");
 }
 
@@ -44,7 +44,7 @@ export function readBoardFeatureFilters(params: URLSearchParams, selection: Boar
   tags:selection==="housing"?[...new Set(read("tags").split(",").map(tag=>tag.trim()).filter(Boolean))]:[]};
 }
 export function boardIntentForSelection(raw:string|null, selection:BoardCategory|"all"):BoardIntent|"all" {
- const intents:Record<BoardCategory,BoardIntent[]>={housing:["offering","looking","forming","managed"],gigz:["hiring","available"],giftz:["giving","iso","grab"],sellz:["selling"],mizzed:["connection"]};
+ const intents:Record<BoardCategory,BoardIntent[]>={housing:["offering","looking","forming","managed"],gigz:["hiring","available"],giftz:["giving","iso","grab"],sellz:["selling"],mizzed:["connection"],outz:["buddy","ride"]};
  const allowed=selection==="all"?Object.values(intents).flat():intents[selection];
  return allowed.includes(raw as BoardIntent)?raw as BoardIntent:"all";
 }

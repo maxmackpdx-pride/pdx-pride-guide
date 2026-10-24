@@ -314,6 +314,25 @@ export function getOutzWallPosts(placeId: string, viewerUserId?: number) {
   return visiblePosts.map(post => ({ ...post, isMine: post.userId === viewerUserId, comments: commentsByPost.get(Number(post.id)) ?? [] }));
 }
 
+/** The Outzide board: only Trip Buddy and Carpool wall posts, across every place. */
+export const OUTZ_BOARD_KINDS = ["HIKE_BUDDY", "CAMP_BUDDY", "LOOKING_FOR_COMPANY", "CARPOOL", "CARPOOL_OFFER", "CARPOOL_REQUEST"];
+export function getOutzBoardPosts(viewerUserId?: number, mineOnly = false) {
+  const today = pacificTodayDate();
+  const rows = sqlite.prepare(`
+    SELECT p.id, p.place_id AS placeId, p.user_id AS userId, p.post_kind AS postKind, p.body,
+           p.trip_date AS tripDate, p.created_at AS createdAt, u.username, u.display_name AS displayName
+    FROM outz_wall_posts p JOIN users u ON u.id = p.user_id
+    WHERE p.post_kind IN (${OUTZ_BOARD_KINDS.map(() => "?").join(",")})
+      AND datetime(p.created_at) >= datetime('now', '-30 days')
+      AND (p.trip_date IS NULL OR p.trip_date >= ?)
+    ORDER BY p.created_at DESC LIMIT 120
+  `).all(...OUTZ_BOARD_KINDS, today) as any[];
+  return rows
+    .filter(row => viewerUserId == null || row.userId === viewerUserId || !storage.isMemberInteractionBlocked(viewerUserId, row.userId))
+    .filter(row => !mineOnly || row.userId === viewerUserId)
+    .map(row => ({ ...row, isMine: row.userId === viewerUserId }));
+}
+
 export function createOutzWallPost(input: { placeId: string; userId: number; postKind: string; body: string; tripDate: string | null }) {
   const result = sqlite.prepare(`
     INSERT INTO outz_wall_posts (place_id, user_id, post_kind, body, trip_date, created_at) VALUES (?, ?, ?, ?, ?, ?)
