@@ -4,7 +4,7 @@
 .tonight-card button { font: inherit; cursor: pointer; }
 .tonight-card__open { display: flex; flex-direction: column; flex: 1; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
 .tonight-card__art { position: relative; width: 100%; aspect-ratio: 4 / 5; flex: none; overflow: hidden; }
-.tonight-card__art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; mask-image: linear-gradient(to bottom, var(--z-black) 68%, transparent 100%); }
+.tonight-card__art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; mask-image: linear-gradient(to bottom, var(--z-black) 84%, color-mix(in srgb, var(--z-black) 22%, transparent) 95%, transparent 100%); }
 .tonight-card__body { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 16px; flex: 1; width: 100%; padding: 22px; box-sizing: border-box; }
 .tonight-card__body p { margin: 0; }
 .tonight-card__time { display: flex; align-items: center; gap: 8px; color: var(--text-hi); font: 600 12px/1.5 var(--font-mono, monospace); }
@@ -78,8 +78,8 @@
 .tonight-card__art > img:not(.today-location__brand) {
   object-fit:cover;
   object-position:top center;
-  mask-image:linear-gradient(to bottom,var(--z-oled) 75%,color-mix(in srgb,var(--z-oled) 22%,transparent) 90%,transparent 100%);
-  -webkit-mask-image:linear-gradient(to bottom,var(--z-oled) 75%,color-mix(in srgb,var(--z-oled) 22%,transparent) 90%,transparent 100%);
+  mask-image:linear-gradient(to bottom,var(--z-oled) 84%,color-mix(in srgb,var(--z-oled) 22%,transparent) 95%,transparent 100%);
+  -webkit-mask-image:linear-gradient(to bottom,var(--z-oled) 84%,color-mix(in srgb,var(--z-oled) 22%,transparent) 95%,transparent 100%);
 }
 .tonight-card__art + .tonight-card__body { margin-top:-31.25%; }
 .tonight-card__art + .tonight-card__body .rail-card-room__logo { filter:drop-shadow(0 2px 6px var(--z-oled)) drop-shadow(0 0 2px var(--z-oled)); }
