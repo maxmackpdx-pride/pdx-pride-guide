@@ -12,7 +12,7 @@ export function photoQuietStyle(quiet){
  return [['x',cx],['y',cy],['rx',rx],['ry',ry]].map(([key,value])=>'--quiet-'+key+':'+(value*100).toFixed(4)+'%').join(';');
 }
 // Places that have blended art (assets/blend-art.js). Their photo span is marked, then filled by enhanceBlend() after render.
-const BLEND_PLACES=new Set(['bc-garibaldi','silver-falls','rooster-rock']);
+const BLEND_PLACES=new Set(['bc-garibaldi','silver-falls','rooster-rock','usfs-6485821010602','usfs-5435010324','dayuse-or-smith-rock-state-park','dayuse-wa-palouse-falls-state-park-heritage-site','cape-disappointment','hurricane-hill','sol-duc-falls','usfs-5250.005571','usfs-7682.004621','dayuse-or-latourell-falls-trailhead-guy-w-talbot','cape-lookout','bc-brandywine']);
 export function photoMarkup(photo,className='',placeId=''){
  if(!photoUrl(photo?.src))return '';
  const srcset=photoSrcSet(photo.variants),overlaySrcset=photoSrcSet(photo.overlayVariants,true),quiet=photoQuietStyle(photo.quiet);
@@ -38,7 +38,7 @@ export function createPhotoMotion(scope=globalThis){
 
 // Blended art: the engine mounts into the marked photo span and the layered photo hides behind it. Falls back to the photo if it cannot load.
 const blendOff=new Set();let blendEngine;
-const loadBlend=()=>blendEngine??=import('./blend-art.js?v=20261023-blend');
+const loadBlend=()=>blendEngine??=import('./blend-art.js?v=20261024-hud');
 export function enhanceBlend(root=document){
  for(const entry of [...blendOff])if(!entry.el.isConnected){entry.off?.();blendOff.delete(entry);}
  root.querySelectorAll('.outz-photo[data-blend-place]:not([data-blend-ready])').forEach(el=>{

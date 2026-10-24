@@ -73,6 +73,8 @@ export function whenMapRendered(map) {
 }
 // Preserve loaded vector tiles and GPU state while adding the deferred surface.
 export function extendMapStyle(map,style) {
+ // Symbol layers need a glyph source; the flat first-paint style has none.
+ if(style.glyphs&&!map.getStyle()?.glyphs)map.setGlyphs(style.glyphs);
  for(const [id,source] of Object.entries(style.sources))if(!map.getSource(id))map.addSource(id,source);
  for(let index=style.layers.length-1;index>=0;index--){
   const layer=style.layers[index];

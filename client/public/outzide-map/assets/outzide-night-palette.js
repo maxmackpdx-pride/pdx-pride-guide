@@ -73,9 +73,19 @@ export function zaylistDotsImage() {
   ctx.beginPath(); ctx.arc(size / 2, size / 2, 1.15, 0, Math.PI * 2); ctx.fill();
   return {data: ctx.getImageData(0, 0, size, size), options: {pixelRatio: 2}};
 }
+// The label box behind peak names: dark with an orange border, like the lock-on label on the cards.
+export const ZAY_HUD_BOX = 'zay-hud-box';
+export function zaylistHudBoxImage() {
+  const size = 24, canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'rgba(5,10,8,.82)'; ctx.fillRect(0, 0, size, size);
+  ctx.strokeStyle = '#FF6600'; ctx.lineWidth = 2; ctx.strokeRect(1, 1, size - 2, size - 2);
+  return {data: ctx.getImageData(0, 0, size, size), options: {pixelRatio: 2, stretchX: [[6, 18]], stretchY: [[6, 18]], content: [6, 6, 18, 18]}};
+}
 export function addZaylistMapLook(style) {
   const at = style.layers.findIndex(entry => entry.id === 'park-areas') + 1 || style.layers.length;
-  const dotOpacity = ['interpolate', ['linear'], ['zoom'], 6, 0, 8, .05, 11, .09, 15, .07, 18, .03];
+  const dotOpacity = ['interpolate', ['linear'], ['zoom'], 7, 0, 9, .02, 11, .04, 15, .03, 18, .012];
   const dots = [];
   for (const sourceLayer of ['landcover', 'landuse']) dots.push({
     id: `zay-dots-${sourceLayer}`, type: 'fill', source: 'terrain', 'source-layer': sourceLayer,
@@ -93,6 +103,19 @@ export function addZaylistMapLook(style) {
       paint: {'line-color': '#FF6600', 'line-width': ['interpolate', ['linear'], ['zoom'], 9, 3, 14, 6], 'line-dasharray': [.25, 18],
         'line-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0, 11, .5, 16, .5, 18, .25]}},
   ];
+  // Elevation HUD: peak names with their height in metres, in the card label style.
+  const peaks = {
+    id: 'zay-peak-hud', type: 'symbol', source: 'terrain', 'source-layer': 'mountain_peak', minzoom: 8,
+    filter: ['all', ['has', 'name'], ['>=', ['to-number', ['get', 'ele'], 0], ['step', ['zoom'], 2400, 10, 1900, 11.5, 1300, 13, 0]]],
+    layout: {
+      'text-field': ['concat', ['upcase', ['coalesce', ['get', 'name:en'], ['get', 'name']]], '  ', ['number-format', ['to-number', ['get', 'ele'], 0], {}], ' M'],
+      'text-font': ['Noto Sans Regular'], 'text-size': ['interpolate', ['linear'], ['zoom'], 8, 9.5, 13, 12], 'text-letter-spacing': .06,
+      'text-anchor': 'top', 'text-offset': [0, .7], 'text-padding': 6, 'text-optional': true,
+      'icon-image': ZAY_HUD_BOX, 'icon-text-fit': 'both', 'icon-text-fit-padding': [3, 6, 3, 6], 'symbol-sort-key': ['-', 0, ['to-number', ['get', 'ele'], 0]],
+    },
+    paint: {'text-color': '#F4EFE6', 'icon-opacity': ['interpolate', ['linear'], ['zoom'], 8, .85, 14, .95]},
+  };
   style.layers.splice(at, 0, ...dots, ...boundary);
+  style.layers.push(peaks);
   return style;
 }

@@ -4,7 +4,7 @@ import {oneShotMapLocation} from '../map-foundation/location.js';
 import {hasActiveOutzFilters} from './assets/filter-state.js';
 import {createNativePins} from '../map-foundation/native-pins.js';
 import {setGeoJSON,addLayers} from '../map-foundation/layers.js';
-import {createMap,vectorFirstStyle,whenStyleReady,whenMapRendered,whenMapSettled,extendMapStyle,observeMapSize,markerFrame,createMapActivity} from '../map-foundation/lifecycle.js';
+import {createMap,vectorFirstStyle,whenStyleReady,whenMapRendered,whenMapSettled,extendMapStyle,observeMapSize,markerFrame,createMapActivity} from '../map-foundation/lifecycle.js?v=20261024-glyphs';
 import {motionPreference} from '../map-foundation/motion.js';
 import {directionsFor} from './assets/directions.js';
 import {uiIcon} from './assets/ui-icons.js';
@@ -24,7 +24,7 @@ import {FIRE_SOURCES,FIRE_COLORS,fetchFireState,containsPoint} from './assets/fi
 import {clusterWaypoints} from './assets/waypoint-clusters.js?v=activity-clusters-20260925';
 import {addI5Spectrum} from './assets/i5-spectrum.js?v=20261024-orange';
 import {mapzSurfaceStyle,createWaterBloom} from './assets/outzide-surface.js';
-import {brightenOutzideTerrain,addZaylistMapLook,zaylistDotsImage,ZAY_DOTS_IMAGE} from './assets/outzide-night-palette.js?v=20261024-alt';
+import {brightenOutzideTerrain,addZaylistMapLook,zaylistDotsImage,ZAY_DOTS_IMAGE,zaylistHudBoxImage,ZAY_HUD_BOX} from './assets/outzide-night-palette.js?v=20261024-peaks2';
 import {addSummitSweep,installSummitSweep} from './assets/summit-sweep.js?v=20261024-alt';
 import {createHologramMaterials,drawProjectionBeam,drawGroundRipples,groundDiskScale} from './assets/hologram-materials.js';
 const cardEmbed=new URLSearchParams(location.search).get('card')==='1';
@@ -262,7 +262,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&cardEmbed&&!$('#uti
 /* The dot screen image, and trails that march: the card route dash, a few frames a second, only when it can be seen. */
 const TRAIL_MARCH=[[0,4,3],[.5,4,2.5],[1,4,2],[1.5,4,1.5],[2,4,1],[2.5,4,.5],[3,4,0],[0,.5,3,3.5],[0,1,3,3],[0,1.5,3,2.5],[0,2,3,2],[0,2.5,3,1.5],[0,3,3,1],[0,3.5,3,.5]];
 function installZaylistLook(map){
- map.on('styleimagemissing',e=>{if(e.id===ZAY_DOTS_IMAGE&&!map.hasImage(ZAY_DOTS_IMAGE)){const image=zaylistDotsImage();map.addImage(e.id,image.data,image.options)}});
+ map.on('styleimagemissing',e=>{const make=e.id===ZAY_DOTS_IMAGE?zaylistDotsImage:e.id===ZAY_HUD_BOX?zaylistHudBoxImage:null;if(make&&!map.hasImage(e.id)){const image=make();map.addImage(e.id,image.data,image.options)}});
  const still=()=>matchMedia('(prefers-reduced-motion: reduce)').matches||document.documentElement.classList.contains('calm-mode')||document.documentElement.dataset.calm==='true';
  let step=0;
  setInterval(()=>{
