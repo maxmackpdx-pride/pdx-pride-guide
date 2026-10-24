@@ -14,7 +14,7 @@ import { isValidBeachId, pacificTodayDate } from "@shared/riverBrats";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 
 export type InboxGroupChatTarget = {
-  kind: "EVENT" | "BEACH";
+  kind: "EVENT" | "BEACH" | "OUTZ";
   id: number | string;
   title: string;
   state?: "BEFORE" | "OPEN" | "CLOSED";
@@ -69,7 +69,9 @@ export default function InboxGroupChat({ target, onBack }: Props) {
   const listRef = useRef<HTMLDivElement>(null);
   const isEvent = target.kind === "EVENT";
   const eventId = isEvent ? Number(target.id) : null;
-  const beachId = !isEvent && isValidBeachId(String(target.id)) ? (String(target.id) as NudeBeachTab) : null;
+  const isOutz = target.kind === "OUTZ";
+  const outzId = isOutz ? String(target.id) : null;
+  const beachId = !isEvent && !isOutz && isValidBeachId(String(target.id)) ? (String(target.id) as NudeBeachTab) : null;
   const beachDate = target.calendarDate || pacificTodayDate();
 
   const eventQuery = useQuery<EventChatPayload>({
@@ -87,12 +89,19 @@ export default function InboxGroupChat({ target, onBack }: Props) {
     enabled: Boolean(beachId),
   });
 
-  const data = isEvent ? eventQuery.data : beachQuery.data;
-  const isLoading = isEvent ? eventQuery.isLoading : beachQuery.isLoading;
+  const outzQuery = useQuery<BeachChatPayload>({
+    queryKey: ["/api/outz/chat", outzId],
+    queryFn: () => apiRequest("GET", `/api/outz/chat?place=${encodeURIComponent(outzId!)}`).then(r => r.json()),
+    refetchInterval: 8_000,
+    enabled: Boolean(outzId),
+  });
+
+  const data = isEvent ? eventQuery.data : isOutz ? outzQuery.data : beachQuery.data;
+  const isLoading = isEvent ? eventQuery.isLoading : isOutz ? outzQuery.isLoading : beachQuery.isLoading;
   const messages = data?.messages ?? [];
   const expiresAt = data?.expiresAt ?? target.closesAt ?? null;
   const opensAt =
-    (isEvent ? eventQuery.data?.opensAt : beachQuery.data?.opensAt) ?? target.opensAt ?? null;
+    (isEvent ? eventQuery.data?.opensAt : isOutz ? outzQuery.data?.opensAt : beachQuery.data?.opensAt) ?? target.opensAt ?? null;
   const chatOpen = Boolean(data?.chatOpen);
   const windowState: "BEFORE" | "OPEN" | "CLOSED" = (() => {
     if (isEvent) {
@@ -132,6 +141,9 @@ export default function InboxGroupChat({ target, onBack }: Props) {
       if (isEvent && eventId != null) {
         return apiRequest("POST", `/api/events/${eventId}/chat`, { body: text });
       }
+      if (isOutz) {
+        return apiRequest("POST", "/api/outz/chat", { placeId: outzId, date: beachDate, body: text });
+      }
       return apiRequest("POST", "/api/river-brats/checkins/chat", {
         beachId,
         date: beachDate,
@@ -142,6 +154,8 @@ export default function InboxGroupChat({ target, onBack }: Props) {
       setBody("");
       if (isEvent && eventId != null) {
         queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "chat"] });
+      } else if (outzId) {
+        queryClient.invalidateQueries({ queryKey: ["/api/outz/chat", outzId] });
       } else if (beachId) {
         queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins/chat", beachId, beachDate] });
       }
@@ -158,7 +172,7 @@ export default function InboxGroupChat({ target, onBack }: Props) {
             ? "Opens 48h before doors"
             : "Opens 48h before beach day"
       : windowState === "OPEN"
-        ? closesIn ?? (isEvent ? "Open now" : "Open until 10pm")
+        ? closesIn ?? (isEvent ? "Open now" : isOutz ? "Open while you are out there" : "Open until 10pm")
         : isEvent
           ? "Chat closed"
           : "Chat closed or locked";
@@ -171,18 +185,22 @@ export default function InboxGroupChat({ target, onBack }: Props) {
       : windowState === "OPEN"
         ? isEvent
           ? "You're checked in. Say hi. Everyone going can see this."
-          : "You're checked in. Say hi. Others heading out can see this until 10pm."
+          : isOutz
+            ? "You're checked in. Say hi. Everyone heading to this place can see this."
+            : "You're checked in. Say hi. Others heading out can see this until 10pm."
         : isEvent
           ? "This chat has closed."
-          : "Check in on the beach page to unlock this room (visible check-in only).";
+          : isOutz
+            ? "Check in at this place to unlock the room (visible check-in only)."
+            : "Check in on the beach page to unlock this room (visible check-in only).";
 
-  const badge = isEvent ? "EVENT GROUP" : "RIVER BRATS";
-  const accentStyle = { "--inbox-exp-accent": isEvent ? "#19e3ff" : "#39ff14" } as CSSProperties;
+  const badge = isEvent ? "EVENT GROUP" : isOutz ? "OUTZIDE" : "RIVER BRATS";
+  const accentStyle = { "--inbox-exp-accent": isEvent ? "#19e3ff" : isOutz ? "var(--neon-orange)" : "#39ff14" } as CSSProperties;
   const canSend = Boolean(body.trim() && chatOpen && !postMutation.isPending);
 
   return (
     <div
-      className={`inbox-group-chat inbox-group-chat--${isEvent ? "event" : "beach"}`}
+      className={`inbox-group-chat inbox-group-chat--${isEvent ? "event" : isOutz ? "outz" : "beach"}`}
       data-testid="inbox-group-chat"
       style={accentStyle}
     >
@@ -196,7 +214,7 @@ export default function InboxGroupChat({ target, onBack }: Props) {
             {windowState === "OPEN" && <span className="inbox-exp-dot inbox-exp-dot--live" aria-hidden />}
           </div>
           <div className="inbox-group-chat__meta">
-            <span className={`inbox-exp-tag inbox-group-chat__badge inbox-exp-tag--${isEvent ? "cyan" : "green"}`}>
+            <span className={`inbox-exp-tag inbox-group-chat__badge inbox-exp-tag--${isEvent ? "cyan" : isOutz ? "orange" : "green"}`}>
               {badge}
             </span>
             <span

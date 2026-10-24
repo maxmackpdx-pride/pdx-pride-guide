@@ -28,7 +28,7 @@ function tagFor(cat: string) {
 }
 
 export type GroupChatRow = {
-  kind: "EVENT" | "BEACH";
+  kind: "EVENT" | "BEACH" | "OUTZ";
   id: number | string;
   title: string;
   state: "BEFORE" | "OPEN";
@@ -120,7 +120,7 @@ export default function PersonalView({
             onClick={() => onOpenGroup?.(row)}
             {...openRow(() => onOpenGroup?.(row))}
           >
-            <span className="inbox-exp-group-avatar">{row.kind === "BEACH" ? "RB" : "GC"}</span>
+            <span className="inbox-exp-group-avatar">{row.kind === "BEACH" ? "RB" : row.kind === "OUTZ" ? "OZ" : "GC"}</span>
             <div className="inbox-exp-row__body">
               <div className="inbox-exp-row__top">
                 <div className="inbox-exp-row__id">

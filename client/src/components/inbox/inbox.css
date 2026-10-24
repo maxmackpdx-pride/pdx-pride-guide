@@ -1665,6 +1665,10 @@ html.calm-mode .inbox-overlay::after,
   background: #39ff14;
 }
 
+.inbox-overlay .inbox-group-chat__badge.inbox-exp-tag--orange {
+  background: var(--neon-orange);
+}
+
 .inbox-overlay .inbox-group-chat__pin {
   flex: none;
   padding: 10px 16px;

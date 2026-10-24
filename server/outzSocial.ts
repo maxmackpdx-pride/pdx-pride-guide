@@ -156,6 +156,35 @@ export function getOutzChatDatesForUser(placeId: string, userId: number) {
   return rows.map(row => String(row.calendarDate));
 }
 
+/** Outzide place rooms the user can chat in right now (non-anonymous active check-ins). */
+export function getOutzChatRoomsForUser(userId: number, names: (placeId: string) => string | null, now = Date.now()) {
+  expireOutzCheckins();
+  const nowIso = new Date(now).toISOString();
+  const rows = sqlite.prepare(`
+    SELECT DISTINCT place_id AS placeId FROM outz_checkins
+    WHERE user_id = ? AND is_active = 1 AND is_anonymous = 0 AND expires_at > ?
+  `).all(userId, nowIso) as Array<{ placeId: string }>;
+  const out: any[] = [];
+  for (const { placeId } of rows) {
+    const title = names(placeId);
+    if (!title) continue;
+    const dates = getOutzChatDatesForUser(placeId, userId);
+    const access = riverBratsChatAccessFromDates(dates, now);
+    if (!access.open || !access.closesAt) continue;
+    out.push({
+      kind: "OUTZ",
+      id: placeId,
+      title,
+      state: "OPEN" as const,
+      opensAt: access.opensAt || nowIso,
+      closesAt: access.closesAt,
+      goingDates: [...dates].sort(),
+      href: `/outzide?place=${encodeURIComponent(placeId)}&tab=community`,
+    });
+  }
+  return out;
+}
+
 export function upsertOutzCheckin(data: OutzCheckinInput) {
   const createdAt = new Date().toISOString();
   const expiresAt = riverBratsChatClosesAtIso(data.calendarDate);

@@ -209,6 +209,7 @@ import {
   postOutzChatMessage,
   upsertOutzPlaceRating,
   upsertOutzCheckin,
+  getOutzChatRoomsForUser,
 } from "./outzSocial";
 import { isProfileAccentColor, isProfileBanner, normalizeProfileAccentColor } from "@shared/profileTheme";
 import {
@@ -5174,7 +5175,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // Group chats the viewer belongs to (event rooms via check-in/hosting, plus
   // today's beach room) - powers the Inbox sheet GROUP rows.
   app.get("/api/chats/mine", requireAuth, (req, res) => {
-    res.json(storage.getMyGroupChats(req.session.userId!));
+    const userId = req.session.userId!;
+    const rooms = [
+      ...storage.getMyGroupChats(userId),
+      ...getOutzChatRoomsForUser(userId, id => outzMapCatalog.find(place => place.id === id)?.name ?? null),
+    ];
+    rooms.sort((a, b) => String(a.closesAt).localeCompare(String(b.closesAt)));
+    res.json(rooms);
   });
 
   app.get("/api/messages/inbox", requireAuth, (req, res) => {
