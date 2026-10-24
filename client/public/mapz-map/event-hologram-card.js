@@ -9,6 +9,11 @@ export function eventCardGeometry(x,centerY,scale=1){
 export function eventCardPerimeter(card){
  return EVENT_FRAME.map(([u,v])=>({x:card.left+u*(card.right-card.left),y:card.top+v*(card.bottom-card.top)}));
 }
+// E3c: the beam lands on a round puck, not the card rectangle.
+export function eventPuckPerimeter(card){
+ const cx=card.x,cy=(card.top+card.bottom)/2,r=Math.min(card.right-card.left,card.bottom-card.top)*.42;
+ return Array.from({length:28},(_,i)=>{const a=i/28*Math.PI*2;return {x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r};});
+}
 export function eventBeamPoint(anchor,end,t,phase=0,seconds=0,reduced=false){
  // Light follows a soft curve, but both endpoints stay pinned, even while panning.
  const wave=reduced?0:Math.sin(seconds*.55+phase+t*4)*Math.sin(Math.PI*t)*2;
@@ -39,7 +44,7 @@ export function createAttachedEventBeam(){
  return {
   draw(ctx,card,anchor,seconds,phase,reduced,color){
    if(disposed||ctx.globalAlpha<=.001||anchor.y-card.bottom<4)return;
-   const perimeter=eventCardPerimeter(card),alpha=ctx.globalAlpha;
+   const perimeter=eventPuckPerimeter(card),alpha=ctx.globalAlpha;
    const clock=reduced?0:seconds,variant=Math.floor(Math.abs(phase)*7)%3;
    ctx.save();ctx.globalCompositeOperation='screen';
    // Broad translucent light volume: never an opaque cone or a wire cage.
