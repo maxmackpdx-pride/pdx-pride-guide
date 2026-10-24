@@ -886,14 +886,21 @@ function renderHologramLabels(labels){
     }else{logoFace.textContent=label.venueName||'EVENT';}
     item.appendChild(brand);
    }
-   const title=document.createElement('span');title.className='standalone-hologram-title';
-   const fitted=labelRows(label.name,label.cardHeight?label.width-14:label.width,label.kind==='housing'?2:undefined,label.cardHeight?54/(label.width-14):.52,Boolean(label.cardHeight));
-   fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
+   // E3c: event cards show the logo face and countdown only. No title, no footer.
+   if(!label.cardHeight){
+    const title=document.createElement('span');title.className='standalone-hologram-title';
+    const fitted=labelRows(label.name,label.width,label.kind==='housing'?2:undefined,.52,false);
+    fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
+   }
    if(label.kind!=='housing'){
-    const footer=document.createElement('span');footer.className='event-hologram-footer';
-    if(label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=timeText;footer.appendChild(clock);}
-    if(label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';appendEventCountdown(countdown,label.countdown);(label.cardHeight?item:footer).appendChild(countdown);}
-    item.appendChild(footer);
+    if(label.cardHeight){
+     if(label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';appendEventCountdown(countdown,label.countdown);item.appendChild(countdown);}
+    }else{
+     const footer=document.createElement('span');footer.className='event-hologram-footer';
+     if(label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=timeText;footer.appendChild(clock);}
+     if(label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';appendEventCountdown(countdown,label.countdown);footer.appendChild(countdown);}
+     item.appendChild(footer);
+    }
    }
 
   }
