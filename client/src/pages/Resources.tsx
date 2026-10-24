@@ -56,6 +56,8 @@ import "@fontsource/jetbrains-mono/latin-600.css";
 import "./Resources.css";
 import "@/components/discovery/EventzDetail.css";
 import "@/components/discovery/OpenCardContinuity.css";
+import HeartButton from "@/components/HeartButton";
+import { LoadMore, useProgressiveList } from "@/hooks/useProgressiveList";
 
 const CommunityWorkspace = lazy(() => import("./Community"));
 const ResourceDirectoryMap = lazy(() => import("@/components/DirectoryMap"));
@@ -448,6 +450,7 @@ const ResourceCard = memo(function ResourceCard({
       onClick={() => onOpen(row)}
       footer={
         <div className="rg-directory-footer">
+          <HeartButton kind="resource" refId={org.name} snapshot={{ title: org.name, subtitle: category.name, href: resourceMapHref(org.name, row.community?.slug) }} />
           <button className={`pdx-glass-rebind pdxBtn${["safety", "legal", "arts", "youth", "harm-reduction"].includes(category.id) ? " rg-contact-white" : ""}`} aria-label={`View details for ${org.name}`} onClick={event => { event.stopPropagation(); onOpen(row); }}>
             View details <ArrowUpRight size={16} />
           </button>
@@ -542,6 +545,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
     const query = searchQuery.trim().toLowerCase();
     return !query || [row.org.name, row.org.desc, row.org.sub, row.org.scope, row.org.addr, ...(row.org.aliases || []), ...(row.org.serviceTags || []), ...categoriesFor(row).map(c => c.name)].filter(Boolean).join(" ").toLowerCase().includes(query);
   }), [categoryIds, searchQuery, allRows]);
+  const rowList = useProgressiveList(rows.length, { initial: 36, step: 36, resetKey: `${categoryIds.join(",")}|${searchQuery}` });
   const selectedCategories = CATEGORIES.filter(c => !categoryIds.length || categoryIds.includes(c.id));
   const renderCard = (row: Row) => <div key={row.community?.id || row.org.name} className="placez-card-surface eb-original-card">
     <ResourceCard row={row} onOpen={openDetail} />
@@ -600,8 +604,8 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
               {!rows.length ? <BrowseStatus title="No resources match your search" description="Try a broader search or another category." actionLabel="Clear filters" onAction={clear} /> : browseView === "browse" ?
                 <div className="eb-lanes">{browseGroups.map(({category, group}, index) => {
                   const offset = browseGroups.slice(0, index).reduce((sum, previous) => sum + previous.group.length, 0);
-                  return <BrowseLane key={category.id} title={category.name} color={category.color} count={group.length}>{renderCards(group.map(row => ({...row, sectionCategory:category})), offset)}</BrowseLane>;
-                })}</div> : <div className="eb-grid">{renderCards(rows)}</div>}
+                  return <BrowseLane key={category.id} title={category.name} color={category.color} count={group.length}>{renderCards(group.slice(0, 16).map(row => ({...row, sectionCategory:category})), offset)}</BrowseLane>;
+                })}</div> : <><div className="eb-grid">{renderCards(rows.slice(0, rowList.limit))}</div><LoadMore hasMore={rowList.hasMore} remaining={rowList.remaining} onLoad={rowList.loadMore} label="Show more resources" /></>}
             </>}
           </section>
         </div>

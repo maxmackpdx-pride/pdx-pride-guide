@@ -3,7 +3,7 @@ import {OutzBlendArt} from '@/components/outz/OutzBlendArt';
 import {hasBlendRecipe} from '@/lib/outzBlend';
 import PlaceModal from "@/components/PlaceModal";
 import OutzCardModal from "./OutzCardModal";
-import OutzFollowButton from "./OutzFollowButton";
+import HeartButton from "@/components/HeartButton";
 import CardWaypoint from "./CardWaypoint";
 import { useState, type CSSProperties } from "react";
 import { ArrowUpRight, MapPin } from "lucide-react";
@@ -53,7 +53,7 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
       </div>
     </button>
     <footer className="tonight-card__footer">
-      {!isPlace && <OutzFollowButton placeId={location.key.replace(/^outz:/, "")} onRequireAuth={onRequireAuth} />}
+      {!isPlace && <HeartButton kind="outz" refId={placeId} snapshot={{ title: location.name, subtitle: "Outzide", href: `/outzide?place=${encodeURIComponent(placeId)}` }} onRequireAuth={onRequireAuth} />}
       {isPlace && location.place && <VenueFollowButton accent={accent} businessId={location.place.id} initialFollowing={Boolean(location.place.isFollowing)} onRequireAuth={onRequireAuth} />}
       <button type="button" className="tonight-card__view" onClick={() => setOpen(true)}>View details <ArrowUpRight size={17} aria-hidden="true" /></button>
     </footer>

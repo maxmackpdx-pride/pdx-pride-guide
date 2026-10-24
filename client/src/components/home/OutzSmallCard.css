@@ -9,3 +9,5 @@
 .outz-small__waypoint{position:absolute;top:6px;left:6px;width:30px;height:30px;pointer-events:none;display:block}
 .outz-small__waypoint>*{width:100%;height:100%}
 .outz-small__title .xr-rl{font-size:12px;padding:0 1px}
+.outz-small__heart{position:absolute;top:6px;right:6px;width:30px;height:30px;z-index:2}
+.outz-small__heart svg{width:15px;height:15px}

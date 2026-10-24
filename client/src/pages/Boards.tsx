@@ -1,5 +1,6 @@
 import BoardArchiveList, { BoardArchiveFeedback } from "@/components/board/BoardArchiveList";
 import BoardBrowseCard from "@/components/board/BoardBrowseCard";
+import { LoadMore } from "@/hooks/useProgressiveList";
 import { pinboardPlacement } from "@/lib/pinboardPlacement";
 import { useBrowseControlsOffset } from "@/components/discovery/useBrowseControlsOffset";
 import BoardCategoryFollows from "@/components/board/BoardCategoryFollows";
@@ -308,7 +309,7 @@ export default function Boards() {
   ), featureFilters);
   const results = matchingCategoryPosts.filter(p => intent === "all" || p.intent === intent);
   // A category doorway shows every matching post; the mixed feed loads progressively.
-  const visibleResults = selectedCategory ? results : results.slice(0, limit);
+  const visibleResults = results.slice(0, limit);
   const clear = () => update({ archive:null, q: null, intent: null, saved: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null }, true);
   const select = (board: Selection) => {
     update({ board, archive:null, q: null, intent: null, saved: null, post: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null });
@@ -599,15 +600,7 @@ export default function Boards() {
                       }
                     />
                   )}
-                {!selectedCategory && results.length > limit && (
-                  <button
-                    type="button"
-                    className="eb-tool ab-more"
-                    onClick={() => setLimit((n) => n + 24)}
-                  >
-                    Show more posts <ArrowRight size={16} />
-                  </button>
-                )}
+                <LoadMore hasMore={results.length > limit} remaining={results.length - limit} onLoad={() => setLimit((n) => n + 24)} label="Show more posts" />
               </section>
             </div>
             </>}

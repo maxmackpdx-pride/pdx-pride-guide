@@ -5,6 +5,7 @@ import { hasBlendRecipe } from "@/lib/outzBlend";
 import { outzBandArt } from "@/lib/outzKinds";
 import { RansomTitle } from "@/components/xerox/Overlays";
 import CardWaypoint from "./CardWaypoint";
+import HeartButton from "@/components/HeartButton";
 import OutzCardModal from "./OutzCardModal";
 import type { TodayLocation } from "./TodayLocationCard";
 import "./OutzSmallCard.css";
@@ -31,6 +32,7 @@ export default function OutzSmallCard({ location, onRequireAuth }: { location: T
         <span className="outz-small__kind">{label}</span>
         <span className="outz-small__title" title={location.name} aria-label={location.name}><span aria-hidden="true"><RansomTitle text={location.name} /></span></span>
       </button>
+      <HeartButton className="outz-small__heart" kind="outz" refId={placeId} snapshot={{ title: location.name, subtitle: "Outzide", href: `/outzide?place=${encodeURIComponent(placeId)}` }} onRequireAuth={onRequireAuth} />
       <span className="outz-small__waypoint"><CardWaypoint kind={location.kind || "trail"} outside /></span>
     </article>
     {open && <OutzCardModal location={location} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth} />}

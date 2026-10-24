@@ -15,6 +15,7 @@ import { schedulePushForActivity } from './push/dispatch';
 import { getWinterConditions } from './outzWinter';
 import { publicWinterEvents } from '../shared/outzWinterEvents';
 import { createWaypointStore } from './outzWaypoints';
+import { addHeart, removeHeart, listHearts, isHeartKind, safeHeartHref } from "./hearts";
 import outzMapCatalog from '@shared/outzMapCatalog';
 import { getOutzDetails } from "./outzDetails";
 import { getOutzCommunityFeed } from "./outzFeed";
@@ -2132,6 +2133,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         ?? outzMapCatalog.find(entry => entry.id === placeId);
       if (!place) return res.status(400).json({ error: "Invalid OUTZ destination" });
       followOutzDestination(req.session.userId!, placeId, place.name);
+      addHeart(req.session.userId!, "outz", placeId, { title: place.name, subtitle: "Outzide", href: `/outzide?place=${encodeURIComponent(placeId)}` });
       res.json({ isFollowing: true });
     } catch { res.status(502).json({ error: "Could not follow destination" }); }
   });
@@ -2140,6 +2142,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const placeId = await knownOutzPlace(req.body.placeId);
       if (!placeId) return res.status(400).json({ error: "Invalid OUTZ destination" });
       unfollowOutzDestination(req.session.userId!, placeId);
+      removeHeart(req.session.userId!, "outz", placeId);
       res.json({ isFollowing: false });
     } catch { res.status(502).json({ error: "Could not unfollow destination" }); }
   });
@@ -2695,6 +2698,37 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // ─── ATTENDANCE ───────────────────────────────────────────────────────────
+  // Hearts: follow a card and pin it on the user's Stacks board.
+  app.get("/api/hearts", requireAuth, (req, res) => {
+    res.setHeader("Cache-Control", "private, no-store");
+    res.json(listHearts(req.session.userId!));
+  });
+  app.post("/api/hearts", requireAuth, (req, res) => {
+    const { kind, ref, title, subtitle, image, href, accent } = req.body ?? {};
+    const safeHref = safeHeartHref(href);
+    if (!isHeartKind(kind) || typeof ref !== "string" || !ref || ref.length > 120 || typeof title !== "string" || !title.trim() || !safeHref) {
+      return res.status(400).json({ error: "Invalid heart" });
+    }
+    const userId = req.session.userId!;
+    if (kind === "place" && /^\d+$/.test(ref) && storage.getBusiness(Number(ref))) storage.followBusiness(userId, Number(ref));
+    const outzPlace = kind === "outz" ? outzMapCatalog.find(entry => entry.id === ref) : undefined;
+    if (outzPlace) followOutzDestination(userId, ref, outzPlace.name);
+    res.json(addHeart(userId, kind, ref, {
+      title: title.trim(), subtitle: typeof subtitle === "string" ? subtitle : null,
+      image: typeof image === "string" && /^(\/|https:\/\/)/.test(image) ? image : null, href: safeHref,
+      accent: typeof accent === "string" && /^(#[0-9a-f]{3,8}|var\(--[a-z0-9-]+\))$/i.test(accent) ? accent : null,
+    }));
+  });
+  app.delete("/api/hearts", requireAuth, (req, res) => {
+    const { kind, ref } = req.body ?? {};
+    if (!isHeartKind(kind) || typeof ref !== "string" || !ref) return res.status(400).json({ error: "Invalid heart" });
+    const userId = req.session.userId!;
+    if (kind === "place" && /^\d+$/.test(ref)) storage.unfollowBusiness(userId, Number(ref));
+    if (kind === "outz") unfollowOutzDestination(userId, ref);
+    removeHeart(userId, kind, ref);
+    res.json({ ok: true });
+  });
+
   app.get("/api/events/:id/attendance", (req, res) => {
     const list = storage.getAttendances(Number(req.params.id), req.session?.userId);
     res.json(list);
@@ -2713,6 +2747,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
       );
       const eventId = Number(req.params.id);
       const att = storage.upsertAttendance(eventId, user, message, visibility);
+      // Going to an event hearts it, so it is pinned and its updates follow.
+      const evt = storage.getEvent(eventId);
+      if (evt) addHeart(user.id, "event", String(eventId), { title: evt.title, subtitle: evt.dateStart, image: evt.posterImageUrl ?? null, href: `/events/${eventId}` });
       notifyAttendanceUpdate(eventId);
       res.json(att);
     } catch (e: any) {
@@ -2809,6 +2846,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const biz = storage.getBusiness(businessId);
     if (!biz || !biz.active) return res.status(404).json({ error: "Venue not found" });
     storage.followBusiness(req.session.userId!, businessId);
+    // A follow is a heart: the place is pinned on the follower's Stacks board.
+    addHeart(req.session.userId!, "place", String(businessId), { title: biz.name, subtitle: biz.neighborhood ?? null, image: biz.imageUrl ?? null, href: `/directory/${businessId}` });
     res.json({
       isFollowing: true,
       followerCount: storage.getBusinessFollowerCount(businessId),
@@ -2820,6 +2859,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const biz = storage.getBusiness(businessId);
     if (!biz || !biz.active) return res.status(404).json({ error: "Venue not found" });
     storage.unfollowBusiness(req.session.userId!, businessId);
+    removeHeart(req.session.userId!, "place", String(businessId));
     res.json({
       isFollowing: false,
       followerCount: storage.getBusinessFollowerCount(businessId),
