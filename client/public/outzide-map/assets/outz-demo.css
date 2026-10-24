@@ -40,3 +40,13 @@
 .maplibregl-ctrl-attrib-inner,.maplibregl-ctrl-attrib a,.maplibregl-ctrl-attrib a:visited,.maplibregl-ctrl-attrib a:hover{color:color-mix(in srgb,var(--text-hi) 55%,transparent)!important;background:transparent!important}
 .maplibregl-ctrl-attrib-button{background-color:transparent!important;opacity:.55}
 .outzide-shell .maplibregl-ctrl-attrib a,.outzide-shell .maplibregl-ctrl-attrib a:visited,.outzide-shell .maplibregl-ctrl-attrib a:hover{color:color-mix(in srgb,var(--text-hi) 55%,transparent)!important}
+
+/* A waypoint with a second purpose flashes the second icon inside the same pin, a moment every few seconds. */
+.waypoint-head{position:relative}
+.waypoint-head .wp-alt{position:absolute;inset:0;display:grid;place-items:center;opacity:0;pointer-events:none;animation:wp-alt-flash 7s ease-in-out infinite;animation-delay:var(--wp-d,0s)}
+.waypoint-head .wp-alt svg{width:62%;height:62%}
+.waypoint-icon:has(.wp-alt) .waypoint-head>svg:first-child{animation:wp-main-flash 7s ease-in-out infinite;animation-delay:var(--wp-d,0s)}
+@keyframes wp-alt-flash{0%,82%,100%{opacity:0}87%,94%{opacity:1}}
+@keyframes wp-main-flash{0%,82%,100%{opacity:1}87%,94%{opacity:0}}
+:is(html.calm-mode,[data-calm=true]) .waypoint-head .wp-alt,:is(html.calm-mode,[data-calm=true]) .waypoint-icon:has(.wp-alt) .waypoint-head>svg:first-child{animation:none}
+@media(prefers-reduced-motion:reduce){.waypoint-head .wp-alt,.waypoint-icon:has(.wp-alt) .waypoint-head>svg:first-child{animation:none}}

@@ -1,20 +1,33 @@
 // Reference theme: black evergreen land, luminous green relief and amber contours.
 // Acid Green #39FF14 and Neon Orange #FF6600 match Zaylist color tokens.
 // Keep this treatment local so Mapz and the home flyover retain their own shader.
+
+// Landscape greens sit three shades down: each shade keeps hue and saturation and takes a fifth off the lightness.
+export function shade(hex, steps = 3) {
+  const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, d = max - min;
+  const sat = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  let h = 0;
+  if (d) h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h = (h * 60 + 360) % 360;
+  const L = l * Math.pow(0.8, steps), C = (1 - Math.abs(2 * L - 1)) * sat, X = C * (1 - Math.abs((h / 60) % 2 - 1)), m = L - C / 2;
+  const [R, G, B] = h < 60 ? [C, X, 0] : h < 120 ? [X, C, 0] : h < 180 ? [0, C, X] : h < 240 ? [0, X, C] : h < 300 ? [X, 0, C] : [C, 0, X];
+  return '#' + [R, G, B].map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('');
+}
 export function brightenOutzideTerrain(style) {
   const layer = id => style.layers.find(entry => entry.id === id);
-  layer('ground').paint['background-color'] = '#031009';
+  layer('ground').paint['background-color'] = shade('#031009');
   Object.assign(layer('land-relief').paint, {
-    'hillshade-shadow-color': '#010704',
-    'hillshade-highlight-color': '#39FF14',
-    'hillshade-accent-color': '#163f15',
+    'hillshade-shadow-color': shade('#010704'),
+    'hillshade-highlight-color': shade('#39FF14'),
+    'hillshade-accent-color': shade('#163f15'),
   });
-  for (const id of ['forest-landcover', 'forest-landuse']) layer(id).paint['fill-color'] = '#123d16';
-  for (const id of ['leaf-landcover', 'leaf-landuse']) layer(id).paint['fill-color'] = '#1c491b';
-  layer('park-areas').paint['fill-color'] = '#255c20';
+  for (const id of ['forest-landcover', 'forest-landuse']) layer(id).paint['fill-color'] = shade('#123d16');
+  for (const id of ['leaf-landcover', 'leaf-landuse']) layer(id).paint['fill-color'] = shade('#1c491b');
+  layer('park-areas').paint['fill-color'] = shade('#255c20');
   layer('developed-earth').paint['fill-color'] = [
-    'match', ['get', 'class'], 'commercial', '#122b19', 'retail', '#122b19',
-    'industrial', '#17301e', '#031009',
+    'match', ['get', 'class'], 'commercial', shade('#122b19'), 'retail', shade('#122b19'),
+    'industrial', shade('#17301e'), shade('#031009'),
   ];
   layer('water').paint['fill-color'] = [
     'interpolate', ['linear'], ['zoom'], 10, '#053329', 14, '#064437', 18, '#095244',
