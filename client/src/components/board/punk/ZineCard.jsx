@@ -16,8 +16,10 @@ const SEEKING=['available','iso','looking','forming','offering'];
 // Cut Type mixes for the headline key word: the only two with no reversed glyphs.
 const TITLE_MIX=['CutMixPaper','CutMixLoose'];
 const VALUE_MIX=['CutMixPaper','CutMixRough','CutMixReverse','CutMixMixed','CutMixLoose','CutMixRansom','CutMixWorn','CutMixTall'];
-const DEFAULT_ART={housing:'house',mizzed:'message-bubbles',gigz:'microphone',sellz:'price-tag'};
-const MOTIF={'magnifying-glass':'magnifier','message-bubbles':'bubbles',microphone:'mic','price-tag':'tag','gift-box':'gift',house:'house'};
+const DEFAULT_ART={housing:'house',mizzed:'message-bubbles',gigz:'microphone',sellz:'price-tag',tripbuddy:'trip-trail',carpool:'carpooling'};
+const MOTIF={'magnifying-glass':'magnifier','message-bubbles':'bubbles',microphone:'mic','price-tag':'tag','gift-box':'gift',house:'house','trip-trail':'trail',carpooling:'ride'};
+// Outzide boards ship their own hero art (not in the motif library): the trail marker and the carpool sticker.
+const OUTZ_HERO={tripbuddy:'/boardz/punk/trip-trail.svg',carpool:'/boardz/punk/punk-objects/carpooling.webp'};
 
 function hash31(text){return Array.from(String(text)).reduce((h,c)=>(Math.imul(h,31)+c.charCodeAt(0))>>>0,0)}
 // Same LCG as the canvas generator, so a post keeps the decay rhythm it had in the mockups.
@@ -53,6 +55,7 @@ function palette(r){
 
 function useArt(r){
   const recipes=useMotifRecipes();
+  if(OUTZ_HERO[r.category])return {hero:{url:OUTZ_HERO[r.category]},motif:MOTIF[DEFAULT_ART[r.category]]};
   const recipe=categoryMotifRecipe(recipes,'boardz',r.category,r.intent);
   const hero=recipe&&recipes?.assets[recipe.heroId],wire=recipe&&recipes?.assets[recipe.companionId];
   const fallback=r.category==='giftz'?(r.intent==='iso'?'magnifying-glass':'gift-box'):DEFAULT_ART[r.category];

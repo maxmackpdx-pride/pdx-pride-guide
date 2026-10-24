@@ -6,6 +6,8 @@ import ActionRow from "@/components/promoter/ActionRow";
 import BoardzComponentSpecimen from "@/components/board/BoardzComponentSpecimen";
 import TodayLocationCard from "@/components/home/TodayLocationCard";
 import { AuthProvider } from "@/context/AuthContext";
+import PunkBoardCard from "@/components/board/punk/PunkBoardCard";
+import { outzWallToBoardPost } from "@/lib/outzBoardPost";
 import { OutzBlendArt } from "@/components/outz/OutzBlendArt";
 import {
   Badge,
@@ -63,6 +65,16 @@ function Specimen({ id }: { id: string }) {
             <TodayLocationCard key={id} location={{ key: `outz:${id}`, name, room: "OutZide", detail, href: `/outzide?place=${id}`, kind }} />
           ))}
         </div></AuthProvider>
+      );
+    case "component:data-display/OutzBoardCard":
+      return (
+        <div className="zay-specimen__row">
+          {([["HIKE_BUDDY", "Looking for a hike buddy", "Saturday sunrise, moderate pace.", "Garibaldi Lake Trail"], ["CARPOOL", "Carpool from the Eastside", "Leaving 7am, two seats open.", "Silver Falls State Park"]] as const).map(([kind, title, body, placeName], i) => (
+            <div key={kind} className="boardz-production-card">
+              <PunkBoardCard post={outzWallToBoardPost({ id: i + 1, postKind: kind, title, body, placeName })!} />
+            </div>
+          ))}
+        </div>
       );
     case "component:data-display/OutzBlendArt":
       return (
