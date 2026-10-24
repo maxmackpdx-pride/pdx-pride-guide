@@ -95,6 +95,8 @@
 /* The app dock remains visible through tablet widths (up to 959px). */
 @media(max-width:959px) {
  .outzide-shell { --browse-bottom:calc(var(--oz-dock) + 12px); }
+ /* Keep provider credits away from the launcher and the selected-card dock. */
+ .outzide-shell .map-stage .maplibregl-ctrl-bottom-right { top:108px;bottom:auto!important;left:12px;right:72px!important; }
 }
 @media(max-width:760px) {
  .outzide-shell #outz-map-controls { inset:78px 8px var(--browse-bottom);width:auto;max-width:none;border-radius:24px; }
