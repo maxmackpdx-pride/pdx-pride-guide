@@ -8,7 +8,7 @@ import {
 } from "../shared/designComponentRegistry";
 
 assert.equal(DESIGN_COMPONENT_SOURCE_REPOSITORY, "maxmackpdx-pride/pdx-pride-guide");
-assert.equal(DESIGN_COMPONENT_REGISTRY.length, 26, "the connected registry includes the four approved Boardz components");
+assert.equal(DESIGN_COMPONENT_REGISTRY.length, 29, "the connected registry includes the current approved card components");
 
 const ids = new Set<string>();
 const sourcePairs = new Set<string>();
@@ -17,7 +17,7 @@ for (const component of DESIGN_COMPONENT_REGISTRY) {
   assert.equal(ids.has(component.id), false, `duplicate object id: ${component.id}`);
   ids.add(component.id);
 
-  assert.match(component.sourcePath, /^client\/src\/components\/[A-Za-z0-9_./-]+\.tsx$/);
+  assert.match(component.sourcePath, /^client\/src\/components\/[A-Za-z0-9_./-]+\.(?:tsx|jsx)$/);
   assert.equal(component.sourcePath.includes(".."), false);
   await access(path.resolve(component.sourcePath));
 
