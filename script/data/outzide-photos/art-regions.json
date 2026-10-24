@@ -4852,5 +4852,799 @@
   "assets/photos/winter-baker.webp": {
     "polygons": [],
     "regionHash": "a95b6784ce64ec63f84fa82b5b72a96194e96eb8e9286bdb56f5dbace9eea624"
+  },
+  "assets/photos/memaloose.webp": {
+    "polygons": [],
+    "regionHash": "a95b6784ce64ec63f84fa82b5b72a96194e96eb8e9286bdb56f5dbace9eea624"
+  },
+  "assets/photos/saddle-mountain.webp": {
+    "reason": "Protect foreground grasses and the walking trail; terrain contours stay on exposed basalt.",
+    "polygons": [
+      [
+        [
+          0.66,
+          0.64
+        ],
+        [
+          1,
+          0.64
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0.66,
+          1
+        ]
+      ]
+    ],
+    "skyNetwork": {
+      "points": [
+        [
+          0.07,
+          0.06
+        ],
+        [
+          0.2,
+          0.16
+        ],
+        [
+          0.35,
+          0.07
+        ],
+        [
+          0.48,
+          0.18
+        ],
+        [
+          0.64,
+          0.06
+        ],
+        [
+          0.78,
+          0.16
+        ],
+        [
+          0.86,
+          0.07
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "8b9860185054fa39a6fd924813f61e1d72383a747b4b4a93cf9a50b849f417dc"
+  },
+  "assets/photos/route-8600563.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.05,
+          0.025
+        ],
+        [
+          0.16,
+          0.07
+        ],
+        [
+          0.28,
+          0.025
+        ],
+        [
+          0.38,
+          0.07
+        ],
+        [
+          0.64,
+          0.02
+        ],
+        [
+          0.75,
+          0.07
+        ],
+        [
+          0.84,
+          0.025
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "d858083f04af88ebdd77a65adb5a274f5a20f6babb4895afb54bab378c953854"
+  },
+  "assets/photos/route-8579996.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.08,
+          0.035
+        ],
+        [
+          0.22,
+          0.1
+        ],
+        [
+          0.36,
+          0.03
+        ],
+        [
+          0.52,
+          0.11
+        ],
+        [
+          0.67,
+          0.035
+        ],
+        [
+          0.8,
+          0.11
+        ],
+        [
+          0.91,
+          0.035
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "052f1956d867e7fbfda199a21b2bd2b4c1343393842619f156ee69d0d2e9186b"
+  },
+  "assets/photos/usfs-5445010324.webp": {
+    "reason": "Remove terrain lines from moss, fern banks and fallen wood; preserve the waterfall and its pool.",
+    "polygons": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          0.29,
+          0
+        ],
+        [
+          0.29,
+          0.45
+        ],
+        [
+          0.42,
+          0.73
+        ],
+        [
+          0.3,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      [
+        [
+          0.28,
+          0.08
+        ],
+        [
+          0.8,
+          0.08
+        ],
+        [
+          0.8,
+          0.27
+        ],
+        [
+          0.28,
+          0.27
+        ]
+      ],
+      [
+        [
+          0.7,
+          0.4
+        ],
+        [
+          1,
+          0.4
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0.85,
+          1
+        ],
+        [
+          0.75,
+          0.82
+        ]
+      ],
+      [
+        [
+          0,
+          0.65
+        ],
+        [
+          0.48,
+          0.65
+        ],
+        [
+          0.48,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    ],
+    "regionHash": "d4b2cc1567c872f649d310e409a9d4250e354c0086f4cbf1a196080d05cb43dc"
+  },
+  "assets/photos/usfs-1288168010602.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.17,
+          0.03
+        ],
+        [
+          0.29,
+          0.12
+        ],
+        [
+          0.4,
+          0.035
+        ],
+        [
+          0.53,
+          0.16
+        ],
+        [
+          0.64,
+          0.05
+        ],
+        [
+          0.75,
+          0.12
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "794dd79b86dc2aee40bf14baa8fc2bdf346de7e000b736cf680f20f1e0b63408"
+  },
+  "assets/photos/fishing-or-diamond-lake.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.05,
+          0.05
+        ],
+        [
+          0.19,
+          0.19
+        ],
+        [
+          0.33,
+          0.055
+        ],
+        [
+          0.47,
+          0.23
+        ],
+        [
+          0.63,
+          0.07
+        ],
+        [
+          0.77,
+          0.2
+        ],
+        [
+          0.92,
+          0.055
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "a15f2cd7ee4ae918ff16eec749e4611fa76a8eddede62a1d60f2142b9e0dcf2b"
+  },
+  "assets/photos/usfs-6952.004731.webp": {
+    "reason": "Keep falling water and moss-covered banks free of terrain graphics; bare left rock and pool reflections remain available.",
+    "polygons": [
+      [
+        [
+          0.25,
+          0.08
+        ],
+        [
+          0.51,
+          0.08
+        ],
+        [
+          0.57,
+          0.24
+        ],
+        [
+          0.47,
+          0.34
+        ],
+        [
+          0.62,
+          0.82
+        ],
+        [
+          0.57,
+          0.88
+        ],
+        [
+          0.4,
+          0.82
+        ],
+        [
+          0.28,
+          0.4
+        ],
+        [
+          0.21,
+          0.3
+        ]
+      ],
+      [
+        [
+          0.6,
+          0.34
+        ],
+        [
+          1,
+          0.34
+        ],
+        [
+          1,
+          0.86
+        ],
+        [
+          0.65,
+          0.86
+        ]
+      ],
+      [
+        [
+          0,
+          0.7
+        ],
+        [
+          0.24,
+          0.7
+        ],
+        [
+          0.35,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    ],
+    "regionHash": "4f3b4c4ac36211c45244703f9fa9bdda38e6908a1d338fdb5012074d5f9dde27"
+  },
+  "assets/photos/usfs-5723010274.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.045,
+          0.035
+        ],
+        [
+          0.17,
+          0.12
+        ],
+        [
+          0.29,
+          0.04
+        ],
+        [
+          0.41,
+          0.15
+        ],
+        [
+          0.55,
+          0.06
+        ],
+        [
+          0.7,
+          0.13
+        ],
+        [
+          0.77,
+          0.035
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "05e8372bd8c7fa412d117d853f8c1405582b351a546833fcf9dce033f187643f"
+  },
+  "assets/photos/usfs-5714010274.webp": {
+    "polygons": [],
+    "regionHash": "a95b6784ce64ec63f84fa82b5b72a96194e96eb8e9286bdb56f5dbace9eea624"
+  },
+  "assets/photos/usfs-5421.005071.webp": {
+    "reason": "Forested mountain slopes do not carry rainbow terrain contours; retain sky network, foreground rock and lake reflections.",
+    "polygons": [
+      [
+        [
+          0.25,
+          0.23
+        ],
+        [
+          0.47,
+          0.14
+        ],
+        [
+          0.64,
+          0.21
+        ],
+        [
+          0.85,
+          0.33
+        ],
+        [
+          1,
+          0.45
+        ],
+        [
+          1,
+          0.64
+        ],
+        [
+          0.18,
+          0.64
+        ]
+      ]
+    ],
+    "skyNetwork": {
+      "points": [
+        [
+          0.08,
+          0.035
+        ],
+        [
+          0.23,
+          0.1
+        ],
+        [
+          0.37,
+          0.025
+        ],
+        [
+          0.52,
+          0.075
+        ],
+        [
+          0.67,
+          0.025
+        ],
+        [
+          0.81,
+          0.08
+        ],
+        [
+          0.92,
+          0.035
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "f07e7a72c5bfbfa017f8a2333592789a683190d49564c593f61835d7fbcd92af"
+  },
+  "assets/photos/usfs-5451.005071.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.025,
+          0.04
+        ],
+        [
+          0.11,
+          0.095
+        ],
+        [
+          0.19,
+          0.035
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "c0903f97cde18d58f9ee56d7dcbc2f52bee07873751c497962af7870a97cf30c"
+  },
+  "assets/photos/usfs-6217.005511.webp": {
+    "reason": "Protect the prominent foreground stump from generated reflections and terrain traces.",
+    "polygons": [
+      [
+        [
+          0.605,
+          0.045
+        ],
+        [
+          0.68,
+          0.045
+        ],
+        [
+          0.7,
+          1
+        ],
+        [
+          0.6,
+          1
+        ]
+      ]
+    ],
+    "skyNetwork": {
+      "points": [
+        [
+          0.3,
+          0.045
+        ],
+        [
+          0.4,
+          0.12
+        ],
+        [
+          0.51,
+          0.045
+        ],
+        [
+          0.74,
+          0.035
+        ],
+        [
+          0.84,
+          0.11
+        ],
+        [
+          0.91,
+          0.045
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "38128bfad169981c6f77a4342d9c4c97363800c956a198fd8e1467fc2461034c"
+  },
+  "assets/photos/second-beach-trail.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.04,
+          0.05
+        ],
+        [
+          0.17,
+          0.14
+        ],
+        [
+          0.27,
+          0.035
+        ],
+        [
+          0.49,
+          0.045
+        ],
+        [
+          0.62,
+          0.13
+        ],
+        [
+          0.77,
+          0.045
+        ],
+        [
+          0.92,
+          0.12
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "9fa90291dabb15113283bdd5d1194d60ab35fde1a33eec2758e10c2fe8542f7d"
+  },
+  "assets/photos/bc-east-sooke.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.37,
+          0.035
+        ],
+        [
+          0.48,
+          0.12
+        ],
+        [
+          0.6,
+          0.04
+        ],
+        [
+          0.71,
+          0.13
+        ],
+        [
+          0.83,
+          0.04
+        ],
+        [
+          0.94,
+          0.11
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "d9c7074a3c162f7e9debaa8c27c5a443f46fd7d8edab2190c073125d82e7243b"
+  },
+  "assets/photos/bc-nairn.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.35,
+          0.035
+        ],
+        [
+          0.46,
+          0.15
+        ],
+        [
+          0.57,
+          0.05
+        ],
+        [
+          0.69,
+          0.2
+        ],
+        [
+          0.81,
+          0.07
+        ],
+        [
+          0.91,
+          0.15
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "1e350d159145faa992a03b82a919065e9df3f52261fe4b8ce3d2ef649e5d51f2"
+  },
+  "assets/photos/bc-alice.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.33,
+          0.24
+        ],
+        [
+          0.43,
+          0.16
+        ],
+        [
+          0.52,
+          0.27
+        ],
+        [
+          0.4,
+          0.34
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "6af53e03afb67d0c193a6e300b6c3f91de410487c160fd0253b1bdb9a87c419d"
+  },
+  "assets/photos/dayuse-wa-lime-kiln-point-state-park.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.045,
+          0.08
+        ],
+        [
+          0.16,
+          0.22
+        ],
+        [
+          0.28,
+          0.08
+        ],
+        [
+          0.36,
+          0.17
+        ],
+        [
+          0.68,
+          0.055
+        ],
+        [
+          0.8,
+          0.13
+        ],
+        [
+          0.9,
+          0.055
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "ca2ced2fbba66d5f6edc4d3d0891b1298cbf7eee98abe4b6cbfde47fefa2932c"
+  },
+  "assets/photos/dayuse-or-hat-rock-state-park.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.045,
+          0.06
+        ],
+        [
+          0.18,
+          0.18
+        ],
+        [
+          0.31,
+          0.07
+        ],
+        [
+          0.46,
+          0.17
+        ],
+        [
+          0.61,
+          0.055
+        ],
+        [
+          0.75,
+          0.17
+        ],
+        [
+          0.91,
+          0.07
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "f82ae772a3fca8b9958b3bf02b8f137abae3d46905138a9b1d64f9ade6df6445"
+  },
+  "assets/photos/dayuse-wa-scenic-beach-state-park.webp": {
+    "polygons": [],
+    "skyNetwork": {
+      "points": [
+        [
+          0.43,
+          0.035
+        ],
+        [
+          0.53,
+          0.16
+        ],
+        [
+          0.64,
+          0.06
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.86,
+          0.1
+        ],
+        [
+          0.96,
+          0.2
+        ]
+      ],
+      "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+    },
+    "regionHash": "99f932d56c08e8b2deb8c4d753867110752343b5b412418a026e716329186dd7"
   }
 }

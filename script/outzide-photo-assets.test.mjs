@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import sharp from 'sharp';
 const base=path.resolve('client/public/outzide-map');const places=JSON.parse(fs.readFileSync(path.join(base,'places.json'))).places;const photos=places.filter(p=>p.photo);const sources=JSON.parse(fs.readFileSync('script/data/outzide-photos/sources.json'));const overlays=JSON.parse(fs.readFileSync('script/data/outzide-photos/overlays.json'));
-test('all75 priority destinations and48 additional assignments have complete attributed layered artwork',async()=>{
- assert.equal(places.length,385);assert.equal(photos.length,123);assert.equal(new Set(photos.map(p=>p.photo.src)).size,120);
+test('all75 priority destinations and68 additional assignments have complete attributed layered artwork',async()=>{
+ assert.equal(places.length,385);assert.equal(photos.length,143);assert.equal(new Set(photos.map(p=>p.photo.src)).size,140);
  const priority=photos.filter(p=>p.photo.rank>=1&&p.photo.rank<=75);assert.equal(priority.length,75);assert.deepEqual(priority.map(p=>p.photo.rank).sort((a,b)=>a-b),Array.from({length:75},(_,i)=>i+1));
  assert.equal(photos.filter(p=>p.photo.overlayGlowSrc).length,20);
  for(const p of photos){const photo=p.photo;assert.equal(photo.treatment,'sculpted-v3');for(const key of ['author','sourceUrl','license','licenseUrl','alt'])assert.ok(photo[key],`${p.id} missing ${key}`);
@@ -14,7 +14,7 @@ test('all75 priority destinations and48 additional assignments have complete att
  }
 });
 test('responsive artwork embeds aligned transparent pixels and no remote references',async()=>{
- const unique=new Map(photos.map(p=>[p.photo.overlaySrc,p.photo]));assert.equal(overlays.length,120);
+ const unique=new Map(photos.map(p=>[p.photo.overlaySrc,p.photo]));assert.equal(overlays.length,140);
  for(const [src,photo] of unique){const record=overlays.find(x=>x.overlaySrc===src);assert.ok(record,src);if(photo.overlayGlowSrc){assert.equal(record.nodeReview?.status,'accepted');assert.equal(record.nodeReview.nodesHash,record.nodesHash);}assert.equal(record.finalReview?.status,'accepted');for(const hash of ['baseHash','artHash','wrapperHash','regionHash','nodesHash'])assert.equal(record.finalReview[hash],record[hash]);
   for(const variant of photo.overlayVariants){const svg=fs.readFileSync(path.join(base,variant.src),'utf8');assert.doesNotMatch(svg,/<script|<foreignObject|onload=|https?:\/\/(?!www\.w3\.org)/i);const embedded=[...svg.matchAll(/href="data:image\/webp;base64,([A-Za-z0-9+/=]+)"/g)];assert.equal(embedded.length,1);assert.equal((svg.match(/<image\b/g)||[]).length,1);const bytes=Buffer.from(embedded[0][1],'base64');const m=await sharp(bytes).metadata();assert.equal(m.width,variant.width);assert.ok(m.hasAlpha);assert.ok(Math.abs(m.width/m.height-photo.width/photo.height)<.01);assert.match(svg,/feComponentTransfer/);if(record.exclusion?.polygons?.length)assert.match(svg,/mask="url\(#allowed\)"/);
   }

@@ -494,7 +494,55 @@
       "art": "assets/motifs/places/memaloose.svg",
       "coordinateSource": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=118",
       "coordinateCheckedAt": "2026-09-22T23:02:50.431Z",
-      "locationPrecision": "agency-area"
+      "locationPrecision": "agency-area",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Memaloose State Park",
+        "author": "brx0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Memaloose_State_Park.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/v3/memaloose.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/v3/memaloose-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/memaloose-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/memaloose.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/memaloose.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/memaloose-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/memaloose-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/memaloose.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.43,
+          "cy": 0.65,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 76,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "usfs-8156.004621",
@@ -3226,7 +3274,55 @@
       "routeMiles": 4.2,
       "routeMatch": true,
       "routeSurface": "N/A",
-      "routeGrade": "N/A"
+      "routeGrade": "N/A",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Chain Lakes",
+        "author": "Ron Clausen",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Table_Mountain_refected._Mount_Baker_area.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/v3/route-8600563.webp",
+        "width": 2048,
+        "height": 1567,
+        "variants": [
+          {
+            "src": "assets/photos/v3/route-8600563-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/route-8600563-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/route-8600563.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/route-8600563.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/route-8600563-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/route-8600563-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/route-8600563.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.7,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 78,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "route-8580755",
@@ -3326,7 +3422,55 @@
       "routeGrade": "N/A",
       "coordinateSource": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecInfraRecreationSites_02/MapServer/0/query?f=pjson&where=site_cn%3D%276304.005511%27&outFields=site_name,latitude,longitude",
       "coordinateCheckedAt": "2026-09-22T23:04:46.842Z",
-      "locationPrecision": "agency-trailhead"
+      "locationPrecision": "agency-trailhead",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Heather Lake",
+        "author": "Iiii I I I",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Heather_Lake_and_Mount_Pilchuck,_Snohomish_County,_Washington_(2026).jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/v3/route-8579996.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/v3/route-8579996-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/route-8579996-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/route-8579996.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/route-8579996.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/route-8579996-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/route-8579996-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/route-8579996.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.7,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 79,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "usfs-5480010324",
@@ -3533,7 +3677,55 @@
       "routeMatch": true,
       "routeSurface": "IMPORTED COMPACTED MATERIAL",
       "routeGrade": "5-8%",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Little Zigzag Falls",
+        "author": "U.S. Forest Service- Pacific Northwest Region",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mt_Hood_National_Forest,_Little_Zigzag_Falls_(37193404145).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "src": "assets/photos/v3/usfs-5445010324.webp",
+        "width": 2048,
+        "height": 1368,
+        "variants": [
+          {
+            "src": "assets/photos/v3/usfs-5445010324-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/usfs-5445010324-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/usfs-5445010324.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/usfs-5445010324.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/usfs-5445010324-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-5445010324-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-5445010324.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 80,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "usfs-1288168010602",
@@ -3550,7 +3742,55 @@
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
       "accent": "#FF6600",
       "art": "assets/motifs/places/usfs-1288168010602.svg",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Sandy River Delta",
+        "author": "Bill Reynolds",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sandy_River_Delta.jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/v3/usfs-1288168010602.webp",
+        "width": 2048,
+        "height": 1178,
+        "variants": [
+          {
+            "src": "assets/photos/v3/usfs-1288168010602-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/usfs-1288168010602-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/usfs-1288168010602.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/usfs-1288168010602.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/usfs-1288168010602-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-1288168010602-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-1288168010602.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 81,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "usfs-5045.009041",
@@ -4571,7 +4811,55 @@
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
       "accent": "#FF6600",
       "art": "assets/motifs/places/usfs-6952.004731.svg",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Falls Creek Falls Th",
+        "author": "Jake Melara jakemelara",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Falls_Creek_Falls,_United_States_(Unsplash_gYa310T59OA).jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "src": "assets/photos/v3/usfs-6952.004731.webp",
+        "width": 2048,
+        "height": 3072,
+        "variants": [
+          {
+            "src": "assets/photos/v3/usfs-6952.004731-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/usfs-6952.004731-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/usfs-6952.004731.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/usfs-6952.004731.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/usfs-6952.004731-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-6952.004731-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-6952.004731.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 83,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "usfs-5124010357",
@@ -4787,7 +5075,55 @@
       "routeMatch": true,
       "routeSurface": "NAT - NATIVE MATERIAL",
       "routeGrade": "5-8%",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Lena Lake Trailhead",
+        "author": "U.S. Forest Service- Pacific Northwest Region",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lena_Lake,_Olympic_National_Forest._(42358599524).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "src": "assets/photos/v3/usfs-5421.005071.webp",
+        "width": 2048,
+        "height": 1083,
+        "variants": [
+          {
+            "src": "assets/photos/v3/usfs-5421.005071-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/usfs-5421.005071-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/usfs-5421.005071.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/usfs-5421.005071.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/usfs-5421.005071-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-5421.005071-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-5421.005071.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.7,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 86,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "usfs-5451.005071",
@@ -4812,7 +5148,55 @@
       "routeMatch": true,
       "routeSurface": "NAT - NATIVE MATERIAL",
       "routeGrade": "5-8%",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Mt. Ellinor (Upper)",
+        "author": "U.S. Forest Service- Pacific Northwest Region",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:View_of_trees_on_Mt_Ellinor,_Olympic_National_Forest_(34246921725).jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "src": "assets/photos/v3/usfs-5451.005071.webp",
+        "width": 2048,
+        "height": 1374,
+        "variants": [
+          {
+            "src": "assets/photos/v3/usfs-5451.005071-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/usfs-5451.005071-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/usfs-5451.005071.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/usfs-5451.005071.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/usfs-5451.005071-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-5451.005071-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-5451.005071.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 87,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "usfs-6217.005511",
@@ -4837,7 +5221,55 @@
       "routeMatch": true,
       "routeSurface": "N/A",
       "routeGrade": "N/A",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Icicle Gorge",
+        "author": "Jonathan Miske from United States",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Icicle_Creek_along_the_Icicle_Gorge_Trail,_May_2015.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/v3/usfs-6217.005511.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/v3/usfs-6217.005511-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/usfs-6217.005511-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/usfs-6217.005511.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/usfs-6217.005511.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/usfs-6217.005511-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-6217.005511-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-6217.005511.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 88,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "usfs-5182010416",
@@ -4952,7 +5384,55 @@
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
       "accent": "#398BFF",
       "art": "assets/motifs/places/usfs-5723010274.svg",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Takhlakh Lake Cg",
+        "author": "FluttershyIsMagic",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Takhlakh_Lake_Reflection_01.JPG",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/v3/usfs-5723010274.webp",
+        "width": 2048,
+        "height": 1535,
+        "variants": [
+          {
+            "src": "assets/photos/v3/usfs-5723010274-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/usfs-5723010274-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/usfs-5723010274.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/usfs-5723010274.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/usfs-5723010274-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-5723010274-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-5723010274.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 84,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "usfs-5562010274",
@@ -4986,7 +5466,55 @@
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
       "accent": "#398BFF",
       "art": "assets/motifs/places/usfs-5714010274.svg",
-      "collection": "Northwest picks"
+      "collection": "Northwest picks",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Lower Falls Recreation Area",
+        "author": "jhvanwa",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lower_Lewis_River_Falls_in_WA_-_53001545841.jpg",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "src": "assets/photos/v3/usfs-5714010274.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/v3/usfs-5714010274-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/usfs-5714010274-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/usfs-5714010274.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/usfs-5714010274.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/usfs-5714010274-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-5714010274-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/usfs-5714010274.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 85,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "usfs-5637010274",
@@ -5692,7 +6220,55 @@
       "art": "assets/motifs/places/saddle-mountain.svg",
       "coordinateSource": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=140",
       "coordinateCheckedAt": "2026-09-22T23:02:50.431Z",
-      "locationPrecision": "agency-area"
+      "locationPrecision": "agency-area",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Saddle Mountain",
+        "author": "Jeffhollett",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Saddle_Mountain_in_Oregon_23.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/v3/saddle-mountain.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/v3/saddle-mountain-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/saddle-mountain-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/saddle-mountain.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/saddle-mountain.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/saddle-mountain-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/saddle-mountain-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/saddle-mountain.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 77,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "fort-clatsop",
@@ -7343,7 +7919,55 @@
       "art": "assets/motifs/places/second-beach-trail.svg",
       "coordinateSource": "https://www.wta.org/go-hiking/hikes/second-beach",
       "coordinateCheckedAt": "2026-09-22T23:04:46.842Z",
-      "locationPrecision": "published-trailhead"
+      "locationPrecision": "published-trailhead",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Second Beach Trail",
+        "author": "King of Hearts",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Second_Beach_Olympic_June_2018_007.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/v3/second-beach-trail.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/v3/second-beach-trail-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/second-beach-trail-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/second-beach-trail.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/second-beach-trail.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/second-beach-trail-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/second-beach-trail-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/second-beach-trail.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 89,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "denny-blaine",
@@ -8370,7 +8994,55 @@
       "selectionBasis": "Curated regional destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
       "locationPrecision": "approximate-area",
-      "landscape": "alpine"
+      "landscape": "alpine",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Diamond Lake",
+        "author": "PGHolbrook",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Diamond_Lake_%26_Mt_Bailey.....JPG",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "src": "assets/photos/v3/fishing-or-diamond-lake.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/v3/fishing-or-diamond-lake-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/fishing-or-diamond-lake-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/fishing-or-diamond-lake.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/fishing-or-diamond-lake.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/fishing-or-diamond-lake-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/fishing-or-diamond-lake-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/fishing-or-diamond-lake.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.7,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 82,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "fishing-or-lake-of-the-woods",
@@ -12628,7 +13300,55 @@
       "locationPrecision": "mapped-site",
       "landscape": "mountain",
       "coordinateSource": "https://www.openstreetmap.org/way/162579100",
-      "coordinateCheckedAt": "2026-09-22T23:06:44.124Z"
+      "coordinateCheckedAt": "2026-09-22T23:06:44.124Z",
+      "photo": {
+        "alt": "Sculpted landscape illustration of East Sooke Coast Trail",
+        "author": "Michal Klajban",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rocky_coast_of_East_Sooke_Regional_Park,_British_Columbia,_Canada_30.jpg",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "src": "assets/photos/v3/bc-east-sooke.webp",
+        "width": 2048,
+        "height": 1341,
+        "variants": [
+          {
+            "src": "assets/photos/v3/bc-east-sooke-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/bc-east-sooke-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/bc-east-sooke.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/bc-east-sooke.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/bc-east-sooke-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/bc-east-sooke-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/bc-east-sooke.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 90,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "bc-jordan-river",
@@ -13382,7 +14102,55 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Nairn Falls Campground",
+        "author": "Sébastien Launay",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nairn_Falls_Campground.jpg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "src": "assets/photos/v3/bc-nairn.webp",
+        "width": 2048,
+        "height": 1365,
+        "variants": [
+          {
+            "src": "assets/photos/v3/bc-nairn-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/bc-nairn-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/bc-nairn.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/bc-nairn.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/bc-nairn-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/bc-nairn-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/bc-nairn.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 91,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "bc-alice",
@@ -13403,7 +14171,55 @@
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
       "locationPrecision": "approximate-area",
-      "landscape": "lake"
+      "landscape": "lake",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Alice Lake Campground",
+        "author": "Yummifruitbat",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alice_lake_twilight.jpg",
+        "license": "CC BY-SA 2.5",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+        "src": "assets/photos/v3/bc-alice.webp",
+        "width": 2048,
+        "height": 2731,
+        "variants": [
+          {
+            "src": "assets/photos/v3/bc-alice-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/bc-alice-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/bc-alice.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/bc-alice.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/bc-alice-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/bc-alice-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/bc-alice.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.7,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 92,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "bc-callaghan-atv",
@@ -13604,7 +14420,55 @@
       "selectionBasis": "Curated day-trip destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:44:22.777Z",
       "locationPrecision": "agency-area",
-      "landscape": "desert"
+      "landscape": "desert",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Hat Rock State Park",
+        "author": "PortlandSaint",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:HatRockSPOR.jpg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "src": "assets/photos/v3/dayuse-or-hat-rock-state-park.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/v3/dayuse-or-hat-rock-state-park-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/dayuse-or-hat-rock-state-park-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/dayuse-or-hat-rock-state-park.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/dayuse-or-hat-rock-state-park.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/dayuse-or-hat-rock-state-park-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/dayuse-or-hat-rock-state-park-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/dayuse-or-hat-rock-state-park.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 94,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "dayuse-or-ecola-state-park",
@@ -14172,7 +15036,55 @@
       "selectionBasis": "Curated day-trip destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:44:22.777Z",
       "locationPrecision": "agency-area",
-      "landscape": "coast"
+      "landscape": "coast",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Lime Kiln Point State Park",
+        "author": "Draugen at English Wikipedia",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lime_Kiln_Lighthouse_2.jpg",
+        "license": "Public domain",
+        "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "src": "assets/photos/v3/dayuse-wa-lime-kiln-point-state-park.webp",
+        "width": 2048,
+        "height": 1536,
+        "variants": [
+          {
+            "src": "assets/photos/v3/dayuse-wa-lime-kiln-point-state-park-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/dayuse-wa-lime-kiln-point-state-park-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/dayuse-wa-lime-kiln-point-state-park.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/dayuse-wa-lime-kiln-point-state-park.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/dayuse-wa-lime-kiln-point-state-park-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/dayuse-wa-lime-kiln-point-state-park-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/dayuse-wa-lime-kiln-point-state-park.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 93,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "dayuse-wa-peace-arch-historical-state-park",
@@ -14373,7 +15285,55 @@
       "selectionBasis": "Curated day-trip destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:44:22.777Z",
       "locationPrecision": "agency-area",
-      "landscape": "coast"
+      "landscape": "coast",
+      "photo": {
+        "alt": "Sculpted landscape illustration of Scenic Beach State Park",
+        "author": "Liz Lawley from Rochester, NY",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Scenic_Beach_State_Park.jpg",
+        "license": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "src": "assets/photos/v3/dayuse-wa-scenic-beach-state-park.webp",
+        "width": 2048,
+        "height": 1474,
+        "variants": [
+          {
+            "src": "assets/photos/v3/dayuse-wa-scenic-beach-state-park-640.webp",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/dayuse-wa-scenic-beach-state-park-1280.webp",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/dayuse-wa-scenic-beach-state-park.webp",
+            "width": 2048
+          }
+        ],
+        "overlaySrc": "assets/photos/v3/overlays/dayuse-wa-scenic-beach-state-park.svg",
+        "overlayVariants": [
+          {
+            "src": "assets/photos/v3/overlays/dayuse-wa-scenic-beach-state-park-640.svg",
+            "width": 640
+          },
+          {
+            "src": "assets/photos/v3/overlays/dayuse-wa-scenic-beach-state-park-1280.svg",
+            "width": 1280
+          },
+          {
+            "src": "assets/photos/v3/overlays/dayuse-wa-scenic-beach-state-park.svg",
+            "width": 2048
+          }
+        ],
+        "quiet": {
+          "cx": 0.5,
+          "cy": 0.55,
+          "rx": 0.43,
+          "ry": 0.28
+        },
+        "rank": 95,
+        "treatment": "sculpted-v3",
+        "modifications": "AI-assisted sculpted HDR illustration retaining source geography; restrained orange shadow accents, vivid greens/blues, upscale and separate generative luminous artwork."
+      }
     },
     {
       "id": "winter-meadows",
