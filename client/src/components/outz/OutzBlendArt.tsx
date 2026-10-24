@@ -6,11 +6,11 @@ let engine:Promise<BlendModule>|undefined;
 let styles=false;
 /** The blend engine is a plain ES module shared with the Outzide map, loaded like the photo motion script so both draw the same art. */
 function loadEngine(){
- if(!styles){styles=true;const link=document.createElement('link');link.rel='stylesheet';link.href='/outzide-map/assets/blend-art.css?v=20261024-rgb';document.head.append(link);}
+ if(!styles){styles=true;const link=document.createElement('link');link.rel='stylesheet';link.href='/outzide-map/assets/blend-art.css?v=20261024-refine';document.head.append(link);}
  return engine??=new Promise<BlendModule>((resolve,reject)=>{
   const scope=window as Window&{__outzBlendArt?:BlendModule};
   if(scope.__outzBlendArt){resolve(scope.__outzBlendArt);return;}
-  const script=document.createElement('script');script.type='module';script.src='/outzide-map/assets/blend-art.js?v=20261024-rgb';
+  const script=document.createElement('script');script.type='module';script.src='/outzide-map/assets/blend-art.js?v=20261024-refine';
   script.onload=()=>scope.__outzBlendArt?resolve(scope.__outzBlendArt):reject(new Error('Blend art unavailable'));
   script.onerror=()=>reject(new Error('Blend art unavailable'));document.head.append(script);
  });

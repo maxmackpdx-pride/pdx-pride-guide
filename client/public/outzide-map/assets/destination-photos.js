@@ -38,7 +38,7 @@ export function createPhotoMotion(scope=globalThis){
 
 // Blended art: the engine mounts into the marked photo span and the layered photo hides behind it. Falls back to the photo if it cannot load.
 const blendOff=new Set();let blendEngine;
-const loadBlend=()=>blendEngine??=import('./blend-art.js?v=20261024-rgb');
+const loadBlend=()=>blendEngine??=import('./blend-art.js?v=20261024-refine');
 export function enhanceBlend(root=document){
  for(const entry of [...blendOff])if(!entry.el.isConnected){entry.off?.();blendOff.delete(entry);}
  root.querySelectorAll('.outz-photo[data-blend-place]:not([data-blend-ready])').forEach(el=>{
