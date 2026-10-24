@@ -24,3 +24,7 @@
    Its inner 94% is exactly clear; the remaining 6% feathers into full artwork.
    The base photo and stationary bottom fade remain outside this graphics mask. */
 .outz-photo[data-photo-quiet=true] .outz-photo__graphics{mask-image:radial-gradient(ellipse var(--quiet-rx) var(--quiet-ry) at var(--quiet-x) var(--quiet-y),transparent 0 94%,#000 100%)!important;-webkit-mask-image:radial-gradient(ellipse var(--quiet-rx) var(--quiet-ry) at var(--quiet-x) var(--quiet-y),transparent 0 94%,#000 100%)!important}
+
+/* Blended art hides the layered photo and its own bottom fade; the blend engine draws the card art. */
+.outz-photo--blend>.outz-photo__base,.outz-photo--blend>.outz-photo__graphics{display:none!important}
+.outz-photo--blend::after{display:none}

@@ -11,11 +11,13 @@ export function photoQuietStyle(quiet){
  if(clearArea<.30||clearArea>.45)return '';
  return [['x',cx],['y',cy],['rx',rx],['ry',ry]].map(([key,value])=>'--quiet-'+key+':'+(value*100).toFixed(4)+'%').join(';');
 }
-export function photoMarkup(photo,className=''){
+// Places that have blended art (assets/blend-art.js). Their photo span is marked, then filled by enhanceBlend() after render.
+const BLEND_PLACES=new Set(['bc-garibaldi','silver-falls','rooster-rock']);
+export function photoMarkup(photo,className='',placeId=''){
  if(!photoUrl(photo?.src))return '';
  const srcset=photoSrcSet(photo.variants),overlaySrcset=photoSrcSet(photo.overlayVariants,true),quiet=photoQuietStyle(photo.quiet);
  const image=(src,kind,alt='')=>{const responsive=kind==='base'?srcset:kind==='overlay'?overlaySrcset:'';return '<img class="outz-photo__'+kind+'" src="'+escape(photoUrl(src))+'"'+(responsive?' srcset="'+escape(responsive)+'" sizes="(max-width: 800px) 100vw, 800px"':'')+' alt="'+escape(alt)+'" width="'+(Number(photo.width)||1600)+'" height="'+(Number(photo.height)||1000)+'" loading="lazy" decoding="async"'+(kind==='base'?'':' aria-hidden="true"')+'>';};
- return '<span class="outz-photo '+escape(className)+'" data-outz-photo'+(quiet?' data-photo-quiet="true"':'')+' data-photo-rank="'+(Number(photo.rank)||999)+'" style="--photo-position:'+escape(photo.position||'center')+(quiet?';'+quiet:'')+'">'+image(photo.src,'base',photo.alt)+(photoUrl(photo.overlaySrc)?'<span class="outz-photo__graphics">'+image(photo.overlaySrc,'overlay')+(photoUrl(photo.overlayGlowSrc)&&photo.rank<=20?image(photo.overlayGlowSrc,'nodes'):'')+'</span>':'')+'</span>';
+ return '<span class="outz-photo '+escape(className)+'"'+(BLEND_PLACES.has(placeId)?' data-blend-place="'+escape(placeId)+'"':'')+' data-outz-photo'+(quiet?' data-photo-quiet="true"':'')+' data-photo-rank="'+(Number(photo.rank)||999)+'" style="--photo-position:'+escape(photo.position||'center')+(quiet?';'+quiet:'')+'">'+image(photo.src,'base',photo.alt)+(photoUrl(photo.overlaySrc)?'<span class="outz-photo__graphics">'+image(photo.overlaySrc,'overlay')+(photoUrl(photo.overlayGlowSrc)&&photo.rank<=20?image(photo.overlayGlowSrc,'nodes'):'')+'</span>':'')+'</span>';
 }
 export function createPhotoMotion(scope=globalThis){
  const doc=scope.document, entries=new Map(),fine=scope.matchMedia?.('(hover: hover) and (pointer: fine)'),reduced=scope.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -33,8 +35,25 @@ export function createPhotoMotion(scope=globalThis){
  doc.addEventListener('visibilitychange',sync);scope.addEventListener('storage',sync);reduced?.addEventListener('change',sync);fine?.addEventListener('change',sync);
  return {attach,refresh(root=doc){for(const element of entries.keys())if(!element.isConnected)detach(element);root.querySelectorAll('[data-outz-photo]').forEach(attach);sync();},dispose(){for(const element of [...entries.keys()])detach(element);observer?.disconnect();mutation?.disconnect();doc.removeEventListener('visibilitychange',sync);scope.removeEventListener('storage',sync);reduced?.removeEventListener('change',sync);fine?.removeEventListener('change',sync);}};
 }
+
+// Blended art: the engine mounts into the marked photo span and the layered photo hides behind it. Falls back to the photo if it cannot load.
+const blendOff=new Set();let blendEngine;
+const loadBlend=()=>blendEngine??=import('./blend-art.js?v=20261023-blend');
+export function enhanceBlend(root=document){
+ for(const entry of [...blendOff])if(!entry.el.isConnected){entry.off?.();blendOff.delete(entry);}
+ root.querySelectorAll('.outz-photo[data-blend-place]:not([data-blend-ready])').forEach(el=>{
+  el.dataset.blendReady='1';
+  loadBlend().then(async mod=>{
+   const id=el.dataset.blendPlace,variant=mod.hasBlend(id,'wide')?'wide':'tall';
+   if(!mod.hasBlend(id,variant))return;
+   const entry={el,off:null};blendOff.add(entry);
+   el.classList.add('outz-photo--blend');
+   try{entry.off=await mod.mountBlend(el,id,{variant})}catch{el.classList.remove('outz-photo--blend')}
+  }).catch(()=>{});
+ });
+}
 let runtime;
-export function enhancePhotos(){(runtime??=createPhotoMotion()).refresh();}
+export function enhancePhotos(){(runtime??=createPhotoMotion()).refresh();enhanceBlend();}
 export function attachPhoto(element){return (runtime??=createPhotoMotion()).attach(element);}
 
 // The React shell loads this public module through a script element (also valid in Vite dev).
