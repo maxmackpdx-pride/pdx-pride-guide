@@ -10,12 +10,27 @@ test.before(async()=>{
  const bridge=fs.readFileSync('client/public/mapz-map/index.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
  const app=express();app.get('/',(_req,res)=>res.send('<div id="root"></div><script src="/host.js"></script>'));
  app.get('/host.js',(_req,res)=>res.type('js').send(result.outputFiles[0].text));
+ const mapHtml=fs.readFileSync('client/public/mapz-map/index.html','utf8'),credit=mapHtml.match(/<div class="credit">.*?<\/div>/)[0];
+ app.get('/credit-host',(_req,res)=>res.send('<style>body{margin:0}iframe{width:100vw;height:100vh;border:0}#dock{position:fixed;bottom:8px;left:8px;right:8px;height:82px;background:black}@media(min-width:960px){#dock{display:none}}</style><iframe src="/credit-frame"></iframe><nav id="dock"></nav>'));
+ app.get('/credit-frame',(_req,res)=>res.send('<html data-embedded="1"><head><style>'+fs.readFileSync('client/public/mapz-map/studio.css','utf8')+'</style></head><body>'+credit+'</body></html>'));
  app.get('/mapz-map/index.html',(_req,res)=>res.send(`<script>${bridge}</script><script>window.messages=[];window.addEventListener('message',e=>{if(e.data.source==='mapz-host')messages.push(e.data)});setTimeout(()=>{if(parent.__failBoot)window.__mapzStartup.fatal('injected boot failure');else {window.__mapzStartup.phase('first-frame');parent.postMessage({source:'mapz-demo',type:'first-frame'},location.origin);if(window.__mapzStartup.ready)window.__mapzStartup.ready();else parent.postMessage({source:'mapz-demo',type:'ready'},location.origin);}},25);</script>`));
  server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s));});base='http://127.0.0.1:'+server.address().port;
  browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
 });
 test.after(async()=>{await browser?.close();server?.closeAllConnections();await new Promise(resolve=>server?.close(resolve));});
 const child=page=>page.frames().find(f=>f.url().includes('/mapz-map/index.html'));
+test('Mapz provider attribution stays above the mobile dock and remains tappable',{timeout:30000},async()=>{
+ const page=await browser.newPage();try{
+  await page.goto(base+'/credit-host');const frame=page.frames().find(f=>f.url().endsWith('/credit-frame'));
+  for(const width of [320,390,768,959,1280]){
+   await page.setViewportSize({width,height:844});
+   const rect=await frame.locator('.credit').boundingBox();
+   assert.ok(rect.x>=0&&rect.x+rect.width<=width);
+   if(width<960){const dock=await page.locator('#dock').boundingBox();assert.ok(rect.y+rect.height<dock.y,'attribution obscured at '+width);}
+   await frame.locator('.credit a').first().click({trial:true});
+  }
+ }finally{await page.close();}
+});
 async function boot(page){await page.waitForFunction(()=>document.querySelector('iframe')?.contentWindow?.messages?.some(m=>m.type==='data'));}
 test('Mapz resends listings, selection and controls after its existing iframe reloads',{timeout:30000},async()=>{
  const page=await browser.newPage();try{
