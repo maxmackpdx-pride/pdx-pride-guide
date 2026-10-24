@@ -6,7 +6,8 @@
 .bl .xc.bw>img{filter:url(#xcopyBW) contrast(1.45) brightness(1.2)}
 .bl .xc.lc>img{filter:url(#xcopyLC) contrast(1.35) saturate(1.2) brightness(1.12)}
 .bl .xc.col>img{filter:url(#xcopyCOL) contrast(1.15) saturate(1.25)}
-.bl .xc.pop>img{filter:url(#xpop) saturate(1.7) contrast(1.4)}
+.bl .xc.pop>img{filter:url(#xpopcool) contrast(1.1)}
+.bl .xc.zor>img{filter:url(#xzor) contrast(1.2)}
 .bl .xc.terr>.xt{position:absolute;inset:0;filter:url(#xcopyBW) contrast(1.45) brightness(1.2)}
 .bl .xt>img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;max-width:none}
 .bl .xt>img.m1,.bl .xt>img.m2{filter:brightness(.88)}.bl .xt>img.m1{transform:translate(.5cqw,-.4cqw)}.bl .xt>img.m2{transform:translate(1cqw,-.8cqw)}

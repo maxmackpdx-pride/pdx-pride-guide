@@ -28,7 +28,8 @@ const copier=(id,sat,curve)=>`<filter id="${id}" x="0" y="0" width="100%" height
 <feComposite in="blk" in2="c" operator="over" result="a"/><feComposite in="stk" in2="a" operator="over" result="d"/>
 <feComposite in="d" in2="SourceGraphic" operator="in"/></filter>`;
 let blDefs=null;const ensureDefs=()=>{if(blDefs&&blDefs.isConnected)return blDefs;let el=document.getElementById('bl-defs');if(!el){const sv=document.createElementNS('http://www.w3.org/2000/svg','svg');sv.setAttribute('width','0');sv.setAttribute('height','0');sv.style.position='absolute';sv.setAttribute('aria-hidden','true');el=document.createElementNS('http://www.w3.org/2000/svg','defs');el.id='bl-defs';sv.appendChild(el);document.body.appendChild(sv);el.innerHTML=DEFS_HTML}return blDefs=el};
-const DEFS_HTML=screenFilter('xdots',3,'dot',1.4,.86,.12)+screenFilter('xpop',4,'hatch',1.8,.12,.05)+copier('xcopyBW',0,'0 .02 .1 .42 .92 1 1')+copier('xcopyLC',.4,'0 .02 .16 .52 .9 1 1')+copier('xcopyCOL',.95,'0 .03 .2 .52 .88 1 1')+
+const DEFS_HTML=screenFilter('xdots',3,'dot',1.4,.86,.12)+screenFilter('xpop',4,'hatch',1.8,.12,.05)+'<filter id="xpopcool" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feColorMatrix in="SourceGraphic" type="matrix" values=".2126 .7152 .0722 0 0 .2126 .7152 .0722 0 0 .2126 .7152 .0722 0 0 0 0 0 1 0" result="lum"/><feTurbulence type="fractalNoise" baseFrequency=".011 .018" numOctaves="3" seed="7" result="nz"/><feColorMatrix in="nz" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1" result="nzg"/><feComposite in="lum" in2="nzg" operator="arithmetic" k1="0" k2="1" k3=".3" k4="-.15" result="mix"/><feComponentTransfer in="mix" result="post"><feFuncR type="discrete" tableValues=".02 .06 .16 .75 .94"/><feFuncG type="discrete" tableValues=".03 .30 .54 .89 .91"/><feFuncB type="discrete" tableValues=".04 .36 .65 .93 .86"/></feComponentTransfer><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="1" seed="11" result="sp"/><feColorMatrix in="sp" type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 9 0 0 0 -7.4" result="spk"/><feComposite in="spk" in2="post" operator="over" result="d"/><feComposite in="d" in2="SourceGraphic" operator="in"/></filter>'+
+ '<filter id="xzor" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feColorMatrix in="SourceGraphic" type="matrix" values=".2126 .7152 .0722 0 0 .2126 .7152 .0722 0 0 .2126 .7152 .0722 0 0 0 0 0 1 0" result="lum"/><feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="2" seed="3" result="nz"/><feColorMatrix in="nz" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1" result="nzg"/><feComposite in="lum" in2="nzg" operator="arithmetic" k1="0" k2="1" k3=".18" k4="-.09" result="mix"/><feComponentTransfer in="mix" result="tri"><feFuncR type="discrete" tableValues="0 1 1"/><feFuncG type="discrete" tableValues="0 .4 1"/><feFuncB type="discrete" tableValues="0 0 1"/></feComponentTransfer><feComposite in="tri" in2="SourceGraphic" operator="in"/></filter>'+copier('xcopyBW',0,'0 .02 .1 .42 .92 1 1')+copier('xcopyLC',.4,'0 .02 .16 .52 .9 1 1')+copier('xcopyCOL',.95,'0 .03 .2 .52 .88 1 1')+
  '<filter id="xglow" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="2.2" result="h"/><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="b"/><feComponentTransfer in="b" result="b2"><feFuncA type="linear" slope=".4"/></feComponentTransfer><feMerge><feMergeNode in="b2"/><feMergeNode in="h"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
 
 // ======== geometry helpers ========
@@ -64,10 +65,10 @@ const isoLines=(f,g,lv)=>{const {gw,gh,sx,sy}=g,segs=[];
   if(line.length>=5)lines.push(line)}
  return lines.map(l=>{const px=l.map(p=>[(p[0]+.5)*sx,(p[1]+.5)*sy]);return px.map((p,i)=>{const a=px[Math.max(0,i-1)],b=px[Math.min(px.length-1,i+1)];return [(a[0]+p[0]*2+b[0])/4,(a[1]+p[1]*2+b[1])/4]})})};
 // photo samples for roughness, glare and light/shadow (one small canvas read per image)
-function samplePhoto(src,g){return new Promise(res=>{const im=new Image();im.onload=()=>{try{const c=document.createElement('canvas');c.width=g.gw;c.height=g.gh;const x=c.getContext('2d');x.drawImage(im,0,0,g.gw,g.gh);const d=x.getImageData(0,0,g.gw,g.gh).data,B=new Float32Array(g.gw*g.gh),T=new Float32Array(g.gw*g.gh);
-  for(let i=0;i<B.length;i++)B[i]=(d[i*4]*.3+d[i*4+1]*.59+d[i*4+2]*.11)/255;
+function samplePhoto(src,g){return new Promise(res=>{const im=new Image();im.onload=()=>{try{const c=document.createElement('canvas');c.width=g.gw;c.height=g.gh;const x=c.getContext('2d');x.drawImage(im,0,0,g.gw,g.gh);const d=x.getImageData(0,0,g.gw,g.gh).data,B=new Float32Array(g.gw*g.gh),T=new Float32Array(g.gw*g.gh),Sa=new Float32Array(g.gw*g.gh);
+  for(let i=0;i<B.length;i++){B[i]=(d[i*4]*.3+d[i*4+1]*.59+d[i*4+2]*.11)/255;const mx=Math.max(d[i*4],d[i*4+1],d[i*4+2]),mn=Math.min(d[i*4],d[i*4+1],d[i*4+2]);Sa[i]=mx?(mx-mn)/mx:0}
   for(let y=1;y<g.gh-1;y++)for(let xx=1;xx<g.gw-1;xx++){const i=y*g.gw+xx;T[i]=Math.abs(B[i]-B[i-1])+Math.abs(B[i]-B[i+1])+Math.abs(B[i]-B[i-g.gw])+Math.abs(B[i]-B[i+g.gw])}
-  res({B,T})}catch(e){res({B:new Float32Array(g.gw*g.gh).fill(.5),T:new Float32Array(g.gw*g.gh).fill(.1)})}};im.onerror=()=>res({B:new Float32Array(g.gw*g.gh).fill(.5),T:new Float32Array(g.gw*g.gh).fill(.1)});im.src=src})}
+  res({B,T,Sa})}catch(e){res({B:new Float32Array(g.gw*g.gh).fill(.5),T:new Float32Array(g.gw*g.gh).fill(.1),Sa:new Float32Array(g.gw*g.gh)})}};im.onerror=()=>res({B:new Float32Array(g.gw*g.gh).fill(.5),T:new Float32Array(g.gw*g.gh).fill(.1),Sa:new Float32Array(g.gw*g.gh)});im.src=src})}
 let uid=0;
 // ---- line drawing: every line is kept to its object and out of the other lines' zones ----
 let CLIPS=[],EXCL=[],SKIP=[],ROUTE=null,RW=800,SWEEP='';
@@ -215,6 +216,23 @@ async function build(rec,name,art,real){
  const focusOf=c=>{if(c.ring)return c.ring;if(c.focusFrom==='person'&&subj){const b=bbox(subj.poly);return [(b.x0+b.x1)/2,b.y1+3]}if(c.focusFrom==='fall'&&fall){const b=bbox(fall.poly);return [(b.x0+b.x1)/2,b.y1+10]}return null};
  EXCL=(rec.mesh||[]).map(objCircle).concat(rec.avoid||[]);SWEEP='';
  const stats={topo:0,water:0};
+
+ // Clouds: die-cut to their real shape from bright, unsaturated sky, drawn in Zaylist orange, black and white; they glitch in and out.
+ try{
+  const LAND=['mountain','snow','rock','veg','water','person','fall'],land=new Uint8Array(g.gw*g.gh);
+  for(const c of rec.cutouts)if(LAND.includes(c.cls)){const m=raster(c.poly,g);for(let i=0;i<land.length;i++)if(m[i])land[i]=1}
+  const field=new Float32Array(g.gw*g.gh).fill(-1);let skyCells=0;
+  for(let x=0;x<g.gw;x++){let y=0;while(y<g.gh&&!land[y*g.gw+x])y++;for(let k=0;k<Math.max(0,y-1);k++){const i=k*g.gw+x;field[i]=S.B[i]-.45*S.Sa[i];skyCells++}}
+  if(skyCells>g.gw*g.gh*.03){
+   const sm=new Float32Array(field);for(let y=1;y<g.gh-1;y++)for(let x=1;x<g.gw-1;x++){const i=y*g.gw+x;if(field[i]<0)continue;let a=0,n=0;for(const j of [-1,0,1,-g.gw,g.gw]){if(field[i+j]>=0){a+=field[i+j];n++}}sm[i]=a/n}
+   const loops=isoLines(sm,g,.58).filter(pl=>pl.length>=8&&area(pl)>W0*H0*.0012);
+   if(loops.length){
+    const id='zc'+(uid++),d=loops.map(pl=>'M'+pl.map(q=>f1(q[0])+','+f1(q[1])).join('L')+'Z').join('');
+    ensureDefs().insertAdjacentHTML('beforeend','<svg width="0" height="0" style="position:absolute"><clipPath id="'+id+'" clipPathUnits="objectBoundingBox"><path transform="scale('+(1/W0)+' '+(1/H0)+')" d="'+d+'"/></clipPath></svg>');
+    art.insertAdjacentHTML('beforeend','<div class="xc zor k2" style="--d:'+(6.5+rnd()*3).toFixed(1)+'s;--o:-'+(rnd()*6).toFixed(1)+'s;clip-path:url(#'+id+')"><img src="'+real.src+'" alt=""></div>');
+   }
+  }
+ }catch(e){}
  let lines=terrain(rec,g,W0>1000?10:9);stats.topo=(lines.match(/<path/g)||[]).length;
  for(const c of rec.cutouts){
   if(c.cls==='fall')lines+=fallLines(c.poly,6);
