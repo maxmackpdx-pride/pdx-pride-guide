@@ -288,7 +288,7 @@ export async function mountBlend(container,placeId,{variant='tall',hud=true}={})
  const rec=RECIPES[key],src=photoUrl(key);if(!rec)return()=>{};
  ensureDefs();
  const W0=rec.W,H0=rec.H,g=mkGrid(rec);
- const box=document.createElement('div');box.className='bl';box.dataset.blend=placeId;container.prepend(box);
+ const box=document.createElement('div');box.className='bl'+(variant==='wide'?' bl--wide':'');box.dataset.blend=placeId;container.prepend(box);
  let disposed=false,ro=null;
  for(let i=0;i<30&&!setVars(box,rec);i++){await new Promise(r=>requestAnimationFrame(r));if(disposed)return()=>{}}
  ro=new ResizeObserver(()=>setVars(box,rec));ro.observe(box);
