@@ -13,7 +13,7 @@ export function prefetchOutzide() {
     ["/outzide-map/places.json", "prefetch", "fetch"],
     ["/outzide-map/details.json", "prefetch", "fetch"],
     ["/outzide-map/routes.json", "prefetch", "fetch"],
-    ["/outzide-map/i5-route.json", "prefetch", "fetch"],
+    ["/outzide-map/interstates-route.json", "prefetch", "fetch"],
   ]) {
     const link = document.createElement("link");
     link.rel = rel;

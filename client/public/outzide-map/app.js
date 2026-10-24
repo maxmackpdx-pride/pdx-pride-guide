@@ -22,7 +22,7 @@ import {createHotSpringSteam} from './assets/hot-spring-steam.js';
 import {createFireHologram} from './assets/fire-hologram.js';
 import {FIRE_SOURCES,FIRE_COLORS,fetchFireState,containsPoint} from './assets/fire-danger.js';
 import {clusterWaypoints} from './assets/waypoint-clusters.js?v=activity-clusters-20260925';
-import {addI5Spectrum} from './assets/i5-spectrum.js';
+import {addI5Spectrum} from './assets/i5-spectrum.js?v=20261024-orange';
 import {mapzSurfaceStyle,createWaterBloom} from './assets/outzide-surface.js';
 import {brightenOutzideTerrain} from './assets/outzide-night-palette.js?v=20261014-reference';
 import {createHologramMaterials,drawProjectionBeam,drawGroundRipples,groundDiskScale} from './assets/hologram-materials.js';
@@ -258,8 +258,8 @@ document.querySelectorAll('[data-controls-tab]').forEach(b=>b.onclick=()=>setMap
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&cardEmbed&&!$('#utility').open){parent.postMessage({source:'outzide-map',type:'close-card'},location.origin);e.preventDefault();return;}if(e.key==='Escape'&&$('#detail').open&&!$('#utility').open){setView('map');closeDetail({clear:true});e.preventDefault()}if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){e.preventDefault();openSearch()}if(e.target.matches('[role="tab"]')&&['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const tabs=['overview','conditions','community'],i=tabs.indexOf(state.tab),next=e.key==='Home'?0:e.key==='End'?2:(i+(e.key==='ArrowRight'?1:2))%3;changeTab(tabs[next])}});
 async function installI5(map){
  try{
-  const response=await fetch('i5-route.json',{signal:AbortSignal.timeout(25000)});
-  if(!response.ok)throw Error('I-5 geometry unavailable');
+  const response=await fetch('interstates-route.json',{signal:AbortSignal.timeout(25000)});
+  if(!response.ok)throw Error('Interstate geometry unavailable');
   const overlay={sources:{},layers:[]};addI5Spectrum(overlay,await response.json());
   await whenStyleReady(map);
   for(const [id,source] of Object.entries(overlay.sources))if(!map.getSource(id))map.addSource(id,source);
