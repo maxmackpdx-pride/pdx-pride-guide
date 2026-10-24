@@ -1124,7 +1124,10 @@ function onVisibilityChange(){
   map.stop();
  }else scheduleFrame();
 }
-window.addEventListener('pagehide',()=>{
+window.addEventListener('pagehide',event=>{
+ // BFCache freezes the complete scene. Keep its objects alive for Back/Forward.
+ if(event.persisted){map.stop();return;}
+ if(disposed)return;
  disposed=true;map.off('render',renderSceneOverlays);clearTimeout(countdownFrameTimer);clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);mapActivity.dispose();featureProjection.dispose();
  cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);
  exploration.dispose();
@@ -1140,8 +1143,8 @@ window.addEventListener('pagehide',()=>{
  if(map.getLayer(groundLightPools.id))map.removeLayer(groundLightPools.id);
  if(map.getLayer(portlandLandmarks.id))map.removeLayer(portlandLandmarks.id);
  map.remove();venueLogos.clear();logoLoads.clear();lightSprites.clear();lightFeatures=[];userLocation=null;userAvatarImage=null;nearbyLights=()=>[];lights.width=lights.height=1;
-},{once:true});
-window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
+});
+window.addEventListener('pageshow',event=>{if(event.persisted){map.resize();onVisibilityChange();scheduleFrame();}});
 
 // Interactive adapter: isolated from the original studio and homepage.
 function tell(type,payload={}){if(parent!==window)parent.postMessage({source:'mapz-demo',type,...payload},location.origin);}
@@ -1206,7 +1209,7 @@ window.addEventListener('message',event=>{
  if(type==='locate'){setUserLocation(data.coordinates,data.avatar);pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:data.coordinates,zoom:16,duration:700});}
  if(type==='fit'&&Array.isArray(data.bounds)){map.fitBounds(data.bounds,{padding:{top:140,bottom:150,left:72,right:72},maxZoom:17.25,duration:620});scheduleFrame();}
  if(type==='zoom'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.zoomTo(Math.max(-2,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});}
- if(type==='view'&&Array.isArray(data.center)&&data.center.length===2){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.jumpTo({center:[Number(data.center[1]),Number(data.center[0])],zoom:Math.max(-2,Math.min(maxExploreZoom,Number(data.zoom)||map.getZoom())),pitch:Number.isFinite(data.pitch)?data.pitch:automaticPitch(),bearing:Number.isFinite(data.bearing)?data.bearing:map.getBearing()});viewState();}
+ if(type==='view'&&Array.isArray(data.center)&&data.center.length===2){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.jumpTo({center:[Number(data.center[1]),Number(data.center[0])],zoom:Math.max(-2,Math.min(maxExploreZoom,(Number.isFinite(Number(data.zoom))?Number(data.zoom):map.getZoom()))),pitch:Number.isFinite(data.pitch)?data.pitch:automaticPitch(),bearing:Number.isFinite(data.bearing)?data.bearing:map.getBearing()});viewState();}
  if(type==='mode'){pauseControl.checked=data.mode!=='flight';pauseControl.dispatchEvent(new Event('input'));}
  if(type==='labels')for(const id of ['road-labels','place-labels'])if(map.getLayer(id))map.setLayoutProperty(id,'visibility',data.enabled?'visible':'none');
  if(type==='time'&&Number.isFinite(Number(data.timestamp))){viewTime=Number(data.timestamp);viewTimeReceived=performance.now();scheduleFrame();}
@@ -1225,5 +1228,5 @@ map.on('webglcontextlost',()=>startup.fatal('The 3D graphics context was lost.')
 map.on('load',()=>{
  pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));
  if(parent===window){map.jumpTo(STANDALONE_DEMO_VIEW);void setListings(standaloneDemoRows());}
- viewState();tell('ready');
+ viewState();startup.ready();
 });

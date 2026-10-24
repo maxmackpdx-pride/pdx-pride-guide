@@ -20,6 +20,7 @@ import MobileBottomNav from "./components/MobileBottomNav";
 import PullToRefresh from "./components/PullToRefresh";
 import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { routeBoundaryKey } from "./lib/routeBoundaryKey";
 import PushNotificationPrompt from "./components/PushNotificationPrompt";
 import AnalyticsTracker from "./components/AnalyticsTracker";
 import PrideGlowNudge from "./components/PrideGlowNudge";
@@ -48,8 +49,9 @@ function RiverBratsIntroOnBeaches() {
 
 function RouteBoundary({ children }: { children: ReactNode }) {
   const [location] = useLocation();
-  // Key by path so navigating away from a crashed page recovers.
-  return <ErrorBoundary key={location.split("?")[0]}>{children}</ErrorBoundary>;
+  // Key by room. Opening an event or place must not remount the board.
+  // Leaving for another room still recovers a crashed page.
+  return <ErrorBoundary key={routeBoundaryKey(location)}>{children}</ErrorBoundary>;
 }
 
 

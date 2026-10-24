@@ -15,6 +15,8 @@ body::after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;back
 .credit{position:fixed;top:max(12px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));z-index:5;font-size:10px;line-height:1.5;letter-spacing:.015em;color:#9eb0c1;text-shadow:0 1px 3px #000}
 .credit a{color:inherit;text-underline-offset:2px}
 .credit a:hover{color:#fff}
+/* Embedded maps sit behind the app's 82px phone/tablet navigation dock. */
+@media(max-width:959px){html[data-embedded] .credit{top:auto;bottom:calc(108px + env(safe-area-inset-bottom,0px));left:12px;right:86px;font-size:9px;text-align:left}}
 #map-status{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;max-width:calc(100% - 40px);padding:14px 20px;border:1px solid #b3cbe226;border-radius:12px;background:#080e19ed;text-align:center;font-size:13px;line-height:1.5;letter-spacing:.015em;box-shadow:0 12px 40px #0006}
 #map-status:empty{display:none}
 html[data-embedded]:not([data-map-error]) #map-status{display:none}

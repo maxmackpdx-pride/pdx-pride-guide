@@ -9,6 +9,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import { roomTitle } from "@/lib/rooms";
 import MapSwitch from "@/components/MapSwitch";
+import {mapRetryHref,type CameraMap} from "../../public/map-foundation/camera.js";
 
 /** Keep the field map's canvas, dialogs and styles isolated from the site shell. */
 export type OutzDiscoveryPlace = { id: string; name: string; region: string; kind: string; short: string; accent: string; cardAccent?: string; note: string; href: string; lat?: number; lng?: number; logo?: string };
@@ -44,8 +45,13 @@ export default function Outz() {
     return () => window.clearTimeout(timer);
   }, [listReady, restoreView]);
   const [attempt, setAttempt] = useState(0);
+  const retrySrc = useRef<{place:string|null;href:string}|null>(null);
   const [mapSlow, setMapSlow] = useState(false);
-  const retryMap = () => { setMapReady(false); setListReady(false); setMapSlow(false); setAttempt(value => value + 1); };
+  const retryMap = () => {
+    const iframe=frame.current;
+    if(iframe)retrySrc.current={place:sharedId,href:mapRetryHref(iframe.src,(iframe.contentWindow as (Window & {__zaylistMap?: CameraMap})|null)?.__zaylistMap)};
+    setMapReady(false); setListReady(false); setMapSlow(false); setAttempt(value => value + 1);
+  };
   useEffect(() => {
     if (mapReady) return;
     const timer = window.setTimeout(() => setMapSlow(true), 15000);
@@ -118,7 +124,7 @@ export default function Outz() {
   if(sharedId && !sharePending && (shareError || !sharedPlace))return <PageRecovery section="OutZide" title={shareError ? "This destination couldn’t load" : "Destination not found"} description="Browse Outzide to find a destination, or try this link again." href="/outzide" label="Browse Outzide" missing={!shareError} retry={shareError ? () => {void retryShare();} : undefined}/>;
   return <><div className="outz-map-page" style={{ position: "relative" }}>
     <MapSwitch current="outz" />
-    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=20261013-forest-room&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (new URLSearchParams(window.location.search).get("mapOnly") === "1" ? "&mapOnly=1" : "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "") + (new URLSearchParams(window.location.search).get("wall") === "1" ? "&wall=1" : "") + (new URLSearchParams(window.location.search).get("restore") === "1" && !sharedId ? "&restore=1" : "") + "&" + new URLSearchParams(Array.from(new URLSearchParams(window.location.search)).filter(([key]) => ["lat","lng","zoom","pitch","bearing"].includes(key))).toString()} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} />
-    {!mapReady && !(listReady && restoreView === 'list') && <MapBootLoader map="outz" overlay error={mapSlow ? "Outzide is taking longer than expected." : undefined} onRetry={mapSlow ? retryMap : undefined} onBrowse={mapSlow && listReady ? () => {frame.current?.contentWindow?.postMessage({source:'outzide-host',type:'set-view',view:'list'},window.location.origin);setMapReady(true);} : undefined}/>}
+    <iframe key={attempt} onLoad={publish} ref={frame} src={(retrySrc.current?.place===sharedId?retrySrc.current.href:null) ?? "/outzide-map/index.html?v=20261013-forest-room&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (new URLSearchParams(window.location.search).get("mapOnly") === "1" ? "&mapOnly=1" : "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "") + (new URLSearchParams(window.location.search).get("wall") === "1" ? "&wall=1" : "") + (new URLSearchParams(window.location.search).get("restore") === "1" && !sharedId ? "&restore=1" : "") + "&" + new URLSearchParams(Array.from(new URLSearchParams(window.location.search)).filter(([key]) => ["lat","lng","zoom","pitch","bearing"].includes(key))).toString()} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} />
+    {!mapReady && !(listReady && restoreView === 'list') && <MapBootLoader map="outz" overlay error={mapSlow ? "Outzide is taking longer than expected." : undefined} onRetry={retryMap} onBrowse={listReady ? () => {frame.current?.contentWindow?.postMessage({source:'outzide-host',type:'set-view',view:'list'},window.location.origin);setMapReady(true);} : undefined}/>}
   </div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
 }

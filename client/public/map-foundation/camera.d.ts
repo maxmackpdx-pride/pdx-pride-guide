@@ -3,5 +3,6 @@ export type CameraMap = {getCenter(): {lng:number;lat:number};getZoom():number;g
 export function captureCamera(map:CameraMap): MapCamera;
 export function readCameraParams(params:URLSearchParams): MapCamera | null;
 export function cameraHref(href:string,camera:MapCamera):string;
+export function mapRetryHref(href:string,map?:CameraMap|null):string;
 export function readSavedCamera(storage?:Storage,key?:string):MapCamera|null;
 export function saveMapCamera(map:CameraMap,storage?:Storage,key?:string):void;
