@@ -14,8 +14,13 @@ export type MapCoordinates = { lat: number; lng: number };
  * Collapses known Pride aliases first (compound tokens resist strip noise),
  * so "Darcell XV Showplace" attaches to "Darcelle XV Showplace".
  */
-function normalizeVenueKey(value: string): string {
-  return value
+const venueKeyCache = new Map<string, string>();
+const addressKeyCache = new Map<string, string>();
+
+export function normalizeVenueKey(value: string): string {
+  const cached = venueKeyCache.get(value);
+  if (cached !== undefined) return cached;
+  const key = value
     .toLowerCase()
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -38,15 +43,23 @@ function normalizeVenueKey(value: string): string {
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+  if (venueKeyCache.size > 8000) venueKeyCache.clear();
+  venueKeyCache.set(value, key);
+  return key;
 }
 
-function normalizeAddressKey(value: string): string {
-  return value
+export function normalizeAddressKey(value: string): string {
+  const cached = addressKeyCache.get(value);
+  if (cached !== undefined) return cached;
+  const key = value
     .toLowerCase()
     .replace(/,?\s*portland,?\s*(or|oregon)?\s*\d{0,5}(-\d{4})?/gi, "")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+  if (addressKeyCache.size > 8000) addressKeyCache.clear();
+  addressKeyCache.set(value, key);
+  return key;
 }
 
 export function hasMapCoordinates(fields: MapCoordinateFields): boolean {

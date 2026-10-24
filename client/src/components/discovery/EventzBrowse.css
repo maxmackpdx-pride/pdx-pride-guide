@@ -27,8 +27,14 @@
 .eb-filter-popover { order: 1; flex: 1 0 100%; width: 100%; max-height: min(70vh, 520px); overflow-y: auto; box-sizing: border-box; }
 @media (max-width: 700px) {
   .eb-filter-popover {
-    max-height: min(42vh, 280px);
-    scroll-margin-bottom: calc(var(--site-mobile-nav-height, 88px) + env(safe-area-inset-bottom, 0px) + 12px);
+    position: fixed;
+    z-index: 130;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    bottom: calc(var(--site-mobile-nav-height, 74px) + var(--site-mobile-nav-offset, 8px) + env(safe-area-inset-bottom, 0px) + 10px);
+    max-height: min(62dvh, calc(100dvh - var(--site-header-height, 56px) - var(--site-mobile-nav-height, 74px) - var(--site-mobile-nav-offset, 8px) - 28px));
+    overflow-y: auto;
   }
 }
 .eb-search-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }

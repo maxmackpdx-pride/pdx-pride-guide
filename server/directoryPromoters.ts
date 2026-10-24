@@ -1,5 +1,5 @@
 import type { Business } from "@shared/schema";
-import { eventMatchesBusiness } from "./venueCoordinates";
+import { eventMatchesBusiness, normalizeVenueKey } from "./venueCoordinates";
 
 export type DirectoryPromoter = { id: number; username: string; displayName: string | null };
 
@@ -41,6 +41,18 @@ export function promotersForBusinesses(
     if (user.email) byEmail.set(user.email, summary);
   }
 
+  const byVenue = new Map<string, PromoterCatalogEvent[]>();
+  const nameless: PromoterCatalogEvent[] = [];
+  for (const event of events) {
+    const key = normalizeVenueKey(event.venueName || "");
+    if (!key) nameless.push(event);
+    else {
+      const bucket = byVenue.get(key);
+      if (bucket) bucket.push(event);
+      else byVenue.set(key, [event]);
+    }
+  }
+
   const out = new Map<number, DirectoryPromoter[]>();
   for (const business of businesses) {
     const seen = new Set<number>();
@@ -50,7 +62,9 @@ export function promotersForBusinesses(
       seen.add(user.id);
       results.push(user);
     };
-    for (const event of events) {
+    const businessKey = normalizeVenueKey(business.name || "");
+    const candidates = businessKey ? [...(byVenue.get(businessKey) ?? []), ...nameless] : nameless;
+    for (const event of candidates) {
       if (!eventMatchesBusiness(event, business)) continue;
       for (const hostId of hostsByEventId.get(event.id) ?? []) add(byId.get(hostId));
       if (event.claimedBy) add(byUsername.get(event.claimedBy) ?? byEmail.get(event.claimedBy));

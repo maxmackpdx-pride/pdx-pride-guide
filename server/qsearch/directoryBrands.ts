@@ -495,16 +495,23 @@ export function matchDirectoryBrands(
  * Critical for short group aliases: "PLA" must not match the letters inside "play"
  * (Yes Coach / pet-play copy was wrongly tagging Portland Leather Alliance).
  */
-function textMentionsPhrase(haystack: string, needle: string): boolean {
-  const h = (haystack || "").toLowerCase();
+const phraseRegex = new Map<string, RegExp>();
+
+function phraseInLower(lowerHay: string, needle: string): boolean {
   const n = (needle || "").toLowerCase().trim();
-  if (!h || !n) return false;
-  if (n.length >= 6 && n.includes(" ")) {
-    // Multi-word full names: plain includes is fine ("portland leather alliance").
-    return h.includes(n);
+  if (!lowerHay || !n) return false;
+  if (n.length >= 6 && n.includes(" ")) return lowerHay.includes(n);
+  let pattern = phraseRegex.get(n);
+  if (!pattern) {
+    const escaped = n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    pattern = new RegExp(`(?:^|[^a-z0-9])${escaped}(?:[^a-z0-9]|$)`, "i");
+    phraseRegex.set(n, pattern);
   }
-  const escaped = n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:[^a-z0-9]|$)`, "i").test(h);
+  return pattern.test(lowerHay);
+}
+
+function textMentionsPhrase(haystack: string, needle: string): boolean {
+  return phraseInLower((haystack || "").toLowerCase(), needle);
 }
 
 /** titleKey / sourceLabelKey are already normalized (letters + spaces). */
@@ -520,9 +527,7 @@ function titleMentionsAlias(titleKey: string, aliasKey: string): boolean {
 }
 
 /** Alias map for Clubs & Groups directory matching (multi-name orgs). */
-function groupAliasesFor(name: string): string[] {
-  const key = normalizeVenueKey(name).replace(/\s+/g, "");
-  const MAP: Record<string, string[]> = {
+const GROUP_ALIAS_MAP: Record<string, string[]> = {
     pinkponies: ["Burning Man Pink Ponies", "Pink Ponies PDX"],
     pdxpahportlandpetsandhandlers: ["Portland Pets and Handlers", "PDX PAH", "PAH"],
     pdxpah: ["Portland Pets and Handlers", "PDX PAH"],
@@ -573,13 +578,35 @@ function groupAliasesFor(name: string): string[] {
     sankofacollective: ["Black PFLAG Portland", "Sankofa"],
     bearracuda: ["Bearracuda PDX", "Bearracuda Portland", "Bearracuda Seattle"],
     theimperialsovereignrosecourtoforegon: ["Rose Court", "ISRC", "Imperial Rose Court"],
-  };
-  // Direct + fuzzy key hits
-  if (MAP[key]) return MAP[key];
-  for (const [k, aliases] of Object.entries(MAP)) {
-    if (key.includes(k) || k.includes(key)) return aliases;
+};
+
+const groupAliasCache = new Map<string, string[]>();
+
+function groupAliasesFor(name: string): string[] {
+  const cached = groupAliasCache.get(name);
+  if (cached) return cached;
+  const key = normalizeVenueKey(name).replace(/\s+/g, "");
+  let aliases = GROUP_ALIAS_MAP[key];
+  if (!aliases) {
+    aliases = [];
+    for (const [candidate, values] of Object.entries(GROUP_ALIAS_MAP)) {
+      if (key.includes(candidate) || candidate.includes(key)) {
+        aliases = values;
+        break;
+      }
+    }
   }
-  return [];
+  groupAliasCache.set(name, aliases);
+  return aliases;
+}
+
+function businessMentionedInLower(lowerHay: string, title: string, business: { name: string }): boolean {
+  const titleKey = normalizeVenueKey(title);
+  return [business.name, ...groupAliasesFor(business.name)].some(alias => {
+    const key = normalizeVenueKey(alias);
+    if (key === "pla") return titleMentionsAlias(titleKey, key);
+    return phraseInLower(lowerHay, alias);
+  });
 }
 
 /**
@@ -592,16 +619,27 @@ export function eventMentionsDirectoryGroup(
   business: { name: string; type?: string | null },
 ): boolean {
   if (business.type !== "group" && business.type !== "nonprofit") return false;
-  const hay = `${event.title || ""} ${event.description || ""}`;
-  if (!hay.trim()) return false;
-  const aliases = [business.name, ...groupAliasesFor(business.name)];
-  return aliases.some(a => {
-    const key = normalizeVenueKey(a);
-    if (key === "pla") {
-      return titleMentionsAlias(normalizeVenueKey(event.title), key);
-    }
-    return textMentionsPhrase(hay, a);
-  });
+  const title = event.title || "";
+  const description = event.description || "";
+  if (!`${title}${description}`.trim()) return false;
+  return businessMentionedInLower(`${title} ${description}`.toLowerCase(), title, business);
+}
+
+/** One lowercase pass for every group on a directory listing. */
+export function mentionedDirectoryGroupIds(
+  event: { title?: string | null; description?: string | null },
+  businesses: ReadonlyArray<{ id: number; name: string; type?: string | null }>,
+): Set<number> {
+  const out = new Set<number>();
+  const title = event.title || "";
+  const description = event.description || "";
+  if (!`${title}${description}`.trim()) return out;
+  const lower = `${title} ${description}`.toLowerCase();
+  for (const business of businesses) {
+    if (business.type !== "group" && business.type !== "nonprofit") continue;
+    if (businessMentionedInLower(lower, title, business)) out.add(business.id);
+  }
+  return out;
 }
 
 /** Re-resolve logos on stored brands (pack paths may improve after logo map updates). */

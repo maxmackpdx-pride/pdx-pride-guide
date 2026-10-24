@@ -7,8 +7,8 @@ import {
   archiveDuplicatesLivePast,
   TUCKER_HOSTED_ARCHIVE_USERNAME,
 } from "@shared/tuckerHostedArchive";
-import { eventMatchesBusiness, mergeMapCoordinates } from "./venueCoordinates";
-import { eventMentionsDirectoryGroup } from "./qsearch/directoryBrands";
+import { eventMatchesBusiness, mergeMapCoordinates, normalizeVenueKey } from "./venueCoordinates";
+import { eventMentionsDirectoryGroup, mentionedDirectoryGroupIds } from "./qsearch/directoryBrands";
 
 export type DirectoryEventSummary = {
   id: number;
@@ -85,24 +85,19 @@ export function attachUpcomingEventsToBusinesses(
  * Groups also match when title/description mentions brand aliases
  * (Coach's Pet → Yes Coach Productions; venue still Sanctuary).
  */
-function createListingMatcher(businesses: Business[]) {
+type Storefront = { name?: string; venueName?: string; address?: string | null; lat?: number | null; lng?: number | null };
+type ListingMatcher = ((
+  listing: { venueName?: string | null; address?: string | null; lat?: number | null; lng?: number | null; title?: string | null; description?: string | null },
+  business: Business,
+) => boolean) & {
+  storefrontsFor(business: Business): Storefront[];
+};
+
+function createListingMatcher(businesses: Business[]): ListingMatcher {
   // All caches belong to this request's snapshot, never another user's payload.
   const fields = new WeakMap<object, ReturnType<typeof mergeMapCoordinates> & { venueName: string }>();
-  const storefronts = new WeakMap<Business, Array<{ name?: string; venueName?: string; address?: string | null; lat?: number | null; lng?: number | null }>>();
-  return function listingMatchesBusiness(
-    listing: { venueName?: string | null; address?: string | null; lat?: number | null; lng?: number | null; title?: string | null; description?: string | null },
-    business: Business,
-  ): boolean {
-    let eventFields = fields.get(listing);
-    if (!eventFields) {
-      eventFields = mergeMapCoordinates({
-        venueName: listing.venueName || "",
-        address: listing.address ?? null,
-        lat: listing.lat ?? null,
-        lng: listing.lng ?? null,
-      }, businesses);
-      fields.set(listing, eventFields);
-    }
+  const storefronts = new WeakMap<Business, Storefront[]>();
+  function storefrontsFor(business: Business): Storefront[] {
     let candidates = storefronts.get(business);
     if (!candidates) {
       candidates = [mergeMapCoordinates({
@@ -118,11 +113,28 @@ function createListingMatcher(businesses: Business[]) {
       }
       storefronts.set(business, candidates);
     }
-    if (candidates.some(biz => eventMatchesBusiness(eventFields, {
+    return candidates;
+  }
+  function listingMatchesBusiness(
+    listing: { venueName?: string | null; address?: string | null; lat?: number | null; lng?: number | null; title?: string | null; description?: string | null },
+    business: Business,
+  ): boolean {
+    let eventFields = fields.get(listing);
+    if (!eventFields) {
+      eventFields = mergeMapCoordinates({
+        venueName: listing.venueName || "",
+        address: listing.address ?? null,
+        lat: listing.lat ?? null,
+        lng: listing.lng ?? null,
+      }, businesses);
+      fields.set(listing, eventFields);
+    }
+    if (storefrontsFor(business).some(biz => eventMatchesBusiness(eventFields, {
       name: biz.name || biz.venueName, address: biz.address, lat: biz.lat, lng: biz.lng,
     }))) return true;
     return eventMentionsDirectoryGroup(listing, business);
-  };
+  }
+  return Object.assign(listingMatchesBusiness, { storefrontsFor });
 }
 
 /** Past nights at this venue: LIVE past listings + Tucker profile archive (Sanctuary / Eagle). */
@@ -194,11 +206,40 @@ export function attachPastEventsToBusinesses<T extends Business>(
 function directoryEventBuilder(businesses: Business[], events: Event[]) {
   const listings = expandMultiDayEvents(events);
   const matches = createListingMatcher(businesses), nowMs = Date.now();
-  return (business: Business) => ({
-    ...business,
-    upcomingEvents: getUpcomingEventsForBusiness(business, listings, businesses, matches),
-    pastEvents: getPastEventsForBusiness(business, listings, businesses, nowMs, matches),
-  });
+  const byVenue = new Map<string, EventListing[]>();
+  const nameless: EventListing[] = [];
+  const groups = businesses.filter(business => business.type === "group" || business.type === "nonprofit");
+  const groupListings = new Map<number, EventListing[]>();
+  for (const listing of listings) {
+    const key = normalizeVenueKey(listing.venueName || "");
+    if (!key) nameless.push(listing);
+    else {
+      const bucket = byVenue.get(key);
+      if (bucket) bucket.push(listing);
+      else byVenue.set(key, [listing]);
+    }
+    if (!groups.length) continue;
+    for (const id of mentionedDirectoryGroupIds(listing, groups)) {
+      const bucket = groupListings.get(id);
+      if (bucket) bucket.push(listing);
+      else groupListings.set(id, [listing]);
+    }
+  }
+  return (business: Business) => {
+    const pool = new Set<EventListing>();
+    for (const storefront of matches.storefrontsFor(business)) {
+      const key = normalizeVenueKey(storefront.name || storefront.venueName || "");
+      for (const listing of key ? byVenue.get(key) ?? [] : []) pool.add(listing);
+    }
+    for (const listing of nameless) pool.add(listing);
+    for (const listing of groupListings.get(business.id) ?? []) pool.add(listing);
+    const candidates = [...pool];
+    return {
+      ...business,
+      upcomingEvents: getUpcomingEventsForBusiness(business, candidates, businesses, matches),
+      pastEvents: getPastEventsForBusiness(business, candidates, businesses, nowMs, matches),
+    };
+  };
 }
 
 export function attachEventsToBusinesses(businesses: Business[], events: Event[]) {
