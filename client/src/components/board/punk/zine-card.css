@@ -184,10 +184,10 @@ body:has(.board-detail-backdrop) .boardz-punk-scope:not(.boardz-punk-scope--open
 .boardz-punk-scope .zine--small .zine-title{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
 
 /* Outzide boards (Trip Buddy, Carpool): token orange, the place stands out as a filled orange tag, copy centered. */
-.boardz-punk-scope .zine.zc-tripbuddy .zine-area,.boardz-punk-scope .zine.zc-carpool .zine-area{max-width:210px;padding:6px 10px;background:var(--neon-orange);color:var(--ink-900,#0a0a0c);border-color:var(--text-hi);font-size:12px;font-weight:800;rotate:-2deg;box-shadow:3px 3px 0 var(--ink-950,#000)}
+.boardz-punk-scope .zine.zc-tripbuddy .zine-area,.boardz-punk-scope .zine.zc-carpool .zine-area{max-width:210px;padding:6px 10px;background:var(--neon-orange);color:var(--ink-900);border-color:var(--text-hi);font-size:12px;font-weight:800;rotate:-2deg;box-shadow:3px 3px 0 var(--ink-950)}
 .boardz-punk-scope .zine--cs.zc-tripbuddy .zine-area,.boardz-punk-scope .zine--cs.zc-carpool .zine-area{font-size:13px}
 .boardz-punk-scope .zine.zc-tripbuddy .zine-title,.boardz-punk-scope .zine.zc-carpool .zine-title{text-align:center}
-.boardz-punk-scope .zine.zc-tripbuddy .zine-tape,.boardz-punk-scope .zine.zc-carpool .zine-tape{color:var(--ink-950,#000)}
+.boardz-punk-scope .zine.zc-tripbuddy .zine-tape,.boardz-punk-scope .zine.zc-carpool .zine-tape{color:var(--ink-950)}
 .boardz-punk-scope .zine[data-motif=trail] .zine-hero{width:170px;right:-14px;top:84px;bottom:auto;rotate:6deg}
 .boardz-punk-scope .zine[data-motif=ride] .zine-hero{width:250px;right:-34px;top:64px;bottom:auto;rotate:-4deg}
 .boardz-punk-scope .zine.zv-b[data-motif=trail] .zine-hero,.boardz-punk-scope .zine.zv-b[data-motif=ride] .zine-hero{rotate:-5deg}
