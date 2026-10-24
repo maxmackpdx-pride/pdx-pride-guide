@@ -11996,5 +11996,1779 @@
       "notes": "Final rendered composite visually accepted with matching base, art, wrapper and semantic region hashes."
     },
     "review": "Final rendered composite accepted; authored semantic exclusions and alpha cleanup applied."
+  },
+  {
+    "file": "assets/photos/v3/memaloose.webp",
+    "sha256": "4a138a416398451ce7460526a75205f9c289279c196aab664e6eb4505cd0bbe3",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/v3/overlays/memaloose.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/memaloose-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/memaloose-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/memaloose.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.43,
+      "cy": 0.65,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "e516a99c7a5274bdeeacf1742b62b2d076b6c6424139cb9534541a46ffd9c99b",
+    "artHash": "6c3b1064499bd98da127090f451b6edcd196d623da792e867531cef14c1a3e21",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "a95b6784ce64ec63f84fa82b5b72a96194e96eb8e9286bdb56f5dbace9eea624",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": []
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "e516a99c7a5274bdeeacf1742b62b2d076b6c6424139cb9534541a46ffd9c99b",
+      "artHash": "6c3b1064499bd98da127090f451b6edcd196d623da792e867531cef14c1a3e21",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "a95b6784ce64ec63f84fa82b5b72a96194e96eb8e9286bdb56f5dbace9eea624",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-01.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/saddle-mountain.webp",
+    "sha256": "cf1b587bfa61ae729fd58cd16159cf0e82bb09a3d712be7742c96c35e682d1cd",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/v3/overlays/saddle-mountain.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/saddle-mountain-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/saddle-mountain-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/saddle-mountain.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "e94ab7207ed1093625a240d838ee61ca74942ba271356e0c4a58fbe53aa03efa",
+    "artHash": "5cc3ce9b1a6890d8758e169562320f47e78366b4524bd60953440185434c2254",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "8b9860185054fa39a6fd924813f61e1d72383a747b4b4a93cf9a50b849f417dc",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "reason": "Protect foreground grasses and the walking trail; terrain contours stay on exposed basalt.",
+      "polygons": [
+        [
+          [
+            0.66,
+            0.64
+          ],
+          [
+            1,
+            0.64
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0.66,
+            1
+          ]
+        ]
+      ],
+      "skyNetwork": {
+        "points": [
+          [
+            0.07,
+            0.06
+          ],
+          [
+            0.2,
+            0.16
+          ],
+          [
+            0.35,
+            0.07
+          ],
+          [
+            0.48,
+            0.18
+          ],
+          [
+            0.64,
+            0.06
+          ],
+          [
+            0.78,
+            0.16
+          ],
+          [
+            0.86,
+            0.07
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "e94ab7207ed1093625a240d838ee61ca74942ba271356e0c4a58fbe53aa03efa",
+      "artHash": "5cc3ce9b1a6890d8758e169562320f47e78366b4524bd60953440185434c2254",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "8b9860185054fa39a6fd924813f61e1d72383a747b4b4a93cf9a50b849f417dc",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-01.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/route-8600563.webp",
+    "sha256": "5a156f42edaced323835096cafd85b9991a65f50f58707ed476cc4d585cab63a",
+    "width": 2048,
+    "height": 1567,
+    "overlaySrc": "assets/photos/v3/overlays/route-8600563.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/route-8600563-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/route-8600563-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/route-8600563.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.7,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "819bf6bb6cff284f565cf04f9343c7124b10381ffce3fa6232928aaa2e04cacf",
+    "artHash": "a04ac4ded483c024129d1b86d8e193d76c86a0ae1726d653315a5f1b1b1b8058",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "d858083f04af88ebdd77a65adb5a274f5a20f6babb4895afb54bab378c953854",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.05,
+            0.025
+          ],
+          [
+            0.16,
+            0.07
+          ],
+          [
+            0.28,
+            0.025
+          ],
+          [
+            0.38,
+            0.07
+          ],
+          [
+            0.64,
+            0.02
+          ],
+          [
+            0.75,
+            0.07
+          ],
+          [
+            0.84,
+            0.025
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "819bf6bb6cff284f565cf04f9343c7124b10381ffce3fa6232928aaa2e04cacf",
+      "artHash": "a04ac4ded483c024129d1b86d8e193d76c86a0ae1726d653315a5f1b1b1b8058",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "d858083f04af88ebdd77a65adb5a274f5a20f6babb4895afb54bab378c953854",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-01.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/route-8579996.webp",
+    "sha256": "84e8eb0eb91857acf4918adccd8e56917ad022f2bfa0ceebeb151ac4e25b7698",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/v3/overlays/route-8579996.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/route-8579996-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/route-8579996-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/route-8579996.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.7,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "6f11df91021db8f4d13e26ebf8daa0751c44cced1e9733f8f4d1decf094c8660",
+    "artHash": "faa330d6044eefb0f2222ef53a00320fa5369789c1e4b4b9820a56a5e36ce2e3",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "052f1956d867e7fbfda199a21b2bd2b4c1343393842619f156ee69d0d2e9186b",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.08,
+            0.035
+          ],
+          [
+            0.22,
+            0.1
+          ],
+          [
+            0.36,
+            0.03
+          ],
+          [
+            0.52,
+            0.11
+          ],
+          [
+            0.67,
+            0.035
+          ],
+          [
+            0.8,
+            0.11
+          ],
+          [
+            0.91,
+            0.035
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "6f11df91021db8f4d13e26ebf8daa0751c44cced1e9733f8f4d1decf094c8660",
+      "artHash": "faa330d6044eefb0f2222ef53a00320fa5369789c1e4b4b9820a56a5e36ce2e3",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "052f1956d867e7fbfda199a21b2bd2b4c1343393842619f156ee69d0d2e9186b",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-01.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/usfs-5445010324.webp",
+    "sha256": "8493658faebde3725e22d5d9b394f6bcee556307469b7d889dd584037fb2700a",
+    "width": 2048,
+    "height": 1368,
+    "overlaySrc": "assets/photos/v3/overlays/usfs-5445010324.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/usfs-5445010324-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-5445010324-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-5445010324.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "cecd9705e6758e39210011481088d7c255f43c523a90c5beb0fd08166181283e",
+    "artHash": "34cd3a8a09dc0c0c5427e8d8dff0be4b069a1793b9acc691a6857ef8e9972281",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "d4b2cc1567c872f649d310e409a9d4250e354c0086f4cbf1a196080d05cb43dc",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "reason": "Remove terrain lines from moss, fern banks and fallen wood; preserve the waterfall and its pool.",
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            0.29,
+            0
+          ],
+          [
+            0.29,
+            0.45
+          ],
+          [
+            0.42,
+            0.73
+          ],
+          [
+            0.3,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          [
+            0.28,
+            0.08
+          ],
+          [
+            0.8,
+            0.08
+          ],
+          [
+            0.8,
+            0.27
+          ],
+          [
+            0.28,
+            0.27
+          ]
+        ],
+        [
+          [
+            0.7,
+            0.4
+          ],
+          [
+            1,
+            0.4
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0.85,
+            1
+          ],
+          [
+            0.75,
+            0.82
+          ]
+        ],
+        [
+          [
+            0,
+            0.65
+          ],
+          [
+            0.48,
+            0.65
+          ],
+          [
+            0.48,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      ]
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "cecd9705e6758e39210011481088d7c255f43c523a90c5beb0fd08166181283e",
+      "artHash": "34cd3a8a09dc0c0c5427e8d8dff0be4b069a1793b9acc691a6857ef8e9972281",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "d4b2cc1567c872f649d310e409a9d4250e354c0086f4cbf1a196080d05cb43dc",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-01.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/usfs-1288168010602.webp",
+    "sha256": "7ba1b489e46e300a38e6a06bf0aa426fd4f492f551be62b6e65dbc1bce521285",
+    "width": 2048,
+    "height": 1178,
+    "overlaySrc": "assets/photos/v3/overlays/usfs-1288168010602.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/usfs-1288168010602-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-1288168010602-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-1288168010602.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "7dbacaa3c7e83a7102e7355574c20a264f8291fb4eaf001801f847fbf4875ef5",
+    "artHash": "971966a603a531c2be49a61e4b48627556d77ba5c53a5614c3fd176d95846df2",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "794dd79b86dc2aee40bf14baa8fc2bdf346de7e000b736cf680f20f1e0b63408",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.17,
+            0.03
+          ],
+          [
+            0.29,
+            0.12
+          ],
+          [
+            0.4,
+            0.035
+          ],
+          [
+            0.53,
+            0.16
+          ],
+          [
+            0.64,
+            0.05
+          ],
+          [
+            0.75,
+            0.12
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "7dbacaa3c7e83a7102e7355574c20a264f8291fb4eaf001801f847fbf4875ef5",
+      "artHash": "971966a603a531c2be49a61e4b48627556d77ba5c53a5614c3fd176d95846df2",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "794dd79b86dc2aee40bf14baa8fc2bdf346de7e000b736cf680f20f1e0b63408",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-01.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/fishing-or-diamond-lake.webp",
+    "sha256": "172df249b79caa1d969cbe4c76802179d8ed49020b5aeadfba571d35a29a9c03",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/v3/overlays/fishing-or-diamond-lake.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/fishing-or-diamond-lake-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/fishing-or-diamond-lake-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/fishing-or-diamond-lake.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.7,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "eb27e511106bf38e6d24c8190ee226eb168b24f0e1dc9a22a5df05d031b420df",
+    "artHash": "5e2790d8c376f8e4240b1822e11a1bd1fd2b54235aeade322a2bb39e0b23b7f8",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "a15f2cd7ee4ae918ff16eec749e4611fa76a8eddede62a1d60f2142b9e0dcf2b",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.05,
+            0.05
+          ],
+          [
+            0.19,
+            0.19
+          ],
+          [
+            0.33,
+            0.055
+          ],
+          [
+            0.47,
+            0.23
+          ],
+          [
+            0.63,
+            0.07
+          ],
+          [
+            0.77,
+            0.2
+          ],
+          [
+            0.92,
+            0.055
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "eb27e511106bf38e6d24c8190ee226eb168b24f0e1dc9a22a5df05d031b420df",
+      "artHash": "5e2790d8c376f8e4240b1822e11a1bd1fd2b54235aeade322a2bb39e0b23b7f8",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "a15f2cd7ee4ae918ff16eec749e4611fa76a8eddede62a1d60f2142b9e0dcf2b",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-02.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/usfs-6952.004731.webp",
+    "sha256": "48e530149b750bca9f6fbeff9a0f60339c0977c7428a841d8bf5d9c56d8bbd32",
+    "width": 2048,
+    "height": 3072,
+    "overlaySrc": "assets/photos/v3/overlays/usfs-6952.004731.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/usfs-6952.004731-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-6952.004731-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-6952.004731.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "8fd959dfdaf6062217b029c1164192e97bb9d5ea960122f01dea0f95f3a0ebdd",
+    "artHash": "2ad8ec5b8e7325eb6bd8978572af0d1f8d8eb47ed271cd3af77b0d99cf6864f2",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "4f3b4c4ac36211c45244703f9fa9bdda38e6908a1d338fdb5012074d5f9dde27",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "reason": "Keep falling water and moss-covered banks free of terrain graphics; bare left rock and pool reflections remain available.",
+      "polygons": [
+        [
+          [
+            0.25,
+            0.08
+          ],
+          [
+            0.51,
+            0.08
+          ],
+          [
+            0.57,
+            0.24
+          ],
+          [
+            0.47,
+            0.34
+          ],
+          [
+            0.62,
+            0.82
+          ],
+          [
+            0.57,
+            0.88
+          ],
+          [
+            0.4,
+            0.82
+          ],
+          [
+            0.28,
+            0.4
+          ],
+          [
+            0.21,
+            0.3
+          ]
+        ],
+        [
+          [
+            0.6,
+            0.34
+          ],
+          [
+            1,
+            0.34
+          ],
+          [
+            1,
+            0.86
+          ],
+          [
+            0.65,
+            0.86
+          ]
+        ],
+        [
+          [
+            0,
+            0.7
+          ],
+          [
+            0.24,
+            0.7
+          ],
+          [
+            0.35,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      ]
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "8fd959dfdaf6062217b029c1164192e97bb9d5ea960122f01dea0f95f3a0ebdd",
+      "artHash": "2ad8ec5b8e7325eb6bd8978572af0d1f8d8eb47ed271cd3af77b0d99cf6864f2",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "4f3b4c4ac36211c45244703f9fa9bdda38e6908a1d338fdb5012074d5f9dde27",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-02.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/usfs-5723010274.webp",
+    "sha256": "55e9234f6ca0141de0b0056879c9c663931d28b4a635af4e3ca4f12a6a3aabcf",
+    "width": 2048,
+    "height": 1535,
+    "overlaySrc": "assets/photos/v3/overlays/usfs-5723010274.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/usfs-5723010274-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-5723010274-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-5723010274.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "5e77c80ec880e84aa0a88d5931fde4a89873cdb8332fd9fed8330e165e7cd86c",
+    "artHash": "13da9d3659a2d8b2b5018937cb054977451647ff0df6cf793b4ae07599c5d80d",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "05e8372bd8c7fa412d117d853f8c1405582b351a546833fcf9dce033f187643f",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.045,
+            0.035
+          ],
+          [
+            0.17,
+            0.12
+          ],
+          [
+            0.29,
+            0.04
+          ],
+          [
+            0.41,
+            0.15
+          ],
+          [
+            0.55,
+            0.06
+          ],
+          [
+            0.7,
+            0.13
+          ],
+          [
+            0.77,
+            0.035
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "5e77c80ec880e84aa0a88d5931fde4a89873cdb8332fd9fed8330e165e7cd86c",
+      "artHash": "13da9d3659a2d8b2b5018937cb054977451647ff0df6cf793b4ae07599c5d80d",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "05e8372bd8c7fa412d117d853f8c1405582b351a546833fcf9dce033f187643f",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-02.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/usfs-5714010274.webp",
+    "sha256": "da8dc4311cc7ea3c90578f496ba1aa5589fe5988c86659b69469e9ff4edab579",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/v3/overlays/usfs-5714010274.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/usfs-5714010274-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-5714010274-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-5714010274.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "f9ec5c1f738b33fbb38e65a16167bf111ae9d545fa8606e65a188a1a65b7e2ab",
+    "artHash": "748de0de12503c58c052aeb64c93527cf36681e7137e8830b065f45ffa545a5f",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "a95b6784ce64ec63f84fa82b5b72a96194e96eb8e9286bdb56f5dbace9eea624",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": []
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "f9ec5c1f738b33fbb38e65a16167bf111ae9d545fa8606e65a188a1a65b7e2ab",
+      "artHash": "748de0de12503c58c052aeb64c93527cf36681e7137e8830b065f45ffa545a5f",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "a95b6784ce64ec63f84fa82b5b72a96194e96eb8e9286bdb56f5dbace9eea624",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-02.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/usfs-5421.005071.webp",
+    "sha256": "0184656c5e440994b60365c3ac7edd7574da9d0ecf23d93a468f8247012420f9",
+    "width": 2048,
+    "height": 1083,
+    "overlaySrc": "assets/photos/v3/overlays/usfs-5421.005071.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/usfs-5421.005071-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-5421.005071-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-5421.005071.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.7,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "398754d85bd2fe1b1e12c995e87bb0e74c9c4f0d3b48b1565d89d33c7776131b",
+    "artHash": "ab1970c0b215f60775a8b7062ceda3f330f89dd16b753aeca2ffc3a48b315d27",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "f07e7a72c5bfbfa017f8a2333592789a683190d49564c593f61835d7fbcd92af",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "reason": "Forested mountain slopes do not carry rainbow terrain contours; retain sky network, foreground rock and lake reflections.",
+      "polygons": [
+        [
+          [
+            0.25,
+            0.23
+          ],
+          [
+            0.47,
+            0.14
+          ],
+          [
+            0.64,
+            0.21
+          ],
+          [
+            0.85,
+            0.33
+          ],
+          [
+            1,
+            0.45
+          ],
+          [
+            1,
+            0.64
+          ],
+          [
+            0.18,
+            0.64
+          ]
+        ]
+      ],
+      "skyNetwork": {
+        "points": [
+          [
+            0.08,
+            0.035
+          ],
+          [
+            0.23,
+            0.1
+          ],
+          [
+            0.37,
+            0.025
+          ],
+          [
+            0.52,
+            0.075
+          ],
+          [
+            0.67,
+            0.025
+          ],
+          [
+            0.81,
+            0.08
+          ],
+          [
+            0.92,
+            0.035
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "398754d85bd2fe1b1e12c995e87bb0e74c9c4f0d3b48b1565d89d33c7776131b",
+      "artHash": "ab1970c0b215f60775a8b7062ceda3f330f89dd16b753aeca2ffc3a48b315d27",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "f07e7a72c5bfbfa017f8a2333592789a683190d49564c593f61835d7fbcd92af",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-02.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/usfs-5451.005071.webp",
+    "sha256": "27eb0efc46a5dd3889994a48e8f8f573e4f43a4f181150f1239d3539d2a169f0",
+    "width": 2048,
+    "height": 1374,
+    "overlaySrc": "assets/photos/v3/overlays/usfs-5451.005071.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/usfs-5451.005071-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-5451.005071-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-5451.005071.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "a59b5ca359124e85624a09200de112579316df9e2980953c3ca0b49dc1fac932",
+    "artHash": "697f16599d3ccbb5ccaf645eda0b55f4cdb83fc87c6e4f4433fdc66c8ac77fae",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "c0903f97cde18d58f9ee56d7dcbc2f52bee07873751c497962af7870a97cf30c",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.025,
+            0.04
+          ],
+          [
+            0.11,
+            0.095
+          ],
+          [
+            0.19,
+            0.035
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "a59b5ca359124e85624a09200de112579316df9e2980953c3ca0b49dc1fac932",
+      "artHash": "697f16599d3ccbb5ccaf645eda0b55f4cdb83fc87c6e4f4433fdc66c8ac77fae",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "c0903f97cde18d58f9ee56d7dcbc2f52bee07873751c497962af7870a97cf30c",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-02.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/usfs-6217.005511.webp",
+    "sha256": "cd85b4d7023972e4a3da48e7ae4c2448b02cf7448f3988d4ee1df7c0ceae0726",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/v3/overlays/usfs-6217.005511.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/usfs-6217.005511-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-6217.005511-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/usfs-6217.005511.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "336c9f56c395b2238b5f84ae525dba4847f75ca16ad1b5d0ddb2af89083c1b07",
+    "artHash": "bcbf5b17335d03cf1c8c22c583e3a157fb7a7ced2ef89d5733320bc7ecd27a75",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "38128bfad169981c6f77a4342d9c4c97363800c956a198fd8e1467fc2461034c",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "reason": "Protect the prominent foreground stump from generated reflections and terrain traces.",
+      "polygons": [
+        [
+          [
+            0.605,
+            0.045
+          ],
+          [
+            0.68,
+            0.045
+          ],
+          [
+            0.7,
+            1
+          ],
+          [
+            0.6,
+            1
+          ]
+        ]
+      ],
+      "skyNetwork": {
+        "points": [
+          [
+            0.3,
+            0.045
+          ],
+          [
+            0.4,
+            0.12
+          ],
+          [
+            0.51,
+            0.045
+          ],
+          [
+            0.74,
+            0.035
+          ],
+          [
+            0.84,
+            0.11
+          ],
+          [
+            0.91,
+            0.045
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "336c9f56c395b2238b5f84ae525dba4847f75ca16ad1b5d0ddb2af89083c1b07",
+      "artHash": "bcbf5b17335d03cf1c8c22c583e3a157fb7a7ced2ef89d5733320bc7ecd27a75",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "38128bfad169981c6f77a4342d9c4c97363800c956a198fd8e1467fc2461034c",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-03.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/second-beach-trail.webp",
+    "sha256": "3fb60366852cd6be66bd80d48977f86848606fec6f92ec0feb490a9229e59537",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/v3/overlays/second-beach-trail.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/second-beach-trail-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/second-beach-trail-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/second-beach-trail.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "ef975d1d015524dc36922dcf26328f6197f04105dfc950e15e7ed25083d2bcdf",
+    "artHash": "5747a80a8635a3d7e80b156e29fd2cac92cb831fa768481f0da90ea2f373b9a4",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "9fa90291dabb15113283bdd5d1194d60ab35fde1a33eec2758e10c2fe8542f7d",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.04,
+            0.05
+          ],
+          [
+            0.17,
+            0.14
+          ],
+          [
+            0.27,
+            0.035
+          ],
+          [
+            0.49,
+            0.045
+          ],
+          [
+            0.62,
+            0.13
+          ],
+          [
+            0.77,
+            0.045
+          ],
+          [
+            0.92,
+            0.12
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "ef975d1d015524dc36922dcf26328f6197f04105dfc950e15e7ed25083d2bcdf",
+      "artHash": "5747a80a8635a3d7e80b156e29fd2cac92cb831fa768481f0da90ea2f373b9a4",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "9fa90291dabb15113283bdd5d1194d60ab35fde1a33eec2758e10c2fe8542f7d",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-03.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/bc-east-sooke.webp",
+    "sha256": "43360a695d72f2bb4844de4da1b41fd5066eade6d34feb13d047a94d66ef9800",
+    "width": 2048,
+    "height": 1341,
+    "overlaySrc": "assets/photos/v3/overlays/bc-east-sooke.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/bc-east-sooke-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/bc-east-sooke-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/bc-east-sooke.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "f2c97c9049b03b2af5c08999e4fdb2ea5a735d80ab0955c10cd7d2f91dc13b3a",
+    "artHash": "1e1ae460c963fb06e9e5319f92e07a9add0f2fe34f236c158bb5d9c25d142ead",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "d9c7074a3c162f7e9debaa8c27c5a443f46fd7d8edab2190c073125d82e7243b",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.37,
+            0.035
+          ],
+          [
+            0.48,
+            0.12
+          ],
+          [
+            0.6,
+            0.04
+          ],
+          [
+            0.71,
+            0.13
+          ],
+          [
+            0.83,
+            0.04
+          ],
+          [
+            0.94,
+            0.11
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "f2c97c9049b03b2af5c08999e4fdb2ea5a735d80ab0955c10cd7d2f91dc13b3a",
+      "artHash": "1e1ae460c963fb06e9e5319f92e07a9add0f2fe34f236c158bb5d9c25d142ead",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "d9c7074a3c162f7e9debaa8c27c5a443f46fd7d8edab2190c073125d82e7243b",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-03.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/bc-nairn.webp",
+    "sha256": "eb311856b06126975eb399b33b9d54ea8a54ce4fdbad465cae0c43aa03363017",
+    "width": 2048,
+    "height": 1365,
+    "overlaySrc": "assets/photos/v3/overlays/bc-nairn.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/bc-nairn-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/bc-nairn-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/bc-nairn.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "d9d1907a25804b42bfe6260283a8cfa2400877e6bca4e1b6fdb8cda12bd6fb0b",
+    "artHash": "d223de6de1972d266644caaa36d25a1eed0050ee278e9c16da9c383fa97f85b9",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "1e350d159145faa992a03b82a919065e9df3f52261fe4b8ce3d2ef649e5d51f2",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.35,
+            0.035
+          ],
+          [
+            0.46,
+            0.15
+          ],
+          [
+            0.57,
+            0.05
+          ],
+          [
+            0.69,
+            0.2
+          ],
+          [
+            0.81,
+            0.07
+          ],
+          [
+            0.91,
+            0.15
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "d9d1907a25804b42bfe6260283a8cfa2400877e6bca4e1b6fdb8cda12bd6fb0b",
+      "artHash": "d223de6de1972d266644caaa36d25a1eed0050ee278e9c16da9c383fa97f85b9",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "1e350d159145faa992a03b82a919065e9df3f52261fe4b8ce3d2ef649e5d51f2",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-03.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/bc-alice.webp",
+    "sha256": "16cc3c88c92e1d7815d3e448cf287898d4399be54c247362d36fe4a4224be63c",
+    "width": 2048,
+    "height": 2731,
+    "overlaySrc": "assets/photos/v3/overlays/bc-alice.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/bc-alice-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/bc-alice-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/bc-alice.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.7,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "fb86d4173078d641b3a405a90d217afda1c7227ab4dc65a6f87235c2032b4673",
+    "artHash": "6fd91fcc2d3245dcbcdd6fd0add24a45294f6bda8b9f557fb705ca96e21f6386",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "6af53e03afb67d0c193a6e300b6c3f91de410487c160fd0253b1bdb9a87c419d",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.33,
+            0.24
+          ],
+          [
+            0.43,
+            0.16
+          ],
+          [
+            0.52,
+            0.27
+          ],
+          [
+            0.4,
+            0.34
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "fb86d4173078d641b3a405a90d217afda1c7227ab4dc65a6f87235c2032b4673",
+      "artHash": "6fd91fcc2d3245dcbcdd6fd0add24a45294f6bda8b9f557fb705ca96e21f6386",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "6af53e03afb67d0c193a6e300b6c3f91de410487c160fd0253b1bdb9a87c419d",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-03.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/dayuse-wa-lime-kiln-point-state-park.webp",
+    "sha256": "049fdeff5ff798886128956578d60399f9971b5fa82a76ac74415a31aff8107d",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/v3/overlays/dayuse-wa-lime-kiln-point-state-park.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/dayuse-wa-lime-kiln-point-state-park-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/dayuse-wa-lime-kiln-point-state-park-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/dayuse-wa-lime-kiln-point-state-park.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "1702f8f25912751945dc1bf93fef35ef7b8ab10b177978d7cef43a2865933d18",
+    "artHash": "7408788d8bc047573c1faad0fc2ee102dc22ef31ce4a5e0e0208e7385cc40764",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "ca2ced2fbba66d5f6edc4d3d0891b1298cbf7eee98abe4b6cbfde47fefa2932c",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.045,
+            0.08
+          ],
+          [
+            0.16,
+            0.22
+          ],
+          [
+            0.28,
+            0.08
+          ],
+          [
+            0.36,
+            0.17
+          ],
+          [
+            0.68,
+            0.055
+          ],
+          [
+            0.8,
+            0.13
+          ],
+          [
+            0.9,
+            0.055
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "1702f8f25912751945dc1bf93fef35ef7b8ab10b177978d7cef43a2865933d18",
+      "artHash": "7408788d8bc047573c1faad0fc2ee102dc22ef31ce4a5e0e0208e7385cc40764",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "ca2ced2fbba66d5f6edc4d3d0891b1298cbf7eee98abe4b6cbfde47fefa2932c",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-03.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/dayuse-or-hat-rock-state-park.webp",
+    "sha256": "a385295e634b51a3923d71e7b7fd9acb908b9d11fdfa7482e30794f433a825b0",
+    "width": 2048,
+    "height": 1536,
+    "overlaySrc": "assets/photos/v3/overlays/dayuse-or-hat-rock-state-park.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/dayuse-or-hat-rock-state-park-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/dayuse-or-hat-rock-state-park-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/dayuse-or-hat-rock-state-park.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "7e834a85ad4e137abc6cd4759957aa81b99d898588eb6763dda9d2e78c5540ce",
+    "artHash": "d1d234b3cdcb235c99c54007b9c7c82a25c0a850f38312a2051621ee7d414694",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "f82ae772a3fca8b9958b3bf02b8f137abae3d46905138a9b1d64f9ade6df6445",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.045,
+            0.06
+          ],
+          [
+            0.18,
+            0.18
+          ],
+          [
+            0.31,
+            0.07
+          ],
+          [
+            0.46,
+            0.17
+          ],
+          [
+            0.61,
+            0.055
+          ],
+          [
+            0.75,
+            0.17
+          ],
+          [
+            0.91,
+            0.07
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "7e834a85ad4e137abc6cd4759957aa81b99d898588eb6763dda9d2e78c5540ce",
+      "artHash": "d1d234b3cdcb235c99c54007b9c7c82a25c0a850f38312a2051621ee7d414694",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "f82ae772a3fca8b9958b3bf02b8f137abae3d46905138a9b1d64f9ade6df6445",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-04.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
+  },
+  {
+    "file": "assets/photos/v3/dayuse-wa-scenic-beach-state-park.webp",
+    "sha256": "468439a19e254788c7150c4480f5f4ac493fef9aae0c7fb43b40b8221c024b7c",
+    "width": 2048,
+    "height": 1474,
+    "overlaySrc": "assets/photos/v3/overlays/dayuse-wa-scenic-beach-state-park.svg",
+    "overlayVariants": [
+      {
+        "src": "assets/photos/v3/overlays/dayuse-wa-scenic-beach-state-park-640.svg",
+        "width": 640
+      },
+      {
+        "src": "assets/photos/v3/overlays/dayuse-wa-scenic-beach-state-park-1280.svg",
+        "width": 1280
+      },
+      {
+        "src": "assets/photos/v3/overlays/dayuse-wa-scenic-beach-state-park.svg",
+        "width": 2048
+      }
+    ],
+    "overlayGlowSrc": null,
+    "nodeRegistration": [],
+    "quiet": {
+      "cx": 0.5,
+      "cy": 0.55,
+      "rx": 0.43,
+      "ry": 0.28
+    },
+    "quietFraction": 0.33421971675291773,
+    "treatment": "sculpted-v3",
+    "baseHash": "96a0658bcd26f5cc3a73b0afcf58c1307008acd73327d17b00b5f45a67a9a6c2",
+    "artHash": "4e698c7fdcb905ffab43d49f52f82ee3ff405232737105cd5cb3637f2aaf51d8",
+    "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+    "regionHash": "99f932d56c08e8b2deb8c4d753867110752343b5b412418a026e716329186dd7",
+    "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "nodeReview": null,
+    "exclusion": {
+      "polygons": [],
+      "skyNetwork": {
+        "points": [
+          [
+            0.43,
+            0.035
+          ],
+          [
+            0.53,
+            0.16
+          ],
+          [
+            0.64,
+            0.06
+          ],
+          [
+            0.75,
+            0.25
+          ],
+          [
+            0.86,
+            0.1
+          ],
+          [
+            0.96,
+            0.2
+          ]
+        ],
+        "codeHash": "ed3da45d7ba24e531de57e7b6ae9f561ed95a95bf5aca3f563abc47b6a659669"
+      }
+    },
+    "finalReview": {
+      "status": "accepted",
+      "baseHash": "96a0658bcd26f5cc3a73b0afcf58c1307008acd73327d17b00b5f45a67a9a6c2",
+      "artHash": "4e698c7fdcb905ffab43d49f52f82ee3ff405232737105cd5cb3637f2aaf51d8",
+      "wrapperHash": "2a1ad41488ee4e17a79d143c4449ec4556432b72417bb79841ea6de28e7ac418",
+      "regionHash": "99f932d56c08e8b2deb8c4d753867110752343b5b412418a026e716329186dd7",
+      "nodesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "evidence": [
+        "sheet-04.png"
+      ],
+      "notes": "Rendered composite visually reviewed with matching source-backed base and transparent artwork."
+    },
+    "review": "Added to a previously unphotographed destination; semantic placement and final composition reviewed."
   }
 ]
