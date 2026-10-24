@@ -26,7 +26,10 @@
 .eb-view-all[aria-pressed="true"], .eb-mobile-filter-toggle[data-active="true"] { color: var(--neon-cyan); border-color: var(--neon-cyan); background: var(--ink-800); }
 .eb-filter-popover { order: 1; flex: 1 0 100%; width: 100%; max-height: min(70vh, 520px); overflow-y: auto; box-sizing: border-box; }
 @media (max-width: 700px) {
-  .eb-filter-popover { max-height: min(42vh, 280px); }
+  .eb-filter-popover {
+    max-height: min(42vh, 280px);
+    scroll-margin-bottom: calc(var(--site-mobile-nav-height, 88px) + env(safe-area-inset-bottom, 0px) + 12px);
+  }
 }
 .eb-search-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .eb-search-row > .pdxField, .eb-search-row > .pdxSearch { flex: 1; min-width: 0; }

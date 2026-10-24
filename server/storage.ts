@@ -65,6 +65,7 @@ import {
 import crypto from "crypto";
 import { buildSubmissionMergePatch } from "@shared/submissionMatch";
 import { mergeMapCoordinates, eventMatchesBusiness } from "./venueCoordinates";
+import { promotersForBusinesses } from "./directoryPromoters";
 import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
 import { pageHubActivity } from "@shared/hubFeedPagination";
@@ -9823,6 +9824,8 @@ export interface IStorage {
   unfollowBusiness(followerUserId: number, businessId: number): void;
   isFollowingBusiness(followerUserId: number, businessId: number): boolean;
   getBusinessFollowerCount(businessId: number): number;
+  getBusinessFollowerCounts(): Map<number, number>;
+  getFollowedBusinessIds(userId: number): Set<number>;
   /** Active directory venues this user follows (business_follows). */
   getFollowedBusinessesList(userId: number): import("../shared/peopleHub").HubFollowedPlace[];
   getFollowingList(userId: number, viewerUserId: number | null): import("../shared/peopleHub").PeopleHubUser[];
@@ -10126,6 +10129,10 @@ export interface IStorage {
   approveBusinessSubmission(id: number, adminName: string, overrideImageUrl?: string): { business?: Business; error?: string };
   rejectBusinessSubmission(id: number, reason?: string): void;
   getPromotersForBusiness(businessId: number): { id: number; username: string; displayName: string | null }[];
+  getPromotersForBusinesses(
+    businesses: Business[],
+    liveEvents: Event[],
+  ): Map<number, { id: number; username: string; displayName: string | null }[]>;
   blockPromoterFromBusiness(businessId: number, blockedUserId: number, createdByUserId: number): { ok?: boolean; error?: string };
   unblockPromoterFromBusiness(businessId: number, blockedUserId: number): void;
   isPromoterBlockedFromBusiness(businessId: number, userId: number): boolean;
@@ -10384,6 +10391,22 @@ export const storage: IStorage = {
   getBusinessFollowerCount(businessId) {
     const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM business_follows WHERE business_id = ?`).get(businessId) as { count: number } | undefined;
     return row?.count ?? 0;
+  },
+  getBusinessFollowerCounts() {
+    const rows = sqlite.prepare(`
+      SELECT business_id AS businessId, COUNT(*) AS count
+      FROM business_follows
+      GROUP BY business_id
+    `).all() as { businessId: number; count: number }[];
+    return new Map(rows.map(row => [row.businessId, row.count]));
+  },
+  getFollowedBusinessIds(userId) {
+    const rows = sqlite.prepare(`
+      SELECT business_id AS businessId
+      FROM business_follows
+      WHERE follower_user_id = ?
+    `).all(userId) as { businessId: number }[];
+    return new Set(rows.map(row => row.businessId));
   },
   getFollowedBusinessesList(userId) {
     const rows = sqlite.prepare(`
@@ -14847,27 +14870,59 @@ export const storage: IStorage = {
   getPromotersForBusiness(businessId) {
     const business = storage.getBusiness(businessId);
     if (!business) return [];
-    const liveEvents = storage.getEvents({ status: "LIVE" });
-    const userIds = new Set<number>();
-    const results: { id: number; username: string; displayName: string | null }[] = [];
-    for (const evt of liveEvents) {
-      if (!eventMatchesBusiness(evt, business)) continue;
-      const candidates: string[] = [];
-      if (evt.claimedBy) candidates.push(evt.claimedBy);
-      if (evt.submittedBy) candidates.push(evt.submittedBy);
-      const hostRows = sqlite.prepare(`SELECT user_id AS userId FROM event_hosts WHERE event_id = ?`).all(evt.id) as { userId: number }[];
-      for (const host of hostRows) {
-        if (userIds.has(host.userId)) continue;
-        const u = db.select().from(users).where(eq(users.id, host.userId)).get();
-        if (u) { userIds.add(u.id); results.push({ id: u.id, username: u.username, displayName: u.displayName ?? null }); }
-      }
-      for (const identifier of candidates) {
-        const u = db.select().from(users).where(eq(users.username, identifier)).get()
-          ?? db.select().from(users).where(eq(users.email, identifier)).get();
-        if (u && !userIds.has(u.id)) { userIds.add(u.id); results.push({ id: u.id, username: u.username, displayName: u.displayName ?? null }); }
-      }
+    return storage.getPromotersForBusinesses([business], storage.getEvents({ status: "LIVE" })).get(businessId) ?? [];
+  },
+  getPromotersForBusinesses(businesses, liveEvents) {
+    if (!businesses.length) return new Map();
+    const eventIds = new Set(liveEvents.map(event => event.id));
+    const hostRows = sqlite.prepare(`
+      SELECT event_id AS eventId, user_id AS userId
+      FROM event_hosts
+      ORDER BY id
+    `).all() as { eventId: number; userId: number }[];
+    const hostsByEventId = new Map<number, number[]>();
+    const hostIds = new Set<number>();
+    for (const row of hostRows) {
+      if (!eventIds.has(row.eventId)) continue;
+      const hosts = hostsByEventId.get(row.eventId);
+      if (hosts) hosts.push(row.userId);
+      else hostsByEventId.set(row.eventId, [row.userId]);
+      hostIds.add(row.userId);
     }
-    return results;
+    const identifiers = new Set<string>();
+    for (const event of liveEvents) {
+      if (event.claimedBy) identifiers.add(event.claimedBy);
+      if (event.submittedBy) identifiers.add(event.submittedBy);
+    }
+    const catalogUsers: { id: number; username: string; displayName: string | null; email: string | null }[] = [];
+    const seenUsers = new Set<number>();
+    const remember = (rows: { id: number; username: string; displayName: string | null; email: string | null }[]) => {
+      for (const row of rows) {
+        if (seenUsers.has(row.id)) continue;
+        seenUsers.add(row.id);
+        catalogUsers.push(row);
+      }
+    };
+    const idList = [...hostIds];
+    for (let i = 0; i < idList.length; i += 300) {
+      const chunk = idList.slice(i, i + 300);
+      remember(sqlite.prepare(`
+        SELECT id, username, display_name AS displayName, email
+        FROM users
+        WHERE id IN (${chunk.map(() => "?").join(",")})
+      `).all(...chunk) as { id: number; username: string; displayName: string | null; email: string | null }[]);
+    }
+    const names = [...identifiers];
+    for (let i = 0; i < names.length; i += 200) {
+      const chunk = names.slice(i, i + 200);
+      const marks = chunk.map(() => "?").join(",");
+      remember(sqlite.prepare(`
+        SELECT id, username, display_name AS displayName, email
+        FROM users
+        WHERE username IN (${marks}) OR email IN (${marks})
+      `).all(...chunk, ...chunk) as { id: number; username: string; displayName: string | null; email: string | null }[]);
+    }
+    return promotersForBusinesses(businesses, liveEvents, hostsByEventId, catalogUsers);
   },
   blockPromoterFromBusiness(businessId, blockedUserId, createdByUserId) {
     ensureBusinessBlocksSchema();

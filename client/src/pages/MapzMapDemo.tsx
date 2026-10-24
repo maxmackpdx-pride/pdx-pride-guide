@@ -868,9 +868,11 @@ export default function MapzMapDemo() {
     setSelected(key);
   },[marks,params,placeId,eventId,resourceName,communitySlug]);
   const openMapSearch = () => {
-    // Events have no search box; Placez does. A layer that has one keeps it.
+    // Events and My Hoüz have no search box. Placez and the other layers do.
     if (!activeLayer || activeLayer === "events" || activeLayer === "houz") changeLayer("places");
-    requestAnimationFrame(() => document.querySelector<HTMLInputElement>(".mapz-layer-sheet input[type=search]")?.focus());
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.querySelector<HTMLInputElement>(".mapz-layer-sheet input[type=search]")?.focus();
+    }));
   };
   return <section ref={pageRef} className="living-map-page mapz-map-demo" data-map="mapz" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
     <MapzCanvas active={active} onBrowse={()=>changeLayer(activeLayer || "places")} onBoot={()=>setDataReady(true)} initialCamera={initialCamera} ref={mapRef} rows={sceneRows} onBoardPins={setPinCards} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
@@ -897,7 +899,7 @@ export default function MapzMapDemo() {
     <MapSwitch current="mapz" />
     {/* Board 42: one rack on both maps. Search, layers, locate; then zoom; then the map's own slot. */}
     <div className="mapz-demo-navigation pdx-glass-rebind" aria-label="Map controls">
-      <button type="button" className="mapz-control-icon" onClick={openMapSearch} aria-label="Search the map" title="Search"><Search size={20} aria-hidden="true"/></button>
+      <button type="button" className="mapz-control-icon" onClick={openMapSearch} onKeyDown={event => { if (event.key === "Escape" && activeLayer) { event.preventDefault(); changeLayer(null); } }} aria-label="Search the map" title="Search"><Search size={20} aria-hidden="true"/></button>
       <button type="button" className="mapz-control-icon" onClick={()=>changeLayer(activeLayer?null:"events")} aria-label={activeLayer?"Close map drawer":"Open map drawer"} title="Layers" aria-expanded={activeLayer!==null}><Layers size={20} aria-hidden="true"/></button>
       <button className="mapz-control-location" onClick={locateMe} aria-label="Locate me" title="Locate me" aria-busy={locating} disabled={locating}><LocateFixed size={22} aria-hidden="true"/></button>
       <span className="mapz-control-gap" aria-hidden="true" />
@@ -907,7 +909,7 @@ export default function MapzMapDemo() {
       <button type="button" className="mapz-control-tonight" aria-pressed={timeFilter === "tonight"} onClick={() => setTimeFilter(timeFilter === "tonight" ? "default" : "tonight")} title="Tonight only">Tonight</button>
       <button className="mapz-control-labels" title="Show map labels" aria-label="Show map labels" aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
     </div>
-    {locateError&&<p className="mapz-demo-notice" role="status">{locateError}</p>}
+    {locateError&&<p className="mapz-demo-notice" role="status"><span>{locateError}</span><button type="button" onClick={() => setLocateError("")}>Dismiss</button></p>}
     <MapzLayerSheet minePanel={<>{ownPinsStatus==="loading"?<p role="status">Loading your pins…</p>:ownPinsStatus==="error"?<p role="alert">Your pins couldn’t fully load. <button type="button" onClick={retryOwnPins}>Retry</button></p>:<p>{marks.length?`${marks.length} active ${marks.length===1?"pin":"pins"}`:"No active pins. Open your posts to place one."}</p>}{marks.map(mark=><button className="mapz-my-postings-row" type="button" key={mark.key} onClick={()=>setPinCards([mark.key])}>{ownMapPostingTitle(mark.item as MapRow)}<ChevronRight size={16}/></button>)}</>} minePins={minePins} onMinePins={()=>user?updateParams(p=>{if(minePins)p.delete("myPosts");else p.set("myPosts","1");}):setShowAuth(true)} layers={layers} active={activeLayer} onActiveChange={changeLayer} />
     {pinCards.length>0 && <MapBoardCards rows={marks.filter(mark=>pinCards.includes(mark.key)).map(mark=>({key:mark.key,row:mark.item as MapRow,category:({"My Hoüz":"housing",Mizzed:"mizzed",Gigz:"gigz",Giftz:"giftz",Sellz:"sellz"} as const)[(mark.item as MapRow)._board as "Gigz"]} as MapBoardCardRow))} onClose={()=>setPinCards([])} onRequireAuth={()=>{setPinCards([]);setShowAuth(true);}} onOpen={(key,target)=>{setPinCards([]);const mark=marks.find(m=>m.key===key);if(mark)openMark(mark,target);}}/>}
     {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="mapz-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
