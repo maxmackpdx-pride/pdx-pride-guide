@@ -6,13 +6,13 @@ import {Grain,useSlot} from './Fx';
 import './xerox.css';
 
 // Animated overlay in the day colour. mode 'bottom' leans into the lower half (flyer events); 'center' wraps the logo.
-export function XeroxOverlay({mode='bottom',W=200,H=250,id='x'}){
+export function XeroxOverlay({mode='bottom',W=200,H=250,id='x',reticle=true}){
   const cx=mode==='bottom'?W*.72:W/2, cy=mode==='bottom'?H*.78:H/2;
   const ring=(k,ph)=>{const p=[];for(let i=0;i<=48;i++){const t=i/48*Math.PI*2,w=1+.07*Math.sin(3*t+ph)+.04*Math.sin(5*t+ph*1.7);p.push((cx+Math.cos(t)*k*w).toFixed(1)+','+(cy+Math.sin(t)*k*.78*w).toFixed(1))}return 'M'+p.join('L')+'Z'};
   const route=mode==='bottom'?`M6 ${H-8} C ${W*.22} ${H-26} ${W*.38} ${H*.84} ${cx-18} ${cy+8}`:`M6 ${H-10} C ${W*.2} ${H-30} ${W*.3} ${H*.7} ${cx-26} ${cy+12}`;
   const R=mode==='bottom'?[22,38,56,78]:[44,64,86,110];
   return <svg className={'xr-xo xr-xo-'+mode} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
-    <g fill="none" stroke="currentColor" strokeLinejoin="round">
+    {reticle&&<><g fill="none" stroke="currentColor" strokeLinejoin="round">
       {R.map((k,i)=><path key={i} d={ring(k,i*1.3)} strokeWidth={i%2?.7:1.1} opacity={i%2?.55:.9} className="xr-xo-cp" style={{animationDelay:`${-i*.9}s`}}/>)}
       <path d={ring(R[1],1.3)} stroke="#fff" strokeWidth="1" pathLength="1000" className="xr-xo-sweep"/>
     </g>
@@ -20,6 +20,7 @@ export function XeroxOverlay({mode='bottom',W=200,H=250,id='x'}){
     <circle r="2.6" fill="#fff"><animateMotion dur="4.6s" repeatCount="indefinite" path={route}/></circle>
     <g transform={`translate(${cx} ${cy})`}><circle r="13" fill="none" stroke="#fff" strokeWidth=".9" strokeDasharray="4 3" className="xr-xo-spin"/>
       <path d="M-20 -8V-20H-8M20 -8V-20H8M-20 8V20H-8M20 8V20H8" fill="none" stroke="#fff" strokeWidth="1.3"/></g>
+    </>}
     <rect className="xr-xo-scan" x="0" y="-30" width={W} height="30" fill="currentColor" opacity=".16"/>
   </svg>;
 }
@@ -49,7 +50,7 @@ export function OutzXerox({children,photo=false,blend=false,delay=0}){
     {children}
     {art&&createPortal(<>
       {photo&&src&&<><img className="xr-copy xr-copy-r" src={src} alt="" aria-hidden="true"/><img className="xr-copy xr-copy-c" src={src} alt="" aria-hidden="true"/></>}
-      {!blend&&<XeroxOverlay mode="bottom" W={200} H={230}/>}
+      {!blend&&<XeroxOverlay mode="bottom" W={200} H={230} reticle={false}/>}
       <Grain/>
     </>,art)}
   </div>;

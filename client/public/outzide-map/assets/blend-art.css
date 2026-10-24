@@ -1,6 +1,6 @@
 /* Blended Outzide art (see blend-art.js): small one-size dot base, six real-photo cutouts, free-floating lines, route HUD. */
 .bl{position:absolute;inset:0;overflow:hidden;container-type:inline-size;background:var(--z-black,#050506);isolation:isolate}
-.bl>.bl-base{position:absolute;left:0;right:0;top:var(--xt,0px);height:var(--xh,100%);width:100%;object-fit:fill;display:block;max-width:none;filter:url(#xdots) brightness(1.08) contrast(1.15)}
+.bl>.bl-base{position:absolute;left:0;right:0;top:var(--xt,0px);height:var(--xh,100%);width:100%;object-fit:fill;display:block;max-width:none;filter:url(#xdots) brightness(1.05) contrast(1.05)}
 .bl .xc{position:absolute;left:0;right:0;top:var(--xt,0px);height:var(--xh,100%);z-index:3;opacity:0;pointer-events:none;filter:drop-shadow(0 .6cqw 1cqw rgba(0,0,0,.55));animation:blon var(--d) steps(1) infinite,bljit var(--d) steps(1) infinite;animation-delay:var(--o),var(--o)}
 .bl .xc>img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;max-width:none}
 .bl .xc.bw>img{filter:url(#xcopyBW) contrast(1.45) brightness(1.2)}
