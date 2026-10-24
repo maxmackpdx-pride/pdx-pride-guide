@@ -35,3 +35,12 @@ test('BFCache pagehide retains the scene and pageshow resumes without navigation
  handlers.get('pageshow')({persisted:false});
  assert.deepEqual([resized,resumed,scheduled],[1,1,1]);
 });
+
+test('Mapz camera recovery preserves a valid zero zoom, flat pitch and north-up bearing',()=>{
+ let captured;
+ const block=scene.slice(scene.indexOf(" if(type==='view'"),scene.indexOf("\n if(type==='mode'"));
+ vm.runInNewContext(block,{type:'view',data:{center:[45.52,-122.67],zoom:0,pitch:0,bearing:0},maxExploreZoom:18,
+  map:{getZoom:()=>13.8,jumpTo:camera=>{captured=camera;}},pauseControl:{dispatchEvent(){}},Event:class{},automaticPitch:()=>48,viewState(){}});
+ assert.equal(captured.zoom,0);assert.equal(captured.pitch,0);assert.equal(captured.bearing,0);
+ assert.equal(captured.center[0],-122.67);assert.equal(captured.center[1],45.52);
+});
