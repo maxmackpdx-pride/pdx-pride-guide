@@ -34,3 +34,9 @@
 /* Cut-out lettering on paper tiles */
 .rz{display:inline-block;padding:0 .22em;margin-inline:.04em;background:var(--text-hi);color:var(--z-black);text-shadow:none;letter-spacing:.1em;rotate:-1.2deg;box-shadow:2px 2px 0 var(--z-black)}
 #detail .detail-hero h2 .rz:nth-of-type(2n){rotate:1deg}
+
+/* Map credits: no box, semi-transparent text. */
+.maplibregl-ctrl.maplibregl-ctrl-attrib,.maplibregl-ctrl-attrib.maplibregl-compact,.maplibregl-ctrl-attrib.maplibregl-compact-show{background:transparent!important;box-shadow:none!important;border:0!important;border-radius:0!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;color:color-mix(in srgb,var(--text-hi) 55%,transparent)!important}
+.maplibregl-ctrl-attrib-inner,.maplibregl-ctrl-attrib a,.maplibregl-ctrl-attrib a:visited,.maplibregl-ctrl-attrib a:hover{color:color-mix(in srgb,var(--text-hi) 55%,transparent)!important;background:transparent!important}
+.maplibregl-ctrl-attrib-button{background-color:transparent!important;opacity:.55}
+.outzide-shell .maplibregl-ctrl-attrib a,.outzide-shell .maplibregl-ctrl-attrib a:visited,.outzide-shell .maplibregl-ctrl-attrib a:hover{color:color-mix(in srgb,var(--text-hi) 55%,transparent)!important}
