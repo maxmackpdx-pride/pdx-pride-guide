@@ -886,10 +886,12 @@ function renderHologramLabels(labels){
     }else{logoFace.textContent=label.venueName||'EVENT';}
     item.appendChild(brand);
    }
-   // E3c: event cards show the logo face and countdown only. No title, no footer.
-   if(!label.cardHeight){
+   // E3c: a card with real artwork (poster or venue logo) shows the art and countdown only.
+   // A card with no artwork keeps its name, so it never reads as an empty box.
+   const hasCardArt=Boolean(label.cardHeight&&(label.poster||(venueLogos.get(label.logo)&&!/\/icons\/event\.svg(?:[?#]|$)/.test(label.logo||''))));
+   if(!hasCardArt){
     const title=document.createElement('span');title.className='standalone-hologram-title';
-    const fitted=labelRows(label.name,label.width,label.kind==='housing'?2:undefined,.52,false);
+    const fitted=labelRows(label.name,label.cardHeight?label.width-14:label.width,label.kind==='housing'?2:undefined,label.cardHeight?54/(label.width-14):.52,Boolean(label.cardHeight));
     fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
    }
    if(label.kind!=='housing'){
