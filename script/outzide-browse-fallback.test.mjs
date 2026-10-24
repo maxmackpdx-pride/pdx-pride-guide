@@ -20,3 +20,9 @@ test('catalog metadata remains available to Sources & map notes after boot',asyn
  assert.match(content,/2026-09-24/);
  assert.match(content,/OpenStreetMap/);
 });
+test('Sources & map notes also opens when the catalog request fails',async()=>{
+ const r=await boot({catalogFails:true});let content;
+ const fn=source.slice(source.indexOf('function sources()'),source.indexOf('const feedLabels='));
+ vm.runInNewContext(fn+'\nsources();',{metadata:r.metadata,stamp:value=>value||'Date unavailable',link:(_url,text)=>text,openUtility:(_title,html)=>{content=html;}});
+ assert.match(content,/Date unavailable/);assert.match(content,/OpenStreetMap/);
+});
