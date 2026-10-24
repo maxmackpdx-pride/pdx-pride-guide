@@ -1,4 +1,4 @@
-import {photoMarkup,enhancePhotos} from './assets/destination-photos.js?v=20261023-blend';
+import {photoMarkup,enhancePhotos} from './assets/destination-photos.js?v=20261024-wide';
 import {motifImage,networkMarkup,enhanceOutzideMotifs} from './assets/library-motifs.js?v=20261016-library';
 import {oneShotMapLocation} from '../map-foundation/location.js';
 import {hasActiveOutzFilters} from './assets/filter-state.js';

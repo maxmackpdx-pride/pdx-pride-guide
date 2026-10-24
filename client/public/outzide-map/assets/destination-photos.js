@@ -44,7 +44,8 @@ export function enhanceBlend(root=document){
  root.querySelectorAll('.outz-photo[data-blend-place]:not([data-blend-ready])').forEach(el=>{
   el.dataset.blendReady='1';
   loadBlend().then(async mod=>{
-   const id=el.dataset.blendPlace,variant=mod.hasBlend(id,'wide')?'wide':'tall';
+   const id=el.dataset.blendPlace,listCard=!!el.closest('#results .place-card'),variant=mod.hasBlend(id,'wide')?'wide':(listCard?null:'tall');
+   if(!variant)return;
    if(!mod.hasBlend(id,variant))return;
    const entry={el,off:null};blendOff.add(entry);
    el.classList.add('outz-photo--blend');
