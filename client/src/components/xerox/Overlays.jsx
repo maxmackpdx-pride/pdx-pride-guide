@@ -2,6 +2,7 @@ import React,{useLayoutEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {ransomLetters} from '../board/punk/ransomStyles.mjs';
 import '../board/punk/cut-type.css';
+import {emphasizeTitle} from '../../../public/map-foundation/title-emphasis.js';
 import {Grain,useSlot} from './Fx';
 import './xerox.css';
 
@@ -34,10 +35,14 @@ export function PlacezRadar(){
   </svg>;
 }
 
-/** Ransom title, one polarity for the whole title: every letter draws a Cut Type pack style, no two neighbours alike. */
-export function RansomTitle({text}){
-  return <>{text.split(' ').map((word,wi)=><span key={wi} className="xr-rw">{ransomLetters(word,word,'dark').map((l,i)=>
-    <span key={i} className="xr-rl" style={{fontFamily:`CutMix${l.style}`,fontPalette:`--cut-mix-${l.style.toLowerCase()}-normal`}}>{l.char}</span>)}</span>)}</>;
+/** Cut-out title: base treatment (white on black) with EXACTLY ONE whole word inverted onto paper tiles (black on white).
+ *  Which word is a pure function of `seed` (the place id) - see map-foundation/title-emphasis.js. The inverted word keeps the
+ *  per-letter Cut Type look; every letter uses its resolved palette so the word has one polarity. Other words stay plain. */
+export function RansomTitle({text,seed}){
+  return <>{emphasizeTitle(text,seed??text).map(({text:word,emphasis},wi)=>emphasis
+    ? <span key={wi} className="xr-rw xr-rw--inv" data-emphasis="true">{ransomLetters(word,`${seed??text}:${word}`,'dark').map((l,i)=>
+        <span key={i} className="xr-rl" style={{fontFamily:`CutMix${l.style}`,fontPalette:`--cut-mix-${l.style.toLowerCase()}-${l.palette}`}}>{l.char}</span>)}</span>
+    : <span key={wi} className="xr-rw xr-pw">{word}</span>)}</>;
 }
 
 /** Cinema Xerox layer for a live Outzide card (TodayLocationCard): channel-split glitch of the photo, overlay, grain. */

@@ -180,6 +180,8 @@
 /* ransom title: one polarity, paper tile and black ink */
 .xr-rl{display:inline-block;padding:1px 3px;margin:0 1px 2px 0;font-style:normal;font-weight:900;line-height:1.02;color:var(--z-black);background:var(--paper)}
 .xr-rw{display:inline-flex;white-space:nowrap;margin-right:.3em}
+/* the one inverted word is tiled (.xr-rw--inv); every other word is plain white on the card */
+.xr-pw{display:inline;color:#fff;font-weight:900;text-transform:uppercase;letter-spacing:.04em;text-shadow:0 1px 2px rgba(0,0,0,.7)}
 .xr-oz .tonight-card__body h3{font-size:15px;line-height:1.2;-webkit-line-clamp:3;max-height:none}
 .xr-oz h3 .xr-rl{font-size:15px;padding:0 2px}
 /* Placez radar over the logo well */
