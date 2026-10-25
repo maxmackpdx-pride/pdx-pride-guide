@@ -3,7 +3,8 @@ import { useLocation } from "wouter";
 import { prefersStillMotion } from "@/lib/motion";
 import "./site-wallpaper.css";
 
-type State = "idle" | "live" | "still" | "fallback";
+/** "boot" is the moment before the first frame: the legacy page overlays are already hidden, so they never flash. */
+type State = "idle" | "boot" | "live" | "still" | "fallback";
 
 /** Routes whose own full-bleed map hides the page behind it. No frames are spent there. */
 function hidesWallpaper(path: string) {
@@ -29,9 +30,9 @@ function isTouchDevice() {
 export default function SiteWallpaper() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<import("./circuitWallpaperEngine").CircuitWallpaperEngine | null>(null);
-  const [state, setState] = useState<State>("idle");
   const [location] = useLocation();
   const hidden = hidesWallpaper(location);
+  const [state, setState] = useState<State>(hidden ? "idle" : "boot");
 
   useEffect(() => {
     const root = document.documentElement;
@@ -45,6 +46,7 @@ export default function SiteWallpaper() {
     const wrap = wrapRef.current;
     if (!wrap) return;
     if (hidden) { setState("idle"); return; }
+    setState("boot");
     // A fresh canvas per boot: a context that was released with loseContext() cannot be reused.
     const canvas = document.createElement("canvas");
     canvas.className = "site-wallpaper__canvas";

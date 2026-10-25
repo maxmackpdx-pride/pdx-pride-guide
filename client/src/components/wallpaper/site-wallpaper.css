@@ -33,18 +33,43 @@
     linear-gradient(to bottom, rgb(0 0 0 / 46%), rgb(0 0 0 / 30%) 38%, rgb(0 0 0 / 52%));
 }
 
-/* The wallpaper replaces the per-page atmosphere washes while it is running. */
-html[data-site-wallpaper="live"] .rg-stream-background,
-html[data-site-wallpaper="still"] .rg-stream-background { display: none; }
+/*
+ * The circuit wallpaper is the ONLY page background. While it is booting, live, or holding a still frame, every legacy
+ * page-level atmosphere layer is hidden. Without WebGL2 or with Save-Data the attribute is "fallback" (or empty on the
+ * full-bleed map routes), none of this applies, and the older per-page CSS atmosphere layers remain as the fallback.
+ * Card-level motifs, card grain and ransom titles are not page backgrounds and are untouched.
+ */
+html:is([data-site-wallpaper="boot"], [data-site-wallpaper="live"], [data-site-wallpaper="still"]) :is(
+  .rg-stream-background,
+  .board-shader-veil,
+  .home-tonight__atmosphere
+) { display: none !important; }
+
+/* index.css: global neon-wash + scanline layer on <body>. */
+html:is([data-site-wallpaper="boot"], [data-site-wallpaper="live"], [data-site-wallpaper="still"]) body::before { display: none; }
+/* index.css: zine pages' dot grid + diagonal wash, and board pages' overlay grain. */
+html:is([data-site-wallpaper="boot"], [data-site-wallpaper="live"], [data-site-wallpaper="still"]) .zine-page::before,
+html:is([data-site-wallpaper="boot"], [data-site-wallpaper="live"], [data-site-wallpaper="still"]) .board-page::after,
+html:is([data-site-wallpaper="boot"], [data-site-wallpaper="live"], [data-site-wallpaper="still"]) .eb-page::before { display: none; }
 
 /*
- * Page roots paint their own opaque black. While the wallpaper runs they step aside so it shows through.
+ * Page roots paint their own opaque fill. While the wallpaper runs they step aside so it shows through.
  * Cards, glass panels and the nav keep their own fills, so content contrast does not change.
  */
-html:is([data-site-wallpaper="live"], [data-site-wallpaper="still"]) :is(
+html:is([data-site-wallpaper="boot"], [data-site-wallpaper="live"], [data-site-wallpaper="still"]) :is(
   .app-shell,
   .zine-page,
   .eb-page,
+  .events-page,
+  .resources-page,
+  .directory-page,
+  .home-page,
+  .about-page,
+  .missed-page,
+  .gigs-page,
+  .contact-page,
+  .login-page,
+  .legal-page,
   body .board-shader-page[data-shader-room],
   .home-main-stage,
   .home-front,
@@ -56,8 +81,24 @@ html:is([data-site-wallpaper="live"], [data-site-wallpaper="still"]) :is(
   background: transparent !important;
 }
 
-html:is([data-site-wallpaper="live"], [data-site-wallpaper="still"]) .board-shader-veil,
-html:is([data-site-wallpaper="live"], [data-site-wallpaper="still"]) .eb-page::before { display: none; }
+/*
+ * No map behind the globe. The hero reserves a dark disc, a little larger than the globe sphere, that fades out
+ * into the wallpaper, so no road or circuit line runs behind or right up against the globe. It sits below the card
+ * layer (z-index 1), so the scroll cards still launch from behind the globe and stay fully bright. The globe canvas
+ * publishes --globe-cx / --globe-cy / --globe-r on the stage; without them (or without the wallpaper) it is empty.
+ */
+.ptunnel__stage::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(
+    circle at var(--globe-cx, 50%) var(--globe-cy, 50%),
+    var(--z-oled) 0,
+    var(--z-oled) calc(var(--globe-r, 0px) * 1.02),
+    color-mix(in srgb, var(--z-oled) 70%, transparent) calc(var(--globe-r, 0px) * 1.2),
+    color-mix(in srgb, var(--z-oled) 28%, transparent) calc(var(--globe-r, 0px) * 1.42),
+    transparent calc(var(--globe-r, 0px) * 1.7)
+  );
+}
+html:not([data-site-wallpaper="boot"], [data-site-wallpaper="live"], [data-site-wallpaper="still"]) .ptunnel__stage::before { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .site-wallpaper__canvas { transition: none; }
