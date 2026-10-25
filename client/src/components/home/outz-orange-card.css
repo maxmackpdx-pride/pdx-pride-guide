@@ -1,0 +1,16 @@
+/*
+ * Every Outzide card (rail, featured, places page small card, hero fly-by) shares one look:
+ * the Outzide orange (--room-outz) is the base card colour, and a gradient band in the place's waypoint colour
+ * (--c, from the same waypoint palette the Outzide map uses) runs across the top. Blended art, ransom titles and
+ * controls sit on top. Copy that lands on the orange is black ink or white on black chips, never white on orange.
+ */
+.outz-orange {
+  --outz-base: var(--room-outz);
+  --outz-ink: var(--z-black);
+}
+.outz-orange__band {
+  position: absolute; inset: 0 0 auto 0; height: 34%; z-index: 3; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(to bottom, var(--c) 0%, color-mix(in srgb, var(--c) 62%, transparent) 42%, transparent 100%);
+}
+/* Plain ransom words: white on a black chip so they stay legible on orange; the one inverted word keeps its paper tile. */
+.outz-orange .xr-pw { background: var(--z-black); padding: 0 3px; text-shadow: none; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
