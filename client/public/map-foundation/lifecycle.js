@@ -93,3 +93,24 @@ export function whenMapSettled(map) {
   map.on('moveend',check);map.on('remove',removed);check();
  });
 }
+
+// Phones: terrain, DEM hillshade and contours are the heaviest GPU/memory layers and are useless at
+// regional zoom. Add the rest of the style now, and the heavy layers only while the camera is close.
+export function deferTerrain(map,style,{enableAt=10,disableAt=8.5}={}) {
+ const heavySources=new Set(['elevation','hillshade-elevation','contours','relief']);
+ const heavy=layer=>heavySources.has(layer.source)||layer.id==='land-relief'||layer.id==='elevation-contours';
+ const base=structuredClone(style);
+ delete base.terrain;
+ for(const id of heavySources)delete base.sources?.[id];
+ base.layers=base.layers.filter(layer=>!heavy(layer));
+ extendMapStyle(map,base);
+ let added=false,visible=false;
+ const show=on=>{
+  visible=on;
+  if(on&&!added){added=true;extendMapStyle(map,style);return;}
+  for(const layer of style.layers)if(heavy(layer)&&map.getLayer(layer.id))map.setLayoutProperty(layer.id,'visibility',on?'visible':'none');
+  map.setTerrain(on?style.terrain||null:null);
+ };
+ const sync=()=>{const zoom=map.getZoom();if(!visible&&zoom>=enableAt)show(true);else if(visible&&zoom<disableAt)show(false);};
+ map.on('zoomend',sync);map.on('moveend',sync);sync();
+}

@@ -39,8 +39,19 @@ test('BFCache pagehide retains the scene and pageshow resumes without navigation
 test('Mapz camera recovery preserves a valid zero zoom, flat pitch and north-up bearing',()=>{
  let captured;
  const block=scene.slice(scene.indexOf(" if(type==='view'"),scene.indexOf("\n if(type==='mode'"));
- vm.runInNewContext(block,{type:'view',data:{center:[45.52,-122.67],zoom:0,pitch:0,bearing:0},maxExploreZoom:18,
+ vm.runInNewContext(block,{type:'view',data:{center:[45.52,-122.67],zoom:0,pitch:0,bearing:0},maxExploreZoom:18,minExploreZoom:-2,
   map:{getZoom:()=>13.8,jumpTo:camera=>{captured=camera;}},pauseControl:{dispatchEvent(){}},Event:class{},automaticPitch:()=>48,viewState(){}});
  assert.equal(captured.zoom,0);assert.equal(captured.pitch,0);assert.equal(captured.bearing,0);
  assert.equal(captured.center[0],-122.67);assert.equal(captured.center[1],45.52);
+});
+
+test('iOS safeguards: touch zoom floor, context-loss grace, windowed recovery, phone terrain deferral',()=>{
+ assert.match(scene,/const minExploreZoom=coarsePointer\?8:-2/);
+ assert.doesNotMatch(scene,/Math\.max\(-2,/);
+ assert.match(scene,/webglcontextrestored/);
+ const canvas=fs.readFileSync(new URL('../client/src/components/MapzCanvas.tsx',import.meta.url),'utf8');
+ assert.doesNotMatch(canvas,/attempts\.current=0;\},30000/);
+ assert.match(canvas,/RECOVERY_WINDOW_MS/);
+ const outzide=fs.readFileSync(new URL('../client/public/outzide-map/app.js',import.meta.url),'utf8');
+ assert.match(outzide,/if\(mobileLightMode\)deferTerrain\(map,style\)/);
 });

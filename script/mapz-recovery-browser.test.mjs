@@ -67,7 +67,7 @@ test('healthy map visits reset the consecutive recovery budget, while a boot loo
  const page=await browser.newPage();try{
   await page.clock.install();await page.goto(base);await boot(page);
   for(let i=0;i<4;i++){
-   await page.clock.fastForward(31000);
+   await page.clock.fastForward(301000);
    const old=child(page);await old.evaluate(()=>window.__mapzStartup.fatal('injected graphics failure'));
    await page.waitForFunction(attempt=>new URL(document.querySelector('iframe').src).searchParams.get('attempt')===String(attempt),i+1);
    await boot(page);
