@@ -22,7 +22,8 @@ export type BoardIntent =
   | "connection"
   | "grab"
   | "buddy"
-  | "ride";
+  | "ride"
+  | "missed";
 export const boardCategories = [
   {
     id: "mizzed",
@@ -115,6 +116,7 @@ export const intentLabels: Record<BoardIntent, string> = {
   grab: "Open grab",
   buddy: "Trip buddy",
   ride: "Carpool",
+  missed: "Missed connections",
 };
 export type BoardPost = {
   photos?: string[];

@@ -1,6 +1,7 @@
 import { sqlite, storage } from "./storage";
 import { DEMO_USERNAMES, isDemoAuthor } from "@shared/demo";
-import { seedOutzBoardDemo } from "./outzBoardDemo";
+import { seedOutzBoardDemo, seedOutzBoardMissedDemo } from "./outzBoardDemo";
+import { MISSED_CONNECTION_KIND } from "@shared/outzBlendedIds";
 import {
   formatBeachGoingChip,
   beachCheckinDateOptions,
@@ -93,6 +94,7 @@ function ensureOutzSocialSchema() {
 }
 ensureOutzSocialSchema();
 try { seedOutzBoardDemo(sqlite); } catch (error) { console.warn("[boot] seed_outz_board_demo_v1 skipped:", error instanceof Error ? error.message : error); }
+try { seedOutzBoardMissedDemo(sqlite); } catch (error) { console.warn("[boot] seed_outz_board_demo_missed_v1 skipped:", error instanceof Error ? error.message : error); }
 
 export function isFollowingOutzDestination(userId: number, placeId: string): boolean {
   return !!sqlite.prepare("SELECT 1 FROM outz_destination_follows WHERE user_id = ? AND place_id = ?")
@@ -291,6 +293,16 @@ export function upsertOutzPlaceRating(placeId: string, userId: number, rating: n
   return getOutzPlaceRating(placeId, userId);
 }
 
+/** Missed connections are anonymous on every surface (board, wall, feed); only the poster sees their own name. */
+export function anonymizeMissedConnection<T extends { postKind: string; userId?: number; username?: string; displayName?: string; photoUrl?: string | null; avatarChoice?: number | null }>(row: T, viewerUserId?: number): T {
+  if (row.postKind !== MISSED_CONNECTION_KIND || (viewerUserId != null && row.userId === viewerUserId)) return row;
+  return { ...row, username: "anonymous", displayName: "Anonymous", photoUrl: null, avatarChoice: null };
+}
+
+export function getOutzWallPostKind(id: number): string | undefined {
+  return (sqlite.prepare("SELECT post_kind AS postKind FROM outz_wall_posts WHERE id = ?").get(id) as { postKind: string } | undefined)?.postKind;
+}
+
 export function getOutzWallPosts(placeId: string, viewerUserId?: number) {
   const posts = sqlite.prepare(`
     SELECT p.id, p.place_id AS placeId, p.user_id AS userId, p.post_kind AS postKind, p.body,
@@ -314,11 +326,11 @@ export function getOutzWallPosts(placeId: string, viewerUserId?: number) {
     list.push({ ...comment, isMine: comment.userId === viewerUserId });
     commentsByPost.set(Number(comment.postId), list);
   }
-  return visiblePosts.map(post => ({ ...post, isMine: post.userId === viewerUserId, comments: commentsByPost.get(Number(post.id)) ?? [] }));
+  return visiblePosts.map(post => ({ ...anonymizeMissedConnection(post, viewerUserId), isMine: post.userId === viewerUserId, comments: commentsByPost.get(Number(post.id)) ?? [] }));
 }
 
 /** The Outzide board: only Trip Buddy and Carpool wall posts, across every place. */
-export const OUTZ_BOARD_KINDS = ["HIKE_BUDDY", "CAMP_BUDDY", "LOOKING_FOR_COMPANY", "CARPOOL", "CARPOOL_OFFER", "CARPOOL_REQUEST"];
+export const OUTZ_BOARD_KINDS = ["HIKE_BUDDY", "CAMP_BUDDY", "LOOKING_FOR_COMPANY", "CARPOOL", "CARPOOL_OFFER", "CARPOOL_REQUEST", "MISSED_CONNECTION"];
 export function getOutzBoardPosts(viewerUserId?: number, mineOnly = false) {
   const today = pacificTodayDate();
   const kinds = OUTZ_BOARD_KINDS.map(() => "?").join(",");
@@ -340,7 +352,7 @@ export function getOutzBoardPosts(viewerUserId?: number, mineOnly = false) {
   return [...rows, ...demos]
     .filter(row => viewerUserId == null || row.userId === viewerUserId || !storage.isMemberInteractionBlocked(viewerUserId, row.userId))
     .filter(row => !mineOnly || row.userId === viewerUserId)
-    .map(row => ({ ...row, isMine: row.userId === viewerUserId, isDemo: isDemoAuthor({ username: row.username, displayName: row.displayName }) }));
+    .map(row => ({ ...anonymizeMissedConnection(row, viewerUserId), isMine: row.userId === viewerUserId, isDemo: isDemoAuthor({ username: row.username, displayName: row.displayName }) }));
 }
 
 export function createOutzWallPost(input: { placeId: string; userId: number; postKind: string; body: string; tripDate: string | null }) {

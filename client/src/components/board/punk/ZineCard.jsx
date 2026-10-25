@@ -8,6 +8,7 @@ import {housingTypes,housingPrice,householdCount,housingFaceMembers,visibleHousi
 import {useCardMotion} from './useCardMotion';
 import './zine-card.css';
 import './zine-decay.css';
+import './outz-missed-card.css';
 
 // Boardz zine cards: Wheatpaste (posts with a photo) and Cutout (posts without). Spec and canvas generator:
 // docs/boardz-card-redesign/ (gen_dirs2.py, gen_rooms.py, dirs2.css).
@@ -16,10 +17,10 @@ const SEEKING=['available','iso','looking','forming','offering'];
 // Cut Type mixes for the headline key word: the only two with no reversed glyphs.
 const TITLE_MIX=['CutMixPaper','CutMixLoose'];
 const VALUE_MIX=['CutMixPaper','CutMixRough','CutMixReverse','CutMixMixed','CutMixLoose','CutMixRansom','CutMixWorn','CutMixTall'];
-const DEFAULT_ART={housing:'house',mizzed:'message-bubbles',gigz:'microphone',sellz:'price-tag',tripbuddy:'trip-trail',carpool:'carpooling'};
+const DEFAULT_ART={housing:'house',mizzed:'message-bubbles',gigz:'microphone',sellz:'price-tag',tripbuddy:'trip-trail',carpool:'carpooling',outzmissed:'message-bubbles'};
 const MOTIF={'magnifying-glass':'magnifier','message-bubbles':'bubbles',microphone:'mic','price-tag':'tag','gift-box':'gift',house:'house','trip-trail':'trail',carpooling:'ride'};
 // Outzide boards ship their own hero art (not in the motif library): the trail marker and the carpool sticker.
-const OUTZ_HERO={tripbuddy:'/boardz/punk/trip-trail.svg',carpool:'/boardz/punk/punk-objects/carpooling.webp'};
+const OUTZ_HERO={tripbuddy:'/boardz/punk/trip-trail.svg',carpool:'/boardz/punk/punk-objects/carpooling.webp',outzmissed:'/boardz/punk/punk-objects/message-bubbles.webp'};
 
 function hash31(text){return Array.from(String(text)).reduce((h,c)=>(Math.imul(h,31)+c.charCodeAt(0))>>>0,0)}
 // Same LCG as the canvas generator, so a post keeps the decay rhythm it had in the mockups.
@@ -50,7 +51,9 @@ export function ZineFilters(){
 function palette(r){
   if(r.category==='housing'){const type='houz-'+r.intent;return {zc:'zc-houz '+type,c:HOUZ_CYAN,c2:housingTypes[r.intent].color,frame:'houz',hero:'houz',strip:type,wire:type}}
   const c=boardPalette[r.category]?.color||r.color;
-  return {zc:'zc-'+r.category,c,c2:c,frame:r.category,hero:r.category,strip:r.category,wire:r.category};
+  // Missed connections blend the site magenta (Mizzed) into the Outzide orange: orange rim + base, magenta bloom/accent.
+  const c2=r.category==='outzmissed'?boardPalette.mizzed.color:c;
+  return {zc:'zc-'+r.category,c,c2,frame:r.category,hero:r.category==='outzmissed'?'mizzed':r.category,strip:r.category,wire:r.category};
 }
 
 function useArt(r){
@@ -178,7 +181,7 @@ const Texture=({r,id,paste,photos,calm,Photo})=><>
   {paste&&<span className="wp-paper" aria-hidden="true"/>}
 </>;
 // The small tape has about 78px beside the heart.
-const SHORT_TYPE={available:'AVAILABLE',connection:'MIZZED',offering:'JOIN',looking:'LOOKING',forming:'BUILDING',managed:'MANAGED'};
+const SHORT_TYPE={missed:'MISSED',available:'AVAILABLE',connection:'MIZZED',offering:'JOIN',looking:'LOOKING',forming:'BUILDING',managed:'MANAGED'};
 
 /** Small card, 136 x 150: texture only, headline under the pin, post type and heart on one baseline. */
 export function ZineSmallCard({r,save,calm=false,Photo}){

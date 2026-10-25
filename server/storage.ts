@@ -15997,11 +15997,11 @@ export const storage: IStorage = {
         items.push({
           id: `outz-post-${row.id}`,
           kind: "outz",
-          badge: ({ CARPOOL: "Carpool", CARPOOL_OFFER: "Offering a ride", CARPOOL_REQUEST: "Looking for a ride", HIKE_BUDDY: "Hike buddy", CAMP_BUDDY: "Camp buddy", LOOKING_FOR_COMPANY: "Company" } as Record<string,string>)[row.postKind] || "OUTZIDE",
+          badge: ({ CARPOOL: "Carpool", CARPOOL_OFFER: "Offering a ride", CARPOOL_REQUEST: "Looking for a ride", HIKE_BUDDY: "Hike buddy", CAMP_BUDDY: "Camp buddy", LOOKING_FOR_COMPANY: "Company", MISSED_CONNECTION: "Missed connection" } as Record<string,string>)[row.postKind] || "OUTZIDE",
           action: `Posted at ${row.placeName}`,
           text: row.body,
           createdAt: row.createdAt,
-          author: hubFeedAuthorFromUser(row),
+          author: hubFeedAuthorFromUser(row.postKind === "MISSED_CONNECTION" && row.userId !== viewerUserId ? { ...row, username: "anonymous", displayName: "Anonymous", photoUrl: null, avatarChoice: null } : row),
           link: `/outzide?place=${encodeURIComponent(row.placeId)}&wall=1`,
           viewerFollowsBoard: followsOutz,
           viewerFollowsSource: true,

@@ -6,7 +6,7 @@ import {RansomText} from './RansomText';
 import {PunkArtwork} from './PunkArtwork';
 import {useCardMotion} from './useCardMotion';
 
-export const boardPalette={gigz:{color:'#6E3DFF',ink:'#b06bff'},sellz:{color:'#39FF14',ink:'#39FF14'},giftz:{color:'#CCFF00',ink:'#CCFF00'},mizzed:{color:'#FF00CC',ink:'#FF00CC'},tripbuddy:{color:'#FF6600',ink:'#FF6600'},carpool:{color:'#FF6600',ink:'#FF6600'}};
+export const boardPalette={gigz:{color:'#6E3DFF',ink:'#b06bff'},sellz:{color:'#39FF14',ink:'#39FF14'},giftz:{color:'#CCFF00',ink:'#CCFF00'},mizzed:{color:'#FF00CC',ink:'#FF00CC'},tripbuddy:{color:'#FF6600',ink:'#FF6600'},carpool:{color:'#FF6600',ink:'#FF6600'},outzmissed:{color:'#FF6600',ink:'#FF00CC'}};
 export function BoardzInkFilters(){return <svg width="0" height="0" aria-hidden="true" focusable="false" style={{position:'absolute',pointerEvents:'none'}}><defs>{Object.entries(boardPalette).map(([key,{color}])=>{const [r,g,b]=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)/255);return <React.Fragment key={key}><filter id={'bz-frame-'+key} colorInterpolationFilters="sRGB"><feComponentTransfer><feFuncR type="linear" slope="1.6" intercept="-.12"/><feFuncG type="linear" slope="1.6" intercept="-.12"/><feFuncB type="linear" slope="1.6" intercept="-.12"/></feComponentTransfer><feColorMatrix values={`${1-r} ${r/2} ${r/2} 0 0 ${1-g} ${g/2} ${g/2} 0 0 ${1-b} ${b/2} ${b/2} 0 0 0 0 0 1 0`}/></filter><filter id={'bz-ink-'+key} colorInterpolationFilters="sRGB"><feComponentTransfer><feFuncG type="linear" slope="1.35" intercept="-.12"/></feComponentTransfer><feColorMatrix values={`0 ${r} 0 0 0 0 ${g} 0 0 0 0 ${b} 0 0 0 0 0 0 1 0`}/></filter></React.Fragment>})}</defs></svg>}
 
 export function BoardzCollage({r,small=false,calm=false,Photo,Save,Location}){

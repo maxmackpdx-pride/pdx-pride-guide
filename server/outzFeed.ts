@@ -31,7 +31,7 @@ export function getOutzCommunityFeed(snapshot: OutzSnapshot, viewerUserId?: numb
     const wallPost = walls.get(p.place_id)?.find(row => row.id === p.id);
     const comments = wallPost?.comments || [];
     items.push({ comments, authorAvatarUrl:avatarUrl(wallPost||{}), id: `post:${p.id}`, kind: p.post_kind === "CARPOOL" ? "carpool" : "post",
-      title: ({CARPOOL:"Carpool",CARPOOL_OFFER:"Offering a ride",CARPOOL_REQUEST:"Looking for a ride",HIKE_BUDDY:"Looking for a hike buddy",CAMP_BUDDY:"Looking for a camp buddy",LOOKING_FOR_COMPANY:"Looking for company"} as Record<string,string>)[p.post_kind] || "Trip note",
+      title: ({CARPOOL:"Carpool",CARPOOL_OFFER:"Offering a ride",CARPOOL_REQUEST:"Looking for a ride",HIKE_BUDDY:"Looking for a hike buddy",CAMP_BUDDY:"Looking for a camp buddy",LOOKING_FOR_COMPANY:"Looking for company",MISSED_CONNECTION:"Missed connection"} as Record<string,string>)[p.post_kind] || "Trip note",
       placeId: p.place_id, postKind: p.post_kind, isMine: p.user_id === viewerUserId, body: p.body, author: p.displayName || p.username, placeName: name(p.place_id)!, href: `${href(p.place_id)}#outz-wall-heading`,
       createdAt: p.created_at, ...(p.trip_date ? { tripDate: p.trip_date } : {}) });
   }
