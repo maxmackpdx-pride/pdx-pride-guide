@@ -11,7 +11,7 @@
 .placez-outzide__region:disabled{opacity:.4;cursor:default}
 .placez-outzide__note{margin:0 0 12px;color:var(--text-mid);font:500 14px/1.4 var(--font-body,inherit)}
 .placez-outzide__more{margin:26px 0 12px;font:800 16px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--neon-orange)}
-/* small cards keep their original 136px size (--outz-small-w only lets a surface opt into a larger one) */
-.placez-outzide__small{display:grid;grid-template-columns:repeat(auto-fill,var(--outz-small-w,136px));gap:16px 14px;justify-content:start}
+/* small cards are one fixed size: 136x150 */
+.placez-outzide__small{display:grid;grid-template-columns:repeat(auto-fill,136px);gap:16px 14px;justify-content:start}
 .placez-outzide__empty{color:var(--text-mid)}
 @media(max-width:767px){.placez-outzide__small{justify-content:center}}
