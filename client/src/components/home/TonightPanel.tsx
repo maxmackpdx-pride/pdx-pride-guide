@@ -8,36 +8,33 @@ import { useTheme } from "@/context/ThemeContext";
 import { ResourceRail } from "@/components/resources/ResourceRail";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Event } from "@shared/schema";
 import type { EventListing } from "@shared/multiDayEvents";
-import { pacificTodayDate, pacificCalendarDate, parsePacificDateTime } from "@shared/missedConnections";
+import { pacificTodayDate } from "@shared/missedConnections";
+import { dailyPicks, todaysUpcomingEvents } from "@/lib/homeToday";
 import { apiRequest } from "@/lib/queryClient";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import TonightEventCard from "./TonightEventCard";
 import EventModal from "@/components/EventModal";
 import AuthModal from "@/components/AuthModal";
-import outzCatalog from "@shared/outzMapCatalog";
 import { outzSharePath } from "@shared/outzShare";
 import { placePath } from "@shared/placeSlug";
 import type { Business } from "@/pages/Directory";
 import TodayLocationCard, { type TodayLocation } from "./TodayLocationCard";
 import "./TonightPanel.css";
 
-// A date-seeded shuffle keeps picks steady during query refreshes and changes them daily.
-function dailyScore(value: string) {
-  let hash = 2166136261;
-  for (const char of value) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
-  return hash >>> 0;
-}
-function dailyPicks<T>(rows: T[], date: string, key: (row: T) => string) {
-  return [...rows].sort((a, b) => dailyScore(`${date}:${key(a)}`) - dailyScore(`${date}:${key(b)}`)).slice(0, 3);
-}
+// Every list on this rail is a short-lived read: a half-minute staleTime, and a refetch on mount,
+// on window focus and when the Pacific day rolls over. Nothing here is bundled or seeded.
+const FRESH = { staleTime: 30_000, refetchOnMount: "always", refetchOnWindowFocus: true } as const;
+type OutzideRow = { id: string; name: string; kind: string; region?: string; art?: string; photo?: OutzPhotoData };
 
 export default function TonightPanel() {
-  const [today, setToday] = useState(() => pacificTodayDate(Date.now()));
+  const queryClient = useQueryClient();
+  const [now, setNow] = useState(() => Date.now());
+  const today = pacificTodayDate(now);
   useEffect(() => {
-    const refreshDate = () => setToday(pacificTodayDate(Date.now()));
+    const refreshDate = () => setNow(Date.now());
     const interval = window.setInterval(refreshDate, 30_000);
     window.addEventListener("focus", refreshDate);
     document.addEventListener("visibilitychange", refreshDate);
@@ -47,6 +44,8 @@ export default function TonightPanel() {
       document.removeEventListener("visibilitychange", refreshDate);
     };
   }, []);
+  // A new Pacific day means yesterday's lists are wrong: refetch them rather than wait out staleTime.
+  useEffect(() => { void queryClient.invalidateQueries({ queryKey: ["/api/events"] }); }, [today, queryClient]);
   const { calmMode } = useTheme();
   const reducedMotion = useReducedMotion();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -56,24 +55,23 @@ export default function TonightPanel() {
   const { data: listings = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then((r) => r.json()),
-    staleTime: 60_000,
+    ...FRESH,
   });
   const { data: places = [] } = useQuery<Business[]>({
     queryKey: ["/api/directory"],
     queryFn: () => apiRequest("GET", "/api/directory").then((r) => r.json()),
-    staleTime: 60_000,
+    ...FRESH,
   });
-  const { data: outzDetails } = useQuery<{ places: { id: string; art: string; region: string; photo?: OutzPhotoData }[] }>({
+  // The live Outzide catalog, the same one the Outzide map and the Placez Outzide section read.
+  const { data: outzDetails } = useQuery<{ places: OutzideRow[] }>({
     queryKey: ["/outzide-map/places.json"],
     queryFn: () => apiRequest("GET", "/outzide-map/places.json?v=20261017-sculpted-v3").then(r => r.json()),
-    staleTime: 3600_000,
+    ...FRESH,
   });
-  const dayEvents = useMemo(() => listings
-    .filter((event) => pacificCalendarDate(event.dateStart) === today)
-    .sort((a, b) => (parsePacificDateTime(a.dateStart) ?? 0) - (parsePacificDateTime(b.dateStart) ?? 0)), [listings, today]);
+  const dayEvents = useMemo(() => todaysUpcomingEvents(listings, now, today), [listings, now, today]);
   const locations = useMemo(() => {
-    const outside: TodayLocation[] = dailyPicks(outzCatalog, today, row => row.id).map(row => ({
-      key: `outz:${row.id}`, name: row.name, room: "OutZide", detail: outzDetails?.places.find(place => place.id === row.id)?.region || "Outdoor destination", kind: row.kind, art: outzDetails?.places.find(place => place.id === row.id)?.art, photo: outzDetails?.places.find(place => place.id === row.id)?.photo, href: outzSharePath(row.id),
+    const outside: TodayLocation[] = dailyPicks(outzDetails?.places ?? [], today, row => row.id).map(row => ({
+      key: `outz:${row.id}`, name: row.name, room: "OutZide", detail: row.region || "Outdoor destination", kind: row.kind, art: row.art, photo: row.photo, href: outzSharePath(row.id),
     }));
     const indoors: TodayLocation[] = dailyPicks(places.filter(row => row.status !== "CLOSED"), today, row => String(row.id)).map(row => ({
       key: `place:${row.id}`, name: row.name, room: "Placez", place: row, detail: row.neighborhood || row.address || "Portland metro", href: placePath(row.id, row.name),
