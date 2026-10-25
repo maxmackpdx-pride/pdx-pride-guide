@@ -148,3 +148,15 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 .standalone-hologram-countdown:has(.event-countdown-group ~ .event-countdown-group ~ .event-countdown-group ~ .event-countdown-group) .event-countdown-number{font-size:13px;}
 .standalone-hologram-countdown:has(.event-countdown-group ~ .event-countdown-group ~ .event-countdown-group ~ .event-countdown-group){gap:1px;padding-inline:1px;}
 .standalone-hologram-countdown:has(.event-countdown-group ~ .event-countdown-group ~ .event-countdown-group ~ .event-countdown-group) .event-countdown-separator{font-size:10px;}
+
+/* Per-venue hologram types. Scoped by data-hologram-type so other cards are unchanged. */
+/* puck (E3c): round logo puck with the countdown chip above it, no frame. */
+.standalone-hologram-label--event[data-hologram-type="puck"] .event-hologram-surface{display:none;}
+.standalone-hologram-label--event[data-hologram-type="puck"]{height:auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0;gap:6px;background:none;}
+.standalone-hologram-label--event[data-hologram-type="puck"]>.event-hologram-brand{position:relative;inset:auto;width:92px;height:92px;border-radius:50%;opacity:1;overflow:hidden;}
+.standalone-hologram-label--event[data-hologram-type="puck"]>.standalone-hologram-countdown{order:-1;}
+/* totem (H5): logo tier stacked above the title and countdown. */
+.standalone-hologram-label--event[data-hologram-type="totem"]>.event-hologram-brand{opacity:1;}
+/* tube (E1): no logo, the name reads down a glass strip. */
+.standalone-hologram-label--event[data-hologram-type="tube"]>.event-hologram-brand{display:none;}
+.standalone-hologram-label--event[data-hologram-type="tube"]>.standalone-hologram-title{height:auto;}
