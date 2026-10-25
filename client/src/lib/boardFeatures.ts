@@ -44,7 +44,7 @@ export function readBoardFeatureFilters(params: URLSearchParams, selection: Boar
   tags:selection==="housing"?[...new Set(read("tags").split(",").map(tag=>tag.trim()).filter(Boolean))]:[]};
 }
 export function boardIntentForSelection(raw:string|null, selection:BoardCategory|"all"):BoardIntent|"all" {
- const intents:Record<BoardCategory,BoardIntent[]>={housing:["offering","looking","forming","managed"],gigz:["hiring","available"],giftz:["giving","iso","grab"],sellz:["selling"],mizzed:["connection"],outz:["buddy","ride"]};
+ const intents:Record<BoardCategory,BoardIntent[]>={housing:["offering","looking","forming","managed"],gigz:["hiring","available"],giftz:["giving","iso","grab"],sellz:["selling"],mizzed:["connection"],outz:["buddy","ride","missed"]};
  const allowed=selection==="all"?Object.values(intents).flat():intents[selection];
  return allowed.includes(raw as BoardIntent)?raw as BoardIntent:"all";
 }

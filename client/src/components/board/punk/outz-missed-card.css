@@ -1,0 +1,52 @@
+/*
+ * Outzide MISSED CONNECTION cards (board kind MISSED_CONNECTION, card category `outzmissed`).
+ * The other Outzide board posts (Trip Buddy, Camp Buddy, Company, Carpool) stay solid Outzide orange. Missed connections
+ * blend the site's magenta (--neon-magenta, the Mizzed colour) with the Outzide orange (--room-outz): a diagonal
+ * magenta-to-orange wash over the card base, a magenta-leaning band across the top, a magenta/orange torn rim,
+ * and the same blend on the place chip, the filter chip and the composer's selected state.
+ * Copy stays legible: card text is white on the dark wash, chips are black ink on the bright blend.
+ * Tokens only (no raw hex). The one shared token is --outz-missed-mix, the magenta-to-orange blend.
+ */
+:root {
+  --outz-missed-mix: linear-gradient(135deg, var(--neon-magenta) 0%, color-mix(in srgb, var(--neon-magenta) 45%, var(--room-outz)) 38%, var(--room-outz) 100%);
+}
+
+/* Card base: a diagonal magenta-to-orange wash over the dark paper, with a magenta-leaning band fading from the top edge.
+   Screened over the paper texture (the face's own ::before) so the grain stays visible. */
+.boardz-punk-scope .zine.zc-outzmissed .zt-face::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; mix-blend-mode: screen;
+  background:
+    linear-gradient(to bottom, color-mix(in srgb, var(--neon-magenta) 78%, var(--room-outz)) 0%, color-mix(in srgb, var(--neon-magenta) 38%, transparent) 16%, transparent 38%),
+    linear-gradient(135deg, color-mix(in srgb, var(--neon-magenta) 52%, transparent) 0%, color-mix(in srgb, var(--room-outz) 46%, transparent) 100%);
+}
+.boardz-punk-scope .zine.zc-outzmissed {
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--neon-magenta) 34%, transparent)) drop-shadow(0 0 16px color-mix(in srgb, var(--room-outz) var(--bloom-alpha, 8%), transparent));
+}
+
+/* Torn rim: the orange rim map with a magenta rim map revealed across the first diagonal. */
+.boardz-punk-scope .zine.zc-outzmissed::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: var(--zt-paper) var(--zt-map); filter: url(#zine-frame-mizzed);
+  mask: var(--zt-paper) var(--zt-map), linear-gradient(135deg, var(--z-black) 0%, var(--z-black) 30%, transparent 78%);
+  mask-composite: intersect; -webkit-mask-composite: source-in;
+}
+.boardz-punk-scope .zine--small.zc-outzmissed::after {
+  background: var(--zt-tall);
+  mask: var(--zt-tall), linear-gradient(135deg, var(--z-black) 0%, var(--z-black) 30%, transparent 78%);
+  mask-composite: intersect; -webkit-mask-composite: source-in;
+}
+
+/* Place chip and tape: the blend with black ink. */
+.boardz-punk-scope .zine.zc-outzmissed .zine-area { background: var(--outz-missed-mix); color: var(--z-black); }
+.boardz-punk-scope .zine.zc-outzmissed .zine-title { text-align: center; }
+.boardz-punk-scope .zine.zc-outzmissed .zine-tape { color: var(--z-black); }
+.boardz-punk-scope .zine.zc-outzmissed .zine-tape::before { filter: url(#zine-strip-mizzed) drop-shadow(0 2px 0 var(--z-black)); }
+
+/* Filter chip ("Missed connections") on the Boardz sidebar: blend border and wash when selected, a magenta edge otherwise. */
+.ab-intents button[data-intent="missed"] { box-shadow: inset 2px 0 0 var(--neon-magenta); }
+.ab-intents button[data-intent="missed"][aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--neon-magenta) 55%, var(--room-outz));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--neon-magenta) 22%, transparent), color-mix(in srgb, var(--room-outz) 20%, transparent));
+  color: var(--text-hi);
+}
+.ab-intents button[data-intent="missed"][aria-pressed="true"] span { color: color-mix(in srgb, var(--neon-magenta) 40%, var(--text-hi)); }

@@ -1,6 +1,6 @@
 import type { BoardPost } from "@/lib/allBoards";
 
-/** A row from /api/outz/board: a Trip Buddy or Carpool wall post. */
+/** A row from /api/outz/board: a Trip Buddy, Carpool or Missed Connection wall post. */
 export type OutzBoardPost = {
   id: number;
   placeId: string;
@@ -20,17 +20,20 @@ export type OutzBoardPost = {
 const BUDDY_KINDS = ["HIKE_BUDDY", "CAMP_BUDDY", "LOOKING_FOR_COMPANY"];
 const CARPOOL_KINDS = ["CARPOOL", "CARPOOL_OFFER", "CARPOOL_REQUEST"];
 
+const MISSED_KINDS = ["MISSED_CONNECTION"];
+
 const BUDDY_TITLES: Record<string, string> = { HIKE_BUDDY: "Looking for a hike buddy", CAMP_BUDDY: "Looking for a camp buddy", LOOKING_FOR_COMPANY: "Looking for company" };
 const RIDE_TITLES: Record<string, string> = { CARPOOL: "Carpool", CARPOOL_OFFER: "Offering a ride", CARPOOL_REQUEST: "Looking for a ride" };
 
-export function outzBoardIntent(kind?: string): "buddy" | "ride" | null {
+export function outzBoardIntent(kind?: string): "buddy" | "ride" | "missed" | null {
   const k = String(kind || "").toUpperCase();
+  if (MISSED_KINDS.includes(k)) return "missed";
   if (BUDDY_KINDS.includes(k)) return "buddy";
   if (CARPOOL_KINDS.includes(k)) return "ride";
   return null;
 }
 
-/** Adapt one /api/outz/board row. Only Trip Buddy and Carpool posts belong on the Outzide board. */
+/** Adapt one /api/outz/board row. Only Trip Buddy, Carpool and Missed Connection posts belong on the Outzide board. */
 export function outzBoardRowToPost(base: Pick<BoardPost, "category" | "motifChoice" | "isDemo" | "isMine" | "status" | "saved" | "id" | "key" | "createdAt">, p: OutzBoardPost): BoardPost {
   const intent = outzBoardIntent(p.postKind) ?? "buddy";
   const kind = p.postKind.toUpperCase();
@@ -39,7 +42,7 @@ export function outzBoardRowToPost(base: Pick<BoardPost, "category" | "motifChoi
     ...base,
     isMine: Boolean(p.isMine),
     intent,
-    title: (intent === "buddy" ? BUDDY_TITLES[kind] : RIDE_TITLES[kind]) || place,
+    title: (intent === "buddy" ? BUDDY_TITLES[kind] : intent === "missed" ? "Missed connection" : RIDE_TITLES[kind]) || place,
     description: p.tripDate ? `${p.body} · ${p.tripDate}` : p.body,
     area: place,
     detail: place,

@@ -495,6 +495,7 @@ export default function Boards() {
                       <button
                         type="button"
                         key={i}
+                        data-intent={i}
                         aria-pressed={intent === i}
                         onClick={() => update({ intent: i }, true)}
                       >

@@ -197,3 +197,10 @@ html,body{height:100%;overflow:hidden;background:#080c0c}main,.workspace{positio
 
 .waypoint-icon.special .waypoint-label{bottom:calc(42px - 39px / 3)}
 .waypoint-icon.selected .waypoint-label{bottom:calc(82px - 70px / 3)}
+
+/* Missed-connection composer: the Boardz magenta+orange blend (map palette --pink and --orange) when that post type is selected. */
+.post-composer[data-kind="MISSED_CONNECTION"]{border:1px solid var(--pink);border-radius:8px;padding:10px;background:linear-gradient(135deg,color-mix(in srgb,var(--pink) 22%,transparent),color-mix(in srgb,var(--orange) 18%,transparent))}
+.post-composer[data-kind="MISSED_CONNECTION"] select,.post-composer[data-kind="MISSED_CONNECTION"] .primary{border-color:var(--pink)}
+.post-composer[data-kind="MISSED_CONNECTION"] .primary{background:linear-gradient(135deg,var(--pink),var(--orange));color:var(--bg)}
+.post-composer .mc-note{margin:0;font-size:12px;color:var(--muted)}
+.post-composer [hidden]{display:none}

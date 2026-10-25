@@ -3,8 +3,8 @@ import {boardPaperChoice} from '@shared/boardCardPresentation';
 
 /** One adapter for form previews, browse faces and open-card heroes. Never supplies demo people or photos. */
 export function toPunkPost(input:BoardPost&{kicker?:string;logo?:string}){
- // Outzide board posts are drawn as the orange Trip Buddy or Carpool card.
- const post=input.category==='outz'?{...input,category:(input.intent==='ride'?'carpool':'tripbuddy') as never,logo:'outzide.png'}:input;
+ // Outzide board posts are drawn as the orange Trip Buddy or Carpool card; Missed connections get the magenta+orange variant.
+ const post=input.category==='outz'?{...input,category:(input.intent==='ride'?'carpool':input.intent==='missed'?'outzmissed':'tripbuddy') as never,logo:'outzide.png'}:input;
  const housing=post.housing;
  const household=housing?.household.filter(p=>p.kind!=='PET')||[];
  const author=housing?.author;
@@ -12,7 +12,7 @@ export function toPunkPost(input:BoardPost&{kicker?:string;logo?:string}){
  const filled=housing?1+others.length:Math.max(0,post.householdCount||0);
  const open=Math.max(0,housing?.openSlots??post.openSlots??0);
  const money=String(post.value||'').trim().replace(/\s*(?:budget|\/\s*mo(?:nth)?|(?:a|per) month|monthly)\s*$/i,'').replace(/^\$\s*/,'');
- return {...post,kind:'board',kicker:(post.kicker||intentLabels[post.intent]).toUpperCase(),logo:post.logo||(post.category==='housing'?'my-houz.svg':post.category==='mizzed'?'mizzed-connection.svg':`${post.category}.svg`),
+ return {...post,kind:'board',kicker:(post.kicker||(post.intent==='missed'?'Missed':intentLabels[post.intent])).toUpperCase(),logo:post.logo||(post.category==='housing'?'my-houz.svg':post.category==='mizzed'?'mizzed-connection.svg':`${post.category}.svg`),
    detail:post.area,description:post.category==='gigz'?post.detail||post.description:post.description||post.detail,
    value:post.category==='mizzed'?'':/^\d/.test(post.value)&&post.category==='gigz'?'$'+post.value:post.value,
    photos:post.category==='mizzed'?[]:post.photos?.length?post.photos:post.photo?[post.photo]:[],

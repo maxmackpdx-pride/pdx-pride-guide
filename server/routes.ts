@@ -10,6 +10,7 @@ import { createEventSaves } from "./eventSaves";
 import { createBoardSaves, isSavedBoard } from "./boardSaves";
 import { publicBoardMapLocations } from './boardMapLocations';
 import { isDemoAuthor } from "@shared/demo";
+import { MISSED_CONNECTION_KIND, OUTZ_BLENDED_PLACE_IDS, missedConnectionBodyError } from "@shared/outzBlendedIds";
 import {getOutzClosures} from './outzClosures';
 import { schedulePushForActivity } from './push/dispatch';
 import { getWinterConditions } from './outzWinter';
@@ -193,6 +194,7 @@ import {
 import {
   deleteOutzCheckin,
   updateOutzWallPost,
+  getOutzWallPostKind,
   deleteOutzWallPost,
   createOutzWallComment,
   createOutzWallPost,
@@ -2289,11 +2291,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const postKind = String(req.body.postKind || "");
       const body = String(req.body.body || "").trim();
       const tripDate = req.body.tripDate ? String(req.body.tripDate) : null;
-      if (!placeId || !["LOOKING_FOR_COMPANY", "HIKE_BUDDY", "CAMP_BUDDY", "CARPOOL", "CARPOOL_OFFER", "CARPOOL_REQUEST", "TRIP_NOTE"].includes(postKind)) return res.status(400).json({ error: "Invalid OUTZ post" });
+      if (!placeId || !["LOOKING_FOR_COMPANY", "HIKE_BUDDY", "CAMP_BUDDY", "CARPOOL", "CARPOOL_OFFER", "CARPOOL_REQUEST", "TRIP_NOTE", MISSED_CONNECTION_KIND].includes(postKind)) return res.status(400).json({ error: "Invalid OUTZ post" });
+      if (postKind === MISSED_CONNECTION_KIND) {
+        if (!OUTZ_BLENDED_PLACE_IDS.includes(placeId)) return res.status(400).json({ error: "Missed connections can be posted at featured Outzide places" });
+        const unsafe = missedConnectionBodyError(body);
+        if (unsafe) return res.status(400).json({ error: unsafe });
+      }
       if (!body || body.length > 500) return res.status(400).json({ error: "Post must be 1 to 500 characters" });
-      if (tripDate && !isAllowedBeachCheckinDate(tripDate)) return res.status(400).json({ error: "Choose a trip day in the next week" });
+      if (tripDate && postKind !== MISSED_CONNECTION_KIND && !isAllowedBeachCheckinDate(tripDate)) return res.status(400).json({ error: "Choose a trip day in the next week" });
       if (moderationGate(res, "OUTZ trip board post", { body })) return;
-      res.json(createOutzWallPost({ placeId, userId: req.session.userId!, postKind, body, tripDate }));
+      res.json(createOutzWallPost({ placeId, userId: req.session.userId!, postKind, body, tripDate: postKind === MISSED_CONNECTION_KIND ? null : tripDate }));
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Could not post to destination wall" });
     }
@@ -2302,6 +2309,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.patch("/api/outz/wall/:id", requireAuth, (req, res) => {
     const body = String(req.body.body || "").trim();
     if (!body || body.length > 500) return res.status(400).json({ error: "Post must be 1 to 500 characters" });
+    if (getOutzWallPostKind(Number(req.params.id)) === MISSED_CONNECTION_KIND) {
+      const unsafe = missedConnectionBodyError(body);
+      if (unsafe) return res.status(400).json({ error: unsafe });
+    }
     if (moderationGate(res, "OUTZ trip board edit", { body })) return;
     if (!updateOutzWallPost(Number(req.params.id), req.session.userId!, body)) return res.status(404).json({ error: "Post not found" });
     res.json({ ok: true });
