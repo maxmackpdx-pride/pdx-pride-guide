@@ -49,3 +49,9 @@
 .ptunnel .ptunnel__front > .home-hero-stats-boundary { pointer-events: auto; background: linear-gradient(to top, var(--z-oled) 0%, var(--z-oled) 72%, rgba(0,0,0,0) 100%); }
 .ptunnel .ptunnel__front .home-front__flight-credit { pointer-events: auto; }
 .ptunnel .ptunnel__slot { pointer-events: auto; }
+
+/* Titles use the shared cut-out rule: white on black with one inverted word (.xr-rw--inv); the wrapper keeps line-clamp working. */
+.ptunnel__title-words { display: block; }
+.ptunnel__title-words .xr-rw { margin-right: .28em; }
+.ptunnel__title-words .xr-rl { padding: 0 2px; margin-bottom: 1px; }
+.ptunnel__title-words .xr-pw { letter-spacing: .02em; text-shadow: none; }
