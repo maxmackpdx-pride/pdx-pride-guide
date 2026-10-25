@@ -23,7 +23,7 @@ export default function OutzSmallCard({ location, onRequireAuth }: { location: T
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(placeId);
   const label = OUTZ_LABELS[location.kind || ""] || "Destination";
   return <>
-    <article className="outz-small" style={{ "--c": accent } as CSSProperties}>
+    <article className="outz-small pdx-glass-rebind" style={{ "--c": accent } as CSSProperties}>
       <button type="button" className="outz-small__open" aria-label={`Open ${location.name}`} onClick={() => setOpen(true)}>
         <span className="outz-small__art">
           {blend ? <OutzBlendArt placeId={placeId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : location.photo ? <OutzPhoto photo={location.photo} /> : <img src={art} alt="" loading="lazy" />}
