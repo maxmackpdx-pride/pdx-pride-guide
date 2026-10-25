@@ -1,4 +1,4 @@
-.outz-small{position:relative;width:var(--outz-small-w,136px);height:calc(var(--outz-small-w,136px) * 1.1029);border-radius:14px;overflow:hidden;isolation:isolate;border:2px solid var(--c);background:var(--z-black);box-shadow:0 0 14px color-mix(in srgb,var(--c) 40%,transparent)}
+.outz-small{position:relative;width:136px;height:150px;flex:none;border-radius:14px;overflow:hidden;isolation:isolate;border:2px solid var(--c);background:var(--z-black);box-shadow:0 0 14px color-mix(in srgb,var(--c) 40%,transparent)}
 .outz-small__open{all:unset;position:absolute;inset:0;cursor:pointer;display:block}
 .outz-small__open:focus-visible{outline:2px solid var(--text-hi);outline-offset:-4px}
 .outz-small__art{position:absolute;inset:0;display:block}

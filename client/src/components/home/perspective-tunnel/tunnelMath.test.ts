@@ -3,27 +3,33 @@ import { test } from "node:test";
 import { TUNNEL, computePose, createPose, hashKey, makeSlots, projectX, projectY } from "./tunnelMath.ts";
 
 const W = 600, H = 400; // desktop 1280x800 stage half-size
-const DESKTOP = 10, COMPACT = 6; // component defaults (5+5 and 3+3)
+const DESKTOP = 10, COMPACT = 6; // 10 desktop cards; 6 kept only as a generic spread check (phones render 0)
 const VIEWS = [{ n: DESKTOP, w: 640, h: 400 }, { n: COMPACT, w: 195, h: 422 }];
 const SEEDS = [1, 7, 42, 99, 1234, 98765];
 const pose = createPose();
 
-test("p=0: every card starts deep, behind the globe, near the globe, small", () => {
+test("p=0: every card starts behind the globe, close to the centre", () => {
   for (const s of makeSlots(DESKTOP, 7)) {
     computePose(pose, s, 0, W, H);
-    assert.equal(pose.z, TUNNEL.zStart);
-    assert.ok(Math.hypot(projectX(pose), projectY(pose)) < 0.45 * Math.hypot(W, H));
-    assert.ok(TUNNEL.perspective / (TUNNEL.perspective - pose.z) < 0.4);
+    assert.ok(Math.hypot(projectX(pose), projectY(pose)) < 0.2 * Math.hypot(W, H), `${projectX(pose)},${projectY(pose)}`);
   }
 });
 
-test("depth-first: by the time lateral spread is small, z has already advanced a lot", () => {
-  const s = { angle: 0, reach: 1.5, delay: 0, rot: 0, size: 1 };
+test("cards never scale: a pose has no scale/z/perspective fields and no tilt, at any progress", () => {
+  for (const s of makeSlots(DESKTOP, 5)) {
+    for (let p = 0; p <= 1.0001; p += 0.05) {
+      const out = computePose(pose, s, Math.min(1, p), W, H) as unknown as Record<string, unknown>;
+      assert.deepEqual(Object.keys(out).sort(), ["opacity", "rotZ", "t", "x", "y"]);
+      for (const k of ["scale", "size", "z", "rotX", "rotY"]) assert.ok(!(k in out), k);
+    }
+  }
+  for (const s of makeSlots(DESKTOP, 5)) assert.ok(!("size" in s) && !("scale" in s));
+});
+
+test("outward travel is already well under way by mid-scroll (depth-first feel kept)", () => {
+  const s = { angle: 0, reach: 1.5, delay: 0, rot: 0 };
   computePose(pose, s, 0.25, W, H);
-  const zFrac = (pose.z - TUNNEL.zStart) / (TUNNEL.zEnd - TUNNEL.zStart);
-  const latFrac = pose.x / (W * s.reach);
-  assert.ok(zFrac > 0.5, `zFrac ${zFrac}`);
-  assert.ok(latFrac < TUNNEL.peek + 0.08, `latFrac ${latFrac}`);
+  assert.ok(pose.x > W * 0.45, `x ${pose.x}`);
 });
 
 test("p=1: every card is far past the viewport edge (vanished), with no clamp", () => {

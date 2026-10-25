@@ -120,13 +120,11 @@
 .boardz-punk-scope .card.small[data-category=housing] .save-paper-shell:before{inset:-1px;transform:translate(2px,2px) rotate(2deg)}
 .boardz-punk-scope .card[data-category=housing] .save-paper-shell .save{position:relative;top:auto;right:auto;background:var(--punk-black);box-shadow:none;transition:color 180ms ease}
 @media(hover:hover) and (pointer:fine){
-  .boardz-punk-scope .card.large[data-category=housing]:hover .occupancy-paper-face:not(.occupancy-paper-more){scale:1.08}
   .boardz-punk-scope .card[data-category=housing] .save:hover{color:var(--secondary)}
 }
 .boardz-punk-scope .card[data-category=housing] .save:is(:focus-visible,:active){color:var(--secondary)}
 .boardz-punk-scope[data-calm=true] .card.large[data-category=housing] .occupancy-paper-face{animation:none!important;translate:none;rotate:none;scale:1;transition:none}
 @media(prefers-reduced-motion:reduce){
   .boardz-punk-scope .card.large[data-category=housing] .occupancy-paper-face{animation:none!important;translate:none;rotate:none;transition:none}
-  .boardz-punk-scope .card.large[data-category=housing]:hover .occupancy-paper-face:not(.occupancy-paper-more){scale:1}
   .boardz-punk-scope .card[data-category=housing] .save-paper-shell .save{transition:none}
 }

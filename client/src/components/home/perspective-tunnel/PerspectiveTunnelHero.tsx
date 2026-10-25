@@ -175,7 +175,7 @@ export default function PerspectiveTunnelHero({
       if (!force && pz.t === cache[i]) continue;
       cache[i] = pz.t;
       el.style.opacity = String(pz.opacity);
-      el.style.transform = `translate3d(${pz.x.toFixed(1)}px,${pz.y.toFixed(1)}px,${pz.z.toFixed(1)}px) rotateX(${pz.rotX.toFixed(2)}deg) rotateY(${pz.rotY.toFixed(2)}deg) rotateZ(${pz.rotZ.toFixed(2)}deg) scale(${slots[i].size.toFixed(3)})`;
+      el.style.transform = `translate(${pz.x.toFixed(1)}px,${pz.y.toFixed(1)}px) rotate(${pz.rotZ.toFixed(2)}deg)`;
     }
   };
 
@@ -240,26 +240,26 @@ export default function PerspectiveTunnelHero({
     return () => io.disconnect();
   }, []);
 
-  // Parallax pointer: subtle camera tilt, spring-smoothed, applied through motion values (no re-render).
+  // Parallax pointer: a few px of camera shift (translate only, never tilt/scale), spring-smoothed, via motion values (no re-render).
   const px = useMotionValue(0);
   const py = useMotionValue(0);
-  const tiltY = useSpring(px, { stiffness: 90, damping: 18, mass: 0.5 });
-  const tiltX = useSpring(py, { stiffness: 90, damping: 18, mass: 0.5 });
+  const shiftX = useSpring(px, { stiffness: 90, damping: 18, mass: 0.5 });
+  const shiftY = useSpring(py, { stiffness: 90, damping: 18, mass: 0.5 });
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (still) return;
     const r = e.currentTarget.getBoundingClientRect();
     const nx = ((e.clientX - r.left) / r.width - 0.5) * 2;
     const ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
-    const amp = e.pointerType === "mouse" ? 4 : 2.5; // gentler on touch
+    const amp = e.pointerType === "mouse" ? 10 : 6; // px, gentler on touch
     px.set(nx * amp);
-    py.set(-ny * amp);
+    py.set(ny * amp);
   };
   const onPointerLeave = () => {
     px.set(0);
     py.set(0);
   };
 
-  const style = { "--ptunnel-perspective": `${TUNNEL.perspective}px`, "--ptunnel-len": scrollLength } as CSSProperties;
+  const style = { "--ptunnel-len": scrollLength } as CSSProperties;
 
   return (
     <section
@@ -281,7 +281,7 @@ export default function PerspectiveTunnelHero({
         onPointerCancel={onPointerLeave}
       >
         {slots.length ? <div className="ptunnel__camera" aria-hidden={still ? undefined : true}>
-          <motion.div className="ptunnel__world" style={{ rotateX: tiltX, rotateY: tiltY }}>
+          <motion.div className="ptunnel__world" style={{ x: shiftX, y: shiftY }}>
             {cards.map((card, i) => (
               <TunnelCard
                 key={card.key}

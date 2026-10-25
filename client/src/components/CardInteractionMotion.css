@@ -37,3 +37,9 @@ html [data-card-motion="shared"] :is(.event-modal__hero-block, .event-modal__tab
 :is(html.calm-mode, html[data-calm="true"]) .gigz-opportunity__arrow {
   transition: none !important; translate: none !important;
 }
+
+/* Cards never scale. These are the card roots whose size is fixed (see cards-fixed-size.test.ts): hover, press,
+   entrance or any other state may not apply a scale to the card box itself. */
+:is(.ptunnel__card, .tonight-card, .outz-small, .home-stage-card, .boardz-production-card, .bz-card, .eb-original-card, .outz-featured__slot) {
+  scale: none !important;
+}

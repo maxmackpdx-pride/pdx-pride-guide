@@ -3,8 +3,9 @@
 .home-stage-card {
   position: relative;
   flex: 0 0 auto;
-  /* Slightly firmer width so the card holds weight next to centered copy */
-  width: clamp(248px, 28vw, 360px);
+  /* One fixed size (360x216); it never scales with the viewport. */
+  width: 360px;
+  height: 216px;
   min-height: 216px;
   max-height: 216px;
   border-radius: var(--glass-card-radius, 14px);

@@ -3,21 +3,28 @@
  * the per-frame path (computePose writes into a caller-owned pose object).
  *
  * Final spec (Tucker, supersedes earlier notes):
- *  - Cards LAUNCH FROM BEHIND the central globe/title: deep z, near the centre, small.
- *  - Depth-first: z advances first, lateral spread starts later.
+ *  - Cards have ONE fixed size and NEVER scale. There is no scale, no z/translateZ, no perspective and no
+ *    rotateX/rotateY here: a pose is a flat screen-space offset (x, y), a z-rotation and an opacity.
+ *  - Cards LAUNCH FROM BEHIND the central globe/title (near the centre, hidden by the globe) and sweep outward.
+ *  - The outward sweep keeps the old depth-first feel: the internal `depth` curve (which used to drive perspective
+ *    growth) now only drives how fast the card travels outward; it never changes the card's size.
  *  - Cards fly PAST the viewport edges and VANISH OFF SCREEN. There is intentionally
  *    no rim clamp, no max outward distance and no keep-visible fade-out anywhere here.
  */
 
 export const TUNNEL = {
-  /** CSS perspective distance in px. A card at depth z is drawn at perspective / (perspective - z). */
-  perspective: 1000,
-  /** Start depth: far behind the globe (draws at ~0.36x). */
+  /** Virtual depth curve start. Only shapes the outward speed (see computePose); it is never rendered as depth or size. */
   zStart: -1800,
-  /** End depth: toward the viewer (draws at ~1.8x before lateral push takes it off screen). */
+  /** Virtual depth curve end. */
   zEnd: 450,
-  /** Fraction of a card's own timeline in which z does all of its travel (depth-first). */
+  /** Reference distance for the outward-speed curve (px-like constant, not a CSS perspective). */
+  reference: 1000,
+  /** Fraction of a card's own timeline in which the depth-first curve does all of its travel. */
   zSpan: 0.85,
+  /** Fraction of a card's timeline over which it eases out from behind the globe's centre. */
+  emerge: 0.25,
+  /** Distance from centre at launch, as a fraction of the full outward curve (small enough that the globe hides the card). */
+  emergeFrom: 0.35,
   /** Fraction of a card's own timeline that passes before lateral spread begins. */
   lateralDelay: 0.2,
   /** Starting offset (fraction of reach) so a sliver of each card peeks out around the globe at progress 0. */
@@ -39,16 +46,13 @@ export type TunnelSlot = {
   delay: number;
   /** Resting z-rotation in degrees. */
   rot: number;
-  /** Constant size multiplier. */
-  size: number;
 };
 
 export type TunnelPose = {
+  /** Flat screen-space offset from the stage centre, px. */
   x: number;
   y: number;
-  z: number;
-  rotX: number;
-  rotY: number;
+  /** In-plane rotation, degrees (size-preserving). */
   rotZ: number;
   opacity: number;
   /** Card-local progress 0..1 (0 = still behind the globe). */
@@ -56,7 +60,7 @@ export type TunnelPose = {
 };
 
 export function createPose(): TunnelPose {
-  return { x: 0, y: 0, z: TUNNEL.zStart, rotX: 0, rotY: 0, rotZ: 0, opacity: 0, t: 0 };
+  return { x: 0, y: 0, rotZ: 0, opacity: 0, t: 0 };
 }
 
 /** Small, fast, seedable PRNG (mulberry32). */
@@ -112,7 +116,6 @@ export function makeSlots(count: number, seed: number): TunnelSlot[] {
       reach: 1.2 + rand() * 0.5,
       delay: count > 1 ? TUNNEL.maxDelay * (order / (count - 1)) : 0,
       rot: (rand() - 0.5) * 14,
-      size: 0.92 + rand() * 0.2,
     });
   }
   return slots;
@@ -120,8 +123,9 @@ export function makeSlots(count: number, seed: number): TunnelSlot[] {
 
 /**
  * Pose of one card at scroll progress `p` (0..1). halfW/halfH are the stage half-size in px.
- * Depth first: z eases out over zSpan of the card's timeline; lateral travel only starts after
- * lateralDelay and accelerates (ease-in) so cards end far beyond the viewport edge.
+ * Depth first: the virtual depth eases out over zSpan of the card's timeline (it only shapes outward speed);
+ * lateral travel only starts after lateralDelay and accelerates (ease-in) so cards end far beyond the viewport edge.
+ * The card's rendered size is constant: nothing here scales it.
  */
 export function computePose(out: TunnelPose, slot: TunnelSlot, p: number, halfW: number, halfH: number): TunnelPose {
   const t = clamp01((p - slot.delay) / (1 - slot.delay));
@@ -130,22 +134,22 @@ export function computePose(out: TunnelPose, slot: TunnelSlot, p: number, halfW:
   const lateral = TUNNEL.peek + (1 - TUNNEL.peek) * lT * lT * (1.35 - 0.35 * lT);
   const cos = Math.cos(slot.angle);
   const sin = Math.sin(slot.angle);
+  const depth = TUNNEL.zStart + (TUNNEL.zEnd - TUNNEL.zStart) * zT;
+  const reach = lateral * (TUNNEL.reference / (TUNNEL.reference - depth)); // outward-speed curve only, never a size
+  const emerge = TUNNEL.emergeFrom + (1 - TUNNEL.emergeFrom) * clamp01(t / TUNNEL.emerge);
   out.t = t;
-  out.z = TUNNEL.zStart + (TUNNEL.zEnd - TUNNEL.zStart) * zT;
-  out.x = cos * halfW * slot.reach * lateral;
-  out.y = sin * halfH * slot.reach * lateral;
+  out.x = cos * halfW * slot.reach * reach * emerge;
+  out.y = sin * halfH * slot.reach * reach * emerge;
   out.rotZ = slot.rot * (1 - 0.7 * zT);
-  out.rotY = cos * 16 * lT;
-  out.rotX = -sin * 12 * lT;
   // Entrance only: cards fade up as they clear the globe. There is no exit fade.
   out.opacity = 0.35 + 0.65 * clamp01(t * 9);
   return out;
 }
 
-/** Projected screen-space centre offset of a pose (px), for tests and screenshots. */
+/** Screen-space centre offset of a pose (px). Flat now: identical to pose.x / pose.y. Kept for tests and screenshots. */
 export function projectX(pose: TunnelPose): number {
-  return (pose.x * TUNNEL.perspective) / (TUNNEL.perspective - pose.z);
+  return pose.x;
 }
 export function projectY(pose: TunnelPose): number {
-  return (pose.y * TUNNEL.perspective) / (TUNNEL.perspective - pose.z);
+  return pose.y;
 }

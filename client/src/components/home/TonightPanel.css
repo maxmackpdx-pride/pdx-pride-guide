@@ -37,6 +37,8 @@
 .home-tonight .rg-resource-rail:focus-visible { outline: 2px solid var(--rail-accent); outline-offset: 3px; }
 .home-tonight .rg-rail-track { display: flex; gap: 29px; touch-action: pan-y pinch-zoom; }
 .home-tonight__item { flex: 0 0 200px; min-width: 0; display: flex; }
+/* Rail cards are one fixed size (200 x 403, the Eventz card tokens): never fluid, never scaled. */
+.home-tonight__item .tonight-card.tonight-card--card { width: var(--event-card-width); height: var(--event-card-height); max-width: none; }
 .home-tonight .rg-rail-track img { user-select: none; -webkit-user-drag: none; }
 .home-tonight .rg-rail-progress { height: 3px; width: min(240px, 60%); margin: 12px auto 0; background: var(--border-default); border-radius: 3px; overflow: hidden; }
 .home-tonight .rg-rail-progress > div { height: 100%; background: var(--rail-accent); transform-origin: right; }
