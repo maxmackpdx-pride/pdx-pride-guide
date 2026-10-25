@@ -156,6 +156,34 @@
       #questions {
         scroll-margin-top: 60px;
       }
+      /* Static topographic contour lines over the shared circuit wallpaper (the only WebGL context on this page).
+         Thin, low-opacity strokes in the Outzide orange token family; above the wallpaper, below all content. */
+      .topo-contours {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        contain: strict;
+        fill: none;
+        opacity: .5;
+      }
+      .topo-contours path {
+        fill: none;
+        stroke-width: 1;
+        vector-effect: non-scaling-stroke;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+      }
+      .topo-contours .tc-a { stroke: color-mix(in srgb, var(--room-outz, var(--neon-orange)) 34%, transparent); }
+      .topo-contours .tc-b { stroke: color-mix(in srgb, color-mix(in srgb, var(--room-outz, var(--neon-orange)) 60%, var(--neon-cyan)) 28%, transparent); }
+      .topo-contours .tc-major { stroke-width: 1.4; }
+      @media (max-width: 720px) {
+        .topo-contours { opacity: .38; }
+        .topo-contours .tc-major { stroke-width: 1.2; }
+      }
+      @media (prefers-reduced-motion: reduce) { .topo-contours { animation: none; transition: none; } }
       .mono,
       .eyebrow,
       .status,
