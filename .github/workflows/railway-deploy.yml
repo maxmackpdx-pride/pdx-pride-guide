@@ -42,9 +42,22 @@ jobs:
       - name: Pre-ship design and bundle guards
         run: npm run ship
 
-      # Railway's connected GitHub service deploys every push to master.
-      # Verify that native deployment here instead of triggering a duplicate
-      # GraphQL deploy with a separate project token that can expire.
+  # Railway's GitHub integration deploys master on its own (about 22 to 25 minutes).
+  # This job starts immediately so health verification is not stuck behind npm ci.
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Verify Railway deployment
         env:
           COMMIT_SHA: ${{ github.sha }}

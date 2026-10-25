@@ -14,7 +14,7 @@ export function gitIsAncestor(ancestor,descendant,cwd=process.cwd()){
  try{execFileSync('git',['merge-base','--is-ancestor',ancestor,descendant],{cwd,stdio:'pipe'});return true;}
  catch(error){if(error.status===1)return false;throw error;}
 }
-export async function verifyLiveDeployment({expected,attempts=90,delayMs=10000,fetchHealth,refreshHistory,isAncestor,wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)),log=console.log}){
+export async function verifyLiveDeployment({expected,attempts=180,delayMs=10000,fetchHealth,refreshHistory,isAncestor,wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)),log=console.log}){
  if(!shaPattern.test(expected||''))throw new Error('COMMIT_SHA must be a full commit SHA');
  for(let attempt=1;attempt<=attempts;attempt++){
   try{

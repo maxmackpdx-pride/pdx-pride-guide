@@ -37,7 +37,7 @@ export function evaluateRailwayDesignBuild(local: Evidence, live: Live, manifest
       !Array.isArray(live.sourceEvidence?.sources) ||
       new Set(live.sourceEvidence.sources.map(source => source.path)).size !== live.sourceEvidence.sources.length ||
       DESIGN_COMPONENT_REGISTRY.some(component => !live.sourceEvidence.sources.some(source => source.path === component.sourcePath)) ||
-      live.sourceEvidence.sources.some(source => typeof source.path !== "string" || !/^client\/src\/components\/[A-Za-z0-9_./-]+\.(tsx|css)$/.test(source.path) || source.path.includes("..") || !hash(source.sha256)) ||
+      live.sourceEvidence.sources.some(source => typeof source.path !== "string" || !/^client\/src\/components\/[A-Za-z0-9_./-]+\.(tsx|jsx|css)$/.test(source.path) || source.path.includes("..") || !hash(source.sha256)) ||
       digest(JSON.stringify(live.sourceEvidence.sources)) !== live.sourceEvidence.evidenceChecksum)
     throw new Error("The live product design registry is not trustworthy or has changed identity.");
   const current = new Map(local.sources.map(item => [item.path, item.sha256]));
