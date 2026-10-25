@@ -14,3 +14,4 @@
 .outz-featured__grid .tonight-card--card.today-location{aspect-ratio:2/3;height:auto}
 .outz-featured__grid .today-location .tonight-card__open{min-height:0}
 .outz-featured__grid .today-location .tonight-card__art{aspect-ratio:auto;flex:1 1 0;min-height:0}
+.outz-featured__grid .today-location .tonight-card__body{flex:none}
