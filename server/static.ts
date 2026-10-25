@@ -91,8 +91,22 @@ export function serveStatic(app: Express) {
     index: false,
     immutable: true,
     maxAge: "1y",
-    fallthrough: false,
+    fallthrough: true,
   }));
+  // A missing hashed asset is a real 404 and must never be cached. Cloudflare
+  // otherwise caches the 404 at the edge and hands the browser a 4h max-age, so
+  // one request that lands mid-deploy (new index.html, old container) poisons
+  // that chunk URL and strands the route on its loading spinner.
+  app.use("/assets", (_req, res) => {
+    res.status(404)
+      .set({
+        "Cache-Control": "no-store, max-age=0",
+        "CDN-Cache-Control": "no-store",
+        "Cloudflare-CDN-Cache-Control": "no-store",
+      })
+      .type("text/plain")
+      .send("Not Found");
+  });
 
   app.use(express.static(distPath, {
     index: false,
