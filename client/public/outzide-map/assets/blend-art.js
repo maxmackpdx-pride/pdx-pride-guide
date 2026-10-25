@@ -219,6 +219,8 @@ const ROUTES={
  rooster:[[150,925],[190,820],[250,700],[300,590],[318,500],[350,420],[430,330],[500,250],[570,170],[625,118],[640,100]],
  hero:[[400,550],[470,520],[550,490],[620,445],[668,390],[655,330],[668,268],[690,205],[700,152],[702,128]]
 };
+// Rooster Rock wide art re-uses the tall art's route, mapped the same way its person cutout is placed (x*.8+400, y*.8).
+ROUTES.roosterHero=ROUTES.rooster.map(q=>[q[0]*.8+400,q[1]*.8]);
 const largest2=ls=>ls.sort((a,b)=>b.length-a.length)[0];
 const insetPoly=(poly,g,dpx)=>{const m=raster(poly,g),D=chamfer(m,g.gw,g.gh),pl=largest2(isoLines(D,g,dpx/g.sx));return pl&&pl.length>=6?pl:null};
 const qa=()=>({});
@@ -272,10 +274,25 @@ async function build(rec,name,art,real){
 
 // ======== public API ========
 // Places with blended art. variant 'tall' is the 200x236 card art, 'wide' the drawer card and open-card hero.
-const BLEND_KEYS={'bc-garibaldi':{tall:'garibaldi',wide:'hero'},'silver-falls':{tall:'falls'},'rooster-rock':{tall:'rooster',wide:'roosterHero'},'dayuse-or-smith-rock-state-park':{tall:'smithrock'},'usfs-5435010324':{tall:'trillium'},'usfs-6485821010602':{tall:'tamolitch'},'cape-disappointment':{tall:'capedis'},'dayuse-wa-palouse-falls-state-park-heritage-site':{tall:'palouse',wide:'palouseWide'},'hurricane-hill':{tall:'hurricane'},'sol-duc-falls':{tall:'solduc',wide:'solducWide'},'usfs-5250.005571':{tall:'proxy'},'usfs-7682.004621':{tall:'tumalo',wide:'tumaloWide'},'bc-brandywine':{tall:'brandywine'},'cape-lookout':{tall:'capelookout'},'dayuse-or-latourell-falls-trailhead-guy-w-talbot':{tall:'latourell'}};
+const BLEND_KEYS={'bc-garibaldi':{tall:'garibaldi',wide:'hero'},'silver-falls':{tall:'falls'},'rooster-rock':{tall:'rooster',wide:'roosterHero'},'dayuse-or-smith-rock-state-park':{tall:'smithrock'},'usfs-5435010324':{tall:'trillium'},'usfs-6485821010602':{tall:'tamolitch'},'cape-disappointment':{tall:'capedis'},'dayuse-wa-palouse-falls-state-park-heritage-site':{tall:'palouse',wide:'palouseWide'},'hurricane-hill':{tall:'hurricane'},'sol-duc-falls':{tall:'solduc',wide:'solducWide'},'usfs-5250.005571':{tall:'proxy'},'usfs-7682.004621':{tall:'tumalo'},'bc-brandywine':{tall:'brandywine'},'cape-lookout':{tall:'capelookout'},'dayuse-or-latourell-falls-trailhead-guy-w-talbot':{tall:'latourell'}};
 const BLEND_PHOTO={palouseWide:'palouse-wide',solducWide:'solduc-wide',tumaloWide:'tumalo-wide',garibaldi:'garibaldi',falls:'falls',rooster:'rooster',hero:'hero',roosterHero:'rooster-wide',smithrock:'smithrock',trillium:'trillium',tamolitch:'tamolitch',capedis:'capedis',palouse:'palouse',hurricane:'hurricane',solduc:'solduc',proxy:'proxy',tumalo:'tumalo',brandywine:'brandywine',capelookout:'capelookout',latourell:'latourell'};
 const HUD_LABEL={garibaldi:'MT GARIBALDI 2,678 M',hero:'MT GARIBALDI 2,678 M',falls:'SOUTH FALLS 177 FT',trillium:"MT HOOD 11,249 FT",palouse:"PALOUSE FALLS 198 FT",hurricane:"HURRICANE HILL 5,757 FT",proxy:"PROXY FALLS 226 FT",tumalo:"TUMALO FALLS 97 FT",latourell:"LATOURELL FALLS 224 FT",brandywine:"BRANDYWINE FALLS 70 M",palouseWide:"PALOUSE FALLS 198 FT",tumaloWide:"TUMALO FALLS 97 FT",brandywineWide:"BRANDYWINE FALLS 70 M"};
-export const hasBlend=(placeId,variant='tall')=>Boolean(BLEND_KEYS[placeId]&&BLEND_KEYS[placeId][variant]);
+export const hasBlend=(placeId,variant='tall')=>Boolean(BLEND_KEYS[placeId]&&BLEND_KEYS[placeId][variant])&&checkBlend(placeId,variant).ok;
+// ---- Xerox cinematic style check: a place qualifies only when every layer of the style is really present ----
+// halftone dot base + photo (the .webp asset), >=5 real-photo cutouts, an orange contour source (terrain or wire mesh or a
+// subject outline), and a route overlay (ROUTES). `blendQualifies` is what the places registry must equal (see home-today.test.ts).
+const LAND=['mountain','snow','rock'];
+export function checkBlend(placeId,variant='tall'){
+ const key=BLEND_KEYS[placeId]&&BLEND_KEYS[placeId][variant],rec=key&&RECIPES[key];
+ const looks={};if(rec)rec.cutouts.forEach(c=>{looks[c.look]=(looks[c.look]||0)+1});
+ const c={key:key||null,recipe:Boolean(rec),photo:Boolean(key&&BLEND_PHOTO[key]),cutouts:rec?rec.cutouts.length:0,looks,
+  contour:rec?rec.cutouts.filter(x=>LAND.includes(x.cls)).length+(rec.mesh?rec.mesh.length:0)+(rec.ownMesh?1:0)+rec.cutouts.filter(x=>x.subject).length:0,
+  route:Boolean(key&&ROUTES[key]),hudLabel:Boolean(key&&HUD_LABEL[key])};
+ c.ok=c.recipe&&c.photo&&c.cutouts>=5&&c.contour>0&&c.route;
+ return c;
+}
+export const blendQualifies=(placeId,variant='tall')=>checkBlend(placeId,variant).ok;
+export const blendPlaces=()=>Object.keys(BLEND_KEYS).filter(id=>blendQualifies(id,'tall'));
 const photoUrl=key=>`/outzide-map/assets/photos/blend/${BLEND_PHOTO[key]}.webp`;
 const setVars=(box,rec)=>{const W=box.clientWidth,H=box.clientHeight;if(!W||!H)return false;const ph=W*rec.H/rec.W;box.style.setProperty('--xt',((H-ph)/2).toFixed(1)+'px');box.style.setProperty('--xh',ph.toFixed(1)+'px');return true};
 // A route with a travelling dot, a target ring and a lock-on label, drawn in the recipe's own coordinates.
@@ -305,8 +322,17 @@ export async function mountBlend(container,placeId,{variant='tall',hud=true}={})
   return `<div class="xc ${c.look} ${k}${terr?' terr':''}" style="--d:${d}s;--o:${o}s">${inner}</div>`}).join(''));
  await build(rec,key,box,{src});
  if(hud&&!disposed)box.insertAdjacentHTML('beforeend',hudMarkup(rec,key));
+ if(qaOn()&&!disposed)qaStrip(box,placeId,variant);
  return ()=>{disposed=true;ro&&ro.disconnect();box.remove()};
 }
 
 // The React cards load this file as a module script and read the API from here.
-if(typeof window!=="undefined")window.__outzBlendArt={hasBlend,mountBlend};
+// "Pipeline QA" strip from the Xerox cinematic reference: a mono readout of what the pipeline produced for this art.
+// Off on production cards (it is a spec/QA readout); show it with ?blendqa=1 or localStorage.blendQA="1".
+const qaOn=()=>{try{return /[?&]blendqa=1/.test(location.search)||localStorage.getItem('blendQA')==='1'}catch{return false}};
+function qaStrip(box,placeId,variant){
+ const c=checkBlend(placeId,variant),l=c.looks,strip=document.createElement('div');strip.className='bl-qa';
+ strip.innerHTML='<b>PIPELINE QA</b> \u00b7 recipe \u2192 rule table \u2192 gates<br>'+(c.key||placeId)+': '+c.cutouts+' cutouts \u00b7 bw '+(l.bw||0)+' pop '+(l.pop||0)+' lc '+(l.lc||0)+' col '+(l.col||0)+' \u00b7 contour '+c.contour+' \u00b7 route '+(c.route?'yes':'NO')+' \u00b7 '+(c.ok?'PASS':'FAIL');
+ box.append(strip);
+}
+if(typeof window!=="undefined")window.__outzBlendArt={hasBlend,mountBlend,checkBlend,blendQualifies,blendPlaces};

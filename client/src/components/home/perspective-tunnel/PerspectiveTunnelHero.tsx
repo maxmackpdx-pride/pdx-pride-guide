@@ -98,7 +98,7 @@ function TunnelCard({ card, interactive, setRef }: { card: TunnelCardData; inter
       tabIndex={interactive ? 0 : -1}
     >
       {card.kind === "outzide" ? <span className="outz-orange__band" aria-hidden="true" /> : null}
-      {card.blendId ? <OutzBlendArt placeId={card.blendId} variant="tall" hud={false} onUnavailable={() => setBlendFailed(true)} /> : null}
+      {card.blendId ? <OutzBlendArt placeId={card.blendId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : null}
       {card.imageUrl && (!card.blendId || blendFailed) ? <img className="ptunnel__img" src={card.imageUrl} alt="" loading="lazy" decoding="async" draggable={false} /> : null}
       <span className="ptunnel__scrim" aria-hidden="true" />
       <span className="ptunnel__kicker">

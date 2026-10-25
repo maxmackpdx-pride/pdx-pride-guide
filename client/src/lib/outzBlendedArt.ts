@@ -6,8 +6,10 @@ import { BLEND_PLACES } from "@/lib/outzBlend";
  * client/public/outzide-map/assets/blend-art.js (BLEND_KEYS). Every other Outzide place, including the
  * 143 with a layered v3 photo, uses the older layered-photo or motif-SVG art and does NOT qualify.
  *
- * `places.json` carries no flag for this, so the recipe registry is the manifest. A test keeps this
- * file, outzBlend.ts and blend-art.js in sync (script/home-today.test.ts).
+ * `places.json` carries no flag for this, so the recipe registry is the manifest. A place qualifies only when it
+ * passes the Xerox cinematic style check in blend-art.js (`checkBlend`: halftone base + photo, >= 5 photo cutouts,
+ * an orange contour source, a route overlay). A test keeps this file, outzBlend.ts and the engine's own check in
+ * sync (script/home-today.test.ts), so a hand-edited registry cannot let an unqualified place in.
  */
 export type BlendVariant = "tall" | "wide";
 
@@ -24,7 +26,7 @@ export const BLEND_PHOTO_FILES: Record<string, Partial<Record<BlendVariant, stri
   "hurricane-hill": { tall: "hurricane" },
   "sol-duc-falls": { tall: "solduc", wide: "solduc-wide" },
   "usfs-5250.005571": { tall: "proxy" },
-  "usfs-7682.004621": { tall: "tumalo", wide: "tumalo-wide" },
+  "usfs-7682.004621": { tall: "tumalo" },
   "bc-brandywine": { tall: "brandywine" },
   "cape-lookout": { tall: "capelookout" },
   "dayuse-or-latourell-falls-trailhead-guy-w-talbot": { tall: "latourell" },

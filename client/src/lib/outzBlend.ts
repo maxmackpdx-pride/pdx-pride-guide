@@ -11,7 +11,7 @@ export const BLEND_PLACES: Record<string, Array<"tall" | "wide">> = {
   "hurricane-hill": ["tall"],
   "sol-duc-falls": ["tall", "wide"],
   "usfs-5250.005571": ["tall"],
-  "usfs-7682.004621": ["tall", "wide"],
+  "usfs-7682.004621": ["tall"], // wide art has no orange contour source, so it does not qualify (blend-art.js checkBlend)
   "dayuse-or-latourell-falls-trailhead-guy-w-talbot": ["tall"],
   "cape-lookout": ["tall"],
   "bc-brandywine": ["tall"],
