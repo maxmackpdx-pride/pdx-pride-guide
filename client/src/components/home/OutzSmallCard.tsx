@@ -30,7 +30,7 @@ export default function OutzSmallCard({ location, onRequireAuth }: { location: T
         </span>
         <span className="outz-small__scrim" aria-hidden="true" />
         <span className="outz-small__kind">{label}</span>
-        <span className="outz-small__title" title={location.name} aria-label={location.name}><span aria-hidden="true"><RansomTitle text={location.name} /></span></span>
+        <span className="outz-small__title" title={location.name} aria-label={location.name}><span aria-hidden="true"><RansomTitle text={location.name} seed={location.key} /></span></span>
       </button>
       <HeartButton className="outz-small__heart" kind="outz" refId={placeId} snapshot={{ title: location.name, subtitle: "Outzide", href: `/outzide?place=${encodeURIComponent(placeId)}` }} onRequireAuth={onRequireAuth} />
       <span className="outz-small__waypoint"><CardWaypoint kind={location.kind || "trail"} outside /></span>

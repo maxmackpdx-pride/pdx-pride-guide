@@ -45,6 +45,7 @@ import {
 } from "@/lib/directoryRecent";
 import PlaceModal from "@/components/PlaceModal";
 import PlacezOutzideSection from "@/components/directory/PlacezOutzideSection";
+import OutzideFeatured, { splitFeatured } from "@/components/directory/OutzideFeatured";
 import OutzSmallCard from "@/components/home/OutzSmallCard";
 import TodayLocationCard from "@/components/home/TodayLocationCard";
 import type { OutzPhotoData } from "@/components/outz/OutzPhoto";
@@ -475,8 +476,9 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     return filterOutzidePlaces(outzidePlaces, selectedSubcategory, searchQuery).sort((a, b) =>
       Number(hasBlendRecipe(b.id)) - Number(hasBlendRecipe(a.id)) || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
   }, [outzideActive, outzidePlaces, selectedSubcategory, searchQuery]);
+  const outzideSplit = useMemo(() => splitFeatured(outzideFiltered), [outzideFiltered]);
   const placeList = useProgressiveList(filtered.length, { initial: 36, step: 36, resetKey: `${activeType}|${selectedSubcategory}|${activeNeighborhood}|${searchQuery}` });
-  const outzideList = useProgressiveList(outzideFiltered.length, { initial: 24, step: 24, resetKey: `outzide|${selectedSubcategory}|${searchQuery}` });
+  const outzideList = useProgressiveList(outzideSplit.rest.length, { initial: 24, step: 24, resetKey: `outzide|${selectedSubcategory}|${searchQuery}` });
 
   const neighborhoodsInUse = useMemo(() => {
     const seen = new Set(
@@ -588,14 +590,18 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                 outzideLoading ? <BoardLoadingState label="Loading Outzide" />
                 : outzideError ? <BrowseStatus error title="Outzide couldn’t load" description="The destinations didn’t come through. Try loading them again." onAction={() => void refetchOutzide()} />
                 : !outzideFiltered.length ? <BrowseStatus title="No destinations match your filters" description="Try another kind of place, or clear the search." actionLabel="Clear filters" onAction={clearPlaceFilters} />
-                : browseView === "browse" && selectedSubcategory === "ALL" ? <div className="eb-lanes">{subcategoryOptions.map(option => {
-                  const places = outzideFiltered.filter(place => place.kind === option.id);
-                  return places.length ? <BrowseLane key={option.id} title={option.label} color={TYPE_COLORS.outzide} count={places.length} onViewAll={() => { setActiveSubcategory(option.id); setBrowseView("grid"); }}>
-                    {places.slice(0, 16).map(place => <div className="eb-original-card" key={place.id}><TodayLocationCard location={outzideLocation(place)} onRequireAuth={() => setShowAuth(true)} /></div>)}
-                  </BrowseLane> : null;
-                })}</div> : <>
-                  <div className="placez-outzide__small">{outzideFiltered.slice(0, outzideList.limit).map(place => <OutzSmallCard key={place.id} location={outzideLocation(place)} onRequireAuth={() => setShowAuth(true)} />)}</div>
-                  <LoadMore hasMore={outzideList.hasMore} remaining={outzideList.remaining} onLoad={outzideList.loadMore} label="Show more destinations" />
+                : <>
+                  <OutzideFeatured places={outzideSplit.featured} toLocation={outzideLocation} onRequireAuth={() => setShowAuth(true)} label="Featured · new art" />
+                  {outzideSplit.rest.length > 0 && (browseView === "browse" && selectedSubcategory === "ALL" ? <div className="eb-lanes">{outzideSplit.featured.length > 0 && <h3 className="placez-outzide__more">More Outzide places</h3>}{subcategoryOptions.map(option => {
+                    const places = outzideSplit.rest.filter(place => place.kind === option.id);
+                    return places.length ? <BrowseLane key={option.id} title={option.label} color={TYPE_COLORS.outzide} count={places.length} onViewAll={() => { setActiveSubcategory(option.id); setBrowseView("grid"); }}>
+                      {places.slice(0, 16).map(place => <OutzSmallCard key={place.id} location={outzideLocation(place)} onRequireAuth={() => setShowAuth(true)} />)}
+                    </BrowseLane> : null;
+                  })}</div> : <>
+                    {outzideSplit.featured.length > 0 && <h3 className="placez-outzide__more">More Outzide places</h3>}
+                    <div className="placez-outzide__small">{outzideSplit.rest.slice(0, outzideList.limit).map(place => <OutzSmallCard key={place.id} location={outzideLocation(place)} onRequireAuth={() => setShowAuth(true)} />)}</div>
+                    <LoadMore hasMore={outzideList.hasMore} remaining={outzideList.remaining} onLoad={outzideList.loadMore} label="Show more destinations" />
+                  </>)}
                 </>
               ) : isLoading ? <BoardLoadingState label="Loading directory" /> : isError ? <BrowseStatus error title="Places couldn’t load" description="Your filters are still here. Try loading the directory again." onAction={() => void refetch()} /> : !filtered.length ?
                 <BrowseStatus title="No places match your filters" description="Try a broader search or another neighborhood." actionLabel="Clear filters" onAction={clearPlaceFilters} /> :

@@ -1,3 +1,4 @@
+import { blendedArtPlaces } from "@/lib/outzBlendedArt";
 import { isEventSchedulePast, pacificCalendarDate, parsePacificDateTime } from "@shared/missedConnections";
 
 /** Minimal listing shape the Today rail needs. */
@@ -23,4 +24,12 @@ export function todaysUpcomingEvents<T extends TodayListing>(listings: T[], now:
   return listings
     .filter(event => pacificCalendarDate(event.dateStart) === today && !isEventSchedulePast(event.dateStart, event.dateEnd, now))
     .sort((a, b) => (parsePacificDateTime(a.dateStart) ?? 0) - (parsePacificDateTime(b.dateStart) ?? 0));
+}
+
+/**
+ * Today's Outzide picks: date-rotated, and only from places with the new blended art.
+ * If none qualify (catalog not loaded, or recipes removed) the result is empty rather than falling back to older art.
+ */
+export function outzideDailyPicks<T extends { id: string }>(places: T[] | null | undefined, date: string, count = 3): T[] {
+  return dailyPicks(blendedArtPlaces(places), date, row => row.id, count);
 }

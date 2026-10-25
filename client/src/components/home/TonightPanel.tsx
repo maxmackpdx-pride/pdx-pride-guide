@@ -12,7 +12,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Event } from "@shared/schema";
 import type { EventListing } from "@shared/multiDayEvents";
 import { pacificTodayDate } from "@shared/missedConnections";
-import { dailyPicks, todaysUpcomingEvents } from "@/lib/homeToday";
+import { dailyPicks, outzideDailyPicks, todaysUpcomingEvents } from "@/lib/homeToday";
 import { apiRequest } from "@/lib/queryClient";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import TonightEventCard from "./TonightEventCard";
@@ -70,7 +70,7 @@ export default function TonightPanel() {
   });
   const dayEvents = useMemo(() => todaysUpcomingEvents(listings, now, today), [listings, now, today]);
   const locations = useMemo(() => {
-    const outside: TodayLocation[] = dailyPicks(outzDetails?.places ?? [], today, row => row.id).map(row => ({
+    const outside: TodayLocation[] = outzideDailyPicks(outzDetails?.places, today).map(row => ({
       key: `outz:${row.id}`, name: row.name, room: "OutZide", detail: row.region || "Outdoor destination", kind: row.kind, art: row.art, photo: row.photo, href: outzSharePath(row.id),
     }));
     const indoors: TodayLocation[] = dailyPicks(places.filter(row => row.status !== "CLOSED"), today, row => String(row.id)).map(row => ({

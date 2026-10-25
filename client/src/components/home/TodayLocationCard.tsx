@@ -47,7 +47,7 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
       <div className="tonight-card__body">
         <p className="rail-card-room"><img className={isPlace ? "rail-card-room__logo rail-card-room__logo--white" : "rail-card-room__logo"} src={isPlace ? "/brand/family/our-placez.svg" : "/brand/outzide.png"} alt={location.room} /></p>
         <p className="tonight-card__time">{label}</p>
-        <h3 title={location.name} aria-label={location.name}>{isPlace ? location.name : <span aria-hidden="true"><RansomTitle text={location.name} /></span>}</h3>
+        <h3 title={location.name} aria-label={location.name}>{isPlace ? location.name : <span aria-hidden="true"><RansomTitle text={location.name} seed={location.key} /></span>}</h3>
         <p className="tonight-card__venue"><MapPin size={16} aria-hidden="true" /><span>{location.detail}</span></p>
         <div className="tonight-card__tags"><span>{label}</span></div>
       </div>
