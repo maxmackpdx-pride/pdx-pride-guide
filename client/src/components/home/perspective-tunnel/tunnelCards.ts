@@ -106,6 +106,7 @@ export function pickTunnelCards(
   seed: number,
   now?: number,
 ): TunnelCardData[] {
+  if (count <= 0) return [];
   // `now` (optional): drop events whose scheduled end has passed.
   const liveEvents = events.filter(e => e.isPublic !== false && !e.isPrivate && e.status === "LIVE" && (now === undefined || !isEventSchedulePast(e.dateStart, e.dateEnd, now)));
   const eventCards = liveEvents.map(eventToTunnelCard);

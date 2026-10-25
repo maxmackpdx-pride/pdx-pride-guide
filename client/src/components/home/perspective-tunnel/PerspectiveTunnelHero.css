@@ -1,14 +1,14 @@
 /* Perspective Tunnel Hero. Cards animate transform + opacity only; no filters, backdrop-filter or bloom on them.
    Surfaces, borders, type and the wordmark/globe layout all come from the site's own tokens and HomeStage.css. */
 .ptunnel { --ptunnel-len: 320; position: relative; height: calc(var(--ptunnel-len) * 1vh); height: calc(var(--ptunnel-len) * 1svh); background: var(--z-oled); color: var(--text-hi); }
-.ptunnel[data-still="1"] { height: 100vh; height: 100svh; min-height: 520px; }
+.ptunnel[data-still="1"], .ptunnel[data-flyout="0"] { height: 100vh; height: 100svh; min-height: 520px; }
 
 .ptunnel__stage {
   --ptunnel-cy: 50%;
   position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--z-oled);
   touch-action: pan-y; contain: layout paint;
 }
-.ptunnel[data-still="1"] .ptunnel__stage { position: relative; }
+.ptunnel[data-still="1"] .ptunnel__stage, .ptunnel[data-flyout="0"] .ptunnel__stage { position: relative; }
 
 .ptunnel__camera { position: absolute; inset: 0; z-index: 1; perspective: var(--ptunnel-perspective, 1000px); perspective-origin: 50% var(--ptunnel-cy); }
 .ptunnel__world { position: absolute; left: 50%; top: var(--ptunnel-cy); width: 0; height: 0; transform-style: preserve-3d; }
@@ -45,6 +45,8 @@
 .ptunnel .ptunnel__front .home-front__metro-globe { pointer-events: none; }
 /* Before the cards launch they are hidden behind the globe, so it can keep its hover glow and the Halloween vines. */
 .ptunnel[data-still="0"] .ptunnel__stage[data-globe-live="1"] .home-front__metro-globe { pointer-events: auto; }
+/* No fly-out cards (phones): the globe always keeps the pointer (hover glow, vines). */
+.ptunnel[data-flyout="0"] .ptunnel__front .home-front__metro-globe { pointer-events: auto; }
 /* The homepage stat strip rides at the bottom of the sticky stage, above the cards, and stays clickable. */
 .ptunnel .ptunnel__front > .home-hero-stats-boundary { pointer-events: auto; background: linear-gradient(to top, var(--z-oled) 0%, var(--z-oled) 72%, rgba(0,0,0,0) 100%); }
 .ptunnel .ptunnel__front .home-front__flight-credit { pointer-events: auto; }

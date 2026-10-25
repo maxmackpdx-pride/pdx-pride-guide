@@ -19,6 +19,7 @@ import { OutzBlendArt } from "@/components/outz/OutzBlendArt";
 import { RansomTitle } from "@/components/xerox/Overlays";
 import { OUTZ_CATALOG_FALLBACK, pickTunnelCards, tunnelDayKey, tunnelDaySeed, type OutzideMapPlace, type TunnelCardData } from "./tunnelCards";
 import { TUNNEL, computePose, createPose, makeSlots } from "./tunnelMath";
+import { NO_FLYOUT_QUERY, useMedia } from "./flyOut";
 // HomeStage.css owns the real hero classes reused below (home-front__*). It must load before our overrides.
 import "@/components/home/HomeStage.css";
 import "./PerspectiveTunnelHero.css";
@@ -60,7 +61,7 @@ export type PerspectiveTunnelHeroProps = {
   scrollLength?: number;
   /** Force the reduced-motion arrangement (e.g. from ThemeContext calmMode). OS preference is always honoured. */
   still?: boolean;
-  /** Total card counts (half events, half Outzide). Defaults 10 desktop / 6 compact. */
+  /** Total card counts (half events, half Outzide). Defaults 10 desktop / 0 on phones (no fly-out cards there). */
   desktopCount?: number;
   compactCount?: number;
   /** Fix the shuffle (tests, screenshots). Omit in production: the seed comes from today's Pacific date, so the set is daily. */
@@ -70,18 +71,6 @@ export type PerspectiveTunnelHeroProps = {
 
 const WORDMARK = "/brand/family/zaylist-primary.svg"; // same asset HomeStage uses
 const COMPACT_QUERY = "(max-width: 700px)";
-
-function useMedia(query: string, initial = false) {
-  const [match, setMatch] = useState(() => (typeof window === "undefined" ? initial : window.matchMedia(query).matches));
-  useEffect(() => {
-    const mq = window.matchMedia(query);
-    const sync = () => setMatch(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, [query]);
-  return match;
-}
 
 /** Reduced motion = OS preference, calm mode (via prefersStillMotion) or the explicit `still` prop. */
 function useStill(force?: boolean) {
@@ -137,13 +126,15 @@ export default function PerspectiveTunnelHero({
   scrollLength = 320,
   still: stillProp,
   desktopCount = 10,
-  compactCount = 6,
+  compactCount = 0,
   seed: seedProp,
   className = "",
 }: PerspectiveTunnelHeroProps) {
   const compact = useMedia(COMPACT_QUERY);
   const still = useStill(stillProp);
-  const count = compact ? compactCount : desktopCount;
+  // Phones (and narrow touch viewports) get the globe hero only: no cards, no card layer, no scroll runway for them.
+  const noFlyout = useMedia(NO_FLYOUT_QUERY);
+  const count = noFlyout ? compactCount : desktopCount;
 
   // Daily set: seeded from the Pacific calendar date (the host passes `seed` and re-renders at midnight; standalone
   // use falls back to the date at mount). Never random per load.
@@ -228,7 +219,8 @@ export default function PerspectiveTunnelHero({
   // once they launch, pointer events fall through the globe canvas so every card is clickable.
   const globeLive = useRef(true);
   const syncGlobeLive = (p: number) => {
-    const live = still ? false : p < TUNNEL.globeLiveUntil;
+    // With no cards (phones) nothing launches from behind the globe, so it always keeps the pointer.
+    const live = slots.length === 0 ? true : still ? false : p < TUNNEL.globeLiveUntil;
     if (live === globeLive.current) return;
     globeLive.current = live;
     stageRef.current?.setAttribute("data-globe-live", live ? "1" : "0");
@@ -275,6 +267,7 @@ export default function PerspectiveTunnelHero({
       className={`ptunnel ${className}`.trim()}
       data-still={still ? "1" : "0"}
       data-compact={compact ? "1" : "0"}
+      data-flyout={slots.length ? "1" : "0"}
       data-active={active ? "1" : "0"}
       style={style}
       aria-labelledby="ptunnel-title"
@@ -287,7 +280,7 @@ export default function PerspectiveTunnelHero({
         onPointerLeave={onPointerLeave}
         onPointerCancel={onPointerLeave}
       >
-        <div className="ptunnel__camera" aria-hidden={still ? undefined : true}>
+        {slots.length ? <div className="ptunnel__camera" aria-hidden={still ? undefined : true}>
           <motion.div className="ptunnel__world" style={{ rotateX: tiltX, rotateY: tiltY }}>
             {cards.map((card, i) => (
               <TunnelCard
@@ -300,7 +293,7 @@ export default function PerspectiveTunnelHero({
               />
             ))}
           </motion.div>
-        </div>
+        </div> : null}
 
         {/* The real hero, as its own layer above the cards: opaque globe sphere (cards launch from behind it) and the
             wordmark + tagline, laid out by HomeStage.css exactly as on the homepage. `home-front` is what the globe

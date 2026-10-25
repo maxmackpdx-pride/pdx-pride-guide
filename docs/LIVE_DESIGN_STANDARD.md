@@ -192,6 +192,8 @@ Primary destinations are owned by `client/src/lib/siteNav.ts` (`PRIMARY_NAV`). P
 
 ## Homepage front door
 
+- The hero's fly-out cards run on desktop and wide viewports only (10 cards, half events, half blended Outzide). Phones and narrow touch viewports (`NO_FLYOUT_QUERY` in `perspective-tunnel/flyOut.ts`) get the globe hero with no card layer, a one-screen hero (no scroll runway) and no `/api/events` or `places.json` fetch for the hero.
+
 - Product-family names are exact: always render `EVENTZ`, `PLACEZ` (page title `OUR PLACEZ`), `OUTZ`, `My Hoüz`, `GIGZ`, `GIFTZ`, `SELLZ`, and `MIZZED CONNECTION` with this capitalization in public UI, metadata, accessibility labels, and current documentation. Existing lowercase routes, APIs, code identifiers, analytics keys, and asset paths remain compatibility internals unless a separate migration is approved.
 
 ## Current board and community entrances

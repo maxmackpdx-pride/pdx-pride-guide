@@ -5,6 +5,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 import PerspectiveTunnelHero from "@/components/home/perspective-tunnel/PerspectiveTunnelHero";
 import { tunnelDayKey, tunnelDaySeed, type OutzideMapPlace } from "@/components/home/perspective-tunnel/tunnelCards";
+import { useFlyOutEnabled } from "@/components/home/perspective-tunnel/flyOut";
 import type { EventListing } from "@shared/multiDayEvents";
 import { isEventSchedulePast, parsePacificDateTime } from "@shared/missedConnections";
 import { apiRequest } from "@/lib/queryClient";
@@ -38,6 +39,8 @@ const IDENTITY_LINES = [
  * Upcoming events only (ended ones drop out), soonest first; Outzide from the live places.json (blended-art places only).
  */
 function useTunnelData() {
+  // Phones fly no cards, so they fetch nothing for them (the Today rail runs its own queries).
+  const flyOut = useFlyOutEnabled();
   // The fly-by set is daily: seeded from the Pacific date. When the date rolls over (midnight, or a tab left open /
   // woken from sleep) switch to the new day's seed and refetch events and places so nothing stale carries over.
   const queryClient = useQueryClient();
@@ -60,11 +63,13 @@ function useTunnelData() {
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
     staleTime: 30_000,
+    enabled: flyOut,
   });
   const { data: outz } = useQuery<{ places: OutzideMapPlace[] }>({
     queryKey: ["/outzide-map/places.json"],
     queryFn: () => apiRequest("GET", "/outzide-map/places.json?v=20261017-sculpted-v3").then(r => r.json()),
     staleTime: 30_000,
+    enabled: flyOut,
   });
   const events = useMemo(() => {
     const now = Date.now();

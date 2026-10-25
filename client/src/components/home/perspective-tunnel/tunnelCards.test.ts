@@ -46,9 +46,9 @@ test("daily pick: same set for the same date regardless of input order, differen
   assert.ok(seen.size > 5, `outzide variety over a week: ${seen.size}`);
 });
 
-test("10 desktop / 6 compact, half events half blended Outzide; events never ended", () => {
+test("10 desktop / 0 on phones, half events half blended Outzide; events never ended", () => {
   const seed = tunnelDaySeed("2026-10-25");
-  for (const [count, ev, oz] of [[10, 5, 5], [6, 3, 3]] as const) {
+  for (const [count, ev, oz] of [[10, 5, 5], [6, 3, 3], [0, 0, 0]] as const) {
     const cards = pickTunnelCards(events, places, count, seed);
     assert.equal(cards.length, count);
     assert.equal(cards.filter(c => c.kind === "event").length, ev);
