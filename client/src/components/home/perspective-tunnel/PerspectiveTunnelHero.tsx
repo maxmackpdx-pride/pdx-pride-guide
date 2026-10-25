@@ -22,6 +22,7 @@ import { TUNNEL, computePose, createPose, makeSlots } from "./tunnelMath";
 // HomeStage.css owns the real hero classes reused below (home-front__*). It must load before our overrides.
 import "@/components/home/HomeStage.css";
 import "./PerspectiveTunnelHero.css";
+import "../outz-orange-card.css";
 
 const NO_EVENTS: readonly EventListing[] = [];
 
@@ -101,12 +102,13 @@ function TunnelCard({ card, interactive, setRef }: { card: TunnelCardData; inter
     <Link
       href={card.href}
       ref={setRef}
-      className="ptunnel__card pdx-glass-rebind"
+      className={`ptunnel__card pdx-glass-rebind${card.kind === "outzide" ? " outz-orange" : ""}`}
       data-kind={card.kind}
       style={{ "--c": card.accent } as CSSProperties}
       // Flying cards are a pointer/touch enhancement; keep them out of the tab order while they move.
       tabIndex={interactive ? 0 : -1}
     >
+      {card.kind === "outzide" ? <span className="outz-orange__band" aria-hidden="true" /> : null}
       {card.blendId ? <OutzBlendArt placeId={card.blendId} variant="tall" hud={false} onUnavailable={() => setBlendFailed(true)} /> : null}
       {card.imageUrl && (!card.blendId || blendFailed) ? <img className="ptunnel__img" src={card.imageUrl} alt="" loading="lazy" decoding="async" draggable={false} /> : null}
       <span className="ptunnel__scrim" aria-hidden="true" />

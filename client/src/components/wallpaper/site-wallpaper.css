@@ -74,31 +74,22 @@ html:is([data-site-wallpaper="boot"], [data-site-wallpaper="live"], [data-site-w
   .home-main-stage,
   .home-front,
   .home-front__welcome,
-  .home-front__flight,
-  .ptunnel,
-  .ptunnel__stage
+  .home-front__flight
 ) {
   background: transparent !important;
 }
 
 /*
- * No map behind the globe. The hero reserves a dark disc, a little larger than the globe sphere, that fades out
- * into the wallpaper, so no road or circuit line runs behind or right up against the globe. It sits below the card
- * layer (z-index 1), so the scroll cards still launch from behind the globe and stay fully bright. The globe canvas
- * publishes --globe-cx / --globe-cy / --globe-r on the stage; without them (or without the wallpaper) it is empty.
+ * The hero panel (the globe stage, .ptunnel) is NOT on the wallpaper: it keeps its own solid near-black Zaylist
+ * background (--z-oled, set in PerspectiveTunnelHero.css), full width, so no map or shader shows anywhere around or
+ * behind the globe. The wallpaper starts at the second panel (Explore Today) and runs down the page. The seam is a
+ * soft fade from the hero's black into the wallpaper along the top of that second panel, behind its content.
  */
-.ptunnel__stage::before {
-  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background: radial-gradient(
-    circle at var(--globe-cx, 50%) var(--globe-cy, 50%),
-    var(--z-oled) 0,
-    var(--z-oled) calc(var(--globe-r, 0px) * 1.02),
-    color-mix(in srgb, var(--z-oled) 70%, transparent) calc(var(--globe-r, 0px) * 1.2),
-    color-mix(in srgb, var(--z-oled) 28%, transparent) calc(var(--globe-r, 0px) * 1.42),
-    transparent calc(var(--globe-r, 0px) * 1.7)
-  );
+.home-tonight::before {
+  content: ""; position: absolute; inset: 0 0 auto; height: clamp(72px, 12vw, 160px); z-index: -1; pointer-events: none;
+  background: linear-gradient(to bottom, var(--z-oled) 0%, color-mix(in srgb, var(--z-oled) 55%, transparent) 45%, transparent 100%);
 }
-html:not([data-site-wallpaper="boot"], [data-site-wallpaper="live"], [data-site-wallpaper="still"]) .ptunnel__stage::before { display: none; }
+html:not([data-site-wallpaper="boot"], [data-site-wallpaper="live"], [data-site-wallpaper="still"]) .home-tonight::before { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .site-wallpaper__canvas { transition: none; }

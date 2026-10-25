@@ -164,6 +164,8 @@ Type: Barlow Condensed (`--font-display`) for titles and labels, Barlow (`--font
 
 ## Maps
 
+- Every Outzide card (home rail, hero fly-by, featured and small cards on the Places page) is the Outzide orange (`--room-outz`) as its base colour, with a gradient band across the top in the place's waypoint colour (`--c`, the `waypointToken` palette in `outzide-map/app.js`). Shared look: `components/home/outz-orange-card.css`. Copy on the orange is black ink or white on black chips.
+
 - Debossed OLED frame; keys = OLED panel chrome, pin **shapes** preserved.
 - No sitewide outer map bloom.
 
@@ -266,6 +268,6 @@ Before changing a global rule, read its relevant accepted Library chapter, inspe
 ## Site wallpaper
 
 - One shared circuit wallpaper (`client/src/components/wallpaper/`) is mounted once in `AppLayout`, behind every route. It owns the only wallpaper WebGL context; never mount a second one per page.
-- While `html[data-site-wallpaper]` is `boot`, `live` or `still`, the circuit wallpaper is the ONLY page background: `body::before`, `.zine-page::before`, `.board-page::after`, `.rg-stream-background`, `.board-shader-veil` and `.home-tonight__atmosphere` are hidden (see `site-wallpaper.css`). Do not add new page-level wash, grain, vignette or shader layers; card-level motifs and grain are fine. The homepage hero keeps a dark disc around the globe (`.ptunnel__stage::before`, driven by `--globe-cx/cy/r` from the globe canvas) so no map runs behind it. Its focus is the engine's own aperture hunt (f/3.5 to f/6, one quadrant snapping sharp a fifth of the time); never put a CSS filter, blur or extra opacity layer over the canvas.
+- While `html[data-site-wallpaper]` is `boot`, `live` or `still`, the circuit wallpaper is the ONLY page background: `body::before`, `.zine-page::before`, `.board-page::after`, `.rg-stream-background`, `.board-shader-veil` and `.home-tonight__atmosphere` are hidden (see `site-wallpaper.css`). Do not add new page-level wash, grain, vignette or shader layers; card-level motifs and grain are fine. The homepage hero panel (`.ptunnel`, the globe stage) is the exception: it keeps its own solid full-width `--z-oled` background, so the wallpaper never shows behind or around the globe; the wallpaper starts at the second panel (Explore Today), with a soft fade at the top of `.home-tonight` for the seam. Its focus is the engine's own aperture hunt (f/3.5 to f/6, one quadrant snapping sharp a fifth of the time); never put a CSS filter, blur or extra opacity layer over the canvas.
 - Page roots (`.app-shell`, `.zine-page`, `.eb-page`, board shader pages, home stage) are transparent in those states so it shows through. New page roots must not paint an opaque full-page background; add them to the list in `site-wallpaper.css` if they do.
 - It is torn down on full-bleed map routes (`/outzide`, `/map`) so the map keeps the memory. Calm Mode and `prefers-reduced-motion` hold one still frame. Without WebGL2 or with Save-Data the older per-page CSS atmosphere layers remain.

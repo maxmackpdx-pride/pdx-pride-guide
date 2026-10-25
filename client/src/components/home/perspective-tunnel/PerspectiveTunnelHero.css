@@ -55,3 +55,16 @@
 .ptunnel__title-words .xr-rw { margin-right: .28em; }
 .ptunnel__title-words .xr-rl { padding: 0 2px; margin-bottom: 1px; }
 .ptunnel__title-words .xr-pw { letter-spacing: .02em; text-shadow: none; }
+
+/* Outzide fly-by cards: Outzide orange base, waypoint-colour gradient band across the top (outz-orange-card.css).
+   The art fills the upper part and fades into the orange, where the copy sits as black ink and black chips. */
+.ptunnel__card.outz-orange { background: var(--outz-base); border-color: var(--outz-base); }
+.ptunnel__card.outz-orange :is(.ptunnel__img, .outz-blend) {
+  inset: 0 0 34% 0; height: 66%;
+  mask-image: linear-gradient(to bottom, var(--z-black) 78%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, var(--z-black) 78%, transparent 100%);
+}
+.ptunnel__card.outz-orange .ptunnel__scrim { display: none; }
+.ptunnel__card.outz-orange .ptunnel__kicker { color: var(--outz-ink); }
+.ptunnel__card.outz-orange .ptunnel__kicker i { background: var(--outz-ink); }
+.ptunnel__card.outz-orange .ptunnel__line { color: var(--outz-ink); }
+.ptunnel__card.outz-orange .ptunnel__title { color: var(--text-hi); }

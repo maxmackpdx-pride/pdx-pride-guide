@@ -1,12 +1,17 @@
-/* Featured Outzide places: large 4:5 cards (~360px). The shared tonight-card sizes itself from --event-card-width. */
+/* Featured Outzide places: tall 2:3 portrait cards (~360px wide, ~540px tall). The shared tonight-card sizes itself from --event-card-width. */
 .outz-featured{margin:0 0 8px}
 .outz-featured__label{margin:6px 0 14px}
 .outz-featured__label b{margin-left:6px;opacity:.7}
 .outz-featured__grid{--outz-featured-w:min(360px,calc(100vw - 32px));--event-card-width:var(--outz-featured-w);--eb-card-width:var(--outz-featured-w);--event-card-title-size:26px;
   display:grid;grid-template-columns:repeat(auto-fill,var(--outz-featured-w));gap:28px 22px;justify-content:start;align-items:start}
-.outz-featured__grid .outz-featured__slot,.eb-page--places .outz-featured__grid .outz-featured__slot{width:var(--outz-featured-w);min-height:calc(var(--outz-featured-w) * 1.25)}
+.outz-featured__grid .outz-featured__slot,.eb-page--places .outz-featured__grid .outz-featured__slot{width:var(--outz-featured-w);min-height:calc(var(--outz-featured-w) * 1.5)}
 .outz-featured__grid .tonight-card--card .tonight-card__body h3{height:auto;min-height:58px;-webkit-line-clamp:2}
 .outz-featured__grid .xr-oz h3 .xr-rl{font-size:21px;padding:0 3px}
 @media(max-width:767px){.outz-featured__grid{justify-content:center}}
 /* the places page narrows its own cards to 136px on phones; featured cards keep their size */
 @media(max-width:767px){.eb-page--places .outz-featured__grid{grid-template-columns:repeat(auto-fill,var(--outz-featured-w))}.eb-page--places .outz-featured__grid .outz-featured__slot{width:var(--outz-featured-w)}}
+/* 2:3 portrait: the card sets the ratio and the art takes whatever the copy and footer leave */
+.outz-featured__grid .tonight-card--card.today-location{aspect-ratio:2/3;height:auto}
+.outz-featured__grid .today-location .tonight-card__open{min-height:0}
+.outz-featured__grid .today-location .tonight-card__art{aspect-ratio:auto;flex:1 1 0;min-height:0}
+.outz-featured__grid .today-location .tonight-card__body{flex:none}

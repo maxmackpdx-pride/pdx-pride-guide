@@ -9,6 +9,7 @@ import HeartButton from "@/components/HeartButton";
 import OutzCardModal from "./OutzCardModal";
 import type { TodayLocation } from "./TodayLocationCard";
 import "./OutzSmallCard.css";
+import "./outz-orange-card.css";
 
 const OUTZ_TOKENS: Record<string, string> = { trail: "--neon-orange", stay: "--neon-magenta", beach: "--neon-magenta", camp: "--green-acid", coastcamp: "--neon-cyan", watercamp: "--neon-cyan", spring: "--neon-cyan", fishing: "--green-acid", boating: "--neon-cyan", atv: "--neon-red", winter: "--neon-blue", dayuse: "--neon-yellow" };
 const OUTZ_LABELS: Record<string, string> = { trail: "Trail", stay: "Stay", beach: "Beach", camp: "Camp", coastcamp: "Coastal camp", watercamp: "Waterfront camp", spring: "Hot spring", fishing: "Fishing", boating: "Boating", atv: "Off-road", winter: "Winter", dayuse: "Day use" };
@@ -23,7 +24,8 @@ export default function OutzSmallCard({ location, onRequireAuth }: { location: T
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(placeId);
   const label = OUTZ_LABELS[location.kind || ""] || "Destination";
   return <>
-    <article className="outz-small pdx-glass-rebind" style={{ "--c": accent } as CSSProperties}>
+    <article className="outz-small outz-orange pdx-glass-rebind" style={{ "--c": accent } as CSSProperties}>
+      <span className="outz-orange__band" aria-hidden="true" />
       <button type="button" className="outz-small__open" aria-label={`Open ${location.name}`} onClick={() => setOpen(true)}>
         <span className="outz-small__art">
           {blend ? <OutzBlendArt placeId={placeId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : location.photo ? <OutzPhoto photo={location.photo} /> : <img src={art} alt="" loading="lazy" />}
