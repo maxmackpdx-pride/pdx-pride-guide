@@ -207,6 +207,25 @@
 .event-modal.eb-detail.eb-detail--place .eb-detail__primary-action > button { font: var(--place-open-action-font) !important; font-size: 18px !important; font-weight: 700 !important; }
 /* iPhone-first interaction: safe-area room and consistent touch targets. */
 .event-modal.eb-detail--place .event-modal__scroll { -webkit-overflow-scrolling: touch; padding-bottom: calc(32px + env(safe-area-inset-bottom,0px)); }
+.event-modal.eb-detail--place .place-modal-panel__fact { overflow-wrap: normal; word-break: normal; align-items: flex-start; }
+.event-modal.eb-detail--place .place-modal-panel__hours { display: flex; flex: 1 1 auto; flex-wrap: wrap; gap: 0 0.4em; min-width: 0; }
+.event-modal.eb-detail--place .place-modal-panel__hours-clause { white-space: nowrap; }
+.event-modal.eb-detail--place .place-modal-panel__description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  max-height: none;
+  overflow: hidden;
+}
+.event-modal.eb-detail--place .place-modal-panel__description--expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  max-height: none;
+  overflow: visible;
+}
+@media (max-width: 640px) {
+  .event-modal.eb-detail--place .place-modal-panel__hero-rail { height: min(48cqw, 200px); }
+}
 .event-modal.eb-detail--place .place-modal-panel__hero-rail { -webkit-overflow-scrolling: touch; }
 .event-modal.eb-detail--place .place-modal-panel__hero img { -webkit-user-drag: none; user-select: none; }
 .event-modal.eb-detail--place :is(.place-modal-panel__read-more,.place-modal-panel__tab) { min-height: 44px; }

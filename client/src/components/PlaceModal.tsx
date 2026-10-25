@@ -32,6 +32,7 @@ import {
 } from "@/pages/Directory";
 import { placeGoogleMapsUrl, placeAppleMapsUrl, telHref } from "@/lib/placeLinks";
 import { placePath } from "@shared/placeSlug";
+import { placeHoursClauses } from "@/lib/placeHours";
 import { sharePageLink, shareToastTitle } from "@/lib/shareEvent";
 import VenueFollowButton from "@/components/VenueFollowButton";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
@@ -207,6 +208,11 @@ function formatPastWhen(ev: DirectoryEventSummary): string {
   if (Number.isNaN(d.getTime())) return "Past";
   const mon = d.toLocaleString([], { month: "short" }).toUpperCase();
   return `${mon} ${d.getFullYear()}`;
+}
+
+function PlaceHours({ hours }: { hours: string }) {
+  const clauses = placeHoursClauses(hours);
+  return <span className="place-modal-panel__hours">{clauses.map((clause, index) => <span className="place-modal-panel__hours-clause" key={`${clause}-${index}`}>{clause}{index < clauses.length - 1 ? "," : ""}</span>)}</span>;
 }
 
 export default function PlaceModal({
@@ -648,7 +654,7 @@ export default function PlaceModal({
                           marginBottom: 6,
                         }}
                       >
-                        {loc.hours && <span>{loc.hours}</span>}
+                        {loc.hours && <PlaceHours hours={loc.hours} />}
                       </div>
                     )}
                     <span style={{ display: "inline-flex", gap: 12 }}>
@@ -816,7 +822,7 @@ export default function PlaceModal({
               {!multiLoc && (
                 <>
                   <div className="place-modal-panel__facts">
-                    {displayed.hours && <div className="place-modal-panel__fact"><Icon d={CLOCK} />{displayed.hours}</div>}
+                    {displayed.hours && <div className="place-modal-panel__fact"><Icon d={CLOCK} /><PlaceHours hours={displayed.hours} /></div>}
                     {address && <div className="place-modal-panel__fact"><Icon d={PIN} />{address}</div>}
                     {displayed.instagram && <div className="place-modal-panel__fact"><Icon d={IG} /><a href={displayed.instagram.startsWith("http") ? displayed.instagram : `https://instagram.com/${displayed.instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer">{displayed.instagram}</a></div>}
                   </div>

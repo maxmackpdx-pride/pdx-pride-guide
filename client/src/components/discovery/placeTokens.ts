@@ -4,4 +4,5 @@ export const PLACE_ACCENTS: Record<string, string> = {
   venue: 'var(--neon-cyan)', service: 'var(--neon-violet)', shop: 'var(--neon-yellow)',
   hotel: 'var(--neon-magenta)', nonprofit: 'var(--text-heading)', healthcare: 'var(--neon-cyan)',
   realestate: 'var(--neon-blue)', group: 'var(--neon-yellow)', campground: 'var(--neon-green)',
+  outzide: 'var(--neon-orange)',
 };

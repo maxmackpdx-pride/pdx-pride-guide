@@ -30,6 +30,24 @@ export function BrowseControls({ title, categories, selected, onSelect, query, o
   const controlsRef=useBrowseControlsOffset();
   const categoryRowRef=useRef<HTMLDivElement>(null);
   const dockTop=useScrollDock(categoryRowRef);
+  const selectedKey = selected.join(",");
+  const categoryKey = categories.map(category => category.id).join(",");
+  const markCategoryScroll = (scroller: HTMLElement) => {
+    const max = scroller.scrollWidth - scroller.clientWidth;
+    scroller.classList.toggle("is-scrolled", scroller.scrollLeft > 4);
+    scroller.classList.toggle("can-scroll-end", max > 4 && scroller.scrollLeft < max - 4);
+  };
+  useEffect(() => {
+    const scroller = categoryRowRef.current?.querySelector<HTMLElement>(".eb-categories");
+    const pressed = scroller?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!scroller || !pressed) return;
+    const pad = 18;
+    const left = pressed.offsetLeft - pad;
+    const right = pressed.offsetLeft + pressed.offsetWidth + pad;
+    if (left < scroller.scrollLeft) scroller.scrollLeft = left;
+    else if (right > scroller.scrollLeft + scroller.clientWidth) scroller.scrollLeft = right - scroller.clientWidth;
+    markCategoryScroll(scroller);
+  }, [selectedKey, categoryKey]);
   const pick=(id: string) => { onSelect(id); onView("grid"); };
   return <div className="eb-controls" ref={controlsRef}>
     {dockTop != null && (<ScrollDock top={dockTop} label={`${title} categories`} searchLabel={`Search ${title}`}
@@ -38,7 +56,7 @@ export function BrowseControls({ title, categories, selected, onSelect, query, o
         color={category.color} pressed={selected.includes(category.id)} onClick={() => { pick(category.id); requestAnimationFrame(() => scrollToResults(".eb-result-head, .eb-body", dockTop)); }} />)}
     </ScrollDock>)}
     <div className="eb-category-row" ref={categoryRowRef}>
-      <div className="eb-categories" role="group" aria-label={`${title} categories`}>
+      <div className="eb-categories" role="group" aria-label={`${title} categories`} onScroll={event => markCategoryScroll(event.currentTarget)}>
         {categories.map(category => <button type="button" className="eb-category pdx-glass-rebind" key={category.id}
           style={{ "--c": category.color } as CSSProperties} aria-pressed={selected.includes(category.id)} onClick={() => pick(category.id)}>
           <span>{category.label}</span><small>{category.id === "ALL" ? "Explore" : title}</small><b>{category.count}</b>
@@ -81,9 +99,10 @@ export function BrowseLane({ title, color, count, children, onViewAll }: { title
   const [open, setOpen] = useState(false);
   const isMobile = useIsMobile();
   const id = useId();
+  const showViewAll = onViewAll ? count > 4 : !isMobile && count > 4;
   return <section className={`eb-lane pdx-glass-rebind${open ? " eb-lane--open" : ""}`} style={{ "--c": color } as CSSProperties} aria-labelledby={id}>
     <header className="eb-lane__head"><h2 id={id}><i aria-hidden="true" />{title} <small>{count}</small></h2>
-      {!isMobile && count > 4 && <button type="button" aria-expanded={onViewAll ? undefined : open} onClick={() => onViewAll ? onViewAll() : setOpen(!open)}>{!onViewAll && open ? "Show less" : "View all"}</button>}
+      {showViewAll && <button type="button" aria-expanded={onViewAll ? undefined : open} onClick={() => onViewAll ? onViewAll() : setOpen(!open)}>{!onViewAll && open ? "Show less" : "View all"}</button>}
     </header>
     <EventsRail open={isMobile || open} label={title}>{Children.map(children, child => <div className="events-rail__item" role="listitem">{child}</div>)}</EventsRail>
   </section>;

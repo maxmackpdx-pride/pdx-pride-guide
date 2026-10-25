@@ -1,4 +1,3 @@
-import { readBrowseCategories } from "@/lib/browseCategoryState";
 import { BrowseHeader, BrowseControls, BrowseFilters, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
 import { PlaceSubcategoryFilters } from '@/components/discovery/PlaceSubcategoryFilters';
 import { directorySubcategories, directorySubcategoryOptions } from '@shared/directorySubcategories';
@@ -46,6 +45,11 @@ import {
 } from "@/lib/directoryRecent";
 import PlaceModal from "@/components/PlaceModal";
 import PlacezOutzideSection from "@/components/directory/PlacezOutzideSection";
+import OutzSmallCard from "@/components/home/OutzSmallCard";
+import TodayLocationCard from "@/components/home/TodayLocationCard";
+import type { OutzPhotoData } from "@/components/outz/OutzPhoto";
+import { hasBlendRecipe } from "@/lib/outzBlend";
+import { OUTZIDE_BROWSE_TYPE, filterOutzidePlaces, outzideSubcategoryOptions, readPlacezBrowseType } from "@/lib/outzideBrowse";
 import { LoadMore, useProgressiveList } from "@/hooks/useProgressiveList";
 import "./Directory.css";
 
@@ -149,6 +153,8 @@ function browseNeighborhood(value?: string | null): string {
 /** Group records power Z/ communities and QSearch, but are not public PLACEZ. */
 const CATEGORY_ORDER = Object.keys(TYPE_LABELS).filter(key => key !== "group");
 
+type OutzideRow = { id: string; name: string; kind: string; region?: string; art?: string; photo?: OutzPhotoData };
+
 /** Session keys so closing a place card does not dump you at top of page. */
 const DIR_SCROLL_KEY = "zaylist.directory.scrollY";
 
@@ -202,7 +208,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   const [formOpen, setFormOpen] = useState(() => new URLSearchParams(window.location.search).get("add") === "1");
   const [activeType, setActiveType] = useState(() => {
     if (isSpaces) return "group";
-    return readBrowseCategories(new URLSearchParams(window.location.search), "type", isPlacezType, "category").join(",") || "ALL";
+    return readPlacezBrowseType(new URLSearchParams(window.location.search));
   });
   const [activeNeighborhood, setActiveNeighborhood] = useState(() => new URLSearchParams(window.location.search).get("neighborhood") || "ALL");
   const [activeSubcategory, setActiveSubcategory] = useState(() => new URLSearchParams(window.location.search).get('sub') || 'ALL');
@@ -237,6 +243,14 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     () => businesses.filter(b => isSpaces ? b.type === "group" : isPlacezType(b.type) && !directoryResourceName(b)),
     [businesses, isSpaces],
   );
+  const { data: outzideCatalog, isLoading: outzideLoading, isError: outzideError, isFetched: outzideFetched, refetch: refetchOutzide } = useQuery<{ places: OutzideRow[] }>({
+    queryKey: ["/outzide-map/places.json"],
+    queryFn: () => apiRequest("GET", "/outzide-map/places.json?v=20261017-sculpted-v3").then(r => r.json()),
+    staleTime: 3_600_000,
+    enabled: !isSpaces,
+  });
+  const outzidePlaces = outzideCatalog?.places ?? [];
+  const outzideActive = !isSpaces && activeType === OUTZIDE_BROWSE_TYPE;
 
   /** Keep type/q on the place URL so remount from /directory → /directory/:id doesn't wipe filters. */
   const directoryQuerySuffix = useCallback(() => {
@@ -264,8 +278,8 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   useEffect(() => {
     const restore = () => {
       const params = new URLSearchParams(window.location.search);
-      const type = readBrowseCategories(params, "type", isPlacezType, "category").join(",");
-      setActiveType(isSpaces ? "group" : type || "ALL");
+      const type = readPlacezBrowseType(params);
+      setActiveType(isSpaces ? "group" : type);
       const view = params.get("layout");
       setBrowseView(view === "grid" || Boolean(type && type !== "ALL") ? "grid" : "browse");
       setSearchQuery(params.get("q") || "");
@@ -395,7 +409,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   }, [visibleBusinesses]);
 
   const categoryBands = useMemo(() => {
-    return (isSpaces ? ["group"] : CATEGORY_ORDER)
+    const bands = (isSpaces ? ["group"] : CATEGORY_ORDER)
       .map(key => ({
         key,
         label: TYPE_LABELS[key],
@@ -403,13 +417,23 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         count: categoryCounts[key] ?? 0,
       }))
       .filter(c => c.count > 0);
-  }, [categoryCounts, isSpaces]);
+    if (!isSpaces && outzidePlaces.length > 0) {
+      bands.push({ key: OUTZIDE_BROWSE_TYPE, label: "Outzide", color: TYPE_COLORS.outzide, count: outzidePlaces.length });
+    }
+    return bands;
+  }, [categoryCounts, isSpaces, outzidePlaces.length]);
 
-  const subcategoryOptions = useMemo(() => isSpaces ? [] : directorySubcategoryOptions(visibleBusinesses, activeType.split(',')), [visibleBusinesses, activeType, isSpaces]);
-  const selectedSubcategory = subcategoryOptions.some(option => option.id === activeSubcategory) ? activeSubcategory : 'ALL';
+  const subcategoryOptions = useMemo(() => {
+    if (isSpaces) return [];
+    if (outzideActive) return outzideSubcategoryOptions(outzidePlaces);
+    return directorySubcategoryOptions(visibleBusinesses, activeType.split(","));
+  }, [isSpaces, outzideActive, outzidePlaces, visibleBusinesses, activeType]);
+  const subcategoryReady = !outzideActive || outzideFetched;
+  const selectedSubcategory = subcategoryReady && !subcategoryOptions.some(option => option.id === activeSubcategory) ? "ALL" : activeSubcategory;
   useEffect(() => {
-    if (!isLoading && activeSubcategory !== selectedSubcategory) setActiveSubcategory(selectedSubcategory);
-  }, [isLoading, activeSubcategory, selectedSubcategory]);
+    if (isLoading || !subcategoryReady) return;
+    if (activeSubcategory !== selectedSubcategory) setActiveSubcategory(selectedSubcategory);
+  }, [isLoading, subcategoryReady, activeSubcategory, selectedSubcategory]);
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -446,7 +470,13 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
       });
   }, [visibleBusinesses, activeType, selectedSubcategory, activeNeighborhood, searchQuery]);
+  const outzideFiltered = useMemo(() => {
+    if (!outzideActive) return [];
+    return filterOutzidePlaces(outzidePlaces, selectedSubcategory, searchQuery).sort((a, b) =>
+      Number(hasBlendRecipe(b.id)) - Number(hasBlendRecipe(a.id)) || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+  }, [outzideActive, outzidePlaces, selectedSubcategory, searchQuery]);
   const placeList = useProgressiveList(filtered.length, { initial: 36, step: 36, resetKey: `${activeType}|${selectedSubcategory}|${activeNeighborhood}|${searchQuery}` });
+  const outzideList = useProgressiveList(outzideFiltered.length, { initial: 24, step: 24, resetKey: `outzide|${selectedSubcategory}|${searchQuery}` });
 
   const neighborhoodsInUse = useMemo(() => {
     const seen = new Set(
@@ -455,12 +485,13 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         .map(b => browseNeighborhood(b.neighborhood))
         .filter((n): n is string => Boolean(n)),
     );
+    if (activeNeighborhood !== "ALL") seen.add(browseNeighborhood(activeNeighborhood));
     const ordered = NEIGHBORHOOD_ORDER.filter(n => n === "ALL" || seen.has(n));
     const extras = [...seen]
       .filter(n => !NEIGHBORHOOD_ORDER.includes(n))
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
     return [...ordered, ...extras];
-  }, [activeType, visibleBusinesses]);
+  }, [activeType, activeNeighborhood, visibleBusinesses]);
 
   const handleSelectCategory = (key: string) => {
     setBrowseView("grid");
@@ -470,7 +501,6 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       if (key === "ALL" || isSpaces) return key;
       return current === key ? 'ALL' : key;
     });
-    setActiveNeighborhood("ALL");
     setSelectedPlace(null);
   };
 
@@ -480,13 +510,26 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   };
 
 
-  const resultLine = isError ? "Results unavailable" : isLoading
-    ? "Loading…"
+  const resultLine = (isError && !outzideActive) || (outzideActive && outzideError) ? "Results unavailable"
+    : (isLoading && !outzideActive) || (outzideActive && outzideLoading) ? "Loading…"
+    : outzideActive ? `${outzideFiltered.length} ${outzideFiltered.length === 1 ? "DESTINATION" : "DESTINATIONS"}`
     : `${filtered.length} ${isSpaces ? (filtered.length === 1 ? "squad" : "squadz") : (filtered.length === 1 ? "PLACE" : "PLACEZ")}`;
 
   const renderBrowsePlace = (biz: Business) => <div key={biz.id} className="eb-original-card">
     <DirectoryCard biz={biz} onClick={element => openPlace(biz, element)} onRequireAuth={() => setShowAuth(true)} />
   </div>;
+
+  const outzideLocation = (place: OutzideRow) => ({
+    key: `outz:${place.id}`,
+    name: place.name,
+    room: "OutZide" as const,
+    detail: place.region || "Outdoor destination",
+    kind: place.kind,
+    art: place.art,
+    photo: place.photo,
+    href: `/outzide?place=${encodeURIComponent(place.id)}`,
+  });
+  const clearPlaceFilters = () => { setSearchQuery(""); setActiveType("ALL"); setActiveSubcategory("ALL"); setActiveNeighborhood("ALL"); };
 
   const { calmMode } = useTheme();
   const reducedMotion = useReducedMotion();
@@ -541,9 +584,23 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               <div className="eb-panel eb-desktop-panel"><h3>Not seeing your place?</h3><p>Share a place with your community.</p><button type="button" className="eb-tool pdx-glass-rebind" onClick={openAddForm}><Plus size={18} />Add a place</button></div>
             </aside>
             <section className="eb-results" aria-label="Placez results">
-              {isLoading ? <BoardLoadingState label="Loading directory" /> : isError ? <BrowseStatus error title="Places couldn’t load" description="Your filters are still here. Try loading the directory again." onAction={() => void refetch()} /> : !filtered.length ?
-                <BrowseStatus title="No places match your filters" description="Try a broader search or another neighborhood." actionLabel="Clear filters" onAction={() => { setSearchQuery(""); setActiveType("ALL"); setActiveSubcategory("ALL"); setActiveNeighborhood("ALL"); }} /> :
+              {outzideActive ? (
+                outzideLoading ? <BoardLoadingState label="Loading Outzide" />
+                : outzideError ? <BrowseStatus error title="Outzide couldn’t load" description="The destinations didn’t come through. Try loading them again." onAction={() => void refetchOutzide()} />
+                : !outzideFiltered.length ? <BrowseStatus title="No destinations match your filters" description="Try another kind of place, or clear the search." actionLabel="Clear filters" onAction={clearPlaceFilters} />
+                : browseView === "browse" && selectedSubcategory === "ALL" ? <div className="eb-lanes">{subcategoryOptions.map(option => {
+                  const places = outzideFiltered.filter(place => place.kind === option.id);
+                  return places.length ? <BrowseLane key={option.id} title={option.label} color={TYPE_COLORS.outzide} count={places.length} onViewAll={() => { setActiveSubcategory(option.id); setBrowseView("grid"); }}>
+                    {places.slice(0, 16).map(place => <div className="eb-original-card" key={place.id}><TodayLocationCard location={outzideLocation(place)} onRequireAuth={() => setShowAuth(true)} /></div>)}
+                  </BrowseLane> : null;
+                })}</div> : <>
+                  <div className="placez-outzide__small">{outzideFiltered.slice(0, outzideList.limit).map(place => <OutzSmallCard key={place.id} location={outzideLocation(place)} onRequireAuth={() => setShowAuth(true)} />)}</div>
+                  <LoadMore hasMore={outzideList.hasMore} remaining={outzideList.remaining} onLoad={outzideList.loadMore} label="Show more destinations" />
+                </>
+              ) : isLoading ? <BoardLoadingState label="Loading directory" /> : isError ? <BrowseStatus error title="Places couldn’t load" description="Your filters are still here. Try loading the directory again." onAction={() => void refetch()} /> : !filtered.length ?
+                <BrowseStatus title="No places match your filters" description="Try a broader search or another neighborhood." actionLabel="Clear filters" onAction={clearPlaceFilters} /> :
                 browseView === "browse" ? <div className="eb-lanes">{categoryBands.map(category => {
+                  if (category.key === OUTZIDE_BROWSE_TYPE) return null;
                   const places = filtered.filter(place => place.type === category.key);
                   return places.length ? <BrowseLane key={category.key} title={category.label} color={category.color} count={places.length} onViewAll={() => {
                     if (activeType !== category.key) { setActiveType(category.key); setActiveSubcategory('ALL'); }
