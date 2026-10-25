@@ -10,10 +10,14 @@ import {
 } from "react";
 import { motion, useMotionValue, useMotionValueEvent, useScroll, useSpring } from "framer-motion";
 import { Link } from "wouter";
+import { HandwritingText } from "@/components/ui/handwriting-text";
+import { PortlandMetroGlobe } from "@/components/ui/portland-metro-globe";
 import type { EventListing } from "@shared/multiDayEvents";
 import { prefersStillMotion } from "@/lib/motion";
 import { OUTZ_CATALOG_FALLBACK, pickTunnelCards, type OutzideMapPlace, type TunnelCardData } from "./tunnelCards";
 import { TUNNEL, computePose, createPose, makeSlots } from "./tunnelMath";
+// HomeStage.css owns the real hero classes reused below (home-front__*). It must load before our overrides.
+import "@/components/home/HomeStage.css";
 import "./PerspectiveTunnelHero.css";
 
 export type PerspectiveTunnelHeroProps = {
@@ -21,18 +25,20 @@ export type PerspectiveTunnelHeroProps = {
   events?: readonly EventListing[];
   /** `places[]` from `/outzide-map/places.json` (385 destinations). Falls back to the static catalog. */
   outzPlaces?: readonly OutzideMapPlace[];
-  /** Central title. It stays anchored in the middle of the viewport for the whole scroll. */
-  title?: string;
-  eyebrow?: string;
-  /** Optional slot under the title (CTA row etc). Receives pointer events. */
+  /** Tagline under the wordmark. Default is the real hero line from HomeStage's IDENTITY_LINES. */
+  tagline?: string;
+  /** Optional slot under the tagline (the hero's CTA row). Receives pointer events. */
   children?: ReactNode;
-  /** Replace the default CSS globe, e.g. with a lightweight image. Keep it WebGL-free on phones. */
-  globe?: ReactNode;
+  /**
+   * Globe layer. Default: the homepage's own `PortlandMetroGlobe` (a single 2D canvas, NOT WebGL/MapLibre).
+   * Pass `null` when the page already mounts HomeFlight underneath, so there is only one globe canvas.
+   */
+  globe?: ReactNode | null;
   /** Scroll runway in svh (sticky stage height x this / 100). Progress 0..1 is mapped across this range. Default 320. */
   scrollLength?: number;
   /** Force the reduced-motion arrangement (e.g. from ThemeContext calmMode). OS preference is always honoured. */
   still?: boolean;
-  /** Card counts. Defaults 22 desktop / 12 compact. */
+  /** Total card counts (half events, half Outzide). Defaults 10 desktop / 6 compact. */
   desktopCount?: number;
   compactCount?: number;
   /** Fix the shuffle (tests, screenshots). Omit in production: a fresh random seed is drawn once per mount. */
@@ -40,6 +46,7 @@ export type PerspectiveTunnelHeroProps = {
   className?: string;
 };
 
+const WORDMARK = "/brand/family/zaylist-primary.svg"; // same asset HomeStage uses
 const COMPACT_QUERY = "(max-width: 700px)";
 
 function useMedia(query: string, initial = false) {
@@ -94,14 +101,13 @@ function TunnelCard({ card, interactive, setRef }: { card: TunnelCardData; inter
 export default function PerspectiveTunnelHero({
   events = [],
   outzPlaces,
-  title = "INTO THE ETHER",
-  eyebrow,
+  tagline = "Show up together",
   children,
   globe,
   scrollLength = 320,
   still: stillProp,
-  desktopCount = 22,
-  compactCount = 12,
+  desktopCount = 10,
+  compactCount = 6,
   seed: seedProp,
   className = "",
 }: PerspectiveTunnelHeroProps) {
@@ -125,6 +131,7 @@ export default function PerspectiveTunnelHero({
   // Preallocated: nothing below allocates objects or arrays per frame.
   const pose = useRef(createPose());
   const half = useRef({ w: 600, h: 400 });
+  const frontRef = useRef<HTMLDivElement>(null);
   const lastT = useRef<Float32Array>(new Float32Array(0));
   const progressNow = useRef(0);
 
@@ -159,6 +166,16 @@ export default function PerspectiveTunnelHero({
       const r = stage.getBoundingClientRect();
       half.current.w = r.width / 2;
       half.current.h = r.height / 2;
+      // Same geometry the real hero gives the globe: it centres on the area above a bottom inset (px, because the
+      // globe parses these with parseFloat). On phones the globe sits above the middle, so the card world follows it.
+      const bottom = Math.round(r.height * 0.12);
+      const cy = r.width < 600 ? (r.height - bottom) / 2 : r.height / 2;
+      const front = frontRef.current;
+      if (front) {
+        front.style.setProperty("--home-foreground-bottom", `${bottom}px`);
+        front.style.setProperty("--home-flight-bottom", `${bottom}px`);
+      }
+      stage.style.setProperty("--ptunnel-cy", `${cy}px`);
       paint(still ? TUNNEL.stillProgress : progress.get(), true);
     };
     measure();
@@ -222,9 +239,6 @@ export default function PerspectiveTunnelHero({
       >
         <div className="ptunnel__camera" aria-hidden={still ? undefined : true}>
           <motion.div className="ptunnel__world" style={{ rotateX: tiltX, rotateY: tiltY }}>
-            {[1, 2, 3, 4, 5].map(n => (
-              <span key={n} className="ptunnel__ring" style={{ transform: `translateZ(${-n * 320}px)` }} aria-hidden="true" />
-            ))}
             {cards.map((card, i) => (
               <TunnelCard
                 key={card.key}
@@ -238,15 +252,34 @@ export default function PerspectiveTunnelHero({
           </motion.div>
         </div>
 
-        {/* Anchor: always painted above the cards, so the title never gets covered and cards read as emerging from behind it. */}
-        <div className="ptunnel__anchor">
-          <div className="ptunnel__globe" aria-hidden="true">
-            {globe ?? <span className="ptunnel__globe-default" />}
-          </div>
-          <div className="ptunnel__copy">
-            {eyebrow ? <p className="ptunnel__eyebrow">{eyebrow}</p> : null}
-            <h1 id="ptunnel-title" className="ptunnel__headline">{title}</h1>
-            {children ? <div className="ptunnel__slot">{children}</div> : null}
+        {/* The real hero, as its own layer above the cards: opaque globe sphere (cards launch from behind it) and the
+            wordmark + tagline, laid out by HomeStage.css exactly as on the homepage. `home-front` is what the globe
+            looks for when it keeps holograms off the wordmark. */}
+        <div ref={frontRef} className="home-front ptunnel__front" style={{ "--home-header-height": "0px" } as CSSProperties}>
+          {globe !== null && (
+            <div className="home-front__flight home-front__flight--globe ptunnel__flight">
+              {globe ?? <PortlandMetroGlobe active={active && !still} still={still} />}
+              <div className="home-front__flight-credit">
+                © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>
+                {" · "}<a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a>
+              </div>
+            </div>
+          )}
+          <div className="home-front__hero">
+            <div className="home-front__brand-group">
+              <h1 id="ptunnel-title" className="sr-only">Zaylist</h1>
+              <div className="home-front__mark">
+                <div className="home-front__mark-art">
+                  <img className="home-front__mark-core" src={WORDMARK} alt="Zaylist" width="2393" height="824" loading="eager" decoding="sync" />
+                </div>
+              </div>
+            </div>
+            <div className="home-front__welcome-copy">
+              <p className="home-front__identity-line">
+                <HandwritingText text={tagline} animate={!still} className="home-front__identity-script" height="1.35em" />
+              </p>
+              {children ? <div className="home-front__hero-actions ptunnel__slot">{children}</div> : null}
+            </div>
           </div>
         </div>
       </div>

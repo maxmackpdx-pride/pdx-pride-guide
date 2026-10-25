@@ -30,7 +30,8 @@ export default function PerspectiveTunnelHeroExample() {
       events={events}
       outzPlaces={outz?.places}
       still={calmMode}
-      eyebrow="Zaylist · Portland"
+      // globe={null} if the page already mounts HomeFlight underneath (one globe canvas only).
+      
     />
   );
 }

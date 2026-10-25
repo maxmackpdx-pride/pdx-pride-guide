@@ -21,11 +21,11 @@ export const TUNNEL = {
   /** Fraction of a card's own timeline that passes before lateral spread begins. */
   lateralDelay: 0.2,
   /** Starting offset (fraction of reach) so a sliver of each card peeks out around the globe at progress 0. */
-  peek: 0.45,
+  peek: 0.6,
   /** Latest a card can start, as a fraction of total scroll progress. */
   maxDelay: 0.3,
   /** Progress used for the reduced-motion arrangement. */
-  stillProgress: 0.6,
+  stillProgress: 0.5,
 } as const;
 
 export type TunnelSlot = {
@@ -84,19 +84,33 @@ export function hashKey(seed: number, id: string): number {
 export const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const easeOutQuad = (v: number) => 1 - (1 - v) * (1 - v);
 
-/** Evenly fanned directions, jittered, with a low-discrepancy start order so cards stream out, not in rings. */
+/** Largest integer <= n/phi that is coprime with n, so a stride walk visits every slot once. */
+function launchStride(n: number): number {
+  const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a);
+  for (let s = Math.max(1, Math.round(n * 0.6180339887)); s > 0; s--) if (gcd(s, n) === 1) return s;
+  return 1;
+}
+
+/**
+ * Directions are exactly evenly spaced around the globe (small jitter, a fraction of one slot, so no
+ * two cards can clump and no side stays empty). Launch order walks the slots with a golden-ratio stride,
+ * so consecutive launches land on far-apart sides and the stagger is evenly spaced rather than random.
+ * Delays are spread 0..maxDelay in launch order, so every card has at least (1 - maxDelay) of the scroll.
+ */
 export function makeSlots(count: number, seed: number): TunnelSlot[] {
   const rand = mulberry32(seed ^ 0x9e3779b9);
   const turn = (Math.PI * 2) / Math.max(1, count);
   const spin = rand() * Math.PI * 2;
+  const stride = launchStride(count);
   const slots: TunnelSlot[] = [];
   for (let i = 0; i < count; i++) {
+    const order = (i * stride) % count; // launch rank of the slot at angle index i
     slots.push({
-      angle: spin + i * turn + (rand() - 0.5) * turn * 0.55,
-      reach: 1.15 + rand() * 0.65,
-      delay: TUNNEL.maxDelay * ((i * 0.6180339887) % 1),
-      rot: (rand() - 0.5) * 16,
-      size: 0.88 + rand() * 0.26,
+      angle: spin + i * turn + (rand() - 0.5) * turn * 0.3,
+      reach: 1.2 + rand() * 0.5,
+      delay: count > 1 ? TUNNEL.maxDelay * (order / (count - 1)) : 0,
+      rot: (rand() - 0.5) * 14,
+      size: 0.92 + rand() * 0.2,
     });
   }
   return slots;
