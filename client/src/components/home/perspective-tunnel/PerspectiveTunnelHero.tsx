@@ -98,7 +98,7 @@ function TunnelCard({ card, interactive, setRef }: { card: TunnelCardData; inter
     <Link
       href={card.href}
       ref={setRef}
-      className="ptunnel__card"
+      className="ptunnel__card pdx-glass-rebind"
       data-kind={card.kind}
       style={{ "--c": card.accent } as CSSProperties}
       // Flying cards are a pointer/touch enhancement; keep them out of the tab order while they move.
