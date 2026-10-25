@@ -253,6 +253,17 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
         :Math.min(width*.48,height*.43)*.7*1.15;
       const cx=width/2,cy=mobile?headerInset+availableHeight/2:height/2;
       const canvasBounds=canvas.getBoundingClientRect();
+      // Publish the sphere's geometry so the hero can keep the wallpaper map from running behind it.
+      const stage=canvas.closest<HTMLElement>('.ptunnel__stage');
+      if(stage){
+        const geometry=`${cx.toFixed(1)}|${cy.toFixed(1)}|${radius.toFixed(1)}`;
+        if(stage.dataset.globeGeometry!==geometry){
+          stage.dataset.globeGeometry=geometry;
+          stage.style.setProperty('--globe-cx',`${cx.toFixed(1)}px`);
+          stage.style.setProperty('--globe-cy',`${cy.toFixed(1)}px`);
+          stage.style.setProperty('--globe-r',`${radius.toFixed(1)}px`);
+        }
+      }
       const protectedAreas = ['.home-front__mark','.home-front__identity-script','.home-front__beta'].flatMap(selector=>{
         const element=front?.querySelector(selector);
         if(!element)return [];
