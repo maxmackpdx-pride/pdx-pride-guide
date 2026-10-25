@@ -111,7 +111,7 @@ export const intentLabels: Record<BoardIntent, string> = {
   giving: "Giving away",
   iso: "In search of",
   selling: "For sale",
-  connection: "Looking for you",
+  connection: "Missed connections",
   grab: "Open grab",
   buddy: "Trip buddy",
   ride: "Carpool",

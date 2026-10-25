@@ -159,7 +159,7 @@ function BoardDetail({
       title={p.title}
       body={p.body}
       place={p.placeName || p.venueHint || ""}
-      kindLabel={p.dayOfWeek || "Looking for you"}
+      kindLabel={p.dayOfWeek || "Missed connections"}
       kindColor={cat.color}
       isMine={p.isMine}
       status={p.status}
