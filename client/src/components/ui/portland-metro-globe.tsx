@@ -71,6 +71,8 @@ function warp(value: number, center: number, strength: number, inverse = false) 
 }
 const smooth = (value: number) => { const t=Math.max(0,Math.min(1,value)); return t*t*t*(t*(t*6-15)+10); };
 const MAX_HOLOGRAMS = 8;
+// Floating waypoint tiles are drawn at 1/1.5 of their original 56 x 66 artwork size.
+const WAYPOINT_TILE_SCALE = 1 / 1.5;
 const DUPLICATE_PHASE_OFFSET = 1000;
 // These venue marks and Zaylist family logos keep their original artwork.
 const FEATURED_LOGO_IDS = new Set(["1-0", "2-0", "5-0", "28-0", "33-0", "41-0"]);
@@ -515,9 +517,9 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
         const tilt=Math.atan2(anchor.y-cy,anchor.x-cx)+Math.PI/2;
         context.fillStyle=color;
         context.globalAlpha=surfaceVisibility*.16;
-        context.beginPath(); context.ellipse(anchor.x,anchor.y,12,12*anchor.z,tilt,0,Math.PI*2); context.fill();
+        context.beginPath(); context.ellipse(anchor.x,anchor.y,12*WAYPOINT_TILE_SCALE,12*WAYPOINT_TILE_SCALE*anchor.z,tilt,0,Math.PI*2); context.fill();
         context.globalAlpha=surfaceVisibility*.8;
-        context.beginPath(); context.ellipse(anchor.x,anchor.y,7,7*anchor.z,tilt,0,Math.PI*2); context.fill();
+        context.beginPath(); context.ellipse(anchor.x,anchor.y,7*WAYPOINT_TILE_SCALE,7*WAYPOINT_TILE_SCALE*anchor.z,tilt,0,Math.PI*2); context.fill();
       }
       context.restore();
       const occupied: { x: number; y: number; w: number; h: number }[] = [];
@@ -530,14 +532,14 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
         const visibility=opening*smooth(anchor.z/.18);
         const fullSize = Math.min(width < 600 ? 86 : 144, radius * .52) * .8;
         const fullFit = Math.min(fullSize/image.width,fullSize*.65/image.height);
-        const fullW=state.waypoint?56:image.width*fullFit, fullH=state.waypoint?66:image.height*fullFit;
+        const fullW=state.waypoint?56*WAYPOINT_TILE_SCALE:image.width*fullFit, fullH=state.waypoint?66*WAYPOINT_TILE_SCALE:image.height*fullFit;
         const head = project(venue.point,1.06);
         // Side-facing anchors also use the pockets below the wordmark corners.
         // Protect the actual rotating words, leaving the empty ends of its row open.
         const side=Math.sign(head.x-cx);
         const sidePocket=smooth((Math.abs(head.x-cx)/radius-.3)/.4)
           * (1-smooth((Math.abs(head.y-cy)/radius-.4)/.35));
-        const upperX=cx+(head.x-cx)*1.22,upperY=head.y-fullSize*.45-radius*.12;
+        const upperX=cx+(head.x-cx)*1.22,upperY=head.y-fullSize*(state.waypoint?WAYPOINT_TILE_SCALE:1)*.45-radius*.12;
         const preferred={x:upperX+(cx+side*radius*.94-upperX)*sidePocket,
           y:upperY+(cy+radius*.08-upperY)*sidePocket};
         let targetX=preferred.x,targetY=preferred.y,bestPlacement=Infinity;
@@ -582,7 +584,7 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
           context.drawImage(image,x-w/2,y-h/2,w,h);
         }
         context.shadowBlur=0;
-        const corner=5*opening, left=x-w/2-5,right=x+w/2+5,top=y-h/2-5,bottom=y+h/2+5;
+        const pad=state.waypoint?5*WAYPOINT_TILE_SCALE:5, corner=pad*opening, left=x-w/2-pad,right=x+w/2+pad,top=y-h/2-pad,bottom=y+h/2+pad;
         context.beginPath();
         for (const [xx, sx] of [[left,1],[right,-1]]) for (const [yy,sy] of [[top,1],[bottom,-1]]) {
           context.moveTo(xx,yy+sy*corner); context.lineTo(xx,yy); context.lineTo(xx+sx*corner,yy);
