@@ -85,6 +85,20 @@
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   animation:xrXrGrainShift .5s steps(4) infinite}
 @keyframes xrXrGrainShift{0%{background-position:0 0}25%{background-position:-37px 21px}50%{background-position:19px -43px}75%{background-position:-11px 33px}100%{background-position:0 0}}
+/* The grain is a rectangle (inset:0), but the card is a torn-paper silhouette, so on its own the grain painted a grey
+   noise box past the torn edge. Mask it with the same silhouette the card rim uses (.zt-rim in zine-card.css), so it
+   only covers paper. The card's own neon glow is a drop-shadow on .zine, so it is not clipped. Keep these masks in
+   step with the .zt-rim ones: large = the punk-materials map, small = the tall torn-card scan, seeking = plus tears. */
+.boardz-punk-scope .xr-rz.xr-sz-large .xr-grain{
+  mask:url('/boardz/punk/punk-materials.png') 0% 7.3034%/166.6667% 225.3521% no-repeat}
+.boardz-punk-scope .xr-rz.xr-sz-large:has(.zine.z-seek) .xr-grain{
+  mask-image:url('/boardz/punk/punk-materials.png'),url('/boardz/punk/seeking-tears-wide.svg');mask-size:166.6667% 225.3521%,100% 100%;
+  mask-position:0% 7.3034%,center;mask-repeat:no-repeat;mask-composite:intersect}
+.boardz-punk-scope .xr-rz.xr-sz-small .xr-grain{
+  mask:url('/boardz/punk/torn-card-scan.webp') top/100% auto no-repeat,url('/boardz/punk/torn-card-scan.webp') bottom/100% auto no-repeat,url('/boardz/punk/torn-card-scan.webp') center/100% 100% no-repeat}
+.boardz-punk-scope .xr-rz.xr-sz-small:has(.zine.z-seek) .xr-grain{
+  mask:url('/boardz/punk/seeking-tears-small.svg') center/100% 100% no-repeat,url('/boardz/punk/torn-card-scan.webp') top/100% auto no-repeat,url('/boardz/punk/torn-card-scan.webp') bottom/100% auto no-repeat,url('/boardz/punk/torn-card-scan.webp') center/100% 100% no-repeat;
+  mask-composite:intersect,add,add}
 @media (prefers-reduced-motion:reduce){.xr-rz *,.xr-hdg *,.xr-grain,.xr-hdg-r,.xr-hdg-c{animation:none!important}}
 
 
