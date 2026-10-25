@@ -116,7 +116,7 @@ export const intentLabels: Record<BoardIntent, string> = {
   grab: "Open grab",
   buddy: "Trip buddy",
   ride: "Carpool",
-  missed: "Missed connections",
+  missed: "Outzide missed connections",
 };
 export type BoardPost = {
   photos?: string[];
