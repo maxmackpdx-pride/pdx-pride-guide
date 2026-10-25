@@ -58,6 +58,7 @@ import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import "@/components/discovery/EventzBrowse.css";
 import "@/components/discovery/EventzDetail.css";
 import "./AllBoards.css";
+import "./BoardPinned.css";
 
 const BoardPostOverlay = lazy(
   () => import("@/components/board/BoardPostOverlay"),

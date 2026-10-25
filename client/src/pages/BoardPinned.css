@@ -1,0 +1,54 @@
+/*
+ * Boardz: cards are pinned notes on one board surface.
+ *  - the board: a recessed, dark pinboard panel with a faint peg grid. It is translucent, so the shared circuit
+ *    wallpaper (which scrolls with this page) shows through subtly.
+ *  - the note: lies flat. A tight contact shadow plus a short soft one, no glow, no lift, no scale.
+ *  - the pin: its needle goes through the card; the hardware keeps its own contact shadow and a dent on the paper.
+ *  - position: a fixed, deterministic angle and offset per card id (pinboardPlacement). Notes turn about their pin.
+ * Card colours, blended art, DEMO tags and ransom titles are untouched. Scoped to the Boardz page.
+ */
+.ab-page .ab-card-grid:has(.boardz-production-card) {
+  position: relative;
+  box-sizing: border-box;
+  border-radius: var(--radius-panel, 12px);
+  border: 1px solid color-mix(in srgb, var(--c, var(--room-hauz)) 34%, var(--z-black));
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--text-hi) 9%, transparent) 0 1px, transparent 1.6px) 0 0 / 24px 24px,
+    linear-gradient(to bottom, color-mix(in srgb, var(--z-black) 62%, transparent), color-mix(in srgb, var(--z-black) 50%, transparent));
+  box-shadow:
+    inset 0 0 0 3px color-mix(in srgb, var(--z-black) 72%, transparent),
+    inset 0 12px 30px rgb(0 0 0 / .5),
+    inset 0 -8px 22px rgb(0 0 0 / .35);
+}
+.ab-page .ab-card-grid--pinboard { padding: 36px 20px 52px; }
+@media (max-width: 767px) {
+  .ab-page .ab-card-grid:has(.boardz-production-card) { padding-inline: 10px; }
+  .ab-page .ab-card-grid--pinboard { padding: 30px 10px 44px; }
+}
+
+/* A note turns about its pin, not about its middle. Never transitions, never drifts. */
+.ab-page .ab-card-grid > .boardz-production-card { transform-origin: 50% 12px; transition: none; }
+
+/* Lying flat: contact shadow (hugs the torn edge) + short soft shadow cast down-right. The old neon glow floated the card. */
+.ab-page .ab-card-grid { --pin-flat-shadow: drop-shadow(0 1px 0 rgb(0 0 0 / .8)) drop-shadow(1px 3px 2px rgb(0 0 0 / .55)) drop-shadow(3px 7px 7px rgb(0 0 0 / .32)); }
+.ab-page .ab-card-grid .demo-pinned > :not(.ab-pin) { filter: var(--pin-flat-shadow); }
+/* .zine carries its own neon glow filter; inside the note it gives way to the flat shadow (applied once, on the outermost element). */
+.ab-page .ab-card-grid .demo-pinned > :not(.ab-pin) .zine { filter: none; }
+.ab-page .ab-card-grid .demo-pinned > .zine { filter: var(--pin-flat-shadow); }
+/* Only press: one pixel, no lift, no scale. */
+.ab-page .ab-card-grid .demo-pinned > :not(.ab-pin):active { translate: 0 1px; }
+
+/* The pin: tighter shadow (it is stuck into the board, not hovering), and a dent where the needle enters the paper. */
+.ab-page .ab-card-grid .demo-pinned > .ab-pin { top: -26px; filter: drop-shadow(1px 2px 1px rgb(0 0 0 / .85)); }
+.ab-page .ab-card-grid .demo-pinned[data-size="small"] > .ab-pin { top: -18px; }
+.ab-page .ab-card-grid .demo-pinned::after {
+  content: ""; position: absolute; z-index: 29; pointer-events: none;
+  left: calc(50% + var(--pin-offset, 0px) - 8px); top: 10px; width: 18px; height: 9px; border-radius: 50%;
+  background: radial-gradient(ellipse at 45% 40%, rgb(0 0 0 / .7), rgb(0 0 0 / .28) 55%, transparent 74%);
+  translate: 3px 2px;
+}
+.ab-page .ab-card-grid .demo-pinned[data-size="small"]::after { top: 7px; width: 14px; height: 7px; left: calc(50% + var(--pin-offset, 0px) - 6px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ab-page .ab-card-grid .demo-pinned > :not(.ab-pin):active { translate: none; }
+}
