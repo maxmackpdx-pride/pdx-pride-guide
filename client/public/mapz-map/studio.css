@@ -160,3 +160,8 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 /* tube (E1): no logo, the name reads down a glass strip. */
 .standalone-hologram-label--event[data-hologram-type="tube"]>.event-hologram-brand{display:none;}
 .standalone-hologram-label--event[data-hologram-type="tube"]>.standalone-hologram-title{height:auto;}
+
+/* Far from the camera but an event tonight: a small puck and chip, no 3D card. */
+.standalone-hologram-label--event[data-hologram-far="true"]>.event-hologram-brand{width:52px;height:52px;}
+.standalone-hologram-label--event[data-hologram-far="true"]>.standalone-hologram-countdown{font-size:9px;}
+.standalone-hologram-label--event[data-hologram-far="true"] .event-hologram-surface{display:none;}

@@ -679,7 +679,7 @@ function drawLights(fade,target=map,surface=lights){
  const eventCards=new Map(beacons.map(item=>{
   const {feature,p}=item,grow=Math.min(riseAmount(feature.properties.key,frameNow),foldAmount(feature.properties.key,frameNow));
   const card=eventCardGeometry(p.x+(item.x-p.x)*grow,p.y+(item.y-p.y)*grow,item.offset.scale*grow);
-  return [feature.properties.key,{...card,key:feature.properties.key,opacity:coreAlpha*grow,locked:Boolean(item.cardLocked)}];
+  return [feature.properties.key,{...card,key:feature.properties.key,opacity:coreAlpha*grow,locked:Boolean(item.cardLocked),far:item.offset.scale*grow<.6*cardPresentationScale}];
  }));
  const retainedCards=new Set(beacons.filter(item=>item.offset.cardVisible).map(item=>item.feature.properties.key));
  const visibleEventCards=new Set(visibleHologramLabels([...eventCards.values()],selectedKey,width,height,retainedCards,120).map(card=>card.key));
@@ -873,7 +873,7 @@ function renderHologramLabels(labels){
   let item=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='title');
   if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.dataset.labelRole='title';item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey,item));root.appendChild(item);}
   const timeText=(label.time||'').replace(/:00(?=\s*[AP]M)/i,''),statusText=label.countdown==='STARTED'?'Live':(label.countdown||'').toLowerCase().replace(/^in /,'In ');
-  item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.dataset.hologramType=label.kind==='housing'?'':(label.hologramType||'puck');item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
+  item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.dataset.hologramType=label.kind==='housing'?'':(label.hologramType||'puck');item.dataset.hologramFar=label.far?'true':'false';item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
   item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',labelComplement(label.projectionColor||label.color));item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${timeText}${statusText?`, ${statusText}`:""}`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);
   const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.projectionColor,label.width,label.avatars,label.logo,!!venueLogos.get(label.logo),label.venueName,label.poster]);
@@ -966,9 +966,8 @@ let selectedKey=null,hitTargets=[],viewTime=Date.now(),viewTimeReceived=performa
 // whose night ends folds back down into its venue. Calm and reduced motion skip both.
 const rises=new Map(),folds=new Map(),RISE_MS=500;let lastBeaconKeys=new Set(),listingsShown=false;
 function riseAmount(key,now){
- const start=rises.get(key);if(start==null)return 1;
- const t=(now-start)/RISE_MS;if(t>=1||reduced.matches){rises.delete(key);return 1;}
- return 1-(1-t)**3;
+ // Event cards no longer grow up from their venue. They appear in place.
+ rises.delete(key);return 1;
 }
 function foldAmount(key,now){
  const end=folds.get(key);if(end==null)return 1;
