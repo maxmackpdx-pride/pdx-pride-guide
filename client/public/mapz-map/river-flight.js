@@ -6,6 +6,7 @@ import {captureCamera,readCameraParams} from '../map-foundation/camera.js';
 import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../map-foundation/lifecycle.js';
 import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventCountdown,appendEventCountdown} from './event-countdown.js';
+import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
 import { updateEventArtwork } from './event-card-artwork.js';
@@ -810,7 +811,7 @@ function drawLights(fade,target=map,surface=lights){
     }
     eventLabels.push({...card,projectionColor,avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,
      name:feature.properties.name,venueName:feature.properties.venueName||'',time:feature.properties.time,
-     countdown:eventCountdown(feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived),true),color,logo:feature.properties.logo,poster:feature.properties.poster,
+     countdown:eventCountdown(feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived),true),color,logo:feature.properties.logo,poster:feature.properties.poster,hologramType:hologramTypeForVenue(feature.properties.venueName||feature.properties.name),
      logoKey:feature.properties.logoKey,logoY:card.top,logoWidth:0,logoHeight:0,opacity:card.opacity*cardAlpha});
   }else if(pass===0){
    const size=126*(.92+.1*pulse);
