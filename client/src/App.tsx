@@ -27,6 +27,7 @@ import PrideGlowNudge from "./components/PrideGlowNudge";
 import RiverBratsIntroPopup from "./components/river-brats/RiverBratsIntroPopup";
 import SpectrumLoader from "./components/SpectrumLoader";
 import MapBootLoader from "./components/MapBootLoader";
+import SiteWallpaper from "./components/wallpaper/SiteWallpaper";
 import { lazyWithReload } from "./lib/lazyWithReload";
 import { legacyOutzRedirect } from "@shared/outzRoutes";
 
@@ -129,6 +130,7 @@ function AppLayout() {
       className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${livingMap ? " app-shell--mapz-demo" : ""}${mapSurface ? " app-shell--map-surface" : ""}${mobileFooter ? "" : " app-shell--no-mobile-footer"}`}
       style={{ background: "var(--z-black, #050506)" }}
     >
+      <SiteWallpaper />
       <InboxDailyReminder />
       <PullToRefresh />
       <Nav />
