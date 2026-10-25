@@ -262,3 +262,9 @@ Before changing a global rule, read its relevant accepted Library chapter, inspe
 - [ ] Nav untouched unless asked; if asked, glow is **hover only**, there is no bottom-nav pull handle, and Hub navigates to `/dashboard` instead of opening an admin/member drawer  
 - [ ] NEXT cards keep approved order, fixed wallpaper, contained objects, static reduced-motion equivalents, and final white idea card
 - [ ] Docs updated if a global default changes  
+
+## Site wallpaper
+
+- One shared circuit wallpaper (`client/src/components/wallpaper/`) is mounted once in `AppLayout`, behind every route. It owns the only wallpaper WebGL context; never mount a second one per page.
+- While `html[data-site-wallpaper]` is `live` or `still`, page roots (`.app-shell`, `.zine-page`, `.eb-page`, board shader pages, home stage) are transparent so it shows through. New page roots must not paint an opaque full-page background; add them to the list in `site-wallpaper.css` if they do.
+- It is torn down on full-bleed map routes (`/outzide`, `/map`) so the map keeps the memory. Calm Mode and `prefers-reduced-motion` hold one still frame. Without WebGL2 or with Save-Data the older per-page CSS atmosphere layers remain.

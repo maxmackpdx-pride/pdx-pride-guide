@@ -1,0 +1,68 @@
+/* Shared page wallpaper: one fixed layer behind every route, mounted once in the app shell. */
+.site-wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--z-oled);
+  contain: strict;
+}
+
+.site-wallpaper[data-hidden="true"] { visibility: hidden; }
+
+.site-wallpaper__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+.site-wallpaper[data-site-wallpaper="live"] .site-wallpaper__canvas,
+.site-wallpaper[data-site-wallpaper="still"] .site-wallpaper__canvas { opacity: var(--site-wallpaper-opacity, 0.88); }
+
+/* Keeps type, cards and controls legible over the brightest comets. */
+.site-wallpaper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgb(0 0 0 / 46%), rgb(0 0 0 / 30%) 38%, rgb(0 0 0 / 52%));
+}
+
+/* The wallpaper replaces the per-page atmosphere washes while it is running. */
+html[data-site-wallpaper="live"] .rg-stream-background,
+html[data-site-wallpaper="still"] .rg-stream-background { display: none; }
+
+/*
+ * Page roots paint their own opaque black. While the wallpaper runs they step aside so it shows through.
+ * Cards, glass panels and the nav keep their own fills, so content contrast does not change.
+ */
+html:is([data-site-wallpaper="live"], [data-site-wallpaper="still"]) :is(
+  .app-shell,
+  .zine-page,
+  .eb-page,
+  body .board-shader-page[data-shader-room],
+  .home-main-stage,
+  .home-front,
+  .home-front__welcome,
+  .home-front__flight,
+  .ptunnel,
+  .ptunnel__stage
+) {
+  background: transparent !important;
+}
+
+html:is([data-site-wallpaper="live"], [data-site-wallpaper="still"]) .board-shader-veil,
+html:is([data-site-wallpaper="live"], [data-site-wallpaper="still"]) .eb-page::before { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .site-wallpaper__canvas { transition: none; }
+}
+
+@media (max-width: 720px) {
+  .site-wallpaper { --site-wallpaper-opacity: 0.7; }
+}
