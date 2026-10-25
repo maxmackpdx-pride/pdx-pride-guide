@@ -10,7 +10,7 @@ const choices = [
   ['housing:FORMING','Hoüz · Building a Hoüz'], ['housing:MANAGED','Hoüz · Managed rental'],
   ['gigz:LOOKING_FOR_WORK','Gigz · Available for work'], ['gigz:HIRING','Gigz · Hiring'],
   ['giftz:ISO','Giftz · In search of'], ['giftz:GIFT','Giftz · Giving away'],
-  ['sellz:SELL','Sellz · For sale'], ['mizzed:CONNECTION','Mizzed · Looking for you'],
+  ['sellz:SELL','Sellz · For sale'], ['mizzed:CONNECTION','Mizzed · Missed connections'],
 ] as const;
 
 /** Read-only fixtures exercise production components; no specimen creates or changes a post. */
