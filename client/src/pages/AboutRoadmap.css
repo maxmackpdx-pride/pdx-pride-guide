@@ -225,11 +225,11 @@
         transform: translateX(-50%);
         background: linear-gradient(
           to bottom,
-          var(--slate-1) 0%,
-          var(--slate-1) 48%,
-          rgba(17,17,19,.86) 68%,
-          rgba(17,17,19,.38) 86%,
-          rgba(17,17,19,0) 100%
+          rgba(0,0,0,.34) 0%,
+          rgba(0,0,0,.34) 48%,
+          rgba(0,0,0,.2) 68%,
+          rgba(0,0,0,.08) 86%,
+          rgba(0,0,0,0) 100%
         );
         pointer-events: none;
       }
