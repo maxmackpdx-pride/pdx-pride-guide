@@ -7,6 +7,7 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
+  type Ref,
 } from "react";
 import { motion, useMotionValue, useMotionValueEvent, useScroll, useSpring } from "framer-motion";
 import { Link } from "wouter";
@@ -20,6 +21,8 @@ import { TUNNEL, computePose, createPose, makeSlots } from "./tunnelMath";
 import "@/components/home/HomeStage.css";
 import "./PerspectiveTunnelHero.css";
 
+const NO_EVENTS: readonly EventListing[] = [];
+
 export type PerspectiveTunnelHeroProps = {
   /** Live events (the `/api/events` payload). Only public LIVE ones are used. */
   events?: readonly EventListing[];
@@ -29,6 +32,22 @@ export type PerspectiveTunnelHeroProps = {
   tagline?: string;
   /** Optional slot under the tagline (the hero's CTA row). Receives pointer events. */
   children?: ReactNode;
+  /** Replaces the default tagline node (the homepage passes its cycling identity line). */
+  identity?: ReactNode;
+  /** Rendered inside the brand group before the wordmark (the homepage's BETA badge). */
+  brandAccessory?: ReactNode;
+  /** Ref to the wordmark <img> (the homepage waits for it to decode before starting the globe). */
+  wordmarkRef?: Ref<HTMLImageElement>;
+  /**
+   * A globe that renders its own `.home-front__flight` wrapper (the homepage's HomeFlight). Mounted directly in the
+   * hero layer, so exactly one globe canvas exists. Takes the place of `globe`.
+   */
+  globeLayer?: ReactNode;
+  /**
+   * Pinned to the bottom of the sticky stage, above the cards (the homepage's stat strip, `.home-hero-stats-boundary`).
+   * Its height is measured and becomes the globe's footer inset, exactly as in the pre-tunnel hero.
+   */
+  foreground?: ReactNode;
   /**
    * Globe layer. Default: the homepage's own `PortlandMetroGlobe` (a single 2D canvas, NOT WebGL/MapLibre).
    * Pass `null` when the page already mounts HomeFlight underneath, so there is only one globe canvas.
@@ -99,10 +118,15 @@ function TunnelCard({ card, interactive, setRef }: { card: TunnelCardData; inter
 }
 
 export default function PerspectiveTunnelHero({
-  events = [],
+  events = NO_EVENTS,
   outzPlaces,
   tagline = "Show up together",
   children,
+  identity,
+  brandAccessory,
+  wordmarkRef,
+  globeLayer,
+  foreground,
   globe,
   scrollLength = 320,
   still: stillProp,
@@ -168,10 +192,13 @@ export default function PerspectiveTunnelHero({
       half.current.h = r.height / 2;
       // Same geometry the real hero gives the globe: it centres on the area above a bottom inset (px, because the
       // globe parses these with parseFloat). On phones the globe sits above the middle, so the card world follows it.
-      const bottom = Math.round(r.height * 0.12);
-      const cy = r.width < 600 ? (r.height - bottom) / 2 : r.height / 2;
       const front = frontRef.current;
-      if (front) {
+      const strip = front?.querySelector<HTMLElement>(":scope > .home-hero-stats-boundary");
+      // With a foreground strip the host (HomeFlight) owns the insets; mirror its numbers. Otherwise use 12%.
+      const bottom = strip ? Math.round(strip.getBoundingClientRect().height + 12) : Math.round(r.height * 0.12);
+      const header = front ? parseFloat(getComputedStyle(front).getPropertyValue("--home-header-height")) || 0 : 0;
+      const cy = r.width < 600 ? header + (r.height - header - bottom) / 2 : r.height / 2;
+      if (front && !globeLayer) {
         front.style.setProperty("--home-foreground-bottom", `${bottom}px`);
         front.style.setProperty("--home-flight-bottom", `${bottom}px`);
       }
@@ -181,11 +208,26 @@ export default function PerspectiveTunnelHero({
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(stage);
-    return () => ro.disconnect();
+    const strip = frontRef.current?.querySelector<HTMLElement>(":scope > .home-hero-stats-boundary");
+    if (strip) ro.observe(strip);
+    // The host sets --home-header-height on the front layer after mount; re-measure when it does.
+    const mo = frontRef.current ? new MutationObserver(measure) : null;
+    if (mo && frontRef.current) mo.observe(frontRef.current, { attributes: true, attributeFilter: ["style"] });
+    return () => { ro.disconnect(); mo?.disconnect(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slots, still]);
+  }, [slots, still, globeLayer]);
 
+  // The globe takes the pointer (hover glow, Halloween vines) only while the cards are still hidden behind it;
+  // once they launch, pointer events fall through the globe canvas so every card is clickable.
+  const globeLive = useRef(true);
+  const syncGlobeLive = (p: number) => {
+    const live = still ? false : p < TUNNEL.globeLiveUntil;
+    if (live === globeLive.current) return;
+    globeLive.current = live;
+    stageRef.current?.setAttribute("data-globe-live", live ? "1" : "0");
+  };
   useMotionValueEvent(progress, "change", p => {
+    syncGlobeLive(p);
     if (!still) paint(p);
   });
 
@@ -233,6 +275,7 @@ export default function PerspectiveTunnelHero({
       <div
         ref={stageRef}
         className="ptunnel__stage"
+        data-globe-live="1"
         onPointerMove={onPointerMove}
         onPointerLeave={onPointerLeave}
         onPointerCancel={onPointerLeave}
@@ -256,7 +299,8 @@ export default function PerspectiveTunnelHero({
             wordmark + tagline, laid out by HomeStage.css exactly as on the homepage. `home-front` is what the globe
             looks for when it keeps holograms off the wordmark. */}
         <div ref={frontRef} className="home-front ptunnel__front" style={{ "--home-header-height": "0px" } as CSSProperties}>
-          {globe !== null && (
+          {globeLayer}
+          {!globeLayer && globe !== null && (
             <div className="home-front__flight home-front__flight--globe ptunnel__flight">
               {globe ?? <PortlandMetroGlobe active={active && !still} still={still} />}
               <div className="home-front__flight-credit">
@@ -268,19 +312,21 @@ export default function PerspectiveTunnelHero({
           <div className="home-front__hero">
             <div className="home-front__brand-group">
               <h1 id="ptunnel-title" className="sr-only">Zaylist</h1>
+              {brandAccessory}
               <div className="home-front__mark">
                 <div className="home-front__mark-art">
-                  <img className="home-front__mark-core" src={WORDMARK} alt="Zaylist" width="2393" height="824" loading="eager" decoding="sync" />
+                  <img ref={wordmarkRef} className="home-front__mark-core" src={WORDMARK} alt="Zaylist" width="2393" height="824" loading="eager" decoding="sync" />
                 </div>
               </div>
             </div>
             <div className="home-front__welcome-copy">
               <p className="home-front__identity-line">
-                <HandwritingText text={tagline} animate={!still} className="home-front__identity-script" height="1.35em" />
+                {identity ?? <HandwritingText text={tagline} animate={!still} className="home-front__identity-script" height="1.35em" />}
               </p>
               {children ? <div className="home-front__hero-actions ptunnel__slot">{children}</div> : null}
             </div>
           </div>
+          {foreground}
         </div>
       </div>
     </section>

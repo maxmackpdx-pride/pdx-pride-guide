@@ -1,11 +1,11 @@
 /* Perspective Tunnel Hero. Cards animate transform + opacity only; no filters, backdrop-filter or bloom on them.
    Surfaces, borders, type and the wordmark/globe layout all come from the site's own tokens and HomeStage.css. */
-.ptunnel { --ptunnel-len: 320; position: relative; height: calc(var(--ptunnel-len) * 1vh); height: calc(var(--ptunnel-len) * 1svh); background: var(--z-oled, #000); color: var(--text-hi, #fff); }
+.ptunnel { --ptunnel-len: 320; position: relative; height: calc(var(--ptunnel-len) * 1vh); height: calc(var(--ptunnel-len) * 1svh); background: var(--z-oled); color: var(--text-hi); }
 .ptunnel[data-still="1"] { height: 100vh; height: 100svh; min-height: 520px; }
 
 .ptunnel__stage {
   --ptunnel-cy: 50%;
-  position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--z-oled, #000);
+  position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--z-oled);
   touch-action: pan-y; contain: layout paint;
 }
 .ptunnel[data-still="1"] .ptunnel__stage { position: relative; }
@@ -20,8 +20,8 @@
   position: absolute; left: 0; top: 0; width: var(--w); aspect-ratio: 3 / 4;
   translate: -50% -50%; opacity: 0; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; padding: 10px;
   overflow: hidden; border-radius: var(--glass-card-radius, 14px);
-  background: var(--ink-800, #0b0b0b); border: 1px solid var(--ink-border, #2b2b2b); box-shadow: 0 0 0 2px #000;
-  color: var(--text-hi, #fff); text-decoration: none; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  background: var(--ink-800); border: 1px solid var(--ink-border); box-shadow: 0 0 0 2px var(--z-oled);
+  color: var(--text-hi); text-decoration: none; backface-visibility: hidden; -webkit-backface-visibility: hidden;
   -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
 .ptunnel[data-compact="1"] .ptunnel__card { --w: clamp(96px, 30vw, 136px); padding: 8px; }
@@ -31,18 +31,21 @@
 .ptunnel__scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.94) 0%, rgba(0,0,0,.62) 40%, rgba(0,0,0,0) 74%); }
 /* One neon per element: the accent only touches the label and its dot. */
 .ptunnel__kicker, .ptunnel__title, .ptunnel__line { position: relative; }
-.ptunnel__kicker { display: flex; align-items: center; gap: 6px; font: 600 8.5px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .18em; text-transform: uppercase; color: var(--c, var(--neon-cyan, #0ff)); white-space: nowrap; }
+.ptunnel__kicker { display: flex; align-items: center; gap: 6px; font: 600 8.5px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .18em; text-transform: uppercase; color: var(--c, var(--neon-cyan)); white-space: nowrap; }
 .ptunnel__kicker i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
-.ptunnel__title { font: 800 clamp(16px, 1.5vw, 21px)/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: var(--tracking-display, .005em); text-transform: uppercase; color: var(--text-hi, #fff); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.ptunnel__line { font: 500 8.5px/1.35 var(--font-mono, ui-monospace, monospace); letter-spacing: .06em; text-transform: uppercase; color: var(--text-lo, #999); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ptunnel__title { font: 800 clamp(16px, 1.5vw, 21px)/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: var(--tracking-display, .005em); text-transform: uppercase; color: var(--text-hi); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.ptunnel__line { font: 500 8.5px/1.35 var(--font-mono, ui-monospace, monospace); letter-spacing: .06em; text-transform: uppercase; color: var(--text-lo); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .ptunnel[data-compact="1"] .ptunnel__title { font-size: 14px; }
 .ptunnel[data-compact="1"] .ptunnel__line { display: none; }
 
 /* The real hero layer. HomeStage.css positions the wordmark, tagline and globe; we only make it transparent
    (so the cards behind the opaque globe sphere show around it) and keep clicks reaching the cards. */
-.ptunnel .home-front.ptunnel__front { position: absolute; inset: 0; z-index: 2; margin-top: 0; background: transparent; overflow: visible; pointer-events: none; }
+.ptunnel .home-front.ptunnel__front { position: absolute; inset: 0; z-index: 2; margin-top: 0; background: transparent; background-color: transparent !important; /* index.css forces .home-front opaque with !important */ overflow: visible; pointer-events: none; }
 .ptunnel .ptunnel__front .home-front__flight--globe { background: transparent; }
 .ptunnel .ptunnel__front .home-front__metro-globe { pointer-events: none; }
+/* Before the cards launch they are hidden behind the globe, so it can keep its hover glow and the Halloween vines. */
+.ptunnel[data-still="0"] .ptunnel__stage[data-globe-live="1"] .home-front__metro-globe { pointer-events: auto; }
+/* The homepage stat strip rides at the bottom of the sticky stage, above the cards, and stays clickable. */
+.ptunnel .ptunnel__front > .home-hero-stats-boundary { pointer-events: auto; background: linear-gradient(to top, var(--z-oled) 0%, var(--z-oled) 72%, rgba(0,0,0,0) 100%); }
 .ptunnel .ptunnel__front .home-front__flight-credit { pointer-events: auto; }
 .ptunnel .ptunnel__slot { pointer-events: auto; }
-.ptunnel .ptunnel__front .home-front__hero { --home-header-height: 0px; }

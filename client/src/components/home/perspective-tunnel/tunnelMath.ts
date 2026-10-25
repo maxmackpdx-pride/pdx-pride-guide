@@ -26,6 +26,8 @@ export const TUNNEL = {
   maxDelay: 0.3,
   /** Progress used for the reduced-motion arrangement. */
   stillProgress: 0.5,
+  /** The globe canvas keeps the pointer (hover, vines) below this progress; above it the cards are clickable through it. */
+  globeLiveUntil: 0.05,
 } as const;
 
 export type TunnelSlot = {

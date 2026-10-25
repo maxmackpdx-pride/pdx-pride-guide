@@ -67,6 +67,14 @@ export function outzPlaceToTunnelCard(place: OutzideMapPlace): TunnelCardData {
 export const OUTZ_CATALOG_FALLBACK: OutzideMapPlace[] = outzCatalog as OutzideMapPlace[];
 
 /**
+ * >>> BLENDED-ART PLUG-IN POINT (the one place to filter Outzide cards) <<<
+ * Which Outzide places may fly through the tunnel. Today: every place (pickTunnelCards then prefers ones with a
+ * photo or art). The "new blended art only" rule is not on master yet; when `lib/outzBlendedArt.ts` lands, change
+ * this to `isBlendedArtPlace(place)` (or filter the `outzPlaces` prop with `blendedArtPlaces`). Nothing else changes.
+ */
+export const isTunnelOutzideEligible = (_place: OutzideMapPlace): boolean => true;
+
+/**
  * Random assortment of real event cards and Outzide cards.
  *
  * Shuffle is keyed by `seed` + item id (not by array order), so the selection does not
@@ -84,7 +92,7 @@ export function pickTunnelCards(
 ): TunnelCardData[] {
   const liveEvents = events.filter(e => e.isPublic !== false && !e.isPrivate && e.status === "LIVE");
   const eventCards = liveEvents.map(eventToTunnelCard);
-  const outzCards = places.map(outzPlaceToTunnelCard);
+  const outzCards = places.filter(isTunnelOutzideEligible).map(outzPlaceToTunnelCard);
   const take = (pool: TunnelCardData[], n: number) => {
     const withArt = pool.filter(c => c.imageUrl);
     const source = withArt.length >= n ? withArt : pool;
