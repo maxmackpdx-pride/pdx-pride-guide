@@ -8,8 +8,9 @@ type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:str
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
 type CanvasProps={active?:boolean;onBrowse?:()=>void;onEscape?:()=>void;onBoot?:()=>void;initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onBoardPins?:(keys:string[])=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};
-const MAP_SRC='/mapz-map/index.html?v=20261006-shared-map';
+const MAP_SRC='/mapz-map/index.html?v=20261025-ios-memory';
 const MAX_3D_ATTEMPTS=3;
+const RECOVERY_WINDOW_MS=5*60*1000;
 
 const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onCluster,onBoardPins,onMode,onView,onEscape},ref){
  const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onCluster,onBoardPins,onMode,onView,onEscape});latest.current={onFailure,onVisible,onSelect,onCluster,onBoardPins,onMode,onView,onEscape};
@@ -71,27 +72,31 @@ const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,row
   if(node.contentDocument?.readyState==='complete')hello();
   return()=>node.removeEventListener('load',hello);
  },[attempt]);
+ // Remounting alone leaves the old iframe's WebGL context alive on iOS Safari. Run the scene's own
+ // pagehide disposal (stops its frame loop and calls map.remove()) before the node is detached.
+ useEffect(()=>{
+  const node=frame.current;
+  return()=>{try{node?.contentWindow?.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:false}));}catch{/* Cross-document or already gone. */}};
+ },[]);
  const cameraParams=useMemo(()=>initialView?new URLSearchParams({lat:String(initialView.center[0]),lng:String(initialView.center[1]),zoom:String(initialView.zoom),pitch:String(initialView.pitch??48),bearing:String(initialView.bearing??0)}).toString():"",[]);
  return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}&${cameraParams}${onEscape?"&escape=host":""}`} title="Zaylist interactive Portland metro map" className="mapz-demo-canvas"/>;
 });
 
 export default forwardRef<MapzHandle,CanvasProps>(function MapzCanvas(props,ref){
  const activeControl=useRef<MapzHandle>(null),lastView=useRef<MapView|null>(props.initialCamera || null);
- const attempts=useRef(0),visible=useRef(false),pendingRecovery=useRef<string|null>(null);
+ const attempts=useRef(0),failureTimes=useRef<number[]>([]),visible=useRef(false),pendingRecovery=useRef<string|null>(null);
  const active=props.active!==false;
  const [generation,setGeneration]=useState(0),[bootError,setBootError]=useState(''),[stopped,setStopped]=useState(false),[shown,setShown]=useState(false);
- // Bound consecutive failures, without exhausting recovery after a healthy visit.
- useEffect(()=>{
-  if(!shown||stopped)return;
-  const timer=window.setTimeout(()=>{attempts.current=0;},30000);
-  return()=>window.clearTimeout(timer);
- },[shown,stopped,generation]);
  const reportView=(view:MapView)=>{lastView.current=view;props.onView(view);};
- const retry=()=>{attempts.current=0;visible.current=false;setStopped(false);setShown(false);setBootError('');setGeneration(value=>value+1);};
+ const retry=()=>{attempts.current=0;failureTimes.current=[];visible.current=false;setStopped(false);setShown(false);setBootError('');setGeneration(value=>value+1);};
  const recover=(reason:string)=>{
   if(!active){pendingRecovery.current=reason;return;}
   console.warn("Map loading failed:", reason);
-  attempts.current+=1;
+  // Count failures in a sliding window. A map that survives 30s then dies again must not get a fresh
+  // budget each time: on iOS every remount leaks GPU memory until Safari reloads the tab.
+  const now=Date.now();
+  failureTimes.current=[...failureTimes.current.filter(time=>now-time<RECOVERY_WINDOW_MS),now];
+  attempts.current=failureTimes.current.length;
   if(attempts.current<MAX_3D_ATTEMPTS){
    visible.current=false;setShown(false);
    setGeneration(value=>value+1);

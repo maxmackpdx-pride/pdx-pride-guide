@@ -19,12 +19,12 @@ const host=await readFile(new URL('../client/src/components/MapzCanvas.tsx',impo
 const roofBoot=await readFile(new URL('../client/public/mapz-map/mapz-roof-boot.js',import.meta.url),'utf8');
 const getStyle=()=>structuredClone(vectorStyle);
 test('Mapz host and iframe use the same versioned asset and message contract',()=>{
- assert.match(host,/\/mapz-map\/index\.html\?v=20261006-shared-map/);
+ assert.match(host,/\/mapz-map\/index\.html\?v=20261025-ios-memory/);
  assert.match(host,/source:'mapz-host'/);
  assert.match(host,/event\.data\?\.source!=='mapz-demo'/);
  assert.match(html,/source:'mapz-demo'/);
  assert.match(html,/event\.data\?\.source!=='mapz-host'/);
- assert.match(html,/river-flight\.js\?v=20261006-shared-map/g);
+ assert.match(html,/river-flight\.js\?v=20261025-ios-memory/g);
  assert.match(renderer,/source:'mapz-demo'/);
  assert.match(renderer,/event\.data\?\.source!=='mapz-host'/);
  assert.match(roofBoot,/event\.data\?\.source!=='mapz-host'/);

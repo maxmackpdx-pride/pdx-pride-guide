@@ -39,6 +39,10 @@ import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__mapzStartup||{phase(){},fatal(){}};
 startup.phase('script');
 const maxExploreZoom=18;
+// iPhone/iPad Safari has a small GPU budget. At world zoom the 3D city (extrusions, sparkles, overlays)
+// is meaningless and a frequent source of WebGL context loss, so touch devices stop at the metro overview.
+const coarsePointer=typeof matchMedia==='function'&&matchMedia('(pointer:coarse)').matches;
+const minExploreZoom=coarsePointer?8:-2;
 const initialCamera=readCameraParams(new URLSearchParams(location.search));
 // First paint is the vector city. DEM workers were blocking the phone boot
 // and the preload already dropped terrain from this first style.
@@ -55,7 +59,7 @@ let map;
 try{
  map=createMap({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
    center:[-122.676,45.523],zoom:13.5+Math.log2(1.25),pitch:48,bearing:0,...initialCamera,
-   minZoom:-2,maxZoom:maxExploreZoom,maxPitch:75,
+   minZoom:minExploreZoom,maxZoom:maxExploreZoom,maxPitch:75,
    style:surfaceStyle});
  window.__zaylistMap=map;
  startup.phase('map-created');
@@ -538,7 +542,7 @@ function drawLights(fade,target=map,surface=lights){
  const emergenceFor=feature=>feature.properties.key===selectedKey||activeTonight(feature)?1:reveal;
  const lights=surface,lightsContext=surface.getContext('2d');
  const surfaces=updateSurfaces(target);
- const width=window.innerWidth,height=window.innerHeight,dpr=Math.min(devicePixelRatio||1,2);
+ const width=window.innerWidth,height=window.innerHeight,dpr=Math.min(devicePixelRatio||1,typeof coarsePointer!=='undefined'&&coarsePointer?1.5:2);
  const viewportScale=Math.min(1,Math.max(.72,(width-32)/680));
  // At the city-wide distance, holograms dominate while unopened Placez markers
  // recede. Holograms then grow smoothly as the camera approaches street level.
@@ -1217,8 +1221,8 @@ window.addEventListener('message',event=>{
  if(type==='select'){selectedKey=data.key;const feature=lightFeatures.find(f=>f.properties.key===selectedKey);if(feature){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:feature.geometry.coordinates,zoom:Math.max(16.5,map.getZoom()),duration:700});}scheduleFrame();}
  if(type==='locate'){setUserLocation(data.coordinates,data.avatar);pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:data.coordinates,zoom:16,duration:700});}
  if(type==='fit'&&Array.isArray(data.bounds)){map.fitBounds(data.bounds,{padding:{top:140,bottom:150,left:72,right:72},maxZoom:17.25,duration:620});scheduleFrame();}
- if(type==='zoom'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.zoomTo(Math.max(-2,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});}
- if(type==='view'&&Array.isArray(data.center)&&data.center.length===2){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.jumpTo({center:[Number(data.center[1]),Number(data.center[0])],zoom:Math.max(-2,Math.min(maxExploreZoom,(Number.isFinite(Number(data.zoom))?Number(data.zoom):map.getZoom()))),pitch:Number.isFinite(data.pitch)?data.pitch:automaticPitch(),bearing:Number.isFinite(data.bearing)?data.bearing:map.getBearing()});viewState();}
+ if(type==='zoom'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.zoomTo(Math.max(minExploreZoom,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});}
+ if(type==='view'&&Array.isArray(data.center)&&data.center.length===2){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.jumpTo({center:[Number(data.center[1]),Number(data.center[0])],zoom:Math.max(minExploreZoom,Math.min(maxExploreZoom,(Number.isFinite(Number(data.zoom))?Number(data.zoom):map.getZoom()))),pitch:Number.isFinite(data.pitch)?data.pitch:automaticPitch(),bearing:Number.isFinite(data.bearing)?data.bearing:map.getBearing()});viewState();}
  if(type==='mode'){pauseControl.checked=data.mode!=='flight';pauseControl.dispatchEvent(new Event('input'));}
  if(type==='labels')for(const id of ['road-labels','place-labels'])if(map.getLayer(id))map.setLayoutProperty(id,'visibility',data.enabled?'visible':'none');
  if(type==='time'&&Number.isFinite(Number(data.timestamp))){viewTime=Number(data.timestamp);viewTimeReceived=performance.now();scheduleFrame();}
@@ -1233,7 +1237,11 @@ map.getCanvas().addEventListener('pointerup',e=>{
  if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);const width=hit.width||Math.max(32,(hit.r||22)*1.5),height=hit.height||width;tell('select',{key:hit.key,rect:{left:hit.x-width/2,top:hit.y-height/2,width,height}});scheduleFrame();}
 });
 map.on('moveend',viewState);
-map.on('webglcontextlost',()=>startup.fatal('The 3D graphics context was lost.'));
+// MapLibre restores a lost context itself. Remounting the whole iframe on every loss allocates a second
+// context while iOS still holds the first, which is how a transient loss becomes a reload loop.
+let contextLostTimer=0;
+map.on('webglcontextlost',()=>{clearTimeout(contextLostTimer);contextLostTimer=window.setTimeout(()=>startup.fatal('The 3D graphics context was lost.'),5000);});
+map.on('webglcontextrestored',()=>{clearTimeout(contextLostTimer);contextLostTimer=0;map.triggerRepaint();scheduleFrame();});
 map.on('load',()=>{
  pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));
  if(parent===window){map.jumpTo(STANDALONE_DEMO_VIEW);void setListings(standaloneDemoRows());}
