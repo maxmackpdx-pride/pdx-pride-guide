@@ -2,7 +2,9 @@
  * Board 18: demo content is data. The server marks seeded demo records with
  * isDemo; pages read the flag and never check usernames themselves.
  */
-const DEMO_USERNAMES = new Set(["hausing_demo", "rowan"]);
+/** Account that authors seeded demo records. */
+export const DEMO_ACCOUNT = "hausing_demo";
+export const DEMO_USERNAMES = new Set([DEMO_ACCOUNT, "rowan"]);
 
 export function isDemoAuthor(author?: { username?: string | null; displayName?: string | null } | null): boolean {
   if (!author) return false;

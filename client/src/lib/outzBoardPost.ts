@@ -11,6 +11,8 @@ export type OutzBoardPost = {
   createdAt: string;
   userId?: number;
   isMine?: boolean;
+  /** Set by the server for seeded DEMO cards. */
+  isDemo?: boolean;
   displayName?: string;
   username?: string;
 };
