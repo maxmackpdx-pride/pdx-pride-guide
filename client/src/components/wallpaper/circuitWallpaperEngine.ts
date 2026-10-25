@@ -329,7 +329,7 @@ export class CircuitWallpaperEngine {
     gl.bindVertexArray(this.vao);
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    for (const n of ["tilt", "viewSpan", "time", "density", "texture_", "bounce[0]"]) this.u[n] = gl.getUniformLocation(this.sceneProg, n);
+    for (const n of ["tilt", "viewSpan", "time", "density", "texture_", "bounce[0]", "scrollQ", "longPage"]) this.u[n] = gl.getUniformLocation(this.sceneProg, n);
     for (const n of ["texel", "sigma", "focusRect", "sharpness", "scene"]) this.fu[n] = gl.getUniformLocation(this.focusProg, n);
     this.textures = [];
     this.pxW = this.pxH = 0; // force target realloc
@@ -439,6 +439,39 @@ export class CircuitWallpaperEngine {
   // ---- loop --------------------------------------------------------------------------------
 
   private active = true;
+
+  // Long-page mode: the wallpaper is one surface as tall as the page. The viewport is a window onto the same
+  // 3072x1536 map, mirror-tiled vertically (no seam, no distortion) and scrolled 1:1 with the page. One canvas the
+  // size of the viewport, one WebGL context: nothing page-sized is ever allocated.
+  private longPage = false;
+  private scrollY = 0;
+  private scrollRaf = 0;
+  private readonly onScroll = () => {
+    this.scrollY = Math.max(0, window.scrollY || 0);
+    // Live mode redraws every frame anyway; a held still frame must repaint on scroll or the board would slide over it.
+    if (this.still && !this.running && this.active && !this.scrollRaf) {
+      this.scrollRaf = requestAnimationFrame(() => { this.scrollRaf = 0; if (!this.disposed) this.renderFrame(performance.now(), true); });
+    }
+  };
+  /** Turn on the scroll-attached long surface (board pages). Off everywhere else. */
+  setLongPage(on: boolean) {
+    if (on === this.longPage) return;
+    this.longPage = on;
+    if (on) { window.addEventListener("scroll", this.onScroll, { passive: true }); this.onScroll(); }
+    else { window.removeEventListener("scroll", this.onScroll); this.scrollY = 0; }
+    if (this.still && !this.running && this.active && this.loaded) this.renderFrame(performance.now(), true);
+  }
+  /** Tiles of the mirrored surface that intersect the viewport: screen y of the tile's map origin and its y direction. */
+  private tiles(scale: number, oy: number): Array<{ fy: number; sg: number }> {
+    if (!this.longPage) return [{ fy: oy, sg: 1 }];
+    const hm = MAP_H * scale, h = this.cssH, top = this.scrollY - oy;
+    const out: Array<{ fy: number; sg: number }> = [];
+    for (let n = Math.floor(top / hm); n <= Math.floor((top + h) / hm); n++) {
+      const t = n * hm - this.scrollY + oy;
+      out.push(n % 2 === 0 ? { fy: t, sg: 1 } : { fy: t + hm, sg: -1 });
+    }
+    return out;
+  }
 
   /** Animate (default) or hold a single still frame (reduced motion, calm mode). */
   setStill(still: boolean) {
@@ -656,6 +689,8 @@ export class CircuitWallpaperEngine {
     this.cometLast = now;
     const scale = this.viewScale;
     const ox = (w - MAP_W * scale) / 2, oy = (h - MAP_H * scale) / 2;
+    const tiles = this.tiles(scale, oy);
+    const cull = this.longPage;
     for (let i = this.cometCount; i < this.comets.length; i++) if (this.comets[i].path >= 0) this.release(this.comets[i], nowS);
     this.launchFair(nowS);
 
@@ -675,15 +710,24 @@ export class CircuitWallpaperEngine {
         const d = head - s * 100;
         if (d < 0 || d > total) continue;
         this.pointAt(id, d, p);
-        const sx = ox + p[0] * scale, sy = oy + p[1] * scale;
-        if (sx < -120 || sx > w + 120 || sy < -120 || sy > h + 120) continue;
+        const sx = ox + p[0] * scale;
+        let seen = false;
+        for (let t = 0; t < tiles.length && !seen; t++) { const sy = tiles[t].fy + tiles[t].sg * p[1] * scale; seen = !(sx < -120 || sx > w + 120 || sy < -120 || sy > h + 120); }
+        if (!seen) continue;
         if (s === 0 && bi < 32) { this.bounce[bi * 3] = p[0] / MAP_W; this.bounce[bi * 3 + 1] = p[1] / MAP_H; this.bounce[bi * 3 + 2] = 0.9; bi++; }
         else if (bi < 32) { this.bounce[bi * 3] = p[0] / MAP_W; this.bounce[bi * 3 + 1] = p[1] / MAP_H; this.bounce[bi * 3 + 2] = 0.45; bi++; }
       }
       const from = Math.max(0, head - tail), to = Math.min(total, head);
       if (!(to > from)) continue;
       const kind = c.kind, base = kind * (U_STEPS + 1);
-      cc.setTransform(k * scale, 0, 0, k * scale, k * ox, k * oy);
+      const bx0 = this.rbounds[id * 4], by0 = this.rbounds[id * 4 + 1], bx1 = this.rbounds[id * 4 + 2], by1 = this.rbounds[id * 4 + 3];
+      for (let ti = 0; ti < tiles.length; ti++) {
+        const tl = tiles[ti];
+        if (cull) {
+          const ya = tl.fy + tl.sg * by0 * scale, yb = tl.fy + tl.sg * by1 * scale;
+          if (Math.max(ya, yb) < -60 || Math.min(ya, yb) > h + 60 || ox + bx1 * scale < -60 || ox + bx0 * scale > w + 60) continue;
+        }
+      cc.setTransform(k * scale, 0, 0, k * scale * tl.sg, k * ox, k * tl.fy);
       const xs = this.rx[id], ys = this.ry[id], ls = this.rlen[id];
       // One bloom pass.
       cc.beginPath();
@@ -730,13 +774,15 @@ export class CircuitWallpaperEngine {
         cc.fill();
         cc.shadowBlur = 0;
       }
+      }
     }
     // Node flares left by passing comets.
-    for (let n = 0; n < this.nodeX.length; n++) {
+    for (let ti = 0; ti < tiles.length; ti++) for (let n = 0; n < this.nodeX.length; n++) {
+      const tl = tiles[ti];
       const age = nowS - this.nodeHit[n];
       if (age < 0 || age > 8) continue;
       const strength = Math.pow(Math.max(0, 1 - age / 8), 1.8), r = this.nodeR[n], kind = this.nodeKind[n];
-      cc.setTransform(k * scale, 0, 0, k * scale, k * ox, k * oy);
+      cc.setTransform(k * scale, 0, 0, k * scale * tl.sg, k * ox, k * tl.fy);
       cc.globalAlpha = strength;
       cc.drawImage(this.glowSprites[kind], this.nodeX[n] - r * 2.1, this.nodeY[n] - r * 2.1, r * 4.2, r * 4.2);
       cc.strokeStyle = this.ringStr[kind];
@@ -797,6 +843,8 @@ export class CircuitWallpaperEngine {
     gl.activeTexture(gl.TEXTURE8); gl.bindTexture(gl.TEXTURE_2D, this.cometTex);
     const scale = this.viewScale;
     gl.uniform2f(this.u.viewSpan, this.cssW / (MAP_W * scale), this.cssH / (MAP_H * scale));
+    gl.uniform1f(this.u.scrollQ, this.longPage ? this.scrollY / (MAP_H * scale) : 0);
+    gl.uniform1f(this.u.longPage, this.longPage ? 1 : 0);
     gl.uniform2f(this.u.tilt, this.tilt.x, this.tilt.y);
     gl.uniform1f(this.u.time, still ? 3.2 : this.time);
     gl.uniform1f(this.u.density, 0.22);
@@ -822,6 +870,8 @@ export class CircuitWallpaperEngine {
     this.disposed = true;
     this.stopLoop();
     window.removeEventListener("pointermove", this.onPointer);
+    window.removeEventListener("scroll", this.onScroll);
+    cancelAnimationFrame(this.scrollRaf);
     this.canvas.removeEventListener("webglcontextlost", this.onContextLost);
     this.canvas.removeEventListener("webglcontextrestored", this.onContextRestored);
     const gl = this.gl;

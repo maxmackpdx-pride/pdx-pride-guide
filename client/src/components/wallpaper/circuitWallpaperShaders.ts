@@ -14,16 +14,26 @@ out vec4 frag;
 uniform sampler2D art, flow, afterglow, riverLines, mapPaths, sparklePoints, steadyRoads, nodeMask, comets;
 uniform vec2 tilt, viewSpan;
 uniform vec3 bounce[32];
-uniform float time, density, texture_;
+uniform float time, density, texture_, scrollQ, longPage;
 void main(){
   vec2 q = vec2((uv.x - .5) * viewSpan.x + .5, (.5 - uv.y) * viewSpan.y + .5);
   vec4 cm = texture(comets, vec2(uv.x, 1. - uv.y));
-  if (q.x < 0. || q.x > 1. || q.y < 0. || q.y > 1.) { frag = vec4(cm.rgb, 1.); return; }
+  // Long-page mode: scroll the surface and mirror-tile the map vertically, so the page is one seamless wallpaper.
+  float mirrored = 0.;
+  if (longPage > .5) {
+    float qy = q.y + scrollQ;
+    float tile = floor(qy);
+    float fy = qy - tile;
+    mirrored = mod(tile, 2.);
+    q.y = mirrored > .5 ? 1. - fy : fy;
+    if (q.x < 0. || q.x > 1.) { frag = vec4(cm.rgb, 1.); return; }
+  } else if (q.x < 0. || q.x > 1. || q.y < 0. || q.y > 1.) { frag = vec4(cm.rgb, 1.); return; }
   vec3 col = texture(art, q).rgb;
   float hiddenRing = texture(nodeMask, q).r;
   float lum = dot(col, vec3(.2126, .7152, .0722));
   col = max(vec3(0.), mix(vec3(lum), col, 1.45)) * 1.18;
   vec2 f = texture(flow, q).rg * 2. - 1.;
+  if (mirrored > .5) f.y = -f.y;
   float phase = atan(f.y, f.x) / 6.2831853;
   float trail = fract(phase - time);
   float gate = 0.;

@@ -13,6 +13,12 @@ function hidesWallpaper(path: string) {
     || bare === "/admin" || bare === "/design-system/specimen";
 }
 
+/** Board pages are long: the wallpaper scrolls with them as one surface instead of staying fixed to the viewport. */
+function isBoardRoute(path: string) {
+  const bare = path.split("?")[0].replace(/\/+$/, "") || "/";
+  return bare === "/boardz" || bare === "/boards" || bare === "/all-boards" || bare === "/our-boardz";
+}
+
 function isTouchDevice() {
   if (typeof navigator === "undefined") return false;
   const ua = navigator.userAgent || "";
@@ -32,6 +38,9 @@ export default function SiteWallpaper() {
   const engineRef = useRef<import("./circuitWallpaperEngine").CircuitWallpaperEngine | null>(null);
   const [location] = useLocation();
   const hidden = hidesWallpaper(location);
+  const longPage = isBoardRoute(location);
+  const longPageRef = useRef(longPage);
+  longPageRef.current = longPage;
   const [state, setState] = useState<State>(hidden ? "idle" : "boot");
 
   useEffect(() => {
@@ -74,6 +83,7 @@ export default function SiteWallpaper() {
         await engine.load(abort.signal);
         if (cancelled) { engine.dispose(); return; }
         engine.resize();
+        engine.setLongPage(longPageRef.current);
         applyMotion();
 
         let resizeTimer = 0;
@@ -115,12 +125,16 @@ export default function SiteWallpaper() {
     };
   }, [hidden]);
 
+  // Switching between a board and another route keeps the same context; only the mapping changes.
+  useEffect(() => { engineRef.current?.setLongPage(longPage); }, [longPage]);
+
   return (
     <div
       ref={wrapRef}
       className="site-wallpaper"
       data-site-wallpaper={state}
       data-hidden={hidden ? "true" : undefined}
+      data-long={longPage ? "true" : undefined}
       aria-hidden="true"
     />
   );
