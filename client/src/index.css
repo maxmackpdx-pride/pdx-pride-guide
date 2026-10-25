@@ -10386,6 +10386,28 @@ html.calm-mode .home-live-ticker__marquee .pdxMarquee__star {
   gap: 26px;
 }
 
+.spectrum-loader__stuck {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  text-align: center;
+}
+
+.spectrum-loader__stuck p { margin: 0; }
+
+.spectrum-loader__stuck button {
+  background: #C8FA3C;
+  color: #000;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .spectrum-loader__ring {
   width: 52px;
   height: 52px;

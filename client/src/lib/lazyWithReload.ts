@@ -3,7 +3,14 @@ import { clearPwaCaches } from "@/lib/pwa";
 
 const RELOAD_KEY = "zaylist-stale-asset-reload-at";
 const RELOAD_COOLDOWN_MS = 60_000;
+// Safari can leave service-worker/cache cleanup pending forever. Never let that
+// strand a route on its loading spinner: reload anyway after this long.
+const CLEANUP_TIMEOUT_MS = 3_000;
+// If the reload still has not navigated away this long after recovery began,
+// stop swallowing the error so the route error boundary can offer a retry.
+export const RECOVERY_WATCHDOG_MS = 10_000;
 let recoveryStarted = false;
+let recoveryFailed = false;
 
 export function isStaleAssetLoadError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error || "");
@@ -16,7 +23,7 @@ export function isStaleAssetLoadError(error: unknown): boolean {
  */
 export function recoverFromStaleAsset(error: unknown): boolean {
   if (typeof window === "undefined" || !isStaleAssetLoadError(error)) return false;
-  if (recoveryStarted) return true;
+  if (recoveryStarted) return !recoveryFailed;
 
   let lastAttempt = 0;
   try { lastAttempt = Number(window.sessionStorage.getItem(RELOAD_KEY) || 0); } catch { /* storage may be disabled */ }
@@ -24,9 +31,19 @@ export function recoverFromStaleAsset(error: unknown): boolean {
 
   try { window.sessionStorage.setItem(RELOAD_KEY, String(Date.now())); } catch { return false; }
   recoveryStarted = true;
-  void clearPwaCaches()
+  let reloaded = false;
+  const reload = () => {
+    if (reloaded) return;
+    reloaded = true;
+    window.location.reload();
+  };
+  const cleanupTimer = setTimeout(reload, CLEANUP_TIMEOUT_MS);
+  void Promise.resolve()
+    .then(() => clearPwaCaches())
     .catch(() => {})
-    .finally(() => window.location.reload());
+    .finally(() => { clearTimeout(cleanupTimer); reload(); });
+  // The reload never took us anywhere: let pending lazy() imports reject.
+  setTimeout(() => { recoveryFailed = true; }, RECOVERY_WATCHDOG_MS);
   return true;
 }
 
@@ -55,7 +72,10 @@ export function lazyWithReload<T extends ComponentType<any>>(factory: () => Prom
   return lazy(() =>
     factory().catch(async (err) => {
       if (recoverFromStaleAsset(err)) {
-        return new Promise<{ default: T }>(() => {});
+        // Hold the Suspense fallback while the reload starts, but never forever.
+        return new Promise<{ default: T }>((_resolve, reject) => {
+          setTimeout(() => reject(err), RECOVERY_WATCHDOG_MS);
+        });
       }
       throw err;
     }),
