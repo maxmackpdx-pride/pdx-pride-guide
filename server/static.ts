@@ -1,5 +1,5 @@
 import express from 'express';
-import { mapzPrecompressed,staticTextPrecompressed } from './mapzStatic';
+import { mapzPrecompressed,staticTextPrecompressed,mutableStaticRevalidate,missingStaticNotFound } from './mapzStatic';
 import type { Express } from 'express';
 import fs from "node:fs";
 import path from "node:path";
@@ -65,7 +65,7 @@ export function serveStatic(app: Express) {
         '<head><script>window.__PDX_LOCAL_PREVIEW__=1</script>',
       );
     }
-    res.status(isAppPath(requestPath) ? 200 : 404).set("Cache-Control", "no-cache").type("html").send(injectSeoIntoHtml(baseIndexHtml, requestPath));
+    res.status(isAppPath(requestPath) ? 200 : 404).set(isAppPath(requestPath) ? { "Cache-Control": "no-cache" } : { "Cache-Control": "no-store", "CDN-Cache-Control": "no-store", "Cloudflare-CDN-Cache-Control": "no-store" }).type("html").send(injectSeoIntoHtml(baseIndexHtml, requestPath));
   };
 
   // Short vanity URLs → their canonical page. 302 (not 301) so the target can
@@ -85,6 +85,7 @@ export function serveStatic(app: Express) {
   // Hashed build assets are content-addressed - cache forever. A hash miss
   // (stale page after a deploy) must 404, not fall through to the SPA HTML,
   // so the client can detect it and reload.
+  app.use(mutableStaticRevalidate());
   app.use(mapzPrecompressed(distPath));
   app.use(staticTextPrecompressed(distPath));
   app.use("/assets", express.static(path.join(distPath, "assets"), {
@@ -122,6 +123,9 @@ export function serveStatic(app: Express) {
   app.get("/favicon.ico", (_req, res) => {
     res.redirect(302, "/favicon.png");
   });
+
+  // Unknown static-looking files (e.g. /map-foundation/new.js requested mid-deploy) must 404 uncached, not fall into the SPA shell.
+  app.use(missingStaticNotFound());
 
   // SPA fallback with server-injected event listings for crawlers and AI fetchers.
   app.use("/{*path}", sendSeoIndex);
