@@ -1,4 +1,6 @@
 import { sqlite, storage } from "./storage";
+import { DEMO_USERNAMES, isDemoAuthor } from "@shared/demo";
+import { seedOutzBoardDemo } from "./outzBoardDemo";
 import {
   formatBeachGoingChip,
   beachCheckinDateOptions,
@@ -90,6 +92,7 @@ function ensureOutzSocialSchema() {
   }
 }
 ensureOutzSocialSchema();
+try { seedOutzBoardDemo(sqlite); } catch (error) { console.warn("[boot] seed_outz_board_demo_v1 skipped:", error instanceof Error ? error.message : error); }
 
 export function isFollowingOutzDestination(userId: number, placeId: string): boolean {
   return !!sqlite.prepare("SELECT 1 FROM outz_destination_follows WHERE user_id = ? AND place_id = ?")
@@ -294,8 +297,8 @@ export function getOutzWallPosts(placeId: string, viewerUserId?: number) {
            p.trip_date AS tripDate, p.created_at AS createdAt, p.updated_at AS updatedAt, u.username, u.display_name AS displayName,
            u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice
     FROM outz_wall_posts p JOIN users u ON u.id = p.user_id
-    WHERE p.place_id = ? ORDER BY p.created_at DESC LIMIT 80
-  `).all(placeId) as any[];
+    WHERE p.place_id = ? AND u.username NOT IN (${[...DEMO_USERNAMES].map(() => "?").join(",")}) ORDER BY p.created_at DESC LIMIT 80
+  `).all(placeId, ...DEMO_USERNAMES) as any[];
   const allowed = (row: any) => viewerUserId == null || row.userId === viewerUserId || !storage.isMemberInteractionBlocked(viewerUserId, row.userId);
   const visiblePosts = posts.filter(allowed);
   const postIds = visiblePosts.map(post => Number(post.id));
@@ -318,19 +321,26 @@ export function getOutzWallPosts(placeId: string, viewerUserId?: number) {
 export const OUTZ_BOARD_KINDS = ["HIKE_BUDDY", "CAMP_BUDDY", "LOOKING_FOR_COMPANY", "CARPOOL", "CARPOOL_OFFER", "CARPOOL_REQUEST"];
 export function getOutzBoardPosts(viewerUserId?: number, mineOnly = false) {
   const today = pacificTodayDate();
-  const rows = sqlite.prepare(`
-    SELECT p.id, p.place_id AS placeId, p.user_id AS userId, p.post_kind AS postKind, p.body,
+  const kinds = OUTZ_BOARD_KINDS.map(() => "?").join(",");
+  const demoNames = [...DEMO_USERNAMES];
+  const select = `SELECT p.id, p.place_id AS placeId, p.user_id AS userId, p.post_kind AS postKind, p.body,
            p.trip_date AS tripDate, p.created_at AS createdAt, u.username, u.display_name AS displayName
-    FROM outz_wall_posts p JOIN users u ON u.id = p.user_id
-    WHERE p.post_kind IN (${OUTZ_BOARD_KINDS.map(() => "?").join(",")})
+    FROM outz_wall_posts p JOIN users u ON u.id = p.user_id`;
+  const rows = sqlite.prepare(`${select}
+    WHERE p.post_kind IN (${kinds}) AND u.username NOT IN (${demoNames.map(() => "?").join(",")})
       AND datetime(p.created_at) >= datetime('now', '-30 days')
       AND (p.trip_date IS NULL OR p.trip_date >= ?)
     ORDER BY p.created_at DESC LIMIT 120
-  `).all(...OUTZ_BOARD_KINDS, today) as any[];
-  return rows
+  `).all(...OUTZ_BOARD_KINDS, ...demoNames, today) as any[];
+  // Seeded DEMO cards ride below every real post, regardless of age (they are examples, not activity).
+  const demos = mineOnly ? [] : sqlite.prepare(`${select}
+    WHERE p.post_kind IN (${kinds}) AND u.username IN (${demoNames.map(() => "?").join(",")})
+    ORDER BY p.created_at ASC LIMIT 40
+  `).all(...OUTZ_BOARD_KINDS, ...demoNames) as any[];
+  return [...rows, ...demos]
     .filter(row => viewerUserId == null || row.userId === viewerUserId || !storage.isMemberInteractionBlocked(viewerUserId, row.userId))
     .filter(row => !mineOnly || row.userId === viewerUserId)
-    .map(row => ({ ...row, isMine: row.userId === viewerUserId }));
+    .map(row => ({ ...row, isMine: row.userId === viewerUserId, isDemo: isDemoAuthor({ username: row.username, displayName: row.displayName }) }));
 }
 
 export function createOutzWallPost(input: { placeId: string; userId: number; postKind: string; body: string; tripDate: string | null }) {
