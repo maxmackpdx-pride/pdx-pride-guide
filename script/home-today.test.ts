@@ -48,6 +48,27 @@ test("blended art registry matches the blend engine recipes and its photo assets
   }
 });
 
+test("every registry place passes the Xerox cinematic style check, and no qualifying place is missing", async () => {
+  const engineMod = await import("../client/public/outzide-map/assets/blend-art.js") as any;
+  const { BLEND_PLACES } = await import("../client/src/lib/outzBlend");
+  for (const [id, variants] of Object.entries(BLEND_PLACES)) {
+    for (const v of variants) {
+      const c = engineMod.checkBlend(id, v);
+      assert.ok(c.recipe && c.photo, `${id}/${v}: recipe + halftone photo`);
+      assert.ok(c.cutouts >= 5, `${id}/${v}: photo cutouts ${c.cutouts}`);
+      assert.ok(c.contour > 0, `${id}/${v}: orange contour source`);
+      assert.ok(c.route, `${id}/${v}: route overlay`);
+      assert.equal(engineMod.hasBlend(id, v), true, `${id}/${v}: engine accepts it`);
+    }
+  }
+  assert.deepEqual(engineMod.blendPlaces().sort(), Object.keys(BLEND_PLACES).sort());
+  // The one variant that fails the check is not registered and is refused by the engine.
+  assert.equal(engineMod.blendQualifies("usfs-7682.004621", "wide"), false);
+  assert.equal(engineMod.hasBlend("usfs-7682.004621", "wide"), false);
+  // Rooster Rock's wide art now has its route overlay.
+  assert.equal(engineMod.checkBlend("rooster-rock", "wide").route, true);
+});
+
 test("only places with blended art qualify; older photo and motif places are excluded", () => {
   const blended = blendedArtPlaces(places);
   assert.equal(places.length, 385);

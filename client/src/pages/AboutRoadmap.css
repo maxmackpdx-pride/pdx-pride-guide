@@ -40,7 +40,8 @@
         z-index: 0;
         scroll-behavior: smooth;
         overflow: visible;
-        background: var(--bg);
+        /* Transparent: the shared SiteWallpaper (circuit shader) shows through. */
+        background: transparent;
       }
       .about-roadmap-page {
         margin: 0;
@@ -154,23 +155,6 @@
       #trust,
       #questions {
         scroll-margin-top: 60px;
-      }
-      .topo-field,
-      .field {
-        position: fixed;
-        inset: 0;
-        z-index: -2;
-        pointer-events: none;
-      }
-      .topo-field {
-        z-index: -3;
-        width: 100%;
-        height: 100%;
-        opacity: 0.32;
-        background: var(--slate-1);
-      }
-      .field {
-        background: transparent;
       }
       .mono,
       .eyebrow,
@@ -1922,11 +1906,9 @@
         width: min(1220px, calc(100% - 44px));
         margin: 0 auto;
         padding: clamp(64px, 7vw, 92px) 0 80px;
-        background:
-          radial-gradient(ellipse at 12% 15%, rgba(25,227,255,.055), transparent 34%),
-          radial-gradient(ellipse at 88% 46%, rgba(255,106,0,.045), transparent 31%),
-          var(--slate-1);
-        box-shadow: 0 0 0 100vmax var(--slate-1);
+        /* Transparent over the shared circuit wallpaper; a soft dark scrim keeps the long founder copy legible. */
+        background: rgb(0 0 0 / 34%);
+        box-shadow: 0 0 0 100vmax rgb(0 0 0 / 34%);
         clip-path: inset(0 -100vmax);
       }
       .founder-story::before {
@@ -1937,20 +1919,6 @@
         left: 0;
         height: 1px;
         background: var(--slate-5);
-      }
-      .founder-story::after {
-        content: "";
-        position: absolute;
-        z-index: -1;
-        inset: 0 -100vw;
-        background:
-          repeating-radial-gradient(ellipse at 18% 18%, transparent 0 78px, rgba(255,255,255,.025) 80px 81px, transparent 83px 124px),
-          linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
-        background-size: auto, 82px 82px, 82px 82px;
-        -webkit-mask-image: linear-gradient(to bottom, transparent, #000 5%, #000 96%, transparent);
-        mask-image: linear-gradient(to bottom, transparent, #000 5%, #000 96%, transparent);
-        pointer-events: none;
       }
       .founder-story > * { position: relative; z-index: 1; }
       .founder-motif {
