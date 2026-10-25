@@ -243,6 +243,16 @@ app.use("/api/auth/password/forgot", passwordResetRequestLimiter);
 app.use("/api/auth/password/reset", authLimiter);
 app.use("/api/promoter/login", authLimiter);
 app.use("/api/admin/login", authLimiter);
+// Google sign-in start + callback (prefix match covers /api/auth/google/callback).
+const googleAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many Google sign-in attempts. Try again in a few minutes." },
+  skip: rateLimitSkipDev,
+});
+app.use("/api/auth/google", googleAuthLimiter);
 const contactLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
