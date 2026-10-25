@@ -31,6 +31,7 @@ test("missed connection posts map to the missed intent, kind label and place car
   assert.equal(post.category, "outz");
   assert.equal(post.intent, "missed");
   assert.equal(post.title, "Missed connection");
-  assert.equal(intentLabels.missed, "Missed connections");
+  assert.equal(intentLabels.missed, "Outzide missed connections");
+  assert.equal(intentLabels.connection, "Missed connections");
   assert.equal(post.detail, "Silver Falls");
 });
