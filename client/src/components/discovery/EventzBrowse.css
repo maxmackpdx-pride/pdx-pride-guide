@@ -122,9 +122,9 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: transparent; }
   .eb-page--places .eb-categories { flex-wrap: wrap; overflow: visible; mask-image: none; }
 }
 .eb-page--places .eb-category { scroll-margin-inline: 16px; }
-.eb-page--places .eb-categories.is-scrolled { mask-image: linear-gradient(to right, transparent, #000 22px, #000 100%); }
-.eb-page--places .eb-categories.can-scroll-end { mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 36px), transparent); }
-.eb-page--places .eb-categories.is-scrolled.can-scroll-end { mask-image: linear-gradient(to right, transparent, #000 22px, #000 calc(100% - 36px), transparent); }
+.eb-page--places .eb-categories.is-scrolled { mask-image: linear-gradient(to right, transparent, black 22px, black 100%); }
+.eb-page--places .eb-categories.can-scroll-end { mask-image: linear-gradient(to right, black 0, black calc(100% - 36px), transparent); }
+.eb-page--places .eb-categories.is-scrolled.can-scroll-end { mask-image: linear-gradient(to right, transparent, black 22px, black calc(100% - 36px), transparent); }
 .eb-category { --category-readable: color-mix(in srgb, var(--c) 72%, var(--text-hi)); color: var(--category-readable); }
 .eb-category[aria-pressed="true"], .eb-category[aria-pressed="true"] b { background: var(--category-readable); }
 .eb-category b { color: var(--category-readable); }
