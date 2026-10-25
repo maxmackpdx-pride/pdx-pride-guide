@@ -3,6 +3,9 @@ import { eventPath } from "@shared/eventSlug";
 import outzCatalog from "@shared/outzMapCatalog";
 import { dayAccentToken } from "@/lib/dsColors";
 import { formatCardTime, listingDay, listingPosterUrl } from "@/lib/dsEvent";
+import { isBlendedArtPlace, blendedArtPhotoUrl } from "@/lib/outzBlendedArt";
+import { dailyScore } from "@/lib/homeToday";
+import { isEventSchedulePast, pacificTodayDate } from "@shared/missedConnections";
 import { hashKey, mulberry32 } from "./tunnelMath";
 
 /** What one flying card needs. Presentational only: no hearts, modals or auth. */
@@ -16,7 +19,16 @@ export type TunnelCardData = {
   imageUrl?: string;
   /** CSS colour, usually a design token var. */
   accent: string;
+  /** Seeds the one-inverted-word title rule: `outz:<placeId>` for Outzide, `event:<eventId>` for events. */
+  titleSeed: string;
+  /** Outzide only: the place whose finished blended art (`<OutzBlendArt variant="tall">`) fills the card. */
+  blendId?: string;
 };
+
+/** Pacific calendar day (YYYY-MM-DD) the fly-by set is chosen for. Changes at local midnight. */
+export const tunnelDayKey = (now = Date.now()): string => pacificTodayDate(now);
+/** Deterministic 32-bit seed for a Pacific day: everyone sees the same cards all day, a new set tomorrow. */
+export const tunnelDaySeed = (dayKey: string): number => dailyScore(`ptunnel:${dayKey}`);
 
 /** The slice of `/outzide-map/places.json` -> `places[]` (385 destinations) the hero reads. */
 export type OutzideMapPlace = {
@@ -46,11 +58,14 @@ export function eventToTunnelCard(listing: EventListing): TunnelCardData {
     href: eventPath(listing.id, listing.title, day),
     imageUrl: listingPosterUrl(listing),
     accent: dayAccentToken(day),
+    titleSeed: `event:${listing.id}`,
   };
 }
 
 export function outzPlaceToTunnelCard(place: OutzideMapPlace): TunnelCardData {
-  const image = place.photo?.src ?? place.art;
+  // Blended places draw the finished blend (OutzBlendArt); the static cutout photo is its fallback image.
+  const blended = isBlendedArtPlace(place);
+  const image = (blended ? blendedArtPhotoUrl(place.id, "tall") : null) ?? place.photo?.src ?? place.art;
   return {
     key: `outz:${place.id}`,
     kind: "outzide",
@@ -58,8 +73,10 @@ export function outzPlaceToTunnelCard(place: OutzideMapPlace): TunnelCardData {
     kicker: OUTZ_LABELS[place.kind] ?? "Destination",
     line: place.region || place.detail || "Outzide",
     href: `/outzide?place=${encodeURIComponent(place.id)}`,
-    imageUrl: image ? assetUrl(image) : undefined,
+    imageUrl: image ? (image.startsWith("/") ? image : assetUrl(image)) : undefined,
     accent: `var(${OUTZ_TOKENS[place.kind] ?? "--neon-yellow"})`,
+    titleSeed: `outz:${place.id}`,
+    blendId: blended ? place.id : undefined,
   };
 }
 
@@ -67,19 +84,17 @@ export function outzPlaceToTunnelCard(place: OutzideMapPlace): TunnelCardData {
 export const OUTZ_CATALOG_FALLBACK: OutzideMapPlace[] = outzCatalog as OutzideMapPlace[];
 
 /**
- * >>> BLENDED-ART PLUG-IN POINT (the one place to filter Outzide cards) <<<
- * Which Outzide places may fly through the tunnel. Today: every place (pickTunnelCards then prefers ones with a
- * photo or art). The "new blended art only" rule is not on master yet; when `lib/outzBlendedArt.ts` lands, change
- * this to `isBlendedArtPlace(place)` (or filter the `outzPlaces` prop with `blendedArtPlaces`). Nothing else changes.
+ * Which Outzide places may fly through the tunnel: only those with the new blended art (15 places).
+ * Never falls back to older photo/motif art.
  */
-export const isTunnelOutzideEligible = (_place: OutzideMapPlace): boolean => true;
+export const isTunnelOutzideEligible = (place: OutzideMapPlace): boolean => isBlendedArtPlace(place);
 
 /**
- * Random assortment of real event cards and Outzide cards.
+ * Daily assortment of real event cards and blended-art Outzide cards (half and half).
  *
  * Shuffle is keyed by `seed` + item id (not by array order), so the selection does not
- * reshuffle when events or places finish loading a moment apart. One seed per mount =
- * stable for the session, different on every load.
+ * reshuffle when events or places finish loading a moment apart. Pass `tunnelDaySeed(tunnelDayKey())`:
+ * the same set all Pacific day, a new one at midnight.
  *
  * Items with imagery are preferred (a flying card with no picture reads as a mistake); the
  * pool falls back to the full set only when too few have images.
@@ -89,8 +104,10 @@ export function pickTunnelCards(
   places: readonly OutzideMapPlace[],
   count: number,
   seed: number,
+  now?: number,
 ): TunnelCardData[] {
-  const liveEvents = events.filter(e => e.isPublic !== false && !e.isPrivate && e.status === "LIVE");
+  // `now` (optional): drop events whose scheduled end has passed.
+  const liveEvents = events.filter(e => e.isPublic !== false && !e.isPrivate && e.status === "LIVE" && (now === undefined || !isEventSchedulePast(e.dateStart, e.dateEnd, now)));
   const eventCards = liveEvents.map(eventToTunnelCard);
   const outzCards = places.filter(isTunnelOutzideEligible).map(outzPlaceToTunnelCard);
   const take = (pool: TunnelCardData[], n: number) => {

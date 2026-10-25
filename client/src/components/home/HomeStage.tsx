@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import HomeFlight from "@/components/home/HomeFlight";
 import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 import PerspectiveTunnelHero from "@/components/home/perspective-tunnel/PerspectiveTunnelHero";
-import type { OutzideMapPlace } from "@/components/home/perspective-tunnel/tunnelCards";
+import { tunnelDayKey, tunnelDaySeed, type OutzideMapPlace } from "@/components/home/perspective-tunnel/tunnelCards";
 import type { EventListing } from "@shared/multiDayEvents";
 import { isEventSchedulePast, parsePacificDateTime } from "@shared/missedConnections";
 import { apiRequest } from "@/lib/queryClient";
@@ -35,9 +35,27 @@ const IDENTITY_LINES = [
 
 /**
  * Live data for the hero's flying cards: the same two queries (same keys, so the same cache) the Today rail reads.
- * Upcoming events only (ended ones drop out), soonest first, capped; Outzide from the live places.json.
+ * Upcoming events only (ended ones drop out), soonest first; Outzide from the live places.json (blended-art places only).
  */
 function useTunnelData() {
+  // The fly-by set is daily: seeded from the Pacific date. When the date rolls over (midnight, or a tab left open /
+  // woken from sleep) switch to the new day's seed and refetch events and places so nothing stale carries over.
+  const queryClient = useQueryClient();
+  const [dayKey, setDayKey] = useState(() => tunnelDayKey());
+  const dayRef = useRef(dayKey);
+  useEffect(() => {
+    const sync = () => {
+      const next = tunnelDayKey();
+      if (next === dayRef.current) return;
+      dayRef.current = next;
+      setDayKey(next);
+      void queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      void queryClient.invalidateQueries({ queryKey: ["/outzide-map/places.json"] });
+    };
+    const timer = window.setInterval(sync, 60_000);
+    document.addEventListener("visibilitychange", sync);
+    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", sync); };
+  }, [queryClient]);
   const { data: listings } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
@@ -52,10 +70,9 @@ function useTunnelData() {
     const now = Date.now();
     return (listings ?? [])
       .filter(e => !isEventSchedulePast(e.dateStart, e.dateEnd, now))
-      .sort((a, b) => (parsePacificDateTime(a.dateStart) ?? 0) - (parsePacificDateTime(b.dateStart) ?? 0))
-      .slice(0, 60);
-  }, [listings]);
-  return { events, outzPlaces: outz?.places };
+      .sort((a, b) => (parsePacificDateTime(a.dateStart) ?? 0) - (parsePacificDateTime(b.dateStart) ?? 0));
+  }, [listings, dayKey]);
+  return { events, outzPlaces: outz?.places, seed: tunnelDaySeed(dayKey) };
 }
 
 type Props = {
@@ -108,6 +125,7 @@ export default function HomeStage({ afterWelcome }: Props) {
       <PerspectiveTunnelHero
         events={tunnel.events}
         outzPlaces={tunnel.outzPlaces}
+        seed={tunnel.seed}
         still={calmMode}
         wordmarkRef={logoRef}
         globeLayer={<HomeFlight enabled={logoReady} />}

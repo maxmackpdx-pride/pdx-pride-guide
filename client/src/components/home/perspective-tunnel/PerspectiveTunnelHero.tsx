@@ -15,7 +15,9 @@ import { HandwritingText } from "@/components/ui/handwriting-text";
 import { PortlandMetroGlobe } from "@/components/ui/portland-metro-globe";
 import type { EventListing } from "@shared/multiDayEvents";
 import { prefersStillMotion } from "@/lib/motion";
-import { OUTZ_CATALOG_FALLBACK, pickTunnelCards, type OutzideMapPlace, type TunnelCardData } from "./tunnelCards";
+import { OutzBlendArt } from "@/components/outz/OutzBlendArt";
+import { RansomTitle } from "@/components/xerox/Overlays";
+import { OUTZ_CATALOG_FALLBACK, pickTunnelCards, tunnelDayKey, tunnelDaySeed, type OutzideMapPlace, type TunnelCardData } from "./tunnelCards";
 import { TUNNEL, computePose, createPose, makeSlots } from "./tunnelMath";
 // HomeStage.css owns the real hero classes reused below (home-front__*). It must load before our overrides.
 import "@/components/home/HomeStage.css";
@@ -60,7 +62,7 @@ export type PerspectiveTunnelHeroProps = {
   /** Total card counts (half events, half Outzide). Defaults 10 desktop / 6 compact. */
   desktopCount?: number;
   compactCount?: number;
-  /** Fix the shuffle (tests, screenshots). Omit in production: a fresh random seed is drawn once per mount. */
+  /** Fix the shuffle (tests, screenshots). Omit in production: the seed comes from today's Pacific date, so the set is daily. */
   seed?: number;
   className?: string;
 };
@@ -94,6 +96,7 @@ function useStill(force?: boolean) {
 }
 
 function TunnelCard({ card, interactive, setRef }: { card: TunnelCardData; interactive: boolean; setRef: (el: HTMLAnchorElement | null) => void }) {
+  const [blendFailed, setBlendFailed] = useState(false);
   return (
     <Link
       href={card.href}
@@ -104,14 +107,15 @@ function TunnelCard({ card, interactive, setRef }: { card: TunnelCardData; inter
       // Flying cards are a pointer/touch enhancement; keep them out of the tab order while they move.
       tabIndex={interactive ? 0 : -1}
     >
-      {card.imageUrl ? <img className="ptunnel__img" src={card.imageUrl} alt="" loading="lazy" decoding="async" draggable={false} /> : null}
+      {card.blendId ? <OutzBlendArt placeId={card.blendId} variant="tall" hud={false} onUnavailable={() => setBlendFailed(true)} /> : null}
+      {card.imageUrl && (!card.blendId || blendFailed) ? <img className="ptunnel__img" src={card.imageUrl} alt="" loading="lazy" decoding="async" draggable={false} /> : null}
       <span className="ptunnel__scrim" aria-hidden="true" />
       <span className="ptunnel__kicker">
         <i aria-hidden="true" />
         {card.kind === "outzide" ? "Outzide · " : ""}
         {card.kicker}
       </span>
-      <span className="ptunnel__title">{card.title}</span>
+      <span className="ptunnel__title" aria-label={card.title}><span className="ptunnel__title-words" aria-hidden="true"><RansomTitle text={card.title} seed={card.titleSeed} /></span></span>
       <span className="ptunnel__line">{card.line}</span>
     </Link>
   );
@@ -139,8 +143,9 @@ export default function PerspectiveTunnelHero({
   const still = useStill(stillProp);
   const count = compact ? compactCount : desktopCount;
 
-  // One seed per mount: different on every load, stable for the session.
-  const seedRef = useRef<number>(seedProp ?? (Math.random() * 4294967296) >>> 0);
+  // Daily set: seeded from the Pacific calendar date (the host passes `seed` and re-renders at midnight; standalone
+  // use falls back to the date at mount). Never random per load.
+  const seedRef = useRef<number>(seedProp ?? tunnelDaySeed(tunnelDayKey()));
   const seed = seedProp ?? seedRef.current;
 
   const cards = useMemo(
