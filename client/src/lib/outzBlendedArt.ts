@@ -53,3 +53,11 @@ export function blendedArtPhotoUrl(placeId: string, variant: BlendVariant = "tal
   const file = BLEND_PHOTO_FILES[placeId]?.[variant];
   return file ? `/outzide-map/assets/photos/blend/${file}.webp` : null;
 }
+
+/** Split a filtered/sorted Outzide list for the places page: blended-art places feature on top (large cards),
+ *  everything else is `rest` (small cards). Order inside each list is preserved, so search, filters and sort still apply. */
+export function splitBlendedArt<T extends { id: string }>(places: readonly T[]): { featured: T[]; rest: T[] } {
+  const featured = blendedArtPlaces(places);
+  const ids = new Set(featured.map(p => p.id));
+  return { featured, rest: places.filter(p => !ids.has(p.id)) };
+}

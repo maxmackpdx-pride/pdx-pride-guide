@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { BrowseLane } from "@/components/discovery/EventzBrowse";
-import TodayLocationCard, { type TodayLocation } from "@/components/home/TodayLocationCard";
+import { type TodayLocation } from "@/components/home/TodayLocationCard";
+import OutzideFeatured, { splitFeatured } from "./OutzideFeatured";
 import OutzSmallCard from "@/components/home/OutzSmallCard";
 import { LoadMore, useProgressiveList } from "@/hooks/useProgressiveList";
 import { hasBlendRecipe } from "@/lib/outzBlend";
@@ -11,9 +11,8 @@ import type { OutzPhotoData } from "@/components/outz/OutzPhoto";
 import "./PlacezOutzideSection.css";
 
 type OutzRow = { id: string; name: string; kind: string; region?: string; state?: string; lat: number; lng: number; browseRegion?: string; art?: string; photo?: OutzPhotoData };
-const TALL_COUNT = 8;
 
-/** Outzide inside Placez: pick a region, see its best destinations as tall cards and the rest as small cards. */
+/** Outzide inside Placez: pick a region; places with the new blended art feature on top as large cards, the rest are small cards. */
 export default function PlacezOutzideSection({ query = "", onRequireAuth }: { query?: string; onRequireAuth?: () => void; quiet?: boolean }) {
   const [region, setRegion] = useState("portland-gorge");
   const { data } = useQuery<{ places: OutzRow[] }>({
@@ -34,7 +33,7 @@ export default function PlacezOutzideSection({ query = "", onRequireAuth }: { qu
   const inRegion = useMemo(() => matches
     .filter(p => p.regionId === active)
     .sort((a, b) => Number(hasBlendRecipe(b.id)) - Number(hasBlendRecipe(a.id)) || Number(Boolean(b.photo)) - Number(Boolean(a.photo)) || a.name.localeCompare(b.name)), [matches, active]);
-  const tall = inRegion.slice(0, TALL_COUNT), small = inRegion.slice(TALL_COUNT);
+  const { featured, rest: small } = useMemo(() => splitFeatured(inRegion), [inRegion]);
   const list = useProgressiveList(small.length, { initial: 24, step: 24, resetKey: `${active}|${q}` });
   const toLocation = (p: OutzRow): TodayLocation => ({ key: `outz:${p.id}`, name: p.name, room: "OutZide", detail: p.region || "Outdoor destination", kind: p.kind, art: p.art, photo: p.photo, href: `/outzide?place=${encodeURIComponent(p.id)}` });
   if (!all.length) return null;
@@ -56,14 +55,11 @@ export default function PlacezOutzideSection({ query = "", onRequireAuth }: { qu
         ))}
       </div>
       {regionMeta && <p className="placez-outzide__note">{regionMeta.note}</p>}
-      {tall.length ? (
-        <div className="eb-lanes"><BrowseLane title={regionMeta?.name ?? "Outzide"} color="var(--neon-orange)" count={inRegion.length}>
-          {tall.map(p => <div className="eb-original-card" key={p.id}><TodayLocationCard location={toLocation(p)} onRequireAuth={onRequireAuth} /></div>)}
-        </BrowseLane></div>
-      ) : <p className="placez-outzide__empty">No Outzide destinations match here yet.</p>}
+      <OutzideFeatured places={featured} toLocation={toLocation} onRequireAuth={onRequireAuth} label={`Featured in ${regionMeta?.name ?? "Outzide"}`} />
+      {!inRegion.length && <p className="placez-outzide__empty">No Outzide destinations match here yet.</p>}
       {small.length > 0 && (
         <>
-          <h3 className="placez-outzide__more">More in {regionMeta?.name}</h3>
+          <h3 className="placez-outzide__more">{featured.length ? "More in" : "All of"} {regionMeta?.name}</h3>
           <div className="placez-outzide__small">
             {small.slice(0, list.limit).map(p => <OutzSmallCard key={p.id} location={toLocation(p)} onRequireAuth={onRequireAuth} />)}
           </div>

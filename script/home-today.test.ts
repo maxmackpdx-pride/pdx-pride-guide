@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { dailyPicks, outzideDailyPicks, todaysUpcomingEvents } from "../client/src/lib/homeToday";
-import { BLENDED_ART_PLACE_IDS, BLEND_PHOTO_FILES, blendedArtPhotoUrl, blendedArtPlaces, isBlendedArtPlace } from "../client/src/lib/outzBlendedArt";
+import { BLENDED_ART_PLACE_IDS, BLEND_PHOTO_FILES, blendedArtPhotoUrl, blendedArtPlaces, isBlendedArtPlace, splitBlendedArt } from "../client/src/lib/outzBlendedArt";
 
 const publicDir = new URL("../client/public/", import.meta.url);
 const places: { id: string; kind: string; photo?: unknown }[] = JSON.parse(readFileSync(new URL("outzide-map/places.json", publicDir), "utf8")).places;
@@ -81,4 +81,20 @@ test("Outzide daily picks come only from blended places, rotate by date, and nev
   assert.deepEqual(outzideDailyPicks(undefined, "2026-10-25"), []);
   // A pool smaller than three returns what it has.
   assert.equal(outzideDailyPicks(places.filter(p => p.id === "silver-falls"), "2026-10-25").length, 1);
+});
+
+test("places page split: blended places feature on top, the rest stay small, order and filters preserved", () => {
+  const all = places.slice().sort((a, b) => (a as any).name.localeCompare((b as any).name));
+  const { featured, rest } = splitBlendedArt(all);
+  assert.equal(featured.length, 15);
+  assert.equal(featured.length + rest.length, all.length);
+  assert.ok(featured.every(p => isBlendedArtPlace(p)) && rest.every(p => !isBlendedArtPlace(p)));
+  assert.deepEqual(featured.map(p => p.id), all.filter(p => isBlendedArtPlace(p)).map(p => p.id), "order preserved");
+  // a narrowing filter (name search) keeps matching blended places in the featured list and drops the rest
+  const falls = all.filter(p => /falls/i.test((p as any).name));
+  const s = splitBlendedArt(falls);
+  assert.ok(s.featured.length > 0 && s.featured.length < 15 && s.rest.length > 0);
+  assert.ok(s.featured.every(p => /falls/i.test((p as any).name)));
+  assert.deepEqual(splitBlendedArt([]), { featured: [], rest: [] });
+  assert.equal(splitBlendedArt(rest).featured.length, 0, "no blended places -> no featured section");
 });
