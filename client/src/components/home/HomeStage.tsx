@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import HomeDiscover from "@/components/home/HomeDiscover";
 import HomeFlight from "@/components/home/HomeFlight";
 import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
@@ -67,7 +66,6 @@ export default function HomeStage({ afterWelcome }: Props) {
   const { calmMode } = useTheme();
   const logoRef = useRef<HTMLImageElement>(null);
   const [logoReady, setLogoReady] = useState(false);
-  const [showDiscover, setShowDiscover] = useState(false);
   const tunnel = useTunnelData();
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
@@ -112,7 +110,7 @@ export default function HomeStage({ afterWelcome }: Props) {
         outzPlaces={tunnel.outzPlaces}
         still={calmMode}
         wordmarkRef={logoRef}
-        globeLayer={<HomeFlight enabled={logoReady} paused={showDiscover} />}
+        globeLayer={<HomeFlight enabled={logoReady} />}
         brandAccessory={<span className="home-front__beta">BETA</span>}
         identity={(
           <span key={identityLine} className="home-front__identity-cycle" data-still={stillIdentity}>
@@ -125,9 +123,7 @@ export default function HomeStage({ afterWelcome }: Props) {
           </span>
         )}
         foreground={afterWelcome}
-      >
-        <HomeDiscover open={showDiscover} onOpenChange={setShowDiscover} />
-      </PerspectiveTunnelHero>
+      />
 
       <div className="site-pre-footer-edge" aria-hidden="true" />
       <TonightPanel />

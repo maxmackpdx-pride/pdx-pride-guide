@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowRight, CalendarDays, LayoutGrid, LifeBuoy, MapPinned, X } from "lucide-react";
 import { Link } from "wouter";
@@ -12,12 +12,33 @@ const destinations = [
 
 ];
 
-export default function HomeDiscover({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+/**
+ * "Start here": the entry panel that sits directly above the Explore Today rail, and the dialog it opens.
+ * The panel is a glass card (no opaque fill), so the shared site wallpaper shows through it. Title is the ransom-note
+ * treatment with exactly one whole word inverted (white on black, one word black on white), never mixed letters.
+ */
+export default function HomeDiscover({ open: controlledOpen, onOpenChange: controlledChange }: { open?: boolean; onOpenChange?: (open: boolean) => void } = {}) {
+  const [innerOpen, setInnerOpen] = useState(false);
+  const open = controlledOpen ?? innerOpen;
+  const onOpenChange = (next: boolean) => { setInnerOpen(next); controlledChange?.(next); };
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Trigger asChild>
-        <button type="button" className="home-discover-trigger pdx-glass-rebind">
-          <strong>Start here</strong><ArrowRight size={25} aria-hidden="true" />
+        <button type="button" className="home-start pdx-glass-rebind" aria-label="Start here: choose where to go on Zaylist">
+          <span className="home-start__copy">
+            <span className="home-start__eyebrow">Queer Portland, connected.</span>
+            <span className="home-start__title" aria-hidden="true">
+              <span className="home-start__word">Start</span>
+              <span className="home-start__word home-start__word--inverted">here</span>
+            </span>
+            <span className="home-start__ask">What do you need today?</span>
+          </span>
+          <span className="home-start__rooms" aria-hidden="true">
+            {destinations.map(item => (
+              <span key={item.href} className="home-start__room pdx-glass-rebind" style={{ "--c": item.accent } as CSSProperties}><i />{item.name.replace("OUR ", "")}</span>
+            ))}
+          </span>
+          <span className="home-start__go" aria-hidden="true"><ArrowRight size={22} /></span>
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>

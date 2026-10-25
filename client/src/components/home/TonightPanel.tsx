@@ -15,6 +15,7 @@ import { pacificTodayDate } from "@shared/missedConnections";
 import { dailyPicks, outzideDailyPicks, todaysUpcomingEvents } from "@/lib/homeToday";
 import { apiRequest } from "@/lib/queryClient";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
+import HomeDiscover from "./HomeDiscover";
 import TonightEventCard from "./TonightEventCard";
 import EventModal from "@/components/EventModal";
 import AuthModal from "@/components/AuthModal";
@@ -109,6 +110,8 @@ export default function TonightPanel() {
             <Link href="/events" className="home-tonight__all">All EVENTZ <ArrowUpRight size={15} aria-hidden="true" /></Link>
           </div>
         </header>
+
+        <HomeDiscover />
 
         {railItems.length ? (
           <ResourceRail id="home-tonight-rail" title="Explore today" color="var(--room-eventz)" count={railItems.length} quiet={Boolean(calmMode || reducedMotion)} room="Zaylist" itemName="card">
