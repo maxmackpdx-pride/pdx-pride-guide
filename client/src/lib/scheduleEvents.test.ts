@@ -20,3 +20,14 @@ test("the schedule derives the weekday from dates instead of stale intake metada
   assert.equal(event.day, "SUN");
   assert.equal(event.calendarDate, "2026-09-20");
 });
+
+test("age filters: verified policies map to their chips and unverified is never all-ages", () => {
+  const age = (ageRequirement: string) => eventListingToScheduleEvent({
+    id: 2, dayOfWeek: "SUN", title: "Age test", dateStart: "2026-09-20T20:00", dateEnd: "2026-09-20T23:00",
+    venueName: "Test venue", admission: "FREE", ageRequirement, eventTypes: "[]", description: "Test",
+  } as EventListing)?.age;
+  assert.equal(age("ALL_AGES"), "all-ages");
+  assert.equal(age("18_PLUS"), "18+");
+  assert.equal(age("21_PLUS"), "21+");
+  assert.equal(age("UNVERIFIED"), "age unverified");
+});

@@ -1,7 +1,7 @@
 import { eventsTonightWindow } from "@shared/eventsTonight";
 import { ScrollDock, focusPageSearch } from "@/components/discovery/ScrollDock";
 import BoardShader from "@/components/board/BoardShader";
-import { createEventSearch } from "@shared/eventSearch";
+import { createEventSearch, extractAgeIntent } from "@shared/eventSearch";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import EventsDrawer from "@/components/events/EventsDrawer";
 import BrowseStatus from "@/components/BrowseStatus";
@@ -478,6 +478,7 @@ export default function Events() {
     if (!isLoading && activeDay !== "ALL" && !activeDay.startsWith("D:") && !dayChips.some(c => c.key === activeDay)) setActiveDay("ALL");
   }, [dayChips, activeDay, isLoading]);
 
+  const ageIntent = useMemo(() => extractAgeIntent(searchQuery).age, [searchQuery]);
   const filtered = useMemo(
     () => sortEvents(filterBoardEvents(events, activeDay, activeFilters, searchQuery, pastView, now), sortMode),
     [events, activeDay, activeFilters, searchQuery, sortMode, pastView, now],
@@ -916,6 +917,7 @@ export default function Events() {
                   : pastEvents.length > 0
                     ? "There are no upcoming listings right now. Explore past events in the archive, or submit an event you know about."
                     : "There are no upcoming listings right now. Submit an event to help fill the board."
+                : ageIntent ? `No listing in this view is confirmed ${ageIntent === "ALL_AGES" ? "all ages" : ageIntent === "18_PLUS" ? "18+" : "21+"} right now. Many venues have not confirmed an age policy yet, so we do not guess. Try another day or a different age, or clear the search.`
                 : searchQuery.trim() ? "Check the spelling, or search a venue, neighborhood or DJ." : "Try another day, or clear the filters to see everything."}
             </p>
             <Button

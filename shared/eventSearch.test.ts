@@ -14,3 +14,23 @@ test('occurrence day changes for expanded listings',()=>assert.equal(createEvent
 test('Bear search finds Bearracuda by prefix',()=>assert.equal(createEventSearch('Bear')({...event,title:'Bearracuda Portland: Dick or Treat!'}),true));
 test('Bearacudda typo still finds Bearracuda',()=>assert.equal(createEventSearch('Bearacudda')({...event,title:'Bearracuda Portland: Dick or Treat!'}),true));
 test('Bear search does not match unrelated gear nights',()=>assert.equal(createEventSearch('Bear')({title:'The Locker Room',venueName:'Eagle Portland',description:'Athletic gear night with a strip contest.',dateStart:'2026-10-30T21:00:00-07:00'}),false));
+
+const aged = (ageRequirement: string | null | undefined) => ({ ...event, ageRequirement });
+for (const query of ['all ages', 'All-Ages', 'all age', 'family friendly']) {
+  test(`age search "${query}" matches only ALL_AGES`, () => {
+    assert.equal(createEventSearch(query)(aged('ALL_AGES')), true);
+    for (const other of ['21_PLUS', '18_PLUS', 'UNVERIFIED', null, undefined]) assert.equal(createEventSearch(query)(aged(other)), false);
+  });
+}
+for (const query of ['21+', '21 plus', '21 and over', 'over 21', 'eagle 21+']) {
+  test(`age search "${query}" matches 21_PLUS`, () => {
+    assert.equal(createEventSearch(query)(aged('21_PLUS')), true);
+    assert.equal(createEventSearch(query)(aged('ALL_AGES')), false);
+  });
+}
+test('18+ matches 18_PLUS and combines with text', () => {
+  assert.equal(createEventSearch('18+')(aged('18_PLUS')), true);
+  assert.equal(createEventSearch('18+ eagle')(aged('18_PLUS')), true);
+  assert.equal(createEventSearch('18+ sanctuary')(aged('18_PLUS')), false);
+});
+test('age phrases do not disturb non-age searches', () => assert.equal(createEventSearch('locker room')(aged('21_PLUS')), true));

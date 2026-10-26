@@ -1203,17 +1203,16 @@ function notifyAttendanceUpdate(eventId: number) {
 }
 
 export function registerRoutes(httpServer: Server, app: Express) {
-  registerBoardArchiveRoutes(app, sqlite, requireAuth, httpServer);
+  // Sessions must be mounted before ANY route that reads req.session (requireAuth/requireAdmin). Routes registered
+  // ahead of the old late mount (/api/board-archive, /api/admin/event-research/pairing) answered 401 to signed-in
+  // users because req.session was undefined. express-session skips a second mount, so the later app.use is harmless.
   const sessionMiddleware = createSessionMiddleware(sqlite);
+  app.use("/api", sessionMiddleware);
+  registerBoardArchiveRoutes(app, sqlite, requireAuth, httpServer);
   const eventSaves = createEventSaves(sqlite);
   const boardSaves = createBoardSaves(sqlite);
   assertProductionPersistence();
   assertProductionSecrets();
-
-  // Admin sessions must exist before the owner-side event-research routes below. The general session middleware is
-  // mounted much later in this function; without this, req.session is undefined for those handlers and every
-  // requireAdmin check answers 401 (even for the signed-in primary owner). express-session skips a second mount.
-  app.use("/api/admin", sessionMiddleware);
 
   // QSEARCH was archived on 2026-08-30. Keep its code and database records for
   // possible future recovery, but make every legacy action inert in production.
