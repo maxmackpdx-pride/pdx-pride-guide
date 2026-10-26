@@ -1,5 +1,6 @@
 // Hologram type for each venue, keyed by normalized venue name.
-// Types map to approved designs: puck = E3c, totem = H5, tube = E1.
+// Event cards do not read this table. Each event-day picks a design in event-design.js.
+// The beam still uses the venue color. This map remains the venue assignment record.
 // Generated from waypoints.json. Edit a row to change a venue's type.
 export const HOLOGRAM_TYPES = ["puck", "totem", "tube", "cube", "vortex", "halo"];
 export const DEFAULT_HOLOGRAM_TYPE = "puck";

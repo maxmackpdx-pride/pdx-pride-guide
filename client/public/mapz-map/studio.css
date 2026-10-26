@@ -159,7 +159,64 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 .standalone-hologram-label--event[data-hologram-type="totem"]>.event-hologram-brand{opacity:1;}
 /* tube (E1): no logo, the name reads down a glass strip. */
 .standalone-hologram-label--event[data-hologram-type="tube"]>.event-hologram-brand{display:none;}
-.standalone-hologram-label--event[data-hologram-type="tube"]>.standalone-hologram-title{height:auto;}
+.standalone-hologram-label--event[data-hologram-type="tube"]>.standalone-hologram-title{height:auto;opacity:1;}
+/* totem, brick, stack, and dna keep the event name even when artwork is showing. */
+.standalone-hologram-label--event[data-hologram-type="totem"]>.standalone-hologram-title,
+.standalone-hologram-label--event[data-hologram-type="brick"]>.standalone-hologram-title,
+.standalone-hologram-label--event[data-hologram-type="stack"]>.standalone-hologram-title,
+.standalone-hologram-label--event[data-hologram-type="dna"]>.standalone-hologram-title{opacity:1;}
+/* puck (E3c) and the round family are logo and countdown only. */
+.standalone-hologram-label--event[data-hologram-type="puck"]>.standalone-hologram-title,
+.standalone-hologram-label--event[data-hologram-type="ring"]>.standalone-hologram-title,
+.standalone-hologram-label--event[data-hologram-type="gear"]>.standalone-hologram-title,
+.standalone-hologram-label--event[data-hologram-type="saturn"]>.standalone-hologram-title,
+.standalone-hologram-label--event[data-hologram-type="halo"]>.standalone-hologram-title,
+.standalone-hologram-label--event[data-hologram-type="vortex"]>.standalone-hologram-title,
+.standalone-hologram-label--event[data-hologram-type="clasp"]>.standalone-hologram-title{display:none;}
+/* ring (H1): countdown sits inside a round logo. */
+.standalone-hologram-label--event[data-hologram-type="ring"] .event-hologram-surface{display:none;}
+.standalone-hologram-label--event[data-hologram-type="ring"]{height:auto;padding:0;background:none;}
+.standalone-hologram-label--event[data-hologram-type="ring"]>.event-hologram-brand{position:relative;inset:auto;width:92px;height:92px;border-radius:50%;opacity:1;overflow:visible;box-shadow:0 0 0 7px var(--projection-color);}
+.standalone-hologram-label--event[data-hologram-type="ring"]>.standalone-hologram-countdown{position:absolute;top:50%;left:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);background:none;border:0;box-shadow:none;}
+/* stack (H2): square tiles, name under the logo. */
+.standalone-hologram-label--event[data-hologram-type="stack"] .event-hologram-surface{display:none;}
+.standalone-hologram-label--event[data-hologram-type="stack"]{height:auto;padding:0;gap:4px;background:none;}
+.standalone-hologram-label--event[data-hologram-type="stack"]>.event-hologram-brand{position:relative;inset:auto;width:84px;height:84px;border-radius:2px;opacity:1;}
+.standalone-hologram-label--event[data-hologram-type="stack"] .event-hologram-logo-face,
+.standalone-hologram-label--event[data-hologram-type="brick"] .event-hologram-logo-face{border-radius:2px;}
+/* gear (H3): round logo with a toothed edge. */
+.standalone-hologram-label--event[data-hologram-type="gear"] .event-hologram-surface{display:none;}
+.standalone-hologram-label--event[data-hologram-type="gear"]{height:auto;padding:0;background:none;}
+.standalone-hologram-label--event[data-hologram-type="gear"]>.event-hologram-brand{position:relative;inset:auto;width:88px;height:88px;border-radius:50%;opacity:1;border:8px dashed var(--projection-color);}
+/* saturn (H4): logo with a wide ring through the middle. */
+.standalone-hologram-label--event[data-hologram-type="saturn"] .event-hologram-surface{display:none;}
+.standalone-hologram-label--event[data-hologram-type="saturn"]{height:auto;padding:0;background:none;}
+.standalone-hologram-label--event[data-hologram-type="saturn"]>.event-hologram-brand{position:relative;inset:auto;width:84px;height:84px;border-radius:50%;opacity:1;}
+.standalone-hologram-label--event[data-hologram-type="saturn"]::before{content:"";position:absolute;left:-18px;right:-18px;top:46%;height:16px;border:1.5px solid var(--projection-color);border-radius:50%;pointer-events:none;}
+/* brick (H6): square stack, name on the face, countdown on top. */
+.standalone-hologram-label--event[data-hologram-type="brick"] .event-hologram-surface{display:none;}
+.standalone-hologram-label--event[data-hologram-type="brick"]{height:auto;padding:0;gap:4px;background:none;}
+.standalone-hologram-label--event[data-hologram-type="brick"]>.event-hologram-brand{position:relative;inset:auto;width:88px;height:72px;border-radius:2px;opacity:1;}
+.standalone-hologram-label--event[data-hologram-type="brick"]>.standalone-hologram-countdown{order:-1;}
+/* dna (H7): name leans off the logo, like one open strand. */
+.standalone-hologram-label--event[data-hologram-type="dna"] .event-hologram-surface{display:none;}
+.standalone-hologram-label--event[data-hologram-type="dna"]{height:auto;padding:0;background:none;}
+.standalone-hologram-label--event[data-hologram-type="dna"]>.event-hologram-brand{position:relative;inset:auto;width:76px;height:76px;opacity:1;transform:rotate(-8deg);}
+.standalone-hologram-label--event[data-hologram-type="dna"]>.standalone-hologram-title{transform:rotate(8deg);}
+/* clasp (H8): logo and countdown sit side by side. */
+.standalone-hologram-label--event[data-hologram-type="clasp"] .event-hologram-surface{display:none;}
+.standalone-hologram-label--event[data-hologram-type="clasp"]{height:auto;flex-direction:row;align-items:center;justify-content:center;gap:8px;padding:0;background:none;}
+.standalone-hologram-label--event[data-hologram-type="clasp"]>.event-hologram-brand{position:relative;inset:auto;width:64px;height:64px;border-radius:4px;opacity:1;}
+.standalone-hologram-label--event[data-hologram-type="clasp"]>.standalone-hologram-countdown{position:relative;inset:auto;bottom:auto;left:auto;right:auto;}
+/* halo (E2): countdown in the middle of a large ring. */
+.standalone-hologram-label--event[data-hologram-type="halo"] .event-hologram-surface{display:none;}
+.standalone-hologram-label--event[data-hologram-type="halo"]{height:auto;padding:0;background:none;}
+.standalone-hologram-label--event[data-hologram-type="halo"]>.event-hologram-brand{position:relative;inset:auto;width:96px;height:96px;border-radius:50%;opacity:1;box-shadow:inset 0 0 0 3px var(--projection-color);}
+.standalone-hologram-label--event[data-hologram-type="halo"]>.standalone-hologram-countdown{position:absolute;top:50%;left:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);background:none;border:0;box-shadow:none;}
+/* vortex (E3): concentric rings around a smaller logo. */
+.standalone-hologram-label--event[data-hologram-type="vortex"] .event-hologram-surface{display:none;}
+.standalone-hologram-label--event[data-hologram-type="vortex"]{height:auto;padding:0;background:none;}
+.standalone-hologram-label--event[data-hologram-type="vortex"]>.event-hologram-brand{position:relative;inset:auto;width:64px;height:64px;border-radius:50%;opacity:1;box-shadow:0 0 0 6px var(--projection-color),0 0 0 12px transparent,0 0 0 14px var(--projection-color);}
 
 /* Far from the camera but an event tonight: a small puck and chip, no 3D card. */
 .standalone-hologram-label--event[data-hologram-far="true"]>.event-hologram-brand{width:52px;height:52px;}

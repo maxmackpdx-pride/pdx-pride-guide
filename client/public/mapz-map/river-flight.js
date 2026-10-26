@@ -6,7 +6,7 @@ import {captureCamera,readCameraParams} from '../map-foundation/camera.js';
 import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../map-foundation/lifecycle.js';
 import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventCountdown,appendEventCountdown} from './event-countdown.js';
-import {hologramTypeForVenue} from './venue-hologram-types.js';
+import {eventDesignFor,hologramLayoutForDesign} from './event-design.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
 import { updateEventArtwork } from './event-card-artwork.js';
@@ -679,7 +679,10 @@ function drawLights(fade,target=map,surface=lights){
  const eventCards=new Map(beacons.map(item=>{
   const {feature,p}=item,grow=Math.min(riseAmount(feature.properties.key,frameNow),foldAmount(feature.properties.key,frameNow));
   const card=eventCardGeometry(p.x+(item.x-p.x)*grow,p.y+(item.y-p.y)*grow,item.offset.scale*grow);
-  return [feature.properties.key,{...card,key:feature.properties.key,opacity:coreAlpha*grow,locked:Boolean(item.cardLocked),far:item.offset.scale*grow<.6*cardPresentationScale}];
+  const hologramDesign=eventDesignFor(feature.properties.key,feature.properties.startsAtMs);
+  // Presence bottoms at 0.62, so a 0.6 scale test never marked a distant card.
+  const far=item.presence.scale<.8;
+  return [feature.properties.key,{...card,key:feature.properties.key,opacity:coreAlpha*grow,locked:Boolean(item.cardLocked),far,hologramDesign,hologramType:far?'puck':hologramLayoutForDesign(hologramDesign)}];
  }));
  const retainedCards=new Set(beacons.filter(item=>item.offset.cardVisible).map(item=>item.feature.properties.key));
  const visibleEventCards=new Set(visibleHologramLabels([...eventCards.values()],selectedKey,width,height,retainedCards,120).map(card=>card.key));
@@ -811,7 +814,7 @@ function drawLights(fade,target=map,surface=lights){
     }
     eventLabels.push({...card,projectionColor,avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,
      name:feature.properties.name,venueName:feature.properties.venueName||'',time:feature.properties.time,
-     countdown:eventCountdown(feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived),true),color,logo:feature.properties.logo,poster:feature.properties.poster,hologramType:hologramTypeForVenue(feature.properties.venueName||feature.properties.name),
+     countdown:eventCountdown(feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived),true),color,logo:feature.properties.logo,poster:feature.properties.poster,
      logoKey:feature.properties.logoKey,logoY:card.top,logoWidth:0,logoHeight:0,opacity:card.opacity*cardAlpha});
   }else if(pass===0){
    const size=126*(.92+.1*pulse);
@@ -873,10 +876,10 @@ function renderHologramLabels(labels){
   let item=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='title');
   if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.dataset.labelRole='title';item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey,item));root.appendChild(item);}
   const timeText=(label.time||'').replace(/:00(?=\s*[AP]M)/i,''),statusText=label.countdown==='STARTED'?'Live':(label.countdown||'').toLowerCase().replace(/^in /,'In ');
-  item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.dataset.hologramType=label.kind==='housing'?'':(label.hologramType||'puck');item.dataset.hologramFar=label.far?'true':'false';item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
+  item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.dataset.hologramType=label.kind==='housing'?'':(label.hologramType||'puck');item.dataset.hologramDesign=label.kind==='housing'?'':(label.hologramDesign||'');item.dataset.hologramFar=label.far?'true':'false';item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
   item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',labelComplement(label.projectionColor||label.color));item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${timeText}${statusText?`, ${statusText}`:""}`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);
-  const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.projectionColor,label.width,label.avatars,label.logo,!!venueLogos.get(label.logo),label.venueName,label.poster]);
+  const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.projectionColor,label.width,label.avatars,label.logo,!!venueLogos.get(label.logo),label.venueName,label.poster,label.hologramDesign,label.hologramType]);
   if(item.dataset.signature!==signature){
    item.dataset.signature=signature;item.replaceChildren();
    if(label.cardHeight){
@@ -891,14 +894,11 @@ function renderHologramLabels(labels){
     }else{logoFace.textContent=label.venueName||'EVENT';}
     item.appendChild(brand);
    }
-   // E3c: a card with real artwork (poster or venue logo) shows the art and countdown only.
-   // A card with no artwork keeps its name, so it never reads as an empty box.
-   const hasCardArt=Boolean(label.cardHeight&&(label.poster||(venueLogos.get(label.logo)&&!/\/icons\/event\.svg(?:[?#]|$)/.test(label.logo||''))));
-   if(!hasCardArt){
-    const title=document.createElement('span');title.className='standalone-hologram-title';
-    const fitted=labelRows(label.name,label.cardHeight?label.width-14:label.width,label.kind==='housing'?2:undefined,label.cardHeight?54/(label.width-14):.52,Boolean(label.cardHeight));
-    fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
-   }
+   // Name is always in the card. Logo-and-countdown designs hide it in CSS.
+   // A card with no artwork still has the name, so it never reads as an empty box.
+   const title=document.createElement('span');title.className='standalone-hologram-title';
+   const fitted=labelRows(label.name,label.cardHeight?label.width-14:label.width,label.kind==='housing'?2:undefined,label.cardHeight?54/(label.width-14):.52,Boolean(label.cardHeight));
+   fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
    if(label.kind!=='housing'){
     if(label.cardHeight){
      if(label.countdown){const countdown=document.createElement('span');countdown.className='standalone-hologram-countdown';appendEventCountdown(countdown,label.countdown);item.appendChild(countdown);}

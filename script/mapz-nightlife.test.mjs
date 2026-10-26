@@ -9,6 +9,7 @@ import {eventNight} from '../client/public/mapz-map/event-night.js';
 import {screenNeighborCounts} from '../client/public/mapz-map/screen-neighbors.js';
 import {mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP} from '../client/public/mapz-map/venue-attachments.js';
 import {visibleHologramLabels} from '../client/public/mapz-map/label-visibility.js';
+import {eventDesignFor,hologramLayoutForDesign} from '../client/public/mapz-map/event-design.js';
 import {waypointGeometry,waypointArtwork} from '../client/public/mapz-map/waypoint-markers.js';
 import {housingIconSize} from '../client/public/mapz-map/housing-holograms.js';
 import test, {after} from 'node:test';
@@ -112,7 +113,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     venueLogos:new Map([['logo',logo]]),logoFocus:{update:noop,active:new Map()},logoFit:()=>.2,logoMotionSeed:0,
     adultVenueColor:'#FF0000',hologramMaterials:{beams:new Map([[color,{}]])},drawProjectionBeam:()=>operations.push('beam'),
     waypointGeometry,waypointArtwork,placezHoverLift:()=>15,typeIcons:new Map(),drawWaypointFoot:()=>operations.push('waypoint-beam'),drawWaypointHead:()=>operations.push('waypoint-head'),waypointFamilyShell:()=>'place',waypointSwapGlitch:()=>0,noteSelectedWaypoint:noop,drawClusterCount:noop,
-    projectorGroundScale,housingIconSize,visibleHologramLabels,
+    projectorGroundScale,housingIconSize,visibleHologramLabels,eventDesignFor,hologramLayoutForDesign,
     applyBuildingOcclusion:()=>operations.push('building-mask'),buildingChrome:{draw:()=>operations.push('chrome')},
     mapHover:{update:noop},hoverTargets:[],logoPointer:{active:false},
     drawSurfaceReflections:()=>operations.push('building-reflections'),drawUserLocationAvatar:noop,tell:noop,
