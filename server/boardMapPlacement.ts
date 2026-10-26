@@ -4,13 +4,73 @@ import { RESOURCE_MAP_ENTRIES } from "../client/src/lib/resourceMap";
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler } from "express";
 import { resolveBusinessLocations } from "../shared/businessLocations";
+import { needzAccent, type NeedzCategoryId } from "../client/src/lib/needzAccent";
 
 const DAY = 86400000;
 const TABLES = { gigz: "gig_posts", giftz: "gifting_posts", sellz: "sellz_posts", mizzed: "missed_connections", houz: "housing_posts" } as const;
 type Board = keyof typeof TABLES;
 export type Placement = { lat: number; lng: number; days: number; venueId?: number | null; keepUntil?: string };
 type Stored = { lat: number; lng: number; firstPlacedAt: string; expiresAt: string; venueId: number | null };
-export type Waypoint = { lat: number; lng: number; name: string; venueId?: number };
+/**
+ * Map waypoint. The first four fields are the original contract. The rest are additive and optional:
+ * `kind` says where the point came from; `category`/`secondary` exist on Needz/Service resources only;
+ * `closed` is true only when a real record says so (omitted otherwise); event points carry the
+ * venue record id (`venueId`) so the client can pick the hologram design for that venue.
+ */
+export type Waypoint = {
+  lat: number; lng: number; name: string; venueId?: number;
+  kind?: "resource" | "venue" | "event";
+  /** Needz/Service sub-category id (a NeedzCategoryId). */
+  category?: NeedzCategoryId;
+  /** Accent token for the category, from needzAccent (e.g. "var(--neon-red)"). */
+  secondary?: string;
+  /** Closed record (permanent status, seasonal/closed hours, or "has closed" resource note). Omitted when open or unknown. */
+  closed?: true;
+};
+export type ResourceWaypointSource = {
+  org: { name: string; hours?: string; desc?: string; locations?: { name?: string; address?: string; hours?: string }[] };
+  categories: { id: string }[];
+  locations: { name: string; address: string; lat: number; lng: number }[];
+};
+export type VenueWaypointSource = { id: number; name: string; active?: boolean; status?: string | null; hours?: string | null } & Record<string, any>;
+export type EventWaypointSource = { lat: unknown; lng: unknown; title?: string; venueName?: string | null; isPublic?: boolean; isPrivate?: boolean; isHouseParty?: boolean };
+
+// "Closed", "Temporarily closed", "Closed for the season", "Seasonally closed", "Closed until spring", "Closed for winter".
+// Day-level closures ("Fri closed", "closed noon-1pm") are not a closed place.
+const CLOSED_HOURS = /^\s*(?:(?:temporarily|permanently|seasonally)\s+)?closed(?:\s+(?:for\s+(?:the\s+)?(?:season|winter|summer|spring|fall|autumn|year|now|renovations?)|until\b[^.]*|indefinitely|for\s+the\s+(?:winter|summer)\s+season))?\s*\.?\s*$|^\s*(?:closed|closing)\s+for\s+the\s+season\b|^\s*seasonal(?:ly)?\s+closure\b/i;
+const HAS_CLOSED = /\b(?:has|have)\s+(?:permanently\s+)?closed\b/i;
+export function hoursSayClosed(hours: unknown): boolean { return typeof hours === "string" && CLOSED_HOURS.test(hours); }
+export function venueClosed(venue: { status?: string | null; hours?: string | null }): boolean {
+  return String(venue.status || "").toUpperCase() === "CLOSED" || hoursSayClosed(venue.hours);
+}
+export function resourceClosed(entry: ResourceWaypointSource, location?: { name: string; address: string }): boolean {
+  const own = location && entry.org.locations?.find(l => (l.name || entry.org.name) === location.name && (l.address || "") === location.address);
+  return hoursSayClosed(own?.hours ?? entry.org.hours) || HAS_CLOSED.test(String(entry.org.desc || ""));
+}
+const venueKey = (name: unknown) => String(name || "").trim().toLowerCase();
+
+export function buildWaypoints(input: { resources: ResourceWaypointSource[]; businesses: VenueWaypointSource[]; events: EventWaypointSource[] }): Waypoint[] {
+  const active = input.businesses.filter(b => b.active);
+  const venueByName = new Map<string, number>();
+  for (const b of active) if (!venueByName.has(venueKey(b.name))) venueByName.set(venueKey(b.name), b.id);
+  return [
+    ...input.resources.flatMap(entry => {
+      // First category in catalog order, the same one the map already colors by.
+      const category = entry.categories[0]?.id;
+      const secondary = category ? needzAccent(category) : undefined;
+      return entry.locations.map(p => ({
+        ...p, name: entry.org.name, kind: "resource" as const,
+        ...(secondary ? { category: category as NeedzCategoryId, secondary } : {}),
+        ...(resourceClosed(entry, p) ? { closed: true as const } : {}),
+      }));
+    }),
+    ...active.flatMap(b => resolveBusinessLocations(b as any).map(p => ({ ...p, name: b.name, venueId: b.id, kind: "venue" as const, ...(venueClosed(b) ? { closed: true as const } : {}) }))),
+    ...input.events.filter(e => e.isPublic && !e.isPrivate && !e.isHouseParty).map(e => {
+      const venueId = venueByName.get(venueKey(e.venueName));
+      return { lat: e.lat, lng: e.lng, name: e.venueName || e.title || "", kind: "event" as const, ...(venueId != null ? { venueId } : {}) };
+    }),
+  ].filter(p => typeof p.lat === "number" && typeof p.lng === "number" && Number.isFinite(p.lat) && Number.isFinite(p.lng)) as Waypoint[];
+}
 
 export function initializeBoardMapPlacement(db: Database.Database, now = new Date()) {
   db.exec(`CREATE TABLE IF NOT EXISTS board_map_locations (board TEXT NOT NULL, post_id INTEGER NOT NULL, lat REAL NOT NULL, lng REAL NOT NULL, PRIMARY KEY(board,post_id))`);
@@ -42,7 +102,7 @@ export function validatePlacement(value: unknown, blockers: Waypoint[] = [], all
   if (!Number.isInteger(days) || days < 1 || days > 14) throw new Error("Choose between 1 and 14 days.");
   if (p.venueId != null && (!allowedVenueId || p.venueId !== allowedVenueId)) throw new Error("That venue is not linked to this post.");
   if (p.venueId != null) {
-    const venue = blockers.find(w => w.venueId === p.venueId && distanceMetres(w,p) < 2);
+    const venue = blockers.find(w => w.kind !== "event" && w.venueId === p.venueId && distanceMetres(w,p) < 2);
     if (!venue) throw new Error("Choose the linked venue’s map point.");
   } else if (blockers.some(w => distanceMetres(w,p) < 18)) throw new Error("Move the pin away from the existing waypoint. Try a nearby cross street.");
   return {lat:p.lat,lng:p.lng,days,venueId:p.venueId || null, ...(typeof p.keepUntil==="string"?{keepUntil:p.keepUntil}:{})};
@@ -70,11 +130,11 @@ export function savePlacement(db: Database.Database, board: string, id: number, 
 }
 export function registerBoardPlacement(app: Express, db: Database.Database, requireAuth: RequestHandler, storage: any) {
   initializeBoardMapPlacement(db);
-  const waypoints = (): Waypoint[] => [
-    ...RESOURCE_MAP_ENTRIES.flatMap(entry=>entry.locations.map(p=>({...p,name:entry.org.name}))),
-    ...storage.getBusinesses().filter((b:any) => b.active).flatMap((b:any) => resolveBusinessLocations(b).map(p => ({...p,name:b.name,venueId:b.id}))),
-    ...storage.getEvents({status:"LIVE"}).filter((e:any) => e.isPublic && !e.isPrivate && !e.isHouseParty).map((e:any) => ({lat:e.lat,lng:e.lng,name:e.venueName || e.title})),
-  ].filter(p => typeof p.lat === "number" && typeof p.lng === "number" && Number.isFinite(p.lat) && Number.isFinite(p.lng)) as Waypoint[];
+  const waypoints = (): Waypoint[] => buildWaypoints({
+    resources: RESOURCE_MAP_ENTRIES,
+    businesses: storage.getBusinesses(),
+    events: storage.getEvents({status:"LIVE"}),
+  });
   const linkedVenue = (post:any) => post.place_id || (post.event_id ? (() => {
     const event=storage.getEvent(post.event_id);
     return storage.getBusinesses().find((b:any) => b.active && b.name.trim().toLowerCase()===event?.venueName?.trim().toLowerCase())?.id;
@@ -86,7 +146,7 @@ export function registerBoardPlacement(app: Express, db: Database.Database, requ
   for (const post of legacy) {
     const created=new Date(post.created_at),venueId=linkedVenue(post);
     if (!Number.isFinite(+created)) continue;
-    const point=waypoints().find(w=>w.venueId===venueId);
+    const point=waypoints().find(w=>w.kind!=="event"&&w.venueId===venueId);
     if(point) savePlacement(db,"mizzed",post.id,{...point,venueId,days:14},created);
   }
   const owner = (board:string,id:number,userId:number) => {
@@ -118,7 +178,7 @@ export function registerBoardPlacement(app: Express, db: Database.Database, requ
     const placement=readPlacement(db,board,id),window=placementWindow(placement?.firstPlacedAt);
     res.setHeader("Cache-Control","private, no-store");
     const venueId=board==="mizzed"?linkedVenue(post):null;
-    res.json({canPlace:canPlace(board,post),reopensPost:board==="mizzed"&&post.status==="ARCHIVED",pending:board==="gigz"&&post.status==="PENDING",placement:placement?.firstPlacedAt ? placement : null,...window,venue:venueId?waypoints().find(w=>w.venueId===venueId):null});
+    res.json({canPlace:canPlace(board,post),reopensPost:board==="mizzed"&&post.status==="ARCHIVED",pending:board==="gigz"&&post.status==="PENDING",placement:placement?.firstPlacedAt ? placement : null,...window,venue:venueId?waypoints().find(w=>w.kind!=="event"&&w.venueId===venueId):null});
   });
   app.put("/api/boards/:board/posts/:id/map-location", requireAuth, (req,res) => {
     const board=String(req.params.board),id=Number(req.params.id),post=owner(board,id,req.session.userId!);
@@ -135,7 +195,7 @@ export function registerBoardPlacement(app: Express, db: Database.Database, requ
     save,
     venuePoint: (placeId?:number|null,eventId?:number|null) => {
       const venueId=linkedVenue({place_id:placeId,event_id:eventId});
-      const point=waypoints().find(w=>w.venueId===venueId);
+      const point=waypoints().find(w=>w.kind!=="event"&&w.venueId===venueId);
       return point?{lat:point.lat,lng:point.lng,venueId,days:14}:null;
     },
   };
