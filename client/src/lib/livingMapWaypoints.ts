@@ -295,7 +295,7 @@ export function waypointHtml(opts: WaypointOpts) {
     <svg class="wp-svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
       ${bloom}<defs><clipPath id="${clipId}"><path d="${mainPath}"/></clipPath></defs>
       ${integratedTip || scoop ? "" : `<polygon points="${cx - tipW},${attachY} ${cx + tipW},${attachY} ${cx},${tipY}" fill="${ring}"/>`}
-      <path class="wp-glow-ring" d="${mainPath}" fill="none" stroke="${glowColor}" stroke-width="${glowW}"/>
+      <path class="wp-glow-ring" d="${mainPath}" fill="none" style="stroke:${glowColor}" stroke-width="${glowW}"/>
       <path d="${mainPath}" fill="#050506" stroke="${ring}" stroke-width="${sw}"/>
       ${markContent}
       ${scoopCircle}
