@@ -72,8 +72,32 @@ export function appendEventCardFrame(item){
  const surface=document.createElement('span');surface.className='event-hologram-surface';surface.setAttribute('aria-hidden','true');surface.appendChild(svg);item.appendChild(surface);
 }
 
-export function createAttachedEventBeam(){
+// E3c 3D coin-puck, drawn on canvas. The design spins a two-faced coin on a 9s
+// helix and leans it toward the camera (fixed tilt, never edge-on or face-on).
+// Front face shows the logo, back face shows it mirrored. Ring only when no logo.
+export const COIN_SPIN_SECONDS=9, COIN_LEAN=.8;
+export function eventCoinPuckRadius(card){
+ return Math.min(card.right-card.left,card.bottom-card.top)*.42;
+}
+export function drawEventCoinPuck(ctx,cx,cy,r,color,logo,seconds,reduced,alpha=1){
+ const angle=reduced?0:(seconds/COIN_SPIN_SECONDS)*Math.PI*2;
+ const spin=Math.cos(angle),front=spin>=0,width=Math.max(.6,r*Math.abs(spin)),height=r*COIN_LEAN;
+ ctx.save();ctx.globalAlpha=alpha;
+ ctx.beginPath();ctx.ellipse(cx,cy,width,height,0,0,Math.PI*2);
+ ctx.fillStyle='#05090e';ctx.fill();
+ ctx.lineWidth=Math.max(1,r*.05);ctx.strokeStyle=color;ctx.shadowColor=color;ctx.shadowBlur=r*.35;ctx.stroke();
+ if(logo&&logo.complete&&logo.naturalWidth){
+  const mark=r*.66,mw=mark*Math.abs(spin),mh=mark*COIN_LEAN;
+  ctx.shadowBlur=0;ctx.beginPath();ctx.ellipse(cx,cy,width*.9,height*.9,0,0,Math.PI*2);ctx.clip();
+  ctx.translate(cx,cy);ctx.scale(front?1:-1,1);
+  ctx.drawImage(logo,-mw/2,-mh/2,Math.max(.5,mw),mh);
+ }
+ ctx.restore();
+}
+
+export function createAttachedEventBeam(options={}){
  const film=createLightFilm();let disposed=false;
+ const logo=options.logo;
  return {
   draw(ctx,card,anchor,seconds,phase,reduced,color){
    if(disposed||ctx.globalAlpha<=.001||anchor.y-card.bottom<4)return;
@@ -105,6 +129,8 @@ export function createAttachedEventBeam(){
      ctx.beginPath();for(let k=0;k<=5;k++){const t=Math.min(1,progress+k*.012),p=eventBeamPoint(anchor,edge,t,phase+i,clock,reduced);k?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y);}ctx.stroke();
     }
    }
+   const coinR=eventCoinPuckRadius(card);
+   drawEventCoinPuck(ctx,card.x,(card.top+card.bottom)/2,coinR,color,logo,clock,reduced,alpha);
    const radius=Math.max(5,9*card.scale),source=ctx.createRadialGradient(anchor.x,anchor.y,0,anchor.x,anchor.y,radius);
    source.addColorStop(0,'#ffffff');source.addColorStop(.15,color+'dd');source.addColorStop(1,color+'00');
    ctx.globalAlpha=alpha;ctx.fillStyle=source;ctx.fillRect(anchor.x-radius,anchor.y-radius,radius*2,radius*2);ctx.restore();
