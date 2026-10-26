@@ -486,8 +486,8 @@ html.calm-mode .events-page > .events-day-dock { animation: none; }
   /* Rails wrap into rows instead of scrolling sideways. */
   .events-page .events-rail { flex-wrap: wrap; overflow: visible; scroll-snap-type: none; gap: 16px; padding-inline: 0; }
   .events-page .events-rail-arrow { display: none; }
-  /* This week is the same seven days as the day tabs above, so desktop drops it. Phones keep it. */
-  .events-page .events-rails > .events-week { display: none; }
+  /* This week: the day cards (with their weekday motif covers) run the full width beneath the bands on desktop too. */
+  .events-page .events-rails > .events-week { flex: 0 0 100%; width: 100%; }
 }
 
 /* View all lives with search, leaving the date rail entirely for day filters. */

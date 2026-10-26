@@ -14,8 +14,3 @@
 .outz-small__title .xr-rw{max-width:100%;flex-wrap:wrap;justify-content:center;margin-right:.2em}
 .outz-small__heart{position:absolute;top:6px;right:6px;width:30px;height:30px;z-index:2}
 .outz-small__heart svg{width:15px;height:15px}
-
-/* Orange base card with a waypoint-colour band on top (outz-orange-card.css). */
-.outz-small.outz-orange { background: var(--outz-base); border-color: var(--outz-base); }
-.outz-small.outz-orange .outz-small__scrim { background: linear-gradient(180deg, transparent 52%, var(--outz-base) 100%); }
-.outz-small.outz-orange .outz-small__kind { background: var(--z-black); color: var(--text-hi); }
