@@ -14,18 +14,3 @@
   position: absolute; left: 9%; top: 17%; width: 82%; height: auto; aspect-ratio: 1;
   object-fit: contain; object-position: center;
 }
-
-/* Outzide: orange base card with a waypoint-colour band on top (outz-orange-card.css). The glass shell forces its own
-   dark fill with !important, so the orange has to be forced the same way. */
-.tonight-card.today-location--outz.pdx-glass-rebind {
-  background: var(--outz-base) !important; background-color: var(--outz-base) !important;
-  border-color: var(--outz-base) !important;
-}
-.today-location--outz .tonight-card__body { background: linear-gradient(to bottom, transparent 0%, var(--outz-base) 46%); }
-.today-location--outz .tonight-card__time { align-self: flex-start; padding: 1px 6px; background: var(--z-black); color: var(--text-hi); }
-.today-location--outz .tonight-card__venue,
-.today-location--outz .tonight-card .tonight-card__venue,
-.today-location--outz .tonight-card__venue > svg { color: var(--outz-ink); }
-.today-location--outz .tonight-card__footer { border-top-color: color-mix(in srgb, var(--outz-ink) 35%, transparent); }
-.today-location--outz .tonight-card__view { color: var(--outz-ink); }
-.today-location--outz .tonight-card__tags span { border-color: var(--outz-ink); }

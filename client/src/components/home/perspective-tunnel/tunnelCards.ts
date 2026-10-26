@@ -7,6 +7,10 @@ import { isBlendedArtPlace, blendedArtPhotoUrl } from "@/lib/outzBlendedArt";
 import { dailyScore } from "@/lib/homeToday";
 import { isEventSchedulePast, pacificTodayDate } from "@shared/missedConnections";
 import { hashKey, mulberry32 } from "./tunnelMath";
+import { EVENT_WEEK_DAYS } from "@shared/eventWeek";
+
+/** Same rule as DayMotif's motifDay (kept here so this file stays free of component/CSS imports). */
+const motifDay = (day: string): string => { const code = day.toUpperCase(); return (EVENT_WEEK_DAYS as readonly string[]).includes(code) ? code : "FRI"; };
 
 /** What one flying card needs. Presentational only: no hearts, modals or auth. */
 export type TunnelCardData = {
@@ -17,6 +21,8 @@ export type TunnelCardData = {
   line: string;
   href: string;
   imageUrl?: string;
+  /** Events with no real flyer: the weekday (MON..SUN) whose day motif (`DayMotif`) fills the card, same art as the rail cards. */
+  motifDay?: string;
   /** CSS colour, usually a design token var. */
   accent: string;
   /** Seeds the one-inverted-word title rule: `outz:<placeId>` for Outzide, `event:<eventId>` for events. */
@@ -57,6 +63,7 @@ export function eventToTunnelCard(listing: EventListing): TunnelCardData {
     line: [formatCardTime(listing), listing.venueName].filter(Boolean).join(" · "),
     href: eventPath(listing.id, listing.title, day),
     imageUrl: listingPosterUrl(listing),
+    motifDay: listingPosterUrl(listing) ? undefined : motifDay(day),
     accent: dayAccentToken(day),
     titleSeed: `event:${listing.id}`,
   };
@@ -112,7 +119,7 @@ export function pickTunnelCards(
   const eventCards = liveEvents.map(eventToTunnelCard);
   const outzCards = places.filter(isTunnelOutzideEligible).map(outzPlaceToTunnelCard);
   const take = (pool: TunnelCardData[], n: number) => {
-    const withArt = pool.filter(c => c.imageUrl);
+    const withArt = pool.filter(c => c.imageUrl || c.motifDay);
     const source = withArt.length >= n ? withArt : pool;
     return source
       .map(c => ({ c, k: hashKey(seed, c.key) }))

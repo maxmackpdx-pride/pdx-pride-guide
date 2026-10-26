@@ -47,7 +47,7 @@ test("card roots declare one fixed width and height (no vw, clamp, min(), %, or 
 test("card CSS never applies scale()/scaleX()/scaleY()/zoom to a card", () => {
   const files = [
     "home/perspective-tunnel/PerspectiveTunnelHero.css", "home/TonightPanel.css", "home/TonightEventCard.css",
-    "home/TodayLocationCard.css", "home/OutzSmallCard.css", "home/HomeStageCard.css", "home/outz-orange-card.css",
+    "home/TodayLocationCard.css", "home/OutzSmallCard.css", "home/HomeStageCard.css", "home/outz-accent-card.css",
     "directory/OutzideFeatured.css", "directory/PlacezOutzideSection.css", "board/MapBoardCards.css",
   ];
   for (const f of files) {
