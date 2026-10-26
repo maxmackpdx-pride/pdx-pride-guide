@@ -14,6 +14,39 @@ export function eventPuckPerimeter(card){
  const cx=card.x,cy=(card.top+card.bottom)/2,r=Math.min(card.right-card.left,card.bottom-card.top)*.42;
  return Array.from({length:28},(_,i)=>{const a=i/28*Math.PI*2;return {x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r};});
 }
+function ellipsePerimeter(cx,cy,rx,ry,count=28){
+ return Array.from({length:count},(_,i)=>{const a=i/count*Math.PI*2;return {x:cx+Math.cos(a)*rx,y:cy+Math.sin(a)*ry};});
+}
+function rectPerimeter(left,top,right,bottom,count=24){
+ const width=right-left,height=bottom-top,span=2*(width+height),points=[];
+ for(let i=0;i<count;i++){
+  let d=i/count*span;
+  if(d<width)points.push({x:left+d,y:top});
+  else if((d-=width)<height)points.push({x:right,y:top+d});
+  else if((d-=height)<width)points.push({x:right-d,y:bottom});
+  else points.push({x:left,y:bottom-(d-width)});
+ }
+ return points;
+}
+// The live beam stays. Only the landing outline changes with the design.
+export function eventDesignPerimeter(card,layout='puck'){
+ const left=card.left,right=card.right,top=card.top,bottom=card.bottom;
+ const cx=card.x,cy=(top+bottom)/2,width=right-left,height=bottom-top;
+ switch(layout){
+  case 'tube':return ellipsePerimeter(cx,cy,width*.16,height*.46);
+  case 'stack':return rectPerimeter(cx-width*.42,top,cx+width*.42,bottom);
+  case 'totem':
+  case 'brick':return rectPerimeter(cx-width*.22,top,cx+width*.22,bottom);
+  case 'clasp':return rectPerimeter(left,cy-height*.2,right,cy+height*.2);
+  case 'dna':return [...ellipsePerimeter(cx,top+height*.22,width*.18,height*.16,16),...ellipsePerimeter(cx,bottom-height*.22,width*.18,height*.16,16)];
+  case 'halo':
+  case 'ring':
+  case 'saturn':return ellipsePerimeter(cx,cy,width*.48,height*.28);
+  case 'vortex':return ellipsePerimeter(cx,cy,width*.3,height*.3,20);
+  case 'gear':return ellipsePerimeter(cx,cy,width*.4,height*.4,12);
+  default:return eventPuckPerimeter(card);
+ }
+}
 export function eventBeamPoint(anchor,end,t,phase=0,seconds=0,reduced=false){
  // Light follows a soft curve, but both endpoints stay pinned, even while panning.
  const wave=reduced?0:Math.sin(seconds*.55+phase+t*4)*Math.sin(Math.PI*t)*2;
@@ -44,7 +77,7 @@ export function createAttachedEventBeam(){
  return {
   draw(ctx,card,anchor,seconds,phase,reduced,color){
    if(disposed||ctx.globalAlpha<=.001||anchor.y-card.bottom<4)return;
-   const perimeter=eventPuckPerimeter(card),alpha=ctx.globalAlpha;
+   const perimeter=eventDesignPerimeter(card,card.hologramType||'puck'),alpha=ctx.globalAlpha;
    const clock=reduced?0:seconds,variant=Math.floor(Math.abs(phase)*7)%3;
    ctx.save();ctx.globalCompositeOperation='screen';
    // Broad translucent light volume: never an opaque cone or a wire cage.
