@@ -100,3 +100,36 @@ The week is exactly MON Jul 13 to SUN Jul 19. Never invent an 8th day. Never use
   baseline before you start; do not increase it.
 - The server bundles to one CJS file. Anything read from disk at module-load time works
   in dev and crashes the Railway deploy. Import assets, or serve from `client/public/`.
+
+## Zaylist working rules (read before any task)
+
+Deploy and release (full detail in `docs/GITHUB_RAILWAY_GUARDRAILS.md` and `AGENTS.md`):
+
+- Repo `maxmackpdx-pride/pdx-pride-guide`, branch `master`. Live site `https://www.zaylist.com`, health at `/api/health`.
+- Production deploys only through GitHub `master` -> Actions "Deploy to Railway" -> Railway project/service `pdx-pride-guide`, env `production`. Builds take 20 to 40 minutes. A newer push cancels a build in progress, so check for a running deploy before merging or pushing.
+- Never `railway up`, never create Railway projects, never upload `data.db`, never run destructive DB operations.
+- Never print or paste secrets or tokens. If one was pasted in a chat, tell Tucker so it gets rotated.
+- Status words: "Fixed locally", then "On GitHub; deploy in progress", then "Production updated". Say the last one only after Railway reports SUCCESS and `/api/health` `gitSha` matches the pushed commit.
+- Only Tucker's own typed "push", "ship" or "go" authorizes shipping. Automated stop-hook reminders do not.
+- A sandbox without push access hands over `git format-patch` output. Zaylist (Grok Bot) applies those patches onto branches such as `claude/mapz-same-day` (PR #49, draft). Do not merge PR #49 until Tucker says so.
+
+Design language:
+
+- Dark theme, indigo and neutral palette, mono labels. No stock demo styling, no generic copy, no em dashes in user-facing copy.
+- Ransom-note titles are white on black with exactly one whole word inverted, or the reverse. Never remove or flatten them.
+- Cards have fixed sizes and never scale (hero fly-out, rail, Outzide, hover).
+- Event day cards keep their picked motifs. Outzide cards use blended Xerox-cinematic art with the waypoint color as an accent only. Only missed-connections cards use the magenta and orange blend.
+- `/boardz` cards are pinned to the board surface, keep orange styling, blended art and ransom titles.
+- Pages use the shared shader wallpaper at full scroll height. `/next` only redirects to `/about`.
+
+Mapz (`/map`):
+
+- Front-end for waypoints and holograms is owned by Claude: `client/src/lib/livingMapWaypoints.ts`, `client/public/mapz-map/waypoint-markers.js` (keep the two `shellPath` copies in sync), and `client/src/lib/needzAccent.ts`.
+- Back-end fields live in `server/boardMapPlacement.ts`: `category`, `secondary`, `closed`, `kind`, `venueId`.
+- The guardrails doc says to keep Mapz color and shader work off `master`. Check it before touching map colors.
+
+Checks:
+
+- Run `npx tsc --noEmit` and `npm run build` before handing work over.
+- `master` has 5 to 6 known failing `test:mapz` tests (Chrome-path browser tests). Do not count those as regressions.
+- `createSessionMiddleware` must mount before auth routes in `server/routes.ts`. Mounting it after causes 401s on pairing and the archive.
