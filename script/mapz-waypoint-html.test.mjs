@@ -7,7 +7,8 @@ globalThis.window??=globalThis;globalThis.document??=el();globalThis.screen??={}
 try{globalThis.navigator??={userAgent:'node',platform:'node'};}catch{}
 const {waypointHtml}=await import('../client/src/lib/livingMapWaypoints.ts');
 
-const glow=html=>html.match(/<path class="wp-glow-ring"[^>]*stroke="([^"]*)"/)[1];
+// The glow color is an inline style (some WebKit builds ignore var() in presentation attributes).
+const glow=html=>html.match(/<path class="wp-glow-ring"[^>]*style="stroke:([^";]*)"/)[1];
 const ring=html=>html.match(/<path d="[^"]*" fill="#050506" stroke="([^"]*)"/)[1];
 
 test('no category or closed: glow stroke equals ring and the icon is drawn',()=>{
@@ -21,6 +22,9 @@ test('category health: glow uses var(--neon-red); the outline keeps the base col
   const html=waypointHtml({id:'venue',color:'#00FFFF',category:'health'});
   assert.equal(glow(html),'var(--neon-red)');
   assert.equal(ring(html),'#00FFFF');
+});
+test('glow ring color is never a stroke attribute',()=>{
+  assert.doesNotMatch(waypointHtml({id:'venue',color:'#00FFFF',category:'health'}),/class="wp-glow-ring"[^>]*\sstroke=/);
 });
 test('unknown category and bloom keep the original glow',()=>{
   const unknown=waypointHtml({id:'venue',color:'#00FFFF',category:'nope'});
