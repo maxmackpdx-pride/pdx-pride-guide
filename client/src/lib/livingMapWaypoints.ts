@@ -174,6 +174,10 @@ const G: Record<WaypointId, string> = {
 };
 
 export type WaypointOpts = {
+  /** Needz/Service sub-category id; drives the secondary accent (see needzAccent.ts). */
+  category?: string;
+  /** Closed-for-season state; renders the closed message instead of the icon badge. */
+  closed?: boolean;
   id: WaypointId;
   selected?: boolean;
   scoop?: string;
@@ -208,7 +212,7 @@ function shellPath(family: string, cx: number, cy: number, r: number) {
   if (family === "ticket") return `M${x0 + q},${y0}H${cx - q}Q${cx},${y0 + q} ${cx + q},${y0}H${x1 - q}V${cy - q}Q${x1 - q * .7},${cy} ${x1},${cy + q}V${y1}H${x0}V${cy + q}Q${x0 + q * .7},${cy} ${x0},${cy - q}V${y0}Z`;
   if (family === "long") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${cy + r * .45}L${cx},${y1 + r * .68} ${x0},${cy + r * .45}V${y0 + q}Z`;
   if (family === "house") return `M${x0 + q},${cy - r * .15} ${cx},${y0} ${x1 - q},${cy - r * .15}V${y1 - q}L${cx},${y1 + r * .68} ${x0 + q},${y1 - q}Z`;
-  if (family === "speech") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${y1 - q}L${x1 - q},${y1}H${cx + q},${cx},${y1 + r * .68} ${cx - q},${y1}H${x0 + q}L${x0},${y1 - q}V${y0 + q}Z`;
+  if (family === "speech") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${y1 - q}L${x1 - q},${y1}H${cx + q}L${cx},${y1 + r * .68}L${cx - q},${y1}H${x0 + q}L${x0},${y1 - q}V${y0 + q}Z`;
   if (family === "zaydark") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${cy + r * .45}L${cx},${y1 + r * .68} ${x0},${cy + r * .45}V${y0 + q}Z`;
   return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${y1 - q}L${cx},${y1 + r * .68} ${x0},${y1 - q}V${y0 + q}Z`;
 }
