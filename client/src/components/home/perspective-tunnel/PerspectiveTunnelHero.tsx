@@ -17,13 +17,14 @@ import type { EventListing } from "@shared/multiDayEvents";
 import { prefersStillMotion } from "@/lib/motion";
 import { OutzBlendArt } from "@/components/outz/OutzBlendArt";
 import { RansomTitle } from "@/components/xerox/Overlays";
+import DayMotif from "@/components/events/DayMotif";
 import { OUTZ_CATALOG_FALLBACK, pickTunnelCards, tunnelDayKey, tunnelDaySeed, type OutzideMapPlace, type TunnelCardData } from "./tunnelCards";
 import { TUNNEL, computePose, createPose, makeSlots } from "./tunnelMath";
 import { NO_FLYOUT_QUERY, useMedia } from "./flyOut";
 // HomeStage.css owns the real hero classes reused below (home-front__*). It must load before our overrides.
 import "@/components/home/HomeStage.css";
 import "./PerspectiveTunnelHero.css";
-import "../outz-orange-card.css";
+import "../outz-accent-card.css";
 
 const NO_EVENTS: readonly EventListing[] = [];
 
@@ -91,15 +92,16 @@ function TunnelCard({ card, interactive, setRef }: { card: TunnelCardData; inter
     <Link
       href={card.href}
       ref={setRef}
-      className={`ptunnel__card pdx-glass-rebind${card.kind === "outzide" ? " outz-orange" : ""}`}
+      className={`ptunnel__card pdx-glass-rebind${card.kind === "outzide" ? " outz-accent" : ""}`}
       data-kind={card.kind}
       style={{ "--c": card.accent } as CSSProperties}
       // Flying cards are a pointer/touch enhancement; keep them out of the tab order while they move.
       tabIndex={interactive ? 0 : -1}
     >
-      {card.kind === "outzide" ? <span className="outz-orange__band" aria-hidden="true" /> : null}
+      {card.kind === "outzide" ? <span className="outz-accent__band" aria-hidden="true" /> : null}
       {card.blendId ? <OutzBlendArt placeId={card.blendId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : null}
       {card.imageUrl && (!card.blendId || blendFailed) ? <img className="ptunnel__img" src={card.imageUrl} alt="" loading="lazy" decoding="async" draggable={false} /> : null}
+      {card.motifDay ? <DayMotif day={card.motifDay} placement="art" /> : null}
       <span className="ptunnel__scrim" aria-hidden="true" />
       <span className="ptunnel__kicker">
         <i aria-hidden="true" />

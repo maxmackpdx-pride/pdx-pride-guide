@@ -17,7 +17,7 @@ import "./TonightEventCard.css";
 import type { Business } from "@/pages/Directory";
 import { outzBandArt } from "@/lib/outzKinds";
 import "./TodayLocationCard.css";
-import "./outz-orange-card.css";
+import "./outz-accent-card.css";
 import { OutzXerox, PlacezXerox, RansomTitle } from "@/components/xerox/Overlays";
 
 export type TodayLocation = { key: string; name: string; room: "OutZide" | "Placez"; detail: string; href: string; kind?: string; art?: string; photo?: OutzPhotoData; place?: Business };
@@ -36,9 +36,9 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(location.key.replace(/^outz:/, ""));
   const businessLogo = isPlace ? resolveDirectoryLogo(location.name, location.place?.imageUrl) || directoryFallbackLogo(kind) : null;
   const label = isPlace ? DIRECTORY_TYPE_LABELS[kind] || "Placez" : OUTZ_LABELS[location.kind || ""] || "Destination";
-  const card = <article className={`tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind${isPlace ? "" : " today-location--outz outz-orange"}`} style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
+  const card = <article className={`tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind${isPlace ? "" : " outz-accent"}`} style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
     {isPlace && <ResourceCardMotif name={location.name} category={`place-${kind}`} />}
-    {!isPlace && <span className="outz-orange__band" aria-hidden="true" />}
+    {!isPlace && <span className="outz-accent__band" aria-hidden="true" />}
     <CardWaypoint kind={isPlace ? kind : location.kind || "trail"} outside={!isPlace} />
     <RailShareButton href={location.href} title={location.name} />
     <button type="button" className="tonight-card__open" aria-label={`Open ${location.name}`} onClick={() => setOpen(true)}>

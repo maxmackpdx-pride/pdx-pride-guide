@@ -164,7 +164,7 @@ Type: Barlow Condensed (`--font-display`) for titles and labels, Barlow (`--font
 
 ## Maps
 
-- Every Outzide card (home rail, hero fly-by, featured and small cards on the Places page) is the Outzide orange (`--room-outz`) as its base colour, with a gradient band across the top in the place's waypoint colour (`--c`, the `waypointToken` palette in `outzide-map/app.js`). Shared look: `components/home/outz-orange-card.css`. Copy on the orange is black ink or white on black chips.
+- Every Outzide card (home rail, hero fly-by, featured and small cards on the Places page) is the dark glass card with the blended Xerox art (halftone cutouts, orange contour, route overlay). It is NOT an orange-filled card: the base is never a solid `--room-outz` fill. The place's waypoint colour (`--c`, the `waypointToken` palette in `outzide-map/app.js`) is an accent only: the waypoint chip, the card border and a soft band across the top (`components/home/outz-accent-card.css`). Event cards keep their weekday motifs; hero fly-by events without a real flyer draw the same `DayMotif` art as the rail (`TunnelCardData.motifDay`). On desktop /events the This week day cards (weekday motif covers) run full width beneath the bands, as on phones.
 
 - Debossed OLED frame; keys = OLED panel chrome, pin **shapes** preserved.
 - No sitewide outer map bloom.

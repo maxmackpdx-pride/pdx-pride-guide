@@ -185,6 +185,7 @@ import {
 } from "./eventResearchAuth";
 import {
   approveAgentPairing,
+  explainAgentPairingApproval,
   listAgentCredentials,
   listAgentPairings,
   redeemAgentPairing,
@@ -1203,10 +1204,16 @@ function notifyAttendanceUpdate(eventId: number) {
 
 export function registerRoutes(httpServer: Server, app: Express) {
   registerBoardArchiveRoutes(app, sqlite, requireAuth, httpServer);
+  const sessionMiddleware = createSessionMiddleware(sqlite);
   const eventSaves = createEventSaves(sqlite);
   const boardSaves = createBoardSaves(sqlite);
   assertProductionPersistence();
   assertProductionSecrets();
+
+  // Admin sessions must exist before the owner-side event-research routes below. The general session middleware is
+  // mounted much later in this function; without this, req.session is undefined for those handlers and every
+  // requireAdmin check answers 401 (even for the signed-in primary owner). express-session skips a second mount.
+  app.use("/api/admin", sessionMiddleware);
 
   // QSEARCH was archived on 2026-08-30. Keep its code and database records for
   // possible future recovery, but make every legacy action inert in production.
@@ -1239,11 +1246,20 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
   app.get("/api/admin/event-research/pairing", requireAdmin, requirePrimaryInboxOwner, (_req, res) => {
     res.setHeader("Cache-Control", "no-store");
-    res.json({ requests: listAgentPairings(), credentials: listAgentCredentials() });
+    try {
+      res.json({ requests: listAgentPairings(), credentials: listAgentCredentials() });
+    } catch (err: any) {
+      // The message is a database error string (no secrets); the owner sees it so the next failure is diagnosable.
+      console.error("[agent-pairing] owner list failed:", err?.code || "", err?.message || err);
+      res.status(500).json({ error: "Could not read agent pairing requests", detail: String(err?.message || err).slice(0, 160) });
+    }
   });
   app.post("/api/admin/event-research/pairing/:id/approve", requireAdmin, requirePrimaryInboxOwner, (req, res) => {
     const ok = approveAgentPairing(String(req.params.id || ""), Number(req.session.userId));
-    if (!ok) return res.status(409).json({ error: "Pairing expired or already approved" });
+    if (!ok) {
+      const why = explainAgentPairingApproval(String(req.params.id || ""));
+      return res.status(409).json({ error: why.message, status: why.status });
+    }
     auditAdmin(req, "event_research_agent_pairing_approved", { type: "agent_pairing", id: String(req.params.id) });
     res.json({ ok: true });
   });
@@ -1671,7 +1687,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // Session middleware - persisted on the same SQLite volume as user data
-  app.use(createSessionMiddleware(sqlite));
+  app.use(sessionMiddleware);
   app.get('/api/boards/saved', requireAuth, (req,res)=>res.json(boardSaves.ids(req.session.userId!)));
   app.put('/api/boards/:board/posts/:id/save', requireAuth, (req,res)=>{
     const board=String(req.params.board), id=Number(req.params.id);

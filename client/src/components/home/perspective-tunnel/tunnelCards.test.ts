@@ -1,7 +1,7 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { readFileSync } from "node:fs";
-import { OUTZ_CATALOG_FALLBACK, isTunnelOutzideEligible, outzPlaceToTunnelCard, pickTunnelCards, tunnelDayKey, tunnelDaySeed } from "./tunnelCards.ts";
+import { eventToTunnelCard, OUTZ_CATALOG_FALLBACK, isTunnelOutzideEligible, outzPlaceToTunnelCard, pickTunnelCards, tunnelDayKey, tunnelDaySeed } from "./tunnelCards.ts";
 import { BLENDED_ART_PLACE_IDS, blendedArtPhotoUrl } from "../../../lib/outzBlendedArt.ts";
 import { emphasizeTitle } from "../../../../public/map-foundation/title-emphasis.js";
 
@@ -71,4 +71,16 @@ test("every card title has exactly one inverted word, seeded outz:<id> / event:<
     assert.equal(emphasizeTitle(c.title, c.titleSeed).filter(w => w.emphasis).length, 1, c.title);
   }
   assert.ok(OUTZ_CATALOG_FALLBACK.filter(isTunnelOutzideEligible).length === 15, "fallback catalog also filtered to blended places");
+});
+
+test("events without a real flyer carry their weekday motif (same DayMotif art as the rail), flyer events do not", () => {
+  const noFlyer = eventToTunnelCard({ ...mkEvent(1), dayOfWeek: "SUN", posterImageUrl: null });
+  assert.equal(noFlyer.imageUrl, undefined);
+  assert.equal(noFlyer.motifDay, "SUN");
+  const placeholder = eventToTunnelCard({ ...mkEvent(2), dayOfWeek: "TUE", posterImageUrl: "/placeholders/event-day-tue.svg" });
+  assert.equal(placeholder.motifDay, "TUE");
+  const flyer = eventToTunnelCard({ ...mkEvent(3), dayOfWeek: "FRI", posterImageUrl: "https://example.com/flyer.jpg" });
+  assert.equal(flyer.imageUrl, "https://example.com/flyer.jpg");
+  assert.equal(flyer.motifDay, undefined);
+  assert.equal(eventToTunnelCard({ ...mkEvent(4), dayOfWeek: "xyz", posterImageUrl: null }).motifDay, "FRI");
 });

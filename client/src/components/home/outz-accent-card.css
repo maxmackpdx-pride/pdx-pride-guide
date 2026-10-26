@@ -1,0 +1,10 @@
+/*
+ * Outzide cards (home rail, hero fly-by, featured and small cards on the Places page) keep the dark glass card with the
+ * blended Xerox art (halftone cutouts, orange contour, route overlay). The place's waypoint colour (--c, from the same
+ * waypoint palette the Outzide map uses) is only an ACCENT: a soft band across the very top of the card, plus the
+ * waypoint chip and border the cards already carry. The card base is never a solid Outzide-orange fill.
+ */
+.outz-accent__band {
+  position: absolute; inset: 0 0 auto 0; height: 16%; z-index: 3; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--c) 78%, transparent) 0%, color-mix(in srgb, var(--c) 30%, transparent) 55%, transparent 100%);
+}
