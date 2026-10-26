@@ -163,3 +163,30 @@ html.calm-mode .board-detail-backdrop:has(>[data-zine-open]){backdrop-filter:blu
 .board-detail-backdrop [role=dialog]:is(.boardz-open-surface,.board-open-card):has(.zine),
 .board-detail-backdrop [role=dialog][data-zine-open]{
   border:0!important;border-width:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;outline:0!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+/* BoardZ opens as one paper object. Only its edges travel; type and images keep
+   their rendered size. The old slice/skew entrance fought that continuity. */
+[role=dialog].ab-open-card[data-zine-open]{
+  --board-open-gutter:32px;
+  animation:none!important;
+}
+[role=dialog].ab-open-card[data-board-continuity] .boardz-punk-scope--open~*{animation:none!important}
+[role=dialog].ab-open-card[data-zine-open]>fieldset,
+[role=dialog].ab-open-card[data-zine-open]>.board-card-scroll{
+  position:relative!important;flex:1 1 auto;min-height:0;min-width:0;
+  margin:0 0 4px!important;padding:0 0 64px!important;
+  overflow:hidden auto!important;overscroll-behavior:contain;scrollbar-width:thin;
+  background:var(--z-black);mask:var(--zt-tall);
+}
+[role=dialog].ab-open-card[data-zine-open] :is(.board-listing-card__row,.board-listing-card__expand,.hz-wrap){
+  padding-left:var(--board-open-gutter)!important;padding-right:var(--board-open-gutter)!important;
+  box-sizing:border-box;min-width:0;
+}
+[role=dialog].ab-open-card[data-zine-seek=true] :is(.board-listing-card__row,.board-listing-card__expand,.hz-wrap){padding-left:40px!important}
+[role=dialog].ab-open-card[data-zine-open] .houz-overlay-content{padding-top:0!important}
+[role=dialog].ab-open-card[data-zine-open] .boardz-punk-scope--open{margin:0!important;padding:0!important}
+[role=dialog].ab-open-card[data-zine-open] .zine-open-head>.zt-face{inset:auto;width:100%;margin:0;padding:0}
+[role=dialog].ab-open-card[data-zine-open] .board-card-scroll>:not(.boardz-punk-scope--open){margin-inline:var(--board-open-gutter)!important}
+[role=dialog].ab-open-card[data-zine-open] .board-card-scroll>.board-detail-modal__meta{margin-top:24px!important}
+[role=dialog].ab-open-card[data-zine-open] .board-card-scroll>.board-detail-modal__body{box-sizing:border-box;max-width:none}
+[role=dialog].ab-open-card[data-zine-open] .boardz-open-photos{padding-inline:var(--board-open-gutter)}

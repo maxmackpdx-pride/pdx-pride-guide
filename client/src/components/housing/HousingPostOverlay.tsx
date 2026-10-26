@@ -1,3 +1,4 @@
+import { closeBoardCard } from "@/components/board/BoardCardContinuity";
 import "@/components/board/BoardOpenReadability.css";
 import DetailActions from "@/components/DetailActions";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
@@ -68,6 +69,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
     if (closingRef.current) return;
     const { onClose: finishClose, originRect: closeOrigin } = latestCloseRef.current;
     const panel = dialogRef.current;
+    if (closeBoardCard(panel, finishClose)) return;
     const transform = panel && closeOrigin && motionAllowed() ? markerTransform(closeOrigin, panel.getBoundingClientRect()) : null;
     if (!panel || !transform) { finishClose(); return; }
     closingRef.current = true;

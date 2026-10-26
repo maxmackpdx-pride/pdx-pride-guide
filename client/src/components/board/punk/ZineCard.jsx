@@ -1,3 +1,4 @@
+import {useBoardCardContinuity} from "../BoardCardContinuity";
 import React,{useLayoutEffect,useRef,useState} from 'react';
 import {NetworkBackdrop} from '../../artwork/NetworkBackdrop';
 import {useMotifRecipes} from '../../artwork/useMotifRecipes';
@@ -214,6 +215,7 @@ export function ZineOpenHead({r,calm=false,Photo}){
     for(const v of vars)dialog.style.setProperty(v,style[v]);
     return()=>{delete dialog.dataset.zineOpen;delete dialog.dataset.zineSeek;delete dialog.dataset.zineCat;for(const v of vars)dialog.style.removeProperty(v)};
   },[key,r.intent,r.category,style['--c'],style['--c2'],style['--zf-frame']]);
+  useBoardCardContinuity(ref);
   return <header ref={ref} className={`${className} zine-open-head`} data-size="open" data-category={r.category} data-intent={r.intent} data-motif={art.motif} style={style}>
     <div className="zt-face">
       <Texture r={r} id={`${key}:open`} paste={paste} photos={photos} calm={calm} Photo={Photo}/>

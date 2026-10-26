@@ -1,3 +1,8 @@
+import BoardPostOverlay from "@/components/board/BoardPostOverlay";
+import HousingPostOverlay from "@/components/housing/HousingPostOverlay";
+import SpottedDetailModal from "@/components/SpottedDetailModal";
+import { BoardCardOrigin, type CardOrigin } from "@/components/board/BoardCardContinuity";
+import BoardDetailBoundary from "@/components/board/BoardDetailBoundary";
 import BoardArchiveList, { BoardArchiveFeedback } from "@/components/board/BoardArchiveList";
 import BoardBrowseCard from "@/components/board/BoardBrowseCard";
 import { LoadMore } from "@/hooks/useProgressiveList";
@@ -60,15 +65,6 @@ import "@/components/discovery/EventzDetail.css";
 import "./AllBoards.css";
 import "./BoardPinned.css";
 
-const BoardPostOverlay = lazy(
-  () => import("@/components/board/BoardPostOverlay"),
-);
-const HousingPostOverlay = lazy(
-  () => import("@/components/housing/HousingPostOverlay"),
-);
-const SpottedDetailModal = lazy(
-  () => import("@/components/SpottedDetailModal"),
-);
 const GigComposer = lazy(() =>
   import("./PrideWork").then((m) => ({ default: m.GigComposer })),
 );
@@ -228,6 +224,7 @@ export default function Boards() {
     [limit, setLimit] = useState(24);
   const lastOpener = useRef<HTMLButtonElement | null>(null);
   const locallyOpened = useRef(false);
+  const cardOrigin = useRef<CardOrigin | null>(null);
   const selectedCategory = boardCategories.find((c) => c.id === selection);
   const update = (patch: Record<string, string | null>, replace = false) => {
     const next = new URLSearchParams(search);
@@ -330,6 +327,8 @@ export default function Boards() {
     const outzPost = key.startsWith("outz:") ? allPosts.find(p => p.key === key) : undefined;
     if (outzPost) { navigate(`/outzide?place=${encodeURIComponent(outzPost.source || "")}&tab=community`); return; }
     lastOpener.current = opener || lastOpener.current;
+    const source = opener?.closest<HTMLElement>(".boardz-punk-scope")?.querySelector<HTMLElement>(".zine") || opener;
+    cardOrigin.current = source ? { element: source, rect: source.getBoundingClientRect() } : null;
     locallyOpened.current = true;
     update({ post: key,compose:null,build:null,join:null,waitlist:null,chat:null }, !!validPost);
   };
@@ -607,6 +606,18 @@ export default function Boards() {
             </div>
             </>}
       </div>
+      {validPost && (
+        <BoardCardOrigin.Provider value={cardOrigin.current}>
+          <BoardDetailBoundary key={validPost} onClose={close}>
+            <BoardDetail
+              postKey={validPost}
+              onClose={close}
+              onRequireAuth={() => setShowAuth(true)}
+              onSelect={(key) => open(key)}
+            />
+          </BoardDetailBoundary>
+        </BoardCardOrigin.Provider>
+      )}
       <Suspense
         fallback={
           <p className="ab-detail-status" role="status">
@@ -614,14 +625,6 @@ export default function Boards() {
           </p>
         }
       >
-        {validPost && (
-          <BoardDetail
-            postKey={validPost}
-            onClose={close}
-            onRequireAuth={() => setShowAuth(true)}
-            onSelect={(key) => open(key)}
-          />
-        )}
         {compose === "housing" && <RoomComposer id="boards-housing-composer" room="hauz" kicker="New post" title="Post to My Hoüz" onClose={()=>{setCompose(null);update({compose:null},true);}}><div className="ab-housing-composer"><HousingComposer initialType={params.get("type")?.toUpperCase() === "PM" ? "PM" : ({offering:"OFFERING",looking:"LOOKING",forming:"FORMING",managed:"MANAGED"} as const)[intent as "offering"|"looking"|"forming"|"managed"] || null} isPropertyManager={!!pm.data?.approved} managerName={pm.data?.manager?.company || pm.data?.manager?.name || null} viewerDisplayName={user?.displayName ?? null} onClose={()=>{setCompose(null);update({compose:null},true);}} onPosted={posted} /></div></RoomComposer>}
         {compose === "mizzed" && <RoomComposer id="boards-mizzed-composer" room="mizzed" kicker="New connection" title="Post a connection" intro="Anonymous posts. Private replies. Reveal when you’re both ready." onClose={()=>{setCompose(null);update({compose:null},true);}}>{postableEvents.isError ? <BrowseStatus error title="Event choices could not load" description="Try again to link your connection to an event." actionLabel="Try again" onAction={()=>void postableEvents.refetch()} /> : <MizzedComposer linkableEvents={postableEvents.data || []} initialSource={{eventId:params.get("event") || undefined,placeId:params.get("place") || undefined,beachId:params.get("beach") || undefined}} onPosted={()=>{setCompose(null);update({compose:null},true);void queryClient.invalidateQueries({queryKey:["/api/missed-connections"]});}} />}</RoomComposer>}
         {compose === "gigz" && (

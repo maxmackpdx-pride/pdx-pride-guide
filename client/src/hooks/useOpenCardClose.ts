@@ -1,3 +1,4 @@
+import { closeBoardCard } from "@/components/board/BoardCardContinuity";
 import { useCallback, useLayoutEffect, useRef } from "react";
 import { useModalA11y } from "@/hooks/useModalA11y";
 
@@ -29,8 +30,9 @@ export function useOpenCardClose(onClose: () => void, enabled = true) {
       latestClose.current();
       return;
     }
+    if (closeBoardCard(panel, () => latestClose.current())) return;
     // Boardz zine cards close through the same slice glitch they open with, in reverse.
-    const animation = panel.dataset.zineOpen ? panel.animate([
+    const animation = panel.dataset.zineOpen && !panel.classList.contains("ab-open-card") ? panel.animate([
       { clipPath: "inset(0)", transform: "none", opacity },
       { clipPath: "polygon(0 0,100% 0,100% 40%,0 40%,0 46%,100% 46%,100% 100%,0 100%)", transform: "skewX(-4deg) translateX(4px)", offset: .3 },
       { clipPath: "inset(0 0 calc(100% - 240px))", transform: "none", opacity: 0 },
@@ -54,7 +56,7 @@ export function useOpenCardClose(onClose: () => void, enabled = true) {
     // Override the older family-specific scale/flip entrance before paint.
     const originalOpacity = panel.style.opacity;
     panel.style.opacity = "1";
-    if (!quietMotion() && typeof panel.animate === "function") {
+    if (!panel.dataset.boardContinuity && !quietMotion() && typeof panel.animate === "function") {
       const timing = { duration: 240, easing: "cubic-bezier(.16,1,.3,1)" };
       animations.current = [panel.animate([{ opacity: 0 }, { opacity: 1 }], timing)];
       // Only text/detail regions move, never the shell, artwork, or wordmark.

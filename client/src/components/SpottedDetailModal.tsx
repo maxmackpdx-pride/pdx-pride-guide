@@ -115,6 +115,7 @@ export default function SpottedDetailModal({
       >
         <span className="board-open-card__rule" aria-hidden="true" />
         <div className="board-open-readable__close"><DetailActions label="listing" onClose={requestClose} /></div>
+        <div className="board-card-scroll">
         <BoardPostFace category="mizzed" post={{id:postId,title,body,venueHint:place,dayOfWeek:kindLabel,status,createdAt:'',isDemo}} hero/>
         <div className="board-detail-modal__meta" style={{ position: "relative", zIndex: 1 }}>
           <span className="board-detail-modal__live-dot" aria-hidden="true" />
@@ -170,6 +171,7 @@ export default function SpottedDetailModal({
           </p>
           <details><summary>Report this connection</summary><label>Reason<input className="board-text-field" value={reportReason} onChange={e=>setReportReason(e.target.value)}/></label><Button disabled={!reportReason.trim()||reportMutation.isPending} onClick={()=>user ? reportMutation.mutate() : setShowAuth(true)}>Send report</Button></details>
         </div>}
+        </div>
       </div>
     </div>
     {showAuth && <AuthModal onClose={()=>setShowAuth(false)} defaultTab="register"/>}
