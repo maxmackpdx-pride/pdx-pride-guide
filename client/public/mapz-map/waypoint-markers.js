@@ -35,7 +35,7 @@ export function waypointGeometry(origin,selected=false,roofLift=0,key=null){
 function shellPath(family,cx,cy,r){
  const x0=cx-r,x1=cx+r,y0=cy-r,y1=cy+r,q=r*.2;
  if(family==='house')return `M${x0+q},${cy-r*.15} ${cx},${y0} ${x1-q},${cy-r*.15}V${y1-q}L${cx},${y1+r*.68} ${x0+q},${y1-q}Z`;
- if(family==='speech')return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}L${x1-q},${y1}H${cx+q},${cx},${y1+r*.68} ${cx-q},${y1}H${x0+q}L${x0},${y1-q}V${y0+q}Z`;
+ if(family==='speech')return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}L${x1-q},${y1}H${cx+q}L${cx},${y1+r*.68}L${cx-q},${y1}H${x0+q}L${x0},${y1-q}V${y0+q}Z`;
  // place and shield share the chamfered head with an integrated tip
  return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}L${cx},${y1+r*.68} ${x0},${y1-q}V${y0+q}Z`;
 }
