@@ -1,7 +1,8 @@
+import { useInlineBoardCard } from "@/components/board/BoardCardContinuity";
 import DetailActions from "@/components/DetailActions";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
 import { useAuth } from "@/context/AuthContext";
@@ -31,12 +32,14 @@ type Props = {
 };
 
 export default function BoardPostOverlay({ kind, postId, onClose, presentation }: Props) {
+  const inline = useInlineBoardCard();
   const [showAuth, setShowAuth] = useState(false);
   const { dialogRef, requestClose } = useOpenCardClose(onClose, !showAuth);
 
   const {user}=useAuth();
+  const client = useQueryClient();
   const endpoint=kind==="gig"?"/api/gigs":kind==="gifting"?"/api/gifting":"/api/sellz";
-  const query=useQuery<GiftingPost|GigPost|SellzPost>({queryKey:[endpoint,postId,user?.id],queryFn:()=>apiRequest("GET",`${endpoint}/${postId}`).then(r=>r.json()),retry:1});
+  const query=useQuery<GiftingPost|GigPost|SellzPost>({queryKey:[endpoint,postId,user?.id],queryFn:()=>apiRequest("GET",`${endpoint}/${postId}`).then(r=>r.json()),retry:1,placeholderData:()=>client.getQueryData<Array<GiftingPost|GigPost|SellzPost>>([endpoint,"all-boards",user?.id])?.find(post=>post.id===postId)});
   const post=query.data;
   const saved=useQuery<number[]>({queryKey:["/api/sellz/saved/ids"],enabled:kind==="sellz"&&!!user,queryFn:()=>apiRequest("GET","/api/sellz/saved/ids").then(r=>r.json())});
 
@@ -88,13 +91,13 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
     "--_c": accent,
   } as CSSProperties;
 
-  return createPortal(
+  const content = (
     <>
       <div className="board-detail-backdrop" onClick={requestClose}>
         <div
           ref={dialogRef}
           role="dialog"
-          aria-modal="true"
+          aria-modal={inline ? undefined : true}
           aria-label={kind === "gig" ? "Gigz listing" : kind === "gifting" ? "Giftz listing" : "Sellz listing"}
           tabIndex={-1}
           className={`boardz-open-surface board-post-overlay board-post-overlay--glass board-open-card--shared pdx-glass-rebind${presentation ? ` ab-open-card${kind === "gig" ? " ab-open-card--gigz" : " ab-open-card--listing"}` : ""}`}
@@ -117,7 +120,7 @@ export default function BoardPostOverlay({ kind, postId, onClose, presentation }
         </div>
       </div>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-    </>,
-    document.body,
+    </>
   );
+  return inline ? content : createPortal(content, document.body);
 }

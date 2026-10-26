@@ -1,3 +1,4 @@
+import { useInlineBoardCard } from "@/components/board/BoardCardContinuity";
 import {BOARD_TEXT_LIMITS,BOARD_NEIGHBORHOODS} from "@shared/boardCardPresentation";
 import BoardComposerPreview from "@/components/board/BoardComposerPreview";
 import BoardPostFace from "@/components/board/BoardPostFace";
@@ -58,6 +59,7 @@ export default function SpottedDetailModal({
   const { user } = useAuth();
   const [showAuth,setShowAuth] = useState(false);
   const [replyBody, setReplyBody] = useState("");
+  const inline = useInlineBoardCard();
   const { dialogRef, requestClose } = useOpenCardClose(onClose, !showAuth);
 
   const [editing,setEditing]=useState(false);
@@ -100,13 +102,13 @@ export default function SpottedDetailModal({
 
   // Portal to <body> so the fixed-position overlay escapes any transformed
   // ancestor (e.g. the feed's ScrollReveal wrappers) and centers on the viewport.
-  return createPortal(
+  const content = (
     <>
     <div className="board-detail-backdrop" onClick={requestClose}>
       <div
         ref={dialogRef}
         role="dialog"
-        aria-modal="true"
+        aria-modal={inline ? undefined : true}
         aria-label={title || "Missed connection"}
         tabIndex={-1}
         className={`boardz-open-surface board-detail-modal board-detail-modal--spotted board-detail-modal--glass board-open-card--shared pdx-glass-rebind board-open-readable board-open-readable--mizzed${presentation ? " ab-open-card" : ""}`}
@@ -175,7 +177,7 @@ export default function SpottedDetailModal({
       </div>
     </div>
     {showAuth && <AuthModal onClose={()=>setShowAuth(false)} defaultTab="register"/>}
-    </>,
-    document.body,
+    </>
   );
+  return inline ? content : createPortal(content, document.body);
 }

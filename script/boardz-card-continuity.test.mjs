@@ -24,16 +24,16 @@ function harness({quiet=false,throws=false,animate=true}={}) {
   return {api,source,target,panel,animations,timers,cleanup:()=>cleanup()};
 }
 
-test('edges begin at the selected card and finish at the open card without scaling content',()=>{
+test('scale expansion begins at the selected card and ends at the expanded layout',()=>{
   const h=harness();
   const [start,end]=h.animations[0].frames;
-  const [dy,dx]=start.clipPath.match(/-?[\d.]+/g).map(Number);
+  const [sx,sy]=start.scale.split(' ').map(Number);
   const [x,y]=start.translate.match(/-?[\d.]+/g).map(Number);
-  assert.equal(h.target.left+dx+x,20);
-  assert.equal(h.target.top+dy+y,180);
-  assert.equal(h.target.width-2*dx,136);
-  assert.equal(h.target.height-2*dy,150);
-  assert.equal(end.clipPath,'inset(0px 0px)');
+  assert.equal(h.target.left+(h.target.width-136)/2+x,20);
+  assert.equal(h.target.top+(h.target.height-150)/2+y,180);
+  assert.equal(h.target.width*sx,136);
+  assert.equal(h.target.height*sy,150);
+  assert.equal(end.scale,'1 1');
   assert.equal(start.transform,undefined);
   assert.equal(h.source.style.visibility,'hidden');
   h.cleanup();assert.equal(h.source.style.visibility,'');
@@ -44,7 +44,7 @@ test('close reverses the edges, completes once and restores the source',()=>{
   assert.equal(h.api.closeBoardCard(h.panel,()=>closed++),true);
   h.api.closeBoardCard(h.panel,()=>closed++);
   assert.equal(h.animations.length,2);
-  assert.equal(h.animations[1].frames[0].clipPath,'inset(0px 0px)');
+  assert.equal(h.animations[1].frames[0].scale,'1 1');
   h.animations[1].onfinish();h.timers.forEach(fn=>fn());
   assert.equal(closed,1);
   h.cleanup();assert.equal(h.api.closeBoardCard(h.panel,()=>{}),false);

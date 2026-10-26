@@ -1,3 +1,4 @@
+import { useInlineBoardCard, useInlineBoardCardKeyboard } from "@/components/board/BoardCardContinuity";
 import { closeBoardCard } from "@/components/board/BoardCardContinuity";
 import "@/components/board/BoardOpenReadability.css";
 import DetailActions from "@/components/DetailActions";
@@ -60,6 +61,7 @@ function markerTransform(source: Pick<DOMRect, "left" | "top" | "width" | "heigh
 }
 
 export default function HousingPostOverlay({ post: initialPost, userId, initialDetail = false, initialIntent = null, sharePath, originRect, onClose, onRequireAuth, onSelectPost, presentation }: Props) {
+  const inline = useInlineBoardCard();
   const closingRef = useRef(false);
   const panelAnimationRef = useRef<Animation | null>(null);
   const transitionFromRef = useRef<DOMRect | null>(null);
@@ -78,7 +80,8 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
     animation.onfinish = finishClose;
     animation.oncancel = () => { closingRef.current = false; };
   }, []);
-  const dialogRef = useModalA11y({ onClose: requestClose });
+  const dialogRef = useModalA11y({ onClose: requestClose, enabled: !inline });
+  useInlineBoardCardKeyboard(dialogRef, requestClose);
   const { toast } = useToast();
   const { openSheet } = useInboxSheet();
   const [detail, setDetail] = useState(initialDetail);
@@ -214,9 +217,9 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
     position: "relative", border: 0, borderRadius: 14, padding: 0, background: "transparent", boxShadow: "none", backdropFilter: "none",
   } as CSSProperties;
 
-  return createPortal(
+  const content = (
     <div className="board-detail-backdrop" onClick={requestClose}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} My Hoüz ${detail ? "details" : "card"}`} tabIndex={-1} className={`hz boardz-housing-dialog pdx-glass-rebind board-open-card--shared board-open-readable board-open-readable--housing${presentation ? " ab-open-card ab-open-card--housing" : ""}`} style={panelStyle} onClick={(event) => event.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal={inline ? undefined : true} aria-label={`${post.displayName || post.headline} My Hoüz ${detail ? "details" : "card"}`} tabIndex={-1} className={`hz boardz-housing-dialog pdx-glass-rebind board-open-card--shared board-open-readable board-open-readable--housing${presentation ? " ab-open-card ab-open-card--housing" : ""}`} style={panelStyle} onClick={(event) => event.stopPropagation()}>
         <span className="board-open-card__rule" aria-hidden="true" />
         <div className="board-open-readable__close"><DetailActions label="My Hoüz listing" onClose={requestClose} /></div>
         {post.isDemo && <p className="board-demo-notice" role="note">Demo listing — example only. Participation is disabled.</p>}
@@ -230,6 +233,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
           <div className="hz-chiprow" style={{ marginTop: 14 }}>{HOUSING_REPORT_REASONS.map(reason => <Chip key={reason} onClick={() => reportMutation.mutate(reason)}>{HOUSING_REPORT_REASON_LABEL[reason]}</Chip>)}</div>
         </div></div> : null}
       </div>
-    </div>, document.body,
+    </div>
   );
+  return inline ? content : createPortal(content, document.body);
 }

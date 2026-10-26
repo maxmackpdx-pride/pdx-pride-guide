@@ -1,21 +1,35 @@
-import { createContext, useContext, useLayoutEffect, type RefObject } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, type RefObject } from "react";
 
 export type CardOrigin = { element: HTMLElement; rect: DOMRect };
+export const BoardCardInline = createContext(false);
+export const useInlineBoardCard = () => useContext(BoardCardInline);
 export const BoardCardOrigin = createContext<CardOrigin | null>(null);
+
+export function useInlineBoardCardKeyboard(ref: RefObject<HTMLElement>, onClose: () => void) {
+  const inline = useInlineBoardCard();
+  useEffect(() => {
+    if (!inline) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || !ref.current?.contains(document.activeElement)) return;
+      event.preventDefault(); event.stopPropagation(); onClose();
+    };
+    const panel = ref.current;
+    panel?.addEventListener("keydown", onKey);
+    return () => panel?.removeEventListener("keydown", onKey);
+  }, [inline, ref, onClose]);
+}
 const closeAnimations = new WeakMap<HTMLElement, (finish: () => void) => void>();
 const quiet = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
   document.documentElement.classList.contains("calm-mode") || document.documentElement.dataset.calm === "true";
 
-/** Move the edges, without scaling the artwork or type inside the card. */
+/** Scale the selected object into its expanded layout, then reverse on close. */
 export function cardEdgeFrames(source: Pick<DOMRect, "left" | "top" | "width" | "height">, target: Pick<DOMRect, "left" | "top" | "width" | "height">): Keyframe[] | null {
   if (![source.left, source.top, source.width, source.height, target.left, target.top, target.width, target.height].every(Number.isFinite) || Math.min(source.width, source.height, target.width, target.height) < 8) return null;
   const x = source.left + source.width / 2 - target.left - target.width / 2;
   const y = source.top + source.height / 2 - target.top - target.height / 2;
-  const vertical = (target.height - source.height) / 2;
-  const horizontal = (target.width - source.width) / 2;
   return [
-    { translate: `${x}px ${y}px`, clipPath: `inset(${vertical}px ${horizontal}px)` },
-    { translate: "0px 0px", clipPath: "inset(0px 0px)" },
+    { translate: `${x}px ${y}px`, scale: `${source.width / target.width} ${source.height / target.height}` },
+    { translate: "0px 0px", scale: "1 1" },
   ];
 }
 
@@ -33,6 +47,7 @@ export function useBoardCardContinuity(head: RefObject<HTMLElement>) {
     const panel = head.current?.closest<HTMLElement>('[role="dialog"]');
     if (!panel || !origin) return;
     panel.dataset.boardContinuity = "true";
+    panel.focus?.({ preventScroll: true });
     let animation: Animation | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let closing = false;

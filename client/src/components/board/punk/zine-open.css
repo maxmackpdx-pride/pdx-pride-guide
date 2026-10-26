@@ -190,3 +190,32 @@ html.calm-mode .board-detail-backdrop:has(>[data-zine-open]){backdrop-filter:blu
 [role=dialog].ab-open-card[data-zine-open] .board-card-scroll>.board-detail-modal__meta{margin-top:24px!important}
 [role=dialog].ab-open-card[data-zine-open] .board-card-scroll>.board-detail-modal__body{box-sizing:border-box;max-width:none}
 [role=dialog].ab-open-card[data-zine-open] .boardz-open-photos{padding-inline:var(--board-open-gutter)}
+
+/* Tucker: a desktop note doubles its width in the board, pushing its neighbors
+   into their new positions. Mobile uses a 90% viewport card. */
+@media(min-width:768px){
+  .ab-page .ab-card-grid:has(.boardz-production-card){display:flex;flex-wrap:wrap;align-items:flex-start}
+  .ab-page .ab-card-grid>.boardz-production-card--expanded{
+    position:relative;flex:0 0 auto;width:min(var(--board-expanded-width),100%)!important;
+    max-width:100%;rotate:0deg!important;translate:0 0!important;z-index:5;
+  }
+  .boardz-production-card--expanded>.boardz-punk-scope{position:absolute;left:0;top:0;visibility:hidden;pointer-events:none}
+  .boardz-inline-host{width:100%;min-width:0;min-height:300px}
+  .boardz-inline-host .board-detail-backdrop{
+    position:static!important;inset:auto!important;display:block!important;padding:0!important;
+    width:100%;height:auto;background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  }
+  .boardz-inline-host [role=dialog].ab-open-card[data-zine-open]{
+    width:100%!important;height:auto!important;min-height:300px;max-height:none!important;
+  }
+  .boardz-inline-host [role=dialog].ab-open-card[data-zine-open]>fieldset,
+  .boardz-inline-host [role=dialog].ab-open-card[data-zine-open]>.board-card-scroll{overflow:visible!important}
+  .boardz-inline-host .ab-detail-status{position:relative;inset:auto;margin:0;padding:32px}
+  .boardz-inline-host .boardz-punk-scope .zine-open-head>.zt-face{height:clamp(250px,30vw,380px)}
+}
+@media(max-width:767px){
+  [role=dialog].ab-open-card[data-zine-open]{width:90vw!important;height:90dvh!important}
+}
+@media(min-width:768px){
+  .boardz-inline-host .boardz-punk-scope .zine-open-head .zine-title{max-width:calc(100% - 64px)}
+}

@@ -1,7 +1,8 @@
+import { useBoardGridMotion } from "@/components/board/useBoardGridMotion";
 import BoardPostOverlay from "@/components/board/BoardPostOverlay";
 import HousingPostOverlay from "@/components/housing/HousingPostOverlay";
 import SpottedDetailModal from "@/components/SpottedDetailModal";
-import { BoardCardOrigin, type CardOrigin } from "@/components/board/BoardCardContinuity";
+import { BoardCardOrigin, BoardCardInline, type CardOrigin } from "@/components/board/BoardCardContinuity";
 import BoardDetailBoundary from "@/components/board/BoardDetailBoundary";
 import BoardArchiveList, { BoardArchiveFeedback } from "@/components/board/BoardArchiveList";
 import BoardBrowseCard from "@/components/board/BoardBrowseCard";
@@ -32,7 +33,7 @@ import {
   type ChangeEvent,
 } from "react";
 import { Link, useLocation, useSearch } from "wouter";
-import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
   Bookmark,
@@ -58,7 +59,7 @@ import {
   type BoardPost,
 } from "@/lib/allBoards";
 import { mizzedSource } from "@/lib/mizzedSource";
-import type { HousingPostView } from "@shared/housing";
+import type { HousingPostView, HousingBoardResponse } from "@shared/housing";
 import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import "@/components/discovery/EventzBrowse.css";
 import "@/components/discovery/EventzDetail.css";
@@ -91,11 +92,16 @@ function BoardDetail({
   const cat = boardCategories.find((c) => c.id === selected.category)!;
   const ownQuery =
     selected.category === "housing" || selected.category === "mizzed";
+  const client = useQueryClient();
   const detail = useQuery<HousingPostView | MissedConnectionPost>({
     queryKey: [cat.endpoint, selected.id, user?.id],
     queryFn: () =>
       apiRequest("GET", `${cat.endpoint}/${selected.id}`).then((r) => r.json()),
     enabled: ownQuery,
+    placeholderData: () => {
+      const feed = client.getQueryData<HousingBoardResponse | MissedConnectionPost[]>([cat.endpoint, "all-boards", user?.id]);
+      return (Array.isArray(feed) ? feed : feed?.posts)?.find(post => post.id === selected.id);
+    },
     retry: 1,
   });
   if (!ownQuery)
@@ -192,6 +198,8 @@ function usePhoneWidePreference() {
 export default function Boards() {
   const [phoneWide, setPhoneWide] = usePhoneWidePreference();
   const phoneLayout = usePhoneLayout();
+  const cardGridRef = useRef<HTMLDivElement>(null);
+  useBoardGridMotion(cardGridRef);
   usePageSeo(
     "Our BoardZ | Zaylist",
     "My Hoüz, Gigz, Giftz, Sellz, and Mizzed Connections. Find your people and your next thing.",
@@ -558,10 +566,12 @@ export default function Boards() {
                   />
                 )}
                 <button type="button" className="ab-phone-grid-toggle" aria-pressed={phoneWide} onClick={() => setPhoneWide(w => !w)}>{phoneWide ? "Two per row" : "One wide per row"}</button>
-                <div className={`ab-card-grid${phoneWide ? " ab-card-grid--wide" : " ab-card-grid--pinboard"}`}>
-                  {visibleResults.map(post => { const pin = phoneWide ? null : pinboardPlacement(post.key, phoneLayout); return <BoardBrowseCard key={post.key} post={post} small={pin ? pin.small : false} style={pin?.style} isSaved={saved.has(post.key)} showStatus={mineOnly}
+                <div ref={cardGridRef} className={`ab-card-grid${phoneWide ? " ab-card-grid--wide" : " ab-card-grid--pinboard"}`}>
+                  {visibleResults.map(post => { const pin = phoneWide ? null : pinboardPlacement(post.key, phoneLayout); const expanded = !phoneLayout && post.key === validPost; return <BoardBrowseCard key={post.key} post={post} small={pin ? pin.small : false} expanded={expanded} style={{...pin?.style, "--board-expanded-width": `${(pin?.small ? 136 : 360) * 2}px`} as CSSProperties} isSaved={saved.has(post.key)} showStatus={mineOnly}
                     saveDisabled={saveMutation.isPending || (!saved.has(post.key) && !canSaveBoardPost(post)) || (!!user && savedQuery.isPending)}
-                    onOpen={target=>open(post.key,target)} onSave={()=>user?saveMutation.mutate({post,wasSaved:saved.has(post.key)}):setShowAuth(true)}/>; })}
+                    onOpen={target=>open(post.key,target)} onSave={()=>user?saveMutation.mutate({post,wasSaved:saved.has(post.key)}):setShowAuth(true)}>
+                      {expanded && <div className="boardz-inline-host"><BoardCardInline.Provider value={true}><BoardCardOrigin.Provider value={cardOrigin.current}><BoardDetailBoundary key={validPost} onClose={close}><BoardDetail postKey={validPost!} onClose={close} onRequireAuth={()=>setShowAuth(true)} onSelect={key=>open(key)}/></BoardDetailBoundary></BoardCardOrigin.Provider></BoardCardInline.Provider></div>}
+                    </BoardBrowseCard>; })}
                 </div>
                 {!loading &&
                   !(savedOnly && savedQuery.isPending) &&
@@ -606,7 +616,7 @@ export default function Boards() {
             </div>
             </>}
       </div>
-      {validPost && (
+      {validPost && (phoneLayout || !visibleResults.some(post => post.key === validPost)) && (
         <BoardCardOrigin.Provider value={cardOrigin.current}>
           <BoardDetailBoundary key={validPost} onClose={close}>
             <BoardDetail

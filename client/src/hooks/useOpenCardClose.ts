@@ -1,4 +1,4 @@
-import { closeBoardCard } from "@/components/board/BoardCardContinuity";
+import { closeBoardCard, useInlineBoardCard, useInlineBoardCardKeyboard } from "@/components/board/BoardCardContinuity";
 import { useCallback, useLayoutEffect, useRef } from "react";
 import { useModalA11y } from "@/hooks/useModalA11y";
 
@@ -8,6 +8,7 @@ const quietMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").
 
 /** Shared 21st-inspired reveal; the shell and logo never scale. */
 export function useOpenCardClose(onClose: () => void, enabled = true) {
+  const inline = useInlineBoardCard();
   const latestClose = useRef(onClose);
   latestClose.current = onClose;
   const closing = useRef(false);
@@ -46,7 +47,8 @@ export function useOpenCardClose(onClose: () => void, enabled = true) {
     };
     animation.oncancel = () => { closing.current = false; };
   }, [cancelAnimations]);
-  const dialogRef = useModalA11y({ onClose: requestClose, enabled });
+  const dialogRef = useModalA11y({ onClose: requestClose, enabled: enabled && !inline });
+  useInlineBoardCardKeyboard(dialogRef, requestClose);
 
   useLayoutEffect(() => {
     closing.current = false;
