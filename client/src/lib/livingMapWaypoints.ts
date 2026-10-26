@@ -1,4 +1,5 @@
 import L from "leaflet";
+import { needzAccent } from "./needzAccent";
 
 export type WaypointId =
   | "eventz"
@@ -268,7 +269,12 @@ export function waypointHtml(opts: WaypointOpts) {
   const ring = opts.bloom ? `url(#${fid}b)` : color;
   const mainPath = shellPath(family, cx, cy, r);
   const clipId = `${fid}clip`;
-  const markContent = opts.avatarUrl
+  const secondary = !opts.bloom && opts.category ? needzAccent(opts.category) : undefined;
+  const glowColor = secondary ?? ring;
+  const closedMark = opts.closed
+    ? `<text class="wp-closed" x="${cx}" y="${cy + 1}" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-size="${Math.max(7, D * 0.19)}" font-weight="800" letter-spacing=".04em">CLOSED</text>`
+    : "";
+  const markContent = closedMark ? closedMark : opts.avatarUrl
     ? `<image class="wp-avatar" href="${escapeAttribute(opts.avatarUrl)}" x="${cx - r}" y="${cy - r}" width="${r * 2}" height="${r * 2.28}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})"/>`
     : opts.logoUrl
     ? `<image class="wp-logo${opts.alternateLogoUrl ? " wp-logo--primary" : ""}" href="${escapeAttribute(opts.logoUrl)}" x="${markX}" y="${markY}" width="${mark}" height="${mark}" preserveAspectRatio="xMidYMid meet"/>${opts.alternateLogoUrl ? `<image class="wp-logo wp-logo--alternate" href="${escapeAttribute(opts.alternateLogoUrl)}" x="${markX}" y="${markY}" width="${mark}" height="${mark}" preserveAspectRatio="xMidYMid meet"/>` : ""}`
@@ -289,7 +295,7 @@ export function waypointHtml(opts: WaypointOpts) {
     <svg class="wp-svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
       ${bloom}<defs><clipPath id="${clipId}"><path d="${mainPath}"/></clipPath></defs>
       ${integratedTip || scoop ? "" : `<polygon points="${cx - tipW},${attachY} ${cx + tipW},${attachY} ${cx},${tipY}" fill="${ring}"/>`}
-      <path class="wp-glow-ring" d="${mainPath}" fill="none" stroke="${ring}" stroke-width="${glowW}"/>
+      <path class="wp-glow-ring" d="${mainPath}" fill="none" stroke="${glowColor}" stroke-width="${glowW}"/>
       <path d="${mainPath}" fill="#050506" stroke="${ring}" stroke-width="${sw}"/>
       ${markContent}
       ${scoopCircle}
