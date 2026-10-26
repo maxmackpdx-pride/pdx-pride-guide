@@ -40,7 +40,7 @@ const allowlist = [
 ];
 
 async function buildAll() {
-  execFileSync(process.execPath, ["--test", "script/mapz-startup.test.mjs", "script/mapz-tiles.test.mjs"], { stdio: "inherit" });
+  execFileSync(process.execPath, ["--test", "script/mapz-startup.test.mjs", "script/mapz-tiles.test.mjs", "script/mapz-event-design.test.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["--import", "tsx", "--test", "client/src/lib/mapRouteRetention.test.ts", "client/src/lib/oneShotMapLocation.test.ts"], { stdio: "inherit" });
   await rm("dist", { recursive: true, force: true });
   const evidence = await writeDesignComponentSourceEvidence();
