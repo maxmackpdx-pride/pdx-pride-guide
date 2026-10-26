@@ -187,6 +187,8 @@ function mapAdmission(admission: string): AdmKey {
 function mapAge(ageRequirement: string): string {
   if (ageRequirement === "21_PLUS") return "21+";
   if (ageRequirement === "18_PLUS") return "18+";
+  // Researched listings whose age policy was never verified must not be presented (or filtered) as all ages.
+  if (ageRequirement === "UNVERIFIED") return "age unverified";
   return "all-ages";
 }
 

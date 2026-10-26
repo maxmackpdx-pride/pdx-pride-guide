@@ -4,6 +4,8 @@ export type SearchableEvent = {
   title: string; venueName: string; description?: string | null;
   neighborhood?: string | null; dateStart: string; dayOfWeek?: string | null;
   searchTalent?: string[];
+  /** ALL_AGES | 18_PLUS | 21_PLUS | UNVERIFIED (anything else/missing never matches an age search). */
+  ageRequirement?: string | null;
 };
 const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const aliases: Record<string, string> = Object.fromEntries(DAYS.flatMap(day => [[day.slice(0, 3), day], [day + 's', day]]));
@@ -38,9 +40,28 @@ function eventWords(event: SearchableEvent): string[] {
   cache.set(event, result);
   return result;
 }
-export function createEventSearch(query: string): (event: SearchableEvent) => boolean {
+/**
+ * Age phrases in a query ("all ages", "21+", "18 and over", "over 21") become a filter on the event's ageRequirement
+ * instead of text terms, so "all ages" finds ALL_AGES listings even though the description never says it.
+ * UNVERIFIED listings are never claimed as all ages.
+ */
+export function extractAgeIntent(query: string): { age: string | null; rest: string } {
+  let age: string | null = null;
+  const take = (pattern: RegExp, value: (m: RegExpMatchArray) => string) => {
+    const match = query.match(pattern);
+    if (match) { age = age ?? value(match); query = query.replace(pattern, ' '); }
+  };
+  take(/\ball[\s-]*ages?\b/i, () => 'ALL_AGES');
+  take(/\b(?:family|kid)[\s-]*friendly\b/i, () => 'ALL_AGES');
+  take(/(?:^|[^\p{L}\p{N}])(21|18)\s*(?:\+|plus\b|and\s*(?:over|up|older)\b)/iu, m => `${m[1]}_PLUS`);
+  take(/\b(?:over|age|ages)\s*(21|18)\b/i, m => `${m[1]}_PLUS`);
+  return { age, rest: query };
+}
+export function createEventSearch(rawQuery: string): (event: SearchableEvent) => boolean {
+  const { age: wantedAge, rest: query } = extractAgeIntent(rawQuery);
   const terms = words(query).filter(term => term !== 'the' && term !== 'at' && term !== 'on').slice(0, 24).map(term => aliases[term] ?? term);
   return event => {
+    if (wantedAge && event.ageRequirement !== wantedAge) return false;
     if (!terms.length) return true;
     const candidates = eventWords(event);
     return terms.every(term => {

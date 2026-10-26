@@ -1,14 +1,13 @@
-import { useModalA11y } from "@/hooks/useModalA11y";
-import { Coffee, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { Coffee } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useTipLinks } from "@/hooks/useTipLinks";
-import "./HomeConstructionNudge.css";
+import { claimFirstRun, releaseFirstRun, rememberDismissed, wasDismissed } from "@/lib/firstRunBanner";
+import FirstRunBanner from "./FirstRunBanner";
 
 // Bump when the rebrand welcome copy or CTA order changes so returning visitors see the update once.
 const DISMISS_KEY = "pgpdx:construction-nudge:v3-zaylist";
 
-/** `?constructNudge=1` force-shows the pop-up for previewing (ignores dismissal). */
+/** `?constructNudge=1` force-shows the banner for previewing (ignores dismissal). */
 function forcedPreview(): boolean {
   try {
     return new URLSearchParams(window.location.search).get("constructNudge") === "1";
@@ -17,18 +16,9 @@ function forcedPreview(): boolean {
   }
 }
 
-function alreadyDismissed(): boolean {
-  try {
-    return localStorage.getItem(DISMISS_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
 /**
- * Welcome pop-up for the rebrand: thanks visitors for Pride Guide years,
- * introduces Zaylist, and invites an optional tip. Shows until dismissed
- * (localStorage). Preview: ?constructNudge=1
+ * Welcome note for the rebrand. A compact bottom banner, never a modal: it is shown once per device (remembered as soon
+ * as it appears), owns the first-run slot so the notification prompt waits for it, and the page behind stays usable.
  */
 export default function HomeConstructionNudge() {
   const { venmoUrl } = useTipLinks();
@@ -36,107 +26,39 @@ export default function HomeConstructionNudge() {
 
   useEffect(() => {
     const forced = forcedPreview();
-    if (!forced && alreadyDismissed()) return;
+    if (!forced && wasDismissed(DISMISS_KEY)) return;
+    // Hold the slot from mount so the notification prompt cannot slip in ahead of Welcome.
+    if (!claimFirstRun("welcome")) return;
     const t = window.setTimeout(() => {
-      // Do not interrupt a visitor who already opened a homepage dialog.
-      // Competing focus traps can otherwise leave both overlays unusable.
-      if (document.querySelector('[role="dialog"], dialog[open]')) return;
+      if (!forced) rememberDismissed(DISMISS_KEY); // shown once; reopening Home never nags again
       setOpen(true);
     }, forced ? 0 : 650);
-    return () => window.clearTimeout(t);
+    return () => { window.clearTimeout(t); releaseFirstRun("welcome"); };
   }, []);
 
-  // Dismiss = remember it so it never nags again.
-  const dismiss = () => {
-    try {
-      localStorage.setItem(DISMISS_KEY, "1");
-    } catch {
-      /* ignore */
-    }
+  const dismiss = useCallback(() => {
+    rememberDismissed(DISMISS_KEY);
     setOpen(false);
-  };
-
-  const dialogRef = useModalA11y({ open, onClose: dismiss });
-  useEffect(() => {
-    if (!open || !dialogRef.current) return;
-    const dialog = dialogRef.current;
-    const background = [...document.body.children].filter((el): el is HTMLElement => el instanceof HTMLElement && !el.contains(dialog));
-    const inertBefore = background.map(el => el.inert);
-    background.forEach(el => { el.inert = true; });
-    return () => background.forEach((el, i) => { el.inert = inertBefore[i]; });
-  }, [open]);
+    releaseFirstRun("welcome");
+  }, []);
 
   if (!open) return null;
 
-  return createPortal(
-    <div className="pgc-backdrop" role="presentation" onClick={dismiss}>
-      <div
-        ref={dialogRef}
-        tabIndex={-1}
-        className="pgc-card"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="pgc-title"
-        onClick={e => e.stopPropagation()}
-      >
-        <button type="button" className="pgc-x" onClick={dismiss} aria-label="Close">
-          <X size={16} aria-hidden="true" />
-        </button>
-
-        <img
-          className="pgc-app-icon"
-          src="/brand/family/prime-z.svg"
-          alt=""
-          width={72}
-          height={72}
-          decoding="async"
-        />
-        <p className="pgc-kicker">Same home · new name</p>
-        <h2 id="pgc-title" className="pgc-title display">
-          Welcome to Zaylist
-        </h2>
-
-        <div className="pgc-body">
-          <p>
-            Thanks for using <strong>Pride Guide</strong> these past years. I hope it helped
-            you find your people and your parties.
-          </p>
-          <p>
-            I&apos;m renaming it <strong>Zaylist</strong>: same home, new name. Year-round
-            for Portland&apos;s LGBTQ+ community: events, boards, directory, and more, all
-            365 days, not just Pride Week.
-          </p>
-          <p className="pgc-tip">
-            Keeping the lights on isn&apos;t free. If this was useful, you&apos;re welcome to
-            toss me a couple bucks toward a coffee or a muffin. Truly no pressure. Every
-            little bit helps.
-          </p>
-        </div>
-
-        <div className="pgc-actions">
-          <button
-            type="button"
-            className="pgc-btn pgc-btn--primary"
-            onClick={dismiss}
-            data-testid="construction-explore-zaylist"
-          >
-            Explore Zaylist
-          </button>
-          <a
-            className="pgc-btn pgc-btn--tip"
-            href={venmoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-testid="construction-buy-coffee-venmo"
-            onClick={dismiss}
-          >
-            <Coffee size={16} aria-hidden="true" /> Buy me a coffee
-          </a>
-        </div>
-
-        <p className="pgc-foot">Made in Portland</p>
-      </div>
-    </div>,
-    document.body,
+  return (
+    <FirstRunBanner
+      id="welcome-banner"
+      titleId="zfr-welcome-title"
+      kicker="Same home · new name"
+      title="Welcome to Zaylist"
+      onDismiss={dismiss}
+      actions={<>
+        <button type="button" className="pgc-btn pgc-btn--primary" onClick={dismiss} data-testid="construction-explore-zaylist">Explore Zaylist</button>
+        <a className="pgc-btn pgc-btn--tip" href={venmoUrl} target="_blank" rel="noopener noreferrer" data-testid="construction-buy-coffee-venmo" onClick={dismiss}>
+          <Coffee size={16} aria-hidden="true" /> Buy me a coffee
+        </a>
+      </>}
+    >
+      <p>Thanks for using <strong>Pride Guide</strong> these past years. I&apos;m renaming it <strong>Zaylist</strong>: same home, new name, year-round for Portland&apos;s LGBTQ+ community.</p>
+    </FirstRunBanner>
   );
 }

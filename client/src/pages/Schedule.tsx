@@ -930,10 +930,12 @@ export default function Schedule({
   });
   const ageDefs: [string, string][] = [
     ['all-ages', 'All ages'],
+    ['18+', '18+'],
     ['21+', '21+'],
   ];
   ageDefs.forEach(([k, label]) => {
     const active = !!fAge[k];
+    if (!active && !viewSet.some((e) => e.age === k)) return; // only offer an age chip when a listing in view has that policy
     const accent = calm ? '#c8c8cc' : 'var(--neon-cyan)';
     const count = viewSet.filter((e) => e.age === k).length;
     chips.push({

@@ -1,6 +1,7 @@
 import { readBrowseCategories } from "@/lib/browseCategoryState";
 import { resourceMapHref } from '@/lib/resourceMap';
 import { useQuery } from "@tanstack/react-query";
+import { CRISIS_LINES, isCrisisQuery, rankForCrisis } from "@/lib/crisisSearch";
 import type { CommunitySummary } from "@shared/community";
 import {resourceDetailSelection, type EmbeddedResourceDetail} from "@/lib/resourceDetailSelection";
 import { mergeCommunityResources } from "@/lib/communityResources";
@@ -228,6 +229,28 @@ function SafetyNotice({ openCard = false }: { openCard?: boolean }) {
         </div>
       </div>
     </aside>
+  );
+}
+
+/** Pinned above results when the search reads as a crisis: reach a person first, browse second. */
+function CrisisPin() {
+  return (
+    <section className="needz-crisis-pin" aria-label="Crisis lines" role="region">
+      <h2>If you need someone right now</h2>
+      <p>Free and confidential. Call 911 if you are in immediate danger.</p>
+      <ul>
+        {CRISIS_LINES.map(line => (
+          <li key={line.tel}>
+            <div><strong>{line.name}</strong><span>{line.note}</span></div>
+            <div className="needz-crisis-actions">
+              <a className="rg-talk-call" href={`tel:${line.tel}`}><Phone size={16} aria-hidden="true" /> {line.number}</a>
+              {line.text && <a className="rg-talk-text" href={line.text.href}>{line.text.label}</a>}
+              <a className="rg-safety-source" href={line.source} target="_blank" rel="noopener noreferrer">Official site <ArrowUpRight size={13} aria-hidden="true" /></a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -540,11 +563,16 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
     setCategoryIds(ids => id === "ALL" ? [] : ids.includes(id) ? ids.filter(value => value !== id) : [...ids, id]);
   };
   const clear = () => { setSearchQuery(""); setCategoryIds([]); };
-  const rows = useMemo(() => allRows.filter(row => {
-    if (categoryIds.length && !categoriesFor(row).some(c => categoryIds.includes(c.id))) return false;
+  const rowText = (row: typeof allRows[number]) => [row.org.name, row.org.desc, row.org.sub, row.org.scope, row.org.addr, ...(row.org.aliases || []), ...(row.org.serviceTags || []), ...categoriesFor(row).map(c => c.name)].filter(Boolean).join(" ");
+  const crisisIntent = isCrisisQuery(searchQuery);
+  const rows = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return !query || [row.org.name, row.org.desc, row.org.sub, row.org.scope, row.org.addr, ...(row.org.aliases || []), ...(row.org.serviceTags || []), ...categoriesFor(row).map(c => c.name)].filter(Boolean).join(" ").toLowerCase().includes(query);
-  }), [categoryIds, searchQuery, allRows]);
+    const inCategory = (row: typeof allRows[number]) => !categoryIds.length || categoriesFor(row).some(c => categoryIds.includes(c.id));
+    const plain = (row: typeof allRows[number]) => !query || rowText(row).toLowerCase().includes(query);
+    // Crisis intent ("suicide", "988", "help now"): crisis/hotline services first, not whatever contains the word.
+    if (isCrisisQuery(searchQuery)) return rankForCrisis(allRows.filter(inCategory), searchQuery, rowText, plain);
+    return allRows.filter(row => inCategory(row) && plain(row));
+  }, [categoryIds, searchQuery, allRows]);
   const rowList = useProgressiveList(rows.length, { initial: 36, step: 36, resetKey: `${categoryIds.join(",")}|${searchQuery}` });
   const selectedCategories = CATEGORIES.filter(c => !categoryIds.length || categoryIds.includes(c.id));
   const renderCard = (row: Row) => <div key={row.community?.id || row.org.name} className="placez-card-surface eb-original-card">
@@ -600,6 +628,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
             <div className="eb-panel eb-desktop-panel"><h3>Know someone we should know?</h3><Link className="eb-tool pdx-glass-rebind" href="/contact">Suggest a resource<ArrowUpRight size={16} /></Link></div>
           </aside>
           <section className="eb-results" aria-label="Resource results">
+            {mode === "directory" && crisisIntent && <CrisisPin />}
             {mode === "talk" ? <><div className="eb-result-head"><h2>A person on the other end.</h2><button type="button" className="eb-clear" onClick={() => setMode("directory")}>Back to resources</button></div><div id="resource-talk-results"><TalkOptions /></div></> : <>
               {!rows.length ? <BrowseStatus title="No resources match your search" description="Try a broader search or another category." actionLabel="Clear filters" onAction={clear} /> : browseView === "browse" ?
                 <div className="eb-lanes">{browseGroups.map(({category, group}, index) => {
