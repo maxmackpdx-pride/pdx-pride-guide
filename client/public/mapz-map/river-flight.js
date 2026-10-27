@@ -28,7 +28,7 @@ import {logoCoverage,logoTone,authoredLogoMode} from './logo-mask.js';
 import {eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
-import {hologramPresence,hologramCameraDrift,boundedHologramPosition} from './hologram-presence.js';
+import {hologramPresence,hologramCameraDrift,boundedHologramPosition,HOLOGRAM_CAMERA_FOLLOW} from './hologram-presence.js';
 import {screenNeighborCounts} from './screen-neighbors.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
@@ -629,6 +629,8 @@ function drawLights(fade,target=map,surface=lights){
   const key=item.feature.properties.phase,prev=layout.get(key)||{x:item.x-item.p.x,y:item.y-item.p.y,scale:item.scaleGoal,vx:0,vy:0,vs:0,avoidX:0,avoidY:0};
   settleValue(prev,'x','vx',item.x-item.p.x,2.3,motionDelta);
   settleValue(prev,'y','vy',item.y-item.p.y,2.3,motionDelta);
+  // Camera-driven sway: damp the x/y spring velocity while the camera moves (0.2x).
+  if(cameraMoving){prev.vx*=HOLOGRAM_CAMERA_FOLLOW;prev.vy*=HOLOGRAM_CAMERA_FOLLOW;}
   settleValue(prev,'scale','vs',item.scaleGoal,2.8,motionDelta);
   prev.scale=Math.min(prev.scale,cardPresentationScale);layout.set(key,prev);
   const drift=hologramCameraDrift(prev,item.p,item.feature.properties.phase,motionDelta,reduced.matches);

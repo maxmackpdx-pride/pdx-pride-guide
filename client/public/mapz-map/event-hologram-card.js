@@ -148,8 +148,9 @@ export function drawEventVortex(ctx,cx,cy,tiers,color,seconds=0,reduced=false,al
 // Level of detail. Far zoom is for map stability, not just looks: the far badge
 // is one cached bitmap drawn with a single drawImage, with no beam, glow, or
 // animation. Close zoom runs the full coin, beam, and animation.
-// NOTE: farZoom and band are placeholders until Tucker sets the real threshold.
-export function createEventLod({farZoom=13,band=.5,level='close'}={}){
+// Close/far switch for the coin, matching waypointArtwork's readable-logo zoom.
+export const COIN_FAR_ZOOM=15.5;
+export function createEventLod({farZoom=COIN_FAR_ZOOM,band=.5,level='close'}={}){
  let state=level,changed=false;
  return {
   // Hysteresis: go far below farZoom - band/2, return close above farZoom + band/2.

@@ -1,4 +1,8 @@
 // Restraint is shared by artwork, labels, beam and camera response.
+// Camera-follow strength. 1 = the current response; 0.2 damps the camera-driven
+// sway of hologram offsets to 20%. Offsets still settle to their pin-relative
+// target, so anchoring and straight beams are unchanged.
+export const HOLOGRAM_CAMERA_FOLLOW=0.2;
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 export function hologramPresence(distance,viewRadius,selected=false){
  const t=clamp((distance/Math.max(350,viewRadius)-.25)/1.25,0,1);
