@@ -867,11 +867,12 @@ function drawLights(fade,target=map,surface=lights){
       e3TransitionDrawn.add(transitionKey);
       // Anchored on the venue's own ground point, so the clip rises from the pin the user sees.
       const anchorCard=eventCards.get(feature.properties.key);
-      const width=anchorCard?Math.max(60,(anchorCard.right-anchorCard.left)*1.3):120;
-      const height=width*e3Transitions.aspect;
-      const cx=p.x,cy=p.y-height/2;
+      // Clip size is named apart from the canvas size, which the off-screen test needs.
+      const clipWidth=anchorCard?Math.max(60,(anchorCard.right-anchorCard.left)*1.3):120;
+      const clipHeight=clipWidth*e3Transitions.aspect;
+      const cx=p.x,cy=p.y-clipHeight/2;
       // Skip the draw when it is off screen; the clock still runs so the clip lands on time.
-      if(cx+width/2>0&&cx-width/2<width&&cy+height/2>0&&cy-height/2<height)e3Transitions.draw(lightsContext,transition,cx,cy,width,Math.min(1,fade));
+      if(cx+clipWidth/2>0&&cx-clipWidth/2<width&&cy+clipHeight/2>0&&cy-clipHeight/2<height)e3Transitions.draw(lightsContext,transition,cx,cy,clipWidth,Math.min(1,fade));
      }
      continue;
     }
