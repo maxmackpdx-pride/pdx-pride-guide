@@ -145,12 +145,57 @@ export function drawEventVortex(ctx,cx,cy,tiers,color,seconds=0,reduced=false,al
  ctx.restore();
 }
 
+// Level of detail. Far zoom is for map stability, not just looks: the far badge
+// is one cached bitmap drawn with a single drawImage, with no beam, glow, or
+// animation. Close zoom runs the full coin, beam, and animation.
+// NOTE: farZoom and band are placeholders until Tucker sets the real threshold.
+export function createEventLod({farZoom=13,band=.5,level='close'}={}){
+ let state=level,changed=false;
+ return {
+  // Hysteresis: go far below farZoom - band/2, return close above farZoom + band/2.
+  update(zoom){
+   const previous=state;
+   if(state==='close'&&zoom<farZoom-band/2)state='far';
+   else if(state==='far'&&zoom>farZoom+band/2)state='close';
+   changed=state!==previous;
+   return state;
+  },
+  get level(){return state;},
+  // True only on the frame the level flips, so callers redraw on change only.
+  get changed(){return changed;},
+ };
+}
+const farBadgeCache=new Map();
+function farBadgeBitmap(color,r){
+ if(typeof document==='undefined')return null;
+ const key=`${color}|${Math.round(r*2)/2}`;
+ if(farBadgeCache.has(key))return farBadgeCache.get(key);
+ if(farBadgeCache.size>32)farBadgeCache.clear();
+ const size=Math.ceil(r*2.6)+4,canvas=document.createElement('canvas');
+ canvas.width=size;canvas.height=size;
+ drawEventCoinPuck(canvas.getContext('2d'),size/2,size/2,r,color,null,0,true,1,'far');
+ farBadgeCache.set(key,canvas);
+ return canvas;
+}
+function drawFarBadge(ctx,card,color,alpha){
+ const canvasWidth=ctx.canvas?.width??Infinity,canvasHeight=ctx.canvas?.height??Infinity;
+ if(card.right<0||card.bottom<0||card.left>canvasWidth||card.top>canvasHeight)return; // off-screen: skip
+ const r=eventCoinPuckRadius(card),bitmap=farBadgeBitmap(color,r);
+ if(!bitmap)return;
+ const cx=card.x,cy=(card.top+card.bottom)/2;
+ ctx.save();ctx.globalAlpha=alpha;
+ ctx.drawImage(bitmap,cx-bitmap.width/2,cy-bitmap.height/2);
+ ctx.restore();
+}
+
 export function createAttachedEventBeam(options={}){
  const film=createLightFilm();let disposed=false;
  const logo=options.logo,distance=options.distance||'close';
  return {
-  draw(ctx,card,anchor,seconds,phase,reduced,color){
-   if(disposed||ctx.globalAlpha<=.001||anchor.y-card.bottom<4)return;
+  draw(ctx,card,anchor,seconds,phase,reduced,color,level='close'){
+   if(disposed||ctx.globalAlpha<=.001)return;
+   if(level==='far'){drawFarBadge(ctx,card,color,ctx.globalAlpha);return;}
+   if(anchor.y-card.bottom<4)return;
    const perimeter=eventDesignPerimeter(card,card.hologramType||'puck'),alpha=ctx.globalAlpha;
    const clock=reduced?0:seconds,variant=Math.floor(Math.abs(phase)*7)%3;
    ctx.save();ctx.globalCompositeOperation='screen';
