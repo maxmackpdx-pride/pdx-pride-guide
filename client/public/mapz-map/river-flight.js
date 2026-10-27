@@ -614,12 +614,12 @@ function drawLights(fade,target=map,surface=lights){
  for(const item of beacons){
   const key=lodGroupKey(item),depthM=eventDepthMeters(target,item.p,height,lodMetersPerPixel),onScreen=item.p.x>=0&&item.p.x<=width&&item.p.y>=0&&item.p.y<=height;
   const sameDay=e3IsSameDay(item.feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived));
-  const group=lodGroups.get(key);
-  if(!group)lodGroups.set(key,{key,depthM,onScreen,sameDay});else{group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;group.sameDay=group.sameDay||sameDay;}
+  const group=lodGroups.get(key),color=venueItems.get(item.feature.properties.venueWaypointKey)?.feature.properties.color||item.feature.properties.venueAnchor?.color||item.feature.properties.color;
+  if(!group)lodGroups.set(key,{key,depthM,onScreen,sameDay,color});else{group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;group.sameDay=group.sameDay||sameDay;}
  }
  const lodLevels=assignE3Levels([...lodGroups.values()],e3LodPrevious);
  e3LodPrevious.clear();for(const [key,level] of lodLevels)e3LodPrevious.set(key,level);
- if(e3Transitions)for(const group of lodGroups.values())e3Transitions.update(group.key,lodLevels.get(group.key),frameNow,!reduced.matches,Boolean(group.sameDay));
+ if(e3Transitions)for(const group of lodGroups.values())e3Transitions.update(group.key,lodLevels.get(group.key),frameNow,!reduced.matches,Boolean(group.sameDay),group.color);
  const e3TransitioningEvents=new Set(),e3TransitionDrawn=new Set();
  const lodNowMs=viewTime+Math.max(0,frameNow-viewTimeReceived),lodRepresented=new Set();
  for(let beaconIndex=0;beaconIndex<beacons.length;beaconIndex++){
@@ -865,10 +865,11 @@ function drawLights(fade,target=map,surface=lights){
      e3TransitioningEvents.add(feature.properties.key);
      if(pass===1&&!e3TransitionDrawn.has(transitionKey)){
       e3TransitionDrawn.add(transitionKey);
+      // Anchored on the venue's own ground point, so the clip rises from the pin the user sees.
       const anchorCard=eventCards.get(feature.properties.key);
-      const cx=anchorCard?(anchorCard.left+anchorCard.right)/2:p.x,cy=anchorCard?(anchorCard.top+anchorCard.bottom)/2:p.y-70*(offset?.scale??1);
-      const width=anchorCard?Math.max(60,(anchorCard.right-anchorCard.left)*1.3):96*(offset?.scale??1);
+      const width=anchorCard?Math.max(60,(anchorCard.right-anchorCard.left)*1.3):120;
       const height=width*e3Transitions.aspect;
+      const cx=p.x,cy=p.y-height/2;
       // Skip the draw when it is off screen; the clock still runs so the clip lands on time.
       if(cx+width/2>0&&cx-width/2<width&&cy+height/2>0&&cy-height/2<height)e3Transitions.draw(lightsContext,transition,cx,cy,width,Math.min(1,fade));
      }

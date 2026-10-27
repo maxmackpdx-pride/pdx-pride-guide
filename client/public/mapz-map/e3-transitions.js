@@ -6,7 +6,11 @@
 //
 // Steps: mini, waypoint, compressed, coin, vortex, stack.
 
+import {E3_SAME_DAY_GREEN} from './e3-lod.js';
+
 export const E3_TRANSITION_STEPS = ['mini', 'waypoint', 'compressed', 'coin', 'vortex', 'stack'];
+// Tinted clip copies are cached: at most this many live at once (about 0.5 MB each on phones).
+const TINT_LIMIT = 6;
 
 // clip name keyed by "from>to"; each clip also plays in reverse for the opposite direction.
 const CLIP_BY_PAIR = {
@@ -26,6 +30,11 @@ const CLIP_BY_PAIR = {
  * Which clip plays between two steps, and whether it plays reversed.
  * Returns {name, reverse} or null when no clip covers the pair.
  */
+// Clips that show a vortex: they take the same-day green and the venue color.
+export function involvesVortex(name) {
+  return /vortex|stack/i.test(name);
+}
+
 export function e3TransitionClip(from, to) {
   const direct = CLIP_BY_PAIR[`${from}>${to}`];
   if (direct) return {name: direct, reverse: false};
@@ -105,6 +114,35 @@ export function createE3TransitionState(manifest, {base = './e3-transitions/', o
   const last = new Map();
   const active = new Map();
   const images = new Map();
+  const tints = new Map();
+  // Clip -> alpha mask, built once per clip (and once per venue color). Each pixel's brightness
+  // becomes its alpha, so the black background is fully transparent and the glow draws normally
+  // over the map. With a color, the clip's brightness keeps its shape and shading in that color.
+  function alphaCanvas(image, color) {
+    const canvas = document.createElement('canvas');
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const g = canvas.getContext('2d', {willReadFrequently: true});
+    g.drawImage(image, 0, 0);
+    const data = g.getImageData(0, 0, canvas.width, canvas.height);
+    const px = data.data;
+    const rgb = color ? [1, 3, 5].map(at => parseInt(color.slice(at, at + 2), 16)) : null;
+    for (let i = 0; i < px.length; i += 4) {
+      const lum = Math.max(px[i], px[i + 1], px[i + 2]);
+      if (rgb) { px[i] = rgb[0]; px[i + 1] = rgb[1]; px[i + 2] = rgb[2]; }
+      px[i + 3] = lum;
+    }
+    g.putImageData(data, 0, 0);
+    return canvas;
+  }
+  function tintedCanvas(entry, color) {
+    const key = `${entry.image.src}|${color}`;
+    if (tints.has(key)) return tints.get(key);
+    const canvas = alphaCanvas(entry.image, color);
+    if (tints.size >= TINT_LIMIT) tints.delete(tints.keys().next().value);
+    tints.set(key, canvas);
+    return canvas;
+  }
   const secondsFor = name => (manifest.transitions[name]?.frames ?? 24) / (manifest.fps ?? 12);
   // A clip plays its green twin when the venue is a same-day vortex and the clip has one.
   const fileFor = (name, green) => {
@@ -115,22 +153,23 @@ export function createE3TransitionState(manifest, {base = './e3-transitions/', o
     const file = fileFor(name, green), key = `${name}|${file}`;
     if (images.has(key) || !manifest.transitions[name]) return;
     const image = new Image();
-    const entry = {image, ready: false};
+    const entry = {image, canvas: null, ready: false};
     image.decoding = 'async';
-    image.onload = () => { entry.ready = true; onReady(); };
+    image.onload = () => { entry.canvas = alphaCanvas(image, null); entry.ready = true; onReady(); };
     images.set(key, entry);
     image.src = `${base}${file}`;
   }
   return {
     aspect: manifest.cell[1] / manifest.cell[0],
-    update(key, level, now, enabled = true, green = false) {
+    // green: the venue group has a same-day event. color: the venue's hologram color.
+    update(key, level, now, enabled = true, green = false, color = null) {
       const prev = last.get(key);
       last.set(key, level);
       if (!enabled || prev === undefined || prev === level) return;
       const path = e3TransitionPath(prev, level);
       if (!path.length) { active.delete(key); return; }
-      path.forEach(clip => ensureImage(clip.name, green));
-      active.set(key, {path, green, start: now, total: path.reduce((sum, clip) => sum + secondsFor(clip.name), 0) * 1000});
+      path.forEach(clip => ensureImage(clip.name, green && involvesVortex(clip.name) && Boolean(manifest.transitions[clip.name].greenFile)));
+      active.set(key, {path, green, color, start: now, total: path.reduce((sum, clip) => sum + secondsFor(clip.name), 0) * 1000});
     },
     current(key, now) {
       const run = active.get(key);
@@ -141,9 +180,16 @@ export function createE3TransitionState(manifest, {base = './e3-transitions/', o
       for (const clip of run.path) {
         const seconds = secondsFor(clip.name);
         if (remaining < seconds) {
-          const entry = images.get(`${clip.name}|${fileFor(clip.name, run.green)}`);
+          const twin = run.green && involvesVortex(clip.name) && Boolean(manifest.transitions[clip.name].greenFile);
+          const entry = images.get(`${clip.name}|${fileFor(clip.name, twin)}`);
           if (!entry?.ready) return null;
-          return {name: clip.name, progress: remaining / seconds, reverse: clip.reverse, image: entry.image};
+          // Same-day vortex clips use their green twin; other clips take the venue color, built once.
+          let image = entry.canvas;
+          if (!twin) {
+            const color = run.green && involvesVortex(clip.name) ? E3_SAME_DAY_GREEN : run.color;
+            if (color) image = tintedCanvas(entry, color);
+          }
+          return {name: clip.name, progress: remaining / seconds, reverse: clip.reverse, image};
         }
         remaining -= seconds;
       }
@@ -154,6 +200,8 @@ export function createE3TransitionState(manifest, {base = './e3-transitions/', o
     draw(ctx, transition, x, y, width, alpha = 1) {
       const height = width * (manifest.cell[1] / manifest.cell[0]);
       ctx.save();
+      // Reset the composite mode: earlier passes (building occlusion) can leave destination-out set.
+      ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = alpha;
       e3DrawTransitionFrame(ctx, transition.image, manifest, transition.name, transition.progress, transition.reverse, x, y, width, height);
       ctx.restore();
