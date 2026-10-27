@@ -119,7 +119,9 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
    item.row=row;item.model.setColor(row.color||'#FF00CC');
    const position=maplibre.MercatorCoordinate.fromLngLat(row.coordinates,row.altitude??0);
    item.root.position.set((position.x-origin.x)/unit,-(position.y-origin.y)/unit,(position.z-origin.z)/unit);
-   item.root.scale.setScalar(row.scaleMeters??18);
+   // Uniform size in meters, with an optional vertical stretch so a hologram can rise above local buildings.
+   const size=row.scaleMeters??18,stretch=row.heightScale??1;
+   item.root.scale.set(size,size,size*stretch);
   }
  }
  function release(root){const geometry=new Set(),material=new Set();root.traverse(node=>{if(node.geometry)geometry.add(node.geometry);for(const m of Array.isArray(node.material)?node.material:node.material?[node.material]:[])material.add(m);});geometry.forEach(g=>g.dispose());material.forEach(m=>m.dispose());}

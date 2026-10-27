@@ -9,7 +9,8 @@ import {eventCountdown,appendEventCountdown} from './event-countdown.js';
 import {planVenueStacks,drawVenueStacks,venueStackKey} from './e3-vortex-stack.js?v=20261026-lod';
 import {createE3TransitionState} from './e3-transitions.js?v=20261027-transitions';
 import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from './e3-venue-stack.js';
-import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN} from './e3-lod.js?v=20261026-lod';
+import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW} from './e3-lod.js?v=20261026-lod';
+import {createE3BlenderLayer} from './e3-blender-model.js';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
@@ -107,6 +108,24 @@ const portlandBridges=createPortlandBridgeLayer(maplibregl,terrainHeight);
 const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,terrainHeight,reduced);
 const citySparkles=createCitySparkles(maplibregl,terrainHeight,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
+// 3D Blender holograms: desktop only, Calm Mode and phones keep the 2D clip path.
+const E3_BLENDER_MAX_VISIBLE=6,E3_STAGE_TWEEN_MS=1400,E3_BLENDER_SCALE_M=6;
+// Height follows the local skyline: the tallest building within E3_CLEARANCE_RADIUS_M sets a vertical stretch.
+const E3_CLEARANCE_RADIUS_M=120,E3_CLEARANCE_METERS_PER_STRETCH=30,E3_CLEARANCE_MAX_STRETCH=4;
+function e3ClearanceMeters(coordinates,buildings){
+ const [lng,lat]=coordinates,mPerDegLat=111320,mPerDegLng=111320*Math.cos(lat*Math.PI/180);
+ let tallest=0;
+ for(const building of buildings){
+  const [bx,by]=building.center??[];
+  if(bx===undefined)continue;
+  const dx=(bx-lng)*mPerDegLng,dy=(by-lat)*mPerDegLat;
+  if(dx*dx+dy*dy<=E3_CLEARANCE_RADIUS_M*E3_CLEARANCE_RADIUS_M)tallest=Math.max(tallest,building.height||0);
+ }
+ return tallest;
+}
+const e3Blender=createE3BlenderLayer(maplibregl,{maxVisible:E3_BLENDER_MAX_VISIBLE});
+const e3Blender3D=new Map(),e3StageState=new Map();
+const e3StageValue=(st,now)=>{const t=Math.max(0,Math.min(1,(now-st.start)/E3_STAGE_TWEEN_MS)),e=t*t*(3-2*t);return st.from+(st.to-st.from)*e;};
 function installSceneExtras(){
  addLayers(map,[groundLightPools],'buildings');
  addLayers(map,[bridgeLayer],'skyline');
@@ -114,6 +133,7 @@ function installSceneExtras(){
  addLayers(map,[landmarkBuildings],'skyline');
  addLayers(map,[portlandLandmarks]);
  addLayers(map,[citySparkles]);
+ if(!coarsePointer)addLayers(map,[e3Blender]);
 }
 // Opening camera move: transition clips wait until the view has arrived. Levels still track during it.
 let e3LoadedAt=0,e3LastZoom=null,e3ZoomChangedAt=0,e3Opened=false;
@@ -618,10 +638,34 @@ function drawLights(fade,target=map,surface=lights){
   const key=lodGroupKey(item),depthM=eventDepthMeters(target,item.p,height,lodMetersPerPixel),onScreen=item.p.x>=0&&item.p.x<=width&&item.p.y>=0&&item.p.y<=height;
   const sameDay=e3IsSameDay(item.feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived));
   const group=lodGroups.get(key),color=venueItems.get(item.feature.properties.venueWaypointKey)?.feature.properties.color||item.feature.properties.venueAnchor?.color||item.feature.properties.color;
-  if(!group)lodGroups.set(key,{key,depthM,onScreen,sameDay,color});else{group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;group.sameDay=group.sameDay||sameDay;}
+  if(!group)lodGroups.set(key,{key,depthM,onScreen,sameDay,color,count:1,coordinates:item.feature.geometry.coordinates});else{group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;group.sameDay=group.sameDay||sameDay;group.count++;}
  }
  const lodLevels=assignE3Levels([...lodGroups.values()],e3LodPrevious);
  e3LodPrevious.clear();for(const [key,level] of lodLevels)e3LodPrevious.set(key,level);
+ // 3D stage per venue from the same LOD levels: mini=waypoint, compressed=raised waypoint, coin=raised puck, vortex.
+ // Non-same-day venues stop at coin. Same-day venues with several events use the double stack.
+ const blenderOn=!coarsePointer&&e3Blender.ready&&!reduced.matches;
+ const hadBlender=e3Blender3D.size>0;
+ e3Blender3D.clear();
+ if(blenderOn){
+  const picked=[...lodGroups.values()].filter(g=>g.onScreen&&lodLevels.get(g.key)).sort((a,b)=>Number(b.sameDay)-Number(a.sameDay)||a.depthM-b.depthM).slice(0,E3_BLENDER_MAX_VISIBLE);
+  const rows=picked.map(g=>{
+   const level=lodLevels.get(g.key);
+   let stage={mini:1,compressed:2,coin:3,vortex:4}[level]??1;
+   if(!g.sameDay&&stage>3)stage=3;
+   if(g.sameDay&&stage===4&&g.count>1)stage=5;
+   let st=e3StageState.get(g.key);
+   if(!st){st={from:stage,to:stage,start:frameNow};e3StageState.set(g.key,st);}
+   else if(st.to!==stage){st.from=e3StageValue(st,frameNow);st.to=stage;st.start=frameNow;}
+   e3Blender3D.set(g.key,true);
+   const clearance=e3ClearanceMeters(g.coordinates,surfaces.buildings??[]);
+   const heightScale=Math.min(E3_CLEARANCE_MAX_STRETCH,1+clearance/E3_CLEARANCE_METERS_PER_STRETCH);
+   return {key:g.key,coordinates:g.coordinates,color:g.sameDay&&stage>=4?E3_SAME_DAY_GREEN:(g.color||'#FF00CC'),stage:e3StageValue(st,frameNow),scaleMeters:E3_BLENDER_SCALE_M,heightScale};
+  });
+  for(const key of [...e3StageState.keys()])if(!lodGroups.has(key))e3StageState.delete(key);
+  e3Blender.setVenues(rows);
+  e3Blender.setMotion({seconds:frameNow/1000,reduced:false,active:true});
+ }else if(hadBlender)e3Blender.setVenues([]);
  const zoomNow=target.getZoom();
  if(zoomNow!==e3LastZoom){e3LastZoom=zoomNow;e3ZoomChangedAt=frameNow;}
  // Open once the view has been still for a moment after load. Later zooms always play clips.
@@ -867,6 +911,8 @@ function drawLights(fade,target=map,surface=lights){
     const planInfo=beaconPlans.get(feature.properties.key);
     // E3 transitions: while a venue's clip plays, the clip replaces its card and beam. Drawn once, in the sky pass.
     const transitionKey=venueStackKey(feature.properties)||feature.properties.key;
+    // Venues drawn by the 3D hologram skip the 2D card, beam and clip for this frame.
+    if(e3Blender3D.has(transitionKey)){e3TransitioningEvents.add(feature.properties.key);continue;}
     const transition=e3Transitions?.current(transitionKey,frameNow)??null;
     if(transition){
      e3TransitioningEvents.add(feature.properties.key);
