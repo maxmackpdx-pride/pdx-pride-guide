@@ -1,8 +1,8 @@
 import {EVENT_CLOCK_HEIGHT} from '../client/public/mapz-map/event-hologram-model.js';
 import {smoothCardVisibility,createEventCardLock} from '../client/public/mapz-map/event-card-motion.js';
-import {eventCardGeometry} from '../client/public/mapz-map/event-hologram-card.js';
+import {eventCardGeometry,eventDepthMeters,assignEventLodLevels} from '../client/public/mapz-map/event-hologram-card.js';
 import {eventCountdown} from '../client/public/mapz-map/event-countdown.js';
-import {hologramPresence,hologramCameraDrift,boundedHologramPosition} from '../client/public/mapz-map/hologram-presence.js';
+import {hologramPresence,hologramCameraDrift,boundedHologramPosition,HOLOGRAM_CAMERA_FOLLOW} from '../client/public/mapz-map/hologram-presence.js';
 import {groupBoardPins,drawBoardPin} from '../client/public/mapz-map/board-pins.js';
 import {eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from '../client/public/mapz-map/event-projection.js';
 import {eventNight} from '../client/public/mapz-map/event-night.js';
@@ -100,7 +100,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   const color='#FF00CC',feature={geometry:{coordinates:[-122.675,45.52]},properties:{key:'demo',kind:'event',demoOpen:true,name:'Musical Mondays',time:'9:00 PM',startsAtMs:Date.now()+720000,logo:'logo',phase:1,color,heightScale:1}};
   const logo={width:120,height:60,padding:1,outlined:'sky-logo',image:'artwork',silhouette:'mask'};
   const context=vm.createContext({window,parent:window,performance,EVENT_CLOCK_HEIGHT,eventCardLocks:new WeakMap(),createEventCardLock,rises:new Map(),folds:new Map(),lastBeaconKeys:new Set(),riseAmount:()=>1,foldAmount:()=>1,document:{getElementById:()=>null},map,lights:surface,devicePixelRatio:1,Intl,Date,Map,Set,Math,
-    smoothCardVisibility,eventCardGeometry,eventCountdown,hologramPresence,hologramCameraDrift,boundedHologramPosition,eventArtworkScale:()=>1,screenNeighborCounts,eventNight,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor,extrusionAmount:()=>1,attachedEventBeam:{draw:(_ctx,card,anchor)=>{operations.push('beam');projections.push({card,anchor});}},mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),viewTimeReceived:performance.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
+    smoothCardVisibility,eventCardGeometry,eventDepthMeters,assignEventLodLevels,eventLodPrevious:new Map(),HOLOGRAM_CAMERA_FOLLOW,eventCountdown,hologramPresence,hologramCameraDrift,boundedHologramPosition,eventArtworkScale:()=>1,screenNeighborCounts,eventNight,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor,extrusionAmount:()=>1,attachedEventBeam:{draw:(_ctx,card,anchor)=>{operations.push('beam');projections.push({card,anchor});}},mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),viewTimeReceived:performance.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
     featureProjection:{project:feature=>map.project(feature.geometry.coordinates)},updateSurfaces:()=>({buildings:[{}],reflections:[]}),waterBloom:{draw:noop},drawUserLocationGlow:noop,
     citySparkles:{update:noop},buildingGlitter:()=>[],opacityControl:{value:1},motionDelta:1/30,pulseTime:1,
     hologramLiftScale:.7,hologramArtworkScale:3.15,hologramLayouts:new WeakMap(),hologramLabelWidth:68.4,HOUSING_EVENT_HEIGHT_RATIO:1/3,
