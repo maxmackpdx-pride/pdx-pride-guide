@@ -116,6 +116,35 @@ export function drawEventCoinPuck(ctx,cx,cy,r,color,logo,seconds,reduced,alpha=1
  ctx.restore();
 }
 
+// E3 vortex: tilted rings with text bands spinning around them. The stage tilts
+// the flat rings by 16 degrees, so each ring is an ellipse with ry = r * sin(16deg).
+// Not wired into the live beam yet; the hourglass waist and beam feed come later.
+export const VORTEX_TILT=Math.sin(16*Math.PI/180);
+export function drawEventVortex(ctx,cx,cy,tiers,color,seconds=0,reduced=false,alpha=1){
+ ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+ for(const tier of tiers){
+  const {r,y=0,text='',n=12,fs=14,speed=5,dir=1,ink='#ffffff'}=tier;
+  const ry=r*VORTEX_TILT,ringCy=cy+y;
+  ctx.globalAlpha=alpha*.75;ctx.strokeStyle=color;ctx.lineWidth=1.5;
+  ctx.shadowColor=color;ctx.shadowBlur=10;
+  ctx.beginPath();ctx.ellipse(cx,ringCy,r,ry,0,0,Math.PI*2);ctx.stroke();
+  ctx.shadowBlur=0;
+  const chars=[...(text||'')];
+  if(!chars.length)continue;
+  const turn=reduced?0:(seconds/speed)*Math.PI*2*dir;
+  ctx.font=`900 ${fs}px 'Barlow Condensed', sans-serif`;
+  ctx.fillStyle=ink;
+  for(let i=0;i<n;i++){
+   const a=i/n*Math.PI*2+turn,ch=chars[i%chars.length];
+   const depth=(Math.sin(a)+1)/2;
+   ctx.globalAlpha=alpha*(.25+.75*depth);
+   ctx.save();ctx.translate(cx+Math.cos(a)*r,ringCy+Math.sin(a)*ry);
+   ctx.fillText(ch,0,0);ctx.restore();
+  }
+ }
+ ctx.restore();
+}
+
 export function createAttachedEventBeam(options={}){
  const film=createLightFilm();let disposed=false;
  const logo=options.logo,distance=options.distance||'close';
