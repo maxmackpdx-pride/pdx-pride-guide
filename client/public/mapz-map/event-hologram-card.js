@@ -72,32 +72,53 @@ export function appendEventCardFrame(item){
  const surface=document.createElement('span');surface.className='event-hologram-surface';surface.setAttribute('aria-hidden','true');surface.appendChild(svg);item.appendChild(surface);
 }
 
-// E3c 3D coin-puck, drawn on canvas. The design spins a two-faced coin on a 9s
-// helix and leans it toward the camera (fixed tilt, never edge-on or face-on).
-// Front face shows the logo, back face shows it mirrored. Ring only when no logo.
-export const COIN_SPIN_SECONDS=9, COIN_LEAN=.8;
+// E3c distance states, from E3c-Compressed.dc.html (not a generic coin):
+// close = the S2 shield with its glyph, yawing back and forth between -32 and +32
+// degrees on a 7s ease (the board's .pspin lean). far = the C1 mini shield: three
+// stacked outlines and a glyph dot, flat, no yaw.
+const S2_PATH='M-18 -32H18L26 -24V8Q22 28 0 48Q-22 28 -26 8V-24Z';
+const SKEW_Y=Math.tan(-1.5*Math.PI/180);
+export const COIN_YAW_DEG=32, COIN_LEAN_SECONDS=7;
+export function coinYaw(seconds,reduced){
+ if(reduced)return -COIN_YAW_DEG/2;
+ const p=((seconds/COIN_LEAN_SECONDS)%2+2)%2, tri=p<=1?p:2-p;
+ return -COIN_YAW_DEG+2*COIN_YAW_DEG*(1-Math.cos(Math.PI*tri))/2;
+}
 export function eventCoinPuckRadius(card){
  return Math.min(card.right-card.left,card.bottom-card.top)*.42;
 }
-export function drawEventCoinPuck(ctx,cx,cy,r,color,logo,seconds,reduced,alpha=1){
- const angle=reduced?0:(seconds/COIN_SPIN_SECONDS)*Math.PI*2;
- const spin=Math.cos(angle),front=spin>=0,width=Math.max(.6,r*Math.abs(spin)),height=r*COIN_LEAN;
- ctx.save();ctx.globalAlpha=alpha;
- ctx.beginPath();ctx.ellipse(cx,cy,width,height,0,0,Math.PI*2);
- ctx.fillStyle='#05090e';ctx.fill();
- ctx.lineWidth=Math.max(1,r*.05);ctx.strokeStyle=color;ctx.shadowColor=color;ctx.shadowBlur=r*.35;ctx.stroke();
- if(logo&&logo.complete&&logo.naturalWidth){
-  const mark=r*.66,mw=mark*Math.abs(spin),mh=mark*COIN_LEAN;
-  ctx.shadowBlur=0;ctx.beginPath();ctx.ellipse(cx,cy,width*.9,height*.9,0,0,Math.PI*2);ctx.clip();
-  ctx.translate(cx,cy);ctx.scale(front?1:-1,1);
-  ctx.drawImage(logo,-mw/2,-mh/2,Math.max(.5,mw),mh);
+export function drawEventCoinPuck(ctx,cx,cy,r,color,logo,seconds,reduced,alpha=1,distance='close'){
+ const shield=new Path2D(S2_PATH);
+ const hasLogo=logo&&logo.complete&&logo.naturalWidth;
+ ctx.save();ctx.globalAlpha=alpha;ctx.translate(cx,cy);
+ if(distance==='far'){
+  const k=r*.0215;
+  ctx.scale(k,k);ctx.transform(1,SKEW_Y,0,1,0,0);
+  for(const [dx,op,w,glow] of [[1.6,.4,2.4,false],[.8,.6,2.4,false],[0,1,5,true]]){
+   ctx.save();ctx.translate(dx,0);ctx.globalAlpha=alpha*op;
+   ctx.fillStyle='#050506';ctx.strokeStyle=color;ctx.lineWidth=w;ctx.lineJoin='round';
+   if(glow){ctx.shadowColor=color;ctx.shadowBlur=6;}
+   ctx.fill(shield);ctx.stroke(shield);ctx.restore();
+  }
+  ctx.save();ctx.shadowColor=color;ctx.shadowBlur=6;ctx.fillStyle=color;
+  ctx.beginPath();ctx.arc(0,-6,7,0,Math.PI*2);ctx.fill();ctx.restore();
+ }else{
+  const k=r*.0174,yaw=coinYaw(seconds,reduced),cosY=Math.cos(yaw*Math.PI/180),front=cosY>=0;
+  ctx.scale(Math.max(.02,Math.abs(cosY))*k,k);
+  ctx.fillStyle='#050506';ctx.strokeStyle=color;ctx.lineWidth=1.2/k;ctx.lineJoin='round';
+  ctx.shadowColor=color;ctx.shadowBlur=r*.12;
+  ctx.fill(shield);ctx.stroke(shield);
+  ctx.shadowBlur=0;
+  if(hasLogo){
+   ctx.save();ctx.scale(front?1:-1,1);ctx.drawImage(logo,-14,-16,28,28);ctx.restore();
+  }
  }
  ctx.restore();
 }
 
 export function createAttachedEventBeam(options={}){
  const film=createLightFilm();let disposed=false;
- const logo=options.logo;
+ const logo=options.logo,distance=options.distance||'close';
  return {
   draw(ctx,card,anchor,seconds,phase,reduced,color){
    if(disposed||ctx.globalAlpha<=.001||anchor.y-card.bottom<4)return;
@@ -130,7 +151,7 @@ export function createAttachedEventBeam(options={}){
     }
    }
    const coinR=eventCoinPuckRadius(card);
-   drawEventCoinPuck(ctx,card.x,(card.top+card.bottom)/2,coinR,color,logo,clock,reduced,alpha);
+   drawEventCoinPuck(ctx,card.x,(card.top+card.bottom)/2,coinR,color,logo,clock,reduced,alpha,distance);
    const radius=Math.max(5,9*card.scale),source=ctx.createRadialGradient(anchor.x,anchor.y,0,anchor.x,anchor.y,radius);
    source.addColorStop(0,'#ffffff');source.addColorStop(.15,color+'dd');source.addColorStop(1,color+'00');
    ctx.globalAlpha=alpha;ctx.fillStyle=source;ctx.fillRect(anchor.x-radius,anchor.y-radius,radius*2,radius*2);ctx.restore();
