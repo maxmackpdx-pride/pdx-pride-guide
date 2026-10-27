@@ -740,7 +740,7 @@ function drawLights(fade,target=map,surface=lights){
   // Far mini badge: pinned straight above its venue's beam anchor, so the beam always lands on the pin.
   if(item.lodLevel==='mini'){
    const anchor=eventBeamAnchor(target,surfaces,venueItems.get(feature.properties.venueWaypointKey)||{feature,p}),scale=item.offset.scale*grow*item.planScale;
-   card=eventCardGeometry(anchor.x,anchor.y-(E3_MINI_RISE_PX+EVENT_CARD_HEIGHT/2)*scale,scale);
+   card=eventCardGeometry(anchor.x,anchor.y-E3_MINI_RISE_PX-EVENT_CARD_HEIGHT*scale/2,scale);
   }
   return [feature.properties.key,{...card,key:feature.properties.key,opacity:coreAlpha*grow,locked:Boolean(item.cardLocked),far:item.offset.scale*grow<.6*cardPresentationScale}];
  }));
@@ -876,11 +876,9 @@ function drawLights(fade,target=map,surface=lights){
      lightsContext.save();lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*(presence?.opacity??1)*bloomScale*cardAlpha;
      const straight=planInfo?.beam;
      if(planInfo?.level==='mini'){
-      // Far: one straight beam and one cached badge. No glow film, no countdown, nothing animated.
+      // Far: one straight beam here, and one cached badge in the sky pass below. No glow film, no countdown, nothing animated.
       lightsContext.strokeStyle=beamColor;lightsContext.lineWidth=1.2;lightsContext.lineCap='round';lightsContext.globalAlpha*=.8;
       lightsContext.beginPath();lightsContext.moveTo(beamAnchor.x,beamAnchor.y);lightsContext.lineTo(card.x,card.bottom);lightsContext.stroke();
-      lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*(presence?.opacity??1)*bloomScale*cardAlpha;
-      drawEventMiniBadge(lightsContext,card,beamColor,lightsContext.globalAlpha,dpr);
      }else if(straight){
       // Step 6: one straight segment from this venue's own ground point. It never bends.
       lightsContext.strokeStyle=beamColor;lightsContext.lineWidth=1.6;lightsContext.lineCap='round';
@@ -889,7 +887,8 @@ function drawLights(fade,target=map,surface=lights){
      lightsContext.restore();continue;
     }
     // The far mini badge is canvas-only, so it has no HTML card.
-    if(planInfo?.level==='mini')continue;
+    // Drawn in the sky pass, after building occlusion, like the other floating artwork.
+    if(planInfo?.level==='mini'){drawEventMiniBadge(lightsContext,card,beamColor,Math.min(1,fade*beamAlpha)*(presence?.opacity??1)*bloomScale*cardAlpha,dpr);continue;}
     // Steps 3 and 6 never show a countdown. Step 3.5 shows the round logo coin. The nearest same-day event keeps its countdown.
     eventLabels.push({...card,projectionColor,avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,
      name:feature.properties.name,venueName:feature.properties.venueName||'',time:feature.properties.time,

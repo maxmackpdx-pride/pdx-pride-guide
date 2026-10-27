@@ -31,8 +31,9 @@ export const E3_LOD_KEEP_BIAS = .9;
 export const E3_MINI_SCALE_NEAR = E3_COMPRESSED_SCALE;
 export const E3_MINI_SCALE_FAR = .2;
 export const E3_MINI_FAR_M = 9000;
-// Mini badge sits this many pixels (at scale 1) straight above its anchor.
-export const E3_MINI_RISE_PX = 70;
+// The mini badge floats this many screen pixels straight above its beam anchor, so it clears the
+// venue's own waypoint head (about 68 px tall) and the beam always lands on the pin.
+export const E3_MINI_RISE_PX = 76;
 // An event is "same day" when it starts within this window, or has begun.
 export const E3_SAME_DAY_MS = 24 * 3600 * 1000;
 
