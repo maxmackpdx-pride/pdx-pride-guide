@@ -110,6 +110,8 @@ const citySparkles=createCitySparkles(maplibregl,terrainHeight,{visibleCore:true
 const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
 // 3D Blender holograms: desktop only, Calm Mode and phones keep the 2D clip path.
 const E3_BLENDER_MAX_VISIBLE=6,E3_STAGE_TWEEN_MS=1400,E3_BLENDER_SCALE_M=6;
+// Tucker said skip the skyline-height idea for now. Flip to true to stretch each hologram above local buildings.
+const E3_BLENDER_SKYLINE_HEIGHT=false;
 // Height follows the local skyline: the tallest building within E3_CLEARANCE_RADIUS_M sets a vertical stretch.
 const E3_CLEARANCE_RADIUS_M=120,E3_CLEARANCE_METERS_PER_STRETCH=30,E3_CLEARANCE_MAX_STRETCH=4;
 function e3ClearanceMeters(coordinates,buildings){
@@ -658,8 +660,7 @@ function drawLights(fade,target=map,surface=lights){
    if(!st){st={from:stage,to:stage,start:frameNow};e3StageState.set(g.key,st);}
    else if(st.to!==stage){st.from=e3StageValue(st,frameNow);st.to=stage;st.start=frameNow;}
    e3Blender3D.set(g.key,true);
-   const clearance=e3ClearanceMeters(g.coordinates,surfaces.buildings??[]);
-   const heightScale=Math.min(E3_CLEARANCE_MAX_STRETCH,1+clearance/E3_CLEARANCE_METERS_PER_STRETCH);
+   const heightScale=E3_BLENDER_SKYLINE_HEIGHT?Math.min(E3_CLEARANCE_MAX_STRETCH,1+e3ClearanceMeters(g.coordinates,surfaces.buildings??[])/E3_CLEARANCE_METERS_PER_STRETCH):1;
    return {key:g.key,coordinates:g.coordinates,color:g.sameDay&&stage>=4?E3_SAME_DAY_GREEN:(g.color||'#FF00CC'),stage:e3StageValue(st,frameNow),scaleMeters:E3_BLENDER_SCALE_M,heightScale};
   });
   for(const key of [...e3StageState.keys()])if(!lodGroups.has(key))e3StageState.delete(key);

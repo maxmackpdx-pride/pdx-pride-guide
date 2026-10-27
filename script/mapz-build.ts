@@ -32,6 +32,8 @@ export async function prepareMapz(publicRoot:string) {
   let html=fs.readFileSync(htmlPath,'utf8');
   html=html.replace(/<link rel="modulepreload"[^>]+>/g,'');
   html=html.replace(/<script type="module"[^>]+><\/script>/g,'');
+  // The bundle inlines three, so the dev import map is dead weight here and must not point at a second copy.
+  html=html.replace(/<script type="importmap">[\s\S]*?<\/script>/g,'');
   const replacements:Array<[RegExp,string]>=[[/\.\.\/home-flight\/vendor\/maplibre-gl-5\.6\.2\.js/g,assets.maplibre],[/\.\.\/home-flight\/vendor\/maplibre-gl-5\.6\.2\.css/g,assets.maplibreCss],[/\.\/vendor\/maplibre-contour-0\.1\.0\.js/g,assets.contour],[/\.\/studio\.css\?[^" ]+/g,assets.style],[/\.\/mapz-perf-preload\.js\?[^" ]+/g,assets.perf]];
   for(const [pattern,value] of replacements)html=html.replace(pattern,value);
   html=html.replace('</head>',`<link rel="modulepreload" href="${assets.script}"></head>`).replace('</body>',`<script type="module" src="${assets.script}"></script></body>`);
