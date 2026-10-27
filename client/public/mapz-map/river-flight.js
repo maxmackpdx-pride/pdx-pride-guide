@@ -1,4 +1,5 @@
-import {eventCardGeometry,appendEventCardFrame,updateEventCardGlitch,createAttachedEventBeam,eventDepthMeters,eventLodLevel} from './event-hologram-card.js';
+import {eventCardGeometry,appendEventCardFrame,updateEventCardGlitch,createAttachedEventBeam,eventDepthMeters,assignEventLodLevels} from './event-hologram-card.js';
+let eventLodPrevious=new Map();
 import {EVENT_CARD_WIDTH,EVENT_CARD_HEIGHT,EVENT_CLOCK_HEIGHT} from './event-hologram-model.js';
 import { groupBoardPins, drawBoardPin } from './board-pins.js';
 import {addLayers} from '../map-foundation/layers.js';
@@ -690,6 +691,10 @@ function drawLights(fade,target=map,surface=lights){
  const visibleEventCards=new Set(visibleHologramLabels([...eventCards.values()],selectedKey,width,height,retainedCards,120).map(card=>card.key));
  const extensionSlots=new Map(),branchCounts=new Map();
  for(const {feature} of ordered){const row=feature.properties;if((row.waypointFamily==='mizzed'||row.waypointFamily==='gigz')&&row.venueWaypointKey)branchCounts.set(row.venueWaypointKey,(branchCounts.get(row.venueWaypointKey)||0)+1);}
+ // Level of detail per event: distance bands, then a cap on full-vortex waypoints in view.
+ const lodMetersPerPixel=40075016.686*Math.cos(target.getCenter().lat*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
+ const eventLodLevels=assignEventLodLevels(beacons.map(item=>({key:item.feature.properties.key,depthM:eventDepthMeters(target,item.p,height,lodMetersPerPixel),onScreen:item.p.x>=0&&item.p.x<=width&&item.p.y>=0&&item.p.y<=height})),eventLodPrevious);
+ eventLodPrevious=eventLodLevels;
  for(const pass of [0,1]){
   if(pass===1){
    // Ground light and projection beams sit behind solid buildings. Floating
@@ -811,10 +816,7 @@ function drawLights(fade,target=map,surface=lights){
     const beamColor=venueItems.get(feature.properties.venueWaypointKey)?.feature.properties.color||feature.properties.venueAnchor?.color||color;
     if(pass===0){
      lightsContext.save();lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*(presence?.opacity??1)*bloomScale*cardAlpha;
-     const lodDepth=eventDepthMeters(target,parent.p,height,40075016.686*Math.cos(target.getCenter().lat*Math.PI/180)/(512*Math.pow(2,target.getZoom())));
-     const lodLevel=eventLodLevel(offset?.lodLevel,lodDepth);
-     if(offset)offset.lodLevel=lodLevel;
-     attachedEventBeam.draw(lightsContext,card,beamAnchor,pulseTime,phase,reduced.matches,beamColor,lodLevel);
+     attachedEventBeam.draw(lightsContext,card,beamAnchor,pulseTime,phase,reduced.matches,beamColor,eventLodLevels.get(feature.properties.key)??'coin');
      lightsContext.restore();continue;
     }
     eventLabels.push({...card,projectionColor,avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,

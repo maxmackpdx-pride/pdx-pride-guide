@@ -216,6 +216,22 @@ export function eventLodLevel(current,depthM,{full=FULL_VORTEX_MAX_M,coin=COIN_M
  return names[rank];
 }
 
+// Density: the full vortex is earned by near waypoints in a sparse view. Among
+// the waypoints on screen, at most maxFull stay vortex, nearest first; the rest
+// step down to coin. A current vortex gets a small preference so two
+// near-equal waypoints do not swap slots every frame.
+export const MAX_FULL_VORTEX=3;
+export function assignEventLodLevels(entries,previous=new Map(),{maxFull=MAX_FULL_VORTEX,full=FULL_VORTEX_MAX_M,coin=COIN_MAX_M,band=EVENT_LOD_BAND}={}){
+ const levels=new Map();
+ for(const {key,depthM,onScreen} of entries){
+  levels.set(key,eventLodLevel(previous.get(key),depthM,{full,coin,band}));
+ }
+ const candidates=entries.filter(e=>e.onScreen&&levels.get(e.key)==='vortex')
+  .sort((a,b)=>a.depthM*(previous.get(a.key)==='vortex'?.9:1)-b.depthM*(previous.get(b.key)==='vortex'?.9:1));
+ candidates.slice(maxFull).forEach(e=>levels.set(e.key,'coin'));
+ return levels;
+}
+
 export function createAttachedEventBeam(options={}){
  const film=createLightFilm();let disposed=false;
  const logo=options.logo,distance=options.distance||'close';
