@@ -62,3 +62,101 @@ export function e3DrawTransitionFrame(ctx, image, manifest, name, progress, reve
   ctx.drawImage(image, cell.sx, cell.sy, cell.sw, cell.sh, x - width / 2, y - height / 2, width, height);
   return true;
 }
+
+// Step graph built from the clips. Every clip is a forward edge; the clips already cover both
+// directions of each step pair, so no clip needs reversing at runtime.
+function stepPairs() {
+  return Object.keys(CLIP_BY_PAIR).map(pair => pair.split('>'));
+}
+
+/**
+ * Clip sequence from one step to another, shortest first (breadth-first over the clip graph).
+ * Returns [] when from === to or the steps are not connected. Each entry is {name, reverse:false}.
+ */
+export function e3TransitionPath(from, to) {
+  if (from === to || !E3_TRANSITION_STEPS.includes(from) || !E3_TRANSITION_STEPS.includes(to)) return [];
+  const edges = stepPairs();
+  const previous = new Map([[from, null]]);
+  const queue = [from];
+  while (queue.length && !previous.has(to)) {
+    const step = queue.shift();
+    for (const [a, b] of edges) {
+      if (a === step && !previous.has(b)) { previous.set(b, step); queue.push(b); }
+    }
+  }
+  if (!previous.has(to)) return [];
+  const steps = [];
+  for (let step = to; step !== from; step = previous.get(step)) steps.unshift(step);
+  const path = [];
+  let at = from;
+  for (const next of steps) { path.push({name: CLIP_BY_PAIR[`${at}>${next}`], reverse: false}); at = next; }
+  return path;
+}
+
+/**
+ * Per-venue transition state for the live map. One instance per map.
+ *   update(key, level, now, enabled)  call once per frame with each venue's current level.
+ *   current(key, now)                 {name, progress, reverse} while a clip plays, else null.
+ *   isPlaying()                       true while any clip is still running (keep frames coming).
+ * Clips that have not finished loading return null, so the swap stays hard until they are ready.
+ * `base` is the URL of the e3-transitions folder; `onReady` runs when an atlas loads.
+ */
+export function createE3TransitionState(manifest, {base = './e3-transitions/', onReady = () => {}} = {}) {
+  const last = new Map();
+  const active = new Map();
+  const images = new Map();
+  const secondsFor = name => (manifest.transitions[name]?.frames ?? 24) / (manifest.fps ?? 12);
+  // A clip plays its green twin when the venue is a same-day vortex and the clip has one.
+  const fileFor = (name, green) => {
+    const clip = manifest.transitions[name];
+    return green && clip.greenFile ? clip.greenFile : clip.file;
+  };
+  function ensureImage(name, green) {
+    const file = fileFor(name, green), key = `${name}|${file}`;
+    if (images.has(key) || !manifest.transitions[name]) return;
+    const image = new Image();
+    const entry = {image, ready: false};
+    image.decoding = 'async';
+    image.onload = () => { entry.ready = true; onReady(); };
+    images.set(key, entry);
+    image.src = `${base}${file}`;
+  }
+  return {
+    aspect: manifest.cell[1] / manifest.cell[0],
+    update(key, level, now, enabled = true, green = false) {
+      const prev = last.get(key);
+      last.set(key, level);
+      if (!enabled || prev === undefined || prev === level) return;
+      const path = e3TransitionPath(prev, level);
+      if (!path.length) { active.delete(key); return; }
+      path.forEach(clip => ensureImage(clip.name, green));
+      active.set(key, {path, green, start: now, total: path.reduce((sum, clip) => sum + secondsFor(clip.name), 0) * 1000});
+    },
+    current(key, now) {
+      const run = active.get(key);
+      if (!run) return null;
+      const elapsed = now - run.start;
+      if (elapsed >= run.total) { active.delete(key); return null; }
+      let remaining = elapsed / 1000;
+      for (const clip of run.path) {
+        const seconds = secondsFor(clip.name);
+        if (remaining < seconds) {
+          const entry = images.get(`${clip.name}|${fileFor(clip.name, run.green)}`);
+          if (!entry?.ready) return null;
+          return {name: clip.name, progress: remaining / seconds, reverse: clip.reverse, image: entry.image};
+        }
+        remaining -= seconds;
+      }
+      return null;
+    },
+    isPlaying() { return active.size > 0; },
+    // Draw one playing clip centered at (x, y), `width` px wide. One drawImage per call.
+    draw(ctx, transition, x, y, width, alpha = 1) {
+      const height = width * (manifest.cell[1] / manifest.cell[0]);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      e3DrawTransitionFrame(ctx, transition.image, manifest, transition.name, transition.progress, transition.reverse, x, y, width, height);
+      ctx.restore();
+    },
+  };
+}

@@ -37,28 +37,32 @@
    "duration_s": 2.0,
    "file": "04-Logo-coin-to-single-vortex.webp",
    "columns": 6,
-   "rows": 4
+   "rows": 4,
+   "greenFile": "04-Logo-coin-to-single-vortex-green.webp"
   },
   "05-Single-vortex-to-double-stack": {
    "frames": 24,
    "duration_s": 2.0,
    "file": "05-Single-vortex-to-double-stack.webp",
    "columns": 6,
-   "rows": 4
+   "rows": 4,
+   "greenFile": "05-Single-vortex-to-double-stack-green.webp"
   },
   "06-Double-stack-to-single-vortex": {
    "frames": 24,
    "duration_s": 2.0,
    "file": "06-Double-stack-to-single-vortex.webp",
    "columns": 6,
-   "rows": 4
+   "rows": 4,
+   "greenFile": "06-Double-stack-to-single-vortex-green.webp"
   },
   "07-Single-vortex-to-logo-coin": {
    "frames": 24,
    "duration_s": 2.0,
    "file": "07-Single-vortex-to-logo-coin.webp",
    "columns": 6,
-   "rows": 4
+   "rows": 4,
+   "greenFile": "07-Single-vortex-to-logo-coin-green.webp"
   },
   "08-Logo-coin-to-compressed": {
    "frames": 24,

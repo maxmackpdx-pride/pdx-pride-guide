@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
-import {e3TransitionClip,e3TransitionFrame,e3TransitionCell,E3_TRANSITION_STEPS} from '../client/public/mapz-map/e3-transitions.js';
+import {e3TransitionClip,e3TransitionFrame,e3TransitionCell,e3TransitionPath,E3_TRANSITION_STEPS} from '../client/public/mapz-map/e3-transitions.js';
 
 const dir = new URL('../client/public/mapz-map/e3-transitions/', import.meta.url);
 const manifest = JSON.parse(readFileSync(new URL('manifest.json', dir), 'utf8'));
@@ -43,4 +43,18 @@ test('the atlas manifest matches the files on disk and every frame has a cell', 
     assert.ok(last.sy + last.sh <= clip.rows * manifest.cell[1]);
   }
   assert.equal(Object.keys(manifest.transitions).length, 10);
+});
+
+test('every LOD step change has a clip path, both directions, and no-op pairs have none', () => {
+  const names = path => path.map(clip => clip.name);
+  assert.deepEqual(names(e3TransitionPath('coin', 'vortex')), ['04-Logo-coin-to-single-vortex']);
+  assert.deepEqual(names(e3TransitionPath('vortex', 'coin')), ['07-Single-vortex-to-logo-coin']);
+  assert.deepEqual(names(e3TransitionPath('compressed', 'coin')), ['03-Compressed-to-logo-coin']);
+  assert.deepEqual(names(e3TransitionPath('coin', 'compressed')), ['08-Logo-coin-to-compressed']);
+  // Mini has no direct clip to compressed or coin, so the path walks through the waypoint.
+  assert.deepEqual(names(e3TransitionPath('mini', 'compressed')), ['01-Mini-badge-to-waypoint', '02-Waypoint-to-compressed']);
+  assert.deepEqual(names(e3TransitionPath('compressed', 'mini')), ['09-Compressed-to-waypoint', '10-Waypoint-to-mini-badge']);
+  assert.equal(e3TransitionPath('vortex', 'mini').length, 4);
+  assert.deepEqual(e3TransitionPath('coin', 'coin'), []);
+  assert.deepEqual(e3TransitionPath('nope', 'coin'), []);
 });
