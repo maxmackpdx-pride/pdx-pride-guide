@@ -7,10 +7,10 @@ import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../ma
 import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventCountdown,appendEventCountdown} from './event-countdown.js';
 import {planVenueStacks,drawVenueStacks,venueStackKey} from './e3-vortex-stack.js?v=20261026-lod';
-import {createE3TransitionState} from './e3-transitions.js?v=20261027-e3-3d';
+import {createE3TransitionState} from './e3-transitions.js?v=20261027-e3-ring';
 import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from './e3-venue-stack.js';
-import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase} from './e3-lod.js?v=20261027-e3-3d';
-import {createE3BlenderLayer} from './e3-blender-model.js?v=20261027-e3-3d';
+import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingText,e3CountdownText,e3NearestSameDayEvent} from './e3-lod.js?v=20261027-e3-ring';
+import {createE3BlenderLayer} from './e3-blender-model.js?v=20261027-e3-ring';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
@@ -645,7 +645,8 @@ function drawLights(fade,target=map,surface=lights){
   // The 3D hologram stands where the 2D pin does (the venue's place item), and takes the venue's logo.
   const isEventArt=url=>/\/icons\/event\.svg(?:[?#]|$)/.test(url||'');
   const logoUrl=[item.feature.properties.logo,venueItem?.feature.properties.waypointLogo,venueItem?.feature.properties.logo].find(url=>url&&!isEventArt(url))||'';
-  if(!group)lodGroups.set(key,{key,depthM,onScreen,sameDay,color,count:1,coordinates:item.feature.geometry.coordinates,anchorItem:venueItem||item,logoUrl});else{group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;group.sameDay=group.sameDay||sameDay;group.count++;if(!group.logoUrl)group.logoUrl=logoUrl;}
+  const eventInfo={startsAtMs:item.feature.properties.startsAtMs,name:item.feature.properties.name,time:item.feature.properties.time,venueName:item.feature.properties.venueName};
+  if(!group)lodGroups.set(key,{key,depthM,onScreen,sameDay,color,count:1,coordinates:item.feature.geometry.coordinates,anchorItem:venueItem||item,logoUrl,events:[eventInfo]});else{group.events.push(eventInfo);group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;group.sameDay=group.sameDay||sameDay;group.count++;if(!group.logoUrl)group.logoUrl=logoUrl;}
  }
  const lodLevels=assignE3Levels([...lodGroups.values()],e3LodPrevious);
  e3LodPrevious.clear();for(const [key,level] of lodLevels)e3LodPrevious.set(key,level);
@@ -679,7 +680,11 @@ function drawLights(fade,target=map,surface=lights){
    const coordinates=e3AnchorCoordinates(anchor.feature.geometry.coordinates,window.__mapzPlaceSnaps);
    const altitude=anchor.feature.properties.kind==='place'?placezHoverMeters(anchorRoof??PLACEZ_HOVER_METERS,blenderExtrusion):(anchorRoof??9)*blenderExtrusion;
    const logoEntry=g.logoUrl?venueLogos.get(g.logoUrl):null;
+   // Same-day vortex copy: lettering around the rings and a live countdown for the nearest same-day event (the 2D rule and clock).
+   const lodNow=viewTime+Math.max(0,frameNow-viewTimeReceived),sameDayVortex=g.sameDay&&stage>=4,nearest=sameDayVortex?e3NearestSameDayEvent(g.events,lodNow):null;
    rows.push({key:g.key,coordinates,altitude,color:g.sameDay&&stage>=4?E3_SAME_DAY_GREEN:(g.color||'#FF00CC'),stage:e3StageValue(st,frameNow),scaleMeters:e3BlenderScaleMeters(blenderZoom,{viewHeight:height,latitude:g.coordinates[1],pitch:blenderPitch}),heightScale,
+    ringText:nearest?e3RingText({venueName:nearest.venueName||anchor.feature.properties.name||'',eventNames:g.events.filter(e=>e.name&&e3IsSameDay(e.startsAtMs,lodNow)).sort((a,b)=>a.startsAtMs-b.startsAtMs).slice(0,2).map(e=>e.name),time:nearest.time}):'',
+    countdown:nearest?e3CountdownText(nearest.startsAtMs,lodNow):'',
     logo:logoEntry?{key:g.logoUrl,image:logoEntry.image,width:logoEntry.width,height:logoEntry.height}:null});
   }
   for(const key of [...e3StageState.keys()])if(!e3Blender3D.has(key))e3StageState.delete(key);

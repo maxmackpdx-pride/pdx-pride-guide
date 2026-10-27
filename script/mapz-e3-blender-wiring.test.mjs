@@ -5,9 +5,9 @@ import {
   e3CrowdTargets,e3CrowdEase,e3BlenderFootprintPx,E3_CROWD_MIN_SCALE,E3_CROWD_READABLE_PX,E3_CROWD_RELEASE,E3_BLENDER_MAX_SCREEN_FRACTION,E3_BLENDER_ZOOM_OUT_GROWTH,
   e3BlenderSizeFactor,e3BlenderScaleMeters,e3BlenderScreenHeightPx,e3BlenderTakesOver,e3AnchorCoordinates,e3CoordKey,placezHoverMeters,
   E3_BLENDER_SCALE_CLOSE_M,E3_BLENDER_SCALE_CLOSE_ZOOM,E3_BLENDER_SIZE_FULL_ZOOM,E3_BLENDER_SIZE_FAR_ZOOM,E3_BLENDER_SIZE_FAR,
-  E3_BLENDER_MIN_SCREEN_PX,PLACEZ_HOVER_METERS,PLACEZ_ROOF_CLEARANCE_METERS,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,
+  E3_BLENDER_MIN_SCREEN_PX,PLACEZ_HOVER_METERS,e3RingText,e3CountdownText,e3NearestSameDayEvent,E3_RING_TEXT_MAX_CHARS,PLACEZ_ROOF_CLEARANCE_METERS,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,
 } from '../client/public/mapz-map/e3-lod.js';
-import {blenderLogoFace} from '../client/public/mapz-map/e3-blender-model.js';
+import {blenderLogoFace,blenderBandFace,blenderPlateFace} from '../client/public/mapz-map/e3-blender-model.js';
 
 test('3D hologram scale: 24 m at close zoom, 20% at zoom 12, full size from 15.5, smooth in between', () => {
   assert.equal(E3_BLENDER_SCALE_CLOSE_M,24);
@@ -139,4 +139,56 @@ test('river-flight wires the new rules: no fixed 6 m scale, cancel clips for 3D 
   assert.match(source,/window\.__mapzPlaceSnaps!==e3SnapTable/);
   assert.match(source,/!e3StageTweenActive\)return;/,'an idle camera still renders frames while the stage morph runs');
   assert.match(source,/const E3_BLENDER_SKYLINE_HEIGHT=false;/);
+});
+
+test('text ring copy: venue, event titles, time, uppercase, middle dots, never an em dash, bounded length', () => {
+  assert.equal(e3RingText({venueName:'Sanctuary Club',eventNames:['Saturday Night'],time:'9:00 PM'}),'SANCTUARY CLUB \u00b7 SATURDAY NIGHT \u00b7 9:00 PM');
+  assert.equal(e3RingText({venueName:'Badlands',eventNames:['Badlands','Drag Bingo'],time:''}),'BADLANDS \u00b7 DRAG BINGO','duplicates are dropped');
+  const long=e3RingText({venueName:'A'.repeat(80),eventNames:['Late show'],time:'9 PM'});
+  assert.ok(long.length<=E3_RING_TEXT_MAX_CHARS,'a long venue name is cut');
+  assert.equal(long,'A'.repeat(E3_RING_TEXT_MAX_CHARS),'later parts that do not fit are skipped');
+  const dashed=e3RingText({venueName:'Pride \u2014 Night',eventNames:['A \u2013 B'],time:''});
+  assert.ok(!/[\u2012-\u2015]/.test(dashed),'no em or en dashes');
+  assert.equal(e3RingText({}),'');
+});
+
+test('countdown copy matches the 2D digital readout and follows the viewTime clock', () => {
+  const now=Date.UTC(2026,9,31,1,0,0);
+  assert.equal(e3CountdownText(now+3*3600e3+5e3,now),'03h : 00m : 05s');
+  assert.equal(e3CountdownText(now+3*3600e3,now+1e3),'02h : 59m : 59s','one second later it ticks');
+  assert.equal(e3CountdownText(now+20*60e3,now),'20m : 00s');
+  assert.equal(e3CountdownText(now-60e3,now),'LIVE');
+  assert.equal(e3CountdownText(NaN,now),'');
+});
+
+test('nearest same-day event: the soonest upcoming one keeps the countdown, later or far events never do', () => {
+  const now=1e12,H=3600e3;
+  const events=[{startsAtMs:now+5*H,name:'late'},{startsAtMs:now+2*H,name:'soon'},{startsAtMs:now+30*H,name:'tomorrow'},{startsAtMs:now-H,name:'begun'}];
+  assert.equal(e3NearestSameDayEvent(events,now).name,'soon');
+  assert.equal(e3NearestSameDayEvent([events[2]],now),null,'beyond 24h there is no same-day event');
+  assert.equal(e3NearestSameDayEvent([events[3],events[2]],now).name,'begun');
+});
+
+test('ring band and countdown plate show only on the vortex and the double stack, and rise into place', () => {
+  for (const stage of [0,1,2,3]) {
+    assert.equal(blenderBandFace({y:[2.9,2.9,2.9,2.9,2.88,3.72],r:[.6,.6,.6,.6,1.1,1.1],h:[.4,.4,.4,.4,.44,.44],a:[0,0,0,0,1,1]},stage).opacity,0);
+    assert.equal(blenderPlateFace(stage).opacity,0,`no countdown plate at stage ${stage}`);
+  }
+  assert.equal(blenderPlateFace(4).opacity,1);
+  assert.equal(blenderPlateFace(5).opacity,1);
+  assert.ok(blenderPlateFace(5).y>blenderPlateFace(4).y,'the plate rides above the top screen of the stack');
+  const mid=blenderPlateFace(3.5);
+  assert.ok(mid.opacity>0&&mid.opacity<1,'fades in during the coin to vortex morph');
+});
+
+test('river-flight and the model wire the ring text and countdown without fake dates', async () => {
+  const flight=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
+  const model=await readFile(new URL('../client/public/mapz-map/e3-blender-model.js',import.meta.url),'utf8');
+  assert.match(flight,/ringText:nearest\?e3RingText\(/);
+  assert.match(flight,/countdown:nearest\?e3CountdownText\(nearest\.startsAtMs,lodNow\)/);
+  assert.match(flight,/sameDayVortex=g\.sameDay&&stage>=4/);
+  assert.match(model,/item\.model\.setRingText\(row\.ringText/);
+  assert.match(model,/item\.model\.setCountdown\(row\.countdown/);
+  assert.match(model,/ringTexture\?\.dispose\(\);ringFarTexture\?\.dispose\(\);countdownTexture\?\.dispose\(\)/,'canvas textures are disposed');
+  assert.ok(!/Date\.now\s*=|fakeNow|mockNow/.test(flight+model),'no fake clock in the product');
 });

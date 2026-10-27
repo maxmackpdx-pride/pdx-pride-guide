@@ -14,6 +14,7 @@
 //
 // Authored from the Mapz same-day work (Claude, PR #49): eventDepthMeters, the
 // hysteresis band and the density cap, rebuilt on top of the E3 steps.
+import {eventCountdown} from './event-countdown.js';
 import {e3CoinPlan,e3CompressedPlan,E3_COMPRESSED_SCALE,E3_COIN_ZOOM,E3_COIN_ZOOM_SPAN} from './e3-venue-stack.js';
 
 // Distance thresholds in meters, scaled x10 by Tucker's approved retune.
@@ -258,4 +259,53 @@ export function e3CrowdTargets(items, current = new Map()) {
 export function e3CrowdEase(current, target, dt, rate = E3_CROWD_EASE_RATE) {
   const next = current + (target - current) * (1 - Math.exp(-rate * Math.max(0, dt)));
   return Math.abs(next - target) < .002 ? target : next;
+}
+
+// ---------------------------------------------------------------------------
+// Same-day vortex copy: the text ring and the countdown. Pure, so they are unit tested.
+// ---------------------------------------------------------------------------
+// Longest text ring, in characters. The ring is repeated around the band, so a short line just repeats.
+export const E3_RING_TEXT_MAX_CHARS = 56;
+export const E3_RING_SEPARATOR = ' \u00b7 ';
+
+/**
+ * Words lettered around the vortex rings, uppercase, like the 2D clip: the venue name, then the event title(s),
+ * then the start time when it still fits. Middle dots separate them. No em dashes.
+ */
+export function e3RingText({venueName = '', eventNames = [], time = ''} = {}) {
+  const seen = new Set(), parts = [];
+  for (const raw of [venueName, ...eventNames, time]) {
+    const part = String(raw || '').replace(/[\u2012-\u2015]/g, '-').replace(/\s+/g, ' ').trim().toUpperCase();
+    if (!part || seen.has(part)) continue;
+    const next = [...parts, part].join(E3_RING_SEPARATOR);
+    // The first part always stays (a long venue name is cut at the limit); later ones only if they fit.
+    if (parts.length && next.length > E3_RING_TEXT_MAX_CHARS) continue;
+    seen.add(part);
+    parts.push(part.length > E3_RING_TEXT_MAX_CHARS ? part.slice(0, E3_RING_TEXT_MAX_CHARS).trim() : part);
+  }
+  return parts.join(E3_RING_SEPARATOR);
+}
+
+/**
+ * Countdown shown on top of a same-day vortex, in the 2D label's digital form: "02h : 44m : 47s", or "LIVE".
+ * Built from eventCountdown(), so it follows the same clock and rules as the 2D card.
+ */
+export function e3CountdownText(startsAtMs, nowMs) {
+  const status = eventCountdown(startsAtMs, nowMs, true);
+  if (!status) return '';
+  if (status === 'STARTED') return 'LIVE';
+  const parts = [...String(status).matchAll(/(\d+)\s*(D|H|M|S)/g)];
+  if (!parts.length) return '';
+  return parts.map(part => `${part[1].padStart(2, '0')}${part[2].toLowerCase()}`).join(' : ');
+}
+
+/** The nearest same-day event of a venue group: the soonest upcoming one, else the latest that has already begun. */
+export function e3NearestSameDayEvent(events, nowMs) {
+  let upcoming = null, begun = null;
+  for (const event of events || []) {
+    if (!e3IsSameDay(event.startsAtMs, nowMs)) continue;
+    if (event.startsAtMs >= nowMs) { if (!upcoming || event.startsAtMs < upcoming.startsAtMs) upcoming = event; }
+    else if (!begun || event.startsAtMs > begun.startsAtMs) begun = event;
+  }
+  return upcoming || begun;
 }
