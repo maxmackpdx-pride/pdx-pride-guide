@@ -115,7 +115,10 @@ function installSceneExtras(){
  addLayers(map,[portlandLandmarks]);
  addLayers(map,[citySparkles]);
 }
+// Opening camera move: transition clips wait until the view has arrived. Levels still track during it.
+let e3LoadedAt=0,e3LastZoom=null,e3ZoomChangedAt=0,e3Opened=false;
 map.on('load',()=>{
+ e3LoadedAt=performance.now();
  loaded=true;startup.phase('map-loaded');cameraDirty=true;updateSceneStatus();scheduleFrame();
  if(parent!==window)revealTime=3;
  const markBase=()=>{
@@ -619,7 +622,11 @@ function drawLights(fade,target=map,surface=lights){
  }
  const lodLevels=assignE3Levels([...lodGroups.values()],e3LodPrevious);
  e3LodPrevious.clear();for(const [key,level] of lodLevels)e3LodPrevious.set(key,level);
- if(e3Transitions)for(const group of lodGroups.values())e3Transitions.update(group.key,lodLevels.get(group.key),frameNow,!reduced.matches,Boolean(group.sameDay),group.color);
+ const zoomNow=target.getZoom();
+ if(zoomNow!==e3LastZoom){e3LastZoom=zoomNow;e3ZoomChangedAt=frameNow;}
+ // Open once the view has been still for a moment after load. Later zooms always play clips.
+ if(!e3Opened&&e3LoadedAt>0&&frameNow-e3LoadedAt>1500&&frameNow-e3ZoomChangedAt>1000)e3Opened=true;
+ if(e3Transitions)for(const group of lodGroups.values())e3Transitions.update(group.key,lodLevels.get(group.key),frameNow,!reduced.matches&&e3Opened,Boolean(group.sameDay),group.color);
  const e3TransitioningEvents=new Set(),e3TransitionDrawn=new Set();
  const lodNowMs=viewTime+Math.max(0,frameNow-viewTimeReceived),lodRepresented=new Set();
  for(let beaconIndex=0;beaconIndex<beacons.length;beaconIndex++){
