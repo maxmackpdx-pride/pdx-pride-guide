@@ -16,11 +16,11 @@
 // hysteresis band and the density cap, rebuilt on top of the E3 steps.
 import {e3CoinPlan,e3CompressedPlan,E3_COMPRESSED_SCALE,E3_COIN_ZOOM,E3_COIN_ZOOM_SPAN} from './e3-venue-stack.js';
 
-// Distance thresholds in meters. At pitch 0 and screen center one meter bound is
-// roughly: 450 m = zoom 17, 1400 m = zoom 15.5, 2800 m = zoom 14.5.
-export const E3_LOD_FULL_MAX_M = 450;
-export const E3_LOD_COIN_MAX_M = 1400;
-export const E3_LOD_COMPRESSED_MAX_M = 2800;
+// Distance thresholds in meters, scaled x10 by Tucker's approved retune.
+// Keep these named bounds independent of the far/near presentation policy.
+export const E3_LOD_FULL_MAX_M = 4500;
+export const E3_LOD_COIN_MAX_M = 14000;
+export const E3_LOD_COMPRESSED_MAX_M = 28000;
 // A level only changes once the distance passes the boundary by this fraction.
 export const E3_LOD_BAND = .1;
 // Most venues that may show the full vortex at once. Nearest first.

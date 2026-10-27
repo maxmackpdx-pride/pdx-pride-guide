@@ -155,7 +155,8 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   }
   // Far away the event is one cached mini badge: no HTML card at all, and the level is remembered.
   context.map.project=()=>({x:450,y:300});context.map.getPitch=()=>55;
-  context.map.getZoom=()=>12;vm.runInContext('drawLights(1)',context);
+  // The approved x10 distance bands extend beyond zoom 12; exercise a genuinely far view.
+  context.map.getZoom=()=>8;vm.runInContext('drawLights(1)',context);
   assert.equal(labels.length,0,'far events draw a canvas badge, not an HTML card');
   assert.equal(context.e3LodPrevious.get('demo'),'mini');
   context.map.getZoom=()=>16.5;vm.runInContext('drawLights(1)',context);

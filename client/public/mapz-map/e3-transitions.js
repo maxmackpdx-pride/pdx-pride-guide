@@ -138,7 +138,15 @@ export function createE3TransitionState(manifest, {base = './e3-transitions/', o
   function tintedCanvas(entry, color) {
     const key = `${entry.image.src}|${color}`;
     if (tints.has(key)) return tints.get(key);
-    const canvas = alphaCanvas(entry.image, color);
+    const canvas = document.createElement('canvas');
+    canvas.width = entry.canvas.width;
+    canvas.height = entry.canvas.height;
+    const g = canvas.getContext('2d');
+    g.fillStyle = color;
+    g.fillRect(0, 0, canvas.width, canvas.height);
+    g.globalCompositeOperation = 'destination-in';
+    g.drawImage(entry.canvas, 0, 0);
+    g.globalCompositeOperation = 'source-over';
     if (tints.size >= TINT_LIMIT) tints.delete(tints.keys().next().value);
     tints.set(key, canvas);
     return canvas;
