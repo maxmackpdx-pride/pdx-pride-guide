@@ -116,7 +116,7 @@ test('base-city readiness uses idle or its bounded fallback without terrain or f
  const canvas={width:0,height:0};
  const context=vm.createContext({
   loaded:false,baseFrameRendered:false,cameraDirty:false,revealTime:0,
-  startup:{phase(){}},updateSceneStatus(){},scheduleFrame:()=>frames++,parent:{},
+  startup:{phase(){}},updateSceneStatus(){},scheduleFrame:()=>frames++,parent:{},performance:{now:()=>0},
   window:{setTimeout(fn,delay){assert.equal(delay,250);fallback=fn;}},
   map:{on(type,fn){assert.equal(type,'load');onLoad=fn;},once(type,fn){assert.equal(type,'idle');onIdle=fn;},getCanvas:()=>canvas},
  });
