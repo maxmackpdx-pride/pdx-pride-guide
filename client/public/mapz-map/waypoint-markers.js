@@ -36,8 +36,8 @@ function shellPath(family,cx,cy,r){
  const x0=cx-r,x1=cx+r,y0=cy-r,y1=cy+r,q=r*.2;
  if(family==='house')return `M${x0+q},${cy-r*.15} ${cx},${y0} ${x1-q},${cy-r*.15}V${y1-q}L${cx},${y1+r*.68} ${x0+q},${y1-q}Z`;
  if(family==='speech')return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}L${x1-q},${y1}H${cx+q},${cx},${y1+r*.68} ${cx-q},${y1}H${x0+q}L${x0},${y1-q}V${y0+q}Z`;
- // place and shield share the chamfered head with an integrated tip
- return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}L${cx},${y1+r*.68} ${x0},${y1-q}V${y0+q}Z`;
+ // place and shield share the E3 shield: chamfered top, straight sides, curved point.
+ return `M${x0+q},${y0}H${x1-q}L${x1},${y0+q}V${y1-q}Q${x1-q*.4},${y1+r*.42} ${cx},${y1+r*.68}Q${x0+q*.4},${y1+r*.42} ${x0},${y1-q}V${y0+q}Z`;
 }
 /** Adult Placez use the same shell and logo/type glyphs as other Placez. Never restore an age-label marker. */
 export function waypointFamilyShell(waypointFamily){
@@ -118,25 +118,14 @@ export function drawWaypointHead(ctx,geometry,color,icon,logo,selected,alpha=1,f
  if(extra.scoop)drawScoop(ctx,x,y,size,color,extra.scoop);
  ctx.restore();
 }
-/** Placez shaft: much narrower than event hologram beams (~61px). Rises from roof or disk. */
-export function drawWaypointFoot(ctx,geometry,color,materials,drawBeam,alpha=1,selected=false){
- const amount=cityAmount();
- const {x,bottom,anchorY}=geometry;
- // Place half-width before drawProjectionBeam: events stay wide; places stay a thin needle.
- const placeHalf=selected?3.2:1.8;
+/** E3 cluster badge: a mini shield with the count, drawn at the head's top-right corner. */
+export function drawMiniShield(ctx,x,y,r,color,count){
  ctx.save();
- if(amount>0.18){
-  // Roof mode: thin shaft only — no ground disk/orb. Building color is the footprint.
-  ctx.globalAlpha=alpha*(selected?.88:.52);
-  drawBeam(ctx,materials.beams.get(color),{x,y:anchorY},x,bottom,placeHalf,1);
- }else{
-  const disk=1-amount;
-  ctx.globalAlpha=alpha*(selected?.9:.55)*disk;
-  drawBeam(ctx,materials.beams.get(color),{x,y:anchorY},x,bottom,placeHalf,1);
-  // 60% smaller than the 44/28 ground orbs. Heads and shafts stay put.
-  const size=selected?18:11,orb=materials.orbs.get(color);
-  if(orb){ctx.globalAlpha=alpha*(selected?1:.75)*disk;ctx.drawImage(orb,x-size/2,anchorY-size/2,size,size);}
- }
+ const path=new Path2D(shellPath('shield',x,y,r));
+ ctx.fillStyle='#050506';ctx.fill(path);
+ ctx.lineWidth=1.4;ctx.strokeStyle=color;ctx.lineJoin='round';ctx.stroke(path);
+ ctx.fillStyle='#FFFFFF';ctx.font=`800 ${Math.round(r*1.2)}px "Barlow Condensed","Arial Narrow",sans-serif`;
+ ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),x,y-r*.1);
  ctx.restore();
 }
 /** Stable artwork: compact symbols at overview; readable logos on approach/selection. */

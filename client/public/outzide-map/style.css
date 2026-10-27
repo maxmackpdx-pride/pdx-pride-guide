@@ -204,3 +204,41 @@ html,body{height:100%;overflow:hidden;background:#080c0c}main,.workspace{positio
 .post-composer[data-kind="MISSED_CONNECTION"] .primary{background:linear-gradient(135deg,var(--pink),var(--orange));color:var(--bg)}
 .post-composer .mc-note{margin:0;font-size:12px;color:var(--muted)}
 .post-composer [hidden]{display:none}
+
+/* Outzide map heads, matched to the E3 artboards: an arrowhead shield (tip on the spot),
+   a white glyph with the kind color glow, and a ghost offset for the layered shell.
+   Shell = ::before (outline, kind color) + ::after (dark fill with scanlines).
+   Sizes: --w is the shield width; height keeps the artboard ratio (68 / 46). */
+.outzide-shell .waypoint-icon .waypoint-head{--w:28px;position:absolute;left:-13px;bottom:calc(25px * 2 / 3);width:var(--w);height:calc(var(--w) * 68 / 46);display:block;overflow:visible;isolation:isolate;padding:0;margin:0;background:none;border:0;border-radius:0;box-shadow:none;color:#fff;transform:none;filter:drop-shadow(3px 0 0 color-mix(in srgb,var(--c) 45%,transparent)) drop-shadow(0 0 4px var(--c)) drop-shadow(0 0 12px color-mix(in srgb,var(--c) 45%,transparent))}
+.outzide-shell .waypoint-icon.special .waypoint-head{--w:34px;left:-16px;bottom:calc(39px * 2 / 3)}
+.outzide-shell .waypoint-icon.selected .waypoint-head,.outzide-shell .waypoint-icon.selected.special .waypoint-head{--w:44px;left:-21px;bottom:calc(70px * 2 / 3)}
+.outzide-shell .waypoint-icon .waypoint-head::before,.outzide-shell .waypoint-icon .waypoint-head::after{content:"";position:absolute;display:block;opacity:1;filter:none;mix-blend-mode:normal;animation:none;will-change:auto}
+.outzide-shell .waypoint-icon .waypoint-head::before{inset:0;z-index:0;background:var(--c);clip-path:polygon(17.39% 0,82.61% 0,100% 11.76%,100% 41.18%,95.24% 53.68%,85.33% 67.65%,70.24% 83.09%,50% 100%,29.76% 83.09%,14.67% 67.65%,4.76% 53.68%,0 41.18%,0 11.76%)}
+.outzide-shell .waypoint-icon .waypoint-head::after{inset:2px;z-index:1;background:repeating-linear-gradient(to bottom,transparent 0 3px,color-mix(in srgb,var(--c) 18%,transparent) 3px 4px),#050506;clip-path:polygon(17.39% 0,82.61% 0,100% 11.76%,100% 41.18%,95.24% 53.68%,85.33% 67.65%,70.24% 83.09%,50% 100%,29.76% 83.09%,14.67% 67.65%,4.76% 53.68%,0 41.18%,0 11.76%)}
+.outzide-shell .waypoint-icon .waypoint-head.stay::before{background:linear-gradient(135deg,#E40303,#FF8C00,#FFED00,#008026,#24408E,#F6A9B8,#55CDFC)}
+.outzide-shell .waypoint-icon .waypoint-head>svg{position:absolute;z-index:2;left:50%;top:43%;width:calc(var(--w) * .68);height:calc(var(--w) * .68);transform:translate(-50%,-50%);color:#fff;background:none;border-radius:0;box-shadow:none;filter:drop-shadow(0 0 4px var(--c));margin:0}
+.outzide-shell .waypoint-icon .waypoint-head .closure-symbol{z-index:4}
+
+/* Winter: the cap becomes the artboard snowcone, a drifting band of snow above the shield. */
+.outzide-shell .waypoint-icon .waypoint-head .waypoint-snowcap{display:block;position:absolute;z-index:3;left:50%;right:auto;top:auto;bottom:calc(100% - 2px);width:52px;height:20px;margin-left:-26px;border-radius:0;clip-path:none;filter:none;transform:none;overflow:hidden;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='52' height='20' viewBox='0 0 52 20'><g fill='%23f0fbff'><circle cx='6' cy='3' r='1.1'/><circle cx='16' cy='10' r='1.4'/><circle cx='26' cy='2' r='1'/><circle cx='36' cy='12' r='1.3'/><circle cx='46' cy='4' r='1.1'/><circle cx='11' cy='16' r='1.2'/><circle cx='31' cy='17' r='1.4'/><circle cx='44' cy='18' r='1'/></g></svg>") 0 -20px/52px 20px repeat-y;animation:outz-snowcone 1.8s linear infinite}
+@keyframes outz-snowcone{from{background-position:0 -20px}to{background-position:0 0}}
+
+/* Clusters: the mini badge (40 by 54, the artboard C1 size) with the count in the shield. */
+.outzide-shell .waypoint-icon.waypoint-cluster .waypoint-head{--w:40px;display:block;left:-20px;bottom:27px;width:40px;height:54px;min-width:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;transform:none}
+.outzide-shell .waypoint-icon.waypoint-cluster .waypoint-head::before,.outzide-shell .waypoint-icon.waypoint-cluster .waypoint-head::after{display:block}
+.outzide-shell .waypoint-icon.waypoint-cluster .waypoint-head>svg{width:14px;height:14px;top:34%;color:#fff}
+.outzide-shell .waypoint-icon.waypoint-cluster .waypoint-head>.cluster-total{position:absolute;z-index:2;left:0;right:0;top:62%;transform:translateY(-50%);font:700 16px/1 var(--body);font-variant-numeric:tabular-nums;letter-spacing:0;text-align:center;color:#fff;text-shadow:0 0 6px var(--c),0 1px 2px #000}
+.outzide-shell .waypoint-icon.waypoint-cluster .waypoint-head.mixed>.cluster-total{top:50%}
+
+/* Closure keeps the shell and recolors it red; the closure symbol carries the status. */
+.outzide-shell .waypoint-icon.closure-pulse .waypoint-head{background:none;box-shadow:none;border-color:transparent}
+.outzide-shell .waypoint-icon.closure-pulse .waypoint-head::before{opacity:1;background:var(--status-closed)}
+
+/* Selected: the shield grows and its glow breathes. Reduced motion and calm mode keep it still. */
+@keyframes outz-head-select{0%,100%{filter:drop-shadow(3px 0 0 color-mix(in srgb,var(--c) 45%,transparent)) drop-shadow(0 0 4px var(--c)) drop-shadow(0 0 16px color-mix(in srgb,var(--c) 60%,transparent))}50%{filter:drop-shadow(3px 0 0 color-mix(in srgb,var(--c) 45%,transparent)) drop-shadow(0 0 4px var(--c)) drop-shadow(0 0 28px color-mix(in srgb,var(--c) 60%,transparent))}}
+@media (prefers-reduced-motion:no-preference){.outzide-shell .waypoint-icon.selected .waypoint-head{animation:outz-head-select 2.4s ease-in-out infinite}}
+@media (prefers-reduced-motion:reduce){.outzide-shell .waypoint-icon .waypoint-head .waypoint-snowcap{animation:none;background-position:0 0}}
+
+/* Mobile light mode drops filters for speed, but the shell itself still has to draw. */
+body.mobile-light .outzide-shell .waypoint-icon .waypoint-head{filter:none;animation:none}
+body.mobile-light .outzide-shell .waypoint-icon .waypoint-head::before,body.mobile-light .outzide-shell .waypoint-icon .waypoint-head::after{display:block}

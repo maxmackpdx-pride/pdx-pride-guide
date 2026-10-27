@@ -33,7 +33,7 @@ import {screenNeighborCounts} from './screen-neighbors.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointHeadSize,waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawWaypointFoot,waypointArtwork,waypointFamilyShell} from './waypoint-markers.js?v=20261005-gap';
+import {waypointHeadSize,waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawMiniShield,waypointArtwork,waypointFamilyShell} from './waypoint-markers.js?v=20261005-gap';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -744,9 +744,8 @@ function drawLights(fade,target=map,surface=lights){
    if(cluster&&cluster.leader.feature.properties.key!==feature.properties.key)continue;
    const selected=feature.properties.key===selectedKey;
    const geometry=waypointGeometry(p,selected,placezHoverLift(target,feature,surfaces),feature.properties.key);
-   if(pass===0)drawWaypointFoot(lightsContext,geometry,color,hologramMaterials,drawProjectionBeam,coreAlpha,selected);
-   else{
-    // Heads remain readable above buildings; their beam is masked at street level.
+   if(pass!==0){
+    // Heads only: E3 waypoints have no tail or ground beam. Heads sit above buildings.
     const logo=feature.properties.waypointLogo?venueLogos.get(feature.properties.waypointLogo)?.image:null;
     const shell=waypointFamilyShell(feature.properties.waypointFamily);
     const icon=typeIcons.get(feature.properties.typeIcon)?.light;
@@ -762,8 +761,7 @@ function drawLights(fade,target=map,surface=lights){
   if(!isBar){
    const selected=feature.properties.key===selectedKey;
    const geometry=waypointGeometry(p,selected,placezHoverLift(target,feature,surfaces),feature.properties.key);
-   if(pass===0)drawWaypointFoot(lightsContext,geometry,color,hologramMaterials,drawProjectionBeam,coreAlpha,selected);
-   else{
+   if(pass!==0){
     drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,coreAlpha,'place');
     hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color});
    }
@@ -1190,8 +1188,9 @@ function drawBranchChip(ctx,x,y,text,color,alpha){
  ctx.lineWidth=1.5;ctx.strokeStyle=color;ctx.stroke();
  ctx.fillStyle='#FFFFFF';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,x,y+.5);ctx.restore();
 }
+/** Cluster count: an E3 mini shield at the head's top-right, no label. */
 function drawClusterCount(ctx,x,y,count,color,size=28){
- ctx.save();ctx.translate(x+size/2-1.5,y-size/2+1.5);ctx.fillStyle='#071018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,10.5,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 11px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),0,.5);ctx.restore();
+ drawMiniShield(ctx,x+size/2-1.5,y-size/2+1.5,8,color,count);
 }
 let sequence=0,phases=new Map(),dataGeneration=0,paletteKey='';
 async function setListings(rows){

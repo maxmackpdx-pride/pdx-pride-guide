@@ -7,6 +7,7 @@
   --neon-orange:#FF6600;
   --neon-red:#FF2400;
   --neon-blue:#0044FF;
+  --neon-violet:#8800FF;
   --green-acid:#39FF14;
 }
 .outzide-shell .waypoint-head{color:var(--c);border-color:var(--c)}
