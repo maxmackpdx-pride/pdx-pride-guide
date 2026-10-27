@@ -7,8 +7,8 @@ import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../ma
 import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventCountdown,appendEventCountdown} from './event-countdown.js';
 import {planVenueStacks,drawVenueStacks,venueStackKey} from './e3-vortex-stack.js?v=20261026-lod';
-import {e3StepFor,e3NearbyCount,e3NearbyPlacement} from './e3-venue-stack.js';
-import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX} from './e3-lod.js?v=20261026-lod';
+import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from './e3-venue-stack.js';
+import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN} from './e3-lod.js?v=20261026-lod';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
@@ -31,7 +31,7 @@ import {logoCoverage,logoTone,authoredLogoMode} from './logo-mask.js';
 import {eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
-import {hologramPresence,hologramCameraDrift,boundedHologramPosition,HOLOGRAM_CAMERA_FOLLOW} from './hologram-presence.js?v=20261026-lod';
+import {hologramPresence,HOLOGRAM_CAMERA_FOLLOW} from './hologram-presence.js?v=20261026-lod';
 import {screenNeighborCounts} from './screen-neighbors.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
@@ -624,7 +624,7 @@ function drawLights(fade,target=map,surface=lights){
   // E3 levels by true camera distance: vortex (nearest), coin, compressed, and the cached mini badge when far.
   const groupKey=lodGroupKey(item),group=lodGroups.get(groupKey);
   item.lodLevel=lodLevels.get(groupKey)||'coin';
-  const plan=e3LodPlan(item.lodLevel,{hasLogo:Boolean(item.feature.properties.logo),sameDay:e3IsSameDay(item.feature.properties.startsAtMs,lodNowMs),depthM:group?.depthM,zoom:target.getZoom()});
+  const plan=e3LodPlan(item.lodLevel,{hasLogo:Boolean(item.feature.properties.logo),sameDay:e3IsSameDay(item.feature.properties.startsAtMs,lodNowMs),zoom:target.getZoom()});
   item.plan=plan;item.planScale=plan.scale;
   // One mini badge per venue. The other events at that venue stay hidden at this distance.
   item.lodHidden=false;
@@ -668,8 +668,8 @@ function drawLights(fade,target=map,surface=lights){
   if(cameraMoving){prev.vx=(prev.vx||0)*HOLOGRAM_CAMERA_FOLLOW;prev.vy=(prev.vy||0)*HOLOGRAM_CAMERA_FOLLOW;}
   settleValue(prev,'scale','vs',item.scaleGoal,2.8,motionDelta);
   prev.scale=Math.min(prev.scale,cardPresentationScale);layout.set(key,prev);
-  const drift=hologramCameraDrift(prev,item.p,item.feature.properties.phase,motionDelta,reduced.matches);
-  prev.cameraX=drift.x;prev.cameraY=drift.y;prev.anchorX=item.p.x;prev.anchorY=item.p.y;
+  // No camera drift: holograms stay on their projected pin (Tucker, 2026-10-26).
+  prev.cameraX=0;prev.cameraY=0;prev.anchorX=item.p.x;prev.anchorY=item.p.y;
   item.offset=prev;
  }
  for(const item of beacons){
@@ -685,13 +685,7 @@ function drawLights(fade,target=map,surface=lights){
  item.x=item.p.x+(item.x-item.p.x)*emergence;
  item.y=item.p.y+(item.y-item.p.y)*emergence;
  }
- // Keep headers near their venue first, then resolve the complete artwork/title
- // footprint. A post-layout clamp would collapse separated headers together.
- for(const item of beacons){
-  const clearance=item.halfHeight;
-  const position=boundedHologramPosition(item.p,{x:item.x,y:item.y+clearance+32*item.offset.scale},item.offset.scale,roofLift(target,item.feature,surfaces),skyCeiling);
-  item.x=position.x;item.y=position.y-clearance-32*item.offset.scale;
- }
+  // The sky clamp (boundedHologramPosition) is removed: holograms are not pushed down or sideways by the ceiling.
  // E3 Step 6: venues whose holograms crowd each other on screen. A stacked venue keeps its vortex place.
  const stackKeyOf=item=>venueStackKey(item.feature.properties);
  const stackCounts=new Map();
@@ -699,7 +693,8 @@ function drawLights(fade,target=map,surface=lights){
  const isStacked=item=>(stackCounts.get(stackKeyOf(item))||0)>1;
  const seenVenues=new Set(),venueRepresentatives=[];
  for(const item of beacons){const venue=stackKeyOf(item)||item.feature.properties.key;if(seenVenues.has(venue))continue;seenVenues.add(venue);venueRepresentatives.push(item);}
- const nearbyStep=e3StepFor({zoom:target.getZoom(),hasLogo:true,nearbyVenues:e3NearbyCount(venueRepresentatives)})==='nearby';
+ // Nearby is decided by the distance levels, not zoom: only venues already at the coin or compressed level compete.
+ const nearbyStep=e3NearbyCount(venueRepresentatives.filter(item=>item.lodLevel==='coin'||item.lodLevel==='compressed'))>=E3_NEARBY_MIN_VENUES;
  const clockHalf=item=>EVENT_CLOCK_HEIGHT*item.offset.scale/2;
  if(!cameraMoving){
   if(nearbyStep){
@@ -869,7 +864,7 @@ function drawLights(fade,target=map,surface=lights){
      continue;
     }
     const projectionColor=eventProjectionColor(feature.properties);
-    const beamColor=venueItems.get(feature.properties.venueWaypointKey)?.feature.properties.color||feature.properties.venueAnchor?.color||color;
+    const beamColor=planInfo?.plan?.countdown?E3_SAME_DAY_GREEN:venueItems.get(feature.properties.venueWaypointKey)?.feature.properties.color||feature.properties.venueAnchor?.color||color;
     // Stacked events draw no beam of their own; the venue stack carries the single beam.
     if(pass===0&&vortex.members.has(feature.properties.key))continue;
     if(pass===0){
@@ -958,7 +953,7 @@ function renderHologramLabels(labels){
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.dataset.hologramType=label.kind==='housing'?'':(label.hologramType||'puck');item.dataset.hologramFar=label.far?'true':'false';item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
   item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',labelComplement(label.projectionColor||label.color));item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${timeText}${statusText?`, ${statusText}`:""}`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);
-  const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.projectionColor,label.width,label.avatars,label.logo,!!venueLogos.get(label.logo),label.venueName,label.poster]);
+  const signature=JSON.stringify([label.kind,label.hologramType,label.name,label.time,label.color,label.projectionColor,label.width,label.avatars,label.logo,!!venueLogos.get(label.logo),label.venueName,label.poster]);
   if(item.dataset.signature!==signature){
    item.dataset.signature=signature;item.replaceChildren();
    if(label.cardHeight){
@@ -970,6 +965,8 @@ function renderHologramLabels(labels){
     if(logo&&!/\/icons\/event\.svg(?:[?#]|$)/.test(label.logo||'')){
      const canvas=document.createElement('canvas');canvas.width=logo.width;canvas.height=logo.height;
      canvas.style.aspectRatio=`${logo.width} / ${logo.height}`;canvas.getContext('2d').drawImage(logo.image,0,0);logoFace.appendChild(canvas);
+     // E3 Step 3.5 round coin: the venue logo is on both faces; CSS turns the coin on its vertical axis.
+     if(label.hologramType==='coin'){const back=document.createElement('span');back.className='event-hologram-logo-face event-hologram-coin-back';back.setAttribute('aria-hidden','true');const backCanvas=document.createElement('canvas');backCanvas.width=logo.width;backCanvas.height=logo.height;backCanvas.style.aspectRatio=canvas.style.aspectRatio;backCanvas.getContext('2d').drawImage(logo.image,0,0);back.appendChild(backCanvas);brand.appendChild(back);}
     }else{logoFace.textContent=label.venueName||'EVENT';}
     item.appendChild(brand);
    }
