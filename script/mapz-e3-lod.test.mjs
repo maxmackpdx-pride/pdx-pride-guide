@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {eventDepthMeters,e3LodLevel,assignE3Levels,e3MiniScale,e3LodPlan,e3IsSameDay,
-  E3_LOD_FULL_MAX_M,E3_LOD_COIN_MAX_M,E3_LOD_COMPRESSED_MAX_M,E3_LOD_BAND,E3_LOD_MAX_FULL,E3_MINI_SCALE_NEAR,E3_MINI_SCALE_FAR,E3_MINI_FAR_M} from '../client/public/mapz-map/e3-lod.js';
+  E3_LOD_FULL_MAX_M,E3_LOD_COIN_MAX_M,E3_LOD_COMPRESSED_MAX_M,E3_LOD_BAND,E3_LOD_MAX_FULL,E3_MINI_FULL_ZOOM,E3_MINI_FAR_ZOOM,E3_MINI_SCALE_FAR} from '../client/public/mapz-map/e3-lod.js';
 import {HOLOGRAM_CAMERA_FOLLOW} from '../client/public/mapz-map/hologram-presence.js';
 
 const map=pitch=>({getPitch:()=>pitch,transform:{cameraToCenterDistance:1000}});
@@ -42,12 +42,14 @@ test('only the nearest venues keep the full vortex, and a current vortex keeps i
   assert.equal(kept.get('a'),'vortex');assert.equal(kept.get('b'),'coin');
 });
 
-test('the mini badge shrinks smoothly from half size to 20% and the plan is cheap and static', () => {
-  assert.ok(Math.abs(e3MiniScale(E3_LOD_COMPRESSED_MAX_M)-E3_MINI_SCALE_NEAR)<1e-9);
-  assert.ok(Math.abs(e3MiniScale(E3_MINI_FAR_M)-E3_MINI_SCALE_FAR)<1e-9);
-  assert.ok(Math.abs(e3MiniScale(E3_MINI_FAR_M*5)-.2)<1e-9);
-  let last=Infinity;for(let d=E3_LOD_COMPRESSED_MAX_M;d<=E3_MINI_FAR_M;d+=300){const s=e3MiniScale(d);assert.ok(s<=last+1e-12);last=s;}
-  const plan=e3LodPlan('mini',{hasLogo:true,sameDay:true,depthM:5000});
+test('the mini badge is full size at zoom 15.5, 20% at zoom 12, and shrinks smoothly between', () => {
+  assert.equal(E3_MINI_FULL_ZOOM,15.5);assert.equal(E3_MINI_FAR_ZOOM,12);
+  assert.ok(Math.abs(e3MiniScale(15.5)-1)<1e-9);
+  assert.ok(Math.abs(e3MiniScale(16.5)-1)<1e-9);
+  assert.ok(Math.abs(e3MiniScale(12)-E3_MINI_SCALE_FAR)<1e-9);
+  assert.ok(Math.abs(e3MiniScale(9)-E3_MINI_SCALE_FAR)<1e-9);
+  let last=-Infinity;for(let z=12;z<=15.5;z+=.05){const s=e3MiniScale(z);assert.ok(s>=last-1e-12);last=s;}
+  const plan=e3LodPlan('mini',{hasLogo:true,sameDay:true,zoom:13});
   assert.equal(plan.shape,'badge');assert.equal(plan.countdown,false);assert.equal(plan.maxPerVenue,1);
 });
 

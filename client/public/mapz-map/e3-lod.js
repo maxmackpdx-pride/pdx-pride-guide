@@ -27,15 +27,19 @@ export const E3_LOD_BAND = .1;
 export const E3_LOD_MAX_FULL = 3;
 // A current vortex keeps its slot against a rival this much farther away.
 export const E3_LOD_KEEP_BIAS = .9;
-// The mini badge shrinks smoothly from half size to this fraction at the far end.
-export const E3_MINI_SCALE_NEAR = E3_COMPRESSED_SCALE;
+// The mini badge is full size at E3_MINI_FULL_ZOOM and closer, and shrinks smoothly to
+// E3_MINI_SCALE_FAR at E3_MINI_FAR_ZOOM and farther. Zoom-driven by design (Tucker, 2026-10-26).
+export const E3_MINI_FULL_ZOOM = 15.5;
+export const E3_MINI_FAR_ZOOM = 12;
 export const E3_MINI_SCALE_FAR = .2;
-export const E3_MINI_FAR_M = 9000;
 // The mini badge floats this many screen pixels straight above its beam anchor, so it clears the
 // venue's own waypoint head (about 68 px tall) and the beam always lands on the pin.
 export const E3_MINI_RISE_PX = 76;
 // An event is "same day" when it starts within this window, or has begun.
 export const E3_SAME_DAY_MS = 24 * 3600 * 1000;
+
+// Same-day vortexes and their beams are green (E3-Lifecycle board, #39FF14). Other levels keep the venue color.
+export const E3_SAME_DAY_GREEN = '#39FF14';
 
 export const E3_LOD_LEVELS = ['vortex', 'coin', 'compressed', 'mini'];
 const BOUNDS = () => [E3_LOD_FULL_MAX_M, E3_LOD_COIN_MAX_M, E3_LOD_COMPRESSED_MAX_M];
@@ -81,11 +85,11 @@ export function assignE3Levels(entries, previous = new Map(), {maxFull = E3_LOD_
   return levels;
 }
 
-/** Smooth shrink of the mini badge from half size to E3_MINI_SCALE_FAR. */
-export function e3MiniScale(depthM) {
-  const t = clamp01((depthM - E3_LOD_COMPRESSED_MAX_M) / (E3_MINI_FAR_M - E3_LOD_COMPRESSED_MAX_M));
+/** Smoothstep shrink of the mini badge: 1 at E3_MINI_FULL_ZOOM, E3_MINI_SCALE_FAR at E3_MINI_FAR_ZOOM. */
+export function e3MiniScale(zoom) {
+  const t = clamp01((zoom - E3_MINI_FAR_ZOOM) / (E3_MINI_FULL_ZOOM - E3_MINI_FAR_ZOOM));
   const eased = t * t * (3 - 2 * t);
-  return E3_MINI_SCALE_NEAR + (E3_MINI_SCALE_FAR - E3_MINI_SCALE_NEAR) * eased;
+  return E3_MINI_SCALE_FAR + (1 - E3_MINI_SCALE_FAR) * eased;
 }
 
 export function e3IsSameDay(startsAtMs, nowMs) {
@@ -93,9 +97,9 @@ export function e3IsSameDay(startsAtMs, nowMs) {
 }
 
 /** Plan for one lone event at a level. Venues with several events use the vortex stack instead. */
-export function e3LodPlan(level, {hasLogo = false, sameDay = false, depthM = E3_LOD_COIN_MAX_M, zoom = E3_COIN_ZOOM + E3_COIN_ZOOM_SPAN} = {}) {
+export function e3LodPlan(level, {hasLogo = false, sameDay = false, zoom = E3_COIN_ZOOM + E3_COIN_ZOOM_SPAN} = {}) {
   if (level === 'mini') {
-    const scale = e3MiniScale(depthM);
+    const scale = e3MiniScale(zoom);
     return {step: 'mini', shape: 'badge', scale, diameterPx: 0, logoOnly: true, countdown: false, maxPerVenue: 1};
   }
   if (level === 'vortex' && sameDay) {
