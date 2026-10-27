@@ -201,6 +201,7 @@ function shellFamily(id: WaypointId) {
   if (id === "zenegade" || id === "afterz") return "long";
   if (id === "hauz") return "house";
   if (id === "mizzed") return "speech";
+  if (id === "outz") return "arrow";
   if (ZAYDARK_USER_IDS.has(id)) return "zaydark";
   if (["venue", "bar", "club", "park", "cafe", "shop", "bath", "adult"].includes(id)) return "place";
   return "shield";
@@ -213,6 +214,14 @@ function shellPath(family: string, cx: number, cy: number, r: number) {
   if (family === "long") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${cy + r * .45}L${cx},${y1 + r * .68} ${x0},${cy + r * .45}V${y0 + q}Z`;
   if (family === "house") return `M${x0 + q},${cy - r * .15} ${cx},${y0} ${x1 - q},${cy - r * .15}V${y1 - q}L${cx},${y1 + r * .68} ${x0 + q},${y1 - q}Z`;
   if (family === "speech") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${y1 - q}L${x1 - q},${y1}H${cx + q}L${cx},${y1 + r * .68}L${cx - q},${y1}H${x0 + q}L${x0},${y1 - q}V${y0 + q}Z`;
+  // Outzide arrowhead (board OZ path): S2 cut corners ending in one point.
+  // Scaled so its width and bounds match the shield shell (u = r / 26).
+  if (family === "arrow") {
+    const u = r / 26;
+    const X = (x: number) => (cx + x * u).toFixed(2);
+    const Y = (y: number) => (cy - r + (y + 30) * u).toFixed(2);
+    return `M${X(-15)},${Y(-30)}H${X(15)}L${X(23)},${Y(-22)}V${Y(-2)}Q${X(21)},${Y(14)} ${X(0)},${Y(38)}Q${X(-21)},${Y(14)} ${X(-23)},${Y(-2)}V${Y(-22)}Z`;
+  }
   if (family === "zaydark") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${cy + r * .45}L${cx},${y1 + r * .68} ${x0},${cy + r * .45}V${y0 + q}Z`;
   return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${y1 - q}L${cx},${y1 + r * .68} ${x0},${y1 - q}V${y0 + q}Z`;
 }
@@ -251,7 +260,7 @@ export function waypointHtml(opts: WaypointOpts) {
   const r = D / 2 - sw / 2;
   const scoopR = D * 0.3;
   const scoopCy = scoop ? cy + r + scoopR * 0.55 : cy;
-  const integratedTip = ["long", "house", "speech", "zaydark", "place", "shield"].includes(family);
+  const integratedTip = ["long", "house", "speech", "zaydark", "place", "shield", "arrow"].includes(family);
   const attachY = scoop ? scoopCy + scoopR * 0.2 : cy + r * 0.62;
   const tipY = (scoop ? scoopCy + scoopR : cy + r) + D * 0.34;
   const tipW = D * 0.3;
