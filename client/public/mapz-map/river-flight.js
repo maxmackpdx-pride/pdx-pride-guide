@@ -7,10 +7,10 @@ import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../ma
 import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventCountdown,appendEventCountdown} from './event-countdown.js';
 import {planVenueStacks,drawVenueStacks,venueStackKey} from './e3-vortex-stack.js?v=20261026-lod';
-import {createE3TransitionState} from './e3-transitions.js?v=20261027-transitions';
+import {createE3TransitionState} from './e3-transitions.js?v=20261027-e3-3d';
 import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from './e3-venue-stack.js';
-import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW} from './e3-lod.js?v=20261026-lod';
-import {createE3BlenderLayer} from './e3-blender-model.js';
+import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase} from './e3-lod.js?v=20261027-e3-3d';
+import {createE3BlenderLayer} from './e3-blender-model.js?v=20261027-e3-3d';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
@@ -109,7 +109,8 @@ const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,terrainHeight,red
 const citySparkles=createCitySparkles(maplibregl,terrainHeight,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
 // 3D Blender holograms: desktop only, Calm Mode and phones keep the 2D clip path.
-const E3_BLENDER_MAX_VISIBLE=6,E3_STAGE_TWEEN_MS=1400,E3_BLENDER_SCALE_M=6;
+// Size follows zoom (e3BlenderScaleMeters in e3-lod.js): about 24 m at close zoom, 20% at zoom 12, full size at 15.5, capped to a third of the screen.
+const E3_BLENDER_MAX_VISIBLE=6,E3_STAGE_TWEEN_MS=1400;
 // Tucker said skip the skyline-height idea for now. Flip to true to stretch each hologram above local buildings.
 const E3_BLENDER_SKYLINE_HEIGHT=false;
 // Height follows the local skyline: the tallest building within E3_CLEARANCE_RADIUS_M sets a vertical stretch.
@@ -126,7 +127,7 @@ function e3ClearanceMeters(coordinates,buildings){
  return tallest;
 }
 const e3Blender=createE3BlenderLayer(maplibregl,{maxVisible:E3_BLENDER_MAX_VISIBLE});
-const e3Blender3D=new Map(),e3StageState=new Map();
+const e3Blender3D=new Map(),e3StageState=new Map(),e3CrowdFactor=new Map();
 const e3StageValue=(st,now)=>{const t=Math.max(0,Math.min(1,(now-st.start)/E3_STAGE_TWEEN_MS)),e=t*t*(3-2*t);return st.from+(st.to-st.from)*e;};
 function installSceneExtras(){
  addLayers(map,[groundLightPools],'buildings');
@@ -138,7 +139,7 @@ function installSceneExtras(){
  if(!coarsePointer)addLayers(map,[e3Blender]);
 }
 // Opening camera move: transition clips wait until the view has arrived. Levels still track during it.
-let e3LoadedAt=0,e3LastZoom=null,e3ZoomChangedAt=0,e3Opened=false;
+let e3LoadedAt=0,e3LastZoom=null,e3ZoomChangedAt=0,e3Opened=false,e3SnapTable=null,e3StageTweenActive=false;
 map.on('load',()=>{
  e3LoadedAt=performance.now();
  loaded=true;startup.phase('map-loaded');cameraDirty=true;updateSceneStatus();scheduleFrame();
@@ -239,16 +240,13 @@ function roofLift(target,feature,surfaces){
  const metersPerPixel=40075016.686*Math.cos(coordinates[1]*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
  return Math.max(12,(roof+12)/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180));
 }
-const PLACEZ_HOVER_METERS=3;
-const PLACEZ_ROOF_CLEARANCE_METERS=4;
 function placezHoverLift(target,feature,surfaces){
  const coordinates=feature.geometry.coordinates;
  const roof=surfaces.roofs?.get(feature.properties.phase)??PLACEZ_HOVER_METERS;
  // Match the waypoint to the same extrusion progress as its building. At full
  // extrusion, every Placez marker stays exactly four meters above its roof.
  const buildingVisibility=extrusionAmount(target);
- const roofHeight=Math.max(PLACEZ_HOVER_METERS,roof+PLACEZ_ROOF_CLEARANCE_METERS);
- const hoverMeters=PLACEZ_HOVER_METERS+(roofHeight-PLACEZ_HOVER_METERS)*buildingVisibility;
+ const hoverMeters=placezHoverMeters(roof,buildingVisibility);
  const metersPerPixel=40075016.686*Math.cos(coordinates[1]*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
  return hoverMeters/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
 }
@@ -588,6 +586,9 @@ function drawLights(fade,target=map,surface=lights){
  const tonight=eventNight(viewTime);
  const activeTonight=feature=>(feature.properties.eventNight||feature.properties.eventDay)===tonight||feature.properties.demoOpen===true;
  const emergenceFor=feature=>feature.properties.key===selectedKey||activeTonight(feature)?1:reveal;
+ // The 2D pin and the 3D hologram both stand on the snapped building point. When the snap table is rebuilt
+ // (building tiles arrive after the camera stopped), drop the cached projections so neither keeps a stale spot.
+ if(window.__mapzPlaceSnaps!==e3SnapTable){e3SnapTable=window.__mapzPlaceSnaps;featureProjection.invalidate();}
  const lights=surface,lightsContext=surface.getContext('2d');
  const surfaces=updateSurfaces(target);
  const width=window.innerWidth,height=window.innerHeight,dpr=Math.min(devicePixelRatio||1,typeof coarsePointer!=='undefined'&&coarsePointer?1.5:2);
@@ -639,39 +640,73 @@ function drawLights(fade,target=map,surface=lights){
  for(const item of beacons){
   const key=lodGroupKey(item),depthM=eventDepthMeters(target,item.p,height,lodMetersPerPixel),onScreen=item.p.x>=0&&item.p.x<=width&&item.p.y>=0&&item.p.y<=height;
   const sameDay=e3IsSameDay(item.feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived));
-  const group=lodGroups.get(key),color=venueItems.get(item.feature.properties.venueWaypointKey)?.feature.properties.color||item.feature.properties.venueAnchor?.color||item.feature.properties.color;
-  if(!group)lodGroups.set(key,{key,depthM,onScreen,sameDay,color,count:1,coordinates:item.feature.geometry.coordinates});else{group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;group.sameDay=group.sameDay||sameDay;group.count++;}
+  const venueItem=venueItems.get(item.feature.properties.venueWaypointKey)||null;
+  const group=lodGroups.get(key),color=venueItem?.feature.properties.color||item.feature.properties.venueAnchor?.color||item.feature.properties.color;
+  // The 3D hologram stands where the 2D pin does (the venue's place item), and takes the venue's logo.
+  const isEventArt=url=>/\/icons\/event\.svg(?:[?#]|$)/.test(url||'');
+  const logoUrl=[item.feature.properties.logo,venueItem?.feature.properties.waypointLogo,venueItem?.feature.properties.logo].find(url=>url&&!isEventArt(url))||'';
+  if(!group)lodGroups.set(key,{key,depthM,onScreen,sameDay,color,count:1,coordinates:item.feature.geometry.coordinates,anchorItem:venueItem||item,logoUrl});else{group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;group.sameDay=group.sameDay||sameDay;group.count++;if(!group.logoUrl)group.logoUrl=logoUrl;}
  }
  const lodLevels=assignE3Levels([...lodGroups.values()],e3LodPrevious);
  e3LodPrevious.clear();for(const [key,level] of lodLevels)e3LodPrevious.set(key,level);
  // 3D stage per venue from the same LOD levels: mini=waypoint, compressed=raised waypoint, coin=raised puck, vortex.
  // Non-same-day venues stop at coin. Same-day venues with several events use the double stack.
+ // The 3D layer only takes a venue over where it really draws (compressed or closer and big enough to read, see
+ // e3BlenderTakesOver). Every other venue keeps its 2D mini badge, card, beam and clips, so nothing is left bare.
  const blenderOn=!coarsePointer&&e3Blender.ready&&!reduced.matches;
  const hadBlender=e3Blender3D.size>0;
  e3Blender3D.clear();
  if(blenderOn){
-  const picked=[...lodGroups.values()].filter(g=>g.onScreen&&lodLevels.get(g.key)).sort((a,b)=>Number(b.sameDay)-Number(a.sameDay)||a.depthM-b.depthM).slice(0,E3_BLENDER_MAX_VISIBLE);
-  const rows=picked.map(g=>{
+  const blenderZoom=target.getZoom(),blenderPitch=target.getPitch(),blenderExtrusion=extrusionAmount(target);
+  const candidates=[...lodGroups.values()].filter(g=>lodLevels.get(g.key)).sort((a,b)=>Number(b.sameDay)-Number(a.sameDay)||a.depthM-b.depthM);
+  const rows=[];
+  for(const g of candidates){
+   if(rows.length>=E3_BLENDER_MAX_VISIBLE)break;
    const level=lodLevels.get(g.key);
    let stage={mini:1,compressed:2,coin:3,vortex:4}[level]??1;
    if(!g.sameDay&&stage>3)stage=3;
    if(g.sameDay&&stage===4&&g.count>1)stage=5;
    let st=e3StageState.get(g.key);
-   if(!st){st={from:stage,to:stage,start:frameNow};e3StageState.set(g.key,st);}
+   const shownStage=st?e3StageValue(st,frameNow):stage;
+   if(!e3BlenderTakesOver({targetStage:stage,shownStage,zoom:blenderZoom,latitude:g.coordinates[1],pitch:blenderPitch,viewHeight:height}))continue;
+   // A venue the layer has just taken over morphs up out of the waypoint instead of popping in.
+   if(!st){st={from:e3Opened&&stage===2?1:stage,to:stage,start:frameNow};e3StageState.set(g.key,st);}
    else if(st.to!==stage){st.from=e3StageValue(st,frameNow);st.to=stage;st.start=frameNow;}
    e3Blender3D.set(g.key,true);
    const heightScale=E3_BLENDER_SKYLINE_HEIGHT?Math.min(E3_CLEARANCE_MAX_STRETCH,1+e3ClearanceMeters(g.coordinates,surfaces.buildings??[])/E3_CLEARANCE_METERS_PER_STRETCH):1;
-   return {key:g.key,coordinates:g.coordinates,color:g.sameDay&&stage>=4?E3_SAME_DAY_GREEN:(g.color||'#FF00CC'),stage:e3StageValue(st,frameNow),scaleMeters:E3_BLENDER_SCALE_M,heightScale};
+   // Anchor: the venue's own pin. Same snapped building point the 2D pin projects from, same hover height above the roof.
+   const anchor=g.anchorItem,anchorRoof=surfaces.roofs?.get(anchor.feature.properties.phase);
+   const coordinates=e3AnchorCoordinates(anchor.feature.geometry.coordinates,window.__mapzPlaceSnaps);
+   const altitude=anchor.feature.properties.kind==='place'?placezHoverMeters(anchorRoof??PLACEZ_HOVER_METERS,blenderExtrusion):(anchorRoof??9)*blenderExtrusion;
+   const logoEntry=g.logoUrl?venueLogos.get(g.logoUrl):null;
+   rows.push({key:g.key,coordinates,altitude,color:g.sameDay&&stage>=4?E3_SAME_DAY_GREEN:(g.color||'#FF00CC'),stage:e3StageValue(st,frameNow),scaleMeters:e3BlenderScaleMeters(blenderZoom,{viewHeight:height,latitude:g.coordinates[1],pitch:blenderPitch}),heightScale,
+    logo:logoEntry?{key:g.logoUrl,image:logoEntry.image,width:logoEntry.width,height:logoEntry.height}:null});
+  }
+  for(const key of [...e3StageState.keys()])if(!e3Blender3D.has(key))e3StageState.delete(key);
+  // Crowd-aware size: holograms that would overlap on screen shrink together (eased, with hysteresis), down to a floor.
+  const crowdItems=rows.map(row=>{
+   const q=target.project(row.coordinates),footprint=e3BlenderFootprintPx(row.stage,row.scaleMeters,blenderZoom,row.coordinates[1],blenderPitch);
+   return {key:row.key,x:q.x,y:q.y,...footprint};
   });
-  for(const key of [...e3StageState.keys()])if(!lodGroups.has(key))e3StageState.delete(key);
+  const crowdTargets=e3CrowdTargets(crowdItems,e3CrowdFactor);
+  let crowdEasing=false;
+  for(const row of rows){
+   const goal=crowdTargets.get(row.key)??1,now=e3CrowdFactor.get(row.key)??goal,next=e3CrowdEase(now,goal,motionDelta);
+   e3CrowdFactor.set(row.key,next);if(next!==goal)crowdEasing=true;
+   row.scaleMeters*=next;
+  }
+  for(const key of [...e3CrowdFactor.keys()])if(!e3Blender3D.has(key))e3CrowdFactor.delete(key);
+  // While a stage morph runs the overlay must keep drawing frames, or an idle camera would freeze the tween.
+  e3StageTweenActive=crowdEasing||[...e3StageState.values()].some(st=>st.from!==st.to&&frameNow-st.start<E3_STAGE_TWEEN_MS);
   e3Blender.setVenues(rows);
   e3Blender.setMotion({seconds:frameNow/1000,reduced:false,active:true});
- }else if(hadBlender)e3Blender.setVenues([]);
+ }else{e3StageTweenActive=false;if(hadBlender)e3Blender.setVenues([]);}
  const zoomNow=target.getZoom();
  if(zoomNow!==e3LastZoom){e3LastZoom=zoomNow;e3ZoomChangedAt=frameNow;}
  // Open once the view has been still for a moment after load. Later zooms always play clips.
  if(!e3Opened&&e3LoadedAt>0&&frameNow-e3LoadedAt>1500&&frameNow-e3ZoomChangedAt>1000)e3Opened=true;
- if(e3Transitions)for(const group of lodGroups.values())e3Transitions.update(group.key,lodLevels.get(group.key),frameNow,!reduced.matches&&e3Opened,Boolean(group.sameDay),group.color);
+ // A venue the 3D layer draws gets no 2D clip: it morphs in 3D instead. The clip clock must not run for it.
+ if(e3Transitions)for(const group of lodGroups.values()){if(e3Blender3D.has(group.key))e3Transitions.cancel(group.key,lodLevels.get(group.key));else e3Transitions.update(group.key,lodLevels.get(group.key),frameNow,!reduced.matches&&e3Opened,Boolean(group.sameDay),group.color);}
  const e3TransitioningEvents=new Set(),e3TransitionDrawn=new Set();
  const lodNowMs=viewTime+Math.max(0,frameNow-viewTimeReceived),lodRepresented=new Set();
  for(let beaconIndex=0;beaconIndex<beacons.length;beaconIndex++){
@@ -1216,14 +1251,14 @@ let overlayVisibility=0,lastOverlayFrame=0,overlayPending=false;
 // A separate animation frame can run before the camera update and trail the map.
 function renderSceneOverlays(){
  if(disposed||!mapActivity.visible||!loaded||!assetsReady)return;
- if(!overlayPending&&!map.isMoving()&&!e3Transitions?.isPlaying())return;
+ if(!overlayPending&&!map.isMoving()&&!e3Transitions?.isPlaying()&&!e3StageTweenActive)return;
  overlayPending=false;
  const now=performance.now();
  motionDelta=lastOverlayFrame?Math.min((now-lastOverlayFrame)/1000,.1):0;
  lastOverlayFrame=now;
  if(!reduced.matches)pulseTime+=motionDelta;
  drawLights(overlayVisibility);
- if(e3Transitions?.isPlaying())map.triggerRepaint();
+ if(e3Transitions?.isPlaying()||e3StageTweenActive)map.triggerRepaint();
  if(!firstPinsPainted&&overlayVisibility>.1&&hitTargets.length){firstPinsPainted=true;performance.mark("mapz-public-pins-painted");tell("pins-painted",{count:hitTargets.length});}
 }
 map.on('render',renderSceneOverlays);

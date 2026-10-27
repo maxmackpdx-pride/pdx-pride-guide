@@ -179,6 +179,11 @@ export function createE3TransitionState(manifest, {base = './e3-transitions/', o
       path.forEach(clip => ensureImage(clip.name, green && involvesVortex(clip.name) && Boolean(manifest.transitions[clip.name].greenFile)));
       active.set(key, {path, green, color, start: now, total: path.reduce((sum, clip) => sum + secondsFor(clip.name), 0) * 1000});
     },
+    // The venue is drawn some other way (the 3D layer): drop any clip and remember the level, so no clip plays later.
+    cancel(key, level) {
+      active.delete(key);
+      last.set(key, level);
+    },
     current(key, now) {
       const run = active.get(key);
       if (!run) return null;

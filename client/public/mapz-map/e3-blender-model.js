@@ -22,14 +22,27 @@ export function blenderStageWeights(stage){
  return E3_BLENDER_MORPHS.map((_,i)=>i+1===lower?1-fraction:i+1===lower+1?fraction:0);
 }
 function interpolate(values,stage){const n=clamp(stage),i=Math.floor(n);return values[i]+((values[Math.min(5,i+1)]??values[i])-values[i])*(n-i);}
+// Venue logo faces. Measured from the Blender shapes (glTF Y-up, front is +Z), per stage 0..5:
+// center height, the box the logo must fit inside, and how visible it is. The coin and the compressed puck
+// replace the generic Z mark; the vortex and the double stack carry it on their screens.
+// Stage 1 (waypoint pin) keeps the venue-type icon. The second plane is the lower screen of the double stack.
+const LOGO_FACE_Z=.095;
+const LOGO_MAIN={y:[3.77,3.79,4.25,4.30,3.98,4.78],w:[0,0,.34,.78,.98,.98],h:[0,0,.34,.78,.7,.7],a:[0,0,1,1,1,1]};
+const LOGO_LOWER={y:[3.03,3.03,3.03,3.03,3.03,1.29],w:[0,0,0,0,0,.98],h:[0,0,0,0,0,.7],a:[0,0,0,0,0,1]};
+export function blenderLogoFace(table,stage,aspect=1){
+ const y=interpolate(table.y,stage),boxW=interpolate(table.w,stage),boxH=interpolate(table.h,stage),opacity=interpolate(table.a,stage);
+ const width=Math.min(boxW,boxH*Math.max(.05,aspect)),height=width/Math.max(.05,aspect);
+ return {y,width,height,opacity};
+}
 function radialTexture(){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=64;
  const ctx=canvas.getContext('2d'),g=ctx.createRadialGradient(32,32,0,32,32,32);
  g.addColorStop(0,'#ffffff');g.addColorStop(.2,'#ffffff88');g.addColorStop(1,'#ffffff00');
  ctx.fillStyle=g;ctx.fillRect(0,0,64,64);return new THREE.CanvasTexture(canvas);
 }
-export function createBlenderHologram(template,{color='#FF00CC',phase=0}={}){
+export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=null}={}){
  const object=template.clone(true),meshes=[],particles=[],materials=new Set(),groundTexture=radialTexture();
+ let iconMaterial=null;
  const tint=new THREE.Color(color);
  object.traverse(node=>{
   if(!node.isMesh)return;
@@ -44,10 +57,33 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0}={}){
   node.renderOrder=role==='beam'?0:role==='panel'?1:role==='ring-fill'?2:3;
   materials.add(material);meshes.push(node);
   if(role==='particle')particles.push(node);
+  if(role==='icon')iconMaterial=material;
  });
+ // Venue logo on the coin faces and the screens. Falls back to the model's own mark when there is no logo.
+ const logoPlanes=[LOGO_MAIN,LOGO_LOWER].map(table=>{
+  const material=new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,color:0xffffff});
+  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1,1),material);
+  mesh.frustumCulled=false;mesh.renderOrder=4;mesh.visible=false;mesh.position.z=LOGO_FACE_Z;object.add(mesh);
+  return {table,mesh,material};
+ });
+ let logoKey=null,logoTexture=null,logoAspect=1;
+ function setLogo(next){
+  const key=next?next.key??next.image:null;
+  if(key===logoKey)return;
+  logoKey=key;
+  if(logoTexture){logoTexture.dispose();logoTexture=null;}
+  if(next?.image&&next.width>0&&next.height>0){
+   logoTexture=new THREE.CanvasTexture(next.image);logoTexture.colorSpace=THREE.SRGBColorSpace;logoTexture.anisotropy=4;
+   logoAspect=next.width/next.height;
+  }
+  for(const plane of logoPlanes){plane.material.map=logoTexture;plane.material.needsUpdate=true;}
+ }
+ setLogo(logo);
  let stage=0;
  return {object,
   setColor(value){tint.set(value);for(const node of meshes)if(!['panel','icon','particle'].includes(node.userData.mapzRole))node.material.color.copy(tint);},
+  setLogo,
+  get hasLogo(){return Boolean(logoTexture);},
   setStage(value){stage=typeof value==='string'?Math.max(0,E3_BLENDER_STAGES.indexOf(value)):clamp(value);},
   // elapsed is seconds of active map time. The map host pauses this clock when
   // hidden and passes reduced=true for Calm Mode. Hover frequencies come from
@@ -62,6 +98,16 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0}={}){
       hover*(.82*Math.sin(frame*motion[0]+motion[1]+phase)+.18*Math.sin(frame*motion[0]*1.9+motion[1]+.6+phase)):0;
     }
    }
+   let logoMix=0;
+   for(const plane of logoPlanes){
+    const face=logoTexture?blenderLogoFace(plane.table,stage,logoAspect):null;
+    plane.mesh.visible=Boolean(face)&&face.opacity>.01&&face.width>.01;
+    if(!face)continue;
+    plane.mesh.position.y=face.y;plane.mesh.scale.set(face.width,face.height,1);plane.material.opacity=face.opacity;
+    if(plane.table===LOGO_MAIN)logoMix=face.opacity;
+   }
+   // The generic mark gives way to the logo; with no logo it stays.
+   if(iconMaterial)iconMaterial.opacity=1-logoMix;
    const h=interpolate(HEIGHT,stage),r=interpolate(RADIUS,stage);
    particles.forEach((node,k)=>{
     node.visible=h>.1;
@@ -70,7 +116,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0}={}){
     node.position.set(Math.cos(angle)*r*t*.72,t*h+.06,-Math.sin(angle)*r*t*.72);
    });
   },
-  dispose(){for(const material of materials)material.dispose();groundTexture.dispose();}
+  dispose(){for(const material of materials)material.dispose();groundTexture.dispose();logoTexture?.dispose();for(const plane of logoPlanes){plane.material.dispose();plane.mesh.geometry.dispose();}}
  };
 }
 
@@ -113,10 +159,10 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
   for(const row of rows){
    let item=instances.get(row.key);
    if(!item){
-    const model=createBlenderHologram(template,{color:row.color,phase:row.phase??instances.size*2.39996}),root=new THREE.Group();
+    const model=createBlenderHologram(template,{color:row.color,phase:row.phase??instances.size*2.39996,logo:row.logo}),root=new THREE.Group();
     model.object.rotation.x=Math.PI/2;root.add(model.object);scene.add(root);item={root,model,row};instances.set(row.key,item);
    }
-   item.row=row;item.model.setColor(row.color||'#FF00CC');
+   item.row=row;item.model.setColor(row.color||'#FF00CC');item.model.setLogo(row.logo??null);
    const position=maplibre.MercatorCoordinate.fromLngLat(row.coordinates,row.altitude??0);
    item.root.position.set((position.x-origin.x)/unit,-(position.y-origin.y)/unit,(position.z-origin.z)/unit);
    // Uniform size in meters, with an optional vertical stretch so a hologram can rise above local buildings.

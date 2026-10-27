@@ -113,3 +113,149 @@ export function e3LodPlan(level, {hasLogo = false, sameDay = false, zoom = E3_CO
   if ((level === 'vortex' || level === 'coin') && hasLogo) return e3CoinPlan({zoom});
   return e3CompressedPlan();
 }
+
+// ---------------------------------------------------------------------------
+// 3D Blender hologram: size, anchor and hand-over rules. Pure, so they are unit tested.
+// ---------------------------------------------------------------------------
+
+// World size of the 3D hologram, in meters per model unit. At close zoom it is E3_BLENDER_SCALE_CLOSE_M (24 m,
+// the sensible baseline; Tucker: big and eye-catching, never absurd). Zooming out the world size grows a little
+// slower than the map shrinks (E3_BLENDER_ZOOM_OUT_GROWTH < 1), so the hologram eases down on screen, and
+// Tucker's size rule applies on top: 20% of full size at zoom 12, full size at zoom 15.5, smooth between.
+// A viewport cap keeps the tallest stage (the double stack) under E3_BLENDER_MAX_SCREEN_FRACTION of the
+// screen height, so it never swallows its neighbours or clips off the top, however close the camera is.
+export const E3_BLENDER_SCALE_CLOSE_M = 24;
+export const E3_BLENDER_SCALE_CLOSE_ZOOM = 17.5;
+export const E3_BLENDER_ZOOM_OUT_GROWTH = .8;
+export const E3_BLENDER_MAX_SCREEN_FRACTION = .30;
+export const E3_BLENDER_TALLEST_UNITS = 5.2;
+export const E3_BLENDER_SIZE_FULL_ZOOM = 15.5;
+export const E3_BLENDER_SIZE_FAR_ZOOM = 12;
+export const E3_BLENDER_SIZE_FAR = .2;
+// The 3D layer only takes a venue over once the model is at least compressed (stage 2) and tall enough to
+// read. The far mini badge, and anything too small, stays on the 2D path.
+export const E3_BLENDER_MIN_STAGE = 2;
+export const E3_BLENDER_MIN_SCREEN_PX = 40;
+// Approximate model height in model units per stage 0..5 (beam top), used for the on-screen size test.
+export const E3_BLENDER_STAGE_HEIGHT_UNITS = [1, 1.4, 4, 4.6, 4.8, 5.2];
+// While a leaving venue's stage tween is still above this value the 3D layer keeps drawing it, so the
+// hand-back to the 2D mini badge is not a pop.
+export const E3_BLENDER_RELEASE_STAGE = 1.02;
+// The pin hovers this many meters above a roof (matches the waypoint pin in river-flight.js).
+export const PLACEZ_HOVER_METERS = 3;
+export const PLACEZ_ROOF_CLEARANCE_METERS = 4;
+
+/** Smooth 0.2..1 size factor: E3_BLENDER_SIZE_FAR at the far zoom, 1 at the full zoom. */
+export function e3BlenderSizeFactor(zoom) {
+  const t = clamp01((zoom - E3_BLENDER_SIZE_FAR_ZOOM) / (E3_BLENDER_SIZE_FULL_ZOOM - E3_BLENDER_SIZE_FAR_ZOOM));
+  const eased = t * t * (3 - 2 * t);
+  return E3_BLENDER_SIZE_FAR + (1 - E3_BLENDER_SIZE_FAR) * eased;
+}
+
+const metersPerPixelAt = (zoom, latitude) => 40075016.686 * Math.cos(latitude * Math.PI / 180) / (512 * Math.pow(2, zoom));
+const pitchFactor = pitch => Math.max(.35, Math.sin(pitch * Math.PI / 180));
+
+/**
+ * World scale in meters for the 3D model at a zoom. With a viewHeight (CSS px) the scale is also capped so the
+ * tallest stage stays under E3_BLENDER_MAX_SCREEN_FRACTION of the screen.
+ */
+export function e3BlenderScaleMeters(zoom, {viewHeight = 0, latitude = 45.5, pitch = 50} = {}) {
+  const zoomOut = Math.max(0, E3_BLENDER_SCALE_CLOSE_ZOOM - zoom);
+  const base = E3_BLENDER_SCALE_CLOSE_M * Math.pow(2, zoomOut * E3_BLENDER_ZOOM_OUT_GROWTH) * e3BlenderSizeFactor(zoom);
+  if (!(viewHeight > 0)) return base;
+  const capped = E3_BLENDER_MAX_SCREEN_FRACTION * viewHeight * metersPerPixelAt(zoom, latitude) / (E3_BLENDER_TALLEST_UNITS * pitchFactor(pitch));
+  return Math.min(base, capped);
+}
+
+/** Approximate on-screen height of the model, in CSS pixels. */
+export function e3BlenderScreenHeightPx(stage, zoom, latitude = 45.5, pitch = 50, viewHeight = 0) {
+  const index = Math.max(0, Math.min(5, stage)), low = Math.floor(index);
+  const units = E3_BLENDER_STAGE_HEIGHT_UNITS[low] + ((E3_BLENDER_STAGE_HEIGHT_UNITS[Math.min(5, low + 1)] - E3_BLENDER_STAGE_HEIGHT_UNITS[low]) * (index - low));
+  return units * e3BlenderScaleMeters(zoom, {viewHeight, latitude, pitch}) / metersPerPixelAt(zoom, latitude) * pitchFactor(pitch);
+}
+
+/**
+ * Whether the 3D layer draws this venue (and so the 2D card, beam and clip are skipped).
+ * targetStage: stage the LOD asks for. shownStage: where its tween currently is.
+ */
+export function e3BlenderTakesOver({targetStage, shownStage = targetStage, zoom, latitude = 45.5, pitch = 50, viewHeight = 0}) {
+  if (e3BlenderScreenHeightPx(Math.max(targetStage, shownStage, E3_BLENDER_MIN_STAGE), zoom, latitude, pitch, viewHeight) < E3_BLENDER_MIN_SCREEN_PX) return false;
+  return targetStage >= E3_BLENDER_MIN_STAGE || shownStage > E3_BLENDER_RELEASE_STAGE;
+}
+
+/** Same key the venue snap table uses (mapz-roof-boot.js coordKey). */
+export function e3CoordKey(coordinates) {
+  return `${Number(coordinates[0]).toFixed(6)},${Number(coordinates[1]).toFixed(6)}`;
+}
+
+/** The lng/lat the 2D waypoint pin is drawn at: the snapped building center when there is one, else the raw point. */
+export function e3AnchorCoordinates(coordinates, snaps) {
+  const snapped = snaps?.get?.(e3CoordKey(coordinates));
+  return Array.isArray(snapped) && snapped.length >= 2 && snapped.every(Number.isFinite) ? [snapped[0], snapped[1]] : coordinates;
+}
+
+/** Meters the waypoint pin hovers above ground: the same rule the 2D pin uses, at the current extrusion. */
+export function placezHoverMeters(roofMeters, extrusion, hover = PLACEZ_HOVER_METERS, clearance = PLACEZ_ROOF_CLEARANCE_METERS) {
+  const roofHeight = Math.max(hover, roofMeters + clearance);
+  return hover + (roofHeight - hover) * extrusion;
+}
+
+// ---------------------------------------------------------------------------
+// Crowd-aware size: holograms that would overlap on screen shrink a little, together, and grow back when
+// there is room again. Isolated venues stay at full size.
+// ---------------------------------------------------------------------------
+// Smallest crowd factor (fraction of normal size). Never goes below this.
+export const E3_CROWD_MIN_SCALE = .65;
+// A hologram shrunk for crowding is never made smaller than this many CSS px tall, when it started larger.
+export const E3_CROWD_READABLE_PX = 56;
+// Widest part of the model (rings), in model units, for the overlap test. The screen is about 1.4 wide.
+export const E3_CROWD_WIDTH_UNITS = 1.6;
+// Hysteresis: a shrunk hologram only starts growing back once its neighbor is this far beyond touching.
+export const E3_CROWD_RELEASE = 1.15;
+// Ease rate per second (higher is quicker). About 0.5 s to settle.
+export const E3_CROWD_EASE_RATE = 6;
+
+/** On-screen footprint of a model at a stage and world scale, in CSS px. */
+export function e3BlenderFootprintPx(stage, scaleMeters, zoom, latitude = 45.5, pitch = 50) {
+  const index = Math.max(0, Math.min(5, stage)), low = Math.floor(index);
+  const units = E3_BLENDER_STAGE_HEIGHT_UNITS[low] + ((E3_BLENDER_STAGE_HEIGHT_UNITS[Math.min(5, low + 1)] - E3_BLENDER_STAGE_HEIGHT_UNITS[low]) * (index - low));
+  const perUnit = scaleMeters / metersPerPixelAt(zoom, latitude);
+  return {widthPx: E3_CROWD_WIDTH_UNITS * perUnit, heightPx: units * perUnit * pitchFactor(pitch)};
+}
+
+/**
+ * Target crowd factor per hologram.
+ * items: [{key, x, y, widthPx, heightPx}] anchors in screen px and their normal-size footprint.
+ * current: Map key -> factor now (below 1 means already shrunk, which engages the release hysteresis).
+ */
+export function e3CrowdTargets(items, current = new Map()) {
+  const targets = new Map(items.map(item => [item.key, 1]));
+  for (let i = 0; i < items.length; i++) {
+    for (let j = i + 1; j < items.length; j++) {
+      const a = items[i], b = items[j];
+      const distance = Math.hypot(a.x - b.x, a.y - b.y);
+      const reach = (a.widthPx + b.widthPx) / 2;
+      if (reach <= 0) continue;
+      // Already shrunk pairs only release once clear by the hysteresis margin.
+      const margin = (current.get(a.key) ?? 1) < .999 || (current.get(b.key) ?? 1) < .999 ? E3_CROWD_RELEASE : 1;
+      const ratio = distance / (reach * margin);
+      if (ratio >= 1) continue;
+      // Scaling both by the ratio makes them just touch; the floor stops it going further.
+      const factor = Math.max(E3_CROWD_MIN_SCALE, ratio);
+      targets.set(a.key, Math.min(targets.get(a.key), factor));
+      targets.set(b.key, Math.min(targets.get(b.key), factor));
+    }
+  }
+  for (const item of items) {
+    // Readable floor: a small hologram is not shrunk below E3_CROWD_READABLE_PX.
+    const readable = item.heightPx > 0 ? Math.min(1, E3_CROWD_READABLE_PX / item.heightPx) : 1;
+    targets.set(item.key, Math.max(targets.get(item.key), E3_CROWD_MIN_SCALE, readable));
+  }
+  return targets;
+}
+
+/** Eased approach toward the target, frame-rate independent. */
+export function e3CrowdEase(current, target, dt, rate = E3_CROWD_EASE_RATE) {
+  const next = current + (target - current) * (1 - Math.exp(-rate * Math.max(0, dt)));
+  return Math.abs(next - target) < .002 ? target : next;
+}
