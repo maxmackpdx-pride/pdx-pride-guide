@@ -1,8 +1,11 @@
-import {EVENT_CLOCK_HEIGHT} from '../client/public/mapz-map/event-hologram-model.js';
+import {EVENT_CLOCK_HEIGHT,EVENT_CARD_HEIGHT} from '../client/public/mapz-map/event-hologram-model.js';
 import {smoothCardVisibility,createEventCardLock} from '../client/public/mapz-map/event-card-motion.js';
-import {eventCardGeometry} from '../client/public/mapz-map/event-hologram-card.js';
+import {eventCardGeometry,drawEventMiniBadge} from '../client/public/mapz-map/event-hologram-card.js';
+import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX} from '../client/public/mapz-map/e3-lod.js';
+import {e3StepFor,e3NearbyCount,e3NearbyPlacement} from '../client/public/mapz-map/e3-venue-stack.js';
+import {planVenueStacks,drawVenueStacks,venueStackKey} from '../client/public/mapz-map/e3-vortex-stack.js';
 import {eventCountdown} from '../client/public/mapz-map/event-countdown.js';
-import {hologramPresence,hologramCameraDrift,boundedHologramPosition} from '../client/public/mapz-map/hologram-presence.js';
+import {hologramPresence,hologramCameraDrift,boundedHologramPosition,HOLOGRAM_CAMERA_FOLLOW} from '../client/public/mapz-map/hologram-presence.js';
 import {groupBoardPins,drawBoardPin} from '../client/public/mapz-map/board-pins.js';
 import {eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from '../client/public/mapz-map/event-projection.js';
 import {eventNight} from '../client/public/mapz-map/event-night.js';
@@ -11,6 +14,7 @@ import {mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP} from '../
 import {visibleHologramLabels} from '../client/public/mapz-map/label-visibility.js';
 import {waypointGeometry,waypointArtwork} from '../client/public/mapz-map/waypoint-markers.js';
 import {housingIconSize} from '../client/public/mapz-map/housing-holograms.js';
+import {hologramTypeForVenue} from '../client/public/mapz-map/venue-hologram-types.js';
 import test, {after} from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
@@ -95,11 +99,11 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   const operations=[],projections=[],noop=()=>{},window={innerWidth:900,innerHeight:1200};
   const ctx=new Proxy({drawImage(image){operations.push(image);},createLinearGradient:()=>({addColorStop:noop}),
     createRadialGradient:()=>({addColorStop:noop})},{get:(target,key)=>key in target?target[key]:noop});
-  const surface={width:900,height:1200,getContext:()=>ctx},map={getCenter:()=>({lat:45.52,lng:-122.675,distanceTo:()=>0}),getZoom:()=>15.5,getPitch:()=>55,project:()=>({x:450,y:700})};
+  const surface={width:900,height:1200,getContext:()=>ctx},map={getCenter:()=>({lat:45.52,lng:-122.675,distanceTo:()=>0}),getZoom:()=>15.5,getPitch:()=>55,transform:{cameraToCenterDistance:300},project:()=>({x:450,y:700})};
   const color='#FF00CC',feature={geometry:{coordinates:[-122.675,45.52]},properties:{key:'demo',kind:'event',demoOpen:true,name:'Musical Mondays',time:'9:00 PM',startsAtMs:Date.now()+720000,logo:'logo',phase:1,color,heightScale:1}};
   const logo={width:120,height:60,padding:1,outlined:'sky-logo',image:'artwork',silhouette:'mask'};
   const context=vm.createContext({window,parent:window,performance,EVENT_CLOCK_HEIGHT,eventCardLocks:new WeakMap(),createEventCardLock,rises:new Map(),folds:new Map(),lastBeaconKeys:new Set(),riseAmount:()=>1,foldAmount:()=>1,document:{getElementById:()=>null},map,lights:surface,devicePixelRatio:1,Intl,Date,Map,Set,Math,
-    smoothCardVisibility,eventCardGeometry,eventCountdown,hologramPresence,hologramCameraDrift,boundedHologramPosition,eventArtworkScale:()=>1,screenNeighborCounts,eventNight,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor,extrusionAmount:()=>1,attachedEventBeam:{draw:(_ctx,card,anchor)=>{operations.push('beam');projections.push({card,anchor});}},mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),viewTimeReceived:performance.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
+    smoothCardVisibility,hologramTypeForVenue,eventCardGeometry,drawEventMiniBadge,eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,e3StepFor,e3NearbyCount,e3NearbyPlacement,planVenueStacks,drawVenueStacks,venueStackKey,HOLOGRAM_CAMERA_FOLLOW,e3LodPrevious:new Map(),compressCard:(card,factor)=>factor===1?card:eventCardGeometry(card.x,(card.top+card.bottom)/2,card.scale*factor),eventBeamAnchor:(_t,_s,parent)=>({x:parent.p.x,y:parent.p.y}),EVENT_CARD_HEIGHT,eventCountdown,hologramPresence,hologramCameraDrift,boundedHologramPosition,eventArtworkScale:()=>1,screenNeighborCounts,eventNight,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor,extrusionAmount:()=>1,attachedEventBeam:{draw:(_ctx,card,anchor)=>{operations.push('beam');projections.push({card,anchor});}},mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),viewTimeReceived:performance.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
     featureProjection:{project:feature=>map.project(feature.geometry.coordinates)},updateSurfaces:()=>({buildings:[{}],reflections:[]}),waterBloom:{draw:noop},drawUserLocationGlow:noop,
     citySparkles:{update:noop},buildingGlitter:()=>[],opacityControl:{value:1},motionDelta:1/30,pulseTime:1,
     hologramLiftScale:.7,hologramArtworkScale:3.15,hologramLayouts:new WeakMap(),hologramLabelWidth:68.4,HOUSING_EVENT_HEIGHT_RATIO:1/3,
@@ -134,7 +138,8 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   for(const viewport of [[900,1200],[393,740]]){
    [window.innerWidth,window.innerHeight]=viewport;
    context.map.project=()=>({x:viewport[0]/2,y:viewport[1]*.8});
-  for(const zoom of [12,13.4,15.5]){
+  // E3 levels follow true camera distance. At these distances a compressed puck or full card is drawn.
+  for(const zoom of [13.4,15.5]){
     context.map.getZoom=()=>zoom;
     for(const pitch of [0,48,75]){
       context.map.getPitch=()=>pitch;
@@ -148,7 +153,16 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   }
 
   }
+  // Far away the event is one cached mini badge: no HTML card at all, and the level is remembered.
+  context.map.project=()=>({x:450,y:300});context.map.getPitch=()=>55;
+  context.map.getZoom=()=>12;vm.runInContext('drawLights(1)',context);
+  assert.equal(labels.length,0,'far events draw a canvas badge, not an HTML card');
+  assert.equal(context.e3LodPrevious.get('demo'),'mini');
+  context.map.getZoom=()=>16.5;vm.runInContext('drawLights(1)',context);
+  assert.equal(context.e3LodPrevious.get('demo'),'vortex');
+  assert.equal(labels.length,1);assert.match(labels[0].countdown,/^IN /,'the nearest same-day event keeps its countdown');
+  context.map.project=()=>({x:450,y:700});context.map.getZoom=()=>15.5;
   context.lightFeatures=[{geometry:{coordinates:[-122.67,45.53]},properties:{key:'houz',kind:'housing',housingModel:'MANAGED',demoOpen:true,logo:'',phase:2,color:'#8800FF',heightScale:1,name:'Property for rent'}}];
   operations.length=0;assert.doesNotThrow(()=>vm.runInContext('drawLights(1)',context));
-  assert.deepEqual(operations,['waypoint-beam','building-mask','chrome','building-reflections','waypoint-head']);
+  assert.deepEqual(operations,['building-mask','chrome','building-reflections','waypoint-head']);
 });

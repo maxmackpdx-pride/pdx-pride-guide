@@ -1,5 +1,5 @@
 import {EVENT_CARD_HEIGHT,EVENT_CLOCK_HEIGHT} from './event-hologram-model.js';
-import {eventCardGeometry} from './event-hologram-card.js';
+import {eventCardGeometry} from './event-hologram-card.js?v=20261026-lod';
 
 // E3 Step 4 (Same Day Vortex) and Step 5 (Double Stack).
 // Several launched events at one venue stack as rings above the venue and share

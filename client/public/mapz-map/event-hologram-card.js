@@ -39,6 +39,44 @@ export function appendEventCardFrame(item){
  const surface=document.createElement('span');surface.className='event-hologram-surface';surface.setAttribute('aria-hidden','true');surface.appendChild(svg);item.appendChild(surface);
 }
 
+// E3 C1 far state: the mini shield badge (three stacked outlines and a glyph dot).
+// It is drawn once per color and size into a small canvas and reused with a single
+// drawImage, so far holograms cost almost nothing per frame and never animate.
+// Ported from the Mapz same-day work (Claude, PR #49, drawEventCoinPuck far branch).
+const MINI_SHIELD='M-18 -32H18L26 -24V8Q22 28 0 48Q-22 28 -26 8V-24Z';
+const MINI_SKEW_Y=Math.tan(-1.5*Math.PI/180);
+const miniBadgeCache=new Map();
+export function eventMiniBadgeRadius(card){return Math.min(card.right-card.left,card.bottom-card.top)*.42;}
+export function drawEventMiniShape(ctx,cx,cy,r,color,alpha=1){
+ const shield=new Path2D(MINI_SHIELD),k=r*.0215;
+ ctx.save();ctx.globalAlpha=alpha;ctx.translate(cx,cy);ctx.scale(k,k);ctx.transform(1,MINI_SKEW_Y,0,1,0,0);
+ for(const [dx,op,w,glow] of [[1.6,.4,2.4,false],[.8,.6,2.4,false],[0,1,5,true]]){
+  ctx.save();ctx.translate(dx,0);ctx.globalAlpha=alpha*op;
+  ctx.fillStyle='#050506';ctx.strokeStyle=color;ctx.lineWidth=w;ctx.lineJoin='round';
+  if(glow){ctx.shadowColor=color;ctx.shadowBlur=6;}
+  ctx.fill(shield);ctx.stroke(shield);ctx.restore();
+ }
+ ctx.save();ctx.shadowColor=color;ctx.shadowBlur=6;ctx.fillStyle=color;ctx.beginPath();ctx.arc(0,-6,7,0,Math.PI*2);ctx.fill();ctx.restore();
+ ctx.restore();
+}
+function miniBadgeBitmap(color,r,dpr=1){
+ if(typeof document==='undefined')return null;
+ const key=`${color}|${Math.round(r*2)/2}|${dpr}`;
+ if(miniBadgeCache.has(key))return miniBadgeCache.get(key);
+ if(miniBadgeCache.size>48)miniBadgeCache.clear();
+ const size=Math.ceil(r*2.6)+4,canvas=document.createElement('canvas');
+ canvas.width=Math.ceil(size*dpr);canvas.height=Math.ceil(size*dpr);
+ const bitmapCtx=canvas.getContext('2d');bitmapCtx.scale(dpr,dpr);
+ drawEventMiniShape(bitmapCtx,size/2,size/2,r,color,1);
+ const entry={canvas,size};miniBadgeCache.set(key,entry);
+ return entry;
+}
+export function drawEventMiniBadge(ctx,card,color,alpha=1,dpr=1){
+ const r=eventMiniBadgeRadius(card),bitmap=miniBadgeBitmap(color,r,dpr);
+ if(!bitmap)return false;
+ ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(bitmap.canvas,card.x-bitmap.size/2,(card.top+card.bottom)/2-bitmap.size/2,bitmap.size,bitmap.size);ctx.restore();
+ return true;
+}
 export function createAttachedEventBeam(){
  const film=createLightFilm();let disposed=false;
  return {
