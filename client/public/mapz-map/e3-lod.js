@@ -18,6 +18,9 @@ import {e3CoinPlan,e3CompressedPlan,E3_COMPRESSED_SCALE,E3_COIN_ZOOM,E3_COIN_ZOO
 
 // Distance thresholds in meters, scaled x10 by Tucker's approved retune.
 // Keep these named bounds independent of the far/near presentation policy.
+// Product question for Tucker: is the same-day vortex the far overview state too?
+// false (default) = vortex only inside the distance bands. true = every same-day venue on screen is a vortex.
+export const E3_SAME_DAY_VORTEX_FAR_OVERVIEW = false;
 export const E3_LOD_FULL_MAX_M = 4500;
 export const E3_LOD_COIN_MAX_M = 14000;
 export const E3_LOD_COMPRESSED_MAX_M = 28000;
@@ -77,6 +80,7 @@ export function e3LodLevel(current, depthM, band = E3_LOD_BAND) {
 export function assignE3Levels(entries, previous = new Map(), {maxFull = E3_LOD_MAX_FULL, band = E3_LOD_BAND} = {}) {
   const levels = new Map();
   for (const {key, depthM} of entries) levels.set(key, e3LodLevel(previous.get(key), depthM, band));
+  if (E3_SAME_DAY_VORTEX_FAR_OVERVIEW) for (const entry of entries) if (entry.sameDay && entry.onScreen) levels.set(entry.key, 'vortex');
   entries
     .filter(entry => entry.onScreen && levels.get(entry.key) === 'vortex')
     .sort((a, b) => a.depthM * (previous.get(a.key) === 'vortex' ? E3_LOD_KEEP_BIAS : 1) - b.depthM * (previous.get(b.key) === 'vortex' ? E3_LOD_KEEP_BIAS : 1))
