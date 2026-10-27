@@ -6,6 +6,8 @@ import {captureCamera,readCameraParams} from '../map-foundation/camera.js';
 import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../map-foundation/lifecycle.js';
 import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventCountdown,appendEventCountdown} from './event-countdown.js';
+import {planVenueStacks,drawVenueStacks,venueStackKey} from './e3-vortex-stack.js?v=20261026-e3-vortex';
+import {e3StepFor,e3SinglePlan,e3NearbyCount,e3NearbyPlacement} from './e3-venue-stack.js';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
@@ -33,7 +35,7 @@ import {screenNeighborCounts} from './screen-neighbors.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
-import {waypointHeadSize,waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawMiniShield,waypointArtwork,waypointFamilyShell} from './waypoint-markers.js?v=20261005-gap';
+import {waypointHeadSize,waypointGeometry,noteSelectedWaypoint,drawWaypointHead,drawMiniShield,waypointArtwork,waypointFamilyShell} from './waypoint-markers.js?v=20261026-e3full';
 import {extrusionAmount} from './venue-roofs.js?v=20260926-placez-roofs';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -419,11 +421,21 @@ function buildingGlitter(target,surfaces){
 }
 
 const attachedEventBeam=createAttachedEventBeam();
+// Same beam anchor as a lone event: the venue's roof, lifted by its extrusion.
+function eventBeamAnchor(target,surfaces,parent){
+ const coordinates=parent.feature.geometry.coordinates;
+ const metersPerPixel=40075016.686*Math.cos(coordinates[1]*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
+ const roof=surfaces.roofs?.get(parent.feature.properties.phase)??9;
+ const roofPixels=roof*extrusionAmount(target)/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
+ return {x:parent.p.x,y:parent.p.y-roofPixels};
+}
 const hologramLayouts=new WeakMap();
 const eventCardLocks=new WeakMap();
 const logoSpacing=1.15;
 const hologramLiftScale=.7*TONIGHT_HEIGHT_MULTIPLIER*.8*1.15*1.35;
 const hologramArtworkScale=2.7;
+// E3 Steps 3 and 3.5 shrink the whole card. A factor of 1 leaves the card untouched.
+const compressCard=(card,factor)=>factor===1?card:eventCardGeometry(card.x,(card.top+card.bottom)/2,card.scale*factor);
 const hologramLabelWidth=62;
 const logoFit=logo=>Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height);
 const eventArtworkScale=feature=>/\/icons\/event\.svg(?:[?#]|$)/.test(feature.properties.logo||'')?.38:1;
@@ -594,7 +606,10 @@ function drawLights(fade,target=map,surface=lights){
   item.attention=reduced.matches?.5:.5+.5*Math.sin(pulseTime*(.13+.025*Math.sin(phase))+phase*1.83);
   const driftX=eventProjectionSway(pulseTime,phase,presentationScale*item.presence.motion,reduced.matches);
   item.scaleGoal=emergenceFor(item.feature)*cardPresentationScale*item.presence.scale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
-  item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
+  // E3 Steps 3 and 3.5: far venues are compressed, and a close venue with a logo becomes a round coin.
+  const plan=e3SinglePlan({zoom:target.getZoom(),hasLogo:Boolean(item.feature.properties.logo)});
+  item.plan=plan;item.planScale=plan.scale;
+  item.boundsGoal=hologramBounds(item.feature,item.scaleGoal*plan.scale);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
   const skyRise=skyCeiling*(.55+.35*item.presence.motion+heightBoost*.25);
   item.x=item.p.x+driftX;
@@ -639,7 +654,7 @@ function drawLights(fade,target=map,surface=lights){
   const phase=item.feature.properties.phase;
   item.hover=reduced.matches||cameraMoving?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   item.x=item.p.x+item.offset.x;item.y=item.p.y+item.offset.y-item.hover;
-  Object.assign(item,hologramBounds(item.feature,item.offset.scale));
+  Object.assign(item,hologramBounds(item.feature,item.offset.scale*item.planScale));
   const avoidance=cameraMoving?{x:0,y:0}:logoPointerOffset(item.x,item.y,phase,item.halfWidth,item.halfHeight);
   item.offset.avoidX+=(avoidance.x-item.offset.avoidX)*pointerBlend;
   item.offset.avoidY+=(avoidance.y-item.offset.avoidY)*pointerBlend;
@@ -655,13 +670,34 @@ function drawLights(fade,target=map,surface=lights){
   const position=boundedHologramPosition(item.p,{x:item.x,y:item.y+clearance+32*item.offset.scale},item.offset.scale,roofLift(target,item.feature,surfaces),skyCeiling);
   item.x=position.x;item.y=position.y-clearance-32*item.offset.scale;
  }
+ // E3 Step 6: venues whose holograms crowd each other on screen. A stacked venue keeps its vortex place.
+ const stackKeyOf=item=>venueStackKey(item.feature.properties);
+ const stackCounts=new Map();
+ for(const item of beacons){const key=stackKeyOf(item);if(key)stackCounts.set(key,(stackCounts.get(key)||0)+1);}
+ const isStacked=item=>(stackCounts.get(stackKeyOf(item))||0)>1;
+ const seenVenues=new Set(),venueRepresentatives=[];
+ for(const item of beacons){const venue=stackKeyOf(item)||item.feature.properties.key;if(seenVenues.has(venue))continue;seenVenues.add(venue);venueRepresentatives.push(item);}
+ const nearbyStep=e3StepFor({zoom:target.getZoom(),hasLogo:true,nearbyVenues:e3NearbyCount(venueRepresentatives)})==='nearby';
+ const clockHalf=item=>EVENT_CLOCK_HEIGHT*item.offset.scale/2;
  if(!cameraMoving){
-  // Separate the combined clock/card footprint about its actual center, so the
-  // raised module reserves only its own height and neighboring pieces stay close.
-  for(const item of beacons)item.y-=EVENT_CLOCK_HEIGHT*item.offset.scale/2;
-  separateHolograms(beacons,width,height);
-  for(const item of beacons)item.y+=EVENT_CLOCK_HEIGHT*item.offset.scale/2;
+  if(nearbyStep){
+   // Straight beams from each venue's own ground point. Holograms shift sideways or hide, never mix.
+   const placement=e3NearbyPlacement(beacons.map(item=>({key:item.feature.properties.key,p:item.p,halfWidth:item.halfWidth,halfHeight:item.halfHeight,attention:item.attention,fixed:isStacked(item),x:item.x,y:item.y-clockHalf(item)})),{width,height});
+   for(const item of beacons){
+    const result=placement.get(item.feature.properties.key);if(!result)continue;
+    item.nearbyBeam=result.beam;item.nearbyHidden=result.hidden;
+    if(!isStacked(item)){item.x=result.x;item.y=result.y+clockHalf(item);}
+   }
+  }else{
+   // Separate the combined clock/card footprint about its actual center, so the
+   // raised module reserves only its own height and neighboring pieces stay close.
+   for(const item of beacons)item.y-=clockHalf(item);
+   separateHolograms(beacons,width,height);
+   for(const item of beacons)item.y+=clockHalf(item);
+  }
  }
+ const beaconPlans=new Map();
+ for(const item of beacons)beaconPlans.set(item.feature.properties.key,{plan:item.plan,beam:item.nearbyBeam||null,hidden:Boolean(item.nearbyHidden)});
  cardLock.apply(beacons,frameNow,cameraMoving,reduced.matches);
  // Keep the pointer's temporary offset separate so it cannot accumulate into drift.
  for(const item of beacons){
@@ -678,9 +714,12 @@ function drawLights(fade,target=map,surface=lights){
  }));
  const eventCards=new Map(beacons.map(item=>{
   const {feature,p}=item,grow=Math.min(riseAmount(feature.properties.key,frameNow),foldAmount(feature.properties.key,frameNow));
-  const card=eventCardGeometry(p.x+(item.x-p.x)*grow,p.y+(item.y-p.y)*grow,item.offset.scale*grow);
+  const card=compressCard(eventCardGeometry(p.x+(item.x-p.x)*grow,p.y+(item.y-p.y)*grow,item.offset.scale*grow),item.planScale);
   return [feature.properties.key,{...card,key:feature.properties.key,opacity:coreAlpha*grow,locked:Boolean(item.cardLocked),far:item.offset.scale*grow<.6*cardPresentationScale}];
  }));
+ // E3 Steps 4 and 5: venues with several launched events stack them as rings on one beam.
+ // One launched event can never form a stack, so the planner only runs for two or more.
+ const vortex=beacons.length>1?planVenueStacks(beacons,eventCards,item=>eventBeamAnchor(target,surfaces,venueItems.get(item.feature.properties.venueWaypointKey)||{feature:item.feature,p:item.p}),item=>venueItems.get(item.feature.properties.venueWaypointKey)?.feature.properties.color||item.feature.properties.venueAnchor?.color||item.feature.properties.color):{stacks:[],members:new Map()};
  const retainedCards=new Set(beacons.filter(item=>item.offset.cardVisible).map(item=>item.feature.properties.key));
  const visibleEventCards=new Set(visibleHologramLabels([...eventCards.values()],selectedKey,width,height,retainedCards,120).map(card=>card.key));
  const extensionSlots=new Map(),branchCounts=new Map();
@@ -785,8 +824,9 @@ function drawLights(fade,target=map,surface=lights){
     // The DOM frame and beam use identical screen geometry during rise/fold.
     lightsContext.setTransform(dpr,0,0,dpr,0,0);
     const card=eventCards.get(feature.properties.key);
+    const planInfo=beaconPlans.get(feature.properties.key);
     // Near the screen edge, keep an event pin until there is room for its light.
-    const wanted=card&&(card.locked||visibleEventCards.has(feature.properties.key)&&card.bottom<beamAnchor.y-Math.max(12,24*card.scale));
+    const wanted=!planInfo?.hidden&&card&&(card.locked||visibleEventCards.has(feature.properties.key)&&card.bottom<beamAnchor.y-Math.max(12,24*card.scale));
     if(pass===0&&offset){
      offset.cardVisible=Boolean(wanted);
      offset.cardAlpha=smoothCardVisibility(offset.cardAlpha??0,wanted,motionDelta,reduced.matches);
@@ -802,14 +842,22 @@ function drawLights(fade,target=map,surface=lights){
     }
     const projectionColor=eventProjectionColor(feature.properties);
     const beamColor=venueItems.get(feature.properties.venueWaypointKey)?.feature.properties.color||feature.properties.venueAnchor?.color||color;
+    // Stacked events draw no beam of their own; the venue stack carries the single beam.
+    if(pass===0&&vortex.members.has(feature.properties.key))continue;
     if(pass===0){
      lightsContext.save();lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*(presence?.opacity??1)*bloomScale*cardAlpha;
-     attachedEventBeam.draw(lightsContext,card,beamAnchor,pulseTime,phase,reduced.matches,beamColor);
+     const straight=planInfo?.beam;
+     if(straight){
+      // Step 6: one straight segment from this venue's own ground point. It never bends.
+      lightsContext.strokeStyle=beamColor;lightsContext.lineWidth=1.6;lightsContext.lineCap='round';
+      lightsContext.beginPath();lightsContext.moveTo(straight.from.x,straight.from.y);lightsContext.lineTo(straight.to.x,straight.to.y);lightsContext.stroke();
+     }else attachedEventBeam.draw(lightsContext,card,beamAnchor,pulseTime,phase,reduced.matches,beamColor);
      lightsContext.restore();continue;
     }
+    // Steps 3 and 6 never show a countdown. Step 3.5 shows the round logo coin.
     eventLabels.push({...card,projectionColor,avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,
      name:feature.properties.name,venueName:feature.properties.venueName||'',time:feature.properties.time,
-     countdown:eventCountdown(feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived),true),color,logo:feature.properties.logo,poster:feature.properties.poster,hologramType:hologramTypeForVenue(feature.properties.venueName||feature.properties.name),
+     countdown:planInfo?.plan.countdown?eventCountdown(feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived),true):null,color,logo:feature.properties.logo,poster:feature.properties.poster,hologramType:planInfo?.plan.shape==='coin'?'coin':hologramTypeForVenue(feature.properties.venueName||feature.properties.name),
      logoKey:feature.properties.logoKey,logoY:card.top,logoWidth:0,logoHeight:0,opacity:card.opacity*cardAlpha});
   }else if(pass===0){
    const size=126*(.92+.1*pulse);
@@ -819,6 +867,7 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.drawImage(hologramMaterials.orbs.get(color),p.x-12.5,raisedY-12.5,25,25);
   }
  }
+ if(pass===0&&vortex.stacks.length)drawVenueStacks(lightsContext,vortex.stacks,{dpr,fade,beam:attachedEventBeam,seconds:pulseTime,now:viewTime+Math.max(0,frameNow-viewTimeReceived),reduced:reduced.matches});
  lightsContext.setTransform(dpr,0,0,dpr,0,0);
  }
  drawUserLocationAvatar(lightsContext,target,fade);

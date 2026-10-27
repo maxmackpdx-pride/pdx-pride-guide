@@ -92,17 +92,19 @@ test('Mapz cannot replace a place glyph with the retired age label',async()=>{
 test('waypoint outlines and glow retain category colors even with stale rainbow metadata',async()=>{
  const source=await readFile(new URL('../client/public/mapz-map/waypoint-markers.js',import.meta.url),'utf8');
  const strokes=[];
- const canvasContext={scale(){},fill(){},stroke(){strokes.push(this.strokeStyle);}};
+ const canvasContext={scale(){},fill(){},stroke(){strokes.push(this.strokeStyle);},save(){},restore(){},translate(){},rotate(){},transform(){},clip(){},beginPath(){},moveTo(){},lineTo(){},drawImage(){}};
  const context=vm.createContext({
   motionPreference:{matches:false},document:{createElement:()=>({getContext:()=>canvasContext})},
   Path2D:class {},performance:{now:()=>1000},
  });
  vm.runInContext(source.replace(/^import .*;\n/gm,'').replace(/export /g,''),context);
- const ctx={save(){},restore(){},drawImage(){}};
+ const ctx={save(){},restore(){},drawImage(){},translate(){},scale(){},rotate(){},transform(){},clip(){},beginPath(){},moveTo(){},lineTo(){},fill(){},stroke(){strokes.push(this.strokeStyle);}};
  context.ctx=ctx;
  for(const color of ['#FF0000','#00FFFF','#FF6600','#8800FF'])for(const selected of [false,true]){
   strokes.length=0;
   vm.runInContext(`drawWaypointHead(ctx,{x:100,y:100,size:42},'${color}',null,null,${selected},1,'place',{bloom:true})`,context);
-  assert.deepEqual(strokes,[color,color]);
+  // Ghost outlines, the body, scanlines and the glow ring all stay in the category color.
+  assert.ok(strokes.length>=2);
+  for(const stroke of strokes)assert.equal(stroke,color);
  }
 });
