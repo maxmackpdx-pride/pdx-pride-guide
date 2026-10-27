@@ -189,13 +189,42 @@ function drawFarBadge(ctx,card,color,alpha){
  ctx.restore();
 }
 
+// Three states, chosen by true camera-to-waypoint distance (not zoom alone).
+// Distance includes pitch and where the waypoint sits on screen, so the top of a
+// pitched view is farther than the bottom at the same zoom.
+// Thresholds are placeholders in meters until Tucker tunes them.
+export const FULL_VORTEX_MAX_M=400;
+export const COIN_MAX_M=1200;
+export const EVENT_LOD_BAND=.1;
+// Camera-to-ground distance for a screen point, in meters. Uses the map's
+// cameraToCenterDistance (px) and the pitch; a point below screen center is nearer.
+export function eventDepthMeters(target,point,viewHeight,metersPerPixel){
+ const pitch=(target.getPitch?.()??0)*Math.PI/180;
+ const f=target.transform?.cameraToCenterDistance||viewHeight*1.2;
+ const dy=point.y-viewHeight/2;
+ const theta=pitch-Math.atan(dy/f);
+ const distancePx=f*Math.cos(pitch)/Math.max(.05,Math.cos(theta));
+ return distancePx*metersPerPixel;
+}
+// Hysteresis: a waypoint moves to a farther state only past the boundary plus
+// the band, and back to a closer state only past the boundary minus the band.
+export function eventLodLevel(current,depthM,{full=FULL_VORTEX_MAX_M,coin=COIN_MAX_M,band=EVENT_LOD_BAND}={}){
+ const bounds=[full,coin],names=['vortex','coin','mini'];
+ let rank=current==='vortex'?0:current==='coin'?1:current==='mini'||current==='far'?2:1;
+ while(rank<2&&depthM>bounds[rank]*(1+band))rank++;
+ while(rank>0&&depthM<bounds[rank-1]*(1-band))rank--;
+ return names[rank];
+}
+
 export function createAttachedEventBeam(options={}){
  const film=createLightFilm();let disposed=false;
  const logo=options.logo,distance=options.distance||'close';
  return {
   draw(ctx,card,anchor,seconds,phase,reduced,color,level='close'){
    if(disposed||ctx.globalAlpha<=.001)return;
-   if(level==='far'){drawFarBadge(ctx,card,color,ctx.globalAlpha);return;}
+   // 'mini' (and the older 'far') is the cached C1 badge. 'vortex' falls back to the
+   // close coin until the vortex tier data is wired per event.
+   if(level==='mini'||level==='far'){drawFarBadge(ctx,card,color,ctx.globalAlpha);return;}
    if(anchor.y-card.bottom<4)return;
    const perimeter=eventDesignPerimeter(card,card.hologramType||'puck'),alpha=ctx.globalAlpha;
    const clock=reduced?0:seconds,variant=Math.floor(Math.abs(phase)*7)%3;
