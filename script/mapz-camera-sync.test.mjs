@@ -6,7 +6,7 @@ const source=await readFile(new URL('../client/public/mapz-map/river-flight.js',
 const handler=source.slice(source.indexOf('function renderSceneOverlays(){'),source.indexOf("map.on('render',renderSceneOverlays);")+"map.on('render',renderSceneOverlays);".length);
 test('overlay paints the current map frame even between animation ticks and pauses when hidden',()=>{
  let now=100,camera=0;const painted=[],events=new Map();
- const state={disposed:false,mapActivity:{visible:true},loaded:true,assetsReady:true,overlayVisibility:1,lastOverlayFrame:0,overlayPending:false,motionDelta:0,pulseTime:0,reduced:{matches:false},firstPinsPainted:true,hitTargets:[],performance:{now:()=>now},map:{on:(name,fn)=>events.set(name,fn),isMoving:()=>true},drawLights:alpha=>painted.push({camera,alpha})};
+ const state={disposed:false,e3Transitions:null,mapActivity:{visible:true},loaded:true,assetsReady:true,overlayVisibility:1,lastOverlayFrame:0,overlayPending:false,motionDelta:0,pulseTime:0,reduced:{matches:false},firstPinsPainted:true,hitTargets:[],performance:{now:()=>now},map:{on:(name,fn)=>events.set(name,fn),isMoving:()=>true},drawLights:alpha=>painted.push({camera,alpha})};
  vm.runInNewContext(handler,state);
  for(let frame=0;frame<6;frame++){camera=frame*17;now+=1000/60;events.get('render')();}
  assert.deepEqual(painted.map(p=>p.camera),[0,17,34,51,68,85]);

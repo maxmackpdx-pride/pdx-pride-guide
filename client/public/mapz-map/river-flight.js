@@ -7,6 +7,7 @@ import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../ma
 import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventCountdown,appendEventCountdown} from './event-countdown.js';
 import {planVenueStacks,drawVenueStacks,venueStackKey} from './e3-vortex-stack.js?v=20261026-lod';
+import {createE3TransitionState} from './e3-transitions.js?v=20261027-transitions';
 import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from './e3-venue-stack.js';
 import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN} from './e3-lod.js?v=20261026-lod';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
@@ -424,6 +425,12 @@ function buildingGlitter(target,surfaces){
 const attachedEventBeam=createAttachedEventBeam();
 // Last frame's LOD level per venue group, so a level only flips past its hysteresis band.
 const e3LodPrevious=new Map();
+// E3 step transitions: each LOD step change plays its Blender clip (sprite atlas) instead of a hard swap.
+// The state stays null until the manifest loads; until then every change is a plain swap.
+let e3Transitions=null;
+fetch(new URL('./e3-transitions/manifest.json',import.meta.url)).then(response=>response.ok?response.json():null).then(manifest=>{
+ if(manifest&&!disposed)e3Transitions=createE3TransitionState(manifest,{base:new URL('./e3-transitions/',import.meta.url).href,onReady:()=>{scheduleFrame();}});
+}).catch(()=>{});
 // Same beam anchor as a lone event: the venue's roof, lifted by its extrusion.
 function eventBeamAnchor(target,surfaces,parent){
  const coordinates=parent.feature.geometry.coordinates;
@@ -606,11 +613,14 @@ function drawLights(fade,target=map,surface=lights){
  const lodGroups=new Map();
  for(const item of beacons){
   const key=lodGroupKey(item),depthM=eventDepthMeters(target,item.p,height,lodMetersPerPixel),onScreen=item.p.x>=0&&item.p.x<=width&&item.p.y>=0&&item.p.y<=height;
+  const sameDay=e3IsSameDay(item.feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived));
   const group=lodGroups.get(key);
-  if(!group)lodGroups.set(key,{key,depthM,onScreen});else{group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;}
+  if(!group)lodGroups.set(key,{key,depthM,onScreen,sameDay});else{group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;group.sameDay=group.sameDay||sameDay;}
  }
  const lodLevels=assignE3Levels([...lodGroups.values()],e3LodPrevious);
  e3LodPrevious.clear();for(const [key,level] of lodLevels)e3LodPrevious.set(key,level);
+ if(e3Transitions)for(const group of lodGroups.values())e3Transitions.update(group.key,lodLevels.get(group.key),frameNow,!reduced.matches,Boolean(group.sameDay));
+ const e3TransitioningEvents=new Set(),e3TransitionDrawn=new Set();
  const lodNowMs=viewTime+Math.max(0,frameNow-viewTimeReceived),lodRepresented=new Set();
  for(let beaconIndex=0;beaconIndex<beacons.length;beaconIndex++){
   const item=beacons[beaconIndex],phase=item.feature.properties.phase;
@@ -848,6 +858,22 @@ function drawLights(fade,target=map,surface=lights){
     lightsContext.setTransform(dpr,0,0,dpr,0,0);
     const card=eventCards.get(feature.properties.key);
     const planInfo=beaconPlans.get(feature.properties.key);
+    // E3 transitions: while a venue's clip plays, the clip replaces its card and beam. Drawn once, in the sky pass.
+    const transitionKey=venueStackKey(feature.properties)||feature.properties.key;
+    const transition=e3Transitions?.current(transitionKey,frameNow)??null;
+    if(transition){
+     e3TransitioningEvents.add(feature.properties.key);
+     if(pass===1&&!e3TransitionDrawn.has(transitionKey)){
+      e3TransitionDrawn.add(transitionKey);
+      const anchorCard=eventCards.get(feature.properties.key);
+      const cx=anchorCard?(anchorCard.left+anchorCard.right)/2:p.x,cy=anchorCard?(anchorCard.top+anchorCard.bottom)/2:p.y-70*(offset?.scale??1);
+      const width=anchorCard?Math.max(60,(anchorCard.right-anchorCard.left)*1.3):96*(offset?.scale??1);
+      const height=width*e3Transitions.aspect;
+      // Skip the draw when it is off screen; the clock still runs so the clip lands on time.
+      if(cx+width/2>0&&cx-width/2<width&&cy+height/2>0&&cy-height/2<height)e3Transitions.draw(lightsContext,transition,cx,cy,width,Math.min(1,fade));
+     }
+     continue;
+    }
     // Near the screen edge, keep an event pin until there is room for its light.
     const wanted=!planInfo?.hidden&&card&&(card.locked||visibleEventCards.has(feature.properties.key)&&card.bottom<beamAnchor.y-Math.max(12,24*card.scale));
     if(pass===0&&offset){
@@ -897,7 +923,7 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.drawImage(hologramMaterials.orbs.get(color),p.x-12.5,raisedY-12.5,25,25);
   }
  }
- if(pass===0&&vortex.stacks.length)drawVenueStacks(lightsContext,vortex.stacks,{dpr,fade,beam:attachedEventBeam,seconds:pulseTime,now:viewTime+Math.max(0,frameNow-viewTimeReceived),reduced:reduced.matches});
+ if(pass===0&&vortex.stacks.length)drawVenueStacks(lightsContext,vortex.stacks.filter(stack=>!stack.members.some(member=>e3TransitioningEvents.has(member.key))),{dpr,fade,beam:attachedEventBeam,seconds:pulseTime,now:viewTime+Math.max(0,frameNow-viewTimeReceived),reduced:reduced.matches});
  lightsContext.setTransform(dpr,0,0,dpr,0,0);
  }
  drawUserLocationAvatar(lightsContext,target,fade);
@@ -1134,13 +1160,14 @@ let overlayVisibility=0,lastOverlayFrame=0,overlayPending=false;
 // A separate animation frame can run before the camera update and trail the map.
 function renderSceneOverlays(){
  if(disposed||!mapActivity.visible||!loaded||!assetsReady)return;
- if(!overlayPending&&!map.isMoving())return;
+ if(!overlayPending&&!map.isMoving()&&!e3Transitions?.isPlaying())return;
  overlayPending=false;
  const now=performance.now();
  motionDelta=lastOverlayFrame?Math.min((now-lastOverlayFrame)/1000,.1):0;
  lastOverlayFrame=now;
  if(!reduced.matches)pulseTime+=motionDelta;
  drawLights(overlayVisibility);
+ if(e3Transitions?.isPlaying())map.triggerRepaint();
  if(!firstPinsPainted&&overlayVisibility>.1&&hitTargets.length){firstPinsPainted=true;performance.mark("mapz-public-pins-painted");tell("pins-painted",{count:hitTargets.length});}
 }
 map.on('render',renderSceneOverlays);

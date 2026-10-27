@@ -178,7 +178,7 @@ export function drawVenueStacks(ctx,stacks,{dpr=1,fade=1,beam,seconds=0,now=0,re
   ctx.beginPath();ctx.moveTo(ax,stack.bottomEdge);ctx.lineTo(ax,stack.topEdge);ctx.stroke();
   ctx.restore();
   // E3 Step 4: the name ring spins around the beam base, tilted to match the rings.
-  if(stack.sameDay&&stack.names)drawVortexTextRing(ctx,ax,ay,[{r:30*s,y:0,text:stack.names,n:14,fs:Math.max(7,8*s),speed:6,dir:1,ink:'#ffffff'}],c,seconds,reduced,alpha);
+  if(stack.sameDay&&stack.names)drawVortexTextRing(ctx,ax,ay,[{r:46*s,y:0,text:stack.names,n:34,fs:Math.max(9,10*s),speed:6,dir:1,ink:'#ffffff'}],c,seconds,reduced,alpha);
   // Countdown sits on the top of the stack and reads the soonest event.
   const box=stack.countdown,text=stackCountdown(stack.members,now),left=box.x-box.width/2;
   ctx.save();ctx.globalAlpha=alpha;
