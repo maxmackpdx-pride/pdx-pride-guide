@@ -6,10 +6,10 @@
 .eb-detail-backdrop { z-index: 3000; }
 .eb-detail.eb-detail--resource {
   position: fixed;
-  inset: 50% auto auto 50%;
-  translate: -50% -50%;
+  /* Center the fixed shell independently of its entrance/exit transforms. */
+  inset: 0;
   z-index: 3001;
-  margin: 0;
+  margin: auto;
   overflow: hidden;
 }
 .event-modal.eb-detail { --event-accent: var(--c); }
