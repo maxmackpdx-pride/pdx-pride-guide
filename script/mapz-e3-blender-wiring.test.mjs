@@ -7,8 +7,9 @@ import {
   E3_BLENDER_SCALE_CLOSE_M,E3_BLENDER_SCALE_CLOSE_ZOOM,E3_BLENDER_SIZE_FULL_ZOOM,E3_BLENDER_SIZE_FAR_ZOOM,E3_BLENDER_SIZE_FAR,
   E3_BLENDER_MIN_SCREEN_PX,PLACEZ_HOVER_METERS,e3RingText,e3CountdownText,e3NearestSameDayEvent,E3_RING_TEXT_MAX_CHARS,e3RingLines,e3TimeLabel,e3ComplementColor,e3VortexTint,e3SlideCycle,e3SlideState,E3_SLIDE_WEIGHTS,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3CleanCopy,E3_SAME_DAY_GREEN,PLACEZ_ROOF_CLEARANCE_METERS,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,
   e3EventUrgency,E3_URGENCY_RAMP_MS,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TURN_SECONDS_BASE,E3_RING_TURN_SECONDS_PEAK,E3_BEAM_PULSES_BASE,E3_BEAM_PULSES_PEAK,E3_BEAM_PULSE_SPEED_BASE,E3_BEAM_PULSE_SPEED_PEAK,E3_RING_TILT_RADIANS,e3SpinUp,e3OrbDrop,e3BlenderTallestUnits,E3_BLENDER_STACK_TALLEST_UNITS,E3_BLENDER_TALLEST_UNITS,
+  E3_LOD_MAX_FULL
 } from '../client/public/mapz-map/e3-lod.js';
-import {blenderLogoFace,blenderBandFace,blenderPlateFace,blenderArtFace,blenderOrbFace,blenderDotsHole,BLENDER_TABLES,blenderBaseFace,blenderStackOpen,STACK_LIFT,STACK_RISE,STACK_GAP,STACK_SHIFT} from '../client/public/mapz-map/e3-blender-model.js';
+import {SINGLE_SIGN_LIFT,SINGLE_RING_LOWER,SINGLE_RING_UPPER,blenderSingleWeight,blenderLogoFace,blenderBandFace,blenderPlateFace,blenderArtFace,blenderOrbFace,blenderDotsHole,BLENDER_TABLES,blenderBaseFace,blenderStackOpen,STACK_LIFT,STACK_RISE,STACK_GAP,STACK_SHIFT} from '../client/public/mapz-map/e3-blender-model.js';
 
 test('3D hologram scale: 24 m at close zoom, 20% at zoom 12, full size from 15.5, smooth in between', () => {
   assert.equal(E3_BLENDER_SCALE_CLOSE_M,24);
@@ -178,7 +179,7 @@ test('ring band and countdown plate show only on the vortex and the double stack
   }
   assert.equal(blenderPlateFace(4).opacity,1);
   assert.equal(blenderPlateFace(5).opacity,1);
-  assert.ok(blenderPlateFace(5).y>blenderPlateFace(4).y,'the plate rides above the top screen of the stack');
+  assert.ok(Math.abs(blenderPlateFace(5).y-blenderPlateFace(4).y)<1e-9,'the single vortex plate ends at the same height as the double stack plate');
   const mid=blenderPlateFace(3.5);
   assert.ok(mid.opacity>0&&mid.opacity<1,'fades in during the coin to vortex morph');
 });
@@ -376,7 +377,7 @@ test('double stack spacing: lower stack lifted off the pin, a gap for the orb, t
   // Bigger ring text and a bigger start time band than the v2 build (bands .58/.36 and .36 tall).
   assert.ok(RING_BANDS.find(item=>item.id==='a1').h[4]>=.78&&RING_BANDS.find(item=>item.id==='a2').h[4]>=.48);
   assert.ok(INFO_MAIN.h[5]>=.5&&INFO_LOWER.h[5]>=.5);
-  assert.equal(e3BlenderTallestUnits(4),E3_BLENDER_TALLEST_UNITS);assert.equal(e3BlenderTallestUnits(5),E3_BLENDER_STACK_TALLEST_UNITS);
+  assert.equal(e3BlenderTallestUnits(3),E3_BLENDER_TALLEST_UNITS);assert.equal(e3BlenderTallestUnits(4),E3_BLENDER_STACK_TALLEST_UNITS);assert.equal(e3BlenderTallestUnits(5),E3_BLENDER_STACK_TALLEST_UNITS);
   assert.ok(E3_BLENDER_STACK_TALLEST_UNITS>E3_BLENDER_TALLEST_UNITS);
 });
 
@@ -408,4 +409,31 @@ test('double stack puts the sooner event on top and labels pending events', asyn
   assert.equal(e3StartsInLabel(now + 3 * h + 14 * 6e4, now), '3H 14M');
   assert.equal(e3StartsInLabel(now + 45 * 6e4, now), '45M');
   assert.equal(e3StartsInLabel(now - 1, now), '');
+});
+
+test('single vortex: longer beam, its sign ends exactly where the double stack top sign ends, rings evenly spaced', () => {
+  const {ART_MAIN,INFO_MAIN,FACE_STACK,COUNTDOWN_PLATE,RING_BANDS,ORB}=BLENDER_TABLES;
+  for (const table of [ART_MAIN,INFO_MAIN,FACE_STACK,COUNTDOWN_PLATE]) assert.ok(Math.abs(table.y[4]-table.y[5])<1e-9,'single and double top sign share one height');
+  assert.ok(Math.abs(SINGLE_SIGN_LIFT-(STACK_SHIFT+.8))<1e-9);
+  assert.equal(e3BlenderTallestUnits(4),e3BlenderTallestUnits(5),'same scale, so the same world and screen height at every zoom');
+  assert.equal(blenderSingleWeight(3),0);assert.equal(blenderSingleWeight(4),1);assert.equal(blenderSingleWeight(5),0);
+  assert.ok(blenderSingleWeight(3.5)>0&&blenderSingleWeight(4.5)>0);
+  // Edge gaps (orb to lower ring, ring to ring, upper ring to the sign) are equal, with room for the ring tilt.
+  const a1=RING_BANDS.find(item=>item.id==='a1'),a2=RING_BANDS.find(item=>item.id==='a2');
+  const lowerBottom=a2.y[4]-a2.h[4]/2,lowerTop=a2.y[4]+a2.h[4]/2,upperBottom=a1.y[4]-a1.h[4]/2,upperTop=a1.y[4]+a1.h[4]/2;
+  const signBottom=INFO_MAIN.y[4]-INFO_MAIN.h[4]/2;
+  const gaps=[lowerBottom-ORB.y[4],upperBottom-lowerTop,signBottom-upperTop];
+  for (const gap of gaps) assert.ok(gap>.8,`gap ${gap} leaves room around the ring text`);
+  assert.ok(Math.max(...gaps)-Math.min(...gaps)<.1,`gaps ${gaps.join(', ')} are even`);
+  // The shader lifts the Blender rings by the same amounts the text bands moved.
+  assert.ok(Math.abs(a2.y[4]-(2.36+SINGLE_RING_LOWER))<1e-9&&Math.abs(a1.y[4]-(2.88+SINGLE_RING_UPPER))<1e-9);
+});
+
+test('no flat coin inside the vortex range: every same-day venue is a vortex, plain venues stay a pin, the 3D budget fits a crowd', async () => {
+  const flight=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
+  assert.match(flight,/const rangeHides=group=>e3VortexBlend\(group\.depthM\)>0&&!e3Blender3D\.has\(group\.key\)&&\(group\.sameDay\?blenderOn:!E3_NON_SAME_DAY_COIN_NEAR\)/);
+  assert.match(flight,/if\(group&&rangeHides\(group\)\)item\.lodHidden=true;/,'the 2D coin is hidden where the vortex range starts');
+  assert.match(flight,/E3_BLENDER_MAX_VISIBLE=coarsePointer\?8:12/);
+  assert.match(flight,/e3Blender3D\.has\(group\.key\)\|\|rangeHides\(group\)/,'no 2D hologram transition runs for a venue the range hides');
+  assert.ok(E3_LOD_MAX_FULL>=12,'the vortex cap is a safety limit, crowds shrink instead');
 });

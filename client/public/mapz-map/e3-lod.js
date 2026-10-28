@@ -32,8 +32,13 @@ export const E3_LOD_COMPRESSED_MAX_M = 120000;
 export const E3_LOD_BLEND = .25;
 // A level only changes once the distance passes the boundary by this fraction.
 export const E3_LOD_BAND = .1;
-// Most venues that may show the full vortex at once. Nearest first.
-export const E3_LOD_MAX_FULL = 3;
+// Most venues that may show the full vortex at once. Nearest first. Tucker (2026-10-28): inside the vortex range every
+// same-day venue on screen is a vortex, never a flat coin beside one, so this is a safety limit for performance only
+// (it equals the 3D layer's draw limit) and crowds are handled by shrinking (e3CrowdTargets), not by dropping to coins.
+export const E3_LOD_MAX_FULL = 12;
+// Venues with no event today are not holograms while the vortex range is on. They are a coin only farther out, in the
+// coin band (the vortex blend hands them from the plain pin to the coin as you zoom out). Set true for the old "coin at any zoom".
+export const E3_NON_SAME_DAY_COIN_NEAR = false;
 // A current vortex keeps its slot against a rival this much farther away.
 export const E3_LOD_KEEP_BIAS = .9;
 // The mini badge is full size at E3_MINI_FULL_ZOOM and closer, and shrinks smoothly to
@@ -91,6 +96,11 @@ export function e3StageForDepth(depthM) {
  */
 export function e3StageTarget(depthM, {capped = false, sameDay = true, stack = false} = {}) {
   let stage = e3StageForDepth(depthM);
+  if (!sameDay && !E3_NON_SAME_DAY_COIN_NEAR) {
+    // Plain pin (stage 1) inside the vortex range, easing up to the coin as the vortex blend lets go.
+    stage = 1 + (Math.min(stage, 3) - 1) * (1 - e3VortexBlend(depthM));
+    return stage;
+  }
   if (capped || !sameDay) stage = Math.min(stage, 3);
   if (stack && stage > 3) stage = 3 + (stage - 3) * 2;
   return stage;
@@ -198,7 +208,7 @@ export const E3_BLENDER_MIN_STAGE = 2;
 // vortex and coin alive through the handoff instead of switching to the larger 2D coin early.
 export const E3_BLENDER_MIN_SCREEN_PX = 28;
 // Approximate model height in model units per stage 0..5 (beam top), used for the on-screen size test.
-export const E3_BLENDER_STAGE_HEIGHT_UNITS = [1, 1.4, 4, 4.6, 4.8, 6.8];
+export const E3_BLENDER_STAGE_HEIGHT_UNITS = [1, 1.4, 4, 4.6, 6.8, 6.8];
 // While a leaving venue's stage tween is still above this value the 3D layer keeps drawing it, so the
 // hand-back to the 2D mini badge is not a pop.
 export const E3_BLENDER_RELEASE_STAGE = 1.02;
@@ -216,10 +226,12 @@ export function e3BlenderSizeFactor(zoom) {
 const metersPerPixelAt = (zoom, latitude) => 40075016.686 * Math.cos(latitude * Math.PI / 180) / (512 * Math.pow(2, zoom));
 const pitchFactor = pitch => Math.max(.35, Math.sin(pitch * Math.PI / 180));
 
-/** Cap height in model units: the single vortex value, blending to the double stack value between stages 4 and 5. */
+/** Cap height in model units: the coin value, blending to the shared single and double stack value between stages 3 and 4. */
 export function e3BlenderTallestUnits(stage = 0) {
-  const open = clamp01(stage - 4);
-  return E3_BLENDER_TALLEST_UNITS + (E3_BLENDER_STACK_TALLEST_UNITS - E3_BLENDER_TALLEST_UNITS) * open;
+  // The single vortex now stands as tall as the double stack (its sign ends at the same height), so the cap
+  // height reaches the stack value at stage 4 and stays there. The coin and below keep the old value.
+  const lift = clamp01(stage - 3);
+  return E3_BLENDER_TALLEST_UNITS + (E3_BLENDER_STACK_TALLEST_UNITS - E3_BLENDER_TALLEST_UNITS) * lift;
 }
 
 /**

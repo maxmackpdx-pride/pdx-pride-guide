@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-import {e3SlideState,e3SpinUp,e3OrbDrop,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TILT_RADIANS} from './e3-lod.js?v=20261027-e3-v3';
+import {e3SlideState,e3SpinUp,e3OrbDrop,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TILT_RADIANS} from './e3-lod.js?v=20261028-vortex-lift';
 
 // This is the exported Blender mesh, not a video/sprite reconstruction. The
 // caller owns venue grouping, same-day eligibility, LOD thresholds and layout.
@@ -13,7 +13,14 @@ export const E3_BLENDER_MORPHS=['Full waypoint','Compressed','Logo coin','Single
 // run over the lower screen), and everything above the ring gap rises by STACK_GAP more (room for the orb). Weighted by the double stack morph, so the single vortex is unchanged.
 const AXIS_VERTICAL=true;
 export const STACK_LIFT=1.15,STACK_RISE=.45,STACK_GAP=.645,STACK_SHIFT=STACK_LIFT+STACK_RISE+STACK_GAP;
-const HEIGHT=[0,0,4.02,4.3,4.6,5.05+STACK_SHIFT],RADIUS=[0,0,.48,.60,.75,.90];
+// The single vortex is a longer beam: its sign (screens, clock and faces) stands at exactly the height of the double
+// stack's top sign, and the two text rings sit between the orb and the sign with equal clear gaps. The sign group of
+// the Blender mesh rises by SINGLE_LIFT (the double's top sign is the single sign plus STACK_SHIFT plus the .8 the
+// screen sits higher there), the upper ring by SINGLE_RING_UPPER and the lower ring by SINGLE_RING_LOWER; the vertex
+// shader classifies each vertex by its single vortex position (rings 2.25-2.45 and 2.75-2.95, sign from 3.05) and
+// weights the lift by how single the stage is (0 at the coin, 1 at stage 4, 0 again at the double stack).
+export const SINGLE_SIGN_LIFT=STACK_SHIFT+.8,SINGLE_RING_LOWER=.965,SINGLE_RING_UPPER=2.17;
+const HEIGHT=[0,0,4.02,4.3,4.6+SINGLE_SIGN_LIFT,5.05+STACK_SHIFT],RADIUS=[0,0,.48,.60,.75,.90];
 const HOVER={
  'Upper poster independent hover':[.043,0],
  'Lower poster independent hover':[.039,2.3],
@@ -34,7 +41,7 @@ function interpolate(values,stage){const n=clamp(stage),i=Math.floor(n);return v
 // replace the generic Z mark; the vortex and the double stack carry it on their screens.
 // Stage 1 (waypoint pin) keeps the venue-type icon. The second plane is the lower screen of the double stack.
 const LOGO_FACE_Z=.095;
-const LOGO_MAIN={y:[3.77,3.79,4.25,4.30,3.98,4.78+STACK_SHIFT],w:[0,0,.34,.78,.98,.98],h:[0,0,.34,.78,.7,.7],a:[0,0,1,1,1,1]};
+const LOGO_MAIN={y:[3.77,3.79,4.25,4.30,3.98+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT],w:[0,0,.34,.78,.98,.98],h:[0,0,.34,.78,.7,.7],a:[0,0,1,1,1,1]};
 // The vortex screens use the art slides instead (see ART_MAIN); the coin logo hands over while the screen unfolds.
 const LOGO_LOWER={y:[3.03,3.03,3.03,3.03,3.03,1.29+STACK_LIFT],w:[0,0,0,0,0,.98],h:[0,0,0,0,0,.7],a:[0,0,0,0,0,1]};
 export function blenderLogoFace(table,stage,aspect=1){
@@ -47,28 +54,28 @@ export function blenderLogoFace(table,stage,aspect=1){
 // ---------------------------------------------------------------------------
 // Screen art box (logo, poster or host logo, with glitch swaps) and the info band under it (start time biggest,
 // event name above it). The screen is 1.34 x 1.0 and its centre sits at 3.98 (vortex) or 4.78 and 1.29 (stack).
-const ART_MAIN={y:[3.98,3.98,3.98,3.98,4.23,4.78+STACK_SHIFT+.25],w:[0,0,0,0,1.2,1.2],h:[0,0,0,0,.42,.42],a:[0,0,0,0,1,1]};
+const ART_MAIN={y:[3.98,3.98,3.98,3.98,4.23+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT+.25],w:[0,0,0,0,1.2,1.2],h:[0,0,0,0,.42,.42],a:[0,0,0,0,1,1]};
 const ART_LOWER={y:[1.54,1.54,1.54,1.54,1.54,1.29+STACK_LIFT+.25],w:[0,0,0,0,0,1.2],h:[0,0,0,0,0,.42],a:[0,0,0,0,0,1]};
-const INFO_MAIN={y:[3.74,3.74,3.74,3.74,3.74,4.78+STACK_SHIFT-.24],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.52,.52,.52,.52,.52,.52],a:[0,0,0,0,1,1]};
+const INFO_MAIN={y:[3.74,3.74,3.74,3.74,3.74+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT-.24],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.52,.52,.52,.52,.52,.52],a:[0,0,0,0,1,1]};
 const INFO_LOWER={y:[1.05,1.05,1.05,1.05,1.05,1.29+STACK_LIFT-.24],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.52,.52,.52,.52,.52,.52],a:[0,0,0,0,0,1]};
 // Text rings. line 0 is the event name on the wide ring, line 1 the DJs (or host) on the narrow ring. The upper
 // stack (screen 0) and the lower stack (screen 1) each carry their own event.
 const RING_BANDS=[
- {id:'a1',screen:0,line:0,y:[2.9,2.9,2.9,2.9,2.88,3.72+STACK_SHIFT],r:[.6,.6,.6,.6,1.1,1.1],h:[.4,.4,.4,.4,.8,.8],a:[0,0,0,0,1,1],width:2048,height:236,font:176},
- {id:'a2',screen:0,line:1,y:[2.4,2.4,2.4,2.4,2.36,3.38+STACK_SHIFT],r:[.6,.6,.6,.6,.76,.8],h:[.3,.3,.3,.3,.5,.5],a:[0,0,0,0,1,1],width:1536,height:154,font:118},
+ {id:'a1',screen:0,line:0,y:[2.9,2.9,2.9,2.9,2.88+SINGLE_RING_UPPER,3.72+STACK_SHIFT],r:[.6,.6,.6,.6,1.1,1.1],h:[.4,.4,.4,.4,.8,.8],a:[0,0,0,0,1,1],width:2048,height:236,font:176},
+ {id:'a2',screen:0,line:1,y:[2.4,2.4,2.4,2.4,2.36+SINGLE_RING_LOWER,3.38+STACK_SHIFT],r:[.6,.6,.6,.6,.76,.8],h:[.3,.3,.3,.3,.5,.5],a:[0,0,0,0,1,1],width:1536,height:154,font:118},
  {id:'b2',screen:1,line:1,y:[2.68,2.68,2.68,2.68,2.68,2.68+STACK_LIFT+STACK_RISE],r:[.8,.8,.8,.8,.8,.8],h:[.5,.5,.5,.5,.5,.5],a:[0,0,0,0,0,1],width:1536,height:154,font:118},
  {id:'b1',screen:1,line:0,y:[2.28,2.28,2.28,2.28,2.28,2.28+STACK_LIFT+STACK_RISE],r:[1.1,1.1,1.1,1.1,1.1,1.1],h:[.8,.8,.8,.8,.8,.8],a:[0,0,0,0,0,1],width:2048,height:236,font:176},
 ];
 // Countdown plate and face stack sit above the top screen (screen centre + .86 and + 1.28).
-const COUNTDOWN_PLATE={y:[4.84,4.84,4.84,4.84,4.84,5.64+STACK_SHIFT],w:[1.5,1.5,1.5,1.5,1.5,1.5],h:[.44,.44,.44,.44,.44,.44],a:[0,0,0,0,1,1]};
-const FACE_STACK={y:[5.26,5.26,5.26,5.26,5.26,6.06+STACK_SHIFT],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.34,.34,.34,.34,.34,.34],a:[0,0,0,0,1,1]};
+const COUNTDOWN_PLATE={y:[4.84,4.84,4.84,4.84,4.84+SINGLE_SIGN_LIFT,5.64+STACK_SHIFT],w:[1.5,1.5,1.5,1.5,1.5,1.5],h:[.44,.44,.44,.44,.44,.44],a:[0,0,0,0,1,1]};
+const FACE_STACK={y:[5.26,5.26,5.26,5.26,5.26+SINGLE_SIGN_LIFT,6.06+STACK_SHIFT],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.34,.34,.34,.34,.34,.34],a:[0,0,0,0,1,1]};
 // The orb floats below the rings of a single vortex and between the two stacks of a double stack.
 // Height the beam light pulses climb to (the lowest ring band), per stage.
-const PULSE_TOP=[2.5,2.5,2.5,2.5,2.4,3.2+STACK_LIFT+STACK_RISE];
-const ORB={y:[1.95,1.95,1.95,1.95,1.95,3.0+STACK_LIFT+STACK_RISE+STACK_GAP/2],a:[0,0,0,0,1,1],radius:.07};
+const PULSE_TOP=[2.5,2.5,2.5,2.5,2.36+SINGLE_RING_LOWER,3.2+STACK_LIFT+STACK_RISE];
+const ORB={y:[1.95,1.95,1.95,1.95,2.0,3.0+STACK_LIFT+STACK_RISE+STACK_GAP/2],a:[0,0,0,0,1,1],radius:.07};
 // The model's own three small circles above the screen (part of the outline): cut out where the face stack goes,
 // local y range and half width per stage. Off below the vortex.
-const DOTS_HOLE={min:[4.5,4.5,4.5,4.5,4.5,5.29+STACK_SHIFT],max:[4.9,4.9,4.9,4.9,4.9,5.7+STACK_SHIFT],half:.42,lowerMin:.5+STACK_LIFT,lowerMax:.76+STACK_LIFT};
+const DOTS_HOLE={min:[4.5,4.5,4.5,4.5,4.5+SINGLE_SIGN_LIFT,5.29+STACK_SHIFT],max:[4.9,4.9,4.9,4.9,4.9+SINGLE_SIGN_LIFT,5.7+STACK_SHIFT],half:.42,lowerMin:.5+STACK_LIFT,lowerMax:.76+STACK_LIFT};
 // Beam base disc and venue label (model units, ground level). The disc and the label ease in with the vortex
 // (stage 3.2 to 4) and stay for the double stack.
 const BASE_DISC={y:.04,radius:.8,on:3.2,full:4};
@@ -89,6 +96,8 @@ export function blenderArtFace(table,stage){
 export function blenderOrbFace(stage){return {y:interpolate(ORB.y,stage),opacity:interpolate(ORB.a,stage)};}
 // How far the double stack spacing has opened (0 at the single vortex, 1 at the full double stack).
 export const blenderStackOpen=stage=>Math.max(0,Math.min(1,stage-4));
+// How much of the single vortex lift applies: ramps in with the vortex (3 to 4), ramps out as the stack opens (4 to 5).
+export const blenderSingleWeight=stage=>stage<=4?Math.max(0,Math.min(1,stage-3)):Math.max(0,Math.min(1,5-stage));
 export function blenderDotsHole(stage){const open=blenderStackOpen(stage);return {min:interpolate(DOTS_HOLE.min,stage),max:interpolate(DOTS_HOLE.max,stage),half:DOTS_HOLE.half,on:stage>=3.3,lowerMin:DOTS_HOLE.lowerMin-STACK_LIFT*(1-open),lowerMax:DOTS_HOLE.lowerMax-STACK_LIFT*(1-open),lowerOn:stage>=4.3};}
 export const BLENDER_TABLES={BASE_DISC,BASE_LABEL,ART_MAIN,ART_LOWER,INFO_MAIN,INFO_LOWER,RING_BANDS,COUNTDOWN_PLATE,FACE_STACK,ORB};
 const fontsReady=()=>{try{return Boolean(document.fonts?.check("900 20px 'Barlow Condensed'"));}catch{return false;}};
@@ -269,7 +278,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  let iconMaterial=null;
  const tint=new THREE.Color(color);
  // Cut-out for the model's three little circles; the face stack replaces them.
- const holeUniform={value:new THREE.Vector4(0,0,0,0)},holeLowerUniform={value:new THREE.Vector4(0,0,0,0)},stackUniform={value:new THREE.Vector4(0,STACK_LIFT,STACK_RISE,STACK_GAP)},spinUniform={value:new THREE.Vector2(0,0)},bandUniform={value:[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0))},pulseUniform={value:new THREE.Vector4(0,2,2.5,0)},beamKUniform={value:1},beamFadeUniform={value:new THREE.Vector2(99,100)},beamAccentUniform={value:new THREE.Color('#ffffff')};
+ const holeUniform={value:new THREE.Vector4(0,0,0,0)},holeLowerUniform={value:new THREE.Vector4(0,0,0,0)},stackUniform={value:new THREE.Vector4(0,STACK_LIFT,STACK_RISE,STACK_GAP)},singleUniform={value:new THREE.Vector4(0,SINGLE_RING_LOWER,SINGLE_RING_UPPER-SINGLE_RING_LOWER,SINGLE_SIGN_LIFT-SINGLE_RING_UPPER)},spinUniform={value:new THREE.Vector2(0,0)},bandUniform={value:[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0))},pulseUniform={value:new THREE.Vector4(0,2,2.5,0)},beamKUniform={value:1},beamFadeUniform={value:new THREE.Vector2(99,100)},beamAccentUniform={value:new THREE.Color('#ffffff')};
  object.traverse(node=>{
   if(!node.isMesh)return;
   const role=node.userData.mapzRole||'outline';
@@ -285,7 +294,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   const holed=role==='outline'||role==='ring-fill'||role==='icon',spaced=holed||role==='panel'||role==='beam',pulsed=role==='beam';
   if(spaced){
    material.onBeforeCompile=shader=>{
-    shader.uniforms.uStack=stackUniform;shader.uniforms.uSpin=spinUniform;shader.uniforms.uBand=bandUniform;
+    shader.uniforms.uStack=stackUniform;shader.uniforms.uSingle=singleUniform;shader.uniforms.uSpin=spinUniform;shader.uniforms.uBand=bandUniform;
     if(pulsed){shader.uniforms.uPulse=pulseUniform;shader.uniforms.uBeamK=beamKUniform;shader.uniforms.uFade=beamFadeUniform;shader.uniforms.uBeamAccent=beamAccentUniform;}
     const morph=`
  #ifdef USE_MORPHTARGETS
@@ -302,6 +311,9 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   float fv=smoothstep(s0,s0+.42,uSpin.x);
   transformed+=dCoin*(1.-fv)+dVort*fv;
  }
+ // Single vortex: longer beam. Each vertex is grouped by its own single vortex height: lower ring, upper ring, sign.
+ float sy=position.y+getMorph(gl_VertexID,3,0).y;
+ transformed.y+=uSingle.x*(uSingle.y*smoothstep(2.1,2.2,sy)+uSingle.z*smoothstep(2.6,2.7,sy)+uSingle.w*smoothstep(3.,3.04,sy));
  #endif
  transformed.y+=uStack.x*(uStack.y*smoothstep(.35,.55,transformed.y)+uStack.z*smoothstep(1.88,2.02,transformed.y)+uStack.w*smoothstep(2.93,3.07,transformed.y));
  for(int k=0;k<4;k++){
@@ -309,7 +321,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   if(bd.y>0.){float wt=1.-smoothstep(bd.y*.7,bd.y,abs(transformed.y-bd.x));transformed.y+=wt*((transformed.z)*bd.z+transformed.x*bd.w);}
  }
  `+(holed?'vHolePos=transformed;':'')+(pulsed?'vBeamY=transformed.y;':'');
-    shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nuniform vec4 uStack;uniform vec2 uSpin;uniform vec4 uBand[4];'+(holed?'\nvarying vec3 vHolePos;':'')+(pulsed?'\nvarying float vBeamY;':''))
+    shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nuniform vec4 uStack;uniform vec4 uSingle;uniform vec2 uSpin;uniform vec4 uBand[4];'+(holed?'\nvarying vec3 vHolePos;':'')+(pulsed?'\nvarying float vBeamY;':''))
      .replace('#include <morphtarget_vertex>',morph);
     if(holed){
      shader.uniforms.uHole=holeUniform;shader.uniforms.uHole2=holeLowerUniform;
@@ -507,6 +519,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     }
    }
    stackUniform.value.x=blenderStackOpen(stage);
+   singleUniform.value.x=blenderSingleWeight(stage);
    const hole=contentKey?blenderDotsHole(stage):{on:false,min:0,max:0,half:0};
    holeUniform.value.set(hole.min,hole.max,hole.half,hole.on?1:0);
    holeLowerUniform.value.set(hole.lowerMin||0,hole.lowerMax||0,hole.half,hole.lowerOn?1:0);

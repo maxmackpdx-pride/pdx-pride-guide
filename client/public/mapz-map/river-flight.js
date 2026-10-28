@@ -9,8 +9,8 @@ import {eventCountdown,appendEventCountdown} from './event-countdown.js';
 import {venueStackKey} from './e3-vortex-stack.js?v=20261026-lod';
 import {createE3TransitionState} from './e3-transitions.js?v=20261027-e3-v3';
 import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from './e3-venue-stack.js';
-import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingLines,e3CleanCopy,e3TimeLabel,e3ComplementColor,e3VortexTint,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3StackOrder,e3StartsInLabel,e3EventUrgency,e3StageTarget,e3VortexBlend,e3RepresentativeIndex,e3MixHex} from './e3-lod.js?v=20261028-zoom-handoff';
-import {createE3BlenderLayer} from './e3-blender-model.js?v=20261028-zoom-handoff';
+import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingLines,e3CleanCopy,e3TimeLabel,e3ComplementColor,e3VortexTint,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3StackOrder,e3StartsInLabel,e3EventUrgency,e3StageTarget,e3VortexBlend,e3RepresentativeIndex,e3MixHex,E3_NON_SAME_DAY_COIN_NEAR} from './e3-lod.js?v=20261028-vortex-lift';
+import {createE3BlenderLayer} from './e3-blender-model.js?v=20261028-vortex-lift';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
@@ -111,7 +111,7 @@ const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
 // 3D Blender holograms: desktop and phones. Calm Mode (reduced motion) has no 3D layer and shows the round logo coin only.
 // Size follows zoom (e3BlenderScaleMeters in e3-lod.js): about 24 m at close zoom, 20% at zoom 10, full size at 15.5, capped to a third of the screen.
 // Touch devices draw fewer 3D holograms at once. The stage follows zoom continuously, easing toward its target with this time constant.
-const E3_BLENDER_MAX_VISIBLE=coarsePointer?4:6,E3_STAGE_FOLLOW_S=.18;
+const E3_BLENDER_MAX_VISIBLE=coarsePointer?8:12,E3_STAGE_FOLLOW_S=.18;
 // Tucker said skip the skyline-height idea for now. Flip to true to stretch each hologram above local buildings.
 const E3_BLENDER_SKYLINE_HEIGHT=false;
 // Height follows the local skyline: the tallest building within E3_CLEARANCE_RADIUS_M sets a vertical stretch.
@@ -755,7 +755,8 @@ function drawLights(fade,target=map,surface=lights){
  // A venue the 3D layer draws gets no 2D clip: it morphs in 3D instead. The clip clock must not run for it.
  // The vortex exists only in 3D. Where the 3D layer does not draw a venue, its 2D form is the round logo coin, never a card.
  const level2d=group=>{const level=lodLevels.get(group.key);return level==='vortex'&&!e3Blender3D.has(group.key)?'coin':level;};
- if(e3Transitions)for(const group of lodGroups.values()){if(e3Blender3D.has(group.key))e3Transitions.cancel(group.key,lodLevels.get(group.key));else e3Transitions.update(group.key,level2d(group),frameNow,!reduced.matches&&e3Opened,Boolean(group.sameDay),group.color);}
+ const rangeHides=group=>e3VortexBlend(group.depthM)>0&&!e3Blender3D.has(group.key)&&(group.sameDay?blenderOn:!E3_NON_SAME_DAY_COIN_NEAR);
+ if(e3Transitions)for(const group of lodGroups.values()){if(e3Blender3D.has(group.key)||rangeHides(group))e3Transitions.cancel(group.key,lodLevels.get(group.key));else e3Transitions.update(group.key,level2d(group),frameNow,!reduced.matches&&e3Opened,Boolean(group.sameDay),group.color);}
  const e3TransitioningEvents=new Set(),e3TransitionDrawn=new Set();
  const lodNowMs=viewTime+Math.max(0,frameNow-viewTimeReceived),lodRepresented=new Set(),lodRepresentative=new Map();
  for(let beaconIndex=0;beaconIndex<beacons.length;beaconIndex++){
@@ -777,6 +778,9 @@ function drawLights(fade,target=map,surface=lights){
   item.lodHidden=false;
   if(!lodRepresented.has(groupKey)){lodRepresented.add(groupKey);lodRepresentative.set(groupKey,group?.eventKeys?.[e3RepresentativeIndex(group.events,lodNowMs)]??item.feature.properties.key);}
   if(lodRepresentative.get(groupKey)!==item.feature.properties.key)item.lodHidden=true;
+  // Inside the vortex range there is no flat 2D coin beside a vortex: a same-day venue the 3D layer draws is a vortex, and a
+  // venue with no event today shows only its pin until the coin band. (Without the 3D layer, e.g. reduced motion, same-day keeps the coin.)
+  if(group&&rangeHides(group))item.lodHidden=true;
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal*plan.scale);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
   const skyRise=skyCeiling*(.55+.35*item.presence.motion+heightBoost*.25);
