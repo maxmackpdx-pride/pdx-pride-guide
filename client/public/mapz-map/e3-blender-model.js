@@ -268,7 +268,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  let iconMaterial=null;
  const tint=new THREE.Color(color);
  // Cut-out for the model's three little circles; the face stack replaces them.
- const holeUniform={value:new THREE.Vector4(0,0,0,0)},holeLowerUniform={value:new THREE.Vector4(0,0,0,0)},stackUniform={value:new THREE.Vector4(0,STACK_LIFT,STACK_RISE,STACK_GAP)},spinUniform={value:new THREE.Vector2(0,0)},bandUniform={value:[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0))},pulseUniform={value:new THREE.Vector4(0,2,2.5,0)};
+ const holeUniform={value:new THREE.Vector4(0,0,0,0)},holeLowerUniform={value:new THREE.Vector4(0,0,0,0)},stackUniform={value:new THREE.Vector4(0,STACK_LIFT,STACK_RISE,STACK_GAP)},spinUniform={value:new THREE.Vector2(0,0)},bandUniform={value:[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0))},pulseUniform={value:new THREE.Vector4(0,2,2.5,0)},beamKUniform={value:1};
  object.traverse(node=>{
   if(!node.isMesh)return;
   const role=node.userData.mapzRole||'outline';
@@ -285,7 +285,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   if(spaced){
    material.onBeforeCompile=shader=>{
     shader.uniforms.uStack=stackUniform;shader.uniforms.uSpin=spinUniform;shader.uniforms.uBand=bandUniform;
-    if(pulsed)shader.uniforms.uPulse=pulseUniform;
+    if(pulsed){shader.uniforms.uPulse=pulseUniform;shader.uniforms.uBeamK=beamKUniform;}
     const morph=`
  #ifdef USE_MORPHTARGETS
  transformed*=morphTargetBaseInfluence;
@@ -317,7 +317,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     }
     if(pulsed){
      // Small bright pulses climbing the beam from the pin to the rings. uPulse: phase, how many at once, the height they reach, strength.
-     shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float vBeamY;uniform vec4 uPulse;uniform vec4 uStack;')
+     shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float vBeamY;uniform vec4 uPulse;uniform vec4 uStack;uniform float uBeamK;')
       .replace('#include <opaque_fragment>',`#include <opaque_fragment>
  {
   float travel=vBeamY/max(uPulse.z,.01),glow=0.;
@@ -327,9 +327,9 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    float d=travel-pos;
    glow+=on*exp(-d*d*1300.)*smoothstep(0.,.1,pos)*(1.-smoothstep(.82,1.,pos));
   }
-  float g=glow*uPulse.w;
-  gl_FragColor.a+=.035+.07*uStack.x;
-  gl_FragColor.rgb+=diffuseColor.rgb*(.04+.08*uStack.x);
+  float g=glow*uPulse.w*uBeamK;
+  gl_FragColor.a+=(.035+.07*uStack.x)*uBeamK;
+  gl_FragColor.rgb+=diffuseColor.rgb*(.04+.08*uStack.x)*uBeamK;
   gl_FragColor.rgb+=mix(diffuseColor.rgb,vec3(1.),.4)*g*1.5;
   gl_FragColor.a=min(.7,gl_FragColor.a+g*.6);
  }`);
@@ -563,6 +563,8 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    {
     const look=e3BeamPulseLook(urgency),reach=interpolate(PULSE_TOP,stage),strength=reduced?0:Math.max(0,Math.min(1,(stage-3.2)/.8));
     pulseUniform.value.set(pulsePhase,look.count,reach,strength);
+    // Beam brightness: 20% of the full look when the start is far off, rising to 80% by the time the event opens.
+    beamKUniform.value=reduced?.5:.2+.6*Math.max(0,Math.min(1,urgency));
    }
    {
     const face=plate.texture?blenderPlateFace(at(sp.extras),COUNTDOWN_PLATE):null;
