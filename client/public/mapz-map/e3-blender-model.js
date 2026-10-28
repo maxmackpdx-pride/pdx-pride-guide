@@ -11,7 +11,7 @@ export const E3_BLENDER_MORPHS=['Full waypoint','Compressed','Logo coin','Single
 // shader below pulls them apart after the morph: everything above the lower screen frame rises by STACK_LIFT
 // (so the pin no longer covers the lower screen), the lower rings rise STACK_RISE more (so the ring text does not
 // run over the lower screen), and everything above the ring gap rises by STACK_GAP more (room for the orb). Weighted by the double stack morph, so the single vortex is unchanged.
-export const STACK_LIFT=.8,STACK_RISE=.45,STACK_GAP=.5,STACK_SHIFT=STACK_LIFT+STACK_RISE+STACK_GAP;
+export const STACK_LIFT=1.15,STACK_RISE=.45,STACK_GAP=.5,STACK_SHIFT=STACK_LIFT+STACK_RISE+STACK_GAP;
 const HEIGHT=[0,0,4.02,4.3,4.6,5.05+STACK_SHIFT],RADIUS=[0,0,.48,.60,.75,.90];
 const HOVER={
  'Upper poster independent hover':[.043,0],
@@ -317,7 +317,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     }
     if(pulsed){
      // Small bright pulses climbing the beam from the pin to the rings. uPulse: phase, how many at once, the height they reach, strength.
-     shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float vBeamY;uniform vec4 uPulse;')
+     shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float vBeamY;uniform vec4 uPulse;uniform vec4 uStack;')
       .replace('#include <opaque_fragment>',`#include <opaque_fragment>
  {
   float travel=vBeamY/max(uPulse.z,.01),glow=0.;
@@ -328,6 +328,8 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    glow+=on*exp(-d*d*1300.)*smoothstep(0.,.1,pos)*(1.-smoothstep(.82,1.,pos));
   }
   float g=glow*uPulse.w;
+  gl_FragColor.a+=.035+.07*uStack.x;
+  gl_FragColor.rgb+=diffuseColor.rgb*(.04+.08*uStack.x);
   gl_FragColor.rgb+=mix(diffuseColor.rgb,vec3(1.),.4)*g*1.5;
   gl_FragColor.a=min(.7,gl_FragColor.a+g*.6);
  }`);
