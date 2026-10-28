@@ -7,7 +7,7 @@ import {
   E3_BLENDER_SCALE_CLOSE_M,E3_BLENDER_SCALE_CLOSE_ZOOM,E3_BLENDER_SIZE_FULL_ZOOM,E3_BLENDER_SIZE_FAR_ZOOM,E3_BLENDER_SIZE_FAR,
   E3_BLENDER_MIN_SCREEN_PX,PLACEZ_HOVER_METERS,e3RingText,e3CountdownText,e3NearestSameDayEvent,E3_RING_TEXT_MAX_CHARS,e3RingLines,e3TimeLabel,e3ComplementColor,e3VortexTint,e3SlideCycle,e3SlideState,E3_SLIDE_WEIGHTS,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3CleanCopy,E3_SAME_DAY_GREEN,PLACEZ_ROOF_CLEARANCE_METERS,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,
   e3EventUrgency,E3_URGENCY_RAMP_MS,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TURN_SECONDS_BASE,E3_RING_TURN_SECONDS_PEAK,E3_BEAM_PULSES_BASE,E3_BEAM_PULSES_PEAK,E3_BEAM_PULSE_SPEED_BASE,E3_BEAM_PULSE_SPEED_PEAK,E3_RING_TILT_RADIANS,e3SpinUp,e3OrbDrop,e3BlenderTallestUnits,E3_BLENDER_STACK_TALLEST_UNITS,E3_BLENDER_TALLEST_UNITS,
-  E3_LOD_MAX_FULL
+  E3_LOD_MAX_FULL,e3ShortenRing,e3RingDwell,e3TextBoost,E3_RING_DWELL,E3_TEXT_FAR_BOOST,E3_SIGN_FAR_BOOST,E3_RING_SUB_MAX_CHARS
 } from '../client/public/mapz-map/e3-lod.js';
 import {SINGLE_SIGN_LIFT,SINGLE_RING_LOWER,SINGLE_RING_UPPER,blenderSingleWeight,blenderLogoFace,blenderBandFace,blenderPlateFace,blenderArtFace,blenderOrbFace,blenderDotsHole,BLENDER_TABLES,blenderBaseFace,blenderStackOpen,STACK_LIFT,STACK_RISE,STACK_GAP,STACK_SHIFT} from '../client/public/mapz-map/e3-blender-model.js';
 
@@ -185,10 +185,10 @@ test('ring band and countdown plate show only on the vortex and the double stack
 });
 
 test('ring lines: event name first, DJs second, host or group when no DJ is listed, venue as the last fallback, no dashes', () => {
-  assert.deepEqual(e3RingLines({eventName:'Little Shop of Ponies',performers:['DJ Grind','DJ Moss'],hostName:'Pink Ponies',venueName:'Secret Warehouse'}),{name:'LITTLE SHOP OF PONIES',sub:'DJ GRIND \u00b7 DJ MOSS',source:'performers'});
+  assert.deepEqual(e3RingLines({eventName:'Little Shop of Ponies',performers:['DJ Grind','DJ Moss'],hostName:'Pink Ponies',venueName:'Secret Warehouse'}),{name:'LITTLE SHOP',sub:'DJ GRIND',source:'performers'});
   assert.deepEqual(e3RingLines({eventName:'Bear Dance',hostName:'Portland Bears',venueName:'CC Slaughters'}),{name:'BEAR DANCE',sub:'PORTLAND BEARS',source:'host'});
   assert.deepEqual(e3RingLines({eventName:'Bear Dance',venueName:'CC Slaughters'}),{name:'BEAR DANCE',sub:'CC SLAUGHTERS',source:'venue'});
-  assert.equal(e3RingLines({eventName:"Coach's Pet \u2014 Yes Coach"}).name,"COACH'S PET - YES COACH");
+  assert.equal(e3RingLines({eventName:"Coach's Pet \u2014 Yes Coach"}).name,"COACH'S PET");
   assert.equal(e3CleanCopy('a \u2013 b'),'A - B');
 });
 
@@ -436,4 +436,46 @@ test('no flat coin inside the vortex range: every same-day venue is a vortex, pl
   assert.match(flight,/E3_BLENDER_MAX_VISIBLE=coarsePointer\?8:12/);
   assert.match(flight,/e3Blender3D\.has\(group\.key\)\|\|rangeHides\(group\)/,'no 2D hologram transition runs for a venue the range hides');
   assert.ok(E3_LOD_MAX_FULL>=12,'the vortex cap is a safety limit, crowds shrink instead');
+});
+
+test('readable text: ring lines shorten by words, the ring rests facing the camera, the sign text grows a little when far', () => {
+  assert.equal(e3ShortenRing('Little Shop of Ponies'.toUpperCase(),14),'LITTLE SHOP');
+  assert.equal(e3ShortenRing('DOUBLE XX BEAR DANCE',14),'DOUBLE XX BEAR');
+  assert.equal(e3ShortenRing('BEAR NIGHT',14),'BEAR NIGHT');
+  assert.equal(e3ShortenRing('SUPERCALIFRAGILISTIC',14),'SUPERCALIFRAGI','a single long word is cut, never an ellipsis');
+  assert.equal(e3ShortenRing('THE NIGHT OF THE LIVING DRAG',14),'THE NIGHT');
+  assert.ok(e3RingLines({eventName:'Double XX Bear Dance',performers:['DJ A','DJ B','DJ C','DJ D'],venueName:'CC'}).sub.length<=E3_RING_SUB_MAX_CHARS);
+  assert.equal(e3RingLines({eventName:'Double XX Bear Dance',performers:['DJ A','DJ B','DJ C'],venueName:'CC'}).sub,'DJ A \u00b7 DJ B \u00b7 DJ C'.length<=E3_RING_SUB_MAX_CHARS?'DJ A \u00b7 DJ B \u00b7 DJ C':'DJ A \u00b7 DJ B');
+  // Dwell: same average turn, rests at multiples of a copy step for E3_RING_DWELL of each step.
+  const step=Math.PI*2/2;
+  assert.equal(e3RingDwell(0,2),0);assert.ok(Math.abs(e3RingDwell(step*.3,2))<1e-12,'resting');
+  assert.ok(Math.abs(e3RingDwell(step*(E3_RING_DWELL),2))<1e-12&&e3RingDwell(step*.8,2)>0&&e3RingDwell(step*.8,2)<step);
+  assert.ok(Math.abs(e3RingDwell(step*1,2)-step)<1e-9&&Math.abs(e3RingDwell(step*5,2)-step*5)<1e-9,'average turn rate unchanged');
+  for(let a=0;a<12;a+=.1)assert.ok(e3RingDwell(a+.1,3)>=e3RingDwell(a,3)-1e-12,'never turns backwards');
+  assert.equal(e3TextBoost(17.8),1);assert.equal(e3TextBoost(19),1);
+  assert.ok(Math.abs(e3TextBoost(14.5)-E3_TEXT_FAR_BOOST)<1e-9&&Math.abs(e3TextBoost(10)-E3_TEXT_FAR_BOOST)<1e-9);
+  assert.ok(e3TextBoost(16)>1&&e3TextBoost(16)<E3_TEXT_FAR_BOOST);
+  assert.ok(E3_SIGN_FAR_BOOST<=E3_TEXT_FAR_BOOST);
+});
+
+test('readable text: bigger sign and plates, the art box sits above the info band, single and double share one top sign', () => {
+  const {ART_MAIN,INFO_MAIN,INFO_LOWER,ART_LOWER,COUNTDOWN_PLATE,FACE_STACK}=BLENDER_TABLES;
+  assert.ok(INFO_MAIN.h[4]>=.6&&INFO_MAIN.h[5]>=.6&&COUNTDOWN_PLATE.h[4]>=.5&&FACE_STACK.h[4]>=.4,'taller sign, plate and face row');
+  for(const [art,info] of [[ART_MAIN,INFO_MAIN]]){
+    for(const i of [4,5])assert.ok(art.y[i]-art.h[i]/2>=info.y[i]+info.h[i]/2-.03,`art box clears the info band at ${i}`);
+  }
+  assert.ok(ART_LOWER.y[5]-ART_LOWER.h[5]/2>=INFO_LOWER.y[5]+INFO_LOWER.h[5]/2-.03);
+  assert.ok(FACE_STACK.y[4]-FACE_STACK.h[4]/2>=COUNTDOWN_PLATE.y[4]+COUNTDOWN_PLATE.h[4]/2-.001,'faces clear the plate');
+  assert.ok(BLENDER_TABLES.BASE_LABEL.width>=2.2);
+});
+
+test('readable text: model wiring has no ghost far wall, no colour fringe offset, and the sign text boost reaches the model', async () => {
+  const model=await readFile(new URL('../client/public/mapz-map/e3-blender-model.js',import.meta.url),'utf8');
+  const flight=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
+  assert.match(model,/band\.far\.mesh\.visible=false/);
+  assert.doesNotMatch(model,/\[band\.far,\.34\]/);
+  assert.doesNotMatch(model,/shadowOffsetX/,'no accent offset behind the ring letters');
+  assert.match(model,/e3RingDwell\(turn\*/);
+  assert.match(model,/setTextBoost\(row\.textBoost\|\|1\)/);
+  assert.match(flight,/textBoost:e3TextBoost\(blenderZoom\)/);
 });

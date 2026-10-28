@@ -9,8 +9,8 @@ import {eventCountdown,appendEventCountdown} from './event-countdown.js';
 import {venueStackKey} from './e3-vortex-stack.js?v=20261026-lod';
 import {createE3TransitionState} from './e3-transitions.js?v=20261027-e3-v3';
 import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from './e3-venue-stack.js';
-import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingLines,e3CleanCopy,e3TimeLabel,e3ComplementColor,e3VortexTint,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3StackOrder,e3StartsInLabel,e3EventUrgency,e3StageTarget,e3VortexBlend,e3RepresentativeIndex,e3MixHex,E3_NON_SAME_DAY_COIN_NEAR} from './e3-lod.js?v=20261028-vortex-lift';
-import {createE3BlenderLayer} from './e3-blender-model.js?v=20261028-vortex-lift';
+import {e3TextBoost,eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingLines,e3CleanCopy,e3TimeLabel,e3ComplementColor,e3VortexTint,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3StackOrder,e3StartsInLabel,e3EventUrgency,e3StageTarget,e3VortexBlend,e3RepresentativeIndex,e3MixHex,E3_NON_SAME_DAY_COIN_NEAR} from './e3-lod.js?v=20261028-readable-text';
+import {createE3BlenderLayer} from './e3-blender-model.js?v=20261028-readable-text';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
@@ -726,7 +726,7 @@ function drawLights(fade,target=map,surface=lights){
     }
    }
    rows.push({key:g.key,coordinates,altitude,color:tint,stage:e3StageValue(st),scaleMeters:e3BlenderScaleMeters(blenderZoom,{viewHeight:height,latitude:g.coordinates[1],pitch:blenderPitch,stage:e3StageValue(st)}),heightScale,
-    content,urgency,
+    content,urgency,textBoost:e3TextBoost(blenderZoom),
     logo:logoEntry?{key:g.logoUrl,image:logoEntry.image,width:logoEntry.width,height:logoEntry.height}:null});
   }
   for(const key of [...e3StageState.keys()])if(!e3Blender3D.has(key))e3StageState.delete(key);

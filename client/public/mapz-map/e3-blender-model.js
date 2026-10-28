@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-import {e3SlideState,e3SpinUp,e3OrbDrop,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TILT_RADIANS} from './e3-lod.js?v=20261028-vortex-lift';
+import {e3SlideState,e3SpinUp,e3OrbDrop,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TILT_RADIANS,E3_RING_DWELL,e3RingDwell,E3_TEXT_FAR_BOOST,E3_SIGN_FAR_BOOST} from './e3-lod.js?v=20261028-readable-text';
 
 // This is the exported Blender mesh, not a video/sprite reconstruction. The
 // caller owns venue grouping, same-day eligibility, LOD thresholds and layout.
@@ -54,21 +54,21 @@ export function blenderLogoFace(table,stage,aspect=1){
 // ---------------------------------------------------------------------------
 // Screen art box (logo, poster or host logo, with glitch swaps) and the info band under it (start time biggest,
 // event name above it). The screen is 1.34 x 1.0 and its centre sits at 3.98 (vortex) or 4.78 and 1.29 (stack).
-const ART_MAIN={y:[3.98,3.98,3.98,3.98,4.23+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT+.25],w:[0,0,0,0,1.2,1.2],h:[0,0,0,0,.42,.42],a:[0,0,0,0,1,1]};
-const ART_LOWER={y:[1.54,1.54,1.54,1.54,1.54,1.29+STACK_LIFT+.25],w:[0,0,0,0,0,1.2],h:[0,0,0,0,0,.42],a:[0,0,0,0,0,1]};
-const INFO_MAIN={y:[3.74,3.74,3.74,3.74,3.74+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT-.24],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.52,.52,.52,.52,.52,.52],a:[0,0,0,0,1,1]};
-const INFO_LOWER={y:[1.05,1.05,1.05,1.05,1.05,1.29+STACK_LIFT-.24],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.52,.52,.52,.52,.52,.52],a:[0,0,0,0,0,1]};
+const ART_MAIN={y:[3.98,3.98,3.98,3.98,4.26+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT+.28],w:[0,0,0,0,1.03,1.03],h:[0,0,0,0,.36,.36],a:[0,0,0,0,1,1]};
+const ART_LOWER={y:[1.54,1.54,1.54,1.54,1.54,1.29+STACK_LIFT+.28],w:[0,0,0,0,0,1.03],h:[0,0,0,0,0,.36],a:[0,0,0,0,0,1]};
+const INFO_MAIN={y:[3.79,3.79,3.79,3.79,3.79+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT-.19],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.62,.62,.62,.62,.62,.62],a:[0,0,0,0,1,1]};
+const INFO_LOWER={y:[1.10,1.10,1.10,1.10,1.10,1.29+STACK_LIFT-.19],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.62,.62,.62,.62,.62,.62],a:[0,0,0,0,0,1]};
 // Text rings. line 0 is the event name on the wide ring, line 1 the DJs (or host) on the narrow ring. The upper
 // stack (screen 0) and the lower stack (screen 1) each carry their own event.
 const RING_BANDS=[
- {id:'a1',screen:0,line:0,y:[2.9,2.9,2.9,2.9,2.88+SINGLE_RING_UPPER,3.72+STACK_SHIFT],r:[.6,.6,.6,.6,1.1,1.1],h:[.4,.4,.4,.4,.8,.8],a:[0,0,0,0,1,1],width:2048,height:236,font:176},
- {id:'a2',screen:0,line:1,y:[2.4,2.4,2.4,2.4,2.36+SINGLE_RING_LOWER,3.38+STACK_SHIFT],r:[.6,.6,.6,.6,.76,.8],h:[.3,.3,.3,.3,.5,.5],a:[0,0,0,0,1,1],width:1536,height:154,font:118},
- {id:'b2',screen:1,line:1,y:[2.68,2.68,2.68,2.68,2.68,2.68+STACK_LIFT+STACK_RISE],r:[.8,.8,.8,.8,.8,.8],h:[.5,.5,.5,.5,.5,.5],a:[0,0,0,0,0,1],width:1536,height:154,font:118},
- {id:'b1',screen:1,line:0,y:[2.28,2.28,2.28,2.28,2.28,2.28+STACK_LIFT+STACK_RISE],r:[1.1,1.1,1.1,1.1,1.1,1.1],h:[.8,.8,.8,.8,.8,.8],a:[0,0,0,0,0,1],width:2048,height:236,font:176},
+ {id:'a1',screen:0,line:0,y:[2.9,2.9,2.9,2.9,2.88+SINGLE_RING_UPPER,3.72+STACK_SHIFT],r:[.6,.6,.6,.6,1.1,1.1],h:[.4,.4,.4,.4,.8,.8],a:[0,0,0,0,1,1],width:2048,height:236,font:224},
+ {id:'a2',screen:0,line:1,y:[2.4,2.4,2.4,2.4,2.36+SINGLE_RING_LOWER,3.38+STACK_SHIFT],r:[.6,.6,.6,.6,.76,.8],h:[.3,.3,.3,.3,.5,.5],a:[0,0,0,0,1,1],width:1536,height:154,font:146},
+ {id:'b2',screen:1,line:1,y:[2.68,2.68,2.68,2.68,2.68,2.68+STACK_LIFT+STACK_RISE],r:[.8,.8,.8,.8,.8,.8],h:[.5,.5,.5,.5,.5,.5],a:[0,0,0,0,0,1],width:1536,height:154,font:146},
+ {id:'b1',screen:1,line:0,y:[2.28,2.28,2.28,2.28,2.28,2.28+STACK_LIFT+STACK_RISE],r:[1.1,1.1,1.1,1.1,1.1,1.1],h:[.8,.8,.8,.8,.8,.8],a:[0,0,0,0,0,1],width:2048,height:236,font:224},
 ];
 // Countdown plate and face stack sit above the top screen (screen centre + .86 and + 1.28).
-const COUNTDOWN_PLATE={y:[4.84,4.84,4.84,4.84,4.84+SINGLE_SIGN_LIFT,5.64+STACK_SHIFT],w:[1.5,1.5,1.5,1.5,1.5,1.5],h:[.44,.44,.44,.44,.44,.44],a:[0,0,0,0,1,1]};
-const FACE_STACK={y:[5.26,5.26,5.26,5.26,5.26+SINGLE_SIGN_LIFT,6.06+STACK_SHIFT],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.34,.34,.34,.34,.34,.34],a:[0,0,0,0,1,1]};
+const COUNTDOWN_PLATE={y:[4.87,4.87,4.87,4.87,4.87+SINGLE_SIGN_LIFT,5.67+STACK_SHIFT],w:[1.6,1.6,1.6,1.6,1.6,1.6],h:[.5,.5,.5,.5,.5,.5],a:[0,0,0,0,1,1]};
+const FACE_STACK={y:[5.36,5.36,5.36,5.36,5.36+SINGLE_SIGN_LIFT,6.16+STACK_SHIFT],w:[1.4,1.4,1.4,1.4,1.4,1.4],h:[.4,.4,.4,.4,.4,.4],a:[0,0,0,0,1,1]};
 // The orb floats below the rings of a single vortex and between the two stacks of a double stack.
 // Height the beam light pulses climb to (the lowest ring band), per stage.
 const PULSE_TOP=[2.5,2.5,2.5,2.5,2.36+SINGLE_RING_LOWER,3.2+STACK_LIFT+STACK_RISE];
@@ -81,7 +81,7 @@ const DOTS_HOLE={min:[4.5,4.5,4.5,4.5,4.5+SINGLE_SIGN_LIFT,5.29+STACK_SHIFT],max
 const BASE_DISC={y:.04,radius:.8,on:3.2,full:4};
 // Tucker did not like the light-up disc: off by default. The venue label under the beam stays.
 const SHOW_BASE_DISC=false;
-const BASE_LABEL={y:.17,z:.86,width:1.9,height:.3};
+const BASE_LABEL={y:.17,z:.86,width:2.3,height:.363};
 export function blenderBaseFace(stage){const t=Math.max(0,Math.min(1,(stage-BASE_DISC.on)/(BASE_DISC.full-BASE_DISC.on)));return {opacity:t*t*(3-2*t),radius:BASE_DISC.radius};}
 const FONT_FAMILY="'Barlow Condensed','Arial Narrow',sans-serif";
 export function blenderBandFace(table,stage){
@@ -101,64 +101,78 @@ export const blenderSingleWeight=stage=>stage<=4?Math.max(0,Math.min(1,stage-3))
 export function blenderDotsHole(stage){const open=blenderStackOpen(stage);return {min:interpolate(DOTS_HOLE.min,stage),max:interpolate(DOTS_HOLE.max,stage),half:DOTS_HOLE.half,on:stage>=3.3,lowerMin:DOTS_HOLE.lowerMin-STACK_LIFT*(1-open),lowerMax:DOTS_HOLE.lowerMax-STACK_LIFT*(1-open),lowerOn:stage>=4.3};}
 export const BLENDER_TABLES={BASE_DISC,BASE_LABEL,ART_MAIN,ART_LOWER,INFO_MAIN,INFO_LOWER,RING_BANDS,COUNTDOWN_PLATE,FACE_STACK,ORB};
 const fontsReady=()=>{try{return Boolean(document.fonts?.check("900 20px 'Barlow Condensed'"));}catch{return false;}};
-// Wide, letterspaced white letters with a small accent shadow, repeated whole times around the band. Big glyphs:
-// the letters fill most of the band height, the spacing opens up to .46 em when the line is short, and closes
-// to .2 em before a long line shrinks.
+// Readable ring text: tall condensed white letters with a dark outline (contrast against the bright map), a thick
+// white stroke and only a soft accent glow (no offset colour fringe). Short lines are spread with letterspacing
+// (up to 1.1 em) instead of stretching the glyphs; long lines first tighten (.2 em), then shrink. The text repeats
+// whole times around the band only when it is short enough that every copy keeps its size, and every copy is
+// centred in its own cell, so the model can turn a copy to face the camera. Returns the number of copies.
+const RING_CONDENSE=.88,RING_SPACE_MIN=.2,RING_SPACE_MAX=1.1,RING_BLOCK_MAX=.5;
 function drawRingTextCanvas(canvas,text,font,accent,tintColor){
  const ctx=canvas.getContext('2d'),width=canvas.width,height=canvas.height;
  ctx.clearRect(0,0,width,height);
  ctx.textBaseline='middle';ctx.textAlign='left';
- const separator='\u00b7';
- const measure=(px,spaceEm)=>{ctx.font=`900 ${px}px ${FONT_FAMILY}`;const space=px*spaceEm;let total=0;for(const ch of text)total+=ctx.measureText(ch).width+space;return {space,total:total+px*1.6};};
- let px=font,spaceEm=.46,m=measure(px,spaceEm);
- for(const tight of [.38,.3,.22]){if(m.total<=width)break;spaceEm=tight;m=measure(px,spaceEm);}
- if(m.total>width){px=Math.max(18,Math.floor(px*width/m.total));m=measure(px,spaceEm);}
- const copies=Math.max(1,Math.round(width/m.total)),stretch=width/(m.total*copies);
- ctx.font=`900 ${px}px ${FONT_FAMILY}`;
- ctx.save();ctx.scale(stretch,1);
+ const chars=[...text],n=Math.max(1,chars.length);
+ const glyphs=px=>{ctx.font=`900 ${px}px ${FONT_FAMILY}`;let total=0;for(const ch of chars)total+=ctx.measureText(ch).width*RING_CONDENSE;return total;};
+ const need=px=>glyphs(px)+n*px*RING_SPACE_MIN;
+ let px=font;
+ if(need(px)>width*RING_BLOCK_MAX)px=Math.max(18,Math.floor(px*width*RING_BLOCK_MAX/need(px)));
+ const glyphWidth=glyphs(px),copies=Math.max(1,Math.floor(width*RING_BLOCK_MAX/(glyphWidth+n*px*RING_SPACE_MIN))),cell=width/copies;
+ const space=Math.min((cell*RING_BLOCK_MAX-glyphWidth)/Math.max(1,n-1),px*RING_SPACE_MAX),block=glyphWidth+(n-1)*space,y=height*.54;
+ ctx.font=`900 ${px}px ${FONT_FAMILY}`;ctx.lineJoin='round';
  for(let c=0;c<copies;c++){
-  let x=c*m.total;
-  ctx.shadowColor=accent;ctx.shadowBlur=px*.1;ctx.shadowOffsetX=px*.05;ctx.shadowOffsetY=px*.05;ctx.fillStyle='#ffffff';
-  ctx.lineWidth=px*.035;ctx.lineJoin='round';ctx.strokeStyle='#ffffff';
-  for(const ch of text){ctx.strokeText(ch,x,height*.54);ctx.fillText(ch,x,height*.54);x+=ctx.measureText(ch).width+m.space;}
-  ctx.shadowColor='transparent';ctx.fillStyle=accent;ctx.fillText(separator,x+px*.1,height*.54);
+  const x0=c*cell+(cell-block)/2;
+  for(const pass of ['outline','glow','fill']){
+   let x=x0;
+   for(const ch of chars){
+    ctx.save();ctx.translate(x,y);ctx.scale(RING_CONDENSE,1);
+    if(pass==='outline'){ctx.shadowColor='transparent';ctx.lineWidth=px*.2;ctx.strokeStyle='rgba(2,4,10,.92)';ctx.strokeText(ch,0,0);}
+    else if(pass==='glow'){ctx.shadowColor=accent;ctx.shadowBlur=px*.14;ctx.fillStyle='#ffffff';ctx.fillText(ch,0,0);}
+    else{ctx.shadowColor='transparent';ctx.fillStyle='#ffffff';ctx.lineWidth=px*.05;ctx.strokeStyle='#ffffff';ctx.strokeText(ch,0,0);ctx.fillText(ch,0,0);}
+    ctx.restore();
+    x+=ctx.measureText(ch).width*RING_CONDENSE+space;
+   }
+  }
+  if(copies>1){ctx.save();ctx.fillStyle=accent;ctx.textAlign='center';ctx.shadowColor='rgba(2,4,10,.9)';ctx.shadowBlur=px*.12;ctx.fillText('\u00b7',c*cell,y);ctx.restore();}
  }
- ctx.restore();
+ return copies;
 }
 function fitText(ctx,text,maxWidth,px,minPx){
  let size=px;ctx.font=`900 ${size}px ${FONT_FAMILY}`;
  while(ctx.measureText(text).width>maxWidth&&size>minPx){size-=2;ctx.font=`900 ${size}px ${FONT_FAMILY}`;}
  return size;
 }
-// Info band under the artwork: the event name in bold caps (small, up to two lines) and the start time, by far the
-// biggest, in the accent. The time takes the lower 62% of the band, like the concept's big "9PM".
+// Info band under the artwork: the event name in bold caps (one or two lines) and the start time, by far the
+// biggest, in the accent. Every glyph sits on a dark outline so it reads over the art. Standby events show the
+// time as a hollow outline with a STARTS IN caption under it.
 function drawInfoCanvas(canvas,name,time,accent,pending=false,startsIn=''){
  const ctx=canvas.getContext('2d'),width=canvas.width,height=canvas.height;
  ctx.clearRect(0,0,width,height);
- ctx.textAlign='center';ctx.textBaseline='middle';
- const label=String(name||''),words=label.split(' ');
+ ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+ const label=String(name||''),words=label.split(' '),caption=pending&&startsIn&&time;
  let lines=[label];
  const k=width/640;
- const nameHeight=height*.38;
- let size=fitText(ctx,label,width-30*k,Math.floor(nameHeight*.92),22*k);
- if(ctx.measureText(label).width>width-30*k&&words.length>1){
+ let nameHeight=height*(caption?.34:.4),two=false;
+ const outline=(text,x,y,size,color)=>{ctx.save();ctx.shadowColor='transparent';ctx.lineWidth=size*.2;ctx.strokeStyle='rgba(2,4,10,.92)';ctx.strokeText(text,x,y);ctx.restore();};
+ let size=fitText(ctx,label,width-24*k,Math.floor(nameHeight*.96),22*k);
+ if(ctx.measureText(label).width>width-24*k&&words.length>1){
   let best=1,gap=1e9;
   for(let i=1;i<words.length;i++){const d=Math.abs(words.slice(0,i).join(' ').length-words.slice(i).join(' ').length);if(d<gap){gap=d;best=i;}}
   lines=[words.slice(0,best).join(' '),words.slice(best).join(' ')];
-  size=Math.min(...lines.map(line=>fitText(ctx,line,width-30*k,Math.floor(nameHeight*.5),18*k)));
+  two=true;nameHeight=height*(caption?.42:.47);
+  size=Math.min(...lines.map(line=>fitText(ctx,line,width-24*k,Math.floor(nameHeight*.52),18*k)));
  }
- ctx.font=`900 ${size}px ${FONT_FAMILY}`;ctx.fillStyle='#ffffff';ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=4;
- ctx.lineWidth=size*.04;ctx.lineJoin='round';ctx.strokeStyle='#ffffff';
- lines.forEach((line,i)=>{const y=nameHeight*(lines.length===1?.52:.27+.46*i);ctx.strokeText(line,width/2,y);ctx.fillText(line,width/2,y);});
+ ctx.font=`900 ${size}px ${FONT_FAMILY}`;ctx.fillStyle='#ffffff';
+ lines.forEach((line,i)=>{const y=nameHeight*(lines.length===1?.52:.27+.46*i);outline(line,width/2,y,size);ctx.shadowColor='transparent';ctx.lineWidth=size*.05;ctx.strokeStyle='#ffffff';ctx.strokeText(line,width/2,y);ctx.fillText(line,width/2,y);});
  if(time){
-  const timeSize=fitText(ctx,time,width-36*k,Math.floor(height*.78),30*k);
-  ctx.font=`900 ${timeSize}px ${FONT_FAMILY}`;ctx.shadowColor=accent;ctx.shadowBlur=14*k;ctx.fillStyle=accent;
-  ctx.lineWidth=timeSize*.03;ctx.strokeStyle=accent;
+  const timeSize=fitText(ctx,time,width-30*k,Math.floor(height*(caption?(two?.42:.5):(two?.52:.62))),30*k),timeY=height*(caption?(two?.66:.6):(two?.76:.72));
+  ctx.font=`900 ${timeSize}px ${FONT_FAMILY}`;
+  outline(time,width/2,timeY,timeSize);
+  ctx.shadowColor=accent;ctx.shadowBlur=8*k;ctx.fillStyle=accent;ctx.lineWidth=timeSize*.04;ctx.strokeStyle=accent;
   if(pending){
-   // Standby: the start time is a hollow outline (not lit yet) with a small STARTS IN caption under the name.
-   ctx.fillStyle='rgba(0,0,0,0)';ctx.shadowBlur=6*k;ctx.lineWidth=Math.max(2,timeSize*.05);ctx.strokeText(time,width/2,height*.7);
-   if(startsIn){const cap=`STARTS IN ${startsIn}`,capSize=Math.floor(height*.15);ctx.shadowBlur=0;ctx.font=`900 ${capSize}px ${FONT_FAMILY}`;ctx.fillStyle=accent;ctx.globalAlpha=.9;ctx.fillText(cap,width/2,height*.97);ctx.globalAlpha=1;}
-  }else{ctx.strokeText(time,width/2,height*.7);ctx.fillText(time,width/2,height*.7);}
+   // Standby: the start time is a bold hollow outline (not lit yet) with a STARTS IN caption under the name.
+   ctx.fillStyle='rgba(2,4,10,.5)';ctx.shadowBlur=4*k;ctx.lineWidth=Math.max(3,timeSize*.07);ctx.fillText(time,width/2,timeY);ctx.strokeText(time,width/2,timeY);
+   if(caption){const cap=`STARTS IN ${startsIn}`,capSize=Math.floor(height*.17),capY=height*.9;ctx.font=`900 ${capSize}px ${FONT_FAMILY}`;outline(cap,width/2,capY,capSize);ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.fillStyle=accent;ctx.lineWidth=capSize*.04;ctx.strokeStyle=accent;ctx.strokeText(cap,width/2,capY);ctx.fillText(cap,width/2,capY);}
+  }else{ctx.strokeText(time,width/2,timeY);ctx.fillText(time,width/2,timeY);}
  }
 }
 // Countdown plate: dark, thin corner brackets in the tint, big equal numerals in the title font with tiny unit letters.
@@ -178,7 +192,7 @@ function drawCountdownCanvas(canvas,parts,tintColor,accent){
  }
  // Measure at full size, then scale the whole readout to fit so every numeral stays equal.
  let size=Math.floor(height*.66);
- const layout=px=>{ctx.font=`900 ${px}px ${FONT_FAMILY}`;const unit=px*.42,gap=px*.28;let total=0;const items=parts.map(part=>{const w=ctx.measureText(part.value).width;ctx.font=`900 ${unit}px ${FONT_FAMILY}`;const uw=ctx.measureText(part.unit).width;ctx.font=`900 ${px}px ${FONT_FAMILY}`;return {part,w,uw};});
+ const layout=px=>{ctx.font=`900 ${px}px ${FONT_FAMILY}`;const unit=px*.5,gap=px*.26;let total=0;const items=parts.map(part=>{const w=ctx.measureText(part.value).width;ctx.font=`900 ${unit}px ${FONT_FAMILY}`;const uw=ctx.measureText(part.unit).width;ctx.font=`900 ${px}px ${FONT_FAMILY}`;return {part,w,uw};});
   items.forEach((item,i)=>{total+=item.w+item.uw+px*.06+(i?gap*1.6:0);});return {items,total,unit,gap};};
  let L=layout(size);
  if(L.total>width-70){size=Math.floor(size*(width-70)/L.total);L=layout(size);}
@@ -187,7 +201,7 @@ function drawCountdownCanvas(canvas,parts,tintColor,accent){
   if(i){ctx.font=`900 ${size}px ${FONT_FAMILY}`;ctx.fillStyle=accent;ctx.textAlign='left';ctx.fillText(':',x+L.gap*.3,base-size*.08);x+=L.gap*1.6;}
   ctx.font=`900 ${size}px ${FONT_FAMILY}`;ctx.fillStyle='#ffffff';ctx.textAlign='left';ctx.lineWidth=size*.05;ctx.lineJoin='round';ctx.strokeStyle='#ffffff';ctx.strokeText(item.part.value,x,base);ctx.fillText(item.part.value,x,base);
   x+=item.w+size*.06;
-  ctx.font=`900 ${L.unit}px ${FONT_FAMILY}`;ctx.fillStyle=accent;ctx.fillText(item.part.unit,x,base-size*.62);
+  ctx.font=`900 ${L.unit}px ${FONT_FAMILY}`;ctx.fillStyle=accent;ctx.fillText(item.part.unit,x,base-size*.58);
   x+=item.uw;
  });
 }
@@ -203,8 +217,8 @@ function drawFaceCanvas(canvas,faces,tintColor){
   ctx.beginPath();ctx.arc(x,height/2,d/2,0,Math.PI*2);
   ctx.shadowColor=tintColor;ctx.shadowBlur=10;
   ctx.fillStyle=more?'#05080c':tintColor;ctx.fill();ctx.shadowBlur=0;
-  ctx.lineWidth=5;ctx.strokeStyle=more?tintColor:'#ffffff';ctx.stroke();
-  ctx.fillStyle=more?'#ffffff':'#03060a';ctx.font=`900 ${Math.floor(d*(label.length>2?.32:.44))}px ${FONT_FAMILY}`;
+  ctx.lineWidth=6;ctx.strokeStyle=more?tintColor:'#ffffff';ctx.stroke();
+  ctx.fillStyle=more?'#ffffff':'#03060a';ctx.font=`900 ${Math.floor(d*(label.length>2?.4:.54))}px ${FONT_FAMILY}`;
   ctx.fillText(label,x,height/2+d*.03);
   x+=step;
  });
@@ -227,11 +241,13 @@ function drawVenueLabelCanvas(canvas,name,accent){
  const text=String(name||'').toUpperCase();if(!text)return;
  ctx.textBaseline='middle';ctx.textAlign='left';
  const measure=px=>{ctx.font=`900 ${px}px ${FONT_FAMILY}`;const space=px*.2;let total=-space;for(const ch of text)total+=ctx.measureText(ch).width+space;return {space,total};};
- let px=Math.floor(height*.74),m=measure(px);
+ let px=Math.floor(height*.78),m=measure(px);
  if(m.total>width-24){px=Math.max(16,Math.floor(px*(width-24)/m.total));m=measure(px);}
  ctx.font=`900 ${px}px ${FONT_FAMILY}`;
  let x=(width-m.total)/2;
- ctx.shadowColor=accent;ctx.shadowBlur=px*.28;ctx.fillStyle='#ffffff';
+ ctx.lineJoin='round';ctx.lineWidth=px*.2;ctx.strokeStyle='rgba(2,4,10,.92)';ctx.shadowColor='transparent';
+ {let sx=x;for(const ch of text){ctx.strokeText(ch,sx,height*.54);sx+=ctx.measureText(ch).width+m.space;}}
+ ctx.shadowColor=accent;ctx.shadowBlur=px*.14;ctx.fillStyle='#ffffff';
  for(const ch of text){ctx.fillText(ch,x,height*.54);x+=ctx.measureText(ch).width+m.space;}
 }
 function radialTexture(){
@@ -260,12 +276,12 @@ vec4 pick(vec2 uv,float slice){
 }
 void main(){
  vec2 uv=vUv;float slice=floor(uv.y*16.);float tick=floor(seconds*22.);
- float r=hash(slice+tick*7.);float tear=glitch>0.&&r>.62?(hash(slice*3.+tick)-.5)*.34*glitch:0.;
- vec2 p=vec2(uv.x+tear,uv.y);float ca=.022*glitch;
+ float r=hash(slice+tick*7.);float tear=glitch>0.&&r>.62?(hash(slice*3.+tick)-.5)*.14*glitch:0.;
+ vec2 p=vec2(uv.x+tear,uv.y);float ca=.008*glitch;
  vec4 sr=pick(p+vec2(ca,0.),slice),sg=pick(p,slice),sb=pick(p-vec2(ca,0.),slice);
  vec3 col=vec3(sr.r,sg.g,sb.b);float a=max(max(sr.a,sg.a),sb.a);
- col=mix(col,col*mix(accent,accent2,uv.x),glitch*.35);
- col*=1.-.18*glitch*step(.5,fract(uv.y*70.));
+ col=mix(col,col*mix(accent,accent2,uv.x),glitch*.2);
+ col*=1.-.08*glitch*step(.5,fract(uv.y*70.));
  float bar=glitch>0.&&hash(slice*5.+tick*3.)>.9?1.:0.;
  col+=accent*bar*.55*glitch;a=max(a,bar*.35*glitch);
  gl_FragColor=vec4(col,a*opacity);
@@ -401,7 +417,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  const orb=new THREE.Group();orb.visible=false;object.add(orb);
  const orbCore=new THREE.Mesh(new THREE.SphereGeometry(ORB.radius,16,12),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,toneMapped:false}));
  const orbShells=[[2.1,.34],[3.4,.14]].map(([scale,alpha])=>{const m=new THREE.Mesh(new THREE.SphereGeometry(ORB.radius*scale,16,12),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,toneMapped:false,blending:THREE.AdditiveBlending}));m.userData.alpha=alpha;return m;});
- for(const mesh of [orbCore,...orbShells]){mesh.frustumCulled=false;mesh.renderOrder=6;orb.add(mesh);}
+ for(const mesh of [orbCore,...orbShells]){mesh.frustumCulled=false;mesh.renderOrder=3;orb.add(mesh);}
  // Beam base disc: flat on the ground at the anchor, in the tint, with a soft pulse.
  const discCanvas=document.createElement('canvas');discCanvas.width=discCanvas.height=256;drawBaseDiscCanvas(discCanvas);
  const discTexture=new THREE.CanvasTexture(discCanvas);discTexture.colorSpace=THREE.SRGBColorSpace;
@@ -442,7 +458,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    screens.forEach((screen,index)=>{
     const slide=slides[index],info=infos[index];
     release(info.texture);info.texture=null;
-    if(screen.name||screen.time){const canvas=document.createElement('canvas');canvas.width=520;canvas.height=210;drawInfoCanvas(canvas,screen.name,screen.time,accent,Boolean(screen.pending),screen.startsIn||'');info.texture=canvasTexture(canvas);}
+    if(screen.name||screen.time){const canvas=document.createElement('canvas');canvas.width=640;canvas.height=305;drawInfoCanvas(canvas,screen.name,screen.time,accent,Boolean(screen.pending),screen.startsIn||'');info.texture=canvasTexture(canvas);}
     info.material.map=info.texture;info.material.needsUpdate=true;
     for(const kind of Object.keys(slide.textures)){release(slide.textures[kind]);}
     slide.textures={};slide.aspects={};slide.kinds=[];
@@ -460,9 +476,9 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    }
    for(const band of bands){
     const screen=screens[band.spec.screen],line=screen?(band.spec.line===0?screen.ringName:screen.ringSub):'';
-    release(band.texture);release(band.farTexture);band.texture=band.farTexture=null;band.text=line||'';
+    release(band.texture);release(band.farTexture);band.texture=band.farTexture=null;band.text=line||'';band.copies=1;
     if(line){
-     const canvas=document.createElement('canvas');canvas.width=band.spec.width;canvas.height=band.spec.height;drawRingTextCanvas(canvas,line,band.spec.font,accent,tintHex);
+     const canvas=document.createElement('canvas');canvas.width=band.spec.width;canvas.height=band.spec.height;band.copies=drawRingTextCanvas(canvas,line,band.spec.font,accent,tintHex);
      band.texture=canvasTexture(canvas);band.texture.wrapS=THREE.RepeatWrapping;
      band.farTexture=band.texture.clone();track(band.farTexture);band.farTexture.repeat.x=-1;band.farTexture.offset.x=1;band.farTexture.needsUpdate=true;
     }
@@ -472,21 +488,23 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    if(venueName){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=162;drawVenueLabelCanvas(canvas,venueName,accent);label.texture=canvasTexture(canvas);}
    label.material.map=label.texture;label.material.needsUpdate=true;
    release(faceStack.texture);faceStack.texture=null;
-   if(faces.people.length){const canvas=document.createElement('canvas');canvas.width=360;canvas.height=94;drawFaceCanvas(canvas,faces,tintHex);faceStack.texture=canvasTexture(canvas);}
+   if(faces.people.length){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=120;drawFaceCanvas(canvas,faces,tintHex);faceStack.texture=canvasTexture(canvas);}
    faceStack.material.map=faceStack.texture;faceStack.material.needsUpdate=true;
    orbCore.material.color.set(accent);for(const shell of orbShells)shell.material.color.set(accent);
   }
   // The countdown changes about once a second.
   release(plate.texture);plate.texture=null;
-  if(countdown.length){const canvas=document.createElement('canvas');canvas.width=400;canvas.height=118;drawCountdownCanvas(canvas,countdown,tintHex,accent);plate.texture=canvasTexture(canvas);}
+  if(countdown.length){const canvas=document.createElement('canvas');canvas.width=480;canvas.height=150;drawCountdownCanvas(canvas,countdown,tintHex,accent);plate.texture=canvasTexture(canvas);}
   plate.material.map=plate.texture;plate.material.needsUpdate=true;
  }
- let stage=0,urgency=0,lastElapsed=null,ringAngle=0,tiltClock=0,pulsePhase=0;
+ let stage=0,urgency=0,lastElapsed=null,ringAngle=0,tiltClock=0,pulsePhase=0,textBoost=1;
  return {object,
   setColor(value){tint.set(value);disc.material.color.copy(tint);for(const node of meshes)if(!['panel','icon','particle'].includes(node.userData.mapzRole))node.material.color.copy(tint);},
   setLogo,setContent,
   // 0..1 time-to-start energy (e3EventUrgency): ring spin, ring tilt rate and beam pulses ramp with it.
   setUrgency(value){urgency=Math.max(0,Math.min(1,Number(value)||0));},
+  // Slight scale-up of the sign text and plates when the camera is far (1 at close zoom).
+  setTextBoost(value){textBoost=Math.max(1,Math.min(E3_TEXT_FAR_BOOST,Number(value)||1));},
   get urgency(){return urgency;},
   get hasContent(){return Boolean(contentKey);},
   get hasRingText(){return bands.some(band=>band.texture);},
@@ -556,7 +574,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    for(const info of infos){
     const face=blenderArtFace(info.table,at(sp.screen)),show=Boolean(info.texture)&&face.opacity>.01;
     info.mesh.visible=show;
-    if(show){info.mesh.position.y=face.y;info.mesh.scale.set(face.width,face.height,1);info.material.opacity=face.opacity*(content.screens[infos.indexOf(info)]?.pending?.85:1);}
+    if(show){const b=Math.min(textBoost,E3_SIGN_FAR_BOOST);info.mesh.position.y=face.y+face.height*(b-1)*.5;info.mesh.scale.set(face.width*b,face.height*b,1);info.material.opacity=face.opacity;}
    }
    // Text rings turn (faster as the event nears, peak when it opens) and adjacent rings tilt gently in opposite
    // directions. The same band table drives the tilt of the Blender ring meshes through uBand (vertex shader).
@@ -569,8 +587,12 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     const tiltX=amp*Math.sin(tiltClock+phase+k*1.7),tiltZ=amp*.6*Math.cos(tiltClock*.8+phase+k*2.3);
     bandUniform.value[k].set(face?face.y:0,show&&amp?face.height*.62:0,tiltX,tiltZ);
     if(!show)return;
-    const spin=(band.spec.line===0?turn:-turn*.8)+band.spec.screen*1.7+(band.spec.line?2.1:0);
-    for(const [part,alpha] of [[band.near,1],[band.far,.34]]){
+    // The ring pauses with a copy of its text centred on the camera side, then turns to the next copy (same average
+    // turn rate as before, faster urgency still speeds it up). Under reduced motion it simply rests facing the camera.
+    const N=Math.max(1,band.copies||1),dir=band.spec.line===0?1:-1,spin=-Math.PI/N+dir*e3RingDwell(turn*(band.spec.line===0?1:.8),N);
+    // No dimmed back wall: the far side letters used to ghost through the front ones.
+    band.far.mesh.visible=false;
+    for(const [part,alpha] of [[band.near,1]]){
      part.mesh.position.y=face.y;part.mesh.scale.set(face.radius,face.height,face.radius);part.material.opacity=face.opacity*alpha;
      part.mesh.rotation.order='ZXY';part.mesh.rotation.set(-tiltX,spin,tiltZ);
     }
@@ -586,10 +608,10 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    {
     const face=plate.texture?blenderPlateFace(at(sp.extras),COUNTDOWN_PLATE):null;
     plate.mesh.visible=Boolean(face)&&face.opacity>.01;
-    if(face){plate.mesh.position.y=face.y;plate.mesh.scale.set(face.width,face.height,1);plate.material.opacity=face.opacity;}
+    if(face){plate.mesh.position.y=face.y+face.height*(textBoost-1)*.5;plate.mesh.scale.set(face.width*textBoost,face.height*textBoost,1);plate.material.opacity=face.opacity;}
     const faceStackFace=faceStack.texture?blenderPlateFace(at(sp.extras),FACE_STACK):null;
     faceStack.mesh.visible=Boolean(faceStackFace)&&faceStackFace.opacity>.01;
-    if(faceStackFace){faceStack.mesh.position.y=faceStackFace.y;faceStack.mesh.scale.set(faceStackFace.width,faceStackFace.height,1);faceStack.material.opacity=faceStackFace.opacity;}
+    if(faceStackFace){faceStack.mesh.position.y=faceStackFace.y+(face?face.height:0)*(textBoost-1)+faceStackFace.height*(textBoost-1)*.5;faceStack.mesh.scale.set(faceStackFace.width*textBoost,faceStackFace.height*textBoost,1);faceStack.material.opacity=faceStackFace.opacity;}
    }
    // Beam base disc (pulses softly, static under reduced motion) and the venue label.
    {
@@ -601,7 +623,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     }
     const showLabel=Boolean(label.texture)&&face.opacity>.01;
     label.mesh.visible=showLabel;
-    if(showLabel){label.mesh.scale.set(BASE_LABEL.width,BASE_LABEL.height,1);label.material.opacity=face.opacity;}
+    if(showLabel){label.mesh.scale.set(BASE_LABEL.width*textBoost,BASE_LABEL.height*textBoost,1);label.material.opacity=face.opacity;}
    }
    // Floating orb with a gentle bob.
    {
@@ -700,7 +722,7 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
     const model=createBlenderHologram(template,{color:row.color,phase:row.phase??instances.size*2.39996,logo:row.logo}),root=new THREE.Group();
     model.object.rotation.x=Math.PI/2;root.add(model.object);scene.add(root);item={root,model,row};instances.set(row.key,item);
    }
-   item.row=row;item.model.setColor(row.color||'#FF00CC');item.model.setUrgency(row.urgency||0);item.model.setLogo(row.logo??null);item.model.setContent(row.content??{});
+   item.row=row;item.model.setColor(row.color||'#FF00CC');item.model.setUrgency(row.urgency||0);item.model.setTextBoost(row.textBoost||1);item.model.setLogo(row.logo??null);item.model.setContent(row.content??{});
    const position=maplibre.MercatorCoordinate.fromLngLat(row.coordinates,row.altitude??0);
    item.root.position.set((position.x-origin.x)/unit,-(position.y-origin.y)/unit,(position.z-origin.z)/unit);
    // Uniform size in meters, with an optional vertical stretch so a hologram can rise above local buildings.
