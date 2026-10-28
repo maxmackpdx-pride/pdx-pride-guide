@@ -4,7 +4,7 @@ import MapBootLoader from './MapBootLoader';
 
 export type MapzHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 export type MapView={center:[number,number];zoom:number;pitch:number;bearing:number;bounds:{south:number;north:number;west:number;east:number}};
-type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string;avatars?:Array<{url:string;initial:string;background:string;ring:string}>};
+type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;performers?:string[];hostName?:string;time?:string;avatars?:Array<{url:string;initial:string;background:string;ring:string}>};
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
 type CanvasProps={active?:boolean;onBrowse?:()=>void;onEscape?:()=>void;onBoot?:()=>void;initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onBoardPins?:(keys:string[])=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};

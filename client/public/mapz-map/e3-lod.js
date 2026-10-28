@@ -309,3 +309,139 @@ export function e3NearestSameDayEvent(events, nowMs) {
   }
   return upcoming || begun;
 }
+
+// ---------------------------------------------------------------------------
+// Vortex v2 copy and timing: ring lines, screen slides, countdown parts, accents, face stack. All pure.
+// ---------------------------------------------------------------------------
+/** Uppercase, one line, never an em or en dash. */
+export function e3CleanCopy(value) {
+  return String(value || '').replace(/[\u2012-\u2015]/g, '-').replace(/\s+/g, ' ').trim().toUpperCase();
+}
+
+/**
+ * The two ring lines of one event: the first ring is the event name, the second is the DJs (performers);
+ * with no performers it falls back to the host or group, then to the venue name.
+ * source tells the caller which data answered ('performers' | 'host' | 'venue' | 'none').
+ */
+export function e3RingLines({eventName = '', performers = [], hostName = '', venueName = ''} = {}) {
+  const name = e3CleanCopy(eventName) || e3CleanCopy(venueName);
+  const djs = [...new Set((performers || []).map(e3CleanCopy).filter(Boolean))].slice(0, 4);
+  const clip = text => text.length > E3_RING_TEXT_MAX_CHARS ? text.slice(0, E3_RING_TEXT_MAX_CHARS).trim() : text;
+  if (djs.length) return {name: clip(name), sub: clip(djs.join(E3_RING_SEPARATOR)), source: 'performers'};
+  const host = e3CleanCopy(hostName);
+  if (host) return {name: clip(name), sub: clip(host), source: 'host'};
+  const venue = e3CleanCopy(venueName);
+  return {name: clip(name), sub: venue && venue !== name ? clip(venue) : '', source: venue && venue !== name ? 'venue' : 'none'};
+}
+
+/** "9:00 PM" -> "9PM", "9:30 PM" -> "9:30PM", "21:00" -> "9PM". Anything unreadable stays as typed, without dashes. */
+export function e3TimeLabel(time) {
+  const text = String(time || '').replace(/[\u2012-\u2015]/g, '-').trim();
+  const match = text.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/i) || text.match(/^(\d{1,2}):(\d{2})()$/);
+  if (!match) return text.toUpperCase();
+  let hour = Number(match[1]);
+  const minute = match[2] || '00', suffix = match[3] ? (match[3].toLowerCase() === 'p' ? 'PM' : 'AM') : (hour >= 12 ? 'PM' : 'AM');
+  if (!match[3]) hour = hour % 12 || 12;
+  return `${hour}${minute === '00' ? '' : `:${minute}`}${suffix}`;
+}
+
+function hexToHsl(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
+  const n = m ? parseInt(m[1], 16) : 0xff00cc;
+  const r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, d = max - min;
+  let h = 0;
+  if (d) h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return {h: (h * 60 + 360) % 360, s: d ? d / (1 - Math.abs(2 * l - 1)) : 0, l};
+}
+function hslToHex(h, s, l) {
+  const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return '#' + [r, g, b].map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+/** The complementary accent of a venue tint: hue turned half way round, bright and saturated so it reads on dark. */
+export function e3ComplementColor(hex) {
+  const {h} = hexToHsl(hex);
+  return hslToHex((h + 180) % 360, 1, .62);
+}
+
+/** Adult venues stay red; every other same-day vortex keeps the same-day green. */
+export const E3_ADULT_RED = '#FF0000';
+export function e3VortexTint(venueColor, sameDay = true) {
+  if (String(venueColor || '').toUpperCase() === E3_ADULT_RED) return E3_ADULT_RED;
+  return sameDay ? E3_SAME_DAY_GREEN : venueColor;
+}
+
+// Screen art cycle: the logo owns at least 60% of the time, then the poster, then the host or group logo.
+export const E3_SLIDE_WEIGHTS = {logo: 60, poster: 25, host: 15};
+export const E3_SLIDE_PERIOD_SECONDS = 12;
+export const E3_SLIDE_GLITCH_SECONDS = .4;
+/** The cycle of one screen: logo segments interleaved with the other slides, each with its start second. */
+export function e3SlideCycle(kinds, period = E3_SLIDE_PERIOD_SECONDS) {
+  const others = ['poster', 'host'].filter(kind => kinds.includes(kind));
+  if (!kinds.includes('logo')) return others.length ? others.map((kind, i) => ({kind, start: i * period / others.length, end: (i + 1) * period / others.length})) : [];
+  if (!others.length) return [{kind: 'logo', start: 0, end: period}];
+  const total = E3_SLIDE_WEIGHTS.logo + others.reduce((sum, kind) => sum + E3_SLIDE_WEIGHTS[kind], 0);
+  const logoShare = E3_SLIDE_WEIGHTS.logo / total, parts = [];
+  let at = 0;
+  others.forEach(kind => {
+    const logoLength = period * logoShare / others.length, otherLength = period * E3_SLIDE_WEIGHTS[kind] / total;
+    parts.push({kind: 'logo', start: at, end: at + logoLength});
+    parts.push({kind, start: at + logoLength, end: at + logoLength + otherLength});
+    at += logoLength + otherLength;
+  });
+  return parts;
+}
+/**
+ * Slide state at a time: which art is on, which is next, how far the swap is, and the glitch strength (0..1).
+ * The glitch only runs inside a short window around each boundary. Reduced motion is the static logo.
+ */
+export function e3SlideState(kinds, seconds, {reduced = false, period = E3_SLIDE_PERIOD_SECONDS, glitch = E3_SLIDE_GLITCH_SECONDS} = {}) {
+  const base = kinds.includes('logo') ? 'logo' : kinds[0] || '';
+  if (reduced || kinds.length < 2) return {from: base, to: base, mix: 0, glitch: 0};
+  const cycle = e3SlideCycle(kinds, period);
+  const t = ((seconds % period) + period) % period, half = glitch / 2;
+  for (let i = 0; i < cycle.length; i++) {
+    const part = cycle[i], next = cycle[(i + 1) % cycle.length];
+    const boundary = part.end, start = boundary - half;
+    // The window may spill over the period end into the first slide.
+    for (const shift of [0, period]) {
+      const local = t + shift - (start);
+      if (local >= 0 && local <= glitch) {
+        const p = local / glitch;
+        return {from: part.kind, to: next.kind, mix: p, glitch: Math.sin(Math.PI * p)};
+      }
+    }
+  }
+  const part = cycle.find(item => t >= item.start && t < item.end) || cycle[0];
+  return {from: part.kind, to: part.kind, mix: 0, glitch: 0};
+}
+
+/** The countdown as big numerals with a small unit letter each: d:h when a day or more away, else h:m:s or m:s. */
+export function e3CountdownParts(startsAtMs, nowMs) {
+  const status = eventCountdown(startsAtMs, nowMs, true);
+  if (!status) return [];
+  if (status === 'STARTED') return [{live: true, value: 'LIVE', unit: ''}];
+  const groups = [...String(status).matchAll(/(\d+)\s*(D|H|M|S)/g)].map(match => ({value: match[1].padStart(2, '0'), unit: match[2].toLowerCase()}));
+  const days = groups.find(group => group.unit === 'd');
+  return days ? groups.slice(0, 2) : groups;
+}
+
+/** Face stack: initials of the people who RSVP'd, friends first when the host marks them. Nothing when nobody did. */
+export const E3_FACE_MAX = 4;
+export function e3FaceStack(avatars, total) {
+  const list = Array.isArray(avatars) ? avatars.filter(Boolean) : [];
+  const friends = list.filter(person => person.friend === true);
+  const shown = (friends.length ? friends : list).slice(0, E3_FACE_MAX);
+  const count = Number.isFinite(total) && total > 0 ? Math.max(total, shown.length) : shown.length;
+  if (!shown.length) return {people: [], more: 0};
+  return {people: shown.map(person => String(person.initial || person.initials || '?').slice(0, 3).toUpperCase()), more: Math.max(0, count - shown.length)};
+}
+
+/** Same-day events of a venue, nearest first: upcoming by start, then the ones already under way (latest first). */
+export function e3SameDayEventsSorted(events, nowMs, limit = 2) {
+  const same = (events || []).filter(event => e3IsSameDay(event.startsAtMs, nowMs));
+  const upcoming = same.filter(event => event.startsAtMs >= nowMs).sort((a, b) => a.startsAtMs - b.startsAtMs);
+  const begun = same.filter(event => event.startsAtMs < nowMs).sort((a, b) => b.startsAtMs - a.startsAtMs);
+  return [...upcoming, ...begun].slice(0, limit);
+}

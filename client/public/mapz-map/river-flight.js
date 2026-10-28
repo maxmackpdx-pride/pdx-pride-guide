@@ -7,10 +7,10 @@ import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../ma
 import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventCountdown,appendEventCountdown} from './event-countdown.js';
 import {planVenueStacks,drawVenueStacks,venueStackKey} from './e3-vortex-stack.js?v=20261026-lod';
-import {createE3TransitionState} from './e3-transitions.js?v=20261027-e3-ring';
+import {createE3TransitionState} from './e3-transitions.js?v=20261027-e3-v2';
 import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from './e3-venue-stack.js';
-import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingText,e3CountdownText,e3NearestSameDayEvent} from './e3-lod.js?v=20261027-e3-ring';
-import {createE3BlenderLayer} from './e3-blender-model.js?v=20261027-e3-ring';
+import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingLines,e3CleanCopy,e3TimeLabel,e3ComplementColor,e3VortexTint,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted} from './e3-lod.js?v=20261027-e3-v2';
+import {createE3BlenderLayer} from './e3-blender-model.js?v=20261027-e3-v2';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
@@ -257,6 +257,27 @@ let assetsReady=false,assetError='',nearbyLights=()=>[];
 let userLocation=null,userAvatarImage=null,userAvatarLoad=0;
 const lightSprites=new Map();
 const venueLogos=new Map();
+// Event posters for the 3D screen slides: same-origin only (a cross-origin image would taint the WebGL texture),
+// decoded once into a small canvas, requested only when a same-day vortex needs them.
+const eventPosters=new Map(),POSTER_MAX_EDGE=256;
+function eventPosterEntry(url){
+ if(!url||typeof url!=='string')return null;
+ const cached=eventPosters.get(url);
+ if(cached)return cached.image?{key:url,image:cached.image,width:cached.width,height:cached.height}:null;
+ let absolute;try{absolute=new URL(url,location.href);}catch{return null;}
+ if(absolute.origin!==location.origin){eventPosters.set(url,{image:null});return null;}
+ eventPosters.set(url,{image:null,loading:true});
+ const image=new Image();image.decoding='async';
+ image.onload=()=>{
+  const scale=Math.min(1,POSTER_MAX_EDGE/Math.max(image.naturalWidth,image.naturalHeight)),canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
+  canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
+  eventPosters.set(url,{image:canvas,width:canvas.width,height:canvas.height});scheduleFrame();
+ };
+ image.onerror=()=>eventPosters.set(url,{image:null});
+ image.src=absolute.href;
+ return null;
+}
 const logoLoads=new Map();
 const avatarRingColors={
  none:['#5af0e6'],rainbow:['#e40303','#ff8c00','#ffed00','#008026','#004dff','#750787'],
@@ -645,7 +666,7 @@ function drawLights(fade,target=map,surface=lights){
   // The 3D hologram stands where the 2D pin does (the venue's place item), and takes the venue's logo.
   const isEventArt=url=>/\/icons\/event\.svg(?:[?#]|$)/.test(url||'');
   const logoUrl=[item.feature.properties.logo,venueItem?.feature.properties.waypointLogo,venueItem?.feature.properties.logo].find(url=>url&&!isEventArt(url))||'';
-  const eventInfo={startsAtMs:item.feature.properties.startsAtMs,name:item.feature.properties.name,time:item.feature.properties.time,venueName:item.feature.properties.venueName};
+  const eventInfo={startsAtMs:item.feature.properties.startsAtMs,name:item.feature.properties.name,time:item.feature.properties.time,venueName:item.feature.properties.venueName,poster:item.feature.properties.poster,logoUrl,alternateLogo:item.feature.properties.alternateLogo,performers:item.feature.properties.performers,hostName:item.feature.properties.hostName,avatars:item.feature.properties.avatars,avatarTotal:item.feature.properties.avatarTotal};
   if(!group)lodGroups.set(key,{key,depthM,onScreen,sameDay,color,count:1,coordinates:item.feature.geometry.coordinates,anchorItem:venueItem||item,logoUrl,events:[eventInfo]});else{group.events.push(eventInfo);group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;group.sameDay=group.sameDay||sameDay;group.count++;if(!group.logoUrl)group.logoUrl=logoUrl;}
  }
  const lodLevels=assignE3Levels([...lodGroups.values()],e3LodPrevious);
@@ -666,7 +687,8 @@ function drawLights(fade,target=map,surface=lights){
    const level=lodLevels.get(g.key);
    let stage={mini:1,compressed:2,coin:3,vortex:4}[level]??1;
    if(!g.sameDay&&stage>3)stage=3;
-   if(g.sameDay&&stage===4&&g.count>1)stage=5;
+   // The double stack needs two events inside the same-day window; one tonight plus a later date stays a single vortex.
+   if(g.sameDay&&stage===4&&e3SameDayEventsSorted(g.events,viewTime+Math.max(0,frameNow-viewTimeReceived),2).length>1)stage=5;
    let st=e3StageState.get(g.key);
    const shownStage=st?e3StageValue(st,frameNow):stage;
    if(!e3BlenderTakesOver({targetStage:stage,shownStage,zoom:blenderZoom,latitude:g.coordinates[1],pitch:blenderPitch,viewHeight:height}))continue;
@@ -680,11 +702,25 @@ function drawLights(fade,target=map,surface=lights){
    const coordinates=e3AnchorCoordinates(anchor.feature.geometry.coordinates,window.__mapzPlaceSnaps);
    const altitude=anchor.feature.properties.kind==='place'?placezHoverMeters(anchorRoof??PLACEZ_HOVER_METERS,blenderExtrusion):(anchorRoof??9)*blenderExtrusion;
    const logoEntry=g.logoUrl?venueLogos.get(g.logoUrl):null;
-   // Same-day vortex copy: lettering around the rings and a live countdown for the nearest same-day event (the 2D rule and clock).
-   const lodNow=viewTime+Math.max(0,frameNow-viewTimeReceived),sameDayVortex=g.sameDay&&stage>=4,nearest=sameDayVortex?e3NearestSameDayEvent(g.events,lodNow):null;
-   rows.push({key:g.key,coordinates,altitude,color:g.sameDay&&stage>=4?E3_SAME_DAY_GREEN:(g.color||'#FF00CC'),stage:e3StageValue(st,frameNow),scaleMeters:e3BlenderScaleMeters(blenderZoom,{viewHeight:height,latitude:g.coordinates[1],pitch:blenderPitch}),heightScale,
-    ringText:nearest?e3RingText({venueName:nearest.venueName||anchor.feature.properties.name||'',eventNames:g.events.filter(e=>e.name&&e3IsSameDay(e.startsAtMs,lodNow)).sort((a,b)=>a.startsAtMs-b.startsAtMs).slice(0,2).map(e=>e.name),time:nearest.time}):'',
-    countdown:nearest?e3CountdownText(nearest.startsAtMs,lodNow):'',
+   // Same-day vortex dressing: the nearest same-day events, each with its ring lines, time, art and RSVP faces.
+   // The countdown runs on the same clock as the 2D card. Adult venues stay red, other same-day vortexes stay green.
+   const lodNow=viewTime+Math.max(0,frameNow-viewTimeReceived),sameDayVortex=g.sameDay&&stage>=4,tint=g.sameDay&&stage>=4?e3VortexTint(g.color,true):(g.color||'#FF00CC');
+   let content=null;
+   if(sameDayVortex){
+    const screenEvents=e3SameDayEventsSorted(g.events,lodNow,stage>=5?2:1),nearest=screenEvents[0];
+    if(nearest){
+     const logoOf=url=>{const entry=url?venueLogos.get(url):null;return entry?{key:url,image:entry.image,width:entry.width,height:entry.height}:null;};
+     content={accent:e3ComplementColor(tint),
+      screens:screenEvents.map(event=>{
+       const lines=e3RingLines({eventName:event.name,performers:event.performers,hostName:event.hostName,venueName:event.venueName||anchor.feature.properties.name||''});
+       return {name:e3CleanCopy(event.name),time:e3TimeLabel(event.time),ringName:lines.name,ringSub:lines.sub,
+        logo:logoOf(event.logoUrl||g.logoUrl),poster:eventPosterEntry(event.poster),host:logoOf(event.alternateLogo&&event.alternateLogo!==(event.logoUrl||g.logoUrl)?event.alternateLogo:'')};
+      }),
+      countdown:e3CountdownParts(nearest.startsAtMs,lodNow),faces:e3FaceStack(nearest.avatars,nearest.avatarTotal)};
+    }
+   }
+   rows.push({key:g.key,coordinates,altitude,color:tint,stage:e3StageValue(st,frameNow),scaleMeters:e3BlenderScaleMeters(blenderZoom,{viewHeight:height,latitude:g.coordinates[1],pitch:blenderPitch}),heightScale,
+    content,
     logo:logoEntry?{key:g.logoUrl,image:logoEntry.image,width:logoEntry.width,height:logoEntry.height}:null});
   }
   for(const key of [...e3StageState.keys()])if(!e3Blender3D.has(key))e3StageState.delete(key);

@@ -111,7 +111,21 @@ function phraseIncludes(haystack: string, needle: string): boolean {
   return phrase.length >= 3 && ` ${words(haystack)} `.includes(` ${phrase} `);
 }
 
-function eventBrandLogos(event: Event, places: Place[]): { primary?: string; alternate?: string; directoryId?: number; alternateDirectoryId?: number } {
+/** Public lineup names for the map: DJs first; other performing roles only when no DJ is listed. The events payload carries role, username, display name triples. */
+function eventPerformers(event: Event): string[] {
+  const raw = (event as { searchTalent?: unknown }).searchTalent;
+  if (!Array.isArray(raw)) return [];
+  const djs: string[] = [], others: string[] = [];
+  for (let i = 0; i + 2 < raw.length + 1; i += 3) {
+    const role = String(raw[i] || "").toUpperCase(), name = String(raw[i + 2] || raw[i + 1] || "").trim();
+    if (!name) continue;
+    if (role === "DJ") djs.push(name);
+    else if (["DRAG", "PERFORMER", "MC", "GOGO"].includes(role)) others.push(name);
+  }
+  return djs.length ? djs : others;
+}
+
+function eventBrandLogos(event: Event, places: Place[]): { primary?: string; alternate?: string; directoryId?: number; alternateDirectoryId?: number; hostName?: string } {
   const eventCopy = `${event.title} ${event.description || ""}`;
   const host = places
     .filter(place => place.type === "group" && phraseIncludes(eventCopy, place.name))
@@ -120,8 +134,8 @@ function eventBrandLogos(event: Event, places: Place[]): { primary?: string; alt
   const venueKey = normalizeDirectoryName(event.venueName || "");
   const venue = places.find(place => place.type !== "group" && normalizeDirectoryName(place.name) === venueKey);
   const venueLogo = venue ? serviceWaypointLogo(venue, resolveDirectoryLogo(venue.name, venue.imageUrl)) : resolveDirectoryLogo(event.venueName || "");
-  if (hostLogo && venueLogo && hostLogo !== venueLogo) return { primary: venueLogo, alternate: hostLogo, directoryId: venue?.id, alternateDirectoryId: host?.id };
-  return { primary: venueLogo || hostLogo || undefined, directoryId: venue?.id || host?.id };
+  if (hostLogo && venueLogo && hostLogo !== venueLogo) return { primary: venueLogo, alternate: hostLogo, directoryId: venue?.id, alternateDirectoryId: host?.id, hostName: host?.name };
+  return { primary: venueLogo || hostLogo || undefined, directoryId: venue?.id || host?.id, hostName: host?.name };
 }
 
 function firstImage(value: unknown): string | null {
@@ -839,6 +853,9 @@ export default function MapzMapDemo() {
     return {pinCyan,wireColor:boardWireColor(row),boardPin:mark.kind==='board',demoPin:row.isDemo===true&&(row.mapPoint as any)?.demo===true,expiresAt:(row.mapPoint as any)?.expiresAt,venueAnchor,createdAt:row.createdAt,closesAt:row.closesAt,status:row.status,waypointLogo:place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl)):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place?serviceIdentity(place)?.icon || mapzTypeIcon(type):event?serviceIdentity(venue || {name:venueName})?.icon || mapzTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
       logo:isHouz?'':brands?.primary||(place?serviceWaypointLogo(place, resolveDirectoryLogo(place.name,place.imageUrl))||directoryFallbackLogo(place.type):mark.kind==='event'?'/mapz-map/icons/event.svg':boardLogo||boardIcon(row)),
       alternateLogo:brands?.alternate,
+      // Ring lines for the 3D same-day vortex: the lineup, else the host or group.
+      performers:event?eventPerformers(event):undefined,
+      hostName:brands?.hostName,
       poster:event?resolveEventPosterUrl(event.id,event.posterImageUrl,event.dayOfWeek):undefined,
       housingModel:undefined,
       neighborhoodLabel:isHouz?housingAreaLabel(row):undefined,

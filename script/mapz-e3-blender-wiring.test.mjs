@@ -5,9 +5,9 @@ import {
   e3CrowdTargets,e3CrowdEase,e3BlenderFootprintPx,E3_CROWD_MIN_SCALE,E3_CROWD_READABLE_PX,E3_CROWD_RELEASE,E3_BLENDER_MAX_SCREEN_FRACTION,E3_BLENDER_ZOOM_OUT_GROWTH,
   e3BlenderSizeFactor,e3BlenderScaleMeters,e3BlenderScreenHeightPx,e3BlenderTakesOver,e3AnchorCoordinates,e3CoordKey,placezHoverMeters,
   E3_BLENDER_SCALE_CLOSE_M,E3_BLENDER_SCALE_CLOSE_ZOOM,E3_BLENDER_SIZE_FULL_ZOOM,E3_BLENDER_SIZE_FAR_ZOOM,E3_BLENDER_SIZE_FAR,
-  E3_BLENDER_MIN_SCREEN_PX,PLACEZ_HOVER_METERS,e3RingText,e3CountdownText,e3NearestSameDayEvent,E3_RING_TEXT_MAX_CHARS,PLACEZ_ROOF_CLEARANCE_METERS,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,
+  E3_BLENDER_MIN_SCREEN_PX,PLACEZ_HOVER_METERS,e3RingText,e3CountdownText,e3NearestSameDayEvent,E3_RING_TEXT_MAX_CHARS,e3RingLines,e3TimeLabel,e3ComplementColor,e3VortexTint,e3SlideCycle,e3SlideState,E3_SLIDE_WEIGHTS,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3CleanCopy,E3_SAME_DAY_GREEN,PLACEZ_ROOF_CLEARANCE_METERS,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,
 } from '../client/public/mapz-map/e3-lod.js';
-import {blenderLogoFace,blenderBandFace,blenderPlateFace} from '../client/public/mapz-map/e3-blender-model.js';
+import {blenderLogoFace,blenderBandFace,blenderPlateFace,blenderArtFace,blenderOrbFace,blenderDotsHole,BLENDER_TABLES} from '../client/public/mapz-map/e3-blender-model.js';
 
 test('3D hologram scale: 24 m at close zoom, 20% at zoom 12, full size from 15.5, smooth in between', () => {
   assert.equal(E3_BLENDER_SCALE_CLOSE_M,24);
@@ -181,14 +181,121 @@ test('ring band and countdown plate show only on the vortex and the double stack
   assert.ok(mid.opacity>0&&mid.opacity<1,'fades in during the coin to vortex morph');
 });
 
-test('river-flight and the model wire the ring text and countdown without fake dates', async () => {
+test('ring lines: event name first, DJs second, host or group when no DJ is listed, venue as the last fallback, no dashes', () => {
+  assert.deepEqual(e3RingLines({eventName:'Little Shop of Ponies',performers:['DJ Grind','DJ Moss'],hostName:'Pink Ponies',venueName:'Secret Warehouse'}),{name:'LITTLE SHOP OF PONIES',sub:'DJ GRIND \u00b7 DJ MOSS',source:'performers'});
+  assert.deepEqual(e3RingLines({eventName:'Bear Dance',hostName:'Portland Bears',venueName:'CC Slaughters'}),{name:'BEAR DANCE',sub:'PORTLAND BEARS',source:'host'});
+  assert.deepEqual(e3RingLines({eventName:'Bear Dance',venueName:'CC Slaughters'}),{name:'BEAR DANCE',sub:'CC SLAUGHTERS',source:'venue'});
+  assert.equal(e3RingLines({eventName:"Coach's Pet \u2014 Yes Coach"}).name,"COACH'S PET - YES COACH");
+  assert.equal(e3CleanCopy('a \u2013 b'),'A - B');
+});
+
+test('start time label: 9PM, 9:30PM, no :00, no dashes', () => {
+  assert.equal(e3TimeLabel('9:00 PM'),'9PM');
+  assert.equal(e3TimeLabel('9:30 PM'),'9:30PM');
+  assert.equal(e3TimeLabel('10 am'),'10AM');
+  assert.equal(e3TimeLabel('21:00'),'9PM');
+  assert.equal(e3TimeLabel('12:00 AM'),'12AM');
+  assert.ok(!/[\u2012-\u2015]/.test(e3TimeLabel('9 \u2014 10 PM')));
+});
+
+test('complementary accents: green gets purple, magenta gets green, red gets cyan', () => {
+  const hue=hex=>{const n=parseInt(hex.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,max=Math.max(r,g,b),d=max-Math.min(r,g,b);const h=d?max===r?((g-b)/d)%6:max===g?(b-r)/d+2:(r-g)/d+4:0;return (h*60+360)%360;};
+  for (const tint of ['#39FF14','#FF00CC','#FF0000','#19E3FF']) {
+    const gap=Math.abs(hue(e3ComplementColor(tint))-hue(tint));
+    assert.ok(Math.abs(gap-180)<6,`${tint} accent is opposite on the wheel`);
+  }
+  assert.equal(e3ComplementColor('#FF00CC'),'#3DFF64');
+});
+
+test('Sanctuary and the other adult venues stay red in the vortex; every other same-day vortex is green', () => {
+  assert.equal(e3VortexTint('#FF0000',true),'#FF0000');
+  assert.equal(e3VortexTint('#ff0000',true),'#FF0000');
+  assert.equal(e3VortexTint('#FF00CC',true),E3_SAME_DAY_GREEN);
+  assert.equal(e3VortexTint('#FF00CC',false),'#FF00CC');
+});
+
+test('screen art cycle: logo owns at least 60% of the time, glitch only at swaps, static logo for reduced motion', () => {
+  assert.equal(E3_SLIDE_WEIGHTS.logo,60);
+  for (const kinds of [['logo','poster','host'],['logo','poster'],['logo','host']]) {
+    const cycle=e3SlideCycle(kinds),total=cycle.reduce((sum,part)=>sum+part.end-part.start,0),logo=cycle.filter(part=>part.kind==='logo').reduce((sum,part)=>sum+part.end-part.start,0);
+    assert.ok(Math.abs(total-12)<1e-9,'the cycle fills the period');
+    assert.ok(logo/total>=.6-1e-9,`logo share ${(logo/total).toFixed(2)} for ${kinds}`);
+    for (const kind of kinds) assert.ok(cycle.some(part=>part.kind===kind),`${kind} appears`);
+  }
+  const seconds=[...Array(1200)].map((_,i)=>i/100);
+  const states=seconds.map(t=>e3SlideState(['logo','poster','host'],t));
+  const glitching=states.filter(state=>state.glitch>0).length/states.length;
+  assert.ok(glitching>0&&glitching<.2,'short glitch windows only');
+  assert.ok(states.every(state=>state.glitch===0||state.from!==state.to),'a glitch is always a swap');
+  const onScreen=kind=>states.filter(state=>(state.mix<.5?state.from:state.to)===kind).length/states.length;
+  assert.ok(onScreen('logo')>=.58,'logo gets the most screen time');
+  assert.ok(onScreen('poster')>onScreen('host'),'poster shows longer than the host logo');
+  for (const t of seconds) {
+    const calm=e3SlideState(['logo','poster','host'],t,{reduced:true});
+    assert.deepEqual(calm,{from:'logo',to:'logo',mix:0,glitch:0});
+  }
+  assert.equal(e3SlideState(['logo'],5).glitch,0,'a lone logo never glitches');
+});
+
+test('countdown parts: big numerals with unit letters, d:h from a day out, h:m:s inside a day, LIVE once started', () => {
+  const now=1e12,H=3600e3;
+  assert.deepEqual(e3CountdownParts(now+3*H+5e3,now),[{value:'03',unit:'h'},{value:'00',unit:'m'},{value:'05',unit:'s'}]);
+  assert.deepEqual(e3CountdownParts(now+30*H+5e3,now),[{value:'01',unit:'d'},{value:'06',unit:'h'}]);
+  assert.deepEqual(e3CountdownParts(now+7*24*H+7*H,now).map(part=>part.unit),['d','h']);
+  assert.equal(e3CountdownParts(now-1,now)[0].live,true);
+  assert.deepEqual(e3CountdownParts(NaN,now),[]);
+});
+
+test('face stack: initials of people who RSVP\'d, friends first when marked, nothing when nobody did', () => {
+  assert.deepEqual(e3FaceStack([],0),{people:[],more:0});
+  assert.deepEqual(e3FaceStack(undefined,undefined),{people:[],more:0});
+  assert.deepEqual(e3FaceStack([{initial:'pon'},{initial:'mtk'}],7),{people:['PON','MTK'],more:5});
+  assert.deepEqual(e3FaceStack([{initial:'ab'},{initial:'cd',friend:true}],2),{people:['CD'],more:1},'friends win when the host marks them');
+  assert.equal(e3FaceStack([1,2,3,4,5,6].map(n=>({initial:String(n)})),6).people.length,4);
+});
+
+test('same-day events are sorted nearest first for the screens of a stack', () => {
+  const now=1e12,H=3600e3;
+  const list=e3SameDayEventsSorted([{startsAtMs:now+5*H,name:'b'},{startsAtMs:now+30*H,name:'far'},{startsAtMs:now+2*H,name:'a'},{startsAtMs:now-H,name:'begun'}],now,3);
+  assert.deepEqual(list.map(event=>event.name),['a','b','begun']);
+});
+
+test('v2 model tables: art, info bands, text rings, orb and the dots cut-out only exist on the vortex and the stack', () => {
+  const {ART_MAIN,ART_LOWER,RING_BANDS,INFO_MAIN,FACE_STACK,COUNTDOWN_PLATE}=BLENDER_TABLES;
+  for (const stage of [0,1,2,3]) {
+    assert.equal(blenderArtFace(ART_MAIN,stage).opacity,0);
+    assert.equal(blenderArtFace(INFO_MAIN,stage).opacity,0);
+    assert.equal(blenderOrbFace(stage).opacity,0);
+    assert.equal(blenderPlateFace(stage,FACE_STACK).opacity,0);
+    assert.equal(blenderPlateFace(stage,COUNTDOWN_PLATE).opacity,0);
+    for (const band of RING_BANDS) assert.equal(blenderBandFace(band,stage).opacity,0);
+  }
+  assert.equal(blenderArtFace(ART_MAIN,4).opacity,1);
+  assert.equal(blenderArtFace(ART_LOWER,4).opacity,0,'the second screen is the double stack only');
+  assert.equal(blenderArtFace(ART_LOWER,5).opacity,1);
+  assert.deepEqual(RING_BANDS.map(band=>[band.id,blenderBandFace(band,4).opacity]),[['a1',1],['a2',1],['b2',0],['b1',0]]);
+  assert.deepEqual(RING_BANDS.map(band=>blenderBandFace(band,5).opacity),[1,1,1,1]);
+  assert.ok(blenderOrbFace(5).y>blenderOrbFace(4).y,'the orb floats between the stacks, above the single vortex base');
+  assert.ok(blenderPlateFace(4,FACE_STACK).y>blenderPlateFace(4,COUNTDOWN_PLATE).y,'faces sit above the clock');
+  assert.equal(blenderDotsHole(3).on,false);
+  assert.equal(blenderDotsHole(4).on,true);
+  // The info band (time and name) sits under the art on the same screen.
+  assert.ok(blenderArtFace(INFO_MAIN,4).y<blenderArtFace(ART_MAIN,4).y);
+});
+
+test('river-flight and the model wire the v2 vortex without fake dates', async () => {
   const flight=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
   const model=await readFile(new URL('../client/public/mapz-map/e3-blender-model.js',import.meta.url),'utf8');
-  assert.match(flight,/ringText:nearest\?e3RingText\(/);
-  assert.match(flight,/countdown:nearest\?e3CountdownText\(nearest\.startsAtMs,lodNow\)/);
+  assert.match(flight,/e3VortexTint\(g\.color,true\)/);
+  assert.match(flight,/e3SameDayEventsSorted\(g\.events,lodNow,stage>=5\?2:1\)/);
+  assert.match(flight,/countdown:e3CountdownParts\(nearest\.startsAtMs,lodNow\)/);
+  assert.match(flight,/faces:e3FaceStack\(nearest\.avatars,nearest\.avatarTotal\)/);
+  assert.match(flight,/e3RingLines\(\{eventName:event\.name,performers:event\.performers,hostName:event\.hostName/);
   assert.match(flight,/sameDayVortex=g\.sameDay&&stage>=4/);
-  assert.match(model,/item\.model\.setRingText\(row\.ringText/);
-  assert.match(model,/item\.model\.setCountdown\(row\.countdown/);
-  assert.match(model,/ringTexture\?\.dispose\(\);ringFarTexture\?\.dispose\(\);countdownTexture\?\.dispose\(\)/,'canvas textures are disposed');
+  assert.match(flight,/absolute\.origin!==location\.origin/,'posters are same-origin only');
+  assert.match(model,/item\.model\.setContent\(row\.content/);
+  assert.match(model,/for\(const texture of \[\.\.\.textures\]\)texture\.dispose\(\)/,'every canvas texture is disposed');
+  assert.match(model,/e3SlideState\(slide\.kinds,elapsed/);
   assert.ok(!/Date\.now\s*=|fakeNow|mockNow/.test(flight+model),'no fake clock in the product');
+  assert.ok(!/[\u2014\u2013]/.test(model.replace(/\/\/.*$/gm,'')),'no dashes in drawn copy');
 });
