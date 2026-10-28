@@ -6,8 +6,9 @@ import {
   e3BlenderSizeFactor,e3BlenderScaleMeters,e3BlenderScreenHeightPx,e3BlenderTakesOver,e3AnchorCoordinates,e3CoordKey,placezHoverMeters,
   E3_BLENDER_SCALE_CLOSE_M,E3_BLENDER_SCALE_CLOSE_ZOOM,E3_BLENDER_SIZE_FULL_ZOOM,E3_BLENDER_SIZE_FAR_ZOOM,E3_BLENDER_SIZE_FAR,
   E3_BLENDER_MIN_SCREEN_PX,PLACEZ_HOVER_METERS,e3RingText,e3CountdownText,e3NearestSameDayEvent,E3_RING_TEXT_MAX_CHARS,e3RingLines,e3TimeLabel,e3ComplementColor,e3VortexTint,e3SlideCycle,e3SlideState,E3_SLIDE_WEIGHTS,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3CleanCopy,E3_SAME_DAY_GREEN,PLACEZ_ROOF_CLEARANCE_METERS,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,
+  e3EventUrgency,E3_URGENCY_RAMP_MS,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TURN_SECONDS_BASE,E3_RING_TURN_SECONDS_PEAK,E3_BEAM_PULSES_BASE,E3_BEAM_PULSES_PEAK,E3_BEAM_PULSE_SPEED_BASE,E3_BEAM_PULSE_SPEED_PEAK,E3_RING_TILT_RADIANS,e3SpinUp,e3OrbDrop,e3BlenderTallestUnits,E3_BLENDER_STACK_TALLEST_UNITS,E3_BLENDER_TALLEST_UNITS,
 } from '../client/public/mapz-map/e3-lod.js';
-import {blenderLogoFace,blenderBandFace,blenderPlateFace,blenderArtFace,blenderOrbFace,blenderDotsHole,BLENDER_TABLES} from '../client/public/mapz-map/e3-blender-model.js';
+import {blenderLogoFace,blenderBandFace,blenderPlateFace,blenderArtFace,blenderOrbFace,blenderDotsHole,BLENDER_TABLES,blenderBaseFace,blenderStackOpen,STACK_LIFT,STACK_RISE,STACK_GAP,STACK_SHIFT} from '../client/public/mapz-map/e3-blender-model.js';
 
 test('3D hologram scale: 24 m at close zoom, 20% at zoom 12, full size from 15.5, smooth in between', () => {
   assert.equal(E3_BLENDER_SCALE_CLOSE_M,24);
@@ -298,4 +299,98 @@ test('river-flight and the model wire the v2 vortex without fake dates', async (
   assert.match(model,/e3SlideState\(slide\.kinds,elapsed/);
   assert.ok(!/Date\.now\s*=|fakeNow|mockNow/.test(flight+model),'no fake clock in the product');
   assert.ok(!/[\u2014\u2013]/.test(model.replace(/\/\/.*$/gm,'')),'no dashes in drawn copy');
+});
+
+test('urgency: gentle baseline until three hours out, eases up, peaks at the start and holds while LIVE', () => {
+  const start=Date.parse('2026-10-30T21:00:00-07:00'),H=3600e3;
+  assert.equal(E3_URGENCY_RAMP_MS,3*H);
+  assert.equal(e3EventUrgency(start,start-5*H),0);
+  assert.equal(e3EventUrgency(start,start-3*H),0);
+  assert.equal(e3EventUrgency(start,start),1,'peak at the start');
+  assert.equal(e3EventUrgency(start,start+1),1,'LIVE holds the peak');
+  assert.equal(e3EventUrgency(start,start+6*H),1);
+  const mid=e3EventUrgency(start,start-1.5*H);
+  assert.ok(Math.abs(mid-.5)<1e-9,'smoothstep midpoint');
+  // Monotonic and smooth, with a slow start (no jump in the first minutes of the ramp).
+  let previous=0;
+  for(let minutes=180;minutes>=0;minutes-=1){const u=e3EventUrgency(start,start-minutes*60e3);assert.ok(u>=previous-1e-12&&u-previous<.02,`smooth at ${minutes} min`);previous=u;}
+  assert.ok(e3EventUrgency(start,start-2.9*H)<.01);
+  assert.ok(e3EventUrgency(start,start-.5*H)>.9&&e3EventUrgency(start,start-.5*H)<1);
+  assert.equal(e3EventUrgency(NaN,start),0);assert.equal(e3EventUrgency(start,NaN),0);
+  // Same startsAtMs and clock the countdown uses: one second before the start the countdown reads 00:00:01.
+  assert.ok(e3EventUrgency(start,start-1000)>.999);
+});
+
+test('urgency drives ring spin, ring tilt rate and beam pulses between named baseline and peak values', () => {
+  assert.ok(Math.abs(1/e3RingSpinRate(0)-E3_RING_TURN_SECONDS_BASE)<1e-9);
+  assert.ok(Math.abs(1/e3RingSpinRate(1)-E3_RING_TURN_SECONDS_PEAK)<1e-9);
+  assert.ok(E3_RING_TURN_SECONDS_PEAK>=4&&E3_RING_TURN_SECONDS_BASE<24,'tasteful: baseline a little faster than before, peak not frantic');
+  assert.ok(e3RingSpinRate(.5)>e3RingSpinRate(.2)&&e3RingSpinRate(1)>e3RingSpinRate(.5));
+  assert.ok(e3RingTiltRate(1)>e3RingTiltRate(0)&&e3RingTiltRate(1)<2*e3RingTiltRate(0)+1,'tilt rate stays gentle');
+  assert.ok(E3_RING_TILT_RADIANS<=.09,'tilt angle stays small (about 4 degrees)');
+  const base=e3BeamPulseLook(0),peak=e3BeamPulseLook(1);
+  const near=(a,b)=>Math.abs(a-b)<1e-9;
+  assert.ok(near(base.count,E3_BEAM_PULSES_BASE)&&near(peak.count,E3_BEAM_PULSES_PEAK));
+  assert.ok(near(base.speed,E3_BEAM_PULSE_SPEED_BASE)&&near(peak.speed,E3_BEAM_PULSE_SPEED_PEAK));
+  assert.ok(peak.count>base.count&&peak.speed>base.speed);
+  assert.ok(near(e3BeamPulseLook(-3).count,E3_BEAM_PULSES_BASE),'clamped');
+  assert.ok(near(e3BeamPulseLook(9).speed,E3_BEAM_PULSE_SPEED_PEAK),'clamped');
+  assert.ok(E3_BEAM_PULSES_PEAK<=8,'the shader loops over at most 8 pulses');
+});
+
+test('staged spin-up: coin flip, rings unfold, screen slides out, orb drops, flash marks the finished vortex', () => {
+  assert.equal(e3SpinUp(3).active,false);assert.equal(e3SpinUp(4).active,false);assert.equal(e3SpinUp(5).active,false);
+  const at=f=>e3SpinUp(3+f);
+  // Order of the sequence: each part starts after the one before.
+  assert.ok(at(.1).flipAngle>0&&at(.1).rings===0&&at(.1).screen===0);
+  assert.ok(at(.3).rings>0&&at(.3).screen===0);
+  assert.ok(at(.55).screen>0&&at(.55).orb===0);
+  assert.ok(at(.8).orb>0&&at(.8).orb<1);
+  // Everything is done at the end, the coin ends front-facing, and the flash peaks just before the end.
+  const end=at(.9999);
+  assert.ok(Math.abs(end.flipAngle)<1e-6&&end.rings===1&&end.screen===1&&end.extras===1&&end.orb>.99);
+  assert.ok(at(.9).flash>.4&&at(.9).flash>at(.6).flash&&at(.9999).flash<.05);
+  // Monotonic progress of every stage; the flip angle only decreases from a full turn.
+  let previous=e3SpinUp(3.001);
+  for(let f=.002;f<1;f+=.002){const now=at(f);for(const key of ['rings','screen','extras','orb'])assert.ok(now[key]>=previous[key]-1e-12,`${key} monotonic at ${f}`);assert.ok(now.flipAngle<=previous.flipAngle+1e-12);previous=now;}
+  // Orb drops from above into place with one small bounce.
+  assert.equal(e3OrbDrop(0),1);assert.equal(e3OrbDrop(1),0);assert.ok(e3OrbDrop(.5)>0&&e3OrbDrop(.5)<1);assert.ok(e3OrbDrop(.875)>0&&e3OrbDrop(.875)<.15);
+});
+
+test('double stack spacing: lower stack lifted off the pin, a gap for the orb, the cap follows the taller stack', () => {
+  assert.ok(STACK_LIFT>=.6&&STACK_GAP>=.5&&STACK_RISE>=.3&&STACK_SHIFT===STACK_LIFT+STACK_RISE+STACK_GAP);
+  assert.equal(blenderStackOpen(4),0);assert.equal(blenderStackOpen(5),1);assert.equal(blenderStackOpen(3),0);
+  const {ART_MAIN,ART_LOWER,INFO_MAIN,INFO_LOWER,RING_BANDS,ORB,COUNTDOWN_PLATE,FACE_STACK}=BLENDER_TABLES;
+  // Lower screen starts above where it was, upper stack rises by the full shift.
+  assert.ok(ART_LOWER.y[5]>=1.49+STACK_LIFT-1e-9);
+  assert.ok(ART_MAIN.y[5]-ART_LOWER.y[5]>3.49+STACK_GAP-1e-9);
+  // The orb sits between the two ring pairs: above the lower pair's top edge and below the upper pair's bottom edge.
+  const band=id=>{const b=RING_BANDS.find(item=>item.id===id);return {top:b.y[5]+b.h[5]/2,bottom:b.y[5]-b.h[5]/2};};
+  const lowerTop=Math.max(band('b1').top,band('b2').top),upperBottom=Math.min(band('a1').bottom,band('a2').bottom);
+  assert.ok(ORB.y[5]>lowerTop-.05&&ORB.y[5]<upperBottom+.05,`orb ${ORB.y[5]} between ${lowerTop} and ${upperBottom}`);
+  assert.ok(upperBottom-lowerTop>.1,'ring pairs no longer overlap');
+  assert.ok(COUNTDOWN_PLATE.y[5]>ART_MAIN.y[5]&&FACE_STACK.y[5]>COUNTDOWN_PLATE.y[5]);
+  // Bigger ring text and a bigger start time band than the v2 build (bands .58/.36 and .36 tall).
+  assert.ok(RING_BANDS.find(item=>item.id==='a1').h[4]>=.78&&RING_BANDS.find(item=>item.id==='a2').h[4]>=.48);
+  assert.ok(INFO_MAIN.h[5]>=.5&&INFO_LOWER.h[5]>=.5);
+  assert.equal(e3BlenderTallestUnits(4),E3_BLENDER_TALLEST_UNITS);assert.equal(e3BlenderTallestUnits(5),E3_BLENDER_STACK_TALLEST_UNITS);
+  assert.ok(E3_BLENDER_STACK_TALLEST_UNITS>E3_BLENDER_TALLEST_UNITS);
+});
+
+test('beam base disc and venue label ease in with the vortex and stay for the stack', () => {
+  assert.equal(blenderBaseFace(3).opacity,0);assert.equal(blenderBaseFace(4).opacity,1);assert.equal(blenderBaseFace(5).opacity,1);
+  assert.ok(blenderBaseFace(3.6).opacity>0&&blenderBaseFace(3.6).opacity<1);
+  assert.ok(BLENDER_TABLES.BASE_DISC.radius>.4&&BLENDER_TABLES.BASE_LABEL.width>1);
+});
+
+test('river-flight wires the urgency clock and the venue label; the model keeps the reduced-motion path static', async () => {
+  const source=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
+  assert.match(source,/urgency=e3EventUrgency\(nearest\.startsAtMs,lodNow\)/,'same startsAtMs and clock as the countdown');
+  assert.match(source,/venueName:anchor\.feature\.properties\.name/);
+  const model=await readFile(new URL('../client/public/mapz-map/e3-blender-model.js',import.meta.url),'utf8');
+  assert.match(model,/if\(!reduced\)\{ringAngle\+=/,'phases only accumulate when motion is allowed');
+  assert.match(model,/const turn=reduced\?0:ringAngle,tiltAmp=reduced\?0:E3_RING_TILT_RADIANS/);
+  assert.match(model,/strength=reduced\?0:/,'no pulses under reduced motion');
+  assert.match(model,/sp=reduced\?\{active:false/,'no staged spin-up under reduced motion');
+  assert.ok(!/[\u2014\u2013]/.test(model),'no em or en dashes in the model copy');
 });

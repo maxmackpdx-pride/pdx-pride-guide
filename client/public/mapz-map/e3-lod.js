@@ -130,6 +130,10 @@ export const E3_BLENDER_SCALE_CLOSE_ZOOM = 17.5;
 export const E3_BLENDER_ZOOM_OUT_GROWTH = .8;
 export const E3_BLENDER_MAX_SCREEN_FRACTION = .30;
 export const E3_BLENDER_TALLEST_UNITS = 5.2;
+// The double stack is taller (the spacing between its two stacks, plus the countdown and face stack on top), so it
+// gets its own cap height. The scale blends from the single to the stack value as the stage goes 4 to 5, which
+// shrinks the pair a little instead of letting it run off the screen.
+export const E3_BLENDER_STACK_TALLEST_UNITS = 6.8;
 export const E3_BLENDER_SIZE_FULL_ZOOM = 15.5;
 export const E3_BLENDER_SIZE_FAR_ZOOM = 12;
 export const E3_BLENDER_SIZE_FAR = .2;
@@ -138,7 +142,7 @@ export const E3_BLENDER_SIZE_FAR = .2;
 export const E3_BLENDER_MIN_STAGE = 2;
 export const E3_BLENDER_MIN_SCREEN_PX = 40;
 // Approximate model height in model units per stage 0..5 (beam top), used for the on-screen size test.
-export const E3_BLENDER_STAGE_HEIGHT_UNITS = [1, 1.4, 4, 4.6, 4.8, 5.2];
+export const E3_BLENDER_STAGE_HEIGHT_UNITS = [1, 1.4, 4, 4.6, 4.8, 6.8];
 // While a leaving venue's stage tween is still above this value the 3D layer keeps drawing it, so the
 // hand-back to the 2D mini badge is not a pop.
 export const E3_BLENDER_RELEASE_STAGE = 1.02;
@@ -156,15 +160,21 @@ export function e3BlenderSizeFactor(zoom) {
 const metersPerPixelAt = (zoom, latitude) => 40075016.686 * Math.cos(latitude * Math.PI / 180) / (512 * Math.pow(2, zoom));
 const pitchFactor = pitch => Math.max(.35, Math.sin(pitch * Math.PI / 180));
 
+/** Cap height in model units: the single vortex value, blending to the double stack value between stages 4 and 5. */
+export function e3BlenderTallestUnits(stage = 0) {
+  const open = clamp01(stage - 4);
+  return E3_BLENDER_TALLEST_UNITS + (E3_BLENDER_STACK_TALLEST_UNITS - E3_BLENDER_TALLEST_UNITS) * open;
+}
+
 /**
  * World scale in meters for the 3D model at a zoom. With a viewHeight (CSS px) the scale is also capped so the
  * tallest stage stays under E3_BLENDER_MAX_SCREEN_FRACTION of the screen.
  */
-export function e3BlenderScaleMeters(zoom, {viewHeight = 0, latitude = 45.5, pitch = 50} = {}) {
+export function e3BlenderScaleMeters(zoom, {viewHeight = 0, latitude = 45.5, pitch = 50, stage = 0} = {}) {
   const zoomOut = Math.max(0, E3_BLENDER_SCALE_CLOSE_ZOOM - zoom);
   const base = E3_BLENDER_SCALE_CLOSE_M * Math.pow(2, zoomOut * E3_BLENDER_ZOOM_OUT_GROWTH) * e3BlenderSizeFactor(zoom);
   if (!(viewHeight > 0)) return base;
-  const capped = E3_BLENDER_MAX_SCREEN_FRACTION * viewHeight * metersPerPixelAt(zoom, latitude) / (E3_BLENDER_TALLEST_UNITS * pitchFactor(pitch));
+  const capped = E3_BLENDER_MAX_SCREEN_FRACTION * viewHeight * metersPerPixelAt(zoom, latitude) / (e3BlenderTallestUnits(stage) * pitchFactor(pitch));
   return Math.min(base, capped);
 }
 
@@ -172,7 +182,7 @@ export function e3BlenderScaleMeters(zoom, {viewHeight = 0, latitude = 45.5, pit
 export function e3BlenderScreenHeightPx(stage, zoom, latitude = 45.5, pitch = 50, viewHeight = 0) {
   const index = Math.max(0, Math.min(5, stage)), low = Math.floor(index);
   const units = E3_BLENDER_STAGE_HEIGHT_UNITS[low] + ((E3_BLENDER_STAGE_HEIGHT_UNITS[Math.min(5, low + 1)] - E3_BLENDER_STAGE_HEIGHT_UNITS[low]) * (index - low));
-  return units * e3BlenderScaleMeters(zoom, {viewHeight, latitude, pitch}) / metersPerPixelAt(zoom, latitude) * pitchFactor(pitch);
+  return units * e3BlenderScaleMeters(zoom, {viewHeight, latitude, pitch, stage: index}) / metersPerPixelAt(zoom, latitude) * pitchFactor(pitch);
 }
 
 /**
@@ -444,4 +454,71 @@ export function e3SameDayEventsSorted(events, nowMs, limit = 2) {
   const upcoming = same.filter(event => event.startsAtMs >= nowMs).sort((a, b) => a.startsAtMs - b.startsAtMs);
   const begun = same.filter(event => event.startsAtMs < nowMs).sort((a, b) => b.startsAtMs - a.startsAtMs);
   return [...upcoming, ...begun].slice(0, limit);
+}
+
+// ---------------------------------------------------------------------------
+// Time-to-start energy: ring spin, ring tilt rate and the beam light pulses ramp up as the event approaches and
+// peak when it opens (start time reached, then LIVE). Driven by the same startsAtMs and view clock as the countdown.
+// ---------------------------------------------------------------------------
+/** The ramp covers the last three hours before the start. Before that everything sits at its gentle baseline. */
+export const E3_URGENCY_RAMP_MS = 3 * 3600 * 1000;
+// Ring turn period in seconds at baseline and at the peak (the 2D ring and the first 3D build turned once in 24 s).
+export const E3_RING_TURN_SECONDS_BASE = 20;
+export const E3_RING_TURN_SECONDS_PEAK = 5.5;
+// Gentle counter-tilt of adjacent rings: fixed small angle (radians, about 4 degrees), oscillation rate in rad/s.
+export const E3_RING_TILT_RADIANS = .07;
+export const E3_RING_TILT_RATE_BASE = .9;
+export const E3_RING_TILT_RATE_PEAK = 1.6;
+// Beam light pulses: how many are travelling up the beam at once, and trips per second.
+export const E3_BEAM_PULSES_BASE = 2;
+export const E3_BEAM_PULSES_PEAK = 7;
+export const E3_BEAM_PULSE_SPEED_BASE = .2;
+export const E3_BEAM_PULSE_SPEED_PEAK = .85;
+
+/** 0 at three hours or more before the start, easing smoothly up to 1 at the start, and 1 from then on (LIVE holds the peak). */
+export function e3EventUrgency(startsAtMs, nowMs, rampMs = E3_URGENCY_RAMP_MS) {
+  if (!Number.isFinite(startsAtMs) || !Number.isFinite(nowMs) || !(rampMs > 0)) return 0;
+  const left = startsAtMs - nowMs;
+  if (left <= 0) return 1;
+  if (left >= rampMs) return 0;
+  const t = 1 - left / rampMs;
+  return t * t * (3 - 2 * t);
+}
+
+const lerp = (a, b, t) => a + (b - a) * clamp01(t);
+/** Ring turns per second (a rate, so the angle can be accumulated and never jumps when the rate changes). */
+export const e3RingSpinRate = urgency => lerp(1 / E3_RING_TURN_SECONDS_BASE, 1 / E3_RING_TURN_SECONDS_PEAK, urgency);
+export const e3RingTiltRate = urgency => lerp(E3_RING_TILT_RATE_BASE, E3_RING_TILT_RATE_PEAK, urgency);
+export const e3BeamPulseLook = urgency => ({count: lerp(E3_BEAM_PULSES_BASE, E3_BEAM_PULSES_PEAK, urgency), speed: lerp(E3_BEAM_PULSE_SPEED_BASE, E3_BEAM_PULSE_SPEED_PEAK, urgency)});
+
+/**
+ * Staged coin to vortex spin-up. f is the stage fraction between coin (3) and vortex (4). Returns each part's own
+ * 0..1 progress so the sequence reads in order: the coin flips, the rings unfold, the screen slides out, the orb
+ * drops in, and a soft glitch flash marks the moment it becomes the full vortex.
+ */
+export const E3_SPINUP_WINDOWS = {flip: [0, .4], rings: [.18, .62], screen: [.46, .9], extras: [.6, .95], orb: [.7, 1]};
+const smooth = (a, b, x) => { const t = clamp01((x - a) / Math.max(1e-6, b - a)); return t * t * (3 - 2 * t); };
+export function e3SpinUp(stage) {
+  const f = clamp01(stage - 3), inside = stage > 3 && stage < 4;
+  const w = E3_SPINUP_WINDOWS;
+  return {
+    active: inside,
+    f,
+    // The coin turns a full revolution (angle 2 pi at f=0, 0 once it has finished), ending front-facing.
+    flipAngle: inside ? Math.PI * 2 * (1 - smooth(w.flip[0], w.flip[1], f)) : 0,
+    rings: smooth(w.rings[0], w.rings[1], f),
+    screen: smooth(w.screen[0], w.screen[1], f),
+    extras: smooth(w.extras[0], w.extras[1], f),
+    // The orb falls from above into place and settles with a small bounce.
+    orb: smooth(w.orb[0], w.orb[1], f),
+    // Soft flash that peaks just as the vortex completes.
+    flash: inside ? smooth(.8, .94, f) * (1 - smooth(.94, 1, f)) : 0,
+  };
+}
+/** Fall height factor for the orb: 1 high above, 0 in place, with one small damped bounce at the end. */
+export function e3OrbDrop(progress) {
+  const p = clamp01(progress);
+  if (p >= 1) return 0;
+  if (p <= .75) { const t = p / .75; return 1 - t * t * (3 - 2 * t); }
+  return Math.sin((p - .75) / .25 * Math.PI) * .12;
 }
