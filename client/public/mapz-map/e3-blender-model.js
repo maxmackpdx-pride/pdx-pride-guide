@@ -11,7 +11,8 @@ export const E3_BLENDER_MORPHS=['Full waypoint','Compressed','Logo coin','Single
 // shader below pulls them apart after the morph: everything above the lower screen frame rises by STACK_LIFT
 // (so the pin no longer covers the lower screen), the lower rings rise STACK_RISE more (so the ring text does not
 // run over the lower screen), and everything above the ring gap rises by STACK_GAP more (room for the orb). Weighted by the double stack morph, so the single vortex is unchanged.
-export const STACK_LIFT=1.15,STACK_RISE=.45,STACK_GAP=.5,STACK_SHIFT=STACK_LIFT+STACK_RISE+STACK_GAP;
+const AXIS_VERTICAL=true;
+export const STACK_LIFT=1.15,STACK_RISE=.45,STACK_GAP=.645,STACK_SHIFT=STACK_LIFT+STACK_RISE+STACK_GAP;
 const HEIGHT=[0,0,4.02,4.3,4.6,5.05+STACK_SHIFT],RADIUS=[0,0,.48,.60,.75,.90];
 const HOVER={
  'Upper poster independent hover':[.043,0],
@@ -268,7 +269,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  let iconMaterial=null;
  const tint=new THREE.Color(color);
  // Cut-out for the model's three little circles; the face stack replaces them.
- const holeUniform={value:new THREE.Vector4(0,0,0,0)},holeLowerUniform={value:new THREE.Vector4(0,0,0,0)},stackUniform={value:new THREE.Vector4(0,STACK_LIFT,STACK_RISE,STACK_GAP)},spinUniform={value:new THREE.Vector2(0,0)},bandUniform={value:[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0))},pulseUniform={value:new THREE.Vector4(0,2,2.5,0)},beamKUniform={value:1};
+ const holeUniform={value:new THREE.Vector4(0,0,0,0)},holeLowerUniform={value:new THREE.Vector4(0,0,0,0)},stackUniform={value:new THREE.Vector4(0,STACK_LIFT,STACK_RISE,STACK_GAP)},spinUniform={value:new THREE.Vector2(0,0)},bandUniform={value:[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0))},pulseUniform={value:new THREE.Vector4(0,2,2.5,0)},beamKUniform={value:1},beamFadeUniform={value:new THREE.Vector2(99,100)},beamAccentUniform={value:new THREE.Color('#ffffff')};
  object.traverse(node=>{
   if(!node.isMesh)return;
   const role=node.userData.mapzRole||'outline';
@@ -276,7 +277,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   const opacity={outline:.9,'ring-fill':.095,beam:.025,panel:.32,icon:1,particle:.85,ground:.5}[role]??1;
   const material=new THREE.MeshBasicMaterial({color:role==='panel'?0x000000:white?0xffffff:tint,
    transparent:true,opacity,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,
-   blending:role==='beam'||role==='particle'?THREE.AdditiveBlending:THREE.NormalBlending,
+   blending:role==='particle'?THREE.AdditiveBlending:THREE.NormalBlending,
    map:role==='ground'?groundTexture:null});
   // Every Blender mesh gets: the double stack spacing, the staged coin to vortex spin-up (per-vertex timing), the gentle
   // counter-tilt of the ring bands; the outline, ring surfaces and icon also get the dots cut-out, and the beam
@@ -285,7 +286,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   if(spaced){
    material.onBeforeCompile=shader=>{
     shader.uniforms.uStack=stackUniform;shader.uniforms.uSpin=spinUniform;shader.uniforms.uBand=bandUniform;
-    if(pulsed){shader.uniforms.uPulse=pulseUniform;shader.uniforms.uBeamK=beamKUniform;}
+    if(pulsed){shader.uniforms.uPulse=pulseUniform;shader.uniforms.uBeamK=beamKUniform;shader.uniforms.uFade=beamFadeUniform;shader.uniforms.uBeamAccent=beamAccentUniform;}
     const morph=`
  #ifdef USE_MORPHTARGETS
  transformed*=morphTargetBaseInfluence;
@@ -317,9 +318,11 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     }
     if(pulsed){
      // Small bright pulses climbing the beam from the pin to the rings. uPulse: phase, how many at once, the height they reach, strength.
-     shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float vBeamY;uniform vec4 uPulse;uniform vec4 uStack;uniform float uBeamK;')
+     shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float vBeamY;uniform vec4 uPulse;uniform float uBeamK;uniform vec2 uFade;uniform vec3 uBeamAccent;')
       .replace('#include <opaque_fragment>',`#include <opaque_fragment>
  {
+  // Flat tinted beam (no white-hot gradient). Light pulses climb it in the complementary accent. The beam fades out
+  // before it reaches the top sign so the sign reads clean in front of it.
   float travel=vBeamY/max(uPulse.z,.01),glow=0.;
   for(int k=0;k<8;k++){
    float on=clamp(uPulse.y-float(k),0.,1.);
@@ -327,11 +330,10 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    float d=travel-pos;
    glow+=on*exp(-d*d*1300.)*smoothstep(0.,.1,pos)*(1.-smoothstep(.82,1.,pos));
   }
-  float g=glow*uPulse.w*uBeamK;
-  gl_FragColor.a+=(.035+.07*uStack.x)*uBeamK;
-  gl_FragColor.rgb+=diffuseColor.rgb*(.04+.08*uStack.x)*uBeamK;
-  gl_FragColor.rgb+=mix(diffuseColor.rgb,vec3(1.),.4)*g*1.5;
-  gl_FragColor.a=min(.7,gl_FragColor.a+g*.6);
+  float g=min(1.,glow*uPulse.w*uBeamK*1.4);
+  float fade=1.-smoothstep(uFade.x,uFade.y,vBeamY);
+  vec3 beamRgb=mix(diffuseColor.rgb,uBeamAccent,g);
+  gl_FragColor=vec4(beamRgb,min(.6,.16*uBeamK+g*.4)*fade);
  }`);
     }
    };
@@ -421,6 +423,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   const textOnly=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.pending,sc.startsIn,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),faces]);
   if(key===contentKey)return;
   const keepStatic=textOnly===content.staticKey;
+  beamAccentUniform.value.set(accent);
   content={accent,screens,countdown,faces,staticKey:textOnly};contentKey=key;
   if(!keepStatic){
    // Ring text, info bands, art textures and faces change only with the event, never with the clock.
@@ -564,6 +567,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     const look=e3BeamPulseLook(urgency),reach=interpolate(PULSE_TOP,stage),strength=reduced?0:Math.max(0,Math.min(1,(stage-3.2)/.8));
     pulseUniform.value.set(pulsePhase,look.count,reach,strength);
     // Beam brightness: 20% of the full look when the start is far off, rising to 80% by the time the event opens.
+    {const bottom=interpolate(ART_MAIN.y,stage)-.75;beamFadeUniform.value.set(stage>=3.9?bottom-.5:99,stage>=3.9?bottom:100);}
     beamKUniform.value=reduced?.5:.2+.6*Math.max(0,Math.min(1,urgency));
    }
    {
@@ -649,7 +653,26 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
    for(const {model,root,row} of instances.values()){
     root.rotation.z=-bearing;model.setStage(row.stage??'vortex');model.update(elapsed,layer.reduced);
    }
-   renderer.resetState();renderer.render(scene,camera);renderer.resetState();
+   // Keep each hologram's axis vertical on screen, so the beam rises from the exact centre of the top of the pin
+   // instead of leaning away from the middle of the view with perspective. Drawn one hologram at a time, each with
+   // a small sideways shear (linear in height) folded into its projection.
+   const M=camera.projectionMatrix.clone(),list=[...instances.values()];
+   renderer.resetState();
+   if(!AXIS_VERTICAL||!list.length){renderer.render(scene,camera);renderer.resetState();return;}
+   const e=M.elements;
+   for(const item of list)item.root.visible=false;
+   for(const item of list){
+    const p=item.root.position,H=Math.max(1,(item.row.scaleMeters??18)*4);
+    const cx0=e[0]*p.x+e[4]*p.y+e[8]*p.z+e[12],cw0=e[3]*p.x+e[7]*p.y+e[11]*p.z+e[15];
+    const cx1=cx0+e[8]*H,cw1=cw0+e[11]*H;
+    const S=M.clone(),se=S.elements;
+    if(cw0>0&&cw1>0){const kz=(cx1/cw1-cx0/cw0)/H;se[8]-=kz*cw0;se[12]+=kz*cw0*p.z;}
+    camera.projectionMatrix.copy(S);
+    item.root.visible=true;renderer.render(scene,camera);item.root.visible=false;
+   }
+   for(const item of list)item.root.visible=true;
+   camera.projectionMatrix.copy(M);
+   renderer.resetState();
   },
   onRemove(){disposed=true;for(const item of instances.values())item.model.dispose();instances.clear();if(template)release(template);renderer?.dispose();layer.ready=false;map=null;}
  };

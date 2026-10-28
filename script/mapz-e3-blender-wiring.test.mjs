@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {
-  e3CrowdTargets,e3CrowdEase,e3BlenderFootprintPx,E3_CROWD_MIN_SCALE,E3_CROWD_READABLE_PX,E3_CROWD_RELEASE,E3_BLENDER_MAX_SCREEN_FRACTION,E3_BLENDER_ZOOM_OUT_GROWTH,
+  e3CrowdTargets,e3CrowdEase,e3BlenderFootprintPx,E3_CROWD_MIN_SCALE,E3_CROWD_READABLE_PX,E3_CROWD_RELEASE,E3_BLENDER_MAX_SCREEN_FRACTION,E3_BLENDER_SIZE_BOOST,E3_BLENDER_ZOOM_OUT_GROWTH,
   e3BlenderSizeFactor,e3BlenderScaleMeters,e3BlenderScreenHeightPx,e3BlenderTakesOver,e3AnchorCoordinates,e3CoordKey,placezHoverMeters,
   E3_BLENDER_SCALE_CLOSE_M,E3_BLENDER_SCALE_CLOSE_ZOOM,E3_BLENDER_SIZE_FULL_ZOOM,E3_BLENDER_SIZE_FAR_ZOOM,E3_BLENDER_SIZE_FAR,
   E3_BLENDER_MIN_SCREEN_PX,PLACEZ_HOVER_METERS,e3RingText,e3CountdownText,e3NearestSameDayEvent,E3_RING_TEXT_MAX_CHARS,e3RingLines,e3TimeLabel,e3ComplementColor,e3VortexTint,e3SlideCycle,e3SlideState,E3_SLIDE_WEIGHTS,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3CleanCopy,E3_SAME_DAY_GREEN,PLACEZ_ROOF_CLEARANCE_METERS,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,
@@ -12,8 +12,9 @@ import {blenderLogoFace,blenderBandFace,blenderPlateFace,blenderArtFace,blenderO
 
 test('3D hologram scale: 24 m at close zoom, 20% at zoom 12, full size from 15.5, smooth in between', () => {
   assert.equal(E3_BLENDER_SCALE_CLOSE_M,24);
+  assert.equal(E3_BLENDER_SIZE_BOOST,1.25);
   assert.equal(E3_BLENDER_SCALE_CLOSE_ZOOM,17.5);
-  for (const zoom of [17.5,17.8,18.5,20]) assert.equal(e3BlenderScaleMeters(zoom),24,`z${zoom} is the close scale`);
+  for (const zoom of [17.5,17.8,18.5,20]) assert.equal(e3BlenderScaleMeters(zoom),24*E3_BLENDER_SIZE_BOOST,`z${zoom} is the close scale, 25% larger`);
   assert.equal(e3BlenderSizeFactor(E3_BLENDER_SIZE_FAR_ZOOM),E3_BLENDER_SIZE_FAR);
   assert.equal(E3_BLENDER_SIZE_FAR,.2);
   assert.equal(e3BlenderSizeFactor(E3_BLENDER_SIZE_FULL_ZOOM),1);
@@ -39,10 +40,10 @@ test('3D hologram scale eases down toward mid zoom, stays readable, and is cappe
   // Zooming in past the close zoom never lets the tallest stage pass the viewport share.
   for (const zoom of [17.5,17.8,18.5,19.5]) {
     const stack=e3BlenderScreenHeightPx(5,zoom,45.52,50,900);
-    assert.ok(stack<=E3_BLENDER_MAX_SCREEN_FRACTION*900+1,`stack at z${zoom} is ${stack.toFixed(0)}px, under ${E3_BLENDER_MAX_SCREEN_FRACTION*900}px`);
+    assert.ok(stack<=E3_BLENDER_MAX_SCREEN_FRACTION*E3_BLENDER_SIZE_BOOST*900+1,`stack at z${zoom} is ${stack.toFixed(0)}px, under ${E3_BLENDER_MAX_SCREEN_FRACTION*E3_BLENDER_SIZE_BOOST*900}px`);
   }
   // Without a viewport the ramp is the plain 24 m close scale.
-  assert.equal(e3BlenderScaleMeters(18.5),24);
+  assert.equal(e3BlenderScaleMeters(18.5),24*E3_BLENDER_SIZE_BOOST);
   assert.ok(e3BlenderScaleMeters(15.5)>=3*E3_BLENDER_SCALE_CLOSE_M*.99,'much larger than the old fixed 6 m');
 });
 

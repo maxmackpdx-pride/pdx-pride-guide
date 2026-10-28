@@ -129,6 +129,8 @@ export const E3_BLENDER_SCALE_CLOSE_M = 24;
 export const E3_BLENDER_SCALE_CLOSE_ZOOM = 17.5;
 export const E3_BLENDER_ZOOM_OUT_GROWTH = .8;
 export const E3_BLENDER_MAX_SCREEN_FRACTION = .30;
+/** Tucker: every vortex 25% larger at every zoom. Applies to the zoom curve and to the screen-height cap. */
+export const E3_BLENDER_SIZE_BOOST = 1.25;
 export const E3_BLENDER_TALLEST_UNITS = 5.2;
 // The double stack is taller (the spacing between its two stacks, plus the countdown and face stack on top), so it
 // gets its own cap height. The scale blends from the single to the stack value as the stage goes 4 to 5, which
@@ -172,9 +174,9 @@ export function e3BlenderTallestUnits(stage = 0) {
  */
 export function e3BlenderScaleMeters(zoom, {viewHeight = 0, latitude = 45.5, pitch = 50, stage = 0} = {}) {
   const zoomOut = Math.max(0, E3_BLENDER_SCALE_CLOSE_ZOOM - zoom);
-  const base = E3_BLENDER_SCALE_CLOSE_M * Math.pow(2, zoomOut * E3_BLENDER_ZOOM_OUT_GROWTH) * e3BlenderSizeFactor(zoom);
+  const base = E3_BLENDER_SCALE_CLOSE_M * Math.pow(2, zoomOut * E3_BLENDER_ZOOM_OUT_GROWTH) * e3BlenderSizeFactor(zoom) * E3_BLENDER_SIZE_BOOST;
   if (!(viewHeight > 0)) return base;
-  const capped = E3_BLENDER_MAX_SCREEN_FRACTION * viewHeight * metersPerPixelAt(zoom, latitude) / (e3BlenderTallestUnits(stage) * pitchFactor(pitch));
+  const capped = E3_BLENDER_MAX_SCREEN_FRACTION * E3_BLENDER_SIZE_BOOST * viewHeight * metersPerPixelAt(zoom, latitude) / (e3BlenderTallestUnits(stage) * pitchFactor(pitch));
   return Math.min(base, capped);
 }
 
