@@ -71,8 +71,8 @@ Mapz presents its vector city before optional scene assets and terrain. Both use
 shared readiness and resize infrastructure. The product-specific recovery UI stays
 in place. Outzide's basemap banner responds to OpenFreeMap source failure/recovery;
 optional API failures remain local to their panels. Catalog failure keeps a usable
-map and a retryable field-guide error. Mapz retries its 3D renderer through
-`MapBootLoader`; the unused 2D fallback and disconnected old map have been removed.
+map and a retryable field-guide error. Mapz retries its MapLibre 3D renderer through
+`MapBootLoader`; the unused Leaflet/2D fallback and disconnected old map have been removed. Do not reintroduce Leaflet as a Mapz fallback or run a parallel Mapz renderer. Current `MapzCanvas.tsx` uses a 25-second loading-phase and 35-second later-phase first-frame watchdog, up to three failures within five minutes, then a manual retry prompt. These are recovery thresholds, not performance targets.
 
 ## Clustering decision
 
