@@ -2,7 +2,7 @@ import { boardMotionTiming } from "@shared/boardMotion";
 import { useId, type CSSProperties } from "react";
 
 /** Decorative hardware stays fixed while the card swings around its needle. */
-export default function BoardPushPin({ postKey }: { postKey: string }) {
+export default function BoardPushPin({ postKey, label }: { postKey: string; label?: string }) {
   const wireId = `pin-wire-${useId().replace(/:/g, "")}`;
   const bodyId = `${wireId}-body`;
   const clock = boardMotionTiming(postKey);
@@ -17,8 +17,13 @@ export default function BoardPushPin({ postKey }: { postKey: string }) {
     "--pin-material-cycle": `${(8.2 + (timing % 4901) / 1000).toFixed(3)}s`,
     "--pin-material-phase": `${-((timing >>> 7) % 13001) / 1000}s`,
   } as CSSProperties;
+  // Only a pin given a label is announced. Unlabeled pins stay decorative.
+  const labelProps = label
+    ? { role: "img", "aria-label": label, "data-label": label }
+    : { "aria-hidden": true };
   return (
-    <svg className={`ab-pin pdx-glass-rebind ab-pin--${variant}`} style={materialStyle} viewBox="0 0 40 48" aria-hidden="true" focusable="false">
+    <svg className={`ab-pin pdx-glass-rebind ab-pin--${variant}`} style={materialStyle} viewBox="0 0 40 48" {...labelProps} focusable="false">
+      {label ? <title>{label}</title> : null}
       <defs>
         <linearGradient id={wireId} gradientUnits="userSpaceOnUse" x1="10" y1="5" x2="30" y2="34">
           <stop offset="0" stopColor="var(--day-thu)" />

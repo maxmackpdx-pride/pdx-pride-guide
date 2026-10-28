@@ -158,7 +158,12 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 /* coin (E3 Step 3.5): the round venue logo returns, ringed in the venue color, no countdown. */
 .standalone-hologram-label--event[data-hologram-type="coin"] .event-hologram-surface{display:none;}
 .standalone-hologram-label--event[data-hologram-type="coin"]{height:auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0;gap:6px;background:none;}
-.standalone-hologram-label--event[data-hologram-type="coin"]>.event-hologram-brand{position:relative;inset:auto;width:92px;height:92px;border-radius:50%;opacity:1;overflow:hidden;box-shadow:0 0 0 2px rgba(12,12,15,.85),0 0 0 3px var(--label-color,#fff),0 0 18px var(--label-color,#fff);}
+/* Round coin, E3 step 3.5: leans 0.8 toward the camera (about 37deg) and turns once every 9s. */
+.standalone-hologram-label--event[data-hologram-type="coin"]>.event-hologram-brand{position:relative;inset:auto;width:92px;height:92px;border-radius:50%;opacity:1;overflow:visible;box-shadow:none;transform-style:preserve-3d;transform:rotateX(-37deg);animation:mapz-coin-turn 9s linear infinite;}
+.standalone-hologram-label--event[data-hologram-type="coin"] .event-hologram-logo-face,.standalone-hologram-label--event[data-hologram-type="coin"] .event-hologram-coin-back{position:absolute;inset:0;border-radius:50%;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 0 0 2px rgba(12,12,15,.85),0 0 0 3px var(--label-color,#fff),0 0 18px var(--label-color,#fff);}
+.standalone-hologram-label--event[data-hologram-type="coin"] .event-hologram-coin-back{transform:rotateY(180deg);}
+@keyframes mapz-coin-turn{from{transform:rotateX(-37deg) rotateY(0deg);}to{transform:rotateX(-37deg) rotateY(360deg);}}
+@media (prefers-reduced-motion: reduce){.standalone-hologram-label--event[data-hologram-type="coin"]>.event-hologram-brand{animation:none;}}
 /* totem (H5): logo tier stacked above the title and countdown. */
 .standalone-hologram-label--event[data-hologram-type="totem"]>.event-hologram-brand{opacity:1;}
 /* tube (E1): no logo, the name reads down a glass strip. */

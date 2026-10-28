@@ -1,4 +1,4 @@
-import {eventCardGeometry,appendEventCardFrame,updateEventCardGlitch,createAttachedEventBeam} from './event-hologram-card.js';
+import {eventCardGeometry,appendEventCardFrame,updateEventCardGlitch,createAttachedEventBeam,drawEventMiniBadge} from './event-hologram-card.js?v=20261026-lod';
 import {EVENT_CARD_WIDTH,EVENT_CARD_HEIGHT,EVENT_CLOCK_HEIGHT} from './event-hologram-model.js';
 import { groupBoardPins, drawBoardPin } from './board-pins.js';
 import {addLayers} from '../map-foundation/layers.js';
@@ -6,8 +6,11 @@ import {captureCamera,readCameraParams} from '../map-foundation/camera.js';
 import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../map-foundation/lifecycle.js';
 import {motionPreference as reduced} from '../map-foundation/motion.js';
 import {eventCountdown,appendEventCountdown} from './event-countdown.js';
-import {planVenueStacks,drawVenueStacks,venueStackKey} from './e3-vortex-stack.js?v=20261026-e3-vortex';
-import {e3StepFor,e3SinglePlan,e3NearbyCount,e3NearbyPlacement} from './e3-venue-stack.js';
+import {planVenueStacks,drawVenueStacks,venueStackKey} from './e3-vortex-stack.js?v=20261026-lod';
+import {createE3TransitionState} from './e3-transitions.js?v=20261027-e3-v3';
+import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from './e3-venue-stack.js';
+import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingLines,e3CleanCopy,e3TimeLabel,e3ComplementColor,e3VortexTint,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3StackOrder,e3StartsInLabel,e3EventUrgency} from './e3-lod.js?v=20261027-e3-v3';
+import {createE3BlenderLayer} from './e3-blender-model.js?v=20261027-e3-v3';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
@@ -30,7 +33,7 @@ import {logoCoverage,logoTone,authoredLogoMode} from './logo-mask.js';
 import {eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
-import {hologramPresence,hologramCameraDrift,boundedHologramPosition} from './hologram-presence.js';
+import {hologramPresence,HOLOGRAM_CAMERA_FOLLOW} from './hologram-presence.js?v=20261026-lod';
 import {screenNeighborCounts} from './screen-neighbors.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
@@ -105,6 +108,27 @@ const portlandBridges=createPortlandBridgeLayer(maplibregl,terrainHeight);
 const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,terrainHeight,reduced);
 const citySparkles=createCitySparkles(maplibregl,terrainHeight,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
+// 3D Blender holograms: desktop only, Calm Mode and phones keep the 2D clip path.
+// Size follows zoom (e3BlenderScaleMeters in e3-lod.js): about 24 m at close zoom, 20% at zoom 12, full size at 15.5, capped to a third of the screen.
+const E3_BLENDER_MAX_VISIBLE=6,E3_STAGE_TWEEN_MS=1400;
+// Tucker said skip the skyline-height idea for now. Flip to true to stretch each hologram above local buildings.
+const E3_BLENDER_SKYLINE_HEIGHT=false;
+// Height follows the local skyline: the tallest building within E3_CLEARANCE_RADIUS_M sets a vertical stretch.
+const E3_CLEARANCE_RADIUS_M=120,E3_CLEARANCE_METERS_PER_STRETCH=30,E3_CLEARANCE_MAX_STRETCH=4;
+function e3ClearanceMeters(coordinates,buildings){
+ const [lng,lat]=coordinates,mPerDegLat=111320,mPerDegLng=111320*Math.cos(lat*Math.PI/180);
+ let tallest=0;
+ for(const building of buildings){
+  const [bx,by]=building.center??[];
+  if(bx===undefined)continue;
+  const dx=(bx-lng)*mPerDegLng,dy=(by-lat)*mPerDegLat;
+  if(dx*dx+dy*dy<=E3_CLEARANCE_RADIUS_M*E3_CLEARANCE_RADIUS_M)tallest=Math.max(tallest,building.height||0);
+ }
+ return tallest;
+}
+const e3Blender=createE3BlenderLayer(maplibregl,{maxVisible:E3_BLENDER_MAX_VISIBLE});
+const e3Blender3D=new Map(),e3StageState=new Map(),e3CrowdFactor=new Map();
+const e3StageValue=(st,now)=>{const t=Math.max(0,Math.min(1,(now-st.start)/E3_STAGE_TWEEN_MS)),e=t*t*(3-2*t);return st.from+(st.to-st.from)*e;};
 function installSceneExtras(){
  addLayers(map,[groundLightPools],'buildings');
  addLayers(map,[bridgeLayer],'skyline');
@@ -112,8 +136,12 @@ function installSceneExtras(){
  addLayers(map,[landmarkBuildings],'skyline');
  addLayers(map,[portlandLandmarks]);
  addLayers(map,[citySparkles]);
+ if(!coarsePointer)addLayers(map,[e3Blender]);
 }
+// Opening camera move: transition clips wait until the view has arrived. Levels still track during it.
+let e3LoadedAt=0,e3LastZoom=null,e3ZoomChangedAt=0,e3Opened=false,e3SnapTable=null,e3StageTweenActive=false;
 map.on('load',()=>{
+ e3LoadedAt=performance.now();
  loaded=true;startup.phase('map-loaded');cameraDirty=true;updateSceneStatus();scheduleFrame();
  if(parent!==window)revealTime=3;
  const markBase=()=>{
@@ -212,16 +240,13 @@ function roofLift(target,feature,surfaces){
  const metersPerPixel=40075016.686*Math.cos(coordinates[1]*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
  return Math.max(12,(roof+12)/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180));
 }
-const PLACEZ_HOVER_METERS=3;
-const PLACEZ_ROOF_CLEARANCE_METERS=4;
 function placezHoverLift(target,feature,surfaces){
  const coordinates=feature.geometry.coordinates;
  const roof=surfaces.roofs?.get(feature.properties.phase)??PLACEZ_HOVER_METERS;
  // Match the waypoint to the same extrusion progress as its building. At full
  // extrusion, every Placez marker stays exactly four meters above its roof.
  const buildingVisibility=extrusionAmount(target);
- const roofHeight=Math.max(PLACEZ_HOVER_METERS,roof+PLACEZ_ROOF_CLEARANCE_METERS);
- const hoverMeters=PLACEZ_HOVER_METERS+(roofHeight-PLACEZ_HOVER_METERS)*buildingVisibility;
+ const hoverMeters=placezHoverMeters(roof,buildingVisibility);
  const metersPerPixel=40075016.686*Math.cos(coordinates[1]*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
  return hoverMeters/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
 }
@@ -232,6 +257,27 @@ let assetsReady=false,assetError='',nearbyLights=()=>[];
 let userLocation=null,userAvatarImage=null,userAvatarLoad=0;
 const lightSprites=new Map();
 const venueLogos=new Map();
+// Event posters for the 3D screen slides: same-origin only (a cross-origin image would taint the WebGL texture),
+// decoded once into a small canvas, requested only when a same-day vortex needs them.
+const eventPosters=new Map(),POSTER_MAX_EDGE=256;
+function eventPosterEntry(url){
+ if(!url||typeof url!=='string')return null;
+ const cached=eventPosters.get(url);
+ if(cached)return cached.image?{key:url,image:cached.image,width:cached.width,height:cached.height}:null;
+ let absolute;try{absolute=new URL(url,location.href);}catch{return null;}
+ if(absolute.origin!==location.origin){eventPosters.set(url,{image:null});return null;}
+ eventPosters.set(url,{image:null,loading:true});
+ const image=new Image();image.decoding='async';
+ image.onload=()=>{
+  const scale=Math.min(1,POSTER_MAX_EDGE/Math.max(image.naturalWidth,image.naturalHeight)),canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
+  canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
+  eventPosters.set(url,{image:canvas,width:canvas.width,height:canvas.height});scheduleFrame();
+ };
+ image.onerror=()=>eventPosters.set(url,{image:null});
+ image.src=absolute.href;
+ return null;
+}
 const logoLoads=new Map();
 const avatarRingColors={
  none:['#5af0e6'],rainbow:['#e40303','#ff8c00','#ffed00','#008026','#004dff','#750787'],
@@ -421,6 +467,14 @@ function buildingGlitter(target,surfaces){
 }
 
 const attachedEventBeam=createAttachedEventBeam();
+// Last frame's LOD level per venue group, so a level only flips past its hysteresis band.
+const e3LodPrevious=new Map();
+// E3 step transitions: each LOD step change plays its Blender clip (sprite atlas) instead of a hard swap.
+// The state stays null until the manifest loads; until then every change is a plain swap.
+let e3Transitions=null;
+fetch(new URL('./e3-transitions/manifest.json',import.meta.url)).then(response=>response.ok?response.json():null).then(manifest=>{
+ if(manifest&&!disposed)e3Transitions=createE3TransitionState(manifest,{base:new URL('./e3-transitions/',import.meta.url).href,onReady:()=>{scheduleFrame();}});
+}).catch(()=>{});
 // Same beam anchor as a lone event: the venue's roof, lifted by its extrusion.
 function eventBeamAnchor(target,surfaces,parent){
  const coordinates=parent.feature.geometry.coordinates;
@@ -553,6 +607,9 @@ function drawLights(fade,target=map,surface=lights){
  const tonight=eventNight(viewTime);
  const activeTonight=feature=>(feature.properties.eventNight||feature.properties.eventDay)===tonight||feature.properties.demoOpen===true;
  const emergenceFor=feature=>feature.properties.key===selectedKey||activeTonight(feature)?1:reveal;
+ // The 2D pin and the 3D hologram both stand on the snapped building point. When the snap table is rebuilt
+ // (building tiles arrive after the camera stopped), drop the cached projections so neither keeps a stale spot.
+ if(window.__mapzPlaceSnaps!==e3SnapTable){e3SnapTable=window.__mapzPlaceSnaps;featureProjection.invalidate();}
  const lights=surface,lightsContext=surface.getContext('2d');
  const surfaces=updateSurfaces(target);
  const width=window.innerWidth,height=window.innerHeight,dpr=Math.min(devicePixelRatio||1,typeof coarsePointer!=='undefined'&&coarsePointer?1.5:2);
@@ -597,6 +654,104 @@ function drawLights(fade,target=map,surface=lights){
  const placeClusters=(cameraMoving&&frozenClusters)||clusterPlaceMarkers(ordered.filter(item=>!item.feature.properties.boardPin&&item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel&&!protectedVenues.has(item.feature.properties.key)&&!(['mizzed','gigz'].includes(item.feature.properties.waypointFamily)&&item.feature.properties.venueWaypointKey)),selectedKey,target.getZoom(),width,height);
  if(!cameraMoving)frozenClusters=placeClusters;
  const {counts:beaconNeighborCounts}=screenNeighborCounts(beacons);
+ // Level of detail by true camera-to-waypoint distance, per venue group, with a cap on full vortexes.
+ const lodGroupKey=item=>venueStackKey(item.feature.properties)||item.feature.properties.key;
+ const lodMetersPerPixel=40075016.686*Math.cos(target.getCenter().lat*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
+ const lodGroups=new Map();
+ for(const item of beacons){
+  const key=lodGroupKey(item),depthM=eventDepthMeters(target,item.p,height,lodMetersPerPixel),onScreen=item.p.x>=0&&item.p.x<=width&&item.p.y>=0&&item.p.y<=height;
+  const sameDay=e3IsSameDay(item.feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived));
+  const venueItem=venueItems.get(item.feature.properties.venueWaypointKey)||null;
+  const group=lodGroups.get(key),color=venueItem?.feature.properties.color||item.feature.properties.venueAnchor?.color||item.feature.properties.color;
+  // The 3D hologram stands where the 2D pin does (the venue's place item), and takes the venue's logo.
+  const isEventArt=url=>/\/icons\/event\.svg(?:[?#]|$)/.test(url||'');
+  const logoUrl=[item.feature.properties.logo,venueItem?.feature.properties.waypointLogo,venueItem?.feature.properties.logo].find(url=>url&&!isEventArt(url))||'';
+  const eventInfo={startsAtMs:item.feature.properties.startsAtMs,name:item.feature.properties.name,time:item.feature.properties.time,venueName:item.feature.properties.venueName,poster:item.feature.properties.poster,logoUrl,alternateLogo:item.feature.properties.alternateLogo,performers:item.feature.properties.performers,hostName:item.feature.properties.hostName,avatars:item.feature.properties.avatars,avatarTotal:item.feature.properties.avatarTotal};
+  if(!group)lodGroups.set(key,{key,depthM,onScreen,sameDay,color,count:1,coordinates:item.feature.geometry.coordinates,anchorItem:venueItem||item,logoUrl,events:[eventInfo]});else{group.events.push(eventInfo);group.depthM=Math.min(group.depthM,depthM);group.onScreen=group.onScreen||onScreen;group.sameDay=group.sameDay||sameDay;group.count++;if(!group.logoUrl)group.logoUrl=logoUrl;}
+ }
+ const lodLevels=assignE3Levels([...lodGroups.values()],e3LodPrevious);
+ e3LodPrevious.clear();for(const [key,level] of lodLevels)e3LodPrevious.set(key,level);
+ // 3D stage per venue from the same LOD levels: mini=waypoint, compressed=raised waypoint, coin=raised puck, vortex.
+ // Non-same-day venues stop at coin. Same-day venues with several events use the double stack.
+ // The 3D layer only takes a venue over where it really draws (compressed or closer and big enough to read, see
+ // e3BlenderTakesOver). Every other venue keeps its 2D mini badge, card, beam and clips, so nothing is left bare.
+ const blenderOn=!coarsePointer&&e3Blender.ready&&!reduced.matches;
+ const hadBlender=e3Blender3D.size>0;
+ e3Blender3D.clear();
+ if(blenderOn){
+  const blenderZoom=target.getZoom(),blenderPitch=target.getPitch(),blenderExtrusion=extrusionAmount(target);
+  const candidates=[...lodGroups.values()].filter(g=>lodLevels.get(g.key)).sort((a,b)=>Number(b.sameDay)-Number(a.sameDay)||a.depthM-b.depthM);
+  const rows=[];
+  for(const g of candidates){
+   if(rows.length>=E3_BLENDER_MAX_VISIBLE)break;
+   const level=lodLevels.get(g.key);
+   let stage={mini:1,compressed:2,coin:3,vortex:4}[level]??1;
+   if(!g.sameDay&&stage>3)stage=3;
+   // The double stack needs two events inside the same-day window; one tonight plus a later date stays a single vortex.
+   if(g.sameDay&&stage===4&&e3SameDayEventsSorted(g.events,viewTime+Math.max(0,frameNow-viewTimeReceived),2).length>1)stage=5;
+   let st=e3StageState.get(g.key);
+   const shownStage=st?e3StageValue(st,frameNow):stage;
+   if(!e3BlenderTakesOver({targetStage:stage,shownStage,zoom:blenderZoom,latitude:g.coordinates[1],pitch:blenderPitch,viewHeight:height}))continue;
+   // A venue the layer has just taken over morphs up out of the waypoint instead of popping in.
+   if(!st){st={from:e3Opened&&stage===2?1:stage,to:stage,start:frameNow};e3StageState.set(g.key,st);}
+   else if(st.to!==stage){st.from=e3StageValue(st,frameNow);st.to=stage;st.start=frameNow;}
+   e3Blender3D.set(g.key,true);
+   const heightScale=E3_BLENDER_SKYLINE_HEIGHT?Math.min(E3_CLEARANCE_MAX_STRETCH,1+e3ClearanceMeters(g.coordinates,surfaces.buildings??[])/E3_CLEARANCE_METERS_PER_STRETCH):1;
+   // Anchor: the venue's own pin. Same snapped building point the 2D pin projects from, same hover height above the roof.
+   const anchor=g.anchorItem,anchorRoof=surfaces.roofs?.get(anchor.feature.properties.phase);
+   const coordinates=e3AnchorCoordinates(anchor.feature.geometry.coordinates,window.__mapzPlaceSnaps);
+   const altitude=anchor.feature.properties.kind==='place'?placezHoverMeters(anchorRoof??PLACEZ_HOVER_METERS,blenderExtrusion):(anchorRoof??9)*blenderExtrusion;
+   const logoEntry=g.logoUrl?venueLogos.get(g.logoUrl):null;
+   // Same-day vortex dressing: the nearest same-day events, each with its ring lines, time, art and RSVP faces.
+   // The countdown runs on the same clock as the 2D card. Adult venues stay red, other same-day vortexes stay green.
+   const lodNow=viewTime+Math.max(0,frameNow-viewTimeReceived),sameDayVortex=g.sameDay&&stage>=4,tint=g.sameDay&&stage>=4?e3VortexTint(g.color,true):(g.color||'#FF00CC');
+   let content=null,urgency=0;
+   if(sameDayVortex){
+    const screenEvents=e3StackOrder(g.events,lodNow,stage>=5?2:1),nearest=screenEvents[0];
+    if(nearest){
+     const logoOf=url=>{const entry=url?venueLogos.get(url):null;return entry?{key:url,image:entry.image,width:entry.width,height:entry.height}:null;};
+     content={venueName:anchor.feature.properties.name||g.events.find(event=>event.venueName)?.venueName||'',accent:e3ComplementColor(tint),
+      screens:screenEvents.map(event=>{
+       const lines=e3RingLines({eventName:event.name,performers:event.performers,hostName:event.hostName,venueName:event.venueName||anchor.feature.properties.name||''});
+       return {name:e3CleanCopy(event.name),time:e3TimeLabel(event.time),pending:event.startsAtMs>lodNow,startsIn:e3StartsInLabel(event.startsAtMs,lodNow),ringName:lines.name,ringSub:lines.sub,
+        logo:logoOf(event.logoUrl||g.logoUrl),poster:eventPosterEntry(event.poster),host:logoOf(event.alternateLogo&&event.alternateLogo!==(event.logoUrl||g.logoUrl)?event.alternateLogo:'')};
+      }),
+      countdown:e3CountdownParts(nearest.startsAtMs,lodNow),faces:e3FaceStack(nearest.avatars,nearest.avatarTotal)};
+     // Ring spin and beam pulses ramp up over the last hours and peak when the event opens (same clock as the countdown).
+     urgency=e3EventUrgency(nearest.startsAtMs,lodNow);
+    }
+   }
+   rows.push({key:g.key,coordinates,altitude,color:tint,stage:e3StageValue(st,frameNow),scaleMeters:e3BlenderScaleMeters(blenderZoom,{viewHeight:height,latitude:g.coordinates[1],pitch:blenderPitch,stage:e3StageValue(st,frameNow)}),heightScale,
+    content,urgency,
+    logo:logoEntry?{key:g.logoUrl,image:logoEntry.image,width:logoEntry.width,height:logoEntry.height}:null});
+  }
+  for(const key of [...e3StageState.keys()])if(!e3Blender3D.has(key))e3StageState.delete(key);
+  // Crowd-aware size: holograms that would overlap on screen shrink together (eased, with hysteresis), down to a floor.
+  const crowdItems=rows.map(row=>{
+   const q=target.project(row.coordinates),footprint=e3BlenderFootprintPx(row.stage,row.scaleMeters,blenderZoom,row.coordinates[1],blenderPitch);
+   return {key:row.key,x:q.x,y:q.y,...footprint};
+  });
+  const crowdTargets=e3CrowdTargets(crowdItems,e3CrowdFactor);
+  let crowdEasing=false;
+  for(const row of rows){
+   const goal=crowdTargets.get(row.key)??1,now=e3CrowdFactor.get(row.key)??goal,next=e3CrowdEase(now,goal,motionDelta);
+   e3CrowdFactor.set(row.key,next);if(next!==goal)crowdEasing=true;
+   row.scaleMeters*=next;
+  }
+  for(const key of [...e3CrowdFactor.keys()])if(!e3Blender3D.has(key))e3CrowdFactor.delete(key);
+  // While a stage morph runs the overlay must keep drawing frames, or an idle camera would freeze the tween.
+  e3StageTweenActive=crowdEasing||[...e3StageState.values()].some(st=>st.from!==st.to&&frameNow-st.start<E3_STAGE_TWEEN_MS);
+  e3Blender.setVenues(rows);
+  e3Blender.setMotion({seconds:frameNow/1000,reduced:false,active:true});
+ }else{e3StageTweenActive=false;if(hadBlender)e3Blender.setVenues([]);}
+ const zoomNow=target.getZoom();
+ if(zoomNow!==e3LastZoom){e3LastZoom=zoomNow;e3ZoomChangedAt=frameNow;}
+ // Open once the view has been still for a moment after load. Later zooms always play clips.
+ if(!e3Opened&&e3LoadedAt>0&&frameNow-e3LoadedAt>1500&&frameNow-e3ZoomChangedAt>1000)e3Opened=true;
+ // A venue the 3D layer draws gets no 2D clip: it morphs in 3D instead. The clip clock must not run for it.
+ if(e3Transitions)for(const group of lodGroups.values()){if(e3Blender3D.has(group.key))e3Transitions.cancel(group.key,lodLevels.get(group.key));else e3Transitions.update(group.key,lodLevels.get(group.key),frameNow,!reduced.matches&&e3Opened,Boolean(group.sameDay),group.color);}
+ const e3TransitioningEvents=new Set(),e3TransitionDrawn=new Set();
+ const lodNowMs=viewTime+Math.max(0,frameNow-viewTimeReceived),lodRepresented=new Set();
  for(let beaconIndex=0;beaconIndex<beacons.length;beaconIndex++){
   const item=beacons[beaconIndex],phase=item.feature.properties.phase;
   const center=target.getCenter();
@@ -606,9 +761,14 @@ function drawLights(fade,target=map,surface=lights){
   item.attention=reduced.matches?.5:.5+.5*Math.sin(pulseTime*(.13+.025*Math.sin(phase))+phase*1.83);
   const driftX=eventProjectionSway(pulseTime,phase,presentationScale*item.presence.motion,reduced.matches);
   item.scaleGoal=emergenceFor(item.feature)*cardPresentationScale*item.presence.scale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
-  // E3 Steps 3 and 3.5: far venues are compressed, and a close venue with a logo becomes a round coin.
-  const plan=e3SinglePlan({zoom:target.getZoom(),hasLogo:Boolean(item.feature.properties.logo)});
+  // E3 levels by true camera distance: vortex (nearest), coin, compressed, and the cached mini badge when far.
+  const groupKey=lodGroupKey(item),group=lodGroups.get(groupKey);
+  item.lodLevel=lodLevels.get(groupKey)||'coin';
+  const plan=e3LodPlan(item.lodLevel,{hasLogo:Boolean(item.feature.properties.logo),sameDay:e3IsSameDay(item.feature.properties.startsAtMs,lodNowMs),zoom:target.getZoom()});
   item.plan=plan;item.planScale=plan.scale;
+  // One mini badge per venue. The other events at that venue stay hidden at this distance.
+  item.lodHidden=false;
+  if(item.lodLevel==='mini'){if(lodRepresented.has(groupKey))item.lodHidden=true;else lodRepresented.add(groupKey);}
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal*plan.scale);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
   const skyRise=skyCeiling*(.55+.35*item.presence.motion+heightBoost*.25);
@@ -644,10 +804,12 @@ function drawLights(fade,target=map,surface=lights){
   const key=item.feature.properties.phase,prev=layout.get(key)||{x:item.x-item.p.x,y:item.y-item.p.y,scale:item.scaleGoal,vx:0,vy:0,vs:0,avoidX:0,avoidY:0};
   settleValue(prev,'x','vx',item.x-item.p.x,2.3,motionDelta);
   settleValue(prev,'y','vy',item.y-item.p.y,2.3,motionDelta);
+  // Camera-driven sway runs at HOLOGRAM_CAMERA_FOLLOW (0.2x) so cards stay put while the map moves.
+  if(cameraMoving){prev.vx=(prev.vx||0)*HOLOGRAM_CAMERA_FOLLOW;prev.vy=(prev.vy||0)*HOLOGRAM_CAMERA_FOLLOW;}
   settleValue(prev,'scale','vs',item.scaleGoal,2.8,motionDelta);
   prev.scale=Math.min(prev.scale,cardPresentationScale);layout.set(key,prev);
-  const drift=hologramCameraDrift(prev,item.p,item.feature.properties.phase,motionDelta,reduced.matches);
-  prev.cameraX=drift.x;prev.cameraY=drift.y;prev.anchorX=item.p.x;prev.anchorY=item.p.y;
+  // No camera drift: holograms stay on their projected pin (Tucker, 2026-10-26).
+  prev.cameraX=0;prev.cameraY=0;prev.anchorX=item.p.x;prev.anchorY=item.p.y;
   item.offset=prev;
  }
  for(const item of beacons){
@@ -663,13 +825,7 @@ function drawLights(fade,target=map,surface=lights){
  item.x=item.p.x+(item.x-item.p.x)*emergence;
  item.y=item.p.y+(item.y-item.p.y)*emergence;
  }
- // Keep headers near their venue first, then resolve the complete artwork/title
- // footprint. A post-layout clamp would collapse separated headers together.
- for(const item of beacons){
-  const clearance=item.halfHeight;
-  const position=boundedHologramPosition(item.p,{x:item.x,y:item.y+clearance+32*item.offset.scale},item.offset.scale,roofLift(target,item.feature,surfaces),skyCeiling);
-  item.x=position.x;item.y=position.y-clearance-32*item.offset.scale;
- }
+  // The sky clamp (boundedHologramPosition) is removed: holograms are not pushed down or sideways by the ceiling.
  // E3 Step 6: venues whose holograms crowd each other on screen. A stacked venue keeps its vortex place.
  const stackKeyOf=item=>venueStackKey(item.feature.properties);
  const stackCounts=new Map();
@@ -677,7 +833,8 @@ function drawLights(fade,target=map,surface=lights){
  const isStacked=item=>(stackCounts.get(stackKeyOf(item))||0)>1;
  const seenVenues=new Set(),venueRepresentatives=[];
  for(const item of beacons){const venue=stackKeyOf(item)||item.feature.properties.key;if(seenVenues.has(venue))continue;seenVenues.add(venue);venueRepresentatives.push(item);}
- const nearbyStep=e3StepFor({zoom:target.getZoom(),hasLogo:true,nearbyVenues:e3NearbyCount(venueRepresentatives)})==='nearby';
+ // Nearby is decided by the distance levels, not zoom: only venues already at the coin or compressed level compete.
+ const nearbyStep=e3NearbyCount(venueRepresentatives.filter(item=>item.lodLevel==='coin'||item.lodLevel==='compressed'))>=E3_NEARBY_MIN_VENUES;
  const clockHalf=item=>EVENT_CLOCK_HEIGHT*item.offset.scale/2;
  if(!cameraMoving){
   if(nearbyStep){
@@ -697,7 +854,7 @@ function drawLights(fade,target=map,surface=lights){
   }
  }
  const beaconPlans=new Map();
- for(const item of beacons)beaconPlans.set(item.feature.properties.key,{plan:item.plan,beam:item.nearbyBeam||null,hidden:Boolean(item.nearbyHidden)});
+ for(const item of beacons)beaconPlans.set(item.feature.properties.key,{plan:item.plan,level:item.lodLevel,beam:item.nearbyBeam||null,hidden:Boolean(item.nearbyHidden||item.lodHidden)});
  cardLock.apply(beacons,frameNow,cameraMoving,reduced.matches);
  // Keep the pointer's temporary offset separate so it cannot accumulate into drift.
  for(const item of beacons){
@@ -714,12 +871,18 @@ function drawLights(fade,target=map,surface=lights){
  }));
  const eventCards=new Map(beacons.map(item=>{
   const {feature,p}=item,grow=Math.min(riseAmount(feature.properties.key,frameNow),foldAmount(feature.properties.key,frameNow));
-  const card=compressCard(eventCardGeometry(p.x+(item.x-p.x)*grow,p.y+(item.y-p.y)*grow,item.offset.scale*grow),item.planScale);
+  let card=compressCard(eventCardGeometry(p.x+(item.x-p.x)*grow,p.y+(item.y-p.y)*grow,item.offset.scale*grow),item.planScale);
+  // Far mini badge: pinned straight above its venue's beam anchor, so the beam always lands on the pin.
+  if(item.lodLevel==='mini'){
+   const anchor=eventBeamAnchor(target,surfaces,venueItems.get(feature.properties.venueWaypointKey)||{feature,p}),scale=item.offset.scale*grow*item.planScale;
+   card=eventCardGeometry(anchor.x,anchor.y-E3_MINI_RISE_PX-EVENT_CARD_HEIGHT*scale/2,scale);
+  }
   return [feature.properties.key,{...card,key:feature.properties.key,opacity:coreAlpha*grow,locked:Boolean(item.cardLocked),far:item.offset.scale*grow<.6*cardPresentationScale}];
  }));
  // E3 Steps 4 and 5: venues with several launched events stack them as rings on one beam.
  // One launched event can never form a stack, so the planner only runs for two or more.
- const vortex=beacons.length>1?planVenueStacks(beacons,eventCards,item=>eventBeamAnchor(target,surfaces,venueItems.get(item.feature.properties.venueWaypointKey)||{feature:item.feature,p:item.p}),item=>venueItems.get(item.feature.properties.venueWaypointKey)?.feature.properties.color||item.feature.properties.venueAnchor?.color||item.feature.properties.color):{stacks:[],members:new Map()};
+ const stackable=beacons.filter(item=>item.lodLevel!=='mini');
+ const vortex=stackable.length>1?planVenueStacks(stackable,eventCards,item=>eventBeamAnchor(target,surfaces,venueItems.get(item.feature.properties.venueWaypointKey)||{feature:item.feature,p:item.p}),item=>venueItems.get(item.feature.properties.venueWaypointKey)?.feature.properties.color||item.feature.properties.venueAnchor?.color||item.feature.properties.color):{stacks:[],members:new Map()};
  const retainedCards=new Set(beacons.filter(item=>item.offset.cardVisible).map(item=>item.feature.properties.key));
  const visibleEventCards=new Set(visibleHologramLabels([...eventCards.values()],selectedKey,width,height,retainedCards,120).map(card=>card.key));
  const extensionSlots=new Map(),branchCounts=new Map();
@@ -825,6 +988,26 @@ function drawLights(fade,target=map,surface=lights){
     lightsContext.setTransform(dpr,0,0,dpr,0,0);
     const card=eventCards.get(feature.properties.key);
     const planInfo=beaconPlans.get(feature.properties.key);
+    // E3 transitions: while a venue's clip plays, the clip replaces its card and beam. Drawn once, in the sky pass.
+    const transitionKey=venueStackKey(feature.properties)||feature.properties.key;
+    // Venues drawn by the 3D hologram skip the 2D card, beam and clip for this frame.
+    if(e3Blender3D.has(transitionKey)){e3TransitioningEvents.add(feature.properties.key);continue;}
+    const transition=e3Transitions?.current(transitionKey,frameNow)??null;
+    if(transition){
+     e3TransitioningEvents.add(feature.properties.key);
+     if(pass===1&&!e3TransitionDrawn.has(transitionKey)){
+      e3TransitionDrawn.add(transitionKey);
+      // Anchored on the venue's own ground point, so the clip rises from the pin the user sees.
+      const anchorCard=eventCards.get(feature.properties.key);
+      // Clip size is named apart from the canvas size, which the off-screen test needs.
+      const clipWidth=anchorCard?Math.max(60,(anchorCard.right-anchorCard.left)*1.3):120;
+      const clipHeight=clipWidth*e3Transitions.aspect;
+      const cx=p.x,cy=p.y-clipHeight/2;
+      // Skip the draw when it is off screen; the clock still runs so the clip lands on time.
+      if(cx+clipWidth/2>0&&cx-clipWidth/2<width&&cy+clipHeight/2>0&&cy-clipHeight/2<height)e3Transitions.draw(lightsContext,transition,cx,cy,clipWidth,Math.min(1,fade));
+     }
+     continue;
+    }
     // Near the screen edge, keep an event pin until there is room for its light.
     const wanted=!planInfo?.hidden&&card&&(card.locked||visibleEventCards.has(feature.properties.key)&&card.bottom<beamAnchor.y-Math.max(12,24*card.scale));
     if(pass===0&&offset){
@@ -841,20 +1024,27 @@ function drawLights(fade,target=map,surface=lights){
      continue;
     }
     const projectionColor=eventProjectionColor(feature.properties);
-    const beamColor=venueItems.get(feature.properties.venueWaypointKey)?.feature.properties.color||feature.properties.venueAnchor?.color||color;
+    const beamColor=planInfo?.plan?.countdown?E3_SAME_DAY_GREEN:venueItems.get(feature.properties.venueWaypointKey)?.feature.properties.color||feature.properties.venueAnchor?.color||color;
     // Stacked events draw no beam of their own; the venue stack carries the single beam.
     if(pass===0&&vortex.members.has(feature.properties.key))continue;
     if(pass===0){
      lightsContext.save();lightsContext.globalAlpha=Math.min(1,fade*beamAlpha)*(presence?.opacity??1)*bloomScale*cardAlpha;
      const straight=planInfo?.beam;
-     if(straight){
+     if(planInfo?.level==='mini'){
+      // Far: one straight beam here, and one cached badge in the sky pass below. No glow film, no countdown, nothing animated.
+      lightsContext.strokeStyle=beamColor;lightsContext.lineWidth=1.2;lightsContext.lineCap='round';lightsContext.globalAlpha*=.8;
+      lightsContext.beginPath();lightsContext.moveTo(beamAnchor.x,beamAnchor.y);lightsContext.lineTo(card.x,card.bottom);lightsContext.stroke();
+     }else if(straight){
       // Step 6: one straight segment from this venue's own ground point. It never bends.
       lightsContext.strokeStyle=beamColor;lightsContext.lineWidth=1.6;lightsContext.lineCap='round';
       lightsContext.beginPath();lightsContext.moveTo(straight.from.x,straight.from.y);lightsContext.lineTo(straight.to.x,straight.to.y);lightsContext.stroke();
      }else attachedEventBeam.draw(lightsContext,card,beamAnchor,pulseTime,phase,reduced.matches,beamColor);
      lightsContext.restore();continue;
     }
-    // Steps 3 and 6 never show a countdown. Step 3.5 shows the round logo coin.
+    // The far mini badge is canvas-only, so it has no HTML card.
+    // Drawn in the sky pass, after building occlusion, like the other floating artwork.
+    if(planInfo?.level==='mini'){drawEventMiniBadge(lightsContext,card,beamColor,Math.min(1,fade*beamAlpha)*(presence?.opacity??1)*bloomScale*cardAlpha,dpr);continue;}
+    // Steps 3 and 6 never show a countdown. Step 3.5 shows the round logo coin. The nearest same-day event keeps its countdown.
     eventLabels.push({...card,projectionColor,avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,
      name:feature.properties.name,venueName:feature.properties.venueName||'',time:feature.properties.time,
      countdown:planInfo?.plan.countdown?eventCountdown(feature.properties.startsAtMs,viewTime+Math.max(0,frameNow-viewTimeReceived),true):null,color,logo:feature.properties.logo,poster:feature.properties.poster,hologramType:planInfo?.plan.shape==='coin'?'coin':hologramTypeForVenue(feature.properties.venueName||feature.properties.name),
@@ -867,7 +1057,7 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.drawImage(hologramMaterials.orbs.get(color),p.x-12.5,raisedY-12.5,25,25);
   }
  }
- if(pass===0&&vortex.stacks.length)drawVenueStacks(lightsContext,vortex.stacks,{dpr,fade,beam:attachedEventBeam,seconds:pulseTime,now:viewTime+Math.max(0,frameNow-viewTimeReceived),reduced:reduced.matches});
+ if(pass===0&&vortex.stacks.length)drawVenueStacks(lightsContext,vortex.stacks.filter(stack=>!stack.members.some(member=>e3TransitioningEvents.has(member.key))),{dpr,fade,beam:attachedEventBeam,seconds:pulseTime,now:viewTime+Math.max(0,frameNow-viewTimeReceived),reduced:reduced.matches});
  lightsContext.setTransform(dpr,0,0,dpr,0,0);
  }
  drawUserLocationAvatar(lightsContext,target,fade);
@@ -923,7 +1113,7 @@ function renderHologramLabels(labels){
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.dataset.hologramType=label.kind==='housing'?'':(label.hologramType||'puck');item.dataset.hologramFar=label.far?'true':'false';item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
   item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',labelComplement(label.projectionColor||label.color));item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${timeText}${statusText?`, ${statusText}`:""}`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);
-  const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.projectionColor,label.width,label.avatars,label.logo,!!venueLogos.get(label.logo),label.venueName,label.poster]);
+  const signature=JSON.stringify([label.kind,label.hologramType,label.name,label.time,label.color,label.projectionColor,label.width,label.avatars,label.logo,!!venueLogos.get(label.logo),label.venueName,label.poster]);
   if(item.dataset.signature!==signature){
    item.dataset.signature=signature;item.replaceChildren();
    if(label.cardHeight){
@@ -935,6 +1125,8 @@ function renderHologramLabels(labels){
     if(logo&&!/\/icons\/event\.svg(?:[?#]|$)/.test(label.logo||'')){
      const canvas=document.createElement('canvas');canvas.width=logo.width;canvas.height=logo.height;
      canvas.style.aspectRatio=`${logo.width} / ${logo.height}`;canvas.getContext('2d').drawImage(logo.image,0,0);logoFace.appendChild(canvas);
+     // E3 Step 3.5 round coin: the venue logo is on both faces; CSS turns the coin on its vertical axis.
+     if(label.hologramType==='coin'){const back=document.createElement('span');back.className='event-hologram-logo-face event-hologram-coin-back';back.setAttribute('aria-hidden','true');const backCanvas=document.createElement('canvas');backCanvas.width=logo.width;backCanvas.height=logo.height;backCanvas.style.aspectRatio=canvas.style.aspectRatio;backCanvas.getContext('2d').drawImage(logo.image,0,0);back.appendChild(backCanvas);brand.appendChild(back);}
     }else{logoFace.textContent=label.venueName||'EVENT';}
     item.appendChild(brand);
    }
@@ -1102,13 +1294,14 @@ let overlayVisibility=0,lastOverlayFrame=0,overlayPending=false;
 // A separate animation frame can run before the camera update and trail the map.
 function renderSceneOverlays(){
  if(disposed||!mapActivity.visible||!loaded||!assetsReady)return;
- if(!overlayPending&&!map.isMoving())return;
+ if(!overlayPending&&!map.isMoving()&&!e3Transitions?.isPlaying()&&!e3StageTweenActive)return;
  overlayPending=false;
  const now=performance.now();
  motionDelta=lastOverlayFrame?Math.min((now-lastOverlayFrame)/1000,.1):0;
  lastOverlayFrame=now;
  if(!reduced.matches)pulseTime+=motionDelta;
  drawLights(overlayVisibility);
+ if(e3Transitions?.isPlaying()||e3StageTweenActive)map.triggerRepaint();
  if(!firstPinsPainted&&overlayVisibility>.1&&hitTargets.length){firstPinsPainted=true;performance.mark("mapz-public-pins-painted");tell("pins-painted",{count:hitTargets.length});}
 }
 map.on('render',renderSceneOverlays);

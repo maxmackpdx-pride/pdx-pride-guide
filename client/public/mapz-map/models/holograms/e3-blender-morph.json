@@ -1,0 +1,19 @@
+{
+  "source": "Mapz-Evolution-Transitions.blend",
+  "sourceSha256": "162a9abd27121eb5e706ce8a51b83aea352571e639eaf3cefd37875d6301b649",
+  "assetSha256": "30e58f5f5ca66fc45af6d2236096628a90d4f596589be664b8492f3f63d9e879",
+  "bytes": 404580,
+  "vertices": 5518,
+  "meshes": 26,
+  "coordinates": "glTF Y-up; Blender Z-up converted by exporter",
+  "stages": [
+    "mini",
+    "waypoint",
+    "compressed",
+    "coin",
+    "vortex",
+    "stack"
+  ],
+  "renderedSprites": false,
+  "materials": "Web materials are adapted at runtime; venue tint is supplied by caller."
+}

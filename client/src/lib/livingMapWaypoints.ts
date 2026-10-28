@@ -1,4 +1,5 @@
 import L from "leaflet";
+import { needzAccent } from "./needzAccent";
 
 export type WaypointId =
   | "eventz"
@@ -173,6 +174,10 @@ const G: Record<WaypointId, string> = {
 };
 
 export type WaypointOpts = {
+  /** Needz/Service sub-category id; drives the secondary accent (see needzAccent.ts). */
+  category?: string;
+  /** Closed-for-season state; renders the closed message instead of the icon badge. */
+  closed?: boolean;
   id: WaypointId;
   selected?: boolean;
   scoop?: string;
@@ -196,6 +201,7 @@ function shellFamily(id: WaypointId) {
   if (id === "zenegade" || id === "afterz") return "long";
   if (id === "hauz") return "house";
   if (id === "mizzed") return "speech";
+  if (id === "outz") return "arrow";
   if (ZAYDARK_USER_IDS.has(id)) return "zaydark";
   if (["venue", "bar", "club", "park", "cafe", "shop", "bath", "adult"].includes(id)) return "place";
   return "shield";
@@ -207,7 +213,15 @@ function shellPath(family: string, cx: number, cy: number, r: number) {
   if (family === "ticket") return `M${x0 + q},${y0}H${cx - q}Q${cx},${y0 + q} ${cx + q},${y0}H${x1 - q}V${cy - q}Q${x1 - q * .7},${cy} ${x1},${cy + q}V${y1}H${x0}V${cy + q}Q${x0 + q * .7},${cy} ${x0},${cy - q}V${y0}Z`;
   if (family === "long") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${cy + r * .45}L${cx},${y1 + r * .68} ${x0},${cy + r * .45}V${y0 + q}Z`;
   if (family === "house") return `M${x0 + q},${cy - r * .15} ${cx},${y0} ${x1 - q},${cy - r * .15}V${y1 - q}L${cx},${y1 + r * .68} ${x0 + q},${y1 - q}Z`;
-  if (family === "speech") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${y1 - q}L${x1 - q},${y1}H${cx + q},${cx},${y1 + r * .68} ${cx - q},${y1}H${x0 + q}L${x0},${y1 - q}V${y0 + q}Z`;
+  if (family === "speech") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${y1 - q}L${x1 - q},${y1}H${cx + q}L${cx},${y1 + r * .68}L${cx - q},${y1}H${x0 + q}L${x0},${y1 - q}V${y0 + q}Z`;
+  // Outzide arrowhead (board OZ path): S2 cut corners ending in one point.
+  // Scaled so its width and bounds match the shield shell (u = r / 26).
+  if (family === "arrow") {
+    const u = r / 26;
+    const X = (x: number) => (cx + x * u).toFixed(2);
+    const Y = (y: number) => (cy - r + (y + 30) * u).toFixed(2);
+    return `M${X(-15)},${Y(-30)}H${X(15)}L${X(23)},${Y(-22)}V${Y(-2)}Q${X(21)},${Y(14)} ${X(0)},${Y(38)}Q${X(-21)},${Y(14)} ${X(-23)},${Y(-2)}V${Y(-22)}Z`;
+  }
   if (family === "zaydark") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${cy + r * .45}L${cx},${y1 + r * .68} ${x0},${cy + r * .45}V${y0 + q}Z`;
   return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${y1 - q}L${cx},${y1 + r * .68} ${x0},${y1 - q}V${y0 + q}Z`;
 }
@@ -246,7 +260,7 @@ export function waypointHtml(opts: WaypointOpts) {
   const r = D / 2 - sw / 2;
   const scoopR = D * 0.3;
   const scoopCy = scoop ? cy + r + scoopR * 0.55 : cy;
-  const integratedTip = ["long", "house", "speech", "zaydark", "place", "shield"].includes(family);
+  const integratedTip = ["long", "house", "speech", "zaydark", "place", "shield", "arrow"].includes(family);
   const attachY = scoop ? scoopCy + scoopR * 0.2 : cy + r * 0.62;
   const tipY = (scoop ? scoopCy + scoopR : cy + r) + D * 0.34;
   const tipW = D * 0.3;
@@ -264,7 +278,12 @@ export function waypointHtml(opts: WaypointOpts) {
   const ring = opts.bloom ? `url(#${fid}b)` : color;
   const mainPath = shellPath(family, cx, cy, r);
   const clipId = `${fid}clip`;
-  const markContent = opts.avatarUrl
+  const secondary = !opts.bloom && opts.category ? needzAccent(opts.category) : undefined;
+  const glowColor = secondary ?? ring;
+  const closedMark = opts.closed
+    ? `<text class="wp-closed" x="${cx}" y="${cy + 1}" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-size="${Math.max(7, D * 0.19)}" font-weight="800" letter-spacing=".04em">CLOSED</text>`
+    : "";
+  const markContent = closedMark ? closedMark : opts.avatarUrl
     ? `<image class="wp-avatar" href="${escapeAttribute(opts.avatarUrl)}" x="${cx - r}" y="${cy - r}" width="${r * 2}" height="${r * 2.28}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})"/>`
     : opts.logoUrl
     ? `<image class="wp-logo${opts.alternateLogoUrl ? " wp-logo--primary" : ""}" href="${escapeAttribute(opts.logoUrl)}" x="${markX}" y="${markY}" width="${mark}" height="${mark}" preserveAspectRatio="xMidYMid meet"/>${opts.alternateLogoUrl ? `<image class="wp-logo wp-logo--alternate" href="${escapeAttribute(opts.alternateLogoUrl)}" x="${markX}" y="${markY}" width="${mark}" height="${mark}" preserveAspectRatio="xMidYMid meet"/>` : ""}`
@@ -285,7 +304,7 @@ export function waypointHtml(opts: WaypointOpts) {
     <svg class="wp-svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
       ${bloom}<defs><clipPath id="${clipId}"><path d="${mainPath}"/></clipPath></defs>
       ${integratedTip || scoop ? "" : `<polygon points="${cx - tipW},${attachY} ${cx + tipW},${attachY} ${cx},${tipY}" fill="${ring}"/>`}
-      <path class="wp-glow-ring" d="${mainPath}" fill="none" stroke="${ring}" stroke-width="${glowW}"/>
+      <path class="wp-glow-ring" d="${mainPath}" fill="none" style="stroke:${glowColor}" stroke-width="${glowW}"/>
       <path d="${mainPath}" fill="#050506" stroke="${ring}" stroke-width="${sw}"/>
       ${markContent}
       ${scoopCircle}

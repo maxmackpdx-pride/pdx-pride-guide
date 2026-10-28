@@ -24,7 +24,7 @@ test('Mapz host and iframe use the same versioned asset and message contract',()
  assert.match(host,/event\.data\?\.source!=='mapz-demo'/);
  assert.match(html,/source:'mapz-demo'/);
  assert.match(html,/event\.data\?\.source!=='mapz-host'/);
- assert.match(html,/river-flight\.js\?v=20261026-e3-venue/g);
+ assert.match(html,/river-flight\.js\?v=20261026-e3-lod/g);
  assert.match(renderer,/source:'mapz-demo'/);
  assert.match(renderer,/event\.data\?\.source!=='mapz-host'/);
  assert.match(roofBoot,/event\.data\?\.source!=='mapz-host'/);
@@ -116,7 +116,7 @@ test('base-city readiness uses idle or its bounded fallback without terrain or f
  const canvas={width:0,height:0};
  const context=vm.createContext({
   loaded:false,baseFrameRendered:false,cameraDirty:false,revealTime:0,
-  startup:{phase(){}},updateSceneStatus(){},scheduleFrame:()=>frames++,parent:{},
+  startup:{phase(){}},updateSceneStatus(){},scheduleFrame:()=>frames++,parent:{},performance:{now:()=>0},
   window:{setTimeout(fn,delay){assert.equal(delay,250);fallback=fn;}},
   map:{on(type,fn){assert.equal(type,'load');onLoad=fn;},once(type,fn){assert.equal(type,'idle');onIdle=fn;},getCanvas:()=>canvas},
  });

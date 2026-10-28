@@ -1,0 +1,89 @@
+{
+ "cell": [
+  144,
+  339
+ ],
+ "crop": [
+  276,
+  128,
+  523,
+  711
+ ],
+ "fps": 12,
+ "transitions": {
+  "01-Mini-badge-to-waypoint": {
+   "frames": 24,
+   "duration_s": 2.0,
+   "file": "01-Mini-badge-to-waypoint.webp",
+   "columns": 6,
+   "rows": 4
+  },
+  "02-Waypoint-to-compressed": {
+   "frames": 24,
+   "duration_s": 2.0,
+   "file": "02-Waypoint-to-compressed.webp",
+   "columns": 6,
+   "rows": 4
+  },
+  "03-Compressed-to-logo-coin": {
+   "frames": 24,
+   "duration_s": 2.0,
+   "file": "03-Compressed-to-logo-coin.webp",
+   "columns": 6,
+   "rows": 4
+  },
+  "04-Logo-coin-to-single-vortex": {
+   "frames": 24,
+   "duration_s": 2.0,
+   "file": "04-Logo-coin-to-single-vortex.webp",
+   "columns": 6,
+   "rows": 4,
+   "greenFile": "04-Logo-coin-to-single-vortex-green.webp"
+  },
+  "05-Single-vortex-to-double-stack": {
+   "frames": 24,
+   "duration_s": 2.0,
+   "file": "05-Single-vortex-to-double-stack.webp",
+   "columns": 6,
+   "rows": 4,
+   "greenFile": "05-Single-vortex-to-double-stack-green.webp"
+  },
+  "06-Double-stack-to-single-vortex": {
+   "frames": 24,
+   "duration_s": 2.0,
+   "file": "06-Double-stack-to-single-vortex.webp",
+   "columns": 6,
+   "rows": 4,
+   "greenFile": "06-Double-stack-to-single-vortex-green.webp"
+  },
+  "07-Single-vortex-to-logo-coin": {
+   "frames": 24,
+   "duration_s": 2.0,
+   "file": "07-Single-vortex-to-logo-coin.webp",
+   "columns": 6,
+   "rows": 4,
+   "greenFile": "07-Single-vortex-to-logo-coin-green.webp"
+  },
+  "08-Logo-coin-to-compressed": {
+   "frames": 24,
+   "duration_s": 2.0,
+   "file": "08-Logo-coin-to-compressed.webp",
+   "columns": 6,
+   "rows": 4
+  },
+  "09-Compressed-to-waypoint": {
+   "frames": 24,
+   "duration_s": 2.0,
+   "file": "09-Compressed-to-waypoint.webp",
+   "columns": 6,
+   "rows": 4
+  },
+  "10-Waypoint-to-mini-badge": {
+   "frames": 24,
+   "duration_s": 2.0,
+   "file": "10-Waypoint-to-mini-badge.webp",
+   "columns": 6,
+   "rows": 4
+  }
+ }
+}
