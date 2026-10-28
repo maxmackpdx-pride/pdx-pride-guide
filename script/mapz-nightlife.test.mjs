@@ -1,7 +1,7 @@
 import {EVENT_CLOCK_HEIGHT,EVENT_CARD_HEIGHT} from '../client/public/mapz-map/event-hologram-model.js';
 import {smoothCardVisibility,createEventCardLock} from '../client/public/mapz-map/event-card-motion.js';
 import {eventCardGeometry,drawEventMiniBadge} from '../client/public/mapz-map/event-hologram-card.js';
-import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3RingText,e3CountdownText,e3NearestSameDayEvent} from '../client/public/mapz-map/e3-lod.js';
+import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,e3StageTarget,e3VortexBlend,e3RepresentativeIndex,e3MixHex,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3RingText,e3CountdownText,e3NearestSameDayEvent} from '../client/public/mapz-map/e3-lod.js';
 import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from '../client/public/mapz-map/e3-venue-stack.js';
 import {planVenueStacks,drawVenueStacks,venueStackKey} from '../client/public/mapz-map/e3-vortex-stack.js';
 import {eventCountdown} from '../client/public/mapz-map/event-countdown.js';
@@ -103,7 +103,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   const color='#FF00CC',feature={geometry:{coordinates:[-122.675,45.52]},properties:{key:'demo',kind:'event',demoOpen:true,name:'Musical Mondays',time:'9:00 PM',startsAtMs:Date.now()+720000,logo:'logo',phase:1,color,heightScale:1}};
   const logo={width:120,height:60,padding:1,outlined:'sky-logo',image:'artwork',silhouette:'mask'};
   const context=vm.createContext({window,parent:window,performance,EVENT_CLOCK_HEIGHT,eventCardLocks:new WeakMap(),createEventCardLock,rises:new Map(),folds:new Map(),lastBeaconKeys:new Set(),riseAmount:()=>1,foldAmount:()=>1,document:{getElementById:()=>null},map,lights:surface,devicePixelRatio:1,Intl,Date,Map,Set,Math,
-    smoothCardVisibility,hologramTypeForVenue,eventCardGeometry,drawEventMiniBadge,eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES,planVenueStacks,drawVenueStacks,venueStackKey,HOLOGRAM_CAMERA_FOLLOW,e3LodPrevious:new Map(),e3Transitions:null,e3LoadedAt:0,e3LastZoom:null,coarsePointer:false,e3Blender:{ready:false,setVenues(){},setMotion(){}},e3Blender3D:new Map(),e3StageState:new Map(),E3_BLENDER_MAX_VISIBLE:6,E3_STAGE_TWEEN_MS:1400,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3RingText,e3CountdownText,e3NearestSameDayEvent,e3SnapTable:null,e3StageTweenActive:false,E3_CLEARANCE_RADIUS_M:120,E3_CLEARANCE_METERS_PER_STRETCH:30,E3_CLEARANCE_MAX_STRETCH:4,e3ClearanceMeters:()=>0,e3StageValue:()=>0,E3_SAME_DAY_VORTEX_FAR_OVERVIEW:false,E3_BLENDER_SKYLINE_HEIGHT:false,e3ZoomChangedAt:0,e3Opened:false,compressCard:(card,factor)=>factor===1?card:eventCardGeometry(card.x,(card.top+card.bottom)/2,card.scale*factor),eventBeamAnchor:(_t,_s,parent)=>({x:parent.p.x,y:parent.p.y}),EVENT_CARD_HEIGHT,eventCountdown,hologramPresence,eventArtworkScale:()=>1,screenNeighborCounts,eventNight,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor,extrusionAmount:()=>1,attachedEventBeam:{draw:(_ctx,card,anchor)=>{operations.push('beam');projections.push({card,anchor});}},mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),viewTimeReceived:performance.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
+    smoothCardVisibility,hologramTypeForVenue,eventCardGeometry,drawEventMiniBadge,eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES,planVenueStacks,drawVenueStacks,venueStackKey,HOLOGRAM_CAMERA_FOLLOW,e3LodPrevious:new Map(),e3Transitions:null,e3LoadedAt:0,e3LastZoom:null,coarsePointer:false,e3Blender:{ready:false,setVenues(){},setMotion(){}},e3Blender3D:new Map(),e3StageState:new Map(),E3_BLENDER_MAX_VISIBLE:6,e3StageStep:(st,target)=>{st.value=target;st.target=target;},e3StageTarget,e3VortexBlend,e3RepresentativeIndex,e3MixHex,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3RingText,e3CountdownText,e3NearestSameDayEvent,e3SnapTable:null,e3StageTweenActive:false,E3_CLEARANCE_RADIUS_M:120,E3_CLEARANCE_METERS_PER_STRETCH:30,E3_CLEARANCE_MAX_STRETCH:4,e3ClearanceMeters:()=>0,e3StageValue:st=>st.value,E3_SAME_DAY_VORTEX_FAR_OVERVIEW:false,E3_BLENDER_SKYLINE_HEIGHT:false,e3ZoomChangedAt:0,e3Opened:false,compressCard:(card,factor)=>factor===1?card:eventCardGeometry(card.x,(card.top+card.bottom)/2,card.scale*factor),eventBeamAnchor:(_t,_s,parent)=>({x:parent.p.x,y:parent.p.y}),EVENT_CARD_HEIGHT,eventCountdown,hologramPresence,eventArtworkScale:()=>1,screenNeighborCounts,eventNight,eventProjectionGeometry,eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor,extrusionAmount:()=>1,attachedEventBeam:{draw:(_ctx,card,anchor)=>{operations.push('beam');projections.push({card,anchor});}},mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,hitTargets:[],viewTime:Date.now(),viewTimeReceived:performance.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
     featureProjection:{project:feature=>map.project(feature.geometry.coordinates),invalidate:noop},updateSurfaces:()=>({buildings:[{}],reflections:[]}),waterBloom:{draw:noop},drawUserLocationGlow:noop,
     citySparkles:{update:noop},buildingGlitter:()=>[],opacityControl:{value:1},motionDelta:1/30,pulseTime:1,
     hologramLiftScale:.7,hologramArtworkScale:3.15,hologramLayouts:new WeakMap(),hologramLabelWidth:68.4,HOUSING_EVENT_HEIGHT_RATIO:1/3,
@@ -122,7 +122,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     drawSurfaceReflections:()=>operations.push('building-reflections'),drawUserLocationAvatar:noop,tell:noop,
   });
   vm.runInContext(source,context);let labels=[];context.renderHologramLabels=rows=>{labels=rows;};vm.runInContext('drawLights(1)',context);
-  assert.equal(labels.length,1);assert.equal(labels[0].name,'Musical Mondays');assert.equal(labels[0].time,'9:00 PM');assert.match(labels[0].countdown,/^IN (?:11M \d+S|12M 0S)$/);assert.ok(labels[0].logoY<700);
+  assert.equal(labels.length,1);assert.equal(labels[0].name,'Musical Mondays');assert.equal(labels[0].time,'9:00 PM');assert.equal(labels[0].countdown,null,'no 2D countdown banner: a same-day event the 3D layer does not draw is a plain round logo coin');assert.equal(labels[0].hologramType,'coin');assert.ok(labels[0].logoY<700);
   assert.deepEqual(operations,['beam','building-mask','chrome','building-reflections']);
   assert.equal(labels[0].logo,'logo','stable logo is carried by the HTML card above the map');
   const anchored={...labels[0]};context.map.isMoving=()=>true;context.map.project=()=>({x:487,y:681});
@@ -155,13 +155,13 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   }
   // Far away the event is one cached mini badge: no HTML card at all, and the level is remembered.
   context.map.project=()=>({x:450,y:300});context.map.getPitch=()=>55;
-  // The approved x10 distance bands extend beyond zoom 12; exercise a genuinely far view.
-  context.map.getZoom=()=>8;vm.runInContext('drawLights(1)',context);
+  // The distance bands now reach farther (vortex to ~30 km, mini past ~150 km); exercise a genuinely far view.
+  context.map.getZoom=()=>5;vm.runInContext('drawLights(1)',context);
   assert.equal(labels.length,0,'far events draw a canvas badge, not an HTML card');
   assert.equal(context.e3LodPrevious.get('demo'),'mini');
   context.map.getZoom=()=>16.5;vm.runInContext('drawLights(1)',context);
   assert.equal(context.e3LodPrevious.get('demo'),'vortex');
-  assert.equal(labels.length,1);assert.match(labels[0].countdown,/^IN /,'the nearest same-day event keeps its countdown');
+  assert.equal(labels.length,1);assert.equal(labels[0].countdown,null,'the countdown lives on the 3D vortex only, never on a 2D card');
   context.map.project=()=>({x:450,y:700});context.map.getZoom=()=>15.5;
   context.lightFeatures=[{geometry:{coordinates:[-122.67,45.53]},properties:{key:'houz',kind:'housing',housingModel:'MANAGED',demoOpen:true,logo:'',phase:2,color:'#8800FF',heightScale:1,name:'Property for rent'}}];
   operations.length=0;assert.doesNotThrow(()=>vm.runInContext('drawLights(1)',context));
