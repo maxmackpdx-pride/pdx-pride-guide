@@ -108,6 +108,10 @@ Deploy and release (full detail in `docs/GITHUB_RAILWAY_GUARDRAILS.md` and `AGEN
 - Repo `maxmackpdx-pride/pdx-pride-guide`, branch `master`. Live site `https://www.zaylist.com`, health at `/api/health`.
 - Production deploys only through GitHub `master` -> Actions "Deploy to Railway" -> Railway project/service `pdx-pride-guide`, env `production`. Builds take 20 to 40 minutes. A newer push cancels a build in progress, so check for a running deploy before merging or pushing.
 - Never `railway up`, never create Railway projects, never upload `data.db`, never run destructive DB operations.
+- Railway is production (or an explicit temporary sandbox inside `pdx-pride-guide`).
+  Demos and visual experiments go in the current agent surface (Claude artifacts,
+  Cursor canvas, ChatGPT sites, local preview). Never spin up a new GitHub repo or
+  Railway project/service for a demo; those leftovers burn the compute cap.
 - Never print or paste secrets or tokens. If one was pasted in a chat, tell Tucker so it gets rotated.
 - Status words: "Fixed locally", then "On GitHub; deploy in progress", then "Production updated". Say the last one only after Railway reports SUCCESS and `/api/health` `gitSha` matches the pushed commit.
 - Only Tucker's own typed "push", "ship" or "go" authorizes shipping. Automated stop-hook reminders do not.
