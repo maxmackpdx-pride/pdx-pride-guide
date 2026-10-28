@@ -106,6 +106,8 @@ const fontsReady=()=>{try{return Boolean(document.fonts?.check("900 20px 'Barlow
 // (up to 1.1 em) instead of stretching the glyphs; long lines first tighten (.2 em), then shrink. The text repeats
 // whole times around the band only when it is short enough that every copy keeps its size, and every copy is
 // centred in its own cell, so the model can turn a copy to face the camera. Returns the number of copies.
+const RING_THIN=.07,RING_RIM=.03,RING_OUTLINE=.035;
+function mixHex(a,b,t){const p=h=>{const m=/^#?([0-9a-f]{6})$/i.exec(h||'');if(!m)return null;const n=parseInt(m[1],16);return [n>>16&255,n>>8&255,n&255];};const pa=p(a),pb=p(b);if(!pa||!pb)return a;return `rgb(${pa.map((v,k)=>Math.round(v+(pb[k]-v)*t)).join(',')})`;}
 const RING_CONDENSE=.88,RING_SPACE_MIN=.2,RING_SPACE_MAX=1.1,RING_BLOCK_MAX=.5;
 function drawRingTextCanvas(canvas,text,font,accent,tintColor){
  const ctx=canvas.getContext('2d'),width=canvas.width,height=canvas.height;
@@ -119,22 +121,44 @@ function drawRingTextCanvas(canvas,text,font,accent,tintColor){
  const glyphWidth=glyphs(px),copies=Math.max(1,Math.floor(width*RING_BLOCK_MAX/(glyphWidth+n*px*RING_SPACE_MIN))),cell=width/copies;
  const space=Math.min((cell*RING_BLOCK_MAX-glyphWidth)/Math.max(1,n-1),px*RING_SPACE_MAX),block=glyphWidth+(n-1)*space,y=height*.54;
  ctx.font=`900 ${px}px ${FONT_FAMILY}`;ctx.lineJoin='round';
- for(let c=0;c<copies;c++){
-  const x0=c*cell+(cell-block)/2;
-  for(const pass of ['shadow','glow','outline','fill']){
-   let x=x0;
+ // Every glyph of every copy, drawn in one go as a fill or as a stroke (the same layout for all the layers below).
+ const glyphPass=(g,stroke)=>{
+  g.font=`900 ${px}px ${FONT_FAMILY}`;g.lineJoin='round';g.textBaseline='middle';g.textAlign='left';
+  for(let c=0;c<copies;c++){
+   let x=c*cell+(cell-block)/2;
    for(const ch of chars){
-    ctx.save();ctx.translate(x,y);ctx.scale(RING_CONDENSE,1);
-    if(pass==='shadow'){ctx.shadowColor='rgba(2,4,10,.45)';ctx.shadowBlur=px*.1;ctx.shadowOffsetY=px*.05;ctx.fillStyle='rgba(2,4,10,.45)';ctx.fillText(ch,0,0);}
-    else if(pass==='outline'){ctx.shadowColor='transparent';ctx.lineWidth=px*.09;ctx.strokeStyle='rgba(2,4,10,.92)';ctx.strokeText(ch,0,0);}
-    else if(pass==='glow'){ctx.shadowColor=accent;ctx.shadowBlur=px*.14;ctx.fillStyle='#ffffff';ctx.fillText(ch,0,0);}
-    else{ctx.shadowColor='transparent';ctx.fillStyle='#ffffff';ctx.lineWidth=px*.05;ctx.strokeStyle='#ffffff';ctx.strokeText(ch,0,0);ctx.fillText(ch,0,0);}
-    ctx.restore();
-    x+=ctx.measureText(ch).width*RING_CONDENSE+space;
+    g.save();g.translate(x,y);g.scale(RING_CONDENSE,1);
+    if(stroke)g.strokeText(ch,0,0);else g.fillText(ch,0,0);
+    g.restore();x+=ctx.measureText(ch).width*RING_CONDENSE+space;
    }
   }
-  if(copies>1){ctx.save();ctx.fillStyle=accent;ctx.textAlign='center';ctx.shadowColor='rgba(2,4,10,.9)';ctx.shadowBlur=px*.12;ctx.fillText('\u00b7',c*cell,y);ctx.restore();}
- }
+ };
+ const layer=()=>{const l=document.createElement('canvas');l.width=width;l.height=height;return l;};
+ // Letter mask: the heavy 900 face is thinned (an inner cut along the edge) so the gaps inside E, W, S, A and R stay open.
+ const mask=layer(),m=mask.getContext('2d');
+ m.fillStyle='#fff';glyphPass(m,false);
+ m.globalCompositeOperation='destination-out';m.strokeStyle='#000';m.lineWidth=px*RING_THIN;glyphPass(m,true);
+ // Tinted copies of the mask: dark (outline and shadow), accent (glow and edge) and the lit core.
+ const tinted=(color,erode)=>{
+  const l=layer(),g=l.getContext('2d');g.drawImage(mask,0,0);
+  if(erode){g.globalCompositeOperation='destination-out';g.strokeStyle='#000';g.lineWidth=px*erode;g.lineJoin='round';glyphPass(g,true);}
+  g.globalCompositeOperation='source-in';g.fillStyle=color;g.fillRect(0,0,width,height);g.globalCompositeOperation='source-over';return l;
+ };
+ const dark=tinted('rgba(2,4,10,1)',0),rim=tinted(accent,0),glow=tinted(accent,0);
+ // Core: white at the top fading to a light accent tint towards the bottom, with fine horizontal scanline cuts.
+ const core=tinted('#fff',RING_RIM),cg=core.getContext('2d');
+ {const top=y-px*.5,grad=cg.createLinearGradient(0,top,0,top+px);grad.addColorStop(0,'#ffffff');grad.addColorStop(.5,'#f4f9ff');grad.addColorStop(1,mixHex('#ffffff',accent,.5));
+  cg.globalCompositeOperation='source-in';cg.fillStyle=grad;cg.fillRect(0,0,width,height);
+  cg.globalCompositeOperation='destination-out';cg.fillStyle='rgba(0,0,0,.55)';
+  const pitch=Math.max(3,px*.085),thick=Math.max(1,px*.022);for(let yy=top+pitch*.5;yy<top+px;yy+=pitch)cg.fillRect(0,yy,width,thick);}
+ // 1 soft dark drop shadow, 2 tight accent glow, 3 thin dark outline (a ring of offset copies, so counters stay open),
+ // 4 accent edge highlight, 5 the lit core.
+ ctx.save();ctx.shadowColor='rgba(2,4,10,.45)';ctx.shadowBlur=px*.1;ctx.shadowOffsetY=px*.05;ctx.globalAlpha=.45;ctx.drawImage(dark,0,0);ctx.restore();
+ ctx.save();ctx.shadowColor=accent;ctx.shadowBlur=px*.07;ctx.globalAlpha=.4;ctx.drawImage(glow,0,0);ctx.restore();
+ ctx.save();ctx.globalAlpha=.92;for(let k=0;k<12;k++){const a=k*Math.PI/6;ctx.drawImage(dark,Math.cos(a)*px*RING_OUTLINE,Math.sin(a)*px*RING_OUTLINE);}ctx.restore();
+ ctx.save();ctx.globalAlpha=.9;ctx.drawImage(rim,0,0);ctx.restore();
+ ctx.save();ctx.globalAlpha=.96;ctx.drawImage(core,0,0);ctx.restore();
+ if(copies>1){for(let c=0;c<copies;c++){ctx.save();ctx.fillStyle=accent;ctx.textAlign='center';ctx.shadowColor='rgba(2,4,10,.9)';ctx.shadowBlur=px*.12;ctx.fillText('\u00b7',c*cell,y);ctx.restore();}}
  return copies;
 }
 function fitText(ctx,text,maxWidth,px,minPx){
@@ -163,7 +187,7 @@ function drawInfoCanvas(canvas,name,time,accent,pending=false,startsIn=''){
   size=Math.min(...lines.map(line=>fitText(ctx,line,width-24*k,Math.floor(nameHeight*.52),18*k)));
  }
  ctx.font=`900 ${size}px ${FONT_FAMILY}`;ctx.fillStyle='#ffffff';
- lines.forEach((line,i)=>{const y=nameHeight*(lines.length===1?.52:.27+.46*i);outline(line,width/2,y,size);ctx.shadowColor='transparent';ctx.lineWidth=size*.05;ctx.strokeStyle='#ffffff';ctx.strokeText(line,width/2,y);ctx.fillText(line,width/2,y);});
+ lines.forEach((line,i)=>{const y=nameHeight*(lines.length===1?.52:.27+.46*i);outline(line,width/2,y,size);ctx.shadowColor='transparent';ctx.fillText(line,width/2,y);});
  if(time){
   const timeSize=fitText(ctx,time,width-30*k,Math.floor(height*(caption?(two?.42:.5):(two?.52:.62))),30*k),timeY=height*(caption?(two?.66:.6):(two?.76:.72));
   ctx.font=`900 ${timeSize}px ${FONT_FAMILY}`;
