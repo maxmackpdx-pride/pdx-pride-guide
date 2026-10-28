@@ -273,9 +273,9 @@ test('v2 model tables: art, info bands, text rings, orb and the dots cut-out onl
     assert.equal(blenderPlateFace(stage,COUNTDOWN_PLATE).opacity,0);
     for (const band of RING_BANDS) assert.equal(blenderBandFace(band,stage).opacity,0);
   }
-  assert.equal(blenderArtFace(ART_MAIN,4).opacity,1);
+  assert.equal(blenderArtFace(ART_MAIN,4).opacity,.98);
   assert.equal(blenderArtFace(ART_LOWER,4).opacity,0,'the second screen is the double stack only');
-  assert.equal(blenderArtFace(ART_LOWER,5).opacity,1);
+  assert.equal(blenderArtFace(ART_LOWER,5).opacity,.98);
   assert.deepEqual(RING_BANDS.map(band=>[band.id,blenderBandFace(band,4).opacity]),[['a1',1],['a2',1],['b2',0],['b1',0]]);
   assert.deepEqual(RING_BANDS.map(band=>blenderBandFace(band,5).opacity),[1,1,1,1]);
   assert.ok(blenderOrbFace(5).y>blenderOrbFace(4).y,'the orb floats between the stacks, above the single vortex base');

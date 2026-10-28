@@ -54,8 +54,8 @@ export function blenderLogoFace(table,stage,aspect=1){
 // ---------------------------------------------------------------------------
 // Screen art box (logo, poster or host logo, with glitch swaps) and the info band under it (start time biggest,
 // event name above it). The screen is 1.34 x 1.0 and its centre sits at 3.98 (vortex) or 4.78 and 1.29 (stack).
-const ART_MAIN={y:[3.98,3.98,3.98,3.98,4.26+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT+.28],w:[0,0,0,0,1.03,1.03],h:[0,0,0,0,.36,.36],a:[0,0,0,0,1,1]};
-const ART_LOWER={y:[1.54,1.54,1.54,1.54,1.54,1.29+STACK_LIFT+.28],w:[0,0,0,0,0,1.03],h:[0,0,0,0,0,.36],a:[0,0,0,0,0,1]};
+const ART_MAIN={y:[3.98,3.98,3.98,3.98,4.26+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT+.28],w:[0,0,0,0,1.03,1.03],h:[0,0,0,0,.36,.36],a:[0,0,0,0,.98,.98]};
+const ART_LOWER={y:[1.54,1.54,1.54,1.54,1.54,1.29+STACK_LIFT+.28],w:[0,0,0,0,0,1.03],h:[0,0,0,0,0,.36],a:[0,0,0,0,0,.98]};
 const INFO_MAIN={y:[3.79,3.79,3.79,3.79,3.79+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT-.19],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.62,.62,.62,.62,.62,.62],a:[0,0,0,0,1,1]};
 const INFO_LOWER={y:[1.10,1.10,1.10,1.10,1.10,1.29+STACK_LIFT-.19],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.62,.62,.62,.62,.62,.62],a:[0,0,0,0,0,1]};
 // Text rings. line 0 is the event name on the wide ring, line 1 the DJs (or host) on the narrow ring. The upper
@@ -121,11 +121,12 @@ function drawRingTextCanvas(canvas,text,font,accent,tintColor){
  ctx.font=`900 ${px}px ${FONT_FAMILY}`;ctx.lineJoin='round';
  for(let c=0;c<copies;c++){
   const x0=c*cell+(cell-block)/2;
-  for(const pass of ['outline','glow','fill']){
+  for(const pass of ['shadow','glow','outline','fill']){
    let x=x0;
    for(const ch of chars){
     ctx.save();ctx.translate(x,y);ctx.scale(RING_CONDENSE,1);
-    if(pass==='outline'){ctx.shadowColor='transparent';ctx.lineWidth=px*.2;ctx.strokeStyle='rgba(2,4,10,.92)';ctx.strokeText(ch,0,0);}
+    if(pass==='shadow'){ctx.shadowColor='rgba(2,4,10,.45)';ctx.shadowBlur=px*.1;ctx.shadowOffsetY=px*.05;ctx.fillStyle='rgba(2,4,10,.45)';ctx.fillText(ch,0,0);}
+    else if(pass==='outline'){ctx.shadowColor='transparent';ctx.lineWidth=px*.09;ctx.strokeStyle='rgba(2,4,10,.92)';ctx.strokeText(ch,0,0);}
     else if(pass==='glow'){ctx.shadowColor=accent;ctx.shadowBlur=px*.14;ctx.fillStyle='#ffffff';ctx.fillText(ch,0,0);}
     else{ctx.shadowColor='transparent';ctx.fillStyle='#ffffff';ctx.lineWidth=px*.05;ctx.strokeStyle='#ffffff';ctx.strokeText(ch,0,0);ctx.fillText(ch,0,0);}
     ctx.restore();
@@ -152,7 +153,7 @@ function drawInfoCanvas(canvas,name,time,accent,pending=false,startsIn=''){
  let lines=[label];
  const k=width/640;
  let nameHeight=height*(caption?.34:.4),two=false;
- const outline=(text,x,y,size,color)=>{ctx.save();ctx.shadowColor='transparent';ctx.lineWidth=size*.2;ctx.strokeStyle='rgba(2,4,10,.92)';ctx.strokeText(text,x,y);ctx.restore();};
+ const outline=(text,x,y,size,color)=>{ctx.save();ctx.shadowColor='rgba(2,4,10,.45)';ctx.shadowBlur=size*.1;ctx.shadowOffsetY=size*.05;ctx.fillStyle='rgba(2,4,10,.45)';ctx.fillText(text,x,y);ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.lineWidth=size*.09;ctx.strokeStyle='rgba(2,4,10,.92)';ctx.strokeText(text,x,y);ctx.restore();};
  let size=fitText(ctx,label,width-24*k,Math.floor(nameHeight*.96),22*k);
  if(ctx.measureText(label).width>width-24*k&&words.length>1){
   let best=1,gap=1e9;
@@ -179,7 +180,7 @@ function drawInfoCanvas(canvas,name,time,accent,pending=false,startsIn=''){
 function drawCountdownCanvas(canvas,parts,tintColor,accent){
  const ctx=canvas.getContext('2d'),width=canvas.width,height=canvas.height;
  ctx.clearRect(0,0,width,height);
- ctx.fillStyle='rgba(2,5,10,.94)';ctx.fillRect(6,6,width-12,height-12);
+ ctx.fillStyle='rgba(2,5,10,.96)';ctx.fillRect(6,6,width-12,height-12);
  ctx.strokeStyle=tintColor;ctx.lineWidth=3;ctx.shadowColor=tintColor;ctx.shadowBlur=8;
  const arm=26,x0=6,y0=6,x1=width-6,y1=height-6;
  ctx.beginPath();
@@ -245,7 +246,9 @@ function drawVenueLabelCanvas(canvas,name,accent){
  if(m.total>width-24){px=Math.max(16,Math.floor(px*(width-24)/m.total));m=measure(px);}
  ctx.font=`900 ${px}px ${FONT_FAMILY}`;
  let x=(width-m.total)/2;
- ctx.lineJoin='round';ctx.lineWidth=px*.2;ctx.strokeStyle='rgba(2,4,10,.92)';ctx.shadowColor='transparent';
+ ctx.lineJoin='round';ctx.lineWidth=px*.09;ctx.fillStyle='rgba(2,4,10,.45)';ctx.shadowColor='rgba(2,4,10,.45)';ctx.shadowBlur=px*.1;ctx.shadowOffsetY=px*.05;
+ {let sx=x;for(const ch of text){ctx.fillText(ch,sx,height*.54);sx+=ctx.measureText(ch).width+m.space;}}
+ ctx.strokeStyle='rgba(2,4,10,.92)';ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
  {let sx=x;for(const ch of text){ctx.strokeText(ch,sx,height*.54);sx+=ctx.measureText(ch).width+m.space;}}
  ctx.shadowColor=accent;ctx.shadowBlur=px*.14;ctx.fillStyle='#ffffff';
  for(const ch of text){ctx.fillText(ch,x,height*.54);x+=ctx.measureText(ch).width+m.space;}
@@ -299,7 +302,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   if(!node.isMesh)return;
   const role=node.userData.mapzRole||'outline';
   const white=role==='icon'||role==='particle';
-  const opacity={outline:.9,'ring-fill':.095,beam:.025,panel:.32,icon:1,particle:.85,ground:.5}[role]??1;
+  const opacity={outline:.9,'ring-fill':.095,beam:.03,panel:.29,icon:1,particle:.89,ground:.5}[role]??1;
   const material=new THREE.MeshBasicMaterial({color:role==='panel'?0x000000:white?0xffffff:tint,
    transparent:true,opacity,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,
    blending:role==='particle'?THREE.AdditiveBlending:THREE.NormalBlending,
