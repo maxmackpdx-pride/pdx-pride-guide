@@ -157,6 +157,8 @@ metadata for already-missing worktree directories; it never deletes a live workt
 
 ## Map rendering
 
+Mapz uses the shared MapLibre renderer exclusively. Its retired Leaflet/2D fallback must not be restored, imported, initialized, or loaded. Handle Mapz startup failures with the existing MapLibre retry and recovery UI, not a second renderer. The former 15-second Leaflet-switch rule is obsolete; follow current boot-timeout behavior in `MapzCanvas.tsx`. Independent embedded CARTO/Leaflet maps elsewhere in Zaylist remain in scope and must not be removed as part of Mapz work.
+
 Mapz and Outzide share `client/public/map-foundation/` for lifecycle, geographic style, camera, motion, source/layer/image registration and ordinary native pins. Portland and OutZide share the OpenFreeMap and Mapterhorn surface. Switching changes palette and objects only. Do not replace holograms, landmark models, building chrome, waypoint heads, waypoint height, or the zoom-out sparkle field with generic symbols or a new basemap. See `docs/MAP_RENDERING.md`.
 
 ## Current design traps
