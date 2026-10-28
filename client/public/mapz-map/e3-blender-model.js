@@ -71,6 +71,8 @@ const DOTS_HOLE={min:[4.5,4.5,4.5,4.5,4.5,5.29+STACK_SHIFT],max:[4.9,4.9,4.9,4.9
 // Beam base disc and venue label (model units, ground level). The disc and the label ease in with the vortex
 // (stage 3.2 to 4) and stay for the double stack.
 const BASE_DISC={y:.04,radius:.8,on:3.2,full:4};
+// Tucker did not like the light-up disc: off by default. The venue label under the beam stays.
+const SHOW_BASE_DISC=false;
 const BASE_LABEL={y:.17,z:.86,width:1.9,height:.3};
 export function blenderBaseFace(stage){const t=Math.max(0,Math.min(1,(stage-BASE_DISC.on)/(BASE_DISC.full-BASE_DISC.on)));return {opacity:t*t*(3-2*t),radius:BASE_DISC.radius};}
 const FONT_FAMILY="'Barlow Condensed','Arial Narrow',sans-serif";
@@ -120,7 +122,7 @@ function fitText(ctx,text,maxWidth,px,minPx){
 }
 // Info band under the artwork: the event name in bold caps (small, up to two lines) and the start time, by far the
 // biggest, in the accent. The time takes the lower 62% of the band, like the concept's big "9PM".
-function drawInfoCanvas(canvas,name,time,accent){
+function drawInfoCanvas(canvas,name,time,accent,pending=false,startsIn=''){
  const ctx=canvas.getContext('2d'),width=canvas.width,height=canvas.height;
  ctx.clearRect(0,0,width,height);
  ctx.textAlign='center';ctx.textBaseline='middle';
@@ -141,8 +143,12 @@ function drawInfoCanvas(canvas,name,time,accent){
  if(time){
   const timeSize=fitText(ctx,time,width-36*k,Math.floor(height*.78),30*k);
   ctx.font=`900 ${timeSize}px ${FONT_FAMILY}`;ctx.shadowColor=accent;ctx.shadowBlur=14*k;ctx.fillStyle=accent;
-  ctx.lineWidth=timeSize*.03;ctx.strokeStyle=accent;ctx.strokeText(time,width/2,height*.7);
-  ctx.fillText(time,width/2,height*.7);
+  ctx.lineWidth=timeSize*.03;ctx.strokeStyle=accent;
+  if(pending){
+   // Standby: the start time is a hollow outline (not lit yet) with a small STARTS IN caption under the name.
+   ctx.fillStyle='rgba(0,0,0,0)';ctx.shadowBlur=6*k;ctx.lineWidth=Math.max(2,timeSize*.05);ctx.strokeText(time,width/2,height*.7);
+   if(startsIn){const cap=`STARTS IN ${startsIn}`,capSize=Math.floor(height*.15);ctx.shadowBlur=0;ctx.font=`900 ${capSize}px ${FONT_FAMILY}`;ctx.fillStyle=accent;ctx.globalAlpha=.9;ctx.fillText(cap,width/2,height*.97);ctx.globalAlpha=1;}
+  }else{ctx.strokeText(time,width/2,height*.7);ctx.fillText(time,width/2,height*.7);}
  }
 }
 // Countdown plate: dark, thin corner brackets in the tint, big equal numerals in the title font with tiny unit letters.
@@ -409,8 +415,8 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   const countdown=next.countdown||[],faces=next.faces||{people:[],more:0};
   const tintHex='#'+tint.getHexString();
   const venueName=String(next.venueName||'');
-  const key=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),countdown.map(c=>c.value+c.unit),faces]);
-  const textOnly=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),faces]);
+  const key=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.pending,sc.startsIn,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),countdown.map(c=>c.value+c.unit),faces]);
+  const textOnly=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.pending,sc.startsIn,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),faces]);
   if(key===contentKey)return;
   const keepStatic=textOnly===content.staticKey;
   content={accent,screens,countdown,faces,staticKey:textOnly};contentKey=key;
@@ -419,7 +425,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    screens.forEach((screen,index)=>{
     const slide=slides[index],info=infos[index];
     release(info.texture);info.texture=null;
-    if(screen.name||screen.time){const canvas=document.createElement('canvas');canvas.width=520;canvas.height=210;drawInfoCanvas(canvas,screen.name,screen.time,accent);info.texture=canvasTexture(canvas);}
+    if(screen.name||screen.time){const canvas=document.createElement('canvas');canvas.width=520;canvas.height=210;drawInfoCanvas(canvas,screen.name,screen.time,accent,Boolean(screen.pending),screen.startsIn||'');info.texture=canvasTexture(canvas);}
     info.material.map=info.texture;info.material.needsUpdate=true;
     for(const kind of Object.keys(slide.textures)){release(slide.textures[kind]);}
     slide.textures={};slide.aspects={};slide.kinds=[];
@@ -516,16 +522,23 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     slide.mesh.visible=has;
     if(!has)continue;
     const state=e3SlideState(slide.kinds,elapsed+slide.index*4.3+phase*.9,{reduced});
+    // Standby: a screen whose event has not started sits dim and flickers softly; when it starts it powers on with a glitch flash.
+    const pendingNow=Boolean(content.screens[slide.index]?.pending),prevPending=slide.pending===true;
+    slide.standby=(slide.standby??(pendingNow?1:0))+((pendingNow?1:0)-(slide.standby??(pendingNow?1:0)))*.08;
+    if(prevPending&&!pendingNow)slide.powerOn=elapsed;
+    slide.pending=pendingNow;
+    const powerFlash=slide.powerOn!=null&&elapsed-slide.powerOn<.9?1-(elapsed-slide.powerOn)/.9:0;
+    const standbyDim=1-slide.standby*(.55+(reduced?0:.07*Math.sin(elapsed*5.3+slide.index)));
     const u=slide.material.uniforms;
     u.map0.value=slide.textures[state.from]||blank;u.map1.value=slide.textures[state.to]||blank;
     u.aspect0.value=slide.aspects[state.from]||1;u.aspect1.value=slide.aspects[state.to]||1;
-    u.mixAmount.value=state.mix;u.glitch.value=Math.max(state.glitch,sp.flash*.9);u.seconds.value=elapsed;u.opacity.value=face.opacity;u.boxAspect.value=face.width/Math.max(.01,face.height);
+    u.mixAmount.value=state.mix;u.glitch.value=Math.max(state.glitch,sp.flash*.9,powerFlash,slide.standby>.5&&!reduced?.12:0);u.seconds.value=elapsed;u.opacity.value=face.opacity*standbyDim;u.boxAspect.value=face.width/Math.max(.01,face.height);
     slide.mesh.position.y=face.y;slide.mesh.scale.set(face.width,face.height,1);
    }
    for(const info of infos){
     const face=blenderArtFace(info.table,at(sp.screen)),show=Boolean(info.texture)&&face.opacity>.01;
     info.mesh.visible=show;
-    if(show){info.mesh.position.y=face.y;info.mesh.scale.set(face.width,face.height,1);info.material.opacity=face.opacity;}
+    if(show){info.mesh.position.y=face.y;info.mesh.scale.set(face.width,face.height,1);info.material.opacity=face.opacity*(content.screens[infos.indexOf(info)]?.pending?.85:1);}
    }
    // Text rings turn (faster as the event nears, peak when it opens) and adjacent rings tilt gently in opposite
    // directions. The same band table drives the tilt of the Blender ring meshes through uBand (vertex shader).
@@ -560,7 +573,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    // Beam base disc (pulses softly, static under reduced motion) and the venue label.
    {
     const face=blenderBaseFace(stage),pulse=reduced?1:1+.07*Math.sin(elapsed*2.1+phase);
-    disc.mesh.visible=face.opacity>.01;
+    disc.mesh.visible=SHOW_BASE_DISC&&face.opacity>.01;
     if(disc.mesh.visible){
      const d=face.radius*2*pulse;disc.mesh.scale.set(d,d,1);
      disc.material.opacity=Math.min(1,face.opacity*(reduced?.85:.72+.18*Math.sin(elapsed*2.1+phase))+sp.flash*.5);

@@ -288,7 +288,7 @@ test('river-flight and the model wire the v2 vortex without fake dates', async (
   const flight=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
   const model=await readFile(new URL('../client/public/mapz-map/e3-blender-model.js',import.meta.url),'utf8');
   assert.match(flight,/e3VortexTint\(g\.color,true\)/);
-  assert.match(flight,/e3SameDayEventsSorted\(g\.events,lodNow,stage>=5\?2:1\)/);
+  assert.match(flight,/e3StackOrder\(g\.events,lodNow,stage>=5\?2:1\)/);
   assert.match(flight,/countdown:e3CountdownParts\(nearest\.startsAtMs,lodNow\)/);
   assert.match(flight,/faces:e3FaceStack\(nearest\.avatars,nearest\.avatarTotal\)/);
   assert.match(flight,/e3RingLines\(\{eventName:event\.name,performers:event\.performers,hostName:event\.hostName/);
@@ -393,4 +393,16 @@ test('river-flight wires the urgency clock and the venue label; the model keeps 
   assert.match(model,/strength=reduced\?0:/,'no pulses under reduced motion');
   assert.match(model,/sp=reduced\?\{active:false/,'no staged spin-up under reduced motion');
   assert.ok(!/[\u2014\u2013]/.test(model),'no em or en dashes in the model copy');
+});
+
+test('double stack puts the sooner event on top and labels pending events', async () => {
+  const {e3StackOrder, e3StartsInLabel} = await import('../client/public/mapz-map/e3-lod.js');
+  const now = Date.parse('2026-10-28T07:00:00-07:00'), h = 36e5;
+  const events = [{name: 'B', startsAtMs: now + 8 * h}, {name: 'A', startsAtMs: now + 3 * h}];
+  assert.deepEqual(e3StackOrder(events, now, 2).map(e => e.name), ['A', 'B']);
+  const live = [{name: 'late', startsAtMs: now + 3 * h}, {name: 'live', startsAtMs: now - h}];
+  assert.deepEqual(e3StackOrder(live, now, 2).map(e => e.name), ['live', 'late']);
+  assert.equal(e3StartsInLabel(now + 3 * h + 14 * 6e4, now), '3H 14M');
+  assert.equal(e3StartsInLabel(now + 45 * 6e4, now), '45M');
+  assert.equal(e3StartsInLabel(now - 1, now), '');
 });

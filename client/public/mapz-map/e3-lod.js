@@ -456,6 +456,21 @@ export function e3SameDayEventsSorted(events, nowMs, limit = 2) {
   return [...upcoming, ...begun].slice(0, limit);
 }
 
+/** Double stack order: of the (up to two) same-day events picked for a venue, the sooner start goes on TOP.
+ *  An event that already began is sooner than one still to come, so a live event sits above a pending one. */
+export function e3StackOrder(events, nowMs, limit = 2) {
+  return e3SameDayEventsSorted(events, nowMs, limit).sort((a, b) => a.startsAtMs - b.startsAtMs);
+}
+
+/** Short 'STARTS IN' text for an event that has not begun: '2H 14M', '45M', 'SOON' under a minute. Empty once begun. */
+export function e3StartsInLabel(startsAtMs, nowMs) {
+  if (!Number.isFinite(startsAtMs) || !Number.isFinite(nowMs) || startsAtMs <= nowMs) return '';
+  const minutes = Math.ceil((startsAtMs - nowMs) / 60000);
+  if (minutes < 1) return 'SOON';
+  const h = Math.floor(minutes / 60), m = minutes % 60;
+  return h ? `${h}H ${String(m).padStart(2, '0')}M` : `${m}M`;
+}
+
 // ---------------------------------------------------------------------------
 // Time-to-start energy: ring spin, ring tilt rate and the beam light pulses ramp up as the event approaches and
 // peak when it opens (start time reached, then LIVE). Driven by the same startsAtMs and view clock as the countdown.

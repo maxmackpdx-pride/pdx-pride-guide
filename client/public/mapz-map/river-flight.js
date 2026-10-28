@@ -9,7 +9,7 @@ import {eventCountdown,appendEventCountdown} from './event-countdown.js';
 import {planVenueStacks,drawVenueStacks,venueStackKey} from './e3-vortex-stack.js?v=20261026-lod';
 import {createE3TransitionState} from './e3-transitions.js?v=20261027-e3-v3';
 import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from './e3-venue-stack.js';
-import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingLines,e3CleanCopy,e3TimeLabel,e3ComplementColor,e3VortexTint,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3EventUrgency} from './e3-lod.js?v=20261027-e3-v3';
+import {eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingLines,e3CleanCopy,e3TimeLabel,e3ComplementColor,e3VortexTint,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3StackOrder,e3StartsInLabel,e3EventUrgency} from './e3-lod.js?v=20261027-e3-v3';
 import {createE3BlenderLayer} from './e3-blender-model.js?v=20261027-e3-v3';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
@@ -707,13 +707,13 @@ function drawLights(fade,target=map,surface=lights){
    const lodNow=viewTime+Math.max(0,frameNow-viewTimeReceived),sameDayVortex=g.sameDay&&stage>=4,tint=g.sameDay&&stage>=4?e3VortexTint(g.color,true):(g.color||'#FF00CC');
    let content=null,urgency=0;
    if(sameDayVortex){
-    const screenEvents=e3SameDayEventsSorted(g.events,lodNow,stage>=5?2:1),nearest=screenEvents[0];
+    const screenEvents=e3StackOrder(g.events,lodNow,stage>=5?2:1),nearest=screenEvents[0];
     if(nearest){
      const logoOf=url=>{const entry=url?venueLogos.get(url):null;return entry?{key:url,image:entry.image,width:entry.width,height:entry.height}:null;};
      content={venueName:anchor.feature.properties.name||g.events.find(event=>event.venueName)?.venueName||'',accent:e3ComplementColor(tint),
       screens:screenEvents.map(event=>{
        const lines=e3RingLines({eventName:event.name,performers:event.performers,hostName:event.hostName,venueName:event.venueName||anchor.feature.properties.name||''});
-       return {name:e3CleanCopy(event.name),time:e3TimeLabel(event.time),ringName:lines.name,ringSub:lines.sub,
+       return {name:e3CleanCopy(event.name),time:e3TimeLabel(event.time),pending:event.startsAtMs>lodNow,startsIn:e3StartsInLabel(event.startsAtMs,lodNow),ringName:lines.name,ringSub:lines.sub,
         logo:logoOf(event.logoUrl||g.logoUrl),poster:eventPosterEntry(event.poster),host:logoOf(event.alternateLogo&&event.alternateLogo!==(event.logoUrl||g.logoUrl)?event.alternateLogo:'')};
       }),
       countdown:e3CountdownParts(nearest.startsAtMs,lodNow),faces:e3FaceStack(nearest.avatars,nearest.avatarTotal)};
