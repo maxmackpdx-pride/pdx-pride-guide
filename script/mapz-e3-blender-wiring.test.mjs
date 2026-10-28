@@ -289,11 +289,13 @@ test('river-flight and the model wire the v2 vortex without fake dates', async (
   const flight=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
   const model=await readFile(new URL('../client/public/mapz-map/e3-blender-model.js',import.meta.url),'utf8');
   assert.match(flight,/e3VortexTint\(g\.color,true\)/);
-  assert.match(flight,/e3StackOrder\(g\.events,lodNow,stage>=5\?2:1\)/);
+  assert.match(flight,/e3StageTarget\(g\.depthM,\{capped,sameDay:g\.sameDay,stack\}\)/,'the stage follows distance continuously');
+  assert.match(flight,/e3StageStep\(st,stage,frameNow\)/);
+  assert.match(flight,/e3StackOrder\(g\.events,lodNow,stack\?2:1\)/);
   assert.match(flight,/countdown:e3CountdownParts\(nearest\.startsAtMs,lodNow\)/);
   assert.match(flight,/faces:e3FaceStack\(nearest\.avatars,nearest\.avatarTotal\)/);
   assert.match(flight,/e3RingLines\(\{eventName:event\.name,performers:event\.performers,hostName:event\.hostName/);
-  assert.match(flight,/sameDayVortex=g\.sameDay&&stage>=4/);
+  assert.match(flight,/sameDayVortex=g\.sameDay&&Math\.max\(stage,st\.value\)>3/);
   assert.match(flight,/absolute\.origin!==location\.origin/,'posters are same-origin only');
   assert.match(model,/item\.model\.setContent\(row\.content/);
   assert.match(model,/for\(const texture of \[\.\.\.textures\]\)texture\.dispose\(\)/,'every canvas texture is disposed');

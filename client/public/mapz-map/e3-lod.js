@@ -5,9 +5,8 @@
 // The distance includes pitch and where the waypoint sits on screen, so the top of a
 // pitched view is farther than the bottom at the same zoom.
 //
-//   vortex     nearest. Same-day events show the full card with countdown, and
-//              venues with several events show the master vortex stack.
-//              Capped by E3_LOD_MAX_FULL, nearest first.
+//   vortex     nearest. The 3D tall vortex (double stack for venues with several same-day events).
+//              Blends into the coin across E3_LOD_BLEND of its boundary. Capped by E3_LOD_MAX_FULL, nearest first.
 //   coin       middle band. Round logo coin (E3 step 3.5).
 //   compressed outer middle band. Half-size logo puck (E3 step 3).
 //   mini       far. One cached C1 mini badge: no per-frame artwork, no countdown.
@@ -22,9 +21,15 @@ import {e3CoinPlan,e3CompressedPlan,E3_COMPRESSED_SCALE,E3_COIN_ZOOM,E3_COIN_ZOO
 // Product question for Tucker: is the same-day vortex the far overview state too?
 // false (default) = vortex only inside the distance bands. true = every same-day venue on screen is a vortex.
 export const E3_SAME_DAY_VORTEX_FAR_OVERVIEW = false;
-export const E3_LOD_FULL_MAX_M = 4500;
-export const E3_LOD_COIN_MAX_M = 14000;
-export const E3_LOD_COMPRESSED_MAX_M = 28000;
+// Zoom handoff (Tucker, 2026-10-28): the tall vortex shows about 2.5 zoom levels farther out than before
+// (4500 m was about zoom 14.0 at screen center, 30000 m is about zoom 11.3), and beyond it the coin takes over.
+// Each boundary is the MIDDLE of a blend: the model cross-fades between the two forms across +/- E3_LOD_BLEND
+// of the boundary distance (e3StageForDepth), so the vortex condenses to the coin as you zoom out, never pops.
+export const E3_LOD_FULL_MAX_M = 30000;
+export const E3_LOD_COIN_MAX_M = 70000;
+export const E3_LOD_COMPRESSED_MAX_M = 120000;
+// Half width of each blend, as a fraction of its boundary distance. 0.25 spans about 0.74 zoom levels.
+export const E3_LOD_BLEND = .25;
 // A level only changes once the distance passes the boundary by this fraction.
 export const E3_LOD_BAND = .1;
 // Most venues that may show the full vortex at once. Nearest first.
@@ -62,6 +67,46 @@ export function eventDepthMeters(target, point, viewHeight, metersPerPixel) {
   return distancePx * metersPerPixel;
 }
 
+const smoothstep01 = t => { const x = clamp01(t); return x * x * (3 - 2 * x); };
+/** Weight of the form on the near side of a boundary: 1 inside it, 0 beyond it, smooth across the blend. */
+function blendAcross(depthM, boundM, blend = E3_LOD_BLEND) {
+  const near = boundM * (1 - blend), far = boundM * (1 + blend);
+  return 1 - smoothstep01((depthM - near) / (far - near));
+}
+/** 0 = pure coin, 1 = pure vortex. Driven by true camera distance, so it follows zoom, pitch and screen position. */
+export function e3VortexBlend(depthM) {
+  return blendAcross(depthM, E3_LOD_FULL_MAX_M);
+}
+/**
+ * Continuous model stage for a distance: 4 vortex, 3 coin, 2 compressed, 1 mini, smooth in between.
+ * Each boundary blends across +/- E3_LOD_BLEND, so the coin spins up into the vortex (stage 3 to 4) as the camera closes in.
+ */
+export function e3StageForDepth(depthM) {
+  return 1 + blendAcross(depthM, E3_LOD_COMPRESSED_MAX_M) + blendAcross(depthM, E3_LOD_COIN_MAX_M) + blendAcross(depthM, E3_LOD_FULL_MAX_M);
+}
+/**
+ * The 3D stage a venue wants. capped: lost its vortex slot to nearer venues. A venue with a single event or no event
+ * today stops at the coin. A same-day venue with several events (stack) spreads the vortex range over 3..5, so the
+ * coin spins up into the vortex first and the second stack then opens.
+ */
+export function e3StageTarget(depthM, {capped = false, sameDay = true, stack = false} = {}) {
+  let stage = e3StageForDepth(depthM);
+  if (capped || !sameDay) stage = Math.min(stage, 3);
+  if (stack && stage > 3) stage = 3 + (stage - 3) * 2;
+  return stage;
+}
+/** Index of the event that stands for its venue in 2D (soonest upcoming, else the latest begun). */
+export function e3RepresentativeIndex(events, nowMs) {
+  let best = null;
+  (events || []).forEach((event, i) => {
+    const at = event?.startsAtMs;
+    if (!Number.isFinite(at)) return;
+    const rank = at >= nowMs ? at - nowMs : 1e15 + (nowMs - at);
+    if (!best || rank < best.rank) best = {rank, i};
+  });
+  return best ? best.i : 0;
+}
+
 /** Level for one distance, with hysteresis against the previous level. */
 export function e3LodLevel(current, depthM, band = E3_LOD_BAND) {
   const bounds = BOUNDS();
@@ -80,7 +125,14 @@ export function e3LodLevel(current, depthM, band = E3_LOD_BAND) {
  */
 export function assignE3Levels(entries, previous = new Map(), {maxFull = E3_LOD_MAX_FULL, band = E3_LOD_BAND} = {}) {
   const levels = new Map();
-  for (const {key, depthM} of entries) levels.set(key, e3LodLevel(previous.get(key), depthM, band));
+  for (const {key, depthM, sameDay} of entries) {
+    const level = e3LodLevel(previous.get(key), depthM, band);
+    // Only a same-day venue has a vortex. Anything else tops out at the coin and never takes a vortex slot.
+    if (sameDay === false && (level === 'vortex' || e3VortexBlend(depthM) > 0)) { levels.set(key, 'coin'); continue; }
+    // The vortex runs for the whole of its blend: any distance with some vortex in it is a vortex candidate.
+    // Past the far edge of the blend it is the coin. No hysteresis here, the blend itself is the smoothing.
+    levels.set(key, e3VortexBlend(depthM) > 0 ? 'vortex' : level === 'vortex' ? 'coin' : level);
+  }
   if (E3_SAME_DAY_VORTEX_FAR_OVERVIEW) for (const entry of entries) if (entry.sameDay && entry.onScreen) levels.set(entry.key, 'vortex');
   entries
     .filter(entry => entry.onScreen && levels.get(entry.key) === 'vortex')
@@ -107,10 +159,8 @@ export function e3LodPlan(level, {hasLogo = false, sameDay = false, zoom = E3_CO
     const scale = e3MiniScale(zoom);
     return {step: 'mini', shape: 'badge', scale, diameterPx: 0, logoOnly: true, countdown: false, maxPerVenue: 1};
   }
-  if (level === 'vortex' && sameDay) {
-    // Full same-day card with its countdown (E3 step 4, one event).
-    return {step: 'vortex', shape: 'puck', scale: 1, diameterPx: 0, logoOnly: false, countdown: true, maxPerVenue: 1};
-  }
+  // No 2D same-day card with a countdown banner any more (Tucker, 2026-10-28). The same-day vortex is the 3D
+  // hologram only, and wherever the 3D layer does not draw a venue it falls back to the round logo coin below.
   if ((level === 'vortex' || level === 'coin') && hasLogo) return e3CoinPlan({zoom});
   return e3CompressedPlan();
 }
@@ -122,7 +172,7 @@ export function e3LodPlan(level, {hasLogo = false, sameDay = false, zoom = E3_CO
 // World size of the 3D hologram, in meters per model unit. At close zoom it is E3_BLENDER_SCALE_CLOSE_M (24 m,
 // the sensible baseline; Tucker: big and eye-catching, never absurd). Zooming out the world size grows a little
 // slower than the map shrinks (E3_BLENDER_ZOOM_OUT_GROWTH < 1), so the hologram eases down on screen, and
-// Tucker's size rule applies on top: 20% of full size at zoom 12, full size at zoom 15.5, smooth between.
+// Tucker's size rule applies on top: 20% of full size at zoom 10 (was 12), full size at zoom 15.5, smooth between.
 // A viewport cap keeps the tallest stage (the double stack) under E3_BLENDER_MAX_SCREEN_FRACTION of the
 // screen height, so it never swallows its neighbours or clips off the top, however close the camera is.
 export const E3_BLENDER_SCALE_CLOSE_M = 24;
@@ -137,12 +187,16 @@ export const E3_BLENDER_TALLEST_UNITS = 5.2;
 // shrinks the pair a little instead of letting it run off the screen.
 export const E3_BLENDER_STACK_TALLEST_UNITS = 6.8;
 export const E3_BLENDER_SIZE_FULL_ZOOM = 15.5;
-export const E3_BLENDER_SIZE_FAR_ZOOM = 12;
+// Tucker's 20% size floor moved from zoom 12 to zoom 10, so the tall vortex stays readable (about 100 px at zoom 12.5)
+// across the extra zoom levels it now reaches. Size at zoom 15.5 and closer is unchanged.
+export const E3_BLENDER_SIZE_FAR_ZOOM = 10;
 export const E3_BLENDER_SIZE_FAR = .2;
 // The 3D layer only takes a venue over once the model is at least compressed (stage 2) and tall enough to
 // read. The far mini badge, and anything too small, stays on the 2D path.
 export const E3_BLENDER_MIN_STAGE = 2;
-export const E3_BLENDER_MIN_SCREEN_PX = 40;
+// Was 40. The camera flattens the pitch when zoomed far out, which foreshortens the model, so 28 keeps the 3D
+// vortex and coin alive through the handoff instead of switching to the larger 2D coin early.
+export const E3_BLENDER_MIN_SCREEN_PX = 28;
 // Approximate model height in model units per stage 0..5 (beam top), used for the on-screen size test.
 export const E3_BLENDER_STAGE_HEIGHT_UNITS = [1, 1.4, 4, 4.6, 4.8, 6.8];
 // While a leaving venue's stage tween is still above this value the 3D layer keeps drawing it, so the
@@ -370,6 +424,12 @@ function hslToHex(h, s, l) {
   const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
   const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
   return '#' + [r, g, b].map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+/** Linear mix of two hex colors, t 0..1 (0 = a). Used to ease the coin's venue color into the vortex tint. */
+export function e3MixHex(a, b, t) {
+  const parse = hex => { const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '')); const n = m ? parseInt(m[1], 16) : 0xFF00CC; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+  const x = parse(a), y = parse(b), k = clamp01(t);
+  return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * k).toString(16).padStart(2, '0')).join('').toUpperCase();
 }
 /** The complementary accent of a venue tint: hue turned half way round, bright and saturated so it reads on dark. */
 export function e3ComplementColor(hex) {
