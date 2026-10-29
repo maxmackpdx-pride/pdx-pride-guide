@@ -55,6 +55,9 @@ serve one is stale.
   (`guidelines/`, `tokens/`, `bundles/`, `guide.json`, `llms.txt`)
 - card authority + the five sources of truth:
   `zaylist-foundation-library` `public/design-system/guidelines/card-system-authority.md`
+- five-room card registry (Eventz, Placez, NEEDZ, Boardz, Outzide states):
+  `zaylist-foundation-library` `public/design-system/sources/room-card-families.json`
+  (published under `/design-system/sources/room-card-families.json` once that Foundation branch ships)
 - live-is-truth rule (this repo, must not contradict the guide): `docs/LIVE_DESIGN_STANDARD.md`
 - map architecture and artwork that must stay: `docs/MAP_RENDERING.md`; shared infrastructure is `client/public/map-foundation/`, with distinct Mapz and Outzide scene adapters.
 - board card rules: `docs/BOARD_CARD_STANDARD.md`

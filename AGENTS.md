@@ -145,6 +145,9 @@ metadata for already-missing worktree directories; it never deletes a live workt
 - Product code implements the current design standard. The durable design/Foundation
   source is the private `maxmackpdx-pride/zaylist-foundation-library` repository and its
   published Cloudflare library.
+- Card work starts from Foundation `public/design-system/sources/room-card-families.json`
+  (Eventz, Placez, NEEDZ, Boardz, Outzide closed/open states and owning contracts). Do not
+  invent a shared card component across those rooms.
 - `docs/LIVE_DESIGN_STANDARD.md` is the repository's production trap list.
 - Consult Foundation onboarding or durable decisions only when a task actually touches
   architecture, product scope, naming, permissions, privacy, safety, cross-product
