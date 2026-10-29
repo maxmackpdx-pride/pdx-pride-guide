@@ -720,7 +720,9 @@ function drawLights(fade,target=map,surface=lights){
        return {name:e3CleanCopy(event.name),time:e3TimeLabel(event.time),pending:event.startsAtMs>lodNow,startsIn:e3StartsInLabel(event.startsAtMs,lodNow),ringName:lines.name,ringSub:lines.sub,
         logo:logoOf(event.logoUrl||g.logoUrl),poster:eventPosterEntry(event.poster),host:logoOf(event.alternateLogo&&event.alternateLogo!==(event.logoUrl||g.logoUrl)?event.alternateLogo:'')};
       }),
-      countdown:e3CountdownParts(nearest.startsAtMs,lodNow),faces:e3FaceStack(nearest.avatars,nearest.avatarTotal)};
+      countdown:e3CountdownParts(nearest.startsAtMs,lodNow),faces:e3FaceStack(nearest.avatars,nearest.avatarTotal),
+      // Concept (no stack): the second event's own countdown and faces, shown with its slide.
+      countdown2:screenEvents[1]?e3CountdownParts(screenEvents[1].startsAtMs,lodNow):[],faces2:screenEvents[1]?e3FaceStack(screenEvents[1].avatars,screenEvents[1].avatarTotal):undefined};
      // Ring spin and beam pulses ramp up over the last hours and peak when the event opens (same clock as the countdown).
      urgency=e3EventUrgency(nearest.startsAtMs,lodNow);
     }

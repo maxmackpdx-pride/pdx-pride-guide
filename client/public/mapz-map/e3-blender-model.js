@@ -20,7 +20,20 @@ export const STACK_LIFT=1.15,STACK_RISE=.45,STACK_GAP=.645,STACK_SHIFT=STACK_LIF
 // shader classifies each vertex by its single vortex position (rings 2.25-2.45 and 2.75-2.95, sign from 3.05) and
 // weights the lift by how single the stage is (0 at the coin, 1 at stage 4, 0 again at the double stack).
 export const SINGLE_SIGN_LIFT=STACK_SHIFT+.8,SINGLE_RING_LOWER=.965,SINGLE_RING_UPPER=2.17;
-const HEIGHT=[0,0,4.02,4.3,4.6+SINGLE_SIGN_LIFT,5.05+STACK_SHIFT],RADIUS=[0,0,.48,.60,.75,.90];
+// Concept: no stack. A venue with two events keeps one sign whose slideshow alternates the two events (poster or
+// logo, with that event's name and time); each event gets its own countdown, stacked under the sign. The whole sign
+// group sits low and compact on the beam, right above the orb (no padding around the orb).
+export const E3_NO_STACK=true,E3_EVENT_SECONDS=7;
+export const ORB_Y=3.2,ORB_R=.07,CD_W=1.6,CD_H=.5,FACE_W=1.4,FACE_H=.4,GAP_ORB=.05,GAP_CD=.06,GAP_SIGN=.07;
+/** Heights (model units) for the no-stack layout with n countdowns: orb, faces, countdowns (first event on top), sign. */
+export function e3NoStackLayout(n=1){
+ const facesBottom=ORB_Y+ORB_R+GAP_ORB,facesY=facesBottom+FACE_H/2,plates=[];
+ let y=facesBottom+FACE_H+GAP_CD;
+ for(let i=Math.max(1,n)-1;i>=0;i--){plates[i]=y+CD_H/2;y+=CD_H+(i?GAP_CD:0);}
+ const signBottom=y+GAP_SIGN,signCentre=signBottom+.53;
+ return {orbY:ORB_Y,facesBottom,facesY,plates,signBottom,signTop:signBottom+1.56,move:signCentre-(3.98+SINGLE_SIGN_LIFT)};
+}
+const HEIGHT=[0,0,4.02,4.3,ORB_Y+.1,5.05+STACK_SHIFT],RADIUS=[0,0,.48,.60,.75,.90];
 const HOVER={
  'Upper poster independent hover':[.043,0],
  'Lower poster independent hover':[.039,2.3],
@@ -64,7 +77,7 @@ export const SIGN_GROW=.56,POSTER_W=.6,POSTER_H=.86,POSTER_DY=.53;
 // Concept: faces and countdown under the poster. The top screen (same size) slides up by SIGN_MOVE so its top lands
 // where the face row used to end (centre +2.14); the countdown plate and the face row sit under it in one centred
 // column the width of the screen, ending where the screen used to end (centre -.53). Outer size is unchanged.
-export const SIGN_MOVE=1.11,COL_W=.98,PLATE_H=.46,PLATE_DY=.25,FACES_H=.44,FACES_DY=-.31;
+export const SIGN_MOVE=0,COL_W=.98,PLATE_H=.46,PLATE_DY=.25,FACES_H=.44,FACES_DY=-.31;
 export const SIGN_NARROW=.73,BLEED_W=.97,BLEED_H=1.56,BLEED_DY=.25,INFO_W=.92,INFO_H=.657,INFO_DY=-.13;
 const ART_MAIN={y:[3.98,3.98,3.98,3.98,3.98+SINGLE_SIGN_LIFT+BLEED_DY+SIGN_MOVE,4.78+STACK_SHIFT+BLEED_DY+SIGN_MOVE],w:[0,0,0,0,BLEED_W,BLEED_W],h:[0,0,0,0,BLEED_H,BLEED_H],a:[0,0,0,0,.98,.98]};
 const ART_LOWER={y:[1.54,1.54,1.54,1.54,1.54,1.29+STACK_LIFT+BLEED_DY],w:[0,0,0,0,0,BLEED_W],h:[0,0,0,0,0,BLEED_H],a:[0,0,0,0,0,.98]};
@@ -83,8 +96,8 @@ const COUNTDOWN_PLATE={y:[4.87,4.87,4.87,4.87,3.98+SINGLE_SIGN_LIFT+PLATE_DY,4.7
 const FACE_STACK={y:[5.36,5.36,5.36,5.36,3.98+SINGLE_SIGN_LIFT+FACES_DY,4.78+STACK_SHIFT+FACES_DY],w:[COL_W,COL_W,COL_W,COL_W,COL_W,COL_W],h:[FACES_H,FACES_H,FACES_H,FACES_H,FACES_H,FACES_H],a:[0,0,0,0,1,1]};
 // The orb floats below the rings of a single vortex and between the two stacks of a double stack.
 // Height the beam light pulses climb to (the lowest ring band), per stage.
-const PULSE_TOP=[2.5,2.5,2.5,2.5,2.36+SINGLE_RING_LOWER,3.2+STACK_LIFT+STACK_RISE];
-const ORB={y:[1.95,1.95,1.95,1.95,2.0,3.0+STACK_LIFT+STACK_RISE+STACK_GAP/2],a:[0,0,0,0,1,1],radius:.07};
+const PULSE_TOP=[2.5,2.5,2.5,2.5,ORB_Y,3.2+STACK_LIFT+STACK_RISE];
+const ORB={y:[1.95,1.95,1.95,1.95,ORB_Y,3.0+STACK_LIFT+STACK_RISE+STACK_GAP/2],a:[0,0,0,0,1,1],radius:.07};
 // The model's own three small circles above the screen (part of the outline): cut out where the face stack goes,
 // local y range and half width per stage. Off below the vortex.
 const DOTS_HOLE={min:[4.5,4.5,4.5,4.5,4.5+SINGLE_SIGN_LIFT+SIGN_GROW,5.29+STACK_SHIFT+SIGN_GROW],max:[4.9,4.9,4.9,4.9,4.9+SINGLE_SIGN_LIFT+SIGN_GROW,5.7+STACK_SHIFT+SIGN_GROW],half:.42,lowerMin:.5+STACK_LIFT,lowerMax:.76+STACK_LIFT};
@@ -229,10 +242,10 @@ function drawCountdownCanvas(canvas,parts,tintColor,accent){
  }
  // Measure at full size, then scale the whole readout to fit so every numeral stays equal.
  let size=Math.floor(height*.66);
- const layout=px=>{ctx.font=`900 ${px}px ${FONT_FAMILY}`;const unit=px*.5,gap=px*.2;let total=0;const items=parts.map(part=>{const w=ctx.measureText(part.value).width;ctx.font=`900 ${unit}px ${FONT_FAMILY}`;const uw=ctx.measureText(part.unit).width;ctx.font=`900 ${px}px ${FONT_FAMILY}`;return {part,w,uw};});
+ const layout=px=>{ctx.font=`900 ${px}px ${FONT_FAMILY}`;const unit=px*.5,gap=px*.26;let total=0;const items=parts.map(part=>{const w=ctx.measureText(part.value).width;ctx.font=`900 ${unit}px ${FONT_FAMILY}`;const uw=ctx.measureText(part.unit).width;ctx.font=`900 ${px}px ${FONT_FAMILY}`;return {part,w,uw};});
   items.forEach((item,i)=>{total+=item.w+item.uw+px*.06+(i?gap*1.6:0);});return {items,total,unit,gap};};
  let L=layout(size);
- if(L.total>width-44){size=Math.floor(size*(width-44)/L.total);L=layout(size);}
+ if(L.total>width-70){size=Math.floor(size*(width-70)/L.total);L=layout(size);}
  let x=(width-L.total)/2;const base=height*.5+size*.36;
  L.items.forEach((item,i)=>{
   if(i){ctx.font=`900 ${size}px ${FONT_FAMILY}`;ctx.fillStyle=accent;ctx.textAlign='left';ctx.fillText(':',x+L.gap*.3,base-size*.08);x+=L.gap*1.6;}
@@ -427,7 +440,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
      // outline inside the screen, so the poster shows edge to edge under the frame border.
      shader.uniforms.uGrow=growUniform;shader.uniforms.uMove=moveUniform;shader.uniforms.uNarrow=narrowUniform;
      shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vSignPos;uniform vec4 uGrow;uniform float uMove;uniform vec2 uNarrow;')
-      .replace('void main() {','void main() {\n if(uNarrow.y>.5){float y=vSignPos.y,ax=abs(vSignPos.x),top=uGrow.y+uMove+.47+uGrow.x;\n  if(y>top+.025&&y<top+.8&&ax<.95)discard;\n'+(role==='outline'?'  if(y>uGrow.y+uMove-.505&&y<top-.025&&ax<'+(.61*SIGN_NARROW-.012).toFixed(4)+')discard;\n  if(uGrow.z>0.){float lt=uGrow.w+.47+uGrow.z;if(y>uGrow.w-.505&&y<lt-.025&&ax<'+(.61*SIGN_NARROW-.012).toFixed(4)+')discard;}\n':'')+' }');
+      .replace('void main() {','void main() {\n if(uNarrow.y>.5){float y=vSignPos.y,ax=abs(vSignPos.x),top=uGrow.y+uMove+.47+uGrow.x;\n  if(y>top+.025&&y<top+.8&&ax<.95)discard;\n  if(y<uGrow.y+uMove-.56)discard;\n'+(role==='outline'?'  if(y>uGrow.y+uMove-.505&&y<top-.025&&ax<'+(.61*SIGN_NARROW-.012).toFixed(4)+')discard;\n  if(uGrow.z>0.){float lt=uGrow.w+.47+uGrow.z;if(y>uGrow.w-.505&&y<lt-.025&&ax<'+(.61*SIGN_NARROW-.012).toFixed(4)+')discard;}\n':'')+' }');
     }
     if(pulsed){
      // Small bright pulses climbing the beam from the pin to the rings. uPulse: phase, how many at once, the height they reach, strength.
@@ -497,11 +510,13 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   return {spec,near,far,meshes:[near,far],texture:null,farTexture:null,text:''};
  });
  const plate={material:flatMaterial(),texture:null};plate.mesh=flat(new THREE.Mesh(new THREE.PlaneGeometry(1,1),plate.material),6);
- const faceStack={material:flatMaterial(),texture:null};faceStack.mesh=flat(new THREE.Mesh(new THREE.PlaneGeometry(1,1),faceStack.material),6);
+ const faceStack={material:flatMaterial(),texture:null,texture2:null};faceStack.mesh=flat(new THREE.Mesh(new THREE.PlaneGeometry(1,1),faceStack.material),6);
+ const plate2={material:flatMaterial(),texture:null};plate2.mesh=flat(new THREE.Mesh(new THREE.PlaneGeometry(1,1),plate2.material),6);
+ let activeEvent=0,eventSwitchAt=-9;
  // Orb: a bright core and two soft additive shells, in the accent.
  const orb=new THREE.Group();orb.visible=false;object.add(orb);
  const orbCore=new THREE.Mesh(new THREE.SphereGeometry(ORB.radius,16,12),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,toneMapped:false}));
- const orbShells=[[2.1,.34],[3.4,.14]].map(([scale,alpha])=>{const m=new THREE.Mesh(new THREE.SphereGeometry(ORB.radius*scale,16,12),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,toneMapped:false,blending:THREE.AdditiveBlending}));m.userData.alpha=alpha;return m;});
+ const orbShells=[[1.6,.32]].map(([scale,alpha])=>{const m=new THREE.Mesh(new THREE.SphereGeometry(ORB.radius*scale,16,12),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,toneMapped:false,blending:THREE.AdditiveBlending}));m.userData.alpha=alpha;return m;});
  for(const mesh of [orbCore,...orbShells]){mesh.frustumCulled=false;mesh.renderOrder=3;orb.add(mesh);}
  // Beam base disc: flat on the ground at the anchor, in the tint, with a soft pulse.
  const discCanvas=document.createElement('canvas');discCanvas.width=discCanvas.height=256;drawBaseDiscCanvas(discCanvas);
@@ -529,15 +544,15 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  const art=(entry)=>entry?.image&&entry.width>0&&entry.height>0?entry:null;
  function setContent(next={}){
   const screens=(next.screens||[]).slice(0,2),accent=next.accent||'#E03DFF',fonts=fontsReady();
-  const countdown=next.countdown||[],faces=next.faces||{people:[],more:0};
+  const countdown=next.countdown||[],faces=next.faces||{people:[],more:0},countdown2=next.countdown2||[],faces2=next.faces2||{people:[],more:0};
   const tintHex='#'+tint.getHexString();
   const venueName=String(next.venueName||'');
-  const key=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.pending,sc.startsIn,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),countdown.map(c=>c.value+c.unit),faces]);
-  const textOnly=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.pending,sc.startsIn,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),faces]);
+  const key=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.pending,sc.startsIn,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),countdown.map(c=>c.value+c.unit),countdown2.map(c=>c.value+c.unit),faces,faces2]);
+  const textOnly=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.pending,sc.startsIn,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),faces,faces2]);
   if(key===contentKey)return;
   const keepStatic=textOnly===content.staticKey;
   beamAccentUniform.value.set(accent);
-  content={accent,screens,countdown,faces,staticKey:textOnly};contentKey=key;
+  content={accent,screens,countdown,faces,countdown2,faces2,staticKey:textOnly};contentKey=key;
   if(!keepStatic){
    // Ring text, info bands, art textures and faces change only with the event, never with the clock.
    screens.forEach((screen,index)=>{
@@ -573,14 +588,19 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    if(venueName){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=162;drawVenueLabelCanvas(canvas,venueName,accent);label.texture=canvasTexture(canvas);}
    label.material.map=label.texture;label.material.needsUpdate=true;
    release(faceStack.texture);faceStack.texture=null;
-   if(faces.people.length){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=189;drawFaceCanvas(canvas,faces,tintHex);faceStack.texture=canvasTexture(canvas);}
+   if(faces.people.length){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=120;drawFaceCanvas(canvas,faces,tintHex);faceStack.texture=canvasTexture(canvas);}
+   release(faceStack.texture2);faceStack.texture2=null;
+   if(faces2.people.length){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=120;drawFaceCanvas(canvas,faces2,tintHex);faceStack.texture2=canvasTexture(canvas);}
    faceStack.material.map=faceStack.texture;faceStack.material.needsUpdate=true;
    orbCore.material.color.set(accent);for(const shell of orbShells)shell.material.color.set(accent);
   }
   // The countdown changes about once a second.
   release(plate.texture);plate.texture=null;
-  if(countdown.length){const canvas=document.createElement('canvas');canvas.width=480;canvas.height=225;drawCountdownCanvas(canvas,countdown,tintHex,accent);plate.texture=canvasTexture(canvas);}
+  if(countdown.length){const canvas=document.createElement('canvas');canvas.width=480;canvas.height=150;drawCountdownCanvas(canvas,countdown,tintHex,accent);plate.texture=canvasTexture(canvas);}
   plate.material.map=plate.texture;plate.material.needsUpdate=true;
+  release(plate2.texture);plate2.texture=null;
+  if(screens.length>1&&countdown2.length){const canvas=document.createElement('canvas');canvas.width=480;canvas.height=150;drawCountdownCanvas(canvas,countdown2,tintHex,accent);plate2.texture=canvasTexture(canvas);}
+  plate2.material.map=plate2.texture;plate2.material.needsUpdate=true;
  }
  let stage=0,urgency=0,lastElapsed=null,ringAngle=0,tiltClock=0,pulsePhase=0,textBoost=1;
  return {object,
@@ -599,7 +619,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   get hasFaces(){return Boolean(faceStack.texture);},
   get hasLogo(){return Boolean(logoTexture);},
   get slideKinds(){return slides.map(slide=>[...slide.kinds]);},
-  setStage(value){stage=typeof value==='string'?Math.max(0,E3_BLENDER_STAGES.indexOf(value)):clamp(value);},
+  setStage(value){stage=typeof value==='string'?Math.max(0,E3_BLENDER_STAGES.indexOf(value)):clamp(value);if(E3_NO_STACK)stage=Math.min(4,stage);},
   // elapsed is seconds of active map time. The map host pauses this clock when
   // hidden and passes reduced=true for Calm Mode. Hover frequencies come from
   // the Blender shape-key drivers; each part moves independently.
@@ -622,7 +642,11 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     }
    }
    noRingUniform.value=E3_NO_RINGS&&at(sp.rings)>3.02?1:0;
-   {const open=blenderStackOpen(stage),v=Math.max(0,Math.min(1,stage-3));growUniform.value.set(SIGN_GROW*v,3.98+SINGLE_SIGN_LIFT,SIGN_GROW*open,1.29+STACK_LIFT);narrowUniform.value.set(SIGN_NARROW,v);moveUniform.value=SIGN_MOVE*v;}
+   const nEvents=Math.max(1,Math.min(2,content.screens?.length||1)),lay=e3NoStackLayout(plate2.texture?2:1),lv=Math.max(0,Math.min(1,stage-3));
+   // Which event the slideshow shows (alternates every E3_EVENT_SECONDS when the venue has two events today).
+   {const next=nEvents>1?Math.floor((elapsed+phase*.9)/E3_EVENT_SECONDS)%nEvents:0;if(next!==activeEvent){activeEvent=next;eventSwitchAt=elapsed;}}
+   const switchFlash=reduced?0:Math.max(0,1-(elapsed-eventSwitchAt)/.6);
+   {const open=blenderStackOpen(stage),v=Math.max(0,Math.min(1,stage-3));growUniform.value.set(SIGN_GROW*v,3.98+SINGLE_SIGN_LIFT,SIGN_GROW*open,1.29+STACK_LIFT);narrowUniform.value.set(SIGN_NARROW,v);moveUniform.value=lay.move*v;}
    stackUniform.value.x=blenderStackOpen(stage);
    singleUniform.value.x=blenderSingleWeight(stage);
    const hole=contentKey?blenderDotsHole(stage):{on:false,min:0,max:0,half:0};
@@ -642,26 +666,28 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    // Screen art slides: logo most of the time, poster and host logo glitching in. Reduced motion is the static logo.
    for(const slide of slides){
     const face=blenderArtFace(slide.table,at(sp.screen)),has=slide.kinds.length>0&&face.opacity>.01&&face.width>.01;
-    slide.mesh.visible=has;
-    if(!has)continue;
-    const state=e3SlideState(slide.kinds,elapsed+slide.index*4.3+phase*.9,{reduced});
+    const src=slide.index===0?slides[activeEvent]||slide:slide,screenIndex=slide.index===0?activeEvent:slide.index;
+    slide.mesh.visible=has&&src.kinds.length>0;
+    if(!slide.mesh.visible)continue;
+    const state=e3SlideState(src.kinds,elapsed+slide.index*4.3+phase*.9,{reduced});
     // Standby: a screen whose event has not started sits dim and flickers softly; when it starts it powers on with a glitch flash.
-    const pendingNow=Boolean(content.screens[slide.index]?.pending),prevPending=slide.pending===true;
+    const pendingNow=Boolean(content.screens[screenIndex]?.pending),prevPending=slide.pending===true;
     slide.standby=(slide.standby??(pendingNow?1:0))+((pendingNow?1:0)-(slide.standby??(pendingNow?1:0)))*.08;
     if(prevPending&&!pendingNow)slide.powerOn=elapsed;
     slide.pending=pendingNow;
     const powerFlash=slide.powerOn!=null&&elapsed-slide.powerOn<.9?1-(elapsed-slide.powerOn)/.9:0;
     const standbyDim=1-slide.standby*(.22+(reduced?0:.07*Math.sin(elapsed*5.3+slide.index)));
     const u=slide.material.uniforms;
-    u.map0.value=slide.textures[state.from]||blank;u.map1.value=slide.textures[state.to]||blank;
-    u.aspect0.value=slide.aspects[state.from]||1;u.aspect1.value=slide.aspects[state.to]||1;u.cover0.value=state.from==='poster'?1:0;u.cover1.value=state.to==='poster'?1:0;
-    u.mixAmount.value=state.mix;u.glitch.value=Math.max(state.glitch,sp.flash*.9,powerFlash,slide.standby>.5&&!reduced?.12:0);u.seconds.value=elapsed;u.opacity.value=face.opacity*standbyDim;u.boxAspect.value=face.width/Math.max(.01,face.height);
-    slide.mesh.position.y=face.y;slide.mesh.scale.set(face.width,face.height,1);
+    u.map0.value=src.textures[state.from]||blank;u.map1.value=src.textures[state.to]||blank;
+    u.aspect0.value=src.aspects[state.from]||1;u.aspect1.value=src.aspects[state.to]||1;u.cover0.value=state.from==='poster'?1:0;u.cover1.value=state.to==='poster'?1:0;
+    u.mixAmount.value=state.mix;u.glitch.value=Math.max(state.glitch,sp.flash*.9,powerFlash,slide.index===0?switchFlash*.8:0,slide.standby>.5&&!reduced?.12:0);u.seconds.value=elapsed;u.opacity.value=face.opacity*standbyDim;u.boxAspect.value=face.width/Math.max(.01,face.height);
+    slide.mesh.position.y=face.y+(slide.index===0?lay.move*lv:0);slide.mesh.scale.set(face.width,face.height,1);
    }
    for(const info of infos){
-    const face=blenderArtFace(info.table,at(sp.screen)),show=Boolean(info.texture)&&face.opacity>.01;
+    const face=blenderArtFace(info.table,at(sp.screen)),srcTex=info.index===0?(infos[activeEvent]?.texture||info.texture):info.texture,show=Boolean(srcTex)&&face.opacity>.01;
     info.mesh.visible=show;
-    if(show){const b=Math.min(textBoost,E3_SIGN_FAR_BOOST,1.04);info.mesh.position.y=face.y+face.height*(b-1)*.5;info.mesh.scale.set(face.width*b,face.height*b,1);info.material.opacity=face.opacity;}
+    if(show&&info.material.map!==srcTex){info.material.map=srcTex;info.material.needsUpdate=true;}
+    if(show){const b=Math.min(textBoost,E3_SIGN_FAR_BOOST,1.04);info.mesh.position.y=face.y+(info.index===0?lay.move*lv:0)+face.height*(b-1)*.5;info.mesh.scale.set(face.width*b,face.height*b,1);info.material.opacity=face.opacity;}
    }
    // Text rings turn (faster as the event nears, peak when it opens) and adjacent rings tilt gently in opposite
    // directions. The same band table drives the tilt of the Blender ring meshes through uBand (vertex shader).
@@ -689,16 +715,22 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     const look=e3BeamPulseLook(urgency),reach=interpolate(PULSE_TOP,stage),strength=reduced?0:Math.max(0,Math.min(1,(stage-3.2)/.8));
     pulseUniform.value.set(pulsePhase,look.count,reach,strength);
     // Beam brightness: 20% of the full look when the start is far off, rising to 80% by the time the event opens.
-    {const bottom=interpolate(INFO_MAIN.y,stage)-INFO_DY-SIGN_MOVE*Math.max(0,Math.min(1,stage-3))-.47;beamFadeUniform.value.set(stage>=3.9?bottom-.5:99,stage>=3.9?bottom:100);}
+    {const bottom=stage>=3.9?lay.facesBottom:interpolate(INFO_MAIN.y,stage)-INFO_DY-.47;beamFadeUniform.value.set(stage>=3.9?bottom-.5:99,stage>=3.9?bottom:100);}
     beamKUniform.value=reduced?.5:.2+.6*Math.max(0,Math.min(1,urgency));
    }
    {
-    const face=plate.texture?blenderPlateFace(at(sp.extras),COUNTDOWN_PLATE):null;
-    plate.mesh.visible=Boolean(face)&&face.opacity>.01;
-    if(face){plate.mesh.position.y=face.y;plate.mesh.scale.set(face.width,face.height,1);plate.material.opacity=face.opacity;}
-    const faceStackFace=faceStack.texture?blenderPlateFace(at(sp.extras),FACE_STACK):null;
-    faceStack.mesh.visible=Boolean(faceStackFace)&&faceStackFace.opacity>.01;
-    if(faceStackFace){faceStack.mesh.position.y=faceStackFace.y;faceStack.mesh.scale.set(faceStackFace.width,faceStackFace.height,1);faceStack.material.opacity=faceStackFace.opacity;}
+    // Countdowns under the sign, at the old 1.6 x .5 size (wider than the sign). With two events the countdown of the
+    // event on the slideshow is lit and the other one dims, so each countdown reads as belonging to its slide.
+    const extra=blenderPlateFace(at(sp.extras),COUNTDOWN_PLATE).opacity,two=Boolean(plate2.texture);
+    const b=Math.min(textBoost,1.06);
+    for(const [k,pl] of [[0,plate],[1,plate2]]){
+     pl.mesh.visible=Boolean(pl.texture)&&extra>.01&&(k===0||two);
+     if(!pl.mesh.visible)continue;
+     pl.mesh.position.y=lay.plates[k];pl.mesh.scale.set(CD_W*b,CD_H,1);pl.material.opacity=extra*(two&&k!==activeEvent?.42:1);
+    }
+    const facesTex=activeEvent===1&&faceStack.texture2?faceStack.texture2:faceStack.texture;
+    faceStack.mesh.visible=Boolean(facesTex)&&extra>.01;
+    if(faceStack.mesh.visible){if(faceStack.material.map!==facesTex){faceStack.material.map=facesTex;faceStack.material.needsUpdate=true;}faceStack.mesh.position.y=lay.facesY;faceStack.mesh.scale.set(FACE_W*b,FACE_H,1);faceStack.material.opacity=extra;}
    }
    // Beam base disc (pulses softly, static under reduced motion) and the venue label.
    {
@@ -719,7 +751,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     if(sp.active)face.y+=e3OrbDrop(sp.orb)*1.6;
     orb.visible=face.opacity>.01;
     if(orb.visible){
-     const bob=reduced?0:Math.sin(elapsed*1.7+phase)*.05;
+     const bob=reduced?0:Math.sin(elapsed*1.7+phase)*.025;
      orb.position.set(0,face.y+bob,0);orb.scale.setScalar(1+sp.flash*1.4);
      orbCore.material.opacity=face.opacity;for(const shell of orbShells)shell.material.opacity=shell.userData.alpha*face.opacity*(reduced?1:.85+.15*Math.sin(elapsed*2.3+phase));
     }
@@ -742,7 +774,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    for(const info of infos){info.material.dispose();info.mesh.geometry.dispose();}
    for(const band of bands)for(const part of band.meshes){part.material.dispose();part.mesh.geometry.dispose();}
    disc.material.dispose();disc.mesh.geometry.dispose();discTexture.dispose();label.material.dispose();label.mesh.geometry.dispose();
-   plate.material.dispose();plate.mesh.geometry.dispose();faceStack.material.dispose();faceStack.mesh.geometry.dispose();
+   plate.material.dispose();plate.mesh.geometry.dispose();plate2.material.dispose();plate2.mesh.geometry.dispose();faceStack.material.dispose();faceStack.mesh.geometry.dispose();
    for(const mesh of [orbCore,...orbShells]){mesh.material.dispose();mesh.geometry.dispose();}
   }
  };
