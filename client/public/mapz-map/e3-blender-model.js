@@ -54,8 +54,12 @@ export function blenderLogoFace(table,stage,aspect=1){
 // ---------------------------------------------------------------------------
 // Screen art box (logo, poster or host logo, with glitch swaps) and the info band under it (start time biggest,
 // event name above it). The screen is 1.34 x 1.0 and its centre sits at 3.98 (vortex) or 4.78 and 1.29 (stack).
-const ART_MAIN={y:[3.98,3.98,3.98,3.98,4.26+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT+.28],w:[0,0,0,0,1.03,1.03],h:[0,0,0,0,.36,.36],a:[0,0,0,0,.98,.98]};
-const ART_LOWER={y:[1.54,1.54,1.54,1.54,1.54,1.29+STACK_LIFT+.28],w:[0,0,0,0,0,1.03],h:[0,0,0,0,0,.36],a:[0,0,0,0,0,.98]};
+// Concept: vertical poster. The art box is a portrait poster (.6 x .86, about 2:3.5) above the info band. The screen
+// frame grows upward by SIGN_GROW (vertex shader: everything above the screen centre rises), so the poster sits
+// between the info band (bottom at centre +.12) and the new frame top; the countdown plate and faces rise with it.
+export const SIGN_GROW=.56,POSTER_W=.6,POSTER_H=.86,POSTER_DY=.53;
+const ART_MAIN={y:[3.98,3.98,3.98,3.98,3.98+SINGLE_SIGN_LIFT+POSTER_DY,4.78+STACK_SHIFT+POSTER_DY],w:[0,0,0,0,POSTER_W,POSTER_W],h:[0,0,0,0,POSTER_H,POSTER_H],a:[0,0,0,0,.98,.98]};
+const ART_LOWER={y:[1.54,1.54,1.54,1.54,1.54,1.29+STACK_LIFT+POSTER_DY],w:[0,0,0,0,0,POSTER_W],h:[0,0,0,0,0,POSTER_H],a:[0,0,0,0,0,.98]};
 const INFO_MAIN={y:[3.79,3.79,3.79,3.79,3.79+SINGLE_SIGN_LIFT,4.78+STACK_SHIFT-.19],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.62,.62,.62,.62,.62,.62],a:[0,0,0,0,1,1]};
 const INFO_LOWER={y:[1.10,1.10,1.10,1.10,1.10,1.29+STACK_LIFT-.19],w:[1.3,1.3,1.3,1.3,1.3,1.3],h:[.62,.62,.62,.62,.62,.62],a:[0,0,0,0,0,1]};
 // Text rings. line 0 is the event name on the wide ring, line 1 the DJs (or host) on the narrow ring. The upper
@@ -67,15 +71,15 @@ const RING_BANDS=[
  {id:'b1',screen:1,line:0,y:[2.28,2.28,2.28,2.28,2.28,2.28+STACK_LIFT+STACK_RISE],r:[1.1,1.1,1.1,1.1,1.1,1.1],h:[.8,.8,.8,.8,.8,.8],a:[0,0,0,0,0,1],width:2048,height:236,font:224},
 ];
 // Countdown plate and face stack sit above the top screen (screen centre + .86 and + 1.28).
-const COUNTDOWN_PLATE={y:[4.87,4.87,4.87,4.87,4.87+SINGLE_SIGN_LIFT,5.67+STACK_SHIFT],w:[1.6,1.6,1.6,1.6,1.6,1.6],h:[.5,.5,.5,.5,.5,.5],a:[0,0,0,0,1,1]};
-const FACE_STACK={y:[5.36,5.36,5.36,5.36,5.36+SINGLE_SIGN_LIFT,6.16+STACK_SHIFT],w:[1.4,1.4,1.4,1.4,1.4,1.4],h:[.4,.4,.4,.4,.4,.4],a:[0,0,0,0,1,1]};
+const COUNTDOWN_PLATE={y:[4.87,4.87,4.87,4.87,4.87+SINGLE_SIGN_LIFT+SIGN_GROW,5.67+STACK_SHIFT+SIGN_GROW],w:[1.6,1.6,1.6,1.6,1.6,1.6],h:[.5,.5,.5,.5,.5,.5],a:[0,0,0,0,1,1]};
+const FACE_STACK={y:[5.36,5.36,5.36,5.36,5.36+SINGLE_SIGN_LIFT+SIGN_GROW,6.16+STACK_SHIFT+SIGN_GROW],w:[1.4,1.4,1.4,1.4,1.4,1.4],h:[.4,.4,.4,.4,.4,.4],a:[0,0,0,0,1,1]};
 // The orb floats below the rings of a single vortex and between the two stacks of a double stack.
 // Height the beam light pulses climb to (the lowest ring band), per stage.
 const PULSE_TOP=[2.5,2.5,2.5,2.5,2.36+SINGLE_RING_LOWER,3.2+STACK_LIFT+STACK_RISE];
 const ORB={y:[1.95,1.95,1.95,1.95,2.0,3.0+STACK_LIFT+STACK_RISE+STACK_GAP/2],a:[0,0,0,0,1,1],radius:.07};
 // The model's own three small circles above the screen (part of the outline): cut out where the face stack goes,
 // local y range and half width per stage. Off below the vortex.
-const DOTS_HOLE={min:[4.5,4.5,4.5,4.5,4.5+SINGLE_SIGN_LIFT,5.29+STACK_SHIFT],max:[4.9,4.9,4.9,4.9,4.9+SINGLE_SIGN_LIFT,5.7+STACK_SHIFT],half:.42,lowerMin:.5+STACK_LIFT,lowerMax:.76+STACK_LIFT};
+const DOTS_HOLE={min:[4.5,4.5,4.5,4.5,4.5+SINGLE_SIGN_LIFT+SIGN_GROW,5.29+STACK_SHIFT+SIGN_GROW],max:[4.9,4.9,4.9,4.9,4.9+SINGLE_SIGN_LIFT+SIGN_GROW,5.7+STACK_SHIFT+SIGN_GROW],half:.42,lowerMin:.5+STACK_LIFT,lowerMax:.76+STACK_LIFT};
 // Beam base disc and venue label (model units, ground level). The disc and the label ease in with the vortex
 // (stage 3.2 to 4) and stay for the double stack.
 const BASE_DISC={y:.04,radius:.8,on:3.2,full:4};
@@ -288,18 +292,19 @@ const ART_VERTEX='varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatr
 const ART_FRAGMENT=`
 varying vec2 vUv;
 uniform sampler2D map0;uniform sampler2D map1;
-uniform float aspect0;uniform float aspect1;uniform float boxAspect;
+uniform float aspect0;uniform float aspect1;uniform float boxAspect;uniform float cover0;uniform float cover1;
 uniform float mixAmount;uniform float glitch;uniform float seconds;uniform float opacity;
 uniform vec3 accent;uniform vec3 accent2;
 float hash(float n){return fract(sin(n*91.345)*47453.5453);}
-vec4 art(sampler2D tex,float asp,vec2 uv){
- vec2 c=uv-.5;float k=boxAspect/asp;vec2 s=k>1.?vec2(k,1.):vec2(1.,1./k);vec2 q=c*s+.5;
+// cover>.5 fills the box and crops (posters); otherwise the art fits inside it (logos).
+vec4 art(sampler2D tex,float asp,vec2 uv,float cover){
+ vec2 c=uv-.5;float k=boxAspect/asp;vec2 s=cover>.5?(k>1.?vec2(1.,1./k):vec2(k,1.)):(k>1.?vec2(k,1.):vec2(1.,1./k));vec2 q=c*s+.5;
  if(q.x<0.||q.x>1.||q.y<0.||q.y>1.)return vec4(0.);
  return texture2D(tex,q);
 }
 vec4 pick(vec2 uv,float slice){
  float m=glitch>0.?step(hash(slice+3.)*.7+.15,mixAmount):mixAmount;
- return m>.5?art(map1,aspect1,uv):art(map0,aspect0,uv);
+ return m>.5?art(map1,aspect1,uv,cover1):art(map0,aspect0,uv,cover0);
 }
 void main(){
  vec2 uv=vUv;float slice=floor(uv.y*16.);float tick=floor(seconds*22.);
@@ -323,7 +328,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  let iconMaterial=null;
  const tint=new THREE.Color(color);
  // Cut-out for the model's three little circles; the face stack replaces them.
- const holeUniform={value:new THREE.Vector4(0,0,0,0)},holeLowerUniform={value:new THREE.Vector4(0,0,0,0)},stackUniform={value:new THREE.Vector4(0,STACK_LIFT,STACK_RISE,STACK_GAP)},singleUniform={value:new THREE.Vector4(0,SINGLE_RING_LOWER,SINGLE_RING_UPPER-SINGLE_RING_LOWER,SINGLE_SIGN_LIFT-SINGLE_RING_UPPER)},spinUniform={value:new THREE.Vector2(0,0)},bandUniform={value:[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0))},pulseUniform={value:new THREE.Vector4(0,2,2.5,0)},beamKUniform={value:1},beamFadeUniform={value:new THREE.Vector2(99,100)},beamAccentUniform={value:new THREE.Color('#ffffff')},noRingUniform={value:0};
+ const holeUniform={value:new THREE.Vector4(0,0,0,0)},holeLowerUniform={value:new THREE.Vector4(0,0,0,0)},stackUniform={value:new THREE.Vector4(0,STACK_LIFT,STACK_RISE,STACK_GAP)},singleUniform={value:new THREE.Vector4(0,SINGLE_RING_LOWER,SINGLE_RING_UPPER-SINGLE_RING_LOWER,SINGLE_SIGN_LIFT-SINGLE_RING_UPPER)},spinUniform={value:new THREE.Vector2(0,0)},bandUniform={value:[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0))},pulseUniform={value:new THREE.Vector4(0,2,2.5,0)},beamKUniform={value:1},beamFadeUniform={value:new THREE.Vector2(99,100)},beamAccentUniform={value:new THREE.Color('#ffffff')},noRingUniform={value:0},growUniform={value:new THREE.Vector4(0,99,0,99)};
  object.traverse(node=>{
   if(!node.isMesh)return;
   const role=node.userData.mapzRole||'outline';
@@ -345,7 +350,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   const holed=role==='outline'||role==='ring-fill'||role==='icon',spaced=holed||role==='panel'||role==='beam',pulsed=role==='beam';
   if(spaced){
    material.onBeforeCompile=shader=>{
-    shader.uniforms.uNoRing=noRingUniform;shader.uniforms.uStack=stackUniform;shader.uniforms.uSingle=singleUniform;shader.uniforms.uSpin=spinUniform;shader.uniforms.uBand=bandUniform;
+    shader.uniforms.uNoRing=noRingUniform;shader.uniforms.uGrow=growUniform;shader.uniforms.uStack=stackUniform;shader.uniforms.uSingle=singleUniform;shader.uniforms.uSpin=spinUniform;shader.uniforms.uBand=bandUniform;
     if(pulsed){shader.uniforms.uPulse=pulseUniform;shader.uniforms.uBeamK=beamKUniform;shader.uniforms.uFade=beamFadeUniform;shader.uniforms.uBeamAccent=beamAccentUniform;}
     const morph=`
  #ifdef USE_MORPHTARGETS
@@ -367,12 +372,14 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  transformed.y+=uSingle.x*(uSingle.y*smoothstep(2.1,2.2,sy)+uSingle.z*smoothstep(2.6,2.7,sy)+uSingle.w*smoothstep(3.,3.04,sy));
  #endif
  transformed.y+=uStack.x*(uStack.y*smoothstep(.35,.55,transformed.y)+uStack.z*smoothstep(1.88,2.02,transformed.y)+uStack.w*smoothstep(2.93,3.07,transformed.y));
- for(int k=0;k<4;k++){
+`+(role==='beam'?'':` // Vertical poster: the top screen grows upward from its centre; the lower screen grows upward inside its own band.
+ {float gy=transformed.y;transformed.y+=uGrow.x*smoothstep(uGrow.y-.03,uGrow.y+.03,gy)+uGrow.z*smoothstep(uGrow.w-.03,uGrow.w+.03,gy)*(1.-smoothstep(uGrow.w+.85,uGrow.w+.9,gy));}
+`)+` for(int k=0;k<4;k++){
   vec4 bd=uBand[k];
   if(bd.y>0.){float wt=1.-smoothstep(bd.y*.7,bd.y,abs(transformed.y-bd.x));transformed.y+=wt*((transformed.z)*bd.z+transformed.x*bd.w);}
  }
  `+(role==='outline'?'vRing=aRing;':'')+(holed?'vHolePos=transformed;':'')+(pulsed?'vBeamY=transformed.y;':'');
-    shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\n'+(role==='outline'?'attribute float aRing;varying float vRing;':'')+'uniform vec4 uStack;uniform vec4 uSingle;uniform vec2 uSpin;uniform vec4 uBand[4];'+(holed?'\nvarying vec3 vHolePos;':'')+(pulsed?'\nvarying float vBeamY;':''))
+    shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\n'+(role==='outline'?'attribute float aRing;varying float vRing;':'')+'uniform vec4 uStack;uniform vec4 uGrow;uniform vec4 uSingle;uniform vec2 uSpin;uniform vec4 uBand[4];'+(holed?'\nvarying vec3 vHolePos;':'')+(pulsed?'\nvarying float vBeamY;':''))
      .replace('#include <morphtarget_vertex>',morph);
     if(holed){
      shader.uniforms.uHole=holeUniform;shader.uniforms.uHole2=holeLowerUniform;
@@ -400,7 +407,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  }`);
     }
    };
-   material.customProgramCacheKey=()=>'e3-v3nr-'+role+(holed?'h':'')+(pulsed?'p':'');
+   material.customProgramCacheKey=()=>'e3-v3vp-'+role+(holed?'h':'')+(pulsed?'p':'');
   }
   node.material=material;node.frustumCulled=false;
   node.renderOrder=role==='beam'?0:role==='panel'?1:role==='ring-fill'?2:3;
@@ -427,7 +434,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  // Art slides, one per screen.
  const slides=[ART_MAIN,ART_LOWER].map((table,index)=>{
   const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,
-   uniforms:{map0:{value:blank},map1:{value:blank},aspect0:{value:1},aspect1:{value:1},boxAspect:{value:1.75},mixAmount:{value:0},glitch:{value:0},seconds:{value:0},opacity:{value:0},
+   uniforms:{map0:{value:blank},map1:{value:blank},aspect0:{value:1},aspect1:{value:1},cover0:{value:0},cover1:{value:0},boxAspect:{value:1.75},mixAmount:{value:0},glitch:{value:0},seconds:{value:0},opacity:{value:0},
     accent:{value:new THREE.Color('#E03DFF')},accent2:{value:new THREE.Color('#19E3FF')}},
    vertexShader:ART_VERTEX,fragmentShader:ART_FRAGMENT});
   material.toneMapped=false;
@@ -572,6 +579,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     }
    }
    noRingUniform.value=E3_NO_RINGS&&at(sp.rings)>3.02?1:0;
+   {const open=blenderStackOpen(stage),v=Math.max(0,Math.min(1,stage-3));growUniform.value.set(SIGN_GROW*v,3.98+SINGLE_SIGN_LIFT,SIGN_GROW*open,1.29+STACK_LIFT);}
    stackUniform.value.x=blenderStackOpen(stage);
    singleUniform.value.x=blenderSingleWeight(stage);
    const hole=contentKey?blenderDotsHole(stage):{on:false,min:0,max:0,half:0};
@@ -603,7 +611,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     const standbyDim=1-slide.standby*(.55+(reduced?0:.07*Math.sin(elapsed*5.3+slide.index)));
     const u=slide.material.uniforms;
     u.map0.value=slide.textures[state.from]||blank;u.map1.value=slide.textures[state.to]||blank;
-    u.aspect0.value=slide.aspects[state.from]||1;u.aspect1.value=slide.aspects[state.to]||1;
+    u.aspect0.value=slide.aspects[state.from]||1;u.aspect1.value=slide.aspects[state.to]||1;u.cover0.value=state.from==='poster'?1:0;u.cover1.value=state.to==='poster'?1:0;
     u.mixAmount.value=state.mix;u.glitch.value=Math.max(state.glitch,sp.flash*.9,powerFlash,slide.standby>.5&&!reduced?.12:0);u.seconds.value=elapsed;u.opacity.value=face.opacity*standbyDim;u.boxAspect.value=face.width/Math.max(.01,face.height);
     slide.mesh.position.y=face.y;slide.mesh.scale.set(face.width,face.height,1);
    }
@@ -638,7 +646,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     const look=e3BeamPulseLook(urgency),reach=interpolate(PULSE_TOP,stage),strength=reduced?0:Math.max(0,Math.min(1,(stage-3.2)/.8));
     pulseUniform.value.set(pulsePhase,look.count,reach,strength);
     // Beam brightness: 20% of the full look when the start is far off, rising to 80% by the time the event opens.
-    {const bottom=interpolate(ART_MAIN.y,stage)-.75;beamFadeUniform.value.set(stage>=3.9?bottom-.5:99,stage>=3.9?bottom:100);}
+    {const bottom=interpolate(INFO_MAIN.y,stage)-.28;beamFadeUniform.value.set(stage>=3.9?bottom-.5:99,stage>=3.9?bottom:100);}
     beamKUniform.value=reduced?.5:.2+.6*Math.max(0,Math.min(1,urgency));
    }
    {
