@@ -344,6 +344,21 @@ export function e3CrowdEase(current, target, dt, rate = E3_CROWD_EASE_RATE) {
 // ---------------------------------------------------------------------------
 // Longest text ring, in characters. The ring is repeated around the band, so a short line just repeats.
 export const E3_RING_TEXT_MAX_CHARS = 56;
+// Ring text is a short label, not a sentence: long names lose filler words, then trailing words, so the letters
+// stay big enough to read on a phone. The sign carries the full name.
+export const E3_RING_NAME_MAX_CHARS = 12;
+export const E3_RING_SUB_MAX_CHARS = 14;
+const E3_RING_FILLER_WORDS = new Set(['THE', 'A', 'AN', 'OF', 'AND', '&', 'AT', 'FOR', 'WITH', 'PRESENTS', 'PRES', 'PRES.', 'FEAT', 'FEAT.', 'FT.']);
+/** Shorten one ring line to maxChars: drop filler words, then trailing whole words; only a single long word is cut. */
+export function e3ShortenRing(text, maxChars = E3_RING_NAME_MAX_CHARS) {
+  let words = String(text || '').trim().split(/\s+/).filter(Boolean);
+  if (words.join(' ').length <= maxChars) return words.join(' ');
+  const strong = words.filter((word, i) => i === 0 || !E3_RING_FILLER_WORDS.has(word));
+  if (strong.length) words = strong;
+  while (words.length > 1 && words.join(' ').length > maxChars) words.pop();
+  while (words.length > 1 && /^[-&+\u00b7]$/.test(words[words.length - 1])) words.pop();
+  return words.join(' ').slice(0, maxChars).trim();
+}
 export const E3_RING_SEPARATOR = ' \u00b7 ';
 
 /**
@@ -404,12 +419,22 @@ export function e3CleanCopy(value) {
 export function e3RingLines({eventName = '', performers = [], hostName = '', venueName = ''} = {}) {
   const name = e3CleanCopy(eventName) || e3CleanCopy(venueName);
   const djs = [...new Set((performers || []).map(e3CleanCopy).filter(Boolean))].slice(0, 4);
-  const clip = text => text.length > E3_RING_TEXT_MAX_CHARS ? text.slice(0, E3_RING_TEXT_MAX_CHARS).trim() : text;
-  if (djs.length) return {name: clip(name), sub: clip(djs.join(E3_RING_SEPARATOR)), source: 'performers'};
+  const clip = text => e3ShortenRing(text, E3_RING_SUB_MAX_CHARS);
+  const clipName = text => e3ShortenRing(text, E3_RING_NAME_MAX_CHARS);
+  if (djs.length) {
+    // As many DJs as fit whole, at least the first.
+    const kept = [];
+    for (const dj of djs) {
+      const next = [...kept, dj].join(E3_RING_SEPARATOR);
+      if (kept.length && next.length > E3_RING_SUB_MAX_CHARS) break;
+      kept.push(dj);
+    }
+    return {name: clipName(name), sub: clip(kept.join(E3_RING_SEPARATOR)), source: 'performers'};
+  }
   const host = e3CleanCopy(hostName);
-  if (host) return {name: clip(name), sub: clip(host), source: 'host'};
+  if (host) return {name: clipName(name), sub: clip(host), source: 'host'};
   const venue = e3CleanCopy(venueName);
-  return {name: clip(name), sub: venue && venue !== name ? clip(venue) : '', source: venue && venue !== name ? 'venue' : 'none'};
+  return {name: clipName(name), sub: venue && venue !== name ? clip(venue) : '', source: venue && venue !== name ? 'venue' : 'none'};
 }
 
 /** "9:00 PM" -> "9PM", "9:30 PM" -> "9:30PM", "21:00" -> "9PM". Anything unreadable stays as typed, without dashes. */
@@ -556,6 +581,24 @@ export const E3_RING_TURN_SECONDS_BASE = 20;
 export const E3_RING_TURN_SECONDS_PEAK = 5.5;
 // Gentle counter-tilt of adjacent rings: fixed small angle (radians, about 4 degrees), oscillation rate in rad/s.
 export const E3_RING_TILT_RADIANS = .07;
+// The ring rests with a copy of its text facing the camera for this share of each copy step, then turns to the next
+// copy. The average turn rate is unchanged (e3RingSpinRate), the turn just comes in short sweeps.
+export const E3_RING_DWELL = .6;
+/** Eased turn angle for a steadily growing angle: steps of 2 PI / copies, resting for E3_RING_DWELL of each step. */
+export function e3RingDwell(angle, copies = 1) {
+  const step = Math.PI * 2 / Math.max(1, copies), u = angle / step, i = Math.floor(u), f = u - i;
+  const t = f < E3_RING_DWELL ? 0 : (f - E3_RING_DWELL) / (1 - E3_RING_DWELL);
+  return (i + t * t * (3 - 2 * t)) * step;
+}
+// Sign text, plates and faces grow a little when the camera is far, so they stay readable (1 at zoom 17.8 and closer).
+export const E3_TEXT_FAR_BOOST = 1.15;
+export const E3_SIGN_FAR_BOOST = 1.12;
+export const E3_TEXT_BOOST_NEAR_ZOOM = 17.8;
+export const E3_TEXT_BOOST_FAR_ZOOM = 14.5;
+export function e3TextBoost(zoom) {
+  const t = clamp01((E3_TEXT_BOOST_NEAR_ZOOM - zoom) / (E3_TEXT_BOOST_NEAR_ZOOM - E3_TEXT_BOOST_FAR_ZOOM));
+  return 1 + (E3_TEXT_FAR_BOOST - 1) * t * t * (3 - 2 * t);
+}
 export const E3_RING_TILT_RATE_BASE = .9;
 export const E3_RING_TILT_RATE_PEAK = 1.6;
 // Beam light pulses: how many are travelling up the beam at once, and trips per second.
