@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-import {e3SlideState,e3SpinUp,e3OrbDrop,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TILT_RADIANS,E3_RING_DWELL,e3RingDwell,E3_TEXT_FAR_BOOST,E3_SIGN_FAR_BOOST} from './e3-lod.js?v=20261028-readable-text';
+import {e3SlideState,e3SpinUp,e3OrbDrop,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TILT_RADIANS,E3_RING_DWELL,e3RingDwell,E3_TEXT_FAR_BOOST,E3_SIGN_FAR_BOOST} from './e3-lod.js?v=20261028-crisp-text';
 
 // This is the exported Blender mesh, not a video/sprite reconstruction. The
 // caller owns venue grouping, same-day eligibility, LOD thresholds and layout.
