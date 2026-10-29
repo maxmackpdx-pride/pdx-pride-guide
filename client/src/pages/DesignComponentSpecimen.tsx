@@ -9,6 +9,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import PunkBoardCard from "@/components/board/punk/PunkBoardCard";
 import { outzWallToBoardPost } from "@/lib/outzBoardPost";
 import { OutzBlendArt } from "@/components/outz/OutzBlendArt";
+import OutzSmallCard from "@/components/home/OutzSmallCard";
+import OutzCardModal from "@/components/home/OutzCardModal";
 import {
   Badge,
   Button,
@@ -98,6 +100,25 @@ function Specimen({ id }: { id: string }) {
             ))}
           </div>
         </div>
+      );
+    case "component:data-display/OutzSmallCard":
+      return (
+        <AuthProvider>
+          <div className="zay-specimen__row">
+            {([["rooster-rock", "Rooster Rock", "Columbia River · Corbett, OR", "beach"], ["bc-garibaldi", "Garibaldi Lake Trail", "Whistler & Sea-to-Sky · BC, Canada", "trail"], ["silver-falls", "Silver Falls State Park", "Trail of Ten Falls · Silverton, OR", "camp"]] as const).map(([id, name, detail, kind]) => (
+              <OutzSmallCard key={id} location={{ key: `outz:${id}`, name, room: "OutZide", detail, href: `/outzide?place=${id}`, kind }} />
+            ))}
+          </div>
+        </AuthProvider>
+      );
+    case "component:data-display/OutzCardModal":
+      return (
+        <AuthProvider>
+          <OutzCardModal
+            location={{ key: "outz:rooster-rock", name: "Rooster Rock", room: "OutZide", detail: "Columbia River · Corbett, OR", href: "/outzide?place=rooster-rock", kind: "beach" }}
+            onClose={() => {}}
+          />
+        </AuthProvider>
       );
     case "component:brand/Logo":
       return <Logo variant="lockup" size={76} href={undefined} />;
