@@ -13,7 +13,7 @@
 //
 // Authored from the Mapz same-day work (Claude, PR #49): eventDepthMeters, the
 // hysteresis band and the density cap, rebuilt on top of the E3 steps.
-import {eventCountdown} from './event-countdown.js';
+import {eventCountdown} from './event-countdown.js?v=20261029-poster-bundle';
 import {e3CoinPlan,e3CompressedPlan,E3_COMPRESSED_SCALE,E3_COIN_ZOOM,E3_COIN_ZOOM_SPAN} from './e3-venue-stack.js';
 
 // Distance thresholds in meters, scaled x10 by Tucker's approved retune.
@@ -189,6 +189,9 @@ export const E3_BLENDER_SCALE_CLOSE_M = 24;
 export const E3_BLENDER_SCALE_CLOSE_ZOOM = 17.5;
 export const E3_BLENDER_ZOOM_OUT_GROWTH = .8;
 export const E3_BLENDER_MAX_SCREEN_FRACTION = .30;
+/** A 3D hologram is drawn only while its venue point is in front of the camera (clip-space w above 0). Behind
+ * the camera the projection flips and the model would smear across the view, since frustum culling is off. */
+export function e3AnchorInFront(w) { return Number.isFinite(w) && w > 1e-6; }
 /** Tucker: every vortex 25% larger at every zoom. Applies to the zoom curve and to the screen-height cap. */
 export const E3_BLENDER_SIZE_BOOST = 1.25;
 export const E3_BLENDER_TALLEST_UNITS = 5.2;
@@ -196,6 +199,35 @@ export const E3_BLENDER_TALLEST_UNITS = 5.2;
 // gets its own cap height. The scale blends from the single to the stack value as the stage goes 4 to 5, which
 // shrinks the pair a little instead of letting it run off the screen.
 export const E3_BLENDER_STACK_TALLEST_UNITS = 6.8;
+// Concept (no stack, taller beam): the real top of the single sign, by how many countdowns sit under it (1 or 2).
+// Must match e3NoStackLayout(n).signTop in e3-blender-model.js (a test checks). The cap uses the real height, so a
+// one-event venue grows into the room the old stack used to need, and E3_BLENDER_MAX_SCREEN_FRACTION stays the max.
+export const E3_NO_STACK_TALLEST_UNITS = [6.71, 7.27];
+// Slideshow: one event per E3_SLIDE_SECONDS on two-event venues.
+export const E3_SLIDE_SECONDS = 7;
+// Orb pulses: a full one when the slide flips, a half one between flips once the event is live.
+export const E3_ORB_PULSE_SECONDS = .6;
+export const E3_LIVE_BEAM_BOOST = .15;
+
+/** Seconds into the current slide window (0..E3_SLIDE_SECONDS), on the same clock the slideshow uses. */
+export function e3SlideClock(elapsed, phase = 0) {
+  const t = (elapsed + phase * .9) % E3_SLIDE_SECONDS;
+  return t < 0 ? t + E3_SLIDE_SECONDS : t;
+}
+
+/** Fill (0..1) of the thin progress bar on the lit countdown: two-event venues only, full right as the slide flips. */
+export function e3SlideProgress(elapsed, phase = 0, events = 1) {
+  if (events < 2) return null;
+  return e3SlideClock(elapsed, phase) / E3_SLIDE_SECONDS;
+}
+
+/** Orb pulse 0..1: one quick bright pulse at each slide flip (two events), a half pulse midway once the event is live. */
+export function e3OrbPulse(elapsed, phase = 0, events = 1, live = false) {
+  const t = e3SlideClock(elapsed, phase), d = E3_ORB_PULSE_SECONDS;
+  const flip = events > 1 && t < d ? 1 - t / d : 0;
+  const mid = E3_SLIDE_SECONDS / 2, half = live && t >= mid && t < mid + d ? .5 * (1 - (t - mid) / d) : 0;
+  return Math.max(flip, half);
+}
 export const E3_BLENDER_SIZE_FULL_ZOOM = 15.5;
 // Tucker's 20% size floor moved from zoom 12 to zoom 10, so the tall vortex stays readable (about 100 px at zoom 12.5)
 // across the extra zoom levels it now reaches. Size at zoom 15.5 and closer is unchanged.
@@ -227,22 +259,23 @@ const metersPerPixelAt = (zoom, latitude) => 40075016.686 * Math.cos(latitude * 
 const pitchFactor = pitch => Math.max(.35, Math.sin(pitch * Math.PI / 180));
 
 /** Cap height in model units: the coin value, blending to the shared single and double stack value between stages 3 and 4. */
-export function e3BlenderTallestUnits(stage = 0) {
+export function e3BlenderTallestUnits(stage = 0, events = 2) {
   // The single vortex now stands as tall as the double stack (its sign ends at the same height), so the cap
   // height reaches the stack value at stage 4 and stays there. The coin and below keep the old value.
   const lift = clamp01(stage - 3);
-  return E3_BLENDER_TALLEST_UNITS + (E3_BLENDER_STACK_TALLEST_UNITS - E3_BLENDER_TALLEST_UNITS) * lift;
+  const top = E3_NO_STACK_TALLEST_UNITS[events >= 2 ? 1 : 0];
+  return E3_BLENDER_TALLEST_UNITS + (top - E3_BLENDER_TALLEST_UNITS) * lift;
 }
 
 /**
  * World scale in meters for the 3D model at a zoom. With a viewHeight (CSS px) the scale is also capped so the
  * tallest stage stays under E3_BLENDER_MAX_SCREEN_FRACTION of the screen.
  */
-export function e3BlenderScaleMeters(zoom, {viewHeight = 0, latitude = 45.5, pitch = 50, stage = 0} = {}) {
+export function e3BlenderScaleMeters(zoom, {viewHeight = 0, latitude = 45.5, pitch = 50, stage = 0, events = 2} = {}) {
   const zoomOut = Math.max(0, E3_BLENDER_SCALE_CLOSE_ZOOM - zoom);
   const base = E3_BLENDER_SCALE_CLOSE_M * Math.pow(2, zoomOut * E3_BLENDER_ZOOM_OUT_GROWTH) * e3BlenderSizeFactor(zoom) * E3_BLENDER_SIZE_BOOST;
   if (!(viewHeight > 0)) return base;
-  const capped = E3_BLENDER_MAX_SCREEN_FRACTION * E3_BLENDER_SIZE_BOOST * viewHeight * metersPerPixelAt(zoom, latitude) / (e3BlenderTallestUnits(stage) * pitchFactor(pitch));
+  const capped = E3_BLENDER_MAX_SCREEN_FRACTION * E3_BLENDER_SIZE_BOOST * viewHeight * metersPerPixelAt(zoom, latitude) / (e3BlenderTallestUnits(stage, events) * pitchFactor(pitch));
   return Math.min(base, capped);
 }
 
@@ -386,7 +419,7 @@ export function e3RingText({venueName = '', eventNames = [], time = ''} = {}) {
 export function e3CountdownText(startsAtMs, nowMs) {
   const status = eventCountdown(startsAtMs, nowMs, true);
   if (!status) return '';
-  if (status === 'STARTED') return 'LIVE';
+  if (status === 'STARTED') return '';
   const parts = [...String(status).matchAll(/(\d+)\s*(D|H|M|S)/g)];
   if (!parts.length) return '';
   return parts.map(part => `${part[1].padStart(2, '0')}${part[2].toLowerCase()}`).join(' : ');
@@ -527,10 +560,11 @@ export function e3SlideState(kinds, seconds, {reduced = false, period = E3_SLIDE
 }
 
 /** The countdown as big numerals with a small unit letter each: d:h when a day or more away, else h:m:s or m:s. */
-export function e3CountdownParts(startsAtMs, nowMs) {
+export function e3CountdownParts(startsAtMs, nowMs, timeLabel = '') {
   const status = eventCountdown(startsAtMs, nowMs, true);
   if (!status) return [];
-  if (status === 'STARTED') return [{live: true, value: 'LIVE', unit: ''}];
+  // Started: no LIVE label; the plate keeps the event time.
+  if (status === 'STARTED') return [{live: true, value: String(timeLabel || ''), unit: ''}];
   const groups = [...String(status).matchAll(/(\d+)\s*(D|H|M|S)/g)].map(match => ({value: match[1].padStart(2, '0'), unit: match[2].toLowerCase()}));
   const days = groups.find(group => group.unit === 'd');
   return days ? groups.slice(0, 2) : groups;

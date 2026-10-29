@@ -9,7 +9,8 @@ import {
   e3EventUrgency,E3_URGENCY_RAMP_MS,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TURN_SECONDS_BASE,E3_RING_TURN_SECONDS_PEAK,E3_BEAM_PULSES_BASE,E3_BEAM_PULSES_PEAK,E3_BEAM_PULSE_SPEED_BASE,E3_BEAM_PULSE_SPEED_PEAK,E3_RING_TILT_RADIANS,e3SpinUp,e3OrbDrop,e3BlenderTallestUnits,E3_BLENDER_STACK_TALLEST_UNITS,E3_BLENDER_TALLEST_UNITS,
   E3_LOD_MAX_FULL,e3ShortenRing,e3RingDwell,e3TextBoost,E3_RING_DWELL,E3_TEXT_FAR_BOOST,E3_SIGN_FAR_BOOST,E3_RING_SUB_MAX_CHARS
 } from '../client/public/mapz-map/e3-lod.js';
-import {SINGLE_SIGN_LIFT,SINGLE_RING_LOWER,SINGLE_RING_UPPER,blenderSingleWeight,blenderLogoFace,blenderBandFace,blenderPlateFace,blenderArtFace,blenderOrbFace,blenderDotsHole,BLENDER_TABLES,blenderBaseFace,blenderStackOpen,STACK_LIFT,STACK_RISE,STACK_GAP,STACK_SHIFT} from '../client/public/mapz-map/e3-blender-model.js';
+import {SINGLE_SIGN_LIFT,SINGLE_RING_LOWER,SINGLE_RING_UPPER,blenderSingleWeight,blenderLogoFace,blenderBandFace,blenderPlateFace,blenderArtFace,blenderOrbFace,blenderDotsHole,BLENDER_TABLES,blenderBaseFace,blenderStackOpen,STACK_LIFT,STACK_RISE,STACK_GAP,STACK_SHIFT,E3_NO_STACK,E3_EVENT_SECONDS,ORB_Y,ORB_R,CD_W,CD_H,FACE_W,FACE_H,GAP_ORB,GAP_CD,GAP_SIGN,e3NoStackLayout,SIGN_NARROW,BLEED_W,BLEED_H,POSTER_W,POSTER_H} from '../client/public/mapz-map/e3-blender-model.js';
+import {E3_NO_STACK_TALLEST_UNITS,E3_SLIDE_SECONDS,e3SlideProgress,e3OrbPulse,e3SlideClock,E3_LIVE_BEAM_BOOST} from '../client/public/mapz-map/e3-lod.js';
 
 test('3D hologram scale: 24 m at close zoom, 20% at zoom 12, full size from 15.5, smooth in between', () => {
   assert.equal(E3_BLENDER_SCALE_CLOSE_M,24);
@@ -160,7 +161,7 @@ test('countdown copy matches the 2D digital readout and follows the viewTime clo
   assert.equal(e3CountdownText(now+3*3600e3+5e3,now),'03h : 00m : 05s');
   assert.equal(e3CountdownText(now+3*3600e3,now+1e3),'02h : 59m : 59s','one second later it ticks');
   assert.equal(e3CountdownText(now+20*60e3,now),'20m : 00s');
-  assert.equal(e3CountdownText(now-60e3,now),'LIVE');
+  assert.equal(e3CountdownText(now-60e3,now),'','no LIVE label once started');
   assert.equal(e3CountdownText(NaN,now),'');
 });
 
@@ -246,6 +247,7 @@ test('countdown parts: big numerals with unit letters, d:h from a day out, h:m:s
   assert.deepEqual(e3CountdownParts(now+30*H+5e3,now),[{value:'01',unit:'d'},{value:'06',unit:'h'}]);
   assert.deepEqual(e3CountdownParts(now+7*24*H+7*H,now).map(part=>part.unit),['d','h']);
   assert.equal(e3CountdownParts(now-1,now)[0].live,true);
+  assert.equal(e3CountdownParts(now-1,now,'9 PM')[0].value,'9 PM','started: the plate keeps the event time, no LIVE text');
   assert.deepEqual(e3CountdownParts(NaN,now),[]);
 });
 
@@ -279,7 +281,8 @@ test('v2 model tables: art, info bands, text rings, orb and the dots cut-out onl
   assert.deepEqual(RING_BANDS.map(band=>[band.id,blenderBandFace(band,4).opacity]),[['a1',1],['a2',1],['b2',0],['b1',0]]);
   assert.deepEqual(RING_BANDS.map(band=>blenderBandFace(band,5).opacity),[1,1,1,1]);
   assert.ok(blenderOrbFace(5).y>blenderOrbFace(4).y,'the orb floats between the stacks, above the single vortex base');
-  assert.ok(blenderPlateFace(4,FACE_STACK).y>blenderPlateFace(4,COUNTDOWN_PLATE).y,'faces sit above the clock');
+  // No stack: faces sit right on the orb, the countdown above them, the one sign on top.
+  {const lay=e3NoStackLayout(1);assert.ok(lay.facesY<lay.plates[0]&&lay.plates[0]<lay.signBottom,'faces under the countdown under the sign');}
   assert.equal(blenderDotsHole(3).on,false);
   assert.equal(blenderDotsHole(4).on,true);
   // The info band (time and name) sits under the art on the same screen.
@@ -293,14 +296,14 @@ test('river-flight and the model wire the v2 vortex without fake dates', async (
   assert.match(flight,/e3StageTarget\(g\.depthM,\{capped,sameDay:g\.sameDay,stack\}\)/,'the stage follows distance continuously');
   assert.match(flight,/e3StageStep\(st,stage,frameNow\)/);
   assert.match(flight,/e3StackOrder\(g\.events,lodNow,stack\?2:1\)/);
-  assert.match(flight,/countdown:e3CountdownParts\(nearest\.startsAtMs,lodNow\)/);
+  assert.match(flight,/countdown:e3CountdownParts\(nearest\.startsAtMs,lodNow,e3TimeLabel\(nearest\.time\)\)/);
   assert.match(flight,/faces:e3FaceStack\(nearest\.avatars,nearest\.avatarTotal\)/);
   assert.match(flight,/e3RingLines\(\{eventName:event\.name,performers:event\.performers,hostName:event\.hostName/);
   assert.match(flight,/sameDayVortex=g\.sameDay&&Math\.max\(stage,st\.value\)>3/);
   assert.match(flight,/absolute\.origin!==location\.origin/,'posters are same-origin only');
   assert.match(model,/item\.model\.setContent\(row\.content/);
   assert.match(model,/for\(const texture of \[\.\.\.textures\]\)texture\.dispose\(\)/,'every canvas texture is disposed');
-  assert.match(model,/e3SlideState\(slide\.kinds,elapsed/);
+  assert.match(model,/e3SlideState\(src\.kinds,elapsed/,'the one sign shows the active event\'s slides');
   assert.ok(!/Date\.now\s*=|fakeNow|mockNow/.test(flight+model),'no fake clock in the product');
   assert.ok(!/[\u2014\u2013]/.test(model.replace(/\/\/.*$/gm,'')),'no dashes in drawn copy');
 });
@@ -361,24 +364,29 @@ test('staged spin-up: coin flip, rings unfold, screen slides out, orb drops, fla
   assert.equal(e3OrbDrop(0),1);assert.equal(e3OrbDrop(1),0);assert.ok(e3OrbDrop(.5)>0&&e3OrbDrop(.5)<1);assert.ok(e3OrbDrop(.875)>0&&e3OrbDrop(.875)<.15);
 });
 
-test('double stack spacing: lower stack lifted off the pin, a gap for the orb, the cap follows the taller stack', () => {
-  assert.ok(STACK_LIFT>=.6&&STACK_GAP>=.5&&STACK_RISE>=.3&&STACK_SHIFT===STACK_LIFT+STACK_RISE+STACK_GAP);
-  assert.equal(blenderStackOpen(4),0);assert.equal(blenderStackOpen(5),1);assert.equal(blenderStackOpen(3),0);
-  const {ART_MAIN,ART_LOWER,INFO_MAIN,INFO_LOWER,RING_BANDS,ORB,COUNTDOWN_PLATE,FACE_STACK}=BLENDER_TABLES;
-  // Lower screen starts above where it was, upper stack rises by the full shift.
-  assert.ok(ART_LOWER.y[5]>=1.49+STACK_LIFT-1e-9);
-  assert.ok(ART_MAIN.y[5]-ART_LOWER.y[5]>3.49+STACK_GAP-1e-9);
-  // The orb sits between the two ring pairs: above the lower pair's top edge and below the upper pair's bottom edge.
-  const band=id=>{const b=RING_BANDS.find(item=>item.id===id);return {top:b.y[5]+b.h[5]/2,bottom:b.y[5]-b.h[5]/2};};
-  const lowerTop=Math.max(band('b1').top,band('b2').top),upperBottom=Math.min(band('a1').bottom,band('a2').bottom);
-  assert.ok(ORB.y[5]>lowerTop-.05&&ORB.y[5]<upperBottom+.05,`orb ${ORB.y[5]} between ${lowerTop} and ${upperBottom}`);
-  assert.ok(upperBottom-lowerTop>.1,'ring pairs no longer overlap');
-  assert.ok(COUNTDOWN_PLATE.y[5]>ART_MAIN.y[5]&&FACE_STACK.y[5]>COUNTDOWN_PLATE.y[5]);
-  // Bigger ring text and a bigger start time band than the v2 build (bands .58/.36 and .36 tall).
-  assert.ok(RING_BANDS.find(item=>item.id==='a1').h[4]>=.78&&RING_BANDS.find(item=>item.id==='a2').h[4]>=.48);
-  assert.ok(INFO_MAIN.h[5]>=.5&&INFO_LOWER.h[5]>=.5);
-  assert.equal(e3BlenderTallestUnits(3),E3_BLENDER_TALLEST_UNITS);assert.equal(e3BlenderTallestUnits(4),E3_BLENDER_STACK_TALLEST_UNITS);assert.equal(e3BlenderTallestUnits(5),E3_BLENDER_STACK_TALLEST_UNITS);
-  assert.ok(E3_BLENDER_STACK_TALLEST_UNITS>E3_BLENDER_TALLEST_UNITS);
+test('no stack: one sign, a countdown per event stacked under it, faces on a snug orb, cap follows the real height', async () => {
+  assert.equal(E3_NO_STACK,true);
+  const model=await readFile(new URL('../client/public/mapz-map/e3-blender-model.js',import.meta.url),'utf8');
+  assert.match(model,/if\(E3_NO_STACK\)stage=Math\.min\(4,stage\)/,'the double stack stage is never used');
+  for (const n of [1,2]) {
+    const lay=e3NoStackLayout(n);
+    assert.equal(lay.plates.length,n);
+    assert.ok(Math.abs(lay.facesBottom-(ORB_Y+ORB_R+GAP_ORB))<1e-9&&GAP_ORB<=.06,'no padding around the orb');
+    assert.ok(lay.facesY+FACE_H/2<=Math.min(...lay.plates)-CD_H/2+1e-9,'faces clear the lowest countdown');
+    assert.ok(Math.max(...lay.plates)+CD_H/2+GAP_SIGN<=lay.signBottom+1e-9,'the sign sits on the top countdown');
+    assert.ok(Math.abs(lay.signTop-E3_NO_STACK_TALLEST_UNITS[n-1])<1e-6,`cap height matches the real sign top for ${n} event(s)`);
+    assert.ok(Math.abs(e3BlenderTallestUnits(4,n)-lay.signTop)<1e-6);
+  }
+  const two=e3NoStackLayout(2);
+  assert.ok(two.plates[0]>two.plates[1],'first event countdown on top, second right under it');
+  assert.ok(Math.abs(two.plates[0]-two.plates[1]-(CD_H+GAP_CD))<1e-9,'same width, tight gap');
+  assert.equal(e3BlenderTallestUnits(3),E3_BLENDER_TALLEST_UNITS);
+  assert.ok(e3BlenderTallestUnits(4,1)<e3BlenderTallestUnits(4,2),'a one-event venue uses the height the stack used to need');
+  assert.equal(E3_BLENDER_MAX_SCREEN_FRACTION,.30,'the screen-height cap stays the hard max');
+  // Taller beam: the orb sits well above the pin so the beam does not read as a stub zoomed out.
+  assert.ok(ORB_Y>=4&&blenderOrbFace(4).y===ORB_Y);
+  const {INFO_MAIN,RING_BANDS}=BLENDER_TABLES;
+  assert.ok(RING_BANDS.find(item=>item.id==='a1').h[4]>=.78&&INFO_MAIN.h[4]>=.5);
 });
 
 test('beam base disc and venue label ease in with the vortex and stay for the stack', () => {
@@ -411,22 +419,14 @@ test('double stack puts the sooner event on top and labels pending events', asyn
   assert.equal(e3StartsInLabel(now - 1, now), '');
 });
 
-test('single vortex: longer beam, its sign ends exactly where the double stack top sign ends, rings evenly spaced', () => {
-  const {ART_MAIN,INFO_MAIN,FACE_STACK,COUNTDOWN_PLATE,RING_BANDS,ORB}=BLENDER_TABLES;
-  for (const table of [ART_MAIN,INFO_MAIN,FACE_STACK,COUNTDOWN_PLATE]) assert.ok(Math.abs(table.y[4]-table.y[5])<1e-9,'single and double top sign share one height');
-  assert.ok(Math.abs(SINGLE_SIGN_LIFT-(STACK_SHIFT+.8))<1e-9);
-  assert.equal(e3BlenderTallestUnits(4),e3BlenderTallestUnits(5),'same scale, so the same world and screen height at every zoom');
-  assert.equal(blenderSingleWeight(3),0);assert.equal(blenderSingleWeight(4),1);assert.equal(blenderSingleWeight(5),0);
-  assert.ok(blenderSingleWeight(3.5)>0&&blenderSingleWeight(4.5)>0);
-  // Edge gaps (orb to lower ring, ring to ring, upper ring to the sign) are equal, with room for the ring tilt.
-  const a1=RING_BANDS.find(item=>item.id==='a1'),a2=RING_BANDS.find(item=>item.id==='a2');
-  const lowerBottom=a2.y[4]-a2.h[4]/2,lowerTop=a2.y[4]+a2.h[4]/2,upperBottom=a1.y[4]-a1.h[4]/2,upperTop=a1.y[4]+a1.h[4]/2;
-  const signBottom=INFO_MAIN.y[4]-INFO_MAIN.h[4]/2;
-  const gaps=[lowerBottom-ORB.y[4],upperBottom-lowerTop,signBottom-upperTop];
-  for (const gap of gaps) assert.ok(gap>.8,`gap ${gap} leaves room around the ring text`);
-  assert.ok(Math.max(...gaps)-Math.min(...gaps)<.1,`gaps ${gaps.join(', ')} are even`);
-  // The shader lifts the Blender rings by the same amounts the text bands moved.
-  assert.ok(Math.abs(a2.y[4]-(2.36+SINGLE_RING_LOWER))<1e-9&&Math.abs(a1.y[4]-(2.88+SINGLE_RING_UPPER))<1e-9);
+test('no rings: the text rings stay hidden at every vortex stage; the slideshow alternates two events', async () => {
+  const model=await readFile(new URL('../client/public/mapz-map/e3-blender-model.js',import.meta.url),'utf8');
+  assert.match(model,/const E3_NO_RINGS=true;/);
+  assert.match(model,/const show=!E3_NO_RINGS&&Boolean\(face\)/,'ring text never shows');
+  assert.match(model,/noRingUniform\.value=E3_NO_RINGS&&/,'ring meshes are cut from the model too');
+  assert.equal(E3_EVENT_SECONDS,E3_SLIDE_SECONDS);assert.equal(E3_SLIDE_SECONDS,7);
+  assert.match(model,/Math\.floor\(\(elapsed\+phase\*\.9\)\/E3_EVENT_SECONDS\)%nEvents/,'one sign, slides alternate per event');
+  assert.equal(blenderSingleWeight(3),0);assert.equal(blenderSingleWeight(4),1);
 });
 
 test('no flat coin inside the vortex range: every same-day venue is a vortex, plain venues stay a pin, the 3D budget fits a crowd', async () => {
@@ -458,15 +458,37 @@ test('readable text: ring lines shorten by words, the ring rests facing the came
   assert.ok(E3_SIGN_FAR_BOOST<=E3_TEXT_FAR_BOOST);
 });
 
-test('readable text: bigger sign and plates, the art box sits above the info band, single and double share one top sign', () => {
-  const {ART_MAIN,INFO_MAIN,INFO_LOWER,ART_LOWER,COUNTDOWN_PLATE,FACE_STACK}=BLENDER_TABLES;
-  assert.ok(INFO_MAIN.h[4]>=.6&&INFO_MAIN.h[5]>=.6&&COUNTDOWN_PLATE.h[4]>=.5&&FACE_STACK.h[4]>=.4,'taller sign, plate and face row');
-  for(const [art,info] of [[ART_MAIN,INFO_MAIN]]){
-    for(const i of [4,5])assert.ok(art.y[i]-art.h[i]/2>=info.y[i]+info.h[i]/2-.03,`art box clears the info band at ${i}`);
-  }
-  assert.ok(ART_LOWER.y[5]-ART_LOWER.h[5]/2>=INFO_LOWER.y[5]+INFO_LOWER.h[5]/2-.03);
-  assert.ok(FACE_STACK.y[4]-FACE_STACK.h[4]/2>=COUNTDOWN_PLATE.y[4]+COUNTDOWN_PLATE.h[4]/2-.001,'faces clear the plate');
+test('full-bleed vertical poster: narrow portrait sign, countdowns at the old size stretch past it, faces readable', async () => {
+  assert.ok(CD_W===1.6&&CD_H===.5,'countdown back to the old 1.6 x .5 size');
+  assert.ok(FACE_W>=1.4&&FACE_H>=.4,'face row big enough to read');
+  assert.ok(SIGN_NARROW<1,'the sign frame narrows to a poster');
+  assert.ok(BLEED_H>BLEED_W*SIGN_NARROW,'the screen is portrait (taller than wide)');
+  assert.ok(CD_W>BLEED_W*SIGN_NARROW,'countdown stretches past the poster sides');
+  const model=await readFile(new URL('../client/public/mapz-map/e3-blender-model.js',import.meta.url),'utf8');
+  assert.match(model,/u\.cover0\.value=state\.from==='poster'\?1:0/,'posters cover the screen edge to edge');
   assert.ok(BLENDER_TABLES.BASE_LABEL.width>=2.2);
+});
+
+test('slide progress bar, orb pulses and the live effect', async () => {
+  assert.equal(e3SlideProgress(1,0,1),null,'no bar on one-event venues');
+  assert.equal(e3SlideProgress(0,0,2),0);
+  assert.ok(Math.abs(e3SlideProgress(3.5,0,2)-.5)<1e-9);
+  assert.ok(e3SlideProgress(6.99,0,2)>.99,'full right as the slide flips');
+  assert.equal(e3SlideProgress(7,0,2),0,'restarts with the next slide');
+  for (let t=0;t<14;t+=.25) assert.ok(Math.abs(e3SlideProgress(t,1.3,2)-e3SlideClock(t,1.3)/7)<1e-9);
+  // The bar's flip and the slideshow's flip are the same clock.
+  for (let t=0;t<30;t+=.37) assert.equal(Math.floor((t+1.3*.9)/E3_EVENT_SECONDS)%2,Math.floor((t+1.3*.9)/7)%2);
+  assert.equal(e3OrbPulse(0,0,2,false),1,'bright pulse on the flip');
+  assert.equal(e3OrbPulse(1,0,2,false),0,'quick');
+  assert.equal(e3OrbPulse(0,0,1,false),0,'no flip, no pulse on one-event venues');
+  assert.equal(e3OrbPulse(3.5,0,2,false),0);
+  assert.equal(e3OrbPulse(3.5,0,2,true),.5,'live: half pulse between slides');
+  assert.equal(e3OrbPulse(3.5,0,1,true),.5);
+  assert.ok(E3_LIVE_BEAM_BOOST>0&&E3_LIVE_BEAM_BOOST<=.2,'beam a little brighter when live, still subtle');
+  const model=await readFile(new URL('../client/public/mapz-map/e3-blender-model.js',import.meta.url),'utf8');
+  assert.match(model,/\+\(live\?E3_LIVE_BEAM_BOOST:0\)/);
+  assert.match(model,/node\.visible=live&&!reduced/,'extra sparkles only when live and motion is allowed');
+  assert.match(model,/const fill=reduced\?null:e3SlideProgress/);
 });
 
 test('readable text: model wiring has no ghost far wall, no colour fringe offset, and the sign text boost reaches the model', async () => {

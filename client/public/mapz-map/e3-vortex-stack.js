@@ -95,7 +95,7 @@ function stackCountdown(members,now){
  const next=Math.min(...members.map(member=>Number.isFinite(member.startsAt)?member.startsAt:Infinity));
  if(!Number.isFinite(next))return '';
  const remaining=next-now;
- if(remaining<=0)return 'LIVE';
+ if(remaining<=0)return '';
  const minutes=Math.floor(remaining/60000),days=Math.floor(minutes/1440),hours=Math.floor((minutes%1440)/60),mins=minutes%60;
  const pad=value=>String(value).padStart(2,'0');
  return days?`${pad(days)}d:${pad(hours)}h`:`${pad(hours)}h:${pad(mins)}m`;
