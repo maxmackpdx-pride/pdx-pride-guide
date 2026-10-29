@@ -316,15 +316,23 @@ void main(){
 }`;
 function blankTexture(){const t=new THREE.DataTexture(new Uint8Array([0,0,0,0]),1,1,THREE.RGBAFormat);t.needsUpdate=true;return t;}
 // mirrored: set when the host draws the model through a projection that flips triangle winding (the map layer does not).
+// Concept: vortex without rings. Hides the text ring bands, the ring fills, and the ring parts of the outline at vortex stages.
+const E3_NO_RINGS=true;
 export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=null,mirrored=false}={}){
  const object=template.clone(true),meshes=[],particles=[],materials=new Set(),groundTexture=radialTexture();
  let iconMaterial=null;
  const tint=new THREE.Color(color);
  // Cut-out for the model's three little circles; the face stack replaces them.
- const holeUniform={value:new THREE.Vector4(0,0,0,0)},holeLowerUniform={value:new THREE.Vector4(0,0,0,0)},stackUniform={value:new THREE.Vector4(0,STACK_LIFT,STACK_RISE,STACK_GAP)},singleUniform={value:new THREE.Vector4(0,SINGLE_RING_LOWER,SINGLE_RING_UPPER-SINGLE_RING_LOWER,SINGLE_SIGN_LIFT-SINGLE_RING_UPPER)},spinUniform={value:new THREE.Vector2(0,0)},bandUniform={value:[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0))},pulseUniform={value:new THREE.Vector4(0,2,2.5,0)},beamKUniform={value:1},beamFadeUniform={value:new THREE.Vector2(99,100)},beamAccentUniform={value:new THREE.Color('#ffffff')};
+ const holeUniform={value:new THREE.Vector4(0,0,0,0)},holeLowerUniform={value:new THREE.Vector4(0,0,0,0)},stackUniform={value:new THREE.Vector4(0,STACK_LIFT,STACK_RISE,STACK_GAP)},singleUniform={value:new THREE.Vector4(0,SINGLE_RING_LOWER,SINGLE_RING_UPPER-SINGLE_RING_LOWER,SINGLE_SIGN_LIFT-SINGLE_RING_UPPER)},spinUniform={value:new THREE.Vector2(0,0)},bandUniform={value:[0,1,2,3].map(()=>new THREE.Vector4(0,0,0,0))},pulseUniform={value:new THREE.Vector4(0,2,2.5,0)},beamKUniform={value:1},beamFadeUniform={value:new THREE.Vector2(99,100)},beamAccentUniform={value:new THREE.Color('#ffffff')},noRingUniform={value:0};
  object.traverse(node=>{
   if(!node.isMesh)return;
   const role=node.userData.mapzRole||'outline';
+  if(E3_NO_RINGS&&role==='outline'&&node.morphTargetDictionary&&!node.geometry.attributes.aRing){
+   node.geometry=node.geometry.clone();
+   const pos=node.geometry.attributes.position,mask=new Float32Array(pos.count),m=node.geometry.morphAttributes.position||[];
+   for(const [name,index] of Object.entries(node.morphTargetDictionary))if(/^Ring \d independent hover$/.test(name)){const d=m[index];for(let v=0;v<pos.count;v++)if(Math.abs(d.getX(v))+Math.abs(d.getY(v))+Math.abs(d.getZ(v))>1e-6)mask[v]=1;}
+   node.geometry.setAttribute('aRing',new THREE.BufferAttribute(mask,1));
+  }
   const white=role==='icon'||role==='particle';
   const opacity={outline:.9,'ring-fill':.095,beam:.03,panel:.29,icon:1,particle:.89,ground:.5}[role]??1;
   const material=new THREE.MeshBasicMaterial({color:role==='panel'?0x000000:white?0xffffff:tint,
@@ -337,7 +345,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   const holed=role==='outline'||role==='ring-fill'||role==='icon',spaced=holed||role==='panel'||role==='beam',pulsed=role==='beam';
   if(spaced){
    material.onBeforeCompile=shader=>{
-    shader.uniforms.uStack=stackUniform;shader.uniforms.uSingle=singleUniform;shader.uniforms.uSpin=spinUniform;shader.uniforms.uBand=bandUniform;
+    shader.uniforms.uNoRing=noRingUniform;shader.uniforms.uStack=stackUniform;shader.uniforms.uSingle=singleUniform;shader.uniforms.uSpin=spinUniform;shader.uniforms.uBand=bandUniform;
     if(pulsed){shader.uniforms.uPulse=pulseUniform;shader.uniforms.uBeamK=beamKUniform;shader.uniforms.uFade=beamFadeUniform;shader.uniforms.uBeamAccent=beamAccentUniform;}
     const morph=`
  #ifdef USE_MORPHTARGETS
@@ -363,13 +371,13 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   vec4 bd=uBand[k];
   if(bd.y>0.){float wt=1.-smoothstep(bd.y*.7,bd.y,abs(transformed.y-bd.x));transformed.y+=wt*((transformed.z)*bd.z+transformed.x*bd.w);}
  }
- `+(holed?'vHolePos=transformed;':'')+(pulsed?'vBeamY=transformed.y;':'');
-    shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nuniform vec4 uStack;uniform vec4 uSingle;uniform vec2 uSpin;uniform vec4 uBand[4];'+(holed?'\nvarying vec3 vHolePos;':'')+(pulsed?'\nvarying float vBeamY;':''))
+ `+(role==='outline'?'vRing=aRing;':'')+(holed?'vHolePos=transformed;':'')+(pulsed?'vBeamY=transformed.y;':'');
+    shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\n'+(role==='outline'?'attribute float aRing;varying float vRing;':'')+'uniform vec4 uStack;uniform vec4 uSingle;uniform vec2 uSpin;uniform vec4 uBand[4];'+(holed?'\nvarying vec3 vHolePos;':'')+(pulsed?'\nvarying float vBeamY;':''))
      .replace('#include <morphtarget_vertex>',morph);
     if(holed){
      shader.uniforms.uHole=holeUniform;shader.uniforms.uHole2=holeLowerUniform;
-     shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vHolePos;uniform vec4 uHole;uniform vec4 uHole2;')
-      .replace('void main() {','void main() {\n if(uHole.w>.5&&vHolePos.y>uHole.x&&vHolePos.y<uHole.y&&abs(vHolePos.x)<uHole.z)discard;\n if(uHole2.w>.5&&vHolePos.y>uHole2.x&&vHolePos.y<uHole2.y&&abs(vHolePos.x)<uHole2.z)discard;');
+     shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vHolePos;uniform vec4 uHole;uniform vec4 uHole2;uniform float uNoRing;'+(role==='outline'?'varying float vRing;':''))
+      .replace('void main() {','void main() {\n'+(role==='outline'?' if(uNoRing>.5&&vRing>.5)discard;\n':role==='ring-fill'?' if(uNoRing>.5)discard;\n':'')+' if(uHole.w>.5&&vHolePos.y>uHole.x&&vHolePos.y<uHole.y&&abs(vHolePos.x)<uHole.z)discard;\n if(uHole2.w>.5&&vHolePos.y>uHole2.x&&vHolePos.y<uHole2.y&&abs(vHolePos.x)<uHole2.z)discard;');
     }
     if(pulsed){
      // Small bright pulses climbing the beam from the pin to the rings. uPulse: phase, how many at once, the height they reach, strength.
@@ -392,7 +400,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  }`);
     }
    };
-   material.customProgramCacheKey=()=>'e3-v3-'+(holed?'h':'')+(pulsed?'p':'');
+   material.customProgramCacheKey=()=>'e3-v3nr-'+role+(holed?'h':'')+(pulsed?'p':'');
   }
   node.material=material;node.frustumCulled=false;
   node.renderOrder=role==='beam'?0:role==='panel'?1:role==='ring-fill'?2:3;
@@ -563,6 +571,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
       hover*(.82*Math.sin(frame*motion[0]+motion[1]+phase)+.18*Math.sin(frame*motion[0]*1.9+motion[1]+.6+phase)):0;
     }
    }
+   noRingUniform.value=E3_NO_RINGS&&at(sp.rings)>3.02?1:0;
    stackUniform.value.x=blenderStackOpen(stage);
    singleUniform.value.x=blenderSingleWeight(stage);
    const hole=contentKey?blenderDotsHole(stage):{on:false,min:0,max:0,half:0};
@@ -608,7 +617,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    const turn=reduced?0:ringAngle,tiltAmp=reduced?0:E3_RING_TILT_RADIANS;
    bands.forEach((band,k)=>{
     const face=band.texture?blenderBandFace(band.spec,at(sp.rings)):null;
-    const show=Boolean(face)&&face.opacity>.01;
+    const show=!E3_NO_RINGS&&Boolean(face)&&face.opacity>.01;
     for(const part of band.meshes)part.mesh.visible=show;
     const sign=k%2?-1:1,amp=show?tiltAmp*Math.min(1,face.opacity)*sign:0;
     const tiltX=amp*Math.sin(tiltClock+phase+k*1.7),tiltZ=amp*.6*Math.cos(tiltClock*.8+phase+k*2.3);
