@@ -17,7 +17,7 @@ export function appendEventCountdown(element,status){
  element.setAttribute('aria-hidden','true');
  const live=status==='STARTED';element.dataset.state=live?'live':'upcoming';
  const add=(className,text)=>{const node=document.createElement('span');node.className=className;node.textContent=text;element.appendChild(node);};
- if(live){add('event-countdown-dot','');add('event-countdown-live','Live');return;}
+ if(live){add('event-countdown-dot','');return;}
  const parts=[...String(status).matchAll(/(\d+)\s*(MIN|H|M|D|S)/g)];
  if(!parts.length){element.textContent=status;return;}
  add('event-countdown-prefix','IN');

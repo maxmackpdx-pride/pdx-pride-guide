@@ -25,9 +25,9 @@ test('settled cards hold their relative positions and scale through pan, zoom an
  assert.equal(items[0].y,150);assert.equal(items[0].offset.scale,1);
  assert.ok(items.every(item=>item.cardLocked));
  const settled=[lockedItem('a',900,900,200),lockedItem('b',950,900,330)];
- lock.apply(settled,3000,false);assert.equal(settled[0].x,122);
- assert.equal(lock.retained(6011,false).size,0);
- const released=[lockedItem('a',170,220)];lock.apply(released,6011,false);
+ lock.apply(settled,2000,false);assert.equal(settled[0].x,122);
+ assert.equal(lock.retained(2511,false).size,0);
+ const released=[lockedItem('a',170,220)];lock.apply(released,2511,false);
  assert.equal(released[0].cardLocked,undefined);assert.equal(released[0].x,170);
 });
 test('locked cards have bounded drift, respect removal, and do not drift in Calm Mode',()=>{

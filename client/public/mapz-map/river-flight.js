@@ -5,17 +5,17 @@ import {addLayers} from '../map-foundation/layers.js';
 import {captureCamera,readCameraParams} from '../map-foundation/camera.js';
 import {createMap,vectorFirstStyle,observeMapSize,createMapActivity} from '../map-foundation/lifecycle.js';
 import {motionPreference as reduced} from '../map-foundation/motion.js';
-import {eventCountdown,appendEventCountdown} from './event-countdown.js';
+import {eventCountdown,appendEventCountdown} from './event-countdown.js?v=20261029-poster-bundle';
 import {venueStackKey} from './e3-vortex-stack.js?v=20261026-lod';
 import {createE3TransitionState} from './e3-transitions.js?v=20261027-e3-v3';
 import {e3NearbyCount,e3NearbyPlacement,E3_NEARBY_MIN_VENUES} from './e3-venue-stack.js';
-import {e3TextBoost,eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingLines,e3CleanCopy,e3TimeLabel,e3ComplementColor,e3VortexTint,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3StackOrder,e3StartsInLabel,e3EventUrgency,e3StageTarget,e3VortexBlend,e3RepresentativeIndex,e3MixHex,E3_NON_SAME_DAY_COIN_NEAR} from './e3-lod.js?v=20261028-crisp-text';
-import {createE3BlenderLayer} from './e3-blender-model.js?v=20261028-crisp-text';
+import {e3TextBoost,eventDepthMeters,assignE3Levels,e3LodPlan,e3IsSameDay,E3_MINI_RISE_PX,E3_SAME_DAY_GREEN,E3_SAME_DAY_VORTEX_FAR_OVERVIEW,e3BlenderScaleMeters,e3BlenderTakesOver,e3AnchorCoordinates,placezHoverMeters,PLACEZ_HOVER_METERS,e3BlenderFootprintPx,e3CrowdTargets,e3CrowdEase,e3RingLines,e3CleanCopy,e3TimeLabel,e3ComplementColor,e3VortexTint,e3CountdownParts,e3FaceStack,e3SameDayEventsSorted,e3StackOrder,e3StartsInLabel,e3EventUrgency,e3StageTarget,e3VortexBlend,e3RepresentativeIndex,e3MixHex,E3_NON_SAME_DAY_COIN_NEAR} from './e3-lod.js?v=20261029-poster-bundle';
+import {createE3BlenderLayer} from './e3-blender-model.js?v=20261029-poster-bundle';
 import {hologramTypeForVenue} from './venue-hologram-types.js';
 import {eventNight} from './event-night.js';
 import {attachVenueRows,mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP,TONIGHT_HEIGHT_MULTIPLIER,branchDaysLeft,branchStrength,branchSlot} from './venue-attachments.js?v=20260930-branches';
 import { updateEventArtwork } from './event-card-artwork.js';
-import { smoothCardVisibility,createEventCardLock } from './event-card-motion.js';
+import { smoothCardVisibility,createEventCardLock } from './event-card-motion.js?v=20261029-poster-bundle';
 import { visibleHologramLabels } from './label-visibility.js?v=20260925-venue-nights';
 import {faceStackHtml} from '../outzide-map/assets/community-ui.js?v=map-continuity-1';
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
@@ -34,7 +34,7 @@ import {eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} fro
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
 import {hologramPresence,HOLOGRAM_CAMERA_FOLLOW} from './hologram-presence.js?v=20261026-lod';
-import {screenNeighborCounts,createSignLift,SIGN_LIFT_ENTER_PX,SIGN_LIFT_EXIT_PX,SIGN_RISE_MAX_OF_CEILING} from './screen-neighbors.js';
+import {screenNeighborCounts,signRise,createSignLift,SIGN_LIFT_ENTER_PX,SIGN_LIFT_EXIT_PX,SIGN_RISE_MAX_OF_CEILING} from './screen-neighbors.js?v=20261029-poster-bundle';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
@@ -649,7 +649,7 @@ function drawLights(fade,target=map,surface=lights){
  const liveBeaconKeys=new Set(ordered.filter(v=>v.feature.properties.kind==='event'&&(activeTonight(v.feature)||v.feature.properties.key===selectedKey)).map(v=>v.feature.properties.key));
  if(!reduced.matches)for(const key of lastBeaconKeys)if(!liveBeaconKeys.has(key)&&!folds.has(key))folds.set(key,frameNow+RISE_MS);
  lastBeaconKeys=liveBeaconKeys;
- const beacons=ordered.filter(v=>{const key=v.feature.properties.key;return (liveBeaconKeys.has(key)||folds.has(key)&&foldAmount(key,frameNow)>0)&&(lockedKeys.has(key)||v.p.x>=-300&&v.p.x<=width+300&&v.p.y>=-300&&v.p.y<=height+300);});
+ const beacons=ordered.filter(v=>{const key=v.feature.properties.key;return (liveBeaconKeys.has(key)||folds.has(key)&&foldAmount(key,frameNow)>0)&&v.p.x>=-300&&v.p.x<=width+300&&v.p.y>=-300&&v.p.y<=height+300;});
  beacons.sort((a,b)=>String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
  const expandedKeys=new Set(beacons.map(item=>item.feature.properties.key));
  const venueItems=new Map(ordered.filter(item=>item.feature.properties.kind==='place').map(item=>[item.feature.properties.key,item]));
@@ -721,14 +721,14 @@ function drawLights(fade,target=map,surface=lights){
        return {name:e3CleanCopy(event.name),time:e3TimeLabel(event.time),pending:event.startsAtMs>lodNow,startsIn:e3StartsInLabel(event.startsAtMs,lodNow),ringName:lines.name,ringSub:lines.sub,
         logo:logoOf(event.logoUrl||g.logoUrl),poster:eventPosterEntry(event.poster),host:logoOf(event.alternateLogo&&event.alternateLogo!==(event.logoUrl||g.logoUrl)?event.alternateLogo:'')};
       }),
-      countdown:e3CountdownParts(nearest.startsAtMs,lodNow),faces:e3FaceStack(nearest.avatars,nearest.avatarTotal),
+      countdown:e3CountdownParts(nearest.startsAtMs,lodNow,e3TimeLabel(nearest.time)),faces:e3FaceStack(nearest.avatars,nearest.avatarTotal),
       // Concept (no stack): the second event's own countdown and faces, shown with its slide.
       countdown2:screenEvents[1]?e3CountdownParts(screenEvents[1].startsAtMs,lodNow):[],faces2:screenEvents[1]?e3FaceStack(screenEvents[1].avatars,screenEvents[1].avatarTotal):undefined};
      // Ring spin and beam pulses ramp up over the last hours and peak when the event opens (same clock as the countdown).
      urgency=e3EventUrgency(nearest.startsAtMs,lodNow);
     }
    }
-   rows.push({key:g.key,coordinates,altitude,color:tint,stage:e3StageValue(st),scaleMeters:e3BlenderScaleMeters(blenderZoom,{viewHeight:height,latitude:g.coordinates[1],pitch:blenderPitch,stage:e3StageValue(st)}),heightScale,
+   rows.push({key:g.key,coordinates,altitude,color:tint,stage:e3StageValue(st),scaleMeters:e3BlenderScaleMeters(blenderZoom,{viewHeight:height,latitude:g.coordinates[1],pitch:blenderPitch,stage:e3StageValue(st),events:content?.screens?.length||1}),heightScale,
     content,urgency,textBoost:e3TextBoost(blenderZoom),
     logo:logoEntry?{key:g.logoUrl,image:logoEntry.image,width:logoEntry.width,height:logoEntry.height}:null});
   }
@@ -791,7 +791,7 @@ function drawLights(fade,target=map,surface=lights){
   item.neighbors=beaconNeighborCounts[beaconIndex];
   // Dodge a close neighbor by rising, with hysteresis and a slow ease so the height never flickers between two values.
   const dodge=signLift.step(item.feature.properties.key,item.neighbors,beaconNeighborFar[beaconIndex],((phase*1.71)%3)*25*effectiveHologramLift,frameNow,motionDelta);
-  item.y=item.p.y-roofLift(target,item.feature,surfaces)-Math.min(skyCeiling*SIGN_RISE_MAX_OF_CEILING,skyRise+dodge)-item.boundsGoal.halfHeight;
+  item.y=item.p.y-roofLift(target,item.feature,surfaces)-signRise(skyRise,dodge,skyCeiling*SIGN_RISE_MAX_OF_CEILING,50*effectiveHologramLift)-item.boundsGoal.halfHeight;
  }
  signLift.prune(frameNow);
  // Relax overlapping logo bounds, with restrained displacement from each fixed anchor.
@@ -874,7 +874,7 @@ function drawLights(fade,target=map,surface=lights){
  }
  const beaconPlans=new Map();
  for(const item of beacons)beaconPlans.set(item.feature.properties.key,{plan:item.plan,level:item.lodLevel,beam:item.nearbyBeam||null,hidden:Boolean(item.nearbyHidden||item.lodHidden)});
- cardLock.apply(beacons,frameNow,cameraMoving,reduced.matches);
+ cardLock.apply(beacons,frameNow,cameraMoving,reduced.matches,{width,height});
  // Keep the pointer's temporary offset separate so it cannot accumulate into drift.
  for(const item of beacons){
   const x=item.x-item.p.x-item.offset.avoidX-item.offset.cameraX,y=item.y-item.p.y+item.hover-item.offset.avoidY-item.offset.cameraY;
@@ -1128,7 +1128,7 @@ function renderHologramLabels(labels){
   live.add(label.key);
   let item=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='title');
   if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.dataset.labelRole='title';item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey,item));root.appendChild(item);}
-  const timeText=(label.time||'').replace(/:00(?=\s*[AP]M)/i,''),statusText=label.countdown==='STARTED'?'Live':(label.countdown||'').toLowerCase().replace(/^in /,'In ');
+  const timeText=(label.time||'').replace(/:00(?=\s*[AP]M)/i,''),statusText=label.countdown==='STARTED'?'':(label.countdown||'').toLowerCase().replace(/^in /,'In ');
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.dataset.hologramType=label.kind==='housing'?'':(label.hologramType||'puck');item.dataset.hologramFar=label.far?'true':'false';item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
   item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',labelComplement(label.projectionColor||label.color));item.style.setProperty('--projection-color',label.projectionColor||label.color);item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${timeText}${statusText?`, ${statusText}`:""}`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);

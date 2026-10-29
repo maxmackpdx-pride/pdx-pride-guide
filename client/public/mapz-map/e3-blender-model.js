@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-import {e3SlideState,e3SpinUp,e3OrbDrop,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TILT_RADIANS,E3_RING_DWELL,e3RingDwell,E3_TEXT_FAR_BOOST,E3_SIGN_FAR_BOOST} from './e3-lod.js?v=20261028-crisp-text';
+import {e3SlideState,e3SpinUp,e3OrbDrop,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TILT_RADIANS,E3_RING_DWELL,e3RingDwell,E3_TEXT_FAR_BOOST,E3_SIGN_FAR_BOOST,e3AnchorInFront,E3_SLIDE_SECONDS,e3SlideProgress,e3OrbPulse,E3_LIVE_BEAM_BOOST} from './e3-lod.js?v=20261029-poster-bundle';
 
 // This is the exported Blender mesh, not a video/sprite reconstruction. The
 // caller owns venue grouping, same-day eligibility, LOD thresholds and layout.
@@ -23,8 +23,9 @@ export const SINGLE_SIGN_LIFT=STACK_SHIFT+.8,SINGLE_RING_LOWER=.965,SINGLE_RING_
 // Concept: no stack. A venue with two events keeps one sign whose slideshow alternates the two events (poster or
 // logo, with that event's name and time); each event gets its own countdown, stacked under the sign. The whole sign
 // group sits low and compact on the beam, right above the orb (no padding around the orb).
-export const E3_NO_STACK=true,E3_EVENT_SECONDS=7;
-export const ORB_Y=3.2,ORB_R=.07,CD_W=1.6,CD_H=.5,FACE_W=1.4,FACE_H=.4,GAP_ORB=.05,GAP_CD=.06,GAP_SIGN=.07;
+// Taller beam: the orb (and the sign group on it) sits higher, so the beam from the pin no longer reads as a stub.
+export const E3_NO_STACK=true,E3_EVENT_SECONDS=E3_SLIDE_SECONDS;
+export const ORB_Y=4.0,ORB_R=.07,CD_W=1.6,CD_H=.5,FACE_W=1.4,FACE_H=.4,GAP_ORB=.05,GAP_CD=.06,GAP_SIGN=.07;
 /** Heights (model units) for the no-stack layout with n countdowns: orb, faces, countdowns (first event on top), sign. */
 export function e3NoStackLayout(n=1){
  const facesBottom=ORB_Y+ORB_R+GAP_ORB,facesY=facesBottom+FACE_H/2,plates=[];
@@ -238,7 +239,10 @@ function drawCountdownCanvas(canvas,parts,tintColor,accent){
  ctx.textBaseline='alphabetic';
  if(parts.length===1&&parts[0].live){
   ctx.fillStyle=accent;ctx.beginPath();ctx.arc(width*.3,height/2,13,0,Math.PI*2);ctx.fill();
-  ctx.font=`900 ${Math.floor(height*.6)}px ${FONT_FAMILY}`;ctx.fillStyle='#ffffff';ctx.textAlign='left';ctx.fillText('LIVE',width*.38,height*.7);return;
+  // Started: no LIVE label. The accent dot plus the event time, nothing else.
+  const time=String(parts[0].value||'');
+  if(time){ctx.font=`900 ${Math.floor(height*.5)}px ${FONT_FAMILY}`;ctx.fillStyle='#ffffff';ctx.textAlign='left';ctx.fillText(time,width*.38,height*.66);}
+  return;
  }
  // Measure at full size, then scale the whole readout to fit so every numeral stays equal.
  let size=Math.floor(height*.66);
@@ -512,6 +516,10 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  const plate={material:flatMaterial(),texture:null};plate.mesh=flat(new THREE.Mesh(new THREE.PlaneGeometry(1,1),plate.material),6);
  const faceStack={material:flatMaterial(),texture:null,texture2:null};faceStack.mesh=flat(new THREE.Mesh(new THREE.PlaneGeometry(1,1),faceStack.material),6);
  const plate2={material:flatMaterial(),texture:null};plate2.mesh=flat(new THREE.Mesh(new THREE.PlaneGeometry(1,1),plate2.material),6);
+ // Thin progress bar on the lit countdown: fills over the slide before the flip (two-event venues only).
+ const progressBar={material:flatMaterial()};progressBar.mesh=flat(new THREE.Mesh(new THREE.PlaneGeometry(1,1),progressBar.material),7);
+ // More sparkles once the event is live: a second, offset set of the model's particles.
+ const liveParticles=particles.map(node=>{const copy=node.clone();copy.visible=false;node.parent?.add(copy);return copy;});
  let activeEvent=0,eventSwitchAt=-9;
  // Orb: a bright core and two soft additive shells, in the accent.
  const orb=new THREE.Group();orb.visible=false;object.add(orb);
@@ -592,7 +600,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    release(faceStack.texture2);faceStack.texture2=null;
    if(faces2.people.length){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=120;drawFaceCanvas(canvas,faces2,tintHex);faceStack.texture2=canvasTexture(canvas);}
    faceStack.material.map=faceStack.texture;faceStack.material.needsUpdate=true;
-   orbCore.material.color.set(accent);for(const shell of orbShells)shell.material.color.set(accent);
+   orbCore.material.color.set(accent);progressBar.material.color.set(accent);for(const shell of orbShells)shell.material.color.set(accent);
   }
   // The countdown changes about once a second.
   release(plate.texture);plate.texture=null;
@@ -646,6 +654,9 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    // Which event the slideshow shows (alternates every E3_EVENT_SECONDS when the venue has two events today).
    {const next=nEvents>1?Math.floor((elapsed+phase*.9)/E3_EVENT_SECONDS)%nEvents:0;if(next!==activeEvent){activeEvent=next;eventSwitchAt=elapsed;}}
    const switchFlash=reduced?0:Math.max(0,1-(elapsed-eventSwitchAt)/.6);
+   // Live: at least one of the venue's events has started.
+   const live=Boolean(contentKey)&&(content.screens||[]).some(screen=>screen&&screen.pending===false);
+   const orbPulse=reduced||!contentKey?0:e3OrbPulse(elapsed,phase,nEvents,live);
    {const open=blenderStackOpen(stage),v=Math.max(0,Math.min(1,stage-3));growUniform.value.set(SIGN_GROW*v,3.98+SINGLE_SIGN_LIFT,SIGN_GROW*open,1.29+STACK_LIFT);narrowUniform.value.set(SIGN_NARROW,v);moveUniform.value=lay.move*v;}
    stackUniform.value.x=blenderStackOpen(stage);
    singleUniform.value.x=blenderSingleWeight(stage);
@@ -716,7 +727,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     pulseUniform.value.set(pulsePhase,look.count,reach,strength);
     // Beam brightness: 20% of the full look when the start is far off, rising to 80% by the time the event opens.
     {const bottom=stage>=3.9?lay.facesBottom:interpolate(INFO_MAIN.y,stage)-INFO_DY-.47;beamFadeUniform.value.set(stage>=3.9?bottom-.5:99,stage>=3.9?bottom:100);}
-    beamKUniform.value=reduced?.5:.2+.6*Math.max(0,Math.min(1,urgency));
+    beamKUniform.value=(reduced?.5:.2+.6*Math.max(0,Math.min(1,urgency)))+(live?E3_LIVE_BEAM_BOOST:0);
    }
    {
     // Countdowns under the sign, at the old 1.6 x .5 size (wider than the sign). With two events the countdown of the
@@ -728,6 +739,10 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
      if(!pl.mesh.visible)continue;
      pl.mesh.position.y=lay.plates[k];pl.mesh.scale.set(CD_W*b,CD_H,1);pl.material.opacity=extra*(two&&k!==activeEvent?.42:1);
     }
+    // Progress bar along the bottom of the lit countdown, full right as the slide flips.
+    {const fill=reduced?null:e3SlideProgress(elapsed,phase,two?nEvents:1),W=CD_W*b*.86;
+     progressBar.mesh.visible=fill!=null&&fill>.002&&extra>.01;
+     if(progressBar.mesh.visible){const w=W*fill;progressBar.mesh.position.set(-W/2+w/2,lay.plates[activeEvent]-CD_H/2+.045,progressBar.mesh.position.z);progressBar.mesh.scale.set(w,.028,1);progressBar.material.opacity=extra*.95;}}
     const facesTex=activeEvent===1&&faceStack.texture2?faceStack.texture2:faceStack.texture;
     faceStack.mesh.visible=Boolean(facesTex)&&extra>.01;
     if(faceStack.mesh.visible){if(faceStack.material.map!==facesTex){faceStack.material.map=facesTex;faceStack.material.needsUpdate=true;}faceStack.mesh.position.y=lay.facesY;faceStack.mesh.scale.set(FACE_W*b,FACE_H,1);faceStack.material.opacity=extra;}
@@ -752,8 +767,8 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     orb.visible=face.opacity>.01;
     if(orb.visible){
      const bob=reduced?0:Math.sin(elapsed*1.7+phase)*.025;
-     orb.position.set(0,face.y+bob,0);orb.scale.setScalar(1+sp.flash*1.4);
-     orbCore.material.opacity=face.opacity;for(const shell of orbShells)shell.material.opacity=shell.userData.alpha*face.opacity*(reduced?1:.85+.15*Math.sin(elapsed*2.3+phase));
+     orb.position.set(0,face.y+bob,0);orb.scale.setScalar((1+sp.flash*1.4)*(1+.6*orbPulse));
+     orbCore.material.opacity=face.opacity;for(const shell of orbShells)shell.material.opacity=Math.min(1,shell.userData.alpha*face.opacity*(reduced?1:.85+.15*Math.sin(elapsed*2.3+phase))*(1+1.6*orbPulse));
     }
    }
    // The generic mark gives way to the logo; with no logo it stays.
@@ -764,6 +779,13 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     const t=((reduced?0:elapsed/9.625)+k/20)%1,angle=k*2.39996+phase;
     // glTF is Y-up; the wrapper is rotated once into the map's Z-up frame.
     node.position.set(Math.cos(angle)*r*t*.72,t*h+.06,-Math.sin(angle)*r*t*.72);
+   });
+   // Live: twice the sparkles, the extra set offset in time and angle so they fill the gaps.
+   liveParticles.forEach((node,k)=>{
+    node.visible=live&&!reduced&&h>.1;
+    if(!node.visible)return;
+    const t=(elapsed/7.3+k/20+.5)%1,angle=k*2.39996+phase+1.2;
+    node.position.set(Math.cos(angle)*r*t*.6,t*h+.06,-Math.sin(angle)*r*t*.6);
    });
   },
   dispose(){
@@ -776,6 +798,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    disc.material.dispose();disc.mesh.geometry.dispose();discTexture.dispose();label.material.dispose();label.mesh.geometry.dispose();
    plate.material.dispose();plate.mesh.geometry.dispose();plate2.material.dispose();plate2.mesh.geometry.dispose();faceStack.material.dispose();faceStack.mesh.geometry.dispose();
    for(const mesh of [orbCore,...orbShells]){mesh.material.dispose();mesh.geometry.dispose();}
+   progressBar.material.dispose();progressBar.mesh.geometry.dispose();
   }
  };
 }
@@ -818,6 +841,9 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
    for(const item of list){
     const p=item.root.position,H=Math.max(1,(item.row.scaleMeters??18)*4);
     const cx0=e[0]*p.x+e[4]*p.y+e[8]*p.z+e[12],cw0=e[3]*p.x+e[7]*p.y+e[11]*p.z+e[15];
+    // Behind the camera (w <= 0) the projection flips: never draw it there.
+    if(!e3AnchorInFront(cw0)){item.culled=true;continue;}
+    item.culled=false;
     const cx1=cx0+e[8]*H,cw1=cw0+e[11]*H;
     const S=M.clone(),se=S.elements;
     if(cw0>0&&cw1>0){const kz=(cx1/cw1-cx0/cw0)/H;se[8]-=kz*cw0;se[12]+=kz*cw0*p.z;}

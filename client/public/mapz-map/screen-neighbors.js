@@ -33,6 +33,12 @@ export const SIGN_LIFT_EASE_S = .45;
 // The total sign rise above its pin (sky rise plus dodge) never passes this fraction of the sky ceiling.
 export const SIGN_RISE_MAX_OF_CEILING = 1;
 
+/** Total sign rise above the pin. Over the cap the shared sky rise gives way first, so each sign keeps its own dodge
+ * on top and close neighbors never get flattened to one height (the cluster stagger survives the cap). */
+export function signRise(skyRise, dodge, ceiling, maxDodge) {
+ return Math.max(0,Math.min(skyRise,ceiling-maxDodge))+Math.max(0,dodge);
+}
+
 export function createSignLift({hold=SIGN_LIFT_HOLD_MS, ease=SIGN_LIFT_EASE_S, ttl=5000}={}) {
  const state=new Map();
  return {
