@@ -34,7 +34,7 @@ import {eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} fro
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
 import {hologramPresence,HOLOGRAM_CAMERA_FOLLOW} from './hologram-presence.js?v=20261026-lod';
-import {screenNeighborCounts} from './screen-neighbors.js';
+import {screenNeighborCounts,createSignLift,SIGN_LIFT_ENTER_PX,SIGN_LIFT_EXIT_PX,SIGN_RISE_MAX_OF_CEILING} from './screen-neighbors.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260925-smooth-map';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260929-mesh';
@@ -129,6 +129,7 @@ function e3ClearanceMeters(coordinates,buildings){
 }
 const e3Blender=createE3BlenderLayer(maplibregl,{maxVisible:E3_BLENDER_MAX_VISIBLE});
 const e3Blender3D=new Map(),e3StageState=new Map(),e3CrowdFactor=new Map();
+const signLift=createSignLift();
 // A venue's shown stage eases toward the stage its distance asks for (e3StageTarget), so the coin and the vortex blend as the camera moves.
 const e3StageValue=st=>st.value;
 const e3StageStep=(st,target,now)=>{const dt=Math.max(0,Math.min(.25,(now-(st.at??now))/1000));st.at=now;st.target=target;st.value+=(target-st.value)*(1-Math.exp(-dt/E3_STAGE_FOLLOW_S));if(Math.abs(target-st.value)<.004)st.value=target;};
@@ -656,7 +657,7 @@ function drawLights(fade,target=map,surface=lights){
  const protectedVenues=new Set(ordered.map(item=>item.feature.properties.venueWaypointKey).filter(Boolean));
  const placeClusters=(cameraMoving&&frozenClusters)||clusterPlaceMarkers(ordered.filter(item=>!item.feature.properties.boardPin&&item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel&&!protectedVenues.has(item.feature.properties.key)&&!(['mizzed','gigz'].includes(item.feature.properties.waypointFamily)&&item.feature.properties.venueWaypointKey)),selectedKey,target.getZoom(),width,height);
  if(!cameraMoving)frozenClusters=placeClusters;
- const {counts:beaconNeighborCounts}=screenNeighborCounts(beacons);
+ const {counts:beaconNeighborCounts}=screenNeighborCounts(beacons,SIGN_LIFT_ENTER_PX),{counts:beaconNeighborFar}=screenNeighborCounts(beacons,SIGN_LIFT_EXIT_PX);
  // Level of detail by true camera-to-waypoint distance, per venue group, with a cap on full vortexes.
  const lodGroupKey=item=>venueStackKey(item.feature.properties)||item.feature.properties.key;
  const lodMetersPerPixel=40075016.686*Math.cos(target.getCenter().lat*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
@@ -787,10 +788,12 @@ function drawLights(fade,target=map,surface=lights){
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
   const skyRise=skyCeiling*(.55+.35*item.presence.motion+heightBoost*.25);
   item.x=item.p.x+driftX;
-  item.y=item.p.y-roofLift(target,item.feature,surfaces)-skyRise-item.boundsGoal.halfHeight;
   item.neighbors=beaconNeighborCounts[beaconIndex];
-  item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25*effectiveHologramLift:0;
+  // Dodge a close neighbor by rising, with hysteresis and a slow ease so the height never flickers between two values.
+  const dodge=signLift.step(item.feature.properties.key,item.neighbors,beaconNeighborFar[beaconIndex],((phase*1.71)%3)*25*effectiveHologramLift,frameNow,motionDelta);
+  item.y=item.p.y-roofLift(target,item.feature,surfaces)-Math.min(skyCeiling*SIGN_RISE_MAX_OF_CEILING,skyRise+dodge)-item.boundsGoal.halfHeight;
  }
+ signLift.prune(frameNow);
  // Relax overlapping logo bounds, with restrained displacement from each fixed anchor.
  if(!cameraMoving)for(let iteration=0;iteration<12;iteration++)for(let i=0;i<beacons.length;i++)for(let j=i+1;j<beacons.length;j++){
   const a=beacons[i],b=beacons[j],dx=b.x-a.x,dy=b.y-a.y;
