@@ -1,0 +1,14 @@
+interface:
+  display_name: Work on Mapz and Outzide
+  short_description: Find the real source for both Zaylist maps
+  default_prompt: Use $work-on-mapz-outzide to find and edit the right Mapz or Outzide
+    source.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
