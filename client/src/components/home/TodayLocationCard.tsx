@@ -22,7 +22,7 @@ import { OutzXerox, PlacezXerox, RansomTitle } from "@/components/xerox/Overlays
 
 export type TodayLocation = { key: string; name: string; room: "OutZide" | "Placez"; detail: string; href: string; kind?: string; art?: string; photo?: OutzPhotoData; place?: Business };
 // Matches the OutZide drawer's waypoint palette and destination categories.
-const OUTZ_TOKENS: Record<string, string> = { trail: "--neon-orange", stay: "--neon-magenta", beach: "--neon-magenta", camp: "--green-acid", coastcamp: "--neon-cyan", watercamp: "--neon-cyan", spring: "--neon-cyan", fishing: "--green-acid", boating: "--neon-cyan", atv: "--neon-red", winter: "--neon-blue", dayuse: "--neon-yellow" };
+const OUTZ_TOKENS: Record<string, string> = { trail: "--neon-orange", stay: "--neon-magenta", beach: "--neon-cyan", camp: "--green-acid", coastcamp: "--neon-cyan", watercamp: "--neon-cyan", spring: "--neon-cyan", fishing: "--green-acid", boating: "--neon-cyan", atv: "--neon-red", winter: "--neon-blue", dayuse: "--neon-yellow" };
 const OUTZ_LABELS: Record<string, string> = { trail: "Trail", stay: "Stay", beach: "Beach", camp: "Camp", coastcamp: "Coastal camp", watercamp: "Waterfront camp", spring: "Hot spring", fishing: "Fishing", boating: "Boating", atv: "Off-road", winter: "Winter", dayuse: "Day use" };
 
 export default function TodayLocationCard({ location, onRequireAuth }: { location: TodayLocation; onRequireAuth?: () => void }) {
