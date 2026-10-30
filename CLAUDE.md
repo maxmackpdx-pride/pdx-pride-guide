@@ -55,6 +55,12 @@ serve one is stale.
   (`guidelines/`, `tokens/`, `bundles/`, `guide.json`, `llms.txt`)
 - card authority + the five sources of truth:
   `zaylist-foundation-library` `public/design-system/guidelines/card-system-authority.md`
+- five-room card registry (Eventz, Placez, NEEDZ, Boardz, Outzide states):
+  `zaylist-foundation-library` `public/design-system/sources/room-card-families.json`
+  Full Card API contracts (every dimension, layer, type role, variant, prop, source hash):
+  `eventz-card-system.json`, `placez-card-system.json`, `needz-card-system.json`,
+  `boardz-card-system.json`, `outzide-card-system.json` under the same `sources/` folder.
+  Agents must return the full contract payload for the room, not a summary index.
 - live-is-truth rule (this repo, must not contradict the guide): `docs/LIVE_DESIGN_STANDARD.md`
 - map architecture and artwork that must stay: `docs/MAP_RENDERING.md`; shared infrastructure is `client/public/map-foundation/`, with distinct Mapz and Outzide scene adapters.
 - board card rules: `docs/BOARD_CARD_STANDARD.md`

@@ -8,7 +8,7 @@ import {
 } from "../shared/designComponentRegistry";
 
 assert.equal(DESIGN_COMPONENT_SOURCE_REPOSITORY, "maxmackpdx-pride/pdx-pride-guide");
-assert.equal(DESIGN_COMPONENT_REGISTRY.length, 29, "the connected registry includes the current approved card components");
+assert.equal(DESIGN_COMPONENT_REGISTRY.length, 31, "the connected registry includes the current approved card components");
 
 const ids = new Set<string>();
 const sourcePairs = new Set<string>();
