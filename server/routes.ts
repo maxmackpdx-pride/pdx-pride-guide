@@ -21,7 +21,22 @@ import outzMapCatalog from '@shared/outzMapCatalog';
 import { getOutzDetails } from "./outzDetails";
 import { getOutzCommunityFeed } from "./outzFeed";
 import { getOutzFeedWeather } from "./outzFeedWeather";
-import { safeMapReturnTo } from "@shared/authReturn";
+import { safeGoogleReturnTo } from "@shared/authReturn";
+import {
+  GOOGLE_OAUTH_STATE_MAX_MS,
+  GOOGLE_TOKEN_ENDPOINT,
+  adminErrorRedirect,
+  buildAuthorizationUrl,
+  createSignedState,
+  decideAdminGoogleLogin,
+  deriveNonce,
+  derivePkce,
+  parseSignedState,
+  peekStateIntent,
+  verifyGoogleIdToken,
+  type AdminGoogleError,
+  type GoogleIntent,
+} from "./googleAuth";
 import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { eventDatesError } from "@shared/eventIntakeDates";
 import { parseMarketplacePrice } from "@shared/marketplace";
@@ -957,56 +972,10 @@ function googleRedirectUri(_req: any) {
   return process.env.GOOGLE_REDIRECT_URI || "https://www.zaylist.com/api/auth/google/callback";
 }
 
-const GOOGLE_OAUTH_STATE_MAX_MS = 15 * 60 * 1000;
 const GOOGLE_OAUTH_STATE_COOKIE = "pdx_g_oauth";
 
 function sessionSecret(): string {
   return process.env.SESSION_SECRET || (process.env.NODE_ENV === "production" ? "" : "pdxpride_secret_dev_only");
-}
-
-function hmacSign(payload: string): string {
-  return crypto.createHmac("sha256", sessionSecret()).update(payload).digest("base64url");
-}
-
-function safeEqualStr(a: string, b: string): boolean {
-  const ba = Buffer.from(a);
-  const bb = Buffer.from(b);
-  if (ba.length !== bb.length) return false;
-  return crypto.timingSafeEqual(ba, bb);
-}
-
-/** Stateless OAuth CSRF token - survives mobile browsers that drop the session cookie mid Google hop. */
-
-function createGoogleOAuthState(linkUserId?: number, returnTo?: string): string {
-  const body = Buffer.from(JSON.stringify({
-    n: crypto.randomBytes(16).toString("hex"),
-    t: Date.now(),
-    ...(linkUserId ? { l: linkUserId } : {}),
-    ...(returnTo ? { r: returnTo } : {}),
-  })).toString("base64url");
-  return `${body}.${hmacSign(body)}`;
-}
-
-function parseGoogleOAuthState(state: string): { linkUserId?: number; returnTo?: string } | null {
-  if (!state || !sessionSecret()) return null;
-  const dot = state.lastIndexOf(".");
-  if (dot <= 0) return null;
-  const body = state.slice(0, dot);
-  const sig = state.slice(dot + 1);
-  if (!sig || !safeEqualStr(sig, hmacSign(body))) return null;
-  try {
-    const data = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as {
-      n?: string;
-      t?: number;
-      l?: number;
-      r?: string;
-    };
-    if (!data.n || typeof data.t !== "number") return null;
-    if (Date.now() - data.t > GOOGLE_OAUTH_STATE_MAX_MS || data.t > Date.now() + 60_000) return null;
-    return { ...(typeof data.l === "number" ? { linkUserId: data.l } : {}), returnTo: safeMapReturnTo(data.r) };
-  } catch {
-    return null;
-  }
 }
 
 function readCookie(req: any, name: string): string | undefined {
@@ -3905,29 +3874,42 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
+  // ─── GOOGLE SIGN-IN ───────────────────────────────────────────────────────
+  // Authorization Code flow + PKCE (S256) + HMAC-signed state + ID-token nonce.
+  // The ID token is verified server-side against Google's JWKS (server/googleAuth.ts).
+  // intent=admin (Admin page button) never creates accounts, never links by email and
+  // only signs in a user who is an admin right now; see decideAdminGoogleLogin.
   app.get("/api/auth/google", (req, res) => {
     const clientId = process.env.GOOGLE_CLIENT_ID;
-    if (!clientId) return res.status(500).send(googleOAuthErrorPage("Google sign-in is not configured on the server."));
-    if (!sessionSecret()) return res.status(500).send(googleOAuthErrorPage("Server session secret is missing."));
+    const intent: GoogleIntent = req.query.intent === "admin" ? "admin" : "member";
+    const adminFail = (code: AdminGoogleError) => res.redirect(adminErrorRedirect(code));
+    if (!clientId) {
+      return intent === "admin" ? adminFail("unavailable") : res.status(500).send(googleOAuthErrorPage("Google sign-in is not configured on the server."));
+    }
+    const secret = sessionSecret();
+    if (!secret) {
+      return intent === "admin" ? adminFail("unavailable") : res.status(500).send(googleOAuthErrorPage("Server session secret is missing."));
+    }
 
     const linkUserId = req.query.link === "1" && req.session.userId ? req.session.userId : undefined;
+    const returnTo = intent === "admin" && !linkUserId ? "/admin" : safeGoogleReturnTo(req.query.returnTo);
     // HMAC-signed state: works even when Android Chrome / in-app browsers drop the session cookie on the Google hop.
-    const state = createGoogleOAuthState(linkUserId, safeMapReturnTo(req.query.returnTo));
+    const state = createSignedState(secret, { linkUserId, returnTo, intent: linkUserId ? "member" : intent });
+    const nonceId = parseSignedState(secret, state)!.nonceId;
     req.session.googleOAuthState = state;
     req.session.googleOAuthLinkUserId = linkUserId;
 
-    const params = new URLSearchParams({
-      client_id: clientId,
-      redirect_uri: googleRedirectUri(req),
-      response_type: "code",
-      scope: "openid email profile",
+    const authUrl = buildAuthorizationUrl({
+      clientId,
+      redirectUri: googleRedirectUri(req),
       state,
-      prompt: "select_account",
+      nonce: deriveNonce(secret, nonceId),
+      codeChallenge: derivePkce(secret, nonceId).challenge,
     });
 
     const finishRedirect = () => {
       setGoogleOAuthStateCookie(res, state);
-      res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+      res.redirect(authUrl);
     };
 
     req.session.save((err) => {
@@ -3940,44 +3922,55 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/auth/google/callback", async (req, res) => {
+    const state = String(req.query.state || "");
+    // Unverified hint, only used to pick which friendly page to show when we cannot trust the state.
+    const hintedIntent = peekStateIntent(state);
+    const fail = (code: AdminGoogleError, intent: GoogleIntent, status: number, message: string) => {
+      clearGoogleOAuthStateCookie(res);
+      if (intent === "admin") return res.redirect(adminErrorRedirect(code));
+      return res.status(status).send(googleOAuthErrorPage(message));
+    };
     try {
       const clientId = process.env.GOOGLE_CLIENT_ID;
       const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+      const secret = sessionSecret();
       const code = String(req.query.code || "");
-      const state = String(req.query.state || "");
-      if (!clientId || !clientSecret) {
-        return res.status(500).send(googleOAuthErrorPage("Google sign-in is not configured on the server."));
+      if (!clientId || !clientSecret || !secret) {
+        return fail("unavailable", hintedIntent, 500, "Google sign-in is not configured on the server.");
       }
-      if (!code) {
-        return res.status(400).send(googleOAuthErrorPage("Google did not return an authorization code. Try again from the browser (not an in-app browser if possible)."));
+      // Canceled at Google's consent screen, or Google reported an error.
+      const oauthError = typeof req.query.error === "string" ? req.query.error : "";
+      if (oauthError) {
+        if (oauthError === "access_denied") {
+          return fail("cancelled", hintedIntent, 400, "Google sign-in was canceled. No changes were made. You can try again whenever you like.");
+        }
+        console.warn("Google OAuth returned an error:", oauthError.slice(0, 60));
+        return fail("failed", hintedIntent, 400, "Google could not complete the sign-in. Try again in a minute.");
       }
 
-      const cookieState = readCookie(req, GOOGLE_OAUTH_STATE_COOKIE);
-      const sessionState = req.session?.googleOAuthState;
-      // Prefer HMAC validation (stateless). Session/cookie equality is a fallback for older in-flight logins.
-      const signed = parseGoogleOAuthState(state);
-      const stateOk = Boolean(
-        signed
-        || (sessionState && state === sessionState)
-        || (cookieState && state === cookieState),
-      );
-      if (!stateOk) {
-        console.warn("Google OAuth state mismatch", {
-          hasSessionState: Boolean(sessionState),
-          hasCookieState: Boolean(cookieState),
-          hasSignedState: Boolean(signed),
-          ua: String(req.headers["user-agent"] || "").slice(0, 120),
-        });
-        clearGoogleOAuthStateCookie(res);
-        return res.status(400).send(googleOAuthErrorPage(
-          "That sign-in step expired or this browser dropped the login cookie (common in Instagram/TikTok in-app browsers and some Android WebViews). Open zaylist.com in Chrome or your system browser and try Google again.",
-        ));
+      const signed = parseSignedState(secret, state);
+      if (!signed) {
+        console.warn("Google OAuth state invalid or expired", { ua: String(req.headers["user-agent"] || "").slice(0, 120) });
+        return fail("expired", hintedIntent, 400,
+          "That sign-in step expired or this browser dropped the login cookie (common in Instagram/TikTok in-app browsers and some Android WebViews). Open zaylist.com in Chrome or your system browser and try Google again.");
+      }
+      const intent = signed.intent;
+      // Admin sign-in is additionally bound to the browser that started it (login-CSRF protection).
+      if (intent === "admin") {
+        const cookieState = readCookie(req, GOOGLE_OAUTH_STATE_COOKIE);
+        if (!cookieState || cookieState !== state) {
+          return fail("expired", intent, 400, "That sign-in step expired. Try again.");
+        }
+      }
+      if (!code) {
+        return fail("failed", intent, 400, "Google did not return an authorization code. Try again from the browser (not an in-app browser if possible).");
       }
 
       req.session.googleOAuthState = undefined;
       clearGoogleOAuthStateCookie(res);
 
-      const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      const pkce = derivePkce(secret, signed.nonceId);
+      const tokenRes = await fetch(GOOGLE_TOKEN_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
@@ -3986,42 +3979,28 @@ export function registerRoutes(httpServer: Server, app: Express) {
           code,
           grant_type: "authorization_code",
           redirect_uri: googleRedirectUri(req),
+          code_verifier: pkce.verifier,
         }),
       });
       if (!tokenRes.ok) {
-        const text = await tokenRes.text();
-        console.error("Google token exchange failed:", text);
-        return res.status(401).send(googleOAuthErrorPage("Google token exchange failed. Try again in a minute."));
+        console.error("Google token exchange failed with status", tokenRes.status);
+        return fail("failed", intent, 401, "Google token exchange failed. Try again in a minute.");
       }
-      const token = await tokenRes.json() as { access_token?: string };
-      if (!token.access_token) {
-        return res.status(401).send(googleOAuthErrorPage("Google token exchange failed. Try again."));
-      }
-
-      const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-        headers: { Authorization: `Bearer ${token.access_token}` },
-      });
-      if (!profileRes.ok) {
-        return res.status(401).send(googleOAuthErrorPage("Could not load your Google profile."));
-      }
-      const profile = await profileRes.json() as {
-        email?: string;
-        email_verified?: boolean;
-        sub?: string;
-        name?: string;
-        picture?: string;
-      };
-      if (!profile.email || profile.email_verified === false) {
-        return res.status(401).send(googleOAuthErrorPage("Your Google email must be verified to sign in."));
-      }
-      if (!profile.sub) {
-        return res.status(401).send(googleOAuthErrorPage("Could not load your Google profile."));
+      const token = await tokenRes.json() as { id_token?: string };
+      let profile;
+      try {
+        profile = await verifyGoogleIdToken(String(token.id_token || ""), {
+          clientId,
+          nonce: deriveNonce(secret, signed.nonceId),
+        });
+      } catch (err) {
+        console.warn("Google ID token rejected:", err instanceof Error ? err.message : "unknown");
+        return fail("failed", intent, 401, "We couldn't verify your Google sign-in. Make sure your Google email is verified, then try again.");
       }
 
-      const linkUserId = signed?.linkUserId ?? req.session.googleOAuthLinkUserId;
-      req.session.googleOAuthLinkUserId = undefined;
+      const linkUserId = signed.linkUserId;
 
-      const establishSession = (userId: number, redirectTo: string) => {
+      const establishSession = (userId: number, redirectTo: string, strict = false) => {
         const finish = () => {
           req.session.userId = userId;
           const user = storage.getUserById(userId);
@@ -4032,6 +4011,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
           req.session.save((saveErr) => {
             if (saveErr) {
               console.error("Google sign-in session save failed:", saveErr);
+              if (intent === "admin") return res.redirect(adminErrorRedirect("failed"));
               return res.status(500).send(googleOAuthErrorPage("Signed in with Google, but saving your session failed. Try again."));
             }
             res.redirect(redirectTo);
@@ -4042,6 +4022,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
           return req.session.regenerate((err) => {
             if (err) {
               console.error("Google OAuth session regenerate failed:", err);
+              // Admin sign-in must never continue on a pre-auth session id (session fixation).
+              if (strict) return res.redirect(adminErrorRedirect("failed"));
               return finish();
             }
             finish();
@@ -4051,7 +4033,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       };
 
       if (linkUserId) {
-        if (req.session.userId && req.session.userId !== linkUserId) {
+        // Linking requires the same browser session that started the link (prevents link-CSRF).
+        if (!req.session.userId || req.session.userId !== linkUserId) {
           return res.status(401).send(googleOAuthErrorPage("Google link session expired. Log in again, then link Google from settings."));
         }
         const existingGoogleUser = storage.getUserByGoogleId(profile.sub);
@@ -4064,10 +4047,63 @@ export function registerRoutes(httpServer: Server, app: Express) {
         }
         storage.linkGoogleToUser(linkUserId, profile.sub);
         if (!linkedUser.photoUrl && profile.picture) storage.updateUser(linkUserId, { photoUrl: profile.picture });
-        return establishSession(linkUserId, "/dashboard?google=linked");
+        storage.logAdminAction({
+          actorUserId: linkedUser.id,
+          actorUsername: linkedUser.username || null,
+          action: "google_link",
+          targetType: "user",
+          targetId: linkedUser.id,
+          detail: { admin: userIsAdminNow(linkedUser) },
+        });
+        const back = signed.returnTo === "/admin" ? "/admin?google=linked" : "/dashboard?google=linked";
+        return establishSession(linkUserId, back);
       }
 
-      let user = storage.getUserByGoogleId(profile.sub) || storage.getUserByEmail(profile.email);
+      // ── Admin intent: existing admins only, never create, never link by email ──
+      if (intent === "admin") {
+        const decision = decideAdminGoogleLogin(profile, {
+          getUserByGoogleId: sub => storage.getUserByGoogleId(sub),
+          getUserByEmailInsensitive: email => {
+            const row = sqlite.prepare(`SELECT id FROM users WHERE LOWER(email) = ? LIMIT 1`).get(email) as { id: number } | undefined;
+            return row ? storage.getUserById(row.id) : undefined;
+          },
+          isAdminNow: u => userIsAdminNow(u),
+          isSystemAccount: u => storage.isSystemGuideAccount(u),
+        });
+        if (decision.action === "link_required") return res.redirect(adminErrorRedirect("link_required"));
+        if (decision.action !== "login") {
+          console.warn("Google admin sign-in denied");
+          return res.redirect(adminErrorRedirect("unauthorized"));
+        }
+        const adminUser = storage.getUserById(decision.userId);
+        const refreshed = adminUser ? (storage.clearExpiredAccountModeration(adminUser.id) || adminUser) : undefined;
+        if (!refreshed || refreshed.status === "deleted" || !userIsAdminNow(refreshed)) {
+          return res.redirect(adminErrorRedirect("unauthorized"));
+        }
+        storage.logAdminAction({
+          actorUserId: refreshed.id,
+          actorUsername: refreshed.username || null,
+          action: "admin_google_login",
+          targetType: "user",
+          targetId: refreshed.id,
+        });
+        return establishSession(refreshed.id, "/admin", true);
+      }
+
+      // ── Member sign-in (existing behavior, plus guards for admin accounts) ──
+      const byGoogle = storage.getUserByGoogleId(profile.sub);
+      let user = byGoogle || storage.getUserByEmail(profile.email);
+      if (user && user.status === "deleted") {
+        return res.status(403).send(googleOAuthErrorPage("This account has been removed."));
+      }
+      if (user && !byGoogle && userIsAdminNow(user)) {
+        // An admin account is never linked or signed into by email match alone.
+        return res.status(403).send(googleOAuthErrorPage(
+          user.googleId
+            ? "This Zaylist account is linked to a different Google account."
+            : "Link required: sign in to Zaylist with your password first, then link Google from the Admin page.",
+        ));
+      }
       if (!user) {
         user = storage.createUser({
           username: makeUsername(profile.email),
@@ -4084,10 +4120,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
         }
       }
 
-      establishSession(user.id, signed?.returnTo || "/dashboard");
+      establishSession(user.id, signed.returnTo || "/dashboard");
     } catch (e) {
-      console.error("Google sign-in error:", e);
-      res.status(500).send(googleOAuthErrorPage("Something went wrong during Google sign-in. Try again."));
+      console.error("Google sign-in error:", e instanceof Error ? e.message : "unknown");
+      fail("failed", hintedIntent, 500, "Something went wrong during Google sign-in. Try again.");
     }
   });
 
@@ -5790,6 +5826,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       isAdmin: true,
       username: resolved?.displayName || resolved?.username || ADMIN_USERNAME,
       email: resolved?.email || null,
+      googleLinked: !!resolved?.googleId,
       isSuperAdmin: superAdmin,
       isPrimaryOwner: primaryOwner,
       canManageTeam: ownerAdmin,

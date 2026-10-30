@@ -1,6 +1,6 @@
 import { Sprout } from "lucide-react";
 import { roomToast } from "@/lib/roomToast";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
 import AdminLoadError from "@/components/admin/AdminLoadError";
+import AdminGoogleButton from "@/components/admin/AdminGoogleButton";
+import { ADMIN_GOOGLE_LINK_URL, readGoogleAdminError, takeApprovalSignature, type AdminGoogleErrorCode } from "@/lib/adminGoogle";
 import AdminQSearchPairing from "@/components/admin/AdminQSearchPairing";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
 import { type BoardRejectTarget, type OwnerDeskItem } from "@/components/admin/admin-queue-types";
@@ -241,6 +243,10 @@ export default function Admin() {
   const [passwordError, setPasswordError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [adminName, setAdminName] = useState("Admin1");
+  // Google sign-in: error code from the redirect back, signature stashed before the redirect, link status.
+  const [googleError, setGoogleError] = useState<AdminGoogleErrorCode | null>(() => readGoogleAdminError(window.location.search));
+  const [googleLinked, setGoogleLinked] = useState<boolean | null>(null);
+  const stashedSignatureRef = useRef<string | null>(null);
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
 
 
@@ -289,6 +295,35 @@ export default function Admin() {
   const [messageSending, setMessageSending] = useState(false);
 
 
+  // Returning from Google: restore the Approval signature, surface errors/link status, clean the URL.
+  useEffect(() => {
+    const saved = takeApprovalSignature();
+    if (saved) stashedSignatureRef.current = saved; // StrictMode re-runs effects; keep the first read
+    const params = new URLSearchParams(window.location.search);
+    const hadError = params.has("google_error");
+    const linked = params.get("google") === "linked";
+    if (hadError && stashedSignatureRef.current) setAdminName(stashedSignatureRef.current);
+    if (linked) toast({ title: "Google linked", description: "You can now use Continue with Google on the Admin login." });
+    if (hadError || linked) {
+      params.delete("google_error");
+      params.delete("google");
+      const qs = params.toString();
+      window.history.replaceState({}, "", `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Whether this admin has linked Google yet (drives the "Link Google" toolbar button).
+  useEffect(() => {
+    if (!authenticated) return;
+    let cancelled = false;
+    fetch("/api/admin/me", { credentials: "include" })
+      .then(r => (r.ok ? r.json() : null))
+      .then(me => { if (!cancelled && me && typeof me.googleLinked === "boolean") setGoogleLinked(me.googleLinked); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [authenticated]);
+
   useEffect(() => {
     if (authLoading) return;
 
@@ -299,6 +334,7 @@ export default function Admin() {
         if (!cancelled) {
           setAuthenticated(true);
           if (user.displayName || user.username) setAdminName(user.displayName || user.username);
+          if (stashedSignatureRef.current) setAdminName(stashedSignatureRef.current);
           if (user.isSuperAdmin) setIsSuperAdmin(true);
           if (user.isPrimaryOwner) setIsPrimaryOwner(true);
           // Trust server flags only - no OR-with-isSuperAdmin (that reopened team tools).
@@ -317,6 +353,7 @@ export default function Admin() {
         if (!cancelled && data?.isAdmin) {
           setAuthenticated(true);
           if (data.username) setAdminName(data.username);
+          if (stashedSignatureRef.current) setAdminName(stashedSignatureRef.current);
           if (data.isSuperAdmin) setIsSuperAdmin(true);
           if (data.isPrimaryOwner) setIsPrimaryOwner(true);
           if (data.canManageTeam) setCanManageTeam(true);
@@ -1590,6 +1627,7 @@ export default function Admin() {
             <button type="submit" className="dash-btn dash-btn-lime active" style={{ width: "100%", marginTop: 8 }}>
               Enter
             </button>
+            <AdminGoogleButton approvalSignature={adminName} error={googleError} />
           </form>
         </div>
       </div>
@@ -1771,10 +1809,17 @@ export default function Admin() {
         onLogout={async () => { try { await logout(); navigate("/"); } catch {} }}
         rightRail={null}
         mainToolbar={(
-          <button type="button" className="hub-ghost-btn" onClick={refreshAdminData}>
-            <RefreshCw size={12} aria-hidden />
-            Refresh all
-          </button>
+          <>
+            <button type="button" className="hub-ghost-btn" onClick={refreshAdminData}>
+              <RefreshCw size={12} aria-hidden />
+              Refresh all
+            </button>
+            {googleLinked === false && (
+              <a className="hub-ghost-btn" href={ADMIN_GOOGLE_LINK_URL} aria-label="Link your Google account to this admin account">
+                Link Google
+              </a>
+            )}
+          </>
         )}
         sideExtra={canPush ? (
           <>

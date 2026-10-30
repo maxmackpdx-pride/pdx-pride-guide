@@ -1096,3 +1096,52 @@ a.dash-thread {
   color: var(--dash-lime);
   border-bottom-color: var(--dash-lime);
 }
+
+/* Admin login: Continue with Google (below ENTER) */
+.dash-google-wrap { margin-top: -4px; }
+.dash-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--dash-cream);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.dash-google-btn:hover:not(:disabled) {
+  border-color: var(--dash-magenta);
+  background: rgba(255, 31, 160, 0.07);
+}
+.dash-google-btn:focus-visible {
+  outline: 2px solid var(--dash-lime);
+  outline-offset: 2px;
+}
+.dash-google-btn:disabled { opacity: 0.6; cursor: progress; }
+.dash-google-error {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--dash-magenta);
+  border-radius: 8px;
+  background: rgba(255, 31, 160, 0.08);
+  color: var(--dash-cream);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+}
+@media (max-width: 480px) {
+  .dash-google-btn { min-height: 52px; font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dash-google-btn { transition: none; }
+}
