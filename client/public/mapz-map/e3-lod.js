@@ -13,7 +13,7 @@
 //
 // Authored from the Mapz same-day work (Claude, PR #49): eventDepthMeters, the
 // hysteresis band and the density cap, rebuilt on top of the E3 steps.
-import {eventCountdown} from './event-countdown.js?v=20261029-poster-bundle';
+import {eventCountdown} from './event-countdown.js?v=20261030-orb-beam-fade';
 import {e3CoinPlan,e3CompressedPlan,E3_COMPRESSED_SCALE,E3_COIN_ZOOM,E3_COIN_ZOOM_SPAN} from './e3-venue-stack.js';
 
 // Distance thresholds in meters, scaled x10 by Tucker's approved retune.
