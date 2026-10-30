@@ -43,6 +43,10 @@ Never deploy production with `railway up` or `railway sandbox`. The only normal 
 path is GitHub `master` -> GitHub Actions -> Railway. Keep `domain-redirects`
 and `domain-redirects-apex` in place.
 
+Railway is not a demo host. Throwaway visual experiments belong in the agent
+surface in use (Claude artifacts, Cursor canvas, ChatGPT sites, local preview).
+Do not create a new GitHub repo or a new Railway project/service for a demo.
+
 ## Current production facts (2026-09-19)
 
 - Live deploy `5c6ce1c5-75f8-407c-aea8-29922737ce46` is `SUCCESS`.

@@ -41,6 +41,20 @@ commit only the intended diff, then push the current commit with
 non-force command. Wait for Railway `SUCCESS` and probe the affected live path when
 useful. Keep the `domain-redirects` and `domain-redirects-apex` services.
 
+### Demos vs Railway
+
+Railway is for Zaylist production (and a temporary sandbox only when Tucker
+explicitly asks for one inside the existing `pdx-pride-guide` project). It is not
+a demo host.
+
+- Visual experiments, wallpaper/shader trials, card specimens, hologram toys, and
+  other throwaway demos belong in the agent surface already in use (Claude
+  artifacts, Cursor canvas, ChatGPT sites, local preview, etc.).
+- Do not create a new GitHub repository for a demo.
+- Do not create a new Railway project, service, bucket, or always-on deploy for a
+  demo. Leftover demo services burn the workspace compute cap.
+- Product work stays in `maxmackpdx-pride/pdx-pride-guide` on a branch or PR.
+
 Claude Code cloud sessions must use the single-repository setup documented in
 `CLAUDE.md`; multi-repository cloud sessions do not load the repo's permission rules.
 For Claude Routines, enable **Allow unrestricted branch pushes** for this repository in
