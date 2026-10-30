@@ -9,7 +9,7 @@ import {
   e3EventUrgency,E3_URGENCY_RAMP_MS,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TURN_SECONDS_BASE,E3_RING_TURN_SECONDS_PEAK,E3_BEAM_PULSES_BASE,E3_BEAM_PULSES_PEAK,E3_BEAM_PULSE_SPEED_BASE,E3_BEAM_PULSE_SPEED_PEAK,E3_RING_TILT_RADIANS,e3SpinUp,e3OrbDrop,e3BlenderTallestUnits,E3_BLENDER_STACK_TALLEST_UNITS,E3_BLENDER_TALLEST_UNITS,
   E3_LOD_MAX_FULL,e3ShortenRing,e3RingDwell,e3TextBoost,E3_RING_DWELL,E3_TEXT_FAR_BOOST,E3_SIGN_FAR_BOOST,E3_RING_SUB_MAX_CHARS
 } from '../client/public/mapz-map/e3-lod.js';
-import {SINGLE_SIGN_LIFT,SINGLE_RING_LOWER,SINGLE_RING_UPPER,blenderSingleWeight,blenderLogoFace,blenderBandFace,blenderPlateFace,blenderArtFace,blenderOrbFace,blenderDotsHole,BLENDER_TABLES,blenderBaseFace,blenderStackOpen,STACK_LIFT,STACK_RISE,STACK_GAP,STACK_SHIFT,E3_NO_STACK,E3_EVENT_SECONDS,ORB_Y,ORB_R,CD_W,CD_H,FACE_W,FACE_H,GAP_ORB,GAP_CD,GAP_SIGN,e3NoStackLayout,SIGN_NARROW,BLEED_W,BLEED_H,POSTER_W,POSTER_H} from '../client/public/mapz-map/e3-blender-model.js';
+import {SINGLE_SIGN_LIFT,SINGLE_RING_LOWER,SINGLE_RING_UPPER,blenderSingleWeight,blenderLogoFace,blenderBandFace,blenderPlateFace,blenderArtFace,blenderOrbFace,blenderDotsHole,BLENDER_TABLES,blenderBaseFace,blenderStackOpen,STACK_LIFT,STACK_RISE,STACK_GAP,STACK_SHIFT,E3_NO_STACK,E3_EVENT_SECONDS,ORB_Y,ORB_R,CD_W,CD_H,FACE_W,FACE_H,GAP_ORB,GAP_CD,GAP_SIGN,e3NoStackLayout,E3_ORB_ALPHA,E3_BEAM_FLARE,E3_BEAM_TOP,SIGN_NARROW,BLEED_W,BLEED_H,POSTER_W,POSTER_H} from '../client/public/mapz-map/e3-blender-model.js';
 import {E3_NO_STACK_TALLEST_UNITS,E3_SLIDE_SECONDS,e3SlideProgress,e3OrbPulse,e3SlideClock,E3_LIVE_BEAM_BOOST} from '../client/public/mapz-map/e3-lod.js';
 
 test('3D hologram scale: 24 m at close zoom, 20% at zoom 12, full size from 15.5, smooth in between', () => {
@@ -500,4 +500,18 @@ test('readable text: model wiring has no ghost far wall, no colour fringe offset
   assert.match(model,/e3RingDwell\(turn\*/);
   assert.match(model,/setTextBoost\(row\.textBoost\|\|1\)/);
   assert.match(flight,/textBoost:e3TextBoost\(blenderZoom\)/);
+});
+
+test('orb sits softer in the beam, and the beam fans out higher and fades to the top of the sign', async () => {
+  assert.equal(E3_ORB_ALPHA,.75,'orb core, glow and pulse peaks at 75% of the old alpha');
+  const model=await readFile(new URL('../client/public/mapz-map/e3-blender-model.js',import.meta.url),'utf8');
+  assert.match(model,/orbCore\.material\.opacity=face\.opacity\*E3_ORB_ALPHA/);
+  assert.match(model,/shell\.material\.opacity=E3_ORB_ALPHA\*Math\.min\(1,/,'pulses still scale the glow, proportionally softer');
+  // Flare: narrow at the pin, widest at the top, vortex only.
+  const flare=h=>1+E3_BEAM_FLARE*Math.min(1,h/E3_BEAM_TOP)**2;
+  assert.ok(flare(.3)<1.01,'pin stays narrow');
+  assert.ok(flare(e3NoStackLayout(1).signBottom+.8)>1.35,'wide by the poster sign');
+  assert.ok(E3_BEAM_TOP>=e3NoStackLayout(2).signTop,'the beam reaches the top of the sign');
+  assert.match(model,/float f=1\.\+\$\{E3_BEAM_FLARE\.toFixed\(4\)\}\*uSingle\.x\*h\*h;/);
+  assert.match(model,/beamFadeUniform\.value\.set\(stage>=3\.9\?bottom:99,stage>=3\.9\?lay\.signTop:100\)/,'fades from the orb to transparent at the sign top');
 });
