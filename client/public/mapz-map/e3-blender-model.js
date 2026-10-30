@@ -25,6 +25,11 @@ export const SINGLE_SIGN_LIFT=STACK_SHIFT+.8,SINGLE_RING_LOWER=.965,SINGLE_RING_
 // group sits low and compact on the beam, right above the orb (no padding around the orb).
 // Taller beam: the orb (and the sign group on it) sits higher, so the beam from the pin no longer reads as a stub.
 export const E3_NO_STACK=true,E3_EVENT_SECONDS=E3_SLIDE_SECONDS;
+// Orb reads as light inside the beam: core, glow and pulse peaks at 75% of their old alpha (Tucker: 25% more transparent).
+export const E3_ORB_ALPHA=.75;
+// Beam fans out as it rises: radius times 1+E3_BEAM_FLARE*(h/top)^2 at the vortex, so it stays narrow at the pin and is
+// widest up by the poster sign. E3_BEAM_TOP is the beam mesh top at the vortex (4.6 in the model plus the sign lift).
+export const E3_BEAM_FLARE=.6,E3_BEAM_TOP=4.6+SINGLE_SIGN_LIFT;
 export const ORB_Y=4.0,ORB_R=.07,CD_W=1.6,CD_H=.5,FACE_W=1.4,FACE_H=.4,GAP_ORB=.05,GAP_CD=.06,GAP_SIGN=.07;
 /** Heights (model units) for the no-stack layout with n countdowns: orb, faces, countdowns (first event on top), sign. */
 export function e3NoStackLayout(n=1){
@@ -418,7 +423,9 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  transformed.y+=uSingle.x*(uSingle.y*smoothstep(2.1,2.2,sy)+uSingle.z*smoothstep(2.6,2.7,sy)+uSingle.w*smoothstep(3.,3.04,sy));
  #endif
  transformed.y+=uStack.x*(uStack.y*smoothstep(.35,.55,transformed.y)+uStack.z*smoothstep(1.88,2.02,transformed.y)+uStack.w*smoothstep(2.93,3.07,transformed.y));
-`+(role==='beam'?'':` // Vertical poster: the top screen grows upward from its centre; the lower screen grows upward inside its own band.
+`+(role==='beam'?` // Beam fans out with height (vortex only, weighted like the single vortex lift).
+ {float h=clamp(transformed.y/${E3_BEAM_TOP.toFixed(4)},0.,1.);float f=1.+${E3_BEAM_FLARE.toFixed(4)}*uSingle.x*h*h;transformed.x*=f;transformed.z*=f;}
+`:` // Vertical poster: the top screen grows upward from its centre; the lower screen grows upward inside its own band.
  {float gy=transformed.y;transformed.y+=uGrow.x*smoothstep(uGrow.y-.03,uGrow.y+.03,gy)+uGrow.z*smoothstep(uGrow.w-.03,uGrow.w+.03,gy)*(1.-smoothstep(uGrow.w+.85,uGrow.w+.9,gy));
   // Faces and countdown under the poster: the top screen slides up by uMove into the space they used to take.
   transformed.y+=uMove*smoothstep(uGrow.y-.62,uGrow.y-.58,gy);}
@@ -726,7 +733,8 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     const look=e3BeamPulseLook(urgency),reach=interpolate(PULSE_TOP,stage),strength=reduced?0:Math.max(0,Math.min(1,(stage-3.2)/.8));
     pulseUniform.value.set(pulsePhase,look.count,reach,strength);
     // Beam brightness: 20% of the full look when the start is far off, rising to 80% by the time the event opens.
-    {const bottom=stage>=3.9?lay.facesBottom:interpolate(INFO_MAIN.y,stage)-INFO_DY-.47;beamFadeUniform.value.set(stage>=3.9?bottom-.5:99,stage>=3.9?bottom:100);}
+    // At the vortex the beam fades smoothly from the orb up to the top of the sign, instead of ending at the faces.
+    {const bottom=stage>=3.9?lay.facesBottom:interpolate(INFO_MAIN.y,stage)-INFO_DY-.47;beamFadeUniform.value.set(stage>=3.9?bottom:99,stage>=3.9?lay.signTop:100);}
     beamKUniform.value=(reduced?.5:.2+.6*Math.max(0,Math.min(1,urgency)))+(live?E3_LIVE_BEAM_BOOST:0);
    }
    {
@@ -768,7 +776,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     if(orb.visible){
      const bob=reduced?0:Math.sin(elapsed*1.7+phase)*.025;
      orb.position.set(0,face.y+bob,0);orb.scale.setScalar((1+sp.flash*1.4)*(1+.6*orbPulse));
-     orbCore.material.opacity=face.opacity;for(const shell of orbShells)shell.material.opacity=Math.min(1,shell.userData.alpha*face.opacity*(reduced?1:.85+.15*Math.sin(elapsed*2.3+phase))*(1+1.6*orbPulse));
+     orbCore.material.opacity=face.opacity*E3_ORB_ALPHA;for(const shell of orbShells)shell.material.opacity=E3_ORB_ALPHA*Math.min(1,shell.userData.alpha*face.opacity*(reduced?1:.85+.15*Math.sin(elapsed*2.3+phase))*(1+1.6*orbPulse));
     }
    }
    // The generic mark gives way to the logo; with no logo it stays.
