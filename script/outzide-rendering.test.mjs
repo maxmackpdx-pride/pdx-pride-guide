@@ -11,7 +11,7 @@ const colors=Object.fromEntries([...css.matchAll(/(--[\w-]+):\s*(#[0-9a-f]{6})/g
 
 test('every waypoint token and mixed cluster can draw without missing canvas textures',()=>{
  let draws=0,layouts=0;
- const context={
+ const context={sceneDisposed:false,
   places,materials:null,markers:[],markerLayout:null,mapActivity:{visible:true},markerFrame,stillMotion:()=>true,branchRows:[],drawMizzedBranches(){},
   document:{documentElement:{},body:{classList:{contains:()=>false}},hidden:false},
   getComputedStyle:()=>({getPropertyValue:name=>colors[name]||''}),

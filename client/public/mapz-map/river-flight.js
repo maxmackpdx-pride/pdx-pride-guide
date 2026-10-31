@@ -1269,10 +1269,10 @@ const exploration=createMapExploration({
   scheduleFrame();
  }
 });
-let overviewPitchFrame=0;
+let overviewPitchFrame=0,overviewSettleFrame=0;
 function syncOverviewPitch(){
  overviewPitchFrame=0;
- if(exploration.mode!=='exploring')return;
+ if(exploration.mode!=='exploring'||map.isEasing())return;
  const pitch=automaticPitch();
  if(Math.abs(map.getPitch()-pitch)>.1)map.setPitch(pitch);
 }
@@ -1280,12 +1280,19 @@ function queueOverviewPitch(){
  if(!overviewPitchFrame&&exploration.mode==='exploring')overviewPitchFrame=requestAnimationFrame(syncOverviewPitch);
 }
 function settleOverviewPitch(){
- if(exploration.mode!=='exploring')return;
- const pitch=automaticPitch();
- if(Math.abs(map.getPitch()-pitch)>.1)map.easeTo({pitch,duration:180,easing:t=>t*t*(3-2*t)});
+ cancelAnimationFrame(overviewSettleFrame);
+ // Do not start an ease inside MapLibre's completion callback: its old ease
+ // still owns that callback and can delete the new animation's frame handler.
+ overviewSettleFrame=requestAnimationFrame(()=>{
+  overviewSettleFrame=0;
+  if(disposed||!mapActivity.visible||exploration.mode!=='exploring'||map.isMoving()||map.isEasing())return;
+  const pitch=automaticPitch();
+  if(Math.abs(map.getPitch()-pitch)>.1)map.easeTo({pitch,duration:180,easing:t=>t*t*(3-2*t)});
+ });
 }
 map.on('zoom',queueOverviewPitch);
 map.on('zoomend',settleOverviewPitch);
+map.on('moveend',settleOverviewPitch);
 function updateSceneStatus(){
  status.textContent=assetError||(loaded?'':'Preparing Portland…');
  document.body.classList.toggle('scene-ready',loaded);
@@ -1400,8 +1407,8 @@ window.addEventListener('pagehide',event=>{
  // BFCache freezes the complete scene. Keep its objects alive for Back/Forward.
  if(event.persisted){map.stop();return;}
  if(disposed)return;
- disposed=true;map.off('render',renderSceneOverlays);clearTimeout(countdownFrameTimer);clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);mapActivity.dispose();featureProjection.dispose();
- cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);
+ disposed=true;clearTimeout(contextLostTimer);cancelAnimationFrame(overviewSettleFrame);map.off('render',renderSceneOverlays);clearTimeout(countdownFrameTimer);clearTimeout(surfaceRefreshTimer);clearTimeout(interactionSettledTimer);cancelAnimationFrame(frame);mapActivity.dispose();featureProjection.dispose();
+ cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);map.off('moveend',settleOverviewPitch);
  exploration.dispose();
  assetController.abort();reduced.removeEventListener('change',onReducedChange);reduced.dispose();stopSceneResize();
  for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);

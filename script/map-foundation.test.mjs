@@ -74,3 +74,10 @@ test('offscreen and document-hidden maps pause independently and dispose listene
  scope.document.hidden=false;visibility();assert.equal(activity.visible,true);
  assert.deepEqual(changes,[false,true]);activity.dispose();assert.equal(disconnected,true);assert.equal(removed,true);
 });
+
+ test('flat detail maps discard every terrain source without changing the main scene',()=>{
+ const style={version:8,terrain:{source:'elevation'},sources:{elevation:{type:'raster-dem'},relief:{type:'raster-dem'},contours:{type:'vector'},basemap:{type:'vector'}},layers:[{id:'relief',source:'relief',type:'hillshade'},{id:'contours',source:'contours',type:'line'},{id:'trails',source:'basemap',type:'line'}]};
+ const flat=vectorFirstStyle(style);
+ assert.deepEqual(Object.keys(flat.sources),['basemap']);assert.deepEqual(flat.layers.map(l=>l.id),['trails']);assert.equal(flat.terrain,undefined);
+ assert.ok(style.sources.relief);assert.ok(style.terrain);
+ });

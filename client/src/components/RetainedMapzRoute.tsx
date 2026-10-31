@@ -16,7 +16,7 @@ const RouteSnapshot = createContext({ path: '/map', search: '' });
 function useMapLocation(): [string, typeof navigate] { return [useContext(RouteSnapshot).path, navigate]; }
 function useMapSearch() { return useContext(RouteSnapshot).search; }
 
-/** Mount only after the first visit; keep one iframe and freeze its routing while away. */
+/** Desktop retains the scene; phones preserve camera state without retaining a hidden GPU context. */
 export default function RetainedMapzRoute() {
   const {user,loading:authLoading}=useAuth();
   const [path] = useLocation();
@@ -27,6 +27,12 @@ export default function RetainedMapzRoute() {
     const sync=()=>setDocumentVisible(!document.hidden);
     document.addEventListener("visibilitychange",sync);
     return()=>document.removeEventListener("visibilitychange",sync);
+  },[]);
+  const [mobileBudget,setMobileBudget]=useState(()=>window.matchMedia('(pointer: coarse)').matches);
+  useLayoutEffect(()=>{
+    const media=window.matchMedia('(pointer: coarse)');
+    const sync=()=>setMobileBudget(media.matches);
+    media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);
   },[]);
   const [visited, setVisited] = useState(active);
   const [generation,setGeneration]=useState(0);
@@ -48,11 +54,11 @@ export default function RetainedMapzRoute() {
     if(active)navigate(`${path}${snapshot.current.search ? '?'+snapshot.current.search : ''}`,{replace:true,state:window.history.state});
   },[authLoading,user?.id,active,path]);
   useLayoutEffect(() => {
-    if (!active) return;
+    if (!active) { if(mobileBudget)setVisited(false); return; }
     setVisited(true);
     if (!search && held.search) navigate(`${path}?${held.search}`, { replace: true, state: window.history.state });
-  }, [active, path, search, held.search]);
-  if (!visited && !active) return null;
+  }, [active, path, search, held.search, mobileBudget]);
+  if (!active && (mobileBudget || !visited)) return null;
   return <Activity.Provider value={active&&documentVisible}>
     <CameraRecorder.Provider value={recordCamera}><RouteSnapshot.Provider value={held}>
       <div hidden={!active} style={{display:active?undefined:"none"}} aria-hidden={!active || undefined} data-mapz-retained={active ? 'active' : 'paused'}>

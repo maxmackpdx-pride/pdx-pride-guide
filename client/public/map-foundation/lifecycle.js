@@ -2,7 +2,7 @@
 export function vectorFirstStyle(style) {
  const flat=structuredClone(style);
  delete flat.terrain;
- const deferred=new Set(['elevation','hillshade-elevation','contours']);
+ const deferred=new Set(['elevation','hillshade-elevation','contours','relief']);
  for(const id of deferred)delete flat.sources?.[id];
  flat.layers=flat.layers.filter(layer=>!deferred.has(layer.source)&&!['land-relief','elevation-contours'].includes(layer.id));
  return flat;

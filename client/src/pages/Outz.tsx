@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { outzShareId, outzSharePath } from "@shared/outzShare";
 import AuthModal from "@/components/AuthModal";
 import {useAuth} from "@/context/AuthContext";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import { roomTitle } from "@/lib/rooms";
@@ -45,6 +45,11 @@ export default function Outz() {
     return () => window.clearTimeout(timer);
   }, [listReady, restoreView]);
   const [attempt, setAttempt] = useState(0);
+  // Dispose while the iframe's browsing context still exists, before React detaches it.
+  useLayoutEffect(() => {
+    const node = frame.current;
+    return () => { try { node?.contentWindow?.dispatchEvent(new PageTransitionEvent('pagehide', {persisted:false})); } catch { /* Already detached. */ } };
+  }, [attempt, sharedId, sharePending, shareError]);
   const retrySrc = useRef<{place:string|null;href:string}|null>(null);
   const [mapSlow, setMapSlow] = useState(false);
   const retryMap = () => {

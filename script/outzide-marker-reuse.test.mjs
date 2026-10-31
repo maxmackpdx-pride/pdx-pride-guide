@@ -27,7 +27,7 @@ function harness(places){
    append(...nodes){this.childNodes.push(...nodes);},
   };
  }
- const context={
+ const context={sceneDisposed:false,
   markers,clusterWaypoints,places,mapActivity:{visible:true},
   filtered:()=>places,
   map:{project:([lng,lat])=>({x:lng*100,y:lat*100}),getZoom:()=>12},

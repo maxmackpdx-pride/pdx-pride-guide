@@ -74,7 +74,7 @@ const Mapz3D=forwardRef<MapzHandle,ThreeDProps>(function Mapz3D({active=true,row
  },[attempt]);
  // Remounting alone leaves the old iframe's WebGL context alive on iOS Safari. Run the scene's own
  // pagehide disposal (stops its frame loop and calls map.remove()) before the node is detached.
- useEffect(()=>{
+ useLayoutEffect(()=>{
   const node=frame.current;
   return()=>{try{node?.contentWindow?.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:false}));}catch{/* Cross-document or already gone. */}};
  },[]);

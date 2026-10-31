@@ -14,7 +14,7 @@ test('iframe accepts view commands only from its same-origin host and reports vi
  let receive;
  const context={parent,location:{origin},state:{view:'list'},document:{documentElement:{dataset:{mapPhase:'first-frame'}}},
   window:{addEventListener:(name,fn)=>{receive=fn;}},openResults:()=>actions.push('list'),setMapControls:value=>actions.push(value)};
- vm.runInNewContext(app.match(/function publishView\(\)\{[^\n]+/)[0]+ '\n'+app.slice(app.lastIndexOf("window.addEventListener('message',event=>{")),context);
+ vm.runInNewContext(app.match(/function publishView\(\)\{[^\n]+/)[0]+ '\n'+app.slice(app.lastIndexOf("window.addEventListener('message',event=>{"),app.indexOf("// Missed connections swap")),context);
  const command={origin,source:parent,data:{source:'outzide-host',type:'set-view',view:'list'}};
  receive({...command,origin:'https://other.example'});
  receive({...command,source:{}});

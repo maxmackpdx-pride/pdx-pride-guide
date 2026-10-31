@@ -24,3 +24,15 @@ test('pushpins reset beam transform and opacity before drawing at their projecte
  vm.runInNewContext(block,{pass:1,boardPins:[{x:73,y:91,items:[{feature:{properties:{key:'board',color:'red'}}}]}],dpr:2,coreAlpha:1,lightsContext:{setTransform:(...args)=>calls.push(args),globalAlpha:.2},drawBoardPin:(ctx,x,y)=>{assert.equal(ctx.globalAlpha,1);calls.push([x,y]);return {};},pulseTime:0,reduced:{matches:false},waypointHeadSize:()=>31,target:{getZoom:()=>16},hitTargets:[]});
  assert.deepEqual(calls,[[2,0,0,2,0,0],[73,91]]);
 });
+
+test('automatic pitch does not interrupt an ease or start a replacement inside its completion event',()=>{
+ const callbacks=new Map(),events=new Map(),calls=[];let id=0,easing=true,moving=false;
+ const state={disposed:false,mapActivity:{visible:true},exploration:{mode:'exploring'},automaticPitch:()=>48,requestAnimationFrame:fn=>{callbacks.set(++id,fn);return id;},cancelAnimationFrame:id=>callbacks.delete(id),map:{on:(name,fn)=>events.set(name,fn),isEasing:()=>easing,isMoving:()=>moving,getPitch:()=>0,setPitch:()=>calls.push('set'),easeTo:()=>calls.push('ease')}};
+ vm.runInNewContext(source.slice(source.indexOf('let overviewPitchFrame='),source.indexOf('function updateSceneStatus()')),state);
+ const flush=()=>{const pending=[...callbacks.values()];callbacks.clear();pending.forEach(fn=>fn());};
+ events.get('zoom')();flush();assert.deepEqual(calls,[]);
+ events.get('zoomend')();assert.deepEqual(calls,[]);flush();assert.deepEqual(calls,[]);
+ easing=false;events.get('moveend')();assert.deepEqual(calls,[]);flush();assert.deepEqual(calls,['ease']);
+ events.get('moveend')();state.mapActivity.visible=false;flush();assert.deepEqual(calls,['ease']);
+ state.mapActivity.visible=true;events.get('moveend')();state.disposed=true;flush();assert.deepEqual(calls,['ease']);
+});
