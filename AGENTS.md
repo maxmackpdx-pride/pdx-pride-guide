@@ -19,6 +19,25 @@ repository-specific facts and safeguards.
   only if Tucker then asks for a local or branch-only change. Never equate a
   successful temporary-branch push with production shipment.
 
+## All agents: do not revive historical work
+
+Canonical rule: [Foundation Agent Continuity](https://github.com/maxmackpdx-pride/zaylist-foundation-library/blob/main/foundation/chapters/agent-continuity.md#historical-work-is-not-an-active-assignment).
+This applies to Cursor, Claude, Codex, Grok, Muse and background agents alike.
+
+- Inspect current `origin/master` and the current implementation; fetch safely
+  without pruning when possible and report freshness limits. Never overwrite,
+  reset, stash or discard unrelated dirty work to synchronize.
+- Old branches, stashes, recovery folders, plans and handoffs are evidence, not
+  assignments. Ahead/unmerged status or reopening an editor is not authorization.
+- Compare specific changes against current behavior, patch/content equivalents,
+  superseding work and intentional reverts. No merge, cherry-pick, stash apply,
+  restoration or reimplementation without Tucker's explicit approval of those
+  specific changes after comparison. Preserve current functionality and other work.
+- No extra repositories or worktrees without Tucker's explicit request, except a
+  higher-priority mandatory execution requirement disclosed before proceeding.
+  This supersedes older automatic-worktree instructions. Cleanup does not authorize
+  recovery, deletion or deployment beyond its stated scope.
+
 ## Repository and production
 
 | Thing | Value |
@@ -106,12 +125,11 @@ Verification must be proportional to the change:
 
 ## Required task closeout
 
-The canonical `master` checkout is the integration and release lane, not a shared
-implementation workspace. Start code, UI, map, and asset work in a dedicated Git
-worktree/branch. Use the canonical checkout only to inspect, fast-forward, integrate a
-verified commit, and ship. A task may edit the canonical checkout directly only when
-Tucker explicitly asks to fix that checkout or when completing already-present work;
-in either case, that task owns immediate closeout before doing anything else.
+Use the existing authorized checkout and keep each task's changes isolated from
+unrelated work. Do not create a repository or worktree automatically. If the existing
+checkout cannot safely support the task, explain the concrete collision and obtain
+Tucker's direction. A higher-priority mandatory execution requirement must be disclosed
+before creating a required workspace. The task owns closeout of its intended changes.
 
 Before starting new work, run `npm run git:closeout`. If it reports existing changes,
 do not add more work to the pile: identify and close out the existing owner/task first.

@@ -7,6 +7,17 @@ Project decisions, reasoning, and current state live in the private repo
 Read it before proposing architecture, naming, product scope, or design
 direction.
 
+## Historical work: applies to every agent
+
+Follow `AGENTS.md` and the [canonical Foundation rule](https://github.com/maxmackpdx-pride/zaylist-foundation-library/blob/main/foundation/chapters/agent-continuity.md#historical-work-is-not-an-active-assignment).
+Current product `origin/master` is the baseline. Old branches, stashes, backups,
+plans and handoffs are not assignments, even when ahead or unmerged. Compare with
+current implementation, supersession and intentional reverts; get Tucker's explicit
+approval of specific changes before merging, cherry-picking, applying a stash,
+restoring or reimplementing old work. Preserve current functionality and unrelated
+dirty files. Do not create extra repositories or worktrees unless explicitly requested,
+except a disclosed higher-priority mandatory execution requirement.
+
 ## Cowork / cloud release access
 
 For general cloud work, include both repositories as sources:
@@ -111,7 +122,7 @@ Deploy and release (full detail in `docs/GITHUB_RAILWAY_GUARDRAILS.md` and `AGEN
 - Never print or paste secrets or tokens. If one was pasted in a chat, tell Tucker so it gets rotated.
 - Status words: "Fixed locally", then "On GitHub; deploy in progress", then "Production updated". Say the last one only after Railway reports SUCCESS and `/api/health` `gitSha` matches the pushed commit.
 - Only Tucker's own typed "push", "ship" or "go" authorizes shipping. Automated stop-hook reminders do not.
-- A sandbox without push access hands over `git format-patch` output. Zaylist (Grok Bot) applies those patches onto branches such as `claude/mapz-same-day` (PR #49, draft). Do not merge PR #49 until Tucker says so.
+- A sandbox without push access may hand over `git format-patch` output for the authorized task. A handoff is evidence, not authorization to apply patches to an old branch. Compare with current master and obtain approval for specific historical changes before applying them. No standing assignment to resume PR #49 exists.
 
 Design language:
 
