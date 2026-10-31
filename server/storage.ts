@@ -3,7 +3,6 @@ import { withoutArchivedPosts } from "./boardArchive";
 import { seedResearchedProviderCards20261013 } from "./seedResearchedProviderCards20261013";
 import { seedOwnerRequestedPlaces20261013 } from "./seedOwnerRequestedPlaces20261013";
 import outzMapCatalog from "@shared/outzMapCatalog";
-import { seedLittleShopOfPonies20261031 } from "./seedLittleShopOfPonies20261031";
 import { seedDiscoveredQueerEvents20260928 } from "./seedDiscoveredQueerEvents20260928";
 import { seedPosterAudit20260928 } from "./seedPosterAudit20260928";
 import { seedHawksReviewedTimes20260928 } from "./seedHawksReviewedTimes20260928";
@@ -8179,7 +8178,7 @@ function runBootMigrationsOnce() {
     recordBootMigration("eagle_portland_instagram_2026_09_v1");
   }
 
-  seedLittleShopOfPonies20261031(sqlite);
+  // Retired by Tucker: do not recreate the October 31 Pink Ponies listing.
   seedApprovedEvents20260928(sqlite);
   seedHawksThroughApril2027(sqlite);
   seedHawksReviewedTimes20260928(sqlite);
