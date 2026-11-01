@@ -1,0 +1,44 @@
+{
+  "checks": [
+    {
+      "family": "outz",
+      "direct": true,
+      "refresh": true,
+      "close": true,
+      "back": true
+    },
+    {
+      "family": "place",
+      "direct": true,
+      "refresh": true,
+      "close": true,
+      "back": true
+    },
+    {
+      "family": "event",
+      "direct": true,
+      "refresh": true,
+      "close": true,
+      "back": true
+    }
+  ],
+  "cleanHistory": [
+    {
+      "family": "place",
+      "profileRestored": true,
+      "recoveryError": 0
+    },
+    {
+      "family": "outz",
+      "profileRestored": true,
+      "recoveryError": 0
+    }
+  ],
+  "eventPoster": {
+    "frontHidden": true,
+    "reverseVisible": true,
+    "nativeOpen": true,
+    "backRestoresProfile": true
+  },
+  "note": "A stale Vite document after earlier source changes was discarded; repeated history checks in a fresh document restored the profile without recovery errors."
+}

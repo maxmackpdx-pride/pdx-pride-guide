@@ -1,0 +1,314 @@
+[
+  {
+    "name": "ProfileIdentity",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileIdentity",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileAbout",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileAbout",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileTop8",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileTop8",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileUpcomingPosters",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileUpcomingPosters",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileFeaturedEvent",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileFeaturedEvent",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileHosting",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileHosting",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileStash",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileStash",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileFavoritePlaces",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileFavoritePlaces",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileOutzCollection",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileOutzCollection",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileConnections",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileConnections",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileUpdate",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileUpdate",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileSoundCloud",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileSoundCloud",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileSocialLinks",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileSocialLinks",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileMarquee",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileMarquee",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfilePhotos",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfilePhotos",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileMedia",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileMedia",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfilePack",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfilePack",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileActivity",
+    "variant": "board-large",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileActivity",
+    "variant": "board-small",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileActivity",
+    "variant": "event-poster",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileActivity",
+    "variant": "event-pocket",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileActivity",
+    "variant": "outz-wide",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileActivity",
+    "variant": "outz-compressed",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileHologram",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileHologram",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileLightRibbon",
+    "variant": "animated",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileLightRibbon",
+    "variant": "calm",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileWall",
+    "variant": "desktop",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileWall",
+    "variant": "mobile",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfilePortrait",
+    "variant": "standard",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfilePortrait",
+    "variant": "compact",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileBoardObject",
+    "variant": "board-large",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "ProfileBoardObject",
+    "variant": "board-small",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "OutzWideCard",
+    "variant": "wide",
+    "rendered": true,
+    "unsupported": false
+  },
+  {
+    "name": "OutzWideCard",
+    "variant": "compressed",
+    "rendered": true,
+    "unsupported": false
+  }
+]
