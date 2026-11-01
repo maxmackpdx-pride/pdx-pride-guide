@@ -21,7 +21,11 @@ test.before(async()=>{
  });
  app.use(express.static('client/public'));
  server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s));});base='http://127.0.0.1:'+server.address().port;
- browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
+ // Portable browser: CHROME_PATH wins, then the macOS Chrome install when
+ // it exists, otherwise Playwright's bundled Chromium.
+ const macChrome='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+ const chromePath=process.env.CHROME_PATH||(fs.existsSync(macChrome)?macChrome:undefined);
+ browser=await chromium.launch(chromePath?{executablePath:chromePath}:{});
 });
 test.after(async()=>{await browser?.close();server?.closeAllConnections();await new Promise(resolve=>server?.close(resolve));});
 const child=page=>page.frames().find(f=>f.url().includes('/mapz-map/index.html'));
