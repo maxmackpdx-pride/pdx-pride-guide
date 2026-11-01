@@ -14,7 +14,23 @@ import {chromium} from 'playwright';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const near=(a,b,message)=>assert.ok(Math.abs(a-b)<=1.1,`${message}: ${a} vs ${b}`);
 const overlaps=(a,b)=>Math.min(a.x+a.width,b.x+b.width)-Math.max(a.x,b.x)>1 && Math.min(a.y+a.height,b.y+b.height)-Math.max(a.y,b.y)>1;
-async function snapshot(page){return page.locator('#qa-grid').evaluate(grid=>[...grid.children].filter(el=>el.getBoundingClientRect().width>0).map(el=>{const face=el.matches("[data-card-expanded=true],[data-card-size]")?el:el.querySelector("[data-card-size]")||el;const r=face.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));}
+// A card can be visible while its finite entrance animation is still delayed.
+// Playwright waits for actionability before clicking; take the baseline only
+// after the same root/wrapper animations finish. Decorative infinite loops do
+// not block readiness. Never cancel or override production animations here.
+async function geometryReady(page){
+ await page.waitForFunction(()=>{
+  const grid=document.querySelector('#qa-grid');if(!grid||document.fonts.status!=='loaded')return false;
+  const roots=new Set([grid,...grid.children]);
+  for(const face of grid.querySelectorAll('[data-card-size]')){
+   for(let node=face;node&&node!==grid;node=node.parentElement)roots.add(node);
+  }
+  return [...roots].every(node=>node.getAnimations().every(animation=>
+   !Number.isFinite(animation.effect?.getComputedTiming().endTime)||['finished','idle'].includes(animation.playState)));
+ });
+}
+async function snapshot(page){await geometryReady(page);return page.locator('#qa-grid').evaluate(grid=>[...grid.children].filter(el=>el.getBoundingClientRect().width>0).map(el=>{const face=el.matches("[data-card-expanded=true],[data-card-size]")?el:el.querySelector("[data-card-size]")||el;const r=face.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};}));}
+async function documentBox(locator){return locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});}
 async function settled(page){await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.waitForTimeout(450);}
 
 test('production cards keep standard dimensions and expand in flow with position-aware anchors',{timeout:600000},async(t)=>{
@@ -59,9 +75,10 @@ test('production cards keep standard dimensions and expand in flow with position
    }
    // Exercise every position in a three-column row, including right-anchored expansion.
    for(const index of [0,1,2]){
-    const original=await snapshot(page);const open=page.locator('#qa-grid button[aria-label^="Open "],#qa-grid button[aria-label^="View details for "]').nth(index);
+    const original=await snapshot(page);const originalScroll=await page.evaluate(()=>({x:scrollX,y:scrollY}));const open=page.locator('#qa-grid button[aria-label^="Open "],#qa-grid button[aria-label^="View details for "]').nth(index);
     if(family==='needz'&&size==='small'&&index===1){await open.focus();await page.keyboard.press('Enter');}else await open.click();await page.locator('.zay-card-expanded').waitFor({state:'visible'});await settled(page);
-    const after=await snapshot(page);const expanded=await page.locator('[data-card-expanded="true"]').boundingBox();assert.ok(expanded);
+    const after=await snapshot(page);const expanded=await documentBox(page.locator('[data-card-expanded="true"]'));assert.ok(expanded);
+    const openedScroll=await page.evaluate(()=>({x:scrollX,y:scrollY}));near(openedScroll.x,originalScroll.x,`${family}/${size}: no unrequested horizontal scroll`);near(openedScroll.y,originalScroll.y,`${family}/${size}: no unrequested vertical scroll`);
     near(expanded.y,original[index].y,`${family}/${size} col${index+1}: top anchor`);
     if(index===2)near(expanded.x+expanded.width,original[index].x+original[index].width,`${family}/${size}: right anchor`);else near(expanded.x,original[index].x,`${family}/${size} col${index+1}: left anchor`);
     assert.ok(expanded.width>original[index].width||expanded.height>original[index].height,`${family}/${size}: genuinely expanded`);
@@ -82,7 +99,7 @@ test('production cards keep standard dimensions and expand in flow with position
    await page.goto(`${base}__card-qa?family=${family}&size=small`,{waitUntil:'domcontentloaded'});await page.locator('#qa-grid button[aria-label^="Open "]').first().waitFor();await settled(page);
    const original=await snapshot(page);const first=page.locator('#qa-grid button[aria-label^="Open "],#qa-grid button[aria-label^="View details for "]').first();
    await first.click();await page.locator('.zay-card-expanded').waitFor({state:'visible'});await settled(page);
-   const box=await page.locator('[data-card-expanded="true"]').boundingBox();near(box.x,original[0].x,'mobile left anchor');near(box.y,original[0].y,'mobile top anchor');
+   const box=await documentBox(page.locator('[data-card-expanded="true"]'));near(box.x,original[0].x,'mobile left anchor');near(box.y,original[0].y,'mobile top anchor');
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'mobile no document horizontal overflow');
    if(shots&&family==='outz')await page.waitForFunction(()=>[...document.querySelectorAll('#qa-grid img')].every(img=>img.complete),undefined,{timeout:10000});
    if(shots)await page.screenshot({path:path.join(shots,`${family}-small-mobile-open.png`),fullPage:true});
@@ -101,7 +118,7 @@ test('production cards keep standard dimensions and expand in flow with position
    assert.equal(await page.locator('.zay-card-expanded').count(),1,`${family}: old details unmounted`);
    const expanded=page.locator('[data-card-expanded="true"]');
    assert.equal(await expanded.locator(`button[aria-label=${JSON.stringify(nextName)}]`).count(),1,`${family}: opened the newly selected source`);
-   const box=await expanded.boundingBox();const neighbors=await page.locator('#qa-grid').evaluate(grid=>[...grid.children].filter(el=>el.dataset.cardExpanded!=='true').map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
+   const box=await documentBox(expanded);const neighbors=await page.locator('#qa-grid').evaluate(grid=>[...grid.children].filter(el=>el.dataset.cardExpanded!=='true').map(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};}));
    neighbors.forEach(r=>assert.ok(!overlaps(box,r),`${family}: switched card does not overlap neighbor`));
    await page.locator('.zay-card-expanded button[aria-label*="Close"]').first().click();await page.locator('.zay-card-expanded').waitFor({state:'detached'});
    console.log(`PASS ${family}: sequential selection replaces active details without overlap`);

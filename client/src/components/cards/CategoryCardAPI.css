@@ -56,3 +56,11 @@
 .rg-directory-card[data-card-category="needz"][data-card-size="small"] .rg-directory-footer > .zheart-btn { width:24px!important; }
 .rg-directory-card[data-card-category="needz"][data-card-size="small"] .rg-directory-footer svg { flex:none;width:12px!important;height:12px!important; }
 .rg-directory-card[data-card-category="needz"][data-card-size="small"] .rg-directory-footer { flex-direction:row!important; }
+/* NEEDZ explicitly uses tall faces: mobile tracks must fit that size, not squeeze two. */
+@media (max-width:767px) {
+  .eb-page.eb-page--resources .eb-grid,
+  .eb-page.eb-page--resources .eb-lane .events-rail {
+    grid-template-columns:repeat(auto-fill,var(--eb-card-width));
+    justify-content:center;
+  }
+}

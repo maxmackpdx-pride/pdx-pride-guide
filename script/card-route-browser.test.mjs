@@ -35,11 +35,12 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce'});
  await context.addInitScript(()=>{localStorage.setItem("pdx-calm-mode","true");Math.random=()=>0.1;});
  const gifts=Array.from({length:8},(_,i)=>({id:i+1,userId:1,postType:'GIFT',title:`QA Gift ${i+1}`,description:'Useful gift',category:'Other',neighborhood:'Portland',pickupPreference:'Pickup',photoUrls:[],status:'OPEN',createdAt:'2026-11-01T00:00:00Z',expiresAt:'2027-01-01T00:00:00Z',username:'qa',interestCount:0}));
- const businesses=Array.from({length:8},(_,i)=>({id:100+i,name:`QA Cafe ${i+1}`,type:'cafe',description:'A welcoming local cafe',address:'123 Main St',neighborhood:'Portland',website:null,instagram:null,donateUrl:null,hours:null,phone:null,queerOwned:true,queerFriendly:true,imageUrl:null,lat:null,lng:null,isNew:false}));
+ const businesses=Array.from({length:8},(_,i)=>({id:100+i,name:`QA Cafe ${i+1}`,type:'cafe',description:i%2?'A welcoming local cafe with a longer description and community gatherings throughout the week.':'A welcoming local cafe',address:'123 Main St',neighborhood:i%2?'Northwest Portland neighborhood':'Portland',website:null,instagram:null,donateUrl:null,hours:null,phone:null,queerOwned:true,queerFriendly:true,imageUrl:null,lat:null,lng:null,isNew:false}));
+ businesses.push(...Array.from({length:4},(_,i)=>({...businesses[i],id:200+i,name:`QA Tavern ${i+1}`,type:'bar'})));
  await context.route('**/outzide-map/places.json*',route=>route.fulfill({json:{places:[]}}));
  await context.route('**/api/**',route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});if(p==='/api/directory')return route.fulfill({json:businesses});if(/^\/api\/directory\/\d+$/.test(p)){const business=businesses.find(item=>item.id===Number(p.split('/').pop()));return route.fulfill({status:business?200:404,json:business?{...business,description:`Fresh detail for ${business.name}`}:{error:'Not found'}});}if(p==='/api/housing')return route.fulfill({json:{posts:[]}});if(p.startsWith('/api/gifting'))return route.fulfill({json:p==='/api/gifting'?gifts:gifts[0]});return route.fulfill({json:[]});});
- let page;const errors=[];
- for(const kind of ['resources','boards']){
+ let page;const errors=[];const focus=process.env.CARD_ROUTE_QA_FOCUS;
+ for(const kind of focus?[]:['resources','boards']){
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`${base}__route-qa/${kind}?layout=grid`,{waitUntil:'networkidle'});await settled(page);
  const selector=kind==='resources'?'.rg-directory-card[data-card-category="needz"]':'.boardz-production-card';
@@ -61,7 +62,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  await page.close();
  }
  // Directory uses its actual responsive grid, not a fixture-sized collection.
- for(const width of [1280,390]){
+ for(const width of focus?[]:[1280,390]){
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width,height:1000});
  await page.goto(`${base}__route-qa/directory?layout=grid`,{waitUntil:'networkidle'});await settled(page);
@@ -87,12 +88,55 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  await page.keyboard.press('Escape');await settled(page);assert.equal(await page.locator('.zay-card-expanded:visible').count(),0,'Directory Escape closes');
  await page.close();
  }
+ // Default BrowseLane is a distinct production layout, including nested wrappers.
+ // Multiple native category lanes exercise the two-track desktop composition;
+ // varied metadata preserves the actual baseline/margin geometry of the faces.
+ for(const kind of ['directory','resources'])for(const width of [1280,390]){
+ if(focus&&focus!==`${kind}/${width}`)continue;
+ page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width,height:1000});
+ await page.goto(`${base}__route-qa/${kind}`,{waitUntil:'networkidle'});await settled(page);
+ assert.ok(!new URL(page.url()).searchParams.has('layout'),'Default Directory does not force grid');
+ const lane=kind==='directory'?page.locator('.eb-lane').filter({has:page.locator('.pdxPlace__name',{hasText:'QA Cafe 1'})}):page.locator('.eb-lane:has(.events-rail__item:nth-child(5))').first();
+ const cards=lane.locator('.pdxPlace[data-card-size]');await cards.first().waitFor();
+ const closedFaces=await cards.evaluateAll(els=>els.filter(el=>el.getBoundingClientRect().width&&getComputedStyle(el.closest('.events-rail__item')).display!=='none').map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
+ for(let i=0;i<closedFaces.length;i++){if(width===390)assert.ok(closedFaces[i].x>=0&&closedFaces[i].x+closedFaces[i].width<=width,`${kind}: mobile closed face fits viewport`);for(let j=i+1;j<closedFaces.length;j++)assert.ok(!overlaps(closedFaces[i],closedFaces[j]),`${kind}: closed browse faces do not overlap`);}
+ const docBox=async locator=>locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});
+ for(const index of [0,1,2,0]){
+ const card=cards.nth(index);await card.scrollIntoViewIfNeeded();await settled(page);
+ const before=await docBox(card);
+ if(index===0)await page.screenshot({path:`/tmp/${kind}-browse-${width}-closed.png`});
+ const hiddenBefore=await lane.locator('.events-rail__item').evaluateAll(els=>els.map(el=>getComputedStyle(el).display==='none'));
+ if(width===1280)assert.ok(hiddenBefore.slice(4).every(Boolean)&&hiddenBefore.length>4,'Desktop browse keeps fifth+ cards hidden');
+ const closedItems=await lane.locator('.events-rail__item:visible').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};}));
+ await card.click({position:{x:60,y:75}});const host=lane.locator('.events-rail__item[data-card-expanded="true"]');await host.waitFor();
+ if(kind==='directory')await host.getByText(`Fresh detail for QA Cafe ${index+1}`,{exact:true}).waitFor();await settled(page);
+ assert.deepEqual(await lane.locator('.events-rail__item').evaluateAll(els=>els.map(el=>getComputedStyle(el).display==='none')),hiddenBefore,'Browse hidden fifth+ visibility unchanged while open');
+ if(index===0)await page.screenshot({path:`/tmp/${kind}-browse-${width}-expanded.png`});
+ const expanded=await docBox(host);const anchor=await host.getAttribute('data-card-anchor');
+ console.log('BROWSE',JSON.stringify({kind,width,index,before,expanded,anchor,layout:await host.evaluate(el=>({style:el.getAttribute('style'),parentStyle:el.parentElement.getAttribute('style'),tracks:getComputedStyle(el.parentElement).gridTemplateColumns,parent:el.parentElement.getBoundingClientRect().toJSON()}))}));
+ near(expanded.y,before.y,`${kind} browse ${width} card${index+1} top anchor`);
+ if(anchor==='right')near(expanded.x+expanded.width,before.x+before.width,`${kind} browse ${width} right anchor`);else near(expanded.x,before.x,`${kind} browse ${width} left anchor`);
+ assert.ok(await host.evaluate(el=>el.parentElement.classList.contains('events-rail')),'Default browse expands rail item, not page or lane');
+ const neighbors=await host.evaluate(el=>[...el.parentElement.children].filter(child=>child!==el&&getComputedStyle(child).display!=='none').map(child=>{const r=child.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};}));
+ for(const neighbor of neighbors)assert.ok(!overlaps(expanded,neighbor),`${kind} browse ${width}: expanded card covers neighbor`);
+ assert.equal(await page.locator('[aria-modal="true"]:visible').count(),0);
+ if(index===1)await page.keyboard.press('Escape');else await host.getByRole('button',{name:kind==='directory'?'Close place':'Close resource',exact:true}).click();await host.waitFor({state:'detached'});await settled(page);
+ assert.deepEqual(await lane.locator('.events-rail__item').evaluateAll(els=>els.map(el=>getComputedStyle(el).display==='none')),hiddenBefore,'Browse hidden fifth+ visibility unchanged after close');
+ const restored=await docBox(card);near(restored.x,before.x,'Browse restored x');near(restored.y,before.y,'Browse restored y');
+ const restoredItems=await lane.locator('.events-rail__item:visible').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};}));
+ restoredItems.forEach((r,i)=>{near(r.x,closedItems[i].x,'Browse neighbor restored x');near(r.y,closedItems[i].y,'Browse neighbor restored y');});
+ console.log(`PASS ${kind} default browse ${width} card${index+1}: anchor, native close/reopen, neighbor reflow`);
+ }
+ await page.close();
+ }
+ if(!focus){
  // Safety card uses the actual mobile page with its inserted card.
  page=await context.newPage();await page.setViewportSize({width:390,height:844});
  await page.goto(`${base}__route-qa/resources?layout=grid&cat=safety`,{waitUntil:'networkidle'});
  await page.locator('.needz-mobile-safety-card').first().click();await page.locator('.zay-card-expanded').waitFor({state:'visible'});
  await page.keyboard.press('Escape');await settled(page);
  assert.equal(await page.locator('.zay-card-expanded:visible').count(),0,'Safety Escape closes');
+ }
  assert.deepEqual(errors,[]);
  }finally{await browser?.close();await server.close();}
 });

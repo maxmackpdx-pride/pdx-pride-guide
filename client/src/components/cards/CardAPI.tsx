@@ -64,7 +64,12 @@ export function CardDetails({ children, onClose }: { children: ReactNode; onClos
     const parentStyle = getComputedStyle(parent);
     const sourceRect = source.getBoundingClientRect();
     const parentRect = parent.getBoundingClientRect();
-    const siblings = Array.from(parent.children).filter((el):el is HTMLElement=>el instanceof HTMLElement).map(element=>{
+    // Collapsed browse lanes keep later cards mounted with display:none. Their
+    // zero rectangles are not a real row: counting them shifts every open card
+    // down one track. Hidden siblings must not participate in placement/reflow.
+    const siblings = Array.from(parent.children).filter((el):el is HTMLElement=>
+      el instanceof HTMLElement && el.getClientRects().length > 0 && el.getBoundingClientRect().width > 0
+    ).map(element=>{
       const style=element.getAttribute('style'),visualRect=element.getBoundingClientRect();
       // Pinboard decoration can rotate/nudge an object without changing its row.
       // Measure layout synchronously without those decorations, then restore them.
