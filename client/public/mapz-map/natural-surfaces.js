@@ -115,13 +115,15 @@ export function createWaterBloom() {
         const falloff=Math.max(3.5,24/scale);
         for(let i=0;i<mask.length;i++){
           const alpha=mask[i]?Math.round(52*Math.exp(-Math.max(0,distances[i]-1)/falloff)):0;
-          pixels.data.set([56,145,135,alpha],i*4);
+          const offset=i*4;
+          pixels.data[offset]=56;pixels.data[offset+1]=145;pixels.data[offset+2]=135;pixels.data[offset+3]=alpha;
         }
         ctx.putImageData(pixels,0,0);
         const centerMask=maskContext.createImageData(interior.width,interior.height);
         for(let i=0;i<mask.length;i++){
           const depth=mask[i]?Math.max(0,Math.min(1,(distances[i]-2)/(14/scale))):0;
-          centerMask.data.set([255,255,255,Math.round(255*depth)],i*4);
+          const offset=i*4;
+          centerMask.data[offset]=255;centerMask.data[offset+1]=255;centerMask.data[offset+2]=255;centerMask.data[offset+3]=Math.round(255*depth);
         }
         maskContext.putImageData(centerMask,0,0);
       }

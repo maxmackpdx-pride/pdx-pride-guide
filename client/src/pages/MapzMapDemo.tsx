@@ -97,18 +97,27 @@ function nightDayColor(night: string | undefined): string | undefined {
   const weekday = new Date(`${night}T12:00:00Z`).getUTCDay();
   return getComputedStyle(document.documentElement).getPropertyValue(`--day-${WEEKDAY_TOKENS[weekday]}`).trim() || undefined;
 }
-function mapzEventColor(event: Event, places: Place[]) {
+function mapzVenueLookup(places: Place[]): Map<string, Place> {
+  const venues = new Map<string, Place>();
+  for (const place of places) {
+    if (place.type === 'group') continue;
+    const key = normalizeDirectoryName(place.name);
+    if (!venues.has(key)) venues.set(key, place);
+  }
+  return venues;
+}
+function mapzEventColor(event: Event, venues: Map<string, Place>) {
   const venueKey=normalizeDirectoryName(event.venueName || '');
   let tags: string[]=[];try { const parsed=JSON.parse(event.eventTypes || '[]'); if(Array.isArray(parsed))tags=parsed; } catch {}
   if(event.isSexPositive || event.nudityOk || tags.some(tag=>['SEX_POSITIVE','NUDITY_OK','KINK'].includes(tag)) || ADULT_VENUES.has(venueKey))return '#FF0000';
-  const venue=places.find(place=>place.type!=='group' && normalizeDirectoryName(place.name)===venueKey);
+  const venue=venues.get(venueKey);
   return venue?mapzPlaceColor(venue):directoryTypeColor('venue');
 }
 
-function phraseIncludes(haystack: string, needle: string): boolean {
-  const words = (value: string) => value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
-  const phrase = words(needle);
-  return phrase.length >= 3 && ` ${words(haystack)} `.includes(` ${phrase} `);
+const phraseWords = (value: string) => value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+function normalizedPhraseIncludes(haystack: string, needle: string): boolean {
+  const phrase = phraseWords(needle);
+  return phrase.length >= 3 && ` ${haystack} `.includes(` ${phrase} `);
 }
 
 /** Public lineup names for the map: DJs first; other performing roles only when no DJ is listed. The events payload carries role, username, display name triples. */
@@ -125,14 +134,14 @@ function eventPerformers(event: Event): string[] {
   return djs.length ? djs : others;
 }
 
-function eventBrandLogos(event: Event, places: Place[]): { primary?: string; alternate?: string; directoryId?: number; alternateDirectoryId?: number; hostName?: string } {
-  const eventCopy = `${event.title} ${event.description || ""}`;
+function eventBrandLogos(event: Event, places: Place[], venues: Map<string, Place>): { primary?: string; alternate?: string; directoryId?: number; alternateDirectoryId?: number; hostName?: string } {
+  const eventCopy = phraseWords(`${event.title} ${event.description || ""}`);
   const host = places
-    .filter(place => place.type === "group" && phraseIncludes(eventCopy, place.name))
+    .filter(place => place.type === "group" && normalizedPhraseIncludes(eventCopy, place.name))
     .sort((a, b) => b.name.length - a.name.length)[0];
   const hostLogo = host ? serviceWaypointLogo(host, resolveDirectoryLogo(host.name, host.imageUrl)) : null;
   const venueKey = normalizeDirectoryName(event.venueName || "");
-  const venue = places.find(place => place.type !== "group" && normalizeDirectoryName(place.name) === venueKey);
+  const venue = venues.get(venueKey);
   const venueLogo = venue ? serviceWaypointLogo(venue, resolveDirectoryLogo(venue.name, venue.imageUrl)) : resolveDirectoryLogo(event.venueName || "");
   if (hostLogo && venueLogo && hostLogo !== venueLogo) return { primary: venueLogo, alternate: hostLogo, directoryId: venue?.id, alternateDirectoryId: host?.id, hostName: host?.name };
   return { primary: venueLogo || hostLogo || undefined, directoryId: venue?.id || host?.id, hostName: host?.name };
@@ -177,19 +186,19 @@ function boardKind(row: MapRow): BoardKind | null {
 }
 
 function finite(n: unknown): n is number { return typeof n === "number" && Number.isFinite(n); }
+// Reuse option parsing; format each current value so Pacific day/DST stays live.
+const pacificHourFormatter = new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: true, timeZone: "America/Los_Angeles" });
+const pacificDayFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit",
+});
 function hour(iso: string) {
-  try { return new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: true, timeZone: "America/Los_Angeles" }).format(new Date(iso)).replace(" ", "").replace("M", ""); }
+  try { return pacificHourFormatter.format(new Date(iso)).replace(" ", "").replace("M", ""); }
   catch { return ""; }
 }
 function portlandCalendarDay(value: string | number | Date) {
   const date = value instanceof Date ? value : new Date(value);
   if (!Number.isFinite(date.getTime())) return "";
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Los_Angeles",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
+  return pacificDayFormatter.format(date);
 }
 function dateTimeLocalValue(value: number) {
   const date = new Date(value);
@@ -818,6 +827,7 @@ export default function MapzMapDemo() {
     return () => observer.disconnect();
   }, []);
   const sceneRows = useMemo(() => {
+    const venues = mapzVenueLookup(places);
     const pinCyan=getComputedStyle(document.documentElement).getPropertyValue("--day-thu").trim();
     return marks.map(mark => {
     if (mark.kind === 'resource') {
@@ -834,8 +844,8 @@ export default function MapzMapDemo() {
     const place=mark.kind==='place'?mark.item as Place:null;
     const row=mark.item as MapRow;
     const isHouz=String(row._board)==='My Hoüz';
-    const brands=event?eventBrandLogos(event,places):null;
-    const color=event?mapzEventColor(event,places):place?mapzPlaceColor(place):boardColor(row);
+    const brands=event?eventBrandLogos(event,places,venues):null;
+    const color=event?mapzEventColor(event,venues):place?mapzPlaceColor(place):boardColor(row);
     const connectionEvent=row._board==='Mizzed'?events.find(e=>e.id===Number(row.eventId)):undefined;
     const linkedBoard=Boolean((row.mapPoint as any)?.venueId);
     const venueName=event?.venueName||connectionEvent?.venueName||String(row.eventVenue||row.venueHint||row.placeName||(row._board==='Gigz'?row.location:'')||'');
