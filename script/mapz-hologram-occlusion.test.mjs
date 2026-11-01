@@ -19,3 +19,15 @@ test('clipping is bounded and overlapping surfaces use independent clips',()=>{
  clipBehindHolograms(ctx,.4,[region,region],100,100);assert.equal(calls.filter(c=>c[0]==='clip').length,2);
  assert.ok(calls.filter(c=>c[0]==='clip').every(c=>c[1]==='evenodd'));
 });
+
+test('foreground hologram screens cover nearer waypoints and suppress their hit targets',()=>{
+ const region={...projectedHologramQuad(matrix,100,100),foreground:true};
+ for(const depth of [-.4,.4,null]){
+  assert.equal(pointBehindHologram({x:50,y:50},depth,[region]),true);
+  assert.equal(pointBehindHologram({x:23,y:32},depth,[region]),false);
+  const calls=[];
+  const ctx=Object.fromEntries(['beginPath','rect','lineTo','moveTo','closePath','clip'].map(k=>[k,(...args)=>calls.push([k,...args])]));
+  clipBehindHolograms(ctx,depth,[region],100,100);
+  assert.equal(calls.filter(c=>c[0]==='clip').length,1);
+ }
+});

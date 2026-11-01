@@ -332,9 +332,9 @@ float hash(float n){return fract(sin(n*91.345)*47453.5453);}
 // (vertical gradient, drifting scan bands and a slow sweep) so the screen is always full.
 vec4 field(vec2 uv){
  float g=.18+.42*smoothstep(0.,1.,uv.y);
- float bands=.5+.5*sin((uv.y*26.-seconds*1.4)*6.2832);
- float sweep=exp(-pow((uv.y-fract(seconds*.18))*7.,2.));
- vec3 c=tint*(g+.10*bands+.35*sweep)+vec3(.02,.03,.05);
+ float bands=.5+.5*sin((uv.y*26.-seconds*.12)*6.2832);
+ float sweep=exp(-pow((uv.y-fract(seconds*.04))*7.,2.));
+ vec3 c=tint*(g+.03*bands+.08*sweep)+vec3(.02,.03,.05);
  return vec4(c,.86);
 }
 vec4 art(sampler2D tex,float asp,vec2 uv,float cover){
@@ -349,7 +349,7 @@ vec4 art(sampler2D tex,float asp,vec2 uv,float cover){
 }
 vec4 pick(vec2 uv,float slice){
  float m=glitch>0.?step(hash(slice+3.)*.7+.15,mixAmount):mixAmount;
- return m>.5?art(map1,aspect1,uv,cover1):art(map0,aspect0,uv,cover0);
+ return mix(art(map0,aspect0,uv,cover0),art(map1,aspect1,uv,cover1),m);
 }
 void main(){
  vec2 uv=vUv;float slice=floor(uv.y*16.);float tick=floor(seconds*22.);
@@ -361,14 +361,14 @@ void main(){
  col*=1.-.08*glitch*step(.5,fract(uv.y*70.));
  float bar=glitch>0.&&hash(slice*5.+tick*3.)>.9?1.:0.;
  col+=accent*bar*.55*glitch;a=max(a,bar*.35*glitch);
- // Hologram: fine scan lines, a faint tint wash and a soft flicker; translucent, not solid.
+ // Fine scan lines and a faint tint wash with steady opacity.
  float lines=uv.y*110.-seconds*.6;
  float footprint=max(fwidth(lines),.001);
  float scan=smoothstep(.5-footprint,.5+footprint,fract(lines));
  // Sub-pixel scan bands become their average instead of aliasing over poster detail.
  col*=mix(.93,.86+.14*scan,1.-smoothstep(.25,.75,footprint));
  col=mix(col,col*.6+tint*.4,.1);
- a*=.9+.03*sin(seconds*9.1)+.02*sin(seconds*23.7);
+ a*=.9;
  // Dark scrim under the info over the lower part of the screen.
  float scrim=1.-smoothstep(.06,.5,uv.y);
  col*=1.-.8*scrim;a=max(a,.92*scrim);
@@ -459,7 +459,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
       .replace('void main() {','void main() {\n if(uNarrow.y>.5){float y=vSignPos.y,ax=abs(vSignPos.x),top=uGrow.y+uMove+.47+uGrow.x;\n  if(y>top+.025&&y<top+.8&&ax<.95)discard;\n  if(y<uGrow.y+uMove-.56)discard;\n'+(role==='outline'?'  if(y>uGrow.y+uMove-.505&&y<top-.025&&ax<'+(.61*SIGN_NARROW-.012).toFixed(4)+')discard;\n  if(uGrow.z>0.){float lt=uGrow.w+.47+uGrow.z;if(y>uGrow.w-.505&&y<lt-.025&&ax<'+(.61*SIGN_NARROW-.012).toFixed(4)+')discard;}\n':'')+' }');
     }
     if(pulsed){
-     // Small bright pulses climbing the beam from the pin to the rings. uPulse: phase, how many at once, the height they reach, strength.
+     // Broad, low-contrast waves drift up the translucent beam. uPulse: phase, how many at once, the height they reach, strength.
      shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float vBeamY;uniform vec4 uPulse;uniform float uBeamK;uniform vec2 uFade;uniform vec3 uBeamAccent;')
       .replace('#include <opaque_fragment>',`#include <opaque_fragment>
  {
@@ -470,12 +470,12 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    float on=clamp(uPulse.y-float(k),0.,1.);
    float pos=fract(uPulse.x+float(k)/max(uPulse.y,1.));
    float d=travel-pos;
-   glow+=on*exp(-d*d*1300.)*smoothstep(0.,.1,pos)*(1.-smoothstep(.82,1.,pos));
+   glow+=on*exp(-d*d*80.)*smoothstep(0.,.1,pos)*(1.-smoothstep(.82,1.,pos));
   }
-  float g=min(1.,glow*uPulse.w*uBeamK*1.4);
+  float g=min(1.,glow*uPulse.w*uBeamK*.3);
   float fade=1.-smoothstep(uFade.x,uFade.y,vBeamY);
   vec3 beamRgb=mix(diffuseColor.rgb,uBeamAccent,g);
-  gl_FragColor=vec4(beamRgb,min(.6,.16*uBeamK+g*.4)*fade);
+  gl_FragColor=vec4(beamRgb,min(.18,.08*uBeamK+g*.08)*fade);
  }`);
     }
    };
@@ -629,7 +629,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  let stage=0,urgency=0,lastElapsed=null,ringAngle=0,tiltClock=0,pulsePhase=0,textBoost=1;
  return {object,
   // Only backed display surfaces occlude flat pins: never beams, rings or particles.
-  get occlusionMeshes(){return [...slides.filter(slide=>slide.mesh.visible&&slide.material.uniforms.opacity.value>.65).map(slide=>slide.mesh),...[plate,plate2].filter(part=>part.mesh.visible&&part.material.opacity>.65).map(part=>part.mesh)];},
+  get occlusionMeshes(){return [...slides.filter(slide=>slide.mesh.visible&&slide.material.uniforms.opacity.value>.01).map(slide=>slide.mesh),...[plate,plate2].filter(part=>part.mesh.visible&&part.material.opacity>.01).map(part=>part.mesh)];},
   setColor(value){tint.set(value);disc.material.color.copy(tint);for(const node of meshes)if(!['panel','icon','particle'].includes(node.userData.mapzRole))node.material.color.copy(tint);},
   setLogo,setContent,
   // 0..1 time-to-start energy (e3EventUrgency): ring spin, ring tilt rate and beam pulses ramp with it.
@@ -652,7 +652,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   update(elapsed=0,reduced=false){
    // Active-time delta for the accumulated phases (a rate that changes with the clock never makes the angle jump).
    const dt=lastElapsed===null?0:Math.max(0,Math.min(.5,elapsed-lastElapsed));lastElapsed=elapsed;
-   if(!reduced){ringAngle+=Math.PI*2*e3RingSpinRate(urgency)*dt;tiltClock+=e3RingTiltRate(urgency)*dt;pulsePhase+=e3BeamPulseLook(urgency).speed*dt;}
+   if(!reduced){ringAngle+=Math.PI*2*e3RingSpinRate(urgency)*dt;tiltClock+=e3RingTiltRate(urgency)*dt;pulsePhase+=e3BeamPulseLook(urgency).speed*dt*.25;}
    // Staged coin to vortex spin-up (stage 3 to 4): the coin flips, the rings unfold, the screen slides out, the orb drops in.
    const sp=reduced?{active:false,f:0,flipAngle:0,rings:0,screen:0,extras:0,orb:0,flash:0}:e3SpinUp(stage);
    const at=progress=>sp.active?3+progress:stage;
@@ -671,7 +671,6 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    const nEvents=Math.max(1,Math.min(2,content.screens?.length||1)),lay=e3NoStackLayout(plate2.texture?2:1),lv=Math.max(0,Math.min(1,stage-3));
    // Which event the slideshow shows (alternates every E3_EVENT_SECONDS when the venue has two events today).
    {const next=nEvents>1?Math.floor((elapsed+phase*.9)/E3_EVENT_SECONDS)%nEvents:0;if(next!==activeEvent){activeEvent=next;eventSwitchAt=elapsed;}}
-   const switchFlash=reduced?0:Math.max(0,1-(elapsed-eventSwitchAt)/.6);
    // Live: at least one of the venue's events has started.
    const live=Boolean(contentKey)&&(content.screens||[]).some(screen=>screen&&screen.pending===false);
    const orbPulse=reduced||!contentKey?0:e3OrbPulse(elapsed,phase,nEvents,live);
@@ -692,24 +691,22 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     plane.mesh.visible=plane.mesh.visible&&face.opacity*handover>.01;
     plane.mesh.position.y=face.y;plane.mesh.scale.set(face.width,face.height,1);plane.material.opacity=face.opacity*handover;
    }
-   // Screen art slides: logo most of the time, poster and host logo glitching in. Reduced motion is the static logo.
+   // Screen art crossfades without glitch flashes. Reduced motion keeps the static logo.
    for(const slide of slides){
     const face=blenderArtFace(slide.table,at(sp.screen)),has=slide.kinds.length>0&&face.opacity>.01&&face.width>.01;
     const src=slide.index===0?slides[activeEvent]||slide:slide,screenIndex=slide.index===0?activeEvent:slide.index;
     slide.mesh.visible=has&&src.kinds.length>0;
     if(!slide.mesh.visible)continue;
     const state=e3SlideState(src.kinds,elapsed+slide.index*4.3+phase*.9,{reduced});
-    // Standby: a screen whose event has not started sits dim and flickers softly; when it starts it powers on with a glitch flash.
-    const pendingNow=Boolean(content.screens[screenIndex]?.pending),prevPending=slide.pending===true;
+    // Pending screens stay steadily dim and ease up to full brightness when live.
+    const pendingNow=Boolean(content.screens[screenIndex]?.pending);
     slide.standby=(slide.standby??(pendingNow?1:0))+((pendingNow?1:0)-(slide.standby??(pendingNow?1:0)))*.08;
-    if(prevPending&&!pendingNow)slide.powerOn=elapsed;
     slide.pending=pendingNow;
-    const powerFlash=slide.powerOn!=null&&elapsed-slide.powerOn<.9?1-(elapsed-slide.powerOn)/.9:0;
-    const standbyDim=1-slide.standby*(.22+(reduced?0:.07*Math.sin(elapsed*5.3+slide.index)));
+    const standbyDim=1-slide.standby*.22;
     const u=slide.material.uniforms;
     u.map0.value=src.textures[state.from]||blank;u.map1.value=src.textures[state.to]||blank;
     u.aspect0.value=src.aspects[state.from]||1;u.aspect1.value=src.aspects[state.to]||1;u.cover0.value=state.from==='poster'?1:0;u.cover1.value=state.to==='poster'?1:0;
-    u.mixAmount.value=state.mix;u.glitch.value=Math.max(state.glitch,sp.flash*.9,powerFlash,slide.index===0?switchFlash*.8:0,slide.standby>.5&&!reduced?.12:0);u.seconds.value=elapsed;u.opacity.value=face.opacity*standbyDim;u.boxAspect.value=face.width/Math.max(.01,face.height);
+    u.mixAmount.value=state.mix;u.glitch.value=0;u.seconds.value=elapsed;u.opacity.value=face.opacity*standbyDim;u.boxAspect.value=face.width/Math.max(.01,face.height);
     slide.mesh.position.y=face.y+(slide.index===0?lay.move*lv:0);slide.mesh.scale.set(face.width,face.height,1);
    }
    for(const info of infos){
@@ -739,10 +736,10 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
      part.mesh.rotation.order='ZXY';part.mesh.rotation.set(-tiltX,spin,tiltZ);
     }
    });
-   // Light pulses up the beam: density and speed follow the urgency; none under reduced motion.
+   // At most two slow, soft waves; none under reduced motion.
    {
     const look=e3BeamPulseLook(urgency),reach=interpolate(PULSE_TOP,stage),strength=reduced?0:Math.max(0,Math.min(1,(stage-3.2)/.8));
-    pulseUniform.value.set(pulsePhase,look.count,reach,strength);
+    pulseUniform.value.set(pulsePhase,Math.min(2,look.count),reach,strength);
     // Beam brightness: 20% of the full look when the start is far off, rising to 80% by the time the event opens.
     // At the vortex the beam fades smoothly from the orb up to the top of the sign, instead of ending at the faces.
     {const bottom=stage>=3.9?lay.facesBottom:interpolate(INFO_MAIN.y,stage)-INFO_DY-.47;beamFadeUniform.value.set(stage>=3.9?bottom:99,stage>=3.9?lay.signTop:100);}
@@ -869,7 +866,7 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
    // instead of leaning away from the middle of the view with perspective. Drawn one hologram at a time, each with
    // a small sideways shear (linear in height) folded into its projection.
    const M=camera.projectionMatrix.clone(),list=[...instances.values()];
-   const collect=item=>{for(const mesh of item.model.occlusionMeshes){projected.multiplyMatrices(camera.projectionMatrix,mesh.matrixWorld);const region=projectedHologramQuad(projected.elements,map.getCanvas().clientWidth,map.getCanvas().clientHeight);if(region)occluders.push(region);}};
+   const collect=item=>{for(const mesh of item.model.occlusionMeshes){projected.multiplyMatrices(camera.projectionMatrix,mesh.matrixWorld);const region=projectedHologramQuad(projected.elements,map.getCanvas().clientWidth,map.getCanvas().clientHeight);if(region)occluders.push({...region,foreground:true});}};
    renderer.resetState();
    if(!AXIS_VERTICAL||!list.length){renderer.render(scene,camera);for(const item of list)collect(item);renderer.resetState();return;}
    const e=M.elements;

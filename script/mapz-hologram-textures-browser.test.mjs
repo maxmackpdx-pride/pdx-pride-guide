@@ -70,8 +70,10 @@ test('projected occlusion hides only background pixels, including overlapping sc
    const matrix=[.8,0,0,0,.4,.8,0,0,0,0,1,0,0,0,-.2,1],region=projectedHologramQuad(matrix,100,100);
    const canvas=document.createElement('canvas');canvas.width=canvas.height=100;const ctx=canvas.getContext('2d');
    const draw=depth=>{ctx.clearRect(0,0,100,100);ctx.save();clipBehindHolograms(ctx,depth,[region,region],100,100);ctx.fillStyle='red';ctx.fillRect(0,0,100,100);ctx.restore();return {inside:ctx.getImageData(50,50,1,1).data[3],gap:ctx.getImageData(23,32,1,1).data[3]};};
-   return {behind:draw(.4),front:draw(-.4),blockedHit:pointBehindHologram({x:50,y:50},.4,[region]),foregroundHit:pointBehindHologram({x:50,y:50},-.4,[region])};
+   const foreground={...region,foreground:true};ctx.clearRect(0,0,100,100);ctx.save();clipBehindHolograms(ctx,-.4,[foreground],100,100);ctx.fillRect(0,0,100,100);ctx.restore();const coveredNearPin=ctx.getImageData(50,50,1,1).data[3]===0;
+   return {coveredNearPin,coveredNearHit:pointBehindHologram({x:50,y:50},-.4,[foreground]),behind:draw(.4),front:draw(-.4),blockedHit:pointBehindHologram({x:50,y:50},.4,[region]),foregroundHit:pointBehindHologram({x:50,y:50},-.4,[region])};
   });
+  assert.equal(result.coveredNearPin,true);assert.equal(result.coveredNearHit,true);
   assert.deepEqual(result.behind,{inside:0,gap:255});assert.deepEqual(result.front,{inside:255,gap:255});assert.equal(result.blockedHit,true);assert.equal(result.foregroundHit,false);
  }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
 });

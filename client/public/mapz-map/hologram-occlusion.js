@@ -11,10 +11,12 @@ export function projectedHologramQuad(elements,width,height){
  }
  return {points,left:Math.min(...points.map(p=>p.x)),right:Math.max(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),bottom:Math.max(...points.map(p=>p.y)),farDepth:Math.max(...points.map(p=>p.z))};
 }
+// Foreground display surfaces cover waypoint hardware regardless of its ground depth.
+// Keep clipping and hit testing identical so covered pins cannot steal screen clicks.
 export function pointBehindHologram(point,depth,regions){
- if(!Number.isFinite(depth))return false;
+ if(!Number.isFinite(depth)&&!regions.some(region=>region.foreground))return false;
  return regions.some(region=>{
-  if(!(depth>region.farDepth+1e-7)||point.x<region.left||point.x>region.right||point.y<region.top||point.y>region.bottom)return false;
+  if((!region.foreground&&!(depth>region.farDepth+1e-7))||point.x<region.left||point.x>region.right||point.y<region.top||point.y>region.bottom)return false;
   let inside=false;const polygon=region.points;
   for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){
    const a=polygon[i],b=polygon[j];
@@ -24,9 +26,9 @@ export function pointBehindHologram(point,depth,regions){
  });
 }
 export function clipBehindHolograms(ctx,depth,regions,width,height,bounds=null){
- if(!Number.isFinite(depth))return;
+ if(!Number.isFinite(depth)&&!regions.some(region=>region.foreground))return;
  for(const region of regions){
-  if(!(depth>region.farDepth+1e-7)||bounds&&(region.right<bounds.left||region.left>bounds.right||region.bottom<bounds.top||region.top>bounds.bottom))continue;
+  if((!region.foreground&&!(depth>region.farDepth+1e-7))||bounds&&(region.right<bounds.left||region.left>bounds.right||region.bottom<bounds.top||region.top>bounds.bottom))continue;
   // Separate clips make overlapping surfaces a union, rather than XOR holes.
   ctx.beginPath();ctx.rect(-1,-1,width+2,height+2);
   region.points.forEach((point,i)=>i?ctx.lineTo(point.x,point.y):ctx.moveTo(point.x,point.y));ctx.closePath();ctx.clip('evenodd');
