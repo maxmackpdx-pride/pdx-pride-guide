@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+import {mapzAsset} from '../client/public/map-foundation/waypoint-objects.js';
 const source=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
 const handler=source.slice(source.indexOf('function renderSceneOverlays(){'),source.indexOf("map.on('render',renderSceneOverlays);")+"map.on('render',renderSceneOverlays);".length);
 test('overlay paints the current map frame even between animation ticks and pauses when hidden',()=>{
@@ -21,7 +22,7 @@ test('pushpins reset beam transform and opacity before drawing at their projecte
  const start=source.indexOf('  if(pass===1)for(const group of boardPins){');
  const block=source.slice(start,source.indexOf('\n  for(const {feature,p,offset',start));
  const calls=[];
- vm.runInNewContext(block,{pass:1,boardPins:[{x:73,y:91,items:[{feature:{properties:{key:'board',color:'red'}}}]}],dpr:2,coreAlpha:1,lightsContext:{setTransform:(...args)=>calls.push(args),globalAlpha:.2},drawBoardPin:(ctx,x,y)=>{assert.equal(ctx.globalAlpha,1);calls.push([x,y]);return {};},pulseTime:0,reduced:{matches:false},waypointHeadSize:()=>31,target:{getZoom:()=>16},hitTargets:[]});
+ vm.runInNewContext(block,{pass:1,boardPins:[{x:73,y:91,items:[{feature:{geometry:{coordinates:[-122.67,45.52]},properties:{key:'board',color:'red'}}}]}],dpr:2,coreAlpha:1,lightsContext:{setTransform:(...args)=>calls.push(args),globalAlpha:.2},drawBoardPin:(ctx,x,y)=>{assert.equal(ctx.globalAlpha,1);calls.push([x,y]);return {};},pulseTime:0,reduced:{matches:false},waypointHeadSize:()=>31,target:{getZoom:()=>16},hitTargets:[],waypointOccluders:[],clipBehindHolograms:()=>{},depthFor:()=>0,width:900,height:1200,waypointObjectRows:[],mapzAsset,waypointObjects:{ready:()=>false},drawClusterCount:()=>{}});
  assert.deepEqual(calls,[[2,0,0,2,0,0],[73,91]]);
 });
 

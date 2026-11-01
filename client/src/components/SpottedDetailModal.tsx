@@ -35,6 +35,13 @@ export type SpottedDetailModalProps = {
   isMine?: boolean;
   status?: string;
   isDemo?: boolean;
+  /**
+   * The post lives outside /api/missed-connections (e.g. an OutZide wall
+   * post). Its id belongs to a different id space, so reply, edit and report
+   * — which target /api/missed-connections/<id> — stay locked; the source
+   * card is where the conversation happens.
+   */
+  external?: boolean;
   source?: { label: string; title: string; image: string | null; href: string; note: string } | null;
   onClose: () => void;
 };
@@ -52,6 +59,7 @@ export default function SpottedDetailModal({
   isMine = false,
   status = "ACTIVE",
   isDemo = false,
+  external = false,
   source,
   presentation,
 }: SpottedDetailModalProps) {
@@ -134,7 +142,8 @@ export default function SpottedDetailModal({
         </p>
         {source && <div className="mizzed-source-link"><span>FROM THE {source.label.toUpperCase()} CARD</span><div>{source.image && <img src={source.image} alt="" />}<div><strong>{source.title}</strong><small>{source.note}</small><a href={source.href}>Open source card <ArrowUpRight size={14} aria-hidden="true" /></a></div></div></div>}
         {isDemo && <p className="board-demo-notice" role="note">Demo connection — example only. Private replies are disabled.</p>}
-        {isDemo ? null : isMine ? <div className="board-detail-modal__actions" style={{position:"relative",zIndex:1}}>
+        {external && !isDemo && <p className="board-demo-notice" role="note">Posted on the OutZide destination card. Open the source card to reply there.</p>}
+        {isDemo || external ? null : isMine ? <div className="board-detail-modal__actions" style={{position:"relative",zIndex:1}}>
           {editing ? <form onSubmit={e=>{e.preventDefault();ownerMutation.mutate({method:"PUT",data:{title:editTitle,body:editBody}});}}><label>Title<input className="board-text-field" maxLength={BOARD_TEXT_LIMITS.title} value={editTitle} onChange={e=>setEditTitle(e.target.value)}/></label><label>Message<textarea className="board-text-field" maxLength={500} rows={5} required value={editBody} onChange={e=>setEditBody(e.target.value)}/></label><Button type="submit" disabled={ownerMutation.isPending||!editBody.trim()}>Save changes</Button><Button type="button" onClick={()=>setEditing(false)}>Cancel</Button></form> : <Button onClick={()=>setEditing(true)}>Edit connection</Button>}
           {status==="ACTIVE" && <Button disabled={ownerMutation.isPending} onClick={()=>ownerMutation.mutate({method:"PUT",data:{status:"ARCHIVED"}})}>Close connection</Button>}
           <Button disabled={ownerMutation.isPending} onClick={()=>{if(confirm("Delete this connection?"))ownerMutation.mutate({method:"DELETE"},{onSuccess:onClose});}}>Delete</Button>

@@ -3,7 +3,7 @@ import { syncPushSubscriptionWithServer } from "@/lib/pushNotifications";
 
 import { queryClient } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
-import { endSession, replaceAccountCache } from "@/lib/authSession";
+import { endSession, replaceAccountCache, resolveSession } from "@/lib/authSession";
 
 export interface AuthUser {
   id: number;
@@ -82,17 +82,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = async () => {
     const version = ++refreshVersion.current;
     try {
-      const res = await fetch("/api/auth/me", { credentials: "include" });
-      if (res.ok) {
-        const next = await res.json();
-        if (version !== refreshVersion.current) return;
-        applyUser(next);
+      // Transient failures (a 503 during a restart, a dropped connection)
+      // retry with backoff instead of settling into a signed-out state;
+      // only a 401 confirms the session is gone.
+      const resolution = await resolveSession<AuthUser>(fetch, {
+        shouldContinue: () => version === refreshVersion.current,
+      });
+      if (version !== refreshVersion.current) return;
+      if (resolution.kind === "user") {
+        applyUser(resolution.user);
         void syncPushSubscriptionWithServer();
-      } else if (res.status === 401 && version === refreshVersion.current) {
+      } else if (resolution.kind === "anonymous") {
         applyUser(null);
       }
-    } catch {
-      // A transient request failure does not mean the session ended.
+      // "unknown": the current identity stands — a transient failure does
+      // not mean the session ended.
     } finally {
       if (version === refreshVersion.current) setLoading(false);
     }
