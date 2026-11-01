@@ -17,7 +17,11 @@ export function registerProfileLayoutRoutes(app:Express,requireAuth:RequestHandl
  app.put('/api/users/me/profile-layout',requireAuth,(req:any,res)=>{
   res.set('Cache-Control','private, no-store');if(Buffer.byteLength(JSON.stringify(req.body??{}))>64000)return res.status(413).json({error:'Layout is too large'});
   const parsed=profileLayoutSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:'Invalid profile layout',issues:parsed.error.issues});
-  if(parsed.data.widgets.some(w=>!eligible(req.session.userId,w.source)))return res.status(403).json({error:'That source cannot be added to this profile'});
-  const result=store.save(req.session.userId,parsed.data);if(result.conflict)return res.status(409).json({error:'unsupported' in result?'This saved wall requires a newer version. It has been preserved.':'Your profile changed on another device',current:result.current,unsupported:'unsupported' in result});res.json(result.current);
+  // A removed source must not trap its owner in an unsaveable layout. Only discard
+  // disabled references already saved by this owner; newly supplied references remain strict.
+  const prior=store.read(req.session.userId);
+  const widgets=parsed.data.widgets.filter(w=>w.enabled||eligible(req.session.userId,w.source)||!prior.widgets.some(old=>old.id===w.id&&JSON.stringify(old.source)===JSON.stringify(w.source)));
+  if(widgets.some(w=>!eligible(req.session.userId,w.source)))return res.status(403).json({error:'That source cannot be added to this profile'});
+  const result=store.save(req.session.userId,{...parsed.data,widgets});if(result.conflict)return res.status(409).json({error:'unsupported' in result?'This saved wall requires a newer version. It has been preserved.':'Your profile changed on another device',current:result.current,unsupported:'unsupported' in result});res.json(result.current);
  });
 }
