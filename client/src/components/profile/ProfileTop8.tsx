@@ -12,6 +12,7 @@ import type { ProfileTop8Entry } from "@/pages/profile/types";
 
 type Props = {
   entries: ProfileTop8Entry[];
+  presentation?: "cards" | "portraits";
   isOwner: boolean;
   displayName: string;
   onEdit?: () => void;
@@ -22,7 +23,7 @@ type Props = {
 
 /** MySpace-style Top 8: ranked grid of favorite people + venues.
  *  People navigate to profiles; venues open the directory card modal on this page. */
-export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onRequireAuth, onPlaceClick }: Props) {
+export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onRequireAuth, onPlaceClick, presentation = "cards" }: Props) {
   const { user } = useAuth();
   const [messageTarget, setMessageTarget] = useState<Extract<ProfileTop8Entry, { kind: "user" }> | null>(null);
   const closeMessage = useCallback(() => setMessageTarget(null), []);
@@ -32,7 +33,7 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onR
   const firstName = (displayName || "their").split(/\s+/)[0];
 
   return (
-    <section className="pp-top8" aria-label="Top 8">
+    <section className={`pp-top8${presentation === "portraits" ? " pp-top8--portraits" : ""}`} aria-label="Top 8">
       <div className="pp-top8__head">
         <span className="pp-top8__kick display">
           <span className="pp-top8__dot" aria-hidden="true" />
@@ -54,6 +55,19 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onR
         <div className="pp-top8__grid">
           {entries.slice(0, 8).map((e, i) => {
             const rank = i + 1;
+            if (presentation === "portraits") {
+              const name = e.kind === "user" ? e.displayName : e.name;
+              return <div className="pp-top8__portrait" key={`${e.kind}-${e.id}`}>
+                {e.kind === "user" ? <Link className="pp-top8__portrait-link" href={`/u/${encodeURIComponent(e.username)}`} aria-label={`View ${name}'s profile`} title={name}>
+                  <UserAvatar photoUrl={e.photoUrl} avatarChoice={e.avatarChoice} avatarRing={e.avatarRing} displayName={name} username={e.username} size={52}/>
+                  <span>{name}</span>
+                </Link> : <button className="pp-top8__portrait-link" type="button" title={name} onClick={event => onPlaceClick ? onPlaceClick(e, event.currentTarget) : window.location.assign(placePath(e.id, e.name))}>
+                  <UserAvatar photoUrl={e.logoUrl} displayName={name} size={52} logoFit/>
+                  <span>{name}</span>
+                </button>}
+                {e.kind === "user" && user?.id !== e.id ? <details className="pp-top8__portrait-options"><summary aria-label={`Actions for ${name}`}>•••</summary><button type="button" onClick={() => user ? setMessageTarget(e) : onRequireAuth?.()}><MessageCircle size={13} aria-hidden="true"/> Message {name}</button></details> : null}
+              </div>;
+            }
             if (e.kind === "user") {
               const isSelf = user?.id === e.id;
               return (

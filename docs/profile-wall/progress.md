@@ -81,3 +81,40 @@ Paired review sources:
 Actual public content differs legitimately from the prototype: no public upcoming RSVP or native BoardZ trail post is projected for Tucker, and private favorites/trips are not exposed to visitors. No example attendance/check-in was fabricated. Native application header/actions remain intact as required by the integration plan.
 
 Remaining: finish targeted browser checks, push the visual correction, await its Railway SUCCESS, capture the actual live desktop/mobile result, refresh exact live package and verified revision in Foundation, then publish/verify Foundation direct/embedded guide and all24 contracts/52 variants.
+
+### Fidelity candidate pushed
+
+`e4161b7fb5dce2ef9cf172437184aeb8c673369f` preserves concurrent Mapz `209da85f81289121552c44067667b19778a5b4cd`. Exact rebased full build passed (`/private/tmp/profile-fidelity-final-build.log`), including portable24/52 package. Native desktop reader rechecked: origin y1700 unchanged; neighboring paper1900→3220→1900, focus returns to the original Open control. Native mobile reader is342px inside the390px frame and opens inline at its existing y4000. Product is on GitHub; awaiting Railway SUCCESS and final actual-live captures.
+
+### Production verified; final browser connection interrupted
+
+Railway `a242a436-365b-429d-bce3-669e8243af70` reached **SUCCESS** at10:33:39 UTC for `e4161b7fb5dce2ef9cf172437184aeb8c673369f`; public health confirmed the exact revision. The live package has376 artifacts/8,528,876 bytes, all downloaded and hash-verified; dependency digest `30fc1a069e8745ecf0c21f3e245f8e291bd89b94b9b4c196565314aa5131e43f`. Foundation now contains those exact bytes and24 verified contracts, and its final build/100-of-100 benchmark passed.
+
+Final CI41297330969: typecheck and glass audit pass; the same two existing Mapz harness failures remain (`/private/tmp/profile-fidelity-ci.log`).
+
+Actual-live pre-correction baselines are `captures/before-live-profile-top.png` and `captures/before-live-profile-mobile.png`. Chrome reached actual CSS390px with no horizontal overflow before deployment; its screenshot was saved. Existing public author `/u/coreykaster` exposes genuine `gigz:17` (DJ in Portland), so it can be used for the final native live reader check without creating any data. After deployment, the Chrome connection stopped responding during reload; reconnect attempts then failed and IAB also timed out. **No post-deployment live screenshot or live reader interaction is claimed yet.** Local native desktop/mobile interaction proofs and corrected real-data mobile preview remain valid. Final browser checks/direct+embedded guide are pending reconnection; publication/API parity work continues.
+
+### Live desktop visual and native reader acceptance recovered
+
+The supported IAB DOM interface works; the native accessibility wrapper was stalling. Chrome CDP separately reports a deadline before command dispatch. IAB is at saved25% zoom: viewport clamps to240 physical pixels, yielding minimum960 CSS pixels; documented viewport controls expose no zoom setter, and supported reset shortcut did not change it. No unsupported control or security workaround was used. User is away from the Mac, so publication is not blocked on that environment limitation.
+
+**Actual deployed desktop evidence** (fresh reload, rectangular frame radius2px):
+- `captures/live-profile-top.png` vs approved `/Users/tuckercasey/Documents/Zaylist/prototypes/tucker-wall/captures/final-desktop/tile-01.png`.
+- `captures/live-profile-desktop.png` vs approved `/Users/tuckercasey/Documents/Zaylist/prototypes/tucker-wall/captures/final-desktop/profile-stitched.png`.
+- Live native reader: `captures/live-native-boardz-open.png`, real public `/u/coreykaster`, `gigz:17`. Native full details render560px wide, inline at unchanged y1064. Close restores all prior coordinates and focus to Open DJ in Portland.
+
+Actual Tucker measurements: About y30/h426, Top8 y504/h762, featured poster y1318/h413, Updates y1783/h391 (52px after poster); overlap and stale gap fixed. Holographic frame, layered Stash, independent paper and native pin connection match the approved material treatment. Native site shell and real content differences remain intentional.
+
+Phone-width local proof: `captures/measured-public-profile-mobile.png` (391px real-public-data native preview), plus native reader verified342px within390px frame. **Final post-deployment live mobile capture remains unresolved**, not claimed as verified.
+
+Foundation `57b6ba89b08ae171d7aad569e4d30e549dc843cc` pushed to main; Cloudflare workflow41298360805 is running.
+
+### Coordinator fidelity correction and external publication block
+
+Coordinator inspected live/demo images and rejected Top8's nested tall cards. The existing ProfileTop8 now has a wall-only portrait presentation: approved compact 4x2 circles with concise two-line names, genuine profile/place targets, and Message behind an accessible details control. Existing legacy card presentation remains. Hologram upper grain now uses the approved fine neutral SVG noise at .022 opacity; the incorrect torn-paper texture causing dark wavy bands is removed. Typecheck/build running; not pushed yet. Browser local reload currently failed during the CDP focus command, so no new visual acceptance is claimed.
+
+Foundation workflow41298360805: Cloudflare deployment step SUCCESS, postdeploy live verification FAILURE. Independent release probe returned HTTP429 Cloudflare **Error1027**. Official Cloudflare documentation identifies this as the account's free-tier daily request quota, resetting00:00UTC. No billing upgrade was authorized or attempted. All376 live Foundation byte checks/direct+embedded live guide remain blocked; do not call Foundation publication verified. Existing product deployment/native reader live evidence remain valid.
+
+Additional untracked filenames ending ` 2` appeared throughout this worktree; they are untouched and will not be staged. Exact intended paths only.
+
+Top8 correction verified locally: desktop grid has four columns and293px height (previously762px); all eight real records retain profile/place actions. Christopher Proudfoot's Message disclosure opens/closes correctly. `captures/top8-compact-local.png` shows the complete compact grid and fine surface without dark bands. Local391px state has no horizontal overflow and uses the existing compact two-column variant. Full build passes. Typecheck passes with a temporary config excluding only unrelated untracked ` 2.ts/tsx` duplicates, which otherwise reference obsolete ProfileActivity exports; no tracked config was altered.
