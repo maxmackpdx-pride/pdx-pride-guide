@@ -3139,6 +3139,44 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(storage.getUserOwnedBusinesses(req.session.userId!));
   });
 
+  // Single-place detail for the Placez modal. Runs the exact same enrichment
+  // and presentation pipeline as GET /api/directory over the full business
+  // set (the venue matcher needs every business for coordinate merging and
+  // group mentions, so a one-row shortcut would attach different events),
+  // then returns just the requested row. A place the public list would not
+  // show (missing or CLOSED) is a 404 here too.
+  app.get("/api/directory/:id", async (req, res, next) => {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isInteger(id) || id <= 0) return res.status(404).json({ error: "Place not found" });
+      const businesses = storage.getBusinesses({});
+      const liveEvents = storage.getEvents({ status: "LIVE" });
+      const withEvents = await attachEventsToBusinessesAsync(businesses, liveEvents);
+      const promoterMap = storage.getPromotersForBusinesses(businesses, liveEvents);
+      const withPromoters = attachPromotersToBusinesses(withEvents, pid => promoterMap.get(pid) ?? []);
+      const missedConnections = storage.getMissedConnections("ACTIVE");
+      const gigs = storage.getGigPosts("LIVE");
+      const withTabs = attachSpottedAndGigsToBusinesses(withPromoters, missedConnections, gigs);
+      const linkedIds = req.session?.userId
+        ? new Set(storage.getUserLinkedBusinesses(req.session.userId).map(b => b.id))
+        : null;
+      const userId = req.session?.userId;
+      const followerCounts = storage.getBusinessFollowerCounts();
+      const followedIds = userId != null ? storage.getFollowedBusinessIds(userId) : null;
+      const biz = withTabs.find(b => b.id === id);
+      if (!biz || (biz as any).status === "CLOSED") return res.status(404).json({ error: "Place not found" });
+      const isOwner = userId != null && biz.ownerId === userId;
+      res.json({
+        ...biz,
+        locations: resolveBusinessLocations(biz),
+        isOwner,
+        canEditVenue: isOwner || (linkedIds?.has(biz.id) ?? false),
+        isFollowing: followedIds?.has(biz.id) ?? false,
+        followerCount: followerCounts.get(biz.id) ?? 0,
+      });
+    } catch (error) { next(error); }
+  });
+
   // ── New-business submission (gig-flow "this address isn't in the system" branch) ──
   const businessSubmissionSchema = z.object({
     name: z.string().trim().min(2).max(120),
