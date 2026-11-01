@@ -27,7 +27,7 @@ export function CardShell({ size, category, children, className = '', ...props }
 
 /** Details live in the clicked card's actual layout slot, never on document.body.
  * A direct URL with no source card renders at the caller's ordinary document position. */
-export function CardDetails({ children, onClose }: { children: ReactNode; onClose?: () => void }) {
+export function CardDetails({ children, onClose, mobileViewport = false }: { children: ReactNode; onClose?: () => void; mobileViewport?: boolean }) {
   const close = useRef(onClose); close.current=onClose;
   const identity=useRef(Symbol("card"));
   useLayoutEffect(()=>{
@@ -211,6 +211,68 @@ export function CardDetails({ children, onClose }: { children: ReactNode; onClos
     panel?.focus({preventScroll:true});
     if(!origin && !directShown.current && fallback.current){directShown.current=true;fallback.current.scrollIntoView({block:"start",behavior:"auto"});}
   },[host]);
+  useLayoutEffect(() => {
+    if(!mobileViewport)return;
+    const container=host || fallback.current;
+    const expanded=container?.querySelector<HTMLElement>('.zay-card-expanded');
+    if(!expanded)return;
+    let frame=0;
+    const viewport=window.visualViewport;
+    const update=()=>{
+      cancelAnimationFrame(frame);
+      if(!window.matchMedia('(max-width:767px), (max-width:1023px) and (max-height:500px) and (pointer:coarse)').matches){
+        delete expanded.dataset.cardMobileViewport;
+        expanded.style.removeProperty('--card-viewport-height');return;
+      }
+      const top=viewport?.offsetTop || 0,bottom=top+(viewport?.height || window.innerHeight);
+      let usableTop=top,usableBottom=bottom;
+      for(const chrome of document.querySelectorAll<HTMLElement>('.site-header,.z-mobile-dock,.site-hub-mobile-bar,[data-card-viewport-edge]')){
+        const style=getComputedStyle(chrome),rect=chrome.getBoundingClientRect();
+        if(!['fixed','sticky'].includes(style.position) || style.visibility==='hidden' || Number(style.opacity)===0 || !rect.height || !rect.width || rect.bottom<=top || rect.top>=bottom)continue;
+        // The production dock floats 8px above the safe-area edge, so touching
+        // the viewport edge is not required for recognized navigation chrome.
+        if(chrome.matches('.site-header,[data-card-viewport-edge=top]'))usableTop=Math.max(usableTop,rect.bottom);
+        if(chrome.matches('.z-mobile-dock,.site-hub-mobile-bar,[data-card-viewport-edge=bottom]'))usableBottom=Math.min(usableBottom,rect.top);
+      }
+      const probe=document.createElement('div');
+      probe.style.cssText='position:fixed;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+      document.body.appendChild(probe);
+      const safe=getComputedStyle(probe);
+      // Chrome already includes its safe-area padding; reserve insets only at an
+      // otherwise unobstructed viewport edge.
+      if(usableTop===top)usableTop+=parseFloat(safe.paddingTop)||0;
+      if(usableBottom===bottom)usableBottom-=parseFloat(safe.paddingBottom)||0;
+      probe.remove();
+      usableTop+=8;usableBottom-=8;
+      expanded.dataset.cardMobileViewport='true';
+      expanded.style.setProperty('--card-viewport-height',`${Math.max(1,Math.min(720,usableBottom-usableTop))}px`);
+      // This is ordinary document scrolling, never a floating or relocated card.
+      // Run on opening/viewport resize only; internal scrolling must not pan page.
+      frame=requestAnimationFrame(()=>{
+        const panel=expanded.querySelector<HTMLElement>('[role="dialog"],.home-outz-modal,.ab-open-card') || expanded;
+        const rect=panel.getBoundingClientRect();
+        if(rect.top<usableTop || rect.bottom>usableBottom){
+          window.scrollBy({top:rect.top-usableTop,behavior:'instant'});
+        }
+      });
+    };
+    update();
+    const chromeSelector='.site-header,.z-mobile-dock,.site-hub-mobile-bar,[data-card-viewport-edge]';
+    const chromeResize=new ResizeObserver(update);
+    let chromeNodes=new Set<HTMLElement>();
+    const observeChrome=()=>{
+      const next=new Set(document.querySelectorAll<HTMLElement>(chromeSelector));
+      const changed=next.size!==chromeNodes.size || [...next].some(node=>!chromeNodes.has(node));
+      if(!changed)return;
+      for(const node of chromeNodes)if(!next.has(node))chromeResize.unobserve(node);
+      for(const node of next)if(!chromeNodes.has(node))chromeResize.observe(node);
+      chromeNodes=next;update();
+    };
+    observeChrome();
+    const mutations=new MutationObserver(observeChrome);mutations.observe(document.body,{childList:true,subtree:true});
+    window.addEventListener('resize',update);viewport?.addEventListener('resize',update);
+    return()=>{cancelAnimationFrame(frame);chromeResize.disconnect();mutations.disconnect();window.removeEventListener('resize',update);viewport?.removeEventListener('resize',update);};
+  },[host,mobileViewport,layoutRevision]);
   const contents = <BoardCardInline.Provider value={true}><div className="zay-card-expanded">{children}</div></BoardCardInline.Provider>;
   return host ? createPortal(contents,host) : origin ? null : <div ref={fallback} className="zay-card-direct-details">{contents}</div>;
 }

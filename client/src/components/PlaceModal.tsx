@@ -41,6 +41,7 @@ import { resolveBusinessLocations } from "@shared/businessLocations";
 import { resolveDirectoryLogo } from "@shared/directoryLogos";
 import DirectoryMap from "@/components/DirectoryMap";
 import "./PlaceModal.css";
+import "./PlaceModal.mobile-card.css";
 import "./RoomDoorways.css";
 import "./events/PlaceEventTile.css";
 import EventFlyerArt from "./events/EventFlyerArt";
@@ -95,11 +96,9 @@ function toOwnerEditableFields(place: Business): OwnerEditableFields {
   };
 }
 
-/* Detail modal for a directory business - same fixed-overlay flex-center
-   idiom as the Schedule embed popover / AuthModal / MissedConnectionsPanel:
-   click the overlay to close, stopPropagation on the panel. Roomier version
-   of PlaceCard's content (name, category, address/hours/phone, description,
-   links, upcoming Pride events / MIZZED CONNECTION posts / gigs tabs). */
+/* Native Placez details stay inside the source card's in-flow slot. Mobile
+   layout pins the artwork and primary phone above its own content scroller;
+   desktop retains the existing detail composition and category tools. */
 
 const DAY_COLOR: Record<string, string> = {
   MON: "var(--day-mon, #ff2d5e)",
@@ -216,7 +215,7 @@ function PlaceHours({ hours }: { hours: string }) {
 }
 
 export default function PlaceModal(props: Parameters<typeof PlaceModalInner>[0]) {
- return <CardDetails key={props.place?.id} onClose={props.onClose}><PlaceModalInner {...props}/></CardDetails>;
+ return <CardDetails key={props.place?.id} onClose={props.onClose} mobileViewport><PlaceModalInner {...props}/></CardDetails>;
 }
 function PlaceModalInner({
   place,
@@ -226,7 +225,7 @@ function PlaceModalInner({
   place: Business | null;
   onClose: () => void;
   onRequireAuth: () => void;
-  /** Retained for callers; opening now uses the shared centered scale/fade. */
+  /** Retained for callers; CardDetails owns source-card anchor geometry. */
   originRect?: PlaceModalOriginRect | null;
 }) {
   const logoInkId = `placez-open-logo-${useId().replace(/:/g, "")}`;
@@ -276,7 +275,7 @@ function PlaceModalInner({
     return () => observer.disconnect();
   }, [place?.id, place?.description, savedOverrides?.description, editing, descriptionExpanded]);
 
-  // Match NEEDZ: a centered scale/fade, independent of the source card.
+  // Keep the native detail entry state without moving its shared source slot.
   useEffect(() => {
     if (!place) return;
     setOpen(false);
@@ -457,8 +456,8 @@ function PlaceModalInner({
     .filter(Boolean)
     .join(" ");
 
-  // Portal to body + overlay-scroll (same idiom as EventModal) so tall venues
-  // like Camp never load clipped off-screen or trapped in a non-scrolling flex box.
+  // CardDetails owns the inline host; mobile content below the phone scrolls
+  // within the bounded card while its image and contact remain visible.
   return (
     <div
       onClick={handleClose}
@@ -486,7 +485,7 @@ function PlaceModalInner({
           <DetailActions label="place" onClose={handleClose} onShare={handleShare} sharing={sharing} />
         </div>
         <div className="place-modal-panel__inner event-modal__scroll">
-        <div>
+        <div className="place-modal-panel__layout">
           <div className="place-modal-panel__body">
 
           <div className="place-modal-panel__identity">
@@ -582,11 +581,16 @@ function PlaceModalInner({
           {!editing && (multiLoc ? locations.some(loc => loc.phone) : displayed.phone) && (
             <div className="place-modal-panel__facts place-modal-panel__contacts" aria-label="Phone contacts">
               {multiLoc ? locations.filter(loc => loc.phone).map((loc, index) => (
-                <div key={index} className="place-modal-panel__fact"><Icon d={PHONE} /><a href={telHref(loc.phone!)}>{loc.label}: {loc.phone}</a></div>
+                <div key={index} className={`place-modal-panel__fact${index > 0 ? " place-modal-panel__fact--additional" : ""}`}><Icon d={PHONE} /><a href={telHref(loc.phone!)} title={`${loc.label}: ${loc.phone}`}><span className="place-modal-panel__phone-label">{loc.label}</span><span className="place-modal-panel__phone-number">{loc.phone}</span></a></div>
               )) : <div className="place-modal-panel__fact"><Icon d={PHONE} /><a href={telHref(displayed.phone!)}>{displayed.phone}</a></div>}
             </div>
           )}
 
+          <div className="place-modal-panel__content-scroll" tabIndex={0} role="region" aria-label={`${place.name} details`}>
+          <p className="place-modal-panel__mobile-context">{categoryLabel}{isGrandOpeningActive(place.grandOpeningDate) && formatGrandOpeningDate(place.grandOpeningDate) ? ` · Grand opening ${formatGrandOpeningDate(place.grandOpeningDate)}` : ""}</p>
+          {!editing && multiLoc && <div className="place-modal-panel__mobile-extra-contacts">
+            {locations.filter(loc => loc.phone).slice(1).map((loc,index)=><div key={index} className="place-modal-panel__fact"><Icon d={PHONE}/><a href={telHref(loc.phone!)}>{loc.label}: {loc.phone}</a></div>)}
+          </div>}
           <details className="event-modal__disclosure" open={editing || detailsOpen} onToggle={event => setDetailsOpen(event.currentTarget.open)}>
             <summary><Info aria-hidden="true" />Place details<ChevronRight aria-hidden="true" /></summary>
           <div className="place-modal-panel__details-room">
@@ -1059,6 +1063,7 @@ function PlaceModalInner({
           </section>}
 
 
+          </div>{/* /.place-modal-panel__content-scroll */}
           </div>
         </div>
         </div>{/* /.place-modal-panel__inner */}

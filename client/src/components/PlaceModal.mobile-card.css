@@ -1,0 +1,60 @@
+.place-modal-panel__mobile-context {display:none;}
+.place-modal-panel__content-scroll {display:contents;}
+.place-modal-panel__phone-label::after {content:": ";}
+.place-modal-panel__mobile-extra-contacts {display:none;}
+@media(max-width:767px), (max-width:1023px) and (max-height:500px) and (pointer:coarse){
+ /* In-place card: fixed image/identity + primary phone, one real scroll region. */
+ .zay-card-expanded[data-card-mobile-viewport="true"] .event-modal.eb-detail--place.event-modal--reference {
+  display:flex!important;flex-direction:column!important;box-sizing:border-box;height:var(--card-viewport-height)!important;max-height:var(--card-viewport-height)!important;min-height:0!important;overflow:hidden!important;
+ }
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .event-modal__chrome {position:relative!important;inset:auto!important;flex:none!important;padding:6px 8px!important;min-height:44px;box-sizing:border-box;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place :is(.place-modal-panel__inner,.place-modal-panel__layout,.place-modal-panel__body) {display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;height:auto!important;max-height:none!important;overflow:hidden!important;margin:0!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__inner {padding:0!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__body {padding:0 10px 8px!important;gap:0!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__identity {display:flex!important;flex-direction:column!important;flex:none!important;min-height:0!important;gap:6px!important;margin:0!important;padding:0!important;border:0!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place :is(.place-modal-panel__hero,.place-modal-panel__hero-rail) {height:min(150px,calc(var(--card-viewport-height)*.26))!important;min-height:0!important;max-height:none!important;margin:0!important;flex:none!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__hero {width:100%;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__hero .eb-detail__art {padding:8px 10px 32px!important;box-sizing:border-box;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__hero .place-modal-panel__logo {height:100%!important;max-height:100%!important;width:auto!important;max-width:100%!important;object-fit:contain;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__hero-switch {bottom:0!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__identity-text {flex:none!important;min-height:0;width:100%;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__identity-text h2 {font-size:clamp(18px,5vw,24px)!important;line-height:1.1!important;margin:0 0 4px!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__identity-text > div {margin-bottom:4px!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__contacts {flex:none!important;margin:0!important;padding:4px 0!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__contacts .place-modal-panel__fact {min-height:44px;margin:0!important;padding:0!important;align-items:center!important;white-space:nowrap;overflow:hidden;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__contacts a {font-size:14px;overflow:hidden;text-overflow:ellipsis;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__contacts .place-modal-panel__fact--additional {display:none;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__content-scroll {display:block;flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden;overscroll-behavior-y:contain;touch-action:auto;-webkit-overflow-scrolling:touch;padding:0 2px 12px;scrollbar-gutter:stable;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__mobile-extra-contacts {display:block;}
+}
+@media(max-width:1023px) and (max-height:500px) and (pointer:coarse){
+ /* A short landscape viewport needs a compact fixed header, not a zero-height
+    content scroller. Artwork and identity share one row; phone stays below. */
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__identity {display:grid!important;grid-template-columns:minmax(0,2fr) minmax(0,3fr);align-items:center;gap:8px!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__identity-text h2 {font-size:18px!important;}
+}
+
+@media(max-width:767px), (max-width:1023px) and (max-height:500px) and (pointer:coarse){
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__contacts a {display:flex;align-items:center;gap:6px;min-width:0;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__phone-number {order:-1;flex:none;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__phone-label {min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:12px;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__phone-label::after {content:"";}
+}
+@media(max-width:767px), (max-width:1023px) and (max-height:500px) and (pointer:coarse){
+ /* Category filters duplicate the underlying page while inspecting a card.
+    Keep permanent app navigation, but clear this transient dock from the card's
+    top corners; :has restores it automatically on close or desktop resize. */
+ .eb-page--places:has(.zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place) .zl-dock {visibility:hidden!important;pointer-events:none!important;}
+}
+
+@media(max-width:1023px) and (max-height:500px) and (pointer:coarse){
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .event-modal__chrome {position:absolute!important;top:4px!important;right:4px!important;left:auto!important;width:auto!important;min-height:44px;padding:0!important;background:transparent!important;z-index:10;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .event-modal__chrome .detail-actions {display:flex;gap:4px;margin:0;padding:0;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .event-modal__chrome button {width:44px!important;min-width:44px!important;height:44px!important;padding:0!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .event-modal__chrome button[aria-label^="Share"] span {display:none;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__identity-text {padding-top:48px;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__identity-text > div {display:none!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place :is(.place-modal-panel__hero,.place-modal-panel__hero-rail) {height:min(100px,calc(var(--card-viewport-height)*.36))!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__hero .eb-detail__art {padding:6px 6px 18px!important;}
+ .zay-card-expanded[data-card-mobile-viewport="true"] .eb-detail--place .place-modal-panel__mobile-context {display:block;margin:0 0 8px;font-size:13px;color:var(--text-mid);}
+}
