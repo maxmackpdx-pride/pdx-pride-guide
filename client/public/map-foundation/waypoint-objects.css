@@ -1,0 +1,7 @@
+/* Keep native buttons, labels, counts and status/secondary indicators accessible. */
+.has-3d-waypoint .waypoint-head{background:none!important;border-color:transparent!important;box-shadow:none!important;filter:none!important}
+.has-3d-waypoint .waypoint-head::before,.has-3d-waypoint .waypoint-head::after{display:none!important}
+.has-3d-waypoint .waypoint-head>svg{visibility:hidden}
+.has-3d-waypoint .waypoint-head .wp-alt svg,.has-3d-waypoint .waypoint-head .closure-symbol svg{visibility:visible}
+.has-3d-waypoint .waypoint-head{animation:none!important}
+.has-3d-waypoint .waypoint-head{translate:0 0!important}

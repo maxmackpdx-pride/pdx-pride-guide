@@ -1,3 +1,4 @@
+import {createWaypointLayer,mapzAsset} from '../map-foundation/waypoint-objects.js';
 import {clipBehindHolograms,pointBehindHologram} from './hologram-occlusion.js';
 import {eventCardGeometry,appendEventCardFrame,updateEventCardGlitch,createAttachedEventBeam,drawEventMiniBadge} from './event-hologram-card.js?v=20261026-lod';
 import {EVENT_CARD_WIDTH,EVENT_CARD_HEIGHT,EVENT_CLOCK_HEIGHT} from './event-hologram-model.js';
@@ -129,6 +130,19 @@ function e3ClearanceMeters(coordinates,buildings){
  return tallest;
 }
 const e3Blender=createE3BlenderLayer(maplibregl,{maxVisible:E3_BLENDER_MAX_VISIBLE});
+const waypointObjects=createWaypointLayer(maplibregl,{id:'mapz-waypoint-objects',occluders:()=>e3Blender.occluders,active:()=>!disposed&&mapActivity.visible,onChange:()=>{overlayPending=true;map.triggerRepaint();}});
+window.__waypointObjects=waypointObjects;
+let waypointObjectRows=[],currentWaypointFeature=null,currentWaypointDepth=null;
+function drawAssetHead(ctx,g,color,icon,logo,selected,alpha=1,family='place',extra={}){
+ const f=currentWaypointFeature;
+ if(f&&alpha>.1){const m=ctx.getTransform(),ratio=lights.width/Math.max(1,lights.clientWidth),key=f.properties.key,asset=mapzAsset(f.properties);
+  waypointObjectRows.push({key,asset,x:(m.a*g.x+m.c*g.y+m.e)/ratio,y:(m.b*g.x+m.d*g.y+m.f)/ratio,size:g.size*Math.abs(m.a)/ratio,depth:currentWaypointDepth,coordinates:f.geometry.coordinates,altitude:15,showIcon:!(f.properties.waypointLogo&&logo),lod:selected?'near':'middle'});
+  if(waypointObjects.ready(key)){if(f.properties.waypointLogo&&logo){ctx.save();ctx.globalAlpha=alpha;const w=g.size*.62,h=w*(logo.height||logo.naturalHeight||1)/(logo.width||logo.naturalWidth||1),fit=Math.min(1,g.size*.72/h);ctx.drawImage(logo,g.x-w*fit/2,g.y-h*fit/2,w*fit,h*fit);ctx.restore();}if(extra.scoop){ctx.save();ctx.fillStyle='#fff';ctx.font='bold 10px monospace';ctx.fillText(extra.scoop,g.x+g.size/2,g.y);ctx.restore();}return;}
+ }
+ drawWaypointHead(ctx,g,color,icon,logo,selected,alpha,family,extra);
+}
+function drawLights(...args){waypointObjectRows=[];try{return drawLightsLegacy(...args);}finally{waypointObjects.setRows(waypointObjectRows);currentWaypointFeature=null;}}
+
 let waypointOccluders=[],waypointDepths=new Map();
 const e3Blender3D=new Map(),e3StageState=new Map(),e3CrowdFactor=new Map();
 const signLift=createSignLift();
@@ -143,6 +157,7 @@ function installSceneExtras(){
  addLayers(map,[portlandLandmarks]);
  addLayers(map,[citySparkles]);
  addLayers(map,[e3Blender]);
+ addLayers(map,[waypointObjects]);
 }
 // Opening camera move: transition clips wait until the view has arrived. Levels still track during it.
 let e3LoadedAt=0,e3LastZoom=null,e3ZoomChangedAt=0,e3Opened=false,e3SnapTable=null,e3StageTweenActive=false;
@@ -602,7 +617,7 @@ function drawUserLocationAvatar(ctx,target,fade){
  }
  ctx.restore();
 }
-function drawLights(fade,target=map,surface=lights){
+function drawLightsLegacy(fade,target=map,surface=lights){
  hitTargets=[];
  noteSelectedWaypoint(selectedKey);
  const eventLabels=[];
@@ -922,7 +937,13 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.globalAlpha=coreAlpha;
    const row=group.items[0].feature.properties;
    if(waypointOccluders.length){lightsContext.save();clipBehindHolograms(lightsContext,depthFor(group.items[0].feature),waypointOccluders,width,height);}
-   const pinHit=drawBoardPin(lightsContext,group.x,group.y,row.color,row.key,pulseTime,reduced.matches,group.items.length,row.wireColor,row.pinCyan,waypointHeadSize(false,target.getZoom()));
+   const pinSize=waypointHeadSize(false,target.getZoom()),pinScale=pinSize*1.15/40;
+   waypointObjectRows.push({key:row.key,asset:mapzAsset(row),x:group.x,y:group.y-20*pinScale,size:pinSize,coordinates:group.items[0].feature.geometry.coordinates,depth:depthFor(group.items[0].feature),altitude:15,lod:'middle'});
+   const pinReady=waypointObjects.ready(row.key);
+   if(pinReady)lightsContext.globalAlpha=0;
+   const pinHit=drawBoardPin(lightsContext,group.x,group.y,row.color,row.key,pulseTime,reduced.matches,group.items.length,row.wireColor,row.pinCyan,pinSize);
+   lightsContext.globalAlpha=coreAlpha;
+   if(pinReady&&group.items.length>1)drawClusterCount(lightsContext,group.x,group.y-20*pinScale,group.items.length,row.color,pinSize);
    if(waypointOccluders.length)lightsContext.restore();
    hitTargets.push({...pinHit,key:row.key,name:row.name,boardPinKeys:group.items.map(v=>v.feature.properties.key)});
   }
@@ -931,6 +952,7 @@ function drawLights(fade,target=map,surface=lights){
   const clipWaypoint=pass===1&&feature.properties.kind!=='event'&&waypointOccluders.length>0;
   if(clipWaypoint){lightsContext.save();lightsContext.setTransform(dpr,0,0,dpr,0,0);clipBehindHolograms(lightsContext,depthFor(feature),waypointOccluders,width,height,{left:p.x-128,right:p.x+128,top:0,bottom:height});}
   try{
+  currentWaypointFeature=feature;currentWaypointDepth=depthFor(feature);
   const {color,phase}=feature.properties;
   // Rise and fold scale the pin up out of its ground point; everything else is untouched.
   const riseLift=Math.min(riseAmount(feature.properties.key,frameNow),foldAmount(feature.properties.key,frameNow));
@@ -965,7 +987,7 @@ function drawLights(fade,target=map,surface=lights){
     continue;
    }
    const days=branchDaysLeft(feature.properties,viewTime);
-   drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,strength,waypointFamilyShell(branchFamily),{scoop:days?`${days}D`:null});
+   drawAssetHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,strength,waypointFamilyShell(branchFamily),{scoop:days?`${days}D`:null});
    hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+6),name:feature.properties.name,category:branchFamily==='gigz'?'Gigz':'Mizzed',color});
    continue;
   }
@@ -982,7 +1004,7 @@ function drawLights(fade,target=map,surface=lights){
     const artwork=waypointArtwork(logo,icon,selected,target.getZoom());
     // Foreground heads retain their brightness even beneath overlapping holograms.
     const headAlpha=coreAlpha;
-    drawWaypointHead(lightsContext,geometry,color,icon,artwork,selected,headAlpha,shell);
+    drawAssetHead(lightsContext,geometry,color,icon,artwork,selected,headAlpha,shell);
     if(cluster?.members.length>1)drawClusterCount(lightsContext,geometry.x,geometry.y,cluster.members.length,color,geometry.size);
     hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color,clusterBounds:cluster?.members.length>1?cluster.bounds:null,clusterKeys:cluster?.members.map(member=>member.feature.properties.key),clusterWorld:feature.properties.waypointFamily});
    }
@@ -992,7 +1014,7 @@ function drawLights(fade,target=map,surface=lights){
    const selected=feature.properties.key===selectedKey;
    const geometry=waypointGeometry(p,selected,placezHoverLift(target,feature,surfaces),feature.properties.key);
    if(pass!==0){
-    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,coreAlpha,'place');
+    drawAssetHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,coreAlpha,'place');
     hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color});
    }
    continue;
@@ -1000,7 +1022,7 @@ function drawLights(fade,target=map,surface=lights){
   if(pass===0)hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:28,name:feature.properties.name,category:feature.properties.type});
   if(pass===1&&!feature.properties.venueWaypointKey&&!isBar){
    const head=venueGeometry({feature,p});
-   drawWaypointHead(lightsContext,head,color,typeIcons.get(feature.properties.typeIcon)?.light,null,false,coreAlpha);
+   drawAssetHead(lightsContext,head,color,typeIcons.get(feature.properties.typeIcon)?.light,null,false,coreAlpha);
   }
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
   lightsContext.globalAlpha=(fade*pulse*beamAlpha)*bloomScale;
@@ -1046,7 +1068,7 @@ function drawLights(fade,target=map,surface=lights){
     if(!card||cardAlpha<.002){
      if(pass===1){
       const head=venueGeometry({feature,p});
-      drawWaypointHead(lightsContext,head,eventProjectionColor(feature.properties),typeIcons.get(feature.properties.typeIcon)?.light,null,false,coreAlpha);
+      drawAssetHead(lightsContext,head,eventProjectionColor(feature.properties),typeIcons.get(feature.properties.typeIcon)?.light,null,false,coreAlpha);
       hitTargets.push({key:feature.properties.key,x:head.x,y:head.y,r:Math.max(22,head.size/2+8),name:feature.properties.name,color});
      }
      continue;

@@ -1,9 +1,9 @@
 {
   "handoff": "2026-10-31-mapz-blender-replacement",
-  "status": "in_progress",
-  "ready_for_waypoint_replacement": false,
-  "verified_production_commit": null,
-  "deployment_verified": false,
+  "status": "owner_accepted_limited_verification",
+  "ready_for_waypoint_replacement": true,
+  "verified_production_commit": "3bf14c9bdb3f1233cdd6cbb96fa60ebf473288ea",
+  "deployment_verified": true,
   "performance_targets_met": false,
-  "note": "The current map audit owns overlapping renderer files. Wait for this specific handoff to be marked ready, with its verified production commit and test outcomes recorded. Missing or stale status is not permission to start. Readiness releases editing ownership; it does not conceal failed or unverified performance targets."
+  "note": "Tucker explicitly accepted the current baseline and deferred deeper testing on November 1. Ownership is released for waypoint integration and publication. The previous short desktop WebKit run crashed after 64 movements (~94 seconds); no endurance or physical-iPhone certification is claimed. See waypoint-release-2026-11-01.md for focused asset-integration evidence."
 }
