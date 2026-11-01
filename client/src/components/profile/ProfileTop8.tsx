@@ -61,7 +61,7 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onR
                 {e.kind === "user" ? <Link className="pp-top8__portrait-link" href={`/u/${encodeURIComponent(e.username)}`} aria-label={`View ${name}'s profile`} title={name}>
                   <UserAvatar photoUrl={e.photoUrl} avatarChoice={e.avatarChoice} avatarRing={e.avatarRing} displayName={name} username={e.username} size={52}/>
                   <span>{name}</span>
-                </Link> : <button className="pp-top8__portrait-link" type="button" title={name} onClick={event => onPlaceClick ? onPlaceClick(e, event.currentTarget) : window.location.assign(placePath(e.id, e.name))}>
+                </Link> : <button className="pp-top8__portrait-link" type="button" title={name} aria-label={`View ${name}`} onClick={event => onPlaceClick ? onPlaceClick(e, event.currentTarget) : window.location.assign(placePath(e.id, e.name))}>
                   <UserAvatar photoUrl={e.logoUrl} displayName={name} size={52} logoFit/>
                   <span>{name}</span>
                 </button>}
