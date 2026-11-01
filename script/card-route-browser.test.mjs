@@ -6,7 +6,8 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {mkdir} from 'node:fs/promises';
+import {mkdir,mkdtemp,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
 import {createServer} from 'vite';
 import react from '@vitejs/plugin-react';
 import {chromium} from 'playwright';
@@ -17,11 +18,19 @@ async function snapshot(page){return page.locator('#qa-grid').evaluate(grid=>[..
 async function settled(page){await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.waitForTimeout(450);}
 
 
-test('actual NEEDZ, BoardZ and Directory routes expand within their own card layout',{timeout:300000},async()=>{
- const server=await createServer({configFile:false,root,publicDir:path.join(root,'client/public'),plugins:[react(),{name:'card-qa-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{if(!req.url?.startsWith('/__route-qa'))return next();const html=await s.transformIndexHtml(req.url,'<!doctype html><html><head><style>body{margin:24px!important}h1{font:16px sans-serif;margin-bottom:24px}@media(max-width:650px){body{margin:12px!important}#qa-grid{grid-template-columns:repeat(auto-fit,var(--qa-card-width))!important;width:100%!important;gap:16px!important}}</style></head><body><div id="root"></div><script type="module" src="/script/fixtures/card-route-browser.tsx"></script></body></html>');res.setHeader('Content-Type','text/html');res.end(html);});}}],resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},define:{__OUTZIDE_ASSETS__:JSON.stringify({script:'/outzide-map/app.js',maplibre:'/home-flight/vendor/maplibre-gl-5.6.2.js',maplibreCss:'/home-flight/vendor/maplibre-gl-5.6.2.css'}),__MAPZ_ASSETS__:'{}',__HOME_FLIGHT_BASE__:JSON.stringify('/home-flight')}});
+test('actual NEEDZ, BoardZ and Directory routes expand within their own card layout',{timeout:300000},async(t)=>{
+ // Every invocation starts cold. Suites must never race over Vite's default
+ // node_modules/.vite cache, and virtual HTML needs an explicit scanner entry.
+ const cacheDir=await mkdtemp(path.join(tmpdir(),'card-route-browser-vite-'));
+ t.after(()=>rm(cacheDir,{recursive:true,force:true}));
+ const fixture='script/fixtures/card-route-browser.tsx';
+ const server=await createServer({configFile:false,root,cacheDir,optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},publicDir:path.join(root,'client/public'),plugins:[react(),{name:'card-qa-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{if(!req.url?.startsWith('/__route-qa'))return next();const html=await s.transformIndexHtml(req.url,'<!doctype html><html><head><style>body{margin:24px!important}h1{font:16px sans-serif;margin-bottom:24px}@media(max-width:650px){body{margin:12px!important}#qa-grid{grid-template-columns:repeat(auto-fit,var(--qa-card-width))!important;width:100%!important;gap:16px!important}}</style></head><body><div id="root"></div><script type="module" src="/script/fixtures/card-route-browser.tsx"></script></body></html>');res.setHeader('Content-Type','text/html');res.end(html);});}}],resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},define:{__OUTZIDE_ASSETS__:JSON.stringify({script:'/outzide-map/app.js',maplibre:'/home-flight/vendor/maplibre-gl-5.6.2.js',maplibreCss:'/home-flight/vendor/maplibre-gl-5.6.2.css'}),__MAPZ_ASSETS__:'{}',__HOME_FLIGHT_BASE__:JSON.stringify('/home-flight')}});
  let browser;
  try{
- await server.listen();const base=server.resolvedUrls.local[0];
+ await server.listen();
+ // Public Vite API: transform the explicit fixture before opening Chromium.
+ await server.warmupRequest(`/${fixture}`);
+ const base=server.resolvedUrls.local[0];
  browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce'});
  await context.addInitScript(()=>{localStorage.setItem("pdx-calm-mode","true");Math.random=()=>0.1;});

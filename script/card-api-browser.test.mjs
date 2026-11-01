@@ -6,7 +6,8 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {mkdir} from 'node:fs/promises';
+import {mkdir,mkdtemp,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
 import {createServer} from 'vite';
 import react from '@vitejs/plugin-react';
 import {chromium} from 'playwright';
@@ -16,11 +17,19 @@ const overlaps=(a,b)=>Math.min(a.x+a.width,b.x+b.width)-Math.max(a.x,b.x)>1 && M
 async function snapshot(page){return page.locator('#qa-grid').evaluate(grid=>[...grid.children].filter(el=>el.getBoundingClientRect().width>0).map(el=>{const face=el.matches("[data-card-expanded=true],[data-card-size]")?el:el.querySelector("[data-card-size]")||el;const r=face.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));}
 async function settled(page){await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.waitForTimeout(450);}
 
-test('production cards keep standard dimensions and expand in flow with position-aware anchors',{timeout:600000},async()=>{
- const server=await createServer({configFile:false,root,publicDir:path.join(root,'client/public'),plugins:[react(),{name:'card-qa-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{if(!req.url?.startsWith('/__card-qa'))return next();const html=await s.transformIndexHtml(req.url,'<!doctype html><html data-zaylist-cards="true"><head><style>body{margin:24px!important}h1{font:16px sans-serif;margin-bottom:24px}@media(max-width:650px){body{margin:12px!important}#qa-grid{grid-template-columns:repeat(auto-fit,var(--qa-card-width))!important;width:100%!important;gap:16px!important}}</style></head><body><div id="root"></div><script type="module" src="/script/fixtures/card-api-browser.tsx"></script></body></html>');res.setHeader('Content-Type','text/html');res.end(html);});}}],resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},define:{__OUTZIDE_ASSETS__:JSON.stringify({script:'/outzide-map/app.js',maplibre:'/home-flight/vendor/maplibre-gl-5.6.2.js',maplibreCss:'/home-flight/vendor/maplibre-gl-5.6.2.css'}),__MAPZ_ASSETS__:'{}',__HOME_FLIGHT_BASE__:JSON.stringify('/home-flight')}});
+test('production cards keep standard dimensions and expand in flow with position-aware anchors',{timeout:600000},async(t)=>{
+ // Every invocation starts cold. Suites must never race over Vite's default
+ // node_modules/.vite cache, and virtual HTML needs an explicit scanner entry.
+ const cacheDir=await mkdtemp(path.join(tmpdir(),'card-api-browser-vite-'));
+ t.after(()=>rm(cacheDir,{recursive:true,force:true}));
+ const fixture='script/fixtures/card-api-browser.tsx';
+ const server=await createServer({configFile:false,root,cacheDir,optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},publicDir:path.join(root,'client/public'),plugins:[react(),{name:'card-qa-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{if(!req.url?.startsWith('/__card-qa'))return next();const html=await s.transformIndexHtml(req.url,'<!doctype html><html data-zaylist-cards="true"><head><style>body{margin:24px!important}h1{font:16px sans-serif;margin-bottom:24px}@media(max-width:650px){body{margin:12px!important}#qa-grid{grid-template-columns:repeat(auto-fit,var(--qa-card-width))!important;width:100%!important;gap:16px!important}}</style></head><body><div id="root"></div><script type="module" src="/script/fixtures/card-api-browser.tsx"></script></body></html>');res.setHeader('Content-Type','text/html');res.end(html);});}}],resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},define:{__OUTZIDE_ASSETS__:JSON.stringify({script:'/outzide-map/app.js',maplibre:'/home-flight/vendor/maplibre-gl-5.6.2.js',maplibreCss:'/home-flight/vendor/maplibre-gl-5.6.2.css'}),__MAPZ_ASSETS__:'{}',__HOME_FLIGHT_BASE__:JSON.stringify('/home-flight')}});
  let browser;
  try{
-  await server.listen();const base=server.resolvedUrls.local[0];
+  await server.listen();
+ // Public Vite API: transform the explicit fixture before opening Chromium.
+ await server.warmupRequest(`/${fixture}`);
+ const base=server.resolvedUrls.local[0];
   browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce'});
   await context.route('**/api/**',route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});return route.fulfill({json:[]});});
