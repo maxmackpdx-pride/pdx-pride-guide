@@ -244,6 +244,18 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     () => businesses.filter(b => isSpaces ? b.type === "group" : isPlacezType(b.type) && !directoryResourceName(b)),
     [businesses, isSpaces],
   );
+
+  // The modal reads the freshest single-place payload (events/spotted/gigs
+  // attached server-side at open time), falling back to the list row while
+  // the detail request is in flight or if it fails. The id guard keeps a
+  // previous place's detail from flashing when switching cards.
+  const { data: detailPlace } = useQuery<Business>({
+    queryKey: ["/api/directory", selectedPlace?.id ?? 0],
+    queryFn: () => apiRequest("GET", `/api/directory/${selectedPlace!.id}`).then(r => r.json()),
+    enabled: !!selectedPlace,
+    staleTime: 30_000,
+  });
+  const modalPlace = detailPlace && selectedPlace && detailPlace.id === selectedPlace.id ? detailPlace : selectedPlace;
   const { data: outzideCatalog, isLoading: outzideLoading, isError: outzideError, isFetched: outzideFetched, refetch: refetchOutzide } = useQuery<{ places: OutzideRow[] }>({
     queryKey: ["/outzide-map/places.json"],
     queryFn: () => apiRequest("GET", "/outzide-map/places.json?v=20261017-sculpted-v3").then(r => r.json()),
@@ -535,7 +547,9 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
   const { calmMode } = useTheme();
   const reducedMotion = useReducedMotion();
-  const placeMissing = !isSpaces && !isLoading && businesses.length > 0 && Number.isFinite(routePlaceId) && (routePlaceId ?? 0) > 0 && !businesses.some(b => b.id === routePlaceId);
+  const routeBusiness = routePlaceId ? businesses.find(b => b.id === routePlaceId) : undefined;
+  const routeRedirectsElsewhere = !!routeBusiness && (!!directoryResourcePath(routeBusiness) || routeBusiness.type === "group");
+  const placeMissing = !isSpaces && !isLoading && businesses.length > 0 && Number.isFinite(routePlaceId) && (routePlaceId ?? 0) > 0 && !visibleBusinesses.some(b => b.id === routePlaceId) && !routeRedirectsElsewhere;
   if (placeMissing) {
     return <PageRecovery section="Placez" title="This place isn’t here anymore."
       description="The listing may have moved or been removed. There’s still plenty to find: browse the places that are ours."
@@ -767,7 +781,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       {selectedPlace && (
         <PlaceModal
           key={selectedPlace.id}
-          place={selectedPlace}
+          place={modalPlace ?? selectedPlace}
           originRect={placeOriginRect}
           onClose={closePlace}
           onRequireAuth={() => setShowAuth(true)}
