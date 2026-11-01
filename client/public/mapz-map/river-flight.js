@@ -29,7 +29,7 @@ import {createBridgeLayer} from '../home-flight/bridge-roads.js?v=20260921-layer
 import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-white-sparkles';
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
-import {maskLogoPixels,authoredLogoMode} from './logo-mask.js';
+import {maskLogoPixels,authoredLogoMode,createLogoWorkQueue} from './logo-mask.js';
 import {eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
@@ -273,16 +273,17 @@ function eventPosterEntry(url){
  eventPosters.set(url,{image:null,loading:true});
  const image=new Image();image.decoding='async';
  image.onload=()=>{
+  if(disposed)return;
   const scale=Math.min(1,POSTER_MAX_EDGE/Math.max(image.naturalWidth,image.naturalHeight)),canvas=document.createElement('canvas');
   canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
   canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
   eventPosters.set(url,{image:canvas,width:canvas.width,height:canvas.height});scheduleFrame();
  };
- image.onerror=()=>eventPosters.set(url,{image:null});
+ image.onerror=()=>{if(!disposed)eventPosters.set(url,{image:null});};
  image.src=absolute.href;
  return null;
 }
-const logoLoads=new Map();
+const logoLoads=new Map(),logoWork=createLogoWorkQueue();
 const avatarRingColors={
  none:['#5af0e6'],rainbow:['#e40303','#ff8c00','#ffed00','#008026','#004dff','#750787'],
  progress:['#e40303','#ff8c00','#ffed00','#008026','#004dff','#750787','#fff','#ffafc8','#74d7ee'],
@@ -324,8 +325,11 @@ async function decodeVenueLogo(url,mode){
  try{
   await image.decode();
   if(disposed)return;
+  await logoWork(async()=>{
+  if(disposed)return;
   // Fit the visible artwork, ignoring transparent padding in the supplied file.
   const canvas=document.createElement('canvas');
+  try{
   // Resolve the ink edge above display resolution before masking tiny originals.
   const sampling=Math.max(image.width,image.height)<256?4:1;
   const sourceWidth=canvas.width=image.width*sampling,sourceHeight=canvas.height=image.height*sampling;
@@ -351,9 +355,9 @@ async function decodeVenueLogo(url,mode){
    outline.drawImage(clean,padding,padding);
    const chromatic=[DAYS.thu,DAYS.fri].map(color=>{const channel=document.createElement('canvas');channel.width=clean.width;channel.height=clean.height;const ctx=channel.getContext('2d');ctx.drawImage(clean,0,0);ctx.globalCompositeOperation='source-in';ctx.fillStyle=color;ctx.fillRect(0,0,channel.width,channel.height);return channel;});
    venueLogos.set(url,{image:clean,silhouette,outlined,chromatic,padding,left:0,top:0,width:clean.width,height:clean.height});
-   canvas.width=canvas.height=1;
-
   }
+  }finally{canvas.width=canvas.height=1;}
+  });
  }catch(error){console.warn('Venue logo unavailable',url,error);}
 }
 const logoMotionSeed=Math.random()*Math.PI*2;
@@ -1417,6 +1421,7 @@ window.addEventListener('pagehide',event=>{
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
  if(map.getLayer(groundLightPools.id))map.removeLayer(groundLightPools.id);
  if(map.getLayer(portlandLandmarks.id))map.removeLayer(portlandLandmarks.id);
+ for(const poster of eventPosters.values())if(poster.image)poster.image.width=poster.image.height=1;eventPosters.clear();
  map.remove();venueLogos.clear();logoLoads.clear();lightSprites.clear();lightFeatures=[];userLocation=null;userAvatarImage=null;nearbyLights=()=>[];lights.width=lights.height=1;
 });
 window.addEventListener('pageshow',event=>{if(event.persisted){map.resize();onVisibilityChange();scheduleFrame();}});

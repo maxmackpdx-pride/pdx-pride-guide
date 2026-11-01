@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {logoCoverage,logoTone,maskLogoPixels} from '../client/public/mapz-map/logo-mask.js';
+import {logoCoverage,logoTone,maskLogoPixels,createLogoWorkQueue} from '../client/public/mapz-map/logo-mask.js';
 
 test('cooperative masking retains exact pixels and crop bounds for every authored ink mode',async()=>{
  for(const mode of ['alpha','grayscale','light','dark','chroma','light-clean','light-faint','white-ink']){
@@ -21,4 +21,13 @@ test('disposed scenes stop processing after yielding',async()=>{
 });
 test('transparent artwork retains empty crop bounds',async()=>{
  assert.deepEqual(await maskLogoPixels(new Uint8ClampedArray(16),2,2,'alpha'),{left:2,top:2,right:0,bottom:0});
+});
+
+test('logo work never overlaps large buffers and a failed image does not block later logos',async()=>{
+ const queue=createLogoWorkQueue(),order=[];let active=0,maxActive=0,release;
+ const gate=new Promise(resolve=>{release=resolve;});
+ const first=queue(async()=>{active++;maxActive=Math.max(maxActive,active);order.push('first');await gate;active--;throw new Error('bad image');});
+ const second=queue(async()=>{active++;maxActive=Math.max(maxActive,active);order.push('second');active--;return 'next image';});
+ const failed=assert.rejects(first,/bad image/);await Promise.resolve();assert.deepEqual(order,['first']);release();
+ await failed;assert.equal(await second,'next image');assert.equal(maxActive,1);assert.deepEqual(order,['first','second']);
 });

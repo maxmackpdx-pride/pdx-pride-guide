@@ -44,3 +44,9 @@ export async function maskLogoPixels(pixels,width,height,mode,{
  }
  return {left,top,right,bottom};
 }
+
+// Network decoding can overlap; large pixel buffers are processed one at a time.
+export function createLogoWorkQueue(){
+ let tail=Promise.resolve();
+ return work=>{const result=tail.then(work);tail=result.catch(()=>{});return result;};
+}
