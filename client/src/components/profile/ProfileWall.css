@@ -7,3 +7,4 @@
 .profile-wall-enabled .pp-hero__avatar{padding:0;border:0;background:none;box-shadow:none}.profile-portrait-bezel{display:inline-block;flex-shrink:0}.pp-page:not(.profile-wall-enabled) .profile-portrait-bezel{padding:0;border:0;background:none;box-shadow:none}.pp-page:not(.profile-wall-enabled) .profile-portrait-bezel:before{display:none}
 
 .profile-portrait-bezel.is-compact .profile-portrait-bezel__screen{width:92px;height:92px}.profile-portrait-bezel.is-compact .profile-portrait-bezel__screen>*{width:100%!important;height:100%!important}
+.profile-wall-object>.profile-wall-object__pin.boardz-punk-scope{position:absolute;inset:0 0 auto;width:100%;height:0;min-height:0;aspect-ratio:auto}
