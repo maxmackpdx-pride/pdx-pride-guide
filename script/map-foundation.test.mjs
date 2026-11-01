@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createMap,vectorFirstStyle,whenStyleReady,markerFrame,createMapActivity} from '../client/public/map-foundation/lifecycle.js';
+import {createMap,createMapWithStyleRecovery,vectorFirstStyle,whenStyleReady,markerFrame,createMapActivity} from '../client/public/map-foundation/lifecycle.js';
 import {setGeoJSON,registerImage,createFeatureInteraction} from '../client/public/map-foundation/layers.js';
 import {mapzSurfaceStyle} from '../client/public/map-foundation/surface.js';
 import {mapzSurfaceStyle as outzideSurface} from '../client/public/outzide-map/assets/outzide-surface.js';
@@ -81,3 +81,11 @@ test('offscreen and document-hidden maps pause independently and dispose listene
  assert.deepEqual(Object.keys(flat.sources),['basemap']);assert.deepEqual(flat.layers.map(l=>l.id),['trails']);assert.equal(flat.terrain,undefined);
  assert.ok(style.sources.relief);assert.ok(style.terrain);
  });
+
+test('standard map recovery rebuilds style resources without allocating another map',()=>{
+ const events=new Map(),style={sources:{terrain:{}},layers:[{id:'ground'}]},calls=[];let constructions=0;
+ class RecoveryMap {constructor(){constructions++;}on(name,fn){events.set(name,fn);}off(name){events.delete(name);}getStyle(){return style;}setStyle(value,options){calls.push({value,options});}}
+ const map=createMapWithStyleRecovery({},{library:{Map:RecoveryMap}});
+ events.get('webglcontextrestored')();assert.equal(constructions,1);assert.equal(calls[0].value,style);assert.deepEqual(calls[0].options,{diff:false});
+ events.get('remove')();assert.equal(events.size,0);assert.ok(map);
+});

@@ -57,7 +57,7 @@ test('Mapz resends listings, selection and controls after its existing iframe re
   await page.goto(base);await boot(page);
   await child(page).evaluate(()=>parent.postMessage({source:'mapz-demo',type:'view',center:[45.55,-122.71],zoom:14.25,pitch:0,bearing:23,bounds:{south:45,north:46,west:-123,east:-122}},location.origin));
   await page.waitForTimeout(50);
-  await child(page).evaluate(()=>location.reload());await boot(page);
+  const reloading=child(page);await Promise.all([reloading.waitForNavigation({waitUntil:'domcontentloaded'}),reloading.evaluate(()=>location.reload())]);await boot(page);
   const messages=await child(page).evaluate(()=>messages);
   for(const type of ['data','select','visibility','labels','time'])assert.ok(messages.some(m=>m.type===type),'missing '+type+' after reload');
   const view=messages.find(m=>m.type==='view');assert.deepEqual(view.center,[45.55,-122.71]);assert.equal(view.zoom,14.25);assert.equal(view.pitch,0);

@@ -1504,11 +1504,12 @@ map.getCanvas().addEventListener('pointerup',e=>{
  if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);const width=hit.width||Math.max(32,(hit.r||22)*1.5),height=hit.height||width;tell('select',{key:hit.key,rect:{left:hit.x-width/2,top:hit.y-height/2,width,height}});scheduleFrame();}
 });
 map.on('moveend',viewState);
-// MapLibre restores a lost context itself. Remounting the whole iframe on every loss allocates a second
-// context while iOS still holds the first, which is how a transient loss becomes a reload loop.
+// Native context restoration leaves stale tile buffers and custom 3D resources.
+// The host rebuilds the scene with its saved camera and a bounded retry budget;
+// layout cleanup disposes this renderer before the replacement is attached.
 let contextLostTimer=0;
 map.on('webglcontextlost',()=>{clearTimeout(contextLostTimer);contextLostTimer=window.setTimeout(()=>startup.fatal('The 3D graphics context was lost.'),5000);});
-map.on('webglcontextrestored',()=>{clearTimeout(contextLostTimer);contextLostTimer=0;map.triggerRepaint();scheduleFrame();});
+map.on('webglcontextrestored',()=>{clearTimeout(contextLostTimer);contextLostTimer=0;if(!disposed)startup.fatal('Rebuilding 3D graphics after context recovery.');});
 map.on('load',()=>{
  pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));
  if(parent===window){map.jumpTo(STANDALONE_DEMO_VIEW);void setListings(standaloneDemoRows());}

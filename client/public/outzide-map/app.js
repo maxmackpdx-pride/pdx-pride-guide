@@ -4,7 +4,7 @@ import {oneShotMapLocation} from '../map-foundation/location.js';
 import {hasActiveOutzFilters} from './assets/filter-state.js';
 import {createNativePins} from '../map-foundation/native-pins.js';
 import {setGeoJSON,addLayers} from '../map-foundation/layers.js';
-import {createMap,vectorFirstStyle,whenStyleReady,whenMapRendered,whenMapSettled,extendMapStyle,deferTerrain,observeMapSize,markerFrame,createMapActivity} from '../map-foundation/lifecycle.js?v=20261025-ios-memory';
+import {createMapWithStyleRecovery as createMap,vectorFirstStyle,whenStyleReady,whenMapRendered,whenMapSettled,extendMapStyle,deferTerrain,observeMapSize,markerFrame,createMapActivity} from '../map-foundation/lifecycle.js?v=20261025-ios-memory';
 import {motionPreference} from '../map-foundation/motion.js';
 import {directionsFor} from './assets/directions.js';
 import {uiIcon} from './assets/ui-icons.js';

@@ -12,6 +12,16 @@ export function createMap(options, {library=globalThis.maplibregl, onError}={}) 
  try{return new library.Map(options);}catch(error){onError?.(error);throw error;}
 }
 
+// Standard style layers keep invalid GPU buffers after a context is restored.
+// Rebuild those resources in the same renderer; custom 3D scenes own their recovery.
+export function createMapWithStyleRecovery(options, dependencies) {
+ const map=createMap(options,dependencies);
+ const restore=()=>map.setStyle(map.getStyle(),{diff:false});
+ const dispose=()=>{map.off('webglcontextrestored',restore);map.off('remove',dispose);};
+ map.on('webglcontextrestored',restore);map.on('remove',dispose);
+ return map;
+}
+
 // `load` fires once; an already loaded or replaced style needs its own readiness.
 export function whenStyleReady(map) {
  if(map.isStyleLoaded())return Promise.resolve();
