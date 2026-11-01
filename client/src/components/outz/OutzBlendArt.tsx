@@ -1,7 +1,7 @@
 import './OutzBlendArt.css';
 import {useEffect,useRef} from 'react';
 
-type BlendModule={hasBlend:(placeId:string,variant?:'tall'|'wide')=>boolean;mountBlend:(container:HTMLElement,placeId:string,opts?:{variant?:'tall'|'wide';hud?:boolean})=>Promise<()=>void>};
+type BlendModule={hasBlend:(placeId:string,variant?:'tall'|'wide')=>boolean;mountBlend:(container:HTMLElement,placeId:string,opts?:{variant?:'tall'|'wide';hud?:boolean;signal?:AbortSignal})=>Promise<()=>void>};
 let engine:Promise<BlendModule>|undefined;
 let styles=false;
 /** The blend engine is a plain ES module shared with the Outzide map, loaded like the photo motion script so both draw the same art. */
@@ -22,14 +22,14 @@ export async function blendAvailable(placeId:string,variant:'tall'|'wide'='tall'
 export function OutzBlendArt({placeId,variant='tall',hud=true,onUnavailable}:{placeId:string;variant?:'tall'|'wide';hud?:boolean;onUnavailable?:()=>void}){
  const host=useRef<HTMLSpanElement>(null);
  useEffect(()=>{
-  let disposed=false,dispose:(()=>void)|undefined;
+  let disposed=false,dispose:(()=>void)|undefined;const controller=new AbortController();
   loadEngine().then(async mod=>{
    if(disposed||!host.current)return;
    if(!mod.hasBlend(placeId,variant)){onUnavailable?.();return;}
-   const off=await mod.mountBlend(host.current,placeId,{variant,hud});
+   const off=await mod.mountBlend(host.current,placeId,{variant,hud,signal:controller.signal});
    if(disposed)off();else dispose=off;
-  }).catch(()=>{onUnavailable?.();});
-  return()=>{disposed=true;dispose?.()};
+  }).catch(()=>{if(!disposed)onUnavailable?.();});
+  return()=>{disposed=true;controller.abort();dispose?.()};
  },[placeId,variant,hud,onUnavailable]);
  return <span ref={host} className="outz-blend" data-outz-blend={placeId} aria-hidden="true"/>;
 }

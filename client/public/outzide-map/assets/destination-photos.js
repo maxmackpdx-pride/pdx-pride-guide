@@ -37,25 +37,55 @@ export function createPhotoMotion(scope=globalThis){
 }
 
 // Blended art: the engine mounts into the marked photo span and the layered photo hides behind it. Falls back to the photo if it cannot load.
-const blendOff=new Set();let blendEngine;
+let blendEngine,blendRuntime;
 const loadBlend=()=>blendEngine??=import('./blend-art.js?v=20261024-refine');
-export function enhanceBlend(root=document){
- for(const entry of [...blendOff])if(!entry.el.isConnected){entry.off?.();blendOff.delete(entry);}
- root.querySelectorAll('.outz-photo[data-blend-place]:not([data-blend-ready])').forEach(el=>{
-  el.dataset.blendReady='1';
-  loadBlend().then(async mod=>{
-   const id=el.dataset.blendPlace,listCard=!!el.closest('#results .place-card'),variant=mod.hasBlend(id,'wide')?'wide':(listCard?null:'tall');
-   if(!variant)return;
-   if(!mod.hasBlend(id,variant))return;
-   const entry={el,off:null};blendOff.add(entry);
-   el.classList.add('outz-photo--blend');
-   try{entry.off=await mod.mountBlend(el,id,{variant})}catch{el.classList.remove('outz-photo--blend')}
-  }).catch(()=>{});
- });
+export function createBlendEnhancer(scope=globalThis,load=loadBlend){
+ const doc=scope.document,entries=new Map();let disposed=false;
+ function stop(entry){entry.controller?.abort();entry.controller=null;entry.off?.();entry.off=null;entry.el.classList.remove('outz-photo--blend');delete entry.el.dataset.blendReady;}
+ function detach(el){const entry=entries.get(el);if(!entry)return;stop(entry);observer?.unobserve(el);entries.delete(el);}
+ function prune(){for(const el of entries.keys())if(!el.isConnected)detach(el);}
+ async function start(entry){
+  if(disposed||doc.hidden||!entry.visible||!entry.el.isConnected||entry.controller)return;
+  const controller=new AbortController();entry.controller=controller;
+  const current=()=>!disposed&&!controller.signal.aborted&&entry.el.isConnected&&entries.get(entry.el)===entry;
+  try{
+   const mod=await load();if(!current())return;
+   const el=entry.el,id=el.dataset.blendPlace,listCard=!!el.closest('#results .place-card'),variant=mod.hasBlend(id,'wide')?'wide':(listCard?null:'tall');
+   if(!variant||!mod.hasBlend(id,variant))return;
+   el.dataset.blendReady='1';el.classList.add('outz-photo--blend');
+   const off=await mod.mountBlend(el,id,{variant,signal:controller.signal});
+   if(!current())off();else entry.off=off;
+  }catch{if(current()){entry.el.classList.remove('outz-photo--blend');delete entry.el.dataset.blendReady;}}
+ }
+ const observer=scope.IntersectionObserver?new scope.IntersectionObserver(changes=>{
+  for(const change of changes){const entry=entries.get(change.target);if(!entry)continue;entry.visible=change.isIntersecting&&change.intersectionRatio>0;if(entry.visible)void start(entry);else stop(entry);}
+ },{threshold:0.01}):null;
+ const mutation=scope.MutationObserver?new scope.MutationObserver(prune):null;
+ mutation?.observe(doc.documentElement,{childList:true,subtree:true});
+ function sync(){prune();for(const entry of entries.values())if(doc.hidden)stop(entry);else void start(entry);}
+ doc.addEventListener('visibilitychange',sync);
+ return {refresh(root=doc){
+  if(disposed)return;prune();
+  root.querySelectorAll('.outz-photo[data-blend-place]').forEach(el=>{
+   if(entries.has(el))return;
+   // Cloned dock cards copy markup and data flags, never the source's ownership.
+   el.querySelectorAll(':scope > .bl').forEach(box=>box.remove());
+   el.classList.remove('outz-photo--blend');delete el.dataset.blendReady;
+   const entry={el,visible:!observer,controller:null,off:null};entries.set(el,entry);
+   observer?.observe(el);if(!observer)void start(entry);
+  });
+ },dispose(){if(disposed)return;disposed=true;for(const el of [...entries.keys()])detach(el);observer?.disconnect();mutation?.disconnect();doc.removeEventListener('visibilitychange',sync);}};
 }
+export function enhanceBlend(root=document){(blendRuntime??=createBlendEnhancer()).refresh(root);}
 let runtime;
 export function enhancePhotos(){(runtime??=createPhotoMotion()).refresh();enhanceBlend();}
 export function attachPhoto(element){return (runtime??=createPhotoMotion()).attach(element);}
 
 // The React shell loads this public module through a script element (also valid in Vite dev).
 if(typeof window!=='undefined')window.__outzPhotoMotion={attachPhoto};
+
+// A removed iframe must release art observers and cancel unfinished mounts too.
+if(typeof window!=='undefined')window.addEventListener('pagehide',event=>{
+ if(event.persisted)return;
+ blendRuntime?.dispose();blendRuntime=undefined;runtime?.dispose();runtime=undefined;
+});

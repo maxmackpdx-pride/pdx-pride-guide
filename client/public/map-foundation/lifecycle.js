@@ -1,3 +1,4 @@
+import {installTerrainResourceCleanup} from './terrain-resource-cleanup.js';
 // Shared infrastructure. Product scenes retain their own styles and effects.
 export function vectorFirstStyle(style) {
  const flat=structuredClone(style);
@@ -15,7 +16,8 @@ export function createMap(options, {library=globalThis.maplibregl, onError}={}) 
 // Standard style layers keep invalid GPU buffers after a context is restored.
 // Rebuild those resources in the same renderer; custom 3D scenes own their recovery.
 export function createMapWithStyleRecovery(options, dependencies) {
- const map=createMap(options,dependencies),images=new Map();
+ const library=dependencies?.library||globalThis.maplibregl;
+ const map=installTerrainResourceCleanup(createMap(options,dependencies),library?.getVersion?.()||library?.version),images=new Map();
  const restoreImages=()=>{
   for(const [id,image] of images)if(!map.hasImage(id))map.addImage(id,image.data,{pixelRatio:image.pixelRatio,sdf:image.sdf,stretchX:image.stretchX,stretchY:image.stretchY,content:image.content});
   images.clear();

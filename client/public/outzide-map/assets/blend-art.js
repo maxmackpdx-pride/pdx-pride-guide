@@ -224,8 +224,9 @@ ROUTES.roosterHero=ROUTES.rooster.map(q=>[q[0]*.8+400,q[1]*.8]);
 const largest2=ls=>ls.sort((a,b)=>b.length-a.length)[0];
 const insetPoly=(poly,g,dpx)=>{const m=raster(poly,g),D=chamfer(m,g.gw,g.gh),pl=largest2(isoLines(D,g,dpx/g.sx));return pl&&pl.length>=6?pl:null};
 const qa=()=>({});
-async function build(rec,name,art,real){
+async function build(rec,name,art,real,signal){
  const W0=rec.W,H0=rec.H,g=mkGrid(rec),S=await samplePhoto(real.src,g);
+ if(signal?.aborted)return;
  RW=W0;ROUTE=null;const rt=ROUTES[name];if(rt){ROUTE=[];for(let i=0;i<rt.length-1;i++){const a=rt[i],b=rt[i+1],n=Math.max(1,Math.round(Math.hypot(b[0]-a[0],b[1]-a[1])/12));for(let j=0;j<n;j++)ROUTE.push([a[0]+(b[0]-a[0])*j/n,a[1]+(b[1]-a[1])*j/n])}}
  const subj=rec.cutouts.find(c=>c.subject),fall=rec.cutouts.find(c=>c.cls==='fall');
  const focusOf=c=>{if(c.ring)return c.ring;if(c.focusFrom==='person'&&subj){const b=bbox(subj.poly);return [(b.x0+b.x1)/2,b.y1+3]}if(c.focusFrom==='fall'&&fall){const b=bbox(fall.poly);return [(b.x0+b.x1)/2,b.y1+10]}return null};
@@ -243,7 +244,7 @@ async function build(rec,name,art,real){
    const loops=isoLines(sm,g,.58).filter(pl=>pl.length>=8&&area(pl)>W0*H0*.0012);
    if(loops.length){
     const id='zc'+(uid++),d=loops.map(pl=>'M'+pl.map(q=>f1(q[0])+','+f1(q[1])).join('L')+'Z').join('');
-    ensureDefs().insertAdjacentHTML('beforeend','<svg width="0" height="0" style="position:absolute"><clipPath id="'+id+'" clipPathUnits="objectBoundingBox"><path transform="scale('+(1/W0)+' '+(1/H0)+')" d="'+d+'"/></clipPath></svg>');
+    art.insertAdjacentHTML('beforeend','<svg width="0" height="0" style="position:absolute"><clipPath id="'+id+'" clipPathUnits="objectBoundingBox"><path transform="scale('+(1/W0)+' '+(1/H0)+')" d="'+d+'"/></clipPath></svg>');
     art.insertAdjacentHTML('beforeend','<div class="xc zor k2" style="--d:'+(6.5+rnd()*3).toFixed(1)+'s;--o:-'+(rnd()*6).toFixed(1)+'s;clip-path:url(#'+id+')"><img src="'+real.src+'" alt=""></div>');
    }
   }
@@ -302,14 +303,25 @@ function hudMarkup(rec,key){
  return `<svg class="bl-hud" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><defs><filter id="bl-hud-glow-${key}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="${(W/200).toFixed(1)}" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g filter="url(#bl-hud-glow-${key})"><path class="bl-route" d="${d}" fill="none" stroke="var(--neon-orange,#FF6600)" stroke-width="${(W/130).toFixed(1)}" stroke-linecap="round" stroke-dasharray="${(W/20).toFixed(0)} ${(W/32).toFixed(0)}"/><circle r="${(W/110).toFixed(1)}" fill="var(--text-hi,#fff)"><animateMotion dur="6s" repeatCount="indefinite" path="${d}"/></circle><g transform="translate(${f1(tx)} ${f1(ty)})"><circle class="bl-ring" r="${(W/16).toFixed(0)}" fill="none" stroke="var(--text-hi,#fff)" stroke-width="${(W/260).toFixed(1)}" stroke-dasharray="${(W/60).toFixed(0)} ${(W/80).toFixed(0)}"/><path d="M${-W/12} ${-W/30}V${-W/12}H${-W/30}M${W/12} ${-W/30}V${-W/12}H${W/30}M${-W/12} ${W/30}V${W/12}H${-W/30}M${W/12} ${W/30}V${W/12}H${W/30}" fill="none" stroke="var(--neon-orange,#FF6600)" stroke-width="${(W/200).toFixed(1)}"/></g>${label?`<g transform="translate(${f1(lx)} ${f1(ly)})"><rect width="${f1(lw)}" height="${f1(fs*1.7)}" fill="var(--z-black,#050506)" stroke="var(--neon-orange,#FF6600)" stroke-width="${(W/400).toFixed(1)}"/><text x="${f1(fs*.6)}" y="${f1(fs*1.2)}" font-family="'JetBrains Mono',ui-monospace,monospace" font-weight="600" font-size="${fs}" fill="var(--text-hi,#fff)" letter-spacing="1">${label}</text></g>`:''}</g></svg>`;
 }
 /** Mount the blended art into `container` (position:relative, sized by its owner). Returns a disposer. */
-export async function mountBlend(container,placeId,{variant='tall',hud=true}={}){
+export async function mountBlend(container,placeId,{variant='tall',hud=true,signal}={}){
+ if(signal?.aborted)return()=>{};
  const key=BLEND_KEYS[placeId]&&BLEND_KEYS[placeId][variant];if(!key)return()=>{};
  const rec=RECIPES[key],src=photoUrl(key);if(!rec)return()=>{};
  ensureDefs();
  const W0=rec.W,H0=rec.H,g=mkGrid(rec);
  const box=document.createElement('div');box.className='bl'+(variant==='wide'?' bl--wide':'');box.dataset.blend=placeId;container.prepend(box);
  let disposed=false,ro=null;
- for(let i=0;i<30&&!setVars(box,rec);i++){await new Promise(r=>requestAnimationFrame(r));if(disposed)return()=>{}}
+ const dispose=()=>{if(disposed)return;disposed=true;signal?.removeEventListener('abort',dispose);ro?.disconnect();box.remove()};
+ signal?.addEventListener('abort',dispose,{once:true});
+ try{
+ for(let i=0;i<30&&!setVars(box,rec);i++){
+  await new Promise(resolve=>{
+   const abort=()=>{cancelAnimationFrame(frame);resolve()};
+   const frame=requestAnimationFrame(()=>{signal?.removeEventListener('abort',abort);resolve()});
+   signal?.addEventListener('abort',abort,{once:true});
+  });
+  if(disposed)return dispose;
+ }
  ro=new ResizeObserver(()=>setVars(box,rec));ro.observe(box);
  box.insertAdjacentHTML('beforeend',`<img class="bl-base" src="${src}" alt="" decoding="async">`);
  box.insertAdjacentHTML('beforeend',rec.cutouts.map((c,ci)=>{
@@ -320,10 +332,11 @@ export async function mountBlend(container,placeId,{variant='tall',hud=true}={})
    inner=`<div class="xt"><img src="${src}" style="clip-path:${cssPoly(c.poly,W0,H0)}" alt="">`+L.map((pl,li)=>pl?`<img class="m${li+1}" src="${src}" style="clip-path:${cssPoly(pl,W0,H0)}" alt="">`:'').join('')+'</div>'}
   else inner=`<img src="${src}" style="clip-path:${cssPoly(c.poly,W0,H0)}" alt="">`;
   return `<div class="xc ${c.look} ${k}${terr?' terr':''}" style="--d:${d}s;--o:${o}s">${inner}</div>`}).join(''));
- await build(rec,key,box,{src});
+ await build(rec,key,box,{src},signal);
  if(hud&&!disposed)box.insertAdjacentHTML('beforeend',hudMarkup(rec,key));
  if(qaOn()&&!disposed)qaStrip(box,placeId,variant);
- return ()=>{disposed=true;ro&&ro.disconnect();box.remove()};
+ return dispose;
+ }catch(error){dispose();throw error;}
 }
 
 // The React cards load this file as a module script and read the API from here.
