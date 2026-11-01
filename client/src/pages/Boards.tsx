@@ -1,4 +1,5 @@
 import BoardDetail from '@/components/board/BoardDetail';
+import { shouldOpenOutzPlace } from "@/lib/outzBoardPost";
 import { useBoardGridMotion } from "@/components/board/useBoardGridMotion";
 import BoardPostOverlay from "@/components/board/BoardPostOverlay";
 import HousingPostOverlay from "@/components/housing/HousingPostOverlay";
@@ -235,9 +236,10 @@ export default function Boards() {
     requestAnimationFrame(() => lastOpener.current?.focus());
   };
   const open = (key: string, opener?: HTMLButtonElement) => {
-    // Outzide posts belong to a place: open that place's card on the Outzide map.
+    // Buddy and ride posts belong to a place: open that place's card on the
+    // Outzide map. Missed connections expand their own card instead.
     const outzPost = key.startsWith("outz:") ? allPosts.find(p => p.key === key) : undefined;
-    if (outzPost) { navigate(`/outzide?place=${encodeURIComponent(outzPost.source || "")}&tab=community`); return; }
+    if (outzPost && shouldOpenOutzPlace(outzPost.intent)) { navigate(`/outzide?place=${encodeURIComponent(outzPost.source || "")}&tab=community`); return; }
     lastOpener.current = opener || lastOpener.current;
     const source = opener?.closest<HTMLElement>(".boardz-punk-scope")?.querySelector<HTMLElement>(".zine") || opener;
     cardOrigin.current = source ? { element: source, rect: source.getBoundingClientRect() } : null;

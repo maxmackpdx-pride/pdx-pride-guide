@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { outzWallToBoardPost, outzBoardIntent } from "./outzBoardPost";
+import { outzWallToBoardPost, outzBoardIntent, shouldOpenOutzPlace, outzMissedSource } from "./outzBoardPost";
 import { intentLabels } from "./allBoards";
 import { pinboardPlacement } from "./pinboardPlacement";
 
@@ -24,6 +24,26 @@ test("pinboard placement is stable and mixes sizes", () => {
   const sizes = new Set(Array.from({ length: 40 }, (_, i) => pinboardPlacement(`k${i}`, false).small));
   assert.equal(sizes.size, 2);
   assert.equal(pinboardPlacement("x", true).small, true);
+});
+
+test("only buddy and ride cards open the place; missed connections expand in place", () => {
+  assert.equal(shouldOpenOutzPlace("buddy"), true);
+  assert.equal(shouldOpenOutzPlace("ride"), true);
+  assert.equal(shouldOpenOutzPlace("missed"), false);
+  assert.equal(shouldOpenOutzPlace(null), false);
+  assert.equal(shouldOpenOutzPlace(undefined), false);
+});
+
+test("an expanded missed connection links back to its OutZide source card", () => {
+  const beach = outzMissedSource("rooster-rock", "Rooster Rock");
+  assert.equal(beach.label, "OutZide");
+  assert.equal(beach.title, "Rooster Rock");
+  assert.equal(beach.image, "/outzide-map/assets/motifs/places/rooster-rock.svg");
+  assert.equal(beach.href, "/outzide?place=rooster-rock&tab=community");
+  const falls = outzMissedSource("silver-falls", "Silver Falls");
+  assert.equal(falls.image, null, "only the two beach destinations carry motif artwork");
+  assert.equal(falls.href, "/outzide?place=silver-falls&tab=community");
+  assert.equal(outzMissedSource("", "").title, "OutZide destination");
 });
 
 test("missed connection posts map to the missed intent, kind label and place card", () => {

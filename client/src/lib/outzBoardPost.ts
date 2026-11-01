@@ -33,6 +33,30 @@ export function outzBoardIntent(kind?: string): "buddy" | "ride" | "missed" | nu
   return null;
 }
 
+/**
+ * Buddy and ride posts are place-first: tapping the card opens the place on
+ * the Outzide map. Missed connections are not — they expand in place, like
+ * every other BoardZ card.
+ */
+export function shouldOpenOutzPlace(intent?: string | null): boolean {
+  return intent === "buddy" || intent === "ride";
+}
+
+/** Places with destination artwork on the Outzide map. */
+const OUTZIDE_ARTWORK = ["rooster-rock", "sauvie-island"];
+
+/** The source-card link shown inside an expanded OutZide missed connection. */
+export function outzMissedSource(placeId?: string | null, placeName?: string | null) {
+  const id = String(placeId || "");
+  return {
+    label: "OutZide",
+    title: placeName || "OutZide destination",
+    image: OUTZIDE_ARTWORK.includes(id) ? `/outzide-map/assets/motifs/places/${id}.svg` : null,
+    href: `/outzide?place=${encodeURIComponent(id)}&tab=community`,
+    note: "From the linked OutZide destination card",
+  };
+}
+
 /** Adapt one /api/outz/board row. Only Trip Buddy, Carpool and Missed Connection posts belong on the Outzide board. */
 export function outzBoardRowToPost(base: Pick<BoardPost, "category" | "motifChoice" | "isDemo" | "isMine" | "status" | "saved" | "id" | "key" | "createdAt">, p: OutzBoardPost): BoardPost {
   const intent = outzBoardIntent(p.postKind) ?? "buddy";

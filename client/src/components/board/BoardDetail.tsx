@@ -7,6 +7,7 @@ import {useQuery,useQueryClient} from '@tanstack/react-query';
 import {apiRequest} from '@/lib/queryClient';
 import {parseBoardPostKey,boardCategories} from '@/lib/allBoards';
 import {mizzedSource} from '@/lib/mizzedSource';
+import {outzBoardIntent,outzMissedSource,type OutzBoardPost} from '@/lib/outzBoardPost';
 import type {HousingPostView,HousingBoardResponse} from '@shared/housing';
 import type {MissedConnectionPost} from '@/components/MissedConnectionsPanel';
 export default function BoardDetail({
@@ -37,6 +38,55 @@ export default function BoardDetail({
     },
     retry: 1,
   });
+  // OutZide wall posts have no per-post endpoint; the detail renders from
+  // the same board feed Boards.tsx already fetched (same query key, so it
+  // dedupes and deep links fetch it on their own).
+  const outzFeed = useQuery<OutzBoardPost[]>({
+    queryKey: [cat.endpoint, "all-boards", user?.id],
+    queryFn: () => apiRequest("GET", cat.endpoint).then((r) => r.json()),
+    enabled: selected.category === "outz",
+    retry: 1,
+  });
+  if (selected.category === "outz") {
+    const row = outzFeed.data?.find(post => post.id === selected.id);
+    if (!row)
+      return (
+        <div className="ab-detail-status" role="status">
+          <BrowseStatus
+            title={outzFeed.isError ? "This post could not load" : "Loading post…"}
+            description={
+              outzFeed.isError
+                ? "It may have closed, or the connection may be interrupted."
+                : "Your board is still here."
+            }
+            actionLabel={outzFeed.isError ? "Try again" : undefined}
+            onAction={outzFeed.isError ? () => void outzFeed.refetch() : undefined}
+          />
+          <button type="button" className="eb-tool" onClick={onClose}>
+            Back to Our BoardZ
+          </button>
+        </div>
+      );
+    if (outzBoardIntent(row.postKind) === "missed")
+      return (
+        <SpottedDetailModal
+          key={postKey}
+          presentation="eventz"
+          postId={row.id}
+          title="Missed connection"
+          body={row.body}
+          place={row.placeName || ""}
+          kindLabel="Missed connections"
+          kindColor={cat.color}
+          isMine={row.isMine}
+          isDemo={row.isDemo}
+          external
+          source={outzMissedSource(row.placeId, row.placeName)}
+          onClose={onClose}
+        />
+      );
+    // Buddy and ride posts keep the place-first behavior handled by Boards.
+  }
   if (!ownQuery)
     return (
       <BoardPostOverlay
