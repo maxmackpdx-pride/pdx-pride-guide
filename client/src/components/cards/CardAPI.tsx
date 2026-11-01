@@ -61,6 +61,12 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
     const originalExpanded = item.getAttribute('data-card-expanded');
     const originalAnchor = item.getAttribute('data-card-anchor');
     const originalClass = item.className;
+    // A responsive relayout first restores the closed styles. Sample the source
+    // only after cancelling any transition from the previous expanded margin;
+    // otherwise sourceRect sees that old margin while the sibling layout pass
+    // below snaps it away, adding the same baseline offset on every resize.
+    item.style.setProperty('transition','none','important');
+    item.style.setProperty('animation','none','important');
     const parentStyle = getComputedStyle(parent);
     const sourceRect = source.getBoundingClientRect();
     const parentRect = parent.getBoundingClientRect();
@@ -200,9 +206,17 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
         if(display)face.style.setProperty('display',display,priority);else face.style.removeProperty('display');
       }
       if (originalStyle===null) item.removeAttribute('style'); else item.setAttribute('style',originalStyle);
+      // Restore the closed geometry atomically. Re-enabling its normal CSS
+      // transition before removing the expansion margin briefly adds that margin
+      // to the restored inline face's baseline, visibly moving the closed card.
+      item.style.setProperty('transition','none','important');
       item.className=originalClass;
       if (originalExpanded===null) delete item.dataset.cardExpanded; else item.dataset.cardExpanded=originalExpanded;
       if (originalAnchor===null) delete item.dataset.cardAnchor; else item.dataset.cardAnchor=originalAnchor;
+      void item.getBoundingClientRect();
+      // Restore the exact declaration (including absence/priority) only after the
+      // closed geometry is committed, without permanently disabling motion.
+      if (originalStyle===null) item.removeAttribute('style'); else item.setAttribute('style',originalStyle);
       queueMicrotask(()=>{if (!target.isConnected && origin.trigger?.isConnected) origin.trigger.focus({preventScroll:true});});
     };
   }, [origin,layoutRevision]);

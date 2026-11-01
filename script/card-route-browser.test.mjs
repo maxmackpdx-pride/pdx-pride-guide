@@ -105,6 +105,8 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  for(const index of [0,1,2,0]){
  const card=cards.nth(index);await card.scrollIntoViewIfNeeded();await settled(page);
  const before=await docBox(card);
+ const diagnose=async()=>card.evaluate(el=>{const chain=[];for(let node=el;node&&chain.length<9;node=node.parentElement){const r=node.getBoundingClientRect(),s=getComputedStyle(node);chain.push({tag:node.tagName,cls:node.className,style:node.getAttribute('style'),x:r.x+scrollX,y:r.y+scrollY,w:r.width,h:r.height,display:s.display,margin:s.margin,padding:s.padding,lineHeight:s.lineHeight,font:s.font,align:s.alignItems,verticalAlign:s.verticalAlign,transform:s.transform,transition:s.transition,animation:s.animation});}return {scrollY,fonts:document.fonts.status,chain};});
+ const beforeDiagnostic=process.env.CARD_ROUTE_QA_DIAGNOSTICS?await diagnose():null;
  if(index===0)await page.screenshot({path:`/tmp/${kind}-browse-${width}-closed.png`});
  const hiddenBefore=await lane.locator('.events-rail__item').evaluateAll(els=>els.map(el=>getComputedStyle(el).display==='none'));
  if(width===1280)assert.ok(hiddenBefore.slice(4).every(Boolean)&&hiddenBefore.length>4,'Desktop browse keeps fifth+ cards hidden');
@@ -123,7 +125,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  assert.equal(await page.locator('[aria-modal="true"]:visible').count(),0);
  if(index===1)await page.keyboard.press('Escape');else await host.getByRole('button',{name:kind==='directory'?'Close place':'Close resource',exact:true}).click();await host.waitFor({state:'detached'});await settled(page);
  assert.deepEqual(await lane.locator('.events-rail__item').evaluateAll(els=>els.map(el=>getComputedStyle(el).display==='none')),hiddenBefore,'Browse hidden fifth+ visibility unchanged after close');
- const restored=await docBox(card);near(restored.x,before.x,'Browse restored x');near(restored.y,before.y,'Browse restored y');
+ const restored=await docBox(card);if(beforeDiagnostic)console.log('RESTORE_DIAGNOSTIC',JSON.stringify({kind,width,index,before:beforeDiagnostic,after:await diagnose()}));near(restored.x,before.x,'Browse restored x');near(restored.y,before.y,'Browse restored y');
  const restoredItems=await lane.locator('.events-rail__item:visible').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};}));
  restoredItems.forEach((r,i)=>{near(r.x,closedItems[i].x,'Browse neighbor restored x');near(r.y,closedItems[i].y,'Browse neighbor restored y');});
  console.log(`PASS ${kind} default browse ${width} card${index+1}: anchor, native close/reopen, neighbor reflow`);
