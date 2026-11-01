@@ -84,8 +84,16 @@ test('offscreen and document-hidden maps pause independently and dispose listene
 
 test('standard map recovery rebuilds style resources without allocating another map',()=>{
  const events=new Map(),style={sources:{terrain:{}},layers:[{id:'ground'}]},calls=[];let constructions=0;
- class RecoveryMap {constructor(){constructions++;}on(name,fn){events.set(name,fn);}off(name){events.delete(name);}getStyle(){return style;}setStyle(value,options){calls.push({value,options});}}
+ const icon={data:{width:2,height:2,data:new Uint8Array(16)},pixelRatio:2,sdf:false};let registered=true,restored;
+ class RecoveryMap {constructor(){constructions++;}on(name,fn){events.set(name,fn);}once(name,fn){events.set(name,fn);}off(name){events.delete(name);}getStyle(){return style;}listImages(){return registered?['pin']:[];}getImage(){return icon;}hasImage(){return registered;}addImage(id,data,options){restored={id,data,options};registered=true;}setStyle(value,options){calls.push({value,options});registered=false;}}
  const map=createMapWithStyleRecovery({},{library:{Map:RecoveryMap}});
  events.get('webglcontextrestored')();assert.equal(constructions,1);assert.equal(calls[0].value,style);assert.deepEqual(calls[0].options,{diff:false});
+ events.get('style.load')();assert.equal(restored.id,'pin');assert.equal(restored.data,icon.data);assert.equal(restored.options.pixelRatio,2);
  events.get('remove')();assert.equal(events.size,0);assert.ok(map);
+});
+
+test('context restoration during startup uses the initial style before images exist',()=>{
+ const events=new Map(),style={version:8,sources:{},layers:[]};let rebuilt;
+ class PendingMap {on(name,fn){events.set(name,fn);}once(name,fn){events.set(name,fn);}off(name){events.delete(name);}getStyle(){return undefined;}listImages(){throw Error('Style is not done loading');}setStyle(value){rebuilt=value;}}
+ createMapWithStyleRecovery({style},{library:{Map:PendingMap}});events.get('webglcontextrestored')();assert.equal(rebuilt,style);
 });

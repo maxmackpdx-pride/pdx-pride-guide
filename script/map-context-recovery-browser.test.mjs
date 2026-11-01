@@ -26,6 +26,7 @@ for(const route of ['/map','/outzide'])test(`${route}: graphics recovery restore
  await frame.evaluate(route=>window.__zaylistMap.jumpTo({center:[-122.69,45.53],zoom:route==='/map'?14.2:8.3}),route);
  await page.waitForTimeout(500);const before=await pixels(frame);assert.ok(before.colors>16,'basemap rendered before loss');
  if(process.env.MAP_RECOVERY_SCREENSHOTS)await page.screenshot({path:process.env.MAP_RECOVERY_SCREENSHOTS+'/'+route.slice(1)+'-recovery-before.png'});
+ if(route==='/outzide')await frame.evaluate(()=>window.__zaylistMap.addImage('recovery-pin-art',{width:2,height:2,data:new Uint8Array(16).fill(255)},{pixelRatio:2}));
  const oldUrl=frame.url();await frame.evaluate(()=>{
  const gl=window.__zaylistMap.getCanvas().getContext('webgl2'),ext=gl.getExtension('WEBGL_lose_context');
  window.__restoreForTest=()=>ext.restoreContext();ext.loseContext();
@@ -38,6 +39,7 @@ for(const route of ['/map','/outzide'])test(`${route}: graphics recovery restore
  assert.ok(after.colors>16,`basemap has ${after.colors} colors after recovery`);
  assert.ok(Math.abs(after.zoom-before.zoom)<.05,'zoom preserved');
  assert.ok(after.center.every((v,i)=>Math.abs(v-before.center[i])<.005),'center preserved');
+ if(route==='/outzide')assert.equal(await frame.evaluate(()=>window.__zaylistMap.getImage('recovery-pin-art')?.pixelRatio),2,'custom pin art survives style recovery');
  assert.deepEqual(errors,[]);
  if(process.env.MAP_RECOVERY_SCREENSHOTS)await page.screenshot({path:process.env.MAP_RECOVERY_SCREENSHOTS+'/'+route.slice(1)+'-recovery-after.png'});
  }finally{await browser.close();if(server){server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}}
