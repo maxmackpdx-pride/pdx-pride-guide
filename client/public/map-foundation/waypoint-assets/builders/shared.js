@@ -23,6 +23,9 @@ export function createWaypointStore({baseURL, maxConcurrentLoads=4}={}) {
    const m=original.clone();m.depthTest=true;m.depthWrite=!m.transparent&&m.userData.depthWrite!==false;
    if(mobile&&m.isMeshPhysicalMaterial){m.transmission=0;m.thickness=0;m.clearcoat=0;}
    if(color){m.color.set(color);if(m.emissive)m.emissive.set(color);}
+   // Keep the authored partial wire motion, without a bloom-like full-bright flash.
+   if(m.userData.materialRole==='pin-wire'){m.emissiveIntensity=.15;m.transparent=true;m.opacity=.5;m.depthWrite=false;}
+   if(m.userData.materialRole==='pin-solid')m.emissiveIntensity=.25;
    variants.set(key,m);
   }return variants.get(key);
  }

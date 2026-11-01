@@ -100,3 +100,16 @@ test('hologram text and tint changes retain unchanged artwork textures',{timeout
   assert.equal(result.retained,true);assert.equal(result.beforeReplacement,0);assert.equal(result.disposals,1);assert.equal(result.replacementDisposals,1);assert.deepEqual(result.borrowedSizes,[16,32]);
  }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
 });
+
+test('a separate live clock removes the duplicate glowing time from poster artwork',{timeout:30000},async()=>{
+ const app=express();app.get('/fixture',(_req,res)=>res.type('html').send('<script type="importmap">{"imports":{"three":"/mapz-map/vendor/three/three.module.js","three/addons/":"/mapz-map/vendor/three/addons/"}}</script>'));app.use(express.static('client/public'));
+ const server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s));});let browser;
+ try{browser=await webkit.launch();const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/fixture`);
+  const result=await page.evaluate(async()=>{
+   const THREE=await import('three'),{createBlenderHologram}=await import('/mapz-map/e3-blender-model.js');
+   const calls=[],original=CanvasRenderingContext2D.prototype.fillText;CanvasRenderingContext2D.prototype.fillText=function(text,...args){if(text==='8PM')calls.push({color:this.fillStyle,blur:this.shadowBlur});return original.call(this,text,...args);};
+   const model=createBlenderHologram(new THREE.Group());const screens=[{name:'Readable Event',time:'8PM'}];
+   try{model.setContent({screens,countdown:[{value:'8PM',live:true}]});const withClock=[...calls];calls.length=0;model.setContent({screens,countdown:[]});return {withClock,withoutClock:calls.length};}finally{model.dispose();CanvasRenderingContext2D.prototype.fillText=original;}
+  });assert.deepEqual(result.withClock,[{color:'#ffffff',blur:0}]);assert.ok(result.withoutClock>0,'time remains available when there is no clock plate');
+ }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
+});

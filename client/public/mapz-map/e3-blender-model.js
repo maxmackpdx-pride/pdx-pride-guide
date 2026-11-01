@@ -208,14 +208,14 @@ function drawInfoCanvas(canvas,name,time,accent,pending=false,startsIn=''){
  const label=String(name||''),words=label.split(' '),caption=pending&&startsIn&&time;
  let lines=[label];
  const k=width/640;
- let nameHeight=height*(caption?.34:.4),two=false;
- const outline=(text,x,y,size,color)=>{ctx.save();ctx.shadowColor='rgba(2,4,10,.45)';ctx.shadowBlur=size*.1;ctx.shadowOffsetY=size*.05;ctx.fillStyle='rgba(2,4,10,.45)';ctx.fillText(text,x,y);ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.lineWidth=size*.09;ctx.strokeStyle='rgba(2,4,10,.92)';ctx.strokeText(text,x,y);ctx.restore();};
+ let nameHeight=height*(!time?.86:caption?.34:.4),two=false;
+ const outline=(text,x,y,size,color)=>{ctx.save();ctx.shadowColor='rgba(2,4,10,.45)';ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.fillStyle='rgba(2,4,10,.45)';ctx.fillText(text,x,y);ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.lineWidth=size*.035;ctx.strokeStyle='rgba(2,4,10,.92)';ctx.strokeText(text,x,y);ctx.restore();};
  let size=fitText(ctx,label,width-24*k,Math.floor(nameHeight*.96),22*k);
  if(ctx.measureText(label).width>width-24*k&&words.length>1){
   let best=1,gap=1e9;
   for(let i=1;i<words.length;i++){const d=Math.abs(words.slice(0,i).join(' ').length-words.slice(i).join(' ').length);if(d<gap){gap=d;best=i;}}
   lines=[words.slice(0,best).join(' '),words.slice(best).join(' ')];
-  two=true;nameHeight=height*(caption?.42:.47);
+  two=true;nameHeight=height*(!time?.9:caption?.42:.47);
   size=Math.min(...lines.map(line=>fitText(ctx,line,width-24*k,Math.floor(nameHeight*.52),18*k)));
  }
  ctx.font=`900 ${size}px ${FONT_FAMILY}`;ctx.fillStyle='#ffffff';
@@ -224,12 +224,12 @@ function drawInfoCanvas(canvas,name,time,accent,pending=false,startsIn=''){
   const timeSize=fitText(ctx,time,width-30*k,Math.floor(height*(caption?(two?.42:.5):(two?.52:.62))),30*k),timeY=height*(caption?(two?.66:.6):(two?.76:.72));
   ctx.font=`900 ${timeSize}px ${FONT_FAMILY}`;
   outline(time,width/2,timeY,timeSize);
-  ctx.shadowColor=accent;ctx.shadowBlur=8*k;ctx.fillStyle=accent;ctx.lineWidth=timeSize*.04;ctx.strokeStyle=accent;
+  ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.fillStyle='#ffffff';ctx.lineWidth=1;ctx.strokeStyle='#ffffff';
   if(pending){
    // Standby: the start time is a bold hollow outline (not lit yet) with a STARTS IN caption under the name.
    ctx.fillStyle='rgba(2,4,10,.5)';ctx.shadowBlur=4*k;ctx.lineWidth=Math.max(3,timeSize*.07);ctx.fillText(time,width/2,timeY);ctx.strokeText(time,width/2,timeY);
    if(caption){const cap=`STARTS IN ${startsIn}`,capSize=Math.floor(height*.17),capY=height*.9;ctx.font=`900 ${capSize}px ${FONT_FAMILY}`;outline(cap,width/2,capY,capSize);ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.fillStyle=accent;ctx.lineWidth=capSize*.04;ctx.strokeStyle=accent;ctx.strokeText(cap,width/2,capY);ctx.fillText(cap,width/2,capY);}
-  }else{ctx.strokeText(time,width/2,timeY);ctx.fillText(time,width/2,timeY);}
+  }else{ctx.fillText(time,width/2,timeY);}
  }
 }
 // Countdown plate: dark, thin corner brackets in the tint, big equal numerals in the title font with tiny unit letters.
@@ -353,22 +353,16 @@ vec4 pick(vec2 uv,float slice){
 }
 void main(){
  vec2 uv=vUv;float slice=floor(uv.y*16.);float tick=floor(seconds*22.);
- float r=hash(slice+tick*7.);float tear=glitch>0.&&r>.62?(hash(slice*3.+tick)-.5)*.14*glitch:0.;
- vec2 p=vec2(uv.x+tear,uv.y);float ca=.008*glitch;
+ float r=hash(slice+tick*7.);float tear=glitch>0.&&r>.62?(hash(slice*3.+tick)-.5)*.025*glitch:0.;
+ vec2 p=vec2(uv.x+tear,uv.y);float ca=.001*glitch;
  vec4 sr=pick(p+vec2(ca,0.),slice),sg=pick(p,slice),sb=pick(p-vec2(ca,0.),slice);
  vec3 col=vec3(sr.r,sg.g,sb.b);float a=max(max(sr.a,sg.a),sb.a);
  col=mix(col,col*mix(accent,accent2,uv.x),glitch*.2);
  col*=1.-.08*glitch*step(.5,fract(uv.y*70.));
  float bar=glitch>0.&&hash(slice*5.+tick*3.)>.9?1.:0.;
- col+=accent*bar*.55*glitch;a=max(a,bar*.35*glitch);
- // Fine scan lines and a faint tint wash with steady opacity.
- float lines=uv.y*110.-seconds*.6;
- float footprint=max(fwidth(lines),.001);
- float scan=smoothstep(.5-footprint,.5+footprint,fract(lines));
- // Sub-pixel scan bands become their average instead of aliasing over poster detail.
- col*=mix(.93,.86+.14*scan,1.-smoothstep(.25,.75,footprint));
- col=mix(col,col*.6+tint*.4,.1);
- a*=.9;
+ col+=accent*bar*.08*glitch;a=max(a,bar*.35*glitch);
+ // Keep poster pixels clean and opaque; texture scanlines/tint soften small lettering.
+ a=1.;
  // Dark scrim under the info over the lower part of the screen.
  float scrim=1.-smoothstep(.06,.5,uv.y);
  col*=1.-.8*scrim;a=max(a,.92*scrim);
@@ -497,7 +491,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  const textures=new Set(),ownedCanvases=new Set();let released=false;
  const track=texture=>{textures.add(texture);return texture;};
  const release=texture=>{if(texture){texture.dispose();textures.delete(texture);const image=texture.image;if(ownedCanvases.delete(image))image.width=image.height=1;}};
- const canvasTexture=(canvas,owned=false)=>{if(owned)ownedCanvases.add(canvas);const t=track(new THREE.CanvasTexture(canvas));t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return t;};
+ const canvasTexture=(canvas,owned=false)=>{if(owned)ownedCanvases.add(canvas);const t=track(new THREE.CanvasTexture(canvas));t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t;};
  const flat=(mesh,order)=>{mesh.frustumCulled=false;mesh.renderOrder=order;mesh.visible=false;mesh.position.z=LOGO_FACE_Z;object.add(mesh);return mesh;};
  const flatMaterial=()=>new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,color:0xffffff});
  // Content, set by the host row: accent, per-screen copy and art, ring lines, countdown parts, faces.
@@ -569,8 +563,8 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   const countdown=next.countdown||[],faces=next.faces||{people:[],more:0},countdown2=next.countdown2||[],faces2=next.faces2||{people:[],more:0};
   const tintHex='#'+tint.getHexString();
   const venueName=String(next.venueName||'');
-  const key=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.pending,sc.startsIn,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),countdown.map(c=>c.value+c.unit),countdown2.map(c=>c.value+c.unit),faces,faces2]);
-  const textOnly=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.pending,sc.startsIn,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),faces,faces2]);
+  const key=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.pending,sc.startsIn,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),countdown.map(c=>c.value+c.unit),countdown2.map(c=>c.value+c.unit),faces,faces2,Boolean(countdown.length),Boolean(countdown2.length)]);
+  const textOnly=JSON.stringify([venueName,accent,tintHex,fonts,screens.map(sc=>[sc.name,sc.time,sc.pending,sc.startsIn,sc.ringName,sc.ringSub,art(sc.logo)?.key,art(sc.poster)?.key,art(sc.host)?.key]),faces,faces2,Boolean(countdown.length),Boolean(countdown2.length)]);
   if(key===contentKey)return;
   const keepStatic=textOnly===content.staticKey;
   beamAccentUniform.value.set(accent);
@@ -580,7 +574,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    screens.forEach((screen,index)=>{
     const slide=slides[index],info=infos[index];
     release(info.texture);info.texture=null;
-    if(screen.name||screen.time){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=300;drawInfoCanvas(canvas,screen.name,screen.time,accent,Boolean(screen.pending),'');info.texture=canvasTexture(canvas,true);}
+    if(screen.name||screen.time){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=300;drawInfoCanvas(canvas,screen.name,(index===0?countdown:countdown2).length?'':screen.time,accent,Boolean(screen.pending),'');info.texture=canvasTexture(canvas,true);}
     info.material.map=info.texture;info.material.needsUpdate=true;
     slide.kinds=[];
     for(const kind of ['logo','poster','host']){
@@ -865,7 +859,7 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
    // Keep each hologram's axis vertical on screen, so the beam rises from the exact centre of the top of the pin
    // instead of leaning away from the middle of the view with perspective. Drawn one hologram at a time, each with
    // a small sideways shear (linear in height) folded into its projection.
-   const M=camera.projectionMatrix.clone(),list=[...instances.values()];
+   const M=camera.projectionMatrix.clone(),depth=item=>{const p=item.root.position,e=M.elements;return e[3]*p.x+e[7]*p.y+e[11]*p.z+e[15];},list=[...instances.values()].sort((a,b)=>depth(b)-depth(a));
    const collect=item=>{for(const mesh of item.model.occlusionMeshes){projected.multiplyMatrices(camera.projectionMatrix,mesh.matrixWorld);const region=projectedHologramQuad(projected.elements,map.getCanvas().clientWidth,map.getCanvas().clientHeight);if(region)occluders.push({...region,foreground:true});}};
    renderer.resetState();
    if(!AXIS_VERTICAL||!list.length){renderer.render(scene,camera);for(const item of list)collect(item);renderer.resetState();return;}

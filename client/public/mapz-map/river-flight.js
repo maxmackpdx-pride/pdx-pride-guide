@@ -136,7 +136,7 @@ let waypointObjectRows=[],currentWaypointFeature=null,currentWaypointDepth=null;
 function drawAssetHead(ctx,g,color,icon,logo,selected,alpha=1,family='place',extra={}){
  const f=currentWaypointFeature;
  if(f&&alpha>.1){const m=ctx.getTransform(),ratio=lights.width/Math.max(1,lights.clientWidth),key=f.properties.key,asset=mapzAsset(f.properties);
-  waypointObjectRows.push({key,asset,x:(m.a*g.x+m.c*g.y+m.e)/ratio,y:(m.b*g.x+m.d*g.y+m.f)/ratio,size:g.size*Math.abs(m.a)/ratio,depth:currentWaypointDepth,coordinates:f.geometry.coordinates,altitude:15,showIcon:!(f.properties.waypointLogo&&logo),lod:selected?'near':'middle'});
+  waypointObjectRows.push({key,asset,x:(m.a*g.x+m.c*g.y+m.e)/ratio,y:(m.b*g.x+m.d*g.y+m.f)/ratio,size:g.size*Math.abs(m.a)/ratio*(asset?.startsWith('family-')?.72:1),depth:currentWaypointDepth,coordinates:f.geometry.coordinates,altitude:15,showIcon:!(f.properties.waypointLogo&&logo),lod:selected?'near':'middle'});
   if(waypointObjects.ready(key)){if(f.properties.waypointLogo&&logo){ctx.save();ctx.globalAlpha=alpha;const w=g.size*.62,h=w*(logo.height||logo.naturalHeight||1)/(logo.width||logo.naturalWidth||1),fit=Math.min(1,g.size*.72/h);ctx.drawImage(logo,g.x-w*fit/2,g.y-h*fit/2,w*fit,h*fit);ctx.restore();}if(extra.scoop){ctx.save();ctx.fillStyle='#fff';ctx.font='bold 10px monospace';ctx.fillText(extra.scoop,g.x+g.size/2,g.y);ctx.restore();}return;}
  }
  drawWaypointHead(ctx,g,color,icon,logo,selected,alpha,family,extra);
@@ -280,11 +280,11 @@ const lightSprites=new Map();
 const venueLogos=new Map();
 // Event posters for the 3D screen slides: same-origin only (a cross-origin image would taint the WebGL texture),
 // decoded once into a small canvas, requested only when a same-day vortex needs them.
-const eventPosters=new Map(),POSTER_MAX_EDGE=512;
+const eventPosters=new Map(),POSTER_MAX_EDGE=768,POSTER_CACHE_LIMIT=24;
 function eventPosterEntry(url){
  if(!url||typeof url!=='string')return null;
  const cached=eventPosters.get(url);
- if(cached)return cached.image?{key:url,image:cached.image,width:cached.width,height:cached.height}:null;
+ if(cached){eventPosters.delete(url);eventPosters.set(url,cached);return cached.image?{key:url,image:cached.image,width:cached.width,height:cached.height}:null;}
  let absolute;try{absolute=new URL(url,location.href);}catch{return null;}
  if(absolute.origin!==location.origin){eventPosters.set(url,{image:null});return null;}
  eventPosters.set(url,{image:null,loading:true});
@@ -293,8 +293,11 @@ function eventPosterEntry(url){
   if(disposed)return;
   const scale=Math.min(1,POSTER_MAX_EDGE/Math.max(image.naturalWidth,image.naturalHeight)),canvas=document.createElement('canvas');
   canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
-  canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
-  eventPosters.set(url,{image:canvas,width:canvas.width,height:canvas.height});scheduleFrame();
+  const ctx=canvas.getContext('2d');ctx.imageSmoothingQuality='high';ctx.drawImage(image,0,0,canvas.width,canvas.height);
+  eventPosters.set(url,{image:canvas,width:canvas.width,height:canvas.height});
+  // Evict cache ownership only: live holograms may still borrow a canvas.
+  for(const [key,entry] of eventPosters){if(eventPosters.size<=POSTER_CACHE_LIMIT)break;if(key!==url&&!entry.loading)eventPosters.delete(key);}
+  scheduleFrame();
  };
  image.onerror=()=>{if(!disposed)eventPosters.set(url,{image:null});};
  image.src=absolute.href;
@@ -937,7 +940,7 @@ function drawLightsLegacy(fade,target=map,surface=lights){
    lightsContext.globalAlpha=coreAlpha;
    const row=group.items[0].feature.properties;
    if(waypointOccluders.length){lightsContext.save();clipBehindHolograms(lightsContext,depthFor(group.items[0].feature),waypointOccluders,width,height);}
-   const pinSize=waypointHeadSize(false,target.getZoom()),pinScale=pinSize*1.15/40;
+   const pinSize=waypointHeadSize(false,target.getZoom())*.72,pinScale=pinSize*1.15/40;
    waypointObjectRows.push({key:row.key,asset:mapzAsset(row),x:group.x,y:group.y-20*pinScale,size:pinSize,coordinates:group.items[0].feature.geometry.coordinates,depth:depthFor(group.items[0].feature),altitude:15,lod:'middle'});
    const pinReady=waypointObjects.ready(row.key);
    if(pinReady)lightsContext.globalAlpha=0;
@@ -1466,7 +1469,7 @@ let frozenClusters=null;
 function clusterPlaceMarkers(items,selected,zoom,width,height){
  // Keep condensed waypoints at the broad overview, then separate them about
  // two zoom levels earlier as the camera approaches individual streets.
- const radius=zoom<11.5?64:zoom<12.5?52:zoom<13.5?38:zoom<14.25?36:32;
+ const radius=Math.max(width<760?52:40,zoom<11.5?64:zoom<12.5?52:zoom<13.5?38:zoom<14.25?36:32);
  const byKey=new Map();
  if(!radius)return {byKey};
  // Pick a deterministic geographic leader so a cluster cannot jump between
