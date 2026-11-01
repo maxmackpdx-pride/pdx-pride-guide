@@ -5,14 +5,14 @@ function cityAmount(){
 }
 function mapZoom(){try{return window.__mapzMap?window.__mapzMap.getZoom():13;}catch{return 13;}}
 function stillMotion(){return motionPreference.matches;}
-/** Waypoint pack sizes: 31 at rest, growing to 42 at zoom 16+, 57 when selected. */
+/** Waypoint pack sizes: 31 at rest, growing to 36 at zoom 16+, 49 when selected. */
 export function waypointHeadSize(selected=false,zoom=mapZoom()){
- if(selected)return 57;
- return Math.round(31+11*Math.max(0,Math.min(1,(zoom-12)/4)));
+ if(selected)return Math.round(57-8*Math.max(0,Math.min(1,(zoom-12)/4)));
+ return Math.round(31+5*Math.max(0,Math.min(1,(zoom-12)/4)));
 }
 /** Shell tip hangs below the head box by this share of the size (livingMapWaypoints r*.68). */
 const TIP=.34;
-// Select motion (board 48): 42 to 57 with the lift, 180ms ease-out, both ways.
+// Select motion (board 48): 36 to 49 with the lift, 180ms ease-out, both ways.
 const SELECT_MS=180;let selection={key:null,prev:null,at:-1e9};
 export function noteSelectedWaypoint(key,now=performance.now()){if(key!==selection.key)selection={key,prev:selection.key,at:now};}
 function selectedAmount(selected,key){

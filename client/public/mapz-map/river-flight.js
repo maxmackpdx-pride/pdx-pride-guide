@@ -1,3 +1,4 @@
+import {clipBehindHolograms,pointBehindHologram} from './hologram-occlusion.js';
 import {eventCardGeometry,appendEventCardFrame,updateEventCardGlitch,createAttachedEventBeam,drawEventMiniBadge} from './event-hologram-card.js?v=20261026-lod';
 import {EVENT_CARD_WIDTH,EVENT_CARD_HEIGHT,EVENT_CLOCK_HEIGHT} from './event-hologram-model.js';
 import { groupBoardPins, drawBoardPin } from './board-pins.js';
@@ -128,6 +129,7 @@ function e3ClearanceMeters(coordinates,buildings){
  return tallest;
 }
 const e3Blender=createE3BlenderLayer(maplibregl,{maxVisible:E3_BLENDER_MAX_VISIBLE});
+let waypointOccluders=[],waypointDepths=new Map();
 const e3Blender3D=new Map(),e3StageState=new Map(),e3CrowdFactor=new Map();
 const signLift=createSignLift();
 // A venue's shown stage eases toward the stage its distance asks for (e3StageTarget), so the coin and the vortex blend as the camera moves.
@@ -263,7 +265,7 @@ const lightSprites=new Map();
 const venueLogos=new Map();
 // Event posters for the 3D screen slides: same-origin only (a cross-origin image would taint the WebGL texture),
 // decoded once into a small canvas, requested only when a same-day vortex needs them.
-const eventPosters=new Map(),POSTER_MAX_EDGE=256;
+const eventPosters=new Map(),POSTER_MAX_EDGE=512;
 function eventPosterEntry(url){
  if(!url||typeof url!=='string')return null;
  const cached=eventPosters.get(url);
@@ -368,7 +370,7 @@ let hoverTargets=[];
 function trackLogoPointer(event){
  logoPointer.active=event.pointerType!=='touch'&&!event.buttons&&!event.target?.closest?.('aside,.credit,.standalone-hologram-label');
  logoPointer.x=event.clientX;logoPointer.y=event.clientY;
- mapHover.update(hoverTargets,logoPointer);
+ mapHover.update(hoverTargets.filter(hit=>!pointBehindHologram(logoPointer,waypointDepths.get(hit.key),waypointOccluders)),logoPointer);
 }
 function clearLogoPointer(){logoPointer.active=false;mapHover.update([],logoPointer);}
 function leaveLogoPointer(event){if(!event.relatedTarget)clearLogoPointer();}
@@ -904,6 +906,8 @@ function drawLights(fade,target=map,surface=lights){
  const vortex={stacks:[],members:new Map()};
  const retainedCards=new Set(beacons.filter(item=>item.offset.cardVisible).map(item=>item.feature.properties.key));
  const visibleEventCards=new Set(visibleHologramLabels([...eventCards.values()],selectedKey,width,height,retainedCards,120).map(card=>card.key));
+ waypointOccluders=e3Blender.occluders;waypointDepths=new Map();
+ const depthFor=feature=>{const key=feature.properties.key;if(!waypointDepths.has(key)){const roof=surfaces.roofs?.get(feature.properties.phase)??9;waypointDepths.set(key,e3Blender.depthAt(feature.geometry.coordinates,roof*extrusionAmount(target)+4));}return waypointDepths.get(key);};
  const extensionSlots=new Map(),branchCounts=new Map();
  for(const {feature} of ordered){const row=feature.properties;if((row.waypointFamily==='mizzed'||row.waypointFamily==='gigz')&&row.venueWaypointKey)branchCounts.set(row.venueWaypointKey,(branchCounts.get(row.venueWaypointKey)||0)+1);}
  for(const pass of [0,1]){
@@ -917,11 +921,16 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.setTransform(dpr,0,0,dpr,0,0);
    lightsContext.globalAlpha=coreAlpha;
    const row=group.items[0].feature.properties;
+   if(waypointOccluders.length){lightsContext.save();clipBehindHolograms(lightsContext,depthFor(group.items[0].feature),waypointOccluders,width,height);}
    const pinHit=drawBoardPin(lightsContext,group.x,group.y,row.color,row.key,pulseTime,reduced.matches,group.items.length,row.wireColor,row.pinCyan,waypointHeadSize(false,target.getZoom()));
+   if(waypointOccluders.length)lightsContext.restore();
    hitTargets.push({...pinHit,key:row.key,name:row.name,boardPinKeys:group.items.map(v=>v.feature.properties.key)});
   }
   for(const {feature,p,offset,presence,neighbors=0} of ordered){
   if(feature.properties.boardPin)continue;
+  const clipWaypoint=pass===1&&feature.properties.kind!=='event'&&waypointOccluders.length>0;
+  if(clipWaypoint){lightsContext.save();lightsContext.setTransform(dpr,0,0,dpr,0,0);clipBehindHolograms(lightsContext,depthFor(feature),waypointOccluders,width,height,{left:p.x-128,right:p.x+128,top:0,bottom:height});}
+  try{
   const {color,phase}=feature.properties;
   // Rise and fold scale the pin up out of its ground point; everything else is untouched.
   const riseLift=Math.min(riseAmount(feature.properties.key,frameNow),foldAmount(feature.properties.key,frameNow));
@@ -952,12 +961,12 @@ function drawLights(fade,target=map,surface=lights){
    if(slot.kind==='chip'){
     const parentItem=venueItems.get(key),ink=parentItem?.feature.properties.color||color;
     drawBranchChip(lightsContext,geometry.x,geometry.y,`+${slot.more}`,ink,strength);
-    hitTargets.push({key,x:geometry.x,y:geometry.y,r:18,name:parentItem?.feature.properties.name,category:'More posts',color:ink});
+    hitTargets.push({key,x:geometry.x,y:geometry.y,r:22,name:parentItem?.feature.properties.name,category:'More posts',color:ink});
     continue;
    }
    const days=branchDaysLeft(feature.properties,viewTime);
    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,null,selected,strength,waypointFamilyShell(branchFamily),{scoop:days?`${days}D`:null});
-   hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:geometry.size/2+6,name:feature.properties.name,category:branchFamily==='gigz'?'Gigz':'Mizzed',color});
+   hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+6),name:feature.properties.name,category:branchFamily==='gigz'?'Gigz':'Mizzed',color});
    continue;
   }
   if(feature.properties.kind!=='event'){
@@ -1075,6 +1084,7 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.globalAlpha=hologramAlpha;
    lightsContext.drawImage(hologramMaterials.orbs.get(color),p.x-12.5,raisedY-12.5,25,25);
   }
+  }finally{if(clipWaypoint)lightsContext.restore();}
  }
 
  lightsContext.setTransform(dpr,0,0,dpr,0,0);
@@ -1086,7 +1096,7 @@ function drawLights(fade,target=map,surface=lights){
  hitTargets.push(...eventLabels.filter(label=>!label.cardHeight&&label.opacity>.1).map(label=>({key:label.logoKey||label.key,x:label.x,y:label.logoY,width:label.logoWidth,height:label.logoHeight,color:label.color})));
  hoverTargets=[...hitTargets];
  if(userLocation&&fade>.1){const p=target.project(userLocation.coordinates);hoverTargets.push({x:p.x,y:p.y-27,r:23,color:userLocation.feature.properties.color,hoverOnly:true});}
- mapHover.update(hoverTargets,logoPointer);
+ mapHover.update(hoverTargets.filter(hit=>!pointBehindHologram(logoPointer,waypointDepths.get(hit.key),waypointOccluders)),logoPointer);
 }
 
 const labelMeasureContext=typeof document.createElement==='function'?document.createElement('canvas').getContext('2d'):{font:'',measureText:text=>({width:String(text).length*55})};
@@ -1499,7 +1509,7 @@ let down=null;
 map.getCanvas().addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};});
 map.getCanvas().addEventListener('pointerup',e=>{
  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>7){down=null;return;}down=null;
- const hit=hoveredMapTarget(hitTargets,{x:e.clientX,y:e.clientY,active:true});
+ const hit=hoveredMapTarget(hitTargets.filter(hit=>!pointBehindHologram({x:e.clientX,y:e.clientY},waypointDepths.get(hit.key),waypointOccluders)),{x:e.clientX,y:e.clientY,active:true});
  if(hit?.boardPinKeys){tell('board-pins',{keys:hit.boardPinKeys});return;}
  if(hit?.clusterBounds){if(parent===window)map.fitBounds(hit.clusterBounds,{padding:72,maxZoom:17.25,duration:620});else tell('cluster',{world:hit.clusterWorld||'places',keys:hit.clusterKeys,bounds:hit.clusterBounds,zoom:map.getZoom()});return;}
  if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);const width=hit.width||Math.max(32,(hit.r||22)*1.5),height=hit.height||width;tell('select',{key:hit.key,rect:{left:hit.x-width/2,top:hit.y-height/2,width,height}});scheduleFrame();}

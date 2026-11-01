@@ -1,3 +1,4 @@
+import {projectedHologramQuad} from './hologram-occlusion.js';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {e3SlideState,e3SpinUp,e3OrbDrop,e3RingSpinRate,e3RingTiltRate,e3BeamPulseLook,E3_RING_TILT_RADIANS,E3_RING_DWELL,e3RingDwell,E3_TEXT_FAR_BOOST,E3_SIGN_FAR_BOOST,e3AnchorInFront,E3_SLIDE_SECONDS,e3SlideProgress,e3OrbPulse,E3_LIVE_BEAM_BOOST} from './e3-lod.js?v=20261030-orb-beam-fade';
@@ -233,8 +234,8 @@ function drawInfoCanvas(canvas,name,time,accent,pending=false,startsIn=''){
 }
 // Countdown plate: dark, thin corner brackets in the tint, big equal numerals in the title font with tiny unit letters.
 function drawCountdownCanvas(canvas,parts,tintColor,accent){
- const ctx=canvas.getContext('2d'),width=canvas.width,height=canvas.height;
- ctx.clearRect(0,0,width,height);
+ const ctx=canvas.getContext('2d'),density=canvas.width/480,width=480,height=150;
+ ctx.setTransform(density,0,0,density,0,0);ctx.clearRect(0,0,width,height);
  ctx.fillStyle='rgba(2,5,10,.96)';ctx.fillRect(6,6,width-12,height-12);
  ctx.strokeStyle=tintColor;ctx.lineWidth=3;ctx.shadowColor=tintColor;ctx.shadowBlur=8;
  const arm=26,x0=6,y0=6,x1=width-6,y1=height-6;
@@ -258,7 +259,7 @@ function drawCountdownCanvas(canvas,parts,tintColor,accent){
  let x=(width-L.total)/2;const base=height*.5+size*.36;
  L.items.forEach((item,i)=>{
   if(i){ctx.font=`900 ${size}px ${FONT_FAMILY}`;ctx.fillStyle=accent;ctx.textAlign='left';ctx.fillText(':',x+L.gap*.3,base-size*.08);x+=L.gap*1.6;}
-  ctx.font=`900 ${size}px ${FONT_FAMILY}`;ctx.fillStyle='#ffffff';ctx.textAlign='left';ctx.lineWidth=size*.05;ctx.lineJoin='round';ctx.strokeStyle='#ffffff';ctx.strokeText(item.part.value,x,base);ctx.fillText(item.part.value,x,base);
+  ctx.font=`900 ${size}px ${FONT_FAMILY}`;ctx.fillStyle='#ffffff';ctx.textAlign='left';ctx.fillText(item.part.value,x,base);
   x+=item.w+size*.06;
   ctx.font=`900 ${L.unit}px ${FONT_FAMILY}`;ctx.fillStyle=accent;ctx.fillText(item.part.unit,x,base-size*.58);
   x+=item.uw;
@@ -361,7 +362,11 @@ void main(){
  float bar=glitch>0.&&hash(slice*5.+tick*3.)>.9?1.:0.;
  col+=accent*bar*.55*glitch;a=max(a,bar*.35*glitch);
  // Hologram: fine scan lines, a faint tint wash and a soft flicker; translucent, not solid.
- col*=.86+.14*step(.5,fract(uv.y*110.-seconds*.6));
+ float lines=uv.y*110.-seconds*.6;
+ float footprint=max(fwidth(lines),.001);
+ float scan=smoothstep(.5-footprint,.5+footprint,fract(lines));
+ // Sub-pixel scan bands become their average instead of aliasing over poster detail.
+ col*=mix(.93,.86+.14*scan,1.-smoothstep(.25,.75,footprint));
  col=mix(col,col*.6+tint*.4,.1);
  a*=.9+.03*sin(seconds*9.1)+.02*sin(seconds*23.7);
  // Dark scrim under the info over the lower part of the screen.
@@ -577,12 +582,13 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     release(info.texture);info.texture=null;
     if(screen.name||screen.time){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=300;drawInfoCanvas(canvas,screen.name,screen.time,accent,Boolean(screen.pending),'');info.texture=canvasTexture(canvas,true);}
     info.material.map=info.texture;info.material.needsUpdate=true;
-    for(const kind of Object.keys(slide.textures)){release(slide.textures[kind]);}
-    slide.textures={};slide.aspects={};slide.kinds=[];
+    slide.kinds=[];
     for(const kind of ['logo','poster','host']){
-     const entry=art(screen[kind]);
-     if(!entry)continue;
-     slide.textures[kind]=canvasTexture(entry.image);slide.aspects[kind]=entry.width/entry.height;slide.kinds.push(kind);
+     const entry=art(screen[kind]),previous=slide.textures[kind];
+     if(!entry){release(previous);delete slide.textures[kind];delete slide.aspects[kind];continue;}
+     // Text and tint transitions do not change borrowed poster/logo pixels.
+     if(previous?.image!==entry.image){release(previous);slide.textures[kind]=canvasTexture(entry.image);}
+     slide.aspects[kind]=entry.width/entry.height;slide.kinds.push(kind);
     }
     slide.material.uniforms.accent.value.set(accent);slide.material.uniforms.tint.value.copy(tint);
    });
@@ -614,14 +620,16 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   }
   // The countdown changes about once a second.
   release(plate.texture);plate.texture=null;
-  if(countdown.length){const canvas=document.createElement('canvas');canvas.width=480;canvas.height=150;drawCountdownCanvas(canvas,countdown,tintHex,accent);plate.texture=canvasTexture(canvas,true);}
+  if(countdown.length){const canvas=document.createElement('canvas');canvas.width=960;canvas.height=300;drawCountdownCanvas(canvas,countdown,tintHex,accent);plate.texture=canvasTexture(canvas,true);}
   plate.material.map=plate.texture;plate.material.needsUpdate=true;
   release(plate2.texture);plate2.texture=null;
-  if(screens.length>1&&countdown2.length){const canvas=document.createElement('canvas');canvas.width=480;canvas.height=150;drawCountdownCanvas(canvas,countdown2,tintHex,accent);plate2.texture=canvasTexture(canvas,true);}
+  if(screens.length>1&&countdown2.length){const canvas=document.createElement('canvas');canvas.width=960;canvas.height=300;drawCountdownCanvas(canvas,countdown2,tintHex,accent);plate2.texture=canvasTexture(canvas,true);}
   plate2.material.map=plate2.texture;plate2.material.needsUpdate=true;
  }
  let stage=0,urgency=0,lastElapsed=null,ringAngle=0,tiltClock=0,pulsePhase=0,textBoost=1;
  return {object,
+  // Only backed display surfaces occlude flat pins: never beams, rings or particles.
+  get occlusionMeshes(){return [...slides.filter(slide=>slide.mesh.visible&&slide.material.uniforms.opacity.value>.65).map(slide=>slide.mesh),...[plate,plate2].filter(part=>part.mesh.visible&&part.material.opacity>.65).map(part=>part.mesh)];},
   setColor(value){tint.set(value);disc.material.color.copy(tint);for(const node of meshes)if(!['panel','icon','particle'].includes(node.userData.mapzRole))node.material.color.copy(tint);},
   setLogo,setContent,
   // 0..1 time-to-start energy (e3EventUrgency): ring spin, ring tilt rate and beam pulses ramp with it.
@@ -819,15 +827,24 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  };
 }
 
+// Each object gets a different camera projection, but shares this frame's world transforms.
+export function updateHologramWorldMatrices(scene){
+ scene.matrixWorldAutoUpdate=true;
+ try{scene.updateMatrixWorld(true);}finally{scene.matrixWorldAutoUpdate=false;}
+}
+
 // A self-contained custom layer adapter for Claude's map wiring. It shares the
 // map's existing WebGL context and geographic depth; it creates no second canvas.
 // No production code imports this until the wiring owner opts in.
 export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{},onError=()=>{},maxVisible=3}={}){
  let map,renderer,scene,camera,template,origin,unit=1,disposed=false,rows=[],elapsed=0;
- const instances=new Map(),matrix=new THREE.Matrix4(),local=new THREE.Matrix4();
+ let occluders=[];
+ const instances=new Map(),matrix=new THREE.Matrix4(),local=new THREE.Matrix4(),projected=new THREE.Matrix4(),depthPoint=new THREE.Vector4();
  const layer={id:'mapz-blender-holograms',type:'custom',renderingMode:'3d',
   setVenues(next){rows=next.slice(0,maxVisible);sync();map?.triggerRepaint();},
   setMotion({seconds=0,reduced=false,active=true}={}){elapsed=seconds;layer.reduced=reduced;layer.active=active;if(active)map?.triggerRepaint();},
+  get occluders(){return occluders;},
+  depthAt(coordinates,altitude=0){if(!map||!origin)return null;const p=maplibre.MercatorCoordinate.fromLngLat(coordinates,altitude),v=depthPoint.set(p.x,p.y,p.z,1).applyMatrix4(matrix);return v.w>0?v.z/v.w:null;},
   ready:false,active:true,reduced:false,
   onAdd(target,gl){
    map=target;scene=new THREE.Scene();camera=new THREE.Camera();
@@ -838,6 +855,7 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
    },undefined,error=>{if(!disposed)onError(error);});
   },
   render(gl,args){
+   occluders=[];
    if(!template||!origin||!layer.active)return;
    matrix.fromArray(args.defaultProjectionData?.mainMatrix||args);
    local.makeTranslation(origin.x,origin.y,origin.z).scale(new THREE.Vector3(unit,-unit,unit));
@@ -846,12 +864,14 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
    for(const {model,root,row} of instances.values()){
     root.rotation.z=-bearing;model.setStage(row.stage??'vortex');model.update(elapsed,layer.reduced);
    }
+   updateHologramWorldMatrices(scene);
    // Keep each hologram's axis vertical on screen, so the beam rises from the exact centre of the top of the pin
    // instead of leaning away from the middle of the view with perspective. Drawn one hologram at a time, each with
    // a small sideways shear (linear in height) folded into its projection.
    const M=camera.projectionMatrix.clone(),list=[...instances.values()];
+   const collect=item=>{for(const mesh of item.model.occlusionMeshes){projected.multiplyMatrices(camera.projectionMatrix,mesh.matrixWorld);const region=projectedHologramQuad(projected.elements,map.getCanvas().clientWidth,map.getCanvas().clientHeight);if(region)occluders.push(region);}};
    renderer.resetState();
-   if(!AXIS_VERTICAL||!list.length){renderer.render(scene,camera);renderer.resetState();return;}
+   if(!AXIS_VERTICAL||!list.length){renderer.render(scene,camera);for(const item of list)collect(item);renderer.resetState();return;}
    const e=M.elements;
    for(const item of list)item.root.visible=false;
    for(const item of list){
@@ -864,13 +884,13 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
     const S=M.clone(),se=S.elements;
     if(cw0>0&&cw1>0){const kz=(cx1/cw1-cx0/cw0)/H;se[8]-=kz*cw0;se[12]+=kz*cw0*p.z;}
     camera.projectionMatrix.copy(S);
-    item.root.visible=true;renderer.render(scene,camera);item.root.visible=false;
+    item.root.visible=true;renderer.render(scene,camera);collect(item);item.root.visible=false;
    }
    for(const item of list)item.root.visible=true;
    camera.projectionMatrix.copy(M);
    renderer.resetState();
   },
-  onRemove(){disposed=true;for(const item of instances.values())item.model.dispose();instances.clear();scene?.clear();if(template)release(template);renderer?.dispose();layer.ready=false;map=null;}
+  onRemove(){occluders=[];disposed=true;for(const item of instances.values())item.model.dispose();instances.clear();scene?.clear();if(template)release(template);renderer?.dispose();layer.ready=false;map=null;}
  };
  function sync(){
   if(disposed||!template||!scene)return;

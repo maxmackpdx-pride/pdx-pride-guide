@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
-import {PORTLAND_BUILDING_MODELS,parseBuildingGlb,replacementBuildingSurfaces,BUILDING_MODEL_MIN_ZOOM} from '../client/public/mapz-map/building-models.js';
+import {PORTLAND_BUILDING_MODELS,parseBuildingGlb,replacementBuildingSurfaces,BUILDING_MODEL_MIN_ZOOM,createBuildingModelLayer} from '../client/public/mapz-map/building-models.js';
 const parse=m=>{const b=fs.readFileSync(new URL(m.url));return parseBuildingGlb(b.buffer.slice(b.byteOffset,b.byteOffset+b.length),m)};
 test('all eight supplied models keep filename GPS, authored meter height and finite grounded geometry',()=>{const heights=[163.38,43.3,65,38,18,72.75,32.6,49];assert.equal(PORTLAND_BUILDING_MODELS.length,8);PORTLAND_BUILDING_MODELS.forEach((m,i)=>{const p=parse(m),match=m.url.match(/_lat([\d.]+)_lon(-[\d.]+)_/);assert.deepEqual(m.center,[+match[2],+match[1]]);assert.ok(Math.abs(p.bounds.max[2]-heights[i])<.02);assert.equal(p.bounds.min[2],0);assert.ok(p.vertices.every(Number.isFinite));assert.ok(p.count<100000);for(let j=3;j<p.vertices.length;j+=7)assert.ok(Math.abs(Math.hypot(...p.vertices.slice(j,j+3))-1)<.001);});assert.equal(BUILDING_MODEL_MIN_ZOOM,12);});
 const square=(x,y,s=.00002)=>[[x-s,y-s],[x+s,y-s],[x+s,y+s],[x-s,y+s],[x-s,y-s]];
@@ -13,4 +13,26 @@ test('node translation, rotation, nonuniform scale and indexed vertex order are 
  const json={asset:{version:'2.0'},scene:0,scenes:[{nodes:[0]}],nodes:[{mesh:0,translation:[10,20,30],scale:[2,3,4],rotation:[0,0,Math.SQRT1_2,Math.SQRT1_2]}],meshes:[{primitives:[{attributes:{POSITION:0,NORMAL:1},indices:2}]}],buffers:[{byteLength:80}],bufferViews:[{buffer:0,byteOffset:0,byteLength:36},{buffer:0,byteOffset:36,byteLength:36},{buffer:0,byteOffset:72,byteLength:6}],accessors:[{bufferView:0,componentType:5126,count:3,type:'VEC3'},{bufferView:1,componentType:5126,count:3,type:'VEC3'},{bufferView:2,componentType:5123,count:3,type:'SCALAR'}]};
  const text=Buffer.from(JSON.stringify(json)),length=Math.ceil(text.length/4)*4,b=Buffer.alloc(12+8+length+8+80,32);b.writeUInt32LE(0x46546c67,0);b.writeUInt32LE(2,4);b.writeUInt32LE(b.length,8);b.writeUInt32LE(length,12);b.writeUInt32LE(0x4e4f534a,16);text.copy(b,20);b.writeUInt32LE(80,20+length);b.writeUInt32LE(0x004e4942,24+length);binary.copy(b,28+length);
  const parsed=parseBuildingGlb(b.buffer.slice(b.byteOffset,b.byteOffset+b.length),{bearing:90});assert.deepEqual([...parsed.vertices.slice(0,3)].map(Math.round),[7,30,0]);assert.deepEqual([...parsed.vertices.slice(7,10)].map(Math.round),[10,30,0]);assert.deepEqual([...parsed.vertices.slice(14,17)].map(Math.round),[10,30,2]);assert.ok(Math.abs(parsed.vertices[4]-1)<1e-6);
+});
+
+
+test('late building responses are discarded before parsing after layer removal',async t=>{
+ const original=globalThis.XMLHttpRequest,originalWarn=console.warn,requests=[],warnings=[];
+ globalThis.XMLHttpRequest=class{constructor(){requests.push(this);}open(){}send(){}};console.warn=(...args)=>warnings.push(args);
+ t.after(()=>{globalThis.XMLHttpRequest=original;console.warn=originalWarn;});
+ const layer=createBuildingModelLayer({}),model=layer.models[0],map={getSource:()=>null};
+ const pending=layer.loadModel(model);assert.equal(requests.length,1);
+ layer.onRemove(map,{deleteProgram(){}});
+ // This malformed payload would throw in the parser, proving no late decode occurs.
+ requests[0].status=200;requests[0].response=new ArrayBuffer(16);requests[0].onload();await pending;
+ assert.equal(model.count,0);assert.equal(model.vertices,undefined);assert.equal(model.failed,undefined);assert.equal(model.loading,false);assert.deepEqual(warnings,[]);
+});
+
+test('an active building layer still parses and schedules a valid model response',async t=>{
+ const original=globalThis.XMLHttpRequest,requests=[];
+ globalThis.XMLHttpRequest=class{constructor(){requests.push(this);}open(){}send(){}};t.after(()=>{globalThis.XMLHttpRequest=original;});
+ const layer=createBuildingModelLayer({}),model=layer.models[0];let repaints=0;layer.map={triggerRepaint(){repaints++;}};
+ const pending=layer.loadModel(model),bytes=fs.readFileSync(new URL(model.url));
+ requests[0].status=200;requests[0].response=bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);requests[0].onload();await pending;
+ assert.ok(model.count>0);assert.ok(model.vertices instanceof Float32Array);assert.equal(model.failed,undefined);assert.equal(model.loading,false);assert.ok(repaints>0);
 });
