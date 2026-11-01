@@ -22,3 +22,25 @@ export function authoredLogoMode(url, mode) {
 export function logoTone(r, g, b, mode) {
   return mode === 'grayscale' ? Math.round(.2126*r + .7152*g + .0722*b) : 255;
 }
+
+/** Preserve every source pixel while letting gestures and paint run between rows. */
+export async function maskLogoPixels(pixels,width,height,mode,{
+ shouldStop=()=>false,now=()=>performance.now(),
+ yieldTask=()=>new Promise(resolve=>setTimeout(resolve,0)),budgetMs=4
+}={}){
+ let left=width,top=height,right=0,bottom=0,deadline=now()+budgetMs;
+ if(shouldStop())return null;
+ for(let y=0;y<height;y++){
+  for(let x=0;x<width;x++){
+   const i=(y*width+x)*4;
+   const coverage=logoCoverage(pixels[i],pixels[i+1],pixels[i+2],pixels[i+3],mode);
+   const tone=logoTone(pixels[i],pixels[i+1],pixels[i+2],mode);
+   pixels[i]=pixels[i+1]=pixels[i+2]=tone;pixels[i+3]=Math.round(coverage*255);
+   if(pixels[i+3]>32){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+  }
+  if(y+1<height&&now()>=deadline){
+   await yieldTask();if(shouldStop())return null;deadline=now()+budgetMs;
+  }
+ }
+ return {left,top,right,bottom};
+}

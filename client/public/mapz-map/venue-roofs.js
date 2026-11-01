@@ -43,24 +43,44 @@ function distToRing(lng,lat,ring){
  return best;
 }
 
+/** Index one geometry snapshot; tile updates construct a fresh matcher. */
+export function createBuildingMatcher(buildings){
+ const indexed=(buildings||[]).filter(building=>building.ring?.length).map(building=>{
+  let west=Infinity,east=-Infinity,south=Infinity,north=-Infinity;
+  for(const [lng,lat] of building.ring){west=Math.min(west,lng);east=Math.max(east,lng);south=Math.min(south,lat);north=Math.max(north,lat);}
+  return {building,west,east,south,north};
+ });
+ return function match(coordinates,maxDist=.0022){
+  if(!Array.isArray(coordinates)||coordinates.length<2)return null;
+  const [lng,lat]=coordinates;
+  let inside=null,edge=null,edgeDist=maxDist,center=null,centerDist=maxDist;
+  for(const {building,west,east,south,north} of indexed){
+   const ring=building.ring;
+   if(lng>=west&&lng<=east&&lat>=south&&lat<=north&&pointInRing(lng,lat,ring)){
+    if(!inside||(Number(building.height)||0)>(Number(inside.height)||0))inside=building;
+    continue;
+   }
+   // Containment wins outright; only a taller containing footprint can replace it.
+   if(inside)continue;
+   // The bounding rectangle gives a conservative lower bound under the same
+   // longitude weighting as the exact edge distance. Distant polygons cannot win.
+   const lowerBound=Math.hypot(Math.max(west-lng,0,lng-east)*.7,Math.max(south-lat,0,lat-north));
+   if(lowerBound<edgeDist){
+    const de=distToRing(lng,lat,ring);
+    if(de<edgeDist){edgeDist=de;edge=building;}
+   }
+   if(!edge){
+    const dc=Math.hypot((building.center[0]-lng)*.7,building.center[1]-lat);
+    if(dc<centerDist){centerDist=dc;center=building;}
+   }
+  }
+  return inside||edge||center;
+ };
+}
+
 /** Prefer footprint containment, then nearest edge, then centroid. Wider search for street GPS. */
 export function matchBuilding(buildings,coordinates,maxDist=.0022){
- if(!Array.isArray(coordinates)||coordinates.length<2)return null;
- const [lng,lat]=coordinates;
- let inside=null,edge=null,edgeDist=maxDist,center=null,centerDist=maxDist;
- for(const building of buildings||[]){
-  const ring=building.ring;
-  if(!ring?.length)continue;
-  if(pointInRing(lng,lat,ring)){
-   if(!inside||(Number(building.height)||0)>(Number(inside.height)||0))inside=building;
-   continue;
-  }
-  const de=distToRing(lng,lat,ring);
-  if(de<edgeDist){edgeDist=de;edge=building;}
-  const dc=Math.hypot((building.center[0]-lng)*.7,building.center[1]-lat);
-  if(dc<centerDist){centerDist=dc;center=building;}
- }
- return inside||edge||center;
+ return createBuildingMatcher(buildings)(coordinates,maxDist);
 }
 
 /** Placez only — no boards, housing, mizzed, pure events. */

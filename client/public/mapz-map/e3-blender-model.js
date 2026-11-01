@@ -592,7 +592,8 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    for(const band of bands){
     const screen=screens[band.spec.screen],line=screen?(band.spec.line===0?screen.ringName:screen.ringSub):'';
     release(band.texture);release(band.farTexture);band.texture=band.farTexture=null;band.text=line||'';band.copies=1;
-    if(line){
+    // The approved no-ring style never samples these large text textures.
+    if(line&&!E3_NO_RINGS){
      const canvas=document.createElement('canvas');canvas.width=band.spec.width;canvas.height=band.spec.height;band.copies=drawRingTextCanvas(canvas,line,band.spec.font,accent,tintHex);
      band.texture=canvasTexture(canvas);band.texture.wrapS=THREE.RepeatWrapping;
      band.farTexture=band.texture.clone();track(band.farTexture);band.farTexture.repeat.x=-1;band.farTexture.offset.x=1;band.farTexture.needsUpdate=true;

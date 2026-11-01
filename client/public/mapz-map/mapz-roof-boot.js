@@ -1,5 +1,5 @@
 import {createSurfaceWork} from './surface-work.js';
-import {createVenueRoofs,extrusionAmount,matchBuilding,isPlacezRow} from './venue-roofs.js?v=20260926-placez-roofs';
+import {createVenueRoofs,extrusionAmount,createBuildingMatcher,isPlacezRow} from './venue-roofs.js?v=20260926-placez-roofs';
 import {installCheapBridgeGlow} from './bridge-water-glow.js?v=20260929-mesh';
 
 function rowsToFeatures(rows){
@@ -40,14 +40,14 @@ function coordKey(c){
 
 function rebuildPlaceSnaps(map){
  const snaps=new Map(),roofHeights=new Map();
- const buildings=buildingsFrom(map);
+ const buildings=buildingsFrom(map),matchBuilding=createBuildingMatcher(buildings);
  const features=window.__mapzVenueFeatures||[];
  const matches=new Map();
  for(const feature of features){
   if(!isPlacezRow(feature.properties||{}))continue;
   const c=feature.geometry?.coordinates;
   if(!Array.isArray(c)||c.length<2)continue;
-  const best=matchBuilding(buildings,c);
+  const best=matchBuilding(c);
   matches.set(feature,best);
   if(!best)continue;
   const key=coordKey(c);

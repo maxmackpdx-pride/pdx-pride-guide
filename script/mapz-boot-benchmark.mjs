@@ -60,7 +60,7 @@ try{
    let result;
    try{
     await frame.waitForFunction(()=>{
-     const map=window.__mapzMap,stats=window.__mapzBench;
+     const map=window.__zaylistMap,stats=window.__mapzBench;
      if(!map||(!stats?.firstFrame&&document.documentElement.dataset.mapPhase!=='first-frame')||!map.areTilesLoaded()||stats.pending||performance.now()-stats.lastActivity<500)return false;
      const layers=['intersection-ground-lights','bridge-decks','portland-bridge-models','portland-building-models','portland-hologram-landmarks','city-sparkles'];
      for(const id of layers){const layer=map.getLayer(id);const impl=layer?.implementation||(id==='portland-bridge-models'?map.getLayer('portland-building-models')?.implementation?.bridges:null);if(!layer&&!impl)return false;if(!impl?.models)continue;
@@ -69,20 +69,22 @@ try{
      const overlay=document.getElementById('waypoint-lights');
      return Number(getComputedStyle(overlay).opacity)>=.99&&Number(document.getElementById('map').style.opacity)>=.99;
     },null,{timeout:Number(args['full-timeout']||90000),polling:100});
-    result=await frame.evaluate(()=>({firstFrameMs:window.__mapzBench.firstFrame,fullSceneMs:performance.now(),longTasks:window.__mapzBench.longTasks,failures:window.__mapzBench.failures,resources:performance.getEntriesByType('resource').map(r=>({name:r.name,bytes:r.transferSize,duration:r.duration})),layers:window.__mapzMap.getStyle().layers.map(l=>l.id)}));
+    result=await frame.evaluate(()=>({firstFrameMs:window.__mapzBench.firstFrame,fullSceneMs:performance.now(),longTasks:window.__mapzBench.longTasks,failures:window.__mapzBench.failures,resources:performance.getEntriesByType('resource').map(r=>({name:r.name,bytes:r.transferSize,duration:r.duration})),layers:window.__zaylistMap.getStyle().layers.map(l=>l.id)}));
     result.performance=await frame.evaluate(async({soakMs})=>{
-     const stats=window.__mapzBench,map=window.__mapzMap;
+     const stats=window.__mapzBench,map=window.__zaylistMap;
+     // Measure gestures without the automatic flight overriding the camera.
+     const pause=document.querySelector('#pause-flight');if(pause){pause.checked=true;pause.dispatchEvent(new Event('input',{bubbles:true}));}
      const sample=()=>({time:performance.now(),layouts:stats.layouts,draws:stats.draws,heap:performance.memory?.usedJSHeapSize});
      const ready=sample();await new Promise(resolve=>setTimeout(resolve,3000));const stationary=sample();
      const frames=[];let last=performance.now(),animation;
-     const tick=now=>{frames.push(now-last);last=now;animation=requestAnimationFrame(tick);};animation=requestAnimationFrame(tick);
+     const tick=()=>{const now=performance.now();frames.push(now-last);last=now;animation=requestAnimationFrame(tick);};animation=requestAnimationFrame(tick);
      await Promise.race([new Promise(resolve=>{map.once('moveend',resolve);map.easeTo({center:[-122.675,45.524],zoom:15.5,duration:1500});}),new Promise(resolve=>setTimeout(resolve,5000))]);
      cancelAnimationFrame(animation);const interaction=sample();
      let soak=null;
      if(soakMs>0){
       const started=performance.now(),origin=performance.timeOrigin,samples=[],gestureIntervals=[];
       let previous=performance.now(),soakFrame,lastSample=started,index=0;
-      const measure=now=>{if(map.isMoving()&&now>previous)gestureIntervals.push(now-previous);previous=now;soakFrame=requestAnimationFrame(measure);};
+      const measure=()=>{const now=performance.now();if(map.isMoving()&&now>previous)gestureIntervals.push(now-previous);previous=now;soakFrame=requestAnimationFrame(measure);};
       soakFrame=requestAnimationFrame(measure);
       const views=[{center:[-122.675,45.524],zoom:15.5},{center:[-122.65,45.52],zoom:14.5},{center:[-122.68,45.51],zoom:16}];
       try{
@@ -105,19 +107,19 @@ try{
     const hostReadiness=await page.evaluate(()=>({pinsMs:window.__mapzBench.firstPins,controlsMs:window.__mapzBench.controlsReady}));
     result.initialUsableMs=hostReadiness.pinsMs!==null&&hostReadiness.controlsMs!==null?Math.max(result.firstFrameMs,hostReadiness.pinsMs,hostReadiness.controlsMs):null;result.publicPinsMs=hostReadiness.pinsMs;result.controlsMs=hostReadiness.controlsMs;
     // Ensure an actual input still reaches the map after readiness.
-    await frame.evaluate(()=>{window.__mapzBench.center=window.__mapzMap.getCenter().toArray();window.__mapzBench.zoom=window.__mapzMap.getZoom();});
+    await frame.evaluate(()=>{window.__mapzBench.center=window.__zaylistMap.getCenter().toArray();window.__mapzBench.zoom=window.__zaylistMap.getZoom();});
     if(args.out&&run===0&&cache==='cold'){fs.mkdirSync(path.dirname(args.out),{recursive:true});await page.screenshot({path:args.out.replace(/\.json$/,'')+'-'+profile+'.png'});}
     const bounds=frame===page.mainFrame()?{x:0,y:0,width:page.viewportSize().width,height:page.viewportSize().height}:await (await frame.frameElement()).boundingBox();
     await page.mouse.move(bounds.x+bounds.width/2,bounds.y+bounds.height/2);await page.mouse.wheel(0,-120);
-    try{await frame.waitForFunction(()=>window.__mapzMap.getCenter().toArray().some((v,i)=>Math.abs(v-window.__mapzBench.center[i])>1e-7)||Math.abs(window.__mapzMap.getZoom()-window.__mapzBench.zoom)>1e-7,null,{timeout:5000});result.panResponded=true;}catch{result.panResponded=false;}
+    try{await frame.waitForFunction(()=>window.__zaylistMap.getCenter().toArray().some((v,i)=>Math.abs(v-window.__mapzBench.center[i])>1e-7)||Math.abs(window.__zaylistMap.getZoom()-window.__mapzBench.zoom)>1e-7,null,{timeout:5000});result.panResponded=true;}catch{result.panResponded=false;}
     if(args.retention==='1'&&frame!==page.mainFrame()){
-     const before=await frame.evaluate(()=>({origin:performance.timeOrigin,camera:{center:window.__mapzMap.getCenter().toArray(),zoom:window.__mapzMap.getZoom(),pitch:window.__mapzMap.getPitch(),bearing:window.__mapzMap.getBearing()},layouts:window.__mapzBench.layouts,draws:window.__mapzBench.draws}));
+     const before=await frame.evaluate(()=>({origin:performance.timeOrigin,camera:{center:window.__zaylistMap.getCenter().toArray(),zoom:window.__zaylistMap.getZoom(),pitch:window.__zaylistMap.getPitch(),bearing:window.__zaylistMap.getBearing()},layouts:window.__mapzBench.layouts,draws:window.__mapzBench.draws}));
      await page.evaluate(()=>{history.pushState(null,'','/boards');dispatchEvent(new PopStateEvent('popstate'));});
      await page.waitForSelector('[data-mapz-retained="paused"]',{state:'attached'});
      await page.waitForTimeout(1100);const hidden=await frame.evaluate(()=>({layouts:window.__mapzBench.layouts,draws:window.__mapzBench.draws}));
      const started=Date.now();await page.evaluate(()=>{history.pushState(null,'','/map');dispatchEvent(new PopStateEvent('popstate'));});
      await page.waitForSelector('[data-mapz-retained="active"] iframe',{state:'visible'});
-     const after=await frame.evaluate(()=>({origin:performance.timeOrigin,camera:{center:window.__mapzMap.getCenter().toArray(),zoom:window.__mapzMap.getZoom(),pitch:window.__mapzMap.getPitch(),bearing:window.__mapzMap.getBearing()}}));
+     const after=await frame.evaluate(()=>({origin:performance.timeOrigin,camera:{center:window.__zaylistMap.getCenter().toArray(),zoom:window.__zaylistMap.getZoom(),pitch:window.__zaylistMap.getPitch(),bearing:window.__zaylistMap.getBearing()}}));
      result.retention={method:'programmatic SPA route away and return; includes driver overhead',restoreMs:Date.now()-started,sameIframeTimeOrigin:before.origin===after.origin,before:before.camera,after:after.camera,hiddenWork:{layouts:hidden.layouts-before.layouts,draws:hidden.draws-before.draws}};
     }
    }catch(error){
@@ -125,6 +127,16 @@ try{
     if(frame!==page.mainFrame())partial.firstFrameMs=await page.evaluate(()=>window.__mapzBench.firstFrame);else if(partial.firstFrameMs!==null&&partial.firstFrameMs!==undefined)partial.firstFrameMs+=partial.frameOrigin-await page.evaluate(()=>performance.timeOrigin);
     delete partial.frameOrigin;
     result={failure:error.message,...partial};
+   }
+   result.scene=await frame.evaluate(()=>{
+    const map=window.__zaylistMap,gl=map?.getCanvas()?.getContext('webgl2'),debug=gl?.getExtension('WEBGL_debug_renderer_info');
+    return {listingCount:window.__mapzVenueFeatures?.length??null,buildingCount:window.__mapzSurfaceBuildings?.length??null,renderer:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):null};
+   }).catch(()=>null);
+   // Keep usable-map timing even when optional scene assets never settle.
+   if(frame!==page.mainFrame()){
+    const host=await page.evaluate(()=>window.__mapzBench);
+    result.firstFrameMs=host.firstFrame;result.publicPinsMs=host.firstPins;result.controlsMs=host.controlsReady;
+    result.initialUsableMs=[host.firstFrame,host.firstPins,host.controlsReady].every(value=>value!==null)?Math.max(host.firstFrame,host.firstPins,host.controlsReady):null;
    }
    if(args.cpu==='1'){const cpu=await cdp.send('Profiler.stop');fs.writeFileSync(args.out+'.'+cache+'.cpuprofile',JSON.stringify(cpu.profile));}
    results.push({profile,run,cache,...result,errors,cancellations});

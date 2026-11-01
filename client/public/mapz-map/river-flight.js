@@ -29,7 +29,7 @@ import {createBridgeLayer} from '../home-flight/bridge-roads.js?v=20260921-layer
 import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-white-sparkles';
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
-import {logoCoverage,logoTone,authoredLogoMode} from './logo-mask.js';
+import {maskLogoPixels,authoredLogoMode} from './logo-mask.js';
 import {eventProjectionHeightLimit,eventProjectionSway,eventProjectionColor} from './event-projection.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js?v=20260926-place-beam';
 import {createSpatialIndex} from './spatial-index.js';
@@ -331,15 +331,11 @@ async function decodeVenueLogo(url,mode){
   const sourceWidth=canvas.width=image.width*sampling,sourceHeight=canvas.height=image.height*sampling;
   const ctx=canvas.getContext('2d');ctx.imageSmoothingQuality='high';ctx.drawImage(image,0,0,sourceWidth,sourceHeight);
   const artwork=ctx.getImageData(0,0,sourceWidth,sourceHeight),pixels=artwork.data;
-  // Suppress low-opacity baked glow; keep anti-aliased solid white artwork.
-  for(let i=0;i<pixels.length;i+=4){
-   const coverage=logoCoverage(pixels[i],pixels[i+1],pixels[i+2],pixels[i+3],mode);
-   const tone=logoTone(pixels[i],pixels[i+1],pixels[i+2],mode);
-   pixels[i]=pixels[i+1]=pixels[i+2]=tone;pixels[i+3]=Math.round(coverage*255);
-  }
+  // Masking large originals must not monopolize the map's main thread.
+  const bounds=await maskLogoPixels(pixels,sourceWidth,sourceHeight,mode,{shouldStop:()=>disposed});
+  if(!bounds)return;
   ctx.putImageData(artwork,0,0);
-  let left=sourceWidth,top=sourceHeight,right=0,bottom=0;
-  for(let y=0;y<sourceHeight;y++)for(let x=0;x<sourceWidth;x++)if(pixels[(y*sourceWidth+x)*4+3]>32){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+  const {left,top,right,bottom}=bounds;
   if(right>=left){
    const cropWidth=right-left+1,cropHeight=bottom-top+1,ratio=Math.min(1,512/Math.max(cropWidth,cropHeight));
    const clean=document.createElement('canvas');clean.width=Math.ceil(cropWidth*ratio);clean.height=Math.ceil(cropHeight*ratio);
