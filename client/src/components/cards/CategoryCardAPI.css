@@ -1,0 +1,58 @@
+/* Category content keeps its own design; the shared card contract owns geometry. */
+.boardz-punk-scope[data-card-size] .demo-pinned,
+.boardz-punk-scope[data-card-size] .demo-pinned > .zine,
+.boardz-punk-scope[data-card-size] .demo-pinned > .card,
+.boardz-punk-scope[data-card-size] .demo-pinned > .xerox-wrap,
+.boardz-punk-scope[data-card-size] .demo-pinned .zine {
+  width:100%!important;height:100%!important;box-sizing:border-box;
+}
+.boardz-punk-scope[data-card-size] .demo-pinned { margin:0!important; }
+.zay-card-expanded .board-detail-backdrop {
+  position:relative!important;inset:auto!important;display:block!important;
+  width:100%!important;height:auto!important;padding:0!important;
+  background:transparent!important;backdrop-filter:none!important;
+}
+.zay-card-expanded [role="dialog"].ab-open-card,
+.zay-card-expanded .rg-resource-detail {
+  position:relative!important;inset:auto!important;width:100%!important;
+  max-width:100%!important;height:auto!important;max-height:none!important;
+  margin:0!important;transform:none!important;translate:none!important;
+  animation:none!important;overflow:visible!important;
+}
+.zay-card-expanded [role="dialog"].ab-open-card > fieldset,
+.zay-card-expanded .board-card-scroll,
+.zay-card-expanded .rg-drawer-body {
+  max-height:none!important;overflow:visible!important;
+}
+.zay-card-expanded .ab-detail-status { position:relative;inset:auto;margin:0;padding:24px; }
+.boardz-punk-scope[data-card-size] .punk-open-target { inset:0; }
+.zay-card-expanded .rg-safety-drawer { padding-top:44px; }
+.boardz-punk-scope[data-card-size] .xr-rz { width:100%!important;height:100%!important; }
+.boardz-punk-scope[data-card-size="tall"] .zine-title { max-width:calc(100% - 48px);font-size:24px; }
+.boardz-punk-scope[data-card-size="tall"] .zine-hero { max-width:190px; }
+.boardz-punk-scope[data-card-size="tall"] .zine-area { max-width:calc(100% - 40px); }
+[data-card-category="needz"][data-card-size="small"] .pdxPlace__body { height:100%;min-height:0;padding:8px;overflow:hidden; }
+[data-card-category="needz"][data-card-size="small"] .pdxPlace__media { height:62px;min-height:0;padding:4px; }
+[data-card-category="needz"][data-card-size="small"] .pdxPlace__name { font-size:14px;line-height:1.1; }
+[data-card-category="needz"][data-card-size="small"] :is(.pdxPlace__desc,.pdxPlace__badges,.rg-directory-footer,.pdxPlace__cat) { display:none; }
+[data-card-category="needz"][data-card-size="wide"] .pdxPlace__body { height:100%;min-height:0; }
+/* Real page tracks use the same dimensions as the reusable faces. */
+.eb-page.eb-page--resources { --eb-card-width:var(--card-tall-width);--eb-card-height:var(--card-tall-height); }
+.eb-page.eb-page--resources .eb-original-card:not([data-card-expanded="true"]) { width:var(--card-tall-width); }
+.eb-page.eb-page--resources .rg-directory-card[data-card-size="tall"] > .pdxPlace__body { height:100%; }
+/* Inline-block baseline leading must not separate a card face from its anchor slot. */
+.eb-page.eb-page--resources .eb-original-card > .pdxPlace { display:block; }
+/* Tall BoardZ faces stack the two metadata chips rather than colliding at 200px. */
+.boardz-punk-scope[data-card-size="tall"] .zine .zine-area { top:44px;right:14px; }
+.boardz-punk-scope[data-card-size="tall"] .zine .zine-title { top:82px; }
+/* Small NEEDZ still exposes native keyboard-operable open and save controls. */
+[data-card-category="needz"][data-card-size="small"] .rg-directory-footer { display:flex;position:absolute;bottom:4px;left:4px;right:4px;gap:2px; }
+[data-card-category="needz"][data-card-size="small"] .rg-directory-footer .pdxBtn { min-height:24px;height:24px;padding:2px 4px;font-size:9px;gap:2px; }
+[data-card-category="needz"][data-card-size="small"] .rg-directory-footer svg { width:12px;height:12px; }
+/* Compact faces reserve independent title and action rows despite native tall rules. */
+.rg-directory-card[data-card-category="needz"][data-card-size="small"] .pdxPlace__main { position:absolute!important;top:90px!important;left:8px!important;right:8px!important;height:40px!important;margin:0!important;overflow:hidden; }
+.rg-directory-card[data-card-category="needz"][data-card-size="small"] .rg-directory-footer { position:absolute!important;inset:auto 4px 4px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;height:26px!important;margin:0!important;padding:0!important;z-index:10!important; }
+.rg-directory-card[data-card-category="needz"][data-card-size="small"] .rg-directory-footer > button { position:static!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:none!important;min-width:0!important;min-height:24px!important;height:24px!important;margin:0!important;padding:2px 4px!important;font-size:9px!important;line-height:1!important;gap:2px!important; }
+.rg-directory-card[data-card-category="needz"][data-card-size="small"] .rg-directory-footer > .zheart-btn { width:24px!important; }
+.rg-directory-card[data-card-category="needz"][data-card-size="small"] .rg-directory-footer svg { flex:none;width:12px!important;height:12px!important; }
+.rg-directory-card[data-card-category="needz"][data-card-size="small"] .rg-directory-footer { flex-direction:row!important; }

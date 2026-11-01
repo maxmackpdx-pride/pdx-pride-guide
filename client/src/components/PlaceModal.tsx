@@ -12,7 +12,7 @@ import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import DetailActions from "./DetailActions";
 import type React from "react";
 import { useEffect, useId, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { CardDetails } from "./cards/CardAPI";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -215,7 +215,10 @@ function PlaceHours({ hours }: { hours: string }) {
   return <span className="place-modal-panel__hours">{clauses.map((clause, index) => <span className="place-modal-panel__hours-clause" key={`${clause}-${index}`}>{clause}{index < clauses.length - 1 ? "," : ""}</span>)}</span>;
 }
 
-export default function PlaceModal({
+export default function PlaceModal(props: Parameters<typeof PlaceModalInner>[0]) {
+ return <CardDetails key={props.place?.id} onClose={props.onClose}><PlaceModalInner {...props}/></CardDetails>;
+}
+function PlaceModalInner({
   place,
   onClose,
   onRequireAuth,
@@ -456,7 +459,7 @@ export default function PlaceModal({
 
   // Portal to body + overlay-scroll (same idiom as EventModal) so tall venues
   // like Camp never load clipped off-screen or trapped in a non-scrolling flex box.
-  return createPortal(
+  return (
     <div
       onClick={handleClose}
       role="presentation"
@@ -466,7 +469,7 @@ export default function PlaceModal({
         ref={panelRef}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
-        aria-modal="true"
+        aria-modal="false"
         aria-label={place.name}
         tabIndex={-1}
         className={panelClass}
@@ -1060,8 +1063,7 @@ export default function PlaceModal({
         </div>
         </div>{/* /.place-modal-panel__inner */}
       </div>
-    </div>,
-    document.body,
+    </div>
   );
 }
 

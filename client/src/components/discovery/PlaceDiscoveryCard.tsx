@@ -1,3 +1,4 @@
+import type {CardSize} from "@/components/cards/CardAPI";
 import { ServiceNameMark } from "@/components/ServiceNameMark";
 import { serviceArtwork } from "@shared/serviceIdentity";
 import { directoryCardCategoryLabel, directorySubcategories } from '@shared/directorySubcategories';
@@ -14,8 +15,8 @@ import '@/pages/Resources.css';
 import './PlaceDiscoveryCard.css';
 
 type PlacePreview = Pick<Business, 'id' | 'name' | 'type'> & Partial<Business>;
-export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
-  place: PlacePreview; onOpen: (element: HTMLElement) => void; onRequireAuth?: () => void;
+export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth, size = "tall" }: {
+  size?: CardSize; place: PlacePreview; onOpen: (element: HTMLElement) => void; onRequireAuth?: () => void;
 }) {
   const logoInkId = `placez-logo-ink-${useId().replace(/:/g, '')}`;
   const accent = PLACE_ACCENTS[place.type] || 'var(--neon-cyan)';
@@ -29,7 +30,7 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth }: {
         <feComponentTransfer><feFuncA type="linear" slope="4" intercept="-1.2" /></feComponentTransfer>
       </filter></defs>
     </svg>
-    <PlaceCard name={place.name} category={place.type} categoryLabel={label} accentColor={accent}
+    <PlaceCard data-card-size={size} name={place.name} category={place.type} categoryLabel={label} accentColor={accent}
       variant="full"
       logoUrl={serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl), true) || undefined} logoFallback={<ServiceNameMark source={place} iconOnly />}
       businessId={place.id} isFollowing={Boolean(place.isFollowing)} onRequireAuth={onRequireAuth}

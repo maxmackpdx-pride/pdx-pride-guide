@@ -15,7 +15,7 @@ const read = (rel: string) => readFileSync(join(here, rel), "utf8").replace(/\/\
 const FIXED: [string, string, string, string][] = [
   ["home/perspective-tunnel/PerspectiveTunnelHero.css", ".ptunnel__card", "214px", "286px"],
   ["home/TonightPanel.css", ".home-tonight__item .tonight-card.tonight-card--card", "var(--event-card-width)", "var(--event-card-height)"],
-  ["home/OutzSmallCard.css", ".outz-small", "136px", "150px"],
+  ["home/OutzSmallCard.css", ".outz-small", "136px", "170px"],
   ["home/HomeStageCard.css", ".home-stage-card", "360px", "216px"],
   ["directory/OutzideFeatured.css", ".outz-featured__grid .tonight-card--card.today-location", "var(--outz-featured-w)", "var(--outz-featured-h)"],
 ];
@@ -41,7 +41,7 @@ test("card roots declare one fixed width and height (no vw, clamp, min(), %, or 
   assert.equal(decl(readFileSync(join(here, "ds/tokens/event-card.css"), "utf8"), "--event-card-width"), "200px");
   assert.equal(decl(readFileSync(join(here, "ds/tokens/event-card.css"), "utf8"), "--event-card-height"), "403px");
   const feat = read("directory/OutzideFeatured.css");
-  assert.match(feat, /--outz-featured-w:360px;--outz-featured-h:540px;/);
+  assert.match(feat, /--outz-featured-w:200px;--outz-featured-h:403px;/);
 });
 
 test("card CSS never applies scale()/scaleX()/scaleY()/zoom to a card", () => {

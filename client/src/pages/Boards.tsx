@@ -1,10 +1,10 @@
+import { CardDetails } from "@/components/cards/CardAPI";
 import BoardDetail from '@/components/board/BoardDetail';
 import { shouldOpenOutzPlace } from "@/lib/outzBoardPost";
 import { useBoardGridMotion } from "@/components/board/useBoardGridMotion";
 import BoardPostOverlay from "@/components/board/BoardPostOverlay";
 import HousingPostOverlay from "@/components/housing/HousingPostOverlay";
 import SpottedDetailModal from "@/components/SpottedDetailModal";
-import { BoardCardOrigin, BoardCardInline, type CardOrigin } from "@/components/board/BoardCardContinuity";
 import BoardDetailBoundary from "@/components/board/BoardDetailBoundary";
 import BoardArchiveList, { BoardArchiveFeedback } from "@/components/board/BoardArchiveList";
 import BoardBrowseCard from "@/components/board/BoardBrowseCard";
@@ -137,7 +137,6 @@ export default function Boards() {
     [limit, setLimit] = useState(24);
   const lastOpener = useRef<HTMLButtonElement | null>(null);
   const locallyOpened = useRef(false);
-  const cardOrigin = useRef<CardOrigin | null>(null);
   const selectedCategory = boardCategories.find((c) => c.id === selection);
   const update = (patch: Record<string, string | null>, replace = false) => {
     const next = new URLSearchParams(search);
@@ -241,8 +240,6 @@ export default function Boards() {
     const outzPost = key.startsWith("outz:") ? allPosts.find(p => p.key === key) : undefined;
     if (outzPost && shouldOpenOutzPlace(outzPost.intent)) { navigate(`/outzide?place=${encodeURIComponent(outzPost.source || "")}&tab=community`); return; }
     lastOpener.current = opener || lastOpener.current;
-    const source = opener?.closest<HTMLElement>(".boardz-punk-scope")?.querySelector<HTMLElement>(".zine") || opener;
-    cardOrigin.current = source ? { element: source, rect: source.getBoundingClientRect() } : null;
     locallyOpened.current = true;
     update({ post: key,compose:null,build:null,join:null,waitlist:null,chat:null }, !!validPost);
   };
@@ -473,11 +470,9 @@ export default function Boards() {
                 )}
                 <button type="button" className="ab-phone-grid-toggle" aria-pressed={phoneWide} onClick={() => setPhoneWide(w => !w)}>{phoneWide ? "Two per row" : "One wide per row"}</button>
                 <div ref={cardGridRef} className={`ab-card-grid${phoneWide ? " ab-card-grid--wide" : " ab-card-grid--pinboard"}`}>
-                  {visibleResults.map(post => { const pin = phoneWide ? null : pinboardPlacement(post.key, phoneLayout); const expanded = !phoneLayout && post.key === validPost; return <BoardBrowseCard key={post.key} post={post} small={pin ? pin.small : false} expanded={expanded} style={{...pin?.style, "--board-expanded-width": `${(pin?.small ? 136 : 360) * 2}px`} as CSSProperties} isSaved={saved.has(post.key)} showStatus={mineOnly}
+                  {visibleResults.map(post => { const pin = phoneWide ? null : pinboardPlacement(post.key, phoneLayout); return <BoardBrowseCard key={post.key} post={post} small={pin ? pin.small : false} style={pin?.style} isSaved={saved.has(post.key)} showStatus={mineOnly}
                     saveDisabled={saveMutation.isPending || (!saved.has(post.key) && !canSaveBoardPost(post)) || (!!user && savedQuery.isPending)}
-                    onOpen={target=>open(post.key,target)} onSave={()=>user?saveMutation.mutate({post,wasSaved:saved.has(post.key)}):setShowAuth(true)}>
-                      {expanded && <div className="boardz-inline-host"><BoardCardInline.Provider value={true}><BoardCardOrigin.Provider value={cardOrigin.current}><BoardDetailBoundary key={validPost} onClose={close}><BoardDetail postKey={validPost!} onClose={close} onRequireAuth={()=>setShowAuth(true)} onSelect={key=>open(key)}/></BoardDetailBoundary></BoardCardOrigin.Provider></BoardCardInline.Provider></div>}
-                    </BoardBrowseCard>; })}
+                    onOpen={target=>open(post.key,target)} onSave={()=>user?saveMutation.mutate({post,wasSaved:saved.has(post.key)}):setShowAuth(true)}/>; })}
                 </div>
                 {!loading &&
                   !(savedOnly && savedQuery.isPending) &&
@@ -522,8 +517,8 @@ export default function Boards() {
             </div>
             </>}
       </div>
-      {validPost && (phoneLayout || !visibleResults.some(post => post.key === validPost)) && (
-        <BoardCardOrigin.Provider value={cardOrigin.current}>
+      {validPost && (
+        <CardDetails key={validPost} onClose={close}>
           <BoardDetailBoundary key={validPost} onClose={close}>
             <BoardDetail
               postKey={validPost}
@@ -532,7 +527,7 @@ export default function Boards() {
               onSelect={(key) => open(key)}
             />
           </BoardDetailBoundary>
-        </BoardCardOrigin.Provider>
+        </CardDetails>
       )}
       <Suspense
         fallback={

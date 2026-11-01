@@ -1,3 +1,4 @@
+import { rememberCardOrigin, type CardSize } from "@/components/cards/CardAPI";
 import {OutzPhoto,type OutzPhotoData} from '@/components/outz/OutzPhoto';
 import {OutzBlendArt} from '@/components/outz/OutzBlendArt';
 import {hasBlendRecipe} from '@/lib/outzBlend';
@@ -25,7 +26,7 @@ export type TodayLocation = { key: string; name: string; room: "OutZide" | "Plac
 const OUTZ_TOKENS: Record<string, string> = { trail: "--neon-orange", stay: "--neon-magenta", beach: "--neon-magenta", camp: "--green-acid", coastcamp: "--neon-cyan", watercamp: "--neon-cyan", spring: "--neon-cyan", fishing: "--green-acid", boating: "--neon-cyan", atv: "--neon-red", winter: "--neon-blue", dayuse: "--neon-yellow" };
 const OUTZ_LABELS: Record<string, string> = { trail: "Trail", stay: "Stay", beach: "Beach", camp: "Camp", coastcamp: "Coastal camp", watercamp: "Waterfront camp", spring: "Hot spring", fishing: "Fishing", boating: "Boating", atv: "Off-road", winter: "Winter", dayuse: "Day use" };
 
-export default function TodayLocationCard({ location, onRequireAuth }: { location: TodayLocation; onRequireAuth?: () => void }) {
+export default function TodayLocationCard({ location, onRequireAuth, size = "tall" }: { location: TodayLocation; onRequireAuth?: () => void; size?: CardSize }) {
   const [open, setOpen] = useState(false);
   const [blendFailed, setBlendFailed] = useState(false);
   const isPlace = location.room === "Placez";
@@ -36,7 +37,7 @@ export default function TodayLocationCard({ location, onRequireAuth }: { locatio
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(location.key.replace(/^outz:/, ""));
   const businessLogo = isPlace ? resolveDirectoryLogo(location.name, location.place?.imageUrl) || directoryFallbackLogo(kind) : null;
   const label = isPlace ? DIRECTORY_TYPE_LABELS[kind] || "Placez" : OUTZ_LABELS[location.kind || ""] || "Destination";
-  const card = <article className={`tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind${isPlace ? "" : " outz-accent"}`} style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
+  const card = <article data-card-size={size} data-card-category={location.room} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind${isPlace ? "" : " outz-accent"}`} style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
     {isPlace && <ResourceCardMotif name={location.name} category={`place-${kind}`} />}
     {!isPlace && <span className="outz-accent__band" aria-hidden="true" />}
     <CardWaypoint kind={isPlace ? kind : location.kind || "trail"} outside={!isPlace} />

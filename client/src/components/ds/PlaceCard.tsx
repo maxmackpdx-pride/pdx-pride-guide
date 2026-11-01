@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import React, { useEffect, useState } from "react";
 import { Badge } from "./Badge";
 import { Share2 } from "lucide-react";
@@ -527,7 +528,7 @@ export function PlaceCard({
     isNonprofit || isHealthcare || isRealEstate || isCampground || isGroup;
 
   return (
-    <article
+    <article data-card-size={isCompact ? "wide" : "tall"} data-card-category="placez" onClickCapture={rememberCardOrigin}
       className={`pdxPlace pdx-glass-rebind${useSpecialEdge ? " pdxPlace--edge" : ""}${isCompact ? " pdxPlace--compact pdxPlace--wide" : ""}${className ? ` ${className}` : ""}`}
       style={{ "--_c": accent, "--c": accent, "--_edge": edge, ...(style || {}) }}
       {...rest}

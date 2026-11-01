@@ -1,3 +1,5 @@
+import "@/components/cards/CategoryCardAPI.css";
+import { CardDetails, rememberCardOrigin, type CardSize } from "@/components/cards/CardAPI";
 import { readBrowseCategories } from "@/lib/browseCategoryState";
 import { resourceMapHref } from '@/lib/resourceMap';
 import { useQuery } from "@tanstack/react-query";
@@ -27,7 +29,6 @@ import {
 import { Link, useLocation, useSearch } from "wouter";
 import { useReducedMotion } from "framer-motion";
 import { useTheme } from "@/context/ThemeContext";
-import { Drawer } from "vaul";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
   ArrowUpRight,
@@ -83,7 +84,8 @@ const ROWS = CATEGORIES.flatMap((category) =>
     : category.orgs
   ).map((org) => ({ org, category })),
 );
-type Row = (typeof ROWS)[number] & { community?: CommunitySummary; sectionCategory?: (typeof RESOURCE_CATEGORIES)[number] };
+export type ResourceCardRow = (typeof ROWS)[number] & { community?: CommunitySummary; sectionCategory?: (typeof RESOURCE_CATEGORIES)[number] };
+type Row = ResourceCardRow;
 function categoriesFor(row: Row) {
   return CATEGORIES.filter((category) =>
     category.id === row.category.id || row.org.categoryIds?.includes(category.id),
@@ -446,12 +448,14 @@ const RESOURCE_CARD_CAPTIONS: Record<string, string> = {
  "Food banks & pantries": "Food Banks & Pantries",
 };
 
-const ResourceCard = memo(function ResourceCard({
+export const ResourceCard = memo(function ResourceCard({
   row,
   onOpen,
+  size = "tall",
 }: {
   row: Row;
   onOpen: (row: Row) => void;
+  size?: CardSize;
 }) {
   const { org } = row;
   const category = row.sectionCategory ?? row.category;
@@ -461,6 +465,9 @@ const ResourceCard = memo(function ResourceCard({
       displayName={RESOURCE_CARD_CAPTIONS[org.name] ?? org.name}
       decoration={<><div className="rg-card-vignette" aria-hidden="true" /><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true" /><ResourceCardMotif glass name={org.name} category={category.id} /></>}
       data-optical-logo={org.name}
+      data-card-category="needz"
+      data-card-size={size}
+      variant={size === "wide" ? "compact" : undefined}
       style={resourceLogoLayout(org.name) as CSSProperties}
       categoryLabel={category.name}
       categoryTags={tagsFor(row).slice(0, 2)}
@@ -516,9 +523,11 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   const [browseView, setBrowseView] = useState<BrowseView>(initial.layout);
   const [supportOpen, setSupportOpen] = useState(false);
   const supportTrigger = useRef<HTMLElement | null>(null);
+  const focusSupportPanel = useCallback((node: HTMLElement | null) => { node?.focus({preventScroll:true}); }, []);
   const [detail, setDetail] = useState<Row | null>(null);
   const [detailOpen, setDetailOpen] = useState(Boolean(embeddedDetail));
   const detailTrigger = useRef<HTMLElement | null>(null);
+  const detailPanel = useRef<HTMLDivElement | null>(null);
   const openedRequest = useRef<string | null>(null);
   const [mobile, setMobile] = useState(() => window.matchMedia("(max-width: 600px)").matches);
   useEffect(() => {
@@ -575,7 +584,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   }, [categoryIds, searchQuery, allRows]);
   const rowList = useProgressiveList(rows.length, { initial: 36, step: 36, resetKey: `${categoryIds.join(",")}|${searchQuery}` });
   const selectedCategories = CATEGORIES.filter(c => !categoryIds.length || categoryIds.includes(c.id));
-  const renderCard = (row: Row) => <div key={row.community?.id || row.org.name} className="placez-card-surface eb-original-card">
+  const renderCard = (row: Row) => <div key={row.community?.id || row.org.name} className="placez-card-surface eb-original-card" onClickCapture={rememberCardOrigin}>
     <ResourceCard row={row} onOpen={openDetail} />
   </div>;
   const browseGroups = selectedCategories.map(category => ({
@@ -585,7 +594,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   const cardCount = browseView === "grid" ? rows.length : browseGroups.reduce((sum, {group}) => sum + group.length, 0);
   if (safetyRank.current === null && cardCount) safetyRank.current = Math.max(4, Math.floor(safetyPlacement * cardCount));
   const safetyIndex = cardCount ? Math.min(cardCount - 1, safetyRank.current ?? 4) : -1;
-  const safetyCard = <div key="mobile-safety" className="placez-card-surface eb-original-card needz-mobile-safety-slot">
+  const safetyCard = <div key="mobile-safety" className="placez-card-surface eb-original-card needz-mobile-safety-slot" data-card-size="tall" data-card-category="needz" onClickCapture={rememberCardOrigin}>
     <button type="button" className="rg-directory-card needz-mobile-safety-card" aria-label="ARE YOU SAFE? Open Oregon urgent help" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}>
       <ResourceCardMotif glass name="Immediate danger safety support" category="safety" />
       <ShieldAlert className="needz-mobile-safety-card__icon" aria-hidden="true" />
@@ -642,33 +651,23 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
         <div className="rg-reassurance"><p>Not sure? <a href="tel:211">Call 211info</a> for help finding a starting point.</p></div>
       </div>
 
-      <Drawer.Root autoFocus open={supportOpen} onOpenChange={setSupportOpen} direction={mobile ? "bottom" : "right"} shouldScaleBackground={false} dismissible closeThreshold={0.2}>
-        <Drawer.Portal>
-          <Drawer.Overlay className="rg-overlay-backdrop" />
-          <Drawer.Content
-            className={`pdx-glass-rebind rg-overlay rg-drawer rg-resource-detail rg-safety-drawer rg-category-safety ${mobile ? "rg-drawer-mobile" : "rg-drawer-desktop"}`}
-            style={{ "--resource-accent": "var(--neon-red)" } as CSSProperties}
-            onCloseAutoFocus={(event) => { if (supportTrigger.current?.isConnected) { event.preventDefault(); supportTrigger.current.focus(); } }}
-          >
-            <Drawer.Handle className="rg-drawer-handle" aria-label="Drag to close safety support" />
-            <Drawer.Close className="rg-close" aria-label="Close safety support"><X size={20} /></Drawer.Close>
-            <div className="rg-drawer-body">
-              <Drawer.Title className="sr-only">ARE YOU SAFE? Oregon urgent help</Drawer.Title>
-              <Drawer.Description className="sr-only">Call 911 for immediate danger, or choose a crisis support line. Includes Oregon safety information.</Drawer.Description>
-              <Support openCard />
-            </div>
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
+      {supportOpen && <CardDetails onClose={() => setSupportOpen(false)}>
+        <section ref={focusSupportPanel} tabIndex={-1} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setSupportOpen(false); } }} className="pdx-glass-rebind rg-overlay rg-drawer rg-resource-detail rg-safety-drawer rg-category-safety" style={{ "--resource-accent": "var(--neon-red)" } as CSSProperties} aria-label="Oregon urgent help">
+          <button type="button" className="rg-close" aria-label="Close safety support" onClick={() => { setSupportOpen(false); supportTrigger.current?.focus({preventScroll:true}); }}><X size={20} /></button>
+          <div className="rg-drawer-body"><Support openCard /></div>
+        </section>
+      </CardDetails>}
 
     </div>}
       <Dialog.Root
+        modal={false}
         open={detailOpen}
         onOpenChange={open => {setDetailOpen(open); if (!open && embeddedDetail) onEmbeddedClose?.();}}
       >
-        <Dialog.Portal>
-          <Dialog.Overlay className="rg-overlay-backdrop eb-detail-backdrop" />
+        {detailOpen && <CardDetails key={detail?.org.name ?? embeddedDetail?.name ?? "resource"} onClose={() => { setDetailOpen(false); if (embeddedDetail) onEmbeddedClose?.(); }}>
           <Dialog.Content
+            ref={detailPanel}
+            onOpenAutoFocus={event => { event.preventDefault(); detailPanel.current?.focus({preventScroll:true}); }}
             className={`pdx-glass-rebind rg-overlay rg-drawer rg-resource-detail event-modal event-modal--approved event-modal--reference eb-detail eb-detail--resource rg-category-${(detail?.sectionCategory ?? detail?.category)?.id || "health"}`}
             data-quiet-motion={quietMotion ? "true" : undefined}
             style={{
@@ -834,7 +833,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
               </div>
             )}
           </Dialog.Content>
-        </Dialog.Portal>
+        </CardDetails>}
       </Dialog.Root>
     </>
   );

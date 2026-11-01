@@ -1,3 +1,4 @@
+import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import type { CSSProperties } from "react";
 import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
 import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
@@ -30,7 +31,7 @@ export default function EventRailCard({
 }) {
   const poster = listingPosterUrl(listing);
   return (
-    <article className={`event-rail-card event-rail-card--${size} pdx-glass-rebind`} style={{ "--c": dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)) } as CSSProperties}>
+    <article data-card-size="small" data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className={`event-rail-card event-rail-card--${size} pdx-glass-rebind`} style={{ "--c": dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)) } as CSSProperties}>
       <button type="button" className="event-rail-card__open" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>
         <span className="event-rail-card__art">
           <EventFlyerArt src={poster} day={listingDay(listing)} showDay={size === "m"} title={listing.title} venueName={listing.venueName} />

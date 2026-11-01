@@ -1,3 +1,5 @@
+import {useIsMobile} from "@/hooks/use-mobile";
+import type {CardSize} from "@/components/cards/CardAPI";
 import { BrowseHeader, BrowseControls, BrowseFilters, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
 import { PlaceSubcategoryFilters } from '@/components/discovery/PlaceSubcategoryFilters';
 import { directorySubcategories, directorySubcategoryOptions } from '@shared/directorySubcategories';
@@ -186,6 +188,7 @@ type DirectoryProps = {
 };
 
 export default function Directory({ surface = "directory" }: DirectoryProps) {
+  const compactCards=useIsMobile();
   const isSpaces = surface === "spaces";
   const [directoryRouteMatch, directoryRouteParams] = useRoute("/directory/:id/:slug?");
   const [spacesRouteMatch, spacesRouteParams] = useRoute("/z/squadz/:id/:slug?");
@@ -530,7 +533,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     : `${filtered.length} ${isSpaces ? (filtered.length === 1 ? "squad" : "squadz") : (filtered.length === 1 ? "PLACE" : "PLACEZ")}`;
 
   const renderBrowsePlace = (biz: Business) => <div key={biz.id} className="eb-original-card">
-    <DirectoryCard biz={biz} onClick={element => openPlace(biz, element)} onRequireAuth={() => setShowAuth(true)} />
+    <DirectoryCard size={compactCards ? "small" : "tall"} biz={biz} onClick={element => openPlace(biz, element)} onRequireAuth={() => setShowAuth(true)} />
   </div>;
 
   const outzideLocation = (place: OutzideRow) => ({
@@ -770,7 +773,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               const places = filtered.filter(place=>place.type===category.key);
               if (!places.length) return null;
               return <ResourceRail room={isSpaces ? "Squadz" : "Placez"} itemName={isSpaces ? "squad" : "place"} key={category.key} id={`placez-${category.key}`} title={category.label} color={TYPE_COLORS[category.key] || 'var(--neon-cyan)'} count={places.length} quiet={Boolean(calmMode || reducedMotion)}>
-                {places.map(biz=><div className="rg-card-reveal" dir="ltr" key={biz.id}><DirectoryCard biz={biz} onClick={el=>openPlace(biz,el)} onRequireAuth={()=>setShowAuth(true)}/></div>)}
+                {places.map(biz=><div className="rg-card-reveal" dir="ltr" key={biz.id}><DirectoryCard size={compactCards ? "small" : "tall"} biz={biz} onClick={el=>openPlace(biz,el)} onRequireAuth={()=>setShowAuth(true)}/></div>)}
               </ResourceRail>;
             })}
           </div>
@@ -826,13 +829,15 @@ export const TYPE_TO_DS_CATEGORY: Record<string, string> = {
 
 /** Image-led directory tile adapted from the approved PlaceCard primitive. */
 function DirectoryCard({
+  size = "tall",
   biz,
   onClick,
   onRequireAuth,
 }: {
+  size?: CardSize;
   biz: Business;
   onClick?: (el: HTMLElement) => void;
   onRequireAuth?: () => void;
 }) {
-  return <PlaceDiscoveryCard place={biz} onOpen={element => onClick?.(element)} onRequireAuth={onRequireAuth} />;
+  return <PlaceDiscoveryCard size={size} place={biz} onOpen={element => onClick?.(element)} onRequireAuth={onRequireAuth} />;
 }

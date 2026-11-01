@@ -58,3 +58,20 @@ jobs:
 
       - name: Audit glass --c rebind
         run: node script/audit-glass-rebind.mjs
+
+  card-continuity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --include=dev
+      - name: Shared card and image preparation regression tests
+        run: node --import tsx --test client/src/components/cards/*.test.ts client/src/components/cards-fixed-size.test.ts script/outzide-image-preparation.test.mjs
+      - name: Install browser for actual layout checks
+        run: npx playwright install --with-deps chromium
+      - name: Verify card sizes, anchors, reflow and dismissal
+        run: node --test script/card-api-browser.test.mjs script/card-route-browser.test.mjs

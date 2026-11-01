@@ -21,9 +21,11 @@ The canonical written guide is maintained only in `maxmackpdx-pride/zaylist-foun
 
 Current guide pointers: `guidelines/card-system.html`, `guidelines/master-letter-library.html`, current room-card chapters and token modules. Historical glow/nav proposals are proposals, not sources that automatically win.
 
-## Current room continuity · 2026-10-13
+## Current room continuity · 2026-11-01
 
-- Our Placez uses large Eventz card proportions on desktop and compact cards on mobile; NEEDZ uses the compact Eventz footprint enlarged 20% on its page. Our BoardZ uses the approved wide card treatment.
+- Tucker’s November 1 direction supersedes category-specific card dimensions and floating open-card hosts: tall, wide and small each share one footprint across all categories. Category artwork, links, features and actions remain distinct. The reusable rendering API owns size and opening behavior; a design-contract JSON endpoint alone is not this API. The implementation entry point is `client/src/components/cards/index.ts`: `ZaylistCard` accepts a category discriminator (`eventz`, `placez`, `outzide`, `boardz`, `needz`), a `size`, and that category’s typed data/actions. Existing category adapters remain available individually.
+- Card clicks expand in the originating layout and move neighboring cards aside, never into a floating window. In a three-column grid, columns one and two retain the top-left corner; column three retains the top-right corner. Closing restores the originating card and layout. Other responsive layouts must preserve a visible anchored edge without overlapping neighbors.
+- Older Foundation size/modal references are historical where they conflict with this newer owner direction; publishing changes to that separate guide remains a separate authorized action.
 - Preserve the Eventz-derived open and closed anatomy, typography, tags, heart actions and token-based buttons. Card motifs retain three independently layered planes and approved geometry.
 - No list view. Category selection shows every matching result; Mapz entrances retain the originating room filter.
 - NEEDZ’s Find Your People category includes public/discoverable clubs and groups from the existing community API. Open cards embed the full community workspace; private groups stay excluded from discovery. Phones remain above the workspace.
@@ -45,7 +47,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Map outer neon bloom / thick glow frame | **Debossed map well** - thin black rim + inward hole (`--map-frame-shadow`); no outer bloom |
 | Sitewide cyan “pull” above bottom nav | **Removed**; hub drawer grip only |
 | Claim chip = yellow rim + magenta offset brutal sticker | **Claim this event** = pure `#00FFFF` fill, dark type `#050506`, soft cyan offset `3px 3px 0 rgba(0,255,255,.35)` (no yellow border) |
-| “Event details →” dead text on grid cards | **Omit**; card click opens modal |
+| “Event details →” dead text on grid cards | **Omit**; card click expands in place |
 | Board “past” = missed-connection 7-day window | **Past** = scheduled `dateEnd` passed (`isEventSchedulePast` / `getEventScheduleTiming`) |
 | Mr. S ad primary `#ff0033` (red) | Mr. S = **cyan** `#19e3ff`; CockBlock = **red** `#ff1f1f` |
 | Ads that don’t match grid/feed | Builder must use **`PosterAdCard` / `FeedAdCard`** + live templates in `lib/adTypes.ts` |
@@ -194,7 +196,7 @@ Primary destinations are owned by `client/src/lib/siteNav.ts` (`PRIMARY_NAV`). P
 
 - Blended Outzide art (Xerox cinematic style: halftone dot base, real-photo cutouts, orange contour lines/mesh, a route overlay and lock-on HUD) is gated by `checkBlend()` in `outzide-map/assets/blend-art.js`: a place qualifies only when its recipe, photo, >= 5 cutouts, a contour source and a ROUTES entry all exist. `client/src/lib/outzBlend.ts` must equal what the engine qualifies (`script/home-today.test.ts`). The "Pipeline QA" readout strip is opt-in (`?blendqa=1` or `localStorage.blendQA="1"`), not shown on production cards.
 
-- Cards never scale. Each card type has one fixed pixel size (hero fly-out 214x286, rail 200x403, featured Outzide 360x540, small Outzide 136x150, home-stage board card 360x216) on desktop and phones. No `scale()`/`zoom`, no viewport-unit or `clamp()` card sizing, no hover/press/entrance scale, no perspective/`translateZ` size change. The hero fly-out cards sweep with `translate` + `rotate` + opacity only; narrow screens scroll or wrap the row. `components/cards-fixed-size.test.ts` guards this.
+- Cards never scale. The shared card API uses one fixed pixel footprint per size across categories: tall 200x403, wide 360x216, small 136x170. Featured placement does not create a fourth category-specific size. Decorative hero fly-out artwork is not a separate reusable card-size contract. No `scale()`/`zoom`, no viewport-unit or `clamp()` card sizing, no hover/press/entrance scale, no perspective/`translateZ` size change. The hero fly-out cards sweep with `translate` + `rotate` + opacity only; narrow screens scroll or wrap the row. `components/cards-fixed-size.test.ts` guards this.
 
 - The hero's fly-out cards run on desktop and wide viewports only (10 cards, half events, half blended Outzide). Phones and narrow touch viewports (`NO_FLYOUT_QUERY` in `perspective-tunnel/flyOut.ts`) get the globe hero with no card layer, a one-screen hero (no scroll runway) and no `/api/events` or `places.json` fetch for the hero.
 

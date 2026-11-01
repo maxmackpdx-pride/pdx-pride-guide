@@ -10,7 +10,7 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ds";
 import DetailActions from "./DetailActions";
 import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { CardDetails } from "./cards/CardAPI";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -201,7 +201,7 @@ export default function EventModal({
   initialSection?: "details" | "attendance";
 }) {
   if (!event || typeof event.id !== "number") return null;
-  return <EventModalInner event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} initialSection={initialSection} />;
+  return <CardDetails key={event.id} onClose={onClose}><EventModalInner event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} initialSection={initialSection} /></CardDetails>;
 }
 
 function EventModalInner({
@@ -761,13 +761,13 @@ function EventModalInner({
     </section>
   );
 
-  return createPortal(
+  return (
     <div className="event-modal-overlay" onClick={handleClose}>
       <div
         ref={dialogRef}
         className="event-modal event-modal--approved event-modal--reference pdx-glass-rebind"
         role="dialog"
-        aria-modal="true"
+        aria-modal="false"
         aria-label={event.title}
         tabIndex={-1}
         onClick={e => e.stopPropagation()}
@@ -1389,7 +1389,6 @@ function EventModalInner({
         )}
       </div>
       {(showAuth || rsvp.showAuth) && <AuthModal onClose={() => { setShowAuth(false); rsvp.setShowAuth(false); }} />}
-    </div>,
-    document.body,
+    </div>
   );
 }

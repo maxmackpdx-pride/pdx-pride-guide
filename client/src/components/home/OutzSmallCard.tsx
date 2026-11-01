@@ -1,3 +1,4 @@
+import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import { useState, type CSSProperties } from "react";
 import { OutzPhoto } from "@/components/outz/OutzPhoto";
 import { OutzBlendArt } from "@/components/outz/OutzBlendArt";
@@ -14,7 +15,7 @@ import "./outz-accent-card.css";
 const OUTZ_TOKENS: Record<string, string> = { trail: "--neon-orange", stay: "--neon-magenta", beach: "--neon-magenta", camp: "--green-acid", coastcamp: "--neon-cyan", watercamp: "--neon-cyan", spring: "--neon-cyan", fishing: "--green-acid", boating: "--neon-cyan", atv: "--neon-red", winter: "--neon-blue", dayuse: "--neon-yellow" };
 const OUTZ_LABELS: Record<string, string> = { trail: "Trail", stay: "Stay", beach: "Beach", camp: "Camp", coastcamp: "Coastal camp", watercamp: "Waterfront camp", spring: "Hot spring", fishing: "Fishing", boating: "Boating", atv: "Off-road", winter: "Winter", dayuse: "Day use" };
 
-/** The 136 x 150 Outzide place card: the tall card's art, kind, ransom title, and a tap to open the destination. */
+/** The 136 x 170 Outzide place card: the tall card's art, kind, ransom title, and a tap to open the destination. */
 export default function OutzSmallCard({ location, onRequireAuth }: { location: TodayLocation; onRequireAuth?: () => void }) {
   const [open, setOpen] = useState(false);
   const [blendFailed, setBlendFailed] = useState(false);
@@ -24,7 +25,7 @@ export default function OutzSmallCard({ location, onRequireAuth }: { location: T
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(placeId);
   const label = OUTZ_LABELS[location.kind || ""] || "Destination";
   return <>
-    <article className="outz-small outz-accent pdx-glass-rebind" style={{ "--c": accent } as CSSProperties}>
+    <article data-card-size="small" data-card-category={"outzide"} onClickCapture={rememberCardOrigin} className="outz-small outz-accent pdx-glass-rebind" style={{ "--c": accent } as CSSProperties}>
       <span className="outz-accent__band" aria-hidden="true" />
       <button type="button" className="outz-small__open" aria-label={`Open ${location.name}`} onClick={() => setOpen(true)}>
         <span className="outz-small__art">
