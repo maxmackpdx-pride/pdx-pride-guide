@@ -74,4 +74,4 @@ jobs:
       - name: Install browser for actual layout checks
         run: npx playwright install --with-deps chromium
       - name: Verify card sizes, anchors, reflow and dismissal
-        run: node --test --test-concurrency=1 script/card-api-browser.test.mjs script/card-route-browser.test.mjs
+        run: node --test --test-concurrency=1 script/card-api-browser.test.mjs script/card-route-browser.test.mjs script/card-small-heart-browser.test.mjs

@@ -1,0 +1,21 @@
+:root {--small-card-heart-background:var(--z-black);--small-card-heart-ink:var(--neon-orange);}
+/* One small-card heart: same outline, glyph, color, placement and true centering.
+   Keep this independent of each category's follow/save transport. */
+html [data-card-size="small"] button[data-card-heart="true"][aria-pressed].zheart-btn {
+ position:absolute!important;inset:var(--card-heart-top,6px) var(--card-heart-right,6px) auto auto!important;z-index:12!important;pointer-events:auto!important;
+ display:inline-grid!important;place-items:center!important;align-items:center!important;justify-content:center!important;
+ box-sizing:border-box!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;
+ margin:0!important;padding:0!important;gap:0!important;border:var(--bw-hair,1.5px) solid var(--small-card-heart-ink)!important;
+ border-radius:50%!important;background:var(--small-card-heart-background)!important;color:var(--small-card-heart-ink)!important;
+ box-shadow:none!important;transform:none!important;font-size:0!important;line-height:0!important;
+}
+html [data-card-size="small"] button[data-card-heart="true"][aria-pressed].zheart-btn > svg {display:block!important;width:18px!important;height:18px!important;min-width:18px!important;margin:0!important;padding:0!important;transform:none!important;flex:none!important;}
+html [data-card-size="small"] button[data-card-heart="true"][aria-pressed].zheart-btn[aria-pressed="true"] {background:var(--small-card-heart-ink)!important;color:var(--small-card-heart-background)!important;}
+[data-card-size="small"] .pdxPlace__actions {display:contents!important;}
+[data-card-size="small"] .save-paper-shell {display:contents!important;}
+
+/* Leave the shared corner action clear of the small BoardZ headline. */
+.boardz-punk-scope[data-card-size="small"] .zine--small .zine-title {top:54px!important;}
+/* BoardZ isolates its artwork below a transparent open target. Raise only the
+   small artwork stack; it stays pointer-transparent except for native controls. */
+.boardz-punk-scope[data-card-size="small"] .demo-pinned {z-index:2;}

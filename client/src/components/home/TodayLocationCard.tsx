@@ -41,7 +41,7 @@ export default function TodayLocationCard({ location, onRequireAuth, size = "tal
     {isPlace && <ResourceCardMotif name={location.name} category={`place-${kind}`} />}
     {!isPlace && <span className="outz-accent__band" aria-hidden="true" />}
     <CardWaypoint kind={isPlace ? kind : location.kind || "trail"} outside={!isPlace} />
-    <RailShareButton href={location.href} title={location.name} />
+    {size !== "small" && <RailShareButton href={location.href} title={location.name} />}
     <button type="button" className="tonight-card__open" aria-label={`Open ${location.name}`} onClick={() => setOpen(true)}>
       <div className="tonight-card__art today-location__art">
         {!isPlace && (blend ? <OutzBlendArt placeId={placeId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : location.photo ? <OutzPhoto photo={location.photo} /> : <img src={art} alt="" loading="lazy" />)}
@@ -55,9 +55,10 @@ export default function TodayLocationCard({ location, onRequireAuth, size = "tal
         <div className="tonight-card__tags"><span>{label}</span></div>
       </div>
     </button>
+    {size === "small" && isPlace && location.place && <VenueFollowButton variant="small-card" accent={accent} businessId={location.place.id} initialFollowing={Boolean(location.place.isFollowing)} onRequireAuth={onRequireAuth} />}
     <footer className="tonight-card__footer">
       {!isPlace && <HeartButton kind="outz" refId={placeId} snapshot={{ title: location.name, subtitle: "Outzide", href: `/outzide?place=${encodeURIComponent(placeId)}` }} onRequireAuth={onRequireAuth} />}
-      {isPlace && location.place && <VenueFollowButton accent={accent} businessId={location.place.id} initialFollowing={Boolean(location.place.isFollowing)} onRequireAuth={onRequireAuth} />}
+      {size !== "small" && isPlace && location.place && <VenueFollowButton accent={accent} businessId={location.place.id} initialFollowing={Boolean(location.place.isFollowing)} onRequireAuth={onRequireAuth} />}
       <button type="button" className="tonight-card__view" onClick={() => setOpen(true)}>View details <ArrowUpRight size={17} aria-hidden="true" /></button>
     </footer>
   </article>;

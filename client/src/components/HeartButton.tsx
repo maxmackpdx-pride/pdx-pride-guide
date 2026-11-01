@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart } from "lucide-react";
+import { CardHeartButton } from "./CardHeartButton";
 import AuthModal from "@/components/AuthModal";
 import { useHeart, type HeartKind, type HeartSnapshot } from "@/hooks/useHearts";
 import "./HeartButton.css";
@@ -16,17 +16,13 @@ export default function HeartButton({ kind, refId, snapshot, onRequireAuth, clas
   const name = label || snapshot.title;
   return (
     <>
-    <button
-      type="button"
-      className={`zheart-btn${hearted ? " is-hearted" : ""} ${className}`.trim()}
-      aria-pressed={hearted}
+    <CardHeartButton active={hearted}
+      className={className}
       aria-label={hearted ? `Remove heart from ${name}` : `Heart ${name}: follow it and pin it to your Stacks`}
       title={hearted ? "Hearted: following and pinned to your Stacks" : "Heart: follow and pin to your Stacks"}
       disabled={pending}
       onClick={event => { event.stopPropagation(); event.preventDefault(); signedIn ? toggle() : onRequireAuth ? onRequireAuth() : setAuth(true); }}
-    >
-      <Heart size={18} aria-hidden="true" fill={hearted ? "currentColor" : "none"} />
-    </button>
+    />
     {auth && <AuthModal onClose={() => setAuth(false)} />}
     </>
   );

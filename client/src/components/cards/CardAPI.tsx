@@ -87,10 +87,10 @@ export function CardDetails({ children, onClose }: { children: ReactNode; onClos
     let convertedFlex=false;
     const rowTops = [...new Set(siblings.map(({rect})=>Math.round(rect.top)))].sort((a,b)=>a-b);
     const target = mount.current || (mount.current=document.createElement('div')); target.className = 'zay-card-detail-mount';
-    const hidden: Array<[HTMLElement,string]> = [];
+    const hidden: Array<[HTMLElement,string,string]> = [];
     // Hide only the closed face. Preserve its React instance, state and handlers.
     const faces = item === source ? Array.from(item.children) : [source];
-    for (const face of faces) if (face instanceof HTMLElement) { hidden.push([face, face.style.display]); face.style.display = 'none'; }
+    for (const face of faces) if (face instanceof HTMLElement) { hidden.push([face, face.style.getPropertyValue('display'), face.style.getPropertyPriority('display')]); face.style.setProperty('display','none','important'); }
     item.appendChild(target);
     item.dataset.cardExpanded = 'true'; item.classList.add('zay-card-expanded-slot');
     item.style.setProperty('height','auto','important');
@@ -196,7 +196,9 @@ export function CardDetails({ children, onClose }: { children: ReactNode; onClos
         if(originalParentStyle===null)parent.removeAttribute("style");else parent.setAttribute("style",originalParentStyle);
         for(const sibling of siblings)if(sibling.element!==item){if(sibling.style===null)sibling.element.removeAttribute("style");else sibling.element.setAttribute("style",sibling.style);}
       }
-      for (const [face,display] of hidden) face.style.display=display;
+      for (const [face,display,priority] of hidden) {
+        if(display)face.style.setProperty('display',display,priority);else face.style.removeProperty('display');
+      }
       if (originalStyle===null) item.removeAttribute('style'); else item.setAttribute('style',originalStyle);
       item.className=originalClass;
       if (originalExpanded===null) delete item.dataset.cardExpanded; else item.dataset.cardExpanded=originalExpanded;

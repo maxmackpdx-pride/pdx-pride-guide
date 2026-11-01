@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
 import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import { eventTimeLabel } from "@/lib/eventDisplay";
-import ZLineIcon from "@/components/ZLineIcon";
+import { CardHeartButton } from "@/components/CardHeartButton";
 import EventFlyerArt from "./EventFlyerArt";
 import { CardArtworkGlass } from '../CardArtworkGlass';
 import { LiveBadge, type TonightCardLive } from "@/components/home/TonightEventCard";
@@ -40,15 +40,12 @@ export default function EventRailCard({
           <span className="event-rail-card__shade"><span className="event-rail-card__title">{listing.title}</span><span className="event-rail-card__meta">{eventTimeLabel(listing.dateStart)} · {listing.venueName}</span></span>
         </span>
       </button>
-      <button
-        type="button"
+      <CardHeartButton active={saved}
         className="event-rail-card__save"
         aria-pressed={saved}
         aria-label={`${saved ? "Remove" : "Add"} ${listing.title} ${saved ? "from" : "to"} my schedule`}
-        onClick={() => onToggleSave(listing.id)}
-      >
-        <ZLineIcon name="favorite" size={17} filled={saved} />
-      </button>
+        onClick={event => { event.stopPropagation(); onToggleSave(listing.id); }}
+      />
     </article>
   );
 }

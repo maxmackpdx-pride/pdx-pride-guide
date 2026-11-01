@@ -26,15 +26,6 @@ export function XeroxOverlay({mode='bottom',W=200,H=250,id='x',reticle=true}){
   </svg>;
 }
 
-export function PlacezRadar(){
-  return <svg className="xr-radar" viewBox="0 0 200 200" aria-hidden="true">
-    {[.34,.58,.82].map((k,i)=><circle key={i} cx="100" cy="100" r={100*k} fill="none" stroke="currentColor" strokeWidth=".8" opacity={.7-i*.15}/>)}
-    <g className="xr-radar-sweep" style={{transformOrigin:'100px 100px'}}><path d="M100 100 L100 0 A100 100 0 0 1 170 29 Z" fill="currentColor" opacity=".22"/><line x1="100" y1="100" x2="100" y2="0" stroke="currentColor" strokeWidth="1"/></g>
-    <g className="xr-radar-pin"><path d="M100 84 C 91 84 86 90 86 96 C 86 104 100 118 100 118 C 100 118 114 104 114 96 C 114 90 109 84 100 84 Z" fill="currentColor"/><circle cx="100" cy="96" r="4" fill="var(--z-black)"/></g>
-    <circle className="xr-radar-ping" cx="100" cy="118" r="6" fill="none" stroke="currentColor" strokeWidth="1"/>
-  </svg>;
-}
-
 /** Cut-out title: base treatment (white on black) with EXACTLY ONE whole word inverted onto paper tiles (black on white).
  *  Which word is a pure function of `seed` (the place id) - see map-foundation/title-emphasis.js. The inverted word keeps the
  *  per-letter Cut Type look; every letter uses its resolved palette so the word has one polarity. Other words stay plain. */
@@ -61,12 +52,12 @@ export function OutzXerox({children,photo=false,blend=false,delay=0}){
   </div>;
 }
 
-/** Placez: the radar over the logo well and a light Boardz scratch texture. Works on PlaceDiscoveryCard and the Placez TodayLocationCard. */
+/** Placez keeps its scratch texture; radar graphics are deliberately removed. */
 export function PlacezXerox({children,slot='.pdxPlace__media',accent}){
   const ref=useRef(null);
   const media=useSlot(ref,slot);
   return <div ref={ref} className="xr-pz" style={accent?{'--c':accent}:undefined}>
     {children}
-    {media&&createPortal(<><PlacezRadar/><Grain/></>,media)}
+    {media&&createPortal(<Grain/>,media)}
   </div>;
 }

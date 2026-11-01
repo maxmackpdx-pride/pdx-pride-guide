@@ -359,3 +359,18 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: transparent; }
   .eb-page .eb-lane--open .events-rail { grid-template-columns:repeat(auto-fill,var(--eb-card-width)); justify-content:space-between; }
   .eb-page--places .eb-lane:only-child .events-rail { justify-content:space-between; }
 }
+
+/* Small Placez faces keep their size; mobile content uses the available screen width. */
+@media (max-width:767px) {
+  .eb-page--places .eb-frame {
+    padding-left:max(16px,env(safe-area-inset-left,0px));
+    padding-right:max(16px,env(safe-area-inset-right,0px));
+  }
+  .eb-page--places .eb-grid,
+  .eb-page--places .eb-lane .events-rail {
+    grid-template-columns:repeat(auto-fill,var(--card-small-width,136px));
+    justify-content:space-between;
+    column-gap:16px;
+    padding-inline:0;
+  }
+}

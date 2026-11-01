@@ -542,14 +542,14 @@ export function PlaceCard({
             <VenueFollowButton
               businessId={businessId}
               initialFollowing={isFollowing}
-              variant="card"
+              variant={rest["data-card-size"] === "small" ? "small-card" : "card"}
               accent={accent}
               onRequireAuth={onRequireAuth}
             />
           )}
-          <button type="button" className="pdxPlace__share" onClick={handleShare} disabled={sharing} aria-label={`Share ${name}`}>
+          {rest["data-card-size"] !== "small" && <button type="button" className="pdxPlace__share" onClick={handleShare} disabled={sharing} aria-label={`Share ${name}`}>
             <Share2 size={11} strokeWidth={2.5} /> {sharing ? "…" : "Share"}
-          </button>
+          </button>}
         </div>
         <div className="pdxPlace__compactRow">
         <div className="pdxPlace__media">

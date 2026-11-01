@@ -1,3 +1,4 @@
+import { CardHeartButton } from "./CardHeartButton";
 import ZLineIcon from "@/components/ZLineIcon";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +9,7 @@ type Props = {
   businessId: number;
   initialFollowing?: boolean;
   /** Compact for PlaceCard corner; full for PlaceModal */
-  variant?: "card" | "modal";
+  variant?: "card" | "small-card" | "modal";
   accent?: string;
   onRequireAuth?: () => void;
 };
@@ -65,6 +66,8 @@ export default function VenueFollowButton({
     }
     mutation.mutate(!following);
   };
+
+  if (variant === "small-card") return <CardHeartButton active={following} disabled={mutation.isPending} onClick={handleClick} aria-label={following ? "Unfollow directory listing" : "Follow directory listing"} />;
 
   const isCard = variant === "card";
 

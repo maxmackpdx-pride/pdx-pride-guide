@@ -24,7 +24,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  const cacheDir=await mkdtemp(path.join(tmpdir(),'card-route-browser-vite-'));
  t.after(()=>rm(cacheDir,{recursive:true,force:true}));
  const fixture='script/fixtures/card-route-browser.tsx';
- const server=await createServer({configFile:false,root,cacheDir,optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},publicDir:path.join(root,'client/public'),plugins:[react(),{name:'card-qa-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{if(!req.url?.startsWith('/__route-qa'))return next();const html=await s.transformIndexHtml(req.url,'<!doctype html><html><head><style>body{margin:24px!important}h1{font:16px sans-serif;margin-bottom:24px}@media(max-width:650px){body{margin:12px!important}#qa-grid{grid-template-columns:repeat(auto-fit,var(--qa-card-width))!important;width:100%!important;gap:16px!important}}</style></head><body><div id="root"></div><script type="module" src="/script/fixtures/card-route-browser.tsx"></script></body></html>');res.setHeader('Content-Type','text/html');res.end(html);});}}],resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},define:{__OUTZIDE_ASSETS__:JSON.stringify({script:'/outzide-map/app.js',maplibre:'/home-flight/vendor/maplibre-gl-5.6.2.js',maplibreCss:'/home-flight/vendor/maplibre-gl-5.6.2.css'}),__MAPZ_ASSETS__:'{}',__HOME_FLIGHT_BASE__:JSON.stringify('/home-flight')}});
+ const server=await createServer({configFile:false,root,cacheDir,optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},publicDir:path.join(root,'client/public'),plugins:[react(),{name:'card-qa-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{if(!req.url?.startsWith('/__route-qa'))return next();const html=await s.transformIndexHtml(req.url,'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0}</style></head><body><div id="root"></div><script type="module" src="/script/fixtures/card-route-browser.tsx"></script></body></html>');res.setHeader('Content-Type','text/html');res.end(html);});}}],resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},define:{__OUTZIDE_ASSETS__:JSON.stringify({script:'/outzide-map/app.js',maplibre:'/home-flight/vendor/maplibre-gl-5.6.2.js',maplibreCss:'/home-flight/vendor/maplibre-gl-5.6.2.css'}),__MAPZ_ASSETS__:'{}',__HOME_FLIGHT_BASE__:JSON.stringify('/home-flight')}});
  let browser;
  try{
  await server.listen();
@@ -38,7 +38,8 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  const businesses=Array.from({length:8},(_,i)=>({id:100+i,name:`QA Cafe ${i+1}`,type:'cafe',description:i%2?'A welcoming local cafe with a longer description and community gatherings throughout the week.':'A welcoming local cafe',address:'123 Main St',neighborhood:i%2?'Northwest Portland neighborhood':'Portland',website:null,instagram:null,donateUrl:null,hours:null,phone:null,queerOwned:true,queerFriendly:true,imageUrl:null,lat:null,lng:null,isNew:false}));
  businesses.push(...Array.from({length:4},(_,i)=>({...businesses[i],id:200+i,name:`QA Tavern ${i+1}`,type:'bar'})));
  await context.route('**/outzide-map/places.json*',route=>route.fulfill({json:{places:[]}}));
- await context.route('**/api/**',route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});if(p==='/api/directory')return route.fulfill({json:businesses});if(/^\/api\/directory\/\d+$/.test(p)){const business=businesses.find(item=>item.id===Number(p.split('/').pop()));return route.fulfill({status:business?200:404,json:business?{...business,description:`Fresh detail for ${business.name}`}:{error:'Not found'}});}if(p==='/api/housing')return route.fulfill({json:{posts:[]}});if(p.startsWith('/api/gifting'))return route.fulfill({json:p==='/api/gifting'?gifts:gifts[0]});return route.fulfill({json:[]});});
+ const mockApi=route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});if(p==='/api/directory')return route.fulfill({json:businesses});if(/^\/api\/directory\/\d+$/.test(p)){const business=businesses.find(item=>item.id===Number(p.split('/').pop()));return route.fulfill({status:business?200:404,json:business?{...business,description:`Fresh detail for ${business.name}`}:{error:'Not found'}});}if(p==='/api/housing')return route.fulfill({json:{posts:[]}});if(p.startsWith('/api/gifting'))return route.fulfill({json:p==='/api/gifting'?gifts:gifts[0]});return route.fulfill({json:[]});};
+ await context.route('**/api/**',mockApi);
  let page;const errors=[];const focus=process.env.CARD_ROUTE_QA_FOCUS;
  for(const kind of focus?[]:['resources','boards']){
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
@@ -128,6 +129,36 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  console.log(`PASS ${kind} default browse ${width} card${index+1}: anchor, native close/reopen, neighbor reflow`);
  }
  await page.close();
+ }
+ if(!focus||focus==='gutters'){
+ const mobileContext=await browser.newContext({isMobile:true,hasTouch:true,deviceScaleFactor:1,viewport:{width:390,height:1000},reducedMotion:'reduce'});
+ await mobileContext.addInitScript(()=>{localStorage.setItem('pdx-calm-mode','true');Math.random=()=>0.1;});
+ await mobileContext.route('**/api/**',mockApi);await mobileContext.route('**/outzide-map/places.json*',route=>route.fulfill({json:{places:[]}}));
+ for(const width of [320,390,430])for(const layout of ['browse','grid']){
+ page=await mobileContext.newPage();page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width,height:1000});
+ await page.goto(`${base}__route-qa/directory${layout==='grid'?'?layout=grid':''}`,{waitUntil:'networkidle'});await settled(page);
+ const collection=layout==='grid'?page.locator('.eb-grid'):page.locator('.eb-lane').filter({has:page.locator('.pdxPlace__name',{hasText:'QA Cafe 1'})}).locator('.events-rail');
+ const cards=collection.locator('.pdxPlace[data-card-size="small"]');await cards.first().waitFor();
+ const documentBox=async locator=>locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});
+ const first=await documentBox(cards.nth(0)),second=await documentBox(cards.nth(1));
+ console.log('GUTTER',JSON.stringify({width,layout,first,second}));
+ near(first.x,16,`${layout}/${width}: left screen gutter`);near(second.x+second.width,width-16,`${layout}/${width}: right screen gutter`);near(first.y,second.y,'Small cards remain two-column');
+ for(const face of [first,second]){near(face.width,136,'Small width unchanged');near(face.height,170,'Small height unchanged');}
+ for(const index of [0,1,0]){
+ await cards.nth(index).scrollIntoViewIfNeeded();await settled(page);const before=await documentBox(cards.nth(index));
+ if(index===0)await page.screenshot({path:`/tmp/placez-gutters-${layout}-${width}-closed.png`});
+ await cards.nth(index).click({position:{x:60,y:85}});const host=collection.locator('[data-card-expanded="true"]');await host.waitFor();await settled(page);
+ const expanded=await documentBox(host);near(expanded.width,width-32,`${layout}/${width}: open card spans content width`);near(expanded.x,16,'Expanded left screen gutter');near(expanded.y,before.y,'Expanded corner stays vertically anchored');
+ if(index===0)near(expanded.x,before.x,'Left card keeps left corner');else near(expanded.x+expanded.width,before.x+before.width,'Right card keeps right corner');
+ const panel=await documentBox(host.locator('[role="dialog"]'));assert.ok(panel.x>=16-1&&panel.x+panel.width<=width-16+1,'Detail panel fits wider host');
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No mobile horizontal overflow');
+ if(index===0)await page.screenshot({path:`/tmp/placez-gutters-${layout}-${width}-open.png`});
+ await host.getByRole('button',{name:'Close place',exact:true}).click();await host.waitFor({state:'detached'});await settled(page);
+ const restored=await documentBox(cards.nth(index));near(restored.x,before.x,'Gutter close restores x');near(restored.y,before.y,'Gutter close restores y');
+ }
+ console.log(`PASS mobile gutters ${layout}/${width}: fixed136 cards,16px gutters,expanded${width-32},both anchors,reopen`);await page.close();
+ }
+ await mobileContext.close();
  }
  if(!focus){
  // Safety card uses the actual mobile page with its inserted card.

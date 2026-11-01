@@ -5,3 +5,4 @@ export { PlaceCard } from './PlaceCard';
 export { OutzCard } from './OutzCard';
 export { BoardCard } from './BoardCard';
 export { NeedzCard } from './NeedzCard';
+export { CardHeartButton } from '../CardHeartButton';

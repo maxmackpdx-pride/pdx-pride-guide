@@ -463,7 +463,7 @@ export const ResourceCard = memo(function ResourceCard({
     <PlaceCard
       name={org.name}
       displayName={RESOURCE_CARD_CAPTIONS[org.name] ?? org.name}
-      decoration={<><div className="rg-card-vignette" aria-hidden="true" /><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true" /><ResourceCardMotif glass name={org.name} category={category.id} /></>}
+      decoration={<><div className="rg-card-vignette" aria-hidden="true" /><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true" /><ResourceCardMotif glass name={org.name} category={category.id} />{size === "small" && <HeartButton kind="resource" refId={org.name} snapshot={{ title: org.name, subtitle: category.name, href: resourceMapHref(org.name, row.community?.slug) }} />}</>}
       data-optical-logo={org.name}
       data-card-category="needz"
       data-card-size={size}
@@ -480,7 +480,7 @@ export const ResourceCard = memo(function ResourceCard({
       onClick={() => onOpen(row)}
       footer={
         <div className="rg-directory-footer">
-          <HeartButton kind="resource" refId={org.name} snapshot={{ title: org.name, subtitle: category.name, href: resourceMapHref(org.name, row.community?.slug) }} />
+          {size !== "small" && <HeartButton kind="resource" refId={org.name} snapshot={{ title: org.name, subtitle: category.name, href: resourceMapHref(org.name, row.community?.slug) }} />}
           <button className={`pdx-glass-rebind pdxBtn${["safety", "legal", "arts", "youth", "harm-reduction"].includes(category.id) ? " rg-contact-white" : ""}`} aria-label={`View details for ${org.name}`} onClick={event => { event.stopPropagation(); onOpen(row); }}>
             View details <ArrowUpRight size={16} />
           </button>

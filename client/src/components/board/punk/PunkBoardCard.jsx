@@ -1,3 +1,4 @@
+import {CardHeartButton} from "@/components/CardHeartButton";
 import '@/components/cards/CategoryCardAPI.css';
 import {rememberCardOrigin} from '@/components/cards/CardAPI';
 import React,{useEffect,useState,useRef,useLayoutEffect} from 'react';
@@ -32,6 +33,7 @@ function HousingPrice({amount,suffix,small,seed}){const ref=useRef(null);const t
 const SaveContext=React.createContext({saved:false,disabled:true,onSave:()=>{}});
 function Save({small=false,paper=false}){
  const {saved,disabled,onSave}=React.useContext(SaveContext);
+ if(small)return <CardHeartButton active={saved} disabled={disabled} aria-label={saved?'Unsave':'Save'} onClick={e=>{e.stopPropagation();onSave();}}/>;
  const button=<button type="button" className={'save '+(small?'mini':'')} disabled={disabled} aria-label={saved?'Unsave':'Save'} aria-pressed={saved} onClick={e=>{e.stopPropagation();onSave();}}><Heart fill={saved?'currentColor':'none'}/></button>;
  return paper?<span className="save-paper-shell">{button}</span>:button;
 }
