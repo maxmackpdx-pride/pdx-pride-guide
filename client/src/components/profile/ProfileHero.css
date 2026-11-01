@@ -63,3 +63,5 @@
 .pp-share-pop__image img { width: 100%; height: auto; border-radius: 10px; }
 .pp-share-pop--portal { max-height: calc(100dvh - 140px); overflow-y: auto; }
 .pp-share-pop__item:focus-visible, .pp-share-pop__image:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 2px; }
+
+.pp-page:not(.profile-wall-enabled) .profile-portrait-username,.pp-page:not(.profile-wall-enabled) .profile-portrait-contact{display:none}

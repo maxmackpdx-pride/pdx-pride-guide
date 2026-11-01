@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { Link } from "wouter";
+import {ProfilePortrait} from "./objects/ProfilePortrait";
 import UserAvatar from "@/components/UserAvatar";
 import AccentPicker from "./AccentPicker";
 import SharePopover from "./SharePopover";
@@ -130,12 +131,13 @@ export default function ProfileHero({
 
       <div className="pp-hero__content">
         <div className="pp-hero__identity">
-          <div className="pp-hero__avatar">
+          <div className="pp-hero__avatar"><ProfilePortrait username={data.username}>
             {isOwner ? (
               onEdit ? <button type="button" onClick={onEdit} className="pp-hero__avatar-link" aria-label="Edit profile">{avatar}</button> : <Link href="/dashboard?edit=profile" className="pp-hero__avatar-link" aria-label="Edit profile">{avatar}</Link>
             ) : (
               avatar
             )}
+            </ProfilePortrait>
           </div>
 
           <div className="pp-hero__meta">

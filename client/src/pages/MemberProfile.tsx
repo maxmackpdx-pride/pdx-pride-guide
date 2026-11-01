@@ -49,6 +49,8 @@ import { profileCssVars } from "@/components/profile/profileHelpers";
 import { copyTextToClipboard } from "@/lib/copyText";
 import "./MemberProfile.css";
 import "./ProfileFoundation.css";
+import {profileQueries} from "@/components/profile/profileQueries";
+import ProfileWall from "@/components/profile/ProfileWall";
 import ProfileContent, { type ProfileChapter } from "@/components/profile/ProfileContent";
 import {parseSocialLinks, socialCardsFor} from "./profile/helpers";
 
@@ -98,7 +100,7 @@ export default function MemberProfile() {
   const { myEventIds, toggleRsvp, showAuth, setShowAuth } = useEventRsvp();
 
   const { data: apiData, isLoading, error, refetch } = useQuery({
-    queryKey: ["profile", username],
+    queryKey: profileQueries.projection(username,viewer?.id ?? null),
     queryFn: async () => {
       const res = await apiRequest("GET", `/api/users/${username}`);
       if (!res.ok) {
@@ -141,7 +143,7 @@ export default function MemberProfile() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile", username] });
+      queryClient.invalidateQueries({ queryKey: profileQueries.projection(username,viewer?.id ?? null) });
       queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
       queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
       toast({
@@ -165,10 +167,10 @@ export default function MemberProfile() {
     },
     onMutate: async (patch) => {
       // Optimistic accent / banner so the picker + hero update immediately
-      await queryClient.cancelQueries({ queryKey: ["profile", username] });
-      const prev = queryClient.getQueryData<MemberProfileData>(["profile", username]);
+      await queryClient.cancelQueries({ queryKey: profileQueries.projection(username,viewer?.id ?? null) });
+      const prev = queryClient.getQueryData<MemberProfileData>(profileQueries.projection(username,viewer?.id ?? null));
       if (prev) {
-        queryClient.setQueryData<MemberProfileData>(["profile", username], {
+        queryClient.setQueryData<MemberProfileData>(profileQueries.projection(username,viewer?.id ?? null), {
           ...prev,
           ...(typeof patch.accentColor === "string" ? { accentColor: patch.accentColor } : {}),
           ...(typeof patch.banner === "string" ? { banner: patch.banner as MemberProfileData["banner"] } : {}),
@@ -178,12 +180,12 @@ export default function MemberProfile() {
       return { prev };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile", username] });
+      queryClient.invalidateQueries({ queryKey: profileQueries.projection(username,viewer?.id ?? null) });
       toast({ title: "Saved", duration: 1500 });
     },
     onError: (err, _patch, ctx) => {
       if (ctx?.prev) {
-        queryClient.setQueryData(["profile", username], ctx.prev);
+        queryClient.setQueryData(profileQueries.projection(username,viewer?.id ?? null), ctx.prev);
       }
       toast({ title: parseApiError(err, "Could not save"), variant: "destructive" });
     },
@@ -288,9 +290,9 @@ export default function MemberProfile() {
   const bigOne = pickTheBigOne(data);
   const posts = data.boardPosts ?? [];
   // Plain compute (not useMemo) so hooks order can never break after early returns.
-  // Hosted past → HOST/MC; attended-only → WENT; host wins on shared ids.
-  const stashById = new Map<number, (typeof going.past)[0] & { stashRole: "MC" | "WENT" }>();
-  for (const e of going.past) stashById.set(e.id, { ...e, stashRole: "WENT" });
+  // Hosted past → HOST/MC; past RSVP history → RSVP; host wins on shared ids.
+  const stashById = new Map<number, (typeof going.past)[0] & { stashRole: "MC" | "RSVP" }>();
+  for (const e of going.past) stashById.set(e.id, { ...e, stashRole: "RSVP" });
   for (const e of hosting.past) stashById.set(e.id, { ...e, stashRole: "MC" });
   const stashEvents = Array.from(stashById.values());
 
@@ -303,7 +305,7 @@ export default function MemberProfile() {
 
   return (
     <div
-      className="pp-page pp-page--reimagined profile-page pp-foundation pdx-glass-rebind"
+      className={`pp-page pp-page--reimagined profile-page pp-foundation pdx-glass-rebind${apiData.profileWallEnabled ? " profile-wall-enabled" : ""}`}
       style={{ ...profileCssVars(accent), "--c": accent } as React.CSSProperties}
     >
       <div className="pp-shell">
@@ -345,6 +347,7 @@ export default function MemberProfile() {
           <ProfileMarquee items={marqueeItems} speed={data.marquee?.speed || 30} color={data.marquee?.color} />
         </div>}
 
+        {apiData?.profileWallEnabled ? <ProfileWall key={`${username}:${viewer?.id ?? "guest"}`} data={data} wire={apiData} variant="standard" isOwner={isOwner} onEdit={() => setEditOpen(true)} onTop8={() => setTop8Open(true)} onRequireAuth={() => setShowAuth(true)} onEvent={id=>void openEvent(id)} onPlace={openPlaceFromTop8} /> : (
         <ProfileContent key={username} username={username} sections={[
           ...(data.roles?.length || data.talents?.length || data.standFor?.length || socialCardsFor(parseSocialLinks(data.socialLinks)).length ? [{ id: "about", room:"about", label: "About", size: "sm", content: <ProfileAbout data={data} mode="about" /> } as ProfileChapter] : []),
           ...(data.businessPlace || data.affiliatedVenues?.length || data.linkedVenues?.length || data.pup || data.packmates?.length || data.handlers?.length ? [{ id: "connections", room:"people", label: "Places and pack", size: "sm", content: <ProfileAbout data={data} mode="connections" /> } as ProfileChapter] : []),
@@ -405,6 +408,7 @@ export default function MemberProfile() {
             <ProfileDeferred label="Outz adventures"><Suspense fallback={<p role="status">Loading adventures…</p>}><OutzAdventures adventures={apiData.outzAdventures} /></Suspense></ProfileDeferred>
           ) } as ProfileChapter] : []),
         ]} />
+        )}
 
         {!isOwner && <SafetyGuide context="profile" compact />}
         <ProfileFooter username={data.username} />

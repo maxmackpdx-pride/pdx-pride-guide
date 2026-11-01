@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import express from 'express';
+import Database from 'better-sqlite3';
+import {createProfileLayoutStore,registerProfileLayoutRoutes} from './profileLayout';
+import {defaultProfileLayout} from '../shared/profileLayout';
+test('owner routes enforce auth, strict references, private caching and atomic conflicts',async()=>{
+ const db=new Database(':memory:');db.exec('CREATE TABLE users(id INTEGER PRIMARY KEY);INSERT INTO users VALUES(1),(2)');const store=createProfileLayoutStore(db),app=express();app.use(express.json());registerProfileLayoutRoutes(app,(req:any,res,next)=>{const id=Number(req.header('x-test-owner'));if(![1,2].includes(id))return res.status(401).end();req.session={userId:id};next();},store,(id,ref)=>ref.kind==='profile'||ref.kind==='event'&&ref.id===8&&id===1);
+ const server=app.listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));const address=server.address() as {port:number};const request=(method:string,owner?:number,body?:unknown)=>fetch(`http://127.0.0.1:${address.port}/api/users/me/profile-layout`,{method,headers:{'Content-Type':'application/json',...(owner?{'x-test-owner':String(owner)}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ try{assert.equal((await request('GET')).status,401);const initial=await request('GET',1);assert.equal(initial.headers.get('cache-control'),'private, no-store');assert.equal((await initial.json()).revision,0);const draft=defaultProfileLayout();assert.equal((await request('PUT',1,{...draft,userId:2})).status,400);const invalid=structuredClone(draft);invalid.widgets.push({...invalid.widgets[0],id:'private-source',objectId:'component:data-display/ProfileActivity',source:{kind:'event',id:9},desktop:{...invalid.widgets[0].desktop,variant:'event-poster'},mobile:{...invalid.widgets[0].mobile,variant:'event-pocket'}});assert.equal((await request('PUT',1,invalid)).status,403);const writes=await Promise.all([request('PUT',1,draft),request('PUT',1,{...draft,palette:'trans'})]);assert.deepEqual(writes.map(r=>r.status).sort(),[200,409]);assert.equal((await (await request('GET',2)).json()).revision,0);assert.equal((await (await request('GET',1)).json()).revision,1);}finally{await new Promise<void>(resolve=>server.close(()=>resolve()));db.close();}
+});

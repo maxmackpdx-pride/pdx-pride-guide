@@ -2,7 +2,7 @@ import { brotliCompressSync, gzipSync, constants } from "node:zlib";
 import path from "node:path";
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile, readdir, writeFile } from "node:fs/promises";
+import { rm, readFile, readdir, writeFile, cp } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { writeDesignComponentSourceEvidence } from "./design-component-source-evidence";
@@ -53,6 +53,8 @@ async function buildAll() {
 
   console.log("building client...");
   await viteBuild();
+  execFileSync(process.execPath,["--import","tsx","script/build-profile-objects.mjs"],{stdio:"inherit"});
+  await cp("dist/profile-objects/v1","dist/public/profile-objects/v1",{recursive:true});
 
   // Startup text is served directly by Express, so emit both negotiated encodings.
   const compress = async (directory:string):Promise<void> => {

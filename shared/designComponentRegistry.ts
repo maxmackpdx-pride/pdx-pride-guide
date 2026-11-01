@@ -1,3 +1,4 @@
+import {PROFILE_OBJECTS} from './profileObjects';
 export const DESIGN_COMPONENT_REGISTRY_SCHEMA = 1 as const;
 export const DESIGN_COMPONENT_SOURCE_REPOSITORY = "maxmackpdx-pride/pdx-pride-guide" as const;
 export const DESIGN_COMPONENT_SPECIMEN_PATH = "/design-system/specimen" as const;
@@ -37,6 +38,13 @@ const entry = (
  * prose and governance, but it must keep this id and source path intact.
  */
 export const DESIGN_COMPONENT_REGISTRY = Object.freeze([
+  ...PROFILE_OBJECTS.map(object=>entry(object.id,object.name,'data-display',object.name,object.name==='ProfileActivity'?'client/src/components/profile/objects/ProfileActivity.tsx':['ProfileUpcomingPosters','ProfileFeaturedEvent','ProfileHosting'].includes(object.name)?'client/src/components/profile/objects/ProfilePosters.tsx':'client/src/components/profile/objects/ProfileObjects.tsx')),
+  entry('component:layout/ProfileHologram','ProfileHologram','layout','ProfileHologram','client/src/components/profile/objects/ProfileHologram.tsx'),
+  entry('component:layout/ProfileLightRibbon','ProfileLightRibbon','layout','ProfileLightRibbon','client/src/components/profile/objects/ProfileLightRibbon.tsx'),
+  entry('component:layout/ProfileWall','ProfileWall','layout','default','client/src/components/profile/ProfileWall.tsx'),
+  entry('component:data-display/ProfilePortrait','ProfilePortrait','data-display','ProfilePortrait','client/src/components/profile/objects/ProfilePortrait.tsx'),
+  entry('component:data-display/ProfileBoardObject','ProfileBoardObject','data-display','default','client/src/components/profile/objects/ProfileBoardObject.tsx'),
+  entry('component:data-display/OutzWideCard','OutzWideCard','data-display','default','client/src/components/outz/OutzWideCard.tsx'),
   entry("component:data-display/BoardPostFace", "BoardPostFace", "data-display", "default", "client/src/components/board/BoardPostFace.tsx"),
   entry("component:forms/BoardComposerPreview", "BoardComposerPreview", "forms", "default", "client/src/components/board/BoardComposerPreview.tsx"),
   entry("component:data-display/BoardPushPin", "BoardPushPin", "data-display", "default", "client/src/components/board/BoardPushPin.tsx"),

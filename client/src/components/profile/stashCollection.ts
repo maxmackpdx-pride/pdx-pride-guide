@@ -6,10 +6,11 @@ function boardIdentity(post: {id:number;contentType?:string;board?:string}) {
  const family: Record<string,string> = {GIG:'gigz',GIFTING:'giftz',HOUSING:'housing',SELL:'sellz',SELLZ:'sellz',SPOTTED:'mizzed',MIZZED:'mizzed'};
  return `${family[post.contentType || ''] || post.board?.toLowerCase() || post.contentType}:${post.id}`;
 }
-export const STASH_WORK_XP = {DJ:70,DRAG:70,MC:60,GOGO:55,PHOTO:45,BAR:40,SECURITY:40,VOLUNTEER:35,VENDOR:35,WENT:15} as const;
+export const STASH_WORK_XP = {DJ:70,DRAG:70,MC:60,GOGO:55,PHOTO:45,BAR:40,SECURITY:40,VOLUNTEER:35,VENDOR:35,WENT:15,RSVP:0} as const;
 export type StashRole = keyof typeof STASH_WORK_XP;
 export function normalizeStashRole(raw?: string | null): StashRole {
   const role=String(raw || 'WENT').toUpperCase().replace(/[\s/-]+/g,'');
+  if(role==='RSVP')return 'RSVP';
   if(role==='DJ'||role==='DJSET')return 'DJ';
   if(role==='DRAG'||role==='PERFORMER')return 'DRAG';
   if(['MC','HOST','HOSTMC','PRIMARY','COHOST'].includes(role))return 'MC';

@@ -46,7 +46,7 @@ export type RegisterOptions = {
   communityStandardsVersion?: string;
 };
 
-interface AuthContextType {
+export interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -71,6 +71,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshVersion = useRef(0);
 
   const applyUser = (next: AuthUser | null) => {
+    if (identity.current !== null && identity.current !== (next?.id ?? null)) {
+      try { sessionStorage.removeItem(`zay-profile-draft:${identity.current}`); } catch { /* Storage can be disabled. */ }
+    }
     replaceAccountCache(queryClient, identity.current, next?.id ?? null);
     identity.current = next?.id ?? null;
     setUser(next);
@@ -167,3 +170,6 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
+
+/** Presentation bridge for canonical object hosts; server authorization remains in domain APIs. */
+export function AuthPresentationProvider({value,children}:{value:AuthContextType;children:ReactNode}){return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;}

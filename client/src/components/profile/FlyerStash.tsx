@@ -24,6 +24,7 @@ type WorkMeta = {
 };
 
 const WORK: Record<StashRole, WorkMeta> = {
+  RSVP: {label:"RSVP HISTORY",color:"#00FFFF",xp:0,ladder:null},
   DJ: { label: "DJ SET", color: "#19e3ff", xp: STASH_WORK_XP.DJ, ladder: ["BEDROOM DJ", "OPENER", "RESIDENT DJ", "HEADLINE DJ", "PDX SOUND LEGEND"] },
   DRAG: { label: "DRAG", color: "#FF00CC", xp: STASH_WORK_XP.DRAG, ladder: ["BABY QUEEN", "LOCAL LEGEND", "STAGE MOTHER", "HEADLINER", "PDX DRAG ROYALTY"] },
   MC: { label: "HOST / MC", color: "#CCFF00", xp: STASH_WORK_XP.MC, ladder: ["OPEN MIC", "MC", "MAIN STAGE MC", "RINGLEADER", "PARTY PUP"] },

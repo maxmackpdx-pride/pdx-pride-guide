@@ -19,10 +19,7 @@ export default function ProfileStatStrip({ data }: Props) {
   const stats = data.stats || {};
   const followers = stats.followers ?? 0;
   const hosting = stats.hosting ?? data.events?.hosting?.upcoming?.length ?? 0;
-  const attended =
-    (data.events?.going?.past?.length ?? 0) ||
-    (typeof stats.checkIns === "number" ? stats.checkIns : 0) ||
-    (typeof stats.shows === "number" ? stats.shows : Number(stats.shows) || 0);
+  const attended = data.events?.going?.past?.length ?? 0;
   const going = stats.going ?? data.events?.going?.upcoming?.length ?? 0;
 
   const prevFollowers = useRef(followers);
@@ -40,7 +37,7 @@ export default function ProfileStatStrip({ data }: Props) {
   const items: { num: string; label: string; tone?: "magenta" | "yellow" | "default" }[] = [
     { num: fmtK(followers), label: "Followers", tone: "default" },
     { num: fmtK(hosting), label: "Hosting", tone: "magenta" },
-    { num: fmtK(attended), label: "Attended", tone: "default" },
+    { num: fmtK(attended), label: "Past RSVPs", tone: "default" },
     { num: fmtK(going), label: "Going", tone: "yellow" },
   ];
 

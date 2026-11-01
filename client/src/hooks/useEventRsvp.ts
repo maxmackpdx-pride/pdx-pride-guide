@@ -59,6 +59,7 @@ export function useEventRsvp() {
     onSettled: (_data, _err, vars) => {
       endInFlight(pendingRef.current, vars.eventId);
       setPendingTick((n) => n + 1);
+      void queryClient.invalidateQueries({ queryKey: ["profile"] });
       queryClient.invalidateQueries({ queryKey: [...RSVP_CHECKINS_KEY] });
       void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
       void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });

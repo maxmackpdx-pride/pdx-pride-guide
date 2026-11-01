@@ -8423,7 +8423,7 @@ function resolveProfileTop8(raw: string | null | undefined): any[] {
     if (!Number.isInteger(id) || id <= 0) continue;
     if (entry.k === "u") {
       const u = storage.getUserById(id);
-      if (u && String(u.status || "").toUpperCase() !== "SUSPENDED") {
+      if (u && String(u.status || "active").toLowerCase() === "active" && !u.shadowBanned) {
         out.push({
           kind: "user",
           id: u.id,
@@ -10614,9 +10614,9 @@ export const storage: IStorage = {
              e.poster_image_url AS posterImageUrl, e.neighborhood AS neighborhood
       FROM event_hosts eh
       JOIN events e ON e.id = eh.event_id
-      WHERE eh.user_id = ? AND e.status = 'LIVE'
+      WHERE eh.user_id = ? AND e.status = 'LIVE' AND (? = 1 OR (e.is_public = 1 AND e.is_private = 0))
       ORDER BY e.date_start ASC
-    `).all(user.id) as any[];
+    `).all(user.id, isOwner ? 1 : 0) as any[];
     const nowMs = Date.now();
     const isPastEvent = (e: { dateEnd: string }) => {
       const endMs = parsePacificDateTime(e.dateEnd);
@@ -10723,22 +10723,25 @@ export const storage: IStorage = {
       SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
              e.date_start AS dateStart, e.date_end AS dateEnd, e.admission,
              e.poster_image_url AS posterImageUrl, e.neighborhood AS neighborhood,
-             e.ticket_url AS ticketUrl
+             e.ticket_url AS ticketUrl, a.visibility, a.is_anonymous AS isAnonymous
       FROM attendances a
       JOIN events e ON e.id = a.event_id
-      WHERE a.user_id = ? AND a.is_active = 1 AND COALESCE(e.status, 'LIVE') != 'DELETED'
+      WHERE a.user_id = ? AND a.is_active = 1 AND e.status = 'LIVE' AND (? = 1 OR (e.is_public = 1 AND e.is_private = 0))
       ORDER BY e.date_start ASC
-    `).all(user.id) as any[];
+    `).all(user.id, isOwner ? 1 : 0) as any[];
+    const interactionBlocked = viewerUserId != null && !isOwner && storage.getMemberBlockStatus(viewerUserId,user.id).interactionBlocked;
+    const visibleAttendance = attendedAll.filter(row => {
+      if(isOwner)return true;
+      if(interactionBlocked)return false;
+      const visibility=resolveAttendanceVisibility(row);
+      return visibility==='public'||(visibility==='friends'&&viewerUserId!=null&&!!sqlite.prepare('SELECT 1 FROM follows WHERE (follower_user_id=? AND following_user_id=?) OR (follower_user_id=? AND following_user_id=?)').get(viewerUserId,user.id,user.id,viewerUserId));
+    }).map(({visibility,isAnonymous,...event})=>({...event,provenance:'rsvp' as const}));
     // One authoritative set drives the profile rail and its counters. Closing an
     // event must not erase a legitimate attendance; only removed events disappear.
-    const checkIns = attendedAll.length;
-    const attendedPastLive = attendedAll.filter(isPastEvent);
-    // Host nights Tucker archived are nights he ran and was there - surface in
-    // both hosting.past and attended past without inventing fake RSVP rows.
-    const attendedPast = mergeTuckerHostedArchivePast(user.username, attendedPastLive);
-    // Public Going rail: upcoming RSVPs are visible on member profiles.
-    // (Previously owner-only, which left the design's Going panel empty for everyone else.)
-    const goingToUpcoming = attendedAll.filter(e => !isPastEvent(e));
+    const checkIns = visibleAttendance.length;
+    const attendedPastLive = visibleAttendance.filter(isPastEvent);
+    const attendedPast = attendedPastLive; // Host archives remain hosting, not evidence of attendance.
+    const goingToUpcoming = visibleAttendance.filter(e => !isPastEvent(e));
 
     const socialLinksRaw = safeJson(user.socialLinks || "{}");
     const activity: any = {
@@ -10760,6 +10763,7 @@ export const storage: IStorage = {
       .map(b => ({ id: b.id, name: b.name, type: b.type }));
 
     return {
+      id: user.id,
       username: user.username,
       displayName: user.displayName,
       pronouns: user.pronouns || null,
@@ -10810,6 +10814,7 @@ export const storage: IStorage = {
         : { blockedByViewer: false, blockedViewer: false, interactionBlocked: false },
       activity,
       boardPosts,
+      boardReferences: interactionBlocked ? [] : ([['housing','housing_posts'],['gigz','gig_posts'],['giftz','gifting_posts'],['sellz','sellz_posts']] as const).flatMap(([category,table])=>withoutArchivedPosts(sqlite,category,sqlite.prepare(`SELECT id,created_at AS createdAt FROM ${table} WHERE user_id=? AND status IN ('LIVE','OPEN','ACTIVE') ORDER BY created_at DESC LIMIT 20`).all(user.id) as {id:number;createdAt:string}[]).map(row=>({category,...row}))),
       linkedVenues: storage.getUserLinkedBusinesses(user.id),
       // Admin-only moderation surface (also useful if owner is viewing own suspend state via gate)
       accountStatus: user.status || "active",

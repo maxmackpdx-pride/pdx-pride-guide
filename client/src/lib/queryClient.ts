@@ -1,3 +1,4 @@
+import {invalidateProfileMutation} from "@/components/profile/profileQueries";
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 const API_BASE = "__PORT_5000__".startsWith("__") ? "" : "__PORT_5000__";
@@ -35,6 +36,7 @@ export async function apiRequest(
   });
 
   await throwIfResNotOk(res);
+  invalidateProfileMutation(queryClient,method,url);
   return res;
 }
 

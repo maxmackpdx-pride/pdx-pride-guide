@@ -1,6 +1,8 @@
+import type {ProfileLayout} from "@shared/profileLayout";
 /* Contract types for GET /api/users/:username (server/storage.ts:getPublicProfile). */
 
 export type ProfileEvent = {
+  provenance?:"rsvp"|"host";
   id: number;
   title: string;
   venueName?: string | null;
@@ -130,6 +132,11 @@ export type ProfileAdventure = {
 };
 
 export type MemberProfileData = {
+  id?:number;
+  profileLayout?:ProfileLayout;
+  profileWallEnabled?:boolean;
+  profileLayoutReadOnly?:boolean;
+  boardReferences?:Array<{id:number;category:"housing"|"gigz"|"giftz"|"sellz";createdAt:string}>;
   outzAdventures?: { upcoming: ProfileAdventure[]; previous: ProfileAdventure[] };
 
   username: string;

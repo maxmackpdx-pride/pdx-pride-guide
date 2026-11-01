@@ -1,7 +1,10 @@
+import {createProfileLayoutStore,registerProfileLayoutRoutes} from "./profileLayout";
+import {publicProfileLayout,type ProfileSource} from "../shared/profileLayout";
 import {boardTextError,BOARD_TEXT_LIMITS} from "../shared/boardCardPresentation";
 import { createInboxDailyReminder } from "./inboxDailyReminder";
 import { inboxCaseForMutation } from "./inboxWorkflow";
 import { metricsForInbox } from "./inboxPolicy";
+import { isBoardArchived } from "./boardArchive";
 import { registerBoardArchiveRoutes } from "./boardArchiveRoutes";
 import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "./boardMotifs";
 import { registerBoardPlacement } from "./boardMapPlacement";
@@ -1209,6 +1212,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const sessionMiddleware = createSessionMiddleware(sqlite);
   app.use("/api", sessionMiddleware);
   registerBoardArchiveRoutes(app, sqlite, requireAuth, httpServer);
+  const profileLayouts=createProfileLayoutStore(sqlite);
+  const eligibleProfileSource=(userId:number,source:ProfileSource)=>{
+    if(source.kind==='profile')return true;
+    if(source.kind==='trip')return !!sqlite.prepare('SELECT 1 FROM outz_checkins WHERE id=? AND user_id=? AND cancelled_at IS NULL').get(source.id,userId);
+    if(source.kind==='event')return !!sqlite.prepare("SELECT 1 FROM events e WHERE e.id=? AND e.status='LIVE' AND (EXISTS(SELECT 1 FROM event_hosts h WHERE h.event_id=e.id AND h.user_id=?) OR EXISTS(SELECT 1 FROM attendances a WHERE a.event_id=e.id AND a.user_id=? AND a.is_active=1))").get(source.id,userId,userId);
+    const table={housing:'housing_posts',gigz:'gig_posts',giftz:'gifting_posts',sellz:'sellz_posts'}[source.category];
+    return !isBoardArchived(sqlite,source.category,source.id)&&!!sqlite.prepare(`SELECT 1 FROM ${table} WHERE id=? AND user_id=? AND status IN ('LIVE','OPEN','ACTIVE')`).get(source.id,userId);
+  };
+  registerProfileLayoutRoutes(app,requireAuth,profileLayouts,eligibleProfileSource);
   const eventSaves = createEventSaves(sqlite);
   const boardSaves = createBoardSaves(sqlite);
   assertProductionPersistence();
@@ -4447,6 +4459,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const profile = storage.getPublicProfile(username, req.session?.userId ?? null, sessionIsAdmin(req));
     if (!profile) return res.status(404).json({ error: "Not found" });
     if (profile.isOwner) profile.outzAdventures = getOutzProfileAdventures(req.session.userId, req.session.userId);
+    res.set('Cache-Control','private, no-store');res.vary('Cookie');
+    const layout=profileLayouts.read(profile.id);
+    profile.profileWallEnabled=process.env.PROFILE_WALL_ENABLED!=='0';
+    profile.profileLayoutReadOnly=!profileLayouts.supported(profile.id);
+    profile.profileLayout=profile.isOwner?layout:publicProfileLayout(layout,source=>{
+      if(source.kind==='profile')return true;
+      if(source.kind==='trip')return false;
+      if(source.kind==='event')return [...profile.activity.hostedEvents,...profile.activity.hostedEventsPast,...profile.activity.goingTo,...profile.activity.attendedPast].some(e=>e.id===source.id);
+      return !profile.blockStatus.interactionBlocked&&eligibleProfileSource(profile.id,source);
+    });
     res.json(profile);
   });
 

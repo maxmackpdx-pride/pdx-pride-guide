@@ -1,3 +1,4 @@
+import ProfileObjectSpecimen from "@/components/profile/ProfileObjectSpecimen";
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "wouter";
 import { DESIGN_COMPONENT_REGISTRY, findDesignComponent } from "@shared/designComponentRegistry";
@@ -52,6 +53,7 @@ function Specimen({ id }: { id: string }) {
   const [query, setQuery] = useState("Zaylist");
   const countdownTarget = useMemo(() => new Date(Date.now() + 5 * 86_400_000).toISOString(), []);
 
+  if (/\/(Profile|OutzWideCard)/.test(id)) return <ProfileObjectSpecimen id={id}/>;
   switch (id) {
     case "component:data-display/BoardPostFace":
     case "component:forms/BoardComposerPreview":
