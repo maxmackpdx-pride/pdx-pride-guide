@@ -48,7 +48,7 @@ test('labels and Placez markers stay locked to the map during camera movement',a
   assert.match(renderer,/const cameraMoving=Boolean\(target\.isMoving\?\.\(\)\)/);
   assert.match(renderer,/reduced\.matches\|\|cameraMoving\?0:/);
   assert.match(renderer,/r:Math\.max\(22,geometry\.size\/2\+8\)/);
-  assert.match(renderer,/if\(!isBar\)\{[\s\S]*?drawWaypointHead\(lightsContext,geometry,color,typeIcons\.get\(feature\.properties\.typeIcon\)\?\.light,null,selected,coreAlpha,'place'\)/);
+  assert.match(renderer,/if\(!isBar\)\{[\s\S]*?drawAssetHead\(lightsContext,geometry,color,typeIcons\.get\(feature\.properties\.typeIcon\)\?\.light,null,selected,coreAlpha,'place'\)/);
   assert.doesNotMatch(renderer,/drawDiscoveryOrb/);
   assert.match(renderer,/map\.on\('render',renderSceneOverlays\)/);
 });
@@ -96,7 +96,7 @@ test('chrome reuses wall paths at rest and rebuilds only when the camera changes
 
 test('actual hologram draw paints sky artwork after building occlusion',async()=>{
   const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
-  const source=renderer.slice(renderer.indexOf('function drawLights('),renderer.indexOf('// Gentle corridor:'));
+  const source=renderer.slice(renderer.indexOf('function drawLightsLegacy('),renderer.indexOf('// Gentle corridor:'));
   const operations=[],projections=[],noop=()=>{},window={innerWidth:900,innerHeight:1200};
   const ctx=new Proxy({drawImage(image){operations.push(image);},createLinearGradient:()=>({addColorStop:noop}),
     createRadialGradient:()=>({addColorStop:noop})},{get:(target,key)=>key in target?target[key]:noop});
@@ -123,12 +123,12 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     mapHover:{update:noop},hoverTargets:[],logoPointer:{active:false},
     drawSurfaceReflections:()=>operations.push('building-reflections'),drawUserLocationAvatar:noop,tell:noop,
   });
-  vm.runInContext(source,context);let labels=[];context.renderHologramLabels=rows=>{labels=rows;};vm.runInContext('drawLights(1)',context);
+  vm.runInContext(source,context);let labels=[];context.renderHologramLabels=rows=>{labels=rows;};vm.runInContext('drawLightsLegacy(1)',context);
   assert.equal(labels.length,1);assert.equal(labels[0].name,'Musical Mondays');assert.equal(labels[0].time,'9:00 PM');assert.equal(labels[0].countdown,null,'no 2D countdown banner: a same-day event the 3D layer does not draw is a plain round logo coin');assert.equal(labels[0].hologramType,'coin');assert.ok(labels[0].logoY<700);
   assert.deepEqual(operations,['beam','building-mask','chrome','building-reflections']);
   assert.equal(labels[0].logo,'logo','stable logo is carried by the HTML card above the map');
   const anchored={...labels[0]};context.map.isMoving=()=>true;context.map.project=()=>({x:487,y:681});
-  vm.runInContext('drawLights(1)',context);
+  vm.runInContext('drawLightsLegacy(1)',context);
   assert.ok(Math.abs(labels[0].x-anchored.x-37)<1e-8);
   assert.ok(Math.abs(labels[0].y-anchored.y+19)<1e-8);
   assert.ok(Math.abs(labels[0].logoY-anchored.logoY+19)<1e-8);
@@ -145,7 +145,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     context.map.getZoom=()=>zoom;
     for(const pitch of [0,48,75]){
       context.map.getPitch=()=>pitch;
-      vm.runInContext('drawLights(1)',context);
+      vm.runInContext('drawLightsLegacy(1)',context);
       const label=labels[0],projection=projections.at(-1);
       assert.equal(label.top,projection.card.top);
       assert.equal(label.bottom,projection.card.bottom);
@@ -158,14 +158,14 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   // Far away the event is one cached mini badge: no HTML card at all, and the level is remembered.
   context.map.project=()=>({x:450,y:300});context.map.getPitch=()=>55;
   // The distance bands now reach farther (vortex to ~30 km, mini past ~150 km); exercise a genuinely far view.
-  context.map.getZoom=()=>5;vm.runInContext('drawLights(1)',context);
+  context.map.getZoom=()=>5;vm.runInContext('drawLightsLegacy(1)',context);
   assert.equal(labels.length,0,'far events draw a canvas badge, not an HTML card');
   assert.equal(context.e3LodPrevious.get('demo'),'mini');
-  context.map.getZoom=()=>16.5;vm.runInContext('drawLights(1)',context);
+  context.map.getZoom=()=>16.5;vm.runInContext('drawLightsLegacy(1)',context);
   assert.equal(context.e3LodPrevious.get('demo'),'vortex');
   assert.equal(labels.length,1);assert.equal(labels[0].countdown,null,'the countdown lives on the 3D vortex only, never on a 2D card');
   context.map.project=()=>({x:450,y:700});context.map.getZoom=()=>15.5;
   context.lightFeatures=[{geometry:{coordinates:[-122.67,45.53]},properties:{key:'houz',kind:'housing',housingModel:'MANAGED',demoOpen:true,logo:'',phase:2,color:'#8800FF',heightScale:1,name:'Property for rent'}}];
-  operations.length=0;assert.doesNotThrow(()=>vm.runInContext('drawLights(1)',context));
+  operations.length=0;assert.doesNotThrow(()=>vm.runInContext('drawLightsLegacy(1)',context));
   assert.deepEqual(operations,['building-mask','chrome','building-reflections','waypoint-head']);
 });
