@@ -46,10 +46,13 @@ export default function Outz() {
   }, [listReady, restoreView]);
   const [attempt, setAttempt] = useState(0);
   // Dispose while the iframe's browsing context still exists, before React detaches it.
+  // Only a retry remount (attempt) or real unmount may dispose the map: sharePending and
+  // shareError flip when the shared-destination lookup resolves, and disposing then would
+  // destroy a healthy map exactly when the destination arrives.
   useLayoutEffect(() => {
     const node = frame.current;
     return () => { try { node?.contentWindow?.dispatchEvent(new PageTransitionEvent('pagehide', {persisted:false})); } catch { /* Already detached. */ } };
-  }, [attempt, sharedId, sharePending, shareError]);
+  }, [attempt]);
   const retrySrc = useRef<{place:string|null;href:string}|null>(null);
   const [mapSlow, setMapSlow] = useState(false);
   const retryMap = () => {
