@@ -1,42 +1,83 @@
-# Profile wall production integration
+# Profile production integration — current release audit
 
-Owner authorized full plan P0–P8, including product master and Foundation main publication.
-Plan: /Users/tuckercasey/Documents/Zaylist/prototypes/tucker-wall/docs/profile-production-integration-plan.md
+Updated 2026-11-01. Overall completion remains **pending P8**. No further approval is needed under Tucker's explicit P0–P8 execution/push/deploy authorization.
 
-## Baselines
-- Product origin/master: fb9e07b3d1a0393521fdc6cfd7f8afce7e344f94. Isolated branch codex/profile-wall-production.
-- Foundation origin/main: 75970a1bec0d545b82820aac07761596ff9431ee. Isolated branch codex/profile-wall-foundation.
-- Existing Mapz branch and dirty Foundation checkout untouched.
-- Native BoardZ prototype correction separately published at 7111e6004bd61cb836af140adf601765b1afafb6; reuse native source in product, not vendored prototype adapters.
+## Release state
 
-## Packages
-- [x] P0: fetch baselines, inspect instructions and establish isolated worktrees.
-- [x] P1: attendance/public projection privacy, provenance and authorized collection projection; regression matrix.
-- [x] P2: canonical object renderers, real variants, specimens, registry and portable ESM manifest.
-- [x] P3: validated server layout, additive migration, owner routes, atomic revisions; integration tests.
-- [x] P4: production profile wall, canonical readers, URL/history behavior and unchanged real shell.
-- [x] P5: owner Save/Cancel editor, independent mobile composition, undo and interaction verification.
-- [x] P6: Hub/domain invalidation, notification/read-state preservation and tests.
-- [x] P7: actual animated sheet ribbon and portrait/contact phase, Calm/reduced-motion, lifecycle checks.
-- [ ] P8: Foundation source/contracts/release, verification, GitHub/Railway/Cloudflare deploy and live probes.
+- Product candidate: `0c40646c474f12b063895305ce721c5e0fd3786c`, confirmed on GitHub `master`. Includes concurrent Mapz work through `41e2b6dc`; unrelated original checkout work preserved.
+- Railway deployment: `0e9df83b-f42b-420e-85cd-340e15ff1f25`, **BUILDING**, not yet accepted as live.
+- Product GitHub deployment verification: run `41293721629`, queued behind previous runs. Final typecheck and glass audit pass; unit job has the two baseline Mapz failures described below.
+- Foundation candidate: isolated `profile-wall-foundation` worktree, baseline `75970a1bec0d545b82820aac07761596ff9431ee`. Release `zaylist-foundation-design-system-2026-11-01.1`. Not committed/pushed/deployed yet; awaiting exact live product package and verified revision.
 
-## Current work
-P1: projection tests pass for public/friends/anonymous RSVP visibility, explicit follow relationship, blocks, private/hidden events, host-archive provenance, and owner-only Outz. The legacy stat strip fallback mislabeled host archives as attended; corrected to actual Past RSVPs.
-P3 complete locally: idempotent table, strict schema/source validation, independent mobile positions, owner-only GET/PUT, no-store, concurrent 200/409 test, and unsupported future-schema overwrite protection pass.
-P2/P4/P5/P6/P7 implementation underway, not accepted or shipped. Canonical BoardDetail extracted from Boards and reused by ProfileBoardObject. Browser measured native open dialog and profile article at identical x/y/width/height (560px wide, 1538px tall), inline host true. Close/reopen, mobile, owner gestures, source actions and full fixtures still require verification.
-Approved shaped portrait, layered Stash pocket/swipe, Hosting center-out reveal, actual shared Outz wide object, irregular identity-based light graph, Progress/Pride/Trans/Bi/custom palettes, and time-varying ribbon geometry are in local source. Deliberate saved overlaps remain unchanged; default/new trail entries get initial slots only.
-ESM packaging and registry/specimens are underway; no portability or all-variant completion claim yet. Foundation source publication is still pending.
+## P0–P8 checklist
 
-Evidence logs: /private/tmp/profile-wall-tests3.log (8 tests pass), /private/tmp/profile-layout-routes-tests.log (owner API/concurrency test passes). Latest typecheck caught one renamed store variable, fixed subsequently; rerun needed after remaining source work. Local server port5057 uses isolated .local/data.db. No production changes published. No demo participation imported.
+- [x] P0 — Isolated worktrees, owner rules/design sources, baselines and preservation of unrelated work.
+- [x] P1 — Authorized profile projection; public/friends/anonymous/blocked/private-event boundaries; historical RSVP versus host archive provenance; archived BoardZ filters. No fabricated production participation.
+- [x] P2 — 18 widgets plus 6 shared renderers registered as 24 contracts, 52 variants. Exact native BoardZ and shared Outz wide source. Typed ESM package, source/asset hashes and runtime constraints.
+- [x] P3 — Additive user-ID layout table, strict schema, owner-only/no-store routes, atomic revisions/409, forward-schema preservation. Removed saved sources can be discarded without admitting new unauthorized references; username change retains layout.
+- [x] P4 — Real profile shell/actions, canonical readers, in-place BoardZ expansion/reflow, chronological trail, URL/history behavior. Original profile renderer retained behind the build-time rollout flag.
+- [x] P5 — Save/Cancel, drawer, native variants, independent desktop/mobile positions, Undo/Redo, keyboard movement, draft recovery and conflict handling.
+- [x] P6 — Viewer-specific profile query keys and domain invalidation; native RSVP and Hub mutation paths reused. Layout/palette changes do not create notifications or mutate read state.
+- [x] P7 — Animated ribbon geometry, portrait/contact phase continuity, palettes, fixed hardware and scroll-only paper sway; Calm/offscreen/hidden lifecycle handling.
+- [ ] P8 — Final Railway SUCCESS/health/profile capture; exact live package and source parity; Foundation commit, Cloudflare success, direct/embedded guide and object API parity.
 
-Update: owner browser Save/Cancel/Undo and reload persistence verified using disposable local fixture only (revision1, desktop compact About, Trans palette persisted; mobile placement unchanged). Archived BoardZ metadata and block boundaries now filter new trail references; regression added. Native BoardZ owner reader shows real Edit/Mark filled/Delete actions and its measured inline article/dialog widths both560px. Browser Back closes; improving focus restoration before acceptance. Portable build now contains24 objects,423 canonical source hashes,375 artifacts including generated TypeScript declarations (8.5MB); production build is wired to publish the package. Latest privacy/domain/notification tests pass14 before two added archive/provenance cases. P2/P4/P5/P7 final browser acceptance and P8 deployment remain outstanding.
+## Actual verification
 
-Browser handoff: released for the continuity observer. Desktop http://127.0.0.1:5057/u/wall_browser_fixture ; true390px frame http://127.0.0.1:5057/@fs/Users/tuckercasey/Documents/Zaylist/profile-wall-production/.local/profile-mobile.html . Local fixture is signed in; no production account or participation changed. Save/Cancel/Undo/Redo/reload verified, revision2 persisted mobile About x10 while desktop x20 remained. Mobile page390/scrollWidth390, board358, native open342; neighbor y4250→5798→4250 and source focus restored. Desktop fresh close restores source focus. Captures: docs/profile-wall/captures/{desktop,mobile}-native-boardz.png. The 24 objects/52 variants passed browser render/unsupported checks. Activity now shares one source-aware renderer between profile, specimens and package. Independent typed/package-only host builds and renders at .local/portable-smoke.html; React CJS peer interop corrected. Scroll paper angle1.4° observed while pin has no rotation; final visible motion/Calm/approved composition pass requested from observer. Background tabs correctly pause light RAF; building can trigger Vite reloads, so wait for build completion before motion sampling.
+- **Final exact-revision Railway build passed** for `0c40646c` (client, service worker, portable package and server); container assembly is in progress. Live package reports 376 artifacts / 8,526,582 bytes; exact live copy will replace the local-platform package.
 
-Visual correction: sparse public profiles were retaining empty default reservations. Added compaction ONLY for revision0 defaults; saved owner positions are returned unchanged. Empty public connections/featured placeholders are omitted. Initial trail slots start near existing content. A focused regression proves dense sparse defaults and saved-layout identity preservation. Hosting preview arrows now page3 (compact1), with swipe; Upcoming swipe suppresses accidental flips. Updated full-profile/Hosting/mobile collage captures are in captures/. Foundation non-browser suite passes226 tests and comprehension benchmark100/100. Product build and deploy-bundle verification pass. Final source integration/rebuild and deploy still pending.
+- Product full build and deploy-bundle checks passed for the corrected native/pin implementation: `/private/tmp/profile-pin-final-build.log`, `/private/tmp/profile-pin-bundle.log`. Final additional CSS hidden-front correction passed the package's CSS/JS build and browser inspection. Rebase over Mapz rehashed every package source/asset: zero changed inputs.
+- Final portable verification: 24 objects, 52 variants, 376 checksummed artifacts, approximately 8.53MB; `/private/tmp/profile-final-portable.log`. Generated declarations compile in an independent typed consumer. Browser host reload renders from the package outside the product application. Native API adapters still require authorized same-origin APIs/assets; no universal standalone claim.
+- Final typecheck passes: `/private/tmp/profile-release-types.log`; final GitHub typecheck and glass audit also pass.
+- Focused privacy/layout/reflow/domain/notification regressions: **16 pass**, `/private/tmp/profile-release-tests.log`.
+- Actual HTTP owner layout/concurrency/source-removal/username tests: **2 pass**, `/private/tmp/profile-source-removal-tests.log`.
+- Unchanged complete predeploy guard passed: `/private/tmp/profile-final-predeploy.log`, including registry, admin operations and QSearch safety guards on disposable data.
+- Foundation non-browser suite: **226 pass**, `/private/tmp/profile-foundation-final-tests.log`. Build passes, and guide comprehension **100/100**, `/private/tmp/profile-foundation-pinned-build.log`, `/private/tmp/profile-foundation-pinned-benchmark.log`. Browser checks use CUA; no local Playwright browser collector was run.
 
-Final local motion evidence: active browser samples show geometry changing over time (not merely color), portrait exit RGB equals first-edge RGB, and Calm mode freezes all ribbon path geometry. Restored Neon afterward. Corrected desktop-native-boardz.png and mobile-native-boardz.png were recaptured in the actual open state and visually inspected; earlier header-only captures replaced. Full default profile capture now reflects sparse-default compaction. P1–P7 locally accepted; P8 remains publication/verified live parity.
+## Browser evidence
 
-Release candidate pushed: product55f1cd30329c729278240b9169240332c31b0dcd, includes current Mapz commits through fefb7353. GitHub Deploy run41292748948; Railway pending. Exact unchanged predeploy guard passed after detached checkout of origin/master, all16 focused tests/typecheck/build/artifact verification passed. Foundation final package sync/build underway; no live-success claim yet.
+Evidence directory: `docs/profile-wall/captures/`.
 
-Final screenshot inspection caught native scope dimensions leaking into the hardware-only poster wrapper. Scoped zero-height absolute wrappers restore the needle to 10px inside the paper top. Sway now ignores hidden preview pins, includes update paper, and freezes at exactly -1.10558deg across idle samples; hardware rotation remains empty. Hosting previews stay still. Captures updated plus pinned-paper-collage.png. Follow-up release verification underway before final acceptance.
+- `specimen-matrix.json`: all **52** variants rendered without unsupported component/error fallback.
+- `portable-independent-host.png`: freshly reloaded independent package host. Typed consumer is `.local/portable-smoke.tsx` (disposable, not production).
+- `desktop-native-boardz.png`, `mobile-native-boardz.png`: actual native open reader, not header-only captures. Desktop inline article/dialog both560px; true390px mobile frame has342px open reader. Mobile neighbor y4250→5798→4250 on open/close; source focus restored. Native owner actions are present.
+- Owner Save/Cancel/Undo/Redo/reload tested using local disposable account only. Revision2 persists mobile About x10 independently of desktop x20. Visitor controls stay absent. Touch long-press is implemented; no physical-device test claim.
+- `detail-links.json`: event/place/Outz direct load, refresh, close and Back, plus poster reverse/native event action. Fresh-document history restores profile without recovery errors. A stale Vite document after source changes was discarded before repeating checks.
+- `hosting-browser.png`: actual41 archived hosted events; balanced uncropped grid. Preview arrows page3/compact1; Stash native collection browsing and swipe wiring retained.
+- `pinned-paper-collage.png`: corrected pin wrapper. Native needle lies inside paper on desktop/mobile. Paper angle remains exactly -1.10558deg across idle samples; pin rotation remains empty; hidden Hosting preview pins do not sway.
+- `portrait-light-phase-a.png` / `b.png`: time-varying geometry and exact portrait/first-edge color phase. Calm browser samples freeze all ribbon paths; Neon restored. Reduced-motion listener inspected in source.
+- `desktop-full-profile.png`: corrected sparse-default compaction and pin attachment. Saved/manual arrangements remain untouched. **Final current-live screenshot still pending deployment**; do not use an old header/full capture as live evidence.
+
+Independent coordinator image review: **PASS** for the four corrected profile/pin/native desktop/native mobile images. No material static visual blocker; this review did not independently exercise motion or interactions.
+
+## Known baseline CI failures
+
+Two `script/mapz-nightlife.test.mjs` harness failures already occur in pre-profile `fefb7353` GitHub run `41291616447` and remain in final run `41293721648`:
+
+1. Old `drawWaypointHead` source-regex assertion after the shared waypoint renderer change.
+2. VM harness cannot evaluate `import.meta` outside a module.
+
+Final typecheck and glass audit pass. The Mapz implementation/test ownership was not expanded into this profile task. Logs: `/private/tmp/profile-baseline-ci.log`, `/private/tmp/profile-final-ci.log`.
+
+## Deployment wait investigation
+
+Railway completed the full build and entered image export at 09:51:09 UTC. It still reports BUILDING without a failure. Read-only Git inspection: baseline tracked source 1,367,987,963 bytes; current 1,369,483,764 bytes; net increase 1,495,801 bytes (1,321,929 bytes are intended proof captures). No `.local`, `node_modules`, `dist` or nested worktree content is tracked. Available deployment metadata does not expose image size or a live export progress counter. This establishes no accidental build-context growth, but does not independently prove export progress. Running deployment preserved. Export then progressed at 10:00:20 UTC and produced image digest `sha256:ad1587322173fea6c7524a32f8e98dfa128da89f50e6945df36d5f3dadf6ae5d`; this was slow export, not a confirmed stuck build.
+
+## Remaining release work
+
+Wait for Railway SUCCESS on the final revision, verify health SHA and the real live profile/native opening, save a current live screenshot, copy and verify all actual live package artifacts into Foundation, pin all24 object contracts to that product revision, regenerate/build/check Foundation, push `main`, wait for Cloudflare deployment success, then verify direct/embedded guide release and every object API contract/package hash. Only then mark P8/overall complete.
+
+## Current live/demo comparison follow-up
+
+Product `0c40646c474f12b063895305ce721c5e0fd3786c` reached Railway **SUCCESS** at 10:05:29 UTC (deployment `0e9df83b-f42b-420e-85cd-340e15ff1f25`); public health matched exactly. All376 live portable files/8,526,582 bytes were SHA-verified and copied to Foundation. Foundation build,226 tests and100/100 benchmark passed, but publication is held for the following material visual corrections.
+
+The actual live public profile exposed About/Top8 overlap and a stale gap before Updates with real content heights. Local correction now measures desktop/mobile independently, uses actual object footprints, compacts only unsaved defaults, and preserves saved owner arrangements. Seven focused layout tests and typecheck pass. The outer portrait frame is restored to the approved rectangular tilted TV housing with a curved inner screen and shared light phase.
+
+Paired review sources:
+- Approved desktop: `/Users/tuckercasey/Documents/Zaylist/prototypes/tucker-wall/captures/final-desktop/tile-01.png` and `profile-stitched.png`.
+- Approved mobile pocket: `/private/tmp/tucker-pocket-mobile.jpg`.
+- Current live before correction: `captures/live-profile-desktop.png` (capture has extra padded canvas; do not treat as final proof).
+- Corrected local native profile, using actual anonymous live profile data: `captures/measured-public-profile-local.png`, `captures/measured-public-profile-mobile.png`. The mobile capture is391px wide with uneven widths/angles, Stash beside About, native Top8, and no horizontal overflow. These are explicitly local previews, not live proof.
+
+Actual public content differs legitimately from the prototype: no public upcoming RSVP or native BoardZ trail post is projected for Tucker, and private favorites/trips are not exposed to visitors. No example attendance/check-in was fabricated. Native application header/actions remain intact as required by the integration plan.
+
+Remaining: finish targeted browser checks, push the visual correction, await its Railway SUCCESS, capture the actual live desktop/mobile result, refresh exact live package and verified revision in Foundation, then publish/verify Foundation direct/embedded guide and all24 contracts/52 variants.

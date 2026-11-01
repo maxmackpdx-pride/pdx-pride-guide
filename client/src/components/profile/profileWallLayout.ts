@@ -1,9 +1,10 @@
 import {profileObject} from '@shared/profileObjects';
 import type {ProfileLayout,ProfileWidget} from '@shared/profileLayout';
 export type WallRect={id:string;x:number;y:number;width:number;height:number;rotation:number;z:number;pinned:boolean;widget:ProfileWidget};
+export type WallMeasurements=Partial<Record<'desktop'|'mobile',Record<string,number>>>;
 export function composeProfileWall(layout:ProfileLayout,mobile:boolean,width:number,heights:Record<string,number>={}):WallRect[]{
  const view=mobile?'mobile':'desktop';const rects:WallRect[]= layout.widgets.filter(w=>w.enabled).flatMap(widget=>{const object=profileObject(widget.objectId),p=widget[view];const size=object?.variants[p.variant as keyof typeof object.variants] as {width:number;height:number}|undefined;if(!size)return [];
-  const w=Math.min(size.width,Math.max(136,width-16));return [{id:widget.id,x:Math.max(8,Math.min(width-w-8,mobile?p.x/360*Math.max(0,width-16):p.x)),y:p.y,width:w,height:Math.max(heights[widget.id]||0,size.height),rotation:p.rotation,z:p.z,pinned:p.pinned,widget}];});
+  const w=Math.min(size.width,Math.max(136,width-16));return [{id:widget.id,x:Math.max(8,Math.min(width-w-8,mobile?p.x/360*Math.max(0,width-16):p.x)),y:p.y,width:w,height:heights[widget.id]||size.height,rotation:p.rotation,z:p.z,pinned:p.pinned,widget}];});
  return rects;
 }
 export function rectanglesOverlap(a:Pick<WallRect,'x'|'y'|'width'|'height'>,b:Pick<WallRect,'x'|'y'|'width'|'height'>,gap=18){return a.x<b.x+b.width+gap&&a.x+a.width+gap>b.x&&a.y<b.y+b.height+gap&&a.y+a.height+gap>b.y;}
@@ -29,15 +30,15 @@ export function resizeWallWidget(layout:ProfileLayout,id:string,mobile:boolean,v
  for(const r of result.rects){const before=rects.find(row=>row.id===r.id)!;if(r.y!==before.y)next=updateWallPlacement(next,r.id,mobile,{y:r.y});}return next;
 }
 /** Give newly projected trail entries an initial slot. Saved/manual overlaps are untouched. */
-export function placeNewProfileActivities(layout:ProfileLayout,ids:Set<string>):ProfileLayout{
- let next=layout;for(const mobile of [false,true]){const rects=composeProfileWall(next,mobile,mobile?390:1160),placed=rects.filter(r=>!ids.has(r.id));for(const r of rects.filter(r=>ids.has(r.id))){let count=0;while(count++<rects.length*2){const hit=placed.find(other=>rectanglesOverlap(r,other,4));if(!hit)break;r.y=hit.y+hit.height+24;}placed.push(r);next=updateWallPlacement(next,r.id,mobile,{y:r.y});}}return next;
+export function placeNewProfileActivities(layout:ProfileLayout,ids:Set<string>,measurements:WallMeasurements={}):ProfileLayout{
+ let next=layout;for(const mobile of [false,true]){const rects=composeProfileWall(next,mobile,mobile?390:1160,measurements[mobile?'mobile':'desktop']),placed=rects.filter(r=>!ids.has(r.id));for(const r of rects.filter(r=>ids.has(r.id))){let count=0;while(count++<rects.length*2){const hit=placed.find(other=>rectanglesOverlap(r,other,4));if(!hit)break;r.y=hit.y+hit.height+24;}placed.push(r);next=updateWallPlacement(next,r.id,mobile,{y:r.y});}}return next;
 }
 /** Collapse absent-widget reservations only before an owner has saved an arrangement. */
-export function compactDefaultProfileLayout(layout:ProfileLayout):ProfileLayout{
+export function compactDefaultProfileLayout(layout:ProfileLayout,measurements:WallMeasurements={}):ProfileLayout{
  if(layout.revision!==0)return layout;
- let next=layout;for(const mobile of [false,true]){const rects=composeProfileWall(next,mobile,mobile?390:1160),placed:WallRect[]=[];
+ let next=layout;for(const mobile of [false,true]){const rects=composeProfileWall(next,mobile,mobile?390:1160,measurements[mobile?'mobile':'desktop']),placed:WallRect[]=[];
   for(const r of [...rects].filter(r=>r.pinned).sort((a,b)=>a.y-b.y)){const overlaps=placed.filter(p=>r.x<p.x+p.width+8&&r.x+r.width+8>p.x);const y=overlaps.length?Math.max(...overlaps.map(p=>p.y+p.height))+48:Math.min(r.y,mobile?150:120);const position={...r,y};placed.push(position);next=updateWallPlacement(next,r.id,mobile,{y});}
-  const featured=rects.find(r=>r.widget.objectId.endsWith('/ProfileFeaturedEvent'));if(featured){const before=placed.filter(p=>p.x<featured.x+featured.width&&p.x+p.width>featured.x);const y=Math.max(mobile?340:360,...before.map(p=>p.y+p.height+52));next=updateWallPlacement(next,featured.id,mobile,{y});}
+  for(const paper of rects.filter(r=>!r.pinned&&r.widget.source.kind==='profile').sort((a,b)=>a.y-b.y)){const before=placed.filter(p=>p.x<paper.x+paper.width&&p.x+p.width>paper.x);const y=Math.max(mobile?340:360,...before.map(p=>p.y+p.height+52));placed.push({...paper,y});next=updateWallPlacement(next,paper.id,mobile,{y});}
  }
  return next;
 }

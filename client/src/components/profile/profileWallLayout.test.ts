@@ -14,3 +14,15 @@ test('ribbon rotates its actual sheet geometry while keeping measured endpoints 
 
 import {compactDefaultProfileLayout} from './profileWallLayout';
 test('sparse unsaved profiles close empty reservations while saved layouts stay exact',()=>{const layout=defaultProfileLayout();const visible=new Set(['ProfileAbout','ProfileHosting','ProfileStash','ProfileFeaturedEvent']);layout.widgets=layout.widgets.map(w=>({...w,enabled:visible.has(w.id)}));const compact=compactDefaultProfileLayout(layout);assert.ok(compact.widgets.find(w=>w.id==='ProfileHosting')!.desktop.y<300);assert.ok(compact.widgets.find(w=>w.id==='ProfileStash')!.desktop.y<700);assert.ok(compact.widgets.find(w=>w.id==='ProfileFeaturedEvent')!.desktop.y<600);const saved={...layout,revision:1};assert.equal(compactDefaultProfileLayout(saved),saved);});
+
+test('real card heights keep default anchors readable and Updates beside the collected content',()=>{
+ const layout=defaultProfileLayout(),visible=new Set(['ProfileAbout','ProfileTop8','ProfileHosting','ProfileStash','ProfileFeaturedEvent','ProfileUpdate']);
+ layout.widgets=layout.widgets.map(w=>({...w,enabled:visible.has(w.id)}));const before=JSON.stringify(layout);
+ const measurements={desktop:{ProfileAbout:520,ProfileTop8:1000},mobile:{ProfileAbout:300,ProfileTop8:1450}};
+ const compact=compactDefaultProfileLayout(layout,measurements);
+ for(const mobile of [false,true]){const rects=composeProfileWall(compact,mobile,mobile?390:1160,measurements[mobile?'mobile':'desktop']);const about=rects.find(r=>r.id==='ProfileAbout')!,top8=rects.find(r=>r.id==='ProfileTop8')!,poster=rects.find(r=>r.id==='ProfileFeaturedEvent')!,update=rects.find(r=>r.id==='ProfileUpdate')!;
+  assert.ok(top8.y>=about.y+about.height,'Top 8 must not cover real About content');assert.ok(poster.y>=top8.y+top8.height,'poster must follow the full native Top 8');assert.ok(update.y>=poster.y+poster.height&&update.y<poster.y+poster.height+100,'Updates must follow the paper without the old empty reservation');
+ }
+ assert.equal(composeProfileWall(layout,false,1160,{ProfileAbout:100}).find(r=>r.id==='ProfileAbout')!.height,100,'measured compact content replaces the placeholder height');
+ assert.equal(JSON.stringify(layout),before);const saved={...layout,revision:1};assert.equal(compactDefaultProfileLayout(saved,measurements),saved);
+});
