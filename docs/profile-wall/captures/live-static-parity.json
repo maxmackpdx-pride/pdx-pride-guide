@@ -1,0 +1,11 @@
+{
+  "productCommit": "8c1a7d5f62d0f2695615738b3fc9fafdf0c8a2ac",
+  "foundationCommit": "6a293e6c5da3e594e1e9602a475231e0e5f4f1ba",
+  "release": "zaylist-foundation-design-system-2026-11-01.3",
+  "objects": 24,
+  "variants": 52,
+  "artifacts": 376,
+  "sourceDigest": "1e0387f6a7e49f3fd605b1a616311f7e8cb18752cc68025a823d2a4a3b961b09",
+  "allStaticContractAndByteParityPassed": true,
+  "apiAndEmbeddedRootBlocked": "Cloudflare Error 1027"
+}
