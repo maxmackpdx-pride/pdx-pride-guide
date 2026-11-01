@@ -46,8 +46,9 @@ test('waypoint heads follow roofs with the existing minimum ground gap',async()=
       const first=waypointGeometry({x:100,y:300},selected,roof);
       const moved=waypointGeometry({x:290,y:185},selected,roof);
       assert.equal(moved.x-first.x,190);assert.ok(Math.abs(moved.y-first.y+115)<1e-9);
-      // Waypoint pack sizes: 31 at rest growing to 36 by zoom 16, 49 selected.
-      assert.equal(first.size,selected?50:35);
+      // Waypoint pack sizes (41e2b6dc): 28 at rest growing to 30 close up,
+      // selected 46 easing to 40 — at this zoom (15.35) that is 30 / 41.
+      assert.equal(first.size,selected?41:30);
       assert.equal(300-first.bottom,Math.max(roof,selected?16:10));
       // The shell's integrated tip (34% of the size) touches the top of the beam.
       assert.ok(Math.abs(first.y+first.size/2+first.size*.34-first.bottom)<1e-9);
@@ -111,8 +112,8 @@ test('waypoint outlines and glow retain category colors even with stale rainbow 
 
 test('nearby waypoint heads are smaller without shrinking the far-view baseline',async()=>{
  const {waypointHeadSize}=await import('../client/public/mapz-map/waypoint-markers.js');
- assert.equal(waypointHeadSize(true,12),57);assert.equal(waypointHeadSize(false,10),31);assert.equal(waypointHeadSize(false,12),31);
- assert.equal(waypointHeadSize(false,16),36);assert.equal(waypointHeadSize(false,20),36);assert.equal(waypointHeadSize(true,16),49);
+ assert.equal(waypointHeadSize(true,12),46);assert.equal(waypointHeadSize(false,10),28);assert.equal(waypointHeadSize(false,12),28);
+ assert.equal(waypointHeadSize(false,16),30);assert.equal(waypointHeadSize(false,20),30);assert.equal(waypointHeadSize(true,16),40);
  const sizes=Array.from({length:41},(_,i)=>waypointHeadSize(false,12+i/10));
  assert.ok(sizes.every((size,i)=>!i||size>=sizes[i-1]&&size-sizes[i-1]<=1));
 });

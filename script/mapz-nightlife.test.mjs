@@ -14,6 +14,7 @@ import {screenNeighborCounts,signRise,createSignLift,SIGN_LIFT_ENTER_PX,SIGN_LIF
 import {mizzedNotificationActive,extensionGeometry,EVENT_WAYPOINT_GAP} from '../client/public/mapz-map/venue-attachments.js';
 import {visibleHologramLabels} from '../client/public/mapz-map/label-visibility.js';
 import {waypointGeometry,waypointArtwork} from '../client/public/mapz-map/waypoint-markers.js';
+import {mapzAsset} from '../client/public/map-foundation/waypoint-objects.js';
 import {housingIconSize} from '../client/public/mapz-map/housing-holograms.js';
 import {hologramTypeForVenue} from '../client/public/mapz-map/venue-hologram-types.js';
 import test, {after} from 'node:test';
@@ -96,9 +97,9 @@ test('chrome reuses wall paths at rest and rebuilds only when the camera changes
 
 test('actual hologram draw paints sky artwork after building occlusion',async()=>{
   const renderer=await readFile(new URL('../client/public/mapz-map/river-flight.js',import.meta.url),'utf8');
-  const source=renderer.slice(renderer.indexOf('function drawLightsLegacy('),renderer.indexOf('// Gentle corridor:'));
+  const source=renderer.slice(renderer.indexOf('let waypointObjectRows'),renderer.indexOf('function drawLights('))+renderer.slice(renderer.indexOf('function drawLightsLegacy('),renderer.indexOf('// Gentle corridor:'));
   const operations=[],projections=[],noop=()=>{},window={innerWidth:900,innerHeight:1200};
-  const ctx=new Proxy({drawImage(image){operations.push(image);},createLinearGradient:()=>({addColorStop:noop}),
+  const ctx=new Proxy({drawImage(image){operations.push(image);},getTransform:()=>({a:1,b:0,c:0,d:1,e:0,f:0}),createLinearGradient:()=>({addColorStop:noop}),
     createRadialGradient:()=>({addColorStop:noop})},{get:(target,key)=>key in target?target[key]:noop});
   const surface={width:900,height:1200,getContext:()=>ctx},map={getCenter:()=>({lat:45.52,lng:-122.675,distanceTo:()=>0}),getZoom:()=>15.5,getPitch:()=>55,transform:{cameraToCenterDistance:300},project:()=>({x:450,y:700})};
   const color='#FF00CC',feature={geometry:{coordinates:[-122.675,45.52]},properties:{key:'demo',kind:'event',demoOpen:true,name:'Musical Mondays',time:'9:00 PM',startsAtMs:Date.now()+720000,logo:'logo',phase:1,color,heightScale:1}};
@@ -117,6 +118,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     venueLogos:new Map([['logo',logo]]),logoFocus:{update:noop,active:new Map()},logoFit:()=>.2,logoMotionSeed:0,
     adultVenueColor:'#FF0000',hologramMaterials:{beams:new Map([[color,{}]])},drawProjectionBeam:()=>operations.push('beam'),
     waypointGeometry,waypointArtwork,placezHoverLift:()=>15,typeIcons:new Map(),drawWaypointFoot:()=>operations.push('waypoint-beam'),drawWaypointHead:()=>operations.push('waypoint-head'),waypointFamilyShell:()=>'place',waypointSwapGlitch:()=>0,noteSelectedWaypoint:noop,drawClusterCount:noop,
+    mapzAsset,waypointObjects:{ready:()=>false,setRows:noop},
     projectorGroundScale,housingIconSize,visibleHologramLabels,
     applyBuildingOcclusion:()=>operations.push('building-mask'),buildingChrome:{draw:()=>operations.push('chrome')},
     clipBehindHolograms,pointBehindHologram,waypointOccluders:[],waypointDepths:new Map(),
