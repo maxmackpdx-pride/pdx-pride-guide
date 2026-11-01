@@ -375,7 +375,7 @@ function blankTexture(){const t=new THREE.DataTexture(new Uint8Array([0,0,0,0]),
 // Concept: vortex without rings. Hides the text ring bands, the ring fills, and the ring parts of the outline at vortex stages.
 const E3_NO_RINGS=true;
 export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=null,mirrored=false}={}){
- const object=template.clone(true),meshes=[],particles=[],materials=new Set(),groundTexture=radialTexture();
+ const object=template.clone(true),meshes=[],particles=[],materials=new Set(),ownedGeometries=new Set(),groundTexture=radialTexture();
  let iconMaterial=null;
  const tint=new THREE.Color(color);
  // Cut-out for the model's three little circles; the face stack replaces them.
@@ -384,7 +384,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   if(!node.isMesh)return;
   const role=node.userData.mapzRole||'outline';
   if(E3_NO_RINGS&&role==='outline'&&node.morphTargetDictionary&&!node.geometry.attributes.aRing){
-   node.geometry=node.geometry.clone();
+   node.geometry=node.geometry.clone();ownedGeometries.add(node.geometry);
    const pos=node.geometry.attributes.position,mask=new Float32Array(pos.count),m=node.geometry.morphAttributes.position||[];
    for(const [name,index] of Object.entries(node.morphTargetDictionary))if(/^Ring \d independent hover$/.test(name)){const d=m[index];for(let v=0;v<pos.count;v++)if(Math.abs(d.getX(v))+Math.abs(d.getY(v))+Math.abs(d.getZ(v))>1e-6)mask[v]=1;}
    node.geometry.setAttribute('aRing',new THREE.BufferAttribute(mask,1));
@@ -489,10 +489,10 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
   mesh.frustumCulled=false;mesh.renderOrder=4;mesh.visible=false;mesh.position.z=LOGO_FACE_Z;object.add(mesh);
   return {table,mesh,material};
  });
- const textures=new Set();
+ const textures=new Set(),ownedCanvases=new Set();let released=false;
  const track=texture=>{textures.add(texture);return texture;};
- const release=texture=>{if(texture){texture.dispose();textures.delete(texture);}};
- const canvasTexture=canvas=>{const t=track(new THREE.CanvasTexture(canvas));t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return t;};
+ const release=texture=>{if(texture){texture.dispose();textures.delete(texture);const image=texture.image;if(ownedCanvases.delete(image))image.width=image.height=1;}};
+ const canvasTexture=(canvas,owned=false)=>{if(owned)ownedCanvases.add(canvas);const t=track(new THREE.CanvasTexture(canvas));t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return t;};
  const flat=(mesh,order)=>{mesh.frustumCulled=false;mesh.renderOrder=order;mesh.visible=false;mesh.position.z=LOGO_FACE_Z;object.add(mesh);return mesh;};
  const flatMaterial=()=>new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,color:0xffffff});
  // Content, set by the host row: accent, per-screen copy and art, ring lines, countdown parts, faces.
@@ -545,6 +545,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  // Venue logo for the coin stages.
  let logoKey=null,logoTexture=null,logoAspect=1;
  function setLogo(next){
+  if(released)return;
   const key=next?next.key??next.image:null;
   if(key===logoKey)return;
   logoKey=key;
@@ -558,6 +559,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
  setLogo(logo);
  const art=(entry)=>entry?.image&&entry.width>0&&entry.height>0?entry:null;
  function setContent(next={}){
+  if(released)return;
   const screens=(next.screens||[]).slice(0,2),accent=next.accent||'#E03DFF',fonts=fontsReady();
   const countdown=next.countdown||[],faces=next.faces||{people:[],more:0},countdown2=next.countdown2||[],faces2=next.faces2||{people:[],more:0};
   const tintHex='#'+tint.getHexString();
@@ -573,7 +575,7 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    screens.forEach((screen,index)=>{
     const slide=slides[index],info=infos[index];
     release(info.texture);info.texture=null;
-    if(screen.name||screen.time){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=300;drawInfoCanvas(canvas,screen.name,screen.time,accent,Boolean(screen.pending),'');info.texture=canvasTexture(canvas);}
+    if(screen.name||screen.time){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=300;drawInfoCanvas(canvas,screen.name,screen.time,accent,Boolean(screen.pending),'');info.texture=canvasTexture(canvas,true);}
     info.material.map=info.texture;info.material.needsUpdate=true;
     for(const kind of Object.keys(slide.textures)){release(slide.textures[kind]);}
     slide.textures={};slide.aspects={};slide.kinds=[];
@@ -595,27 +597,27 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
     // The approved no-ring style never samples these large text textures.
     if(line&&!E3_NO_RINGS){
      const canvas=document.createElement('canvas');canvas.width=band.spec.width;canvas.height=band.spec.height;band.copies=drawRingTextCanvas(canvas,line,band.spec.font,accent,tintHex);
-     band.texture=canvasTexture(canvas);band.texture.wrapS=THREE.RepeatWrapping;
+     band.texture=canvasTexture(canvas,true);band.texture.wrapS=THREE.RepeatWrapping;
      band.farTexture=band.texture.clone();track(band.farTexture);band.farTexture.repeat.x=-1;band.farTexture.offset.x=1;band.farTexture.needsUpdate=true;
     }
     band.near.material.map=band.texture;band.far.material.map=band.farTexture;band.near.material.needsUpdate=true;band.far.material.needsUpdate=true;
    }
    release(label.texture);label.texture=null;
-   if(venueName){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=162;drawVenueLabelCanvas(canvas,venueName,accent);label.texture=canvasTexture(canvas);}
+   if(venueName){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=162;drawVenueLabelCanvas(canvas,venueName,accent);label.texture=canvasTexture(canvas,true);}
    label.material.map=label.texture;label.material.needsUpdate=true;
    release(faceStack.texture);faceStack.texture=null;
-   if(faces.people.length){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=120;drawFaceCanvas(canvas,faces,tintHex);faceStack.texture=canvasTexture(canvas);}
+   if(faces.people.length){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=120;drawFaceCanvas(canvas,faces,tintHex);faceStack.texture=canvasTexture(canvas,true);}
    release(faceStack.texture2);faceStack.texture2=null;
-   if(faces2.people.length){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=120;drawFaceCanvas(canvas,faces2,tintHex);faceStack.texture2=canvasTexture(canvas);}
+   if(faces2.people.length){const canvas=document.createElement('canvas');canvas.width=420;canvas.height=120;drawFaceCanvas(canvas,faces2,tintHex);faceStack.texture2=canvasTexture(canvas,true);}
    faceStack.material.map=faceStack.texture;faceStack.material.needsUpdate=true;
    orbCore.material.color.set(accent);progressBar.material.color.set(accent);for(const shell of orbShells)shell.material.color.set(accent);
   }
   // The countdown changes about once a second.
   release(plate.texture);plate.texture=null;
-  if(countdown.length){const canvas=document.createElement('canvas');canvas.width=480;canvas.height=150;drawCountdownCanvas(canvas,countdown,tintHex,accent);plate.texture=canvasTexture(canvas);}
+  if(countdown.length){const canvas=document.createElement('canvas');canvas.width=480;canvas.height=150;drawCountdownCanvas(canvas,countdown,tintHex,accent);plate.texture=canvasTexture(canvas,true);}
   plate.material.map=plate.texture;plate.material.needsUpdate=true;
   release(plate2.texture);plate2.texture=null;
-  if(screens.length>1&&countdown2.length){const canvas=document.createElement('canvas');canvas.width=480;canvas.height=150;drawCountdownCanvas(canvas,countdown2,tintHex,accent);plate2.texture=canvasTexture(canvas);}
+  if(screens.length>1&&countdown2.length){const canvas=document.createElement('canvas');canvas.width=480;canvas.height=150;drawCountdownCanvas(canvas,countdown2,tintHex,accent);plate2.texture=canvasTexture(canvas,true);}
   plate2.material.map=plate2.texture;plate2.material.needsUpdate=true;
  }
  let stage=0,urgency=0,lastElapsed=null,ringAngle=0,tiltClock=0,pulsePhase=0,textBoost=1;
@@ -798,8 +800,13 @@ export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=nul
    });
   },
   dispose(){
+   if(released)return;released=true;
+   for(const geometry of ownedGeometries)geometry.dispose();ownedGeometries.clear();
    for(const material of materials)material.dispose();groundTexture.dispose();blank.dispose();
-   for(const texture of [...textures])texture.dispose();textures.clear();
+   for(const texture of [...textures])release(texture);textures.clear();
+   // Release CPU canvas buffers as well as GPU textures; borrowed artwork is untouched.
+   for(const canvas of ownedCanvases)canvas.width=canvas.height=1;ownedCanvases.clear();
+   groundTexture.image.width=groundTexture.image.height=1;discCanvas.width=discCanvas.height=1;
    for(const plane of logoPlanes){plane.material.dispose();plane.mesh.geometry.dispose();}
    for(const slide of slides){slide.material.dispose();slide.mesh.geometry.dispose();}
    for(const info of infos){info.material.dispose();info.mesh.geometry.dispose();}
@@ -863,10 +870,10 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
    camera.projectionMatrix.copy(M);
    renderer.resetState();
   },
-  onRemove(){disposed=true;for(const item of instances.values())item.model.dispose();instances.clear();if(template)release(template);renderer?.dispose();layer.ready=false;map=null;}
+  onRemove(){disposed=true;for(const item of instances.values())item.model.dispose();instances.clear();scene?.clear();if(template)release(template);renderer?.dispose();layer.ready=false;map=null;}
  };
  function sync(){
-  if(!template||!scene)return;
+  if(disposed||!template||!scene)return;
   if(!origin&&rows.length){origin=maplibre.MercatorCoordinate.fromLngLat(rows[0].coordinates,0);unit=origin.meterInMercatorCoordinateUnits();}
   const keep=new Set(rows.map(row=>row.key));
   for(const [key,item] of instances)if(!keep.has(key)){scene.remove(item.root);item.model.dispose();instances.delete(key);}

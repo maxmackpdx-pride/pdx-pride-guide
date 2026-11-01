@@ -302,7 +302,7 @@ test('river-flight and the model wire the v2 vortex without fake dates', async (
   assert.match(flight,/sameDayVortex=g\.sameDay&&Math\.max\(stage,st\.value\)>3/);
   assert.match(flight,/absolute\.origin!==location\.origin/,'posters are same-origin only');
   assert.match(model,/item\.model\.setContent\(row\.content/);
-  assert.match(model,/for\(const texture of \[\.\.\.textures\]\)texture\.dispose\(\)/,'every canvas texture is disposed');
+  // Resource ownership and disposal are exercised in mapz-hologram-textures-browser.test.mjs.
   assert.match(model,/e3SlideState\(src\.kinds,elapsed/,'the one sign shows the active event\'s slides');
   assert.ok(!/Date\.now\s*=|fakeNow|mockNow/.test(flight+model),'no fake clock in the product');
   assert.ok(!/[\u2014\u2013]/.test(model.replace(/\/\/.*$/gm,'')),'no dashes in drawn copy');
