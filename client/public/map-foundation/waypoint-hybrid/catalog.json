@@ -1,0 +1,5037 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "placez-bar",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "placez-bar",
+      "token": "neon-magenta",
+      "color": "#FF00CC",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "BAR",
+      "svg": "svg/placez-bar.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.01938597012224
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.01938597012224
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        24.6939776044053,
+        35.745811579282794,
+        50.70495909861396,
+        51.25627874221521
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6148
+    },
+    {
+      "id": "placez-venue",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "placez-venue",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "VENUE",
+      "svg": "svg/placez-venue.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.04619951995582
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.04619951995582
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        24.83417857497414,
+        36.13219314489516,
+        51.25628168832172,
+        50.88361817007161
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7248
+    },
+    {
+      "id": "placez-adult",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "placez-adult",
+      "token": "neon-red",
+      "color": "#FF2400",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "ADULT",
+      "svg": "svg/placez-adult.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.07252638207686
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.07252638207686
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        28.040178889337945,
+        33.899802846493785,
+        45.455322843341136,
+        55.79895672012696
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7489
+    },
+    {
+      "id": "placez-needz",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "placez-needz",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "NEEDZ",
+      "svg": "svg/placez-needz.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        195.98038535516707
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        169.98038535516707
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.237688118128215,
+        35.7745244441259,
+        56.59311046598982,
+        51.263227709517516
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 11930
+    },
+    {
+      "id": "placez-shop",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "placez-shop",
+      "token": "neon-yellow",
+      "color": "#CCFF00",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SHOP",
+      "svg": "svg/placez-shop.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.01940397051496
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.01940397051496
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        24.78632330354731,
+        33.076725065155294,
+        50.40078833096702,
+        53.410442130988145
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6753
+    },
+    {
+      "id": "placez-cafe",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "placez-cafe",
+      "token": "green-acid",
+      "color": "#39FF14",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "CAFE",
+      "svg": "svg/placez-cafe.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.0471773637386
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.0471773637386
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        23.526301426434706,
+        37.35831121729872,
+        52.34802098820517,
+        54.997041303991764
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7588
+    },
+    {
+      "id": "placez-restaurant",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "placez-restaurant",
+      "token": "neon-orange",
+      "color": "#FF6600",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "RESTAURANT",
+      "svg": "svg/placez-restaurant.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.07249036888047
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.07249036888047
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        26.27576744277367,
+        36.130152639414185,
+        45.918116368353,
+        49.29221640592673
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6941
+    },
+    {
+      "id": "placez-service",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "placez-service",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SERVICE",
+      "svg": "svg/placez-service.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.04424422019633
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.04424422019633
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        23.849926729154646,
+        36.221610228744574,
+        51.25367438405162,
+        50.79189078705847
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7711
+    },
+    {
+      "id": "outzide-spring",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-spring",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SPRING",
+      "svg": "svg/outzide-spring.svg",
+      "viewBox": [
+        -18,
+        -36,
+        136,
+        225.33727189455115
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        163.33727189455115
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.937948511177378,
+        33.92217602981881,
+        56.1888209616619,
+        60.043842602032456
+      ],
+      "iconRemovable": true,
+      "effects": [
+        "steam"
+      ],
+      "bytes": 7635
+    },
+    {
+      "id": "outzide-winter",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-winter",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "WINTER",
+      "svg": "svg/outzide-winter.svg",
+      "viewBox": [
+        -18,
+        -36,
+        136,
+        225.61896536331133
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        163.61896536331133
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        23.641531742724975,
+        32.38959357693719,
+        53.991612089873676,
+        60.31071859286784
+      ],
+      "iconRemovable": true,
+      "effects": [
+        "snow",
+        "frost"
+      ],
+      "bytes": 8638
+    },
+    {
+      "id": "outzide-trail",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-trail",
+      "token": "neon-orange",
+      "color": "#FF6600",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "TRAIL",
+      "svg": "svg/outzide-trail.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        207.67176853797145
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        181.67176853797145
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.560290787470155,
+        32.63022157616661,
+        55.647803922717145,
+        54.17967510565048
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6743
+    },
+    {
+      "id": "outzide-stay",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-stay",
+      "token": "neon-magenta",
+      "color": "#FF00CC",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "STAY",
+      "svg": "svg/outzide-stay.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        189.2630432592586
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        163.2630432592586
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.425214378490242,
+        33.64096796250535,
+        56.310067726520764,
+        56.89902130215343
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 10403
+    },
+    {
+      "id": "outzide-beach",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-beach",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "BEACH",
+      "svg": "svg/outzide-beach.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        189.33735824211445
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        163.33735824211445
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.77533186826484,
+        30.594635456430282,
+        62.35481548055366,
+        67.14021866551361
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7880
+    },
+    {
+      "id": "outzide-camp",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-camp",
+      "token": "green-acid",
+      "color": "#39FF14",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "CAMP",
+      "svg": "svg/outzide-camp.svg",
+      "viewBox": [
+        -18,
+        -36,
+        136,
+        250.27430175561963
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        188.27430175561963
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        17.81134799131261,
+        34.06529782303409,
+        63.981047164905405,
+        59.83831167637347
+      ],
+      "iconRemovable": true,
+      "effects": [
+        "fire",
+        "smoke"
+      ],
+      "bytes": 7240
+    },
+    {
+      "id": "outzide-fishing",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-fishing",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "FISHING",
+      "svg": "svg/outzide-fishing.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        189.38804725083048
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        163.38804725083048
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.836688107363525,
+        36.643531538096944,
+        56.02282591071258,
+        42.154960166407534
+      ],
+      "iconRemovable": true,
+      "effects": [
+        "swim"
+      ],
+      "bytes": 7552
+    },
+    {
+      "id": "outzide-boating",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-boating",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "BOATING",
+      "svg": "svg/outzide-boating.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        189.3592144750376
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        163.3592144750376
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.384754681515982,
+        35.14978813529289,
+        62.094838994724135,
+        61.844283903351446
+      ],
+      "iconRemovable": true,
+      "effects": [
+        "rock"
+      ],
+      "bytes": 7255
+    },
+    {
+      "id": "outzide-atv",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-atv",
+      "token": "neon-red",
+      "color": "#FF2400",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "ATV",
+      "svg": "svg/outzide-atv.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        189.33747896503098
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        163.33747896503098
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.378479455067136,
+        36.624722492732595,
+        66.37326752502605,
+        54.326383052461516
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 8537
+    },
+    {
+      "id": "outzide-day-use",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-day-use",
+      "token": "neon-yellow",
+      "color": "#CCFF00",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "DAY USE",
+      "svg": "svg/outzide-day-use.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        189.36670550923316
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        163.36670550923316
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.4760045034112,
+        37.32581233607639,
+        60.364961842278625,
+        50.78143260417622
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7158
+    },
+    {
+      "id": "outzide-winter-closed",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-winter-closed",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "WINTER \u00b7 CLOSED",
+      "svg": "svg/outzide-winter-closed.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        189.38790933310506
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        163.38790933310506
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.192478974165315,
+        33.62006059858887,
+        57.32818951344172,
+        57.35912605669983
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6349
+    },
+    {
+      "id": "needz-health",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "needz-health",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-red",
+      "secondary": "#FF2400",
+      "label": "HEALTH",
+      "svg": "svg/needz-health.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.04133199315316
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.04133199315316
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.196195528348532,
+        35.750425631966856,
+        56.59403748107421,
+        51.262894878765394
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7494
+    },
+    {
+      "id": "needz-safety",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "needz-safety",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-red",
+      "secondary": "#FF2400",
+      "label": "SAFETY",
+      "svg": "svg/needz-safety.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.0198347622281
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.0198347622281
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        26.97156351164245,
+        33.07561864411374,
+        45.91790132098702,
+        56.60305761981666
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 8484
+    },
+    {
+      "id": "needz-legal",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "needz-legal",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-blue",
+      "secondary": "#0044FF",
+      "label": "LEGAL",
+      "svg": "svg/needz-legal.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.05105902104418
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.05105902104418
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.204343256145016,
+        37.35916399335716,
+        56.41985777140476,
+        49.65913401893648
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7086
+    },
+    {
+      "id": "needz-youth",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "needz-youth",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "icon-white",
+      "secondary": "#FFFFFF",
+      "label": "YOUTH",
+      "svg": "svg/needz-youth.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.07198786902302
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.07198786902302
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.132820809418238,
+        35.75698877277557,
+        56.21127635757979,
+        51.04028900123544
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 9158
+    },
+    {
+      "id": "needz-community",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "needz-community",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-yellow",
+      "secondary": "#CCFF00",
+      "label": "COMMUNITY",
+      "svg": "svg/needz-community.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.04037205713473
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.04037205713473
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.222085879481433,
+        35.750223809734365,
+        56.594446989880495,
+        49.65601315996571
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 8560
+    },
+    {
+      "id": "needz-family",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "needz-family",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-magenta",
+      "secondary": "#FF00CC",
+      "label": "FAMILY",
+      "svg": "svg/needz-family.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.0200314285219
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.0200314285219
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        24.4571220894362,
+        33.078237702637345,
+        51.25178592977237,
+        53.90931090978824
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7174
+    },
+    {
+      "id": "needz-money",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "needz-money",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "green-acid",
+      "secondary": "#39FF14",
+      "label": "MONEY",
+      "svg": "svg/needz-money.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.05201543807613
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.05201543807613
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        35.4192734523828,
+        30.641539575344694,
+        30.43450534165367,
+        57.31942659410209
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7712
+    },
+    {
+      "id": "needz-arts",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "needz-arts",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-violet",
+      "secondary": "#8800FF",
+      "label": "ARTS",
+      "svg": "svg/needz-arts.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.0717734966829
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.0717734966829
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.475093119503118,
+        33.09116887570764,
+        56.57304352601341,
+        56.607641554221416
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 8899
+    },
+    {
+      "id": "needz-mental-health",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "needz-mental-health",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-red",
+      "secondary": "#FF2400",
+      "label": "MENTAL HEALTH",
+      "svg": "svg/needz-mental-health.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.03941969110318
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.03941969110318
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.17196023290047,
+        33.059121732905815,
+        56.598630461138725,
+        56.58544049215721
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 10720
+    },
+    {
+      "id": "needz-harm-reduction",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "needz-harm-reduction",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-red",
+      "secondary": "#FF2400",
+      "label": "HARM REDUCTION",
+      "svg": "svg/needz-harm-reduction.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.02026322152614
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.02026322152614
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.884301073486036,
+        35.105297034544925,
+        56.193001677159515,
+        51.42673476953032
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 8913
+    },
+    {
+      "id": "services-graphic-design",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "services-graphic-design",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "GRAPHIC DESIGN",
+      "svg": "svg/services-graphic-design.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.05296365412337
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.05296365412337
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.105210811842596,
+        33.08750901102894,
+        56.57304352601341,
+        56.60138078088197
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 8863
+    },
+    {
+      "id": "services-hair",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "services-hair",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "HAIR",
+      "svg": "svg/services-hair.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.07152412982146
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.07152412982146
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        25.104943741615852,
+        35.756773392972825,
+        48.11669846104823,
+        51.27199699711538
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7387
+    },
+    {
+      "id": "services-massage",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "services-massage",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "MASSAGE",
+      "svg": "svg/services-massage.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.03847619483946
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.03847619483946
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.104832744151153,
+        33.080435504702955,
+        56.87295127752607,
+        56.600601205797126
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 9261
+    },
+    {
+      "id": "services-tattoo",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "services-tattoo",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "TATTOO",
+      "svg": "svg/services-tattoo.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.02052982703754
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.02052982703754
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        27.435979817135856,
+        37.94557696576643,
+        45.413885836722535,
+        50.406430444949414
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6750
+    },
+    {
+      "id": "services-web-development",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "services-web-development",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "WEB DEVELOPMENT",
+      "svg": "svg/services-web-development.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        196.05390237377662
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        170.05390237377662
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.321129183074046,
+        44.23254107954911,
+        56.59444697503859,
+        34.30773934779431
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6263
+    },
+    {
+      "id": "secondary-mountains",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-mountains",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "MOUNTAINS",
+      "svg": "svg/secondary-mountains.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.96984800636848
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.96984800636848
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.3254286294298,
+        21.459603485535176,
+        60.59182053102389,
+        53.90036783271189
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3179
+    },
+    {
+      "id": "secondary-river",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-river",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "RIVER",
+      "svg": "svg/secondary-river.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.95063475901281
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.95063475901281
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.765948920534537,
+        20.676280825424104,
+        55.34994963117682,
+        58.28867278950205
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5545
+    },
+    {
+      "id": "secondary-coast",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-coast",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "COAST",
+      "svg": "svg/secondary-coast.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.94110607642486
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.94110607642486
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.072737571283167,
+        26.429511689383816,
+        60.06540347598458,
+        43.723614346417
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6130
+    },
+    {
+      "id": "secondary-high-desert",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-high-desert",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "HIGH DESERT",
+      "svg": "svg/secondary-high-desert.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.96049160619023
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.96049160619023
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.715559219993057,
+        19.22767814754211,
+        58.19633121197822,
+        58.14659071587534
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4024
+    },
+    {
+      "id": "secondary-forest",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-forest",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "FOREST",
+      "svg": "svg/secondary-forest.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.9696665231715
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.9696665231715
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.389705382656654,
+        20.622090341579167,
+        58.85503338853963,
+        56.759500086338925
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6270
+    },
+    {
+      "id": "secondary-dunes",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-dunes",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "DUNES",
+      "svg": "svg/secondary-dunes.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.95010909198504
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.95010909198504
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.835560772554743,
+        23.528359407278945,
+        59.45548042926057,
+        49.53488407509539
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4832
+    },
+    {
+      "id": "secondary-swimming",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-swimming",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SWIMMING",
+      "svg": "svg/secondary-swimming.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.94129714249587
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.94129714249587
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.67934507930391,
+        17.70930384465146,
+        61.150631568800556,
+        61.16422039542954
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4536
+    },
+    {
+      "id": "secondary-nude-recreation",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-nude-recreation",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "NUDE RECREATION",
+      "svg": "svg/secondary-nude-recreation.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.96101385728362
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.96101385728362
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        32.63014861782935,
+        23.52759473043934,
+        35.83857560419754,
+        48.709875056534344
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3790
+    },
+    {
+      "id": "secondary-lake",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-lake",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "LAKE",
+      "svg": "svg/secondary-lake.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.96946574985778
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.96946574985778
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        28.756907925987154,
+        20.62204764404743,
+        43.72312880845846,
+        58.273583377138664
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4971
+    },
+    {
+      "id": "secondary-hot-springs",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-hot-springs",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "HOT SPRINGS",
+      "svg": "svg/secondary-hot-springs.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.94959064125376
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.94959064125376
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.339061189988215,
+        17.710818906794923,
+        59.657515511683805,
+        61.18137687446889
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5019
+    },
+    {
+      "id": "secondary-waterfall",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-waterfall",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "WATERFALL",
+      "svg": "svg/secondary-waterfall.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.9415073600105
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.9415073600105
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.056542526758278,
+        26.429621093223393,
+        60.06540347596523,
+        43.723795338459
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6376
+    },
+    {
+      "id": "secondary-canyon",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-canyon",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "CANYON",
+      "svg": "svg/secondary-canyon.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.96152853926465
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.96152853926465
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.50855268072393,
+        21.457762372354843,
+        60.59182053003891,
+        53.8957434845636
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3664
+    },
+    {
+      "id": "secondary-dark-sky",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-dark-sky",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "DARK SKY",
+      "svg": "svg/secondary-dark-sky.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.96924595495302
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.96924595495302
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.066580984547446,
+        20.62928887490247,
+        56.779335713276026,
+        55.359383772022234
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4335
+    },
+    {
+      "id": "secondary-pet-friendly",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-pet-friendly",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "PET FRIENDLY",
+      "svg": "svg/secondary-pet-friendly.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.949080106139
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.949080106139
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.380322386436966,
+        17.71072564188371,
+        61.12659254243377,
+        61.15932755256957
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6966
+    },
+    {
+      "id": "secondary-accessible",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "secondary-accessible",
+      "token": "secondary-neutral",
+      "color": "#BFC9D6",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "ACCESSIBLE",
+      "svg": "svg/secondary-accessible.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        122.94173644596263
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        96.94173644596263
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        25.572347884472695,
+        20.616150581279886,
+        46.110426326345475,
+        55.222362431798196
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5059
+    },
+    {
+      "id": "mini-placez-bar",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-placez-bar",
+      "token": "neon-magenta",
+      "color": "#FF00CC",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "BAR MINI",
+      "svg": "svg/mini-placez-bar.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.3133476194713
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.3133476194713
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5919
+    },
+    {
+      "id": "mini-placez-venue",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-placez-venue",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "VENUE MINI",
+      "svg": "svg/mini-placez-venue.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.32530710689346
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.32530710689346
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5668
+    },
+    {
+      "id": "mini-placez-adult",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-placez-adult",
+      "token": "neon-red",
+      "color": "#FF2400",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "ADULT MINI",
+      "svg": "svg/mini-placez-adult.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.29026598364936
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.29026598364936
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5731
+    },
+    {
+      "id": "mini-placez-needz",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-placez-needz",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "NEEDZ MINI",
+      "svg": "svg/mini-placez-needz.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.27895551922967
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.27895551922967
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5810
+    },
+    {
+      "id": "mini-placez-shop",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-placez-shop",
+      "token": "neon-yellow",
+      "color": "#CCFF00",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SHOP MINI",
+      "svg": "svg/mini-placez-shop.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.31420092734172
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.31420092734172
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5976
+    },
+    {
+      "id": "mini-placez-cafe",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-placez-cafe",
+      "token": "green-acid",
+      "color": "#39FF14",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "CAFE MINI",
+      "svg": "svg/mini-placez-cafe.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.32486642537242
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.32486642537242
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5719
+    },
+    {
+      "id": "mini-placez-restaurant",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-placez-restaurant",
+      "token": "neon-orange",
+      "color": "#FF6600",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "RESTAURANT MINI",
+      "svg": "svg/mini-placez-restaurant.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.28942100008842
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.28942100008842
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6063
+    },
+    {
+      "id": "mini-placez-service",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-placez-service",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SERVICE MINI",
+      "svg": "svg/mini-placez-service.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.27941154062543
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.27941154062543
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5806
+    },
+    {
+      "id": "mini-outzide-spring",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-spring",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SPRING MINI",
+      "svg": "svg/mini-outzide-spring.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.52658937138324
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.52658937138324
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5693
+    },
+    {
+      "id": "mini-outzide-winter",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-winter",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "WINTER MINI",
+      "svg": "svg/mini-outzide-winter.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.5355645263809
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.5355645263809
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5528
+    },
+    {
+      "id": "mini-outzide-trail",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-trail",
+      "token": "neon-orange",
+      "color": "#FF6600",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "TRAIL MINI",
+      "svg": "svg/mini-outzide-trail.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.50122413134557
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.50122413134557
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5603
+    },
+    {
+      "id": "mini-outzide-stay",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-stay",
+      "token": "neon-magenta",
+      "color": "#FF00CC",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "STAY MINI",
+      "svg": "svg/mini-outzide-stay.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.49288413102755
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.49288413102755
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5611
+    },
+    {
+      "id": "mini-outzide-beach",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-beach",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "BEACH MINI",
+      "svg": "svg/mini-outzide-beach.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.52737508333365
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.52737508333365
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5647
+    },
+    {
+      "id": "mini-outzide-camp",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-camp",
+      "token": "green-acid",
+      "color": "#39FF14",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "CAMP MINI",
+      "svg": "svg/mini-outzide-camp.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.5350830480535
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.5350830480535
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5829
+    },
+    {
+      "id": "mini-outzide-fishing",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-fishing",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "FISHING MINI",
+      "svg": "svg/mini-outzide-fishing.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.50044747108126
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.50044747108126
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5732
+    },
+    {
+      "id": "mini-outzide-boating",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-boating",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "BOATING MINI",
+      "svg": "svg/mini-outzide-boating.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.49337968395838
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.49337968395838
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5695
+    },
+    {
+      "id": "mini-outzide-atv",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-atv",
+      "token": "neon-red",
+      "color": "#FF2400",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "ATV MINI",
+      "svg": "svg/mini-outzide-atv.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.52814283941237
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.52814283941237
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5553
+    },
+    {
+      "id": "mini-outzide-day-use",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-day-use",
+      "token": "neon-yellow",
+      "color": "#CCFF00",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "DAY USE MINI",
+      "svg": "svg/mini-outzide-day-use.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.53457315760372
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.53457315760372
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5655
+    },
+    {
+      "id": "mini-outzide-winter-closed",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-winter-closed",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "WINTER \u00b7 CLOSED MINI",
+      "svg": "svg/mini-outzide-winter-closed.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.4996893329759
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.4996893329759
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5669
+    },
+    {
+      "id": "mini-needz-health",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-needz-health",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-red",
+      "secondary": "#FF2400",
+      "label": "HEALTH MINI",
+      "svg": "svg/mini-needz-health.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.2809607574124
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.2809607574124
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7478
+    },
+    {
+      "id": "mini-needz-safety",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-needz-safety",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-red",
+      "secondary": "#FF2400",
+      "label": "SAFETY MINI",
+      "svg": "svg/mini-needz-safety.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.3174378717453
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.3174378717453
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7359
+    },
+    {
+      "id": "mini-needz-legal",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-needz-legal",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-blue",
+      "secondary": "#0044FF",
+      "label": "LEGAL MINI",
+      "svg": "svg/mini-needz-legal.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.32280071616546
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.32280071616546
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7450
+    },
+    {
+      "id": "mini-needz-youth",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-needz-youth",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "icon-white",
+      "secondary": "#FFFFFF",
+      "label": "YOUTH MINI",
+      "svg": "svg/mini-needz-youth.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.2862229581708
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.2862229581708
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7516
+    },
+    {
+      "id": "mini-needz-community",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-needz-community",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-yellow",
+      "secondary": "#CCFF00",
+      "label": "COMMUNITY MINI",
+      "svg": "svg/mini-needz-community.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.2815352158722
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.2815352158722
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7521
+    },
+    {
+      "id": "mini-needz-family",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-needz-family",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-magenta",
+      "secondary": "#FF00CC",
+      "label": "FAMILY MINI",
+      "svg": "svg/mini-needz-family.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.31819757164928
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.31819757164928
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7255
+    },
+    {
+      "id": "mini-needz-money",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-needz-money",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "green-acid",
+      "secondary": "#39FF14",
+      "label": "MONEY MINI",
+      "svg": "svg/mini-needz-money.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.32221204319654
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.32221204319654
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7120
+    },
+    {
+      "id": "mini-needz-arts",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-needz-arts",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-violet",
+      "secondary": "#8800FF",
+      "label": "ARTS MINI",
+      "svg": "svg/mini-needz-arts.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.28547433282245
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.28547433282245
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7441
+    },
+    {
+      "id": "mini-needz-mental-health",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-needz-mental-health",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-red",
+      "secondary": "#FF2400",
+      "label": "MENTAL HEALTH MINI",
+      "svg": "svg/mini-needz-mental-health.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.28213743549168
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.28213743549168
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7499
+    },
+    {
+      "id": "mini-needz-harm-reduction",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-needz-harm-reduction",
+      "token": "needz-neutral",
+      "color": "#999999",
+      "secondaryToken": "neon-red",
+      "secondary": "#FF2400",
+      "label": "HARM REDUCTION MINI",
+      "svg": "svg/mini-needz-harm-reduction.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.3189353512653
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.3189353512653
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7378
+    },
+    {
+      "id": "mini-services-graphic-design",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-services-graphic-design",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "GRAPHIC DESIGN MINI",
+      "svg": "svg/mini-services-graphic-design.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.3215960096998
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.3215960096998
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5987
+    },
+    {
+      "id": "mini-services-hair",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-services-hair",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "HAIR MINI",
+      "svg": "svg/mini-services-hair.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.28474813983496
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.28474813983496
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5975
+    },
+    {
+      "id": "mini-services-massage",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-services-massage",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "MASSAGE MINI",
+      "svg": "svg/mini-services-massage.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.28276659809342
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.28276659809342
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5737
+    },
+    {
+      "id": "mini-services-tattoo",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-services-tattoo",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "TATTOO MINI",
+      "svg": "svg/mini-services-tattoo.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.31965020747563
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.31965020747563
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5939
+    },
+    {
+      "id": "mini-services-web-development",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-services-web-development",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "WEB DEVELOPMENT MINI",
+      "svg": "svg/mini-services-web-development.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        192.3209534385936
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        166.3209534385936
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5968
+    },
+    {
+      "id": "family-ride-offer-car",
+      "normal": "3d",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "family-ride-offer-car",
+      "token": "neon-orange",
+      "color": "#FF6600",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "RIDE OFFER CAR"
+    },
+    {
+      "id": "outzide-nude-recreation",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "outzide-nude-recreation",
+      "token": "neon-yellow",
+      "color": "#CCFF00",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "NUDE RECREATION",
+      "svg": "svg/outzide-nude-recreation.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        189.36670550923316
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        163.36670550923316
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        32.08101865966925,
+        36.625683908182594,
+        37.154935193739874,
+        50.479699020508946
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6916
+    },
+    {
+      "id": "mini-outzide-nude-recreation",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "mini-outzide-nude-recreation",
+      "token": "neon-yellow",
+      "color": "#CCFF00",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "NUDE RECREATION",
+      "svg": "svg/mini-outzide-nude-recreation.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        185.53457315760372
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        159.53457315760372
+      ],
+      "headWidth": 100,
+      "iconBounds": null,
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5701
+    },
+    {
+      "id": "badge-placez-bar",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-placez-bar",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "BAR",
+      "svg": "svg/badge-placez-bar.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.259775433001373,
+        21.44470647461822,
+        56.11194012133361,
+        56.84032126465762
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3105
+    },
+    {
+      "id": "badge-placez-venue",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-placez-venue",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "VENUE",
+      "svg": "svg/badge-placez-venue.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.71497226072417,
+        21.947646132950712,
+        56.84032126465762,
+        56.337381606325124
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4200
+    },
+    {
+      "id": "badge-placez-adult",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-placez-adult",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "ADULT",
+      "svg": "svg/badge-placez-adult.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        23.52514070384786,
+        19.596148630049278,
+        50.485241392611286,
+        61.61026855989604
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4114
+    },
+    {
+      "id": "badge-placez-needz",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-placez-needz",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "NEEDZ",
+      "svg": "svg/badge-placez-needz.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.793252815199857,
+        21.44471564114196,
+        62.68374869755156,
+        56.84031209813387
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4749
+    },
+    {
+      "id": "badge-placez-shop",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-placez-shop",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SHOP",
+      "svg": "svg/badge-placez-shop.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.280088449620923,
+        18.52272119990529,
+        55.710088886864106,
+        59.08200839635242
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3676
+    },
+    {
+      "id": "badge-placez-cafe",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-placez-cafe",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "CAFE",
+      "svg": "svg/badge-placez-cafe.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.91527097939998,
+        23.566995051268826,
+        57.64002254598181,
+        60.56200782069473
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4639
+    },
+    {
+      "id": "badge-placez-restaurant",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-placez-restaurant",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "RESTAURANT",
+      "svg": "svg/badge-placez-restaurant.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        24.63695982706803,
+        21.937572123354645,
+        50.996346131969894,
+        54.22517162253246
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3953
+    },
+    {
+      "id": "badge-placez-service",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-placez-service",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SERVICE",
+      "svg": "svg/badge-placez-service.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.71669556718828,
+        22.066315949357158,
+        56.83687465172939,
+        56.216988483454564
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4439
+    },
+    {
+      "id": "badge-outzide-spring",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-spring",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SPRING",
+      "svg": "svg/badge-outzide-spring.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.511474425261255,
+        21.876706405685958,
+        55.24731693558345,
+        59.3303066083028
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4764
+    },
+    {
+      "id": "badge-outzide-winter",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-winter",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "WINTER",
+      "svg": "svg/badge-outzide-winter.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        23.65635261636879,
+        20.645009776555902,
+        52.957560553368374,
+        58.43971924404412
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3751
+    },
+    {
+      "id": "badge-outzide-trail",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-trail",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "TRAIL",
+      "svg": "svg/badge-outzide-trail.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.742375583460696,
+        21.44470647461822,
+        56.826935848358566,
+        54.718037271268884
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3832
+    },
+    {
+      "id": "badge-outzide-stay",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-stay",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "STAY",
+      "svg": "svg/badge-outzide-stay.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.42728677955363,
+        21.44470647461822,
+        55.415692226998694,
+        56.218720956442425
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3200
+    },
+    {
+      "id": "badge-outzide-beach",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-beach",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "BEACH",
+      "svg": "svg/badge-outzide-beach.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.49553686542104,
+        18.52272119990529,
+        61.27919434689481,
+        66.33677569910556
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4672
+    },
+    {
+      "id": "badge-outzide-camp",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-camp",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "CAMP",
+      "svg": "svg/badge-outzide-camp.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.992093048282555,
+        22.066315949357158,
+        63.215624779716975,
+        59.03178959601389
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4030
+    },
+    {
+      "id": "badge-outzide-fishing",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-fishing",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "FISHING",
+      "svg": "svg/badge-outzide-fishing.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        22.22729385610996,
+        24.377022421592077,
+        55.01787884623899,
+        42.05851340434517
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4095
+    },
+    {
+      "id": "badge-outzide-boating",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-boating",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "BOATING",
+      "svg": "svg/badge-outzide-boating.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.67520989735235,
+        23.566995051268826,
+        60.91984828303219,
+        60.56200782069473
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4206
+    },
+    {
+      "id": "badge-outzide-atv",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-atv",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "ATV",
+      "svg": "svg/badge-outzide-atv.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.792986986011243,
+        24.366691749331142,
+        65.58812278851886,
+        53.918335989944694
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4677
+    },
+    {
+      "id": "badge-outzide-day-use",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-day-use",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "DAY USE",
+      "svg": "svg/badge-outzide-day-use.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.91527097939998,
+        25.43603090988473,
+        58.439723827306,
+        49.92252454130486
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3884
+    },
+    {
+      "id": "badge-outzide-winter-closed",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-winter-closed",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "WINTER \u00b7 CLOSED",
+      "svg": "svg/badge-outzide-winter-closed.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.71497226072417,
+        21.44470647461822,
+        56.82216696438008,
+        56.84032126465762
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3596
+    },
+    {
+      "id": "badge-needz-health",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-needz-health",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "HEALTH",
+      "svg": "svg/badge-needz-health.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.793252815199857,
+        21.44471564114196,
+        62.68374869755156,
+        56.84031209813387
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4751
+    },
+    {
+      "id": "badge-needz-safety",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-needz-safety",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SAFETY",
+      "svg": "svg/badge-needz-safety.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        24.637243989304135,
+        18.52140122048597,
+        50.99606196973379,
+        62.69362791851804
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4475
+    },
+    {
+      "id": "badge-needz-legal",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-needz-legal",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "LEGAL",
+      "svg": "svg/badge-needz-legal.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.92811300417141,
+        23.566995051268826,
+        62.45363228544995,
+        54.71803268800701
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4219
+    },
+    {
+      "id": "badge-needz-youth",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-needz-youth",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "YOUTH",
+      "svg": "svg/badge-needz-youth.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.002726215827085,
+        21.444871472045634,
+        62.26481335445178,
+        56.58654147150756
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5803
+    },
+    {
+      "id": "badge-needz-community",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-needz-community",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "COMMUNITY",
+      "svg": "svg/badge-needz-community.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.792986986011243,
+        21.44470647461822,
+        62.684291814083466,
+        54.718037271268884
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5180
+    },
+    {
+      "id": "badge-needz-family",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-needz-family",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "FAMILY",
+      "svg": "svg/badge-needz-family.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.71497226072417,
+        18.52424284284701,
+        56.8351650950509,
+        59.743730579000726
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4739
+    },
+    {
+      "id": "badge-needz-money",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-needz-money",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "MONEY",
+      "svg": "svg/badge-needz-money.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        35.33782528343195,
+        22.236821729933812,
+        29.871847414064902,
+        56.79970540667901
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4578
+    },
+    {
+      "id": "badge-needz-arts",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-needz-arts",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "ARTS",
+      "svg": "svg/badge-needz-arts.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.792986986011243,
+        18.528349445484896,
+        62.66085072123584,
+        62.678663568503865
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5800
+    },
+    {
+      "id": "badge-needz-mental-health",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-needz-mental-health",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "MENTAL HEALTH",
+      "svg": "svg/badge-needz-mental-health.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.79069764670586,
+        18.49926406564111,
+        62.688870492694235,
+        62.66628876144773
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 7543
+    },
+    {
+      "id": "badge-needz-harm-reduction",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-needz-harm-reduction",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "HARM REDUCTION",
+      "svg": "svg/badge-needz-harm-reduction.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.414589585857374,
+        20.743329910247816,
+        62.13814345444664,
+        56.920097520812824
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5802
+    },
+    {
+      "id": "badge-services-graphic-design",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-services-graphic-design",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "GRAPHIC DESIGN",
+      "svg": "svg/badge-services-graphic-design.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.792986986011243,
+        18.528349445484896,
+        62.66085072123584,
+        62.678663568503865
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5872
+    },
+    {
+      "id": "badge-services-hair",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-services-hair",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "HAIR",
+      "svg": "svg/badge-services-hair.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.71497226072417,
+        21.44470647461822,
+        53.296731098467625,
+        56.84032126465762
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4237
+    },
+    {
+      "id": "badge-services-massage",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-services-massage",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "MASSAGE",
+      "svg": "svg/badge-services-massage.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.48727883584415,
+        18.52272119990529,
+        62.98886331530615,
+        62.68400765184737
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5973
+    },
+    {
+      "id": "badge-services-tattoo",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-services-tattoo",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "TATTOO",
+      "svg": "svg/badge-services-tattoo.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        24.698584074576637,
+        21.41395278745279,
+        50.96548015488859,
+        56.27122222119354
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3860
+    },
+    {
+      "id": "badge-services-web-development",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-services-web-development",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "WEB DEVELOPMENT",
+      "svg": "svg/badge-services-web-development.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.792986986011243,
+        30.832271773495933,
+        62.684291814083466,
+        38.06519983342593
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3125
+    },
+    {
+      "id": "badge-secondary-mountains",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-mountains",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "MOUNTAINS",
+      "svg": "svg/badge-secondary-mountains.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.193582406727643,
+        22.61788401615838,
+        61.88309868101973,
+        54.7857824650084
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3167
+    },
+    {
+      "id": "badge-secondary-river",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-river",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "RIVER",
+      "svg": "svg/badge-secondary-river.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.715235798281846,
+        21.50328972787433,
+        56.840050852207135,
+        59.78798655564295
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5374
+    },
+    {
+      "id": "badge-secondary-coast",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-coast",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "COAST",
+      "svg": "svg/badge-secondary-coast.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.562406656142887,
+        27.288686190567812,
+        61.14545247382018,
+        45.15237099928217
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5926
+    },
+    {
+      "id": "badge-secondary-high-desert",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-high-desert",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "HIGH DESERT",
+      "svg": "svg/badge-secondary-high-desert.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.91527097939998,
+        20.645009776555902,
+        58.439723827306,
+        58.43971924404412
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3953
+    },
+    {
+      "id": "badge-secondary-forest",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-forest",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "FOREST",
+      "svg": "svg/badge-secondary-forest.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.028165610851186,
+        21.44471564114196,
+        60.362672595329784,
+        57.64001337945806
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5721
+    },
+    {
+      "id": "badge-secondary-dunes",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-dunes",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "DUNES",
+      "svg": "svg/badge-secondary-dunes.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.91527097939998,
+        24.370358358829257,
+        60.34416538388806,
+        50.98902207949741
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4921
+    },
+    {
+      "id": "badge-secondary-swimming",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-swimming",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SWIMMING",
+      "svg": "svg/badge-secondary-swimming.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.792986986011243,
+        18.52272119990529,
+        62.666137513805936,
+        62.684291814083466
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4354
+    },
+    {
+      "id": "badge-secondary-nude-recreation",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-nude-recreation",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "NUDE RECREATION",
+      "svg": "svg/badge-secondary-nude-recreation.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        31.93208962550259,
+        24.366691749331142,
+        36.406086535100776,
+        49.82318234021535
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3682
+    },
+    {
+      "id": "badge-secondary-lake",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-lake",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "LAKE",
+      "svg": "svg/badge-secondary-lake.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        27.559025308863728,
+        21.44470647461822,
+        45.152215168378504,
+        59.761169890426125
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5009
+    },
+    {
+      "id": "badge-secondary-hot-springs",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-hot-springs",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "HOT SPRINGS",
+      "svg": "svg/badge-secondary-hot-springs.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.91527097939998,
+        18.52272119990529,
+        60.54886531727493,
+        62.69627704388043
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4862
+    },
+    {
+      "id": "badge-secondary-waterfall",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-waterfall",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "WATERFALL",
+      "svg": "svg/badge-secondary-waterfall.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.562406656142887,
+        27.288686190567812,
+        61.14545247382018,
+        45.15237099928217
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 5950
+    },
+    {
+      "id": "badge-secondary-canyon",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-canyon",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "CANYON",
+      "svg": "svg/badge-secondary-canyon.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.193582406727643,
+        22.61788401615838,
+        61.88309868101973,
+        54.7857824650084
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3593
+    },
+    {
+      "id": "badge-secondary-dark-sky",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-dark-sky",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "DARK SKY",
+      "svg": "svg/badge-secondary-dark-sky.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.71497226072417,
+        21.45492714859421,
+        57.64002254598181,
+        56.830100590681624
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4278
+    },
+    {
+      "id": "badge-secondary-pet-friendly",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-pet-friendly",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "PET FRIENDLY",
+      "svg": "svg/badge-secondary-pet-friendly.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        18.817470770934897,
+        18.52272119990529,
+        62.64165143725134,
+        62.67410780620246
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 6769
+    },
+    {
+      "id": "badge-secondary-accessible",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-secondary-accessible",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "ACCESSIBLE",
+      "svg": "svg/badge-secondary-accessible.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        24.700733624394907,
+        21.44470647461822,
+        47.37143744200455,
+        56.71040412361571
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4880
+    },
+    {
+      "id": "badge-family-looking",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-family-looking",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "LOOKING",
+      "svg": "svg/badge-family-looking.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.145085904535605,
+        23.636193139021977,
+        62.17158293306944,
+        58.410212204108056
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3718
+    },
+    {
+      "id": "badge-family-forming",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-family-forming",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "FORMING",
+      "svg": "svg/badge-family-forming.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.351788723360823,
+        21.44470647461822,
+        59.56669063101525,
+        56.218720956442425
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3238
+    },
+    {
+      "id": "badge-family-offering",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-family-offering",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "OFFERING",
+      "svg": "svg/badge-family-offering.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        20.351788723360823,
+        21.44470647461822,
+        59.56669063101525,
+        56.218720956442425
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3352
+    },
+    {
+      "id": "badge-family-managed",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-family-managed",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "MANAGED",
+      "svg": "svg/badge-family-managed.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        28.2911647269233,
+        19.253210643690714,
+        43.687936332259355,
+        61.221585036786635
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4229
+    },
+    {
+      "id": "badge-family-gigz",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-family-gigz",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "GIGZ",
+      "svg": "svg/badge-family-gigz.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.71669556718828,
+        24.257802613760916,
+        56.83687465172939,
+        54.02550181905081
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4326
+    },
+    {
+      "id": "badge-family-giftz",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-family-giftz",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "GIFTZ",
+      "svg": "svg/badge-family-giftz.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.52520661115359,
+        20.24727431124803,
+        61.21985256379878,
+        57.416153119812606
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4577
+    },
+    {
+      "id": "badge-family-sellz",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-family-sellz",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SELLZ",
+      "svg": "svg/badge-family-sellz.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        21.71497226072417,
+        21.57147033149175,
+        59.031810220692314,
+        58.90504865544972
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3770
+    },
+    {
+      "id": "badge-family-mizzed",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-family-mizzed",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "MIZZED",
+      "svg": "svg/badge-family-mizzed.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.52376746692558,
+        23.654819515272393,
+        50.91699382753791,
+        52.40042382339189
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 4168
+    },
+    {
+      "id": "badge-family-outside-post",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-family-outside-post",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "OUTSIDE POST",
+      "svg": "svg/badge-family-outside-post.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        19.08613470701636,
+        22.536320287872847,
+        62.09799637207323,
+        54.70269251051928
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3223
+    },
+    {
+      "id": "badge-family-ride-offer-car",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-family-ride-offer-car",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "RIDE OFFER CAR",
+      "svg": "svg/badge-family-ride-offer-car.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        23.9064635083898,
+        26.144649028013905,
+        52.40056590450994,
+        52.20958596553882
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3354
+    },
+    {
+      "id": "badge-outzide-nude-recreation",
+      "normal": "svg",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "badge-outzide-nude-recreation",
+      "token": "icon-white",
+      "color": "#FFFFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "NUDE RECREATION",
+      "svg": "svg/badge-outzide-nude-recreation.svg",
+      "viewBox": [
+        -18,
+        -8,
+        136,
+        126.0
+      ],
+      "headBounds": [
+        0,
+        0,
+        100,
+        100.0
+      ],
+      "headWidth": 100,
+      "iconBounds": [
+        31.93208962550259,
+        24.366691749331142,
+        36.406086535100776,
+        49.82318234021535
+      ],
+      "iconRemovable": true,
+      "effects": [],
+      "bytes": 3674
+    },
+    {
+      "id": "family-looking",
+      "normal": "3d",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "family-looking",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "LOOKING"
+    },
+    {
+      "id": "family-forming",
+      "normal": "3d",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "family-forming",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": "green-acid",
+      "secondary": "#39FF14",
+      "label": "FORMING"
+    },
+    {
+      "id": "family-offering",
+      "normal": "3d",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "family-offering",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": "neon-magenta",
+      "secondary": "#FF00CC",
+      "label": "OFFERING"
+    },
+    {
+      "id": "family-managed",
+      "normal": "3d",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "family-managed",
+      "token": "neon-cyan",
+      "color": "#00FFFF",
+      "secondaryToken": "neon-red",
+      "secondary": "#FF2400",
+      "label": "MANAGED"
+    },
+    {
+      "id": "family-gigz",
+      "normal": "3d",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "family-gigz",
+      "token": "neon-violet",
+      "color": "#8800FF",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "GIGZ"
+    },
+    {
+      "id": "family-giftz",
+      "normal": "3d",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "family-giftz",
+      "token": "neon-yellow",
+      "color": "#CCFF00",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "GIFTZ"
+    },
+    {
+      "id": "family-sellz",
+      "normal": "3d",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "family-sellz",
+      "token": "green-acid",
+      "color": "#39FF14",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "SELLZ"
+    },
+    {
+      "id": "family-mizzed",
+      "normal": "3d",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "family-mizzed",
+      "token": "neon-magenta",
+      "color": "#FF00CC",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "MIZZED"
+    },
+    {
+      "id": "family-outside-post",
+      "normal": "3d",
+      "selected": "3d",
+      "enlarged": "3d",
+      "modelId": "family-outside-post",
+      "token": "neon-orange",
+      "color": "#FF6600",
+      "secondaryToken": null,
+      "secondary": null,
+      "label": "OUTSIDE POST"
+    }
+  ]
+}

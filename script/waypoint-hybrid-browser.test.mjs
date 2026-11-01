@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import express from 'express';
+import {build} from 'esbuild';
+import {webkit} from 'playwright';
+import sharp from 'sharp';
+import {fileURLToPath} from 'node:url';
+
+test('animated SVGs mask all holograms and switch atomically without loading ordinary 3D',{timeout:60000},async()=>{
+ const compiled=await build({entryPoints:[fileURLToPath(new URL('../client/public/map-foundation/waypoint-objects.js',import.meta.url))],bundle:true,format:'esm',platform:'browser',write:false});
+ const app=express();app.get('/assets/hybrid-test/renderer.js',(_q,r)=>r.type('js').send(compiled.outputFiles[0].text));app.get('/fixture',(_q,r)=>r.type('html').send('<style>body{margin:0;background:white}#map{position:relative;width:400px;height:300px}</style><div id="map"><canvas width="400" height="300" style="width:400px;height:300px"></canvas></div>'));app.use(express.static(fileURLToPath(new URL('../client/public/',import.meta.url))));
+ const server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s));});let browser;
+ try{browser=await webkit.launch();const page=await browser.newPage({viewport:{width:400,height:300}});const errors=[],requests=[],held=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().includes('/shared/geometry/'))requests.push(r.url());});
+  await page.goto(`http://127.0.0.1:${server.address().port}/fixture`);
+  await page.evaluate(async()=>{const {createWaypointLayer}=await import('/assets/hybrid-test/renderer.js');const canvas=document.querySelector('canvas'),gl=canvas.getContext('webgl2',{preserveDrawingBuffer:true});window.regions=[];window.layer=createWaypointLayer({}, {occluders:()=>window.regions});layer.onAdd({getCanvas:()=>canvas,triggerRepaint(){}},gl);window.rows=[{key:'first',asset:'placez-bar',size:30,x:120,y:150,depth:0},{key:'second',asset:'placez-bar',size:30,x:260,y:150,depth:.3}];window.render=()=>{gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);layer.render(gl,{defaultProjectionData:{mainMatrix:[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]}});};layer.setRows(rows);});
+  await page.waitForFunction(()=>layer.stats().svgLoaded===2);const initial=await page.evaluate(()=>{render();return {stats:layer.stats(),animations:document.getAnimations().length,width:parseFloat(getComputedStyle(document.querySelector('[data-wp-svg]')).width),pointer:getComputedStyle(document.querySelector('[data-wp-svg]')).pointerEvents};});
+  assert.equal(initial.stats.modelsLoaded,0);assert.equal(initial.stats.geometries,0);assert.equal(requests.length,0);assert.ok(initial.animations>=2);assert.ok(Math.abs(initial.width-40.8)<.1);assert.equal(initial.pointer,'none');
+  assert.equal(await page.evaluate(()=>{const observer=new MutationObserver(()=>{});observer.observe(document.querySelector('[data-waypoint-overlay]'),{subtree:true,attributes:true});for(let i=0;i<20;i++)render();const count=observer.takeRecords().length;observer.disconnect();return count;}),0,'stationary markers do not rewrite SVG styles every frame');
+  const ink=async()=>{const {data,info}=await sharp(await page.screenshot()).removeAlpha().raw().toBuffer({resolveWithObject:true});let n=0;for(let i=0;i<data.length;i+=info.channels)if(data[i]<240||data[i+1]<240||data[i+2]<240)n++;return n;};assert.ok(await ink()>200);
+  await page.evaluate(()=>{regions=[...Array.from({length:47},()=>({points:[{x:-30,y:-30},{x:-20,y:-30},{x:-20,y:-20},{x:-30,y:-20}]})),{points:[{x:0,y:0},{x:400,y:0},{x:400,y:300},{x:0,y:300}]}];render();});assert.equal(await ink(),0,'the forty-eighth hologram masks both SVGs');
+  await page.evaluate(()=>{regions=[];render();});await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.evaluate(()=>{render();return document.getAnimations().length;}),0);await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.route('**/shared/geometry/*.glb',route=>{held.push(route);});await page.evaluate(()=>{rows[0].lod='near';layer.setRows(rows);render();});
+  const until=Date.now()+10000;while(!held.length&&Date.now()<until)await new Promise(r=>setTimeout(r,25));assert.ok(held.length);
+  assert.equal(await page.evaluate(()=>[...document.querySelectorAll('[data-wp-svg]')].filter(n=>n.style.visibility==='visible').length),2,'SVG remains while selection loads');
+  await page.evaluate(()=>{rows[0].lod='middle';layer.setRows(rows);render();});await page.unroute('**/shared/geometry/*.glb');await Promise.all(held.map(r=>r.continue()));await page.waitForFunction(()=>layer.stats().activeLoads===0);await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>layer.stats().modelsLoaded),0,'cancelled model cannot reappear');
+  await page.evaluate(()=>{rows[0].lod='near';rows[0].size=40;rows[1].x=120;layer.setRows(rows);});await page.waitForFunction(()=>layer.stats().modelsLoaded===1);const selected=await page.evaluate(()=>{render();return {stats:layer.stats(),visibleSvg:[...document.querySelectorAll('[data-wp-svg]')].filter(n=>n.style.visibility==='visible').length,hull:document.querySelector('mask[id*="-depth-"] polygon')?.getAttribute('points').split(' ').length};});assert.equal(selected.visibleSvg,1);assert.ok(selected.hull>4,'the nearer model masks with its actual convex silhouette, not a padded rectangle');
+  await page.evaluate(()=>{layer.setRows([{key:'pin',asset:'family-looking',size:22,x:200,y:150,depth:0}]);});await page.waitForFunction(()=>layer.stats().modelsLoaded===1&&layer.stats().svgLoaded===0&&layer.stats().pending===0);assert.equal(await page.evaluate(()=>{render();return layer.stats().visible;}),1,'physical pin remains 3D');
+  const final=await page.evaluate(()=>{layer.onRemove();return {stats:layer.stats(),overlays:document.querySelectorAll('[data-waypoint-overlay]').length,canvases:document.querySelectorAll('canvas').length};});assert.equal(final.stats.loaded,0);assert.equal(final.stats.instances,0);assert.equal(final.overlays,0);assert.equal(final.canvases,1);assert.deepEqual(errors,[]);
+ }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
+});

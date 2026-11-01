@@ -16,12 +16,12 @@ await page.route('**/waypoint-test.html',r=>r.fulfill({contentType:'text/html',b
 const result=await page.evaluate(async()=>{
  const {createWaypointLayer}=await import('/assets/waypoint-test/renderer.js');const canvas=document.querySelector('canvas'),gl=canvas.getContext('webgl2',{alpha:true,preserveDrawingBuffer:true});let masks=[];
  const map={getCanvas:()=>canvas,triggerRepaint(){}};const layer=createWaypointLayer({}, {occluders:()=>masks});layer.onAdd(map,gl);
- layer.setRows([{key:'one',asset:'placez-bar',x:150,y:150,size:65,depth:0},{key:'two',asset:'placez-bar',x:250,y:150,size:65,depth:0}]);
- const until=Date.now()+25000;while(layer.stats().loaded<2&&Date.now()<until)await new Promise(r=>setTimeout(r,50));
+ layer.setRows([{key:'one',asset:'placez-bar',x:150,y:150,size:65,depth:0,lod:'near'},{key:'two',asset:'placez-bar',x:250,y:150,size:65,depth:0,lod:'near'}]);
+ const until=Date.now()+25000;while(layer.stats().modelsLoaded<2&&Date.now()<until)await new Promise(r=>setTimeout(r,50));
  const args={defaultProjectionData:{mainMatrix:[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]}};
  const render=()=>{gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);layer.render(gl,args);const px=new Uint8Array(400*300*4);gl.readPixels(0,0,400,300,gl.RGBA,gl.UNSIGNED_BYTE,px);let ink=0;for(let i=3;i<px.length;i+=4)if(px[i])ink++;return ink;};
  const visiblePixels=render(),two=layer.stats();masks=[...Array.from({length:47},()=>({points:[{x:-100,y:-100},{x:-80,y:-100},{x:-80,y:-80},{x:-100,y:-80}]})),{points:[{x:0,y:0},{x:400,y:0},{x:400,y:300},{x:0,y:300}]}];const coveredPixels=render();
- masks=[];layer.setRows([{key:'two',asset:'placez-bar',x:250,y:150,size:65,depth:0}]);const remainingPixels=render(),one=layer.stats();layer.onRemove();await new Promise(r=>setTimeout(r,250));return {visiblePixels,coveredPixels,remainingPixels,two,one,after:layer.stats(),canvases:document.querySelectorAll('canvas').length};
+ masks=[];layer.setRows([{key:'two',asset:'placez-bar',x:250,y:150,size:65,depth:0,lod:'near'}]);const remainingPixels=render(),one=layer.stats();layer.onRemove();await new Promise(r=>setTimeout(r,250));return {visiblePixels,coveredPixels,remainingPixels,two,one,after:layer.stats(),canvases:document.querySelectorAll('canvas').length};
 });assert.equal(result.two.loaded,2);assert.equal(result.one.loaded,1);assert.equal(result.two.drawBatches,result.one.drawBatches);assert.ok(result.visiblePixels>100);assert.equal(result.coveredPixels,0);assert.ok(result.remainingPixels>100);assert.equal(result.after.instances,0);assert.equal(result.canvases,1);assert.deepEqual(errors,[]);
 }finally{await browser.close();}
 
