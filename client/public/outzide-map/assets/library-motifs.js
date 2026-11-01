@@ -11,7 +11,7 @@ const built=new WeakSet();
 
 // The only shared fallback is the unchanged alpine artwork registered in the Library.
 export function placeMotifIds(place){
- const ids=['outzide-place-'+place.id];
+ const ids=[]; // Tucker retired the rough named-location sketches; keep only existing shared artwork.
  if(place.art==='assets/motifs/adventure-map-alpine-waypoints.svg')ids.push('outzide-adventure-map-alpine-waypoints');
  return ids;
 }
@@ -22,7 +22,8 @@ export function networkStack(index){
 const seedFor=key=>Array.from(key).reduce((n,c)=>(Math.imul(n,31)+c.charCodeAt(0))>>>0,7);
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function motifImage(place,className){
- return '<img class="'+className+'" data-outzide-motif-ids="'+escape(placeMotifIds(place).join(' '))+'" alt="" loading="lazy" decoding="async">';
+ const ids=placeMotifIds(place);
+ return ids.length ? '<img class="'+className+'" data-outzide-motif-ids="'+escape(ids.join(' '))+'" alt="" loading="lazy" decoding="async">' : '';
 }
 export function networkMarkup(identity){
  return '<span class="outzide-network" data-outzide-network="'+escape(identity)+'" aria-hidden="true"></span>';

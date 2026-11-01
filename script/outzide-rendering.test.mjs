@@ -1,3 +1,4 @@
+import {readWaypointPalette} from '../client/public/outzide-map/assets/waypoint-palette.js';
 import {markerFrame} from '../client/public/map-foundation/lifecycle.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -25,6 +26,7 @@ test('every waypoint token and mixed cluster can draw without missing canvas tex
   springSteam:{draw:(_ctx,texture)=>assert.ok(texture,'spring texture')},
   ctx:{setTransform(){},clearRect(){},save(){},restore(){},transform(){},drawImage(texture){assert.ok(texture,'Canvas drawImage requires a texture');draws++}},
  };
+ context.readWaypointPalette=tokens=>readWaypointPalette(tokens,context.document.documentElement,context.getComputedStyle);
  vm.createContext(context);
  vm.runInContext(app.slice(app.indexOf('const waypointToken='),app.indexOf('function renderMarkers')),context);
  vm.runInContext(app.match(/materials=createHologramMaterials\([^;]+;/)[0],context);
