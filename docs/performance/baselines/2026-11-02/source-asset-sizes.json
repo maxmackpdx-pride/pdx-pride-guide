@@ -1,0 +1,42 @@
+{
+  "commit": "90a88238a3d1b775bcf144641f66171d21f3a828",
+  "measured_at_utc": "2026-11-02T07:10:33.051415+00:00",
+  "measurement": "uncompressed checked-out source file sizes, not browser transfer or built deployment",
+  "paths": {
+    "client/public": {
+      "files": 4400,
+      "bytes": 1291131995,
+      "files_over_1MiB": 348
+    },
+    "client/public/outzide-map": {
+      "files": 1849,
+      "bytes": 859896237,
+      "files_over_1MiB": 256
+    },
+    "client/public/outzide-map/assets/photos": {
+      "files": 1380,
+      "bytes": 849355519,
+      "files_over_1MiB": 251
+    },
+    "client/public/brand": {
+      "files": 126,
+      "bytes": 55993421,
+      "files_over_1MiB": 15
+    },
+    "client/public/posters": {
+      "files": 120,
+      "bytes": 93319030,
+      "files_over_1MiB": 28
+    },
+    "client/public/directory-logos": {
+      "files": 466,
+      "bytes": 52786883,
+      "files_over_1MiB": 2
+    },
+    "client/public/event-posters": {
+      "files": 40,
+      "bytes": 43597476,
+      "files_over_1MiB": 10
+    }
+  }
+}

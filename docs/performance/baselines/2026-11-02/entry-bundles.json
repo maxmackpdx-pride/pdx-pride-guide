@@ -1,0 +1,19 @@
+{
+  "commit": "90a88238a3d1b775bcf144641f66171d21f3a828",
+  "built_at_utc": "2026-11-02T07:15:21.989710+00:00",
+  "measurement": "local production-build entry files; not route total transfer",
+  "files": [
+    {
+      "url": "/assets/index-Bpf_WOJt.js",
+      "raw_bytes": 1874029,
+      "brotli_bytes": 514862,
+      "gzip_bytes": 550359
+    },
+    {
+      "url": "/assets/index-DOHXHz6l.css",
+      "raw_bytes": 700192,
+      "brotli_bytes": 113146,
+      "gzip_bytes": 125539
+    }
+  ]
+}

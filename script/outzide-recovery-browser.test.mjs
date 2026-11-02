@@ -9,7 +9,9 @@ test('Outzide remains browsable with WebGL unavailable, including destination mi
  const base='http://127.0.0.1:'+server.address().port;
  let browser;
  try{
-  browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--disable-webgl']});
+  const macChrome='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  const chromePath=process.env.CHROME_PATH||(fs.existsSync(macChrome)?macChrome:undefined);
+  browser=await chromium.launch({executablePath:chromePath,args:['--disable-webgl']});
   const page=await browser.newPage({viewport:{width:390,height:844}}),errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(base+'/outzide',{waitUntil:'domcontentloaded'});

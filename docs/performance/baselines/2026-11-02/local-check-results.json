@@ -1,0 +1,77 @@
+{
+  "focused-regressions": {
+    "tests": 40,
+    "pass": 40,
+    "fail": 0,
+    "skipped": 0
+  },
+  "map-render-regressions": {
+    "tests": 61,
+    "pass": 61,
+    "fail": 0,
+    "skipped": 0
+  },
+  "outz-iframe-lifecycle": {
+    "tests": 2,
+    "pass": 2,
+    "fail": 0,
+    "skipped": 0
+  },
+  "map-host-recovery-browser": {
+    "tests": 6,
+    "pass": 6,
+    "fail": 0,
+    "skipped": 0
+  },
+  "additional-map-lifetime": {
+    "tests": 17,
+    "pass": 14,
+    "fail": 3,
+    "skipped": 0,
+    "failure_class": "environment: three WebKit launches blocked by missing native host libraries"
+  },
+  "typecheck": {
+    "passed": true
+  },
+  "build": {
+    "passed": true
+  },
+  "verify-deploy-bundle": {
+    "passed": true
+  },
+  "ci-unit-regressions": {
+    "tests": 67,
+    "pass": 67,
+    "fail": 0,
+    "skipped": 0
+  },
+  "glass-parser": {
+    "tests": 4,
+    "pass": 4,
+    "fail": 0,
+    "skipped": 0
+  },
+  "glass-audit": {
+    "passed": true,
+    "violations": 0,
+    "files": 837
+  },
+  "card-browser": {
+    "tests": 4,
+    "pass": 4,
+    "fail": 0,
+    "skipped": 0,
+    "durationMs": 609954.407381
+  },
+  "predeploy": {
+    "passed": true,
+    "database": "ignored .local/data.db plus disposable QSearch copies"
+  },
+  "measurement-harness": {
+    "syntaxPassed": true,
+    "correctedSmokeSamples": 10,
+    "navigationSuccess": 10,
+    "mapReadyObserved": false,
+    "knownLimitations": "external network failures, software GPU, WebKit missing libs; no physical iPhone"
+  }
+}

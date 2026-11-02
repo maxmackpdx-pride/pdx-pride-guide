@@ -1,0 +1,313 @@
+{
+  "sourceCommit": "90a88238a3d1b775bcf144641f66171d21f3a828",
+  "conditions": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "deviceScaleFactor": 1,
+    "isMobile": true,
+    "hasTouch": true,
+    "network": "unthrottled; executor network (loopback when local)",
+    "gpu": "Chromium SwiftShader software renderer",
+    "auth": "anonymous",
+    "sampleWindowMs": 5000,
+    "physicalDevice": false,
+    "sampleDeadlineMs": 45000,
+    "cache": "Fresh browser context per cold sample; warm reload in same context; service workers blocked",
+    "limits": "Top-frame Resource Timing excludes navigation and iframe resources and omits cross-origin byte detail without Timing-Allow-Origin; these byte totals are not total page transfer. Scroll frame timeout is recorded, not treated as smooth performance."
+  },
+  "caveats": [
+    "Local production build and local seed data only; not production mobile or physical iPhone.",
+    "Top-frame bytes exclude navigation/iframe resources and inaccessible external assets; original Directory warm readings superseded by uncapped run.",
+    "Most synthetic scroll probes timed out under software rendering; no FPS or smoothness claim."
+  ],
+  "routes": [
+    {
+      "route": "/",
+      "cache": "cold",
+      "samples": 3,
+      "successfulNavigation": 3,
+      "domContentLoadedMedianMs": 239.7,
+      "resourceTransferMedianBytes": 14504221,
+      "imageEncodedMedianBytes": 5406271,
+      "resourceCountRange": [
+        203,
+        203
+      ],
+      "scrollTimedOut": 3,
+      "pageErrors": 0,
+      "failedRequests": 33
+    },
+    {
+      "route": "/",
+      "cache": "warm",
+      "samples": 3,
+      "successfulNavigation": 3,
+      "domContentLoadedMedianMs": 297.4,
+      "resourceTransferMedianBytes": 10240,
+      "imageEncodedMedianBytes": 2990,
+      "resourceCountRange": [
+        195,
+        196
+      ],
+      "scrollTimedOut": 3,
+      "pageErrors": 0,
+      "failedRequests": 33
+    },
+    {
+      "route": "/events",
+      "cache": "cold",
+      "samples": 3,
+      "successfulNavigation": 3,
+      "domContentLoadedMedianMs": 240.4,
+      "resourceTransferMedianBytes": 5005278,
+      "imageEncodedMedianBytes": 2270427,
+      "resourceCountRange": [
+        150,
+        150
+      ],
+      "scrollTimedOut": 3,
+      "pageErrors": 0,
+      "failedRequests": 18
+    },
+    {
+      "route": "/events",
+      "cache": "warm",
+      "samples": 3,
+      "successfulNavigation": 3,
+      "domContentLoadedMedianMs": 522.2,
+      "resourceTransferMedianBytes": 32928,
+      "imageEncodedMedianBytes": 1476736,
+      "resourceCountRange": [
+        153,
+        153
+      ],
+      "scrollTimedOut": 3,
+      "pageErrors": 0,
+      "failedRequests": 21
+    },
+    {
+      "route": "/directory",
+      "cache": "cold",
+      "samples": 3,
+      "successfulNavigation": 3,
+      "domContentLoadedMedianMs": 232.3,
+      "resourceTransferMedianBytes": 14139201,
+      "imageEncodedMedianBytes": 5113652,
+      "resourceCountRange": [
+        165,
+        165
+      ],
+      "scrollTimedOut": 3,
+      "pageErrors": 0,
+      "failedRequests": 75
+    },
+    {
+      "route": "/directory",
+      "cache": "warm",
+      "samples": 3,
+      "successfulNavigation": 3,
+      "domContentLoadedMedianMs": 777.4,
+      "resourceTransferMedianBytes": 11894885,
+      "imageEncodedMedianBytes": 13302393,
+      "resourceCountRange": [
+        260,
+        260
+      ],
+      "scrollTimedOut": 3,
+      "pageErrors": 0,
+      "failedRequests": 75
+    },
+    {
+      "route": "/outzide",
+      "cache": "cold",
+      "samples": 3,
+      "successfulNavigation": 3,
+      "domContentLoadedMedianMs": 226.4,
+      "resourceTransferMedianBytes": 1323317,
+      "imageEncodedMedianBytes": 0,
+      "resourceCountRange": [
+        24,
+        24
+      ],
+      "scrollTimedOut": 0,
+      "pageErrors": 0,
+      "failedRequests": 27
+    },
+    {
+      "route": "/outzide",
+      "cache": "warm",
+      "samples": 3,
+      "successfulNavigation": 3,
+      "domContentLoadedMedianMs": 110.2,
+      "resourceTransferMedianBytes": 1540,
+      "imageEncodedMedianBytes": 0,
+      "resourceCountRange": [
+        24,
+        24
+      ],
+      "scrollTimedOut": 0,
+      "pageErrors": 0,
+      "failedRequests": 27
+    },
+    {
+      "route": "/boardz",
+      "cache": "cold",
+      "samples": 3,
+      "successfulNavigation": 3,
+      "domContentLoadedMedianMs": 223.3,
+      "resourceTransferMedianBytes": 8110533,
+      "imageEncodedMedianBytes": 3158703,
+      "resourceCountRange": [
+        144,
+        150
+      ],
+      "scrollTimedOut": 3,
+      "pageErrors": 0,
+      "failedRequests": 45
+    },
+    {
+      "route": "/boardz",
+      "cache": "warm",
+      "samples": 3,
+      "successfulNavigation": 3,
+      "domContentLoadedMedianMs": 329.2,
+      "resourceTransferMedianBytes": 6940,
+      "imageEncodedMedianBytes": 1449248,
+      "resourceCountRange": [
+        145,
+        163
+      ],
+      "scrollTimedOut": 3,
+      "pageErrors": 0,
+      "failedRequests": 63
+    }
+  ],
+  "mapStartup": [
+    {
+      "route": "/map",
+      "cache": "cold",
+      "mapStartup": {
+        "events": [],
+        "observedWithinWindow": false
+      },
+      "error": null,
+      "failed": [
+        {
+          "url": "https://tiles.openfreemap.org/planet",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        }
+      ]
+    },
+    {
+      "route": "/map",
+      "cache": "warm",
+      "mapStartup": {
+        "events": [],
+        "observedWithinWindow": false
+      },
+      "error": null,
+      "failed": [
+        {
+          "url": "https://tiles.openfreemap.org/planet",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        }
+      ]
+    },
+    {
+      "route": "/outzide",
+      "cache": "cold",
+      "mapStartup": {
+        "events": [],
+        "observedWithinWindow": false
+      },
+      "error": null,
+      "failed": [
+        {
+          "url": "https://tiles.openfreemap.org/styles/dark",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motif-recipes",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://tiles.openfreemap.org/planet",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-back/file?v=5082e3ebc2fa137f",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-middle/file?v=2b1b733af4af5fc1",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-front/file?v=ad6e074064505ed9",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-back/file?v=4883968a6b712c26",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-middle/file?v=607de33520a12f8a",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-front/file?v=fe86cc958499f8fa",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        }
+      ]
+    },
+    {
+      "route": "/outzide",
+      "cache": "warm",
+      "mapStartup": {
+        "events": [],
+        "observedWithinWindow": false
+      },
+      "error": null,
+      "failed": [
+        {
+          "url": "https://tiles.openfreemap.org/styles/dark",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motif-recipes",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://tiles.openfreemap.org/planet",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-back/file?v=5082e3ebc2fa137f",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-middle/file?v=2b1b733af4af5fc1",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-a-front/file?v=ad6e074064505ed9",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-back/file?v=4883968a6b712c26",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-middle/file?v=607de33520a12f8a",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        },
+        {
+          "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/network-stack-b-front/file?v=fe86cc958499f8fa",
+          "error": "net::ERR_EMPTY_RESPONSE"
+        }
+      ]
+    }
+  ]
+}
