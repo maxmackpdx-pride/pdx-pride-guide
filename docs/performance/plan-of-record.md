@@ -3,7 +3,7 @@ Merged Nov 1, 2026 into the single document of record (merged from Muse’s evid
 
 **Status: execution authorized.** Tucker authorized completion of this entire plan on November 2, 2026 at 07:08 UTC, starting with Release 1 and proceeding through the gated releases. Release verification remains required. Decisions that expand scope or require separate permission are not silently assumed.
 
-Execution run logs: [Release 1 baseline](release-1-baseline.md), [Release 2 runtime](release-2-runtime.md). This repository copy carries the agreed plan forward; previously delivered PDF/JSON are the pre-execution snapshot.
+Execution run logs: [Release 1 baseline](release-1-baseline.md), [Release 2 runtime](release-2-runtime.md), [Release 3 API](release-3-api.md). This repository copy carries the agreed plan forward; previously delivered PDF/JSON are the pre-execution snapshot.
 Amended Nov 1 per Codex's document review: Node 24 corrected to a chosen target (not a Vite 8 requirement); Express ETag wording corrected; home-flight acceptance criterion changed to zero obsolete asset dependencies; home globe described as canvas; cache-freshness tests, repeatable performance gates, and a pre-move reference audit added; map-code extraction marked proposed. That review used the earlier code findings and current official documentation — not a fresh production audit; nothing was changed or deployed by it.
 
 ## Ground rules (apply to every release)

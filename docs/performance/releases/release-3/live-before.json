@@ -1,0 +1,56 @@
+[
+  {
+    "path": "/api/events",
+    "sample": 1,
+    "utc": "2026-11-02T08:44:23.459330+00:00",
+    "curlFields": "status transferBytes pretransferSeconds starttransferSeconds totalSeconds",
+    "value": "200 207224 4.245313 4.456423 4.515941",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "path": "/api/events",
+    "sample": 2,
+    "utc": "2026-11-02T08:44:27.731375+00:00",
+    "curlFields": "status transferBytes pretransferSeconds starttransferSeconds totalSeconds",
+    "value": "200 207171 4.022189 4.197271 4.256603",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "path": "/api/events",
+    "sample": 3,
+    "utc": "2026-11-02T08:44:34.543175+00:00",
+    "curlFields": "status transferBytes pretransferSeconds starttransferSeconds totalSeconds",
+    "value": "200 207212 6.570386 6.744140 6.802590",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "path": "/api/events?limit=1",
+    "sample": 1,
+    "utc": "2026-11-02T08:44:42.651839+00:00",
+    "curlFields": "status transferBytes pretransferSeconds starttransferSeconds totalSeconds",
+    "value": "200 207002 7.861806 8.039723 8.099266",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "path": "/api/events?limit=1",
+    "sample": 2,
+    "utc": "2026-11-02T08:44:47.808445+00:00",
+    "curlFields": "status transferBytes pretransferSeconds starttransferSeconds totalSeconds",
+    "value": "200 207328 4.785447 4.976366 5.145067",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "path": "/api/events?limit=1",
+    "sample": 3,
+    "utc": "2026-11-02T08:44:51.416147+00:00",
+    "curlFields": "status transferBytes pretransferSeconds starttransferSeconds totalSeconds",
+    "value": "200 207881 3.380611 3.544689 3.599089",
+    "exit": 0,
+    "error": ""
+  }
+]

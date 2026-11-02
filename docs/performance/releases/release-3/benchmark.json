@@ -1,0 +1,77 @@
+{
+  "runtime": "Node 24.22.2",
+  "measured_at_utc": "2026-11-02T08:44:05.521247+00:00",
+  "scope": "Local synthetic immutable 1406-event fixture; not a production SLA",
+  "unit": "milliseconds",
+  "source_log": ".local/release3-verification/final-focused.log",
+  "samples": {
+    "legacy": {
+      "milliseconds": [
+        55.303413999999975,
+        31.78101400000014,
+        29.042228000000023,
+        41.03913199999988
+      ],
+      "bytes": 1362579,
+      "rows": 1406,
+      "status": null,
+      "eventLoopP99Ms": 36.732927,
+      "eventLoopMaxMs": 36.732927,
+      "sample_count": 4,
+      "median_ms": 36.41007300000001,
+      "tail_max_ms": 55.303413999999975
+    },
+    "cold": {
+      "milliseconds": [
+        38.52846199999999
+      ],
+      "bytes": 1362579,
+      "rows": 1406,
+      "status": "MISS",
+      "eventLoopP99Ms": 19.234815,
+      "eventLoopMaxMs": 19.234815,
+      "sample_count": 1,
+      "median_ms": 38.52846199999999,
+      "tail_max_ms": 38.52846199999999
+    },
+    "warm": {
+      "milliseconds": [
+        10.943870999999945,
+        10.917430999999851,
+        10.864231999999902,
+        11.154819000000089
+      ],
+      "bytes": 1362579,
+      "rows": 1406,
+      "status": "HIT",
+      "eventLoopP99Ms": 15.130623,
+      "eventLoopMaxMs": 15.130623,
+      "sample_count": 4,
+      "median_ms": 10.930650999999898,
+      "tail_max_ms": 11.154819000000089
+    },
+    "page": {
+      "milliseconds": [
+        6.667912999999999,
+        3.8252709999999297,
+        3.7420149999998102,
+        3.8260110000001077
+      ],
+      "bytes": 749,
+      "rows": 1,
+      "status": "HIT",
+      "eventLoopP99Ms": 10.559487,
+      "eventLoopMaxMs": 10.559487,
+      "sample_count": 4,
+      "median_ms": 3.8256410000000187,
+      "tail_max_ms": 6.667912999999999
+    }
+  },
+  "equivalence": {
+    "legacy_and_cached_json_deep_equal": true,
+    "full_payload_bytes_equal": true,
+    "legacy_rows": 1406,
+    "cached_rows": 1406,
+    "paginated_rows": 1
+  }
+}

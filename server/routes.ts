@@ -1,3 +1,4 @@
+import { createPublicEventFeedCache, EventFeedChangedError, EventFeedQueryError, parseEventFeedQuery, selectEventFeed } from "./publicEventFeedCache";
 import {createProfileLayoutStore,registerProfileLayoutRoutes} from "./profileLayout";
 import {publicProfileLayout,type ProfileSource} from "../shared/profileLayout";
 import {boardTextError,BOARD_TEXT_LIMITS} from "../shared/boardCardPresentation";
@@ -1205,6 +1206,60 @@ function notifyAttendanceUpdate(eventId: number) {
   attendanceHub?.broadcastAttendance(eventId);
 }
 
+/** The production public-list handler, separately mountable for isolated HTTP regression tests.
+ * All SQLite inputs are captured before the first enrichment yield. Never use this
+ * cache for detail, admin, or session-personalized responses.
+ */
+export function registerPublicEventFeedRoute(app: Express, httpServer: Server) {
+  const feed = createPublicEventFeedCache(sqlite, async () => {
+    // Collapse same-day/same-time duplicates so the public board never shows the
+    // same event twice (non-destructive — nothing is deleted from the DB).
+    const evts = dedupeEvents(expandMultiDayEvents(storage.getEvents({ status: "LIVE" })));
+    const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
+    const mapBusinesses = storage.getBusinesses();
+    const websites = buildVenueWebsiteIndex(mapBusinesses as any);
+    // Batch public lineup names; pending invitations never enter the search payload.
+    const searchTalent = new Map<number, string[]>();
+    const lineup = sqlite.prepare(`
+      SELECT et.event_id AS eventId, et.role, u.username, u.display_name AS displayName
+      FROM event_talent et JOIN users u ON u.id = et.user_id
+      JOIN events e ON e.id = et.event_id
+      WHERE et.status = 'LIVE' AND e.status = 'LIVE'
+    `).all() as Array<{ eventId: number; role: string; username: string; displayName: string | null }>;
+    for (const row of lineup) {
+      const names = searchTalent.get(row.eventId) ?? [];
+      names.push(row.role, row.username, row.displayName ?? "");
+      searchTalent.set(row.eventId, names);
+    }
+    const payload = [];
+    // Coordinate enrichment is CPU work. Keep documents and asset requests
+    // responsive while preserving this catalog snapshot and its row order.
+    for (const evt of evts) {
+      payload.push({ ...publicEvent(evt, pendingClaimIds, websites,mapBusinesses), searchTalent: searchTalent.get(evt.id) ?? [] });
+      if (payload.length % 8 === 0) await new Promise<void>(resolve => setImmediate(resolve));
+    }
+    return payload;
+  });
+  httpServer.once("close", () => feed.dispose());
+  app.get("/api/events", async (req, res, next) => {
+    try {
+      const query = parseEventFeedQuery(req.query);
+      const { rows, status } = await feed.get();
+      res.set("Cache-Control", status === "BYPASS" ? "private, no-store" : "private, no-cache");
+      res.set("X-Event-Feed-Cache", status);
+      res.json(selectEventFeed(rows, query));
+    } catch (error) {
+      res.set("Cache-Control", "private, no-store");
+      if (error instanceof EventFeedQueryError) return res.status(400).json({ error: error.message });
+      if (error instanceof EventFeedChangedError) {
+        res.set("Retry-After", "1");
+        return res.status(503).json({ error: "Event feed is changing; please retry" });
+      }
+      next(error);
+    }
+  });
+}
+
 export function registerRoutes(httpServer: Server, app: Express) {
   // Sessions must be mounted before ANY route that reads req.session (requireAuth/requireAdmin). Routes registered
   // ahead of the old late mount (/api/board-archive, /api/admin/event-research/pairing) answered 401 to signed-in
@@ -1944,42 +1999,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // ─── EVENTS ─────────────────────────────────────────────────────────────
-  app.get("/api/events", async (req, res, next) => {
-    try {
-    const { day } = req.query;
-    // Collapse same-day/same-time duplicates so the public board never shows the
-    // same event twice (non-destructive — nothing is deleted from the DB).
-    let evts = dedupeEvents(expandMultiDayEvents(storage.getEvents({ status: "LIVE" })));
-    if (typeof day === "string" && day.length > 0) {
-      evts = evts.filter(evt => evt.dayOfWeek === day);
-    }
-    const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
-    const websites = venueWebsiteIndex();
-    // Batch public lineup names; pending invitations never enter the search payload.
-    const searchTalent = new Map<number, string[]>();
-    const lineup = sqlite.prepare(`
-      SELECT et.event_id AS eventId, et.role, u.username, u.display_name AS displayName
-      FROM event_talent et JOIN users u ON u.id = et.user_id
-      JOIN events e ON e.id = et.event_id
-      WHERE et.status = 'LIVE' AND e.status = 'LIVE'
-    `).all() as Array<{ eventId: number; role: string; username: string; displayName: string | null }>;
-    for (const row of lineup) {
-      const names = searchTalent.get(row.eventId) ?? [];
-      names.push(row.role, row.username, row.displayName ?? "");
-      searchTalent.set(row.eventId, names);
-    }
-    const mapBusinesses=storage.getBusinesses();
-    const payload = [];
-    // Coordinate enrichment is CPU work. Keep documents and asset requests
-    // responsive while preserving this catalog snapshot and its row order.
-    for (const evt of evts) {
-      payload.push({ ...publicEvent(evt, pendingClaimIds, websites,mapBusinesses), searchTalent: searchTalent.get(evt.id) ?? [] });
-      if (payload.length % 8 === 0) await new Promise<void>(resolve => setImmediate(resolve));
-    }
-    res.json(payload);
-
-    } catch (error) { next(error); }
-  });
+  registerPublicEventFeedRoute(app, httpServer);
 
   /**
    * Lifetime event count for the About page — every distinct event the site has

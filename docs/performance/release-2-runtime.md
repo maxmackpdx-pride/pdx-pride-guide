@@ -1,6 +1,6 @@
 # Release 2 pinned Node 24 runtime
 
-Status: local validation complete; publication and live-runtime verification pending. Base commit: `1d3d804dd34038585f6a9e972639c424b98386ed`.
+Status: verified in production on November 2, 2026. Base commit: `1d3d804dd34038585f6a9e972639c424b98386ed`.
 
 ## Scope
 
@@ -48,3 +48,14 @@ Physical Safari/GPU limitations from Release 1 remain. This runtime release does
 ## Publication gate
 
 Before marking complete: publish only the intended diff, require exact-commit CI success, observe Railway SUCCESS, verify the live commit and `nodeVersion: v24.22.2`, and probe database-backed routes. Rollback must revert runtime/configuration/dependency pins together; do not reuse native modules across Node ABIs.
+
+
+## Publication verification
+
+Implementation commit: `45271a47e3301ac81d8442bac238b2ca859a62a0`. Core [CI 41411911208](https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/runs/41411911208) succeeded at 08:32:54 UTC, including the full card browser job. [Deploy verification 41411911004](https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/runs/41411911004) succeeded at 08:25:37 UTC.
+
+An existing report bot then published descendant `3a63fc4279005617c1ed79a19a8da5e5c5a6baad`, changing only three report files, not implementation. Railway deployment `66e535ce-5c2b-4f0e-a962-1a6a1a1cc3c2` reached SUCCESS. Live health at 08:27:41 UTC returned this descendant SHA and **nodeVersion v24.22.2**. The events and directory endpoints returned valid JSON successfully. Local checkout was fast-forwarded without discarding the report changes.
+
+### Separate existing flyer validation issue
+
+The Flyer workflow reported success, but its extraction accuracy was **19%**, not a passing accuracy result. All eight fixtures received vision HTTP 429 and parser HTTP 404 responses, falling back to heuristics. The previous committed report already contained the same provider failures and scored 26%; two date predictions account for the score difference. Existing shell code captures the exit status of `tee`, not the failed validator, so the accuracy-failure step was skipped. This release changed only that workflow's Node version, not its permissions, provider configuration, thresholds or report behavior. This is recorded as a separate pre-existing validation defect, not hidden inside a claim that every quality metric passed.
