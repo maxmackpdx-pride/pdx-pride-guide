@@ -1,0 +1,61 @@
+{
+  "runtime-tests": {
+    "exit": 0,
+    "seconds": 0.17,
+    "command": "node --test script/node-runtime.test.mjs"
+  },
+  "typecheck": {
+    "exit": 0,
+    "seconds": 4.7
+  },
+  "ci-unit": {
+    "exit": 0,
+    "seconds": 1.18,
+    "command": "node --import tsx --test server/platformV1.test.ts server/ingest/mirrorEventPosters.test.ts client/src/lib/optimisticCache.test.ts client/src/lib/authSession.test.ts client/src/lib/queryClient.test.ts client/src/lib/timeAgo.test.ts script/nav-tripwire.test.ts script/token-guard.test.mjs server/sessionStore.test.ts server/passwords.test.ts script/design-component-source-evidence.test.ts script/prepare-design-component-proposal.test.ts script/design-product-publication.test.ts script/verify-railway-design-build.test.ts client/src/lib/boardFollowChoices.test.ts script/home-halloween.test.ts script/mapz-nightlife.test.mjs script/map-startup-delivery.test.ts script/node-runtime.test.mjs"
+  },
+  "card-unit": {
+    "exit": 0,
+    "seconds": 0.41
+  },
+  "session-http": {
+    "exit": 0,
+    "seconds": 9.23
+  },
+  "glass": {
+    "exit": 0,
+    "seconds": 0.72
+  },
+  "predeploy": {
+    "exit": 0,
+    "seconds": 4.59,
+    "command": "npm run predeploy"
+  },
+  "build": {
+    "exit": 0,
+    "command": "node --import tsx script/build.ts",
+    "note": "Equivalent source runner; tsx CLI IPC unavailable in sandbox"
+  },
+  "verify-bundle": {
+    "exit": 0,
+    "command": "npm run verify:deploy",
+    "note": "Rerun after complete Node24 build"
+  },
+  "card-browser": {
+    "exit": 0,
+    "tests": 4,
+    "pass": 4,
+    "fail": 0,
+    "durationMs": 533555.561014
+  },
+  "deployment-verification-tests": {
+    "exit": 0,
+    "tests": 5,
+    "pass": 5
+  },
+  "local-health": {
+    "ok": true,
+    "nodeVersion": "v24.22.2",
+    "outboundFetch": "disabled",
+    "geocoding": "disabled"
+  }
+}

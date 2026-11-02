@@ -2,10 +2,10 @@
   "$schema": "https://schema.railway.app/railway-schema-v2.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm install --include=dev && npm run build"
+    "buildCommand": "export PATH=/opt/node-runtime/bin:$PATH && test \"$(node --version)\" = v24.22.2 && npm run build"
   },
   "deploy": {
-    "startCommand": "npm start",
+    "startCommand": "export NODE_ENV=production PATH=/opt/node-runtime/bin:$PATH && test \"$(node --version)\" = v24.22.2 && node --version && exec /opt/node-runtime/bin/node dist/index.cjs",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 60,
     "restartPolicyType": "ON_FAILURE",

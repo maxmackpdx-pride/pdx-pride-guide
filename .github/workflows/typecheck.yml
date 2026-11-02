@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24.22.2"
           cache: npm
 
       - name: Install dependencies
@@ -35,11 +35,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24.22.2"
           cache: npm
       - run: npm ci --include=dev
       - name: Run regression tests
-        run: npx tsx --test server/platformV1.test.ts server/ingest/mirrorEventPosters.test.ts client/src/lib/optimisticCache.test.ts client/src/lib/authSession.test.ts client/src/lib/queryClient.test.ts client/src/lib/timeAgo.test.ts script/nav-tripwire.test.ts script/token-guard.test.mjs server/sessionStore.test.ts server/passwords.test.ts script/design-component-source-evidence.test.ts script/prepare-design-component-proposal.test.ts script/design-product-publication.test.ts script/verify-railway-design-build.test.ts client/src/lib/boardFollowChoices.test.ts script/home-halloween.test.ts script/mapz-nightlife.test.mjs script/map-startup-delivery.test.ts
+        run: npx tsx --test server/platformV1.test.ts server/ingest/mirrorEventPosters.test.ts client/src/lib/optimisticCache.test.ts client/src/lib/authSession.test.ts client/src/lib/queryClient.test.ts client/src/lib/timeAgo.test.ts script/nav-tripwire.test.ts script/token-guard.test.mjs server/sessionStore.test.ts server/passwords.test.ts script/design-component-source-evidence.test.ts script/prepare-design-component-proposal.test.ts script/design-product-publication.test.ts script/verify-railway-design-build.test.ts client/src/lib/boardFollowChoices.test.ts script/home-halloween.test.ts script/mapz-nightlife.test.mjs script/map-startup-delivery.test.ts script/node-runtime.test.mjs
 
   glass-rebind:
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24.22.2"
 
       - name: Test glass audit parser
         run: node --test script/audit-glass-rebind.test.mjs
@@ -66,7 +66,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24.22.2"
           cache: npm
       - run: npm ci --include=dev
       - name: Shared card and image preparation regression tests

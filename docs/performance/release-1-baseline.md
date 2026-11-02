@@ -111,3 +111,8 @@ The reproduction harness was independently reviewed, including correction of its
 ## Environment limits
 
 Managed cloud Chromium cannot create WebGL contexts. Its map fallback screenshots demonstrate the unavailable-graphics path, not map-render success. Direct Playwright navigation to production could not establish trusted TLS in this environment; no certificate bypass was attempted. WebKit could not launch due to missing host native libraries. These limitations must remain visible in completion and future comparison reports.
+
+
+## Publication verification
+
+Published as `1d3d804dd34038585f6a9e972639c424b98386ed`. [CI 41407010160](https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/runs/41407010160) completed successfully at 07:48:53 UTC on November 2, with all four jobs green and no skipped steps. [Deploy verification 41407010190](https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/runs/41407010190) succeeded at 07:40:41 UTC. Railway deployment `9f24ef00-f7d0-4bc0-b6f2-2101155af3df` reached SUCCESS; live health returned the exact release SHA at 07:42:02 UTC and Home returned HTTP 200. This closes the baseline release within the explicitly documented measurement limits.

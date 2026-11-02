@@ -1577,6 +1577,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({
       ok: true,
       ts: new Date().toISOString(),
+      nodeVersion: process.version,
       pushConfigured: isPushConfigured(),
       emailConfigured: isTransactionalEmailConfigured(),
       pushSubscriptions,

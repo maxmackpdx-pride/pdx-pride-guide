@@ -1,0 +1,6 @@
+{
+  "node": "v24.22.2",
+  "nativeABI": "137",
+  "sqlitePackage": "12.11.1",
+  "sqlite": "3.53.2"
+}

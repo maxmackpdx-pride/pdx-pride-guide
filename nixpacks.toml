@@ -1,0 +1,12 @@
+# Keep the existing Nixpacks builder/native libraries; do not use its stale Node snapshot.
+# The checksummed official distribution supplies both Node and npm before installation.
+[phases.setup]
+nixPkgs = ["openssl"]
+nixpkgsArchive = "ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7"
+aptPkgs = ["...", "curl", "xz-utils", "ca-certificates"]
+cmds = ["bash script/install-node-runtime.sh"]
+paths = ["/opt/node-runtime/bin"]
+
+[phases.install]
+cmds = ["export PATH=/opt/node-runtime/bin:$PATH && test \"$(node --version)\" = v24.22.2 && npm ci --include=dev"]
+paths = ["/opt/node-runtime/bin", "/app/node_modules/.bin"]
