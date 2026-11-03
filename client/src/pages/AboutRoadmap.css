@@ -19,15 +19,15 @@
         --system: var(--panel-cyan);
         --cross: #ad74ff;
         --done: var(--green-acid);
-        --day-mon: #8800ff;
-        --day-mon-text: #aa66ff;
-        --day-tue: #0044ff;
-        --day-tue-text: #4488ff;
-        --day-wed: #ffee00;
+        --day-mon: #7B00FF;
+        --day-mon-text: #9D66FF;
+        --day-tue: #0066FF;
+        --day-tue-text: #44AAFF;
+        --day-wed: #FFDD00;
         --day-thu: #00ffff;
-        --day-fri: #ff00cc;
-        --day-sat: #39ff14;
-        --day-sun: #ff6600;
+        --day-fri: #FF1FA0;
+        --day-sat: #2BFF00;
+        --day-sun: #FF7B00;
         --rainbow-rule: linear-gradient(90deg, #ff2d5e, #ff9500, var(--yellow), var(--green-acid), var(--neon-cyan), #3a6bff, var(--neon-violet), var(--neon-magenta), #ff2d5e);
         font-family: Barlow, system-ui, sans-serif;
       }
@@ -2134,7 +2134,7 @@
         width: clamp(110px, 14vw, 180px);
         height: auto;
         opacity: .075;
-        filter: drop-shadow(0 0 18px rgba(255,0,204,.22));
+        filter: drop-shadow(0 0 18px rgba(255,31,160,.22));
         transform: rotate(9deg);
         pointer-events: none;
       }

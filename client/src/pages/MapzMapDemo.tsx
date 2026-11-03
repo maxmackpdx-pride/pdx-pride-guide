@@ -834,7 +834,7 @@ export default function MapzMapDemo() {
       const entry = mark.item as ResourceMapEntry;
       const category = entry.categories[0];
       const token = category.color.match(/var\((--[^)]+)\)/)?.[1];
-      const color = token ? getComputedStyle(document.documentElement).getPropertyValue(token).trim() || '#CCFF00' : '#CCFF00';
+      const color = token ? getComputedStyle(document.documentElement).getPropertyValue(token).trim() || '#D4FF00' : '#D4FF00';
       return { key:mark.key, kind:'resource', waypointFamily:'rezources', type:'service', typeIcon:serviceIdentity(entry.org)?.icon || mapzTypeIcon('service'),
         coordinates:[mark.lng,mark.lat], name:entry.org.name, color,
         waypointLogo:serviceWaypointLogo(entry.org, entry.org.logo) || '/mapz-map/icons/types/service.svg',

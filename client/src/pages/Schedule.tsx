@@ -381,9 +381,9 @@ export default function Schedule({
       x.fillRect(0, 0, W, H);
       const rb = x.createLinearGradient(0, 0, W, 0);
       rb.addColorStop(0, '#00FFFF');
-      rb.addColorStop(0.34, '#CCFF00');
-      rb.addColorStop(0.67, '#FF00CC');
-      rb.addColorStop(1, '#FF6600');
+      rb.addColorStop(0.34, '#D4FF00');
+      rb.addColorStop(0.67, '#FF1FA0');
+      rb.addColorStop(1, '#FF7B00');
       x.fillStyle = rb;
       x.fillRect(0, 0, W, 16);
       x.fillRect(0, H - 16, W, 16);
@@ -428,14 +428,14 @@ export default function Schedule({
         y += 108;
       }
       if (list.length > rows.length) {
-        x.fillStyle = '#CCFF00';
+        x.fillStyle = '#D4FF00';
         x.font = '700 30px "Barlow Condensed", sans-serif';
         x.fillText('+ ' + (list.length - rows.length) + ' MORE ON ZAYLIST.COM', 104, y + 6);
       }
       x.fillStyle = '#fff';
       x.font = '900 40px "Barlow Condensed", sans-serif';
       x.fillText('ZAYLIST', 74, H - 96);
-      x.fillStyle = '#FF00CC';
+      x.fillStyle = '#FF1FA0';
       x.font = '700 27px "Barlow Condensed", sans-serif';
       x.fillText('PRIDE IS A PROTEST. TAKE CARE OF EACH OTHER.', 74, H - 56);
       const blob: Blob | null = await new Promise((res) => c.toBlob(res, 'image/png'));
@@ -962,7 +962,7 @@ export default function Schedule({
   const heroStats = useMemo(
     () => [
       { num: totalVisible, label: "Events on the grid", color: "#19e3ff" },
-      { num: myCount, label: "In your schedule this week", color: "#ccff00" },
+      { num: myCount, label: "In your schedule this week", color: "#D4FF00" },
       { num: 7, label: "Days, one timeline", color: "#ff1fa0" },
     ],
     [totalVisible, myCount],

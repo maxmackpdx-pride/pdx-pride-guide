@@ -7,12 +7,12 @@
   --panel-card-2: #0d0d10;
   --panel-border: #1c1c22;
   --panel-border-2: #24242c;
-  --panel-lime: #c8fa3c;
+  --panel-lime: #D4FF00;
   --panel-cyan: #19e3ff;
   --panel-magenta: #ff1fa0;
   --panel-orange: #ff8c00;
   --panel-purple: #b06bff;
-  --status-good: #39FF14;
+  --status-good: #2BFF00;
   --status-warn: #FFB347;
   --status-bad: #FF4D4D;
   --status-neutral: #19E3FF;
@@ -171,7 +171,7 @@
     /* Unified hub chrome - same on member + admin */
     .hub-v2-rainbow{
       height:3px;width:100%;
-      background:linear-gradient(90deg,#e40303,#ff8c00,#ffed00,#008026,#24408e,#732982,#ff00cc);
+      background:linear-gradient(90deg,#e40303,#ff8c00,#ffed00,#008026,#24408e,#732982,#FF1FA0);
     }
     .hub-v2-home{
       display:flex;align-items:center;gap:6px;
@@ -245,7 +245,7 @@
     .hub-admin-folder--rail .hub-admin-folder__child{padding-left:28px;font-size:13px}
     .hub-admin-folder--menu .hub-admin-folder__children{border-top:1px solid #222;margin-top:2px;padding-top:2px}
     .hub-admin-folder--menu .hub-admin-folder__child{padding-left:28px;font-size:.76rem;color:#aaa}
-    .hub-admin-folder--menu .hub-admin-folder__child.active,.hub-admin-folder--menu .hub-admin-folder__child:hover{color:#fff;background:rgba(204,255,0,.08)}
+    .hub-admin-folder--menu .hub-admin-folder__child.active,.hub-admin-folder--menu .hub-admin-folder__child:hover{color:#fff;background:rgba(212,255,0,.08)}
     .hub-admin-folder__sheet .hub-more-item{display:flex;align-items:center;gap:10px}
     @media (prefers-reduced-motion: reduce) {
       .hub-root .fitem,.hub-root .statnum,.hub-root .rowin,.hub-root .reveal,.hub-root .seg.on::after,.hub-root .navi.on { color: var(--nav-accent, var(--panel-cyan)); }
@@ -1115,7 +1115,7 @@
       html.calm-mode .hub-next-rsvp__tag{
         box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
       }
-      .hub-next-rsvp__tag--donation{--tag-c:var(--panel-lime,#c8fa3c)}
+      .hub-next-rsvp__tag--donation{--tag-c:var(--panel-lime,#D4FF00)}
       .hub-next-rsvp__tag--ticketed{--tag-c:var(--panel-magenta,#ff1fa0)}
       .hub-next-rsvp__tag--door{--tag-c:var(--panel-cyan,#19e3ff)}
       .hub-next-rsvp__going.pdx-glass-rebind{

@@ -729,7 +729,7 @@ function drawLightsLegacy(fade,target=map,surface=lights){
    const logoEntry=g.logoUrl?venueLogos.get(g.logoUrl):null;
    // Same-day vortex dressing: the nearest same-day events, each with its ring lines, time, art and RSVP faces.
    // The countdown runs on the same clock as the 2D card. Adult venues stay red, other same-day vortexes stay green.
-   const lodNow=viewTime+Math.max(0,frameNow-viewTimeReceived),sameDayVortex=g.sameDay&&Math.max(stage,st.value)>3,venueTint=g.color||'#FF00CC',tint=g.sameDay?e3MixHex(venueTint,e3VortexTint(g.color,true),(st.value-3)/.6):venueTint;
+   const lodNow=viewTime+Math.max(0,frameNow-viewTimeReceived),sameDayVortex=g.sameDay&&Math.max(stage,st.value)>3,venueTint=g.color||'#FF1FA0',tint=g.sameDay?e3MixHex(venueTint,e3VortexTint(g.color,true),(st.value-3)/.6):venueTint;
    let content=null,urgency=0;
    if(sameDayVortex){
     const screenEvents=e3StackOrder(g.events,lodNow,stack?2:1),nearest=screenEvents[0];

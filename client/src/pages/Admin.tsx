@@ -1286,7 +1286,7 @@ export default function Admin() {
         title: p.displayName || p.username || p.email || "Promoter request",
         subtitle: p.eventTitle ? `Claiming ${p.eventTitle}` : "Promoter application",
         kindLabel: "Promoter",
-        color: "#FF00CC",
+        color: "#FF1FA0",
       });
     }
     for (const m of pendingMod.slice(0, 4)) {
@@ -1304,7 +1304,7 @@ export default function Admin() {
         title: g.title || "GIFTZ post",
         subtitle: `${g.reportCount || 0} report(s)`,
         kindLabel: "GIFTZ report",
-        color: "#AA66FF",
+        color: "#9D66FF",
       });
     }
     for (const claim of businessClaims.slice(0, 3)) {
@@ -1322,7 +1322,7 @@ export default function Admin() {
         title: sub.name || "New venue",
         subtitle: `${sub.type || "Business"} · ${sub.neighborhood || sub.address || "No location"}`,
         kindLabel: "New venue",
-        color: "#FF6600",
+        color: "#FF7B00",
       });
     }
     for (const req of businessLogoRequests.slice(0, 2)) {
@@ -1331,7 +1331,7 @@ export default function Admin() {
         title: req.businessName || "Logo change",
         subtitle: "Pending logo approval",
         kindLabel: "Logo request",
-        color: "#FF00CC",
+        color: "#FF1FA0",
       });
     }
     return items.slice(0, 8);
@@ -1340,10 +1340,10 @@ export default function Admin() {
   const overviewKindPills = useMemo(() => {
     const pills: KindPill[] = [];
     if (pendingSubs.length) pills.push({ key: "submissions", label: "Submissions", count: pendingSubs.length, color: "#FF1FA0" });
-    if (pendingPromoters.length) pills.push({ key: "promoters", label: "Promoters", count: pendingPromoters.length, color: "#FF00CC" });
+    if (pendingPromoters.length) pills.push({ key: "promoters", label: "Promoters", count: pendingPromoters.length, color: "#FF1FA0" });
     if (pendingMod.length) pills.push({ key: "moderation", label: "Moderation", count: pendingMod.length, color: "#FF8C00" });
-    if (pendingGiftingReports.length) pills.push({ key: "reports", label: "Reports", count: pendingGiftingReports.length, color: "#FF6600" });
-    if (pendingGiftingFlagged.length) pills.push({ key: "gifting", label: "Flagged gifts", count: pendingGiftingFlagged.length, color: "#AA66FF" });
+    if (pendingGiftingReports.length) pills.push({ key: "reports", label: "Reports", count: pendingGiftingReports.length, color: "#FF7B00" });
+    if (pendingGiftingFlagged.length) pills.push({ key: "gifting", label: "Flagged gifts", count: pendingGiftingFlagged.length, color: "#9D66FF" });
     if (venueClaimsPendingCount) pills.push({ key: "venue-claims", label: "Venue claims", count: venueClaimsPendingCount, color: "#19E3FF" });
     return pills;
   }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports, venueClaimsPendingCount]);
@@ -1534,9 +1534,9 @@ export default function Admin() {
 
     return (
       <div className="dash-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: 24 }}>
-        <div className="w-full max-w-sm" style={{ background: "#0d0d0d", border: "2px solid #C8FA3C", borderRadius: 16, padding: 32 }}>
+        <div className="w-full max-w-sm" style={{ background: "#0d0d0d", border: "2px solid #D4FF00", borderRadius: 16, padding: 32 }}>
           <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <Lock size={28} style={{ color: "#C8FA3C", margin: "0 auto 16px" }} />
+            <Lock size={28} style={{ color: "#D4FF00", margin: "0 auto 16px" }} />
             <h1 className="dash-anton dash-admin-title">Admin</h1>
             <p className="dash-mono" style={{ fontSize: 11, color: "var(--dash-muted)", marginTop: 6 }}>Zaylist</p>
           </div>
@@ -1553,7 +1553,7 @@ export default function Admin() {
               />
             </div>
             <div>
-              <label className="dash-mono" style={{ fontSize: 10, color: "#C8FA3C", display: "block", marginBottom: 8 }}>Approval signature</label>
+              <label className="dash-mono" style={{ fontSize: 10, color: "#D4FF00", display: "block", marginBottom: 8 }}>Approval signature</label>
               <input
                 type="text"
                 value={adminName}
@@ -1564,7 +1564,7 @@ export default function Admin() {
               <p className="dash-mono" style={{ fontSize: 9, color: "var(--dash-muted)", marginTop: 6 }}>Shown on approvals, not your login username</p>
             </div>
             <div>
-              <label className="dash-mono" style={{ fontSize: 10, color: "#C8FA3C", display: "block", marginBottom: 8 }}>Password</label>
+              <label className="dash-mono" style={{ fontSize: 10, color: "#D4FF00", display: "block", marginBottom: 8 }}>Password</label>
               <div style={{ position: "relative" }}>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -1572,7 +1572,7 @@ export default function Admin() {
                   onChange={e => { setPassword(e.target.value); setPasswordError(false); }}
                   style={{
                     width: "100%", padding: "10px 36px 10px 12px", background: "rgba(0,0,0,0.4)",
-                    border: passwordError ? "1px solid #FF2400" : "1px solid rgba(255,255,255,0.2)",
+                    border: passwordError ? "1px solid #FF0000" : "1px solid rgba(255,255,255,0.2)",
                     color: "#fff", fontSize: 14,
                   }}
                   placeholder="Password"
@@ -1585,7 +1585,7 @@ export default function Admin() {
                   {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
-              {passwordError && <p style={{ color: "#FF2400", fontSize: 12, marginTop: 4 }}>Incorrect password</p>}
+              {passwordError && <p style={{ color: "#FF0000", fontSize: 12, marginTop: 4 }}>Incorrect password</p>}
             </div>
             <button type="submit" className="dash-btn dash-btn-lime active" style={{ width: "100%", marginTop: 8 }}>
               Enter
@@ -1976,7 +1976,7 @@ export default function Admin() {
                   onClick={() => setEventStatusFilter(filter.key)}
                   className={`dash-admin-tab ${eventStatusFilter === filter.key ? "active" : ""}`}
                   style={{
-                    borderBottom: eventStatusFilter === filter.key ? "2px solid #C8FA3C" : "2px solid transparent",
+                    borderBottom: eventStatusFilter === filter.key ? "2px solid #D4FF00" : "2px solid transparent",
                     marginBottom: 0,
                     padding: "8px 12px",
                     fontSize: 10,
@@ -1988,11 +1988,11 @@ export default function Admin() {
             </div>
             {bulkEventIds.length > 0 && (
               <div
-                className="mb-4 p-3 border border-[#FF00CC]/40 flex flex-wrap items-center gap-3"
-                style={{ background: "rgba(255,0,204,0.06)" }}
+                className="mb-4 p-3 border border-[#FF1FA0]/40 flex flex-wrap items-center gap-3"
+                style={{ background: "rgba(255,31,160,0.06)" }}
                 data-testid="admin-bulk-events-toolbar"
               >
-                <span className="display text-xs text-[#FF00CC]">{bulkEventIds.length} selected</span>
+                <span className="display text-xs text-[#FF1FA0]">{bulkEventIds.length} selected</span>
                 <select
                   value={bulkAction}
                   onChange={e => {
@@ -2034,7 +2034,7 @@ export default function Admin() {
                   type="button"
                   disabled={bulkBusy || !bulkPreview}
                   className="display text-xs px-3 py-1 border"
-                  style={{ borderColor: "#C8FA3C", color: "#C8FA3C", opacity: bulkPreview ? 1 : 0.4 }}
+                  style={{ borderColor: "#D4FF00", color: "#D4FF00", opacity: bulkPreview ? 1 : 0.4 }}
                   onClick={async () => {
                     setBulkBusy(true);
                     try {
@@ -2138,7 +2138,7 @@ export default function Admin() {
                           <p className="text-[#00FFFF]/80 text-[10px] mt-1 uppercase tracking-wide">Community submitted</p>
                         )}
                         {checkInCount > 0 && (
-                          <p className="text-[#C8FA3C]/80 text-[10px] mt-1 uppercase tracking-wide">{checkInCount} check-in{checkInCount === 1 ? "" : "s"}</p>
+                          <p className="text-[#D4FF00]/80 text-[10px] mt-1 uppercase tracking-wide">{checkInCount} check-in{checkInCount === 1 ? "" : "s"}</p>
                         )}
                         {(ev.submittedByProfile || ev.claimedByProfile) && (
                           <div className="mt-2 space-y-1">
@@ -2186,7 +2186,7 @@ export default function Admin() {
                         <button
                           onClick={() => claimableMutation.mutate({ id: ev.id, isClaimable: !ev.isClaimable })}
                           className="flex items-center gap-1 text-sm transition-all"
-                          style={{ color: ev.isClaimable ? "#CCFF00" : "#444" }}
+                          style={{ color: ev.isClaimable ? "#D4FF00" : "#444" }}
                         >
                           {ev.isClaimable ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
                           <span className="display text-xs">{ev.isClaimable ? "CLAIMABLE" : "CLAIM OFF"}</span>
@@ -2234,7 +2234,7 @@ export default function Admin() {
                     {ev.claimedBy && (
                       <div className="border-t border-white/10 px-4 py-2 flex items-center gap-3 flex-wrap" style={{ background: "#0a0a0a" }}>
                         <span className="text-white/35 text-[10px] uppercase tracking-wide">Host</span>
-                        <span className="text-sm" style={{ color: "#CCFF00" }}>
+                        <span className="text-sm" style={{ color: "#D4FF00" }}>
                           @{ev.claimedByProfile?.username || ev.claimedBy}
                           {ev.claimedByProfile?.displayName ? ` · ${ev.claimedByProfile.displayName}` : ""}
                         </span>
@@ -2260,10 +2260,10 @@ export default function Admin() {
                         {editDuplicateMatches.length > 0 && (
                           <div
                             className="p-4 border space-y-2"
-                            style={{ borderColor: "rgba(255, 102, 0, 0.55)", background: "rgba(255, 102, 0, 0.08)" }}
+                            style={{ borderColor: "rgba(255, 123, 0, 0.55)", background: "rgba(255, 123, 0, 0.08)" }}
                             data-testid="admin-edit-duplicates"
                           >
-                            <p className="display text-xs" style={{ color: "#FF6600", letterSpacing: "0.1em" }}>
+                            <p className="display text-xs" style={{ color: "#FF7B00", letterSpacing: "0.1em" }}>
                               POSSIBLE DUPLICATES · {editDuplicateMatches.length}
                             </p>
                             <p className="text-white/45 text-xs">
@@ -2273,7 +2273,7 @@ export default function Admin() {
                               {editDuplicateMatches.map(m => {
                                 const confColor =
                                   m.confidence === "high" ? "#FF4D4D"
-                                    : m.confidence === "medium" ? "#FF6600"
+                                    : m.confidence === "medium" ? "#FF7B00"
                                       : "#C8C4BB";
                                 return (
                                   <li
@@ -2422,7 +2422,7 @@ export default function Admin() {
                             <label className="display text-xs text-white/40 block mb-1">PROMOTER (PRIMARY HOST)</label>
                             {ev.claimedBy ? (
                               <div className="flex items-center gap-3 flex-wrap">
-                                <span className="text-sm" style={{ color: "#CCFF00" }}>
+                                <span className="text-sm" style={{ color: "#D4FF00" }}>
                                   @{ev.claimedByProfile?.username || ev.claimedBy}
                                   {ev.claimedByProfile?.displayName ? ` · ${ev.claimedByProfile.displayName}` : ""}
                                 </span>
@@ -2650,13 +2650,13 @@ export default function Admin() {
                 marginTop: -4,
                 marginBottom: 8,
                 padding: "16px 18px",
-                border: "1.5px solid rgba(255, 102, 0, 0.45)",
+                border: "1.5px solid rgba(255, 123, 0, 0.45)",
                 borderRadius: 10,
                 background: "#0a0a0c",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.55)",
               }}
             >
-              <p className="display text-sm mb-1" style={{ color: "#FF6600", letterSpacing: "0.08em" }}>
+              <p className="display text-sm mb-1" style={{ color: "#FF7B00", letterSpacing: "0.08em" }}>
                 MANUAL PROMOTER OVERRIDE
               </p>
               <p className="text-white/45 text-xs mb-3">
@@ -2665,7 +2665,7 @@ export default function Admin() {
               </p>
               <div className="flex gap-2 flex-wrap">
                 <input
-                  className="flex-1 min-w-[200px] bg-black border border-white/20 px-3 py-2.5 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#FF6600]"
+                  className="flex-1 min-w-[200px] bg-black border border-white/20 px-3 py-2.5 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#FF7B00]"
                   placeholder="@username, email, or name..."
                   value={userSearchQ}
                   onChange={e => setUserSearchQ(e.target.value)}
@@ -2688,9 +2688,9 @@ export default function Admin() {
                     <div key={u.id} className="p-4 border border-white/10 flex items-center justify-between gap-4 flex-wrap" style={{ background: "#0d0d0d" }}>
                       <div className="min-w-0 flex-1">
                         <AdminUserIdentity profile={u} showEmail size={40} />
-                        <p className="text-xs mt-2 ml-[52px]" style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
+                        <p className="text-xs mt-2 ml-[52px]" style={{ color: u.promoterStatus === "approved" ? "#D4FF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF0000" }}>
                           promoter: {u.promoterStatus || "none"}
-                          {u.subAdmin && <span style={{ color: "#FF00CC" }}> · SUB-ADMIN</span>}
+                          {u.subAdmin && <span style={{ color: "#FF1FA0" }}> · SUB-ADMIN</span>}
                         </p>
                       </div>
                       <div className="flex gap-2 flex-wrap">
@@ -2722,7 +2722,7 @@ export default function Admin() {
                         {isSuperAdmin && (
                           <button type="button" onClick={() => setSubAdminMutation.mutate({ userId: u.id, grant: !u.subAdmin })}
                             className="display text-xs px-3 py-1 border"
-                            style={{ borderColor: "#FF00CC", color: u.subAdmin ? "#FF00CC" : "#FF00CC88" }}>
+                            style={{ borderColor: "#FF1FA0", color: u.subAdmin ? "#FF1FA0" : "#FF1FA088" }}>
                             {u.subAdmin ? "REVOKE SUB-ADMIN" : "GRANT SUB-ADMIN"}
                           </button>
                         )}
@@ -2780,7 +2780,7 @@ export default function Admin() {
               <>
                 {/* Approved promoters + site admins */}
                 <div>
-                  <p className="display text-sm mb-3" style={{ color: "#CCFF00" }}>
+                  <p className="display text-sm mb-3" style={{ color: "#D4FF00" }}>
                     PROMOTERS &amp; ADMINS · {approvedPromoters.length}
                   </p>
                   {approvedPromoters.length === 0 ? (
@@ -2798,12 +2798,12 @@ export default function Admin() {
                         >
                           <div className="min-w-0 flex-1">
                             <AdminUserIdentity profile={u} showEmail size={40} />
-                            <p className="text-xs mt-2 ml-[52px]" style={{ color: isApprovedPromoter ? "#CCFF00" : "#C8FA3C" }}>
+                            <p className="text-xs mt-2 ml-[52px]" style={{ color: isApprovedPromoter ? "#D4FF00" : "#D4FF00" }}>
                               {isApprovedPromoter ? "promoter: approved" : "promoter: none"}
-                              {u.isOwner && <span style={{ color: "#C8FA3C" }}> · SITE ADMIN</span>}
-                              {u.subAdmin && !u.isOwner && <span style={{ color: "#FF00CC" }}> · SUB-ADMIN</span>}
+                              {u.isOwner && <span style={{ color: "#D4FF00" }}> · SITE ADMIN</span>}
+                              {u.subAdmin && !u.isOwner && <span style={{ color: "#FF1FA0" }}> · SUB-ADMIN</span>}
                               {isAdminRow && !u.isOwner && !u.subAdmin && (
-                                <span style={{ color: "#C8FA3C" }}> · SITE ADMIN</span>
+                                <span style={{ color: "#D4FF00" }}> · SITE ADMIN</span>
                               )}
                               {u.createdAt && (
                                 <span className="text-white/35"> · joined {new Date(u.createdAt).toLocaleDateString()}</span>
@@ -2856,7 +2856,7 @@ export default function Admin() {
                                 type="button"
                                 onClick={() => setSubAdminMutation.mutate({ userId: u.id, grant: !u.subAdmin })}
                                 className="display text-xs px-3 py-1 border"
-                                style={{ borderColor: "#FF00CC", color: u.subAdmin ? "#FF00CC" : "#FF00CC88" }}
+                                style={{ borderColor: "#FF1FA0", color: u.subAdmin ? "#FF1FA0" : "#FF1FA088" }}
                               >
                                 {u.subAdmin ? "REVOKE SUB-ADMIN" : "GRANT SUB-ADMIN"}
                               </button>
@@ -2936,7 +2936,7 @@ export default function Admin() {
             <div>
               <p className="display text-sm mb-3" style={{ color: "#19E3FF" }}>VENUE CLAIMS ({businessClaims.length})</p>
               {businessClaimsError ? (
-                <p className="text-xs" style={{ color: "#FF2400" }}>Could not load venue claims.</p>
+                <p className="text-xs" style={{ color: "#FF0000" }}>Could not load venue claims.</p>
               ) : businessClaimsLoading ? (
                 <p className="text-white/30 text-xs">Loading…</p>
               ) : businessClaims.length === 0 ? (
@@ -2979,9 +2979,9 @@ export default function Admin() {
             </div>
 
             <div>
-              <p className="display text-sm mb-3" style={{ color: "#FF6600" }}>NEW VENUE SUBMISSIONS ({businessSubmissions.length})</p>
+              <p className="display text-sm mb-3" style={{ color: "#FF7B00" }}>NEW VENUE SUBMISSIONS ({businessSubmissions.length})</p>
               {businessSubmissionsError ? (
-                <p className="text-xs" style={{ color: "#FF2400" }}>Could not load new venue submissions.</p>
+                <p className="text-xs" style={{ color: "#FF0000" }}>Could not load new venue submissions.</p>
               ) : businessSubmissionsLoading ? (
                 <p className="text-white/30 text-xs">Loading…</p>
               ) : businessSubmissions.length === 0 ? (
@@ -3019,9 +3019,9 @@ export default function Admin() {
             </div>
 
             <div>
-              <p className="display text-sm mb-3" style={{ color: "#FF00CC" }}>LOGO REQUESTS ({businessLogoRequests.length})</p>
+              <p className="display text-sm mb-3" style={{ color: "#FF1FA0" }}>LOGO REQUESTS ({businessLogoRequests.length})</p>
               {businessLogoRequestsError ? (
-                <p className="text-xs" style={{ color: "#FF2400" }}>Could not load logo requests.</p>
+                <p className="text-xs" style={{ color: "#FF0000" }}>Could not load logo requests.</p>
               ) : businessLogoRequestsLoading ? (
                 <p className="text-white/30 text-xs">Loading…</p>
               ) : businessLogoRequests.length === 0 ? (
@@ -3053,7 +3053,7 @@ export default function Admin() {
             </div>
 
             <div>
-              <p className="display text-sm mb-2" style={{ color: "#C8FA3C" }}>
+              <p className="display text-sm mb-2" style={{ color: "#D4FF00" }}>
                 FULL DIRECTORY ({adminDirectory.length})
               </p>
               <p className="text-white/40 text-xs mb-3">
@@ -3081,8 +3081,8 @@ export default function Admin() {
                       onClick={() => setDirectoryOwnerFilter(key)}
                       className="display text-[10px] px-3 py-1.5 border"
                       style={{
-                        borderColor: directoryOwnerFilter === key ? "#C8FA3C" : "#333",
-                        color: directoryOwnerFilter === key ? "#C8FA3C" : "#666",
+                        borderColor: directoryOwnerFilter === key ? "#D4FF00" : "#333",
+                        color: directoryOwnerFilter === key ? "#D4FF00" : "#666",
                         background: "transparent",
                       }}
                     >
@@ -3092,7 +3092,7 @@ export default function Admin() {
                 </div>
               </div>
               {adminDirectoryError ? (
-                <p className="text-xs" style={{ color: "#FF2400" }}>Could not load directory.</p>
+                <p className="text-xs" style={{ color: "#FF0000" }}>Could not load directory.</p>
               ) : adminDirectoryLoading ? (
                 <p className="text-white/30 text-xs">Loading directory…</p>
               ) : filteredAdminDirectory.length === 0 ? (
@@ -3136,7 +3136,7 @@ export default function Admin() {
                         {!biz.ownerId ? (
                           <div
                             className="border-t border-white/10 px-4 py-3 flex flex-wrap items-center gap-2"
-                            style={{ background: "rgba(200, 250, 60, 0.05)" }}
+                            style={{ background: "rgba(212, 255, 0, 0.05)" }}
                           >
                             <span className="display text-[10px] text-white/45 shrink-0">ASSIGN OWNER</span>
                             <div className="flex-1 min-w-[200px] max-w-sm">
@@ -3182,7 +3182,7 @@ export default function Admin() {
                             {biz.ownerProfile ? (
                               <AdminUserIdentity profile={biz.ownerProfile} size={28} />
                             ) : (
-                              <span className="text-sm" style={{ color: "#CCFF00" }}>
+                              <span className="text-sm" style={{ color: "#D4FF00" }}>
                                 user #{biz.ownerId}
                               </span>
                             )}
@@ -3257,14 +3257,14 @@ export default function Admin() {
         {activeTab === "users" && canViewUsers && (
           <div>
             {newUsersToday.length > 0 && (
-              <div id="new-users-today" style={{ marginBottom: 28, padding: 16, border: "1px solid #C8FA3C33", background: "#0a0f00" }}>
-                <p className="display text-sm" style={{ color: "#C8FA3C", marginBottom: 12 }}>
+              <div id="new-users-today" style={{ marginBottom: 28, padding: 16, border: "1px solid #D4FF0033", background: "#0a0f00" }}>
+                <p className="display text-sm" style={{ color: "#D4FF00", marginBottom: 12 }}>
                   <Sprout size={16} aria-hidden="true" /> NEW TODAY: {newUsersToday.length} {newUsersToday.length === 1 ? "person" : "people"} joined
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {newUsersToday.map(u => (
                     <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#1a1a1a", border: "1px solid #C8FA3C44", overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#C8FA3C", fontFamily: "var(--font-display)", fontSize: 14 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#1a1a1a", border: "1px solid #D4FF0044", overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#D4FF00", fontFamily: "var(--font-display)", fontSize: 14 }}>
                         {u.photoUrl ? <img src={u.photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (u.displayName || u.username).slice(0, 1).toUpperCase()}
                       </div>
                       <div style={{ minWidth: 0 }}>
@@ -3326,15 +3326,15 @@ export default function Admin() {
                       <AdminUserIdentity profile={u} showEmail size={44} />
                       <div className="flex flex-wrap items-center gap-2 mt-2 ml-[56px]">
                         {u.isOwner && (
-                          <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>SITE ADMIN</span>
+                          <span className="sticker text-xs" style={{ color: "#D4FF00", borderColor: "#D4FF00" }}>SITE ADMIN</span>
                         )}
                         {u.subAdmin && (
-                          <span className="sticker text-xs" style={{ color: "#FF00CC", borderColor: "#FF00CC" }}>SUB-ADMIN</span>
+                          <span className="sticker text-xs" style={{ color: "#FF1FA0", borderColor: "#FF1FA0" }}>SUB-ADMIN</span>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-3 mt-2 text-xs ml-[56px]">
                         {u.promoterStatus && u.promoterStatus !== "none" && (
-                          <span style={{ color: u.promoterStatus === "approved" ? "#CCFF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF2400" }}>
+                          <span style={{ color: u.promoterStatus === "approved" ? "#D4FF00" : u.promoterStatus === "pending" ? "#00FFFF" : "#FF0000" }}>
                             promoter: {u.promoterStatus}
                           </span>
                         )}
@@ -3366,7 +3366,7 @@ export default function Admin() {
                           </span>
                         )}
                         {(u.accountStatus === "deleted" || u.status === "deleted") && (
-                          <span style={{ color: "#FF2400" }}>deleted</span>
+                          <span style={{ color: "#FF0000" }}>deleted</span>
                         )}
                       </div>
                     </div>
@@ -3382,7 +3382,7 @@ export default function Admin() {
           <div className="space-y-8">
             {isPrimaryOwner && <AdminQSearchPairing />}
             <div className="border border-white/10 p-4" style={{ background: "#0d0d0d" }}>
-              <p className="display text-sm mb-2" style={{ color: "#C8FA3C" }}>QUEUE CLAIMS · WHO HOLDS WHAT</p>
+              <p className="display text-sm mb-2" style={{ color: "#D4FF00" }}>QUEUE CLAIMS · WHO HOLDS WHAT</p>
               <p className="text-white/40 text-xs mb-3">
                 Soft claims from floating inbox Admin · Queue. Anyone can take over; claims auto-expire.
               </p>
@@ -3476,7 +3476,7 @@ export default function Admin() {
                       <AdminUserIdentity profile={{ ...member, id: member.userId }} showEmail size={44} />
                       <div className="flex flex-wrap items-center gap-2 mt-2 pl-[56px]">
                         {member.protected && (
-                          <span className="sticker text-xs" style={{ color: "#C8FA3C", borderColor: "#C8FA3C" }}>
+                          <span className="sticker text-xs" style={{ color: "#D4FF00", borderColor: "#D4FF00" }}>
                             SITE ADMIN
                           </span>
                         )}
@@ -3547,7 +3547,7 @@ export default function Admin() {
           >
             <p
               className="display text-sm"
-              style={{ color: messageTarget.as === "personal" ? "#C8FA3C" : "#19E3FF" }}
+              style={{ color: messageTarget.as === "personal" ? "#D4FF00" : "#19E3FF" }}
             >
               {messageTarget.as === "personal"
                 ? `MESSAGE FROM ${signedInAdminLabel.toUpperCase()}`
@@ -3586,7 +3586,7 @@ export default function Admin() {
                 className="display text-xs px-4 py-2 border"
                 style={
                   messageTarget.as === "personal"
-                    ? { borderColor: "#C8FA3C", color: "#000", background: "#C8FA3C" }
+                    ? { borderColor: "#D4FF00", color: "#000", background: "#D4FF00" }
                     : { borderColor: "#19E3FF", color: "#000", background: "#19E3FF" }
                 }
                 onClick={() => void sendAdminMessage()}

@@ -1725,7 +1725,7 @@
   border-radius: var(--glass-card-radius, 14px);
   background:
     linear-gradient(133deg, rgba(255,255,255,.07), transparent 27%),
-    radial-gradient(90% 90% at 100% 100%, rgba(255,0,204,.07), transparent 64%),
+    radial-gradient(90% 90% at 100% 100%, rgba(255,31,160,.07), transparent 64%),
     #050505;
   box-shadow: 0 0 0 2px #000, 0 34px 66px -28px #000;
 }

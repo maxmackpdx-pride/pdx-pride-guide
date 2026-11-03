@@ -119,11 +119,11 @@ const modAccent: Record<Exclude<ModerationMode, null>, string> = {
 };
 
 const DAY_OPPOSITE: Record<string, string> = {
-  MON: "#CCFF00",
-  TUE: "#FF6600",
-  WED: "#8800FF",
-  THU: "#FF6600",
-  FRI: "#CCFF00",
+  MON: "#D4FF00",
+  TUE: "#FF7B00",
+  WED: "#7B00FF",
+  THU: "#FF7B00",
+  FRI: "#D4FF00",
   SAT: "#FF3030",
   SUN: "#00FFFF",
 };
@@ -1332,7 +1332,7 @@ function EventModalInner({
             <summary><MapPin aria-hidden="true" />Location &amp; directions<ChevronRight aria-hidden="true" /></summary>
             <div className="event-modal__disclosure-content">
               {event.address && <p className="event-modal__description">{event.address}</p>}
-              {locationOpen && <EventLocationMap event={event} primary={DAY_COLORS[dayCode as keyof typeof DAY_COLORS] || "#00FFFF"} complementary={DAY_OPPOSITE[dayCode] || "#CCFF00"}
+              {locationOpen && <EventLocationMap event={event} primary={DAY_COLORS[dayCode as keyof typeof DAY_COLORS] || "#00FFFF"} complementary={DAY_OPPOSITE[dayCode] || "#D4FF00"}
                 scheduled={rsvp.myEventIds.has(event.id)} schedulePending={rsvp.isRsvpPending(event.id)}
                 onSchedule={() => rsvp.toggleRsvp(event.id)} />}
             </div>

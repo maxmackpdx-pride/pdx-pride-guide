@@ -95,8 +95,8 @@
 
 .home-hero__share:hover,
 .home-hero__share:focus-visible {
-  border-color: var(--panel-lime, #c8fa3c);
-  color: var(--panel-lime, #c8fa3c);
+  border-color: var(--panel-lime, #D4FF00);
+  color: var(--panel-lime, #D4FF00);
   outline: none;
 }
 
@@ -1510,7 +1510,7 @@ html.calm-mode .home-main-stage .pg-note--spot {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(120% 80% at 100% 0%, rgba(255, 0, 204, 0.06), transparent 55%),
+    radial-gradient(120% 80% at 100% 0%, rgba(255, 31, 160, 0.06), transparent 55%),
     radial-gradient(110% 80% at 0% 100%, rgba(0, 255, 255, 0.05), transparent 55%);
 }
 
@@ -1565,7 +1565,7 @@ html.calm-mode .home-main-stage .pg-note--spot {
 }
 
 .home-boards__all:hover {
-  color: var(--neon-yellow, #ccff00);
+  color: var(--neon-yellow, #D4FF00);
 }
 
 .home-boards__header {
@@ -1595,13 +1595,13 @@ html.calm-mode .home-main-stage .pg-note--spot {
     linear-gradient(
       90deg,
       #00ffff 0%,
-      #39ff14 12%,
-      #ccff00 24%,
-      #ffee00 36%,
-      #ff6600 48%,
-      #ff00cc 60%,
-      #8800ff 72%,
-      #0044ff 86%,
+      #2BFF00 12%,
+      #D4FF00 24%,
+      #FFDD00 36%,
+      #FF7B00 48%,
+      #FF1FA0 60%,
+      #7B00FF 72%,
+      #0066FF 86%,
       #00ffff 100%
     )
   );
@@ -1675,7 +1675,7 @@ html.calm-mode .home-main-stage .pg-note--spot {
 
 .home-boards__card--gigs {
   --acc: var(--neon-violet);
-  --acc-text: #aa66ff;
+  --acc-text: #9D66FF;
   animation-duration: 4.9s;
 }
 
@@ -2057,15 +2057,15 @@ html.calm-mode .home-main-stage .home-front__grid-group--duplicate,
   font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--neon-magenta, #ff00cc);
+  color: var(--neon-magenta, #FF1FA0);
 }
 
 .home-up-next__dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--neon-magenta, #ff00cc);
-  box-shadow: 0 0 10px var(--neon-magenta, #ff00cc);
+  background: var(--neon-magenta, #FF1FA0);
+  box-shadow: 0 0 10px var(--neon-magenta, #FF1FA0);
   animation: homeHeroBlink 1.8s ease-in-out infinite;
 }
 
@@ -2149,7 +2149,7 @@ html.calm-mode .home-up-next__card::before {
   font-size: 10px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--up-day, var(--day-mon-text, #aa66ff));
+  color: var(--up-day, var(--day-mon-text, #9D66FF));
   margin-bottom: 10px;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
 }
@@ -2210,9 +2210,9 @@ html.calm-mode .home-up-next__card::before {
   font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--neon-yellow, #ccff00);
+  color: var(--neon-yellow, #D4FF00);
   background: transparent;
-  border: 1.5px solid var(--neon-yellow, #ccff00);
+  border: 1.5px solid var(--neon-yellow, #D4FF00);
   padding: 6px 12px;
   border-radius: 3px;
   cursor: pointer;
@@ -2220,7 +2220,7 @@ html.calm-mode .home-up-next__card::before {
 
 .home-up-next__rsvp--going {
   color: #000;
-  background: var(--neon-yellow, #ccff00);
+  background: var(--neon-yellow, #D4FF00);
 }
 
 /*
@@ -2251,7 +2251,7 @@ html.calm-mode .home-up-next__card::before {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(120% 80% at 100% 0%, rgba(255, 0, 204, 0.07), transparent 55%),
+    radial-gradient(120% 80% at 100% 0%, rgba(255, 31, 160, 0.07), transparent 55%),
     radial-gradient(110% 80% at 0% 100%, rgba(0, 255, 255, 0.055), transparent 55%),
     radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1.4px),
     var(--home-glass-frame);
@@ -2457,7 +2457,7 @@ a.home-boards__utility:focus .home-boards__utility-mantra {
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .home-main-stage .home-boards {
     background:
-      radial-gradient(120% 80% at 100% 0%, rgba(255, 0, 204, 0.07), transparent 55%),
+      radial-gradient(120% 80% at 100% 0%, rgba(255, 31, 160, 0.07), transparent 55%),
       radial-gradient(110% 80% at 0% 100%, rgba(0, 255, 255, 0.055), transparent 55%),
       #0a0a0e;
   }
@@ -2477,7 +2477,7 @@ html.calm-mode .home-main-stage .home-boards,
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   background:
-    radial-gradient(120% 80% at 100% 0%, rgba(255, 0, 204, 0.05), transparent 55%),
+    radial-gradient(120% 80% at 100% 0%, rgba(255, 31, 160, 0.05), transparent 55%),
     radial-gradient(110% 80% at 0% 100%, rgba(0, 255, 255, 0.04), transparent 55%),
     #0a0a0e;
 }
@@ -2517,7 +2517,7 @@ html.calm-mode .home-beach-widget,
   flex: 1.6;
   background:
     var(--home-glass-specular),
-    radial-gradient(120% 90% at 0% 0%, rgba(255, 0, 204, 0.06), transparent 50%),
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 31, 160, 0.06), transparent 50%),
     var(--home-glass-fill);
   border: 1px solid var(--home-glass-edge);
   border-radius: 10px;
@@ -2534,7 +2534,7 @@ html.calm-mode .home-beach-widget,
   font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--neon-magenta, #ff00cc);
+  color: var(--neon-magenta, #FF1FA0);
   margin-bottom: 8px;
 }
 
@@ -2592,7 +2592,7 @@ html.calm-mode .home-beach-widget,
   flex: 1;
   background:
     var(--home-glass-specular),
-    radial-gradient(120% 90% at 100% 0%, rgba(255, 102, 0, 0.06), transparent 52%),
+    radial-gradient(120% 90% at 100% 0%, rgba(255, 123, 0, 0.06), transparent 52%),
     var(--home-glass-fill);
   border: 1px solid var(--home-glass-edge);
   border-radius: 10px;
@@ -2618,33 +2618,33 @@ html.calm-mode .home-beach-widget,
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--status-good, #39ff14);
+  color: var(--status-good, #2BFF00);
   padding: 16px 24px 0;
 }
 
 .home-beach-widget--rooster .home-beach-widget__live {
-  color: var(--neon-orange, #ff6600);
+  color: var(--neon-orange, #FF7B00);
 }
 
 .home-beach-widget__live-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--status-good, #39ff14);
-  box-shadow: 0 0 8px var(--status-good, #39ff14);
+  background: var(--status-good, #2BFF00);
+  box-shadow: 0 0 8px var(--status-good, #2BFF00);
   animation: homeHeroBlink 1.8s ease-in-out infinite;
 }
 
 .home-beach-widget--rooster .home-beach-widget__live-dot {
-  background: var(--neon-orange, #ff6600);
-  box-shadow: 0 0 10px var(--neon-orange, #ff6600);
+  background: var(--neon-orange, #FF7B00);
+  box-shadow: 0 0 10px var(--neon-orange, #FF7B00);
 }
 
 .home-beach-widget--rooster {
-  border-color: color-mix(in srgb, var(--neon-orange, #ff6600) 28%, var(--home-glass-edge));
+  border-color: color-mix(in srgb, var(--neon-orange, #FF7B00) 28%, var(--home-glass-edge));
   box-shadow:
     var(--home-glass-shadow),
-    0 0 24px rgba(255, 102, 0, 0.12);
+    0 0 24px rgba(255, 123, 0, 0.12);
 }
 
 .home-beach-widget__tabs {
@@ -2678,7 +2678,7 @@ html.calm-mode .home-beach-widget,
 }
 
 .home-beach-widget__tab--orange.home-beach-widget__tab--active {
-  border-bottom-color: var(--neon-orange, #ff6600);
+  border-bottom-color: var(--neon-orange, #FF7B00);
 }
 
 .home-beach-widget__panel {
@@ -2722,16 +2722,16 @@ html.calm-mode .home-beach-widget,
   font-variant-numeric: tabular-nums;
 }
 
-.home-beach-widget__stat--good { color: var(--status-good, #39ff14); }
+.home-beach-widget__stat--good { color: var(--status-good, #2BFF00); }
 /* Sauvie Island: green heading + a thin divider separating it from the
    Rooster Rock block above (works in the home card and the standalone widget). */
 .home-beach-widget__name--sauvie {
-  color: var(--status-good, #39ff14);
+  color: var(--status-good, #2BFF00);
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid color-mix(in srgb, var(--status-good, #39ff14) 32%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--status-good, #2BFF00) 32%, transparent);
 }
-.home-beach-widget__stat--orange { color: var(--neon-orange, #ff6600); }
+.home-beach-widget__stat--orange { color: var(--neon-orange, #FF7B00); }
 .home-beach-widget__stat--water {
   color: var(--neon-cyan, #19e3ff);
   text-shadow: 0 0 14px rgba(25, 227, 255, 0.28);
@@ -2761,7 +2761,7 @@ html.calm-mode .home-beach-widget,
 }
 
 .home-beach-widget__link--cyan { color: var(--panel-cyan, var(--neon-cyan)); }
-.home-beach-widget__link--orange { color: var(--neon-orange, #ff6600); }
+.home-beach-widget__link--orange { color: var(--neon-orange, #FF7B00); }
 
 .home-beach-widget__loading {
   font-size: 14px;
@@ -3265,9 +3265,9 @@ html.calm-mode .home-next-preview__orb,
 }
 .home-next-preview__card.pdx-glass-rebind[data-tone="red"] { --c: #ff1f1f; }
 .home-next-preview__card.pdx-glass-rebind[data-tone="cyan"] { --c: var(--neon-cyan, #00ffff); }
-.home-next-preview__card.pdx-glass-rebind[data-tone="magenta"] { --c: var(--neon-magenta, #ff00cc); }
-.home-next-preview__card.pdx-glass-rebind[data-tone="acid"] { --c: var(--neon-yellow, #ccff00); }
-.home-next-preview__card.pdx-glass-rebind[data-tone="orange"] { --c: var(--neon-orange, #ff6600); }
+.home-next-preview__card.pdx-glass-rebind[data-tone="magenta"] { --c: var(--neon-magenta, #FF1FA0); }
+.home-next-preview__card.pdx-glass-rebind[data-tone="acid"] { --c: var(--neon-yellow, #D4FF00); }
+.home-next-preview__card.pdx-glass-rebind[data-tone="orange"] { --c: var(--neon-orange, #FF7B00); }
 .home-next-preview__card.pdx-glass-rebind[data-tone="violet"] { --c: #8f5cff; }
 .home-next-preview__card.pdx-glass-rebind[data-tone="gold"] { --c: #ffb400; }
 .home-next-preview__card.pdx-glass-rebind[data-tone="scarlet"] { --c: #ff2d2d; }
@@ -3370,7 +3370,7 @@ html.calm-mode .home-next-preview__orb,
   transform: rotate(-7deg);
   padding: 3px 8px 2px;
   border-radius: 3px;
-  background: var(--green-acid, #39ff14);
+  background: var(--green-acid, #2BFF00);
   color: var(--text-inverse, #000);
   font-family: var(--font-display, "Barlow Condensed", "Arial Narrow", sans-serif);
   font-weight: 900;
@@ -3381,7 +3381,7 @@ html.calm-mode .home-next-preview__orb,
   box-shadow:
     var(--chrome-keyline, 0 0 0 1px #000),
     var(--chrome-bevel, inset 0 1px 0 rgba(255, 255, 255, .72)),
-    0 10px 22px -14px color-mix(in srgb, var(--green-acid, #39ff14) 90%, transparent);
+    0 10px 22px -14px color-mix(in srgb, var(--green-acid, #2BFF00) 90%, transparent);
   pointer-events: none;
 }
 

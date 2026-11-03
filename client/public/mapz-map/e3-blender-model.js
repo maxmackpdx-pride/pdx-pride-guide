@@ -373,7 +373,7 @@ function blankTexture(){const t=new THREE.DataTexture(new Uint8Array([0,0,0,0]),
 // mirrored: set when the host draws the model through a projection that flips triangle winding (the map layer does not).
 // Concept: vortex without rings. Hides the text ring bands, the ring fills, and the ring parts of the outline at vortex stages.
 const E3_NO_RINGS=true;
-export function createBlenderHologram(template,{color='#FF00CC',phase=0,logo=null,mirrored=false}={}){
+export function createBlenderHologram(template,{color='#FF1FA0',phase=0,logo=null,mirrored=false}={}){
  const object=template.clone(true),meshes=[],particles=[],materials=new Set(),ownedGeometries=new Set(),groundTexture=radialTexture();
  let iconMaterial=null;
  const tint=new THREE.Color(color);
@@ -894,7 +894,7 @@ export function createE3BlenderLayer(maplibre,{url=E3_BLENDER_URL,onReady=()=>{}
     const model=createBlenderHologram(template,{color:row.color,phase:row.phase??instances.size*2.39996,logo:row.logo}),root=new THREE.Group();
     model.object.rotation.x=Math.PI/2;root.add(model.object);scene.add(root);item={root,model,row};instances.set(row.key,item);
    }
-   item.row=row;item.model.setColor(row.color||'#FF00CC');item.model.setUrgency(row.urgency||0);item.model.setTextBoost(row.textBoost||1);item.model.setLogo(row.logo??null);item.model.setContent(row.content??{});
+   item.row=row;item.model.setColor(row.color||'#FF1FA0');item.model.setUrgency(row.urgency||0);item.model.setTextBoost(row.textBoost||1);item.model.setLogo(row.logo??null);item.model.setContent(row.content??{});
    const position=maplibre.MercatorCoordinate.fromLngLat(row.coordinates,row.altitude??0);
    item.root.position.set((position.x-origin.x)/unit,-(position.y-origin.y)/unit,(position.z-origin.z)/unit);
    // Uniform size in meters, with an optional vertical stretch so a hologram can rise above local buildings.
