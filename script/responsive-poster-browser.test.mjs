@@ -18,9 +18,18 @@ test('real Home cards and EventModal retain geometry/DPR delivery; failed varian
    const context=await makeContext(dpr),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await context.route(u=>u.pathname===source,route=>route.fulfill({contentType,body:originalBytes}));
    await page.goto(base+'__poster-qa?source='+encodeURIComponent(source)+(original?'&original=1':''),{waitUntil:'networkidle'});
    const tall=await measure(page,'#qa-card .tonight-card__art img'),wide=await measure(page,'#qa-row .tonight-card__art img');await page.locator('#qa-open').click();const detail=await measure(page,'.event-modal__poster-img');
-   await page.waitForLoadState('networkidle');await page.screenshot({path:path.join(evidence,`detail-dpr${dpr}-${original?'original':'responsive'}.png`)});
+   await page.waitForLoadState('networkidle');
+   // Keep real DPR for delivery/layout checks, but do not rasterize 9x evidence pixels
+   // on the software compositor at DPR3. Two-CPU CI otherwise stalls capture >30s.
+   const screenshotPath=path.join(evidence,`detail-dpr${dpr}-${original?'original':'responsive'}.png`);
+   await page.screenshot({path:screenshotPath,scale:'css',timeout:30000});
+   const screenshotBytes=await readFile(screenshotPath),screenshotImage=sharp(screenshotBytes);
+   const screenshotInfo=await screenshotImage.metadata(),screenshotStats=await screenshotImage.stats();
+   assert.equal(screenshotInfo.format,'png');assert.equal(screenshotInfo.width,390);assert.equal(screenshotInfo.height,844);
+   assert.ok(screenshotStats.channels.some(channel=>channel.min<channel.max),'saved screenshot must decode and contain visible content');
+   const screenshot={scale:'css',width:screenshotInfo.width,height:screenshotInfo.height,bytes:screenshotBytes.length};
    const transfers=await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>r.initiatorType==='img').map(r=>({url:r.name,encodedBytes:r.encodedBodySize,transferBytes:r.transferSize})));
-   const record={dpr,original,source,tall,wide,detail,transfers,errors};results.push(record);assert.deepEqual(errors,[]);
+   const record={dpr,original,source,tall,wide,detail,transfers,errors,screenshot};results.push(record);assert.deepEqual(errors,[]);
    if(original)baseline=record;else{for(const k of ['tall','wide','detail'])for(const d of ['width','height'])assert.ok(Math.abs(record[k][d]-baseline[k][d])<.2,`${k} ${d} changed`);assert.match(tall.currentSrc,/\/api\/poster-variants\/image\/.*-640\.webp$/);assert.match(wide.currentSrc,/\/api\/poster-variants\/image\/.*-640\.webp$/);assert.ok(detail.naturalWidth>0);assert.match(detail.currentSrc,new RegExp(`/api/poster-variants/image/.*-${dpr===1?640:1280}\\.webp$`));}
    await context.close();
   }}

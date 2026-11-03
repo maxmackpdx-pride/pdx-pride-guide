@@ -1,11 +1,11 @@
 # Zaylist improvement plan of record — gated release sequence with evidence
 Merged Nov 1, 2026 into the single document of record (merged from Muse’s evidence and the reviewed gated sequence; execution now owned by Janice). Structure: the revised gated sequence. Underneath each release: Muse's file-level evidence and acceptance criteria from the Nov 1 audit at master `90a88238`, plus the two adopted adjustments.
 
-**Current authorization boundary, November 3 at 00:16:40 UTC: complete and verify Releases 1–6, then STOP for a review of the whole project with Tucker. Release 7 must not begin automatically. It requires explicit new approval after that review and after confirming all of Releases 1–6 are done. No automatic production map cutover or retirement of the old map system.**
+**Current authorization boundary, November 3 at 01:50:17 UTC: finish and verify Release 4 and both Release 5 upgrades (5a React, 5b Vite), then STOP and notify Tucker that the whole project is ready for review. Do not start Release 6 map building or Release 7 cutover/retirement until he explicitly approves them. No map repository creation, map implementation, production map swap or old-system retirement is authorized by this plan's remaining scope.**
 
-Current progress at this instruction: Releases 1–3 are complete and verified; Release 4 forward-only image processing is ongoing. React and Vite remain Release 5a and 5b, respectively; the replacement map build is Release 6. Numbering is unchanged.
+Releases 1–3 are complete and verified. Release 4 deployment is in progress at this instruction; do not treat that as a completed live verification. React and Vite remain Release 5a and 5b, respectively; the replacement map build is Release 6 and is on hold. Numbering is unchanged.
 
-The earlier November 2 full-plan execution authorization is narrowed by this latest instruction. Verification remains required for every release. Decisions that expand scope or require separate permission are not silently assumed.
+This latest instruction narrows the earlier full-plan and Releases 1–6 authorizations. Verification remains required for every authorized release. The recorded device-fallback preference does not authorize starting map work.
 
 Execution run logs: [Release 1 baseline](release-1-baseline.md), [Release 2 runtime](release-2-runtime.md), [Release 3 API](release-3-api.md), [Release 4 phone loading](release-4-phone-load.md). This repository copy carries the agreed plan forward; previously delivered PDF/JSON are the pre-execution snapshot.
 Amended Nov 1 per Codex's document review: Node 24 corrected to a chosen target (not a Vite 8 requirement); Express ETag wording corrected; home-flight acceptance criterion changed to zero obsolete asset dependencies; home globe described as canvas; cache-freshness tests, repeatable performance gates, and a pre-move reference audit added; map-code extraction marked proposed. That review used the earlier code findings and current official documentation — not a fresh production audit; nothing was changed or deployed by it.
@@ -90,10 +90,12 @@ Tailwind 3.4.17 → 4 only if it delivers a clear benefit; don't rewrite styling
 
 ## Release 6 — Build the complete replacement map system last (separate repository)
 
+**HOLD since November 3 at 01:50:17 UTC:** do not start map building or create the map repository. Finish and verify Releases 4, 5a and 5b, notify Tucker that the full project is ready for review, and obtain explicit approval before beginning Release 6. The following remains a deferred plan, not an execution instruction.
+
 One separate repository containing the shared map engine and **all five modes: Mapz, OutZide, Afterz, ZayDark, and Boardz** (Boardz: corkboard ground, paper styling, pushpins — added after the original four). Define how it connects to existing accounts, cards, data, and chat before building it. The existing maps keep working while the replacement is developed and tested.
 
 ### GATE — device-support decision (before map architecture, before any engine commitment)
-**Approved November 3 at 00:20:47 UTC:** preserve the current browser support range; provide usable lists and cards on devices that cannot run the new map graphics. This approves the fallback product direction, not a specific engine version or an untested device-compatibility claim. Validate supported map behavior and the list/card fallback before settling the architecture. Release 7 still requires the separate full-project review and explicit approval.
+**Recorded preference from November 3 at 00:20:47 UTC, retained while Release 6 is on hold:** preserve the current browser support range; provide usable lists and cards on devices that cannot run the new map graphics. This is a future product direction, not authorization to start implementation, choose an engine version or claim device compatibility. If Release 6 is later approved, validate map behavior and the list/card fallback before settling the architecture. Release 7 also remains on hold.
 
 Test the oldest iPhones and browsers we intend to support. **Verify the approved usable-list/card fallback before committing to the engine**, rather than discovering an exclusion after launch. Preserve the current support range. This gate comes before the MapLibre decision below because the tested fallback and device capabilities constrain the architecture.
 
@@ -112,7 +114,7 @@ Test the oldest iPhones and browsers we intend to support. **Verify the approved
 
 ## Release 7 — Swap it in, then retire the old map plumbing
 
-**HOLD: not authorized to start automatically.** First confirm Releases 1–6 are complete and verified, review the entire project with Tucker, and obtain his explicit new approval. The production map swap and old-system retirement below are blocked until that approval.
+**HOLD: not authorized to start.** Stop after verified Releases 4, 5a and 5b for Tucker’s full-project review. Release 6 is also held; any later approval to build it does not automatically approve Release 7. Before a cutover, require completion and verification of all prerequisite work and Tucker’s explicit approval for the production map swap and old-system retirement.
 
 Verify mobile behavior, terrain, markers, recovery, privacy, and mode switching before cutover. Keep a rollback path. Only after the replacement is verified live, remove unused home-flight assets and obsolete build code, preserving anything still needed by the globe or map outputs.
 
