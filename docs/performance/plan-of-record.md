@@ -1,9 +1,13 @@
 # Zaylist improvement plan of record — gated release sequence with evidence
 Merged Nov 1, 2026 into the single document of record (merged from Muse’s evidence and the reviewed gated sequence; execution now owned by Janice). Structure: the revised gated sequence. Underneath each release: Muse's file-level evidence and acceptance criteria from the Nov 1 audit at master `90a88238`, plus the two adopted adjustments.
 
-**Status: execution authorized.** Tucker authorized completion of this entire plan on November 2, 2026 at 07:08 UTC, starting with Release 1 and proceeding through the gated releases. Release verification remains required. Decisions that expand scope or require separate permission are not silently assumed.
+**Current authorization boundary, November 3 at 00:16:40 UTC: complete and verify Releases 1–6, then STOP for a review of the whole project with Tucker. Release 7 must not begin automatically. It requires explicit new approval after that review and after confirming all of Releases 1–6 are done. No automatic production map cutover or retirement of the old map system.**
 
-Execution run logs: [Release 1 baseline](release-1-baseline.md), [Release 2 runtime](release-2-runtime.md), [Release 3 API](release-3-api.md). This repository copy carries the agreed plan forward; previously delivered PDF/JSON are the pre-execution snapshot.
+Current progress at this instruction: Releases 1–3 are complete and verified; Release 4 forward-only image processing is ongoing. React and Vite remain Release 5a and 5b, respectively; the replacement map build is Release 6. Numbering is unchanged.
+
+The earlier November 2 full-plan execution authorization is narrowed by this latest instruction. Verification remains required for every release. Decisions that expand scope or require separate permission are not silently assumed.
+
+Execution run logs: [Release 1 baseline](release-1-baseline.md), [Release 2 runtime](release-2-runtime.md), [Release 3 API](release-3-api.md), [Release 4 phone loading](release-4-phone-load.md). This repository copy carries the agreed plan forward; previously delivered PDF/JSON are the pre-execution snapshot.
 Amended Nov 1 per Codex's document review: Node 24 corrected to a chosen target (not a Vite 8 requirement); Express ETag wording corrected; home-flight acceptance criterion changed to zero obsolete asset dependencies; home globe described as canvas; cache-freshness tests, repeatable performance gates, and a pre-move reference audit added; map-code extraction marked proposed. That review used the earlier code findings and current official documentation — not a fresh production audit; nothing was changed or deployed by it.
 
 ## Ground rules (apply to every release)
@@ -58,6 +62,8 @@ Evidence (older measurement, to recheck):
 - Vite copies `client/public` wholesale into dist, so everything in it ships in every deploy.
 
 ### 4b. Image derivatives
+**Scope revision, November 3 at 00:09:38 UTC:** process new eligible incoming images automatically going forward, using persistent runtime derivatives and dynamic frontend delivery. Do not backfill the existing image catalogue or include the earlier 368-file static batch in this release. Preserve originals and backups. Complete and verify this forward-only work, then move to Release 5. The exact runtime paths and coverage must be documented from the implementation, not assumed.
+
 Serve properly sized image derivatives while preserving originals (`sharp@^0.35.3` is already a dependency). Phones should receive the 640/1280 copies, not camera-size originals. **Brand exception (Tucker's rule):** `brand/` masters stay high resolution and untouched; only web-served copies get sized to their display dimensions.
 
 ### 4c. Defer and consolidate runtime work
@@ -87,7 +93,9 @@ Tailwind 3.4.17 → 4 only if it delivers a clear benefit; don't rewrite styling
 One separate repository containing the shared map engine and **all five modes: Mapz, OutZide, Afterz, ZayDark, and Boardz** (Boardz: corkboard ground, paper styling, pushpins — added after the original four). Define how it connects to existing accounts, cards, data, and chat before building it. The existing maps keep working while the replacement is developed and tested.
 
 ### GATE — device-support decision (before map architecture, before any engine commitment)
-Test the oldest iPhones and browsers we intend to support. **Decide what unsupported devices receive before committing to the engine**, rather than discovering the exclusion after launch. This gate comes before the MapLibre decision below, because its answer constrains the architecture.
+**Approved November 3 at 00:20:47 UTC:** preserve the current browser support range; provide usable lists and cards on devices that cannot run the new map graphics. This approves the fallback product direction, not a specific engine version or an untested device-compatibility claim. Validate supported map behavior and the list/card fallback before settling the architecture. Release 7 still requires the separate full-project review and explicit approval.
+
+Test the oldest iPhones and browsers we intend to support. **Verify the approved usable-list/card fallback before committing to the engine**, rather than discovering an exclusion after launch. Preserve the current support range. This gate comes before the MapLibre decision below because the tested fallback and device capabilities constrain the architecture.
 
 ### The MapLibre question (evaluated inside this release, after the gate)
 - Current sprawl: npm `maplibre-gl@^4.7.1` (EventLocationMap.tsx, outzTopography.ts) vs a **vendored 5.6.2 UMD build (937 KB)** loaded by the standalone Mapz/Outzide maps. Latest is 6.16.0.
@@ -103,6 +111,8 @@ Test the oldest iPhones and browsers we intend to support. **Decide what unsuppo
 - Entanglement (why home-flight still exists): Sep 25, 2026 (c3a899d8) Mapz was pointed at home-flight's vendored MapLibre; Oct 6 (7a339430) Mapz + Outzide were consolidated onto home-flight modules. Today: mapz-map/index.html + outzide-map/index.html load home-flight/vendor/maplibre-gl-5.6.2.{js,css}; mapz-map/river-flight.js imports bridge-roads.js, city-sparkles.js, roof-sparkles.js from home-flight; mapz-map/bridge-fit.js imports bridge-roads.js; map-foundation/surface.js imports home-flight/city-map.js; vite.config.ts versions the whole directory; server/mapzStatic.ts allowlists home-flight/vendor; script/build.ts compresses it; script/mapz-build.ts reads/rewrites it; script/build-home-globe-atlas.mjs reads home-flight/waypoints.json, logo-mask.js, and venue logos; seven test scripts read home-flight sources.
 
 ## Release 7 — Swap it in, then retire the old map plumbing
+
+**HOLD: not authorized to start automatically.** First confirm Releases 1–6 are complete and verified, review the entire project with Tucker, and obtain his explicit new approval. The production map swap and old-system retirement below are blocked until that approval.
 
 Verify mobile behavior, terrain, markers, recovery, privacy, and mode switching before cutover. Keep a rollback path. Only after the replacement is verified live, remove unused home-flight assets and obsolete build code, preserving anything still needed by the globe or map outputs.
 
@@ -127,3 +137,5 @@ llms.txt gaps; `/openapi.json`, `/agents.json`, `ai-plugin.json` return 404. (Th
 
 - November 2, Release 1: production API responses already arrive gzip-compressed through Cloudflare, with weak ETags and working 304 validation. Source has no explicit application compression middleware; direct-origin behavior has not been measured. Release 3 must improve computation cost and freshness, not claim edge compression as a new benefit.
 - November 2, Release 1: audit/archive folder names are not evidence of unused assets. Live Eventz references audit-2026-09-28 posters, including the large steam-events-3.png candidate. Preserve runtime files and prioritize served derivatives; only confirmed unused material may leave the deployed tree.
+
+- November 2, Release 4 reconstruction: workspace loss required recovering exact original artifacts where available and reconstructing other changes. The earlier reconstructed candidate passed its local checks at 22:53 UTC, but its static-batch image scope was superseded November 3 at 00:09:38 UTC. Those results are historical only. The forward-only runtime image implementation subsequently passed fresh local typecheck, CI (146 passes, one intentional skip), 14 browser tests, build/bundle checks and 30 offline route samples on November 3. Publisher and member ingestion workflows passed separately against disposable databases. The release remains unpublished pending exact-commit CI, Railway and live verification.

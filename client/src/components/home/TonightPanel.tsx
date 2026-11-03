@@ -3,7 +3,7 @@ import { WebGLShader } from "@/components/ui/web-gl-shader";
 import { useSavedEvents } from "@/hooks/useSavedEvents";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useMemo, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "motion/react";
 import { useTheme } from "@/context/ThemeContext";
 import { ResourceRail } from "@/components/resources/ResourceRail";
 import { ArrowUpRight } from "lucide-react";

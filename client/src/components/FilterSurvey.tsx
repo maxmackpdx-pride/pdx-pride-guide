@@ -1,6 +1,6 @@
 import { useId, useState, type CSSProperties, type ReactNode } from "react";
 import { Check, ChevronDown } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTheme } from "@/context/ThemeContext";
 import { ResourceFilterButton } from "@/components/resources/ResourceFilterButton";
 import "./FilterSurvey.css";

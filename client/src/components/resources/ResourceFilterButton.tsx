@@ -1,4 +1,4 @@
-import { motion, useMotionTemplate, useSpring, useTransform, type HTMLMotionProps } from "framer-motion";
+import { motion, useMotionTemplate, useSpring, useTransform, type HTMLMotionProps } from "motion/react";
 
 /** Same restrained spring response as the cards, applied to the filter face. */
 export function ResourceFilterButton({ quietMotion = false, style, onPointerMove, onPointerLeave, ...props }: HTMLMotionProps<"button"> & { quietMotion?: boolean }) {

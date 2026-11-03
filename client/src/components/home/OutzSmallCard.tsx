@@ -29,7 +29,7 @@ export default function OutzSmallCard({ location, onRequireAuth }: { location: T
       <span className="outz-accent__band" aria-hidden="true" />
       <button type="button" className="outz-small__open" aria-label={`Open ${location.name}`} onClick={() => setOpen(true)}>
         <span className="outz-small__art">
-          {blend ? <OutzBlendArt placeId={placeId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : location.photo ? <OutzPhoto photo={location.photo} /> : <img src={art} alt="" loading="lazy" />}
+          {blend ? <OutzBlendArt placeId={placeId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : location.photo ? <OutzPhoto photo={location.photo} sizes="136px" /> : <img src={art} alt="" loading="lazy" />}
         </span>
         <span className="outz-small__scrim" aria-hidden="true" />
         <span className="outz-small__kind">{label}</span>

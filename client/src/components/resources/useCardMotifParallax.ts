@@ -1,6 +1,6 @@
 import "../CardMotifMotion.css";
 import { useEffect, useId, useRef } from "react";
-import { useReducedMotion, useSpring } from "framer-motion";
+import { useReducedMotion, useSpring } from "motion/react";
 import { useTheme } from "@/context/ThemeContext";
 
 type Surface = HTMLElement | SVGElement;

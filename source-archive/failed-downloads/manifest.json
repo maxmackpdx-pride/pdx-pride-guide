@@ -1,0 +1,51 @@
+[
+  {
+    "originalPath": "client/public/posters/tucker-archive/bear-naked-2024.jpg",
+    "archivePath": "source-archive/failed-downloads/posters/tucker-archive/bear-naked-2024.jpg",
+    "bytes": 431,
+    "sha256": "f3e4d8c9537c38eb81bd7fa7dec7046e2d1185e05e2994039534d48e16bfea53",
+    "reason": "XML/XHTML error document, not image"
+  },
+  {
+    "originalPath": "client/public/posters/tucker-archive/fairy-dust-2024.png",
+    "archivePath": "source-archive/failed-downloads/posters/tucker-archive/fairy-dust-2024.png",
+    "bytes": 431,
+    "sha256": "4f16f5d8d0ac8b8119d6dcb633fe2b972c32197cf4fb14917f20c3ae4514e8cb",
+    "reason": "XML/XHTML error document, not image"
+  },
+  {
+    "originalPath": "client/public/posters/tucker-archive/honey-2024.png",
+    "archivePath": "source-archive/failed-downloads/posters/tucker-archive/honey-2024.png",
+    "bytes": 431,
+    "sha256": "88e68f2e8ed35da4716435838db1abc6ef28fdad45cfaf806128d36842515a5f",
+    "reason": "XML/XHTML error document, not image"
+  },
+  {
+    "originalPath": "client/public/posters/tucker-archive/honey-tradie-2025.png",
+    "archivePath": "source-archive/failed-downloads/posters/tucker-archive/honey-tradie-2025.png",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reason": "empty file"
+  },
+  {
+    "originalPath": "client/public/posters/tucker-archive/kink-codes-2024.png",
+    "archivePath": "source-archive/failed-downloads/posters/tucker-archive/kink-codes-2024.png",
+    "bytes": 430,
+    "sha256": "ad63e29434a681336bd754e6b3a3b73d8feea39b515af6da815731d1107618d8",
+    "reason": "XML/XHTML error document, not image"
+  },
+  {
+    "originalPath": "client/public/posters/tucker-archive/primal-masquerade-2024.png",
+    "archivePath": "source-archive/failed-downloads/posters/tucker-archive/primal-masquerade-2024.png",
+    "bytes": 430,
+    "sha256": "2d36a99ae2cb745dbe997538edb3b73e5ec949b742946368f5d877810e013ca9",
+    "reason": "XML/XHTML error document, not image"
+  },
+  {
+    "originalPath": "client/public/posters/tucker-archive/yes-coach-1989.png",
+    "archivePath": "source-archive/failed-downloads/posters/tucker-archive/yes-coach-1989.png",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reason": "empty file"
+  }
+]

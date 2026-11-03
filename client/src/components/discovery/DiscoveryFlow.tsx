@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
+import { motion, useInView, useReducedMotion } from 'motion/react';
 import { useTheme } from '@/context/ThemeContext';
 import { ResourceFilterButton } from '@/components/resources/ResourceFilterButton';
 import './DiscoveryFlow.css';

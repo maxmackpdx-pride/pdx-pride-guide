@@ -11,7 +11,7 @@ import { ArrowUpRight } from "lucide-react";
 import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import DetailActions from "./DetailActions";
 import type React from "react";
-import { useEffect, useId, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useId, useRef, useState } from "react";
 import { CardDetails } from "./cards/CardAPI";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -39,7 +39,8 @@ import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpeni
 import { categoryHidesMissedConnections } from "@shared/missedConnections";
 import { resolveBusinessLocations } from "@shared/businessLocations";
 import { resolveDirectoryLogo } from "@shared/directoryLogos";
-import DirectoryMap from "@/components/DirectoryMap";
+import { useIncidentalMap } from "@/hooks/useIncidentalMap";
+const DirectoryMap = lazy(() => import("@/components/DirectoryMap"));
 import "./PlaceModal.css";
 import "./PlaceModal.mobile-card.css";
 import "./RoomDoorways.css";
@@ -247,6 +248,7 @@ function PlaceModalInner({
   const [missedOpen, setMissedOpen] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const [heroMapVisible, setHeroMapVisible] = useState(false);
+  const incidentalMap = useIncidentalMap(heroMapVisible, place?.id ?? "place");
   const [detailsOpen, setDetailsOpen] = useState(true);
   const [eventsOpen, setEventsOpen] = useState(true);
   const [open, setOpen] = useState(false);
@@ -508,8 +510,9 @@ function PlaceModalInner({
           </div>
               </div>
               <div className="place-modal-panel__hero-slide" aria-label="Place map">
-<div className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
-            <DirectoryMap
+<div ref={incidentalMap.ref} className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
+            {incidentalMap.active && <Suspense fallback={<span role="status">Loading map…</span>}><DirectoryMap
+              cameraMemory={incidentalMap.memory}
               businesses={hasMapCoordinates ? [displayed] : []}
               height="100%"
               showKey={false}
@@ -517,7 +520,7 @@ function PlaceModalInner({
               focusBusiness={hasMapCoordinates}
               rasterBasemap
               accent={accent}
-            />
+            /></Suspense>}
             <div className="place-modal-panel__map-label">
               <MapPinned size={14} aria-hidden="true" />
               <span>

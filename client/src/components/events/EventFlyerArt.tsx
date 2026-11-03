@@ -1,4 +1,6 @@
+import { useResponsivePoster } from "@/lib/useResponsivePoster";
 import type { ImgHTMLAttributes } from "react";
+import { restoreOriginalPoster } from "@/lib/responsivePoster";
 import DayMotif, { motifDay } from "./DayMotif";
 import EventFallbackLogo from "./EventFallbackLogo";
 
@@ -16,9 +18,11 @@ export default function EventFlyerArt({
   glass = false,
   backdrop = true,
   alt = "",
+  onError,
   ...img
 }: { src: string | null | undefined; day: string | null | undefined; showDay?: boolean; title?: string; venueName?: string; glass?: boolean; backdrop?: boolean } & Omit<ImgHTMLAttributes<HTMLImageElement>, "src">) {
-  if (src) return <>{backdrop && <DayMotif day={day} placement="art" networkOnly />}<img src={src} alt={alt} loading="lazy" decoding="async" {...img} /></>;
+  const posterAttributes = useResponsivePoster(src, img.sizes);
+  if (src) return <>{backdrop && <DayMotif day={day} placement="art" networkOnly />}<img {...posterAttributes} alt={alt} loading="lazy" decoding="async" {...img} onError={event => { if (!restoreOriginalPoster(event.currentTarget, src)) onError?.(event); }} /></>;
   return (
     <>
       <DayMotif day={day} placement="art" glass={glass} />

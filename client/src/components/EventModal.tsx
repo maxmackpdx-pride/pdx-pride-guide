@@ -1,3 +1,5 @@
+import { useResponsivePoster } from "@/lib/useResponsivePoster";
+import { restoreOriginalPoster, POSTER_DETAIL_SIZES } from "@/lib/responsivePoster";
 import { CardArtworkGlass } from "./CardArtworkGlass";
 import { useSavedEvents } from "@/hooks/useSavedEvents";
 import { ResourceCardMotif } from "./resources/ResourceCardMotif";
@@ -340,6 +342,7 @@ function EventModalInner({
   const eventTiming = getEventScheduleTiming(event.dateStart, event.dateEnd);
   const isPastEvent = eventTiming === "past";
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
+  const posterAttributes = useResponsivePoster(posterUrl, POSTER_DETAIL_SIZES);
   useEffect(() => setPosterOrientation("portrait"), [posterUrl]);
   useEffect(() => {
     const hero = heroRef.current;
@@ -811,7 +814,7 @@ function EventModalInner({
         <section ref={heroRef} className={`event-modal__poster event-modal__hero event-modal--poster-${posterOrientation}`} aria-labelledby="event-modal-title">
           {posterUrl && <DayMotif day={event.dayOfWeek} placement="card" networkOnly />}
           {posterUrl
-            ? <img ref={posterImageRef} src={posterUrl} alt="" className="event-modal__poster-img" onLoad={e => setPosterOrientation(e.currentTarget.naturalHeight > e.currentTarget.naturalWidth * 1.08 ? "portrait" : "landscape")} />
+            ? <img ref={posterImageRef} {...posterAttributes} loading="lazy" decoding="async" onError={e => restoreOriginalPoster(e.currentTarget, posterUrl)} alt="" className="event-modal__poster-img" onLoad={e => setPosterOrientation(e.currentTarget.naturalHeight > e.currentTarget.naturalWidth * 1.08 ? "portrait" : "landscape")} />
             : <span className="event-modal__poster-img event-modal__poster-motif"><DayMotif day={event.dayOfWeek} placement="art" /><CardArtworkGlass /><EventFallbackLogo title={event.title} venueName={event.venueName} /></span>}
           <span className="event-modal__poster-fade" aria-hidden="true" />
           <span className="event-modal__poster-scan" aria-hidden="true" />

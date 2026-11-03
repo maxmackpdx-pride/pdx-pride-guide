@@ -1,9 +1,7 @@
-import { useId } from "react";
+import { lazy, Suspense, useId } from "react";
 import { ChevronDown, MapPinned } from "lucide-react";
-import { MapContainer } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import CartoVectorBasemap from "@/components/CartoVectorBasemap";
-import { MAP_SURFACE_BG } from "@/components/ds/mapTheme";
+import { useIncidentalMap } from "@/hooks/useIncidentalMap";
+const PlaceCardMapCanvas = lazy(() => import("./PlaceCardMapCanvas"));
 
 function formatCoordinates(latitude: number, longitude: number) {
   const latitudeDirection = latitude >= 0 ? "N" : "S";
@@ -27,6 +25,8 @@ export function PlaceCardMap({
   zoom?: number;
 }) {
   const mapId = `place-map-${useId().replace(/:/g, "")}`;
+
+  const map = useIncidentalMap(expanded);
 
   return (
     <div
@@ -54,23 +54,13 @@ export function PlaceCardMap({
         className="pdxPlaceMap__reveal"
         aria-hidden={!expanded}
       >
-        <div className="pdxPlaceMap__well">
+        <div className="pdxPlaceMap__well" ref={map.ref}>
           {expanded && (
             <>
               <div className="pdxPlaceMap__live">
-                <MapContainer
-                  center={[latitude, longitude]}
-                  zoom={zoom}
-                  minZoom={1}
-                  zoomControl={false}
-                  attributionControl={false}
-                  dragging={false}
-                  scrollWheelZoom={false}
-                  doubleClickZoom={false}
-                  style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
-                >
-                  <CartoVectorBasemap />
-                </MapContainer>
+                {map.active && <Suspense fallback={<span className="pdxPlaceMap__loading" role="status" aria-label="Loading map" />}>
+                  <PlaceCardMapCanvas latitude={latitude} longitude={longitude} zoom={zoom} />
+                </Suspense>}
               </div>
               <span className="pdxPlaceMap__pin" aria-hidden="true">
                 <MapPinned size={27} strokeWidth={2.5} />

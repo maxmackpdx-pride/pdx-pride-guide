@@ -2,7 +2,7 @@ import { useMapzActive } from './MapzActivity';
 import { useCallback, useEffect, useLayoutEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
 import { Link } from "wouter";
 import { ChevronRight, SlidersHorizontal, X } from "lucide-react";
-import { useDragControls } from "framer-motion";
+import { useDragControls } from "motion/react";
 import SmoothDrawer from "./ui/smooth-drawer";
 import { NavGlassLayers, navGlassPointer } from "./ui/nav-glass";
 

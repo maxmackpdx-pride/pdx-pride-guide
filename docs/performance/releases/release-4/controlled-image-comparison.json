@@ -1,0 +1,57 @@
+{
+  "status": "forward_only_actual_route_checks",
+  "scope": "Isolated real production route registration with copied databases and loopback-only traffic; no production mutations.",
+  "publisher": {
+    "scope": "isolated full production route registration, copied database, loopback only",
+    "checks": [
+      "unauthenticated publisher upload rejected",
+      "real session login succeeds",
+      "publisher input JPEG under 1 MB",
+      "authenticated multipart poster upload succeeds",
+      "uploaded original byte-for-byte preserved",
+      "upload alone does not enqueue or publish derivative",
+      "local research run started",
+      "single create API stores URL as normal LIVE public database event",
+      "database insert automatically enqueues poster",
+      "public event feed returns original URL reference",
+      "background production timer generates variants without manual processing",
+      "dynamic optimized image delivers 200 and smaller bytes",
+      "derivative delivery is no-store",
+      "original remains available after conversion"
+    ],
+    "details": {
+      "eventId": 435,
+      "inputBytes": 25695,
+      "derivativeBytes": 1060,
+      "variantWidths": [
+        640,
+        1280
+      ],
+      "originalSha256": "e4df313c227b5edf08924fc27df35147cf68375eb08f467f5b8ad9eac322a059"
+    },
+    "passed": true
+  },
+  "member": {
+    "scope": "isolated full production route registration, copied database, loopback only",
+    "checks": [
+      "ordinary member authenticates without admin or promoter privilege",
+      "ordinary authenticated poster upload accepted",
+      "unapproved member submission remains pending moderation",
+      "pending submission has no event or derivative job",
+      "real admin approval publishes submission",
+      "approval preserves same poster field on user_submitted public event",
+      "approval insertion queues same automatic processor",
+      "ordinary approved member poster automatically receives responsive copies",
+      "ordinary member derivative serves successfully",
+      "approved promoter autoapproval still reaches same event insert",
+      "autoapproved event queued too",
+      "private submission remains excluded from derivative jobs even when approved",
+      "ordinary uploaded original bytes preserved"
+    ],
+    "passed": true
+  },
+  "limitations": [
+    "Synthetic publisher image bytes are a functional fixture, not representative savings.",
+    "Prior static-batch DPR image comparisons are superseded, not current catalogue evidence."
+  ]
+}

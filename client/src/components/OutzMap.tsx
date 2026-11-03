@@ -1,4 +1,6 @@
-import { useEffect } from "react";
+import IncidentalMapCamera from "./IncidentalMapCamera";
+import type { IncidentalMapMemory } from "@/hooks/useIncidentalMap";
+import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -7,7 +9,6 @@ import {
   type OutzCatalogPlace,
   type OutzCommunityStay,
   type OutzDestination,
-  type OutzPlaceKind,
 } from "@shared/outz";
 import { LIVE_MAP_CHROME_CSS, MAP_PIN_SIZE, MAP_SURFACE_BG, mapPinHtml } from "@/components/ds/mapTheme";
 import CartoVectorBasemap from "@/components/CartoVectorBasemap";
@@ -51,6 +52,7 @@ function PopupCard({ name, detail, href, zHref }: { name: string; detail: string
 }
 
 type OutzMapProps = {
+  cameraMemory?: IncidentalMapMemory;
   destinations: OutzDestination[];
   catalog: OutzCatalogPlace[];
   stays?: OutzCommunityStay[];
@@ -64,6 +66,7 @@ type OutzMapProps = {
 };
 
 export default function OutzMap({
+  cameraMemory,
   destinations,
   catalog,
   stays = [],
@@ -72,6 +75,7 @@ export default function OutzMap({
   minimal = false,
   accent = null,
 }: OutzMapProps) {
+  const [savedView] = useState(() => cameraMemory?.current);
   return (
     <div className="directory-map-wrap outz-map">
       <div className="directory-map outz-map__canvas pdx-map-live pdx-map-surface">
@@ -79,9 +83,10 @@ export default function OutzMap({
         <div className="pdx-map-live__vignette" aria-hidden="true" />
         <div className="pdx-map-live__shaft" aria-hidden="true" />
         {minimal ? null : <div className="outz-map__chip pdx-glass-rebind" aria-hidden="true"><span /> Live official sources</div>}
-        <MapContainer center={center ?? [45.2, -122.6]} zoom={zoom ?? 7} minZoom={1} zoomControl={!minimal} scrollWheelZoom={false} style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}>
+        <MapContainer center={savedView?.center ?? center ?? [45.2, -122.6]} zoom={savedView?.zoom ?? zoom ?? 7} minZoom={1} zoomControl={!minimal} scrollWheelZoom={false} style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}>
           <CartoVectorBasemap accent={accent} />
           <MapResizer />
+          <IncidentalMapCamera memory={cameraMemory} />
           {destinations.map(place => (
             <Marker key={place.id} position={[place.lat, place.lng]} icon={pin(outzPinHex(place.name, place.kind))}>
               <Popup><PopupCard name={place.name} detail={place.officialNotice?.summary ?? place.subtitle} href={place.officialUrl} zHref={outzPlaceHref(place)} /></Popup>
@@ -101,11 +106,4 @@ export default function OutzMap({
       </div>
     </div>
   );
-}
-
-export function outzAccentForName(name: string, kind?: OutzPlaceKind): string | null {
-  const n = name.toLowerCase();
-  if (n.includes("rooster")) return "#FF6600";
-  if (n.includes("sauvie") || n.includes("collins")) return "#39FF14";
-  return kind ? outzPinHex(name, kind) : null;
 }

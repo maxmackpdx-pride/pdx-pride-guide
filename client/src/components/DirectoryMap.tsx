@@ -1,11 +1,13 @@
 import {PORTLAND_MAP_BOUNDS} from "../../public/map-foundation/mode-camera.js";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
-import CartoVectorBasemap from "@/components/CartoVectorBasemap";
+import IncidentalMapCamera from "./IncidentalMapCamera";
+import type { IncidentalMapMemory } from "@/hooks/useIncidentalMap";
+const CartoVectorBasemap = lazy(() => import("@/components/CartoVectorBasemap"));
 import { cartoDarkTileUrl, CARTO_ATTRIBUTION } from "@/lib/mapTiles";
 import {
   MAP_PIN_SIZE,
@@ -508,8 +510,10 @@ export default function DirectoryMap({
   focusBusiness = false,
   rasterBasemap = false,
   accent,
+  cameraMemory,
 }: {
   businesses: Business[];
+  cameraMemory?: IncidentalMapMemory;
   height?: number | string;
   /** When true, render the pin color key under the map (Directory page). */
   showKey?: boolean;
@@ -526,6 +530,7 @@ export default function DirectoryMap({
   /** Optional category color wash for an embedded place minimap. */
   accent?: string;
 }) {
+  const [savedView] = useState(() => cameraMemory?.current);
   const isBackdrop = backdrop;
   const isInteractive = interactive && !isBackdrop;
   const renderMarkers = showMarkers && !isBackdrop;
@@ -565,8 +570,8 @@ export default function DirectoryMap({
         </>
       )}
       <MapContainer
-        center={initialCenter}
-        zoom={initialZoom}
+        center={savedView?.center ?? initialCenter}
+        zoom={savedView?.zoom ?? initialZoom}
         style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
         maxBounds={isBackdrop || focusBusiness ? undefined : PORTLAND_BOUNDS}
         maxBoundsViscosity={1.0}
@@ -587,9 +592,10 @@ export default function DirectoryMap({
             subdomains="abcd"
             maxZoom={20}
           />
-        ) : <CartoVectorBasemap />}
+        ) : <Suspense fallback={null}><CartoVectorBasemap /></Suspense>}
         <MapInvalidateSize enabled={isBackdrop || focusBusiness} />
-        <MapFocus pins={mapped} enabled={focusBusiness} />
+        <MapFocus pins={mapped} enabled={focusBusiness && !savedView} />
+        <IncidentalMapCamera memory={cameraMemory} />
         {mapped.map(pin => {
           const accent = TYPE_COLORS[pin.biz.type] || "#FF00CC";
           const rainbow = pin.biz.type === "nonprofit";

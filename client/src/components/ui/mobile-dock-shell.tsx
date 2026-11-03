@@ -1,5 +1,5 @@
 import { Children, cloneElement, isValidElement, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import { MobileGlassLite } from "./mobile-glass-lite";
 import "./mobile-dock-shell.css";
 import { useContext } from "react";

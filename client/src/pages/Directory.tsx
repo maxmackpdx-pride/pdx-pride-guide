@@ -12,7 +12,7 @@ import { PLACE_ACCENTS as TYPE_COLORS } from '@/components/discovery/placeTokens
 import PlaceDiscoveryCard from '@/components/discovery/PlaceDiscoveryCard';
 import { ResourceRail } from '@/components/resources/ResourceRail';
 import { useTheme } from '@/context/ThemeContext';
-import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
 import BrowseToolbar from "@/components/BrowseToolbar";

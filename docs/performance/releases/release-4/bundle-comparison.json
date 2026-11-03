@@ -1,0 +1,44 @@
+{
+  "baselineProvenance": "Release1 counts retained from earlier evidence/transcript; not original raw bundle files in this run",
+  "scope": "Entry bytes only, partly deferred chunks; not total code elimination or a whole-page speed claim. Brotli quality5.",
+  "entries": [
+    {
+      "kind": "js",
+      "historicalBaseline": {
+        "kind": "js",
+        "raw": 1874029,
+        "brotli": 514862,
+        "gzip": 550359
+      },
+      "fresh": {
+        "url": "/assets/index-DPB67N4F.js",
+        "raw": 795598,
+        "gzip": 249659,
+        "brotli": 233148
+      },
+      "rawReductionBytes": 1078431,
+      "rawReductionPercent": 57.55,
+      "brotliReductionBytes": 281714,
+      "brotliReductionPercent": 54.72
+    },
+    {
+      "kind": "css",
+      "historicalBaseline": {
+        "kind": "css",
+        "raw": 700192,
+        "brotli": 113146,
+        "gzip": 125539
+      },
+      "fresh": {
+        "url": "/assets/index-Dvn9aBmC.css",
+        "raw": 588002,
+        "gzip": 104358,
+        "brotli": 94396
+      },
+      "rawReductionBytes": 112190,
+      "rawReductionPercent": 16.02,
+      "brotliReductionBytes": 18750,
+      "brotliReductionPercent": 16.57
+    }
+  ]
+}

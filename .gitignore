@@ -21,3 +21,6 @@ foundation/**/private/
 uploads/
 # Smoke test screenshots
 script/smoke-output*/
+
+# Generated responsive posters on the local persistent runtime path
+/poster-variants/

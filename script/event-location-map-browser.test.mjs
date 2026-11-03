@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import {mapFixture,installContextEvidence,visibility} from './map-browser-helpers.mjs';
+test('event location defers engine bytes and preserves controls, camera and GL cleanup',{timeout:120000},async()=>{
+ const f=await mapFixture('script/fixtures/event-location-map-browser.tsx',{webgl:true});const {page,context,requests}=f;
+ try{
+  await installContextEvidence(context);await page.goto(`${f.base}__map-qa`,{waitUntil:'networkidle'});
+  const engineRequests=()=>requests.filter(url=>/maplibre-gl|EventLocationMapCanvas/.test(url));assert.deepEqual(engineRequests(),[],'closed map downloads no engine');await page.locator('#toggle').click();await page.waitForTimeout(150);assert.deepEqual(engineRequests(),[],'far-offscreen map downloads no engine');
+  await page.locator('#slot').scrollIntoViewIfNeeded();await page.locator('.event-location-map__pin').waitFor();const canvas=page.locator('canvas.maplibregl-canvas');assert.equal(await canvas.count(),1);assert.ok(engineRequests().some(url=>url.includes('EventLocationMapCanvas')));const height=await page.locator('.event-location-map').evaluate(el=>el.getBoundingClientRect().height);
+  await page.getByRole('button',{name:'Directions',exact:true}).click();assert.equal(await page.getByRole('link',{name:'Google Maps',exact:true}).count(),1);await page.getByRole('button',{name:'Directions',exact:true}).click();await page.getByRole('button',{name:'Schedule',exact:true}).click();assert.equal(await page.getByRole('button',{name:'Scheduled',exact:true}).getAttribute('aria-pressed'),'true');
+  const marker=()=>page.locator('.event-location-map__pin').evaluate(el=>{const r=el.getBoundingClientRect(),p=el.closest('.event-location-map').getBoundingClientRect();return {x:r.x-p.x,y:r.y-p.y};}),initial=await marker(),b=await canvas.boundingBox();await page.mouse.move(b.x+b.width*.7,b.y+b.height*.5);await page.mouse.down();await page.mouse.move(b.x+b.width*.5,b.y+b.height*.5,{steps:10});await page.mouse.up();await page.waitForTimeout(700);const before=await marker();assert.ok(Math.abs(before.x-initial.x)>2,'native drag changed camera');
+  const released=()=>page.waitForFunction(()=>!document.querySelector('canvas.maplibregl-canvas')&&window.contexts.every(r=>!r.canvas.isConnected&&r.gl.isContextLost()));await page.evaluate(()=>scrollTo(0,0));await released();await page.locator('#slot').scrollIntoViewIfNeeded();await page.locator('.event-location-map__pin').waitFor();const after=await marker();assert.ok(Math.abs(after.x-before.x)<1.1&&Math.abs(after.y-before.y)<1.1);assert.equal(await page.locator('.event-location-map').evaluate(el=>el.getBoundingClientRect().height),height);assert.equal(await page.getByRole('button',{name:'Scheduled',exact:true}).getAttribute('aria-pressed'),'true');
+  await visibility(page,true);await released();await visibility(page,false);await page.locator('.event-location-map__pin').waitFor();await page.evaluate(()=>document.querySelector('#toggle').click());await released();assert.deepEqual(f.errors,[]);
+ }finally{await f.close();}
+});

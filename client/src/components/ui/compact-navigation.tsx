@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Mail, Home, Info, CalendarDays, MapPin, Map, TreePine, Layers, House, LayoutGrid, PanelsTopLeft, ChevronDown, Menu, X, MessageCircle, LifeBuoy, type LucideIcon } from "lucide-react";

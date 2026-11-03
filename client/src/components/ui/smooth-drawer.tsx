@@ -8,7 +8,7 @@
 import {
   createContext, forwardRef, useContext, useEffect, useLayoutEffect, useRef, useState,
 } from "react";
-import {motion, useReducedMotion, useSpring, type HTMLMotionProps, type Variants} from "framer-motion";
+import {motion, useReducedMotion, useSpring, type HTMLMotionProps, type Variants} from "motion/react";
 
 const spring = {type: "spring", stiffness: 300, damping: 30, mass: 0.8} as const;
 const drawerVariants: Variants = {

@@ -1,0 +1,14 @@
+# Build from source; never copy local credentials/runtime state into an image.
+.git
+node_modules
+dist
+.local
+.env
+.env.*
+!.env.example
+!.env.sample
+.railway
+.vercel
+
+# Preserved authoring/error-download evidence is not runtime web content.
+source-archive

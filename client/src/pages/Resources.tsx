@@ -1,3 +1,4 @@
+import { useIncidentalMap } from "@/hooks/useIncidentalMap";
 import "@/components/cards/CategoryCardAPI.css";
 import { CardDetails, rememberCardOrigin, type CardSize } from "@/components/cards/CardAPI";
 import { readBrowseCategories } from "@/lib/browseCategoryState";
@@ -27,7 +28,7 @@ import {
   type CSSProperties,
 } from "react";
 import { Link, useLocation, useSearch } from "wouter";
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "motion/react";
 import { useTheme } from "@/context/ThemeContext";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
@@ -400,6 +401,7 @@ function FoodPantryList() {
 
 function ResourceLocationMap({ org, color, initiallyOpen = false }: { org: ResourceOrg; color: string; initiallyOpen?: boolean }) {
   const [open, setOpen] = useState(initiallyOpen);
+  const incidentalMap = useIncidentalMap(open, org.name);
   const locations = org.locations || (org.addr ? [{ name: org.name, address: org.addr, lat: org.lat, lng: org.lng }] : []);
   if (!locations.length) return null;
   const pins = locations.flatMap((location, i) => location.lat != null && location.lng != null ? [{
@@ -409,10 +411,10 @@ function ResourceLocationMap({ org, color, initiallyOpen = false }: { org: Resou
   return <section className="rg-resource-map" style={{ "--resource-accent": color } as CSSProperties} aria-label={`Locations for ${org.name}`} onClick={(event) => event.stopPropagation()}>
     <button className="pdx-glass-rebind pdxBtn rg-map-toggle" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Hide map & directions" : "Map & directions"}</button>
     {open && <>
-      {pins.length > 0 && <div className="rg-resource-map-canvas" data-vaul-no-drag>
-        <Suspense fallback={<span className="rg-map-loading" role="status">Loading map…</span>}>
-          <ResourceDirectoryMap businesses={pins} height="100%" showKey={false} interactive={false} focusBusiness rasterBasemap accent={color} />
-        </Suspense>
+      {pins.length > 0 && <div ref={incidentalMap.ref} className="rg-resource-map-canvas" data-vaul-no-drag>
+        {incidentalMap.active && <Suspense fallback={<span className="rg-map-loading" role="status">Loading map…</span>}>
+          <ResourceDirectoryMap cameraMemory={incidentalMap.memory} businesses={pins} height="100%" showKey={false} interactive={false} focusBusiness rasterBasemap accent={color} />
+        </Suspense>}
       </div>}
       {pins.length > 0 && <small className="rg-map-credit">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> · © <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a></small>}
       {locations.map((location) => <a key={location.address} className="pdx-glass-rebind pdxBtn" href={placeGoogleMapsUrl({ address: location.address, name: location.name })} target="_blank" rel="noopener noreferrer">{location.address} <ArrowUpRight size={16} /></a>)}

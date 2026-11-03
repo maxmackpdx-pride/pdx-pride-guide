@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef, type CSSProperties, type ReactNode } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
-import { motion, useSpring } from "framer-motion";
+import { motion, useSpring } from "motion/react";
 
 // Adapted from 21st's Appica Carousel and Designali Scroll Progress patterns.
 // The rail owns navigation and clipping; resource cards keep their own design.

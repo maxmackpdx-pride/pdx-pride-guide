@@ -1,4 +1,4 @@
-import { rememberCardOrigin, type CardSize } from "@/components/cards/CardAPI";
+import { CARD_SIZES, rememberCardOrigin, type CardSize } from "@/components/cards/CardAPI";
 import {OutzPhoto,type OutzPhotoData} from '@/components/outz/OutzPhoto';
 import {OutzBlendArt} from '@/components/outz/OutzBlendArt';
 import {hasBlendRecipe} from '@/lib/outzBlend';
@@ -44,7 +44,7 @@ export default function TodayLocationCard({ location, onRequireAuth, size = "tal
     {size !== "small" && <RailShareButton href={location.href} title={location.name} />}
     <button type="button" className="tonight-card__open" aria-label={`Open ${location.name}`} onClick={() => setOpen(true)}>
       <div className="tonight-card__art today-location__art">
-        {!isPlace && (blend ? <OutzBlendArt placeId={placeId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : location.photo ? <OutzPhoto photo={location.photo} /> : <img src={art} alt="" loading="lazy" />)}
+        {!isPlace && (blend ? <OutzBlendArt placeId={placeId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : location.photo ? <OutzPhoto photo={location.photo} sizes={`${CARD_SIZES[size].width}px`} /> : <img src={art} alt="" loading="lazy" />)}
         {isPlace && <img className={`today-location__brand${isPlace ? " today-location__brand--business" : ""}`} src={businessLogo || "/brand/outzide.png"} alt={isPlace ? `${location.name} logo` : "OutZide"} onError={event => { if (isPlace) { event.currentTarget.onerror = null; event.currentTarget.src = directoryFallbackLogo(kind); } }} />}
       </div>
       <div className="tonight-card__body">

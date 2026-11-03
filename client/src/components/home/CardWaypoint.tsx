@@ -1,4 +1,4 @@
-import { waypointHtml, type WaypointId } from '@/lib/livingMapWaypoints';
+import { waypointHtml, type WaypointId } from '@/lib/livingMapWaypointMarkup';
 import { outzWaypointGlyphs } from './outzWaypointGlyphs';
 import './OutzCardModal.css';
 const kinds:Record<string,WaypointId>={bar:'bar',club:'club',restaurant:'venue',cafe:'cafe',shop:'shop',retail:'shop',park:'park',bathhouse:'bath',venue:'venue'};

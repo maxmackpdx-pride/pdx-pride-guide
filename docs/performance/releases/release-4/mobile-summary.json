@@ -1,0 +1,158 @@
+{
+  "source": "d5ae1154b0dde8b05fd2007ff936f7acdaea302a+forward-only-release4-working-tree",
+  "conditions": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "deviceScaleFactor": 1,
+    "isMobile": true,
+    "hasTouch": true,
+    "network": "OFFLINE ONLY: all non-loopback browser+server requests denied; not equivalent to initial baseline external-failure conditions",
+    "gpu": "Chromium SwiftShader software renderer",
+    "auth": "anonymous",
+    "sampleWindowMs": 5000,
+    "physicalDevice": false,
+    "sampleDeadlineMs": 45000,
+    "cache": "Fresh context per cold; same-context reload labeled warm. Playwright request routing DISABLES HTTP CACHE; unlike initial baseline warm-cache samples. Service workers blocked.",
+    "limits": "Top-frame Resource Timing excludes navigation and iframe resources and omits cross-origin byte detail without Timing-Allow-Origin; these byte totals are not total page transfer. Scroll frame timeout is recorded, not treated as smooth performance."
+  },
+  "browser": "136.0.7103.25",
+  "routes": [
+    {
+      "route": "/",
+      "cache": "cold",
+      "samples": 3,
+      "http200": 3,
+      "domContentLoadedMedianMs": 104.1,
+      "scriptEncodedMedianBytes": 741811,
+      "resourceTransferMedianBytes": 13778317,
+      "imageEncodedMedianBytes": 5610488,
+      "mapLibraryRequests": 0,
+      "topFrameMapCanvases": 0,
+      "scrollTimedOut": 3
+    },
+    {
+      "route": "/",
+      "cache": "warm",
+      "samples": 3,
+      "http200": 3,
+      "domContentLoadedMedianMs": 603.6,
+      "scriptEncodedMedianBytes": 741811,
+      "resourceTransferMedianBytes": 13751939,
+      "imageEncodedMedianBytes": 5607498,
+      "mapLibraryRequests": 0,
+      "topFrameMapCanvases": 0,
+      "scrollTimedOut": 3
+    },
+    {
+      "route": "/events",
+      "cache": "cold",
+      "samples": 3,
+      "http200": 3,
+      "domContentLoadedMedianMs": 97.1,
+      "scriptEncodedMedianBytes": 582066,
+      "resourceTransferMedianBytes": 5552217,
+      "imageEncodedMedianBytes": 3094596,
+      "mapLibraryRequests": 0,
+      "topFrameMapCanvases": 0,
+      "scrollTimedOut": 3
+    },
+    {
+      "route": "/events",
+      "cache": "warm",
+      "samples": 3,
+      "http200": 3,
+      "domContentLoadedMedianMs": 529.9,
+      "scriptEncodedMedianBytes": 582066,
+      "resourceTransferMedianBytes": 5552217,
+      "imageEncodedMedianBytes": 2273417,
+      "mapLibraryRequests": 0,
+      "topFrameMapCanvases": 0,
+      "scrollTimedOut": 3
+    },
+    {
+      "route": "/directory",
+      "cache": "cold",
+      "samples": 3,
+      "http200": 3,
+      "domContentLoadedMedianMs": 88.8,
+      "scriptEncodedMedianBytes": 494457,
+      "resourceTransferMedianBytes": 13861279,
+      "imageEncodedMedianBytes": 5116642,
+      "mapLibraryRequests": 0,
+      "topFrameMapCanvases": 0,
+      "scrollTimedOut": 3
+    },
+    {
+      "route": "/directory",
+      "cache": "warm",
+      "samples": 3,
+      "http200": 3,
+      "domContentLoadedMedianMs": 594.1,
+      "scriptEncodedMedianBytes": 494457,
+      "resourceTransferMedianBytes": 13857989,
+      "imageEncodedMedianBytes": 5113652,
+      "mapLibraryRequests": 0,
+      "topFrameMapCanvases": 0,
+      "scrollTimedOut": 3
+    },
+    {
+      "route": "/outzide",
+      "cache": "cold",
+      "samples": 3,
+      "http200": 3,
+      "domContentLoadedMedianMs": 112.9,
+      "scriptEncodedMedianBytes": 255056,
+      "resourceTransferMedianBytes": 1110099,
+      "imageEncodedMedianBytes": 2990,
+      "mapLibraryRequests": 0,
+      "topFrameMapCanvases": 0,
+      "scrollTimedOut": 0
+    },
+    {
+      "route": "/outzide",
+      "cache": "warm",
+      "samples": 3,
+      "http200": 3,
+      "domContentLoadedMedianMs": 133.6,
+      "scriptEncodedMedianBytes": 255056,
+      "resourceTransferMedianBytes": 1110099,
+      "imageEncodedMedianBytes": 2990,
+      "mapLibraryRequests": 0,
+      "topFrameMapCanvases": 0,
+      "scrollTimedOut": 0
+    },
+    {
+      "route": "/boardz",
+      "cache": "cold",
+      "samples": 3,
+      "http200": 3,
+      "domContentLoadedMedianMs": 115.4,
+      "scriptEncodedMedianBytes": 593621,
+      "resourceTransferMedianBytes": 7835368,
+      "imageEncodedMedianBytes": 3161693,
+      "mapLibraryRequests": 0,
+      "topFrameMapCanvases": 0,
+      "scrollTimedOut": 3
+    },
+    {
+      "route": "/boardz",
+      "cache": "warm",
+      "samples": 3,
+      "http200": 3,
+      "domContentLoadedMedianMs": 352,
+      "scriptEncodedMedianBytes": 593621,
+      "resourceTransferMedianBytes": 7832078,
+      "imageEncodedMedianBytes": 3158703,
+      "mapLibraryRequests": 0,
+      "topFrameMapCanvases": 0,
+      "scrollTimedOut": 3
+    }
+  ],
+  "blockedBrowserHosts": {
+    "zaylist-foundation-library.maxmackpdx.workers.dev": 366,
+    "tiles.openfreemap.org": 12
+  },
+  "scope": "Fresh forward-only local production build with copied seed; no staged historical derivative batch. Offline routing disables HTTP cache. Not whole-page speed comparison or physical-device proof; iframes excluded."
+}

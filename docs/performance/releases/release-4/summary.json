@@ -1,0 +1,108 @@
+{
+  "status": "forward_only_locally_verified_unpublished",
+  "baseCommit": "d5ae1154b0dde8b05fd2007ff936f7acdaea302a",
+  "scopeChangedAt": "2026-11-03T00:09:38Z",
+  "imageScope": "Forward-only automatic processing of new eligible incoming images with persistent runtime derivatives and dynamic frontend delivery. No historical image backfill.",
+  "historicalBatch": {
+    "inCurrentIntendedRelease": false,
+    "fileCount": 368,
+    "bytes": 44216102,
+    "preservation": "Preserve existing originals and recovery backups; removal from intended release is not permission to delete them."
+  },
+  "retainedOptimizations": [
+    "OutZide card photo sizing",
+    "Incidental map deferral and camera lifecycle",
+    "Pure waypoint imports and intent-based Home map warming",
+    "Motion runtime consolidation",
+    "Declaration-emission safeguards",
+    "Verified failed-download housekeeping with originals preserved"
+  ],
+  "verificationStatus": "fresh_forward_only_final_candidate_passed",
+  "currentChecks": {
+    "ci-unit": {
+      "tests": 147,
+      "pass": 146,
+      "fail": 0,
+      "skipped": 1
+    },
+    "shared-card-unit": {
+      "tests": 20,
+      "pass": 20,
+      "fail": 0,
+      "skipped": 0
+    },
+    "all-browser": {
+      "tests": 14,
+      "pass": 14,
+      "fail": 0,
+      "skipped": 0
+    },
+    "glass-parser": {
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "skipped": 0
+    },
+    "typecheck": "passed",
+    "predeploy": "passed",
+    "fullBuild": "passed",
+    "bundleVerification": "passed",
+    "serverBundle": "present",
+    "publisherRouteIntegration": {
+      "pass": 14
+    },
+    "memberRouteIntegration": {
+      "pass": 13
+    }
+  },
+  "historicalEvidencePolicy": "Prior static-batch evidence was superseded. Current evidence files describe fresh tests of the forward-only candidate, not historical image savings.",
+  "publication": {
+    "status": "not_published"
+  },
+  "remainingEvidence": [
+    "Exact final staged tree and remote commit match",
+    "Exact-commit CI and Railway success",
+    "Read-only live verification; no production result yet"
+  ],
+  "limitations": [
+    "No physical iPhone/Safari proof from earlier cloud checks.",
+    "Offline metrics cannot establish live whole-page speed; request routing disables HTTP cache."
+  ],
+  "implementationDesign": {
+    "status": "implemented_and_freshly_locally_verified",
+    "queue": "Persistent SQLite event jobs and future insert/poster/publication/privacy-change triggers, installed after seed. No new processor backfill scan. Existing remote-poster mirroring around15seconds after startup can change old remote URLs to local, triggering legitimate replacement optimization.",
+    "eligibility": "Current event LIVE, public, not private, same source URL.",
+    "processing": "Local first-party files only; at most 2 sequential jobs per 5-second tick; 20 MiB/40 MP; 3 total attempts; WebP q88 widths640/1280 no upscale and at least5% byte reduction.",
+    "storage": "Persistent sibling of uploads, outside static serving; current eligibility checked by metadata/image endpoints with private,no-store.",
+    "frontend": "Shared EventFlyerArt/EventModal query; one30-second foreground refresh timer; eligible first-party cold images wait at most2seconds, then original fallback. External/paused-offline bypass wait. Metadata limited to5000newestready records/2MB; omitted mappings use originals.",
+    "limits": [
+      "Old unchanged events are not scanned; future publication/poster changes, including existing mirroring, may qualify.",
+      "External URLs remain original-only unless existing ingestion captures them locally.",
+      "Same-URL byte replacement does not automatically invalidate outputs.",
+      "No claimed aggregate disk cap or orphan cleanup.",
+      "Already delivered bytes cannot be recalled."
+    ]
+  },
+  "focusedEvidence": {
+    "status": "included_in_fresh_forward_only_verification",
+    "unitAndHttp": {
+      "pass": 10,
+      "fail": 0
+    },
+    "typecheck": "pass",
+    "posterBrowser": "pass: DPR1/2/3, fallback and five cold-metadata cases; 400ms ready had zero original requests, error/timeout/empty/paused-offline had one original request each.",
+    "ingestionPipeline": "Publisher14checks/member13checks passed through actual HTTP routes and real background timer with copied databases, loopback-only traffic and preserved originals."
+  },
+  "verifiedAt": "2026-11-03T00:35:54.885983+00:00",
+  "sourceInventoryContentDigest": "a624372113dc09f61e51dcc07587387c22b4d3a394850d122dfe4ed74c3672e4",
+  "sourceInventoryFileCount": 6062,
+  "sourceInventoryDrift": [],
+  "offlineSamples": {
+    "total": 30,
+    "http200": 30,
+    "pageErrors": 0,
+    "negativeFrameIntervals": 0,
+    "topFrameMapCanvases": 0,
+    "mapLibraryScriptRequests": 0
+  }
+}

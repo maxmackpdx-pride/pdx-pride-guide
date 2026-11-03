@@ -1,0 +1,425 @@
+{
+  "status": "forward_only_fresh_local_verification",
+  "baseCommit": "d5ae1154b0dde8b05fd2007ff936f7acdaea302a",
+  "capturedAt": "2026-11-03T00:19:12.699509+00:00",
+  "scope": "All tracked and nonignored untracked files except docs/; ignored runtime/dependency/build output excluded",
+  "inventoryFileSha256": "354ae0a069df790154b8e0374f8549938fe16f1d6c87a60b4f80c779706511cf",
+  "fullInventoryRecordCount": 6062,
+  "postBuildCheck": {
+    "checkedAt": "2026-11-03T00:34:41.828228+00:00",
+    "scope": "Complete captured tracked/nonignored files excluding docs; ignored outputs excluded",
+    "filesChecked": 6062,
+    "drift": [],
+    "pass": true
+  },
+  "changedSourceFiles": [
+    {
+      "path": ".dockerignore",
+      "bytes": 255,
+      "sha256": "cd8bd3c8280e4ae6522eeb84a23e3a7c5c93c8dbfad91f26b94e98bf06f4202b"
+    },
+    {
+      "path": ".github/workflows/typecheck.yml",
+      "bytes": 3375,
+      "sha256": "a74af1046f1dbbc4e0ddf42a264caeb0a4425655cf32e32702209c88389dfc52"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 655,
+      "sha256": "70ea869a7c72aa3c08ea266fc5074346579a3bff722b5b3df5e0a5ed4bddfd9b"
+    },
+    {
+      "path": "client/src/components/AuthModal.tsx",
+      "bytes": 26676,
+      "sha256": "7fcc3acf4a50a9bb417a7ae6d5c9285e9e844c78166c10063b538b7c9f525e03"
+    },
+    {
+      "path": "client/src/components/DirectoryMap.tsx",
+      "bytes": 19470,
+      "sha256": "024a22f76c7d34278d865032fcdd8fc45226d8f954e7e57db0251056ffcb6b60"
+    },
+    {
+      "path": "client/src/components/EventLocationMap.tsx",
+      "bytes": 3724,
+      "sha256": "dac51c31f39e5ee0875a1337fca66acc4b654920f940b93680efec4ae3c733e3"
+    },
+    {
+      "path": "client/src/components/EventLocationMapCanvas.tsx",
+      "bytes": 3631,
+      "sha256": "8c24e53e5c0e7a530625ce211eadd9793ea8b52fddd7648a7a223457161b90dc"
+    },
+    {
+      "path": "client/src/components/EventModal.tsx",
+      "bytes": 61859,
+      "sha256": "3d55ba7bb6b6e4de17a0b4ad66a8df47eee7275f4690effeac9844a56f21110c"
+    },
+    {
+      "path": "client/src/components/FilterSurvey.tsx",
+      "bytes": 4479,
+      "sha256": "4a9f229878e64c030b16e4bbfd618c9b5612103cef9efa0866a7bd32446b1f3c"
+    },
+    {
+      "path": "client/src/components/IncidentalMapCamera.tsx",
+      "bytes": 658,
+      "sha256": "62f59b2ad781827a8a08550df78c4ece02a72bb0477b0a66668114b2ccc22b3b"
+    },
+    {
+      "path": "client/src/components/MapzLayerSheet.tsx",
+      "bytes": 6883,
+      "sha256": "285cbb9bd52ca337c41b52e942e6c4b111a03b62a78b418f9d97569099231605"
+    },
+    {
+      "path": "client/src/components/OutzMap.tsx",
+      "bytes": 4390,
+      "sha256": "4a9b9f03ebcab759f1ad6ddb1cbd9814945b94a6840369e405828d5784453fea"
+    },
+    {
+      "path": "client/src/components/PageRecovery.tsx",
+      "bytes": 1658,
+      "sha256": "a7ceea147623fd1ff84fa1791e0357757a8a778e4d938b467b8783a6c8785bfc"
+    },
+    {
+      "path": "client/src/components/PlaceModal.tsx",
+      "bytes": 48805,
+      "sha256": "f6932057fd298ff4e2a8c96c4029b4b5eeae769491bdc9e767fa4f569f82e9d6"
+    },
+    {
+      "path": "client/src/components/discovery/DiscoveryFlow.tsx",
+      "bytes": 4662,
+      "sha256": "788e189086ae0d0660542b1897d83112e71d4102d7dc73dd19bebc718cc92c4b"
+    },
+    {
+      "path": "client/src/components/ds/PlaceCardMap.tsx",
+      "bytes": 2479,
+      "sha256": "d7693d7f9de868a3fb9a1d32a33cc41eb19722003259c6f08acb8d9396be5d4f"
+    },
+    {
+      "path": "client/src/components/ds/PlaceCardMapCanvas.tsx",
+      "bytes": 1061,
+      "sha256": "a49be620a18ef6bf06bf6ea4197fe6be060f9f94c27b20d61c7df20fb34af424"
+    },
+    {
+      "path": "client/src/components/events/EventFlyerArt.tsx",
+      "bytes": 1489,
+      "sha256": "305a05bc8c71c59fe3db874a570d8c56975b5101d81215e34c78fcd469477254"
+    },
+    {
+      "path": "client/src/components/home/CardWaypoint.tsx",
+      "bytes": 893,
+      "sha256": "9aa4ff494bd6b105af704cffb7c49d5b156bdeac94946548f6a3bcdd1e7493b1"
+    },
+    {
+      "path": "client/src/components/home/OutzSmallCard.tsx",
+      "bytes": 3466,
+      "sha256": "2aa4eca33c632f0cbea67a85c311ddcef676041a4524370a44bc6fd9b47f44e9"
+    },
+    {
+      "path": "client/src/components/home/TodayLocationCard.tsx",
+      "bytes": 6638,
+      "sha256": "29270a01327db517a877e9302da417fc444a281fa3b19be08fa592e6c6ef242b"
+    },
+    {
+      "path": "client/src/components/home/TonightEventCard.tsx",
+      "bytes": 6311,
+      "sha256": "dbd160b92e81741cc837434ef5601f141db3e0f8432c74107163d992dfcc06d0"
+    },
+    {
+      "path": "client/src/components/home/TonightPanel.tsx",
+      "bytes": 7605,
+      "sha256": "d0428939576cd72323022092344d824c876ba2de490b2e516ae7da2e3e6e0834"
+    },
+    {
+      "path": "client/src/components/home/perspective-tunnel/PerspectiveTunnelHero.tsx",
+      "bytes": 15711,
+      "sha256": "c5a286daef336f2bfde14030abe13b23880fb7850e6ef28707d1939c508ecaee"
+    },
+    {
+      "path": "client/src/components/outz/OutzPhoto.tsx",
+      "bytes": 3481,
+      "sha256": "f5a6d321f7e851cac951f66be31d86d08732bd79be1463d695b51c93e6987882"
+    },
+    {
+      "path": "client/src/components/resources/ResourceFilterButton.tsx",
+      "bytes": 1441,
+      "sha256": "d9bb3a37b9604ec3659587df24eab381b8c2ff609d0c49ba08b41ab05c898d3e"
+    },
+    {
+      "path": "client/src/components/resources/ResourceRail.tsx",
+      "bytes": 4842,
+      "sha256": "36e0a4971fb5264d8a02080d26d77121406131168c34c8dc6984cbef55b53695"
+    },
+    {
+      "path": "client/src/components/resources/useCardMotifParallax.ts",
+      "bytes": 4637,
+      "sha256": "797e121582ef03266624716872faee65d4ad79536f79679fa1b10c5061604062"
+    },
+    {
+      "path": "client/src/components/ui/animated-state-icons.tsx",
+      "bytes": 5253,
+      "sha256": "933e9759796b07f972e4d5fec70a48cad57772b8925f085cf2061ce121fe2b2e"
+    },
+    {
+      "path": "client/src/components/ui/compact-navigation.tsx",
+      "bytes": 10567,
+      "sha256": "f899af6be35e253009d0b6d92f78df3108e4a497de6b9c966ee085de4e35045a"
+    },
+    {
+      "path": "client/src/components/ui/meeting-scheduler.tsx",
+      "bytes": 6357,
+      "sha256": "0556ca5d2a49a61c0e65a253fe4b16a632868ee79c0a275ffe511b6491361613"
+    },
+    {
+      "path": "client/src/components/ui/mobile-dock-shell.tsx",
+      "bytes": 4471,
+      "sha256": "533836271375fdb47ecdbcfafc396534369645fa530c1da1ffaaf1238ab55d61"
+    },
+    {
+      "path": "client/src/components/ui/nav-shell.tsx",
+      "bytes": 1207,
+      "sha256": "3027eb25173edb685135f6c54b6ce09c35d9fc29934874587ccb71f76a158c8c"
+    },
+    {
+      "path": "client/src/components/ui/portland-metro-globe.tsx",
+      "bytes": 41942,
+      "sha256": "37f9f50cecdcbb6e5546ef2fed32574b1ed914bc5034873900a584c26d493111"
+    },
+    {
+      "path": "client/src/components/ui/smooth-drawer.tsx",
+      "bytes": 3711,
+      "sha256": "7357f81e88763cea9db1cdf941179da3b1b1e349fdaedf6da169c67bfd8fdfd9"
+    },
+    {
+      "path": "client/src/hooks/useIncidentalMap.ts",
+      "bytes": 1516,
+      "sha256": "2c15fd0b16ed2a2d434e3192abfd254d84eff868b34bf3e58d26c46b65838cf9"
+    },
+    {
+      "path": "client/src/lib/homeMapIntent.ts",
+      "bytes": 761,
+      "sha256": "1497b046fef7f2fdfd019d0dc2f6ca4cc0ed6d5524c87591fb4541cbbdbdfd29"
+    },
+    {
+      "path": "client/src/lib/livingMapWaypointMarkup.ts",
+      "bytes": 17457,
+      "sha256": "256611fca533224e2edc9986217d000904c88f9d882db911cc75a7c2f4a12bab"
+    },
+    {
+      "path": "client/src/lib/livingMapWaypoints.ts",
+      "bytes": 1427,
+      "sha256": "b4f9a1f81cf6ca34195e45ae814560c0466a3a2f16c1c833dae916fb5ccfbb78"
+    },
+    {
+      "path": "client/src/lib/outzKinds.ts",
+      "bytes": 2415,
+      "sha256": "5892a307b3f614c687d0c9f96af5cace689450489fa8db05676e9df92abfbfe0"
+    },
+    {
+      "path": "client/src/lib/responsivePoster.test.ts",
+      "bytes": 2962,
+      "sha256": "cfc85a330cc4038c82b6f574acff1ff3dfe14172666d3404b356570979fe8c8e"
+    },
+    {
+      "path": "client/src/lib/responsivePoster.ts",
+      "bytes": 1443,
+      "sha256": "a9e3c7a4ddc834f9b2dce6dc0cc86ace9a80137bb63e027663d31b1656b6696a"
+    },
+    {
+      "path": "client/src/lib/useResponsivePoster.ts",
+      "bytes": 1936,
+      "sha256": "ffe9cbaafca0e53688e214fa705e3b009f99c9685d8fd0c8a75e035c6fb5db48"
+    },
+    {
+      "path": "client/src/pages/Directory.tsx",
+      "bytes": 45560,
+      "sha256": "275c4e47794262e6ecd7daf66816ad629608c2c14c02aaf4fcfb8944cd035ae5"
+    },
+    {
+      "path": "client/src/pages/Home.tsx",
+      "bytes": 2090,
+      "sha256": "1dce4e04b7ba42a1a0de6930e435c9b65aceab3cf422ca91c95af0b5e6ce909d"
+    },
+    {
+      "path": "client/src/pages/OutzPlace.tsx",
+      "bytes": 32996,
+      "sha256": "34a5f908c3dced15605e1b1ef1b7e5b2fae5e24a522b1366f89e11766f08e9a7"
+    },
+    {
+      "path": "client/src/pages/Resources.tsx",
+      "bytes": 55236,
+      "sha256": "f4d6e068b757907d20004cffe918ea0b171df9d97c9b3399251d32cca4fff484"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 557699,
+      "sha256": "e7e407e6710616d6fe2e987bcc78199c64c0087ad59f8040bac69ed331c2353f"
+    },
+    {
+      "path": "package.json",
+      "bytes": 5784,
+      "sha256": "55a6a13a0f3511a53e7891e2b9731f1fe3b1ef9dbd3258ca0330e78410ef86e6"
+    },
+    {
+      "path": "script/build-profile-objects.mjs",
+      "bytes": 7020,
+      "sha256": "9d3be36fa3c122d3cec99e831003ef8902f536c1fc04fc1fc75e57f60eb97f7c"
+    },
+    {
+      "path": "script/event-location-map-browser.test.mjs",
+      "bytes": 3105,
+      "sha256": "65ae4f8d9919dd16638fcdb45b969e5069ef7a3024bb4a63773aa24c6a8c0e8b"
+    },
+    {
+      "path": "script/fixtures/event-location-map-browser.tsx",
+      "bytes": 858,
+      "sha256": "8d404f07c3290bb0c0d6ad9f5493695f844c87ee3323d3051039d35a1e6edbf3"
+    },
+    {
+      "path": "script/fixtures/home-map-intent-browser.tsx",
+      "bytes": 1140,
+      "sha256": "7bbfc78d5efb4a936ca2ddd7d690137328068d25541d3e08c9f7acf2bcf1ffed"
+    },
+    {
+      "path": "script/fixtures/incidental-map-browser.tsx",
+      "bytes": 2220,
+      "sha256": "c4aef1ba54982246e82ae36a903eb5c487155850627012473f0a7b2fb73b7080"
+    },
+    {
+      "path": "script/fixtures/motion-runtime-browser.tsx",
+      "bytes": 1926,
+      "sha256": "210c66d16d3e6308cef5e05ed63291edace1537d06db4fd7e606b4d69193a1d5"
+    },
+    {
+      "path": "script/fixtures/outz-photo-sizes-browser.tsx",
+      "bytes": 2135,
+      "sha256": "31ed81ee657e115ee89b7080f357cea4aca24784c0f6d7eadbb35a0542513959"
+    },
+    {
+      "path": "script/fixtures/place-map-carousel-browser.tsx",
+      "bytes": 479,
+      "sha256": "24d61351e1f2c4be243b3015879d0b3e1762ae3e722615c3b3f0238577bb7331"
+    },
+    {
+      "path": "script/fixtures/responsive-poster-browser.tsx",
+      "bytes": 2482,
+      "sha256": "85a68233ff63d443e446729d80b986fb15444a0d6879d219f1ff54f8e8085c49"
+    },
+    {
+      "path": "script/home-map-intent-browser.test.mjs",
+      "bytes": 2633,
+      "sha256": "781dd7e09b400fc7cdcbe0e48460c7e9d781b1280f77829f2be5ef974b55437f"
+    },
+    {
+      "path": "script/incidental-map-browser.test.mjs",
+      "bytes": 3413,
+      "sha256": "fc6d6e95db7a7671eb1e7017c643608eb2e42cbe9a38a45de199417fb1b6478b"
+    },
+    {
+      "path": "script/incidental-map-webgl-browser.test.mjs",
+      "bytes": 2902,
+      "sha256": "4f55873a6655a1c310aeb8182a58b4619a58e49122c64816123b2d2fc052f4ed"
+    },
+    {
+      "path": "script/map-browser-helpers.mjs",
+      "bytes": 4554,
+      "sha256": "a56b07f10196516a9705c88d979a8bbfea214901a0b2b31af1260eebc8febc9d"
+    },
+    {
+      "path": "script/motion-runtime-browser.test.mjs",
+      "bytes": 7809,
+      "sha256": "8ee70ab68a6ff485b7aff9f81c7fe11d264b4106316664a3414b67708480c5ae"
+    },
+    {
+      "path": "script/outz-photo-sizes-browser.test.mjs",
+      "bytes": 5386,
+      "sha256": "47fbc6f79d52bb255d4f14a959f28ce0cdb5e19b38348b6f3eff90ebaed6fd1a"
+    },
+    {
+      "path": "script/place-map-carousel-browser.test.mjs",
+      "bytes": 5253,
+      "sha256": "0caff0eb8db04876dca61f20c858219dafd6441c34b703acb67f74b518f28fd2"
+    },
+    {
+      "path": "script/profile-declaration-emitter.mjs",
+      "bytes": 4747,
+      "sha256": "56ed38544c10e8ab23fa737954ea94ebc5ade14f69342fbbc20de2c60bd02433"
+    },
+    {
+      "path": "script/profile-declaration-emitter.test.mjs",
+      "bytes": 3216,
+      "sha256": "0f31ca7f4ada4075c7519252d101c8fea356991ed76ece73000a9d3fcb10fd7d"
+    },
+    {
+      "path": "script/responsive-poster-browser.test.mjs",
+      "bytes": 8680,
+      "sha256": "9ffd6f58a3d47f5d97bdb0d0d26cfea6da2d99e14d54b98122265335b7ace689"
+    },
+    {
+      "path": "script/route-map-imports.test.mjs",
+      "bytes": 1676,
+      "sha256": "49ec42cbfc08dc57708562b5eeebd0954a079d50f51978b89b5e8861f0140e06"
+    },
+    {
+      "path": "server/posterVariants.test.ts",
+      "bytes": 6281,
+      "sha256": "91ceb253afddfa06c51bbb537d2bcbe6cd36ac92cac99d6a0a3b2645ab5e847b"
+    },
+    {
+      "path": "server/posterVariants.ts",
+      "bytes": 8688,
+      "sha256": "49d972ae922560018f2e0f38f1bf269bbbbb6703aab51e050fdb9200d908b77e"
+    },
+    {
+      "path": "server/routes.ts",
+      "bytes": 378692,
+      "sha256": "c642fdb0411d2145e70313b7352c69369ca3aea42c50bbeaa92448c8a5795b07"
+    },
+    {
+      "path": "source-archive/failed-downloads/README.md",
+      "bytes": 411,
+      "sha256": "5914d625e994f8464c47b2c2b510d0787d010d6572d45a7a07baa6c6a7bdf60a"
+    },
+    {
+      "path": "source-archive/failed-downloads/manifest.json",
+      "bytes": 2321,
+      "sha256": "3a2dfff5577a16b74d786d84480c1d4053292382f5bad02a93e756d9ab122ce7"
+    },
+    {
+      "path": "source-archive/failed-downloads/posters/tucker-archive/bear-naked-2024.jpg",
+      "bytes": 431,
+      "sha256": "f3e4d8c9537c38eb81bd7fa7dec7046e2d1185e05e2994039534d48e16bfea53"
+    },
+    {
+      "path": "source-archive/failed-downloads/posters/tucker-archive/fairy-dust-2024.png",
+      "bytes": 431,
+      "sha256": "4f16f5d8d0ac8b8119d6dcb633fe2b972c32197cf4fb14917f20c3ae4514e8cb"
+    },
+    {
+      "path": "source-archive/failed-downloads/posters/tucker-archive/honey-2024.png",
+      "bytes": 431,
+      "sha256": "88e68f2e8ed35da4716435838db1abc6ef28fdad45cfaf806128d36842515a5f"
+    },
+    {
+      "path": "source-archive/failed-downloads/posters/tucker-archive/honey-tradie-2025.png",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "source-archive/failed-downloads/posters/tucker-archive/kink-codes-2024.png",
+      "bytes": 430,
+      "sha256": "ad63e29434a681336bd754e6b3a3b73d8feea39b515af6da815731d1107618d8"
+    },
+    {
+      "path": "source-archive/failed-downloads/posters/tucker-archive/primal-masquerade-2024.png",
+      "bytes": 430,
+      "sha256": "2d36a99ae2cb745dbe997538edb3b73e5ec949b742946368f5d877810e013ca9"
+    },
+    {
+      "path": "source-archive/failed-downloads/posters/tucker-archive/yes-coach-1989.png",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "note": "Compact changed-source identity plus full verification inventory digest. Documentation excluded. Former static-batch inventory superseded. Final documentation staging changes the full Git tree; runtime source digest remains the verification identity.",
+  "inventoryContentDigest": "a624372113dc09f61e51dcc07587387c22b4d3a394850d122dfe4ed74c3672e4",
+  "intendedStagedTreeAtTestStart": "f464955c58a1af26f0ab73ef868adde3ef7a9457"
+}

@@ -1,3 +1,4 @@
+import { registerPosterVariants } from "./posterVariants";
 import { createPublicEventFeedCache, EventFeedChangedError, EventFeedQueryError, parseEventFeedQuery, selectEventFeed } from "./publicEventFeedCache";
 import {createProfileLayoutStore,registerProfileLayoutRoutes} from "./profileLayout";
 import {publicProfileLayout,type ProfileSource} from "../shared/profileLayout";
@@ -2000,6 +2001,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── EVENTS ─────────────────────────────────────────────────────────────
   registerPublicEventFeedRoute(app, httpServer);
+  registerPosterVariants(app, httpServer, sqlite, UPLOADS_DIR);
 
   /**
    * Lifetime event count for the About page — every distinct event the site has

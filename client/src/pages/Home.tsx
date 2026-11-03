@@ -6,7 +6,7 @@ import HomeStage from "@/components/home/HomeStage";
 import HomeStatStrip from "@/components/HomeStatStrip";
 import HomeConstructionNudge from "@/components/HomeConstructionNudge";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { prefetchMapz } from "@/lib/prefetchMapz";
+import { listenForHomeMapIntent } from "@/lib/homeMapIntent";
 import "./Home.css";
 import { shareCardUrl } from "@shared/shareCards";
 
@@ -28,7 +28,7 @@ export default function Home() {
     { image: shareCardUrl("home"), imageAlt: "Zaylist: Portland queer events and community" },
   );
 
-  useEffect(() => { prefetchMapz(); }, []);
+  useEffect(listenForHomeMapIntent, []);
 
   const { data: stats, isPending: statsPending, isError: statsError } = useQuery<HomeStats>({
     queryKey: ["/api/home/stats"],

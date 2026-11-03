@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import "./AuthModal.css";
 import { ArrowLeft, ArrowRight, AtSign, Lock, Mail, User, X } from "lucide-react";
 import { EyeToggleIcon } from "@/components/ui/animated-state-icons";

@@ -2,14 +2,16 @@ import {OutzPhoto,type OutzPhotoData} from '@/components/outz/OutzPhoto';
 import { ArrowUpRight } from "lucide-react";
 import { TriangleAlert } from "lucide-react";
 import PageRecovery from "@/components/PageRecovery";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRoute } from "wouter";
 import { Bell, ExternalLink, Lock, MapPin, MessageCircle, Star, TentTree } from "lucide-react";
 import { Badge, Button } from "@/components/ds";
 import AuthModal from "@/components/AuthModal";
 import BoardHero from "@/components/BoardHero";
-import OutzMap, { outzAccentForName } from "@/components/OutzMap";
+import { outzAccentForName } from "@/lib/outzKinds";
+import { useIncidentalMap } from "@/hooks/useIncidentalMap";
+const OutzMap = lazy(() => import("@/components/OutzMap"));
 import { MeetingScheduler } from "@/components/ui/meeting-scheduler";
 import { useAuth } from "@/context/AuthContext";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -84,6 +86,7 @@ function formatChatClose(expiresAt: string | null) {
 export default function OutzPlace() {
   const [, params] = useRoute("/outzide/:placeSlug");
   const slug = params?.placeSlug;
+  const incidentalMap = useIncidentalMap(true, slug ?? "outz");
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -343,8 +346,9 @@ export default function OutzPlace() {
 
         <div className="outz-place__where">
           {coords && snapshot
-            ? <div className="outz-place__map">
-                <OutzMap
+            ? <div ref={incidentalMap.ref} className="outz-place__map">
+                {incidentalMap.active && <Suspense fallback={<span role="status">Loading map…</span>}><OutzMap key={slug}
+                  cameraMemory={incidentalMap.memory}
                   destinations={destination ? [destination] : []}
                   catalog={catalogSite ? [catalogSite] : []}
                   stays={stay ? [stay] : []}
@@ -352,7 +356,7 @@ export default function OutzPlace() {
                   zoom={stay && !destination && !catalogSite ? 9 : 11}
                   minimal
                   accent={place ? outzAccentForName(place.name, place.kind) : null}
-                />
+                /></Suspense>}
               </div>
             : null}
           <p className="outz-place__map-note">

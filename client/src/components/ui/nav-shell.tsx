@@ -1,5 +1,5 @@
 import { forwardRef, type ReactNode } from "react";
-import { Divider } from "@/components/ds";
+import { Divider } from "@/components/ds/Divider";
 import { navGlassPointer } from "@/components/ui/nav-glass";
 import { MobileLiquidGlass } from "@/components/ui/mobile-liquid-glass";
 

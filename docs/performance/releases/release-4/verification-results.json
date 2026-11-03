@@ -1,0 +1,104 @@
+{
+  "verifiedAt": "2026-11-03T00:35:54.885983+00:00",
+  "baseCommit": "d5ae1154b0dde8b05fd2007ff936f7acdaea302a",
+  "intendedStagedTreeAtStart": "f464955c58a1af26f0ab73ef868adde3ef7a9457",
+  "stagedTreeMatchedAtStart": true,
+  "pipeline": "forward-only runtime poster processing; historical368asset batch excluded",
+  "inventoryFileSha256": "354ae0a069df790154b8e0374f8549938fe16f1d6c87a60b4f80c779706511cf",
+  "inventoryContentDigest": "a624372113dc09f61e51dcc07587387c22b4d3a394850d122dfe4ed74c3672e4",
+  "inventoryFileCount": 6062,
+  "finalInventoryDrift": [],
+  "rootSeedDbSha256": "84f59e3974d35112ed9dad8521f31f28d545faf8b97d6dbc2a636ce70c21d14b",
+  "checks": {
+    "ci-unit": {
+      "tests": 147,
+      "pass": 146,
+      "fail": 0,
+      "skipped": 1
+    },
+    "shared-card-unit": {
+      "tests": 20,
+      "pass": 20,
+      "fail": 0,
+      "skipped": 0
+    },
+    "all-browser": {
+      "tests": 14,
+      "pass": 14,
+      "fail": 0,
+      "skipped": 0
+    },
+    "glass-parser": {
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "typecheck": "passed",
+  "predeploy": "passed",
+  "fullBuild": "passed",
+  "bundleVerification": "passed",
+  "serverBundle": "present",
+  "profileDeclarations": {
+    "complete": 324,
+    "jsonInputsSkipped": 0
+  },
+  "node": "24.22.2",
+  "browser": "136.0.7103.25",
+  "posterBrowserScenarios": {
+    "total": 13,
+    "dprComparisons": 6,
+    "coldStates": 5,
+    "fallbackStates": 2
+  },
+  "ingestionIntegrations": {
+    "publisher": {
+      "checks": 14,
+      "passed": true,
+      "details": {
+        "eventId": 435,
+        "inputBytes": 25695,
+        "derivativeBytes": 1060,
+        "variantWidths": [
+          640,
+          1280
+        ],
+        "originalSha256": "e4df313c227b5edf08924fc27df35147cf68375eb08f467f5b8ad9eac322a059"
+      },
+      "scope": "isolated full production route registration, copied database, loopback only"
+    },
+    "member": {
+      "checks": 13,
+      "passed": true,
+      "scope": "isolated full production route registration, copied database, loopback only"
+    },
+    "limits": "Independent copied-database, loopback integration checks; synthetic JPEG input under1MB, not a representative real-poster savings average. These are separate from CI counts and may overlap."
+  },
+  "offlineSamples": {
+    "total": 30,
+    "http200": 30,
+    "pageErrors": 0,
+    "negativeFrameIntervals": 0,
+    "topFrameMapCanvases": 0,
+    "mapLibraryScriptRequests": 0
+  },
+  "limitations": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "deviceScaleFactor": 1,
+    "isMobile": true,
+    "hasTouch": true,
+    "network": "OFFLINE ONLY: all non-loopback browser+server requests denied; not equivalent to initial baseline external-failure conditions",
+    "gpu": "Chromium SwiftShader software renderer",
+    "auth": "anonymous",
+    "sampleWindowMs": 5000,
+    "physicalDevice": false,
+    "sampleDeadlineMs": 45000,
+    "cache": "Fresh context per cold; same-context reload labeled warm. Playwright request routing DISABLES HTTP CACHE; unlike initial baseline warm-cache samples. Service workers blocked.",
+    "limits": "Top-frame Resource Timing excludes navigation and iframe resources and omits cross-origin byte detail without Timing-Allow-Origin; these byte totals are not total page transfer. Scroll frame timeout is recorded, not treated as smooth performance."
+  },
+  "publication": "No publication by verification agent"
+}

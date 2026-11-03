@@ -50,3 +50,10 @@ export function outzBandArt(id: string) {
 export function outzTempLabel(value: number | null | undefined) {
   return value == null ? "—" : `${Math.round(value)}°F`;
 }
+
+export function outzAccentForName(name: string, kind?: OutzPlaceKind): string | null {
+  const n = name.toLowerCase();
+  if (n.includes("rooster")) return "#FF6600";
+  if (n.includes("sauvie") || n.includes("collins")) return "#39FF14";
+  return kind ? outzPinHex(name, kind) : null;
+}

@@ -9,7 +9,7 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
-import { motion, useMotionValue, useMotionValueEvent, useScroll, useSpring } from "framer-motion";
+import { motion, useMotionValue, useMotionValueEvent, useScroll, useSpring } from "motion/react";
 import { Link } from "wouter";
 import { HandwritingText } from "@/components/ui/handwriting-text";
 import { PortlandMetroGlobe } from "@/components/ui/portland-metro-globe";

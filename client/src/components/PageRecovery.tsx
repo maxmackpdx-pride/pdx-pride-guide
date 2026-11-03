@@ -1,6 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "wouter";
-import { Button } from "@/components/ds";
+import { Button } from "@/components/ds/Button";
 import "./PageRecovery.css";
 
 type Props = {

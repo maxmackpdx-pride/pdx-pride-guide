@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { waypointHtml, type WaypointId } from "@/lib/livingMapWaypoints";
+import { waypointHtml, type WaypointId } from "@/lib/livingMapWaypointMarkup";
 import { VINE_ANCHORS, hitVines } from "./ponies-globe-vines";
 import { createVineRenderer } from "./ponies-globe-vine-renderer";
 import hologramData from "./portland-globe-holograms.json";
