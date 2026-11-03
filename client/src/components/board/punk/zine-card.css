@@ -127,7 +127,7 @@
 .boardz-punk-scope .zine .wp-photo,.boardz-punk-scope .zine .zt-face::before{animation:var(--zd-skin-n) var(--zd-skin-d) steps(1,end) var(--zd-skin-o) infinite}
 .boardz-punk-scope .zine .zine-sticker{animation:var(--zd-hero-n) var(--zd-hero-d) steps(1,end) var(--zd-hero-o) infinite}
 .boardz-punk-scope .zine .zt-face{animation:zine-jit var(--zd-jit-d) steps(1,end) var(--zd-jit-o) infinite}
-@keyframes zine-jit{0%,41%,43.5%,100%{translate:0;filter:none}41.2%{translate:3px 0;filter:drop-shadow(-2px 0 rgba(255,0,204,.7)) drop-shadow(2px 0 rgba(25,227,255,.7))}42.4%{translate:-2px 0;filter:drop-shadow(2px 0 rgba(255,0,204,.6)) drop-shadow(-2px 0 rgba(25,227,255,.6))}}
+@keyframes zine-jit{0%,41%,43.5%,100%{translate:0;filter:none}41.2%{translate:3px 0;filter:drop-shadow(-2px 0 rgba(255,31,160,.7)) drop-shadow(2px 0 rgba(25,227,255,.7))}42.4%{translate:-2px 0;filter:drop-shadow(2px 0 rgba(255,31,160,.6)) drop-shadow(-2px 0 rgba(25,227,255,.6))}}
 .boardz-punk-scope .zine :is(.zt-rim,.wp-photo,.zt-face,.zine-sticker){animation-play-state:var(--card-ambient-playing,running)}
 .boardz-punk-scope .zine .zt-face::before{animation-play-state:var(--card-ambient-playing,running)}
 .boardz-punk-scope[data-calm=true] .zine :is(.zt-rim,.wp-photo,.zt-face,.zine-sticker),

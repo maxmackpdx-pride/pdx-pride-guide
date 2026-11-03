@@ -26,7 +26,7 @@ const terrainSamples=createTerrainSampler(coordinates=>map.queryTerrainElevation
 const terrainHeight=coordinates=>terrainSamples.sample(coordinates).height;
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
-const dayColors=['#8800FF','#00FFFF','#FF00CC','#39FF14','#FF6600'];
+const dayColors=['#7B00FF','#00FFFF','#FF1FA0','#2BFF00','#FF7B00'];
 const hologramMaterials=createHologramMaterials([...dayColors,adultVenueColor]);
 const assetController=new AbortController();
 function waypointHeightScale([longitude,latitude]){

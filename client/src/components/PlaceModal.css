@@ -32,7 +32,7 @@
 }
 
 /* ── Panel shell (deep glass) ─────────────────────────────── */ .place-modal-panel.pdx-glass-rebind {
-  --c: var(--pink, #ff00cc);
+  --c: var(--pink, #FF1FA0);
   --dir-gm: 60;
   position: relative;
   width: 100%;
@@ -141,12 +141,12 @@
     90deg,
     #ff2d5e,
     #ff9500,
-    #ffee00,
-    #39ff14,
+    #FFDD00,
+    #2BFF00,
     #00ffff,
     #3a6bff,
-    #8800ff,
-    #ff00cc,
+    #7B00FF,
+    #FF1FA0,
     #ff2d5e
   );
   background-size: 200% 100%;
@@ -527,7 +527,7 @@
   color: inherit;
   background: #050506;
   border: 1px solid #2a2a32;
-  border-top: 3px solid var(--pm-day, var(--day-fri, #ff00cc));
+  border-top: 3px solid var(--pm-day, var(--day-fri, #FF1FA0));
   border-radius: 8px;
   overflow: hidden;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
@@ -718,7 +718,7 @@ html.calm-mode .place-modal-panel__sheen {
   font: 800 .86rem var(--font-display);
   text-transform: uppercase;
 }
-.place-modal-panel__inner > .detail-actions > button[aria-label^="Close"] { border-radius: 50%; border-color: var(--neon-yellow, #ffee00); color: var(--neon-yellow, #ffee00); }
+.place-modal-panel__inner > .detail-actions > button[aria-label^="Close"] { border-radius: 50%; border-color: var(--neon-yellow, #FFDD00); color: var(--neon-yellow, #FFDD00); }
 .place-modal-panel__body { padding: 24px 28px 24px; }
 .place-modal-panel__identity { min-height: 165px; margin-bottom: 24px; }
 .place-modal-panel__identity-text { flex: 1 1 58%; min-width: 0; }

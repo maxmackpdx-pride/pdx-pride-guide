@@ -441,7 +441,7 @@ function AccountDashboard() {
                   <strong style={{ color: "#19e3ff" }}>Local demo hub</strong>
                   {" - "}
                   chrome only. Feed, posts, and admin tools need a real login.{" "}
-                  <Link href={LOCAL_DEMO_PROFILE_PATH} style={{ color: "#ccff00" }}>
+                  <Link href={LOCAL_DEMO_PROFILE_PATH} style={{ color: "#D4FF00" }}>
                     Open @{demoUser.username} profile <ArrowRight size={14} aria-hidden="true" />
                   </Link>
                 </p>

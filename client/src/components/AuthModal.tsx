@@ -21,7 +21,7 @@ interface AuthModalProps {
 }
 
 /** The four seam colours, so the beams read as the site's rainbow rule. */
-const BEAM = ["#19e3ff", "#c8fa3c", "#ff1fa0", "#ff6600"] as const;
+const BEAM = ["#19e3ff", "#D4FF00", "#ff1fa0", "#FF7B00"] as const;
 
 /**
  * One field: icon on the left, dark glass well, accent edge on focus.
@@ -243,7 +243,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
             <div className="mb-6 text-center">
               <p
                 className="m-0 text-[11px] uppercase tracking-[0.2em]"
-                style={{ color: "var(--panel-lime, #c8fa3c)", fontFamily: "var(--font-mono, ui-monospace, monospace)" }}
+                style={{ color: "var(--panel-lime, #D4FF00)", fontFamily: "var(--font-mono, ui-monospace, monospace)" }}
               >
                 Portland · All year
               </p>
@@ -402,7 +402,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                     <SwapNote
                       question="No account?"
                       action="Join free"
-                      accent="#c8fa3c"
+                      accent="#D4FF00"
                       onClick={() => { setTab("register"); setError(""); }}
                     />
                   </form>
@@ -418,7 +418,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                       <h3 className="text-lg font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
                         {registerStep === 0 ? "Your account" : registerStep === 1 ? "Set your password" : "Community standards"}
                       </h3>
-                      <span className="rounded-full border border-[#c8fa3c]/40 bg-[#c8fa3c]/10 px-2.5 py-1 text-xs text-[#c8fa3c]" style={{ fontFamily: "var(--font-mono, ui-monospace, monospace)" }}>{registerStep + 1} / {COMMUNITY_STANDARDS_GATE_ENABLED ? 3 : 2}</span>
+                      <span className="rounded-full border border-[#D4FF00]/40 bg-[#D4FF00]/10 px-2.5 py-1 text-xs text-[#D4FF00]" style={{ fontFamily: "var(--font-mono, ui-monospace, monospace)" }}>{registerStep + 1} / {COMMUNITY_STANDARDS_GATE_ENABLED ? 3 : 2}</span>
                     </div>
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.div
@@ -434,21 +434,21 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                             <p className="text-sm text-white/65">Choose how people will find you.</p>
                             <Field
                               icon={<AtSign className="h-4 w-4" />}
-                              accent="#c8fa3c" focused={focusedInput === "username"}
+                              accent="#D4FF00" focused={focusedInput === "username"}
                               onFocus={() => setFocusedInput("username")} onBlur={() => setFocusedInput(null)}
                               type="text" value={username} onChange={e => setUsername(e.target.value)}
                               required placeholder="Username" aria-label="Username" minLength={3} autoComplete="username"
                             />
                             <Field
                               icon={<User className="h-4 w-4" />}
-                              accent="#c8fa3c" focused={focusedInput === "displayName"}
+                              accent="#D4FF00" focused={focusedInput === "displayName"}
                               onFocus={() => setFocusedInput("displayName")} onBlur={() => setFocusedInput(null)}
                               type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
                               placeholder="Display name (optional)" aria-label="Display name (optional)" autoComplete="nickname"
                             />
                             <Field
                               icon={<Mail className="h-4 w-4" />}
-                              accent="#c8fa3c" focused={focusedInput === "email"}
+                              accent="#D4FF00" focused={focusedInput === "email"}
                               onFocus={() => setFocusedInput("email")} onBlur={() => setFocusedInput(null)}
                               type="email" value={email} onChange={e => setEmail(e.target.value)}
                               required placeholder="you@example.com" aria-label="Email address" autoComplete="email"
@@ -460,7 +460,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                             <p className="text-sm text-white/65">Make a password for your account.</p>
                             <Field
                               icon={<Lock className="h-4 w-4" />}
-                              accent="#c8fa3c" focused={focusedInput === "password"}
+                              accent="#D4FF00" focused={focusedInput === "password"}
                               onFocus={() => setFocusedInput("password")} onBlur={() => setFocusedInput(null)}
                               type={showPassword ? "text" : "password"} value={password}
                               onChange={e => setPassword(e.target.value)} required
@@ -469,7 +469,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                             />
                             <Field
                               icon={<Lock className="h-4 w-4" />}
-                              accent="#c8fa3c" focused={focusedInput === "confirm"}
+                              accent="#D4FF00" focused={focusedInput === "confirm"}
                               onFocus={() => setFocusedInput("confirm")} onBlur={() => setFocusedInput(null)}
                               type={showPassword ? "text" : "password"} value={confirmPassword}
                               onChange={e => setConfirmPassword(e.target.value)} required
@@ -503,7 +503,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                       )}
                       <SubmitButton
                         type="submit"
-                        accent="#c8fa3c"
+                        accent="#D4FF00"
                         disabled={loading || (registerStep === 2 && COMMUNITY_STANDARDS_GATE_ENABLED && !agreedStandards)}
                       >
                         {loading ? "Joining..." : registerStep === (COMMUNITY_STANDARDS_GATE_ENABLED ? 2 : 1) ? "Join Zaylist" : "Continue"}

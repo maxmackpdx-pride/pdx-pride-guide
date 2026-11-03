@@ -105,12 +105,12 @@
     90deg,
     #ff2d5e,
     #ff9500,
-    #ffee00,
-    #39ff14,
+    #FFDD00,
+    #2BFF00,
     #00ffff,
     #3a6bff,
-    #8800ff,
-    #ff00cc,
+    #7B00FF,
+    #FF1FA0,
     #ff2d5e
   );
 
@@ -638,12 +638,12 @@ html.calm-mode .pdxLegend,
   -webkit-backdrop-filter: blur(var(--glass-card-blur));
 }
 
-/* Board cards: listing accent → --c (MC #FF00CC · Gifting #CCFF00 · Gigs #6E3DFF)
+/* Board cards: listing accent → --c (MC #FF1FA0 · Gifting #D4FF00 · Gigs #6E3DFF)
    Solid posts: black ring + accent rim + left accent bar.
    ISO / Looking: dashed full border (no solid left bar). */
 .board-listing-card,
 .board-listing-card--makeover {
-  --c: var(--listing-accent, var(--_c, #ccff00));
+  --c: var(--listing-accent, var(--_c, #D4FF00));
   border-radius: 14px !important;
   border: 1.5px solid color-mix(in srgb, var(--c) 70%, #101014) !important;
   border-left: 4px solid var(--c) !important;
@@ -674,7 +674,7 @@ html.calm-mode .pdxLegend,
 .board-spotted-card,
 .spotted-card,
 .board-detail-modal--spotted {
-  --c: var(--spotted-accent, var(--listing-accent, #ff00cc));
+  --c: var(--spotted-accent, var(--listing-accent, #FF1FA0));
   border: 1px solid color-mix(in srgb, var(--c) 55%, #101014) !important;
   box-shadow:
     0 0 0 2px #000,
@@ -687,7 +687,7 @@ html.calm-mode .pdxLegend,
 
 .board-detail-modal,
 .board-post-overlay {
-  --c: var(--listing-accent, var(--_c, #ff00cc));
+  --c: var(--listing-accent, var(--_c, #FF1FA0));
   border: 1px solid color-mix(in srgb, var(--c) 55%, #101014) !important;
   border-radius: 14px !important;
   box-shadow:
@@ -724,7 +724,7 @@ html.calm-mode .pdxLegend,
   pointer-events: none;
   z-index: 1;
   opacity: 0.2;
-  color: var(--c, var(--listing-accent, #ff00cc));
+  color: var(--c, var(--listing-accent, #FF1FA0));
   overflow: visible;
 }
 .board-glass-motif svg {
@@ -764,7 +764,7 @@ html.calm-mode .pdxLegend,
   font-size: clamp(5.5rem, 16vw, 9rem);
   line-height: 1;
   opacity: 0.18;
-  color: var(--c, var(--listing-accent, #ff00cc));
+  color: var(--c, var(--listing-accent, #FF1FA0));
   filter: none;
   z-index: 1;
 }
@@ -877,12 +877,12 @@ html.calm-mode .pdxLegend,
       90deg,
       #ff2d5e,
       #ff9500,
-      #ffee00,
-      #39ff14,
+      #FFDD00,
+      #2BFF00,
       #00ffff,
       #3a6bff,
-      #8800ff,
-      #ff00cc,
+      #7B00FF,
+      #FF1FA0,
       #ff2d5e
     )
   );
@@ -942,7 +942,7 @@ html.calm-mode .pdxRow::before,
 :root[data-calm="true"] .pdxBoard::before,
 :root[data-calm="true"] .pdxRow::before {
   animation: none !important;
-  background: var(--rainbow-bar, linear-gradient(90deg, #19e3ff, #ffee00, #ff00cc, #ff6600, #19e3ff));
+  background: var(--rainbow-bar, linear-gradient(90deg, #19e3ff, #FFDD00, #FF1FA0, #FF7B00, #19e3ff));
   background-size: auto;
   opacity: 0.85;
   filter: none;
@@ -951,7 +951,7 @@ html.calm-mode .pdxRow::before,
 }
 
 .gifting-form-panel--makeover.pdx-glass-rebind {
-  --c: #ccff00;
+  --c: #D4FF00;
   box-shadow: var(--glass-card-shadow) !important;
 }
 

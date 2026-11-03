@@ -111,9 +111,9 @@ const CSS = `
 .pdxPlace__grandDate{
   font-family:var(--font-display); font-weight:900; text-transform:uppercase;
   font-size:0.98rem; line-height:1.1; letter-spacing:.04em;
-  color:var(--neon-yellow,#FFEE00);
+  color:var(--neon-yellow,#FFDD00);
   margin-top:4px;
-  text-shadow:0 0 12px color-mix(in srgb, var(--neon-yellow,#FFEE00) 55%, transparent);
+  text-shadow:0 0 12px color-mix(in srgb, var(--neon-yellow,#FFDD00) 55%, transparent);
   position:relative; z-index:1;
 }
 .pdxPlace__rows{ display:flex; flex-direction:column; gap:6px; position:relative; z-index:1; }
@@ -375,15 +375,15 @@ if (typeof document !== "undefined") {
 const CAT_COLOR = {
   bars:"var(--pink)", food:"var(--orange)", cafes:"var(--green)", venues:"var(--cyan)",
   services:"var(--purple)", shops:"var(--amber)", hotels:"var(--blue)",
-  healthcare:"#FF00CC", realestate:"#1A4DFF", campgrounds:"#39FF14", groups:"#FFD700",
+  healthcare:"#FF1FA0", realestate:"#1A4DFF", campgrounds:"#2BFF00", groups:"#FFD700",
 };
-const RAINBOW_EDGE = "linear-gradient(120deg,#FF2400,#FF9500,#FFEE00,#39FF14,#00FFFF,#3A6BFF,#8800FF,#FF00CC)";
+const RAINBOW_EDGE = "linear-gradient(120deg,#FF0000,#FF9500,#FFDD00,#2BFF00,#00FFFF,#3A6BFF,#7B00FF,#FF1FA0)";
 /** Pink → white neon for Health & Care cards. */
-const HEALTHCARE_EDGE = "linear-gradient(125deg,#FF00CC 0%,#FF4DD2 35%,#FFB3EC 70%,#FFFFFF 100%)";
+const HEALTHCARE_EDGE = "linear-gradient(125deg,#FF1FA0 0%,#FF4DD2 35%,#FFB3EC 70%,#FFFFFF 100%)";
 /** Neon navy → white for Real Estate cards. */
 const REALESTATE_EDGE = "linear-gradient(125deg,#061A66 0%,#0A1F8C 28%,#1A4DFF 62%,#FFFFFF 100%)";
 /** Lime green → dark forest green for Campgrounds cards. */
-const CAMPGROUND_EDGE = "linear-gradient(125deg,#B8FF3C 0%,#39FF14 28%,#0F8A3D 62%,#064E2A 100%)";
+const CAMPGROUND_EDGE = "linear-gradient(125deg,#B8FF3C 0%,#2BFF00 28%,#0F8A3D 62%,#064E2A 100%)";
 /** White → gold neon for Clubs & Groups cards. */
 const GROUP_EDGE = "linear-gradient(125deg,#FFFFFF 0%,#FFF3C4 32%,#FFD700 68%,#C9A227 100%)";
 const DAY_COLOR = { MON:"var(--day-mon,var(--pink))", TUE:"var(--day-tue,var(--orange))", WED:"var(--day-wed,var(--yellow))", THU:"var(--cyan)", FRI:"var(--pink)", SAT:"var(--green)", SUN:"var(--orange)" };

@@ -102,9 +102,9 @@ html.calm-mode .floating-inbox__fab,
   --panel-cyan: #19e3ff;
   --panel-magenta: #ff1fa0;
   --panel-purple: #b06bff;
-  --panel-lime: #c8fa3c;
-  --panel-lime-bright: #ccff00;
-  --panel-green: #39ff14;
+  --panel-lime: #D4FF00;
+  --panel-lime-bright: #D4FF00;
+  --panel-green: #2BFF00;
   --board-text: #e6e3da;
   --board-muted: #999999;
   /*
@@ -454,8 +454,8 @@ html.calm-mode .inbox-overlay::after,
 .inbox-exp-dot--live {
   width: 7px;
   height: 7px;
-  background: #39ff14;
-  box-shadow: 0 0 7px #39ff14;
+  background: #2BFF00;
+  box-shadow: 0 0 7px #2BFF00;
 }
 
 /* Section kicker - hub .kick */
@@ -657,7 +657,7 @@ html.calm-mode .inbox-overlay::after,
   display: flex;
   align-items: center;
   justify-content: center;
-  background: conic-gradient(from 90deg, #c8fa3c, #19e3ff, #ff1fa0, #c8fa3c);
+  background: conic-gradient(from 90deg, #D4FF00, #19e3ff, #ff1fa0, #D4FF00);
   font-family: var(--font-display), "Barlow Condensed", sans-serif;
   font-weight: 800;
   font-size: 14px;
@@ -873,7 +873,7 @@ html.calm-mode .inbox-overlay::after,
 }
 
 .inbox-exp-folder-pill.is-active {
-  background: #c8fa3c;
+  background: #D4FF00;
   color: #000;
 }
 
@@ -1271,7 +1271,7 @@ html.calm-mode .inbox-overlay::after,
   padding: 8px 14px;
   border-radius: 10px;
   border: none;
-  background: #c8fa3c;
+  background: #D4FF00;
   color: #000;
   cursor: pointer;
 }
@@ -1603,7 +1603,7 @@ html.calm-mode .inbox-overlay::after,
 }
 
 .inbox-overlay .inbox-group-chat--beach {
-  --inbox-exp-accent: #39ff14;
+  --inbox-exp-accent: #2BFF00;
 }
 
 .inbox-overlay .inbox-group-chat__head {
@@ -1662,7 +1662,7 @@ html.calm-mode .inbox-overlay::after,
 }
 
 .inbox-overlay .inbox-group-chat__badge.inbox-exp-tag--green {
-  background: #39ff14;
+  background: #2BFF00;
 }
 
 .inbox-overlay .inbox-group-chat__badge.inbox-exp-tag--orange {
@@ -1784,7 +1784,7 @@ html.calm-mode .inbox-overlay::after,
 
 .inbox-exp-stats-pulse {
   border: 1px solid var(--panel-border);
-  border-top: 3px solid #39ff14;
+  border-top: 3px solid #2BFF00;
   border-radius: 12px;
   background: var(--panel-card);
   padding: 16px;
@@ -2303,7 +2303,7 @@ html.calm-mode .inbox-overlay::after,
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
   font-size: 8.5px;
   letter-spacing: 0.09em;
-  color: #39ff14;
+  color: #2BFF00;
 }
 
 .inbox-exp-stats-chart__delta-dot {

@@ -54,34 +54,34 @@ type MapPin = {
 };
 
 export const MAP_TYPE_COLORS: Record<string, string> = {
-  bar: "#FF00CC",
-  restaurant: "#FF6600",
-  cafe: "#39FF14",
+  bar: "#FF1FA0",
+  restaurant: "#FF7B00",
+  cafe: "#2BFF00",
   venue: "#19E3FF",
   service: "#A855F7",
   shop: "#FFD700",
   hotel: "#FF1FA0",
   nonprofit: "#FFFFFF",
-  healthcare: "#FF00CC",
+  healthcare: "#FF1FA0",
   realestate: "#1A4DFF",
   group: "#FFD700",
-  campground: "#39FF14",
+  campground: "#2BFF00",
 };
 
 /** CSS backgrounds for legend swatches (solid or gradient neon). */
 export const MAP_TYPE_SWATCH: Record<string, string> = {
-  bar: "#FF00CC",
-  restaurant: "#FF6600",
-  cafe: "#39FF14",
+  bar: "#FF1FA0",
+  restaurant: "#FF7B00",
+  cafe: "#2BFF00",
   venue: "#19E3FF",
   service: "#A855F7",
   shop: "#FFD700",
   hotel: "#FF1FA0",
-  nonprofit: "conic-gradient(#FF2400,#FF6600,#FFEE00,#39FF14,#00FFFF,#0044FF,#8800FF,#FF00CC,#FF2400)",
-  healthcare: "linear-gradient(135deg,#FF00CC 0%,#FF7AE0 48%,#FFFFFF 100%)",
+  nonprofit: "conic-gradient(#FF0000,#FF7B00,#FFDD00,#2BFF00,#00FFFF,#0066FF,#7B00FF,#FF1FA0,#FF0000)",
+  healthcare: "linear-gradient(135deg,#FF1FA0 0%,#FF7AE0 48%,#FFFFFF 100%)",
   realestate: "linear-gradient(135deg,#0A1F8C 0%,#1A4DFF 48%,#FFFFFF 100%)",
   group: "linear-gradient(135deg,#FFFFFF 0%,#FFF3C4 40%,#FFD700 100%)",
-  campground: "linear-gradient(135deg,#B8FF3C 0%,#39FF14 32%,#0F8A3D 68%,#064E2A 100%)",
+  campground: "linear-gradient(135deg,#B8FF3C 0%,#2BFF00 32%,#0F8A3D 68%,#064E2A 100%)",
 };
 
 export const MAP_TYPE_LABELS: Record<string, string> = {
@@ -313,10 +313,10 @@ function DirectoryPopup({
             fontSize: "0.625rem",
             letterSpacing: "0.06em",
             textTransform: "uppercase",
-            color: "#CCFF00",
+            color: "#D4FF00",
             border: "1px solid #000",
             borderRadius: 3,
-            outline: "1px solid #CCFF00",
+            outline: "1px solid #D4FF00",
             outlineOffset: -2,
             padding: "4px 7px 3px",
             boxShadow: "inset 0 1px 2px rgba(0,0,0,.75)",
@@ -362,7 +362,7 @@ function DirectoryPopup({
             fontSize: "0.7875rem",
             lineHeight: 1.1,
             letterSpacing: "0.04em",
-            color: "#FFEE00",
+            color: "#FFDD00",
             marginBottom: 8,
           }}
         >
@@ -597,7 +597,7 @@ export default function DirectoryMap({
         <MapFocus pins={mapped} enabled={focusBusiness && !savedView} />
         <IncidentalMapCamera memory={cameraMemory} />
         {mapped.map(pin => {
-          const accent = TYPE_COLORS[pin.biz.type] || "#FF00CC";
+          const accent = TYPE_COLORS[pin.biz.type] || "#FF1FA0";
           const rainbow = pin.biz.type === "nonprofit";
           return (
             <Marker

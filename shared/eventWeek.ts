@@ -9,7 +9,7 @@ export const EVENT_WEEK_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 export type EventWeekDay = (typeof EVENT_WEEK_DAYS)[number];
 
 /** Reserved for RSVP pulse on the events map - no day may use this hex. */
-export const RSVP_COLOR = "#CCFF00";
+export const RSVP_COLOR = "#D4FF00";
 
 export const EVENT_WEEK_DAY_OPTIONS: ReadonlyArray<{
   value: EventWeekDay;
@@ -21,13 +21,13 @@ export const EVENT_WEEK_DAY_OPTIONS: ReadonlyArray<{
   /** Text-safe variant - day pills, tags, labels (≥4.5:1 on near-black). */
   textColor: string;
 }> = [
-  { value: "MON", label: "Monday July 13", date: "2026-07-13", nextDate: "2026-07-14", color: "#8800FF", textColor: "#AA66FF" },
-  { value: "TUE", label: "Tuesday July 14", date: "2026-07-14", nextDate: "2026-07-15", color: "#0044FF", textColor: "#4488FF" },
-  { value: "WED", label: "Wednesday July 15", date: "2026-07-15", nextDate: "2026-07-16", color: "#FFEE00", textColor: "#FFEE00" },
+  { value: "MON", label: "Monday July 13", date: "2026-07-13", nextDate: "2026-07-14", color: "#7B00FF", textColor: "#9D66FF" },
+  { value: "TUE", label: "Tuesday July 14", date: "2026-07-14", nextDate: "2026-07-15", color: "#0066FF", textColor: "#44AAFF" },
+  { value: "WED", label: "Wednesday July 15", date: "2026-07-15", nextDate: "2026-07-16", color: "#FFDD00", textColor: "#FFDD00" },
   { value: "THU", label: "Thursday July 16", date: "2026-07-16", nextDate: "2026-07-17", color: "#00FFFF", textColor: "#00FFFF" },
-  { value: "FRI", label: "Friday July 17", date: "2026-07-17", nextDate: "2026-07-18", color: "#FF00CC", textColor: "#FF00CC" },
-  { value: "SAT", label: "Saturday July 18", date: "2026-07-18", nextDate: "2026-07-19", color: "#39FF14", textColor: "#39FF14" },
-  { value: "SUN", label: "Sunday July 19", date: "2026-07-19", nextDate: "2026-07-20", color: "#FF6600", textColor: "#FF6600" },
+  { value: "FRI", label: "Friday July 17", date: "2026-07-17", nextDate: "2026-07-18", color: "#FF1FA0", textColor: "#FF1FA0" },
+  { value: "SAT", label: "Saturday July 18", date: "2026-07-18", nextDate: "2026-07-19", color: "#2BFF00", textColor: "#2BFF00" },
+  { value: "SUN", label: "Sunday July 19", date: "2026-07-19", nextDate: "2026-07-20", color: "#FF7B00", textColor: "#FF7B00" },
 ];
 
 export const EVENT_WEEK_START_DATE = EVENT_WEEK_DAY_OPTIONS[0].date;
@@ -178,7 +178,7 @@ export const DAYS: DayDef[] = EVENT_WEEK_DAY_OPTIONS.map((d) => ({
 }));
 
 export const ADM: Record<AdmKey, AdmDef> = {
-  FREE: { label: "Free", color: "#c8fa3c" },
+  FREE: { label: "Free", color: "#D4FF00" },
   TICKETED: { label: "Ticketed", color: "#00FFFF" },
   SUGGESTED_DONATION: { label: "Donation", color: "#FFB23D" },
 };

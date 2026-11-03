@@ -52,8 +52,8 @@ export const E3_MINI_RISE_PX = 76;
 // An event is "same day" when it starts within this window, or has begun.
 export const E3_SAME_DAY_MS = 24 * 3600 * 1000;
 
-// Same-day vortexes and their beams are green (E3-Lifecycle board, #39FF14). Other levels keep the venue color.
-export const E3_SAME_DAY_GREEN = '#39FF14';
+// Same-day vortexes and their beams are green (E3-Lifecycle board, #2BFF00). Other levels keep the venue color.
+export const E3_SAME_DAY_GREEN = '#2BFF00';
 
 export const E3_LOD_LEVELS = ['vortex', 'coin', 'compressed', 'mini'];
 const BOUNDS = () => [E3_LOD_FULL_MAX_M, E3_LOD_COIN_MAX_M, E3_LOD_COMPRESSED_MAX_M];
@@ -483,7 +483,7 @@ export function e3TimeLabel(time) {
 
 function hexToHsl(hex) {
   const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
-  const n = m ? parseInt(m[1], 16) : 0xff00cc;
+  const n = m ? parseInt(m[1], 16) : 0xff1fa0;
   const r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
   const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, d = max - min;
   let h = 0;
@@ -497,7 +497,7 @@ function hslToHex(h, s, l) {
 }
 /** Linear mix of two hex colors, t 0..1 (0 = a). Used to ease the coin's venue color into the vortex tint. */
 export function e3MixHex(a, b, t) {
-  const parse = hex => { const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '')); const n = m ? parseInt(m[1], 16) : 0xFF00CC; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+  const parse = hex => { const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '')); const n = m ? parseInt(m[1], 16) : 0xFF1FA0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
   const x = parse(a), y = parse(b), k = clamp01(t);
   return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * k).toString(16).padStart(2, '0')).join('').toUpperCase();
 }

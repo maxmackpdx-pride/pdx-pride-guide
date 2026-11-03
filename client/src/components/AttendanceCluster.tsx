@@ -432,7 +432,7 @@ export default function AttendanceCluster({
                     size={52}
                   />
                   {isSelf && (
-                    <span data-testid="self-marker" style={{ position: "absolute", bottom: 0, right: 0, width: 10, height: 10, borderRadius: "50%", background: "#CCFF00", border: "2px solid #0d0d0d", zIndex: 5 }} />
+                    <span data-testid="self-marker" style={{ position: "absolute", bottom: 0, right: 0, width: 10, height: 10, borderRadius: "50%", background: "#D4FF00", border: "2px solid #0d0d0d", zIndex: 5 }} />
                   )}
                 </div>
                 {!p.masked && (
@@ -505,7 +505,7 @@ export default function AttendanceCluster({
               bottom: 0,
               width: "min(100%, 380px)",
               background: "#0a0a0a",
-              borderLeft: "2px solid #CCFF00",
+              borderLeft: "2px solid #D4FF00",
               display: "flex",
               flexDirection: "column",
               zIndex: 71,
@@ -566,7 +566,7 @@ export default function AttendanceCluster({
                 onClick={() => messageTarget && messageMutation.mutate({ attendanceId: messageTarget.id, body: messageBody })}
                 disabled={!messageBody.trim() || messageMutation.isPending}
                 className="display"
-                style={{ background: "#CCFF00", color: "#000", border: "none", borderRadius: 999, padding: "0 20px", cursor: "pointer", opacity: !messageBody.trim() || messageMutation.isPending ? 0.5 : 1 }}
+                style={{ background: "#D4FF00", color: "#000", border: "none", borderRadius: 999, padding: "0 20px", cursor: "pointer", opacity: !messageBody.trim() || messageMutation.isPending ? 0.5 : 1 }}
               >
                 SEND
               </button>

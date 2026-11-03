@@ -65,7 +65,7 @@ type WallPost = {
 
 const STAY_PRESENTATION: Record<string, { accent: string; label: string; logo?: string; motif: string }> = {
   "we-moon-land": { accent: "#ff1fa0", label: "QUEER STAY", motif: "adventure-map-waterfall-route.svg" },
-  "bamboo-acres": { accent: "#ccff00", label: "QUEER STAY", motif: "alpine-lake-loop-lime.svg" },
+  "bamboo-acres": { accent: "#D4FF00", label: "QUEER STAY", motif: "alpine-lake-loop-lime.svg" },
   "triangle-recreation-camp": {
     accent: "#19e3ff",
     label: "QUEER CAMPGROUND",

@@ -13,7 +13,7 @@
 
 .nude-beaches-page.board-page--makeover {
   background:
-    radial-gradient(circle at 10% 6%, rgba(255, 102, 0, 0.08), transparent 22rem),
+    radial-gradient(circle at 10% 6%, rgba(255, 123, 0, 0.08), transparent 22rem),
     radial-gradient(circle at 88% 14%, rgba(255, 31, 160, 0.06), transparent 24rem),
     #06060a;
 }
@@ -138,11 +138,11 @@
 }
 
 .nude-rooster-status.pdx-glass-rebind {
-  --c: var(--nb-accent, #ff6600);
-  --nb-rim: var(--nb-accent, #ff6600);
+  --c: var(--nb-accent, #FF7B00);
+  --nb-rim: var(--nb-accent, #FF7B00);
   position: relative;
   border: 1px solid #2a2a32;
-  border-top-color: color-mix(in srgb, var(--nb-rim, var(--nb-accent, #ff6600)) 68%, #2a2a32);
+  border-top-color: color-mix(in srgb, var(--nb-rim, var(--nb-accent, #FF7B00)) 68%, #2a2a32);
   background: var(--nb-island-bg, var(--glass-card-bg, #050506));
   border-radius: 12px;
   padding: 18px 20px;
@@ -232,11 +232,11 @@
 }
 
 .nude-metric-tile.pdx-glass-rebind {
-  --c: var(--nb-accent, #ff6600);
-  --nb-rim: var(--nb-accent, #ff6600);
+  --c: var(--nb-accent, #FF7B00);
+  --nb-rim: var(--nb-accent, #FF7B00);
   position: relative;
   border: 1px solid #2a2a32;
-  border-top-color: color-mix(in srgb, var(--nb-rim, var(--nb-accent, #ff6600)) 68%, #2a2a32);
+  border-top-color: color-mix(in srgb, var(--nb-rim, var(--nb-accent, #FF7B00)) 68%, #2a2a32);
   background: var(--nb-island-bg, var(--glass-card-bg, #050506));
   border-radius: 10px;
   padding: 14px 16px;
@@ -289,16 +289,16 @@
 
 .nude-panel__kicker--cyan { color: var(--panel-cyan); }
 .nude-panel__kicker--magenta { color: var(--panel-magenta); }
-.nude-panel__kicker--orange { color: var(--neon-orange, #FF6600); }
+.nude-panel__kicker--orange { color: var(--neon-orange, #FF7B00); }
 .nude-panel__kicker--lime { color: var(--neon-yellow); }
 
 .nude-live-card.pdx-glass-rebind {
   /* Top-rim island; status modifiers recolor --nb-rim only */
-  --c: var(--nb-accent, #ff6600);
-  --nb-rim: var(--nb-accent, #ff6600);
+  --c: var(--nb-accent, #FF7B00);
+  --nb-rim: var(--nb-accent, #FF7B00);
   position: relative;
   border: 1px solid #2a2a32;
-  border-top-color: color-mix(in srgb, var(--nb-rim, var(--nb-accent, #ff6600)) 68%, #2a2a32);
+  border-top-color: color-mix(in srgb, var(--nb-rim, var(--nb-accent, #FF7B00)) 68%, #2a2a32);
   background: var(--nb-island-bg, var(--glass-card-bg, #050506)) !important;
   padding: 16px 18px;
   border-radius: 10px;
@@ -397,12 +397,12 @@
 }
 
 .nude-resource-link.pdx-glass-rebind {
-  --c: var(--nb-accent, #ff6600);
-  --nb-rim: var(--nb-accent, #ff6600);
+  --c: var(--nb-accent, #FF7B00);
+  --nb-rim: var(--nb-accent, #FF7B00);
   position: relative;
   display: block;
   border: 1px solid #2a2a32;
-  border-top-color: color-mix(in srgb, var(--nb-rim, var(--nb-accent, #ff6600)) 68%, #2a2a32);
+  border-top-color: color-mix(in srgb, var(--nb-rim, var(--nb-accent, #FF7B00)) 68%, #2a2a32);
   background: var(--nb-island-bg, var(--glass-card-bg, #050506));
   padding: 14px 16px;
   border-radius: 10px;
@@ -489,7 +489,7 @@
   background: rgba(5, 5, 7, 0.88);
   border: 1px solid #000;
   box-shadow: 0 0 0 1px #000, inset 0 1px 2px rgba(0, 0, 0, 0.75);
-  outline: 1px solid color-mix(in srgb, var(--nb-accent, #ff6600) 55%, #000);
+  outline: 1px solid color-mix(in srgb, var(--nb-accent, #FF7B00) 55%, #000);
   outline-offset: -2px;
   pointer-events: none;
 }
@@ -500,7 +500,7 @@
   border-radius: 999px;
   flex: none;
   background: #000;
-  border: 2px solid var(--nb-accent, #ff6600);
+  border: 2px solid var(--nb-accent, #FF7B00);
   box-shadow: 0 0 0 1px #000, inset 0 1px 1px rgba(0, 0, 0, 0.85);
   box-sizing: border-box;
 }
@@ -625,15 +625,15 @@
 
 .nude-beaches-page--sauvie.board-page--makeover {
   background:
-    radial-gradient(circle at 10% 6%, rgba(57, 255, 20, 0.08), transparent 22rem),
-    radial-gradient(circle at 88% 14%, rgba(57, 255, 20, 0.06), transparent 24rem),
+    radial-gradient(circle at 10% 6%, rgba(43, 255, 0, 0.08), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(43, 255, 0, 0.06), transparent 24rem),
     #06060a;
 }
 
 .nude-beaches-page .nude-beaches-tab-bar .events-tab--rooster-rock.active,
 .nude-beaches-page .nude-beaches-tab-bar .events-tab--rooster-rock:hover {
-  color: var(--neon-orange, #ff6600);
-  border-bottom-color: var(--neon-orange, #ff6600);
+  color: var(--neon-orange, #FF7B00);
+  border-bottom-color: var(--neon-orange, #FF7B00);
 }
 
 .nude-beaches-page .nude-beaches-tab-bar .events-tab--sauvie-island.active,
@@ -757,7 +757,7 @@ html.calm-mode .board-close-seam {
 }
 
 /* Beach buttons: island accent only (orange Rooster / green Sauvie). Soft charcoal+tint edge - never cyan.pdx-glass-rebind, never solid neon border. */ .nude-map-btn.pdx-glass-rebind {
-  --c: var(--nb-accent, #ff6600);
+  --c: var(--nb-accent, #FF7B00);
   display: inline-flex;
   align-items: center;
   padding: 9px 14px;
@@ -794,7 +794,7 @@ html.calm-mode .board-close-seam {
 }
 
 /* Primary = canonical solid glass button: black ring.pdx-glass-rebind, restrained inset sheen.pdx-glass-rebind, no outer bloom. */ .nude-map-btn--primary.pdx-glass-rebind {
-  --c: var(--nb-accent, #ff6600);
+  --c: var(--nb-accent, #FF7B00);
   color: var(--z-black);
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 42%), var(--c);
   border: 1px solid #000;
@@ -909,8 +909,8 @@ html.calm-mode .board-close-seam {
   font-weight: 900;
   font-size: 18px;
   color: var(--green-acid);
-  background: rgba(57, 255, 20, 0.12);
-  border: 1px solid rgba(57, 255, 20, 0.4);
+  background: rgba(43, 255, 0, 0.12);
+  border: 1px solid rgba(43, 255, 0, 0.4);
   margin-bottom: 16px;
 }
 .nb-log-step__title {
@@ -1111,8 +1111,8 @@ html.calm-mode .nude-beaches-map__chip-dot {
 /* Beat events-page makeover cyan (#19e3ff) on beach tabs */
 .nude-beaches-page.events-page.board-page--makeover .nude-beaches-tab-bar .events-tab--rooster-rock.active,
 .nude-beaches-page.events-page.board-page--makeover .nude-beaches-tab-bar .events-tab--rooster-rock:hover {
-  color: var(--neon-orange, #ff6600);
-  border-bottom-color: var(--neon-orange, #ff6600);
+  color: var(--neon-orange, #FF7B00);
+  border-bottom-color: var(--neon-orange, #FF7B00);
 }
 
 .nude-beaches-page.events-page.board-page--makeover .nude-beaches-tab-bar .events-tab--sauvie-island.active,
@@ -1130,7 +1130,7 @@ html.calm-mode .nude-beaches-map__chip-dot {
 .nude-beaches-page--sauvie .board-stats-band__item:nth-child(1) .board-stats-band__num,
 .nude-beaches-page--sauvie .board-stats-band__item:nth-child(2) .board-stats-band__num {
   color: var(--green-acid);
-  text-shadow: 0 0 22px rgba(57, 255, 20, 0.35);
+  text-shadow: 0 0 22px rgba(43, 255, 0, 0.35);
 }
 
 .nude-beaches-page--sauvie .board-stats-band__item:nth-child(3) .board-stats-band__num {
@@ -1150,7 +1150,7 @@ html.calm-mode .nude-beaches-map__chip-dot {
   --_shx: transparent;
 }
 
-/* ═══════════════════════════════════════════════════════════ Islands · Nude Beaches - top-rim neon only (10-islands.png) Rooster → orange #FF6600 · Sauvie → green #39FF14 River level → cyan #19E3FF top rim Discrete stacked islands; no full-perimeter bloom shell. ═══════════════════════════════════════════════════════════ */ .nude-beaches-page.pdx-glass-rebind:not(.nude-beaches-page--sauvie) {
+/* ═══════════════════════════════════════════════════════════ Islands · Nude Beaches - top-rim neon only (10-islands.png) Rooster → orange #FF7B00 · Sauvie → green #2BFF00 River level → cyan #19E3FF top rim Discrete stacked islands; no full-perimeter bloom shell. ═══════════════════════════════════════════════════════════ */ .nude-beaches-page.pdx-glass-rebind:not(.nude-beaches-page--sauvie) {
   --nb-accent: var(--neon-orange);
   --nb-rim: var(--neon-orange);
   --c: var(--neon-orange);
@@ -1166,7 +1166,7 @@ html.calm-mode .nude-beaches-map__chip-dot {
  * Top-rim island recipe: charcoal sides, neon only on top edge + short bloom.
  */
 .nude-beaches-page {
-  --nb-rim: var(--nb-accent, #ff6600);
+  --nb-rim: var(--nb-accent, #FF7B00);
   --nb-island-shadow:
     0 0 0 1px #000,
     0 18px 36px -20px rgba(0, 0, 0, 0.92),
@@ -1329,7 +1329,7 @@ html.calm-mode .nude-map-btn--primary {
 
 /* ═══════════════════════════════════════════════════════════
    Beach page buttons - no cyan, no solid neon borders
-   Rooster → orange #FF6600 · Sauvie → green #39FF14
+   Rooster → orange #FF7B00 · Sauvie → green #2BFF00
    ═══════════════════════════════════════════════════════════ */
 
 .nude-beaches-page:not(.nude-beaches-page--sauvie) {
@@ -1342,8 +1342,8 @@ html.calm-mode .nude-map-btn--primary {
 /* DS brutal buttons (Refresh, carpool, etc.): soft glass outline.pdx-glass-rebind, island accent */ .nude-beaches-page .pdxBtn.pdx-glass-rebind,
 .nude-beaches-page .btn-neon.pdx-glass-rebind,
 .nude-beaches-page button.pdxBtn.pdx-glass-rebind {
-  --_c: var(--nb-btn, var(--nb-accent, #ff6600)) !important;
-  --c: var(--nb-btn, var(--nb-accent, #ff6600)) !important;
+  --_c: var(--nb-btn, var(--nb-accent, #FF7B00)) !important;
+  --c: var(--nb-btn, var(--nb-accent, #FF7B00)) !important;
   color: var(--_c) !important;
   background:
     linear-gradient(
@@ -1416,13 +1416,13 @@ html.calm-mode .nude-map-btn--primary {
 .nude-beaches-page .rb-hour-chip.pdx-glass-rebind.active,
 .nude-beaches-page .cv-chip.pdx-glass-rebind.active,
 .nude-beaches-page .rb-checkin__seg--active.pdx-glass-rebind {
-  --c: var(--nb-btn, var(--nb-accent, #ff6600));
+  --c: var(--nb-btn, var(--nb-accent, #FF7B00));
 }
 
 .nude-beaches-page .rb-link-btn,
 .nude-beaches-page .rb-card__dm-hint,
 .nude-beaches-page a.rb-link-btn {
-  color: var(--nb-btn, var(--nb-accent, #ff6600)) !important;
+  color: var(--nb-btn, var(--nb-accent, #FF7B00)) !important;
 }
 
 /* Hour chips / date chips: accent edge only, never cyan, no outer bloom */
@@ -1445,7 +1445,7 @@ html.calm-mode .nude-map-btn--primary {
 /* River Brats primary / send - glass fill.pdx-glass-rebind, black rim.pdx-glass-rebind, no outer bloom */ .nude-beaches-page .rb-checkin__primary.pdx-glass-rebind,
 .nude-beaches-page .rb-checkin__plan-next-btn.pdx-glass-rebind,
 .nude-beaches-page .rb-group-chat__send.pdx-glass-rebind {
-  --c: var(--nb-btn, var(--nb-accent, #ff6600)) !important;
+  --c: var(--nb-btn, var(--nb-accent, #FF7B00)) !important;
   border: 1px solid #000 !important;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 42%),
     var(--c) !important;
@@ -1458,7 +1458,7 @@ html.calm-mode .nude-map-btn--primary {
 
 .nude-beaches-page .rb-checkin__primary--update.pdx-glass-rebind,
 .nude-beaches-page .rb-checkin__withdraw.pdx-glass-rebind {
-  --c: var(--nb-btn, var(--nb-accent, #ff6600)) !important;
+  --c: var(--nb-btn, var(--nb-accent, #FF7B00)) !important;
   color: var(--c) !important;
   background:
     linear-gradient(
@@ -1473,10 +1473,10 @@ html.calm-mode .nude-map-btn--primary {
 
 /* Tabs already island-colored; reassert no cyan active underline */
 .nude-beaches-page .river-brats__tabs .events-tab.active {
-  border-bottom-color: var(--nb-btn, var(--nb-accent, #ff6600)) !important;
+  border-bottom-color: var(--nb-btn, var(--nb-accent, #FF7B00)) !important;
 }
 .nude-beaches-page .river-brats__tabs .events-tab:hover {
-  color: var(--nb-btn, var(--nb-accent, #ff6600)) !important;
+  color: var(--nb-btn, var(--nb-accent, #FF7B00)) !important;
 }
 .nude-beaches-page .river-brats--cyan .river-brats__tabs .events-tab.active,
 .nude-beaches-page .river-brats--cyan .river-brats__tabs .events-tab:hover {

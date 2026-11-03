@@ -242,7 +242,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           rect = node.getBoundingClientRect(),
           ratio = Math.min(2, devicePixelRatio || 1),
           ctx = futureConfetti.getContext("2d"),
-          colors = ["#ff2d5e", "#ff9500", "#ffee00", "#39ff14", "#00ffff", "#3a6bff", "#a855f7", "#ff2db2"];
+          colors = ["#ff2d5e", "#ff9500", "#FFDD00", "#2BFF00", "#00ffff", "#3a6bff", "#a855f7", "#ff2db2"];
         futureConfetti.width = innerWidth * ratio;
         futureConfetti.height = innerHeight * ratio;
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);

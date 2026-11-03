@@ -38,7 +38,7 @@ type NavItem = {
 const NAV_ACCENTS: Record<string, string> = {
   feed: "var(--panel-cyan, #19e3ff)",
   profile: "var(--panel-magenta, #ff1fa0)",
-  events: "var(--panel-lime, #c8fa3c)",
+  events: "var(--panel-lime, #D4FF00)",
   people: "var(--panel-purple, #a78bfa)",
   settings: "var(--panel-orange, #ff8a3d)",
 };

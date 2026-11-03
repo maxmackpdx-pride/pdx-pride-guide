@@ -15,7 +15,7 @@ import "./UpdatesPanel.css";
 
 const BOARD_GLOW: Record<string, string> = {
   GIG: "var(--panel-purple, #b06bff)",
-  GIFTING: "var(--panel-lime, #c8fa3c)",
+  GIFTING: "var(--panel-lime, #D4FF00)",
   HUB: "var(--panel-cyan, #00ffff)",
 };
 

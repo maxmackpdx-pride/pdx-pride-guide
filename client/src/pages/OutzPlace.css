@@ -131,7 +131,7 @@
 }
 .outz-place__section-head h2 { font-size: clamp(1.5rem, 3vw, 1.9rem); margin-bottom: 0; }
 .outz-place__section-head span { color: var(--text-lo, #999); display: block; font-size: 14px; margin-top: 6px; max-width: 60ch; }
-.outz-place__section-head--wall p { color: var(--green-acid, #39ff14); }
+.outz-place__section-head--wall p { color: var(--green-acid, #2BFF00); }
 
 /* ---------- check-in + chat ---------- */
 .outz-community { position: relative; }
@@ -157,7 +157,7 @@
   border-radius: 10px; box-shadow: var(--glass-card-shadow); color: var(--text-lo, #999); display: flex; font-family: var(--font-mono, monospace);
   font-size: 11px; gap: 10px; letter-spacing: .06em; margin: 0 0 20px; padding: 11px 14px; text-transform: uppercase;
 }
-.outz-community__pulse i { background: var(--green-acid, #39ff14); border-radius: 50%; box-shadow: 0 0 10px color-mix(in srgb, var(--green-acid, #39ff14) 65%, transparent); flex: 0 0 8px; height: 8px; width: 8px; }
+.outz-community__pulse i { background: var(--green-acid, #2BFF00); border-radius: 50%; box-shadow: 0 0 10px color-mix(in srgb, var(--green-acid, #2BFF00) 65%, transparent); flex: 0 0 8px; height: 8px; width: 8px; }
 .outz-place__social-grid { display: grid; gap: 24px; grid-template-columns: 1fr 1fr; }
 .outz-checkin { border-top-color: color-mix(in srgb, var(--outz-c) 72%, #2a2a32); display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
 .outz-checkin__eyebrow {
@@ -237,7 +237,7 @@ html.calm-mode .meeting-scheduler, :root[data-calm="true"] .meeting-scheduler { 
 .outz-wall-post { display: flex; flex-direction: column; gap: 10px; }
 .outz-wall-post header { align-items: center; display: flex; gap: 12px; justify-content: space-between; }
 .outz-wall-post header span {
-  color: var(--green-acid, #39ff14); font-family: var(--font-display, sans-serif); font-size: 11px;
+  color: var(--green-acid, #2BFF00); font-family: var(--font-display, sans-serif); font-size: 11px;
   font-weight: 700; letter-spacing: var(--tracking-chrome, .06em); text-transform: uppercase;
 }
 .outz-wall-post header time { color: var(--text-faint, #666); font-family: var(--font-mono, monospace); font-size: 11px; }

@@ -368,7 +368,7 @@
 }
 
 .pdxBoard__affMeta--code {
-  color: var(--c, #39ff14);
+  color: var(--c, #2BFF00);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-weight: 600;

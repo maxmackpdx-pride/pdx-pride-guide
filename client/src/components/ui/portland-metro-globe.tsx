@@ -36,7 +36,7 @@ function globeWaypointSvg(id: GlobeWaypointId, color: string) {
   </svg>`;
 }
 
-const COLORS = ["#00ffff", "#ff00cc", "#ccff00", "#ff6600", "#ab75ff"];
+const COLORS = ["#00ffff", "#FF1FA0", "#D4FF00", "#FF7B00", "#ab75ff"];
 type Venue = { id: string; name: string; coordinates: [number, number]; logo?: string; logoMode?: string; color?: string; point?: Point };
 // Screenshot crop, approximated from Eagle, downtown, I-205 and Sellwood.
 // These bounds drive BOTH the texture sampling and all venue/label positions.
@@ -97,11 +97,11 @@ const MARKERS = PLACES.map(place => ({ ...place, point: placePoint(place) }));
 // Decorative product waypoints, not real listings or claimed venue locations.
 // One per longitude sector keeps the random anchors spread around the globe.
 const PRODUCT_WAYPOINTS: Venue[] = [
-  { id: "giftz", name: "GIFTZ", logo: "/brand/family/giftz.svg?v=20261013-texture", color: "#ccff00" },
-  { id: "mizzed", name: "MIZZED CONNECTION", logo: "/brand/family/mizzed-connection.svg?v=20261013-texture", color: "#ff00cc" },
-  { id: "gigz", name: "GIGZ", logo: "/brand/family/gigz.svg?v=20261013-texture", color: "#8800ff" },
-  { id: "outz", name: "OUTZide", logo: "/brand/outzide.png", color: "#ff6600" },
-  { id: "sellz", name: "SELLZ", logo: "/brand/family/sellz.svg?v=20261013-texture", color: "#39ff14" },
+  { id: "giftz", name: "GIFTZ", logo: "/brand/family/giftz.svg?v=20261013-texture", color: "#D4FF00" },
+  { id: "mizzed", name: "MIZZED CONNECTION", logo: "/brand/family/mizzed-connection.svg?v=20261013-texture", color: "#FF1FA0" },
+  { id: "gigz", name: "GIGZ", logo: "/brand/family/gigz.svg?v=20261013-texture", color: "#7B00FF" },
+  { id: "outz", name: "OUTZide", logo: "/brand/outzide.png", color: "#FF7B00" },
+  { id: "sellz", name: "SELLZ", logo: "/brand/family/sellz.svg?v=20261013-texture", color: "#2BFF00" },
   { id: "hauz", name: "My Hoüz", logo: "/brand/family/my-houz.svg", color: "#00ffff" },
 ].map((waypoint, index) => ({
   ...waypoint, coordinates: [0, 0], logoMode: "alpha",
@@ -110,11 +110,11 @@ const PRODUCT_WAYPOINTS: Venue[] = [
 }));
 
 const OUTZIDE_SOURCE = [
-  { id: "outzide-rooster-rock", name: "Rooster Rock", color: "#ff00cc" },
-  { id: "outzide-sauvie-island", name: "Sauvie Island", color: "#ff00cc" },
-  { id: "outzide-silver-falls", name: "Silver Falls State Park", color: "#39ff14" },
+  { id: "outzide-rooster-rock", name: "Rooster Rock", color: "#FF1FA0" },
+  { id: "outzide-sauvie-island", name: "Sauvie Island", color: "#FF1FA0" },
+  { id: "outzide-silver-falls", name: "Silver Falls State Park", color: "#2BFF00" },
   { id: "outzide-cape-lookout", name: "Cape Lookout State Park", color: "#f2ca78" },
-  { id: "outzide-beacon-rock", name: "Beacon Rock State Park", color: "#39ff14" },
+  { id: "outzide-beacon-rock", name: "Beacon Rock State Park", color: "#2BFF00" },
 ];
 const OUTZIDE_WAYPOINTS: Venue[] = OUTZIDE_SOURCE.map((waypoint, index) => ({
   ...waypoint, coordinates: [0, 0],

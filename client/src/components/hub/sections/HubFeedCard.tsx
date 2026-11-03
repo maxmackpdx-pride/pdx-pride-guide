@@ -190,8 +190,8 @@ export default function HubFeedCard({ item, compact = false }: Props) {
 
   const BOARD_ACCENTS: Record<string, string> = {
     gig: "var(--board-gigs)",
-    gifting: "#CCFF00",
-    spotted: "#FF00CC",
+    gifting: "#D4FF00",
+    spotted: "#FF1FA0",
     housing: "var(--panel-cyan)",
   };
   const glow = BOARD_ACCENTS[item.kind];

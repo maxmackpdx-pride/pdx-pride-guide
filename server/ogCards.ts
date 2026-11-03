@@ -182,11 +182,11 @@ function baseDefs(): string {
   <defs>
     <linearGradient id="rb" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#00FFFF"/>
-      <stop offset="20%" stop-color="#39FF14"/>
-      <stop offset="40%" stop-color="#CCFF00"/>
-      <stop offset="60%" stop-color="#FF00CC"/>
-      <stop offset="80%" stop-color="#8800FF"/>
-      <stop offset="100%" stop-color="#FF6600"/>
+      <stop offset="20%" stop-color="#2BFF00"/>
+      <stop offset="40%" stop-color="#D4FF00"/>
+      <stop offset="60%" stop-color="#FF1FA0"/>
+      <stop offset="80%" stop-color="#7B00FF"/>
+      <stop offset="100%" stop-color="#FF7B00"/>
     </linearGradient>
     <linearGradient id="leftScrim" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#060608" stop-opacity="0.15"/>
@@ -213,7 +213,7 @@ export function ogProfileCardUrl(username: string): string {
 
 /** Conic stops matching client avatar ring CSS (for rectangular edge glow). */
 const RING_STOPS: Record<AvatarRingId, string[]> = {
-  none: ["#19e3ff", "#ff00cc", "#ccff00", "#19e3ff"],
+  none: ["#19e3ff", "#FF1FA0", "#D4FF00", "#19e3ff"],
   rainbow: ["#E40303", "#FF8C00", "#FFED00", "#008026", "#24408E", "#732982", "#E40303"],
   progress: ["#E40303", "#FF8C00", "#FFED00", "#008026", "#24408E", "#FFFFFF", "#F6A9B8", "#55CDFC", "#784F17", "#E40303"],
   lesbian: ["#D52D00", "#FF9A56", "#FFFFFF", "#D362A4", "#A30262", "#D52D00"],
@@ -285,7 +285,7 @@ export async function renderEventOgCard(eventId: number): Promise<Buffer | null>
   <rect width="${W}" height="${H}" fill="#0a0a0a"/>
   ${rainbowBarSvg()}
   <rect x="0" y="8" width="${W}" height="${H - 8}" fill="#0c0c0f"/>
-  <text x="${textX}" y="72" fill="#CCFF00" font-family="ui-monospace, Menlo, monospace" font-size="18" letter-spacing="0.22em">ZAYLIST · EVENT</text>
+  <text x="${textX}" y="72" fill="#D4FF00" font-family="ui-monospace, Menlo, monospace" font-size="18" letter-spacing="0.22em">ZAYLIST · EVENT</text>
   ${titleSvg}
   ${meta ? `<text x="${textX}" y="${160 + titleLines.length * 58 + 24}" fill="#19E3FF" font-family="ui-monospace, Menlo, monospace" font-size="22" letter-spacing="0.12em">${escapeXml(meta.toUpperCase())}</text>` : ""}
   <text x="${textX}" y="${H - 48}" fill="#888888" font-family="ui-monospace, Menlo, monospace" font-size="16" letter-spacing="0.16em">ZAYLIST.COM</text>
@@ -403,8 +403,8 @@ export async function renderPublicProfileArtwork(user: {photoUrl?: string | null
   const cardName = nameGlyphs.length > 42 ? `${nameGlyphs.slice(0, 41).join("")}…` : nameGlyphs.join("");
   const nameSize = Math.min(42, Math.floor((W - 96) / Math.max(1, Array.from(cardName).length * .65)));
   const namePath = profileShareDisplayPath(cardName, {x:48,y:H-61,width:W-96,height:45,maxSize:44}, "#FFFFFF");
-  const rawAccent = String(user.accentColor || "#FF00CC").trim() || "#FF00CC";
-  const accent = rawAccent.toUpperCase() === "#00EE44" ? "#39FF14" : rawAccent;
+  const rawAccent = String(user.accentColor || "#FF1FA0").trim() || "#FF1FA0";
+  const accent = rawAccent.toUpperCase() === "#00EE44" ? "#2BFF00" : rawAccent;
 
   // Edge ring: thick outer stroke + blurred inward glow (rect frame, not circle)
   const edgeGlow = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
@@ -435,7 +435,7 @@ export async function renderPublicProfileArtwork(user: {photoUrl?: string | null
   <rect width="${W}" height="${H}" fill="url(#inward)"/>
   <!-- Bottom name plate -->
   <rect x="0" y="${H - 120}" width="${W}" height="120" fill="#060608" fill-opacity="0.72"/>
-  <text x="48" y="${H - 68}" fill="#CCFF00" font-family="ui-monospace, Menlo, monospace" font-size="16" letter-spacing="0.2em">Follow me on Zaylist</text>
+  <text x="48" y="${H - 68}" fill="#D4FF00" font-family="ui-monospace, Menlo, monospace" font-size="16" letter-spacing="0.2em">Follow me on Zaylist</text>
   ${namePath || `<text x="48" y="${H - 28}" fill="#FFFFFF" font-family="Arial Narrow, Arial, sans-serif" font-weight="900" font-size="${nameSize}" letter-spacing="0.02em">${escapeXml(cardName)}</text>`}
   <text x="${W - 48}" y="${H - 68}" fill="${escapeXml(accent)}" font-family="ui-monospace, Menlo, monospace" font-size="22" letter-spacing="0.08em" text-anchor="end">${escapeXml(handle)}</text>
 </svg>`);

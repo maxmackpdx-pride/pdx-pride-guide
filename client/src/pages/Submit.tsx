@@ -128,7 +128,7 @@ function InlineFormError({ message }: { message: string | null }) {
 
 function liveChip(isVerified: boolean): StatusChip {
   return isVerified
-    ? { label: "Goes live now", color: "var(--panel-lime, #c8fa3c)" }
+    ? { label: "Goes live now", color: "var(--panel-lime, #D4FF00)" }
     : { label: "Reviewed first", color: "var(--panel-cyan, #19e3ff)" };
 }
 
@@ -329,7 +329,7 @@ export default function Submit() {
       title: "Submit an event",
       forWho: "You're running it.",
       outcome: "Put your event on Zaylist.",
-      accent: "var(--neon-yellow, #ccff00)",
+      accent: "var(--neon-yellow, #D4FF00)",
       chip: submitChip,
     },
     {
@@ -353,7 +353,7 @@ export default function Submit() {
       title: "Spotted an event",
       forWho: "Not yours  -  Zaylist is missing it.",
       outcome: "Tip us and we will chase it down.",
-      accent: "var(--neon-magenta, #ff00cc)",
+      accent: "var(--neon-magenta, #FF1FA0)",
       chip: suggestChip,
     },
   ];
@@ -372,7 +372,7 @@ export default function Submit() {
         label: path.chip.label,
         variant: "solid",
         // Claim row is cyan; "goes live" chip still lime per design
-        accent: goesLive ? "var(--neon-yellow, #ccff00)" : path.accent,
+        accent: goesLive ? "var(--neon-yellow, #D4FF00)" : path.accent,
       },
     };
   });
@@ -633,7 +633,7 @@ export default function Submit() {
           variant="band"
           showLive={false}
           stats={[
-            { num: allEvents.length, label: "Live on Zaylist", color: "#ccff00" },
+            { num: allEvents.length, label: "Live on Zaylist", color: "#D4FF00" },
             { num: unclaimedEvents.length, label: "Unclaimed, open to grab", color: "#19e3ff" },
             { num: venueCount, label: "Venues repping Pride", color: "#ff1fa0" },
           ]}
@@ -1081,7 +1081,7 @@ export default function Submit() {
         ) : (
           <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
             <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}><ArrowLeft size={14} aria-hidden="true" /> Back to hub</button>
-            <RoomKicker room="eventz" accent="var(--board-spotted, #ff00cc)" as="div">Community tip</RoomKicker>
+            <RoomKicker room="eventz" accent="var(--board-spotted, #FF1FA0)" as="div">Community tip</RoomKicker>
             <h2 className="display section-heading">Spotted an event</h2>
             <p className="board-copy-sm">
               Saw a Pride event we are missing? Tip us off. You just need a free account, no promoter status required. We review every tip, approved ones go live as unclaimed listings.

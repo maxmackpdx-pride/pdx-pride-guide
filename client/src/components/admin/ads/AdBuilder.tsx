@@ -20,17 +20,17 @@ const SWATCHES = [
   "#ff1fa0",
   "#ff8c00",
   "#b06bff",
-  "#c8fa3c",
+  "#D4FF00",
 ];
 
 const DAY_COLORS: Record<string, string> = {
-  MON: "#8800FF",
-  TUE: "#0044FF",
-  WED: "#FFEE00",
+  MON: "#7B00FF",
+  TUE: "#0066FF",
+  WED: "#FFDD00",
   THU: "#00FFFF",
-  FRI: "#FF00CC",
-  SAT: "#39FF14",
-  SUN: "#FF6600",
+  FRI: "#FF1FA0",
+  SAT: "#2BFF00",
+  SUN: "#FF7B00",
 };
 
 type TemplatePick =

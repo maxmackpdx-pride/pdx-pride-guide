@@ -79,9 +79,9 @@ type BeachCheckin = { id: number };
 const TODAY_ACCENTS = [
   "var(--day-thu, #00ffff)",
   "var(--board-gigs, #6e3dff)",
-  "var(--neon-green, #39ff14)",
-  "var(--board-spotted, #ff00cc)",
-  "var(--board-gifting, #ccff00)",
+  "var(--neon-green, #2BFF00)",
+  "var(--board-spotted, #FF1FA0)",
+  "var(--board-gifting, #D4FF00)",
 ];
 
 function newestFirst<T>(rows: T[], at: (row: T) => string | null | undefined): T[] {

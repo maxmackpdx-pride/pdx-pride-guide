@@ -35,48 +35,48 @@ export type WaypointId =
   | "goon-buds";
 
 export const WAYPOINT_COLOR: Record<WaypointId, string> = {
-  eventz: "#ccff00",
+  eventz: "#D4FF00",
   hauz: "#00ffff",
-  zenegade: "#ff2400",
-  afterz: "#ffee00",
-  mizzed: "#ff00cc",
+  zenegade: "#FF0000",
+  afterz: "#FFDD00",
+  mizzed: "#FF1FA0",
   carpool: "#00ffff",
-  bar: "#ff00cc",
-  club: "#8800ff",
+  bar: "#FF1FA0",
+  club: "#7B00FF",
   venue: "#00ffff",
-  park: "#39ff14",
-  outz: "#ff6600",
-  cafe: "#39ff14",
+  park: "#2BFF00",
+  outz: "#FF7B00",
+  cafe: "#2BFF00",
   shop: "#ffb23d",
-  bath: "#0044ff",
-  adult: "#ff00cc",
+  bath: "#0066FF",
+  adult: "#FF1FA0",
   gigz: "#6e3dff",
-  sells: "#39ff14",
-  giftz: "#ccff00",
-  plus: "#ff2400",
-  "host-home": "#ff2400",
-  "host-hotel": "#ff2400",
-  "host-car": "#ff2400",
-  "host-hole": "#ff2400",
-  "host-group": "#ff2400",
-  "dark-room": "#ff2400",
-  sling: "#ff2400",
-  "glory-hole": "#ff2400",
-  trail: "#ff2400",
-  happening: "#ff2400",
-  "looking-now": "#ff2400",
-  "looking-later": "#ff2400",
-  "goon-buds": "#ff2400",
+  sells: "#2BFF00",
+  giftz: "#D4FF00",
+  plus: "#FF0000",
+  "host-home": "#FF0000",
+  "host-hotel": "#FF0000",
+  "host-car": "#FF0000",
+  "host-hole": "#FF0000",
+  "host-group": "#FF0000",
+  "dark-room": "#FF0000",
+  sling: "#FF0000",
+  "glory-hole": "#FF0000",
+  trail: "#FF0000",
+  happening: "#FF0000",
+  "looking-now": "#FF0000",
+  "looking-later": "#FF0000",
+  "goon-buds": "#FF0000",
 };
 
 const DAY_COLOR: Record<string, string> = {
-  mon: "#8800ff",
-  tue: "#0044ff",
-  wed: "#ffee00",
+  mon: "#7B00FF",
+  tue: "#0066FF",
+  wed: "#FFDD00",
   thu: "#00ffff",
-  fri: "#ff00cc",
-  sat: "#39ff14",
-  sun: "#ff6600",
+  fri: "#FF1FA0",
+  sat: "#2BFF00",
+  sun: "#FF7B00",
 };
 
 function svg(body: string) {
@@ -260,7 +260,7 @@ export function waypointHtml(opts: WaypointOpts) {
   const glowW = sw * 1.6;
   const scoopStroke = Math.max(1, sw * 0.85);
   const bloom = opts.bloom
-    ? `<defs><linearGradient id="${fid}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff00cc"/><stop offset=".25" stop-color="#ccff00"/><stop offset=".5" stop-color="#00ffff"/><stop offset=".75" stop-color="#8800ff"/><stop offset="1" stop-color="#ff00cc"/></linearGradient></defs>`
+    ? `<defs><linearGradient id="${fid}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF1FA0"/><stop offset=".25" stop-color="#D4FF00"/><stop offset=".5" stop-color="#00ffff"/><stop offset=".75" stop-color="#7B00FF"/><stop offset="1" stop-color="#FF1FA0"/></linearGradient></defs>`
     : "";
   const ring = opts.bloom ? `url(#${fid}b)` : color;
   const mainPath = shellPath(family, cx, cy, r);

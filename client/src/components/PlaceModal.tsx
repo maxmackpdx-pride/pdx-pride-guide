@@ -104,11 +104,11 @@ function toOwnerEditableFields(place: Business): OwnerEditableFields {
 const DAY_COLOR: Record<string, string> = {
   MON: "var(--day-mon, #ff2d5e)",
   TUE: "var(--day-tue, #ff9500)",
-  WED: "var(--day-wed, #ffee00)",
+  WED: "var(--day-wed, #FFDD00)",
   THU: "var(--day-thu, var(--cyan, #19e3ff))",
-  FRI: "var(--day-fri, var(--pink, #ff00cc))",
-  SAT: "var(--day-sat, var(--green, #39ff14))",
-  SUN: "var(--day-sun, var(--orange, #ff6600))",
+  FRI: "var(--day-fri, var(--pink, #FF1FA0))",
+  SAT: "var(--day-sat, var(--green, #2BFF00))",
+  SUN: "var(--day-sun, var(--orange, #FF7B00))",
 };
 
 /** Nonprofit card border - full-spectrum rainbow instead of a single category color. */
@@ -116,13 +116,13 @@ const NONPROFIT_RAINBOW_EDGE =
   "linear-gradient(120deg,var(--neon-red),#FF9500,var(--yellow),var(--green),var(--neon-cyan),#3A6BFF,var(--neon-violet),var(--neon-magenta))";
 /** Health & Care - pink → white neon edge. */
 const HEALTHCARE_EDGE =
-  "linear-gradient(125deg,#FF00CC 0%,#FF4DD2 35%,#FFB3EC 70%,#FFFFFF 100%)";
+  "linear-gradient(125deg,#FF1FA0 0%,#FF4DD2 35%,#FFB3EC 70%,#FFFFFF 100%)";
 /** Real Estate - neon navy → white edge. */
 const REALESTATE_EDGE =
   "linear-gradient(125deg,#061A66 0%,#0A1F8C 28%,#1A4DFF 62%,#FFFFFF 100%)";
 /** Campgrounds - lime → dark forest green neon edge. */
 const CAMPGROUND_EDGE =
-  "linear-gradient(125deg,#B8FF3C 0%,#39FF14 28%,#0F8A3D 62%,#064E2A 100%)";
+  "linear-gradient(125deg,#B8FF3C 0%,#2BFF00 28%,#0F8A3D 62%,#064E2A 100%)";
 /** Clubs & Groups - white → gold neon edge. */
 const GROUP_EDGE =
   "linear-gradient(125deg,#FFFFFF 0%,#FFF3C4 32%,#FFD700 68%,#C9A227 100%)";
@@ -569,8 +569,8 @@ function PlaceModalInner({
                 fontSize: "1.33rem", // ~30% smaller than 1.9rem
                 lineHeight: 1.1,
                 letterSpacing: "0.04em",
-                color: "var(--neon-yellow, #FFEE00)",
-                textShadow: "0 0 12px color-mix(in srgb, var(--neon-yellow, #FFEE00) 55%, transparent)",
+                color: "var(--neon-yellow, #FFDD00)",
+                textShadow: "0 0 12px color-mix(in srgb, var(--neon-yellow, #FFDD00) 55%, transparent)",
                 margin: "0 0 14px",
               }}
             >

@@ -6,9 +6,9 @@
   --hub-panel: #0c0c0f;
   --hub-border: #1c1c22;
   --hub-cyan: #00ffff;
-  --hub-pink: #ff00cc;
-  --hub-lime: #ccff00;
-  --hub-green: #39ff14;
+  --hub-pink: #FF1FA0;
+  --hub-lime: #D4FF00;
+  --hub-green: #2BFF00;
 }
 
 .hub-shell {
@@ -22,7 +22,7 @@
 .hub-shell__rainbow {
   height: 3px;
   width: 100%;
-  background: linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982, #ff00cc);
+  background: linear-gradient(90deg, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982, #FF1FA0);
 }
 
 .hub-shell__frame {
@@ -160,11 +160,11 @@
 }
 
 .hub-side__nav-btn.is-active.is-purple {
-  box-shadow: inset 3px 0 0 #8800ff;
+  box-shadow: inset 3px 0 0 #7B00FF;
 }
 
 .hub-side__nav-btn.is-active.is-orange {
-  box-shadow: inset 3px 0 0 #ff6600;
+  box-shadow: inset 3px 0 0 #FF7B00;
 }
 
 .hub-side__pill {
@@ -188,7 +188,7 @@
 
 .hub-side__pill--purple {
   color: #fff;
-  background: #8800ff;
+  background: #7B00FF;
 }
 
 .hub-side__spacer {
@@ -225,7 +225,7 @@
 }
 
 .hub-side__extra .hub-push-status .dot.is-bad {
-  background: #ff2400;
+  background: #FF0000;
 }
 
 .hub-side__extra .hub-push-meta {
@@ -314,7 +314,7 @@
 
 .hub-side__user-role {
   font-size: 11px;
-  color: #8800ff;
+  color: #7B00FF;
   margin-top: 2px;
 }
 
@@ -732,52 +732,52 @@
 }
 
 .hub-mobile-tab.is-active.is-green {
-  color: var(--hub-green, #39ff14);
-  background: color-mix(in srgb, var(--hub-green, #39ff14) 16%, #0a0a0e);
+  color: var(--hub-green, #2BFF00);
+  background: color-mix(in srgb, var(--hub-green, #2BFF00) 16%, #0a0a0e);
   border-color: #000;
   box-shadow:
-    0 0 18px -2px color-mix(in srgb, var(--hub-green, #39ff14) 70%, transparent),
-    0 0 36px -8px color-mix(in srgb, var(--hub-green, #39ff14) 45%, transparent),
+    0 0 18px -2px color-mix(in srgb, var(--hub-green, #2BFF00) 70%, transparent),
+    0 0 36px -8px color-mix(in srgb, var(--hub-green, #2BFF00) 45%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hub-mobile-tab.is-active.is-lime {
-  color: var(--hub-lime, #ccff00);
-  background: color-mix(in srgb, var(--hub-lime, #ccff00) 16%, #0a0a0e);
+  color: var(--hub-lime, #D4FF00);
+  background: color-mix(in srgb, var(--hub-lime, #D4FF00) 16%, #0a0a0e);
   border-color: #000;
   box-shadow:
-    0 0 20px -2px color-mix(in srgb, var(--hub-lime, #ccff00) 75%, transparent),
-    0 0 40px -8px color-mix(in srgb, var(--hub-lime, #ccff00) 50%, transparent),
+    0 0 20px -2px color-mix(in srgb, var(--hub-lime, #D4FF00) 75%, transparent),
+    0 0 40px -8px color-mix(in srgb, var(--hub-lime, #D4FF00) 50%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hub-mobile-tab.is-active.is-orange {
-  color: var(--neon-orange, #ff6600);
-  background: color-mix(in srgb, var(--neon-orange, #ff6600) 16%, #0a0a0e);
+  color: var(--neon-orange, #FF7B00);
+  background: color-mix(in srgb, var(--neon-orange, #FF7B00) 16%, #0a0a0e);
   border-color: #000;
   box-shadow:
-    0 0 20px -2px color-mix(in srgb, var(--neon-orange, #ff6600) 75%, transparent),
-    0 0 40px -8px color-mix(in srgb, var(--neon-orange, #ff6600) 50%, transparent),
+    0 0 20px -2px color-mix(in srgb, var(--neon-orange, #FF7B00) 75%, transparent),
+    0 0 40px -8px color-mix(in srgb, var(--neon-orange, #FF7B00) 50%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hub-mobile-tab.is-active.is-pink {
-  color: var(--hub-pink, #ff00cc);
-  background: color-mix(in srgb, var(--hub-pink, #ff00cc) 16%, #0a0a0e);
+  color: var(--hub-pink, #FF1FA0);
+  background: color-mix(in srgb, var(--hub-pink, #FF1FA0) 16%, #0a0a0e);
   border-color: #000;
   box-shadow:
-    0 0 20px -2px color-mix(in srgb, var(--hub-pink, #ff00cc) 75%, transparent),
-    0 0 40px -8px color-mix(in srgb, var(--hub-pink, #ff00cc) 50%, transparent),
+    0 0 20px -2px color-mix(in srgb, var(--hub-pink, #FF1FA0) 75%, transparent),
+    0 0 40px -8px color-mix(in srgb, var(--hub-pink, #FF1FA0) 50%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hub-mobile-tab.is-active.is-purple {
   color: #c08cff;
-  background: color-mix(in srgb, #8800ff 18%, #0a0a0e);
+  background: color-mix(in srgb, #7B00FF 18%, #0a0a0e);
   border-color: #000;
   box-shadow:
-    0 0 18px -2px color-mix(in srgb, #8800ff 65%, transparent),
-    0 0 36px -8px color-mix(in srgb, #8800ff 40%, transparent),
+    0 0 18px -2px color-mix(in srgb, #7B00FF 65%, transparent),
+    0 0 36px -8px color-mix(in srgb, #7B00FF 40%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
@@ -815,11 +815,11 @@
   justify-content: center;
   font-weight: 800;
   border: 2px solid var(--hub-ink);
-  box-shadow: 0 0 10px rgba(255, 0, 204, 0.65);
+  box-shadow: 0 0 10px rgba(255, 31, 160, 0.65);
 }
 
 .hub-mobile-bar i.is-purple {
-  background: #8800ff;
+  background: #7B00FF;
   color: #fff;
 }
 
@@ -1029,16 +1029,16 @@ html.calm-mode .hub-mobile-tab.is-active {
 /*
  * Placez tab accent. Claude Design handoff "Top Nav Bar Mockups", 2026-08-21:
  * the bottom bar carries the same per-destination accents as the desktop
- * pills. #0044ff is too dark to read as label ink, so the glow keeps the
+ * pills. #0066FF is too dark to read as label ink, so the glow keeps the
  * token and the text lifts to a tint of it.
  */
 .hub-mobile-tab.is-active.is-blue {
   color: #5a8bff;
-  background: color-mix(in srgb, var(--neon-blue, #0044ff) 20%, #0a0a0e);
+  background: color-mix(in srgb, var(--neon-blue, #0066FF) 20%, #0a0a0e);
   border-color: #000;
   box-shadow:
-    0 0 18px -2px color-mix(in srgb, var(--neon-blue, #0044ff) 70%, transparent),
-    0 0 36px -8px color-mix(in srgb, var(--neon-blue, #0044ff) 45%, transparent),
+    0 0 18px -2px color-mix(in srgb, var(--neon-blue, #0066FF) 70%, transparent),
+    0 0 36px -8px color-mix(in srgb, var(--neon-blue, #0066FF) 45%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
@@ -1103,7 +1103,7 @@ html.calm-mode .hub-mobile-tab.is-active {
   right: 0;
   height: 1.5px;
   z-index: 2;
-  background: linear-gradient(90deg, #19e3ff, #c8fa3c, #ff1fa0, #ff8c00, #19e3ff);
+  background: linear-gradient(90deg, #19e3ff, #D4FF00, #ff1fa0, #ff8c00, #19e3ff);
   background-size: 200% 100%;
   animation: navSeamFlow 6s linear infinite;
   pointer-events: none;
@@ -1155,17 +1155,17 @@ html.calm-mode .hub-mobile-tab.is-active {
 /*
  * One accent contract for the whole bar: idle is a hairline, and the tab
  * lights in its own colour when hovered, pressed, or current. --tab-c is the
- * glow, --tab-ink the label, since #0044ff and #8800ff are too dark to read.
+ * glow, --tab-ink the label, since #0066FF and #7B00FF are too dark to read.
  */
 .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-cyan { --tab-c: #19e3ff; --tab-ink: #19e3ff; }
-.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-blue { --tab-c: #0044ff; --tab-ink: #5a8bff; }
-.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-purple { --tab-c: #8800ff; --tab-ink: #c9a3ff; }
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-blue { --tab-c: #0066FF; --tab-ink: #5a8bff; }
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-purple { --tab-c: #7B00FF; --tab-ink: #c9a3ff; }
 .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-pink { --tab-c: #ff1fa0; --tab-ink: #ff1fa0; }
 
 /* Idle tabs still need their accent for hover, so it is keyed off the label. */
-.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab[aria-label="Placez"] { --tab-c: #0044ff; --tab-ink: #5a8bff; }
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab[aria-label="Placez"] { --tab-c: #0066FF; --tab-ink: #5a8bff; }
 .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab[aria-label="Eventz"] { --tab-c: #19e3ff; --tab-ink: #19e3ff; }
-.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab[aria-label="Z/Space"] { --tab-c: #8800ff; --tab-ink: #c9a3ff; }
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab[aria-label="Z/Space"] { --tab-c: #7B00FF; --tab-ink: #c9a3ff; }
 .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab[data-inbox-open-trigger="messages"] { --tab-c: #ff1fa0; --tab-ink: #ff1fa0; }
 
 .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab:not(.is-active):hover,
@@ -1280,13 +1280,13 @@ html.calm-mode .hub-mobile-tab.is-active {
     0 0 0 1px #000,
     inset 0 1px 0 rgba(255, 255, 255, .06),
     0 -14px 40px -10px rgba(0, 0, 0, .7),
-    0 0 30px -10px color-mix(in srgb, var(--sheet-c, #8800ff) 40%, transparent);
+    0 0 30px -10px color-mix(in srgb, var(--sheet-c, #7B00FF) 40%, transparent);
   animation: navSheetUp .3s ease-out;
 }
 
-.hub-more-sheet.hub-more-sheet--site[data-accent="violet"] { --sheet-c: #8800ff; }
+.hub-more-sheet.hub-more-sheet--site[data-accent="violet"] { --sheet-c: #7B00FF; }
 .hub-more-sheet.hub-more-sheet--site[data-accent="cyan"] { --sheet-c: #19e3ff; }
-.hub-more-sheet.hub-more-sheet--site[data-accent="orange"] { --sheet-c: #ff6600; }
+.hub-more-sheet.hub-more-sheet--site[data-accent="orange"] { --sheet-c: #FF7B00; }
 
 .hub-more-sheet.hub-more-sheet--site h3 {
   margin: 2px 4px 10px;
@@ -1313,10 +1313,10 @@ html.calm-mode .hub-mobile-tab.is-active {
 
 .hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="cyan"] { --item-c: #19e3ff; --item-ink: #19e3ff; }
 .hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="violet"] { --item-c: #b06bff; --item-ink: #b06bff; }
-.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="green"] { --item-c: #39ff14; --item-ink: #39ff14; }
+.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="green"] { --item-c: #2BFF00; --item-ink: #2BFF00; }
 .hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="magenta"] { --item-c: #ff1fa0; --item-ink: #ff1fa0; }
-.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="lime"] { --item-c: #c8fa3c; --item-ink: #c8fa3c; }
-.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="orange"] { --item-c: #ff6600; --item-ink: #ff6600; }
+.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="lime"] { --item-c: #D4FF00; --item-ink: #D4FF00; }
+.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="orange"] { --item-c: #FF7B00; --item-ink: #FF7B00; }
 
 .hub-more-sheet.hub-more-sheet--site .hub-more-item:hover,
 .hub-more-sheet.hub-more-sheet--site .hub-more-item.is-active {
@@ -1360,7 +1360,7 @@ html.calm-mode .hub-mobile-tab.is-active {
     0 0 0 1px #000,
     inset 0 1px 0 rgba(255, 255, 255, .06),
     0 -14px 40px -10px rgba(0, 0, 0, .7),
-    0 0 30px -10px rgba(255, 102, 0, .2);
+    0 0 30px -10px rgba(255, 123, 0, .2);
   animation: navSheetUp .3s ease-out;
 }
 
@@ -1393,10 +1393,10 @@ html.calm-mode .hub-mobile-tab.is-active {
   justify-content: center;
   min-width: 22px;
   height: 22px;
-  border: 1px solid var(--neon-orange, #ff6600);
+  border: 1px solid var(--neon-orange, #FF7B00);
   border-radius: 99px;
-  background: rgba(255, 102, 0, .15);
-  color: var(--neon-orange, #ff6600);
+  background: rgba(255, 123, 0, .15);
+  color: var(--neon-orange, #FF7B00);
   font: 700 11px var(--font-mono, ui-monospace, monospace);
 }
 
@@ -1411,7 +1411,7 @@ html.calm-mode .hub-mobile-tab.is-active {
 
 .hub-outz-drawer__all {
   padding: 10px 12px 2px;
-  color: var(--neon-orange, #ff6600);
+  color: var(--neon-orange, #FF7B00);
   font-family: var(--font-display), sans-serif;
   font-weight: 700;
   font-size: .78rem;
@@ -1660,10 +1660,10 @@ html.calm-mode .hub-sheet,
   min-height: 44px;
 }
 
-.site-hub-mtop .hub-mtop__mode-btn[data-accent="lime"] { --mtop-c: var(--panel-lime, #c8fa3c); --mtop-ink: var(--panel-lime, #c8fa3c); }
+.site-hub-mtop .hub-mtop__mode-btn[data-accent="lime"] { --mtop-c: var(--panel-lime, #D4FF00); --mtop-ink: var(--panel-lime, #D4FF00); }
 .site-hub-mtop .hub-mtop__mode-btn[data-accent="magenta"] { --mtop-c: var(--panel-magenta, #ff1fa0); --mtop-ink: var(--panel-magenta, #ff1fa0); }
 .site-hub-mtop .hub-mtop__mode-btn[data-accent="cyan"] { --mtop-c: var(--panel-cyan, #19e3ff); --mtop-ink: var(--panel-cyan, #19e3ff); }
-.site-hub-mtop .hub-mtop__mode-btn[data-accent="violet"] { --mtop-c: var(--neon-violet, #8800ff); --mtop-ink: #c9a3ff; }
+.site-hub-mtop .hub-mtop__mode-btn[data-accent="violet"] { --mtop-c: var(--neon-violet, #7B00FF); --mtop-ink: #c9a3ff; }
 
 .site-hub-mtop .hub-mtop__mode-btn:hover,
 .site-hub-mtop .hub-mtop__mode-btn:active {
