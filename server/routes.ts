@@ -1047,7 +1047,7 @@ function googleOAuthErrorPage(message: string): string {
 <style>body{font-family:system-ui,sans-serif;background:#06060a;color:#f4f1ea;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:24px}
 .card{max-width:420px;background:#0c0c0f;border:1.5px solid #1c1c22;border-radius:14px;padding:28px}
 h1{font-size:1.25rem;margin:0 0 10px}p{color:#c8c4bb;line-height:1.5;margin:0 0 18px}
-a{display:inline-block;background:#c8fa3c;color:#06060a;font-weight:800;text-decoration:none;padding:12px 16px;border-radius:8px;margin-right:10px;margin-top:6px}
+a{display:inline-block;background:#D4FF00;color:#06060a;font-weight:800;text-decoration:none;padding:12px 16px;border-radius:8px;margin-right:10px;margin-top:6px}
 a.sec{background:transparent;color:#19e3ff;border:1px solid #19e3ff}</style></head>
 <body><div class="card"><h1>Google sign-in didn’t finish</h1><p>${safe}</p>
 <a href="/api/auth/google">Try Google again</a>

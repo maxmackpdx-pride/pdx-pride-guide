@@ -15913,9 +15913,9 @@ export const storage: IStorage = {
         : row.beachId === "rooster-rock"
           ? { label: "Rooster Rock", color: "#19e3ff" }
           : row.beachId === "sauvie-island"
-            ? { label: "Sauvie Island", color: "#ff6600" }
+            ? { label: "Sauvie Island", color: "#FF7B00" }
             : row.beachId
-              ? { label: "At the beach", color: "#ff6600" }
+              ? { label: "At the beach", color: "#FF7B00" }
               : { label: "Around town", color: "#ff8c00" };
       const place = row.eventTitle
         ? (row.eventVenue ? `At ${row.eventTitle} · ${row.eventVenue}` : `At ${row.eventTitle}`)

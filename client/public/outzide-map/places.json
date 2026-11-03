@@ -14,7 +14,7 @@
       "note": "Check the river crossing, access to the clothing-optional area, parking, and weather before you go.",
       "officialUrl": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=126",
       "sourceName": "Oregon State Parks",
-      "accent": "#FF00CC",
+      "accent": "#FF1FA0",
       "special": true,
       "state": "OR",
       "art": "assets/motifs/places/rooster-rock.svg",
@@ -81,7 +81,7 @@
       "note": "Check Collins Beach access, island parking permits, water quality, and weather before you go.",
       "officialUrl": "https://myodfw.com/sauvie-island-wildlife-area-visitors-guide",
       "sourceName": "Oregon Department of Fish and Wildlife",
-      "accent": "#FF00CC",
+      "accent": "#FF1FA0",
       "special": true,
       "state": "OR",
       "art": "assets/motifs/places/sauvie-island.svg",
@@ -154,7 +154,7 @@
       "detail": "Campground · Trail of Ten Falls · Silverton, OR",
       "note": "Camping",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/silver-falls.svg",
       "photo": {
         "alt": "South Falls in winter at Silver Falls State Park",
@@ -342,7 +342,7 @@
       "detail": "Camping · Gorge trails · Skamania, WA",
       "note": "Road access: Yes",
       "state": "WA",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/beacon-rock.svg",
       "coordinateSource": "https://parks.wa.gov/find-parks/state-parks/beacon-rock-state-park",
       "coordinateCheckedAt": "2026-09-22T23:02:50.431Z",
@@ -416,7 +416,7 @@
       "detail": "Camping · Multi-use trails · Oregon Coast Range",
       "note": "Camping",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/stub-stewart.svg",
       "coordinateSource": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=75",
       "coordinateCheckedAt": "2026-09-22T23:02:50.431Z",
@@ -558,7 +558,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-8156.004621.svg",
       "routeIds": [
         8619817
@@ -584,7 +584,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-8157.004621.svg",
       "routeIds": [
         8590277
@@ -610,7 +610,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6795235010602.svg",
       "routeIds": [
         8570084
@@ -636,7 +636,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5179010262.svg"
     },
     {
@@ -653,7 +653,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status. The recreation waypoint and mapped trail are separated in the source data; confirm your arrival point with USFS.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6961801010602.svg",
       "routeIds": [
         8600816,
@@ -697,7 +697,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "WA",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5719010274.svg"
     },
     {
@@ -714,7 +714,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6171012010602.svg",
       "routeIds": [
         8599583
@@ -757,7 +757,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5117010324.svg",
       "routeIds": [
         8572381
@@ -783,7 +783,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-3254060010602.svg",
       "routeIds": [
         8588181
@@ -809,7 +809,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5017.005631.svg"
     },
     {
@@ -826,7 +826,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5183010262.svg",
       "routeIds": [
         8573516
@@ -934,7 +934,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5434010324.svg"
     },
     {
@@ -951,7 +951,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5054.005621.svg",
       "routeIds": [
         8628030
@@ -977,7 +977,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5094.005641.svg",
       "routeIds": [
         8628030
@@ -1003,7 +1003,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5026.005621.svg",
       "routeIds": [
         8628030
@@ -1029,7 +1029,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5027.005621.svg",
       "routeIds": [
         8628030
@@ -1055,7 +1055,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5067.005621.svg",
       "routeIds": [
         8628030
@@ -1081,7 +1081,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5129010262.svg",
       "routeIds": [
         8580304,
@@ -1108,7 +1108,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5164010262.svg",
       "routeIds": [
         8600965
@@ -1134,7 +1134,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-296847010602.svg",
       "routeIds": [
         8568887
@@ -1208,7 +1208,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5031010372.svg"
     },
     {
@@ -1242,7 +1242,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5254010381.svg",
       "routeIds": [
         8575384
@@ -1268,7 +1268,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "WA",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-7632.004731.svg",
       "routeIds": [
         8577309
@@ -1342,7 +1342,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5463010371.svg"
     },
     {
@@ -1359,7 +1359,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-6131010414.svg",
       "photo": {
         "alt": "A forest campsite at Archie Knowles Campground",
@@ -1424,7 +1424,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5156010324.svg"
     },
     {
@@ -1441,7 +1441,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-10990010371.svg"
     },
     {
@@ -1475,7 +1475,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5087.005641.svg",
       "routeIds": [
         8595809
@@ -1501,7 +1501,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5287010381.svg",
       "routeIds": [
         8575716
@@ -1527,7 +1527,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5231010526.svg",
       "routeIds": [
         8614839
@@ -1553,7 +1553,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-11226010526.svg",
       "routeIds": [
         8626503
@@ -1579,7 +1579,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5315.005181.svg",
       "routeIds": [
         8629840
@@ -1605,7 +1605,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6432979010602.svg",
       "routeIds": [
         8618872
@@ -1631,7 +1631,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5993.004901.svg",
       "routeIds": [
         8568694,
@@ -1725,7 +1725,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6015.004901.svg",
       "routeIds": [
         8571956
@@ -1799,7 +1799,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-4290630010602.svg"
     },
     {
@@ -1816,7 +1816,7 @@
       "detail": "OPEN",
       "note": "OPEN",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5147010324.svg",
       "routeIds": [
         8567390,
@@ -1854,7 +1854,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6146010414.svg",
       "routeIds": [
         8564809
@@ -1880,7 +1880,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6433005010602.svg",
       "routeIds": [
         8626397
@@ -1906,7 +1906,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "WA",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-11370010324.svg",
       "routeIds": [
         8567800
@@ -1932,7 +1932,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5198.004991.svg",
       "routeIds": [
         8589110
@@ -1958,7 +1958,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-3254340010602.svg",
       "routeIds": [
         8589127
@@ -1984,7 +1984,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5233010526.svg",
       "routeIds": [
         8580930,
@@ -2012,7 +2012,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-11231010526.svg",
       "routeIds": [
         8580930,
@@ -2040,7 +2040,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-11232010526.svg",
       "routeIds": [
         8580930,
@@ -2068,7 +2068,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5090010324.svg"
     },
     {
@@ -2085,7 +2085,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5081010324.svg"
     },
     {
@@ -2102,7 +2102,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6433007010602.svg",
       "routeIds": [
         8618880,
@@ -2131,7 +2131,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6537271010602.svg",
       "routeIds": [
         8565368
@@ -2157,7 +2157,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5326.005181.svg",
       "routeIds": [
         8637874
@@ -2183,7 +2183,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5357.005571.svg",
       "routeIds": [
         8591325,
@@ -2214,7 +2214,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5076010324.svg"
     },
     {
@@ -2231,7 +2231,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5347.004621.svg",
       "routeIds": [
         8610971
@@ -2257,7 +2257,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5452.005571.svg",
       "routeIds": [
         8602263
@@ -2283,7 +2283,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-10109010526.svg",
       "routeIds": [
         8637874
@@ -2309,7 +2309,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-10110010526.svg",
       "routeIds": [
         8637874
@@ -2335,7 +2335,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "WA",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5615010274.svg"
     },
     {
@@ -2352,7 +2352,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5663497010602.svg",
       "routeIds": [
         8596130
@@ -2378,7 +2378,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5084010262.svg"
     },
     {
@@ -2395,7 +2395,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5344010371.svg",
       "routeIds": [
         8600815,
@@ -2470,7 +2470,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5013.005621.svg"
     },
     {
@@ -2487,7 +2487,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-7676.004621.svg",
       "routeIds": [
         8586772
@@ -2513,7 +2513,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5444.005571.svg",
       "routeIds": [
         8630230,
@@ -2588,7 +2588,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "WA",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-7113.004731.svg",
       "routeIds": [
         8578371
@@ -2614,7 +2614,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5059.005641.svg",
       "routeIds": [
         8630374
@@ -2688,7 +2688,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5082.005641.svg",
       "routeIds": [
         8636904
@@ -2731,7 +2731,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-7674.004621.svg",
       "routeIds": [
         8611217
@@ -2757,7 +2757,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "OR",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-6124010414.svg"
     },
     {
@@ -2774,7 +2774,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "WA",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6909.004731.svg",
       "routeIds": [
         8578727
@@ -2800,7 +2800,7 @@
       "detail": "Explore this Forest Service recreation site.",
       "note": "Listed in the USFS recreation inventory. This is not a current access or closure status.",
       "state": "WA",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6928.004731.svg",
       "routeIds": [
         8577929
@@ -3040,7 +3040,7 @@
       "note": "Waypoint marks the published access trailhead. Check current road access, permits and conditions with the Forest Service.",
       "sourceName": "USFS National Forest System Trails",
       "officialUrl": "https://www.fs.usda.gov/recarea/okawen/recarea/?recid=59387",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/adventure-map-alpine-waypoints.svg",
       "routeIds": [
         8579664
@@ -3114,7 +3114,7 @@
       "note": "Waypoint marks the published access trailhead. Check current road access, permits and conditions with the Forest Service.",
       "sourceName": "USFS National Forest System Trails",
       "officialUrl": "https://www.fs.usda.gov/visit",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/adventure-map-alpine-waypoints.svg",
       "routeIds": [
         8594524,
@@ -3189,7 +3189,7 @@
       "note": "Waypoint marks the Forest Service Snow Lake trailhead at Alpental. Check permits, parking and current conditions before visiting.",
       "sourceName": "USFS National Forest System Trails",
       "officialUrl": "https://www.wta.org/go-hiking/hikes/snow-lake-1",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/adventure-map-alpine-waypoints.svg",
       "routeIds": [
         8676464,
@@ -3265,7 +3265,7 @@
       "note": "The waypoint marks the mapped route endpoint. Confirm the trailhead, permits, and current conditions with the Forest Service.",
       "sourceName": "USFS National Forest System Trails",
       "officialUrl": "https://www.fs.usda.gov/visit",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/adventure-map-alpine-waypoints.svg",
       "routeIds": [
         8600563
@@ -3336,7 +3336,7 @@
       "note": "Waypoint marks the published access trailhead. Check current road access, permits and conditions with the Forest Service.",
       "sourceName": "USFS National Forest System Trails",
       "officialUrl": "https://www.fs.usda.gov/recarea/okawen/recarea/?recid=59019",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/adventure-map-alpine-waypoints.svg",
       "routeIds": [
         8580755
@@ -3410,7 +3410,7 @@
       "note": "Waypoint marks the published access trailhead. Check current road access, permits and conditions with the Forest Service.",
       "sourceName": "USFS National Forest System Trails",
       "officialUrl": "https://www.fs.usda.gov/recarea/okawen/recarea/?recid=58793",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/adventure-map-alpine-waypoints.svg",
       "routeIds": [
         8579996
@@ -3485,7 +3485,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53566",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5480010324.svg",
       "routeIds": [
         8569785
@@ -3559,7 +3559,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53600",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5441010324.svg",
       "collection": "Northwest picks",
       "photo": {
@@ -3624,7 +3624,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53610",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5447010324.svg",
       "collection": "Northwest picks"
     },
@@ -3641,7 +3641,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53632",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5442010324.svg",
       "routeIds": [
         8570265,
@@ -3667,7 +3667,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53552",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5445010324.svg",
       "routeIds": [
         8569339
@@ -3740,7 +3740,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/crgnsa/recarea/?recid=29976",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-1288168010602.svg",
       "collection": "Northwest picks",
       "photo": {
@@ -3805,7 +3805,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/crgnsa/recarea/?recid=29910",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5045.009041.svg",
       "collection": "Northwest picks",
       "photo": {
@@ -3870,7 +3870,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38526",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-7682.004621.svg",
       "collection": "Northwest picks",
       "photo": {
@@ -3935,7 +3935,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=80282",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5250.005571.svg",
       "routeIds": [
         8622696,
@@ -4009,7 +4009,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=82063",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6485821010602.svg",
       "collection": "Northwest picks",
       "photo": {
@@ -4074,7 +4074,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38850",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-7667.004621.svg",
       "collection": "Northwest picks"
     },
@@ -4091,7 +4091,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53164",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-3009212010602.svg",
       "collection": "Northwest picks",
       "coordinateSource": "https://www.openstreetmap.org/node/5015818380",
@@ -4111,7 +4111,7 @@
       "officialUrl": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_InfraRecreationSites_01/MapServer/0/query?f=pjson&where=site_cn+%3D+%275461010324%27&outFields=*&returnGeometry=false",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5461010324.svg",
       "routeIds": [
         8572117,
@@ -4138,7 +4138,7 @@
       "sourceName": "US Forest Service",
       "sourceFetchedAt": "2026-09-22T09:26:38.059Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5343010263.svg"
     },
     {
@@ -4667,7 +4667,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/wallowa-whitman/recarea/?recid=52747",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5518010263.svg",
       "collection": "Northwest picks"
     },
@@ -4685,7 +4685,7 @@
       "sourceName": "US Forest Service",
       "sourceFetchedAt": "2026-09-22T09:26:38.059Z",
       "collection": "Northwest picks",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5346010263.svg"
     },
     {
@@ -4718,7 +4718,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/crgnsa/recarea/?recid=29902",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5007010324.svg",
       "routeIds": [
         8567399,
@@ -4792,7 +4792,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=32122",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6910.004731.svg",
       "collection": "Northwest picks"
     },
@@ -4809,7 +4809,7 @@
       "officialUrl": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_InfraRecreationSites_01/MapServer/0/query?f=pjson&where=site_cn+%3D+%276952.004731%27&outFields=*&returnGeometry=false",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6952.004731.svg",
       "collection": "Northwest picks",
       "photo": {
@@ -4874,7 +4874,7 @@
       "officialUrl": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_InfraRecreationSites_01/MapServer/0/query?f=pjson&where=site_cn+%3D+%275124010357%27&outFields=*&returnGeometry=false",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5124010357.svg",
       "routeIds": [
         8594029,
@@ -4900,7 +4900,7 @@
       "officialUrl": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_InfraRecreationSites_01/MapServer/0/query?f=pjson&where=site_cn+%3D+%27138847010602%27&outFields=*&returnGeometry=false",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-138847010602.svg",
       "routeIds": [
         8605515
@@ -4974,7 +4974,7 @@
       "sourceName": "US Forest Service",
       "sourceFetchedAt": "2026-09-22T09:26:38.060Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5528010616.svg"
     },
     {
@@ -4990,7 +4990,7 @@
       "officialUrl": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_InfraRecreationSites_01/MapServer/0/query?f=pjson&where=site_cn+%3D+%275171010357%27&outFields=*&returnGeometry=false",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5171010357.svg",
       "routeIds": [
         8593990,
@@ -5064,7 +5064,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/olympic/recarea/?recid=48045",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5421.005071.svg",
       "routeIds": [
         8578934,
@@ -5138,7 +5138,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/olympic/recarea/?recid=48059",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5451.005071.svg",
       "routeIds": [
         8580422
@@ -5211,7 +5211,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/okawen/recarea/?recid=58807",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6217.005511.svg",
       "routeIds": [
         8581050
@@ -5284,7 +5284,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/okawen/recarea/?recid=57749",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5182010416.svg",
       "routeIds": [
         8588035
@@ -5357,7 +5357,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/okawen/recarea/?recid=59115",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5228010553.svg",
       "routeIds": [
         8600736
@@ -5447,7 +5447,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31306",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5562010274.svg",
       "collection": "Northwest picks"
     },
@@ -5529,7 +5529,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31866",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5637010274.svg",
       "collection": "Northwest picks"
     },
@@ -5546,7 +5546,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31870",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5647010274.svg",
       "collection": "Northwest picks"
     },
@@ -5597,7 +5597,7 @@
       "officialUrl": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_InfraRecreationSites_01/MapServer/0/query?f=pjson&where=site_cn+%3D+%275107010357%27&outFields=*&returnGeometry=false",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5107010357.svg",
       "collection": "Northwest picks"
     },
@@ -5649,7 +5649,7 @@
       "sourceName": "US Forest Service",
       "sourceFetchedAt": "2026-09-22T09:26:38.060Z",
       "collection": "Northwest picks",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5516010616.svg"
     },
     {
@@ -5733,7 +5733,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/okawen/recarea/?recid=59281",
       "sourceName": "US Forest Service Recreation Sites",
       "sourceFetchedAt": "2026-09-22T09:14:55.924Z",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5249010553.svg",
       "collection": "Northwest picks"
     },
@@ -5751,7 +5751,7 @@
       "sourceName": "www.portland.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.673Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/forest-park.svg",
       "photo": {
         "alt": "Forest Park · Wildwood Trails scenery with crisp HDR color and a subtle orange tint in the shadows.",
@@ -5835,7 +5835,7 @@
       "sourceName": "www.portland.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/hoyt-arboretum.svg",
       "photo": {
         "alt": "Tree branches and green foliage at Hoyt Arboretum, with cartographic graphic treatment.",
@@ -5900,7 +5900,7 @@
       "sourceName": "www.portland.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/powell-butte.svg",
       "photo": {
         "alt": "Trail through a flowering meadow at Powell Butte Nature Park, with cartographic graphic treatment.",
@@ -5965,7 +5965,7 @@
       "sourceName": "www.portland.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/mount-tabor.svg",
       "photo": {
         "alt": "Mt. Tabor Park Trails scenery with crisp HDR color and a subtle orange tint in the shadows.",
@@ -6216,7 +6216,7 @@
       "sourceName": "stateparks.oregon.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/saddle-mountain.svg",
       "coordinateSource": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=140",
       "coordinateCheckedAt": "2026-09-22T23:02:50.431Z",
@@ -6284,7 +6284,7 @@
       "sourceName": "www.nps.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/fort-clatsop.svg"
     },
     {
@@ -6400,7 +6400,7 @@
       "sourceName": "www.nps.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/heart-hills.svg"
     },
     {
@@ -6434,7 +6434,7 @@
       "sourceName": "www.nps.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/hall-mosses.svg",
       "photo": {
         "alt": "Mossy forest pond at the Hall of Mosses trail entrance, with cartographic graphic treatment.",
@@ -6499,7 +6499,7 @@
       "sourceName": "www.nps.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/hurricane-hill.svg",
       "photo": {
         "alt": "Olympic mountain ridges viewed from Hurricane Hill, with cartographic graphic treatment.",
@@ -6565,7 +6565,7 @@
       "sourceName": "www.nps.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/marymere.svg",
       "photo": {
         "alt": "Marymere Falls — HDR photograph with a slight warm shadow tint",
@@ -6630,7 +6630,7 @@
       "sourceName": "www.nps.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/sol-duc-falls.svg",
       "photo": {
         "alt": "Sol Duc Falls — HDR photograph with a slight warm shadow tint",
@@ -6695,7 +6695,7 @@
       "sourceName": "www.nps.gov",
       "sourceFetchedAt": "2026-09-22T09:23:10.674Z",
       "collection": "Northwest picks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/rialto.svg",
       "photo": {
         "alt": "Sea stacks and driftwood along Rialto Beach, with cartographic graphic treatment.",
@@ -7232,7 +7232,7 @@
       "sourceName": "US Forest Service",
       "sourceFetchedAt": "2026-09-22T09:26:38.060Z",
       "collection": "Northern California",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6492.004291.svg",
       "photo": {
         "alt": "Mount Shasta and conifers seen from Bunny Flat",
@@ -7315,7 +7315,7 @@
       "sourceName": "US Forest Service",
       "sourceFetchedAt": "2026-09-22T09:26:38.060Z",
       "collection": "Northern California",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/usfs-5388.004291.svg"
     },
     {
@@ -7363,7 +7363,7 @@
       "region": "Prairie Creek · Northern California",
       "detail": "Walk through a canyon lined with ferns. Check creek crossings and seasonal parking reservation requirements.",
       "note": "Confirm current access, camping or parking reservations, and seasonal restrictions with the managing park.",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "sourceName": "www.nps.gov",
       "sourceFetchedAt": "2026-09-22T09:26:38.060Z",
       "collection": "Northern California",
@@ -7526,7 +7526,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42683",
       "sourceName": "US Forest Service",
       "collection": "Coast & Portland foothills",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6130010414.svg",
       "photo": {
         "alt": "Drift Creek Falls cascading down a forested rock cliff",
@@ -7590,7 +7590,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42291",
       "sourceName": "US Forest Service",
       "collection": "Coast & Portland foothills",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-6143010414.svg"
     },
     {
@@ -7606,7 +7606,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recreation/recarea/?recid=42309",
       "sourceName": "US Forest Service",
       "collection": "Coast & Portland foothills",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5663296010602.svg",
       "photo": {
         "alt": "Cape Perpetua Trails — HDR photograph with a slight warm shadow tint",
@@ -7670,7 +7670,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42579",
       "sourceName": "US Forest Service",
       "collection": "Coast & Portland foothills",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-27.005251.svg"
     },
     {
@@ -7686,7 +7686,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recreation/recarea/?recid=42567&actid=50",
       "sourceName": "US Forest Service",
       "collection": "Coast & Portland foothills",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/usfs-5661111010602.svg"
     },
     {
@@ -7750,7 +7750,7 @@
       "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52902",
       "sourceName": "US Forest Service",
       "collection": "Coast & Portland foothills",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "officialNotice": {
         "summary": "The source inventory mentions a closure. Confirm current status with the managing agency before visiting.",
         "checkedAt": "2026-09-22T05:11:39.477Z",
@@ -7771,7 +7771,7 @@
       "note": "Approximate park-area waypoint. Use the official park map for entrances and current access, camping reservations, or permits.",
       "sourceName": "Official park / land manager",
       "collection": "Coast & Portland foothills",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/molalla-river-trails.svg"
     },
     {
@@ -7803,7 +7803,7 @@
       "note": "Approximate park-area waypoint. Use the official park map for entrances and current access, camping reservations, or permits.",
       "sourceName": "Official park / land manager",
       "collection": "Coast & Portland foothills",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/sandy-river-park.svg"
     },
     {
@@ -7819,7 +7819,7 @@
       "note": "Approximate park-area waypoint. Use the official park map for entrances and current access, camping reservations, or permits.",
       "sourceName": "Official park / land manager",
       "collection": "Coast & Portland foothills",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/wildwood-recreation.svg",
       "photo": {
         "alt": "Salmon River through the forest at Wildwood Recreation Site",
@@ -7883,7 +7883,7 @@
       "note": "Approximate park-area waypoint. Use the official park map for entrances and current access, camping reservations, or permits.",
       "sourceName": "Official park / land manager",
       "collection": "Coast & Portland foothills",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/eagle-fern.svg"
     },
     {
@@ -7915,7 +7915,7 @@
       "note": "Approximate park-area waypoint. Use the official park map for entrances and current access, camping reservations, or permits.",
       "sourceName": "Official park / land manager",
       "collection": "Coast & Portland foothills",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/second-beach-trail.svg",
       "coordinateSource": "https://www.wta.org/go-hiking/hikes/second-beach",
       "coordinateCheckedAt": "2026-09-22T23:04:46.842Z",
@@ -7984,7 +7984,7 @@
       "officialUrl": "https://www.seattle.gov/parks/parks/denny-blaine-park",
       "sourceName": "Seattle Parks and Recreation",
       "kind": "beach",
-      "accent": "#FF00CC",
+      "accent": "#FF1FA0",
       "special": false,
       "art": "assets/motifs/places/denny-blaine.svg",
       "sourceCheckedAt": "2026-09-22",
@@ -8054,7 +8054,7 @@
       "inclusionNote": "Documented traditional nude recreation; this listing does not imply an official clothing-optional designation.",
       "referenceUrl": "https://en.wikipedia.org/wiki/Howell_Park_(Seattle)",
       "kind": "beach",
-      "accent": "#FF00CC",
+      "accent": "#FF1FA0",
       "special": false,
       "art": "assets/motifs/places/howell-park.svg",
       "sourceCheckedAt": "2026-09-22"
@@ -8077,7 +8077,7 @@
       "inclusionNote": "Eugene Weekly’s August 2025 reporting describes traditional clothing-optional use, not an officially sanctioned clothing-optional area.",
       "referenceUrl": "https://oregonnews.uoregon.edu/lccn/2024240314/2025-08-21/ed-1/seq-7.pdf",
       "kind": "beach",
-      "accent": "#FF00CC",
+      "accent": "#FF1FA0",
       "special": false,
       "art": "assets/motifs/places/glass-bar-island.svg",
       "sourceCheckedAt": "2026-09-22"
@@ -12766,7 +12766,7 @@
       "note": "Check the official operator for current access, reservations, restrictions and seasonal conditions. Use the signed clothing-optional area and official beach access.",
       "officialUrl": "https://metrovancouver.org/services/regional-parks/park/pacific-spirit-regional-park",
       "sourceName": "Metro Vancouver",
-      "accent": "#FF00CC",
+      "accent": "#FF1FA0",
       "art": "assets/motifs/places/bc-wreck.svg",
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
@@ -12838,7 +12838,7 @@
       "note": "Check the official operator for current access, reservations, restrictions and seasonal conditions. ",
       "officialUrl": "https://metrovancouver.org/services/regional-parks/Documents/lynn-headwaters-regional-park-map.pdf",
       "sourceName": "Metro Vancouver",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/bc-lynn.svg",
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
@@ -13293,7 +13293,7 @@
       "note": "Check the official operator for current access, reservations, restrictions and seasonal conditions. ",
       "officialUrl": "https://www.crd.ca/parks-recreation/find-park-or-trail/east-sooke-regional-park",
       "sourceName": "Capital Regional District",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/bc-east-sooke.svg",
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
@@ -13455,7 +13455,7 @@
       "note": "Check the official operator for current access, reservations, restrictions and seasonal conditions. ",
       "officialUrl": "https://bcparks.ca/goldstream-park/",
       "sourceName": "BC Parks",
-      "accent": "#39FF14",
+      "accent": "#2BFF00",
       "art": "assets/motifs/places/bc-goldstream.svg",
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
@@ -13959,7 +13959,7 @@
       "note": "Check the official operator for current access, reservations, restrictions and seasonal conditions. ",
       "officialUrl": "https://bcparks.ca/garibaldi-park/",
       "sourceName": "BC Parks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/bc-garibaldi.svg",
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
@@ -14028,7 +14028,7 @@
       "note": "Check the official operator for current access, reservations, restrictions and seasonal conditions. ",
       "officialUrl": "https://bcparks.ca/brandywine-falls-park/",
       "sourceName": "BC Parks",
-      "accent": "#FF6600",
+      "accent": "#FF7B00",
       "art": "assets/motifs/places/bc-brandywine.svg",
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
