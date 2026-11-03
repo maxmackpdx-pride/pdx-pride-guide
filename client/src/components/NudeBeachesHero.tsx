@@ -21,7 +21,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
         {
           num: snapshot?.roosterRock.airTempF != null ? `${snapshot.roosterRock.airTempF}°` : "-",
           label: "air temp",
-          color: "var(--neon-orange, #ff6600)",
+          color: "var(--neon-orange, #FF7B00)",
         },
         {
           num:
@@ -34,7 +34,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
         {
           num: roosterWind.value,
           label: roosterWind.label,
-          color: "var(--neon-orange, #ff6600)",
+          color: "var(--neon-orange, #FF7B00)",
         },
       ]
     : [
@@ -45,12 +45,12 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
               snapshot?.sauvieIsland.swimStatus,
             ) || "-",
           label: "Collins swim",
-          color: "var(--green-acid, #39FF14)",
+          color: "var(--green-acid, #2BFF00)",
         },
         {
           num: snapshot?.sauvieIsland.airTempF != null ? `${snapshot.sauvieIsland.airTempF}°` : "-",
           label: "air temp",
-          color: "var(--green-acid, #39FF14)",
+          color: "var(--green-acid, #2BFF00)",
         },
         {
           num: sauvieWind.value,

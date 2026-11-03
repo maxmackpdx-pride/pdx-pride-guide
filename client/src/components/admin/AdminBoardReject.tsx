@@ -43,7 +43,7 @@ export default function AdminBoardReject({
         disabled={pending || !reasonCode}
         onClick={onReject}
         className="display text-xs px-4 py-2 border transition-all disabled:opacity-50 self-start"
-        style={{ borderColor: "#FF2400", color: "#FF2400", background: "transparent" }}
+        style={{ borderColor: "#FF0000", color: "#FF0000", background: "transparent" }}
       >
         {pending ? "SENDING BACK…" : "SEND BACK"}
       </button>

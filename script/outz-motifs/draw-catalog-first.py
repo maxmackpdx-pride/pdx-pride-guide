@@ -26,7 +26,7 @@ scenes={
  pine(44,179,1.85)+pine(208,166,1.6)+pine(153,126,.85)+'<path d="M20 197Q83 161 143 177T245 161M20 216Q87 179 146 196T245 182M43 239Q110 211 162 226T245 213M86 159L114 120 143 159ZM103 158L115 138 127 159M174 211L189 204 201 213M82 226L98 218"/>')
 }
 for id,(feature,url,image,paths) in scenes.items():
- r=next(x for x in rows if x['id']==id); trail=r['kind']=='trailhead'; color='#FF6600' if trail else '#39FF14'
+ r=next(x for x in rows if x['id']==id); trail=r['kind']=='trailhead'; color='#FF7B00' if trail else '#2BFF00'
  svg=f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264 264" color="{color}"><title>{escape(r["name"])}</title><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">{paths}{sign(r["name"]) if trail else ""}</g></svg>'
  (D/f'{id}.svg').write_text(svg)
  r.update(status='drawn-awaiting-visual-review',asset=f'/motifs/outz/places/{id}.svg',visualFeatures=[feature],references=[{'url':url,'image':image}])

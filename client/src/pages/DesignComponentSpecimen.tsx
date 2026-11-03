@@ -124,7 +124,7 @@ function Specimen({ id }: { id: string }) {
     case "component:data-display/StickerBadge":
       return <StickerBadge color="pink">Owner approved</StickerBadge>;
     case "component:forms/ActionRow":
-      return <ActionRow number="01" title="Publish connected component" forWho="For Tucker" outcome="Review the exact source and release evidence." accent="#00ffff" badge={{ label: "Ready", variant: "solid", accent: "#ccff00" }} onClick={() => undefined} />;
+      return <ActionRow number="01" title="Publish connected component" forWho="For Tucker" outcome="Review the exact source and release evidence." accent="#00ffff" badge={{ label: "Ready", variant: "solid", accent: "#D4FF00" }} onClick={() => undefined} />;
     case "component:forms/Button":
       return <div className="zay-specimen__row"><Button accent="lime">Primary</Button><Button accent="cyan" variant="solid">Solid</Button><Button accent="pink" arrow>Continue</Button></div>;
     case "component:forms/FilterChip":

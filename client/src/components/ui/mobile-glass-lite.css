@@ -78,7 +78,7 @@
   .z-mobile-dock .z-dock-glitch > span { position:absolute;inset:0;opacity:0;pointer-events:none; }
   .z-mobile-dock .z-dock-glitch > span > svg { display:block;width:30px;height:26px; }
   .z-mobile-dock .z-dock-glitch__red { color:#ff304f;clip-path:inset(18% 0 62%);--glitch-x:-1px; }
-  .z-mobile-dock .z-dock-glitch__green { color:#39ff14;clip-path:inset(48% 0 35%);--glitch-x:1px; }
+  .z-mobile-dock .z-dock-glitch__green { color:#2BFF00;clip-path:inset(48% 0 35%);--glitch-x:1px; }
   .z-mobile-dock .z-dock-glitch__blue { color:#00ffff;clip-path:inset(72% 0 10%);--glitch-x:-1px; }
   .z-mobile-dock[data-collapsed="true"] .z-dock-glitch > span { animation:zDockLiteGlitch 6s steps(1,end) infinite; }
   @keyframes zDockLiteGlitch { 0%,96%,100% { opacity:0;transform:none; } 97%,99% { opacity:.65;transform:translateX(var(--glitch-x)); } }

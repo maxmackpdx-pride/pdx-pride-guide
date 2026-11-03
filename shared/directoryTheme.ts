@@ -61,20 +61,20 @@ export const DIRECTORY_TYPE_LABELS: Record<string, string> = {
 };
 
 export const DIRECTORY_TYPE_COLORS: Record<string, string> = {
-  bar: "#FF00CC",
-  restaurant: "#FF6600",
-  cafe: "#39FF14",
+  bar: "#FF1FA0",
+  restaurant: "#FF7B00",
+  cafe: "#2BFF00",
   venue: "#19E3FF",
   service: "#A855F7",
   shop: "#FFD700",
   hotel: "#FF1FA0",
   nonprofit: "#FFFFFF",
-  healthcare: "#FF00CC",
+  healthcare: "#FF1FA0",
   realestate: "#1A4DFF",
   /** Gold pole of white→gold Clubs & Groups neon */
   group: "#FFD700",
   /** Lime pole of lime→dark green campground neon */
-  campground: "#39FF14",
+  campground: "#2BFF00",
 };
 
 export function directoryTypeColor(type: string | null | undefined): string {

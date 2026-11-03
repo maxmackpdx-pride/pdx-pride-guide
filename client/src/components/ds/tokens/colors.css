@@ -19,15 +19,15 @@
   --ink-border-strong: #333333;
 
   /* ---- NEON PALETTE (exact hexes) ------------------------ */
-  --neon-yellow:  #CCFF00;  /* PRIMARY action (chartreuse) */
+  --neon-yellow:  #D4FF00;  /* PRIMARY action (chartreuse) */
   --neon-cyan:    #00FFFF;  /* accent pop, THU, links */
-  --neon-magenta: #FF00CC;  /* FRI, offset shadows + glows */
-  --neon-orange:  #FF6600;  /* SUN, warm pop */
-  --neon-violet:  #8800FF;  /* MON */
-  --neon-red:     #FF2400;  /* protest red / rose red */
-  --green-acid: #39FF14;
+  --neon-magenta: #FF1FA0;  /* FRI, offset shadows + glows */
+  --neon-orange:  #FF7B00;  /* SUN, warm pop */
+  --neon-violet:  #7B00FF;  /* MON */
+  --neon-red:     #FF0000;  /* protest red / rose red */
+  --green-acid: #2BFF00;
   --neon-green:   var(--green-acid); /* compatibility alias; Acid Green is canonical */
-  --neon-blue:    #0044FF;  /* TUE */
+  --neon-blue:    #0066FF;  /* TUE */
   --accent-pop:   var(--neon-cyan);
 
   /* ---- LEGACY / SEMANTIC COLOR NAMES (used across kit) ----
@@ -42,17 +42,17 @@
   --orange:  var(--neon-orange);
   --purple:  var(--neon-violet);
   --blue:    var(--neon-blue);
-  --yellow:  #FFEE00;              /* WED day + highlighter (GRAND OPENING) */
+  --yellow:  #FFDD00;              /* WED day + highlighter (GRAND OPENING) */
   --amber:   #FFB23D;              /* supporting warm (donation, shops) */
   --red:     var(--neon-red);
 
   /* ---- NEON, softened for tints -------------------------- */
-  --lime-soft:  #CCFF0022;
-  --pink-soft:  #FF00CC22;
+  --lime-soft:  #D4FF0022;
+  --pink-soft:  #FF1FA022;
   --cyan-soft:  #00FFFF22;
   --green-soft: color-mix(in srgb, var(--green-acid) 13%, transparent);
-  --orange-soft:#FF660022;
-  --purple-soft:#8800FF22;
+  --orange-soft:#FF7B0022;
+  --purple-soft:#7B00FF22;
 
   /* ---- TEXT (exact) -------------------------------------- */
   --text-hi:      #ffffff;  /* headings */
@@ -92,24 +92,24 @@
      DAY COLOR SYSTEM (mirror of shared/eventWeek.ts).
      Pride Week = Jul 13 to 19; the Thu to Sun weekend carries the
      event program.
-       MON Jul 13  violet  #8800FF   (week opener)
-       TUE Jul 14  blue    #0044FF
-       WED Jul 15  yellow  #FFEE00
+       MON Jul 13  violet  #7B00FF   (week opener)
+       TUE Jul 14  blue    #0066FF
+       WED Jul 15  yellow  #FFDD00
        THU Jul 16  cyan    #00FFFF   (official Pride kickoff)
-       FRI Jul 17  magenta #FF00CC
-       SAT Jul 18  green   #39FF14
-       SUN Jul 19  orange  #FF6600   (parade day)
+       FRI Jul 17  magenta #FF1FA0
+       SAT Jul 18  green   #2BFF00
+       SUN Jul 19  orange  #FF7B00   (parade day)
      ============================================================ */
-  --day-mon:   #8800FF;
-  --day-tue:   #0044FF;
-  --day-wed:   #FFEE00;
+  --day-mon:   #7B00FF;
+  --day-tue:   #0066FF;
+  --day-wed:   #FFDD00;
   --day-thu:   #00FFFF;
-  --day-fri:   #FF00CC;
-  --day-sat:   #39FF14;
-  --day-sun:   #FF6600;
+  --day-fri:   #FF1FA0;
+  --day-sat:   #2BFF00;
+  --day-sun:   #FF7B00;
   /* lighter text-safe versions of the dark day colors */
-  --day-mon-text: #AA66FF;
-  --day-tue-text: #4488FF;
+  --day-mon-text: #9D66FF;
+  --day-tue-text: #44AAFF;
   /* Multi-day pin / legend pie (MON→SUN order) */
   --day-multi: linear-gradient(
     90deg,
@@ -172,7 +172,7 @@
 }
 
 :root{
-  --panel-lime: #c8fa3c;
+  --panel-lime: #D4FF00;
   --tag-free: var(--panel-lime);
   --board-gigs: #6E3DFF;
 }

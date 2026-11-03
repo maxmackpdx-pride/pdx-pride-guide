@@ -7,7 +7,7 @@ export type WorldRow = Record<string, any> & { id: number | string };
 export type MapBounds = { south: number; north: number; west: number; east: number };
 export const WORLD_NAMES: Record<MapWorld, string> = {places:"Placez",mizzed:"Mizzed",gigz:"Gigz",giftz:"Giftz",sellz:"Sellz"};
 export const WORLD_DETAIL_KEYS: Record<MapWorld, string> = {places:"place",mizzed:"mizzed",gigz:"gig",giftz:"gift",sellz:"sell"};
-export const WORLD_COLORS: Record<MapWorld, string> = {places:"#00FFFF",mizzed:"#FF00CC",gigz:"#8800FF",giftz:"#CCFF00",sellz:"#39FF14"};
+export const WORLD_COLORS: Record<MapWorld, string> = {places:"#00FFFF",mizzed:"#FF1FA0",gigz:"#7B00FF",giftz:"#D4FF00",sellz:"#2BFF00"};
 
 export function inMapBounds(point: {lat:number;lng:number}, bounds: MapBounds | null): boolean {
   if (!bounds) return true;

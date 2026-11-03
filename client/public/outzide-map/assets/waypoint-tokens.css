@@ -1,14 +1,14 @@
 /* This iframe mirrors the exact shared Zaylist color tokens in
    client/src/components/ds/tokens/colors.css. A regression check guards drift. */
 :root{
-  --neon-yellow:#CCFF00;
+  --neon-yellow:#D4FF00;
   --neon-cyan:#00FFFF;
-  --neon-magenta:#FF00CC;
-  --neon-orange:#FF6600;
-  --neon-red:#FF2400;
-  --neon-blue:#0044FF;
-  --neon-violet:#8800FF;
-  --green-acid:#39FF14;
+  --neon-magenta:#FF1FA0;
+  --neon-orange:#FF7B00;
+  --neon-red:#FF0000;
+  --neon-blue:#0066FF;
+  --neon-violet:#7B00FF;
+  --green-acid:#2BFF00;
 }
 .outzide-shell .waypoint-head{color:var(--c);border-color:var(--c)}
 .outzide-shell .waypoint-head:is(.winter,.atv,.boating,.fishing,.dayuse){color:color-mix(in srgb,var(--c) 60%,white)}

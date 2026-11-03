@@ -98,7 +98,7 @@ export type AdDraft = Omit<AdRecord, "id" | "impressions" | "clicks" | "createdA
 export const AD_BRAND_PRIMARY = {
   cockblock: "#ff1f1f",
   mrs: "#19e3ff",
-  custom: "#39ff14",
+  custom: "#2BFF00",
 } as const;
 
 export type AdTemplateKey =

@@ -21,12 +21,12 @@ export const EVENT_TALENT_ROLE_LABELS: Record<EventTalentRole, string> = {
 };
 
 export const EVENT_TALENT_ROLE_COLORS: Record<EventTalentRole, { color: string; borderColor: string }> = {
-  DRAG: { color: "#FF00CC", borderColor: "#FF00CC" },
+  DRAG: { color: "#FF1FA0", borderColor: "#FF1FA0" },
   DJ: { color: "#00FFFF", borderColor: "#00FFFF" },
-  BARTENDER: { color: "#FF6600", borderColor: "#FF6600" },
-  MC: { color: "#CCFF00", borderColor: "#CCFF00" },
-  GOGO: { color: "#FF00CC", borderColor: "#FF00CC" },
-  PERFORMER: { color: "#CCFF00", borderColor: "#CCFF00" },
+  BARTENDER: { color: "#FF7B00", borderColor: "#FF7B00" },
+  MC: { color: "#D4FF00", borderColor: "#D4FF00" },
+  GOGO: { color: "#FF1FA0", borderColor: "#FF1FA0" },
+  PERFORMER: { color: "#D4FF00", borderColor: "#D4FF00" },
   OTHER: { color: "#aaaaaa", borderColor: "#555555" },
 };
 

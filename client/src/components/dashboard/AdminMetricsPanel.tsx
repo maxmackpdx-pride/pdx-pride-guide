@@ -20,12 +20,12 @@ interface AdminMetrics {
 }
 
 const METRICS: { key: keyof AdminMetrics; label: string; color: string; tab?: string; alwaysClickable?: boolean }[] = [
-  { key: "users",              label: "Registered users",               color: "#C8FA3C", tab: "users",    alwaysClickable: true },
-  { key: "newUsersToday",      label: "New users today",                color: "#C8FA3C", tab: "users",    alwaysClickable: true },
+  { key: "users",              label: "Registered users",               color: "#D4FF00", tab: "users",    alwaysClickable: true },
+  { key: "newUsersToday",      label: "New users today",                color: "#D4FF00", tab: "users",    alwaysClickable: true },
   { key: "activeSessions",     label: "Stored login sessions",                color: "#19E3FF" },
   { key: "liveEvents",         label: "Live events (excl. placeholders)", color: "#FF8C00", tab: "events", alwaysClickable: true },
   { key: "userSubmittedEvents",label: "Community-submitted events",     color: "#00FFFF", tab: "events" },
-  { key: "attendances",        label: "Member check-ins",               color: "#C8FA3C", tab: "events",  alwaysClickable: true },
+  { key: "attendances",        label: "Member check-ins",               color: "#D4FF00", tab: "events",  alwaysClickable: true },
   { key: "messages",           label: "Active messages",                color: "#19E3FF", tab: "inbox",   alwaysClickable: true },
   { key: "pendingSubmissions", label: "Pending review",                 color: "#FF1FA0", tab: "inbox" },
   { key: "gigPosts",           label: "Live GIGZ posts",                 color: "#FF8C00", tab: "gigs",    alwaysClickable: true },
@@ -37,7 +37,7 @@ const METRICS: { key: keyof AdminMetrics; label: string; color: string; tab?: st
 type StatCardColor = "lime" | "cyan" | "orange" | "pink" | "purple";
 
 const METRIC_COLOR_MAP: Record<string, StatCardColor> = {
-  "#C8FA3C": "lime",
+  "#D4FF00": "lime",
   "#19E3FF": "cyan",
   "#FF8C00": "orange",
   "#00FFFF": "cyan",

@@ -149,19 +149,19 @@ export function weatherStyle(code: number) {
   }
   if (code >= 51 && code <= 67) {
     return {
-      sunGradient: "radial-gradient(circle,#19E3FF,#0044FF)",
+      sunGradient: "radial-gradient(circle,#19E3FF,#0066FF)",
       sunGlow: "0 0 22px rgba(25,227,255,.45)",
     };
   }
   if (code >= 95) {
     return {
-      sunGradient: "radial-gradient(circle,#8800FF,#19E3FF)",
-      sunGlow: "0 0 22px rgba(136,0,255,.5)",
+      sunGradient: "radial-gradient(circle,#7B00FF,#19E3FF)",
+      sunGlow: "0 0 22px rgba(123,0,255,.5)",
     };
   }
   return {
-    sunGradient: "radial-gradient(circle,#C8FA3C,#19E3FF)",
-    sunGlow: "0 0 20px rgba(200,250,60,.4)",
+    sunGradient: "radial-gradient(circle,#D4FF00,#19E3FF)",
+    sunGlow: "0 0 20px rgba(212,255,0,.4)",
   };
 }
 

@@ -4,7 +4,7 @@ import {createRequire} from 'node:module'; const require=createRequire(import.me
 import {logoCoverage} from '../client/public/home-flight/logo-mask.js';
 const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..'), pub=path.join(root,'client/public');
 const source=await fs.readFile(path.join(root,'client/src/components/ui/portland-metro-globe.tsx'),'utf8');
-const colors=['#00ffff','#ff00cc','#ccff00','#ff6600','#ab75ff'];
+const colors=['#00ffff','#FF1FA0','#D4FF00','#FF7B00','#ab75ff'];
 const originals=JSON.parse(await fs.readFile(path.join(pub,'home-flight/waypoints.json'),'utf8'));
 const previousManifest=JSON.parse(await fs.readFile(path.join(root,'client/src/components/ui/portland-globe-holograms.json'),'utf8'));
 const previousPhases=new Map(previousManifest.map(r=>[r.id,r.phase]));

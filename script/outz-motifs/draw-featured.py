@@ -24,7 +24,7 @@ scenes={
 }
 for id,(feature,url,image,paths) in scenes.items():
  row=next(r for r in rows if r['id']==id)
- svg=f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264 264"><title>{escape(row["name"])}</title><g fill="none" stroke="#39FF14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">{paths}</g></svg>'
+ svg=f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264 264"><title>{escape(row["name"])}</title><g fill="none" stroke="#2BFF00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">{paths}</g></svg>'
  (DIR/f'{id}.svg').write_text(svg)
  row.update(status='drawn-awaiting-visual-review',visualFeatures=[feature],references=[{'url':url,'image':image}],asset=f'/motifs/outz/places/{id}.svg')
 (DIR/'research.json').write_text(json.dumps(rows,indent=2)+'\n')

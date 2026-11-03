@@ -70,7 +70,7 @@ function groupByRole(rows: EventTalentRow[]) {
   return EVENT_TALENT_ROLES.filter(r => map.has(r)).map(role => ({ role, rows: map.get(role)! }));
 }
 
-export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCFF00", mode, isClaimable, hideSelfTag = false }: Props) {
+export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#D4FF00", mode, isClaimable, hideSelfTag = false }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [hostUsername, setHostUsername] = useState("");
@@ -219,7 +219,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
                           type="button"
                           onClick={() => removeMutation.mutate(row.id)}
                           disabled={removeMutation.isPending}
-                          style={{ background: "none", border: "none", color: "#FF2400", fontSize: "0.65rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
+                          style={{ background: "none", border: "none", color: "#FF0000", fontSize: "0.65rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
                         >
                           REMOVE
                         </button>
@@ -248,7 +248,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
               <div style={{ display: "flex", gap: 8 }}>
                 <button type="button" className="btn-neon solid pdx-glass-rebind" style={{ fontSize: "0.65rem", padding: "6px 10px" }}
                   onClick={() => approveMutation.mutate(row.id)} disabled={approveMutation.isPending}>APPROVE</button>
-                <button type="button" className="btn-neon pdx-glass-rebind" style={{ fontSize: "0.65rem", padding: "6px 10px", borderColor: "#FF2400", color: "#FF2400" }}
+                <button type="button" className="btn-neon pdx-glass-rebind" style={{ fontSize: "0.65rem", padding: "6px 10px", borderColor: "#FF0000", color: "#FF0000" }}
                   onClick={() => rejectMutation.mutate(row.id)} disabled={rejectMutation.isPending}>DENY</button>
               </div>
             </div>

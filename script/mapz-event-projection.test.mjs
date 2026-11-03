@@ -75,9 +75,9 @@ test('projection remains tall and narrow at phone and desktop scales and pins it
 });
 
 test('day tokens override venue colors and respect the supplied Portland event night',()=>{
-  assert.equal(eventProjectionColor({dayColor:'#0044ff',color:'#FF0000'}),'#0044FF');
-  assert.equal(eventProjectionColor({eventNight:'2026-10-06',color:'#FF0000'}),'#0044FF');
-  assert.equal(eventProjectionColor({eventNight:'2026-10-05'}),'#8800FF');
+  assert.equal(eventProjectionColor({dayColor:'#0066ff',color:'#FF0000'}),'#0066FF');
+  assert.equal(eventProjectionColor({eventNight:'2026-10-06',color:'#FF0000'}),'#0066FF');
+  assert.equal(eventProjectionColor({eventNight:'2026-10-05'}),'#7B00FF');
   assert.equal(eventProjectionColor({dayColor:'#00FFFF',eventNight:'2026-10-05'}),'#00FFFF');
 });
 

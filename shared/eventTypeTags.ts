@@ -21,15 +21,15 @@ export interface EventTypeTagColors {
 }
 
 export const EVENT_TYPE_TAG_COLORS: Record<EventTypeFilterLabel, EventTypeTagColors> = {
-  "SEX POSITIVE": { color: "#FF00CC", borderColor: "#FF00CC" },
-  "NUDITY OK": { color: "#FF00CC", borderColor: "#FF00CC" },
-  FREE: { color: "#39FF14", borderColor: "#39FF14" },
+  "SEX POSITIVE": { color: "#FF1FA0", borderColor: "#FF1FA0" },
+  "NUDITY OK": { color: "#FF1FA0", borderColor: "#FF1FA0" },
+  FREE: { color: "#2BFF00", borderColor: "#2BFF00" },
   TICKETED: { color: "#00FFFF", borderColor: "#00FFFF" },
-  "DOOR FEE": { color: "#FF6600", borderColor: "#FF6600" },
-  "21+": { color: "#CCFF00", borderColor: "#CCFF00" },
-  "ALL AGES": { color: "#CCFF00", borderColor: "#CCFF00" },
+  "DOOR FEE": { color: "#FF7B00", borderColor: "#FF7B00" },
+  "21+": { color: "#D4FF00", borderColor: "#D4FF00" },
+  "ALL AGES": { color: "#D4FF00", borderColor: "#D4FF00" },
   PUBLIC: { color: "#888888", borderColor: "#555555" },
-  "HOUSE PARTY": { color: "#FF6600", borderColor: "#FF6600" },
+  "HOUSE PARTY": { color: "#FF7B00", borderColor: "#FF7B00" },
 };
 
 type EventTagSource = Pick<

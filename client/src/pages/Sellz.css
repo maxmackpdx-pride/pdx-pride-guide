@@ -1,6 +1,6 @@
 .sellz-page {
-  --board-accent: #39ff14;
-  --listing-accent: #39ff14;
+  --board-accent: #2BFF00;
+  --listing-accent: #2BFF00;
 }
 
 .sellz-page .sr-only {
@@ -43,7 +43,7 @@
 .sellz-market-header__kicker,
 .sellz-market-results__kicker {
   margin: 0 0 10px;
-  color: var(--green-acid, #39ff14);
+  color: var(--green-acid, #2BFF00);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 700;
@@ -78,15 +78,15 @@
   min-height: 62px;
   margin-top: clamp(24px, 4vw, 38px);
   padding: 0 16px;
-  border: 1px solid color-mix(in srgb, var(--green-acid, #39ff14) 54%, #26262c);
+  border: 1px solid color-mix(in srgb, var(--green-acid, #2BFF00) 54%, #26262c);
   border-radius: 14px;
   background: #09090c;
   box-shadow: var(--chrome-keyline), var(--chrome-floor), var(--neon-bloom);
-  color: var(--green-acid, #39ff14);
+  color: var(--green-acid, #2BFF00);
 }
 
 .sellz-market-search:focus-within {
-  border-color: var(--green-acid, #39ff14);
+  border-color: var(--green-acid, #2BFF00);
 }
 
 .sellz-market-search input {
@@ -160,20 +160,20 @@
 
 .sellz-market-views button:hover,
 .sellz-market-views button.is-active {
-  background: color-mix(in srgb, var(--green-acid, #39ff14) 12%, #111115);
-  border-color: color-mix(in srgb, var(--green-acid, #39ff14) 55%, #222228);
+  background: color-mix(in srgb, var(--green-acid, #2BFF00) 12%, #111115);
+  border-color: color-mix(in srgb, var(--green-acid, #2BFF00) 55%, #222228);
   color: #fff;
 }
 
 .sellz-market-views button.is-active {
-  color: var(--green-acid, #39ff14);
+  color: var(--green-acid, #2BFF00);
 }
 
 .sellz-market-views button span {
   min-width: 20px;
   padding: 2px 5px;
   border-radius: 999px;
-  background: var(--green-acid, #39ff14);
+  background: var(--green-acid, #2BFF00);
   color: #050506;
   font: 800 0.7rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
@@ -214,7 +214,7 @@
 .sellz-market-views button:focus-visible,
 .sellz-market-clear:focus-visible,
 .sellz-market-search button:focus-visible {
-  outline: 2px solid var(--green-acid, #39ff14);
+  outline: 2px solid var(--green-acid, #2BFF00);
   outline-offset: 2px;
 }
 
@@ -225,7 +225,7 @@
 }
 
 .sellz-market-clear:hover {
-  border-color: var(--green-acid, #39ff14);
+  border-color: var(--green-acid, #2BFF00);
   color: #fff;
 }
 
@@ -321,7 +321,7 @@
 }
 
 .sellz-card__open:focus-visible {
-  outline: 3px solid var(--green-acid, #39ff14);
+  outline: 3px solid var(--green-acid, #2BFF00);
   outline-offset: 4px;
 }
 
@@ -369,7 +369,7 @@
 }
 
 .sellz-card__price small {
-  color: var(--panel-lime, #c8fa3c);
+  color: var(--panel-lime, #D4FF00);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
 }
@@ -395,7 +395,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   background: rgba(5, 5, 6, 0.88);
-  color: var(--green-acid, #39ff14);
+  color: var(--green-acid, #2BFF00);
   font: 800 0.67rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -464,7 +464,7 @@
   min-height: 300px;
   border: 1px solid #26262c;
   border-radius: 14px;
-  background: radial-gradient(circle at 50% 0, rgba(57, 255, 20, 0.06), transparent 58%), #09090c;
+  background: radial-gradient(circle at 50% 0, rgba(43, 255, 0, 0.06), transparent 58%), #09090c;
 }
 
 .sellz-market-empty__actions {
@@ -500,7 +500,7 @@
 }
 
 .sellz-market-how li strong {
-  color: var(--green-acid, #39ff14);
+  color: var(--green-acid, #2BFF00);
   font-family: var(--font-board-display);
   font-size: 1.08rem;
   text-transform: uppercase;
@@ -638,8 +638,8 @@
 
 /* The standalone Sellz board shares the Gigz and Giftz card language. */
 .sellz-board-page { background: #09090d; color: #faf8fc; min-height: 100vh; }
-.sellz-board-page .gigz-section-head h1 span { color: #39ff14; }
-.sellz-board-page .gigz-post { --button-c: var(--room-sellz, #39ff14); }
+.sellz-board-page .gigz-section-head h1 span { color: #2BFF00; }
+.sellz-board-page .gigz-post { --button-c: var(--room-sellz, #2BFF00); }
 .sellz-board-page .board-follow-button { border-color: #318d31; color: #d5fbd0; }
 .sellz-board-page .board-follow-button:hover:not(:disabled) { background: #1b321b; }
 .sellz-board-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -653,11 +653,11 @@
 .sellz-board-summary span { display: flex; align-items: center; gap: 6px; }
 .sellz-listing-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 17px; }
 .sellz-board-page .sellz-listing { width: 100%; height: clamp(310px, 32vw, 430px); }
-.sellz-board-page .sellz-listing:hover { border-color: #39ff14; }
-.sellz-listing__fallback { position: absolute; inset: 0; display: grid; place-items: center; background: radial-gradient(circle at 65% 24%, #356f38, #152c1e 48%, #0b1510); color: #39ff1477; }
+.sellz-board-page .sellz-listing:hover { border-color: #2BFF00; }
+.sellz-listing__fallback { position: absolute; inset: 0; display: grid; place-items: center; background: radial-gradient(circle at 65% 24%, #356f38, #152c1e 48%, #0b1510); color: #2BFF0077; }
 .sellz-listing__saved { position: absolute; right: 19px; bottom: 19px; z-index: 2; display: flex; align-items: center; gap: 4px; font-size: 12px; color: #cfffbb; }
 .sellz-listing .gigz-opportunity__bottom strong { font-size: clamp(20px, 2vw, 28px); }
-.sellz-listing .gigz-opportunity__bottom em { border-color: #39ff14; color: #d6ffce; }
+.sellz-listing .gigz-opportunity__bottom em { border-color: #2BFF00; color: #d6ffce; }
 .sellz-listing:has(.sellz-listing__saved) .gigz-opportunity__bottom { bottom: 44px; }
 .sellz-board-page .gigz-detail { border-color: #318d31; }
 .sellz-board-page .gigz-detail .sellz-card { width: 100%; max-width: none; }
@@ -666,7 +666,7 @@
 .sellz-inactive p { color: #b8d5b7; margin: 0 0 15px; }
 .sellz-inactive > div { display: flex; flex-wrap: wrap; gap: 9px; }
 .sellz-inactive button { padding: 10px 13px; border: 1px solid #318d31; border-radius: 8px; color: white; }
-.sellz-inactive button span { margin-left: 8px; color: #39ff14; font-size: 11px; text-transform: capitalize; }
+.sellz-inactive button span { margin-left: 8px; color: #2BFF00; font-size: 11px; text-transform: capitalize; }
 .sellz-board-rules { color: #899786; font-size: 12px; letter-spacing: .06em; margin: 46px 0 0; }
 @media (max-width: 900px) { .sellz-listing-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 700px) { .sellz-listing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .sellz-board-page .sellz-listing { height: 310px; } .sellz-listing .gigz-opportunity__top, .sellz-listing .gigz-opportunity__bottom { left: 12px; right: 12px; } .sellz-listing .gigz-opportunity__top { top: 13px; } .sellz-listing .gigz-opportunity__bottom { bottom: 16px; } .sellz-listing .gigz-opportunity__bottom strong { font-size: 20px; } .sellz-listing .gigz-opportunity__bottom > span { margin-top: 9px; font-size: 11px; } .sellz-listing .gigz-opportunity__bottom em { margin-top: 9px; } .sellz-listing .gigz-opportunity__arrow { width: 28px; height: 28px; } .sellz-listing:has(.sellz-listing__saved) .gigz-opportunity__bottom { bottom: 40px; } }

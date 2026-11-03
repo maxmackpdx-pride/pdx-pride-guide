@@ -51,7 +51,7 @@ function overlaySvg({ tagline, domain }) {
     </linearGradient>
     <radialGradient id="glow" cx="50%" cy="46%" r="55%">
       <stop offset="0%" stop-color="#19e3ff" stop-opacity="0.18"/>
-      <stop offset="45%" stop-color="#ff00cc" stop-opacity="0.08"/>
+      <stop offset="45%" stop-color="#FF1FA0" stop-opacity="0.08"/>
       <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="vignette" x1="0" y1="0" x2="0" y2="1">

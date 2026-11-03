@@ -29,14 +29,12 @@ export function dayComplementToken(day: string): string {
 }
 
 const HEX_TO_DS_ACCENT: Record<string, string> = {
-  "#CCFF00": "lime",
-  "#C8FA3C": "lime",
-  "#39FF14": "green",
+  "#D4FF00": "lime",
+  "#2BFF00": "green",
   "#19E3FF": "cyan",
   "#00FFFF": "cyan",
   "#FF8C00": "orange",
-  "#FF6600": "orange",
-  "#FF00CC": "pink",
+  "#FF7B00": "orange",
   "#FF1FA0": "pink",
   "#A855F7": "purple",
   "#750787": "purple",

@@ -47,7 +47,7 @@
   transform: rotate(-4deg);
   padding: 3px 8px 2px;
   border-radius: var(--chrome-radius-tag, 7px);
-  background: var(--acid-lit-chip, #ccff00);
+  background: var(--acid-lit-chip, #D4FF00);
   color: #101015;
   font-family: var(--font-display, "Barlow Condensed", sans-serif);
   font-weight: 900;

@@ -50,8 +50,8 @@
 
 .map-switch__option--outz[aria-current="page"] {
   color: var(--room-outz, var(--neon-orange));
-  background: color-mix(in srgb, var(--neon-orange, #ff6600) 16%, transparent);
-  box-shadow: inset 0 0 0 1px var(--neon-orange, #ff6600);
+  background: color-mix(in srgb, var(--neon-orange, #FF7B00) 16%, transparent);
+  box-shadow: inset 0 0 0 1px var(--neon-orange, #FF7B00);
 }
 
 /* Phones: keep one viewport anchor below the map lockup, including when

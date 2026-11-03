@@ -29,7 +29,7 @@ assert(
   isTrustedLaneSource({ id: "directory-x", url: "https://camptrc.org/Events" }),
   "camptrc.org host is trusted lane",
 );
-assert(DIRECTORY_TYPE_COLORS.campground === "#39FF14", "campground type accent lime");
+assert(DIRECTORY_TYPE_COLORS.campground === "#2BFF00", "campground type accent lime");
 const trcLogo = `/directory-logos/Triangle_Recreation_Camp.png?v=${DIRECTORY_LOGO_VERSION}`;
 assert(
   resolveDirectoryLogo("Triangle Recreation Camp") === trcLogo,

@@ -10,10 +10,10 @@
 | Board/Hoüz pin families | `family-looking`, `family-forming`, `family-offering`, `family-managed`, `family-gigz`, `family-giftz`, `family-sellz`, `family-mizzed`, `family-outside-post` |
 | Ride offer | `family-ride-offer-car`; no exported clip; runtime-only subtle hover |
 | Outzide trail, stay, beach, camp, spring, fishing, boating, atv, winter | `outzide-{kind}` via Outzide builder |
-| Outzide `dayuse` | Explicit alias to `outzide-day-use` (yellow #CCFF00) |
+| Outzide `dayuse` | Explicit alias to `outzide-day-use` (yellow #D4FF00) |
 | Outzide `coastcamp`, `watercamp` | Keep current distinct icons/renderer; no matching combined asset is invented. Build shared camp parts only if retaining the correct coastal/water icon and existing behavior. |
 | Outzide `mixed` and clusters | Keep current mixed-kind logic and counts; homogeneous clusters can use the corresponding base with the existing count overlay. Never replace counts with an unlabelled individual marker. |
-| Closed status | Separate `status-closed` #FF2400 layer. `outzide-winter-closed` is the provided winter example, not a universal category replacement. |
+| Closed status | Separate `status-closed` #FF0000 layer. `outzide-winter-closed` is the provided winter example, not a universal category replacement. |
 | Nude recreation | `outzide-nude-recreation`, yellow; explicit owner-requested primary. Connect to the current product field; do not invent a new API enum. |
 | Swimming and other secondary indicators | `secondary-swimming`, `secondary-*`, or `badge-secondary-*`; attach as secondary pieces instead of silently changing the main place kind. |
 | Small/far markers | `mini-{primary id}` where present; use the catalog, not string concatenation without existence checks. Minis omit detailed icons intentionally. |

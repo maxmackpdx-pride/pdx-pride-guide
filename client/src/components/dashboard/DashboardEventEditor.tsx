@@ -294,7 +294,7 @@ export function DashboardEventEditForm({
               disabled={saving || deleting}
               data-testid="button-delete-event"
               className={embedded ? "event-modal__btn-ghost" : "dash-btn dash-btn-ghost"}
-              style={{ color: "#FF2400", borderColor: "rgba(255,36,0,0.45)" }}
+              style={{ color: "#FF0000", borderColor: "rgba(255,0,0,0.45)" }}
             >
               {deleting ? "Deleting..." : "Delete event"}
             </button>

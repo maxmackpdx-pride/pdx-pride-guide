@@ -21,5 +21,5 @@ test('each pass sees current theme values and retains the existing closed fallba
  theme='#12ABCD';
  const second=readWaypointPalette({beach:'--cyan'}, {},readStyle);
  assert.equal(first.colors.beach,'#00FFFF');assert.equal(second.colors.beach,'#12ABCD');
- assert.equal(second.closed,'#FF2400');
+ assert.equal(second.closed,'#FF0000');
 });

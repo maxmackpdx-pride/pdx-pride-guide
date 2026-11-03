@@ -151,7 +151,7 @@ export default function SuspendedAccountGate() {
                 width: "100%",
                 marginTop: 12,
                 padding: 14,
-                background: "#c8fa3c",
+                background: "#D4FF00",
                 color: "#000",
                 border: "none",
                 fontFamily: "var(--font-display, sans-serif)",
@@ -165,7 +165,7 @@ export default function SuspendedAccountGate() {
             </button>
           </>
         ) : (
-          <p style={{ marginTop: 16, color: "#c8fa3c", lineHeight: 1.45 }}>
+          <p style={{ marginTop: 16, color: "#D4FF00", lineHeight: 1.45 }}>
             Appeal received. Admins will review it in the moderation queue. You can sign out below
             and come back later.
           </p>

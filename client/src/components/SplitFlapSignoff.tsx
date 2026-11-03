@@ -27,7 +27,7 @@ const CSS = `
   display:inline-flex; align-items:center; justify-content:center;
   background:linear-gradient(180deg,#141418 0%,#0a0a0d 48%,#121218 52%,#0c0c10 100%);
   border:1px solid #24242c; border-radius:2px;
-  color:var(--flap-c, #CCFF00); font-size:clamp(.72rem,1.6vw,.95rem);
+  color:var(--flap-c, #D4FF00); font-size:clamp(.72rem,1.6vw,.95rem);
   transform-style:preserve-3d; backface-visibility:hidden;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
 }
@@ -35,7 +35,7 @@ const CSS = `
 .pdxFlap--static{
   font-family:var(--font-display, "Barlow Condensed", sans-serif);
   font-weight:700; letter-spacing:.08em; text-transform:uppercase;
-  font-size:clamp(.85rem,1.8vw,1.05rem); color:var(--flap-c, #CCFF00);
+  font-size:clamp(.85rem,1.8vw,1.05rem); color:var(--flap-c, #D4FF00);
 }
 `;
 

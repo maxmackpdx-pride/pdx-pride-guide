@@ -84,9 +84,9 @@ html.calm-mode .home-front__backdrop-dim,:root[data-calm="true"] .home-front__ba
 .home-front__worlds { position:relative; isolation:isolate; width:100%; margin:0; padding:calc(clamp(34px,5vw,64px) - 2px) 0 calc(clamp(56px,8vw,104px) + 2px); overflow:hidden; background:#000; }
 .home-front__worlds-fx { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
 .home-front__worlds-orb { position:absolute; display:block; width:clamp(280px,36vw,560px); aspect-ratio:1; border-radius:50%; opacity:.55; pointer-events:none; }
-.home-front__worlds-orb--a { top:-18%; left:6%; background:radial-gradient(circle, #ff00cc 0%, transparent 68%); animation:homeWorldsOrbA 18s ease-in-out infinite alternate; }
+.home-front__worlds-orb--a { top:-18%; left:6%; background:radial-gradient(circle, #FF1FA0 0%, transparent 68%); animation:homeWorldsOrbA 18s ease-in-out infinite alternate; }
 .home-front__worlds-orb--b { right:4%; bottom:-22%; background:radial-gradient(circle, #00ffff 0%, transparent 68%); animation:homeWorldsOrbB 22s ease-in-out infinite alternate; }
-.home-front__worlds-orb--c { top:38%; left:42%; width:clamp(180px,22vw,360px); background:radial-gradient(circle, #ccff00 0%, transparent 68%); animation:homeWorldsOrbC 16s ease-in-out infinite alternate; }
+.home-front__worlds-orb--c { top:38%; left:42%; width:clamp(180px,22vw,360px); background:radial-gradient(circle, #D4FF00 0%, transparent 68%); animation:homeWorldsOrbC 16s ease-in-out infinite alternate; }
 @keyframes homeWorldsOrbA { to { transform:translate(40px,26px) scale(1.08); } }
 @keyframes homeWorldsOrbB { to { transform:translate(-36px,-22px) scale(.94); } }
 @keyframes homeWorldsOrbC { to { transform:translate(22px,-30px) scale(1.06); } }
@@ -103,7 +103,7 @@ html.calm-mode .home-front__backdrop-dim,:root[data-calm="true"] .home-front__ba
 .home-front__content-word-core { position:relative; z-index:1; color:#fff; -webkit-text-fill-color:currentColor; }
 .home-front__content-word-a, .home-front__content-word-b { position:absolute; inset:0; opacity:0; pointer-events:none; mix-blend-mode:screen; }
 .home-front__content-word-a { color:#00ffff; animation:homeFrontGlitchA 3.4s steps(1,end) infinite; }
-.home-front__content-word-b { color:#ff00cc; animation:homeFrontGlitchB 3.4s steps(1,end) infinite; }
+.home-front__content-word-b { color:#FF1FA0; animation:homeFrontGlitchB 3.4s steps(1,end) infinite; }
 .home-front__deck { /* One box for every slide: the fan sizes each slide to --fan-card x --fan-card-h and stretches its child to 100%, so widening these keeps all cards identical. The old 248px cap could not fit an 11-character word at the title size. */ --fan-card:clamp(236px,18vw,280px); --fan-card-h:620px; }
 html.calm-mode .home-front__worlds-orb,:root[data-calm="true"] .home-front__worlds-orb,
 html.calm-mode .home-front__content-word-a,:root[data-calm="true"] .home-front__content-word-a,

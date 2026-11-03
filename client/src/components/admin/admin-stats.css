@@ -182,8 +182,8 @@
 }
 
 .admin-stats__ga-chip--on {
-  border-color: var(--lime, #c8fa3c);
-  color: var(--lime, #c8fa3c);
+  border-color: var(--lime, #D4FF00);
+  color: var(--lime, #D4FF00);
 }
 
 .admin-stats__ga-chip--source {
@@ -288,7 +288,7 @@
   font-weight: 700;
   font-size: 12px;
   text-transform: uppercase;
-  color: var(--lime, #c8fa3c);
+  color: var(--lime, #D4FF00);
 }
 
 .admin-stats__chart-wipe {
@@ -450,7 +450,7 @@
 
 .admin-stats__conv {
   border: 1px solid var(--border-default, #1f1f1f);
-  border-left: 4px solid var(--lime, #c8fa3c);
+  border-left: 4px solid var(--lime, #D4FF00);
   border-radius: 10px;
   background: var(--ink-800, #0d0d0d);
   padding: 15px 16px;
@@ -461,9 +461,9 @@
   font-family: var(--font-display), sans-serif;
   font-weight: 900;
   font-size: 30px;
-  color: var(--lime, #c8fa3c);
+  color: var(--lime, #D4FF00);
   line-height: 0.9;
-  text-shadow: 0 0 18px color-mix(in srgb, var(--lime, #c8fa3c) 40%, transparent);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--lime, #D4FF00) 40%, transparent);
 }
 
 .admin-stats__conv-label {
@@ -477,7 +477,7 @@
 
 .admin-stats__conv-delta {
   font-size: 12px;
-  color: var(--lime, #c8fa3c);
+  color: var(--lime, #D4FF00);
   margin-top: 4px;
 }
 

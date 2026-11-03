@@ -16,7 +16,7 @@ import "./NudeBeachesHubPanel.css";
 
 /** Swim-status color ramp used for the big water-quality value + card border. */
 function swimStatusColor(status?: string | null) {
-  if (status === "pass") return "#39FF14";
+  if (status === "pass") return "#2BFF00";
   if (status === "fail") return "#FF4D4D";
   if (status === "warning") return "#FFB347";
   return "#19E3FF";

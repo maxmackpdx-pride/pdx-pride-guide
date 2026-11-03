@@ -52,7 +52,7 @@ export const mapLightShaftBackground =
   "linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015) 50%, transparent)";
 
 const MULTI_CONIC =
-  "conic-gradient(var(--purple,#8800FF),var(--blue,#1A4DFF),var(--cyan,#00FFFF),var(--green,#39FF14),var(--yellow,#FFEE00),var(--orange,#FF6600),var(--pink,#FF00CC),var(--purple,#8800FF))";
+  "conic-gradient(var(--purple,#7B00FF),var(--blue,#1A4DFF),var(--cyan,#00FFFF),var(--green,#2BFF00),var(--yellow,#FFDD00),var(--orange,#FF7B00),var(--pink,#FF1FA0),var(--purple,#7B00FF))";
 
 /** Pin core shadow: thin black ring + inward hole only - no outer neon bloom. */
 const PIN_INSET =
@@ -104,10 +104,10 @@ export function mapPinMultiHtml(opts?: { rsvpPulse?: boolean; rsvpColor?: string
 /** Legend / Expand chips - accent border + thin black + inward only. */
 export function mapChipStyle(): string {
   return [
-    "color:var(--lime, #CCFF00)",
+    "color:var(--lime, #D4FF00)",
     "background:rgba(5,5,7,.7)",
     "border:1px solid #000",
-    "outline:1px solid var(--lime, #CCFF00)",
+    "outline:1px solid var(--lime, #D4FF00)",
     "outline-offset:-2px",
     "box-shadow:0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.75)",
   ].join("; ");
@@ -171,7 +171,7 @@ export const LIVE_MAP_CHROME_CSS = `
   height:44px !important;
   line-height:42px !important;
   background:#111 !important;
-  color:var(--lime, #CCFF00) !important;
+  color:var(--lime, #D4FF00) !important;
   border:1px solid #000 !important;
   box-shadow:inset 0 1px 2px rgba(0,0,0,.7) !important;
 }
@@ -200,11 +200,11 @@ export const LIVE_MAP_CHROME_CSS = `
 }
 /* Expand chip - separate from legend; thin black + lime edge */
 .pdx-map-live .pdx-map-live__expand{
-  color:var(--lime, #CCFF00);
+  color:var(--lime, #D4FF00);
   background:rgba(5,5,7,.88);
   border:1px solid #000;
   box-shadow:0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.75);
-  outline:1px solid color-mix(in srgb, var(--lime, #CCFF00) 70%, #000);
+  outline:1px solid color-mix(in srgb, var(--lime, #D4FF00) 70%, #000);
   outline-offset:-2px;
 }
 html.calm-mode .pdx-map-live .pdx-map-live__expand,

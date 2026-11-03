@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
   <title>Waterfall Crossing Adventure Map</title>
-  <g fill="none" stroke="#CCFF00" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <g fill="none" stroke="#D4FF00" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
     <path d="M80 190L186 96L273 181L355 82L520 210"></path>
     <path d="M213 212H397L384 360Q360 407 304 414Q247 406 232 360Z"></path>
     <path d="M275 215V350M304 215V372M333 215V350"></path>

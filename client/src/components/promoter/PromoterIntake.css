@@ -35,8 +35,8 @@
   border-radius: 50%;
   margin-top: 5px;
   flex: none;
-  background: var(--neon-yellow, #ccff00);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--neon-yellow, #ccff00) 70%, transparent);
+  background: var(--neon-yellow, #D4FF00);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--neon-yellow, #D4FF00) 70%, transparent);
 }
 
 .pi-intake__kicker-label {
@@ -46,7 +46,7 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   line-height: 1.15;
-  color: var(--neon-yellow, #ccff00);
+  color: var(--neon-yellow, #D4FF00);
 }
 
 .pi-intake__meta {
@@ -59,7 +59,7 @@
 }
 
 /* ── Verified banner - dark glass + soft lime rim (design image) ─ */ .pi-verified.pdx-glass-rebind {
-  --c: var(--neon-yellow, #ccff00);
+  --c: var(--neon-yellow, #D4FF00);
   --dir-gm: 42;
   position: relative;
   overflow: hidden;
@@ -109,8 +109,8 @@
   border-radius: 50%;
   margin-top: 5px;
   flex: none;
-  background: var(--neon-yellow, #ccff00);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--neon-yellow, #ccff00) 75%, transparent);
+  background: var(--neon-yellow, #D4FF00);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--neon-yellow, #D4FF00) 75%, transparent);
 }
 
 .pi-verified__title {
@@ -119,7 +119,7 @@
   font-size: 0.95rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--neon-yellow, #ccff00);
+  color: var(--neon-yellow, #D4FF00);
   line-height: 1.15;
 }
 
@@ -162,7 +162,7 @@
 }
 
 /* ── Action row - accent glass + strong neon rim (design) ── */ .pi-action-row.pdx-glass-rebind {
-  --c: var(--neon-yellow, #ccff00);
+  --c: var(--neon-yellow, #D4FF00);
   --badge-c: var(--c);
   --dir-gm: 72;
   position: relative;

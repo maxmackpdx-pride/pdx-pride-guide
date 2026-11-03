@@ -2,29 +2,29 @@
 
 /** Must match server allowlist in profileTheme.ts (PUT /api/users/me). */
 export const PROFILE_ACCENT_COLORS = [
-  "#FF00CC",
+  "#FF1FA0",
   "#00FFFF",
-  "#CCFF00",
-  "#FF6600",
-  "#8800FF",
-  "#39FF14", // Acid Green - the only general-purpose green
-  "#0044FF",
-  "#FF2400",
+  "#D4FF00",
+  "#FF7B00",
+  "#7B00FF",
+  "#2BFF00", // Acid Green - the only general-purpose green
+  "#0066FF",
+  "#FF0000",
 ] as const;
 
 export type ProfileAccentColor = (typeof PROFILE_ACCENT_COLORS)[number];
 
-export const DEFAULT_PROFILE_ACCENT: ProfileAccentColor = "#FF00CC";
+export const DEFAULT_PROFILE_ACCENT: ProfileAccentColor = "#FF1FA0";
 
 export function normalizeProfileAccent(hex: string): string {
   const upper = hex.toUpperCase();
-  return upper === "#00EE44" ? "#39FF14" : upper;
+  return upper === "#00EE44" ? "#2BFF00" : upper;
 }
 
 /** Lighter text-safe variants on dark backgrounds. */
 export const PROFILE_ACCENT_TEXT: Partial<Record<ProfileAccentColor, string>> = {
-  "#8800FF": "#AA66FF",
-  "#0044FF": "#4488FF",
+  "#7B00FF": "#9D66FF",
+  "#0066FF": "#44AAFF",
 };
 
 export function profileAccentText(hex: string): string {

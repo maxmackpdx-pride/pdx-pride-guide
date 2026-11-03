@@ -19,7 +19,7 @@ export default function MizzedMotif({ index }: { index: number }) {
   const mirrored = variant >= 6;
   const id = `mizzed-motif-${useId().replace(/:/g, "")}`;
   return <svg ref={motion} className={`mizzed-motif${mirrored ? " mizzed-motif--mirror" : ""}`} data-motif-variant={variant} viewBox="0 0 600 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-    <defs><linearGradient id={id} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#ff00cc"/><stop offset=".48" stopColor="#a855f7"/><stop offset="1" stopColor="#19e3ff"/></linearGradient></defs>
+    <defs><linearGradient id={id} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#FF1FA0"/><stop offset=".48" stopColor="#a855f7"/><stop offset="1" stopColor="#19e3ff"/></linearGradient></defs>
     <g transform={mirrored ? "translate(600 0) scale(-1 1)" : undefined}>
       <g data-motif-depth="back" className="mizzed-motif__mesh" fill="none" stroke={`url(#${id})`} strokeWidth="1.25">{Array.from({length:8},(_,i)=><path key={i} d={`M${i*90-50} 0L${i*90+220} 360`}/>)}</g>
       <g data-motif-depth="front" className="mizzed-motif__drawing" fill="none" stroke={`url(#${id})`} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">{MOTIFS[drawing]}</g>

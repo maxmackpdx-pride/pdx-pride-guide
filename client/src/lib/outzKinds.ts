@@ -6,17 +6,17 @@ import type { OutzPlaceKind } from "@shared/outz";
  */
 export const OUTZ_KIND_META: Record<OutzPlaceKind, { label: string; color: string; accent: string; pin: string }> = {
   beach: { label: "Beach", color: "cyan", accent: "var(--cyan)", pin: "#19E3FF" },
-  "camp-hike": { label: "Camp + Hike", color: "lime", accent: "var(--lime)", pin: "#CCFF00" },
-  campground: { label: "Camp", color: "green", accent: "var(--green)", pin: "#39FF14" },
-  trailhead: { label: "Hike", color: "orange", accent: "var(--orange)", pin: "#FF6600" },
+  "camp-hike": { label: "Camp + Hike", color: "lime", accent: "var(--lime)", pin: "#D4FF00" },
+  campground: { label: "Camp", color: "green", accent: "var(--green)", pin: "#2BFF00" },
+  trailhead: { label: "Hike", color: "orange", accent: "var(--orange)", pin: "#FF7B00" },
   "outdoor-stay": { label: "Stay", color: "amber", accent: "var(--amber)", pin: "#FFB000" },
 };
 
 /** Rooster = orange, Sauvie/Collins = acid green; everything else follows kind. */
 export function outzPinHex(name: string, kind: OutzPlaceKind): string {
   const n = name.toLowerCase();
-  if (n.includes("rooster")) return "#FF6600";
-  if (n.includes("sauvie") || n.includes("collins")) return "#39FF14";
+  if (n.includes("rooster")) return "#FF7B00";
+  if (n.includes("sauvie") || n.includes("collins")) return "#2BFF00";
   return OUTZ_KIND_META[kind].pin;
 }
 
@@ -53,7 +53,7 @@ export function outzTempLabel(value: number | null | undefined) {
 
 export function outzAccentForName(name: string, kind?: OutzPlaceKind): string | null {
   const n = name.toLowerCase();
-  if (n.includes("rooster")) return "#FF6600";
-  if (n.includes("sauvie") || n.includes("collins")) return "#39FF14";
+  if (n.includes("rooster")) return "#FF7B00";
+  if (n.includes("sauvie") || n.includes("collins")) return "#2BFF00";
   return kind ? outzPinHex(name, kind) : null;
 }

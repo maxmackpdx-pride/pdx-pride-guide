@@ -10,7 +10,7 @@ import type { ProfileEvent, ProfileUserChip } from "./types";
 import "./TheBigOne.css";
 import DayMotif from "@/components/events/DayMotif";
 
-const DAY_OPPOSITE: Record<string, string> = { MON:"#CCFF00", TUE:"#FF6600", WED:"#8800FF", THU:"#FF6600", FRI:"#CCFF00", SAT:"#FF3030", SUN:"#00FFFF" };
+const DAY_OPPOSITE: Record<string, string> = { MON:"#D4FF00", TUE:"#FF7B00", WED:"#7B00FF", THU:"#FF7B00", FRI:"#D4FF00", SAT:"#FF3030", SUN:"#00FFFF" };
 
 export type TheBigOneEvent = ProfileEvent & {
   ticketUrl?: string | null;
@@ -164,7 +164,7 @@ export default function TheBigOne({
   return (
     <section
       className={`tbo pdx-glass-rebind${className ? ` ${className}` : ""}`}
-      style={{ "--tbo-day": dayColor, "--tbo-day-ink": dayInk, "--tbo-opposite": DAY_OPPOSITE[dayCode] || "#CCFF00", "--c": dayColor } as CSSProperties}
+      style={{ "--tbo-day": dayColor, "--tbo-day-ink": dayInk, "--tbo-opposite": DAY_OPPOSITE[dayCode] || "#D4FF00", "--c": dayColor } as CSSProperties}
       aria-label={`The Big One: ${event.title}`}
     >
       <RoomKicker accent={dayColor} as="div">The Big One · Up next</RoomKicker>

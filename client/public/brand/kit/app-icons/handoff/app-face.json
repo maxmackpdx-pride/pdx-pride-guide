@@ -27,15 +27,15 @@
       },
       {
         "offset": 0.34,
-        "color": "#FFEE00"
+        "color": "#FFDD00"
       },
       {
         "offset": 0.68,
-        "color": "#FF00CC"
+        "color": "#FF1FA0"
       },
       {
         "offset": 1,
-        "color": "#FF6600"
+        "color": "#FF7B00"
       }
     ],
     "monochrome": "#ffffff"

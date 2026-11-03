@@ -4,7 +4,7 @@
  * SoT: docs/handoffs/deep-glass-2026-07-16/ §2.11
  *      screenshots/12-infrastructure-grid.png
  * Tokens: glass.css `.pdx-glass-card` + `.pdx-glass-card--left-accent`
- * Accents: Gigs var(--board-gigs) · Gifting #CCFF00 · MC #FF00CC · Nude Beaches #FF6600
+ * Accents: Gigs var(--board-gigs) · Gifting #D4FF00 · MC #FF1FA0 · Nude Beaches #FF7B00
  * No title glow.
  */
 
@@ -34,21 +34,21 @@ export const INFRASTRUCTURE_CARDS: readonly InfraCard[] = [
     title: "GIFTZ",
     description:
       "Need something for Pride week or have old Pride gear collecting dust? Hit GIFTZ.",
-    accent: "#CCFF00",
+    accent: "#D4FF00",
   },
   {
     href: "/mizzed",
     title: "Missed connections",
     description:
       "Trying to find someone after a Pride event? That's why MIZZED CONNECTION posts exists.",
-    accent: "#FF00CC",
+    accent: "#FF1FA0",
   },
   {
     href: "/outzide",
     title: "OUTZ",
     description:
       "Rooster Rock and Sauvie Island conditions, carpools, check-ins, and River Brats.",
-    accent: "#FF6600",
+    accent: "#FF7B00",
   },
 ] as const;
 

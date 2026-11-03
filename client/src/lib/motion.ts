@@ -14,19 +14,19 @@ export function prefersStillMotion(): boolean {
 
 export const NEON_CYCLE = [
   "#00FFFF",
-  "#CCFF00",
-  "#FF00CC",
-  "#FF6600",
-  "#8800FF",
-  "#39FF14",
+  "#D4FF00",
+  "#FF1FA0",
+  "#FF7B00",
+  "#7B00FF",
+  "#2BFF00",
 ] as const;
 
 export const DAY_PALETTE = [
-  "#8800FF",
-  "#0044FF",
-  "#FFEE00",
+  "#7B00FF",
+  "#0066FF",
+  "#FFDD00",
   "#00FFFF",
-  "#FF00CC",
-  "#39FF14",
-  "#FF6600",
+  "#FF1FA0",
+  "#2BFF00",
+  "#FF7B00",
 ] as const;

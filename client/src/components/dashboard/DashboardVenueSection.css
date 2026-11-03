@@ -112,7 +112,7 @@
 }
 
 .dvs-glass-btn--danger.pdx-glass-rebind {
-  --c: #ff2400;
+  --c: #FF0000;
   color: var(--c);
   background: var(--glass-btn-outline-bg);
   border: var(--glass-btn-outline-border);

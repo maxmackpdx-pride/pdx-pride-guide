@@ -24,8 +24,8 @@ export const radix={
 };
 export const OLED='#000000';
 export const DAYS={
- mon:'#8800FF',tue:'#0044FF',wed:'#FFEE00',thu:'#00FFFF',
- fri:'#FF00CC',sat:'#39FF14',sun:'#FF6600'
+ mon:'#7B00FF',tue:'#0066FF',wed:'#FFDD00',thu:'#00FFFF',
+ fri:'#FF1FA0',sat:'#2BFF00',sun:'#FF7B00'
 };
 export const DAY_LIST=[DAYS.mon,DAYS.tue,DAYS.wed,DAYS.thu,DAYS.fri,DAYS.sat,DAYS.sun];
 export const windowNeon={

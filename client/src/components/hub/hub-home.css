@@ -42,7 +42,7 @@
 }
 
 .hub-profile__avatar-link:focus-visible {
-  outline: 2px solid var(--hub-lime, #c8fa3c);
+  outline: 2px solid var(--hub-lime, #D4FF00);
   outline-offset: 3px;
 }
 
@@ -131,11 +131,11 @@
   font-family: var(--font-display), sans-serif;
   font-weight: 900;
   font-size: 19px;
-  color: var(--neon-magenta, #ff00cc);
+  color: var(--neon-magenta, #FF1FA0);
 }
 
 .hub-keys__n--purple {
-  color: var(--neon-violet, #8800ff);
+  color: var(--neon-violet, #7B00FF);
 }
 
 /* Magenta glass primary CTA (Admin queue) - §1.5 glass-btn, no brutal offset */
@@ -451,7 +451,7 @@ html.calm-mode .hub-keys,
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: #ffee00;
+  background: #FFDD00;
   color: #000;
   padding: 3px 9px 2px;
   border-radius: 2px;
@@ -492,7 +492,7 @@ html.calm-mode .hub-keys,
   font-weight: 800;
   font-size: 0.85rem;
   letter-spacing: 0.08em;
-  color: var(--neon-orange, #ff6600);
+  color: var(--neon-orange, #FF7B00);
 }
 
 .hub-weather__cond {
@@ -501,7 +501,7 @@ html.calm-mode .hub-keys,
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--neon-orange, #ff6600);
+  color: var(--neon-orange, #FF7B00);
 }
 
 .hub-weather__now {
@@ -534,8 +534,8 @@ html.calm-mode .hub-keys,
 }
 
 .hub-weather__day.is-hot {
-  border-color: rgba(255, 238, 0, 0.35);
-  background: rgba(255, 238, 0, 0.06);
+  border-color: rgba(255, 221, 0, 0.35);
+  background: rgba(255, 221, 0, 0.06);
 }
 
 .hub-weather__day-label {
@@ -563,7 +563,7 @@ html.calm-mode .hub-keys,
 }
 
 .hub-weather__day-temp.is-hot {
-  color: #ffee00;
+  color: #FFDD00;
 }
 
 .hub-weather__refresh {
@@ -584,7 +584,7 @@ html.calm-mode .hub-keys,
   background: #0a0a0a;
   border: 2px solid transparent;
   background-image: linear-gradient(#0a0a0a, #0a0a0a),
-    linear-gradient(90deg, #00ffff, #39ff14, #ffee00, #ff6600, #ff00cc);
+    linear-gradient(90deg, #00ffff, #2BFF00, #FFDD00, #FF7B00, #FF1FA0);
   background-origin: border-box;
   background-clip: padding-box, border-box;
 }
@@ -615,7 +615,7 @@ html.calm-mode .hub-keys,
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #000;
-  background: var(--neon-yellow, #ccff00);
+  background: var(--neon-yellow, #D4FF00);
   padding: 4px 9px;
   border-radius: 99px;
 }
@@ -657,7 +657,7 @@ html.calm-mode .hub-keys,
   width: 7px;
   height: 7px;
   border-radius: 99px;
-  background: #ffee00;
+  background: #FFDD00;
   flex: none;
 }
 
@@ -689,8 +689,8 @@ html.calm-mode .hub-keys,
 }
 
 .hub-posts-tab.is-active {
-  background: var(--neon-green, #39ff14);
-  border-color: var(--neon-green, #39ff14);
+  background: var(--neon-green, #2BFF00);
+  border-color: var(--neon-green, #2BFF00);
   color: #000;
 }
 

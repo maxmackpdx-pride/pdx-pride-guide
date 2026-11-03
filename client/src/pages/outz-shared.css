@@ -10,9 +10,9 @@
      canonical Design System accent channel inherited by its glass surfaces. */
   --c: var(--cyan, #00ffff);
   --outz-c: var(--c);
-  --outz-good: var(--green, #39ff14);
+  --outz-good: var(--green, #2BFF00);
   --outz-warn: var(--amber, #ffb23d);
-  --outz-bad: var(--neon-orange, #ff6600);
+  --outz-bad: var(--neon-orange, #FF7B00);
   background: var(--bg-app, #06060a);
   isolation: isolate;
   overflow: hidden;
@@ -145,7 +145,7 @@
 .outz-pillrow button:focus-visible { outline: 2px solid var(--outz-c); outline-offset: 2px; }
 .outz-pillrow button.is-active { background: color-mix(in srgb, var(--outz-c) 8%, transparent); border-color: var(--outz-c); color: var(--outz-c); }
 .outz-pillrow--display button { font-family: var(--font-display, sans-serif); font-weight: 700; }
-.outz-pillrow--lime button.is-active { background: color-mix(in srgb, var(--green-acid, #39ff14) 8%, transparent); border-color: var(--green-acid, #39ff14); color: var(--green-acid, #39ff14); }
+.outz-pillrow--lime button.is-active { background: color-mix(in srgb, var(--green-acid, #2BFF00) 8%, transparent); border-color: var(--green-acid, #2BFF00); color: var(--green-acid, #2BFF00); }
 
 @media (max-width: 860px) {
   .outz-section__art { display: none; }

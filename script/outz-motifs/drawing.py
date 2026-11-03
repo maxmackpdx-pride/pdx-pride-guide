@@ -12,7 +12,7 @@ def sign(name):
 
 def save(scenes):
  for id,(feature,url,image,paths) in scenes.items():
-  r=next(x for x in rows if x['id']==id); trail=r['kind']=='trailhead'; color='#FF6600' if trail else '#00FFFF' if r['kind']=='outdoor-stay' else '#FF00CC' if r['kind']=='beach' else '#39FF14'
+  r=next(x for x in rows if x['id']==id); trail=r['kind']=='trailhead'; color='#FF7B00' if trail else '#00FFFF' if r['kind']=='outdoor-stay' else '#FF1FA0' if r['kind']=='beach' else '#2BFF00'
   svg=f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264 264" color="{color}"><title>{escape(r["name"])}</title><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">{paths}{sign(r["name"]) if trail else ""}</g></svg>'
   (D/f'{id}.svg').write_text(svg)
   r.update(status='drawn-awaiting-visual-review',asset=f'/motifs/outz/places/{id}.svg',visualFeatures=[feature],references=[{'url':url,'image':image}])

@@ -16,7 +16,7 @@
   font-size: 0.66rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--neon-magenta, #ff00cc);
+  color: var(--neon-magenta, #FF1FA0);
 }
 
 .adult-gate__title {
@@ -46,7 +46,7 @@
 
 .adult-gate__enter {
   padding: 9px 18px;
-  background: var(--neon-yellow, #ccff00);
+  background: var(--neon-yellow, #D4FF00);
   border: none;
   color: #000;
   font-size: 0.82rem;

@@ -210,7 +210,7 @@ export default function AdminProfileModeration({
         }
         .pp-admin-mod__badge.is-suspend { color: #ff8c00; border-color: #ff8c00; }
         .pp-admin-mod__badge.is-shadow { color: #b06bff; border-color: #b06bff; }
-        .pp-admin-mod__badge.is-deleted { color: #ff2400; border-color: #ff2400; }
+        .pp-admin-mod__badge.is-deleted { color: #FF0000; border-color: #FF0000; }
         .pp-admin-mod__panel {
           margin-top: 8px;
           padding: 10px;
@@ -248,7 +248,7 @@ export default function AdminProfileModeration({
           text-transform: uppercase;
           cursor: pointer;
         }
-        .pp-admin-mod__go.is-danger { background: #ff2400; color: #fff; }
+        .pp-admin-mod__go.is-danger { background: #FF0000; color: #fff; }
         .pp-admin-mod__go:disabled { opacity: 0.6; cursor: wait; }
         .pp-admin-mod__hint {
           margin: 0;

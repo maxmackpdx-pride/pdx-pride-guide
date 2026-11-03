@@ -46,8 +46,8 @@
 .submit-intent-nav__choices button:hover,
 .submit-intent-nav__choices button:focus-visible,
 .submit-intent-nav__choices button.is-active {
-  color: var(--intent-accent, #ccff00);
-  border-color: var(--intent-accent, #ccff00);
+  color: var(--intent-accent, #D4FF00);
+  border-color: var(--intent-accent, #D4FF00);
 }
 
 .submit-intent-nav button:focus-visible {
@@ -63,7 +63,7 @@
 }
 
 .submit-progress {
-  --submit-progress-accent: var(--neon-yellow, #ccff00);
+  --submit-progress-accent: var(--neon-yellow, #D4FF00);
   padding: 16px;
   border: 1px solid var(--panel-border-2, #24242c);
   border-radius: 12px;
@@ -152,7 +152,7 @@
 }
 
 .submit-form-section {
-  --submit-section-accent: var(--neon-yellow, #ccff00);
+  --submit-section-accent: var(--neon-yellow, #D4FF00);
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -289,7 +289,7 @@
   margin-bottom: 14px;
   padding: 15px 16px;
   border: 1px solid var(--panel-border-2, #24242c);
-  border-left: 3px solid var(--neon-yellow, #ccff00);
+  border-left: 3px solid var(--neon-yellow, #D4FF00);
   border-radius: 9px;
   background: #09090c;
 }

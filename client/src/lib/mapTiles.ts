@@ -48,8 +48,8 @@ export function cartoTransformRequest(url: string): { url: string } {
   }
 }
 
-export const ROOSTER_ACCENT = "#FF6600";
-export const SAUVIE_ACCENT = "#39FF14";
+export const ROOSTER_ACCENT = "#FF7B00";
+export const SAUVIE_ACCENT = "#2BFF00";
 
 /** Mix a hex color toward an accent without leaving the dark map. */
 export function mixHex(base: string, accent: string, amount: number): string {

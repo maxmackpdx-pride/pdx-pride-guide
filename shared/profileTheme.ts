@@ -1,35 +1,35 @@
 /** Profile accent color swatches - the only selectable hexes, all existing design-system neon tokens. */
 export const PROFILE_ACCENT_COLORS = [
-  "#FF00CC", // neon-magenta
+  "#FF1FA0", // neon-magenta
   "#00FFFF", // neon-cyan
-  "#CCFF00", // neon-yellow
-  "#FF6600", // neon-orange
-  "#8800FF", // neon-violet
-  "#39FF14", // Acid Green (canonical green)
-  "#0044FF", // neon-blue
-  "#FF2400", // neon-red
+  "#D4FF00", // neon-yellow
+  "#FF7B00", // neon-orange
+  "#7B00FF", // neon-violet
+  "#2BFF00", // Acid Green (canonical green)
+  "#0066FF", // neon-blue
+  "#FF0000", // neon-red
 ] as const;
 
 export type ProfileAccentColor = (typeof PROFILE_ACCENT_COLORS)[number];
 
 /** Lighter text-safe variant for accents that are too dark to read as body/heading text. */
 export const PROFILE_ACCENT_TEXT_OVERRIDES: Record<string, string> = {
-  "#8800FF": "#AA66FF", // --day-mon-text
-  "#0044FF": "#4488FF", // --day-tue-text
+  "#7B00FF": "#9D66FF", // --day-mon-text
+  "#0066FF": "#44AAFF", // --day-tue-text
 };
 
 export function profileAccentTextColor(hex: string): string {
   return PROFILE_ACCENT_TEXT_OVERRIDES[hex.toUpperCase()] || hex;
 }
 
-export const DEFAULT_PROFILE_ACCENT = "#FF00CC";
+export const DEFAULT_PROFILE_ACCENT = "#FF1FA0";
 
 /** Retired green accepted at the API boundary so existing profiles upgrade safely. */
 export const LEGACY_PROFILE_GREEN = "#00EE44";
 
 export function normalizeProfileAccentColor(value: string): string {
   const upper = value.toUpperCase();
-  return upper === LEGACY_PROFILE_GREEN ? "#39FF14" : upper;
+  return upper === LEGACY_PROFILE_GREEN ? "#2BFF00" : upper;
 }
 
 export type ProfileBanner = "accent-gradient" | "sticker-wall" | "pride-guide-social";

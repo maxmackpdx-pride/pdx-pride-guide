@@ -17,10 +17,10 @@
   max-height: 88vh;
   overflow-y: auto;
   background: #0b0b0e;
-  border: 2px solid rgba(255, 0, 204, 0.5);
+  border: 2px solid rgba(255, 31, 160, 0.5);
   border-radius: 14px;
   padding: 28px 24px 26px;
-  box-shadow: 0 30px 80px -12px rgba(0, 0, 0, 0.85), 0 0 40px -8px rgba(255, 0, 204, 0.4);
+  box-shadow: 0 30px 80px -12px rgba(0, 0, 0, 0.85), 0 0 40px -8px rgba(255, 31, 160, 0.4);
 }
 
 .pcm-close {
@@ -100,17 +100,17 @@
 .pcm-field select:focus,
 .pcm-field textarea:focus {
   outline: none;
-  border-color: var(--pink, #ff00cc);
+  border-color: var(--pink, #FF1FA0);
 }
 
 .pcm-panel--sponsor {
-  border-color: rgba(204, 255, 0, 0.45);
-  box-shadow: 0 30px 80px -12px rgba(0, 0, 0, 0.85), 0 0 40px -8px rgba(204, 255, 0, 0.35);
+  border-color: rgba(212, 255, 0, 0.45);
+  box-shadow: 0 30px 80px -12px rgba(0, 0, 0, 0.85), 0 0 40px -8px rgba(212, 255, 0, 0.35);
 }
 
 .pcm-panel--sponsor .pcm-field input:focus,
 .pcm-panel--sponsor .pcm-field textarea:focus {
-  border-color: var(--lime, #ccff00);
+  border-color: var(--lime, #D4FF00);
 }
 
 .pcm-panel--order {
@@ -264,7 +264,7 @@
   font-weight: 900;
   font-size: 1.5rem;
   text-transform: uppercase;
-  color: var(--lime, #ccff00);
+  color: var(--lime, #D4FF00);
   margin: 0 0 10px;
 }
 

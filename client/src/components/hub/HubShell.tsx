@@ -44,19 +44,19 @@ export const ADMIN_VIEW_META: Record<
   overview: {
     title: "Admin overview",
     kicker: "Control room",
-    kickerColor: "var(--lime, #ccff00)",
+    kickerColor: "var(--lime, #D4FF00)",
     lede: "Clear the queue, check the pulse, then go live. Take care of each other.",
   },
   qsearch: {
     title: "QSearch",
     kicker: "Ingest",
-    kickerColor: "var(--orange, #ff6600)",
+    kickerColor: "var(--orange, #FF7B00)",
     lede: "Pull events from venue sites and directory websites. Preview first, commit as HIDDEN, then go LIVE from All Events.",
   },
   events: {
     title: "All events",
     kicker: "The program",
-    kickerColor: "var(--orange, #ff6600)",
+    kickerColor: "var(--orange, #FF7B00)",
     lede: "Assign unclaimed listings, edit details, hide stubs. Every live night starts here.",
   },
   users: {
@@ -74,7 +74,7 @@ export const ADMIN_VIEW_META: Record<
   promoters: {
     title: "Promoters",
     kicker: "The scene makers",
-    kickerColor: "var(--pink, #ff00cc)",
+    kickerColor: "var(--pink, #FF1FA0)",
     // Keep lede short so Manual Promoter Override sits high on the page
     lede: "Grant status, clear the queue, message hosts.",
   },
@@ -87,7 +87,7 @@ export const ADMIN_VIEW_META: Record<
   team: {
     title: "My team",
     kicker: "Keyholders",
-    kickerColor: "var(--lime, #ccff00)",
+    kickerColor: "var(--lime, #D4FF00)",
     lede: "Site admins can open this panel while logged into their own account. Grant it to people you trust with the queues.",
   },
   ads: {

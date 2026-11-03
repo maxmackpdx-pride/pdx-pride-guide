@@ -1,5 +1,5 @@
 // Reference theme: black evergreen land, luminous green relief and amber contours.
-// Acid Green #39FF14 and Neon Orange #FF6600 match Zaylist color tokens.
+// Acid Green #2BFF00 and Neon Orange #FF7B00 match Zaylist color tokens.
 // Keep this treatment local so Mapz and the home flyover retain their own shader.
 
 // Landscape greens sit three shades down: each shade keeps hue and saturation and takes a fifth off the lightness.
@@ -19,30 +19,30 @@ export function brightenOutzideTerrain(style) {
   layer('ground').paint['background-color'] = shade('#031009');
   Object.assign(layer('land-relief').paint, {
     'hillshade-shadow-color': shade('#010704'),
-    'hillshade-highlight-color': shade('#39FF14'),
-    'hillshade-accent-color': shade('#163f15'),
+    'hillshade-highlight-color': shade('#2BFF00'),
+    'hillshade-accent-color': shade('#255C28'),
   });
   for (const id of ['forest-landcover', 'forest-landuse']) layer(id).paint['fill-color'] = shade('#123d16');
-  for (const id of ['leaf-landcover', 'leaf-landuse']) layer(id).paint['fill-color'] = shade('#1c491b');
-  layer('park-areas').paint['fill-color'] = shade('#255c20');
+  for (const id of ['leaf-landcover', 'leaf-landuse']) layer(id).paint['fill-color'] = shade('#2BFF00');
+  layer('park-areas').paint['fill-color'] = shade('#255C28');
   layer('developed-earth').paint['fill-color'] = [
-    'match', ['get', 'class'], 'commercial', shade('#122b19'), 'retail', shade('#122b19'),
-    'industrial', shade('#17301e'), shade('#031009'),
+    'match', ['get', 'class'], 'commercial', shade('#5C2559'), 'retail', shade('#5C2559'),
+    'industrial', shade('#5C2559'), shade('#031009'),
   ];
   layer('water').paint['fill-color'] = [
-    'interpolate', ['linear'], ['zoom'], 10, '#053329', 14, '#064437', 18, '#095244',
+    'interpolate', ['linear'], ['zoom'], 10, '#003380', 14, '#0066FF', 18, '#4D94FF',
   ];
   layer('streets').paint['line-color'] = [
-    'match', ['get', 'class'], 'motorway', '#91b834', 'trunk', '#80a632',
-    'primary', '#698c29', 'secondary', '#567b25', 'tertiary', '#41651f',
-    'minor', '#35551d', 'service', '#294819', 'path', '#9e8339',
-    'rail', '#667d38', '#35551d',
+    'match', ['get', 'class'], 'motorway', '#91b834', 'trunk', '#91b834',
+    'primary', '#91b834', 'secondary', '#35551d', 'tertiary', '#35551d',
+    'minor', '#35551d', 'service', '#35551d', 'path', '#9e8339',
+    'rail', '#35551d', '#35551d',
   ];
   // Contours: clay lines, with the index line (every fifth) in Zaylist orange and a soft glow under it.
   const contours = layer('elevation-contours');
   if (contours) {
     Object.assign(contours.paint, {
-      'line-color': ['match', ['get', 'level'], 1, '#FF6600', '#B84710'],
+      'line-color': ['match', ['get', 'level'], 1, '#FF7B00', '#B84710'],
       'line-opacity': ['interpolate', ['linear'], ['zoom'], 10, .16, 12.5, .5, 15, .42, 18, .16],
       'line-width': ['match', ['get', 'level'], 1, 1.25, .5],
     });
@@ -51,7 +51,7 @@ export function brightenOutzideTerrain(style) {
       id: 'elevation-contours-glow', type: 'line', source: contours.source, 'source-layer': contours['source-layer'], minzoom: 10.5,
       filter: ['==', ['get', 'level'], 1],
       paint: {
-        'line-color': '#FF6600', 'line-blur': 3, 'line-width': ['interpolate', ['linear'], ['zoom'], 10.5, 2.5, 15, 5],
+        'line-color': '#FF7B00', 'line-blur': 3, 'line-width': ['interpolate', ['linear'], ['zoom'], 10.5, 2.5, 15, 5],
         'line-opacity': ['interpolate', ['linear'], ['zoom'], 10.5, 0, 12.5, .2, 15, .16, 18, .06],
       },
     });
@@ -61,7 +61,7 @@ export function brightenOutzideTerrain(style) {
 
 /**
  * The Zaylist map look, added to the Outzide map only: a printed dot screen over forest and parks,
- * and dashed orange HUD lines for park and wilderness boundaries. Water stays the only cyan.
+ * and dashed orange HUD lines for park and wilderness boundaries. Water carries the hero blue ramp.
  */
 export const ZAY_DOTS_IMAGE = 'zay-dots';
 export function zaylistDotsImage() {
@@ -69,7 +69,7 @@ export function zaylistDotsImage() {
   const size = 6, canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#FF6600';
+  ctx.fillStyle = '#FF7B00';
   ctx.beginPath(); ctx.arc(size / 2, size / 2, 1.15, 0, Math.PI * 2); ctx.fill();
   return {data: ctx.getImageData(0, 0, size, size), options: {pixelRatio: 2}};
 }
@@ -80,7 +80,7 @@ export function zaylistHudBoxImage() {
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = 'rgba(5,10,8,.82)'; ctx.fillRect(0, 0, size, size);
-  ctx.strokeStyle = '#FF6600'; ctx.lineWidth = 2; ctx.strokeRect(1, 1, size - 2, size - 2);
+  ctx.strokeStyle = '#FF7B00'; ctx.lineWidth = 2; ctx.strokeRect(1, 1, size - 2, size - 2);
   return {data: ctx.getImageData(0, 0, size, size), options: {pixelRatio: 2, stretchX: [[6, 18]], stretchY: [[6, 18]], content: [6, 6, 18, 18]}};
 }
 export function addZaylistMapLook(style) {
@@ -97,10 +97,10 @@ export function addZaylistMapLook(style) {
   const boundary = [
     {id: 'zay-boundary-dash', type: 'line', source: 'terrain', 'source-layer': 'park', minzoom: 7,
       layout: {'line-join': 'round'},
-      paint: {'line-color': '#FF6600', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, .5, 12, 1], 'line-dasharray': [4, 3],
+      paint: {'line-color': '#FF7B00', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, .5, 12, 1], 'line-dasharray': [4, 3],
         'line-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0, 9, .45, 14, .55, 18, .3]}},
     {id: 'zay-boundary-ticks', type: 'line', source: 'terrain', 'source-layer': 'park', minzoom: 9,
-      paint: {'line-color': '#FF6600', 'line-width': ['interpolate', ['linear'], ['zoom'], 9, 3, 14, 6], 'line-dasharray': [.25, 18],
+      paint: {'line-color': '#FF7B00', 'line-width': ['interpolate', ['linear'], ['zoom'], 9, 3, 14, 6], 'line-dasharray': [.25, 18],
         'line-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0, 11, .5, 16, .5, 18, .25]}},
   ];
   // Elevation HUD: peak names with their height in metres, in the card label style.

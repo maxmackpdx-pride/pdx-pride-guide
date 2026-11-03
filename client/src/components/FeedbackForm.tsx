@@ -171,8 +171,8 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
           >
             {status === "sending" ? "SENDING..." : "SUBMIT FEEDBACK"}
           </button>
-          {status === "sent" && <div className="display" style={{ color: "#CCFF00", fontSize: "0.78rem" }}>Got it. Thank you for helping us sand the sharp edges.</div>}
-          {status === "error" && <div className="display" style={{ color: "#FF2400", fontSize: "0.78rem" }}>That did not send. Please try once more.</div>}
+          {status === "sent" && <div className="display" style={{ color: "#D4FF00", fontSize: "0.78rem" }}>Got it. Thank you for helping us sand the sharp edges.</div>}
+          {status === "error" && <div className="display" style={{ color: "#FF0000", fontSize: "0.78rem" }}>That did not send. Please try once more.</div>}
         </form>
       </div>
     </div>,

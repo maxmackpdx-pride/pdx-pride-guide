@@ -77,8 +77,8 @@
 }
 
 .confirm-sheet__btn--danger {
-  --button-c: var(--neon-red, #ff2400);
-  color: var(--neon-red, #ff2400);
+  --button-c: var(--neon-red, #FF0000);
+  color: var(--neon-red, #FF0000);
 }
 
 @media (max-width: 600px) {

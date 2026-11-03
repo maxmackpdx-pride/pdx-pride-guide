@@ -7,7 +7,7 @@ const CSS = `
 }
 .pdxRsvpSparks__spark{
   position:absolute; left:50%; top:50%; width:5px; height:5px; margin:-2.5px 0 0 -2.5px;
-  border-radius:1px; background:var(--sp, #CCFF00);
+  border-radius:1px; background:var(--sp, #D4FF00);
   animation:pdxaSpark .72s var(--ease-out, cubic-bezier(.2,.8,.2,1)) forwards;
   opacity:1;
 }

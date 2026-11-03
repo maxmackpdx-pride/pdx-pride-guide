@@ -95,7 +95,7 @@ export function resolveAdChrome(ad: AdBrandHint): {
       feedBrandClass: "feed-aff--cockblock",
     };
   }
-  const accent = primary || "#39ff14";
+  const accent = primary || "#2BFF00";
   return {
     brand: "custom",
     accent,

@@ -245,7 +245,7 @@ export default function CommunityStandardsGate() {
             style={{
               flex: "1 1 160px",
               padding: "14px 16px",
-              background: "#C8FA3C",
+              background: "#D4FF00",
               color: "#000",
               border: "2px solid #000",
               fontFamily: "var(--font-display, sans-serif)",

@@ -57,10 +57,10 @@ export interface AvatarEmojiOption {
 
 export const AVATAR_EMOJI_OPTIONS: AvatarEmojiOption[] = [
   { id: 1, bg: "#00FFFF", label: "Cyan Cat" },
-  { id: 2, bg: "#FF00CC", label: "Magenta Butterfly" },
-  { id: 3, bg: "#CCFF00", label: "Neon Snake" },
-  { id: 4, bg: "#8800FF", label: "Violet Moon" },
-  { id: 5, bg: "#FF6600", label: "Orange Flame" },
+  { id: 2, bg: "#FF1FA0", label: "Magenta Butterfly" },
+  { id: 3, bg: "#D4FF00", label: "Neon Snake" },
+  { id: 4, bg: "#7B00FF", label: "Violet Moon" },
+  { id: 5, bg: "#FF7B00", label: "Orange Flame" },
   { id: 6, bg: "#fff", label: "White Lightning" },
   // Illustrated Portland / Pride avatars.
   { id: 7, img: "/avatars/rose.webp", label: "Portland Rose" },

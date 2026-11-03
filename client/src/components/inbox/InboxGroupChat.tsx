@@ -195,7 +195,7 @@ export default function InboxGroupChat({ target, onBack }: Props) {
             : "Check in on the beach page to unlock this room (visible check-in only).";
 
   const badge = isEvent ? "EVENT GROUP" : isOutz ? "OUTZIDE" : "RIVER BRATS";
-  const accentStyle = { "--inbox-exp-accent": isEvent ? "#19e3ff" : isOutz ? "var(--neon-orange)" : "#39ff14" } as CSSProperties;
+  const accentStyle = { "--inbox-exp-accent": isEvent ? "#19e3ff" : isOutz ? "var(--neon-orange)" : "#2BFF00" } as CSSProperties;
   const canSend = Boolean(body.trim() && chatOpen && !postMutation.isPending);
 
   return (

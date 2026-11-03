@@ -1,6 +1,6 @@
-/* * Nude beaches hub - stacked top-rim islands (SoT: 10-islands.png) * * Right column = discrete cards (Live / River / Parking).pdx-glass-rebind, NOT one outer shell * with flat inner sections. Neon lives on the TOP rim only; sides stay quiet * charcoal. Orange #FF6600 default · cyan #19E3FF river · green #39FF14 Sauvie. */ .nb-hub.pdx-glass-rebind {
-  --nb-accent: #ff6600;
-  --nb-rim: var(--nb-accent, #ff6600);
+/* * Nude beaches hub - stacked top-rim islands (SoT: 10-islands.png) * * Right column = discrete cards (Live / River / Parking).pdx-glass-rebind, NOT one outer shell * with flat inner sections. Neon lives on the TOP rim only; sides stay quiet * charcoal. Orange #FF7B00 default · cyan #19E3FF river · green #2BFF00 Sauvie. */ .nb-hub.pdx-glass-rebind {
+  --nb-accent: #FF7B00;
+  --nb-rim: var(--nb-accent, #FF7B00);
   --c: var(--nb-rim);
   /* Top-rim island shadow stack - short bloom above top edge, no full-perimeter neon */
   --nb-island-shadow:
@@ -46,15 +46,15 @@
 }
 
 .nb-hub--rooster.pdx-glass-rebind {
-  --nb-accent: #ff6600;
-  --nb-rim: #ff6600;
-  --c: #ff6600;
+  --nb-accent: #FF7B00;
+  --nb-rim: #FF7B00;
+  --c: #FF7B00;
 }
 
 .nb-hub--sauvie.pdx-glass-rebind {
-  --nb-accent: #39ff14;
-  --nb-rim: #39ff14;
-  --c: #39ff14;
+  --nb-accent: #2BFF00;
+  --nb-rim: #2BFF00;
+  --c: #2BFF00;
 }
 
 .nb-hub--loading {
@@ -73,7 +73,7 @@
 }
 
 /* * Each section = discrete top-rim island card. */ .nb-hub__section.pdx-glass-rebind {
-  --c: var(--nb-rim, var(--nb-accent, #ff6600));
+  --c: var(--nb-rim, var(--nb-accent, #FF7B00));
   position: relative;
   flex-shrink: 0;
   border: var(--nb-island-border);
@@ -177,22 +177,22 @@
   font-weight: 900;
   font-size: clamp(1.8rem, 3.5vw, 2.4rem);
   line-height: 1;
-  color: #ff00cc;
-  text-shadow: 0 0 22px rgba(255, 0, 204, 0.35);
+  color: #FF1FA0;
+  text-shadow: 0 0 22px rgba(255, 31, 160, 0.35);
 }
 
 .nb-hub--rooster .nb-hub__weather-value {
-  color: var(--neon-orange, #ff6600);
-  text-shadow: 0 0 22px rgba(255, 102, 0, 0.35);
+  color: var(--neon-orange, #FF7B00);
+  text-shadow: 0 0 22px rgba(255, 123, 0, 0.35);
 }
 
 .nb-hub--rooster .nb-hub__weather-grid > .nb-hub__weather-stat:first-of-type .nb-hub__weather-stat-value {
-  color: var(--neon-orange, #ff6600);
+  color: var(--neon-orange, #FF7B00);
 }
 
 .nb-hub--sauvie .nb-hub__weather-value {
-  color: #39ff14;
-  text-shadow: 0 0 22px rgba(57, 255, 20, 0.35);
+  color: #2BFF00;
+  text-shadow: 0 0 22px rgba(43, 255, 0, 0.35);
 }
 
 .nb-hub--sauvie .nb-hub__level-value {
@@ -236,15 +236,15 @@
 }
 
 /* Live / weather island - accent top rim (orange or green) */ .nb-hub--rooster .nb-hub__section--pulse.pdx-glass-rebind {
-  --nb-rim: #ff6600;
-  --c: #ff6600;
-  --dc: #ff6600;
+  --nb-rim: #FF7B00;
+  --c: #FF7B00;
+  --dc: #FF7B00;
   animation: none;
 }
 
 .nb-hub--sauvie .nb-hub__section.pdx-glass-rebind {
-  --nb-rim: #39ff14;
-  --c: #39ff14;
+  --nb-rim: #2BFF00;
+  --c: #2BFF00;
 }
 
 /* River level island - cyan top rim (text values already cyan) */ .nb-hub__level.pdx-glass-rebind {
@@ -277,16 +277,16 @@
 }
 
 /* Swim / water quality island (Sauvie) - green rim; status can recolor */ .nb-hub__swim.pdx-glass-rebind {
-  --nb-rim: #39ff14;
-  --c: #39ff14;
+  --nb-rim: #2BFF00;
+  --c: #2BFF00;
 }
 
 .nb-hub__section--water.pdx-glass-rebind.nb-hub__swim--pass,
 .nb-hub__swim--pass.pdx-glass-rebind {
-  --nb-rim: #39ff14;
-  --c: #39ff14;
-  --dc: #39ff14;
-  border-top-color: color-mix(in srgb, #39ff14 70%, #2a2a32);
+  --nb-rim: #2BFF00;
+  --c: #2BFF00;
+  --dc: #2BFF00;
+  border-top-color: color-mix(in srgb, #2BFF00 70%, #2a2a32);
 }
 
 .nb-hub__swim--fail.pdx-glass-rebind {
@@ -304,14 +304,14 @@
 }
 
 .nb-hub__swim--unknown.pdx-glass-rebind {
-  --nb-rim: #39ff14;
-  --c: #39ff14;
-  --dc: #39ff14;
-  border-top-color: color-mix(in srgb, #39ff14 55%, #2a2a32);
+  --nb-rim: #2BFF00;
+  --c: #2BFF00;
+  --dc: #2BFF00;
+  border-top-color: color-mix(in srgb, #2BFF00 55%, #2a2a32);
 }
 
 /* Soften value text glows */
-.nb-hub__swim-value--pass { color: #39ff14; text-shadow: 0 0 12px rgba(57, 255, 20, 0.22); }
+.nb-hub__swim-value--pass { color: #2BFF00; text-shadow: 0 0 12px rgba(43, 255, 0, 0.22); }
 .nb-hub__swim-value--fail { color: #ff4d4d; text-shadow: 0 0 12px rgba(255, 77, 77, 0.22); }
 .nb-hub__swim-value--warning { color: #ffb347; text-shadow: 0 0 12px rgba(255, 179, 71, 0.22); }
 .nb-hub__swim-value--unknown { color: #19e3ff; text-shadow: none; }

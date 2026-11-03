@@ -4,9 +4,9 @@
  * shell and gets its ink, light and accent. Maps never take the 8% bloom.
  */
 :root {
-  --status-closed: var(--neon-red, #ff2400);
+  --status-closed: var(--neon-red, #FF0000);
   --status-caution: var(--amber, #ffb23d);
-  --status-open: var(--green-acid, #39ff14);
+  --status-open: var(--green-acid, #2BFF00);
 }
 [data-map] {
   --map-chrome-radius: 18px;

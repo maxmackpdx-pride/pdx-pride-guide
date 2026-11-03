@@ -41,7 +41,7 @@
 @media (prefers-reduced-motion:reduce){.bl *{animation:none!important}}
 
 
-.bl{--z-black:#050506;--neon-orange:#FF6600;--neon-cyan:#00FFFF;--text-hi:#fff}
+.bl{--z-black:#050506;--neon-orange:#FF7B00;--neon-cyan:#00FFFF;--text-hi:#fff}
 .bl>.bl-hud{position:absolute;left:0;right:0;top:var(--xt,0px);height:var(--xh,100%);width:100%;z-index:6;pointer-events:none}
 .bl .bl-route{animation:blmarch 1.4s linear infinite}
 @keyframes blmarch{to{stroke-dashoffset:-60}}
@@ -58,5 +58,5 @@
 :root[data-calm="true"] .bl .xc.bw,[data-demo-still="true"] .bl .xc.bw{opacity:.85}
 
 /* Pipeline QA strip (opt-in, ?blendqa=1): mono readout pinned to the bottom of the art, like the Xerox cinematic reference */
-.bl>.bl-qa{position:absolute;left:4cqw;right:4cqw;bottom:3cqw;z-index:8;pointer-events:none;padding:2cqw 3cqw;border:1px solid color-mix(in srgb,var(--neon-orange,#FF6600) 55%,transparent);border-radius:1.6cqw;background:rgb(10 10 12 / 88%);color:var(--text-hi,#fff);font:500 max(7px,2.6cqw)/1.45 var(--font-mono,ui-monospace,monospace);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:clip}
-.bl>.bl-qa b{color:var(--neon-orange,#FF6600);font-weight:700}
+.bl>.bl-qa{position:absolute;left:4cqw;right:4cqw;bottom:3cqw;z-index:8;pointer-events:none;padding:2cqw 3cqw;border:1px solid color-mix(in srgb,var(--neon-orange,#FF7B00) 55%,transparent);border-radius:1.6cqw;background:rgb(10 10 12 / 88%);color:var(--text-hi,#fff);font:500 max(7px,2.6cqw)/1.45 var(--font-mono,ui-monospace,monospace);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.bl>.bl-qa b{color:var(--neon-orange,#FF7B00);font-weight:700}

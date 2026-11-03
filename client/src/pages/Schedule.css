@@ -12,8 +12,8 @@
 .sch-scroll::-webkit-scrollbar-corner { background: #0a0a0a; }
 
 @keyframes schGlow {
-  0%, 100% { box-shadow: 0 0 16px rgba(255,0,204,.85), 0 0 34px rgba(255,0,204,.4); }
-  50% { box-shadow: 0 0 26px rgba(255,0,204,.95), 0 0 56px rgba(255,0,204,.5); }
+  0%, 100% { box-shadow: 0 0 16px rgba(255,31,160,.85), 0 0 34px rgba(255,31,160,.4); }
+  50% { box-shadow: 0 0 26px rgba(255,31,160,.95), 0 0 56px rgba(255,31,160,.5); }
 }
 @keyframes schIn {
   from { opacity: 0; transform: translateY(5px); }
@@ -234,7 +234,7 @@
   font-size: 13.5px;
   padding: 12px 20px;
   border-radius: 10px;
-  box-shadow: 0 0 24px -4px rgba(57, 255, 20, .6);
+  box-shadow: 0 0 24px -4px rgba(43, 255, 0, .6);
   max-width: calc(100vw - 24px);
 }
 

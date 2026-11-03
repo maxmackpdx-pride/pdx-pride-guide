@@ -64,7 +64,7 @@ export default function InstallModal({ open, onClose }: { open: boolean; onClose
           overflowY: "auto",
           border: "3px solid var(--neon-cyan, #19E3FF)",
           background: "#050505",
-          boxShadow: "0 0 30px rgba(25,227,255,0.22), 0 0 52px rgba(255,0,204,0.1)",
+          boxShadow: "0 0 30px rgba(25,227,255,0.22), 0 0 52px rgba(255,31,160,0.1)",
           padding: 18,
           position: "relative",
         }}
@@ -107,7 +107,7 @@ export default function InstallModal({ open, onClose }: { open: boolean; onClose
         </p>
 
         {isIos && (
-          <p style={{ color: "#FF00CC", fontSize: "0.82rem", fontStyle: "italic", lineHeight: 1.45, marginBottom: 14 }}>
+          <p style={{ color: "#FF1FA0", fontSize: "0.82rem", fontStyle: "italic", lineHeight: 1.45, marginBottom: 14 }}>
             IYKYK, it's the same move as saving Sniffies to your home screen.
           </p>
         )}

@@ -12,7 +12,7 @@
   height: 4px;
   background: var(
     --grad-rainbow,
-    linear-gradient(90deg, #00ffff, #ccff00, #ff00cc, #ff6600)
+    linear-gradient(90deg, #00ffff, #D4FF00, #FF1FA0, #FF7B00)
   );
 }
 
@@ -33,19 +33,19 @@
 }
 
 .resume-kicker--lime {
-  color: var(--neon-yellow, #ccff00);
+  color: var(--neon-yellow, #D4FF00);
 }
 .resume-kicker--cyan {
   color: var(--neon-cyan, #00ffff);
 }
 .resume-kicker--orange {
-  color: var(--neon-orange, #ff6600);
+  color: var(--neon-orange, #FF7B00);
 }
 .resume-kicker--violet {
-  color: var(--neon-violet, #8800ff);
+  color: var(--neon-violet, #7B00FF);
 }
 .resume-kicker--green {
-  color: var(--green-acid, #39ff14);
+  color: var(--green-acid, #2BFF00);
 }
 
 .resume-h2 {
@@ -124,8 +124,8 @@
   font-size: 0.72rem;
   padding: 7px 13px 6px;
   border-radius: 999px;
-  border: 2px solid var(--neon-green, #39ff14);
-  color: var(--neon-green, #39ff14);
+  border: 2px solid var(--neon-green, #2BFF00);
+  color: var(--neon-green, #2BFF00);
   white-space: nowrap;
 }
 
@@ -133,8 +133,8 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--neon-green, #39ff14);
-  box-shadow: 0 0 10px var(--neon-green, #39ff14);
+  background: var(--neon-green, #2BFF00);
+  box-shadow: 0 0 10px var(--neon-green, #2BFF00);
   animation: resumeBlink 1.8s ease-in-out infinite;
 }
 
@@ -169,7 +169,7 @@
   line-height: 0.98;
   padding: 9px 15px 7px;
   border-radius: 4px;
-  background: var(--neon-yellow, #ccff00);
+  background: var(--neon-yellow, #D4FF00);
   color: #000;
   border: 3px solid #050505;
   box-shadow: 4px 4px 0 #050505;
@@ -183,7 +183,7 @@
   white-space: nowrap;
   background: var(
     --grad-rainbow,
-    linear-gradient(90deg, #00ffff, #ccff00, #ff00cc, #ff6600)
+    linear-gradient(90deg, #00ffff, #D4FF00, #FF1FA0, #FF7B00)
   );
   border-block: 3px solid #050505;
   padding-block: 9px;
@@ -231,7 +231,7 @@
 }
 
 .resume-stat {
-  --_c: var(--neon-yellow, #ccff00);
+  --_c: var(--neon-yellow, #D4FF00);
   display: flex;
   flex-direction: column;
   gap: 9px;
@@ -243,22 +243,22 @@
 }
 
 .resume-stat--lime {
-  --_c: var(--neon-yellow, #ccff00);
+  --_c: var(--neon-yellow, #D4FF00);
 }
 .resume-stat--cyan {
   --_c: var(--neon-cyan, #00ffff);
 }
 .resume-stat--magenta {
-  --_c: var(--neon-magenta, #ff00cc);
+  --_c: var(--neon-magenta, #FF1FA0);
 }
 .resume-stat--orange {
-  --_c: var(--neon-orange, #ff6600);
+  --_c: var(--neon-orange, #FF7B00);
 }
 .resume-stat--green {
-  --_c: var(--neon-green, #39ff14);
+  --_c: var(--neon-green, #2BFF00);
 }
 .resume-stat--violet {
-  --_c: var(--neon-violet, #8800ff);
+  --_c: var(--neon-violet, #7B00FF);
 }
 
 .resume-stat__num {
@@ -290,7 +290,7 @@
   letter-spacing: 0.02em;
   line-height: 1;
   color: #111;
-  background: var(--neon-yellow, #ccff00);
+  background: var(--neon-yellow, #D4FF00);
   padding: 3px 12px 4px;
   transform: rotate(-1.6deg);
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
@@ -320,7 +320,7 @@
 
 /* Site neon palette for every employer tape */
 .resume-tape--lime {
-  background: var(--neon-yellow, #ccff00);
+  background: var(--neon-yellow, #D4FF00);
   color: #111;
   transform: rotate(-1.4deg);
 }
@@ -330,32 +330,32 @@
   transform: rotate(1.2deg);
 }
 .resume-tape--magenta {
-  background: var(--neon-magenta, #ff00cc);
+  background: var(--neon-magenta, #FF1FA0);
   color: #fff;
   transform: rotate(-0.9deg);
 }
 .resume-tape--red {
-  background: var(--neon-red, #ff2400);
+  background: var(--neon-red, #FF0000);
   color: #fff;
   transform: rotate(1.1deg);
 }
 .resume-tape--blue {
-  background: var(--neon-blue, #0044ff);
+  background: var(--neon-blue, #0066FF);
   color: #fff;
   transform: rotate(-1.2deg);
 }
 .resume-tape--violet {
-  background: var(--neon-violet, #8800ff);
+  background: var(--neon-violet, #7B00FF);
   color: #fff;
   transform: rotate(0.8deg);
 }
 .resume-tape--green {
-  background: var(--neon-green, #39ff14);
+  background: var(--neon-green, #2BFF00);
   color: #101015;
   transform: rotate(-0.7deg);
 }
 .resume-tape--orange {
-  background: var(--neon-orange, #ff6600);
+  background: var(--neon-orange, #FF7B00);
   color: #101015;
   transform: rotate(1deg);
 }
@@ -378,19 +378,19 @@
 }
 
 .resume-xp__card--lime {
-  --_g: var(--neon-yellow, #ccff00);
+  --_g: var(--neon-yellow, #D4FF00);
 }
 .resume-xp__card--cyan {
   --_g: var(--neon-cyan, #00ffff);
 }
 .resume-xp__card--magenta {
-  --_g: var(--neon-magenta, #ff00cc);
+  --_g: var(--neon-magenta, #FF1FA0);
 }
 .resume-xp__card--red {
-  --_g: var(--neon-red, #ff2400);
+  --_g: var(--neon-red, #FF0000);
 }
 .resume-xp__card--blue {
-  --_g: var(--neon-blue, #0044ff);
+  --_g: var(--neon-blue, #0066FF);
 }
 
 .resume-xp__card:hover {
@@ -506,15 +506,15 @@
   font-size: 0.72rem;
   padding: 5px 10px 4px;
   border-radius: 3px;
-  border: 2px solid var(--neon-yellow, #ccff00);
-  color: var(--neon-yellow, #ccff00);
+  border: 2px solid var(--neon-yellow, #D4FF00);
+  color: var(--neon-yellow, #D4FF00);
   background: transparent;
   white-space: nowrap;
 }
 
 .resume-chip--lime {
-  border-color: var(--neon-yellow, #ccff00);
-  color: var(--neon-yellow, #ccff00);
+  border-color: var(--neon-yellow, #D4FF00);
+  color: var(--neon-yellow, #D4FF00);
 }
 
 .resume-chip--cyan {
@@ -555,12 +555,12 @@
 }
 
 .resume-close__note a:hover {
-  color: var(--neon-yellow, #ccff00);
+  color: var(--neon-yellow, #D4FF00);
   text-decoration: underline;
 }
 
 .resume-close__star {
-  color: var(--neon-magenta, #ff00cc);
+  color: var(--neon-magenta, #FF1FA0);
   margin: 0 10px;
 }
 

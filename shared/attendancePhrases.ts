@@ -18,12 +18,12 @@ export type AttendancePhraseDef = {
 export const PAST_EVENT_ATTENDANCE_PHRASE_KEY: AttendancePhraseKey = "I_WAS_HERE";
 
 export const ATTENDANCE_PHRASES: AttendancePhraseDef[] = [
-  { key: "HEY", label: "Hey there", color: "#C8FA3C" },
+  { key: "HEY", label: "Hey there", color: "#D4FF00" },
   { key: "ILL_BE_HERE", label: "I'll be there", color: "#19E3FF" },
-  { key: "I_WAS_HERE", label: "I was here", color: "#C8FA3C" },
-  { key: "WANT_TO_CHECK_OUT", label: "Checking it out", color: "#FF00CC" },
+  { key: "I_WAS_HERE", label: "I was here", color: "#D4FF00" },
+  { key: "WANT_TO_CHECK_OUT", label: "Checking it out", color: "#FF1FA0" },
   { key: "LOOKING_FOR_SOMEONE", label: "Looking for someone", color: "#A24BFF" },
-  { key: "WORKING_THIS", label: "I'm Working", color: "#FF6600" },
+  { key: "WORKING_THIS", label: "I'm Working", color: "#FF7B00" },
 ];
 
 export const ATTENDANCE_PHRASE_BY_KEY: Record<AttendancePhraseKey, AttendancePhraseDef> =
@@ -45,5 +45,5 @@ export function resolveAttendancePhrase(message: string): AttendancePhraseDef {
   if (trimmed === "Working this one") return ATTENDANCE_PHRASE_BY_KEY.WORKING_THIS;
   const byLabel = ATTENDANCE_PHRASES.find(p => p.label === trimmed);
   if (byLabel) return byLabel;
-  return { key: "HEY", label: trimmed || "Hey there", color: "#C8FA3C" };
+  return { key: "HEY", label: trimmed || "Hey there", color: "#D4FF00" };
 }

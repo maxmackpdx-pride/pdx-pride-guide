@@ -25,14 +25,14 @@ import "@/components/ds/styles.css";
 import "@/sandbox/ds/sandbox-preview.css";
 
 const NEON_SWATCHES = [
-  { name: "Yellow", var: "--neon-yellow", hex: "#CCFF00" },
+  { name: "Yellow", var: "--neon-yellow", hex: "#D4FF00" },
   { name: "Cyan", var: "--neon-cyan", hex: "#00FFFF" },
-  { name: "Magenta", var: "--neon-magenta", hex: "#FF00CC" },
-  { name: "Orange", var: "--neon-orange", hex: "#FF6600" },
-  { name: "Violet", var: "--neon-violet", hex: "#8800FF" },
-  { name: "Blue", var: "--neon-blue", hex: "#0044FF" },
-  { name: "Acid Green", var: "--green-acid", hex: "#39FF14" },
-  { name: "Red", var: "--neon-red", hex: "#FF2400" },
+  { name: "Magenta", var: "--neon-magenta", hex: "#FF1FA0" },
+  { name: "Orange", var: "--neon-orange", hex: "#FF7B00" },
+  { name: "Violet", var: "--neon-violet", hex: "#7B00FF" },
+  { name: "Blue", var: "--neon-blue", hex: "#0066FF" },
+  { name: "Acid Green", var: "--green-acid", hex: "#2BFF00" },
+  { name: "Red", var: "--neon-red", hex: "#FF0000" },
 ] as const;
 
 const SUBNAV = [

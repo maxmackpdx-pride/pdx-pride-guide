@@ -118,7 +118,7 @@ export default function AccentPicker({
 
   if (!open || !isOwner || typeof document === "undefined") return null;
 
-  const activeAccent = (localAccent || accent || "#FF00CC").toUpperCase();
+  const activeAccent = (localAccent || accent || "#FF1FA0").toUpperCase();
   const solidOn = !hasCustomCover && !banner;
 
   const pickAccent = (hex: string) => {

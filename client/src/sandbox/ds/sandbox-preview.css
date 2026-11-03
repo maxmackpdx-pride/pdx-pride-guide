@@ -21,7 +21,7 @@
   text-transform: uppercase;
   text-align: center;
   color: #000;
-  background: var(--neon-yellow, #ccff00);
+  background: var(--neon-yellow, #D4FF00);
   border-bottom: 2px solid #000;
 }
 
@@ -111,8 +111,8 @@
 
 .ds-sandbox__calm-btn[aria-pressed="true"] {
   color: #000;
-  background: var(--neon-yellow, #ccff00);
-  border-color: var(--neon-yellow, #ccff00);
+  background: var(--neon-yellow, #D4FF00);
+  border-color: var(--neon-yellow, #D4FF00);
 }
 
 .ds-sandbox__subnav {
@@ -142,7 +142,7 @@
 }
 
 .ds-sandbox__subnav a:hover {
-  color: var(--neon-yellow, #ccff00);
+  color: var(--neon-yellow, #D4FF00);
   border-color: var(--ds-border);
   text-decoration: none;
 }

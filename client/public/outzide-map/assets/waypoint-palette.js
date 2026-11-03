@@ -5,5 +5,5 @@ export function readWaypointPalette(tokens,root=globalThis.document.documentElem
  const style=readStyle(root),values=new Map();
  const color=token=>{if(!values.has(token))values.set(token,style.getPropertyValue(token).trim());return values.get(token);};
  const colors=Object.fromEntries(Object.entries(tokens).map(([kind,token])=>[kind,color(token)]));
- return {colors,closed:(color('--status-closed')||'#FF2400').toUpperCase()};
+ return {colors,closed:(color('--status-closed')||'#FF0000').toUpperCase()};
 }

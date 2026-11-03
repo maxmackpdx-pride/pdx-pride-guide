@@ -14,10 +14,10 @@
 :root {
   /* ---- BRUTALIST OFFSET (sticker / legacy ONLY - not default CTA) ---- */
   /* Do not re-wire buttons / tickets / Shop Now / RSVP to these. */
-  --brutal-shadow:    4px 4px 0 rgba(255,0,204,0.36);
-  --brutal-shadow-lg: 6px 6px 0 rgba(255,0,204,0.50);
+  --brutal-shadow:    4px 4px 0 rgba(255,31,160,0.36);
+  --brutal-shadow-lg: 6px 6px 0 rgba(255,31,160,0.50);
   --brutal-shadow-cyan: 4px 4px 0 rgba(0,255,255,0.32);
-  --brutal-shadow-lime: 4px 4px 0 rgba(204,255,0,0.30);
+  --brutal-shadow-lime: 4px 4px 0 rgba(212,255,0,0.30);
   /* Live claim sticker shadow (soft cyan; prefer this over --brutal-shadow) */
   --claim-sticker-shadow: 3px 3px 0 rgba(0, 255, 255, 0.35);
   --claim-sticker-bg: #00ffff;
@@ -69,8 +69,8 @@
 }
 /* Slow magenta glow pulse (Spotted / missed-connections cards) */
 @keyframes pdxSpotPulse {
-  0%, 100% { box-shadow: 0 0 14px rgba(255,0,204,0.25); }
-  50%      { box-shadow: 0 0 24px rgba(255,0,204,0.40); }
+  0%, 100% { box-shadow: 0 0 14px rgba(255,31,160,0.25); }
+  50%      { box-shadow: 0 0 24px rgba(255,31,160,0.40); }
 }
 
 /* Deep-glass card entrance - canonical values from PlaceCard / §6 audit:
@@ -211,8 +211,8 @@ html.calm-mode .pdxRow {
   }
   50% {
     box-shadow:
-      0 0 14px rgba(255, 0, 204, 0.60),
-      0 3px 10px 1px rgba(255, 0, 204, 0.32);
+      0 0 14px rgba(255, 31, 160, 0.60),
+      0 3px 10px 1px rgba(255, 31, 160, 0.32);
   }
 }
 
@@ -305,7 +305,7 @@ html.calm-mode .pdx-seam {
   filter: none;
   box-shadow:
     0 0 8px rgba(0, 255, 255, 0.30),
-    0 2px 8px 1px rgba(255, 0, 204, 0.18);
+    0 2px 8px 1px rgba(255, 31, 160, 0.18);
 }
 
 /* Card top seams (pseudo-element rainbow bars on glowing cards) */
@@ -376,7 +376,7 @@ html.calm-mode .featured-event-ad::before {
     filter: none;
     box-shadow:
       0 0 8px rgba(0, 255, 255, 0.30),
-      0 2px 8px 1px rgba(255, 0, 204, 0.18);
+      0 2px 8px 1px rgba(255, 31, 160, 0.18);
   }
 }
 

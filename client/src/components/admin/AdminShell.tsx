@@ -53,14 +53,14 @@ const VIEW_TITLES: Record<AdminView, string> = {
 };
 
 const VIEW_KICKERS: Record<AdminView, { label: string; color: string }> = {
-  overview: { label: "Control room", color: "var(--lime, #ccff00)" },
-  qsearch: { label: "Ingest", color: "var(--orange, #ff6600)" },
-  events: { label: "The program", color: "var(--orange, #ff6600)" },
+  overview: { label: "Control room", color: "var(--lime, #D4FF00)" },
+  qsearch: { label: "Ingest", color: "var(--orange, #FF7B00)" },
+  events: { label: "The program", color: "var(--orange, #FF7B00)" },
   users: { label: "The community", color: "var(--cyan, #00ffff)" },
   gigs: { label: "The gig board", color: "var(--amber, #ffb020)" },
-  promoters: { label: "The scene makers", color: "var(--pink, #ff00cc)" },
+  promoters: { label: "The scene makers", color: "var(--pink, #FF1FA0)" },
   "venue-claims": { label: "The directory", color: "var(--cyan, #00ffff)" },
-  team: { label: "Keyholders", color: "var(--lime, #ccff00)" },
+  team: { label: "Keyholders", color: "var(--lime, #D4FF00)" },
   ads: { label: "Owner only", color: "var(--cyan, #19e3ff)" },
 };
 

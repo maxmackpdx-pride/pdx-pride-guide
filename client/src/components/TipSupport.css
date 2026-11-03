@@ -45,11 +45,11 @@
 
 /* * Buy me a coffee = same solid lime glass as .support-sponsors__pitch * (never orange/magenta gradient; never cyan). */ .tip-support__btn--lime-glass.pdx-glass-rebind,
 .tip-support__btn--coffee-grad.pdx-glass-rebind {
-  --c: var(--lime, #ccff00);
+  --c: var(--lime, #D4FF00);
   position: relative;
   color: #050506 !important;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
-    var(--lime, #ccff00) !important;
+    var(--lime, #D4FF00) !important;
   border: 1px solid #000 !important;
   box-shadow:
     0 0 0 1px #000,
@@ -98,7 +98,7 @@
 
 .tip-support__btn--lime-glass:focus-visible,
 .tip-support__btn--coffee-grad:focus-visible {
-  outline: 2px solid var(--lime, #ccff00);
+  outline: 2px solid var(--lime, #D4FF00);
   outline-offset: 3px;
 }
 
@@ -118,7 +118,7 @@
   border-radius: 10px;
   color: #050506 !important;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
-    var(--lime, #ccff00) !important;
+    var(--lime, #D4FF00) !important;
   border: 1px solid #000 !important;
   box-shadow:
     0 0 0 1px #000,

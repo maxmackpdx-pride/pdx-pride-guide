@@ -15,7 +15,7 @@
       <path d="M16 0H0v16" fill="none" stroke="#2f6b3a" stroke-width="0.5" opacity="0.30" />
     </pattern>
     <pattern id="hzGridLg" width="96" height="96" patternUnits="userSpaceOnUse">
-      <path d="M96 0H0v96" fill="none" stroke="#39ff14" stroke-width="0.7" opacity="0.13" />
+      <path d="M96 0H0v96" fill="none" stroke="#2BFF00" stroke-width="0.7" opacity="0.13" />
     </pattern>
     <linearGradient id="hzVign" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#0b1016" stop-opacity="0" />
@@ -28,18 +28,18 @@
   <rect width="1504" height="688" fill="url(#hzGridLg)" />
 
   <!-- structural rules -->
-  <g stroke="#39ff14" fill="none" opacity="0.55">
+  <g stroke="#2BFF00" fill="none" opacity="0.55">
     <path d="M0 104h1504" stroke-width="3" />
     <path d="M0 118h1504" stroke-width="0.8" opacity="0.5" />
     <path d="M0 636h1504" stroke-width="1.4" opacity="0.45" />
   </g>
-  <g stroke="#39ff14" fill="none" opacity="0.22" stroke-width="1">
+  <g stroke="#2BFF00" fill="none" opacity="0.22" stroke-width="1">
     <path d="M636 0v688M968 118v518M176 118v518" />
     <path d="M60 300h520M968 300h460" />
   </g>
 
   <!-- long table, five seats a side -->
-  <g stroke="#39ff14" fill="none" stroke-width="3" opacity="0.9">
+  <g stroke="#2BFF00" fill="none" stroke-width="3" opacity="0.9">
     <rect x="84" y="176" width="326" height="96" rx="6" />
     <path d="M74 196v56" stroke-width="4" />
     <g>
@@ -58,7 +58,7 @@
 
   <!-- table with people, seen from above -->
   <g fill="none" stroke-width="4">
-    <rect x="676" y="176" width="188" height="152" rx="6" stroke="#39ff14" opacity="0.85" />
+    <rect x="676" y="176" width="188" height="152" rx="6" stroke="#2BFF00" opacity="0.85" />
     <g stroke="#ffffff" opacity="0.95">
       <circle cx="712" cy="200" r="24" />
       <circle cx="712" cy="258" r="18" />
@@ -67,7 +67,7 @@
       <circle cx="832" cy="262" r="18" />
       <circle cx="828" cy="312" r="26" />
     </g>
-    <g stroke="#39ff14" opacity="0.9">
+    <g stroke="#2BFF00" opacity="0.9">
       <circle cx="772" cy="172" r="24" />
       <circle cx="770" cy="252" r="12" />
     </g>
@@ -86,7 +86,7 @@
       <path d="M1196 232h108a26 26 0 0 0-26-26h-56a26 26 0 0 0-26 26z" />
       <path d="M1014 150h176v82h-176z" />
     </g>
-    <g stroke="#39ff14" opacity="0.9">
+    <g stroke="#2BFF00" opacity="0.9">
       <circle cx="1074" cy="176" r="34" />
       <circle cx="1164" cy="150" r="30" />
       <circle cx="1248" cy="164" r="26" />
@@ -111,14 +111,14 @@
     <path d="M474 530v52M510 530v52" />
   </g>
   <!-- the spark where the hands meet -->
-  <g stroke="#c8fa3c" stroke-width="4" stroke-linecap="round" opacity="0.95">
+  <g stroke="#D4FF00" stroke-width="4" stroke-linecap="round" opacity="0.95">
     <path d="M420 322v-24M392 334l-14-18M448 334l14-18M376 356l-22-8M466 356l22-8" />
   </g>
 
   <!-- a round table, still being filled -->
   <g fill="none" stroke-width="4">
-    <rect x="644" y="404" width="240" height="196" rx="6" stroke="#39ff14" opacity="0.5" />
-    <g stroke="#39ff14" opacity="0.9">
+    <rect x="644" y="404" width="240" height="196" rx="6" stroke="#2BFF00" opacity="0.5" />
+    <g stroke="#2BFF00" opacity="0.9">
       <circle cx="716" cy="490" r="34" />
       <circle cx="792" cy="470" r="24" />
       <circle cx="848" cy="510" r="26" />
@@ -127,13 +127,13 @@
   </g>
 
   <!-- someone still on their own -->
-  <g fill="none" stroke="#39ff14" stroke-width="4" opacity="0.9">
+  <g fill="none" stroke="#2BFF00" stroke-width="4" opacity="0.9">
     <circle cx="1254" cy="404" r="18" />
     <circle cx="1250" cy="462" r="36" />
   </g>
 
   <!-- loose ones, not yet placed -->
-  <g fill="none" stroke="#39ff14" stroke-width="4" opacity="0.85">
+  <g fill="none" stroke="#2BFF00" stroke-width="4" opacity="0.85">
     <circle cx="940" cy="350" r="22" />
     <circle cx="1038" cy="452" r="18" />
   </g>

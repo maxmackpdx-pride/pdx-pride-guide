@@ -241,8 +241,8 @@ export default function MissedConnectionsPanel({
   }
 
   const composeForm = mode === "board" && !boardLayout && (
-    <section style={{ background: "#0a0a0a", border: "2px solid #FF00CC", padding: 20, marginBottom: 28 }}>
-      <h2 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>WRITE A NOTE</h2>
+    <section style={{ background: "#0a0a0a", border: "2px solid #FF1FA0", padding: 20, marginBottom: 28 }}>
+      <h2 className="display panel-heading" style={{ color: "#FF1FA0", marginBottom: 8 }}>WRITE A NOTE</h2>
       <p className="board-copy-sm" style={{ marginBottom: 14 }}>
         Tell them where you crossed paths—at an event, a favorite spot, or somewhere around town. You stay anonymous on the board.
       </p>
@@ -254,7 +254,7 @@ export default function MissedConnectionsPanel({
         placeholder="Where did you notice them? Share the moment. Keep it kind, specific, and under 500 characters."
         maxLength={500}
       />
-      <div style={{ color: form.body.length >= 500 ? "#FF2400" : "#555", fontSize: "0.75rem", marginTop: 4 }}>{form.body.length}/500</div>
+      <div style={{ color: form.body.length >= 500 ? "#FF0000" : "#555", fontSize: "0.75rem", marginTop: 4 }}>{form.body.length}/500</div>
       <button
         onClick={() => createMutation.mutate()}
         disabled={!form.body.trim() || createMutation.isPending}
@@ -275,7 +275,7 @@ export default function MissedConnectionsPanel({
         <button className="btn-neon pdx-glass-rebind" style={{ marginTop: 16 }} onClick={() => refetch()}>Try again</button>
       </div>
     ) : (
-      <div style={{ textAlign: "center", padding: "24px 0", border: "2px dashed #FF00CC" }}>
+      <div style={{ textAlign: "center", padding: "24px 0", border: "2px dashed #FF1FA0" }}>
         <p style={{ color: "#fff", marginBottom: 12 }}>Could not load MIZZED CONNECTION posts.</p>
         <button className="btn-neon pdx-glass-rebind" style={{ fontSize: "0.78rem", padding: "8px 14px" }} onClick={() => refetch()}>TRY AGAIN</button>
       </div>
@@ -312,14 +312,14 @@ export default function MissedConnectionsPanel({
 
   const replyModal = replyingTo && (
     <div onClick={() => setReplyingTo(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#090909", border: "2px solid #FF00CC", width: "100%", maxWidth: 520, padding: 22 }}>
-        <h3 className="display panel-heading" style={{ color: "#FF00CC", marginBottom: 8 }}>PRIVATE REPLY</h3>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#090909", border: "2px solid #FF1FA0", width: "100%", maxWidth: 520, padding: 22 }}>
+        <h3 className="display panel-heading" style={{ color: "#FF1FA0", marginBottom: 8 }}>PRIVATE REPLY</h3>
         <p style={{ color: "#888", fontSize: "0.85rem", marginBottom: 12, lineHeight: 1.5 }}>
           {replyingTo.title}. Your reply stays anonymous in inbox until you both choose to reveal.
         </p>
         <textarea style={{ ...inputStyle, minHeight: 120, resize: "vertical" }} value={replyBody} onChange={e => setReplyBody(e.target.value)} placeholder="Write your reply..." />
         <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-          <button onClick={() => replyMutation.mutate()} disabled={!replyBody.trim() || replyMutation.isPending} style={{ background: "#FF00CC", color: "#000", border: "none", padding: "9px 16px", cursor: "pointer", opacity: !replyBody.trim() || replyMutation.isPending ? 0.55 : 1 }}>
+          <button onClick={() => replyMutation.mutate()} disabled={!replyBody.trim() || replyMutation.isPending} style={{ background: "#FF1FA0", color: "#000", border: "none", padding: "9px 16px", cursor: "pointer", opacity: !replyBody.trim() || replyMutation.isPending ? 0.55 : 1 }}>
             {replyMutation.isPending ? "SENDING..." : "SEND"}
           </button>
           <button onClick={() => setReplyingTo(null)} style={{ background: "transparent", color: "#666", border: "1px solid #333", padding: "9px 12px", cursor: "pointer" }}>Cancel</button>
@@ -355,7 +355,7 @@ export default function MissedConnectionsPanel({
 
       {(mode === "event" || mode === "beach") && (
         <section style={{ background: "#0a0a0a", border: "1px solid #333", padding: 16, marginBottom: 16 }}>
-          <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 8 }}>Post a MIZZED CONNECTION</h3>
+          <h3 className="display" style={{ color: "#FF1FA0", fontSize: "1rem", marginBottom: 8 }}>Post a MIZZED CONNECTION</h3>
           <p style={{ color: "#888", fontSize: "0.78rem", marginBottom: 10 }}>
             {mode === "beach"
               ? "Missed connections from the beach · also on the main MIZZED CONNECTION board · anonymous until you both reveal in inbox."
@@ -373,7 +373,7 @@ export default function MissedConnectionsPanel({
             onClick={() => createMutation.mutate()}
             disabled={!form.body.trim() || createMutation.isPending}
             className="display"
-            style={{ marginTop: 10, background: "#FF00CC", color: "#000", border: "none", padding: "8px 16px", cursor: "pointer", fontSize: "0.8rem", opacity: !form.body.trim() || createMutation.isPending ? 0.55 : 1 }}
+            style={{ marginTop: 10, background: "#FF1FA0", color: "#000", border: "none", padding: "8px 16px", cursor: "pointer", fontSize: "0.8rem", opacity: !form.body.trim() || createMutation.isPending ? 0.55 : 1 }}
           >
             {createMutation.isPending ? "POSTING..." : "POST"}
           </button>

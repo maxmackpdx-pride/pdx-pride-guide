@@ -9,18 +9,18 @@ export function attendanceInitials(handle: string): string {
 export function attendanceSeedColor(seed: string): string {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  const colors = ["#CCFF00", "#00FFFF", "#FF00CC", "#FF6600", "#8800FF", "#FF2400", "#39FF14"];
+  const colors = ["#D4FF00", "#00FFFF", "#FF1FA0", "#FF7B00", "#7B00FF", "#FF0000", "#2BFF00"];
   return colors[h % colors.length];
 }
 
 const REFERENCE_GRADIENTS = [
-  "linear-gradient(135deg, #FF00CC, #A24BFF)",
+  "linear-gradient(135deg, #FF1FA0, #A24BFF)",
   "linear-gradient(135deg, #19E3FF, #008026)",
-  "linear-gradient(135deg, #CCFF00, #19E3FF)",
-  "linear-gradient(135deg, #FF6600, #FF00CC)",
+  "linear-gradient(135deg, #D4FF00, #19E3FF)",
+  "linear-gradient(135deg, #FF7B00, #FF1FA0)",
   "linear-gradient(135deg, #A24BFF, #19E3FF)",
-  "linear-gradient(135deg, #FFED00, #FF6600)",
-  "linear-gradient(135deg, #CCFF00, #FF00CC)",
+  "linear-gradient(135deg, #FFED00, #FF7B00)",
+  "linear-gradient(135deg, #D4FF00, #FF1FA0)",
 ];
 
 export function attendanceBubbleGradient(seed: string): string {

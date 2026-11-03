@@ -9,9 +9,9 @@ const ADULT = new Set(["fantasyland", "taboovideo", "mrpeeps", "fantasy"]);
 // The legacy file for this record contained unrelated “PrEP4All” artwork.
 const FORCE_GENERATE = new Set(["cascadeaidsprojectcapandourhouse"]);
 const COLORS = {
-  bar: "#FF00CC", restaurant: "#FF6600", cafe: "#39FF14", venue: "#19E3FF",
-  service: "#A855F7", shop: "#FFD700", nonprofit: "#FFFFFF", healthcare: "#FF00CC",
-  realestate: "#1A4DFF", group: "#FFD700", campground: "#39FF14", hotel: "#FF1FA0",
+  bar: "#FF1FA0", restaurant: "#FF7B00", cafe: "#2BFF00", venue: "#19E3FF",
+  service: "#A855F7", shop: "#FFD700", nonprofit: "#FFFFFF", healthcare: "#FF1FA0",
+  realestate: "#1A4DFF", group: "#FFD700", campground: "#2BFF00", hotel: "#FF1FA0",
 };
 
 const normalize = (name) => name.toLowerCase().normalize("NFKD")
@@ -33,7 +33,7 @@ for (const place of places) {
   const primary = path.join(OUT, `${stem}.png`);
   const white = path.join(OUT, `${stem}-white.png`);
   const adult = ADULT.has(norm);
-  const color = adult ? "#FF2400" : (COLORS[place.type] || COLORS.venue);
+  const color = adult ? "#FF0000" : (COLORS[place.type] || COLORS.venue);
   let generated = FORCE_GENERATE.has(norm);
   if (!generated) {
     try { await fs.access(primary); } catch { generated = true; }

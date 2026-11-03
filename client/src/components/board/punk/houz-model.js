@@ -1,7 +1,7 @@
 export const housingTypes = {
-  offering: { label: 'JOIN OUR HOÜZ', color: '#FF00CC', suffix: '/MO' },
-  looking: { label: 'LOOKING TO RENT', color: '#FF6600', suffix: '/MO' },
-  forming: { label: 'BUILDING A HOÜZ', color: '#39FF14', suffix: 'BUDGET' },
+  offering: { label: 'JOIN OUR HOÜZ', color: '#FF1FA0', suffix: '/MO' },
+  looking: { label: 'LOOKING TO RENT', color: '#FF7B00', suffix: '/MO' },
+  forming: { label: 'BUILDING A HOÜZ', color: '#2BFF00', suffix: 'BUDGET' },
   managed: { label: 'MANAGED RENTAL', color: '#FF5F6D', suffix: '/MO' },
 };
 export function housingPrice(amount, suffix, compact = false) {

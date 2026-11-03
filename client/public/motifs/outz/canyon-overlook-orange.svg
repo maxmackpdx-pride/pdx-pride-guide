@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
   <title>Canyon Overlook Adventure Map</title>
-  <g fill="none" stroke="#FF6600" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <g fill="none" stroke="#FF7B00" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
     <path d="M70 142L147 108L194 151L238 116V374M362 374V116L411 151L459 108L531 142"></path>
     <path d="M70 142L96 369L172 410L238 374M531 142L505 369L430 410L362 374"></path>
     <path d="M111 194L170 225L238 183M489 194L430 225L362 183"></path>

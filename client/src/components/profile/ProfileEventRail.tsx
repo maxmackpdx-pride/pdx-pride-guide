@@ -8,7 +8,7 @@ import EventFlyerArt from "@/components/events/EventFlyerArt";
 
 const DAY_CODES = new Set(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]);
 const WEEKDAY_FROM_JS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
-const DAY_OPPOSITE: Record<string, string> = { MON:"#CCFF00", TUE:"#FF6600", WED:"#8800FF", THU:"#FF6600", FRI:"#CCFF00", SAT:"#FF3030", SUN:"#00FFFF" };
+const DAY_OPPOSITE: Record<string, string> = { MON:"#D4FF00", TUE:"#FF7B00", WED:"#7B00FF", THU:"#FF7B00", FRI:"#D4FF00", SAT:"#FF3030", SUN:"#00FFFF" };
 
 /** Resolve MON to SUN for day tokens; falls back from dateStart when dayOfWeek is missing. */
 export function eventDayCode(event: ProfileEvent): string {
@@ -116,7 +116,7 @@ export function GoingEventCard({ event, onClick, goingAvatars = [], past = false
   const style = {
     ["--pp-day" as string]: day,
     ["--pp-day-ink" as string]: dayInk,
-    ["--pp-opposite" as string]: DAY_OPPOSITE[code] || "#CCFF00",
+    ["--pp-opposite" as string]: DAY_OPPOSITE[code] || "#D4FF00",
     ["--c" as string]: day,
   } as CSSProperties;
   const clickable = typeof onClick === "function";

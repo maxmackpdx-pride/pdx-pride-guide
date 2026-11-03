@@ -5,14 +5,14 @@
   gap: 8px;
   margin-top: 10px;
   padding: 10px 12px;
-  border: 1px solid rgba(255, 36, 0, 0.45);
+  border: 1px solid rgba(255, 0, 0, 0.45);
   background: rgba(0, 0, 0, 0.55);
   max-width: 240px;
 }
 
 .pp-admin-photo-reject__label {
   font-size: 0.62rem;
-  color: rgba(255, 36, 0, 0.85);
+  color: rgba(255, 0, 0, 0.85);
   letter-spacing: 0.1em;
 }
 
@@ -30,7 +30,7 @@
 .pp-admin-photo-reject__select:focus,
 .pp-admin-photo-reject__input:focus {
   outline: none;
-  border-color: #ff2400;
+  border-color: #FF0000;
 }
 
 .pp-admin-photo-reject__btn {
@@ -39,15 +39,15 @@
   font-family: var(--font-display);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
-  color: #ff2400;
-  border: 1px solid #ff2400;
+  color: #FF0000;
+  border: 1px solid #FF0000;
   background: transparent;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .pp-admin-photo-reject__btn:hover:not(:disabled) {
-  background: rgba(255, 36, 0, 0.12);
+  background: rgba(255, 0, 0, 0.12);
 }
 
 .pp-admin-photo-reject__btn:disabled {

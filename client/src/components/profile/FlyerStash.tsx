@@ -26,14 +26,14 @@ type WorkMeta = {
 const WORK: Record<StashRole, WorkMeta> = {
   RSVP: {label:"RSVP HISTORY",color:"#00FFFF",xp:0,ladder:null},
   DJ: { label: "DJ SET", color: "#19e3ff", xp: STASH_WORK_XP.DJ, ladder: ["BEDROOM DJ", "OPENER", "RESIDENT DJ", "HEADLINE DJ", "PDX SOUND LEGEND"] },
-  DRAG: { label: "DRAG", color: "#FF00CC", xp: STASH_WORK_XP.DRAG, ladder: ["BABY QUEEN", "LOCAL LEGEND", "STAGE MOTHER", "HEADLINER", "PDX DRAG ROYALTY"] },
-  MC: { label: "HOST / MC", color: "#CCFF00", xp: STASH_WORK_XP.MC, ladder: ["OPEN MIC", "MC", "MAIN STAGE MC", "RINGLEADER", "PARTY PUP"] },
-  GOGO: { label: "GO-GO", color: "#FF6600", xp: STASH_WORK_XP.GOGO, ladder: ["FRESH FEET", "GO-GO", "BOX STAR", "HEADLINE DANCER", "PDX GO-GO LEGEND"] },
+  DRAG: { label: "DRAG", color: "#FF1FA0", xp: STASH_WORK_XP.DRAG, ladder: ["BABY QUEEN", "LOCAL LEGEND", "STAGE MOTHER", "HEADLINER", "PDX DRAG ROYALTY"] },
+  MC: { label: "HOST / MC", color: "#D4FF00", xp: STASH_WORK_XP.MC, ladder: ["OPEN MIC", "MC", "MAIN STAGE MC", "RINGLEADER", "PARTY PUP"] },
+  GOGO: { label: "GO-GO", color: "#FF7B00", xp: STASH_WORK_XP.GOGO, ladder: ["FRESH FEET", "GO-GO", "BOX STAR", "HEADLINE DANCER", "PDX GO-GO LEGEND"] },
   PHOTO: { label: "PHOTOG", color: "#b06bff", xp: STASH_WORK_XP.PHOTO, ladder: ["SHUTTERBUG", "EVENT PHOTOG", "SCENE SHOOTER", "STAFF LENS", "PDX LENS LEGEND"] },
   BAR: { label: "BAR", color: "#FFB23D", xp: STASH_WORK_XP.BAR, ladder: ["BACK BAR", "BARTENDER", "HEAD POUR", "BAR BOSS", "PDX BAR LEGEND"] },
-  SECURITY: { label: "SECURITY", color: "#39FF14", xp: STASH_WORK_XP.SECURITY, ladder: ["DOOR", "SECURITY", "HEAD OF DOOR", "SAFETY LEAD", "PDX SAFETY LEGEND"] },
+  SECURITY: { label: "SECURITY", color: "#2BFF00", xp: STASH_WORK_XP.SECURITY, ladder: ["DOOR", "SECURITY", "HEAD OF DOOR", "SAFETY LEAD", "PDX SAFETY LEGEND"] },
   VOLUNTEER: { label: "VOLUNTEER", color: "#00FFFF", xp: STASH_WORK_XP.VOLUNTEER, ladder: ["HELPER", "VOLUNTEER", "CREW", "TEAM LEAD", "PDX CREW LEGEND"] },
-  VENDOR: { label: "VENDOR", color: "#FFEE00", xp: STASH_WORK_XP.VENDOR, ladder: ["POP-UP", "VENDOR", "MARKET REG", "VENDOR BOSS", "PDX MARKET LEGEND"] },
+  VENDOR: { label: "VENDOR", color: "#FFDD00", xp: STASH_WORK_XP.VENDOR, ladder: ["POP-UP", "VENDOR", "MARKET REG", "VENDOR BOSS", "PDX MARKET LEGEND"] },
   WENT: { label: "WENT", color: "#00FFFF", xp: STASH_WORK_XP.WENT, ladder: null },
 };
 

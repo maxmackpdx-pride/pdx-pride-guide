@@ -28,5 +28,5 @@ test('the landscape fills use the darker greens',()=>{
  const layers=['ground','land-relief','forest-landcover','forest-landuse','leaf-landcover','leaf-landuse','park-areas','developed-earth','water','streets'].map(id=>({id,paint:{}}));
  brightenOutzideTerrain({layers});
  assert.equal(layers.find(l=>l.id==='forest-landcover').paint['fill-color'],shade('#123d16'));
- assert.equal(layers.find(l=>l.id==='park-areas').paint['fill-color'],shade('#255c20'));
+ assert.equal(layers.find(l=>l.id==='park-areas').paint['fill-color'],shade('#255C28'));
 });

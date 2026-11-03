@@ -16,7 +16,7 @@ type Props = {
 
 const DAY_CODES = new Set(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]);
 const WEEKDAY_FROM_JS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
-const DAY_OPPOSITE: Record<string, string> = { MON:"#CCFF00", TUE:"#FF6600", WED:"#8800FF", THU:"#FF6600", FRI:"#CCFF00", SAT:"#FF3030", SUN:"#00FFFF" };
+const DAY_OPPOSITE: Record<string, string> = { MON:"#D4FF00", TUE:"#FF7B00", WED:"#7B00FF", THU:"#FF7B00", FRI:"#D4FF00", SAT:"#FF3030", SUN:"#00FFFF" };
 
 function dayCode(event: ProfileEvent): string {
   const raw = (event.dayOfWeek || "").trim().toUpperCase();
@@ -103,7 +103,7 @@ function HostingCard({
   const admission = admissionChrome(event.admission);
   const dayInk = code === "MON" || code === "TUE" ? "#fff" : "#050506";
 
-  const style = { "--hp-day": color, "--hp-day-ink": dayInk, "--hp-opposite": DAY_OPPOSITE[code] || "#CCFF00", "--c": color } as CSSProperties;
+  const style = { "--hp-day": color, "--hp-day-ink": dayInk, "--hp-opposite": DAY_OPPOSITE[code] || "#D4FF00", "--c": color } as CSSProperties;
 
   const activate = () => {
     if (interactive) onEventClick!(event);

@@ -33,7 +33,7 @@ test('standalone demo includes the four seeded HAÜZ listing roles at neighborho
   const rows=standaloneDemoRows().filter(row=>row.kind==='housing');
   assert.deepEqual(rows.map(row=>row.housingModel).sort(),['FORMING','LOOKING','MANAGED','OFFERING']);
   assert.ok(rows.every(row=>row.demoOpen&&row.neighborhoodLabel&&row.coordinates.every(Number.isFinite)));
-  assert.equal(rows.find(row=>row.housingModel==='MANAGED').color,'#8800FF');
+  assert.equal(rows.find(row=>row.housingModel==='MANAGED').color,'#7B00FF');
 });
 
 test('HAÜZ projection keeps a readable event-relative envelope at every camera distance',async()=>{

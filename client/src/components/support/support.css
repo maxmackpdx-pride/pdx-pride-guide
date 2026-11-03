@@ -45,8 +45,8 @@
 
 /* "Alive" matches pitch / sponsors lime accent */
 .support-keepalive__alive {
-  color: var(--lime, #ccff00);
-  text-shadow: 0 0 22px color-mix(in srgb, var(--lime, #ccff00) 40%, transparent);
+  color: var(--lime, #D4FF00);
+  text-shadow: 0 0 22px color-mix(in srgb, var(--lime, #D4FF00) 40%, transparent);
 }
 
 .support-keepalive__copy p,
@@ -116,7 +116,7 @@
 }
 
 .support-affiliate__star {
-  color: var(--lime, #ccff00);
+  color: var(--lime, #D4FF00);
   font-weight: 900;
 }
 
@@ -288,8 +288,8 @@
   letter-spacing: 0.02em;
   line-height: 0.95;
   font-size: clamp(1.75rem, 3.4vw, 2.35rem);
-  color: var(--lime, #ccff00);
-  text-shadow: 0 0 22px color-mix(in srgb, var(--lime, #ccff00) 40%, transparent);
+  color: var(--lime, #D4FF00);
+  text-shadow: 0 0 22px color-mix(in srgb, var(--lime, #D4FF00) 40%, transparent);
   margin: 0 0 18px;
 }
 
@@ -322,7 +322,7 @@
   border-radius: 12px;
   position: relative;
   overflow: hidden;
-  --c: var(--lime, #ccff00);
+  --c: var(--lime, #D4FF00);
   background:
     radial-gradient(90% 70% at 50% 46%, #000 0%, #000 40%, #050508 100%),
     radial-gradient(100% 80% at 0% 50%, color-mix(in srgb, var(--c) 14%, transparent), transparent 55%);
@@ -339,15 +339,15 @@
 }
 
 .support-sponsors__check .mark {
-  color: var(--lime, #ccff00);
+  color: var(--lime, #D4FF00);
   font-weight: 900;
   font-size: 18px;
   flex-shrink: 0;
-  text-shadow: 0 0 12px color-mix(in srgb, var(--lime, #ccff00) 55%, transparent);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--lime, #D4FF00) 55%, transparent);
 }
 
 /* Pitch CTA - solid lime glass.pdx-glass-rebind, no outer bloom (never cyan) */ .support-sponsors__pitch.pdx-glass-rebind {
-  --c: var(--lime, #ccff00);
+  --c: var(--lime, #D4FF00);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -363,7 +363,7 @@
   border-radius: 10px;
   color: #050506 !important;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
-    var(--lime, #ccff00) !important;
+    var(--lime, #D4FF00) !important;
   border: 1px solid #000 !important;
   box-shadow:
     0 0 0 1px #000,
@@ -391,7 +391,7 @@
 }
 
 .support-sponsors__pitch:focus-visible {
-  outline: 2px solid var(--lime, #ccff00);
+  outline: 2px solid var(--lime, #D4FF00);
   outline-offset: 3px;
 }
 

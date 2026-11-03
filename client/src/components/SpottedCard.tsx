@@ -10,9 +10,9 @@ import { BoardGlassMotif } from "@/components/board/GiftListingCard";
 import { mizzedSource } from "@/lib/mizzedSource";
 import MizzedMotif from "@/components/MizzedMotif";
 
-const ACCENT_CYCLE = ["#19E3FF", "#FF00CC", "#39FF14", "#A855F7", "#FF6600"];
+const ACCENT_CYCLE = ["#19E3FF", "#FF1FA0", "#2BFF00", "#A855F7", "#FF7B00"];
 /** Deep-glass board accent for MIZZED CONNECTION (SoT §2.4). */
-const MC_GLASS = "#FF00CC";
+const MC_GLASS = "#FF1FA0";
 
 export function spottedAccent(id: number): string {
   return ACCENT_CYCLE[Math.abs(id) % ACCENT_CYCLE.length];
@@ -43,8 +43,8 @@ export function spottedKind(post: MissedConnectionPost): { label: string; color:
   if (post.eventId != null) return { label: "At an event", color: "#19e3ff" };
   if (post.placeId != null) return { label: "Placez", color: "#ff37c2" };
   if (post.beachId === "rooster-rock") return { label: "Rooster Rock", color: "#19e3ff" };
-  if (post.beachId === "sauvie-island") return { label: "Sauvie Island", color: "#ff6600" };
-  if (post.beachId) return { label: "At the beach", color: "#ff6600" };
+  if (post.beachId === "sauvie-island") return { label: "Sauvie Island", color: "#FF7B00" };
+  if (post.beachId) return { label: "At the beach", color: "#FF7B00" };
   return { label: "Around town", color: "#ff8c00" };
 }
 

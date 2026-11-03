@@ -283,10 +283,10 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
 
       <RiverBratsShell beachId={beachId} />
 
-      <section className="nude-outz-link pdx-glass-card pdx-glass-rebind" style={{ "--c": isRooster ? "#ff6600" : "#39ff14" } as CSSProperties}>
+      <section className="nude-outz-link pdx-glass-card pdx-glass-rebind" style={{ "--c": isRooster ? "#FF7B00" : "#2BFF00" } as CSSProperties}>
         <p>BEYOND THE BEACH</p>
         <h2>Camping, trails, and practical trip leads live in OUTZ.</h2>
-        <Link className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href="/outzide#outz-stays" style={{ "--c": isRooster ? "#ff6600" : "#39ff14" } as CSSProperties}>
+        <Link className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href="/outzide#outz-stays" style={{ "--c": isRooster ? "#FF7B00" : "#2BFF00" } as CSSProperties}>
           MORE OUTZ
         </Link>
       </section>

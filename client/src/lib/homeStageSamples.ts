@@ -97,9 +97,9 @@ export type SpottedRow = {
 };
 
 const ACCENT: Record<HomeStageBoardKey, string> = {
-  events: "var(--day-fri, #FF00CC)",
+  events: "var(--day-fri, #FF1FA0)",
   housing: "var(--panel-cyan, #19e3ff)",
-  gifting: "var(--panel-lime, #c8fa3c)",
+  gifting: "var(--panel-lime, #D4FF00)",
   gigs: "var(--panel-purple, #b06bff)",
   spotted: "var(--panel-magenta, #ff1fa0)",
 };

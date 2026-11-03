@@ -5,8 +5,8 @@ import AppleCardCarousel, { type EventCarouselCard } from "@/components/ui/carou
 import "./FeedEventDeck.css";
 
 const DAY_COLOR: Record<string, string> = {
-  MON: "#8800FF", TUE: "#0044FF", WED: "#FFEE00", THU: "#00FFFF",
-  FRI: "#FF00CC", SAT: "#39FF14", SUN: "#FF6600",
+  MON: "#7B00FF", TUE: "#0066FF", WED: "#FFDD00", THU: "#00FFFF",
+  FRI: "#FF1FA0", SAT: "#2BFF00", SUN: "#FF7B00",
 };
 
 export default function FeedEventDeck({ events, onOpen }: {

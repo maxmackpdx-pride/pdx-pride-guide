@@ -132,7 +132,7 @@ export const BEACH_MAP_LOCATIONS: Record<NudeBeachTab, BeachMapLocation> = {
     lat: 45.5446,
     lng: -122.2342,
     zoom: 15,
-    pinColor: "#FF6600",
+    pinColor: "#FF7B00",
   },
   "sauvie-island": {
     label: "Collins Beach",
@@ -140,7 +140,7 @@ export const BEACH_MAP_LOCATIONS: Record<NudeBeachTab, BeachMapLocation> = {
     lat: 45.793,
     lng: -122.789,
     zoom: 14,
-    pinColor: "#39FF14",
+    pinColor: "#2BFF00",
   },
 };
 

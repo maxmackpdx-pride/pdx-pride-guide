@@ -1,7 +1,7 @@
 /* Approved The Big One: poster-proportion feature object with production actions intact. */
 
 .tbo {
-  --tbo-day: var(--day-sat, #39ff14);
+  --tbo-day: var(--day-sat, #2BFF00);
   width: 100%;
   min-width: 0;
 }

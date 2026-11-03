@@ -122,7 +122,7 @@ async function buildMissedConnectionCanvas(post: ShareMissedConnection): Promise
     position: relative; margin-top: 56px; display: flex; flex-direction: column; align-items: center; gap: 8px;
   `;
   footer.innerHTML = `
-    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:38px;color:#C8FA3C;letter-spacing:0.04em;">MISSED CONNECTIONS</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:38px;color:#D4FF00;letter-spacing:0.04em;">MISSED CONNECTIONS</div>
     <div style="font-family:'Inter',sans-serif;font-size:26px;color:#666;">zaylist.com · Portland, OR</div>
   `;
   node.appendChild(footer);

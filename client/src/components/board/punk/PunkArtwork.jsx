@@ -26,7 +26,7 @@ export function resolvePunkArtwork(post){
   return byId[fallback[post.category]]||null;
 }
 export function PunkArtworkFilters(){return <svg width="0" height="0" aria-hidden="true" style={{position:'absolute'}}><defs><filter id="punk-cutout-alpha" colorInterpolationFilters="sRGB"><feComponentTransfer><feFuncA type="linear" slope="5" intercept="-3.6"/></feComponentTransfer></filter></defs></svg>}
-export function punkPostInk(post){return post.category==='housing'?housingTypes[post.intent].color:({gigz:'#6E3DFF',sellz:'#39FF14',giftz:'#CCFF00',mizzed:'#FF00CC'}[post.category]||'#00FFFF')}
+export function punkPostInk(post){return post.category==='housing'?housingTypes[post.intent].color:({gigz:'#6E3DFF',sellz:'#2BFF00',giftz:'#D4FF00',mizzed:'#FF1FA0'}[post.category]||'#00FFFF')}
 // Preserve 20% of the flag's own color; category ink belongs to its surrounding scraps.
 export function PunkInkImage({art,secondary='#00FFFF'}){
   const id='paper-ink-'+useId().replace(/:/g,'');

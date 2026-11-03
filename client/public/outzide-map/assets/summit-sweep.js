@@ -34,7 +34,7 @@ export function addSummitSweep(style){
     id:`summit-sweep-${s.id}`,type:'line',source:contours.source,'source-layer':contours['source-layer'],minzoom:10,
     filter:['within',disc(s.lng,s.lat)],
     layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':'#FF6600','line-blur':.9,'line-opacity':0,
+    paint:{'line-color':'#FF7B00','line-blur':.9,'line-opacity':0,
       'line-width':['interpolate',['linear'],['zoom'],10,2.4,12.5,3.6,15,5.2]},
   }));
   style.layers.splice(style.layers.indexOf(contours)+1,0,...layers);
