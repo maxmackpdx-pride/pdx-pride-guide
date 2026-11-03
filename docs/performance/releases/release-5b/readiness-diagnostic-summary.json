@@ -1,0 +1,109 @@
+{
+  "samplesRecorded": 29,
+  "stoppedReason": "Home6pairs complete. Outzide one pair showed0blendmounts in both versions, so marker inapplicable; further repeated timeout samples stopped. One extra Outzide cold may have completed before stop.",
+  "variants": {
+    "r5a": {
+      "samples": 6,
+      "warmDclValuesMs": [
+        2030.4000000022352,
+        1430.800000000745,
+        2527.5,
+        1278.800000000745,
+        2105.900000002235,
+        1074.5
+      ],
+      "medianMs": 1730.6000000014901,
+      "zeroPendingAtCapturedBoundary": 4,
+      "readiness": [
+        {
+          "started": 12,
+          "completed": 12,
+          "pending": 0,
+          "waitResolved": true
+        },
+        {
+          "started": 9,
+          "completed": 9,
+          "pending": 0,
+          "waitResolved": true
+        },
+        {
+          "started": 6,
+          "completed": 6,
+          "pending": 0,
+          "waitResolved": true
+        },
+        {
+          "started": 15,
+          "completed": 15,
+          "pending": 0,
+          "waitResolved": false
+        },
+        {
+          "started": 12,
+          "completed": 9,
+          "pending": 3,
+          "waitResolved": true
+        },
+        {
+          "started": 18,
+          "completed": 15,
+          "pending": 3,
+          "waitResolved": true
+        }
+      ]
+    },
+    "r5b": {
+      "samples": 6,
+      "warmDclValuesMs": [
+        903.1999999992549,
+        1944.7000000029802,
+        251.69999999925494,
+        1698.6000000014901,
+        961.5,
+        1764.1000000014901
+      ],
+      "medianMs": 1330.050000000745,
+      "zeroPendingAtCapturedBoundary": 4,
+      "readiness": [
+        {
+          "started": 18,
+          "completed": 18,
+          "pending": 0,
+          "waitResolved": false
+        },
+        {
+          "started": 9,
+          "completed": 6,
+          "pending": 3,
+          "waitResolved": true
+        },
+        {
+          "started": 24,
+          "completed": 21,
+          "pending": 3,
+          "waitResolved": false
+        },
+        {
+          "started": 21,
+          "completed": 21,
+          "pending": 0,
+          "waitResolved": false
+        },
+        {
+          "started": 21,
+          "completed": 21,
+          "pending": 0,
+          "waitResolved": false
+        },
+        {
+          "started": 6,
+          "completed": 6,
+          "pending": 0,
+          "waitResolved": true
+        }
+      ]
+    }
+  },
+  "interpretation": "Supplemental readiness changes warm direction and reveals remount races in both versions; cannot replace original5sec scenario or certify a performance pass. Wrapper returns originalPromise/disposer, no source change. Global image quiet failed and is retained separately."
+}

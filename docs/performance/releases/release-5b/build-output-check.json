@@ -1,0 +1,68 @@
+{
+  "passed": true,
+  "manifests": {
+    "home-flight": {
+      "base": "/assets/home-flight-042df3c60eb12022"
+    },
+    "mapz": {
+      "base": "/assets/mapz-a8d25226a7c26df4",
+      "assets": {
+        "script": "/assets/mapz-a8d25226a7c26df4/boot.js",
+        "maplibre": "/assets/mapz-a8d25226a7c26df4/maplibre.js",
+        "maplibreCss": "/assets/mapz-a8d25226a7c26df4/maplibre.css",
+        "contour": "/assets/mapz-a8d25226a7c26df4/contour.js",
+        "style": "/assets/mapz-a8d25226a7c26df4/studio.css",
+        "perf": "/assets/mapz-a8d25226a7c26df4/perf.js"
+      }
+    },
+    "outzide": {
+      "assets": {
+        "script": "/assets/outzide-ca43db21d084e26b/boot.js",
+        "maplibre": "/assets/mapz-a8d25226a7c26df4/maplibre.js",
+        "maplibreCss": "/assets/mapz-a8d25226a7c26df4/maplibre.css"
+      }
+    }
+  },
+  "checked": [
+    {
+      "url": "/assets/mapz-a8d25226a7c26df4/boot.js",
+      "bytes": 889204,
+      "compressedRoundTrip": true
+    },
+    {
+      "url": "/assets/mapz-a8d25226a7c26df4/maplibre.js",
+      "bytes": 937726,
+      "compressedRoundTrip": true
+    },
+    {
+      "url": "/assets/mapz-a8d25226a7c26df4/maplibre.css",
+      "bytes": 69430,
+      "compressedRoundTrip": true
+    },
+    {
+      "url": "/assets/mapz-a8d25226a7c26df4/contour.js",
+      "bytes": 31355,
+      "compressedRoundTrip": true
+    },
+    {
+      "url": "/assets/mapz-a8d25226a7c26df4/studio.css",
+      "bytes": 19819,
+      "compressedRoundTrip": true
+    },
+    {
+      "url": "/assets/mapz-a8d25226a7c26df4/perf.js",
+      "bytes": 2516,
+      "compressedRoundTrip": true
+    },
+    {
+      "url": "/assets/outzide-ca43db21d084e26b/boot.js",
+      "bytes": 882158,
+      "compressedRoundTrip": true
+    }
+  ],
+  "serverBundleBytes": 3756207,
+  "sqliteVersion": "3.53.2",
+  "sqliteSmoke": "native in-memory write/read passed; tracked DB not opened",
+  "pwaWorkerBytes": 18792,
+  "homeFlight": "Complete source parity separately enforced by verify-deploy-bundle.mjs"
+}

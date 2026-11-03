@@ -1,0 +1,107 @@
+{
+  "verifiedAt": "2026-11-03T04:36:03.256302+00:00",
+  "baseCommit": "4d9c4a473aaeafc0b2362b56de9eb04cd80bea2b",
+  "intendedStagedTreeAtStart": "5bf5fd1dafd4963c1ab0159a3744d386c2caca19",
+  "inventoryFileSha256": "14626a20781127ba651949551e5dc89df96eb6b9d21875f8f5e944221c9349ff",
+  "inventoryContentDigest": "b856ac867be75536ca2e6e171e579aa79dbbe08735c1c25dd2888748ca9519ee",
+  "inventoryFileCount": 6063,
+  "finalInventoryDrift": [],
+  "rootSeedDbSha256": "84f59e3974d35112ed9dad8521f31f28d545faf8b97d6dbc2a636ce70c21d14b",
+  "checks": {
+    "ci-unit": {
+      "tests": 147,
+      "pass": 146,
+      "fail": 0,
+      "skipped": 1
+    },
+    "shared-card-unit": {
+      "tests": 20,
+      "pass": 20,
+      "fail": 0,
+      "skipped": 0
+    },
+    "all-browser": {
+      "tests": 14,
+      "pass": 14,
+      "fail": 0,
+      "skipped": 0
+    },
+    "glass-parser": {
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "typecheck": "passed",
+  "glassAudit": "passed",
+  "predeploy": "passed",
+  "fullBuild": "passed; external Foundation motif request blocked locally and checked-in fallback used",
+  "bundleVerification": "passed",
+  "profileDeclarations": {
+    "complete": 325,
+    "jsonInputsSkipped": 0
+  },
+  "buildOutputCheck": "passed: home-flight source parity, Mapz/Outzide manifests/sharedrenderer, all referenced JS/CSS br+gzip roundtrip, serverbundle, nativeSQLite in-memory read/write",
+  "builtAppSmoke": "passed4same-documentmobile navigation routes and localworker activation/iconsmanifest-onlycache",
+  "hmr": "passed isolated React fixture state/document preserved after source edit; removed fixture afterward",
+  "node": "24.22.2",
+  "browser": "136.0.7103.25",
+  "packages": {
+    "vite": "8.3.5",
+    "@vitejs/plugin-react": "6.2.1",
+    "vite-plugin-pwa": "1.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "offlineBaseline": {
+    "samples": 30,
+    "HTTP200": 30,
+    "JSerrors": 0,
+    "topFrameMapCanvases": 0
+  },
+  "interleavedReplay": {
+    "samples": 120,
+    "HTTP200": 120,
+    "JSerrors": 0,
+    "evidence": "interleaved-summary.json"
+  },
+  "performanceStatus": "Investigation required/explicit decision remains: coldDCL+15\u201321ms (+18\u201326%) across5routes; original5sec warm Home+207ms/+30.6%,Directory+155.7ms/+18.7%,Outzide+68.85ms/+132.8%; image-readiness diagnostic changes direction but is not an overall performance pass.",
+  "initialJavaScriptIncludingPreloads": {
+    "kind": ".js",
+    "initialFilesIncludingPreloads": [
+      1,
+      34
+    ],
+    "reactVite7": {
+      "raw": 875795,
+      "gzip": 273327,
+      "brotli": 255123
+    },
+    "reactVite8": {
+      "raw": 885579,
+      "gzip": 278820,
+      "brotli": 262681
+    },
+    "changePercent": {
+      "raw": 1.1171564121740918,
+      "gzip": 2.0096807121140703,
+      "brotli": 2.962492601607858
+    }
+  },
+  "readinessDiagnostic": "readiness-diagnostic-summary.json",
+  "limitations": [
+    "Offline disposable seededDB/softwareGPU; no physicaliPhone/Safari proof.",
+    "Interleaved resource URLs for prior variant collapsed by sanitizer; numeric bytes/counts/timing intact and raw CDP traces retained. Fixed sanitizer for diagnostic.",
+    "Globalquiet diagnostic stopped after inability to settle; scoped Home complete, Outzide marker inapplicable.",
+    "No productionwrites/sourceedits by verifier; parent ownspublication decision."
+  ],
+  "publicationDecision": {
+    "status": "held_for_user_decision",
+    "askedAt": "2026-11-03T04:36:40Z",
+    "questionScope": "Deploy the tested Vite upgrade with recorded performance caveats, or retain current production and investigate further.",
+    "decisionReceived": false,
+    "production": "No Vite deployment or live verification claimed.",
+    "mapWork": "Releases6and7 remain held regardless of Vite decision."
+  }
+}

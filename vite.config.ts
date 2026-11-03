@@ -72,6 +72,8 @@ export default defineConfig(async ({ command }):Promise<UserConfig> => {
   // fallback, and the app never booted on deep links.
   base: "/",
   build: {
+    // Preserve the pre-upgrade browser floor; Vite 8 defaults are newer.
+    target: ["chrome107", "edge107", "firefox104", "safari16", "ios16"],
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     manifest: true,
     emptyOutDir: true,

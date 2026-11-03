@@ -1,0 +1,556 @@
+{
+  "conditions": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "deviceScaleFactor": 1,
+    "isMobile": true,
+    "hasTouch": true,
+    "network": "OFFLINE ONLY: all non-loopback browser+server requests denied; not equivalent to initial baseline external-failure conditions",
+    "gpu": "Chromium SwiftShader software renderer",
+    "auth": "anonymous",
+    "sampleWindowMs": 5000,
+    "physicalDevice": false,
+    "sampleDeadlineMs": 45000,
+    "cache": "Fresh context per cold; same-context reload labeled warm. Playwright request routing DISABLES HTTP CACHE; unlike initial baseline warm-cache samples. Service workers blocked.",
+    "limits": "Top-frame Resource Timing excludes navigation and iframe resources and omits cross-origin byte detail without Timing-Allow-Origin; these byte totals are not total page transfer. Scroll frame timeout is recorded, not treated as smooth performance."
+  },
+  "browser": "136.0.7103.25",
+  "samples": 30,
+  "http200": 30,
+  "jsErrors": 0,
+  "topFrameMapCanvases": 0,
+  "routes": [
+    {
+      "route": "/",
+      "cache": "cold",
+      "samplesPerVersion": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "reactBaselineValues": [
+          122.69999999925494,
+          103.30000000074506,
+          90.39999999850988
+        ],
+        "viteValues": [
+          148,
+          141.40000000223517,
+          131.10000000149012
+        ],
+        "baselineMedian": 103.30000000074506,
+        "currentMedian": 141.40000000223517,
+        "changePercent": 36.882865441641165
+      },
+      "resourceTransferBytes": {
+        "reactBaselineValues": [
+          13798559,
+          13144785,
+          14452333
+        ],
+        "viteValues": [
+          13809658,
+          13806368,
+          14463432
+        ],
+        "baselineMedian": 13798559,
+        "currentMedian": 13809658,
+        "changePercent": 0.08043593537556681
+      },
+      "scriptEncodedBytes": {
+        "reactBaselineValues": [
+          765343,
+          765343,
+          765343
+        ],
+        "viteValues": [
+          670358,
+          670358,
+          670358
+        ],
+        "baselineMedian": 765343,
+        "currentMedian": 670358,
+        "changePercent": -12.410775299440902
+      }
+    },
+    {
+      "route": "/",
+      "cache": "warm",
+      "samplesPerVersion": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "reactBaselineValues": [
+          529.8999999985099,
+          462.19999999925494,
+          1692.3999999985099
+        ],
+        "viteValues": [
+          934.9000000022352,
+          1021.1000000014901,
+          697.6000000014901
+        ],
+        "baselineMedian": 529.8999999985099,
+        "currentMedian": 934.9000000022352,
+        "changePercent": 76.42951500374866
+      },
+      "resourceTransferBytes": {
+        "reactBaselineValues": [
+          13775471,
+          12282484,
+          5236877
+        ],
+        "viteValues": [
+          14437054,
+          13779990,
+          13779990
+        ],
+        "baselineMedian": 12282484,
+        "currentMedian": 13779990,
+        "changePercent": 12.19220802567298
+      },
+      "scriptEncodedBytes": {
+        "reactBaselineValues": [
+          765343,
+          727294,
+          735718
+        ],
+        "viteValues": [
+          670358,
+          670358,
+          670358
+        ],
+        "baselineMedian": 735718,
+        "currentMedian": 670358,
+        "changePercent": -8.883838644698105
+      }
+    },
+    {
+      "route": "/events",
+      "cache": "cold",
+      "samplesPerVersion": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "reactBaselineValues": [
+          98.39999999850988,
+          102.69999999925494,
+          103.19999999925494
+        ],
+        "viteValues": [
+          142.19999999925494,
+          142.90000000223517,
+          115.59999999776483
+        ],
+        "baselineMedian": 102.69999999925494,
+        "currentMedian": 142.19999999925494,
+        "changePercent": 38.46153846181748
+      },
+      "resourceTransferBytes": {
+        "reactBaselineValues": [
+          5575759,
+          5575759,
+          5575759
+        ],
+        "viteValues": [
+          5585832,
+          5585832,
+          5585832
+        ],
+        "baselineMedian": 5575759,
+        "currentMedian": 5585832,
+        "changePercent": 0.18065701907130638
+      },
+      "scriptEncodedBytes": {
+        "reactBaselineValues": [
+          605608,
+          605608,
+          605608
+        ],
+        "viteValues": [
+          512304,
+          512304,
+          512304
+        ],
+        "baselineMedian": 605608,
+        "currentMedian": 512304,
+        "changePercent": -15.406665697943222
+      }
+    },
+    {
+      "route": "/events",
+      "cache": "warm",
+      "samplesPerVersion": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "reactBaselineValues": [
+          673.1999999992549,
+          526,
+          610.9000000022352
+        ],
+        "viteValues": [
+          599.3000000007451,
+          697.0999999977648,
+          590.1999999992549
+        ],
+        "baselineMedian": 610.9000000022352,
+        "currentMedian": 599.3000000007451,
+        "changePercent": -1.8988377805610912
+      },
+      "resourceTransferBytes": {
+        "reactBaselineValues": [
+          5575759,
+          5575759,
+          5575759
+        ],
+        "viteValues": [
+          5585832,
+          5585832,
+          5585832
+        ],
+        "baselineMedian": 5575759,
+        "currentMedian": 5585832,
+        "changePercent": 0.18065701907130638
+      },
+      "scriptEncodedBytes": {
+        "reactBaselineValues": [
+          605608,
+          605608,
+          605608
+        ],
+        "viteValues": [
+          512304,
+          512304,
+          512304
+        ],
+        "baselineMedian": 605608,
+        "currentMedian": 512304,
+        "changePercent": -15.406665697943222
+      }
+    },
+    {
+      "route": "/directory",
+      "cache": "cold",
+      "samplesPerVersion": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "reactBaselineValues": [
+          106.19999999925494,
+          102.60000000149012,
+          87.89999999850988
+        ],
+        "viteValues": [
+          127.29999999701977,
+          112.80000000074506,
+          141.80000000074506
+        ],
+        "baselineMedian": 102.60000000149012,
+        "currentMedian": 127.29999999701977,
+        "changePercent": 24.07407406936737
+      },
+      "resourceTransferBytes": {
+        "reactBaselineValues": [
+          13884873,
+          13884873,
+          13884873
+        ],
+        "viteValues": [
+          13897840,
+          13897840,
+          14061265
+        ],
+        "baselineMedian": 13884873,
+        "currentMedian": 13897840,
+        "changePercent": 0.09338940298553311
+      },
+      "scriptEncodedBytes": {
+        "reactBaselineValues": [
+          518051,
+          518051,
+          518051
+        ],
+        "viteValues": [
+          427174,
+          427174,
+          427174
+        ],
+        "baselineMedian": 518051,
+        "currentMedian": 427174,
+        "changePercent": -17.542095276333804
+      }
+    },
+    {
+      "route": "/directory",
+      "cache": "warm",
+      "samplesPerVersion": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "reactBaselineValues": [
+          581.4000000022352,
+          772.5999999977648,
+          878
+        ],
+        "viteValues": [
+          1260.9000000022352,
+          865.0999999977648,
+          866.6000000014901
+        ],
+        "baselineMedian": 772.5999999977648,
+        "currentMedian": 866.6000000014901,
+        "changePercent": 12.166709811545084
+      },
+      "resourceTransferBytes": {
+        "reactBaselineValues": [
+          14045008,
+          14045008,
+          14045008
+        ],
+        "viteValues": [
+          14057975,
+          14057975,
+          13894550
+        ],
+        "baselineMedian": 14045008,
+        "currentMedian": 14057975,
+        "changePercent": 0.09232461811341519
+      },
+      "scriptEncodedBytes": {
+        "reactBaselineValues": [
+          518051,
+          518051,
+          518051
+        ],
+        "viteValues": [
+          427174,
+          427174,
+          427174
+        ],
+        "baselineMedian": 518051,
+        "currentMedian": 427174,
+        "changePercent": -17.542095276333804
+      }
+    },
+    {
+      "route": "/outzide",
+      "cache": "cold",
+      "samplesPerVersion": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "reactBaselineValues": [
+          106.30000000074506,
+          107.90000000223517,
+          108.5
+        ],
+        "viteValues": [
+          134.29999999701977,
+          135.89999999850988,
+          141.80000000074506
+        ],
+        "baselineMedian": 107.90000000223517,
+        "currentMedian": 135.89999999850988,
+        "changePercent": 25.949953656806947
+      },
+      "resourceTransferBytes": {
+        "reactBaselineValues": [
+          1133761,
+          1133761,
+          1133761
+        ],
+        "viteValues": [
+          1146790,
+          1146790,
+          1146790
+        ],
+        "baselineMedian": 1133761,
+        "currentMedian": 1146790,
+        "changePercent": 1.1491839990968034
+      },
+      "scriptEncodedBytes": {
+        "reactBaselineValues": [
+          278716,
+          278716,
+          278716
+        ],
+        "viteValues": [
+          188676,
+          188676,
+          188676
+        ],
+        "baselineMedian": 278716,
+        "currentMedian": 188676,
+        "changePercent": -32.305285667130704
+      }
+    },
+    {
+      "route": "/outzide",
+      "cache": "warm",
+      "samplesPerVersion": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "reactBaselineValues": [
+          123.39999999850988,
+          138.80000000074506,
+          131.5
+        ],
+        "viteValues": [
+          153.69999999925494,
+          137.30000000074506,
+          139.5
+        ],
+        "baselineMedian": 131.5,
+        "currentMedian": 139.5,
+        "changePercent": 6.083650190114076
+      },
+      "resourceTransferBytes": {
+        "reactBaselineValues": [
+          1133761,
+          1130471,
+          1133761
+        ],
+        "viteValues": [
+          1143500,
+          1143500,
+          1143500
+        ],
+        "baselineMedian": 1133761,
+        "currentMedian": 1143500,
+        "changePercent": 0.8589993834679399
+      },
+      "scriptEncodedBytes": {
+        "reactBaselineValues": [
+          278716,
+          278716,
+          278716
+        ],
+        "viteValues": [
+          188676,
+          188676,
+          188676
+        ],
+        "baselineMedian": 278716,
+        "currentMedian": 188676,
+        "changePercent": -32.305285667130704
+      }
+    },
+    {
+      "route": "/boardz",
+      "cache": "cold",
+      "samplesPerVersion": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "reactBaselineValues": [
+          107.69999999925494,
+          107.30000000074506,
+          89.19999999925494
+        ],
+        "viteValues": [
+          131.59999999776483,
+          118,
+          115.90000000223517
+        ],
+        "baselineMedian": 107.30000000074506,
+        "currentMedian": 118,
+        "changePercent": 9.972041005760147
+      },
+      "resourceTransferBytes": {
+        "reactBaselineValues": [
+          7858906,
+          7858906,
+          7858906
+        ],
+        "viteValues": [
+          7869714,
+          7869714,
+          7869714
+        ],
+        "baselineMedian": 7858906,
+        "currentMedian": 7869714,
+        "changePercent": 0.13752550291350474
+      },
+      "scriptEncodedBytes": {
+        "reactBaselineValues": [
+          617159,
+          617159,
+          617159
+        ],
+        "viteValues": [
+          523133,
+          523133,
+          523133
+        ],
+        "baselineMedian": 617159,
+        "currentMedian": 523133,
+        "changePercent": -15.235295928601866
+      }
+    },
+    {
+      "route": "/boardz",
+      "cache": "warm",
+      "samplesPerVersion": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "reactBaselineValues": [
+          395.1000000014901,
+          418.19999999925494,
+          427.80000000074506
+        ],
+        "viteValues": [
+          382.69999999925494,
+          377.29999999701977,
+          450.3999999985099
+        ],
+        "baselineMedian": 418.19999999925494,
+        "currentMedian": 382.69999999925494,
+        "changePercent": -8.488761358216944
+      },
+      "resourceTransferBytes": {
+        "reactBaselineValues": [
+          7855616,
+          7855616,
+          8061738
+        ],
+        "viteValues": [
+          7869714,
+          7866424,
+          7866424
+        ],
+        "baselineMedian": 7855616,
+        "currentMedian": 7866424,
+        "changePercent": 0.13758309978491035
+      },
+      "scriptEncodedBytes": {
+        "reactBaselineValues": [
+          617159,
+          617159,
+          617159
+        ],
+        "viteValues": [
+          523133,
+          523133,
+          523133
+        ],
+        "baselineMedian": 617159,
+        "currentMedian": 523133,
+        "changePercent": -15.235295928601866
+      }
+    }
+  ]
+}

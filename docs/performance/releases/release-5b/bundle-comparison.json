@@ -1,0 +1,46 @@
+[
+  {
+    "kind": ".js",
+    "initialFilesIncludingPreloads": [
+      1,
+      34
+    ],
+    "reactVite7": {
+      "raw": 875795,
+      "gzip": 273327,
+      "brotli": 255123
+    },
+    "reactVite8": {
+      "raw": 885579,
+      "gzip": 278820,
+      "brotli": 262681
+    },
+    "changePercent": {
+      "raw": 1.1171564121740918,
+      "gzip": 2.0096807121140703,
+      "brotli": 2.962492601607858
+    }
+  },
+  {
+    "kind": ".css",
+    "initialFilesIncludingPreloads": [
+      1,
+      1
+    ],
+    "reactVite7": {
+      "raw": 588002,
+      "gzip": 104358,
+      "brotli": 94396
+    },
+    "reactVite8": {
+      "raw": 576267,
+      "gzip": 102577,
+      "brotli": 93229
+    },
+    "changePercent": {
+      "raw": -1.9957415110832932,
+      "gzip": -1.7066252707027774,
+      "brotli": -1.2362811983558597
+    }
+  }
+]

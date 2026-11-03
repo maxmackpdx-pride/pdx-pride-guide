@@ -1,0 +1,64 @@
+{
+  "at": "2026-11-03T04:09:18.077Z",
+  "rows": [
+    {
+      "kind": "client-navigation",
+      "path": "/events",
+      "rootChildren": 2,
+      "bodyTextLength": 911,
+      "scrollWidth": 390,
+      "viewport": 390
+    },
+    {
+      "kind": "client-navigation",
+      "path": "/directory",
+      "rootChildren": 2,
+      "bodyTextLength": 4793,
+      "scrollWidth": 390,
+      "viewport": 390
+    },
+    {
+      "kind": "client-navigation",
+      "path": "/boardz",
+      "rootChildren": 2,
+      "bodyTextLength": 2123,
+      "scrollWidth": 390,
+      "viewport": 390
+    },
+    {
+      "kind": "client-navigation",
+      "path": "/",
+      "rootChildren": 2,
+      "bodyTextLength": 1236,
+      "scrollWidth": 390,
+      "viewport": 390
+    },
+    {
+      "kind": "local-worker-install",
+      "manifestName": "Zaylist",
+      "startUrl": "/",
+      "display": "standalone",
+      "workerState": "activated",
+      "cacheAssets": [
+        "/manifest.webmanifest",
+        "/favicon.png",
+        "/icons/zaylist-mono.png",
+        "/icons/zaylist-mask.png",
+        "/icons/zaylist-512.png",
+        "/icons/zaylist-192.png",
+        "/icons/zaylist-180.png",
+        "/icons/zaylist-1024.png",
+        "/icons/icon-mono-512.png",
+        "/icons/icon-512.png",
+        "/icons/icon-512-maskable.png",
+        "/icons/icon-192.png",
+        "/icons/badge-72.png",
+        "/icons/apple-touch-icon.png"
+      ]
+    }
+  ],
+  "blockedHosts": {
+    "zaylist-foundation-library.maxmackpdx.workers.dev": 83
+  },
+  "limits": "Local production build with disposable seeded database. Software Chromium mobile emulation, no physical iPhone/Safari or OS installation/push check. Navigation denies non-loopback and write requests. Worker checks only local static precache with no push/notification events."
+}
