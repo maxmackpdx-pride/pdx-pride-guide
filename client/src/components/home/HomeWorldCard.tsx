@@ -61,7 +61,7 @@ function useDynamicTitle(text: string) {
   const bodyRef = useRef<HTMLSpanElement>(null);
   const kickerRef = useRef<HTMLSpanElement>(null);
   const tailRef = useRef<HTMLSpanElement>(null);
-  const idRef = useRef<string>();
+  const idRef = useRef<string | undefined>(undefined);
   if (!idRef.current) idRef.current = `dt-${nextFrameId++}`;
   const [frame, setFrame] = useState<Frame | null>(sharedFrame);
 

@@ -379,7 +379,7 @@ export default function MapzMapDemo() {
   const [dataReady,setDataReady]=useState(false);
   const initialCamera=useMemo(()=>readMapCamera(params),[]);
   const cameraState=useRef(initialCamera);
-  const cameraWriteTimer=useRef<number>();
+  const cameraWriteTimer=useRef<number | undefined>(undefined);
   useEffect(()=>()=>window.clearTimeout(cameraWriteTimer.current),[]);
 
   const timeFilter = readTimeFilter(params);

@@ -302,7 +302,7 @@ export function HousingComposer({
   managerName?: string | null;
   /** Current user's display name — the title motif for a Looking post preview. */
   viewerDisplayName?: string | null;
-}): JSX.Element {
+}): React.JSX.Element {
   const [type, setType] = useState<HousingType | "PM" | null>(initialType ?? null);
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [mapLocation, setMapLocation] = useState<BoardMapPoint | null>(null);

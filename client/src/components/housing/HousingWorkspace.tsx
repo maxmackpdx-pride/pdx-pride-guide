@@ -625,7 +625,7 @@ export function HousingWorkspace({
 }: {
   post: HousingPostView;
   onOpenThread?: () => void;
-}): JSX.Element | null {
+}): React.JSX.Element | null {
   const [tab, setTab] = useState<TabKey>("chat");
   const { user } = useAuth();
 

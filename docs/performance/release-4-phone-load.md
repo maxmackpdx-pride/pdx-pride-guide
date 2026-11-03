@@ -1,8 +1,8 @@
 # Release 4: forward-only image processing and phone loading
 
-**Status: FORWARD-ONLY IMPLEMENTATION LOCALLY VERIFIED / UNPUBLISHED.** Base production commit: `d5ae1154b0dde8b05fd2007ff936f7acdaea302a`.
+**Status: PUBLISHED AND VERIFIED ON PRODUCTION.** Base production commit: `d5ae1154b0dde8b05fd2007ff936f7acdaea302a`.
 
-On November 3, 2026 at 00:09:38 UTC, the user changed the image work to focus on new incoming images rather than the existing catalogue, then proceed to Release 5. The current direction is automatic forward-only processing, persistent runtime derivatives and dynamic frontend delivery. The implemented paths and fresh local verification are recorded below; no production deployment or live success is claimed.
+On November 3, 2026 at 00:09:38 UTC, the user changed the image work to focus on new incoming images rather than the existing catalogue, then proceed to Release 5. The current direction is automatic forward-only processing, persistent runtime derivatives and dynamic frontend delivery. The implemented paths, local verification and production closeout are recorded below.
 
 ## Current scope
 
@@ -41,10 +41,20 @@ Fresh entry JavaScript is **795,598 raw / 233,148 Brotli / 249,659 gzip bytes**.
 
 [Current verification](releases/release-4/verification-results.json), [source identity](releases/release-4/source-verification-identity.json), [bundle evidence](releases/release-4/bundle-comparison.json), [offline diagnostics](releases/release-4/mobile-summary.json), [image-flow evidence](releases/release-4/controlled-image-comparison.json) and [release summary](releases/release-4/summary.json) describe this candidate. No historical catalogue savings are claimed for forward-only processing.
 
-## Publication gate
+## Production closeout
 
-Local checks have passed. Verify and publish only the intended current tree through the existing non-force GitHub master pipeline, require exact-commit CI and Railway success, then perform appropriate read-only live checks. Retain the prior verified commit as rollback target. A source push alone is not a verified production release.
+The initial implementation shipped as `1fa417cf6577dbd61d7b4f23b4233d5a8db00182`. Its core CI failed during poster screenshot capture. That initial CI failure is retained in the chronology; the earlier local passes do not make the first CI run a pass.
 
-Only after Release 4 passes its revised gate and is verified live should the separately gated React/Vite work proceed. Do not restart historical image backfill to delay that sequence.
+Follow-up `b15844b13685a3bbc78b2096133836597778529c` made a minimal test-only screenshot reliability correction for constrained CI, plus the latest map-work authorization hold in the plan. It did not alter application runtime behavior. The repair used CSS-scale captures and a 30-second screenshot timeout while preserving behavioral assertions; constrained local reproduction failed before and passed after the repair.
+
+At `b15844b13685a3bbc78b2096133836597778529c`:
+- Core CI run `41565024036`: SUCCESS.
+- Deploy workflow run `41565024055`: SUCCESS.
+- Railway deployment `4d2bc47d-0fec-4d1d-97f5-0c50ac58e3b5`: SUCCESS.
+- Live health returned that exact SHA and Node 24.22.2.
+
+These establish the deployed identity and successful release pipeline. Local disposable-database tests establish the publisher/member mutation workflows; this record does not claim those mutations were repeated on production. [Machine-readable production closeout](releases/release-4/production-closeout.json).
+
+Release 5a may now proceed separately, followed by 5b only after 5a is verified live. Stop after both for the user's whole-project review. Releases 6 and 7 remain held. Do not restart the abandoned historical poster batch.
 
 Cloud Chromium/software-renderer checks are not physical iPhone/Safari proof. Offline diagnostics with request routing do not represent warm HTTP-cache or live network behavior; top-frame measurements omit iframe internals. Entry-byte reductions and selected image fixtures are not whole-page speed or catalogue-wide claims.

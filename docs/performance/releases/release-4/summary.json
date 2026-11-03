@@ -1,5 +1,5 @@
 {
-  "status": "forward_only_locally_verified_unpublished",
+  "status": "forward_only_published_verified",
   "baseCommit": "d5ae1154b0dde8b05fd2007ff936f7acdaea302a",
   "scopeChangedAt": "2026-11-03T00:09:38Z",
   "imageScope": "Forward-only automatic processing of new eligible incoming images with persistent runtime derivatives and dynamic frontend delivery. No historical image backfill.",
@@ -57,13 +57,31 @@
   },
   "historicalEvidencePolicy": "Prior static-batch evidence was superseded. Current evidence files describe fresh tests of the forward-only candidate, not historical image savings.",
   "publication": {
-    "status": "not_published"
+    "status": "published_verified",
+    "implementationCommit": "1fa417cf6577dbd61d7b4f23b4233d5a8db00182",
+    "initialCoreCi": "failed_poster_screenshot_capture",
+    "verifiedCommit": "b15844b13685a3bbc78b2096133836597778529c",
+    "repair": "Test-only screenshot capture reliability adjustment plus plan authorization hold; no application runtime changes.",
+    "coreCi": {
+      "runId": 41565024036,
+      "status": "SUCCESS"
+    },
+    "deployWorkflow": {
+      "runId": 41565024055,
+      "status": "SUCCESS"
+    },
+    "railway": {
+      "deploymentId": "4d2bc47d-0fec-4d1d-97f5-0c50ac58e3b5",
+      "status": "SUCCESS"
+    },
+    "liveHealth": {
+      "gitSha": "b15844b13685a3bbc78b2096133836597778529c",
+      "nodeVersion": "v24.22.2"
+    },
+    "scopeLimit": "Live identity and successful deployment pipeline; publisher/member mutation workflows were verified locally with disposable databases, not repeated against production.",
+    "nextGate": "Release5a separately, then5b, then stop for review. Release6and7 require explicit approval."
   },
-  "remainingEvidence": [
-    "Exact final staged tree and remote commit match",
-    "Exact-commit CI and Railway success",
-    "Read-only live verification; no production result yet"
-  ],
+  "remainingEvidence": [],
   "limitations": [
     "No physical iPhone/Safari proof from earlier cloud checks.",
     "Offline metrics cannot establish live whole-page speed; request routing disables HTTP cache."

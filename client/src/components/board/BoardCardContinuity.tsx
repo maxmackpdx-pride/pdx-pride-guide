@@ -5,7 +5,7 @@ export const BoardCardInline = createContext(false);
 export const useInlineBoardCard = () => useContext(BoardCardInline);
 export const BoardCardOrigin = createContext<CardOrigin | null>(null);
 
-export function useInlineBoardCardKeyboard(ref: RefObject<HTMLElement>, onClose: () => void) {
+export function useInlineBoardCardKeyboard(ref: RefObject<HTMLElement | null>, onClose: () => void) {
   const inline = useInlineBoardCard();
   useEffect(() => {
     if (!inline) return;
@@ -41,7 +41,7 @@ export function closeBoardCard(panel: HTMLElement | null, finish: () => void): b
 }
 
 /** Runs once the real head has applied the final paper geometry to its dialog. */
-export function useBoardCardContinuity(head: RefObject<HTMLElement>) {
+export function useBoardCardContinuity(head: RefObject<HTMLElement | null>) {
   const origin = useContext(BoardCardOrigin);
   useLayoutEffect(() => {
     const panel = head.current?.closest<HTMLElement>('[role="dialog"]');

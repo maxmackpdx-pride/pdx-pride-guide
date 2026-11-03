@@ -1,0 +1,25 @@
+{
+  "status": "published_verified",
+  "implementationCommit": "1fa417cf6577dbd61d7b4f23b4233d5a8db00182",
+  "initialCoreCi": "failed_poster_screenshot_capture",
+  "verifiedCommit": "b15844b13685a3bbc78b2096133836597778529c",
+  "repair": "Test-only screenshot capture reliability adjustment plus plan authorization hold; no application runtime changes.",
+  "coreCi": {
+    "runId": 41565024036,
+    "status": "SUCCESS"
+  },
+  "deployWorkflow": {
+    "runId": 41565024055,
+    "status": "SUCCESS"
+  },
+  "railway": {
+    "deploymentId": "4d2bc47d-0fec-4d1d-97f5-0c50ac58e3b5",
+    "status": "SUCCESS"
+  },
+  "liveHealth": {
+    "gitSha": "b15844b13685a3bbc78b2096133836597778529c",
+    "nodeVersion": "v24.22.2"
+  },
+  "scopeLimit": "Live identity and successful deployment pipeline; publisher/member mutation workflows were verified locally with disposable databases, not repeated against production.",
+  "nextGate": "Release5a separately, then5b, then stop for review. Release6and7 require explicit approval."
+}

@@ -1,0 +1,52 @@
+[
+  {
+    "kind": ".js",
+    "r4": {
+      "url": "/assets/index-DPB67N4F.js",
+      "raw": 795598,
+      "gzip": 249659,
+      "brotli": 233148
+    },
+    "r5": {
+      "url": "/assets/index-Dloo53c7.js",
+      "raw": 875795,
+      "gzip": 273327,
+      "brotli": 255123
+    },
+    "delta": {
+      "raw": 80197,
+      "gzip": 23668,
+      "brotli": 21975
+    },
+    "changePercent": {
+      "raw": 10.080090699071631,
+      "gzip": 9.480130898545625,
+      "brotli": 9.425343558597966
+    }
+  },
+  {
+    "kind": ".css",
+    "r4": {
+      "url": "/assets/index-Dvn9aBmC.css",
+      "raw": 588002,
+      "gzip": 104358,
+      "brotli": 94396
+    },
+    "r5": {
+      "url": "/assets/index-Dvn9aBmC.css",
+      "raw": 588002,
+      "gzip": 104358,
+      "brotli": 94396
+    },
+    "delta": {
+      "raw": 0,
+      "gzip": 0,
+      "brotli": 0
+    },
+    "changePercent": {
+      "raw": 0.0,
+      "gzip": 0.0,
+      "brotli": 0.0
+    }
+  }
+]

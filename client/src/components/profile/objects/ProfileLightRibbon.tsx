@@ -1,6 +1,6 @@
 import {profileLightColor,profileLightEdges,profileNodePhase,ribbonGeometry,ribbonCenterline} from '@shared/profileLight';
 import {useEffect,useRef,useId,type RefObject} from 'react';
-export function ProfileLightRibbon({root,palette='pride',calm=false,revision}:{root:RefObject<HTMLElement>;palette?:string;calm?:boolean;revision?:string}){
+export function ProfileLightRibbon({root,palette='pride',calm=false,revision}:{root:RefObject<HTMLElement | null>;palette?:string;calm?:boolean;revision?:string}){
  const instance=useId().replace(/:/g,'');const svg=useRef<SVGSVGElement>(null);
  useEffect(()=>{const rootNode=root.current,svgNode=svg.current;if(!rootNode||!svgNode)return;const host:HTMLElement=rootNode,canvas:SVGSVGElement=svgNode;let frame=0,visible=true,tick=0;const ns='http://www.w3.org/2000/svg',motion=matchMedia('(prefers-reduced-motion: reduce)');let edges:Array<{a:HTMLElement;b:HTMLElement;path:SVGPathElement;halo:SVGPathElement;core:SVGPathElement;stops:SVGStopElement[];gradient:SVGLinearGradientElement;phase:number;endPhase:number}>=[];
  const quiet=()=>calm||motion.matches||document.documentElement.classList.contains('calm-mode')||document.documentElement.dataset.calm==='true';

@@ -22,7 +22,7 @@ function quiet() {
  * and the cover art drifts with scroll like the big event card motifs: an 8px
  * diagonal from page scroll, plus a little sideways drift as the rail slides.
  */
-function useWeekCovers(ref: RefObject<HTMLElement>, key: number) {
+function useWeekCovers(ref: RefObject<HTMLElement | null>, key: number) {
   useEffect(() => {
     const sec = ref.current;
     if (!sec) return;
@@ -95,7 +95,7 @@ export default function ThisWeekRail({
   const visible = days.filter(d => d.items.length > 0);
 
   const children = useMemo(() => {
-    const out: JSX.Element[] = [];
+    const out: React.JSX.Element[] = [];
     let sponsorCount = 0;
     for (const d of visible) {
       const isOpen = open.has(d.key);

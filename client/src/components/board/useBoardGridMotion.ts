@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, type RefObject } from "react";
 
 type Position = { left: number; top: number };
 /** Animate neighboring notes between their actual flex-layout positions. */
-export function useBoardGridMotion(ref: RefObject<HTMLDivElement>) {
+export function useBoardGridMotion(ref: RefObject<HTMLDivElement | null>) {
   const positions = useRef(new Map<HTMLElement, Position>());
   const animations = useRef(new Map<HTMLElement, Animation>());
   useLayoutEffect(() => {

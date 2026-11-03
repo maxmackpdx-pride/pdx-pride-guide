@@ -1,0 +1,62 @@
+{
+  "verifiedAt": "2026-11-03T02:34:10.618549+00:00",
+  "baseCommit": "b15844b13685a3bbc78b2096133836597778529c",
+  "status": "implementation_frozen_for_independent_review_and_aggregate",
+  "npmCi": "pass; 891 packages",
+  "typecheck": "pass",
+  "peerTree": "pass",
+  "nativeSmoke": "SQLite3.53.2 and esbuild transform pass",
+  "focusedUnit": {
+    "passed": 24,
+    "failed": 0
+  },
+  "focusedBrowser": {
+    "passed": 6,
+    "failed": 0,
+    "files": [
+      "script/incidental-map-browser.test.mjs",
+      "script/place-map-carousel-browser.test.mjs",
+      "script/event-location-map-browser.test.mjs",
+      "script/motion-runtime-browser.test.mjs"
+    ]
+  },
+  "files": {
+    "client/src/pages/MapzMapDemo.tsx": "d3582ae48e4210d55b17a9401fc18882452a3adeb10873d6d7df77e5ea234ed8",
+    "client/src/components/home/HomeWorldCard.tsx": "a6bc36bff11e01cab99f04ffd7e308ff8eebc0eb4fcb3ab23383629e37225a18",
+    "client/src/components/discovery/DiscoveryFlow.tsx": "cd33f119331c7ea095229b7a80129560a40c38de512c7e4a8a87c57ab3601c1a",
+    "client/src/components/housing/HousingComposer.tsx": "955d8fd96e0bcb724a2d5d09c92a904f3c8eada29d673cee8b503604b345f04c",
+    "client/src/components/housing/HousingWorkspace.tsx": "fdd2d547350309446e7141a63d440b19dfc88fb47e8dbc6d9faf493046816fd7",
+    "client/src/components/events/ThisWeekRail.tsx": "b4ea0cfcb252eafdf37ecf76b6dbcf3223ee28df3fb0917b437323e6454a7d60",
+    "client/src/components/Nav.tsx": "2b98f5ee983594591aa5e053cf54a6bce14d6cc9ba2a9f328afec88245a7c1eb",
+    "client/src/components/profile/usePinnedScrollSway.ts": "fcfc74b8a102d669d6bc26c067527c1ef517b6b458388758d28d7bafba362c1e",
+    "client/src/components/profile/objects/ProfileLightRibbon.tsx": "b1a761093eaab1d41cbd7b924e919ba9ff9d21912ff09e9af26d0a561343fc94",
+    "client/src/components/board/BoardCardContinuity.tsx": "93349684d91dd2c32704adf818f918acd94f262702cb4c2c504e2a36f9a9aca5",
+    "client/src/components/board/useBoardGridMotion.ts": "fd094059b90e58152aab3b7f0a037e2165fe88bb2a50429ccf25ecbf41c75a97",
+    "package.json": "e223d897f76a7d65edb29067fbc1209327025f22a7781021315d363f49c35f7a",
+    "package-lock.json": "8b4e95b49aa81ac71fb9fd03ca838ca0286015a05e61e6f98950abe3b9833e63"
+  },
+  "rootSeedSHA256": "84f59e3974d35112ed9dad8521f31f28d545faf8b97d6dbc2a636ce70c21d14b",
+  "limitations": [
+    "Full final aggregate/browser/build/live verification still pending.",
+    "Existing browser harness console warnings about public paths unchanged.",
+    "No physical Safari/iPhone test."
+  ],
+  "lifecycleFix": {
+    "verifiedAt": "2026-11-03T02:49:56.241686+00:00",
+    "cause": "maplibre-gl-leaflet0.1.4 transitionEnd queues an uncancelled animation frame; removal clears _map before getZoom",
+    "beforeRegression": "deterministic failure with stack at adapter transitionEnd",
+    "afterWebGLRuns": 3,
+    "typecheck": "pass",
+    "adjacentBrowser": {
+      "passed": 4,
+      "failed": 0
+    },
+    "sourceFiles": {
+      "client/src/components/CartoVectorBasemap.tsx": "19c2fd8e52d93af4e6ca3ab5220571807e07f0456b8931ce0e9d49d06106b054",
+      "client/src/lib/guardMaplibreLayerLifecycle.ts": "996972f7fb4b894e8d124064be1331406f5456db0f193dab569dee830b51c62f",
+      "script/incidental-map-webgl-browser.test.mjs": "82cb58168608f96f0b7d5d373989047c3bf70703eff267d5542031091ca7ae48"
+    },
+    "engineVersionUnchanged": true,
+    "independentReview": "approved; reviewer independently reran WebGL regression PASS"
+  }
+}

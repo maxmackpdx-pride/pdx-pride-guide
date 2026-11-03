@@ -1,0 +1,112 @@
+{
+  "verifiedAt": "2026-11-03T03:23:56.053780+00:00",
+  "baseCommit": "b15844b13685a3bbc78b2096133836597778529c",
+  "intendedStagedTreeAtStart": "aa55468b8ac0591c540b66709dd2e9bd1dc47c69",
+  "inventoryFileSha256": "002a9270b73e42cf678eec2ee2475d2defae76300b1085a0efe296409f24f60b",
+  "inventoryContentDigest": "1dbc0626e261f77dd5117ae42378ed757e298fb0ea080ba91e10625174e84308",
+  "inventoryFileCount": 6063,
+  "finalInventoryDrift": [],
+  "rootSeedDbSha256": "84f59e3974d35112ed9dad8521f31f28d545faf8b97d6dbc2a636ce70c21d14b",
+  "checks": {
+    "ci-unit": {
+      "tests": 147,
+      "pass": 146,
+      "fail": 0,
+      "skipped": 1
+    },
+    "shared-card-unit": {
+      "tests": 20,
+      "pass": 20,
+      "fail": 0,
+      "skipped": 0
+    },
+    "all-browser": {
+      "tests": 14,
+      "pass": 14,
+      "fail": 0,
+      "skipped": 0
+    },
+    "glass-parser": {
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "typecheck": "passed",
+  "glassAudit": "passed",
+  "predeploy": "passed",
+  "fullBuild": "passed with external egress locally denied and checked-in motif snapshot fallback",
+  "bundleVerification": "passed",
+  "serverBundle": "present",
+  "profileDeclarations": {
+    "complete": 325,
+    "jsonInputsSkipped": 0
+  },
+  "node": "24.22.2",
+  "browser": "136.0.7103.25",
+  "packages": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-leaflet": "5.0.0",
+    "@react-leaflet/core": "3.0.0",
+    "motion": "12.43.0"
+  },
+  "offlineBaseline": {
+    "samples": 30,
+    "HTTP200": 30,
+    "JSerrors": 0,
+    "topFrameMapCanvases": 0,
+    "negativeIntervals": 0
+  },
+  "builtAppSmoke": {
+    "clientNavigations": 4,
+    "sameDocument": true,
+    "pageErrors": 0,
+    "worker": "activated",
+    "cache": "manifest and icons only; no HTML/JS",
+    "evidence": "built-app-smoke.json"
+  },
+  "performanceInvestigation": {
+    "initialRepeats": "repeated-timing-summary.json",
+    "interleaved": "interleaved-summary.json",
+    "samples": 72,
+    "HTTP200": 72,
+    "JSerrors": 0,
+    "missingAssets": 0,
+    "remainingThresholdFlag": "Directory cold DCL +18.10% / +13.7ms; reviewer assessment pending. Other paired route medians under15%; all transfer growth under5%.",
+    "entryCost": "JS Brotli +21975bytes/+9.43%; one React runtime, no duplicate React18; attribution by reviewer."
+  },
+  "limits": [
+    "Local seeded disposable database and offline-only browser/server, no production writes.",
+    "Chromium software GPU mobile emulation, no physical iPhone/Safari or push/OS install verification.",
+    "Historical R4 and current replay are not direct production performance measurements.",
+    "First failed lifecycle aggregate and invalid gzip fulfillment pilot preserved separately, excluded from final proof."
+  ],
+  "publication": "Not performed by verifier; parent owns approval/publication",
+  "closeout": "Expected staged owner code and staged/unstaged owner docs preserved; no product edits by verifier.",
+  "releaseAcceptance": {
+    "status": "local_functional_verified_performance_cost_documented_deployment_approved_unpublished",
+    "review": "Independent reviewer found investigation/repeat requirement satisfied and no functional blocker.",
+    "decision": "Release owner accepts modest compatibility cost within authorized React upgrade; not a blanket timing pass, speed gain or no-regression claim.",
+    "residualThresholdExceedance": {
+      "route": "Directory",
+      "phase": "cold",
+      "baselineMedianMs": 75.7,
+      "currentMedianMs": 89.4,
+      "deltaMs": 13.7,
+      "deltaPercent": 18.1
+    },
+    "routeTransferGrowthPercentRange": [
+      0.17,
+      1.35
+    ],
+    "entryBrotliGrowthBytes": 21975,
+    "entryBrotliGrowthPercent": 9.43,
+    "javaScriptChunkCountBeforeAndAfter": 193,
+    "runtime": "Single React runtime",
+    "publication": "User explicitly approved deployment of the tested React upgrade and narrow Carto/React lifecycle correction on 2026-11-03 at03:27:08UTC. Publication and deployment verification pending.",
+    "limits": "Offline software-GPU replay of production R4 static artifacts versus local R5a build; HTTP cache disabled; not live performance or physical iPhone/Safari proof.",
+    "chronology": "Verifier performanceInvestigation.remainingThresholdFlag preserves the pre-review finding; this acceptance does not erase the exceedance."
+  }
+}

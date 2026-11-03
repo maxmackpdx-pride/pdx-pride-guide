@@ -3,6 +3,7 @@ import {test} from 'node:test';
 import {mapFixture,visibility} from './map-browser-helpers.mjs';
 test('incidental vector maps load real style and release WebGL contexts on hide/unmount',{timeout:120000},async()=>{
  const f=await mapFixture('script/fixtures/incidental-map-browser.tsx',{webgl:true});const {page}=f;
+ page.on('pageerror', error => console.error(error.stack));
  try{
   await page.goto(`${f.base}__map-qa?kind=card`,{waitUntil:'domcontentloaded'});await page.locator('#toggle').waitFor();
   assert.ok(await page.evaluate(()=>{const gl=document.createElement('canvas').getContext('webgl2');const ok=!!gl;gl?.getExtension('WEBGL_lose_context')?.loseContext();return ok;}),'WebGL must initialize; raster fallback is not a pass');
@@ -15,7 +16,14 @@ test('incidental vector maps load real style and release WebGL contexts on hide/
   // Installed adapter removes its MapLibre map. MapLibre remove() calls loseContext,
   // detaches canvas and fires remove. Test-only references intentionally remain for inspection.
   const released=()=>page.waitForFunction(()=>window.mapStats.active.size===0&&!document.querySelector('canvas.maplibregl-canvas')&&window.vectorEvidence.every(r=>r.removed&&!r.canvas.isConnected&&r.gl.isContextLost()));
-  await capture();await page.evaluate(()=>document.querySelector('#toggle').click());await released();await page.evaluate(()=>document.querySelector('#toggle').click());await capture();await page.evaluate(()=>scrollTo(0,0));await released();await page.locator('#slot').scrollIntoViewIfNeeded();await capture();await visibility(page,true);await released();await visibility(page,false);await capture();await page.evaluate(()=>window.setMounted(false));await released();
+  await capture();
+  await page.evaluate(()=>{const m=[...window.mapStats.active][0];m.setZoom(m.getZoom()+1,{animate:false});m.fire('resize');});
+  await page.waitForFunction(()=>{const m=[...window.mapStats.active][0],engine=Object.values(m._layers).map(l=>l.getMaplibreMap?.()).find(Boolean);return engine?.getZoom()===m.getZoom()-1;});
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  await page.evaluate(()=>document.querySelector('#toggle').click());await released();await page.evaluate(()=>document.querySelector('#toggle').click());await capture();await page.evaluate(()=>scrollTo(0,0));await released();await page.locator('#slot').scrollIntoViewIfNeeded();await capture();await visibility(page,true);await released();await visibility(page,false);await capture();// Queue the adapter's resize animation frame and remove its layer before it runs.
+  // React teardown/hidden cards can reach this same ordering during a ResizeObserver tick.
+  await page.evaluate(()=>{const m=[...window.mapStats.active][0],layer=Object.values(m._layers).find(l=>l.getMaplibreMap?.());m.fire('resize');m.removeLayer(layer);window.setMounted(false);});await released();
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   const count=await page.evaluate(()=>({n:window.vectorEvidence.length,created:window.mapStats.created,removed:window.mapStats.removed}));assert.equal(count.n,4);assert.equal(count.created,count.removed);assert.deepEqual(f.errors,[]);
  }finally{await f.close();}
 });

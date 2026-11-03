@@ -11,7 +11,7 @@ export default function DiscoveryFlow({ room, accent, choices, children, initial
   initiallyOpen?: boolean; initialChoiceId?: string; title?: string; kicker?: ReactNode; intro?: string; enabled?: boolean; keepMounted?: boolean; onViewAll?: () => void;
 }) {
   const id = useId();
-  const scrollTimer = useRef<ReturnType<typeof setTimeout>>();
+  const scrollTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(scrollTimer.current), []);
   const [selected, setSelected] = useState<string | null>(initiallyOpen ? initialChoiceId ?? choices[0]?.id ?? null : null);
   const reduced = useReducedMotion();

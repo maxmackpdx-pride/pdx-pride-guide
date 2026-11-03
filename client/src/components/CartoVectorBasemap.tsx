@@ -3,6 +3,7 @@ import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { maplibreGL } from "@maplibre/maplibre-gl-leaflet";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { guardMaplibreLayerLifecycle } from "@/lib/guardMaplibreLayerLifecycle";
 import {
   CARTO_ATTRIBUTION,
   cartoDarkTileUrl,
@@ -67,6 +68,7 @@ export default function CartoVectorBasemap({ accent, waterColor, warmLand = fals
         minZoom: 1,
         transformRequest: cartoTransformRequest,
       });
+      guardMaplibreLayerLifecycle(layer);
       Object.assign(layer.options, { attribution: CARTO_ATTRIBUTION });
       layer.addTo(map);
       gl = layer.getMaplibreMap();

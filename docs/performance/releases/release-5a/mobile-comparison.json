@@ -1,0 +1,563 @@
+{
+  "conditions": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "deviceScaleFactor": 1,
+    "isMobile": true,
+    "hasTouch": true,
+    "network": "OFFLINE ONLY: all non-loopback browser+server requests denied; not equivalent to initial baseline external-failure conditions",
+    "gpu": "Chromium SwiftShader software renderer",
+    "auth": "anonymous",
+    "sampleWindowMs": 5000,
+    "physicalDevice": false,
+    "sampleDeadlineMs": 45000,
+    "cache": "Fresh context per cold; same-context reload labeled warm. Playwright request routing DISABLES HTTP CACHE; unlike initial baseline warm-cache samples. Service workers blocked.",
+    "limits": "Top-frame Resource Timing excludes navigation and iframe resources and omits cross-origin byte detail without Timing-Allow-Origin; these byte totals are not total page transfer. Scroll frame timeout is recorded, not treated as smooth performance."
+  },
+  "browser": "136.0.7103.25",
+  "samples": 30,
+  "http200": 30,
+  "jsErrors": 0,
+  "topFrameMapCanvases": 0,
+  "negativeIntervals": 0,
+  "scrollTimeouts": 24,
+  "blockedHosts": {
+    "zaylist-foundation-library.maxmackpdx.workers.dev": 348,
+    "tiles.openfreemap.org": 12
+  },
+  "routes": [
+    {
+      "route": "/",
+      "cache": "cold",
+      "samples": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "baselineValues": [
+          113.70000000111759,
+          104.09999999962747,
+          89.09999999962747
+        ],
+        "currentValues": [
+          122.69999999925494,
+          103.30000000074506,
+          90.39999999850988
+        ],
+        "baselineMedian": 104.09999999962747,
+        "currentMedian": 103.30000000074506,
+        "changePercent": -0.768491833703433
+      },
+      "scriptEncodedBytes": {
+        "baselineValues": [
+          741811,
+          741811,
+          741811
+        ],
+        "currentValues": [
+          765343,
+          765343,
+          765343
+        ],
+        "baselineMedian": 741811,
+        "currentMedian": 765343,
+        "changePercent": 3.172236593957223
+      },
+      "resourceTransferBytes": {
+        "baselineValues": [
+          13778317,
+          13778317,
+          13778317
+        ],
+        "currentValues": [
+          13798559,
+          13144785,
+          14452333
+        ],
+        "baselineMedian": 13778317,
+        "currentMedian": 13798559,
+        "changePercent": 0.1469119922266282
+      }
+    },
+    {
+      "route": "/",
+      "cache": "warm",
+      "samples": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "baselineValues": [
+          603.5999999996275,
+          300.30000000074506,
+          1037.300000000745
+        ],
+        "currentValues": [
+          529.8999999985099,
+          462.19999999925494,
+          1692.3999999985099
+        ],
+        "baselineMedian": 603.5999999996275,
+        "currentMedian": 529.8999999985099,
+        "changePercent": -12.210072896150281
+      },
+      "scriptEncodedBytes": {
+        "baselineValues": [
+          741811,
+          741811,
+          741811
+        ],
+        "currentValues": [
+          765343,
+          727294,
+          735718
+        ],
+        "baselineMedian": 741811,
+        "currentMedian": 735718,
+        "changePercent": -0.8213682460896377
+      },
+      "resourceTransferBytes": {
+        "baselineValues": [
+          13755229,
+          13751939,
+          13751939
+        ],
+        "currentValues": [
+          13775471,
+          12282484,
+          5236877
+        ],
+        "baselineMedian": 13751939,
+        "currentMedian": 12282484,
+        "changePercent": -10.685438613420262
+      }
+    },
+    {
+      "route": "/events",
+      "cache": "cold",
+      "samples": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "baselineValues": [
+          98.29999999888241,
+          95,
+          97.10000000149012
+        ],
+        "currentValues": [
+          98.39999999850988,
+          102.69999999925494,
+          103.19999999925494
+        ],
+        "baselineMedian": 97.10000000149012,
+        "currentMedian": 102.69999999925494,
+        "changePercent": 5.767250255076095
+      },
+      "scriptEncodedBytes": {
+        "baselineValues": [
+          582066,
+          582066,
+          582066
+        ],
+        "currentValues": [
+          605608,
+          605608,
+          605608
+        ],
+        "baselineMedian": 582066,
+        "currentMedian": 605608,
+        "changePercent": 4.044558520855013
+      },
+      "resourceTransferBytes": {
+        "baselineValues": [
+          5552217,
+          5552217,
+          5552217
+        ],
+        "currentValues": [
+          5575759,
+          5575759,
+          5575759
+        ],
+        "baselineMedian": 5552217,
+        "currentMedian": 5575759,
+        "changePercent": 0.42401080505318767
+      }
+    },
+    {
+      "route": "/events",
+      "cache": "warm",
+      "samples": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "baselineValues": [
+          529.9000000003725,
+          513.1999999992549,
+          538.2000000011176
+        ],
+        "currentValues": [
+          673.1999999992549,
+          526,
+          610.9000000022352
+        ],
+        "baselineMedian": 529.9000000003725,
+        "currentMedian": 610.9000000022352,
+        "changePercent": 15.28590300090691
+      },
+      "scriptEncodedBytes": {
+        "baselineValues": [
+          582066,
+          582066,
+          582066
+        ],
+        "currentValues": [
+          605608,
+          605608,
+          605608
+        ],
+        "baselineMedian": 582066,
+        "currentMedian": 605608,
+        "changePercent": 4.044558520855013
+      },
+      "resourceTransferBytes": {
+        "baselineValues": [
+          5552217,
+          5552217,
+          5552217
+        ],
+        "currentValues": [
+          5575759,
+          5575759,
+          5575759
+        ],
+        "baselineMedian": 5552217,
+        "currentMedian": 5575759,
+        "changePercent": 0.42401080505318767
+      }
+    },
+    {
+      "route": "/directory",
+      "cache": "cold",
+      "samples": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "baselineValues": [
+          91.40000000037253,
+          85.5,
+          88.80000000074506
+        ],
+        "currentValues": [
+          106.19999999925494,
+          102.60000000149012,
+          87.89999999850988
+        ],
+        "baselineMedian": 88.80000000074506,
+        "currentMedian": 102.60000000149012,
+        "changePercent": 15.540540541249182
+      },
+      "scriptEncodedBytes": {
+        "baselineValues": [
+          494457,
+          494457,
+          494457
+        ],
+        "currentValues": [
+          518051,
+          518051,
+          518051
+        ],
+        "baselineMedian": 494457,
+        "currentMedian": 518051,
+        "changePercent": 4.771699055731848
+      },
+      "resourceTransferBytes": {
+        "baselineValues": [
+          13861279,
+          13861279,
+          13861279
+        ],
+        "currentValues": [
+          13884873,
+          13884873,
+          13884873
+        ],
+        "baselineMedian": 13861279,
+        "currentMedian": 13884873,
+        "changePercent": 0.17021517278457132
+      }
+    },
+    {
+      "route": "/directory",
+      "cache": "warm",
+      "samples": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "baselineValues": [
+          632.5999999996275,
+          594.0999999996275,
+          536.5999999996275
+        ],
+        "currentValues": [
+          581.4000000022352,
+          772.5999999977648,
+          878
+        ],
+        "baselineMedian": 594.0999999996275,
+        "currentMedian": 772.5999999977648,
+        "changePercent": 30.045446894167526
+      },
+      "scriptEncodedBytes": {
+        "baselineValues": [
+          494457,
+          494457,
+          494457
+        ],
+        "currentValues": [
+          518051,
+          518051,
+          518051
+        ],
+        "baselineMedian": 494457,
+        "currentMedian": 518051,
+        "changePercent": 4.771699055731848
+      },
+      "resourceTransferBytes": {
+        "baselineValues": [
+          13857989,
+          13857989,
+          13861279
+        ],
+        "currentValues": [
+          14045008,
+          14045008,
+          14045008
+        ],
+        "baselineMedian": 13857989,
+        "currentMedian": 14045008,
+        "changePercent": 1.3495392441139842
+      }
+    },
+    {
+      "route": "/outzide",
+      "cache": "cold",
+      "samples": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "baselineValues": [
+          106.90000000037253,
+          120.69999999925494,
+          112.90000000037253
+        ],
+        "currentValues": [
+          106.30000000074506,
+          107.90000000223517,
+          108.5
+        ],
+        "baselineMedian": 112.90000000037253,
+        "currentMedian": 107.90000000223517,
+        "changePercent": -4.4286979611345085
+      },
+      "scriptEncodedBytes": {
+        "baselineValues": [
+          255056,
+          255056,
+          255056
+        ],
+        "currentValues": [
+          278716,
+          278716,
+          278716
+        ],
+        "baselineMedian": 255056,
+        "currentMedian": 278716,
+        "changePercent": 9.27639420362587
+      },
+      "resourceTransferBytes": {
+        "baselineValues": [
+          1110099,
+          1110099,
+          1110099
+        ],
+        "currentValues": [
+          1133761,
+          1133761,
+          1133761
+        ],
+        "baselineMedian": 1110099,
+        "currentMedian": 1133761,
+        "changePercent": 2.131521603028208
+      }
+    },
+    {
+      "route": "/outzide",
+      "cache": "warm",
+      "samples": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "baselineValues": [
+          130.2000000011176,
+          152.5,
+          133.59999999962747
+        ],
+        "currentValues": [
+          123.39999999850988,
+          138.80000000074506,
+          131.5
+        ],
+        "baselineMedian": 133.59999999962747,
+        "currentMedian": 131.5,
+        "changePercent": -1.571856287150697
+      },
+      "scriptEncodedBytes": {
+        "baselineValues": [
+          255056,
+          255056,
+          255056
+        ],
+        "currentValues": [
+          278716,
+          278716,
+          278716
+        ],
+        "baselineMedian": 255056,
+        "currentMedian": 278716,
+        "changePercent": 9.27639420362587
+      },
+      "resourceTransferBytes": {
+        "baselineValues": [
+          1110099,
+          1110099,
+          1110099
+        ],
+        "currentValues": [
+          1133761,
+          1130471,
+          1133761
+        ],
+        "baselineMedian": 1110099,
+        "currentMedian": 1133761,
+        "changePercent": 2.131521603028208
+      }
+    },
+    {
+      "route": "/boardz",
+      "cache": "cold",
+      "samples": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "baselineValues": [
+          136.5,
+          96.20000000111759,
+          115.39999999850988
+        ],
+        "currentValues": [
+          107.69999999925494,
+          107.30000000074506,
+          89.19999999925494
+        ],
+        "baselineMedian": 115.39999999850988,
+        "currentMedian": 107.30000000074506,
+        "changePercent": -7.0190641229371025
+      },
+      "scriptEncodedBytes": {
+        "baselineValues": [
+          593621,
+          593621,
+          593621
+        ],
+        "currentValues": [
+          617159,
+          617159,
+          617159
+        ],
+        "baselineMedian": 593621,
+        "currentMedian": 617159,
+        "changePercent": 3.965156219203836
+      },
+      "resourceTransferBytes": {
+        "baselineValues": [
+          7835368,
+          7835368,
+          7835368
+        ],
+        "currentValues": [
+          7858906,
+          7858906,
+          7858906
+        ],
+        "baselineMedian": 7835368,
+        "currentMedian": 7858906,
+        "changePercent": 0.30040707724257043
+      }
+    },
+    {
+      "route": "/boardz",
+      "cache": "warm",
+      "samples": [
+        3,
+        3
+      ],
+      "dclMs": {
+        "baselineValues": [
+          352,
+          347.40000000037253,
+          420.5
+        ],
+        "currentValues": [
+          395.1000000014901,
+          418.19999999925494,
+          427.80000000074506
+        ],
+        "baselineMedian": 352,
+        "currentMedian": 418.19999999925494,
+        "changePercent": 18.806818181606523
+      },
+      "scriptEncodedBytes": {
+        "baselineValues": [
+          593621,
+          593621,
+          593621
+        ],
+        "currentValues": [
+          617159,
+          617159,
+          617159
+        ],
+        "baselineMedian": 593621,
+        "currentMedian": 617159,
+        "changePercent": 3.965156219203836
+      },
+      "resourceTransferBytes": {
+        "baselineValues": [
+          7832078,
+          7832078,
+          7832078
+        ],
+        "currentValues": [
+          7855616,
+          7855616,
+          8061738
+        ],
+        "baselineMedian": 7832078,
+        "currentMedian": 7855616,
+        "changePercent": 0.30053326843781925
+      }
+    }
+  ],
+  "limits": "Same offline harness and viewport, separate runs. HTTP cache disabled, synthetic seeded data/software GPU. DCL noisy; not production or physical-device speed proof."
+}

@@ -292,7 +292,7 @@ function ProfileMenu({
   user: AuthUser;
   profileOpen: boolean;
   setProfileOpen: (open: boolean | ((v: boolean) => boolean)) => void;
-  profileRef: RefObject<HTMLDivElement>;
+  profileRef: RefObject<HTMLDivElement | null>;
   profilePath: string;
   profileActive: boolean;
   hubActive: boolean;
