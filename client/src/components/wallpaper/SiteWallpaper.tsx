@@ -19,29 +19,22 @@ function isBoardRoute(path: string) {
   return bare === "/boardz" || bare === "/boards" || bare === "/all-boards" || bare === "/our-boardz";
 }
 
-function isTouchDevice() {
-  if (typeof navigator === "undefined") return false;
-  const ua = navigator.userAgent || "";
-  return /iP(hone|ad|od)|Android/i.test(ua)
-    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-    || (typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches);
-}
-
 /**
  * The one shared page wallpaper. Mounted once in the app shell, so every route sits on the same
- * single WebGL context. Calm mode, reduced motion, Save-Data, and missing WebGL2 all fall back
- * without ever blanking the page: reduced motion paints one still frame; the rest keep the
- * original CSS atmosphere layers that each page already carries.
+ * single surface. The surface itself is the standalone circuit-cork board (no wordmark) served
+ * from /circuit-wallpaper/index.html and embedded as a frame inside this layer; the state
+ * contract is unchanged, so every page keeps the same behaviour: Calm mode and reduced motion
+ * hold one still frame (the board honours prefers-reduced-motion itself), Save-Data and a
+ * failed frame load fall back without ever blanking the page — the original CSS atmosphere
+ * layers that each page already carries take over again.
  */
 export default function SiteWallpaper() {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const engineRef = useRef<import("./circuitWallpaperEngine").CircuitWallpaperEngine | null>(null);
   const [location] = useLocation();
   const hidden = hidesWallpaper(location);
   const longPage = isBoardRoute(location);
-  const longPageRef = useRef(longPage);
-  longPageRef.current = longPage;
   const [state, setState] = useState<State>(hidden ? "idle" : "boot");
+  const [mount, setMount] = useState(false);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -49,84 +42,38 @@ export default function SiteWallpaper() {
     return () => { delete root.dataset.siteWallpaper; };
   }, [state]);
 
-  // Behind a full-bleed map the wallpaper is invisible, so it is torn down completely
-  // (context, textures, comet layer) instead of being paused. Memory goes to the map.
+  // Behind a full-bleed map the wallpaper is invisible, so the frame is torn down
+  // completely instead of being paused. Memory goes to the map.
   useEffect(() => {
-    const wrap = wrapRef.current;
-    if (!wrap) return;
-    if (hidden) { setState("idle"); return; }
+    if (hidden) { setState("idle"); setMount(false); return; }
     setState("boot");
-    // A fresh canvas per boot: a context that was released with loseContext() cannot be reused.
-    const canvas = document.createElement("canvas");
-    canvas.className = "site-wallpaper__canvas";
-    wrap.appendChild(canvas);
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
     if (conn?.saveData) { setState("fallback"); return; }
-    let cancelled = false;
-    const abort = new AbortController();
-    let idleHandle = 0;
-    let cleanup = () => {};
-
-    const boot = async () => {
-      try {
-        const { CircuitWallpaperEngine } = await import("./circuitWallpaperEngine");
-        if (cancelled) return;
-        const engine = new CircuitWallpaperEngine(canvas, { touch: isTouchDevice() });
-        engineRef.current = engine;
-        const applyMotion = () => {
-          const still = prefersStillMotion();
-          engine.setStill(still);
-          setState(still ? "still" : "live");
-        };
-        engine.onLost = () => { engine.stop(); setState("fallback"); };
-        engine.onRestored = () => { applyMotion(); };
-        await engine.load(abort.signal);
-        if (cancelled) { engine.dispose(); return; }
-        engine.resize();
-        engine.setLongPage(longPageRef.current);
-        applyMotion();
-
-        let resizeTimer = 0;
-        const onResize = () => { window.clearTimeout(resizeTimer); resizeTimer = window.setTimeout(() => engine.resize(), 120); };
-        window.addEventListener("resize", onResize);
-        window.addEventListener("orientationchange", onResize);
-        const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-        mq.addEventListener?.("change", applyMotion);
-        const mo = new MutationObserver(applyMotion);
-        mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-calm"] });
-        cleanup = () => {
-          window.clearTimeout(resizeTimer);
-          window.removeEventListener("resize", onResize);
-          window.removeEventListener("orientationchange", onResize);
-          mq.removeEventListener?.("change", applyMotion);
-          mo.disconnect();
-          engine.dispose();
-          engineRef.current = null;
-        };
-      } catch {
-        engineRef.current?.dispose();
-        engineRef.current = null;
-        if (!cancelled) setState("fallback");
-      }
-    };
-
-    // Never compete with first paint: start once the page has settled.
+    // Never compete with first paint: mount once the page has settled.
     const ric = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
-    if (ric) idleHandle = ric(() => void boot(), { timeout: 2500 });
-    else idleHandle = window.setTimeout(() => void boot(), 800);
-
+    let idleHandle = 0;
+    if (ric) idleHandle = ric(() => setMount(true), { timeout: 2500 });
+    else idleHandle = window.setTimeout(() => setMount(true), 800);
     return () => {
-      cancelled = true;
-      abort.abort();
       const cic = (window as Window & { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback;
       if (cic) cic(idleHandle); else window.clearTimeout(idleHandle);
-      cleanup();
-      canvas.remove();
     };
   }, [hidden]);
 
-  // Switching between a board and another route keeps the same context; only the mapping changes.
-  useEffect(() => { engineRef.current?.setLongPage(longPage); }, [longPage]);
+  // Calm mode / reduced-motion changes flip live <-> still; the board inside the
+  // frame paints (or holds) its own frame to match.
+  useEffect(() => {
+    const applyMotion = () => {
+      setState(prev => (prev === "live" || prev === "still")
+        ? (prefersStillMotion() ? "still" : "live")
+        : prev);
+    };
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    mq.addEventListener?.("change", applyMotion);
+    const mo = new MutationObserver(applyMotion);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-calm"] });
+    return () => { mq.removeEventListener?.("change", applyMotion); mo.disconnect(); };
+  }, []);
 
   return (
     <div
@@ -136,6 +83,17 @@ export default function SiteWallpaper() {
       data-hidden={hidden ? "true" : undefined}
       data-long={longPage ? "true" : undefined}
       aria-hidden="true"
-    />
+    >
+      {mount && !hidden && (
+        <iframe
+          className="site-wallpaper__canvas"
+          src="/circuit-wallpaper/index.html"
+          title=""
+          tabIndex={-1}
+          onLoad={() => setState(prefersStillMotion() ? "still" : "live")}
+          onError={() => setState("fallback")}
+        />
+      )}
+    </div>
   );
 }
