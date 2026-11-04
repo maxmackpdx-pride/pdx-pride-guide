@@ -72,10 +72,12 @@ test('Places preserve clear artwork and opposite-depth parallax across sizes and
     });
     const page=await context.newPage();page.setDefaultTimeout(30000);
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
-    for(const [family,size] of [['discovery','wide'],['discovery','tall'],['discovery','small'],['home','tall'],['home','wide']]){
+    for(const [family,size] of [['public','wide'],['public','tall'],['public','small'],['directory',device==='mobile'?'small':'tall']]){
      const label=`${device}-${mode}-${family}-${size}`;
+     try{
      await page.goto(`${server.resolvedUrls.local[0]}__placez-artwork?family=${family}&size=${size}`,{waitUntil:'domcontentloaded'});
      const urls=await artworkReady(page);
+     if(shots)await page.screenshot({path:path.join(shots,`${label}-loaded.png`),fullPage:true,animations:'allow'});
      const card=page.locator('#qa-card [data-card-size]').first();
      const dimensions=await card.evaluate(el=>({width:el.offsetWidth,height:el.offsetHeight}));
      const expected=size==='wide'?[360,216]:size==='small'?[136,170]:[200,403];
@@ -117,6 +119,11 @@ test('Places preserve clear artwork and opposite-depth parallax across sizes and
      assert.deepEqual(errors,[],`${label}: no uncaught errors`);
      assert.deepEqual(writes,[],`${label}: no attempted writes`);
      console.log(`PASS ${label}: clear artwork, dimensions, layers, motion, overflow`);
+     }catch(error){
+      evidence.push({label,error:String(error)});
+      if(shots)await page.screenshot({path:path.join(shots,`${label}-FAILED.png`),fullPage:true,animations:'allow',timeout:10000}).catch(()=>{});
+      throw error;
+     }
     }
    }finally{await context.close();}
   }

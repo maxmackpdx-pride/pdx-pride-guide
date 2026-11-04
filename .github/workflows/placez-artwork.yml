@@ -30,7 +30,8 @@ jobs:
         with:
           node-version: "24.22.2"
           cache: npm
-      - run: npm ci --include=dev
+      - id: dependencies
+        run: npm ci --include=dev
       - name: Verify clear artwork and React 19 preservation
         run: node --test script/placez-artwork.test.mjs
       - name: Install browser
@@ -40,6 +41,7 @@ jobs:
         env:
           PLACEZ_QA_SCREENSHOT_DIR: artifacts/placez-artwork
       - name: Build and verify production bundle without deploying
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
         run: npm run build && npm run verify:deploy
       - name: Preserve Places screenshots for review
         if: always()
