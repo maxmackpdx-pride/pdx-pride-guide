@@ -108,6 +108,10 @@ A 1.5 GB replica-cap attempt did not stick; do not keep retrying caps that do no
 Current env controls are `FLYER_LLM_DISABLED=1`, `QSEARCH_SCRUB_LLM=0`, and
 `QSEARCH_SCRUB_FLYER_VISION=0`.
 
+## Deploy waits
+
+Read `.claude/skills/deploy-wait/SKILL.md` before waiting on CI or Railway. One status read at the decision point. No polling and no pending status pings. Report the result once, then stop.
+
 ## Verification
 
 Verification must be proportional to the change:
