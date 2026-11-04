@@ -1,0 +1,39 @@
+/* Card morphs use the View Transition pseudo tree. Resting card sizes stay on the real elements. */
+::view-transition-group(.zay-card-morph) {
+  animation-duration: 280ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+::view-transition-old(.zay-card-morph),
+::view-transition-new(.zay-card-morph) {
+  animation-duration: 180ms;
+  height: 100%;
+  overflow: clip;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(.zay-card-morph),
+  ::view-transition-old(.zay-card-morph),
+  ::view-transition-new(.zay-card-morph) {
+    animation-duration: 0s;
+  }
+}
+html.calm-mode ::view-transition-group(.zay-card-morph),
+html[data-calm="true"] ::view-transition-group(.zay-card-morph),
+html.calm-mode ::view-transition-old(.zay-card-morph),
+html[data-calm="true"] ::view-transition-old(.zay-card-morph),
+html.calm-mode ::view-transition-new(.zay-card-morph),
+html[data-calm="true"] ::view-transition-new(.zay-card-morph) {
+  animation-duration: 0s;
+}
+
+.zay-card-skeleton {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: var(--text-hi);
+  background: var(--ink-800);
+  border: 1px solid var(--ink-border);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

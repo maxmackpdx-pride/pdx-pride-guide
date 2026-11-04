@@ -1,4 +1,6 @@
+import { startTransition, useOptimistic } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { nextOptimisticFlag } from "@/components/cards/react19CardModel";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -25,6 +27,7 @@ export function useHeart(kind: HeartKind, ref: string, snapshot: HeartSnapshot) 
   const hearts = useHearts();
   const key = [...HEARTS_KEY, user?.id];
   const hearted = !!hearts.data?.some(h => h.kind === kind && h.ref === ref);
+  const [optimisticHearted, setOptimisticHearted] = useOptimistic(hearted, nextOptimisticFlag);
   const toggle = useMutation({
     mutationFn: () => hearted
       ? apiRequest("DELETE", "/api/hearts", { kind, ref }).then(r => r.json())
@@ -40,5 +43,11 @@ export function useHeart(kind: HeartKind, ref: string, snapshot: HeartSnapshot) 
     onError: (_error, _vars, context) => { if (context) cache.setQueryData(key, context.before); },
     onSettled: () => { void cache.invalidateQueries({ queryKey: key }); void cache.invalidateQueries({ queryKey: ["/api/outz/follow"] }); },
   });
-  return { hearted, signedIn: !!user, loading: hearts.isLoading, pending: toggle.isPending, toggle: () => toggle.mutate() };
+  const run = () => {
+    startTransition(async () => {
+      setOptimisticHearted("toggle");
+      try { await toggle.mutateAsync(); } catch { /* The mutation restores the cached heart. */ }
+    });
+  };
+  return { hearted: optimisticHearted, signedIn: !!user, loading: hearts.isLoading, pending: toggle.isPending, toggle: run };
 }

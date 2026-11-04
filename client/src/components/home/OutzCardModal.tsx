@@ -1,12 +1,17 @@
 import {useEffect,useRef,useState} from 'react';
 import {CardDetails} from "@/components/cards/CardAPI";
+import {OpenCardMeta} from "@/components/cards/react19Card";
+import {closeOpenCard} from "@/components/cards/react19CardModel";
 import {X} from 'lucide-react';
 import {useLocation} from 'wouter';
 import {useAuth} from '@/context/AuthContext';
 import {useOpenCardClose} from '@/hooks/useOpenCardClose';
 import type {TodayLocation} from './TodayLocationCard';
 import './OutzCardModal.css';
-export default function OutzCardModal(props:Parameters<typeof OutzCardDetails>[0]) {return <CardDetails key={props.location.key} onClose={props.onClose}><OutzCardDetails {...props}/></CardDetails>}
+export default function OutzCardModal({documentMeta=true,...props}:Parameters<typeof OutzCardDetails>[0]&{documentMeta?:boolean}) {
+ const close=()=>closeOpenCard(props.onClose);
+ return <CardDetails key={props.location.key} onClose={props.onClose}>{documentMeta&&<OpenCardMeta title={props.location.name} description={props.location.detail}/>}<OutzCardDetails {...props} onClose={close}/></CardDetails>;
+}
 function OutzCardDetails({location,onClose,onRequireAuth}:{location:TodayLocation;onClose:()=>void;onRequireAuth?:()=>void}) {
  const [ready,setReady]=useState(false);
  const [failed,setFailed]=useState(false);

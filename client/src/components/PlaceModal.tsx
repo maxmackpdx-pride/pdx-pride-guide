@@ -13,6 +13,8 @@ import DetailActions from "./DetailActions";
 import type React from "react";
 import { lazy, Suspense, useEffect, useId, useRef, useState } from "react";
 import { CardDetails } from "./cards/CardAPI";
+import { OpenCardMeta } from "./cards/react19Card";
+import { closeOpenCard } from "./cards/react19CardModel";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -215,8 +217,9 @@ function PlaceHours({ hours }: { hours: string }) {
   return <span className="place-modal-panel__hours">{clauses.map((clause, index) => <span className="place-modal-panel__hours-clause" key={`${clause}-${index}`}>{clause}{index < clauses.length - 1 ? "," : ""}</span>)}</span>;
 }
 
-export default function PlaceModal(props: Parameters<typeof PlaceModalInner>[0]) {
- return <CardDetails key={props.place?.id} onClose={props.onClose} mobileViewport><PlaceModalInner {...props}/></CardDetails>;
+export default function PlaceModal({ documentMeta = true, ...props }: Parameters<typeof PlaceModalInner>[0] & { documentMeta?: boolean }) {
+ const place = props.place;
+ return <CardDetails key={place?.id} onClose={props.onClose} mobileViewport>{documentMeta && place ? <OpenCardMeta title={place.name} description={place.neighborhood || place.address || place.description || ""} /> : null}<PlaceModalInner {...props} onClose={() => closeOpenCard(props.onClose)} /></CardDetails>;
 }
 function PlaceModalInner({
   place,

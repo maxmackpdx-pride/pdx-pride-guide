@@ -1,6 +1,8 @@
 import { useIncidentalMap } from "@/hooks/useIncidentalMap";
 import "@/components/cards/CategoryCardAPI.css";
 import { CardDetails, rememberCardOrigin, type CardSize } from "@/components/cards/CardAPI";
+import { OpenCardMeta, PausedCard } from "@/components/cards/react19Card";
+import { closeOpenCard } from "@/components/cards/react19CardModel";
 import { readBrowseCategories } from "@/lib/browseCategoryState";
 import { resourceMapHref } from '@/lib/resourceMap';
 import { useQuery } from "@tanstack/react-query";
@@ -524,6 +526,8 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   const [mode, setMode] = useState<"directory" | "talk">(initial.mode);
   const [browseView, setBrowseView] = useState<BrowseView>(initial.layout);
   const [supportOpen, setSupportOpen] = useState(false);
+  const [supportMounted, setSupportMounted] = useState(false);
+  if (supportOpen && !supportMounted) setSupportMounted(true);
   const supportTrigger = useRef<HTMLElement | null>(null);
   const focusSupportPanel = useCallback((node: HTMLElement | null) => { node?.focus({preventScroll:true}); }, []);
   const [detail, setDetail] = useState<Row | null>(null);
@@ -653,12 +657,14 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
         <div className="rg-reassurance"><p>Not sure? <a href="tel:211">Call 211info</a> for help finding a starting point.</p></div>
       </div>
 
-      {supportOpen && <CardDetails onClose={() => setSupportOpen(false)}>
-        <section ref={focusSupportPanel} tabIndex={-1} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setSupportOpen(false); } }} className="pdx-glass-rebind rg-overlay rg-drawer rg-resource-detail rg-safety-drawer rg-category-safety" style={{ "--resource-accent": "var(--neon-red)" } as CSSProperties} aria-label="Oregon urgent help">
-          <button type="button" className="rg-close" aria-label="Close safety support" onClick={() => { setSupportOpen(false); supportTrigger.current?.focus({preventScroll:true}); }}><X size={20} /></button>
+      {supportMounted && <>
+        {supportOpen && <OpenCardMeta title="Oregon urgent help" description="Urgent help and support resources." />}
+        <PausedCard open={supportOpen}><CardDetails onClose={() => closeOpenCard(() => setSupportOpen(false))}>
+        <section ref={focusSupportPanel} tabIndex={-1} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); closeOpenCard(() => setSupportOpen(false)); } }} className="pdx-glass-rebind rg-overlay rg-drawer rg-resource-detail rg-safety-drawer rg-category-safety" style={{ "--resource-accent": "var(--neon-red)" } as CSSProperties} aria-label="Oregon urgent help">
+          <button type="button" className="rg-close" aria-label="Close safety support" onClick={() => { closeOpenCard(() => setSupportOpen(false)); supportTrigger.current?.focus({preventScroll:true}); }}><X size={20} /></button>
           <div className="rg-drawer-body"><Support openCard /></div>
         </section>
-      </CardDetails>}
+      </CardDetails></PausedCard></>}
 
     </div>}
       <Dialog.Root
@@ -666,7 +672,8 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
         open={detailOpen}
         onOpenChange={open => {setDetailOpen(open); if (!open && embeddedDetail) onEmbeddedClose?.();}}
       >
-        {detailOpen && <CardDetails key={detail?.org.name ?? embeddedDetail?.name ?? "resource"} onClose={() => { setDetailOpen(false); if (embeddedDetail) onEmbeddedClose?.(); }}>
+        {detailOpen && <CardDetails key={detail?.org.name ?? embeddedDetail?.name ?? "resource"} onClose={() => closeOpenCard(() => { setDetailOpen(false); if (embeddedDetail) onEmbeddedClose?.(); })}>
+          <OpenCardMeta title={detail?.org.name || embeddedDetail?.name || "NEEDZ"} description={detail?.org.desc || ""} />
           <Dialog.Content
             ref={detailPanel}
             onOpenAutoFocus={event => { event.preventDefault(); detailPanel.current?.focus({preventScroll:true}); }}

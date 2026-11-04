@@ -1,6 +1,7 @@
 import {CardHeartButton} from "@/components/CardHeartButton";
 import '@/components/cards/CategoryCardAPI.css';
 import {rememberCardOrigin} from '@/components/cards/CardAPI';
+import {openCardFromEvent} from '@/components/cards/react19CardModel';
 import React,{useEffect,useState,useRef,useLayoutEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Heart,Share2,ArrowUpRight,MapPin,Waves} from 'lucide-react';
@@ -82,9 +83,9 @@ function useFilters(){useLayoutEffect(()=>{filterUsers++;if(!filterRoot){filterN
 export default function PunkBoardCard({post,small=false,size=small?"small":"wide",saved=false,saveDisabled=false,onSave,onOpen,showStatus=false,calm=false}){
  small=size==="small";
  const {calmMode}=useTheme(); calm=calm||calmMode; useFilters(); const openRef=useRef(null); const r=toPunkPost(post);
- return <SaveContext.Provider value={{saved,disabled:saveDisabled||!onSave,onSave:onSave||(()=>{})}}><div className="boardz-punk-scope" data-card-size={size} data-card-category={post.category} onClickCapture={rememberCardOrigin} data-direction="split" data-calm={calm} data-compact={small||undefined} onClick={e=>{if(onOpen&&!e.target.closest('button,a,input,select,textarea'))onOpen(openRef.current)}}>
+ return <SaveContext.Provider value={{saved,disabled:saveDisabled||!onSave,onSave:onSave||(()=>{})}}><div className="boardz-punk-scope" data-card-size={size} data-card-category={post.category} onClickCapture={rememberCardOrigin} data-direction="split" data-calm={calm} data-compact={small||undefined} onClick={e=>{if(onOpen&&!e.target.closest('button,a,input,select,textarea'))openCardFromEvent(e,()=>onOpen(openRef.current))}}>
  <Card r={r} small={small} calm={calm}/>
- {onOpen&&<button type="button" className="punk-open-target" ref={openRef} onClick={e=>onOpen(e.currentTarget)} aria-label={'Open '+post.title}/>}
+ {onOpen&&<button type="button" className="punk-open-target" ref={openRef} onClick={e=>openCardFromEvent(e,()=>onOpen(e.currentTarget))} aria-label={'Open '+post.title}/>}
  {(post.isDemo||showStatus)&&<span className="punk-post-status">{post.isDemo?'DEMO · ':''}{showStatus?post.status:''}</span>}
  </div></SaveContext.Provider>;
 }

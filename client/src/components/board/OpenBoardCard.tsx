@@ -1,4 +1,5 @@
 import { type CSSProperties, type ReactNode } from "react";
+import { OpenCardMeta } from "@/components/cards/react19Card";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
@@ -28,6 +29,7 @@ export default function OpenBoardCard({ label, accent, onClose, children, floati
         style={{ "--c": accent, "--listing-accent": accent } as CSSProperties}
         onClick={event => event.stopPropagation()}
       >
+        <OpenCardMeta title={label} description={label} />
         <button type="button" className="board-open-card__close" onClick={requestClose} aria-label={`Close ${label}`}><X size={18} /></button>
         {typeof children === "function" ? children(requestClose) : children}
       </section>

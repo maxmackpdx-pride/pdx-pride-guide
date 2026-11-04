@@ -1,5 +1,7 @@
 // @ts-nocheck
 import { rememberCardOrigin } from "@/components/cards/CardAPI";
+import { CardMorph } from "@/components/cards/react19Card";
+import { cardMorphName, preloadCardImage } from "@/components/cards/react19CardModel";
 import React, { useEffect, useState } from "react";
 import { Badge } from "./Badge";
 import { Share2 } from "lucide-react";
@@ -526,8 +528,10 @@ export function PlaceCard({
 
   const useSpecialEdge =
     isNonprofit || isHealthcare || isRealEstate || isCampground || isGroup;
+  if (logoUrl) preloadCardImage(logoUrl, "auto");
 
   return (
+    <CardMorph name={cardMorphName(["place", businessId ?? name])}>
     <article data-card-size={isCompact ? "wide" : "tall"} data-card-category="placez" onClickCapture={rememberCardOrigin}
       className={`pdxPlace pdx-glass-rebind${useSpecialEdge ? " pdxPlace--edge" : ""}${isCompact ? " pdxPlace--compact pdxPlace--wide" : ""}${className ? ` ${className}` : ""}`}
       style={{ "--_c": accent, "--c": accent, "--_edge": edge, ...(style || {}) }}
@@ -728,5 +732,6 @@ export function PlaceCard({
         {footer}
       </div>
     </article>
+    </CardMorph>
   );
 }

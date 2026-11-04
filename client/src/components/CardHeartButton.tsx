@@ -1,13 +1,18 @@
-import { useLayoutEffect, useRef, type ButtonHTMLAttributes } from 'react';
+import { useLayoutEffect, useRef, type ButtonHTMLAttributes, type Ref } from 'react';
 import { Heart } from 'lucide-react';
 import './HeartButton.css';
 import './CardHeartButton.css';
 
 /** Shared visual control only. Categories retain their own follow/save behavior. */
-export function CardHeartButton({ active, className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { active: boolean }) {
-  const ref = useRef<HTMLButtonElement>(null);
+export function CardHeartButton({ active, className = '', ref, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { active: boolean; ref?: Ref<HTMLButtonElement> }) {
+  const local = useRef<HTMLButtonElement>(null);
+  const setRef = (node: HTMLButtonElement | null) => {
+    local.current = node;
+    if (typeof ref === "function") ref(node);
+    else if (ref) ref.current = node;
+  };
   useLayoutEffect(() => {
-    const button=ref.current;
+    const button=local.current;
     const card=button?.closest<HTMLElement>('[data-card-size="small"]');
     if(!button || !card)return;
     const align=()=>{
@@ -26,7 +31,7 @@ export function CardHeartButton({ active, className = '', ...props }: ButtonHTML
     if(button.offsetParent instanceof HTMLElement && button.offsetParent!==card)observer.observe(button.offsetParent);
     return()=>observer.disconnect();
   },[]);
-  return <button {...props} ref={ref} type="button" data-card-heart="true" aria-pressed={active}
+  return <button {...props} ref={setRef} type="button" data-card-heart="true" aria-pressed={active}
     className={`zheart-btn${active ? ' is-hearted' : ''} ${className}`.trim()}>
     <Heart size={18} aria-hidden="true" fill={active ? 'currentColor' : 'none'} />
   </button>;

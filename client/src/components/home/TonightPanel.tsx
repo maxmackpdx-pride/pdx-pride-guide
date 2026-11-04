@@ -18,6 +18,7 @@ import { useEventRsvp } from "@/hooks/useEventRsvp";
 import HomeDiscover from "./HomeDiscover";
 import TonightEventCard from "./TonightEventCard";
 import EventModal from "@/components/EventModal";
+import { OpenCardMeta, PausedCard } from "@/components/cards/react19Card";
 import AuthModal from "@/components/AuthModal";
 import { outzSharePath } from "@shared/outzShare";
 import { placePath } from "@shared/placeSlug";
@@ -50,6 +51,7 @@ export default function TonightPanel() {
   const { calmMode } = useTheme();
   const reducedMotion = useReducedMotion();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [heldEvent, setHeldEvent] = useState<Event | null>(null);
   const { showAuth, setShowAuth } = useEventRsvp();
   const { user } = useAuth();
   const { savedIds, toggleSave } = useSavedEvents();
@@ -119,7 +121,7 @@ export default function TonightPanel() {
               if (item.location) return <div className="home-tonight__item" dir="ltr" key={item.location.key}><TodayLocationCard location={item.location} onRequireAuth={() => setShowAuth(true)} /></div>;
               const event = item.event;
               return <div className="home-tonight__item" dir="ltr" key={event.listingInstanceKey || `${event.id}:${event.dateStart}`}>
-                <TonightEventCard listing={event} rsvped={savedIds.has(event.id)} onToggleRsvp={id => user ? toggleSave(id) : setShowAuth(true)} onOpen={setSelectedEvent} />
+                <TonightEventCard listing={event} rsvped={savedIds.has(event.id)} onToggleRsvp={id => user ? toggleSave(id) : setShowAuth(true)} onOpen={(listing) => { setHeldEvent(listing); setSelectedEvent(listing); }} />
               </div>;
             })}
           </ResourceRail>
@@ -127,7 +129,10 @@ export default function TonightPanel() {
           <p className="home-tonight__empty">Nothing listed for today yet. Check EVENTZ for what&apos;s coming up.</p>
         )}
       </div>
-      {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} onEventUpdated={setSelectedEvent} />}
+      {heldEvent && <>
+        {selectedEvent && <OpenCardMeta title={selectedEvent.title} description={selectedEvent.venueName} />}
+        <PausedCard open={selectedEvent != null}><EventModal documentMeta={false} event={selectedEvent ?? heldEvent} onClose={() => setSelectedEvent(null)} onEventUpdated={(event) => { setSelectedEvent(event); setHeldEvent(event); }} /></PausedCard>
+      </>}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </section>
   );

@@ -13,6 +13,8 @@ import { Button } from "@/components/ds";
 import DetailActions from "./DetailActions";
 import { useState, useEffect, useRef } from "react";
 import { CardDetails } from "./cards/CardAPI";
+import { OpenCardMeta } from "./cards/react19Card";
+import { closeOpenCard } from "./cards/react19CardModel";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -195,15 +197,17 @@ export default function EventModal({
   onEventUpdated,
   originRect = null,
   initialSection = "details",
+  documentMeta = true,
 }: {
   event: Event;
   onClose: () => void;
   onEventUpdated?: (event: Event) => void;
   originRect?: EventModalOriginRect | null;
   initialSection?: "details" | "attendance";
+  documentMeta?: boolean;
 }) {
   if (!event || typeof event.id !== "number") return null;
-  return <CardDetails key={event.id} onClose={onClose}><EventModalInner event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} initialSection={initialSection} /></CardDetails>;
+  return <CardDetails key={event.id} onClose={onClose}>{documentMeta ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}<EventModalInner event={event} onClose={() => closeOpenCard(onClose)} onEventUpdated={onEventUpdated} originRect={originRect} initialSection={initialSection} /></CardDetails>;
 }
 
 function EventModalInner({

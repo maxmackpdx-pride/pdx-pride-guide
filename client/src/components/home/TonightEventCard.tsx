@@ -1,5 +1,7 @@
 import { rememberCardOrigin } from "@/components/cards/CardAPI";
-import { useEffect, useState, type CSSProperties } from "react";
+import { CardMorph } from "@/components/cards/react19Card";
+import { cardMorphName, nextOptimisticFlag, openCardFromEvent, preloadCardImage } from "@/components/cards/react19CardModel";
+import { startTransition, useEffect, useOptimistic, useState, type CSSProperties } from "react";
 import { ArrowUpRight, Clock3, MapPin } from "lucide-react";
 import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
 import type { ScheduleEvent } from "@/lib/scheduleEvents";
@@ -59,13 +61,15 @@ export type TonightEventCardProps = {
 };
 
 export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp, onOpen, liveState, layout = "card" }: TonightEventCardProps) {
+  const [saved, setSaved] = useOptimistic(rsvped, nextOptimisticFlag);
   const admission = listing.admission === "FREE" ? "Free" : listing.admission === "SUGGESTED_DONATION" ? "Suggested donation" : listing.admission === "DOOR_FEE" ? "Door fee" : "Ticketed";
   // Saved cards show what moved since you saved them (last two weeks).
   const changedAt = listing.lastChangeAt ? Date.parse(listing.lastChangeAt) : NaN;
   const changeLabel = rsvped && listing.lastChangeLabel && Number.isFinite(changedAt) && Date.now() - changedAt < CHANGE_WINDOW_MS ? listing.lastChangeLabel : null;
   const poster = listingPosterUrl(listing);
+  if (poster) preloadCardImage(poster, layout === "card" ? "auto" : "low");
   const age = listing.ageRequirement === "21_PLUS" ? "21+" : listing.ageRequirement === "18_PLUS" ? "18+" : "All ages";
-  return <article data-card-size={layout === "row" ? "wide" : "tall"} data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--${layout} pdx-glass-card pdx-glass-rebind`} style={{ "--c": dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
+  return <CardMorph name={cardMorphName(["event", listing.id, layout])}><article data-card-size={layout === "row" ? "wide" : "tall"} data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--${layout} pdx-glass-card pdx-glass-rebind`} style={{ "--c": dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
     {poster
       ? <DayMotif day={listingDay(listing)} placement="card" />
       : <DayMotif day={listingDay(listing)} placement="art" className="tonight-card__motif-fill" />}
@@ -73,7 +77,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
     <RailShareButton href={eventPath(listing.id, listing.title, listing.dayOfWeek)} title={listing.title} />
     {liveState ? <LiveBadge live={liveState} /> : null}
     <div className="tonight-card__sheen pdx-glass-sheen--specular" aria-hidden="true" />
-    <button className="tonight-card__open" type="button" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>
+    <button className="tonight-card__open" type="button" onClick={(click) => openCardFromEvent(click, () => onOpen(listing))} aria-label={`Open ${listing.title}`}>
       <div className={`tonight-card__art tonight-card__art--flyer${poster ? "" : " tonight-card__art--motif"}`}>{poster ? <EventFlyerArt src={poster} day={listingDay(listing)} backdrop={false} sizes={layout === "row" ? "144px" : "200px"} /> : <><i className="day-motif-code">{motifDay(listingDay(listing))}</i><EventFallbackLogo title={listing.title} venueName={listing.venueName} /></>}</div>
       <div className="tonight-card__body">
         <p className="rail-card-room"><img className="rail-card-room__logo rail-card-room__logo--white" src="/brand/family/eventz.png" alt="Eventz" /></p>
@@ -85,8 +89,8 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
       </div>
     </button>
     <footer className="tonight-card__footer">
-      <button type="button" className="tonight-card__save" aria-pressed={rsvped} aria-label={`${rsvped ? "Remove" : "Add"} ${listing.title} ${rsvped ? "from" : "to"} my schedule`} onClick={() => onToggleRsvp(listing.id)}><ZLineIcon name="favorite" size={18} filled={rsvped} />{rsvped ? "Saved" : "Save"}</button>
-      <button type="button" className="tonight-card__view" onClick={() => onOpen(listing)} aria-label={`View ${listing.title}`}>View event <ArrowUpRight size={17} aria-hidden="true" /></button>
+      <button type="button" className="tonight-card__save" aria-pressed={saved} aria-label={`${saved ? "Remove" : "Add"} ${listing.title} ${saved ? "from" : "to"} my schedule`} onClick={(click) => { click.stopPropagation(); startTransition(() => { setSaved("toggle"); onToggleRsvp(listing.id); }); }}><ZLineIcon name="favorite" size={18} filled={saved} />{saved ? "Saved" : "Save"}</button>
+      <button type="button" className="tonight-card__view" onClick={(click) => openCardFromEvent(click, () => onOpen(listing))} aria-label={`View ${listing.title}`}>View event <ArrowUpRight size={17} aria-hidden="true" /></button>
     </footer>
-  </article>;
+  </article></CardMorph>;
 }
