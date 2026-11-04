@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -45,7 +45,7 @@ jobs:
   # Railway's GitHub integration deploys master on its own (about 22 to 25 minutes).
   # This job starts immediately so health verification is not stuck behind npm ci.
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - name: Checkout
