@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { preloadCardImage } from '@/components/cards/react19CardModel';
+import { deliveredImageUrl, slotPixels } from './imageSlot';
 import { queryClient } from './queryClient';
 import { useQuery } from '@tanstack/react-query';
 import { responsivePoster, type PosterVariants } from './responsivePoster';
@@ -35,5 +37,12 @@ export function useResponsivePoster(src: string | null | undefined, sizes?: stri
   });
   // Wait briefly for shared metadata rather than downloading the large original first.
   if (eligible && isPending && fetchStatus === 'fetching') return { src: undefined };
-  return responsivePoster(src ?? '', sizes, data);
+  const attrs = responsivePoster(src ?? '', sizes, data);
+  const variants = attrs.srcSet?.split(',').map(part => {
+    const match = part.trim().match(/^(\S+)\s+(\d+)w$/);
+    return match ? { src: match[1], width: Number(match[2]) } : null;
+  }).filter((item): item is { src: string; width: number } => !!item) ?? [];
+  const variant = deliveredImageUrl(variants, slotPixels(sizes, window.innerWidth, query => window.matchMedia(query).matches), window.devicePixelRatio || 1, src);
+  if (variant) preloadCardImage(variant, 'auto');
+  return attrs;
 }
