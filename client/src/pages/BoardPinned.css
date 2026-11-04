@@ -1,7 +1,7 @@
 /*
  * Boardz: cards are pinned notes on one board surface.
- *  - the board: a recessed, dark pinboard panel with a faint peg grid. It is translucent, so the shared circuit
- *    wallpaper (which scrolls with this page) shows through subtly.
+ *  - the board: the shared circuit shader itself, which scrolls 1:1 with this page.
+ *    No second panel, peg grid or inset well sits between the shader and the cards.
  *  - the note: lies flat. A tight contact shadow plus a short soft one, no glow, no lift, no scale.
  *  - the pin: its needle goes through the card; the hardware keeps its own contact shadow and a dent on the paper.
  *  - position: a fixed, deterministic angle and offset per card id (pinboardPlacement). Notes turn about their pin.
@@ -10,15 +10,9 @@
 .ab-page .ab-card-grid:has(.boardz-production-card) {
   position: relative;
   box-sizing: border-box;
-  border-radius: var(--radius-panel, 12px);
-  border: 1px solid color-mix(in srgb, var(--c, var(--room-hauz)) 34%, var(--z-black));
-  background:
-    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--text-hi) 9%, transparent) 0 1px, transparent 1.6px) 0 0 / 24px 24px,
-    linear-gradient(to bottom, color-mix(in srgb, var(--z-black) 62%, transparent), color-mix(in srgb, var(--z-black) 50%, transparent));
-  box-shadow:
-    inset 0 0 0 3px color-mix(in srgb, var(--z-black) 72%, transparent),
-    inset 0 12px 30px rgb(0 0 0 / .5),
-    inset 0 -8px 22px rgb(0 0 0 / .35);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .ab-page .ab-card-grid--pinboard { padding: 36px 20px 52px; }
 @media (max-width: 767px) {

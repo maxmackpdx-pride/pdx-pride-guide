@@ -10,6 +10,7 @@ import BoardArchiveList, { BoardArchiveFeedback } from "@/components/board/Board
 import BoardBrowseCard from "@/components/board/BoardBrowseCard";
 import { LoadMore } from "@/hooks/useProgressiveList";
 import { pinboardPlacement } from "@/lib/pinboardPlacement";
+import { mixBoardDemos } from "@/lib/mixBoardDemos";
 import { useBrowseControlsOffset } from "@/components/discovery/useBrowseControlsOffset";
 import BoardCategoryFollows from "@/components/board/BoardCategoryFollows";
 import { followRoomForCategory } from "@/lib/boardFollowChoices";
@@ -217,7 +218,10 @@ export default function Boards() {
         .toLowerCase()
         .includes(query.trim().toLowerCase()),
   ), featureFilters);
-  const results = matchingCategoryPosts.filter(p => intent === "all" || p.intent === intent);
+  const filteredResults = matchingCategoryPosts.filter(p => intent === "all" || p.intent === intent);
+  const results = featureFilters.sort === "newest" && !mineOnly && !savedOnly
+    ? mixBoardDemos(filteredResults)
+    : filteredResults;
   // A category doorway shows every matching post; the mixed feed loads progressively.
   const visibleResults = results.slice(0, limit);
   const clear = () => update({ archive:null, q: null, intent: null, saved: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null }, true);
