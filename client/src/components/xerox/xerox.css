@@ -191,9 +191,8 @@
 @keyframes xrPinDrop{0%{transform:translateY(-38px);opacity:0}15%{opacity:1}40%,100%{transform:translateY(0);opacity:1}}
 .xr-radar-ping{transform-box:fill-box;transform-origin:center;animation:xrPing 2.8s ease-out infinite}
 @keyframes xrPing{0%,40%{transform:scale(.4);opacity:.9}100%{transform:scale(3.2);opacity:0}}
-.xr-pz .pdxPlace__body::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:screen;opacity:.22;background:url(/boardz/punk/torn-card-scan.webp) center/auto 125%}
 @media (prefers-reduced-motion:reduce){.xr-xo *,.xr-radar *,.xr-copy,.xr-radar-pin,.xr-radar-ping{animation:none!important}}
-.xr-oz .xr-grain,.xr-pz .xr-grain{opacity:.3}
+.xr-oz .xr-grain{opacity:.3}
 
 /* One action per card: no share, and the follow control is the heart, bottom right, 44px, as on every other card */
 .xr-oz .rail-card-share,.xr-pz :is(.rail-card-share,.pdxPlace__share){display:none!important}

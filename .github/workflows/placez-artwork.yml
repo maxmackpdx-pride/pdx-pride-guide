@@ -1,0 +1,51 @@
+name: Places artwork regression
+
+on:
+  pull_request:
+    paths:
+      - "client/src/components/discovery/PlaceDiscoveryCard.tsx"
+      - "client/src/components/home/TodayLocationCard.tsx"
+      - "client/src/components/xerox/**"
+      - "client/src/components/CardMotifMotion.css"
+      - "client/src/components/resources/**"
+      - "client/src/components/artwork/**"
+      - "script/placez-artwork*.mjs"
+      - "script/fixtures/placez-artwork-browser.tsx"
+      - ".github/workflows/placez-artwork.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: placez-artwork-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  artwork:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.22.2"
+          cache: npm
+      - run: npm ci --include=dev
+      - name: Verify clear artwork and React 19 preservation
+        run: node --test script/placez-artwork.test.mjs
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: Verify Places layers, motion and responsive rendering
+        run: node --test script/placez-artwork-browser.test.mjs
+        env:
+          PLACEZ_QA_SCREENSHOT_DIR: artifacts/placez-artwork
+      - name: Build and verify production bundle without deploying
+        run: npm run build && npm run verify:deploy
+      - name: Preserve Places screenshots for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: placez-artwork-${{ github.sha }}
+          path: artifacts/placez-artwork
+          if-no-files-found: ignore
+          retention-days: 7
