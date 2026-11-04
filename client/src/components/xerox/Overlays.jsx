@@ -52,12 +52,9 @@ export function OutzXerox({children,photo=false,blend=false,delay=0}){
   </div>;
 }
 
-/** Placez keeps its scratch texture; radar graphics are deliberately removed. */
-export function PlacezXerox({children,slot='.pdxPlace__media',accent}){
-  const ref=useRef(null);
-  const media=useSlot(ref,slot);
-  return <div ref={ref} className="xr-pz" style={accent?{'--c':accent}:undefined}>
+/** Keep Placez controls and framing without a film over its authored motif planes. */
+export function PlacezXerox({children,accent}){
+  return <div className="xr-pz" style={accent?{'--c':accent}:undefined}>
     {children}
-    {media&&createPortal(<Grain/>,media)}
   </div>;
 }

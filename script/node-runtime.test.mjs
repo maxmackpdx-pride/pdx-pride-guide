@@ -12,7 +12,7 @@ test('runtime pins stay consistent across development, CI and production',()=>{
  assert.equal(JSON.parse(read('package.json')).engines.node,`>=${version} <25`);
  assert.equal(JSON.parse(read('package-lock.json')).packages[''].engines.node,`>=${version} <25`);
  const pins=readdirSync(path.join(root,'.github/workflows')).filter(f=>f.endsWith('.yml')).flatMap(f=>[...read(`.github/workflows/${f}`).matchAll(/node-version:\s*"([^"]+)"/g)].map(m=>m[1]));
- assert.equal(pins.length,7);assert.ok(pins.every(p=>p===version));
+ assert.equal(pins.length,8);assert.ok(pins.every(p=>p===version));
  assert.ok(read('script/install-node-runtime.sh').includes(`version=${version}`));
  const railway=JSON.parse(read('railway.json'));
  assert.equal(railway.build.builder,'NIXPACKS');
@@ -39,3 +39,4 @@ test('Node24 native SQLite supports transactions and queries',async()=>{
  const {default:Database}=await import('better-sqlite3');const db=new Database(':memory:');
  try {db.exec('CREATE TABLE smoke (value INTEGER)');db.transaction(()=>db.prepare('INSERT INTO smoke VALUES (?)').run(42))();assert.equal(db.prepare('SELECT value FROM smoke').get().value,42);assert.ok(db.prepare('SELECT sqlite_version() AS version').get().version);} finally {db.close();}
 });
+

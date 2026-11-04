@@ -14,6 +14,11 @@
  animation-name:card-motif-idle-support !important; animation-duration:29s !important;
  translate:calc(var(--rg-parallax-x,0px) * .35) calc(var(--rg-parallax-y,0px) * -.3) !important;
 }
+/* Placez keeps its authored pair on opposing pointer/scroll vectors. Using
+   :where keeps the reduced-motion and Calm Mode overrides authoritative. */
+[data-card-motif]:where([data-motif^="place-"]) [data-motif-depth="support"] {
+ translate:calc(var(--rg-parallax-x,0px) * -.35) calc(var(--rg-parallax-y,0px) * -.3) !important;
+}
 [data-card-motif] [data-motif-depth="front"],
 [data-card-motif][data-motif-depth="front"] {
  animation-name:card-motif-idle-front !important; animation-duration:32s !important;
