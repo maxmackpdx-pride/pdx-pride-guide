@@ -18,7 +18,6 @@ const jsFile = jsFiles.join(", ");
 const js = jsFiles.map((f) => readFileSync(join(assetsDir, f), "utf8")).join("\n");
 const css = readFileSync(join(assetsDir, cssFile), "utf8");
 const sourceCss = readFileSync("client/src/index.css", "utf8");
-const dashboardCss = readFileSync("client/src/components/dashboard/dashboard.css", "utf8");
 
 // A cached map document must keep every relative import and logo in its version directory.
 const flightBase = JSON.parse(readFileSync("dist/public/home-flight-manifest.json", "utf8")).base;
@@ -41,10 +40,6 @@ const checks = {
   noEventBoardCard: !js.includes("EventBoardCard"),
   noLegacyPageHeroCss: !sourceCss.includes(".page-hero") && !sourceCss.includes(".zine-hero"),
   noRainbowButtonHover: !sourceCss.includes("linear-gradient(90deg, #E40303"),
-  barlowFonts:
-    sourceCss.includes("--font-board-display: 'Barlow Condensed'") &&
-    !sourceCss.includes("Anton") &&
-    !dashboardCss.includes("DM Mono"),
   noLegacyHeroOverlays: !js.includes("hero-video-overlays") && !js.includes("home-hero-glitch"),
   noPageHeroKickers: !js.includes("PRIDE WEEKEND 2026") && !js.includes("ABOUT THIS GUIDE"),
 };

@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   typecheck:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -29,7 +29,7 @@ jobs:
         run: npm run typecheck
 
   unit-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -42,7 +42,7 @@ jobs:
         run: npx tsx --test server/platformV1.test.ts server/ingest/mirrorEventPosters.test.ts client/src/lib/optimisticCache.test.ts client/src/lib/authSession.test.ts client/src/lib/queryClient.test.ts client/src/lib/timeAgo.test.ts script/nav-tripwire.test.ts script/token-guard.test.mjs server/sessionStore.test.ts server/passwords.test.ts script/design-component-source-evidence.test.ts script/prepare-design-component-proposal.test.ts script/design-product-publication.test.ts script/verify-railway-design-build.test.ts client/src/lib/boardFollowChoices.test.ts script/home-halloween.test.ts script/mapz-nightlife.test.mjs script/map-startup-delivery.test.ts script/node-runtime.test.mjs server/publicEventFeedCache.test.ts server/publicEventFeedRoute.test.ts client/src/lib/responsivePoster.test.ts server/posterVariants.test.ts script/profile-declaration-emitter.test.mjs script/route-map-imports.test.mjs
 
   glass-rebind:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Checkout
@@ -60,7 +60,7 @@ jobs:
         run: node script/audit-glass-rebind.mjs
 
   card-continuity:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
