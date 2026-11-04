@@ -44,10 +44,9 @@ export function useHeart(kind: HeartKind, ref: string, snapshot: HeartSnapshot) 
     onSettled: () => { void cache.invalidateQueries({ queryKey: key }); void cache.invalidateQueries({ queryKey: ["/api/outz/follow"] }); },
   });
   const run = () => {
-    startTransition(async () => {
-      setOptimisticHearted("toggle");
-      try { await toggle.mutateAsync(); } catch { /* The mutation restores the cached heart. */ }
-    });
+    const next = !hearted;
+    startTransition(() => { setOptimisticHearted(next); });
+    toggle.mutate();
   };
   return { hearted: optimisticHearted, signedIn: !!user, loading: hearts.isLoading, pending: toggle.isPending, toggle: run };
 }
