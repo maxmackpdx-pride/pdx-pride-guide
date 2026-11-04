@@ -1,6 +1,6 @@
 import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import { CardMorph, OpenCardMeta, PausedCard } from "@/components/cards/react19Card";
-import { cardMorphName, openCardFromEvent, preloadCardImage } from "@/components/cards/react19CardModel";
+import { cardMorphName, openCardFromEvent, preloadCardImage, preloadSizedImage } from "@/components/cards/react19CardModel";
 import { blendedArtPhotoUrl } from "@/lib/outzBlendedArt";
 import { useState, type CSSProperties } from "react";
 import { OutzPhoto } from "@/components/outz/OutzPhoto";
@@ -27,9 +27,9 @@ export default function OutzSmallCard({ location, onRequireAuth }: { location: T
   const accent = `var(${OUTZ_TOKENS[location.kind || ""] || "--neon-yellow"})`;
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(placeId);
   const label = OUTZ_LABELS[location.kind || ""] || "Destination";
+  const photoSrc = location.photo?.src ? (location.photo.src.startsWith("/") ? location.photo.src : location.photo.src.startsWith("assets/") ? `/outzide-map/${location.photo.src}` : null) : null;
   if (blend) preloadCardImage(blendedArtPhotoUrl(placeId, "tall"), "high");
-  else if (location.photo?.src) preloadCardImage(location.photo.src.startsWith("/") ? location.photo.src : location.photo.src.startsWith("assets/") ? `/outzide-map/${location.photo.src}` : null, "auto");
-  else preloadCardImage(art, "low");
+  else if (location.photo?.variants?.length) preloadSizedImage(location.photo.variants.map(item => ({ src: item.src.startsWith("/") || item.src.startsWith("http") ? item.src : `/outzide-map/${item.src.replace(/^\//, "")}`, width: item.width })), "136px", photoSrc, "auto");
   return <>
     <CardMorph name={cardMorphName(["outz-small", location.key])}>
     <article data-card-size="small" data-card-category={"outzide"} onClickCapture={rememberCardOrigin} className="outz-small outz-accent pdx-glass-rebind" style={{ "--c": accent } as CSSProperties}>

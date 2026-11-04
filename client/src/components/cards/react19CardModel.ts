@@ -1,5 +1,6 @@
 import { addTransitionType, startTransition } from "react";
 import { preinit, preinitModule, preload, preloadModule } from "react-dom";
+import { deliveredImageUrl, slotPixels, type ImageCandidate } from "@/lib/imageSlot";
 
 /** React 19.3 exports these. The plan keeps the names in one place. */
 export const CARD_OPEN_TRANSITION = "card-open";
@@ -104,6 +105,13 @@ export function closeOpenCard(onClose?: () => void) {
 export function preloadCardImage(href: string | null | undefined, priority: "high" | "low" | "auto" = "auto") {
   if (!href || typeof document === "undefined") return;
   preload(href, { as: "image", fetchPriority: priority });
+}
+
+/** Preload the srcset candidate the card paints. Skips the full original. */
+export function preloadSizedImage(variants: ImageCandidate[] | null | undefined, sizes: string, original?: string | null, priority: "high" | "low" | "auto" = "auto") {
+  if (typeof document === "undefined" || !variants?.length) return;
+  const chosen = deliveredImageUrl(variants, slotPixels(sizes, window.innerWidth, (query) => window.matchMedia(query).matches), window.devicePixelRatio || 1, original);
+  if (chosen) preloadCardImage(chosen, priority);
 }
 
 export function preinitCardStyle(href: string) {

@@ -1,6 +1,6 @@
 import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import { CardMorph } from "@/components/cards/react19Card";
-import { cardMorphName, nextOptimisticFlag, openCardFromEvent, preloadCardImage } from "@/components/cards/react19CardModel";
+import { cardMorphName, nextOptimisticFlag, openCardFromEvent } from "@/components/cards/react19CardModel";
 import { startTransition, useEffect, useOptimistic, useState, type CSSProperties } from "react";
 import { ArrowUpRight, Clock3, MapPin } from "lucide-react";
 import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
@@ -67,7 +67,6 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
   const changedAt = listing.lastChangeAt ? Date.parse(listing.lastChangeAt) : NaN;
   const changeLabel = rsvped && listing.lastChangeLabel && Number.isFinite(changedAt) && Date.now() - changedAt < CHANGE_WINDOW_MS ? listing.lastChangeLabel : null;
   const poster = listingPosterUrl(listing);
-  if (poster) preloadCardImage(poster, layout === "card" ? "auto" : "low");
   const age = listing.ageRequirement === "21_PLUS" ? "21+" : listing.ageRequirement === "18_PLUS" ? "18+" : "All ages";
   return <CardMorph name={cardMorphName(["event", listing.id, layout])}><article data-card-size={layout === "row" ? "wide" : "tall"} data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--${layout} pdx-glass-card pdx-glass-rebind`} style={{ "--c": dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
     {poster
@@ -89,7 +88,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
       </div>
     </button>
     <footer className="tonight-card__footer">
-      <button type="button" className="tonight-card__save" aria-pressed={saved} aria-label={`${saved ? "Remove" : "Add"} ${listing.title} ${saved ? "from" : "to"} my schedule`} onClick={(click) => { click.stopPropagation(); startTransition(() => { setSaved("toggle"); onToggleRsvp(listing.id); }); }}><ZLineIcon name="favorite" size={18} filled={saved} />{saved ? "Saved" : "Save"}</button>
+      <button type="button" className="tonight-card__save" aria-pressed={saved} aria-label={`${saved ? "Remove" : "Add"} ${listing.title} ${saved ? "from" : "to"} my schedule`} onClick={(click) => { click.stopPropagation(); const next = !rsvped; startTransition(() => { setSaved(next); }); onToggleRsvp(listing.id); }}><ZLineIcon name="favorite" size={18} filled={saved} />{saved ? "Saved" : "Save"}</button>
       <button type="button" className="tonight-card__view" onClick={(click) => openCardFromEvent(click, () => onOpen(listing))} aria-label={`View ${listing.title}`}>View event <ArrowUpRight size={17} aria-hidden="true" /></button>
     </footer>
   </article></CardMorph>;

@@ -67,10 +67,8 @@ export default function VenueFollowButton({
       return;
     }
     const next = !following;
-    startTransition(async () => {
-      setOptimisticFollowing(next);
-      try { await mutation.mutateAsync(next); } catch { /* The mutation reports the error. */ }
-    });
+    startTransition(() => { setOptimisticFollowing(next); });
+    mutation.mutate(next);
   };
 
   if (variant === "small-card") return <CardHeartButton active={optimisticFollowing} disabled={mutation.isPending} onClick={handleClick} aria-label={optimisticFollowing ? "Unfollow directory listing" : "Follow directory listing"} />;

@@ -1,6 +1,6 @@
 import {rememberCardOrigin} from "@/components/cards/CardAPI";
 import {CardData, CardMorph, CardSkeleton, OpenCardMeta, PausedCard} from "@/components/cards/react19Card";
-import {cardMorphName, cardResource, openCardTransition, preinitCardStyle, preloadCardImage, preloadCardModule} from "@/components/cards/react19CardModel";
+import {cardMorphName, cardResource, openCardTransition, preinitCardStyle, preloadCardModule, preloadSizedImage} from "@/components/cards/react19CardModel";
 import OutzCardModal from "@/components/home/OutzCardModal";
 import {useEffect,useRef,useState} from 'react';
 import type {OutzPhotoData} from './OutzPhoto';
@@ -32,7 +32,7 @@ export default function OutzWideCard({place,variant='wide',onOpen,onRequireAuth}
  const size=variant==='compressed'?'small':'wide';
  preloadCardModule(WIDE_SCRIPT);
  for(const href of WIDE_STYLES)preinitCardStyle('/outzide-map/assets/'+href);
- preloadCardImage(photoSrc(place.photo),variant==='wide'?'high':'auto');
+ if(place.photo?.variants?.length)preloadSizedImage(place.photo.variants.map(item=>({src:item.src.startsWith('/')||item.src.startsWith('http')?item.src:`/outzide-map/${item.src.replace(/^\//,'')}`,width:item.width})),'(max-width: 800px) 100vw, 800px',photoSrc(place.photo),variant==='wide'?'high':'auto');
  const openDetail=(slot:HTMLElement|null)=>{
   if(onOpen){onOpen();return;}
   openCardTransition(()=>setOpen(true),slot);
