@@ -1,6 +1,6 @@
 import { CARD_SIZES, rememberCardOrigin, type CardSize } from "@/components/cards/CardAPI";
 import { CardMorph, OpenCardMeta, PausedCard } from "@/components/cards/react19Card";
-import { cardMorphName, openCardFromEvent, preloadCardImage, preloadSizedImage } from "@/components/cards/react19CardModel";
+import { cardMorphName, openCardFromEvent, preloadCardImage } from "@/components/cards/react19CardModel";
 import { blendedArtPhotoUrl } from "@/lib/outzBlendedArt";
 import {OutzPhoto,type OutzPhotoData} from '@/components/outz/OutzPhoto';
 import {OutzBlendArt} from '@/components/outz/OutzBlendArt';
@@ -39,10 +39,9 @@ export default function TodayLocationCard({ location, onRequireAuth, size = "tal
   const accent = isPlace ? PLACE_ACCENTS[kind] || "var(--neon-cyan)" : `var(${OUTZ_TOKENS[location.kind || ""] || "--neon-yellow"})`;
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(location.key.replace(/^outz:/, ""));
   const businessLogo = isPlace ? resolveDirectoryLogo(location.name, location.place?.imageUrl) || directoryFallbackLogo(kind) : null;
-  const photoSrc = location.photo?.src ? (location.photo.src.startsWith("/") ? location.photo.src : location.photo.src.startsWith("assets/") ? `/outzide-map/${location.photo.src}` : null) : null;
   if (blend) preloadCardImage(blendedArtPhotoUrl(placeId, "tall"), size === "small" ? "auto" : "high");
-  else if (!isPlace && location.photo?.variants?.length) preloadSizedImage(location.photo.variants.map(item => ({ src: item.src.startsWith("/") || item.src.startsWith("http") ? item.src : `/outzide-map/${item.src.replace(/^\//, "")}`, width: item.width })), `${CARD_SIZES[size].width}px`, photoSrc, "auto");
-  else if (!isPlace && !photoSrc) preloadCardImage(art, "low");
+  else if (!isPlace && location.photo?.src) preloadCardImage(location.photo.src.startsWith("/") ? location.photo.src : location.photo.src.startsWith("assets/") ? `/outzide-map/${location.photo.src}` : null, "auto");
+  else if (!isPlace) preloadCardImage(art, "low");
   else if (businessLogo) preloadCardImage(businessLogo, "auto");
   const label = isPlace ? DIRECTORY_TYPE_LABELS[kind] || "Placez" : OUTZ_LABELS[location.kind || ""] || "Destination";
   const card = <CardMorph name={cardMorphName(["today", location.key, size])}><article data-card-size={size} data-card-category={location.room} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind${isPlace ? "" : " outz-accent"}`} style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
