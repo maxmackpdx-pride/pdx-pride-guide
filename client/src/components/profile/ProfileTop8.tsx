@@ -57,15 +57,16 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onR
             const rank = i + 1;
             if (presentation === "portraits") {
               const name = e.kind === "user" ? e.displayName : e.name;
+              const hasActions = e.kind === "user" && user?.id !== e.id;
               return <div className="pp-top8__portrait" key={`${e.kind}-${e.id}`}>
                 {e.kind === "user" ? <Link className="pp-top8__portrait-link" href={`/u/${encodeURIComponent(e.username)}`} aria-label={`View ${name}'s profile`} title={name}>
                   <UserAvatar photoUrl={e.photoUrl} avatarChoice={e.avatarChoice} avatarRing={e.avatarRing} displayName={name} username={e.username} size={52}/>
-                  <span>{name}</span>
+                  {!hasActions && <span>{name}</span>}
                 </Link> : <button className="pp-top8__portrait-link" type="button" title={name} aria-label={`View ${name}`} onClick={event => onPlaceClick ? onPlaceClick(e, event.currentTarget) : window.location.assign(placePath(e.id, e.name))}>
                   <UserAvatar photoUrl={e.logoUrl} displayName={name} size={52} logoFit/>
                   <span>{name}</span>
                 </button>}
-                {e.kind === "user" && user?.id !== e.id ? <details className="pp-top8__portrait-options"><summary aria-label={`Actions for ${name}`}>•••</summary><button type="button" onClick={() => user ? setMessageTarget(e) : onRequireAuth?.()}><MessageCircle size={13} aria-hidden="true"/> Message {name}</button></details> : null}
+                {e.kind === "user" && hasActions ? <details className="pp-top8__portrait-options"><summary aria-label={`Actions for ${name}`}><span>{name}</span></summary><button type="button" onClick={() => user ? setMessageTarget(e) : onRequireAuth?.()}><MessageCircle size={13} aria-hidden="true"/> Message {name}</button></details> : null}
               </div>;
             }
             if (e.kind === "user") {

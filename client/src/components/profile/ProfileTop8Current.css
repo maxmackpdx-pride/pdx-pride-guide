@@ -27,12 +27,14 @@
 .pp-place-preview .placez-discovery-card:focus-within {outline:2px solid var(--c,var(--neon-cyan));outline-offset:3px;}
 
 /* Approved wall presentation: one compact portrait grid, with optional actions. */
-.profile-hologram .pp-top8.pp-top8--portraits .pp-top8__grid {grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 10px;}
+.profile-hologram .pp-top8.pp-top8--portraits .pp-top8__grid {grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 10px;}
 .pp-top8__portrait {position:relative;min-width:0;text-align:center;}
 .pp-top8__portrait-link {display:flex;flex-direction:column;align-items:center;gap:7px;width:100%;min-width:0;padding:0;border:0;background:none;color:inherit;text-decoration:none;cursor:pointer;}
 .pp-top8__portrait-link>span {font:400 11px/1.3 var(--font-body);max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:normal;min-height:2.6em;}
 .pp-top8__portrait-link:focus-visible,.pp-top8__portrait-options summary:focus-visible {outline:2px solid var(--neon-cyan);outline-offset:3px;}
-.pp-top8__portrait-options summary {list-style:none;cursor:pointer;font-size:12px;line-height:18px;min-height:44px;width:44px;margin-inline:auto;display:flex;align-items:center;justify-content:center;}
+.pp-top8__portrait-options summary {list-style:none;cursor:pointer;font:400 11px/1.3 var(--font-body);min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;gap:2px;}
+.pp-top8__portrait-options summary span {display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
+.pp-top8__portrait-options summary::after {content:'▾';font-size:8px;}
 .pp-top8__portrait-options summary::-webkit-details-marker {display:none;}
 .pp-top8__portrait-options button {position:absolute;z-index:8;left:0;top:100%;min-width:140px;min-height:44px;padding:8px;border:1px solid var(--panel-border);border-radius:8px;background:var(--z-oled);color:var(--text-hi);text-align:left;}
 .pp-top8__portrait:nth-child(4n) .pp-top8__portrait-options button {left:auto;right:0;}

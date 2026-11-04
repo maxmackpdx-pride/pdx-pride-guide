@@ -13,7 +13,7 @@ export function profileLightEdges(nodes:Array<{id:string;anchor:boolean}>):Array
 export type RibbonPoint={x:number;y:number};
 /** Project a continuously rotating sheet. Time changes the geometry, not only its color. */
 export function ribbonGeometry(a:RibbonPoint,b:RibbonPoint,time:number,phase=0){
- const dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy)||1,nx=-dy/length,ny=dx/length,half=Math.min(13,length*.04),front:string[]=[],back:string[]=[];
+ const dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy)||1,nx=-dy/length,ny=dx/length,half=Math.min(7,length*.035),front:string[]=[],back:string[]=[];
  for(let i=0;i<=40;i++){const t=i/40;const width=half*Math.sin(Math.PI*t)*Math.cos(Math.PI*t+time*.8+phase),bow=Math.sin(Math.PI*t)*Math.min(10,length*.02),x=a.x+dx*t+nx*bow,y=a.y+dy*t+ny*bow;front.push(`${(x+nx*width).toFixed(2)},${(y+ny*width).toFixed(2)}`);back.push(`${(x-nx*width).toFixed(2)},${(y-ny*width).toFixed(2)}`);}
  return `M${front.join(' L')} L${back.reverse().join(' L')} Z`;
 }

@@ -64,6 +64,7 @@ type RepliesResponse = {
 
 type Props = {
   hideHeader?: boolean;
+  paper?: boolean;
   posts: UpdatesPost[];
   author: UpdatesAuthor;
   onPostClick?: (post: UpdatesPost) => void;
@@ -132,6 +133,7 @@ function boardOverlayKind(type: "GIG" | "GIFTING"): "gig" | "gifting" {
 
 export default function UpdatesPanel({
   hideHeader = false,
+  paper = false,
   posts,
   author,
   onPostClick,
@@ -554,11 +556,11 @@ export default function UpdatesPanel({
           );
 
           const cardClass = [
-            "card",
-            "fitem",
-            glow ? "fitem--glow" : "",
+            !paper && "card",
+            !paper && "fitem",
+            !paper && glow ? "fitem--glow" : "",
             "pp-updates__card",
-            "pdx-glass-rebind",
+            !paper && "pdx-glass-rebind",
             expanded ? "is-expanded" : "",
             isBoardCard ? "pp-updates__card--board" : "",
             clickable ? "pp-updates__card--btn" : "",
