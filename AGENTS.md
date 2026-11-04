@@ -108,9 +108,12 @@ A 1.5 GB replica-cap attempt did not stick; do not keep retrying caps that do no
 Current env controls are `FLYER_LLM_DISABLED=1`, `QSEARCH_SCRUB_LLM=0`, and
 `QSEARCH_SCRUB_FLYER_VISION=0`.
 
-## Deploy waits
+## Usage
 
-Read `.claude/skills/deploy-wait/SKILL.md` before waiting on CI or Railway. One status read at the decision point. No polling and no pending status pings. Report the result once, then stop.
+- CI or Railway wait: `.claude/skills/deploy-wait/SKILL.md`. One read at the decision point. No polling and no pending status pings.
+- After the asked result is reported: `.claude/skills/report-once/SKILL.md`. Stop. No second confirmation.
+- A side comment during a task: `.claude/skills/stay-on-the-ask/SKILL.md`. Answer it. Do not recheck CI, Railway, or git.
+- Job logs: `.claude/skills/failure-logs-only/SKILL.md`. Open logs only for a failed required check, or when Tucker asks why.
 
 ## Verification
 
