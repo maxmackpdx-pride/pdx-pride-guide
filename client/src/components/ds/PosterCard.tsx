@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { CardArtworkGlass } from "../CardArtworkGlass";
+import { preloadCardImage } from "@/components/cards/react19CardModel";
 import { dayAccentToken, dayInkToken, dayComplementToken } from "@/lib/dsColors";
 import React, { useLayoutEffect, useRef } from "react";
 import "./event-grid-card.css";
@@ -91,6 +92,7 @@ export function PosterCard({
   showLink, showDetailsLink, dense,
   className = "", style = {}, ...rest
 }: any) {
+  if (image) preloadCardImage(image, "auto");
   const base = dayAccentToken(day);
   const contrast = dayInkToken(day);
   const secondary = dayComplementToken(day);

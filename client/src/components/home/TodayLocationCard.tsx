@@ -1,4 +1,7 @@
 import { CARD_SIZES, rememberCardOrigin, type CardSize } from "@/components/cards/CardAPI";
+import { CardMorph, OpenCardMeta, PausedCard } from "@/components/cards/react19Card";
+import { cardMorphName, openCardFromEvent, preloadCardImage } from "@/components/cards/react19CardModel";
+import { blendedArtPhotoUrl } from "@/lib/outzBlendedArt";
 import {OutzPhoto,type OutzPhotoData} from '@/components/outz/OutzPhoto';
 import {OutzBlendArt} from '@/components/outz/OutzBlendArt';
 import {hasBlendRecipe} from '@/lib/outzBlend';
@@ -36,13 +39,17 @@ export default function TodayLocationCard({ location, onRequireAuth, size = "tal
   const accent = isPlace ? PLACE_ACCENTS[kind] || "var(--neon-cyan)" : `var(${OUTZ_TOKENS[location.kind || ""] || "--neon-yellow"})`;
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(location.key.replace(/^outz:/, ""));
   const businessLogo = isPlace ? resolveDirectoryLogo(location.name, location.place?.imageUrl) || directoryFallbackLogo(kind) : null;
+  if (blend) preloadCardImage(blendedArtPhotoUrl(placeId, "tall"), size === "small" ? "auto" : "high");
+  else if (!isPlace && location.photo?.src) preloadCardImage(location.photo.src.startsWith("/") ? location.photo.src : location.photo.src.startsWith("assets/") ? `/outzide-map/${location.photo.src}` : null, "auto");
+  else if (!isPlace) preloadCardImage(art, "low");
+  else if (businessLogo) preloadCardImage(businessLogo, "auto");
   const label = isPlace ? DIRECTORY_TYPE_LABELS[kind] || "Placez" : OUTZ_LABELS[location.kind || ""] || "Destination";
-  const card = <article data-card-size={size} data-card-category={location.room} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind${isPlace ? "" : " outz-accent"}`} style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
+  const card = <CardMorph name={cardMorphName(["today", location.key, size])}><article data-card-size={size} data-card-category={location.room} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind${isPlace ? "" : " outz-accent"}`} style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
     {isPlace && <ResourceCardMotif name={location.name} category={`place-${kind}`} />}
     {!isPlace && <span className="outz-accent__band" aria-hidden="true" />}
     <CardWaypoint kind={isPlace ? kind : location.kind || "trail"} outside={!isPlace} />
     {size !== "small" && <RailShareButton href={location.href} title={location.name} />}
-    <button type="button" className="tonight-card__open" aria-label={`Open ${location.name}`} onClick={() => setOpen(true)}>
+    <button type="button" className="tonight-card__open" aria-label={`Open ${location.name}`} onClick={(event) => openCardFromEvent(event, () => setOpen(true))}>
       <div className="tonight-card__art today-location__art">
         {!isPlace && (blend ? <OutzBlendArt placeId={placeId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : location.photo ? <OutzPhoto photo={location.photo} sizes={`${CARD_SIZES[size].width}px`} /> : <img src={art} alt="" loading="lazy" />)}
         {isPlace && <img className={`today-location__brand${isPlace ? " today-location__brand--business" : ""}`} src={businessLogo || "/brand/outzide.png"} alt={isPlace ? `${location.name} logo` : "OutZide"} onError={event => { if (isPlace) { event.currentTarget.onerror = null; event.currentTarget.src = directoryFallbackLogo(kind); } }} />}
@@ -59,8 +66,8 @@ export default function TodayLocationCard({ location, onRequireAuth, size = "tal
     <footer className="tonight-card__footer">
       {!isPlace && <HeartButton kind="outz" refId={placeId} snapshot={{ title: location.name, subtitle: "Outzide", href: `/outzide?place=${encodeURIComponent(placeId)}` }} onRequireAuth={onRequireAuth} />}
       {size !== "small" && isPlace && location.place && <VenueFollowButton accent={accent} businessId={location.place.id} initialFollowing={Boolean(location.place.isFollowing)} onRequireAuth={onRequireAuth} />}
-      <button type="button" className="tonight-card__view" onClick={() => setOpen(true)}>View details <ArrowUpRight size={17} aria-hidden="true" /></button>
+      <button type="button" className="tonight-card__view" onClick={(event) => openCardFromEvent(event, () => setOpen(true))}>View details <ArrowUpRight size={17} aria-hidden="true" /></button>
     </footer>
-  </article>;
-  return <>{isPlace ? <PlacezXerox slot=".today-location__art">{card}</PlacezXerox> : <OutzXerox photo={Boolean(location.photo) && !blend} blend={blend}>{card}</OutzXerox>}{open && (isPlace && location.place ? <PlaceModal place={location.place} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth || (() => {})} /> : <OutzCardModal location={location} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth} />)}</>;
+  </article></CardMorph>;
+  return <>{isPlace ? <PlacezXerox slot=".today-location__art">{card}</PlacezXerox> : <OutzXerox photo={Boolean(location.photo) && !blend} blend={blend}>{card}</OutzXerox>}{open && <OpenCardMeta title={location.name} description={location.detail} />}<PausedCard open={open}>{isPlace && location.place ? <PlaceModal documentMeta={false} place={location.place} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth || (() => {})} /> : <OutzCardModal documentMeta={false} location={location} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth} />}</PausedCard></>;
 }

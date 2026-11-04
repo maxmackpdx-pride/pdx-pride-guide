@@ -1,7 +1,8 @@
-import { useLayoutEffect, useRef, useState, type HTMLAttributes, type MouseEvent, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type HTMLAttributes, type MouseEvent, type ReactNode, type Ref } from 'react';
 import { createPortal } from 'react-dom';
 import { BoardCardInline } from '../board/BoardCardContinuity';
 import { CARD_SIZES, expansionPlacement, type CardSize } from './cardLayout';
+import { CARD_SLOT_EVENT, forgetActiveCard, rememberActiveCard } from './react19CardModel';
 import './CardAPI.css';
 export { CARD_SIZES, type CardSize } from './cardLayout';
 
@@ -18,10 +19,10 @@ function consumeOrigin() {
   return origin && origin.element.isConnected && Date.now() - origin.at < 2000 ? origin : null;
 }
 /** Reusable visual API: categories provide their own face and native actions. */
-export function CardShell({ size, category, children, className = '', ...props }: HTMLAttributes<HTMLDivElement> & {
-  size: CardSize; category: string; children: ReactNode;
+export function CardShell({ size, category, children, className = '', ref, ...props }: HTMLAttributes<HTMLDivElement> & {
+  size: CardSize; category: string; children: ReactNode; ref?: Ref<HTMLDivElement>;
 }) {
-  return <div {...props} className={`zay-card-shell ${className}`} data-card-size={size} data-card-category={category}
+  return <div {...props} ref={ref} className={`zay-card-shell ${className}`} data-card-size={size} data-card-category={category}
     onClickCapture={event => { rememberCardOrigin(event); props.onClickCapture?.(event); }}>{children}</div>;
 }
 
@@ -44,6 +45,7 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
   const directShown=useRef(false);
   useLayoutEffect(() => {
     if (!origin?.element.isConnected) return;
+    rememberActiveCard(origin.element);
     if (pendingOrigin === origin) pendingOrigin = null;
     const source = origin.element;
     let item = source;
@@ -197,6 +199,8 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
     resize.observe(parent);
     return () => {
       resize.disconnect();
+      origin.element.dispatchEvent(new CustomEvent(CARD_SLOT_EVENT, { detail: "close" }));
+      forgetActiveCard(origin.element);
       target.remove();
       if(convertedFlex){
         if(originalParentStyle===null)parent.removeAttribute("style");else parent.setAttribute("style",originalParentStyle);

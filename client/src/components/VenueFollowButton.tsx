@@ -1,6 +1,7 @@
 import { CardHeartButton } from "./CardHeartButton";
 import ZLineIcon from "@/components/ZLineIcon";
-import { useState } from "react";
+import { startTransition, useOptimistic, useState } from "react";
+import { nextOptimisticFlag } from "@/components/cards/react19CardModel";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +29,7 @@ export default function VenueFollowButton({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [following, setFollowing] = useState(initialFollowing);
+  const [optimisticFollowing, setOptimisticFollowing] = useOptimistic(following, nextOptimisticFlag);
 
   const mutation = useMutation({
     mutationFn: async (next: boolean) => {
@@ -64,10 +66,14 @@ export default function VenueFollowButton({
       }
       return;
     }
-    mutation.mutate(!following);
+    const next = !following;
+    startTransition(async () => {
+      setOptimisticFollowing(next);
+      try { await mutation.mutateAsync(next); } catch { /* The mutation reports the error. */ }
+    });
   };
 
-  if (variant === "small-card") return <CardHeartButton active={following} disabled={mutation.isPending} onClick={handleClick} aria-label={following ? "Unfollow directory listing" : "Follow directory listing"} />;
+  if (variant === "small-card") return <CardHeartButton active={optimisticFollowing} disabled={mutation.isPending} onClick={handleClick} aria-label={optimisticFollowing ? "Unfollow directory listing" : "Follow directory listing"} />;
 
   const isCard = variant === "card";
 
@@ -76,8 +82,8 @@ export default function VenueFollowButton({
       type="button"
       onClick={handleClick}
       disabled={mutation.isPending}
-      aria-pressed={following}
-      aria-label={following ? "Unfollow directory listing" : "Follow directory listing"}
+      aria-pressed={optimisticFollowing}
+      aria-label={optimisticFollowing ? "Unfollow directory listing" : "Follow directory listing"}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -86,13 +92,13 @@ export default function VenueFollowButton({
         height: isCard ? 28 : 34,
         padding: isCard ? "0 10px" : "0 14px",
         borderRadius: 999,
-        border: `1.5px solid ${following ? accent : "color-mix(in srgb, " + accent + " 55%, #444)"}`,
-        background: following
+        border: `1.5px solid ${optimisticFollowing ? accent : "color-mix(in srgb, " + accent + " 55%, #444)"}`,
+        background: optimisticFollowing
           ? `color-mix(in srgb, ${accent} 16%, rgba(6,6,10,0.88))`
           : "rgba(6,6,10,0.82)",
         backdropFilter: isCard ? undefined : "blur(10px) saturate(1.02)",
         WebkitBackdropFilter: isCard ? undefined : "blur(10px) saturate(1.02)",
-        color: following ? "#fff" : accent,
+        color: optimisticFollowing ? "#fff" : accent,
         fontFamily: "var(--font-display)",
         fontWeight: 800,
         fontSize: isCard ? 10 : 12,
@@ -104,8 +110,8 @@ export default function VenueFollowButton({
         boxShadow: isCard ? undefined : "0 4px 14px -6px rgba(0,0,0,.75)",
       }}
     >
-      <span className="venue-follow-heart" aria-hidden="true" style={{display:"none"}}><ZLineIcon name="favorite" size={17} filled={following} /></span>
-      {following ? "Following" : "Follow"}
+      <span className="venue-follow-heart" aria-hidden="true" style={{display:"none"}}><ZLineIcon name="favorite" size={17} filled={optimisticFollowing} /></span>
+      {optimisticFollowing ? "Following" : "Follow"}
     </button>
   );
 }

@@ -19,6 +19,7 @@ import { OutzBlendArt } from "@/components/outz/OutzBlendArt";
 import { RansomTitle } from "@/components/xerox/Overlays";
 import DayMotif from "@/components/events/DayMotif";
 import { OUTZ_CATALOG_FALLBACK, pickTunnelCards, tunnelDayKey, tunnelDaySeed, type OutzideMapPlace, type TunnelCardData } from "./tunnelCards";
+import { preloadCardImage } from "@/components/cards/react19CardModel";
 import { TUNNEL, computePose, createPose, makeSlots } from "./tunnelMath";
 import { NO_FLYOUT_QUERY, useMedia } from "./flyOut";
 // HomeStage.css owns the real hero classes reused below (home-front__*). It must load before our overrides.
@@ -88,6 +89,7 @@ function useStill(force?: boolean) {
 
 function TunnelCard({ card, interactive, setRef }: { card: TunnelCardData; interactive: boolean; setRef: (el: HTMLAnchorElement | null) => void }) {
   const [blendFailed, setBlendFailed] = useState(false);
+  if (card.imageUrl) preloadCardImage(card.imageUrl, "high");
   return (
     <Link
       href={card.href}

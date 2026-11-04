@@ -1,4 +1,7 @@
 import { rememberCardOrigin } from "@/components/cards/CardAPI";
+import { CardMorph, OpenCardMeta, PausedCard } from "@/components/cards/react19Card";
+import { cardMorphName, openCardFromEvent, preloadCardImage } from "@/components/cards/react19CardModel";
+import { blendedArtPhotoUrl } from "@/lib/outzBlendedArt";
 import { useState, type CSSProperties } from "react";
 import { OutzPhoto } from "@/components/outz/OutzPhoto";
 import { OutzBlendArt } from "@/components/outz/OutzBlendArt";
@@ -24,10 +27,14 @@ export default function OutzSmallCard({ location, onRequireAuth }: { location: T
   const accent = `var(${OUTZ_TOKENS[location.kind || ""] || "--neon-yellow"})`;
   const art = location.art ? `/outzide-map/${location.art.replace(/^\//, "")}` : outzBandArt(placeId);
   const label = OUTZ_LABELS[location.kind || ""] || "Destination";
+  if (blend) preloadCardImage(blendedArtPhotoUrl(placeId, "tall"), "high");
+  else if (location.photo?.src) preloadCardImage(location.photo.src.startsWith("/") ? location.photo.src : location.photo.src.startsWith("assets/") ? `/outzide-map/${location.photo.src}` : null, "auto");
+  else preloadCardImage(art, "low");
   return <>
+    <CardMorph name={cardMorphName(["outz-small", location.key])}>
     <article data-card-size="small" data-card-category={"outzide"} onClickCapture={rememberCardOrigin} className="outz-small outz-accent pdx-glass-rebind" style={{ "--c": accent } as CSSProperties}>
       <span className="outz-accent__band" aria-hidden="true" />
-      <button type="button" className="outz-small__open" aria-label={`Open ${location.name}`} onClick={() => setOpen(true)}>
+      <button type="button" className="outz-small__open" aria-label={`Open ${location.name}`} onClick={(event) => openCardFromEvent(event, () => setOpen(true))}>
         <span className="outz-small__art">
           {blend ? <OutzBlendArt placeId={placeId} variant="tall" onUnavailable={() => setBlendFailed(true)} /> : location.photo ? <OutzPhoto photo={location.photo} sizes="136px" /> : <img src={art} alt="" loading="lazy" />}
         </span>
@@ -38,6 +45,8 @@ export default function OutzSmallCard({ location, onRequireAuth }: { location: T
       <HeartButton className="outz-small__heart" kind="outz" refId={placeId} snapshot={{ title: location.name, subtitle: "Outzide", href: `/outzide?place=${encodeURIComponent(placeId)}` }} onRequireAuth={onRequireAuth} />
       <span className="outz-small__waypoint"><CardWaypoint kind={location.kind || "trail"} outside /></span>
     </article>
-    {open && <OutzCardModal location={location} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth} />}
+    </CardMorph>
+    {open && <OpenCardMeta title={location.name} description={location.detail} />}
+    <PausedCard open={open}><OutzCardModal documentMeta={false} location={location} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth} /></PausedCard>
   </>;
 }

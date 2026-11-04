@@ -9,7 +9,7 @@ test('NEEDZ resource and safety details share the in-flow card host', () => {
   assert.match(source, /onClickCapture=\{rememberCardOrigin\}/);
   assert.match(source, /modal=\{false\}/);
   assert.match(source, /detailOpen && <CardDetails key=/);
-  assert.match(source, /supportOpen && <CardDetails onClose=/);
+  assert.match(source, /<PausedCard open=\{supportOpen\}><CardDetails onClose=/);
   assert.doesNotMatch(source, /<(?:Dialog|Drawer)\.Portal/);
 });
 

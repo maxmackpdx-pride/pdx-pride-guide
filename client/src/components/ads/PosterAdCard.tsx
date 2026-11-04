@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
+import { preloadCardImage } from "@/components/cards/react19CardModel";
 import type { AdDraft, AdServePayload } from "@/lib/adTypes";
 import { trackAdClick, trackAdImpression } from "@/lib/adTracking";
 import {
@@ -81,6 +82,7 @@ export default function PosterAdCard({
       : ad.singleSrc
         ? [ad.singleSrc]
         : [];
+  if (slides[0]) preloadCardImage(slides[0], "auto");
 
   useEffect(() => {
     if (preview || !ad.id) return;

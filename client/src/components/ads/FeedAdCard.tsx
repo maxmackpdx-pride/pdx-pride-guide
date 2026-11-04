@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { preloadCardImage } from "@/components/cards/react19CardModel";
 import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
 import type { AdDraft, AdServePayload } from "@/lib/adTypes";
 import { trackAdClick, trackAdImpression } from "@/lib/adTracking";
@@ -31,6 +32,7 @@ export default function FeedAdCard({ ad, preview = false, className = "" }: Prop
           ? [ad.logoImg]
           : [];
   const isSlideshow = slides.length > 1;
+  if (slides[0]) preloadCardImage(slides[0], "low");
   const { accent: primary, feedBrandClass, brand } = resolveAdChrome(ad);
   const brandTint = primary;
   const dismissible = ad.dismissible !== false;
