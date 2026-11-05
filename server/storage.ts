@@ -11,6 +11,7 @@ import { seedApprovedEvents20260928 } from "./seedApprovedEvents20260928";
 import { eventRetentionCutoff, isExpiredEvent } from "./eventRetention";
 import { hashPassword, verifyPassword, isLegacyPasswordHash } from "./passwords";
 export { hashPassword, verifyPassword, isLegacyPasswordHash } from "./passwords";
+import { randomUUID } from "node:crypto";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { and, eq } from "drizzle-orm";
@@ -1638,6 +1639,15 @@ function seedData() {
       needsDevRepair;
     if (needsReseed) {
       // Only replace admin seed events - never wipe user gigs, claims, or submissions.
+      const reseedIds = (
+        sqlite
+          .prepare(
+            `SELECT id FROM events
+             WHERE source = 'admin_seeded' AND claimed_by IS NULL AND submitted_by IS NULL`,
+          )
+          .all() as Array<{ id: number }>
+      ).map((row) => row.id);
+      const reseedSnapshots = eventDeletionSnapshots(reseedIds);
       sqlite.exec(`
         DELETE FROM attendances
         WHERE event_id IN (
@@ -1649,6 +1659,7 @@ function seedData() {
         DELETE FROM events
         WHERE source = 'admin_seeded' AND claimed_by IS NULL AND submitted_by IS NULL
       `);
+      insertEventDeletionRecords(reseedSnapshots, "reseed", "Seed replacement: unclaimed admin_seeded events replaced on reseed");
     } else {
       return;
     }
@@ -3388,9 +3399,107 @@ function seedCheckingPortlandEventsJuly2026() {
   });
 }
 
+type EventDeletionSnapshot = {
+  id: number;
+  title: string;
+  venueName: string | null;
+  dateStart: string;
+  dateEnd: string;
+  status: string;
+  source: string | null;
+  updatedAt: string;
+};
+
+/** Same DDL as ensureEventResearchChangeTable in eventResearchMemory.ts. */
+function ensureEventChangeLogTable() {
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS agent_event_change_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      rollback_token TEXT NOT NULL UNIQUE,
+      operation TEXT NOT NULL,
+      event_id INTEGER NOT NULL,
+      before_json TEXT,
+      after_json TEXT NOT NULL,
+      patch_json TEXT NOT NULL,
+      evidence_receipts_json TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      actor TEXT NOT NULL DEFAULT 'qsearch-2',
+      created_at TEXT NOT NULL,
+      rolled_back_at TEXT,
+      rollback_result_json TEXT
+    );
+    CREATE INDEX IF NOT EXISTS agent_event_change_log_event
+      ON agent_event_change_log(event_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS agent_event_change_log_created
+      ON agent_event_change_log(created_at DESC);
+  `);
+}
+
+/** Identity snapshot of event rows about to be hard-deleted. */
+function eventDeletionSnapshots(ids: number[]): EventDeletionSnapshot[] {
+  if (!ids.length) return [];
+  const idPh = ids.map(() => "?").join(",");
+  const rows = sqlite
+    .prepare(
+      `SELECT id, title, venue_name AS venueName, date_start AS dateStart,
+              date_end AS dateEnd, status, source, updated_at AS updatedAt
+       FROM events WHERE id IN (${idPh})`,
+    )
+    .all(...ids) as EventDeletionSnapshot[];
+  return rows;
+}
+
+/**
+ * Leave a durable record of a hard deletion in the agent change log, the same
+ * surface the admin changes feed reads for creates/updates. Most deletions
+ * never pass through the QSearch mutation path (retention purge, boot
+ * cleanups, reseeds), so without this they vanish with no trace.
+ */
+function insertEventDeletionRecords(
+  snapshots: EventDeletionSnapshot[],
+  actor: string,
+  reason: string,
+) {
+  if (!snapshots.length) return;
+  ensureEventChangeLogTable();
+  const insert = sqlite.prepare(`
+    INSERT INTO agent_event_change_log (
+      rollback_token, operation, event_id, before_json, after_json,
+      patch_json, evidence_receipts_json, reason, actor, created_at
+    ) VALUES (?, 'delete', ?, ?, ?, ?, '[]', ?, ?, ?)
+  `);
+  const createdAt = new Date().toISOString();
+  for (const snapshot of snapshots) {
+    const patch = {
+      title: snapshot.title,
+      dateStart: snapshot.dateStart,
+      dateEnd: snapshot.dateEnd,
+      status: snapshot.status,
+    };
+    insert.run(
+      randomUUID(),
+      snapshot.id,
+      JSON.stringify(snapshot),
+      JSON.stringify(snapshot),
+      JSON.stringify(patch),
+      reason,
+      actor,
+      createdAt,
+    );
+  }
+}
+
+type EventDeletionContext = { actor: string; reason: string };
+
+const UNLABELED_DELETION: EventDeletionContext = {
+  actor: "storage",
+  reason: "Hard delete via hardDeleteEventIds",
+};
+
 /** Hard-delete events and dependent rows (attendance, hosts, messages, etc.). */
-function hardDeleteEventIds(ids: number[], strict = false) {
+function hardDeleteEventIds(ids: number[], strict = false, deletion: EventDeletionContext = UNLABELED_DELETION) {
   if (!ids.length) return;
+  const snapshots = eventDeletionSnapshots(ids);
   const idPh = ids.map(() => "?").join(",");
   sqlite.prepare(`DELETE FROM attendances WHERE event_id IN (${idPh})`).run(...ids);
   sqlite.prepare(`DELETE FROM event_chat_messages WHERE event_id IN (${idPh})`).run(...ids);
@@ -3412,6 +3521,7 @@ function hardDeleteEventIds(ids: number[], strict = false) {
     sqlite.prepare(`DELETE FROM moderation_requests WHERE event_id IN (${idPh})`).run(...ids);
   } catch (error) { if (strict) throw error; }
   sqlite.prepare(`DELETE FROM events WHERE id IN (${idPh})`).run(...ids);
+  insertEventDeletionRecords(snapshots, deletion.actor, deletion.reason);
 }
 
 /** Permanent tombstone for the invalid Sasha Colby listing and its old assets. */
@@ -3424,7 +3534,10 @@ function purgeInvalidSashaColbyEvent() {
          OR LOWER(COALESCE(poster_image_url, '')) LIKE '%sasha-colby%'
     `)
     .all() as Array<{ id: number }>;
-  hardDeleteEventIds(rows.map((row) => row.id));
+  hardDeleteEventIds(rows.map((row) => row.id), false, {
+    actor: "boot-cleanup",
+    reason: "Permanent tombstone for the invalid Sasha Colby listing",
+  });
 }
 
 /**
@@ -3440,7 +3553,10 @@ function prunePostPrideWeekEvents() {
   const byStart = sqlite
     .prepare(`SELECT id FROM events WHERE date_start >= '2026-07-20'`)
     .all() as Array<{ id: number }>;
-  hardDeleteEventIds(byStart.map(r => r.id));
+  hardDeleteEventIds(byStart.map(r => r.id), false, {
+    actor: "boot-cleanup",
+    reason: "Post-Pride-week listing cap: start after 2026-07-19",
+  });
 
   // Clip multi-day spans so they do not expand onto Mon Jul 20+ (e.g. Midtown).
   // Overnight parties that end before noon Mon can keep early-morning end times
@@ -3503,7 +3619,10 @@ function deleteUnverifiedCheckingPortlandEvents() {
   const idRows = sqlite
     .prepare(`SELECT id FROM events WHERE title IN (${placeholders})`)
     .all(...titles) as Array<{ id: number }>;
-  hardDeleteEventIds(idRows.map((r) => r.id));
+  hardDeleteEventIds(idRows.map((r) => r.id), false, {
+    actor: "boot-cleanup",
+    reason: "Unverified Checking-Portland batch rows removed",
+  });
 }
 
 function applyEventDataAuditFixes() {
@@ -6135,7 +6254,10 @@ function runBootMigrationsOnce() {
         `SELECT id FROM events WHERE title = 'Oregon State Leather Contest 2026' OR title LIKE 'Oregon State Leather%'`,
       )
       .all() as Array<{ id: number }>;
-    hardDeleteEventIds(oscl.map(r => r.id));
+    hardDeleteEventIds(oscl.map(r => r.id), false, {
+      actor: "boot-migration",
+      reason: "Boot migration prune_post_pride_week_permanent_v2: OSLC revival wipe",
+    });
     sqlite
       .prepare(
         `UPDATE events SET date_end = '2026-07-19T20:00:00' WHERE title = 'Midtown Beer Garden Pride' AND date_end >= '2026-07-20'`,
@@ -6168,6 +6290,19 @@ function runBootMigrationsOnce() {
   // Locker Room series: drop Jan/Feb/Jul/Sep (any year) and June 2026 from live events.
   // Archive dates are filtered in shared/tuckerHostedArchive.ts - this cleans any seeded/live rows.
   if (!hasBootMigration("scrub_locker_room_excluded_months_v1")) {
+    const lockerRoomIds = (
+      sqlite
+        .prepare(
+          `SELECT id FROM events
+           WHERE LOWER(title) LIKE '%locker room%'
+             AND (
+               substr(date_start, 6, 2) IN ('01', '02', '07', '09')
+               OR date_start LIKE '2026-06%'
+             )`,
+        )
+        .all() as Array<{ id: number }>
+    ).map((row) => row.id);
+    const lockerRoomSnapshots = eventDeletionSnapshots(lockerRoomIds);
     sqlite.prepare(`
       DELETE FROM events
       WHERE LOWER(title) LIKE '%locker room%'
@@ -6176,6 +6311,7 @@ function runBootMigrationsOnce() {
           OR date_start LIKE '2026-06%'
         )
     `).run();
+    insertEventDeletionRecords(lockerRoomSnapshots, "boot-migration", "Boot migration scrub_locker_room_excluded_months_v1");
     recordBootMigration("scrub_locker_room_excluded_months_v1");
   }
 
@@ -7439,7 +7575,10 @@ function runBootMigrationsOnce() {
             OR lower(title) LIKE '%barbell instructor certification%'`,
       )
       .all() as Array<{ id: number }>;
-    hardDeleteEventIds(noise.map(r => r.id));
+    hardDeleteEventIds(noise.map(r => r.id), false, {
+      actor: "boot-migration",
+      reason: "Boot migration scrub_noise_and_live_dups_v1: non-scene noise removal",
+    });
 
     // LIVE exact-ish dups: same title + venue + calendar day → keep lowest id, hide rest.
     const live = sqlite
@@ -7571,7 +7710,10 @@ function runBootMigrationsOnce() {
            OR lower(venue_name) LIKE '%glendoveer golf%'`,
       )
       .all() as Array<{ id: number }>;
-    hardDeleteEventIds(byId.map(r => r.id));
+    hardDeleteEventIds(byId.map(r => r.id), false, {
+      actor: "boot-migration",
+      reason: "Boot migration scrub_offscene_eb_noise_v1: Eventbrite/url_ingest off-scene noise removal",
+    });
     recordBootMigration("scrub_offscene_eb_noise_v1");
   }
 
@@ -7643,7 +7785,10 @@ function runBootMigrationsOnce() {
 
     const ids = Array.from(drop);
     try {
-      hardDeleteEventIds(ids);
+      hardDeleteEventIds(ids, false, {
+        actor: "boot-migration",
+        reason: "Boot migration scrub_url_ingest_eb_no_queer_v2: url_ingest Eventbrite rows without LGBTQ signal",
+      });
     } catch (e) {
       console.error("[boot] scrub_url_ingest_eb_no_queer_v2 hardDelete failed, soft-hiding:", e);
       for (const id of ids) {
@@ -15203,8 +15348,12 @@ export const storage: IStorage = {
     return sqlite.transaction(() => {
       const rows = sqlite.prepare("SELECT id, date_start AS start, date_end AS end FROM events").all() as Array<{ id: number; start: string; end: string }>;
       const ids = rows.filter(row => isExpiredEvent(row.start, row.end, cutoff)).map(row => row.id);
+      const deletion = {
+        actor: "retention-purge",
+        reason: `Retention purge: event ended before the three-month cutoff ${new Date(cutoff).toISOString()}`,
+      };
       for (let offset = 0; offset < ids.length; offset += 250) {
-        hardDeleteEventIds(ids.slice(offset, offset + 250), true);
+        hardDeleteEventIds(ids.slice(offset, offset + 250), true, deletion);
       }
       return ids.length;
     })();
