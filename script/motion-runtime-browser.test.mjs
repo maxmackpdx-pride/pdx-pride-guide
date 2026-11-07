@@ -25,7 +25,7 @@ test('application uses one Motion React runtime; no direct legacy dependency', a
   await walk(path.join(root,'client/src'));
 });
 
-test('real drawer, dock, navigation and auth transitions work with normal and reduced motion', {timeout:120000}, async () => {
+test('real dock, navigation and auth transitions work with normal and reduced motion', {timeout:120000}, async () => {
   const cacheDir=await mkdtemp(path.join(tmpdir(),'motion-runtime-vite-'));
   const fixture='script/fixtures/motion-runtime-browser.tsx';
   const server=await createServer({configFile:false,root,cacheDir,publicDir:false,
@@ -34,8 +34,7 @@ test('real drawer, dock, navigation and auth transitions work with normal and re
       if(!req.url?.startsWith('/__motion-qa'))return next();
       res.setHeader('Content-Type','text/html');
       res.end(await s.transformIndexHtml(req.url,`<!doctype html><html><head><style>
-        body{margin:20px}.mapz-layer-sheet{position:fixed;left:20px;right:20px;top:100px;height:300px;background:#ddd}
-        .mapz-layer-sheet[hidden]{display:none}.mapz-layer-sheet__title{height:48px;touch-action:none}
+        body{margin:20px}
         .z-mobile-dock{position:fixed;bottom:10px;left:20px;right:20px}.hub-mobile-bar__dock{display:flex;position:relative}
         .hub-mobile-bar__dock>button{width:120px;height:48px}.z-mobile-dock__indicator{position:absolute;height:4px}
       </style></head><body><div id="root"></div><script type="module" src="/${fixture}"></script></body></html>`));
@@ -53,20 +52,8 @@ test('real drawer, dock, navigation and auth transitions work with normal and re
       });
       const page=await context.newPage();page.setDefaultTimeout(10000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
       await page.goto(server.resolvedUrls.local[0]+'__motion-qa');
-      await page.locator('.mapz-layer-sheet__title').waitFor();await page.waitForTimeout(800);
-      const resting=await page.locator('.mapz-layer-sheet').boundingBox();
-      const drag=async dy=>{
-        const box=await page.locator('.mapz-layer-sheet__title').boundingBox();
-        await page.mouse.move(box.x+35,box.y+20);await page.mouse.down();
-        await page.mouse.move(box.x+35,box.y+20+dy,{steps:12});await page.waitForTimeout(200);await page.mouse.up();
-        await page.waitForTimeout(700);
-      };
-      await drag(15);assert.equal(await page.locator('#active').textContent(),'events');
-      const snapped=await page.locator('.mapz-layer-sheet').boundingBox();assert.ok(Math.abs(snapped.y-resting.y)<2,JSON.stringify({resting,snapped}));
-      await drag(120);assert.equal(await page.locator('#active').textContent(),'closed');
-      await page.locator('#reopen').click();await page.waitForTimeout(300);
-      await page.getByRole('button',{name:'Close map drawer'}).click();
-      assert.equal(await page.locator('#active').textContent(),'closed');
+      // The retired MapzLayerSheet is not part of the shared Motion runtime.
+      // Five-mode map drawer coverage belongs to the pinned map engine tests.
       await page.getByRole('button',{name:'Second',exact:true}).click();await page.waitForTimeout(700);
       assert.equal(await page.getByRole('button',{name:'Second',exact:true}).getAttribute('data-dock-selected'),'true');
       assert.equal(await page.locator('.z-mobile-dock').getAttribute('data-quiet'),String(reducedMotion==='reduce'));
