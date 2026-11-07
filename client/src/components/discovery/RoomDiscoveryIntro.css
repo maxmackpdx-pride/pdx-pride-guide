@@ -206,9 +206,10 @@ html.calm-mode .rd-intro *{box-shadow:none;filter:none;animation:none;transition
  .eb-page.eb-page--resources.rd-page .eb-lane .events-rail{grid-template-columns:minmax(0,1fr);gap:20px}
  .eb-page.eb-page--resources.rd-page .events-rail__item{width:100%;min-width:0}
  .eb-page.eb-page--resources.rd-page .rd-card[data-card-size="tall"]{height:auto!important;min-height:0}
- .eb-page.eb-page--resources.rd-page .rd-card-media{flex-basis:132px;min-height:132px}
- .eb-page.eb-page--resources.rd-page .rd-card-copy{padding:22px;gap:14px}
+ .eb-page.eb-page--resources.rd-page .rd-card-media{flex-basis:164px;min-height:164px}
+ .eb-page.eb-page--resources.rd-page .rd-card-media>img{max-height:100px}
+ .eb-page.eb-page--resources.rd-page .rd-card-copy{padding:20px;gap:12px}
  .eb-page.eb-page--resources.rd-page .rd-card-copy>h3{font-size:32px;display:block;overflow:visible;overflow-wrap:anywhere}
- .eb-page.eb-page--resources.rd-page .rd-card-description{flex:none}
+ .eb-page.eb-page--resources.rd-page .rd-card-description{flex:none;font-size:15px;line-height:1.5;-webkit-line-clamp:3}
  .eb-page.eb-page--resources.rd-page .rd-card-footer{margin-top:6px}
 }
