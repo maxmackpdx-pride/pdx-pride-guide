@@ -18,6 +18,22 @@ function OutzCardDetails({location,onClose,onRequireAuth}:{location:TodayLocatio
  const node=useRef<HTMLDivElement>(null);const [,navigate]=useLocation();
  const {dialogRef,requestClose}=useOpenCardClose(onClose);const id=location.key.replace(/^outz:/,'');
  const callbacks=useRef({requestClose,navigate});callbacks.current={requestClose,navigate};
+ // RTL discovery rails can align an expanded inline slot a few pixels beyond
+ // the phone edge. Clamp this native card only; shared CardAPI stays untouched.
+ useEffect(()=>{
+  const card=dialogRef.current;if(!card)return;
+  let shift=0,frame=0;const previous=card.style.translate;
+  const measure=()=>{frame=0;const rect=card.getBoundingClientRect();const edge=12;
+   const delta=rect.left<edge?edge-rect.left:rect.right>innerWidth-edge?innerWidth-edge-rect.right:0;
+   if(Math.abs(delta)>.5){shift+=delta;card.style.translate=`${shift}px 0`;}
+  };
+  const schedule=()=>{if(!frame)frame=requestAnimationFrame(measure);};
+  const observer=new ResizeObserver(schedule);observer.observe(card);
+  const slot=card.closest('.zay-card-expanded-slot');if(slot)observer.observe(slot);
+  window.addEventListener('resize',schedule);document.addEventListener('scroll',schedule,true);schedule();
+  return()=>{cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener('resize',schedule);document.removeEventListener('scroll',schedule,true);card.style.translate=previous;};
+ },[id]);
+
  useEffect(()=>{
   let disposed=false;let release:(()=>void)|undefined;let unmount:(()=>void)|undefined;
   const restoreDocument=preserveMapDocument();

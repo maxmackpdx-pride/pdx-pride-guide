@@ -10,3 +10,6 @@
 .home-outz-loading{font:var(--open-card-meta-font)}
 @media(max-width:600px){.home-outz-overlay{padding:12px}.home-outz-modal{height:calc(100dvh - 24px);width:100%}}
 :is(html.calm-mode,:root[data-calm=true]) .home-outz-modal{animation:none}
+
+/* Native inline rail details remain within the phone viewport. */
+.home-outz-modal{max-width:calc(100vw - 24px)}
