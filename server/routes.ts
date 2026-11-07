@@ -1,3 +1,4 @@
+import {registerFoodResources} from "./foodResources";
 import { registerPosterVariants } from "./posterVariants";
 import { createPublicEventFeedCache, EventFeedChangedError, EventFeedQueryError, parseEventFeedQuery, selectEventFeed } from "./publicEventFeedCache";
 import {createProfileLayoutStore,registerProfileLayoutRoutes} from "./profileLayout";
@@ -1267,6 +1268,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // users because req.session was undefined. express-session skips a second mount, so the later app.use is harmless.
   const sessionMiddleware = createSessionMiddleware(sqlite);
   app.use("/api", sessionMiddleware);
+  registerFoodResources(app);
   registerBoardArchiveRoutes(app, sqlite, requireAuth, httpServer);
   const profileLayouts=createProfileLayoutStore(sqlite);
   const eligibleProfileSource=(userId:number,source:ProfileSource)=>{
