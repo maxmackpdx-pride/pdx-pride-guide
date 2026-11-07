@@ -473,6 +473,7 @@ export const ResourceCard = memo(function ResourceCard({
       decoration={<><div className="rg-card-vignette" aria-hidden="true" /><div className="pdx-refract-seam rg-card-top-rule" aria-hidden="true" /><ResourceCardMotif glass name={org.name} category={category.id} />{size === "small" && <HeartButton kind="resource" refId={org.name} snapshot={{ title: org.name, subtitle: category.name, href: resourceMapHref(org.name, row.community?.slug) }} />}</>}
       data-optical-logo={org.name}
       data-card-category="needz"
+      onClickCapture={rememberCardOrigin}
       data-card-size={size}
       variant={size === "wide" ? "compact" : undefined}
       style={resourceLogoLayout(org.name) as CSSProperties}
