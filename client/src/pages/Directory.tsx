@@ -1,3 +1,9 @@
+import RoomDiscoveryCard from '@/components/discovery/RoomDiscoveryCard';
+import HeartButton from '@/components/HeartButton';
+import {ServiceNameMark} from '@/components/ServiceNameMark';
+import {serviceArtwork} from '@shared/serviceIdentity';
+import {matchesPlaceDiscoveryRegion,readPlaceDiscoveryRegion} from '@/lib/placeDiscoveryRegion';
+import { PlacezDiscoveryIntro } from '@/components/discovery/RoomDiscoveryIntro';
 import {useIsMobile} from "@/hooks/use-mobile";
 import type {CardSize} from "@/components/cards/CardAPI";
 import { BrowseHeader, BrowseControls, BrowseFilters, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
@@ -205,9 +211,10 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   );
 
   const { user } = useAuth();
-  const [browseView, setBrowseView] = useState<BrowseView>(() => { const params = new URLSearchParams(window.location.search); const type = params.get("type") || params.get("category"); return params.get("layout") === "grid" || Boolean(type && type !== "ALL") ? "grid" : "browse"; });
+  const [browseView, setBrowseView] = useState<BrowseView>(() => { const params = new URLSearchParams(window.location.search); const type = params.get("type") || params.get("category"); return params.get("layout") === "browse" ? "browse" : "grid"; });
   const [placeIntent, setPlaceIntent] = useState(false);
   const [discoveryChosen, setDiscoveryChosen] = useState(() => /[?&](type|category|neighborhood|q|place)=/.test(window.location.search));
+  const [discoveryRegion, setDiscoveryRegion] = useState(()=>readPlaceDiscoveryRegion(new URLSearchParams(window.location.search).get('area')));
   const [showAuth, setShowAuth] = useState(false);
   const [formOpen, setFormOpen] = useState(() => new URLSearchParams(window.location.search).get("add") === "1");
   const [activeType, setActiveType] = useState(() => {
@@ -273,6 +280,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     const params = new URLSearchParams();
     if (!isSpaces && activeType !== "ALL") params.set("type", activeType);
     if (!isSpaces && activeType !== 'ALL' && activeSubcategory !== 'ALL') params.set('sub', activeSubcategory);
+    if (discoveryRegion !== "ALL") params.set("area", discoveryRegion);
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
     if (activeNeighborhood !== "ALL") params.set("neighborhood", activeNeighborhood);
     if (formOpen) params.set("add", "1");
@@ -283,7 +291,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     }
     const next = params.toString();
     return next ? `?${next}` : "";
-  }, [activeType, activeSubcategory, isSpaces, searchQuery, activeNeighborhood, formOpen, browseView]);
+  }, [activeType, activeSubcategory, isSpaces, searchQuery, activeNeighborhood, formOpen, browseView, discoveryRegion]);
 
   useEffect(() => {
     if (routePlaceId || new URLSearchParams(window.location.search).has("place")) return;
@@ -296,8 +304,9 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       const params = new URLSearchParams(window.location.search);
       const type = readPlacezBrowseType(params);
       setActiveType(isSpaces ? "group" : type);
+      setDiscoveryRegion(readPlaceDiscoveryRegion(params.get("area")));
       const view = params.get("layout");
-      setBrowseView(view === "grid" || Boolean(type && type !== "ALL") ? "grid" : "browse");
+      setBrowseView(view === "browse" ? "browse" : "grid");
       setSearchQuery(params.get("q") || "");
       setActiveNeighborhood(params.get("neighborhood") || "ALL");
       setActiveSubcategory(params.get('sub') || 'ALL');
@@ -455,6 +464,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     const q = searchQuery.trim().toLowerCase();
     return visibleBusinesses
       .filter(b => {
+        if (!matchesPlaceDiscoveryRegion(b,discoveryRegion)) return false;
         if (activeType !== "ALL" && !activeType.split(",").includes(b.type)) return false;
         if (selectedSubcategory !== 'ALL' && !directorySubcategories(b).some(tag => tag.id === selectedSubcategory)) return false;
         if (activeNeighborhood !== "ALL" && browseNeighborhood(b.neighborhood) !== browseNeighborhood(activeNeighborhood)) return false;
@@ -485,7 +495,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         if (bGo !== aGo) return bGo - aGo;
         return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
       });
-  }, [visibleBusinesses, activeType, selectedSubcategory, activeNeighborhood, searchQuery]);
+  }, [visibleBusinesses, activeType, selectedSubcategory, activeNeighborhood, searchQuery, discoveryRegion]);
   const outzideFiltered = useMemo(() => {
     if (!outzideActive) return [];
     return filterOutzidePlaces(outzidePlaces, selectedSubcategory, searchQuery).sort((a, b) =>
@@ -533,7 +543,12 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     : `${filtered.length} ${isSpaces ? (filtered.length === 1 ? "squad" : "squadz") : (filtered.length === 1 ? "PLACE" : "PLACEZ")}`;
 
   const renderBrowsePlace = (biz: Business) => <div key={biz.id} className="eb-original-card">
-    <DirectoryCard size={compactCards ? "small" : "tall"} biz={biz} onClick={element => openPlace(biz, element)} onRequireAuth={() => setShowAuth(true)} />
+    {isSpaces ? <DirectoryCard size={compactCards ? "small" : "tall"} biz={biz} onClick={element=>openPlace(biz,element)} onRequireAuth={()=>setShowAuth(true)}/>
+      : <RoomDiscoveryCard room="placez" name={biz.name} category={TYPE_LABELS[biz.type] || biz.type} accent={TYPE_COLORS[biz.type] || 'var(--neon-cyan)'}
+        logo={serviceArtwork(biz,resolveDirectoryLogo(biz.name,biz.imageUrl),true)} fallback={<ServiceNameMark source={biz} iconOnly/>}
+        description={biz.description} tags={[TYPE_LABELS[biz.type] || biz.type,...(biz.queerOwned?['Queer owned']:[])]} meta={biz.neighborhood || biz.address}
+        href={listingPath(biz)} onOpen={element=>openPlace(biz,element)}
+        heart={<HeartButton kind="place" refId={biz.id} snapshot={{title:biz.name,subtitle:biz.neighborhood,href:listingPath(biz)}} onRequireAuth={()=>setShowAuth(true)}/>}/>}
   </div>;
 
   const outzideLocation = (place: OutzideRow) => ({
@@ -559,8 +574,8 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       href="/directory" label="Browse Placez" missing />;
   }
   return (
-    <div className={isSpaces ? "zine-page directory-page board-page board-page--makeover directory-page--v2 resources-page directory-page--spaces" : "eb-page eb-page--places"}>
-      <WebGLShader direction={-1} waveSpeed={0.7} />
+    <div className={isSpaces ? "zine-page directory-page board-page board-page--makeover directory-page--v2 resources-page directory-page--spaces" : "eb-page eb-page--places rd-page"}>
+      {isSpaces && <WebGLShader direction={-1} waveSpeed={0.7} />}
       {isSpaces && <svg className="placez-shader-contours" viewBox="0 0 1000 600" preserveAspectRatio="none" fill="none" aria-hidden="true">
         <path className="placez-shader-contours__cyan" d="M1080 185 C790 350 710 295 500 220 S165 75 -80 310" />
         <path className="placez-shader-contours__magenta" d="M1080 360 C795 165 670 225 470 375 S165 580 -80 370" />
@@ -568,12 +583,13 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       </svg>}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       {!isSpaces ? <>
-        <BrowseHeader title="Placez" logo="/brand/family/our-placez.svg" kicker="Portland · Find your place"
-          description="Places that are ours. Find your next night out, a place to gather, or a local business to support.">
+        <BrowseHeader title="Placez" logo="/brand/family/our-placez.svg" kicker="Local discovery / Oregon + Vancouver, WA"
+          description="Good places. Real connection. A reason to get out.">
           <BoardShareButton title="Placez" path="/directory" />
           <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Add a place" onClick={openAddForm}><Plus size={18} /><span>Add a place</span></button>
         </BrowseHeader>
-        <div className="eb-frame">
+        <PlacezDiscoveryIntro region={discoveryRegion} quiet={Boolean(calmMode || reducedMotion)} onChoose={id=>{setActiveType(id);setActiveSubcategory('ALL');setBrowseView('grid');setSearchQuery('');}} onRegion={setDiscoveryRegion} onSurprise={()=>{const candidates=filtered.length?filtered:visibleBusinesses;if(candidates.length)openPlace(candidates[Math.floor(Math.random()*candidates.length)]);}} onFeature={()=>{const museum=visibleBusinesses.find(biz=>/portland art museum/i.test(biz.name));if(museum)openPlace(museum);else{setActiveType('venue');setActiveSubcategory('ALL');setBrowseView('grid');requestAnimationFrame(()=>document.getElementById('placez-results')?.scrollIntoView({behavior:calmMode||reducedMotion?'instant':'smooth'}));}}} />
+        <div className="eb-frame" id="placez-results">
           <BrowseControls title="Placez" categories={[{id:"ALL",label:"All Placez",color:"var(--neon-cyan)",count:visibleBusinesses.length}, ...categoryBands.map(c => ({id:c.key,label:c.label,color:c.color,count:c.count}))]}
             selected={activeType.split(",")} onSelect={handleSelectCategory} query={searchQuery} onSearch={setSearchQuery} view={browseView} onView={setBrowseView}>
             <BrowseFilters title="Filter places" active={activeNeighborhood !== "ALL"}>

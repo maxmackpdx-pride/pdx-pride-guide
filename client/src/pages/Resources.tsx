@@ -1,3 +1,5 @@
+import RoomDiscoveryCard from '@/components/discovery/RoomDiscoveryCard';
+import { NeedzDiscoveryIntro } from '@/components/discovery/RoomDiscoveryIntro';
 import { useIncidentalMap } from "@/hooks/useIncidentalMap";
 import "@/components/cards/CategoryCardAPI.css";
 import { CardDetails, rememberCardOrigin, type CardSize } from "@/components/cards/CardAPI";
@@ -188,6 +190,7 @@ function SafetyNotice({ openCard = false }: { openCard?: boolean }) {
       </div>
       <p className="rg-safety-lead">If you or someone else is in danger right now, call 911 if you can do so safely.</p>
       <a className="pdx-glass-rebind pdxBtn pdxBtn--solid rg-safety-emergency" href="tel:911"><Phone size={18} aria-hidden="true" /> Call 911</a>
+      {openCard && <><a className="pdx-glass-rebind pdxBtn rd-emergency-text" href="sms:911">Text 911 if you can’t call <ArrowUpRight size={18} /></a><p className="rd-safety-text-guide">Call if you can. If speaking is unsafe or impossible, text 911 with your exact location and a short description of the emergency. Send it only to 911, not a group, and follow the dispatcher’s instructions. Washington has statewide text-to-911; Oregon availability varies. If you receive a message that texting is unavailable, call if you can do so safely. Texts can be delayed or fail to arrive.</p><div className="rg-safety-law-links"><a href="https://www.oregon.gov/OEM/911/Pages/Text-to-9-1-1.aspx" target="_blank" rel="noopener noreferrer">Oregon text-to-911 guidance ↗</a><a href="https://m.mil.wa.gov/texting911" target="_blank" rel="noopener noreferrer">Washington text-to-911 guidance ↗</a></div></>}
       {!openCard && <button type="button" className="rg-safety-expand" aria-expanded={expanded} aria-controls={detailsId} onClick={() => setExpanded(!expanded)}>
         <span className="rg-safety-expand-copy">
           <strong>{expanded ? "Hide safety & support options" : "Show safety & support options"}</strong>
@@ -514,7 +517,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   const readBrowseState = () => {
     const params = new URLSearchParams(window.location.search);
     const ids = readBrowseCategories(params, "cat", id => RESOURCE_CATEGORIES.some(c => c.id === id));
-    return { ids: params.get("view") === "all" ? [] : ids, query: params.get("q") || "", layout: params.get("layout") === "grid" || ids.length > 0 ? "grid" as const : "browse" as const, mode: params.get("door") === "talk" ? "talk" as const : "directory" as const };
+    return { ids: params.get("view") === "all" ? [] : ids, query: params.get("q") || "", layout: params.get("layout") === "browse" ? "browse" as const : "grid" as const, mode: params.get("door") === "talk" ? "talk" as const : "directory" as const };
   };
   const communities = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"] });
   const allRows = useMemo(() => mergeCommunityResources(ROWS, communities.data || [], CATEGORIES.find(c => c.id === "community")!), [communities.data]);
@@ -590,36 +593,41 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   }, [categoryIds, searchQuery, allRows]);
   const rowList = useProgressiveList(rows.length, { initial: 36, step: 36, resetKey: `${categoryIds.join(",")}|${searchQuery}` });
   const selectedCategories = CATEGORIES.filter(c => !categoryIds.length || categoryIds.includes(c.id));
-  const renderCard = (row: Row) => <div key={row.community?.id || row.org.name} className="placez-card-surface eb-original-card" onClickCapture={rememberCardOrigin}>
-    <ResourceCard row={row} onOpen={openDetail} />
+  const renderCard = (row: Row) => <div key={row.community?.id || row.org.name} className="eb-original-card">
+    <RoomDiscoveryCard room="needz" name={RESOURCE_CARD_CAPTIONS[row.org.name] ?? row.org.name} category={row.category.name}
+      accent={/food|pantr|meal/i.test(row.org.name)?"var(--neon-orange)":row.category.id==="community"?"var(--neon-cyan)":"var(--neon-red)"}
+      logo={serviceArtwork(row.org,row.org.logo,true)} fallback={<Mark org={row.org} allowArtwork={false} iconOnly/>}
+      description={row.org.desc} tags={[row.category.name,...(row.org.serviceTags || [])]} meta={row.org.scope}
+      href={resourceMapHref(row.org.name,row.community?.slug)} onOpen={()=>openDetail(row)}
+      heart={<HeartButton kind="resource" refId={row.org.name} snapshot={{title:row.org.name,subtitle:row.category.name,href:resourceMapHref(row.org.name,row.community?.slug)}}/>}/>
   </div>;
   const browseGroups = selectedCategories.map(category => ({
     category,
     group: rows.filter(row => categoriesFor(row).some(c => c.id === category.id)).sort((a, b) => Number(b.category.id === category.id) - Number(a.category.id === category.id)),
   })).filter(({group}) => group.length);
   const cardCount = browseView === "grid" ? rows.length : browseGroups.reduce((sum, {group}) => sum + group.length, 0);
-  if (safetyRank.current === null && cardCount) safetyRank.current = Math.max(4, Math.floor(safetyPlacement * cardCount));
+  if (safetyRank.current === null && cardCount) safetyRank.current = Math.min(3, cardCount - 1);
   const safetyIndex = cardCount ? Math.min(cardCount - 1, safetyRank.current ?? 4) : -1;
-  const safetyCard = <div key="mobile-safety" className="placez-card-surface eb-original-card needz-mobile-safety-slot" data-card-size="tall" data-card-category="needz" onClickCapture={rememberCardOrigin}>
-    <button type="button" className="rg-directory-card needz-mobile-safety-card" aria-label="ARE YOU SAFE? Open Oregon urgent help" onClick={event => {supportTrigger.current = event.currentTarget; setSupportOpen(true);}}>
-      <ResourceCardMotif glass name="Immediate danger safety support" category="safety" />
-      <ShieldAlert className="needz-mobile-safety-card__icon" aria-hidden="true" />
-      <span className="needz-mobile-safety-card__copy"><strong>ARE YOU SAFE?</strong><span>Oregon urgent help<ArrowUpRight size={16} aria-hidden="true" /></span></span>
-    </button>
+  const safetyCard = <div key="safety-options" className="eb-original-card">
+    <RoomDiscoveryCard room="needz" name="ARE YOU SAFE?" category="Safety" accent="var(--neon-red)" fallback={<ShieldAlert size={90} strokeWidth={1}/>}
+      description="A quiet place to find safety and emergency options. Opening this card does not contact anyone."
+      tags={['Safety','Emergency','Support']} meta="Oregon + Vancouver, WA" href="/needz"
+      onOpen={element=>{supportTrigger.current=element;setSupportOpen(true);}} heart={null}/>
   </div>;
   const renderCards = (items: Row[], offset = 0) => items.flatMap((row, index) => [
-    ...(mobile && offset + index === safetyIndex ? [safetyCard] : []), renderCard(row),
+    ...(offset + index === safetyIndex ? [safetyCard] : []), renderCard(row),
   ]);
   return (
     <>
-    {!embeddedDetail && <div className="eb-page eb-page--resources">
+    {!embeddedDetail && <div className="eb-page eb-page--resources rd-page">
       <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>
-      <BrowseHeader title="NEEDZ" logo="/brand/family/needz-mobile.webp?v=20261014-late-rent" kicker="Oregon · All the ways we show up"
-        description="Art, community, opportunity, care, and support for queer and trans Oregon. Find your next connection.">
+      <BrowseHeader title="NEEDZ" logo="/brand/family/needz-mobile.webp?v=20261014-late-rent" kicker="Community resources / Oregon + Vancouver, WA"
+        description="Real life gets complicated. Finding support shouldn’t.">
         <BoardShareButton title="NEEDZ" path="/needz" card={{ room: "NEEDZ", mark: "/brand/family/needz-mobile.webp?v=20261014-late-rent", line: "All the ways we show up." }} />
         <BoardFollowButton board="rezources" />
       </BrowseHeader>
-      <div className="eb-frame">
+      <NeedzDiscoveryIntro quiet={Boolean(quietMotion)} onChoose={id=>{setMode('directory');setBrowseView('grid');setSearchQuery('');setCategoryIds(id==='ALL'?[]:[id]);}} onTalk={()=>{setMode('talk');requestAnimationFrame(()=>document.getElementById('needz-results')?.scrollIntoView({behavior:quietMotion?'instant':'smooth'}));}} onSafety={()=>setSupportOpen(true)} />
+      <div className="eb-frame" id="needz-results">
         <BrowseControls title="NEEDZ" categories={[{id:"ALL",label:"All resources",color:"var(--neon-cyan)",count:allRows.length}, ...CATEGORIES.map((c, i) => ({id:c.id,label:LABELS[i],color:c.color,count:allRows.filter(row => categoriesFor(row).some(category => category.id === c.id)).length}))]}
           selected={categoryIds.length ? categoryIds : ["ALL"]} onSelect={choose} query={searchQuery} onSearch={value => {setSearchQuery(value); setMode("directory");}} view={browseView} onView={value => {setBrowseView(value); setMode("directory");}} actions={<div className="needz-support-actions">
             <button type="button" className="eb-tool needz-support-action needz-support-action--talk" aria-pressed={mode === "talk"} onClick={() => setMode(mode === "talk" ? "directory" : "talk")}><Phone size={18} aria-hidden="true" /><span>Talk to someone</span></button>
