@@ -221,7 +221,7 @@ html.calm-mode .rd-intro *{box-shadow:none;filter:none;animation:none;transition
 .rd-placez-feature figcaption>.rd-eyebrow{color:var(--neon-cyan)}
 .rd-placez-feature figcaption>strong{font:800 38px/1.05 var(--font-display);text-transform:uppercase}
 .rd-intro--placez .rd-moods{grid-template-columns:repeat(3,minmax(0,1fr))}
-.rd-moods [data-kind=adult]{--m:var(--neon-purple,#a855f7)}
+.rd-moods [data-kind=adult]{--m:var(--neon-violet)}
 .rd-moods [data-kind=outzide]{--m:var(--neon-yellow)}
 @media(max-width:1100px){.rd-intro--placez .rd-moods{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.rd-placez-feature{min-height:300px;aspect-ratio:4/3}.rd-placez-feature>figcaption{bottom:20px;left:20px;right:20px;gap:10px}.rd-placez-feature figcaption>strong{font-size:30px}}

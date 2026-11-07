@@ -1,0 +1,760 @@
+{
+  "contract": "zaylist-map-social/v1",
+  "mode": "zaydark",
+  "revision": 1,
+  "contentKind": "fictional-demo",
+  "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS",
+  "notDirections": true,
+  "content": {
+    "adultGateRequired": true,
+    "profiles": [
+      {
+        "id": "demo-profile-1",
+        "synthetic": true,
+        "displayName": "Alex Demo",
+        "age": 31,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation",
+          "leather"
+        ],
+        "openTo": [
+          "conversation",
+          "leather"
+        ],
+        "tagline": "Records, coffee, good conversation.",
+        "bio": "Leather community regular in this fictional scene. I like clear plans and a low-pressure hello.",
+        "areaLabel": "Lantern Quarter \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 14,
+          "y": 13,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-1.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-1",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-2",
+        "synthetic": true,
+        "displayName": "Jules Demo",
+        "age": 28,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation",
+          "kink-community"
+        ],
+        "openTo": [
+          "conversation",
+          "kink-community"
+        ],
+        "tagline": "Curious minds, clear boundaries.",
+        "bio": "Here for community chat and swapping event ideas. Ask first and take it at our own pace.",
+        "areaLabel": "Velvet Mews \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 47,
+          "y": 18,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-2.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-2",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-3",
+        "synthetic": true,
+        "displayName": "River Demo",
+        "age": 35,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "friendship"
+        ],
+        "openTo": [
+          "friendship"
+        ],
+        "tagline": "New friends and weekend walks.",
+        "bio": "Looking for friendship only. Happy to talk books, trail snacks and favorite local music.",
+        "areaLabel": "Orbit Yard \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 85,
+          "y": 24,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-3.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-3",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-4",
+        "synthetic": true,
+        "displayName": "Morgan Demo",
+        "age": 42,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation",
+          "leather"
+        ],
+        "openTo": [
+          "conversation",
+          "leather"
+        ],
+        "tagline": "A quiet corner and a good story.",
+        "bio": "A blocked-profile fixture kept out of discovery to demonstrate persistent safety controls.",
+        "areaLabel": "Cobalt Court \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 126,
+          "y": 15,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-4.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": true,
+        "albumId": "demo-album-4",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-5",
+        "synthetic": true,
+        "displayName": "Kai Demo",
+        "age": 30,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation"
+        ],
+        "openTo": [
+          "conversation",
+          "friendship"
+        ],
+        "tagline": "Dance-floor energy, calm conversations.",
+        "bio": "Usually the one making a playlist. A message is an invitation to talk, never an assumption.",
+        "areaLabel": "Echo Rise \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 31,
+          "y": 39,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-5.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-5",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-6",
+        "synthetic": true,
+        "displayName": "Dev Demo",
+        "age": 37,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "leather",
+          "conversation"
+        ],
+        "openTo": [
+          "leather",
+          "conversation"
+        ],
+        "tagline": "Vintage jackets, fresh coffee.",
+        "bio": "Interested in leather community stories and getting to know people slowly.",
+        "areaLabel": "Paper Moon Lane \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 62,
+          "y": 42,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-6.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-6",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-7",
+        "synthetic": true,
+        "displayName": "Remy Demo",
+        "age": 26,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation",
+          "kink-community"
+        ],
+        "openTo": [
+          "conversation",
+          "kink-community"
+        ],
+        "tagline": "Board games and thoughtful questions.",
+        "bio": "Community-curious and happy to start with conversation. Please check boundaries before changing the topic.",
+        "areaLabel": "Marigold Loop \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 103,
+          "y": 39,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-7.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-7",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-8",
+        "synthetic": true,
+        "displayName": "Ash Demo",
+        "age": 33,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation"
+        ],
+        "openTo": [
+          "conversation",
+          "friendship"
+        ],
+        "tagline": "Late-night noodles enthusiast.",
+        "bio": "A fictional night owl who likes tiny gigs, design books and easy company.",
+        "areaLabel": "Prism Rise \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 144,
+          "y": 43,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-8.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-8",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-9",
+        "synthetic": true,
+        "displayName": "Robin Demo",
+        "age": 40,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation",
+          "leather"
+        ],
+        "openTo": [
+          "conversation",
+          "leather"
+        ],
+        "tagline": "Old films and new connections.",
+        "bio": "Looking for respectful conversation and community. I appreciate direct, kind communication.",
+        "areaLabel": "Firefly Crescent \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 17,
+          "y": 65,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-9.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-9",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-10",
+        "synthetic": true,
+        "displayName": "Ellis Demo",
+        "age": 29,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation",
+          "kink-community"
+        ],
+        "openTo": [
+          "conversation",
+          "kink-community"
+        ],
+        "tagline": "Good questions over small talk.",
+        "bio": "Here for adult community discussion with clear consent and no pressure to meet.",
+        "areaLabel": "Juniper Arcade \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 48,
+          "y": 71,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-10.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-10",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-11",
+        "synthetic": true,
+        "displayName": "Ari Demo",
+        "age": 32,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation"
+        ],
+        "openTo": [
+          "conversation",
+          "friendship"
+        ],
+        "tagline": "Synths, sketches, shared stories.",
+        "bio": "A fictional creative who loves talking about music and the things people make.",
+        "areaLabel": "Halo Rise \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 85,
+          "y": 64,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-11.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-11",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-12",
+        "synthetic": true,
+        "displayName": "Blake Demo",
+        "age": 45,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "leather",
+          "conversation"
+        ],
+        "openTo": [
+          "leather",
+          "conversation"
+        ],
+        "tagline": "Community, with room to breathe.",
+        "bio": "Interested in warm conversation and mutual interests. Slow replies are always okay.",
+        "areaLabel": "Moonbeam Row \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 126,
+          "y": 70,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-12.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-12",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-13",
+        "synthetic": true,
+        "displayName": "Shay Demo",
+        "age": 27,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation"
+        ],
+        "openTo": [
+          "conversation",
+          "friendship"
+        ],
+        "tagline": "One more record, then breakfast.",
+        "bio": "Let\u2019s trade favorite tracks. Friendship and conversation are a good place to start.",
+        "areaLabel": "Lantern Quarter \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 28,
+          "y": 101,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-13.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-13",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-14",
+        "synthetic": true,
+        "displayName": "Reese Demo",
+        "age": 38,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation",
+          "kink-community"
+        ],
+        "openTo": [
+          "conversation",
+          "kink-community"
+        ],
+        "tagline": "Thoughtful company, clear expectations.",
+        "bio": "Enjoys community chats and curiosity without assumptions. Consent is specific and can change.",
+        "areaLabel": "Orbit Yard \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 66,
+          "y": 103,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-14.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-14",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-15",
+        "synthetic": true,
+        "displayName": "Quinn Demo",
+        "age": 34,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation",
+          "leather"
+        ],
+        "openTo": [
+          "conversation",
+          "leather"
+        ],
+        "tagline": "A little wit and a lot of respect.",
+        "bio": "Here to connect over shared interests. Ask before sharing anything personal or changing the pace.",
+        "areaLabel": "Velvet Mews \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 106,
+          "y": 98,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-15.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-15",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-profile-16",
+        "synthetic": true,
+        "displayName": "Cameron Demo",
+        "age": 36,
+        "adultConfirmed": true,
+        "lookingFor": [
+          "conversation"
+        ],
+        "openTo": [
+          "conversation",
+          "friendship"
+        ],
+        "tagline": "Books, breakfast, the last tram.",
+        "bio": "A fictional neighbor looking for an easy conversation and good recommendations.",
+        "areaLabel": "Prism Rise \u00b7 fictional area",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 143,
+          "y": 100,
+          "notDirections": true
+        },
+        "publicImageUrl": "media/demo-profile-16.svg",
+        "publicImageExplicit": false,
+        "presence": "visible-opt-in",
+        "blockedByViewer": false,
+        "albumId": "demo-album-16",
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      }
+    ],
+    "albums": [
+      {
+        "id": "demo-album-1",
+        "synthetic": true,
+        "ownerId": "demo-profile-1",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-2",
+        "synthetic": true,
+        "ownerId": "demo-profile-2",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-3",
+        "synthetic": true,
+        "ownerId": "demo-profile-3",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-4",
+        "synthetic": true,
+        "ownerId": "demo-profile-4",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-5",
+        "synthetic": true,
+        "ownerId": "demo-profile-5",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-6",
+        "synthetic": true,
+        "ownerId": "demo-profile-6",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-7",
+        "synthetic": true,
+        "ownerId": "demo-profile-7",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-8",
+        "synthetic": true,
+        "ownerId": "demo-profile-8",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-9",
+        "synthetic": true,
+        "ownerId": "demo-profile-9",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-10",
+        "synthetic": true,
+        "ownerId": "demo-profile-10",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-11",
+        "synthetic": true,
+        "ownerId": "demo-profile-11",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-12",
+        "synthetic": true,
+        "ownerId": "demo-profile-12",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-13",
+        "synthetic": true,
+        "ownerId": "demo-profile-13",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-14",
+        "synthetic": true,
+        "ownerId": "demo-profile-14",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-15",
+        "synthetic": true,
+        "ownerId": "demo-profile-15",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-album-16",
+        "synthetic": true,
+        "ownerId": "demo-profile-16",
+        "explicit": false,
+        "mediaUrls": [
+          "media/demo-album.svg"
+        ],
+        "grantedTo": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      }
+    ],
+    "topics": [
+      {
+        "id": "demo-topic-1",
+        "synthetic": true,
+        "title": "Leather community",
+        "minimumAge": 18,
+        "memberIds": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-topic-2",
+        "synthetic": true,
+        "title": "Kink conversation",
+        "minimumAge": 18,
+        "memberIds": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-topic-3",
+        "synthetic": true,
+        "title": "Conversation and connection",
+        "minimumAge": 18,
+        "memberIds": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      }
+    ],
+    "chats": [
+      {
+        "id": "demo-chat-direct-1",
+        "synthetic": true,
+        "kind": "direct",
+        "profileId": "demo-profile-1",
+        "status": "pending",
+        "memberIds": [
+          "demo-profile-1"
+        ],
+        "messages": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      }
+    ],
+    "mapDemos": [
+      {
+        "id": "demo-profile-1",
+        "area": "Downtown",
+        "coordinate": [
+          -122.681,
+          45.52
+        ],
+        "photo": 0
+      },
+      {
+        "id": "demo-profile-2",
+        "area": "Downtown",
+        "coordinate": [
+          -122.675,
+          45.523
+        ],
+        "photo": 1
+      },
+      {
+        "id": "demo-profile-5",
+        "area": "Downtown",
+        "coordinate": [
+          -122.679,
+          45.527
+        ],
+        "photo": 2
+      },
+      {
+        "id": "demo-profile-6",
+        "area": "Lloyd Center",
+        "coordinate": [
+          -122.653,
+          45.532
+        ],
+        "photo": 3
+      }
+    ],
+    "photoUrl": "social/zaydark-fictional-men.png"
+  },
+  "adultGateRequired": true
+}

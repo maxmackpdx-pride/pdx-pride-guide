@@ -1,3 +1,4 @@
+import { prepareMapRelease } from "./prepare-map-release.mjs";
 import { brotliCompressSync, gzipSync, constants } from "node:zlib";
 import path from "node:path";
 import { build as esbuild } from "esbuild";
@@ -53,6 +54,7 @@ async function buildAll() {
 
   console.log("building client...");
   await viteBuild();
+  prepareMapRelease();
   execFileSync(process.execPath,["--import","tsx","script/build-profile-objects.mjs"],{stdio:"inherit"});
   await cp("dist/profile-objects/v1","dist/public/profile-objects/v1",{recursive:true});
 
@@ -61,13 +63,13 @@ async function buildAll() {
     for(const entry of await readdir(directory,{withFileTypes:true})) {
       const file=path.join(directory,entry.name);
       if(entry.isDirectory()){await compress(file);continue;}
-      if(!/\.(js|css|json|svg)$/.test(file))continue;
+      if(!/\.(js|cjs|css|json|svg)$/.test(file))continue;
       const bytes=await readFile(file);
       await writeFile(file+'.br',brotliCompressSync(bytes,{params:{[constants.BROTLI_PARAM_QUALITY]:5}}));
       await writeFile(file+'.gz',gzipSync(bytes));
     }
   };
-  for(const directory of ['assets','outzide-map','map-foundation','mapz-map','home-flight/vendor'])await compress(path.join('dist/public',directory));
+  for(const directory of ['assets','map-assets','outzide-map','map-foundation','mapz-map','home-flight/vendor'])await compress(path.join('dist/public',directory));
   console.log("building server...");
   const pkg = JSON.parse(await readFile("package.json", "utf-8"));
   const allDeps = [

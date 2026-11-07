@@ -1,0 +1,240 @@
+{
+  "contract": "zaylist-map-social/v1",
+  "mode": "afterz",
+  "revision": 1,
+  "contentKind": "fictional-demo",
+  "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS",
+  "notDirections": true,
+  "content": {
+    "availability": {
+      "startLocal": "21:00",
+      "endLocal": "06:00",
+      "timeZone": "America/Los_Angeles",
+      "prototypeDefault": true
+    },
+    "scene": {
+      "id": "demo-neighborhood",
+      "kind": "virtual-demo-scene",
+      "units": "local-scene-units",
+      "label": "Fictional demo neighborhood; not real homes",
+      "width": 160,
+      "height": 120
+    },
+    "hosts": [
+      {
+        "id": "demo-host-1",
+        "synthetic": true,
+        "displayName": "Theo Demo",
+        "age": 29,
+        "adultConfirmed": true,
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-host-2",
+        "synthetic": true,
+        "displayName": "Nico Demo",
+        "age": 33,
+        "adultConfirmed": true,
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-host-3",
+        "synthetic": true,
+        "displayName": "Sam Demo",
+        "age": 28,
+        "adultConfirmed": true,
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-host-4",
+        "synthetic": true,
+        "displayName": "Avery Demo",
+        "age": 36,
+        "adultConfirmed": true,
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      }
+    ],
+    "gatherings": [
+      {
+        "id": "demo-afterz-1",
+        "synthetic": true,
+        "title": "Demo: Snacks and quiet music",
+        "hostId": "demo-host-1",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 157.88996089144615,
+          "y": -166.3219956318081,
+          "notDirections": true
+        },
+        "houseFootprint": {
+          "width": 6,
+          "depth": 8,
+          "height": 4
+        },
+        "venueType": "house",
+        "description": "A soft landing with soup, snacks and a mellow playlist.",
+        "tags": [
+          "alcohol-free",
+          "bring-snacks"
+        ],
+        "inviteSource": "always-crew",
+        "invitationStatus": "pending",
+        "chatId": "demo-chat-afterz-1",
+        "schedule": {
+          "kind": "fictional-demo-night",
+          "timeZone": "America/Los_Angeles",
+          "startLocal": "22:30",
+          "endLocal": "04:00"
+        },
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-afterz-2",
+        "synthetic": true,
+        "title": "Demo: Rooftop vinyl hour",
+        "hostId": "demo-host-2",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": -127.82276348395283,
+          "y": -133.89193302330264,
+          "notDirections": true
+        },
+        "houseFootprint": {
+          "width": 10,
+          "depth": 10,
+          "height": 24
+        },
+        "venueType": "tower",
+        "description": "Downtempo records in a fictional tower lounge. Bring one favorite track.",
+        "tags": [
+          "bring-snacks"
+        ],
+        "inviteSource": "always-crew",
+        "invitationStatus": "pending",
+        "chatId": "demo-chat-afterz-2",
+        "schedule": {
+          "kind": "fictional-demo-night",
+          "timeZone": "America/Los_Angeles",
+          "startLocal": "23:00",
+          "endLocal": "05:30"
+        },
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-afterz-3",
+        "synthetic": true,
+        "title": "Demo: Neighborhood wind-down",
+        "hostId": "demo-host-3",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": 144.11689204493862,
+          "y": 106.66761632973778,
+          "notDirections": true
+        },
+        "houseFootprint": {
+          "width": 7,
+          "depth": 7,
+          "height": 5
+        },
+        "venueType": "house",
+        "description": "A small living-room hangout after the last set. Conversation first.",
+        "tags": [
+          "bring-alcohol"
+        ],
+        "inviteSource": "radius-demo",
+        "invitationStatus": "pending",
+        "chatId": "demo-chat-afterz-3",
+        "schedule": {
+          "kind": "fictional-demo-night",
+          "timeZone": "America/Los_Angeles",
+          "startLocal": "21:30",
+          "endLocal": "02:00"
+        },
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-afterz-4",
+        "synthetic": true,
+        "title": "Demo: Tea at apartment",
+        "hostId": "demo-host-4",
+        "location": {
+          "kind": "virtual-demo-scene",
+          "sceneId": "demo-neighborhood",
+          "x": -123.6734085656379,
+          "y": 122.18326093506467,
+          "notDirections": true
+        },
+        "houseFootprint": {
+          "width": 9,
+          "depth": 8,
+          "height": 12
+        },
+        "venueType": "apartment",
+        "description": "A kettle on, cozy cushions and room for a few more stories.",
+        "tags": [
+          "alcohol-free",
+          "bring-snacks"
+        ],
+        "inviteSource": "friend-invite",
+        "invitationStatus": "pending",
+        "chatId": "demo-chat-afterz-4",
+        "schedule": {
+          "kind": "fictional-demo-night",
+          "timeZone": "America/Los_Angeles",
+          "startLocal": "23:30",
+          "endLocal": "03:30"
+        },
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      }
+    ],
+    "chats": [
+      {
+        "id": "demo-chat-afterz-1",
+        "synthetic": true,
+        "kind": "gathering",
+        "gatheringId": "demo-afterz-1",
+        "memberIds": [
+          "demo-host-1"
+        ],
+        "messages": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-chat-afterz-2",
+        "synthetic": true,
+        "kind": "gathering",
+        "gatheringId": "demo-afterz-2",
+        "memberIds": [
+          "demo-host-2"
+        ],
+        "messages": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-chat-afterz-3",
+        "synthetic": true,
+        "kind": "gathering",
+        "gatheringId": "demo-afterz-3",
+        "memberIds": [
+          "demo-host-3"
+        ],
+        "messages": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      },
+      {
+        "id": "demo-chat-afterz-4",
+        "synthetic": true,
+        "kind": "gathering",
+        "gatheringId": "demo-afterz-4",
+        "memberIds": [
+          "demo-host-4"
+        ],
+        "messages": [],
+        "demoLabel": "FICTIONAL DEMO \u00b7 NOT REAL PEOPLE, HOMES OR GATHERINGS"
+      }
+    ]
+  }
+}

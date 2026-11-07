@@ -1,5 +1,5 @@
 import { InboxDailyReminder } from "./components/inbox/InboxDailyReminder";
-import RetainedMapzRoute from "@/components/RetainedMapzRoute";
+
 import { boardBrowseHref } from "@/lib/boardBrowseHref";
 import type { BoardCategory } from "@/lib/allBoards";
 import MapWorldRedirect from "@/components/MapWorldRedirect";
@@ -79,7 +79,7 @@ const NotificationSettings = lazyWithReload(() => import("./pages/NotificationSe
 const Directory = lazyWithReload(() => import("./pages/Directory"));
 const RoosterRock = lazyWithReload(() => import("./pages/RoosterRock"));
 const SauvieIsland = lazyWithReload(() => import("./pages/SauvieIsland"));
-const Outz = lazyWithReload(() => import("./pages/Outz"));
+const UnifiedMap = lazyWithReload(() => import("./pages/UnifiedMap"));
 const OutzPlace = lazyWithReload(() => import("./pages/OutzPlace"));
 const DesignSystemSandbox = lazyWithReload(() => import("./pages/DesignSystemSandbox"));
 const DesignComponentSpecimen = lazyWithReload(() => import("./pages/DesignComponentSpecimen"));
@@ -121,6 +121,7 @@ function AppLayout() {
   const profile = isProfilePath(location);
   const routePath = pathname.replace(/\/+$/, "") || "/";
   const livingMap = ["/map", "/map-demo"].includes(routePath);
+  const unifiedMap = livingMap || routePath === "/outzide" || routePath.startsWith("/outzide/share/");
   const mapSurface = livingMap || routePath === "/outzide" || routePath.startsWith("/outzide/");
   const hideFooter = livingMap || routePath === "/outzide" || routePath.startsWith("/outzide/");
   const mobileFooter = routePath === "/" || routePath === "/about";
@@ -132,11 +133,11 @@ function AppLayout() {
     >
       <SiteWallpaper />
       <InboxDailyReminder />
-      <PullToRefresh />
-      <Nav />
-      {location.split("?")[0] !== "/admin" && <MobileBottomNav />}
+      {!unifiedMap && <PullToRefresh />}
+      {!unifiedMap && <Nav />}
+      {!unifiedMap && location.split("?")[0] !== "/admin" && <MobileBottomNav />}
       <main className="flex-1">
-        <RetainedMapzRoute />
+
         <RouteBoundary>
           <Suspense fallback={routePath === "/" ? <div dangerouslySetInnerHTML={{ __html: homeBootLogoHtml }} /> : livingMap ? <MapBootLoader map="mapz" /> : routePath === "/outzide" ? <MapBootLoader map="outz" /> : <SpectrumLoader variant="full" label="Loading page" />}>
             <Switch>
@@ -153,8 +154,8 @@ function AppLayout() {
             <Route path="/boards">{() => <Redirect to={`/boardz${window.location.search}${window.location.hash}`} replace />}</Route>
             <Route path="/all-boards">{() => <Redirect to={`/boardz${window.location.search}${window.location.hash}`} replace />}</Route>
             <Route path="/our-boardz">{() => <Redirect to={`/boardz${window.location.search}${window.location.hash}`} replace />}</Route>
-            <Route path="/map-demo">{() => null}</Route>
-            <Route path="/map">{() => null}</Route>
+            <Route path="/map-demo" component={UnifiedMap} />
+            <Route path="/map" component={UnifiedMap} />
             <Route path="/schedule">{() => <Schedule />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />
@@ -240,8 +241,8 @@ function AppLayout() {
               }}
             </Route>
             <Route path={/^\/outz(?:\/.*)?$/i} component={LegacyOutzRedirect} />
-            <Route path="/outzide" component={Outz} />
-            <Route path="/outzide/share/:placeId" component={Outz} />
+            <Route path="/outzide" component={UnifiedMap} />
+            <Route path="/outzide/share/:placeId" component={UnifiedMap} />
             <Route path="/outzide/rooster-rock" component={RoosterRock} />
             <Route path="/outzide/sauvie-island" component={SauvieIsland} />
             <Route path="/outzide/:placeSlug" component={OutzPlace} />

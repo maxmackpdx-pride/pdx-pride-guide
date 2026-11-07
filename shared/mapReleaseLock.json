@@ -1,0 +1,46 @@
+{
+  "repository": "maxmackpdx-pride/zaylist-maps",
+  "tag": "v1.0.0",
+  "commit": "b6b7013dce8854c8f225d4f2e7aca421beca3af0",
+  "archive": "vendor/zaylist-maps/v1.0.0.tar.gz",
+  "sha256": "4c7e25c370a3550df7cfe7adff21f7a47508a4b0b49b69649ad00e2242c40ac3",
+  "base": "/map-assets/v1.0.0/",
+  "entry": "map.js",
+  "styles": [
+    "assets/map-BZ1PEtZD.css"
+  ],
+  "stack": {
+    "react": "19.3.1",
+    "maplibre-gl": "6.16.0",
+    "@vis.gl/react-maplibre": "8.1.3",
+    "vite": "8.3.5"
+  },
+  "archiveParts": [
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part000",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part001",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part002",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part003",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part004",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part005",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part006",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part007",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part008",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part009",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part010",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part011",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part012",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part013",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part014",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part015",
+    "vendor/zaylist-maps/v1.0.0.tar.gz.part016"
+  ],
+  "rollbackTag": "pre-five-mode-map-v1.0.0-20261107",
+  "rollbackCommit": "4bc990e0599ca5629d1336767c0452d1cd3b33a9",
+  "build": {
+    "target": "browser-esm-production",
+    "define": {
+      "process.env.NODE_ENV": "\"production\""
+    },
+    "sourceTag": "v1.0.0"
+  }
+}

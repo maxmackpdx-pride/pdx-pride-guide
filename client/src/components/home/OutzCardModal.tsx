@@ -4,7 +4,7 @@ import {OpenCardMeta} from "@/components/cards/react19Card";
 import {closeOpenCard} from "@/components/cards/react19CardModel";
 import {X} from 'lucide-react';
 import {useLocation} from 'wouter';
-import {useAuth} from '@/context/AuthContext';
+import {acquirePinnedMapModule} from '@/lib/pinnedMapModule';
 import {useOpenCardClose} from '@/hooks/useOpenCardClose';
 import type {TodayLocation} from './TodayLocationCard';
 import './OutzCardModal.css';
@@ -13,22 +13,19 @@ export default function OutzCardModal({documentMeta=true,...props}:Parameters<ty
  return <CardDetails key={props.location.key} onClose={props.onClose}>{documentMeta&&<OpenCardMeta title={props.location.name} description={props.location.detail}/>}<OutzCardDetails {...props} onClose={close}/></CardDetails>;
 }
 function OutzCardDetails({location,onClose,onRequireAuth}:{location:TodayLocation;onClose:()=>void;onRequireAuth?:()=>void}) {
- const [ready,setReady]=useState(false);
- const [failed,setFailed]=useState(false);
- const frame=useRef<HTMLIFrameElement>(null); const {user,loading}=useAuth(); const [,navigate]=useLocation();
- const {dialogRef,requestClose}=useOpenCardClose(onClose); const id=location.key.replace(/^outz:/,'');
+ const [failed,setFailed]=useState('');
+ const node=useRef<HTMLDivElement>(null);const [,navigate]=useLocation();
+ const {dialogRef,requestClose}=useOpenCardClose(onClose);const id=location.key.replace(/^outz:/,'');
+ const callbacks=useRef({requestClose,navigate});callbacks.current={requestClose,navigate};
  useEffect(()=>{
-  const publish=()=>frame.current?.contentWindow?.postMessage({source:'outzide-host',type:'auth-state',allowed:!!user&&!loading},window.location.origin);
-  const receive=(event:MessageEvent)=>{
-   if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='outzide-map')return;
-   if(event.data.type==='ready')publish();
-   if(event.data.type==='card-ready')setReady(true);
-   if(event.data.type==='browse-error')setFailed(true);
-   if(event.data.type==='require-auth'&&!user&&!loading)onRequireAuth?.();
-   if(event.data.type==='close-card')requestClose();
-   if(event.data.type==='view-mapz'){const target=new URL(location.href,window.location.origin);target.searchParams.set('mapOnly','1');onClose();navigate(target.pathname+target.search+target.hash);}
-  };
-  window.addEventListener('message',receive);publish();return()=>window.removeEventListener('message',receive);
- },[user,loading,id,location.href,navigate,onClose,onRequireAuth,requestClose]);
- return (<div className="home-outz-overlay" onClick={requestClose}><div ref={dialogRef} className="home-outz-modal" role="dialog" aria-modal="false" aria-label={location.name} onClick={e=>e.stopPropagation()}><div className="home-outz-loading" role="status" hidden={ready}>{failed ? <a href={location.href}>Open destination details</a> : "Loading destination…"}</div><iframe ref={frame} title={`${location.name} details`} src={`/outzide-map/index.html?v=20261013-forest-room&card=1&place=${encodeURIComponent(id)}&guestPlace=${encodeURIComponent(id)}`} /><button type="button" className="home-outz-close" aria-label="Close destination" onClick={requestClose}><X size={20} aria-hidden="true" /></button></div></div>);
+  let disposed=false;let release:(()=>void)|undefined;let unmount:(()=>void)|undefined;
+  setFailed('');
+  void acquirePinnedMapModule().then(acquired=>{
+   release=acquired.release;if(disposed||!node.current){release();return;}
+   const card=acquired.module.mountDestinationCard(node.current,{placeId:id,loginHref:'/outzide?auth=login',onClose:()=>callbacks.current.requestClose(),onNavigate:href=>callbacks.current.navigate(href)});
+   unmount=card.unmount;
+  }).catch(error=>{if(!disposed)setFailed(error instanceof Error?error.message:'Destination could not load.');});
+  return()=>{disposed=true;unmount?.();release?.();};
+ },[id]);
+ return (<div className="home-outz-overlay" onClick={requestClose}><div ref={dialogRef} className="home-outz-modal" role="dialog" aria-modal="false" aria-label={location.name} onClick={e=>e.stopPropagation()}><div ref={node} className="home-outz-native" style={{height:'100%',overflow:'auto'}}/>{failed&&<div className="home-outz-loading" role="alert">{failed} <a href={location.href}>Open destination details</a></div>}<button type="button" className="home-outz-close" aria-label="Close destination" onClick={requestClose}><X size={20} aria-hidden="true" /></button></div></div>);
 }

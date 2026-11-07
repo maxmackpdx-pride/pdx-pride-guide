@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import{opaqueRgbHex}from'./mapHostTokens';
+test('browser color serialization preserves exact channel identity, never approximate token matching',()=>{assert.equal(opaqueRgbHex('rgb(255, 0, 0)'),'#FF0000');assert.equal(opaqueRgbHex('rgba(25, 227, 255, 1)'),'#19E3FF');assert.equal(opaqueRgbHex('rgb(123 0 255)'),'#7B00FF');for(const value of ['rgba(255,0,0,.5)','transparent','rgb(256,0,0)','url(https://example.com)'])assert.equal(opaqueRgbHex(value),undefined);});

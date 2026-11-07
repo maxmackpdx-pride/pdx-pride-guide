@@ -1,3 +1,5 @@
+import mapRelease from "../shared/mapReleaseLock.json";
+import {registerMapSocialRoutes} from "./mapSocialRoutes";
 import {registerFoodResources} from "./foodResources";
 import { registerPosterVariants } from "./posterVariants";
 import { createPublicEventFeedCache, EventFeedChangedError, EventFeedQueryError, parseEventFeedQuery, selectEventFeed } from "./publicEventFeedCache";
@@ -1268,6 +1270,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // users because req.session was undefined. express-session skips a second mount, so the later app.use is harmless.
   const sessionMiddleware = createSessionMiddleware(sqlite);
   app.use("/api", sessionMiddleware);
+  registerMapSocialRoutes(app,{db:sqlite,getUserById:id=>storage.getUserById(id)});
   registerFoodResources(app);
   registerBoardArchiveRoutes(app, sqlite, requireAuth, httpServer);
   const profileLayouts=createProfileLayoutStore(sqlite);
@@ -1639,6 +1642,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       pushConfigured: isPushConfigured(),
       emailConfigured: isTransactionalEmailConfigured(),
       pushSubscriptions,
+      maps:{repository:mapRelease.repository,tag:mapRelease.tag,commit:mapRelease.commit,sha256:mapRelease.sha256},
       ...(gitSha ? { gitSha } : {}),
       ...(railwayEnvironment ? { railwayEnvironment } : {}),
       ...(deploymentId ? { deploymentId } : {}),

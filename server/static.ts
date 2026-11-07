@@ -1,3 +1,4 @@
+import mapRelease from "../shared/mapReleaseLock.json";
 import express from 'express';
 import { mapzPrecompressed,staticTextPrecompressed,mutableStaticRevalidate,missingStaticNotFound } from './mapzStatic';
 import type { Express } from 'express';
@@ -38,7 +39,7 @@ export function serveStatic(app: Express) {
     if (requestPath === "/" || requestPath === "/index.html") {
       baseIndexHtml = baseIndexHtml.replace('<div id="root"></div>', `<div id="root">${homeBootLogoHtml}</div>`);
     }
-    const mapEntry=requestPath === "/map" || requestPath === "/map-demo" ? "src/pages/MapzMapDemo.tsx" : requestPath === "/outzide" ? "src/pages/Outz.tsx" : null;
+    const mapEntry=["/map","/map-demo","/outzide"].includes(requestPath)||requestPath.startsWith("/outzide/share/")?"src/pages/UnifiedMap.tsx":null;
     if(mapEntry){
       // The homepage globe competes with the map engine on cold map routes.
       baseIndexHtml=baseIndexHtml.replace(/<link[^>]*href="\/home-globe\/portland-city-beam-density\.png"[^>]*>/g, "");
@@ -52,12 +53,8 @@ export function serveStatic(app: Express) {
         baseIndexHtml=baseIndexHtml.replace('</head>',`<link rel="modulepreload" href="/${entry.file}">${[...css].map(file=>`<link rel="preload" as="style" href="/${file}">`).join('')}</head>`);
       }
     }
-    if(requestPath === "/map" || requestPath === "/map-demo") {
-      const {assets}=JSON.parse(fs.readFileSync(path.join(distPath,"mapz-manifest.json"),"utf8"));
-      baseIndexHtml=baseIndexHtml.replace('</head>',`<link rel="preload" as="script" href="${assets.maplibre}"><link rel="modulepreload" href="${assets.script}"><link rel="preload" as="script" href="${assets.perf}"><link rel="preload" as="style" href="/outzide-map/assets/map-continuity.css?v=2"><link rel="preload" as="style" href="${assets.maplibreCss}"><link rel="preload" as="style" href="${assets.style}"></head>`);
-    } else if(requestPath === "/outzide") {
-      const {assets}=JSON.parse(fs.readFileSync(path.join(distPath,"outzide-manifest.json"),"utf8"));
-      baseIndexHtml=baseIndexHtml.replace('</head>',`<link rel="preload" as="script" href="${assets.maplibre}"><link rel="modulepreload" href="${assets.script}"></head>`);
+    if(mapEntry){
+      baseIndexHtml=baseIndexHtml.replace('</head>',`<link rel="modulepreload" href="${mapRelease.base}${mapRelease.entry}">${mapRelease.styles.map(file=>`<link rel="preload" as="style" href="${mapRelease.base}${file}">`).join('')}</head>`);
     }
     if (process.env.LOCAL_PREVIEW === "1") {
       baseIndexHtml = baseIndexHtml.replace(
@@ -108,6 +105,18 @@ export function serveStatic(app: Express) {
       .type("text/plain")
       .send("Not Found");
   });
+
+  // Live directory artwork is content data, not part of the frozen engine bundle.
+  // v1.0.0 emits these legacy card paths; resolve only the exact known families.
+  app.get(`${mapRelease.base}card-assets/directory-logos/:file`, (req,res,next)=>{
+    if(!/^[a-zA-Z0-9_-]+\.(?:svg|png|webp)$/.test(req.params.file))return next();
+    res.set('Cache-Control','no-cache').redirect(307,`/directory-logos/${req.params.file}`);
+  });
+  for(const family of ['giftz','sellz'])app.get(`${mapRelease.base}card-assets/boardz/punk/${family}.svg`,(_req,res)=>res.set('Cache-Control','no-cache').redirect(307,`/boardz/punk/${family}.svg`));
+  for(const category of ['nonprofit','healthcare','realestate'])app.get(`${mapRelease.base}waypoints/package/placez-${category}.svg`,(_req,res)=>res.set('Cache-Control','no-cache').redirect(307,`/mapz-map/icons/types/${category}.svg`));
+
+  // Only the checksum-verified pinned artifact is served at this immutable namespace.
+  app.use(mapRelease.base,express.static(path.join(distPath,mapRelease.base),{index:false,immutable:true,maxAge:'1y',fallthrough:false,setHeaders(res,file){res.setHeader('X-Zaylist-Map-Release',mapRelease.tag);if(file.endsWith('.cjs'))res.setHeader('Content-Type','text/javascript; charset=utf-8');}}));
 
   app.use(express.static(distPath, {
     index: false,

@@ -3,7 +3,9 @@ import { withinHousingBounds } from "@shared/housing";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
-import MapzCanvas, { type MapzHandle, type MapView } from "../MapzCanvas";
+import {acquirePinnedMapModule} from "@/lib/pinnedMapModule";
+type MapView={center:[number,number];zoom:number;pitch:number;bearing:number;bounds:{south:number;north:number;west:number;east:number}};
+type MapzHandle={send:(command:string,value:unknown)=>void};
 import BoardPushPin from "./BoardPushPin";
 import { apiRequest } from "@/lib/queryClient";
 import "./BoardMapPlacement.css";
@@ -13,13 +15,13 @@ const metres = (a:BoardMapPoint,b:BoardMapPoint) => Math.hypot((a.lat-b.lat)*111
 export default function BoardMapPicker({value,housing=false,maxDays=14,renewal=false,venue,saving=false,error,confirmLabel="Save placement",onCancel,onConfirm}: {
  housing?:boolean;saving?:boolean;error?:string;confirmLabel?:string;value:BoardMapPoint|null;maxDays?:number;renewal?:boolean;venue?:BoardMapVenue|null;onCancel:()=>void;onConfirm:(p:BoardMapPoint)=>void;
 }) {
- const dialog=useRef<HTMLDialogElement>(null),map=useRef<MapzHandle>(null);
+ const dialog=useRef<HTMLDialogElement>(null),map=useRef<MapzHandle|null>(null),mapNode=useRef<HTMLDivElement>(null);
  const initialPoint=useRef<BoardMapPoint>(value || venue || {lat:45.5231,lng:-122.6765});
  const [point,setPoint]=useState(initialPoint.current);
  const [chosen,setChosen]=useState(Boolean(value || venue));
  const [durationChanged,setDurationChanged]=useState(false);
  const [days,setDays]=useState(Math.min(value?.days || 7,maxDays));
- const [viewTime]=useState(Date.now);
+ const [mapError,setMapError]=useState('');
  const [ready,setReady]=useState(false),[fine,setFine]=useState(false);
  const [atVenue,setAtVenue]=useState(Boolean(venue && (!value || value.venueId)));
  const camera=useRef<MapView>({center:[point.lat,point.lng],zoom:17,pitch:0,bearing:0,bounds:{south:45.2,north:45.85,west:-123.15,east:-122.15}});
@@ -42,18 +44,30 @@ export default function BoardMapPicker({value,housing=false,maxDays=14,renewal=f
    map.current?.send("view",next);
  };
  const waypointColor=getComputedStyle(document.documentElement).getPropertyValue("--day-thu").trim();
- const rows=useMemo(()=>(waypoints.data || []).map((w,i)=>({key:`placement-${i}`,coordinates:[w.lng,w.lat],name:w.name,color:waypointColor,logo:"",kind:"place",waypointFamily:"places"})),[waypoints.data,waypointColor]);
+ const points=useMemo(()=>(waypoints.data||[]).map(w=>({lat:w.lat,lng:w.lng,name:w.name})),[waypoints.data]);
+ const pointRef=useRef(points);pointRef.current=points;
+ const viewCallback=useRef((v:MapView)=>{});
+ viewCallback.current=v=>{
+  camera.current=v;const next={lat:v.center[0],lng:v.center[1]};
+  if(metres(initialPoint.current,next)>1)setChosen(true);
+  setPoint(p=>({...p,...next}));if(venue&&metres(venue,next)>2)setAtVenue(false);
+ };
+ const native=useRef<{updateWaypoints:(points:unknown[])=>void}|null>(null);
+ useEffect(()=>{
+  let disposed=false;let release:(()=>void)|undefined;let unmount:(()=>void)|undefined;
+  void acquirePinnedMapModule().then(acquired=>{
+   release=acquired.release;if(disposed||!mapNode.current){release();return;}
+   const handle=acquired.module.mountMapPicker(mapNode.current,{initialView:camera.current,waypoints:pointRef.current,accent:waypointColor,onReady:()=>setReady(true),onView:(v:MapView)=>viewCallback.current(v),onError:(message:string)=>{setReady(false);setMapError(message);}});
+   map.current=handle;native.current=handle;unmount=handle.unmount;
+  }).catch(error=>{if(!disposed)setMapError(error instanceof Error?error.message:'Map could not load.');});
+  return()=>{disposed=true;unmount?.();release?.();map.current=null;native.current=null;};
+ },[]);
+ useEffect(()=>{native.current?.updateWaypoints(points);},[points]);
  const keepExpiry=Boolean(value?.keepUntil && !durationChanged);
  const status=!ready?"Loading map…":waypoints.isPending?"Checking nearby waypoints…":!chosen?"Choose a spot before saving.":null;
  const close=()=>{if(!saving)onCancel();};
  return createPortal(<dialog ref={dialog} className="board-pin-picker" aria-labelledby="pin-picker-title" aria-describedby="pin-picker-help" onCancel={e=>{e.preventDefault();close();}} onKeyDown={e=>{if(e.key==="Escape")e.stopPropagation();}}>
-   <MapzCanvas ref={map} onEscape={close} rows={rows} selected={null} labelsEnabled viewTime={viewTime} initialCamera={camera.current} onSelect={()=>{}} onBoot={()=>setReady(true)} onView={v=>{
-     camera.current={center:v.center,zoom:v.zoom,pitch:v.pitch,bearing:v.bearing,bounds:v.bounds};
-     const next={lat:v.center[0],lng:v.center[1]};
-     if(metres(initialPoint.current,next)>1)setChosen(true);
-     setPoint(p=>({...p,...next}));
-     if(venue && metres(venue,next)>2)setAtVenue(false);
-   }} />
+   <div ref={mapNode} className="board-pin-picker__native" style={{position:"absolute",inset:0}}/>
    <div className="board-pin-picker__heading"><h2 id="pin-picker-title">Place your pin</h2><button type="button" disabled={saving} onClick={close}>Cancel</button></div>
    <div className="board-pin-picker__target pdx-glass-rebind" aria-hidden="true"><BoardPushPin postKey="placement-preview"/><span>+</span></div>
    <div className="board-pin-picker__controls">
@@ -71,6 +85,7 @@ export default function BoardMapPicker({value,housing=false,maxDays=14,renewal=f
     </div>
     <div className="board-pin-picker__feedback">
      {waypoints.isError?<p role="alert">Nearby waypoints couldn’t load. <button type="button" onClick={()=>void waypoints.refetch()}>Retry</button></p>:outside?<p role="alert">{housing?"Choose a point from the Portland metro area through Salem.":"Choose a point in the Portland metro area."}</p>:blocked?<p role="status">Move a little farther from the existing waypoint.</p>:status?<p role="status">{status}</p>:null}
+     {mapError && <p role="alert">{mapError}</p>}
      {error && <p role="alert">{error}</p>}
     </div>
     <button className="board-pin-picker__confirm" type="button" disabled={saving || !ready || !chosen || !waypoints.isSuccess || blocked || outside} onClick={()=>onConfirm({...target,days,venueId:atVenue?venue?.venueId:null,keepUntil:keepExpiry?value?.keepUntil:undefined})}>{saving?"Saving…":confirmLabel}</button>

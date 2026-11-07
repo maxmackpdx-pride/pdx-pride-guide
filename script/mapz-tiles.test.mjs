@@ -54,21 +54,16 @@ test('Mapz retries the 3D renderer without a retired 2D architecture',()=>{
  assert.match(bootLoader,/>Reload map<\/button>/);
 });
 
-test('Mapz browsing is public while posting and private views require authentication',()=>{
- // One public host outside the Switch keeps the same scene across both route aliases.
- assert.match(app,/<RetainedMapzRoute \/>[\s\S]*<RouteBoundary>[\s\S]*<Switch>/);
- for(const path of ['/map','/map-demo'])assert.ok(app.includes(`<Route path="${path}">{() => null}</Route>`));
- assert.match(retainedHost,/const active = isMapzRoute\(path\)/);
- assert.ok(retainedHost.includes("lazyWithReload(() => import('@/pages/MapzMapDemo'))"));
- assert.match(retainedHost,/<MapzPage key=\{generation\} \/>/);
- assert.doesNotMatch(retainedHost,/SignedIn|if\s*\(\s*!user\s*\)\s*return/);
- assert.doesNotMatch(app,/SignedInLivingMap/);
- assert.doesNotMatch(page,/gateSignedOutControls|canOpenMapObjects/);
- assert.match(page,/if\(!user\)\{setShowAuth\(true\);return;\}/);
- assert.match(page,/user && composeWorld && <MapComposerOverlay/);
- assert.match(page,/user && houzCompose && <HousingComposerOverlay/);
- assert.match(page,/!authLoading && !user && requestedPrivateAction/);
- assert.match(page,/<AuthModal onClose=\{\(\) => setShowAuth\(false\)\} defaultTab="login" \/>/);
+test('Mapz browsing is public while the native release authenticates private adult content',async()=>{
+ for(const path of ['/map','/map-demo'])assert.ok(app.includes(`<Route path="${path}" component={UnifiedMap} />`));
+ const unified=await readFile(new URL('../client/src/pages/UnifiedMap.tsx',import.meta.url),'utf8');
+ const gate=await readFile(new URL('../server/mapSocialRoutes.ts',import.meta.url),'utf8');
+ assert.match(unified,/module.mount/);
+ assert.doesNotMatch(unified,/if\s*\(\s*!user\s*\)\s*return/);
+ assert.match(unified,/AuthModal/);
+ assert.match(gate,/current.signedIn/);
+ assert.match(gate,/state.adultOptIn/);
+ assert.doesNotMatch(app,/SignedInLivingMap|<RetainedMapzRoute/);
 });
 
 test('Mapz opens the shared board card shell and preserves demo reply guards',()=>{

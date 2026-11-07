@@ -18,7 +18,27 @@ permissions:
   contents: read
 
 jobs:
+  map-rollback-tag:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Preserve pre-launch production rollback
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ref = 'tags/pre-five-mode-map-v1.0.0-20261107';
+            const sha = '4bc990e0599ca5629d1336767c0452d1cd3b33a9';
+            const repo = {owner: context.repo.owner, repo: context.repo.repo};
+            let current;
+            try { current = (await github.rest.git.getRef({...repo, ref})).data; }
+            catch (error) { if (error.status !== 404) throw error; }
+            if (current && current.object.sha !== sha) throw new Error('Pre-launch rollback tag does not match recorded production baseline');
+            if (!current) await github.rest.git.createRef({...repo, ref: 'refs/' + ref, sha});
+            core.info('Verified rollback ' + ref + ' -> ' + sha);
+
   deploy:
+    needs: map-rollback-tag
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -38,6 +58,9 @@ jobs:
 
       - name: Deployment verification regression tests
         run: node --test script/verify-live-deployment.test.mjs
+
+      - name: Unified map source, host and social-gate regressions
+        run: node --import tsx --test script/map-release.test.mjs client/src/lib/mapBookmarks.test.ts client/src/lib/mapHostTokens.test.ts server/mapSocialContent.test.ts server/mapSocialRoutes.test.ts
 
       - name: Pre-ship design and bundle guards
         run: npm run ship
