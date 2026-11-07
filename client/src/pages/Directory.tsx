@@ -451,7 +451,9 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   const subcategoryOptions = useMemo(() => {
     if (isSpaces) return [];
     if (outzideActive) return outzideSubcategoryOptions(outzidePlaces);
-    return directorySubcategoryOptions(visibleBusinesses, activeType.split(","));
+    const options = directorySubcategoryOptions(visibleBusinesses, activeType.split(","));
+    const adultCount = visibleBusinesses.filter(b => activeType.split(",").includes(b.type) && directorySubcategories(b).some(tag => ['adult-social','adult-retail','kink-gear'].includes(tag.id))).length;
+    return adultCount ? [{id:'adult',label:'Adult · 18+',count:adultCount},...options] : options;
   }, [isSpaces, outzideActive, outzidePlaces, visibleBusinesses, activeType]);
   const subcategoryReady = !outzideActive || outzideFetched;
   const selectedSubcategory = subcategoryReady && !subcategoryOptions.some(option => option.id === activeSubcategory) ? "ALL" : activeSubcategory;
@@ -466,7 +468,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       .filter(b => {
         if (!matchesPlaceDiscoveryRegion(b,discoveryRegion)) return false;
         if (activeType !== "ALL" && !activeType.split(",").includes(b.type)) return false;
-        if (selectedSubcategory !== 'ALL' && !directorySubcategories(b).some(tag => tag.id === selectedSubcategory)) return false;
+        if (selectedSubcategory !== 'ALL' && !directorySubcategories(b).some(tag => selectedSubcategory === 'adult' ? ['adult-social','adult-retail','kink-gear'].includes(tag.id) : tag.id === selectedSubcategory)) return false;
         if (activeNeighborhood !== "ALL" && browseNeighborhood(b.neighborhood) !== browseNeighborhood(activeNeighborhood)) return false;
         if (q) {
           const haystack = [
@@ -588,7 +590,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
           <BoardShareButton title="Placez" path="/directory" />
           <button type="button" className="eb-tool pdx-glass-rebind" aria-label="Add a place" onClick={openAddForm}><Plus size={18} /><span>Add a place</span></button>
         </BrowseHeader>
-        <PlacezDiscoveryIntro region={discoveryRegion} quiet={Boolean(calmMode || reducedMotion)} onChoose={id=>{setActiveType(id);setActiveSubcategory('ALL');setBrowseView('grid');setSearchQuery('');}} onRegion={setDiscoveryRegion} onSurprise={()=>{const candidates=filtered.length?filtered:visibleBusinesses;if(candidates.length)openPlace(candidates[Math.floor(Math.random()*candidates.length)]);}} onFeature={()=>{const museum=visibleBusinesses.find(biz=>/portland art museum/i.test(biz.name));if(museum)openPlace(museum);else{setActiveType('venue');setActiveSubcategory('ALL');setBrowseView('grid');requestAnimationFrame(()=>document.getElementById('placez-results')?.scrollIntoView({behavior:calmMode||reducedMotion?'instant':'smooth'}));}}} />
+        <PlacezDiscoveryIntro region={discoveryRegion} quiet={Boolean(calmMode || reducedMotion)} onChoose={id=>{setActiveType(id==='adult'?'venue,shop':id);setActiveSubcategory(id==='adult'?'adult':'ALL');setActiveNeighborhood('ALL');setBrowseView('grid');setSearchQuery('');}} onRegion={setDiscoveryRegion} onSurprise={()=>{const candidates=filtered.length?filtered:visibleBusinesses;if(candidates.length)openPlace(candidates[Math.floor(Math.random()*candidates.length)]);}} onFeature={()=>{const museum=visibleBusinesses.find(biz=>/portland art museum/i.test(biz.name));if(museum)openPlace(museum);else{setActiveType('venue');setActiveSubcategory('ALL');setBrowseView('grid');requestAnimationFrame(()=>document.getElementById('placez-results')?.scrollIntoView({behavior:calmMode||reducedMotion?'instant':'smooth'}));}}} />
         <div className="eb-frame" id="placez-results">
           <BrowseControls title="Placez" categories={[{id:"ALL",label:"All Placez",color:"var(--neon-cyan)",count:visibleBusinesses.length}, ...categoryBands.map(c => ({id:c.key,label:c.label,color:c.color,count:c.count}))]}
             selected={activeType.split(",")} onSelect={handleSelectCategory} query={searchQuery} onSearch={setSearchQuery} view={browseView} onView={setBrowseView}>
