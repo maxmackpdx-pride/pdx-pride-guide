@@ -594,10 +594,10 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   const rowList = useProgressiveList(rows.length, { initial: 36, step: 36, resetKey: `${categoryIds.join(",")}|${searchQuery}` });
   const selectedCategories = CATEGORIES.filter(c => !categoryIds.length || categoryIds.includes(c.id));
   const renderCard = (row: Row) => <div key={row.community?.id || row.org.name} className="eb-original-card">
-    <RoomDiscoveryCard room="needz" name={RESOURCE_CARD_CAPTIONS[row.org.name] ?? row.org.name} category={row.category.name}
-      accent={/food|pantr|meal/i.test(row.org.name)?"var(--neon-orange)":row.category.id==="community"?"var(--neon-cyan)":"var(--neon-red)"}
+    <RoomDiscoveryCard room="needz" name={RESOURCE_CARD_CAPTIONS[row.org.name] ?? row.org.name} category={(row.sectionCategory ?? row.category).name}
+      accent={(row.sectionCategory ?? row.category).color}
       logo={serviceArtwork(row.org,row.org.logo,true)} fallback={<Mark org={row.org} allowArtwork={false} iconOnly/>}
-      description={row.org.desc} tags={[row.category.name,...(row.org.serviceTags || [])]} meta={row.org.scope}
+      description={row.org.desc} tags={[(row.sectionCategory ?? row.category).name,...(row.org.serviceTags || [])]} meta={row.org.scope}
       href={resourceMapHref(row.org.name,row.community?.slug)} onOpen={()=>openDetail(row)}
       heart={<HeartButton kind="resource" refId={row.org.name} snapshot={{title:row.org.name,subtitle:row.category.name,href:resourceMapHref(row.org.name,row.community?.slug)}}/>}/>
   </div>;
