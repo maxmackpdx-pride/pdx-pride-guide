@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 const root=resolve(import.meta.dirname,'..');
 export function validateMapRelease(lock){
- if(lock.repository!=='maxmackpdx-pride/zaylist-maps'||lock.tag!=='v1.0.0'||!/^\/[a-z0-9/.-]+\/$/.test(lock.base)||lock.base!==`/map-assets/${lock.tag}/`||!/^[a-f0-9]{40}$/.test(lock.commit)||!/^[a-f0-9]{64}$/.test(lock.sha256))throw Error('Map release lock must name the exact tagged source commit and archive SHA-256');
+ if(lock.repository!=='maxmackpdx-pride/zaylist-maps'||!/^v1\.0\.\d+$/.test(lock.tag)||!/^\/[a-z0-9/.-]+\/$/.test(lock.base)||lock.base!==`/map-assets/${lock.tag}/`||!/^[a-f0-9]{40}$/.test(lock.commit)||!/^[a-f0-9]{64}$/.test(lock.sha256))throw Error('Map release lock must name the exact tagged source commit and archive SHA-256');
  for(const [name,value] of Object.entries({'react':'19.3.1','maplibre-gl':'6.16.0','@vis.gl/react-maplibre':'8.1.3','vite':'8.3.5'}))if(lock.stack?.[name]!==value)throw Error(`Map release stack mismatch: ${name}`);
  if(!validEntry(lock.entry)||!lock.entry.endsWith('.js')||!Array.isArray(lock.styles)||!lock.styles.length||lock.styles.some(name=>!validEntry(name)||!name.endsWith('.css')))throw Error('Invalid map entry or styles');
  if(lock.archive!==`vendor/zaylist-maps/${lock.tag}.tar.gz`)throw Error('Invalid map release archive path');
@@ -14,7 +14,7 @@ export function validateMapRelease(lock){
 function validEntry(name){return typeof name==='string'&&/^[a-zA-Z0-9_./-]+$/.test(name)&&!name.startsWith('/')&&!name.split('/').includes('..');}
 export function prepareMapRelease(output=join(root,'dist/public')){
  const lock=validateMapRelease(JSON.parse(readFileSync(join(root,'shared/mapReleaseLock.json'),'utf8')));
- const archive=lock.archiveParts?join(root,'.local','map-release-v1.0.0.tar.gz'):join(root,lock.archive);
+ const archive=lock.archiveParts?join(root,'.local',`map-release-${lock.tag}.tar.gz`):join(root,lock.archive);
  if(lock.archiveParts){mkdirSync(join(root,'.local'),{recursive:true});writeFileSync(archive,Buffer.concat(lock.archiveParts.map(file=>readFileSync(join(root,file)))));}
  const hash=createHash('sha256').update(readFileSync(archive)).digest('hex');
  if(hash!==lock.sha256)throw Error('Pinned map release archive checksum does not match lock');

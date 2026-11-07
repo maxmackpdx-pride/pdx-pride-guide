@@ -75,6 +75,19 @@ export function serveStatic(app: Express) {
     app.get(from, (_req, res) => res.redirect(302, to));
   }
 
+  // Retired standalone bookmarks now resolve to the one native map system.
+  // Data, images, shared helpers and destination-detail URLs are not redirected.
+  for(const prefix of ['/mapz-map','/outzide-map']){
+    app.get([prefix,prefix+'/',prefix+'/index.html'],(req,res)=>{
+      const query=new URL(req.originalUrl,'https://www.zaylist.com').searchParams;
+      if(query.has('guestPlace')&&!query.has('place'))query.set('place',query.get('guestPlace')!);
+      query.delete('guestPlace');
+      const target=prefix==='/mapz-map'?'/map':'/outzide';
+      if(prefix==='/mapz-map'&&!query.has('mode'))query.set('mode','mapz');
+      res.redirect(308,target+(query.size?'?'+query.toString():''));
+    });
+  }
+
   // Serve injected HTML for the homepage - express.static would bypass SEO injection.
   app.get("/", sendSeoIndex);
   app.get("/index.html", sendSeoIndex);

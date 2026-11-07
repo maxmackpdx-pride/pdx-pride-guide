@@ -1,3 +1,4 @@
+import {preserveMapDocument} from '@/lib/preserveMapDocument';
 import { acquireBoardMapPicker } from "@/lib/boardMapPickerActivity";
 import { withinHousingBounds } from "@shared/housing";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -55,12 +56,13 @@ export default function BoardMapPicker({value,housing=false,maxDays=14,renewal=f
  const native=useRef<{updateWaypoints:(points:unknown[])=>void}|null>(null);
  useEffect(()=>{
   let disposed=false;let release:(()=>void)|undefined;let unmount:(()=>void)|undefined;
+  const restoreDocument=preserveMapDocument();
   void acquirePinnedMapModule().then(acquired=>{
    release=acquired.release;if(disposed||!mapNode.current){release();return;}
    const handle=acquired.module.mountMapPicker(mapNode.current,{initialView:camera.current,waypoints:pointRef.current,accent:waypointColor,onReady:()=>setReady(true),onView:(v:MapView)=>viewCallback.current(v),onError:(message:string)=>{setReady(false);setMapError(message);}});
    map.current=handle;native.current=handle;unmount=handle.unmount;
   }).catch(error=>{if(!disposed)setMapError(error instanceof Error?error.message:'Map could not load.');});
-  return()=>{disposed=true;unmount?.();release?.();map.current=null;native.current=null;};
+  return()=>{disposed=true;unmount?.();release?.();restoreDocument();map.current=null;native.current=null;};
  },[]);
  useEffect(()=>{native.current?.updateWaypoints(points);},[points]);
  const keepExpiry=Boolean(value?.keepUntil && !durationChanged);
