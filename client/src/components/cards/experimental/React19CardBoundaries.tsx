@@ -1,4 +1,4 @@
-import { memo, useDeferredValue, useMemo, type ReactNode } from "react";
+import { useDeferredValue, useMemo, type ReactNode } from "react";
 
 /**
  * Experimental, opt-in React 19 rendering boundaries.
@@ -18,7 +18,7 @@ export function useDeferredCardCollection<T extends CardRecord>(
   query: string,
   matches: (record: T, normalizedQuery: string) => boolean,
 ): { records: readonly T[]; metrics: CardRenderMetrics } {
-  const normalizedQuery = query.trim().toLocaleLowerCase();
+  "use memo";\n  const normalizedQuery = query.trim().toLocaleLowerCase();
   const deferredQuery = useDeferredValue(normalizedQuery);
   const filtered = useMemo(
     () => deferredQuery ? records.filter(record => matches(record, deferredQuery)) : records,
@@ -41,9 +41,9 @@ export type CardSurfaceProps<T extends CardRecord> = {
 
 /** React can skip a stable item when its record and renderer are unchanged. */
 function CardSurfaceInner<T extends CardRecord>({ record, render }: CardSurfaceProps<T>) {
-  return <>{render(record)}</>;
+  "use memo";\n  return <>{render(record)}</>;
 }
-export const ExperimentalCardSurface = memo(CardSurfaceInner) as typeof CardSurfaceInner;
+export const ExperimentalCardSurface = CardSurfaceInner;
 
 export type CardCollectionProps<T extends CardRecord> = {
   records: readonly T[];
@@ -55,7 +55,7 @@ export type CardCollectionProps<T extends CardRecord> = {
 export function ExperimentalCardCollection<T extends CardRecord>({
   records, render, empty = null,
 }: CardCollectionProps<T>) {
-  if (records.length === 0) return <>{empty}</>;
+  "use memo";\n  if (records.length === 0) return <>{empty}</>;
   return <>{records.map(record =>
     <ExperimentalCardSurface key={record.id} record={record} render={render} />
   )}</>;
