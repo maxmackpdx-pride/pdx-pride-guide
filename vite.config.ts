@@ -21,7 +21,7 @@ const flightBase = `/assets/home-flight-${flightHash.digest("hex").slice(0, 16)}
 export default defineConfig(({ command }):UserConfig => {
  return ({
   plugins: [
-    react(),
+    react({\n      babel: {\n        plugins: [["babel-plugin-react-compiler", { compilationMode: "annotation" }]],\n      },\n    }),
     {
       name: "version-home-flight-assets",
       apply: "build",
