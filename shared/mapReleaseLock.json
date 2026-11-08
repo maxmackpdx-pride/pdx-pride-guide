@@ -1,13 +1,13 @@
 {
   "repository": "maxmackpdx-pride/zaylist-maps",
-  "tag": "v1.0.6",
-  "commit": "d286e5c1bdf42a423bc5e449be9b05e4c43c1be9",
-  "archive": "vendor/zaylist-maps/v1.0.6.tar.gz",
-  "sha256": "cb1faa120c87cf847915061bf00b36d34f6b499b149ed5149fc7acf1b5f5907b",
-  "base": "/map-assets/v1.0.6/",
+  "tag": "v1.0.7",
+  "commit": "f33b20a604506a6f31828751258656e008ddb678",
+  "archive": "vendor/zaylist-maps/v1.0.7.tar.gz",
+  "sha256": "24d812bb5d9f5483f53fd88514f06d4d482fc698c259f62860ed11bc198e17a6",
+  "base": "/map-assets/v1.0.7/",
   "entry": "map.js",
   "styles": [
-    "assets/map-vmBXbZG0.css"
+    "assets/map-C21QCdjf.css"
   ],
   "stack": {
     "react": "19.3.1",
@@ -16,23 +16,23 @@
     "vite": "8.3.5"
   },
   "archiveParts": [
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part000",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part001",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part002",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part003",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part004",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part005",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part006",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part007",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part008",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part009",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part010",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part011",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part012",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part013",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part014",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part015",
-    "vendor/zaylist-maps/v1.0.6.tar.gz.part016"
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part000",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part001",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part002",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part003",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part004",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part005",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part006",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part007",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part008",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part009",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part010",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part011",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part012",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part013",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part014",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part015",
+    "vendor/zaylist-maps/v1.0.7.tar.gz.part016"
   ],
   "rollbackTag": "pre-five-mode-map-v1.0.0-20261107",
   "rollbackCommit": "4bc990e0599ca5629d1336767c0452d1cd3b33a9",
@@ -41,6 +41,6 @@
     "define": {
       "process.env.NODE_ENV": "\"production\""
     },
-    "sourceTag": "v1.0.6"
+    "sourceTag": "v1.0.7"
   }
 }
