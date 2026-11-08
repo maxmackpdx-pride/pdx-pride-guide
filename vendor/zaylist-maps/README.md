@@ -1,15 +1,15 @@
 # Pinned map release artifact
 
-`v1.0.9.tar.gz` is the immutable build of maxmackpdx-pride/zaylist-maps tag v1.0.9.
+`v1.0.10.tar.gz` is the immutable build of maxmackpdx-pride/zaylist-maps tag v1.0.10.
 The exact source commit, bundle entry and SHA-256 are locked in shared/mapReleaseLock.json.
-The ordinary site build verifies and extracts it to /map-assets/v1.0.9/.
+The ordinary site build verifies and extracts it to /map-assets/v1.0.10/.
 No runtime fetch of an unpinned latest branch is permitted. No private address notes
 or captured user data are included. This archive is installed only once the source
 release is tagged and its corresponding build is verified.
 
 The deterministic release archive is stored as ordered 2 MiB parts to keep connector uploads bounded. Build reassembles the exact bytes and verifies the full SHA-256 before extraction. Parts are never selected via latest/main.
 
-Browser-target compilation of the exact tagged source uses the explicit Vite define `process.env.NODE_ENV = "production"`. The v1.0.9 source configuration includes this define; the native ESM browser must not depend on a global Node process shim. Reproduce after checking out the exact lock commit and `npm ci`:
+Browser-target compilation of the exact tagged source uses the explicit Vite define `process.env.NODE_ENV = "production"`. The v1.0.10 source configuration includes this define; the native ESM browser must not depend on a global Node process shim. Reproduce after checking out the exact lock commit and `npm ci`:
 
 ```sh
 node --import tsx --input-type=module -e 'import {build} from "vite"; await build({configFile:"vite.release.config.ts",define:{"process.env.NODE_ENV":JSON.stringify("production")}})'
@@ -33,3 +33,5 @@ v1.0.7 fixes the map cards and drawer on phones: closed Mapz and Boardz cards ar
 v1.0.8 refines all five map modes with more legible map labels and selections, outdoor activity imagery, a monochrome Afterz palette and selected demo lighting, paper neighborhood labels for Boardz, and clearer ZayDark entry states. Existing demo and source boundaries remain in place.
 
 v1.0.9 aligns the place category accent colors with the kit-assigned waypoint colors: venue moves from cyan to violet, cafe from green to Afterz Yellow, service from violet to cyan, and shop from yellow to cyan. Bar, restaurant, hotel and adult already matched the kit and are unchanged; healthcare is unchanged pending a separate ruling. The v1.0.8 parts remain in this folder for rollback.
+
+v1.0.10 restores the Outzide landscape treatment that v1.0.8 muted: water returns from the muted teal to the deep-navy luminous token, Outzide place labels return from pale near-white to the guide sage, and a selected Outzide waypoint's label again renders in its assigned accent colour instead of white. Contour emphasis from v1.0.8 is retained. The v1.0.9 parts remain in this folder for rollback.
