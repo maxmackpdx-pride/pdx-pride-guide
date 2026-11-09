@@ -85,11 +85,6 @@
   .eb-page--places .eb-lane:only-child { width:100%; }
   .eb-page--places .eb-lane:only-child .events-rail { grid-template-columns:repeat(auto-fill,var(--eb-card-width)); }
   .eb-page .eb-lane:not(.eb-lane--open) .events-rail__item:nth-child(n+5) { display: none; }
-  /* The shared 200px tall-card contract is !important. On narrow two-track
-     Placez browse layouts the closed face must fit its actual track width. */
-  .eb-page--places .eb-original-card .rg-directory-card[data-card-size="tall"] {
-    width: min(100%, var(--card-tall-width)) !important;
-  }
   .eb-page .events-rail-arrow { display: none; }
   .eb-mobile-filter-toggle { display: none; }
   .eb-grid { grid-template-columns: repeat(auto-fill, var(--eb-card-width)); }
@@ -219,6 +214,11 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: transparent; }
   .eb-page .eb-lane .events-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 10px; overflow: visible; scroll-snap-type: none; align-items: start; }
   .eb-page .events-rail__item,
   .eb-page .eb-original-card { width: 100%; min-width: 0; }
+  /* The shared 200px tall-card contract is !important. On narrow two-track
+     Placez browse layouts the closed face must fit its actual track width. */
+  .eb-page--places .eb-original-card .rg-directory-card[data-card-size="tall"] {
+    width: min(100%, var(--card-tall-width)) !important;
+  }
   .eb-page .events-rail-arrow { display: none; }
   .eb-page--places .eb-original-card .rg-directory-card { height: auto; min-height: var(--eb-card-height); }
   .eb-page--places .eb-original-card .rg-directory-card > .pdxPlace__body { min-height: var(--eb-card-height); }
