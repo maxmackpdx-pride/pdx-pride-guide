@@ -66,6 +66,8 @@ jobs:
           git push origin HEAD:experiment/react19-card-render-boundaries
       - name: Install with frozen lockfile
         run: npm ci --include=dev
+      - name: Syntax-check optimized profiling fixture
+        run: node --check script/react-production-like-card-profile-browser.test.mjs
       - name: Verify compiler is performing real transforms
         run: node script/react-compiler-smoke.mjs
       - name: Verify actual Vite app card-only Compiler scope
