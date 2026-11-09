@@ -1,0 +1,44 @@
+name: Mobile discovery audit
+on:
+  push:
+    branches: [audit/mobile-discovery-2026-11-09]
+  pull_request:
+    paths:
+      - script/mobile-discovery-audit.mjs
+      - script/board-save-accessibility-browser.test.mjs
+      - client/src/components/board/punk/PunkBoardCard.jsx
+      - client/src/components/board/punk/ZineCard.jsx
+      - .github/workflows/mobile-discovery-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mobile-discovery-audit-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.22.2"
+          cache: npm
+      - run: npm ci --include=dev
+      - run: npm run typecheck
+      - run: npx playwright install --with-deps chromium
+      - name: Verify Boardz save labels and toggles
+        id: save
+        run: node --test script/board-save-accessibility-browser.test.mjs
+      - name: Capture live mobile journeys without writes
+        if: always() && steps.save.outcome != 'skipped'
+        run: node script/mobile-discovery-audit.mjs
+      - name: Save screenshots and measured results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-discovery-evidence
+          path: artifacts/mobile-discovery
+          if-no-files-found: warn
+          retention-days: 14
