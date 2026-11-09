@@ -88,3 +88,5 @@ jobs:
         run: node --test --test-concurrency=1 script/react-compiler-comparison-browser.test.mjs
       - name: Check card expansion and motion
         run: node --test --test-concurrency=1 script/card-api-browser.test.mjs script/card-route-browser.test.mjs script/motion-runtime-browser.test.mjs
+      - name: Check real card route expansion with scoped Compiler enabled
+        run: CARD_ROUTE_QA_COMPILER=1 node --test --test-concurrency=1 script/card-route-browser.test.mjs
