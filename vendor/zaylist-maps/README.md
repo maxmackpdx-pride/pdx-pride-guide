@@ -1,15 +1,15 @@
 # Pinned map release artifact
 
-`v1.0.13.tar.gz` is the immutable build of maxmackpdx-pride/zaylist-maps tag v1.0.13.
+`v1.0.14.tar.gz` is the immutable build of maxmackpdx-pride/zaylist-maps tag v1.0.14.
 The exact source commit, bundle entry and SHA-256 are locked in shared/mapReleaseLock.json.
-The ordinary site build verifies and extracts it to /map-assets/v1.0.13/.
+The ordinary site build verifies and extracts it to /map-assets/v1.0.14/.
 No runtime fetch of an unpinned latest branch is permitted. No private address notes
 or captured user data are included. This archive is installed only once the source
 release is tagged and its corresponding build is verified.
 
 The deterministic release archive is stored as ordered 2 MiB parts to keep connector uploads bounded. Build reassembles the exact bytes and verifies the full SHA-256 before extraction. Parts are never selected via latest/main.
 
-Browser-target compilation of the exact tagged source uses the explicit Vite define `process.env.NODE_ENV = "production"`. The v1.0.13 source configuration includes this define; the native ESM browser must not depend on a global Node process shim. Reproduce after checking out the exact lock commit and `npm ci`:
+Browser-target compilation of the exact tagged source uses the explicit Vite define `process.env.NODE_ENV = "production"`. The v1.0.14 source configuration includes this define; the native ESM browser must not depend on a global Node process shim. Reproduce after checking out the exact lock commit and `npm ci`:
 
 ```sh
 node --import tsx --input-type=module -e 'import {build} from "vite"; await build({configFile:"vite.release.config.ts",define:{"process.env.NODE_ENV":JSON.stringify("production")}})'
@@ -41,3 +41,5 @@ v1.0.11 moves the mode switcher back to the top of the map as floating chrome, r
 v1.0.12 gates the Worlds Dial to a visitor's first arrival only: the seen flag persists, returning visits land straight in the map, and deep links never consumed the first visit. Mode icons change to a folded-map glyph for Mapz and a cyan push pin on black for Boardz. Outzide waypoints now resolve their accent from the guide kind table (beach cyan, stay magenta, winter violet, day-use acid yellow, water kinds cyan, atv red) instead of stale per-record fields; the minor-road grid and neighbourhood labels are hidden in Outzide only; topographic contours are roughly twice as wide in token Safety Orange #FF7B00. The Mapz drawer is simplified to search, filters and a link to the Eventz page — the glance summary and teaser card list are gone — and it remains exactly one scroll field. The v1.0.11 parts remain in this folder for rollback.
 
 v1.0.13 fixes the Outzide street suppression on the OpenFreeMap fallback style: its minor-road layer is named highway_minor, which the v1.0.12 matcher missed, so fallback sessions kept the residential grid (CARTO bridge/tunnel minor roads are covered too). Highway shields now render on both provider styles — neither style draws them, so they are built from the tiles' own route data (shield_text/network on CARTO, route refs on OpenFreeMap) as upright canvas shields. Contours are raised again to decisively bold widths (index 3.0px at z12, minors 1.4px, at least 1.8px across the z9-10 metro band) in token Safety Orange. The Outzide drawer header shows a loading state instead of a fabricated 0 destinations while the catalog fetch is in flight. The v1.0.12 parts remain in this folder for rollback.
+
+v1.0.14 completes the Outzide street-fabric removal: the road lines were already suppressed in v1.0.13 (verified against the assembled styles — zero minor-road features render on either provider style), but the grid still read as present on OpenFreeMap-fallback sessions because that style's `building` fill keeps its provider fill-outline-color (rgb(27,27,29)) through the app's palette repaint, tiling every block with building-footprint outlines. The provider footprint fills (building, building-top) are now suppressed in Outzide only, through the same save/restore mechanism as the road layers, and return in every other mode. Contours are raised again with margin over the rendered targets — index ~3.8px and minors ~1.9px at the z13.5 working framing, index ~2.8px at the z9.6 metro framing — pixel-measured in before/after captures, still solely token Safety Orange #FF7B00. The v1.0.13 parts remain in this folder for rollback.
