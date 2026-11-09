@@ -1,5 +1,6 @@
 import { defineConfig, type UserConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 import fs from "node:fs";
@@ -21,7 +22,9 @@ const flightBase = `/assets/home-flight-${flightHash.digest("hex").slice(0, 16)}
 export default defineConfig(({ command }):UserConfig => {
  return ({
   plugins: [
-    react({\n      babel: {\n        plugins: [["babel-plugin-react-compiler", { compilationMode: "annotation" }]],\n      },\n    }),
+    react(),
+    // Compiler stays annotation-only until profiler and regression gates pass.
+    babel({ presets: [reactCompilerPreset({ compilationMode: "annotation" })] }),
     {
       name: "version-home-flight-assets",
       apply: "build",
