@@ -1,15 +1,15 @@
 # Pinned map release artifact
 
-`v1.0.11.tar.gz` is the immutable build of maxmackpdx-pride/zaylist-maps tag v1.0.11.
+`v1.0.12.tar.gz` is the immutable build of maxmackpdx-pride/zaylist-maps tag v1.0.12.
 The exact source commit, bundle entry and SHA-256 are locked in shared/mapReleaseLock.json.
-The ordinary site build verifies and extracts it to /map-assets/v1.0.11/.
+The ordinary site build verifies and extracts it to /map-assets/v1.0.12/.
 No runtime fetch of an unpinned latest branch is permitted. No private address notes
 or captured user data are included. This archive is installed only once the source
 release is tagged and its corresponding build is verified.
 
 The deterministic release archive is stored as ordered 2 MiB parts to keep connector uploads bounded. Build reassembles the exact bytes and verifies the full SHA-256 before extraction. Parts are never selected via latest/main.
 
-Browser-target compilation of the exact tagged source uses the explicit Vite define `process.env.NODE_ENV = "production"`. The v1.0.11 source configuration includes this define; the native ESM browser must not depend on a global Node process shim. Reproduce after checking out the exact lock commit and `npm ci`:
+Browser-target compilation of the exact tagged source uses the explicit Vite define `process.env.NODE_ENV = "production"`. The v1.0.12 source configuration includes this define; the native ESM browser must not depend on a global Node process shim. Reproduce after checking out the exact lock commit and `npm ci`:
 
 ```sh
 node --import tsx --input-type=module -e 'import {build} from "vite"; await build({configFile:"vite.release.config.ts",define:{"process.env.NODE_ENV":JSON.stringify("production")}})'
@@ -37,3 +37,5 @@ v1.0.9 aligns the place category accent colors with the kit-assigned waypoint co
 v1.0.10 restores the Outzide landscape treatment that v1.0.8 muted: water returns from the muted teal to the deep-navy luminous token, Outzide place labels return from pale near-white to the guide sage, and a selected Outzide waypoint's label again renders in its assigned accent colour instead of white. Contour emphasis from v1.0.8 is retained. The v1.0.9 parts remain in this folder for rollback.
 
 v1.0.11 moves the mode switcher back to the top of the map as floating chrome, rebuilt as Expanding Icons: icon-only circles where only the active mode expands into a pill revealing its label, tinted in its mode colour. The Mapz hologram layout solver's top inset is now chrome-aware, measured live from the rendered header and switcher edges, so no plaque can render under the chrome. Bare arrivals at /map are met by the Worlds Dial entry moment — a glowing globe with the five worlds as nodes on circuit traces; picking a node enters that world, and deep links with ?mode= still land directly in their mode with no dial detour. The drawer returns to pure discovery and remains exactly one scroll field. The v1.0.10 parts remain in this folder for rollback.
+
+v1.0.12 gates the Worlds Dial to a visitor's first arrival only: the seen flag persists, returning visits land straight in the map, and deep links never consumed the first visit. Mode icons change to a folded-map glyph for Mapz and a cyan push pin on black for Boardz. Outzide waypoints now resolve their accent from the guide kind table (beach cyan, stay magenta, winter violet, day-use acid yellow, water kinds cyan, atv red) instead of stale per-record fields; the minor-road grid and neighbourhood labels are hidden in Outzide only; topographic contours are roughly twice as wide in token Safety Orange #FF7B00. The Mapz drawer is simplified to search, filters and a link to the Eventz page — the glance summary and teaser card list are gone — and it remains exactly one scroll field. The v1.0.11 parts remain in this folder for rollback.
