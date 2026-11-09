@@ -11,6 +11,7 @@ on:
       - "script/react-compiler-smoke.mjs"
       - "script/react-card-profile-browser.test.mjs"
       - "script/react-compiler-comparison-browser.test.mjs"
+      - "script/react-production-card-compiler-comparison.test.mjs"
       - "script/fixtures/react-compiler-card-benchmark.tsx"
       - "script/fixtures/card-api-browser.tsx"
       - "script/node-runtime.test.mjs"
@@ -76,6 +77,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Profile existing production card components (baseline)
         run: node --test --test-concurrency=1 script/react-card-profile-browser.test.mjs
+      - name: Compare actual production card rendering with and without Compiler
+        run: node --test --test-concurrency=1 script/react-production-card-compiler-comparison.test.mjs
       - name: Compare compiled and uncompiled experimental card renders
         run: node --test --test-concurrency=1 script/react-compiler-comparison-browser.test.mjs
       - name: Check card expansion and motion
