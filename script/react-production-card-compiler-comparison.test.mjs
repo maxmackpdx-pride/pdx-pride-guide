@@ -90,6 +90,12 @@ async function sample(browser,mode,t) {
         assert.deepEqual(compiledFaces,cardFaceModules,
           'Card-scoped infer must transform each real face renderer, not just the wrapper');
         const excluded=[
+          '/client/src/components/cards/NeedzCard.tsx',
+          '/client/src/components/cards/OutzCard.tsx',
+          '/client/src/components/cards/CardAPI.tsx',
+          '/client/src/components/cards/react19Card.tsx',
+          '/client/src/components/cards/cardLayout.ts',
+          '/client/src/components/cards/experimental/React19CardBoundaries.tsx',
           '/client/src/components/discovery/EventzBrowse.tsx',
           '/client/src/components/VenueFollowButton.tsx',
           '/client/src/components/PlaceModal.tsx',

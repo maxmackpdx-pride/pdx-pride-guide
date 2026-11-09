@@ -20,6 +20,12 @@ const inScope=[
  ...cardFaceModules.map(face=>'components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx')),
 ];
 const outOfScope=[
+ 'components/cards/NeedzCard.tsx',
+ 'components/cards/OutzCard.tsx',
+ 'components/cards/CardAPI.tsx',
+ 'components/cards/react19Card.tsx',
+ 'components/cards/cardLayout.ts',
+ 'components/cards/experimental/React19CardBoundaries.tsx',
  'components/discovery/EventzBrowse.tsx',
  'components/VenueFollowButton.tsx',
  'components/PlaceModal.tsx',

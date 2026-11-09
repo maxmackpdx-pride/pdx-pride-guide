@@ -15,9 +15,11 @@ export const cardFaceModules = [
 ];
 
 // Identical to the allowlist measured in PR #69's four-trial Chromium fixture.
-// The cards directory is an intentionally bounded API surface, not the whole app.
+// Only the four measured Eventz/Boardz/Placez card API entry components are in scope.
+// Never infer-compile shared CardAPI, NeedzCard, OutzCard, model/test helpers, or
+// consent/privacy controllers through a wildcard directory rule.
 export const cardSourcePatterns = [
-  /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/].*\.[jt]sx?$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:EventCard|BoardCard|PlaceCard|ZaylistCard)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]discovery[\\/]PlaceDiscoveryCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventRailCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventFlyerArt\.tsx$/,
