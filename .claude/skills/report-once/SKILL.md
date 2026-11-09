@@ -1,9 +1,12 @@
 ---
 name: report-once
-description: Stop after the asked result is reported. Use when a task result, merge SHA, or deploy outcome is already in the chat. No second confirmation, log appendix, or extra watch.
+description: Cursor only. Stop after the asked result is reported. Use when a task result, merge SHA, or deploy outcome is already in the chat. No second confirmation, log appendix, or extra watch.
 ---
 
 # Report once
+
+This skill's usage limits apply only to Cursor. Other agents follow their normal
+workflow and the shared rules in `AGENTS.md`.
 
 When the result the user asked for is already in the chat, stop.
 

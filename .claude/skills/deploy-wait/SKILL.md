@@ -1,9 +1,12 @@
 ---
 name: deploy-wait
-description: Wait on CI or a Railway deploy with one check at the decision point. Use when a pull request, required check, or Deploy to Railway run is in flight. No polling and no pending status pings.
+description: Cursor only. Wait on CI or a Railway deploy with one check at the decision point. Use when a pull request, required check, or Deploy to Railway run is in flight. No polling and no pending status pings.
 ---
 
 # Deploy wait
+
+This skill's usage limits apply only to Cursor. Other agents follow their normal
+workflow and the shared rules in `AGENTS.md`.
 
 Use this whenever a deploy is waiting on GitHub checks or Railway. Usage is the constraint. Pending time is not a reason to keep looking.
 
