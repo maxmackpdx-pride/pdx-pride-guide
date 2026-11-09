@@ -1,4 +1,4 @@
-/** Matched browser profiling of actual Eventz/Boardz React 19 card components.
+/** Matched browser profiling of actual Eventz/Boardz/Placez React 19 card components.
  * An isolated fixture compares React Compiler disabled vs heuristic (infer) mode.
  * It never changes production Vite settings, card code, API data or live traffic.
  */
@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
+import {createHash} from 'node:crypto';
 import {createServer} from 'vite';
 import react,{reactCompilerPreset} from '@vitejs/plugin-react';
 import babel from '@rolldown/plugin-babel';
@@ -48,7 +49,7 @@ async function sample(browser,compiled,t) {
     await server.listen();
     await server.warmupRequest('/'+fixture);
     const results=[];
-    for(const family of ['event','board']) {
+    for(const family of ['event','board','place']) {
       const context=await browser.newContext({viewport:{width:1280,height:900},reducedMotion:'reduce'});
       try {
         await context.route('**/api/**',route=>{
@@ -83,6 +84,7 @@ async function sample(browser,compiled,t) {
         results.push({
           family,mode:compiled?'compiler-infer':'uncompiled',
           cards:before.length,parentUpdates:5,profilerCommits:commits.length,
+          contentFingerprint:createHash('sha256').update(JSON.stringify(before)).digest('hex').slice(0,16),
           totalActualDurationMs:Number(commits.reduce((n,c)=>n+c.actualDurationMs,0).toFixed(3)),
           totalBaseDurationMs:Number(commits.reduce((n,c)=>n+c.baseDurationMs,0).toFixed(3)),
         });
@@ -92,18 +94,27 @@ async function sample(browser,compiled,t) {
   }finally{await server.close();}
 }
 
-test('same real Eventz and Boardz cards are intact with React Compiler enabled',{timeout:300000},async t=>{
+test('matched real Eventz, Boardz and Placez cards render identically with Compiler enabled',{timeout:300000},async t=>{
   const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   try{
-    const without=await sample(browser,false,t);
-    const withCompiler=await sample(browser,true,t);
-    for(let i=0;i<without.length;i++){
-      assert.equal(withCompiler[i].family,without[i].family,'Must compare matching card families');
-      assert.equal(withCompiler[i].cards,without[i].cards,'Card count must not change');
+    // Reverse the execution order in the second pair to reduce browser warmup bias.
+    const rounds=[];
+    for(const [round,compiled] of [[1,false],[1,true],[2,true],[2,false]]){
+      rounds.push({round,compiled,results:await sample(browser,compiled,t)});
+    }
+    const reference=rounds[0].results;
+    for(const trial of rounds){
+      assert.equal(trial.results.length,reference.length,'Must compare the same card families');
+      for(let i=0;i<reference.length;i++){
+        assert.equal(trial.results[i].family,reference[i].family,'Must compare matching card families');
+        assert.equal(trial.results[i].cards,6,'Must render six top-level production cards');
+        assert.equal(trial.results[i].contentFingerprint,reference[i].contentFingerprint,
+          `${trial.results[i].family}: Compiler or trial changed visible card output`);
+      }
     }
     console.log('REACT_REAL_CARD_COMPILER_COMPARISON '+JSON.stringify({
-      browser:browser.version(),without,withCompiler,
-      note:'Diagnostic timings only; not a statistically powered production speedup claim.',
+      browser:browser.version(),rounds,
+      note:'Exploratory dev-server timings over five parent updates per trial. Two matched pairs, reversed order. Not a production speedup claim.',
     }));
   }finally{await browser.close();}
 });
