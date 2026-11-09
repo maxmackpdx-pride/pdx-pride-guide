@@ -29,7 +29,7 @@ function Fixture(){
  const [saved,setSaved] = useState<number[]>([]);
  const [profileTick,setProfileTick] = useState(0);
  // Test-only profiling hook. No production card or DOM layout changes.
- useEffect(()=>{const tick=()=>setProfileTick(t=>t+1);window.addEventListener('zaylist-card-profile-tick',tick);return()=>window.removeEventListener('zaylist-card-profile-tick',tick);},[]);
+ useEffect(()=>{const tick=()=>setProfileTick(t=>t+1);window.addEventListener('zaylist-card-profile-tick',tick);(window as any).__zayCardProfileListenerReady=true;return()=>{window.removeEventListener('zaylist-card-profile-tick',tick);delete (window as any).__zayCardProfileListenerReady;};},[]);
  const save=(id:number)=>setSaved(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
  return <><h1>Production card layout regression</h1><output hidden data-profile-tick>{profileTick}</output><React.Profiler id="production-card-grid" onRender={(_id,phase,actualDuration,baseDuration)=>{const measurements=((window as any).__zayCardRenderProfile??=[]);measurements.push({phase,actualDurationMs:actualDuration,baseDurationMs:baseDuration,tick:profileTick});}}><div id="qa-grid" style={{display:layout.startsWith('flex')?'flex':'grid',flexWrap:'wrap',gridTemplateColumns:layout==='fluid'?`repeat(3,minmax(${width}px,1fr))`:`repeat(3, ${width}px)`,gap:24,alignItems:'start',justifyContent:'start',width:layout==='fluid'?1100:width*3+48,maxWidth:'100%',position:'relative','--qa-card-width':`${width}px`} as React.CSSProperties}>
  {places.map((id,i)=>{
