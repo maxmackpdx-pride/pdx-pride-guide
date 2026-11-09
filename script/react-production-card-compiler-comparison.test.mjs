@@ -13,6 +13,7 @@ import react,{reactCompilerPreset} from '@vitejs/plugin-react';
 import babel from '@rolldown/plugin-babel';
 import {chromium} from 'playwright';
 import sharp from 'sharp';
+import {cardFaceModules,cardSourcePatterns,cardCompilerExcludedPatterns} from './react-compiler-card-scope.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const fixture='script/fixtures/card-api-browser.tsx';
@@ -22,27 +23,6 @@ const fixture='script/fixtures/card-api-browser.tsx';
 // Only these exact components are included, not page routes, auth, modal, Mapz,
 // or consent UI. The profiling parent remains deliberately uncompiled.
 // The fixture parent remains uncompiled so its updates cannot be memoized away.
-const cardFaceModules=[
-  'events/EventRailCard',
-  'events/EventFlyerArt',
-  'home/TonightEventCard',
-  'board/BoardBrowseCard',
-  'board/punk/PunkBoardCard',
-  'board/punk/ZineCard',
-  'home/TodayLocationCard',
-];
-const cardSourcePatterns=[
-  /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/].*\.[jt]sx?$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]discovery[\\/]PlaceDiscoveryCard\.tsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventRailCard\.tsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventFlyerArt\.tsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]home[\\/]TonightEventCard\.tsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]BoardBrowseCard\.tsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]punk[\\/]PunkBoardCard\.jsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]punk[\\/]ZineCard\.jsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]home[\\/]TodayLocationCard\.tsx$/,
-];
-
 // Keep the profiling parent fixture uncompiled. Otherwise the Compiler could
 // cache its children and produce a misleading "card optimization" result.
 
@@ -58,7 +38,7 @@ async function sample(browser,mode,t) {
     optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},
     plugins:[
       react(),
-      ...(compiled?[babel({presets:[reactCompilerPreset({compilationMode:compilerMode})],...(scoped?{include:cardSourcePatterns}:{}),exclude:[/[\\/]node_modules[\\/]/,/\x00rolldown\/runtime\.js/ ,/[\\/]script[\\/]fixtures[\\/]/]})]:[]),
+      ...(compiled?[babel({presets:[reactCompilerPreset({compilationMode:compilerMode})],...(scoped?{include:cardSourcePatterns}:{}),exclude:cardCompilerExcludedPatterns})]:[]),
       {name:'real-card-profile-html',configureServer(vite){vite.middlewares.use(async(req,res,next)=>{
         if(!req.url?.startsWith('/__real-card-compiler-profile'))return next();
         const html=await vite.transformIndexHtml(req.url,
