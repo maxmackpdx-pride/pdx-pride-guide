@@ -21,16 +21,18 @@ const near=(a,b,message)=>assert.ok(Math.abs(a-b)<=1.1,`${message}: ${a} vs ${b}
 const overlaps=(a,b)=>Math.min(a.x+a.width,b.x+b.width)-Math.max(a.x,b.x)>1 && Math.min(a.y+a.height,b.y+b.height)-Math.max(a.y,b.y)>1;
 async function snapshot(page){return page.locator('#qa-grid').evaluate(grid=>[...grid.children].filter(el=>el.getBoundingClientRect().width>0).map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));}
 async function settled(page){await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.waitForTimeout(450);}
-// WebKit may finish a horizontal scroll or late font/layout pass after the
-// first boundingBox read. Never compare an unstable closed position to an open
-// one: demand several consecutive steady samples without widening geometry QA.
-async function stableCardBox(locator){
+// Playwright's boundingBox x coordinate differs from DOM getBoundingClientRect
+// by 10px in Linux WebKit on this route. Compare *both* card states in the same
+// DOM viewport coordinate system; still require stable geometry and <=1.1px
+// anchor parity. This does not hide an actual visual displacement.
+const domCardRect=locator=>locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};});
+async function stableDomCardRect(locator){
  const page=locator.page();
  await page.evaluate(async()=>{await document.fonts.ready;});
  let previous=null,steady=0;
  for(let attempt=0;attempt<24;attempt++){
   await page.waitForTimeout(120);
-  const current=await locator.boundingBox();
+  const current=await domCardRect(locator);
   assert.ok(current,'Card must remain measurable while layout settles');
   if(previous&&['x','y','width','height'].every(k=>Math.abs(current[k]-previous[k])<=0.5))steady++;
   else steady=0;
@@ -71,7 +73,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  const selector=kind==='resources'?'.rd-card[data-card-category="needz"]':'.boardz-production-card';
  await page.locator(selector).first().waitFor({timeout:30000});
  await page.locator(selector).first().scrollIntoViewIfNeeded();await settled(page);
- const before=await stableCardBox(page.locator(selector).first());
+ const before=await stableDomCardRect(page.locator(selector).first());
  const beforeMeta=await page.locator(selector).first().evaluate(el=>({scrollY:window.scrollY,top:el.getBoundingClientRect().top,parentTop:el.parentElement.getBoundingClientRect().top,margin:getComputedStyle(el).margin,transform:getComputedStyle(el).transform}));
  // Browser engines can disagree about grid intrinsic alignment. Capture both
  // the closed face and its hosting grid so regressions are diagnosed from real
@@ -83,7 +85,8 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
    return {face:info(el),slot:info(slot),grid:info(grid),scrollY:window.scrollY};
  });
  const closedLayout=browserEngine==='webkit'?await layoutProbe():null;
- const immediatelyBeforeClick=await page.locator(selector).first().boundingBox();
+ if(closedLayout){near(closedLayout.face.x,before.x,`${kind}: DOM face origin before click`);near(closedLayout.face.y,before.y,`${kind}: DOM face vertical origin before click`);}
+ const immediatelyBeforeClick=await domCardRect(page.locator(selector).first());
  assert.ok(immediatelyBeforeClick,'Card stays measurable before opening');
  near(immediatelyBeforeClick.x,before.x,`${kind}: stable closed x before click`);
  near(immediatelyBeforeClick.y,before.y,`${kind}: stable closed y before click`);
