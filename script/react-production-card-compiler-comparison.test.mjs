@@ -53,15 +53,22 @@ async function sample(browser,mode,t) {
     await server.listen();
     await server.warmupRequest('/'+fixture);
     if(compiled){
+      // Vite rewrites "react/compiler-runtime" to "react_compiler-runtime"
+      // in dev-server output. Check both rather than reporting false negatives.
+      const isCompiled=code=>/react(?:\/|_)compiler-runtime|useMemoCache|memo_cache_sentinel/.test(code);
       const fixtureCode=await server.transformRequest('/'+fixture);
-      assert.ok(!/react\/compiler-runtime/.test(fixtureCode?.code??''),
+      assert.ok(!isCompiled(fixtureCode?.code??''),
         'Profile harness must remain uncompiled to avoid parent memoization bias');
-      const transformed=[];
+      const transformed=[],probes=[];
       for(const name of ['EventCard','BoardCard','PlaceCard']){
         const module=await server.transformRequest('/client/src/components/cards/'+name+'.tsx');
-        if(/react\/compiler-runtime/.test(module?.code??''))transformed.push(name);
+        const code=module?.code??'';
+        const hit=isCompiled(code);
+        probes.push({name,compiled:hit,bytes:code.length,
+          runtimeReference:code.match(/.{0,40}(?:compiler-runtime|useMemoCache|memo_cache_sentinel).{0,80}/)?.[0]??null});
+        if(hit)transformed.push(name);
       }
-      console.log('COMPILER_PRODUCTION_CARD_MODULES '+JSON.stringify({mode,transformed}));
+      console.log('COMPILER_PRODUCTION_CARD_MODULES '+JSON.stringify({mode,transformed,probes}));
       assert.ok(transformed.length>0,'Compiler did not transform any actual production card module');
     }
     const results=[];
