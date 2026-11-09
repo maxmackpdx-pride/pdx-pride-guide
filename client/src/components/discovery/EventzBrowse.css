@@ -364,9 +364,9 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: transparent; }
   .eb-page--places .eb-lane:only-child .events-rail { justify-content:space-between; }
 }
 
-/* Placez browse renders the 200px tall card shell, not 136px small faces.
-   Match the mobile tracks and their item boxes to that unscaled card width;
-   a narrow phone naturally gets one column instead of overlapping two. */
+/* Compact Placez poster faces keep their 136px tracks. The Directory's
+   RoomDiscoveryCard is a distinct 200px tall face: only its browse rail
+   needs 200px tracks, avoiding the 8px overlap seen on 390px phones. */
 @media (max-width:767px) {
   .eb-page--places .eb-frame {
     padding-left:max(16px,env(safe-area-inset-left,0px));
@@ -374,13 +374,15 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: transparent; }
   }
   .eb-page--places .eb-grid,
   .eb-page--places .eb-lane .events-rail {
-    grid-template-columns:repeat(auto-fill,var(--card-tall-width,200px));
+    grid-template-columns:repeat(auto-fill,var(--card-small-width,136px));
     justify-content:space-between;
     column-gap:16px;
     padding-inline:0;
   }
-  .eb-page--places .eb-original-card,
-  .eb-page--places .events-rail__item {
+  .eb-page.rd-page.eb-page--places .eb-lane .events-rail {
+    grid-template-columns:repeat(auto-fill,var(--card-tall-width,200px));
+  }
+  .eb-page.rd-page.eb-page--places .events-rail__item:not([data-card-expanded="true"]) {
     width:var(--card-tall-width,200px);
     max-width:100%;
   }
