@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { Link } from "wouter";
-import { Home, MapPin, Moon, Mountain, Shield } from "lucide-react";
+import { Home, Map, Moon, Mountain, Pin } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import "./MobileWorldFan.css";
 
 export type WorldFanMode = "mapz" | "outzide" | "afterz" | "boardz" | "zaydark";
@@ -10,8 +11,7 @@ type World = {
   label: string;
   descriptor: string;
   accent: string;
-  paper?: boolean;
-  Icon: typeof Shield;
+  Icon: LucideIcon;
   x: string;
   y: number;
   delay: number;
@@ -20,12 +20,17 @@ type World = {
 // The fan keeps the Worlds Dial's own arrangement and words: ZayDark and
 // Afterz at the low ends of the arc, Boardz and Outzide mid-arc, Mapz at the
 // crown above the MAPZ dock button it is anchored to. Descriptors mirror the
-// maps app's Dial tags verbatim. Accents are the mode colours; Boardz coral
-// has no site token yet, so it is the one literal (#FF5F6D, the kit value).
+// maps app's Dial tags verbatim. Node icons follow Tucker's fan rulings:
+// Mapz is the folded map (magenta kept); Boardz is a cyan push pin on the
+// standard black glass disc. The open animation is adapted from the
+// "Radial Menu" pattern by @kanchanasw on 21st.dev
+// (https://21st.dev/@kanchanasw/components/radial-menu) — a semicircular
+// arc fan with spring-pop nodes and a centre-out stagger — re-expressed
+// in MobileWorldFan.css with Zaylist tokens and iconography.
 const WORLDS: World[] = [
   { mode: "zaydark", label: "ZayDark", descriptor: "ON YOUR TERMS", accent: "var(--neon-red)", Icon: Moon, x: "9%", y: 0, delay: 84 },
-  { mode: "boardz", label: "Boardz", descriptor: "MADE OF COMMUNITY", accent: "#FF5F6D", paper: true, Icon: MapPin, x: "29.5%", y: 30, delay: 42 },
-  { mode: "mapz", label: "Mapz", descriptor: "THE CITY AFTER DARK", accent: "var(--neon-magenta)", Icon: Shield, x: "50%", y: 54, delay: 0 },
+  { mode: "boardz", label: "Boardz", descriptor: "MADE OF COMMUNITY", accent: "var(--neon-cyan)", Icon: Pin, x: "29.5%", y: 30, delay: 42 },
+  { mode: "mapz", label: "Mapz", descriptor: "THE CITY AFTER DARK", accent: "var(--neon-magenta)", Icon: Map, x: "50%", y: 54, delay: 0 },
   { mode: "outzide", label: "Outzide", descriptor: "TAKE THE LONG WAY", accent: "var(--neon-orange)", Icon: Mountain, x: "70.5%", y: 30, delay: 42 },
   { mode: "afterz", label: "Afterz", descriptor: "A LIGHT LEFT ON", accent: "var(--yellow)", Icon: Home, x: "91%", y: 0, delay: 84 },
 ];
@@ -94,7 +99,7 @@ export default function MobileWorldFan({ open, onClose, onNavigate }: {
             <Link
               key={world.mode}
               href={`/map?mode=${world.mode}`}
-              className={`wf-node${world.paper ? " wf-node--paper" : ""}`}
+              className="wf-node"
               style={{
                 "--wf-x": world.x,
                 "--wf-y": `${world.y}px`,
