@@ -12,28 +12,28 @@ import {cardFaceModules,cardSourcePatterns} from './react-compiler-card-scope.mj
 const root=path.resolve(import.meta.dirname,'..');
 const compilerMarker=/react(?:\/|_)compiler-runtime|useMemoCache|memo_cache_sentinel/;
 const inScope=[
- 'cards/EventCard.tsx',
- 'cards/BoardCard.tsx',
- 'cards/PlaceCard.tsx',
- 'cards/ZaylistCard.tsx',
- 'discovery/PlaceDiscoveryCard.tsx',
- ...cardFaceModules.map(face=>face+(face.startsWith('board/punk/')?'.jsx':'.tsx')),
+ 'components/cards/EventCard.tsx',
+ 'components/cards/BoardCard.tsx',
+ 'components/cards/PlaceCard.tsx',
+ 'components/cards/ZaylistCard.tsx',
+ 'components/discovery/PlaceDiscoveryCard.tsx',
+ ...cardFaceModules.map(face=>'components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx')),
 ];
 const outOfScope=[
- 'discovery/EventzBrowse.tsx',
- 'VenueFollowButton.tsx',
- 'PlaceModal.tsx',
- '../context/AuthContext.tsx',
- '../pages/Directory.tsx',
- '../pages/Boards.tsx',
+ 'components/discovery/EventzBrowse.tsx',
+ 'components/VenueFollowButton.tsx',
+ 'components/PlaceModal.tsx',
+ 'context/AuthContext.tsx',
+ 'pages/Directory.tsx',
+ 'pages/Boards.tsx',
 ];
 
 for(const file of inScope){
- const absolute=path.join(root,'client/src/components',file);
+ const absolute=path.join(root,'client/src',file);
  assert.ok(cardSourcePatterns.some(pattern=>pattern.test(absolute)),`Expected card renderer not allowlisted: ${file}`);
 }
 for(const file of outOfScope){
- const absolute=path.join(root,'client/src/components',file);
+ const absolute=path.join(root,'client/src',file);
  assert.ok(cardSourcePatterns.every(pattern=>!pattern.test(absolute)),`Unsafe compiler scope includes: ${file}`);
 }
 
@@ -46,7 +46,7 @@ try{
  const inspected=[];
  for(const [files,expected] of [[inScope,true],[outOfScope,false]]){
   for(const file of files){
-   const url='/src/components/'+file;
+   const url='/src/'+file;
    const transformed=await server.transformRequest(url);
    assert.ok(transformed?.code,`Vite did not transform ${url}`);
    const compiled=compilerMarker.test(transformed.code);
