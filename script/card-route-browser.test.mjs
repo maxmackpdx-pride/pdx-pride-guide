@@ -44,7 +44,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  for(const kind of focus?[]:['resources','boards']){
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`${base}__route-qa/${kind}?layout=grid`,{waitUntil:'networkidle'});await settled(page);
- const selector=kind==='resources'?'.rg-directory-card[data-card-category="needz"]':'.boardz-production-card';
+ const selector=kind==='resources'?'.rd-card[data-card-category="needz"]':'.boardz-production-card';
  await page.locator(selector).first().waitFor({timeout:30000});
  await page.locator(selector).first().scrollIntoViewIfNeeded();await settled(page);
  const before=await page.locator(selector).first().boundingBox();
@@ -66,7 +66,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  for(const width of focus?[]:[1280,390]){
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width,height:1000});
- await page.goto(`${base}__route-qa/directory?layout=grid`,{waitUntil:'networkidle'});await settled(page);
+ await page.goto(`${base}__route-qa/directory?type=ALL&layout=grid`,{waitUntil:'networkidle'});await settled(page);
  const cards=page.locator('.eb-grid .pdxPlace[data-card-size]');await cards.first().waitFor();
  const boxes=await cards.evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
  const expected=width===390?{width:136,height:170}:{width:200,height:403};
@@ -95,8 +95,8 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  for(const kind of ['directory','resources'])for(const width of [1280,390]){
  if(focus&&focus!==`${kind}/${width}`)continue;
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width,height:1000});
- await page.goto(`${base}__route-qa/${kind}`,{waitUntil:'networkidle'});await settled(page);
- assert.ok(!new URL(page.url()).searchParams.has('layout'),'Default Directory does not force grid');
+ await page.goto(`${base}__route-qa/${kind}${kind==='directory'?'?type=ALL&layout=browse':'?layout=browse'}`,{waitUntil:'networkidle'});await settled(page);
+ assert.equal(new URL(page.url()).searchParams.get('layout'),'browse','Explicit browse layout is preserved');
  const lane=kind==='directory'?page.locator('.eb-lane').filter({has:page.locator('.pdxPlace__name',{hasText:'QA Cafe 1'})}):page.locator('.eb-lane:has(.events-rail__item:nth-child(5))').first();
  const cards=lane.locator('.pdxPlace[data-card-size]');await cards.first().waitFor();
  const closedFaces=await cards.evaluateAll(els=>els.filter(el=>el.getBoundingClientRect().width&&getComputedStyle(el.closest('.events-rail__item')).display!=='none').map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
@@ -138,7 +138,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  await mobileContext.route('**/api/**',mockApi);await mobileContext.route('**/outzide-map/places.json*',route=>route.fulfill({json:{places:[]}}));
  for(const width of [320,390,430])for(const layout of ['browse','grid']){
  page=await mobileContext.newPage();page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width,height:1000});
- await page.goto(`${base}__route-qa/directory${layout==='grid'?'?layout=grid':''}`,{waitUntil:'networkidle'});await settled(page);
+ await page.goto(`${base}__route-qa/directory?type=ALL&layout=${layout}`,{waitUntil:'networkidle'});await settled(page);
  const collection=layout==='grid'?page.locator('.eb-grid'):page.locator('.eb-lane').filter({has:page.locator('.pdxPlace__name',{hasText:'QA Cafe 1'})}).locator('.events-rail');
  const cards=collection.locator('.pdxPlace[data-card-size="small"]');await cards.first().waitFor();
  const documentBox=async locator=>locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});
