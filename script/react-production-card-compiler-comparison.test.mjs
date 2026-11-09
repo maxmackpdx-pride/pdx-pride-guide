@@ -16,6 +16,18 @@ import {chromium} from 'playwright';
 const root=path.resolve(import.meta.dirname,'..');
 const fixture='script/fixtures/card-api-browser.tsx';
 
+// Keep the profiling parent fixture uncompiled. Otherwise the Compiler could
+// cache its children and produce a misleading "card optimization" result.
+function productionComponentPreset() {
+  const preset=reactCompilerPreset({compilationMode:'infer'});
+  const existing=preset.rolldown.filter.id.exclude;
+  preset.rolldown.filter.id.exclude=[
+    ...(Array.isArray(existing)?existing:existing?[existing]:[]),
+    '**/script/fixtures/**',
+  ];
+  return preset;
+}
+
 async function sample(browser,compiled,t) {
   const cacheDir=await mkdtemp(path.join(tmpdir(),compiled?'zay-real-compiler-':'zay-real-uncompiled-'));
   t.after(()=>rm(cacheDir,{recursive:true,force:true}));
@@ -25,7 +37,7 @@ async function sample(browser,compiled,t) {
     optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},
     plugins:[
       react(),
-      ...(compiled?[babel({presets:[reactCompilerPreset({compilationMode:'infer'})]})]:[]),
+      ...(compiled?[babel({presets:[productionComponentPreset()]})]:[]),
       {name:'real-card-profile-html',configureServer(vite){vite.middlewares.use(async(req,res,next)=>{
         if(!req.url?.startsWith('/__real-card-compiler-profile'))return next();
         const html=await vite.transformIndexHtml(req.url,
@@ -48,6 +60,18 @@ async function sample(browser,compiled,t) {
   try {
     await server.listen();
     await server.warmupRequest('/'+fixture);
+    if(compiled){
+      const fixtureCode=await server.transformRequest('/'+fixture);
+      assert.ok(!/react\/compiler-runtime/.test(fixtureCode?.code??''),
+        'Profile harness must remain uncompiled to avoid parent memoization bias');
+      const transformed=[];
+      for(const name of ['EventCard','BoardCard','PlaceCard']){
+        const module=await server.transformRequest('/client/src/components/cards/'+name+'.tsx');
+        if(/react\/compiler-runtime/.test(module?.code??''))transformed.push(name);
+      }
+      console.log('COMPILER_PRODUCTION_CARD_MODULES '+JSON.stringify({transformed}));
+      assert.ok(transformed.length>0,'Compiler did not transform any actual production card module');
+    }
     const results=[];
     for(const family of ['event','board','place']) {
       const context=await browser.newContext({viewport:{width:1280,height:900},reducedMotion:'reduce'});
