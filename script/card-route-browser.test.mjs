@@ -67,8 +67,10 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  const mockApi=route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});if(p==='/api/directory')return route.fulfill({json:businesses});if(/^\/api\/directory\/\d+$/.test(p)){const business=businesses.find(item=>item.id===Number(p.split('/').pop()));return route.fulfill({status:business?200:404,json:business?{...business,description:`Fresh detail for ${business.name}`}:{error:'Not found'}});}if(p==='/api/housing')return route.fulfill({json:{posts:[]}});if(p.startsWith('/api/gifting'))return route.fulfill({json:p==='/api/gifting'?gifts:gifts[0]});return route.fulfill({json:[]});};
  await context.route('**/api/**',mockApi);
  let page;const errors=[];const focus=process.env.CARD_ROUTE_QA_FOCUS;
- for(const kind of focus==='grid-resources'?['resources']:focus?[]:['resources','boards']){
+ // Isolated route probes distinguish cross-route WebKit renderer failures from card-specific regressions.
+ for(const kind of focus==='grid-resources'?['resources']:focus==='grid-boards'?['boards']:focus?[]:['resources','boards']){
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
+ page.on('crash',()=>console.error(`CARD_ROUTE_BROWSER_PAGE_CRASH ${browserEngine} ${kind}`));
  await page.goto(`${base}__route-qa/${kind}?layout=grid`,{waitUntil:'networkidle'});await settled(page);
  const selector=kind==='resources'?'.rd-card[data-card-category="needz"]':'.boardz-production-card';
  await page.locator(selector).first().waitFor({timeout:30000});
