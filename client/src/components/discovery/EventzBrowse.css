@@ -214,6 +214,10 @@ html.calm-mode .eb-controls { backdrop-filter: none; background: transparent; }
   .eb-page .eb-lane .events-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 10px; overflow: visible; scroll-snap-type: none; align-items: start; }
   .eb-page .events-rail__item,
   .eb-page .eb-original-card { width: 100%; min-width: 0; }
+  /* The 200px tall-card contract is !important; fit the actual mobile track. */
+  .eb-page--places .eb-original-card .rg-directory-card[data-card-size="tall"] {
+    width: min(100%, var(--card-tall-width)) !important;
+  }
   .eb-page .events-rail-arrow { display: none; }
   .eb-page--places .eb-original-card .rg-directory-card { height: auto; min-height: var(--eb-card-height); }
   .eb-page--places .eb-original-card .rg-directory-card > .pdxPlace__body { min-height: var(--eb-card-height); }
