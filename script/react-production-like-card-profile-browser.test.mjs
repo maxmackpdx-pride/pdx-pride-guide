@@ -37,12 +37,11 @@ async function makeBuiltFixture(compiled,t){
       })]:[]),
     ],
     resolve:{alias:[
-      // React 19 disables onRender in ordinary optimized production bundles.
-      // Its dedicated profiling build retains callbacks without dev-only behavior.
-      {find:/^react-dom\\/client$/,replacement:'react-dom/profiling'},
-      {find:/^@\\/$/,replacement:path.join(root,'client/src')+'/'},
-      {find:/^@shared\\/$/,replacement:path.join(root,'shared')+'/'},
-      {find:/^@assets\\/$/,replacement:path.join(root,'attached_assets')+'/'},
+      // The profiling renderer is used only in this isolated production build.
+      {find:'react-dom/client',replacement:'react-dom/profiling'},
+      {find:'@shared',replacement:path.join(root,'shared')},
+      {find:'@assets',replacement:path.join(root,'attached_assets')},
+      {find:'@',replacement:path.join(root,'client/src')},
     ]},
     define:{
       __OUTZIDE_ASSETS__:JSON.stringify({script:'/outzide-map/app.js',maplibre:'/home-flight/vendor/maplibre-gl-5.6.2.js',maplibreCss:'/home-flight/vendor/maplibre-gl-5.6.2.css'}),
@@ -82,7 +81,7 @@ async function measure(browser,url,mode,family){
     const snapshot=()=>page.locator('#qa-grid > *').evaluateAll(elements=>elements.map(element=>({
       category:(element.matches('[data-card-category]')?element:element.querySelector('[data-card-category]'))?.getAttribute('data-card-category'),
       size:(element.matches('[data-card-size]')?element:element.querySelector('[data-card-size]'))?.getAttribute('data-card-size'),
-      text:element.textContent?.replace(/\\s+/g,' ').trim(),
+      text:element.textContent?.replace(/\s+/g,' ').trim(),
     })));
     const before=await snapshot();
     assert.equal(before.length,6,mode+'/'+family+': expected six actual cards');
