@@ -16,15 +16,18 @@ import {chromium} from 'playwright';
 const root=path.resolve(import.meta.dirname,'..');
 const fixture='script/fixtures/card-api-browser.tsx';
 
-// A bounded infer experiment including the actual dedicated card faces, not
-// merely the thin EventCard/BoardCard/PlaceCard wrappers. Keep the exact face
-// allowlist outside page routes, authentication, modal, Mapz, and consent UI.
+// A bounded infer experiment including the actual dedicated card faces and
+// Boardz artwork renderers, not merely thin EventCard/BoardCard/PlaceCard wrappers.
+// Only these exact components are included, not page routes, auth, modal, Mapz,
+// or consent UI. The profiling parent remains deliberately uncompiled.
 // The fixture parent remains uncompiled so its updates cannot be memoized away.
 const cardFaceModules=[
   'events/EventRailCard',
   'events/EventFlyerArt',
   'home/TonightEventCard',
   'board/BoardBrowseCard',
+  'board/punk/PunkBoardCard',
+  'board/punk/ZineCard',
   'home/TodayLocationCard',
 ];
 const cardSourcePatterns=[
@@ -34,6 +37,8 @@ const cardSourcePatterns=[
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventFlyerArt\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]home[\\/]TonightEventCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]BoardBrowseCard\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]punk[\\/]PunkBoardCard\.jsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]punk[\\/]ZineCard\.jsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]home[\\/]TodayLocationCard\.tsx$/,
 ];
 
@@ -98,7 +103,7 @@ async function sample(browser,mode,t) {
           'Card-scoped infer must transform all three real card components');
         const compiledFaces=[];
         for(const face of cardFaceModules){
-          const module=await server.transformRequest('/client/src/components/'+face+'.tsx');
+          const module=await server.transformRequest('/client/src/components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx'));
           if(isCompiled(module?.code??''))compiledFaces.push(face);
         }
         assert.deepEqual(compiledFaces,cardFaceModules,
