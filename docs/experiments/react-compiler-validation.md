@@ -29,5 +29,10 @@ The benchmark:
 
 Duration measurements are diagnostic, not a guaranteed speedup percentage. A lower render-call count does not replace real Placez, Eventz, Boardz and Needz performance traces on representative devices.
 
+## Matched real-card comparison (added; CI pending)
+The additional `script/react-production-card-compiler-comparison.test.mjs` uses the **actual** `ZaylistCard` Eventz and Boardz components from the existing card API fixture. It loads matched fixture data twice in Chromium: React 19 without Compiler, and React 19 with the supported `reactCompilerPreset({compilationMode:'infer'})` in an isolated Vite test server. Both modes perform five identical parent-state updates, compare the six-card DOM category/size/text snapshots before and after updates, and record React Profiler durations and commit counts. This is a separate, more exploratory mode than the opt-in annotation-only production experiment.
+
+It does not claim a speedup, alter runtime assets, or enable infer-mode compilation in the application. Browser rendering is noisy; investigate any change in DOM, errors, or unusual timings before promoting a compiler optimization. Actual device measurements and regression gates still apply. The additional CI check has **not** yet passed when this note was written.
+
 ## Adoption gate
 Complete CI browser regressions, confirm matched baseline/Compiler comparison, profile representative **actual production pages** on a consistent browser/network/device, then rerun typecheck, Mapz/platform regressions, build, bundle validation, keyboard/focus/reduced-motion checks, and physical iPhone gestures. Only merge measurable beneficial changes after review. No CI result authorizes skipping production release gates, and no Mapz frontend/backend change is in scope.
