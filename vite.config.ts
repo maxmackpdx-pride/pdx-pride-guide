@@ -5,6 +5,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 import fs from "node:fs";
 import { createHash } from "node:crypto";
+import { cardSourcePatterns, cardCompilerExcludedPatterns } from "./script/react-compiler-card-scope.mjs";
 
 // Fingerprint the independent homepage flyover. The five-mode engine uses a separately pinned release.
 const flightSource = path.resolve(import.meta.dirname, "client/public/home-flight");
@@ -23,8 +24,15 @@ export default defineConfig(({ command }):UserConfig => {
  return ({
   plugins: [
     react(),
-    // Compiler stays annotation-only until profiler and regression gates pass.
-    babel({ presets: [reactCompilerPreset({ compilationMode: "annotation" })] }),
+    // Experimental production candidate: ONLY the card API and real card-face
+    // renderers measured in the balanced Chromium comparison. Keep pages, auth,
+    // consent, modal controllers, Mapz, and the profiling harness uncompiled.
+    // Release still requires independent browser, visual, and performance gates.
+    babel({
+      presets: [reactCompilerPreset({ compilationMode: "infer" })],
+      include: cardSourcePatterns,
+      exclude: cardCompilerExcludedPatterns,
+    }),
     {
       name: "version-home-flight-assets",
       apply: "build",
