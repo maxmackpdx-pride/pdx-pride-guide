@@ -47,7 +47,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  const mockApi=route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});if(p==='/api/directory')return route.fulfill({json:businesses});if(/^\/api\/directory\/\d+$/.test(p)){const business=businesses.find(item=>item.id===Number(p.split('/').pop()));return route.fulfill({status:business?200:404,json:business?{...business,description:`Fresh detail for ${business.name}`}:{error:'Not found'}});}if(p==='/api/housing')return route.fulfill({json:{posts:[]}});if(p.startsWith('/api/gifting'))return route.fulfill({json:p==='/api/gifting'?gifts:gifts[0]});return route.fulfill({json:[]});};
  await context.route('**/api/**',mockApi);
  let page;const errors=[];const focus=process.env.CARD_ROUTE_QA_FOCUS;
- for(const kind of focus?[]:['resources','boards']){
+ for(const kind of focus==='grid-resources'?['resources']:focus?[]:['resources','boards']){
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`${base}__route-qa/${kind}?layout=grid`,{waitUntil:'networkidle'});await settled(page);
  const selector=kind==='resources'?'.rd-card[data-card-category="needz"]':'.boardz-production-card';
@@ -55,11 +55,23 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  await page.locator(selector).first().scrollIntoViewIfNeeded();await settled(page);
  const before=await page.locator(selector).first().boundingBox();
  const beforeMeta=await page.locator(selector).first().evaluate(el=>({scrollY:window.scrollY,top:el.getBoundingClientRect().top,parentTop:el.parentElement.getBoundingClientRect().top,margin:getComputedStyle(el).margin,transform:getComputedStyle(el).transform}));
+ // Browser engines can disagree about grid intrinsic alignment. Capture both
+ // the closed face and its hosting grid so regressions are diagnosed from real
+ // geometry, not by changing the assertion or its 1.1px tolerance.
+ const layoutProbe=async()=>page.locator(selector).first().evaluate(el=>{
+   const slot=el.closest('.eb-original-card')||el;
+   const grid=slot.parentElement;
+   const info=node=>{if(!node)return null;const r=node.getBoundingClientRect(),c=getComputedStyle(node);return {x:r.x,y:r.y,width:r.width,height:r.height,style:node.getAttribute('style'),margin:c.margin,padding:c.padding,justifySelf:c.justifySelf,justifyContent:c.justifyContent,gridColumn:c.gridColumn,gridTemplateColumns:c.gridTemplateColumns,columnGap:c.columnGap,display:c.display,boxSizing:c.boxSizing,transform:c.transform};};
+   return {face:info(el),slot:info(slot),grid:info(grid),scrollY:window.scrollY};
+ });
+ const closedLayout=browserEngine==='webkit'?await layoutProbe():null;
  if(kind==='resources')await page.locator(selector).first().click({position:{x:80,y:90}});else await page.locator(selector).first().locator('.punk-open-target').click();
  await page.locator('.zay-card-expanded').waitFor({state:'visible'});await settled(page);
+ const hostLocForDiagnostics=()=>page.locator('[data-card-expanded="true"]').evaluate(el=>{const grid=el.parentElement;const info=node=>{if(!node)return null;const r=node.getBoundingClientRect(),c=getComputedStyle(node);return {x:r.x,y:r.y,width:r.width,height:r.height,style:node.getAttribute('style'),margin:c.margin,padding:c.padding,justifySelf:c.justifySelf,justifyContent:c.justifyContent,gridColumn:c.gridColumn,gridTemplateColumns:c.gridTemplateColumns,columnGap:c.columnGap,display:c.display,boxSizing:c.boxSizing,transform:c.transform};};return {slot:info(el),grid:info(grid)};});
  const host=await page.locator('[data-card-expanded="true"]').evaluate(el=>({tag:el.tagName,cls:el.className,parent:el.parentElement.className,rect:{x:el.getBoundingClientRect().x,y:el.getBoundingClientRect().y,width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}}));
  assert.ok(!/eb-page|ab-page|eb-frame/.test(host.cls),`${kind}: selected whole page`);
  console.log(JSON.stringify({kind,before,beforeMeta,scrollY:await page.evaluate(()=>window.scrollY),host}));
+ if(closedLayout)console.log('WEBKIT_GRID_LAYOUT',JSON.stringify({kind,closed:closedLayout,open:await hostLocForDiagnostics()}));
  near(host.rect.x,before.x,`${kind}: first-card left anchor`);
  near(host.rect.y,before.y,`${kind}: first-card top anchor`);
  assert.equal(await page.locator('[aria-modal="true"]:visible').count(),0);
