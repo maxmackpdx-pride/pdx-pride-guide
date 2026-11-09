@@ -10,6 +10,7 @@ on:
       - "client/src/components/cards/experimental/**"
       - "script/react-compiler-smoke.mjs"
       - "script/react-compiler-card-scope.mjs"
+      - "script/react-compiler-card-scope.d.mts"
       - "script/react-compiler-production-scope.mjs"
       - "script/react-card-profile-browser.test.mjs"
       - "script/react-compiler-comparison-browser.test.mjs"
