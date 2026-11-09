@@ -1,0 +1,63 @@
+name: React Compiler experiment validation
+
+on:
+  push:
+    branches:
+      - experiment/react19-card-render-boundaries
+  workflow_dispatch:
+
+# Only the nonproduction experiment branch receives an automatically regenerated
+# lockfile. No deployment or merge is performed by this workflow.
+permissions:
+  contents: write
+
+concurrency:
+  group: react-compiler-experiment
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - name: Checkout experiment branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Use production Node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.22.2"
+          cache: npm
+      - name: Resolve lockfile from official npm registry
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Commit lockfile update to the experiment branch only
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo "Lockfile is already synchronized"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore(experiment): synchronize React Compiler dependency lockfile"
+          git push origin HEAD:experiment/react19-card-render-boundaries
+      - name: Install with frozen lockfile
+        run: npm ci --include=dev
+      - name: Verify compiler is performing real transforms
+        run: node script/react-compiler-smoke.mjs
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Mapz regression suite
+        run: npm run test:mapz
+      - name: Platform regression suite
+        run: npm run test:platform
+      - name: Build with current release lock
+        run: npm run build
+      - name: Verify deployment bundle
+        run: npm run verify:deploy
+      - name: Install browser for card regression tests
+        run: npx playwright install --with-deps chromium
+      - name: Check card expansion and motion
+        run: node --test --test-concurrency=1 script/card-api-browser.test.mjs script/card-route-browser.test.mjs script/motion-runtime-browser.test.mjs
