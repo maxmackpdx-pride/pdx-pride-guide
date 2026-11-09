@@ -12,6 +12,7 @@ import {createServer} from 'vite';
 import react,{reactCompilerPreset} from '@vitejs/plugin-react';
 import babel from '@rolldown/plugin-babel';
 import {chromium} from 'playwright';
+import sharp from 'sharp';
 
 const root=path.resolve(import.meta.dirname,'..');
 const fixture='script/fixtures/card-api-browser.tsx';
@@ -123,7 +124,7 @@ async function sample(browser,mode,t) {
         }));
       }
     }
-    const results=[];
+    const results=[],visuals=[];
     for(const family of ['event','board','place']) {
       const context=await browser.newContext({viewport:{width:1280,height:900},reducedMotion:'reduce'});
       try {
@@ -165,6 +166,15 @@ async function sample(browser,mode,t) {
         }
         assert.ok(commits.every(c=>Number.isFinite(c.actualDurationMs)&&c.actualDurationMs>=0
           &&Number.isFinite(c.baseDurationMs)&&c.baseDurationMs>=0),'Invalid React Profiler duration');
+        // Compare actual rendered pixels, not only card text. Wait for fonts
+        // and images, then disable CSS animations during the screenshot.
+        await page.evaluate(async()=>{
+          await document.fonts.ready;
+          await Promise.all([...document.images].map(image=>image.decode().catch(()=>null)));
+        });
+        const screenshot=await page.locator('#qa-grid').screenshot({animations:'disabled',caret:'hide',scale:'css'});
+        const {data,info}=await sharp(screenshot).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+        visuals.push({family,width:info.width,height:info.height,pixels:data});
         results.push({
           family,mode:compiled?`compiler-${mode}`:'uncompiled',
           cards:before.length,parentUpdates:5,profilerCommits:commits.length,
@@ -174,7 +184,7 @@ async function sample(browser,mode,t) {
         });
       }finally{await context.close();}
     }
-    return results;
+    return {results,visuals};
   }finally{await server.close();}
 }
 
@@ -184,7 +194,8 @@ test('matched real Eventz, Boardz and Placez cards render identically with Compi
     // Four balanced trials put each mode in every execution position once.
     const rounds=[];
     for(const [round,mode] of [[1,'off'],[1,'annotation'],[1,'card-infer'],[1,'infer'],[2,'infer'],[2,'card-infer'],[2,'annotation'],[2,'off'],[3,'annotation'],[3,'infer'],[3,'off'],[3,'card-infer'],[4,'card-infer'],[4,'off'],[4,'infer'],[4,'annotation']]){
-      rounds.push({round,mode,results:await sample(browser,mode,t)});
+      const {results,visuals}=await sample(browser,mode,t);
+      rounds.push({round,mode,results,visuals});
     }
     const reference=rounds[0].results;
     for(const trial of rounds){
@@ -196,9 +207,32 @@ test('matched real Eventz, Boardz and Placez cards render identically with Compi
           `${trial.results[i].family}: Compiler or trial changed visible card output`);
       }
     }
+    // The matching uncompiled sample from the same balanced round is the
+    // screenshot reference. Material image differences fail the release gate.
+    const visualComparisons=[];
+    for(const trial of rounds.filter(item=>item.mode!=='off')){
+      const baseline=rounds.find(item=>item.round===trial.round&&item.mode==='off');
+      assert.ok(baseline,`Missing uncompiled screenshot reference for round ${trial.round}`);
+      for(let index=0;index<trial.visuals.length;index++){
+        const expected=baseline.visuals[index],actual=trial.visuals[index];
+        assert.equal(actual.family,expected.family,'Visual comparison changed card family');
+        assert.equal(actual.width,expected.width,`${actual.family}: screenshot width changed`);
+        assert.equal(actual.height,expected.height,`${actual.family}: screenshot height changed`);
+        assert.equal(actual.pixels.length,expected.pixels.length,'Screenshot channel count changed');
+        let changedPixels=0;
+        for(let pixel=0;pixel<actual.pixels.length;pixel+=4){
+          if(Math.max(...[0,1,2].map(channel=>Math.abs(actual.pixels[pixel+channel]-expected.pixels[pixel+channel])))>16)changedPixels++;
+        }
+        const totalPixels=actual.width*actual.height;
+        const changedRatio=changedPixels/totalPixels;
+        visualComparisons.push({round:trial.round,mode:trial.mode,family:actual.family,changedPixels,totalPixels,changedRatio:Number(changedRatio.toFixed(6))});
+        assert.ok(changedRatio<=0.0025,
+          `${actual.family} ${trial.mode} round ${trial.round}: screenshots differ in ${(changedRatio*100).toFixed(3)}% of pixels (max 0.25%; RGB threshold 16)`);
+      }
+    }
     console.log('REACT_REAL_CARD_COMPILER_COMPARISON '+JSON.stringify({
-      browser:browser.version(),rounds,
-      note:'Exploratory dev-server timings over five parent updates per trial. Four order-balanced trials for each mode; each requested update must have a Profiler callback. The annotation case matches experimental Vite, while card-infer limits infer to card API and an exact allowlist of existing card face renderers. These measurements do not establish a production speedup.',
+      browser:browser.version(),rounds:rounds.map(({visuals,...rest})=>rest),visualComparisons,
+      note:'Exploratory dev-server timings over five parent updates per trial. Four order-balanced trials for each mode; each requested update must have a Profiler callback. Screenshot comparison allows at most 0.25% of pixels to differ by more than 16 RGB units after font and image loads with animations disabled; not pixel-perfect certification. The annotation case matches experimental Vite, while card-infer limits infer to card API and an exact allowlist of existing card face renderers. These measurements do not establish a production speedup.',
     }));
   }finally{await browser.close();}
 });
