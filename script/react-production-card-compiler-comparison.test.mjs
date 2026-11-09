@@ -118,6 +118,9 @@ async function sample(browser,mode,t) {
         page.on('pageerror',error=>errors.push(String(error)));
         await page.goto(server.resolvedUrls.local[0]+'__real-card-compiler-profile?family='+family+'&size=small');
         await page.locator('#qa-grid > *').first().waitFor({state:'visible',timeout:30000});
+        // A visible card does not guarantee the fixture's useEffect listener is attached.
+        // Handshake before ticks so CI load cannot silently drop the first update.
+        await page.waitForFunction(()=>window.__zayCardProfileListenerReady===true,null,{timeout:30000});
         const before=await page.locator('#qa-grid > *').evaluateAll(els=>els.map(el=>({
           category:(el.matches('[data-card-category]')?el:el.querySelector('[data-card-category]'))?.getAttribute('data-card-category'),size:(el.matches('[data-card-size]')?el:el.querySelector('[data-card-size]'))?.getAttribute('data-card-size'),
           text:el.textContent?.replace(/\s+/g,' ').trim(),
@@ -127,7 +130,18 @@ async function sample(browser,mode,t) {
         await page.evaluate(()=>{window.__zayCardRenderProfile=[];});
         for(let tick=1;tick<=5;tick++){
           await page.evaluate(()=>window.dispatchEvent(new Event('zaylist-card-profile-tick')));
-          await page.waitForFunction(n=>document.querySelector('[data-profile-tick]')?.textContent===String(n),tick,{timeout:15000});
+          try {
+            await page.waitForFunction(n=>document.querySelector('[data-profile-tick]')?.textContent===String(n),tick,{timeout:15000});
+          } catch(error) {
+            const state=await page.evaluate(()=>({
+              listenerReady:window.__zayCardProfileListenerReady===true,
+              observedTick:document.querySelector('[data-profile-tick]')?.textContent??null,
+              cardCount:document.querySelectorAll('#qa-grid > *').length,
+              profilerCommits:window.__zayCardRenderProfile?.length??0,
+            })).catch(e=>({diagnosticError:String(e)}));
+            console.error('REACT_CARD_PROFILE_TICK_TIMEOUT '+JSON.stringify({mode,family,tick,state,errors}));
+            throw error;
+          }
           await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
         }
         const after=await page.locator('#qa-grid > *').evaluateAll(els=>els.map(el=>({
