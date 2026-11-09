@@ -414,10 +414,15 @@ function qsearchOwnsCurrentLockedValue(
 ): boolean {
   ensureEventResearchChangeTable();
   const jsonPath = `$.${field}`;
+  // The change log is now the shared event change feed: every storage write
+  // path records there with its own actor. Ownership provenance for this gate
+  // is QSearch's own writes only (actor 'qsearch-3', the value
+  // recordEventResearchChange stamps), never another writer's rows.
   const row = sqlite.prepare(`
     SELECT after_json
     FROM agent_event_change_log
     WHERE event_id = ?
+      AND actor = 'qsearch-3'
       AND rolled_back_at IS NULL
       AND json_type(patch_json, ?) IS NOT NULL
     ORDER BY id DESC
