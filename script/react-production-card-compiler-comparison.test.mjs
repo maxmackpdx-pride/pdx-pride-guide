@@ -18,15 +18,6 @@ const fixture='script/fixtures/card-api-browser.tsx';
 
 // Keep the profiling parent fixture uncompiled. Otherwise the Compiler could
 // cache its children and produce a misleading "card optimization" result.
-function productionComponentPreset(mode) {
-  const preset=reactCompilerPreset({compilationMode:mode});
-  const existing=preset.rolldown.filter.id.exclude;
-  preset.rolldown.filter.id.exclude=[
-    ...(Array.isArray(existing)?existing:existing?[existing]:[]),
-    '**/script/fixtures/**',
-  ];
-  return preset;
-}
 
 async function sample(browser,mode,t) {
   const compiled=mode!=='off';
@@ -38,7 +29,7 @@ async function sample(browser,mode,t) {
     optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},
     plugins:[
       react(),
-      ...(compiled?[babel({presets:[productionComponentPreset(mode)]})]:[]),
+      ...(compiled?[babel({presets:[reactCompilerPreset({compilationMode:mode})],filter:{id:{exclude:['**/script/fixtures/**']}}})]:[]),
       {name:'real-card-profile-html',configureServer(vite){vite.middlewares.use(async(req,res,next)=>{
         if(!req.url?.startsWith('/__real-card-compiler-profile'))return next();
         const html=await vite.transformIndexHtml(req.url,
