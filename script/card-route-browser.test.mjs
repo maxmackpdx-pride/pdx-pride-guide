@@ -12,8 +12,11 @@ import {createServer} from 'vite';
 import react,{reactCompilerPreset} from '@vitejs/plugin-react';
 import babel from '@rolldown/plugin-babel';
 import {cardSourcePatterns,cardCompilerExcludedPatterns} from './react-compiler-card-scope.mjs';
-import {chromium} from 'playwright';
+import {chromium,webkit} from 'playwright';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+// Opt-in WebKit adds a second rendering engine, not a physical iOS Safari certification.
+const browserEngine=process.env.CARD_ROUTE_QA_BROWSER??'chromium';
+assert.ok(['chromium','webkit'].includes(browserEngine),`Unsupported card QA browser engine: ${browserEngine}`);
 const near=(a,b,message)=>assert.ok(Math.abs(a-b)<=1.1,`${message}: ${a} vs ${b}`);
 const overlaps=(a,b)=>Math.min(a.x+a.width,b.x+b.width)-Math.max(a.x,b.x)>1 && Math.min(a.y+a.height,b.y+b.height)-Math.max(a.y,b.y)>1;
 async function snapshot(page){return page.locator('#qa-grid').evaluate(grid=>[...grid.children].filter(el=>el.getBoundingClientRect().width>0).map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));}
@@ -26,7 +29,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  const cacheDir=await mkdtemp(path.join(tmpdir(),'card-route-browser-vite-'));
  t.after(()=>rm(cacheDir,{recursive:true,force:true}));
  const fixture='script/fixtures/card-route-browser.tsx';
- console.log('CARD_ROUTE_COMPILER_MODE '+(process.env.CARD_ROUTE_QA_COMPILER==='1'?'card-only-infer':'off'));
+ console.log('CARD_ROUTE_COMPILER_MODE '+(process.env.CARD_ROUTE_QA_COMPILER==='1'?'card-only-infer':'off')+' BROWSER_ENGINE '+browserEngine);
  const server=await createServer({configFile:false,root,cacheDir,optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},publicDir:path.join(root,'client/public'),plugins:[react(),...(process.env.CARD_ROUTE_QA_COMPILER==='1'?[babel({presets:[reactCompilerPreset({compilationMode:'infer'})],include:cardSourcePatterns,exclude:cardCompilerExcludedPatterns})]:[]),{name:'card-qa-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{if(!req.url?.startsWith('/__route-qa'))return next();const html=await s.transformIndexHtml(req.url,'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0}</style></head><body><div id="root"></div><script type="module" src="/script/fixtures/card-route-browser.tsx"></script></body></html>');res.setHeader('Content-Type','text/html');res.end(html);});}}],resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},define:{__OUTZIDE_ASSETS__:JSON.stringify({script:'/outzide-map/app.js',maplibre:'/home-flight/vendor/maplibre-gl-5.6.2.js',maplibreCss:'/home-flight/vendor/maplibre-gl-5.6.2.css'}),__MAPZ_ASSETS__:'{}',__HOME_FLIGHT_BASE__:JSON.stringify('/home-flight')}});
  let browser;
  try{
@@ -34,7 +37,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  // Public Vite API: transform the explicit fixture before opening Chromium.
  await server.warmupRequest(`/${fixture}`);
  const base=server.resolvedUrls.local[0];
- browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+ browser=browserEngine==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce'});
  await context.addInitScript(()=>{localStorage.setItem("pdx-calm-mode","true");Math.random=()=>0.1;});
  const gifts=Array.from({length:8},(_,i)=>({id:i+1,userId:1,postType:'GIFT',title:`QA Gift ${i+1}`,description:'Useful gift',category:'Other',neighborhood:'Portland',pickupPreference:'Pickup',photoUrls:[],status:'OPEN',createdAt:'2026-11-01T00:00:00Z',expiresAt:'2027-01-01T00:00:00Z',username:'qa',interestCount:0}));
