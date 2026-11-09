@@ -63,7 +63,7 @@ async function sample(browser,compiled,t) {
         await page.locator('#qa-grid [data-card-size]').first().waitFor({state:'visible',timeout:30000});
         const before=await page.locator('#qa-grid [data-card-size]').evaluateAll(els=>els.map(el=>({
           category:el.getAttribute('data-card-category'),size:el.getAttribute('data-card-size'),
-          text:el.textContent?.replace(/\\s+/g,' ').trim().slice(0,120),
+          text:el.textContent?.replace(/\s+/g,' ').trim().slice(0,120),
         })));
         assert.equal(before.length,6,'Expected six actual production card components');
         await page.evaluate(()=>{window.__zayCardRenderProfile=[];});
@@ -74,7 +74,7 @@ async function sample(browser,compiled,t) {
         }
         const after=await page.locator('#qa-grid [data-card-size]').evaluateAll(els=>els.map(el=>({
           category:el.getAttribute('data-card-category'),size:el.getAttribute('data-card-size'),
-          text:el.textContent?.replace(/\\s+/g,' ').trim().slice(0,120),
+          text:el.textContent?.replace(/\s+/g,' ').trim().slice(0,120),
         })));
         const commits=await page.evaluate(()=>window.__zayCardRenderProfile??[]);
         assert.deepEqual(after,before,compiled?'Compiler changed the card DOM':'Baseline changed the card DOM');
