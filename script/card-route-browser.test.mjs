@@ -100,7 +100,8 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  await page.goto(`${base}__route-qa/${kind}${kind==='directory'?'?type=ALL&layout=browse':'?layout=browse'}`,{waitUntil:'networkidle'});await settled(page);
  const layoutParam=new URL(page.url()).searchParams.get('layout');assert.ok(layoutParam===null||layoutParam==='browse','Browse URL may normalize the default view while preserving the lane');
  const lane=kind==='directory'?page.locator('.eb-lane').filter({has:page.locator('.rd-card-copy h3',{hasText:'QA Cafe 1'})}):page.locator('.eb-lane:has(.events-rail__item:nth-child(5))').first();
- const cards=lane.locator('.rd-card[data-card-category="placez"]');await cards.first().waitFor();
+ const expectedCategory=kind==='directory'?'placez':'needz';
+ const cards=lane.locator(`.rd-card[data-card-category="${expectedCategory}"]`);await cards.first().waitFor({state:'visible',timeout:30000});
  const closedFaces=await cards.evaluateAll(els=>els.filter(el=>el.getBoundingClientRect().width&&getComputedStyle(el.closest('.events-rail__item')).display!=='none').map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
  for(let i=0;i<closedFaces.length;i++){if(width===390)assert.ok(closedFaces[i].x>=0&&closedFaces[i].x+closedFaces[i].width<=width,`${kind}: mobile closed face fits viewport`);for(let j=i+1;j<closedFaces.length;j++)assert.ok(!overlaps(closedFaces[i],closedFaces[j]),`${kind} ${width}: closed browse faces ${i}/${j} overlap; rectangles ${JSON.stringify([closedFaces[i],closedFaces[j]])}`);}
  const docBox=async locator=>locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});
