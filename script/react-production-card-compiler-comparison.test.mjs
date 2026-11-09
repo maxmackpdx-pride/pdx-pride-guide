@@ -86,19 +86,20 @@ async function sample(browser,mode,t) {
         const page=await context.newPage(),errors=[];
         page.on('pageerror',error=>errors.push(String(error)));
         await page.goto(server.resolvedUrls.local[0]+'__real-card-compiler-profile?family='+family+'&size=small');
-        await page.locator('#qa-grid > [data-card-size]').first().waitFor({state:'visible',timeout:30000});
-        const before=await page.locator('#qa-grid > [data-card-size]').evaluateAll(els=>els.map(el=>({
-          category:el.getAttribute('data-card-category'),size:el.getAttribute('data-card-size'),
+        await page.locator('#qa-grid > *').first().waitFor({state:'visible',timeout:30000});
+        const before=await page.locator('#qa-grid > *').evaluateAll(els=>els.map(el=>({
+          category:(el.matches('[data-card-category]')?el:el.querySelector('[data-card-category]'))?.getAttribute('data-card-category'),size:(el.matches('[data-card-size]')?el:el.querySelector('[data-card-size]'))?.getAttribute('data-card-size'),
           text:el.textContent?.replace(/\s+/g,' ').trim().slice(0,120),
         })));
-        assert.equal(before.length,6,'Expected six actual production card components');
+        assert.equal(before.length,6,'Expected six top-level production card slots');
+        assert.ok(before.every(card=>card.category&&card.size),'Each card slot must contain an identifiable production card');
         await page.evaluate(()=>{window.__zayCardRenderProfile=[];});
         for(let tick=1;tick<=5;tick++){
           await page.evaluate(()=>window.dispatchEvent(new Event('zaylist-card-profile-tick')));
           await page.waitForFunction(n=>document.querySelector('[data-profile-tick]')?.textContent===String(n),tick,{timeout:15000});
           await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
         }
-        const after=await page.locator('#qa-grid > [data-card-size]').evaluateAll(els=>els.map(el=>({
+        const after=await page.locator('#qa-grid > *').evaluateAll(els=>els.map(el=>({
           category:el.getAttribute('data-card-category'),size:el.getAttribute('data-card-size'),
           text:el.textContent?.replace(/\s+/g,' ').trim().slice(0,120),
         })));
