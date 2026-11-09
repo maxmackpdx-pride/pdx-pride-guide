@@ -18,7 +18,8 @@ export function useDeferredCardCollection<T extends CardRecord>(
   query: string,
   matches: (record: T, normalizedQuery: string) => boolean,
 ): { records: readonly T[]; metrics: CardRenderMetrics } {
-  "use memo";\n  const normalizedQuery = query.trim().toLocaleLowerCase();
+  "use memo";
+  const normalizedQuery = query.trim().toLocaleLowerCase();
   const deferredQuery = useDeferredValue(normalizedQuery);
   const filtered = useMemo(
     () => deferredQuery ? records.filter(record => matches(record, deferredQuery)) : records,
@@ -41,7 +42,8 @@ export type CardSurfaceProps<T extends CardRecord> = {
 
 /** React can skip a stable item when its record and renderer are unchanged. */
 function CardSurfaceInner<T extends CardRecord>({ record, render }: CardSurfaceProps<T>) {
-  "use memo";\n  return <>{render(record)}</>;
+  "use memo";
+  return <>{render(record)}</>;
 }
 export const ExperimentalCardSurface = CardSurfaceInner;
 
@@ -55,7 +57,8 @@ export type CardCollectionProps<T extends CardRecord> = {
 export function ExperimentalCardCollection<T extends CardRecord>({
   records, render, empty = null,
 }: CardCollectionProps<T>) {
-  "use memo";\n  if (records.length === 0) return <>{empty}</>;
+  "use memo";
+  if (records.length === 0) return <>{empty}</>;
   return <>{records.map(record =>
     <ExperimentalCardSurface key={record.id} record={record} render={render} />
   )}</>;
