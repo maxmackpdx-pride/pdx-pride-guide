@@ -57,7 +57,12 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  // Public Vite API: transform the explicit fixture before opening Chromium.
  await server.warmupRequest(`/${fixture}`);
  const base=server.resolvedUrls.local[0];
- browser=browserEngine==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+ // On GPU-less Linux runners, headless WPE can crash in graphics initialization.
+ // The explicit headed WebKit option runs under Xvfb; all geometry and behavior
+ // assertions remain identical. This does not count as physical Safari evidence.
+ const webkitHeadless=process.env.CARD_ROUTE_QA_WEBKIT_HEADED!=='1';
+ console.log('WEBKIT_RENDER_MODE '+(webkitHeadless?'headless':'headed-xvfb'));
+ browser=browserEngine==='webkit'?await webkit.launch({headless:webkitHeadless}):await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce'});
  await context.addInitScript(()=>{localStorage.setItem("pdx-calm-mode","true");Math.random=()=>0.1;});
  const gifts=Array.from({length:8},(_,i)=>({id:i+1,userId:1,postType:'GIFT',title:`QA Gift ${i+1}`,description:'Useful gift',category:'Other',neighborhood:'Portland',pickupPreference:'Pickup',photoUrls:[],status:'OPEN',createdAt:'2026-11-01T00:00:00Z',expiresAt:'2027-01-01T00:00:00Z',username:'qa',interestCount:0}));
