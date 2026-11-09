@@ -59,5 +59,7 @@ jobs:
         run: npm run verify:deploy
       - name: Install browser for card regression tests
         run: npx playwright install --with-deps chromium
+      - name: Profile existing production card components (baseline)
+        run: node --test --test-concurrency=1 script/react-card-profile-browser.test.mjs
       - name: Check card expansion and motion
         run: node --test --test-concurrency=1 script/card-api-browser.test.mjs script/card-route-browser.test.mjs script/motion-runtime-browser.test.mjs
