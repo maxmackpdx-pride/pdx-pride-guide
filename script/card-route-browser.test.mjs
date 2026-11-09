@@ -181,6 +181,46 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  }
  await mobileContext.close();
  }
+ // Real 18+ chat gate with synthetic-only content. Both compiler modes must
+ // preserve explicit acknowledgement, decline, reload and browser isolation.
+ if(!focus){
+  const consentContext=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
+  try{
+   await consentContext.route('**/api/**',mockApi);
+   const consentPage=await consentContext.newPage();
+   consentPage.on('pageerror',e=>errors.push(e.message));
+   await consentPage.goto(`${base}__route-qa/adult-gate`,{waitUntil:'networkidle'});
+   const gate=consentPage.getByRole('alertdialog',{name:'18 and over only'});
+   const gatedBody=consentPage.getByTestId('adult-chat-content');
+   await gate.waitFor({state:'visible'});
+   assert.equal(await gatedBody.count(),0,'Adult chat content must not mount before acknowledgement');
+   assert.equal(await consentPage.evaluate(()=>localStorage.getItem('pdx-chat-18-ack-v1')),null,'No unsolicited adult acknowledgement');
+   await gate.getByRole('button',{name:'Not now'}).click();
+   await consentPage.getByTestId('adult-gate-declined').waitFor({state:'visible'});
+   assert.equal(await gatedBody.count(),0,'Declining adult gate must not reveal chat');
+   assert.equal(await consentPage.evaluate(()=>localStorage.getItem('pdx-chat-18-ack-v1')),null,'Declining must not persist adult acknowledgement');
+   await consentPage.reload({waitUntil:'networkidle'});
+   await gate.waitFor({state:'visible'});
+   assert.equal(await gatedBody.count(),0,'Reload after decline remains gated');
+   await gate.getByRole('button',{name:"I'm 18+ - enter chat"}).click();
+   await gatedBody.waitFor({state:'visible'});
+   assert.equal(await consentPage.evaluate(()=>localStorage.getItem('pdx-chat-18-ack-v1')),'1','Acceptance persists explicit adult acknowledgement');
+   await consentPage.reload({waitUntil:'networkidle'});
+   await gatedBody.waitFor({state:'visible'});
+   assert.equal(await gate.count(),0,'Accepted browser context does not prompt again');
+   await consentPage.close();
+  }finally{await consentContext.close();}
+  const freshContext=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
+  try{
+   await freshContext.route('**/api/**',mockApi);
+   const freshPage=await freshContext.newPage();
+   freshPage.on('pageerror',e=>errors.push(e.message));
+   await freshPage.goto(`${base}__route-qa/adult-gate`,{waitUntil:'networkidle'});
+   await freshPage.getByRole('alertdialog',{name:'18 and over only'}).waitFor({state:'visible'});
+   assert.equal(await freshPage.getByTestId('adult-chat-content').count(),0,'Adult consent must not leak to fresh browser context');
+  }finally{await freshContext.close();}
+  console.log('PASS adult chat consent: no pre-ack content, decline, explicit opt-in, reload and cross-context isolation');
+ }
  if(!focus){
  // Current Needz safety is a RoomDiscoveryCard in the grid, not the retired selector.
  page=await context.newPage();await page.setViewportSize({width:390,height:844});
