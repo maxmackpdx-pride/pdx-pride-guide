@@ -16,11 +16,21 @@ import {chromium} from 'playwright';
 const root=path.resolve(import.meta.dirname,'..');
 const fixture='script/fixtures/card-api-browser.tsx';
 
+// A bounded infer experiment: only the existing card API and the dedicated
+// Placez discovery face. Page routes, authentication, Mapz and the benchmark
+// parent are explicitly outside the Compiler boundary.
+const cardSourcePatterns=[
+  /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/].*\.[jt]sx?$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]discovery[\\/]PlaceDiscoveryCard\.tsx$/,
+];
+
 // Keep the profiling parent fixture uncompiled. Otherwise the Compiler could
 // cache its children and produce a misleading "card optimization" result.
 
 async function sample(browser,mode,t) {
   const compiled=mode!=='off';
+  const scoped=mode==='card-infer';
+  const compilerMode=scoped?'infer':mode;
   const cacheDir=await mkdtemp(path.join(tmpdir(),compiled?`zay-real-${mode}-`:'zay-real-uncompiled-'));
   t.after(()=>rm(cacheDir,{recursive:true,force:true}));
   const server=await createServer({
@@ -29,7 +39,7 @@ async function sample(browser,mode,t) {
     optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},
     plugins:[
       react(),
-      ...(compiled?[babel({presets:[reactCompilerPreset({compilationMode:mode})],exclude:[/[\\/]node_modules[\\/]/,/\x00rolldown\/runtime\.js/ ,/[\\/]script[\\/]fixtures[\\/]/]})]:[]),
+      ...(compiled?[babel({presets:[reactCompilerPreset({compilationMode:compilerMode})],...(scoped?{include:cardSourcePatterns}:{}),exclude:[/[\\/]node_modules[\\/]/,/\x00rolldown\/runtime\.js/ ,/[\\/]script[\\/]fixtures[\\/]/]})]:[]),
       {name:'real-card-profile-html',configureServer(vite){vite.middlewares.use(async(req,res,next)=>{
         if(!req.url?.startsWith('/__real-card-compiler-profile'))return next();
         const html=await vite.transformIndexHtml(req.url,
@@ -70,6 +80,17 @@ async function sample(browser,mode,t) {
       }
       console.log('COMPILER_PRODUCTION_CARD_MODULES '+JSON.stringify({mode,transformed,probes}));
       assert.ok(transformed.length>0,'Compiler did not transform any actual production card module');
+      if(scoped){
+        assert.deepEqual(transformed,['EventCard','BoardCard','PlaceCard'],
+          'Card-scoped infer must transform all three real card components');
+        const outside=await server.transformRequest('/client/src/components/discovery/EventzBrowse.tsx');
+        assert.ok(!isCompiled(outside?.code??''),
+          'Card-scoped infer must not compile discovery page controls');
+        console.log('COMPILER_CARD_SCOPE '+JSON.stringify({
+          compiledCards:transformed,excludedPage:'EventzBrowse',parentFixtureCompiled:false,
+          sourcePatterns:cardSourcePatterns.map(pattern=>pattern.source),
+        }));
+      }
     }
     const results=[];
     for(const family of ['event','board','place']) {
@@ -125,7 +146,7 @@ test('matched real Eventz, Boardz and Placez cards render identically with Compi
   try{
     // Reverse the execution order in the second pair to reduce browser warmup bias.
     const rounds=[];
-    for(const [round,mode] of [[1,'off'],[1,'annotation'],[1,'infer'],[2,'infer'],[2,'annotation'],[2,'off']]){
+    for(const [round,mode] of [[1,'off'],[1,'annotation'],[1,'card-infer'],[1,'infer'],[2,'infer'],[2,'card-infer'],[2,'annotation'],[2,'off']]){
       rounds.push({round,mode,results:await sample(browser,mode,t)});
     }
     const reference=rounds[0].results;
@@ -140,7 +161,7 @@ test('matched real Eventz, Boardz and Placez cards render identically with Compi
     }
     console.log('REACT_REAL_CARD_COMPILER_COMPARISON '+JSON.stringify({
       browser:browser.version(),rounds,
-      note:'Exploratory dev-server timings over five parent updates per trial. Two order-balanced trials for each mode. The annotation case matches the experimental Vite compilation setting; not a production speedup claim.',
+      note:'Exploratory dev-server timings over five parent updates per trial. Two order-balanced trials for each mode. The annotation case matches experimental Vite, while card-infer limits infer to card API and dedicated Placez face. These measurements do not establish a production speedup.',
     }));
   }finally{await browser.close();}
 });
